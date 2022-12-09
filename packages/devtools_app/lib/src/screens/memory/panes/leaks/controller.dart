@@ -9,10 +9,10 @@ import 'package:flutter/material.dart';
 import 'package:leak_tracker/devtools_integration.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../../../config_specific/import_export/import_export.dart';
-import '../../../../primitives/utils.dart';
+import '../../../../shared/config_specific/import_export/import_export.dart';
 import '../../../../shared/globals.dart';
-import '../../primitives/memory_utils.dart';
+import '../../../../shared/primitives/utils.dart';
+import '../../shared/primitives/memory_utils.dart';
 import 'diagnostics/formatter.dart';
 import 'diagnostics/leak_analyzer.dart';
 import 'diagnostics/model.dart';

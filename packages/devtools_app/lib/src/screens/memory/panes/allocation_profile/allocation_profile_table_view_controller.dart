@@ -7,11 +7,11 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../../../analytics/analytics.dart' as ga;
-import '../../../../analytics/constants.dart' as analytics_constants;
-import '../../../../config_specific/import_export/import_export.dart';
-import '../../../../primitives/auto_dispose.dart';
+import '../../../../shared/analytics/analytics.dart' as ga;
+import '../../../../shared/analytics/constants.dart' as gac;
+import '../../../../shared/config_specific/import_export/import_export.dart';
 import '../../../../shared/globals.dart';
+import '../../../../shared/primitives/auto_dispose.dart';
 import 'model.dart';
 
 class AllocationProfileTableViewController extends DisposableController
@@ -75,8 +75,8 @@ class AllocationProfileTableViewController extends DisposableController
   /// The returned string is the name of the downloaded CSV file.
   void downloadMemoryTableCsv(AdaptedAllocationProfile profile) {
     ga.select(
-      analytics_constants.memory,
-      analytics_constants.MemoryEvent.profileDownloadCsv,
+      gac.memory,
+      gac.MemoryEvent.profileDownloadCsv,
     );
     final csvBuffer = StringBuffer();
 

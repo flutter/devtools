@@ -5,8 +5,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import '../../config_specific/host_platform/host_platform.dart';
-import '../../primitives/utils.dart';
+import '../../shared/config_specific/host_platform/host_platform.dart';
+import '../../shared/primitives/utils.dart';
 
 final LogicalKeySet goToLineNumberKeySet = LogicalKeySet(
   HostPlatform.instance.isMacOS

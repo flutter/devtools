@@ -8,12 +8,12 @@ import 'package:codicon/codicon.dart';
 import 'package:flutter/material.dart' hide Stack;
 import 'package:vm_service/vm_service.dart';
 
-import '../../primitives/auto_dispose_mixin.dart';
 import '../../shared/common_widgets.dart';
 import '../../shared/globals.dart';
+import '../../shared/primitives/auto_dispose.dart';
 import '../../shared/theme.dart';
+import '../../shared/ui/label.dart';
 import '../../shared/utils.dart';
-import '../../ui/label.dart';
 import 'debugger_controller.dart';
 
 class DebuggingControls extends StatefulWidget {

@@ -11,9 +11,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../primitives/enum_utils.dart';
-import '../../primitives/utils.dart';
-import '../../ui/icons.dart';
+import '../../shared/primitives/enum_utils.dart';
+import '../../shared/primitives/utils.dart';
+import '../../shared/ui/icons.dart';
 import '../debugger/debugger_model.dart';
 import 'inspector_service.dart';
 

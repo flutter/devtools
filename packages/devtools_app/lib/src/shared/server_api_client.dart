@@ -7,9 +7,9 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
-import '../config_specific/logger/logger.dart';
-import '../config_specific/notifications/notifications.dart';
-import '../config_specific/sse/sse_shim.dart';
+import 'config_specific/logger/logger.dart';
+import 'config_specific/notifications/notifications.dart';
+import 'config_specific/sse/sse_shim.dart';
 import 'framework_controller.dart';
 import 'globals.dart';
 

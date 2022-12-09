@@ -8,11 +8,11 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../analytics/constants.dart' as analytics_constants;
-import '../primitives/utils.dart';
 import '../screens/performance/performance_utils.dart';
+import 'analytics/constants.dart' as gac;
 import 'common_widgets.dart';
 import 'globals.dart';
+import 'primitives/utils.dart';
 import 'screen.dart';
 import 'theme.dart';
 import 'version.dart';
@@ -371,8 +371,7 @@ To pre-compile shaders, see the instructions at ''',
             display: preCompileShadersDocsUrl,
             url: preCompileShadersDocsUrl,
             gaScreenName: screenId,
-            gaSelectedItemDescription:
-                analytics_constants.shaderCompilationDocs,
+            gaSelectedItemDescription: gac.shaderCompilationDocs,
           ),
           context: context,
           style: theme.errorMessageLinkStyle,
@@ -411,7 +410,7 @@ You are opting in to a high CPU sampling rate. This may affect the performance o
             display: 'documentation',
             url: _cpuSamplingRateDocsUrl,
             gaScreenName: screenId,
-            gaSelectedItemDescription: analytics_constants.cpuSamplingRateDocs,
+            gaSelectedItemDescription: gac.cpuSamplingRateDocs,
           ),
           context: context,
           style: theme.warningMessageLinkStyle,
@@ -572,7 +571,7 @@ LinkTextSpan _runInProfileModeTextSpan(
       display: 'profile mode',
       url: _runInProfileModeDocsUrl,
       gaScreenName: screenId,
-      gaSelectedItemDescription: analytics_constants.profileModeDocs,
+      gaSelectedItemDescription: gac.profileModeDocs,
     ),
     context: context,
     style: style,

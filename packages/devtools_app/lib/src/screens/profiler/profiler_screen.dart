@@ -8,19 +8,19 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart' hide Stack;
 
-import '../../analytics/analytics.dart' as ga;
-import '../../analytics/constants.dart' as analytics_constants;
-import '../../primitives/auto_dispose_mixin.dart';
-import '../../primitives/listenable.dart';
-import '../../primitives/simple_items.dart';
+import '../../shared/analytics/analytics.dart' as ga;
+import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/banner_messages.dart';
 import '../../shared/common_widgets.dart';
 import '../../shared/globals.dart';
+import '../../shared/primitives/auto_dispose.dart';
+import '../../shared/primitives/listenable.dart';
+import '../../shared/primitives/simple_items.dart';
 import '../../shared/screen.dart';
 import '../../shared/theme.dart';
+import '../../shared/ui/icons.dart';
+import '../../shared/ui/vm_flag_widgets.dart';
 import '../../shared/utils.dart';
-import '../../ui/icons.dart';
-import '../../ui/vm_flag_widgets.dart';
 import 'cpu_profile_controller.dart';
 import 'cpu_profile_model.dart';
 import 'cpu_profiler.dart';
@@ -306,8 +306,8 @@ class _PrimaryControls extends StatelessWidget {
               _primaryControlsMinIncludeTextWidth,
           onPressed: () {
             ga.select(
-              analytics_constants.cpuProfiler,
-              analytics_constants.record,
+              gac.cpuProfiler,
+              gac.record,
             );
             unawaited(controller.startRecording());
           },
@@ -319,8 +319,8 @@ class _PrimaryControls extends StatelessWidget {
               _primaryControlsMinIncludeTextWidth,
           onPressed: () {
             ga.select(
-              analytics_constants.cpuProfiler,
-              analytics_constants.stop,
+              gac.cpuProfiler,
+              gac.stop,
             );
             unawaited(controller.stopRecording());
           },
@@ -333,8 +333,8 @@ class _PrimaryControls extends StatelessWidget {
               ? null
               : () {
                   ga.select(
-                    analytics_constants.cpuProfiler,
-                    analytics_constants.clear,
+                    gac.cpuProfiler,
+                    gac.clear,
                   );
                   unawaited(controller.clear());
                 },
@@ -375,8 +375,8 @@ class _SecondaryControls extends StatelessWidget {
             onPressed: !profilerBusy
                 ? () {
                     ga.select(
-                      analytics_constants.cpuProfiler,
-                      analytics_constants.profileAppStartUp,
+                      gac.cpuProfiler,
+                      gac.profileAppStartUp,
                     );
                     unawaited(
                       controller.cpuProfilerController.loadAppStartUpProfile(),
@@ -393,8 +393,8 @@ class _SecondaryControls extends StatelessWidget {
           onPressed: !profilerBusy
               ? () {
                   ga.select(
-                    analytics_constants.cpuProfiler,
-                    analytics_constants.loadAllCpuSamples,
+                    gac.cpuProfiler,
+                    gac.loadAllCpuSamples,
                   );
                   unawaited(controller.cpuProfilerController.loadAllSamples());
                 }
@@ -413,8 +413,8 @@ class _SecondaryControls extends StatelessWidget {
                   controller.cpuProfileData?.isEmpty == false
               ? () {
                   ga.select(
-                    analytics_constants.cpuProfiler,
-                    analytics_constants.export,
+                    gac.cpuProfiler,
+                    gac.export,
                   );
                   _exportPerformance(context);
                 }

@@ -7,9 +7,9 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../../analytics/constants.dart' as analytics_constants;
+import '../../../shared/analytics/constants.dart' as gac;
 import '../../../shared/split.dart';
-import '../../../ui/tab.dart';
+import '../../../shared/ui/tab.dart';
 import '../../debugger/program_explorer.dart';
 import '../../debugger/program_explorer_model.dart';
 import '../vm_developer_tools_controller.dart';
@@ -61,15 +61,15 @@ class _ObjectInspectorViewState extends State<_ObjectInspectorView>
       initialFractions: const [0.20, 0.80],
       children: [
         AnalyticsTabbedView(
-          gaScreen: analytics_constants.objectInspectorScreen,
+          gaScreen: gac.objectInspectorScreen,
           tabs: [
             DevToolsTab.create(
               tabName: 'Program Explorer',
-              gaPrefix: analytics_constants.programExplorer,
+              gaPrefix: gac.programExplorer,
             ),
             DevToolsTab.create(
               tabName: 'Object Store',
-              gaPrefix: analytics_constants.objectStore,
+              gaPrefix: gac.objectStore,
             ),
           ],
           tabViews: [

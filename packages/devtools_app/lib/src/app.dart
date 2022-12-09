@@ -8,10 +8,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import 'analytics/analytics.dart' as ga;
-import 'analytics/analytics_controller.dart';
-import 'analytics/constants.dart' as analytics_constants;
-import 'config_specific/server/server.dart';
 import 'example/conditional_screen.dart';
 import 'framework/about_dialog.dart';
 import 'framework/framework_core.dart';
@@ -21,7 +17,6 @@ import 'framework/notifications_view.dart';
 import 'framework/release_notes/release_notes.dart';
 import 'framework/report_feedback_button.dart';
 import 'framework/scaffold.dart';
-import 'primitives/auto_dispose_mixin.dart';
 import 'screens/app_size/app_size_controller.dart';
 import 'screens/app_size/app_size_screen.dart';
 import 'screens/debugger/debugger_controller.dart';
@@ -44,14 +39,19 @@ import 'screens/provider/provider_screen.dart';
 import 'screens/vm_developer/vm_developer_tools_controller.dart';
 import 'screens/vm_developer/vm_developer_tools_screen.dart';
 import 'service/service_extension_widgets.dart';
+import 'shared/analytics/analytics.dart' as ga;
+import 'shared/analytics/analytics_controller.dart';
+import 'shared/analytics/constants.dart' as gac;
 import 'shared/common_widgets.dart';
+import 'shared/config_specific/server/server.dart';
 import 'shared/dialogs.dart';
 import 'shared/globals.dart';
+import 'shared/primitives/auto_dispose.dart';
 import 'shared/routing.dart';
 import 'shared/screen.dart';
 import 'shared/snapshot_screen.dart';
 import 'shared/theme.dart';
-import 'ui/hover.dart';
+import 'shared/ui/hover.dart';
 
 // Assign to true to use a sample implementation of a conditional screen.
 // WARNING: Do not check in this file if debugEnableSampleScreen is true.
@@ -493,26 +493,26 @@ class SettingsDialog extends StatelessWidget {
             label: const Text('Use a dark theme'),
             listenable: preferences.darkModeTheme,
             toggle: preferences.toggleDarkModeTheme,
-            gaItem: analytics_constants.darkTheme,
+            gaItem: gac.darkTheme,
           ),
           CheckboxSetting(
             label: const Text('Use dense mode'),
             listenable: preferences.denseModeEnabled,
             toggle: preferences.toggleDenseMode,
-            gaItem: analytics_constants.denseMode,
+            gaItem: gac.denseMode,
           ),
           if (isExternalBuild && isDevToolsServerAvailable)
             CheckboxSetting(
               label: const Text('Enable analytics'),
               listenable: analyticsController.analyticsEnabled,
               toggle: analyticsController.toggleAnalyticsEnabled,
-              gaItem: analytics_constants.analytics,
+              gaItem: gac.analytics,
             ),
           CheckboxSetting(
             label: const Text('Enable VM developer mode'),
             listenable: preferences.vmDeveloperModeEnabled,
             toggle: preferences.toggleVmDeveloperMode,
-            gaItem: analytics_constants.vmDeveloperMode,
+            gaItem: gac.vmDeveloperMode,
           ),
         ],
       ),
@@ -561,7 +561,7 @@ class CheckboxSetting extends StatelessWidget {
 
   void toggleSetting(bool? newValue) {
     ga.select(
-      analytics_constants.settingsDialog,
+      gac.settingsDialog,
       '$gaItem-${newValue == true ? 'enabled' : 'disabled'}',
     );
     toggle(newValue == true);

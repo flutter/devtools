@@ -7,14 +7,14 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../analytics/analytics.dart' as ga;
-import '../../analytics/constants.dart' as analytics_constants;
-import '../../analytics/metrics.dart';
-import '../../primitives/utils.dart';
 import '../../service/vm_flags.dart' as vm_flags;
+import '../../shared/analytics/analytics.dart' as ga;
+import '../../shared/analytics/constants.dart' as gac;
+import '../../shared/analytics/metrics.dart';
 import '../../shared/globals.dart';
-import '../../ui/filter.dart';
-import '../../ui/search.dart';
+import '../../shared/primitives/utils.dart';
+import '../../shared/ui/filter.dart';
+import '../../shared/ui/search.dart';
 import 'cpu_profile_model.dart';
 import 'cpu_profile_service.dart';
 import 'cpu_profile_transformer.dart';
@@ -211,7 +211,7 @@ class CpuProfilerController
 
         await ga.timeAsync(
           analyticsScreenId!,
-          analytics_constants.cpuProfileProcessingTime,
+          gac.cpuProfileProcessingTime,
           asyncOperation: pullAndProcessHelper,
           screenMetricsProvider: () => ProfilerScreenMetrics(
             cpuSampleCount: cpuProfiles.profileMetaData.sampleCount,

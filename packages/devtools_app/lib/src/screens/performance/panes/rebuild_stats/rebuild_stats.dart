@@ -5,13 +5,13 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-import '../../../../primitives/auto_dispose_mixin.dart';
-import '../../../../primitives/utils.dart';
 import '../../../../service/service_extension_manager.dart';
 import '../../../../service/service_extension_widgets.dart';
 import '../../../../service/service_extensions.dart' as extensions;
 import '../../../../shared/common_widgets.dart';
 import '../../../../shared/globals.dart';
+import '../../../../shared/primitives/auto_dispose.dart';
+import '../../../../shared/primitives/utils.dart';
 import '../../../../shared/table/table.dart';
 import '../../../../shared/table/table_data.dart';
 import '../../../../shared/theme.dart';

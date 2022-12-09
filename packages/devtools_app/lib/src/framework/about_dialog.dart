@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../devtools.dart' as devtools;
-import '../analytics/constants.dart' as analytics_constants;
+import '../shared/analytics/constants.dart' as gac;
 import '../shared/common_widgets.dart';
 import '../shared/dialogs.dart';
 import '../shared/globals.dart';
@@ -95,8 +95,8 @@ class _DiscordLink extends StatelessWidget {
         link: const Link(
           display: 'Discord',
           url: _channelLink,
-          gaScreenName: analytics_constants.devToolsMain,
-          gaSelectedItemDescription: analytics_constants.discordLink,
+          gaScreenName: gac.devToolsMain,
+          gaSelectedItemDescription: gac.discordLink,
         ),
         context: context,
       ),

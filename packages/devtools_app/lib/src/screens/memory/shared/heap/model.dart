@@ -4,12 +4,12 @@
 
 import 'package:vm_service/vm_service.dart';
 
-import '../../../../analytics/analytics.dart' as ga;
-import '../../../../analytics/constants.dart' as analytics_constants;
-import '../../../../analytics/metrics.dart';
-import '../../../../primitives/utils.dart';
-import '../../primitives/class_name.dart';
-import '../../primitives/memory_utils.dart';
+import '../../../../shared/analytics/analytics.dart' as ga;
+import '../../../../shared/analytics/constants.dart' as gac;
+import '../../../../shared/analytics/metrics.dart';
+import '../../../../shared/primitives/utils.dart';
+import '../primitives/class_name.dart';
+import '../primitives/memory_utils.dart';
 
 /// Names for json fields.
 class _JsonFields {
@@ -288,8 +288,8 @@ class SnapshotTaker {
 AdaptedHeapData _adaptSnapshotGaWrapper(HeapSnapshotGraph graph) {
   late final AdaptedHeapData result;
   ga.timeSync(
-    analytics_constants.memory,
-    analytics_constants.MemoryTime.adaptSnapshot,
+    gac.memory,
+    gac.MemoryTime.adaptSnapshot,
     syncOperation: () => result = AdaptedHeapData.fromHeapSnapshot(graph),
     screenMetricsProvider: () => MemoryScreenMetrics(
       heapObjectsTotal: graph.objects.length,

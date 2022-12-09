@@ -4,9 +4,9 @@
 
 import 'package:flutter/material.dart';
 
-import '../../../../../analytics/constants.dart' as analytics_constants;
+import '../../../../../shared/analytics/constants.dart' as gac;
 import '../../../../../shared/common_widgets.dart';
-import '../../../primitives/ui.dart';
+import '../../../shared/primitives/simple_elements.dart';
 import '../controller.dart';
 import '../diagnostics/formatter.dart';
 
@@ -18,9 +18,8 @@ class LeaksHelpLink extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return HelpButtonWithDialog(
-      gaScreen: analytics_constants.memory,
-      gaSelection:
-          analytics_constants.topicDocumentationButton(_documentationTopic),
+      gaScreen: gac.memory,
+      gaSelection: gac.topicDocumentationButton(_documentationTopic),
       dialogTitle: 'Memory Leak Detection Help',
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.end,
@@ -29,9 +28,9 @@ class LeaksHelpLink extends StatelessWidget {
               'and troubleshoot some types of memory leaks.'),
           MoreInfoLink(
             url: linkToGuidance,
-            gaScreenName: analytics_constants.memory,
+            gaScreenName: gac.memory,
             gaSelectedItemDescription:
-                analytics_constants.topicDocumentationLink(_documentationTopic),
+                gac.topicDocumentationLink(_documentationTopic),
           )
         ],
       ),
@@ -53,7 +52,7 @@ class AnalyzeButton extends StatelessWidget {
       tooltip: 'Analyze the leaks and download the result\n'
           'to ${yamlFilePrefix}_<time>.yaml.',
       onPressed: () async => await leaksController.requestLeaksAndSaveToYaml(),
-      minScreenWidthForTextBeforeScaling: primaryControlsMinVerboseWidth,
+      minScreenWidthForTextBeforeScaling: memoryControlsMinVerboseWidth,
     );
   }
 }

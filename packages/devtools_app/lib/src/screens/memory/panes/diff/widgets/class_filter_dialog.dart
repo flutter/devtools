@@ -6,8 +6,8 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
-import '../../../../../analytics/analytics.dart' as ga;
-import '../../../../../analytics/constants.dart' as analytics_constants;
+import '../../../../../shared/analytics/analytics.dart' as ga;
+import '../../../../../shared/analytics/constants.dart' as gac;
 import '../../../../../shared/common_widgets.dart';
 import '../../../../../shared/dialogs.dart';
 import '../../../../../shared/theme.dart';
@@ -95,15 +95,15 @@ class _ClassFilterDialogState extends State<ClassFilterDialog> {
       helpText: _helpText,
       onResetDefaults: () {
         ga.select(
-          analytics_constants.memory,
-          analytics_constants.MemoryEvent.diffSnapshotFilterReset,
+          gac.memory,
+          gac.MemoryEvent.diffSnapshotFilterReset,
         );
         setState(() => _loadStateFromFilter(ClassFilter.empty()));
       },
       onApply: () {
         ga.select(
-          analytics_constants.memory,
-          '${analytics_constants.MemoryEvent.diffSnapshotFilterType}-$_type',
+          gac.memory,
+          '${gac.MemoryEvent.diffSnapshotFilterType}-$_type',
         );
         final newFilter = ClassFilter(
           filterType: _type,

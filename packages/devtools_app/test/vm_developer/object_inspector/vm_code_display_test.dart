@@ -4,10 +4,10 @@
 
 import 'dart:math';
 
-import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/screens/vm_developer/object_inspector/object_inspector_view_controller.dart';
 import 'package:devtools_app/src/screens/vm_developer/object_inspector/vm_code_display.dart';
 import 'package:devtools_app/src/screens/vm_developer/vm_service_private_extensions.dart';
+import 'package:devtools_app/src/shared/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_app/src/shared/table/table.dart';
 import 'package:devtools_test/devtools_test.dart';

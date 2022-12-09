@@ -15,10 +15,10 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../primitives/auto_dispose.dart';
-import '../../primitives/utils.dart';
 import '../../shared/eval_on_dart_library.dart';
 import '../../shared/globals.dart';
+import '../../shared/primitives/auto_dispose.dart';
+import '../../shared/primitives/utils.dart';
 import '../debugger/debugger_model.dart';
 import 'diagnostics_node.dart';
 import 'primitives/inspector_common.dart';

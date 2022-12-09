@@ -6,16 +6,16 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
-import '../../analytics/constants.dart' as analytics_constants;
-import '../../charts/flame_chart.dart';
-import '../../primitives/auto_dispose_mixin.dart';
-import '../../primitives/feature_flags.dart';
+import '../../shared/analytics/constants.dart' as gac;
+import '../../shared/charts/flame_chart.dart';
 import '../../shared/common_widgets.dart';
+import '../../shared/feature_flags.dart';
 import '../../shared/globals.dart';
+import '../../shared/primitives/auto_dispose.dart';
 import '../../shared/theme.dart';
+import '../../shared/ui/search.dart';
+import '../../shared/ui/tab.dart';
 import '../../shared/utils.dart';
-import '../../ui/search.dart';
-import '../../ui/tab.dart';
 import 'panes/flutter_frames/flutter_frame_model.dart';
 import 'panes/flutter_frames/flutter_frames_controller.dart';
 import 'panes/frame_analysis/frame_analysis.dart';
@@ -101,7 +101,7 @@ class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
     return AnalyticsTabbedView(
       tabs: tabs,
       tabViews: tabViews,
-      gaScreen: analytics_constants.performance,
+      gaScreen: gac.performance,
       onTabChanged: (int index) {
         final featureController = featureControllers[index];
         unawaited(controller.setActiveFeature(featureController));
@@ -184,7 +184,7 @@ class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
                   ),
                   const FlameChartHelpButton(
                     gaScreen: PerformanceScreen.id,
-                    gaSelection: analytics_constants.timelineFlameChartHelp,
+                    gaSelection: gac.timelineFlameChartHelp,
                   ),
                 ],
                 if (!offlineController.offlineMode.value)
@@ -265,8 +265,8 @@ class RefreshTimelineEventsButton extends StatelessWidget {
       iconData: Icons.refresh,
       onPressed: controller.processAllTraceEvents,
       tooltip: 'Refresh timeline events',
-      gaScreen: analytics_constants.performance,
-      gaSelection: analytics_constants.refreshTimelineEvents,
+      gaScreen: gac.performance,
+      gaSelection: gac.refreshTimelineEvents,
     );
   }
 }
