@@ -19,6 +19,7 @@ class PrimaryControls extends StatelessWidget {
       showChart: preferences.memory.showChart,
       onPressed: (show) => preferences.memory.showChart.value = show,
       minScreenWidthForTextBeforeScaling: memoryControlsMinVerboseWidth,
+      tooltip: 'Memory usage chart',
     );
   }
 }

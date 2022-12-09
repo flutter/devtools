@@ -517,6 +517,7 @@ class ChartVisibilityButton extends StatelessWidget {
     required this.onPressed,
     this.minScreenWidthForTextBeforeScaling,
     this.label = 'Chart',
+    required this.tooltip,
   });
 
   final ValueListenable<bool> showChart;
@@ -527,6 +528,8 @@ class ChartVisibilityButton extends StatelessWidget {
 
   final String label;
 
+  final String tooltip;
+
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<bool>(
@@ -534,7 +537,7 @@ class ChartVisibilityButton extends StatelessWidget {
       builder: (_, show, __) {
         return IconLabelButton(
           key: key,
-          tooltip: show ? 'Hide chart' : 'Show chart',
+          tooltip: tooltip,
           icon: show ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
           label: label,
           minScreenWidthForTextBeforeScaling:
