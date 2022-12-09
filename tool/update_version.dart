@@ -69,16 +69,16 @@ String? incrementVersionByType(String version, String type) {
   var minor = int.parse(semVerMatch.namedGroup('minor')!, radix: 10);
   var patch = int.parse(semVerMatch.namedGroup('patch')!, radix: 10);
   switch (type) {
-    case 'next-major':
+    case 'major':
       major++;
       minor = 0;
       patch = 0;
       break;
-    case 'next-minor':
+    case 'minor':
       minor++;
       patch = 0;
       break;
-    case 'next-patch':
+    case 'patch':
       patch++;
       break;
     default:
@@ -284,15 +284,6 @@ class ManualUpdateCommand extends Command {
   }
 }
 
-class _AutoExample {
-  _AutoExample(String orignal, String updated);
-  @override
-  String toString() {
-    // TODO: implement toString
-    return '';
-  }
-}
-
 class AutoUpdateCommand extends Command {
   @override
   final name = 'auto';
@@ -302,7 +293,7 @@ class AutoUpdateCommand extends Command {
     argParser.addOption(
       'type',
       abbr: 't',
-      allowed: ['release', 'dev', 'next-patch', 'next-minor', 'next-major'],
+      allowed: ['release', 'dev', 'patch', 'minor', 'major'],
       allowedHelp: {
         'release': [
           'strips any pre-release versions from the version.',
@@ -316,23 +307,23 @@ class AutoUpdateCommand extends Command {
           '\t1.2.3       => 1.2.3-dev.0',
           '\t1.2.3-dev.4 => 1.2.3-dev.5',
         ].join('\n'),
-        'next-patch': [
-          'bumps the version to the next patch value, and sets the dev version to 0.',
+        'patch': [
+          'bumps the version to the next patch value.',
           'Examples:',
-          '\t1.2.3       => 1.2.4-dev.0',
-          '\t1.2.3-dev.4 => 1.2.4-dev.0',
+          '\t1.2.3       => 1.2.4',
+          '\t1.2.3-dev.4 => 1.2.4',
         ].join('\n'),
-        'next-minor': [
-          'bumps the version to the next minor value, and sets the dev version to 0.',
+        'minor': [
+          'bumps the version to the next minor value.',
           'Examples:',
-          '\t1.2.3       => 1.3.0-dev.0',
-          '\t1.2.3-dev.4 => 1.3.0-dev.0',
+          '\t1.2.3       => 1.3.0',
+          '\t1.2.3-dev.4 => 1.3.0',
         ].join('\n'),
-        'next-major': [
-          'bumps the version to the next major value, and sets the dev version to 0.',
-          'Examples:', //Example:\n\t\n\t
-          '\t1.2.3       => 2.0.0-dev.0',
-          '\t1.2.3-dev.4 => 2.0.0-dev.0',
+        'major': [
+          'bumps the version to the next major value.',
+          'Examples:',
+          '\t1.2.3       => 2.0.0',
+          '\t1.2.3-dev.4 => 2.0.0',
         ].join('\n'),
       },
       mandatory: true,
@@ -368,7 +359,6 @@ class AutoUpdateCommand extends Command {
         if (newVersion == null) {
           throw 'Failed to determine the newVersion.';
         }
-        newVersion = incrementDevVersion(newVersion);
     }
     print('Updating from $currentVersion to $newVersion');
 
