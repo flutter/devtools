@@ -68,18 +68,16 @@ class InspectorBreadcrumbNavigator extends StatelessWidget {
       );
     }).toList();
     List<_InspectorBreadcrumbData> breadcrumbs;
-    if (items.length > _maxNumberOfBreadcrumbs) {
-      breadcrumbs = [
-        items[0],
-        _InspectorBreadcrumbData.more(),
-        ...items.sublist(
-          items.length - _maxNumberOfBreadcrumbs + 1,
-          items.length,
-        ),
-      ];
-    } else {
-      breadcrumbs = items;
-    }
+    breadcrumbs = items.length > _maxNumberOfBreadcrumbs
+        ? [
+            items[0],
+            _InspectorBreadcrumbData.more(),
+            ...items.sublist(
+              items.length - _maxNumberOfBreadcrumbs + 1,
+              items.length,
+            )
+          ]
+        : items;
 
     return breadcrumbs.joinWith(_InspectorBreadcrumbData.chevron());
   }

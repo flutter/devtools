@@ -54,11 +54,9 @@ class DevToolsTab extends Tab {
   }
 
   static double calculateHeight(Icon? icon, String? text, Widget? child) {
-    if (icon == null || (text == null && child == null)) {
-      return _tabHeight;
-    } else {
-      return _textAndIconTabHeight;
-    }
+    return icon == null || (text == null && child == null)
+        ? _tabHeight
+        : _textAndIconTabHeight;
   }
 
   /// Tab id for google analytics.

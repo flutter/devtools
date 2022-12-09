@@ -634,11 +634,8 @@ class DebuggerController extends DisposableController
   void selectStackFrame(StackFrameAndSourcePosition? frame) {
     _selectedStackFrame.value = frame;
 
-    if (frame != null) {
-      _variables.value = _createVariablesForFrame(frame.frame);
-    } else {
-      _variables.value = [];
-    }
+    _variables.value =
+        frame != null ? _createVariablesForFrame(frame.frame) : [];
 
     final scriptRef = frame?.scriptRef;
     final position = frame?.position;

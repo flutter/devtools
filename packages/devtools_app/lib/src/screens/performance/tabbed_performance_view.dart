@@ -113,17 +113,15 @@ class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
     assert(serviceManager.connectedApp!.isFlutterAppNow!);
     Widget frameAnalysisView;
     final selectedFrame = _selectedFlutterFrame;
-    if (selectedFrame != null) {
-      frameAnalysisView = FlutterFrameAnalysisView(
-        frameAnalysis: selectedFrame.frameAnalysis,
-        enhanceTracingController: controller.enhanceTracingController,
-        rebuildCountModel: controller.data!.rebuildCountModel,
-      );
-    } else {
-      frameAnalysisView = const Center(
-        child: Text('Select a frame above to view analysis data.'),
-      );
-    }
+    frameAnalysisView = selectedFrame != null
+        ? FlutterFrameAnalysisView(
+            frameAnalysis: selectedFrame.frameAnalysis,
+            enhanceTracingController: controller.enhanceTracingController,
+            rebuildCountModel: controller.data!.rebuildCountModel,
+          )
+        : const Center(
+            child: Text('Select a frame above to view analysis data.'),
+          );
     return _PerformanceTabRecord(
       tab: _buildTab(tabName: 'Frame Analysis'),
       tabView: KeepAliveWrapper(

@@ -276,10 +276,8 @@ class ScreenSize {
     if (width < 600) return MediaSize.xs;
     if (width < 900) return MediaSize.s;
     if (width < 1200) return MediaSize.m;
-    if (width < 1500)
-      return MediaSize.l;
-    else
-      return MediaSize.xl;
+    if (width < 1500) return MediaSize.l;
+    return MediaSize.xl;
   }
 
   MediaSize _calculateHeight(BuildContext context) {
@@ -288,9 +286,7 @@ class ScreenSize {
     if (height < 450) return MediaSize.xs;
     if (height < 600) return MediaSize.s;
     if (height < 750) return MediaSize.m;
-    if (height < 900)
-      return MediaSize.l;
-    else
-      return MediaSize.xl;
+    if (height < 900) return MediaSize.l;
+    return MediaSize.xl;
   }
 }

@@ -712,17 +712,15 @@ class FlexChildVisualizer extends StatelessWidget {
       final horizontal = rootLocal.isMainAxisHorizontal;
 
       late Size size;
-      if (propertiesLocal.hasFlexFactor) {
-        size = SizeTween(
-          begin: Size(
-            horizontal ? minRenderWidth - entranceMargin : renderSize.width,
-            vertical ? minRenderHeight - entranceMargin : renderSize.height,
-          ),
-          end: renderSize,
-        ).evaluate(state.entranceCurve)!;
-      } else {
-        size = renderSize;
-      }
+      size = propertiesLocal.hasFlexFactor
+          ? SizeTween(
+              begin: Size(
+                horizontal ? minRenderWidth - entranceMargin : renderSize.width,
+                vertical ? minRenderHeight - entranceMargin : renderSize.height,
+              ),
+              end: renderSize,
+            ).evaluate(state.entranceCurve)!
+          : renderSize;
       // Not-expanded widgets enter much faster.
       return Opacity(
         opacity: min([state.entranceCurve.value * 5, 1.0]),

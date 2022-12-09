@@ -2509,12 +2509,10 @@ class BulletSpacer extends StatelessWidget {
     final ThemeData theme = Theme.of(context);
 
     late TextStyle? textStyle;
-    if (useAccentColor) {
-      textStyle = theme.appBarTheme.toolbarTextStyle ??
-          theme.primaryTextTheme.bodyMedium;
-    } else {
-      textStyle = theme.textTheme.bodyMedium;
-    }
+    textStyle = useAccentColor
+        ? theme.appBarTheme.toolbarTextStyle ??
+            theme.primaryTextTheme.bodyMedium
+        : theme.textTheme.bodyMedium;
 
     final mutedColor = textStyle?.color?.withAlpha(0x90);
 
