@@ -46,7 +46,11 @@ class MemoryTabView extends StatelessWidget {
         return AnalyticsTabbedView(
           tabs: tabs,
           tabViews: tabViews,
+          initialSelectedIndex: controller.selectedFeatureTabIndex,
           gaScreen: gac.memory,
+          onTabChanged: (int index) {
+            controller.selectedFeatureTabIndex = index;
+          },
         );
       },
     );

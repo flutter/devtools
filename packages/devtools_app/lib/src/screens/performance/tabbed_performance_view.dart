@@ -101,8 +101,10 @@ class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
     return AnalyticsTabbedView(
       tabs: tabs,
       tabViews: tabViews,
+      initialSelectedIndex: controller.selectedFeatureTabIndex,
       gaScreen: gac.performance,
       onTabChanged: (int index) {
+        controller.selectedFeatureTabIndex = index;
         final featureController = featureControllers[index];
         unawaited(controller.setActiveFeature(featureController));
       },
