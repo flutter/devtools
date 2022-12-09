@@ -264,7 +264,7 @@ class DevToolsRouterDelegate extends RouterDelegate<DevToolsRouteConfiguration>
     // Create a new map in case the one we were given was unmodifiable.
     final params = {...currentConfig.args};
     params.removeWhere((key, value) => value == null);
-    //await SystemNavigator.selectMultiEntryHistory();
+    await SystemNavigator.selectMultiEntryHistory();
     await SystemNavigator.routeInformationUpdated(
       location: Uri(
         path: path,
