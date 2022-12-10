@@ -104,7 +104,7 @@ void main() {
           find.text('Select a frame above to view analysis data.'),
           findsOneWidget,
         );
-        expect(find.byType(ChartVisibilityButton), findsOneWidget);
+        expect(find.byType(VisibilityButton), findsOneWidget);
         expect(find.byIcon(Icons.block), findsOneWidget);
         expect(find.text('Performance Overlay'), findsOneWidget);
         expect(find.text('Enhance Tracing'), findsOneWidget);
@@ -133,7 +133,7 @@ void main() {
           findsNothing,
         );
         expect(find.byType(EventDetails), findsOneWidget);
-        expect(find.byType(ChartVisibilityButton), findsNothing);
+        expect(find.byType(VisibilityButton), findsNothing);
         expect(find.byIcon(Icons.block), findsOneWidget);
         expect(find.text('Performance Overlay'), findsNothing);
         expect(find.text('Enhance Tracing'), findsNothing);
@@ -157,7 +157,7 @@ void main() {
           await pumpPerformanceScreen(tester, runAsync: true);
           await tester.pumpAndSettle();
 
-          final chartButtonFinder = find.byType(ChartVisibilityButton);
+          final chartButtonFinder = find.byType(VisibilityButton);
           expect(chartButtonFinder, findsOneWidget);
 
           // The flutter frames chart is visible.

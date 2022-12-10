@@ -511,16 +511,16 @@ class CollapseAllButton extends StatelessWidget {
 ///
 /// The button automatically toggles the icon and the tooltip to indicate the
 /// shown or hidden state.
-class ChartVisibilityButton extends StatelessWidget {
-  const ChartVisibilityButton({
-    required this.showChart,
+class VisibilityButton extends StatelessWidget {
+  const VisibilityButton({
+    required this.show,
     required this.onPressed,
     this.minScreenWidthForTextBeforeScaling,
-    this.label = 'Chart',
+    required this.label,
     required this.tooltip,
   });
 
-  final ValueListenable<bool> showChart;
+  final ValueListenable<bool> show;
 
   final void Function(bool) onPressed;
 
@@ -533,7 +533,7 @@ class ChartVisibilityButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<bool>(
-      valueListenable: showChart,
+      valueListenable: show,
       builder: (_, show, __) {
         return IconLabelButton(
           key: key,
