@@ -221,7 +221,7 @@ class _FramesChartState extends State<FramesChart> with AutoDisposeMixin {
       });
     });
 
-    final initialScrollOffset = _calculateInitialScrollOffset();
+    final initialScrollOffset = _calculateInitialHorizontalScrollOffset();
     _framesScrollController = ScrollController(
       initialScrollOffset: initialScrollOffset,
     );
@@ -236,13 +236,14 @@ class _FramesChartState extends State<FramesChart> with AutoDisposeMixin {
     }
   }
 
-  double _calculateInitialScrollOffset() {
+  double _calculateInitialHorizontalScrollOffset() {
     final selectedIndex = _selectedFrameIndex;
     if (selectedIndex == null) return 0.0;
 
+    final chartWidthWithoutAxisLabels =
+        widget.constraints.maxWidth - _yAxisUnitsSpace;
     final totalFramesInView =
-        (widget.constraints.maxWidth - _yAxisUnitsSpace) ~/
-            _defaultFrameWidthWithPadding;
+        chartWidthWithoutAxisLabels ~/ _defaultFrameWidthWithPadding;
     final fullFrameRangeInView = Range(0, totalFramesInView);
 
     if (fullFrameRangeInView.contains(selectedIndex)) return 0.0;
