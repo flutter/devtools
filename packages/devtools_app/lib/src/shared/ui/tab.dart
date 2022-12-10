@@ -82,6 +82,7 @@ class AnalyticsTabbedView<T> extends StatefulWidget {
     this.outlined = true,
     this.sendAnalytics = true,
     this.onTabChanged,
+    this.initialSelectedIndex,
   })  : trailingWidgets = List.generate(
           tabs.length,
           (index) => tabs[index].trailing ?? const SizedBox(),
@@ -97,6 +98,8 @@ class AnalyticsTabbedView<T> extends StatefulWidget {
   final List<Widget> trailingWidgets;
 
   final bool outlined;
+
+  final int? initialSelectedIndex;
 
   /// Whether to send analytics events to GA.
   ///
@@ -124,6 +127,11 @@ class _AnalyticsTabbedViewState extends State<AnalyticsTabbedView>
       length: widget.tabs.length,
       vsync: this,
     );
+
+    final initialIndex = widget.initialSelectedIndex;
+    if (initialIndex != null) {
+      _currentTabControllerIndex = initialIndex;
+    }
     if (_currentTabControllerIndex >= _tabController!.length) {
       _currentTabControllerIndex = 0;
     }
