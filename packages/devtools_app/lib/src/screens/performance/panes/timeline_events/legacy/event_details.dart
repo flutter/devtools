@@ -37,30 +37,33 @@ class EventDetails extends StatelessWidget {
     // (see html_event_details.dart).
     final theme = Theme.of(context);
     return OutlineDecoration(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          AreaPaneHeader(
-            needsTopBorder: false,
-            tall: true,
-            title: Text(_generateHeaderText()),
-            actions: [
-              CpuSamplingRateDropdown(
-                screenId: PerformanceScreen.id,
-                profilePeriodFlagNotifier:
-                    legacyController.cpuProfilerController.profilePeriodFlag!,
+      child: ValueListenableBuilder<bool>(
+        valueListenable: offlineController.offlineMode,
+        builder: (context, offline, _) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              AreaPaneHeader(
+                needsTopBorder: false,
+                tall: true,
+                title: Text(_generateHeaderText()),
+                actions: [
+                  if (!offline)
+                    CpuSamplingRateDropdown(
+                      screenId: PerformanceScreen.id,
+                      profilePeriodFlagNotifier: legacyController
+                          .cpuProfilerController.profilePeriodFlag!,
+                    ),
+                ],
+              ),
+              Expanded(
+                child: selectedEvent != null
+                    ? _buildDetails(offline)
+                    : _buildInstructions(theme),
               ),
             ],
-          ),
-          Expanded(
-            child: selectedEvent != null
-                ? ValueListenableBuilder<bool>(
-                    valueListenable: offlineController.offlineMode,
-                    builder: (context, offline, _) => _buildDetails(offline),
-                  )
-                : _buildInstructions(theme),
-          ),
-        ],
+          );
+        },
       ),
     );
   }
