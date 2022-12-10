@@ -7,6 +7,7 @@ import 'package:devtools_app/src/screens/performance/panes/timeline_events/legac
 import 'package:devtools_app/src/screens/profiler/cpu_profiler.dart';
 import 'package:devtools_app/src/service/vm_flags.dart' as vm_flags;
 import 'package:devtools_app/src/shared/config_specific/import_export/import_export.dart';
+import 'package:devtools_app/src/shared/ui/vm_flag_widgets.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -55,6 +56,19 @@ void main() {
         (WidgetTester tester) async {
       await pumpEventDetails(goldenUiTimelineEvent, tester);
       expect(find.byType(CpuProfiler), findsOneWidget);
+      expect(find.byType(CpuSamplingRateDropdown), findsOneWidget);
+      expect(find.byType(CpuProfilerDisabled), findsNothing);
+      expect(find.byType(EventSummary), findsOneWidget);
+      expect(find.text(EventDetails.noEventSelected), findsNothing);
+      expect(find.text(EventDetails.instructions), findsNothing);
+    });
+
+    testWidgetsWithWindowSize('builds for UI event in offline mode', windowSize,
+        (WidgetTester tester) async {
+      offlineController.enterOfflineMode();
+      await pumpEventDetails(goldenUiTimelineEvent, tester);
+      expect(find.byType(CpuProfiler), findsOneWidget);
+      expect(find.byType(CpuSamplingRateDropdown), findsNothing);
       expect(find.byType(CpuProfilerDisabled), findsNothing);
       expect(find.byType(EventSummary), findsOneWidget);
       expect(find.text(EventDetails.noEventSelected), findsNothing);
@@ -65,6 +79,7 @@ void main() {
         (WidgetTester tester) async {
       await pumpEventDetails(goldenRasterTimelineEvent, tester);
       expect(find.byType(CpuProfiler), findsNothing);
+      expect(find.byType(CpuSamplingRateDropdown), findsNothing);
       expect(find.byType(CpuProfilerDisabled), findsNothing);
       expect(find.byType(EventSummary), findsOneWidget);
       expect(find.text(EventDetails.noEventSelected), findsNothing);
@@ -75,6 +90,7 @@ void main() {
         (WidgetTester tester) async {
       await pumpEventDetails(asyncEventWithInstantChildren, tester);
       expect(find.byType(CpuProfiler), findsNothing);
+      expect(find.byType(CpuSamplingRateDropdown), findsNothing);
       expect(find.byType(CpuProfilerDisabled), findsNothing);
       expect(find.byType(EventSummary), findsOneWidget);
       expect(find.text(EventDetails.noEventSelected), findsNothing);
@@ -85,6 +101,7 @@ void main() {
         (WidgetTester tester) async {
       await pumpEventDetails(null, tester);
       expect(find.byType(CpuProfiler), findsNothing);
+      expect(find.byType(CpuSamplingRateDropdown), findsNothing);
       expect(find.byType(CpuProfilerDisabled), findsNothing);
       expect(find.byType(EventSummary), findsNothing);
       expect(find.text(EventDetails.noEventSelected), findsOneWidget);
@@ -96,6 +113,7 @@ void main() {
       await serviceManager.service!.setFlag(vm_flags.profiler, 'false');
       await pumpEventDetails(goldenUiTimelineEvent, tester);
       expect(find.byType(CpuProfiler), findsNothing);
+      expect(find.byType(CpuSamplingRateDropdown), findsNothing);
       expect(find.byType(CpuProfilerDisabled), findsOneWidget);
       expect(find.byType(EventSummary), findsNothing);
       expect(find.text(EventDetails.noEventSelected), findsNothing);
@@ -105,6 +123,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(CpuProfiler), findsOneWidget);
+      expect(find.byType(CpuSamplingRateDropdown), findsOneWidget);
       expect(find.byType(CpuProfilerDisabled), findsNothing);
       expect(find.byType(EventSummary), findsOneWidget);
     });

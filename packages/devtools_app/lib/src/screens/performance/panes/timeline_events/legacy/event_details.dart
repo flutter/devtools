@@ -37,30 +37,39 @@ class EventDetails extends StatelessWidget {
     // (see html_event_details.dart).
     final theme = Theme.of(context);
     return OutlineDecoration(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          AreaPaneHeader(
-            needsTopBorder: false,
-            tall: true,
-            title: Text(_generateHeaderText()),
-            actions: [
-              CpuSamplingRateDropdown(
-                screenId: PerformanceScreen.id,
-                profilePeriodFlagNotifier:
-                    legacyController.cpuProfilerController.profilePeriodFlag!,
+      child: DualValueListenableBuilder<bool, Flag>(
+        firstListenable: offlineController.offlineMode,
+        secondListenable:
+            legacyController.cpuProfilerController.profilerFlagNotifier!,
+        builder: (context, offline, profilerFlag, _) {
+          final profilerEnabled = profilerFlag.valueAsString == 'true';
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              AreaPaneHeader(
+                needsTopBorder: false,
+                tall: true,
+                title: Text(_generateHeaderText()),
+                actions: [
+                  if (selectedEvent != null &&
+                      selectedEvent!.isUiEvent &&
+                      !offline &&
+                      profilerEnabled)
+                    CpuSamplingRateDropdown(
+                      screenId: PerformanceScreen.id,
+                      profilePeriodFlagNotifier: legacyController
+                          .cpuProfilerController.profilePeriodFlag!,
+                    ),
+                ],
+              ),
+              Expanded(
+                child: selectedEvent != null
+                    ? _buildDetails(offline, profilerEnabled)
+                    : _buildInstructions(theme),
               ),
             ],
-          ),
-          Expanded(
-            child: selectedEvent != null
-                ? ValueListenableBuilder<bool>(
-                    valueListenable: offlineController.offlineMode,
-                    builder: (context, offline, _) => _buildDetails(offline),
-                  )
-                : _buildInstructions(theme),
-          ),
-        ],
+          );
+        },
       ),
     );
   }
@@ -74,7 +83,7 @@ class EventDetails extends StatelessWidget {
         '${selected.name} (${msText(selected.time.duration)})';
   }
 
-  Widget _buildDetails(bool offlineMode) {
+  Widget _buildDetails(bool offlineMode, bool profilerEnabled) {
     final selected = selectedEvent!;
     if (selected.isUiEvent) {
       // In [offlineController.offlineMode], we do not need to worry about
@@ -82,15 +91,9 @@ class EventDetails extends StatelessWidget {
       if (offlineMode) {
         return _buildCpuProfiler(legacyController.cpuProfilerController);
       }
-      return ValueListenableBuilder<Flag>(
-        valueListenable:
-            legacyController.cpuProfilerController.profilerFlagNotifier!,
-        builder: (context, profilerFlag, _) {
-          return profilerFlag.valueAsString == 'true'
-              ? _buildCpuProfiler(legacyController.cpuProfilerController)
-              : CpuProfilerDisabled(legacyController.cpuProfilerController);
-        },
-      );
+      return profilerEnabled
+          ? _buildCpuProfiler(legacyController.cpuProfilerController)
+          : CpuProfilerDisabled(legacyController.cpuProfilerController);
     }
     return EventSummary(selected);
   }
