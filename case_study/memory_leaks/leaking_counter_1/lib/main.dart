@@ -29,32 +29,39 @@ class MyHomePage extends StatefulWidget {
 }
 
 class MyIncrementer {
-  MyIncrementer(this.increment);
-
+  MyIncrementer(this.increment, this.screen);
+  final Scaffold? screen;
   final VoidCallback increment;
 }
 
 class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
 
-  late MyIncrementer _incrementer = MyIncrementer(() => setState(() {
-        _counter++;
-      }));
+  late MyIncrementer _incrementer = MyIncrementer(
+    () => setState(() {
+      _counter++;
+    }),
+    null,
+  );
 
-  void _updateAndInvokeIncrementer(BuildContext context) {
-    final incrementer = _incrementer;
+  /// Increments counter if current screen contains floating action button.
+  void _incrementCounter(BuildContext context) {
+    final oldIncrementer = _incrementer;
 
-    _incrementer = MyIncrementer(() {
-      if (identityHashCode(context) > 0) {
-        incrementer.increment();
-      }
-    });
+    _incrementer = MyIncrementer(
+      () {
+        final screen = theScreen;
+        if (screen.floatingActionButton != null) {
+          oldIncrementer.increment();
+        }
+      },
+      theScreen,
+    );
 
     _incrementer.increment();
   }
 
-  @override
-  Widget build(BuildContext context) {
+  Scaffold get theScreen {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
@@ -64,20 +71,33 @@ class _MyHomePageState extends State<MyHomePage> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             const Text(
-              'You have pushed the button this many times:',
+              'The counter value is:',
             ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
+            MyCounter(value: _counter),
           ],
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => _updateAndInvokeIncrementer(context),
-        tooltip: 'Increment',
+        onPressed: () => _incrementCounter(context),
+        tooltip: 'Increment counter',
         child: const Icon(Icons.add),
       ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) => theScreen;
+}
+
+class MyCounter extends StatelessWidget {
+  const MyCounter({super.key, required this.value});
+  final int value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      '$value',
+      style: Theme.of(context).textTheme.headlineMedium,
     );
   }
 }
