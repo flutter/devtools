@@ -204,7 +204,7 @@ class _PrimaryControls extends StatelessWidget {
             onPressed:
                 controller.flutterFramesController.toggleShowFlutterFrames,
             label: 'Flutter frames',
-            tooltip: 'Toggle visibility of the Flutter frames',
+            tooltip: 'Toggle visibility of the Flutter frames chart',
           ),
           const SizedBox(width: denseSpacing),
         ],
