@@ -54,6 +54,14 @@ class PerformanceController extends DisposableController
   //(https://github.com/flutter/devtools/pull/4566).
   final rebuildCountModel = RebuildCountModel();
 
+  /// Index of the selected feature tab.
+  ///
+  /// This value is used to set the initial tab selection of the
+  /// [TabbedPerformanceView]. This widget will be disposed and re-initialized
+  /// on DevTools screen changes, so we must store this value in the controller
+  /// instead of the widget state.
+  int selectedFeatureTabIndex = 0;
+
   bool _fetchMissingLocationsStarted = false;
   IsolateRef? _currentRebuildWidgetsIsolate;
 
