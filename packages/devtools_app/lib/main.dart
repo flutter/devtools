@@ -25,7 +25,9 @@ void main() async {
   // fragment format and redirect if necessary.
   if (_handleLegacyUrl()) return;
 
-  usePathUrlStrategy();
+  // Temporarily comment out for the sake of writing integration tests
+  // see https://github.com/flutter/flutter/issues/116936.
+  // usePathUrlStrategy();
 
   // Initialize the framework before we do anything else, otherwise the
   // StorageController won't be initialized and preferences won't be loaded.
