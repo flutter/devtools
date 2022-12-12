@@ -199,12 +199,12 @@ class _PrimaryControls extends StatelessWidget {
     return Row(
       children: [
         if (serviceManager.connectedApp!.isFlutterAppNow!) ...[
-          ChartVisibilityButton(
-            showChart:
-                controller.flutterFramesController.showFlutterFramesChart,
+          VisibilityButton(
+            show: controller.flutterFramesController.showFlutterFramesChart,
             onPressed:
                 controller.flutterFramesController.toggleShowFlutterFrames,
             label: 'Flutter frames',
+            tooltip: 'Toggle visibility of the Flutter frames chart',
           ),
           const SizedBox(width: denseSpacing),
         ],
