@@ -609,11 +609,7 @@ class TreemapNode extends TreeNode<TreemapNode> {
     if (!showDiff) {
       return backgroundColor ?? mainUiColor;
     }
-    if (byteSize < 0) {
-      return treemapDecreaseColor;
-    } else {
-      return treemapIncreaseColor;
-    }
+    return byteSize < 0 ? treemapDecreaseColor : treemapIncreaseColor;
   }
 
   TextSpan displayText({Color? color, bool oneLine = true}) {

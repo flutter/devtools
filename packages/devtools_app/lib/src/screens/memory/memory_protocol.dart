@@ -102,14 +102,11 @@ class MemoryTracker {
 
     // Polls for current Android meminfo using:
     //    > adb shell dumpsys meminfo -d <package_name>
-    if (serviceManager.hasConnection &&
-        serviceManager.vm!.operatingSystem == 'android' &&
-        memoryController.isAndroidChartVisibleNotifier.value) {
-      adbMemoryInfo = await _fetchAdbInfo();
-    } else {
-      // TODO(terry): TBD alternative for iOS memory info - all values zero.
-      adbMemoryInfo = AdbMemoryInfo.empty();
-    }
+    adbMemoryInfo = serviceManager.hasConnection &&
+            serviceManager.vm!.operatingSystem == 'android' &&
+            memoryController.isAndroidChartVisibleNotifier.value
+        ? await _fetchAdbInfo()
+        : AdbMemoryInfo.empty();
 
     // Query the engine's rasterCache estimate.
     rasterCache = await _fetchRasterCacheInfo();

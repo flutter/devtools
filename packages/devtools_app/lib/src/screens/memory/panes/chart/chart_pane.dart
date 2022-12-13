@@ -324,13 +324,11 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
 
     double totalHoverHeight;
     int totalTraces;
-    if (controller.isAndroidChartVisibleNotifier.value) {
-      totalTraces = chartsValues.vmData.entries.length -
-          1 +
-          chartsValues.androidData.entries.length;
-    } else {
-      totalTraces = chartsValues.vmData.entries.length - 1;
-    }
+    totalTraces = controller.isAndroidChartVisibleNotifier.value
+        ? chartsValues.vmData.entries.length -
+            1 +
+            chartsValues.androidData.entries.length
+        : chartsValues.vmData.entries.length - 1;
 
     totalHoverHeight = _computeHoverHeight(
       chartsValues.eventCount,

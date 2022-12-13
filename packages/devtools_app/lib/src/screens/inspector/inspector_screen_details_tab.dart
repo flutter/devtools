@@ -71,7 +71,7 @@ class InspectorExpandCollapseButtons extends StatefulWidget {
 
 class _InspectorExpandCollapseButtonsState
     extends State<InspectorExpandCollapseButtons> with BlockingActionMixin {
-  bool get enableButtons => actionInProgress == false;
+  bool get enableButtons => !actionInProgress;
 
   @override
   Widget build(BuildContext context) {
