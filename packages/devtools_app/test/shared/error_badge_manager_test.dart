@@ -13,13 +13,13 @@ import 'package:devtools_app/src/screens/profiler/profiler_screen.dart';
 import 'package:devtools_app/src/shared/error_badge_manager.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-const supportedScreenIds = [
+final supportedScreenIds = [
   InspectorScreen.id,
   PerformanceScreen.id,
   NetworkScreen.id,
 ];
 
-const allScreenIds = [
+final allScreenIds = [
   InspectorScreen.id,
   PerformanceScreen.id,
   ProfilerScreen.id,

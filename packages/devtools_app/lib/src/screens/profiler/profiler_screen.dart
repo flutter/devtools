@@ -33,12 +33,12 @@ const iosProfilerWorkaround =
     'https://github.com/flutter/flutter/issues/88466#issuecomment-905830680';
 
 class ProfilerScreen extends Screen {
-  const ProfilerScreen()
+  ProfilerScreen()
       : super.conditional(
           id: id,
           requiresDartVm: true,
           worksOffline: true,
-          title: 'CPU Profiler',
+          title: ScreenMetaData.cpuProfiler.title,
           icon: Octicons.dashboard,
         );
 
@@ -47,7 +47,7 @@ class ProfilerScreen extends Screen {
   @visibleForTesting
   static const recordingStatusKey = Key('Recording Status');
 
-  static const id = ScreenIds.cpuProfiler;
+  static final id = ScreenMetaData.cpuProfiler.id;
 
   @override
   String get docPageId => id;

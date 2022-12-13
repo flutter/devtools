@@ -40,15 +40,15 @@ abstract class VMDeveloperView {
 }
 
 class VMDeveloperToolsScreen extends Screen {
-  const VMDeveloperToolsScreen()
+  VMDeveloperToolsScreen()
       : super.conditional(
           id: id,
-          title: 'VM Tools',
+          title: ScreenMetaData.vmTools.title,
           icon: Icons.settings_applications,
           requiresVmDeveloperMode: true,
         );
 
-  static const id = ScreenIds.vmTools;
+  static final id = ScreenMetaData.vmTools.id;
 
   @override
   ValueListenable<bool> get showIsolateSelector =>

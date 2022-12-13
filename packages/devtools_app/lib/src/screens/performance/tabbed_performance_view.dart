@@ -184,7 +184,7 @@ class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
                       return _buildSearchField(searchFieldEnabled);
                     },
                   ),
-                  const FlameChartHelpButton(
+                  FlameChartHelpButton(
                     gaScreen: PerformanceScreen.id,
                     gaSelection: gac.timelineFlameChartHelp,
                   ),

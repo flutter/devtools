@@ -578,7 +578,7 @@ class CheckboxSetting extends StatelessWidget {
 List<DevToolsScreen> get defaultScreens {
   return <DevToolsScreen>[
     DevToolsScreen<InspectorController>(
-      const InspectorScreen(),
+      InspectorScreen(),
       createController: (_) => InspectorController(
         inspectorTree: InspectorTreeController(),
         detailsTree: InspectorTreeController(),
@@ -586,40 +586,43 @@ List<DevToolsScreen> get defaultScreens {
       ),
     ),
     DevToolsScreen<PerformanceController>(
-      const PerformanceScreen(),
+      PerformanceScreen(),
       createController: (_) => PerformanceController(),
       supportsOffline: true,
     ),
     DevToolsScreen<ProfilerScreenController>(
-      const ProfilerScreen(),
+      ProfilerScreen(),
       createController: (_) => ProfilerScreenController(),
       supportsOffline: true,
     ),
     DevToolsScreen<MemoryController>(
-      const MemoryScreen(),
+      MemoryScreen(),
       createController: (_) => MemoryController(),
     ),
     DevToolsScreen<DebuggerController>(
-      const DebuggerScreen(),
+      DebuggerScreen(),
       createController: (routerDelegate) => DebuggerController(
         routerDelegate: routerDelegate,
       ),
     ),
     DevToolsScreen<NetworkController>(
-      const NetworkScreen(),
+      NetworkScreen(),
       createController: (_) => NetworkController(),
     ),
     DevToolsScreen<LoggingController>(
-      const LoggingScreen(),
+      LoggingScreen(),
       createController: (_) => LoggingController(),
     ),
-    DevToolsScreen<void>(const ProviderScreen(), createController: (_) {}),
+    DevToolsScreen<void>(
+      ProviderScreen(),
+      createController: (_) {},
+    ),
     DevToolsScreen<AppSizeController>(
-      const AppSizeScreen(),
+      AppSizeScreen(),
       createController: (_) => AppSizeController(),
     ),
     DevToolsScreen<VMDeveloperToolsController>(
-      const VMDeveloperToolsScreen(),
+      VMDeveloperToolsScreen(),
       createController: (_) => VMDeveloperToolsController(),
     ),
     // Show the sample DevTools screen.
