@@ -31,10 +31,7 @@ jobs:
       - name: Get Latest Flutter Candidate
         id: flutter-candidate
         run: |
-          # TODO(https://github.com/flutter/devtools/issues/4943): unpin once we can version
-          # solve with Dart 3.0.0
-          # LATEST_FLUTTER_CANDIDATE=$(./tool/latest_flutter_candidate.sh)
-          LATEST_FLUTTER_CANDIDATE='flutter-3.7-candidate.3'
+          LATEST_FLUTTER_CANDIDATE=$(./tool/latest_flutter_candidate.sh)
           echo "FLUTTER_CANDIDATE=$LATEST_FLUTTER_CANDIDATE" >> $GITHUB_OUTPUT
       
       - name: Load Cached Flutter SDK
