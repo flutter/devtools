@@ -24,7 +24,7 @@ xattr -d com.apple.quarantine ~/path/to/chromedriver
 
 ### Running a test
 
-1. Run the integration test script: `dart run integration_test/e2e.dart`
+1. Run an integration test script: `dart run integration_test/all.dart`
 
 To speed up local development, you can pass in a vm service uri from a Dart or Flutter app running on
 your local machine. This saves the cost of spinning up a new test app for each test run. To do this,
