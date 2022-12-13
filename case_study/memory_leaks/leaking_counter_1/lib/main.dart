@@ -54,7 +54,6 @@ class _MyHomePageState extends State<MyHomePage> {
           oldIncrementer.increment();
         }
       },
-      //buildScreen(context),
     );
 
     _incrementer.increment();
