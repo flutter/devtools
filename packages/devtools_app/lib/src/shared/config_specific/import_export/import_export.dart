@@ -166,7 +166,7 @@ abstract class ExportController {
     // This is a workaround to guarantee that DevTools exports are compatible
     // with other trace viewers (catapult, perfetto, chrome://tracing), which
     // require a top level field named "traceEvents".
-    if (activeScreenId == ScreenIds.performance) {
+    if (activeScreenId == ScreenMetaData.performance.id) {
       final traceEvents = List<Map<String, dynamic>>.from(
         contents[traceEventsFieldName],
       );

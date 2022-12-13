@@ -55,7 +55,7 @@ void main() {
     await tester.pumpWidget(
       wrapWithControllers(
         DevToolsScaffold(
-          tabs: const [
+          tabs: [
             _TestScreen(
               DebuggerScreen.id,
               debuggerScreenKey,
