@@ -146,7 +146,6 @@ class DevToolsRouterDelegate extends RouterDelegate<DevToolsRouteConfiguration>
   }
 
   bool _handleOnPopPage(Route<dynamic> route, dynamic result) {
-    print('on pop page');
     if (routes.length <= 1) {
       return false;
     }
@@ -279,7 +278,6 @@ class DevToolsRouterDelegate extends RouterDelegate<DevToolsRouteConfiguration>
   ///
   /// Existing state will be preserved unless overwritten by [stateUpdate].
   void updateStateIfNotCurrent(
-    BuildContext context,
     DevToolsNavigationState stateUpdate,
   ) {
     final stateChanged = _changesState(stateUpdate);
@@ -296,8 +294,6 @@ class DevToolsRouterDelegate extends RouterDelegate<DevToolsRouteConfiguration>
       ),
     );
     // Add the new state to the browser history.
-    print('router navigate');
-    Router.navigate(context, () => null);
     notifyListeners();
   }
 

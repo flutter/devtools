@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:codicon/codicon.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide Stack;
+import 'package:flutter/scheduler.dart';
 import 'package:provider/provider.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -114,6 +115,16 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
     ga.screen(DebuggerScreen.id);
     ga.timeStart(DebuggerScreen.id, analytics_constants.pageReady);
     _shownFirstScript = false;
+    SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
+      if (!_shownFirstScript) return;
+      final routerDelegate = DevToolsRouterDelegate.of(context);
+      routerDelegate.updateStateIfNotCurrent(
+        CodeViewSourceLocationNavigationState(
+          script: controller.codeViewController.currentScriptRef.value!,
+          line: 0,
+        ),
+      );
+    });
   }
 
   @override
@@ -176,16 +187,6 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
                           action: analytics_constants.pageReady,
                         ),
                       );
-
-                      final routerDelegate = DevToolsRouterDelegate.of(context);
-                      unawaited(
-                        routerDelegate.replaceState(
-                          CodeViewSourceLocationNavigationState(
-                            script: scriptRef,
-                            line: 0,
-                          ),
-                        ),
-                      );
                       _shownFirstScript = true;
                     }
 
@@ -211,14 +212,15 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
     final location = node?.location;
     if (node != null && location != null) {
       final routerDelegate = DevToolsRouterDelegate.of(context);
-      routerDelegate.updateStateIfNotCurrent(
-        context,
-        CodeViewSourceLocationNavigationState(
-          script: location.scriptRef,
-          line: location.location?.line ?? -1,
-          object: node.object,
-        ),
-      );
+      Router.navigate(context, () {
+        routerDelegate.updateStateIfNotCurrent(
+          CodeViewSourceLocationNavigationState(
+            script: location.scriptRef,
+            line: location.location?.line ?? -1,
+            object: node.object,
+          ),
+        );
+      });
     }
   }
 

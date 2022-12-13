@@ -49,15 +49,17 @@ class CodeViewController extends DisposableController
         {
           final processedState =
               CodeViewSourceLocationNavigationState._fromState(state);
-          print('state: ${processedState.location}');
           final object = processedState.object;
           showScriptLocation(processedState.location, focusLine: true);
           if (programExplorerController.initialized.value) {
             if (object != null) {
-              final node =
-                  programExplorerController.findOutlineNode(object);
+              final node = programExplorerController.findOutlineNode(object);
               if (node != null) {
                 programExplorerController.selectOutlineNode(node);
+              } else {
+                // If the object isn't associated with an outline node, clear
+                // the current outline selection.
+                programExplorerController.clearOutlineSelection();
               }
             } else {
               programExplorerController.clearOutlineSelection();
@@ -448,4 +450,9 @@ class CodeViewSourceLocationNavigationState extends DevToolsNavigationState {
         script,
         location: SourcePosition(line: line, column: 1),
       );
+
+  @override
+  String toString() {
+    return 'kind: $kind script: ${script.uri} line: $line object: ${object?.id}';
+  }
 }
