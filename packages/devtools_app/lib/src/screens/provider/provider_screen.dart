@@ -9,10 +9,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:provider/provider.dart' as provider show Provider;
 
-import '../../analytics/analytics.dart' as ga;
+import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/banner_messages.dart';
 import '../../shared/common_widgets.dart';
 import '../../shared/dialogs.dart';
+import '../../shared/primitives/simple_items.dart';
 import '../../shared/screen.dart';
 import '../../shared/split.dart';
 import 'instance_viewer/instance_details.dart';
@@ -55,7 +56,7 @@ class ProviderScreen extends Screen {
           icon: Icons.attach_file,
         );
 
-  static const id = 'provider';
+  static const id = ScreenIds.provider;
 
   @override
   Widget build(BuildContext context) {
@@ -124,7 +125,8 @@ class ProviderScreenBody extends ConsumerWidget {
                 needsTopBorder: false,
                 title: Text(detailsTitleText),
                 actions: [
-                  SettingsOutlinedButton(
+                  ToolbarAction(
+                    icon: Icons.settings,
                     onPressed: () {
                       unawaited(
                         showDialog(

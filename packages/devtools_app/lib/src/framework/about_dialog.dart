@@ -5,15 +5,21 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 import '../../devtools.dart' as devtools;
-import '../analytics/constants.dart' as analytics_constants;
+import '../shared/analytics/constants.dart' as gac;
 import '../shared/common_widgets.dart';
 import '../shared/dialogs.dart';
 import '../shared/globals.dart';
 import '../shared/theme.dart';
+import 'release_notes/release_notes.dart';
 
 class DevToolsAboutDialog extends StatelessWidget {
+  const DevToolsAboutDialog(this.releaseNotesController);
+
+  final ReleaseNotesController releaseNotesController;
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -23,23 +29,44 @@ class DevToolsAboutDialog extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const SelectableText('DevTools version ${devtools.version}'),
-          const SizedBox(height: defaultSpacing),
-          ...dialogSubHeader(theme, 'Feedback'),
+          Row(
+            children: [
+              const SelectableText('DevTools version ${devtools.version}'),
+              const Text(' - '),
+              InkWell(
+                child: Text(
+                  'release notes',
+                  style: theme.linkTextStyle,
+                ),
+                onTap: () =>
+                    releaseNotesController.toggleReleaseNotesVisible(true),
+              ),
+            ],
+          ),
+          const SizedBox(height: denseSpacing),
           Wrap(
             children: const [
               Text('Encountered an issue? Let us know at '),
               _FeedbackLink(),
-              Text(','),
+              Text('.'),
+            ],
+          ),
+          const SizedBox(height: defaultSpacing),
+          ...dialogSubHeader(theme, 'Contributing'),
+          Wrap(
+            children: const [
+              Text('Want to contribute to DevTools? Please see our '),
+              _ContributingLink(),
+              Text(' guide, or '),
             ],
           ),
           Wrap(
             children: const [
-              Text('or connect with us on '),
+              Text('connect with us on '),
               _DiscordLink(),
               Text('.'),
             ],
-          )
+          ),
         ],
       ),
       actions: const [
@@ -63,11 +90,32 @@ class _FeedbackLink extends StatelessWidget {
   }
 }
 
+class _ContributingLink extends StatelessWidget {
+  const _ContributingLink({Key? key}) : super(key: key);
+
+  static const _contributingGuideUrl =
+      'https://github.com/flutter/devtools/blob/master/CONTRIBUTING.md';
+
+  @override
+  Widget build(BuildContext context) {
+    return RichText(
+      text: LinkTextSpan(
+        link: const Link(
+          display: 'CONTRIBUTING',
+          url: _contributingGuideUrl,
+          gaScreenName: gac.devToolsMain,
+          gaSelectedItemDescription: gac.contributingLink,
+        ),
+        context: context,
+      ),
+    );
+  }
+}
+
 class _DiscordLink extends StatelessWidget {
   const _DiscordLink({Key? key}) : super(key: key);
 
-  static const _channelLink =
-      'https://discord.com/channels/608014603317936148/958862085297672282';
+  static const _discordWikiUrl = 'https://github.com/flutter/flutter/wiki/Chat';
 
   @override
   Widget build(BuildContext context) {
@@ -75,9 +123,9 @@ class _DiscordLink extends StatelessWidget {
       text: LinkTextSpan(
         link: const Link(
           display: 'Discord',
-          url: _channelLink,
-          gaScreenName: analytics_constants.devToolsMain,
-          gaSelectedItemDescription: analytics_constants.discordLink,
+          url: _discordWikiUrl,
+          gaScreenName: gac.devToolsMain,
+          gaSelectedItemDescription: gac.discordLink,
         ),
         context: context,
       ),
@@ -88,6 +136,7 @@ class _DiscordLink extends StatelessWidget {
 class OpenAboutAction extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final releaseNotesController = Provider.of<ReleaseNotesController>(context);
     return DevToolsTooltip(
       message: 'About DevTools',
       child: InkWell(
@@ -95,7 +144,7 @@ class OpenAboutAction extends StatelessWidget {
           unawaited(
             showDialog(
               context: context,
-              builder: (context) => DevToolsAboutDialog(),
+              builder: (context) => DevToolsAboutDialog(releaseNotesController),
             ),
           );
         },

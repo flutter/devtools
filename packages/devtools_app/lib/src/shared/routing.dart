@@ -7,8 +7,9 @@ import 'dart:collection';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-import '../primitives/utils.dart';
 import 'globals.dart';
+import 'primitives/auto_dispose.dart';
+import 'primitives/utils.dart';
 
 /// The page ID (used in routing) for the standalone app-size page.
 ///
@@ -21,10 +22,11 @@ const snapshotPageId = 'snapshot';
 
 /// Represents a Page/route for a DevTools screen.
 class DevToolsRouteConfiguration {
-  DevToolsRouteConfiguration(this.page, this.args);
+  DevToolsRouteConfiguration(this.page, this.args, this.state);
 
   final String page;
   final Map<String, String?> args;
+  final DevToolsNavigationState? state;
 }
 
 /// Converts between structured [DevToolsRouteConfiguration] (our internal data
@@ -66,7 +68,15 @@ class DevToolsRouteInformationParser
     // prefixed with a leading slash. Internally we use "page IDs" that do not
     // start with slashes but match the screenId for each screen.
     final path = uri.path.isNotEmpty ? uri.path.substring(1) : '';
-    final configuration = DevToolsRouteConfiguration(path, uri.queryParameters);
+    final configuration = DevToolsRouteConfiguration(
+      path,
+      uri.queryParameters,
+      routeInformation.state == null
+          ? null
+          : DevToolsNavigationState._(
+              (routeInformation.state as Map).cast<String, String?>(),
+            ),
+    );
     return SynchronousFuture<DevToolsRouteConfiguration>(configuration);
   }
 
@@ -81,7 +91,11 @@ class DevToolsRouteInformationParser
     final params = {...configuration.args};
     params.removeWhere((key, value) => value == null);
     return RouteInformation(
-      location: Uri(path: path, queryParameters: params).toString(),
+      location: Uri(
+        path: path,
+        queryParameters: params,
+      ).toString(),
+      state: configuration.state,
     );
   }
 }
@@ -99,7 +113,12 @@ class DevToolsRouterDelegate extends RouterDelegate<DevToolsRouteConfiguration>
   @override
   final GlobalKey<NavigatorState> navigatorKey;
 
-  final Page Function(BuildContext, String?, Map<String, String?>) _getPage;
+  final Page Function(
+    BuildContext,
+    String?,
+    Map<String, String?>,
+    DevToolsNavigationState?,
+  ) _getPage;
 
   /// A list of any routes/pages on the stack.
   ///
@@ -116,10 +135,11 @@ class DevToolsRouterDelegate extends RouterDelegate<DevToolsRouteConfiguration>
     final routeConfig = currentConfiguration;
     final page = routeConfig?.page;
     final args = routeConfig?.args ?? {};
+    final state = routeConfig?.state;
 
     return Navigator(
       key: navigatorKey,
-      pages: [_getPage(context, page, args)],
+      pages: [_getPage(context, page, args, state)],
       onPopPage: _handleOnPopPage,
     );
   }
@@ -134,27 +154,36 @@ class DevToolsRouterDelegate extends RouterDelegate<DevToolsRouteConfiguration>
     return true;
   }
 
-  /// Navigates to a new page, optionally updating arguments.
+  /// Navigates to a new page, optionally updating arguments and state.
   ///
-  /// If page and args would be the same, does nothing.
+  /// If page, args, and state would be the same, does nothing.
   /// Existing arguments (for example &uri=) will be preserved unless
   /// overwritten by [argUpdates].
-  void navigateIfNotCurrent(String page, [Map<String, String?>? argUpdates]) {
+  void navigateIfNotCurrent(
+    String page, [
+    Map<String, String?>? argUpdates,
+    DevToolsNavigationState? stateUpdates,
+  ]) {
     final pageChanged = page != currentConfiguration!.page;
     final argsChanged = _changesArgs(argUpdates);
-    if (!pageChanged && !argsChanged) {
+    final stateChanged = _changesState(stateUpdates);
+    if (!pageChanged && !argsChanged && !stateChanged) {
       return;
     }
 
-    navigate(page, argUpdates);
+    navigate(page, argUpdates, stateUpdates);
   }
 
-  /// Navigates to a new page, optionally updating arguments.
+  /// Navigates to a new page, optionally updating arguments and state.
   ///
   /// Existing arguments (for example &uri=) will be preserved unless
   /// overwritten by [argUpdates].
-  void navigate(String page, [Map<String, String?>? argUpdates]) {
-    final newArgs = {...currentConfiguration!.args, ...?argUpdates};
+  void navigate(
+    String page, [
+    Map<String, String?>? argUpdates,
+    DevToolsNavigationState? state,
+  ]) {
+    final newArgs = {...currentConfiguration?.args ?? {}, ...?argUpdates};
 
     // Ensure we disconnect from any previously connected applications if we do
     // not have a vm service uri as a query parameter, unless we are loading an
@@ -163,7 +192,9 @@ class DevToolsRouterDelegate extends RouterDelegate<DevToolsRouteConfiguration>
       serviceManager.manuallyDisconnect();
     }
 
-    _replaceStack(DevToolsRouteConfiguration(page, newArgs));
+    _replaceStack(
+      DevToolsRouteConfiguration(page, newArgs, state),
+    );
     notifyListeners();
   }
 
@@ -203,16 +234,104 @@ class DevToolsRouterDelegate extends RouterDelegate<DevToolsRouteConfiguration>
       return;
     }
 
-    final currentPage = currentConfiguration!.page;
-    final newArgs = {...currentConfiguration!.args, ...argUpdates};
-    _replaceStack(DevToolsRouteConfiguration(currentPage, newArgs));
+    final currentConfig = currentConfiguration!;
+    final currentPage = currentConfig.page;
+    final newArgs = {...currentConfig.args, ...argUpdates};
+    _replaceStack(
+      DevToolsRouteConfiguration(
+        currentPage,
+        newArgs,
+        currentConfig.state,
+      ),
+    );
     notifyListeners();
   }
 
-  /// Checks whether applying [changes] over the current routes args will result
+  /// Checks whether applying [changes] over the current route's args will result
   /// in any changes.
-  bool _changesArgs(Map<String, String?>? changes) => !mapEquals(
-        {...currentConfiguration!.args, ...?changes},
-        {...currentConfiguration!.args},
-      );
+  bool _changesArgs(Map<String, String?>? changes) {
+    final currentConfig = currentConfiguration!;
+    return !mapEquals(
+      {...currentConfig.args, ...?changes},
+      {...currentConfig.args},
+    );
+  }
+
+  /// Checks whether applying [changes] over the current route's state will result
+  /// in any changes.
+  bool _changesState(DevToolsNavigationState? changes) {
+    final currentState = currentConfiguration!.state;
+    if (currentState == null) {
+      return changes != null;
+    }
+    return currentState.hasChanges(changes);
+  }
+}
+
+/// Encapsulates state associated with a [Router] navigation event.
+class DevToolsNavigationState {
+  DevToolsNavigationState({
+    required this.kind,
+    required Map<String, String?> state,
+  }) : _state = {
+          _kKind: kind,
+          ...state,
+        };
+
+  factory DevToolsNavigationState.fromJson(Map<String, dynamic> json) =>
+      DevToolsNavigationState._(json.cast<String, String?>());
+
+  DevToolsNavigationState._(this._state) : kind = _state[_kKind]!;
+
+  static const _kKind = '_kind';
+
+  final String kind;
+
+  UnmodifiableMapView<String, String?> get state => UnmodifiableMapView(_state);
+  final Map<String, String?> _state;
+
+  bool hasChanges(DevToolsNavigationState? other) {
+    return !mapEquals(
+      {...state, ...?other?.state},
+      state,
+    );
+  }
+
+  @override
+  String toString() => _state.toString();
+
+  Map<String, dynamic> toJson() => _state;
+}
+
+/// Mixin that gives controllers the ability to respond to changes in router
+/// navigation state.
+mixin RouteStateHandlerMixin on DisposableController {
+  DevToolsRouterDelegate? _delegate;
+
+  @override
+  void dispose() {
+    super.dispose();
+    _delegate?.removeListener(_onRouteStateUpdate);
+  }
+
+  void subscribeToRouterEvents(DevToolsRouterDelegate delegate) {
+    final oldDelegate = _delegate;
+    if (oldDelegate != null) {
+      oldDelegate.removeListener(_onRouteStateUpdate);
+    }
+    delegate.addListener(_onRouteStateUpdate);
+    _delegate = delegate;
+  }
+
+  void _onRouteStateUpdate() {
+    final state = _delegate?.currentConfiguration?.state;
+    if (state == null) return;
+    onRouteStateUpdate(state);
+  }
+
+  /// Perform operations based on changes in navigation state.
+  ///
+  /// This method is only invoked if [subscribeToRouterEvents] has been called on
+  /// this instance with a valid [DevToolsRouterDelegate].
+  void onRouteStateUpdate(DevToolsNavigationState state);
 }

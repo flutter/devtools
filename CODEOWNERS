@@ -15,6 +15,9 @@ profiler/           @kenzieschmoll
 # Memory files
 memory/             @bkonyi @polina-c
 
+# Memory leak tracking files
+memory/panes/leaks  @CoderDake @polina-c
+
 # Debugger files
 debugger/           @elliette
 

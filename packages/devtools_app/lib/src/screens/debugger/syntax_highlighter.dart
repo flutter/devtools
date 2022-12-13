@@ -8,7 +8,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 
-import '../../primitives/utils.dart';
+import '../../shared/primitives/utils.dart';
 import '../../shared/theme.dart';
 import 'span_parser.dart';
 

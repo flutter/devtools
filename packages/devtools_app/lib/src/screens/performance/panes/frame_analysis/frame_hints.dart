@@ -5,11 +5,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../../../analytics/analytics.dart' as ga;
-import '../../../../analytics/constants.dart' as analytics_constants;
-import '../../../../primitives/utils.dart';
 import '../../../../service/service_extensions.dart' as extensions;
+import '../../../../shared/analytics/analytics.dart' as ga;
+import '../../../../shared/analytics/constants.dart' as gac;
 import '../../../../shared/common_widgets.dart';
+import '../../../../shared/primitives/utils.dart';
 import '../../../../shared/theme.dart';
 import '../../performance_controller.dart';
 import '../../performance_utils.dart';
@@ -194,6 +194,7 @@ class EnhanceTracingHint extends StatelessWidget {
           text: 'Since "$settingTitle" was enabled while this frame was drawn, '
               'you should be able to see timeline events for each '
               '$eventDescription.',
+          style: theme.regularTextStyle,
         ),
       ];
     }
@@ -237,8 +238,8 @@ class SmallEnhanceTracingButton extends StatelessWidget {
       color: Theme.of(context).colorScheme.toggleButtonsTitle,
       onPressed: () {
         ga.select(
-          analytics_constants.performance,
-          analytics_constants.smallEnhanceTracingButton,
+          gac.performance,
+          gac.smallEnhanceTracingButton,
         );
         enhanceTracingController.showEnhancedTracingMenu();
       },
@@ -264,8 +265,8 @@ class IntrinsicOperationsHint extends StatelessWidget {
     return _Hint(
       message: _ExpensiveOperationHint(
         docsUrl: _intrinsicOperationsDocs,
-        gaScreenName: analytics_constants.performance,
-        gaSelectedItemDescription: analytics_constants.shaderCompilationDocs,
+        gaScreenName: gac.performance,
+        gaSelectedItemDescription: gac.shaderCompilationDocs,
         message: TextSpan(
           children: [
             TextSpan(
@@ -307,8 +308,8 @@ class CanvasSaveLayerHint extends StatelessWidget {
     return _Hint(
       message: _ExpensiveOperationHint(
         docsUrl: _saveLayerDocs,
-        gaScreenName: analytics_constants.performance,
-        gaSelectedItemDescription: analytics_constants.canvasSaveLayerDocs,
+        gaScreenName: gac.performance,
+        gaSelectedItemDescription: gac.canvasSaveLayerDocs,
         message: TextSpan(
           children: [
             TextSpan(
@@ -342,8 +343,8 @@ class ShaderCompilationHint extends StatelessWidget {
     return _Hint(
       message: _ExpensiveOperationHint(
         docsUrl: preCompileShadersDocsUrl,
-        gaScreenName: analytics_constants.performance,
-        gaSelectedItemDescription: analytics_constants.shaderCompilationDocs,
+        gaScreenName: gac.performance,
+        gaSelectedItemDescription: gac.shaderCompilationDocs,
         message: TextSpan(
           children: [
             TextSpan(

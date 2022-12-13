@@ -4,10 +4,10 @@
 
 import 'package:flutter/material.dart';
 
-import '../../analytics/constants.dart' as analytics_constants;
-import '../../http/http_request_data.dart';
+import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/common_widgets.dart';
-import '../../ui/tab.dart';
+import '../../shared/http/http_request_data.dart';
+import '../../shared/ui/tab.dart';
 import 'network_controller.dart';
 import 'network_model.dart';
 import 'network_request_inspector_views.dart';
@@ -101,7 +101,7 @@ class NetworkRequestInspector extends StatelessWidget {
                         if (data.hasCookies) HttpRequestCookiesView(data),
                       ],
                     ],
-                    gaScreen: analytics_constants.network,
+                    gaScreen: gac.network,
                     // TODO(kenz): Consider using the outlined style
                     outlined: false,
                   ),

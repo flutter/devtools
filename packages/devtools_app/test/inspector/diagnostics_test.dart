@@ -5,7 +5,7 @@
 import 'dart:convert';
 
 import 'package:devtools_app/devtools_app.dart';
-import 'package:devtools_app/src/ui/utils.dart';
+import 'package:devtools_app/src/shared/ui/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';

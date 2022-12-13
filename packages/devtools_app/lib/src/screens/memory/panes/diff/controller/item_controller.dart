@@ -4,7 +4,7 @@
 
 import 'package:flutter/foundation.dart';
 
-import '../../../../../primitives/auto_dispose.dart';
+import '../../../../../shared/primitives/auto_dispose.dart';
 import '../../../shared/heap/heap.dart';
 import '../../../shared/heap/model.dart';
 

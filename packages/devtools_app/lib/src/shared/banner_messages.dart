@@ -8,11 +8,11 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../analytics/constants.dart' as analytics_constants;
-import '../primitives/utils.dart';
 import '../screens/performance/performance_utils.dart';
+import 'analytics/constants.dart' as gac;
 import 'common_widgets.dart';
 import 'globals.dart';
+import 'primitives/utils.dart';
 import 'screen.dart';
 import 'theme.dart';
 import 'version.dart';
@@ -20,7 +20,7 @@ import 'version.dart';
 const _runInProfileModeDocsUrl =
     'https://flutter.dev/docs/testing/ui-performance#run-in-profile-mode';
 
-const _profileGranularityDocsUrl =
+const _cpuSamplingRateDocsUrl =
     'https://flutter.dev/docs/development/tools/devtools/performance#profile-granularity';
 
 class BannerMessagesController {
@@ -371,8 +371,7 @@ To pre-compile shaders, see the instructions at ''',
             display: preCompileShadersDocsUrl,
             url: preCompileShadersDocsUrl,
             gaScreenName: screenId,
-            gaSelectedItemDescription:
-                analytics_constants.shaderCompilationDocs,
+            gaSelectedItemDescription: gac.shaderCompilationDocs,
           ),
           context: context,
           style: theme.errorMessageLinkStyle,
@@ -387,9 +386,9 @@ To pre-compile shaders, see the instructions at ''',
   }
 }
 
-class HighProfileGranularityMessage {
-  HighProfileGranularityMessage(this.screenId)
-      : key = Key('HighProfileGranularityMessage - $screenId');
+class HighCpuSamplingRateMessage {
+  HighCpuSamplingRateMessage(this.screenId)
+      : key = Key('HighCpuSamplingRateMessage - $screenId');
 
   final Key key;
 
@@ -409,10 +408,9 @@ You are opting in to a high CPU sampling rate. This may affect the performance o
         LinkTextSpan(
           link: Link(
             display: 'documentation',
-            url: _profileGranularityDocsUrl,
+            url: _cpuSamplingRateDocsUrl,
             gaScreenName: screenId,
-            gaSelectedItemDescription:
-                analytics_constants.profileGranularityDocs,
+            gaSelectedItemDescription: gac.cpuSamplingRateDocs,
           ),
           context: context,
           style: theme.warningMessageLinkStyle,
@@ -573,7 +571,7 @@ LinkTextSpan _runInProfileModeTextSpan(
       display: 'profile mode',
       url: _runInProfileModeDocsUrl,
       gaScreenName: screenId,
-      gaSelectedItemDescription: analytics_constants.profileModeDocs,
+      gaSelectedItemDescription: gac.profileModeDocs,
     ),
     context: context,
     style: style,

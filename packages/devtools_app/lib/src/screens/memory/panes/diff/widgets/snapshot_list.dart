@@ -6,10 +6,10 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
-import '../../../../../analytics/analytics.dart' as ga;
-import '../../../../../analytics/constants.dart' as analytics_constants;
-import '../../../../../primitives/auto_dispose_mixin.dart';
+import '../../../../../shared/analytics/analytics.dart' as ga;
+import '../../../../../shared/analytics/constants.dart' as gac;
 import '../../../../../shared/common_widgets.dart';
+import '../../../../../shared/primitives/auto_dispose.dart';
 import '../../../../../shared/table/table.dart';
 import '../../../../../shared/theme.dart';
 import '../controller/diff_pane_controller.dart';
@@ -23,7 +23,15 @@ class SnapshotList extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        _ListControlPane(controller: controller),
+        OutlineDecoration.onlyBottom(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              vertical: denseSpacing,
+              horizontal: densePadding,
+            ),
+            child: _ListControlPane(controller: controller),
+          ),
+        ),
         Expanded(
           child: _SnapshotListItems(controller: controller),
         ),
@@ -50,7 +58,7 @@ class _ListControlPane extends StatelessWidget {
               icon: Icons.fiber_manual_record,
               tooltip: 'Take heap snapshot for the selected isolate',
               onPressed: controller.takeSnapshotHandler(
-                analytics_constants.MemoryEvent.diffTakeSnapshotControlPane,
+                gac.MemoryEvent.diffTakeSnapshotControlPane,
               ),
             ),
             ToolbarAction(
@@ -59,8 +67,8 @@ class _ListControlPane extends StatelessWidget {
               onPressed: clearAllEnabled
                   ? () async {
                       ga.select(
-                        analytics_constants.memory,
-                        analytics_constants.MemoryEvent.diffClearSnapshots,
+                        gac.memory,
+                        gac.MemoryEvent.diffClearSnapshots,
                       );
                       unawaited(controller.clearSnapshots());
                     }

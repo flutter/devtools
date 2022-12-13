@@ -4,10 +4,10 @@
 
 import 'dart:math';
 
-import '../../primitives/trees.dart';
-import '../../primitives/utils.dart';
+import '../common_widgets.dart';
+import '../primitives/trees.dart';
+import '../primitives/utils.dart';
 import '../theme.dart';
-import '../utils.dart';
 import 'table_controller.dart';
 import 'table_data.dart';
 
@@ -121,17 +121,22 @@ extension TreeColumnWidthExtension<T extends TreeNode<T>>
         //
         // `characterWidth` was determined through trial and error to roughly
         // approximate the width of a single character.
-        const characterWidth = 9.0;
+        final characterWidth = assumedMonospaceCharacterWidth;
         double longestWidth = 0;
         for (var node in flattenedList) {
           final width = column.getNodeIndentPx(node) +
-              (column.getDisplayValue(node).length *
-                  scaleByFontFactor(characterWidth));
+              (column.getDisplayValue(node).length * characterWidth);
           if (width > longestWidth) {
             longestWidth = width;
           }
         }
-        width = longestWidth;
+        // Add two characters to account for expansion caret and ensure we
+        // always display the full column title.
+        width = max(
+              max(longestWidth, column.minWidthPx ?? 0),
+              column.title.length * characterWidth,
+            ) +
+            characterWidth * 2;
       }
       widths.add(width);
     }

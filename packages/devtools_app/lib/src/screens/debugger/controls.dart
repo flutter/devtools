@@ -8,17 +8,18 @@ import 'package:codicon/codicon.dart';
 import 'package:flutter/material.dart' hide Stack;
 import 'package:vm_service/vm_service.dart';
 
-import '../../primitives/auto_dispose_mixin.dart';
 import '../../shared/common_widgets.dart';
+import '../../shared/globals.dart';
+import '../../shared/primitives/auto_dispose.dart';
 import '../../shared/theme.dart';
+import '../../shared/ui/label.dart';
 import '../../shared/utils.dart';
-import '../../ui/label.dart';
 import 'debugger_controller.dart';
 
 class DebuggingControls extends StatefulWidget {
   const DebuggingControls({Key? key}) : super(key: key);
 
-  static const minWidthBeforeScaling = 1600.0;
+  static const minWidthBeforeScaling = 1750.0;
 
   @override
   _DebuggingControlsState createState() => _DebuggingControlsState();
@@ -44,6 +45,7 @@ class _DebuggingControlsState extends State<DebuggingControls>
     final hasStackFrames = controller.stackFramesWithLocation.value.isNotEmpty;
     final isSystemIsolate = controller.isSystemIsolate;
     final canStep = isPaused && !resuming && hasStackFrames && !isSystemIsolate;
+    final isVmApp = serviceManager.connectedApp?.isRunningOnDartVM ?? false;
     return SizedBox(
       height: defaultButtonHeight,
       child: Row(
@@ -53,8 +55,10 @@ class _DebuggingControlsState extends State<DebuggingControls>
           _stepButtons(canStep: canStep),
           const SizedBox(width: denseSpacing),
           BreakOnExceptionsControl(controller: controller),
-          const SizedBox(width: denseSpacing),
-          CodeCoverageToggle(controller: controller),
+          if (isVmApp) ...[
+            const SizedBox(width: denseSpacing),
+            CodeStatisticsControls(controller: controller),
+          ],
           const Expanded(child: SizedBox(width: denseSpacing)),
           _librariesButton(),
         ],
@@ -140,8 +144,8 @@ class _DebuggingControlsState extends State<DebuggingControls>
   }
 }
 
-class CodeCoverageToggle extends StatelessWidget {
-  const CodeCoverageToggle({
+class CodeStatisticsControls extends StatelessWidget {
+  const CodeStatisticsControls({
     super.key,
     required this.controller,
   });
@@ -151,10 +155,11 @@ class CodeCoverageToggle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return RoundedOutlinedBorder(
-      child: ValueListenableBuilder<bool>(
-        valueListenable: controller.codeViewController.showCodeCoverage,
-        builder: (context, selected, _) {
-          final isInSmallMode = MediaQuery.of(context).size.width <
+      child: DualValueListenableBuilder<bool, bool>(
+        firstListenable: controller.codeViewController.showCodeCoverage,
+        secondListenable: controller.codeViewController.showProfileInformation,
+        builder: (context, showCodeCoverage, showProfileInformation, _) {
+          final isInSmallMode = MediaQuery.of(context).size.width <=
               DebuggingControls.minWidthBeforeScaling;
           return Row(
             children: [
@@ -162,7 +167,7 @@ class CodeCoverageToggle extends StatelessWidget {
                 label: isInSmallMode ? null : 'Show Coverage',
                 message: 'Show code coverage',
                 icon: Codicons.checklist,
-                isSelected: selected,
+                isSelected: showCodeCoverage,
                 outlined: false,
                 shape: const RoundedRectangleBorder(
                   borderRadius: BorderRadius.only(
@@ -173,12 +178,24 @@ class CodeCoverageToggle extends StatelessWidget {
                 onPressed: controller.codeViewController.toggleShowCodeCoverage,
               ),
               LeftBorder(
+                child: ToggleButton(
+                  label: isInSmallMode ? null : 'Show Profile',
+                  message: 'Show profiler hits',
+                  icon: Codicons.flame,
+                  isSelected: showProfileInformation,
+                  outlined: false,
+                  shape: const ContinuousRectangleBorder(),
+                  onPressed: controller
+                      .codeViewController.toggleShowProfileInformation,
+                ),
+              ),
+              LeftBorder(
                 child: IconLabelButton(
                   label: '',
-                  tooltip: 'Refresh code coverage statistics',
+                  tooltip: 'Refresh statistics',
                   outlined: false,
-                  onPressed: selected
-                      ? controller.codeViewController.refreshCodeCoverage
+                  onPressed: showCodeCoverage || showProfileInformation
+                      ? controller.codeViewController.refreshCodeStatistics
                       : null,
                   minScreenWidthForTextBeforeScaling: 20000,
                   icon: Icons.refresh,

@@ -2,20 +2,20 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:math' as math;
+import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 
-import '../../../../config_specific/logger/logger.dart';
-import '../../../../primitives/trace_event.dart';
-import '../../../../primitives/utils.dart';
+import '../../../../shared/config_specific/logger/logger.dart';
+import '../../../../shared/primitives/trace_event.dart';
+import '../../../../shared/primitives/utils.dart';
 import '../../performance_controller.dart';
 import '../../performance_model.dart';
 import '../../performance_utils.dart';
 import 'timeline_events_controller.dart';
 
-// For documentation, see the Chrome "Trace Event Format" document:
-// https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU.
+// For documentation on the Chrome "Trace Event Format", see this document:
+// https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU/preview
 // This class depends on the stability of event names we receive from the
 // engine. That dependency is tracked at
 // https://github.com/flutter/flutter/issues/27609.
@@ -26,33 +26,17 @@ const String rasterEventNameWithFrameNumber = 'Rasterizer::DoDraw';
 
 const String uiEventName = 'Animator::BeginFrame';
 
-/// Processor for composing a recorded list of trace events into a timeline of
-/// [AsyncTimelineEvent]s, [SyncTimelineEvent]s, and [FlutterFrame]s.
-class LegacyTimelineEventProcessor {
-  LegacyTimelineEventProcessor(this.performanceController);
-
-  /// Number of traceEvents we will process in each batch.
-  static const _defaultBatchSize = 2000;
+abstract class BaseTraceEventProcessor {
+  BaseTraceEventProcessor(this.performanceController);
 
   final PerformanceController performanceController;
 
   TimelineEventsController get eventsController =>
       performanceController.timelineEventsController;
 
-  /// Notifies with the current progress value of processing Timeline data.
-  ///
-  /// This value should sit between 0.0 and 1.0.
-  ValueListenable get progressNotifier => _progressNotifier;
-  final _progressNotifier = ValueNotifier<double>(0.0);
+  int? uiThreadId;
 
-  int _traceEventsProcessed = 0;
-
-  /// Async timeline events we have processed, mapped to their respective async
-  /// ids.
-  ///
-  /// The id keys should be of the form <category>:<scope>:<id> or
-  /// <category>:<id> if scope is null. See [TraceEvent.asyncUID].
-  final _asyncEventsById = <String, AsyncTimelineEvent>{};
+  int? rasterThreadId;
 
   /// The current timeline event nodes for duration events.
   ///
@@ -82,208 +66,36 @@ class LegacyTimelineEventProcessor {
   /// This is guaranteed because we process the events in timestamp order.
   SyncTimelineEvent? _pendingRootCompleteEvent;
 
-  // TODO(kenz): Remove the [uiThreadId] and [rasterThreadId] once ui/raster
-  //  distinction changes and frame ids are available in the engine.
-  int? uiThreadId;
-
-  int? rasterThreadId;
-
   /// Process the given trace events to create [TimelineEvent]s.
   ///
   /// [traceEvents] must be sorted in increasing timestamp order before calling
   /// this method.
-  Future<void> processTraceEvents(
+  FutureOr<void> processData(
     List<TraceEventWrapper> traceEvents, {
     int startIndex = 0,
   }) async {
-    resetProcessingData();
+    // Events need to be in increasing timestamp order.
+    final _traceEvents = traceEvents.sublist(startIndex)..sort();
 
-    final _traceEvents = (traceEvents.sublist(startIndex)
-          // Events need to be in increasing timestamp order.
-          ..sort())
-        .where((event) => event.event.timestampMicros != null)
-        .toList();
+    // A subclass of [BaseTimelineEventProcessor] must implement this method.
+    await processTraceEvents(_traceEvents);
 
-    for (final trace in _traceEvents) {
-      eventsController.recordTrace(trace.event.json);
-    }
+    addPendingCompleteRootToTimeline(force: true);
 
-    // At minimum, process the data in 4 batches to smooth the appearance of
-    // the progress indicator.
-    final batchSize = math
-        .min(_defaultBatchSize, math.max(1, _traceEvents.length / 4))
-        .round();
-
-    while (_traceEventsProcessed < _traceEvents.length) {
-      _processBatch(batchSize, _traceEvents);
-      _progressNotifier.value = _traceEventsProcessed / _traceEvents.length;
-
-      // Await a small delay to give the UI thread a chance to update the
-      // progress indicator.
-      await delayForBatchProcessing();
-    }
-
-    final idsToRemove = <String>[];
-    for (var rootEvent in _asyncEventsById.values.where((e) => e.isRoot)) {
-      // Do not add incomplete async trees to the timeline.
-      // TODO(kenz): infer missing end times based on other end times in the
-      // async event tree. Add these "repaired" events to the timeline.
-      if (!rootEvent.isWellFormedDeep) continue;
-
-      eventsController.addTimelineEvent(rootEvent);
-      idsToRemove.add(rootEvent.asyncUID);
-    }
-    idsToRemove.forEach(_asyncEventsById.remove);
-
-    _addPendingCompleteRootToTimeline(force: true);
-
-    final _data = performanceController.data!;
-    _data.timelineEvents.sort(
-      (a, b) =>
-          a.time.start!.inMicroseconds.compareTo(b.time.start!.inMicroseconds),
-    );
-    if (_data.timelineEvents.isNotEmpty) {
-      _data.time = TimeRange()
-        // We process trace events in timestamp order, so we can ensure the first
-        // trace event has the earliest starting timestamp.
-        ..start = Duration(
-          microseconds: _data.timelineEvents.first.time.start!.inMicroseconds,
-        )
-        // We cannot guarantee that the last trace event is the latest timestamp
-        // in the timeline. DurationComplete events' timestamps refer to their
-        // starting timestamp, but their end time is derived from the same trace
-        // via the "dur" field. For this reason, we use the cached value stored in
-        // [timelineController.fullTimeline].
-        ..end = Duration(microseconds: _data.endTimestampMicros);
-    } else {
-      _data.time = TimeRange()
-        ..start = Duration.zero
-        ..end = Duration.zero;
-    }
-
-    resetProcessingData();
+    // Perform any necessary post-processing on the data. A suclass of
+    // [BaseTimelineEventProcessor] should override [postProcessTraceEvents] if
+    // the subclass needs to perform post-processing.
+    postProcessData();
   }
 
-  void _processBatch(int batchSize, List<TraceEventWrapper> traceEvents) {
-    final batchEnd =
-        math.min(_traceEventsProcessed + batchSize, traceEvents.length);
-    for (int i = _traceEventsProcessed; i < batchEnd; i++) {
-      final eventWrapper = traceEvents[i];
-      _traceEventsProcessed++;
+  @protected
+  FutureOr<void> processTraceEvents(List<TraceEventWrapper> events);
 
-      // TODO(kenz): stop manually setting the type once we have that data
-      // from the engine.
-      eventWrapper.event.type = inferEventType(eventWrapper.event);
+  @protected
+  void postProcessData() {}
 
-      // Add [pendingRootCompleteEvent] to the timeline if it is ready.
-      _addPendingCompleteRootToTimeline(
-        currentProcessingTime: eventWrapper.event.timestampMicros,
-      );
-
-      switch (eventWrapper.event.phase) {
-        case TraceEvent.asyncBeginPhase:
-        case TraceEvent.asyncInstantPhase:
-          _addAsyncEvent(eventWrapper);
-          break;
-        case TraceEvent.asyncEndPhase:
-          _endAsyncEvent(eventWrapper);
-          break;
-        case TraceEvent.durationBeginPhase:
-          _handleDurationBeginEvent(eventWrapper);
-          break;
-        case TraceEvent.durationEndPhase:
-          _handleDurationEndEvent(eventWrapper);
-          break;
-        case TraceEvent.durationCompletePhase:
-          _handleDurationCompleteEvent(eventWrapper);
-          break;
-        // TODO(kenz): add support for instant events
-        // https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU/preview#heading=h.lenwiilchoxp
-        // TODO(kenz): add support for flows.
-        // https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU/preview#heading=h.4qqub5rv9ybk
-        default:
-          break;
-      }
-    }
-  }
-
-  void _addPendingCompleteRootToTimeline({
-    int? currentProcessingTime,
-    bool force = false,
-  }) {
-    assert(currentProcessingTime != null || force);
-    if (_pendingRootCompleteEvent != null &&
-        (force ||
-            currentProcessingTime! >
-                _pendingRootCompleteEvent!.time.end!.inMicroseconds)) {
-      eventsController.addTimelineEvent(_pendingRootCompleteEvent!);
-      _pendingRootCompleteEvent = null;
-    }
-  }
-
-  void _addAsyncEvent(TraceEventWrapper eventWrapper) {
-    final timelineEvent = AsyncTimelineEvent(eventWrapper);
-    if (eventWrapper.event.phase == TraceEvent.asyncInstantPhase) {
-      timelineEvent.time.end = timelineEvent.time.start;
-    }
-
-    // If parentId is specified, use it to define the async tree structure.
-    if (timelineEvent.hasExplicitParent) {
-      final parent = _asyncEventsById[timelineEvent.parentAsyncUID];
-      if (parent != null) {
-        parent.addChild(timelineEvent);
-      }
-      _asyncEventsById[eventWrapper.event.asyncUID] = timelineEvent;
-      return;
-    }
-
-    final currentEventWithId = _asyncEventsById[eventWrapper.event.asyncUID];
-
-    // If we already have a timeline event with the same async id as
-    // [timelineEvent] (e.g. [currentEventWithId]), then [timelineEvent] is
-    // either a child of [currentEventWithId] or a new root event with this id.
-    if (currentEventWithId != null) {
-      if (currentEventWithId.isWellFormedDeep) {
-        // [timelineEvent] is a new root with the same id as
-        // [currentEventWithId]. Since [currentEventWithId] is well formed, add
-        // it to the timeline.
-        eventsController.addTimelineEvent(currentEventWithId);
-        _asyncEventsById[eventWrapper.event.asyncUID] = timelineEvent;
-      } else {
-        if (eventWrapper.event.phase != TraceEvent.asyncInstantPhase &&
-            currentEventWithId.isWellFormed) {
-          // Since this is not an async instant event and the parent id was not
-          // explicitly passed in the event args, and since we process events in
-          // timestamp order, if [currentEventWithId] is well formed,
-          // [timelineEvent] cannot be a child of [currentEventWithId]. This is
-          // an illegal id collision that we need to handle gracefully, so throw
-          // this event away. Bug tracking collisions:
-          // https://github.com/flutter/flutter/issues/47019.
-          log('Id collision on id ${eventWrapper.event.id}', LogLevel.warning);
-        } else {
-          // We know it must be a child because we process events in timestamp
-          // order.
-          currentEventWithId.addChild(timelineEvent);
-        }
-      }
-    } else {
-      _asyncEventsById[eventWrapper.event.asyncUID] = timelineEvent;
-    }
-  }
-
-  void _endAsyncEvent(TraceEventWrapper eventWrapper) {
-    final AsyncTimelineEvent? root =
-        _asyncEventsById[eventWrapper.event.asyncUID];
-    if (root == null) {
-      // Since we process trace events in timestamp order, we can guarantee that
-      // we have not already processed the matching begin event. Discard the end
-      // event in this case.
-      return;
-    }
-    root.endAsyncEvent(eventWrapper);
-  }
-
-  void _handleDurationBeginEvent(TraceEventWrapper eventWrapper) {
+  @protected
+  void handleDurationBeginEvent(TraceEventWrapper eventWrapper) {
     final threadId = eventWrapper.event.threadId!;
     final current = currentDurationEventNodes[threadId];
     final timelineEvent = SyncTimelineEvent(eventWrapper);
@@ -304,7 +116,8 @@ class LegacyTimelineEventProcessor {
     currentDurationEventNodes[threadId] = timelineEvent;
   }
 
-  void _handleDurationEndEvent(TraceEventWrapper eventWrapper) {
+  @protected
+  void handleDurationEndEvent(TraceEventWrapper eventWrapper) {
     final TraceEvent event = eventWrapper.event;
     final eventThreadId = event.threadId!;
     final eventJson = event.json;
@@ -472,7 +285,8 @@ class LegacyTimelineEventProcessor {
     }
   }
 
-  void _handleDurationCompleteEvent(TraceEventWrapper eventWrapper) {
+  @protected
+  void handleDurationCompleteEvent(TraceEventWrapper eventWrapper) {
     final event = eventWrapper.event;
     final timelineEvent = SyncTimelineEvent(eventWrapper)
       ..time.end =
@@ -502,17 +316,25 @@ class LegacyTimelineEventProcessor {
     }
   }
 
+  @protected
+  void addPendingCompleteRootToTimeline({
+    int? currentProcessingTime,
+    bool force = false,
+  }) {
+    assert(currentProcessingTime != null || force);
+    if (_pendingRootCompleteEvent != null &&
+        (force ||
+            currentProcessingTime! >
+                _pendingRootCompleteEvent!.time.end!.inMicroseconds)) {
+      eventsController.addTimelineEvent(_pendingRootCompleteEvent!);
+      _pendingRootCompleteEvent = null;
+    }
+  }
+
   void reset() {
-    _asyncEventsById.clear();
     currentDurationEventNodes.clear();
     _previousDurationEndEvents.clear();
     _pendingRootCompleteEvent = null;
-    resetProcessingData();
-  }
-
-  void resetProcessingData() {
-    _traceEventsProcessed = 0;
-    _progressNotifier.value = 0.0;
   }
 
   void primeThreadIds({
@@ -524,6 +346,7 @@ class LegacyTimelineEventProcessor {
   }
 
   @visibleForTesting
+  @protected
   TimelineEventType inferEventType(TraceEvent event) {
     if (event.phase == TraceEvent.asyncBeginPhase ||
         event.phase == TraceEvent.asyncInstantPhase ||

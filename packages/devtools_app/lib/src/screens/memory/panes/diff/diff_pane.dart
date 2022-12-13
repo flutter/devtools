@@ -5,10 +5,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 
-import '../../../../analytics/constants.dart' as analytics_constants;
+import '../../../../shared/analytics/constants.dart' as gac;
 import '../../../../shared/common_widgets.dart';
 import '../../../../shared/split.dart';
 import '../../../../shared/theme.dart';
+import '../../shared/primitives/simple_elements.dart';
 import 'controller/diff_pane_controller.dart';
 import 'controller/item_controller.dart';
 import 'widgets/snapshot_control_pane.dart';
@@ -27,10 +28,10 @@ class DiffPane extends StatelessWidget {
       initialFractions: const [0.1, 0.9],
       minSizes: const [80, 80],
       children: [
-        OutlineDecoration(
+        OutlineDecoration.onlyRight(
           child: SnapshotList(controller: diffController),
         ),
-        OutlineDecoration(
+        OutlineDecoration.onlyLeft(
           child: _SnapshotItemContent(
             controller: diffController,
           ),
@@ -46,6 +47,8 @@ class _SnapshotItemContent extends StatelessWidget {
 
   final DiffPaneController controller;
 
+  static const _documentationTopic = gac.MemoryEvent.diffHelp;
+
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<SnapshotItem>(
@@ -59,12 +62,11 @@ class _SnapshotItemContent extends StatelessWidget {
               children: [
                 const Expanded(child: Markdown(data: _snapshotDocumentation)),
                 const SizedBox(height: denseSpacing),
-                IconLabelButton(
-                  onPressed: controller.takeSnapshotHandler(
-                    analytics_constants.MemoryEvent.diffTakeSnapshotAfterHelp,
-                  ),
-                  icon: Icons.fiber_manual_record,
-                  label: 'Take Snapshot',
+                MoreInfoLink(
+                  url: DocLinks.diff.value,
+                  gaScreenName: gac.memory,
+                  gaSelectedItemDescription:
+                      gac.topicDocumentationLink(_documentationTopic),
                 )
               ],
             ),
@@ -87,9 +89,12 @@ class SnapshotInstanceItemPane extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        const SizedBox(height: denseRowSpacing),
-        SnapshotControlPane(controller: controller),
-        const SizedBox(height: denseRowSpacing),
+        OutlineDecoration.onlyBottom(
+          child: Padding(
+            padding: const EdgeInsets.all(denseSpacing),
+            child: SnapshotControlPane(controller: controller),
+          ),
+        ),
         Expanded(
           child: SnapshotView(
             controller: controller,
@@ -105,7 +110,6 @@ const _snapshotDocumentation = '''
 Take a **heap snapshot** to view current memory allocation:
 
 1. In the Snapshots panel, click the ● button
-(or click **Take Snapshot** below these instructions)
 2. Use the **Filter** button to refine the results
 3. Select a class from the snapshot table to view its retaining paths
 4. View the path detail by selecting from the **Shortest Retaining Paths…** table

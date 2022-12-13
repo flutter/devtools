@@ -19,6 +19,8 @@ MockPerformanceController createMockPerformanceControllerWithDefaults() {
   when(controller.data).thenReturn(PerformanceData());
   when(controller.enhanceTracingController)
       .thenReturn(EnhanceTracingController());
+  when(controller.offlinePerformanceData).thenReturn(null);
+  when(controller.selectedFeatureTabIndex).thenReturn(0);
 
   // Stubs for Flutter Frames feature.
   when(controller.flutterFramesController).thenReturn(flutterFramesController);
@@ -84,7 +86,11 @@ MockCodeViewController createMockCodeViewControllerWithDefaults({
   when(codeViewController.programExplorerController).thenReturn(
     mockProgramExplorerController,
   );
+  when(codeViewController.showProfileInformation).thenReturn(
+    const FixedValueListenable(false),
+  );
   when(codeViewController.showCodeCoverage).thenReturn(ValueNotifier(false));
+  when(codeViewController.focusLine).thenReturn(ValueNotifier(-1));
 
   return codeViewController;
 }

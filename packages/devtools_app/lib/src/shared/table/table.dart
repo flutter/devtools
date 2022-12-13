@@ -9,16 +9,16 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide TableRow;
 import 'package:flutter/services.dart';
 
-import '../../primitives/auto_dispose_mixin.dart';
-import '../../primitives/flutter_widgets/linked_scroll_controller.dart';
-import '../../primitives/trees.dart';
-import '../../primitives/utils.dart';
-import '../../ui/colors.dart';
-import '../../ui/search.dart';
-import '../../ui/utils.dart';
 import '../collapsible_mixin.dart';
 import '../common_widgets.dart';
+import '../primitives/auto_dispose.dart';
+import '../primitives/flutter_widgets/linked_scroll_controller.dart';
+import '../primitives/trees.dart';
+import '../primitives/utils.dart';
 import '../theme.dart';
+import '../ui/colors.dart';
+import '../ui/search.dart';
+import '../ui/utils.dart';
 import '../utils.dart';
 import 'column_widths.dart';
 import 'table_controller.dart';
@@ -1063,7 +1063,7 @@ abstract class ColumnRenderer<T> {
   ///
   /// This method can return `null` to indicate that the default rendering
   /// should be used instead.
-  Widget build(
+  Widget? build(
     BuildContext context,
     T data, {
     bool isRowSelected = false,
@@ -1419,7 +1419,7 @@ class _TableRowState<T> extends State<TableRow<T>>
   /// Presents the content of this row.
   Widget tableRowFor(BuildContext context, {VoidCallback? onPressed}) {
     Widget columnFor(ColumnData<T> column, double columnWidth) {
-      late Widget content;
+      Widget? content;
       final theme = Theme.of(context);
       final node = widget.node;
       if (widget.rowType == _TableRowType.columnHeader) {
@@ -1435,7 +1435,6 @@ class _TableRowState<T> extends State<TableRow<T>>
         // widget class.
         final padding = column.getNodeIndentPx(node);
         assert(padding >= 0);
-
         if (column is ColumnRenderer) {
           content = (column as ColumnRenderer).build(
             context,
@@ -1443,26 +1442,27 @@ class _TableRowState<T> extends State<TableRow<T>>
             isRowSelected: widget.isSelected,
             onPressed: onPressed,
           );
-        } else {
-          content = RichText(
-            text: TextSpan(
-              text: column.getDisplayValue(node),
-              children: [
-                if (column.getCaption(node) != null)
-                  TextSpan(
-                    text: ' ${column.getCaption(node)}',
-                    style: const TextStyle(
-                      fontStyle: FontStyle.italic,
-                    ),
-                  )
-              ],
-              style: contentTextStyle(column),
-            ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            textAlign: _textAlignmentFor(column),
-          );
         }
+        // If ColumnRenderer.build returns null, fall back to the default
+        // rendering.
+        content ??= RichText(
+          text: TextSpan(
+            text: column.getDisplayValue(node),
+            children: [
+              if (column.getCaption(node) != null)
+                TextSpan(
+                  text: ' ${column.getCaption(node)}',
+                  style: const TextStyle(
+                    fontStyle: FontStyle.italic,
+                  ),
+                )
+            ],
+            style: contentTextStyle(column),
+          ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          textAlign: _textAlignmentFor(column),
+        );
 
         final tooltip = column.getTooltip(node);
         if (tooltip.isNotEmpty) {

@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app/src/primitives/utils.dart';
 import 'package:devtools_app/src/screens/profiler/cpu_profile_model.dart';
+import 'package:devtools_app/src/shared/primitives/utils.dart';
 
 final Map<String, dynamic> goldenCpuProfileDataJson = {
   'type': '_CpuProfileTimeline',

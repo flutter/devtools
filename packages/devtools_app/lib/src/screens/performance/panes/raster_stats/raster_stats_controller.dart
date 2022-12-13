@@ -4,7 +4,7 @@
 
 import 'package:flutter/foundation.dart';
 
-import '../../../../config_specific/logger/logger.dart' as logger;
+import '../../../../shared/config_specific/logger/logger.dart' as logger;
 import '../../../../shared/globals.dart';
 import '../../performance_controller.dart';
 import '../../performance_model.dart';
@@ -15,8 +15,8 @@ class RasterStatsController extends PerformanceFeatureController {
   RasterStatsController(super.performanceController);
 
   /// The active raster stats for the view.
-  ValueListenable<RasterStats> get rasterStats => _rasterStats;
-  final _rasterStats = ValueNotifier<RasterStats>(RasterStats.empty());
+  ValueListenable<RasterStats?> get rasterStats => _rasterStats;
+  final _rasterStats = ValueNotifier<RasterStats?>(null);
 
   ValueListenable<bool> get loadingSnapshot => _loadingSnapshot;
   final _loadingSnapshot = ValueNotifier<bool>(false);
@@ -24,7 +24,8 @@ class RasterStatsController extends PerformanceFeatureController {
   final selectedSnapshot = ValueNotifier<LayerSnapshot?>(null);
 
   void selectSnapshot(LayerSnapshot? snapshot) {
-    _rasterStats.value.selectedSnapshot = snapshot;
+    assert(_rasterStats.value != null);
+    _rasterStats.value!.selectedSnapshot = snapshot;
     selectedSnapshot.value = snapshot;
   }
 
@@ -44,9 +45,9 @@ class RasterStatsController extends PerformanceFeatureController {
     }
   }
 
-  void setData(RasterStats stats) {
+  void setData(RasterStats? stats) {
     _rasterStats.value = stats;
-    selectedSnapshot.value = stats.selectedSnapshot;
+    selectedSnapshot.value = stats?.selectedSnapshot;
     performanceController.data!.rasterStats = stats;
   }
 
@@ -65,6 +66,6 @@ class RasterStatsController extends PerformanceFeatureController {
 
   @override
   void clearData() {
-    setData(RasterStats.empty());
+    setData(null);
   }
 }

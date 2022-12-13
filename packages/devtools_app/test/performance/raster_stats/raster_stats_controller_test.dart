@@ -30,43 +30,36 @@ void main() {
 
     test('calling collectRasterStats sets data', () async {
       var rasterStats = controller.rasterStats.value;
-      expect(rasterStats.layerSnapshots, isEmpty);
-      expect(rasterStats.selectedSnapshot, isNull);
-      expect(rasterStats.originalFrameSize, isNull);
-      expect(rasterStats.totalRasterTime, equals(Duration.zero));
+      expect(rasterStats, isNull);
 
       await controller.collectRasterStats();
 
       rasterStats = controller.rasterStats.value;
-      expect(rasterStats.layerSnapshots.length, equals(2));
+      expect(rasterStats, isNotNull);
+      expect(rasterStats!.layerSnapshots.length, equals(2));
       expect(rasterStats.selectedSnapshot, isNotNull);
       expect(rasterStats.originalFrameSize, isNotNull);
       expect(rasterStats.totalRasterTime, isNot(equals(Duration.zero)));
     });
 
-    test('calling collectRasterStats sets empty data for bad service response',
+    test('calling collectRasterStats sets null data for bad service response',
         () async {
       var rasterStats = controller.rasterStats.value;
-      expect(rasterStats.layerSnapshots, isEmpty);
-      expect(rasterStats.selectedSnapshot, isNull);
-      expect(rasterStats.originalFrameSize, isNull);
-      expect(rasterStats.totalRasterTime, equals(Duration.zero));
+      expect(rasterStats, isNull);
 
       when(mockServiceManager.renderFrameWithRasterStats)
           .thenAnswer((_) => throw Exception('something went wrong'));
       await controller.collectRasterStats();
 
       rasterStats = controller.rasterStats.value;
-      expect(rasterStats.layerSnapshots, isEmpty);
-      expect(rasterStats.selectedSnapshot, isNull);
-      expect(rasterStats.originalFrameSize, isNull);
-      expect(rasterStats.totalRasterTime, equals(Duration.zero));
+      expect(rasterStats, isNull);
     });
 
-    test('clear', () async {
+    test('calling clear nulls out raster stats', () async {
       await controller.collectRasterStats();
       var rasterStats = controller.rasterStats.value;
-      expect(rasterStats.layerSnapshots.length, equals(2));
+      expect(rasterStats, isNotNull);
+      expect(rasterStats!.layerSnapshots.length, equals(2));
       expect(rasterStats.selectedSnapshot, isNotNull);
       expect(rasterStats.originalFrameSize, isNotNull);
       expect(rasterStats.totalRasterTime, isNot(equals(Duration.zero)));
@@ -74,22 +67,20 @@ void main() {
       controller.clearData();
 
       rasterStats = controller.rasterStats.value;
-      expect(rasterStats.layerSnapshots, isEmpty);
-      expect(rasterStats.selectedSnapshot, isNull);
-      expect(rasterStats.originalFrameSize, isNull);
-      expect(rasterStats.totalRasterTime, equals(Duration.zero));
+      expect(rasterStats, isNull);
     });
 
     test('setOfflineData', () async {
       final rasterStats = RasterStats.parse(rasterStatsFromServiceJson);
 
-      // Ensure we are starting in an empty state.
-      expect(controller.rasterStats.value.layerSnapshots, isEmpty);
+      // Ensure we are starting in a null state.
+      expect(controller.rasterStats.value, isNull);
 
       final offlineData = PerformanceData(rasterStats: rasterStats);
       await controller.setOfflineData(offlineData);
 
-      expect(controller.rasterStats.value.layerSnapshots.length, equals(2));
+      expect(controller.rasterStats.value, isNotNull);
+      expect(controller.rasterStats.value!.layerSnapshots.length, equals(2));
     });
   });
 }

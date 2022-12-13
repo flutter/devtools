@@ -7,26 +7,23 @@ import 'dart:async';
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/material.dart';
 
-import '../../analytics/analytics.dart' as ga;
-import '../../analytics/analytics_common.dart';
-import '../../analytics/constants.dart' as analytics_constants;
-import '../../config_specific/import_export/import_export.dart';
-import '../../primitives/auto_dispose_mixin.dart';
 import '../../service/service_extension_widgets.dart';
 import '../../service/service_extensions.dart' as extensions;
+import '../../shared/analytics/analytics.dart' as ga;
+import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/banner_messages.dart';
 import '../../shared/common_widgets.dart';
 import '../../shared/globals.dart';
+import '../../shared/primitives/auto_dispose.dart';
+import '../../shared/primitives/simple_items.dart';
 import '../../shared/screen.dart';
 import '../../shared/theme.dart';
+import '../../shared/ui/icons.dart';
 import '../../shared/utils.dart';
-import '../../ui/icons.dart';
-import '../../ui/vm_flag_widgets.dart';
 import 'panes/controls/enhance_tracing/enhance_tracing.dart';
 import 'panes/controls/layer_debugging_options.dart';
 import 'panes/controls/performance_settings.dart';
 import 'panes/flutter_frames/flutter_frames_chart.dart';
-import 'panes/flutter_frames/flutter_frames_controller.dart';
 import 'panes/timeline_events/timeline_events_controller.dart';
 import 'performance_controller.dart';
 import 'performance_model.dart';
@@ -45,7 +42,7 @@ class PerformanceScreen extends Screen {
           icon: Octicons.pulse,
         );
 
-  static const id = 'performance';
+  static const id = ScreenIds.performance;
 
   @override
   String get docPageId => id;
@@ -66,14 +63,6 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
         AutoDisposeMixin,
         OfflineScreenMixin<PerformanceScreenBody, OfflinePerformanceData>,
         ProvidedControllerMixin<PerformanceController, PerformanceScreenBody> {
-  bool processing = false;
-
-  double processingProgress = 0.0;
-
-  late TimelineEventsController _timelineEventsController;
-
-  late FlutterFramesController _flutterFramesController;
-
   @override
   void initState() {
     super.initState();
@@ -101,28 +90,9 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
 
     if (!initController()) return;
 
-    _timelineEventsController = controller.timelineEventsController;
-    _flutterFramesController = controller.flutterFramesController;
-
     cancelListeners();
 
-    processing = controller.timelineEventsController.processing.value;
-    addAutoDisposeListener(controller.timelineEventsController.processing, () {
-      setState(() {
-        processing = controller.timelineEventsController.processing.value;
-      });
-    });
-
-    final legacyProcessor =
-        _timelineEventsController.legacyController.processor;
-    processingProgress = legacyProcessor.progressNotifier.value;
-    addAutoDisposeListener(legacyProcessor.progressNotifier, () {
-      setState(() {
-        processingProgress = legacyProcessor.progressNotifier.value;
-      });
-    });
-
-    addAutoDisposeListener(_flutterFramesController.selectedFrame);
+    addAutoDisposeListener(controller.flutterFramesController.selectedFrame);
 
     // Load offline timeline data if available.
     if (shouldLoadOfflineData()) {
@@ -149,10 +119,6 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
         controller.offlinePerformanceData != null &&
         controller.offlinePerformanceData!.frames.isNotEmpty;
 
-    final tabbedPerformanceView = TabbedPerformanceView(
-      processing: processing,
-      processingProgress: processingProgress,
-    );
     final performanceScreen = Column(
       children: [
         if (!offlineController.offlineMode.value) _buildPerformanceControls(),
@@ -160,8 +126,8 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
         if (isOfflineFlutterApp ||
             (!offlineController.offlineMode.value &&
                 serviceManager.connectedApp!.isFlutterAppNow!))
-          FlutterFramesChart(_flutterFramesController),
-        Expanded(child: tabbedPerformanceView),
+          FlutterFramesChart(controller.flutterFramesController),
+        const Expanded(child: TabbedPerformanceView()),
       ],
     );
 
@@ -185,10 +151,15 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        _PrimaryControls(
-          controller: controller,
-          processing: processing,
-          onClear: () => setState(() {}),
+        ValueListenableBuilder<EventsControllerStatus>(
+          valueListenable: controller.timelineEventsController.status,
+          builder: (context, status, _) {
+            return _PrimaryControls(
+              controller: controller,
+              processing: status == EventsControllerStatus.processing,
+              onClear: () => setState(() {}),
+            );
+          },
         ),
         const SizedBox(width: defaultSpacing),
         SecondaryPerformanceControls(controller: controller),
@@ -228,12 +199,12 @@ class _PrimaryControls extends StatelessWidget {
     return Row(
       children: [
         if (serviceManager.connectedApp!.isFlutterAppNow!) ...[
-          ChartVisibilityButton(
-            showChart:
-                controller.flutterFramesController.showFlutterFramesChart,
+          VisibilityButton(
+            show: controller.flutterFramesController.showFlutterFramesChart,
             onPressed:
                 controller.flutterFramesController.toggleShowFlutterFrames,
             label: 'Flutter frames',
+            tooltip: 'Toggle visibility of the Flutter frames chart',
           ),
           const SizedBox(width: denseSpacing),
         ],
@@ -247,7 +218,7 @@ class _PrimaryControls extends StatelessWidget {
   }
 
   Future<void> _clearPerformanceData() async {
-    ga.select(analytics_constants.performance, analytics_constants.clear);
+    ga.select(gac.performance, gac.clear);
     await controller.clearData();
     onClear();
   }
@@ -259,7 +230,7 @@ class SecondaryPerformanceControls extends StatelessWidget {
     required this.controller,
   }) : super(key: key);
 
-  static const minScreenWidthForTextBeforeScaling = 1140.0;
+  static const minScreenWidthForTextBeforeScaling = 920.0;
 
   final PerformanceController controller;
 
@@ -281,15 +252,6 @@ class SecondaryPerformanceControls extends StatelessWidget {
           const SizedBox(width: denseSpacing),
           const MoreDebuggingOptionsButton(),
         ],
-        const SizedBox(width: denseSpacing),
-        ProfileGranularityDropdown(
-          screenId: PerformanceScreen.id,
-          profileGranularityFlagNotifier: controller
-              .timelineEventsController
-              .legacyController
-              .cpuProfilerController
-              .profileGranularityFlagNotifier!,
-        ),
         const SizedBox(width: defaultSpacing),
         OutlinedIconButton(
           icon: Icons.file_download,
@@ -305,13 +267,10 @@ class SecondaryPerformanceControls extends StatelessWidget {
   }
 
   void _exportPerformanceData(BuildContext context) {
-    ga.select(analytics_constants.performance, analytics_constants.export);
-    final exportedFile = controller.exportData();
+    ga.select(gac.performance, gac.export);
+    controller.exportData();
     // TODO(kenz): investigate if we need to do any error handling here. Is the
     // download always successful?
-    // TODO(peterdjlee): find a way to push the notification logic into the
-    // export controller.
-    notificationService.push(successfulExportMessage(exportedFile));
   }
 
   void _openSettingsDialog(BuildContext context) {
@@ -322,18 +281,4 @@ class SecondaryPerformanceControls extends StatelessWidget {
       ),
     );
   }
-}
-
-class PerformanceScreenMetrics extends ScreenAnalyticsMetrics {
-  PerformanceScreenMetrics({
-    this.uiDuration,
-    this.rasterDuration,
-    this.shaderCompilationDuration,
-    this.traceEventCount,
-  });
-
-  final Duration? uiDuration;
-  final Duration? rasterDuration;
-  final Duration? shaderCompilationDuration;
-  final int? traceEventCount;
 }

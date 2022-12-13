@@ -4,16 +4,17 @@
 
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/performance/panes/raster_stats/raster_stats.dart';
+import 'package:devtools_app/src/shared/config_specific/import_export/import_export.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../test_infra/matchers.dart';
+import '../../test_infra/matchers/matchers.dart';
 import '../../test_infra/test_data/performance_raster_stats.dart';
 
 void main() {
-  group('RenderingLayerVisualizer', () {
+  group('$RasterStatsView', () {
     late RasterStatsController controller;
 
     setUp(() async {
@@ -22,6 +23,7 @@ void main() {
         (_) => Future.value(Response.parse(rasterStatsFromServiceJson)),
       );
       setGlobal(ServiceConnectionManager, mockServiceManager);
+      setGlobal(OfflineModeController, OfflineModeController());
       setGlobal(IdeTheme, IdeTheme());
 
       controller =
@@ -32,7 +34,7 @@ void main() {
     Future<void> pumpRenderingLayerVisualizer(WidgetTester tester) async {
       await tester.pumpWidget(
         wrap(
-          RenderingLayerVisualizer(
+          RasterStatsView(
             rasterStatsController: controller,
           ),
         ),
@@ -71,7 +73,7 @@ void main() {
       expect(find.byType(LayerImage), findsOneWidget);
 
       await expectLater(
-        find.byType(RenderingLayerVisualizer),
+        find.byType(RasterStatsView),
         matchesDevToolsGolden('goldens/raster_stats_with_data.png'),
       );
     });
@@ -79,23 +81,21 @@ void main() {
     testWidgets('can change layer selection', (tester) async {
       await pumpRenderingLayerVisualizer(tester);
 
-      final layers = controller.rasterStats.value.layerSnapshots;
+      final rasterStats = controller.rasterStats.value!;
+      final layers = rasterStats.layerSnapshots;
       final firstLayer = layers.first;
       final secondLayer = layers.last;
       expect(firstLayer.displayName, equals('Layer 12731'));
       expect(secondLayer.displayName, equals('Layer 12734'));
 
-      expect(
-        controller.rasterStats.value.selectedSnapshot,
-        equals(firstLayer),
-      );
+      expect(rasterStats.selectedSnapshot, equals(firstLayer));
 
       await tester.tap(find.richText('Layer 12734'));
       await tester.pumpAndSettle();
 
       expect(controller.selectedSnapshot.value, equals(secondLayer));
       await expectLater(
-        find.byType(RenderingLayerVisualizer),
+        find.byType(RasterStatsView),
         matchesDevToolsGolden('goldens/raster_stats_changed_selection.png'),
       );
     });

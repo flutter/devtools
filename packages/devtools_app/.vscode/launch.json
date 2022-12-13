@@ -1,0 +1,64 @@
+{
+    // Set of configurations to launch devtools_app from VSCode.
+    //
+    // The configurations will be picked up by VSCode if the opened folder is devtools_app.
+    // To access them in VSCode, select the tab "Run and Debug".
+    //
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "opened test or devtools",
+            "cwd": "devtools_app",
+            "request": "launch",
+            "type": "dart",
+        },
+        {
+            "name": "devtools",
+            "request": "launch",
+            "type": "dart",
+            "program": "lib/main.dart",
+        },
+        {
+            "name": "devtools + experiments",
+            "request": "launch",
+            "type": "dart",
+            "program": "lib/main.dart",
+            "args": [
+                "--dart-define=enable_experiments=true"
+            ]
+        },
+        {
+            "name": "devtools - profile",
+            "request": "launch",
+            "type": "dart",
+            "program": "lib/main.dart",
+            "flutterMode": "profile",
+        },
+        {
+            "name": "memory/default",
+            "request": "launch",
+            "type": "dart",
+            "program": "test/test_infra/scenes/memory/default.stager_app.dart",
+        },
+        {
+            "name": "memory/diff_snapshot",
+            "request": "launch",
+            "type": "dart",
+            "program": "test/test_infra/scenes/memory/diff_snapshot.stager_app.dart",
+        },
+        {
+            "name": "performance/default",
+            "request": "launch",
+            "type": "dart",
+            "program": "test/test_infra/scenes/performance/default.stager_app.dart",
+        },
+        {
+            "name": "attach",
+            "type": "dart",
+            "request": "attach",
+        },
+    ]
+}

@@ -5,15 +5,17 @@
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart' hide TimelineEvent;
 
-import '../../../../../primitives/trace_event.dart';
-import '../../../../../primitives/utils.dart';
 import '../../../../../shared/common_widgets.dart';
 import '../../../../../shared/globals.dart';
+import '../../../../../shared/primitives/trace_event.dart';
+import '../../../../../shared/primitives/utils.dart';
 import '../../../../../shared/theme.dart';
+import '../../../../../shared/ui/vm_flag_widgets.dart';
 import '../../../../profiler/cpu_profile_controller.dart';
 import '../../../../profiler/cpu_profile_model.dart';
 import '../../../../profiler/cpu_profiler.dart';
 import '../../../performance_model.dart';
+import '../../../performance_screen.dart';
 import '../timeline_events_controller.dart';
 
 class EventDetails extends StatelessWidget {
@@ -35,22 +37,39 @@ class EventDetails extends StatelessWidget {
     // (see html_event_details.dart).
     final theme = Theme.of(context);
     return OutlineDecoration(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          AreaPaneHeader(
-            needsTopBorder: false,
-            title: Text(_generateHeaderText()),
-          ),
-          Expanded(
-            child: selectedEvent != null
-                ? ValueListenableBuilder<bool>(
-                    valueListenable: offlineController.offlineMode,
-                    builder: (context, offline, _) => _buildDetails(offline),
-                  )
-                : _buildInstructions(theme),
-          ),
-        ],
+      child: DualValueListenableBuilder<bool, Flag>(
+        firstListenable: offlineController.offlineMode,
+        secondListenable:
+            legacyController.cpuProfilerController.profilerFlagNotifier!,
+        builder: (context, offline, profilerFlag, _) {
+          final profilerEnabled = profilerFlag.valueAsString == 'true';
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              AreaPaneHeader(
+                needsTopBorder: false,
+                tall: true,
+                title: Text(_generateHeaderText()),
+                actions: [
+                  if (selectedEvent != null &&
+                      selectedEvent!.isUiEvent &&
+                      !offline &&
+                      profilerEnabled)
+                    CpuSamplingRateDropdown(
+                      screenId: PerformanceScreen.id,
+                      profilePeriodFlagNotifier: legacyController
+                          .cpuProfilerController.profilePeriodFlag!,
+                    ),
+                ],
+              ),
+              Expanded(
+                child: selectedEvent != null
+                    ? _buildDetails(offline, profilerEnabled)
+                    : _buildInstructions(theme),
+              ),
+            ],
+          );
+        },
       ),
     );
   }
@@ -64,7 +83,7 @@ class EventDetails extends StatelessWidget {
         '${selected.name} (${msText(selected.time.duration)})';
   }
 
-  Widget _buildDetails(bool offlineMode) {
+  Widget _buildDetails(bool offlineMode, bool profilerEnabled) {
     final selected = selectedEvent!;
     if (selected.isUiEvent) {
       // In [offlineController.offlineMode], we do not need to worry about
@@ -72,15 +91,9 @@ class EventDetails extends StatelessWidget {
       if (offlineMode) {
         return _buildCpuProfiler(legacyController.cpuProfilerController);
       }
-      return ValueListenableBuilder<Flag>(
-        valueListenable:
-            legacyController.cpuProfilerController.profilerFlagNotifier!,
-        builder: (context, profilerFlag, _) {
-          return profilerFlag.valueAsString == 'true'
-              ? _buildCpuProfiler(legacyController.cpuProfilerController)
-              : CpuProfilerDisabled(legacyController.cpuProfilerController);
-        },
-      );
+      return profilerEnabled
+          ? _buildCpuProfiler(legacyController.cpuProfilerController)
+          : CpuProfilerDisabled(legacyController.cpuProfilerController);
     }
     return EventSummary(selected);
   }

@@ -4,8 +4,8 @@
 
 import 'package:flutter/material.dart';
 
-import '../../../../../../analytics/analytics.dart' as ga;
-import '../../../../../../analytics/constants.dart' as analytics_constants;
+import '../../../../../../shared/analytics/analytics.dart' as ga;
+import '../../../../../../shared/analytics/constants.dart' as gac;
 import '../../../../../../shared/common_widgets.dart';
 import '../../../../../../shared/theme.dart';
 import '../../../../shared/heap/model.dart';
@@ -23,24 +23,27 @@ class RetainingPathView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        const SizedBox(height: densePadding),
-        _PathControlPane(
-          controller: controller,
-          path: path,
-        ),
-        Expanded(
-          child: Padding(
-            padding: const EdgeInsets.only(
-              top: densePadding,
-              left: densePadding,
-            ),
-            child: _PathView(path: path, controller: controller),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: denseSpacing),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const SizedBox(height: densePadding),
+          _PathControlPane(
+            controller: controller,
+            path: path,
           ),
-        ),
-      ],
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.only(
+                top: densePadding,
+                left: densePadding,
+              ),
+              child: _PathView(path: path, controller: controller),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -53,60 +56,61 @@ class _PathControlPane extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(right: denseSpacing),
-      child: Row(
-        children: [
-          Expanded(
+    final titleText = 'Retaining path for ${path.classes.last.className}';
+    return Row(
+      children: [
+        Expanded(
+          child: DevToolsTooltip(
+            message: titleText,
             child: Text(
-              'Retaining path for ${path.classes.last.className}',
+              titleText,
               overflow: TextOverflow.ellipsis,
               style: const TextStyle(fontWeight: FontWeight.bold),
             ),
           ),
-          const SizedBox(width: denseSpacing),
-          CopyToClipboardControl(
-            dataProvider: () => path.toLongString(delimiter: '\n'),
-            // We do not give success message because it pops up directly on
-            // top of the path widget, that makes the widget anavailable
-            // while message is here.
-            successMessage: null,
-            gaScreen: analytics_constants.memory,
-            gaItem: analytics_constants.MemoryEvent.diffPathCopy,
+        ),
+        const SizedBox(width: denseSpacing),
+        CopyToClipboardControl(
+          dataProvider: () => path.toLongString(delimiter: '\n'),
+          // We do not give success message because it pops up directly on
+          // top of the path widget, that makes the widget anavailable
+          // while message is here.
+          successMessage: null,
+          gaScreen: gac.memory,
+          gaItem: gac.MemoryEvent.diffPathCopy,
+        ),
+        const SizedBox(width: denseSpacing),
+        ValueListenableBuilder<bool>(
+          valueListenable: controller.hideStandard,
+          builder: (_, hideStandard, __) => FilterButton(
+            onPressed: () {
+              ga.select(
+                gac.memory,
+                '${gac.MemoryEvent.diffPathFilter}-$hideStandard',
+              );
+              controller.hideStandard.value = !controller.hideStandard.value;
+            },
+            isFilterActive: hideStandard,
+            message: 'Hide standard libraries',
           ),
-          const SizedBox(width: denseSpacing),
-          ValueListenableBuilder<bool>(
-            valueListenable: controller.hideStandard,
-            builder: (_, hideStandard, __) => FilterButton(
-              onPressed: () {
-                ga.select(
-                  analytics_constants.memory,
-                  '${analytics_constants.MemoryEvent.diffPathFilter}-$hideStandard',
-                );
-                controller.hideStandard.value = !controller.hideStandard.value;
-              },
-              isFilterActive: hideStandard,
-              message: 'Hide standard libraries',
-            ),
+        ),
+        const SizedBox(width: denseSpacing),
+        ValueListenableBuilder<bool>(
+          valueListenable: controller.invert,
+          builder: (_, invert, __) => ToggleButton(
+            onPressed: () {
+              ga.select(
+                gac.memory,
+                '${gac.MemoryEvent.diffPathInvert}-$invert',
+              );
+              controller.invert.value = !controller.invert.value;
+            },
+            isSelected: invert,
+            message: 'Invert the path',
+            icon: Icons.swap_horiz,
           ),
-          const SizedBox(width: denseSpacing),
-          ValueListenableBuilder<bool>(
-            valueListenable: controller.invert,
-            builder: (_, invert, __) => ToggleButton(
-              onPressed: () {
-                ga.select(
-                  analytics_constants.memory,
-                  '${analytics_constants.MemoryEvent.diffPathInvert}-$invert',
-                );
-                controller.invert.value = !controller.invert.value;
-              },
-              isSelected: invert,
-              message: 'Invert the path',
-              icon: Icons.swap_horiz,
-            ),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }

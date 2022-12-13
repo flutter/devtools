@@ -4,11 +4,12 @@
 
 import 'package:vm_service/vm_service.dart';
 
-import '../../../../analytics/analytics.dart' as ga;
-import '../../../../analytics/constants.dart' as analytics_constants;
-import '../../../../analytics/metrics.dart';
-import '../../primitives/class_name.dart';
-import '../../primitives/memory_utils.dart';
+import '../../../../shared/analytics/analytics.dart' as ga;
+import '../../../../shared/analytics/constants.dart' as gac;
+import '../../../../shared/analytics/metrics.dart';
+import '../../../../shared/primitives/utils.dart';
+import '../primitives/class_name.dart';
+import '../primitives/memory_utils.dart';
 
 /// Names for json fields.
 class _JsonFields {
@@ -140,6 +141,7 @@ class ClassOnlyHeapPath {
           isLong: false,
         ),
         inverted: inverted,
+        skipObject: true,
       );
 
   String toLongString({
@@ -193,8 +195,13 @@ class ClassOnlyHeapPath {
     required List<String> data,
     required String delimiter,
     required bool inverted,
-  }) =>
-      (inverted ? data.reversed : data).join(delimiter);
+    bool skipObject = false,
+  }) {
+    data = data.joinWith(delimiter).toList();
+    if (skipObject) data.removeAt(data.length - 1);
+    if (inverted) data = data.reversed.toList();
+    return data.join().trim();
+  }
 
   @override
   bool operator ==(Object other) {
@@ -281,8 +288,8 @@ class SnapshotTaker {
 AdaptedHeapData _adaptSnapshotGaWrapper(HeapSnapshotGraph graph) {
   late final AdaptedHeapData result;
   ga.timeSync(
-    analytics_constants.memory,
-    analytics_constants.MemoryTime.adaptSnapshot,
+    gac.memory,
+    gac.MemoryTime.adaptSnapshot,
     syncOperation: () => result = AdaptedHeapData.fromHeapSnapshot(graph),
     screenMetricsProvider: () => MemoryScreenMetrics(
       heapObjectsTotal: graph.objects.length,

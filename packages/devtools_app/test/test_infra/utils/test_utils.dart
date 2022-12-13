@@ -2,10 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 
-import 'package:devtools_app/src/primitives/trace_event.dart';
 import 'package:devtools_app/src/screens/performance/performance_model.dart';
+import 'package:devtools_app/src/shared/primitives/trace_event.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -45,4 +47,20 @@ void setupClipboardCopyListener({
 
     return Future.value(true);
   });
+}
+
+Future<String> loadPageHtmlContent(String url) async {
+  final request = await HttpClient().getUrl(Uri.parse(url));
+  final response = await request.close();
+
+  final completer = Completer<String>();
+  final content = StringBuffer();
+  response.transform(utf8.decoder).listen(
+    (data) {
+      content.write(data);
+    },
+    onDone: () => completer.complete(content.toString()),
+  );
+  await completer.future;
+  return content.toString();
 }

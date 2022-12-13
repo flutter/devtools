@@ -3,9 +3,9 @@
 // found in the LICENSE file.
 
 import 'package:collection/collection.dart';
-import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
-import 'package:devtools_app/src/primitives/utils.dart';
+import 'package:devtools_app/src/shared/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/shared/globals.dart';
+import 'package:devtools_app/src/shared/primitives/utils.dart';
 import 'package:devtools_app/src/shared/utils.dart';
 import 'package:devtools_shared/devtools_test_utils.dart';
 import 'package:devtools_test/devtools_test.dart';

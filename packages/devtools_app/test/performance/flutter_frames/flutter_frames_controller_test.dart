@@ -84,7 +84,7 @@ void main() async {
 
       // Select a frame.
       expect(framesController.selectedFrame.value, isNull);
-      await framesController.toggleSelectedFrame(frame0);
+      framesController.handleSelectedFrame(frame0);
       expect(
         framesController.selectedFrame.value,
         equals(frame0),
@@ -94,14 +94,14 @@ void main() async {
       expect(timelineControllerHandlerCalled, isTrue);
 
       // Unselect this frame.
-      await framesController.toggleSelectedFrame(frame0);
+      framesController.handleSelectedFrame(frame0);
       expect(
         framesController.selectedFrame.value,
         isNull,
       );
 
       // Select a different frame.
-      await framesController.toggleSelectedFrame(frame1);
+      framesController.handleSelectedFrame(frame1);
       expect(
         framesController.selectedFrame.value,
         equals(frame1),

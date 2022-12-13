@@ -4,19 +4,18 @@
 
 import 'dart:async';
 
-import 'package:pedantic/pedantic.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../config_specific/import_export/import_export.dart';
-import '../../primitives/auto_dispose.dart';
-import '../../primitives/feature_flags.dart';
+import '../../shared/config_specific/import_export/import_export.dart';
+import '../../shared/feature_flags.dart';
 import '../../shared/globals.dart';
+import '../../shared/primitives/auto_dispose.dart';
 import '../inspector/inspector_service.dart';
 import 'panes/controls/enhance_tracing/enhance_tracing_controller.dart';
 import 'panes/flutter_frames/flutter_frame_model.dart';
 import 'panes/flutter_frames/flutter_frames_controller.dart';
 import 'panes/raster_stats/raster_stats_controller.dart';
-import 'panes/rebuild_stats/rebuild_counts.dart';
+import 'panes/rebuild_stats/rebuild_stats_model.dart';
 import 'panes/timeline_events/timeline_events_controller.dart';
 import 'performance_model.dart';
 import 'performance_screen.dart';
@@ -54,6 +53,14 @@ class PerformanceController extends DisposableController
   // PR for rebuild indicators lands
   //(https://github.com/flutter/devtools/pull/4566).
   final rebuildCountModel = RebuildCountModel();
+
+  /// Index of the selected feature tab.
+  ///
+  /// This value is used to set the initial tab selection of the
+  /// [TabbedPerformanceView]. This widget will be disposed and re-initialized
+  /// on DevTools screen changes, so we must store this value in the controller
+  /// instead of the widget state.
+  int selectedFeatureTabIndex = 0;
 
   bool _fetchMissingLocationsStarted = false;
   IsolateRef? _currentRebuildWidgetsIsolate;
@@ -211,12 +218,10 @@ class PerformanceController extends DisposableController
   }
 
   /// Exports the current performance screen data to a .json file.
-  ///
-  /// This method returns the name of the file that was downloaded.
-  String exportData() {
+  void exportData() {
     final encodedData =
         _exportController.encode(PerformanceScreen.id, data!.toJson());
-    return _exportController.downloadFile(encodedData);
+    _exportController.downloadFile(encodedData);
   }
 
   /// Clears the timeline data currently stored by the controller as well the

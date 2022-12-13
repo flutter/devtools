@@ -8,10 +8,10 @@ import 'dart:math' as math;
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 
-import '../../../../primitives/trace_event.dart';
-import '../../../../primitives/utils.dart';
 import '../../../../service/service_manager.dart';
 import '../../../../shared/globals.dart';
+import '../../../../shared/primitives/trace_event.dart';
+import '../../../../shared/primitives/utils.dart';
 import '../../performance_controller.dart';
 import '../../performance_model.dart';
 import '../../performance_screen.dart';
@@ -140,15 +140,6 @@ class FlutterFramesController extends PerformanceFeatureController {
     return _unassignedFlutterFrames.containsKey(frameNumber);
   }
 
-  Future<void> toggleSelectedFrame(FlutterFrame frame) async {
-    handleSelectedFrame(frame);
-    // We do not need to block the UI on the TimelineEvents feature loading the
-    // selected frame.
-    unawaited(
-      performanceController.timelineEventsController.handleSelectedFrame(frame),
-    );
-  }
-
   void _addPendingFlutterFrames() {
     _pendingFlutterFrames.forEach(_maybeBadgeTabForJankyFrame);
     data!.frames.addAll(_pendingFlutterFrames);
@@ -210,6 +201,12 @@ class FlutterFramesController extends PerformanceFeatureController {
 
     _data.selectedFrame = frame;
     _selectedFrameNotifier.value = frame;
+
+    // We do not need to block the UI on the TimelineEvents feature loading the
+    // selected frame.
+    unawaited(
+      performanceController.timelineEventsController.handleSelectedFrame(frame),
+    );
   }
 
   @override

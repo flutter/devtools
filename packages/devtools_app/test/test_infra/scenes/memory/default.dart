@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be found
 // in the LICENSE file.
 
-import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
-import 'package:devtools_app/src/config_specific/import_export/import_export.dart';
 import 'package:devtools_app/src/screens/memory/memory_controller.dart';
 import 'package:devtools_app/src/screens/memory/memory_screen.dart';
 import 'package:devtools_app/src/screens/memory/panes/diff/controller/diff_pane_controller.dart';
-import 'package:devtools_app/src/screens/memory/primitives/class_name.dart';
 import 'package:devtools_app/src/screens/memory/shared/heap/model.dart';
+import 'package:devtools_app/src/screens/memory/shared/primitives/class_name.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
+import 'package:devtools_app/src/shared/config_specific/ide_theme/ide_theme.dart';
+import 'package:devtools_app/src/shared/config_specific/import_export/import_export.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_app/src/shared/notifications.dart';
 import 'package:devtools_app/src/shared/preferences.dart';
@@ -24,7 +24,7 @@ import '../../../test_infra/test_data/memory/heap/heap_data.dart';
 import '../../../test_infra/test_data/memory_allocation.dart';
 
 /// To run:
-/// flutter run -t test/scenes/memory/default.stager_app.dart -d macos
+/// flutter run -t test/test_infra/scenes/memory/default.stager_app.dart -d macos
 class MemoryDefaultScene extends Scene {
   late MemoryController controller;
   late FakeServiceManager fakeServiceManager;

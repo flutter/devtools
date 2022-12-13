@@ -5,7 +5,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-import '../../primitives/auto_dispose_mixin.dart';
+import '../../shared/primitives/auto_dispose.dart';
+import '../../shared/primitives/simple_items.dart';
 import '../../shared/screen.dart';
 import '../../shared/theme.dart';
 import '../../shared/utils.dart';
@@ -47,7 +48,7 @@ class VMDeveloperToolsScreen extends Screen {
           requiresVmDeveloperMode: true,
         );
 
-  static const id = 'vm-tools';
+  static const id = ScreenIds.vmTools;
 
   @override
   ValueListenable<bool> get showIsolateSelector =>
