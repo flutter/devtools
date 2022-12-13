@@ -32,15 +32,15 @@ import 'network_request_inspector.dart';
 final networkSearchFieldKey = GlobalKey(debugLabel: 'NetworkSearchFieldKey');
 
 class NetworkScreen extends Screen {
-  const NetworkScreen()
+  NetworkScreen()
       : super.conditional(
           id: id,
           requiresDartVm: true,
-          title: 'Network',
+          title: ScreenMetaData.network.title,
           icon: Icons.network_check,
         );
 
-  static const id = ScreenIds.network;
+  static final id = ScreenMetaData.network.id;
 
   @override
   String get docPageId => screenId;

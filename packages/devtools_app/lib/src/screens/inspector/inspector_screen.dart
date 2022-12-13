@@ -33,16 +33,16 @@ import 'inspector_tree.dart';
 import 'inspector_tree_controller.dart';
 
 class InspectorScreen extends Screen {
-  const InspectorScreen()
+  InspectorScreen()
       : super.conditional(
           id: id,
           requiresLibrary: flutterLibraryUri,
           requiresDebugBuild: true,
-          title: 'Flutter Inspector',
+          title: ScreenMetaData.inspector.title,
           icon: Octicons.deviceMobile,
         );
 
-  static const id = ScreenIds.inspector;
+  static final id = ScreenMetaData.inspector.id;
 
   // There is not enough room to safely show the console in the embed view of
   // the DevTools and IDEs have their own consoles.

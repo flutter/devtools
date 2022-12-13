@@ -13,12 +13,12 @@ const timingEvent = 'timing'; // Timed operation.
 // These screen ids must match the `screenId` for each respective subclass of
 // [Screen]. This is to ensure that the analytics for documentation links match
 // the screen id for other analytics on the same screen.
-const inspector = ScreenIds.inspector;
-const performance = ScreenIds.performance;
-const cpuProfiler = ScreenIds.cpuProfiler;
-const memory = ScreenIds.memory;
-const network = ScreenIds.network;
-const logging = ScreenIds.logging;
+final inspector = ScreenMetaData.inspector.id;
+final performance = ScreenMetaData.performance.id;
+final cpuProfiler = ScreenMetaData.cpuProfiler.id;
+final memory = ScreenMetaData.memory.id;
+final network = ScreenMetaData.network.id;
+final logging = ScreenMetaData.logging.id;
 
 // GA events not associated with a any screen e.g., hotReload, hotRestart, etc
 const devToolsMain = 'main';
@@ -31,6 +31,7 @@ const appDisconnected = 'appDisconnected';
 // Main bar UX actions:
 const feedbackLink = 'feedback';
 const feedbackButton = 'feedbackButton';
+const contributingLink = 'contributing';
 const discordLink = 'discord';
 
 // Inspector UX actions:

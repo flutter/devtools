@@ -46,6 +46,10 @@ Run the `tool/update_version.dart` script to update the DevTools version.
    ```shell
    dart tool/update_version.dart auto --type patch
    ```
+- Pre-release versions can be stripped with:
+   ```shell
+   dart tool/update_version.dart auto --type release
+   ```
 
 Verify:
 * that this script updated the pubspecs under packages/

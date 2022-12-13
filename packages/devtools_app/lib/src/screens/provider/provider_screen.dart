@@ -47,16 +47,16 @@ final _selectedProviderNode = AutoDisposeProvider<ProviderNode?>((ref) {
 final _showInternals = StateProvider<bool>((ref) => false);
 
 class ProviderScreen extends Screen {
-  const ProviderScreen()
+  ProviderScreen()
       : super.conditional(
           id: id,
           requiresLibrary: 'package:provider/',
-          title: 'Provider',
+          title: ScreenMetaData.provider.title,
           requiresDebugBuild: true,
           icon: Icons.attach_file,
         );
 
-  static const id = ScreenIds.provider;
+  static final id = ScreenMetaData.provider.id;
 
   @override
   Widget build(BuildContext context) {
@@ -125,7 +125,8 @@ class ProviderScreenBody extends ConsumerWidget {
                 needsTopBorder: false,
                 title: Text(detailsTitleText),
                 actions: [
-                  SettingsOutlinedButton(
+                  ToolbarAction(
+                    icon: Icons.settings,
                     onPressed: () {
                       unawaited(
                         showDialog(
@@ -157,8 +158,7 @@ void showProviderErrorBanner(BuildContext context) {
     context,
     listen: false,
   ).addMessage(
-    const ProviderUnknownErrorBanner(screenId: ProviderScreen.id)
-        .build(context),
+    ProviderUnknownErrorBanner(screenId: ProviderScreen.id).build(context),
   );
 }
 

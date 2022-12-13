@@ -15,10 +15,12 @@ class PrimaryControls extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChartVisibilityButton(
-      showChart: preferences.memory.showChart,
+    return VisibilityButton(
+      show: preferences.memory.showChart,
       onPressed: (show) => preferences.memory.showChart.value = show,
       minScreenWidthForTextBeforeScaling: memoryControlsMinVerboseWidth,
+      label: 'Memory chart',
+      tooltip: 'Toggle visibility of the Memory usage chart',
     );
   }
 }

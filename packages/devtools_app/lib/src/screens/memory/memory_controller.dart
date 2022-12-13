@@ -71,6 +71,14 @@ class MemoryController extends DisposableController
   /// Controller for [AllocationProfileTableView].
   final allocationProfileController = AllocationProfileTableViewController();
 
+  /// Index of the selected feature tab.
+  ///
+  /// This value is used to set the initial tab selection of the
+  /// [MemoryTabView]. This widget will be disposed and re-initialized on
+  /// DevTools screen changes, so we must store this value in the controller
+  /// instead of the widget state.
+  int selectedFeatureTabIndex = 0;
+
   static const logFilenamePrefix = 'memory_log_';
 
   final _shouldShowLeaksTab = ValueNotifier<bool>(false);

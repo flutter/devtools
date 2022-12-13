@@ -32,11 +32,11 @@ const initialFractionForTreemap = 0.67;
 const initialFractionForTreeTable = 0.33;
 
 class AppSizeScreen extends Screen {
-  const AppSizeScreen()
+  AppSizeScreen()
       : super.conditional(
           id: id,
           requiresDartVm: true,
-          title: 'App Size',
+          title: ScreenMetaData.appSize.title,
           icon: Octicons.fileZip,
         );
 
@@ -47,7 +47,7 @@ class AppSizeScreen extends Screen {
   ///
   /// This must be different to the top-level appSizePageId which is also used
   /// in routing when to ensure they have unique URLs.
-  static const id = ScreenIds.appSize;
+  static final id = ScreenMetaData.appSize.id;
 
   @visibleForTesting
   static const diffTypeDropdownKey = Key('Diff Tree Type Dropdown');
