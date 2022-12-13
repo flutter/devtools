@@ -350,7 +350,7 @@ class DevToolsNavigationState {
   /// Creates a new [DevToolsNavigationState] by merging this instance with
   /// [other].
   ///
-  /// State contained in [other] will take presidence over state contanied in
+  /// State contained in [other] will take presidence over state contained in
   /// this instance (e.g., if both instances have state with the same key, the
   /// state in [other] will be used).
   DevToolsNavigationState merge(DevToolsNavigationState other) {
