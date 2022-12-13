@@ -1,16 +1,30 @@
+// Copyright 2022 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'dart:convert';
 import 'dart:io';
 
 import 'package:collection/collection.dart';
 
 import 'io_utils.dart';
-import 'test_app_driver/driver.dart';
+import 'test_app_driver.dart';
 
-void main(List<String> args) async {
+const testTargetArg = '--target=';
+const testAppArg = '--test-app-uri=';
+
+Future<void> runTest(List<String> args) async {
+  final argWithTestTarget =
+      args.firstWhereOrNull((arg) => arg.startsWith(testTargetArg));
+  if (argWithTestTarget == null) {
+    throw Exception(
+      'Please specify a test target (e.g. --target=path/to/test.dart',
+    );
+  }
+  final testTarget = argWithTestTarget.substring(testTargetArg.length);
+
   TestFlutterApp? testApp;
   String? testAppUri;
-
-  const testAppArg = '--test-app-uri=';
 
   final argWithTestAppUri =
       args.firstWhereOrNull((arg) => arg.startsWith(testAppArg));
@@ -32,7 +46,7 @@ void main(List<String> args) async {
     'service_uri': testAppUri,
   };
   final testRunner = TestRunner();
-  await testRunner.run(headless: headless, args: testArgs);
+  await testRunner.run(testTarget, headless: headless, args: testArgs);
 
   if (createTestApp) {
     _debugLog('killing the test app');
@@ -60,7 +74,8 @@ class ChromeDriver with IoMixin {
 }
 
 class TestRunner with IoMixin {
-  Future<void> run({
+  Future<void> run(
+    String testTarget, {
     bool headless = false,
     Map<String, Object> args = const <String, Object>{},
   }) async {
@@ -70,7 +85,7 @@ class TestRunner with IoMixin {
       [
         'drive',
         '--driver=test_driver/integration_test.dart',
-        '--target=integration_test/app_test.dart',
+        '--target=$testTarget',
         '-d',
         headless ? 'web-server' : 'chrome',
         if (args.isNotEmpty) '--dart-define=test_args=${jsonEncode(args)}'

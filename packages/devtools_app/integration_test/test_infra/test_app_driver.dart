@@ -1,8 +1,13 @@
+
+// Copyright 2022 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import '../io_utils.dart';
+import 'io_utils.dart';
 
 // Set this to true for debugging to get JSON written to stdout.
 const bool _printDebugOutputToStdOut = true;

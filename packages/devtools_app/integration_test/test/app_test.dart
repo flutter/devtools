@@ -6,7 +6,7 @@ import 'package:devtools_app/src/framework/landing_screen.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 
-import 'utilities.dart';
+import 'test_utils.dart';
 
 void main() {
   final binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
@@ -33,12 +33,12 @@ void main() {
   });
 
   // testWidgets('Connect screen loads 2', (tester) async {
-  //   print('========== begin connect screen loads test ================');
+  //   print('========== begin #2 connect screen loads test ================');
   //   await pumpDevTools(tester);
   //   expect(find.byType(LandingScreenBody), findsOneWidget);
   //   expect(find.text('No client connection'), findsOneWidget);
 
-  //   print('========== end connect screen loads test ================');
+  //   print('========== end #2 connect screen loads test ================');
   // });
 
   // testWidgets('can connect to app', (tester) async {
