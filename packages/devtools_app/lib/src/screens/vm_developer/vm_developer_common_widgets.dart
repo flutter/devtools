@@ -288,11 +288,9 @@ String? qualifiedName(ObjRef? ref) {
   if (ref is ClassRef) {
     return '${ref.name}';
   } else if (ref is FuncRef) {
-    if (ref.owner is! LibraryRef) {
-      return '${qualifiedName(ref.owner)}.${ref.name}';
-    } else {
-      return '${ref.name}';
-    }
+    return ref.owner is! LibraryRef
+        ? '${qualifiedName(ref.owner)}.${ref.name}'
+        : '${ref.name}';
   }
 
   throw Exception('Unexpected owner type: ${ref.type}');

@@ -492,16 +492,14 @@ class CpuProfilerController
         label: userTagNone,
       )!;
 
-      if (tag == groupByUserTag || tag == groupByVmTag) {
-        data = CpuProfilePair.withTagRoots(
-          fullData,
-          tag == groupByUserTag
-              ? CpuProfilerTagType.user
-              : CpuProfilerTagType.vm,
-        );
-      } else {
-        data = CpuProfilePair.fromUserTag(fullData, tag);
-      }
+      data = tag == groupByUserTag || tag == groupByVmTag
+          ? CpuProfilePair.withTagRoots(
+              fullData,
+              tag == groupByUserTag
+                  ? CpuProfilerTagType.user
+                  : CpuProfilerTagType.vm,
+            )
+          : CpuProfilePair.fromUserTag(fullData, tag);
       cpuProfileStore.storeProfile(
         data,
         label: tag,

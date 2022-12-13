@@ -218,12 +218,9 @@ class LoggingController extends DisposableController
 
     String label;
 
-    if (totalCount == showingCount) {
-      label = nf.format(totalCount);
-    } else {
-      label = 'showing ${nf.format(showingCount)} of '
-          '${nf.format(totalCount)}';
-    }
+    label = totalCount == showingCount
+        ? nf.format(totalCount)
+        : 'showing ${nf.format(showingCount)} of ' '${nf.format(totalCount)}';
 
     label = '$label ${pluralize('event', totalCount)}';
 
@@ -783,11 +780,9 @@ String? _valueAsString(InstanceRef? ref) {
     return ref.valueAsString;
   }
 
-  if (ref.valueAsStringIsTruncated == true) {
-    return '${ref.valueAsString}...';
-  } else {
-    return ref.valueAsString;
-  }
+  return ref.valueAsStringIsTruncated == true
+      ? '${ref.valueAsString}...'
+      : ref.valueAsString;
 }
 
 /// A log data object that includes optional summary information about whether

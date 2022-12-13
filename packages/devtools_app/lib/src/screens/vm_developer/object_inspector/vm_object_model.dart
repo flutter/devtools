@@ -201,11 +201,8 @@ class FieldObject extends VmObject {
 
     guardClassKind = obj.guardClassKind();
 
-    if (guardClassKind == GuardClassKind.single) {
-      guardClass = await obj.guardClass;
-    } else {
-      guardClass = null;
-    }
+    guardClass =
+        guardClassKind == GuardClassKind.single ? await obj.guardClass : null;
   }
 }
 

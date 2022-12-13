@@ -65,16 +65,14 @@ class InspectorController extends DisposableController
       onExpand: _onExpand,
       onClientActiveChange: _onClientChange,
     );
-    if (isSummaryTree) {
-      details = InspectorController(
-        inspectorTree: detailsTree!,
-        treeType: treeType,
-        parent: this,
-        isSummaryTree: false,
-      );
-    } else {
-      details = null;
-    }
+    details = isSummaryTree
+        ? InspectorController(
+            inspectorTree: detailsTree!,
+            treeType: treeType,
+            parent: this,
+            isSummaryTree: false,
+          )
+        : null;
 
     await serviceManager.onServiceAvailable;
 
@@ -807,7 +805,7 @@ class InspectorController extends DisposableController
   }
 
   void selectionChanged() {
-    if (visibleToUser == false) {
+    if (!visibleToUser) {
       return;
     }
 

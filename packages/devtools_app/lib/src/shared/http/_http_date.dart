@@ -221,11 +221,7 @@ class HttpDate {
 
     int expectNum(String separator) {
       int pos;
-      if (separator.length > 0) {
-        pos = date.indexOf(separator, index);
-      } else {
-        pos = date.length;
-      }
+      pos = separator.length > 0 ? date.indexOf(separator, index) : date.length;
       String tmp = date.substring(index, pos);
       index = pos + separator.length;
       try {

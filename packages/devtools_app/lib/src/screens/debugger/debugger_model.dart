@@ -437,13 +437,11 @@ class ScriptRefUtils {
       ];
     }
 
-    if (parts.length > 1) {
-      return [
-        parts.first,
-        parts.sublist(1).join('/'),
-      ];
-    } else {
-      return parts;
-    }
+    return parts.length > 1
+        ? [
+            parts.first,
+            parts.sublist(1).join('/'),
+          ]
+        : parts;
   }
 }

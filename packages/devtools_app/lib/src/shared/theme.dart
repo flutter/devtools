@@ -297,9 +297,7 @@ extension DevToolsColorScheme on ColorScheme {
 
   Color get toggleButtonsFillSelected => devtoolsBlue[400]!;
 
-  Color get grey => isLight
-      ? const Color.fromARGB(255, 128, 128, 128)
-      : const Color.fromARGB(255, 128, 128, 128);
+  Color get grey => const Color.fromARGB(255, 128, 128, 128);
 
   Color get breakpointColor => isLight ? devtoolsBlue[600]! : Colors.white;
 
