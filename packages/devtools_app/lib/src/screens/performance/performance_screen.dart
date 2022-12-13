@@ -33,16 +33,16 @@ import 'tabbed_performance_view.dart';
 // where applicable.
 
 class PerformanceScreen extends Screen {
-  const PerformanceScreen()
+  PerformanceScreen()
       : super.conditional(
           id: id,
           requiresDartVm: true,
           worksOffline: true,
-          title: 'Performance',
+          title: ScreenMetaData.performance.title,
           icon: Octicons.pulse,
         );
 
-  static const id = ScreenIds.performance;
+  static final id = ScreenMetaData.performance.id;
 
   @override
   String get docPageId => id;

@@ -17,7 +17,7 @@ import 'package:stager/stager.dart';
 /// flutter run -t test/test_infra/scenes/performance/default.stager_app.dart -d macos
 class PerformanceDefaultScene extends Scene {
   late PerformanceController controller;
-  final screen = const PerformanceScreen();
+  final screen = PerformanceScreen();
 
   @override
   Widget build() {

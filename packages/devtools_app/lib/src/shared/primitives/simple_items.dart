@@ -25,21 +25,24 @@ class PackagePrefixes {
   static const dartUi = 'dart:ui';
 }
 
-class ScreenIds {
-  ScreenIds._();
+enum ScreenMetaData {
+  inspector('inspector', 'Flutter Inspector'),
+  performance('performance', 'Performance'),
+  cpuProfiler('cpu-profiler', 'CPU Profiler'),
+  memory('memory', 'Memory'),
+  debugger('debugger', 'Debugger'),
+  network('network', 'Network'),
+  logging('logging', 'Logging'),
+  provider('provider', 'Provider'),
+  appSize('app-size', 'App Size'),
+  vmTools('vm-tools', 'VM Tools'),
+  simple('simple', '');
 
-  static const simple = 'simple';
+  const ScreenMetaData(this.id, this.title);
 
-  static const appSize = 'app-size';
-  static const debugger = 'debugger';
-  static const provider = 'provider';
-  static const inspector = 'inspector';
-  static const vmTools = 'vm-tools';
-  static const performance = 'performance';
-  static const cpuProfiler = 'cpu-profiler';
-  static const network = 'network';
-  static const memory = 'memory';
-  static const logging = 'logging';
+  final String id;
+
+  final String title;
 }
 
 const String traceEventsFieldName = 'traceEvents';
