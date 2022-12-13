@@ -29,8 +29,7 @@ class MyHomePage extends StatefulWidget {
 }
 
 class MyIncrementer {
-  MyIncrementer(this.increment, {this.screen});
-  final Scaffold? screen;
+  MyIncrementer(this.increment);
   final VoidCallback increment;
 }
 
