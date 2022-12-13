@@ -637,7 +637,7 @@ class FlutterFrameTooltip extends StatelessWidget {
                     shaderText,
                     style: textStyle,
                   ),
-                  const MoreInfoLink(
+                  MoreInfoLink(
                     url: preCompileShadersDocsUrl,
                     gaScreenName: gac.performance,
                     gaSelectedItemDescription:

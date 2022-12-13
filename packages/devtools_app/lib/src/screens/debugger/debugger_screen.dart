@@ -36,16 +36,16 @@ import 'program_explorer_model.dart';
 import 'variables.dart';
 
 class DebuggerScreen extends Screen {
-  const DebuggerScreen()
+  DebuggerScreen()
       : super.conditional(
           id: id,
           requiresDebugBuild: true,
-          title: 'Debugger',
+          title: ScreenMetaData.debugger.title,
           icon: Octicons.bug,
           showFloatingDebuggerControls: false,
         );
 
-  static const id = ScreenIds.debugger;
+  static final id = ScreenMetaData.debugger.id;
 
   @override
   bool showConsole(bool embed) => true;

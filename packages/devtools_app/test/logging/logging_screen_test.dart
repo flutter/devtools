@@ -50,7 +50,7 @@ void main() async {
       setGlobal(ServiceConnectionManager, fakeServiceManager);
       setGlobal(IdeTheme, IdeTheme());
 
-      screen = const LoggingScreen();
+      screen = LoggingScreen();
     });
 
     testWidgets('builds its tab', (WidgetTester tester) async {

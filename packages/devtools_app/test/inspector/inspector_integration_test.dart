@@ -63,7 +63,7 @@ void main() async {
       expect(serviceManager.service, equals(env.service));
       expect(serviceManager.isolateManager, isNotNull);
 
-      const screen = InspectorScreen();
+      final screen = InspectorScreen();
       await tester.pumpWidget(
         wrapWithInspectorControllers(Builder(builder: screen.build)),
       );
@@ -419,7 +419,7 @@ void main() async {
       expect(serviceManager.service, equals(env.service));
       expect(serviceManager.isolateManager, isNotNull);
 
-      const screen = InspectorScreen();
+      final screen = InspectorScreen();
       await tester.pumpWidget(
         wrapWithInspectorControllers(Builder(builder: screen.build)),
       );

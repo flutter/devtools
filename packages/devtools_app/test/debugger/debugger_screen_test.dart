@@ -18,7 +18,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 
 void main() {
-  const screen = DebuggerScreen();
+  final screen = DebuggerScreen();
 
   const windowSize = Size(4000.0, 4000.0);
   const smallWindowSize = Size(1100.0, 1100.0);

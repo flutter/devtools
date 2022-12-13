@@ -24,15 +24,15 @@ import 'panes/chart/memory_vm_chart.dart';
 import 'panes/control/control_pane.dart';
 
 class MemoryScreen extends Screen {
-  const MemoryScreen()
+  MemoryScreen()
       : super.conditional(
           id: id,
           requiresDartVm: true,
-          title: 'Memory',
+          title: ScreenMetaData.memory.title,
           icon: Octicons.package,
         );
 
-  static const id = ScreenIds.memory;
+  static final id = ScreenMetaData.memory.id;
 
   @override
   ValueListenable<bool> get showIsolateSelector =>

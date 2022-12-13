@@ -27,14 +27,14 @@ final loggingSearchFieldKey = GlobalKey(debugLabel: 'LoggingSearchFieldKey');
 
 /// Presents logs from the connected app.
 class LoggingScreen extends Screen {
-  const LoggingScreen()
+  LoggingScreen()
       : super(
           id,
-          title: 'Logging',
+          title: ScreenMetaData.logging.title,
           icon: Octicons.clippy,
         );
 
-  static const id = ScreenIds.logging;
+  static final id = ScreenMetaData.logging.id;
 
   @override
   String get docPageId => screenId;

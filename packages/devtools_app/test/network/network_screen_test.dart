@@ -23,7 +23,7 @@ void main() {
       setGlobal(IdeTheme, IdeTheme());
       when(fakeServiceManager.errorBadgeManager.errorCountNotifier('network'))
           .thenReturn(ValueNotifier<int>(0));
-      screen = const NetworkScreen();
+      screen = NetworkScreen();
     });
 
     testWidgets('builds its tab', (WidgetTester tester) async {

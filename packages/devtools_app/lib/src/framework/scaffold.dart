@@ -517,13 +517,13 @@ class KeyboardShortcutsState extends State<KeyboardShortcuts>
 }
 
 class SimpleScreen extends Screen {
-  const SimpleScreen(this.child)
+  SimpleScreen(this.child)
       : super(
           id,
           showFloatingDebuggerControls: false,
         );
 
-  static const id = ScreenIds.simple;
+  static final id = ScreenMetaData.simple.id;
 
   final Widget child;
 
