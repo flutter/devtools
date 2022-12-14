@@ -33,10 +33,11 @@ void main(List<String> args) async {
   return;
 }
 
-Future<void> performTheVersionUpdate(
-    {required String currentVersion,
-    required String newVersion,
-    bool modifyChangeLog = true}) async {
+Future<void> performTheVersionUpdate({
+  required String currentVersion,
+  required String newVersion,
+  bool modifyChangeLog = true,
+}) async {
   print('Updating pubspecs from $currentVersion to version $newVersion...');
 
   for (final pubspec in _pubspecs) {
@@ -155,7 +156,6 @@ void writeVersionToVersionFile(File versionFile, String version) {
 }
 
 void writeVersionToChangelog(File changelog, String version) {
-  //TODO Do not do this for devv file
   final lines = changelog.readAsLinesSync();
   final versionString = '## $version';
   if (lines.first.endsWith(versionString)) {
