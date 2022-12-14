@@ -24,9 +24,12 @@ xattr -d com.apple.quarantine ~/path/to/chromedriver
 
 ### Running a test
 
-1. Run an integration test script: `dart run integration_test/all.dart`
+- To run all integration tets: `dart run integration_test/all.dart`
+- To run a single integration test: `dart run integration_test/single.dart --target=integration_test/test/my_test.dart`
 
-To speed up local development, you can pass in a vm service uri from a Dart or Flutter app running on
-your local machine. This saves the cost of spinning up a new test app for each test run. To do this,
+Special flags:
+
+- `--test-app-uri`: To speed up local development, you can pass in a vm service uri from a Dart or Flutter app running on your local machine. This saves the cost of spinning up a new test app for each test run. To do this,
 pass the vm service uri using the `--test-app-uri=some-uri` run flag.
+- `--enable_experiments`: enabled experiments for DevTools within the integration test environment
 
