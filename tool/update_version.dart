@@ -6,6 +6,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:args/command_runner.dart';
+import '../packages/devtools_app/lib/devtools.dart' as devtools_app_version;
 
 // This script must be executed from the top level devtools/ directory.
 // TODO(kenz): If changes are made to this script, first consider refactoring to
@@ -23,7 +24,8 @@ void main(List<String> args) async {
     'A program for updating the devtools version',
   )
     ..addCommand(ManualUpdateCommand())
-    ..addCommand(AutoUpdateCommand());
+    ..addCommand(AutoUpdateCommand())
+    ..addCommand(CurrentVersionCommand());
   runner.run(args).catchError((error) {
     if (error is! UsageException) throw error;
     print(error);
@@ -281,6 +283,18 @@ class ManualUpdateCommand extends Command {
       currentVersion: currentVersion,
       newVersion: newVersion,
     );
+  }
+}
+
+class CurrentVersionCommand extends Command {
+  @override
+  final name = 'current-version';
+  @override
+  final description = 'Print the current devtools_app version.';
+
+  @override
+  void run() async {
+    print(devtools_app_version.version);
   }
 }
 
