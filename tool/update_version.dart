@@ -6,7 +6,6 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:args/command_runner.dart';
-import 'package:devtools_app/devtools.dart' as devtools_app_version;
 
 // This script must be executed from the top level devtools/ directory.
 // TODO(kenz): If changes are made to this script, first consider refactoring to
@@ -35,7 +34,9 @@ void main(List<String> args) async {
 }
 
 Future<void> performTheVersionUpdate(
-    {required String currentVersion, required String newVersion}) async {
+    {required String currentVersion,
+    required String newVersion,
+    bool modifyChangeLog = true}) async {
   print('Updating pubspecs from $currentVersion to version $newVersion...');
 
   for (final pubspec in _pubspecs) {
@@ -48,8 +49,10 @@ Future<void> performTheVersionUpdate(
     newVersion,
   );
 
-  print('Updating CHANGELOG to version $newVersion...');
-  writeVersionToChangelog(File('CHANGELOG.md'), newVersion);
+  if (modifyChangeLog) {
+    print('Updating CHANGELOG to version $newVersion...');
+    writeVersionToChangelog(File('CHANGELOG.md'), newVersion);
+  }
 
   print('Updating index.html to version $newVersion...');
   writeVersionToIndexHtml(
@@ -152,6 +155,7 @@ void writeVersionToVersionFile(File versionFile, String version) {
 }
 
 void writeVersionToChangelog(File changelog, String version) {
+  //TODO Do not do this for devv file
   final lines = changelog.readAsLinesSync();
   final versionString = '## $version';
   if (lines.first.endsWith(versionString)) {
@@ -294,7 +298,7 @@ class CurrentVersionCommand extends Command {
 
   @override
   void run() async {
-    print(devtools_app_version.version);
+    print(versionFromPubspecFile());
   }
 }
 
@@ -357,6 +361,7 @@ class AutoUpdateCommand extends Command {
     final type = argResults!['type'].toString();
     final isDryRun = argResults!['dry-run'];
     final currentVersion = versionFromPubspecFile();
+    bool modifyChangeLog = true;
     String? newVersion;
     if (currentVersion == null) {
       throw 'Could not automatically determine current version.';
@@ -367,6 +372,7 @@ class AutoUpdateCommand extends Command {
         break;
       case 'dev':
         newVersion = incrementDevVersion(currentVersion);
+        modifyChangeLog = false;
         break;
       default:
         newVersion = incrementVersionByType(currentVersion, type);
@@ -383,6 +389,7 @@ class AutoUpdateCommand extends Command {
     performTheVersionUpdate(
       currentVersion: currentVersion,
       newVersion: newVersion,
+      modifyChangeLog: modifyChangeLog,
     );
   }
 }
