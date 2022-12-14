@@ -45,10 +45,10 @@ void main() {
     await binding.takeScreenshot('perfetto_initial_load');
     print('after take screenshot');
 
-    logStatus('select a Flutter Frame');
-    await tester.tap(find.byType(FlutterFramesChartItem).last);
-    await tester.pump(longPumpDuration);
-    await tester.pumpAndSettle();
+    // logStatus('select a Flutter Frame');
+    // await tester.tap(find.byType(FlutterFramesChartItem).last);
+    // await tester.pump(longPumpDuration);
+    // await tester.pumpAndSettle();
 
     // print('before take screenshot');
     // await binding.takeScreenshot('perfetto_frame_selection');
@@ -60,12 +60,12 @@ void main() {
     //   ),
     // );
 
-    logStatus('switch to a different feature tab and back to Timeline Events');
-    await tester.tap(find.widgetWithText(InkWell, 'Frame Analysis'));
-    await tester.pump(longPumpDuration);
+    // logStatus('switch to a different feature tab and back to Timeline Events');
+    // await tester.tap(find.widgetWithText(InkWell, 'Frame Analysis'));
+    // await tester.pump(longPumpDuration);
 
-    await tester.tap(find.widgetWithText(InkWell, 'Timeline Events'));
-    await tester.pump(longPumpDuration);
+    // await tester.tap(find.widgetWithText(InkWell, 'Timeline Events'));
+    // await tester.pump(longPumpDuration);
 
     // print('before take screenshot');
     // await binding.takeScreenshot('perfetto_frame_selection');
