@@ -6,7 +6,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:args/command_runner.dart';
-import '../packages/devtools_app/lib/devtools.dart' as devtools_app_version;
+import 'package:devtools_app/devtools.dart' as devtools_app_version;
 
 // This script must be executed from the top level devtools/ directory.
 // TODO(kenz): If changes are made to this script, first consider refactoring to

@@ -7,6 +7,8 @@ environment:
 dependencies:
   args: ^2.1.0
   cli_util: ^0.3.3
+  devtools_app:
+    path: ../packages/devtools_app
   devtools_shared: ^2.18.0
   http: ^0.13.3
   lints: any
