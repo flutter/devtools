@@ -27,8 +27,8 @@ class MyGetHttpDataState extends State<MyGetHttpData> {
 
   final Logging logs = Logging.logging;
 
-  RestfulAPI api;
-  List data;
+  late RestfulAPI api;
+  List? data;
 
   RestfulAPI computeUri() {
     switch (restfulApi) {
@@ -109,7 +109,7 @@ class MyGetHttpDataState extends State<MyGetHttpData> {
       ),
       // Create a Listview and load the data when available
       body: ListView.builder(
-        itemCount: data == null ? 0 : data.length,
+        itemCount: data == null ? 0 : data!.length,
         itemBuilder: (BuildContext context, int index) {
           return Center(
             child: Column(
