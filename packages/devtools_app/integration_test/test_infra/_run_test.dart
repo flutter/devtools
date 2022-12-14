@@ -14,6 +14,7 @@ const testTargetArg = '--target=';
 const testAppArg = '--test-app-uri=';
 
 Future<void> runTest(List<String> args) async {
+  // TODO(kenz): consider using ArgParser from package:args to clean this up.
   final argWithTestTarget =
       args.firstWhereOrNull((arg) => arg.startsWith(testTargetArg));
   if (argWithTestTarget == null) {
@@ -42,11 +43,17 @@ Future<void> runTest(List<String> args) async {
   await chromedriver.start();
 
   final headless = args.contains('--headless');
+  final enableExperiments = args.contains('--enable-experiments');
   final testArgs = {
     'service_uri': testAppUri,
   };
   final testRunner = TestRunner();
-  await testRunner.run(testTarget, headless: headless, args: testArgs);
+  await testRunner.run(
+    testTarget,
+    enableExperiements: enableExperiments,
+    headless: headless,
+    args: testArgs,
+  );
 
   if (createTestApp) {
     _debugLog('killing the test app');
@@ -60,7 +67,9 @@ Future<void> runTest(List<String> args) async {
 }
 
 class ChromeDriver with IoMixin {
-  // TODO(kenz): add error messaging if the chromedriver executable is not found
+  // TODO(kenz): add error messaging if the chromedriver executable is not
+  // found. We can also consider using web installers directly in this script:
+  // https://github.com/flutter/flutter/wiki/Running-Flutter-Driver-tests-with-Web#web-installers-repo.
   Future<void> start() async {
     _debugLog('starting the chromedriver process');
     final process = await Process.start(
@@ -77,6 +86,7 @@ class TestRunner with IoMixin {
   Future<void> run(
     String testTarget, {
     bool headless = false,
+    bool enableExperiements = false,
     Map<String, Object> args = const <String, Object>{},
   }) async {
     _debugLog('starting the flutter drive process');
@@ -88,7 +98,8 @@ class TestRunner with IoMixin {
         '--target=$testTarget',
         '-d',
         headless ? 'web-server' : 'chrome',
-        if (args.isNotEmpty) '--dart-define=test_args=${jsonEncode(args)}'
+        if (args.isNotEmpty) '--dart-define=test_args=${jsonEncode(args)}',
+        if (enableExperiements) '--dart-define=enable_experiments=true',
       ],
     );
     listenToProcessOutput(process);

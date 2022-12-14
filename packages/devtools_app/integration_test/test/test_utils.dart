@@ -10,7 +10,8 @@ import 'package:devtools_app/src/framework/landing_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-const safePumpDuration = Duration(seconds: 5);
+const safePumpDuration = Duration(seconds: 3);
+const longPumpDuration = Duration(seconds: 6);
 
 Future<void> pumpDevTools(WidgetTester tester) async {
   app.main();
@@ -22,11 +23,13 @@ Future<void> pumpDevTools(WidgetTester tester) async {
 
 Future<void> connectToTestApp(WidgetTester tester, TestApp testApp) async {
   final textFieldFinder = find.byType(TextField);
-  print('entering text into connect dialog');
   await tester.enterText(textFieldFinder, testApp.vmServiceUri);
   await tester.tap(find.byKey(connectButtonKey));
-  print('after tapping');
   await tester.pumpAndSettle(safePumpDuration);
+}
+
+void logStatus(String log) {
+  print('TEST STATUS: $log');
 }
 
 class TestApp {

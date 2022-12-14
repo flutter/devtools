@@ -67,6 +67,8 @@ dev_dependencies:
   devtools_test: 2.20.0
   flutter_test:
     sdk: flutter
+  flutter_driver:
+    sdk: flutter
   integration_test:
     sdk: flutter
   mockito: ^5.1.0
