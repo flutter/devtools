@@ -1,0 +1,67 @@
+name: Daily Dev Bump
+on:
+  schedule:
+    # * is a special character in YAML so you have to quote this string
+    - cron: '0 0 * * *' # Run every day at midnight
+  workflow_dispatch: # Allows for manual triggering if needed
+
+permissions:
+  contents: write
+
+env:
+  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+jobs:
+  bump-dev-version:
+    name: Bump Dev Version
+    runs-on: ubuntu-latest
+    steps:
+    - name: git clone devtools
+      uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8
+      with:
+        ref: master
+
+    - uses: dart-lang/setup-dart@v1.3
+
+    - name: setup git config
+      run: |
+
+        # TODO(https://github.com/flutter/devtools/issues/4949):  Change the author to
+        # a flutter owned account
+        git config user.name "Dan Chevalier's GitHub Actions Bot"
+        git config user.email "chevalier.dan@gmail.com"
+
+    - name: Bump the Dev Version
+      id: version-bump
+      run: |
+        set -x
+        pushd tool/
+        dart pub get
+        popd
+
+        CURRENT_VERSION=$(dart tool/update_version.dart current-version)
+        if ! echo "$CURRENT_VERSION" |grep -Eq "\-dev\.[0-9]+" ; then
+          ERROR_DESCRIPTION="Doing \
+        a Dev bump on a release version ($CURRENT_VERSION) is not supported. \
+        Ensure that that current version has been properly bumped to a '-dev.*' \
+        pre-release version, in order to continue daily dev bumps."
+
+          echo "::error ,title=Cannot Bump A Release Version ($CURRENT_VERSION)::$ERROR_DESCRIPTION" 
+          exit 1;
+        fi
+    
+        # Get the commit message
+        COMMIT_MESSAGE=$(dart tool/update_version.dart auto --dry-run --type dev)
+        echo "COMMIT_MESSAGE=$COMMIT_MESSAGE" >> $GITHUB_OUTPUT
+
+        # Do the update
+        dart tool/update_version.dart auto --type dev
+
+    - name: commit
+      run: |
+        # Stage the file, commit and push
+
+        git commit -a -m "$COMMIT_MESSAGE"
+        git push
+      env:
+        COMMIT_MESSAGE: ${{ steps.version-bump.outputs.COMMIT_MESSAGE }}
