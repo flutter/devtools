@@ -355,7 +355,8 @@ class MemoryPreferencesController extends DisposableController
 class CpuProfilerPreferencesController extends DisposableController
     with AutoDisposeControllerMixin {
   final displayTreeGuidelines = ValueNotifier<bool>(false);
-  static const _displayTreeGuidelinesId =
+
+  static final _displayTreeGuidelinesId =
       '${gac.cpuProfiler}.${gac.cpuProfileDisplayTreeGuidelines}';
 
   Future<void> init() async {

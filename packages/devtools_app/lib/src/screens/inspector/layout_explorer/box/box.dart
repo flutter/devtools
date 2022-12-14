@@ -78,11 +78,9 @@ class _BoxLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
     setState(() {
       // This implementation will need to change if we support showing more than
       // a single widget in the box visualization for the layout explorer.
-      if (newProperties != null && selectedNode == newProperties.node) {
-        highlighted = newProperties;
-      } else {
-        highlighted = null;
-      }
+      highlighted = newProperties != null && selectedNode == newProperties.node
+          ? newProperties
+          : null;
     });
   }
 

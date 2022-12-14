@@ -96,7 +96,7 @@ void main() {
       setGlobal(ServiceConnectionManager, fakeServiceManager);
       setGlobal(IdeTheme, IdeTheme());
       setGlobal(NotificationService, NotificationService());
-      screen = const MemoryScreen();
+      screen = MemoryScreen();
       controller = MemoryController();
       _setUpServiceManagerForMemory();
     });

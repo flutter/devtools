@@ -18,7 +18,7 @@ import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart';
 
 void main() {
-  const screen = DebuggerScreen();
+  final screen = DebuggerScreen();
 
   const windowSize = Size(4000.0, 4000.0);
 

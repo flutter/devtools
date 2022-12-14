@@ -162,31 +162,31 @@ BannerMessagesController bannerMessagesController(BuildContext context) {
   return Provider.of<BannerMessagesController>(context, listen: false);
 }
 
-const testMessage1ScreenId = SimpleScreen.id;
-const testMessage2ScreenId = SimpleScreen.id;
-const testMessage3ScreenId = ProfilerScreen.id;
+final testMessage1ScreenId = SimpleScreen.id;
+final testMessage2ScreenId = SimpleScreen.id;
+final testMessage3ScreenId = ProfilerScreen.id;
 const k1 = Key('test message 1');
 const k2 = Key('test message 2');
 const k3 = Key('test message 3');
-const testMessage1 = BannerMessage(
+final testMessage1 = BannerMessage(
   key: k1,
-  textSpans: [TextSpan(text: 'Test Message 1')],
+  textSpans: const [TextSpan(text: 'Test Message 1')],
   backgroundColor: Colors.black,
   foregroundColor: Colors.white,
   screenId: testMessage1ScreenId,
   messageType: BannerMessageType.warning,
 );
-const testMessage2 = BannerMessage(
+final testMessage2 = BannerMessage(
   key: k2,
-  textSpans: [TextSpan(text: 'Test Message 2')],
+  textSpans: const [TextSpan(text: 'Test Message 2')],
   backgroundColor: Colors.black,
   foregroundColor: Colors.white,
   screenId: testMessage2ScreenId,
   messageType: BannerMessageType.warning,
 );
-const testMessage3 = BannerMessage(
+final testMessage3 = BannerMessage(
   key: k3,
-  textSpans: [TextSpan(text: 'Test Message 3')],
+  textSpans: const [TextSpan(text: 'Test Message 3')],
   backgroundColor: Colors.black,
   foregroundColor: Colors.white,
   screenId: testMessage3ScreenId,

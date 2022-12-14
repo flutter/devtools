@@ -27,14 +27,8 @@ class IsolateState {
   void onIsolateLoaded(Isolate isolate) {
     _isolateNow = isolate;
     _completer.complete(isolate);
-    if (_isPaused.value == null) {
-      if (isolate.pauseEvent != null &&
-          isolate.pauseEvent!.kind != EventKind.kResume) {
-        _isPaused.value = true;
-      } else {
-        _isPaused.value = false;
-      }
-    }
+    _isPaused.value ??= isolate.pauseEvent != null &&
+        isolate.pauseEvent!.kind != EventKind.kResume;
   }
 
   void dispose() {

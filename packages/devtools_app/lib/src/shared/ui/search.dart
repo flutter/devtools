@@ -1219,11 +1219,9 @@ class _SearchFieldSuffix extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     assert(supportsNavigation || onClose != null);
-    if (supportsNavigation) {
-      return SearchNavigationControls(controller, onClose: onClose);
-    } else {
-      return closeSearchDropdownButton(onClose);
-    }
+    return supportsNavigation
+        ? SearchNavigationControls(controller, onClose: onClose)
+        : closeSearchDropdownButton(onClose);
   }
 }
 

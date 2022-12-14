@@ -152,11 +152,9 @@ String msText(
 /// Render the given [Duration] to text using either seconds or milliseconds as
 /// the units, depending on the value of the duration.
 String renderDuration(Duration duration) {
-  if (duration.inMilliseconds < 1000) {
-    return '${nf.format(duration.inMilliseconds)}ms';
-  } else {
-    return '${(duration.inMilliseconds / 1000).toStringAsFixed(1)}s';
-  }
+  return duration.inMilliseconds < 1000
+      ? '${nf.format(duration.inMilliseconds)}ms'
+      : '${(duration.inMilliseconds / 1000).toStringAsFixed(1)}s';
 }
 
 T? nullSafeMin<T extends num>(T? a, T? b) {
@@ -1046,7 +1044,7 @@ final _lowercaseLookup = <String, String>{};
 extension StringExtension on String {
   bool caseInsensitiveContains(Pattern? pattern) {
     if (pattern is RegExp) {
-      assert(pattern.isCaseSensitive == false);
+      assert(!pattern.isCaseSensitive);
       return contains(pattern);
     } else if (pattern is String) {
       final lowerCase = _lowercaseLookup.putIfAbsent(this, () => toLowerCase());
@@ -1181,11 +1179,9 @@ Uri? getServiceUriFromQueryString(String? location) {
   final token = queryParams['token'];
   final host = queryParams['host'] ?? 'localhost';
   if (port != null) {
-    if (token == null) {
-      return Uri.parse('ws://$host:$port/ws');
-    } else {
-      return Uri.parse('ws://$host:$port/$token/ws');
-    }
+    return token == null
+        ? Uri.parse('ws://$host:$port/ws')
+        : Uri.parse('ws://$host:$port/$token/ws');
   }
 
   return null;

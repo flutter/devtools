@@ -31,7 +31,7 @@ import 'package:mockito/mockito.dart';
 import '../test_infra/flutter_test_storage.dart';
 
 void main() {
-  const screen = InspectorScreen();
+  final screen = InspectorScreen();
 
   late FakeServiceManager fakeServiceManager;
   late FakeServiceExtensionManager fakeExtensionManager;

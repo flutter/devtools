@@ -54,7 +54,7 @@ void main() {
         ValueNotifier<List<ScriptRef>>([]),
       );
       setGlobal(ScriptManager, mockScriptManager);
-      screen = const ProfilerScreen();
+      screen = ProfilerScreen();
     });
 
     void verifyBaseState(

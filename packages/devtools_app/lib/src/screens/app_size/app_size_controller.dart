@@ -695,16 +695,14 @@ class AppSizeController {
     }
 
     // If none of the children matched the diff tree type
-    if (totalByteSize == 0 && skipNodesWithNoByteSizeChange) {
-      return null;
-    } else {
-      return _buildNode(
-        treeJson,
-        totalByteSize,
-        children: treemapNodeChildren,
-        showDiff: showDiff,
-      );
-    }
+    return totalByteSize == 0 && skipNodesWithNoByteSizeChange
+        ? null
+        : _buildNode(
+            treeJson,
+            totalByteSize,
+            children: treemapNodeChildren,
+            showDiff: showDiff,
+          );
   }
 
   TreemapNode _buildNode(
