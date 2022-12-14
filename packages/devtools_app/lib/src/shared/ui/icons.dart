@@ -101,7 +101,7 @@ class CustomIconMaker {
     bool isAbstract = false,
   }) {
     final theKind = kind ?? IconKind.classIcon;
-    if (fromText.isEmpty != false) {
+    if (fromText.isEmpty) {
       return null;
     }
 

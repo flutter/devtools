@@ -131,11 +131,7 @@ class DiffPaneController extends DisposableController {
     final diffWith = item.diffWith.value;
 
     late String filePrefix;
-    if (diffWith == null) {
-      filePrefix = item.name;
-    } else {
-      filePrefix = '${item.name}-${diffWith.name}';
-    }
+    filePrefix = diffWith == null ? item.name : '${item.name}-${diffWith.name}';
 
     ExportController().downloadFile(
       classesToCsv(classes.classStatsList),

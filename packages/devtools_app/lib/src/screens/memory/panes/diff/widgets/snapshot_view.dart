@@ -31,11 +31,9 @@ class SnapshotView extends StatelessWidget {
 
         final classes = controller.derived.heapClasses.value;
         if (classes == null) {
-          if (controller.isTakingSnapshot.value) {
-            return const SizedBox.shrink();
-          } else {
-            return const Center(child: Text('Could not take snapshot.'));
-          }
+          return controller.isTakingSnapshot.value
+              ? const SizedBox.shrink()
+              : const Center(child: Text('Could not take snapshot.'));
         }
 
         assert((singleClasses == null) != (diffClasses == null));

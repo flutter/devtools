@@ -33,11 +33,9 @@ Future<String> resolvePackagePath(String package) async {
   // so the packages directory is the current directory's grandparent.
   // TODO(https://github.com/flutter/flutter/issues/20907): Remove the workaround here.
   String packagesPath;
-  if (io.Directory.current.path.endsWith('test')) {
-    packagesPath = io.Directory.current.parent.parent.path;
-  } else {
-    packagesPath = io.Directory.current.parent.path;
-  }
+  packagesPath = io.Directory.current.path.endsWith('test')
+      ? io.Directory.current.parent.parent.path
+      : io.Directory.current.parent.path;
 
   path = '$packagesPath/$package';
   if (!io.Directory(path).existsSync()) {

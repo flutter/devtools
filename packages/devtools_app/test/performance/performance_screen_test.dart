@@ -84,7 +84,7 @@ void main() {
     });
 
     testWidgets('builds its tab', (WidgetTester tester) async {
-      const screen = PerformanceScreen();
+      final screen = PerformanceScreen();
       await tester.pumpWidget(
         wrapWithControllers(
           Builder(builder: screen.buildTab),

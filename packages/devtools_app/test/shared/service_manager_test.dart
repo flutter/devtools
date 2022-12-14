@@ -500,7 +500,7 @@ Future<void> _serviceExtensionAvailable(String extensionName) async {
 
   final completer = Completer<void>();
   final listener = () {
-    if (listenable.value == true && !completer.isCompleted) {
+    if (listenable.value && !completer.isCompleted) {
       completer.complete();
     }
   };

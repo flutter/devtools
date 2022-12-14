@@ -43,7 +43,7 @@ void main() {
       child: Directionality(
         textDirection: TextDirection.ltr,
         child: wrapWithControllers(
-          const BannerMessages(screen: ProviderScreen()),
+          BannerMessages(screen: ProviderScreen()),
           bannerMessages: bannerMessagesController,
         ),
       ),
@@ -392,7 +392,7 @@ void main() {
 
       expect(
         find.byKey(
-          const Key('ProviderUnknownErrorBanner - ${ProviderScreen.id}'),
+          Key('ProviderUnknownErrorBanner - ${ProviderScreen.id}'),
         ),
         findsOneWidget,
       );

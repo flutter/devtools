@@ -88,11 +88,9 @@ Future<VmServiceWrapper> connect(Uri uri, Completer<void> finishedCompleter) {
   // successful.
   Future<VmServiceWrapper> connectHelper() async {
     VmServiceWrapper service;
-    if (uri.scheme == 'sse' || uri.scheme == 'sses') {
-      service = await _connectWithSse(uri, onError, finishedCompleter);
-    } else {
-      service = await _connectWithWebSocket(uri, onError, finishedCompleter);
-    }
+    service = uri.scheme == 'sse' || uri.scheme == 'sses'
+        ? await _connectWithSse(uri, onError, finishedCompleter)
+        : await _connectWithWebSocket(uri, onError, finishedCompleter);
     // Verify that the VM is alive enough to actually get the version before
     // considering it successfully connected. Otherwise, VMService instances
     // that failed part way through the connection may appear to be connected.

@@ -621,11 +621,7 @@ Future<List<DartObjectNode>> _createVariablesForDiagnostics(
     if (diagnostic.level == DiagnosticLevel.hidden) continue;
     variables.add(_buildVariable(diagnostic, inspectorService, isolateRef));
   }
-  if (variables.isNotEmpty) {
-    return await Future.wait(variables);
-  } else {
-    return const [];
-  }
+  return variables.isNotEmpty ? await Future.wait(variables) : const [];
 }
 
 List<DartObjectNode> _createVariablesForAssociations(
