@@ -55,7 +55,7 @@ class DevToolsAboutDialog extends StatelessWidget {
           ...dialogSubHeader(theme, 'Contributing'),
           Wrap(
             children: const [
-              Text('Want to contribute to DevTools? Please see our '),
+              Text('Want to contribute to DevTools?'),
               _ContributingLink(),
               Text(' guide, or '),
             ],
