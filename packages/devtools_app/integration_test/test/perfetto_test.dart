@@ -12,7 +12,14 @@ import 'package:integration_test/integration_test.dart';
 
 import 'test_utils.dart';
 
+const _testRequiresExperiments = true;
+
 void main() {
+  if (_testRequiresExperiments &&
+      (const bool.fromEnvironment('enable_experiments') == false)) {
+    logStatus('Skipping test because experiments are not enabled.');
+    return;
+  }
   final binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
   late TestApp testApp;

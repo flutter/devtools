@@ -36,9 +36,11 @@ Future<void> runDevTools(
   // fragment format and redirect if necessary.
   if (_handleLegacyUrl()) return;
 
-  // Temporarily comment out for the sake of writing integration tests
-  // see https://github.com/flutter/flutter/issues/116936.
-  // usePathUrlStrategy();
+  // If we don't comment this out, we can't run the integration tests. See
+  // see https://github.com/flutter/flutter/issues/116936. However, if we comment
+  // this out, then we can only run once test per file, because the second test
+  // case will hit line 37 and redirect and return early.
+  usePathUrlStrategy();
 
   // This may be from our Flutter integration tests. Since we call
   // [runDevTools] from Dart code, we cannot set the 'enable_experiements'
@@ -65,11 +67,15 @@ Future<void> runDevTools(
   await SyntaxHighlighter.initialize();
 
   FutureOr<void> runCallback() async => await runner(
-        ProviderScope(
-          observers: const [ErrorLoggerObserver()],
-          child: DevToolsApp(defaultScreens, await analyticsController),
-        ),
+        MaterialApp(home: Text('this is my app')),
       );
+
+  // FutureOr<void> runCallback() async => await runner(
+  //       ProviderScope(
+  //         observers: const [ErrorLoggerObserver()],
+  //         child: DevToolsApp(defaultScreens, await analyticsController),
+  //       ),
+  //     );
 
   if (useCustomErrorHandling) {
     setupErrorHandling(() async {
@@ -88,10 +94,12 @@ Future<void> runDevTools(
 /// initialization should be skipped.
 bool _handleLegacyUrl() {
   final url = getWebUrl();
+  print('in _handleLegacyUrl: $url');
   if (url == null) return false;
 
   final newUrl = mapLegacyUrl(url);
   if (newUrl != null) {
+    print('performing redirect to $newUrl');
     webRedirect(newUrl);
     return true;
   }
