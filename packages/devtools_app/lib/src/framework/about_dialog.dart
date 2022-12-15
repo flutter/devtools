@@ -29,7 +29,7 @@ class DevToolsAboutDialog extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
+          Wrap(
             children: [
               const SelectableText('DevTools version ${devtools.version}'),
               const Text(' - '),
