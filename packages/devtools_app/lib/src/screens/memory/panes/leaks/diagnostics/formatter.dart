@@ -7,8 +7,7 @@ import 'package:leak_tracker/devtools_integration.dart';
 
 import 'model.dart';
 
-const linkToGuidance =
-    'https://github.com/flutter/devtools/blob/master/packages/devtools_app/lib/src/screens/memory/panes/leaks/LEAK_TRACKING.md';
+const linkToGuidance = 'https://github.com/dart-lang/leak_tracker';
 
 String analyzedLeaksToYaml({
   required List<LeakReport>? gcedLate,
