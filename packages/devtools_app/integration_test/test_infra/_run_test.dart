@@ -10,52 +10,39 @@ import 'package:collection/collection.dart';
 import 'io_utils.dart';
 import 'test_app_driver.dart';
 
-const testTargetArg = '--target=';
-const testAppArg = '--test-app-uri=';
-
 Future<void> runTest(List<String> args) async {
-  // TODO(kenz): consider using ArgParser from package:args to clean this up.
-  final argWithTestTarget =
-      args.firstWhereOrNull((arg) => arg.startsWith(testTargetArg));
-  if (argWithTestTarget == null) {
-    throw Exception(
-      'Please specify a test target (e.g. --target=path/to/test.dart',
-    );
-  }
-  final testTarget = argWithTestTarget.substring(testTargetArg.length);
+  final testRunnerArgs = _TestArgs(args);
 
   TestFlutterApp? testApp;
-  String? testAppUri;
+  late String testAppUri;
 
-  final argWithTestAppUri =
-      args.firstWhereOrNull((arg) => arg.startsWith(testAppArg));
-  final createTestApp = argWithTestAppUri == null;
-
-  if (createTestApp) {
+  final bool shouldCreateTestApp = testRunnerArgs.testAppUri == null;
+  if (shouldCreateTestApp) {
+    // Create the test app and start it.
     testApp = TestFlutterApp();
     await testApp.start();
     testAppUri = testApp.vmServiceUri.toString();
   } else {
-    testAppUri = argWithTestAppUri.substring(testAppArg.length);
+    testAppUri = testRunnerArgs.testAppUri!;
   }
 
+  // Start chrome driver before running the flutter integration test.
   final chromedriver = ChromeDriver();
   await chromedriver.start();
 
-  final headless = args.contains('--headless');
-  final enableExperiments = args.contains('--enable-experiments');
-  final testArgs = {
-    'service_uri': testAppUri,
-  };
+  // Run the flutter integration test.
   final testRunner = TestRunner();
   await testRunner.run(
-    testTarget,
-    enableExperiements: enableExperiments,
-    headless: headless,
-    args: testArgs,
+    testRunnerArgs.testTarget,
+    enableExperiements: testRunnerArgs.enableExperiments,
+    updateGoldens: testRunnerArgs.updateGoldens,
+    headless: testRunnerArgs.headless,
+    testAppArguments: {
+      'service_uri': testAppUri,
+    },
   );
 
-  if (createTestApp) {
+  if (shouldCreateTestApp) {
     _debugLog('killing the test app');
     await testApp?.killGracefully();
   }
@@ -87,7 +74,8 @@ class TestRunner with IoMixin {
     String testTarget, {
     bool headless = false,
     bool enableExperiements = false,
-    Map<String, Object> args = const <String, Object>{},
+    bool updateGoldens = false,
+    Map<String, Object> testAppArguments = const <String, Object>{},
   }) async {
     _debugLog('starting the flutter drive process');
     final process = await Process.start(
@@ -98,8 +86,10 @@ class TestRunner with IoMixin {
         '--target=$testTarget',
         '-d',
         headless ? 'web-server' : 'chrome',
-        if (args.isNotEmpty) '--dart-define=test_args=${jsonEncode(args)}',
+        if (testAppArguments.isNotEmpty)
+          '--dart-define=test_args=${jsonEncode(testAppArguments)}',
         if (enableExperiements) '--dart-define=enable_experiments=true',
+        if (updateGoldens) '--dart-define=update_goldens=true',
       ],
     );
     listenToProcessOutput(process);
@@ -114,4 +104,37 @@ void _debugLog(String log) {
   if (_debugTestScript) {
     print(log);
   }
+}
+
+class _TestArgs {
+  _TestArgs(List<String> args) {
+    final argWithTestTarget =
+        args.firstWhereOrNull((arg) => arg.startsWith(testTargetArg));
+    final target = argWithTestTarget?.substring(testTargetArg.length);
+    assert(
+      target != null,
+      'Please specify a test target (e.g. --target=path/to/test.dart',
+    );
+    testTarget = target!;
+
+    final argWithTestAppUri =
+        args.firstWhereOrNull((arg) => arg.startsWith(testAppArg));
+    testAppUri = argWithTestAppUri?.substring(testAppArg.length);
+
+    enableExperiments = args.contains(enableExperimentsArg);
+    updateGoldens = args.contains(updateGoldensArg);
+    headless = args.contains(headlessArg);
+  }
+
+  static const testTargetArg = '--target=';
+  static const testAppArg = '--test-app-uri=';
+  static const enableExperimentsArg = '--enable-experiments';
+  static const updateGoldensArg = '--update-goldens';
+  static const headlessArg = '--headless';
+
+  late final String testTarget;
+  late final String? testAppUri;
+  late final bool enableExperiments;
+  late final bool updateGoldens;
+  late final bool headless;
 }
