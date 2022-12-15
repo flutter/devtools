@@ -5,14 +5,15 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-import '../../analytics/analytics.dart' as ga;
-import '../../primitives/auto_dispose_mixin.dart';
-import '../../primitives/listenable.dart';
+import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/banner_messages.dart';
+import '../../shared/primitives/auto_dispose.dart';
+import '../../shared/primitives/listenable.dart';
+import '../../shared/primitives/simple_items.dart';
 import '../../shared/screen.dart';
 import '../../shared/theme.dart';
+import '../../shared/ui/icons.dart';
 import '../../shared/utils.dart';
-import '../../ui/icons.dart';
 import 'memory_controller.dart';
 import 'memory_tabs.dart';
 import 'panes/chart/chart_pane.dart';
@@ -23,15 +24,15 @@ import 'panes/chart/memory_vm_chart.dart';
 import 'panes/control/control_pane.dart';
 
 class MemoryScreen extends Screen {
-  const MemoryScreen()
+  MemoryScreen()
       : super.conditional(
           id: id,
           requiresDartVm: true,
-          title: 'Memory',
+          title: ScreenMetaData.memory.title,
           icon: Octicons.package,
         );
 
-  static const id = 'memory';
+  static final id = ScreenMetaData.memory.id;
 
   @override
   ValueListenable<bool> get showIsolateSelector =>
@@ -95,13 +96,13 @@ class MemoryBodyState extends State<MemoryBody>
           chartController: _chartController,
           controller: controller,
         ),
-        const SizedBox(height: defaultSpacing),
+        const SizedBox(height: denseRowSpacing),
         MemoryChartPane(
           chartController: _chartController,
           keyFocusNode: _focusNode,
         ),
         Expanded(
-          child: MemoryTabs(memoryController),
+          child: MemoryTabView(memoryController),
         ),
       ],
     );

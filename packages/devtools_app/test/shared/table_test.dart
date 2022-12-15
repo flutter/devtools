@@ -2,11 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
-import 'package:devtools_app/src/primitives/trees.dart';
-import 'package:devtools_app/src/primitives/utils.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
+import 'package:devtools_app/src/shared/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/shared/globals.dart';
+import 'package:devtools_app/src/shared/primitives/trees.dart';
+import 'package:devtools_app/src/shared/primitives/utils.dart';
 import 'package:devtools_app/src/shared/table/column_widths.dart';
 import 'package:devtools_app/src/shared/table/table.dart';
 import 'package:devtools_app/src/shared/table/table_controller.dart';
@@ -982,6 +982,7 @@ void main() {
         current.addChild(next);
         current = next;
       }
+      root.expandCascading();
       final table = TreeTable<TestData>(
         columns: [
           _NumberColumn(),
@@ -996,7 +997,6 @@ void main() {
         defaultSortColumn: treeColumn,
         defaultSortDirection: SortDirection.ascending,
       );
-      // This test will throw an exception if the table overflows.
       await tester.pumpWidget(
         wrap(
           SizedBox(
@@ -1006,7 +1006,35 @@ void main() {
           ),
         ),
       );
+
       expect(find.byWidget(table), findsOneWidget);
+      // Regression test for https://github.com/flutter/devtools/issues/4786
+      expect(
+        find.text(
+          '\u2026', // Unicode '...'
+          findRichText: true,
+          skipOffstage: false,
+        ),
+        findsNothing,
+      );
+      expect(
+        find.text(
+          'Root',
+          findRichText: true,
+          skipOffstage: false,
+        ),
+        findsOneWidget,
+      );
+      for (final str in strings) {
+        expect(
+          find.text(
+            str,
+            findRichText: true,
+            skipOffstage: false,
+          ),
+          findsWidgets,
+        );
+      }
     });
 
     testWidgets('properly collapses and expands the tree',
@@ -1088,7 +1116,7 @@ void main() {
       await tester.pumpWidget(wrap(table));
       final TreeTableState state = tester.state(find.byWidget(table));
       expect(state.tableController.columnWidths[0], equals(400));
-      expect(state.tableController.columnWidths[1], equals(63));
+      expect(state.tableController.columnWidths[1], equals(81));
       final tree = state.tableController.dataRoots[0];
       expect(tree.children[0].name, equals('Bar'));
       expect(tree.children[0].children[0].name, equals('Baz'));

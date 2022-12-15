@@ -21,12 +21,12 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../config_specific/logger/logger.dart';
-import '../../config_specific/url/url.dart';
-import '../../primitives/auto_dispose.dart';
-import '../../primitives/utils.dart';
 import '../../service/service_extensions.dart' as extensions;
+import '../../shared/config_specific/logger/logger.dart';
+import '../../shared/config_specific/url/url.dart';
 import '../../shared/globals.dart';
+import '../../shared/primitives/auto_dispose.dart';
+import '../../shared/primitives/utils.dart';
 import 'diagnostics_node.dart';
 import 'inspector_screen.dart';
 import 'inspector_service.dart';
@@ -65,16 +65,14 @@ class InspectorController extends DisposableController
       onExpand: _onExpand,
       onClientActiveChange: _onClientChange,
     );
-    if (isSummaryTree) {
-      details = InspectorController(
-        inspectorTree: detailsTree!,
-        treeType: treeType,
-        parent: this,
-        isSummaryTree: false,
-      );
-    } else {
-      details = null;
-    }
+    details = isSummaryTree
+        ? InspectorController(
+            inspectorTree: detailsTree!,
+            treeType: treeType,
+            parent: this,
+            isSummaryTree: false,
+          )
+        : null;
 
     await serviceManager.onServiceAvailable;
 
@@ -807,7 +805,7 @@ class InspectorController extends DisposableController
   }
 
   void selectionChanged() {
-    if (visibleToUser == false) {
+    if (!visibleToUser) {
       return;
     }
 

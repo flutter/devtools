@@ -7,14 +7,14 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../primitives/auto_dispose.dart';
-import '../primitives/utils.dart';
 import '../screens/debugger/debugger_model.dart';
 import '../screens/inspector/diagnostics_node.dart';
 import '../screens/inspector/inspector_service.dart';
 import '../service/vm_service_wrapper.dart';
 import 'globals.dart';
 import 'object_tree.dart';
+import 'primitives/auto_dispose.dart';
+import 'primitives/utils.dart';
 
 /// A line in the console.
 ///

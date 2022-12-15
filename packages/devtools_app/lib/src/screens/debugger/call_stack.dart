@@ -112,17 +112,15 @@ class _CallStackState extends State<CallStack>
       ),
     );
 
-    if (isAsyncBreak) {
-      return result;
-    } else {
-      return DevToolsTooltip(
-        message: locationDescription == null
-            ? frameDescription
-            : '$frameDescription $locationDescription',
-        waitDuration: tooltipWaitLong,
-        child: result,
-      );
-    }
+    return isAsyncBreak
+        ? result
+        : DevToolsTooltip(
+            message: locationDescription == null
+                ? frameDescription
+                : '$frameDescription $locationDescription',
+            waitDuration: tooltipWaitLong,
+            child: result,
+          );
   }
 
   Future<void> _onStackFrameSelected(StackFrameAndSourcePosition frame) async {

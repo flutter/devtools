@@ -2,12 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:typed_data';
-
 import 'package:vm_service/vm_service.dart';
 
-import '../../primitives/trees.dart';
-import '../../ui/search.dart';
+import '../../shared/primitives/trees.dart';
+import '../../shared/ui/search.dart';
 import '../inspector/diagnostics_node.dart';
 import '../inspector/inspector_service.dart';
 
@@ -34,24 +32,14 @@ bool includeDiagnosticChildren = false;
 /// A [RemoteDiagnosticsNode] is used rather than an [InspectorInstanceRef] as
 /// the additional data provided by [RemoteDiagnosticsNode] is helpful to
 /// correctly display the object and [RemoteDiagnosticsNode] includes a
-/// reference to an [InspectorInstanceRef]. [value] must be an ObjectRef,
+/// reference to an [InspectorInstanceRef]. [value] must be a VM service type,
 /// Sentinel, or primitive type.
 class GenericInstanceRef {
   GenericInstanceRef({
     required this.isolateRef,
     this.value,
     this.diagnostic,
-  }) : assert(
-          value == null ||
-              value is ObjRef ||
-              value is Sentinel ||
-              value is num ||
-              value is String ||
-              value is bool ||
-              value is Int32x4 ||
-              value is Float32x4 ||
-              value is Float64x2,
-        );
+  });
 
   final Object? value;
 
@@ -449,13 +437,11 @@ class ScriptRefUtils {
       ];
     }
 
-    if (parts.length > 1) {
-      return [
-        parts.first,
-        parts.sublist(1).join('/'),
-      ];
-    } else {
-      return parts;
-    }
+    return parts.length > 1
+        ? [
+            parts.first,
+            parts.sublist(1).join('/'),
+          ]
+        : parts;
   }
 }

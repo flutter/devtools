@@ -4,9 +4,9 @@
 
 import 'package:flutter/material.dart';
 
-import '../config_specific/ide_theme/ide_theme.dart';
-import '../ui/colors.dart';
 import 'common_widgets.dart';
+import 'config_specific/ide_theme/ide_theme.dart';
+import 'ui/colors.dart';
 import 'utils.dart';
 
 const _contrastForegroundWhite = Color.fromARGB(255, 240, 240, 240);
@@ -297,9 +297,7 @@ extension DevToolsColorScheme on ColorScheme {
 
   Color get toggleButtonsFillSelected => devtoolsBlue[400]!;
 
-  Color get grey => isLight
-      ? const Color.fromARGB(255, 128, 128, 128)
-      : const Color.fromARGB(255, 128, 128, 128);
+  Color get grey => const Color.fromARGB(255, 128, 128, 128);
 
   Color get breakpointColor => isLight ? devtoolsBlue[600]! : Colors.white;
 
@@ -391,8 +389,12 @@ extension DevToolsColorScheme on ColorScheme {
   Color get selectedRowColor =>
       isLight ? devtoolsBlue[600]! : devtoolsGrey[600]!;
 
-  Color get coverageHitColor => treemapIncreaseColor;
-  Color get coverageMissColor => treemapDecreaseColor;
+  Color get performanceLowImpactColor => const Color(0xFF5CB246);
+  Color get performanceMediumImpactColor => const Color(0xFFF7AC2A);
+  Color get performanceHighImpactColor => const Color(0xFFC94040);
+
+  Color get coverageHitColor => performanceLowImpactColor;
+  Color get coverageMissColor => performanceHighImpactColor;
 
   List<Color> get treeGuidelineColors => [
         devtoolsBlue[400]!,

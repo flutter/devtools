@@ -5,15 +5,15 @@
 @TestOn('vm')
 import 'dart:async';
 
-import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
-import 'package:devtools_app/src/primitives/storage.dart';
-import 'package:devtools_app/src/primitives/utils.dart';
 import 'package:devtools_app/src/service/service_extension_manager.dart';
 import 'package:devtools_app/src/service/service_extensions.dart' as extensions;
 import 'package:devtools_app/src/service/service_registrations.dart'
     as registrations;
+import 'package:devtools_app/src/shared/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/shared/eval_on_dart_library.dart';
 import 'package:devtools_app/src/shared/globals.dart';
+import 'package:devtools_app/src/shared/primitives/storage.dart';
+import 'package:devtools_app/src/shared/primitives/utils.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -500,7 +500,7 @@ Future<void> _serviceExtensionAvailable(String extensionName) async {
 
   final completer = Completer<void>();
   final listener = () {
-    if (listenable.value == true && !completer.isCompleted) {
+    if (listenable.value && !completer.isCompleted) {
       completer.complete();
     }
   };

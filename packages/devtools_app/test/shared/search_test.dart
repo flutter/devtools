@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app/src/primitives/utils.dart';
-import 'package:devtools_app/src/ui/search.dart';
+import 'package:devtools_app/src/shared/primitives/utils.dart';
+import 'package:devtools_app/src/shared/ui/search.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 // TODO(https://github.com/flutter/devtools/issues/3514): increase test coverage

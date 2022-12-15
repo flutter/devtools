@@ -7,23 +7,87 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
-import '../../../../primitives/utils.dart';
+import '../../../../shared/analytics/analytics.dart' as ga;
+import '../../../../shared/analytics/constants.dart' as gac;
 import '../../../../shared/common_widgets.dart';
 import '../../../../shared/dialogs.dart';
+import '../../../../shared/globals.dart';
+import '../../../../shared/primitives/utils.dart';
 import '../../../../shared/split.dart';
 import '../../../../shared/table/table.dart';
 import '../../../../shared/table/table_data.dart';
 import '../../../../shared/theme.dart';
+import '../../../../shared/ui/colors.dart';
 import '../../../../shared/utils.dart';
-import '../../../../ui/colors.dart';
 import 'raster_stats_controller.dart';
 import 'raster_stats_model.dart';
 
-class RenderingLayerVisualizer extends StatelessWidget {
-  const RenderingLayerVisualizer({
-    Key? key,
+class RasterStatsView extends StatelessWidget {
+  const RasterStatsView({
+    super.key,
     required this.rasterStatsController,
-  }) : super(key: key);
+  });
+
+  final RasterStatsController rasterStatsController;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        if (!offlineController.offlineMode.value)
+          _RasterStatsControls(
+            rasterStatsController: rasterStatsController,
+          ),
+        Expanded(
+          child: _LayerVisualizer(
+            rasterStatsController: rasterStatsController,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _RasterStatsControls extends StatelessWidget {
+  const _RasterStatsControls({required this.rasterStatsController});
+
+  final RasterStatsController rasterStatsController;
+
+  @override
+  Widget build(BuildContext context) {
+    return OutlineDecoration.onlyBottom(
+      child: Padding(
+        padding: const EdgeInsets.all(denseSpacing),
+        child: Row(
+          children: [
+            IconLabelButton(
+              tooltip: 'Take a snapshot of the rendering layers on the current'
+                  ' screen',
+              icon: Icons.camera,
+              label: 'Take Snapshot',
+              onPressed: () {
+                ga.select(
+                  gac.performance,
+                  gac.collectRasterStats,
+                );
+                unawaited(
+                  rasterStatsController.collectRasterStats(),
+                );
+              },
+            ),
+            const SizedBox(width: denseSpacing),
+            ClearButton(
+              onPressed: rasterStatsController.clearData,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _LayerVisualizer extends StatelessWidget {
+  const _LayerVisualizer({required this.rasterStatsController});
 
   final RasterStatsController rasterStatsController;
 
@@ -68,6 +132,7 @@ class RenderingLayerVisualizer extends StatelessWidget {
   }
 }
 
+@visibleForTesting
 class LayerSnapshotTable extends StatelessWidget {
   const LayerSnapshotTable({
     Key? key,
@@ -162,6 +227,7 @@ class _RenderingTimePercentageColumn extends ColumnData<LayerSnapshot> {
   bool get numeric => true;
 }
 
+@visibleForTesting
 class LayerImage extends StatelessWidget {
   const LayerImage({
     Key? key,
@@ -291,7 +357,7 @@ class _FullScreenButton extends StatelessWidget {
           unawaited(
             showDialog(
               context: context,
-              builder: (context) => LayerImageDialog(
+              builder: (context) => _LayerImageDialog(
                 snapshot: snapshot,
                 originalFrameSize: originalFrameSize,
               ),
@@ -303,8 +369,8 @@ class _FullScreenButton extends StatelessWidget {
   }
 }
 
-class LayerImageDialog extends StatelessWidget {
-  const LayerImageDialog({
+class _LayerImageDialog extends StatelessWidget {
+  const _LayerImageDialog({
     Key? key,
     required this.snapshot,
     required this.originalFrameSize,

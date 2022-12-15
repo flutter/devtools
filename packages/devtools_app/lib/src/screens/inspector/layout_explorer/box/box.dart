@@ -7,8 +7,8 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
-import '../../../../primitives/math_utils.dart';
-import '../../../../primitives/utils.dart';
+import '../../../../shared/primitives/math_utils.dart';
+import '../../../../shared/primitives/utils.dart';
 import '../../../../shared/theme.dart';
 import '../../diagnostics_node.dart';
 import '../../inspector_controller.dart';
@@ -78,11 +78,9 @@ class _BoxLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
     setState(() {
       // This implementation will need to change if we support showing more than
       // a single widget in the box visualization for the layout explorer.
-      if (newProperties != null && selectedNode == newProperties.node) {
-        highlighted = newProperties;
-      } else {
-        highlighted = null;
-      }
+      highlighted = newProperties != null && selectedNode == newProperties.node
+          ? newProperties
+          : null;
     });
   }
 

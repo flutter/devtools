@@ -7,17 +7,18 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../analytics/analytics.dart' as ga;
-import '../../primitives/auto_dispose_mixin.dart';
 import '../../service/service_extension_widgets.dart';
+import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/common_widgets.dart';
+import '../../shared/primitives/auto_dispose.dart';
+import '../../shared/primitives/simple_items.dart';
 import '../../shared/screen.dart';
 import '../../shared/split.dart';
 import '../../shared/theme.dart';
+import '../../shared/ui/filter.dart';
+import '../../shared/ui/icons.dart';
+import '../../shared/ui/search.dart';
 import '../../shared/utils.dart';
-import '../../ui/filter.dart';
-import '../../ui/icons.dart';
-import '../../ui/search.dart';
 import '_log_details.dart';
 import '_logs_table.dart';
 import 'logging_controller.dart';
@@ -26,14 +27,14 @@ final loggingSearchFieldKey = GlobalKey(debugLabel: 'LoggingSearchFieldKey');
 
 /// Presents logs from the connected app.
 class LoggingScreen extends Screen {
-  const LoggingScreen()
+  LoggingScreen()
       : super(
           id,
-          title: 'Logging',
+          title: ScreenMetaData.logging.title,
           icon: Octicons.clippy,
         );
 
-  static const id = 'logging';
+  static final id = ScreenMetaData.logging.id;
 
   @override
   String get docPageId => screenId;

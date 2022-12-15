@@ -7,17 +7,17 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../analytics/analytics.dart' as ga;
-import '../../analytics/constants.dart' as analytics_constants;
-import '../../primitives/utils.dart';
 import '../../service/vm_flags.dart' as vm_flags;
+import '../../shared/analytics/analytics.dart' as ga;
+import '../../shared/analytics/constants.dart' as gac;
+import '../../shared/analytics/metrics.dart';
 import '../../shared/globals.dart';
-import '../../ui/filter.dart';
-import '../../ui/search.dart';
+import '../../shared/primitives/utils.dart';
+import '../../shared/ui/filter.dart';
+import '../../shared/ui/search.dart';
 import 'cpu_profile_model.dart';
 import 'cpu_profile_service.dart';
 import 'cpu_profile_transformer.dart';
-import 'profiler_screen.dart';
 
 enum CpuProfilerViewType {
   function,
@@ -154,7 +154,7 @@ class CpuProfilerController
   ValueNotifier<Flag>? get profilerFlagNotifier =>
       serviceManager.vmFlagManager.flag(vm_flags.profiler);
 
-  ValueNotifier<Flag>? get profileGranularityFlagNotifier =>
+  ValueNotifier<Flag>? get profilePeriodFlag =>
       serviceManager.vmFlagManager.flag(vm_flags.profilePeriod);
 
   /// Whether the profiler is enabled.
@@ -211,7 +211,7 @@ class CpuProfilerController
 
         await ga.timeAsync(
           analyticsScreenId!,
-          analytics_constants.cpuProfileProcessingTime,
+          gac.cpuProfileProcessingTime,
           asyncOperation: pullAndProcessHelper,
           screenMetricsProvider: () => ProfilerScreenMetrics(
             cpuSampleCount: cpuProfiles.profileMetaData.sampleCount,
@@ -492,16 +492,14 @@ class CpuProfilerController
         label: userTagNone,
       )!;
 
-      if (tag == groupByUserTag || tag == groupByVmTag) {
-        data = CpuProfilePair.withTagRoots(
-          fullData,
-          tag == groupByUserTag
-              ? CpuProfilerTagType.user
-              : CpuProfilerTagType.vm,
-        );
-      } else {
-        data = CpuProfilePair.fromUserTag(fullData, tag);
-      }
+      data = tag == groupByUserTag || tag == groupByVmTag
+          ? CpuProfilePair.withTagRoots(
+              fullData,
+              tag == groupByUserTag
+                  ? CpuProfilerTagType.user
+                  : CpuProfilerTagType.vm,
+            )
+          : CpuProfilePair.fromUserTag(fullData, tag);
       cpuProfileStore.storeProfile(
         data,
         label: tag,

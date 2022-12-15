@@ -182,8 +182,7 @@ class CliAppFixture extends AppFixture {
       );
       foundIsolate = isolates.firstWhere(
         (isolate) =>
-            isolate!.id != skipId &&
-            isolate.pauseEvent?.kind == pauseEventKind,
+            isolate!.id != skipId && isolate.pauseEvent?.kind == pauseEventKind,
         orElse: () => null,
       );
       return foundIsolate != null;

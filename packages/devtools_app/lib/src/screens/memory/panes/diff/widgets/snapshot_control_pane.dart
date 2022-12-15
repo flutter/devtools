@@ -6,12 +6,12 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
-import '../../../../../analytics/analytics.dart' as ga;
-import '../../../../../analytics/constants.dart' as analytics_constants;
+import '../../../../../shared/analytics/analytics.dart' as ga;
+import '../../../../../shared/analytics/constants.dart' as gac;
 import '../../../../../shared/common_widgets.dart';
 import '../../../../../shared/theme.dart';
-import '../../../primitives/ui.dart';
 import '../../../shared/heap/class_filter.dart';
+import '../../../shared/primitives/simple_elements.dart';
 import '../controller/diff_pane_controller.dart';
 import '../controller/item_controller.dart';
 import 'class_filter_dialog.dart';
@@ -30,57 +30,53 @@ class SnapshotControlPane extends StatelessWidget {
       builder: (_, isProcessing, __) {
         final current = controller.core.selectedItem as SnapshotInstanceItem;
 
-        return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(
-                children: [
-                  if (!isProcessing && current.heap != null) ...[
-                    _DiffDropdown(
-                      current: current,
-                      controller: controller,
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Row(
+              children: [
+                if (!isProcessing && current.heap != null) ...[
+                  _DiffDropdown(
+                    current: current,
+                    controller: controller,
+                  ),
+                  const SizedBox(width: defaultSpacing),
+                  ValueListenableBuilder<ClassFilter>(
+                    valueListenable: filter,
+                    builder: (context, filterValue, ___) => ClassFilterButton(
+                      filter: filterValue,
+                      onChanged: controller.applyFilter,
                     ),
-                    const SizedBox(width: defaultSpacing),
-                    ValueListenableBuilder<ClassFilter>(
-                      valueListenable: filter,
-                      builder: (context, filterValue, ___) => ClassFilterButton(
-                        filter: filterValue,
-                        onChanged: controller.applyFilter,
-                      ),
-                    ),
-                    const SizedBox(width: defaultSpacing),
-                    ToCsvButton(
-                      minScreenWidthForTextBeforeScaling:
-                          primaryControlsMinVerboseWidth,
-                      onPressed: () {
-                        ga.select(
-                          analytics_constants.memory,
-                          analytics_constants
-                              .MemoryEvent.diffSnapshotDownloadCsv,
-                        );
-                        controller.downloadCurrentItemToCsv();
-                      },
-                    ),
-                  ],
+                  ),
+                  const SizedBox(width: defaultSpacing),
+                  ToCsvButton(
+                    minScreenWidthForTextBeforeScaling:
+                        memoryControlsMinVerboseWidth,
+                    onPressed: () {
+                      ga.select(
+                        gac.memory,
+                        gac.MemoryEvent.diffSnapshotDownloadCsv,
+                      );
+                      controller.downloadCurrentItemToCsv();
+                    },
+                  ),
                 ],
-              ),
-              ToolbarAction(
-                icon: Icons.clear,
-                tooltip: 'Delete snapshot',
-                onPressed: isProcessing
-                    ? null
-                    : () {
-                        controller.deleteCurrentSnapshot();
-                        ga.select(
-                          analytics_constants.memory,
-                          analytics_constants.MemoryEvent.diffSnapshotDelete,
-                        );
-                      },
-              ),
-            ],
-          ),
+              ],
+            ),
+            ToolbarAction(
+              icon: Icons.clear,
+              tooltip: 'Delete snapshot',
+              onPressed: isProcessing
+                  ? null
+                  : () {
+                      controller.deleteCurrentSnapshot();
+                      ga.select(
+                        gac.memory,
+                        gac.MemoryEvent.diffSnapshotDelete,
+                      );
+                    },
+            ),
+          ],
         );
       },
     );
@@ -99,8 +95,8 @@ class ClassFilterButton extends StatelessWidget {
     return FilterButton(
       onPressed: () {
         ga.select(
-          analytics_constants.memory,
-          analytics_constants.MemoryEvent.diffSnapshotFilter,
+          gac.memory,
+          gac.MemoryEvent.diffSnapshotFilter,
         );
 
         unawaited(
@@ -165,14 +161,14 @@ class _DiffDropdown extends StatelessWidget {
               late SnapshotInstanceItem? newDiffWith;
               if ((value ?? current) == current) {
                 ga.select(
-                  analytics_constants.memory,
-                  analytics_constants.MemoryEvent.diffSnapshotDiffOff,
+                  gac.memory,
+                  gac.MemoryEvent.diffSnapshotDiffOff,
                 );
                 newDiffWith = null;
               } else {
                 ga.select(
-                  analytics_constants.memory,
-                  analytics_constants.MemoryEvent.diffSnapshotDiffSelect,
+                  gac.memory,
+                  gac.MemoryEvent.diffSnapshotDiffSelect,
                 );
                 newDiffWith = value;
               }

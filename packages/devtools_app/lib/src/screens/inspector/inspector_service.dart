@@ -15,10 +15,10 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../primitives/auto_dispose.dart';
-import '../../primitives/utils.dart';
 import '../../shared/eval_on_dart_library.dart';
 import '../../shared/globals.dart';
+import '../../shared/primitives/auto_dispose.dart';
+import '../../shared/primitives/utils.dart';
 import '../debugger/debugger_model.dart';
 import 'diagnostics_node.dart';
 import 'primitives/inspector_common.dart';
@@ -122,13 +122,11 @@ abstract class InspectorServiceBase extends DisposableController
   }
 
   Future<bool> invokeBoolServiceMethodNoArgs(String methodName) async {
-    if (useDaemonApi) {
-      return await invokeServiceMethodDaemonNoGroupArgs(methodName) == true;
-    } else {
-      return (await invokeServiceMethodObservatoryNoGroup(methodName))
-              ?.valueAsString ==
-          'true';
-    }
+    return useDaemonApi
+        ? await invokeServiceMethodDaemonNoGroupArgs(methodName) == true
+        : (await invokeServiceMethodObservatoryNoGroup(methodName))
+                ?.valueAsString ==
+            'true';
   }
 
   Future<Object?> invokeServiceMethodDaemonNoGroupArgs(
@@ -638,13 +636,11 @@ abstract class ObjectGroupBase implements Disposable {
     String methodName,
   ) async {
     if (disposed) return null;
-    if (useDaemonApi) {
-      return parseDiagnosticsNodeDaemon(invokeServiceMethodDaemon(methodName));
-    } else {
-      return parseDiagnosticsNodeObservatory(
-        invokeServiceMethodObservatory(methodName),
-      );
-    }
+    return useDaemonApi
+        ? parseDiagnosticsNodeDaemon(invokeServiceMethodDaemon(methodName))
+        : parseDiagnosticsNodeObservatory(
+            invokeServiceMethodObservatory(methodName),
+          );
   }
 
   Future<RemoteDiagnosticsNode?> invokeServiceMethodReturningNodeInspectorRef(
@@ -652,15 +648,13 @@ abstract class ObjectGroupBase implements Disposable {
     InspectorInstanceRef? ref,
   ) async {
     if (disposed) return null;
-    if (useDaemonApi) {
-      return parseDiagnosticsNodeDaemon(
-        invokeServiceMethodDaemonInspectorRef(methodName, ref),
-      );
-    } else {
-      return parseDiagnosticsNodeObservatory(
-        invokeServiceMethodObservatoryInspectorRef(methodName, ref),
-      );
-    }
+    return useDaemonApi
+        ? parseDiagnosticsNodeDaemon(
+            invokeServiceMethodDaemonInspectorRef(methodName, ref),
+          )
+        : parseDiagnosticsNodeObservatory(
+            invokeServiceMethodObservatoryInspectorRef(methodName, ref),
+          );
   }
 
   Future<RemoteDiagnosticsNode?> invokeServiceMethodWithArgReturningNode(
@@ -668,15 +662,13 @@ abstract class ObjectGroupBase implements Disposable {
     String arg,
   ) async {
     if (disposed) return null;
-    if (useDaemonApi) {
-      return parseDiagnosticsNodeDaemon(
-        invokeServiceMethodDaemonArg(methodName, arg, groupName),
-      );
-    } else {
-      return parseDiagnosticsNodeObservatory(
-        invokeServiceMethodObservatoryWithGroupName1(methodName, arg),
-      );
-    }
+    return useDaemonApi
+        ? parseDiagnosticsNodeDaemon(
+            invokeServiceMethodDaemonArg(methodName, arg, groupName),
+          )
+        : parseDiagnosticsNodeObservatory(
+            invokeServiceMethodObservatoryWithGroupName1(methodName, arg),
+          );
   }
 
   Future<void> invokeVoidServiceMethodInspectorRef(
@@ -1049,19 +1041,17 @@ abstract class ObjectGroupBase implements Disposable {
     bool isProperty,
   ) async {
     if (disposed) return const [];
-    if (useDaemonApi) {
-      return parseDiagnosticsNodesDaemon(
-        invokeServiceMethodDaemonInspectorRef(methodName, instanceRef),
-        parent,
-        isProperty,
-      );
-    } else {
-      return parseDiagnosticsNodesObservatory(
-        invokeServiceMethodObservatoryInspectorRef(methodName, instanceRef),
-        parent,
-        isProperty,
-      );
-    }
+    return useDaemonApi
+        ? parseDiagnosticsNodesDaemon(
+            invokeServiceMethodDaemonInspectorRef(methodName, instanceRef),
+            parent,
+            isProperty,
+          )
+        : parseDiagnosticsNodesObservatory(
+            invokeServiceMethodObservatoryInspectorRef(methodName, instanceRef),
+            parent,
+            isProperty,
+          );
   }
 
   /// Evaluate an expression where `object` references the [inspectorRef] or
@@ -1246,12 +1236,10 @@ class ObjectGroup extends ObjectGroupBase {
     }
     if (disposed) return null;
 
-    if (newSelection != null &&
-        newSelection.dartDiagnosticRef == previousSelectionRef) {
-      return previousSelection;
-    } else {
-      return newSelection;
-    }
+    return newSelection != null &&
+            newSelection.dartDiagnosticRef == previousSelectionRef
+        ? previousSelection
+        : newSelection;
   }
 
   Future<bool> setSelectionInspector(
@@ -1264,20 +1252,21 @@ class ObjectGroup extends ObjectGroupBase {
     if (uiAlreadyUpdated) {
       inspectorService._trackClientSelfTriggeredSelection(selection);
     }
-    if (useDaemonApi) {
-      return handleSetSelectionDaemon(
-        invokeServiceMethodDaemonInspectorRef('setSelectionById', selection),
-        uiAlreadyUpdated,
-      );
-    } else {
-      return handleSetSelectionObservatory(
-        invokeServiceMethodObservatoryInspectorRef(
-          'setSelectionById',
-          selection,
-        ),
-        uiAlreadyUpdated,
-      );
-    }
+    return useDaemonApi
+        ? handleSetSelectionDaemon(
+            invokeServiceMethodDaemonInspectorRef(
+              'setSelectionById',
+              selection,
+            ),
+            uiAlreadyUpdated,
+          )
+        : handleSetSelectionObservatory(
+            invokeServiceMethodObservatoryInspectorRef(
+              'setSelectionById',
+              selection,
+            ),
+            uiAlreadyUpdated,
+          );
   }
 
   Future<bool> setSelection(GenericInstanceRef selection) async {

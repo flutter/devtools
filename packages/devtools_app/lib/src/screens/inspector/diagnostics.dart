@@ -4,13 +4,13 @@
 
 import 'package:flutter/material.dart';
 
-import '../../primitives/utils.dart';
 import '../../shared/globals.dart';
 import '../../shared/object_tree.dart';
+import '../../shared/primitives/utils.dart';
 import '../../shared/theme.dart';
-import '../../ui/hover.dart';
-import '../../ui/icons.dart';
-import '../../ui/utils.dart';
+import '../../shared/ui/hover.dart';
+import '../../shared/ui/icons.dart';
+import '../../shared/ui/utils.dart';
 import '../debugger/debugger_controller.dart';
 import '../debugger/variables.dart';
 import 'diagnostics_node.dart';
@@ -134,7 +134,7 @@ class DiagnosticsNodeDescription extends StatelessWidget {
       }
     }
 
-    if (description.isNotEmpty == true) {
+    if (description.isNotEmpty) {
       yield TextSpan(text: description, style: textStyle);
     }
 
@@ -295,12 +295,9 @@ class DiagnosticsNodeDescription extends StatelessWidget {
               final int green = JsonUtils.getIntMember(properties, 'green');
               final int blue = JsonUtils.getIntMember(properties, 'blue');
               String radix(int chan) => chan.toRadixString(16).padLeft(2, '0');
-              if (alpha == 255) {
-                description = '#${radix(red)}${radix(green)}${radix(blue)}';
-              } else {
-                description =
-                    '#${radix(alpha)}${radix(red)}${radix(green)}${radix(blue)}';
-              }
+              description = alpha == 255
+                  ? '#${radix(red)}${radix(green)}${radix(blue)}'
+                  : '#${radix(alpha)}${radix(red)}${radix(green)}${radix(blue)}';
 
               final Color color = Color.fromARGB(alpha, red, green, blue);
               children.add(_paddedIcon(_colorIconMaker.getCustomIcon(color)));

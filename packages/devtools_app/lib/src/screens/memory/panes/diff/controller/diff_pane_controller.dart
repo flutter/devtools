@@ -8,16 +8,16 @@ import 'dart:math';
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 
-import '../../../../../analytics/analytics.dart' as ga;
-import '../../../../../analytics/constants.dart' as analytics_constants;
-import '../../../../../config_specific/import_export/import_export.dart';
-import '../../../../../primitives/auto_dispose.dart';
-import '../../../../../primitives/utils.dart';
-import '../../../primitives/class_name.dart';
-import '../../../primitives/memory_utils.dart';
+import '../../../../../shared/analytics/analytics.dart' as ga;
+import '../../../../../shared/analytics/constants.dart' as gac;
+import '../../../../../shared/config_specific/import_export/import_export.dart';
+import '../../../../../shared/primitives/auto_dispose.dart';
+import '../../../../../shared/primitives/utils.dart';
 import '../../../shared/heap/class_filter.dart';
 import '../../../shared/heap/heap.dart';
 import '../../../shared/heap/model.dart';
+import '../../../shared/primitives/class_name.dart';
+import '../../../shared/primitives/memory_utils.dart';
 import 'heap_diff.dart';
 import 'item_controller.dart';
 import 'simple_controllers.dart';
@@ -49,7 +49,7 @@ class DiffPaneController extends DisposableController {
     if (_isTakingSnapshot.value) return null;
     return () {
       ga.select(
-        analytics_constants.memory,
+        gac.memory,
         gaEvent,
       );
       unawaited(takeSnapshot());
@@ -131,11 +131,7 @@ class DiffPaneController extends DisposableController {
     final diffWith = item.diffWith.value;
 
     late String filePrefix;
-    if (diffWith == null) {
-      filePrefix = item.name;
-    } else {
-      filePrefix = '${item.name}-${diffWith.name}';
-    }
+    filePrefix = diffWith == null ? item.name : '${item.name}-${diffWith.name}';
 
     ExportController().downloadFile(
       classesToCsv(classes.classStatsList),
@@ -358,8 +354,8 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
     assert(!_updatingValues);
 
     ga.timeStart(
-      analytics_constants.memory,
-      analytics_constants.MemoryTime.updateValues,
+      gac.memory,
+      gac.MemoryTime.updateValues,
     );
 
     _updatingValues = true;
@@ -369,8 +365,8 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
     _updatingValues = false;
 
     ga.timeEnd(
-      analytics_constants.memory,
-      analytics_constants.MemoryTime.updateValues,
+      gac.memory,
+      gac.MemoryTime.updateValues,
     );
 
     _assertIntegrity();

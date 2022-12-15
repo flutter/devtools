@@ -8,16 +8,17 @@ import 'dart:math' as math;
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 
-import '../../charts/flame_chart.dart';
-import '../../primitives/trace_event.dart';
-import '../../primitives/trees.dart';
-import '../../primitives/utils.dart';
 import '../../service/service_manager.dart';
-import '../../ui/search.dart';
+import '../../shared/charts/flame_chart.dart';
+import '../../shared/primitives/simple_items.dart';
+import '../../shared/primitives/trace_event.dart';
+import '../../shared/primitives/trees.dart';
+import '../../shared/primitives/utils.dart';
+import '../../shared/ui/search.dart';
 import '../profiler/cpu_profile_model.dart';
 import 'panes/flutter_frames/flutter_frame_model.dart';
 import 'panes/raster_stats/raster_stats_model.dart';
-import 'panes/rebuild_stats/rebuild_counts.dart';
+import 'panes/rebuild_stats/rebuild_stats_model.dart';
 import 'panes/timeline_events/timeline_event_processor.dart';
 import 'performance_utils.dart';
 
@@ -38,7 +39,7 @@ class PerformanceData {
         displayRefreshRate = displayRefreshRate ?? defaultRefreshRate,
         timelineEvents = timelineEvents ?? <TimelineEvent>[];
 
-  static const traceEventsKey = 'traceEvents';
+  static const traceEventsKey = traceEventsFieldName;
 
   static const cpuProfileKey = 'cpuProfile';
 

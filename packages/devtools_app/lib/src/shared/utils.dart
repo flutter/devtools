@@ -15,7 +15,8 @@ import 'package:provider/provider.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../devtools.dart' as devtools;
-import '../config_specific/logger/logger.dart' as logger;
+import 'common_widgets.dart';
+import 'config_specific/logger/logger.dart' as logger;
 import 'connected_app.dart';
 import 'globals.dart';
 
@@ -77,7 +78,7 @@ extension VmExtension on VM {
   }
 }
 
-Map<String, String> generateDeviceDescription(
+List<ConnectionDescription> generateDeviceDescription(
   VM vm,
   ConnectedApp connectedApp, {
   bool includeVmServiceConnection = true,
@@ -91,19 +92,36 @@ Map<String, String> generateDeviceDescription(
 
   final flutterVersion = connectedApp.flutterVersionNow;
 
-  return {
-    'CPU / OS': vm.deviceDisplay,
-    'Dart Version': version,
+  ConnectionDescription? _vmServiceConnection;
+  if (includeVmServiceConnection && serviceManager.service != null) {
+    final description = serviceManager.service!.connectedUri.toString();
+    _vmServiceConnection = ConnectionDescription(
+      title: 'VM Service Connection',
+      description: description,
+      actions: [CopyToClipboardControl(dataProvider: () => description)],
+    );
+  }
+
+  return [
+    ConnectionDescription(title: 'CPU / OS', description: vm.deviceDisplay),
+    ConnectionDescription(title: 'Dart Version', description: version),
     if (flutterVersion != null) ...{
-      'Flutter Version':
-          '${flutterVersion.version} / ${flutterVersion.channel}',
-      'Framework / Engine': '${flutterVersion.frameworkRevision} / '
-          '${flutterVersion.engineRevision}',
+      ConnectionDescription(
+        title: 'Flutter Version',
+        description: '${flutterVersion.version} / ${flutterVersion.channel}',
+      ),
+      ConnectionDescription(
+        title: 'Framework / Engine',
+        description: '${flutterVersion.frameworkRevision} / '
+            '${flutterVersion.engineRevision}',
+      ),
     },
-    'Connected app type': connectedApp.display,
-    if (includeVmServiceConnection && serviceManager.service != null)
-      'VM Service Connection': serviceManager.service!.connectedUri.toString(),
-  };
+    ConnectionDescription(
+      title: 'Connected app type',
+      description: connectedApp.display,
+    ),
+    if (_vmServiceConnection != null) _vmServiceConnection,
+  ];
 }
 
 List<String> issueLinkDetails() {
@@ -115,13 +133,13 @@ List<String> issueLinkDetails() {
   final vm = serviceManager.vm;
   final connectedApp = serviceManager.connectedApp;
   if (vm != null && connectedApp != null) {
-    final deviceDescriptionMap = generateDeviceDescription(
+    final descriptionEntries = generateDeviceDescription(
       vm,
       connectedApp,
       includeVmServiceConnection: false,
     );
-    final deviceDescription = deviceDescriptionMap.keys
-        .map((key) => '$key: ${deviceDescriptionMap[key]}');
+    final deviceDescription = descriptionEntries
+        .map((entry) => '${entry.title}: ${entry.description}');
     issueDescriptionItems.addAll([
       '**Connected Device**:',
       ...deviceDescription,
@@ -158,4 +176,18 @@ mixin ProvidedControllerMixin<T, V extends StatefulWidget> on State<V> {
     _controller = newController;
     return true;
   }
+}
+
+class ConnectionDescription {
+  ConnectionDescription({
+    required this.title,
+    required this.description,
+    this.actions = const <Widget>[],
+  });
+
+  final String title;
+
+  final String description;
+
+  final List<Widget> actions;
 }

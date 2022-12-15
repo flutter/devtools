@@ -7,7 +7,7 @@ import 'dart:async';
 import 'package:vm_service/utils.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
-import '../config_specific/sse/sse_shim.dart';
+import '../shared/config_specific/sse/sse_shim.dart';
 import 'vm_service_wrapper.dart';
 
 Future<VmServiceWrapper> _connectWithSse(
@@ -88,11 +88,9 @@ Future<VmServiceWrapper> connect(Uri uri, Completer<void> finishedCompleter) {
   // successful.
   Future<VmServiceWrapper> connectHelper() async {
     VmServiceWrapper service;
-    if (uri.scheme == 'sse' || uri.scheme == 'sses') {
-      service = await _connectWithSse(uri, onError, finishedCompleter);
-    } else {
-      service = await _connectWithWebSocket(uri, onError, finishedCompleter);
-    }
+    service = uri.scheme == 'sse' || uri.scheme == 'sses'
+        ? await _connectWithSse(uri, onError, finishedCompleter)
+        : await _connectWithWebSocket(uri, onError, finishedCompleter);
     // Verify that the VM is alive enough to actually get the version before
     // considering it successfully connected. Otherwise, VMService instances
     // that failed part way through the connection may appear to be connected.

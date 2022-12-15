@@ -6,10 +6,10 @@
 import 'dart:async';
 
 import 'package:devtools_app/devtools_app.dart';
-import 'package:devtools_app/src/config_specific/import_export/import_export.dart';
 import 'package:devtools_app/src/screens/performance/panes/flutter_frames/flutter_frames_chart.dart';
 import 'package:devtools_app/src/screens/performance/panes/timeline_events/legacy/event_details.dart';
 import 'package:devtools_app/src/screens/performance/panes/timeline_events/legacy/timeline_flame_chart.dart';
+import 'package:devtools_app/src/shared/config_specific/import_export/import_export.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -84,7 +84,7 @@ void main() {
     });
 
     testWidgets('builds its tab', (WidgetTester tester) async {
-      const screen = PerformanceScreen();
+      final screen = PerformanceScreen();
       await tester.pumpWidget(
         wrapWithControllers(
           Builder(builder: screen.buildTab),
@@ -104,7 +104,7 @@ void main() {
           find.text('Select a frame above to view analysis data.'),
           findsOneWidget,
         );
-        expect(find.byType(ChartVisibilityButton), findsOneWidget);
+        expect(find.byType(VisibilityButton), findsOneWidget);
         expect(find.byIcon(Icons.block), findsOneWidget);
         expect(find.text('Performance Overlay'), findsOneWidget);
         expect(find.text('Enhance Tracing'), findsOneWidget);
@@ -133,7 +133,7 @@ void main() {
           findsNothing,
         );
         expect(find.byType(EventDetails), findsOneWidget);
-        expect(find.byType(ChartVisibilityButton), findsNothing);
+        expect(find.byType(VisibilityButton), findsNothing);
         expect(find.byIcon(Icons.block), findsOneWidget);
         expect(find.text('Performance Overlay'), findsNothing);
         expect(find.text('Enhance Tracing'), findsNothing);
@@ -157,7 +157,7 @@ void main() {
           await pumpPerformanceScreen(tester, runAsync: true);
           await tester.pumpAndSettle();
 
-          final chartButtonFinder = find.byType(ChartVisibilityButton);
+          final chartButtonFinder = find.byType(VisibilityButton);
           expect(chartButtonFinder, findsOneWidget);
 
           // The flutter frames chart is visible.

@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/screens/debugger/breakpoint_manager.dart';
 import 'package:devtools_app/src/screens/inspector/inspector_screen.dart';
 import 'package:devtools_app/src/screens/inspector/inspector_service.dart';
+import 'package:devtools_app/src/shared/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_app/src/shared/notifications.dart';
 import 'package:devtools_test/devtools_test.dart';
@@ -14,7 +14,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../test_infra/flutter_test_driver.dart' show FlutterRunConfiguration;
 import '../test_infra/flutter_test_environment.dart';
-import '../test_infra/matchers.dart';
+import '../test_infra/matchers/matchers.dart';
 
 // This is a bit conservative to ensure we do not get flakes due to
 // slow interactions with the VM Service. This delay could likely be
@@ -63,7 +63,7 @@ void main() async {
       expect(serviceManager.service, equals(env.service));
       expect(serviceManager.isolateManager, isNotNull);
 
-      const screen = InspectorScreen();
+      final screen = InspectorScreen();
       await tester.pumpWidget(
         wrapWithInspectorControllers(Builder(builder: screen.build)),
       );
@@ -419,7 +419,7 @@ void main() async {
       expect(serviceManager.service, equals(env.service));
       expect(serviceManager.isolateManager, isNotNull);
 
-      const screen = InspectorScreen();
+      final screen = InspectorScreen();
       await tester.pumpWidget(
         wrapWithInspectorControllers(Builder(builder: screen.build)),
       );

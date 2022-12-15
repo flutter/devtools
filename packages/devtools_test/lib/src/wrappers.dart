@@ -23,7 +23,7 @@ Widget wrap(Widget widget) {
   return MaterialApp.router(
     theme: themeFor(isDarkTheme: false, ideTheme: IdeTheme()),
     routerDelegate: DevToolsRouterDelegate(
-      (context, page, args) => MaterialPage(
+      (context, page, args, state) => MaterialPage(
         child: Material(
           child: Directionality(
             textDirection: TextDirection.ltr,

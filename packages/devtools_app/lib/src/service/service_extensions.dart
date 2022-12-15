@@ -6,9 +6,9 @@ library service_extensions;
 
 import 'package:flutter/material.dart';
 
-import '../analytics/constants.dart' as analytics_constants;
+import '../shared/analytics/constants.dart' as gac;
 import '../shared/theme.dart';
-import '../ui/icons.dart';
+import '../shared/ui/icons.dart';
 
 // Each service extension needs to be added to [_extensionDescriptions].
 class ToggleableServiceExtensionDescription<T>
@@ -118,8 +118,8 @@ final debugAllowBanner = ToggleableServiceExtensionDescription<bool>._(
   enabledIcon: const AssetImageIcon(asset: 'icons/debug_banner@2x.png'),
   enabledValue: true,
   disabledValue: false,
-  gaScreenName: analytics_constants.inspector,
-  gaItem: analytics_constants.debugBanner,
+  gaScreenName: gac.inspector,
+  gaItem: gac.debugBanner,
   tooltip: 'Toggle Debug Banner',
 );
 
@@ -136,13 +136,13 @@ final invertOversizedImages = ToggleableServiceExtensionDescription<bool>._(
   ),
   enabledValue: true,
   disabledValue: false,
-  gaScreenName: analytics_constants.inspector,
-  gaItem: analytics_constants.highlightOversizedImages,
+  gaScreenName: gac.inspector,
+  gaItem: gac.highlightOversizedImages,
   tooltip:
       'Highlight images that are using too much memory by inverting colors and flipping them.',
   documentationUrl:
       'https://flutter.dev/docs/development/tools/devtools/inspector#highlight-oversized-images',
-  gaDocsItem: analytics_constants.highlightOversizedImagesDocs,
+  gaDocsItem: gac.highlightOversizedImagesDocs,
 );
 
 final debugPaint = ToggleableServiceExtensionDescription<bool>._(
@@ -158,12 +158,12 @@ final debugPaint = ToggleableServiceExtensionDescription<bool>._(
   ),
   enabledValue: true,
   disabledValue: false,
-  gaScreenName: analytics_constants.inspector,
-  gaItem: analytics_constants.debugPaint,
+  gaScreenName: gac.inspector,
+  gaItem: gac.debugPaint,
   tooltip: 'Overlay guidelines to assist with fixing layout issues.',
   documentationUrl:
       'https://flutter.dev/docs/development/tools/devtools/inspector#show-guidelines',
-  gaDocsItem: analytics_constants.debugPaintDocs,
+  gaDocsItem: gac.debugPaintDocs,
 );
 
 final debugPaintBaselines = ToggleableServiceExtensionDescription<bool>._(
@@ -179,13 +179,13 @@ final debugPaintBaselines = ToggleableServiceExtensionDescription<bool>._(
   ),
   enabledValue: true,
   disabledValue: false,
-  gaScreenName: analytics_constants.inspector,
-  gaItem: analytics_constants.paintBaseline,
+  gaScreenName: gac.inspector,
+  gaItem: gac.paintBaseline,
   tooltip:
       'Show baselines, which are used to position text. Can be useful for checking if text is aligned.',
   documentationUrl:
       'https://flutter.dev/docs/development/tools/devtools/inspector#show-baselines',
-  gaDocsItem: analytics_constants.paintBaselineDocs,
+  gaDocsItem: gac.paintBaselineDocs,
 );
 
 final performanceOverlay = ToggleableServiceExtensionDescription<bool>._(
@@ -201,12 +201,12 @@ final performanceOverlay = ToggleableServiceExtensionDescription<bool>._(
   ),
   enabledValue: true,
   disabledValue: false,
-  gaScreenName: analytics_constants.performance,
-  gaItem: analytics_constants.performanceOverlay,
+  gaScreenName: gac.performance,
+  gaItem: gac.performanceOverlay,
   tooltip: 'Overlay a performance chart on your app.',
   documentationUrl:
       'https://flutter.dev/docs/perf/rendering/ui-performance#the-performance-overlay',
-  gaDocsItem: analytics_constants.performanceOverlayDocs,
+  gaDocsItem: gac.performanceOverlayDocs,
 );
 
 final profileWidgetBuilds = ToggleableServiceExtensionDescription<bool>._(
@@ -222,13 +222,13 @@ final profileWidgetBuilds = ToggleableServiceExtensionDescription<bool>._(
   ),
   enabledValue: true,
   disabledValue: false,
-  gaScreenName: analytics_constants.performance,
-  gaItem: analytics_constants.trackRebuilds,
+  gaScreenName: gac.performance,
+  gaItem: gac.trackRebuilds,
   description: 'Adds an event to the timeline for every Widget built.',
   tooltip: '',
   documentationUrl:
       'https://docs.flutter.dev/development/tools/devtools/performance#track-widget-builds',
-  gaDocsItem: analytics_constants.trackWidgetBuildsDocs,
+  gaDocsItem: gac.trackWidgetBuildsDocs,
 );
 
 final profileUserWidgetBuilds = ToggleableServiceExtensionDescription<bool>._(
@@ -244,8 +244,8 @@ final profileUserWidgetBuilds = ToggleableServiceExtensionDescription<bool>._(
   ),
   enabledValue: true,
   disabledValue: false,
-  gaScreenName: analytics_constants.performance,
-  gaItem: analytics_constants.trackUserCreatedWidgetBuilds,
+  gaScreenName: gac.performance,
+  gaItem: gac.trackUserCreatedWidgetBuilds,
   description:
       'Adds an event to the timeline for every Widget created in user code.',
   tooltip: '',
@@ -258,13 +258,13 @@ final profileRenderObjectPaints = ToggleableServiceExtensionDescription<bool>._(
   disabledIcon: Icon(Icons.format_paint, size: defaultIconSize),
   enabledValue: true,
   disabledValue: false,
-  gaScreenName: analytics_constants.performance,
-  gaItem: analytics_constants.trackPaints,
+  gaScreenName: gac.performance,
+  gaItem: gac.trackPaints,
   description: 'Adds an event to the timeline for every RenderObject painted.',
   tooltip: '',
   documentationUrl:
       'https://docs.flutter.dev/development/tools/devtools/performance#track-paints',
-  gaDocsItem: analytics_constants.trackPaintsDocs,
+  gaDocsItem: gac.trackPaintsDocs,
 );
 
 final profileRenderObjectLayouts =
@@ -275,13 +275,13 @@ final profileRenderObjectLayouts =
   disabledIcon: Icon(Icons.auto_awesome_mosaic, size: defaultIconSize),
   enabledValue: true,
   disabledValue: false,
-  gaScreenName: analytics_constants.performance,
-  gaItem: analytics_constants.trackLayouts,
+  gaScreenName: gac.performance,
+  gaItem: gac.trackLayouts,
   description: 'Adds an event to the timeline for every RenderObject layout.',
   tooltip: '',
   documentationUrl:
       'https://docs.flutter.dev/development/tools/devtools/performance#track-layouts',
-  gaDocsItem: analytics_constants.trackLayoutsDocs,
+  gaDocsItem: gac.trackLayoutsDocs,
 );
 
 final repaintRainbow = ToggleableServiceExtensionDescription<bool>._(
@@ -297,13 +297,13 @@ final repaintRainbow = ToggleableServiceExtensionDescription<bool>._(
   ),
   enabledValue: true,
   disabledValue: false,
-  gaScreenName: analytics_constants.inspector,
-  gaItem: analytics_constants.repaintRainbow,
+  gaScreenName: gac.inspector,
+  gaItem: gac.repaintRainbow,
   tooltip:
       'Show borders that change color when elements repaint. Useful for finding unnecessary repaints.',
   documentationUrl:
       'https://flutter.dev/docs/development/tools/devtools/inspector#highlight-repaints',
-  gaDocsItem: analytics_constants.repaintRainbowDocs,
+  gaDocsItem: gac.repaintRainbowDocs,
 );
 
 final slowAnimations = ToggleableServiceExtensionDescription<num>._(
@@ -319,12 +319,12 @@ final slowAnimations = ToggleableServiceExtensionDescription<num>._(
   ),
   enabledValue: 5.0,
   disabledValue: 1.0,
-  gaScreenName: analytics_constants.inspector,
-  gaItem: analytics_constants.slowAnimation,
+  gaScreenName: gac.inspector,
+  gaItem: gac.slowAnimation,
   tooltip: 'Run animations 5 times slower to help fine-tune them.',
   documentationUrl:
       'https://flutter.dev/docs/development/tools/devtools/inspector#slow-animations',
-  gaDocsItem: analytics_constants.slowAnimationDocs,
+  gaDocsItem: gac.slowAnimationDocs,
 );
 
 final togglePlatformMode = ServiceExtensionDescription<String>(
@@ -339,8 +339,8 @@ final togglePlatformMode = ServiceExtensionDescription<String>(
     'Platform: MacOS',
     'Platform: Linux'
   ],
-  gaScreenName: analytics_constants.inspector,
-  gaItem: analytics_constants.togglePlatform,
+  gaScreenName: gac.inspector,
+  gaItem: gac.togglePlatform,
   tooltip: 'Override Target Platform',
 );
 
@@ -358,15 +358,15 @@ final disableClipLayers = ToggleableServiceExtensionDescription<bool>._(
   ),
   enabledValue: true,
   disabledValue: false,
-  gaScreenName: analytics_constants.performance,
-  gaItem: analytics_constants.disableClipLayersOption,
+  gaScreenName: gac.performance,
+  gaItem: gac.disableClipLayersOption,
   description: 'Render all clipping effects during paint.',
   tooltip: '''Disable this option to check whether excessive use of clipping is
 affecting performance. If performance improves with this option
 disabled, try to reduce the use of clipping effects in your app.''',
   documentationUrl:
       'https://docs.flutter.dev/development/tools/devtools/performance#more-debugging-options',
-  gaDocsItem: analytics_constants.disableClipLayersOptionDocs,
+  gaDocsItem: gac.disableClipLayersOptionDocs,
 );
 
 final disableOpacityLayers = ToggleableServiceExtensionDescription<bool>._(
@@ -383,15 +383,15 @@ final disableOpacityLayers = ToggleableServiceExtensionDescription<bool>._(
   ),
   enabledValue: true,
   disabledValue: false,
-  gaScreenName: analytics_constants.performance,
-  gaItem: analytics_constants.disableOpacityLayersOption,
+  gaScreenName: gac.performance,
+  gaItem: gac.disableOpacityLayersOption,
   description: 'Render all opacity effects during paint.',
   tooltip: '''Disable this option to check whether excessive use of opacity
 effects is affecting performance. If performance improves with this
 option disabled, try to reduce the use of opacity effects in your app.''',
   documentationUrl:
       'https://docs.flutter.dev/development/tools/devtools/performance#more-debugging-options',
-  gaDocsItem: analytics_constants.disableOpacityLayersOptionDocs,
+  gaDocsItem: gac.disableOpacityLayersOptionDocs,
 );
 
 final disablePhysicalShapeLayers =
@@ -409,16 +409,16 @@ final disablePhysicalShapeLayers =
   ),
   enabledValue: true,
   disabledValue: false,
-  gaScreenName: analytics_constants.performance,
-  gaItem: analytics_constants.disablePhysicalShapeLayersOption,
+  gaScreenName: gac.performance,
+  gaItem: gac.disablePhysicalShapeLayersOption,
   description: 'Render all physical modeling effects during paint.',
-  tooltip: '''Disable this option to check whether excessive use of physical 
-modeling effects is affecting performance (shadows, elevations, etc.). 
-If performance improves with this option disabled, try to reduce the 
+  tooltip: '''Disable this option to check whether excessive use of physical
+modeling effects is affecting performance (shadows, elevations, etc.).
+If performance improves with this option disabled, try to reduce the
 use of physical modeling effects in your app.''',
   documentationUrl:
       'https://docs.flutter.dev/development/tools/devtools/performance#more-debugging-options',
-  gaDocsItem: analytics_constants.disablePhysicalShapeLayersOptionDocs,
+  gaDocsItem: gac.disablePhysicalShapeLayersOptionDocs,
 );
 
 final httpEnableTimelineLogging = ToggleableServiceExtensionDescription<bool>._(
@@ -463,8 +463,8 @@ final toggleOnDeviceWidgetInspector =
   ),
   enabledValue: true,
   disabledValue: false,
-  gaScreenName: analytics_constants.inspector,
-  gaItem: analytics_constants.showOnDeviceInspector,
+  gaScreenName: gac.inspector,
+  gaItem: gac.showOnDeviceInspector,
   tooltip: 'Toggle select widget mode',
 );
 
@@ -483,8 +483,8 @@ final toggleSelectWidgetMode = ToggleableServiceExtensionDescription<bool>._(
   ),
   enabledValue: true,
   disabledValue: false,
-  gaScreenName: analytics_constants.inspector,
-  gaItem: analytics_constants.selectWidgetMode,
+  gaScreenName: gac.inspector,
+  gaItem: gac.selectWidgetMode,
   tooltip: 'Toggle select widget mode',
 );
 
@@ -499,8 +499,8 @@ final enableOnDeviceInspector = ToggleableServiceExtensionDescription<bool>._(
   enabledIcon: const AssetImageIcon(asset: 'icons/general/locate@2x.png'),
   enabledValue: true,
   disabledValue: false,
-  gaScreenName: analytics_constants.inspector,
-  gaItem: analytics_constants.enableOnDeviceInspector,
+  gaScreenName: gac.inspector,
+  gaItem: gac.enableOnDeviceInspector,
   tooltip: 'Toggle on-device inspector',
 );
 
@@ -510,8 +510,8 @@ final structuredErrors = ToggleableServiceExtensionDescription<bool>._(
   enabledIcon: const AssetImageIcon(asset: 'icons/perf/RedExcl@2x.png'),
   enabledValue: true,
   disabledValue: false,
-  gaScreenName: analytics_constants.logging,
-  gaItem: analytics_constants.structuredErrors,
+  gaScreenName: gac.logging,
+  gaItem: gac.structuredErrors,
   tooltip: 'Toggle showing structured errors for Flutter framework issues',
 );
 
@@ -523,18 +523,13 @@ final trackRebuildWidgets = ToggleableServiceExtensionDescription<bool>._(
   disabledValue: false,
   description: 'Tells you what has been rebuilt in your app\'s current screen.',
   tooltip: 'Show widget rebuild counts since the last reload',
-  gaScreenName: analytics_constants.inspector,
-  gaItem: analytics_constants.trackRebuildWidgets,
+  gaScreenName: gac.inspector,
+  gaItem: gac.trackRebuildWidgets,
 );
 
 // This extensions below should never be displayed as a button so does not need
 // a ServiceExtensionDescription object.
 const String didSendFirstFrameEvent = 'ext.flutter.didSendFirstFrameEvent';
-
-// TODO(polinach): reference this constant in dart SDK, when it gets submitted
-// there.
-// https://github.com/flutter/devtools/issues/3951
-const String memoryLeakTracking = 'ext.dart.memoryLeakTracking';
 
 final List<ServiceExtensionDescription> _extensionDescriptions = [
   debugPaint,

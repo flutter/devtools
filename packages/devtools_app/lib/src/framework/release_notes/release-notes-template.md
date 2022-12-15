@@ -5,31 +5,31 @@ This is draft for future release notes, that are going to land on
 
 Dart & Flutter DevTools - A Suite of Performance Tools for Dart and Flutter
 
-# General updates
+## General updates
 TODO: Remove this section if there are not any general updates.
 
-# Inspector updates
+## Inspector updates
 TODO: Remove this section if there are not any general updates.
 
-# Performance updates
+## Performance updates
 TODO: Remove this section if there are not any general updates.
 
-# CPU profiler updates
+## CPU profiler updates
 TODO: Remove this section if there are not any general updates.
 
-# Memory updates
+## Memory updates
 TODO: Remove this section if there are not any general updates.
 
-# Debugger updates
+## Debugger updates
 TODO: Remove this section if there are not any general updates.
 
-# Network profiler updates
+## Network profiler updates
 TODO: Remove this section if there are not any general updates.
 
-# Logging updates
+## Logging updates
 TODO: Remove this section if there are not any general updates.
 
-# App size tool updates
+## App size tool updates
 TODO: Remove this section if there are not any general updates.
 
 ## Changelog

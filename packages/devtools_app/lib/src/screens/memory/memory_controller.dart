@@ -7,93 +7,28 @@ import 'dart:async';
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
+import 'package:leak_tracker/devtools_integration.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../analytics/analytics.dart' as ga;
-import '../../analytics/constants.dart' as analytics_constants;
-import '../../config_specific/file/file.dart';
-import '../../config_specific/logger/logger.dart';
-import '../../primitives/auto_dispose.dart';
-import '../../primitives/utils.dart';
-import '../../service/service_extensions.dart';
 import '../../service/service_manager.dart';
+import '../../shared/analytics/analytics.dart' as ga;
+import '../../shared/analytics/constants.dart' as gac;
+import '../../shared/config_specific/file/file.dart';
+import '../../shared/config_specific/logger/logger.dart';
 import '../../shared/globals.dart';
+import '../../shared/primitives/auto_dispose.dart';
 import '../../shared/utils.dart';
 import 'memory_protocol.dart';
 import 'panes/allocation_profile/allocation_profile_table_view_controller.dart';
+import 'panes/chart/primitives.dart';
 import 'panes/diff/controller/diff_pane_controller.dart';
-import 'primitives/memory_timeline.dart';
 import 'shared/heap/model.dart';
-
-enum ChartType {
-  DartHeaps,
-  AndroidHeaps,
-}
+import 'shared/primitives/memory_timeline.dart';
 
 // TODO(terry): Consider supporting more than one file since app was launched.
 // Memory Log filename.
 final String _memoryLogFilename =
     '${MemoryController.logFilenamePrefix}${DateFormat("yyyyMMdd_HH_mm").format(DateTime.now())}';
-
-/// Automatic pruning of collected memory statistics (plotted) full data is
-/// still retained. Default is the best view each tick is 10 pixels, the
-/// width of an event symbol e.g., snapshot, monitor, etc.
-enum ChartInterval {
-  Default,
-  OneMinute,
-  FiveMinutes,
-  TenMinutes,
-  All,
-}
-
-/// Duration for each ChartInterval.
-const displayDurations = <Duration?>[
-  Duration.zero, // ChartInterval.Default
-  Duration(minutes: 1), // ChartInterval.OneMinute
-  Duration(minutes: 5), // ChartInterval.FiveMinutes
-  Duration(minutes: 10), // ChartInterval.TenMinutes
-  null, // ChartInterval.All
-];
-
-Duration? chartDuration(ChartInterval interval) =>
-    displayDurations[interval.index];
-
-const displayDefault = 'Default';
-const displayAll = 'All';
-
-final displayDurationsStrings = <String>[
-  displayDefault,
-  chartDuration(ChartInterval.OneMinute)!.inMinutes.toString(),
-  chartDuration(ChartInterval.FiveMinutes)!.inMinutes.toString(),
-  chartDuration(ChartInterval.TenMinutes)!.inMinutes.toString(),
-  displayAll,
-];
-
-String displayDuration(ChartInterval interval) =>
-    displayDurationsStrings[interval.index];
-
-ChartInterval chartInterval(String displayName) {
-  final index = displayDurationsStrings.indexOf(displayName);
-  switch (index) {
-    case 0:
-      assert(index == ChartInterval.Default.index);
-      return ChartInterval.Default;
-    case 1:
-      assert(index == ChartInterval.OneMinute.index);
-      return ChartInterval.OneMinute;
-    case 2:
-      assert(index == ChartInterval.FiveMinutes.index);
-      return ChartInterval.FiveMinutes;
-    case 3:
-      assert(index == ChartInterval.TenMinutes.index);
-      return ChartInterval.TenMinutes;
-    case 4:
-      assert(index == ChartInterval.All.index);
-      return ChartInterval.All;
-    default:
-      return ChartInterval.All;
-  }
-}
 
 class OfflineFileException implements Exception {
   OfflineFileException(this.message) : super();
@@ -136,24 +71,18 @@ class MemoryController extends DisposableController
   /// Controller for [AllocationProfileTableView].
   final allocationProfileController = AllocationProfileTableViewController();
 
-  static const logFilenamePrefix = 'memory_log_';
+  /// Index of the selected feature tab.
+  ///
+  /// This value is used to set the initial tab selection of the
+  /// [MemoryTabView]. This widget will be disposed and re-initialized on
+  /// DevTools screen changes, so we must store this value in the controller
+  /// instead of the widget state.
+  int selectedFeatureTabIndex = 0;
 
-  /// Root nodes names that contains nodes of either libraries or classes depending on
-  /// group by library or group by class.
-  static const libraryRootNode = '___LIBRARY___';
-  static const classRootNode = '___CLASSES___';
+  static const logFilenamePrefix = 'memory_log_';
 
   final _shouldShowLeaksTab = ValueNotifier<bool>(false);
   ValueListenable<bool> get shouldShowLeaksTab => _shouldShowLeaksTab;
-
-  ValueListenable get legendVisibleNotifier => _legendVisibleNotifier;
-
-  final _legendVisibleNotifier = ValueNotifier<bool>(false);
-
-  bool get isLegendVisible => _legendVisibleNotifier.value;
-
-  bool toggleLegendVisibility() =>
-      _legendVisibleNotifier.value = !_legendVisibleNotifier.value;
 
   late MemoryTimeline memoryTimeline;
 
@@ -167,12 +96,12 @@ class MemoryController extends DisposableController
 
   HeapSample? _selectedAndroidSample;
 
-  HeapSample? getSelectedSample(ChartType type) => type == ChartType.DartHeaps
+  HeapSample? getSelectedSample(ChartType type) => type == ChartType.dartHeaps
       ? _selectedDartSample
       : _selectedAndroidSample;
 
   void setSelectedSample(ChartType type, HeapSample sample) {
-    if (type == ChartType.DartHeaps) {
+    if (type == ChartType.dartHeaps) {
       _selectedDartSample = sample;
     } else {
       _selectedAndroidSample = sample;
@@ -203,32 +132,10 @@ class MemoryController extends DisposableController
     _updateAndroidChartVisibility();
   }
 
-  /// Starting chunk for slider based on the intervalDurationInMs.
-  double sliderValue = 1.0;
-
-  /// Number of interval stops for the timeline slider e.g., for 15 minutes of
-  /// collected data, displayed at a 5 minute interval there will be 3 stops,
-  /// each stop would be 5 minutes prior to the previous stop.
-  int numberOfStops = 0;
-
-  /// Compute total timeline stops used by Timeline slider.
-  int computeStops() {
-    int stops = 0;
-    if (memoryTimeline.data.isNotEmpty) {
-      final lastSampleTimestamp = memoryTimeline.data.last.timestamp.toDouble();
-      final firstSampleTimestamp =
-          memoryTimeline.data.first.timestamp.toDouble();
-      stops =
-          ((lastSampleTimestamp - firstSampleTimestamp) / intervalDurationInMs)
-              .round();
-    }
-    return stops == 0 ? 1 : stops;
-  }
-
   /// Default is to display default tick width based on width of chart of the collected
   /// data in the chart.
   final _displayIntervalNotifier =
-      ValueNotifier<ChartInterval>(ChartInterval.Default);
+      ValueNotifier<ChartInterval>(ChartInterval.theDefault);
 
   ValueListenable<ChartInterval> get displayIntervalNotifier =>
       _displayIntervalNotifier;
@@ -238,19 +145,6 @@ class MemoryController extends DisposableController
   }
 
   ChartInterval get displayInterval => _displayIntervalNotifier.value;
-
-  /// 1 minute in milliseconds.
-  static const int minuteInMs = 60 * 1000;
-
-  static int displayIntervalToIntervalDurationInMs(ChartInterval interval) {
-    return interval == ChartInterval.All
-        ? maxJsInt
-        : chartDuration(interval)!.inMilliseconds;
-  }
-
-  /// Return the pruning interval in milliseconds.
-  int get intervalDurationInMs =>
-      displayIntervalToIntervalDurationInMs(displayInterval);
 
   /// MemorySource has changed update the view.
   /// Return value of null implies offline file loaded.
@@ -291,14 +185,6 @@ class MemoryController extends DisposableController
 
   final isAndroidChartVisibleNotifier = ValueNotifier<bool>(false);
 
-  final _updateClassStackTraces = ValueNotifier(0);
-
-  ValueListenable<int> get updateClassStackTraces => _updateClassStackTraces;
-
-  void changeStackTraces() {
-    _updateClassStackTraces.value += 1;
-  }
-
   String? get _isolateId =>
       serviceManager.isolateManager.selectedIsolate.value?.id;
 
@@ -324,7 +210,7 @@ class MemoryController extends DisposableController
 
   void _refreshShouldShowLeaksTab() {
     _shouldShowLeaksTab.value = serviceManager.serviceExtensionManager
-        .hasServiceExtension(memoryLeakTracking)
+        .hasServiceExtension(memoryLeakTrackingExtensionName)
         .value;
   }
 
@@ -446,26 +332,6 @@ class MemoryController extends DisposableController
     return serviceManager.vm?.operatingSystem == 'android';
   }
 
-  /// Source file name as returned from allocation's stacktrace.
-  /// Map source URI
-  ///    packages/flutter/lib/src/widgets/image.dart
-  /// would map to
-  ///    package:flutter/src/widgets/image.dart
-  // TODO(terry): Review with Ben pathing doesn't quite work the source
-  //              file has the lib/ maybe a LibraryRef could be returned
-  //              if it's a package today all packages are file:///? Also,
-  //              would be nice to have a line # too for the source.
-  //
-  //              When line # and package mapping exist ability to navigate
-  //              to line number of the source file when clicked is needed.
-  static const packageName = '/packages/';
-
-  Future getObject(String objectRef) async =>
-      await serviceManager.service!.getObject(
-        _isolateId!,
-        objectRef,
-      );
-
   bool get isGcing => _gcing;
   bool _gcing = false;
 
@@ -510,20 +376,6 @@ class MemoryController extends DisposableController
   }
 }
 
-/// Index in datasets to each dataset's list of Entry's.
-enum ChartDataSets {
-  // Datapoint entries for each used heap value.
-  usedSet,
-  // Datapoint entries for each capacity heap value.
-  capacitySet,
-  // Datapoint entries for each external memory value.
-  externalHeapSet,
-  // Datapoint entries for each RSS value.
-  rssSet,
-  rasterLayerSet,
-  rasterPictureSet,
-}
-
 /// Supports saving and loading memory samples.
 class _MemoryLog {
   _MemoryLog(this.controller);
@@ -535,7 +387,7 @@ class _MemoryLog {
 
   /// Persist the the live memory data to a JSON file in the /tmp directory.
   List<String> exportMemory() {
-    ga.select(analytics_constants.memory, analytics_constants.export);
+    ga.select(gac.memory, gac.export);
 
     final liveData = controller.memoryTimeline.liveData;
 

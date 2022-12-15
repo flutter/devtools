@@ -8,7 +8,8 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 
-import '../../primitives/utils.dart';
+import '../../shared/config_specific/logger/logger.dart';
+import '../../shared/primitives/utils.dart';
 import '../../shared/theme.dart';
 import 'span_parser.dart';
 
@@ -41,7 +42,19 @@ class SyntaxHighlighter {
       final grammarJson = json.decode(
         await rootBundle.loadString('assets/dart_syntax.json'),
       );
-      _grammar = Grammar.fromJson(grammarJson);
+      try {
+        _grammar = Grammar.fromJson(grammarJson);
+      } catch (error) {
+        // Safari does not support negative-lookbehind regex which are currently
+        // required by the syntax highlighting. An unhandled exception here will
+        // prevent DevTools initializing, so just print the error and leave
+        // syntax highlighting disabled if this happens.
+        log(
+          'Failed to load Dart Syntax Highlighting:\n'
+          '$error',
+          LogLevel.warning,
+        );
+      }
     }
   }
 
@@ -60,11 +73,15 @@ class SyntaxHighlighter {
           .sublist(lineRange.begin - 1, lineRange.end)
           .join('\n');
     }
+    final grammar = _grammar;
+    if (grammar == null) {
+      return TextSpan(text: _processedSource);
+    }
     return TextSpan(
       children: _highlightLoopHelper(
         currentScope: null,
         loopCondition: () => _currentPosition < _processedSource.length,
-        scopes: SpanParser.parse(_grammar!, _processedSource),
+        scopes: SpanParser.parse(grammar, _processedSource),
       ),
     );
   }

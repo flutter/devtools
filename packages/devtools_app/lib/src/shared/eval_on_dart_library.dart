@@ -10,11 +10,11 @@ import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../config_specific/logger/logger.dart';
-import '../primitives/auto_dispose.dart';
 import '../screens/inspector/inspector_service.dart';
 import '../service/vm_service_wrapper.dart';
+import 'config_specific/logger/logger.dart';
 import 'globals.dart';
+import 'primitives/auto_dispose.dart';
 
 class Disposable {
   bool disposed = false;

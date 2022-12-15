@@ -8,10 +8,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import 'analytics/analytics.dart' as ga;
-import 'analytics/analytics_controller.dart';
-import 'analytics/constants.dart' as analytics_constants;
-import 'config_specific/server/server.dart';
 import 'example/conditional_screen.dart';
 import 'framework/about_dialog.dart';
 import 'framework/framework_core.dart';
@@ -21,7 +17,6 @@ import 'framework/notifications_view.dart';
 import 'framework/release_notes/release_notes.dart';
 import 'framework/report_feedback_button.dart';
 import 'framework/scaffold.dart';
-import 'primitives/auto_dispose_mixin.dart';
 import 'screens/app_size/app_size_controller.dart';
 import 'screens/app_size/app_size_screen.dart';
 import 'screens/debugger/debugger_controller.dart';
@@ -44,14 +39,19 @@ import 'screens/provider/provider_screen.dart';
 import 'screens/vm_developer/vm_developer_tools_controller.dart';
 import 'screens/vm_developer/vm_developer_tools_screen.dart';
 import 'service/service_extension_widgets.dart';
+import 'shared/analytics/analytics.dart' as ga;
+import 'shared/analytics/analytics_controller.dart';
+import 'shared/analytics/constants.dart' as gac;
 import 'shared/common_widgets.dart';
+import 'shared/config_specific/server/server.dart';
 import 'shared/dialogs.dart';
 import 'shared/globals.dart';
+import 'shared/primitives/auto_dispose.dart';
 import 'shared/routing.dart';
 import 'shared/screen.dart';
 import 'shared/snapshot_screen.dart';
 import 'shared/theme.dart';
-import 'ui/hover.dart';
+import 'shared/ui/hover.dart';
 
 // Assign to true to use a sample implementation of a conditional screen.
 // WARNING: Do not check in this file if debugEnableSampleScreen is true.
@@ -96,6 +96,8 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
   final hoverCardController = HoverCardController();
 
   late ReleaseNotesController releaseNotesController;
+
+  late final routerDelegate = DevToolsRouterDelegate(_getPage);
 
   @override
   void initState() {
@@ -148,13 +150,19 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
   }
 
   /// Gets the page for a given page/path and args.
-  Page _getPage(BuildContext context, String? page, Map<String, String?> args) {
+  Page _getPage(
+    BuildContext context,
+    String? page,
+    Map<String, String?> args,
+    DevToolsNavigationState? state,
+  ) {
     // Provide the appropriate page route.
     if (pages.containsKey(page)) {
       Widget widget = pages[page!]!(
         context,
         page,
         args,
+        state,
       );
       assert(
         () {
@@ -163,6 +171,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
               context,
               page,
               args,
+              state,
             ),
           );
           return true;
@@ -185,6 +194,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
     BuildContext context,
     String? page,
     Map<String, String?> params,
+    DevToolsNavigationState? state,
   ) {
     final vmServiceUri = params['uri'];
 
@@ -262,7 +272,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
       homePageId: _buildTabbedPage,
       for (final screen in widget.screens)
         screen.screen.screenId: _buildTabbedPage,
-      snapshotPageId: (_, __, args) {
+      snapshotPageId: (_, __, args, ___) {
         final snapshotArgs = SnapshotArguments.fromArgs(args);
         return DevToolsScaffold.withChild(
           key: UniqueKey(),
@@ -273,7 +283,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
           ),
         );
       },
-      appSizePageId: (_, __, ___) {
+      appSizePageId: (_, __, ___, ____) {
         return DevToolsScaffold.withChild(
           key: const Key('appsize'),
           ideTheme: ideTheme,
@@ -303,7 +313,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
         .where(
           (s) => s.providesController && (offline ? s.supportsOffline : true),
         )
-        .map((s) => s.controllerProvider)
+        .map((s) => s.controllerProvider(routerDelegate))
         .toList();
 
     return MultiProvider(
@@ -330,16 +340,18 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
             Provider<HoverCardController>.value(
               value: hoverCardController,
             ),
+            Provider<ReleaseNotesController>.value(
+              value: releaseNotesController,
+            ),
           ],
           child: NotificationsView(
             child: ReleaseNotesViewer(
-              releaseNotesController: releaseNotesController,
               child: child,
             ),
           ),
         );
       },
-      routerDelegate: DevToolsRouterDelegate(_getPage),
+      routerDelegate: routerDelegate,
       routeInformationParser: DevToolsRouteInformationParser(),
       // Disable default scrollbar behavior on web to fix duplicate scrollbars
       // bug, see https://github.com/flutter/flutter/issues/90697:
@@ -372,7 +384,7 @@ class DevToolsScreen<C> {
   ///
   /// If [createController] and [controller] are both null, [screen] will be
   /// responsible for creating and maintaining its own controller.
-  final C Function()? createController;
+  final C Function(DevToolsRouterDelegate)? createController;
 
   /// A provided controller for this screen, if non-null.
   ///
@@ -393,7 +405,7 @@ class DevToolsScreen<C> {
   /// Defaults to false.
   final bool supportsOffline;
 
-  Provider<C> get controllerProvider {
+  Provider<C> controllerProvider(DevToolsRouterDelegate routerDelegate) {
     assert(
       (createController != null && controller == null) ||
           (createController == null && controller != null),
@@ -402,16 +414,17 @@ class DevToolsScreen<C> {
     if (controllerLocal != null) {
       return Provider<C>.value(value: controllerLocal);
     }
-    return Provider<C>(create: (_) => createController!());
+    return Provider<C>(create: (_) => createController!(routerDelegate));
   }
 }
 
 /// A [WidgetBuilder] that takes an additional map of URL query parameters and
-/// args.
+/// args, as well a state not included in the URL.
 typedef UrlParametersBuilder = Widget Function(
   BuildContext,
   String?,
   Map<String, String?>,
+  DevToolsNavigationState?,
 );
 
 /// Displays the checked mode banner in the bottom end corner instead of the
@@ -480,26 +493,26 @@ class SettingsDialog extends StatelessWidget {
             label: const Text('Use a dark theme'),
             listenable: preferences.darkModeTheme,
             toggle: preferences.toggleDarkModeTheme,
-            gaItem: analytics_constants.darkTheme,
+            gaItem: gac.darkTheme,
           ),
           CheckboxSetting(
             label: const Text('Use dense mode'),
             listenable: preferences.denseModeEnabled,
             toggle: preferences.toggleDenseMode,
-            gaItem: analytics_constants.denseMode,
+            gaItem: gac.denseMode,
           ),
           if (isExternalBuild && isDevToolsServerAvailable)
             CheckboxSetting(
               label: const Text('Enable analytics'),
               listenable: analyticsController.analyticsEnabled,
               toggle: analyticsController.toggleAnalyticsEnabled,
-              gaItem: analytics_constants.analytics,
+              gaItem: gac.analytics,
             ),
           CheckboxSetting(
             label: const Text('Enable VM developer mode'),
             listenable: preferences.vmDeveloperModeEnabled,
             toggle: preferences.toggleVmDeveloperMode,
-            gaItem: analytics_constants.vmDeveloperMode,
+            gaItem: gac.vmDeveloperMode,
           ),
         ],
       ),
@@ -548,7 +561,7 @@ class CheckboxSetting extends StatelessWidget {
 
   void toggleSetting(bool? newValue) {
     ga.select(
-      analytics_constants.settingsDialog,
+      gac.settingsDialog,
       '$gaItem-${newValue == true ? 'enabled' : 'disabled'}',
     );
     toggle(newValue == true);
@@ -565,53 +578,58 @@ class CheckboxSetting extends StatelessWidget {
 List<DevToolsScreen> get defaultScreens {
   return <DevToolsScreen>[
     DevToolsScreen<InspectorController>(
-      const InspectorScreen(),
-      createController: () => InspectorController(
+      InspectorScreen(),
+      createController: (_) => InspectorController(
         inspectorTree: InspectorTreeController(),
         detailsTree: InspectorTreeController(),
         treeType: FlutterTreeType.widget,
       ),
     ),
     DevToolsScreen<PerformanceController>(
-      const PerformanceScreen(),
-      createController: () => PerformanceController(),
+      PerformanceScreen(),
+      createController: (_) => PerformanceController(),
       supportsOffline: true,
     ),
     DevToolsScreen<ProfilerScreenController>(
-      const ProfilerScreen(),
-      createController: () => ProfilerScreenController(),
+      ProfilerScreen(),
+      createController: (_) => ProfilerScreenController(),
       supportsOffline: true,
     ),
     DevToolsScreen<MemoryController>(
-      const MemoryScreen(),
-      createController: () => MemoryController(),
+      MemoryScreen(),
+      createController: (_) => MemoryController(),
     ),
     DevToolsScreen<DebuggerController>(
-      const DebuggerScreen(),
-      createController: () => DebuggerController(),
+      DebuggerScreen(),
+      createController: (routerDelegate) => DebuggerController(
+        routerDelegate: routerDelegate,
+      ),
     ),
     DevToolsScreen<NetworkController>(
-      const NetworkScreen(),
-      createController: () => NetworkController(),
+      NetworkScreen(),
+      createController: (_) => NetworkController(),
     ),
     DevToolsScreen<LoggingController>(
-      const LoggingScreen(),
-      createController: () => LoggingController(),
+      LoggingScreen(),
+      createController: (_) => LoggingController(),
     ),
-    DevToolsScreen<void>(const ProviderScreen(), createController: () {}),
+    DevToolsScreen<void>(
+      ProviderScreen(),
+      createController: (_) {},
+    ),
     DevToolsScreen<AppSizeController>(
-      const AppSizeScreen(),
-      createController: () => AppSizeController(),
+      AppSizeScreen(),
+      createController: (_) => AppSizeController(),
     ),
     DevToolsScreen<VMDeveloperToolsController>(
-      const VMDeveloperToolsScreen(),
-      createController: () => VMDeveloperToolsController(),
+      VMDeveloperToolsScreen(),
+      createController: (_) => VMDeveloperToolsController(),
     ),
     // Show the sample DevTools screen.
     if (debugEnableSampleScreen && (kDebugMode || kProfileMode))
       DevToolsScreen<ExampleController>(
         const ExampleConditionalScreen(),
-        createController: () => ExampleController(),
+        createController: (_) => ExampleController(),
         supportsOffline: true,
       ),
   ];

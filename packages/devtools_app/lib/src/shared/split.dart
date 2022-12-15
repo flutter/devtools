@@ -7,7 +7,7 @@ import 'dart:math' as math;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
-import '../primitives/utils.dart';
+import 'primitives/utils.dart';
 
 /// A widget that takes a list of children, lays them out along [axis], and
 /// allows the user to resize them.
@@ -119,11 +119,9 @@ class _SplitState extends State<Split> {
 
       // Reduce the min sizes gracefully if the total required min size for all
       // children is greater than the available size for children.
-      if (totalMinSize > availableSize) {
-        return widget.minSizes![index] * availableSize / totalMinSize;
-      } else {
-        return widget.minSizes![index];
-      }
+      return totalMinSize > availableSize
+          ? widget.minSizes![index] * availableSize / totalMinSize
+          : widget.minSizes![index];
     }
 
     double _minFractionForIndex(int index) =>

@@ -6,7 +6,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 
-import '../../primitives/utils.dart';
+import '../../shared/primitives/utils.dart';
 import 'cpu_profile_model.dart';
 
 /// Process for composing [CpuProfileData] into a structured tree of
@@ -72,16 +72,16 @@ class CpuProfileTransformer {
     if (cpuProfileData.rootedAtTags) {
       // Check to see if there are any empty tag roots as a result of filtering
       // and remove them.
-      final nodeIndiciesToRemove = <int>[];
+      final nodeIndicesToRemove = <int>[];
       for (int i = cpuProfileData.cpuProfileRoot.children.length - 1;
           i >= 0;
           --i) {
         final root = cpuProfileData.cpuProfileRoot.children[i];
         if (root.isTag && root.children.isEmpty) {
-          nodeIndiciesToRemove.add(i);
+          nodeIndicesToRemove.add(i);
         }
       }
-      nodeIndiciesToRemove.forEach(
+      nodeIndicesToRemove.forEach(
         cpuProfileData.cpuProfileRoot.removeChildAtIndex,
       );
     }

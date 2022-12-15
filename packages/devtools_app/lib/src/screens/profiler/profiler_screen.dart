@@ -8,20 +8,19 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart' hide Stack;
 
-import '../../analytics/analytics.dart' as ga;
-import '../../analytics/analytics_common.dart';
-import '../../analytics/constants.dart' as analytics_constants;
-import '../../config_specific/import_export/import_export.dart';
-import '../../primitives/auto_dispose_mixin.dart';
-import '../../primitives/listenable.dart';
+import '../../shared/analytics/analytics.dart' as ga;
+import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/banner_messages.dart';
 import '../../shared/common_widgets.dart';
 import '../../shared/globals.dart';
+import '../../shared/primitives/auto_dispose.dart';
+import '../../shared/primitives/listenable.dart';
+import '../../shared/primitives/simple_items.dart';
 import '../../shared/screen.dart';
 import '../../shared/theme.dart';
+import '../../shared/ui/icons.dart';
+import '../../shared/ui/vm_flag_widgets.dart';
 import '../../shared/utils.dart';
-import '../../ui/icons.dart';
-import '../../ui/vm_flag_widgets.dart';
 import 'cpu_profile_controller.dart';
 import 'cpu_profile_model.dart';
 import 'cpu_profiler.dart';
@@ -34,12 +33,12 @@ const iosProfilerWorkaround =
     'https://github.com/flutter/flutter/issues/88466#issuecomment-905830680';
 
 class ProfilerScreen extends Screen {
-  const ProfilerScreen()
+  ProfilerScreen()
       : super.conditional(
           id: id,
           requiresDartVm: true,
           worksOffline: true,
-          title: 'CPU Profiler',
+          title: ScreenMetaData.cpuProfiler.title,
           icon: Octicons.dashboard,
         );
 
@@ -48,7 +47,7 @@ class ProfilerScreen extends Screen {
   @visibleForTesting
   static const recordingStatusKey = Key('Recording Status');
 
-  static const id = 'cpu-profiler';
+  static final id = ScreenMetaData.cpuProfiler.id;
 
   @override
   String get docPageId => id;
@@ -307,8 +306,8 @@ class _PrimaryControls extends StatelessWidget {
               _primaryControlsMinIncludeTextWidth,
           onPressed: () {
             ga.select(
-              analytics_constants.cpuProfiler,
-              analytics_constants.record,
+              gac.cpuProfiler,
+              gac.record,
             );
             unawaited(controller.startRecording());
           },
@@ -320,8 +319,8 @@ class _PrimaryControls extends StatelessWidget {
               _primaryControlsMinIncludeTextWidth,
           onPressed: () {
             ga.select(
-              analytics_constants.cpuProfiler,
-              analytics_constants.stop,
+              gac.cpuProfiler,
+              gac.stop,
             );
             unawaited(controller.stopRecording());
           },
@@ -334,8 +333,8 @@ class _PrimaryControls extends StatelessWidget {
               ? null
               : () {
                   ga.select(
-                    analytics_constants.cpuProfiler,
-                    analytics_constants.clear,
+                    gac.cpuProfiler,
+                    gac.clear,
                   );
                   unawaited(controller.clear());
                 },
@@ -353,7 +352,7 @@ class _SecondaryControls extends StatelessWidget {
 
   static const _secondaryControlsMinScreenWidthForText = 1050.0;
 
-  static const _profilingControlsMinScreenWidthForText = 815.0;
+  static const _profilingControlsMinScreenWidthForText = 825.0;
 
   final ProfilerScreenController controller;
 
@@ -376,8 +375,8 @@ class _SecondaryControls extends StatelessWidget {
             onPressed: !profilerBusy
                 ? () {
                     ga.select(
-                      analytics_constants.cpuProfiler,
-                      analytics_constants.profileAppStartUp,
+                      gac.cpuProfiler,
+                      gac.profileAppStartUp,
                     );
                     unawaited(
                       controller.cpuProfilerController.loadAppStartUpProfile(),
@@ -394,18 +393,18 @@ class _SecondaryControls extends StatelessWidget {
           onPressed: !profilerBusy
               ? () {
                   ga.select(
-                    analytics_constants.cpuProfiler,
-                    analytics_constants.loadAllCpuSamples,
+                    gac.cpuProfiler,
+                    gac.loadAllCpuSamples,
                   );
                   unawaited(controller.cpuProfilerController.loadAllSamples());
                 }
               : null,
         ),
         const SizedBox(width: denseSpacing),
-        ProfileGranularityDropdown(
+        CpuSamplingRateDropdown(
           screenId: ProfilerScreen.id,
-          profileGranularityFlagNotifier:
-              controller.cpuProfilerController.profileGranularityFlagNotifier!,
+          profilePeriodFlagNotifier:
+              controller.cpuProfilerController.profilePeriodFlag!,
         ),
         const SizedBox(width: denseSpacing),
         ExportButton(
@@ -414,8 +413,8 @@ class _SecondaryControls extends StatelessWidget {
                   controller.cpuProfileData?.isEmpty == false
               ? () {
                   ga.select(
-                    analytics_constants.cpuProfiler,
-                    analytics_constants.export,
+                    gac.cpuProfiler,
+                    gac.export,
                   );
                   _exportPerformance(context);
                 }
@@ -428,21 +427,8 @@ class _SecondaryControls extends StatelessWidget {
   }
 
   void _exportPerformance(BuildContext context) {
-    final exportedFile = controller.exportData();
+    controller.exportData();
     // TODO(kenz): investigate if we need to do any error handling here. Is the
     // download always successful?
-    // TODO(peterdjlee): find a way to push the notification logic into the
-    // export controller.
-    notificationService.push(successfulExportMessage(exportedFile));
   }
-}
-
-class ProfilerScreenMetrics extends ScreenAnalyticsMetrics {
-  ProfilerScreenMetrics({
-    required this.cpuSampleCount,
-    required this.cpuStackDepth,
-  });
-
-  final int cpuSampleCount;
-  final int cpuStackDepth;
 }

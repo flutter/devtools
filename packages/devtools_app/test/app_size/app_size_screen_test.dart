@@ -4,16 +4,16 @@
 
 import 'dart:convert';
 
-import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
-import 'package:devtools_app/src/primitives/utils.dart';
 import 'package:devtools_app/src/screens/app_size/app_size_controller.dart';
 import 'package:devtools_app/src/screens/app_size/app_size_screen.dart';
 import 'package:devtools_app/src/screens/app_size/app_size_table.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/shared/common_widgets.dart';
+import 'package:devtools_app/src/shared/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/shared/file_import.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_app/src/shared/notifications.dart';
+import 'package:devtools_app/src/shared/primitives/utils.dart';
 import 'package:devtools_app/src/shared/split.dart';
 import 'package:devtools_shared/devtools_test_utils.dart';
 import 'package:devtools_test/devtools_test.dart';
@@ -103,7 +103,7 @@ void main() {
 
   group('AppSizeScreen', () {
     setUp(() async {
-      screen = const AppSizeScreen();
+      screen = AppSizeScreen();
       appSizeController = AppSizeTestController();
       fakeServiceManager = FakeServiceManager();
       setGlobal(ServiceConnectionManager, fakeServiceManager);
@@ -206,7 +206,7 @@ void main() {
 
   group('SnapshotView', () {
     setUp(() async {
-      screen = const AppSizeScreen();
+      screen = AppSizeScreen();
       appSizeController = AppSizeTestController();
     });
 
@@ -277,7 +277,7 @@ void main() {
 
   group('DiffView', () {
     setUp(() async {
-      screen = const AppSizeScreen();
+      screen = AppSizeScreen();
       appSizeController = AppSizeTestController();
     });
 
@@ -413,7 +413,7 @@ void main() {
 
   group('AppSizeController', () {
     setUp(() async {
-      screen = const AppSizeScreen();
+      screen = AppSizeScreen();
       appSizeController = AppSizeTestController();
     });
 

@@ -8,16 +8,16 @@ import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../devtools.dart' as devtools;
-import '../analytics/constants.dart' as analytics_constants;
 import '../service/isolate_manager.dart';
 import '../service/service_manager.dart';
+import '../shared/analytics/constants.dart' as gac;
 import '../shared/common_widgets.dart';
 import '../shared/device_dialog.dart';
 import '../shared/globals.dart';
 import '../shared/screen.dart';
 import '../shared/theme.dart';
+import '../shared/ui/utils.dart';
 import '../shared/utils.dart';
-import '../ui/utils.dart';
 import 'about_dialog.dart';
 import 'report_feedback_button.dart';
 
@@ -107,7 +107,7 @@ class StatusLine extends StatelessWidget {
                 : 'flutter.dev/devtools/$docPageId',
             url: 'https://flutter.dev/devtools/$docPageId',
             gaScreenName: currentScreen.screenId,
-            gaSelectedItemDescription: analytics_constants.documentationLink,
+            gaSelectedItemDescription: gac.documentationLink,
           ),
           context: context,
         ),

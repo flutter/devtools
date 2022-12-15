@@ -7,18 +7,19 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../analytics/prompt.dart';
 import '../app.dart';
-import '../config_specific/drag_and_drop/drag_and_drop.dart';
-import '../config_specific/ide_theme/ide_theme.dart';
-import '../config_specific/import_export/import_export.dart';
-import '../primitives/auto_dispose_mixin.dart';
 import '../screens/debugger/console.dart';
 import '../screens/debugger/debugger_screen.dart';
+import '../shared/analytics/prompt.dart';
 import '../shared/banner_messages.dart';
 import '../shared/common_widgets.dart';
+import '../shared/config_specific/drag_and_drop/drag_and_drop.dart';
+import '../shared/config_specific/ide_theme/ide_theme.dart';
+import '../shared/config_specific/import_export/import_export.dart';
 import '../shared/framework_controller.dart';
 import '../shared/globals.dart';
+import '../shared/primitives/auto_dispose.dart';
+import '../shared/primitives/simple_items.dart';
 import '../shared/routing.dart';
 import '../shared/screen.dart';
 import '../shared/split.dart';
@@ -226,6 +227,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
           routerDelegate.navigateIfNotCurrent(
             _currentScreen.screenId,
             routerDelegate.currentConfiguration?.args,
+            routerDelegate.currentConfiguration?.state,
           );
         });
       });
@@ -515,13 +517,13 @@ class KeyboardShortcutsState extends State<KeyboardShortcuts>
 }
 
 class SimpleScreen extends Screen {
-  const SimpleScreen(this.child)
+  SimpleScreen(this.child)
       : super(
           id,
           showFloatingDebuggerControls: false,
         );
 
-  static const id = 'simple';
+  static final id = ScreenMetaData.simple.id;
 
   final Widget child;
 

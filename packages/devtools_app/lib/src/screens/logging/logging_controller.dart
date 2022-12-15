@@ -12,14 +12,14 @@ import 'package:intl/intl.dart';
 import 'package:path/path.dart' as path;
 import 'package:vm_service/vm_service.dart';
 
-import '../../config_specific/logger/logger.dart' as logger;
-import '../../primitives/auto_dispose.dart';
-import '../../primitives/message_bus.dart';
-import '../../primitives/utils.dart';
 import '../../service/vm_service_wrapper.dart';
+import '../../shared/config_specific/logger/logger.dart' as logger;
 import '../../shared/globals.dart';
-import '../../ui/filter.dart';
-import '../../ui/search.dart';
+import '../../shared/primitives/auto_dispose.dart';
+import '../../shared/primitives/message_bus.dart';
+import '../../shared/primitives/utils.dart';
+import '../../shared/ui/filter.dart';
+import '../../shared/ui/search.dart';
 import '../inspector/diagnostics_node.dart';
 import '../inspector/inspector_service.dart';
 import '../inspector/inspector_tree.dart';
@@ -218,12 +218,9 @@ class LoggingController extends DisposableController
 
     String label;
 
-    if (totalCount == showingCount) {
-      label = nf.format(totalCount);
-    } else {
-      label = 'showing ${nf.format(showingCount)} of '
-          '${nf.format(totalCount)}';
-    }
+    label = totalCount == showingCount
+        ? nf.format(totalCount)
+        : 'showing ${nf.format(showingCount)} of ' '${nf.format(totalCount)}';
 
     label = '$label ${pluralize('event', totalCount)}';
 
@@ -783,11 +780,9 @@ String? _valueAsString(InstanceRef? ref) {
     return ref.valueAsString;
   }
 
-  if (ref.valueAsStringIsTruncated == true) {
-    return '${ref.valueAsString}...';
-  } else {
-    return ref.valueAsString;
-  }
+  return ref.valueAsStringIsTruncated == true
+      ? '${ref.valueAsString}...'
+      : ref.valueAsString;
 }
 
 /// A log data object that includes optional summary information about whether

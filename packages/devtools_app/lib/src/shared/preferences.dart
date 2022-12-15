@@ -7,13 +7,13 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 
-import '../analytics/analytics.dart' as ga;
-import '../analytics/constants.dart' as analytics_constants;
-import '../primitives/auto_dispose.dart';
-import '../primitives/utils.dart';
 import '../screens/inspector/inspector_service.dart';
 import '../service/vm_service_wrapper.dart';
+import 'analytics/analytics.dart' as ga;
+import 'analytics/constants.dart' as gac;
 import 'globals.dart';
+import 'primitives/auto_dispose.dart';
+import 'primitives/utils.dart';
 
 /// A controller for global application preferences.
 class PreferencesController extends DisposableController
@@ -323,8 +323,8 @@ class MemoryPreferencesController extends DisposableController
         );
         if (androidCollectionEnabled.value) {
           ga.select(
-            analytics_constants.memory,
-            analytics_constants.MemoryEvent.chartAndroid,
+            gac.memory,
+            gac.MemoryEvent.chartAndroid,
           );
         }
       },
@@ -341,10 +341,10 @@ class MemoryPreferencesController extends DisposableController
         );
 
         ga.select(
-          analytics_constants.memory,
+          gac.memory,
           showChart.value
-              ? analytics_constants.MemoryEvent.showChart
-              : analytics_constants.MemoryEvent.hideChart,
+              ? gac.MemoryEvent.showChart
+              : gac.MemoryEvent.hideChart,
         );
       },
     );
@@ -355,8 +355,9 @@ class MemoryPreferencesController extends DisposableController
 class CpuProfilerPreferencesController extends DisposableController
     with AutoDisposeControllerMixin {
   final displayTreeGuidelines = ValueNotifier<bool>(false);
-  static const _displayTreeGuidelinesId =
-      '${analytics_constants.cpuProfiler}.${analytics_constants.cpuProfileDisplayTreeGuidelines}';
+
+  static final _displayTreeGuidelinesId =
+      '${gac.cpuProfiler}.${gac.cpuProfileDisplayTreeGuidelines}';
 
   Future<void> init() async {
     addAutoDisposeListener(
@@ -367,8 +368,8 @@ class CpuProfilerPreferencesController extends DisposableController
           displayTreeGuidelines.value.toString(),
         );
         ga.select(
-          analytics_constants.cpuProfiler,
-          analytics_constants.cpuProfileDisplayTreeGuidelines,
+          gac.cpuProfiler,
+          gac.cpuProfileDisplayTreeGuidelines,
           value: displayTreeGuidelines.value ? 1 : 0,
         );
       },

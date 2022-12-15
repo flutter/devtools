@@ -7,22 +7,23 @@ import 'dart:async';
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/material.dart';
 
-import '../../analytics/analytics.dart' as ga;
-import '../../charts/treemap.dart';
-import '../../config_specific/drag_and_drop/drag_and_drop.dart';
-import '../../config_specific/server/server.dart' as server;
-import '../../config_specific/url/url.dart';
-import '../../primitives/auto_dispose_mixin.dart';
-import '../../primitives/utils.dart';
+import '../../shared/analytics/analytics.dart' as ga;
+import '../../shared/charts/treemap.dart';
 import '../../shared/common_widgets.dart';
+import '../../shared/config_specific/drag_and_drop/drag_and_drop.dart';
+import '../../shared/config_specific/server/server.dart' as server;
+import '../../shared/config_specific/url/url.dart';
 import '../../shared/file_import.dart';
 import '../../shared/globals.dart';
+import '../../shared/primitives/auto_dispose.dart';
+import '../../shared/primitives/simple_items.dart';
+import '../../shared/primitives/utils.dart';
 import '../../shared/screen.dart';
 import '../../shared/split.dart';
 import '../../shared/theme.dart';
+import '../../shared/ui/icons.dart';
+import '../../shared/ui/tab.dart';
 import '../../shared/utils.dart';
-import '../../ui/icons.dart';
-import '../../ui/tab.dart';
 import 'app_size_controller.dart';
 import 'app_size_table.dart';
 import 'code_size_attribution.dart';
@@ -31,11 +32,11 @@ const initialFractionForTreemap = 0.67;
 const initialFractionForTreeTable = 0.33;
 
 class AppSizeScreen extends Screen {
-  const AppSizeScreen()
+  AppSizeScreen()
       : super.conditional(
           id: id,
           requiresDartVm: true,
-          title: 'App Size',
+          title: ScreenMetaData.appSize.title,
           icon: Octicons.fileZip,
         );
 
@@ -46,7 +47,7 @@ class AppSizeScreen extends Screen {
   ///
   /// This must be different to the top-level appSizePageId which is also used
   /// in routing when to ensure they have unique URLs.
-  static const id = 'app-size';
+  static final id = ScreenMetaData.appSize.id;
 
   @visibleForTesting
   static const diffTypeDropdownKey = Key('Diff Tree Type Dropdown');

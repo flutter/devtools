@@ -4,8 +4,8 @@
 
 import 'package:flutter/foundation.dart';
 
-import '../../../primitives/auto_dispose.dart';
 import '../../../shared/globals.dart';
+import '../../../shared/primitives/auto_dispose.dart';
 import '../vm_service_private_extensions.dart';
 
 class ObjectStoreController extends DisposableController

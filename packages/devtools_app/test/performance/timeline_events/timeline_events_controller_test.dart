@@ -5,7 +5,7 @@
 import 'dart:async';
 
 import 'package:devtools_app/devtools_app.dart';
-import 'package:devtools_app/src/config_specific/import_export/import_export.dart';
+import 'package:devtools_app/src/shared/config_specific/import_export/import_export.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
@@ -88,7 +88,7 @@ void main() {
         // Verify an empty list is returned for bad input.
         expect(eventsController.legacyController.matchesForSearch(''), isEmpty);
 
-        await eventsController.clearData();
+        eventsController.clearData();
         expect(eventsController.data!.timelineEvents, isEmpty);
         expect(
           eventsController.legacyController.matchesForSearch('test'),
@@ -111,7 +111,7 @@ void main() {
       });
 
       test('search query searches through previous matches', () async {
-        await eventsController.clearData();
+        eventsController.clearData();
         eventsController.addTimelineEvent(goldenUiTimelineEvent..deepCopy());
 
         final data = eventsController.data!;

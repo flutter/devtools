@@ -8,7 +8,7 @@ import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-import '../../../../primitives/math_utils.dart';
+import '../../../../shared/primitives/math_utils.dart';
 import '../../../../shared/theme.dart';
 import '../../diagnostics_node.dart';
 import '../../inspector_controller.dart';
@@ -712,17 +712,15 @@ class FlexChildVisualizer extends StatelessWidget {
       final horizontal = rootLocal.isMainAxisHorizontal;
 
       late Size size;
-      if (propertiesLocal.hasFlexFactor) {
-        size = SizeTween(
-          begin: Size(
-            horizontal ? minRenderWidth - entranceMargin : renderSize.width,
-            vertical ? minRenderHeight - entranceMargin : renderSize.height,
-          ),
-          end: renderSize,
-        ).evaluate(state.entranceCurve)!;
-      } else {
-        size = renderSize;
-      }
+      size = propertiesLocal.hasFlexFactor
+          ? SizeTween(
+              begin: Size(
+                horizontal ? minRenderWidth - entranceMargin : renderSize.width,
+                vertical ? minRenderHeight - entranceMargin : renderSize.height,
+              ),
+              end: renderSize,
+            ).evaluate(state.entranceCurve)!
+          : renderSize;
       // Not-expanded widgets enter much faster.
       return Opacity(
         opacity: min([state.entranceCurve.value * 5, 1.0]),

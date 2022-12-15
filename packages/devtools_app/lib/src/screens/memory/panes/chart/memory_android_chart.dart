@@ -5,14 +5,14 @@
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/material.dart';
 
-import '../../../../charts/chart.dart';
-import '../../../../charts/chart_controller.dart';
-import '../../../../charts/chart_trace.dart' as trace;
-import '../../../../primitives/auto_dispose_mixin.dart';
+import '../../../../shared/charts/chart.dart';
+import '../../../../shared/charts/chart_controller.dart';
+import '../../../../shared/charts/chart_trace.dart' as trace;
+import '../../../../shared/primitives/auto_dispose.dart';
 import '../../../../shared/theme.dart';
 import '../../../../shared/utils.dart';
 import '../../memory_controller.dart';
-import '../../primitives/memory_timeline.dart';
+import '../../shared/primitives/memory_timeline.dart';
 
 class AndroidChartController extends ChartController {
   AndroidChartController(this._memoryController, {sharedLabels = const <int>[]})

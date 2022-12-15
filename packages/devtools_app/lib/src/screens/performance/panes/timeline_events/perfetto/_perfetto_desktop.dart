@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 
-import '_perfetto_controller_desktop.dart';
+import 'perfetto_controller.dart';
 
 class Perfetto extends StatelessWidget {
   const Perfetto({

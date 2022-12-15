@@ -1,0 +1,597 @@
+>// Copyright 2022 The Chromium Authors. All rights reserved.
+#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ comment.line.double-slash.dart
+>// Use of this source code is governed by a BSD-style license that can be
+#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ comment.line.double-slash.dart
+>// found in the LICENSE file.
+#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ comment.line.double-slash.dart
+>
+>const $bool = null;
+#^^^^^ storage.modifier.dart
+#            ^ keyword.operator.assignment.dart
+#              ^^^^ constant.language.dart
+#                  ^ punctuation.terminator.dart
+>const bool$ = null;
+#^^^^^ storage.modifier.dart
+#            ^ keyword.operator.assignment.dart
+#              ^^^^ constant.language.dart
+#                  ^ punctuation.terminator.dart
+>const $num = null;
+#^^^^^ storage.modifier.dart
+#           ^ keyword.operator.assignment.dart
+#             ^^^^ constant.language.dart
+#                 ^ punctuation.terminator.dart
+>const num$ = null;
+#^^^^^ storage.modifier.dart
+#           ^ keyword.operator.assignment.dart
+#             ^^^^ constant.language.dart
+#                 ^ punctuation.terminator.dart
+>const $int = null;
+#^^^^^ storage.modifier.dart
+#           ^ keyword.operator.assignment.dart
+#             ^^^^ constant.language.dart
+#                 ^ punctuation.terminator.dart
+>const int$ = null;
+#^^^^^ storage.modifier.dart
+#           ^ keyword.operator.assignment.dart
+#             ^^^^ constant.language.dart
+#                 ^ punctuation.terminator.dart
+>const $double = null;
+#^^^^^ storage.modifier.dart
+#              ^ keyword.operator.assignment.dart
+#                ^^^^ constant.language.dart
+#                    ^ punctuation.terminator.dart
+>const double$ = null;
+#^^^^^ storage.modifier.dart
+#              ^ keyword.operator.assignment.dart
+#                ^^^^ constant.language.dart
+#                    ^ punctuation.terminator.dart
+>const $dynamic = null;
+#^^^^^ storage.modifier.dart
+#               ^ keyword.operator.assignment.dart
+#                 ^^^^ constant.language.dart
+#                     ^ punctuation.terminator.dart
+>const dynamic$ = null;
+#^^^^^ storage.modifier.dart
+#               ^ keyword.operator.assignment.dart
+#                 ^^^^ constant.language.dart
+#                     ^ punctuation.terminator.dart
+>const $true = null;
+#^^^^^ storage.modifier.dart
+#            ^ keyword.operator.assignment.dart
+#              ^^^^ constant.language.dart
+#                  ^ punctuation.terminator.dart
+>const true$ = null;
+#^^^^^ storage.modifier.dart
+#            ^ keyword.operator.assignment.dart
+#              ^^^^ constant.language.dart
+#                  ^ punctuation.terminator.dart
+>const $false = null;
+#^^^^^ storage.modifier.dart
+#             ^ keyword.operator.assignment.dart
+#               ^^^^ constant.language.dart
+#                   ^ punctuation.terminator.dart
+>const false$ = null;
+#^^^^^ storage.modifier.dart
+#             ^ keyword.operator.assignment.dart
+#               ^^^^ constant.language.dart
+#                   ^ punctuation.terminator.dart
+>const $null = null;
+#^^^^^ storage.modifier.dart
+#            ^ keyword.operator.assignment.dart
+#              ^^^^ constant.language.dart
+#                  ^ punctuation.terminator.dart
+>const null$ = null;
+#^^^^^ storage.modifier.dart
+#            ^ keyword.operator.assignment.dart
+#              ^^^^ constant.language.dart
+#                  ^ punctuation.terminator.dart
+>const $this = null;
+#^^^^^ storage.modifier.dart
+#            ^ keyword.operator.assignment.dart
+#              ^^^^ constant.language.dart
+#                  ^ punctuation.terminator.dart
+>const this$ = null;
+#^^^^^ storage.modifier.dart
+#            ^ keyword.operator.assignment.dart
+#              ^^^^ constant.language.dart
+#                  ^ punctuation.terminator.dart
+>const $super = null;
+#^^^^^ storage.modifier.dart
+#             ^ keyword.operator.assignment.dart
+#               ^^^^ constant.language.dart
+#                   ^ punctuation.terminator.dart
+>const super$ = null;
+#^^^^^ storage.modifier.dart
+#             ^ keyword.operator.assignment.dart
+#               ^^^^ constant.language.dart
+#                   ^ punctuation.terminator.dart
+>const $as = null;
+#^^^^^ storage.modifier.dart
+#          ^ keyword.operator.assignment.dart
+#            ^^^^ constant.language.dart
+#                ^ punctuation.terminator.dart
+>const as$ = null;
+#^^^^^ storage.modifier.dart
+#          ^ keyword.operator.assignment.dart
+#            ^^^^ constant.language.dart
+#                ^ punctuation.terminator.dart
+>const $try = null;
+#^^^^^ storage.modifier.dart
+#           ^ keyword.operator.assignment.dart
+#             ^^^^ constant.language.dart
+#                 ^ punctuation.terminator.dart
+>const try$ = null;
+#^^^^^ storage.modifier.dart
+#           ^ keyword.operator.assignment.dart
+#             ^^^^ constant.language.dart
+#                 ^ punctuation.terminator.dart
+>const $on = null;
+#^^^^^ storage.modifier.dart
+#          ^ keyword.operator.assignment.dart
+#            ^^^^ constant.language.dart
+#                ^ punctuation.terminator.dart
+>const on$ = null;
+#^^^^^ storage.modifier.dart
+#          ^ keyword.operator.assignment.dart
+#            ^^^^ constant.language.dart
+#                ^ punctuation.terminator.dart
+>const $catch = null;
+#^^^^^ storage.modifier.dart
+#             ^ keyword.operator.assignment.dart
+#               ^^^^ constant.language.dart
+#                   ^ punctuation.terminator.dart
+>const catch$ = null;
+#^^^^^ storage.modifier.dart
+#             ^ keyword.operator.assignment.dart
+#               ^^^^ constant.language.dart
+#                   ^ punctuation.terminator.dart
+>const $finally = null;
+#^^^^^ storage.modifier.dart
+#               ^ keyword.operator.assignment.dart
+#                 ^^^^ constant.language.dart
+#                     ^ punctuation.terminator.dart
+>const finally$ = null;
+#^^^^^ storage.modifier.dart
+#               ^ keyword.operator.assignment.dart
+#                 ^^^^ constant.language.dart
+#                     ^ punctuation.terminator.dart
+>const $throw = null;
+#^^^^^ storage.modifier.dart
+#             ^ keyword.operator.assignment.dart
+#               ^^^^ constant.language.dart
+#                   ^ punctuation.terminator.dart
+>const throw$ = null;
+#^^^^^ storage.modifier.dart
+#             ^ keyword.operator.assignment.dart
+#               ^^^^ constant.language.dart
+#                   ^ punctuation.terminator.dart
+>const $rethrow = null;
+#^^^^^ storage.modifier.dart
+#               ^ keyword.operator.assignment.dart
+#                 ^^^^ constant.language.dart
+#                     ^ punctuation.terminator.dart
+>const rethrow$ = null;
+#^^^^^ storage.modifier.dart
+#               ^ keyword.operator.assignment.dart
+#                 ^^^^ constant.language.dart
+#                     ^ punctuation.terminator.dart
+>const $break = null;
+#^^^^^ storage.modifier.dart
+#             ^ keyword.operator.assignment.dart
+#               ^^^^ constant.language.dart
+#                   ^ punctuation.terminator.dart
+>const break$ = null;
+#^^^^^ storage.modifier.dart
+#             ^ keyword.operator.assignment.dart
+#               ^^^^ constant.language.dart
+#                   ^ punctuation.terminator.dart
+>const $case = null;
+#^^^^^ storage.modifier.dart
+#            ^ keyword.operator.assignment.dart
+#              ^^^^ constant.language.dart
+#                  ^ punctuation.terminator.dart
+>const case$ = null;
+#^^^^^ storage.modifier.dart
+#            ^ keyword.operator.assignment.dart
+#              ^^^^ constant.language.dart
+#                  ^ punctuation.terminator.dart
+>const $continue = null;
+#^^^^^ storage.modifier.dart
+#                ^ keyword.operator.assignment.dart
+#                  ^^^^ constant.language.dart
+#                      ^ punctuation.terminator.dart
+>const continue$ = null;
+#^^^^^ storage.modifier.dart
+#                ^ keyword.operator.assignment.dart
+#                  ^^^^ constant.language.dart
+#                      ^ punctuation.terminator.dart
+>const $default = null;
+#^^^^^ storage.modifier.dart
+#               ^ keyword.operator.assignment.dart
+#                 ^^^^ constant.language.dart
+#                     ^ punctuation.terminator.dart
+>const default$ = null;
+#^^^^^ storage.modifier.dart
+#               ^ keyword.operator.assignment.dart
+#                 ^^^^ constant.language.dart
+#                     ^ punctuation.terminator.dart
+>const $do = null;
+#^^^^^ storage.modifier.dart
+#          ^ keyword.operator.assignment.dart
+#            ^^^^ constant.language.dart
+#                ^ punctuation.terminator.dart
+>const do$ = null;
+#^^^^^ storage.modifier.dart
+#          ^ keyword.operator.assignment.dart
+#            ^^^^ constant.language.dart
+#                ^ punctuation.terminator.dart
+>const $else = null;
+#^^^^^ storage.modifier.dart
+#            ^ keyword.operator.assignment.dart
+#              ^^^^ constant.language.dart
+#                  ^ punctuation.terminator.dart
+>const else$ = null;
+#^^^^^ storage.modifier.dart
+#            ^ keyword.operator.assignment.dart
+#              ^^^^ constant.language.dart
+#                  ^ punctuation.terminator.dart
+>const $for = null;
+#^^^^^ storage.modifier.dart
+#           ^ keyword.operator.assignment.dart
+#             ^^^^ constant.language.dart
+#                 ^ punctuation.terminator.dart
+>const for$ = null;
+#^^^^^ storage.modifier.dart
+#           ^ keyword.operator.assignment.dart
+#             ^^^^ constant.language.dart
+#                 ^ punctuation.terminator.dart
+>const $if = null;
+#^^^^^ storage.modifier.dart
+#          ^ keyword.operator.assignment.dart
+#            ^^^^ constant.language.dart
+#                ^ punctuation.terminator.dart
+>const if$ = null;
+#^^^^^ storage.modifier.dart
+#          ^ keyword.operator.assignment.dart
+#            ^^^^ constant.language.dart
+#                ^ punctuation.terminator.dart
+>const $in = null;
+#^^^^^ storage.modifier.dart
+#          ^ keyword.operator.assignment.dart
+#            ^^^^ constant.language.dart
+#                ^ punctuation.terminator.dart
+>const in$ = null;
+#^^^^^ storage.modifier.dart
+#          ^ keyword.operator.assignment.dart
+#            ^^^^ constant.language.dart
+#                ^ punctuation.terminator.dart
+>const $return = null;
+#^^^^^ storage.modifier.dart
+#              ^ keyword.operator.assignment.dart
+#                ^^^^ constant.language.dart
+#                    ^ punctuation.terminator.dart
+>const return$ = null;
+#^^^^^ storage.modifier.dart
+#              ^ keyword.operator.assignment.dart
+#                ^^^^ constant.language.dart
+#                    ^ punctuation.terminator.dart
+>const $switch = null;
+#^^^^^ storage.modifier.dart
+#              ^ keyword.operator.assignment.dart
+#                ^^^^ constant.language.dart
+#                    ^ punctuation.terminator.dart
+>const switch$ = null;
+#^^^^^ storage.modifier.dart
+#              ^ keyword.operator.assignment.dart
+#                ^^^^ constant.language.dart
+#                    ^ punctuation.terminator.dart
+>const $while = null;
+#^^^^^ storage.modifier.dart
+#             ^ keyword.operator.assignment.dart
+#               ^^^^ constant.language.dart
+#                   ^ punctuation.terminator.dart
+>const while$ = null;
+#^^^^^ storage.modifier.dart
+#             ^ keyword.operator.assignment.dart
+#               ^^^^ constant.language.dart
+#                   ^ punctuation.terminator.dart
+>const $sync = null;
+#^^^^^ storage.modifier.dart
+#            ^ keyword.operator.assignment.dart
+#              ^^^^ constant.language.dart
+#                  ^ punctuation.terminator.dart
+>const sync$ = null;
+#^^^^^ storage.modifier.dart
+#            ^ keyword.operator.assignment.dart
+#              ^^^^ constant.language.dart
+#                  ^ punctuation.terminator.dart
+>const $async = null;
+#^^^^^ storage.modifier.dart
+#             ^ keyword.operator.assignment.dart
+#               ^^^^ constant.language.dart
+#                   ^ punctuation.terminator.dart
+>const async$ = null;
+#^^^^^ storage.modifier.dart
+#             ^ keyword.operator.assignment.dart
+#               ^^^^ constant.language.dart
+#                   ^ punctuation.terminator.dart
+>const $await = null;
+#^^^^^ storage.modifier.dart
+#             ^ keyword.operator.assignment.dart
+#               ^^^^ constant.language.dart
+#                   ^ punctuation.terminator.dart
+>const await$ = null;
+#^^^^^ storage.modifier.dart
+#             ^ keyword.operator.assignment.dart
+#               ^^^^ constant.language.dart
+#                   ^ punctuation.terminator.dart
+>const $yield = null;
+#^^^^^ storage.modifier.dart
+#             ^ keyword.operator.assignment.dart
+#               ^^^^ constant.language.dart
+#                   ^ punctuation.terminator.dart
+>const yield$ = null;
+#^^^^^ storage.modifier.dart
+#             ^ keyword.operator.assignment.dart
+#               ^^^^ constant.language.dart
+#                   ^ punctuation.terminator.dart
+>const $assert = null;
+#^^^^^ storage.modifier.dart
+#              ^ keyword.operator.assignment.dart
+#                ^^^^ constant.language.dart
+#                    ^ punctuation.terminator.dart
+>const assert$ = null;
+#^^^^^ storage.modifier.dart
+#              ^ keyword.operator.assignment.dart
+#                ^^^^ constant.language.dart
+#                    ^ punctuation.terminator.dart
+>const $new = null;
+#^^^^^ storage.modifier.dart
+#           ^ keyword.operator.assignment.dart
+#             ^^^^ constant.language.dart
+#                 ^ punctuation.terminator.dart
+>const new$ = null;
+#^^^^^ storage.modifier.dart
+#           ^ keyword.operator.assignment.dart
+#             ^^^^ constant.language.dart
+#                 ^ punctuation.terminator.dart
+>const $abstract = null;
+#^^^^^ storage.modifier.dart
+#                ^ keyword.operator.assignment.dart
+#                  ^^^^ constant.language.dart
+#                      ^ punctuation.terminator.dart
+>const abstract$ = null;
+#^^^^^ storage.modifier.dart
+#                ^ keyword.operator.assignment.dart
+#                  ^^^^ constant.language.dart
+#                      ^ punctuation.terminator.dart
+>const $class = null;
+#^^^^^ storage.modifier.dart
+#             ^ keyword.operator.assignment.dart
+#               ^^^^ constant.language.dart
+#                   ^ punctuation.terminator.dart
+>const class$ = null;
+#^^^^^ storage.modifier.dart
+#             ^ keyword.operator.assignment.dart
+#               ^^^^ constant.language.dart
+#                   ^ punctuation.terminator.dart
+>const $enum = null;
+#^^^^^ storage.modifier.dart
+#            ^ keyword.operator.assignment.dart
+#              ^^^^ constant.language.dart
+#                  ^ punctuation.terminator.dart
+>const enum$ = null;
+#^^^^^ storage.modifier.dart
+#            ^ keyword.operator.assignment.dart
+#              ^^^^ constant.language.dart
+#                  ^ punctuation.terminator.dart
+>const $extends = null;
+#^^^^^ storage.modifier.dart
+#               ^ keyword.operator.assignment.dart
+#                 ^^^^ constant.language.dart
+#                     ^ punctuation.terminator.dart
+>const extends$ = null;
+#^^^^^ storage.modifier.dart
+#               ^ keyword.operator.assignment.dart
+#                 ^^^^ constant.language.dart
+#                     ^ punctuation.terminator.dart
+>const $extension = null;
+#^^^^^ storage.modifier.dart
+#                 ^ keyword.operator.assignment.dart
+#                   ^^^^ constant.language.dart
+#                       ^ punctuation.terminator.dart
+>const extension$ = null;
+#^^^^^ storage.modifier.dart
+#                 ^ keyword.operator.assignment.dart
+#                   ^^^^ constant.language.dart
+#                       ^ punctuation.terminator.dart
+>const $external = null;
+#^^^^^ storage.modifier.dart
+#                ^ keyword.operator.assignment.dart
+#                  ^^^^ constant.language.dart
+#                      ^ punctuation.terminator.dart
+>const external$ = null;
+#^^^^^ storage.modifier.dart
+#                ^ keyword.operator.assignment.dart
+#                  ^^^^ constant.language.dart
+#                      ^ punctuation.terminator.dart
+>const $factory = null;
+#^^^^^ storage.modifier.dart
+#               ^ keyword.operator.assignment.dart
+#                 ^^^^ constant.language.dart
+#                     ^ punctuation.terminator.dart
+>const factory$ = null;
+#^^^^^ storage.modifier.dart
+#               ^ keyword.operator.assignment.dart
+#                 ^^^^ constant.language.dart
+#                     ^ punctuation.terminator.dart
+>const $implements = null;
+#^^^^^ storage.modifier.dart
+#                  ^ keyword.operator.assignment.dart
+#                    ^^^^ constant.language.dart
+#                        ^ punctuation.terminator.dart
+>const implements$ = null;
+#^^^^^ storage.modifier.dart
+#                  ^ keyword.operator.assignment.dart
+#                    ^^^^ constant.language.dart
+#                        ^ punctuation.terminator.dart
+>const $get = null;
+#^^^^^ storage.modifier.dart
+#           ^ keyword.operator.assignment.dart
+#             ^^^^ constant.language.dart
+#                 ^ punctuation.terminator.dart
+>const get$ = null;
+#^^^^^ storage.modifier.dart
+#           ^ keyword.operator.assignment.dart
+#             ^^^^ constant.language.dart
+#                 ^ punctuation.terminator.dart
+>const $mixin = null;
+#^^^^^ storage.modifier.dart
+#             ^ keyword.operator.assignment.dart
+#               ^^^^ constant.language.dart
+#                   ^ punctuation.terminator.dart
+>const mixin$ = null;
+#^^^^^ storage.modifier.dart
+#             ^ keyword.operator.assignment.dart
+#               ^^^^ constant.language.dart
+#                   ^ punctuation.terminator.dart
+>const $native = null;
+#^^^^^ storage.modifier.dart
+#              ^ keyword.operator.assignment.dart
+#                ^^^^ constant.language.dart
+#                    ^ punctuation.terminator.dart
+>const native$ = null;
+#^^^^^ storage.modifier.dart
+#              ^ keyword.operator.assignment.dart
+#                ^^^^ constant.language.dart
+#                    ^ punctuation.terminator.dart
+>const $operator = null;
+#^^^^^ storage.modifier.dart
+#                ^ keyword.operator.assignment.dart
+#                  ^^^^ constant.language.dart
+#                      ^ punctuation.terminator.dart
+>const operator$ = null;
+#^^^^^ storage.modifier.dart
+#                ^ keyword.operator.assignment.dart
+#                  ^^^^ constant.language.dart
+#                      ^ punctuation.terminator.dart
+>const $set = null;
+#^^^^^ storage.modifier.dart
+#           ^ keyword.operator.assignment.dart
+#             ^^^^ constant.language.dart
+#                 ^ punctuation.terminator.dart
+>const set$ = null;
+#^^^^^ storage.modifier.dart
+#           ^ keyword.operator.assignment.dart
+#             ^^^^ constant.language.dart
+#                 ^ punctuation.terminator.dart
+>const $typedef = null;
+#^^^^^ storage.modifier.dart
+#               ^ keyword.operator.assignment.dart
+#                 ^^^^ constant.language.dart
+#                     ^ punctuation.terminator.dart
+>const typedef$ = null;
+#^^^^^ storage.modifier.dart
+#               ^ keyword.operator.assignment.dart
+#                 ^^^^ constant.language.dart
+#                     ^ punctuation.terminator.dart
+>const $with = null;
+#^^^^^ storage.modifier.dart
+#            ^ keyword.operator.assignment.dart
+#              ^^^^ constant.language.dart
+#                  ^ punctuation.terminator.dart
+>const with$ = null;
+#^^^^^ storage.modifier.dart
+#            ^ keyword.operator.assignment.dart
+#              ^^^^ constant.language.dart
+#                  ^ punctuation.terminator.dart
+>const $covariant = null;
+#^^^^^ storage.modifier.dart
+#                 ^ keyword.operator.assignment.dart
+#                   ^^^^ constant.language.dart
+#                       ^ punctuation.terminator.dart
+>const covariant$ = null;
+#^^^^^ storage.modifier.dart
+#                 ^ keyword.operator.assignment.dart
+#                   ^^^^ constant.language.dart
+#                       ^ punctuation.terminator.dart
+>const $static = null;
+#^^^^^ storage.modifier.dart
+#              ^ keyword.operator.assignment.dart
+#                ^^^^ constant.language.dart
+#                    ^ punctuation.terminator.dart
+>const static$ = null;
+#^^^^^ storage.modifier.dart
+#              ^ keyword.operator.assignment.dart
+#                ^^^^ constant.language.dart
+#                    ^ punctuation.terminator.dart
+>const $final = null;
+#^^^^^ storage.modifier.dart
+#             ^ keyword.operator.assignment.dart
+#               ^^^^ constant.language.dart
+#                   ^ punctuation.terminator.dart
+>const final$ = null;
+#^^^^^ storage.modifier.dart
+#             ^ keyword.operator.assignment.dart
+#               ^^^^ constant.language.dart
+#                   ^ punctuation.terminator.dart
+>const $const = null;
+#^^^^^ storage.modifier.dart
+#             ^ keyword.operator.assignment.dart
+#               ^^^^ constant.language.dart
+#                   ^ punctuation.terminator.dart
+>const const$ = null;
+#^^^^^ storage.modifier.dart
+#             ^ keyword.operator.assignment.dart
+#               ^^^^ constant.language.dart
+#                   ^ punctuation.terminator.dart
+>const $required = null;
+#^^^^^ storage.modifier.dart
+#                ^ keyword.operator.assignment.dart
+#                  ^^^^ constant.language.dart
+#                      ^ punctuation.terminator.dart
+>const required$ = null;
+#^^^^^ storage.modifier.dart
+#                ^ keyword.operator.assignment.dart
+#                  ^^^^ constant.language.dart
+#                      ^ punctuation.terminator.dart
+>const $late = null;
+#^^^^^ storage.modifier.dart
+#            ^ keyword.operator.assignment.dart
+#              ^^^^ constant.language.dart
+#                  ^ punctuation.terminator.dart
+>const late$ = null;
+#^^^^^ storage.modifier.dart
+#            ^ keyword.operator.assignment.dart
+#              ^^^^ constant.language.dart
+#                  ^ punctuation.terminator.dart
+>const $void = null;
+#^^^^^ storage.modifier.dart
+#            ^ keyword.operator.assignment.dart
+#              ^^^^ constant.language.dart
+#                  ^ punctuation.terminator.dart
+>const void$ = null;
+#^^^^^ storage.modifier.dart
+#            ^ keyword.operator.assignment.dart
+#              ^^^^ constant.language.dart
+#                  ^ punctuation.terminator.dart
+>const $var = null;
+#^^^^^ storage.modifier.dart
+#           ^ keyword.operator.assignment.dart
+#             ^^^^ constant.language.dart
+#                 ^ punctuation.terminator.dart
+>const var$ = null;
+#^^^^^ storage.modifier.dart
+#           ^ keyword.operator.assignment.dart
+#             ^^^^ constant.language.dart
+#                 ^ punctuation.terminator.dart
+>const $is = null;
+#^^^^^ storage.modifier.dart
+#          ^ keyword.operator.assignment.dart
+#            ^^^^ constant.language.dart
+#                ^ punctuation.terminator.dart
+>const is$ = null;
+#^^^^^ storage.modifier.dart
+#          ^ keyword.operator.assignment.dart
+#            ^^^^ constant.language.dart
+#                ^ punctuation.terminator.dart

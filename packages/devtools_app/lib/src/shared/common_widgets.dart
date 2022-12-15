@@ -11,19 +11,19 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../analytics/analytics.dart' as ga;
-import '../config_specific/launch_url/launch_url.dart';
-import '../primitives/auto_dispose_mixin.dart';
-import '../primitives/flutter_widgets/linked_scroll_controller.dart';
-import '../primitives/utils.dart';
 import '../screens/debugger/debugger_controller.dart';
 import '../screens/debugger/variables.dart';
-import '../ui/icons.dart';
-import '../ui/label.dart';
+import 'analytics/analytics.dart' as ga;
+import 'config_specific/launch_url/launch_url.dart';
 import 'dialogs.dart';
 import 'globals.dart';
 import 'object_tree.dart';
+import 'primitives/auto_dispose.dart';
+import 'primitives/flutter_widgets/linked_scroll_controller.dart';
+import 'primitives/utils.dart';
 import 'theme.dart';
+import 'ui/icons.dart';
+import 'ui/label.dart';
 import 'utils.dart';
 
 const tooltipWait = Duration(milliseconds: 500);
@@ -34,6 +34,7 @@ const debuggerDeviceWidth = 800.0;
 
 const defaultDialogRadius = 20.0;
 double get areaPaneHeaderHeight => scaleByFontFactor(36.0);
+double get assumedMonospaceCharacterWidth => scaleByFontFactor(9.0);
 
 /// Convenience [Divider] with [Padding] that provides a good divider in forms.
 class PaddedDivider extends StatelessWidget {
@@ -510,15 +511,16 @@ class CollapseAllButton extends StatelessWidget {
 ///
 /// The button automatically toggles the icon and the tooltip to indicate the
 /// shown or hidden state.
-class ChartVisibilityButton extends StatelessWidget {
-  const ChartVisibilityButton({
-    required this.showChart,
+class VisibilityButton extends StatelessWidget {
+  const VisibilityButton({
+    required this.show,
     required this.onPressed,
     this.minScreenWidthForTextBeforeScaling,
-    this.label = 'Chart',
+    required this.label,
+    required this.tooltip,
   });
 
-  final ValueListenable<bool> showChart;
+  final ValueListenable<bool> show;
 
   final void Function(bool) onPressed;
 
@@ -526,14 +528,16 @@ class ChartVisibilityButton extends StatelessWidget {
 
   final String label;
 
+  final String tooltip;
+
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<bool>(
-      valueListenable: showChart,
+      valueListenable: show,
       builder: (_, show, __) {
         return IconLabelButton(
           key: key,
-          tooltip: show ? 'Hide chart' : 'Show chart',
+          tooltip: tooltip,
           icon: show ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
           label: label,
           minScreenWidthForTextBeforeScaling:
@@ -834,17 +838,21 @@ class DevToolsIconButton extends StatelessWidget {
             size: defaultIconSize,
           )
         : iconWidget;
-    return DevToolsTooltip(
-      message: tooltip,
-      child: TextButton(
-        onPressed: () {
-          ga.select(gaScreen, gaSelection);
-          onPressed();
-        },
-        child: Container(
-          height: defaultButtonHeight,
-          width: defaultButtonHeight,
-          child: icon,
+    return SizedBox(
+      // This is required to force the button height.
+      height: defaultButtonHeight,
+      child: DevToolsTooltip(
+        message: tooltip,
+        child: TextButton(
+          onPressed: () {
+            ga.select(gaScreen, gaSelection);
+            onPressed();
+          },
+          child: SizedBox(
+            height: defaultButtonHeight,
+            width: defaultButtonHeight,
+            child: icon,
+          ),
         ),
       ),
     );
@@ -860,8 +868,10 @@ class ToolbarAction extends StatelessWidget {
     this.tooltip,
     Key? key,
     this.size,
+    this.style,
   }) : super(key: key);
 
+  final TextStyle? style;
   final IconData icon;
   final String? tooltip;
   final VoidCallback? onPressed;
@@ -873,9 +883,14 @@ class ToolbarAction extends StatelessWidget {
       style: TextButton.styleFrom(
         padding: EdgeInsets.zero,
         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        textStyle: style,
       ),
       onPressed: onPressed,
-      child: Icon(icon, size: size ?? actionsIconSize),
+      child: Icon(
+        icon,
+        size: size ?? actionsIconSize,
+        color: style?.color,
+      ),
     );
 
     return tooltip == null
@@ -994,20 +1009,23 @@ class DevToolsToggleButtonGroup extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return ToggleButtons(
-      borderRadius:
-          const BorderRadius.all(Radius.circular(defaultBorderRadius)),
-      color: theme.colorScheme.toggleButtonsTitle,
-      selectedColor: theme.colorScheme.toggleButtonsTitleSelected,
-      fillColor: theme.colorScheme.toggleButtonsFillSelected,
-      textStyle: theme.textTheme.bodyLarge,
-      constraints: BoxConstraints(
-        minWidth: defaultButtonHeight,
-        minHeight: defaultButtonHeight,
+    return SizedBox(
+      height: defaultButtonHeight,
+      child: ToggleButtons(
+        borderRadius:
+            const BorderRadius.all(Radius.circular(defaultBorderRadius)),
+        color: theme.colorScheme.toggleButtonsTitle,
+        selectedColor: theme.colorScheme.toggleButtonsTitleSelected,
+        fillColor: theme.colorScheme.toggleButtonsFillSelected,
+        textStyle: theme.textTheme.bodyLarge,
+        constraints: BoxConstraints(
+          minWidth: defaultButtonHeight,
+          minHeight: defaultButtonHeight,
+        ),
+        isSelected: selectedStates,
+        onPressed: onPressed,
+        children: children,
       ),
-      isSelected: selectedStates,
-      onPressed: onPressed,
-      children: children,
     );
   }
 }
@@ -2014,8 +2032,10 @@ class CopyToClipboardControl extends StatelessWidget {
     this.size,
     this.gaScreen,
     this.gaItem,
+    this.style,
   });
 
+  final TextStyle? style;
   final ClipboardDataProvider? dataProvider;
   final String? successMessage;
   final String tooltip;
@@ -2043,6 +2063,7 @@ class CopyToClipboardControl extends StatelessWidget {
       onPressed: onPressed,
       key: buttonKey,
       size: size,
+      style: style,
     );
   }
 }
@@ -2095,11 +2116,14 @@ class NotifierCheckbox extends StatelessWidget {
     return ValueListenableBuilder(
       valueListenable: notifier,
       builder: (context, bool? value, _) {
-        return Checkbox(
-          materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-          value: value,
-          onChanged: enabled ? _updateValue : null,
-          key: checkboxKey,
+        return SizedBox(
+          height: defaultButtonHeight,
+          child: Checkbox(
+            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            value: value,
+            onChanged: enabled ? _updateValue : null,
+            key: checkboxKey,
+          ),
         );
       },
     );
@@ -2488,12 +2512,10 @@ class BulletSpacer extends StatelessWidget {
     final ThemeData theme = Theme.of(context);
 
     late TextStyle? textStyle;
-    if (useAccentColor) {
-      textStyle = theme.appBarTheme.toolbarTextStyle ??
-          theme.primaryTextTheme.bodyMedium;
-    } else {
-      textStyle = theme.textTheme.bodyMedium;
-    }
+    textStyle = useAccentColor
+        ? theme.appBarTheme.toolbarTextStyle ??
+            theme.primaryTextTheme.bodyMedium
+        : theme.textTheme.bodyMedium;
 
     final mutedColor = textStyle?.color?.withAlpha(0x90);
 

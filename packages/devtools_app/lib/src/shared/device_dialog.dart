@@ -7,12 +7,12 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../primitives/auto_dispose_mixin.dart';
-import '../primitives/utils.dart';
 import 'common_widgets.dart';
 import 'connected_app.dart';
 import 'dialogs.dart';
 import 'globals.dart';
+import 'primitives/auto_dispose.dart';
+import 'primitives/utils.dart';
 import 'routing.dart';
 import 'table/table.dart';
 import 'table/table_data.dart';
@@ -33,7 +33,8 @@ class DeviceDialog extends StatelessWidget {
 
     if (vm == null) return const SizedBox();
 
-    final items = generateDeviceDescription(vm, connectedApp);
+    final connectionDescriptionEntries =
+        generateDeviceDescription(vm, connectedApp);
 
     // TODO(kenz): set actions alignment to `spaceBetween` if
     // https://github.com/flutter/flutter/issues/69708 is fixed.
@@ -43,13 +44,17 @@ class DeviceDialog extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          for (var name in items.keys)
+          for (var entry in connectionDescriptionEntries)
             Padding(
               padding: const EdgeInsets.only(bottom: denseRowSpacing),
               child: Row(
                 children: [
-                  Text('$name: ', style: boldText),
-                  SelectableText(items[name]!, style: theme.subtleTextStyle),
+                  Text('${entry.title}: ', style: boldText),
+                  SelectableText(
+                    entry.description,
+                    style: theme.subtleTextStyle,
+                  ),
+                  if (entry.actions.isNotEmpty) ...entry.actions,
                 ],
               ),
             ),
@@ -136,12 +141,9 @@ class _VMFlagsDialogState extends State<VMFlagsDialog> with AutoDisposeMixin {
   void _refilter() {
     final filter = filterController.text.trim().toLowerCase();
 
-    if (filter.isEmpty) {
-      filteredFlags = flags;
-    } else {
-      filteredFlags =
-          flags.where((flag) => flag.filterText.contains(filter)).toList();
-    }
+    filteredFlags = filter.isEmpty
+        ? flags
+        : flags.where((flag) => flag.filterText.contains(filter)).toList();
   }
 
   @override

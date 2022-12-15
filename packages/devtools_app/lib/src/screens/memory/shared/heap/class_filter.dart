@@ -4,7 +4,7 @@
 
 import 'package:flutter/foundation.dart';
 
-import '../../primitives/class_name.dart';
+import '../primitives/class_name.dart';
 
 enum ClassFilterType {
   showAll,
