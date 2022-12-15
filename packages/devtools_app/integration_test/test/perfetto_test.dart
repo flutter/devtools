@@ -22,7 +22,7 @@ void main() {
     expect(testApp.vmServiceUri, isNotNull);
   });
 
-  testWidgets('Perfetto workflow', (tester) async {
+  testWidgets('Perfetto trace viewer', (tester) async {
     await pumpDevTools(tester);
     await connectToTestApp(tester, testApp);
 
@@ -41,24 +41,13 @@ void main() {
     expect(find.byType(Perfetto), findsOneWidget);
     expect(find.byType(HtmlElementView), findsOneWidget);
 
-    print('before take screenshot');
-    await binding.takeScreenshot('perfetto_initial_load');
-    print('after take screenshot');
+    await verifyScreenshot(binding, 'perfetto_initial_load');
 
-    // logStatus('select a Flutter Frame');
-    // await tester.tap(find.byType(FlutterFramesChartItem).last);
-    // await tester.pump(longPumpDuration);
-    // await tester.pumpAndSettle();
+    logStatus('select a Flutter Frame');
+    await tester.tap(find.byType(FlutterFramesChartItem).last);
+    await tester.pump(longPumpDuration);
 
-    // print('before take screenshot');
-    // await binding.takeScreenshot('perfetto_frame_selection');
-    // print('after take screenshot');
-    // await expectLater(
-    //   goldenBytes,
-    //   matchesDevToolsGolden(
-    //     '../test_infra/goldens/perfetto_frame_selection.png',
-    //   ),
-    // );
+    await verifyScreenshot(binding, 'perfetto_frame_selection');
 
     // logStatus('switch to a different feature tab and back to Timeline Events');
     // await tester.tap(find.widgetWithText(InkWell, 'Frame Analysis'));
