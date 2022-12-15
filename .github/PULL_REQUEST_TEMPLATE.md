@@ -11,7 +11,9 @@
 - [ ] I listed at least one issue that this PR fixes in the description above.
 - [ ] I updated/added relevant documentation (doc comments with `///`).
 - [ ] I added new tests to check the change I am making, or there is a reason for not adding tests.
-- Existing and new test status: ![build.yaml badge]
+
+
+![build.yaml badge]
 
 If you need help, consider asking for advice on the #hackers-devexp-📐 channel on [Discord].
 
