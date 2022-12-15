@@ -29,7 +29,7 @@ class DevToolsAboutDialog extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
+          Wrap(
             children: [
               const SelectableText('DevTools version ${devtools.version}'),
               const Text(' - '),
@@ -55,7 +55,7 @@ class DevToolsAboutDialog extends StatelessWidget {
           ...dialogSubHeader(theme, 'Contributing'),
           Wrap(
             children: const [
-              Text('Want to contribute to DevTools? Please see our '),
+              Text('Want to contribute to DevTools?'),
               _ContributingLink(),
               Text(' guide, or '),
             ],
