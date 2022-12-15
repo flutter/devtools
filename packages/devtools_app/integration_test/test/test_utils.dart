@@ -9,12 +9,23 @@ import 'package:devtools_app/src/app.dart';
 import 'package:devtools_app/src/framework/landing_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:integration_test/integration_test.dart';
 
 const safePumpDuration = Duration(seconds: 3);
 const longPumpDuration = Duration(seconds: 6);
 
 Future<void> pumpDevTools(WidgetTester tester) async {
-  app.main();
+  // TODO(kenz): how can we share code across integration_test/test and
+  // integration_test/test_infra? When trying to import, we get an error:
+  // Error when reading 'org-dartlang-app:/test_infra/shared.dart': File not found
+  const shouldEnableExperiments = bool.fromEnvironment('enable_experiments');
+  await app.runDevTools(
+    tester.pumpWidget,
+    // ignore: avoid_redundant_argument_values
+    shouldEnableExperiments: shouldEnableExperiments,
+    useCustomErrorHandling: false,
+  );
+
   // Await a delay to ensure the widget tree has loaded. It is important to use
   // `pump` instead of `pumpAndSettle` here.
   await tester.pumpAndSettle(safePumpDuration);
@@ -59,4 +70,16 @@ class TestApp {
     // with the test app's VmService from Dart code. See the use of [vmService]
     // in `test/test_infra/flutter_test_driver.dart`.
   }
+}
+
+Future<void> verifyScreenshot(
+  IntegrationTestWidgetsFlutterBinding binding,
+  String screenshotName,
+) async {
+  const updateGoldens = bool.fromEnvironment('update_goldens');
+  logStatus('verify $screenshotName screenshot');
+  await binding.takeScreenshot(
+    screenshotName,
+    {'update_goldens': updateGoldens},
+  );
 }
