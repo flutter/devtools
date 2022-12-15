@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -16,11 +18,20 @@ import 'src/shared/config_specific/framework_initialize/framework_initialize.dar
 import 'src/shared/config_specific/ide_theme/ide_theme.dart';
 import 'src/shared/config_specific/url/url.dart';
 import 'src/shared/config_specific/url_strategy/url_strategy.dart';
+import 'src/shared/feature_flags.dart';
 import 'src/shared/globals.dart';
 import 'src/shared/preferences.dart';
 import 'src/shared/primitives/url_utils.dart';
 
 void main() async {
+  await runDevTools(runApp);
+}
+
+Future<void> runDevTools(
+  FutureOr<void> Function(Widget) runner, {
+  bool useCustomErrorHandling = true,
+  bool shouldEnableExperiments = false,
+}) async {
   // Before switching to URL path strategy, check if this URL is in the legacy
   // fragment format and redirect if necessary.
   if (_handleLegacyUrl()) return;
@@ -28,6 +39,13 @@ void main() async {
   // Temporarily comment out for the sake of writing integration tests
   // see https://github.com/flutter/flutter/issues/116936.
   // usePathUrlStrategy();
+
+  // This may be from our Flutter integration tests. Since we call
+  // [runDevTools] from Dart code, we cannot set the 'enable_experiements'
+  // environment variable before calling [runDevTools].
+  if (shouldEnableExperiments) {
+    setEnableExperiments();
+  }
 
   // Initialize the framework before we do anything else, otherwise the
   // StorageController won't be initialized and preferences won't be loaded.
@@ -46,15 +64,21 @@ void main() async {
   // Load the Dart syntax highlighting grammar.
   await SyntaxHighlighter.initialize();
 
-  setupErrorHandling(() async {
-    // Run the app.
-    runApp(
-      ProviderScope(
-        observers: const [ErrorLoggerObserver()],
-        child: DevToolsApp(defaultScreens, await analyticsController),
-      ),
-    );
-  });
+  FutureOr<void> runCallback() async => await runner(
+        ProviderScope(
+          observers: const [ErrorLoggerObserver()],
+          child: DevToolsApp(defaultScreens, await analyticsController),
+        ),
+      );
+
+  if (useCustomErrorHandling) {
+    setupErrorHandling(() async {
+      // Run the app.
+      await runCallback();
+    });
+  } else {
+    await runCallback();
+  }
 }
 
 /// Checks if the request is for a legacy URL and if so, redirects to the new
