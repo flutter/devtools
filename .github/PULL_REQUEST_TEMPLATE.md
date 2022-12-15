@@ -15,12 +15,12 @@
 
 ![build.yaml badge]
 
-If you need help, consider asking for advice on the #hackers-devexp-📐 channel on [Discord].
+If you need help, consider asking for help on [Discord].
 
 <!-- Links -->
 [Contributor Guide]: https://github.com/flutter/devtools/blob/master/CONTRIBUTING.md
 [Tree Hygiene]: https://github.com/flutter/flutter/wiki/Tree-hygiene
 [Flutter Style Guide]: https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo
 [CLA]: https://cla.developers.google.com/
-[Discord]: https://discord.com/channels/608014603317936148/608020249119555594
+[Discord]: https://github.com/flutter/flutter/wiki/Chat
 [build.yaml badge]: https://github.com/flutter/devtools/actions/workflows/build.yaml/badge.svg
