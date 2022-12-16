@@ -29,8 +29,7 @@ class MyHomePage extends StatefulWidget {
 }
 
 class MyIncrementer {
-  MyIncrementer(this.increment, this.screen);
-  final Scaffold? screen;
+  MyIncrementer(this.increment);
   final VoidCallback increment;
 }
 
@@ -41,27 +40,26 @@ class _MyHomePageState extends State<MyHomePage> {
     () => setState(() {
       _counter++;
     }),
-    null,
   );
 
   /// Increments counter if current screen contains floating action button.
   void _incrementCounter(BuildContext context) {
     final oldIncrementer = _incrementer;
+    final screen = buildScreen(context);
 
     _incrementer = MyIncrementer(
       () {
-        final screen = theScreen;
         if (screen.floatingActionButton != null) {
           oldIncrementer.increment();
         }
       },
-      theScreen,
     );
 
     _incrementer.increment();
   }
 
-  Scaffold get theScreen {
+  Scaffold buildScreen(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
@@ -80,13 +78,14 @@ class _MyHomePageState extends State<MyHomePage> {
       floatingActionButton: FloatingActionButton(
         onPressed: () => _incrementCounter(context),
         tooltip: 'Increment counter',
+        foregroundColor: theme.canvasColor,
         child: const Icon(Icons.add),
       ),
     );
   }
 
   @override
-  Widget build(BuildContext context) => theScreen;
+  Widget build(BuildContext context) => buildScreen(context);
 }
 
 class MyCounter extends StatelessWidget {

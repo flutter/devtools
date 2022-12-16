@@ -230,14 +230,9 @@ class _SizeTest {
     required this.unreachableSize,
   }) : assert(_assertHeapIndexIsCode(heap));
 
-  /// For convenience of testing each heap object has code equal to the
-  /// index in array.
   final AdaptedHeapData heap;
-
   final String name;
-
   final int rootRetainedSize;
-
   final int unreachableSize;
 }
 
@@ -272,6 +267,8 @@ AdaptedHeapObject _createOneByteWeakObject(
   return result;
 }
 
+/// For convenience of testing each heap object has code equal to the
+/// index in array.
 bool _assertHeapIndexIsCode(AdaptedHeapData heap) => heap.objects
     .asMap()
     .entries
