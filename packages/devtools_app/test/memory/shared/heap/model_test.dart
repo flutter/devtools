@@ -77,14 +77,15 @@ void main() {
     expect(json, AdaptedHeapData.fromJson(json).toJson());
   });
 
-  for (final t in _heapPathTests) {
-    test(
-      '$HeapPath.isRetainedBySameClass returns expected result for ${t.name}.',
-      () {
-        expect(t.heapPath.isRetainedBySameClass, t.isRetainedBySameClass);
-      },
-    );
-  }
+  test('$HeapPath.isRetainedBySameClass returns expected result for.', () {
+    for (final t in _heapPathTests) {
+      expect(
+        t.heapPath.isRetainedBySameClass,
+        t.isRetainedBySameClass,
+        reason: t.name,
+      );
+    }
+  });
 }
 
 AdaptedHeapObject _objectForClass(String lib, String theClass) =>
