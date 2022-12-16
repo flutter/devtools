@@ -90,8 +90,11 @@ void main() {
       for (final o in t.heap.objects) {
         if (o.heapClass == _classA) classes.countInstance(t.heap, o.code);
       }
-      expect(classes.objects.retainedSize, t.expectedClassARetainedSize,
-          reason: t.name);
+      expect(
+        classes.objects.retainedSize,
+        t.expectedClassARetainedSize,
+        reason: t.name,
+      );
     }
   });
 }
