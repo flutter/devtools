@@ -68,7 +68,8 @@ class LeaksPaneController {
       _lastLeakSummary = message;
 
       _addToLeakSummaryHistory(
-          '${formatDateTime(message.time)}: ${message.toMessage()}');
+        '${formatDateTime(message.time)}: ${message.toMessage()}',
+      );
 
       return;
     }
