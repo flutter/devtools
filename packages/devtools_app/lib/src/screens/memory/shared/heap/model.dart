@@ -114,6 +114,8 @@ class HeapPath {
   final List<AdaptedHeapObject> objects;
 
   late final bool isRetainedBySameClass = () {
+    if (objects.isEmpty) return false;
+
     final theClass = objects.last.heapClass;
 
     final firstWithSameClass =

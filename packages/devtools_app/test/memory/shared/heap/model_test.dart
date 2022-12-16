@@ -19,7 +19,41 @@ class _HeapPathTest {
 }
 
 final _heapPathTests = <_HeapPathTest>[
-  _HeapPathTest('empty', HeapPath([]), isRetainedBySameClass: false),
+  _HeapPathTest(
+    'empty',
+    HeapPath([]),
+    isRetainedBySameClass: false,
+  ),
+  _HeapPathTest(
+    'one item',
+    HeapPath([_objectForClass('myLib', 'myClass')]),
+    isRetainedBySameClass: false,
+  ),
+  _HeapPathTest(
+    'two different',
+    HeapPath([
+      _objectForClass('myLib1', 'myClass'),
+      _objectForClass('myLib2', 'myClass'),
+    ]),
+    isRetainedBySameClass: false,
+  ),
+  _HeapPathTest(
+    'two identical',
+    HeapPath([
+      _objectForClass('myLib', 'myClass'),
+      _objectForClass('myLib', 'myClass'),
+    ]),
+    isRetainedBySameClass: true,
+  ),
+  _HeapPathTest(
+    'three identical',
+    HeapPath([
+      _objectForClass('myLib', 'myClass'),
+      _objectForClass('myLib', 'myClass'),
+      _objectForClass('myLib', 'myClass'),
+    ]),
+    isRetainedBySameClass: true,
+  ),
 ];
 
 void main() {
@@ -45,10 +79,18 @@ void main() {
 
   for (final t in _heapPathTests) {
     test(
-      '$HeapPath.isRetainedBySameClass returns expected result for ${t.name}',
+      '$HeapPath.isRetainedBySameClass returns expected result for ${t.name}.',
       () {
         expect(t.heapPath.isRetainedBySameClass, t.isRetainedBySameClass);
       },
     );
   }
 }
+
+AdaptedHeapObject _objectForClass(String lib, String theClass) =>
+    AdaptedHeapObject(
+      code: 1,
+      references: [],
+      heapClass: HeapClassName(className: theClass, library: lib),
+      shallowSize: 1,
+    );
