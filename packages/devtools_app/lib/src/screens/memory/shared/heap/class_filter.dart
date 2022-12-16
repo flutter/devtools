@@ -125,6 +125,8 @@ class ClassFilter {
   }
 
   bool apply(HeapClassName className) {
+    if (className.isRoot) return false;
+
     if (filterType == ClassFilterType.showAll) return true;
 
     for (var filter in filters) {
