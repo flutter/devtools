@@ -9,6 +9,7 @@ import '../../../../../shared/split.dart';
 import '../../../shared/heap/heap.dart';
 import '../controller/diff_pane_controller.dart';
 import '../controller/heap_diff.dart';
+import '../controller/item_controller.dart';
 import 'class_details/class_details.dart';
 import 'classes_table_diff.dart';
 import 'classes_table_single.dart';
@@ -41,9 +42,13 @@ class SnapshotView extends StatelessWidget {
         late Widget classTable;
 
         if (singleClasses != null) {
+          final totalSize =
+              (controller.core.selectedItem as SnapshotInstanceItem).totalSize;
+
           classTable = ClassesTableSingle(
             classes: singleClasses,
             selection: controller.derived.selectedSingleClassStats,
+            totalSize: totalSize!,
           );
         } else if (diffClasses != null) {
           classTable = ClassesTableDiff(

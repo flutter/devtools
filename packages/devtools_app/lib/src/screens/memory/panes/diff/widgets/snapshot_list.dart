@@ -10,6 +10,7 @@ import '../../../../../shared/analytics/analytics.dart' as ga;
 import '../../../../../shared/analytics/constants.dart' as gac;
 import '../../../../../shared/common_widgets.dart';
 import '../../../../../shared/primitives/auto_dispose.dart';
+import '../../../../../shared/primitives/utils.dart';
 import '../../../../../shared/table/table.dart';
 import '../../../../../shared/theme.dart';
 import '../controller/diff_pane_controller.dart';
@@ -95,6 +96,10 @@ class _SnapshotListTitle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theItem = item;
+    final theme = Theme.of(context);
+    final textStyle =
+        selected ? theme.selectedTextStyle : theme.regularTextStyle;
+
     return ValueListenableBuilder<bool>(
       valueListenable: theItem.isProcessing,
       builder: (_, isProcessing, __) => Row(
@@ -102,8 +107,23 @@ class _SnapshotListTitle extends StatelessWidget {
           const SizedBox(width: denseRowSpacing),
           if (theItem is SnapshotInstanceItem)
             Expanded(
-              child: Text(theItem.name, overflow: TextOverflow.ellipsis),
+              child: Text(
+                theItem.name,
+                overflow: TextOverflow.ellipsis,
+                style: textStyle,
+              ),
             ),
+          if (theItem is SnapshotInstanceItem && theItem.totalSize != null) ...[
+            Text(
+              prettyPrintBytes(
+                theItem.totalSize,
+                includeUnit: true,
+                kbFractionDigits: 1,
+              )!,
+              style: textStyle,
+            ),
+            const SizedBox(width: denseRowSpacing)
+          ],
           if (theItem is SnapshotDocItem)
             const Expanded(
               child: Text('Snapshots', overflow: TextOverflow.ellipsis),
@@ -174,9 +194,10 @@ class _SnapshotListItemsState extends State<_SnapshotListItems>
         shrinkWrap: true,
         itemCount: snapshots.length,
         itemBuilder: (context, index) {
+          final selected = selectedIndex == index;
           return Container(
             height: _headerHeight,
-            color: selectedIndex == index
+            color: selected
                 ? Theme.of(context).colorScheme.selectedRowColor
                 : null,
             child: InkWell(
@@ -184,7 +205,7 @@ class _SnapshotListItemsState extends State<_SnapshotListItems>
               onTap: () => widget.controller.setSnapshotIndex(index),
               child: _SnapshotListTitle(
                 item: snapshots[index],
-                selected: index == selectedIndex,
+                selected: selected,
               ),
             ),
           );

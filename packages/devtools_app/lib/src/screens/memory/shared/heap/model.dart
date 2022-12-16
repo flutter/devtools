@@ -105,6 +105,7 @@ class AdaptedHeapData {
 
   late final totalSize = () {
     if (!isSpanningTreeBuilt) throw StateError('Spanning tree should be built');
+    return objects[rootIndex].retainedSize!;
   }();
 }
 

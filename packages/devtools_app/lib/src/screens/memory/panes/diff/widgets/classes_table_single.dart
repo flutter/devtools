@@ -94,13 +94,15 @@ class _ShallowSizeColumn extends ColumnData<SingleClassStats> {
 }
 
 class _RetainedSizeColumn extends ColumnData<SingleClassStats> {
-  _RetainedSizeColumn()
+  _RetainedSizeColumn(this.totalSize)
       : super(
-          'Retained\nDart Size',
+          'Retained Dart Size',
           titleTooltip: retainedSizeColumnTooltip,
-          fixedWidthPx: scaleByFontFactor(85.0),
+          fixedWidthPx: scaleByFontFactor(160.0),
           alignment: ColumnAlignment.right,
         );
+
+  final int totalSize;
 
   @override
   int getValue(SingleClassStats classStats) => classStats.objects.retainedSize;
@@ -109,32 +111,55 @@ class _RetainedSizeColumn extends ColumnData<SingleClassStats> {
   bool get numeric => true;
 
   @override
-  String getDisplayValue(SingleClassStats classStats) => prettyPrintBytes(
-        getValue(classStats),
-        includeUnit: true,
-        kbFractionDigits: 1,
-      )!;
+  String getDisplayValue(SingleClassStats classStats) {
+    final value = getValue(classStats);
+
+    final bytes = prettyPrintBytes(
+      value,
+      includeUnit: true,
+      kbFractionDigits: 1,
+    )!;
+
+    final percents = '${(value * 100 / totalSize).round()}%';
+
+    return '$bytes ($percents)';
+  }
+}
+
+class _ClassesTableSingleColumns {
+  _ClassesTableSingleColumns(this.totalSize);
+
+  final int totalSize;
+
+  late final retainedSizeColumn = _RetainedSizeColumn(totalSize);
+
+  late final columnList = <ColumnData<SingleClassStats>>[
+    _ClassNameColumn(),
+    _InstanceColumn(),
+    _ShallowSizeColumn(),
+    retainedSizeColumn,
+  ];
 }
 
 class ClassesTableSingle extends StatelessWidget {
   const ClassesTableSingle({
-    Key? key,
+    super.key,
     required this.classes,
     required this.selection,
-  }) : super(key: key);
+    required this.totalSize,
+  });
+
+  final int totalSize;
 
   final List<SingleClassStats> classes;
   final ValueNotifier<SingleClassStats?> selection;
 
-  static final ColumnData<SingleClassStats> _retainedSizeColumn =
-      _RetainedSizeColumn();
-  static late final List<ColumnData<SingleClassStats>> _columns =
-      <ColumnData<SingleClassStats>>[
-    _ClassNameColumn(),
-    _InstanceColumn(),
-    _ShallowSizeColumn(),
-    _retainedSizeColumn,
-  ];
+  static final _columnStore = <String, _ClassesTableSingleColumns>{};
+  static _ClassesTableSingleColumns _columns(int totalSize) =>
+      _columnStore.putIfAbsent(
+        '$totalSize',
+        () => _ClassesTableSingleColumns(totalSize),
+      );
 
   @override
   Widget build(BuildContext context) {
@@ -142,7 +167,7 @@ class ClassesTableSingle extends StatelessWidget {
     // no matter what the data passed to it is.
     const dataKey = 'ClassesTableSingle';
     return FlatTable<SingleClassStats>(
-      columns: _columns,
+      columns: _columns(totalSize).columnList,
       data: classes,
       dataKey: dataKey,
       keyFactory: (e) => Key(e.heapClass.fullName),
@@ -151,7 +176,7 @@ class ClassesTableSingle extends StatelessWidget {
         gac.memory,
         gac.MemoryEvent.diffClassSingleSelect,
       ),
-      defaultSortColumn: _retainedSizeColumn,
+      defaultSortColumn: _columns(totalSize).retainedSizeColumn,
       defaultSortDirection: SortDirection.descending,
     );
   }
