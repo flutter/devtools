@@ -108,21 +108,26 @@ class AdaptedHeapData {
 typedef IdentityHashCode = int;
 
 /// Sequence of ids of objects in the heap.
-///
-/// TODO(polina-c): maybe we do not need to store path by objects.
-/// It can be that only classes are interesting, and we can save some
-/// performance on this object. It will become clear when the leak tracking
-/// feature stabilizes.
 class HeapPath {
   HeapPath(this.objects);
 
   final List<AdaptedHeapObject> objects;
 
+  late final bool isRetainedBySameClass = () {
+    final theClass = objects.last.heapClass;
+
+    final firstWithSameClass =
+        objects.firstWhere((object) => object.heapClass == theClass);
+    if (firstWithSameClass == objects.last) return false;
+
+    return true;
+  }();
+
   /// Retaining path for the object in string format.
-  String? shortPath() => '/${objects.map((o) => o.shortName).join('/')}/';
+  String shortPath() => '/${objects.map((o) => o.shortName).join('/')}/';
 
   /// Retaining path for the object as an array of the retaining objects.
-  List<String>? detailedPath() =>
+  List<String> detailedPath() =>
       objects.map((o) => o.name).toList(growable: false);
 }
 

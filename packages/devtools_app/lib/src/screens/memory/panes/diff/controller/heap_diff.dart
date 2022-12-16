@@ -164,15 +164,18 @@ class ObjectSetDiff {
       if (inBefore && inAfter) continue;
 
       final object = before.objectsByCodes[code] ?? after.objectsByCodes[code]!;
+      final excludeFromRetained =
+          before.excludedFromRetained.contains(object.code) ||
+              after.excludedFromRetained.contains(object.code);
 
       if (inBefore) {
-        deleted.countInstance(object);
-        delta.uncountInstance(object);
+        deleted.countInstance(object, excludeFromRetained: excludeFromRetained);
+        delta.uncountInstance(object, excludeFromRetained: excludeFromRetained);
         continue;
       }
       if (inAfter) {
-        created.countInstance(object);
-        delta.countInstance(object);
+        created.countInstance(object, excludeFromRetained: excludeFromRetained);
+        delta.countInstance(object, excludeFromRetained: excludeFromRetained);
         continue;
       }
       assert(false);
