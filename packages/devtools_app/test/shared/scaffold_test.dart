@@ -47,7 +47,7 @@ void main() {
       wrapScaffold(
         wrapWithNotifications(
           DevToolsScaffold(
-            tabs: const [_screen1, _screen2, _screen3, _screen4, _screen5],
+            screens: const [_screen1, _screen2, _screen3, _screen4, _screen5],
             ideTheme: IdeTheme(),
           ),
         ),
@@ -65,7 +65,7 @@ void main() {
       wrapScaffold(
         wrapWithNotifications(
           DevToolsScaffold(
-            tabs: const [_screen1, _screen2, _screen3, _screen4, _screen5],
+            screens: const [_screen1, _screen2, _screen3, _screen4, _screen5],
             ideTheme: IdeTheme(),
           ),
         ),
@@ -82,7 +82,7 @@ void main() {
       wrapScaffold(
         wrapWithNotifications(
           DevToolsScaffold(
-            tabs: const [_screen1],
+            screens: const [_screen1],
             ideTheme: IdeTheme(),
           ),
         ),
@@ -97,7 +97,7 @@ void main() {
       wrapScaffold(
         wrapWithNotifications(
           DevToolsScaffold(
-            tabs: const [_screen1, _screen2],
+            screens: const [_screen1, _screen2],
             ideTheme: IdeTheme(),
           ),
         ),
@@ -126,7 +126,7 @@ void main() {
       wrapScaffold(
         wrapWithNotifications(
           DevToolsScaffold(
-            tabs: const [_screen1, _screen2],
+            screens: const [_screen1, _screen2],
             page: _screen2.screenId,
             ideTheme: IdeTheme(),
           ),
