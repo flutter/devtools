@@ -139,7 +139,8 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
       // Stay on the current tab if possible when the collection of tabs changes.
       if (_tabController != null &&
           widget.screens.contains(oldWidget.screens[_tabController!.index])) {
-        newIndex = widget.screens.indexOf(oldWidget.screens[_tabController!.index]);
+        newIndex =
+            widget.screens.indexOf(oldWidget.screens[_tabController!.index]);
       }
       // Create a new tab controller to reflect the changed tabs.
       _setupTabController();
