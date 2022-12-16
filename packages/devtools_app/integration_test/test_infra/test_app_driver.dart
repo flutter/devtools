@@ -226,12 +226,6 @@ abstract class _TestApp with IoMixin {
   }
 }
 
-Stream<String> transformToLines(Stream<List<int>> byteStream) {
-  return byteStream
-      .transform<String>(utf8.decoder)
-      .transform<String>(const LineSplitter());
-}
-
 /// Map the URI to a WebSocket URI for the VM service protocol.
 ///
 /// If the URI is already a VM Service WebSocket URI it will not be modified.
