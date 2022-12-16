@@ -58,11 +58,6 @@ mixin FilterableHeapClasses<T extends ClassStats> on HeapClasses<T> {
     final task = newFilter.task(previous: oldFilter);
     if (task == FilteringTask.doNothing) return oldFiltered!;
 
-    // Return all data if filter is trivial.
-    if (newFilter.filterType == ClassFilterType.showAll) {
-      return _filtered = classStatsList;
-    }
-
     final Iterable<T> dataToFilter;
     if (task == FilteringTask.refilter) {
       dataToFilter = classStatsList;
