@@ -84,17 +84,16 @@ final _classSizeTests = <_ClassSizeTest>[
 ];
 
 void main() {
-  for (final t in _classSizeTests) {
-    test(
-        '$SingleClassStats does not double-count self-referenced classes for ${t.name}.',
-        () {
+  test('$SingleClassStats does not double-count self-referenced classes.', () {
+    for (final t in _classSizeTests) {
       final classes = SingleClassStats(_classA);
       for (final o in t.heap.objects) {
         if (o.heapClass == _classA) classes.countInstance(t.heap, o.code);
       }
-      expect(classes.objects.retainedSize, t.expectedClassARetainedSize);
-    });
-  }
+      expect(classes.objects.retainedSize, t.expectedClassARetainedSize,
+          reason: t.name);
+    }
+  });
 }
 
 AdaptedHeapObject _createOneByteObject(
