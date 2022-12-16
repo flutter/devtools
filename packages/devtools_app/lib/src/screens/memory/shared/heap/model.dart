@@ -118,12 +118,9 @@ class HeapPath {
 
     final theClass = objects.last.heapClass;
 
-    // `objects.take` is not used here to avoid copying the path for each heap object.
-    final firstWithSameClass =
-        objects.firstWhere((object) => object.heapClass == theClass);
-    if (firstWithSameClass == objects.last) return false;
-
-    return true;
+    return objects
+        .take(objects.length - 1)
+        .any((object) => object.heapClass == theClass);
   }();
 
   /// Retaining path for the object in string format.
