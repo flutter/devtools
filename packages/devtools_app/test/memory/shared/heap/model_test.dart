@@ -6,6 +6,22 @@ import 'package:devtools_app/src/screens/memory/shared/heap/model.dart';
 import 'package:devtools_app/src/screens/memory/shared/primitives/class_name.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+class _HeapPathTest {
+  _HeapPathTest(
+    this.name,
+    this.heapPath, {
+    required this.isRetainedBySameClass,
+  });
+
+  final String name;
+  final HeapPath heapPath;
+  final bool isRetainedBySameClass;
+}
+
+final _heapPathTests = <_HeapPathTest>[
+  _HeapPathTest('empty', HeapPath([]), isRetainedBySameClass: false),
+];
+
 void main() {
   test('$AdaptedHeapData serializes.', () {
     final json = AdaptedHeapData(
@@ -26,4 +42,13 @@ void main() {
 
     expect(json, AdaptedHeapData.fromJson(json).toJson());
   });
+
+  for (final t in _heapPathTests) {
+    test(
+      '$HeapPath.isRetainedBySameClass returns expected result for ${t.name}',
+      () {
+        expect(t.heapPath.isRetainedBySameClass, t.isRetainedBySameClass);
+      },
+    );
+  }
 }

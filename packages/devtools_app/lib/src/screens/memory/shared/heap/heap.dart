@@ -221,8 +221,10 @@ class ObjectSet extends ObjectSetStats {
   }
 
   @override
-  void uncountInstance(AdaptedHeapObject object,
-      {required bool excludeFromRetained}) {
+  void uncountInstance(
+    AdaptedHeapObject object, {
+    required bool excludeFromRetained,
+  }) {
     throw AssertionError('uncountInstance is not valid for $ObjectSet');
   }
 }
