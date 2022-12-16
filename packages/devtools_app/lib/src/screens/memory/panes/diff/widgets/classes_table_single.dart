@@ -98,7 +98,7 @@ class _RetainedSizeColumn extends ColumnData<SingleClassStats> {
       : super(
           'Retained Dart Size',
           titleTooltip: retainedSizeColumnTooltip,
-          fixedWidthPx: scaleByFontFactor(160.0),
+          fixedWidthPx: scaleByFontFactor(135.0),
           alignment: ColumnAlignment.right,
         );
 
