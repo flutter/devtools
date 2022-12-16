@@ -102,6 +102,10 @@ class AdaptedHeapData {
 
     return HeapPath(result.reversed.toList(growable: false));
   }
+
+  late final totalSize = () {
+    if (!isSpanningTreeBuilt) throw StateError('Spanning tree should be built');
+  }();
 }
 
 /// Result of invocation of [identityHashCode].
