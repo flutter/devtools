@@ -23,9 +23,6 @@ import '../shared/ui/label.dart';
 import '../shared/utils.dart';
 import 'framework_core.dart';
 
-@visibleForTesting
-const connectButtonKey = Key('Connect button');
-
 /// The landing screen when starting Dart DevTools without being connected to an
 /// app.
 ///
@@ -180,7 +177,6 @@ class _ConnectDialogState extends State<ConnectDialog>
             ),
             const SizedBox(width: defaultSpacing),
             ElevatedButton(
-              key: connectButtonKey,
               onPressed: actionInProgress ? null : _connect,
               child: const Text('Connect'),
             ),

@@ -91,7 +91,7 @@ class TestRunner with IoMixin {
       'flutter',
       [
         'drive',
-        '--release',
+        '--profile',
         '--driver=test_driver/integration_test.dart',
         '--target=$testTarget',
         '-d',

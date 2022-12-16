@@ -34,8 +34,14 @@ Future<void> connectToTestApp(WidgetTester tester, TestApp testApp) async {
   final textFieldFinder = find.byType(TextField);
   // TODO(https://github.com/flutter/flutter/issues/89749): use
   // `tester.enterText` once this issue is fixed.
-  (tester.firstWidget(textFieldFinder) as TextField).controller?.text = testApp.vmServiceUri;
-  await tester.tap(find.byKey(connectButtonKey));
+  (tester.firstWidget(textFieldFinder) as TextField).controller?.text =
+      testApp.vmServiceUri;
+  await tester.tap(
+    find.ancestor(
+      of: find.text('Connect'),
+      matching: find.byType(ElevatedButton),
+    ),
+  );
   await tester.pumpAndSettle(safePumpDuration);
 }
 

@@ -11,6 +11,10 @@ import 'package:vm_service/utils.dart';
 import 'package:vm_service/vm_service.dart';
 import 'package:vm_service/vm_service_io.dart';
 
+// TODO(kenz): eventually delete this class in favor of
+// integration_test/test_infra/test_app_driver.dart once the tests that
+// depend on this class are moved over to be true integration tests.
+
 /// This class was copied from
 /// flutter/packages/flutter_tools/test/integration/test_driver.dart. Its
 /// supporting classes were also copied from flutter/packages/flutter_tools.
