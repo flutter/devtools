@@ -576,7 +576,7 @@ class CheckboxSetting extends StatelessWidget {
 /// Conditional screens can be added to this list, and they will automatically
 /// be shown or hidden based on the [Screen.conditionalLibrary] provided.
 List<DevToolsScreen> get defaultScreens {
-  return <DevToolsScreen>[
+  return devtoolsScreens ??= <DevToolsScreen>[
     DevToolsScreen<InspectorController>(
       InspectorScreen(),
       createController: (_) => InspectorController(
@@ -634,3 +634,6 @@ List<DevToolsScreen> get defaultScreens {
       ),
   ];
 }
+
+@visibleForTesting
+List<DevToolsScreen>? devtoolsScreens;

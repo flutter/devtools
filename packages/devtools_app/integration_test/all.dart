@@ -21,6 +21,6 @@ void main(List<String> args) async {
       .where((testFile) => testFile.path.endsWith(testSuffix));
   for (final testFile in testFiles) {
     final testTarget = testFile.path;
-    await runTest([...args, '$testTargetArg$testTarget']);
+    await runTest([...args, '${TestArgs.testTargetArg}$testTarget']);
   }
 }

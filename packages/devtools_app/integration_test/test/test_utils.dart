@@ -26,13 +26,15 @@ Future<void> pumpDevTools(WidgetTester tester) async {
 
   // Await a delay to ensure the widget tree has loaded. It is important to use
   // `pump` instead of `pumpAndSettle` here.
-  await tester.pumpAndSettle(safePumpDuration);
+  await tester.pump(longPumpDuration);
   expect(find.byType(DevToolsApp), findsOneWidget);
 }
 
 Future<void> connectToTestApp(WidgetTester tester, TestApp testApp) async {
   final textFieldFinder = find.byType(TextField);
-  await tester.enterText(textFieldFinder, testApp.vmServiceUri);
+  // TODO(https://github.com/flutter/flutter/issues/89749): use
+  // `tester.enterText` once this issue is fixed.
+  (tester.firstWidget(textFieldFinder) as TextField).controller?.text = testApp.vmServiceUri;
   await tester.tap(find.byKey(connectButtonKey));
   await tester.pumpAndSettle(safePumpDuration);
 }

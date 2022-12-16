@@ -11,7 +11,7 @@ import 'io_utils.dart';
 import 'test_app_driver.dart';
 
 Future<void> runTest(List<String> args) async {
-  final testRunnerArgs = _TestArgs(args);
+  final testRunnerArgs = TestArgs(args);
 
   TestFlutterApp? testApp;
   late String testAppUri;
@@ -51,21 +51,30 @@ Future<void> runTest(List<String> args) async {
   _debugLog('cancelling stream subscriptions');
   await testRunner.cancelAllStreamSubscriptions();
   await chromedriver.cancelAllStreamSubscriptions();
+
+  _debugLog('killing the chromedriver process');
+  chromedriver.kill();
 }
 
 class ChromeDriver with IoMixin {
+  late final Process _process;
+
   // TODO(kenz): add error messaging if the chromedriver executable is not
   // found. We can also consider using web installers directly in this script:
   // https://github.com/flutter/flutter/wiki/Running-Flutter-Driver-tests-with-Web#web-installers-repo.
   Future<void> start() async {
     _debugLog('starting the chromedriver process');
-    final process = await Process.start(
+    _process = await Process.start(
       'chromedriver',
       [
         '--port=4444',
       ],
     );
-    listenToProcessOutput(process);
+    listenToProcessOutput(_process);
+  }
+
+  void kill() {
+    _process.kill();
   }
 }
 
@@ -82,6 +91,7 @@ class TestRunner with IoMixin {
       'flutter',
       [
         'drive',
+        '--release',
         '--driver=test_driver/integration_test.dart',
         '--target=$testTarget',
         '-d',
@@ -95,6 +105,7 @@ class TestRunner with IoMixin {
     listenToProcessOutput(process);
 
     await process.exitCode;
+    process.kill();
     _debugLog('flutter drive process has exited');
   }
 }
@@ -106,8 +117,8 @@ void _debugLog(String log) {
   }
 }
 
-class _TestArgs {
-  _TestArgs(List<String> args) {
+class TestArgs {
+  TestArgs(List<String> args) {
     final argWithTestTarget =
         args.firstWhereOrNull((arg) => arg.startsWith(testTargetArg));
     final target = argWithTestTarget?.substring(testTargetArg.length);
