@@ -29,7 +29,7 @@ final _classB = HeapClassName(className: 'B', library: 'l');
 
 final _classSizeTests = <_ClassSizeTest>[
   _ClassSizeTest(
-    name: 'all separate',
+    name: 'separate',
     heap: AdaptedHeapData(
       [
         _createOneByteObject(0, [1, 2, 3], _root),
@@ -40,7 +40,47 @@ final _classSizeTests = <_ClassSizeTest>[
       rootIndex: 0,
     ),
     expectedClassARetainedSize: 3,
-  )
+  ),
+  _ClassSizeTest(
+    name: 'linked',
+    heap: AdaptedHeapData(
+      [
+        _createOneByteObject(0, [1], _root),
+        _createOneByteObject(1, [2], _classA),
+        _createOneByteObject(2, [3], _classA),
+        _createOneByteObject(3, [], _classA),
+      ],
+      rootIndex: 0,
+    ),
+    expectedClassARetainedSize: 3,
+  ),
+  _ClassSizeTest(
+    name: 'full graph',
+    heap: AdaptedHeapData(
+      [
+        _createOneByteObject(0, [1], _root),
+        _createOneByteObject(1, [2, 3], _classA),
+        _createOneByteObject(2, [3, 1], _classA),
+        _createOneByteObject(3, [1, 2], _classA),
+      ],
+      rootIndex: 0,
+    ),
+    expectedClassARetainedSize: 3,
+  ),
+  _ClassSizeTest(
+    name: 'with global B',
+    heap: AdaptedHeapData(
+      [
+        _createOneByteObject(0, [1], _root),
+        _createOneByteObject(1, [2, 4], _classA),
+        _createOneByteObject(2, [3, 4], _classA),
+        _createOneByteObject(3, [4], _classA),
+        _createOneByteObject(4, [], _classB),
+      ],
+      rootIndex: 0,
+    ),
+    expectedClassARetainedSize: 4,
+  ),
 ];
 
 void main() {
