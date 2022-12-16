@@ -114,10 +114,11 @@ class HeapPath {
   final List<AdaptedHeapObject> objects;
 
   late final bool isRetainedBySameClass = () {
-    if (objects.isEmpty) return false;
+    if (objects.length < 2) return false;
 
     final theClass = objects.last.heapClass;
 
+    // `objects.take` is not used here to avoid copying the path for each heap object.
     final firstWithSameClass =
         objects.firstWhere((object) => object.heapClass == theClass);
     if (firstWithSameClass == objects.last) return false;
