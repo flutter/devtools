@@ -47,6 +47,8 @@ class HeapClassName {
 
   bool get isSentinel => className == 'Sentinel' && library.isEmpty;
 
+  bool get isRoot => className == 'Root' && library.isEmpty;
+
   /// Whether a class can hold a reference to an object
   /// without preventing garbage collection.
   bool get isWeakEntry {
