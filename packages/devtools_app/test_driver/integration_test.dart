@@ -9,7 +9,7 @@ Future<void> main() async {
   final FlutterDriver driver = await FlutterDriver.connect();
   await integrationDriver(
     driver: driver,
-    onScreenshot: (String screenshotName, List<int> screenshotBytes) {
+    onScreenshot: (String screenshotName, List<int> screenshotBytes) async {
       // TODO(kenz): implement golden image testing.
       return true;
     },
