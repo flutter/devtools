@@ -65,6 +65,46 @@ Future<void> performTheVersionUpdate({
   });
 }
 
+Future<void> resetReleaseNotes({
+  required String version,
+}) async {
+  print('Resetting the release notes');
+
+  // Clear out the current notes
+  final imagesDir = Directory('./tool/release_notes/images');
+  if (imagesDir.existsSync()) {
+    await imagesDir.delete(recursive: true);
+  }
+  imagesDir.create();
+  await File('./tool/release_notes/images/.gitkeep').create();
+
+  final currentReleaseNotesFile =
+      File('./tool/release_notes/NEXT_RELEASE_NOTES.md');
+  if (currentReleaseNotesFile.existsSync()) {
+    await currentReleaseNotesFile.delete();
+  }
+
+  // Normalize the version number so that it onl
+  final semVerMatch = RegExp(r'^(?<major>\d+)\.(?<minor>\d+)\.(?<patch>\d+)')
+      .firstMatch(version);
+  if (semVerMatch == null) {
+    throw 'Version format is unexpected';
+  }
+  var major = int.parse(semVerMatch.namedGroup('major')!, radix: 10);
+  var minor = int.parse(semVerMatch.namedGroup('minor')!, radix: 10);
+  final normalizedVersionNumber = '$major.$minor.0';
+
+  final templateFile =
+      File('./tool/release_notes/helpers/release_notes_template.md');
+  final templateFileContents = await templateFile.readAsString();
+  currentReleaseNotesFile.writeAsString(
+    templateFileContents.replaceAll(
+      RegExp(r'<number>'),
+      normalizedVersionNumber,
+    ),
+  );
+}
+
 String? incrementVersionByType(String version, String type) {
   final semVerMatch = RegExp(r'^(?<major>\d+)\.(?<minor>\d+)\.(?<patch>\d+)')
       .firstMatch(version);
@@ -361,7 +401,7 @@ class AutoUpdateCommand extends Command {
     final type = argResults!['type'].toString();
     final isDryRun = argResults!['dry-run'];
     final currentVersion = versionFromPubspecFile();
-    bool modifyChangeLog = true;
+    bool modifyChangeLog = false;
     String? newVersion;
     if (currentVersion == null) {
       throw 'Could not automatically determine current version.';
@@ -369,10 +409,10 @@ class AutoUpdateCommand extends Command {
     switch (type) {
       case 'release':
         newVersion = stripPreReleases(currentVersion);
+        modifyChangeLog = true;
         break;
       case 'dev':
         newVersion = incrementDevVersion(currentVersion);
-        modifyChangeLog = false;
         break;
       default:
         newVersion = incrementVersionByType(currentVersion, type);
@@ -391,5 +431,11 @@ class AutoUpdateCommand extends Command {
       newVersion: newVersion,
       modifyChangeLog: modifyChangeLog,
     );
+    if (['minor', 'major'].contains(type)) {
+      // Only cycle the release notes when doing a minor or major version bump
+      resetReleaseNotes(
+        version: newVersion,
+      );
+    }
   }
 }

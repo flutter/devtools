@@ -229,17 +229,17 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
         return ValueListenableBuilder<bool>(
           valueListenable: preferences.vmDeveloperModeEnabled,
           builder: (_, __, child) {
-            final tabs = _visibleScreens()
+            final screens = _visibleScreens()
                 .where((p) => embed && page != null ? p.screenId == page : true)
                 .where((p) => !hide.contains(p.screenId))
                 .toList();
-            if (tabs.isEmpty) return child ?? const SizedBox.shrink();
+            if (screens.isEmpty) return child ?? const SizedBox.shrink();
             return _providedControllers(
               child: DevToolsScaffold(
                 embed: embed,
                 ideTheme: ideTheme,
                 page: page,
-                tabs: tabs,
+                screens: screens,
                 actions: [
                   // TODO(https://github.com/flutter/devtools/issues/1941)
                   if (serviceManager.connectedApp!.isFlutterAppNow!) ...[

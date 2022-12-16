@@ -49,7 +49,7 @@ void main() {
       wrapScaffold(
         wrapWithNotifications(
           DevToolsScaffold(
-            tabs: const [_screen1, _screen2],
+            screens: const [_screen1, _screen2],
             ideTheme: IdeTheme(),
           ),
         ),
