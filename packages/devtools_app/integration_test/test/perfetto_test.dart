@@ -5,7 +5,6 @@
 import 'package:devtools_app/src/screens/performance/panes/flutter_frames/flutter_frames_chart.dart';
 import 'package:devtools_app/src/screens/performance/panes/timeline_events/perfetto/_perfetto_web.dart';
 import 'package:devtools_app/src/shared/primitives/simple_items.dart';
-import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
@@ -15,11 +14,9 @@ import 'test_utils.dart';
 const _testRequiresExperiments = true;
 
 void main() {
-  if (_testRequiresExperiments &&
-      (const bool.fromEnvironment('enable_experiments') == false)) {
-    logStatus('Skipping test because experiments are not enabled.');
-    return;
-  }
+  const skipTests = _testRequiresExperiments &&
+      (bool.fromEnvironment('enable_experiments') == false);
+
   final binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
   late TestApp testApp;
@@ -29,50 +26,47 @@ void main() {
     expect(testApp.vmServiceUri, isNotNull);
   });
 
-  testWidgets('Perfetto trace viewer', (tester) async {
-    await pumpDevTools(tester);
-    await connectToTestApp(tester, testApp);
+  testWidgets(
+    'Perfetto trace viewer',
+    (tester) async {
+      await pumpDevTools(tester);
 
-    logStatus('load performance page and switch to Timeline Events tab');
-    final performanceTab = find.descendant(
-      of: find.byType(AppBar),
-      matching: find.widgetWithText(Tab, ScreenMetaData.performance.title),
-    );
-    await tester.tap(performanceTab);
-    await tester.pump(safePumpDuration);
+      // TODO(kenz): we have to load offline data or the goldens will always be
+      // slightly different.
+      await connectToTestApp(tester, testApp);
 
-    await tester.tap(find.widgetWithText(InkWell, 'Timeline Events'));
-    await tester.pump(longPumpDuration);
+      logStatus('load performance page and switch to Timeline Events tab');
+      final performanceTab = find.descendant(
+        of: find.byType(AppBar),
+        matching: find.widgetWithText(Tab, ScreenMetaData.performance.title),
+      );
+      await tester.tap(performanceTab);
+      await tester.pump(safePumpDuration);
 
-    logStatus('verify HtmlElementView has loaded');
-    expect(find.byType(Perfetto), findsOneWidget);
-    expect(find.byType(HtmlElementView), findsOneWidget);
+      await tester.tap(find.widgetWithText(InkWell, 'Timeline Events'));
+      await tester.pump(longPumpDuration);
 
-    await verifyScreenshot(binding, 'perfetto_initial_load');
+      logStatus('verify HtmlElementView has loaded');
+      expect(find.byType(Perfetto), findsOneWidget);
+      expect(find.byType(HtmlElementView), findsOneWidget);
 
-    logStatus('select a Flutter Frame');
-    await tester.tap(find.byType(FlutterFramesChartItem).last);
-    await tester.pump(longPumpDuration);
+      await verifyScreenshot(binding, 'perfetto_initial_load');
 
-    await verifyScreenshot(binding, 'perfetto_frame_selection');
+      logStatus('select a Flutter Frame');
+      await tester.tap(find.byType(FlutterFramesChartItem).last);
+      await tester.pump(longPumpDuration);
 
-    // logStatus('switch to a different feature tab and back to Timeline Events');
-    // await tester.tap(find.widgetWithText(InkWell, 'Frame Analysis'));
-    // await tester.pump(longPumpDuration);
+      await verifyScreenshot(binding, 'perfetto_frame_selection');
 
-    // await tester.tap(find.widgetWithText(InkWell, 'Timeline Events'));
-    // await tester.pump(longPumpDuration);
+      logStatus('switch to a different feature tab and back to Timeline Events');
+      await tester.tap(find.widgetWithText(InkWell, 'Frame Analysis'));
+      await tester.pump(longPumpDuration);
 
-    // print('before take screenshot');
-    // await binding.takeScreenshot('perfetto_frame_selection');
-    // print('after take screenshot');
-    // await expectLater(
-    //   goldenBytes,
-    //   matchesDevToolsGolden(
-    //     '../test_infra/goldens/perfetto_frame_selection.png',
-    //   ),
-    // );
+      await tester.tap(find.widgetWithText(InkWell, 'Timeline Events'));
+      await tester.pump(longPumpDuration);
 
-    await tester.pump(longPumpDuration);
-  });
+      await verifyScreenshot(binding, 'perfetto_frame_selection');
+    },
+    skip: skipTests,
+  );
 }

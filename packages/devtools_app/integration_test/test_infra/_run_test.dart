@@ -26,6 +26,7 @@ Future<void> runTest(List<String> args) async {
     testAppUri = testRunnerArgs.testAppUri!;
   }
 
+  // TODO(kenz): do we need to start chromedriver in headless mode?
   // Start chrome driver before running the flutter integration test.
   final chromedriver = ChromeDriver();
   await chromedriver.start();
@@ -50,7 +51,6 @@ Future<void> runTest(List<String> args) async {
   _debugLog('cancelling stream subscriptions');
   await testRunner.cancelAllStreamSubscriptions();
   await chromedriver.cancelAllStreamSubscriptions();
-  _debugLog('end of main');
 }
 
 class ChromeDriver with IoMixin {

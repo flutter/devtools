@@ -24,22 +24,14 @@ import 'src/shared/preferences.dart';
 import 'src/shared/primitives/url_utils.dart';
 
 void main() async {
-  await runDevTools(runApp);
+  await runDevTools();
 }
 
-Future<void> runDevTools(
-  FutureOr<void> Function(Widget) runner, {
-  bool useCustomErrorHandling = true,
-  bool shouldEnableExperiments = false,
-}) async {
+Future<void> runDevTools({bool shouldEnableExperiments = false}) async {
   // Before switching to URL path strategy, check if this URL is in the legacy
   // fragment format and redirect if necessary.
   if (_handleLegacyUrl()) return;
 
-  // If we don't comment this out, we can't run the integration tests. See
-  // see https://github.com/flutter/flutter/issues/116936. However, if we comment
-  // this out, then we can only run once test per file, because the second test
-  // case will hit line 37 and redirect and return early.
   usePathUrlStrategy();
 
   // This may be from our Flutter integration tests. Since we call
@@ -66,25 +58,15 @@ Future<void> runDevTools(
   // Load the Dart syntax highlighting grammar.
   await SyntaxHighlighter.initialize();
 
-  FutureOr<void> runCallback() async => await runner(
-        MaterialApp(home: Text('this is my app')),
-      );
-
-  // FutureOr<void> runCallback() async => await runner(
-  //       ProviderScope(
-  //         observers: const [ErrorLoggerObserver()],
-  //         child: DevToolsApp(defaultScreens, await analyticsController),
-  //       ),
-  //     );
-
-  if (useCustomErrorHandling) {
-    setupErrorHandling(() async {
-      // Run the app.
-      await runCallback();
-    });
-  } else {
-    await runCallback();
-  }
+  setupErrorHandling(() async {
+    // Run the app.
+    runApp(
+      ProviderScope(
+        observers: const [ErrorLoggerObserver()],
+        child: DevToolsApp(defaultScreens, await analyticsController),
+      ),
+    );
+  });
 }
 
 /// Checks if the request is for a legacy URL and if so, redirects to the new
@@ -94,12 +76,10 @@ Future<void> runDevTools(
 /// initialization should be skipped.
 bool _handleLegacyUrl() {
   final url = getWebUrl();
-  print('in _handleLegacyUrl: $url');
   if (url == null) return false;
 
   final newUrl = mapLegacyUrl(url);
   if (newUrl != null) {
-    print('performing redirect to $newUrl');
     webRedirect(newUrl);
     return true;
   }

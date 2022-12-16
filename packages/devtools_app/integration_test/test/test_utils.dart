@@ -20,16 +20,14 @@ Future<void> pumpDevTools(WidgetTester tester) async {
   // Error when reading 'org-dartlang-app:/test_infra/shared.dart': File not found
   const shouldEnableExperiments = bool.fromEnvironment('enable_experiments');
   await app.runDevTools(
-    tester.pumpWidget,
     // ignore: avoid_redundant_argument_values
     shouldEnableExperiments: shouldEnableExperiments,
-    useCustomErrorHandling: false,
   );
 
   // Await a delay to ensure the widget tree has loaded. It is important to use
   // `pump` instead of `pumpAndSettle` here.
   await tester.pumpAndSettle(safePumpDuration);
-  // expect(find.byType(DevToolsApp), findsOneWidget);
+  expect(find.byType(DevToolsApp), findsOneWidget);
 }
 
 Future<void> connectToTestApp(WidgetTester tester, TestApp testApp) async {
