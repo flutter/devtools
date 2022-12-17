@@ -36,6 +36,7 @@ git commit -am "$COMMIT_MESSAGE"
 git checkout -b $NEXT_BRANCH;
 COMMIT_MESSAGE=$(dart tool/update_version.dart auto -d -t $TYPE)
 dart tool/update_version.dart auto -t $TYPE
+dart tool/update_version.dart auto -t dev # set the first dev version
 git commit -am "$COMMIT_MESSAGE"
 
 
