@@ -29,7 +29,7 @@ Make sure:
     - Clean Branch
     - Next Branch
 - You will need to prepare and submit both of these branches, when you are doing a full release.
-- ** For your convenience, the `tool/release_helper.sh` script exports the followinging two variables to the terminal it is run in:**
+- **For your convenience, the `tool/release_helper.sh` script exports the followinging two variables to the terminal it is run in:**
   - `$DEVTOOLS_CLEAN_BRANCH`
   - `$DEVTOOLS_NEXT_BRANCH`
 
