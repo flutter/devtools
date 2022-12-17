@@ -34,10 +34,13 @@ dart tool/bin/repo_tool.dart generate-changelog
 git commit -am "$COMMIT_MESSAGE"
 
 git checkout -b $NEXT_BRANCH;
-COMMIT_MESSAGE=$(dart tool/update_version.dart auto -d -t $TYPE)
+TYPE_BUMP_COMMIT_MESSAGE=$(dart tool/update_version.dart auto -d -t $TYPE)
 dart tool/update_version.dart auto -t $TYPE
+git commit -am "$TYPE_BUMP_COMMIT_MESSAGE"
+
+DEV_BUMP_COMMIT_MESSAGE=$(dart tool/update_version.dart auto -d -t dev)
 dart tool/update_version.dart auto -t dev # set the first dev version
-git commit -am "$COMMIT_MESSAGE"
+git commit -am "$DEV_BUMP_COMMIT_MESSAGE"
 
 
 git checkout $CLEAN_BRANCH
