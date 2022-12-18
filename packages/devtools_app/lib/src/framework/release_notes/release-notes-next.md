@@ -6,7 +6,8 @@ This is draft for future release notes, that are going to land on
 Dart & Flutter DevTools - A Suite of Performance Tools for Dart and Flutter
 
 ## General updates
-TODO: Remove this section if there are not any general updates.
+
+- Fix an issue in Safari (browsers that do not support RegExp negative lookbehind) that prevented DevTools from loading.
 
 ## Inspector updates
 TODO: Remove this section if there are not any general updates.
