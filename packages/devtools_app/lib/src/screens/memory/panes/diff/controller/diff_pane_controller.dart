@@ -162,7 +162,7 @@ class CoreData {
       _snapshots.value[_selectedSnapshotIndex.value];
 
   /// Full name for the selected class (cross-snapshot).
-  HeapClassName? className;
+  HeapClassName? className_;
 
   /// Selected retaining path (cross-snapshot).
   ClassOnlyHeapPath? path;
@@ -228,8 +228,8 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
 
   /// Updates cross-snapshot class if the argument is not null.
   void _setClassIfNotNull(HeapClassName? theClass) {
-    if (theClass == null || theClass == _core.className) return;
-    _core.className = theClass;
+    if (theClass == null || theClass == _core.className_) return;
+    _core.className_ = theClass;
     _updateValues();
   }
 
@@ -325,7 +325,7 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
 
     _updateClasses(
       classes: classes,
-      className: _core.className,
+      className: _core.className_,
     );
 
     // Set paths to show.
@@ -346,7 +346,7 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
     // Set current snapshot.
     _selectedItem.value = _core.selectedItem;
 
-    _endUpdateValues();
+    _endUpdatingValues();
   }
 
   void _startUpdatingValues() {
@@ -361,7 +361,7 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
     _updatingValues = true;
   }
 
-  void _endUpdateValues() {
+  void _endUpdatingValues() {
     _updatingValues = false;
 
     ga.timeEnd(
@@ -374,8 +374,9 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
 
   /// Set initial selection of class and path, for discoverability of detailed view.
   void _setSelections() {
-    if (_core.className != null) return;
-    final classes = heapClasses.value?.classStatsList;
+    if (_core.className_ != null) return;
+
+    final classes = heapClasses.value;
     if (classes == null) return;
 
     SingleClassStats singleWithMaxRetainedSize(
@@ -392,14 +393,16 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
 
     // Get class with max retained size.
     final ClassStats theClass;
-    if (classes is List<SingleClassStats>) {
-      theClass = classes.reduce(singleWithMaxRetainedSize);
-    } else if (classes is List<DiffClassStats>) {
-      theClass = classes.reduce(diffWithMaxRetainedSize);
+    if (classes is SingleHeapClasses) {
+      final classStatsList = classes.filtered(_core.classFilter.value);
+      theClass = classStatsList.reduce(singleWithMaxRetainedSize);
+    } else if (classes is DiffHeapClasses) {
+      final classStatsList = classes.filtered(_core.classFilter.value);
+      theClass = classStatsList.reduce(diffWithMaxRetainedSize);
     } else {
       throw StateError('Unexpected type ${classes.runtimeType}');
     }
-    _core.className = theClass.heapClass;
+    _core.className_ = theClass.heapClass;
 
     // Get path with max retained size.
     final path = theClass.statsByPathEntries.reduce((v, e) {
