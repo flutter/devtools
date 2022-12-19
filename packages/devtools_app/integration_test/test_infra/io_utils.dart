@@ -12,7 +12,7 @@ Stream<String> transformToLines(Stream<List<int>> byteStream) {
       .transform<String>(const LineSplitter());
 }
 
-mixin IoMixin {
+mixin IOMixin {
   final stdoutController = StreamController<String>.broadcast();
 
   final stderrController = StreamController<String>.broadcast();

@@ -34,7 +34,7 @@ class TestFlutterApp extends _TestApp {
 // TODO(kenz): implement for running integration tests against a Dart CLI app.
 class TestDartCliApp {}
 
-abstract class _TestApp with IoMixin {
+abstract class _TestApp with IOMixin {
   _TestApp(this.testAppPath);
 
   static const _appStartTimeout = Duration(seconds: 120);
@@ -82,18 +82,24 @@ abstract class _TestApp with IoMixin {
     // Stash the PID so that we can terminate the VM more reliably than using
     // proc.kill() (because proc is a shell, because `flutter` is a shell
     // script).
-    final Map<String, dynamic> connected =
-        await waitFor(event: 'daemon.connected');
-    runProcessId = connected['params']['pid'];
+    final connected =
+        await waitFor(event: FlutterDaemonConstants.daemonConnected.key);
+    runProcessId = (connected[FlutterDaemonConstants.params.key]!
+        as Map<String, Object?>)[FlutterDaemonConstants.pid.key] as int;
 
-    // Set this up now, but we don't wait it yet. We want to make sure we don't
+    // Set this up now, but we don't await it yet. We want to make sure we don't
     // miss it while waiting for debugPort below.
-    final Future<Map<String, dynamic>> started =
-        waitFor(event: 'app.started', timeout: _appStartTimeout);
+    final started = waitFor(
+      event: FlutterDaemonConstants.appStarted.key,
+      timeout: _appStartTimeout,
+    );
 
-    final Map<String, dynamic> debugPort =
-        await waitFor(event: 'app.debugPort', timeout: _appStartTimeout);
-    final String wsUriString = debugPort['params']['wsUri'];
+    final debugPort = await waitFor(
+      event: FlutterDaemonConstants.appDebugPort.key,
+      timeout: _appStartTimeout,
+    );
+    final wsUriString = (debugPort[FlutterDaemonConstants.params.key]!
+        as Map<String, Object?>)[FlutterDaemonConstants.wsUri.key] as String;
     _vmServiceWsUri = Uri.parse(wsUriString);
 
     // Map to WS URI.
@@ -130,47 +136,71 @@ abstract class _TestApp with IoMixin {
     );
   }
 
-  Future<Map<String, dynamic>> waitFor({
+  Future<Map<String, Object?>> waitFor({
     String? event,
     int? id,
     Duration? timeout,
     bool ignoreAppStopEvent = false,
   }) async {
-    final Completer<Map<String, dynamic>> response =
-        Completer<Map<String, dynamic>>();
+    final response = Completer<Map<String, Object?>>();
     late StreamSubscription<String> sub;
-    sub = stdoutController.stream.listen((String line) async {
-      final dynamic json = _parseFlutterResponse(line);
-      if (json == null) {
-        return;
-      } else if ((event != null && json['event'] == event) ||
-          (id != null && json['id'] == id)) {
-        await sub.cancel();
-        response.complete(json);
-      } else if (!ignoreAppStopEvent && json['event'] == 'app.stop') {
-        await sub.cancel();
-        final StringBuffer error = StringBuffer();
-        error.write('Received app.stop event while waiting for ');
-        error.write(
-          '${event != null ? '$event event' : 'response to request $id.'}.\n\n',
-        );
-        if (json['params'] != null && json['params']['error'] != null) {
-          error.write('${json['params']['error']}\n\n');
-        }
-        if (json['params'] != null && json['params']['trace'] != null) {
-          error.write('${json['params']['trace']}\n\n');
-        }
-        response.completeError(error.toString());
-      }
-    });
+    sub = stdoutController.stream.listen(
+      (String line) => _handleStdout(
+        line,
+        subscription: sub,
+        response: response,
+        event: event,
+        id: id,
+        ignoreAppStopEvent: ignoreAppStopEvent,
+      ),
+    );
 
-    return _timeoutWithMessages<Map<String, dynamic>>(
+    return _timeoutWithMessages<Map<String, Object?>>(
       () => response.future,
       timeout: timeout,
       message: event != null
           ? 'Did not receive expected $event event.'
           : 'Did not receive response to request "$id".',
     ).whenComplete(() => sub.cancel());
+  }
+
+  void _handleStdout(
+    String line, {
+    required StreamSubscription<String> subscription,
+    required Completer<Map<String, Object?>> response,
+    required String? event,
+    required int? id,
+    bool ignoreAppStopEvent = false,
+  }) async {
+    final json = _parseFlutterResponse(line);
+    if (json == null) {
+      return;
+    } else if ((event != null &&
+            json[FlutterDaemonConstants.event.key] == event) ||
+        (id != null && json[FlutterDaemonConstants.id.key] == id)) {
+      await subscription.cancel();
+      response.complete(json);
+    } else if (!ignoreAppStopEvent &&
+        json[FlutterDaemonConstants.event.key] ==
+            FlutterDaemonConstants.appStop.key) {
+      await subscription.cancel();
+      final error = StringBuffer();
+      error.write('Received app.stop event while waiting for ');
+      error.write(
+        '${event != null ? '$event event' : 'response to request $id.'}.\n\n',
+      );
+      final errorFromJson = (json[FlutterDaemonConstants.params.key]
+          as Map<String, Object?>?)?[FlutterDaemonConstants.error.key];
+      if (errorFromJson != null) {
+        error.write('$errorFromJson\n\n');
+      }
+      final traceFromJson = (json[FlutterDaemonConstants.params.key]
+          as Map<String, Object?>?)?[FlutterDaemonConstants.trace.key];
+      if (traceFromJson != null) {
+        error.write('$traceFromJson\n\n');
+      }
+      response.completeError(error.toString());
+    }
   }
 
   Future<T> _timeoutWithMessages<T>(
@@ -180,15 +210,14 @@ abstract class _TestApp with IoMixin {
   }) {
     // Capture output to a buffer so if we don't get the response we want we can show
     // the output that did arrive in the timeout error.
-    final StringBuffer messages = StringBuffer();
-    final DateTime start = DateTime.now();
+    final messages = StringBuffer();
+    final start = DateTime.now();
     void logMessage(String m) {
       final int ms = DateTime.now().difference(start).inMilliseconds;
       messages.writeln('[+ ${ms.toString().padLeft(5)}] $m');
     }
 
-    final StreamSubscription<String> sub =
-        _allMessages.stream.listen(logMessage);
+    final sub = _allMessages.stream.listen(logMessage);
 
     return f().timeout(
       timeout ?? _defaultTimeout,
@@ -196,15 +225,15 @@ abstract class _TestApp with IoMixin {
         logMessage('<timed out>');
         throw '$message';
       },
-    ).catchError((dynamic error) {
+    ).catchError((error) {
       throw '$error\nReceived:\n${messages.toString()}';
     }).whenComplete(() => sub.cancel());
   }
 
-  Map<String, dynamic>? _parseFlutterResponse(String line) {
+  Map<String, Object?>? _parseFlutterResponse(String line) {
     if (line.startsWith('[') && line.endsWith(']')) {
       try {
-        final Map<String, dynamic>? resp = json.decode(line)[0];
+        final Map<String, Object?>? resp = json.decode(line)[0];
         return resp;
       } catch (e) {
         // Not valid JSON, so likely some other output that was surrounded by [brackets]
@@ -215,8 +244,8 @@ abstract class _TestApp with IoMixin {
   }
 
   String _debugPrint(String msg) {
-    const int maxLength = 500;
-    final String truncatedMsg =
+    const maxLength = 500;
+    final truncatedMsg =
         msg.length > maxLength ? msg.substring(0, maxLength) + '...' : msg;
     _allMessages.add(truncatedMsg);
     if (_printDebugOutputToStdOut) {
@@ -241,4 +270,28 @@ Uri convertToWebSocketUrl({required Uri serviceProtocolUrl}) {
           : '${serviceProtocolUrl.path}/ws');
 
   return serviceProtocolUrl.replace(scheme: scheme, path: path);
+}
+
+// TODO(kenz): consider moving these constants to devtools_shared if they are
+// used outside of these integration tests. Optionally, we could consider making
+// these constants where the flutter daemon is defined in flutter tools.
+enum FlutterDaemonConstants {
+  event,
+  error,
+  id,
+  params,
+  trace,
+  wsUri,
+  pid,
+  appStop(nameOverride: 'app.stop'),
+  appStarted(nameOverride: 'app.started'),
+  appDebugPort(nameOverride: 'app.debugPort'),
+  daemonConnected(nameOverride: 'daemon.connected');
+
+  const FlutterDaemonConstants({String? nameOverride})
+      : _nameOverride = nameOverride;
+
+  final String? _nameOverride;
+
+  String get key => _nameOverride ?? name;
 }
