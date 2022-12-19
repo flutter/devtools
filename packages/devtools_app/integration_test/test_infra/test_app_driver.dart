@@ -15,10 +15,12 @@ class TestFlutterApp extends _TestApp {
   TestFlutterApp({String appPath = 'test/test_infra/fixtures/flutter_app'})
       : super(appPath);
 
+  static const _appStartTimeout = Duration(seconds: 120);
+
   Directory get workingDirectory => Directory(testAppPath);
 
   @override
-  Future<void> startProcess() async {
+  Future<void> start() async {
     runProcess = await Process.start(
       'flutter',
       [
@@ -28,56 +30,17 @@ class TestFlutterApp extends _TestApp {
         'flutter-tester',
       ],
     );
-  }
-}
-
-// TODO(kenz): implement for running integration tests against a Dart CLI app.
-class TestDartCliApp {}
-
-abstract class _TestApp with IOMixin {
-  _TestApp(this.testAppPath);
-
-  static const _appStartTimeout = Duration(seconds: 120);
-
-  static const _defaultTimeout = Duration(seconds: 40);
-
-  static const _quitTimeout = Duration(seconds: 10);
-
-  /// The path relative to the 'devtools_app' directory where the test app
-  /// lives.
-  ///
-  /// This will either be a file path or a directory path depending on the type
-  /// of app.
-  final String testAppPath;
-
-  late Process? runProcess;
-
-  late int runProcessId;
-
-  final _allMessages = StreamController<String>.broadcast();
-
-  Uri get vmServiceUri => _vmServiceWsUri;
-  late Uri _vmServiceWsUri;
-
-  Future<void> startProcess();
-
-  Future<void> start() async {
-    await startProcess();
-    assert(
-      runProcess != null,
-      '\'runProcess\' cannot be null. Assign \'runProcess\' inside the '
-      '\'startProcess\' method.',
-    );
+    final process = runProcess!;
 
     // This class doesn't use the result of the future. It's made available
     // via a getter for external uses.
     unawaited(
-      runProcess!.exitCode.then((int code) {
+      process.exitCode.then((int code) {
         _debugPrint('Process exited ($code)');
       }),
     );
 
-    listenToProcessOutput(runProcess!, printCallback: _debugPrint);
+    listenToProcessOutput(process, printCallback: _debugPrint);
 
     // Stash the PID so that we can terminate the VM more reliably than using
     // proc.kill() (because proc is a shell, because `flutter` is a shell
@@ -108,6 +71,60 @@ abstract class _TestApp with IOMixin {
 
     await started;
   }
+}
+
+class TestDartCliApp extends _TestApp {
+  TestDartCliApp({String appPath = 'test/test_infra/fixtures/empty_app.dart'})
+      : super(appPath);
+
+  @override
+  Future<void> start() async {
+    runProcess = await Process.start(
+      'dart',
+      [
+        'run',
+        testAppPath,
+      ],
+    );
+    final process = runProcess!;
+    runProcessId = process.pid;
+
+    // This class doesn't use the result of the future. It's made available
+    // via a getter for external uses.
+    unawaited(
+      process.exitCode.then((int code) {
+        _debugPrint('Process exited ($code)');
+      }),
+    );
+
+    listenToProcessOutput(process, printCallback: _debugPrint);
+  }
+}
+
+abstract class _TestApp with IOMixin {
+  _TestApp(this.testAppPath);
+
+  static const _defaultTimeout = Duration(seconds: 40);
+
+  static const _quitTimeout = Duration(seconds: 10);
+
+  /// The path relative to the 'devtools_app' directory where the test app
+  /// lives.
+  ///
+  /// This will either be a file path or a directory path depending on the type
+  /// of app.
+  final String testAppPath;
+
+  late Process? runProcess;
+
+  late int runProcessId;
+
+  final _allMessages = StreamController<String>.broadcast();
+
+  Uri get vmServiceUri => _vmServiceWsUri;
+  late Uri _vmServiceWsUri;
+
+  Future<void> start();
 
   Future<int> killGracefully() async {
     _debugPrint('Sending SIGTERM to $runProcessId..');

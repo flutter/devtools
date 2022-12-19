@@ -21,6 +21,21 @@ void main(List<String> args) async {
       .where((testFile) => testFile.path.endsWith(testSuffix));
   for (final testFile in testFiles) {
     final testTarget = testFile.path;
-    await runTest([...args, '${TestArgs.testTargetArg}$testTarget']);
+    await runFlutterIntegrationTest([
+      ...args,
+      '${TestArgs.testTargetArg}$testTarget',
+    ]);
+  }
+
+  final dartTestDirectory = Directory('integration_test/dart_test');
+  final dartTestFiles = dartTestDirectory
+      .listSync()
+      .where((testFile) => testFile.path.endsWith(testSuffix));
+  for (final testFile in dartTestFiles) {
+    final testTarget = testFile.path;
+    await runStandAloneDartTest([
+      ...args,
+      '${TestArgs.testTargetArg}$testTarget',
+    ]);
   }
 }

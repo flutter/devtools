@@ -4,12 +4,15 @@
 
 import 'dart:convert';
 
+import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/main.dart' as app;
 import 'package:devtools_app/src/app.dart';
 import 'package:devtools_app/src/framework/landing_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
+import 'package:vm_service/vm_service.dart';
+import 'package:vm_service/vm_service_io.dart';
 
 const safePumpDuration = Duration(seconds: 3);
 const longPumpDuration = Duration(seconds: 6);
@@ -71,10 +74,14 @@ class TestApp {
 
   final String vmServiceUri;
 
-  void init() {
-    // TODO(kenz): create a VmServiceWrapper object so that we can interact
-    // with the test app's VmService from Dart code. See the use of [vmService]
-    // in `test/test_infra/flutter_test_driver.dart`.
+  late final VmServiceWrapper vmService;
+
+  Future<void> init() async {
+    vmService = VmServiceWrapper(
+      await vmServiceConnectUri(vmServiceUri.toString()),
+      Uri.parse(vmServiceUri),
+      trackFutures: true,
+    );
   }
 }
 

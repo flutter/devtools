@@ -10,7 +10,10 @@ import 'package:collection/collection.dart';
 import 'io_utils.dart';
 import 'test_app_driver.dart';
 
-Future<void> runTest(List<String> args) async {
+Future<void> runFlutterIntegrationTest(
+  List<String> args, {
+  String testAppPath = 'test/test_infra/fixtures/flutter_app',
+}) async {
   final testRunnerArgs = TestArgs(args);
 
   TestFlutterApp? testApp;
@@ -19,7 +22,8 @@ Future<void> runTest(List<String> args) async {
   final bool shouldCreateTestApp = testRunnerArgs.testAppUri == null;
   if (shouldCreateTestApp) {
     // Create the test app and start it.
-    testApp = TestFlutterApp();
+    // TODO(kenz): support running Dart CLI test apps from here too.
+    testApp = TestFlutterApp(appPath: testAppPath);
     await testApp.start();
     testAppUri = testApp.vmServiceUri.toString();
   } else {
@@ -35,7 +39,7 @@ Future<void> runTest(List<String> args) async {
   final testRunner = TestRunner();
   await testRunner.run(
     testRunnerArgs.testTarget,
-    enableExperiements: testRunnerArgs.enableExperiments,
+    enableExperiments: testRunnerArgs.enableExperiments,
     updateGoldens: testRunnerArgs.updateGoldens,
     headless: testRunnerArgs.headless,
     testAppArguments: {
@@ -54,6 +58,35 @@ Future<void> runTest(List<String> args) async {
 
   _debugLog('killing the chromedriver process');
   chromedriver.kill();
+}
+
+Future<void> runStandAloneDartTest(
+  List<String> args, {
+  String testAppPath = 'test/test_infra/fixtures/empty_app.dart',
+}) async {
+  final testRunnerArgs = TestArgs(args);
+
+  TestDartCliApp? testApp;
+  late String testAppUri;
+
+  final bool shouldCreateTestApp = testRunnerArgs.testAppUri == null;
+  if (shouldCreateTestApp) {
+    // Create the test app and start it.
+    testApp = TestDartCliApp(appPath: testAppPath);
+    await testApp.start();
+    testAppUri = testApp.vmServiceUri.toString();
+  } else {
+    testAppUri = testRunnerArgs.testAppUri!;
+  }
+
+// start process to run dart test. flutter driver? dart test?
+
+  if (shouldCreateTestApp) {
+    _debugLog('killing the test app');
+    await testApp?.killGracefully();
+  }
+
+  // kill process to run dart test
 }
 
 class ChromeDriver with IoMixin {
@@ -82,7 +115,7 @@ class TestRunner with IoMixin {
   Future<void> run(
     String testTarget, {
     bool headless = false,
-    bool enableExperiements = false,
+    bool enableExperiments = false,
     bool updateGoldens = false,
     Map<String, Object> testAppArguments = const <String, Object>{},
   }) async {
@@ -98,7 +131,7 @@ class TestRunner with IoMixin {
         headless ? 'web-server' : 'chrome',
         if (testAppArguments.isNotEmpty)
           '--dart-define=test_args=${jsonEncode(testAppArguments)}',
-        if (enableExperiements) '--dart-define=enable_experiments=true',
+        if (enableExperiments) '--dart-define=enable_experiments=true',
         if (updateGoldens) '--dart-define=update_goldens=true',
       ],
     );
