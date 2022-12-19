@@ -13,11 +13,9 @@ import 'test_app_driver.dart';
 bool _debugTestScript = false;
 
 Future<void> runFlutterIntegrationTest(
-  List<String> args, {
+  TestArgs testRunnerArgs, {
   String testAppPath = 'test/test_infra/fixtures/flutter_app',
 }) async {
-  final testRunnerArgs = TestArgs(args);
-
   TestFlutterApp? testApp;
   late String testAppUri;
 
@@ -119,6 +117,8 @@ void _debugLog(String log) {
   }
 }
 
+// TODO(https://github.com/flutter/devtools/issues/4970): use package:args to
+// parse these arguments.
 class TestArgs {
   TestArgs(List<String> args) {
     final argWithTestTarget =
