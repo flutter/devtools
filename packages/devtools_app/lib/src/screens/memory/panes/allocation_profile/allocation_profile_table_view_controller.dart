@@ -64,8 +64,11 @@ class AllocationProfileTableViewController extends DisposableController
     final service = serviceManager.service;
     if (service == null) return;
     _currentAllocationProfile.value = null;
+
     final isolate = serviceManager.isolateManager.selectedIsolate.value;
-    final allocationProfile = await service.getAllocationProfile(isolate!.id!);
+    if (isolate == null) return;
+
+    final allocationProfile = await service.getAllocationProfile(isolate.id!);
     _currentAllocationProfile.value =
         AdaptedAllocationProfile.fromAllocationProfile(allocationProfile);
   }
