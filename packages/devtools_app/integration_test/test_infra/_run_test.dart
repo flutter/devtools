@@ -10,12 +10,12 @@ import 'package:collection/collection.dart';
 import 'io_utils.dart';
 import 'test_app_driver.dart';
 
+bool _debugTestScript = false;
+
 Future<void> runFlutterIntegrationTest(
-  List<String> args, {
+  TestArgs testRunnerArgs, {
   String testAppPath = 'test/test_infra/fixtures/flutter_app',
 }) async {
-  final testRunnerArgs = TestArgs(args);
-
   TestFlutterApp? testApp;
   late String testAppUri;
 
@@ -89,7 +89,7 @@ Future<void> runStandAloneDartTest(
   // kill process to run dart test
 }
 
-class ChromeDriver with IoMixin {
+class ChromeDriver with IOMixin {
   late final Process _process;
 
   // TODO(kenz): add error messaging if the chromedriver executable is not
@@ -111,7 +111,7 @@ class ChromeDriver with IoMixin {
   }
 }
 
-class TestRunner with IoMixin {
+class TestRunner with IOMixin {
   Future<void> run(
     String testTarget, {
     bool headless = false,
@@ -143,13 +143,14 @@ class TestRunner with IoMixin {
   }
 }
 
-bool _debugTestScript = true;
 void _debugLog(String log) {
   if (_debugTestScript) {
     print(log);
   }
 }
 
+// TODO(https://github.com/flutter/devtools/issues/4970): use package:args to
+// parse these arguments.
 class TestArgs {
   TestArgs(List<String> args) {
     final argWithTestTarget =
