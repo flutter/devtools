@@ -26,7 +26,6 @@ void main() async {
   late MockLoggingController mockLoggingController;
   const windowSize = Size(1000.0, 1000.0);
 
-  await ensureInspectorDependencies();
   mockLoggingController = MockLoggingController();
 
   final FakeServiceManager fakeServiceManager = FakeServiceManager();

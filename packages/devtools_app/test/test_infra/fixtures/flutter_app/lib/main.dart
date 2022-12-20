@@ -3,10 +3,9 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-
-// ignore: unused_import
+// Unused imports are useful for testing autocomplete.
+// ignore_for_file: unused_import
 import 'src/autocomplete.dart';
-// ignore: unused_import
 import 'src/other_classes.dart';
 
 void main() => runApp(MyApp());

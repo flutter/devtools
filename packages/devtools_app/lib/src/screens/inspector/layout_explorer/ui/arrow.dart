@@ -135,7 +135,6 @@ class ArrowWrapper extends StatelessWidget {
 class ArrowWidget extends StatelessWidget {
   ArrowWidget({
     this.color = defaultArrowColor,
-    // ignore: always_require_non_null_named_parameters
     required this.headSize,
     Key? key,
     this.shouldDrawHead = true,
@@ -176,7 +175,6 @@ class ArrowWidget extends StatelessWidget {
 
 class _ArrowPainter extends CustomPainter {
   _ArrowPainter({
-    // ignore: always_require_non_null_named_parameters
     required this.headSize,
     this.strokeWidth = defaultArrowStrokeWidth,
     this.color = defaultArrowColor,

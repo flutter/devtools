@@ -73,7 +73,7 @@ class TestRenderingFlutterBinding extends BindingBase
   /// The returned iterable takes errors lazily. If, for example, you iterate over 2
   /// errors, but there are 5 errors total, this binding will still fail the test.
   /// Tests are expected to take and inspect all errors.
-  Iterable<dynamic> takeAllFlutterExceptions() sync* {
+  Iterable<Object> takeAllFlutterExceptions() sync* {
     // sync* and yield are used for lazy evaluation. Otherwise, the list would be
     // drained eagerly and allow a test pass with unexpected errors.
     while (_errors.isNotEmpty) {

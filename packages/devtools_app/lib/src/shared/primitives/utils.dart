@@ -284,7 +284,8 @@ String pluralize(String word, int count, {String? plural}) =>
 /// `GestureBinding.handleBeginFrame`.
 ///
 /// See (https://github.com/dart-lang/sdk/issues/36999).
-String getSimpleStackFrameName(String name) {
+String getSimpleStackFrameName(String? name) {
+  name ??= '';
   final newName = name.replaceAll('<anonymous closure>', '<closure>');
 
   // If the class name contains a space, then it is not a valid Dart name. We
@@ -430,7 +431,7 @@ class JsonUtils {
   }
 
   static List<String> getValues(Map<String, Object> json, String member) {
-    final List<dynamic>? values = json[member] as List?;
+    final values = json[member] as List<Object?>?;
     if (values == null || values.isEmpty) {
       return const [];
     }
@@ -860,7 +861,7 @@ class DebugTimingLogger {
 class MovingAverage {
   MovingAverage({
     this.averagePeriod = 50,
-    this.ratio = .5,
+    this.ratio = 0.5,
     List<int>? newDataSet,
   }) : assert(ratio >= 0 && ratio <= 1, 'Value ratio $ratio is not 0 to 1.') {
     if (newDataSet != null) {
@@ -1216,7 +1217,7 @@ String prettyTimestamp(
 class ListValueNotifier<T> extends ChangeNotifier
     implements ValueListenable<List<T>> {
   /// Creates a [ListValueNotifier] that wraps this value [_rawList].
-  ListValueNotifier(List<T> rawList) : _rawList = List<T>.from(rawList) {
+  ListValueNotifier(List<T> rawList) : _rawList = List<T>.of(rawList) {
     _currentList = ImmutableList(_rawList);
   }
 
@@ -1486,7 +1487,6 @@ extension UriExtension on Uri {
     String? userInfo,
     String? host,
     int? port,
-    String? path,
     Iterable<String>? pathSegments,
     String? query,
     Map<String, dynamic>? queryParameters,

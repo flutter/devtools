@@ -223,15 +223,13 @@ class _FlexLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
             // if the axis is the main axis the type should be [MainAxisAlignment]
             // if the axis is the cross axis the type should be [CrossAxisAlignment]
             FlexLayoutProperties changedProperties;
-            if (axis == direction) {
-              changedProperties = propertiesLocal.copyWith(
-                mainAxisAlignment: newSelection as MainAxisAlignment?,
-              );
-            } else {
-              changedProperties = propertiesLocal.copyWith(
-                crossAxisAlignment: newSelection as CrossAxisAlignment?,
-              );
-            }
+            changedProperties = axis == direction
+                ? propertiesLocal.copyWith(
+                    mainAxisAlignment: newSelection as MainAxisAlignment?,
+                  )
+                : propertiesLocal.copyWith(
+                    crossAxisAlignment: newSelection as CrossAxisAlignment?,
+                  );
             final valueRef = propertiesLocal.node.valueRef;
             markAsDirty();
             await objectGroup!.invokeSetFlexProperties(
@@ -707,7 +705,7 @@ class FlexChildVisualizer extends StatelessWidget {
     final propertiesLocal = properties;
     final rootLocal = root;
 
-    Widget buildEntranceAnimation(BuildContext context, Widget? child) {
+    Widget buildEntranceAnimation(BuildContext _, Widget? child) {
       final vertical = rootLocal.isMainAxisVertical;
       final horizontal = rootLocal.isMainAxisHorizontal;
 

@@ -46,7 +46,7 @@ void main() {
       testWidgets('with 50% space to first child', (WidgetTester tester) async {
         final split = buildSplit(
           Axis.horizontal,
-          initialFractions: [0.50, 0.50],
+          initialFractions: [0.5, 0.5],
         );
         await tester.pumpWidget(wrap(split));
         expectEqualSizes(

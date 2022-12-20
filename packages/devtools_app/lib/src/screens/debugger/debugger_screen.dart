@@ -138,11 +138,13 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
               child: ValueListenableBuilder<bool>(
                 valueListenable: codeViewController.fileExplorerVisible,
                 builder: (context, visible, child) {
+                  // Conditional expression
+                  // ignore: prefer-conditional-expression
                   if (visible) {
                     // TODO(devoncarew): Animate this opening and closing.
                     return Split(
                       axis: Axis.horizontal,
-                      initialFractions: const [0.70, 0.30],
+                      initialFractions: const [0.7, 0.3],
                       children: [
                         child!,
                         OutlineDecoration(
@@ -184,7 +186,9 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
                       debuggerController: controller,
                       scriptRef: scriptRef,
                       parsedScript: parsedScript,
-                      onSelected: breakpointManager.toggleBreakpoint,
+                      onSelected: (script, line) => unawaited(
+                        breakpointManager.toggleBreakpoint(script, line),
+                      ),
                     );
                   },
                 ),
@@ -211,7 +215,7 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
       builder: (context, constraints) {
         return FlexSplitColumn(
           totalHeight: constraints.maxHeight,
-          initialFractions: const [0.40, 0.40, 0.20],
+          initialFractions: const [0.4, 0.4, 0.2],
           minSizes: const [0.0, 0.0, 0.0],
           headers: <PreferredSizeWidget>[
             AreaPaneHeader(
@@ -264,7 +268,7 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
               child: ToolbarAction(
                 icon: Icons.delete,
                 onPressed: breakpoints.isNotEmpty
-                    ? breakpointManager.clearBreakpoints
+                    ? () => unawaited(breakpointManager.clearBreakpoints())
                     : null,
               ),
             ),
@@ -359,9 +363,14 @@ class _DebuggerStatusState extends State<DebuggerStatus> with AutoDisposeMixin {
   void initState() {
     super.initState();
 
-    addAutoDisposeListener(widget.controller.isPaused, _updateStatus);
+    addAutoDisposeListener(
+      widget.controller.isPaused,
+      () => unawaited(
+        _updateStatus(),
+      ),
+    );
 
-    _updateStatus();
+    unawaited(_updateStatus());
   }
 
   @override
@@ -369,7 +378,12 @@ class _DebuggerStatusState extends State<DebuggerStatus> with AutoDisposeMixin {
     super.didUpdateWidget(oldWidget);
 
     // todo: should we check that widget.controller != oldWidget.controller?
-    addAutoDisposeListener(widget.controller.isPaused, _updateStatus);
+    addAutoDisposeListener(
+      widget.controller.isPaused,
+      () => unawaited(
+        _updateStatus(),
+      ),
+    );
   }
 
   @override
@@ -381,7 +395,7 @@ class _DebuggerStatusState extends State<DebuggerStatus> with AutoDisposeMixin {
     );
   }
 
-  void _updateStatus() async {
+  Future<void> _updateStatus() async {
     final status = await _computeStatus();
     if (status != _status) {
       setState(() {
@@ -402,14 +416,15 @@ class _DebuggerStatusState extends State<DebuggerStatus> with AutoDisposeMixin {
     final reason =
         event.kind == EventKind.kPauseException ? ' on exception' : '';
 
-    final scriptUri = frame?.location?.script?.uri;
+    final location = frame?.location;
+    final scriptUri = location?.script?.uri;
     if (scriptUri == null) {
       return 'paused$reason';
     }
 
     final fileName = ' at ' + scriptUri.split('/').last;
-    final tokenPos = frame?.location?.tokenPos;
-    final scriptRef = frame?.location?.script;
+    final tokenPos = location?.tokenPos;
+    final scriptRef = location?.script;
     if (tokenPos == null || scriptRef == null) {
       return 'paused$reason$fileName';
     }

@@ -9,7 +9,7 @@ import 'package:mockito/mockito.dart';
 
 // TODO(kenz): add better test coverage for [PerformanceController].
 
-void main() async {
+void main() {
   late PerformanceController controller;
   late MockServiceConnectionManager mockServiceManager;
 
@@ -31,17 +31,17 @@ void main() async {
       controller = PerformanceController();
     });
 
-    test('setActiveFeature', () {
+    test('setActiveFeature', () async {
       expect(controller.flutterFramesController.isActiveFeature, isTrue);
       expect(controller.timelineEventsController.isActiveFeature, isFalse);
       expect(controller.rasterStatsController.isActiveFeature, isFalse);
 
-      controller.setActiveFeature(controller.timelineEventsController);
+      await controller.setActiveFeature(controller.timelineEventsController);
       expect(controller.flutterFramesController.isActiveFeature, isTrue);
       expect(controller.timelineEventsController.isActiveFeature, isTrue);
       expect(controller.rasterStatsController.isActiveFeature, isFalse);
 
-      controller.setActiveFeature(controller.rasterStatsController);
+      await controller.setActiveFeature(controller.rasterStatsController);
       expect(controller.flutterFramesController.isActiveFeature, isTrue);
       expect(controller.timelineEventsController.isActiveFeature, isFalse);
       expect(controller.rasterStatsController.isActiveFeature, isTrue);

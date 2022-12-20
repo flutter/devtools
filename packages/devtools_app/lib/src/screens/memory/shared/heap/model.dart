@@ -39,8 +39,8 @@ class AdaptedHeapData {
     final createdJson = json[_JsonFields.created];
 
     return AdaptedHeapData(
-      (json[_JsonFields.objects] as List<dynamic>)
-          .map((e) => AdaptedHeapObject.fromJson(e))
+      (json[_JsonFields.objects] as List<Object?>)
+          .map((e) => AdaptedHeapObject.fromJson(e as Map<String, Object?>))
           .toList(),
       created: createdJson == null ? null : DateTime.parse(createdJson),
       rootIndex: json[_JsonFields.rootIndex] ?? _defaultRootIndex,
@@ -238,21 +238,21 @@ class AdaptedHeapObject {
   factory AdaptedHeapObject.fromHeapSnapshotObject(HeapSnapshotObject object) {
     return AdaptedHeapObject(
       code: object.identityHashCode,
-      references: List.from(object.references),
+      references: List.of(object.references),
       heapClass: HeapClassName.fromHeapSnapshotClass(object.klass),
       shallowSize: object.shallowSize,
     );
   }
 
-  factory AdaptedHeapObject.fromJson(Map<String, dynamic> json) =>
+  factory AdaptedHeapObject.fromJson(Map<String, Object?> json) =>
       AdaptedHeapObject(
-        code: json[_JsonFields.code],
-        references: (json[_JsonFields.references] as List<dynamic>).cast<int>(),
+        code: json[_JsonFields.code] as int,
+        references: (json[_JsonFields.references] as List<Object?>).cast<int>(),
         heapClass: HeapClassName(
-          className: json[_JsonFields.klass],
+          className: json[_JsonFields.klass] as String,
           library: json[_JsonFields.library],
         ),
-        shallowSize: json[_JsonFields.shallowSize] ?? 0,
+        shallowSize: (json[_JsonFields.shallowSize] ?? 0) as int,
       );
 
   final List<int> references;

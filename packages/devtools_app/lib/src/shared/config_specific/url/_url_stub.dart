@@ -12,4 +12,6 @@ String? getWebUrl() => null;
 /// Performs a web redirect using window.location.replace().
 ///
 /// No-op for non-web platforms.
+// Unused parameter lint doesn't make sense for stub files.
+// ignore: avoid-unused-parameters
 void webRedirect(String url) {}

@@ -130,29 +130,9 @@ class _ConnectDialogState extends State<ConnectDialog>
 
   @override
   Widget build(BuildContext context) {
-    return LandingScreenSection(
-      title: 'Connect',
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Connect to a Running App',
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
-          const SizedBox(height: denseRowSpacing),
-          Text(
-            'Enter a URL to a running Dart or Flutter application',
-            style: Theme.of(context).textTheme.bodySmall,
-          ),
-          const Padding(padding: EdgeInsets.only(top: 20.0)),
-          _buildConnectInput(),
-        ],
-      ),
-    );
-  }
+    final textTheme = Theme.of(context).textTheme;
 
-  Widget _buildConnectInput() {
-    return Column(
+    final connectorInput = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Row(
@@ -177,7 +157,7 @@ class _ConnectDialogState extends State<ConnectDialog>
             ),
             const SizedBox(width: defaultSpacing),
             ElevatedButton(
-              onPressed: actionInProgress ? null : _connect,
+              onPressed: actionInProgress ? null : () => unawaited(_connect()),
               child: const Text('Connect'),
             ),
           ],
@@ -191,6 +171,26 @@ class _ConnectDialogState extends State<ConnectDialog>
           ),
         ),
       ],
+    );
+
+    return LandingScreenSection(
+      title: 'Connect',
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Connect to a Running App',
+            style: textTheme.titleMedium,
+          ),
+          const SizedBox(height: denseRowSpacing),
+          Text(
+            'Enter a URL to a running Dart or Flutter application',
+            style: textTheme.bodySmall,
+          ),
+          const Padding(padding: EdgeInsets.only(top: 20.0)),
+          connectorInput,
+        ],
+      ),
     );
   }
 
@@ -251,6 +251,7 @@ class ImportFileInstructions extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
     return LandingScreenSection(
       title: 'Load DevTools Data',
       child: Column(
@@ -258,13 +259,13 @@ class ImportFileInstructions extends StatelessWidget {
         children: [
           Text(
             'Import a data file to use DevTools without an app connection.',
-            style: Theme.of(context).textTheme.titleMedium,
+            style: textTheme.titleMedium,
           ),
           const SizedBox(height: denseRowSpacing),
           Text(
             'At this time, DevTools only supports importing files that were originally'
             ' exported from DevTools.',
-            style: Theme.of(context).textTheme.bodySmall,
+            style: textTheme.bodySmall,
           ),
           const SizedBox(height: defaultSpacing),
           ElevatedButton(
@@ -300,6 +301,7 @@ class AppSizeToolingInstructions extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
     return LandingScreenSection(
       title: 'App Size Tooling',
       child: Column(
@@ -307,13 +309,13 @@ class AppSizeToolingInstructions extends StatelessWidget {
         children: [
           Text(
             'Analyze and view diffs for your app\'s size',
-            style: Theme.of(context).textTheme.titleMedium,
+            style: textTheme.titleMedium,
           ),
           const SizedBox(height: denseRowSpacing),
           Text(
             'Load Dart AOT snapshots or app size analysis files to '
             'track down size issues in your app.',
-            style: Theme.of(context).textTheme.bodySmall,
+            style: textTheme.bodySmall,
           ),
           const SizedBox(height: defaultSpacing),
           ElevatedButton(

@@ -110,19 +110,20 @@ class InspectorController extends DisposableController
     }
 
     autoDisposeStreamSubscription(
-      serviceManager.onConnectionAvailable.listen(_handleConnectionStart),
+      serviceManager.onConnectionAvailable
+          .listen((_) => _handleConnectionStart()),
     );
     if (serviceManager.connectedAppInitialized) {
-      _handleConnectionStart(serviceManager.service!);
+      _handleConnectionStart();
     }
     autoDisposeStreamSubscription(
-      serviceManager.onConnectionClosed.listen(_handleConnectionStop),
+      serviceManager.onConnectionClosed.listen((_) => _handleConnectionStop()),
     );
 
     serviceManager.consoleService.ensureServiceInitialized();
   }
 
-  void _handleConnectionStart(VmService service) {
+  void _handleConnectionStart() {
     // Clear any existing badge/errors for older errors that were collected.
     // Do this in a post frame callback so that we are not trying to clear the
     // error notifiers for this screen while the framework is already in the
@@ -135,7 +136,7 @@ class InspectorController extends DisposableController
     filterErrors();
   }
 
-  void _handleConnectionStop(dynamic event) {
+  void _handleConnectionStop() {
     setActivate(false);
     if (isSummaryTree) {
       dispose();
@@ -895,6 +896,8 @@ class InspectorController extends DisposableController
     }
   }
 
+  // TODO(jacobr): implement this method and use the parameter.
+  // ignore: avoid-unused-parameters
   void _navigateTo(RemoteDiagnosticsNode diagnostic) {
     // TODO(jacobr): dispatch an event over the inspectorService requesting a
     //  navigate operation.
@@ -946,7 +949,7 @@ class InspectorController extends DisposableController
     );
   }
 
-  Future<void> collapseDetailsToSelected() async {
+  void collapseDetailsToSelected() {
     final detailsLocal = details!;
     detailsLocal.inspectorTree.collapseToSelected();
     detailsLocal.animateTo(detailsLocal.inspectorTree.selection);

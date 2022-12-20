@@ -22,8 +22,9 @@ import '../analytics/analytics.dart' as ga;
 bool _debugAnalytics = false;
 
 @JS('gtag')
-external void _gTagCommandName(String command, String name, [dynamic params]);
+external void _gTagCommandName(String command, String name, [Object? params]);
 
+// TODO(jacobr): refactor this code if we do not migrate off gtags.
 // ignore: avoid_classes_with_only_static_members
 class GTag {
   static const String _event = 'event';
@@ -60,7 +61,7 @@ class GtagEvent {
 
     int value = 0,
     bool non_interaction = false,
-    dynamic custom_map,
+    Object? custom_map,
   });
 
   external String? get event_category;
@@ -72,7 +73,7 @@ class GtagEvent {
   external int get value; // Positive number.
   external bool get non_interaction;
 
-  external dynamic get custom_map; // Custom metrics
+  external Object? get custom_map; // Custom metrics
 }
 
 @JS()

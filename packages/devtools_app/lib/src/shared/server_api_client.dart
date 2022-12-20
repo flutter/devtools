@@ -76,7 +76,7 @@ class DevToolsServerConnection {
   int _nextRequestId = 0;
   Notification? _lastNotification;
 
-  final Map<String, Completer> _completers = {};
+  final Map<String, Completer<Object?>> _completers = {};
 
   /// Tie the DevTools server connection to the framework controller.
   ///
@@ -130,7 +130,7 @@ class DevToolsServerConnection {
     return completer.future;
   }
 
-  void _handleMessage(dynamic msg) {
+  void _handleMessage(String msg) {
     try {
       final Map request = jsonDecode(msg);
 
@@ -176,7 +176,7 @@ class DevToolsServerConnection {
     }
   }
 
-  void _handleResponse(String id, dynamic result) {
+  void _handleResponse(String id, Object? result) {
     final completer = _completers.remove(id);
     completer?.complete(result);
   }

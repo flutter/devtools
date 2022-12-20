@@ -71,6 +71,7 @@ void main() {
     when(mockCodeViewController.showProfileInformation)
         .thenReturn(showProfileHits);
     refreshCodeCoverageInvoked = false;
+    // TODO(jacobr): is there a better way to clean this up?
     // ignore: discarded_futures
     when(mockCodeViewController.refreshCodeStatistics()).thenAnswer(
       (_) async => refreshCodeCoverageInvoked = true,

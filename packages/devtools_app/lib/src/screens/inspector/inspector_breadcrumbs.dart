@@ -93,7 +93,7 @@ class _InspectorBreadcrumb extends StatelessWidget {
   static const BorderRadius _borderRadius =
       BorderRadius.all(Radius.circular(defaultBorderRadius));
 
-  static const _iconScale = .75;
+  static const _iconScale = 0.75;
 
   final _InspectorBreadcrumbData data;
   final VoidCallback onTap;

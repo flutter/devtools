@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// Code needs to match API from VmService.
+// ignore_for_file: avoid-dynamic
+library vm_service_wrapper;
+
 import 'dart:async';
 
 import 'package:collection/collection.dart' show IterableExtension;

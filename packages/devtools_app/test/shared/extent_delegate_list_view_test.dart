@@ -48,7 +48,7 @@ void main() {
     testWidgets('builds successfully with customPointerSignalHandler',
         (tester) async {
       int pointerSignalEventCount = 0;
-      void _handlePointerSignal(PointerSignalEvent event) {
+      void _handlePointerSignal(PointerSignalEvent _) {
         pointerSignalEventCount++;
       }
 

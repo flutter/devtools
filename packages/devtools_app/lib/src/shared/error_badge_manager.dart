@@ -56,7 +56,7 @@ class ErrorBadgeManager extends DisposableController
     );
   }
 
-  void _handleExtensionEvent(Event e) async {
+  void _handleExtensionEvent(Event e) {
     if (e.extensionKind == 'Flutter.Error') {
       incrementBadgeCount(LoggingScreen.id);
 
@@ -97,7 +97,7 @@ class ErrorBadgeManager extends DisposableController
     return InspectableWidgetError(errorMessage, inspectorRef);
   }
 
-  void _handleStdErr(Event e) {
+  void _handleStdErr(Event _) {
     incrementBadgeCount(LoggingScreen.id);
   }
 

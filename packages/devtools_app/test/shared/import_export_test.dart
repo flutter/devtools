@@ -102,17 +102,17 @@ void main() async {
 final nonDevToolsFileJson = DevToolsJsonFile(
   name: 'nonDevToolsFileJson',
   lastModifiedTime: DateTime.fromMicrosecondsSinceEpoch(1000),
-  data: <String, dynamic>{},
+  data: <String, Object?>{},
 );
 final nonDevToolsFileJsonWithListData = DevToolsJsonFile(
   name: 'nonDevToolsFileJsonWithListData',
   lastModifiedTime: DateTime.fromMicrosecondsSinceEpoch(1000),
-  data: <Map<String, dynamic>>[],
+  data: <Map<String, Object?>>[],
 );
 final devToolsFileJson = DevToolsJsonFile(
   name: 'devToolsFileJson',
   lastModifiedTime: DateTime.fromMicrosecondsSinceEpoch(2000),
-  data: <String, dynamic>{
+  data: <String, Object?>{
     'devToolsSnapshot': true,
     'activeScreenId': 'example',
     'example': {'title': 'example custom tools'}

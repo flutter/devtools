@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+library debugger;
+
 import 'package:devtools_shared/devtools_test_utils.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -356,7 +358,7 @@ class DebuggingManager {
   Future<List<String>> getVariables() async {
     final AppResponse response =
         await tools.tabInstance.send('debugger.getVariables');
-    final List<dynamic> result = response.result as List;
+    final List<Object?> result = response.result as List<Object?>;
     return result.cast<String>();
   }
 
@@ -387,14 +389,14 @@ class DebuggingManager {
   Future<List<String>> getBreakpoints() async {
     final AppResponse response =
         await tools.tabInstance.send('debugger.getBreakpoints');
-    final List<dynamic> result = response.result as List;
+    final result = response.result as List<Object?>;
     return result.cast<String>();
   }
 
   Future<List<String>> getScripts() async {
     final AppResponse response =
         await tools.tabInstance.send('debugger.getScripts');
-    final List<dynamic> result = response.result as List;
+    final result = response.result as List<Object?>;
     return result.cast<String>();
   }
 
@@ -407,7 +409,7 @@ class DebuggingManager {
   Future<List<String>> getCallStackFrames() async {
     final AppResponse response =
         await tools.tabInstance.send('debugger.getCallStackFrames');
-    final List<dynamic> result = response.result as List;
+    final result = response.result as List<Object?>;
     return result.cast<String>();
   }
 }

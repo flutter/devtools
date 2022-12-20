@@ -173,7 +173,6 @@ class ChartPainter extends CustomPainter {
       (canavas) {
         drawAxes(
           canvas,
-          size,
           axis,
           displayX: chartController.displayXAxis,
         );
@@ -352,7 +351,6 @@ class ChartPainter extends CustomPainter {
                   drawSelection(
                     canvas,
                     xCanvasCoord,
-                    chartController.canvasChartHeight,
                   );
                 },
               );
@@ -446,7 +444,6 @@ class ChartPainter extends CustomPainter {
 
   void drawAxes(
     Canvas canvas,
-    Size size,
     Paint axis, {
     bool displayX = true,
     bool displayY = true,
@@ -474,7 +471,7 @@ class ChartPainter extends CustomPainter {
     }
   }
 
-  void drawSelection(Canvas canvas, double x, double y) {
+  void drawSelection(Canvas canvas, double x) {
     final paint = Paint()
       ..strokeWidth = 2.0
       ..color = colorScheme.hoverSelectionBarColor;

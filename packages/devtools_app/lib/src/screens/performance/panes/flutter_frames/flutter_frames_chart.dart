@@ -28,6 +28,7 @@ import 'flutter_frame_model.dart';
 import 'flutter_frames_controller.dart';
 
 // Turn this flag on to see when flutter frames are linked with timeline events.
+// ignore: avoid-global-state
 bool debugFrames = false;
 
 class FlutterFramesChart extends StatelessWidget {
@@ -443,11 +444,11 @@ class FlutterFramesChartItem extends StatelessWidget {
 
     if (debugFrames) {
       if (frame.timelineEventData.uiEvent == null) {
-        uiColor = uiColor.darken(.5);
+        uiColor = uiColor.darken(0.5);
       }
       if (frame.timelineEventData.rasterEvent == null) {
-        rasterColor = rasterColor.darken(.5);
-        shaderColor = shaderColor.darken(.5);
+        rasterColor = rasterColor.darken(0.5);
+        shaderColor = shaderColor.darken(0.5);
       }
     }
 
@@ -461,17 +462,16 @@ class FlutterFramesChartItem extends StatelessWidget {
       color: uiColor,
     );
 
-    final shaderToRasterRatio =
-        frame.shaderDuration.inMilliseconds / frame.rasterTime.inMilliseconds;
+    final shaderDuration = frame.shaderDuration.inMilliseconds;
+    final rasterTime = frame.rasterTime.inMilliseconds;
+    final shaderToRasterRatio = shaderDuration / rasterTime;
 
     final raster = Column(
       children: [
         Container(
           key: Key('frame ${frame.id} - raster'),
           width: defaultFrameWidth / 2,
-          height: ((frame.rasterTime.inMilliseconds -
-                      frame.shaderDuration.inMilliseconds) /
-                  msPerPx)
+          height: ((frame.rasterTime.inMilliseconds - shaderDuration) / msPerPx)
               .clamp(0.0, availableChartHeight * (1 - shaderToRasterRatio)),
           color: rasterColor,
         ),
@@ -479,7 +479,7 @@ class FlutterFramesChartItem extends StatelessWidget {
           Container(
             key: Key('frame ${frame.id} - shaders'),
             width: defaultFrameWidth / 2,
-            height: (frame.shaderDuration.inMilliseconds / msPerPx)
+            height: (shaderDuration / msPerPx)
                 .clamp(0.0, availableChartHeight * shaderToRasterRatio),
             color: shaderColor,
           ),

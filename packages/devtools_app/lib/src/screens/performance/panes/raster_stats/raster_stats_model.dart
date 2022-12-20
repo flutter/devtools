@@ -117,7 +117,7 @@ class LayerSnapshot {
       (json[_topKey] as num).toDouble(),
     );
     final imageBytes = Uint8List.fromList(
-      (json[_snapshotJsonKey] as List<dynamic>).cast<int>(),
+      (json[_snapshotJsonKey] as List<Object?>).cast<int>(),
     );
     return LayerSnapshot(
       id: id,

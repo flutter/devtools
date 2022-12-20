@@ -96,8 +96,8 @@ class LocationMap {
     return location;
   }
 
-  Map<String, dynamic> toJson() {
-    final json = <String, dynamic>{};
+  Map<String, Object> toJson() {
+    final json = <String, Object>{};
     final pathToLocations = <String, List<Location>>{};
     for (var location in _locationMap.values) {
       if (location.isResolved) {
@@ -181,11 +181,11 @@ class LocationMap {
 class RebuildCountModel {
   RebuildCountModel();
 
-  RebuildCountModel.parse(Map<String, dynamic> json) {
+  RebuildCountModel.parse(Map<String, Object?> json) {
     if (json.isEmpty) return;
-    locationMap.processLocationMap(json[_locationsKey]);
+    locationMap.processLocationMap(json[_locationsKey] as Map<String, Object?>);
     final frames =
-        (json[_framesKey] as List<dynamic>).cast<Map<String, dynamic>>();
+        (json[_framesKey] as List<Object?>).cast<Map<String, Object?>>();
     frames.forEach(processRebuildsForFrame);
   }
 
@@ -211,12 +211,12 @@ class RebuildCountModel {
 
   bool get isNotEmpty => _rebuildsForFrame.isNotEmpty;
 
-  Map<String, dynamic>? toJson() {
+  Map<String, Object?>? toJson() {
     if (_rebuildsForFrame.isEmpty) {
       // No need to encode data unless there were actually rebuilds reported.
       return null;
     }
-    final frames = <dynamic>[];
+    final frames = <Object>[];
 
     _rebuildsForFrame.forEach((id, rebuilds) {
       final events = <int>[];
@@ -227,7 +227,7 @@ class RebuildCountModel {
       }
       frames.add({_frameNumberKey: id, _eventsKey: events});
     });
-    return <String, dynamic>{
+    return <String, Object?>{
       _locationsKey: locationMap.toJson(),
       _framesKey: frames,
     };

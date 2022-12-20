@@ -140,7 +140,7 @@ class OpenAboutAction extends StatelessWidget {
     return DevToolsTooltip(
       message: 'About DevTools',
       child: InkWell(
-        onTap: () async {
+        onTap: () {
           unawaited(
             showDialog(
               context: context,

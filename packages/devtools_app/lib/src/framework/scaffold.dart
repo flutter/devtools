@@ -164,7 +164,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
     );
     // This needs to be called at the scaffold level because we need an instance
     // of Notifications above this context.
-    surveyService.maybeShowSurveyPrompt(context);
+    surveyService.maybeShowSurveyPrompt();
   }
 
   @override
@@ -336,7 +336,9 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
                 child: Scaffold(
                   appBar: widget.embed
                       ? null
-                      : _buildAppBar(scaffoldTitle) as PreferredSizeWidget?,
+                      :
+                      // ignore: avoid-returning-widgets as that would make code more verbose for no clear benefit in this case.
+                      _buildAppBar(scaffoldTitle),
                   body: (serviceManager.connectedAppInitialized &&
                           !serviceManager.connectedApp!.isProfileBuildNow! &&
                           !offlineController.offlineMode.value &&
@@ -371,7 +373,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
 
   /// Builds an [AppBar] with the [TabBar] placed on the side or the bottom,
   /// depending on the screen width.
-  Widget _buildAppBar(String title) {
+  PreferredSizeWidget _buildAppBar(String title) {
     Widget? flexibleSpace;
     late final Size preferredSize;
     TabBar tabBar;

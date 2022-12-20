@@ -102,7 +102,7 @@ class TimelineStreamManager extends Disposer {
   /// This method is responsible for updating the value of
   /// [TimelineStream.recorded] for each stream to match the value on the VM.
   @visibleForTesting
-  void handleTimelineEvent(Event event) async {
+  void handleTimelineEvent(Event event) {
     if (event.kind == EventKind.kTimelineStreamSubscriptionsUpdate) {
       final newRecordedStreams = event.updatedStreams ?? <String>[];
       for (final stream in _streams.values) {

@@ -19,6 +19,7 @@
 // ignore_for_file: unused_catch_clause
 // ignore_for_file: unused_element
 // ignore_for_file: unused_local_variable
+// ignore_for_file: prefer-moving-to-variable
 
 part of http;
 

@@ -171,7 +171,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   bool? _isLocalClass;
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (other is! RemoteDiagnosticsNode) return false;
     return dartDiagnosticRef == other.dartDiagnosticRef;
   }
@@ -283,7 +283,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   ///
   /// Only applies to IterableProperty.
   List<String>? get values {
-    final rawValues = json['values'] as List<Object>?;
+    final rawValues = json['values'] as List<Object?>?;
     if (rawValues == null) {
       return null;
     }
@@ -297,7 +297,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   /// interactive object debugger view to get more information on what the value
   /// is.
   List<bool>? get primitiveValues {
-    final rawValues = json['primitiveValues'] as List<Object>?;
+    final rawValues = json['primitiveValues'] as List<Object?>?;
     if (rawValues == null) {
       return null;
     }
@@ -520,7 +520,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
     // that indicates the node should have no children in the tree while if the
     // 'children' property is not specified it means we do not know whether
     // there is a list of children and need to query the server to find out.
-    final children = json['children'] as List<dynamic>?;
+    final children = json['children'] as List<Object?>?;
     if (children != null) {
       return children.isNotEmpty;
     }
@@ -574,7 +574,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
     }
   }
 
-  Future<List<RemoteDiagnosticsNode>> _getChildrenHelper() async {
+  Future<List<RemoteDiagnosticsNode>> _getChildrenHelper() {
     return inspectorService!.getChildren(
       dartDiagnosticRef,
       isSummaryTree,
