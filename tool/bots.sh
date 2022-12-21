@@ -72,9 +72,6 @@ echo `pwd`
 
 if [ "$BOT" = "main" ]; then
 
-    # Provision our packages.
-    flutter pub get
-
     # Verify that dart format has been run.
     echo "Checking formatting..."
     # Here, we use the dart instance from the flutter sdk.
@@ -103,16 +100,10 @@ if [ "$BOT" = "main" ]; then
 
 elif [ "$BOT" = "build_ddc" ]; then
 
-    # Provision our packages.
-    flutter pub get
-
     # TODO(https://github.com/flutter/flutter/issues/43538): Remove workaround.
     flutter build web --pwa-strategy=none --no-tree-shake-icons
 
 elif [ "$BOT" = "build_dart2js" ]; then
-
-    # Provision our packages.
-    flutter pub get
 
     flutter build web --release
 
@@ -144,10 +135,6 @@ elif [[ "$BOT" == "test_ddc" || "$BOT" == "test_dart2js" ]]; then
 
 elif [ "$BOT" = "integration_ddc" ]; then
 
-    # Provision our packages.
-    flutter pub get
-    flutter config --enable-web
-
     # TODO(https://github.com/flutter/devtools/issues/1987): rewrite integration tests.
     # We need to run integration tests with -j1 to run with no concurrency.
     # flutter test -j1 test/integration_tests/
@@ -155,11 +142,10 @@ elif [ "$BOT" = "integration_ddc" ]; then
 elif [ "$BOT" = "integration_dart2js" ]; then
 
     flutter pub get
-    flutter config --enable-web
 
     # TODO(https://github.com/flutter/devtools/issues/1987): rewrite integration tests.
-    # We need to run integration tests with -j1 to run with no concurrency.
-    # WEBDEV_RELEASE=true flutter test -j1 test/integration_tests/
+    # TODO(kenz): does this bot fail if the test fails? Or do we need to rethrow from the dart script?
+    dart run integration_test/run_tests.dart --target=integration_test/test/app_test.dart --headless
 
 else
 
