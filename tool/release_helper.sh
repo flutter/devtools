@@ -21,7 +21,7 @@ fi
 
 MASTER="tmp_master_$(date +%s)"
 git fetch $DEVTOOLS_REMOTE master
-git switch -c $MASTER $DEVTOOLS_REMOTE/master
+git checkout -b $MASTER $DEVTOOLS_REMOTE/master
 
 
 RELEASE_BRANCH="clean_release_$(date +%s)"
