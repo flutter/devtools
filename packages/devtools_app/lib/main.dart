@@ -21,6 +21,10 @@ import 'src/shared/preferences.dart';
 import 'src/shared/primitives/url_utils.dart';
 
 void main() async {
+  await runDevTools();
+}
+
+Future<void> runDevTools({bool shouldEnableExperiments = false}) async {
   // Before switching to URL path strategy, check if this URL is in the legacy
   // fragment format and redirect if necessary.
   if (_handleLegacyUrl()) return;

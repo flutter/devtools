@@ -48,7 +48,7 @@ Future<void> runFlutterIntegrationTest(
 
   if (shouldCreateTestApp) {
     _debugLog('killing the test app');
-    await testApp?.killGracefully();
+    await testApp?.stop();
   }
 
   _debugLog('cancelling stream subscriptions');
