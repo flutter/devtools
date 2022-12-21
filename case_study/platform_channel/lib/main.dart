@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import 'channel_demo.dart';
@@ -30,9 +32,11 @@ class _HomePage extends StatelessWidget {
         child: TextButton(
           style: TextButton.styleFrom(backgroundColor: Colors.green),
           onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => ChannelDemo()),
+            unawaited(
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => ChannelDemo()),
+              ),
             );
           },
           child: const Text(

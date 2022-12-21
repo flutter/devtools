@@ -5,7 +5,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-import '../../primitives/auto_dispose_mixin.dart';
+import '../../shared/primitives/auto_dispose.dart';
+import '../../shared/primitives/simple_items.dart';
 import '../../shared/screen.dart';
 import '../../shared/theme.dart';
 import '../../shared/utils.dart';
@@ -39,15 +40,15 @@ abstract class VMDeveloperView {
 }
 
 class VMDeveloperToolsScreen extends Screen {
-  const VMDeveloperToolsScreen()
+  VMDeveloperToolsScreen()
       : super.conditional(
           id: id,
-          title: 'VM Tools',
+          title: ScreenMetaData.vmTools.title,
           icon: Icons.settings_applications,
           requiresVmDeveloperMode: true,
         );
 
-  static const id = 'vm-tools';
+  static final id = ScreenMetaData.vmTools.id;
 
   @override
   ValueListenable<bool> get showIsolateSelector =>

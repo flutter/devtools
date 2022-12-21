@@ -9,13 +9,14 @@ import 'package:collection/collection.dart' show IterableExtension;
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../primitives/auto_dispose.dart';
-import '../../primitives/message_bus.dart';
-import '../../primitives/utils.dart';
 import '../../service/isolate_state.dart';
 import '../../service/vm_service_wrapper.dart';
 import '../../shared/globals.dart';
 import '../../shared/object_tree.dart';
+import '../../shared/primitives/auto_dispose.dart';
+import '../../shared/primitives/message_bus.dart';
+import '../../shared/primitives/utils.dart';
+import '../../shared/routing.dart';
 import 'codeview_controller.dart';
 import 'debugger_model.dart';
 
@@ -30,10 +31,16 @@ class DebuggerController extends DisposableController
     with AutoDisposeControllerMixin {
   // `initialSwitchToIsolate` can be set to false for tests to skip the logic
   // in `switchToIsolate`.
-  DebuggerController({this.initialSwitchToIsolate = true}) {
+  DebuggerController({
+    DevToolsRouterDelegate? routerDelegate,
+    this.initialSwitchToIsolate = true,
+  }) {
     autoDisposeStreamSubscription(
       serviceManager.onConnectionAvailable.listen(_handleConnectionAvailable),
     );
+    if (routerDelegate != null) {
+      codeViewController.subscribeToRouterEvents(routerDelegate);
+    }
     if (serviceManager.hasService) {
       initialize();
     }
@@ -60,7 +67,7 @@ class DebuggerController extends DisposableController
     _clearCaches();
 
     _hasTruncatedFrames.value = false;
-    _getStackOperation?.cancel();
+    unawaited(_getStackOperation?.cancel());
     _getStackOperation = null;
 
     isolateRef = null;
@@ -377,7 +384,7 @@ class DebuggerController extends DisposableController
     if (_resuming.value &&
         event.isolate!.id != _isolateRefId &&
         event.kind == EventKind.kPauseStart) {
-      _resumeIsolatePauseStart(event);
+      unawaited(_resumeIsolatePauseStart(event));
     }
 
     if (event.isolate!.id != _isolateRefId) return;
@@ -386,7 +393,7 @@ class DebuggerController extends DisposableController
 
     switch (event.kind) {
       case EventKind.kResume:
-        _pause(false);
+        unawaited(_pause(false));
         break;
       case EventKind.kPauseStart:
       case EventKind.kPauseExit:
@@ -397,7 +404,7 @@ class DebuggerController extends DisposableController
         // Any event we receive here indicates that any resume/step request has been
         // processed.
         _resuming.value = false;
-        _pause(true, pauseEvent: event);
+        unawaited(_pause(true, pauseEvent: event));
         break;
     }
   }
@@ -457,9 +464,11 @@ class DebuggerController extends DisposableController
   /// This method ensures that the source for the script is populated in our
   /// cache, in order to reduce flashing in the editor view.
   void _populateScriptAndShowLocation(ScriptRef scriptRef) {
-    scriptManager.getScript(scriptRef).then((script) {
-      codeViewController.showScriptLocation(ScriptLocation(scriptRef));
-    });
+    unawaited(
+      scriptManager.getScript(scriptRef).then((script) {
+        codeViewController.showScriptLocation(ScriptLocation(scriptRef));
+      }),
+    );
   }
 
   final _hasTruncatedFrames = ValueNotifier<bool>(false);
@@ -625,11 +634,8 @@ class DebuggerController extends DisposableController
   void selectStackFrame(StackFrameAndSourcePosition? frame) {
     _selectedStackFrame.value = frame;
 
-    if (frame != null) {
-      _variables.value = _createVariablesForFrame(frame.frame);
-    } else {
-      _variables.value = [];
-    }
+    _variables.value =
+        frame != null ? _createVariablesForFrame(frame.frame) : [];
 
     final scriptRef = frame?.scriptRef;
     final position = frame?.position;

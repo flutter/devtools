@@ -3,12 +3,12 @@
 // found in the LICENSE file.
 
 @TestOn('vm')
-import 'package:devtools_app/src/primitives/extent_delegate_list.dart';
+import 'package:devtools_app/src/shared/primitives/extent_delegate_list.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../test_utils/extent_delegate_utils.dart';
-import '../test_utils/rendering_tester.dart';
+import '../test_infra/utils/extent_delegate_utils.dart';
+import '../test_infra/utils/rendering_tester.dart';
 
 void main() {
   group('RenderSliverFixedExtentDelgate', () {

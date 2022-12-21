@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
-import 'package:devtools_app/src/config_specific/import_export/import_export.dart';
 import 'package:devtools_app/src/framework/scaffold.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
+import 'package:devtools_app/src/shared/config_specific/ide_theme/ide_theme.dart';
+import 'package:devtools_app/src/shared/config_specific/import_export/import_export.dart';
 import 'package:devtools_app/src/shared/framework_controller.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_app/src/shared/notifications.dart';
@@ -47,7 +47,7 @@ void main() {
       wrapScaffold(
         wrapWithNotifications(
           DevToolsScaffold(
-            tabs: const [_screen1, _screen2, _screen3, _screen4, _screen5],
+            screens: const [_screen1, _screen2, _screen3, _screen4, _screen5],
             ideTheme: IdeTheme(),
           ),
         ),
@@ -65,7 +65,7 @@ void main() {
       wrapScaffold(
         wrapWithNotifications(
           DevToolsScaffold(
-            tabs: const [_screen1, _screen2, _screen3, _screen4, _screen5],
+            screens: const [_screen1, _screen2, _screen3, _screen4, _screen5],
             ideTheme: IdeTheme(),
           ),
         ),
@@ -82,7 +82,7 @@ void main() {
       wrapScaffold(
         wrapWithNotifications(
           DevToolsScaffold(
-            tabs: const [_screen1],
+            screens: const [_screen1],
             ideTheme: IdeTheme(),
           ),
         ),
@@ -97,7 +97,7 @@ void main() {
       wrapScaffold(
         wrapWithNotifications(
           DevToolsScaffold(
-            tabs: const [_screen1, _screen2],
+            screens: const [_screen1, _screen2],
             ideTheme: IdeTheme(),
           ),
         ),
@@ -126,7 +126,7 @@ void main() {
       wrapScaffold(
         wrapWithNotifications(
           DevToolsScaffold(
-            tabs: const [_screen1, _screen2],
+            screens: const [_screen1, _screen2],
             page: _screen2.screenId,
             ideTheme: IdeTheme(),
           ),

@@ -11,19 +11,19 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../analytics/analytics.dart' as ga;
-import '../config_specific/launch_url/launch_url.dart';
-import '../primitives/auto_dispose_mixin.dart';
-import '../primitives/flutter_widgets/linked_scroll_controller.dart';
-import '../primitives/utils.dart';
 import '../screens/debugger/debugger_controller.dart';
 import '../screens/debugger/variables.dart';
-import '../ui/icons.dart';
-import '../ui/label.dart';
+import 'analytics/analytics.dart' as ga;
+import 'config_specific/launch_url/launch_url.dart';
 import 'dialogs.dart';
 import 'globals.dart';
 import 'object_tree.dart';
+import 'primitives/auto_dispose.dart';
+import 'primitives/flutter_widgets/linked_scroll_controller.dart';
+import 'primitives/utils.dart';
 import 'theme.dart';
+import 'ui/icons.dart';
+import 'ui/label.dart';
 import 'utils.dart';
 
 const tooltipWait = Duration(milliseconds: 500);
@@ -34,6 +34,7 @@ const debuggerDeviceWidth = 800.0;
 
 const defaultDialogRadius = 20.0;
 double get areaPaneHeaderHeight => scaleByFontFactor(36.0);
+double get assumedMonospaceCharacterWidth => scaleByFontFactor(9.0);
 
 /// Convenience [Divider] with [Padding] that provides a good divider in forms.
 class PaddedDivider extends StatelessWidget {
@@ -356,6 +357,7 @@ class RefreshButton extends IconLabelButton {
     Key? key,
     String? tooltip,
     required VoidCallback? onPressed,
+    bool outlined = true,
   })  : isIconButton = true,
         super(
           key: key,
@@ -363,13 +365,15 @@ class RefreshButton extends IconLabelButton {
           label: '',
           tooltip: tooltip,
           onPressed: onPressed,
+          outlined: outlined,
+          minScreenWidthForTextBeforeScaling: 20000,
         );
 
   final bool isIconButton;
 
   @override
   Widget build(BuildContext context) {
-    if (!isIconButton) {
+    if (!isIconButton || !outlined) {
       return super.build(context);
     }
     return OutlinedIconButton(
@@ -507,15 +511,16 @@ class CollapseAllButton extends StatelessWidget {
 ///
 /// The button automatically toggles the icon and the tooltip to indicate the
 /// shown or hidden state.
-class ChartVisibilityButton extends StatelessWidget {
-  const ChartVisibilityButton({
-    required this.showChart,
+class VisibilityButton extends StatelessWidget {
+  const VisibilityButton({
+    required this.show,
     required this.onPressed,
     this.minScreenWidthForTextBeforeScaling,
-    this.label = 'Chart',
+    required this.label,
+    required this.tooltip,
   });
 
-  final ValueListenable<bool> showChart;
+  final ValueListenable<bool> show;
 
   final void Function(bool) onPressed;
 
@@ -523,14 +528,16 @@ class ChartVisibilityButton extends StatelessWidget {
 
   final String label;
 
+  final String tooltip;
+
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<bool>(
-      valueListenable: showChart,
+      valueListenable: show,
       builder: (_, show, __) {
         return IconLabelButton(
           key: key,
-          tooltip: show ? 'Hide chart' : 'Show chart',
+          tooltip: tooltip,
           icon: show ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
           label: label,
           minScreenWidthForTextBeforeScaling:
@@ -831,17 +838,21 @@ class DevToolsIconButton extends StatelessWidget {
             size: defaultIconSize,
           )
         : iconWidget;
-    return DevToolsTooltip(
-      message: tooltip,
-      child: TextButton(
-        onPressed: () {
-          ga.select(gaScreen, gaSelection);
-          onPressed();
-        },
-        child: Container(
-          height: defaultButtonHeight,
-          width: defaultButtonHeight,
-          child: icon,
+    return SizedBox(
+      // This is required to force the button height.
+      height: defaultButtonHeight,
+      child: DevToolsTooltip(
+        message: tooltip,
+        child: TextButton(
+          onPressed: () {
+            ga.select(gaScreen, gaSelection);
+            onPressed();
+          },
+          child: SizedBox(
+            height: defaultButtonHeight,
+            width: defaultButtonHeight,
+            child: icon,
+          ),
         ),
       ),
     );
@@ -857,8 +868,10 @@ class ToolbarAction extends StatelessWidget {
     this.tooltip,
     Key? key,
     this.size,
+    this.style,
   }) : super(key: key);
 
+  final TextStyle? style;
   final IconData icon;
   final String? tooltip;
   final VoidCallback? onPressed;
@@ -870,9 +883,14 @@ class ToolbarAction extends StatelessWidget {
       style: TextButton.styleFrom(
         padding: EdgeInsets.zero,
         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        textStyle: style,
       ),
       onPressed: onPressed,
-      child: Icon(icon, size: size ?? actionsIconSize),
+      child: Icon(
+        icon,
+        size: size ?? actionsIconSize,
+        color: style?.color,
+      ),
     );
 
     return tooltip == null
@@ -991,20 +1009,23 @@ class DevToolsToggleButtonGroup extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return ToggleButtons(
-      borderRadius:
-          const BorderRadius.all(Radius.circular(defaultBorderRadius)),
-      color: theme.colorScheme.toggleButtonsTitle,
-      selectedColor: theme.colorScheme.toggleButtonsTitleSelected,
-      fillColor: theme.colorScheme.toggleButtonsFillSelected,
-      textStyle: theme.textTheme.bodyLarge,
-      constraints: BoxConstraints(
-        minWidth: defaultButtonHeight,
-        minHeight: defaultButtonHeight,
+    return SizedBox(
+      height: defaultButtonHeight,
+      child: ToggleButtons(
+        borderRadius:
+            const BorderRadius.all(Radius.circular(defaultBorderRadius)),
+        color: theme.colorScheme.toggleButtonsTitle,
+        selectedColor: theme.colorScheme.toggleButtonsTitleSelected,
+        fillColor: theme.colorScheme.toggleButtonsFillSelected,
+        textStyle: theme.textTheme.bodyLarge,
+        constraints: BoxConstraints(
+          minWidth: defaultButtonHeight,
+          minHeight: defaultButtonHeight,
+        ),
+        isSelected: selectedStates,
+        onPressed: onPressed,
+        children: children,
       ),
-      isSelected: selectedStates,
-      onPressed: onPressed,
-      children: children,
     );
   }
 }
@@ -1065,7 +1086,9 @@ class ToggleButton extends StatelessWidget {
     required this.isSelected,
     required this.message,
     required this.icon,
+    this.outlined = true,
     this.label,
+    this.shape,
   }) : super(key: key);
 
   final String message;
@@ -1076,7 +1099,11 @@ class ToggleButton extends StatelessWidget {
 
   final IconData icon;
 
-  final Text? label;
+  final String? label;
+
+  final OutlinedBorder? shape;
+
+  final bool outlined;
 
   @override
   Widget build(BuildContext context) {
@@ -1091,9 +1118,11 @@ class ToggleButton extends StatelessWidget {
           key: key,
           onPressed: onPressed,
           style: TextButton.styleFrom(
+            side: outlined ? null : BorderSide.none,
             backgroundColor: isSelected
-                ? theme.colorScheme.toggleButtonBackgroundColor
+                ? theme.colorScheme.toggleButtonsFillSelected
                 : Colors.transparent,
+            shape: shape,
           ),
           child: Row(
             children: [
@@ -1101,12 +1130,19 @@ class ToggleButton extends StatelessWidget {
                 icon,
                 size: defaultIconSize,
                 color: isSelected
-                    ? theme.colorScheme.toggleButtonForegroundColor
-                    : theme.colorScheme.contrastForeground,
+                    ? theme.colorScheme.toggleButtonsTitleSelected
+                    : theme.colorScheme.toggleButtonsTitle,
               ),
               if (label != null) ...[
                 const SizedBox(width: denseSpacing),
-                label!,
+                Text(
+                  style: theme.textTheme.bodyLarge!.apply(
+                    color: isSelected
+                        ? theme.colorScheme.toggleButtonsTitleSelected
+                        : theme.colorScheme.toggleButtonsTitle,
+                  ),
+                  label!,
+                ),
               ]
             ],
           ),
@@ -1414,12 +1450,22 @@ class CenteredMessage extends StatelessWidget {
 }
 
 class CenteredCircularProgressIndicator extends StatelessWidget {
-  const CenteredCircularProgressIndicator();
+  const CenteredCircularProgressIndicator({this.size});
+
+  final double? size;
 
   @override
   Widget build(BuildContext context) {
-    return const Center(
+    const indicator = Center(
       child: CircularProgressIndicator(),
+    );
+
+    if (size == null) return indicator;
+
+    return SizedBox(
+      width: size,
+      height: size,
+      child: indicator,
     );
   }
 }
@@ -1764,6 +1810,8 @@ class _JsonViewerState extends State<JsonViewer>
         isSystemIsolate: true,
       ),
     );
+    // Intended to be unawaited.
+    // ignore: discarded_futures
     _initializeTree = buildVariablesTree(variable);
   }
 
@@ -1854,7 +1902,7 @@ class MoreInfoLink extends StatelessWidget {
   }
 
   void _onLinkTap(BuildContext context) {
-    launchUrl(url, context);
+    unawaited(launchUrl(url, context));
     ga.select(gaScreenName, gaSelectedItemDescription);
   }
 }
@@ -1982,19 +2030,32 @@ class CopyToClipboardControl extends StatelessWidget {
     this.tooltip = 'Copy to clipboard',
     this.buttonKey,
     this.size,
+    this.gaScreen,
+    this.gaItem,
+    this.style,
   });
 
+  final TextStyle? style;
   final ClipboardDataProvider? dataProvider;
   final String? successMessage;
   final String tooltip;
   final Key? buttonKey;
   final double? size;
+  final String? gaScreen;
+  final String? gaItem;
 
   @override
   Widget build(BuildContext context) {
     final onPressed = dataProvider == null
         ? null
-        : () => copyToClipboard(dataProvider!() ?? '', successMessage, context);
+        : () {
+            if (gaScreen != null && gaItem != null) {
+              ga.select(gaScreen!, gaItem!);
+            }
+            unawaited(
+              copyToClipboard(dataProvider!() ?? '', successMessage, context),
+            );
+          };
 
     return ToolbarAction(
       icon: Icons.content_copy,
@@ -2002,6 +2063,7 @@ class CopyToClipboardControl extends StatelessWidget {
       onPressed: onPressed,
       key: buttonKey,
       size: size,
+      style: style,
     );
   }
 }
@@ -2054,11 +2116,14 @@ class NotifierCheckbox extends StatelessWidget {
     return ValueListenableBuilder(
       valueListenable: notifier,
       builder: (context, bool? value, _) {
-        return Checkbox(
-          materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-          value: value,
-          onChanged: enabled ? _updateValue : null,
-          key: checkboxKey,
+        return SizedBox(
+          height: defaultButtonHeight,
+          child: Checkbox(
+            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            value: value,
+            onChanged: enabled ? _updateValue : null,
+            key: checkboxKey,
+          ),
         );
       },
     );
@@ -2410,19 +2475,20 @@ class HelpButtonWithDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     return HelpButton(
       onPressed: () {
         ga.select(gaScreen, gaSelection);
-        showDialog(
-          context: context,
-          builder: (context) => DevToolsDialog(
-            title: dialogTitleText(theme, dialogTitle),
-            includeDivider: false,
-            content: child,
-            actions: [
-              DialogCloseButton(),
-            ],
+        unawaited(
+          showDialog(
+            context: context,
+            builder: (context) => DevToolsDialog(
+              title: DialogTitleText(dialogTitle),
+              includeDivider: false,
+              content: child,
+              actions: const [
+                DialogCloseButton(),
+              ],
+            ),
           ),
         );
       },
@@ -2446,12 +2512,10 @@ class BulletSpacer extends StatelessWidget {
     final ThemeData theme = Theme.of(context);
 
     late TextStyle? textStyle;
-    if (useAccentColor) {
-      textStyle = theme.appBarTheme.toolbarTextStyle ??
-          theme.primaryTextTheme.bodyMedium;
-    } else {
-      textStyle = theme.textTheme.bodyMedium;
-    }
+    textStyle = useAccentColor
+        ? theme.appBarTheme.toolbarTextStyle ??
+            theme.primaryTextTheme.bodyMedium
+        : theme.textTheme.bodyMedium;
 
     final mutedColor = textStyle?.color?.withAlpha(0x90);
 
@@ -2462,24 +2526,6 @@ class BulletSpacer extends StatelessWidget {
       child: Text(
         '•',
         style: textStyle?.copyWith(color: mutedColor),
-      ),
-    );
-  }
-}
-
-class Progress extends StatelessWidget {
-  Progress({Key? key, double? size})
-      : size = size ?? smallProgressSize,
-        super(key: key);
-  final double size;
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: size,
-      height: size,
-      child: CircularProgressIndicator(
-        color: Theme.of(context).textTheme.bodyLarge?.color,
       ),
     );
   }
@@ -2505,6 +2551,39 @@ class ToCsvButton extends StatelessWidget {
       tooltip: tooltip,
       onPressed: onPressed,
       minScreenWidthForTextBeforeScaling: minScreenWidthForTextBeforeScaling,
+    );
+  }
+}
+
+class RadioButton<T> extends StatelessWidget {
+  const RadioButton({
+    super.key,
+    required this.label,
+    required this.itemValue,
+    required this.groupValue,
+    this.onChanged,
+    this.radioKey,
+  });
+
+  final String label;
+  final T itemValue;
+  final T groupValue;
+  final void Function(T?)? onChanged;
+  final Key? radioKey;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Radio<T>(
+          value: itemValue,
+          groupValue: groupValue,
+          materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          onChanged: onChanged,
+          key: radioKey,
+        ),
+        Expanded(child: Text(label, overflow: TextOverflow.ellipsis)),
+      ],
     );
   }
 }

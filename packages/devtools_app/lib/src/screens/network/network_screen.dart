@@ -2,26 +2,29 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../analytics/analytics.dart' as ga;
-import '../../analytics/constants.dart' as analytics_constants;
-import '../../http/curl_command.dart';
-import '../../http/http_request_data.dart';
-import '../../primitives/auto_dispose_mixin.dart';
-import '../../primitives/utils.dart';
+import '../../shared/analytics/analytics.dart' as ga;
+import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/common_widgets.dart';
 import '../../shared/globals.dart';
+import '../../shared/http/curl_command.dart';
+import '../../shared/http/http_request_data.dart';
+import '../../shared/primitives/auto_dispose.dart';
+import '../../shared/primitives/simple_items.dart';
+import '../../shared/primitives/utils.dart';
 import '../../shared/screen.dart';
 import '../../shared/split.dart';
 import '../../shared/table/table.dart';
 import '../../shared/table/table_data.dart';
 import '../../shared/theme.dart';
+import '../../shared/ui/filter.dart';
+import '../../shared/ui/search.dart';
 import '../../shared/utils.dart';
-import '../../ui/filter.dart';
-import '../../ui/search.dart';
 import 'network_controller.dart';
 import 'network_model.dart';
 import 'network_request_inspector.dart';
@@ -29,15 +32,15 @@ import 'network_request_inspector.dart';
 final networkSearchFieldKey = GlobalKey(debugLabel: 'NetworkSearchFieldKey');
 
 class NetworkScreen extends Screen {
-  const NetworkScreen()
+  NetworkScreen()
       : super.conditional(
           id: id,
           requiresDartVm: true,
-          title: 'Network',
+          title: ScreenMetaData.network.title,
           icon: Icons.network_check,
         );
 
-  static const id = 'network';
+  static final id = ScreenMetaData.network.id;
 
   @override
   String get docPageId => screenId;
@@ -125,13 +128,13 @@ class _NetworkScreenBodyState extends State<NetworkScreenBody>
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (!initController()) return;
-    controller.startRecording();
+    unawaited(controller.startRecording());
 
     cancelListeners();
 
     addAutoDisposeListener(serviceManager.isolateManager.mainIsolate, () {
       if (serviceManager.isolateManager.mainIsolate.value != null) {
-        controller.startRecording();
+        unawaited(controller.startRecording());
       }
     });
   }
@@ -219,8 +222,8 @@ class _NetworkProfilerControlsState extends State<_NetworkProfilerControls>
           onPressed: _recording
               ? () {
                   ga.select(
-                    analytics_constants.network,
-                    analytics_constants.pause,
+                    gac.network,
+                    gac.pause,
                   );
                   widget.controller.togglePolling(false);
                 }
@@ -235,8 +238,8 @@ class _NetworkProfilerControlsState extends State<_NetworkProfilerControls>
               ? null
               : () {
                   ga.select(
-                    analytics_constants.network,
-                    analytics_constants.resume,
+                    gac.network,
+                    gac.resume,
                   );
                   widget.controller.togglePolling(true);
                 },
@@ -247,10 +250,10 @@ class _NetworkProfilerControlsState extends State<_NetworkProfilerControls>
               _NetworkProfilerControls._includeTextWidth,
           onPressed: () {
             ga.select(
-              analytics_constants.network,
-              analytics_constants.clear,
+              gac.network,
+              gac.clear,
             );
-            widget.controller.clear();
+            unawaited(widget.controller.clear());
           },
         ),
         const SizedBox(width: defaultSpacing),
@@ -277,12 +280,14 @@ class _NetworkProfilerControlsState extends State<_NetworkProfilerControls>
   }
 
   void _showFilterDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => FilterDialog<NetworkController, NetworkRequest>(
-        controller: widget.controller,
-        queryInstructions: NetworkScreenBody.filterQueryInstructions,
-        queryFilterArguments: widget.controller.filterArgs,
+    unawaited(
+      showDialog(
+        context: context,
+        builder: (context) => FilterDialog<NetworkController, NetworkRequest>(
+          controller: widget.controller,
+          queryInstructions: NetworkScreenBody.filterQueryInstructions,
+          queryFilterArguments: widget.controller.filterArgs,
+        ),
       ),
     );
   }
@@ -441,20 +446,24 @@ class ActionsColumn extends ColumnData<NetworkRequest>
         PopupMenuItem(
           child: const Text('Copy as URL'),
           onTap: () {
-            copyToClipboard(
-              data.uri,
-              'Copied the URL to the clipboard',
-              context,
+            unawaited(
+              copyToClipboard(
+                data.uri,
+                'Copied the URL to the clipboard',
+                context,
+              ),
             );
           },
         ),
         PopupMenuItem(
           child: const Text('Copy as cURL'),
           onTap: () {
-            copyToClipboard(
-              CurlCommand.from(data).toString(),
-              'Copied the cURL command to the clipboard',
-              context,
+            unawaited(
+              copyToClipboard(
+                CurlCommand.from(data).toString(),
+                'Copied the cURL command to the clipboard',
+                context,
+              ),
             );
           },
         )

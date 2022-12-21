@@ -4,7 +4,7 @@
 
 import 'package:flutter/foundation.dart';
 
-import '../../../../../primitives/auto_dispose.dart';
+import '../../../../../shared/primitives/auto_dispose.dart';
 import '../../../shared/heap/heap.dart';
 import '../../../shared/heap/model.dart';
 
@@ -44,7 +44,9 @@ class SnapshotInstanceItem extends SnapshotItem {
 
   AdaptedHeap? heap;
 
-  void setHeapData(AdaptedHeapData? data) {
+  /// This method is expected to be called once when heap is actually recieved.
+  void initializeHeapData(AdaptedHeapData? data) {
+    assert(heap == null);
     if (data != null) heap = AdaptedHeap(data);
     _isProcessing.value = false;
   }
@@ -58,4 +60,6 @@ class SnapshotInstanceItem extends SnapshotItem {
 
   @override
   bool get hasData => heap != null;
+
+  int? get totalSize => heap?.data.totalSize;
 }

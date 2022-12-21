@@ -144,6 +144,6 @@ class MyGetHttpDataState extends State<MyGetHttpData> {
     super.initState();
 
     // Call the getJSONData() method when the app initializes
-    getJSONData();
+    unawaited(getJSONData());
   }
 }

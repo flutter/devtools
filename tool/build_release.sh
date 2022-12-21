@@ -13,24 +13,16 @@ TOOL_DIR=`dirname "${RELATIVE_PATH_TO_SCRIPT}"`
 # The devtools root directory is assumed to be the parent of this directory.
 DEVTOOLS_DIR="${TOOL_DIR}/.."
 
+pushd $TOOL_DIR
+
 # Use the Flutter SDK from flutter-sdk/.
 FLUTTER_DIR="`pwd`/flutter-sdk"
 PATH="$FLUTTER_DIR/bin":$PATH
 
-REQUIRED_FLUTTER_VERSION=`dart $TOOL_DIR/bin/repo_tool.dart latest-flutter-candidate | tail -n 1`
+# Make sure the flutter sdk is on the correct branch.
+./update_flutter_sdk.sh
 
-flutter --version
-ACTUAL_FLUTTER_VERSION=$(<"$FLUTTER_DIR/version")
-
-# Check that the 'actual' and 'required' SDK versions agree.
-if [[ "$REQUIRED_FLUTTER_VERSION" != "$ACTUAL_FLUTTER_VERSION" ]]; then
-  echo ""
-  echo "Failed Flutter version check:"
-  echo "  $REQUIRED_FLUTTER_VERSION (required) != $ACTUAL_FLUTTER_VERSION (actual)"
-  echo ""
-  echo "To switch versions, run './tool/update_flutter_sdk.sh'."
-  exit 1
-fi
+popd
 
 # echo on
 set -ex
@@ -66,4 +58,4 @@ mv build/web/devtools_service_worker.js build/web/service_worker.js
 chmod 0755 build/web/canvaskit/canvaskit.*
 chmod 0755 build/web/canvaskit/profiling/canvaskit.*
 
-flutter pub get
+popd

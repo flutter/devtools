@@ -6,9 +6,9 @@ import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../../primitives/utils.dart';
 import '../../../service/vm_service_wrapper.dart';
 import '../../../shared/globals.dart';
+import '../../../shared/primitives/utils.dart';
 import '../../debugger/debugger_model.dart';
 import '../vm_service_private_extensions.dart';
 
@@ -201,11 +201,8 @@ class FieldObject extends VmObject {
 
     guardClassKind = obj.guardClassKind();
 
-    if (guardClassKind == GuardClassKind.single) {
-      guardClass = await obj.guardClass;
-    } else {
-      guardClass = null;
-    }
+    guardClass =
+        guardClassKind == GuardClassKind.single ? await obj.guardClass : null;
   }
 }
 

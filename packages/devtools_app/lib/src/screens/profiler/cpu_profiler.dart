@@ -2,22 +2,23 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
 
-import '../../analytics/constants.dart' as analytics_constants;
-import '../../charts/flame_chart.dart';
-import '../../primitives/auto_dispose_mixin.dart';
+import '../../shared/analytics/constants.dart' as gac;
+import '../../shared/charts/flame_chart.dart';
 import '../../shared/common_widgets.dart';
 import '../../shared/dialogs.dart';
 import '../../shared/globals.dart';
+import '../../shared/primitives/auto_dispose.dart';
 import '../../shared/theme.dart';
+import '../../shared/ui/colors.dart';
+import '../../shared/ui/filter.dart';
+import '../../shared/ui/search.dart';
+import '../../shared/ui/tab.dart';
 import '../../shared/utils.dart';
-import '../../ui/colors.dart';
-import '../../ui/filter.dart';
-import '../../ui/search.dart';
-import '../../ui/tab.dart';
 import 'cpu_profile_bottom_up.dart';
 import 'cpu_profile_call_tree.dart';
 import 'cpu_profile_controller.dart';
@@ -177,8 +178,24 @@ class _CpuProfilerState extends State<CpuProfiler>
                 isFilterActive: widget.controller.isToggleFilterActive,
               ),
               const SizedBox(width: denseSpacing),
+              if (currentTab.key != CpuProfiler.flameChartTab) ...[
+                const DisplayTreeGuidelinesToggle(),
+                const SizedBox(width: denseSpacing),
+              ],
               UserTagDropdown(widget.controller),
               const SizedBox(width: denseSpacing),
+              ValueListenableBuilder<bool>(
+                valueListenable: preferences.vmDeveloperModeEnabled,
+                builder: (context, vmDeveloperModeEnabled, _) {
+                  if (!vmDeveloperModeEnabled) {
+                    return const SizedBox();
+                  }
+                  return Padding(
+                    padding: const EdgeInsets.only(right: denseSpacing),
+                    child: ModeDropdown(widget.controller),
+                  );
+                },
+              ),
             ],
             // TODO(kenz): support search for call tree and bottom up tabs as
             // well. This will require implementing search for tree tables.
@@ -186,9 +203,9 @@ class _CpuProfilerState extends State<CpuProfiler>
               if (widget.searchFieldKey != null) _buildSearchField(),
               FlameChartHelpButton(
                 gaScreen: widget.standaloneProfiler
-                    ? analytics_constants.cpuProfiler
-                    : analytics_constants.performance,
-                gaSelection: analytics_constants.cpuProfileFlameChartHelp,
+                    ? gac.cpuProfiler
+                    : gac.performance,
+                gaSelection: gac.cpuProfileFlameChartHelp,
                 additionalInfo: [
                   ...dialogSubHeader(Theme.of(context), 'Legend'),
                   Legend(
@@ -239,22 +256,29 @@ class _CpuProfilerState extends State<CpuProfiler>
             ],
           ],
         ),
-        Expanded(
-          child: TabBarView(
-            physics: defaultTabBarViewPhysics,
-            controller: _tabController,
-            children: _buildProfilerViews(),
-          ),
+        ValueListenableBuilder<CpuProfilerViewType>(
+          valueListenable: widget.controller.viewType,
+          builder: (context, viewType, _) {
+            return Expanded(
+              child: TabBarView(
+                physics: defaultTabBarViewPhysics,
+                controller: _tabController,
+                children: _buildProfilerViews(),
+              ),
+            );
+          },
         ),
       ],
     );
   }
 
   void _showFilterDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => CpuProfileFilterDialog(
-        controller: widget.controller,
+    unawaited(
+      showDialog(
+        context: context,
+        builder: (context) => CpuProfileFilterDialog(
+          controller: widget.controller,
+        ),
       ),
     );
   }
@@ -275,10 +299,26 @@ class _CpuProfilerState extends State<CpuProfiler>
 
   List<Widget> _buildProfilerViews() {
     final bottomUp = KeepAliveWrapper(
-      child: CpuBottomUpTable(widget.bottomUpRoots),
+      child: ValueListenableBuilder<bool>(
+        valueListenable: preferences.cpuProfiler.displayTreeGuidelines,
+        builder: (context, displayTreeGuidelines, _) {
+          return CpuBottomUpTable(
+            widget.bottomUpRoots,
+            displayTreeGuidelines: displayTreeGuidelines,
+          );
+        },
+      ),
     );
     final callTree = KeepAliveWrapper(
-      child: CpuCallTreeTable(widget.callTreeRoots),
+      child: ValueListenableBuilder<bool>(
+        valueListenable: preferences.cpuProfiler.displayTreeGuidelines,
+        builder: (context, displayTreeGuidelines, _) {
+          return CpuCallTreeTable(
+            widget.callTreeRoots,
+            displayTreeGuidelines: displayTreeGuidelines,
+          );
+        },
+      ),
     );
     final cpuFlameChart = KeepAliveWrapper(
       child: LayoutBuilder(
@@ -317,6 +357,28 @@ class _CpuProfilerState extends State<CpuProfiler>
     setState(() {
       roots.forEach(callback);
     });
+  }
+}
+
+class DisplayTreeGuidelinesToggle extends StatelessWidget {
+  const DisplayTreeGuidelinesToggle();
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder<bool>(
+      valueListenable: preferences.cpuProfiler.displayTreeGuidelines,
+      builder: (context, displayTreeGuidelines, _) {
+        return ToggleButton(
+          onPressed: () {
+            preferences.cpuProfiler.displayTreeGuidelines.value =
+                !displayTreeGuidelines;
+          },
+          isSelected: displayTreeGuidelines,
+          message: 'Display guidelines',
+          icon: Icons.stacked_bar_chart,
+        );
+      },
+    );
   }
 }
 
@@ -401,31 +463,47 @@ class UserTagDropdown extends StatelessWidget {
           height: defaultButtonHeight,
           child: DevToolsTooltip(
             message: tooltip,
-            child: RoundedDropDownButton<String>(
-              isDense: true,
-              style: Theme.of(context).textTheme.bodyMedium,
-              value: userTag,
-              items: [
-                _buildMenuItem(
-                  display: '$filterByTag ${CpuProfilerController.userTagNone}',
-                  value: CpuProfilerController.userTagNone,
-                ),
-                // We don't want to show the 'Default' tag if it is the only
-                // tag available. The 'none' tag above is equivalent in this
-                // case.
-                if (!(userTags.length == 1 &&
-                    userTags.first == UserTag.defaultTag.label))
-                  for (final tag in userTags)
+            child: ValueListenableBuilder<bool>(
+              valueListenable: preferences.vmDeveloperModeEnabled,
+              builder: (context, vmDeveloperModeEnabled, _) {
+                return RoundedDropDownButton<String>(
+                  isDense: true,
+                  style: Theme.of(context).textTheme.bodyMedium,
+                  value: userTag,
+                  items: [
                     _buildMenuItem(
-                      display: '$filterByTag $tag',
-                      value: tag,
+                      display:
+                          '$filterByTag ${CpuProfilerController.userTagNone}',
+                      value: CpuProfilerController.userTagNone,
                     ),
-              ],
-              onChanged: userTags.isEmpty ||
-                      (userTags.length == 1 &&
-                          userTags.first == UserTag.defaultTag.label)
-                  ? null
-                  : (String? tag) => _onUserTagChanged(tag!, context),
+                    // We don't want to show the 'Default' tag if it is the only
+                    // tag available. The 'none' tag above is equivalent in this
+                    // case.
+                    if (!(userTags.length == 1 &&
+                        userTags.first == UserTag.defaultTag.label)) ...[
+                      for (final tag in userTags)
+                        _buildMenuItem(
+                          display: '$filterByTag $tag',
+                          value: tag,
+                        ),
+                      _buildMenuItem(
+                        display: 'Group by: User Tag',
+                        value: CpuProfilerController.groupByUserTag,
+                      ),
+                    ],
+                    if (vmDeveloperModeEnabled)
+                      _buildMenuItem(
+                        display: 'Group by: VM Tag',
+                        value: CpuProfilerController.groupByVmTag,
+                      )
+                  ],
+                  onChanged: userTags.isEmpty ||
+                          (userTags.length == 1 &&
+                              userTags.first == UserTag.defaultTag.label)
+                      ? null
+                      : (String? tag) => _onUserTagChanged(tag!, context),
+                );
+              },
             ),
           ),
         );
@@ -449,5 +527,61 @@ class UserTagDropdown extends StatelessWidget {
     } catch (e) {
       notificationService.push(e.toString());
     }
+  }
+}
+
+/// DropdownButton that controls the value of
+/// [ProfilerScreenController.viewType].
+class ModeDropdown extends StatelessWidget {
+  const ModeDropdown(this.controller);
+
+  final CpuProfilerController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    const mode = 'View:';
+    return ValueListenableBuilder<CpuProfilerViewType>(
+      valueListenable: controller.viewType,
+      builder: (context, viewType, _) {
+        final tooltip = viewType == CpuProfilerViewType.function
+            ? 'Display the profile in terms of the Dart call stack '
+                '(i.e., inlined frames are expanded)'
+            : 'Display the profile in terms of native stack frames '
+                '(i.e., inlined frames are not expanded, display code objects '
+                'rather than individual functions)';
+        return SizedBox(
+          height: defaultButtonHeight,
+          child: DevToolsTooltip(
+            message: tooltip,
+            child: RoundedDropDownButton<CpuProfilerViewType>(
+              isDense: true,
+              style: Theme.of(context).textTheme.bodyMedium,
+              value: viewType,
+              items: [
+                _buildMenuItem(
+                  display: '$mode ${CpuProfilerViewType.function}',
+                  value: CpuProfilerViewType.function,
+                ),
+                _buildMenuItem(
+                  display: '$mode ${CpuProfilerViewType.code}',
+                  value: CpuProfilerViewType.code,
+                ),
+              ],
+              onChanged: (type) => controller.updateView(type!),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  DropdownMenuItem<CpuProfilerViewType> _buildMenuItem({
+    required String display,
+    required CpuProfilerViewType value,
+  }) {
+    return DropdownMenuItem<CpuProfilerViewType>(
+      value: value,
+      child: Text(display),
+    );
   }
 }

@@ -5,20 +5,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'src/analytics/analytics_controller.dart';
 import 'src/app.dart';
-import 'src/config_specific/framework_initialize/framework_initialize.dart';
-import 'src/config_specific/ide_theme/ide_theme.dart';
-import 'src/config_specific/url/url.dart';
-import 'src/config_specific/url_strategy/url_strategy.dart';
 import 'src/extension_points/extensions_base.dart';
 import 'src/extension_points/extensions_external.dart';
 import 'src/framework/app_error_handling.dart';
-import 'src/primitives/url_utils.dart';
 import 'src/screens/debugger/syntax_highlighter.dart';
 import 'src/screens/provider/riverpod_error_logger_observer.dart';
+import 'src/shared/analytics/analytics_controller.dart';
+import 'src/shared/config_specific/framework_initialize/framework_initialize.dart';
+import 'src/shared/config_specific/ide_theme/ide_theme.dart';
+import 'src/shared/config_specific/url/url.dart';
+import 'src/shared/config_specific/url_strategy/url_strategy.dart';
 import 'src/shared/globals.dart';
 import 'src/shared/preferences.dart';
+import 'src/shared/primitives/url_utils.dart';
 
 void main() async {
   // Before switching to URL path strategy, check if this URL is in the legacy
@@ -33,6 +33,9 @@ void main() async {
 
   setGlobal(IdeTheme, getIdeTheme());
 
+  // Set the extension points global.
+  setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
+
   final preferences = PreferencesController();
   // Wait for preferences to load before rendering the app to avoid a flash of
   // content with the incorrect theme.
@@ -40,9 +43,6 @@ void main() async {
 
   // Load the Dart syntax highlighting grammar.
   await SyntaxHighlighter.initialize();
-
-  // Set the extension points global.
-  setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
 
   setupErrorHandling(() async {
     // Run the app.

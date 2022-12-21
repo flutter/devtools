@@ -2,9 +2,19 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '../../primitives/utils.dart';
+import 'package:collection/collection.dart';
+import 'package:flutter/material.dart';
+import 'package:vm_service/vm_service.dart';
+
+import '../../shared/globals.dart';
+import '../../shared/primitives/utils.dart';
+import '../../shared/routing.dart';
+import '../../shared/table/table.dart';
 import '../../shared/table/table_data.dart';
 import '../../shared/utils.dart';
+import '../debugger/codeview_controller.dart';
+import '../debugger/debugger_screen.dart';
+import '../vm_developer/vm_developer_common_widgets.dart';
 import 'cpu_profile_model.dart';
 
 const timeColumnWidthPx = 180.0;
@@ -95,7 +105,8 @@ class MethodNameColumn extends TreeColumnData<CpuStackFrame> {
 }
 
 // TODO(kenz): make these urls clickable once we can jump to source.
-class SourceColumn extends ColumnData<CpuStackFrame> {
+class SourceColumn extends ColumnData<CpuStackFrame>
+    implements ColumnRenderer<CpuStackFrame> {
   SourceColumn() : super.wide('Source', alignment: ColumnAlignment.right);
 
   @override
@@ -113,4 +124,34 @@ class SourceColumn extends ColumnData<CpuStackFrame> {
 
   @override
   bool get supportsSorting => true;
+
+  @override
+  Widget? build(
+    BuildContext context,
+    CpuStackFrame data, {
+    bool isRowSelected = false,
+    VoidCallback? onPressed,
+  }) {
+    final script = scriptManager.sortedScripts.value.firstWhereOrNull(
+      (element) => element.uri == data.packageUri,
+    );
+    if (script == null) {
+      return null;
+    }
+    final routerDelegate = DevToolsRouterDelegate.of(context);
+    return VmServiceObjectLink<ScriptRef>(
+      object: script,
+      textBuilder: (_) => getDisplayValue(data),
+      onTap: (e) {
+        routerDelegate.navigate(
+          DebuggerScreen.id,
+          const {},
+          CodeViewSourceLocationNavigationState(
+            script: script,
+            line: data.sourceLine!,
+          ),
+        );
+      },
+    );
+  }
 }

@@ -2,12 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
-import '../../../../primitives/math_utils.dart';
-import '../../../../primitives/utils.dart';
+import '../../../../shared/primitives/math_utils.dart';
+import '../../../../shared/primitives/utils.dart';
 import '../../../../shared/theme.dart';
 import '../../diagnostics_node.dart';
 import '../../inspector_controller.dart';
@@ -77,11 +78,9 @@ class _BoxLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
     setState(() {
       // This implementation will need to change if we support showing more than
       // a single widget in the box visualization for the layout explorer.
-      if (newProperties != null && selectedNode == newProperties.node) {
-        highlighted = newProperties;
-      } else {
-        highlighted = null;
-      }
+      highlighted = newProperties != null && selectedNode == newProperties.node
+          ? newProperties
+          : null;
     });
   }
 
@@ -408,7 +407,7 @@ class BoxChildVisualizer extends StatelessWidget {
       top: renderOffset.dy,
       left: renderOffset.dx,
       child: InkWell(
-        onTap: () => state.onTap(propertiesLocal),
+        onTap: () => unawaited(state.onTap(propertiesLocal)),
         onDoubleTap: () => state.onDoubleTap(propertiesLocal),
         onLongPress: () => state.onDoubleTap(propertiesLocal),
         child: SizedBox(

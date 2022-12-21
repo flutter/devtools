@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import 'about.dart';
@@ -86,15 +88,19 @@ class MyHomeState extends State<MyHome> with SingleTickerProviderStateMixin {
   void showMenuSelection(String value) {
     switch (value) {
       case logMenu:
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => Logger()),
+        unawaited(
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => Logger()),
+          ),
         );
         break;
       case aboutMenu:
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => About()),
+        unawaited(
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => About()),
+          ),
         );
         break;
       default:

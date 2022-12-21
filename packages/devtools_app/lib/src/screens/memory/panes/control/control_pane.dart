@@ -24,10 +24,7 @@ class MemoryControlPane extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        PrimaryControls(
-          chartController: chartController,
-          controller: controller,
-        ),
+        const PrimaryControls(),
         const Spacer(),
         SecondaryControls(
           chartController: chartController,

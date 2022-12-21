@@ -763,10 +763,59 @@ final mockSyntaxHighlighter = SyntaxHighlighter.withGrammar(
   source: mockScript!.source,
 );
 
+const coverageHitLines = <int>{
+  1,
+  3,
+  4,
+  7,
+};
+
+const coverageMissLines = <int>{
+  2,
+  5,
+};
+
+const executableLines = <int>{
+  ...coverageHitLines,
+  ...coverageMissLines,
+};
+
+const profilerEntries = <int, ProfileReportEntry>{
+  1: ProfileReportEntry(
+    sampleCount: 5,
+    line: 1,
+    inclusive: 2,
+    exclusive: 2,
+  ),
+  3: ProfileReportEntry(
+    sampleCount: 5,
+    line: 3,
+    inclusive: 1,
+    exclusive: 1,
+  ),
+  4: ProfileReportEntry(
+    sampleCount: 5,
+    line: 4,
+    inclusive: 1,
+    exclusive: 1,
+  ),
+  7: ProfileReportEntry(
+    sampleCount: 5,
+    line: 7,
+    inclusive: 1,
+    exclusive: 1,
+  ),
+};
+
 final mockParsedScript = ParsedScript(
   script: mockScript!,
   highlighter: mockSyntaxHighlighter,
-  executableLines: <int>{},
+  executableLines: executableLines,
+  sourceReport: ProcessedSourceReport(
+    coverageHitLines: coverageHitLines,
+    coverageMissedLines: coverageMissLines,
+    profilerEntries: profilerEntries,
+  ),
 );
 
 final mockScriptRefs = [

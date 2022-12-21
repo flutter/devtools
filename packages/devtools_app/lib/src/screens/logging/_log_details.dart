@@ -2,10 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../../shared/common_widgets.dart';
-import '../../shared/console.dart';
+import '../../shared/console/console.dart';
 import '../../shared/theme.dart';
 import 'logging_controller.dart';
 
@@ -30,14 +32,14 @@ class _LogDetailsState extends State<LogDetails>
   void initState() {
     super.initState();
     scrollController = ScrollController();
-    _computeLogDetails();
+    unawaited(_computeLogDetails());
   }
 
   @override
   void didUpdateWidget(LogDetails oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.log != oldWidget.log) {
-      _computeLogDetails();
+      unawaited(_computeLogDetails());
     }
   }
 

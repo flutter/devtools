@@ -2,39 +2,65 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../analytics/constants.dart' as analytics_constants;
-import '../../config_specific/import_export/import_export.dart';
-import '../../config_specific/logger/allowed_error.dart';
-import '../../primitives/auto_dispose.dart';
-import '../../primitives/utils.dart';
+import '../../shared/analytics/constants.dart' as gac;
+import '../../shared/config_specific/import_export/import_export.dart';
+import '../../shared/config_specific/logger/allowed_error.dart';
 import '../../shared/globals.dart';
+import '../../shared/primitives/auto_dispose.dart';
+import '../../shared/primitives/utils.dart';
 import 'cpu_profile_controller.dart';
 import 'cpu_profile_model.dart';
 import 'cpu_profile_service.dart';
-import 'profile_granularity.dart';
 import 'profiler_screen.dart';
+import 'sampling_rate.dart';
 
 class ProfilerScreenController extends DisposableController
     with AutoDisposeControllerMixin {
   ProfilerScreenController() {
     if (!offlineController.offlineMode.value) {
-      allowedError(
-        serviceManager.service!.setProfilePeriod(mediumProfilePeriod),
-        logError: false,
+      unawaited(
+        allowedError(
+          serviceManager.service!.setProfilePeriod(mediumProfilePeriod),
+          logError: false,
+        ),
       );
 
       _currentIsolate = serviceManager.isolateManager.selectedIsolate.value;
       addAutoDisposeListener(serviceManager.isolateManager.selectedIsolate, () {
         switchToIsolate(serviceManager.isolateManager.selectedIsolate.value);
       });
+
+      addAutoDisposeListener(preferences.vmDeveloperModeEnabled, () async {
+        if (preferences.vmDeveloperModeEnabled.value) {
+          // If VM developer mode was just enabled, clear the profile store
+          // since the existing entries won't have code profiles and cannot be
+          // constructed from function profiles.
+          cpuProfilerController.cpuProfileStore.clear();
+          cpuProfilerController.reset();
+        } else {
+          // If VM developer mode is disabled and we're grouping by VM tags, we
+          // need to default to the basic view of the profile.
+          final userTagFilter = cpuProfilerController.userTagFilter.value;
+          if (userTagFilter == CpuProfilerController.groupByVmTag) {
+            await cpuProfilerController
+                .loadDataWithTag(CpuProfilerController.userTagNone);
+          }
+        }
+        // Always reset to the function view when the VM developer mode state
+        // changes. The selector is hidden when VM developer mode is disabled
+        // and data for code profiles won't be requested.
+        cpuProfilerController.updateView(CpuProfilerViewType.function);
+      });
     }
   }
 
   final cpuProfilerController =
-      CpuProfilerController(analyticsScreenId: analytics_constants.cpuProfiler);
+      CpuProfilerController(analyticsScreenId: gac.cpuProfiler);
 
   final _exportController = ExportController();
 

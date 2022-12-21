@@ -2,34 +2,27 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app/src/charts/flame_chart.dart';
-import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
-import 'package:devtools_app/src/config_specific/import_export/import_export.dart';
-import 'package:devtools_app/src/primitives/listenable.dart';
+import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/performance/panes/frame_analysis/frame_analysis.dart';
 import 'package:devtools_app/src/screens/performance/panes/raster_stats/raster_stats.dart';
-import 'package:devtools_app/src/screens/performance/panes/timeline_events/timeline_flame_chart.dart';
-import 'package:devtools_app/src/screens/performance/performance_controller.dart';
-import 'package:devtools_app/src/screens/performance/performance_model.dart';
+import 'package:devtools_app/src/screens/performance/panes/timeline_events/legacy/timeline_flame_chart.dart';
 import 'package:devtools_app/src/screens/performance/tabbed_performance_view.dart';
-import 'package:devtools_app/src/service/service_manager.dart';
-import 'package:devtools_app/src/shared/common_widgets.dart';
-import 'package:devtools_app/src/shared/globals.dart';
-import 'package:devtools_app/src/shared/notifications.dart';
-import 'package:devtools_app/src/shared/preferences.dart';
-import 'package:devtools_app/src/shared/version.dart';
-import 'package:devtools_app/src/ui/tab.dart';
+import 'package:devtools_app/src/shared/charts/flame_chart.dart';
+import 'package:devtools_app/src/shared/config_specific/import_export/import_export.dart';
+import 'package:devtools_app/src/shared/ui/tab.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
-import '../test_data/performance.dart';
+import '../test_infra/test_data/performance.dart';
 
 void main() {
   late FakeServiceManager fakeServiceManager;
   late MockPerformanceController controller;
+  late MockFlutterFramesController mockFlutterFramesController;
+  late MockTimelineEventsController mockTimelineEventsController;
 
   Future<void> _setUpServiceManagerWithTimeline(
     Map<String, dynamic> timelineJson,
@@ -63,8 +56,26 @@ void main() {
       setGlobal(PreferencesController, PreferencesController());
       setGlobal(NotificationService, NotificationService());
       controller = createMockPerformanceControllerWithDefaults();
-      frameAnalysisSupported = true;
-      rasterStatsSupported = true;
+      mockTimelineEventsController = MockTimelineEventsController();
+      when(mockTimelineEventsController.data).thenReturn(controller.data);
+      when(mockTimelineEventsController.useLegacyTraceViewer)
+          .thenReturn(ValueNotifier<bool>(true));
+      when(mockTimelineEventsController.status).thenReturn(
+        const FixedValueListenable<EventsControllerStatus>(
+          EventsControllerStatus.ready,
+        ),
+      );
+      when(mockTimelineEventsController.legacyController)
+          .thenReturn(LegacyTimelineEventsController(controller));
+      when(controller.timelineEventsController)
+          .thenReturn(mockTimelineEventsController);
+      mockFlutterFramesController = MockFlutterFramesController();
+      when(mockFlutterFramesController.displayRefreshRate)
+          .thenReturn(const FixedValueListenable<double>(defaultRefreshRate));
+      when(mockFlutterFramesController.selectedFrame)
+          .thenReturn(const FixedValueListenable<FlutterFrame?>(null));
+      when(controller.flutterFramesController)
+          .thenReturn(mockFlutterFramesController);
     });
 
     Future<void> pumpView(
@@ -84,11 +95,7 @@ void main() {
 
       await tester.pumpWidget(
         wrapWithControllers(
-          TabbedPerformanceView(
-            controller: controller,
-            processing: false,
-            processingProgress: 0.0,
-          ),
+          const TabbedPerformanceView(),
           performance: controller,
         ),
       );
@@ -113,24 +120,6 @@ void main() {
     });
 
     testWidgetsWithWindowSize(
-        'builds content for Timeline Events tab', windowSize,
-        (WidgetTester tester) async {
-      await tester.runAsync(() async {
-        await _setUpServiceManagerWithTimeline({});
-        await pumpView(tester);
-
-        expect(find.byType(AnalyticsTabbedView), findsOneWidget);
-        expect(find.byType(DevToolsTab), findsNWidgets(3));
-
-        // Timeline Events tab should be selected by default
-        expect(find.byType(RefreshTimelineEventsButton), findsOneWidget);
-        expect(find.byType(FlameChartHelpButton), findsOneWidget);
-        expect(find.byKey(timelineSearchFieldKey), findsOneWidget);
-        expect(find.byType(TimelineEventsView), findsOneWidget);
-      });
-    });
-
-    testWidgetsWithWindowSize(
         'builds content for Frame Analysis tab with selected frame', windowSize,
         (WidgetTester tester) async {
       await tester.runAsync(() async {
@@ -139,8 +128,7 @@ void main() {
           ..setEventFlow(animatorBeginFrameEvent)
           ..setEventFlow(goldenRasterTimelineEvent);
 
-        controller = createMockPerformanceControllerWithDefaults();
-        when(controller.selectedFrame)
+        when(mockFlutterFramesController.selectedFrame)
             .thenReturn(FixedValueListenable<FlutterFrame?>(frame0));
 
         await pumpView(tester, performanceController: controller);
@@ -148,9 +136,7 @@ void main() {
         expect(find.byType(AnalyticsTabbedView), findsOneWidget);
         expect(find.byType(DevToolsTab), findsNWidgets(3));
 
-        await tester.tap(find.text('Frame Analysis'));
-        await tester.pumpAndSettle();
-
+        // The frame analysis tab should be selected by default.
         expect(find.byType(FlutterFrameAnalysisView), findsOneWidget);
       });
     });
@@ -165,9 +151,7 @@ void main() {
         expect(find.byType(AnalyticsTabbedView), findsOneWidget);
         expect(find.byType(DevToolsTab), findsNWidgets(3));
 
-        await tester.tap(find.text('Frame Analysis'));
-        await tester.pumpAndSettle();
-
+        // The frame analysis tab should be selected by default.
         expect(
           find.text('Select a frame above to view analysis data.'),
           findsOneWidget,
@@ -187,9 +171,29 @@ void main() {
         await tester.tap(find.text('Raster Stats'));
         await tester.pumpAndSettle();
 
-        expect(find.byType(RenderingLayerVisualizer), findsOneWidget);
+        expect(find.byType(RasterStatsView), findsOneWidget);
         expect(find.text('Take Snapshot'), findsOneWidget);
         expect(find.byType(ClearButton), findsOneWidget);
+      });
+    });
+
+    testWidgetsWithWindowSize(
+        'builds content for Timeline Events tab', windowSize,
+        (WidgetTester tester) async {
+      await tester.runAsync(() async {
+        await _setUpServiceManagerWithTimeline({});
+        await pumpView(tester);
+
+        expect(find.byType(AnalyticsTabbedView), findsOneWidget);
+        expect(find.byType(DevToolsTab), findsNWidgets(3));
+
+        await tester.tap(find.text('Timeline Events'));
+        await tester.pumpAndSettle();
+
+        expect(find.byType(RefreshTimelineEventsButton), findsOneWidget);
+        expect(find.byType(FlameChartHelpButton), findsOneWidget);
+        expect(find.byKey(timelineSearchFieldKey), findsOneWidget);
+        expect(find.byType(TimelineEventsView), findsOneWidget);
       });
     });
 

@@ -2,22 +2,23 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide TableRow;
 import 'package:flutter/services.dart';
 
-import '../../primitives/auto_dispose_mixin.dart';
-import '../../primitives/flutter_widgets/linked_scroll_controller.dart';
-import '../../primitives/trees.dart';
-import '../../primitives/utils.dart';
-import '../../ui/colors.dart';
-import '../../ui/search.dart';
-import '../../ui/utils.dart';
 import '../collapsible_mixin.dart';
 import '../common_widgets.dart';
+import '../primitives/auto_dispose.dart';
+import '../primitives/flutter_widgets/linked_scroll_controller.dart';
+import '../primitives/trees.dart';
+import '../primitives/utils.dart';
 import '../theme.dart';
+import '../ui/colors.dart';
+import '../ui/search.dart';
+import '../ui/utils.dart';
 import '../utils.dart';
 import 'column_widths.dart';
 import 'table_controller.dart';
@@ -335,6 +336,7 @@ class TreeTable<T extends TreeNode<T>> extends StatefulWidget {
     this.secondarySortColumn,
     this.autoExpandRoots = false,
     this.preserveVerticalScrollPosition = false,
+    this.displayTreeGuidelines = false,
     ValueNotifier<Selection<T?>>? selectionNotifier,
   })  : selectionNotifier = selectionNotifier ??
             ValueNotifier<Selection<T?>>(Selection.empty()),
@@ -401,6 +403,9 @@ class TreeTable<T extends TreeNode<T>> extends StatefulWidget {
   /// This should be set to true if the table is not disposed and completely
   /// rebuilt when changing from one data set to another.
   final bool preserveVerticalScrollPosition;
+
+  /// Determines whether or not guidelines should be rendered in tree columns.
+  final bool displayTreeGuidelines;
 
   @override
   TreeTableState<T> createState() => TreeTableState<T>();
@@ -615,6 +620,7 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
         isExpanded: node.isExpanded,
         isExpandable: node.isExpandable,
         isShown: node.shouldShow(),
+        displayTreeGuidelines: widget.displayTreeGuidelines,
         expansionChildren:
             node != animatingNode || animatingChildrenSet.contains(node)
                 ? null
@@ -727,16 +733,21 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
       // Scroll so selected row is the last full item displayed in the viewport.
       // To do this we need to be showing the (minCompleteItemsInView + 1)
       // previous item  at the top.
-      scrollController.animateTo(
-        (newSelectedNodeIndex - minCompleteItemsInView + 1) * defaultRowHeight,
-        duration: defaultDuration,
-        curve: defaultCurve,
+      unawaited(
+        scrollController.animateTo(
+          (newSelectedNodeIndex - minCompleteItemsInView + 1) *
+              defaultRowHeight,
+          duration: defaultDuration,
+          curve: defaultCurve,
+        ),
       );
     } else if (isAboveViewport) {
-      scrollController.animateTo(
-        newSelectedNodeIndex * defaultRowHeight,
-        duration: defaultDuration,
-        curve: defaultCurve,
+      unawaited(
+        scrollController.animateTo(
+          newSelectedNodeIndex * defaultRowHeight,
+          duration: defaultDuration,
+          curve: defaultCurve,
+        ),
       );
     }
 
@@ -936,7 +947,7 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
     // If we're at the end already, scroll to expose the new content.
     if (widget.autoScrollContent) {
       if (scrollController.hasClients && scrollController.atScrollBottom) {
-        scrollController.autoScrollToBottom();
+        unawaited(scrollController.autoScrollToBottom());
       }
     }
 
@@ -1052,7 +1063,7 @@ abstract class ColumnRenderer<T> {
   ///
   /// This method can return `null` to indicate that the default rendering
   /// should be used instead.
-  Widget build(
+  Widget? build(
     BuildContext context,
     T data, {
     bool isRowSelected = false,
@@ -1084,6 +1095,7 @@ class TableRow<T> extends StatefulWidget {
     this.isExpandable = false,
     this.isSelected = false,
     this.isShown = true,
+    this.displayTreeGuidelines = false,
     this.searchMatchesNotifier,
     this.activeSearchMatchNotifier,
   })  : sortColumn = null,
@@ -1117,6 +1129,7 @@ class TableRow<T> extends StatefulWidget {
         onExpansionCompleted = null,
         searchMatchesNotifier = null,
         activeSearchMatchNotifier = null,
+        displayTreeGuidelines = false,
         rowType = _TableRowType.columnHeader,
         super(key: key);
 
@@ -1144,6 +1157,7 @@ class TableRow<T> extends StatefulWidget {
         onExpansionCompleted = null,
         searchMatchesNotifier = null,
         activeSearchMatchNotifier = null,
+        displayTreeGuidelines = false,
         rowType = _TableRowType.columnGroupHeader,
         super(key: key);
 
@@ -1210,6 +1224,8 @@ class TableRow<T> extends StatefulWidget {
   final ValueListenable<List<T>>? searchMatchesNotifier;
 
   final ValueListenable<T?>? activeSearchMatchNotifier;
+
+  final bool displayTreeGuidelines;
 
   @override
   _TableRowState<T> createState() => _TableRowState<T>();
@@ -1403,7 +1419,8 @@ class _TableRowState<T> extends State<TableRow<T>>
   /// Presents the content of this row.
   Widget tableRowFor(BuildContext context, {VoidCallback? onPressed}) {
     Widget columnFor(ColumnData<T> column, double columnWidth) {
-      late Widget content;
+      Widget? content;
+      final theme = Theme.of(context);
       final node = widget.node;
       if (widget.rowType == _TableRowType.columnHeader) {
         content = _ColumnHeader(
@@ -1418,7 +1435,6 @@ class _TableRowState<T> extends State<TableRow<T>>
         // widget class.
         final padding = column.getNodeIndentPx(node);
         assert(padding >= 0);
-
         if (column is ColumnRenderer) {
           content = (column as ColumnRenderer).build(
             context,
@@ -1426,26 +1442,27 @@ class _TableRowState<T> extends State<TableRow<T>>
             isRowSelected: widget.isSelected,
             onPressed: onPressed,
           );
-        } else {
-          content = RichText(
-            text: TextSpan(
-              text: column.getDisplayValue(node),
-              children: [
-                if (column.getCaption(node) != null)
-                  TextSpan(
-                    text: ' ${column.getCaption(node)}',
-                    style: const TextStyle(
-                      fontStyle: FontStyle.italic,
-                    ),
-                  )
-              ],
-              style: contentTextStyle(column),
-            ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            textAlign: _textAlignmentFor(column),
-          );
         }
+        // If ColumnRenderer.build returns null, fall back to the default
+        // rendering.
+        content ??= RichText(
+          text: TextSpan(
+            text: column.getDisplayValue(node),
+            children: [
+              if (column.getCaption(node) != null)
+                TextSpan(
+                  text: ' ${column.getCaption(node)}',
+                  style: const TextStyle(
+                    fontStyle: FontStyle.italic,
+                  ),
+                )
+            ],
+            style: contentTextStyle(column),
+          ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          textAlign: _textAlignmentFor(column),
+        );
 
         final tooltip = column.getTooltip(node);
         if (tooltip.isNotEmpty) {
@@ -1496,6 +1513,18 @@ class _TableRowState<T> extends State<TableRow<T>>
           child: content,
         ),
       );
+      if (widget.displayTreeGuidelines &&
+          node != null &&
+          node is TreeNode &&
+          column is TreeColumnData) {
+        content = CustomPaint(
+          painter: _RowGuidelinePainter(
+            node.level,
+            theme.colorScheme,
+          ),
+          child: content,
+        );
+      }
       return content;
     }
 
@@ -1589,6 +1618,38 @@ class _TableRowState<T> extends State<TableRow<T>>
 
   @override
   bool shouldShow() => widget.isShown;
+}
+
+class _RowGuidelinePainter extends CustomPainter {
+  _RowGuidelinePainter(this.level, this.colorScheme);
+
+  final int level;
+  final ColorScheme colorScheme;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final colors = colorScheme.treeGuidelineColors;
+    for (int i = 0; i < level; ++i) {
+      final currentX = i * TreeColumnData.treeToggleWidth + defaultIconSize / 2;
+      // Draw a vertical line for each tick identifying a connection between
+      // an ancestor of this node and some other node in the tree.
+      canvas.drawLine(
+        Offset(currentX, 0.0),
+        Offset(currentX, defaultRowHeight),
+        Paint()
+          ..color = colors[i % colors.length]
+          ..strokeWidth = 1.0,
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(CustomPainter oldDelegate) {
+    if (oldDelegate is _RowGuidelinePainter) {
+      return oldDelegate.colorScheme.isLight != colorScheme.isLight;
+    }
+    return true;
+  }
 }
 
 class _ColumnHeader<T> extends StatelessWidget {

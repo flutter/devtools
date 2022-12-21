@@ -8,8 +8,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:stack_trace/stack_trace.dart' as stack_trace;
 
-import '../analytics/analytics.dart' as ga;
-import '../config_specific/logger/logger.dart';
+import '../shared/analytics/analytics.dart' as ga;
+import '../shared/config_specific/logger/logger.dart';
 
 /// Set up error handling for the app.
 ///

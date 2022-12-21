@@ -2,16 +2,22 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// TODO(https://github.com/flutter/devtools/issues/4717): migrate away from
+// deprecated members.
+// ignore_for_file: deprecated_member_use
+
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide Stack;
 import 'package:provider/provider.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../primitives/listenable.dart';
-import '../../primitives/utils.dart';
 import '../../shared/common_widgets.dart';
 import '../../shared/globals.dart';
 import '../../shared/object_tree.dart';
+import '../../shared/primitives/listenable.dart';
+import '../../shared/primitives/utils.dart';
 import '../../shared/routing.dart';
 import '../../shared/theme.dart';
 import '../../shared/tree.dart';
@@ -31,14 +37,17 @@ class Variables extends StatelessWidget {
       dataRootsListenable: controller.variables,
       dataDisplayProvider: (variable, onPressed) =>
           displayProvider(context, variable, onPressed, controller),
-      onItemSelected: (variable) => onItemPressed(variable, controller),
+      onItemSelected: (variable) async => onItemPressed(variable, controller),
     );
   }
 
-  void onItemPressed(DartObjectNode v, DebuggerController controller) {
+  Future<void> onItemPressed(
+    DartObjectNode v,
+    DebuggerController controller,
+  ) async {
     // On expansion, lazily build the variables tree for performance reasons.
     if (v.isExpanded) {
-      v.children.forEach(buildVariablesTree);
+      await Future.wait(v.children.map(buildVariablesTree));
     }
   }
 }
@@ -70,14 +79,18 @@ class ExpandableVariable extends StatelessWidget {
       shrinkWrap: true,
       dataDisplayProvider: (variable, onPressed) =>
           displayProvider(context, variable, onPressed, debuggerController),
-      onItemSelected: (variable) => onItemPressed(variable, debuggerController),
+      onItemSelected: (variable) async =>
+          onItemPressed(variable, debuggerController),
     );
   }
 
-  void onItemPressed(DartObjectNode v, DebuggerController controller) {
+  Future<void> onItemPressed(
+    DartObjectNode v,
+    DebuggerController controller,
+  ) async {
     // On expansion, lazily build the variables tree for performance reasons.
     if (v.isExpanded) {
-      v.children.forEach(buildVariablesTree);
+      await Future.wait(v.children.map(buildVariablesTree));
     }
   }
 }
@@ -117,12 +130,32 @@ Widget displayProvider(
   }
   TextStyle variableDisplayStyle() {
     final style = theme.subtleFixedFontStyle;
-    switch (variable.ref!.instanceRef!.kind) {
+    String? kind = variable.ref?.instanceRef?.kind;
+    // Handle nodes with primative values.
+    if (kind == null) {
+      final value = variable.ref?.value;
+      if (value != null) {
+        switch (value.runtimeType) {
+          case String:
+            kind = InstanceKind.kString;
+            break;
+          case num:
+            kind = InstanceKind.kInt;
+            break;
+          case bool:
+            kind = InstanceKind.kBool;
+            break;
+        }
+      }
+      kind ??= InstanceKind.kNull;
+    }
+    switch (kind) {
       case InstanceKind.kString:
         return style.apply(
           color: theme.colorScheme.stringSyntaxColor,
         );
       case InstanceKind.kInt:
+      case InstanceKind.kDouble:
         return style.apply(
           color: theme.colorScheme.numericConstantSyntaxColor,
         );
@@ -138,7 +171,7 @@ Widget displayProvider(
 
   final hasName = variable.name?.isNotEmpty ?? false;
   return DevToolsTooltip(
-    message: variable.displayValue,
+    message: variable.displayValue.toString(),
     waitDuration: tooltipWaitLong,
     child: SelectableText.rich(
       TextSpan(
@@ -155,8 +188,10 @@ Widget displayProvider(
               style: theme.fixedFontStyle,
             ),
           TextSpan(
-            text: variable.displayValue,
-            style: variableDisplayStyle(),
+            text: variable.displayValue.toString(),
+            style: variable.artificialValue
+                ? theme.subtleFixedFontStyle
+                : variableDisplayStyle(),
           ),
         ],
       ),
@@ -220,7 +255,8 @@ class VariableSelectionControls extends MaterialTextSelectionControls {
       clipboardStatus: clipboardStatus!,
       handleCut: canCut(delegate) ? () => handleCut(delegate) : null,
       handleCopy: canCopy(delegate) ? () => handleCopy(delegate) : null,
-      handlePaste: canPaste(delegate) ? () => handlePaste(delegate) : null,
+      handlePaste:
+          canPaste(delegate) ? () => unawaited(handlePaste(delegate)) : null,
       handleSelectAll:
           canSelectAll(delegate) ? () => handleSelectAll(delegate) : null,
       handleInspect:

@@ -7,12 +7,12 @@ import 'dart:async';
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/material.dart';
 
-import '../analytics/analytics.dart' as ga;
-import '../analytics/constants.dart' as analytics_constants;
-import '../primitives/auto_dispose_mixin.dart';
-import '../primitives/utils.dart';
+import '../shared/analytics/analytics.dart' as ga;
+import '../shared/analytics/constants.dart' as gac;
 import '../shared/common_widgets.dart';
 import '../shared/globals.dart';
+import '../shared/primitives/auto_dispose.dart';
+import '../shared/primitives/utils.dart';
 import '../shared/routing.dart';
 import '../shared/theme.dart';
 import 'framework_core.dart';
@@ -77,7 +77,7 @@ class _InitializerState extends State<Initializer>
           !connectionState.userInitiatedConnectionState) {
         // Try to reconnect (otherwise, will fall back to showing the
         // disconnected overlay).
-        _attemptUrlConnection();
+        unawaited(_attemptUrlConnection());
       }
     });
 
@@ -88,7 +88,7 @@ class _InitializerState extends State<Initializer>
       serviceManager.onConnectionAvailable.listen((_) => setState(() {})),
     );
 
-    _attemptUrlConnection();
+    unawaited(_attemptUrlConnection());
   }
 
   @override
@@ -97,7 +97,7 @@ class _InitializerState extends State<Initializer>
 
     // Handle widget rebuild when the URL has changed.
     if (widget.url != null && widget.url != oldWidget.url) {
-      _attemptUrlConnection();
+      unawaited(_attemptUrlConnection());
     }
   }
 
@@ -137,8 +137,8 @@ class _InitializerState extends State<Initializer>
           ModalRoute.of(context)!.isCurrent &&
           currentDisconnectedOverlay == null) {
         ga.select(
-          analytics_constants.devToolsMain,
-          analytics_constants.appDisconnected,
+          gac.devToolsMain,
+          gac.appDisconnected,
         );
         Overlay.of(context).insert(_createDisconnectedOverlay());
 

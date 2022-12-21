@@ -6,8 +6,8 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:devtools_app/devtools_app.dart';
-import 'package:devtools_app/src/config_specific/framework_initialize/_framework_initialize_desktop.dart';
-import 'package:devtools_app/src/primitives/message_bus.dart';
+import 'package:devtools_app/src/shared/config_specific/framework_initialize/_framework_initialize_desktop.dart';
+import 'package:devtools_app/src/shared/primitives/message_bus.dart';
 
 import 'flutter_test_driver.dart';
 
@@ -26,7 +26,7 @@ final defaultFlutterExecutable = Platform.isWindows ? 'flutter.bat' : 'flutter';
 class FlutterTestEnvironment {
   FlutterTestEnvironment(
     this._runConfig, {
-    this.testAppDirectory = 'test/fixtures/flutter_app',
+    this.testAppDirectory = 'test/test_infra/fixtures/flutter_app',
     FlutterDriverFactory? flutterDriverFactory,
   })  : _flutterDriverFactory = flutterDriverFactory ?? defaultFlutterRunDriver,
         _flutterExe = _parseFlutterExeFromEnv();

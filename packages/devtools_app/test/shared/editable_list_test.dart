@@ -8,7 +8,7 @@ import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../test_utils/test_utils.dart';
+import '../test_infra/utils/test_utils.dart';
 
 void main() {
   const windowSize = Size(1000.0, 1000.0);

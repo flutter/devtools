@@ -2,14 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
-import '../../analytics/analytics.dart' as ga;
-import '../../analytics/constants.dart' as analytics_constants;
-import '../../primitives/blocking_action_mixin.dart';
+import '../../shared/analytics/analytics.dart' as ga;
+import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/common_widgets.dart';
+import '../../shared/primitives/blocking_action_mixin.dart';
 import '../../shared/theme.dart';
-import '../../ui/tab.dart';
+import '../../shared/ui/tab.dart';
 import 'inspector_controller.dart';
 import 'inspector_screen.dart';
 import 'layout_explorer/layout_explorer.dart';
@@ -41,7 +43,7 @@ class InspectorDetails extends StatelessWidget {
     return AnalyticsTabbedView(
       tabs: tabs,
       tabViews: tabViews,
-      gaScreen: analytics_constants.inspector,
+      gaScreen: gac.inspector,
     );
   }
 
@@ -69,7 +71,7 @@ class InspectorExpandCollapseButtons extends StatefulWidget {
 
 class _InspectorExpandCollapseButtonsState
     extends State<InspectorExpandCollapseButtons> with BlockingActionMixin {
-  bool get enableButtons => actionInProgress == false;
+  bool get enableButtons => !actionInProgress;
 
   @override
   Widget build(BuildContext context) {
@@ -111,16 +113,23 @@ class _InspectorExpandCollapseButtonsState
   }
 
   void _onExpandClick() {
-    blockWhileInProgress(() async {
-      ga.select(analytics_constants.inspector, analytics_constants.expandAll);
-      await widget.controller.expandAllNodesInDetailsTree();
-    });
+    unawaited(
+      blockWhileInProgress(() async {
+        ga.select(gac.inspector, gac.expandAll);
+        await widget.controller.expandAllNodesInDetailsTree();
+      }),
+    );
   }
 
   void _onCollapseClick() {
-    blockWhileInProgress(() async {
-      ga.select(analytics_constants.inspector, analytics_constants.collapseAll);
-      await widget.controller.collapseDetailsToSelected();
-    });
+    unawaited(
+      blockWhileInProgress(() async {
+        ga.select(
+          gac.inspector,
+          gac.collapseAll,
+        );
+        await widget.controller.collapseDetailsToSelected();
+      }),
+    );
   }
 }

@@ -3,9 +3,9 @@
 // found in the LICENSE file.
 
 import 'package:collection/collection.dart';
-import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
-import 'package:devtools_app/src/primitives/utils.dart';
+import 'package:devtools_app/src/shared/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/shared/globals.dart';
+import 'package:devtools_app/src/shared/primitives/utils.dart';
 import 'package:devtools_app/src/shared/utils.dart';
 import 'package:devtools_shared/devtools_test_utils.dart';
 import 'package:devtools_test/devtools_test.dart';
@@ -336,6 +336,52 @@ void main() {
         );
         expect((TimeRange()..end = Duration.zero).isWellFormed, isFalse);
         expect((TimeRange()..start = Duration.zero).isWellFormed, isFalse);
+      });
+
+      group('offset', () {
+        test('from well formed time range', () {
+          final t = TimeRange()
+            ..start = const Duration(milliseconds: 100)
+            ..end = const Duration(milliseconds: 200);
+          final offset = TimeRange.offset(
+            original: t,
+            offset: const Duration(milliseconds: 300),
+          );
+
+          expect(offset.start, equals(const Duration(milliseconds: 400)));
+          expect(offset.end, equals(const Duration(milliseconds: 500)));
+        });
+
+        test('from half formed time range', () {
+          var t = TimeRange()..start = const Duration(milliseconds: 100);
+          var offset = TimeRange.offset(
+            original: t,
+            offset: const Duration(milliseconds: 300),
+          );
+
+          expect(offset.start, equals(const Duration(milliseconds: 400)));
+          expect(offset.end, isNull);
+
+          t = TimeRange()..end = const Duration(milliseconds: 200);
+          offset = TimeRange.offset(
+            original: t,
+            offset: const Duration(milliseconds: 300),
+          );
+
+          expect(offset.start, isNull);
+          expect(offset.end, equals(const Duration(milliseconds: 500)));
+        });
+
+        test('from empty time range', () {
+          final t = TimeRange();
+          final offset = TimeRange.offset(
+            original: t,
+            offset: const Duration(milliseconds: 300),
+          );
+
+          expect(offset.start, isNull);
+          expect(offset.end, isNull);
+        });
       });
     });
 

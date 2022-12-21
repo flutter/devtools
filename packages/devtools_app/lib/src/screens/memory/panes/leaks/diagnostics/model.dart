@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:leak_tracker/devtools_integration.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../../shared/heap/model.dart';
-import '../instrumentation/model.dart';
 
 /// Names for json fields.
 class _JsonFields {
@@ -46,8 +46,15 @@ class NotGCedAnalyzerTask {
         heap: AdaptedHeapData.fromJson(json[_JsonFields.heap]),
       );
 
-  NotGCedAnalyzerTask.fromSnapshot(HeapSnapshotGraph graph, this.reports)
-      : heap = AdaptedHeapData.fromHeapSnapshot(graph);
+  static Future<NotGCedAnalyzerTask> fromSnapshot(
+    HeapSnapshotGraph graph,
+    List<LeakReport> reports,
+  ) async {
+    return NotGCedAnalyzerTask(
+      heap: AdaptedHeapData.fromHeapSnapshot(graph),
+      reports: reports,
+    );
+  }
 
   final AdaptedHeapData heap;
   final List<LeakReport> reports;

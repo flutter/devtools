@@ -7,12 +7,12 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../primitives/auto_dispose_mixin.dart';
-import '../primitives/utils.dart';
 import 'common_widgets.dart';
 import 'connected_app.dart';
 import 'dialogs.dart';
 import 'globals.dart';
+import 'primitives/auto_dispose.dart';
+import 'primitives/utils.dart';
 import 'routing.dart';
 import 'table/table.dart';
 import 'table/table_data.dart';
@@ -33,23 +33,28 @@ class DeviceDialog extends StatelessWidget {
 
     if (vm == null) return const SizedBox();
 
-    final items = generateDeviceDescription(vm, connectedApp);
+    final connectionDescriptionEntries =
+        generateDeviceDescription(vm, connectedApp);
 
     // TODO(kenz): set actions alignment to `spaceBetween` if
     // https://github.com/flutter/flutter/issues/69708 is fixed.
     return DevToolsDialog(
-      title: dialogTitleText(theme, 'Device Info'),
+      title: const DialogTitleText('Device Info'),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          for (var name in items.keys)
+          for (var entry in connectionDescriptionEntries)
             Padding(
               padding: const EdgeInsets.only(bottom: denseRowSpacing),
               child: Row(
                 children: [
-                  Text('$name: ', style: boldText),
-                  SelectableText(items[name]!, style: theme.subtleTextStyle),
+                  Text('${entry.title}: ', style: boldText),
+                  SelectableText(
+                    entry.description,
+                    style: theme.subtleTextStyle,
+                  ),
+                  if (entry.actions.isNotEmpty) ...entry.actions,
                 ],
               ),
             ),
@@ -58,7 +63,7 @@ class DeviceDialog extends StatelessWidget {
       actions: [
         _connectToNewAppButton(context),
         if (connectedApp.isRunningOnDartVM!) _ViewVMFlagsButton(),
-        DialogCloseButton(),
+        const DialogCloseButton(),
       ],
     );
   }
@@ -136,22 +141,17 @@ class _VMFlagsDialogState extends State<VMFlagsDialog> with AutoDisposeMixin {
   void _refilter() {
     final filter = filterController.text.trim().toLowerCase();
 
-    if (filter.isEmpty) {
-      filteredFlags = flags;
-    } else {
-      filteredFlags =
-          flags.where((flag) => flag.filterText.contains(filter)).toList();
-    }
+    filteredFlags = filter.isEmpty
+        ? flags
+        : flags.where((flag) => flag.filterText.contains(filter)).toList();
   }
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
     return DevToolsDialog(
       title: Row(
         children: [
-          dialogTitleText(theme, 'VM Flags'),
+          const DialogTitleText('VM Flags'),
           const Expanded(child: SizedBox(width: denseSpacing)),
           Container(
             width: defaultSearchTextWidth,
@@ -178,7 +178,7 @@ class _VMFlagsDialogState extends State<VMFlagsDialog> with AutoDisposeMixin {
           ),
         ],
       ),
-      actions: [
+      actions: const [
         DialogCloseButton(),
       ],
     );

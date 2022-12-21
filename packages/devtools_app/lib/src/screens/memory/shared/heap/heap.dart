@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import '../primitives/class_name.dart';
+import 'class_filter.dart';
 import 'model.dart';
 import 'spanning_tree.dart';
 
@@ -10,9 +12,9 @@ class AdaptedHeap {
 
   final AdaptedHeapData data;
 
-  late final SingleHeapClasses classes = _heapStatistics(data);
+  late final SingleHeapClasses classes = _heapStatistics();
 
-  static SingleHeapClasses _heapStatistics(AdaptedHeapData data) {
+  SingleHeapClasses _heapStatistics() {
     final result = <HeapClassName, SingleClassStats>{};
     if (!data.isSpanningTreeBuilt) buildSpanningTree(data);
 
@@ -33,12 +35,47 @@ class AdaptedHeap {
   }
 }
 
-abstract class HeapClasses with Sealable {
-  Iterable<ClassStats> get classStatsList;
+abstract class HeapClasses<T extends ClassStats> with Sealable {
+  List<T> get classStatsList;
+}
+
+mixin FilterableHeapClasses<T extends ClassStats> on HeapClasses<T> {
+  ClassFilter? _appliedFilter;
+  List<T>? _filtered;
+
+  List<T> filtered(ClassFilter newFilter) {
+    final oldFilter = _appliedFilter;
+    final oldFiltered = _filtered;
+    _appliedFilter = newFilter;
+    if ((oldFilter == null) != (oldFiltered == null)) {
+      throw StateError('Nullness should match.');
+    }
+
+    // Return previous data if filter did not change.
+    if (oldFilter == newFilter) return oldFiltered!;
+
+    // Return previous data if filter is identical.
+    final task = newFilter.task(previous: oldFilter);
+    if (task == FilteringTask.doNothing) return oldFiltered!;
+
+    final Iterable<T> dataToFilter;
+    if (task == FilteringTask.refilter) {
+      dataToFilter = classStatsList;
+    } else if (task == FilteringTask.reuse) {
+      dataToFilter = oldFiltered!;
+    } else {
+      throw StateError('Unexpected task: $task.');
+    }
+
+    final result =
+        dataToFilter.where((e) => newFilter.apply(e.heapClass)).toList();
+    return _filtered = result;
+  }
 }
 
 /// Set of heap class statistical information for single heap (not comparision between two heaps).
-class SingleHeapClasses extends HeapClasses {
+class SingleHeapClasses extends HeapClasses<SingleClassStats>
+    with FilterableHeapClasses<SingleClassStats> {
   SingleHeapClasses(this.classesByName);
 
   /// Maps full class name to class.
@@ -55,7 +92,7 @@ class SingleHeapClasses extends HeapClasses {
   }
 
   @override
-  Iterable<ClassStats> get classStatsList => classes;
+  List<SingleClassStats> get classStatsList => classes;
 }
 
 typedef StatsByPath = Map<ClassOnlyHeapPath, ObjectSetStats>;
@@ -91,15 +128,19 @@ class SingleClassStats extends ClassStats {
     assert(!isSealed);
     final object = data.objects[objectIndex];
     assert(object.heapClass.fullName == heapClass.fullName);
-    objects.countInstance(object);
 
     final path = data.retainingPath(objectIndex);
+    objects.countInstance(
+      object,
+      excludeFromRetained: path?.isRetainedBySameClass ?? false,
+    );
+
     if (path == null) return;
     final objectsForPath = statsByPath.putIfAbsent(
       ClassOnlyHeapPath(path),
       () => ObjectSet(),
     );
-    objectsForPath.countInstance(object);
+    objectsForPath.countInstance(object, excludeFromRetained: false);
   }
 
   bool get isZero => objects.isZero;
@@ -132,16 +173,22 @@ class ObjectSetStats with Sealable {
   bool get isZero =>
       shallowSize == 0 && retainedSize == 0 && instanceCount == 0;
 
-  void countInstance(AdaptedHeapObject object) {
+  void countInstance(
+    AdaptedHeapObject object, {
+    required bool excludeFromRetained,
+  }) {
     assert(!isSealed);
-    retainedSize += object.retainedSize!;
+    if (!excludeFromRetained) retainedSize += object.retainedSize!;
     shallowSize += object.shallowSize;
     instanceCount++;
   }
 
-  void uncountInstance(AdaptedHeapObject object) {
+  void uncountInstance(
+    AdaptedHeapObject object, {
+    required bool excludeFromRetained,
+  }) {
     assert(!isSealed);
-    retainedSize -= object.retainedSize!;
+    if (!excludeFromRetained) retainedSize -= object.retainedSize!;
     shallowSize -= object.shallowSize;
     instanceCount--;
   }
@@ -152,19 +199,27 @@ class ObjectSet extends ObjectSetStats {
   static ObjectSet empty = ObjectSet()..seal();
 
   final objectsByCodes = <IdentityHashCode, AdaptedHeapObject>{};
+  final notCountedInRetained = <IdentityHashCode>{};
 
   @override
   bool get isZero => objectsByCodes.isEmpty;
 
   @override
-  void countInstance(AdaptedHeapObject object) {
+  void countInstance(
+    AdaptedHeapObject object, {
+    required bool excludeFromRetained,
+  }) {
     if (objectsByCodes.containsKey(object.code)) return;
-    super.countInstance(object);
+    super.countInstance(object, excludeFromRetained: excludeFromRetained);
     objectsByCodes[object.code] = object;
+    if (excludeFromRetained) notCountedInRetained.add(object.code);
   }
 
   @override
-  void uncountInstance(AdaptedHeapObject object) {
+  void uncountInstance(
+    AdaptedHeapObject object, {
+    required bool excludeFromRetained,
+  }) {
     throw AssertionError('uncountInstance is not valid for $ObjectSet');
   }
 }

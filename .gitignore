@@ -8,7 +8,6 @@ pubspec.lock
 
 .idea/
 .data_dir/
-.vscode/
 
 # Ignore any Flutter SDK in flutter-sdk/
 flutter-sdk/
@@ -28,3 +27,4 @@ Podfile.lock
 packages/devtools_test/lib/src/mocks/generated.mocks.dart
 **/*.stager_app.dart
 **/test/**/failures/
+*.dill

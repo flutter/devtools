@@ -2,15 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
+import 'package:devtools_app/src/shared/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/shared/globals.dart';
-import 'package:devtools_app/src/ui/utils.dart';
+import 'package:devtools_app/src/shared/ui/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../matchers/matchers.dart';
+import '../test_infra/matchers/matchers.dart';
 
 void main() {
   setUp(() {
@@ -263,7 +263,9 @@ void main() {
     // Screenshot should show both vertical and horizontal scrollbars.
     await expectLater(
       find.byKey(root),
-      matchesDevToolsGolden('../goldens/offset_scrollbar_startup.png'),
+      matchesDevToolsGolden(
+        '../test_infra/goldens/offset_scrollbar_startup.png',
+      ),
     );
 
     _scrollControllerX.jumpTo(500);
@@ -272,7 +274,9 @@ void main() {
     // scrollbar is at its initial offset.
     await expectLater(
       find.byKey(root),
-      matchesDevToolsGolden('../goldens/offset_scrollbar_scrolled.png'),
+      matchesDevToolsGolden(
+        '../test_infra/goldens/offset_scrollbar_scrolled.png',
+      ),
     );
   });
 }

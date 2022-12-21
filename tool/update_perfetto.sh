@@ -40,6 +40,11 @@ else
   cd ../../
 fi
 
+echo "UPDATE_PERFETTO: Deleting unnecessary js source map files"
+find ./ -name '*.js.map' -exec rm {} \;
+find ./ -name 'traceconv.wasm' -exec rm {} \;
+find ./ -name 'traceconv_bundle.js' -exec rm {} \;
+
 echo "UPDATE_PERFETTO: Moving DevTools-Perfetto integration files back from _tmp/"
 mkdir dist/devtools
 mv _tmp/* dist/devtools/
@@ -59,8 +64,8 @@ popd
 
 pushd $DEVTOOLS_DIR
 
-// Verify that all the perfetto assets are included in the devtools_app pubspec.yaml, and that the assets
-// paths are updated to the new version number.
+# Verify that all the perfetto assets are included in the devtools_app pubspec.yaml, and that the assets
+# paths are updated to the new version number.
 dart ./tool/update_perfetto_assets.dart
 
 popd

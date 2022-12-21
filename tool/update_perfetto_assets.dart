@@ -65,6 +65,6 @@ void main(List<String> args) {
     'Updating devtools_app/pubspec.yaml for new Perfetto version'
     '$newVersionNumber',
   );
-  final pubspecLinesAsString = lines.join('\n');
+  final pubspecLinesAsString = '${lines.join('\n')}\n';
   pubspec.writeAsStringSync(pubspecLinesAsString);
 }

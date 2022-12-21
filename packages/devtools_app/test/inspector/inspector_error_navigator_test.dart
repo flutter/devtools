@@ -4,9 +4,9 @@
 
 import 'dart:collection';
 
-import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/screens/inspector/inspector_screen.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
+import 'package:devtools_app/src/shared/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/shared/error_badge_manager.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_test/devtools_test.dart';
@@ -68,6 +68,8 @@ void main() {
 
     testWidgets(
       'can navigate forwards',
+      // Intentionally unawaited.
+      // ignore: discarded_futures
       (WidgetTester tester) => testNavigate(
         tester,
         tapIcon: Icons.keyboard_arrow_down,
@@ -79,6 +81,8 @@ void main() {
 
     testWidgets(
       'can navigate backwards',
+      // Intentionally unawaited.
+      // ignore: discarded_futures
       (WidgetTester tester) => testNavigate(
         tester,
         tapIcon: Icons.keyboard_arrow_up,
@@ -90,6 +94,8 @@ void main() {
 
     testWidgets(
       'wraps forwards',
+      // Intentionally unawaited.
+      // ignore: discarded_futures
       (WidgetTester tester) => testNavigate(
         tester,
         tapIcon: Icons.keyboard_arrow_down,
@@ -101,6 +107,8 @@ void main() {
 
     testWidgets(
       'wraps backwards',
+      // Intentionally unawaited.
+      // ignore: discarded_futures
       (WidgetTester tester) => testNavigate(
         tester,
         tapIcon: Icons.keyboard_arrow_up,

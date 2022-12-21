@@ -4,6 +4,7 @@
 
 import 'package:flutter/widgets.dart';
 
+import '../../../../../../shared/common_widgets.dart';
 import '../../../../../../shared/split.dart';
 import '../../../../shared/heap/heap.dart';
 import '../../controller/simple_controllers.dart';
@@ -31,7 +32,7 @@ class HeapClassDetails extends StatelessWidget {
     final theEntries = entries;
     if (theEntries == null) {
       return const Center(
-        child: Text('Select class to see details here.'),
+        child: Text('Click a table row to see retaining paths here.'),
       );
     }
 
@@ -48,7 +49,7 @@ class HeapClassDetails extends StatelessWidget {
         if (selection == null) {
           return const Center(
             child: Text(
-              'Select a group of instances to see the retaining path here.',
+              'Click a table row to see the detailed path.',
             ),
           );
         }
@@ -63,7 +64,14 @@ class HeapClassDetails extends StatelessWidget {
     return Split(
       axis: Axis.horizontal,
       initialFractions: const [0.7, 0.3],
-      children: [retainingPathsTable, selectedPathView],
+      children: [
+        OutlineDecoration.onlyRight(
+          child: retainingPathsTable,
+        ),
+        OutlineDecoration.onlyLeft(
+          child: selectedPathView,
+        ),
+      ],
     );
   }
 }

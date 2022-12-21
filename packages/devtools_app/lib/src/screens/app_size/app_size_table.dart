@@ -4,13 +4,12 @@
 
 import 'package:flutter/material.dart';
 
-import '../../charts/treemap.dart';
-import '../../primitives/utils.dart';
+import '../../shared/charts/treemap.dart';
+import '../../shared/primitives/utils.dart';
 import '../../shared/table/table.dart';
 import '../../shared/table/table_data.dart';
+import '../../shared/ui/colors.dart';
 import '../../shared/utils.dart';
-import '../../ui/colors.dart';
-
 import 'app_size_controller.dart';
 
 class AppSizeAnalysisTable extends StatelessWidget {
@@ -239,11 +238,7 @@ class _DiffColumn extends ColumnData<TreemapNode> {
 
   @override
   Color getTextColor(TreemapNode dataObject) {
-    if (dataObject.byteSize < 0) {
-      return tableDecreaseColor;
-    } else {
-      return tableIncreaseColor;
-    }
+    return dataObject.byteSize < 0 ? tableDecreaseColor : tableIncreaseColor;
   }
 }
 

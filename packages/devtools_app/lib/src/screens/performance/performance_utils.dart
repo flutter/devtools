@@ -4,7 +4,7 @@
 
 import 'package:flutter/foundation.dart';
 
-import '../../primitives/utils.dart';
+import '../../shared/primitives/utils.dart';
 import 'performance_model.dart';
 
 // ignore: avoid_classes_with_only_static_members

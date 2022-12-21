@@ -7,13 +7,13 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../config_specific/logger/allowed_error.dart';
-import '../../http/http_request_data.dart';
-import '../../http/http_service.dart';
-import '../../primitives/utils.dart';
+import '../../shared/config_specific/logger/allowed_error.dart';
 import '../../shared/globals.dart';
-import '../../ui/filter.dart';
-import '../../ui/search.dart';
+import '../../shared/http/http_request_data.dart';
+import '../../shared/http/http_service.dart';
+import '../../shared/primitives/utils.dart';
+import '../../shared/ui/filter.dart';
+import '../../shared/ui/search.dart';
 import 'network_model.dart';
 import 'network_screen.dart';
 import 'network_service.dart';
@@ -87,14 +87,15 @@ class NetworkController
         if (!request.inProgress) {
           final data =
               outstandingRequestsMap.remove(id) as DartIOHttpRequestData;
-          data.getFullRequestData().then((value) => _updateData());
+
+          unawaited(data.getFullRequestData().then((value) => _updateData()));
         }
         continue;
       } else if (wrapped.inProgress) {
         outstandingRequestsMap.putIfAbsent(id, () => wrapped);
       } else {
         // If the response has completed, send a request for body data.
-        wrapped.getFullRequestData().then((value) => _updateData());
+        unawaited(wrapped.getFullRequestData().then((value) => _updateData()));
       }
       currentValues.add(wrapped);
     }
@@ -162,7 +163,7 @@ class NetworkController
         // TODO(kenz): look into improving performance by caching more data.
         // Polling less frequently helps performance.
         const Duration(milliseconds: 2000),
-        (_) => _networkService.refreshNetworkData(),
+        (_) => unawaited(_networkService.refreshNetworkData()),
       );
     } else {
       _pollingTimer?.cancel();

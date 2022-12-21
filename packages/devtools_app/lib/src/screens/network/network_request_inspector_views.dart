@@ -5,13 +5,13 @@
 import 'package:flutter/material.dart';
 import 'package:image/image.dart' as image;
 
-import '../../http/http.dart';
-import '../../http/http_request_data.dart';
-import '../../primitives/utils.dart';
 import '../../shared/common_widgets.dart';
+import '../../shared/http/http.dart';
+import '../../shared/http/http_request_data.dart';
+import '../../shared/primitives/utils.dart';
 import '../../shared/table/table.dart';
 import '../../shared/theme.dart';
-import '../../ui/colors.dart';
+import '../../shared/ui/colors.dart';
 import 'network_model.dart';
 
 // Approximately double the indent of the expandable tile's title.
@@ -146,10 +146,22 @@ class HttpRequestView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final requestHeaders = data.requestHeaders;
+    final requestContentType = requestHeaders?['content-type'] ?? '';
+    Widget child;
+    if (requestContentType.contains('json')) {
+      child = JsonViewer(encodedJson: data.requestBody!);
+    } else {
+      child = Text(
+        data.requestBody!,
+        style: theme.fixedFontStyle,
+      );
+    }
     return Padding(
       padding: const EdgeInsets.all(denseSpacing),
       child: SingleChildScrollView(
-        child: JsonViewer(encodedJson: data.requestBody!),
+        child: child,
       ),
     );
   }

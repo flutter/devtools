@@ -8,15 +8,16 @@ import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
+import 'package:stack_trace/stack_trace.dart' as stack_trace;
 import 'package:vm_service/vm_service.dart';
 
-import '../config_specific/logger/logger.dart';
-import '../primitives/trees.dart';
-import '../primitives/utils.dart';
 import '../screens/debugger/debugger_model.dart';
 import '../screens/inspector/diagnostics_node.dart';
 import '../screens/inspector/inspector_service.dart';
+import 'config_specific/logger/logger.dart';
 import 'globals.dart';
+import 'primitives/trees.dart';
+import 'primitives/utils.dart';
 
 Future<void> addExpandableChildren(
   DartObjectNode variable,
@@ -92,26 +93,26 @@ Future<void> buildVariablesTree(
     }
   }
 
-  if (variable.childCount > DartObjectNode.MAX_CHILDREN_IN_GROUPING) {
-    final numChildrenInGrouping =
-        variable.childCount >= pow(DartObjectNode.MAX_CHILDREN_IN_GROUPING, 2)
-            ? (roundToNearestPow10(variable.childCount) /
-                    DartObjectNode.MAX_CHILDREN_IN_GROUPING)
-                .floor()
-            : DartObjectNode.MAX_CHILDREN_IN_GROUPING;
+  try {
+    if (variable.childCount > DartObjectNode.MAX_CHILDREN_IN_GROUPING) {
+      final numChildrenInGrouping =
+          variable.childCount >= pow(DartObjectNode.MAX_CHILDREN_IN_GROUPING, 2)
+              ? (roundToNearestPow10(variable.childCount) /
+                      DartObjectNode.MAX_CHILDREN_IN_GROUPING)
+                  .floor()
+              : DartObjectNode.MAX_CHILDREN_IN_GROUPING;
 
-    var start = variable.offset;
-    final end = start + variable.childCount;
-    while (start < end) {
-      final count = min(end - start, numChildrenInGrouping);
-      variable.addChild(
-        DartObjectNode.grouping(variable.ref, offset: start, count: count),
-      );
-      start += count;
-    }
-  } else if (instanceRef != null && serviceManager.service != null) {
-    final variableId = variable.ref!.isolateRef!.id!;
-    try {
+      var start = variable.offset;
+      final end = start + variable.childCount;
+      while (start < end) {
+        final count = min(end - start, numChildrenInGrouping);
+        variable.addChild(
+          DartObjectNode.grouping(variable.ref, offset: start, count: count),
+        );
+        start += count;
+      }
+    } else if (instanceRef != null && serviceManager.service != null) {
+      final variableId = variable.ref!.isolateRef!.id!;
       final dynamic result = await serviceManager.service!.getObject(
         variableId,
         instanceRef.id!,
@@ -119,18 +120,79 @@ Future<void> buildVariablesTree(
         count: variable.childCount,
       );
       if (result is Instance) {
-        if (result.associations != null) {
-          variable.addAllChildren(
-            _createVariablesForAssociations(result, isolateRef),
-          );
-        } else if (result.elements != null) {
-          variable
-              .addAllChildren(_createVariablesForElements(result, isolateRef));
-        } else if (result.bytes != null) {
-          variable.addAllChildren(_createVariablesForBytes(result, isolateRef));
-          // Check fields last, as all instanceRefs may have a non-null fields
-          // with no entries.
-        } else if (result.fields != null) {
+        switch (result.kind) {
+          case InstanceKind.kMap:
+            variable.addAllChildren(
+              _createVariablesForAssociations(result, isolateRef),
+            );
+            break;
+          case InstanceKind.kList:
+            variable.addAllChildren(
+              _createVariablesForElements(result, isolateRef),
+            );
+            break;
+          case InstanceKind.kUint8ClampedList:
+          case InstanceKind.kUint8List:
+          case InstanceKind.kUint16List:
+          case InstanceKind.kUint32List:
+          case InstanceKind.kUint64List:
+          case InstanceKind.kInt8List:
+          case InstanceKind.kInt16List:
+          case InstanceKind.kInt32List:
+          case InstanceKind.kInt64List:
+          case InstanceKind.kFloat32List:
+          case InstanceKind.kFloat64List:
+          case InstanceKind.kInt32x4List:
+          case InstanceKind.kFloat32x4List:
+          case InstanceKind.kFloat64x2List:
+            variable.addAllChildren(
+              _createVariablesForBytes(result, isolateRef),
+            );
+            break;
+          case InstanceKind.kRegExp:
+            variable.addAllChildren(
+              _createVariablesForRegExp(result, isolateRef),
+            );
+            break;
+          case InstanceKind.kClosure:
+            variable.addAllChildren(
+              _createVariablesForClosure(result, isolateRef),
+            );
+            break;
+          case InstanceKind.kReceivePort:
+            variable.addAllChildren(
+              _createVariablesForReceivePort(result, isolateRef),
+            );
+            break;
+          case InstanceKind.kType:
+            variable.addAllChildren(
+              _createVariablesForType(result, isolateRef),
+            );
+            break;
+          case InstanceKind.kTypeParameter:
+            variable.addAllChildren(
+              _createVariablesForTypeParameters(result, isolateRef),
+            );
+            break;
+          case InstanceKind.kFunctionType:
+            variable.addAllChildren(
+              _createVariablesForFunctionType(result, isolateRef),
+            );
+            break;
+          case InstanceKind.kWeakProperty:
+            variable.addAllChildren(
+              _createVariablesForWeakProperty(result, isolateRef),
+            );
+            break;
+          case InstanceKind.kStackTrace:
+            variable.addAllChildren(
+              _createVariablesForStackTrace(result, isolateRef),
+            );
+            break;
+          default:
+            break;
+        }
+        if (result.fields != null) {
           variable.addAllChildren(
             _createVariablesForFields(
               result,
@@ -140,10 +202,42 @@ Future<void> buildVariablesTree(
           );
         }
       }
-    } on SentinelException {
-      // Fail gracefully if calling `getObject` throws a SentinelException.
+    } else if (variable.value != null) {
+      var value = variable.value;
+      if (value is ObjRef) {
+        value = await serviceManager.service!.getObject(
+          isolateRef!.id!,
+          value.id!,
+        );
+        switch (value.runtimeType) {
+          case Func:
+            final function = value as Func;
+            variable.addAllChildren(
+              _createVariablesForFunc(function, isolateRef),
+            );
+            break;
+          case Context:
+            final context = value as Context;
+            variable.addAllChildren(
+              _createVariablesForContext(context, isolateRef),
+            );
+            break;
+        }
+      } else if (value is! String && value is! num && value is! bool) {
+        switch (value.runtimeType) {
+          case Parameter:
+            final parameter = value as Parameter;
+            variable.addAllChildren(
+              _createVariablesForParameter(parameter, isolateRef),
+            );
+            break;
+        }
+      }
     }
+  } on SentinelException {
+    // Fail gracefully if calling `getObject` throws a SentinelException.
   }
+
   if (diagnostic != null && includeDiagnosticChildren) {
     // Always add children last after properties to avoid confusion.
     final ObjectGroupBase? service = diagnostic.inspectorService;
@@ -219,6 +313,288 @@ Future<void> buildVariablesTree(
   variable.treeInitializeComplete = true;
 }
 
+List<DartObjectNode> _createVariablesForStackTrace(
+  Instance stackTrace,
+  IsolateRef? isolateRef,
+) {
+  final trace = stack_trace.Trace.parse(stackTrace.valueAsString!);
+  return [
+    for (int i = 0; i < trace.frames.length; ++i)
+      DartObjectNode.fromValue(
+        name: '[$i]',
+        value: trace.frames[i].toString(),
+        isolateRef: isolateRef,
+        artificialName: true,
+        artificialValue: true,
+      )
+  ];
+}
+
+List<DartObjectNode> _createVariablesForParameter(
+  Parameter parameter,
+  IsolateRef? isolateRef,
+) {
+  return [
+    if (parameter.name != null)
+      DartObjectNode.fromString(
+        name: 'name',
+        value: parameter.name,
+        isolateRef: isolateRef,
+      ),
+    DartObjectNode.fromValue(
+      name: 'required',
+      value: parameter.required ?? false,
+      isolateRef: isolateRef,
+    ),
+    DartObjectNode.fromValue(
+      name: 'type',
+      value: parameter.parameterType,
+      isolateRef: isolateRef,
+    ),
+  ];
+}
+
+List<DartObjectNode> _createVariablesForContext(
+  Context context,
+  IsolateRef isolateRef,
+) {
+  return [
+    DartObjectNode.fromValue(
+      name: 'length',
+      value: context.length,
+      isolateRef: isolateRef,
+    ),
+    if (context.parent != null)
+      DartObjectNode.fromValue(
+        name: 'parent',
+        value: context.parent,
+        isolateRef: isolateRef,
+      ),
+    DartObjectNode.fromList(
+      name: 'variables',
+      type: '_ContextElement',
+      list: context.variables,
+      displayNameBuilder: (Object? e) => (e as ContextElement).value,
+      artificialChildValues: false,
+      isolateRef: isolateRef,
+    ),
+  ];
+}
+
+List<DartObjectNode> _createVariablesForFunc(
+  Func function,
+  IsolateRef isolateRef,
+) {
+  return [
+    DartObjectNode.fromString(
+      name: 'name',
+      value: function.name,
+      isolateRef: isolateRef,
+    ),
+    DartObjectNode.fromValue(
+      name: 'signature',
+      value: function.signature,
+      isolateRef: isolateRef,
+    ),
+    DartObjectNode.fromValue(
+      name: 'owner',
+      value: function.owner,
+      isolateRef: isolateRef,
+      artificialValue: true,
+    ),
+  ];
+}
+
+List<DartObjectNode> _createVariablesForWeakProperty(
+  Instance result,
+  IsolateRef? isolateRef,
+) {
+  return [
+    DartObjectNode.fromValue(
+      name: 'key',
+      value: result.propertyKey,
+      isolateRef: isolateRef,
+    ),
+    DartObjectNode.fromValue(
+      name: 'value',
+      value: result.propertyValue,
+      isolateRef: isolateRef,
+    ),
+  ];
+}
+
+List<DartObjectNode> _createVariablesForTypeParameters(
+  Instance result,
+  IsolateRef? isolateRef,
+) {
+  return [
+    // TODO(bkonyi): determine if we want to display this and add
+    // support for displaying Class objects.
+    // DartObjectNode.fromValue(
+    //   name: 'parameterizedClass',
+    //   value: result.parameterizedClass,
+    //   isolateRef: isolateRef,
+    // ),
+    DartObjectNode.fromValue(
+      name: 'index',
+      value: result.parameterIndex,
+      isolateRef: isolateRef,
+    ),
+    DartObjectNode.fromValue(
+      name: 'bound',
+      value: result.bound,
+      isolateRef: isolateRef,
+    ),
+  ];
+}
+
+List<DartObjectNode> _createVariablesForFunctionType(
+  Instance result,
+  IsolateRef? isolateRef,
+) {
+  return [
+    DartObjectNode.fromValue(
+      name: 'returnType',
+      value: result.returnType,
+      isolateRef: isolateRef,
+    ),
+    if (result.typeParameters != null)
+      DartObjectNode.fromValue(
+        name: 'typeParameters',
+        value: result.typeParameters,
+        isolateRef: isolateRef,
+      ),
+    DartObjectNode.fromList(
+      name: 'parameters',
+      type: '_Parameters',
+      list: result.parameters,
+      displayNameBuilder: (e) => '_Parameter',
+      childBuilder: (e) {
+        final parameter = e as Parameter;
+        return [
+          if (parameter.name != null) ...[
+            DartObjectNode.fromString(
+              name: 'name',
+              value: parameter.name,
+              isolateRef: isolateRef,
+            ),
+            DartObjectNode.fromValue(
+              name: 'required',
+              value: parameter.required,
+              isolateRef: isolateRef,
+            )
+          ],
+          DartObjectNode.fromValue(
+            name: 'type',
+            value: parameter.parameterType,
+            isolateRef: isolateRef,
+          ),
+        ];
+      },
+      isolateRef: isolateRef,
+    ),
+  ];
+}
+
+List<DartObjectNode> _createVariablesForType(
+  Instance result,
+  IsolateRef? isolateRef,
+) {
+  return [
+    DartObjectNode.fromString(
+      name: 'name',
+      value: result.name,
+      isolateRef: isolateRef,
+    ),
+    // TODO(bkonyi): determine if we want to display this and add
+    // support for displaying Class objects.
+    // DartObjectNode.fromValue(
+    //   name: 'typeClass',
+    //   value: result.typeClass,
+    //   isolateRef: isolateRef,
+    // ),
+    if (result.typeArguments != null)
+      DartObjectNode.fromValue(
+        name: 'typeArguments',
+        value: result.typeArguments,
+        isolateRef: isolateRef,
+      ),
+    if (result.targetType != null)
+      DartObjectNode.fromValue(
+        name: 'targetType',
+        value: result.targetType,
+        isolateRef: isolateRef,
+      ),
+  ];
+}
+
+List<DartObjectNode> _createVariablesForReceivePort(
+  Instance result,
+  IsolateRef? isolateRef,
+) {
+  return [
+    if (result.debugName!.isNotEmpty)
+      DartObjectNode.fromString(
+        name: 'debugName',
+        value: result.debugName,
+        isolateRef: isolateRef,
+      ),
+    DartObjectNode.fromValue(
+      name: 'portId',
+      value: result.portId,
+      isolateRef: isolateRef,
+    ),
+    DartObjectNode.fromValue(
+      name: 'allocationLocation',
+      value: result.allocationLocation,
+      isolateRef: isolateRef,
+    ),
+  ];
+}
+
+List<DartObjectNode> _createVariablesForClosure(
+  Instance result,
+  IsolateRef? isolateRef,
+) {
+  return [
+    DartObjectNode.fromValue(
+      name: 'function',
+      value: result.closureFunction,
+      isolateRef: isolateRef,
+      artificialValue: true,
+    ),
+    DartObjectNode.fromValue(
+      name: 'context',
+      value: result.closureContext,
+      isolateRef: isolateRef,
+      artificialValue: result.closureContext != null,
+    ),
+  ];
+}
+
+List<DartObjectNode> _createVariablesForRegExp(
+  Instance result,
+  IsolateRef? isolateRef,
+) {
+  return [
+    DartObjectNode.fromValue(
+      name: 'pattern',
+      value: result.pattern,
+      isolateRef: isolateRef,
+    ),
+    DartObjectNode.fromValue(
+      name: 'isCaseSensitive',
+      value: result.isCaseSensitive,
+      isolateRef: isolateRef,
+    ),
+    DartObjectNode.fromValue(
+      name: 'isMultiline',
+      value: result.isMultiLine,
+      isolateRef: isolateRef,
+    ),
+  ];
+}
+
 Future<DartObjectNode> _buildVariable(
   RemoteDiagnosticsNode diagnostic,
   ObjectGroupBase inspectorService,
@@ -245,11 +621,7 @@ Future<List<DartObjectNode>> _createVariablesForDiagnostics(
     if (diagnostic.level == DiagnosticLevel.hidden) continue;
     variables.add(_buildVariable(diagnostic, inspectorService, isolateRef));
   }
-  if (variables.isNotEmpty) {
-    return await Future.wait(variables);
-  } else {
-    return const [];
-  }
+  return variables.isNotEmpty ? await Future.wait(variables) : const [];
 }
 
 List<DartObjectNode> _createVariablesForAssociations(
@@ -434,25 +806,28 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
     int? offset,
     int? childCount,
     this.artificialName = false,
+    this.artificialValue = false,
   })  : _ref = ref,
         _offset = offset,
         _childCount = childCount {
     indentChildren = ref?.diagnostic?.style != DiagnosticsTreeStyle.flat;
   }
 
-  /// Creates a variable from a value that must be an InstanceRef or a primitive
-  /// type.
+  /// Creates a variable from a value that must be an VM service type or a
+  /// primitive type.
   ///
   /// [value] should typically be an [InstanceRef] but can also be a [Sentinel]
   /// [ObjRef] or primitive type such as num or String.
   ///
-  /// [artificialName] is used by [ExpandableVariable] to determine styling of
-  /// `Text(name)`. Artificial names are rendered using `subtleFixedFontStyle`
-  /// to put less emphasis on the name (e.g., for the root node of a JSON tree).
+  /// [artificialName] and [artificialValue] is used by [ExpandableVariable] to
+  /// determine styling of `Text(name)` and `Text(displayValue)` respectively.
+  /// Artificial names and values are rendered using `subtleFixedFontStyle` to
+  /// put less emphasis on the name (e.g., for the root node of a JSON tree).
   factory DartObjectNode.fromValue({
     String? name,
     required Object? value,
     bool artificialName = false,
+    bool artificialValue = false,
     RemoteDiagnosticsNode? diagnostic,
     required IsolateRef? isolateRef,
   }) {
@@ -465,7 +840,71 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
         value: value,
       ),
       artificialName: artificialName,
+      artificialValue: artificialValue,
     );
+  }
+
+  /// Creates a variable from a `String` which displays [value] with quotation
+  /// marks.
+  factory DartObjectNode.fromString({
+    String? name,
+    required String? value,
+    required IsolateRef? isolateRef,
+  }) {
+    name = name ?? '';
+    return DartObjectNode._(
+      name: name,
+      ref: GenericInstanceRef(
+        isolateRef: isolateRef,
+        value: value != null ? "'$value'" : null,
+      ),
+    );
+  }
+
+  /// Creates a list node from a list of values that must be VM service objects
+  /// or primitives.
+  ///
+  /// [list] should be a list of VM service objects or primitives.
+  ///
+  /// [displayNameBuilder] is used to transform a list element that will be the
+  /// child node's `value`.
+  ///
+  /// [childBuilder] is used to generate nodes for each child.
+  ///
+  /// [artificialChildValues] determines styling of `Text(displayValue)` for
+  /// child nodes. Artificial values are rendered using `subtleFixedFontStyle`
+  /// to put less emphasis on the value.
+  factory DartObjectNode.fromList({
+    String? name,
+    required String? type,
+    required List<Object?>? list,
+    required IsolateRef? isolateRef,
+    Object? Function(Object?)? displayNameBuilder,
+    List<DartObjectNode> Function(Object?)? childBuilder,
+    bool artificialChildValues = true,
+  }) {
+    name = name ?? '';
+    return DartObjectNode._(
+      name: name,
+      ref: GenericInstanceRef(
+        isolateRef: isolateRef,
+        value: '$type (${_itemCount(list?.length ?? 0)})',
+      ),
+      artificialValue: true,
+      childCount: list?.length ?? 0,
+    )..addAllChildren([
+        if (list != null)
+          for (int i = 0; i < list.length; ++i)
+            DartObjectNode.fromValue(
+              name: '[$i]',
+              value: displayNameBuilder?.call(list[i]) ?? list[i],
+              isolateRef: isolateRef,
+              artificialName: true,
+              artificialValue: artificialChildValues,
+            )..addAllChildren([
+                if (childBuilder != null) ...childBuilder(list[i]),
+              ]),
+      ]);
   }
 
   factory DartObjectNode.create(
@@ -512,6 +951,12 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
   /// to put less emphasis on the name (e.g., for the root node of a JSON tree).
   final bool artificialName;
 
+  /// [artificialValue] is used by [ExpandableVariable] to determine styling of
+  /// `Text(displayValue)`. Artificial names are rendered using
+  /// `subtleFixedFontStyle` to put less emphasis on the value (e.g., for type
+  /// names).
+  final bool artificialValue;
+
   GenericInstanceRef? get ref => _ref;
   GenericInstanceRef? _ref;
 
@@ -553,7 +998,15 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
       return true;
     // TODO(jacobr): do something smarter to avoid expandable variable flicker.
     final instanceRef = ref?.instanceRef;
-    return instanceRef != null ? instanceRef.valueAsString == null : false;
+    if (instanceRef != null) {
+      if (instanceRef.kind == InstanceKind.kStackTrace) {
+        return true;
+      }
+      return instanceRef.valueAsString == null;
+    }
+    return (ref?.value is! String?) &&
+        (ref?.value is! num?) &&
+        (ref?.value is! bool?);
   }
 
   Object? get value => ref?.value;
@@ -571,7 +1024,10 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
 
     if (value is InstanceRef) {
       final kind = value.kind;
-      if (value.valueAsString == null) {
+      if (kind == InstanceKind.kStackTrace) {
+        final depth = children.length;
+        valueStr = 'StackTrace ($depth ${pluralize('frame', depth)})';
+      } else if (value.valueAsString == null) {
         valueStr = value.classRef?.name ?? '';
       } else {
         valueStr = value.valueAsString ?? '';
@@ -595,6 +1051,8 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
       valueStr = value.valueAsString;
     } else if (value is TypeArgumentsRef) {
       valueStr = value.name;
+    } else if (value is ObjRef) {
+      valueStr = _stripReferenceToken(value.type);
     } else {
       valueStr = value.toString();
     }
@@ -602,8 +1060,15 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
     return valueStr;
   }
 
-  String _itemCount(int count) {
+  static String _itemCount(int count) {
     return '${nf.format(count)} ${pluralize('item', count)}';
+  }
+
+  static String _stripReferenceToken(String type) {
+    if (type.startsWith('@')) {
+      return '_${type.substring(1)}';
+    }
+    return '_$type';
   }
 
   @override

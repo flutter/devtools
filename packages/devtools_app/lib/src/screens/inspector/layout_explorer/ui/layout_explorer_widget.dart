@@ -2,11 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
-import '../../../../primitives/utils.dart';
 import '../../../../shared/globals.dart';
+import '../../../../shared/primitives/utils.dart';
 import '../../../../shared/theme.dart';
 import '../../diagnostics_node.dart';
 import '../../inspector_controller.dart';
@@ -265,7 +267,7 @@ abstract class LayoutExplorerWidgetState<W extends LayoutExplorerWidget,
         'flex-layout',
       );
     }
-    onSelectionChanged();
+    unawaited(onSelectionChanged());
   }
 
   bool _dirty = false;

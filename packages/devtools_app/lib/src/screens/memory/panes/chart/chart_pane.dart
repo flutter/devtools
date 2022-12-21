@@ -5,17 +5,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import '../../../../charts/chart_controller.dart';
-import '../../../../primitives/auto_dispose_mixin.dart';
-import '../../../../primitives/utils.dart';
+import '../../../../shared/charts/chart_controller.dart';
 import '../../../../shared/common_widgets.dart';
 import '../../../../shared/globals.dart';
+import '../../../../shared/primitives/auto_dispose.dart';
+import '../../../../shared/primitives/utils.dart';
 import '../../../../shared/theme.dart';
 import '../../../../shared/utils.dart';
 import '../../memory_controller.dart';
-import '../../primitives/painting.dart';
+import '../../shared/primitives/painting.dart';
 import 'chart_control_pane.dart';
 import 'chart_pane_controller.dart';
+import 'legend.dart';
 import 'memory_android_chart.dart';
 import 'memory_charts.dart';
 import 'memory_events_pane.dart';
@@ -212,6 +213,7 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // The chart.
               Expanded(
                 child: Column(
                   children: [
@@ -230,6 +232,22 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
                   ],
                 ),
               ),
+              // The legend.
+              DualValueListenableBuilder<bool, bool>(
+                firstListenable: widget.chartController.legendVisibleNotifier,
+                secondListenable: controller.isAndroidChartVisibleNotifier,
+                builder: (_, isLegendVisible, isAndroidChartVisible, __) {
+                  if (!isLegendVisible) return const SizedBox.shrink();
+                  return Padding(
+                    padding: const EdgeInsets.only(right: denseSpacing),
+                    child: MemoryChartLegend(
+                      isAndroidVisible: isAndroidChartVisible,
+                      chartController: widget.chartController,
+                    ),
+                  );
+                },
+              ),
+              // Chart control pane.
               ChartControlPane(
                 chartController: widget.chartController,
               ),
@@ -306,13 +324,11 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
 
     double totalHoverHeight;
     int totalTraces;
-    if (controller.isAndroidChartVisibleNotifier.value) {
-      totalTraces = chartsValues.vmData.entries.length -
-          1 +
-          chartsValues.androidData.entries.length;
-    } else {
-      totalTraces = chartsValues.vmData.entries.length - 1;
-    }
+    totalTraces = controller.isAndroidChartVisibleNotifier.value
+        ? chartsValues.vmData.entries.length -
+            1 +
+            chartsValues.androidData.entries.length
+        : chartsValues.vmData.entries.length - 1;
 
     totalHoverHeight = _computeHoverHeight(
       chartsValues.eventCount,
@@ -338,7 +354,7 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
               color: focusColor,
               width: _hover_card_border_width,
             ),
-            borderRadius: BorderRadius.circular(10.0),
+            borderRadius: BorderRadius.circular(defaultBorderRadius),
           ),
           width: _hoverWidth,
           child: Column(

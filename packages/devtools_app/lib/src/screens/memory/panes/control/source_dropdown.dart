@@ -4,12 +4,10 @@
 
 import 'package:flutter/material.dart';
 
-import '../../../../analytics/analytics.dart' as ga;
-import '../../../../analytics/constants.dart' as analytics_constants;
 import '../../../../shared/common_widgets.dart';
 import '../../../../shared/utils.dart';
 import '../../memory_controller.dart';
-import '../../shared/constants.dart';
+import 'primitives.dart';
 
 class SourceDropdownMenuItem<T> extends DropdownMenuItem<T> {
   const SourceDropdownMenuItem({T? value, required Widget child})
@@ -67,10 +65,6 @@ class _MemorySourceDropdownState extends State<MemorySourceDropdown>
       value: controller.memorySource,
       onChanged: (String? newValue) {
         setState(() {
-          ga.select(
-            analytics_constants.memory,
-            analytics_constants.sourcesDropDown,
-          );
           controller.memorySource = newValue!;
         });
       },

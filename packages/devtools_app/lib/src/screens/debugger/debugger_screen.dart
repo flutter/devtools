@@ -2,24 +2,27 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:codicon/codicon.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide Stack;
 import 'package:provider/provider.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../analytics/analytics.dart' as ga;
-import '../../analytics/constants.dart' as analytics_constants;
-import '../../primitives/auto_dispose_mixin.dart';
-import '../../primitives/listenable.dart';
+import '../../shared/analytics/analytics.dart' as ga;
+import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/common_widgets.dart';
 import '../../shared/flex_split_column.dart';
 import '../../shared/globals.dart';
+import '../../shared/primitives/auto_dispose.dart';
+import '../../shared/primitives/listenable.dart';
+import '../../shared/primitives/simple_items.dart';
 import '../../shared/screen.dart';
 import '../../shared/split.dart';
 import '../../shared/theme.dart';
+import '../../shared/ui/icons.dart';
 import '../../shared/utils.dart';
-import '../../ui/icons.dart';
 import 'breakpoints.dart';
 import 'call_stack.dart';
 import 'codeview.dart';
@@ -33,16 +36,16 @@ import 'program_explorer_model.dart';
 import 'variables.dart';
 
 class DebuggerScreen extends Screen {
-  const DebuggerScreen()
+  DebuggerScreen()
       : super.conditional(
           id: id,
           requiresDebugBuild: true,
-          title: 'Debugger',
+          title: ScreenMetaData.debugger.title,
           icon: Octicons.bug,
           showFloatingDebuggerControls: false,
         );
 
-  static const id = 'debugger';
+  static final id = ScreenMetaData.debugger.id;
 
   @override
   bool showConsole(bool embed) => true;
@@ -108,7 +111,7 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
   void initState() {
     super.initState();
     ga.screen(DebuggerScreen.id);
-    ga.timeStart(DebuggerScreen.id, analytics_constants.pageReady);
+    ga.timeStart(DebuggerScreen.id, gac.pageReady);
     _shownFirstScript = false;
   }
 
@@ -116,7 +119,7 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (!initController()) return;
-    controller.onFirstDebuggerScreenLoad();
+    unawaited(controller.onFirstDebuggerScreenLoad());
   }
 
   @override
@@ -164,11 +167,13 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
                         !_shownFirstScript) {
                       ga.timeEnd(
                         DebuggerScreen.id,
-                        analytics_constants.pageReady,
+                        gac.pageReady,
                       );
-                      serviceManager.sendDwdsEvent(
-                        screen: DebuggerScreen.id,
-                        action: analytics_constants.pageReady,
+                      unawaited(
+                        serviceManager.sendDwdsEvent(
+                          screen: DebuggerScreen.id,
+                          action: gac.pageReady,
+                        ),
                       );
                       _shownFirstScript = true;
                     }
@@ -194,7 +199,10 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
   void _onNodeSelected(VMServiceObjectNode? node) {
     final location = node?.location;
     if (location != null) {
-      controller.codeViewController.showScriptLocation(location);
+      controller.codeViewController.showScriptLocation(
+        location,
+        focusLine: true,
+      );
     }
   }
 

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -14,7 +16,7 @@ class _ChannelDemoState extends State<ChannelDemo> {
   late String _response;
 
   void _sendMessage() {
-    _channel.send('Message from Dart');
+    unawaited(_channel.send('Message from Dart'));
   }
 
   void _reset() {

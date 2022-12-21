@@ -7,18 +7,19 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../analytics/prompt.dart';
 import '../app.dart';
-import '../config_specific/drag_and_drop/drag_and_drop.dart';
-import '../config_specific/ide_theme/ide_theme.dart';
-import '../config_specific/import_export/import_export.dart';
-import '../primitives/auto_dispose_mixin.dart';
 import '../screens/debugger/console.dart';
 import '../screens/debugger/debugger_screen.dart';
+import '../shared/analytics/prompt.dart';
 import '../shared/banner_messages.dart';
 import '../shared/common_widgets.dart';
+import '../shared/config_specific/drag_and_drop/drag_and_drop.dart';
+import '../shared/config_specific/ide_theme/ide_theme.dart';
+import '../shared/config_specific/import_export/import_export.dart';
 import '../shared/framework_controller.dart';
 import '../shared/globals.dart';
+import '../shared/primitives/auto_dispose.dart';
+import '../shared/primitives/simple_items.dart';
 import '../shared/routing.dart';
 import '../shared/screen.dart';
 import '../shared/split.dart';
@@ -36,7 +37,7 @@ import 'status_line.dart';
 class DevToolsScaffold extends StatefulWidget {
   const DevToolsScaffold({
     Key? key,
-    required this.tabs,
+    required this.screens,
     this.page,
     this.actions,
     this.embed = false,
@@ -50,7 +51,7 @@ class DevToolsScaffold extends StatefulWidget {
     List<Widget>? actions,
   }) : this(
           key: key,
-          tabs: [SimpleScreen(child)],
+          screens: [SimpleScreen(child)],
           ideTheme: ideTheme,
           actions: actions,
         );
@@ -76,7 +77,7 @@ class DevToolsScaffold extends StatefulWidget {
       EdgeInsets.symmetric(horizontal: isEmbedded() ? 2.0 : 16.0);
 
   /// All of the [Screen]s that it's possible to navigate to from this Scaffold.
-  final List<Screen> tabs;
+  final List<Screen> screens;
 
   /// The page being rendered.
   final String? page;
@@ -133,22 +134,23 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
   void didUpdateWidget(DevToolsScaffold oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    if (widget.tabs.length != oldWidget.tabs.length) {
+    if (widget.screens.length != oldWidget.screens.length) {
       var newIndex = 0;
       // Stay on the current tab if possible when the collection of tabs changes.
       if (_tabController != null &&
-          widget.tabs.contains(oldWidget.tabs[_tabController!.index])) {
-        newIndex = widget.tabs.indexOf(oldWidget.tabs[_tabController!.index]);
+          widget.screens.contains(oldWidget.screens[_tabController!.index])) {
+        newIndex =
+            widget.screens.indexOf(oldWidget.screens[_tabController!.index]);
       }
       // Create a new tab controller to reflect the changed tabs.
       _setupTabController();
       _tabController!.index = newIndex;
-    } else if (widget.tabs[_tabController!.index].screenId != widget.page) {
+    } else if (widget.screens[_tabController!.index].screenId != widget.page) {
       // If the page changed (eg. the route was modified by pressing back in the
       // browser), animate to the new one.
       final newIndex = widget.page == null
           ? 0 // When there's no supplied page, we show the first one.
-          : widget.tabs.indexWhere((t) => t.screenId == widget.page);
+          : widget.screens.indexWhere((t) => t.screenId == widget.page);
       _tabController!.animateTo(newIndex);
     }
   }
@@ -182,19 +184,19 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
 
   void _setupTabController() {
     _tabController?.dispose();
-    _tabController = TabController(length: widget.tabs.length, vsync: this);
+    _tabController = TabController(length: widget.screens.length, vsync: this);
 
     if (widget.page != null) {
       final initialIndex =
-          widget.tabs.indexWhere((screen) => screen.screenId == widget.page);
+          widget.screens.indexWhere((screen) => screen.screenId == widget.page);
       if (initialIndex != -1) {
         _tabController!.index = initialIndex;
       }
     }
 
-    _currentScreen = widget.tabs[_tabController!.index];
+    _currentScreen = widget.screens[_tabController!.index];
     _tabController!.addListener(() {
-      final screen = widget.tabs[_tabController!.index];
+      final screen = widget.screens[_tabController!.index];
 
       if (_currentScreen != screen) {
         setState(() {
@@ -226,6 +228,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
           routerDelegate.navigateIfNotCurrent(
             _currentScreen.screenId,
             routerDelegate.currentConfiguration?.args,
+            routerDelegate.currentConfiguration?.state,
           );
         });
       });
@@ -244,7 +247,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
     final existingTabIndex = _tabController!.index;
 
     final newIndex =
-        widget.tabs.indexWhere((screen) => screen.screenId == pageId);
+        widget.screens.indexWhere((screen) => screen.screenId == pageId);
 
     if (newIndex != -1 && newIndex != existingTabIndex) {
       DevToolsRouterDelegate.of(context).navigateIfNotCurrent(pageId);
@@ -276,7 +279,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
   Widget build(BuildContext context) {
     // Build the screens for each tab and wrap them in the appropriate styling.
     final tabBodies = [
-      for (var screen in widget.tabs)
+      for (var screen in widget.screens)
         Container(
           // TODO(kenz): this padding creates a flash when dragging and dropping
           // into the app size screen because it creates space that is outside
@@ -378,17 +381,17 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
 
     // Add a leading [BulletSpacer] to the actions if the screen is not narrow.
     final actions = List<Widget>.from(widget.actions ?? []);
-    if (!isNarrow && actions.isNotEmpty && widget.tabs.length > 1) {
+    if (!isNarrow && actions.isNotEmpty && widget.screens.length > 1) {
       actions.insert(0, const BulletSpacer(useAccentColor: true));
     }
 
-    final bool hasMultipleTabs = widget.tabs.length > 1;
+    final bool hasMultipleTabs = widget.screens.length > 1;
 
     if (hasMultipleTabs) {
       tabBar = TabBar(
         controller: _tabController,
         isScrollable: true,
-        tabs: [for (var screen in widget.tabs) screen.buildTab(context)],
+        tabs: [for (var screen in widget.screens) screen.buildTab(context)],
       );
       preferredSize = isNarrow
           ? Size.fromHeight(
@@ -459,7 +462,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
     // Approximate size of the title. Add [defaultSpacing] to account for
     // title's leading padding.
     double wideWidth = painter.width + defaultSpacing;
-    for (var tab in widget.tabs) {
+    for (var tab in widget.screens) {
       wideWidth += tab.approximateWidth(textTheme);
     }
     final actionsLength = widget.actions?.length ?? 0;
@@ -515,13 +518,13 @@ class KeyboardShortcutsState extends State<KeyboardShortcuts>
 }
 
 class SimpleScreen extends Screen {
-  const SimpleScreen(this.child)
+  SimpleScreen(this.child)
       : super(
           id,
           showFloatingDebuggerControls: false,
         );
 
-  static const id = 'simple';
+  static final id = ScreenMetaData.simple.id;
 
   final Widget child;
 

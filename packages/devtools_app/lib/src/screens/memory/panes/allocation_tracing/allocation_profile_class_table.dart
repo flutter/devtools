@@ -4,8 +4,10 @@
 
 import 'package:flutter/material.dart';
 
-import '../../../../primitives/utils.dart';
+import '../../../../shared/analytics/analytics.dart' as ga;
+import '../../../../shared/analytics/constants.dart' as gac;
 import '../../../../shared/common_widgets.dart';
+import '../../../../shared/primitives/utils.dart';
 import '../../../../shared/table/table.dart';
 import '../../../../shared/table/table_controller.dart';
 import '../../../../shared/table/table_data.dart';
@@ -43,6 +45,10 @@ class _TraceCheckBoxColumn extends ColumnData<TracedClass>
     return Checkbox(
       value: item.traceAllocations,
       onChanged: (value) async {
+        ga.select(
+          gac.memory,
+          '${gac.MemoryEvent.tracingTraceCheck}-$value',
+        );
         await controller.setAllocationTracingForClass(item.cls, value!);
       },
     );
@@ -72,7 +78,9 @@ class _ClassNameColumn extends ColumnData<TracedClass> {
 class _InstancesColumn extends ColumnData<TracedClass> {
   _InstancesColumn()
       : super(
-          'Instances',
+          'Delta',
+          titleTooltip:
+              'Number of instances, allocated after the class was selected for tracing.',
           fixedWidthPx: scaleByFontFactor(_defaultNumberFieldWidth),
         );
 
@@ -112,43 +120,57 @@ class _AllocationTracingTableState extends State<AllocationTracingTable> {
     ];
   }
 
+  // How often the ga event should be sent if the user keeps editing the filter.
+  static const _editFilterGaThrottling = Duration(seconds: 5);
+  DateTime _editFilterGaSent = DateTime.fromMillisecondsSinceEpoch(0);
+  void _sendFilterEditGaEvent() {
+    final now = DateTime.now();
+    if (now.difference(_editFilterGaSent) < _editFilterGaThrottling) return;
+    ga.select(
+      gac.memory,
+      gac.MemoryEvent.tracingClassFilter,
+    );
+    _editFilterGaSent = now;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
         Padding(
-          padding: const EdgeInsets.only(bottom: densePadding),
+          padding: const EdgeInsets.all(denseSpacing),
           child: DevToolsClearableTextField(
             labelText: 'Class Filter',
             hintText: 'Filter by class name',
-            onChanged: widget.controller.updateClassFilter,
+            onChanged: (value) {
+              _sendFilterEditGaEvent();
+              widget.controller.updateClassFilter(value);
+            },
             controller: widget.controller.textEditingController,
           ),
         ),
         Expanded(
-          child: OutlineDecoration(
-            child: DualValueListenableBuilder<bool,
-                AllocationProfileTracingIsolateState>(
-              firstListenable: widget.controller.refreshing,
-              secondListenable: widget.controller.stateForIsolate,
-              builder: (context, _, state, __) {
-                return ValueListenableBuilder<List<TracedClass>>(
-                  valueListenable: state.filteredClassList,
-                  builder: (context, filteredClassList, _) {
-                    return FlatTable<TracedClass>(
-                      keyFactory: (e) => Key(e.cls.id!),
-                      data: filteredClassList,
-                      dataKey: 'allocation-tracing',
-                      columns: columns,
-                      defaultSortColumn: _classNameColumn,
-                      defaultSortDirection: SortDirection.ascending,
-                      selectionNotifier: state.selectedTracedClass,
-                      pinBehavior: FlatTablePinBehavior.pinOriginalToTop,
-                    );
-                  },
-                );
-              },
-            ),
+          child: DualValueListenableBuilder<bool,
+              AllocationProfileTracingIsolateState>(
+            firstListenable: widget.controller.refreshing,
+            secondListenable: widget.controller.stateForIsolate,
+            builder: (context, _, state, __) {
+              return ValueListenableBuilder<List<TracedClass>>(
+                valueListenable: state.filteredClassList,
+                builder: (context, filteredClassList, _) {
+                  return FlatTable<TracedClass>(
+                    keyFactory: (e) => Key(e.cls.id!),
+                    data: filteredClassList,
+                    dataKey: 'allocation-tracing',
+                    columns: columns,
+                    defaultSortColumn: _classNameColumn,
+                    defaultSortDirection: SortDirection.ascending,
+                    selectionNotifier: state.selectedTracedClass,
+                    pinBehavior: FlatTablePinBehavior.pinOriginalToTop,
+                  );
+                },
+              );
+            },
           ),
         ),
       ],

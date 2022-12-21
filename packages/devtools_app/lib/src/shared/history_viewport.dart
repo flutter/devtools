@@ -4,9 +4,9 @@
 
 import 'package:flutter/material.dart';
 
-import '../primitives/history_manager.dart';
 import '../screens/debugger/common.dart';
 import 'common_widgets.dart';
+import 'primitives/history_manager.dart';
 import 'theme.dart';
 
 /// A [Widget] that allows for displaying content based on the current state of a

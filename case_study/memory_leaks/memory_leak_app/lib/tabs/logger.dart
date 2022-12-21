@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../common.dart';
@@ -34,31 +36,33 @@ class LoggerState extends State<Logger> {
 
   // ignore: unused_element
   void _pushSaved() {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) {
-          final tiles = _saved.map(
-            (itemValue) {
-              return ListTile(
-                title: Text(
-                  itemValue,
-                  style: _biggerFont,
-                ),
-              );
-            },
-          );
-          final divided = ListTile.divideTiles(
-            context: context,
-            tiles: tiles,
-          ).toList();
+    unawaited(
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (context) {
+            final tiles = _saved.map(
+              (itemValue) {
+                return ListTile(
+                  title: Text(
+                    itemValue,
+                    style: _biggerFont,
+                  ),
+                );
+              },
+            );
+            final divided = ListTile.divideTiles(
+              context: context,
+              tiles: tiles,
+            ).toList();
 
-          return Scaffold(
-            appBar: AppBar(
-              title: const Text('Saved lists'),
-            ),
-            body: ListView(children: divided),
-          );
-        },
+            return Scaffold(
+              appBar: AppBar(
+                title: const Text('Saved lists'),
+              ),
+              body: ListView(children: divided),
+            );
+          },
+        ),
       ),
     );
   }

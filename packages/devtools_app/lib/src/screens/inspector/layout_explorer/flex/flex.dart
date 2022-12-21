@@ -2,12 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-import '../../../../primitives/math_utils.dart';
+import '../../../../shared/primitives/math_utils.dart';
 import '../../../../shared/theme.dart';
 import '../../diagnostics_node.dart';
 import '../../inspector_controller.dart';
@@ -272,7 +273,7 @@ class _FlexLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
           left: crossAxisArrowIndicatorSize + margin,
         ),
         child: InkWell(
-          onTap: () => onTap(propertiesLocal),
+          onTap: () => unawaited(onTap(propertiesLocal)),
           child: WidgetVisualizer(
             title: flexType,
             layoutProperties: propertiesLocal,
@@ -421,10 +422,12 @@ class _VisualizeFlexChildrenState extends State<VisualizeFlexChildren> {
               selectedChildKey.currentContext?.findRenderObject();
           if (selectedRenderObject != null &&
               widget.scrollController.hasClients) {
-            widget.scrollController.position.ensureVisible(
-              selectedRenderObject,
-              alignment: 0.5,
-              duration: defaultDuration,
+            unawaited(
+              widget.scrollController.position.ensureVisible(
+                selectedRenderObject,
+                alignment: 0.5,
+                duration: defaultDuration,
+              ),
             );
           }
         });
@@ -709,17 +712,15 @@ class FlexChildVisualizer extends StatelessWidget {
       final horizontal = rootLocal.isMainAxisHorizontal;
 
       late Size size;
-      if (propertiesLocal.hasFlexFactor) {
-        size = SizeTween(
-          begin: Size(
-            horizontal ? minRenderWidth - entranceMargin : renderSize.width,
-            vertical ? minRenderHeight - entranceMargin : renderSize.height,
-          ),
-          end: renderSize,
-        ).evaluate(state.entranceCurve)!;
-      } else {
-        size = renderSize;
-      }
+      size = propertiesLocal.hasFlexFactor
+          ? SizeTween(
+              begin: Size(
+                horizontal ? minRenderWidth - entranceMargin : renderSize.width,
+                vertical ? minRenderHeight - entranceMargin : renderSize.height,
+              ),
+              end: renderSize,
+            ).evaluate(state.entranceCurve)!
+          : renderSize;
       // Not-expanded widgets enter much faster.
       return Opacity(
         opacity: min([state.entranceCurve.value * 5, 1.0]),
@@ -739,7 +740,7 @@ class FlexChildVisualizer extends StatelessWidget {
       top: renderOffset.dy,
       left: renderOffset.dx,
       child: GestureDetector(
-        onTap: () => state.onTap(propertiesLocal),
+        onTap: () => unawaited(state.onTap(propertiesLocal)),
         onDoubleTap: () => state.onDoubleTap(propertiesLocal),
         onLongPress: () => state.onDoubleTap(propertiesLocal),
         child: SizedBox(

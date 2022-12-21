@@ -6,9 +6,9 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/screens/debugger/span_parser.dart';
 import 'package:devtools_app/src/screens/debugger/syntax_highlighter.dart';
+import 'package:devtools_app/src/shared/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_app/src/shared/routing.dart';
 import 'package:devtools_app/src/shared/theme.dart';
@@ -179,7 +179,7 @@ void main() {
               ideTheme: getIdeTheme(),
             ),
             routerDelegate: DevToolsRouterDelegate(
-              (a, b, c) => const CupertinoPage(child: SizedBox.shrink()),
+              (a, b, c, d) => const CupertinoPage(child: SizedBox.shrink()),
             ),
             routeInformationParser: DevToolsRouteInformationParser(),
             builder: (context, _) {

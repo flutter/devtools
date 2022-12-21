@@ -217,7 +217,8 @@ void main() {
       debuggerController.parsedScript.value = ParsedScript(
         script: testScript,
         highlighter: mockSyntaxHighlighter,
-        executableLines: {},
+        executableLines: const {},
+        sourceReport: const ProcessedSourceReport.empty(),
       );
     });
 

@@ -2,79 +2,117 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
+import '../../../../../shared/analytics/analytics.dart' as ga;
+import '../../../../../shared/analytics/constants.dart' as gac;
 import '../../../../../shared/common_widgets.dart';
 import '../../../../../shared/theme.dart';
-import '../../../primitives/ui.dart';
+import '../../../shared/heap/class_filter.dart';
+import '../../../shared/primitives/simple_elements.dart';
 import '../controller/diff_pane_controller.dart';
 import '../controller/item_controller.dart';
+import 'class_filter_dialog.dart';
 
 class SnapshotControlPane extends StatelessWidget {
   const SnapshotControlPane({Key? key, required this.controller})
       : super(key: key);
 
   final DiffPaneController controller;
-  static const _classFilterWidth = 200.0;
 
   @override
   Widget build(BuildContext context) {
+    final filter = controller.core.classFilter;
     return ValueListenableBuilder<bool>(
-      valueListenable: controller.isProcessing,
+      valueListenable: controller.isTakingSnapshot,
       builder: (_, isProcessing, __) {
         final current = controller.core.selectedItem as SnapshotInstanceItem;
 
-        return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(
-                children: [
-                  if (!isProcessing && current.heap != null) ...[
-                    _DiffDropdown(
-                      current: current,
-                      controller: controller,
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Row(
+              children: [
+                if (!isProcessing && current.heap != null) ...[
+                  _DiffDropdown(
+                    current: current,
+                    controller: controller,
+                  ),
+                  const SizedBox(width: defaultSpacing),
+                  ValueListenableBuilder<ClassFilter>(
+                    valueListenable: filter,
+                    builder: (context, filterValue, ___) => ClassFilterButton(
+                      filter: filterValue,
+                      onChanged: controller.applyFilter,
                     ),
-                    const SizedBox(width: defaultSpacing),
-                    SizedBox(
-                      width: _classFilterWidth,
-                      child: _ClassFilter(onChanged: controller.setClassFilter),
-                    ),
-                    const SizedBox(width: defaultSpacing),
-                    ToCsvButton(
-                      minScreenWidthForTextBeforeScaling:
-                          primaryControlsMinVerboseWidth,
-                      onPressed: controller.downloadCurrentItemToCsv,
-                    ),
-                  ],
+                  ),
+                  const SizedBox(width: defaultSpacing),
+                  ToCsvButton(
+                    minScreenWidthForTextBeforeScaling:
+                        memoryControlsMinVerboseWidth,
+                    onPressed: () {
+                      ga.select(
+                        gac.memory,
+                        gac.MemoryEvent.diffSnapshotDownloadCsv,
+                      );
+                      controller.downloadCurrentItemToCsv();
+                    },
+                  ),
                 ],
-              ),
-              ToolbarAction(
-                icon: Icons.clear,
-                tooltip: 'Delete snapshot',
-                onPressed:
-                    isProcessing ? null : controller.deleteCurrentSnapshot,
-              ),
-            ],
-          ),
+              ],
+            ),
+            ToolbarAction(
+              icon: Icons.clear,
+              tooltip: 'Delete snapshot',
+              onPressed: isProcessing
+                  ? null
+                  : () {
+                      controller.deleteCurrentSnapshot();
+                      ga.select(
+                        gac.memory,
+                        gac.MemoryEvent.diffSnapshotDelete,
+                      );
+                    },
+            ),
+          ],
         );
       },
     );
   }
 }
 
-class _ClassFilter extends StatelessWidget {
-  const _ClassFilter({Key? key, required this.onChanged}) : super(key: key);
+@visibleForTesting
+class ClassFilterButton extends StatelessWidget {
+  const ClassFilterButton({required this.filter, required this.onChanged});
 
-  final Function(String value) onChanged;
+  final ClassFilter filter;
+  final Function(ClassFilter) onChanged;
 
   @override
-  Widget build(BuildContext context) => DevToolsClearableTextField(
-        labelText: 'Class Filter',
-        hintText: 'Filter by class name',
-        onChanged: onChanged,
-      );
+  Widget build(BuildContext context) {
+    return FilterButton(
+      onPressed: () {
+        ga.select(
+          gac.memory,
+          gac.MemoryEvent.diffSnapshotFilter,
+        );
+
+        unawaited(
+          showDialog(
+            context: context,
+            builder: (context) => ClassFilterDialog(
+              filter,
+              onChanged: onChanged,
+            ),
+          ),
+        );
+      },
+      isFilterActive: !filter.isEmpty,
+      message: filter.buttonTooltip,
+    );
+  }
 }
 
 class _DiffDropdown extends StatelessWidget {
@@ -122,8 +160,16 @@ class _DiffDropdown extends StatelessWidget {
             onChanged: (SnapshotInstanceItem? value) {
               late SnapshotInstanceItem? newDiffWith;
               if ((value ?? current) == current) {
+                ga.select(
+                  gac.memory,
+                  gac.MemoryEvent.diffSnapshotDiffOff,
+                );
                 newDiffWith = null;
               } else {
+                ga.select(
+                  gac.memory,
+                  gac.MemoryEvent.diffSnapshotDiffSelect,
+                );
                 newDiffWith = value;
               }
               controller.setDiffing(current, newDiffWith);

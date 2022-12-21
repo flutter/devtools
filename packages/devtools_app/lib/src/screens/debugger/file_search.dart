@@ -7,14 +7,16 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../primitives/auto_dispose_mixin.dart';
-import '../../primitives/utils.dart';
 import '../../shared/globals.dart';
-import '../../ui/search.dart';
+import '../../shared/primitives/auto_dispose.dart';
+import '../../shared/primitives/utils.dart';
+import '../../shared/ui/search.dart';
 import 'codeview_controller.dart';
 import 'debugger_model.dart';
 
 const int numOfMatchesToShow = 10;
+
+const noResultsMsg = 'No files found.';
 
 final _fileNamesCache = <String, String>{};
 
@@ -100,7 +102,9 @@ class FileSearchFieldState extends State<FileSearchField>
 
     final searchResults = _createSearchResults(currentQuery, scripts);
     if (searchResults.scriptRefs.isEmpty) {
-      autoCompleteController.searchAutoComplete.value = [];
+      autoCompleteController.searchAutoComplete.value = [
+        AutoCompleteMatch(noResultsMsg),
+      ];
     } else {
       searchResults.topMatches.scriptRefs.forEach(_addScriptRefToCache);
       autoCompleteController.searchAutoComplete.value =
@@ -126,6 +130,10 @@ class FileSearchFieldState extends State<FileSearchField>
   }
 
   void _onSelection(String scriptUri) {
+    if (scriptUri == noResultsMsg) {
+      _onClose();
+      return;
+    }
     final scriptRef = _scriptsCache[scriptUri]!;
     widget.codeViewController.showScriptLocation(ScriptLocation(scriptRef));
     _onClose();

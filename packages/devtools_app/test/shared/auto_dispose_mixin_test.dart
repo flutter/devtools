@@ -5,12 +5,11 @@
 // ignore_for_file: invalid_use_of_protected_member
 import 'dart:async';
 
-import 'package:devtools_app/src/primitives/auto_dispose.dart';
-import 'package:devtools_app/src/primitives/auto_dispose_mixin.dart';
+import 'package:devtools_app/src/shared/primitives/auto_dispose.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../fixtures/debugging_app_async.dart';
+import '../test_infra/fixtures/debugging_app_async.dart';
 
 class AutoDisposedWidget extends StatefulWidget {
   const AutoDisposedWidget(this.stream, {Key? key}) : super(key: key);

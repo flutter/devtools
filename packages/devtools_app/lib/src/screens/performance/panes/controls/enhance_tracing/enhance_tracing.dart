@@ -6,12 +6,12 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
-import '../../../../../primitives/auto_dispose_mixin.dart';
 import '../../../../../service/service_extension_manager.dart';
 import '../../../../../service/service_extension_widgets.dart';
 import '../../../../../service/service_extensions.dart' as extensions;
 import '../../../../../shared/common_widgets.dart';
 import '../../../../../shared/globals.dart';
+import '../../../../../shared/primitives/auto_dispose.dart';
 import '../../../../../shared/theme.dart';
 import '../../../performance_screen.dart';
 import 'enhance_tracing_controller.dart';
@@ -148,21 +148,24 @@ class _TrackWidgetBuildsSettingState extends State<TrackWidgetBuildsSetting>
     // respond to their state changes.
     for (final type in TrackWidgetBuildsScope.values) {
       final extension = _trackWidgetBuildsExtensions[type]!;
-      serviceManager.serviceExtensionManager
-          .waitForServiceExtensionAvailable(extension.extension)
-          .then((isServiceAvailable) {
-        if (isServiceAvailable) {
-          _trackingAvailable.value = true;
 
-          final state = serviceManager.serviceExtensionManager
-              .getServiceExtensionState(extension.extension);
+      unawaited(
+        serviceManager.serviceExtensionManager
+            .waitForServiceExtensionAvailable(extension.extension)
+            .then((isServiceAvailable) {
+          if (isServiceAvailable) {
+            _trackingAvailable.value = true;
 
-          _updateForServiceExtensionState(state.value, type);
-          addAutoDisposeListener(state, () {
+            final state = serviceManager.serviceExtensionManager
+                .getServiceExtensionState(extension.extension);
+
             _updateForServiceExtensionState(state.value, type);
-          });
-        }
-      });
+            addAutoDisposeListener(state, () {
+              _updateForServiceExtensionState(state.value, type);
+            });
+          }
+        }),
+      );
     }
   }
 

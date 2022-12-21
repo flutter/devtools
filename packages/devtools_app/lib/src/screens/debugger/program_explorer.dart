@@ -2,15 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart' hide Stack;
 
-import '../../primitives/auto_dispose_mixin.dart';
-import '../../primitives/utils.dart';
 import '../../shared/common_widgets.dart';
 import '../../shared/flex_split_column.dart';
 import '../../shared/globals.dart';
+import '../../shared/primitives/auto_dispose.dart';
+import '../../shared/primitives/utils.dart';
 import '../../shared/theme.dart';
 import '../../shared/tree.dart';
 import '../../shared/utils.dart';
@@ -349,7 +351,7 @@ class _FileExplorerState extends State<_FileExplorer> with AutoDisposeMixin {
         return _ProgramExplorerRow(
           node: node,
           onTap: () {
-            widget.controller.selectNode(node);
+            unawaited(widget.controller.selectNode(node));
             onTap();
           },
         );
@@ -366,10 +368,12 @@ class _FileExplorerState extends State<_FileExplorer> with AutoDisposeMixin {
       _scrollController.offset + _scrollController.position.extentInside,
     );
     if (!extentVisible.contains(selectedNodeOffset)) {
-      _scrollController.animateTo(
-        selectedNodeOffset - _selectedNodeTopSpacing,
-        duration: longDuration,
-        curve: defaultCurve,
+      unawaited(
+        _scrollController.animateTo(
+          selectedNodeOffset - _selectedNodeTopSpacing,
+          duration: longDuration,
+          curve: defaultCurve,
+        ),
       );
     }
   }

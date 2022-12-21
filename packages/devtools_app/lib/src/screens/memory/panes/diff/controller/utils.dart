@@ -2,9 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import '../../../../../shared/globals.dart';
 import '../../../shared/heap/heap.dart';
 
-String classesToCsv(HeapClasses classes) {
+String classesToCsv(Iterable<ClassStats> classes) {
   final csvBuffer = StringBuffer();
 
   // Write the headers first.
@@ -20,7 +21,7 @@ String classesToCsv(HeapClasses classes) {
     ].map((e) => '"$e"').join(','),
   );
 
-  for (var classStats in classes.classStatsList) {
+  for (var classStats in classes) {
     for (var pathStats in classStats.statsByPathEntries) {
       csvBuffer.writeln(
         [
@@ -37,4 +38,13 @@ String classesToCsv(HeapClasses classes) {
   }
 
   return csvBuffer.toString();
+}
+
+/// Returns root package or empty string.
+Future<String?> tryToDetectRootPackage() async {
+  final rootLib = await serviceManager.tryToDetectMainRootLib();
+  if (rootLib == null) return null;
+  final slashIndex = rootLib.indexOf('/');
+  if (slashIndex == -1) return null;
+  return rootLib.substring(0, slashIndex);
 }

@@ -2,18 +2,18 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
-import '../analytics/analytics.dart' as ga;
 
-import '../analytics/constants.dart' as analytics_constants;
-
-import '../primitives/auto_dispose.dart';
-import '../primitives/utils.dart';
 import '../screens/inspector/inspector_service.dart';
 import '../service/vm_service_wrapper.dart';
+import 'analytics/analytics.dart' as ga;
+import 'analytics/constants.dart' as gac;
 import 'globals.dart';
+import 'primitives/auto_dispose.dart';
+import 'primitives/utils.dart';
 
 /// A controller for global application preferences.
 class PreferencesController extends DisposableController
@@ -31,6 +31,9 @@ class PreferencesController extends DisposableController
 
   MemoryPreferencesController get memory => _memory;
   final _memory = MemoryPreferencesController();
+
+  CpuProfilerPreferencesController get cpuProfiler => _cpuProfiler;
+  final _cpuProfiler = CpuProfilerPreferencesController();
 
   Future<void> init() async {
     // Get the current values and listen for and write back changes.
@@ -54,6 +57,7 @@ class PreferencesController extends DisposableController
 
     await inspector.init();
     await memory.init();
+    await cpuProfiler.init();
 
     setGlobal(PreferencesController, this);
   }
@@ -102,17 +106,14 @@ class InspectorPreferencesController extends DisposableController
   String? _mainScriptDir;
 
   Future<void> _updateMainScriptRef() async {
-    final isolateRef = serviceManager.isolateManager.mainIsolate.value!;
-    if (isolateRef.id != null) {
-      final isolate = await serviceManager.service?.getIsolate(isolateRef.id!);
-      final rootLibUri = Uri.parse(isolate?.rootLib?.uri ?? '');
-      final directorySegments = rootLibUri.pathSegments
-          .sublist(0, rootLibUri.pathSegments.length - 1);
-      final rootLibDirectory = rootLibUri.replace(
-        pathSegments: directorySegments,
-      );
-      _mainScriptDir = rootLibDirectory.path;
-    }
+    final rootLibUriString = await serviceManager.tryToDetectMainRootLib();
+    final rootLibUri = Uri.parse(rootLibUriString ?? '');
+    final directorySegments =
+        rootLibUri.pathSegments.sublist(0, rootLibUri.pathSegments.length - 1);
+    final rootLibDirectory = rootLibUri.replace(
+      pathSegments: directorySegments,
+    );
+    _mainScriptDir = rootLibDirectory.path;
   }
 
   Future<void> init() async {
@@ -200,9 +201,11 @@ class InspectorPreferencesController extends DisposableController
   }
 
   void _persistCustomPubRootDirectoriesToStorage() {
-    storage.setValue(
-      _customPubRootStorageId(),
-      jsonEncode(_customPubRootDirectories.value),
+    unawaited(
+      storage.setValue(
+        _customPubRootStorageId(),
+        jsonEncode(_customPubRootDirectories.value),
+      ),
     );
   }
 
@@ -307,9 +310,6 @@ class MemoryPreferencesController extends DisposableController
   static const _androidCollectionEnabledStorageId =
       'memory.androidCollectionEnabled';
 
-  final autoSnapshotEnabled = ValueNotifier<bool>(false);
-  static const _autoSnapshotEnabledStorageId = 'memory.autoSnapshotEnabled';
-
   final showChart = ValueNotifier<bool>(true);
   static const _showChartStorageId = 'memory.showChart';
 
@@ -323,32 +323,14 @@ class MemoryPreferencesController extends DisposableController
         );
         if (androidCollectionEnabled.value) {
           ga.select(
-            analytics_constants.memory,
-            analytics_constants.androidChart,
+            gac.memory,
+            gac.MemoryEvent.chartAndroid,
           );
         }
       },
     );
     androidCollectionEnabled.value =
         await storage.getValue(_androidCollectionEnabledStorageId) == 'true';
-
-    addAutoDisposeListener(
-      autoSnapshotEnabled,
-      () {
-        storage.setValue(
-          _autoSnapshotEnabledStorageId,
-          autoSnapshotEnabled.value.toString(),
-        );
-        if (autoSnapshotEnabled.value) {
-          ga.select(
-            analytics_constants.memory,
-            analytics_constants.autoSnapshot,
-          );
-        }
-      },
-    );
-    autoSnapshotEnabled.value =
-        await storage.getValue(_autoSnapshotEnabledStorageId) == 'true';
 
     addAutoDisposeListener(
       showChart,
@@ -359,13 +341,40 @@ class MemoryPreferencesController extends DisposableController
         );
 
         ga.select(
-          analytics_constants.memory,
+          gac.memory,
           showChart.value
-              ? analytics_constants.showChart
-              : analytics_constants.hideChart,
+              ? gac.MemoryEvent.showChart
+              : gac.MemoryEvent.hideChart,
         );
       },
     );
     showChart.value = await storage.getValue(_showChartStorageId) == 'true';
+  }
+}
+
+class CpuProfilerPreferencesController extends DisposableController
+    with AutoDisposeControllerMixin {
+  final displayTreeGuidelines = ValueNotifier<bool>(false);
+
+  static final _displayTreeGuidelinesId =
+      '${gac.cpuProfiler}.${gac.cpuProfileDisplayTreeGuidelines}';
+
+  Future<void> init() async {
+    addAutoDisposeListener(
+      displayTreeGuidelines,
+      () {
+        storage.setValue(
+          _displayTreeGuidelinesId,
+          displayTreeGuidelines.value.toString(),
+        );
+        ga.select(
+          gac.cpuProfiler,
+          gac.cpuProfileDisplayTreeGuidelines,
+          value: displayTreeGuidelines.value ? 1 : 0,
+        );
+      },
+    );
+    displayTreeGuidelines.value =
+        await storage.getValue(_displayTreeGuidelinesId) == 'true';
   }
 }

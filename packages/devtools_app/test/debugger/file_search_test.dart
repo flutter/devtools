@@ -2,11 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/screens/debugger/file_search.dart';
-import 'package:devtools_app/src/scripts/script_manager.dart';
+import 'package:devtools_app/src/shared/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/shared/globals.dart';
-import 'package:devtools_app/src/ui/search.dart';
+import 'package:devtools_app/src/shared/scripts/script_manager.dart';
+import 'package:devtools_app/src/shared/ui/search.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -233,7 +233,15 @@ void main() {
     );
 
     autoCompleteController.search = 'caterpie';
-    expect(autoCompleteController.searchAutoComplete.value, equals([]));
+    expect(
+      getAutoCompleteMatch(
+        autoCompleteController.searchAutoComplete.value,
+        preserveCases: true,
+      ),
+      equals([
+        'No files found.',
+      ]),
+    );
   });
 
   testWidgetsWithWindowSize(
@@ -418,15 +426,33 @@ void main() {
         ],
       ),
     );
+
+    autoCompleteController.search = 'food cartwheel';
+    expect(
+      getAutoCompleteMatch(
+        autoCompleteController.searchAutoComplete.value,
+        preserveCases: true,
+      ),
+      equals(
+        [
+          'No files found.',
+        ],
+      ),
+    );
   });
 }
 
-List<String> getAutoCompleteMatch(List<AutoCompleteMatch> matches) {
+List<String> getAutoCompleteMatch(
+  List<AutoCompleteMatch> matches, {
+  bool preserveCases = false,
+}) {
   return matches
       .map(
         (match) => match.transformAutoCompleteMatch<String>(
-          transformMatchedSegment: (segment) => segment.toUpperCase(),
-          transformUnmatchedSegment: (segment) => segment.toLowerCase(),
+          transformMatchedSegment: (segment) =>
+              preserveCases ? segment : segment.toUpperCase(),
+          transformUnmatchedSegment: (segment) =>
+              preserveCases ? segment : segment.toLowerCase(),
           combineSegments: (segments) => segments.join(),
         ),
       )

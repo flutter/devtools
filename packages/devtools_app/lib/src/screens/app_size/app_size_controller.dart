@@ -10,10 +10,10 @@ import 'package:vm_snapshot_analysis/treemap.dart';
 import 'package:vm_snapshot_analysis/utils.dart';
 import 'package:vm_snapshot_analysis/v8_profile.dart';
 
-import '../../charts/treemap.dart';
-import '../../primitives/utils.dart';
+import '../../shared/charts/treemap.dart';
+import '../../shared/primitives/utils.dart';
 import '../../shared/table/table.dart';
-import '../../ui/colors.dart';
+import '../../shared/ui/colors.dart';
 import 'app_size_screen.dart';
 
 // Temporary feature flag for deferred loading.
@@ -695,16 +695,14 @@ class AppSizeController {
     }
 
     // If none of the children matched the diff tree type
-    if (totalByteSize == 0 && skipNodesWithNoByteSizeChange) {
-      return null;
-    } else {
-      return _buildNode(
-        treeJson,
-        totalByteSize,
-        children: treemapNodeChildren,
-        showDiff: showDiff,
-      );
-    }
+    return totalByteSize == 0 && skipNodesWithNoByteSizeChange
+        ? null
+        : _buildNode(
+            treeJson,
+            totalByteSize,
+            children: treemapNodeChildren,
+            showDiff: showDiff,
+          );
   }
 
   TreemapNode _buildNode(

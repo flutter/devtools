@@ -4,19 +4,21 @@
 
 import 'package:flutter/widgets.dart';
 
-import '../../../../../../primitives/utils.dart';
+import '../../../../../../shared/analytics/analytics.dart' as ga;
+import '../../../../../../shared/analytics/constants.dart' as gac;
+import '../../../../../../shared/primitives/utils.dart';
 import '../../../../../../shared/table/table.dart';
 import '../../../../../../shared/table/table_data.dart';
 import '../../../../../../shared/utils.dart';
 import '../../../../shared/heap/heap.dart';
-import '../../../../shared/heap/primitives.dart';
+import '../../../../shared/primitives/simple_elements.dart';
 
 class _RetainingPathColumn extends ColumnData<StatsByPathEntry> {
   _RetainingPathColumn(String className)
       : super.wide(
           'Shortest Retaining Path for Instances of $className',
-          titleTooltip: 'Class names of objects that retain'
-              '\nthe instances from garbage collection.',
+          titleTooltip: 'The shortest sequence of objects\n'
+              'retaining $className instances from garbage collection.',
           alignment: ColumnAlignment.left,
         );
 
@@ -101,13 +103,13 @@ class _RetainingPathTableColumns {
 
   final String className;
 
-  late final shallowSizeColumn = _ShallowSizeColumn(isDiff);
+  late final retainedSizeColumn = _RetainedSizeColumn(isDiff);
 
   late final columnList = <ColumnData<StatsByPathEntry>>[
     _RetainingPathColumn(className),
     _InstanceColumn(isDiff),
-    shallowSizeColumn,
-    _RetainedSizeColumn(isDiff),
+    _ShallowSizeColumn(isDiff),
+    retainedSizeColumn,
   ];
 }
 
@@ -138,7 +140,7 @@ class RetainingPathTable extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final dataKey = 'RetainingPathTable-${identityHashCode(entries)}';
+    final dataKey = 'RetainingPathTable-$isDiff-$className';
     final columns = _columns(dataKey, isDiff, className);
     return FlatTable<StatsByPathEntry>(
       dataKey: dataKey,
@@ -146,7 +148,11 @@ class RetainingPathTable extends StatelessWidget {
       data: entries,
       keyFactory: (e) => Key(e.key.toLongString()),
       selectionNotifier: selection,
-      defaultSortColumn: columns.shallowSizeColumn,
+      onItemSelected: (_) => ga.select(
+        gac.memory,
+        '${gac.MemoryEvent.diffPathSelect}-${isDiff ? "diff" : "single"}',
+      ),
+      defaultSortColumn: columns.retainedSizeColumn,
       defaultSortDirection: SortDirection.descending,
     );
   }

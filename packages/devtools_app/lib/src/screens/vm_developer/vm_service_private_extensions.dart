@@ -130,11 +130,9 @@ class Instruction {
       return;
     }
     final rawObject = data[3] as Map<String, dynamic>;
-    if (rawObject['type'].contains('Instance')) {
-      object = InstanceRef.parse(rawObject);
-    } else {
-      object = createServiceObject(data[3], const <String>[]) as ObjRef;
-    }
+    object = rawObject['type'].contains('Instance')
+        ? InstanceRef.parse(rawObject)
+        : createServiceObject(data[3], const <String>[]) as ObjRef;
   }
 
   /// The instruction's address in memory.
@@ -262,9 +260,18 @@ enum FunctionKind {
   }
 }
 
+extension CodeRefPrivateViewExtension on CodeRef {
+  static const _functionKey = 'function';
+
+  /// Returns the function from which this code object was generated.
+  FuncRef? get function {
+    final functionJson = json![_functionKey] as Map<String, dynamic>;
+    return FuncRef.parse(functionJson);
+  }
+}
+
 /// An extension on [Code] which allows for access to VM internal fields.
 extension CodePrivateViewExtension on Code {
-  static const _functionKey = 'function';
   static const _disassemblyKey = '_disassembly';
 
   /// Returns the disassembly of the [Code], which is the generated assembly
@@ -272,12 +279,6 @@ extension CodePrivateViewExtension on Code {
   Disassembly get disassembly => Disassembly.parse(json![_disassemblyKey]);
   set disassembly(Disassembly disassembly) =>
       json![_disassemblyKey] = disassembly.toJson();
-
-  /// Returns the function from which this code object was generated.
-  FuncRef? get function {
-    final functionJson = json![_functionKey] as Map<String, dynamic>;
-    return FuncRef.parse(functionJson);
-  }
 }
 
 /// An extension on [Field] which allows for access to VM internal fields.
@@ -317,11 +318,7 @@ extension FieldPrivateViewExtension on Field {
       guardClassType = json![_guardClassKey]['type'];
     }
 
-    if (guardClassType == '@Class' || guardClassType == 'Class') {
-      return true;
-    } else {
-      return false;
-    }
+    return guardClassType == '@Class' || guardClassType == 'Class';
   }
 }
 
@@ -394,4 +391,179 @@ class ObjectStore {
   }
 
   final Map<String, ObjRef> fields;
+}
+
+/// A `ProfileCode` contains profiling information about a Dart or native
+/// code object.
+///
+/// See [CpuSamples].
+class ProfileCode {
+  ProfileCode({
+    this.kind,
+    this.inclusiveTicks,
+    this.exclusiveTicks,
+    this.code,
+    this.ticks,
+  });
+
+  ProfileCode._fromJson(Map<String, dynamic> json) {
+    kind = json['kind'] ?? '';
+    inclusiveTicks = json['inclusiveTicks'] ?? -1;
+    exclusiveTicks = json['exclusiveTicks'] ?? -1;
+    code = createServiceObject(json['code'], const ['@Code']) as CodeRef?;
+    ticks = json['ticks'];
+  }
+  static ProfileCode? parse(Map<String, dynamic>? json) =>
+      json == null ? null : ProfileCode._fromJson(json);
+
+  /// The kind of function this object represents.
+  String? kind;
+
+  /// The number of times function appeared on the stack during sampling events.
+  int? inclusiveTicks;
+
+  /// The number of times function appeared on the top of the stack during
+  /// sampling events.
+  int? exclusiveTicks;
+
+  /// The function captured during profiling.
+  CodeRef? code;
+
+  List? ticks;
+
+  Map<String, dynamic> toJson() {
+    final json = <String, dynamic>{};
+    json.addAll({
+      'kind': kind ?? '',
+      'inclusiveTicks': inclusiveTicks ?? -1,
+      'exclusiveTicks': exclusiveTicks ?? -1,
+      'code': code?.toJson(),
+      'ticks': ticks,
+    });
+    return json;
+  }
+
+  @override
+  String toString() => '[ProfileCode ' //
+      'kind: $kind, inclusiveTicks: $inclusiveTicks, exclusiveTicks: $exclusiveTicks, ' //
+      'code: $code]';
+}
+
+extension CpuSamplePrivateView on CpuSample {
+  static final _expando = Expando<List<int>>();
+
+  List<int> get codeStack => _expando[this] ?? [];
+  void setCodeStack(List<int> stack) => _expando[this] = stack;
+}
+
+extension CpuSamplesPrivateView on CpuSamples {
+  // Used to attach the codes list to a CpuSamples instance.
+  static final _expando = Expando<List<ProfileCode>>();
+
+  static const _kCodesKey = '_codes';
+
+  bool get hasCodes {
+    return _expando[this] != null || json!.containsKey(_kCodesKey);
+  }
+
+  List<ProfileCode> get codes {
+    var _codes = _expando[this];
+    if (_codes == null) {
+      _codes = json![_kCodesKey]
+          .cast<Map<String, dynamic>>()
+          .map<ProfileCode>((e) => ProfileCode.parse(e)!)
+          .toList();
+      _expando[this] = _codes;
+    }
+    return _codes!;
+  }
+}
+
+extension ProfileDataRanges on SourceReport {
+  ProfileReport asProfileReport(Script script) =>
+      ProfileReport._fromJson(script, json!);
+}
+
+class ProfileReportMetaData {
+  const ProfileReportMetaData._({required this.sampleCount});
+  final int sampleCount;
+}
+
+/// Profiling information for a given line in a [Script].
+class ProfileReportEntry {
+  const ProfileReportEntry({
+    required this.sampleCount,
+    required this.line,
+    required this.inclusive,
+    required this.exclusive,
+  });
+
+  final int sampleCount;
+  final int line;
+  final int inclusive;
+  final int exclusive;
+
+  double get inclusivePercentage => inclusive * 100 / sampleCount;
+  double get exclusivePercentage => exclusive * 100 / sampleCount;
+}
+
+/// Profiling information for a range of token positions in a [Script].
+class ProfileReportRange {
+  ProfileReportRange._fromJson(Script script, Map<String, dynamic> json)
+      : metadata = ProfileReportMetaData._(
+          sampleCount: json[_kProfileKey][_kMetadataKey][_kSampleCountKey],
+        ),
+        inclusiveTicks = json[_kProfileKey][_kInclusiveTicksKey].cast<int>(),
+        exclusiveTicks = json[_kProfileKey][_kExclusiveTicksKey].cast<int>(),
+        lines = json[_kProfileKey][_kPositionsKey]
+            .map<int>(
+              // It's possible to get a synthetic token position which will
+              // either be a negative value or a String (e.g., 'ParallelMove'
+              // or 'NoSource'). We'll just use -1 as a placeholder since we
+              // won't display anything for these tokens anyway.
+              (e) => e is int
+                  ? script.getLineNumberFromTokenPos(e) ?? _kNoSourcePosition
+                  : _kNoSourcePosition,
+            )
+            .toList() {
+    for (int i = 0; i < lines.length; ++i) {
+      final line = lines[i];
+      entries[line] = ProfileReportEntry(
+        sampleCount: metadata.sampleCount,
+        line: line,
+        inclusive: inclusiveTicks[i],
+        exclusive: exclusiveTicks[i],
+      );
+    }
+  }
+
+  static const _kProfileKey = 'profile';
+  static const _kMetadataKey = 'metadata';
+  static const _kSampleCountKey = 'sampleCount';
+  static const _kInclusiveTicksKey = 'inclusiveTicks';
+  static const _kExclusiveTicksKey = 'exclusiveTicks';
+  static const _kPositionsKey = 'positions';
+  static const _kNoSourcePosition = -1;
+
+  final ProfileReportMetaData metadata;
+  final entries = <int, ProfileReportEntry>{};
+  List<int> inclusiveTicks;
+  List<int> exclusiveTicks;
+  List<int> lines;
+}
+
+/// A representation of the `_Profile` [SourceReport], which contains profiling
+/// information for a given [Script].
+class ProfileReport {
+  ProfileReport._fromJson(Script script, Map<String, dynamic> json)
+      : _profileRanges = (json['ranges'] as List)
+            .cast<Map<String, dynamic>>()
+            .where((e) => e.containsKey('profile'))
+            .map<ProfileReportRange>(
+              (e) => ProfileReportRange._fromJson(script, e),
+            )
+            .toList();
+
+  List<ProfileReportRange> get profileRanges => _profileRanges;
+  final List<ProfileReportRange> _profileRanges;
 }

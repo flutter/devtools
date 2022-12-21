@@ -15,35 +15,15 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../primitives/auto_dispose.dart';
-import '../../primitives/utils.dart';
 import '../../shared/eval_on_dart_library.dart';
 import '../../shared/globals.dart';
+import '../../shared/primitives/auto_dispose.dart';
+import '../../shared/primitives/utils.dart';
 import '../debugger/debugger_model.dart';
 import 'diagnostics_node.dart';
-import 'inspector_service_polyfill.dart';
 import 'primitives/inspector_common.dart';
 
 const inspectorLibraryUri = 'package:flutter/src/widgets/widget_inspector.dart';
-
-class RegistrableServiceExtension {
-  const RegistrableServiceExtension(this.name);
-
-  final String name;
-
-  // Layout explorer service extensions.
-  static const getLayoutExplorerNode =
-      RegistrableServiceExtension('getLayoutExplorerNode');
-  static const setFlexFit = RegistrableServiceExtension('setFlexFit');
-  static const setFlexFactor = RegistrableServiceExtension('setFlexFactor');
-  static const setFlexProperties =
-      RegistrableServiceExtension('setFlexProperties');
-  static const getRootWidgetSummaryTreeWithPreviews =
-      RegistrableServiceExtension('getRootWidgetSummaryTreeWithPreviews');
-
-  static const getPubRootDirectories =
-      RegistrableServiceExtension('getPubRootDirectories');
-}
 
 abstract class InspectorServiceBase extends DisposableController
     with AutoDisposeControllerMixin {
@@ -57,14 +37,6 @@ abstract class InspectorServiceBase extends DisposableController
         inspectorLibrary = EvalOnDartLibrary(
           inspectorLibraryUri,
           serviceManager.service!,
-          // TODO(jacobr): evaluate whether oneRequestAtATime is really required.
-          // The out of order request issues seen may have been isolated to Java
-          // where requests could truly be out of order due to multiple threads.
-          // It appears that enforcing in-order requests has significant negative
-          // consequences that out-weigh the benefits of being able to cancel
-          // requests from object groups that have been disposed before the requests
-          // were issued.
-          oneRequestAtATime: true,
           isolate: serviceManager.isolateManager.mainIsolate,
         ) {
     _lastMainIsolate = serviceManager.isolateManager.mainIsolate.value;
@@ -150,13 +122,11 @@ abstract class InspectorServiceBase extends DisposableController
   }
 
   Future<bool> invokeBoolServiceMethodNoArgs(String methodName) async {
-    if (useDaemonApi) {
-      return await invokeServiceMethodDaemonNoGroupArgs(methodName) == true;
-    } else {
-      return (await invokeServiceMethodObservatoryNoGroup(methodName))
-              ?.valueAsString ==
-          'true';
-    }
+    return useDaemonApi
+        ? await invokeServiceMethodDaemonNoGroupArgs(methodName) == true
+        : (await invokeServiceMethodObservatoryNoGroup(methodName))
+                ?.valueAsString ==
+            'true';
   }
 
   Future<Object?> invokeServiceMethodDaemonNoGroupArgs(
@@ -471,6 +441,22 @@ class InspectorService extends InspectorServiceBase {
     return response.map<String>((e) => e.toString()).toList();
   }
 
+  /// Requests the full mapping of widget ids to source locations.
+  ///
+  /// See [LocationMap] which provides support to parse this JSON.
+  Future<Map<String, dynamic>> widgetLocationIdMap() async {
+    assert(useDaemonApi);
+    final response = await invokeServiceMethodDaemonNoGroupArgs(
+      'widgetLocationIdMap',
+    );
+
+    if (response is! Map) {
+      return {};
+    }
+
+    return response as Map<String, dynamic>;
+  }
+
   /// As we aren't running from an IDE, we don't know exactly what the pub root
   /// directories are for the current project so we make a best guess if needed
   /// based on the the root directory of the first non artifical widget in the
@@ -650,13 +636,11 @@ abstract class ObjectGroupBase implements Disposable {
     String methodName,
   ) async {
     if (disposed) return null;
-    if (useDaemonApi) {
-      return parseDiagnosticsNodeDaemon(invokeServiceMethodDaemon(methodName));
-    } else {
-      return parseDiagnosticsNodeObservatory(
-        invokeServiceMethodObservatory(methodName),
-      );
-    }
+    return useDaemonApi
+        ? parseDiagnosticsNodeDaemon(invokeServiceMethodDaemon(methodName))
+        : parseDiagnosticsNodeObservatory(
+            invokeServiceMethodObservatory(methodName),
+          );
   }
 
   Future<RemoteDiagnosticsNode?> invokeServiceMethodReturningNodeInspectorRef(
@@ -664,15 +648,13 @@ abstract class ObjectGroupBase implements Disposable {
     InspectorInstanceRef? ref,
   ) async {
     if (disposed) return null;
-    if (useDaemonApi) {
-      return parseDiagnosticsNodeDaemon(
-        invokeServiceMethodDaemonInspectorRef(methodName, ref),
-      );
-    } else {
-      return parseDiagnosticsNodeObservatory(
-        invokeServiceMethodObservatoryInspectorRef(methodName, ref),
-      );
-    }
+    return useDaemonApi
+        ? parseDiagnosticsNodeDaemon(
+            invokeServiceMethodDaemonInspectorRef(methodName, ref),
+          )
+        : parseDiagnosticsNodeObservatory(
+            invokeServiceMethodObservatoryInspectorRef(methodName, ref),
+          );
   }
 
   Future<RemoteDiagnosticsNode?> invokeServiceMethodWithArgReturningNode(
@@ -680,15 +662,13 @@ abstract class ObjectGroupBase implements Disposable {
     String arg,
   ) async {
     if (disposed) return null;
-    if (useDaemonApi) {
-      return parseDiagnosticsNodeDaemon(
-        invokeServiceMethodDaemonArg(methodName, arg, groupName),
-      );
-    } else {
-      return parseDiagnosticsNodeObservatory(
-        invokeServiceMethodObservatoryWithGroupName1(methodName, arg),
-      );
-    }
+    return useDaemonApi
+        ? parseDiagnosticsNodeDaemon(
+            invokeServiceMethodDaemonArg(methodName, arg, groupName),
+          )
+        : parseDiagnosticsNodeObservatory(
+            invokeServiceMethodObservatoryWithGroupName1(methodName, arg),
+          );
   }
 
   Future<void> invokeVoidServiceMethodInspectorRef(
@@ -1061,19 +1041,17 @@ abstract class ObjectGroupBase implements Disposable {
     bool isProperty,
   ) async {
     if (disposed) return const [];
-    if (useDaemonApi) {
-      return parseDiagnosticsNodesDaemon(
-        invokeServiceMethodDaemonInspectorRef(methodName, instanceRef),
-        parent,
-        isProperty,
-      );
-    } else {
-      return parseDiagnosticsNodesObservatory(
-        invokeServiceMethodObservatoryInspectorRef(methodName, instanceRef),
-        parent,
-        isProperty,
-      );
-    }
+    return useDaemonApi
+        ? parseDiagnosticsNodesDaemon(
+            invokeServiceMethodDaemonInspectorRef(methodName, instanceRef),
+            parent,
+            isProperty,
+          )
+        : parseDiagnosticsNodesObservatory(
+            invokeServiceMethodObservatoryInspectorRef(methodName, instanceRef),
+            parent,
+            isProperty,
+          );
   }
 
   /// Evaluate an expression where `object` references the [inspectorRef] or
@@ -1158,35 +1136,6 @@ class ObjectGroup extends ObjectGroupBase {
   @override
   final InspectorService inspectorService;
 
-  Future<Object?> invokeServiceExtensionMethod(
-    RegistrableServiceExtension extension,
-    Map<String, String?> parameters,
-  ) async {
-    final name = extension.name;
-    final fullName = '${inspectorService.serviceExtensionPrefix}.$name';
-    if (!serviceManager.serviceExtensionManager
-        .isServiceExtensionAvailable(fullName)) {
-      // Wait until a service extension we know will be eventually available for
-      // a Flutter app is loaded to avoid attempting to apply the polyfill
-      // while the list of Flutter service extensions is really just being
-      // registered on the device. This prevents pew in the app console about
-      // trying to register service extensions multiple times.
-      final regularExtensionsRegistered = await serviceManager
-          .serviceExtensionManager
-          .waitForServiceExtensionAvailable(
-        '${inspectorService.serviceExtensionPrefix}.isWidgetCreationTracked',
-      );
-      if (disposed) return null;
-      assert(regularExtensionsRegistered);
-      if (!serviceManager.serviceExtensionManager
-          .isServiceExtensionAvailable(fullName)) {
-        await invokeInspectorPolyfill(this);
-      }
-      if (disposed) return null;
-    }
-    return invokeServiceMethodDaemonParams(name, parameters);
-  }
-
   Future<RemoteDiagnosticsNode?> getRoot(FlutterTreeType type) {
     // There is no excuse to call this method on a disposed group.
     assert(!disposed);
@@ -1200,8 +1149,9 @@ class ObjectGroup extends ObjectGroupBase {
 
   Future<RemoteDiagnosticsNode?> getRootWidget() {
     return parseDiagnosticsNodeDaemon(
-      invokeServiceExtensionMethod(
-        RegistrableServiceExtension.getRootWidgetSummaryTreeWithPreviews,
+      invokeServiceMethodDaemonParams(
+        WidgetInspectorServiceExtensions
+            .getRootWidgetSummaryTreeWithPreviews.name,
         {'groupName': groupName},
       ),
     );
@@ -1286,12 +1236,10 @@ class ObjectGroup extends ObjectGroupBase {
     }
     if (disposed) return null;
 
-    if (newSelection != null &&
-        newSelection.dartDiagnosticRef == previousSelectionRef) {
-      return previousSelection;
-    } else {
-      return newSelection;
-    }
+    return newSelection != null &&
+            newSelection.dartDiagnosticRef == previousSelectionRef
+        ? previousSelection
+        : newSelection;
   }
 
   Future<bool> setSelectionInspector(
@@ -1304,20 +1252,21 @@ class ObjectGroup extends ObjectGroupBase {
     if (uiAlreadyUpdated) {
       inspectorService._trackClientSelfTriggeredSelection(selection);
     }
-    if (useDaemonApi) {
-      return handleSetSelectionDaemon(
-        invokeServiceMethodDaemonInspectorRef('setSelectionById', selection),
-        uiAlreadyUpdated,
-      );
-    } else {
-      return handleSetSelectionObservatory(
-        invokeServiceMethodObservatoryInspectorRef(
-          'setSelectionById',
-          selection,
-        ),
-        uiAlreadyUpdated,
-      );
-    }
+    return useDaemonApi
+        ? handleSetSelectionDaemon(
+            invokeServiceMethodDaemonInspectorRef(
+              'setSelectionById',
+              selection,
+            ),
+            uiAlreadyUpdated,
+          )
+        : handleSetSelectionObservatory(
+            invokeServiceMethodObservatoryInspectorRef(
+              'setSelectionById',
+              selection,
+            ),
+            uiAlreadyUpdated,
+          );
   }
 
   Future<bool> setSelection(GenericInstanceRef selection) async {
@@ -1390,8 +1339,8 @@ class ObjectGroup extends ObjectGroupBase {
     MainAxisAlignment? mainAxisAlignment,
     CrossAxisAlignment? crossAxisAlignment,
   ) async {
-    await invokeServiceExtensionMethod(
-      RegistrableServiceExtension.setFlexProperties,
+    await invokeServiceMethodDaemonParams(
+      WidgetInspectorServiceExtensions.setFlexProperties.name,
       {
         'id': ref.id,
         'mainAxisAlignment': '$mainAxisAlignment',
@@ -1404,8 +1353,8 @@ class ObjectGroup extends ObjectGroupBase {
     InspectorInstanceRef ref,
     int? flexFactor,
   ) async {
-    await invokeServiceExtensionMethod(
-      RegistrableServiceExtension.setFlexFactor,
+    await invokeServiceMethodDaemonParams(
+      WidgetInspectorServiceExtensions.setFlexFactor.name,
       {'id': ref.id, 'flexFactor': '$flexFactor'},
     );
   }
@@ -1414,8 +1363,8 @@ class ObjectGroup extends ObjectGroupBase {
     InspectorInstanceRef ref,
     FlexFit flexFit,
   ) async {
-    await invokeServiceExtensionMethod(
-      RegistrableServiceExtension.setFlexFit,
+    await invokeServiceMethodDaemonParams(
+      WidgetInspectorServiceExtensions.setFlexFit.name,
       {'id': ref.id, 'flexFit': '$flexFit'},
     );
   }
@@ -1426,8 +1375,8 @@ class ObjectGroup extends ObjectGroupBase {
   }) async {
     if (node == null) return null;
     return parseDiagnosticsNodeDaemon(
-      invokeServiceExtensionMethod(
-        RegistrableServiceExtension.getLayoutExplorerNode,
+      invokeServiceMethodDaemonParams(
+        WidgetInspectorServiceExtensions.getLayoutExplorerNode.name,
         {
           'groupName': groupName,
           'id': node.dartDiagnosticRef.id,
@@ -1438,8 +1387,8 @@ class ObjectGroup extends ObjectGroupBase {
   }
 
   Future<List<String>> getPubRootDirectories() async {
-    final invocationResult = await invokeServiceExtensionMethod(
-      RegistrableServiceExtension.getPubRootDirectories,
+    final invocationResult = await invokeServiceMethodDaemonParams(
+      WidgetInspectorServiceExtensions.getPubRootDirectories.name,
       {},
     );
     final directories = (invocationResult as List?)?.cast<Object>();
@@ -1548,14 +1497,14 @@ class InspectorObjectGroupManager {
 
   void clearCurrent() {
     if (_current != null) {
-      _current!.dispose();
+      unawaited(_current!.dispose());
       _current = null;
     }
   }
 
   void cancelNext() {
     if (_next != null) {
-      _next!.dispose();
+      unawaited(_next!.dispose());
       _setNextNull();
     }
   }

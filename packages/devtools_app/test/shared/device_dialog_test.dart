@@ -2,12 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
-import 'package:devtools_app/src/service/service_manager.dart';
+import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/service/service_registrations.dart'
     as registrations;
 import 'package:devtools_app/src/shared/device_dialog.dart';
-import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -78,6 +76,7 @@ void main() {
       expect(find.text('Dart web'), findsOneWidget);
       expect(find.text('VM Service Connection: '), findsOneWidget);
       expect(find.text('ws://127.0.0.1:56137/ISsyt6ki0no=/ws'), findsOneWidget);
+      expect(find.byType(CopyToClipboardControl), findsOneWidget);
     });
 
     testWidgetsWithWindowSize('builds dialog for dart CLI app', windowSize,
@@ -108,6 +107,7 @@ void main() {
       expect(find.text('Dart CLI'), findsOneWidget);
       expect(find.text('VM Service Connection: '), findsOneWidget);
       expect(find.text('ws://127.0.0.1:56137/ISsyt6ki0no=/ws'), findsOneWidget);
+      expect(find.byType(CopyToClipboardControl), findsOneWidget);
     });
 
     testWidgetsWithWindowSize(
@@ -140,6 +140,7 @@ void main() {
       expect(find.text('Flutter native (debug build)'), findsOneWidget);
       expect(find.text('VM Service Connection: '), findsOneWidget);
       expect(find.text('ws://127.0.0.1:56137/ISsyt6ki0no=/ws'), findsOneWidget);
+      expect(find.byType(CopyToClipboardControl), findsOneWidget);
     });
 
     testWidgetsWithWindowSize(
@@ -171,6 +172,7 @@ void main() {
       expect(find.text('Flutter native (profile build)'), findsOneWidget);
       expect(find.text('VM Service Connection: '), findsOneWidget);
       expect(find.text('ws://127.0.0.1:56137/ISsyt6ki0no=/ws'), findsOneWidget);
+      expect(find.byType(CopyToClipboardControl), findsOneWidget);
     });
 
     testWidgetsWithWindowSize(
@@ -204,6 +206,7 @@ void main() {
       expect(find.text('Flutter web (debug build)'), findsOneWidget);
       expect(find.text('VM Service Connection: '), findsOneWidget);
       expect(find.text('ws://127.0.0.1:56137/ISsyt6ki0no=/ws'), findsOneWidget);
+      expect(find.byType(CopyToClipboardControl), findsOneWidget);
     });
 
     testWidgetsWithWindowSize(
@@ -237,6 +240,7 @@ void main() {
       expect(find.text('Flutter web (profile build)'), findsOneWidget);
       expect(find.text('VM Service Connection: '), findsOneWidget);
       expect(find.text('ws://127.0.0.1:56137/ISsyt6ki0no=/ws'), findsOneWidget);
+      expect(find.byType(CopyToClipboardControl), findsOneWidget);
     });
   });
 

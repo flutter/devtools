@@ -2,11 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
-import 'package:devtools_app/src/primitives/trees.dart';
-import 'package:devtools_app/src/primitives/utils.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
+import 'package:devtools_app/src/shared/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/shared/globals.dart';
+import 'package:devtools_app/src/shared/primitives/trees.dart';
+import 'package:devtools_app/src/shared/primitives/utils.dart';
 import 'package:devtools_app/src/shared/table/column_widths.dart';
 import 'package:devtools_app/src/shared/table/table.dart';
 import 'package:devtools_app/src/shared/table/table_controller.dart';
@@ -962,6 +962,81 @@ void main() {
       expect(find.byWidget(table), findsOneWidget);
     });
 
+    testWidgets('displays wide data with many columns',
+        (WidgetTester tester) async {
+      const strings = <String>[
+        'All work',
+        'and no play',
+        'makes Ben',
+        'a dull boy',
+        // ignore: no_adjacent_strings_in_list
+        'The quick brown fox jumps over the lazy dog, although the fox '
+            "can't jump very high and the dog is very, very small, so it really"
+            " isn't much of an achievement on the fox's part, so I'm not sure why "
+            "we're even talking about it."
+      ];
+      final root = TestData('Root', 0);
+      var current = root;
+      for (int i = 0; i < 1000; ++i) {
+        final next = TestData(strings[i % strings.length], i);
+        current.addChild(next);
+        current = next;
+      }
+      root.expandCascading();
+      final table = TreeTable<TestData>(
+        columns: [
+          _NumberColumn(),
+          _CombinedColumn(),
+          treeColumn,
+          _CombinedColumn(),
+        ],
+        dataRoots: [root],
+        dataKey: 'test-data',
+        treeColumn: treeColumn,
+        keyFactory: (d) => Key(d.name),
+        defaultSortColumn: treeColumn,
+        defaultSortDirection: SortDirection.ascending,
+      );
+      await tester.pumpWidget(
+        wrap(
+          SizedBox(
+            width: 200.0,
+            height: 200.0,
+            child: table,
+          ),
+        ),
+      );
+
+      expect(find.byWidget(table), findsOneWidget);
+      // Regression test for https://github.com/flutter/devtools/issues/4786
+      expect(
+        find.text(
+          '\u2026', // Unicode '...'
+          findRichText: true,
+          skipOffstage: false,
+        ),
+        findsNothing,
+      );
+      expect(
+        find.text(
+          'Root',
+          findRichText: true,
+          skipOffstage: false,
+        ),
+        findsOneWidget,
+      );
+      for (final str in strings) {
+        expect(
+          find.text(
+            str,
+            findRichText: true,
+            skipOffstage: false,
+          ),
+          findsWidgets,
+        );
+      }
+    });
+
     testWidgets('properly collapses and expands the tree',
         (WidgetTester tester) async {
       final table = TreeTable<TestData>(
@@ -1041,7 +1116,7 @@ void main() {
       await tester.pumpWidget(wrap(table));
       final TreeTableState state = tester.state(find.byWidget(table));
       expect(state.tableController.columnWidths[0], equals(400));
-      expect(state.tableController.columnWidths[1], equals(500));
+      expect(state.tableController.columnWidths[1], equals(81));
       final tree = state.tableController.dataRoots[0];
       expect(tree.children[0].name, equals('Bar'));
       expect(tree.children[0].children[0].name, equals('Baz'));

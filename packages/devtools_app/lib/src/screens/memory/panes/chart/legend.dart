@@ -6,13 +6,115 @@ import 'package:flutter/material.dart';
 
 import '../../../../shared/common_widgets.dart';
 import '../../../../shared/theme.dart';
-import '../../primitives/painting.dart';
-import '../../shared/constants.dart';
+import '../../../../shared/utils.dart';
+import '../../shared/primitives/painting.dart';
 import 'chart_pane_controller.dart';
 import 'memory_android_chart.dart';
 import 'memory_charts.dart';
 import 'memory_events_pane.dart';
 import 'memory_vm_chart.dart';
+
+late final _legendWidth = scaleByFontFactor(200.0);
+late final _legendTextWidth = scaleByFontFactor(55.0);
+late final _legendHeight1Chart = scaleByFontFactor(200.0);
+late final _legendHeight2Charts = scaleByFontFactor(323.0);
+
+/// Padding for each title in the legend.
+const _legendTitlePadding = EdgeInsets.fromLTRB(5, 0, 0, 4);
+
+class MemoryChartLegend extends StatelessWidget {
+  const MemoryChartLegend({
+    super.key,
+    required this.isAndroidVisible,
+    required this.chartController,
+  });
+
+  final bool isAndroidVisible;
+  final MemoryChartPaneController chartController;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final legendHeading = theme.hoverTextStyle;
+
+    final legendRows = <Widget>[];
+
+    final events = eventLegendContent(colorScheme.isLight);
+    legendRows.add(
+      Container(
+        padding: _legendTitlePadding,
+        child: Text('Events Legend', style: legendHeading),
+      ),
+    );
+
+    final iterator = events.entries.iterator;
+    while (iterator.moveNext()) {
+      final leftEntry = iterator.current;
+      final rightEntry = iterator.moveNext() ? iterator.current : null;
+      legendRows.add(
+        LegendRow(
+          entry1: leftEntry,
+          entry2: rightEntry,
+          chartController: chartController,
+        ),
+      );
+    }
+
+    final vms = vmLegendContent(chartController.vm);
+    legendRows.add(
+      Container(
+        padding: _legendTitlePadding,
+        child: Text('Memory Legend', style: legendHeading),
+      ),
+    );
+
+    for (final entry in vms.entries) {
+      legendRows.add(
+        LegendRow(
+          entry1: entry,
+          chartController: chartController,
+        ),
+      );
+    }
+
+    if (isAndroidVisible) {
+      final androids = androidLegendContent(chartController.android);
+      legendRows.add(
+        Container(
+          padding: _legendTitlePadding,
+          child: Text('Android Legend', style: legendHeading),
+        ),
+      );
+
+      for (final entry in androids.entries) {
+        legendRows.add(
+          LegendRow(
+            entry1: entry,
+            chartController: chartController,
+          ),
+        );
+      }
+    }
+
+    return Container(
+      width: _legendWidth,
+      // The height is specified here,
+      // because [legendRows] are designed to take all available space.
+      height: isAndroidVisible ? _legendHeight2Charts : _legendHeight1Chart,
+      padding: const EdgeInsets.fromLTRB(0, densePadding, densePadding, 0),
+      decoration: BoxDecoration(
+        color: colorScheme.defaultBackgroundColor,
+        border: Border.all(color: theme.focusColor),
+        borderRadius: BorderRadius.circular(defaultBorderRadius),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: legendRows,
+      ),
+    );
+  }
+}
 
 class LegendRow extends StatelessWidget {
   const LegendRow({
@@ -41,7 +143,7 @@ class LegendRow extends StatelessWidget {
         Expanded(
           child: Container(
             padding: EdgeInsets.fromLTRB(leftEdge, 0, 0, 2),
-            width: legendTextWidth + leftEdge,
+            width: _legendTextWidth + leftEdge,
             child: Text(name, style: legendEntry),
           ),
         ),

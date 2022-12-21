@@ -6,97 +6,54 @@ Make sure:
 1. You have a local checkout of the Dart SDK
    - (for getting started instructions, see [sdk/CONTRIBUTING.md](https://github.com/dart-lang/sdk/blob/main/CONTRIBUTING.md)).
 2. Ensure your `.bashrc` sets `$LOCAL_DART_SDK`
-    
-   ```shell 
+
+   ```shell
    DART_SDK_REPO_DIR=<Path to cloned dart sdk>
    export LOCAL_DART_SDK=$DART_SDK_REPO_DIR/sdk
    ```
 3. The local checkout is at `main` branch:
    - `git rebase-update`.
-4. Your Flutter version is equal to the one in flutter_version.txt. If not, fix it using one of:
-    - Run `./tool/update_flutter_sdk.sh` from the main devtools directory
-    - Switch Flutter version by running 'git checkout <version in flutter_version.txt>' in Flutter directory.
-5. You have goma [configured](http://go/ma-mac-setup). 
+4. Your Flutter version is equal to latest candidate release branch:
+    - Run `./tool/update_flutter_sdk.sh --local` from the main devtools directory.
+5. You have goma [configured](http://go/ma-mac-setup).
 
 ### Prepare the release
 
-#### Create a branch for your release.
-
-```shell
-cd ~/path/to/devtools
-```
-
-```shell
-git checkout master && \
-git pull upstream master && \
-git checkout -b release_$(date +%s);
-```
 
 #### Update the DevTools version number
 
-Run the `tool/update_version.dart` script to update the DevTools version.
-- For regular monthly releases, use `minor`:
-   ```shell
-   dart tool/update_version.dart auto --type minor
-   ```
-- To manually set the version:
-   ```shell
-   dart tool/update_version.dart manual --new-version 1.2.3
-   ```
-- To automatically update the version by `major`, `minor`, `patch`, or `dev`:
-   ```shell
-   dart tool/update_version.dart auto --type patch
-   ```
+- Make sure your working branch is clean
+- Run the `tool/release_helper.sh` script with `minor` or `major`.
+   `./tool/release_helper.sh [minor|major]`
+- This creates 2 branches for you:
+    - Release Branch
+    - Next Branch
+- The following steps will guide you through how these branches will be prepared and merged.
+- **For your convenience, the `tool/release_helper.sh` script exports the following two variables to the terminal it is run in:**
+  - `$DEVTOOLS_RELEASE_BRANCH`
+  - `$DEVTOOLS_NEXT_BRANCH`
 
-Verify:
-* that this script updated the pubspecs under packages/
-* updated all references to those packages.
-*  make sure that the version constant in `packages/devtools_app/lib/devtools.dart` was updated
+#### Verify the version changes
+> For both the `$DEVTOOLS_RELEASE_BRANCH` and the `$DEVTOOLS_NEXT_BRANCH` branches
+
+Verify the version changes:
+- that release_helper.sh script updated the pubspecs under packages/
+- updated all references to those packages.
+- make sure that the version constant in `packages/devtools_app/lib/devtools.dart` was updated
 
 These packages always have their version numbers updated in lock, so we don't have to worry about versioning.
 
-> Note: Updating to a new `dev` version will automatically prepare the version for a new `minor` release (eg, `2.17.0` will become `2.18.0-dev.0`). To update to a `major` or `patch` release instead, specify either `dev,patch` or `dev,major` (eg, `dart tool/update_version.dart auto --type dev,patch`).
+#### Manually review the CHANGELOG.md
+> For both the `$DEVTOOLS_RELEASE_BRANCH` and the `$DEVTOOLS_NEXT_BRANCH` branches
 
-#### Update the CHANGELOG.md (for non-dev releases)
-
-* Use the tool `generate-changelog` to automatically update the `packages/devtools/CHANGELOG.md` file.
-
-   ```shell
-   cd ~/path/to/devtools && \
-   dart tool/bin/repo_tool.dart generate-changelog;
-   ```
-
-* The `generate-changelog` script is
-intended to do the bulk of the work, but still needs manual review.
 * Verify
    * that the version for the CHANGELOG entry was correctly generated
-   * that the entries don't have any syntax errors. 
+   * that the entries don't have any syntax errors.
 
-#### Push the local branch
+### Test the CLEAN_BRANCH 
+> You only need to do this on the `$DEVTOOLS_RELEASE_BRANCH` branch
 
-```shell
-NEW_DEVTOOLS_VERSION=2.7.0 # Change this to the new version
-```
-
-```shell
-git add . && \
-git commit -m “Prepare for $NEW_DEVTOOLS_VERSION release.” && \
-git push origin release_$NEW_DEVTOOLS_VERSION;
-```
-
-From the git GUI tool or from github.com directly:
-1. Create a PR.
-2. Add the entry about the created PR to the CHANGELOG.md manually, and push to the PR.
-3. Receive an LGTM, squash and commit.
-
-### Test the release
-
-- Checkout the commit you just created,
-   - or remain on the branch you just landed the prep PR from.
-   ```shell
-   git checkout 8881a7caa9067471008a8e00750b161f53cdb843
-   ```
-
+- Checkout the `$DEVTOOLS_RELEASE_BRANCH`,
 - Build the DevTools binary and run it from your local Dart SDK.
    - From the main devtools/ directory.
    ```shell
@@ -123,6 +80,20 @@ From the git GUI tool or from github.com directly:
       git checkout . && \
       git clean -f -d;
       ```
+#### Push the `$DEVTOOLS_RELEASE_BRANCH`
+
+
+> Ensure you are still on the `$DEVTOOLS_RELEASE_BRANCH`
+
+```shell
+git push -u origin $DEVTOOLS_RELEASE_BRANCH
+```
+
+From the git GUI tool or from github.com directly:
+1. Create a PR.
+2. Add the entry about the created PR to the CHANGELOG.md manually, and push to the PR.
+3. Receive an LGTM, squash and commit.
+
 
 ### Tag the release
 - Checkout the commit from which you want to release DevTools
@@ -135,6 +106,22 @@ From the git GUI tool or from github.com directly:
    ```shell
    tool/tag_version.sh;
    ```
+
+### Verify and Submit the release notes
+
+See the release notes
+[README.md](https://github.com/flutter/devtools/blob/master/packages/devtools_app/lib/src/framework/release_notes/README.md)
+for details on where to add DevTools release notes to Flutter website and how to test them.
+
+- Follow the release notes
+[README.md](https://github.com/flutter/devtools/blob/master/packages/devtools_app/lib/src/framework/release_notes/README.md)
+to add release notes to Flutter website
+  - On the `$DEVTOOLS_RELEASE_BRANCH` copy the release notes from [NEXT_RELEASE_NOTES.md](./release_notes/NEXT_RELEASE_NOTES.md)
+    - These are the release notes you will submit through the flutter/website PR.
+  - make sure to also follow the instructions to test them.
+
+
+[1]: ../packages/devtools_app/lib/src/framework/release_notes/release-notes-next.md
 
 ### Upload the DevTools binary to CIPD
 - Use the update.sh script to build and upload the DevTools binary to CIPD:
@@ -169,7 +156,7 @@ From the git GUI tool or from github.com directly:
    ./tools/build.py -mrelease -ax64 create_sdk;
    ```
 
-- Verify that running `dart devtools` launches the version of DevTools you just released. 
+- Verify that running `dart devtools` launches the version of DevTools you just released.
    - for OSX
       ```shell
       xcodebuild/ReleaseX64/dart-sdk/bin/dart devtools
@@ -180,7 +167,7 @@ From the git GUI tool or from github.com directly:
       ```
 
 - If the version of DevTools you just published to CIPD loads properly
-  
+
    > You may need to hard reload and clear your browser cache in order to see the changes.
 
    - push up the SDK CL for review.
@@ -199,19 +186,12 @@ From the git GUI tool or from github.com directly:
    flutter pub publish
    ```
 
-### Write release notes for the release
-Release notes should contain details about the user-facing changes included in the release.
+### Push the DEVTOOLS_NEXT_BRANCH
+```shell
+git checkout $DEVTOOLS_NEXT_BRANCH
+git push -u origin $DEVTOOLS_NEXT_BRANCH
+```
 
-These notes are shown directly in DevTools when a user opens a new version of DevTools.
-
-1. Request the team to verify their important user facing changes are documented in 
-   [release-notes-next.md][1].
-
-2. See the release notes
-[README.md](https://github.com/flutter/devtools/blob/master/packages/devtools_app/lib/src/framework/release_notes/README.md)
-for details on where to add DevTools release notes to Flutter website and how to test them.
-   
-3. Copy the content of [release-notes-template.md](../packages/devtools_app/lib/src/framework/release_notes/release-notes-template.md) to [release-notes-next.md][1], to contain
-   draft for the next release.
-
-[1]: ../packages/devtools_app/lib/src/framework/release_notes/release-notes-next.md
+From the git GUI tool or from github.com directly:
+1. Create a PR.
+2. Receive an LGTM, squash and commit.

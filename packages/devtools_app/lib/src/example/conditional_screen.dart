@@ -55,7 +55,7 @@ class _ExampleConditionalScreenBodyState
       final json =
           offlineController.offlineDataJson[ExampleConditionalScreen.id];
       if (json.isNotEmpty) {
-        loadOfflineData(json['title']);
+        unawaited(loadOfflineData(json['title']));
       }
     }
   }

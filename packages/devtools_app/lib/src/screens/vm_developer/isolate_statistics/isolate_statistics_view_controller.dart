@@ -8,9 +8,9 @@ import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart' hide VmService;
 
-import '../../../primitives/auto_dispose.dart';
 import '../../../service/vm_service_wrapper.dart';
 import '../../../shared/globals.dart';
+import '../../../shared/primitives/auto_dispose.dart';
 import '../../profiler/cpu_profile_controller.dart';
 import '../vm_service_private_extensions.dart';
 
@@ -20,19 +20,19 @@ class IsolateStatisticsViewController extends DisposableController
     // If the CPU profiler is enabled later, refresh the isolate data to get
     // the tag information.
     cpuProfilerController.profilerFlagNotifier?.addListener(
-      () => refresh(),
+      () => unawaited(refresh()),
     );
 
     final isolateListenable = serviceManager.isolateManager.selectedIsolate;
     addAutoDisposeListener(isolateListenable, () {
       final isolate = isolateListenable.value;
       if (isolate != null) {
-        switchToIsolate(isolate);
+        unawaited(switchToIsolate(isolate));
       }
     });
     final isolate = isolateListenable.value;
     if (isolate != null) {
-      switchToIsolate(isolate);
+      unawaited(switchToIsolate(isolate));
     }
   }
 

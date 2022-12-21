@@ -5,9 +5,9 @@
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/material.dart';
 
-import '../analytics/constants.dart' as analytics_constants;
+import '../shared/analytics/constants.dart' as gac;
 import '../shared/theme.dart';
-import '../ui/icons.dart';
+import '../shared/ui/icons.dart';
 
 class RegisteredServiceDescription extends RegisteredService {
   const RegisteredServiceDescription._({
@@ -34,8 +34,8 @@ final hotReload = RegisteredServiceDescription._(
     height: actionsIconSize,
     width: actionsIconSize,
   ),
-  gaScreenName: analytics_constants.devToolsMain,
-  gaItem: analytics_constants.hotReload,
+  gaScreenName: gac.devToolsMain,
+  gaItem: gac.hotReload,
 );
 
 /// Hot restart service registered by Flutter Tools.
@@ -48,8 +48,8 @@ final hotRestart = RegisteredServiceDescription._(
     Icons.settings_backup_restore,
     size: actionsIconSize,
   ),
-  gaScreenName: analytics_constants.devToolsMain,
-  gaItem: analytics_constants.hotRestart,
+  gaScreenName: gac.devToolsMain,
+  gaItem: gac.hotRestart,
 );
 
 /// Flutter version service registered by Flutter Tools.

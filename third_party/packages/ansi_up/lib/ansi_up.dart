@@ -314,8 +314,12 @@ class AnsiUp {
 }
 
 class _TextWithAttr {
-  _TextWithAttr(
-      {this.fg, this.bg, this.style = StyledText.NONE, this.text = '',});
+  _TextWithAttr({
+    this.fg,
+    this.bg,
+    this.style = StyledText.NONE,
+    this.text = '',
+  });
 
   final AnsiUpColor? fg;
   final AnsiUpColor? bg;

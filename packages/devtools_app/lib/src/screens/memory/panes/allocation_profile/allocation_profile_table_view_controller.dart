@@ -2,12 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../../../config_specific/import_export/import_export.dart';
-import '../../../../primitives/auto_dispose.dart';
+import '../../../../shared/analytics/analytics.dart' as ga;
+import '../../../../shared/analytics/constants.dart' as gac;
+import '../../../../shared/config_specific/import_export/import_export.dart';
 import '../../../../shared/globals.dart';
+import '../../../../shared/primitives/auto_dispose.dart';
 import 'model.dart';
 
 class AllocationProfileTableViewController extends DisposableController
@@ -34,14 +38,14 @@ class AllocationProfileTableViewController extends DisposableController
     autoDisposeStreamSubscription(
       serviceManager.service!.onGCEvent.listen((event) {
         if (refreshOnGc.value) {
-          refresh();
+          unawaited(refresh());
         }
       }),
     );
     addAutoDisposeListener(serviceManager.isolateManager.selectedIsolate, () {
-      refresh();
+      unawaited(refresh());
     });
-    refresh();
+    unawaited(refresh());
     _initialized = true;
   }
 
@@ -57,10 +61,14 @@ class AllocationProfileTableViewController extends DisposableController
   /// Clear the current allocation profile and request an updated version from
   /// the VM service.
   Future<void> refresh() async {
+    final service = serviceManager.service;
+    if (service == null) return;
     _currentAllocationProfile.value = null;
-    final service = serviceManager.service!;
+
     final isolate = serviceManager.isolateManager.selectedIsolate.value;
-    final allocationProfile = await service.getAllocationProfile(isolate!.id!);
+    if (isolate == null) return;
+
+    final allocationProfile = await service.getAllocationProfile(isolate.id!);
     _currentAllocationProfile.value =
         AdaptedAllocationProfile.fromAllocationProfile(allocationProfile);
   }
@@ -69,6 +77,10 @@ class AllocationProfileTableViewController extends DisposableController
   ///
   /// The returned string is the name of the downloaded CSV file.
   void downloadMemoryTableCsv(AdaptedAllocationProfile profile) {
+    ga.select(
+      gac.memory,
+      gac.MemoryEvent.profileDownloadCsv,
+    );
     final csvBuffer = StringBuffer();
 
     // Write the headers first.

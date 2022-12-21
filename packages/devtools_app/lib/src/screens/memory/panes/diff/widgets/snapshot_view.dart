@@ -9,6 +9,7 @@ import '../../../../../shared/split.dart';
 import '../../../shared/heap/heap.dart';
 import '../controller/diff_pane_controller.dart';
 import '../controller/heap_diff.dart';
+import '../controller/item_controller.dart';
 import 'class_details/class_details.dart';
 import 'classes_table_diff.dart';
 import 'classes_table_single.dart';
@@ -20,41 +21,52 @@ class SnapshotView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<HeapClasses?>(
-      valueListenable: controller.derived.heapClasses,
-      builder: (_, classes, __) {
-        if (classes == null) {
-          if (controller.isProcessing.value) {
-            return const SizedBox.shrink();
-          } else {
-            return const Center(child: Text('Could not take snapshot.'));
-          }
+    return DualValueListenableBuilder<List<SingleClassStats>?,
+        List<DiffClassStats>?>(
+      firstListenable: controller.derived.singleClassesToShow,
+      secondListenable: controller.derived.diffClassesToShow,
+      builder: (_, singleClasses, diffClasses, __) {
+        if (controller.derived.updatingValues) {
+          return const Center(child: Text('Calculating...'));
         }
 
-        late Widget table1;
+        final classes = controller.derived.heapClasses.value;
+        if (classes == null) {
+          return controller.isTakingSnapshot.value
+              ? const SizedBox.shrink()
+              : const Center(child: Text('Could not take snapshot.'));
+        }
 
-        if (classes is SingleHeapClasses) {
-          table1 = ClassesTableSingle(
-            classes: classes,
+        assert((singleClasses == null) != (diffClasses == null));
+
+        late Widget classTable;
+
+        if (singleClasses != null) {
+          final totalSize =
+              (controller.core.selectedItem as SnapshotInstanceItem).totalSize;
+
+          classTable = ClassesTableSingle(
+            classes: singleClasses,
             selection: controller.derived.selectedSingleClassStats,
+            totalSize: totalSize!,
           );
-        } else if (classes is DiffHeapClasses) {
-          table1 = ClassesTableDiff(
-            classes: classes,
+        } else if (diffClasses != null) {
+          classTable = ClassesTableDiff(
+            classes: controller.derived.diffClassesToShow.value!,
             selection: controller.derived.selectedDiffClassStats,
           );
         } else {
-          throw StateError('Unexpected type: ${classes.runtimeType}.');
+          throw StateError('singleClasses or diffClasses should not be null.');
         }
 
-        final table2 = ValueListenableBuilder<List<StatsByPathEntry>?>(
+        final pathTable = ValueListenableBuilder<List<StatsByPathEntry>?>(
           valueListenable: controller.derived.pathEntries,
           builder: (_, entries, __) => HeapClassDetails(
             entries: entries,
             selection: controller.derived.selectedPathEntry,
             isDiff: classes is DiffHeapClasses,
             pathController: controller.retainingPathController,
-            className: controller.core.className?.className,
+            className: controller.core.className_?.className,
           ),
         );
 
@@ -63,8 +75,12 @@ class SnapshotView extends StatelessWidget {
           initialFractions: const [0.4, 0.6],
           minSizes: const [80, 80],
           children: [
-            OutlineDecoration(child: table1),
-            OutlineDecoration(child: table2),
+            OutlineDecoration.onlyBottom(
+              child: classTable,
+            ),
+            OutlineDecoration.onlyTop(
+              child: pathTable,
+            ),
           ],
         );
       },

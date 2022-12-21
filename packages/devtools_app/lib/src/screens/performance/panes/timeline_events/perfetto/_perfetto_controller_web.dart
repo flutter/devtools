@@ -2,16 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-import 'dart:convert';
 import 'dart:html' as html;
-import 'dart:typed_data';
 import 'dart:ui' as ui;
 
-import '../../../../../app.dart';
-import '../../../../../primitives/auto_dispose.dart';
-import '../../../../../primitives/trace_event.dart';
+import 'package:flutter/foundation.dart';
+
 import '../../../../../shared/globals.dart';
+import '../../../../../shared/primitives/trace_event.dart';
+import '../../../../../shared/primitives/utils.dart';
+import 'perfetto_controller.dart';
 
 /// Flag to enable embedding an instance of the Perfetto UI running on
 /// localhost.
@@ -22,35 +21,38 @@ import '../../../../../shared/globals.dart';
 /// app running locally.
 const _debugUseLocalPerfetto = false;
 
-class PerfettoController extends DisposableController
-    with AutoDisposeControllerMixin {
-  static const viewId = 'embedded-perfetto';
+/// Incrementer for the Perfetto iFrame view that will live for the entire
+/// DevTools lifecycle.
+///
+/// A new instance of [PerfettoController] will be created for each connected
+/// app and for each load of offline data. Each time [PerfettoController.init]
+/// is called, we create a new [html.IFrameElement] and register it to
+/// [PerfettoController.viewId] via
+/// [ui.platformViewRegistry.registerViewFactory]. Each new [html.IFrameElement]
+/// must have a unique id in the [PlatformViewRegistry], which
+/// [_viewIdIncrementer] is used to create.
+var _viewIdIncrementer = 0;
+
+class PerfettoControllerImpl extends PerfettoController {
+  PerfettoControllerImpl(
+    super.performanceController,
+    super.timelineEventsController,
+  );
+
+  /// The view id for the Perfetto iFrame.
+  ///
+  /// See [_viewIdIncrementer] for an explanation of why we use an incrementer
+  /// in the id.
+  late final viewId = 'embedded-perfetto-${_viewIdIncrementer++}';
 
   /// Url when running Perfetto locally following the instructions here:
   /// https://perfetto.dev/docs/contributing/build-instructions#ui-development
   static const _debugPerfettoUrl = 'http://127.0.0.1:10000/$_embeddedModeQuery';
 
+  /// These query parameters have side effects in the Perfetto web app.
   static const _embeddedModeQuery = '?mode=embedded&hideSidebar=true';
 
-  static const _perfettoPing = 'PING';
-
-  static const _perfettoPong = 'PONG';
-
-  static const _devtoolsThemePing = 'DART-DEVTOOLS-THEME-PING';
-
-  static const _devtoolsThemePong = 'DART-DEVTOOLS-THEME-PONG';
-
-  /// Id for a [postMessage] request that is sent on DevTools theme changes.
-  ///
-  /// This id is marked in the Perfetto UI codebase [post_message_handler.ts] as
-  /// trusted. This ensures that the embedded Perfetto web app does not try to
-  /// handle this message and warn "Unknown postMessage() event received".
-  ///
-  /// Any changes to this string must also be applied in
-  /// [post_message_handler.ts] in the Perfetto codebase.
-  static const _devtoolsThemeChange = 'DART-DEVTOOLS-THEME-CHANGE';
-
-  String get _perfettoUrl {
+  String get perfettoUrl {
     if (_debugUseLocalPerfetto) {
       return _debugPerfettoUrl;
     }
@@ -60,20 +62,44 @@ class PerfettoController extends DisposableController
     return '$baseUrl$_embeddedModeQuery';
   }
 
+  html.IFrameElement get perfettoIFrame => _perfettoIFrame;
+
   late final html.IFrameElement _perfettoIFrame;
 
-  late final Completer<void> _perfettoReady;
+  /// The set of trace events that should be shown in the Perfetto trace viewer.
+  ValueListenable<List<TraceEventWrapper>> get activeTraceEvents =>
+      _activeTraceEvents;
+  final _activeTraceEvents = ValueNotifier<List<TraceEventWrapper>>([]);
 
-  late final Completer<void> _devtoolsThemeHandlerReady;
+  /// The time range that should be scrolled to, or focused, in the Perfetto
+  /// trace viewer.
+  ValueListenable<TimeRange?> get activeScrollToTimeRange =>
+      _activeScrollToTimeRange;
+  final _activeScrollToTimeRange = ValueNotifier<TimeRange?>(null);
 
+  /// Trace events that we should load, but have not yet since the trace viewer
+  /// is not visible (i.e. [TimelineEventsController.isActiveFeature] is false).
+  List<TraceEventWrapper>? pendingTraceEventsToLoad;
+
+  /// Time range we should scroll to, but have not yet since the trace viewer
+  /// is not visible (i.e. [TimelineEventsController.isActiveFeature] is false).
+  TimeRange? pendingScrollToTimeRange;
+
+  bool _initialized = false;
+
+  @override
   void init() {
-    _perfettoReady = Completer();
-    _devtoolsThemeHandlerReady = Completer();
+    assert(
+      !_initialized,
+      'PerfettoController.init() should only be called once.',
+    );
+    _initialized = true;
+
     _perfettoIFrame = html.IFrameElement()
       // This url is safe because we built it ourselves and it does not include
       // any user input.
       // ignore: unsafe_html
-      ..src = _perfettoUrl
+      ..src = perfettoUrl
       ..allow = 'usb';
     _perfettoIFrame.style
       ..border = 'none'
@@ -81,126 +107,48 @@ class PerfettoController extends DisposableController
       ..width = '100%';
 
     // ignore: undefined_prefixed_name
-    ui.platformViewRegistry.registerViewFactory(
+    final registered = ui.platformViewRegistry.registerViewFactory(
       viewId,
       (int viewId) => _perfettoIFrame,
     );
-
-    html.window.addEventListener('message', _handleMessage);
-
-    if (isExternalBuild) {
-      _loadInitialStyle();
-      addAutoDisposeListener(preferences.darkModeTheme, () async {
-        _loadStyle(preferences.darkModeTheme.value);
-      });
-    }
-  }
-
-  Future<void> loadTrace(List<TraceEventWrapper> devToolsTraceEvents) async {
-    await _pingPerfettoUntilReady();
-
-    final encodedJson = jsonEncode({
-      'traceEvents': devToolsTraceEvents
-          .map((eventWrapper) => eventWrapper.event.json)
-          .toList(),
-    });
-    final buffer = Uint8List.fromList(encodedJson.codeUnits);
-
-    _postMessage({
-      'perfetto': {
-        'buffer': buffer,
-        'title': 'DevTools timeline trace',
-        'keepApiOpen': true,
-      }
-    });
-  }
-
-  Future<void> _loadInitialStyle() async {
-    if (!isExternalBuild) return;
-    await _pingDevToolsThemeHandlerUntilReady();
-    _loadStyle(preferences.darkModeTheme.value);
-  }
-
-  void _loadStyle(bool darkMode) {
-    if (!isExternalBuild) return;
-    // This message will be handled by [devtools_theme_handler.js], which is
-    // included in the Perfetto build inside [packages/perfetto_compiled/dist].
-    _postMessageWithId(
-      _devtoolsThemeChange,
-      args: {
-        'theme': '${darkMode ? 'dark' : 'light'}',
-      },
-    );
-  }
-
-  void _postMessage(dynamic message) async {
-    await _perfettoIFrameReady();
-    _perfettoIFrame.contentWindow!.postMessage(
-      message,
-      _perfettoUrl,
-    );
-  }
-
-  void _postMessageWithId(String id, {Map<String, dynamic> args = const {}}) {
-    final message = <String, dynamic>{
-      'msgId': id,
-    }..addAll(args);
-    _postMessage(message);
-  }
-
-  void _handleMessage(html.Event e) {
-    if (e is html.MessageEvent) {
-      if (e.data == _perfettoPong && !_perfettoReady.isCompleted) {
-        _perfettoReady.complete();
-      }
-
-      if (e.data == _devtoolsThemePong &&
-          !_devtoolsThemeHandlerReady.isCompleted) {
-        _devtoolsThemeHandlerReady.complete();
-      }
-    }
-  }
-
-  Future<void> _perfettoIFrameReady() async {
-    if (_perfettoIFrame.contentWindow == null) {
-      await _perfettoIFrame.onLoad.first;
-      assert(
-        _perfettoIFrame.contentWindow != null,
-        'Something went wrong. The iFrame\'s contentWindow is null after the'
-        ' onLoad event.',
-      );
-    }
-  }
-
-  Future<void> _pingPerfettoUntilReady() async {
-    while (!_perfettoReady.isCompleted) {
-      await Future.delayed(const Duration(microseconds: 100), () async {
-        // Once the Perfetto UI is ready, Perfetto will receive this 'PING'
-        // message and return a 'PONG' message, handled in [_handleMessage].
-        _postMessage(_perfettoPing);
-      });
-    }
-  }
-
-  Future<void> _pingDevToolsThemeHandlerUntilReady() async {
-    if (!isExternalBuild) return;
-    while (!_devtoolsThemeHandlerReady.isCompleted) {
-      await Future.delayed(const Duration(microseconds: 100), () async {
-        // Once [devtools_theme_handler.js] is ready, it will receive this
-        // 'PING-DEVTOOLS-THEME' message and return a 'PONG-DEVTOOLS-THEME'
-        // message, handled in [_handleMessage].
-        _postMessageWithId(_devtoolsThemePing);
-      });
-    }
-  }
-
-  Future<void> clear() async {
-    await loadTrace([]);
+    assert(registered, 'Failed to register view factory for $viewId.');
   }
 
   @override
-  void dispose() {
-    html.window.removeEventListener('message', _handleMessage);
-    super.dispose();
+  void onBecomingActive() {
+    assert(timelineEventsController.isActiveFeature);
+    if (pendingTraceEventsToLoad != null) {
+      loadTrace(pendingTraceEventsToLoad!);
+      pendingTraceEventsToLoad = null;
+    }
+    if (pendingScrollToTimeRange != null) {
+      scrollToTimeRange(pendingScrollToTimeRange!);
+      pendingScrollToTimeRange = null;
+    }
+  }
+
+  @override
+  void loadTrace(List<TraceEventWrapper> devToolsTraceEvents) {
+    if (!timelineEventsController.isActiveFeature) {
+      pendingTraceEventsToLoad = List.from(devToolsTraceEvents);
+      return;
+    }
+    pendingTraceEventsToLoad = null;
+    _activeTraceEvents.value = List.from(devToolsTraceEvents);
+  }
+
+  @override
+  void scrollToTimeRange(TimeRange timeRange) {
+    if (!timelineEventsController.isActiveFeature) {
+      pendingScrollToTimeRange = timeRange;
+      return;
+    }
+    pendingScrollToTimeRange = null;
+    _activeScrollToTimeRange.value = timeRange;
+  }
+
+  @override
+  void clear() {
+    loadTrace([]);
   }
 }

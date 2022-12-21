@@ -2,21 +2,24 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:codicon/codicon.dart';
 import 'package:flutter/material.dart' hide Stack;
 import 'package:vm_service/vm_service.dart';
 
-import '../../primitives/auto_dispose_mixin.dart';
 import '../../shared/common_widgets.dart';
+import '../../shared/globals.dart';
+import '../../shared/primitives/auto_dispose.dart';
 import '../../shared/theme.dart';
+import '../../shared/ui/label.dart';
 import '../../shared/utils.dart';
-import '../../ui/label.dart';
 import 'debugger_controller.dart';
 
 class DebuggingControls extends StatefulWidget {
   const DebuggingControls({Key? key}) : super(key: key);
 
-  static const minWidthBeforeScaling = 1300.0;
+  static const minWidthBeforeScaling = 1750.0;
 
   @override
   _DebuggingControlsState createState() => _DebuggingControlsState();
@@ -42,6 +45,7 @@ class _DebuggingControlsState extends State<DebuggingControls>
     final hasStackFrames = controller.stackFramesWithLocation.value.isNotEmpty;
     final isSystemIsolate = controller.isSystemIsolate;
     final canStep = isPaused && !resuming && hasStackFrames && !isSystemIsolate;
+    final isVmApp = serviceManager.connectedApp?.isRunningOnDartVM ?? false;
     return SizedBox(
       height: defaultButtonHeight,
       child: Row(
@@ -51,6 +55,10 @@ class _DebuggingControlsState extends State<DebuggingControls>
           _stepButtons(canStep: canStep),
           const SizedBox(width: denseSpacing),
           BreakOnExceptionsControl(controller: controller),
+          if (isVmApp) ...[
+            const SizedBox(width: denseSpacing),
+            CodeStatisticsControls(controller: controller),
+          ],
           const Expanded(child: SizedBox(width: denseSpacing)),
           _librariesButton(),
         ],
@@ -136,6 +144,71 @@ class _DebuggingControlsState extends State<DebuggingControls>
   }
 }
 
+class CodeStatisticsControls extends StatelessWidget {
+  const CodeStatisticsControls({
+    super.key,
+    required this.controller,
+  });
+
+  final DebuggerController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    return RoundedOutlinedBorder(
+      child: DualValueListenableBuilder<bool, bool>(
+        firstListenable: controller.codeViewController.showCodeCoverage,
+        secondListenable: controller.codeViewController.showProfileInformation,
+        builder: (context, showCodeCoverage, showProfileInformation, _) {
+          final isInSmallMode = MediaQuery.of(context).size.width <=
+              DebuggingControls.minWidthBeforeScaling;
+          return Row(
+            children: [
+              ToggleButton(
+                label: isInSmallMode ? null : 'Show Coverage',
+                message: 'Show code coverage',
+                icon: Codicons.checklist,
+                isSelected: showCodeCoverage,
+                outlined: false,
+                shape: const RoundedRectangleBorder(
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(4),
+                    bottomLeft: Radius.circular(4),
+                  ),
+                ),
+                onPressed: controller.codeViewController.toggleShowCodeCoverage,
+              ),
+              LeftBorder(
+                child: ToggleButton(
+                  label: isInSmallMode ? null : 'Show Profile',
+                  message: 'Show profiler hits',
+                  icon: Codicons.flame,
+                  isSelected: showProfileInformation,
+                  outlined: false,
+                  shape: const ContinuousRectangleBorder(),
+                  onPressed: controller
+                      .codeViewController.toggleShowProfileInformation,
+                ),
+              ),
+              LeftBorder(
+                child: IconLabelButton(
+                  label: '',
+                  tooltip: 'Refresh statistics',
+                  outlined: false,
+                  onPressed: showCodeCoverage || showProfileInformation
+                      ? controller.codeViewController.refreshCodeStatistics
+                      : null,
+                  minScreenWidthForTextBeforeScaling: 20000,
+                  icon: Icons.refresh,
+                ),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+}
+
 class BreakOnExceptionsControl extends StatelessWidget {
   const BreakOnExceptionsControl({
     Key? key,
@@ -157,7 +230,7 @@ class BreakOnExceptionsControl extends StatelessWidget {
           onChanged: controller.isSystemIsolate
               ? null
               : (ExceptionMode? mode) {
-                  controller.setIsolatePauseMode(mode!.id);
+                  unawaited(controller.setIsolatePauseMode(mode!.id));
                 },
           isDense: true,
           items: [

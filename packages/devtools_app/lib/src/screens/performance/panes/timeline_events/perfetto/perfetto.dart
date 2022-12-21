@@ -4,11 +4,8 @@
 
 import 'package:flutter/material.dart';
 
-import '_perfetto_controller_desktop.dart'
-    if (dart.library.html) '_perfetto_controller_web.dart';
 import '_perfetto_desktop.dart' if (dart.library.html) '_perfetto_web.dart';
-
-PerfettoController createPerfettoController() => PerfettoController();
+import 'perfetto_controller.dart';
 
 class EmbeddedPerfetto extends StatelessWidget {
   const EmbeddedPerfetto({Key? key, required this.perfettoController})

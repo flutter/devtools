@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 @TestOn('vm')
-import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/screens/provider/instance_viewer/instance_details.dart';
 import 'package:devtools_app/src/screens/provider/instance_viewer/instance_providers.dart';
 import 'package:devtools_app/src/screens/provider/provider_list.dart';
@@ -11,6 +10,7 @@ import 'package:devtools_app/src/screens/provider/provider_nodes.dart';
 import 'package:devtools_app/src/screens/provider/provider_screen.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/shared/banner_messages.dart';
+import 'package:devtools_app/src/shared/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_app/src/shared/notifications.dart';
 import 'package:devtools_test/devtools_test.dart';
@@ -18,7 +18,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../matchers/matchers.dart';
+import '../test_infra/matchers/matchers.dart';
 
 void main() {
   // Set a wide enough screen width that we do not run into overflow.
@@ -27,7 +27,7 @@ void main() {
   late Widget providerScreen;
   late BannerMessagesController bannerMessagesController;
 
-  setUpAll(() => loadFonts());
+  setUpAll(() async => await loadFonts());
 
   setUp(() {
     setGlobal(IdeTheme, getIdeTheme());
@@ -43,7 +43,7 @@ void main() {
       child: Directionality(
         textDirection: TextDirection.ltr,
         child: wrapWithControllers(
-          const BannerMessages(screen: ProviderScreen()),
+          BannerMessages(screen: ProviderScreen()),
           bannerMessages: bannerMessagesController,
         ),
       ),
@@ -82,7 +82,7 @@ void main() {
       await expectLater(
         find.byType(ProviderScreenBody),
         matchesDevToolsGolden(
-          '../goldens/provider_screen/list_error_banner.png',
+          '../test_infra/goldens/provider_screen/list_error_banner.png',
         ),
       );
     });
@@ -311,7 +311,7 @@ void main() {
       await expectLater(
         find.byType(ProviderScreenBody),
         matchesDevToolsGolden(
-          '../goldens/provider_screen/no_selected_provider.png',
+          '../test_infra/goldens/provider_screen/no_selected_provider.png',
         ),
       );
 
@@ -347,7 +347,7 @@ void main() {
       await expectLater(
         find.byType(ProviderScreenBody),
         matchesDevToolsGolden(
-          '../goldens/provider_screen/selected_provider.png',
+          '../test_infra/goldens/provider_screen/selected_provider.png',
         ),
       );
     });
@@ -392,7 +392,7 @@ void main() {
 
       expect(
         find.byKey(
-          const Key('ProviderUnknownErrorBanner - ${ProviderScreen.id}'),
+          Key('ProviderUnknownErrorBanner - ${ProviderScreen.id}'),
         ),
         findsOneWidget,
       );
@@ -400,7 +400,7 @@ void main() {
       await expectLater(
         find.byType(ProviderScreenBody),
         matchesDevToolsGolden(
-          '../goldens/provider_screen/selected_provider_error_banner.png',
+          '../test_infra/goldens/provider_screen/selected_provider_error_banner.png',
         ),
       );
     });

@@ -4,7 +4,7 @@
 
 import 'dart:async';
 
-import 'package:devtools_app/src/primitives/flutter_widgets/linked_scroll_controller.dart';
+import 'package:devtools_app/src/shared/primitives/flutter_widgets/linked_scroll_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 

@@ -2,17 +2,19 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart' hide VmService;
 
-import '../../../primitives/auto_dispose.dart';
 import '../../../service/vm_service_wrapper.dart';
 import '../../../shared/globals.dart';
+import '../../../shared/primitives/auto_dispose.dart';
 
 class VMStatisticsViewController extends DisposableController {
   VMStatisticsViewController() {
-    refresh();
+    unawaited(refresh());
   }
 
   Future<void> refresh() async {
