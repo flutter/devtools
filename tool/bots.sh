@@ -133,11 +133,9 @@ elif [[ "$BOT" == "test_ddc" || "$BOT" == "test_dart2js" ]]; then
         exit 1
     fi
 
-elif [ "$BOT" = "integration_ddc" ]; then
-
-    # TODO(https://github.com/flutter/devtools/issues/1987): rewrite integration tests.
-    # We need to run integration tests with -j1 to run with no concurrency.
-    # flutter test -j1 test/integration_tests/
+# TODO(https://github.com/flutter/devtools/issues/1987): consider running integration tests
+# for a DDC build of DevTools
+# elif [ "$BOT" = "integration_ddc" ]; then
 
 elif [ "$BOT" = "integration_dart2js" ]; then
 
