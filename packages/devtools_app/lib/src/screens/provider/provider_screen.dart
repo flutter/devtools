@@ -158,7 +158,7 @@ void showProviderErrorBanner(BuildContext context) {
     context,
     listen: false,
   ).addMessage(
-    ProviderUnknownErrorBanner(screenId: ProviderScreen.id).build(context),
+    ProviderUnknownErrorBanner(screenId: ProviderScreen.id).build(),
   );
 }
 

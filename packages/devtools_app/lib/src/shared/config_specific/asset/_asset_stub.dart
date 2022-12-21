@@ -11,6 +11,7 @@
 /// caller is going to be doing its own caching. (It might not be cached if
 /// it's set to true either, that depends on the asset bundle
 /// implementation.)
+// ignore: avoid-unused-parameters
 Future<String> loadStringImpl(String key, {bool cache = true}) {
   throw Exception('Assets not yet supported in dart:html app');
 }

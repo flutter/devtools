@@ -161,7 +161,6 @@ class DiagnosticsNodeDescription extends StatelessWidget {
   Widget buildDescription({
     required String description,
     required TextStyle textStyle,
-    required BuildContext context,
     required ColorScheme colorScheme,
     RemoteDiagnosticsNode? diagnostic,
     String? searchValue,
@@ -331,7 +330,6 @@ class DiagnosticsNodeDescription extends StatelessWidget {
           child: buildDescription(
             description: description,
             textStyle: descriptionTextStyle,
-            context: context,
             colorScheme: colorScheme,
             diagnostic: diagnostic,
             searchValue: searchValue,
@@ -389,7 +387,6 @@ class DiagnosticsNodeDescription extends StatelessWidget {
       var diagnosticDescription = buildDescription(
         description: diagnosticLocal.description ?? '',
         textStyle: descriptionTextStyle,
-        context: context,
         colorScheme: colorScheme,
         diagnostic: diagnostic,
         searchValue: searchValue,

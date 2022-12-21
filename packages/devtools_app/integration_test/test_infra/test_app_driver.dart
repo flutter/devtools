@@ -109,7 +109,7 @@ abstract class _TestApp with IOMixin {
     await started;
   }
 
-  Future<int> killGracefully() async {
+  Future<int> killGracefully() {
     _debugPrint('Sending SIGTERM to $runProcessId..');
     Process.killPid(runProcessId);
 
@@ -119,7 +119,7 @@ abstract class _TestApp with IOMixin {
     return killFuture;
   }
 
-  Future<int> _killForcefully() async {
+  Future<int> _killForcefully() {
     _debugPrint('Sending SIGKILL to $runProcessId..');
     Process.killPid(runProcessId, ProcessSignal.sigkill);
 
@@ -141,7 +141,7 @@ abstract class _TestApp with IOMixin {
     int? id,
     Duration? timeout,
     bool ignoreAppStopEvent = false,
-  }) async {
+  }) {
     final response = Completer<Map<String, Object?>>();
     late StreamSubscription<String> sub;
     sub = stdoutController.stream.listen(

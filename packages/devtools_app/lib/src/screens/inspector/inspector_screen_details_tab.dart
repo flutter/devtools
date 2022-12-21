@@ -122,14 +122,10 @@ class _InspectorExpandCollapseButtonsState
   }
 
   void _onCollapseClick() {
-    unawaited(
-      blockWhileInProgress(() async {
-        ga.select(
-          gac.inspector,
-          gac.collapseAll,
-        );
-        await widget.controller.collapseDetailsToSelected();
-      }),
+    ga.select(
+      gac.inspector,
+      gac.collapseAll,
     );
+    widget.controller.collapseDetailsToSelected();
   }
 }

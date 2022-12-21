@@ -78,7 +78,7 @@ class _FieldInstanceCountColumn extends ColumnData<AllocationProfileRecord> {
   final _HeapGeneration heap;
 
   @override
-  dynamic getValue(AllocationProfileRecord dataObject) {
+  int? getValue(AllocationProfileRecord dataObject) {
     switch (heap) {
       case _HeapGeneration.newSpace:
         return dataObject.newSpaceInstances;
@@ -102,7 +102,7 @@ class _FieldExternalSizeColumn extends _FieldSizeColumn {
         );
 
   @override
-  dynamic getValue(AllocationProfileRecord dataObject) {
+  int? getValue(AllocationProfileRecord dataObject) {
     switch (heap) {
       case _HeapGeneration.newSpace:
         return dataObject.newSpaceExternalSize;
@@ -122,7 +122,7 @@ class _FieldDartHeapSizeColumn extends _FieldSizeColumn {
         );
 
   @override
-  dynamic getValue(AllocationProfileRecord dataObject) {
+  int? getValue(AllocationProfileRecord dataObject) {
     switch (heap) {
       case _HeapGeneration.newSpace:
         return dataObject.newSpaceDartHeapSize;
@@ -157,7 +157,7 @@ class _FieldSizeColumn extends ColumnData<AllocationProfileRecord> {
   final _HeapGeneration heap;
 
   @override
-  dynamic getValue(AllocationProfileRecord dataObject) {
+  int? getValue(AllocationProfileRecord dataObject) {
     switch (heap) {
       case _HeapGeneration.newSpace:
         return dataObject.newSpaceSize;

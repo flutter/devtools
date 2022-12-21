@@ -532,7 +532,7 @@ Future<void> _verifyInitialExtensionStateInServiceManager(
 Future<void> _verifyExtensionStateInServiceManager(
   String extensionName,
   bool enabled,
-  dynamic value,
+  Object? value,
 ) async {
   final stateListenable = serviceManager.serviceExtensionManager
       .getServiceExtensionState(extensionName);

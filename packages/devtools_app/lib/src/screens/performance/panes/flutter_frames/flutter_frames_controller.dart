@@ -225,4 +225,9 @@ class FlutterFramesController extends PerformanceFeatureController {
 
     _displayRefreshRate.value = offlineData.displayRefreshRate;
   }
+
+  @override
+  Future<void> onBecomingActive() {
+    return Future.value();
+  }
 }

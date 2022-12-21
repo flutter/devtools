@@ -37,13 +37,12 @@ class Variables extends StatelessWidget {
       dataRootsListenable: controller.variables,
       dataDisplayProvider: (variable, onPressed) =>
           displayProvider(context, variable, onPressed, controller),
-      onItemSelected: (variable) async => onItemPressed(variable, controller),
+      onItemSelected: onItemPressed,
     );
   }
 
   Future<void> onItemPressed(
     DartObjectNode v,
-    DebuggerController controller,
   ) async {
     // On expansion, lazily build the variables tree for performance reasons.
     if (v.isExpanded) {
@@ -79,14 +78,12 @@ class ExpandableVariable extends StatelessWidget {
       shrinkWrap: true,
       dataDisplayProvider: (variable, onPressed) =>
           displayProvider(context, variable, onPressed, debuggerController),
-      onItemSelected: (variable) async =>
-          onItemPressed(variable, debuggerController),
+      onItemSelected: onItemPressed,
     );
   }
 
   Future<void> onItemPressed(
     DartObjectNode v,
-    DebuggerController controller,
   ) async {
     // On expansion, lazily build the variables tree for performance reasons.
     if (v.isExpanded) {

@@ -31,7 +31,6 @@ class PerformanceDefaultScene extends Scene {
   Future<void> setUp() async {
     FeatureFlags.widgetRebuildstats = true;
 
-    await ensureInspectorDependencies();
     setGlobal(OfflineModeController, OfflineModeController());
     setGlobal(IdeTheme, IdeTheme());
     setGlobal(NotificationService, NotificationService());

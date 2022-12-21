@@ -118,7 +118,8 @@ class InspectorPreferencesController extends DisposableController
 
   Future<void> init() async {
     await _initHoverEvalMode();
-    await _initCustomPubRootDirectories();
+    // TODO(jacobr): consider initializing this first as it is not blocking.
+    _initCustomPubRootDirectories();
   }
 
   Future<void> _initHoverEvalMode() async {
@@ -137,7 +138,7 @@ class InspectorPreferencesController extends DisposableController
     });
   }
 
-  Future<void> _initCustomPubRootDirectories() async {
+  void _initCustomPubRootDirectories() {
     autoDisposeStreamSubscription(
       serviceManager.onConnectionAvailable
           .listen(_handleConnectionToNewService),
@@ -159,13 +160,13 @@ class InspectorPreferencesController extends DisposableController
           if (debuggerState?.isPaused.value == false) {
             // the isolate is already unpaused, we can try to load
             // the directories
-            preferences.inspector.loadCustomPubRootDirectories();
+            unawaited(preferences.inspector.loadCustomPubRootDirectories());
           } else {
             late Function() pausedListener;
 
             pausedListener = () {
               if (debuggerState?.isPaused.value == false) {
-                preferences.inspector.loadCustomPubRootDirectories();
+                unawaited(preferences.inspector.loadCustomPubRootDirectories());
 
                 debuggerState?.isPaused.removeListener(pausedListener);
               }
@@ -179,12 +180,12 @@ class InspectorPreferencesController extends DisposableController
     );
   }
 
-  void _handleConnectionClosed(dynamic _) async {
+  void _handleConnectionClosed(Object? _) {
     _mainScriptDir = null;
     _customPubRootDirectories.clear();
   }
 
-  Future<void> _handleConnectionToNewService(VmServiceWrapper wrapper) async {
+  Future<void> _handleConnectionToNewService(VmServiceWrapper _) async {
     await _updateMainScriptRef();
 
     _customPubRootDirectories.clear();
@@ -250,8 +251,8 @@ class InspectorPreferencesController extends DisposableController
       final freshPubRootDirectories =
           await localInspectorService.getPubRootDirectories();
       if (freshPubRootDirectories != null) {
-        final newSet = Set<String>.from(freshPubRootDirectories);
-        final oldSet = Set<String>.from(_customPubRootDirectories.value);
+        final newSet = Set<String>.of(freshPubRootDirectories);
+        final oldSet = Set<String>.of(_customPubRootDirectories.value);
         final directoriesToAdd = newSet.difference(oldSet);
         final directoriesToRemove = oldSet.difference(newSet);
 

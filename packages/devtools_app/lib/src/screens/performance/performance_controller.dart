@@ -261,11 +261,11 @@ abstract class PerformanceFeatureController extends DisposableController {
     }
   }
 
-  Future<void> onBecomingActive() async {}
+  Future<void> onBecomingActive();
 
-  Future<void> init() async {}
+  Future<void> init();
 
-  FutureOr<void> setOfflineData(PerformanceData offlineData);
+  Future<void> setOfflineData(PerformanceData offlineData);
 
   FutureOr<void> clearData();
 

@@ -38,9 +38,9 @@ void setupClipboardCopyListener({
         clipboardContentsCallback(call.arguments['text']);
         break;
       case 'Clipboard.getData':
-        return Future.value(<String, dynamic>{});
+        return Future.value(<String, Object?>{});
       case 'Clipboard.hasStrings':
-        return Future.value(<String, dynamic>{'value': true});
+        return Future.value(<String, Object?>{'value': true});
       default:
         break;
     }

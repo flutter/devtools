@@ -76,22 +76,28 @@ class BrowserManager {
   Future<BrowserTabInstance> createNewTab() async {
     final String targetId = await this.tab.createNewTarget();
 
+    // This is a false positive for this lint.
+    // ignore: prefer-moving-to-variable
     await delay();
 
     final ChromeTab tab =
         (await chromeProcess.connectToTabId('localhost', targetId))!;
     await tab.connect(verbose: true);
 
+    // This is a false positive for this lint.
+    // ignore: prefer-moving-to-variable
     await delay();
 
     await tab.wipConnection!.target.activateTarget(targetId);
 
+    // This is a false positive for this lint.
+    // ignore: prefer-moving-to-variable
     await delay();
 
     return BrowserTabInstance(tab);
   }
 
-  Future<void> teardown() async {
+  void teardown() {
     chromeProcess.kill();
   }
 }
@@ -106,8 +112,7 @@ class BrowserTabInstance {
         final String value = '${message.value}';
         if (value.startsWith('[') && value.endsWith(']')) {
           try {
-            final dynamic msg =
-                jsonDecode(value.substring(1, value.length - 1));
+            final msg = jsonDecode(value.substring(1, value.length - 1));
             if (msg is Map) {
               _handleBrowserMessage(msg);
             }
@@ -156,7 +161,7 @@ class BrowserTabInstance {
 
   Stream<AppEvent> get onEvent => _eventStream.stream;
 
-  Future<AppResponse> send(String method, [dynamic params]) async {
+  Future<AppResponse> send(String method, [Object? params]) async {
     _remote ??= await _getAppChannelObject();
 
     final int id = _nextId++;
@@ -168,7 +173,7 @@ class BrowserTabInstance {
       await tab.wipConnection!.runtime.callFunctionOn(
         "function (method, id, params) { return window['devtools'].send(method, id, params); }",
         objectId: _remote!.objectId,
-        arguments: <dynamic>[method, id, params],
+        arguments: <Object?>[method, id, params],
       );
 
       return completer.future;
@@ -217,7 +222,7 @@ class AppEvent {
 
   String? get event => json['event'];
 
-  dynamic get params => json['params'];
+  Object? get params => json['params'];
 
   @override
   String toString() => '$event ${params ?? ''}';
@@ -230,7 +235,7 @@ class AppResponse {
 
   int? get id => json['id'];
 
-  dynamic get result => json['result'];
+  Object? get result => json['result'];
 
   bool get hasError => json.containsKey('error');
 
@@ -408,7 +413,7 @@ class WebBuildFixture {
   static Future<Process> _runFlutter(
     List<String> buildArgs, {
     bool verbose = false,
-  }) async {
+  }) {
     // Remove the DART_VM_OPTIONS env variable from the child process, so the
     // Dart VM doesn't try and open a service protocol port if
     // 'DART_VM_OPTIONS: --enable-vm-service:63990' was passed in.

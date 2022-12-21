@@ -9,7 +9,7 @@ import 'package:vm_service/vm_service.dart';
 void main() {
   group('JsonToServiceCache', () {
     test('basic', () {
-      const data = <String, dynamic>{
+      const data = <String, Object?>{
         'id': 1,
         'map': {
           'foo': 'bar',
@@ -90,7 +90,7 @@ void main() {
     });
 
     test('sub-collection support', () {
-      final data = <String, dynamic>{
+      final data = <String, Object?>{
         'list': [
           for (int i = 0; i < 10; ++i) i,
         ],

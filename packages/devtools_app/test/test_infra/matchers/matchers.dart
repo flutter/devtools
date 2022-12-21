@@ -85,8 +85,8 @@ class _EqualsGoldenIgnoringHashCodes extends Matcher {
   }
 
   @override
-  bool matches(dynamic object, Map<dynamic, dynamic> matchState) {
-    final String description = _normalize(object);
+  bool matches(Object? object, Map<dynamic, dynamic> matchState) {
+    final String description = _normalize(object as String);
     if (_value != description) {
       if (updateGoldens) {
         io.File(path).writeAsStringSync(description);
@@ -109,7 +109,7 @@ class _EqualsGoldenIgnoringHashCodes extends Matcher {
 
   @override
   Description describeMismatch(
-    dynamic item,
+    Object? item,
     Description mismatchDescription,
     Map<dynamic, dynamic> matchState,
     bool verbose,
@@ -136,7 +136,7 @@ class AlwaysTrueMatcher extends Matcher {
   const AlwaysTrueMatcher();
 
   @override
-  bool matches(dynamic object, Map<dynamic, dynamic> matchState) {
+  bool matches(Object? object, Map<dynamic, dynamic> matchState) {
     return true;
   }
 

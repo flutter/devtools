@@ -57,10 +57,7 @@ void main() {
       screen = ProfilerScreen();
     });
 
-    void verifyBaseState(
-      ProfilerScreenBody perfScreenBody,
-      WidgetTester tester,
-    ) {
+    void verifyBaseState() {
       expect(find.byType(RecordButton), findsOneWidget);
       expect(find.byType(StopRecordingButton), findsOneWidget);
       expect(find.byType(ClearButton), findsOneWidget);
@@ -106,7 +103,7 @@ void main() {
       const perfScreenBody = ProfilerScreenBody();
       await pumpProfilerScreenBody(tester, perfScreenBody);
       expect(find.byType(ProfilerScreenBody), findsOneWidget);
-      verifyBaseState(perfScreenBody, tester);
+      verifyBaseState();
     });
 
     testWidgetsWithWindowSize(
@@ -117,7 +114,7 @@ void main() {
       const perfScreenBody = ProfilerScreenBody();
       await pumpProfilerScreenBody(tester, perfScreenBody);
       expect(find.byType(ProfilerScreenBody), findsOneWidget);
-      verifyBaseState(perfScreenBody, tester);
+      verifyBaseState();
     });
 
     testWidgetsWithWindowSize(
@@ -127,7 +124,7 @@ void main() {
         const perfScreenBody = ProfilerScreenBody();
         await pumpProfilerScreenBody(tester, perfScreenBody);
         expect(find.byType(ProfilerScreenBody), findsOneWidget);
-        verifyBaseState(perfScreenBody, tester);
+        verifyBaseState();
 
         // Start recording.
         await tester.tap(find.byType(RecordButton));
@@ -149,7 +146,7 @@ void main() {
         // Clear the profile.
         await tester.tap(find.byType(ClearButton));
         await tester.pump();
-        verifyBaseState(perfScreenBody, tester);
+        verifyBaseState();
       },
     );
 
@@ -171,7 +168,7 @@ void main() {
       await tester.tap(find.text('Enable profiler'));
       await tester.pumpAndSettle();
 
-      verifyBaseState(perfScreenBody, tester);
+      verifyBaseState();
     });
   });
 }

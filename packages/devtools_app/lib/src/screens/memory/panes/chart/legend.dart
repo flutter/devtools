@@ -20,7 +20,7 @@ late final _legendHeight1Chart = scaleByFontFactor(200.0);
 late final _legendHeight2Charts = scaleByFontFactor(323.0);
 
 /// Padding for each title in the legend.
-const _legendTitlePadding = EdgeInsets.fromLTRB(5, 0, 0, 4);
+const _legendTitlePadding = EdgeInsets.only(left: 5, bottom: 4);
 
 class MemoryChartLegend extends StatelessWidget {
   const MemoryChartLegend({
@@ -194,7 +194,7 @@ class LegendRow extends StatelessWidget {
 
     return Expanded(
       child: Container(
-        padding: const EdgeInsets.fromLTRB(10, 0, 0, 2),
+        padding: const EdgeInsets.only(left: 10, bottom: 2),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: rowChildren,

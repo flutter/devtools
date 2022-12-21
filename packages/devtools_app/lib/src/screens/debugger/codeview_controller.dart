@@ -122,7 +122,12 @@ class CodeViewController extends DisposableController
   /// connecting to low-end devices.
   Future<void> maybeSetupProgramExplorer() async {
     await _maybeSetUpProgramExplorer();
-    addAutoDisposeListener(currentScriptRef, _maybeSetUpProgramExplorer);
+    addAutoDisposeListener(
+      currentScriptRef,
+      () => unawaited(
+        _maybeSetUpProgramExplorer(),
+      ),
+    );
   }
 
   Future<void> _maybeSetUpProgramExplorer() async {

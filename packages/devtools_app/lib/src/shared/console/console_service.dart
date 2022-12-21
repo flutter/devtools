@@ -123,10 +123,7 @@ class ConsoleService extends Disposer {
   }
 
   /// Append to the stdout / stderr buffer.
-  void appendStdio(
-    String text, {
-    bool forceScrollIntoView = false,
-  }) {
+  void appendStdio(String text) {
     const int kMaxLogItemsLowerBound = 5000;
     const int kMaxLogItemsUpperBound = 5500;
 

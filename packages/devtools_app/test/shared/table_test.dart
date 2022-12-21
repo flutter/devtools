@@ -969,6 +969,7 @@ void main() {
         'and no play',
         'makes Ben',
         'a dull boy',
+        // String is maybe a little easier to read this way.
         // ignore: no_adjacent_strings_in_list
         'The quick brown fox jumps over the lazy dog, although the fox '
             "can't jump very high and the dog is very, very small, so it really"

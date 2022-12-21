@@ -15,9 +15,12 @@
 // ignore_for_file: unnecessary_new
 // ignore_for_file: unused_catch_clause
 // ignore_for_file: unused_local_variable
+// ignore_for_file: prefer-moving-to-variable
+// ignore_for_file: avoid-throw-in-catch-block
 
 part of http;
 
+// TODO(jacobr): cleanup this class with only static members.
 // ignore: avoid_classes_with_only_static_members
 /// Utility functions for working with dates with HTTP specific date formats.
 class HttpDate {

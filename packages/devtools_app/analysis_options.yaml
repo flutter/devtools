@@ -10,3 +10,8 @@ analyzer:
     # these files if you want to ensure code is not invalid except where
     # expected.
     - test/test_infra/test_data/syntax_highlighting/**
+
+dart_code_metrics:
+  metrics-exclude:
+    - test/**
+    - test/test_infra/test_data/**

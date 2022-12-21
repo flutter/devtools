@@ -214,7 +214,7 @@ class MemoryController extends DisposableController
         .value;
   }
 
-  void _handleConnectionStart(ServiceConnectionManager serviceManager) async {
+  void _handleConnectionStart(ServiceConnectionManager serviceManager) {
     _refreshShouldShowLeaksTab();
     if (_memoryTracker == null) {
       _memoryTracker = MemoryTracker(this);
@@ -298,7 +298,7 @@ class MemoryController extends DisposableController
         isOfflineAndAndroidData || isConnectedToAndroidAndAndroidEnabled;
   }
 
-  void _handleConnectionStop(dynamic event) {
+  void _handleConnectionStop(Object? _) {
     _memoryTracker?.stop();
     _memoryTrackerController.add(_memoryTracker);
 
@@ -306,7 +306,7 @@ class MemoryController extends DisposableController
     hasStopped = true;
   }
 
-  Future<void> startTimeline() async {
+  void startTimeline() {
     addAutoDisposeListener(
       serviceManager.isolateManager.selectedIsolate,
       _handleIsolateChanged,

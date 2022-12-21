@@ -27,8 +27,6 @@ void main() async {
     );
   }
 
-  await ensureInspectorDependencies();
-
   when(fakeServiceManager.connectedApp!.isFlutterWebAppNow).thenReturn(false);
   when(fakeServiceManager.connectedApp!.isProfileBuildNow).thenReturn(false);
   when(fakeServiceManager.errorBadgeManager.errorCountNotifier('logging'))

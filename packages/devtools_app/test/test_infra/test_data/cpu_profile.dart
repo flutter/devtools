@@ -912,7 +912,7 @@ final filteredCpuSampleTraceEvents = [
     'tid': 42247,
     'ts': 47377796685,
     'cat': 'Dart',
-    'args': <String, dynamic>{
+    'args': <String, Object?>{
       'userTag': 'Foo',
       'vmTag': 'Dart',
     },
@@ -925,7 +925,7 @@ final filteredCpuSampleTraceEvents = [
     'tid': 42247,
     'ts': 47377797975,
     'cat': 'Dart',
-    'args': <String, dynamic>{
+    'args': <String, Object?>{
       'userTag': 'Foo',
       'vmTag': 'Dart',
     },
@@ -938,7 +938,7 @@ final filteredCpuSampleTraceEvents = [
     'tid': 42247,
     'ts': 47377799063,
     'cat': 'Dart',
-    'args': <String, dynamic>{
+    'args': <String, Object?>{
       'userTag': 'Foo',
       'vmTag': 'Dart',
     },
@@ -951,7 +951,7 @@ final filteredCpuSampleTraceEvents = [
     'tid': 42247,
     'ts': 47377800363,
     'cat': 'Dart',
-    'args': <String, dynamic>{
+    'args': <String, Object?>{
       'userTag': 'Default',
       'vmTag': 'VM',
     },
@@ -964,7 +964,7 @@ final filteredCpuSampleTraceEvents = [
     'tid': 42247,
     'ts': 47377800463,
     'cat': 'Dart',
-    'args': <String, dynamic>{
+    'args': <String, Object?>{
       'userTag': 'Default',
       'vmTag': 'VM',
     },
@@ -977,7 +977,7 @@ final filteredCpuSampleTraceEvents = [
     'tid': 42247,
     'ts': 47377800563,
     'cat': 'Dart',
-    'args': <String, dynamic>{
+    'args': <String, Object?>{
       'userTag': 'Default',
       'vmTag': 'VM',
     },
@@ -990,7 +990,7 @@ final filteredCpuSampleTraceEvents = [
     'tid': 42247,
     'ts': 47377800663,
     'cat': 'Dart',
-    'args': <String, dynamic>{
+    'args': <String, Object?>{
       'userTag': 'Default',
       'vmTag': 'VM',
     },
@@ -1003,7 +1003,7 @@ final filteredCpuSampleTraceEvents = [
     'tid': 42247,
     'ts': 47377800763,
     'cat': 'Dart',
-    'args': <String, dynamic>{
+    'args': <String, Object?>{
       'userTag': 'Default',
       'vmTag': 'VM',
     },
@@ -1021,7 +1021,7 @@ final List<Map<String, dynamic>> goldenCpuProfileTraceEvents =
           'tid': 42247,
           'ts': 47377800363,
           'cat': 'Dart',
-          'args': <String, dynamic>{
+          'args': <String, Object?>{
             'userTag': 'Default',
             'vmTag': 'VM',
           },
@@ -1034,7 +1034,7 @@ final List<Map<String, dynamic>> goldenCpuProfileTraceEvents =
           'tid': 42247,
           'ts': 47377800463,
           'cat': 'Dart',
-          'args': <String, dynamic>{
+          'args': <String, Object?>{
             'userTag': 'Default',
             'vmTag': 'VM',
           },
@@ -1047,7 +1047,7 @@ final List<Map<String, dynamic>> goldenCpuProfileTraceEvents =
           'tid': 42247,
           'ts': 47377800563,
           'cat': 'Dart',
-          'args': <String, dynamic>{
+          'args': <String, Object?>{
             'userTag': 'Default',
             'vmTag': 'VM',
           },
@@ -1060,7 +1060,7 @@ final List<Map<String, dynamic>> goldenCpuProfileTraceEvents =
           'tid': 42247,
           'ts': 47377800663,
           'cat': 'Dart',
-          'args': <String, dynamic>{
+          'args': <String, Object?>{
             'userTag': 'Default',
             'vmTag': 'VM',
           },
@@ -1073,7 +1073,7 @@ final List<Map<String, dynamic>> goldenCpuProfileTraceEvents =
           'tid': 42247,
           'ts': 47377800763,
           'cat': 'Dart',
-          'args': <String, dynamic>{
+          'args': <String, Object?>{
             'userTag': 'Default',
             'vmTag': 'VM',
           },
@@ -1089,7 +1089,7 @@ final subProfileTraceEvents = [
     'tid': 42247,
     'ts': 47377796685,
     'cat': 'Dart',
-    'args': <String, dynamic>{
+    'args': <String, Object?>{
       'userTag': 'Foo',
       'vmTag': 'Dart',
     },
@@ -1102,7 +1102,7 @@ final subProfileTraceEvents = [
     'tid': 42247,
     'ts': 47377797975,
     'cat': 'Dart',
-    'args': <String, dynamic>{
+    'args': <String, Object?>{
       'userTag': 'Foo',
       'vmTag': 'Dart',
     },
@@ -1115,7 +1115,7 @@ final subProfileTraceEvents = [
     'tid': 42247,
     'ts': 47377799063,
     'cat': 'Dart',
-    'args': <String, dynamic>{
+    'args': <String, Object?>{
       'userTag': 'Foo',
       'vmTag': 'Dart',
     },
@@ -1170,7 +1170,7 @@ final responseWithMissingLeafFrame = {
       'tid': 42247,
       'ts': 47377796685,
       'cat': 'Dart',
-      'args': <String, dynamic>{},
+      'args': <String, Object?>{},
       'sf': '140357727781376-0'
     },
     {
@@ -1180,7 +1180,7 @@ final responseWithMissingLeafFrame = {
       'tid': 42247,
       'ts': 47377797975,
       'cat': 'Dart',
-      'args': <String, dynamic>{},
+      'args': <String, Object?>{},
       'sf': '140357727781376-2'
     },
     {
@@ -1190,7 +1190,7 @@ final responseWithMissingLeafFrame = {
       'tid': 42247,
       'ts': 47377799063,
       'cat': 'Dart',
-      'args': <String, dynamic>{},
+      'args': <String, Object?>{},
       'sf': '140357727781376-4'
     },
   ]

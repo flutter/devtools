@@ -17,7 +17,6 @@ void main() {
     late MaterialApp app;
     const Key initializedKey = Key('initialized');
     setUp(() async {
-      await ensureInspectorDependencies();
       final serviceManager = FakeServiceManager();
       when(serviceManager.connectedApp!.isDartWebApp)
           .thenAnswer((_) => Future.value(false));
@@ -28,7 +27,6 @@ void main() {
         initialRoute: '/init',
         routes: {
           '/init': (_) => Initializer(
-                // ignore: avoid_redundant_argument_values
                 url: null,
                 builder: (_) => const SizedBox(key: initializedKey),
               ),

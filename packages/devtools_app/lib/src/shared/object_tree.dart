@@ -113,7 +113,7 @@ Future<void> buildVariablesTree(
       }
     } else if (instanceRef != null && serviceManager.service != null) {
       final variableId = variable.ref!.isolateRef!.id!;
-      final dynamic result = await serviceManager.service!.getObject(
+      final result = await serviceManager.service!.getObject(
         variableId,
         instanceRef.id!,
         offset: variable.offset,
@@ -688,7 +688,7 @@ List<DartObjectNode> _createVariablesForBytes(
 ) {
   final bytes = base64.decode(instance.bytes!);
   final variables = <DartObjectNode>[];
-  List<dynamic> result;
+  List<Object?> result;
   switch (instance.kind) {
     case InstanceKind.kUint8ClampedList:
     case InstanceKind.kUint8List:
@@ -1004,9 +1004,8 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
       }
       return instanceRef.valueAsString == null;
     }
-    return (ref?.value is! String?) &&
-        (ref?.value is! num?) &&
-        (ref?.value is! bool?);
+    final value = ref?.value;
+    return (value is! String?) && (value is! num?) && (value is! bool?);
   }
 
   Object? get value => ref?.value;

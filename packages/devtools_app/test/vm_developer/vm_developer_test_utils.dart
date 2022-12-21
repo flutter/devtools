@@ -132,7 +132,7 @@ class TestInboundReferences extends InboundReferences {
   TestInboundReferences({required super.references});
 
   @override
-  Map<String, dynamic>? get json => <String, dynamic>{};
+  Map<String, Object?>? get json => <String, Object?>{};
 }
 
 class TestObjectInspectorViewController extends ObjectInspectorViewController {

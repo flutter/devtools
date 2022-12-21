@@ -133,7 +133,7 @@ abstract class InspectorServiceBase extends DisposableController
     String methodName, [
     List<String>? args,
   ]) {
-    final Map<String, Object> params = {};
+    final Map<String, Object?> params = {};
     if (args != null) {
       for (int i = 0; i < args.length; ++i) {
         params['arg$i'] = args[i];
@@ -153,7 +153,7 @@ abstract class InspectorServiceBase extends DisposableController
 
   Future<Object?> invokeServiceMethodDaemonNoGroup(
     String methodName, {
-    Map<String, Object>? args,
+    Map<String, Object?>? args,
   }) async {
     final callMethodName = '$serviceExtensionPrefix.$methodName';
     if (!serviceManager.serviceExtensionManager
@@ -343,7 +343,7 @@ class InspectorService extends InspectorServiceBase {
         // third_party/dart_src/long/package/name    (package:long.package.name)
         // so its path should be at minimum depth 3.
         const minThirdPartyPathDepth = 3;
-        if (packageParts[0] == 'third_party' &&
+        if (packageParts.first == 'third_party' &&
             packageParts.length >= minThirdPartyPathDepth) {
           assert(packageParts[1] == 'dart' || packageParts[1] == 'dart_src');
           packageParts = packageParts.sublist(2);
@@ -359,7 +359,8 @@ class InspectorService extends InspectorServiceBase {
     await _updateLocalClasses();
   }
 
-  Future<void> _updateLocalClasses() async {
+  Future<void> _updateLocalClasses() {
+    return Future.value();
     // TODO(https://github.com/flutter/devtools/issues/4393)
     // localClasses.clear();
     // if (_rootDirectories.value.isNotEmpty) {
@@ -434,7 +435,7 @@ class InspectorService extends InspectorServiceBase {
       'getPubRootDirectories',
     );
 
-    if (response is! List<dynamic>) {
+    if (response is! List<Object?>) {
       return [];
     }
 
@@ -850,7 +851,7 @@ abstract class ObjectGroupBase implements Disposable {
     final instanceRef = await instanceRefFuture;
     if (disposed || instanceRefFuture == null) return [];
     return parseDiagnosticsNodesHelper(
-      await instanceRefToJson(instanceRef) as List<Object>?,
+      await instanceRefToJson(instanceRef) as List<Object?>?,
       parent,
       isProperty,
     );

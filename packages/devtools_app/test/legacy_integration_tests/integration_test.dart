@@ -29,7 +29,7 @@ void main() {
       });
 
       tearDownAll(() async {
-        await browserManager.teardown();
+        browserManager.teardown();
         await webBuildFixture.teardown();
       });
 
