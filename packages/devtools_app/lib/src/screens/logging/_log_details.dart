@@ -7,7 +7,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import '../../shared/common_widgets.dart';
-import '../../shared/console.dart';
+import '../../shared/console/console.dart';
 import '../../shared/theme.dart';
 import 'logging_controller.dart';
 
