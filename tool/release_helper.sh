@@ -28,7 +28,6 @@ RELEASE_BRANCH="clean_release_$(date +%s)"
 NEXT_BRANCH="next_version_$(date +%s)"
 
 git checkout -b $RELEASE_BRANCH;
-exit
 COMMIT_MESSAGE=$(dart tool/update_version.dart auto -d -t release)
 dart tool/update_version.dart auto -t release
 dart tool/bin/repo_tool.dart generate-changelog
