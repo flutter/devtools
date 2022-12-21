@@ -16,6 +16,7 @@ import 'src/shared/config_specific/framework_initialize/framework_initialize.dar
 import 'src/shared/config_specific/ide_theme/ide_theme.dart';
 import 'src/shared/config_specific/url/url.dart';
 import 'src/shared/config_specific/url_strategy/url_strategy.dart';
+import 'src/shared/feature_flags.dart';
 import 'src/shared/globals.dart';
 import 'src/shared/preferences.dart';
 import 'src/shared/primitives/url_utils.dart';
@@ -30,6 +31,13 @@ Future<void> runDevTools({bool shouldEnableExperiments = false}) async {
   if (_handleLegacyUrl()) return;
 
   usePathUrlStrategy();
+
+  // This may be from our Flutter integration tests. Since we call
+  // [runDevTools] from Dart code, we cannot set the 'enable_experiements'
+  // environment variable before calling [runDevTools].
+  if (shouldEnableExperiments) {
+    setEnableExperiments();
+  }
 
   // Initialize the framework before we do anything else, otherwise the
   // StorageController won't be initialized and preferences won't be loaded.
