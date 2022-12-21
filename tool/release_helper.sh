@@ -24,10 +24,10 @@ git fetch $DEVTOOLS_REMOTE master
 git switch -c $MASTER $DEVTOOLS_REMOTE/master
 
 
-CLEAN_BRANCH="clean_release_$(date +%s)"
+RELEASE_BRANCH="clean_release_$(date +%s)"
 NEXT_BRANCH="next_version_$(date +%s)"
 
-git checkout -b $CLEAN_BRANCH;
+git checkout -b $RELEASE_BRANCH;
 COMMIT_MESSAGE=$(dart tool/update_version.dart auto -d -t release)
 dart tool/update_version.dart auto -t release
 dart tool/bin/repo_tool.dart generate-changelog
@@ -43,14 +43,14 @@ dart tool/update_version.dart auto -t dev # set the first dev version
 git commit -am "$DEV_BUMP_COMMIT_MESSAGE"
 
 
-git checkout $CLEAN_BRANCH
+git checkout $RELEASE_BRANCH
 
 echo "------------------------"
 echo "RELEASE HELPER FINISHED"
 echo "The branches created are as follows:"
 echo
-echo "DEVTOOLS_CLEAN_BRANCH=\"$CLEAN_BRANCH\";"
+echo "DEVTOOLS_RELEASE_BRANCH=\"$RELEASE_BRANCH\";"
 echo "DEVTOOLS_NEXT_BRANCH=\"$NEXT_BRANCH\";"
 
-export DEVTOOLS_CLEAN_BRANCH="$CLEAN_BRANCH"
+export DEVTOOLS_RELEASE_BRANCH="$RELEASE_BRANCH"
 export DEVTOOLS_NEXT_BRANCH="$NEXT_BRANCH"

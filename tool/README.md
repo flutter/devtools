@@ -26,15 +26,15 @@ Make sure:
 - Run the `tool/release_helper.sh` script with `minor` or `major`.
    `./tool/release_helper.sh [minor|major]`
 - This creates 2 branches for you:
-    - Clean Branch
+    - Release Branch
     - Next Branch
-- You will need to prepare and submit both of these branches, when you are doing a full release.
-- **For your convenience, the `tool/release_helper.sh` script exports the followinging two variables to the terminal it is run in:**
-  - `$DEVTOOLS_CLEAN_BRANCH`
+- The following steps will guide you through how these branches will be prepared and merged.
+- **For your convenience, the `tool/release_helper.sh` script exports the following two variables to the terminal it is run in:**
+  - `$DEVTOOLS_RELEASE_BRANCH`
   - `$DEVTOOLS_NEXT_BRANCH`
 
 #### Verify the version changes
-> For both the $DEVTOOLS_CLEAN_BRANCH and the $DEVTOOLS_NEXT_BRANCH branches
+> For both the `$DEVTOOLS_RELEASE_BRANCH` and the `$DEVTOOLS_NEXT_BRANCH` branches
 
 Verify the version changes:
 - that release_helper.sh script updated the pubspecs under packages/
@@ -44,16 +44,16 @@ Verify the version changes:
 These packages always have their version numbers updated in lock, so we don't have to worry about versioning.
 
 #### Manually review the CHANGELOG.md
-> For both the $DEVTOOLS_CLEAN_BRANCH and the $DEVTOOLS_NEXT_BRANCH branches
+> For both the `$DEVTOOLS_RELEASE_BRANCH` and the `$DEVTOOLS_NEXT_BRANCH` branches
 
 * Verify
    * that the version for the CHANGELOG entry was correctly generated
    * that the entries don't have any syntax errors.
 
 ### Test the CLEAN_BRANCH 
-> You only need to do this on the $DEVTOOLS_CLEAN_BRANCH branch
+> You only need to do this on the `$DEVTOOLS_RELEASE_BRANCH` branch
 
-- Checkout the $DEVTOOLS_CLEAN_BRANCH,
+- Checkout the `$DEVTOOLS_RELEASE_BRANCH`,
 - Build the DevTools binary and run it from your local Dart SDK.
    - From the main devtools/ directory.
    ```shell
@@ -80,12 +80,13 @@ These packages always have their version numbers updated in lock, so we don't ha
       git checkout . && \
       git clean -f -d;
       ```
-#### Push the DEVTOOLS_CLEAN_BRANCH
+#### Push the `$DEVTOOLS_RELEASE_BRANCH`
 
-> Ensure you are still on the $DEVTOOLS_CLEAN_BRANCH
+
+> Ensure you are still on the `$DEVTOOLS_RELEASE_BRANCH`
 
 ```shell
-git push -u origin $DEVTOOLS_CLEAN_BRANCH
+git push -u origin $DEVTOOLS_RELEASE_BRANCH
 ```
 
 From the git GUI tool or from github.com directly:
@@ -112,11 +113,12 @@ See the release notes
 [README.md](https://github.com/flutter/devtools/blob/master/packages/devtools_app/lib/src/framework/release_notes/README.md)
 for details on where to add DevTools release notes to Flutter website and how to test them.
 
-1. The release notes for the clean version can be found in [NEXT_RELEASE_NOTES.md](./release_notes/NEXT_RELEASE_NOTES.md)
-2. Follow the release notes
+- Follow the release notes
 [README.md](https://github.com/flutter/devtools/blob/master/packages/devtools_app/lib/src/framework/release_notes/README.md)
-to add these DevTools release notes to Flutter website
-   - make sure to also follow the instructions to test them.
+to add release notes to Flutter website
+  - On the `$DEVTOOLS_RELEASE_BRANCH` copy the release notes from [NEXT_RELEASE_NOTES.md](./release_notes/NEXT_RELEASE_NOTES.md)
+    - These are the release notes you will submit through the flutter/website PR.
+  - make sure to also follow the instructions to test them.
 
 
 [1]: ../packages/devtools_app/lib/src/framework/release_notes/release-notes-next.md
@@ -192,4 +194,4 @@ git push -u origin $DEVTOOLS_NEXT_BRANCH
 
 From the git GUI tool or from github.com directly:
 1. Create a PR.
-3. Receive an LGTM, squash and commit.
+2. Receive an LGTM, squash and commit.
