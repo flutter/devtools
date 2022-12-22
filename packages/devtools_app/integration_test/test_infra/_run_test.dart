@@ -37,26 +37,30 @@ Future<void> runFlutterIntegrationTest(
 
   // Run the flutter integration test.
   final testRunner = TestRunner();
-  await testRunner.run(
-    testRunnerArgs.testTarget,
-    enableExperiments: testRunnerArgs.enableExperiments,
-    headless: testRunnerArgs.headless,
-    testAppArguments: {
-      'service_uri': testAppUri,
-    },
-  );
+  try {
+    await testRunner.run(
+      testRunnerArgs.testTarget,
+      enableExperiments: testRunnerArgs.enableExperiments,
+      headless: testRunnerArgs.headless,
+      testAppArguments: {
+        'service_uri': testAppUri,
+      },
+    );
+  } catch (_) {
+    rethrow;
+  } finally {
+    if (shouldCreateTestApp) {
+      _debugLog('killing the test app');
+      await testApp?.stop();
+    }
 
-  if (shouldCreateTestApp) {
-    _debugLog('killing the test app');
-    await testApp?.stop();
+    _debugLog('cancelling stream subscriptions');
+    await testRunner.cancelAllStreamSubscriptions();
+    await chromedriver.cancelAllStreamSubscriptions();
+
+    _debugLog('killing the chromedriver process');
+    chromedriver.kill();
   }
-
-  _debugLog('cancelling stream subscriptions');
-  await testRunner.cancelAllStreamSubscriptions();
-  await chromedriver.cancelAllStreamSubscriptions();
-
-  _debugLog('killing the chromedriver process');
-  chromedriver.kill();
 }
 
 class ChromeDriver with IOMixin {
@@ -103,7 +107,12 @@ class TestRunner with IOMixin {
         if (enableExperiments) '--dart-define=enable_experiments=true',
       ],
     );
-    listenToProcessOutput(process);
+    listenToProcessOutput(
+      process,
+      onError: (line) {
+        throw Exception(line);
+      },
+    );
 
     await process.exitCode;
     process.kill();
