@@ -692,7 +692,7 @@ class CpuProfileData {
     if (!processed) return <CpuStackFrame>[];
     return _callTreeRoots ??= [
       // Don't display the root node.
-      ..._cpuProfileRoot.children.map((e) => e.deepCopy())
+      ..._cpuProfileRoot.children.map((e) => e.deepCopy()),
     ];
   }
 
@@ -1045,7 +1045,7 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
           CpuProfileData.resolvedPackageUriKey: packageUri,
           CpuProfileData.sourceLineKey: sourceLine,
           if (parentId != null) CpuProfileData.parentIdKey: parentId,
-        }
+        },
       };
 
   @override

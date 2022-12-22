@@ -654,7 +654,7 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
       LogicalKeyboardKey.arrowDown,
       LogicalKeyboardKey.arrowUp,
       LogicalKeyboardKey.arrowLeft,
-      LogicalKeyboardKey.arrowRight
+      LogicalKeyboardKey.arrowRight,
     ].contains(event.logicalKey)) return KeyEventResult.ignored;
 
     // If there is no selected node, choose the first one.
@@ -1468,7 +1468,7 @@ class _TableRowState<T> extends State<TableRow<T>>
                   style: const TextStyle(
                     fontStyle: FontStyle.italic,
                   ),
-                )
+                ),
             ],
             style: contentTextStyle(column),
           ),

@@ -8,7 +8,7 @@ void launchUrlVSCode(String url) {
   window.parent?.postMessage(
     {
       'command': 'launchUrl',
-      'data': {'url': url}
+      'data': {'url': url},
     },
     '*',
   );

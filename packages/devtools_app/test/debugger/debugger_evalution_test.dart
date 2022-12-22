@@ -145,7 +145,7 @@ void main() {
               'staticField2',
               'namedConstructor',
               'factory1',
-              'staticMethod'
+              'staticMethod',
             ]),
           );
           expect(
@@ -340,7 +340,7 @@ void main() {
                 'modInverse',
                 'gcd',
                 'noSuchMethod',
-                'runtimeType'
+                'runtimeType',
               ],
             ),
           );

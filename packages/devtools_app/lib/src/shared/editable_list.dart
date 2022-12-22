@@ -254,7 +254,7 @@ class EditableListRow extends StatelessWidget {
               );
             },
           ),
-          const SizedBox(width: denseRowSpacing)
+          const SizedBox(width: denseRowSpacing),
         ],
       ),
     );

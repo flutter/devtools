@@ -365,7 +365,7 @@ class NetworkRequestsTable extends StatelessWidget {
           typeColumn,
           durationColumn,
           timestampColumn,
-          actionsColumn
+          actionsColumn,
         ],
         selectionNotifier: networkController.selectedRequest,
         defaultSortColumn: timestampColumn,
@@ -464,8 +464,8 @@ class ActionsColumn extends ColumnData<NetworkRequest>
               ),
             );
           },
-        )
-      ]
+        ),
+      ],
     ];
   }
 

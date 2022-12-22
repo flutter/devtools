@@ -66,7 +66,7 @@ class HttpDate {
       "Sep",
       "Oct",
       "Nov",
-      "Dec"
+      "Dec",
     ];
 
     DateTime d = date.toUtc();
@@ -113,7 +113,7 @@ class HttpDate {
       "Thursday",
       "Friday",
       "Saturday",
-      "Sunday"
+      "Sunday",
     ];
     const List months = const [
       "Jan",
@@ -127,7 +127,7 @@ class HttpDate {
       "Sep",
       "Oct",
       "Nov",
-      "Dec"
+      "Dec",
     ];
     const List wkdaysLowerCase = const [
       "mon",
@@ -136,7 +136,7 @@ class HttpDate {
       "thu",
       "fri",
       "sat",
-      "sun"
+      "sun",
     ];
     const List weekdaysLowerCase = const [
       "monday",
@@ -145,7 +145,7 @@ class HttpDate {
       "thursday",
       "friday",
       "saturday",
-      "sunday"
+      "sunday",
     ];
     const List monthsLowerCase = const [
       "jan",
@@ -159,7 +159,7 @@ class HttpDate {
       "sep",
       "oct",
       "nov",
-      "dec"
+      "dec",
     ];
 
     final int formatRfc1123 = 0;
@@ -284,7 +284,7 @@ class HttpDate {
       "sep",
       "oct",
       "nov",
-      "dec"
+      "dec",
     ];
 
     int position = 0;

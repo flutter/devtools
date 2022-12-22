@@ -189,7 +189,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
                   extensions: [
                     selectModeSupported
                         ? extensions.toggleSelectWidgetMode
-                        : extensions.toggleOnDeviceWidgetInspector
+                        : extensions.toggleOnDeviceWidgetInspector,
                   ],
                   minScreenWidthForTextBeforeScaling:
                       minScreenWidthForTextBeforeScaling,
@@ -265,7 +265,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
                     );
                   },
                 ),
-              )
+              ),
             ],
           ),
         );
@@ -429,7 +429,7 @@ class InspectorSummaryTreeControls extends StatelessWidget {
                   : [
                       constraints.maxWidth >= _searchBreakpoint
                           ? _buildSearchControls()
-                          : const Spacer()
+                          : const Spacer(),
                     ],
               ToolbarAction(
                 icon: Icons.refresh,

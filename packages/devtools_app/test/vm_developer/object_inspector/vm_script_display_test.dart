@@ -41,33 +41,36 @@ void main() {
     when(mockScriptObject.scriptRef).thenReturn(testScriptCopy);
   });
 
-  testWidgetsWithWindowSize('builds script display', windowSize,
-      (WidgetTester tester) async {
-    final controller = ObjectInspectorViewController();
-    await tester.pumpWidget(
-      wrap(
-        VmScriptDisplay(
-          controller: controller,
-          script: mockScriptObject,
+  testWidgetsWithWindowSize(
+    'builds script display',
+    windowSize,
+    (WidgetTester tester) async {
+      final controller = ObjectInspectorViewController();
+      await tester.pumpWidget(
+        wrap(
+          VmScriptDisplay(
+            controller: controller,
+            script: mockScriptObject,
+          ),
         ),
-      ),
-    );
+      );
 
-    expect(find.byType(VmObjectDisplayBasicLayout), findsOneWidget);
-    expect(find.byType(VMInfoCard), findsOneWidget);
-    expect(find.text('General Information'), findsOneWidget);
-    expect(find.text('1 KB'), findsOneWidget);
-    expect(find.text('Library:'), findsOneWidget);
-    expect(find.text('fooLib'), findsOneWidget);
-    expect(find.text('URI:'), findsOneWidget);
-    expect(find.text('fooScript.dart'), findsOneWidget);
-    expect(find.text('Load time:'), findsOneWidget);
-    expect(find.text('2022-08-10 06:30:00.000'), findsOneWidget);
+      expect(find.byType(VmObjectDisplayBasicLayout), findsOneWidget);
+      expect(find.byType(VMInfoCard), findsOneWidget);
+      expect(find.text('General Information'), findsOneWidget);
+      expect(find.text('1 KB'), findsOneWidget);
+      expect(find.text('Library:'), findsOneWidget);
+      expect(find.text('fooLib'), findsOneWidget);
+      expect(find.text('URI:'), findsOneWidget);
+      expect(find.text('fooScript.dart'), findsOneWidget);
+      expect(find.text('Load time:'), findsOneWidget);
+      expect(find.text('2022-08-10 06:30:00.000'), findsOneWidget);
 
-    expect(find.byType(RequestableSizeWidget), findsNWidgets(2));
+      expect(find.byType(RequestableSizeWidget), findsNWidgets(2));
 
-    expect(find.byType(RetainingPathWidget), findsOneWidget);
+      expect(find.byType(RetainingPathWidget), findsOneWidget);
 
-    expect(find.byType(InboundReferencesWidget), findsOneWidget);
-  });
+      expect(find.byType(InboundReferencesWidget), findsOneWidget);
+    },
+  );
 }

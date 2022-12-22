@@ -60,7 +60,7 @@ class CurlCommand {
         parts.addAll([
           if (multiline) _lineBreak,
           '--header',
-          _escapeString('$headerKey: $headerValue')
+          _escapeString('$headerKey: $headerValue'),
         ]);
       }
     }

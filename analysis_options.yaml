@@ -216,9 +216,7 @@ dart_code_metrics:
     # - prefer-moving-to-variable:
     #    allowed-duplicated-chains: 2
     # - prefer-static-class
-    # TODO(jacobr): enable this one as a follow up CL. This one has a lot
-    # of violations but generally the style is aligned with DevTools.
-    # - prefer-trailing-comma
+    - prefer-trailing-comma
     - tag-name
     - always-remove-listener
     # - avoid-border-all Micro-optimization to avoid a const constructor.

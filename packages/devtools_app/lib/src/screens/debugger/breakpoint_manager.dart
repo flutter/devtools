@@ -256,7 +256,7 @@ class BreakpointManager extends Disposer {
         _breakpoints.value = [
           for (var b in _breakpoints.value)
             if (b != event.breakpoint) b,
-          breakpoint
+          breakpoint,
         ];
 
         unawaited(
@@ -278,12 +278,12 @@ class BreakpointManager extends Disposer {
 
         _breakpoints.value = [
           for (var b in _breakpoints.value)
-            if (b != breakpoint) b
+            if (b != breakpoint) b,
         ];
 
         _breakpointsWithLocation.value = [
           for (var b in _breakpointsWithLocation.value)
-            if (b.breakpoint != breakpoint) b
+            if (b.breakpoint != breakpoint) b,
         ];
 
         break;

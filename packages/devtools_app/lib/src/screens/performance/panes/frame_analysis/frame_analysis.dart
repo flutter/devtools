@@ -130,7 +130,7 @@ class FlutterFrameAnalysisView extends StatelessWidget {
                   metricNames: const ['Rebuild Count'],
                   metrics: combineStats([rebuilds]),
                 ),
-              )
+              ),
           ],
         ],
       ),

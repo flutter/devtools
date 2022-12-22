@@ -153,7 +153,7 @@ class ServiceExtensionManager extends Disposer {
     _pendingServiceExtensions.clear();
     await Future.wait([
       for (String extension in extensionsToProcess)
-        _addServiceExtension(extension)
+        _addServiceExtension(extension),
     ]);
   }
 
@@ -189,12 +189,12 @@ class ServiceExtensionManager extends Disposer {
         }
         await Future.wait([
           for (String extension in mainIsolate.extensionRPCs!)
-            _maybeAddServiceExtension(extension)
+            _maybeAddServiceExtension(extension),
         ]);
       } else {
         await Future.wait([
           for (String extension in mainIsolate.extensionRPCs!)
-            _addServiceExtension(extension)
+            _addServiceExtension(extension),
         ]);
       }
     }

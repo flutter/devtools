@@ -179,7 +179,7 @@ class _PerfettoViewController extends DisposableController
         'buffer': buffer,
         'title': 'DevTools timeline trace',
         'keepApiOpen': true,
-      }
+      },
     });
   }
 
@@ -202,7 +202,7 @@ class _PerfettoViewController extends DisposableController
         'timeEnd': timeRange.end!.inMicroseconds / 1000000,
         // The time range should take up 80% of the visible window.
         'viewPercentage': 0.8,
-      }
+      },
     });
   }
 

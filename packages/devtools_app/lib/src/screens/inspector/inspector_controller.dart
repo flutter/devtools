@@ -327,7 +327,7 @@ class InspectorController extends DisposableController
 
     return Future.wait([
       _waitForPendingUpdateDone(),
-      detailsLocal._waitForPendingUpdateDone()
+      detailsLocal._waitForPendingUpdateDone(),
     ]);
   }
 

@@ -245,7 +245,7 @@ class BreakOnExceptionsControl extends StatelessWidget {
                 child: Text(
                   isInSmallMode ? mode.name : mode.description,
                 ),
-              )
+              ),
           ],
         );
       },

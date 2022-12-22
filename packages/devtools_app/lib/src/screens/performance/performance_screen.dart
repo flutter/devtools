@@ -104,7 +104,7 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
         offlineController.offlineDataJson[PerformanceScreen.id],
       )..addAll({
           PerformanceData.traceEventsKey:
-              offlineController.offlineDataJson[PerformanceData.traceEventsKey]
+              offlineController.offlineDataJson[PerformanceData.traceEventsKey],
         });
       final offlinePerformanceData = OfflinePerformanceData.parse(timelineJson);
       if (!offlinePerformanceData.isEmpty) {

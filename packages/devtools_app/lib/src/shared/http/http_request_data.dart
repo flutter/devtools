@@ -178,7 +178,7 @@ class DartIOHttpRequestData extends NetworkRequest {
     if (_instantEvents == null) {
       _instantEvents = [
         for (final event in _request.request?.events ?? [])
-          DartIOHttpInstantEvent._(event)
+          DartIOHttpInstantEvent._(event),
       ];
       _recalculateInstantEventTimes();
     }

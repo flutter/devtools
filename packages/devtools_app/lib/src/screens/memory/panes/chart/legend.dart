@@ -228,7 +228,7 @@ Map<String, Map<String, Object?>> eventLegendContent(bool isLight) => {
       ),
       eventsLegendName: traceRender(
         image: eventsLegend,
-      )
+      ),
     };
 
 Map<String, Map<String, Object?>> vmLegendContent(
@@ -313,6 +313,6 @@ Map<String, Map<String, Object?>> androidLegendContent(
     // Stack trace
     androidStackDisplay: traceRender(
       color: traces[AndroidTraceName.stack.index].characteristics.color,
-    )
+    ),
   };
 }

@@ -66,7 +66,7 @@ void main() {
           line: 1,
           column: 10,
         ),
-      )
+      ),
     ]),
   );
 
@@ -79,33 +79,36 @@ void main() {
     };
   }
 
-  testWidgetsWithWindowSize('debugger controls paused', windowSize,
-      (WidgetTester tester) async {
-    await tester.pumpWidget(
-      wrapWithControllers(
-        Builder(builder: screen.build),
-        debugger: debuggerController,
-      ),
-    );
+  testWidgetsWithWindowSize(
+    'debugger controls paused',
+    windowSize,
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        wrapWithControllers(
+          Builder(builder: screen.build),
+          debugger: debuggerController,
+        ),
+      );
 
-    expect(
-      find.byWidgetPredicate(createDebuggerButtonPredicate('Pause')),
-      findsOneWidget,
-    );
-    final pause = _getWidgetFromFinder(
-      find.byWidgetPredicate(createDebuggerButtonPredicate('Pause')),
-    ) as DebuggerButton;
-    expect(pause.onPressed, isNull);
+      expect(
+        find.byWidgetPredicate(createDebuggerButtonPredicate('Pause')),
+        findsOneWidget,
+      );
+      final pause = _getWidgetFromFinder(
+        find.byWidgetPredicate(createDebuggerButtonPredicate('Pause')),
+      ) as DebuggerButton;
+      expect(pause.onPressed, isNull);
 
-    expect(
-      find.byWidgetPredicate(createDebuggerButtonPredicate('Resume')),
-      findsOneWidget,
-    );
-    final resume = _getWidgetFromFinder(
-      find.byWidgetPredicate(createDebuggerButtonPredicate('Resume')),
-    ) as DebuggerButton;
-    expect(resume.onPressed, isNotNull);
-  });
+      expect(
+        find.byWidgetPredicate(createDebuggerButtonPredicate('Resume')),
+        findsOneWidget,
+      );
+      final resume = _getWidgetFromFinder(
+        find.byWidgetPredicate(createDebuggerButtonPredicate('Resume')),
+      ) as DebuggerButton;
+      expect(resume.onPressed, isNotNull);
+    },
+  );
 }
 
 Widget _getWidgetFromFinder(Finder finder) {

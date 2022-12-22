@@ -143,7 +143,7 @@ class EventSummary extends StatelessWidget {
           if (event.isAsyncEvent)
             ...event.children
                 .cast<AsyncTimelineEvent>()
-                .where((e) => e.isAsyncInstantEvent)
+                .where((e) => e.isAsyncInstantEvent),
         ],
         _eventArgs = Map.from(event.traceEvents.first.event.args!)
           ..addAll({for (var trace in event.traceEvents) ...trace.event.args!});

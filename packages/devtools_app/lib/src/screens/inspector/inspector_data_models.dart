@@ -76,7 +76,7 @@ List<double> computeRenderSizes({
           (s - smallestSize) *
                   (largestRenderSize - smallestRenderSize) /
                   (largestSize - smallestSize) +
-              smallestRenderSize
+              smallestRenderSize,
       ];
 
   var renderSizes = transformToRenderSize(largestRenderSize);

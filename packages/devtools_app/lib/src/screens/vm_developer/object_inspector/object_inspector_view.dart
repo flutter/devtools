@@ -86,7 +86,7 @@ class _ObjectInspectorViewState extends State<_ObjectInspectorView>
         ),
         ObjectViewport(
           controller: controller,
-        )
+        ),
       ],
     );
   }

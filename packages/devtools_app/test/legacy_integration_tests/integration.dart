@@ -273,7 +273,7 @@ class WebBuildFixture {
       'build_runner',
       'serve',
       'web',
-      '--delete-conflicting-outputs'
+      '--delete-conflicting-outputs',
     ];
     if (release) {
       cliArgs.add('--release');
@@ -338,7 +338,7 @@ class WebBuildFixture {
       'web',
       '--pwa-strategy=none',
       '--dart-define=FLUTTER_WEB_USE_SKIA=true',
-      '--no-tree-shake-icons'
+      '--no-tree-shake-icons',
     ]);
 
     final process = await _runFlutter(cliArgs, verbose: verbose);

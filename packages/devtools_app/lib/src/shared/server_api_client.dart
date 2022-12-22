@@ -64,7 +64,7 @@ class DevToolsServerConnection {
         '', // Leading '/'
         ...baseUriPathSegments,
         'api',
-        'sse'
+        'sse',
       ],
     );
     final client = SseClient(sseUri.toString());

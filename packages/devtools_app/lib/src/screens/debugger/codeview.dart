@@ -1593,9 +1593,9 @@ class GoToLineDialog extends StatelessWidget {
             ),
             keyboardType: TextInputType.number,
             inputFormatters: <TextInputFormatter>[
-              FilteringTextInputFormatter.digitsOnly
+              FilteringTextInputFormatter.digitsOnly,
             ],
-          )
+          ),
         ],
       ),
       actions: const [

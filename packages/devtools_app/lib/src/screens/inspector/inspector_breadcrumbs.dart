@@ -75,7 +75,7 @@ class InspectorBreadcrumbNavigator extends StatelessWidget {
             ...items.sublist(
               items.length - _maxNumberOfBreadcrumbs + 1,
               items.length,
-            )
+            ),
           ]
         : items;
 

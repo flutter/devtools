@@ -108,7 +108,7 @@ class BannerMessages extends StatelessWidget {
         ),
         Expanded(
           child: screen.build(context),
-        )
+        ),
       ],
     );
   }

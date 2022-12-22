@@ -743,7 +743,7 @@ extension AppSizeJsonFileExtension on DevToolsJsonFile {
     'macos',
     'windows',
     'linux',
-    'web'
+    'web',
   ];
 
   bool get isAnalyzeSizeFile {

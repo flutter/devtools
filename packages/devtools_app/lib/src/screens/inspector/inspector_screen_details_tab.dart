@@ -106,7 +106,7 @@ class _InspectorExpandCollapseButtonsState
                   InspectorScreenBodyState.minScreenWidthForTextBeforeScaling,
               outlined: false,
             ),
-          )
+          ),
         ],
       ),
     );

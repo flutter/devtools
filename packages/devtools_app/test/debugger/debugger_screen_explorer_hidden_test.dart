@@ -39,7 +39,7 @@ void main() {
   final codeViewController = debuggerController.codeViewController;
 
   final scripts = [
-    ScriptRef(uri: 'package:/test/script.dart', id: 'test-script')
+    ScriptRef(uri: 'package:/test/script.dart', id: 'test-script'),
   ];
 
   when(scriptManager.sortedScripts).thenReturn(ValueNotifier(scripts));
@@ -63,9 +63,12 @@ void main() {
     );
   }
 
-  testWidgetsWithWindowSize('File Explorer hidden', windowSize,
-      (WidgetTester tester) async {
-    await pumpDebuggerScreen(tester, debuggerController);
-    expect(find.text('File Explorer'), findsOneWidget);
-  });
+  testWidgetsWithWindowSize(
+    'File Explorer hidden',
+    windowSize,
+    (WidgetTester tester) async {
+      await pumpDebuggerScreen(tester, debuggerController);
+      expect(find.text('File Explorer'), findsOneWidget);
+    },
+  );
 }

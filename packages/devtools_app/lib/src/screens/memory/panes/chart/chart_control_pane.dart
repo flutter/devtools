@@ -154,7 +154,7 @@ class _ChartHelpLink extends StatelessWidget {
             gaScreenName: '',
             gaSelectedItemDescription:
                 gac.topicDocumentationLink(_documentationTopic),
-          )
+          ),
         ],
       ),
     );

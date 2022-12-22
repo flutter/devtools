@@ -177,7 +177,7 @@ class _FlexLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
                       ),
                     ),
                   ],
-                )
+                ),
             ];
           },
           items: [
@@ -215,7 +215,7 @@ class _FlexLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
                     ],
                   ),
                 ),
-              )
+              ),
           ],
           onChanged: (Object? newSelection) async {
             // newSelection is an object instead of type here because
@@ -504,7 +504,7 @@ class _VisualizeFlexChildrenState extends State<VisualizeFlexChildren> {
           final freeSpacesWidgets = [
             for (var renderProperties in [
               ...mainAxisSpaces,
-              ...crossAxisSpaces
+              ...crossAxisSpaces,
             ])
               FreeSpaceVisualizerWidget(renderProperties),
           ];
@@ -656,7 +656,7 @@ class FlexChildVisualizer extends StatelessWidget {
       items: <DropdownMenuItem<FlexFit>>[
         buildMenuItem(FlexFit.loose),
         if (propertiesLocal.description != 'Expanded')
-          buildMenuItem(FlexFit.tight)
+          buildMenuItem(FlexFit.tight),
       ],
     );
   }

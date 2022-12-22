@@ -663,7 +663,7 @@ class RecordingInstructions extends StatelessWidget {
           children: [
             const Text('Click the record button '),
             const Icon(Icons.fiber_manual_record),
-            Text(' to start recording $recordedObject.')
+            Text(' to start recording $recordedObject.'),
           ],
         ),
         stopOrPauseRow,
@@ -1143,7 +1143,7 @@ class ToggleButton extends StatelessWidget {
                   ),
                   label!,
                 ),
-              ]
+              ],
             ],
           ),
         ),
@@ -1894,7 +1894,7 @@ class MoreInfoLink extends StatelessWidget {
               Icons.launch,
               size: tooltipIconSize,
               color: theme.colorScheme.toggleButtonsTitle,
-            )
+            ),
           ],
         ),
       ),

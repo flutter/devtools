@@ -61,22 +61,23 @@ void main() {
     );
 
     testWidgets(
-        'does not perform a hot reload when the extension is not registered.',
-        (WidgetTester tester) async {
-      registerServiceExtension(
-        mockServiceManager,
-        hotReload,
-        serviceAvailable: false,
-      );
-      final button = HotReloadButton();
-      await tester.pumpWidget(wrap(Scaffold(body: Center(child: button))));
-      expect(find.byWidget(button), findsOneWidget);
-      await tester.pumpAndSettle();
-      expect(reloads, 0);
-      await tester.tap(find.byWidget(button), warnIfMissed: false);
-      await tester.pumpAndSettle();
-      expect(reloads, 0);
-    });
+      'does not perform a hot reload when the extension is not registered.',
+      (WidgetTester tester) async {
+        registerServiceExtension(
+          mockServiceManager,
+          hotReload,
+          serviceAvailable: false,
+        );
+        final button = HotReloadButton();
+        await tester.pumpWidget(wrap(Scaffold(body: Center(child: button))));
+        expect(find.byWidget(button), findsOneWidget);
+        await tester.pumpAndSettle();
+        expect(reloads, 0);
+        await tester.tap(find.byWidget(button), warnIfMissed: false);
+        await tester.pumpAndSettle();
+        expect(reloads, 0);
+      },
+    );
   });
 
   group('Hot Restart Button', () {
@@ -114,22 +115,23 @@ void main() {
     );
 
     testWidgets(
-        'does not perform a hot restart when the service is not available',
-        (WidgetTester tester) async {
-      registerServiceExtension(
-        mockServiceManager,
-        hotRestart,
-        serviceAvailable: false,
-      );
-      final button = HotRestartButton();
-      await tester.pumpWidget(wrap(Scaffold(body: Center(child: button))));
-      expect(find.byWidget(button), findsOneWidget);
-      await tester.pumpAndSettle();
-      expect(restarts, 0);
-      await tester.tap(find.byWidget(button), warnIfMissed: false);
-      await tester.pumpAndSettle();
-      expect(restarts, 0);
-    });
+      'does not perform a hot restart when the service is not available',
+      (WidgetTester tester) async {
+        registerServiceExtension(
+          mockServiceManager,
+          hotRestart,
+          serviceAvailable: false,
+        );
+        final button = HotRestartButton();
+        await tester.pumpWidget(wrap(Scaffold(body: Center(child: button))));
+        expect(find.byWidget(button), findsOneWidget);
+        await tester.pumpAndSettle();
+        expect(restarts, 0);
+        await tester.tap(find.byWidget(button), warnIfMissed: false);
+        await tester.pumpAndSettle();
+        expect(restarts, 0);
+      },
+    );
   });
 
   group('Structured Errors toggle', () {
@@ -171,31 +173,35 @@ void main() {
       expect(mostRecentState.value, false);
     });
 
-    testWidgets('updates based on the service extension',
-        (WidgetTester tester) async {
-      await (mockServiceManager.serviceExtensionManager
-              as FakeServiceExtensionManager)
-          .fakeAddServiceExtension(structuredErrors.extension);
-      final button = StructuredErrorsToggle();
-      await tester.pumpWidget(wrap(Scaffold(body: Center(child: button))));
-      expect(find.byWidget(button), findsOneWidget);
+    testWidgets(
+      'updates based on the service extension',
+      (WidgetTester tester) async {
+        await (mockServiceManager.serviceExtensionManager
+                as FakeServiceExtensionManager)
+            .fakeAddServiceExtension(structuredErrors.extension);
+        final button = StructuredErrorsToggle();
+        await tester.pumpWidget(wrap(Scaffold(body: Center(child: button))));
+        expect(find.byWidget(button), findsOneWidget);
 
-      await mockServiceManager.serviceExtensionManager.setServiceExtensionState(
-        structuredErrors.extension,
-        enabled: true,
-        value: true,
-      );
-      await tester.pumpAndSettle();
-      expect(toggle.value, true, reason: 'The extension is enabled.');
+        await mockServiceManager.serviceExtensionManager
+            .setServiceExtensionState(
+          structuredErrors.extension,
+          enabled: true,
+          value: true,
+        );
+        await tester.pumpAndSettle();
+        expect(toggle.value, true, reason: 'The extension is enabled.');
 
-      await mockServiceManager.serviceExtensionManager.setServiceExtensionState(
-        structuredErrors.extension,
-        enabled: false,
-        value: false,
-      );
-      await tester.pumpAndSettle();
-      expect(toggle.value, false, reason: 'The extension is disabled.');
-    });
+        await mockServiceManager.serviceExtensionManager
+            .setServiceExtensionState(
+          structuredErrors.extension,
+          enabled: false,
+          value: false,
+        );
+        await tester.pumpAndSettle();
+        expect(toggle.value, false, reason: 'The extension is disabled.');
+      },
+    );
   });
 }
 
