@@ -37,7 +37,7 @@ jobs:
         run: |
           PULLS_RESPONSE=$(gh api /repos/$GITHUB_REPOSITORY/pulls/$PULL_NUMBER)
           DESCRIPTION_BODY=$(echo $PULLS_RESPONSE | jq '.body')
-          AUTHOR_ID=$(echo $PULLS_RESPONSE | jq '.user.login')
+          AUTHOR_ID=$(echo $PULLS_RESPONSE | jq -r '.user.login')
 
           sudo apt-get install pandoc
 
