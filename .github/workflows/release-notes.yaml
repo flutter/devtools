@@ -52,7 +52,7 @@ jobs:
             HAS_RELEASE_NOTE_EXCEPTION_STRING=false
           fi
 
-          if [[ "$AUTHOR_ID" == "dependabot[bot]" ]] ; then
+          if [[ "$AUTHOR_ID" == "CoderDake" ]] ; then
             IS_DEPENDABOT_PR=true
           else
             IS_DEPENDABOT_PR=false
