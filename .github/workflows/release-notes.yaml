@@ -40,7 +40,7 @@ jobs:
 
           sudo apt-get install pandoc
 
-          BODY_WITHOUT_COMMENTS=$(echo $DESCRIPTION_BODY | pandoc --strip-comments -f markdown -t gfm)
+          BODY_WITHOUT_COMMENTS=$(echo $DESCRIPTION_BODY | pandoc --strip-comments -f markdown -t html)
           echo $DESCRIPTION_BODY
           echo $BODY_WITHOUT_COMMENTS
           if $(echo $BODY_WITHOUT_COMMENTS | grep -Eq "RELEASE_NOTE_EXCEPTION="); then
