@@ -36,7 +36,7 @@ void main() {
       );
       testCode.json = {};
       final offset = pow(2, 20) as int;
-      testCode.disassembly = Disassembly.parse(<dynamic>[
+      testCode.disassembly = Disassembly.parse(<Object?>[
         for (int i = 0; i < 1000; ++i) ...[
           (i * 4 + offset).toRadixString(16),
           'unknown',

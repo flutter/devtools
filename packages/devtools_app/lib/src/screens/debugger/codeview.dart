@@ -112,9 +112,18 @@ class _CodeViewState extends State<CodeView>
     super.initState();
 
     verticalController = LinkedScrollControllerGroup();
+    // TODO(jacobr): this lint does not understand that some methods have side
+    // effects.
+    // ignore: prefer-moving-to-variable
     gutterController = verticalController.addAndGet();
+    // TODO(jacobr): this lint does not understand that some methods have side
+    // effects.
+    // ignore: prefer-moving-to-variable
     textController = verticalController.addAndGet();
     if (widget.codeViewController.showProfileInformation.value) {
+      // TODO(jacobr): this lint does not understand that some methods have side
+      // effects.
+      // ignore: prefer-moving-to-variable
       profileController = verticalController.addAndGet();
     }
     horizontalController = ScrollController();
@@ -139,15 +148,17 @@ class _CodeViewState extends State<CodeView>
     // gutter and code view when the widget is toggled on/off. If we don't do
     // this, the profile information gutter will always be at position 0 when
     // first enabled until the user scrolls.
-    addAutoDisposeListener(widget.codeViewController.showProfileInformation,
-        () {
-      if (widget.codeViewController.showProfileInformation.value) {
-        profileController = verticalController.addAndGet();
-      } else {
-        profileController!.dispose();
-        profileController = null;
-      }
-    });
+    addAutoDisposeListener(
+      widget.codeViewController.showProfileInformation,
+      () {
+        if (widget.codeViewController.showProfileInformation.value) {
+          profileController = verticalController.addAndGet();
+        } else {
+          profileController!.dispose();
+          profileController = null;
+        }
+      },
+    );
   }
 
   @override
@@ -265,7 +276,7 @@ class _CodeViewState extends State<CodeView>
         return Stack(
           children: [
             scriptRef == null
-                ? buildEmptyState(context)
+                ? CodeViewEmptyState(widget: widget, context: context)
                 : buildCodeArea(context),
             if (showFileOpener)
               Positioned(
@@ -492,22 +503,6 @@ class _CodeViewState extends State<CodeView>
     );
   }
 
-  Widget buildEmptyState(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Center(
-      child: ElevatedButton(
-        autofocus: true,
-        onPressed: () =>
-            widget.codeViewController.toggleFileOpenerVisibility(true),
-        child: Text(
-          'Open a file ($openFileKeySetDescription)',
-          style: theme.textTheme.titleMedium,
-        ),
-      ),
-    );
-  }
-
   List<PopupMenuEntry<ScriptRef>> _buildScriptMenuFromHistory(
     BuildContext context,
   ) {
@@ -537,6 +532,34 @@ class _CodeViewState extends State<CodeView>
         ),
       );
     }).toList();
+  }
+}
+
+class CodeViewEmptyState extends StatelessWidget {
+  const CodeViewEmptyState({
+    super.key,
+    required this.widget,
+    required this.context,
+  });
+
+  final CodeView widget;
+  final BuildContext context;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Center(
+      child: ElevatedButton(
+        autofocus: true,
+        onPressed: () =>
+            widget.codeViewController.toggleFileOpenerVisibility(true),
+        child: Text(
+          'Open a file ($openFileKeySetDescription)',
+          style: theme.textTheme.titleMedium,
+        ),
+      ),
+    );
   }
 }
 
@@ -1116,6 +1139,9 @@ class _LineItemState extends State<LineItem>
     with ProvidedControllerMixin<DebuggerController, LineItem> {
   Future<HoverCardData?> _generateHoverCardData({
     required PointerEvent event,
+    // TODO(jacobr): this needs to be ignored as this method is passed as a
+    // callback.
+    // ignore: avoid-unused-parameters
     required bool Function() isHoverStale,
   }) async {
     if (!controller.isPaused.value) return null;
@@ -1196,7 +1222,7 @@ class _LineItemState extends State<LineItem>
               // to allow us to render this as a proper overlay as similar
               // functionality exists to render the selection handles properly.
               Opacity(
-                opacity: .5,
+                opacity: 0.5,
                 child: RichText(
                   text: truncateTextSpan(widget.lineContents, column - 1),
                 ),
@@ -1352,7 +1378,7 @@ class _LineItemState extends State<LineItem>
   ) {
     final searchMatches = widget.searchMatches;
     if (searchMatches == null || searchMatches.isEmpty) return startingContents;
-    final searchMatchesToFind = List<SourceToken>.from(searchMatches)
+    final searchMatchesToFind = List<SourceToken>.of(searchMatches)
       ..remove(widget.activeSearchMatch);
 
     var contentsWithMatch = startingContents;
@@ -1472,10 +1498,12 @@ final copyPackagePathOption = ScriptPopupMenuOption(
 final copyFilePathOption = ScriptPopupMenuOption(
   label: 'Copy file path',
   icon: Icons.content_copy,
-  onSelected: (_, controller) async {
-    return Clipboard.setData(
-      ClipboardData(text: await fetchScriptLocationFullFilePath(controller)),
-    );
+  onSelected: (_, controller) {
+    unawaited(() async {
+      await Clipboard.setData(
+        ClipboardData(text: await fetchScriptLocationFullFilePath(controller)),
+      );
+    }());
   },
 );
 
@@ -1520,7 +1548,7 @@ final goToLineOption = ScriptPopupMenuOption(
   onSelected: showGoToLineDialog,
 );
 
-void showFileOpener(BuildContext context, CodeViewController controller) {
+void showFileOpener(BuildContext _, CodeViewController controller) {
   controller.toggleFileOpenerVisibility(true);
 }
 

@@ -416,7 +416,7 @@ class _SecondaryControls extends StatelessWidget {
                     gac.cpuProfiler,
                     gac.export,
                   );
-                  _exportPerformance(context);
+                  _exportPerformance();
                 }
               : null,
           minScreenWidthForTextBeforeScaling:
@@ -426,7 +426,7 @@ class _SecondaryControls extends StatelessWidget {
     );
   }
 
-  void _exportPerformance(BuildContext context) {
+  void _exportPerformance() {
     controller.exportData();
     // TODO(kenz): investigate if we need to do any error handling here. Is the
     // download always successful?

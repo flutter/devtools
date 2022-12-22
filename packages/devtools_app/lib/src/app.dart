@@ -112,21 +112,21 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
     });
 
     _isDarkThemeEnabled = preferences.darkModeTheme.value;
-    preferences.darkModeTheme.addListener(() {
+    addAutoDisposeListener(preferences.darkModeTheme, () {
       setState(() {
         _isDarkThemeEnabled = preferences.darkModeTheme.value;
       });
     });
 
     _vmDeveloperModeEnabled = preferences.vmDeveloperModeEnabled.value;
-    preferences.vmDeveloperModeEnabled.addListener(() {
+    addAutoDisposeListener(preferences.vmDeveloperModeEnabled, () {
       setState(() {
         _vmDeveloperModeEnabled = preferences.vmDeveloperModeEnabled.value;
       });
     });
 
     _denseModeEnabled = preferences.denseModeEnabled.value;
-    preferences.denseModeEnabled.addListener(() {
+    addAutoDisposeListener(preferences.denseModeEnabled, () {
       setState(() {
         _denseModeEnabled = preferences.denseModeEnabled.value;
       });
@@ -191,10 +191,10 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
   }
 
   Widget _buildTabbedPage(
-    BuildContext context,
+    BuildContext _,
     String? page,
     Map<String, String?> params,
-    DevToolsNavigationState? state,
+    DevToolsNavigationState? __,
   ) {
     final vmServiceUri = params['uri'];
 
@@ -234,7 +234,8 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
                 .where((p) => !hide.contains(p.screenId))
                 .toList();
             if (screens.isEmpty) return child ?? const SizedBox.shrink();
-            return _providedControllers(
+            return MultiProvider(
+              providers: _providedControllers(),
               child: DevToolsScaffold(
                 embed: embed,
                 ideTheme: ideTheme,
@@ -277,8 +278,8 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
         return DevToolsScaffold.withChild(
           key: UniqueKey(),
           ideTheme: ideTheme,
-          child: _providedControllers(
-            offline: true,
+          child: MultiProvider(
+            providers: _providedControllers(offline: true),
             child: SnapshotScreenBody(snapshotArgs, _screens),
           ),
         );
@@ -292,7 +293,8 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
             ReportFeedbackButton(),
             OpenAboutAction(),
           ],
-          child: _providedControllers(
+          child: MultiProvider(
+            providers: _providedControllers(),
             child: const AppSizeBody(),
           ),
         );
@@ -308,18 +310,13 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
 
   List<Screen> _visibleScreens() => _screens.where(shouldShowScreen).toList();
 
-  Widget _providedControllers({required Widget child, bool offline = false}) {
-    final _providers = widget.screens
+  List<Provider> _providedControllers({bool offline = false}) {
+    return widget.screens
         .where(
           (s) => s.providesController && (offline ? s.supportsOffline : true),
         )
         .map((s) => s.controllerProvider(routerDelegate))
         .toList();
-
-    return MultiProvider(
-      providers: _providers,
-      child: child,
-    );
   }
 
   @override
@@ -456,7 +453,7 @@ class OpenSettingsAction extends StatelessWidget {
     return DevToolsTooltip(
       message: 'Settings',
       child: InkWell(
-        onTap: () async {
+        onTap: () {
           unawaited(
             showDialog(
               context: context,
@@ -505,7 +502,8 @@ class SettingsDialog extends StatelessWidget {
             CheckboxSetting(
               label: const Text('Enable analytics'),
               listenable: analyticsController.analyticsEnabled,
-              toggle: analyticsController.toggleAnalyticsEnabled,
+              toggle: (enable) =>
+                  unawaited(analyticsController.toggleAnalyticsEnabled(enable)),
               gaItem: gac.analytics,
             ),
           CheckboxSetting(
@@ -537,7 +535,7 @@ class CheckboxSetting extends StatelessWidget {
 
   final ValueListenable<bool> listenable;
 
-  final Function(bool) toggle;
+  final void Function(bool) toggle;
 
   final String gaItem;
 

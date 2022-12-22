@@ -5,11 +5,15 @@
 import 'dart:developer' as developer;
 import 'dart:math' as math;
 
-// ignore: unused_import
+// These lints get in the way of testing autocomplete.
+// ignore_for_file: unused_import, unused_local_variable, unused_element, prefer_final_locals
+
 import 'autocomplete_helper_library.dart';
 
 export 'other_classes.dart';
 
+// Unused parameters are needed to test autocomplete.
+// ignore_for_file: avoid-unused-parameters
 class FooClass {
   FooClass();
   FooClass.namedConstructor();
@@ -28,7 +32,6 @@ class FooClass {
   }
 }
 
-// ignore: unused_element
 class _PrivateClass {}
 
 class AnotherClass {
@@ -43,13 +46,9 @@ class AnotherClass {
   void someInstanceMethod() {}
 
   void pauseWithScopedVariablesMethod() {
-    // ignore: unused_local_variable, prefer_final_locals
     var foo = FooClass();
-    // ignore: unused_local_variable, prefer_final_locals
     var foobar = 2;
-    // ignore: unused_local_variable, prefer_final_locals
     var baz = 3;
-    // ignore: unused_local_variable, prefer_final_locals
     var bar = 4;
     developer.debugger();
   }
@@ -68,7 +67,5 @@ set someTopLevelSetter(v) {}
 
 void someTopLevelMember() {}
 
-// ignore: unused_element
 const _privateField1 = 1;
-// ignore: unused_element
 const _privateField2 = 2;

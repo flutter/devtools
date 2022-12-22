@@ -140,18 +140,16 @@ class DevToolsRouterDelegate extends RouterDelegate<DevToolsRouteConfiguration>
     return Navigator(
       key: navigatorKey,
       pages: [_getPage(context, page, args, state)],
-      onPopPage: _handleOnPopPage,
+      onPopPage: (_, __) {
+        if (routes.length <= 1) {
+          return false;
+        }
+
+        routes.removeLast();
+        notifyListeners();
+        return true;
+      },
     );
-  }
-
-  bool _handleOnPopPage(Route<dynamic> route, dynamic result) {
-    if (routes.length <= 1) {
-      return false;
-    }
-
-    routes.removeLast();
-    notifyListeners();
-    return true;
   }
 
   /// Navigates to a new page, optionally updating arguments and state.

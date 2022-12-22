@@ -294,7 +294,7 @@ class ExpressionEvalFieldState extends State<ExpressionEvalField>
 
   void _handleExpressionEval() async {
     final expressionText = searchTextFieldController.value.text.trim();
-    updateSearchField(_autoCompleteController, newValue: '', caretPosition: 0);
+    updateSearchField(newValue: '', caretPosition: 0);
     clearSearchField(_autoCompleteController, force: true);
 
     if (expressionText.isEmpty) return;
@@ -342,7 +342,6 @@ class ExpressionEvalFieldState extends State<ExpressionEvalField>
   void _emitToConsole(String text) {
     serviceManager.consoleService.appendStdio(
       '  ${text.replaceAll('\n', '\n  ')}\n',
-      forceScrollIntoView: true,
     );
   }
 

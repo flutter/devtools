@@ -32,7 +32,7 @@ class _AutoDisposedWidgetState extends State<AutoDisposedWidget>
     autoDisposeStreamSubscription(widget.stream.listen(_onData));
   }
 
-  void _onData(dynamic data) {
+  void _onData(Object? _) {
     eventCount++;
   }
 

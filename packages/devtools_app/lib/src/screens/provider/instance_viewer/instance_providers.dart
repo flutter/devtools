@@ -370,7 +370,6 @@ final AutoDisposeFutureProviderFamily<InstanceDetails, InstancePath>
         ref,
         eval,
         instance,
-        classInstance,
         isAlive: isAlive,
         appName: appName,
       );
@@ -397,8 +396,7 @@ String? tryParsePackageName(String uri) {
 Future<List<ObjectField>> _parseFields(
   AutoDisposeRef ref,
   EvalOnDartLibrary eval,
-  Instance instance,
-  Class classInstance, {
+  Instance instance, {
   required Disposable isAlive,
   required String? appName,
 }) async {

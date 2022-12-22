@@ -177,7 +177,7 @@ abstract class _TestApp with IOMixin {
         .timeout(_quitTimeout, onTimeout: _killForcefully);
   }
 
-  Future<int> _killForcefully() async {
+  Future<int> _killForcefully() {
     _debugPrint('Sending SIGKILL to $runProcessId..');
     Process.killPid(runProcessId, ProcessSignal.sigkill);
     return runProcess!.exitCode;
@@ -188,7 +188,7 @@ abstract class _TestApp with IOMixin {
     int? id,
     Duration? timeout,
     bool ignoreAppStopEvent = false,
-  }) async {
+  }) {
     final response = Completer<Map<String, Object?>>();
     late StreamSubscription<String> sub;
     sub = stdoutController.stream.listen(

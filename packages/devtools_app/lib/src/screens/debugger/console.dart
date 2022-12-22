@@ -7,8 +7,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../shared/common_widgets.dart';
-import '../../shared/console.dart';
-import '../../shared/console_service.dart';
+import '../../shared/console/console.dart';
+import '../../shared/console/console_service.dart';
 import '../../shared/globals.dart';
 import '../../shared/theme.dart';
 import 'debugger_controller.dart';

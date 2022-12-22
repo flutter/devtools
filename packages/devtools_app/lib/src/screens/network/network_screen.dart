@@ -384,7 +384,7 @@ class UriColumn extends ColumnData<NetworkRequest>
         );
 
   @override
-  dynamic getValue(NetworkRequest dataObject) {
+  String getValue(NetworkRequest dataObject) {
     return dataObject.uri;
   }
 
@@ -413,7 +413,7 @@ class MethodColumn extends ColumnData<NetworkRequest> {
   MethodColumn() : super('Method', fixedWidthPx: scaleByFontFactor(70));
 
   @override
-  dynamic getValue(NetworkRequest dataObject) {
+  String getValue(NetworkRequest dataObject) {
     return dataObject.method;
   }
 }
@@ -436,11 +436,11 @@ class ActionsColumn extends ColumnData<NetworkRequest>
   bool get includeHeader => false;
 
   @override
-  dynamic getValue(NetworkRequest dataObject) {
+  String getValue(NetworkRequest dataObject) {
     return '';
   }
 
-  List<PopupMenuItem> _buildOptions(BuildContext context, NetworkRequest data) {
+  List<PopupMenuItem> _buildOptions(NetworkRequest data) {
     return [
       if (data is DartIOHttpRequestData) ...[
         PopupMenuItem(
@@ -450,7 +450,6 @@ class ActionsColumn extends ColumnData<NetworkRequest>
               copyToClipboard(
                 data.uri,
                 'Copied the URL to the clipboard',
-                context,
               ),
             );
           },
@@ -462,7 +461,6 @@ class ActionsColumn extends ColumnData<NetworkRequest>
               copyToClipboard(
                 CurlCommand.from(data).toString(),
                 'Copied the cURL command to the clipboard',
-                context,
               ),
             );
           },
@@ -478,7 +476,7 @@ class ActionsColumn extends ColumnData<NetworkRequest>
     bool isRowSelected = false,
     VoidCallback? onPressed,
   }) {
-    final options = _buildOptions(context, data);
+    final options = _buildOptions(data);
 
     // Only show the actions button when there are options and the row is
     // currently selected.
@@ -504,7 +502,7 @@ class StatusColumn extends ColumnData<NetworkRequest>
         );
 
   @override
-  dynamic getValue(NetworkRequest dataObject) {
+  String? getValue(NetworkRequest dataObject) {
     return dataObject.status;
   }
 
@@ -539,7 +537,7 @@ class TypeColumn extends ColumnData<NetworkRequest> {
         );
 
   @override
-  dynamic getValue(NetworkRequest dataObject) {
+  String getValue(NetworkRequest dataObject) {
     return dataObject.type;
   }
 
@@ -558,7 +556,7 @@ class DurationColumn extends ColumnData<NetworkRequest> {
         );
 
   @override
-  dynamic getValue(NetworkRequest dataObject) {
+  int? getValue(NetworkRequest dataObject) {
     return dataObject.duration?.inMilliseconds;
   }
 
@@ -583,7 +581,7 @@ class TimestampColumn extends ColumnData<NetworkRequest> {
         );
 
   @override
-  dynamic getValue(NetworkRequest dataObject) {
+  DateTime? getValue(NetworkRequest dataObject) {
     return dataObject.startTimestamp;
   }
 

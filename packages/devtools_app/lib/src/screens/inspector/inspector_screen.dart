@@ -352,7 +352,7 @@ class FlutterInspectorSettingsDialog extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             ...dialogSubHeader(
-              Theme.of(context),
+              theme,
               'General',
             ),
             CheckboxSetting(
@@ -364,7 +364,7 @@ class FlutterInspectorSettingsDialog extends StatelessWidget {
               gaItem: gac.inspectorHoverEvalMode,
             ),
             const SizedBox(height: denseSpacing),
-            ...dialogSubHeader(Theme.of(context), 'Package Directories'),
+            ...dialogSubHeader(theme, 'Package Directories'),
             Text(
               'Widgets in these directories will show up in your summary tree.',
               style: theme.subtleTextStyle,

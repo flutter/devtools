@@ -90,7 +90,6 @@ class _ProgramExplorerRow extends StatelessWidget {
       final func = node.object as Func;
       final isInstanceMethod = func.owner is ClassRef;
       final subtext = _buildFunctionTypeText(
-        func.name,
         func.signature!,
         isInstanceMethod: isInstanceMethod,
       );
@@ -136,7 +135,6 @@ class _ProgramExplorerRow extends StatelessWidget {
   ///   - Baz(String, [int]) -> void
   ///   - Faz(String, {String? bar, required int baz}) -> int
   String _buildFunctionTypeText(
-    String? functionName,
     InstanceRef signature, {
     bool isInstanceMethod = false,
   }) {
@@ -174,7 +172,7 @@ class _ProgramExplorerRow extends StatelessWidget {
       if (paramType != null) {
         final paramTypeName = param.parameterType?.name;
         if (paramTypeName == null) {
-          buffer.write(_buildFunctionTypeText('Function', paramType));
+          buffer.write(_buildFunctionTypeText(paramType));
         } else {
           buffer.write(paramTypeName);
         }
@@ -201,7 +199,7 @@ class _ProgramExplorerRow extends StatelessWidget {
     if (returnType != null) {
       final returnTypeName = signature.returnType?.name;
       if (returnTypeName == null) {
-        buffer.write(_buildFunctionTypeText('Function', returnType));
+        buffer.write(_buildFunctionTypeText(returnType));
       } else {
         buffer.write(returnTypeName);
       }

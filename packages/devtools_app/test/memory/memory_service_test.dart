@@ -32,7 +32,7 @@ void main() async {
 
     env.afterNewSetup = () async {
       memoryController = MemoryController();
-      await memoryController.startTimeline();
+      memoryController.startTimeline();
     };
 
     group('MemoryController', () {

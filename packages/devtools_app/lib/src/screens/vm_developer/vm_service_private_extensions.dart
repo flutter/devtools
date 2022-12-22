@@ -431,8 +431,8 @@ class ProfileCode {
 
   List? ticks;
 
-  Map<String, dynamic> toJson() {
-    final json = <String, dynamic>{};
+  Map<String, Object?> toJson() {
+    final json = <String, Object?>{};
     json.addAll({
       'kind': kind ?? '',
       'inclusiveTicks': inclusiveTicks ?? -1,

@@ -115,40 +115,7 @@ class _CallGraphViewState extends State<CallGraphView> {
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        return Stack(
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Flexible(
-                  child: _buildFromTable(),
-                ),
-                Container(
-                  height: constraints.maxHeight,
-                  width: densePadding,
-                  color: Theme.of(context).titleSolidBackgroundColor,
-                ),
-                Flexible(
-                  child: _buildToTable(),
-                ),
-              ],
-            ),
-            Positioned(
-              top: 0,
-              width: constraints.maxWidth,
-              child: _buildMainNode(),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  Widget _buildFromTable() {
-    return FlatTable<CallGraphNode>(
+    final fromTable = FlatTable<CallGraphNode>(
       key: CallGraphView.fromTableKey,
       keyFactory: (CallGraphNode node) => ValueKey<CallGraphNode>(node),
       data: selectedNode.pred,
@@ -158,10 +125,8 @@ class _CallGraphViewState extends State<CallGraphView> {
       defaultSortColumn: _fromColumn,
       defaultSortDirection: SortDirection.descending,
     );
-  }
 
-  Widget _buildToTable() {
-    return FlatTable<CallGraphNode>(
+    final toTable = FlatTable<CallGraphNode>(
       key: CallGraphView.toTableKey,
       keyFactory: (CallGraphNode node) => ValueKey<CallGraphNode>(node),
       data: selectedNode.succ,
@@ -171,10 +136,8 @@ class _CallGraphViewState extends State<CallGraphView> {
       defaultSortColumn: _toColumn,
       defaultSortDirection: SortDirection.descending,
     );
-  }
 
-  Widget _buildMainNode() {
-    return Row(
+    final mainNode = Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         const Padding(
@@ -196,6 +159,37 @@ class _CallGraphViewState extends State<CallGraphView> {
           child: Icon(Icons.arrow_forward),
         ),
       ],
+    );
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return Stack(
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Flexible(
+                  child: fromTable,
+                ),
+                Container(
+                  height: constraints.maxHeight,
+                  width: densePadding,
+                  color: Theme.of(context).titleSolidBackgroundColor,
+                ),
+                Flexible(
+                  child: toTable,
+                ),
+              ],
+            ),
+            Positioned(
+              top: 0,
+              width: constraints.maxWidth,
+              child: mainNode,
+            ),
+          ],
+        );
+      },
     );
   }
 

@@ -53,9 +53,7 @@ class _PerfettoState extends State<Perfetto> with AutoDisposeMixin {
   }
 
   void _loadActiveTrace() {
-    unawaited(
-      _viewController._loadTrace(_perfettoController.activeTraceEvents.value),
-    );
+    _viewController._loadTrace(_perfettoController.activeTraceEvents.value);
   }
 
   void _scrollToActiveTimeRange() {
@@ -168,7 +166,7 @@ class _PerfettoViewController extends DisposableController
     }
   }
 
-  Future<void> _loadTrace(List<TraceEventWrapper> devToolsTraceEvents) async {
+  void _loadTrace(List<TraceEventWrapper> devToolsTraceEvents) {
     final encodedJson = jsonEncode({
       'traceEvents': devToolsTraceEvents
           .map((eventWrapper) => eventWrapper.event.json)
@@ -221,7 +219,7 @@ class _PerfettoViewController extends DisposableController
     );
   }
 
-  void _postMessage(dynamic message) async {
+  void _postMessage(Object message) async {
     await _perfettoIFrameReady.future;
     assert(
       perfettoController.perfettoIFrame.contentWindow != null,
@@ -236,10 +234,10 @@ class _PerfettoViewController extends DisposableController
 
   void _postMessageWithId(
     String id, {
-    Map<String, dynamic> args = const {},
+    Map<String, Object> args = const {},
     bool perfettoIgnore = false,
   }) {
-    final message = <String, dynamic>{
+    final message = <String, Object>{
       'msgId': id,
       if (perfettoIgnore) 'perfettoIgnore': true,
     }..addAll(args);

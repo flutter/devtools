@@ -19,8 +19,9 @@ import '../shared/primitives/utils.dart';
 import '../shared/scripts/script_manager.dart';
 import '../shared/survey.dart';
 
-typedef ErrorReporter = void Function(String title, dynamic error);
+typedef ErrorReporter = void Function(String title, Object error);
 
+// TODO(jacobr): refactor this class to not use static members.
 // ignore: avoid_classes_with_only_static_members
 class FrameworkCore {
   static void initGlobals() {

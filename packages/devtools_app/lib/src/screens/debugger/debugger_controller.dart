@@ -301,7 +301,7 @@ class DebuggerController extends DisposableController
   /// stack frame, or the top frame if there is no current selection.
   ///
   /// This will fail if the application is not currently paused.
-  Future<Response> evalAtCurrentFrame(String expression) async {
+  Future<Response> evalAtCurrentFrame(String expression) {
     if (!isPaused.value) {
       return Future.error(
         RPCError.withDetails(
@@ -348,7 +348,7 @@ class DebuggerController extends DisposableController
   Future<String?> retrieveFullStringValue(
     InstanceRef stringRef, {
     String onUnavailable(String? truncatedValue)?,
-  }) async {
+  }) {
     return _service.retrieveFullStringValue(
       _isolateRefId,
       stringRef,
@@ -431,8 +431,14 @@ class DebuggerController extends DisposableController
     final currentScriptRefs =
         await scriptManager.retrieveAndSortScripts(isolateRef!);
     final removedScripts =
+        // There seems to be a bug in how this lint is working with type
+        // inference.
+        // ignore: avoid-collection-methods-with-unrelated-types
         Set.of(previousScriptRefs).difference(Set.of(currentScriptRefs));
     final addedScripts =
+        // There seems to be a bug in how this lint is working with type
+        // inference.
+        // ignore: avoid-collection-methods-with-unrelated-types
         Set.of(currentScriptRefs).difference(Set.of(previousScriptRefs));
 
     // TODO(devoncarew): Show a message in the logging view.
@@ -654,8 +660,10 @@ class DebuggerController extends DisposableController
 
     final variables =
         frame.vars!.map((v) => DartObjectNode.create(v, isolateRef)).toList();
+    // TODO(jacobr): would be nice to be able to remove this call to unawaited
+    // but it would require a significant refactor.
     variables
-      ..forEach(buildVariablesTree)
+      ..forEach((v) => unawaited(buildVariablesTree(v)))
       ..sort((a, b) => sortFieldsByName(a.name!, b.name!));
     return variables;
   }

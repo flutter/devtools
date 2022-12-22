@@ -342,11 +342,19 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
     }
     ScriptRef? scriptRef = script;
     int? tokenPos = 0;
-    if (object != null &&
-        (object is FieldRef || object is FuncRef || object is ClassRef)) {
-      final location = (object as dynamic).location;
-      tokenPos = location.tokenPos;
-      scriptRef = location.script;
+    final object = this.object;
+
+    SourceLocation? sourceLocation;
+    if (object is FieldRef) {
+      sourceLocation = object.location;
+    } else if (object is FuncRef) {
+      sourceLocation = object.location;
+    } else if (object is ClassRef) {
+      sourceLocation = object.location;
+    }
+    if (sourceLocation != null) {
+      tokenPos = sourceLocation.tokenPos;
+      scriptRef = sourceLocation.script;
     }
 
     if (scriptRef != null) {

@@ -7,14 +7,14 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../screens/debugger/debugger_model.dart';
-import '../screens/inspector/diagnostics_node.dart';
-import '../screens/inspector/inspector_service.dart';
-import '../service/vm_service_wrapper.dart';
-import 'globals.dart';
-import 'object_tree.dart';
-import 'primitives/auto_dispose.dart';
-import 'primitives/utils.dart';
+import '../../screens/debugger/debugger_model.dart';
+import '../../screens/inspector/diagnostics_node.dart';
+import '../../screens/inspector/inspector_service.dart';
+import '../../service/vm_service_wrapper.dart';
+import '../globals.dart';
+import '../object_tree.dart';
+import '../primitives/auto_dispose.dart';
+import '../primitives/utils.dart';
 
 /// A line in the console.
 ///
@@ -123,10 +123,7 @@ class ConsoleService extends Disposer {
   }
 
   /// Append to the stdout / stderr buffer.
-  void appendStdio(
-    String text, {
-    bool forceScrollIntoView = false,
-  }) {
+  void appendStdio(String text) {
     const int kMaxLogItemsLowerBound = 5000;
     const int kMaxLogItemsUpperBound = 5500;
 

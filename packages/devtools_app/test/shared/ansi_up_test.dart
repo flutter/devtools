@@ -164,9 +164,6 @@ void main() {
     }
 
     setUp(() async {
-      // TODO(polinach): remove unnecessary setup steps after fixing
-      // https://github.com/flutter/devtools/issues/3616.
-      await ensureInspectorDependencies();
       mockLoggingController = MockLoggingController();
       when(mockLoggingController.data).thenReturn([]);
       when(mockLoggingController.search).thenReturn('');

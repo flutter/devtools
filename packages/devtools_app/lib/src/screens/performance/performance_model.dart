@@ -188,7 +188,7 @@ class TimelineEventGroup {
   bool _timestampsInitialized = false;
 
   List<TimelineEvent> get sortedEventRoots =>
-      _sortedEventRoots ??= List<TimelineEvent>.from(rowIndexForEvent.keys)
+      _sortedEventRoots ??= List<TimelineEvent>.of(rowIndexForEvent.keys)
           .where((event) => event.isRoot)
           .toList()
         ..sort(
@@ -254,12 +254,14 @@ class TimelineEventGroup {
     for (int i = 0; i < event.displayDepth; i++) {
       final displayRow = event.displayRows[i];
       for (var e in displayRow) {
+        final timeStart = e.time.start!.inMicroseconds;
+        final timeEnd = e.time.end!.inMicroseconds;
         earliestTimestampMicros = _timestampsInitialized
-            ? math.min(e.time.start!.inMicroseconds, earliestTimestampMicros)
-            : e.time.start!.inMicroseconds;
+            ? math.min(timeStart, earliestTimestampMicros)
+            : timeEnd;
         latestTimestampMicros = _timestampsInitialized
-            ? math.max(e.time.end!.inMicroseconds, latestTimestampMicros)
-            : e.time.end!.inMicroseconds;
+            ? math.max(timeEnd, latestTimestampMicros)
+            : timeEnd;
         _timestampsInitialized = true;
 
         rows[row + i].events.add(e);
@@ -316,12 +318,12 @@ class OfflinePerformanceData extends PerformanceData {
             .cast<Map<String, dynamic>>();
 
     final Map<String, dynamic> cpuProfileJson =
-        json[PerformanceData.cpuProfileKey] ?? <String, dynamic>{};
+        json[PerformanceData.cpuProfileKey] ?? <String, Object>{};
     final CpuProfileData? cpuProfileData =
         cpuProfileJson.isNotEmpty ? CpuProfileData.parse(cpuProfileJson) : null;
 
     final Map<String, dynamic> rasterStatsJson =
-        json[PerformanceData.rasterStatsKey] ?? <String, dynamic>{};
+        json[PerformanceData.rasterStatsKey] ?? <String, Object>{};
     final RasterStats? rasterStats =
         rasterStatsJson.isNotEmpty ? RasterStats.parse(rasterStatsJson) : null;
 
@@ -343,7 +345,7 @@ class OfflinePerformanceData extends PerformanceData {
     final OfflineTimelineEvent? selectedEvent = selectedEventJson.isNotEmpty
         ? OfflineTimelineEvent(
             (selectedEventJson[TimelineEvent.firstTraceKey] ?? {})
-                .cast<String, dynamic>(),
+                .cast<String, Object>(),
           )
         : null;
 
@@ -504,7 +506,7 @@ abstract class TimelineEvent extends TreeNode<TimelineEvent>
 
   String? get name => traceEvents.first.event.name;
 
-  String? get groupKey => traceEvents.first.event.args!['filterKey'];
+  String? get groupKey => traceEvents.first.event.args!['filterKey'] as String?;
 
   Map<String, dynamic> get beginTraceEventJson => traceEvents.first.json;
 
@@ -632,7 +634,7 @@ abstract class TimelineEvent extends TreeNode<TimelineEvent>
 
   void removeChild(TimelineEvent childToRemove) {
     assert(children.contains(childToRemove));
-    final List<TimelineEvent> newChildren = List.from(childToRemove.children);
+    final List<TimelineEvent> newChildren = List.of(childToRemove.children);
     newChildren.forEach(_addChild);
     children.remove(childToRemove);
   }
@@ -774,7 +776,7 @@ class SyncTimelineEvent extends TimelineEvent {
     final frameNumber =
         traceEvents.first.event.args![TraceEvent.frameNumberArg];
     return _flutterFrameNumber =
-        frameNumber != null ? int.tryParse(frameNumber) : null;
+        frameNumber != null ? int.tryParse(frameNumber as String) : null;
   }
 
   int? _flutterFrameNumber;
@@ -861,7 +863,7 @@ class SyncTimelineEvent extends TimelineEvent {
 // code.
 class AsyncTimelineEvent extends TimelineEvent {
   AsyncTimelineEvent(TraceEventWrapper firstTraceEvent)
-      : _parentId = firstTraceEvent.event.args![parentIdKey],
+      : _parentId = firstTraceEvent.event.args![parentIdKey] as String?,
         super(firstTraceEvent) {
     type = TimelineEventType.async;
   }

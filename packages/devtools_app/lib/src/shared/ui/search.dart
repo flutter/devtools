@@ -184,10 +184,11 @@ mixin SearchControllerMixin<T extends DataSearchStateMixin> {
   List<T> matchesForSearch(
     String search, {
     bool searchPreviousMatches = false,
-  }) =>
-      [];
+  });
 
   /// Called when selected match index changes. Index is 0 based
+  // Subclasses provide a valid implementation.
+  // ignore: avoid-unused-parameters
   void onMatchChanged(int index) {}
 
   void resetSearch() {
@@ -538,7 +539,6 @@ mixin AutoCompleteSearchControllerMixin on SearchControllerMixin {
   /// [bottom] if false placed above TextField (search field).
   /// [maxWidth] if true drop-down is width of TextField otherwise minPopupWidth.
   OverlayEntry createAutoCompleteOverlay({
-    required BuildContext context,
     required GlobalKey searchFieldKey,
     required SelectAutoComplete onTap,
     bool bottom = true,
@@ -579,7 +579,6 @@ mixin AutoCompleteSearchControllerMixin on SearchControllerMixin {
     }
 
     autoCompleteOverlay = createAutoCompleteOverlay(
-      context: context,
       searchFieldKey: searchFieldKey,
       onTap: onTap,
       bottom: bottom,
@@ -890,8 +889,7 @@ mixin SearchFieldMixin<T extends StatefulWidget>
     }
   }
 
-  void updateSearchField(
-    SearchControllerMixin controller, {
+  void updateSearchField({
     required String newValue,
     required int caretPosition,
   }) {
@@ -1098,7 +1096,7 @@ class _AutoCompleteSearchFieldState extends State<_AutoCompleteSearchField>
     }
   }
 
-  KeyEventResult _handleKeyStrokes(FocusNode node, RawKeyEvent event) {
+  KeyEventResult _handleKeyStrokes(FocusNode _, RawKeyEvent event) {
     if (event is RawKeyDownEvent) {
       final key = event.data.logicalKey.keyId & LogicalKeyboardKey.valueMask;
 
@@ -1312,7 +1310,17 @@ mixin TreeDataSearchStateMixin<T extends TreeNode<T>>
     on TreeNode<T>, DataSearchStateMixin {}
 
 class AutoCompleteController extends DisposableController
-    with SearchControllerMixin, AutoCompleteSearchControllerMixin {}
+    with SearchControllerMixin, AutoCompleteSearchControllerMixin {
+  // TODO(jacobr): seems a little surprising that returning an empty list of
+  // matches for the search is the intended behavior for the auto-complete
+  // controller.
+  @override
+  List<DataSearchStateMixin> matchesForSearch(
+    String search, {
+    bool searchPreviousMatches = false,
+  }) =>
+      const [];
+}
 
 class AutoCompleteMatch {
   AutoCompleteMatch(this.text, {this.matchedSegments = const <Range>[]});

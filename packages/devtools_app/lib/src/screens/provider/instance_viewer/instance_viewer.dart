@@ -36,7 +36,7 @@ final isExpandedProvider = StateProviderFamily<bool, InstancePath>((ref, path) {
 final estimatedChildCountProvider =
     AutoDisposeProviderFamily<int, InstancePath>((ref, rootPath) {
   int estimatedChildCount(InstancePath path) {
-    int one(InstanceDetails instance) => 1;
+    int one(InstanceDetails _) => 1;
 
     int expandableEstimatedChildCount(Iterable<PathToProperty> keys) {
       if (!ref.watch(isExpandedProvider(path))) {
@@ -118,8 +118,8 @@ class _InstanceViewerState extends ConsumerState<InstanceViewer> {
 
   Iterable<Widget> _buildError(
     Object error,
-    StackTrace? stackTrace,
-    InstancePath path,
+    StackTrace? _,
+    InstancePath __,
   ) {
     if (error is SentinelException) {
       final valueAsString = error.sentinel.valueAsString;

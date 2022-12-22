@@ -903,6 +903,7 @@ extension NodeListExtension on List<FlameChartNode> {
   }
 }
 
+// TODO(jacobr): cleanup up this util class with just static members.
 // ignore: avoid_classes_with_only_static_members
 class FlameChartUtils {
   static double leftPaddingForNode(

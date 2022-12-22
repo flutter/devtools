@@ -356,7 +356,7 @@ class ProgramExplorerController extends DisposableController
         await service.getObject(isolateId, targetScript.id!) as Script;
     final LibraryRef targetLib = scriptObj.library!;
 
-    // Search targetLib only on the root level nodes
+    // Search targetLib only on the root level nodes.
     final libNode = _searchRootObjectNodes(targetLib)!;
 
     // If the object's owning script URI is the same as the target library URI,

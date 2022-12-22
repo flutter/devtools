@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app/src/screens/memory/memory_controller.dart';
 import 'package:devtools_app/src/screens/memory/memory_screen.dart';
 import 'package:devtools_app/src/screens/memory/memory_tabs.dart';
 import 'package:devtools_app/src/screens/memory/panes/allocation_profile/allocation_profile_table_view_controller.dart';
@@ -23,10 +22,7 @@ void main() {
     await scene.setUp();
   });
 
-  Future<void> pumpMemoryScreen(
-    WidgetTester tester, {
-    MemoryController? memoryController,
-  }) async {
+  Future<void> pumpMemoryScreen(WidgetTester tester) async {
     await tester.pumpWidget(scene.build());
     // Delay to ensure the memory profiler has collected data.
     await tester.pumpAndSettle(const Duration(seconds: 1));

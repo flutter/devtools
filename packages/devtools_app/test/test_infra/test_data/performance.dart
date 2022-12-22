@@ -1327,7 +1327,7 @@ final unknownEventEndTrace = testTraceEventWrapper({
 });
 
 // Mark: OfflinePerformanceData.
-final goldenTraceEventsJson = List<Map<String, dynamic>>.from(
+final goldenTraceEventsJson = List<Map<String, dynamic>>.of(
   goldenUiTraceEvents.map((trace) => trace.json).toList()
     ..addAll(goldenRasterTraceEvents.map((trace) => trace.json).toList()),
 );

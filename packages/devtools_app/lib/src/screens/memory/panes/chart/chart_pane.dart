@@ -176,7 +176,7 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
     await serviceManager.onServiceAvailable;
 
     if (!controller.hasStarted) {
-      await controller.startTimeline();
+      controller.startTimeline();
 
       // TODO(terry): Need to set the initial state of buttons.
 /*
@@ -347,7 +347,7 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
         left: xPosition,
         height: totalHoverHeight,
         child: Container(
-          padding: const EdgeInsets.fromLTRB(0, 5, 0, 8),
+          padding: const EdgeInsets.only(top: 5, bottom: 8),
           decoration: BoxDecoration(
             color: colorScheme.defaultBackgroundColor,
             border: Border.all(
@@ -391,15 +391,14 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
     if (firstWidget != null) results.add(firstWidget);
 
     for (var entry in dataToDisplay.entries) {
-      final image = entry.value.keys.contains(renderImage)
+      final keys = entry.value.keys;
+      final image = keys.contains(renderImage)
           ? entry.value[renderImage] as String?
           : null;
-      final color = entry.value.keys.contains(renderLine)
-          ? entry.value[renderLine] as Color?
-          : null;
-      final dashedLine = entry.value.keys.contains(renderDashed)
-          ? entry.value[renderDashed]
-          : false;
+      final color =
+          keys.contains(renderLine) ? entry.value[renderLine] as Color? : null;
+      final dashedLine =
+          keys.contains(renderDashed) ? entry.value[renderDashed] : false;
 
       results.add(
         _hoverRow(
@@ -424,7 +423,6 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
     bool bold = true,
     bool hasNumeric = false,
     bool scaleImage = false,
-    double leftPadding = 5.0,
   }) {
     final theme = Theme.of(context);
     final hoverTitleEntry = theme.hoverTextStyle;
@@ -436,7 +434,6 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
       String? image,
       Color? colorPatch,
       bool dashed = false,
-      double leftEdge = 5.0,
     }) {
       String displayName = name;
       // Empty string overflows, default value space.
@@ -455,12 +452,11 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
       }
 
       Widget traceColor;
+      // Logic would be hard to read as a conditional expression.
+      // ignore: prefer-conditional-expression
       if (colorPatch != null) {
-        if (dashed) {
-          traceColor = createDashWidget(colorPatch);
-        } else {
-          traceColor = createSolidLine(colorPatch);
-        }
+        traceColor =
+            dashed ? createDashWidget(colorPatch) : createSolidLine(colorPatch);
       } else {
         traceColor = image == null
             ? const SizedBox()
@@ -493,11 +489,10 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
         image: image,
         colorPatch: colorPatch,
         dashed: dashed,
-        leftEdge: leftPadding,
       ),
     );
     return Container(
-      padding: const EdgeInsets.fromLTRB(5, 0, 0, 2),
+      margin: const EdgeInsets.only(left: 5, bottom: 2),
       child: Row(
         children: rowChildren,
       ),
@@ -532,7 +527,6 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
                 _listItem(
                   allEvents: chartsValues.extensionEvents,
                   title: entry.key,
-                  icon: Icons.dashboard,
                 ),
               ],
             ),
@@ -544,7 +538,7 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
         /// Pull out the event name, and custom values.
         final output =
             _displayEvent(null, chartsValues.extensionEvents.first).trim();
-        widgets.add(_hoverRow(name: output, bold: false, leftPadding: 0.0));
+        widgets.add(_hoverRow(name: output, bold: false));
       }
     }
     return widgets;
@@ -567,7 +561,6 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
   Widget _listItem({
     required List<Map<String, Object>> allEvents,
     required String title,
-    IconData? icon,
   }) {
     final widgets = <Widget>[];
     var index = 1;
@@ -591,7 +584,7 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
           tilePadding: EdgeInsets.zero,
           childrenPadding: EdgeInsets.zero,
           leading: Container(
-            padding: const EdgeInsets.fromLTRB(5, 4, 0, 0),
+            padding: const EdgeInsets.only(left: 5, top: 4),
             child: Image(
               image: allEvents.length > 1
                   ? const AssetImage(eventsLegend)
@@ -613,23 +606,21 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
     final hoverValueEntry = theme.hoverSmallValueTextStyle;
     final expandedGradient = colorScheme.verticalGradient;
 
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: Container(
-        width: _hoverWidth,
-        decoration: BoxDecoration(
-          gradient: expandedGradient,
-        ),
-        child: Row(
-          children: [
-            const SizedBox(width: 10),
-            Text(
-              value,
-              overflow: TextOverflow.ellipsis,
-              style: hoverValueEntry,
-            ),
-          ],
-        ),
+    return Container(
+      margin: const EdgeInsets.only(bottom: 8),
+      width: _hoverWidth,
+      decoration: BoxDecoration(
+        gradient: expandedGradient,
+      ),
+      child: Row(
+        children: [
+          const SizedBox(width: 10),
+          Text(
+            value,
+            overflow: TextOverflow.ellipsis,
+            style: hoverValueEntry,
+          ),
+        ],
       ),
     );
   }

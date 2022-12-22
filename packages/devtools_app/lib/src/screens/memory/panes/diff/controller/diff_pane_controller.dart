@@ -77,7 +77,7 @@ class DiffPaneController extends DisposableController {
     derived._updateValues();
   }
 
-  Future<void> clearSnapshots() async {
+  void clearSnapshots() {
     final snapshots = core._snapshots;
     for (var i = 1; i < snapshots.value.length; i++) {
       snapshots.value[i].dispose();

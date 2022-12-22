@@ -180,7 +180,7 @@ class CpuProfileTransformer {
 void mergeCpuProfileRoots(List<CpuStackFrame> roots) {
   // Loop through a copy of [roots] so that we can remove nodes from [roots]
   // once we have merged them.
-  final List<CpuStackFrame> rootsCopy = List.from(roots);
+  final List<CpuStackFrame> rootsCopy = List.of(roots);
   for (CpuStackFrame root in rootsCopy) {
     if (!roots.contains(root)) {
       // We have already merged [root] and removed it from [roots]. Do not

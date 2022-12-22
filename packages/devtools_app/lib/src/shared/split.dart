@@ -93,7 +93,7 @@ class _SplitState extends State<Split> {
   @override
   void initState() {
     super.initState();
-    fractions = List.from(widget.initialFractions);
+    fractions = List.of(widget.initialFractions);
   }
 
   @override
@@ -101,7 +101,7 @@ class _SplitState extends State<Split> {
     return LayoutBuilder(builder: _buildLayout);
   }
 
-  Widget _buildLayout(BuildContext context, BoxConstraints constraints) {
+  Widget _buildLayout(BuildContext _, BoxConstraints constraints) {
     final width = constraints.maxWidth;
     final height = constraints.maxHeight;
     final axisSize = isHorizontal ? width : height;
