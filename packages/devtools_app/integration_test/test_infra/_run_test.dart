@@ -23,8 +23,12 @@ Future<void> runFlutterIntegrationTest(
   if (shouldCreateTestApp) {
     // Create the test app and start it.
     // TODO(kenz): support running Dart CLI test apps from here too.
-    testApp = TestFlutterApp(appPath: testAppPath);
-    await testApp.start();
+    try {
+      testApp = TestFlutterApp(appPath: testAppPath);
+      await testApp.start();
+    } catch (e) {
+      throw Exception('Error starting test app: $e');
+    }
     testAppUri = testApp.vmServiceUri.toString();
   } else {
     testAppUri = testRunnerArgs.testAppUri!;
@@ -33,7 +37,11 @@ Future<void> runFlutterIntegrationTest(
   // TODO(kenz): do we need to start chromedriver in headless mode?
   // Start chrome driver before running the flutter integration test.
   final chromedriver = ChromeDriver();
-  await chromedriver.start();
+  try {
+    await chromedriver.start();
+  } catch (e) {
+    throw Exception('Error starting chromedriver: $e');
+  }
 
   // Run the flutter integration test.
   final testRunner = TestRunner();
@@ -134,9 +142,11 @@ class _TestResult {
 
   factory _TestResult.parse(Map<String, Object?> json) {
     final result = json[resultKey] == 'true';
-    final failureDetails = json[failureDetailsKey] as Map<String, Object?>?;
-    final methodName = failureDetails?[methodNameKey] as String?;
-    final details = failureDetails?[detailsKey] as String?;
+    final failureDetails =
+        (json[failureDetailsKey] as List<Object?>).cast<String>().first;
+    final failureDetailsMap = jsonDecode(failureDetails) as Map<String, Object?>;
+    final methodName = failureDetailsMap[methodNameKey] as String?;
+    final details = failureDetailsMap[detailsKey] as String?;
     return _TestResult._(result, methodName, details);
   }
 
