@@ -60,7 +60,7 @@ class TestApp {
   factory TestApp.fromEnvironment() {
     const testArgs = String.fromEnvironment('test_args');
     final Map<String, Object> argsMap =
-        (jsonDecode(testArgs)).cast<String, Object>();
+        jsonDecode(testArgs).cast<String, Object>();
     return TestApp.parse(argsMap);
   }
 

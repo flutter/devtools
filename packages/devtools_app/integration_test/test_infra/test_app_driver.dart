@@ -112,8 +112,9 @@ abstract class _TestApp with IOMixin {
     // Now await the started event; if it had already happened the future will
     // have already completed.
     final startedResult = await started;
-    _currentRunningAppId = (startedResult[FlutterDaemonConstants.params.key]!
-        as Map<String, Object?>)[FlutterDaemonConstants.appId.key] as String?;
+    final params = startedResult[FlutterDaemonConstants.params.key]!
+        as Map<String, Object?>;
+    _currentRunningAppId = params[FlutterDaemonConstants.appId.key] as String?;
   }
 
   Future<int> stop() async {
