@@ -110,7 +110,7 @@ class TestRunner with IOMixin {
     listenToProcessOutput(
       process,
       onError: (line) {
-        throw Exception(line);
+        print('on error, would be throwing exception here: $line');
       },
     );
 
