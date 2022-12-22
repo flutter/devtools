@@ -109,14 +109,53 @@ class TestRunner with IOMixin {
     );
     listenToProcessOutput(
       process,
-      onError: (line) {
-        print('on error, would be throwing exception here: $line');
+      onStdout: (line) {
+        if (line.startsWith(_TestResult.testResultPrefix)) {
+          final testResultJson = line.substring(line.indexOf('{'));
+          final testResultMap =
+              jsonDecode(testResultJson) as Map<String, Object?>;
+          final result = _TestResult.parse(testResultMap);
+          if (!result.result) {
+            throw Exception(result.toString());
+          }
+        }
+        print('stdout = $line');
       },
     );
 
     await process.exitCode;
     process.kill();
     _debugLog('flutter drive process has exited');
+  }
+}
+
+class _TestResult {
+  _TestResult._(this.result, this.methodName, this.details);
+
+  factory _TestResult.parse(Map<String, Object?> json) {
+    final result = json[resultKey]! as bool;
+    final failureDetails = json[failureDetailsKey] as Map<String, Object?>?;
+    final methodName = failureDetails?[methodNameKey] as String?;
+    final details = failureDetails?[detailsKey] as String?;
+    return _TestResult._(result, methodName, details);
+  }
+
+  static const testResultPrefix = 'result {"result":';
+  static const resultKey = 'result';
+  static const failureDetailsKey = 'failureDetails';
+  static const methodNameKey = 'methodName';
+  static const detailsKey = 'details';
+
+  final bool result;
+  final String? methodName;
+  final String? details;
+
+  @override
+  String toString() {
+    if (result) {
+      return 'Test passed';
+    }
+    return 'Test \'$methodName\' failed: $details.';
   }
 }
 

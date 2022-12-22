@@ -22,15 +22,16 @@ mixin IOMixin {
   void listenToProcessOutput(
     Process process, {
     void Function(String) printCallback = _defaultPrintCallback,
-    void Function(String)? onError,
+    void Function(String)? onStdout,
+    void Function(String)? onStderr,
   }) {
     streamSubscriptions.addAll([
-      transformToLines(process.stdout)
-          .listen((String line) => stdoutController.add(line)),
+      transformToLines(process.stdout).listen((String line) {
+        onStdout?.call(line);
+        stdoutController.add(line);
+      }),
       transformToLines(process.stderr).listen((String line) {
-        if (onError != null) {
-          onError(line);
-        }
+        onStderr?.call(line);
         stderrController.add(line);
       }),
 
