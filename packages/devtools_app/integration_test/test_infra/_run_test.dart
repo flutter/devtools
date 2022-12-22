@@ -133,7 +133,7 @@ class _TestResult {
   _TestResult._(this.result, this.methodName, this.details);
 
   factory _TestResult.parse(Map<String, Object?> json) {
-    final result = json[resultKey]! as bool;
+    final result = json[resultKey] == 'true';
     final failureDetails = json[failureDetailsKey] as Map<String, Object?>?;
     final methodName = failureDetails?[methodNameKey] as String?;
     final details = failureDetails?[detailsKey] as String?;
