@@ -696,7 +696,7 @@ class DebuggerController extends DisposableController
           name: '<exception>',
           value: reportedException,
         ),
-        ...frame.vars ?? []
+        ...frame.vars ?? [],
       ];
 
       frames = [newFrame, ...frames.sublist(1)];

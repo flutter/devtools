@@ -148,7 +148,7 @@ class VMInfoList extends StatelessWidget {
                             child: Builder(builder: row.value),
                           ),
                         ],
-                      )
+                      ),
                   ],
                 ),
               ),
@@ -459,7 +459,7 @@ class RetainingPathWidget extends StatelessWidget {
             style: theme.fixedFontStyle,
           ),
         ],
-      )
+      ),
     ];
 
     return prettyRows(context, retainingObjects);

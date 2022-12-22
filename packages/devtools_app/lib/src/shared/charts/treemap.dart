@@ -643,7 +643,7 @@ class TreemapNode extends TreeNode<TreemapNode> {
           TextSpan(
             text: '$separator$caption',
             style: TextStyle(fontStyle: FontStyle.italic, color: textColor),
-          )
+          ),
       ],
       style: TextStyle(color: textColor),
     );

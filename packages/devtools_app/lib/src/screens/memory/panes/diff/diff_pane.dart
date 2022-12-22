@@ -67,7 +67,7 @@ class _SnapshotItemContent extends StatelessWidget {
                   gaScreenName: gac.memory,
                   gaSelectedItemDescription:
                       gac.topicDocumentationLink(_documentationTopic),
-                )
+                ),
               ],
             ),
           );

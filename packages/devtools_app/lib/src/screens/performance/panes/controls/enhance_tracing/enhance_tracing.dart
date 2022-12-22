@@ -66,7 +66,7 @@ class EnhanceTracingButton extends StatelessWidget {
                   'to reproduce activity in your app to see the enhanced '
                   'tracing in the timeline.',
               style: textStyle,
-            )
+            ),
           ],
         ),
       ),
@@ -308,7 +308,7 @@ class TrackWidgetBuildsCheckbox extends StatelessWidget {
             extension.extension,
             enabled: false,
             value: extension.disabledValue,
-          )
+          ),
       ]);
     }
   }

@@ -49,8 +49,8 @@ class MoreDebuggingOptionsButton extends StatelessWidget {
                     'To use them, run your app in debug mode.',
                 style: Theme.of(context).subtleErrorTextStyle,
               ),
-            )
-          ]
+            ),
+          ],
         ],
       ),
       overlayWidthBeforeScaling: _width,

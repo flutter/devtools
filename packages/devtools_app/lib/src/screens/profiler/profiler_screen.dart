@@ -99,20 +99,25 @@ class _ProfilerScreenBodyState extends State<ProfilerScreenBody>
       });
     });
 
-    addAutoDisposeListener(controller.cpuProfilerController.processingNotifier,
-        () {
-      setState(() {
-        processing = controller.cpuProfilerController.processingNotifier.value;
-      });
-    });
+    addAutoDisposeListener(
+      controller.cpuProfilerController.processingNotifier,
+      () {
+        setState(() {
+          processing =
+              controller.cpuProfilerController.processingNotifier.value;
+        });
+      },
+    );
 
     addAutoDisposeListener(
-        controller.cpuProfilerController.transformer.progressNotifier, () {
-      setState(() {
-        processingProgress =
-            controller.cpuProfilerController.transformer.progressNotifier.value;
-      });
-    });
+      controller.cpuProfilerController.transformer.progressNotifier,
+      () {
+        setState(() {
+          processingProgress = controller
+              .cpuProfilerController.transformer.progressNotifier.value;
+        });
+      },
+    );
 
     // Load offline profiler data if available.
     if (shouldLoadOfflineData()) {

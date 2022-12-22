@@ -61,20 +61,22 @@ void main() {
     }
 
     testWidgetsWithWindowSize(
-        'Tapping the Console Clear button clears stdio.', windowSize,
-        (WidgetTester tester) async {
-      serviceManager.consoleService.clearStdio();
-      serviceManager.consoleService.appendStdio(_ansiCodesOutput());
+      'Tapping the Console Clear button clears stdio.',
+      windowSize,
+      (WidgetTester tester) async {
+        serviceManager.consoleService.clearStdio();
+        serviceManager.consoleService.appendStdio(_ansiCodesOutput());
 
-      await pumpConsole(tester, debuggerController);
+        await pumpConsole(tester, debuggerController);
 
-      final clearButton = find.byKey(DebuggerConsole.clearStdioButtonKey);
-      expect(clearButton, findsOneWidget);
+        final clearButton = find.byKey(DebuggerConsole.clearStdioButtonKey);
+        expect(clearButton, findsOneWidget);
 
-      await tester.tap(clearButton);
+        await tester.tap(clearButton);
 
-      expect(serviceManager.consoleService.stdio.value, isEmpty);
-    });
+        expect(serviceManager.consoleService.stdio.value, isEmpty);
+      },
+    );
 
     group('Clipboard', () {
       String _clipboardContents = '';
@@ -95,19 +97,22 @@ void main() {
       });
 
       testWidgetsWithWindowSize(
-          'Tapping the Copy to Clipboard button attempts to copy stdio to clipboard.',
-          windowSize, (WidgetTester tester) async {
-        await pumpConsole(tester, debuggerController);
+        'Tapping the Copy to Clipboard button attempts to copy stdio to clipboard.',
+        windowSize,
+        (WidgetTester tester) async {
+          await pumpConsole(tester, debuggerController);
 
-        final copyButton = find.byKey(DebuggerConsole.copyToClipboardButtonKey);
-        expect(copyButton, findsOneWidget);
+          final copyButton =
+              find.byKey(DebuggerConsole.copyToClipboardButtonKey);
+          expect(copyButton, findsOneWidget);
 
-        expect(_clipboardContents, isEmpty);
+          expect(_clipboardContents, isEmpty);
 
-        await tester.tap(copyButton);
+          await tester.tap(copyButton);
 
-        expect(_clipboardContents, equals(_expected));
-      });
+          expect(_clipboardContents, equals(_expected));
+        },
+      );
     });
   });
 }

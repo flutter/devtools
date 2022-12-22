@@ -119,7 +119,7 @@ class _ServiceExtensionButtonGroupState
         onPressed: available ? _onPressed : null,
         children: <Widget>[
           for (var extensionState in _extensionStates)
-            _buildExtension(extensionState)
+            _buildExtension(extensionState),
         ],
       ),
     );
@@ -529,7 +529,7 @@ class _ServiceExtensionCheckboxState extends State<ServiceExtensionCheckbox>
                 gaScreenName: widget.serviceExtension.gaScreenName!,
                 gaSelectedItemDescription: widget.serviceExtension.gaDocsItem!,
                 padding: const EdgeInsets.symmetric(vertical: denseSpacing),
-              )
+              ),
           ],
         );
       },

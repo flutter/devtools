@@ -31,7 +31,7 @@ class LeaksHelpLink extends StatelessWidget {
             gaScreenName: gac.memory,
             gaSelectedItemDescription:
                 gac.topicDocumentationLink(_documentationTopic),
-          )
+          ),
         ],
       ),
     );

@@ -100,7 +100,7 @@ class _VMDeveloperToolsScreenState extends State<VMDeveloperToolsScreenBody>
                     NavigationRailDestination(
                       label: Text(view.title),
                       icon: Icon(view.icon),
-                    )
+                    ),
                 ],
               ),
             Expanded(
@@ -112,11 +112,11 @@ class _VMDeveloperToolsScreenState extends State<VMDeveloperToolsScreenBody>
                   index: selectedIndex,
                   children: [
                     for (final view in VMDeveloperToolsScreenBody.views)
-                      view.build(context)
+                      view.build(context),
                   ],
                 ),
               ),
-            )
+            ),
           ],
         );
       },

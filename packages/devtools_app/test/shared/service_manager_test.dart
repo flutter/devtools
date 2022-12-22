@@ -456,7 +456,7 @@ void main() async {
         final numericArgs = {
           numericExtensionDescription.extension.substring(
             numericExtensionDescription.extension.lastIndexOf('.') + 1,
-          ): numericExtensionDescription.enabledValue
+          ): numericExtensionDescription.enabledValue,
         };
         const numericEvalExpression = 'timeDilation';
         final numericLibrary = EvalOnDartLibrary(

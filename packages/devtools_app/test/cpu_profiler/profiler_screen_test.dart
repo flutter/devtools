@@ -98,24 +98,29 @@ void main() {
       expect(find.text('CPU Profiler'), findsOneWidget);
     });
 
-    testWidgetsWithWindowSize('builds base state for Dart CLI app', windowSize,
-        (WidgetTester tester) async {
-      const perfScreenBody = ProfilerScreenBody();
-      await pumpProfilerScreenBody(tester, perfScreenBody);
-      expect(find.byType(ProfilerScreenBody), findsOneWidget);
-      verifyBaseState();
-    });
+    testWidgetsWithWindowSize(
+      'builds base state for Dart CLI app',
+      windowSize,
+      (WidgetTester tester) async {
+        const perfScreenBody = ProfilerScreenBody();
+        await pumpProfilerScreenBody(tester, perfScreenBody);
+        expect(find.byType(ProfilerScreenBody), findsOneWidget);
+        verifyBaseState();
+      },
+    );
 
     testWidgetsWithWindowSize(
-        'builds base state for Flutter native app', windowSize,
-        (WidgetTester tester) async {
-      when(fakeServiceManager.connectedApp!.isFlutterNativeAppNow)
-          .thenReturn(true);
-      const perfScreenBody = ProfilerScreenBody();
-      await pumpProfilerScreenBody(tester, perfScreenBody);
-      expect(find.byType(ProfilerScreenBody), findsOneWidget);
-      verifyBaseState();
-    });
+      'builds base state for Flutter native app',
+      windowSize,
+      (WidgetTester tester) async {
+        when(fakeServiceManager.connectedApp!.isFlutterNativeAppNow)
+            .thenReturn(true);
+        const perfScreenBody = ProfilerScreenBody();
+        await pumpProfilerScreenBody(tester, perfScreenBody);
+        expect(find.byType(ProfilerScreenBody), findsOneWidget);
+        verifyBaseState();
+      },
+    );
 
     testWidgetsWithWindowSize(
       'builds proper content for recording state',
@@ -150,25 +155,28 @@ void main() {
       },
     );
 
-    testWidgetsWithWindowSize('builds for disabled profiler', windowSize,
-        (WidgetTester tester) async {
-      await serviceManager.service!.setFlag(vm_flags.profiler, 'false');
-      const perfScreenBody = ProfilerScreenBody();
-      await pumpProfilerScreenBody(tester, perfScreenBody);
-      expect(find.byType(CpuProfilerDisabled), findsOneWidget);
-      expect(
-        find.byKey(ProfilerScreen.recordingInstructionsKey),
-        findsNothing,
-      );
-      expect(find.byType(RecordButton), findsNothing);
-      expect(find.byType(StopRecordingButton), findsNothing);
-      expect(find.byType(ClearButton), findsNothing);
-      expect(find.byType(CpuSamplingRateDropdown), findsNothing);
+    testWidgetsWithWindowSize(
+      'builds for disabled profiler',
+      windowSize,
+      (WidgetTester tester) async {
+        await serviceManager.service!.setFlag(vm_flags.profiler, 'false');
+        const perfScreenBody = ProfilerScreenBody();
+        await pumpProfilerScreenBody(tester, perfScreenBody);
+        expect(find.byType(CpuProfilerDisabled), findsOneWidget);
+        expect(
+          find.byKey(ProfilerScreen.recordingInstructionsKey),
+          findsNothing,
+        );
+        expect(find.byType(RecordButton), findsNothing);
+        expect(find.byType(StopRecordingButton), findsNothing);
+        expect(find.byType(ClearButton), findsNothing);
+        expect(find.byType(CpuSamplingRateDropdown), findsNothing);
 
-      await tester.tap(find.text('Enable profiler'));
-      await tester.pumpAndSettle();
+        await tester.tap(find.text('Enable profiler'));
+        await tester.pumpAndSettle();
 
-      verifyBaseState();
-    });
+        verifyBaseState();
+      },
+    );
   });
 }

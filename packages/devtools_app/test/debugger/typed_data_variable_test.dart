@@ -484,54 +484,57 @@ void main() {
   });
 
   test(
-      'Creates bound variable with groupings for children for a large Uint8ClampedList instance',
-      () async {
-    final instance = Instance(
-      kind: InstanceKind.kUint8ClampedList,
-      id: objectId,
-      length: 332,
-    );
-    final variable = DartObjectNode.create(
-      BoundVariable(
-        name: 'test',
-        value: instance,
-      ),
-      isolateRef,
-    );
+    'Creates bound variable with groupings for children for a large Uint8ClampedList instance',
+    () async {
+      final instance = Instance(
+        kind: InstanceKind.kUint8ClampedList,
+        id: objectId,
+        length: 332,
+      );
+      final variable = DartObjectNode.create(
+        BoundVariable(
+          name: 'test',
+          value: instance,
+        ),
+        isolateRef,
+      );
 
-    await buildVariablesTree(variable);
+      await buildVariablesTree(variable);
 
-    expect(variable.children, [
-      matchesVariableGroup(start: 0, end: 99),
-      matchesVariableGroup(start: 100, end: 199),
-      matchesVariableGroup(start: 200, end: 299),
-      matchesVariableGroup(start: 300, end: 331),
-    ]);
-  });
+      expect(variable.children, [
+        matchesVariableGroup(start: 0, end: 99),
+        matchesVariableGroup(start: 100, end: 199),
+        matchesVariableGroup(start: 200, end: 299),
+        matchesVariableGroup(start: 300, end: 331),
+      ]);
+    },
+  );
 
-  test('Creates groupings of exactly 100 if the length is a multiple of 100',
-      () async {
-    final instance = Instance(
-      kind: InstanceKind.kUint8ClampedList,
-      id: objectId,
-      length: 300,
-    );
-    final variable = DartObjectNode.create(
-      BoundVariable(
-        name: 'test',
-        value: instance,
-      ),
-      isolateRef,
-    );
+  test(
+    'Creates groupings of exactly 100 if the length is a multiple of 100',
+    () async {
+      final instance = Instance(
+        kind: InstanceKind.kUint8ClampedList,
+        id: objectId,
+        length: 300,
+      );
+      final variable = DartObjectNode.create(
+        BoundVariable(
+          name: 'test',
+          value: instance,
+        ),
+        isolateRef,
+      );
 
-    await buildVariablesTree(variable);
+      await buildVariablesTree(variable);
 
-    expect(variable.children, [
-      matchesVariableGroup(start: 0, end: 99),
-      matchesVariableGroup(start: 100, end: 199),
-      matchesVariableGroup(start: 200, end: 299),
-    ]);
-  });
+      expect(variable.children, [
+        matchesVariableGroup(start: 0, end: 99),
+        matchesVariableGroup(start: 100, end: 199),
+        matchesVariableGroup(start: 200, end: 299),
+      ]);
+    },
+  );
 }
 
 Matcher matchesVariable({

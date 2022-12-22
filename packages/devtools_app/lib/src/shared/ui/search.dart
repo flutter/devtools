@@ -741,7 +741,7 @@ class SearchTextEditingController extends TextEditingController {
         TextSpan(
           text: suggestionText,
           style: style?.copyWith(color: Theme.of(context).colorScheme.grey),
-        )
+        ),
       ],
       style: style,
     );
@@ -1274,7 +1274,7 @@ class SearchNavigationControls extends StatelessWidget {
                   Icons.keyboard_arrow_down,
                   numMatches > 1 ? controller.nextMatch : null,
                 ),
-                if (onClose != null) closeSearchDropdownButton(onClose)
+                if (onClose != null) closeSearchDropdownButton(onClose),
               ],
             );
           },

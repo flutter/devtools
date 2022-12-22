@@ -91,7 +91,7 @@ class AnalysisStatusView extends StatelessWidget {
                     onPressed: () => controller.reset(),
                   ),
                 ],
-              )
+              ),
           ],
         );
       },

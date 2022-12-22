@@ -326,7 +326,7 @@ List<DartObjectNode> _createVariablesForStackTrace(
         isolateRef: isolateRef,
         artificialName: true,
         artificialValue: true,
-      )
+      ),
   ];
 }
 
@@ -482,7 +482,7 @@ List<DartObjectNode> _createVariablesForFunctionType(
               name: 'required',
               value: parameter.required,
               isolateRef: isolateRef,
-            )
+            ),
           ],
           DartObjectNode.fromValue(
             name: 'type',

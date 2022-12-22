@@ -144,7 +144,7 @@ class ProviderScreenBody extends ConsumerWidget {
                     rootPath: InstancePath.fromProviderId(selectedProviderId),
                     showInternalProperties: ref.watch(_showInternals),
                   ),
-                )
+                ),
             ],
           ),
         ),
@@ -189,7 +189,7 @@ class _StateInspectorSettingsDialog extends ConsumerWidget {
                 ),
               ],
             ),
-          )
+          ),
         ],
       ),
       actions: const [

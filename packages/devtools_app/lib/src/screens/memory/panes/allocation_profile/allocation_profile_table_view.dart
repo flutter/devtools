@@ -435,7 +435,7 @@ class _ProfileHelpLink extends StatelessWidget {
             gaScreenName: '',
             gaSelectedItemDescription:
                 gac.topicDocumentationLink(_documentationTopic),
-          )
+          ),
         ],
       ),
     );

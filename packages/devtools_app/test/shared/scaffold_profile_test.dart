@@ -38,30 +38,33 @@ void main() {
   setGlobal(IdeTheme, IdeTheme());
   setGlobal(NotificationService, NotificationService());
 
-  testWidgets('does not display floating debugger controls in profile mode',
-      (WidgetTester tester) async {
-    final mockConnectedApp = MockConnectedAppLegacy();
-    when(mockConnectedApp.isFlutterAppNow).thenReturn(true);
-    when(mockConnectedApp.isProfileBuildNow).thenReturn(true);
-    when(mockServiceManager.connectedAppInitialized).thenReturn(true);
-    when(mockServiceManager.connectedApp).thenReturn(mockConnectedApp);
-    final mockDebuggerController = MockDebuggerController();
-    when(mockDebuggerController.isPaused).thenReturn(ValueNotifier<bool>(true));
+  testWidgets(
+    'does not display floating debugger controls in profile mode',
+    (WidgetTester tester) async {
+      final mockConnectedApp = MockConnectedAppLegacy();
+      when(mockConnectedApp.isFlutterAppNow).thenReturn(true);
+      when(mockConnectedApp.isProfileBuildNow).thenReturn(true);
+      when(mockServiceManager.connectedAppInitialized).thenReturn(true);
+      when(mockServiceManager.connectedApp).thenReturn(mockConnectedApp);
+      final mockDebuggerController = MockDebuggerController();
+      when(mockDebuggerController.isPaused)
+          .thenReturn(ValueNotifier<bool>(true));
 
-    await tester.pumpWidget(
-      wrapWithControllers(
-        DevToolsScaffold(
-          screens: const [_screen1, _screen2],
-          ideTheme: IdeTheme(),
+      await tester.pumpWidget(
+        wrapWithControllers(
+          DevToolsScaffold(
+            screens: const [_screen1, _screen2],
+            ideTheme: IdeTheme(),
+          ),
+          debugger: mockDebuggerController,
+          analytics: AnalyticsController(enabled: false, firstRun: false),
         ),
-        debugger: mockDebuggerController,
-        analytics: AnalyticsController(enabled: false, firstRun: false),
-      ),
-    );
-    expect(find.byKey(_k1), findsOneWidget);
-    expect(find.byKey(_k2), findsNothing);
-    expect(find.byType(FloatingDebuggerControls), findsNothing);
-  });
+      );
+      expect(find.byKey(_k1), findsOneWidget);
+      expect(find.byKey(_k2), findsNothing);
+      expect(find.byType(FloatingDebuggerControls), findsNothing);
+    },
+  );
 }
 
 class _TestScreen extends Screen {

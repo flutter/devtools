@@ -517,7 +517,7 @@ class TimelineEventsController extends PerformanceFeatureController
         TraceEventWrapper(
           TraceEvent(trace),
           DateTime.now().microsecondsSinceEpoch,
-        )
+        ),
     ];
     allTraceEvents
       ..clear()

@@ -74,7 +74,7 @@ class _ListControlPane extends StatelessWidget {
                       controller.clearSnapshots();
                     }
                   : null,
-            )
+            ),
           ],
         );
       },
@@ -122,7 +122,7 @@ class _SnapshotListTitle extends StatelessWidget {
               )!,
               style: textStyle,
             ),
-            const SizedBox(width: denseRowSpacing)
+            const SizedBox(width: denseRowSpacing),
           ],
           if (theItem is SnapshotDocItem)
             Expanded(
@@ -134,7 +134,7 @@ class _SnapshotListTitle extends StatelessWidget {
             ),
           if (isProcessing) ...[
             CenteredCircularProgressIndicator(size: smallProgressSize),
-            const SizedBox(width: denseRowSpacing)
+            const SizedBox(width: denseRowSpacing),
           ],
         ],
       ),

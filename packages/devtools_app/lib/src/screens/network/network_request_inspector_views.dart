@@ -87,7 +87,7 @@ class HttpRequestHeadersView extends StatelessWidget {
                     _Row(entry: entry, constraints: constraints),
               ],
               key: requestHeadersKey,
-            )
+            ),
           ],
         );
       },
@@ -374,7 +374,7 @@ class HttpRequestCookiesView extends StatelessWidget {
                     _buildColumn('Size', numeric: true),
                     _buildColumn('HttpOnly'),
                     _buildColumn('Secure'),
-                  ]
+                  ],
                 ],
                 rows: [
                   for (int i = 0; i < cookies.length; ++i)

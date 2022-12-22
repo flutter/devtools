@@ -493,7 +493,7 @@ class UserTagDropdown extends StatelessWidget {
                       _buildMenuItem(
                         display: 'Group by: VM Tag',
                         value: CpuProfilerController.groupByVmTag,
-                      )
+                      ),
                   ],
                   onChanged: userTags.isEmpty ||
                           (userTags.length == 1 &&

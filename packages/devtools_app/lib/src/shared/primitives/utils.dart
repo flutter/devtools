@@ -233,7 +233,7 @@ Future<T?> timeout<T>(Future<T> operation, int timeoutMillis) =>
       Future<T?>.delayed(
         Duration(milliseconds: timeoutMillis),
         () => Future<T?>.value(),
-      )
+      ),
     ]);
 
 String longestFittingSubstring(
@@ -504,13 +504,15 @@ class RateLimiter {
     // to occur once the rate limiter is available.
     requestScheduledButNotStarted = true;
     _activeTimer = Timer(
-        Duration(
-          milliseconds: currentTime - _lastRequestTime! + delayBetweenRequests,
-        ), () {
-      _activeTimer = null;
-      requestScheduledButNotStarted = false;
-      _performRequest();
-    });
+      Duration(
+        milliseconds: currentTime - _lastRequestTime! + delayBetweenRequests,
+      ),
+      () {
+        _activeTimer = null;
+        requestScheduledButNotStarted = false;
+        _performRequest();
+      },
+    );
   }
 
   void _performRequest() async {
@@ -1104,7 +1106,7 @@ extension ListExtension<T> on List<T> {
       for (int i = 0; i < length; i++) ...[
         this[i],
         if (i != length - 1) separator,
-      ]
+      ],
     ];
   }
 

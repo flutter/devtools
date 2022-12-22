@@ -166,7 +166,7 @@ void main() async {
                   'MyOtherWidget',
                   'NotAWidget',
                   '_PrivateClass',
-                  '_PrivateExportedClass'
+                  '_PrivateExportedClass',
                 ],
               ),
             );
@@ -257,7 +257,7 @@ void main() async {
 
           await inspectorServiceLocal.addPubRootDirectories([
             '/usr/me/clients/google3/foo/bar/baz/lib/src/bla',
-            '/usr/me/clients/google3/foo/core/lib'
+            '/usr/me/clients/google3/foo/core/lib',
           ]);
           expect(
             inspectorServiceLocal.rootPackages.toList(),
@@ -275,7 +275,7 @@ void main() async {
           // Test bazel directories without a lib directory.
           await inspectorServiceLocal.addPubRootDirectories([
             '/usr/me/clients/google3/foo/bar/baz',
-            '/usr/me/clients/google3/foo/core/'
+            '/usr/me/clients/google3/foo/core/',
           ]);
           expect(
             inspectorServiceLocal.rootPackages.toList(),
@@ -291,7 +291,7 @@ void main() async {
           );
           await inspectorServiceLocal.addPubRootDirectories([
             '/usr/me/clients/google3/third_party/dart/foo/lib/src/bla',
-            '/usr/me/clients/google3/third_party/dart_src/bar/core/lib'
+            '/usr/me/clients/google3/third_party/dart_src/bar/core/lib',
           ]);
           expect(
             inspectorServiceLocal.rootPackages.toList(),
@@ -336,7 +336,7 @@ void main() async {
 
           await inspectorServiceLocal.addPubRootDirectories([
             '/usr/me/clients/google3/third_party/dart/foo',
-            '/usr/me/clients/google3/third_party/dart_src/bar/core'
+            '/usr/me/clients/google3/third_party/dart_src/bar/core',
           ]);
           expect(
             inspectorServiceLocal.rootPackages.toList(),

@@ -45,7 +45,7 @@ void main() {
     mockCodeViewController: mockCodeViewController,
   );
   final scripts = [
-    ScriptRef(uri: 'package:test/script.dart', id: 'test-script')
+    ScriptRef(uri: 'package:test/script.dart', id: 'test-script'),
   ];
 
   when(scriptManager.sortedScripts).thenReturn(ValueNotifier(scripts));
@@ -79,13 +79,16 @@ void main() {
     );
   }
 
-  testWidgetsWithWindowSize('File Explorer visible', windowSize,
-      (WidgetTester tester) async {
-    await pumpDebuggerScreen(tester, debuggerController);
-    // One for the button and one for the title of the File Explorer view.
-    expect(find.text('File Explorer'), findsNWidgets(2));
+  testWidgetsWithWindowSize(
+    'File Explorer visible',
+    windowSize,
+    (WidgetTester tester) async {
+      await pumpDebuggerScreen(tester, debuggerController);
+      // One for the button and one for the title of the File Explorer view.
+      expect(find.text('File Explorer'), findsNWidgets(2));
 
-    // test for items in the libraries tree
-    expect(find.text(scripts.first.uri!.split('/').first), findsOneWidget);
-  });
+      // test for items in the libraries tree
+      expect(find.text(scripts.first.uri!.split('/').first), findsOneWidget);
+    },
+  );
 }

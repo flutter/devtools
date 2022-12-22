@@ -191,7 +191,7 @@ class Cookie {
       "?",
       "=",
       "{",
-      "}"
+      "}",
     ];
     if (newName == null) throw new ArgumentError.notNull("name");
     for (int i = 0; i < newName.length; i++) {

@@ -29,7 +29,7 @@ class MemoryControlPane extends StatelessWidget {
         SecondaryControls(
           chartController: chartController,
           controller: controller,
-        )
+        ),
       ],
     );
   }

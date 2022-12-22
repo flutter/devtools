@@ -546,7 +546,7 @@ class FlutterFramesChartItem extends StatelessWidget {
                   '${frame.id}',
                   style: themeData.subtleChartTextStyle,
                 ),
-              )
+              ),
             ],
           )
         : content;
