@@ -23,8 +23,12 @@ Future<void> runFlutterIntegrationTest(
   if (shouldCreateTestApp) {
     // Create the test app and start it.
     // TODO(kenz): support running Dart CLI test apps from here too.
-    testApp = TestFlutterApp(appPath: testAppPath);
-    await testApp.start();
+    try {
+      testApp = TestFlutterApp(appPath: testAppPath);
+      await testApp.start();
+    } catch (e) {
+      throw Exception('Error starting test app: $e');
+    }
     testAppUri = testApp.vmServiceUri.toString();
   } else {
     testAppUri = testRunnerArgs.testAppUri!;
@@ -33,30 +37,38 @@ Future<void> runFlutterIntegrationTest(
   // TODO(kenz): do we need to start chromedriver in headless mode?
   // Start chrome driver before running the flutter integration test.
   final chromedriver = ChromeDriver();
-  await chromedriver.start();
+  try {
+    await chromedriver.start();
+  } catch (e) {
+    throw Exception('Error starting chromedriver: $e');
+  }
 
   // Run the flutter integration test.
   final testRunner = TestRunner();
-  await testRunner.run(
-    testRunnerArgs.testTarget,
-    enableExperiments: testRunnerArgs.enableExperiments,
-    headless: testRunnerArgs.headless,
-    testAppArguments: {
-      'service_uri': testAppUri,
-    },
-  );
+  try {
+    await testRunner.run(
+      testRunnerArgs.testTarget,
+      enableExperiments: testRunnerArgs.enableExperiments,
+      headless: testRunnerArgs.headless,
+      testAppArguments: {
+        'service_uri': testAppUri,
+      },
+    );
+  } catch (_) {
+    rethrow;
+  } finally {
+    if (shouldCreateTestApp) {
+      _debugLog('killing the test app');
+      await testApp?.stop();
+    }
 
-  if (shouldCreateTestApp) {
-    _debugLog('killing the test app');
-    await testApp?.killGracefully();
+    _debugLog('cancelling stream subscriptions');
+    await testRunner.cancelAllStreamSubscriptions();
+    await chromedriver.cancelAllStreamSubscriptions();
+
+    _debugLog('killing the chromedriver process');
+    chromedriver.kill();
   }
-
-  _debugLog('cancelling stream subscriptions');
-  await testRunner.cancelAllStreamSubscriptions();
-  await chromedriver.cancelAllStreamSubscriptions();
-
-  _debugLog('killing the chromedriver process');
-  chromedriver.kill();
 }
 
 class ChromeDriver with IOMixin {
@@ -103,11 +115,59 @@ class TestRunner with IOMixin {
         if (enableExperiments) '--dart-define=enable_experiments=true',
       ],
     );
-    listenToProcessOutput(process);
+    listenToProcessOutput(
+      process,
+      onStdout: (line) {
+        if (line.startsWith(_TestResult.testResultPrefix)) {
+          final testResultJson = line.substring(line.indexOf('{'));
+          final testResultMap =
+              jsonDecode(testResultJson) as Map<String, Object?>;
+          final result = _TestResult.parse(testResultMap);
+          if (!result.result) {
+            throw Exception(result.toString());
+          }
+        }
+        print('stdout = $line');
+      },
+    );
 
     await process.exitCode;
     process.kill();
     _debugLog('flutter drive process has exited');
+  }
+}
+
+class _TestResult {
+  _TestResult._(this.result, this.methodName, this.details);
+
+  factory _TestResult.parse(Map<String, Object?> json) {
+    final result = json[resultKey] == 'true';
+    final failureDetails =
+        (json[failureDetailsKey] as List<Object?>).cast<String>().firstOrNull ??
+            '{}';
+    final failureDetailsMap =
+        jsonDecode(failureDetails) as Map<String, Object?>;
+    final methodName = failureDetailsMap[methodNameKey] as String?;
+    final details = failureDetailsMap[detailsKey] as String?;
+    return _TestResult._(result, methodName, details);
+  }
+
+  static const testResultPrefix = 'result {"result":';
+  static const resultKey = 'result';
+  static const failureDetailsKey = 'failureDetails';
+  static const methodNameKey = 'methodName';
+  static const detailsKey = 'details';
+
+  final bool result;
+  final String? methodName;
+  final String? details;
+
+  @override
+  String toString() {
+    if (result) {
+      return 'Test passed';
+    }
+    return 'Test \'$methodName\' failed: $details.';
   }
 }
 

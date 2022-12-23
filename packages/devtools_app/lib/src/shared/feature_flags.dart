@@ -6,6 +6,10 @@ import 'package:flutter/foundation.dart';
 
 import 'globals.dart';
 
+@visibleForTesting
+bool get enableExperiments =>
+    _experimentsEnabledByEnvironment || _experimentsEnabledFromMain;
+
 /// If true, features under construction will be enabled for release build.
 ///
 /// By default, the constant is false.
@@ -16,10 +20,14 @@ import 'globals.dart';
 ///   "args": [
 ///     "--dart-define=enable_experiments=true"
 ///   ]
-const bool _kEnableExperiments = bool.fromEnvironment('enable_experiments');
+const bool _experimentsEnabledByEnvironment =
+    bool.fromEnvironment('enable_experiments');
 
-@visibleForTesting
-bool enableExperiments = _kEnableExperiments;
+bool _experimentsEnabledFromMain = false;
+
+void setEnableExperiments() {
+  _experimentsEnabledFromMain = true;
+}
 
 @visibleForTesting
 bool get enableBeta => enableExperiments || !isExternalBuild;

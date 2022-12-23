@@ -27,6 +27,7 @@ class TestFlutterApp extends _TestApp {
         '-d',
         'flutter-tester',
       ],
+      workingDirectory: testAppPath,
     );
   }
 }
@@ -58,6 +59,8 @@ abstract class _TestApp with IOMixin {
 
   Uri get vmServiceUri => _vmServiceWsUri;
   late Uri _vmServiceWsUri;
+
+  String? _currentRunningAppId;
 
   Future<void> startProcess();
 
@@ -106,34 +109,79 @@ abstract class _TestApp with IOMixin {
     _vmServiceWsUri =
         convertToWebSocketUrl(serviceProtocolUrl: _vmServiceWsUri);
 
-    await started;
+    // Now await the started event; if it had already happened the future will
+    // have already completed.
+    final startedResult = await started;
+    final params = startedResult[FlutterDaemonConstants.params.key]!
+        as Map<String, Object?>;
+    _currentRunningAppId = params[FlutterDaemonConstants.appId.key] as String?;
   }
 
-  Future<int> killGracefully() {
-    _debugPrint('Sending SIGTERM to $runProcessId..');
-    Process.killPid(runProcessId);
+  Future<int> stop() async {
+    if (_currentRunningAppId != null) {
+      _debugPrint('Stopping app');
+      await Future.any<void>(<Future<void>>[
+        runProcess!.exitCode,
+        _sendRequest(
+          'app.stop',
+          <String, dynamic>{'appId': _currentRunningAppId},
+        ),
+      ]).timeout(
+        _quitTimeout,
+        onTimeout: () {
+          _debugPrint('app.stop did not return within $_quitTimeout');
+        },
+      );
+      _currentRunningAppId = null;
+    }
 
-    final killFuture =
-        runProcess!.exitCode.timeout(_quitTimeout, onTimeout: _killForcefully);
-    unawaited(_killAndShutdown(killFuture));
-    return killFuture;
+    _debugPrint('Waiting for process to end');
+    return runProcess!.exitCode.timeout(
+      _quitTimeout,
+      onTimeout: _killGracefully,
+    );
+  }
+
+  int _requestId = 1;
+  Future<dynamic> _sendRequest(String method, dynamic params) async {
+    final int requestId = _requestId++;
+    final Map<String, dynamic> request = <String, dynamic>{
+      'id': requestId,
+      'method': method,
+      'params': params
+    };
+    final String jsonEncoded = json.encode(<Map<String, dynamic>>[request]);
+    _debugPrint(jsonEncoded);
+
+    // Set up the response future before we send the request to avoid any
+    // races. If the method we're calling is app.stop then we tell waitFor not
+    // to throw if it sees an app.stop event before the response to this request.
+    final Future<Map<String, dynamic>> responseFuture = waitFor(
+      id: requestId,
+      ignoreAppStopEvent: method == 'app.stop',
+    );
+    runProcess!.stdin.writeln(jsonEncoded);
+    final Map<String, dynamic> response = await responseFuture;
+
+    if (response['error'] != null || response['result'] == null) {
+      throw Exception('Unexpected error response');
+    }
+
+    return response['result'];
+  }
+
+  Future<int> _killGracefully() async {
+    _debugPrint('Sending SIGTERM to $runProcessId..');
+    await cancelAllStreamSubscriptions();
+    Process.killPid(runProcessId);
+    return runProcess!.exitCode
+        .timeout(_quitTimeout, onTimeout: _killForcefully);
   }
 
   Future<int> _killForcefully() {
     _debugPrint('Sending SIGKILL to $runProcessId..');
     Process.killPid(runProcessId, ProcessSignal.sigkill);
-
-    final killFuture = runProcess!.exitCode;
-    unawaited(_killAndShutdown(killFuture));
-    return killFuture;
-  }
-
-  Future<void> _killAndShutdown(Future<int> killFuture) async {
-    unawaited(
-      killFuture.then((_) async {
-        await cancelAllStreamSubscriptions();
-      }),
-    );
+    return runProcess!.exitCode;
   }
 
   Future<Map<String, Object?>> waitFor({
@@ -279,6 +327,7 @@ enum FlutterDaemonConstants {
   event,
   error,
   id,
+  appId,
   params,
   trace,
   wsUri,
