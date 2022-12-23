@@ -143,7 +143,8 @@ class _TestResult {
   factory _TestResult.parse(Map<String, Object?> json) {
     final result = json[resultKey] == 'true';
     final failureDetails =
-        (json[failureDetailsKey] as List<Object?>).cast<String>().first;
+        (json[failureDetailsKey] as List<Object?>).cast<String>().firstOrNull ??
+            '{}';
     final failureDetailsMap =
         jsonDecode(failureDetails) as Map<String, Object?>;
     final methodName = failureDetailsMap[methodNameKey] as String?;
