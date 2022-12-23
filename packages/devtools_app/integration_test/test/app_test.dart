@@ -28,10 +28,6 @@ void main() {
     expect(find.byType(LandingScreenBody), findsOneWidget);
     expect(find.text('No client connection'), findsOneWidget);
 
-    // temporary, just committed this to verify that the bots will fail if this
-    // test case fails.
-    expect(true, isFalse);
-
     logStatus('verify that we can connect to an app');
     await connectToTestApp(tester, testApp);
     expect(find.byType(LandingScreenBody), findsNothing);

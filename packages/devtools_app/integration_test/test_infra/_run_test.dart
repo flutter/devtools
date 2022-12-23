@@ -144,7 +144,8 @@ class _TestResult {
     final result = json[resultKey] == 'true';
     final failureDetails =
         (json[failureDetailsKey] as List<Object?>).cast<String>().first;
-    final failureDetailsMap = jsonDecode(failureDetails) as Map<String, Object?>;
+    final failureDetailsMap =
+        jsonDecode(failureDetails) as Map<String, Object?>;
     final methodName = failureDetailsMap[methodNameKey] as String?;
     final details = failureDetailsMap[detailsKey] as String?;
     return _TestResult._(result, methodName, details);
