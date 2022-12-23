@@ -15,7 +15,7 @@ import 'package:vm_service/vm_service.dart';
 
 import '../../../screens/debugger/debugger_controller.dart';
 import '../../../screens/debugger/variables.dart';
-import '../../../screens/inspector/diagnostics.dart';
+import 'diagnostics.dart';
 import '../../../shared/common_widgets.dart';
 import '../../../shared/globals.dart';
 import '../../../shared/object_tree.dart';

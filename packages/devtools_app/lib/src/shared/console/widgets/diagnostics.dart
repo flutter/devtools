@@ -4,19 +4,20 @@
 
 import 'package:flutter/material.dart';
 
-import '../../shared/console/widgets/expandable_variable.dart';
-import '../../shared/globals.dart';
-import '../../shared/object_tree.dart';
-import '../../shared/primitives/utils.dart';
-import '../../shared/theme.dart';
-import '../../shared/ui/hover.dart';
-import '../../shared/ui/icons.dart';
-import '../../shared/ui/utils.dart';
-import '../debugger/debugger_controller.dart';
-import '../debugger/variables.dart';
-import 'diagnostics_node.dart';
-import 'inspector_tree.dart';
-import 'primitives/inspector_text_styles.dart' as inspector_text_styles;
+import 'expandable_variable.dart';
+import '../../globals.dart';
+import '../../object_tree.dart';
+import '../../primitives/utils.dart';
+import '../../theme.dart';
+import '../../ui/hover.dart';
+import '../../ui/icons.dart';
+import '../../ui/utils.dart';
+import '../../../screens/debugger/debugger_controller.dart';
+import '../../../screens/debugger/variables.dart';
+import '../../../screens/inspector/diagnostics_node.dart';
+import '../../../screens/inspector/inspector_tree.dart';
+import '../../../screens/inspector/primitives/inspector_text_styles.dart'
+    as inspector_text_styles;
 
 final _colorIconMaker = ColorIconMaker();
 final _customIconMaker = CustomIconMaker();

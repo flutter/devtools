@@ -22,7 +22,7 @@ import '../../shared/primitives/utils.dart';
 import '../../shared/routing.dart';
 import '../../shared/theme.dart';
 import '../../shared/tree.dart';
-import '../inspector/diagnostics.dart';
+import '../../shared/console/widgets/diagnostics.dart';
 import '../inspector/inspector_screen.dart';
 import 'debugger_controller.dart';
 
