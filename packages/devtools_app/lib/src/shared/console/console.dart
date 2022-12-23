@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:devtools_app/src/shared/console/widgets/expandable_variable.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 

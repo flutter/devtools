@@ -4,6 +4,7 @@
 
 import 'package:flutter/material.dart';
 
+import '../../shared/console/widgets/expandable_variable.dart';
 import '../../shared/globals.dart';
 import '../../shared/object_tree.dart';
 import '../../shared/primitives/utils.dart';
