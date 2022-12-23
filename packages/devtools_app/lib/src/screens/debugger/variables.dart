@@ -27,8 +27,11 @@ class Variables extends StatelessWidget {
     // on stepping.
     return TreeView<DartObjectNode>(
       dataRootsListenable: controller.variables,
-      dataDisplayProvider: (variable, onPressed) =>
-          displayProvider(context, variable, onPressed, controller),
+      dataDisplayProvider: (variable, onPressed) => DisplayProvider(
+        variable: variable,
+        onTap: onPressed,
+        controller: controller,
+      ),
       onItemSelected: onItemPressed,
     );
   }

@@ -16,132 +16,140 @@ import '../../../shared/theme.dart';
 import '../../primitives/simple_items.dart';
 import 'diagnostics.dart';
 
-// TODO(jacobr): this looks like a widget.
-Widget displayProvider(
-  BuildContext context,
-  DartObjectNode variable,
-  VoidCallback onTap,
-  DebuggerController controller,
-) {
-  final theme = Theme.of(context);
+class DisplayProvider extends StatelessWidget {
+  const DisplayProvider({
+    super.key,
+    required this.variable,
+    required this.onTap,
+    required this.controller,
+  });
 
-  // TODO(devoncarew): Here, we want to wait until the tooltip wants to show,
-  // then call toString() on variable and render the result in a tooltip. We
-  // should also include the type of the value in the tooltip if the variable
-  // is not null.
-  if (variable.text != null) {
-    return SelectableText.rich(
-      TextSpan(
-        children: processAnsiTerminalCodes(
-          variable.text,
-          theme.subtleFixedFontStyle,
-        ),
-      ),
-      onTap: onTap,
-    );
-  }
-  final diagnostic = variable.ref?.diagnostic;
-  if (diagnostic != null) {
-    return DiagnosticsNodeDescription(
-      diagnostic,
-      multiline: true,
-      style: theme.fixedFontStyle,
-      debuggerController: controller,
-    );
-  }
-  TextStyle variableDisplayStyle() {
-    final style = theme.subtleFixedFontStyle;
-    String? kind = variable.ref?.instanceRef?.kind;
-    // Handle nodes with primative values.
-    if (kind == null) {
-      final value = variable.ref?.value;
-      if (value != null) {
-        switch (value.runtimeType) {
-          case String:
-            kind = InstanceKind.kString;
-            break;
-          case num:
-            kind = InstanceKind.kInt;
-            break;
-          case bool:
-            kind = InstanceKind.kBool;
-            break;
-        }
-      }
-      kind ??= InstanceKind.kNull;
-    }
-    switch (kind) {
-      case InstanceKind.kString:
-        return style.apply(
-          color: theme.colorScheme.stringSyntaxColor,
-        );
-      case InstanceKind.kInt:
-      case InstanceKind.kDouble:
-        return style.apply(
-          color: theme.colorScheme.numericConstantSyntaxColor,
-        );
-      case InstanceKind.kBool:
-      case InstanceKind.kNull:
-        return style.apply(
-          color: theme.colorScheme.modifierSyntaxColor,
-        );
-      default:
-        return style;
-    }
-  }
+  final DartObjectNode variable;
+  final VoidCallback onTap;
+  final DebuggerController controller;
 
-  final hasName = variable.name?.isNotEmpty ?? false;
-  return DevToolsTooltip(
-    message: variable.displayValue.toString(),
-    waitDuration: tooltipWaitLong,
-    child: SelectableText.rich(
-      TextSpan(
-        text: hasName ? variable.name : null,
-        style: variable.artificialName
-            ? theme.subtleFixedFontStyle
-            : theme.fixedFontStyle.apply(
-                color: theme.colorScheme.controlFlowSyntaxColor,
-              ),
-        children: [
-          if (hasName)
-            TextSpan(
-              text: ': ',
-              style: theme.fixedFontStyle,
-            ),
-          TextSpan(
-            text: variable.displayValue.toString(),
-            style: variable.artificialValue
-                ? theme.subtleFixedFontStyle
-                : variableDisplayStyle(),
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    // TODO(devoncarew): Here, we want to wait until the tooltip wants to show,
+    // then call toString() on variable and render the result in a tooltip. We
+    // should also include the type of the value in the tooltip if the variable
+    // is not null.
+    if (variable.text != null) {
+      return SelectableText.rich(
+        TextSpan(
+          children: processAnsiTerminalCodes(
+            variable.text,
+            theme.subtleFixedFontStyle,
           ),
-        ],
-      ),
-      selectionControls: VariableSelectionControls(
-        handleInspect: serviceManager.inspectorService != null
-            ? (delegate) async {
-                delegate.hideToolbar();
-                final router = DevToolsRouterDelegate.of(context);
-                final inspectorService = serviceManager.inspectorService;
-                if (await variable.inspectWidget()) {
-                  router.navigateIfNotCurrent(ScreenMetaData.inspector.id);
-                } else {
-                  if (inspectorService!.isDisposed) return;
-                  final isInspectable = await variable.isInspectable;
-                  if (inspectorService.isDisposed) return;
-                  if (isInspectable) {
-                    notificationService.push(
-                      'Widget is already the current inspector selection.',
-                    );
+        ),
+        onTap: onTap,
+      );
+    }
+    final diagnostic = variable.ref?.diagnostic;
+    if (diagnostic != null) {
+      return DiagnosticsNodeDescription(
+        diagnostic,
+        multiline: true,
+        style: theme.fixedFontStyle,
+        debuggerController: controller,
+      );
+    }
+    TextStyle variableDisplayStyle() {
+      final style = theme.subtleFixedFontStyle;
+      String? kind = variable.ref?.instanceRef?.kind;
+      // Handle nodes with primative values.
+      if (kind == null) {
+        final value = variable.ref?.value;
+        if (value != null) {
+          switch (value.runtimeType) {
+            case String:
+              kind = InstanceKind.kString;
+              break;
+            case num:
+              kind = InstanceKind.kInt;
+              break;
+            case bool:
+              kind = InstanceKind.kBool;
+              break;
+          }
+        }
+        kind ??= InstanceKind.kNull;
+      }
+      switch (kind) {
+        case InstanceKind.kString:
+          return style.apply(
+            color: theme.colorScheme.stringSyntaxColor,
+          );
+        case InstanceKind.kInt:
+        case InstanceKind.kDouble:
+          return style.apply(
+            color: theme.colorScheme.numericConstantSyntaxColor,
+          );
+        case InstanceKind.kBool:
+        case InstanceKind.kNull:
+          return style.apply(
+            color: theme.colorScheme.modifierSyntaxColor,
+          );
+        default:
+          return style;
+      }
+    }
+
+    final hasName = variable.name?.isNotEmpty ?? false;
+    return DevToolsTooltip(
+      message: variable.displayValue.toString(),
+      waitDuration: tooltipWaitLong,
+      child: SelectableText.rich(
+        TextSpan(
+          text: hasName ? variable.name : null,
+          style: variable.artificialName
+              ? theme.subtleFixedFontStyle
+              : theme.fixedFontStyle.apply(
+                  color: theme.colorScheme.controlFlowSyntaxColor,
+                ),
+          children: [
+            if (hasName)
+              TextSpan(
+                text: ': ',
+                style: theme.fixedFontStyle,
+              ),
+            TextSpan(
+              text: variable.displayValue.toString(),
+              style: variable.artificialValue
+                  ? theme.subtleFixedFontStyle
+                  : variableDisplayStyle(),
+            ),
+          ],
+        ),
+        selectionControls: VariableSelectionControls(
+          handleInspect: serviceManager.inspectorService != null
+              ? (delegate) async {
+                  delegate.hideToolbar();
+                  final router = DevToolsRouterDelegate.of(context);
+                  final inspectorService = serviceManager.inspectorService;
+                  if (await variable.inspectWidget()) {
+                    router.navigateIfNotCurrent(ScreenMetaData.inspector.id);
                   } else {
-                    notificationService.push(
-                      'Only Elements and RenderObjects can currently be inspected',
-                    );
+                    if (inspectorService!.isDisposed) return;
+                    final isInspectable = await variable.isInspectable;
+                    if (inspectorService.isDisposed) return;
+                    if (isInspectable) {
+                      notificationService.push(
+                        'Widget is already the current inspector selection.',
+                      );
+                    } else {
+                      notificationService.push(
+                        'Only Elements and RenderObjects can currently be inspected',
+                      );
+                    }
                   }
                 }
-              }
-            : null,
+              : null,
+        ),
+        onTap: onTap,
       ),
-      onTap: onTap,
-    ),
-  );
+    );
+  }
 }
