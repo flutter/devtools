@@ -11,19 +11,10 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide Stack;
 import 'package:provider/provider.dart';
-import 'package:vm_service/vm_service.dart';
 
-import '../../shared/common_widgets.dart';
 import '../../shared/console/widgets/display_provider.dart';
-import '../../shared/globals.dart';
 import '../../shared/object_tree.dart';
-import '../../shared/primitives/listenable.dart';
-import '../../shared/primitives/utils.dart';
-import '../../shared/routing.dart';
-import '../../shared/theme.dart';
 import '../../shared/tree.dart';
-import '../../shared/console/widgets/diagnostics.dart';
-import '../inspector/inspector_screen.dart';
 import 'debugger_controller.dart';
 
 class Variables extends StatelessWidget {

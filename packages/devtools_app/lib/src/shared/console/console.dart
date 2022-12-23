@@ -4,18 +4,17 @@
 
 import 'dart:async';
 
-import 'package:devtools_app/src/shared/console/widgets/expandable_variable.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../screens/debugger/debugger_controller.dart';
-import '../../screens/debugger/variables.dart';
 import '../common_widgets.dart';
 import '../primitives/auto_dispose.dart';
 import '../primitives/utils.dart';
 import '../theme.dart';
 import '../utils.dart';
 import 'console_service.dart';
+import 'widgets/expandable_variable.dart';
 
 // TODO(devoncarew): Allow scrolling horizontally as well.
 

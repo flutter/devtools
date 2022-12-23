@@ -4,7 +4,11 @@
 
 import 'package:flutter/material.dart';
 
-import 'expandable_variable.dart';
+import '../../../screens/debugger/debugger_controller.dart';
+import '../../../screens/inspector/diagnostics_node.dart';
+import '../../../screens/inspector/inspector_tree.dart';
+import '../../../screens/inspector/primitives/inspector_text_styles.dart'
+    as inspector_text_styles;
 import '../../globals.dart';
 import '../../object_tree.dart';
 import '../../primitives/utils.dart';
@@ -12,12 +16,7 @@ import '../../theme.dart';
 import '../../ui/hover.dart';
 import '../../ui/icons.dart';
 import '../../ui/utils.dart';
-import '../../../screens/debugger/debugger_controller.dart';
-import '../../../screens/debugger/variables.dart';
-import '../../../screens/inspector/diagnostics_node.dart';
-import '../../../screens/inspector/inspector_tree.dart';
-import '../../../screens/inspector/primitives/inspector_text_styles.dart'
-    as inspector_text_styles;
+import 'expandable_variable.dart';
 
 final _colorIconMaker = ColorIconMaker();
 final _customIconMaker = CustomIconMaker();

@@ -35,7 +35,6 @@ import 'debugger_controller.dart';
 import 'debugger_model.dart';
 import 'file_search.dart';
 import 'key_sets.dart';
-import 'variables.dart';
 
 final debuggerCodeViewSearchKey =
     GlobalKey(debugLabel: 'DebuggerCodeViewSearchKey');

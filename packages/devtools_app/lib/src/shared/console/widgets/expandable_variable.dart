@@ -4,20 +4,11 @@
 
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide Stack;
-import 'package:provider/provider.dart';
-import 'package:vm_service/vm_service.dart';
 
 import '../../../screens/debugger/debugger_controller.dart';
-import '../../../screens/debugger/variables.dart';
-import '../../../shared/common_widgets.dart';
-import '../../../shared/globals.dart';
 import '../../../shared/object_tree.dart';
 import '../../../shared/primitives/listenable.dart';
-import '../../../shared/primitives/utils.dart';
-import '../../../shared/routing.dart';
-import '../../../shared/theme.dart';
 import '../../../shared/tree.dart';
 import 'display_provider.dart';
 

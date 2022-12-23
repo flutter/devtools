@@ -2,29 +2,19 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// TODO(https://github.com/flutter/devtools/issues/4717): migrate away from
-// deprecated members.
-// ignore_for_file: deprecated_member_use
-
-import 'dart:async';
-
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide Stack;
-import 'package:provider/provider.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../../screens/debugger/debugger_controller.dart';
 import '../../../screens/debugger/variables.dart';
-import 'diagnostics.dart';
 import '../../../shared/common_widgets.dart';
 import '../../../shared/globals.dart';
 import '../../../shared/object_tree.dart';
-import '../../../shared/primitives/listenable.dart';
 import '../../../shared/primitives/utils.dart';
 import '../../../shared/routing.dart';
 import '../../../shared/theme.dart';
-import '../../../shared/tree.dart';
 import '../../primitives/simple_items.dart';
+import 'diagnostics.dart';
 
 // TODO(jacobr): this looks like a widget.
 Widget displayProvider(
