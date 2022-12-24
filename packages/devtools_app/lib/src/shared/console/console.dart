@@ -7,12 +7,11 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-import '../../screens/debugger/debugger_controller.dart';
+//import '../../screens/debugger/debugger_controller.dart';
 import '../common_widgets.dart';
 import '../primitives/auto_dispose.dart';
 import '../primitives/utils.dart';
 import '../theme.dart';
-import '../utils.dart';
 import 'console_service.dart';
 import 'widgets/expandable_variable.dart';
 
@@ -125,9 +124,7 @@ class _ConsoleOutput extends StatefulWidget {
 }
 
 class _ConsoleOutputState extends State<_ConsoleOutput>
-    with
-        AutoDisposeMixin<_ConsoleOutput>,
-        ProvidedControllerMixin<DebuggerController, _ConsoleOutput> {
+    with AutoDisposeMixin<_ConsoleOutput> {
   // The scroll controller must survive ConsoleOutput re-renders
   // to work as intended, so it must be part of the "state".
   final ScrollController _scroll = ScrollController();
@@ -194,12 +191,6 @@ class _ConsoleOutputState extends State<_ConsoleOutput>
         (_scroll.hasClients && _scroll.atScrollBottom)) {
       _scrollToBottom = true;
     }
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    initController();
   }
 
   @override
