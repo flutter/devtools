@@ -730,7 +730,10 @@ bool _isConstructor(FuncRef funcRef, Class clazz) =>
     funcRef.name == clazz.name || funcRef.name!.startsWith('${clazz.name}.');
 
 bool _isAccessible(
-    String member, Class? clazz, DebuggerController evalService) {
+  String member,
+  Class? clazz,
+  DebuggerController evalService,
+) {
   final frame = evalService.frameForEval!;
   final currentScript = frame.location!.script;
   return !isPrivate(member) || currentScript!.id == clazz?.location?.script?.id;
