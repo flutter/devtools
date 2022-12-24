@@ -5,10 +5,10 @@
 import 'package:flutter/material.dart' hide Stack;
 import 'package:vm_service/vm_service.dart';
 
-import '../../../screens/debugger/variables.dart';
 import '../../../shared/common_widgets.dart';
 import '../../../shared/globals.dart';
 import '../../../shared/object_tree.dart';
+import '../../../shared/primitives/selection_controls.dart';
 import '../../../shared/primitives/utils.dart';
 import '../../../shared/routing.dart';
 import '../../../shared/theme.dart';
