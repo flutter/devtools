@@ -33,6 +33,7 @@ import 'inspector_service.dart';
 import 'inspector_tree.dart';
 import 'inspector_tree_controller.dart';
 import 'primitives/inspector_common.dart';
+import 'primitives/instance_ref.dart';
 
 const inspectorRefQueryParam = 'inspectorRef';
 

@@ -14,6 +14,7 @@ import '../../shared/primitives/utils.dart';
 import '../../shared/ui/icons.dart';
 import '../debugger/debugger_model.dart';
 import 'inspector_service.dart';
+import 'primitives/instance_ref.dart';
 
 final diagnosticLevelUtils = EnumUtils<DiagnosticLevel>(DiagnosticLevel.values);
 
