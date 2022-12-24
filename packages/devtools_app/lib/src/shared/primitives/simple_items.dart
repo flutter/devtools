@@ -46,3 +46,8 @@ enum ScreenMetaData {
 }
 
 const String traceEventsFieldName = 'traceEvents';
+
+class Reference<T> {
+  Reference(this.value);
+  T value;
+}
