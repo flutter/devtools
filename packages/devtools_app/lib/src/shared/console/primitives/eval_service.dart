@@ -11,12 +11,16 @@ import '../../../shared/globals.dart';
 import '../../object_tree.dart';
 import '../../primitives/reference.dart';
 
+typedef ExpressionEvaluator = Future<Response> Function(String expression);
+
 class EvalService {
-  EvalService(this.isolateRef, this.variables);
+  EvalService(this.isolateRef, this.variables, this.evalAtCurrentFrame);
 
   final Reference<IsolateRef?> isolateRef;
 
   final ValueListenable<List<DartObjectNode>> variables;
+
+  final ExpressionEvaluator evalAtCurrentFrame;
 
   final EvalHistory evalHistory = EvalHistory();
 
