@@ -32,7 +32,7 @@ import '../../shared/globals.dart';
 import '../../shared/primitives/auto_dispose.dart';
 import '../../shared/primitives/utils.dart';
 import 'inspector_screen.dart';
-import 'inspector_tree.dart';
+import '../../shared/console/eval/inspector_tree.dart';
 import 'inspector_tree_controller.dart';
 
 const inspectorRefQueryParam = 'inspectorRef';

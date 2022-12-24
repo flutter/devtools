@@ -17,7 +17,7 @@ export 'src/screens/debugger/span_parser.dart';
 export 'src/screens/debugger/syntax_highlighter.dart';
 export 'src/screens/inspector/inspector_controller.dart';
 export 'src/screens/inspector/inspector_screen.dart';
-export 'src/screens/inspector/inspector_tree.dart';
+export 'src/shared/console/eval/inspector_tree.dart';
 export 'src/screens/inspector/inspector_tree_controller.dart';
 export 'src/screens/logging/logging_controller.dart';
 export 'src/screens/logging/logging_screen.dart';

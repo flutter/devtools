@@ -22,7 +22,7 @@ import '../../shared/ui/filter.dart';
 import '../../shared/ui/search.dart';
 import '../../shared/console/eval/diagnostics_node.dart';
 import '../../shared/console/eval/inspector_service.dart';
-import '../inspector/inspector_tree.dart';
+import '../../shared/console/eval/inspector_tree.dart';
 import '../inspector/inspector_tree_controller.dart';
 import 'logging_screen.dart';
 

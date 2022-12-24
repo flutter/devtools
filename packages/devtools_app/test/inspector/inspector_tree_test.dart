@@ -6,7 +6,7 @@ import 'package:devtools_app/src/screens/debugger/breakpoint_manager.dart';
 import 'package:devtools_app/src/screens/debugger/debugger_controller.dart';
 import 'package:devtools_app/src/screens/inspector/inspector_breadcrumbs.dart';
 import 'package:devtools_app/src/screens/inspector/inspector_controller.dart';
-import 'package:devtools_app/src/screens/inspector/inspector_tree.dart';
+import 'package:devtools_app/src/shared/console/eval/inspector_tree.dart';
 import 'package:devtools_app/src/screens/inspector/inspector_tree_controller.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/shared/config_specific/ide_theme/ide_theme.dart';

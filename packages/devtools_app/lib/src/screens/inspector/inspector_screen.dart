@@ -29,7 +29,7 @@ import '../../shared/ui/search.dart';
 import '../../shared/utils.dart';
 import 'inspector_controller.dart';
 import 'inspector_screen_details_tab.dart';
-import 'inspector_tree.dart';
+import '../../shared/console/eval/inspector_tree.dart';
 import 'inspector_tree_controller.dart';
 
 class InspectorScreen extends Screen {

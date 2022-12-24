@@ -5,7 +5,7 @@
 import 'package:flutter/material.dart';
 
 import '../eval/diagnostics_node.dart';
-import '../../../screens/inspector/inspector_tree.dart';
+import '../eval/inspector_tree.dart';
 import '../../globals.dart';
 import '../../object_tree.dart';
 import '../../primitives/utils.dart';

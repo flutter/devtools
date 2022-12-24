@@ -34,7 +34,7 @@ import '../../shared/console/eval/diagnostics_node.dart';
 import 'inspector_breadcrumbs.dart';
 import 'inspector_controller.dart';
 import 'inspector_screen.dart';
-import 'inspector_tree.dart';
+import '../../shared/console/eval/inspector_tree.dart';
 
 /// Presents a [TreeNode].
 class _InspectorTreeRowWidget extends StatefulWidget {

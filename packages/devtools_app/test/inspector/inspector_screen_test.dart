@@ -10,7 +10,7 @@ import 'dart:convert';
 import 'package:devtools_app/src/shared/console/eval/diagnostics_node.dart';
 import 'package:devtools_app/src/screens/inspector/inspector_controller.dart';
 import 'package:devtools_app/src/screens/inspector/inspector_screen.dart';
-import 'package:devtools_app/src/screens/inspector/inspector_tree.dart';
+import 'package:devtools_app/src/shared/console/eval/inspector_tree.dart';
 import 'package:devtools_app/src/screens/inspector/inspector_tree_controller.dart';
 import 'package:devtools_app/src/screens/inspector/layout_explorer/flex/flex.dart';
 import 'package:devtools_app/src/screens/inspector/layout_explorer/layout_explorer.dart';
