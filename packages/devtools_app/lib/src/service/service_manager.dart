@@ -9,7 +9,7 @@ import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart' hide Error;
 
-import '../screens/inspector/inspector_service.dart';
+import '../shared/console/eval/inspector_service.dart';
 import '../screens/logging/vm_service_logger.dart';
 import '../screens/performance/timeline_streams.dart';
 import '../shared/analytics/analytics.dart' as ga;

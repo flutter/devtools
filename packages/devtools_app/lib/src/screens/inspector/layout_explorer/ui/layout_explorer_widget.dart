@@ -13,7 +13,7 @@ import '../../../../shared/theme.dart';
 import '../../diagnostics_node.dart';
 import '../../inspector_controller.dart';
 import '../../inspector_data_models.dart';
-import '../../inspector_service.dart';
+import '../../../../shared/console/eval/inspector_service.dart';
 import 'utils.dart';
 
 const maxRequestsPerSecond = 3.0;

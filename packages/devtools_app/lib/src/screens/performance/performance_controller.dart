@@ -10,7 +10,7 @@ import '../../shared/config_specific/import_export/import_export.dart';
 import '../../shared/feature_flags.dart';
 import '../../shared/globals.dart';
 import '../../shared/primitives/auto_dispose.dart';
-import '../inspector/inspector_service.dart';
+import '../../shared/console/eval/inspector_service.dart';
 import 'panes/controls/enhance_tracing/enhance_tracing_controller.dart';
 import 'panes/flutter_frames/flutter_frame_model.dart';
 import 'panes/flutter_frames/flutter_frames_controller.dart';

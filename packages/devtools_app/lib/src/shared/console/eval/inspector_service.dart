@@ -15,14 +15,14 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../shared/console/primitives/instance_ref.dart';
-import '../../shared/console/primitives/simple_items.dart';
-import '../../shared/eval_on_dart_library.dart';
-import '../../shared/globals.dart';
-import '../../shared/primitives/auto_dispose.dart';
-import '../../shared/primitives/utils.dart';
-import '../debugger/debugger_model.dart';
-import 'diagnostics_node.dart';
+import '../primitives/instance_ref.dart';
+import '../primitives/simple_items.dart';
+import '../../eval_on_dart_library.dart';
+import '../../globals.dart';
+import '../../primitives/auto_dispose.dart';
+import '../../primitives/utils.dart';
+import '../../../screens/debugger/debugger_model.dart';
+import '../../../screens/inspector/diagnostics_node.dart';
 
 const inspectorLibraryUri = 'package:flutter/src/widgets/widget_inspector.dart';
 

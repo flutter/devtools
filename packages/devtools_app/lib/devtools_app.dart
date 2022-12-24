@@ -18,7 +18,7 @@ export 'src/screens/debugger/syntax_highlighter.dart';
 export 'src/screens/inspector/diagnostics_node.dart';
 export 'src/screens/inspector/inspector_controller.dart';
 export 'src/screens/inspector/inspector_screen.dart';
-export 'src/screens/inspector/inspector_service.dart';
+export 'src/shared/console/eval/inspector_service.dart';
 export 'src/screens/inspector/inspector_tree.dart';
 export 'src/screens/inspector/inspector_tree_controller.dart';
 export 'src/screens/logging/logging_controller.dart';

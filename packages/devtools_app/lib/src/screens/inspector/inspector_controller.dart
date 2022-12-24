@@ -31,7 +31,7 @@ import '../../shared/primitives/auto_dispose.dart';
 import '../../shared/primitives/utils.dart';
 import 'diagnostics_node.dart';
 import 'inspector_screen.dart';
-import 'inspector_service.dart';
+import '../../shared/console/eval/inspector_service.dart';
 import 'inspector_tree.dart';
 import 'inspector_tree_controller.dart';
 
