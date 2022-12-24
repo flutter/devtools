@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:devtools_app/src/shared/console/primitives/simple_items.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -24,7 +25,6 @@ import 'screens/debugger/debugger_screen.dart';
 import 'screens/inspector/inspector_controller.dart';
 import 'screens/inspector/inspector_screen.dart';
 import 'screens/inspector/inspector_tree_controller.dart';
-import 'screens/inspector/primitives/inspector_common.dart';
 import 'screens/logging/logging_controller.dart';
 import 'screens/logging/logging_screen.dart';
 import 'screens/memory/memory_controller.dart';

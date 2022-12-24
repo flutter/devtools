@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app/devtools_app.dart';
+import 'package:devtools_app/src/shared/console/primitives/simple_items.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';

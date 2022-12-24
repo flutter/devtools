@@ -24,6 +24,8 @@ import 'package:vm_service/vm_service.dart';
 import '../../service/service_extensions.dart' as extensions;
 import '../../shared/config_specific/logger/logger.dart';
 import '../../shared/config_specific/url/url.dart';
+import '../../shared/console/primitives/instance_ref.dart';
+import '../../shared/console/primitives/simple_items.dart';
 import '../../shared/globals.dart';
 import '../../shared/primitives/auto_dispose.dart';
 import '../../shared/primitives/utils.dart';
@@ -32,8 +34,6 @@ import 'inspector_screen.dart';
 import 'inspector_service.dart';
 import 'inspector_tree.dart';
 import 'inspector_tree_controller.dart';
-import 'primitives/inspector_common.dart';
-import 'primitives/instance_ref.dart';
 
 const inspectorRefQueryParam = 'inspectorRef';
 
