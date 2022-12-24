@@ -69,7 +69,7 @@ class _DebuggerConsoleState extends State<DebuggerConsole> {
             footer: SizedBox(
               height: consoleLineHeight,
               child: ExpressionEvalField(
-                controller:
+                evalService:
                     Provider.of<DebuggerController>(context, listen: false),
               ),
             ),

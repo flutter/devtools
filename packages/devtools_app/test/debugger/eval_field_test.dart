@@ -234,7 +234,7 @@ Future<_EvalFieldTestObjects> _setupEvalFieldObjects(
   final debuggerController = DebuggerController(initialSwitchToIsolate: false);
 
   final evalField = ExpressionEvalField(
-    controller: debuggerController,
+    evalService: debuggerController,
     getAutoCompleteResults: (value, controller) async {
       return ['foo', 'bar', 'bazz', 'fozz', 'barz']
           // Simple implementation of search
