@@ -65,7 +65,7 @@ export 'src/shared/common_widgets.dart';
 export 'src/shared/config_specific/ide_theme/ide_theme.dart';
 export 'src/shared/connected_app.dart';
 export 'src/shared/console/console_service.dart';
-export 'src/shared/console/widgets/diagnostics.dart';
+export 'src/shared/console/widgets/description.dart';
 export 'src/shared/error_badge_manager.dart';
 export 'src/shared/globals.dart';
 export 'src/shared/http/http_request_data.dart';

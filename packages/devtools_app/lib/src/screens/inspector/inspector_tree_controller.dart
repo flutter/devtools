@@ -19,7 +19,7 @@ import '../../shared/collapsible_mixin.dart';
 import '../../shared/common_widgets.dart';
 import '../../shared/config_specific/logger/logger.dart';
 import '../../shared/console/primitives/text_styles.dart';
-import '../../shared/console/widgets/diagnostics.dart';
+import '../../shared/console/widgets/description.dart';
 import '../../shared/error_badge_manager.dart';
 import '../../shared/globals.dart';
 import '../../shared/primitives/auto_dispose.dart';

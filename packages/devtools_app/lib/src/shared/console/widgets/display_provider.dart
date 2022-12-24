@@ -13,7 +13,7 @@ import '../../../shared/primitives/utils.dart';
 import '../../../shared/routing.dart';
 import '../../../shared/theme.dart';
 import '../../primitives/simple_items.dart';
-import 'diagnostics.dart';
+import 'description.dart';
 
 class DisplayProvider extends StatelessWidget {
   const DisplayProvider({

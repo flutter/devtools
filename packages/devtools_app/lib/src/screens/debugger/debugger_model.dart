@@ -5,9 +5,8 @@
 import 'package:vm_service/vm_service.dart';
 
 import '../../shared/primitives/trees.dart';
+import '../../shared/primitives/utils.dart';
 import '../../shared/ui/search.dart';
-import '../inspector/diagnostics_node.dart';
-import '../inspector/inspector_service.dart';
 
 /// Whether to include properties surfaced through Diagnosticable objects as
 /// part of the generic Debugger view of an object.
@@ -22,37 +21,6 @@ bool includeDiagnosticPropertiesInDebugger = true;
 /// object which might be different from children on fields for the Inspector
 /// summary tree case which has a filtered view of children.
 bool includeDiagnosticChildren = false;
-
-/// A generic [InstanceRef] using either format used by the [InspectorService]
-/// or Dart VM.
-///
-/// Either one or both of [value] and [diagnostic] may be provided. The
-/// `valueRef` getter on the [diagnostic] should refer to the same object as
-/// [instanceRef] although using the [InspectorInstanceRef] scheme.
-/// A [RemoteDiagnosticsNode] is used rather than an [InspectorInstanceRef] as
-/// the additional data provided by [RemoteDiagnosticsNode] is helpful to
-/// correctly display the object and [RemoteDiagnosticsNode] includes a
-/// reference to an [InspectorInstanceRef]. [value] must be a VM service type,
-/// Sentinel, or primitive type.
-class GenericInstanceRef {
-  GenericInstanceRef({
-    required this.isolateRef,
-    this.value,
-    this.diagnostic,
-  });
-
-  final Object? value;
-
-  InstanceRef? get instanceRef =>
-      value is InstanceRef ? value as InstanceRef? : null;
-
-  /// If both [diagnostic] and [instanceRef] are provided, [diagnostic.valueRef]
-  /// must reference the same underlying object just using the
-  /// [InspectorInstanceRef] scheme.
-  final RemoteDiagnosticsNode? diagnostic;
-
-  final IsolateRef? isolateRef;
-}
 
 /// A tuple of a script and an optional location.
 class ScriptLocation {
@@ -444,5 +412,42 @@ class ScriptRefUtils {
             parts.sublist(1).join('/'),
           ]
         : parts;
+  }
+}
+
+class InspectorSourceLocation {
+  InspectorSourceLocation(this.json, this.parent);
+
+  final Map<String, Object?> json;
+  final InspectorSourceLocation? parent;
+
+  String? get path => JsonUtils.getStringMember(json, 'file');
+
+  String? getFile() {
+    final fileName = path;
+    if (fileName == null) {
+      return parent != null ? parent!.getFile() : null;
+    }
+
+    return fileName;
+  }
+
+  int getLine() => JsonUtils.getIntMember(json, 'line');
+
+  String? getName() => JsonUtils.getStringMember(json, 'name');
+
+  int getColumn() => JsonUtils.getIntMember(json, 'column');
+
+  SourcePosition? getXSourcePosition() {
+    final file = getFile();
+    if (file == null) {
+      return null;
+    }
+    final int line = getLine();
+    final int column = getColumn();
+    if (line < 0 || column < 0) {
+      return null;
+    }
+    return SourcePosition(file: file, line: line - 1, column: column - 1);
   }
 }
