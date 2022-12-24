@@ -1254,7 +1254,6 @@ class InspectorRowContent extends StatelessWidget {
                           isSelected: row.isSelected,
                           searchValue: searchValue,
                           errorText: error?.errorMessage,
-                          debuggerController: debuggerController,
                           nodeDescriptionHighlightStyle:
                               searchValue.isEmpty || !row.isSearchMatch
                                   ? inspector_text_styles.regular

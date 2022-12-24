@@ -1165,7 +1165,6 @@ class _LineItemState extends State<LineItem>
           title: word,
           contents: Material(
             child: ExpandableVariable(
-              debuggerController: controller,
               variable: variable,
             ),
           ),

@@ -253,7 +253,6 @@ class _ConsoleOutputState extends State<_ConsoleOutput>
           } else if (line is VariableConsoleLine) {
             return ExpandableVariable(
               variable: line.variable,
-              debuggerController: controller,
             );
           } else {
             assert(

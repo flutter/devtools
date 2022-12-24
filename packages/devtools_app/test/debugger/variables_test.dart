@@ -27,7 +27,6 @@ void main() {
         wrap(
           ExpandableVariable(
             variable: variable,
-            debuggerController: MockDebuggerController(),
           ),
         ),
       );

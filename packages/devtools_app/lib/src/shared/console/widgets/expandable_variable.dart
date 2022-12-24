@@ -6,7 +6,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart' hide Stack;
 
-import '../../../screens/debugger/debugger_controller.dart';
 import '../../../shared/object_tree.dart';
 import '../../../shared/primitives/listenable.dart';
 import '../../../shared/tree.dart';
@@ -16,15 +15,12 @@ class ExpandableVariable extends StatelessWidget {
   const ExpandableVariable({
     Key? key,
     this.variable,
-    required this.debuggerController,
   }) : super(key: key);
 
   @visibleForTesting
   static const emptyExpandableVariableKey = Key('empty expandable variable');
 
   final DartObjectNode? variable;
-
-  final DebuggerController debuggerController;
 
   @override
   Widget build(BuildContext context) {
@@ -40,7 +36,6 @@ class ExpandableVariable extends StatelessWidget {
       dataDisplayProvider: (variable, onPressed) => DisplayProvider(
         variable: variable,
         onTap: onPressed,
-        controller: debuggerController,
       ),
       onItemSelected: onItemPressed,
     );

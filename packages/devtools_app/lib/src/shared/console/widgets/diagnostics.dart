@@ -4,7 +4,6 @@
 
 import 'package:flutter/material.dart';
 
-import '../../../screens/debugger/debugger_controller.dart';
 import '../../../screens/inspector/diagnostics_node.dart';
 import '../../../screens/inspector/inspector_tree.dart';
 import '../../../screens/inspector/primitives/inspector_text_styles.dart'
@@ -40,7 +39,6 @@ class DiagnosticsNodeDescription extends StatelessWidget {
     this.errorText,
     this.multiline = false,
     this.style,
-    required this.debuggerController,
     this.nodeDescriptionHighlightStyle,
   });
 
@@ -50,7 +48,6 @@ class DiagnosticsNodeDescription extends StatelessWidget {
   final String? searchValue;
   final bool multiline;
   final TextStyle? style;
-  final DebuggerController debuggerController;
   final TextStyle? nodeDescriptionHighlightStyle;
 
   static Widget _paddedIcon(Widget icon) {
@@ -220,7 +217,6 @@ class DiagnosticsNodeDescription extends StatelessWidget {
           title: diagnosticLocal.toStringShort(),
           contents: Material(
             child: ExpandableVariable(
-              debuggerController: debuggerController,
               variable: variable,
             ),
           ),

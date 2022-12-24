@@ -30,7 +30,6 @@ class Variables extends StatelessWidget {
       dataDisplayProvider: (variable, onPressed) => DisplayProvider(
         variable: variable,
         onTap: onPressed,
-        controller: controller,
       ),
       onItemSelected: onItemPressed,
     );

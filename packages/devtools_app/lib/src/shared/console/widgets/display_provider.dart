@@ -5,7 +5,6 @@
 import 'package:flutter/material.dart' hide Stack;
 import 'package:vm_service/vm_service.dart';
 
-import '../../../screens/debugger/debugger_controller.dart';
 import '../../../screens/debugger/variables.dart';
 import '../../../shared/common_widgets.dart';
 import '../../../shared/globals.dart';
@@ -21,12 +20,10 @@ class DisplayProvider extends StatelessWidget {
     super.key,
     required this.variable,
     required this.onTap,
-    required this.controller,
   });
 
   final DartObjectNode variable;
   final VoidCallback onTap;
-  final DebuggerController controller;
 
   @override
   Widget build(BuildContext context) {
@@ -53,7 +50,6 @@ class DisplayProvider extends StatelessWidget {
         diagnostic,
         multiline: true,
         style: theme.fixedFontStyle,
-        debuggerController: controller,
       );
     }
     TextStyle variableDisplayStyle() {

@@ -1847,7 +1847,6 @@ class _JsonViewerState extends State<JsonViewer>
               return Container();
             return ExpandableVariable(
               variable: variable,
-              debuggerController: controller,
             );
           },
         ),
