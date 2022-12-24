@@ -7,7 +7,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../screens/inspector/diagnostics_node.dart';
+import 'eval/diagnostics_node.dart';
 import 'eval/inspector_service.dart';
 import '../../service/vm_service_wrapper.dart';
 import '../globals.dart';

@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 
-import '../../../screens/inspector/diagnostics_node.dart';
+import '../eval/diagnostics_node.dart';
 import '../../../screens/inspector/inspector_tree.dart';
 import '../../globals.dart';
 import '../../object_tree.dart';

@@ -20,7 +20,7 @@ import '../../shared/primitives/message_bus.dart';
 import '../../shared/primitives/utils.dart';
 import '../../shared/ui/filter.dart';
 import '../../shared/ui/search.dart';
-import '../inspector/diagnostics_node.dart';
+import '../../shared/console/eval/diagnostics_node.dart';
 import '../../shared/console/eval/inspector_service.dart';
 import '../inspector/inspector_tree.dart';
 import '../inspector/inspector_tree_controller.dart';

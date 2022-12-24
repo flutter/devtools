@@ -6,7 +6,7 @@ library matchers;
 
 import 'dart:io' as io;
 
-import 'package:devtools_app/src/screens/inspector/diagnostics_node.dart';
+import 'package:devtools_app/src/shared/console/eval/diagnostics_node.dart';
 import 'package:flutter_test/flutter_test.dart';
 import '_golden_matcher_io.dart'
     if (dart.library.html) '_golden_matcher_web.dart' as golden_matcher;

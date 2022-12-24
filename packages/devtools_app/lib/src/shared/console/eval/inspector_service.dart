@@ -22,7 +22,7 @@ import '../../globals.dart';
 import '../../primitives/auto_dispose.dart';
 import '../../primitives/utils.dart';
 import '../../../screens/debugger/debugger_model.dart';
-import '../../../screens/inspector/diagnostics_node.dart';
+import 'diagnostics_node.dart';
 
 const inspectorLibraryUri = 'package:flutter/src/widgets/widget_inspector.dart';
 

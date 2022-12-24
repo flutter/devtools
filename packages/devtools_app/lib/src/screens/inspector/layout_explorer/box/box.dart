@@ -10,7 +10,7 @@ import 'package:flutter/material.dart';
 import '../../../../shared/primitives/math_utils.dart';
 import '../../../../shared/primitives/utils.dart';
 import '../../../../shared/theme.dart';
-import '../../diagnostics_node.dart';
+import '../../../../shared/console/eval/diagnostics_node.dart';
 import '../../inspector_controller.dart';
 import '../../inspector_data_models.dart';
 import '../ui/free_space.dart';

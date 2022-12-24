@@ -30,7 +30,7 @@ import '../../shared/ui/search.dart';
 import '../../shared/ui/utils.dart';
 import '../../shared/utils.dart';
 import '../debugger/debugger_controller.dart';
-import 'diagnostics_node.dart';
+import '../../shared/console/eval/diagnostics_node.dart';
 import 'inspector_breadcrumbs.dart';
 import 'inspector_controller.dart';
 import 'inspector_screen.dart';
