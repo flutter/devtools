@@ -14,15 +14,15 @@ import 'package:vm_service/vm_service.dart';
 
 import '../../service/vm_service_wrapper.dart';
 import '../../shared/config_specific/logger/logger.dart' as logger;
+import '../../shared/console/eval/diagnostics_node.dart';
+import '../../shared/console/eval/inspector_service.dart';
+import '../../shared/console/eval/inspector_tree.dart';
 import '../../shared/globals.dart';
 import '../../shared/primitives/auto_dispose.dart';
 import '../../shared/primitives/message_bus.dart';
 import '../../shared/primitives/utils.dart';
 import '../../shared/ui/filter.dart';
 import '../../shared/ui/search.dart';
-import '../../shared/console/eval/diagnostics_node.dart';
-import '../../shared/console/eval/inspector_service.dart';
-import '../../shared/console/eval/inspector_tree.dart';
 import '../inspector/inspector_tree_controller.dart';
 import 'logging_screen.dart';
 

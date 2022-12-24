@@ -4,8 +4,6 @@
 
 import 'package:flutter/material.dart';
 
-import '../eval/diagnostics_node.dart';
-import '../eval/inspector_tree.dart';
 import '../../globals.dart';
 import '../../object_tree.dart';
 import '../../primitives/utils.dart';
@@ -13,6 +11,8 @@ import '../../theme.dart';
 import '../../ui/hover.dart';
 import '../../ui/icons.dart';
 import '../../ui/utils.dart';
+import '../eval/diagnostics_node.dart';
+import '../eval/inspector_tree.dart';
 import '../primitives/text_styles.dart';
 import 'expandable_variable.dart';
 

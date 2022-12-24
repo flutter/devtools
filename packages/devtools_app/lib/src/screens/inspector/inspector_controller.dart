@@ -26,13 +26,13 @@ import '../../shared/config_specific/logger/logger.dart';
 import '../../shared/config_specific/url/url.dart';
 import '../../shared/console/eval/diagnostics_node.dart';
 import '../../shared/console/eval/inspector_service.dart';
+import '../../shared/console/eval/inspector_tree.dart';
 import '../../shared/console/primitives/instance_ref.dart';
 import '../../shared/console/primitives/simple_items.dart';
 import '../../shared/globals.dart';
 import '../../shared/primitives/auto_dispose.dart';
 import '../../shared/primitives/utils.dart';
 import 'inspector_screen.dart';
-import '../../shared/console/eval/inspector_tree.dart';
 import 'inspector_tree_controller.dart';
 
 const inspectorRefQueryParam = 'inspectorRef';

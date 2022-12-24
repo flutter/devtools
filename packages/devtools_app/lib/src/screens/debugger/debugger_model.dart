@@ -4,8 +4,8 @@
 
 import 'package:vm_service/vm_service.dart';
 
+import '../../shared/console/primitives/source_location.dart';
 import '../../shared/primitives/trees.dart';
-import '../../shared/primitives/utils.dart';
 import '../../shared/ui/search.dart';
 
 /// Whether to include properties surfaced through Diagnosticable objects as
@@ -45,43 +45,6 @@ class ScriptLocation {
 
   @override
   String toString() => '${scriptRef.uri} $location';
-}
-
-class SourcePosition {
-  const SourcePosition({
-    required this.line,
-    required this.column,
-    this.file,
-    this.tokenPos,
-  });
-
-  factory SourcePosition.calculatePosition(Script script, int tokenPos) {
-    return SourcePosition(
-      line: script.getLineNumberFromTokenPos(tokenPos),
-      column: script.getColumnNumberFromTokenPos(tokenPos),
-      tokenPos: tokenPos,
-    );
-  }
-
-  final String? file;
-  final int? line;
-  final int? column;
-  final int? tokenPos;
-
-  @override
-  bool operator ==(other) {
-    return other is SourcePosition &&
-        other.line == line &&
-        other.column == column &&
-        other.tokenPos == tokenPos;
-  }
-
-  @override
-  int get hashCode =>
-      line != null && column != null ? (line! << 7) ^ column! : super.hashCode;
-
-  @override
-  String toString() => '$line:$column';
 }
 
 class SourceToken with DataSearchStateMixin {
@@ -412,42 +375,5 @@ class ScriptRefUtils {
             parts.sublist(1).join('/'),
           ]
         : parts;
-  }
-}
-
-class InspectorSourceLocation {
-  InspectorSourceLocation(this.json, this.parent);
-
-  final Map<String, Object?> json;
-  final InspectorSourceLocation? parent;
-
-  String? get path => JsonUtils.getStringMember(json, 'file');
-
-  String? getFile() {
-    final fileName = path;
-    if (fileName == null) {
-      return parent != null ? parent!.getFile() : null;
-    }
-
-    return fileName;
-  }
-
-  int getLine() => JsonUtils.getIntMember(json, 'line');
-
-  String? getName() => JsonUtils.getStringMember(json, 'name');
-
-  int getColumn() => JsonUtils.getIntMember(json, 'column');
-
-  SourcePosition? getXSourcePosition() {
-    final file = getFile();
-    if (file == null) {
-      return null;
-    }
-    final int line = getLine();
-    final int column = getColumn();
-    if (line < 0 || column < 0) {
-      return null;
-    }
-    return SourcePosition(file: file, line: line - 1, column: column - 1);
   }
 }

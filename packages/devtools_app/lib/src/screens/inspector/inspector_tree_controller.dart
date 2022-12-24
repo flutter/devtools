@@ -18,6 +18,8 @@ import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/collapsible_mixin.dart';
 import '../../shared/common_widgets.dart';
 import '../../shared/config_specific/logger/logger.dart';
+import '../../shared/console/eval/diagnostics_node.dart';
+import '../../shared/console/eval/inspector_tree.dart';
 import '../../shared/console/primitives/text_styles.dart';
 import '../../shared/console/widgets/description.dart';
 import '../../shared/error_badge_manager.dart';
@@ -30,11 +32,9 @@ import '../../shared/ui/search.dart';
 import '../../shared/ui/utils.dart';
 import '../../shared/utils.dart';
 import '../debugger/debugger_controller.dart';
-import '../../shared/console/eval/diagnostics_node.dart';
 import 'inspector_breadcrumbs.dart';
 import 'inspector_controller.dart';
 import 'inspector_screen.dart';
-import '../../shared/console/eval/inspector_tree.dart';
 
 /// Presents a [TreeNode].
 class _InspectorTreeRowWidget extends StatefulWidget {

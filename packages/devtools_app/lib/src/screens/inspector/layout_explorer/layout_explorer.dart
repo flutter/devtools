@@ -4,8 +4,8 @@
 
 import 'package:flutter/widgets.dart';
 
-import '../../../shared/primitives/auto_dispose.dart';
 import '../../../shared/console/eval/diagnostics_node.dart';
+import '../../../shared/primitives/auto_dispose.dart';
 import '../inspector_controller.dart';
 import '../layout_explorer/box/box.dart';
 import '../layout_explorer/flex/flex.dart';

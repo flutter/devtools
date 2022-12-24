@@ -12,6 +12,7 @@ import 'package:vm_service/vm_service.dart' hide Stack;
 
 import '../../shared/common_widgets.dart';
 import '../../shared/config_specific/logger/logger.dart';
+import '../../shared/console/primitives/source_location.dart';
 import '../../shared/console/widgets/expandable_variable.dart';
 import '../../shared/dialogs.dart';
 import '../../shared/globals.dart';

@@ -14,6 +14,7 @@ import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/common_widgets.dart';
 import '../../shared/connected_app.dart';
+import '../../shared/console/eval/inspector_tree.dart';
 import '../../shared/dialogs.dart';
 import '../../shared/editable_list.dart';
 import '../../shared/error_badge_manager.dart';
@@ -29,7 +30,6 @@ import '../../shared/ui/search.dart';
 import '../../shared/utils.dart';
 import 'inspector_controller.dart';
 import 'inspector_screen_details_tab.dart';
-import '../../shared/console/eval/inspector_tree.dart';
 import 'inspector_tree_controller.dart';
 
 class InspectorScreen extends Screen {

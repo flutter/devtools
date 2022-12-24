@@ -9,13 +9,13 @@ import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart' hide Error;
 
-import '../shared/console/eval/inspector_service.dart';
 import '../screens/logging/vm_service_logger.dart';
 import '../screens/performance/timeline_streams.dart';
 import '../shared/analytics/analytics.dart' as ga;
 import '../shared/config_specific/logger/logger.dart';
 import '../shared/connected_app.dart';
 import '../shared/console/console_service.dart';
+import '../shared/console/eval/inspector_service.dart';
 import '../shared/error_badge_manager.dart';
 import '../shared/globals.dart';
 import '../shared/primitives/utils.dart';

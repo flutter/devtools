@@ -4,11 +4,11 @@
 
 import 'package:flutter/material.dart';
 
+import '../../shared/console/eval/inspector_tree.dart';
 import '../../shared/console/primitives/text_styles.dart';
 import '../../shared/primitives/utils.dart';
 import '../../shared/theme.dart';
 import '../../shared/utils.dart';
-import '../../shared/console/eval/inspector_tree.dart';
 
 class InspectorBreadcrumbNavigator extends StatelessWidget {
   const InspectorBreadcrumbNavigator({
