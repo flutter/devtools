@@ -4,15 +4,19 @@
 
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../../shared/globals.dart';
-import '../../primitives/simple_items.dart';
+import '../../object_tree.dart';
+import '../../primitives/reference.dart';
 
 class EvalService {
-  EvalService(this.isolateRef);
+  EvalService(this.isolateRef, this.variables);
 
   final Reference<IsolateRef?> isolateRef;
+
+  final ValueListenable<List<DartObjectNode>> variables;
 
   String get _isolateRefId {
     final id = isolateRef.value?.id;
