@@ -4,7 +4,6 @@
 
 import 'dart:async';
 
-import 'package:devtools_app/src/shared/console/primitives/simple_items.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -44,6 +43,7 @@ import 'shared/analytics/analytics_controller.dart';
 import 'shared/analytics/constants.dart' as gac;
 import 'shared/common_widgets.dart';
 import 'shared/config_specific/server/server.dart';
+import 'shared/console/primitives/simple_items.dart';
 import 'shared/dialogs.dart';
 import 'shared/globals.dart';
 import 'shared/primitives/auto_dispose.dart';
