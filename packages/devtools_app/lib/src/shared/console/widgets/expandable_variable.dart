@@ -37,8 +37,11 @@ class ExpandableVariable extends StatelessWidget {
       dataRootsListenable:
           FixedValueListenable<List<DartObjectNode>>([variable]),
       shrinkWrap: true,
-      dataDisplayProvider: (variable, onPressed) =>
-          displayProvider(context, variable, onPressed, debuggerController),
+      dataDisplayProvider: (variable, onPressed) => DisplayProvider(
+        variable: variable,
+        onTap: onPressed,
+        controller: debuggerController,
+      ),
       onItemSelected: onItemPressed,
     );
   }
