@@ -18,6 +18,7 @@ import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/collapsible_mixin.dart';
 import '../../shared/common_widgets.dart';
 import '../../shared/config_specific/logger/logger.dart';
+import '../../shared/console/primitives/text_styles.dart';
 import '../../shared/console/widgets/diagnostics.dart';
 import '../../shared/error_badge_manager.dart';
 import '../../shared/globals.dart';
@@ -34,7 +35,6 @@ import 'inspector_breadcrumbs.dart';
 import 'inspector_controller.dart';
 import 'inspector_screen.dart';
 import 'inspector_tree.dart';
-import 'primitives/inspector_text_styles.dart' as inspector_text_styles;
 
 /// Presents a [TreeNode].
 class _InspectorTreeRowWidget extends StatefulWidget {
@@ -1256,7 +1256,7 @@ class InspectorRowContent extends StatelessWidget {
                           errorText: error?.errorMessage,
                           nodeDescriptionHighlightStyle:
                               searchValue.isEmpty || !row.isSearchMatch
-                                  ? inspector_text_styles.regular
+                                  ? ConsoleTextStyles.regular
                                   : row.isSelected
                                       ? theme.searchMatchHighlightStyleFocused
                                       : theme.searchMatchHighlightStyle,
