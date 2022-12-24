@@ -185,7 +185,6 @@ void main() {
           matchesDevToolsGolden('../test_infra/goldens/treemap_sizes.png'),
         );
       },
-      // ignore: avoid_redundant_argument_values
       skip: kIsWeb,
     );
   });
@@ -211,7 +210,6 @@ void main() {
         // Await delay for golden comparison.
         await tester.pumpAndSettle(const Duration(seconds: 2));
       },
-      // ignore: avoid_redundant_argument_values
       skip: kIsWeb,
     );
   });
@@ -237,7 +235,6 @@ void main() {
         // Await delay for golden comparison.
         await tester.pumpAndSettle(const Duration(seconds: 2));
       },
-      // ignore: avoid_redundant_argument_values
       skip: kIsWeb,
     );
   });

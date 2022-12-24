@@ -177,7 +177,7 @@ class _FlexLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
                       ),
                     ),
                   ],
-                )
+                ),
             ];
           },
           items: [
@@ -215,7 +215,7 @@ class _FlexLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
                     ],
                   ),
                 ),
-              )
+              ),
           ],
           onChanged: (Object? newSelection) async {
             // newSelection is an object instead of type here because
@@ -223,15 +223,13 @@ class _FlexLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
             // if the axis is the main axis the type should be [MainAxisAlignment]
             // if the axis is the cross axis the type should be [CrossAxisAlignment]
             FlexLayoutProperties changedProperties;
-            if (axis == direction) {
-              changedProperties = propertiesLocal.copyWith(
-                mainAxisAlignment: newSelection as MainAxisAlignment?,
-              );
-            } else {
-              changedProperties = propertiesLocal.copyWith(
-                crossAxisAlignment: newSelection as CrossAxisAlignment?,
-              );
-            }
+            changedProperties = axis == direction
+                ? propertiesLocal.copyWith(
+                    mainAxisAlignment: newSelection as MainAxisAlignment?,
+                  )
+                : propertiesLocal.copyWith(
+                    crossAxisAlignment: newSelection as CrossAxisAlignment?,
+                  );
             final valueRef = propertiesLocal.node.valueRef;
             markAsDirty();
             await objectGroup!.invokeSetFlexProperties(
@@ -506,7 +504,7 @@ class _VisualizeFlexChildrenState extends State<VisualizeFlexChildren> {
           final freeSpacesWidgets = [
             for (var renderProperties in [
               ...mainAxisSpaces,
-              ...crossAxisSpaces
+              ...crossAxisSpaces,
             ])
               FreeSpaceVisualizerWidget(renderProperties),
           ];
@@ -658,7 +656,7 @@ class FlexChildVisualizer extends StatelessWidget {
       items: <DropdownMenuItem<FlexFit>>[
         buildMenuItem(FlexFit.loose),
         if (propertiesLocal.description != 'Expanded')
-          buildMenuItem(FlexFit.tight)
+          buildMenuItem(FlexFit.tight),
       ],
     );
   }
@@ -707,22 +705,20 @@ class FlexChildVisualizer extends StatelessWidget {
     final propertiesLocal = properties;
     final rootLocal = root;
 
-    Widget buildEntranceAnimation(BuildContext context, Widget? child) {
+    Widget buildEntranceAnimation(BuildContext _, Widget? child) {
       final vertical = rootLocal.isMainAxisVertical;
       final horizontal = rootLocal.isMainAxisHorizontal;
 
       late Size size;
-      if (propertiesLocal.hasFlexFactor) {
-        size = SizeTween(
-          begin: Size(
-            horizontal ? minRenderWidth - entranceMargin : renderSize.width,
-            vertical ? minRenderHeight - entranceMargin : renderSize.height,
-          ),
-          end: renderSize,
-        ).evaluate(state.entranceCurve)!;
-      } else {
-        size = renderSize;
-      }
+      size = propertiesLocal.hasFlexFactor
+          ? SizeTween(
+              begin: Size(
+                horizontal ? minRenderWidth - entranceMargin : renderSize.width,
+                vertical ? minRenderHeight - entranceMargin : renderSize.height,
+              ),
+              end: renderSize,
+            ).evaluate(state.entranceCurve)!
+          : renderSize;
       // Not-expanded widgets enter much faster.
       return Opacity(
         opacity: min([state.entranceCurve.value * 5, 1.0]),

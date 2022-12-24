@@ -49,7 +49,7 @@ final _rawProviderIdsProvider = AutoDisposeFutureProvider<List<String>>(
 
     final providerIdInstances = await Future.wait([
       for (final idRef in providerIdRefs.elements!.cast<InstanceRef>())
-        eval.safeGetInstance(idRef, isAlive)
+        eval.safeGetInstance(idRef, isAlive),
     ]);
 
     return [

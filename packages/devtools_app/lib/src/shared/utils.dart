@@ -26,7 +26,6 @@ import 'globals.dart';
 Future<void> copyToClipboard(
   String data,
   String? successMessage,
-  BuildContext context,
 ) async {
   await Clipboard.setData(
     ClipboardData(

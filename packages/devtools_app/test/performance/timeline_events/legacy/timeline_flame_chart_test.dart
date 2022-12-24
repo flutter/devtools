@@ -21,9 +21,9 @@ void main() {
   FakeServiceManager fakeServiceManager;
   late PerformanceController controller;
 
-  Future<void> _setUpServiceManagerWithTimeline(
+  void _setUpServiceManagerWithTimeline(
     Map<String, dynamic> timelineJson,
-  ) async {
+  ) {
     fakeServiceManager = FakeServiceManager(
       service: FakeServiceManager.createFakeService(
         timelineData: vm_service.Timeline.parse(timelineJson)!,
@@ -43,8 +43,8 @@ void main() {
   }
 
   group('$TimelineEventsView', () {
-    setUp(() async {
-      await _setUpServiceManagerWithTimeline(testTimelineJson);
+    setUp(() {
+      _setUpServiceManagerWithTimeline(testTimelineJson);
     });
 
     Future<void> pumpPerformanceScreenBody(
@@ -80,7 +80,7 @@ void main() {
     testWidgetsWithWindowSize('builds header with search field', windowSize,
         (WidgetTester tester) async {
       await tester.runAsync(() async {
-        await _setUpServiceManagerWithTimeline({});
+        _setUpServiceManagerWithTimeline({});
         await pumpPerformanceScreenBody(tester);
         await tester.pumpAndSettle();
         expect(find.byType(RefreshTimelineEventsButton), findsOneWidget);
@@ -92,7 +92,7 @@ void main() {
     testWidgetsWithWindowSize('can show help dialog', windowSize,
         (WidgetTester tester) async {
       await tester.runAsync(() async {
-        await _setUpServiceManagerWithTimeline({});
+        _setUpServiceManagerWithTimeline({});
         await pumpPerformanceScreenBody(tester);
         await tester.pumpAndSettle();
 
@@ -127,7 +127,7 @@ void main() {
     testWidgetsWithWindowSize('builds flame chart with no data', windowSize,
         (WidgetTester tester) async {
       await tester.runAsync(() async {
-        await _setUpServiceManagerWithTimeline({});
+        _setUpServiceManagerWithTimeline({});
         await pumpPerformanceScreenBody(tester, runAsync: true);
         await tester.pumpAndSettle();
         expect(
@@ -168,7 +168,6 @@ void main() {
         // Await delay for golden comparison.
         await tester.pumpAndSettle(const Duration(seconds: 2));
       },
-      // ignore: avoid_redundant_argument_values
       skip: kIsWeb,
     );
   });

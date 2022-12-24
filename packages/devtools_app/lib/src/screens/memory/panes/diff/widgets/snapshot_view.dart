@@ -9,6 +9,7 @@ import '../../../../../shared/split.dart';
 import '../../../shared/heap/heap.dart';
 import '../controller/diff_pane_controller.dart';
 import '../controller/heap_diff.dart';
+import '../controller/item_controller.dart';
 import 'class_details/class_details.dart';
 import 'classes_table_diff.dart';
 import 'classes_table_single.dart';
@@ -31,11 +32,9 @@ class SnapshotView extends StatelessWidget {
 
         final classes = controller.derived.heapClasses.value;
         if (classes == null) {
-          if (controller.isTakingSnapshot.value) {
-            return const SizedBox.shrink();
-          } else {
-            return const Center(child: Text('Could not take snapshot.'));
-          }
+          return controller.isTakingSnapshot.value
+              ? const SizedBox.shrink()
+              : const Center(child: Text('Could not take snapshot.'));
         }
 
         assert((singleClasses == null) != (diffClasses == null));
@@ -43,9 +42,13 @@ class SnapshotView extends StatelessWidget {
         late Widget classTable;
 
         if (singleClasses != null) {
+          final totalSize =
+              (controller.core.selectedItem as SnapshotInstanceItem).totalSize;
+
           classTable = ClassesTableSingle(
             classes: singleClasses,
             selection: controller.derived.selectedSingleClassStats,
+            totalSize: totalSize!,
           );
         } else if (diffClasses != null) {
           classTable = ClassesTableDiff(
@@ -63,7 +66,7 @@ class SnapshotView extends StatelessWidget {
             selection: controller.derived.selectedPathEntry,
             isDiff: classes is DiffHeapClasses,
             pathController: controller.retainingPathController,
-            className: controller.core.className?.className,
+            className: controller.core.className_?.className,
           ),
         );
 

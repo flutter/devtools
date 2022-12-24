@@ -58,7 +58,7 @@ class _ObjectInspectorViewState extends State<_ObjectInspectorView>
   Widget build(BuildContext context) {
     return Split(
       axis: Axis.horizontal,
-      initialFractions: const [0.20, 0.80],
+      initialFractions: const [0.2, 0.8],
       children: [
         AnalyticsTabbedView(
           gaScreen: gac.objectInspectorScreen,
@@ -86,7 +86,7 @@ class _ObjectInspectorViewState extends State<_ObjectInspectorView>
         ),
         ObjectViewport(
           controller: controller,
-        )
+        ),
       ],
     );
   }

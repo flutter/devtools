@@ -5,7 +5,7 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
-import 'package:vm_service/vm_service.dart';
+import 'package:vm_service/vm_service.dart' hide Error;
 
 import '../../service/vm_flags.dart' as vm_flags;
 import '../../shared/analytics/analytics.dart' as ga;
@@ -166,7 +166,7 @@ class CpuProfilerController
       ? true
       : profilerFlagNotifier?.value.valueAsString == 'true';
 
-  Future<dynamic> enableCpuProfiler() {
+  Future<Response> enableCpuProfiler() {
     return serviceManager.service!.enableCpuProfiler();
   }
 
@@ -231,8 +231,6 @@ class CpuProfilerController
     required String processId,
     required bool storeAsUserTagNone,
     required bool shouldApplyFilters,
-    required bool shouldRefreshSearchMatches,
-    required bool isCodeProfile,
   }) async {
     await cpuProfiles.process(
       transformer: transformer,
@@ -285,8 +283,6 @@ class CpuProfilerController
         processId: processId,
         storeAsUserTagNone: storeAsUserTagNone,
         shouldApplyFilters: shouldApplyFilters,
-        shouldRefreshSearchMatches: shouldRefreshSearchMatches,
-        isCodeProfile: type == CpuProfilerViewType.code,
       ).then((p) => p.getActive(type));
 
       _dataNotifier.value = cpuProfileData;
@@ -458,13 +454,16 @@ class CpuProfilerController
       _dataNotifier.value = await processDataForTag(tag).then(
         (e) => e.getActive(viewType.value),
       );
-    } catch (e) {
+    } catch (e, stackTrace) {
       // In the event of an error, reset the data to the original CPU profile.
       final filteredOriginalData = cpuProfileStore.lookupProfile(
         label: _wrapWithFilterSuffix(userTagNone),
       )!;
       _dataNotifier.value = filteredOriginalData.getActive(viewType.value);
-      throw Exception('Error loading data with tag "$tag": ${e.toString()}');
+      Error.throwWithStackTrace(
+        Exception('Error loading data with tag "$tag": ${e.toString()}'),
+        stackTrace,
+      );
     } finally {
       _processingNotifier.value = false;
     }
@@ -492,16 +491,14 @@ class CpuProfilerController
         label: userTagNone,
       )!;
 
-      if (tag == groupByUserTag || tag == groupByVmTag) {
-        data = CpuProfilePair.withTagRoots(
-          fullData,
-          tag == groupByUserTag
-              ? CpuProfilerTagType.user
-              : CpuProfilerTagType.vm,
-        );
-      } else {
-        data = CpuProfilePair.fromUserTag(fullData, tag);
-      }
+      data = tag == groupByUserTag || tag == groupByVmTag
+          ? CpuProfilePair.withTagRoots(
+              fullData,
+              tag == groupByUserTag
+                  ? CpuProfilerTagType.user
+                  : CpuProfilerTagType.vm,
+            )
+          : CpuProfilePair.fromUserTag(fullData, tag);
       cpuProfileStore.storeProfile(
         data,
         label: tag,

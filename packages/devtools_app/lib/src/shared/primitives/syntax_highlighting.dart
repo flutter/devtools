@@ -57,8 +57,8 @@ class TextmateGrammar {
   }
 
   void _parseFileRules() {
-    final List<dynamic> patterns = _definition['patterns'];
-    for (Map info in patterns.cast<Map<dynamic, dynamic>>()) {
+    final List<Object?> patterns = _definition['patterns'];
+    for (Map info in patterns.cast<Map<Object?, Object?>>()) {
       _fileRules.add(Rule(info['name']).._parse(info));
     }
     print('fileRules: $_fileRules');
@@ -79,7 +79,7 @@ class Rule {
 
   final String? name;
 
-  void _parse(Map? info) {
+  void _parse(Map<Object?, Object?>? _) {
     // todo:
   }
 

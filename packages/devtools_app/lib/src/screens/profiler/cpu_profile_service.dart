@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:vm_service/vm_service.dart';
+
 import '../../service/vm_flags.dart' as vm_flags;
 import '../../service/vm_service_wrapper.dart';
 import '../../shared/globals.dart';
@@ -74,11 +76,11 @@ extension CpuProfilerExtension on VmServiceWrapper {
     );
   }
 
-  Future<dynamic> setProfilePeriod(String value) {
+  Future<Response> setProfilePeriod(String value) {
     return serviceManager.service!.setFlag(vm_flags.profilePeriod, value);
   }
 
-  Future<dynamic> enableCpuProfiler() async {
+  Future<Response> enableCpuProfiler() async {
     return await serviceManager.service!.setFlag(vm_flags.profiler, 'true');
   }
 }

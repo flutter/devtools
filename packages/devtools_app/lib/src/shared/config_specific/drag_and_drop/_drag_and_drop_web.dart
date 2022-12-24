@@ -46,7 +46,7 @@ class DragAndDropManagerWeb extends DragAndDropManager {
     event.dataTransfer.dropEffect = 'move';
   }
 
-  void _onDragLeave(MouseEvent event) {
+  void _onDragLeave(MouseEvent _) {
     dragLeave();
   }
 

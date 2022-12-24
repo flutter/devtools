@@ -285,7 +285,7 @@ Future<void> resetDevToolsFile() async {
   }
 }
 
-Future<DevToolsJsonFile?> requestBaseAppSizeFile(String path) async {
+Future<DevToolsJsonFile?> requestBaseAppSizeFile(String path) {
   return requestFile(
     api: apiGetBaseAppSizeFile,
     fileKey: baseAppSizeFilePropertyName,
@@ -293,7 +293,7 @@ Future<DevToolsJsonFile?> requestBaseAppSizeFile(String path) async {
   );
 }
 
-Future<DevToolsJsonFile?> requestTestAppSizeFile(String path) async {
+Future<DevToolsJsonFile?> requestTestAppSizeFile(String path) {
   return requestFile(
     api: apiGetTestAppSizeFile,
     fileKey: testAppSizeFilePropertyName,

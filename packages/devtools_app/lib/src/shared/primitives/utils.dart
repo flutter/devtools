@@ -152,11 +152,9 @@ String msText(
 /// Render the given [Duration] to text using either seconds or milliseconds as
 /// the units, depending on the value of the duration.
 String renderDuration(Duration duration) {
-  if (duration.inMilliseconds < 1000) {
-    return '${nf.format(duration.inMilliseconds)}ms';
-  } else {
-    return '${(duration.inMilliseconds / 1000).toStringAsFixed(1)}s';
-  }
+  return duration.inMilliseconds < 1000
+      ? '${nf.format(duration.inMilliseconds)}ms'
+      : '${(duration.inMilliseconds / 1000).toStringAsFixed(1)}s';
 }
 
 T? nullSafeMin<T extends num>(T? a, T? b) {
@@ -177,7 +175,7 @@ double logBase({required int x, required int base}) {
   return log(x) / log(base);
 }
 
-int log2(num x) => (logBase(x: x.floor(), base: 2)).floor();
+int log2(num x) => logBase(x: x.floor(), base: 2).floor();
 
 int roundToNearestPow10(int x) =>
     pow(10, logBase(x: x, base: 10).ceil()).floor();
@@ -235,7 +233,7 @@ Future<T?> timeout<T>(Future<T> operation, int timeoutMillis) =>
       Future<T?>.delayed(
         Duration(milliseconds: timeoutMillis),
         () => Future<T?>.value(),
-      )
+      ),
     ]);
 
 String longestFittingSubstring(
@@ -286,7 +284,8 @@ String pluralize(String word, int count, {String? plural}) =>
 /// `GestureBinding.handleBeginFrame`.
 ///
 /// See (https://github.com/dart-lang/sdk/issues/36999).
-String getSimpleStackFrameName(String name) {
+String getSimpleStackFrameName(String? name) {
+  name ??= '';
   final newName = name.replaceAll('<anonymous closure>', '<closure>');
 
   // If the class name contains a space, then it is not a valid Dart name. We
@@ -432,7 +431,7 @@ class JsonUtils {
   }
 
   static List<String> getValues(Map<String, Object> json, String member) {
-    final List<dynamic>? values = json[member] as List?;
+    final values = json[member] as List<Object?>?;
     if (values == null || values.isEmpty) {
       return const [];
     }
@@ -505,13 +504,15 @@ class RateLimiter {
     // to occur once the rate limiter is available.
     requestScheduledButNotStarted = true;
     _activeTimer = Timer(
-        Duration(
-          milliseconds: currentTime - _lastRequestTime! + delayBetweenRequests,
-        ), () {
-      _activeTimer = null;
-      requestScheduledButNotStarted = false;
-      _performRequest();
-    });
+      Duration(
+        milliseconds: currentTime - _lastRequestTime! + delayBetweenRequests,
+      ),
+      () {
+        _activeTimer = null;
+        requestScheduledButNotStarted = false;
+        _performRequest();
+      },
+    );
   }
 
   void _performRequest() async {
@@ -862,7 +863,7 @@ class DebugTimingLogger {
 class MovingAverage {
   MovingAverage({
     this.averagePeriod = 50,
-    this.ratio = .5,
+    this.ratio = 0.5,
     List<int>? newDataSet,
   }) : assert(ratio >= 0 && ratio <= 1, 'Value ratio $ratio is not 0 to 1.') {
     if (newDataSet != null) {
@@ -1046,7 +1047,7 @@ final _lowercaseLookup = <String, String>{};
 extension StringExtension on String {
   bool caseInsensitiveContains(Pattern? pattern) {
     if (pattern is RegExp) {
-      assert(pattern.isCaseSensitive == false);
+      assert(!pattern.isCaseSensitive);
       return contains(pattern);
     } else if (pattern is String) {
       final lowerCase = _lowercaseLookup.putIfAbsent(this, () => toLowerCase());
@@ -1105,7 +1106,7 @@ extension ListExtension<T> on List<T> {
       for (int i = 0; i < length; i++) ...[
         this[i],
         if (i != length - 1) separator,
-      ]
+      ],
     ];
   }
 
@@ -1181,11 +1182,9 @@ Uri? getServiceUriFromQueryString(String? location) {
   final token = queryParams['token'];
   final host = queryParams['host'] ?? 'localhost';
   if (port != null) {
-    if (token == null) {
-      return Uri.parse('ws://$host:$port/ws');
-    } else {
-      return Uri.parse('ws://$host:$port/$token/ws');
-    }
+    return token == null
+        ? Uri.parse('ws://$host:$port/ws')
+        : Uri.parse('ws://$host:$port/$token/ws');
   }
 
   return null;
@@ -1220,7 +1219,7 @@ String prettyTimestamp(
 class ListValueNotifier<T> extends ChangeNotifier
     implements ValueListenable<List<T>> {
   /// Creates a [ListValueNotifier] that wraps this value [_rawList].
-  ListValueNotifier(List<T> rawList) : _rawList = List<T>.from(rawList) {
+  ListValueNotifier(List<T> rawList) : _rawList = List<T>.of(rawList) {
     _currentList = ImmutableList(_rawList);
   }
 
@@ -1490,7 +1489,6 @@ extension UriExtension on Uri {
     String? userInfo,
     String? host,
     int? port,
-    String? path,
     Iterable<String>? pathSegments,
     String? query,
     Map<String, dynamic>? queryParameters,

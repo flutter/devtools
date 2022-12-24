@@ -110,9 +110,7 @@ class _CpuProfilerState extends State<CpuProfiler>
       _initTabController();
     }
     if (widget.data != oldWidget.data) {
-      setState(() {
-        data = widget.data;
-      });
+      data = widget.data;
     }
   }
 
@@ -495,13 +493,13 @@ class UserTagDropdown extends StatelessWidget {
                       _buildMenuItem(
                         display: 'Group by: VM Tag',
                         value: CpuProfilerController.groupByVmTag,
-                      )
+                      ),
                   ],
                   onChanged: userTags.isEmpty ||
                           (userTags.length == 1 &&
                               userTags.first == UserTag.defaultTag.label)
                       ? null
-                      : (String? tag) => _onUserTagChanged(tag!, context),
+                      : (String? tag) => _onUserTagChanged(tag!),
                 );
               },
             ),
@@ -521,7 +519,7 @@ class UserTagDropdown extends StatelessWidget {
     );
   }
 
-  void _onUserTagChanged(String newTag, BuildContext context) async {
+  void _onUserTagChanged(String newTag) async {
     try {
       await controller.loadDataWithTag(newTag);
     } catch (e) {

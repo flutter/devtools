@@ -72,7 +72,7 @@ void _sendKeyPressToParent(KeyboardEvent event) {
     'location': event.location,
     'metaKey': event.metaKey,
     'repeat': event.repeat,
-    'shiftKey': event.shiftKey
+    'shiftKey': event.shiftKey,
   };
   window.parent?.postMessage({'command': 'keydown', 'data': data}, '*');
 }

@@ -96,7 +96,7 @@ extension FrameIdentifierExtension on TraceEventWrapper {
   /// Returns the flutter frame number for this trace event, or null if it does
   /// not exist.
   int? get flutterFrameNumber {
-    final frameNumber = event.args?[TraceEvent.frameNumberArg];
+    final frameNumber = event.args?[TraceEvent.frameNumberArg] as String?;
     if (frameNumber == null) return null;
     return int.tryParse(frameNumber);
   }

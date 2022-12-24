@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:flutter/material.dart' hide Stack;
 import 'package:vm_service/vm_service.dart';
 
@@ -55,9 +53,11 @@ class _CallStackState extends State<CallStack>
 
     Widget child;
 
-    final asyncMarker = frame.frame.kind == FrameKind.kAsyncSuspensionMarker;
-    final asyncFrame = frame.frame.kind == FrameKind.kAsyncActivation ||
-        frame.frame.kind == FrameKind.kAsyncSuspensionMarker;
+    final frameKind = frame.frame.kind;
+
+    final asyncMarker = frameKind == FrameKind.kAsyncSuspensionMarker;
+    final asyncFrame = frameKind == FrameKind.kAsyncActivation ||
+        frameKind == FrameKind.kAsyncSuspensionMarker;
     final noLineInfo = frame.line == null;
 
     final frameDescription = frame.description;
@@ -103,7 +103,7 @@ class _CallStackState extends State<CallStack>
     final result = Material(
       color: selected ? theme.colorScheme.selectedRowColor : null,
       child: InkWell(
-        onTap: () => unawaited(_onStackFrameSelected(frame)),
+        onTap: () => _onStackFrameSelected(frame),
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: densePadding),
           alignment: Alignment.centerLeft,
@@ -112,20 +112,18 @@ class _CallStackState extends State<CallStack>
       ),
     );
 
-    if (isAsyncBreak) {
-      return result;
-    } else {
-      return DevToolsTooltip(
-        message: locationDescription == null
-            ? frameDescription
-            : '$frameDescription $locationDescription',
-        waitDuration: tooltipWaitLong,
-        child: result,
-      );
-    }
+    return isAsyncBreak
+        ? result
+        : DevToolsTooltip(
+            message: locationDescription == null
+                ? frameDescription
+                : '$frameDescription $locationDescription',
+            waitDuration: tooltipWaitLong,
+            child: result,
+          );
   }
 
-  Future<void> _onStackFrameSelected(StackFrameAndSourcePosition frame) async {
+  void _onStackFrameSelected(StackFrameAndSourcePosition frame) {
     controller.selectStackFrame(frame);
   }
 }

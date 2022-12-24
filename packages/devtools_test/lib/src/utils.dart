@@ -32,7 +32,7 @@ final screenIds = <String>[
 ///
 /// Tests that `listener` has actually been invoked.
 Future<void> addListenerScope({
-  required dynamic listenable,
+  required Listenable listenable,
   required Function listener,
   required Function callback,
 }) async {
@@ -89,7 +89,7 @@ TreemapNode generateTree(Map<String, dynamic> treeJson) {
   if (rawChildren != null) {
     // If not a leaf node, build all children then take the sum of the
     // children's sizes as its own size.
-    for (dynamic child in rawChildren) {
+    for (var child in rawChildren) {
       final childTreemapNode = generateTree(child);
       treemapNodeChildren.add(childTreemapNode);
       treemapNodeSize += childTreemapNode.byteSize;
@@ -105,7 +105,7 @@ TreemapNode generateTree(Map<String, dynamic> treeJson) {
     ..addAllChildren(treemapNodeChildren);
 }
 
-Finder findSubstring(Widget widget, String text) {
+Finder findSubstring(String text) {
   return find.byWidgetPredicate((widget) {
     if (widget is Text) {
       if (widget.data != null) return widget.data!.contains(text);

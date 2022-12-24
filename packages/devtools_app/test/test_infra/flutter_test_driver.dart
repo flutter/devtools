@@ -11,6 +11,10 @@ import 'package:vm_service/utils.dart';
 import 'package:vm_service/vm_service.dart';
 import 'package:vm_service/vm_service_io.dart';
 
+// TODO(kenz): eventually delete this class in favor of
+// integration_test/test_infra/test_app_driver.dart once the tests that
+// depend on this class are moved over to be true integration tests.
+
 /// This class was copied from
 /// flutter/packages/flutter_tools/test/integration/test_driver.dart. Its
 /// supporting classes were also copied from flutter/packages/flutter_tools.
@@ -106,7 +110,7 @@ abstract class FlutterTestDriver {
     stderrController.stream.listen(_debugPrint);
   }
 
-  Future<int> killGracefully() async {
+  Future<int> killGracefully() {
     _debugPrint('Sending SIGTERM to $procPid..');
     Process.killPid(procPid);
     return proc.exitCode.timeout(quitTimeout, onTimeout: _killForcefully);
@@ -172,7 +176,7 @@ abstract class FlutterTestDriver {
 
   Future<Isolate?> resume({String? step, bool wait = true}) async {
     _debugPrint('Sending resume ($step)');
-    await _timeoutWithMessages<dynamic>(
+    await _timeoutWithMessages<Object?>(
       () async => vmService!.resume(await getFlutterIsolateId(), step: step),
       message: 'Isolate did not respond to resume ($step)',
     );
@@ -189,7 +193,7 @@ abstract class FlutterTestDriver {
         Completer<Map<String, dynamic>>();
     late StreamSubscription<String> sub;
     sub = stdoutController.stream.listen((String line) async {
-      final dynamic json = _parseFlutterResponse(line);
+      final json = _parseFlutterResponse(line);
       if (json == null) {
         return;
       } else if ((event != null && json['event'] == event) ||
@@ -203,11 +207,14 @@ abstract class FlutterTestDriver {
         error.write(
           '${event != null ? '$event event' : 'response to request $id.'}.\n\n',
         );
-        if (json['params'] != null && json['params']['error'] != null) {
-          error.write('${json['params']['error']}\n\n');
-        }
-        if (json['params'] != null && json['params']['trace'] != null) {
-          error.write('${json['params']['trace']}\n\n');
+        final params = json['params'];
+        if (params != null && params is Map<String, Object?>) {
+          if (params['error'] != null) {
+            error.write('${params['error']}\n\n');
+          }
+          if (params['trace'] != null) {
+            error.write('${params['trace']}\n\n');
+          }
         }
         response.completeError(error.toString());
       }
@@ -245,12 +252,12 @@ abstract class FlutterTestDriver {
         logMessage('<timed out>');
         throw '$message';
       },
-    ).catchError((dynamic error) {
+    ).catchError((Object? error) {
       throw '$error\nReceived:\n${messages.toString()}';
     }).whenComplete(() => sub.cancel());
   }
 
-  Map<String, dynamic>? _parseFlutterResponse(String line) {
+  Map<String, Object?>? _parseFlutterResponse(String line) {
     if (line.startsWith('[') && line.endsWith(']')) {
       try {
         final Map<String, dynamic>? resp = json.decode(line)[0];
@@ -403,16 +410,17 @@ class FlutterRunTestDriver extends FlutterTestDriver {
       throw Exception('App has not started yet');
     }
 
-    final dynamic hotReloadResp = await _sendRequest(
+    final hotReloadResp = await _sendRequest(
       'app.restart',
-      <String, dynamic>{
+      <String, Object?>{
         'appId': _currentRunningAppId,
         'fullRestart': fullRestart,
         'pause': pause
       },
     );
 
-    if (hotReloadResp == null || hotReloadResp['code'] != 0) {
+    if (hotReloadResp == null ||
+        (hotReloadResp as Map<String, Object?>)['code'] != 0) {
       _throwErrorResponse(
         'Hot ${fullRestart ? 'restart' : 'reload'} request failed',
       );
@@ -431,7 +439,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
         proc.exitCode,
         _sendRequest(
           'app.detach',
-          <String, dynamic>{'appId': _currentRunningAppId},
+          <String, Object?>{'appId': _currentRunningAppId},
         ),
       ]).timeout(
         quitTimeout,
@@ -457,7 +465,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
         proc.exitCode,
         _sendRequest(
           'app.stop',
-          <String, dynamic>{'appId': _currentRunningAppId},
+          <String, Object?>{'appId': _currentRunningAppId},
         ),
       ]).timeout(
         quitTimeout,
@@ -474,14 +482,14 @@ class FlutterRunTestDriver extends FlutterTestDriver {
 
   int id = 1;
 
-  Future<dynamic> _sendRequest(String method, dynamic params) async {
+  Future<Object?> _sendRequest(String method, Object? params) async {
     final int requestId = id++;
-    final Map<String, dynamic> request = <String, dynamic>{
+    final request = <String, Object?>{
       'id': requestId,
       'method': method,
       'params': params
     };
-    final String jsonEncoded = json.encode(<Map<String, dynamic>>[request]);
+    final String jsonEncoded = json.encode(<Map<String, Object?>>[request]);
     _debugPrint(jsonEncoded);
 
     // Set up the response future before we send the request to avoid any

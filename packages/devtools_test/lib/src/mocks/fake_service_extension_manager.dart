@@ -80,7 +80,7 @@ class FakeServiceExtensionManager extends Fake
   ) async {
     final extension = serviceExtensionsAllowlist[name];
     if (extension != null) {
-      final dynamic value = _getExtensionValueFromJson(name, valueFromJson);
+      final Object? value = _getExtensionValueFromJson(name, valueFromJson);
 
       final enabled = extension is ToggleableServiceExtensionDescription
           ? value == extension.enabledValue
@@ -98,7 +98,7 @@ class FakeServiceExtensionManager extends Fake
     }
   }
 
-  dynamic _getExtensionValueFromJson(String name, String valueFromJson) {
+  Object? _getExtensionValueFromJson(String name, String valueFromJson) {
     final expectedValueType =
         serviceExtensionsAllowlist[name]!.values.first.runtimeType;
     switch (expectedValueType) {
@@ -186,8 +186,9 @@ class FakeServiceExtensionManager extends Fake
     }
   }
 
-  Future<void> callServiceExtension(String name, dynamic value) async {
+  Future<void> callServiceExtension(String name, Object? value) {
     extensionValueOnDevice[name] = value;
+    return Future.value();
   }
 
   @override
@@ -205,7 +206,7 @@ class FakeServiceExtensionManager extends Fake
   Future<void> setServiceExtensionState(
     String name, {
     required bool enabled,
-    required dynamic value,
+    required Object? value,
     bool callExtension = true,
   }) async {
     if (callExtension && _serviceExtensions.contains(name)) {

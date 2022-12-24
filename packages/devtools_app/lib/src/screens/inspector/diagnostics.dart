@@ -134,7 +134,7 @@ class DiagnosticsNodeDescription extends StatelessWidget {
       }
     }
 
-    if (description.isNotEmpty == true) {
+    if (description.isNotEmpty) {
       yield TextSpan(text: description, style: textStyle);
     }
 
@@ -161,7 +161,6 @@ class DiagnosticsNodeDescription extends StatelessWidget {
   Widget buildDescription({
     required String description,
     required TextStyle textStyle,
-    required BuildContext context,
     required ColorScheme colorScheme,
     RemoteDiagnosticsNode? diagnostic,
     String? searchValue,
@@ -295,12 +294,9 @@ class DiagnosticsNodeDescription extends StatelessWidget {
               final int green = JsonUtils.getIntMember(properties, 'green');
               final int blue = JsonUtils.getIntMember(properties, 'blue');
               String radix(int chan) => chan.toRadixString(16).padLeft(2, '0');
-              if (alpha == 255) {
-                description = '#${radix(red)}${radix(green)}${radix(blue)}';
-              } else {
-                description =
-                    '#${radix(alpha)}${radix(red)}${radix(green)}${radix(blue)}';
-              }
+              description = alpha == 255
+                  ? '#${radix(red)}${radix(green)}${radix(blue)}'
+                  : '#${radix(alpha)}${radix(red)}${radix(green)}${radix(blue)}';
 
               final Color color = Color.fromARGB(alpha, red, green, blue);
               children.add(_paddedIcon(_colorIconMaker.getCustomIcon(color)));
@@ -334,7 +330,6 @@ class DiagnosticsNodeDescription extends StatelessWidget {
           child: buildDescription(
             description: description,
             textStyle: descriptionTextStyle,
-            context: context,
             colorScheme: colorScheme,
             diagnostic: diagnostic,
             searchValue: searchValue,
@@ -392,7 +387,6 @@ class DiagnosticsNodeDescription extends StatelessWidget {
       var diagnosticDescription = buildDescription(
         description: diagnosticLocal.description ?? '',
         textStyle: descriptionTextStyle,
-        context: context,
         colorScheme: colorScheme,
         diagnostic: diagnostic,
         searchValue: searchValue,

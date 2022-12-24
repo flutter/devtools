@@ -48,14 +48,14 @@ void main() {
         line: 10,
       ),
       enabled: true,
-    )
+    ),
   ];
 
   final breakpointsWithLocation = [
     BreakpointAndSourcePosition.create(
       breakpoints.first,
       const SourcePosition(line: 10, column: 1),
-    )
+    ),
   ];
   final codeViewController = debuggerController.codeViewController;
   when(mockBreakpointManager.breakpoints)
@@ -79,20 +79,23 @@ void main() {
     );
   }
 
-  testWidgetsWithWindowSize('Breakpoints show items', windowSize,
-      (WidgetTester tester) async {
-    await pumpDebuggerScreen(tester, debuggerController);
+  testWidgetsWithWindowSize(
+    'Breakpoints show items',
+    windowSize,
+    (WidgetTester tester) async {
+      await pumpDebuggerScreen(tester, debuggerController);
 
-    expect(find.text('Breakpoints'), findsOneWidget);
+      expect(find.text('Breakpoints'), findsOneWidget);
 
-    // test for items in the breakpoint list
-    expect(
-      find.byWidgetPredicate(
-        (Widget widget) =>
-            widget is RichText &&
-            widget.text.toPlainText().contains('script.dart:10'),
-      ),
-      findsOneWidget,
-    );
-  });
+      // test for items in the breakpoint list
+      expect(
+        find.byWidgetPredicate(
+          (Widget widget) =>
+              widget is RichText &&
+              widget.text.toPlainText().contains('script.dart:10'),
+        ),
+        findsOneWidget,
+      );
+    },
+  );
 }

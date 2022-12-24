@@ -15,9 +15,12 @@
 // ignore_for_file: unnecessary_new
 // ignore_for_file: unused_catch_clause
 // ignore_for_file: unused_local_variable
+// ignore_for_file: prefer-moving-to-variable
+// ignore_for_file: avoid-throw-in-catch-block
 
 part of http;
 
+// TODO(jacobr): cleanup this class with only static members.
 // ignore: avoid_classes_with_only_static_members
 /// Utility functions for working with dates with HTTP specific date formats.
 class HttpDate {
@@ -63,7 +66,7 @@ class HttpDate {
       "Sep",
       "Oct",
       "Nov",
-      "Dec"
+      "Dec",
     ];
 
     DateTime d = date.toUtc();
@@ -110,7 +113,7 @@ class HttpDate {
       "Thursday",
       "Friday",
       "Saturday",
-      "Sunday"
+      "Sunday",
     ];
     const List months = const [
       "Jan",
@@ -124,7 +127,7 @@ class HttpDate {
       "Sep",
       "Oct",
       "Nov",
-      "Dec"
+      "Dec",
     ];
     const List wkdaysLowerCase = const [
       "mon",
@@ -133,7 +136,7 @@ class HttpDate {
       "thu",
       "fri",
       "sat",
-      "sun"
+      "sun",
     ];
     const List weekdaysLowerCase = const [
       "monday",
@@ -142,7 +145,7 @@ class HttpDate {
       "thursday",
       "friday",
       "saturday",
-      "sunday"
+      "sunday",
     ];
     const List monthsLowerCase = const [
       "jan",
@@ -156,7 +159,7 @@ class HttpDate {
       "sep",
       "oct",
       "nov",
-      "dec"
+      "dec",
     ];
 
     final int formatRfc1123 = 0;
@@ -221,11 +224,7 @@ class HttpDate {
 
     int expectNum(String separator) {
       int pos;
-      if (separator.length > 0) {
-        pos = date.indexOf(separator, index);
-      } else {
-        pos = date.length;
-      }
+      pos = separator.length > 0 ? date.indexOf(separator, index) : date.length;
       String tmp = date.substring(index, pos);
       index = pos + separator.length;
       try {
@@ -285,7 +284,7 @@ class HttpDate {
       "sep",
       "oct",
       "nov",
-      "dec"
+      "dec",
     ];
 
     int position = 0;

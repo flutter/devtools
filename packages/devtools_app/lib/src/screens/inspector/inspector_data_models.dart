@@ -76,7 +76,7 @@ List<double> computeRenderSizes({
           (s - smallestSize) *
                   (largestRenderSize - smallestRenderSize) /
                   (largestSize - smallestSize) +
-              smallestRenderSize
+              smallestRenderSize,
       ];
 
   var renderSizes = transformToRenderSize(largestRenderSize);
@@ -297,7 +297,7 @@ extension MainAxisAlignmentExtension on MainAxisAlignment {
   }
 }
 
-/// TODO(albertusangga): Move this to [RemoteDiagnosticsNode] once dart:html app is removed
+/// TODO(albertusangga): Move this to [RemoteDiagnosticsNode] once dart:html app is removed.
 class FlexLayoutProperties extends LayoutProperties {
   FlexLayoutProperties({
     required Size size,
@@ -382,7 +382,7 @@ class FlexLayoutProperties extends LayoutProperties {
 
   static FlexLayoutProperties _buildNode(RemoteDiagnosticsNode node) {
     final Map<String, Object?> renderObjectJson = node.renderObject!.json;
-    final properties = renderObjectJson['properties'] as List<dynamic>;
+    final properties = renderObjectJson['properties'] as List<Object?>;
     final data = Map<String, Object?>.fromIterable(
       properties,
       key: (property) => property['name'],

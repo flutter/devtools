@@ -71,7 +71,7 @@ class InspectorExpandCollapseButtons extends StatefulWidget {
 
 class _InspectorExpandCollapseButtonsState
     extends State<InspectorExpandCollapseButtons> with BlockingActionMixin {
-  bool get enableButtons => actionInProgress == false;
+  bool get enableButtons => !actionInProgress;
 
   @override
   Widget build(BuildContext context) {
@@ -106,7 +106,7 @@ class _InspectorExpandCollapseButtonsState
                   InspectorScreenBodyState.minScreenWidthForTextBeforeScaling,
               outlined: false,
             ),
-          )
+          ),
         ],
       ),
     );
@@ -122,14 +122,10 @@ class _InspectorExpandCollapseButtonsState
   }
 
   void _onCollapseClick() {
-    unawaited(
-      blockWhileInProgress(() async {
-        ga.select(
-          gac.inspector,
-          gac.collapseAll,
-        );
-        await widget.controller.collapseDetailsToSelected();
-      }),
+    ga.select(
+      gac.inspector,
+      gac.collapseAll,
     );
+    widget.controller.collapseDetailsToSelected();
   }
 }

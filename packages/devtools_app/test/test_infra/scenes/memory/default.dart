@@ -39,7 +39,6 @@ class MemoryDefaultScene extends Scene {
 
   @override
   Future<void> setUp() async {
-    await ensureInspectorDependencies();
     setGlobal(OfflineModeController, OfflineModeController());
     setGlobal(IdeTheme, IdeTheme());
     setGlobal(NotificationService, NotificationService());

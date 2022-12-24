@@ -139,7 +139,7 @@ class InstanceDetails with _$InstanceDetails {
   }) = EnumInstance;
 
   bool get isExpandable {
-    bool falsy(Object obj) => false;
+    bool falsy(Object _) => false;
 
     return map(
       nill: falsy,

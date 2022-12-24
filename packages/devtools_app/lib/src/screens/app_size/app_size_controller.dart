@@ -503,10 +503,10 @@ class AppSizeController {
     _diffTreeMap = _generateDiffTrees(diffMap);
 
     if (isDeferredApp.value) {
-      // For main only:
+      // For main only.
       _mainDiffTreeMap = _generateDiffTrees(mainDiffMap!);
 
-      // For deferred only:
+      // For deferred only.
       _deferredDiffTreeMap = _generateDiffTrees(deferredDiffMap!);
     }
 
@@ -577,9 +577,9 @@ class AppSizeController {
     return compareProgramInfo(oldApkProgramInfo, newApkProgramInfo);
   }
 
-  Map<String, dynamic> _wrapInArtificialRoot(Map<String, dynamic> json) {
+  Map<String, Object> _wrapInArtificialRoot(Map<String, dynamic> json) {
     json['n'] = _mainNodeName;
-    return <String, dynamic>{
+    return <String, Object>{
       'n': _artificialRootNodeName,
       'children': [json],
     };
@@ -598,8 +598,8 @@ class AppSizeController {
     );
 
     if (!isLeafNode) {
-      final List<dynamic> rawChildren = json['children'] as List<dynamic>;
-      for (final childJson in rawChildren.cast<Map<String, dynamic>>()) {
+      final rawChildren = json['children'] as List<Object?>;
+      for (final childJson in rawChildren.cast<Map<String, Object?>>()) {
         _apkJsonToProgramInfo(program: program, parent: node, json: childJson);
       }
     } else {
@@ -695,16 +695,14 @@ class AppSizeController {
     }
 
     // If none of the children matched the diff tree type
-    if (totalByteSize == 0 && skipNodesWithNoByteSizeChange) {
-      return null;
-    } else {
-      return _buildNode(
-        treeJson,
-        totalByteSize,
-        children: treemapNodeChildren,
-        showDiff: showDiff,
-      );
-    }
+    return totalByteSize == 0 && skipNodesWithNoByteSizeChange
+        ? null
+        : _buildNode(
+            treeJson,
+            totalByteSize,
+            children: treemapNodeChildren,
+            showDiff: showDiff,
+          );
   }
 
   TreemapNode _buildNode(
@@ -745,13 +743,13 @@ extension AppSizeJsonFileExtension on DevToolsJsonFile {
     'macos',
     'windows',
     'linux',
-    'web'
+    'web',
   ];
 
   bool get isAnalyzeSizeFile {
-    if (data is Map<String, dynamic>) {
-      final dataMap = data as Map<String, dynamic>;
-      final type = dataMap['type'];
+    final data = this.data;
+    if (data is Map<String, Object?>) {
+      final type = data['type'] as String?;
       return AppSizeJsonFileExtension._supportedAnalyzeSizePlatforms
           .contains(type);
     }

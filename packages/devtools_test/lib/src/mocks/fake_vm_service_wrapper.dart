@@ -77,7 +77,7 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
   late final Map<String, String>? _reverseResolvedUriMap;
   final _gcEventStream = StreamController<Event>.broadcast();
 
-  final _flags = <String, dynamic>{
+  final _flags = <String, List<Flag?>>{
     'flags': <Flag>[
       Flag(
         name: 'flag 1 name',
@@ -107,6 +107,7 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
       ),
     ],
   };
+
   @override
   Future<CpuSamples> getCpuSamples(
     String isolateId,
@@ -222,12 +223,16 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
   @override
   Future<Isolate> getIsolate(String isolateId) {
     return Future.value(
-      Isolate.parse({
-        'rootLib': LibraryRef.parse({
-          'name': 'fake_isolate_name',
-          'uri': 'package:fake_uri_root/main.dart'
-        })
-      }),
+      Isolate.parse(
+        {
+          'rootLib': LibraryRef.parse(
+            {
+              'name': 'fake_isolate_name',
+              'uri': 'package:fake_uri_root/main.dart',
+            },
+          ),
+        },
+      ),
     );
   }
 
@@ -267,7 +272,7 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
 
   @override
   Future<Success> setFlag(String name, String value) {
-    final List<Flag?> flags = _flags['flags'];
+    final List<Flag?> flags = _flags['flags']!;
     final existingFlag = flags.firstWhereOrNull((f) => f?.name == name);
     if (existingFlag != null) {
       existingFlag.valueAsString = value;
@@ -288,6 +293,8 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
       newValue: value,
       timestamp: 1, // 1 is arbitrary.
     );
+    // This library is conceptually for testing even though it is in its own
+    // package to support code reuse.
     // ignore: invalid_use_of_visible_for_testing_member
     _vmFlagManager.handleVmEvent(fakeVmFlagUpdateEvent);
     return Future.value(Success());
@@ -297,7 +304,7 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
   Future<FlagList> getFlagList() =>
       Future.value(FlagList.parse(_flags) ?? FlagList(flags: []));
 
-  final _vmTimelineFlags = <String, dynamic>{
+  final _vmTimelineFlags = <String, Object?>{
     'type': 'TimelineFlags',
     'recordedStreams': [],
     'availableStreams': [],

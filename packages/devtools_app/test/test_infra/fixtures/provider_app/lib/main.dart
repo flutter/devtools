@@ -12,6 +12,9 @@ import 'mixin.dart';
 // ignore: unused_import, allows the tests to use functions from tester.dart
 import 'tester.dart';
 
+// This lint gets in the way of testing the provider package.
+// ignore_for_file: unnecessary_getters_setters
+
 void main() {
   runApp(MyApp());
 }
@@ -38,7 +41,7 @@ class _MyAppState extends State<MyApp> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text('Providers count ${1 + _providers.length}'),
+                Text('Providers count ${_providers.length + 1}'),
                 Text(context.watch<Counter>().count.toString()),
                 ElevatedButton(
                   key: const Key('increment'),
@@ -67,7 +70,7 @@ class _MyAppState extends State<MyApp> {
                 key: const Key('remove'),
                 onPressed: () {
                   setState(() {
-                    _providers = List.from(_providers)..removeLast();
+                    _providers = List.of(_providers)..removeLast();
                   });
                 },
                 child: const Icon(Icons.remove),
@@ -105,7 +108,7 @@ class ComplexObject {
   Null nill;
   bool boolean = false;
   int integer = 0;
-  double float = .42;
+  double float = 0.42;
   String string = 'hello world';
   Object plainInstance = const _SubObject('hello world');
 
@@ -117,9 +120,7 @@ class ComplexObject {
   int get getter => 42;
 
   int _getterAndSetter = 0;
-  // ignore: unnecessary_getters_setters
   int get getterAndSetter => _getterAndSetter;
-  // ignore: unnecessary_getters_setters
   set getterAndSetter(int value) => _getterAndSetter = value;
 
   var map = <Object?, Object?>{

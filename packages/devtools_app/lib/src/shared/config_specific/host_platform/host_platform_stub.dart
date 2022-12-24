@@ -2,9 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be found
 // in the LICENSE file.
 
-// ignore: avoid_classes_with_only_static_members
 class HostPlatform {
-  // ignore: prefer_const_declarations
   static late final HostPlatform instance = HostPlatform();
 
   bool get isMacOS => throw UnimplementedError();

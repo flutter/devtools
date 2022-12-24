@@ -82,19 +82,22 @@ void main() {
       mockVmObject(mockFieldObject);
     });
 
-    testWidgetsWithWindowSize('viewport shows field display', windowSize,
-        (WidgetTester tester) async {
-      testObjectInspectorViewController.fakeObjectHistory
-          .setCurrentObject(mockFieldObject);
+    testWidgetsWithWindowSize(
+      'viewport shows field display',
+      windowSize,
+      (WidgetTester tester) async {
+        testObjectInspectorViewController.fakeObjectHistory
+            .setCurrentObject(mockFieldObject);
 
-      await tester.pumpWidget(
-        wrap(ObjectViewport(controller: testObjectInspectorViewController)),
-      );
+        await tester.pumpWidget(
+          wrap(ObjectViewport(controller: testObjectInspectorViewController)),
+        );
 
-      expect(ObjectViewport.viewportTitle(mockFieldObject), 'Field fooField');
-      expect(find.text('Field fooField'), findsOneWidget);
-      expect(find.byType(VmFieldDisplay), findsOneWidget);
-    });
+        expect(ObjectViewport.viewportTitle(mockFieldObject), 'Field fooField');
+        expect(find.text('Field fooField'), findsOneWidget);
+        expect(find.byType(VmFieldDisplay), findsOneWidget);
+      },
+    );
   });
 
   group('test for function object:', () {

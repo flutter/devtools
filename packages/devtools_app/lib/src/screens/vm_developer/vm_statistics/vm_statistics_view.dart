@@ -75,7 +75,7 @@ class VMStatisticsWidget extends StatelessWidget {
                 child: ProcessStatisticsWidget(
                   controller: controller,
                 ),
-              )
+              ),
             ],
           ),
         ),

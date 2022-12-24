@@ -8,6 +8,7 @@ import 'dart:convert';
 import 'package:collection/collection.dart';
 import 'package:string_scanner/string_scanner.dart';
 
+//TODO(jacobr): cleanup.
 // ignore: avoid_classes_with_only_static_members
 abstract class SpanParser {
   /// Takes a TextMate [Grammar] and a [String] and outputs a list of
@@ -707,7 +708,7 @@ class ScopeStack {
         endLocation: end,
       );
       // Replace the last span with this one.
-      spans[spans.length - 1] = span;
+      spans.last = span;
     } else {
       final span = ScopeSpan(
         scopes: newScopes,

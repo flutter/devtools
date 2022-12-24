@@ -399,6 +399,7 @@ class FileNode extends TreeNode<FileNode> {
   }
 }
 
+// TODO(jacobr): refactor this code.
 // ignore: avoid_classes_with_only_static_members
 class ScriptRefUtils {
   static String fileName(ScriptRef scriptRef) =>
@@ -437,13 +438,11 @@ class ScriptRefUtils {
       ];
     }
 
-    if (parts.length > 1) {
-      return [
-        parts.first,
-        parts.sublist(1).join('/'),
-      ];
-    } else {
-      return parts;
-    }
+    return parts.length > 1
+        ? [
+            parts.first,
+            parts.sublist(1).join('/'),
+          ]
+        : parts;
   }
 }

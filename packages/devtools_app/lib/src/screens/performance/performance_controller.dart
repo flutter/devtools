@@ -124,8 +124,7 @@ class PerformanceController extends DisposableController
             // the last hot restart. Their data would be bogus.
             data.rebuildCountModel
                 .processRebuildEvent(event.extensionData!.data);
-            if (data.rebuildCountModel.locationMap.locationsResolved.value ==
-                    false &&
+            if (!data.rebuildCountModel.locationMap.locationsResolved.value &&
                 !_fetchMissingLocationsStarted) {
               _fetchMissingRebuildLocations();
             }
@@ -153,13 +152,13 @@ class PerformanceController extends DisposableController
       // own. This wouldn't be a big deal but suggests a logic bug
       // somewhere.
       assert(
-        data.rebuildCountModel.locationMap.locationsResolved.value == false,
+        !data.rebuildCountModel.locationMap.locationsResolved.value,
       );
       data.rebuildCountModel.locationMap.processLocationMap(json);
       // Only one call to fetch missing locations should ever be
       // needed as rebuild events include all associated locations.
       assert(
-        data.rebuildCountModel.locationMap.locationsResolved.value == true,
+        data.rebuildCountModel.locationMap.locationsResolved.value,
       );
     }
   }
@@ -262,11 +261,11 @@ abstract class PerformanceFeatureController extends DisposableController {
     }
   }
 
-  Future<void> onBecomingActive() async {}
+  Future<void> onBecomingActive();
 
-  Future<void> init() async {}
+  Future<void> init();
 
-  FutureOr<void> setOfflineData(PerformanceData offlineData);
+  Future<void> setOfflineData(PerformanceData offlineData);
 
   FutureOr<void> clearData();
 

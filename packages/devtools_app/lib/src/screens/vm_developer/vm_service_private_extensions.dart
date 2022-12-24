@@ -130,11 +130,9 @@ class Instruction {
       return;
     }
     final rawObject = data[3] as Map<String, dynamic>;
-    if (rawObject['type'].contains('Instance')) {
-      object = InstanceRef.parse(rawObject);
-    } else {
-      object = createServiceObject(data[3], const <String>[]) as ObjRef;
-    }
+    object = rawObject['type'].contains('Instance')
+        ? InstanceRef.parse(rawObject)
+        : createServiceObject(data[3], const <String>[]) as ObjRef;
   }
 
   /// The instruction's address in memory.
@@ -320,11 +318,7 @@ extension FieldPrivateViewExtension on Field {
       guardClassType = json![_guardClassKey]['type'];
     }
 
-    if (guardClassType == '@Class' || guardClassType == 'Class') {
-      return true;
-    } else {
-      return false;
-    }
+    return guardClassType == '@Class' || guardClassType == 'Class';
   }
 }
 
@@ -437,8 +431,8 @@ class ProfileCode {
 
   List? ticks;
 
-  Map<String, dynamic> toJson() {
-    final json = <String, dynamic>{};
+  Map<String, Object?> toJson() {
+    final json = <String, Object?>{};
     json.addAll({
       'kind': kind ?? '',
       'inclusiveTicks': inclusiveTicks ?? -1,

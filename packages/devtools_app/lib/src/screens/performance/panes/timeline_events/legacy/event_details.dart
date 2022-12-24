@@ -143,7 +143,7 @@ class EventSummary extends StatelessWidget {
           if (event.isAsyncEvent)
             ...event.children
                 .cast<AsyncTimelineEvent>()
-                .where((e) => e.isAsyncInstantEvent)
+                .where((e) => e.isAsyncInstantEvent),
         ],
         _eventArgs = Map.from(event.traceEvents.first.event.args!)
           ..addAll({for (var trace in event.traceEvents) ...trace.event.args!});
@@ -193,7 +193,7 @@ class EventSummary extends StatelessWidget {
               if (event.isAsyncEvent)
                 Flexible(
                   fit: FlexFit.tight,
-                  child: _asyncIdTile(context),
+                  child: _asyncIdTile(),
                 ),
               Flexible(
                 fit: FlexFit.tight,
@@ -212,35 +212,33 @@ class EventSummary extends StatelessWidget {
             ],
           ),
         ),
-        if (_connectedEvents.isNotEmpty) _buildConnectedEvents(context),
-        if (_eventArgs.isNotEmpty) _buildArguments(context),
+        if (_connectedEvents.isNotEmpty) _buildConnectedEvents(),
+        if (_eventArgs.isNotEmpty) _buildArguments(),
       ],
     );
   }
 
-  Widget _asyncIdTile(BuildContext context) {
+  Widget _asyncIdTile() {
     late final String asyncId;
-    if (event is OfflineTimelineEvent) {
-      asyncId = event.traceEvents.first.event.id;
-    } else {
-      asyncId = (event as AsyncTimelineEvent).asyncId;
-    }
+    asyncId = event is OfflineTimelineEvent
+        ? event.traceEvents.first.event.id as String
+        : (event as AsyncTimelineEvent).asyncId;
     return EventMetaData(
       title: 'Async id',
       inlineValue: asyncId,
     );
   }
 
-  Widget _buildConnectedEvents(BuildContext context) {
+  Widget _buildConnectedEvents() {
     return ExpandingEventMetaData(
       title: 'Connected events',
       children: [
-        for (var e in _connectedEvents) _buildConnectedEvent(context, e),
+        for (var e in _connectedEvents) _buildConnectedEvent(e),
       ],
     );
   }
 
-  Widget _buildConnectedEvent(BuildContext context, TimelineEvent e) {
+  Widget _buildConnectedEvent(TimelineEvent e) {
     final eventArgs = {
       'startTime': msText(e.time.start! - event.time.start!),
       'args': e.traceEvents.first.event.args,
@@ -254,7 +252,7 @@ class EventSummary extends StatelessWidget {
     );
   }
 
-  Widget _buildArguments(BuildContext context) {
+  Widget _buildArguments() {
     return ExpandingEventMetaData(
       title: 'Arguments',
       children: [

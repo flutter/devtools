@@ -528,7 +528,7 @@ class _CustomPointerScrollableState extends State<CustomPointerScrollable>
   Drag? _drag;
   ScrollHoldController? _hold;
 
-  void _handleDragDown(DragDownDetails details) {
+  void _handleDragDown(DragDownDetails _) {
     assert(_drag == null);
     assert(_hold == null);
     _hold = position!.hold(_disposeHold);

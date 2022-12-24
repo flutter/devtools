@@ -39,57 +39,58 @@ void main() {
   setGlobal(NotificationService, NotificationService());
 
   testWidgets(
-      'does not display floating debugger controls when debugger screen is showing',
-      (WidgetTester tester) async {
-    final mockConnectedApp = MockConnectedAppLegacy();
-    when(mockConnectedApp.isFlutterAppNow).thenReturn(true);
-    when(mockConnectedApp.isProfileBuildNow).thenReturn(false);
-    when(mockServiceManager.connectedAppInitialized).thenReturn(true);
-    when(mockServiceManager.connectedApp).thenReturn(mockConnectedApp);
-    final mockDebuggerController = MockDebuggerController();
-    when(mockDebuggerController.isPaused)
-        .thenReturn(ValueNotifier<bool>(false));
+    'does not display floating debugger controls when debugger screen is showing',
+    (WidgetTester tester) async {
+      final mockConnectedApp = MockConnectedAppLegacy();
+      when(mockConnectedApp.isFlutterAppNow).thenReturn(true);
+      when(mockConnectedApp.isProfileBuildNow).thenReturn(false);
+      when(mockServiceManager.connectedAppInitialized).thenReturn(true);
+      when(mockServiceManager.connectedApp).thenReturn(mockConnectedApp);
+      final mockDebuggerController = MockDebuggerController();
+      when(mockDebuggerController.isPaused)
+          .thenReturn(ValueNotifier<bool>(false));
 
-    const debuggerScreenKey = Key('debugger screen');
-    const debuggerTabKey = Key('debugger tab');
-    await tester.pumpWidget(
-      wrapWithControllers(
-        DevToolsScaffold(
-          tabs: [
-            _TestScreen(
-              DebuggerScreen.id,
-              debuggerScreenKey,
-              tabKey: debuggerTabKey,
-              showFloatingDebuggerControls: false,
-            ),
-            _screen2,
-          ],
-          ideTheme: IdeTheme(),
+      const debuggerScreenKey = Key('debugger screen');
+      const debuggerTabKey = Key('debugger tab');
+      await tester.pumpWidget(
+        wrapWithControllers(
+          DevToolsScaffold(
+            screens: [
+              _TestScreen(
+                DebuggerScreen.id,
+                debuggerScreenKey,
+                tabKey: debuggerTabKey,
+                showFloatingDebuggerControls: false,
+              ),
+              _screen2,
+            ],
+            ideTheme: IdeTheme(),
+          ),
+          debugger: mockDebuggerController,
+          analytics: AnalyticsController(enabled: false, firstRun: false),
         ),
-        debugger: mockDebuggerController,
-        analytics: AnalyticsController(enabled: false, firstRun: false),
-      ),
-    );
-    expect(find.byKey(debuggerScreenKey), findsOneWidget);
-    expect(find.byKey(_k2), findsNothing);
-    expect(find.byType(FloatingDebuggerControls), findsNothing);
+      );
+      expect(find.byKey(debuggerScreenKey), findsOneWidget);
+      expect(find.byKey(_k2), findsNothing);
+      expect(find.byType(FloatingDebuggerControls), findsNothing);
 
-    // Tap on the tab for screen 2 and verify the controls are present.
-    await tester.tap(find.byKey(_t2));
-    await tester.pumpAndSettle();
-    await tester.pumpAndSettle();
-    expect(find.byKey(debuggerScreenKey), findsNothing);
-    expect(find.byKey(_k2), findsOneWidget);
-    expect(find.byType(FloatingDebuggerControls), findsOneWidget);
+      // Tap on the tab for screen 2 and verify the controls are present.
+      await tester.tap(find.byKey(_t2));
+      await tester.pumpAndSettle();
+      await tester.pumpAndSettle();
+      expect(find.byKey(debuggerScreenKey), findsNothing);
+      expect(find.byKey(_k2), findsOneWidget);
+      expect(find.byType(FloatingDebuggerControls), findsOneWidget);
 
-    // Return to the debugger screen and verify the controls are gone.
-    await tester.tap(find.byKey(debuggerTabKey));
-    await tester.pumpAndSettle();
-    await tester.pumpAndSettle();
-    expect(find.byKey(debuggerScreenKey), findsOneWidget);
-    expect(find.byKey(_k2), findsNothing);
-    expect(find.byType(FloatingDebuggerControls), findsNothing);
-  });
+      // Return to the debugger screen and verify the controls are gone.
+      await tester.tap(find.byKey(debuggerTabKey));
+      await tester.pumpAndSettle();
+      await tester.pumpAndSettle();
+      expect(find.byKey(debuggerScreenKey), findsOneWidget);
+      expect(find.byKey(_k2), findsNothing);
+      expect(find.byType(FloatingDebuggerControls), findsNothing);
+    },
+  );
 }
 
 class _TestScreen extends Screen {

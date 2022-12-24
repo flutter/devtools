@@ -49,7 +49,6 @@ ThemeData _darkTheme(IdeTheme ideTheme) {
       : theme.canvasColor;
   return _baseTheme(
     theme: theme,
-    ideTheme: ideTheme,
     primaryColor: devtoolsGrey[900]!,
     backgroundColor: background,
     indicatorColor: devtoolsBlue[400]!,
@@ -64,7 +63,6 @@ ThemeData _lightTheme(IdeTheme ideTheme) {
       : theme.canvasColor;
   return _baseTheme(
     theme: theme,
-    ideTheme: ideTheme,
     primaryColor: devtoolsBlue[600]!,
     backgroundColor: background,
     indicatorColor: Colors.yellowAccent[400]!,
@@ -74,20 +72,26 @@ ThemeData _lightTheme(IdeTheme ideTheme) {
 
 ThemeData _baseTheme({
   required ThemeData theme,
-  required IdeTheme ideTheme,
   required Color primaryColor,
   required Color backgroundColor,
   required Color indicatorColor,
   required Color textSelectionColor,
 }) {
+  final fillColor = MaterialStateProperty.resolveWith(
+    (states) {
+      if (states.contains(MaterialState.selected) &&
+          !states.contains(MaterialState.disabled)) {
+        return devtoolsBlue[400];
+      }
+      return null;
+    },
+  );
   return theme.copyWith(
     primaryColor: primaryColor,
     indicatorColor: indicatorColor,
     // Same values for both light and dark themes.
     primaryColorDark: devtoolsBlue[700],
     primaryColorLight: devtoolsBlue[400],
-    // ignore: deprecated_member_use
-    accentColor: devtoolsBlue[400],
     canvasColor: backgroundColor,
     scaffoldBackgroundColor: backgroundColor,
     outlinedButtonTheme: OutlinedButtonThemeData(
@@ -111,13 +115,7 @@ ThemeData _baseTheme({
       ),
     ),
     switchTheme: SwitchThemeData(
-      thumbColor: MaterialStateProperty.resolveWith((states) {
-        if (states.contains(MaterialState.selected) &&
-            !states.contains(MaterialState.disabled)) {
-          return devtoolsBlue[400];
-        }
-        return null;
-      }),
+      thumbColor: fillColor,
       trackColor: MaterialStateProperty.resolveWith((states) {
         if (states.contains(MaterialState.selected) &&
             !states.contains(MaterialState.disabled)) {
@@ -126,23 +124,9 @@ ThemeData _baseTheme({
         return null;
       }),
     ),
-    radioTheme: RadioThemeData(
-      fillColor: MaterialStateProperty.resolveWith((states) {
-        if (states.contains(MaterialState.selected) &&
-            !states.contains(MaterialState.disabled)) {
-          return devtoolsBlue[400];
-        }
-        return null;
-      }),
-    ),
+    radioTheme: RadioThemeData(fillColor: fillColor),
     checkboxTheme: CheckboxThemeData(
-      fillColor: MaterialStateProperty.resolveWith((states) {
-        if (states.contains(MaterialState.selected) &&
-            !states.contains(MaterialState.disabled)) {
-          return devtoolsBlue[400];
-        }
-        return null;
-      }),
+      fillColor: fillColor,
     ),
     textSelectionTheme: TextSelectionThemeData(
       selectionColor: textSelectionColor,
@@ -297,9 +281,7 @@ extension DevToolsColorScheme on ColorScheme {
 
   Color get toggleButtonsFillSelected => devtoolsBlue[400]!;
 
-  Color get grey => isLight
-      ? const Color.fromARGB(255, 128, 128, 128)
-      : const Color.fromARGB(255, 128, 128, 128);
+  Color get grey => const Color.fromARGB(255, 128, 128, 128);
 
   Color get breakpointColor => isLight ? devtoolsBlue[600]! : Colors.white;
 

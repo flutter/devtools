@@ -71,6 +71,7 @@ void main() {
     when(mockCodeViewController.showProfileInformation)
         .thenReturn(showProfileHits);
     refreshCodeCoverageInvoked = false;
+    // TODO(jacobr): is there a better way to clean this up?
     // ignore: discarded_futures
     when(mockCodeViewController.refreshCodeStatistics()).thenAnswer(
       (_) async => refreshCodeCoverageInvoked = true,
@@ -118,70 +119,73 @@ void main() {
     }
   }
 
-  testWidgetsWithWindowSize('Gutter displays code statistics info', windowSize,
-      (WidgetTester tester) async {
-    await pumpDebuggerScreen(tester, debuggerController);
+  testWidgetsWithWindowSize(
+    'Gutter displays code statistics info',
+    windowSize,
+    (WidgetTester tester) async {
+      await pumpDebuggerScreen(tester, debuggerController);
 
-    final findCoverageToggle = find.text('Show Coverage');
-    final findProfileToggle = find.text('Show Profile');
-    final findRefresh = find.byType(IconLabelButton);
-    expect(findCoverageToggle, findsOneWidget);
-    expect(findProfileToggle, findsOneWidget);
-    expect(findRefresh, findsOneWidget);
+      final findCoverageToggle = find.text('Show Coverage');
+      final findProfileToggle = find.text('Show Profile');
+      final findRefresh = find.byType(IconLabelButton);
+      expect(findCoverageToggle, findsOneWidget);
+      expect(findProfileToggle, findsOneWidget);
+      expect(findRefresh, findsOneWidget);
 
-    // Coverage display starts disabled.
-    gutterItemCoverageTester(tester, false);
-    gutterItemProfileInfoTester(tester, false);
-    expect(
-      tester.widget<IconLabelButton>(findRefresh).onPressed,
-      isNull,
-    );
+      // Coverage display starts disabled.
+      gutterItemCoverageTester(tester, false);
+      gutterItemProfileInfoTester(tester, false);
+      expect(
+        tester.widget<IconLabelButton>(findRefresh).onPressed,
+        isNull,
+      );
 
-    // Toggle showing coverage and verify the gutter items contain coverage
-    // information.
-    await tester.tap(findCoverageToggle);
-    await pumpDebuggerScreen(tester, debuggerController);
-    gutterItemCoverageTester(tester, true);
-    gutterItemProfileInfoTester(tester, false);
-    expect(
-      tester.widget<IconLabelButton>(findRefresh).onPressed,
-      isNotNull,
-    );
+      // Toggle showing coverage and verify the gutter items contain coverage
+      // information.
+      await tester.tap(findCoverageToggle);
+      await pumpDebuggerScreen(tester, debuggerController);
+      gutterItemCoverageTester(tester, true);
+      gutterItemProfileInfoTester(tester, false);
+      expect(
+        tester.widget<IconLabelButton>(findRefresh).onPressed,
+        isNotNull,
+      );
 
-    // Toggle showing profiler information and verify the gutter items contain
-    // profiling information.
-    await tester.tap(findProfileToggle);
-    await pumpDebuggerScreen(tester, debuggerController);
-    gutterItemCoverageTester(tester, true);
-    gutterItemProfileInfoTester(tester, true);
-    expect(
-      tester.widget<IconLabelButton>(findRefresh).onPressed,
-      isNotNull,
-    );
+      // Toggle showing profiler information and verify the gutter items contain
+      // profiling information.
+      await tester.tap(findProfileToggle);
+      await pumpDebuggerScreen(tester, debuggerController);
+      gutterItemCoverageTester(tester, true);
+      gutterItemProfileInfoTester(tester, true);
+      expect(
+        tester.widget<IconLabelButton>(findRefresh).onPressed,
+        isNotNull,
+      );
 
-    // Test the refresh coverage button.
-    await tester.tap(findRefresh);
-    await pumpDebuggerScreen(tester, debuggerController);
-    expect(refreshCodeCoverageInvoked, true);
+      // Test the refresh coverage button.
+      await tester.tap(findRefresh);
+      await pumpDebuggerScreen(tester, debuggerController);
+      expect(refreshCodeCoverageInvoked, true);
 
-    // Toggle again and verify the coverage information is no longer present.
-    await tester.tap(findCoverageToggle);
-    await pumpDebuggerScreen(tester, debuggerController);
-    gutterItemCoverageTester(tester, false);
-    gutterItemProfileInfoTester(tester, true);
-    expect(
-      tester.widget<IconLabelButton>(findRefresh).onPressed,
-      isNotNull,
-    );
+      // Toggle again and verify the coverage information is no longer present.
+      await tester.tap(findCoverageToggle);
+      await pumpDebuggerScreen(tester, debuggerController);
+      gutterItemCoverageTester(tester, false);
+      gutterItemProfileInfoTester(tester, true);
+      expect(
+        tester.widget<IconLabelButton>(findRefresh).onPressed,
+        isNotNull,
+      );
 
-    // Toggle again and verify the profiling information is no longer present.
-    await tester.tap(findProfileToggle);
-    await pumpDebuggerScreen(tester, debuggerController);
-    gutterItemCoverageTester(tester, false);
-    gutterItemProfileInfoTester(tester, false);
-    expect(
-      tester.widget<IconLabelButton>(findRefresh).onPressed,
-      isNull,
-    );
-  });
+      // Toggle again and verify the profiling information is no longer present.
+      await tester.tap(findProfileToggle);
+      await pumpDebuggerScreen(tester, debuggerController);
+      gutterItemCoverageTester(tester, false);
+      gutterItemProfileInfoTester(tester, false);
+      expect(
+        tester.widget<IconLabelButton>(findRefresh).onPressed,
+        isNull,
+      );
+    },
+  );
 }

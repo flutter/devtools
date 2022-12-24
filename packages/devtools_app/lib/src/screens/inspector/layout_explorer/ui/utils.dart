@@ -98,7 +98,7 @@ class BorderLayout extends StatelessWidget {
           Align(
             alignment: Alignment.bottomCenter,
             child: Container(height: bottomHeight, child: bottom),
-          )
+          ),
       ],
     );
   }
@@ -181,7 +181,7 @@ class WidgetVisualizer extends StatelessWidget {
               boxShadow: isSelected
                   ? [
                       BoxShadow(
-                        color: Colors.black.withOpacity(.5),
+                        color: Colors.black.withOpacity(0.5),
                         blurRadius: 20,
                       ),
                     ]
@@ -264,7 +264,7 @@ class AnimatedLayoutProperties<T extends LayoutProperties>
               begin.children[i],
               end.children[i],
               animation,
-            )
+            ),
         ];
 
   final T begin;
@@ -291,7 +291,7 @@ class AnimatedLayoutProperties<T extends LayoutProperties>
     final animationLocal = animation;
     return [
       for (var i = 0; i < children.length; i++)
-        lerpDouble(l1[i], l2[i], animationLocal.value)!
+        lerpDouble(l1[i], l2[i], animationLocal.value)!,
     ];
   }
 

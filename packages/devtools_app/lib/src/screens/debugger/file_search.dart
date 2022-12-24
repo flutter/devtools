@@ -398,7 +398,7 @@ class FileSearchResults {
     for (final matches in [
       _exactFileNameMatches,
       _exactFullPathMatches,
-      _fuzzyMatches
+      _fuzzyMatches,
     ]) {
       final selected = _takeMatches(matches, matchesLeft);
       topMatches.add(selected);

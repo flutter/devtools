@@ -19,7 +19,7 @@ class AppSizeAnalysisTable extends StatelessWidget {
   }) {
     final treeColumn = _NameColumn(
       currentRootLevel: controller.isDeferredApp.value
-          ? rootNode.children[0].level
+          ? rootNode.children.first.level
           : rootNode.level,
     );
     final sizeColumn = _SizeColumn();
@@ -110,7 +110,7 @@ class _SizeColumn extends ColumnData<TreemapNode> {
         );
 
   @override
-  dynamic getValue(TreemapNode dataObject) => dataObject.byteSize;
+  Comparable getValue(TreemapNode dataObject) => dataObject.byteSize;
 
   @override
   String getDisplayValue(TreemapNode dataObject) {
@@ -220,7 +220,7 @@ class _DiffColumn extends ColumnData<TreemapNode> {
 
   // Ensure sort by absolute size.
   @override
-  dynamic getValue(TreemapNode dataObject) => dataObject.unsignedByteSize;
+  int getValue(TreemapNode dataObject) => dataObject.unsignedByteSize;
 
 // TODO(peterdjlee): Add up or down arrows indicating increase or decrease for display value.
   @override
@@ -238,11 +238,7 @@ class _DiffColumn extends ColumnData<TreemapNode> {
 
   @override
   Color getTextColor(TreemapNode dataObject) {
-    if (dataObject.byteSize < 0) {
-      return tableDecreaseColor;
-    } else {
-      return tableIncreaseColor;
-    }
+    return dataObject.byteSize < 0 ? tableDecreaseColor : tableIncreaseColor;
   }
 }
 

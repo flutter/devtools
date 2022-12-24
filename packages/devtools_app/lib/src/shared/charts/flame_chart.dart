@@ -379,11 +379,7 @@ abstract class FlameChartState<T extends FlameChart,
   }
 
   void _handleKeyEvent(RawKeyEvent event) {
-    if (event.isAltPressed) {
-      _altKeyPressed = true;
-    } else {
-      _altKeyPressed = false;
-    }
+    _altKeyPressed = event.isAltPressed;
 
     // Only handle down events so logic is not duplicated on key up.
     if (event is RawKeyDownEvent) {
@@ -907,6 +903,7 @@ extension NodeListExtension on List<FlameChartNode> {
   }
 }
 
+// TODO(jacobr): cleanup up this util class with just static members.
 // ignore: avoid_classes_with_only_static_members
 class FlameChartUtils {
   static double leftPaddingForNode(
@@ -1120,15 +1117,13 @@ class FlameChartNode<T extends FlameChartDataMixin<T>> {
             )
           : const SizedBox(),
     );
-    if (hovered || !selectable) {
-      return DevToolsTooltip(
-        key: key,
-        message: data.tooltip,
-        child: node,
-      );
-    } else {
-      return node;
-    }
+    return (hovered || !selectable)
+        ? DevToolsTooltip(
+            key: key,
+            message: data.tooltip,
+            child: node,
+          )
+        : node;
   }
 
   Color _backgroundColor({
@@ -1366,12 +1361,9 @@ class TimelineGridPainter extends FlameChartPainter {
     final microsPerInterval = _microsPerInterval(intervalWidth);
     int timestampMicros = _startingTimestamp(intervalWidth, microsPerInterval);
     double lineX;
-    if (visible.left <= chartStartInset) {
-      lineX = chartStartInset - visible.left;
-    } else {
-      lineX =
-          intervalWidth - ((visible.left - chartStartInset) % intervalWidth);
-    }
+    lineX = visible.left <= chartStartInset
+        ? chartStartInset - visible.left
+        : intervalWidth - ((visible.left - chartStartInset) % intervalWidth);
 
     while (lineX < constraints.maxWidth) {
       _paintTimestamp(canvas, timestampMicros, intervalWidth, lineX);

@@ -164,7 +164,7 @@ class _ProfileHelpLink extends StatelessWidget {
             gaScreenName: gac.memory,
             gaSelectedItemDescription:
                 gac.topicDocumentationLink(_documentationTopic),
-          )
+          ),
         ],
       ),
     );

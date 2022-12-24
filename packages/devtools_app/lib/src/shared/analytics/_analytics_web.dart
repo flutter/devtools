@@ -71,6 +71,8 @@ class GtagEventDevTools extends GtagEvent {
 
     int value,
     bool non_interaction,
+    // This code is going away so not worth cleaning up to be free of dynamic.
+    // ignore: avoid-dynamic
     dynamic custom_map,
 
     // NOTE: Do not reorder any of these. Order here must match the order in the
@@ -120,7 +122,7 @@ class GtagEventDevTools extends GtagEvent {
   external bool get non_interaction;
 
   @override
-  external dynamic get custom_map;
+  external Object get custom_map;
 
   // Custom dimensions:
   external String? get user_app;
@@ -650,27 +652,27 @@ bool _userApplicationDimensionsComputed = false;
 void _computeUserApplicationCustomGTagData() {
   if (_userApplicationDimensionsComputed) return;
 
-  assert(serviceManager.connectedApp!.isFlutterAppNow != null);
-  assert(serviceManager.connectedApp!.isDartWebAppNow != null);
-  assert(serviceManager.connectedApp!.isProfileBuildNow != null);
+  final connectedApp = serviceManager.connectedApp!;
+  assert(connectedApp.isFlutterAppNow != null);
+  assert(connectedApp.isDartWebAppNow != null);
+  assert(connectedApp.isProfileBuildNow != null);
 
   const unknownOS = 'unknown';
-  if (serviceManager.connectedApp!.isFlutterAppNow!) {
+  if (connectedApp.isFlutterAppNow!) {
     userPlatformType = serviceManager.vm?.operatingSystem ?? unknownOS;
   }
-  if (serviceManager.connectedApp!.isFlutterWebAppNow) {
+  if (connectedApp.isFlutterWebAppNow) {
     userAppType = appTypeFlutterWeb;
-  } else if (serviceManager.connectedApp!.isFlutterAppNow!) {
+  } else if (connectedApp.isFlutterAppNow!) {
     userAppType = appTypeFlutter;
-  } else if (serviceManager.connectedApp!.isDartWebAppNow!) {
+  } else if (connectedApp.isDartWebAppNow!) {
     userAppType = appTypeWeb;
   } else {
     userAppType = appTypeDartCLI;
   }
 
-  userBuildType = serviceManager.connectedApp!.isProfileBuildNow!
-      ? buildTypeProfile
-      : buildTypeDebug;
+  userBuildType =
+      connectedApp.isProfileBuildNow! ? buildTypeProfile : buildTypeDebug;
 
   _analyticsComputed = true;
 }
@@ -749,7 +751,7 @@ void waitForDimensionsComputed(String screenName) {
 
 // Loading screen from a hash code, can't collect GA (if enabled) until we have
 // all the dimension data.
-void setupAndGaScreen(String screenName) async {
+void setupAndGaScreen(String screenName) {
   if (!_analyticsComputed) {
     _stillWaiting++;
     waitForDimensionsComputed(screenName);
