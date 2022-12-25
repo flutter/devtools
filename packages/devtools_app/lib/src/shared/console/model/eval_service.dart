@@ -4,13 +4,16 @@
 
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../../service/vm_service_wrapper.dart';
 import '../../globals.dart';
 import '../../object_tree.dart';
 import '../../primitives/reference.dart';
 import '../primitives/eval_history.dart';
+
+typedef ExpressionEvaluator = Future<Response> Function(String expression);
+typedef FrameObtainer = Frame? Function();
 
 class AutocompleteCache {
   final classes = <ClassRef, Class>{};
@@ -38,23 +41,21 @@ class AutocompleteCache {
 }
 
 class EvalService {
-  EvalService({
-    required this.isolateRef,
-    required this.variables,
-    required this.frameForEval,
-    required this.isPaused,
-    required this.service,
-  });
+  EvalService(
+    this.isolateRef,
+    this.evalAtCurrentFrame,
+    this.variables,
+    this.frameForEval,
+  );
 
   final ValueObtainer<IsolateRef?> isolateRef;
 
-  final ValueObtainer<bool> isPaused;
+  final ValueListenable<List<DartObjectNode>> variables;
 
-  final ValueObtainer<Frame?> frameForEval;
+  final ExpressionEvaluator
+      evalAtCurrentFrame; // should not be passed to constructor?
 
-  final ValueObtainer<List<DartObjectNode>> variables;
-
-  final ValueObtainer<VmServiceWrapper> service;
+  final FrameObtainer frameForEval;
 
   final EvalHistory evalHistory = EvalHistory();
 
@@ -102,40 +103,5 @@ class EvalService {
   /// The return value can be one of [Obj] or [Sentinel].
   Future<Obj> getObject(ObjRef objRef) {
     return serviceManager.service!.getObject(_isolateRefId, objRef.id!);
-  }
-
-  /// Evaluate the given expression in the context of the currently selected
-  /// stack frame, or the top frame if there is no current selection.
-  ///
-  /// This will fail if the application is not currently paused.
-  Future<Response> evalAtCurrentFrame(String expression) {
-    if (!isPaused.value) {
-      return Future.error(
-        RPCError.withDetails(
-          'evaluateInFrame',
-          RPCError.kInvalidParams,
-          'Isolate not paused',
-        ),
-      );
-    }
-
-    final frame = frameForEval.value;
-
-    if (frame == null) {
-      return Future.error(
-        RPCError.withDetails(
-          'evaluateInFrame',
-          RPCError.kInvalidParams,
-          'No frames available',
-        ),
-      );
-    }
-
-    return service.value.evaluateInFrame(
-      _isolateRefId,
-      frame.index!,
-      expression,
-      disableBreakpoints: true,
-    );
   }
 }

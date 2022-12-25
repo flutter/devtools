@@ -53,10 +53,11 @@ class DebuggerController extends DisposableController
   final codeViewController = CodeViewController();
 
   late final EvalService evalService = EvalService(
-    isolateRef,
-    evalAtCurrentFrame,
-    variables,
-    () => frameForEval,
+    isolateRef: isolateRef,
+    variables: ListenebleAsObtainer(variables),
+    frameForEval: FunctionAsObtainer(() => frameForEval),
+    isPaused: ListenebleAsObtainer(isPaused),
+    service: FunctionAsObtainer(() => _service),
   );
 
   bool _firstDebuggerScreenLoaded = false;
@@ -170,7 +171,7 @@ class DebuggerController extends DisposableController
 
   ValueListenable<String?> get exceptionPauseMode => _exceptionPauseMode;
 
-  final isolateRef = UpdatableReference<IsolateRef?>(null);
+  final isolateRef = ValueAsObtainer<IsolateRef?>(null);
 
   bool get isSystemIsolate => isolateRef.value?.isSystemIsolate ?? false;
 
@@ -257,42 +258,6 @@ class DebuggerController extends DisposableController
     _resuming.value = true;
 
     return _service.resume(_isolateRefId, step: StepOption.kOut);
-  }
-
-  /// Evaluate the given expression in the context of the currently selected
-  /// stack frame, or the top frame if there is no current selection.
-  ///
-  /// This will fail if the application is not currently paused.
-  Future<Response> evalAtCurrentFrame(String expression) {
-    if (!isPaused.value) {
-      return Future.error(
-        RPCError.withDetails(
-          'evaluateInFrame',
-          RPCError.kInvalidParams,
-          'Isolate not paused',
-        ),
-      );
-    }
-
-    if (stackFramesWithLocation.value.isEmpty) {
-      return Future.error(
-        RPCError.withDetails(
-          'evaluateInFrame',
-          RPCError.kInvalidParams,
-          'No frames available',
-        ),
-      );
-    }
-
-    final frame = selectedStackFrame.value?.frame ??
-        stackFramesWithLocation.value.first.frame;
-
-    return _service.evaluateInFrame(
-      _isolateRefId,
-      frame.index!,
-      expression,
-      disableBreakpoints: true,
-    );
   }
 
   /// Call `toString()` on the given instance and return the result.

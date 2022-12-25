@@ -435,7 +435,7 @@ Future<List<String>> autoCompleteResultsFor(
         }
       }
     }
-    final frame = evalService.frameForEval();
+    final frame = evalService.frameForEval.value;
     if (frame != null) {
       final function = frame.function;
       if (function != null) {
@@ -734,7 +734,7 @@ bool _isAccessible(
   Class? clazz,
   EvalService evalService,
 ) {
-  final frame = evalService.frameForEval()!;
+  final frame = evalService.frameForEval.value!;
   final currentScript = frame.location!.script;
   return !isPrivate(member) || currentScript!.id == clazz?.location?.script?.id;
 }

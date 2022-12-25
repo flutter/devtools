@@ -1154,7 +1154,7 @@ class _LineItemState extends State<LineItem>
 
     if (word != '') {
       try {
-        final response = await controller.evalAtCurrentFrame(word);
+        final response = await controller.evalService.evalAtCurrentFrame(word);
         final isolateRef = controller.isolateRef.value;
         if (response is! InstanceRef) return null;
         final variable = DartObjectNode.fromValue(
