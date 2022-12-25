@@ -11,13 +11,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../shared/console/eval/eval_service.dart';
-import '../../shared/globals.dart';
-import '../../shared/primitives/auto_dispose.dart';
-import '../../shared/primitives/utils.dart';
-import '../../shared/theme.dart';
-import '../../shared/ui/search.dart';
-import '../../shared/ui/utils.dart';
+import '../../globals.dart';
+import '../../primitives/auto_dispose.dart';
+import '../../primitives/utils.dart';
+import '../../theme.dart';
+import '../../ui/search.dart';
+import '../../ui/utils.dart';
+import '../eval/eval_service.dart';
 
 typedef AutoCompleteResultsFunction = Future<List<String>> Function(
   EditingParts parts,

@@ -9,10 +9,10 @@ import 'package:provider/provider.dart';
 import '../../shared/common_widgets.dart';
 import '../../shared/console/console.dart';
 import '../../shared/console/console_service.dart';
+import '../../shared/console/widgets/evaluate.dart';
 import '../../shared/globals.dart';
 import '../../shared/theme.dart';
 import 'debugger_controller.dart';
-import 'evaluate.dart';
 
 // TODO(devoncarew): Show some small UI indicator when we receive stdout/stderr.
 
