@@ -70,7 +70,8 @@ class _DebuggerConsoleState extends State<DebuggerConsole> {
               height: consoleLineHeight,
               child: ExpressionEvalField(
                 evalService:
-                    Provider.of<DebuggerController>(context, listen: false),
+                    Provider.of<DebuggerController>(context, listen: false)
+                        .evalService,
               ),
             ),
           ),

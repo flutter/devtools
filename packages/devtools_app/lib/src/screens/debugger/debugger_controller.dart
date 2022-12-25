@@ -11,12 +11,14 @@ import 'package:vm_service/vm_service.dart';
 
 import '../../service/isolate_state.dart';
 import '../../service/vm_service_wrapper.dart';
-import '../../shared/console/primitives/eval_service.dart';
+import '../../shared/console/eval/eval_service.dart';
+import '../../shared/console/primitives/eval_history.dart';
 import '../../shared/console/primitives/source_location.dart';
 import '../../shared/globals.dart';
 import '../../shared/object_tree.dart';
 import '../../shared/primitives/auto_dispose.dart';
 import '../../shared/primitives/message_bus.dart';
+import '../../shared/primitives/reference.dart';
 import '../../shared/primitives/utils.dart';
 import '../../shared/routing.dart';
 import 'codeview_controller.dart';
@@ -50,6 +52,13 @@ class DebuggerController extends DisposableController
 
   final codeViewController = CodeViewController();
 
+  late final EvalService evalService = EvalService(
+    isolateRef,
+    evalAtCurrentFrame,
+    variables,
+    () => frameForEval,
+  );
+
   bool _firstDebuggerScreenLoaded = false;
 
   /// Callback to be called when the debugger screen is first loaded.
@@ -72,7 +81,7 @@ class DebuggerController extends DisposableController
     unawaited(_getStackOperation?.cancel());
     _getStackOperation = null;
 
-    isolateRef = null;
+    isolateRef.value = null;
     _isPaused.value = false;
     _resuming.value = false;
     _lastEvent = null;
@@ -112,27 +121,11 @@ class DebuggerController extends DisposableController
   final bool initialSwitchToIsolate;
 
   IsolateState? get isolateDebuggerState =>
-      serviceManager.isolateManager.isolateDebuggerState(isolateRef);
+      serviceManager.isolateManager.isolateDebuggerState(isolateRef.value);
 
   VmServiceWrapper get _service {
     return serviceManager.service!;
   }
-
-  /// Cache of autocomplete matches to show for a library when that library is
-  /// imported.
-  ///
-  /// This cache includes autocompletes from libraries exported by the library
-  /// but does not include autocompletes for libraries imported by this library.
-
-  final libraryMemberAutocompleteCache = <LibraryRef, Future<Set<String?>>>{};
-
-  /// Cache of autocomplete matches for a library for code written within that
-  /// library.
-  ///
-  /// This cache includes autocompletes from all libraries imported and exported
-  /// by the library as well as all private autocompletes for the library.
-  final libraryMemberAndImportsAutocompleteCache =
-      <LibraryRef, Future<Set<String?>>>{};
 
   final _isPaused = ValueNotifier<bool>(false);
 
@@ -147,39 +140,6 @@ class DebuggerController extends DisposableController
   Event? _lastEvent;
 
   Event? get lastEvent => _lastEvent;
-
-  final _clazzCache = <ClassRef, Class>{};
-
-  /// Find the owner library for a ClassRef, FuncRef, or LibraryRef.
-  ///
-  /// If Dart had union types, ref would be type ClassRef | FuncRef | LibraryRef
-  Future<LibraryRef?> findOwnerLibrary(Object? ref) async {
-    if (ref is LibraryRef) {
-      return ref;
-    }
-    if (ref is ClassRef) {
-      if (ref.library != null) {
-        return ref.library;
-      }
-      // Fallback for older VMService versions.
-      final clazz = await classFor(ref);
-      return clazz?.library;
-    }
-    if (ref is FuncRef) {
-      return findOwnerLibrary(ref.owner);
-    }
-    return null;
-  }
-
-  /// Returns the class for the provided [ClassRef].
-  ///
-  /// May return null.
-  Future<Class?> classFor(ClassRef classRef) async {
-    try {
-      return _clazzCache[classRef] ??= await getObject(classRef) as Class;
-    } catch (_) {}
-    return null;
-  }
 
   final _stackFramesWithLocation =
       ValueNotifier<List<StackFrameAndSourcePosition>>([]);
@@ -210,12 +170,12 @@ class DebuggerController extends DisposableController
 
   ValueListenable<String?> get exceptionPauseMode => _exceptionPauseMode;
 
-  IsolateRef? isolateRef;
+  final isolateRef = UpdatableReference<IsolateRef?>(null);
 
-  bool get isSystemIsolate => isolateRef?.isSystemIsolate ?? false;
+  bool get isSystemIsolate => isolateRef.value?.isSystemIsolate ?? false;
 
   String get _isolateRefId {
-    final id = isolateRef?.id;
+    final id = isolateRef.value?.id;
     if (id == null) return '';
     return id;
   }
@@ -223,7 +183,7 @@ class DebuggerController extends DisposableController
   final EvalHistory evalHistory = EvalHistory();
 
   void switchToIsolate(IsolateRef? ref) async {
-    isolateRef = ref;
+    isolateRef.value = ref;
     _isPaused.value = false;
     await _pause(false);
 
@@ -426,12 +386,12 @@ class DebuggerController extends DisposableController
     // ignore: unused_local_variable
     final status = reloadEvent.status;
 
-    _clearAutocompleteCaches();
-    if (isolateRef == null) return;
+    evalService.cache.clear();
+    if (isolateRef.value == null) return;
     // Refresh the list of scripts.
     final previousScriptRefs = scriptManager.sortedScripts.value;
     final currentScriptRefs =
-        await scriptManager.retrieveAndSortScripts(isolateRef!);
+        await scriptManager.retrieveAndSortScripts(isolateRef.value!);
     final removedScripts =
         // There seems to be a bug in how this lint is working with type
         // inference.
@@ -579,13 +539,7 @@ class DebuggerController extends DisposableController
   void _clearCaches() {
     _lastEvent = null;
     breakpointManager.clearCache();
-    _clearAutocompleteCaches();
-  }
-
-  void _clearAutocompleteCaches() {
-    _clazzCache.clear();
-    libraryMemberAutocompleteCache.clear();
-    libraryMemberAndImportsAutocompleteCache.clear();
+    evalService.cache.clear();
   }
 
   /// Get the populated [Obj] object, given an [ObjRef].
@@ -596,8 +550,9 @@ class DebuggerController extends DisposableController
   }
 
   Future<void> _populateScripts(Isolate isolate) async {
-    if (isolateRef == null) return;
-    final scriptRefs = await scriptManager.retrieveAndSortScripts(isolateRef!);
+    if (isolateRef.value == null) return;
+    final scriptRefs =
+        await scriptManager.retrieveAndSortScripts(isolateRef.value!);
 
     // Update the selected script.
     final mainScriptRef = scriptRefs.firstWhereOrNull((ref) {
@@ -660,8 +615,9 @@ class DebuggerController extends DisposableController
       return [];
     }
 
-    final variables =
-        frame.vars!.map((v) => DartObjectNode.create(v, isolateRef)).toList();
+    final variables = frame.vars!
+        .map((v) => DartObjectNode.create(v, isolateRef.value))
+        .toList();
     // TODO(jacobr): would be nice to be able to remove this call to unawaited
     // but it would require a significant refactor.
     variables

@@ -11,17 +11,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../../shared/console/eval/eval_service.dart';
 import '../../shared/globals.dart';
 import '../../shared/primitives/auto_dispose.dart';
 import '../../shared/primitives/utils.dart';
 import '../../shared/theme.dart';
 import '../../shared/ui/search.dart';
 import '../../shared/ui/utils.dart';
-import 'debugger_controller.dart';
 
 typedef AutoCompleteResultsFunction = Future<List<String>> Function(
   EditingParts parts,
-  DebuggerController evalService,
+  EvalService evalService,
 );
 
 class ExpressionEvalField extends StatefulWidget {
@@ -31,7 +31,7 @@ class ExpressionEvalField extends StatefulWidget {
   }) : getAutoCompleteResults =
             getAutoCompleteResults ?? autoCompleteResultsFor;
 
-  final DebuggerController evalService;
+  final EvalService evalService;
   final AutoCompleteResultsFunction getAutoCompleteResults;
 
   @override
@@ -321,7 +321,7 @@ class ExpressionEvalFieldState extends State<ExpressionEvalField>
 
       // Display the response to the user.
       if (response is InstanceRef) {
-        _emitRefToConsole(response, isolateRef);
+        _emitRefToConsole(response, isolateRef.value);
       } else {
         String? value = response.toString();
 
@@ -400,7 +400,7 @@ class ExpressionEvalFieldState extends State<ExpressionEvalField>
 
 Future<List<String>> autoCompleteResultsFor(
   EditingParts parts,
-  DebuggerController evalService,
+  EvalService evalService,
 ) async {
   final result = <String>{};
   if (!parts.isField) {
@@ -435,7 +435,7 @@ Future<List<String>> autoCompleteResultsFor(
         }
       }
     }
-    final frame = evalService.frameForEval;
+    final frame = evalService.frameForEval();
     if (frame != null) {
       final function = frame.function;
       if (function != null) {
@@ -494,10 +494,10 @@ bool debugIncludeExports = true;
 
 Future<Set<String>> libraryMemberAndImportsAutocompletes(
   LibraryRef libraryRef,
-  DebuggerController evalService,
+  EvalService evalService,
 ) async {
   final values = removeNullValues(
-    await evalService.libraryMemberAndImportsAutocompleteCache.putIfAbsent(
+    await evalService.cache.libraryMemberAndImportsAutocomplete.putIfAbsent(
       libraryRef,
       () => _libraryMemberAndImportsAutocompletes(libraryRef, evalService),
     ),
@@ -507,7 +507,7 @@ Future<Set<String>> libraryMemberAndImportsAutocompletes(
 
 Future<Set<String>> _libraryMemberAndImportsAutocompletes(
   LibraryRef libraryRef,
-  DebuggerController evalService,
+  EvalService evalService,
 ) async {
   final result = <String>{};
   try {
@@ -550,12 +550,12 @@ Future<Set<String>> _libraryMemberAndImportsAutocompletes(
 }
 
 Future<Set<String>> libraryMemberAutocompletes(
-  DebuggerController evalService,
+  EvalService evalService,
   LibraryRef libraryRef, {
   required bool includePrivates,
 }) async {
   var result = removeNullValues(
-    await evalService.libraryMemberAutocompleteCache.putIfAbsent(
+    await evalService.cache.libraryMemberAutocomplete.putIfAbsent(
       libraryRef,
       () => _libraryMemberAutocompletes(evalService, libraryRef),
     ),
@@ -567,7 +567,7 @@ Future<Set<String>> libraryMemberAutocompletes(
 }
 
 Future<Set<String>> _libraryMemberAutocompletes(
-  DebuggerController evalService,
+  EvalService evalService,
   LibraryRef libraryRef,
 ) async {
   final result = <String>{};
@@ -620,7 +620,7 @@ Future<Set<String>> _libraryMemberAutocompletes(
 Future<void> _addAllInstanceMembersToAutocompleteList(
   Set<String> result,
   InstanceRef response,
-  DebuggerController controller,
+  EvalService controller,
 ) async {
   final Instance instance = await controller.getObject(response) as Instance;
   final classRef = instance.classRef;
@@ -649,7 +649,7 @@ Future<void> _addAllInstanceMembersToAutocompleteList(
 
 Future<Set<String>> _autoCompleteMembersFor(
   ClassRef classRef,
-  DebuggerController controller, {
+  EvalService controller, {
   required bool staticContext,
 }) async {
   final result = <String>{};
@@ -732,9 +732,9 @@ bool _isConstructor(FuncRef funcRef, Class clazz) =>
 bool _isAccessible(
   String member,
   Class? clazz,
-  DebuggerController evalService,
+  EvalService evalService,
 ) {
-  final frame = evalService.frameForEval!;
+  final frame = evalService.frameForEval()!;
   final currentScript = frame.location!.script;
   return !isPrivate(member) || currentScript!.id == clazz?.location?.script?.id;
 }
