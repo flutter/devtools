@@ -29,8 +29,8 @@ class ValueAsObtainer<T> implements ValueObtainer<T> {
   T value;
 }
 
-/// Use this class instead when the client needs
-/// to access current value but does not need the value to be listeneble,
+/// Use this interface when the client needs
+/// access to the current value, but does not need the value to be listeneble,
 /// i.e. [ValueListeneble] would be too strong requirement.
 abstract class ValueObtainer<T> {
   T get value;

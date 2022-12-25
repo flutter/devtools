@@ -9,7 +9,7 @@ import 'package:vm_service/vm_service.dart';
 
 import '../../globals.dart';
 import '../../object_tree.dart';
-import '../../primitives/reference.dart';
+import '../../primitives/value_obtainer.dart';
 import '../primitives/eval_history.dart';
 
 typedef ExpressionEvaluator = Future<Response> Function(String expression);

@@ -18,7 +18,7 @@ import '../../shared/globals.dart';
 import '../../shared/object_tree.dart';
 import '../../shared/primitives/auto_dispose.dart';
 import '../../shared/primitives/message_bus.dart';
-import '../../shared/primitives/reference.dart';
+import '../../shared/primitives/value_obtainer.dart';
 import '../../shared/primitives/utils.dart';
 import '../../shared/routing.dart';
 import 'codeview_controller.dart';
