@@ -6,8 +6,8 @@ import 'dart:async';
 
 import 'package:devtools_app/src/screens/debugger/breakpoint_manager.dart';
 import 'package:devtools_app/src/screens/debugger/debugger_controller.dart';
-import 'package:devtools_app/src/screens/debugger/evaluate.dart';
 import 'package:devtools_app/src/shared/console/eval/eval_service.dart';
+import 'package:devtools_app/src/shared/console/widgets/evaluate.dart';
 import 'package:devtools_app/src/shared/eval_on_dart_library.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_app/src/shared/primitives/storage.dart';
