@@ -9,17 +9,15 @@ import 'package:collection/collection.dart' show IterableExtension;
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../service/isolate_state.dart';
 import '../../service/vm_service_wrapper.dart';
 import '../../shared/console/eval/eval_service.dart';
-import '../../shared/console/primitives/eval_history.dart';
 import '../../shared/console/primitives/source_location.dart';
 import '../../shared/globals.dart';
 import '../../shared/object_tree.dart';
 import '../../shared/primitives/auto_dispose.dart';
 import '../../shared/primitives/message_bus.dart';
-import '../../shared/primitives/value_obtainer.dart';
 import '../../shared/primitives/utils.dart';
+import '../../shared/primitives/value_obtainer.dart';
 import '../../shared/routing.dart';
 import 'codeview_controller.dart';
 import 'debugger_model.dart';
@@ -37,8 +35,8 @@ class DebuggerController extends DisposableController
   // in `switchToIsolate`.
   DebuggerController({
     DevToolsRouterDelegate? routerDelegate,
-    this.initialSwitchToIsolate = true,
-  }) {
+    bool initialSwitchToIsolate = true,
+  }) : _initialSwitchToIsolate = initialSwitchToIsolate {
     autoDisposeStreamSubscription(
       serviceManager.onConnectionAvailable.listen(_handleConnectionAvailable),
     );
@@ -46,7 +44,7 @@ class DebuggerController extends DisposableController
       codeViewController.subscribeToRouterEvents(routerDelegate);
     }
     if (serviceManager.hasService) {
-      initialize();
+      _initialize();
     }
   }
 
@@ -55,7 +53,7 @@ class DebuggerController extends DisposableController
   late final EvalService evalService = EvalService(
     isolateRef: isolateRef,
     variables: ListenebleAsObtainer(variables),
-    frameForEval: FunctionAsObtainer(() => frameForEval),
+    frameForEval: FunctionAsObtainer(() => _frameForEval),
     isPaused: ListenebleAsObtainer(isPaused),
     service: FunctionAsObtainer(() => _service),
   );
@@ -75,7 +73,7 @@ class DebuggerController extends DisposableController
   }
 
   /// Method to call after the vm service shuts down.
-  void onServiceShutdown() {
+  void _onServiceShutdown() {
     _clearCaches();
 
     _hasTruncatedFrames.value = false;
@@ -98,18 +96,18 @@ class DebuggerController extends DisposableController
   void _handleConnectionAvailable(VmServiceWrapper service) {
     if (service == _lastService) return;
     _lastService = service;
-    onServiceShutdown();
-    initialize();
+    _onServiceShutdown();
+    _initialize();
   }
 
-  void initialize() {
-    if (initialSwitchToIsolate) {
+  void _initialize() {
+    if (_initialSwitchToIsolate) {
       assert(serviceManager.isolateManager.selectedIsolate.value != null);
-      switchToIsolate(serviceManager.isolateManager.selectedIsolate.value);
+      _switchToIsolate(serviceManager.isolateManager.selectedIsolate.value);
     }
 
     addAutoDisposeListener(serviceManager.isolateManager.selectedIsolate, () {
-      switchToIsolate(serviceManager.isolateManager.selectedIsolate.value);
+      _switchToIsolate(serviceManager.isolateManager.selectedIsolate.value);
     });
     autoDisposeStreamSubscription(
       _service.onDebugEvent.listen(_handleDebugEvent),
@@ -119,10 +117,7 @@ class DebuggerController extends DisposableController
     );
   }
 
-  final bool initialSwitchToIsolate;
-
-  IsolateState? get isolateDebuggerState =>
-      serviceManager.isolateManager.isolateDebuggerState(isolateRef.value);
+  final bool _initialSwitchToIsolate;
 
   VmServiceWrapper get _service {
     return serviceManager.service!;
@@ -153,7 +148,7 @@ class DebuggerController extends DisposableController
   ValueListenable<StackFrameAndSourcePosition?> get selectedStackFrame =>
       _selectedStackFrame;
 
-  Frame? get frameForEval =>
+  Frame? get _frameForEval =>
       _selectedStackFrame.value?.frame ??
       _stackFramesWithLocation.value.safeFirst?.frame;
 
@@ -181,9 +176,7 @@ class DebuggerController extends DisposableController
     return id;
   }
 
-  final EvalHistory evalHistory = EvalHistory();
-
-  void switchToIsolate(IsolateRef? ref) async {
+  void _switchToIsolate(IsolateRef? ref) async {
     isolateRef.value = ref;
     _isPaused.value = false;
     await _pause(false);
@@ -258,29 +251,6 @@ class DebuggerController extends DisposableController
     _resuming.value = true;
 
     return _service.resume(_isolateRefId, step: StepOption.kOut);
-  }
-
-  /// Call `toString()` on the given instance and return the result.
-  Future<Response> invokeToString(InstanceRef instance) {
-    return _service.invoke(
-      _isolateRefId,
-      instance.id!,
-      'toString',
-      <String>[],
-      disableBreakpoints: true,
-    );
-  }
-
-  /// Retrieves the full string value of a [stringRef].
-  Future<String?> retrieveFullStringValue(
-    InstanceRef stringRef, {
-    String onUnavailable(String? truncatedValue)?,
-  }) {
-    return _service.retrieveFullStringValue(
-      _isolateRefId,
-      stringRef,
-      onUnavailable: onUnavailable,
-    );
   }
 
   Future<void> setIsolatePauseMode(String mode) async {
@@ -406,8 +376,6 @@ class DebuggerController extends DisposableController
 
   final _hasTruncatedFrames = ValueNotifier<bool>(false);
 
-  ValueListenable<bool> get hasTruncatedFrames => _hasTruncatedFrames;
-
   CancelableOperation<_StackInfo>? _getStackOperation;
 
   Future<void> _pause(bool paused, {Event? pauseEvent}) async {
@@ -505,13 +473,6 @@ class DebuggerController extends DisposableController
     _lastEvent = null;
     breakpointManager.clearCache();
     evalService.cache.clear();
-  }
-
-  /// Get the populated [Obj] object, given an [ObjRef].
-  ///
-  /// The return value can be one of [Obj] or [Sentinel].
-  Future<Obj> getObject(ObjRef objRef) {
-    return _service.getObject(_isolateRefId, objRef.id!);
   }
 
   Future<void> _populateScripts(Isolate isolate) async {
