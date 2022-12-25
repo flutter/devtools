@@ -98,6 +98,12 @@ MockCodeViewController createMockCodeViewControllerWithDefaults({
 MockDebuggerController createMockDebuggerControllerWithDefaults({
   MockCodeViewController? mockCodeViewController,
 }) {
+  final evalService = EvalService(
+    UpdatableReference<IsolateRef?>(null),
+    (e) => throw 'not implemented',
+    ValueNotifier<List<DartObjectNode>>(<DartObjectNode>[]),
+    () => null,
+  );
   final debuggerController = MockDebuggerController();
   when(debuggerController.isPaused).thenReturn(ValueNotifier(false));
   when(debuggerController.resuming).thenReturn(ValueNotifier(false));
@@ -117,6 +123,8 @@ MockDebuggerController createMockDebuggerControllerWithDefaults({
   when(debuggerController.codeViewController).thenReturn(
     mockCodeViewController,
   );
+
+  when(debuggerController.evalService).thenReturn(evalService);
 
   return debuggerController;
 }
