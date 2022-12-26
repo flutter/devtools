@@ -37,5 +37,6 @@ import 'package:vm_service/vm_service.dart';
   LibraryObject,
   CodeViewController,
   BreakpointManager,
+  EvalService,
 ])
 void main() {}
