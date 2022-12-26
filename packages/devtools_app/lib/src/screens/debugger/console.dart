@@ -16,40 +16,41 @@ import 'debugger_controller.dart';
 
 // TODO(devoncarew): Show some small UI indicator when we receive stdout/stderr.
 
+@override
+PreferredSizeWidget buildConsolePaneHeader() {
+  return AreaPaneHeader(
+    title: const Text('Console'),
+    needsTopBorder: false,
+    actions: [
+      CopyToClipboardControl(
+        dataProvider: () =>
+            serviceManager.consoleService.stdio.value.join('\n'),
+        buttonKey: ConsolePane.copyToClipboardButtonKey,
+      ),
+      DeleteControl(
+        buttonKey: ConsolePane.clearStdioButtonKey,
+        tooltip: 'Clear console output',
+        onPressed: () => serviceManager.consoleService.clearStdio(),
+      ),
+    ],
+  );
+}
+
 /// Display the stdout and stderr output from the process under debug.
-class DebuggerConsole extends StatefulWidget {
-  const DebuggerConsole({
+class ConsolePane extends StatefulWidget {
+  const ConsolePane({
     Key? key,
   }) : super(key: key);
 
   static const copyToClipboardButtonKey =
-      Key('debugger_console_copy_to_clipboard_button');
-  static const clearStdioButtonKey = Key('debugger_console_clear_stdio_button');
+      Key('console_copy_to_clipboard_button');
+  static const clearStdioButtonKey = Key('console_clear_stdio_button');
 
   @override
-  State<DebuggerConsole> createState() => _DebuggerConsoleState();
-
-  static PreferredSizeWidget buildHeader() {
-    return AreaPaneHeader(
-      title: const Text('Console'),
-      needsTopBorder: false,
-      actions: [
-        CopyToClipboardControl(
-          dataProvider: () =>
-              serviceManager.consoleService.stdio.value.join('\n'),
-          buttonKey: DebuggerConsole.copyToClipboardButtonKey,
-        ),
-        DeleteControl(
-          buttonKey: DebuggerConsole.clearStdioButtonKey,
-          tooltip: 'Clear console output',
-          onPressed: () => serviceManager.consoleService.clearStdio(),
-        ),
-      ],
-    );
-  }
+  State<ConsolePane> createState() => _ConsolePaneState();
 }
 
-class _DebuggerConsoleState extends State<DebuggerConsole> {
+class _ConsolePaneState extends State<ConsolePane> {
   ValueListenable<List<ConsoleLine>> get stdio =>
       serviceManager.consoleService.stdio;
 

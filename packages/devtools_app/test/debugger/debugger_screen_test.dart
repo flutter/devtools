@@ -51,8 +51,8 @@ void main() {
       wrapWithControllers(
         Row(
           children: [
-            Flexible(child: DebuggerConsole.buildHeader()),
-            const Expanded(child: DebuggerConsole()),
+            Flexible(child: buildConsolePaneHeader()),
+            const Expanded(child: ConsolePane()),
           ],
         ),
         debugger: controller,

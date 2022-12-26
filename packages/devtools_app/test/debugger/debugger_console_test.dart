@@ -42,8 +42,8 @@ void main() {
       wrapWithControllers(
         Row(
           children: [
-            Flexible(child: DebuggerConsole.buildHeader()),
-            const Expanded(child: DebuggerConsole()),
+            Flexible(child: buildConsolePaneHeader()),
+            const Expanded(child: ConsolePane()),
           ],
         ),
         debugger: controller,
@@ -69,7 +69,7 @@ void main() {
 
         await pumpConsole(tester, debuggerController);
 
-        final clearButton = find.byKey(DebuggerConsole.clearStdioButtonKey);
+        final clearButton = find.byKey(ConsolePane.clearStdioButtonKey);
         expect(clearButton, findsOneWidget);
 
         await tester.tap(clearButton);
@@ -102,8 +102,7 @@ void main() {
         (WidgetTester tester) async {
           await pumpConsole(tester, debuggerController);
 
-          final copyButton =
-              find.byKey(DebuggerConsole.copyToClipboardButtonKey);
+          final copyButton = find.byKey(ConsolePane.copyToClipboardButtonKey);
           expect(copyButton, findsOneWidget);
 
           expect(_clipboardContents, isEmpty);

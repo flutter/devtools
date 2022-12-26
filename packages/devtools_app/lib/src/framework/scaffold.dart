@@ -346,14 +346,14 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
                       ? Split(
                           axis: Axis.vertical,
                           splitters: [
-                            DebuggerConsole.buildHeader(),
+                            buildConsolePaneHeader(),
                           ],
                           initialFractions: const [0.8, 0.2],
                           children: [
                             content,
                             Padding(
                               padding: DevToolsScaffold.horizontalPadding,
-                              child: const DebuggerConsole(),
+                              child: const ConsolePane(),
                             ),
                           ],
                         )
