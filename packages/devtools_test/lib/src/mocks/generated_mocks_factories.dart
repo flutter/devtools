@@ -99,13 +99,11 @@ MockDebuggerController createMockDebuggerControllerWithDefaults({
   MockCodeViewController? mockCodeViewController,
 }) {
   final evalService = EvalService(
-    isolateRef: ValueAsObtainer(null),
-    variables: ValueAsObtainer([]),
-    frameForEval: ValueAsObtainer(null),
-    isPaused: ValueAsObtainer(false),
-    service: FunctionAsObtainer(
-      () => throw 'not implemented stub for VmServiceWrapper',
-    ),
+    isolateRef: () => null,
+    variables: () => [],
+    frameForEval: () => null,
+    isPaused: () => true,
+    service: () => throw 'not implemented stub for VmServiceWrapper',
   );
 
   final debuggerController = MockDebuggerController();
