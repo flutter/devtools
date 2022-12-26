@@ -115,7 +115,6 @@ MockDebuggerController createMockDebuggerControllerWithDefaults({
   when(debuggerController.stackFramesWithLocation)
       .thenReturn(ValueNotifier([]));
   when(debuggerController.selectedStackFrame).thenReturn(ValueNotifier(null));
-  when(debuggerController.hasTruncatedFrames).thenReturn(ValueNotifier(false));
 
   when(debuggerController.exceptionPauseMode)
       .thenReturn(ValueNotifier('Unhandled'));
