@@ -43,6 +43,9 @@ class MemoryScreen extends Screen {
 
   @override
   Widget build(BuildContext context) => const MemoryBody();
+
+  @override
+  bool showConsole(bool embed) => true;
 }
 
 class MemoryBody extends StatefulWidget {

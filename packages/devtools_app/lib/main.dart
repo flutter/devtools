@@ -36,7 +36,7 @@ Future<void> runDevTools({bool shouldEnableExperiments = false}) async {
   // [runDevTools] from Dart code, we cannot set the 'enable_experiements'
   // environment variable before calling [runDevTools].
   if (shouldEnableExperiments) {
-    setEnableExperiments();
+    enableExperimentsFromMain();
   }
 
   // Initialize the framework before we do anything else, otherwise the
