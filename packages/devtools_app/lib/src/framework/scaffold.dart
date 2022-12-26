@@ -320,6 +320,11 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
       child: Provider<ImportController>.value(
         value: _importController,
         builder: (context, _) {
+          final showConsole = serviceManager.connectedAppInitialized &&
+              !serviceManager.connectedApp!.isProfileBuildNow! &&
+              !offlineController.offlineMode.value &&
+              _currentScreen.showConsole(widget.embed);
+
           return DragAndDrop(
             handleDrop: _importController.importData,
             child: Title(
@@ -339,10 +344,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
                       :
                       // ignore: avoid-returning-widgets as that would make code more verbose for no clear benefit in this case.
                       _buildAppBar(scaffoldTitle),
-                  body: (serviceManager.connectedAppInitialized &&
-                          !serviceManager.connectedApp!.isProfileBuildNow! &&
-                          !offlineController.offlineMode.value &&
-                          _currentScreen.showConsole(widget.embed))
+                  body: showConsole
                       ? Split(
                           axis: Axis.vertical,
                           splitters: [
