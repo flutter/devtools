@@ -7,9 +7,7 @@ import 'dart:async';
 import 'package:vm_service/vm_service.dart';
 
 import '../../../service/vm_service_wrapper.dart';
-import '../../globals.dart';
 import '../../object_tree.dart';
-import '../../primitives/value_obtainer.dart';
 import '../primitives/eval_history.dart';
 
 class AutocompleteCache {
@@ -46,22 +44,22 @@ class EvalService {
     required this.service,
   });
 
-  final ValueObtainer<IsolateRef?> isolateRef;
+  final IsolateRef? Function() isolateRef;
 
-  final ValueObtainer<bool> isPaused;
+  final bool Function() isPaused;
 
-  final ValueObtainer<Frame?> frameForEval;
+  final Frame? Function() frameForEval;
 
-  final ValueObtainer<List<DartObjectNode>> variables;
+  final List<DartObjectNode> Function() variables;
 
-  final ValueObtainer<VmServiceWrapper> service;
+  final VmServiceWrapper Function() service;
 
   final EvalHistory evalHistory = EvalHistory();
 
   final cache = AutocompleteCache();
 
   String get _isolateRefId {
-    final id = isolateRef.value?.id;
+    final id = isolateRef()?.id;
     if (id == null) return '';
     return id;
   }
@@ -101,7 +99,7 @@ class EvalService {
   ///
   /// The return value can be one of [Obj] or [Sentinel].
   Future<Obj> getObject(ObjRef objRef) {
-    return serviceManager.service!.getObject(_isolateRefId, objRef.id!);
+    return service().getObject(_isolateRefId, objRef.id!);
   }
 
   /// Evaluate the given expression in the context of the currently selected
@@ -109,7 +107,7 @@ class EvalService {
   ///
   /// This will fail if the application is not currently paused.
   Future<Response> evalAtCurrentFrame(String expression) {
-    if (!isPaused.value) {
+    if (!isPaused()) {
       return Future.error(
         RPCError.withDetails(
           'evaluateInFrame',
@@ -119,7 +117,7 @@ class EvalService {
       );
     }
 
-    final frame = frameForEval.value;
+    final frame = frameForEval();
 
     if (frame == null) {
       return Future.error(
@@ -131,7 +129,7 @@ class EvalService {
       );
     }
 
-    return service.value.evaluateInFrame(
+    return service().evaluateInFrame(
       _isolateRefId,
       frame.index!,
       expression,

@@ -79,7 +79,6 @@ export 'src/shared/primitives/storage.dart';
 export 'src/shared/primitives/trace_event.dart';
 export 'src/shared/primitives/trees.dart';
 export 'src/shared/primitives/utils.dart';
-export 'src/shared/primitives/value_obtainer.dart';
 export 'src/shared/routing.dart';
 export 'src/shared/screen.dart';
 export 'src/shared/scripts/script_manager.dart';

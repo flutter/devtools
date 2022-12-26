@@ -315,13 +315,13 @@ class ExpressionEvalFieldState extends State<ExpressionEvalField>
 
     try {
       // Response is either a ErrorRef, InstanceRef, or Sentinel.
-      final isolateRef = widget.evalService.isolateRef;
+      final isolateRef = widget.evalService.isolateRef();
       final response =
           await widget.evalService.evalAtCurrentFrame(expressionText);
 
       // Display the response to the user.
       if (response is InstanceRef) {
-        _emitRefToConsole(response, isolateRef.value);
+        _emitRefToConsole(response, isolateRef);
       } else {
         String? value = response.toString();
 
@@ -404,7 +404,7 @@ Future<List<String>> autoCompleteResultsFor(
 ) async {
   final result = <String>{};
   if (!parts.isField) {
-    final variables = evalService.variables.value;
+    final variables = evalService.variables();
     result.addAll(removeNullValues(variables.map((variable) => variable.name)));
 
     final thisVariable = variables.firstWhereOrNull(
@@ -435,7 +435,7 @@ Future<List<String>> autoCompleteResultsFor(
         }
       }
     }
-    final frame = evalService.frameForEval.value;
+    final frame = evalService.frameForEval();
     if (frame != null) {
       final function = frame.function;
       if (function != null) {
@@ -734,7 +734,7 @@ bool _isAccessible(
   Class? clazz,
   EvalService evalService,
 ) {
-  final frame = evalService.frameForEval.value!;
+  final frame = evalService.frameForEval()!;
   final currentScript = frame.location!.script;
   return !isPrivate(member) || currentScript!.id == clazz?.location?.script?.id;
 }

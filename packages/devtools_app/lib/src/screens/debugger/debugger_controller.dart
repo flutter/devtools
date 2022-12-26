@@ -17,7 +17,6 @@ import '../../shared/object_tree.dart';
 import '../../shared/primitives/auto_dispose.dart';
 import '../../shared/primitives/message_bus.dart';
 import '../../shared/primitives/utils.dart';
-import '../../shared/primitives/value_obtainer.dart';
 import '../../shared/routing.dart';
 import 'codeview_controller.dart';
 import 'debugger_model.dart';
@@ -51,11 +50,11 @@ class DebuggerController extends DisposableController
   final codeViewController = CodeViewController();
 
   late final EvalService evalService = EvalService(
-    isolateRef: isolateRef,
-    variables: ListenebleAsObtainer(variables),
-    frameForEval: FunctionAsObtainer(() => _frameForEval),
-    isPaused: ListenebleAsObtainer(isPaused),
-    service: FunctionAsObtainer(() => _service),
+    isolateRef: () => isolateRef,
+    variables: () => variables.value,
+    frameForEval: () => _frameForEval,
+    isPaused: () => isPaused.value,
+    service: () => _service,
   );
 
   bool _firstDebuggerScreenLoaded = false;
@@ -80,7 +79,7 @@ class DebuggerController extends DisposableController
     unawaited(_getStackOperation?.cancel());
     _getStackOperation = null;
 
-    isolateRef.value = null;
+    isolateRef = null;
     _isPaused.value = false;
     _resuming.value = false;
     _lastEvent = null;
@@ -166,18 +165,18 @@ class DebuggerController extends DisposableController
 
   ValueListenable<String?> get exceptionPauseMode => _exceptionPauseMode;
 
-  final isolateRef = ValueAsObtainer<IsolateRef?>(null);
+  IsolateRef? isolateRef;
 
-  bool get isSystemIsolate => isolateRef.value?.isSystemIsolate ?? false;
+  bool get isSystemIsolate => isolateRef?.isSystemIsolate ?? false;
 
   String get _isolateRefId {
-    final id = isolateRef.value?.id;
+    final id = isolateRef?.id;
     if (id == null) return '';
     return id;
   }
 
   void _switchToIsolate(IsolateRef? ref) async {
-    isolateRef.value = ref;
+    isolateRef = ref;
     _isPaused.value = false;
     await _pause(false);
 
@@ -322,11 +321,11 @@ class DebuggerController extends DisposableController
     final status = reloadEvent.status;
 
     evalService.cache.clear();
-    if (isolateRef.value == null) return;
+    if (isolateRef == null) return;
     // Refresh the list of scripts.
     final previousScriptRefs = scriptManager.sortedScripts.value;
     final currentScriptRefs =
-        await scriptManager.retrieveAndSortScripts(isolateRef.value!);
+        await scriptManager.retrieveAndSortScripts(isolateRef!);
     final removedScripts =
         // There seems to be a bug in how this lint is working with type
         // inference.
@@ -476,9 +475,8 @@ class DebuggerController extends DisposableController
   }
 
   Future<void> _populateScripts(Isolate isolate) async {
-    if (isolateRef.value == null) return;
-    final scriptRefs =
-        await scriptManager.retrieveAndSortScripts(isolateRef.value!);
+    if (isolateRef == null) return;
+    final scriptRefs = await scriptManager.retrieveAndSortScripts(isolateRef!);
 
     // Update the selected script.
     final mainScriptRef = scriptRefs.firstWhereOrNull((ref) {
@@ -541,9 +539,8 @@ class DebuggerController extends DisposableController
       return [];
     }
 
-    final variables = frame.vars!
-        .map((v) => DartObjectNode.create(v, isolateRef.value))
-        .toList();
+    final variables =
+        frame.vars!.map((v) => DartObjectNode.create(v, isolateRef)).toList();
     // TODO(jacobr): would be nice to be able to remove this call to unawaited
     // but it would require a significant refactor.
     variables
