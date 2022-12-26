@@ -8,7 +8,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../app.dart';
-import '../screens/debugger/console.dart';
 import '../screens/debugger/debugger_screen.dart';
 import '../shared/analytics/prompt.dart';
 import '../shared/banner_messages.dart';
@@ -16,6 +15,7 @@ import '../shared/common_widgets.dart';
 import '../shared/config_specific/drag_and_drop/drag_and_drop.dart';
 import '../shared/config_specific/ide_theme/ide_theme.dart';
 import '../shared/config_specific/import_export/import_export.dart';
+import '../shared/console/widgets/consolePane.dart';
 import '../shared/framework_controller.dart';
 import '../shared/globals.dart';
 import '../shared/primitives/auto_dispose.dart';

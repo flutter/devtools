@@ -45,17 +45,21 @@ class DebuggerController extends DisposableController
     if (serviceManager.hasService) {
       _initialize();
     }
+
+    evalService = EvalService(
+      isolateRef: () => isolateRef,
+      variables: () => variables.value,
+      frameForEval: () => _frameForEval,
+      isPaused: () => isPaused.value,
+      service: () => _service,
+    );
+
+    setGlobal(EvalService, evalService);
   }
 
   final codeViewController = CodeViewController();
 
-  late final EvalService evalService = EvalService(
-    isolateRef: () => isolateRef,
-    variables: () => variables.value,
-    frameForEval: () => _frameForEval,
-    isPaused: () => isPaused.value,
-    service: () => _service,
-  );
+  late final EvalService evalService;
 
   bool _firstDebuggerScreenLoaded = false;
 

@@ -4,15 +4,13 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
-import '../../shared/common_widgets.dart';
-import '../../shared/console/console.dart';
-import '../../shared/console/console_service.dart';
-import '../../shared/console/widgets/evaluate.dart';
-import '../../shared/globals.dart';
-import '../../shared/theme.dart';
-import 'debugger_controller.dart';
+import '../../common_widgets.dart';
+import '../../globals.dart';
+import '../../theme.dart';
+import '../console.dart';
+import '../console_service.dart';
+import 'evaluate.dart';
 
 // TODO(devoncarew): Show some small UI indicator when we receive stdout/stderr.
 
@@ -70,9 +68,7 @@ class _ConsolePaneState extends State<ConsolePane> {
             footer: SizedBox(
               height: consoleLineHeight,
               child: ExpressionEvalField(
-                evalService:
-                    Provider.of<DebuggerController>(context, listen: false)
-                        .evalService,
+                evalService: evalService,
               ),
             ),
           ),
