@@ -1,31 +1,38 @@
-// Copyright 2020 The Chromium Authors. All rights reserved.
+// Copyright 2022 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-
-// TODO(https://github.com/flutter/devtools/issues/4717): migrate away from
-// deprecated members.
-// ignore_for_file: deprecated_member_use
 
 import 'dart:async';
 
 import 'package:flutter/material.dart' hide Stack;
-import 'package:provider/provider.dart';
 
-import '../../shared/console/widgets/display_provider.dart';
-import '../../shared/object_tree.dart';
-import '../../shared/tree.dart';
-import 'debugger_controller.dart';
+import '../../../shared/object_tree.dart';
+import '../../../shared/primitives/listenable.dart';
+import '../../../shared/tree.dart';
+import 'display_provider.dart';
 
-class Variables extends StatelessWidget {
-  const Variables({Key? key}) : super(key: key);
+class ExpandableVariable extends StatelessWidget {
+  const ExpandableVariable({
+    Key? key,
+    this.variable,
+  }) : super(key: key);
+
+  @visibleForTesting
+  static const emptyExpandableVariableKey = Key('empty expandable variable');
+
+  final DartObjectNode? variable;
 
   @override
   Widget build(BuildContext context) {
-    final controller = Provider.of<DebuggerController>(context);
+    final variable = this.variable;
+    if (variable == null)
+      return const SizedBox(key: emptyExpandableVariableKey);
     // TODO(kenz): preserve expanded state of tree on switching frames and
     // on stepping.
     return TreeView<DartObjectNode>(
-      dataRootsListenable: controller.variables,
+      dataRootsListenable:
+          FixedValueListenable<List<DartObjectNode>>([variable]),
+      shrinkWrap: true,
       dataDisplayProvider: (variable, onPressed) => DisplayProvider(
         variable: variable,
         onTap: onPressed,

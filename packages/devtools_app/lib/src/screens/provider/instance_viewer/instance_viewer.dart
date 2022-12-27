@@ -12,10 +12,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../shared/console/primitives/text_styles.dart';
 import '../../../shared/eval_on_dart_library.dart';
 import '../../../shared/primitives/sliver_iterable_child_delegate.dart';
 import '../../../shared/theme.dart';
-import '../../inspector/primitives/inspector_text_styles.dart';
 import 'instance_details.dart';
 import 'instance_providers.dart';
 
@@ -382,7 +382,9 @@ class _InstanceViewerState extends ConsumerState<InstanceViewer> {
               if (field.isFinal)
                 Text(
                   'final ',
-                  style: unimportant(Theme.of(context).colorScheme),
+                  style: ConsoleTextStyles.unimportant(
+                    Theme.of(context).colorScheme,
+                  ),
                 ),
               Text('${field.name}: '),
               Expanded(child: rowItem),
@@ -458,7 +460,7 @@ class _ObjectHeader extends StatelessWidget {
             ),
           TextSpan(
             text: '#${shortHash(hash)}',
-            style: unimportant(colorScheme),
+            style: ConsoleTextStyles.unimportant(colorScheme),
           ),
           TextSpan(text: startToken),
           if (meta != null) TextSpan(text: meta),

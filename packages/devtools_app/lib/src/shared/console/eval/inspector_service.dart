@@ -15,13 +15,14 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../shared/eval_on_dart_library.dart';
-import '../../shared/globals.dart';
-import '../../shared/primitives/auto_dispose.dart';
-import '../../shared/primitives/utils.dart';
-import '../debugger/debugger_model.dart';
+import '../../eval_on_dart_library.dart';
+import '../../globals.dart';
+import '../../primitives/auto_dispose.dart';
+import '../../primitives/utils.dart';
+import '../primitives/instance_ref.dart';
+import '../primitives/simple_items.dart';
+import '../primitives/source_location.dart';
 import 'diagnostics_node.dart';
-import 'primitives/inspector_common.dart';
 
 const inspectorLibraryUri = 'package:flutter/src/widgets/widget_inspector.dart';
 
@@ -1403,33 +1404,6 @@ abstract class InspectorServiceClient {
   void onFlutterFrame();
 
   Future<void> onForceRefresh();
-}
-
-/// Reference to a Dart object.
-///
-/// This class is similar to the Observatory protocol InstanceRef with the
-/// difference that InspectorInstanceRef objects do not expire and all
-/// instances of the same Dart object are guaranteed to have the same
-/// InspectorInstanceRef id. The tradeoff is the consumer of
-/// InspectorInstanceRef objects is responsible for managing their lifecycles.
-class InspectorInstanceRef {
-  const InspectorInstanceRef(this.id);
-
-  @override
-  bool operator ==(Object other) {
-    if (other is InspectorInstanceRef) {
-      return id == other.id;
-    }
-    return false;
-  }
-
-  @override
-  int get hashCode => id.hashCode;
-
-  @override
-  String toString() => '$id';
-
-  final String? id;
 }
 
 /// Manager that simplifies preventing memory leaks when using the

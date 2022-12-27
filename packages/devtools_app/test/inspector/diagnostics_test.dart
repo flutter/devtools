@@ -70,7 +70,6 @@ void main() {
         preferences.inspector.setHoverEvalMode(true);
         diagnosticsNodeDescription = DiagnosticsNodeDescription(
           diagnostic,
-          debuggerController: MockDebuggerController(),
         );
       });
 
@@ -109,7 +108,6 @@ void main() {
           );
           diagnosticsNodeDescription = DiagnosticsNodeDescription(
             diagnosticWithoutService,
-            debuggerController: MockDebuggerController(),
           );
 
           await tester.pumpWidget(wrap(diagnosticsNodeDescription));
@@ -144,7 +142,6 @@ void main() {
           );
           final diagnosticsNodeDescription = DiagnosticsNodeDescription(
             diagnosticWithoutService,
-            debuggerController: MockDebuggerController(),
           );
 
           await tester.pumpWidget(wrap(diagnosticsNodeDescription));
@@ -197,7 +194,6 @@ void main() {
           );
           final diagnosticsNodeDescription = DiagnosticsNodeDescription(
             diagnosticWithoutService,
-            debuggerController: MockDebuggerController(),
           );
 
           await tester.pumpWidget(wrap(diagnosticsNodeDescription));
@@ -268,7 +264,6 @@ void main() {
           const textStyle = TextStyle(fontSize: 24.0, fontFamily: 'Roboto');
           final diagnosticsNodeDescription = DiagnosticsNodeDescription(
             diagnosticWithoutService,
-            debuggerController: MockDebuggerController(),
             style: textStyle,
           );
 
