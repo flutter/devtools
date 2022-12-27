@@ -52,7 +52,9 @@ class DebuggerController extends DisposableController
   late final EvalService evalService = EvalService(
     isolateRef: isolateRef,
     variables: variables,
-    frameForEval: () => _frameForEval,
+    frameForEval: () =>
+        _selectedStackFrame.value?.frame ??
+        _stackFramesWithLocation.value.safeFirst?.frame,
     isPaused: isPaused,
     service: _service,
   );
@@ -146,10 +148,6 @@ class DebuggerController extends DisposableController
 
   ValueListenable<StackFrameAndSourcePosition?> get selectedStackFrame =>
       _selectedStackFrame;
-
-  Frame? get _frameForEval =>
-      _selectedStackFrame.value?.frame ??
-      _stackFramesWithLocation.value.safeFirst?.frame;
 
   final _variables = ValueNotifier<List<DartObjectNode>>([]);
 
