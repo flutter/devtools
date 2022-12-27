@@ -4,18 +4,17 @@
 
 import 'package:flutter/material.dart';
 
-import '../../shared/globals.dart';
-import '../../shared/object_tree.dart';
-import '../../shared/primitives/utils.dart';
-import '../../shared/theme.dart';
-import '../../shared/ui/hover.dart';
-import '../../shared/ui/icons.dart';
-import '../../shared/ui/utils.dart';
-import '../debugger/debugger_controller.dart';
-import '../debugger/variables.dart';
-import 'diagnostics_node.dart';
-import 'inspector_tree.dart';
-import 'primitives/inspector_text_styles.dart' as inspector_text_styles;
+import '../../globals.dart';
+import '../../object_tree.dart';
+import '../../primitives/utils.dart';
+import '../../theme.dart';
+import '../../ui/hover.dart';
+import '../../ui/icons.dart';
+import '../../ui/utils.dart';
+import '../eval/diagnostics_node.dart';
+import '../eval/inspector_tree.dart';
+import '../primitives/text_styles.dart';
+import 'expandable_variable.dart';
 
 final _colorIconMaker = ColorIconMaker();
 final _customIconMaker = CustomIconMaker();
@@ -39,7 +38,6 @@ class DiagnosticsNodeDescription extends StatelessWidget {
     this.errorText,
     this.multiline = false,
     this.style,
-    required this.debuggerController,
     this.nodeDescriptionHighlightStyle,
   });
 
@@ -49,7 +47,6 @@ class DiagnosticsNodeDescription extends StatelessWidget {
   final String? searchValue;
   final bool multiline;
   final TextStyle? style;
-  final DebuggerController debuggerController;
   final TextStyle? nodeDescriptionHighlightStyle;
 
   static Widget _paddedIcon(Widget icon) {
@@ -119,8 +116,7 @@ class DiagnosticsNodeDescription extends StatelessWidget {
         if (match.group(2)?.isNotEmpty == true) {
           yield TextSpan(
             text: match.group(2),
-            style:
-                textStyle.merge(inspector_text_styles.unimportant(colorScheme)),
+            style: textStyle.merge(ConsoleTextStyles.unimportant(colorScheme)),
           );
         }
         return;
@@ -219,7 +215,6 @@ class DiagnosticsNodeDescription extends StatelessWidget {
           title: diagnosticLocal.toStringShort(),
           contents: Material(
             child: ExpandableVariable(
-              debuggerController: debuggerController,
               variable: variable,
             ),
           ),
@@ -255,7 +250,7 @@ class DiagnosticsNodeDescription extends StatelessWidget {
     final defaultStyle = DefaultTextStyle.of(context).style;
     final baseStyle = style ?? defaultStyle;
     TextStyle textStyle = baseStyle.merge(
-      inspector_text_styles.textStyleForLevel(
+      ConsoleTextStyles.textStyleForLevel(
         diagnosticLocal.level,
         colorScheme,
       ),
@@ -281,7 +276,7 @@ class DiagnosticsNodeDescription extends StatelessWidget {
       }
 
       if (diagnosticLocal.isCreatedByLocalProject) {
-        textStyle = textStyle.merge(inspector_text_styles.regularBold);
+        textStyle = textStyle.merge(ConsoleTextStyles.regularBold);
       }
 
       String description = diagnosticLocal.description ?? '';
@@ -321,7 +316,7 @@ class DiagnosticsNodeDescription extends StatelessWidget {
 
       if (_showRenderObjectPropertiesAsLinks &&
           propertyType == 'RenderObject') {
-        textStyle = textStyle..merge(inspector_text_styles.link(colorScheme));
+        textStyle = textStyle..merge(ConsoleTextStyles.link(colorScheme));
       }
 
       // TODO(jacobr): custom display for units, iterables, and padding.
@@ -353,7 +348,7 @@ class DiagnosticsNodeDescription extends StatelessWidget {
           children.add(
             Text(
               name,
-              style: inspector_text_styles.unimportant(colorScheme),
+              style: ConsoleTextStyles.unimportant(colorScheme),
             ),
           );
         } else {
@@ -381,7 +376,7 @@ class DiagnosticsNodeDescription extends StatelessWidget {
 
       if (!diagnosticLocal.isSummaryTree &&
           diagnosticLocal.isCreatedByLocalProject) {
-        textStyle = textStyle.merge(inspector_text_styles.regularBold);
+        textStyle = textStyle.merge(ConsoleTextStyles.regularBold);
       }
 
       var diagnosticDescription = buildDescription(
@@ -431,7 +426,7 @@ class DiagnosticsNodeDescription extends StatelessWidget {
         text: TextSpan(
           text:
               '${location.getFile()!.split('/').last}:${location.getLine()}:${location.getColumn()}            ',
-          style: inspector_text_styles.regular
+          style: ConsoleTextStyles.regular
               .copyWith(color: theme.colorScheme.defaultForeground),
         ),
       ),
@@ -448,8 +443,8 @@ class DiagnosticsNodeDescription extends StatelessWidget {
           // When the node is selected, the background will be an error
           // color so don't render the text the same color.
           style: isSelected
-              ? inspector_text_styles.regular
-              : inspector_text_styles.error(colorScheme),
+              ? ConsoleTextStyles.regular
+              : ConsoleTextStyles.error(colorScheme),
         ),
       ),
     );

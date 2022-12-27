@@ -3,9 +3,9 @@
 // found in the LICENSE file.
 
 @TestOn('vm')
-import 'package:devtools_app/src/screens/inspector/diagnostics_node.dart';
-import 'package:devtools_app/src/screens/inspector/inspector_service.dart';
-import 'package:devtools_app/src/screens/inspector/primitives/inspector_common.dart';
+import 'package:devtools_app/src/shared/console/eval/diagnostics_node.dart';
+import 'package:devtools_app/src/shared/console/eval/inspector_service.dart';
+import 'package:devtools_app/src/shared/console/primitives/simple_items.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter_test/flutter_test.dart';
