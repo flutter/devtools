@@ -51,10 +51,10 @@ class DebuggerController extends DisposableController
 
   late final EvalService evalService = EvalService(
     isolateRef: () => isolateRef,
-    variables: () => variables.value,
+    variables: variables,
     frameForEval: () => _frameForEval,
-    isPaused: () => isPaused.value,
-    service: () => _service,
+    isPaused: isPaused,
+    service: _service,
   );
 
   bool _firstDebuggerScreenLoaded = false;

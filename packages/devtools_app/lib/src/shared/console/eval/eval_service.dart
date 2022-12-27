@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../../service/vm_service_wrapper.dart';
@@ -46,13 +47,13 @@ class EvalService {
 
   final IsolateRef? Function() isolateRef;
 
-  final bool Function() isPaused;
+  final ValueListenable<bool> isPaused;
 
   final Frame? Function() frameForEval;
 
-  final List<DartObjectNode> Function() variables;
+  final ValueListenable<List<DartObjectNode>> variables;
 
-  final VmServiceWrapper Function() service;
+  final VmServiceWrapper service;
 
   final EvalHistory evalHistory = EvalHistory();
 
@@ -100,7 +101,7 @@ class EvalService {
   ///
   /// The return value can be one of [Obj] or [Sentinel].
   Future<Obj> getObject(ObjRef objRef) {
-    return service().getObject(_isolateRefId, objRef.id!);
+    return service.getObject(_isolateRefId, objRef.id!);
   }
 
   /// Evaluate the given expression in the context of the currently selected
@@ -108,7 +109,7 @@ class EvalService {
   ///
   /// This will fail if the application is not currently paused.
   Future<Response> evalAtCurrentFrame(String expression) {
-    if (!isPaused()) {
+    if (!isPaused.value) {
       return Future.error(
         RPCError.withDetails(
           'evaluateInFrame',
@@ -130,7 +131,7 @@ class EvalService {
       );
     }
 
-    return service().evaluateInFrame(
+    return service.evaluateInFrame(
       _isolateRefId,
       frame.index!,
       expression,

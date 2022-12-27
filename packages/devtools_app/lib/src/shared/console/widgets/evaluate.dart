@@ -404,7 +404,7 @@ Future<List<String>> autoCompleteResultsFor(
 ) async {
   final result = <String>{};
   if (!parts.isField) {
-    final variables = evalService.variables();
+    final variables = evalService.variables.value;
     result.addAll(removeNullValues(variables.map((variable) => variable.name)));
 
     final thisVariable = variables.firstWhereOrNull(
