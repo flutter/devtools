@@ -60,6 +60,7 @@ class EvalService {
 
   String get _isolateRefId {
     final id = isolateRef()?.id;
+    // TODO(polina-c): it is not clear why returning '' is ok.
     if (id == null) return '';
     return id;
   }
