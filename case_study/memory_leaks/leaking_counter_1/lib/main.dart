@@ -28,34 +28,15 @@ class MyHomePage extends StatefulWidget {
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
-class MyIncrementer {
-  MyIncrementer(this.increment);
-  final VoidCallback increment;
-}
-
 class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
-
-  late MyIncrementer _incrementer = MyIncrementer(
-    () => setState(() {
-      _counter++;
-    }),
-  );
+  final _cachedScreens = <Scaffold>[];
 
   /// Increments counter if current screen contains floating action button.
   void _incrementCounter(BuildContext context) {
-    final oldIncrementer = _incrementer;
-    final screen = buildScreen(context);
-
-    _incrementer = MyIncrementer(
-      () {
-        if (screen.floatingActionButton != null) {
-          oldIncrementer.increment();
-        }
-      },
-    );
-
-    _incrementer.increment();
+    if (_cachedScreens.last.floatingActionButton != null) {
+      setState(() => _counter++);
+    }
   }
 
   Scaffold buildScreen(BuildContext context) {
@@ -71,7 +52,7 @@ class _MyHomePageState extends State<MyHomePage> {
             const Text(
               'The counter value is:',
             ),
-            MyCounter(value: _counter),
+            MyCounterView(value: _counter),
           ],
         ),
       ),
@@ -85,11 +66,15 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   @override
-  Widget build(BuildContext context) => buildScreen(context);
+  Widget build(BuildContext context) {
+    final screen = buildScreen(context);
+    _cachedScreens.add(screen);
+    return screen;
+  }
 }
 
-class MyCounter extends StatelessWidget {
-  const MyCounter({super.key, required this.value});
+class MyCounterView extends StatelessWidget {
+  const MyCounterView({super.key, required this.value});
   final int value;
 
   @override
