@@ -315,7 +315,7 @@ class ExpressionEvalFieldState extends State<ExpressionEvalField>
 
     try {
       // Response is either a ErrorRef, InstanceRef, or Sentinel.
-      final isolateRef = widget.evalService.isolateRef();
+      final isolateRef = widget.evalService.isolateRef.value;
       final response =
           await widget.evalService.evalAtCurrentFrame(expressionText);
 
