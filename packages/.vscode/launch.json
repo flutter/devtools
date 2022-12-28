@@ -1,0 +1,59 @@
+{
+    // Adjusted copy of devtools_app/.vscode/launch.json,
+    // made for thouse who prefer to work in folder `packages` to
+    // see mock errors in devtools_test.
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "opened test or devtools",
+            "cwd": "devtools_app",
+            "request": "launch",
+            "type": "dart",
+        },
+        {
+            "name": "devtools",
+            "request": "launch",
+            "type": "dart",
+            "program": "devtools_app/lib/main.dart",
+        },
+        {
+            "name": "devtools + experiments",
+            "request": "launch",
+            "type": "dart",
+            "program": "devtools_app/lib/main.dart",
+            "args": [
+                "--dart-define=enable_experiments=true"
+            ]
+        },
+        {
+            "name": "devtools - profile",
+            "request": "launch",
+            "type": "dart",
+            "program": "devtools_app/lib/main.dart",
+            "flutterMode": "profile",
+        },
+        {
+            "name": "memory/default",
+            "request": "launch",
+            "type": "dart",
+            "program": "devtools_app/test/test_infra/scenes/memory/default.stager_app.dart",
+        },
+        {
+            "name": "memory/diff_snapshot",
+            "request": "launch",
+            "type": "dart",
+            "program": "devtools_app/test/test_infra/scenes/memory/diff_snapshot.stager_app.dart",
+        },
+        {
+            "name": "performance/default",
+            "request": "launch",
+            "type": "dart",
+            "program": "devtools_app/test/test_infra/scenes/performance/default.stager_app.dart",
+        },
+        {
+            "name": "attach",
+            "type": "dart",
+            "request": "attach",
+        },
+    ]
+}
