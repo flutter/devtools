@@ -315,7 +315,7 @@ class ExpressionEvalFieldState extends State<ExpressionEvalField>
 
     try {
       // Response is either a ErrorRef, InstanceRef, or Sentinel.
-      final isolateRef = widget.evalService.isolateRef();
+      final isolateRef = widget.evalService.isolateRef.value;
       final response =
           await widget.evalService.evalAtCurrentFrame(expressionText);
 
@@ -404,7 +404,7 @@ Future<List<String>> autoCompleteResultsFor(
 ) async {
   final result = <String>{};
   if (!parts.isField) {
-    final variables = evalService.variables();
+    final variables = evalService.variables.value;
     result.addAll(removeNullValues(variables.map((variable) => variable.name)));
 
     final thisVariable = variables.firstWhereOrNull(

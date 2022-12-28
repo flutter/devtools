@@ -99,11 +99,10 @@ MockDebuggerController createMockDebuggerControllerWithDefaults({
   MockCodeViewController? mockCodeViewController,
 }) {
   final evalService = EvalService(
-    isolateRef: () => null,
-    variables: () => [],
+    isolateRef: ValueNotifier<IsolateRef?>(null),
+    variables: ValueNotifier<List<DartObjectNode>>([]),
     frameForEval: () => null,
-    isPaused: () => true,
-    service: () => throw 'not implemented stub for VmServiceWrapper',
+    isPaused: ValueNotifier<bool>(true),
   );
 
   final debuggerController = MockDebuggerController();

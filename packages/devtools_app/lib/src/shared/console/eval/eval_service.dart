@@ -8,6 +8,13 @@ import 'package:vm_service/vm_service.dart';
 
 import '../../../service/vm_service_wrapper.dart';
 import '../../object_tree.dart';
+import 'package:flutter/foundation.dart';
+import 'package:vm_service/vm_service.dart';
+
+import '../../../service/vm_service_wrapper.dart';
+import '../../globals.dart';
+import '../../object_tree.dart';
+import '../../primitives/auto_dispose.dart';
 import '../primitives/eval_history.dart';
 
 class AutocompleteCache {
@@ -28,38 +35,38 @@ class AutocompleteCache {
   /// but does not include autocompletes for libraries imported by this library.
   final libraryMemberAutocomplete = <LibraryRef, Future<Set<String?>>>{};
 
-  void clear() {
+  void _clear() {
     classes.clear();
     libraryMemberAndImportsAutocomplete.clear();
     libraryMemberAutocomplete.clear();
   }
 }
 
-class EvalService {
+class EvalService extends DisposableController with AutoDisposeControllerMixin {
   EvalService({
     required this.isolateRef,
     required this.variables,
     required this.frameForEval,
     required this.isPaused,
-    required this.service,
-  });
+  }) {
+    addAutoDisposeListener(isolateRef, () => cache._clear());
+  }
 
-  final IsolateRef? Function() isolateRef;
+  final ValueListenable<IsolateRef?> isolateRef;
 
-  final bool Function() isPaused;
+  final ValueListenable<bool> isPaused;
 
   final Frame? Function() frameForEval;
 
-  final List<DartObjectNode> Function() variables;
-
-  final VmServiceWrapper Function() service;
+  final ValueListenable<List<DartObjectNode>> variables;
 
   final EvalHistory evalHistory = EvalHistory();
 
   final cache = AutocompleteCache();
 
   String get _isolateRefId {
-    final id = isolateRef()?.id;
+    final id = isolateRef.value?.id;
+    // TODO(polina-c): it is not clear why returning '' is ok.
     if (id == null) return '';
     return id;
   }
@@ -99,7 +106,7 @@ class EvalService {
   ///
   /// The return value can be one of [Obj] or [Sentinel].
   Future<Obj> getObject(ObjRef objRef) {
-    return service().getObject(_isolateRefId, objRef.id!);
+    return _service.getObject(_isolateRefId, objRef.id!);
   }
 
   /// Evaluate the given expression in the context of the currently selected
@@ -107,7 +114,7 @@ class EvalService {
   ///
   /// This will fail if the application is not currently paused.
   Future<Response> evalAtCurrentFrame(String expression) {
-    if (!isPaused()) {
+    if (!isPaused.value) {
       return Future.error(
         RPCError.withDetails(
           'evaluateInFrame',
@@ -129,7 +136,7 @@ class EvalService {
       );
     }
 
-    return service().evaluateInFrame(
+    return _service.evaluateInFrame(
       _isolateRefId,
       frame.index!,
       expression,

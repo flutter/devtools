@@ -42,6 +42,16 @@ class DebuggerController extends DisposableController
     if (routerDelegate != null) {
       codeViewController.subscribeToRouterEvents(routerDelegate);
     }
+
+    evalService = EvalService(
+      isolateRef: isolateRef,
+      variables: variables,
+      frameForEval: () =>
+          _selectedStackFrame.value?.frame ??
+          _stackFramesWithLocation.value.safeFirst?.frame,
+      isPaused: isPaused,
+    );
+
     if (serviceManager.hasService) {
       _initialize();
     }
@@ -83,7 +93,7 @@ class DebuggerController extends DisposableController
     unawaited(_getStackOperation?.cancel());
     _getStackOperation = null;
 
-    isolateRef = null;
+    _isolateRef.value = null;
     _isPaused.value = false;
     _resuming.value = false;
     _lastEvent = null;
@@ -151,10 +161,6 @@ class DebuggerController extends DisposableController
   ValueListenable<StackFrameAndSourcePosition?> get selectedStackFrame =>
       _selectedStackFrame;
 
-  Frame? get _frameForEval =>
-      _selectedStackFrame.value?.frame ??
-      _stackFramesWithLocation.value.safeFirst?.frame;
-
   final _variables = ValueNotifier<List<DartObjectNode>>([]);
 
   ValueListenable<List<DartObjectNode>> get variables => _variables;
@@ -169,18 +175,20 @@ class DebuggerController extends DisposableController
 
   ValueListenable<String?> get exceptionPauseMode => _exceptionPauseMode;
 
-  IsolateRef? isolateRef;
+  final _isolateRef = ValueNotifier<IsolateRef?>(null);
 
-  bool get isSystemIsolate => isolateRef?.isSystemIsolate ?? false;
+  ValueListenable<IsolateRef?> get isolateRef => _isolateRef;
+
+  bool get isSystemIsolate => isolateRef.value?.isSystemIsolate ?? false;
 
   String get _isolateRefId {
-    final id = isolateRef?.id;
+    final id = isolateRef.value?.id;
     if (id == null) return '';
     return id;
   }
 
   void _switchToIsolate(IsolateRef? ref) async {
-    isolateRef = ref;
+    _isolateRef.value = ref;
     _isPaused.value = false;
     await _pause(false);
 
@@ -324,12 +332,12 @@ class DebuggerController extends DisposableController
     // ignore: unused_local_variable
     final status = reloadEvent.status;
 
-    evalService.cache.clear();
-    if (isolateRef == null) return;
+    final theIsolateRef = isolateRef.value;
+    if (theIsolateRef == null) return;
     // Refresh the list of scripts.
     final previousScriptRefs = scriptManager.sortedScripts.value;
     final currentScriptRefs =
-        await scriptManager.retrieveAndSortScripts(isolateRef!);
+        await scriptManager.retrieveAndSortScripts(theIsolateRef);
     final removedScripts =
         // There seems to be a bug in how this lint is working with type
         // inference.
@@ -475,12 +483,13 @@ class DebuggerController extends DisposableController
   void _clearCaches() {
     _lastEvent = null;
     breakpointManager.clearCache();
-    evalService.cache.clear();
   }
 
   Future<void> _populateScripts(Isolate isolate) async {
-    if (isolateRef == null) return;
-    final scriptRefs = await scriptManager.retrieveAndSortScripts(isolateRef!);
+    final theIsolateRef = isolateRef.value;
+    if (theIsolateRef == null) return;
+    final scriptRefs =
+        await scriptManager.retrieveAndSortScripts(theIsolateRef);
 
     // Update the selected script.
     final mainScriptRef = scriptRefs.firstWhereOrNull((ref) {
@@ -543,8 +552,9 @@ class DebuggerController extends DisposableController
       return [];
     }
 
-    final variables =
-        frame.vars!.map((v) => DartObjectNode.create(v, isolateRef)).toList();
+    final variables = frame.vars!
+        .map((v) => DartObjectNode.create(v, isolateRef.value))
+        .toList();
     // TODO(jacobr): would be nice to be able to remove this call to unawaited
     // but it would require a significant refactor.
     variables
