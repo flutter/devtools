@@ -26,7 +26,7 @@ const bool _experimentsEnabledByEnvironment =
 bool _experimentsEnabledFromMain = false;
 
 /// This method is allowed to be invoked from main only.
-void enableExperimentsFromMain() {
+void setEnableExperiments() {
   _experimentsEnabledFromMain = true;
 }
 
