@@ -52,19 +52,11 @@ class DebuggerController extends DisposableController
       isPaused: isPaused,
     );
 
+    setGlobal(EvalService, evalService);
+
     if (serviceManager.hasService) {
       _initialize();
     }
-
-    evalService = EvalService(
-      isolateRef: () => isolateRef,
-      variables: () => variables.value,
-      frameForEval: () => _frameForEval,
-      isPaused: () => isPaused.value,
-      service: () => _service,
-    );
-
-    setGlobal(EvalService, evalService);
   }
 
   final codeViewController = CodeViewController();

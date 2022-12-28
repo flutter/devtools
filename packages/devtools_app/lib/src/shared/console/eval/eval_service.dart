@@ -4,10 +4,6 @@
 
 import 'dart:async';
 
-import 'package:vm_service/vm_service.dart';
-
-import '../../../service/vm_service_wrapper.dart';
-import '../../object_tree.dart';
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -100,6 +96,10 @@ class EvalService extends DisposableController with AutoDisposeControllerMixin {
       return findOwnerLibrary(ref.owner);
     }
     return null;
+  }
+
+  VmServiceWrapper get _service {
+    return serviceManager.service!;
   }
 
   /// Get the populated [Obj] object, given an [ObjRef].
