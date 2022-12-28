@@ -49,15 +49,7 @@ class DebuggerController extends DisposableController
 
   final codeViewController = CodeViewController();
 
-  late final EvalService evalService = EvalService(
-    isolateRef: isolateRef,
-    variables: variables,
-    frameForEval: () =>
-        _selectedStackFrame.value?.frame ??
-        _stackFramesWithLocation.value.safeFirst?.frame,
-    isPaused: isPaused,
-    service: _service,
-  );
+  late final EvalService evalService;
 
   bool _firstDebuggerScreenLoaded = false;
 
@@ -115,6 +107,16 @@ class DebuggerController extends DisposableController
     );
     autoDisposeStreamSubscription(
       _service.onIsolateEvent.listen(_handleIsolateEvent),
+    );
+
+    evalService = EvalService(
+      isolateRef: isolateRef,
+      variables: variables,
+      frameForEval: () =>
+          _selectedStackFrame.value?.frame ??
+          _stackFramesWithLocation.value.safeFirst?.frame,
+      isPaused: isPaused,
+      service: _service,
     );
   }
 
