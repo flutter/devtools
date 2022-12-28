@@ -25,7 +25,6 @@ const bool _experimentsEnabledByEnvironment =
 
 bool _experimentsEnabledFromMain = false;
 
-/// This method is allowed to be invoked from main only.
 void setEnableExperiments() {
   _experimentsEnabledFromMain = true;
 }
@@ -65,7 +64,7 @@ abstract class FeatureFlags {
   ///
   /// When adding a new flag, you are responsible for adding it to this map as
   /// well.
-  static late final _allFlags = <String, bool>{
+  static final _allFlags = <String, bool>{
     'embeddedPerfetto': embeddedPerfetto,
     'widgetRebuildStats': widgetRebuildstats,
     'evalAndBrowseSnapshot': evalAndBrowse,
