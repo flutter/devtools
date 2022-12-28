@@ -67,6 +67,10 @@ class EvalService extends DisposableController with AutoDisposeControllerMixin {
     return id;
   }
 
+  VmServiceWrapper get _service {
+    return serviceManager.service!;
+  }
+
   /// Returns the class for the provided [ClassRef].
   ///
   /// May return null.
@@ -96,10 +100,6 @@ class EvalService extends DisposableController with AutoDisposeControllerMixin {
       return findOwnerLibrary(ref.owner);
     }
     return null;
-  }
-
-  VmServiceWrapper get _service {
-    return serviceManager.service!;
   }
 
   /// Get the populated [Obj] object, given an [ObjRef].
