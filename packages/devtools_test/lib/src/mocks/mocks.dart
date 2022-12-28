@@ -203,8 +203,6 @@ class MockDebuggerControllerLegacy extends Mock implements DebuggerController {
     when(debuggerController.stackFramesWithLocation)
         .thenReturn(ValueNotifier([]));
     when(debuggerController.selectedStackFrame).thenReturn(ValueNotifier(null));
-    when(debuggerController.hasTruncatedFrames)
-        .thenReturn(ValueNotifier(false));
     when(debuggerController.exceptionPauseMode)
         .thenReturn(ValueNotifier('Unhandled'));
     when(debuggerController.variables).thenReturn(ValueNotifier([]));
