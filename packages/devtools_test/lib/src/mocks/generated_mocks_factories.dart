@@ -103,7 +103,6 @@ MockDebuggerController createMockDebuggerControllerWithDefaults({
     variables: ValueNotifier<List<DartObjectNode>>([]),
     frameForEval: () => null,
     isPaused: ValueNotifier<bool>(true),
-    service: MockVmServiceWrapper(),
   );
 
   final debuggerController = MockDebuggerController();

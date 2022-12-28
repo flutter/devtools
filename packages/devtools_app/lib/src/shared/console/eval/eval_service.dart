@@ -8,6 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../../service/vm_service_wrapper.dart';
+import '../../globals.dart';
 import '../../object_tree.dart';
 import '../../primitives/auto_dispose.dart';
 import '../primitives/eval_history.dart';
@@ -43,7 +44,6 @@ class EvalService extends DisposableController with AutoDisposeControllerMixin {
     required this.variables,
     required this.frameForEval,
     required this.isPaused,
-    required this.service,
   }) {
     addAutoDisposeListener(isolateRef, () => cache._clear());
   }
@@ -56,8 +56,6 @@ class EvalService extends DisposableController with AutoDisposeControllerMixin {
 
   final ValueListenable<List<DartObjectNode>> variables;
 
-  final VmServiceWrapper service;
-
   final EvalHistory evalHistory = EvalHistory();
 
   final cache = AutocompleteCache();
@@ -67,6 +65,10 @@ class EvalService extends DisposableController with AutoDisposeControllerMixin {
     // TODO(polina-c): it is not clear why returning '' is ok.
     if (id == null) return '';
     return id;
+  }
+
+  VmServiceWrapper get _service {
+    return serviceManager.service!;
   }
 
   /// Returns the class for the provided [ClassRef].
@@ -104,7 +106,7 @@ class EvalService extends DisposableController with AutoDisposeControllerMixin {
   ///
   /// The return value can be one of [Obj] or [Sentinel].
   Future<Obj> getObject(ObjRef objRef) {
-    return service.getObject(_isolateRefId, objRef.id!);
+    return _service.getObject(_isolateRefId, objRef.id!);
   }
 
   /// Evaluate the given expression in the context of the currently selected
@@ -134,7 +136,7 @@ class EvalService extends DisposableController with AutoDisposeControllerMixin {
       );
     }
 
-    return service.evaluateInFrame(
+    return _service.evaluateInFrame(
       _isolateRefId,
       frame.index!,
       expression,

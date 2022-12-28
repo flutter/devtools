@@ -42,6 +42,16 @@ class DebuggerController extends DisposableController
     if (routerDelegate != null) {
       codeViewController.subscribeToRouterEvents(routerDelegate);
     }
+
+    evalService = EvalService(
+      isolateRef: isolateRef,
+      variables: variables,
+      frameForEval: () =>
+          _selectedStackFrame.value?.frame ??
+          _stackFramesWithLocation.value.safeFirst?.frame,
+      isPaused: isPaused,
+    );
+
     if (serviceManager.hasService) {
       _initialize();
     }
@@ -107,16 +117,6 @@ class DebuggerController extends DisposableController
     );
     autoDisposeStreamSubscription(
       _service.onIsolateEvent.listen(_handleIsolateEvent),
-    );
-
-    evalService = EvalService(
-      isolateRef: isolateRef,
-      variables: variables,
-      frameForEval: () =>
-          _selectedStackFrame.value?.frame ??
-          _stackFramesWithLocation.value.safeFirst?.frame,
-      isPaused: isPaused,
-      service: _service,
     );
   }
 
