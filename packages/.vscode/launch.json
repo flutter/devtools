@@ -1,6 +1,6 @@
 {
     // Adjusted copy of devtools_app/.vscode/launch.json,
-    // made for thouse who prefer to work in folder `packages` to
+    // made for thouse who prefer to work in the folder `packages` to
     // see mock errors in devtools_test.
     "version": "0.2.0",
     "configurations": [
