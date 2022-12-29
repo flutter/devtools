@@ -80,13 +80,18 @@ class _InstanceColumn extends ColumnData<SingleClassStats>
   }) {
     final theme = Theme.of(context);
 
-    return InstanceSetView(
-      textStyle:
-          isRowSelected ? theme.selectedTextStyle : theme.regularTextStyle,
-      count: getValue(data),
-      gaContext: gac.MemoryAreas.snapshotSingle,
-      sampleObtainer: () => throw 'not implemented',
-      showMenu: isRowSelected,
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: [
+        InstanceSetView(
+          textStyle:
+              isRowSelected ? theme.selectedTextStyle : theme.regularTextStyle,
+          count: getValue(data),
+          gaContext: gac.MemoryAreas.snapshotSingle,
+          sampleObtainer: isRowSelected ? () => throw 'not implemented' : null,
+          showMenu: isRowSelected,
+        ),
+      ],
     );
   }
 }
