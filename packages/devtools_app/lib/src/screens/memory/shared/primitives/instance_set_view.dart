@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -37,9 +37,49 @@ class InstanceSetView extends StatelessWidget {
           format.format(count),
           style: textStyle,
         ),
-        if (showMenu) ContextMenuButton(style: textStyle),
+        if (showMenu)
+          ContextMenuButton(
+            style: textStyle,
+            menu: _menu(),
+          ),
         if (!showMenu) const SizedBox(width: ContextMenuButton.width),
       ],
     );
   }
 }
+
+List<Widget> _menu() => [
+      MenuItemButton(
+        child: Text('MenuEntry.about.label'),
+        onPressed: () => print('click'),
+      ),
+      MenuItemButton(
+        child: Text('MenuEntry.about.label'),
+        onPressed: () => print('click'),
+      ),
+      MenuItemButton(
+        child: Text('MenuEntry.about.label'),
+        onPressed: () => print('click'),
+      ),
+      MenuItemButton(
+        child: Text('MenuEntry.about.label'),
+        onPressed: () => print('click'),
+      ),
+      SubmenuButton(
+        menuChildren: <Widget>[
+          MenuItemButton(
+            onPressed: () => print('click'),
+            child: Text('MenuEntry.colorRed.label'),
+          ),
+          MenuItemButton(
+            onPressed: () => print('click'),
+            child: Text('MenuEntry.colorGreen.label'),
+          ),
+          MenuItemButton(
+            onPressed: () => print('click'),
+            child: Text('MenuEntry.colorBlue.label'),
+          ),
+        ],
+        child: const Text('Background Color'),
+      ),
+    ];
