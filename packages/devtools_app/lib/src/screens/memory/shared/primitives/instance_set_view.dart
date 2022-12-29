@@ -52,7 +52,7 @@ List<Widget> _menu() => [
       SubmenuButton(
         menuChildren: <Widget>[
           MenuItemButton(
-            onPressed: () => print('get ields'),
+            onPressed: () => print('get fields'),
             child: const Text('Fields'),
           ),
           const MenuItemButton(
@@ -64,34 +64,32 @@ List<Widget> _menu() => [
         ],
         child: const Text('Store one instance as a console variable'),
       ),
-      SubmenuButton(
+      const SubmenuButton(
         menuChildren: <Widget>[
           MenuItemButton(
-            onPressed: () => print('get ields'),
-            child: const Text('Fields'),
+            child: Text('Fields'),
           ),
-          const MenuItemButton(
+          MenuItemButton(
             child: Text('Outgoing references'),
           ),
-          const MenuItemButton(
+          MenuItemButton(
             child: Text('Incoming references'),
           ),
         ],
-        child: const Text('Store 100 instances as a console variable'),
+        child: Text('Store 100 instances as a console variable'),
       ),
-      SubmenuButton(
+      const SubmenuButton(
         menuChildren: <Widget>[
           MenuItemButton(
-            onPressed: () => print('get ields'),
-            child: const Text('Fields'),
+            child: Text('Fields'),
           ),
-          const MenuItemButton(
+          MenuItemButton(
             child: Text('Outgoing references'),
           ),
-          const MenuItemButton(
+          MenuItemButton(
             child: Text('Incoming references'),
           ),
         ],
-        child: const Text('Store all instances as a console variable'),
+        child: Text('Store all instances as a console variable'),
       ),
     ];
