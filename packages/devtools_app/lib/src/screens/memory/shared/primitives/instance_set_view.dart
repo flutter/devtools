@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/widgets.dart';
+import 'package:intl/intl.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../../../shared/analytics/constants.dart';
@@ -28,10 +29,12 @@ class InstanceSetView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final format = NumberFormat.decimalPattern();
+
     return Row(
       children: [
         Text(
-          count.toString(),
+          format.format(count),
           style: textStyle,
         ),
         if (showMenu) ContextMenuButton(style: textStyle),
