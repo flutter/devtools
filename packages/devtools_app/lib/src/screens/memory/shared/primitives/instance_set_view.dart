@@ -7,7 +7,7 @@ import 'package:intl/intl.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../../../shared/analytics/constants.dart';
-import '../../../../shared/common_widgets.dart';
+import '../../../../shared/context_menu.dart';
 
 typedef SampleObtainer = InstanceRef Function();
 

@@ -2067,45 +2067,6 @@ class CopyToClipboardControl extends StatelessWidget {
   }
 }
 
-class ContextMenuButton extends StatelessWidget {
-  const ContextMenuButton({
-    this.tooltip = 'Open context menu',
-    this.buttonKey,
-    this.size,
-    this.style,
-    this.gaScreen,
-    this.gaItem,
-  });
-
-  static const double width = 14;
-
-  final TextStyle? style;
-  final String tooltip;
-  final Key? buttonKey;
-  final double? size;
-  final String? gaScreen;
-  final String? gaItem;
-
-  @override
-  Widget build(BuildContext context) {
-    final onPressed = () {
-      if (gaScreen != null && gaItem != null) {
-        ga.select(gaScreen!, gaItem!);
-      }
-    };
-
-    return SizedBox(
-      width: width,
-      child: MaterialButton(
-        padding: const EdgeInsets.all(0),
-        onPressed: onPressed,
-        key: buttonKey,
-        child: Text('⋮', style: style, textAlign: TextAlign.center),
-      ),
-    );
-  }
-}
-
 /// Checkbox Widget class that listens to and manages a [ValueNotifier].
 ///
 /// Used to create a Checkbox widget who's boolean value is attached
