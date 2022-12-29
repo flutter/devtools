@@ -7,7 +7,7 @@ import 'package:intl/intl.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../../../shared/analytics/constants.dart';
-import '../../../../shared/context_menu.dart';
+import '../../../../shared/common_widgets.dart';
 
 typedef SampleObtainer = InstanceRef Function();
 
@@ -49,37 +49,49 @@ class InstanceSetView extends StatelessWidget {
 }
 
 List<Widget> _menu() => [
-      MenuItemButton(
-        child: Text('MenuEntry.about.label'),
-        onPressed: () => print('click'),
-      ),
-      MenuItemButton(
-        child: Text('MenuEntry.about.label'),
-        onPressed: () => print('click'),
-      ),
-      MenuItemButton(
-        child: Text('MenuEntry.about.label'),
-        onPressed: () => print('click'),
-      ),
-      MenuItemButton(
-        child: Text('MenuEntry.about.label'),
-        onPressed: () => print('click'),
+      SubmenuButton(
+        menuChildren: <Widget>[
+          MenuItemButton(
+            onPressed: () => print('get ields'),
+            child: const Text('Fields'),
+          ),
+          const MenuItemButton(
+            child: Text('Outgoing references'),
+          ),
+          const MenuItemButton(
+            child: Text('Incoming references'),
+          ),
+        ],
+        child: const Text('Store one instance as a console variable'),
       ),
       SubmenuButton(
         menuChildren: <Widget>[
           MenuItemButton(
-            onPressed: () => print('click'),
-            child: Text('MenuEntry.colorRed.label'),
+            onPressed: () => print('get ields'),
+            child: const Text('Fields'),
           ),
-          MenuItemButton(
-            onPressed: () => print('click'),
-            child: Text('MenuEntry.colorGreen.label'),
+          const MenuItemButton(
+            child: Text('Outgoing references'),
           ),
-          MenuItemButton(
-            onPressed: () => print('click'),
-            child: Text('MenuEntry.colorBlue.label'),
+          const MenuItemButton(
+            child: Text('Incoming references'),
           ),
         ],
-        child: const Text('Background Color'),
+        child: const Text('Store 100 instances as a console variable'),
+      ),
+      SubmenuButton(
+        menuChildren: <Widget>[
+          MenuItemButton(
+            onPressed: () => print('get ields'),
+            child: const Text('Fields'),
+          ),
+          const MenuItemButton(
+            child: Text('Outgoing references'),
+          ),
+          const MenuItemButton(
+            child: Text('Incoming references'),
+          ),
+        ],
+        child: const Text('Store all instances as a console variable'),
       ),
     ];
