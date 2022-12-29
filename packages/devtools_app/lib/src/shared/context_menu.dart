@@ -26,54 +26,29 @@ class ContextMenuButton extends StatefulWidget {
 }
 
 class _ContextMenuButtonState extends State<ContextMenuButton> {
-  //final FocusNode _buttonFocusNode = FocusNode(debugLabel: 'Menu Button');
-
   @override
   Widget build(BuildContext context) {
-    final onPressed = () {
-      if (widget.gaScreen != null && widget.gaItem != null) {
-        ga.select(widget.gaScreen!, widget.gaItem!);
-      }
-    };
-
     return MenuAnchor(
       menuChildren: widget.menu,
       builder:
           (BuildContext context, MenuController controller, Widget? child) {
-        return _MenuButton(style: widget.style, controller: controller);
+        return SizedBox(
+          width: ContextMenuButton.width,
+          child: TextButton(
+            child: Text('⋮', style: widget.style, textAlign: TextAlign.center),
+            onPressed: () {
+              if (widget.gaScreen != null && widget.gaItem != null) {
+                ga.select(widget.gaScreen!, widget.gaItem!);
+              }
+              if (controller.isOpen) {
+                controller.close();
+              } else {
+                controller.open();
+              }
+            },
+          ),
+        );
       },
-    );
-  }
-
-  @override
-  void dispose() {
-    //_buttonFocusNode.dispose();
-    super.dispose();
-  }
-}
-
-class _MenuButton extends StatelessWidget {
-  const _MenuButton({this.style, required this.controller});
-
-  final TextStyle? style;
-  final MenuController controller;
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: ContextMenuButton.width,
-      child: MaterialButton(
-        padding: const EdgeInsets.all(0),
-        child: Text('⋮', style: style, textAlign: TextAlign.center),
-        //focusNode: _buttonFocusNode,
-        onPressed: () {
-          if (controller.isOpen) {
-            controller.close();
-          } else {
-            controller.open();
-          }
-        },
-      ),
     );
   }
 }
