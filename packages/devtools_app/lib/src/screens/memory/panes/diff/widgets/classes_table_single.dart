@@ -12,6 +12,7 @@ import '../../../../../shared/table/table_data.dart';
 import '../../../../../shared/theme.dart';
 import '../../../../../shared/utils.dart';
 import '../../../shared/heap/heap.dart';
+import '../../../shared/primitives/instance_set_view.dart';
 import '../../../shared/primitives/simple_elements.dart';
 import '../../../shared/shared_memory_widgets.dart';
 
@@ -54,7 +55,8 @@ class _ClassNameColumn extends ColumnData<SingleClassStats>
   }
 }
 
-class _InstanceColumn extends ColumnData<SingleClassStats> {
+class _InstanceColumn extends ColumnData<SingleClassStats>
+    implements ColumnRenderer<SingleClassStats> {
   _InstanceColumn()
       : super(
           'Instances',
@@ -68,6 +70,25 @@ class _InstanceColumn extends ColumnData<SingleClassStats> {
 
   @override
   bool get numeric => true;
+
+  @override
+  Widget build(
+    BuildContext context,
+    SingleClassStats data, {
+    bool isRowSelected = false,
+    VoidCallback? onPressed,
+  }) {
+    final theme = Theme.of(context);
+
+    return InstanceSetView(
+      textStyle:
+          isRowSelected ? theme.selectedTextStyle : theme.regularTextStyle,
+      count: getValue(data),
+      gaContext: gac.MemoryAreas.snapshotSingle,
+      sampleObtainer: () => throw 'not implemented',
+      showMenu: isRowSelected,
+    );
+  }
 }
 
 class _ShallowSizeColumn extends ColumnData<SingleClassStats> {
