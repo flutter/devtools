@@ -31,8 +31,7 @@ class ContextMenuButton extends StatefulWidget {
 }
 
 class _ContextMenuButtonState extends State<ContextMenuButton> {
-  //MenuEntry? _lastSelection;
-  //final FocusNode _buttonFocusNode = FocusNode(debugLabel: 'Menu Button');
+  final FocusNode _buttonFocusNode = FocusNode(debugLabel: 'Menu Button');
 
   @override
   Widget build(BuildContext context) {
@@ -42,13 +41,79 @@ class _ContextMenuButtonState extends State<ContextMenuButton> {
       }
     };
 
+    return MenuAnchor(
+      menuChildren: [
+        MenuItemButton(
+          child: Text('MenuEntry.about.label'),
+          onPressed: () => print('click'),
+        ),
+        MenuItemButton(
+          child: Text('MenuEntry.about.label'),
+          onPressed: () => print('click'),
+        ),
+        MenuItemButton(
+          child: Text('MenuEntry.about.label'),
+          onPressed: () => print('click'),
+        ),
+        MenuItemButton(
+          child: Text('MenuEntry.about.label'),
+          onPressed: () => print('click'),
+        ),
+        SubmenuButton(
+          menuChildren: <Widget>[
+            MenuItemButton(
+              onPressed: () => print('click'),
+              child: Text('MenuEntry.colorRed.label'),
+            ),
+            MenuItemButton(
+              onPressed: () => print('click'),
+              child: Text('MenuEntry.colorGreen.label'),
+            ),
+            MenuItemButton(
+              onPressed: () => print('click'),
+              child: Text('MenuEntry.colorBlue.label'),
+            ),
+          ],
+          child: const Text('Background Color'),
+        ),
+      ],
+      builder:
+          (BuildContext context, MenuController controller, Widget? child) {
+        return TextButton(
+          focusNode: _buttonFocusNode,
+          onPressed: () {
+            if (controller.isOpen) {
+              controller.close();
+            } else {
+              controller.open();
+            }
+          },
+          child: _MenuButton(style: widget.style),
+        );
+      },
+    );
+  }
+
+  @override
+  void dispose() {
+    _buttonFocusNode.dispose();
+    super.dispose();
+  }
+}
+
+class _MenuButton extends StatelessWidget {
+  const _MenuButton({this.style});
+
+  final TextStyle? style;
+
+  @override
+  Widget build(BuildContext context) {
     return SizedBox(
       width: ContextMenuButton.width,
       child: MaterialButton(
         padding: const EdgeInsets.all(0),
-        onPressed: onPressed,
-        key: widget.buttonKey,
-        child: Text('⋮', style: widget.style, textAlign: TextAlign.center),
+        onPressed: null,
+        child: Text('⋮', style: style, textAlign: TextAlign.center),
       ),
     );
   }
