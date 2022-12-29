@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 
 import 'analytics/analytics.dart' as ga;
 
-class ContextMenuButton extends StatefulWidget {
+class ContextMenuButton extends StatelessWidget {
   const ContextMenuButton({
     this.style,
     this.gaScreen,
@@ -22,23 +22,18 @@ class ContextMenuButton extends StatefulWidget {
   final List<Widget> menu;
 
   @override
-  State<ContextMenuButton> createState() => _ContextMenuButtonState();
-}
-
-class _ContextMenuButtonState extends State<ContextMenuButton> {
-  @override
   Widget build(BuildContext context) {
     return MenuAnchor(
-      menuChildren: widget.menu,
+      menuChildren: menu,
       builder:
           (BuildContext context, MenuController controller, Widget? child) {
         return SizedBox(
           width: ContextMenuButton.width,
           child: TextButton(
-            child: Text('⋮', style: widget.style, textAlign: TextAlign.center),
+            child: Text('⋮', style: style, textAlign: TextAlign.center),
             onPressed: () {
-              if (widget.gaScreen != null && widget.gaItem != null) {
-                ga.select(widget.gaScreen!, widget.gaItem!);
+              if (gaScreen != null && gaItem != null) {
+                ga.select(gaScreen!, gaItem!);
               }
               if (controller.isOpen) {
                 controller.close();
