@@ -6,6 +6,7 @@ import 'package:flutter/widgets.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../../../shared/analytics/constants.dart';
+import '../../../../shared/common_widgets.dart';
 
 typedef SampleObtainer = InstanceRef Function();
 
@@ -17,7 +18,7 @@ class InstanceSetView extends StatelessWidget {
     required this.showMenu,
     this.textStyle,
     required this.gaContext,
-  }) : assert(showMenu == (sampleObtainer == null));
+  }) : assert(showMenu == (sampleObtainer != null));
 
   final int count;
   final SampleObtainer? sampleObtainer;
@@ -27,6 +28,15 @@ class InstanceSetView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Placeholder();
+    return Row(
+      children: [
+        Text(
+          count.toString(),
+          style: textStyle,
+        ),
+        if (showMenu) ContextMenuButton(style: textStyle),
+        if (!showMenu) const SizedBox(width: ContextMenuButton.width),
+      ],
+    );
   }
 }
