@@ -44,7 +44,7 @@ void main() {
       wrapWithControllers(
         Row(
           children: [
-            Flexible(child: buildConsolePaneHeader()),
+            Flexible(child: ConsolePaneHeader()),
             const Expanded(child: ConsolePane()),
           ],
         ),

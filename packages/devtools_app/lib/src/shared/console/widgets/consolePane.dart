@@ -14,24 +14,24 @@ import 'evaluate.dart';
 
 // TODO(devoncarew): Show some small UI indicator when we receive stdout/stderr.
 
-@override
-PreferredSizeWidget buildConsolePaneHeader() {
-  return AreaPaneHeader(
-    title: const Text('Console'),
-    needsTopBorder: false,
-    actions: [
-      CopyToClipboardControl(
-        dataProvider: () =>
-            serviceManager.consoleService.stdio.value.join('\n'),
-        buttonKey: ConsolePane.copyToClipboardButtonKey,
-      ),
-      DeleteControl(
-        buttonKey: ConsolePane.clearStdioButtonKey,
-        tooltip: 'Clear console output',
-        onPressed: () => serviceManager.consoleService.clearStdio(),
-      ),
-    ],
-  );
+class ConsolePaneHeader extends AreaPaneHeader {
+  ConsolePaneHeader()
+      : super(
+          title: const Text('Console'),
+          needsTopBorder: false,
+          actions: [
+            CopyToClipboardControl(
+              dataProvider: () =>
+                  serviceManager.consoleService.stdio.value.join('\n'),
+              buttonKey: ConsolePane.copyToClipboardButtonKey,
+            ),
+            DeleteControl(
+              buttonKey: ConsolePane.clearStdioButtonKey,
+              tooltip: 'Clear console output',
+              onPressed: () => serviceManager.consoleService.clearStdio(),
+            ),
+          ],
+        );
 }
 
 /// Display the stdout and stderr output from the process under debug.
