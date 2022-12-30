@@ -43,7 +43,6 @@ void main() {
   final codeViewController = debuggerController.codeViewController;
   when(codeViewController.showFileOpener).thenReturn(ValueNotifier(false));
 
-  when(debuggerController.isPaused).thenReturn(ValueNotifier(true));
   when(debuggerController.stackFramesWithLocation).thenReturn(
     ValueNotifier([
       StackFrameAndSourcePosition(

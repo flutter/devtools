@@ -231,11 +231,7 @@ class _EvalFieldTestObjects {
 Future<_EvalFieldTestObjects> _setupEvalFieldObjects(
   WidgetTester tester,
 ) async {
-  final evalService =
-      DebuggerController(initialSwitchToIsolate: false).evalService;
-
   final evalField = ExpressionEvalField(
-    evalService: evalService,
     getAutoCompleteResults: (value, controller) async {
       return ['foo', 'bar', 'bazz', 'fozz', 'barz']
           // Simple implementation of search

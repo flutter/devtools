@@ -33,14 +33,14 @@ class _DebuggingControlsState extends State<DebuggingControls>
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (!initController()) return;
-    addAutoDisposeListener(controller.isPaused);
+    addAutoDisposeListener(controller.appState.isPaused);
     addAutoDisposeListener(controller.resuming);
     addAutoDisposeListener(controller.stackFramesWithLocation);
   }
 
   @override
   Widget build(BuildContext context) {
-    final isPaused = controller.isPaused.value;
+    final isPaused = controller.appState.isPaused.value;
     final resuming = controller.resuming.value;
     final hasStackFrames = controller.stackFramesWithLocation.value.isNotEmpty;
     final isSystemIsolate = controller.isSystemIsolate;

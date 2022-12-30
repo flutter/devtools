@@ -63,15 +63,13 @@ void main() {
     'Variables shows items',
     windowSize,
     (WidgetTester tester) async {
-      when(debuggerController.variables).thenReturn(
-        ValueNotifier(
-          [
-            _buildListVariable(),
-            _buildMapVariable(),
-            _buildStringVariable('test str'),
-            _buildBooleanVariable(true),
-          ],
-        ),
+      debuggerController.appState.setVariables(
+        [
+          _buildListVariable(),
+          _buildMapVariable(),
+          _buildStringVariable('test str'),
+          _buildBooleanVariable(true),
+        ],
       );
       await pumpDebuggerScreen(tester, debuggerController);
       expect(find.text('Variables'), findsOneWidget);

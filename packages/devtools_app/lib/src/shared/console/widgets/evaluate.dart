@@ -18,6 +18,7 @@ import '../../theme.dart';
 import '../../ui/search.dart';
 import '../../ui/utils.dart';
 import '../eval/eval_service.dart';
+import '../primitives/eval_history.dart';
 
 typedef AutoCompleteResultsFunction = Future<List<String>> Function(
   EditingParts parts,
@@ -26,12 +27,10 @@ typedef AutoCompleteResultsFunction = Future<List<String>> Function(
 
 class ExpressionEvalField extends StatefulWidget {
   const ExpressionEvalField({
-    required this.evalService,
     AutoCompleteResultsFunction? getAutoCompleteResults,
   }) : getAutoCompleteResults =
             getAutoCompleteResults ?? autoCompleteResultsFor;
 
-  final EvalService evalService;
   final AutoCompleteResultsFunction getAutoCompleteResults;
 
   @override
@@ -47,6 +46,8 @@ class ExpressionEvalFieldState extends State<ExpressionEvalField>
   List<String> _matches = [];
 
   final evalTextFieldKey = GlobalKey(debugLabel: 'evalTextFieldKey');
+
+  final evalService = EvalService();
 
   @override
   void initState() {
@@ -156,7 +157,7 @@ class ExpressionEvalFieldState extends State<ExpressionEvalField>
       final matches =
           parts.activeWord.startsWith(_activeWord) && _activeWord.isNotEmpty
               ? _filterMatches(_matches, parts.activeWord)
-              : await widget.getAutoCompleteResults(parts, widget.evalService);
+              : await widget.getAutoCompleteResults(parts, evalService);
 
       _matches = matches;
       _activeWord = parts.activeWord;
@@ -310,14 +311,13 @@ class ExpressionEvalFieldState extends State<ExpressionEvalField>
     serviceManager.consoleService.appendStdio('> $expressionText\n');
     setState(() {
       historyPosition = -1;
-      widget.evalService.evalHistory.pushEvalHistory(expressionText);
+      evalService.appState.evalHistory.pushEvalHistory(expressionText);
     });
 
     try {
       // Response is either a ErrorRef, InstanceRef, or Sentinel.
-      final isolateRef = widget.evalService.isolateRef.value;
-      final response =
-          await widget.evalService.evalAtCurrentFrame(expressionText);
+      final isolateRef = evalService.appState.isolateRef.value;
+      final response = await evalService.evalAtCurrentFrame(expressionText);
 
       // Display the response to the user.
       if (response is InstanceRef) {
@@ -363,16 +363,17 @@ class ExpressionEvalFieldState extends State<ExpressionEvalField>
     super.dispose();
   }
 
+  EvalHistory get _evalHistory => evalService.appState.evalHistory;
+
   void _historyNavUp() {
-    final evalHistory = widget.evalService.evalHistory;
-    if (!evalHistory.canNavigateUp) {
+    if (!_evalHistory.canNavigateUp) {
       return;
     }
 
     setState(() {
-      evalHistory.navigateUp();
+      _evalHistory.navigateUp();
 
-      final text = evalHistory.currentText ?? '';
+      final text = _evalHistory.currentText ?? '';
       searchTextFieldController.value = TextEditingValue(
         text: text,
         selection: TextSelection.collapsed(offset: text.length),
@@ -381,15 +382,14 @@ class ExpressionEvalFieldState extends State<ExpressionEvalField>
   }
 
   void _historyNavDown() {
-    final evalHistory = widget.evalService.evalHistory;
-    if (!evalHistory.canNavigateDown) {
+    if (!_evalHistory.canNavigateDown) {
       return;
     }
 
     setState(() {
-      evalHistory.navigateDown();
+      _evalHistory.navigateDown();
 
-      final text = evalHistory.currentText ?? '';
+      final text = _evalHistory.currentText ?? '';
       searchTextFieldController.value = TextEditingValue(
         text: text,
         selection: TextSelection.collapsed(offset: text.length),
@@ -404,7 +404,7 @@ Future<List<String>> autoCompleteResultsFor(
 ) async {
   final result = <String>{};
   if (!parts.isField) {
-    final variables = evalService.variables.value;
+    final variables = evalService.appState.variables.value;
     result.addAll(removeNullValues(variables.map((variable) => variable.name)));
 
     final thisVariable = variables.firstWhereOrNull(
@@ -435,7 +435,7 @@ Future<List<String>> autoCompleteResultsFor(
         }
       }
     }
-    final frame = evalService.frameForEval();
+    final frame = evalService.appState.currentFrame.value;
     if (frame != null) {
       final function = frame.function;
       if (function != null) {
@@ -497,7 +497,8 @@ Future<Set<String>> libraryMemberAndImportsAutocompletes(
   EvalService evalService,
 ) async {
   final values = removeNullValues(
-    await evalService.cache.libraryMemberAndImportsAutocomplete.putIfAbsent(
+    await evalService.appState.cache.libraryMemberAndImportsAutocomplete
+        .putIfAbsent(
       libraryRef,
       () => _libraryMemberAndImportsAutocompletes(libraryRef, evalService),
     ),
@@ -555,7 +556,7 @@ Future<Set<String>> libraryMemberAutocompletes(
   required bool includePrivates,
 }) async {
   var result = removeNullValues(
-    await evalService.cache.libraryMemberAutocomplete.putIfAbsent(
+    await evalService.appState.cache.libraryMemberAutocomplete.putIfAbsent(
       libraryRef,
       () => _libraryMemberAutocompletes(evalService, libraryRef),
     ),
@@ -734,7 +735,7 @@ bool _isAccessible(
   Class? clazz,
   EvalService evalService,
 ) {
-  final frame = evalService.frameForEval()!;
+  final frame = evalService.appState.currentFrame.value!;
   final currentScript = frame.location!.script;
   return !isPrivate(member) || currentScript!.id == clazz?.location?.script?.id;
 }

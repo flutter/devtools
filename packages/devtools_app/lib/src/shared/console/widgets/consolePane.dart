@@ -67,9 +67,7 @@ class _ConsolePaneState extends State<ConsolePane> {
             lines: stdio,
             footer: SizedBox(
               height: consoleLineHeight,
-              child: ExpressionEvalField(
-                evalService: evalService,
-              ),
+              child: const ExpressionEvalField(),
             ),
           ),
         ),
