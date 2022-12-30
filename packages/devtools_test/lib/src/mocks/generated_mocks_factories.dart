@@ -115,8 +115,6 @@ MockDebuggerController createMockDebuggerControllerWithDefaults({
     mockCodeViewController,
   );
 
-  when(debuggerController.evalService).thenReturn(evalService);
-
   return debuggerController;
 }
 
