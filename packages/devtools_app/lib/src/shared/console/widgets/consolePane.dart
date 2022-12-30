@@ -35,7 +35,7 @@ class ConsolePaneHeader extends AreaPaneHeader {
 }
 
 /// Display the stdout and stderr output from the process under debug.
-class ConsolePane extends StatefulWidget {
+class ConsolePane extends StatelessWidget {
   const ConsolePane({
     Key? key,
   }) : super(key: key);
@@ -44,19 +44,8 @@ class ConsolePane extends StatefulWidget {
       Key('console_copy_to_clipboard_button');
   static const clearStdioButtonKey = Key('console_clear_stdio_button');
 
-  @override
-  State<ConsolePane> createState() => _ConsolePaneState();
-}
-
-class _ConsolePaneState extends State<ConsolePane> {
   ValueListenable<List<ConsoleLine>> get stdio =>
       serviceManager.consoleService.stdio;
-
-  @override
-  void initState() {
-    super.initState();
-    serviceManager.consoleService.ensureServiceInitialized();
-  }
 
   @override
   Widget build(BuildContext context) {
