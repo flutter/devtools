@@ -8,6 +8,7 @@ import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/shared/analytics/analytics_controller.dart';
 import 'package:devtools_app/src/shared/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/shared/config_specific/import_export/import_export.dart';
+import 'package:devtools_app/src/shared/connected_app.dart';
 import 'package:devtools_app/src/shared/framework_controller.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_app/src/shared/notifications.dart';
@@ -44,11 +45,12 @@ void main() {
       final mockConnectedApp = MockConnectedAppLegacy();
       when(mockConnectedApp.isFlutterAppNow).thenReturn(true);
       when(mockConnectedApp.isProfileBuildNow).thenReturn(false);
+      when(mockConnectedApp.appState).thenReturn(AppState());
       when(mockServiceManager.connectedAppInitialized).thenReturn(true);
       when(mockServiceManager.connectedApp).thenReturn(mockConnectedApp);
       final mockDebuggerController = MockDebuggerController();
-      when(mockDebuggerController.isPaused)
-          .thenReturn(ValueNotifier<bool>(true));
+
+      mockConnectedApp.appState.setPaused(true);
 
       await tester.pumpWidget(
         wrapWithControllers(

@@ -7,6 +7,7 @@ import 'package:devtools_app/src/screens/debugger/debugger_controller.dart';
 import 'package:devtools_app/src/screens/debugger/debugger_screen.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/shared/config_specific/ide_theme/ide_theme.dart';
+import 'package:devtools_app/src/shared/connected_app.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_app/src/shared/notifications.dart';
 import 'package:devtools_app/src/shared/object_tree.dart';
@@ -27,6 +28,7 @@ void main() {
   setUp(() {
     fakeServiceManager = FakeServiceManager();
     scriptManager = MockScriptManager();
+
     mockConnectedApp(
       fakeServiceManager.connectedApp!,
       isProfileBuild: false,
@@ -42,6 +44,8 @@ void main() {
     when(fakeServiceManager.errorBadgeManager.errorCountNotifier('debugger'))
         .thenReturn(ValueNotifier<int>(0));
     debuggerController = createMockDebuggerControllerWithDefaults();
+    when(debuggerController.appState)
+        .thenReturn(fakeServiceManager.connectedApp!.appState);
 
     _resetRef();
     _resetRoot();
@@ -127,13 +131,10 @@ void main() {
     (WidgetTester tester) async {
       final list = _buildParentListVariable(length: 380250);
       await buildVariablesTree(list);
-      when(debuggerController.variables).thenReturn(
-        ValueNotifier(
-          [
-            list,
-          ],
-        ),
-      );
+
+      final appState = serviceManager.connectedApp!.appState;
+      appState.setVariables([list]);
+
       await pumpDebuggerScreen(tester, debuggerController);
 
       final listFinder =
@@ -188,13 +189,10 @@ void main() {
     (WidgetTester tester) async {
       final map = _buildParentMapVariable(length: 243621);
       await buildVariablesTree(map);
-      when(debuggerController.variables).thenReturn(
-        ValueNotifier(
-          [
-            map,
-          ],
-        ),
-      );
+
+      final appState = serviceManager.connectedApp!.appState;
+      appState.setVariables([map]);
+
       await pumpDebuggerScreen(tester, debuggerController);
 
       final listFinder =
