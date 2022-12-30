@@ -49,16 +49,14 @@ class DebuggerController extends DisposableController
       () => _updateCurrentFrame(),
     );
 
-    setGlobal(EvalService, evalService);
-
     if (serviceManager.hasService) {
       _initialize();
     }
   }
 
-  final codeViewController = CodeViewController();
+  late final evalService = EvalService();
 
-  late final EvalService evalService;
+  final codeViewController = CodeViewController();
 
   bool _firstDebuggerScreenLoaded = false;
 
