@@ -114,6 +114,7 @@ MockDebuggerController createMockDebuggerControllerWithDefaults({
   when(debuggerController.codeViewController).thenReturn(
     mockCodeViewController,
   );
+  when(debuggerController.appState).thenReturn(AppState());
 
   return debuggerController;
 }

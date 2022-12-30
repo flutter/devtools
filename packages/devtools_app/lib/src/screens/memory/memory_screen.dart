@@ -44,6 +44,7 @@ class MemoryScreen extends Screen {
   @override
   Widget build(BuildContext context) => const MemoryBody();
 
+  // TODO(polina-c): when embedded and console features should be in native console in VSCode
   @override
   bool showConsole(bool embed) => true;
 }
