@@ -13,13 +13,14 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 
 void main() {
+  final appState = AppState();
   final mockServiceManager = MockServiceConnectionManager();
   when(mockServiceManager.service).thenReturn(null);
   when(mockServiceManager.connectedAppInitialized).thenReturn(false);
   when(mockServiceManager.connectedState).thenReturn(
     ValueNotifier<ConnectedState>(const ConnectedState(false)),
   );
-  when(mockServiceManager.appState).thenReturn(AppState());
+  when(mockServiceManager.appState).thenReturn(appState);
 
   final mockErrorBadgeManager = MockErrorBadgeManager();
   when(mockServiceManager.errorBadgeManager).thenReturn(mockErrorBadgeManager);
@@ -42,6 +43,7 @@ void main() {
       when(mockServiceManager.connectedAppInitialized).thenReturn(true);
       when(mockServiceManager.connectedApp).thenReturn(mockConnectedApp);
       final mockDebuggerController = MockDebuggerController();
+      when(mockDebuggerController.appState).thenReturn(appState);
 
       const debuggerScreenKey = Key('debugger screen');
       const debuggerTabKey = Key('debugger tab');
