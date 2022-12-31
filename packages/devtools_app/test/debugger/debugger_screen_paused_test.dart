@@ -79,6 +79,10 @@ void main() {
     };
   }
 
+  setUp(() {
+    debuggerController.appState.setPaused(true);
+  });
+
   testWidgetsWithWindowSize(
     'debugger controls paused',
     windowSize,
