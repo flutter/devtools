@@ -93,7 +93,7 @@ class ServiceConnectionManager {
   late final ServiceExtensionManager _serviceExtensionManager;
 
   ConnectedApp? connectedApp;
-  AppState? appState;
+  late AppState appState;
 
   VmServiceWrapper? service;
   VM? vm;
@@ -365,7 +365,6 @@ class ServiceConnectionManager {
     vm = null;
     sdkVersion = null;
     connectedApp = null;
-    appState = null;
     _cachedMainRootLibKey = null;
     _cachedMainRootLibValue = null;
     generateDevToolsTitle();
