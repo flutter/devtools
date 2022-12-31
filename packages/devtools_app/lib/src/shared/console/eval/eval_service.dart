@@ -12,7 +12,7 @@ import '../../globals.dart';
 import '../../primitives/auto_dispose.dart';
 
 class EvalService extends DisposableController with AutoDisposeControllerMixin {
-  AppState get appState => serviceManager.appState!;
+  AppState get appState => serviceManager.appState;
 
   VmServiceWrapper get _service {
     return serviceManager.service!;

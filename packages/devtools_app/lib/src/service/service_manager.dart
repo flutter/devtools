@@ -93,7 +93,7 @@ class ServiceConnectionManager {
   late final ServiceExtensionManager _serviceExtensionManager;
 
   ConnectedApp? connectedApp;
-  AppState? appState;
+  AppState appState = AppState();
 
   VmServiceWrapper? service;
   VM? vm;
@@ -204,6 +204,7 @@ class ServiceConnectionManager {
 
     connectedApp = ConnectedApp();
 
+    appState.dispose();
     appState = AppState();
 
     // It is critical we call vmServiceOpened on each manager class before
@@ -367,9 +368,6 @@ class ServiceConnectionManager {
     vm = null;
     sdkVersion = null;
     connectedApp = null;
-
-    appState?.dispose();
-    appState = null;
 
     _cachedMainRootLibKey = null;
     _cachedMainRootLibValue = null;
