@@ -26,7 +26,6 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
     this.availableServices = const [],
     this.availableLibraries = const [],
   }) : service = service ?? createFakeService() {
-    appState = AppState();
     for (var screenId in screenIds) {
       when(errorBadgeManager.erroredItemsForPage(screenId)).thenReturn(
         FixedValueListenable(LinkedHashMap<String, DevToolsError>()),
@@ -91,6 +90,9 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
 
   @override
   ConnectedApp? connectedApp = MockConnectedApp();
+
+  @override
+  AppState appState = AppState();
 
   @override
   final ConsoleService consoleService = ConsoleService();
