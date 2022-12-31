@@ -47,7 +47,7 @@ class ExpressionEvalFieldState extends State<ExpressionEvalField>
 
   final evalTextFieldKey = GlobalKey(debugLabel: 'evalTextFieldKey');
 
-  final evalService = EvalService();
+  final _evalService = EvalService();
 
   @override
   void initState() {
@@ -157,7 +157,7 @@ class ExpressionEvalFieldState extends State<ExpressionEvalField>
       final matches =
           parts.activeWord.startsWith(_activeWord) && _activeWord.isNotEmpty
               ? _filterMatches(_matches, parts.activeWord)
-              : await widget.getAutoCompleteResults(parts, evalService);
+              : await widget.getAutoCompleteResults(parts, _evalService);
 
       _matches = matches;
       _activeWord = parts.activeWord;
@@ -311,13 +311,13 @@ class ExpressionEvalFieldState extends State<ExpressionEvalField>
     serviceManager.consoleService.appendStdio('> $expressionText\n');
     setState(() {
       historyPosition = -1;
-      evalService.appState.evalHistory.pushEvalHistory(expressionText);
+      _evalService.appState.evalHistory.pushEvalHistory(expressionText);
     });
 
     try {
       // Response is either a ErrorRef, InstanceRef, or Sentinel.
-      final isolateRef = evalService.appState.isolateRef.value;
-      final response = await evalService.evalAtCurrentFrame(expressionText);
+      final isolateRef = _evalService.appState.isolateRef.value;
+      final response = await _evalService.evalAtCurrentFrame(expressionText);
 
       // Display the response to the user.
       if (response is InstanceRef) {
@@ -363,7 +363,7 @@ class ExpressionEvalFieldState extends State<ExpressionEvalField>
     super.dispose();
   }
 
-  EvalHistory get _evalHistory => evalService.appState.evalHistory;
+  EvalHistory get _evalHistory => _evalService.appState.evalHistory;
 
   void _historyNavUp() {
     if (!_evalHistory.canNavigateUp) {
