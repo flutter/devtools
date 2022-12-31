@@ -161,8 +161,6 @@ class ConnectedApp {
     generateDevToolsTitle();
     initialized.complete(true);
   }
-
-  final appState = AppState();
 }
 
 /// Extension methods for the [ConnectedApp] class.
@@ -265,4 +263,10 @@ class AppState {
   final EvalHistory evalHistory = EvalHistory();
 
   final cache = AutocompleteCache();
+
+  void reset() {
+    setIsolateRef(null);
+    setPaused(false);
+    setVariables([]);
+  }
 }

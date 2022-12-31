@@ -26,6 +26,7 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
     this.availableServices = const [],
     this.availableLibraries = const [],
   }) : service = service ?? createFakeService() {
+    appState = AppState();
     for (var screenId in screenIds) {
       when(errorBadgeManager.erroredItemsForPage(screenId)).thenReturn(
         FixedValueListenable(LinkedHashMap<String, DevToolsError>()),

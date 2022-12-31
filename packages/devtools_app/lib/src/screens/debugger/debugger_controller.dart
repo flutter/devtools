@@ -60,12 +60,13 @@ class DebuggerController extends DisposableController
 
   bool _firstDebuggerScreenLoaded = false;
 
-  AppState get appState => serviceManager.connectedApp!.appState;
+  AppState get appState => serviceManager.appState!;
 
   void _updateCurrentFrame() {
-    final frame = _selectedStackFrame.value?.frame ??
-        _stackFramesWithLocation.value.safeFirst?.frame;
-    appState.setCurrentFrame(frame);
+    appState.setCurrentFrame(
+      _selectedStackFrame.value?.frame ??
+          _stackFramesWithLocation.value.safeFirst?.frame,
+    );
   }
 
   /// Callback to be called when the debugger screen is first loaded.

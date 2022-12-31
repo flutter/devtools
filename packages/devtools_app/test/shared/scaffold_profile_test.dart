@@ -26,6 +26,7 @@ void main() {
   when(mockServiceManager.connectedState).thenReturn(
     ValueNotifier<ConnectedState>(const ConnectedState(false)),
   );
+  when(mockServiceManager.appState).thenReturn(AppState());
 
   final mockErrorBadgeManager = MockErrorBadgeManager();
   when(mockServiceManager.errorBadgeManager).thenReturn(mockErrorBadgeManager);
@@ -45,12 +46,11 @@ void main() {
       final mockConnectedApp = MockConnectedAppLegacy();
       when(mockConnectedApp.isFlutterAppNow).thenReturn(true);
       when(mockConnectedApp.isProfileBuildNow).thenReturn(true);
-      when(mockConnectedApp.appState).thenReturn(AppState());
       when(mockServiceManager.connectedAppInitialized).thenReturn(true);
       when(mockServiceManager.connectedApp).thenReturn(mockConnectedApp);
       final mockDebuggerController = MockDebuggerController();
 
-      mockConnectedApp.appState.setPaused(true);
+      mockServiceManager.appState!.setPaused(true);
 
       await tester.pumpWidget(
         wrapWithControllers(

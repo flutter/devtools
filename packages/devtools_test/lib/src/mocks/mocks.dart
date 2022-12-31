@@ -293,7 +293,6 @@ void mockConnectedApp(
   // Initialized.
   when(connectedApp.connectedAppInitialized).thenReturn(true);
   when(connectedApp.initialized).thenReturn(Completer()..complete(true));
-  when(connectedApp.appState).thenReturn(AppState());
 }
 
 void mockFlutterVersion(
