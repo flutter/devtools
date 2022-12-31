@@ -43,13 +43,15 @@ void main() {
   testWidgets(
     'displays floating debugger controls',
     (WidgetTester tester) async {
+      final appState = AppState();
       final mockConnectedApp = MockConnectedAppLegacy();
       when(mockConnectedApp.isFlutterAppNow).thenReturn(true);
       when(mockConnectedApp.isProfileBuildNow).thenReturn(false);
       when(mockServiceManager.connectedAppInitialized).thenReturn(true);
       when(mockServiceManager.connectedApp).thenReturn(mockConnectedApp);
+      when(mockServiceManager.appState).thenReturn(appState);
       final mockDebuggerController = MockDebuggerController();
-
+      when(mockDebuggerController.appState).thenReturn(appState);
       mockServiceManager.appState.setPaused(true);
 
       await tester.pumpWidget(

@@ -8,6 +8,7 @@ import 'package:devtools_app/src/service/service_extensions.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/service/service_registrations.dart';
 import 'package:devtools_app/src/shared/config_specific/ide_theme/ide_theme.dart';
+import 'package:devtools_app/src/shared/connected_app.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_app/src/shared/notifications.dart';
 import 'package:devtools_app/src/shared/primitives/message_bus.dart';
@@ -22,6 +23,7 @@ void main() {
   final mockServiceManager = MockServiceConnectionManager();
   when(mockServiceManager.serviceExtensionManager)
       .thenReturn(FakeServiceExtensionManager());
+  when(mockServiceManager.appState).thenReturn(AppState());
   setGlobal(ServiceConnectionManager, mockServiceManager);
   setGlobal(NotificationService, NotificationService());
 
