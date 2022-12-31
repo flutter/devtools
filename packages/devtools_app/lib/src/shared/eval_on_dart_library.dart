@@ -13,9 +13,9 @@ import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart' hide Error;
 import 'package:vm_service/vm_service.dart' as vm_service;
 
-import '../screens/inspector/inspector_service.dart';
 import '../service/vm_service_wrapper.dart';
 import 'config_specific/logger/logger.dart';
+import 'console/eval/inspector_service.dart';
 import 'globals.dart';
 import 'primitives/auto_dispose.dart';
 

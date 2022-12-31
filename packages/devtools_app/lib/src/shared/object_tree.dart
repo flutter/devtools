@@ -12,9 +12,9 @@ import 'package:stack_trace/stack_trace.dart' as stack_trace;
 import 'package:vm_service/vm_service.dart';
 
 import '../screens/debugger/debugger_model.dart';
-import '../screens/inspector/diagnostics_node.dart';
-import '../screens/inspector/inspector_service.dart';
 import 'config_specific/logger/logger.dart';
+import 'console/eval/diagnostics_node.dart';
+import 'console/eval/inspector_service.dart';
 import 'globals.dart';
 import 'primitives/trees.dart';
 import 'primitives/utils.dart';

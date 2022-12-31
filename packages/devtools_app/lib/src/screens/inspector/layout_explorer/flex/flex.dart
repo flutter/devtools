@@ -8,12 +8,12 @@ import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+import '../../../../shared/console/eval/diagnostics_node.dart';
+import '../../../../shared/console/eval/inspector_service.dart';
 import '../../../../shared/primitives/math_utils.dart';
 import '../../../../shared/theme.dart';
-import '../../diagnostics_node.dart';
 import '../../inspector_controller.dart';
 import '../../inspector_data_models.dart';
-import '../../inspector_service.dart';
 import '../ui/arrow.dart';
 import '../ui/free_space.dart';
 import '../ui/layout_explorer_widget.dart';

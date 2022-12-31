@@ -12,6 +12,8 @@ import 'package:vm_service/vm_service.dart' hide Stack;
 
 import '../../shared/common_widgets.dart';
 import '../../shared/config_specific/logger/logger.dart';
+import '../../shared/console/primitives/source_location.dart';
+import '../../shared/console/widgets/expandable_variable.dart';
 import '../../shared/dialogs.dart';
 import '../../shared/globals.dart';
 import '../../shared/history_viewport.dart';
@@ -34,7 +36,6 @@ import 'debugger_controller.dart';
 import 'debugger_model.dart';
 import 'file_search.dart';
 import 'key_sets.dart';
-import 'variables.dart';
 
 final debuggerCodeViewSearchKey =
     GlobalKey(debugLabel: 'DebuggerCodeViewSearchKey');
@@ -1153,8 +1154,8 @@ class _LineItemState extends State<LineItem>
 
     if (word != '') {
       try {
-        final response = await controller.evalAtCurrentFrame(word);
-        final isolateRef = controller.isolateRef;
+        final response = await controller.evalService.evalAtCurrentFrame(word);
+        final isolateRef = controller.isolateRef.value;
         if (response is! InstanceRef) return null;
         final variable = DartObjectNode.fromValue(
           value: response,
@@ -1165,7 +1166,6 @@ class _LineItemState extends State<LineItem>
           title: word,
           contents: Material(
             child: ExpandableVariable(
-              debuggerController: controller,
               variable: variable,
             ),
           ),
