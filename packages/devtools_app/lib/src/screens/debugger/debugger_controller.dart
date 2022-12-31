@@ -60,7 +60,7 @@ class DebuggerController extends DisposableController
 
   bool _firstDebuggerScreenLoaded = false;
 
-  AppState get appState => serviceManager.appState;
+  AppState get appState => serviceManager.appState!;
 
   void _updateCurrentFrame() {
     appState.setCurrentFrame(

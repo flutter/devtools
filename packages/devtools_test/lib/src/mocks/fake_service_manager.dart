@@ -92,7 +92,7 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
   ConnectedApp? connectedApp = MockConnectedApp();
 
   @override
-  AppState appState = AppState();
+  AppState? appState = AppState();
 
   @override
   final ConsoleService consoleService = ConsoleService();

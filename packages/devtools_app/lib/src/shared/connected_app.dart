@@ -264,9 +264,9 @@ class AppState {
 
   final cache = AutocompleteCache();
 
-  void reset() {
-    setIsolateRef(null);
-    setPaused(false);
-    setVariables([]);
+  void dispose() {
+    _variables.dispose();
+    _isPaused.dispose();
+    _currentFrame.dispose();
   }
 }

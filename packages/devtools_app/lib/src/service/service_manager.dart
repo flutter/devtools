@@ -93,7 +93,7 @@ class ServiceConnectionManager {
   late final ServiceExtensionManager _serviceExtensionManager;
 
   ConnectedApp? connectedApp;
-  late AppState appState;
+  AppState? appState;
 
   VmServiceWrapper? service;
   VM? vm;
@@ -203,7 +203,9 @@ class ServiceConnectionManager {
     assert(_cachedMainRootLibValue == null);
 
     connectedApp = ConnectedApp();
+
     appState = AppState();
+
     // It is critical we call vmServiceOpened on each manager class before
     // performing any async operations. Otherwise, we may get end up with
     // race conditions where managers cannot listen for events soon enough.
@@ -365,6 +367,10 @@ class ServiceConnectionManager {
     vm = null;
     sdkVersion = null;
     connectedApp = null;
+
+    appState?.dispose();
+    appState = null;
+
     _cachedMainRootLibKey = null;
     _cachedMainRootLibValue = null;
     generateDevToolsTitle();

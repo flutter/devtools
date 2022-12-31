@@ -43,7 +43,7 @@ void main() {
     when(fakeServiceManager.errorBadgeManager.errorCountNotifier('debugger'))
         .thenReturn(ValueNotifier<int>(0));
     debuggerController = createMockDebuggerControllerWithDefaults();
-    when(debuggerController.appState).thenReturn(fakeServiceManager.appState);
+    when(debuggerController.appState).thenReturn(fakeServiceManager.appState!);
 
     _resetRef();
     _resetRoot();
@@ -130,7 +130,7 @@ void main() {
       final list = _buildParentListVariable(length: 380250);
       await buildVariablesTree(list);
 
-      final appState = serviceManager.appState;
+      final appState = serviceManager.appState!;
       appState.setVariables([list]);
 
       await pumpDebuggerScreen(tester, debuggerController);
@@ -189,7 +189,7 @@ void main() {
       await buildVariablesTree(map);
 
       final appState = serviceManager.appState;
-      appState.setVariables([map]);
+      appState!.setVariables([map]);
 
       await pumpDebuggerScreen(tester, debuggerController);
 
