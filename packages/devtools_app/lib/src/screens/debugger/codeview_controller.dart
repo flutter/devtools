@@ -461,6 +461,13 @@ class CodeViewSourceLocationNavigationState extends DevToolsNavigationState {
           state: state.state,
         );
 
+  static CodeViewSourceLocationNavigationState? fromState(
+    DevToolsNavigationState? state,
+  ) {
+    if (state?.kind != type) return null;
+    return CodeViewSourceLocationNavigationState._fromState(state!);
+  }
+
   static const _kScriptId = 'scriptId';
   static const _kUri = 'uri';
   static const _kLine = 'line';

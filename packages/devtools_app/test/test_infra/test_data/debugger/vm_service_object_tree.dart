@@ -27,7 +27,8 @@ final testClassRef = ClassRef(
   library: testLibRef,
   location: SourceLocation(
     script: testScript,
-    tokenPos: 0,
+    tokenPos: 10,
+    line: 10,
   ),
 );
 
@@ -45,11 +46,19 @@ final testClass = Class(
   location: testClassRef.location,
 );
 
-final testScript = Script(
-  uri: 'fooScript.dart',
-  library: testLibRef,
-  id: '1234',
-);
+// We need to invoke `Script.parse` to build the internal token position table.
+final testScript = Script.parse(
+  Script(
+    uri: 'fooScript.dart',
+    library: testLibRef,
+    id: '1234',
+    tokenPosTable: [
+      [10, 10, 1],
+      [20, 20, 1],
+      [30, 30, 1],
+    ],
+  ).toJson(),
+)!;
 
 final testFunction = Func(
   name: 'fooFunction',
@@ -57,14 +66,22 @@ final testFunction = Func(
   isStatic: false,
   isConst: false,
   implicit: false,
-  location: SourceLocation(script: testScript),
+  location: SourceLocation(
+    script: testScript,
+    tokenPos: 20,
+    line: 20,
+  ),
   signature: InstanceRef(id: '1234'),
   id: '1234',
 );
 
 final testField = Field(
   name: 'fooField',
-  location: SourceLocation(script: testScript),
+  location: SourceLocation(
+    script: testScript,
+    tokenPos: 30,
+    line: 30,
+  ),
   declaredType: InstanceRef(id: '1234'),
   owner: testClassRef,
   isStatic: false,

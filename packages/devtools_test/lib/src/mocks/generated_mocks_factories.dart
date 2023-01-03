@@ -64,7 +64,7 @@ MockProgramExplorerController
 }
 
 MockCodeViewController createMockCodeViewControllerWithDefaults({
-  MockProgramExplorerController? mockProgramExplorerController,
+  ProgramExplorerController? programExplorerController,
 }) {
   final codeViewController = MockCodeViewController();
   when(codeViewController.fileExplorerVisible).thenReturn(ValueNotifier(false));
@@ -80,10 +80,10 @@ MockCodeViewController createMockCodeViewControllerWithDefaults({
   when(codeViewController.searchInProgressNotifier)
       .thenReturn(const FixedValueListenable<bool>(false));
   when(codeViewController.matchIndex).thenReturn(ValueNotifier<int>(0));
-  mockProgramExplorerController ??=
+  programExplorerController ??=
       createMockProgramExplorerControllerWithDefaults();
   when(codeViewController.programExplorerController).thenReturn(
-    mockProgramExplorerController,
+    programExplorerController,
   );
   when(codeViewController.showProfileInformation).thenReturn(
     const FixedValueListenable(false),
