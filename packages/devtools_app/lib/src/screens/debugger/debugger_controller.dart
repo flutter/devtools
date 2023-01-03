@@ -10,7 +10,6 @@ import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../service/vm_service_wrapper.dart';
-import '../../shared/connected_app.dart';
 import '../../shared/console/eval/eval_service.dart';
 import '../../shared/console/primitives/source_location.dart';
 import '../../shared/globals.dart';
@@ -60,10 +59,8 @@ class DebuggerController extends DisposableController
 
   bool _firstDebuggerScreenLoaded = false;
 
-  AppState get appState => serviceManager.appState;
-
   void _updateCurrentFrame() {
-    appState.setCurrentFrame(
+    serviceManager.appState.setCurrentFrame(
       _selectedStackFrame.value?.frame ??
           _stackFramesWithLocation.value.safeFirst?.frame,
     );
@@ -88,6 +85,8 @@ class DebuggerController extends DisposableController
     _hasTruncatedFrames.value = false;
     unawaited(_getStackOperation?.cancel());
     _getStackOperation = null;
+
+    final appState = serviceManager.appState;
 
     appState.setIsolateRef(null);
     appState.setPaused(false);
@@ -164,17 +163,18 @@ class DebuggerController extends DisposableController
   ValueListenable<String?> get exceptionPauseMode => _exceptionPauseMode;
 
   bool get isSystemIsolate =>
-      appState.isolateRef.value?.isSystemIsolate ?? false;
+      serviceManager.appState.isolateRef.value?.isSystemIsolate ?? false;
 
   String get _isolateRefId {
-    final id = appState.isolateRef.value?.id;
+    final id = serviceManager.appState.isolateRef.value?.id;
     if (id == null) return '';
     return id;
   }
 
   void _switchToIsolate(IsolateRef? ref) async {
-    appState.setIsolateRef(ref);
-    appState.setPaused(false);
+    serviceManager.appState
+      ..setIsolateRef(ref)
+      ..setPaused(false);
     await _pause(false);
 
     _clearCaches();
@@ -317,7 +317,7 @@ class DebuggerController extends DisposableController
     // ignore: unused_local_variable
     final status = reloadEvent.status;
 
-    final theIsolateRef = appState.isolateRef.value;
+    final theIsolateRef = serviceManager.appState.isolateRef.value;
     if (theIsolateRef == null) return;
     // Refresh the list of scripts.
     final previousScriptRefs = scriptManager.sortedScripts.value;
@@ -379,7 +379,7 @@ class DebuggerController extends DisposableController
     // serviceManager.isolateManager.selectedIsolateState.isPaused.value;
     // listening for changes there instead of having separate logic.
     await _getStackOperation?.cancel();
-    appState.setPaused(paused);
+    serviceManager.appState.setPaused(paused);
 
     _log.log('_pause(running: ${!paused})');
 
@@ -471,7 +471,7 @@ class DebuggerController extends DisposableController
   }
 
   Future<void> _populateScripts(Isolate isolate) async {
-    final theIsolateRef = appState.isolateRef.value;
+    final theIsolateRef = serviceManager.appState.isolateRef.value;
     if (theIsolateRef == null) return;
     final scriptRefs =
         await scriptManager.retrieveAndSortScripts(theIsolateRef);
@@ -519,7 +519,7 @@ class DebuggerController extends DisposableController
   void selectStackFrame(StackFrameAndSourcePosition? frame) {
     _selectedStackFrame.value = frame;
 
-    appState.setVariables(
+    serviceManager.appState.setVariables(
       frame != null ? _createVariablesForFrame(frame.frame) : [],
     );
 
@@ -539,7 +539,12 @@ class DebuggerController extends DisposableController
     }
 
     final variables = frame.vars!
-        .map((v) => DartObjectNode.create(v, appState.isolateRef.value))
+        .map(
+          (v) => DartObjectNode.create(
+            v,
+            serviceManager.appState.isolateRef.value,
+          ),
+        )
         .toList();
     // TODO(jacobr): would be nice to be able to remove this call to unawaited
     // but it would require a significant refactor.

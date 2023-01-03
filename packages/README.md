@@ -7,4 +7,4 @@ we declare the related fields always in the same order:
 
 1. Public getter for ValueListeneble
 2. Private ValueNotifier
-3. Public setter
+3. Public setter (when needed)
