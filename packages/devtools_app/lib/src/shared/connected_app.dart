@@ -240,6 +240,8 @@ class AutocompleteCache {
 }
 
 class AppState {
+  // TODO(CoderDake or polina-c): It might be good to move the isolateRef
+  // lifecycle code to this context from DebuggerController.
   ValueListenable<IsolateRef?> get isolateRef => _isolateRef;
   final _isolateRef = ValueNotifier<IsolateRef?>(null);
   void setIsolateRef(IsolateRef? value) {
