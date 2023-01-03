@@ -30,7 +30,7 @@ file.
 ### Announcing your changes
 
 If your improvement is user-facing, document it in
-[release-notes-next.md](packages/devtools_app/lib/src/framework/release_notes/release-notes-next.md).
+[NEXT_RELEASE_NOTES.md](tool/release_notes/NEXT_RELEASE_NOTES.md).
 
 ## Development prep
 
