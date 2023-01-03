@@ -5,8 +5,9 @@
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../../../../devtools_app.dart';
 import '../../../../shared/analytics/constants.dart';
+import '../../../../shared/common_widgets.dart';
+import '../../../../shared/primitives/utils.dart';
 
 typedef SampleObtainer = InstanceRef Function();
 
