@@ -69,6 +69,6 @@ jobs:
         run: |
           if [ "$HAS_CHANGED_RELEASE_NOTES" != "true" ] && [ "$HAS_RELEASE_NOTE_EXCEPTION_STRING" != "true" ] && [ "$IS_DEPENDABOT_PR" != "true" ] ; then
             echo "Release Preparedness check failed"
-            echo "::error file=$CURRENT_RELEASE_FILE_PATH,line=0,col=0,endColumn=0,title='Release Notes Weren\'t Modified'::Please add a release note entry to $CURRENT_RELEASE_FILE_PATH or an exception reason to your description using: \`RELEASE_NOTE_EXCEPTION=[reason goes here]\`"
+            echo "::error file=$CURRENT_RELEASE_FILE_PATH,line=0,col=0,endColumn=0,title='Release Notes were not Modified'::Please add a release note entry to $CURRENT_RELEASE_FILE_PATH or an exception reason to your description using: \`RELEASE_NOTE_EXCEPTION=[reason goes here]\`"
             exit 1
           fi
