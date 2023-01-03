@@ -3,21 +3,20 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../../../../../devtools_app.dart';
 import '../../../../shared/analytics/constants.dart';
-import '../../../../shared/common_widgets.dart';
 
 typedef SampleObtainer = InstanceRef Function();
 
 class InstanceSetView extends StatelessWidget {
   const InstanceSetView({
     super.key,
+    this.textStyle,
     required this.count,
     required this.sampleObtainer,
     required this.showMenu,
-    this.textStyle,
     required this.gaContext,
   }) : assert(showMenu == (sampleObtainer != null));
 
@@ -29,12 +28,10 @@ class InstanceSetView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final format = NumberFormat.decimalPattern();
-
     return Row(
       children: [
         Text(
-          format.format(count),
+          nf.format(count),
           style: textStyle,
         ),
         if (showMenu)
@@ -48,48 +45,33 @@ class InstanceSetView extends StatelessWidget {
   }
 }
 
+class _MenuForSubset extends StatelessWidget {
+  const _MenuForSubset(this.menuText);
+
+  final String menuText;
+
+  @override
+  Widget build(BuildContext context) {
+    return SubmenuButton(
+      menuChildren: <Widget>[
+        MenuItemButton(
+          onPressed: () => {},
+          child: const Text('Fields'),
+        ),
+        const MenuItemButton(
+          child: Text('Outgoing references'),
+        ),
+        const MenuItemButton(
+          child: Text('Incoming references'),
+        ),
+      ],
+      child: Text(menuText),
+    );
+  }
+}
+
 List<Widget> _menu() => [
-      SubmenuButton(
-        menuChildren: <Widget>[
-          MenuItemButton(
-            onPressed: () => print('get fields'),
-            child: const Text('Fields'),
-          ),
-          const MenuItemButton(
-            child: Text('Outgoing references'),
-          ),
-          const MenuItemButton(
-            child: Text('Incoming references'),
-          ),
-        ],
-        child: const Text('Store one instance as a console variable'),
-      ),
-      const SubmenuButton(
-        menuChildren: <Widget>[
-          MenuItemButton(
-            child: Text('Fields'),
-          ),
-          MenuItemButton(
-            child: Text('Outgoing references'),
-          ),
-          MenuItemButton(
-            child: Text('Incoming references'),
-          ),
-        ],
-        child: Text('Store 100 instances as a console variable'),
-      ),
-      const SubmenuButton(
-        menuChildren: <Widget>[
-          MenuItemButton(
-            child: Text('Fields'),
-          ),
-          MenuItemButton(
-            child: Text('Outgoing references'),
-          ),
-          MenuItemButton(
-            child: Text('Incoming references'),
-          ),
-        ],
-        child: Text('Store all instances as a console variable'),
-      ),
+      const _MenuForSubset('Store one instance as a console variable'),
+      const _MenuForSubset('Store first 100 instances as a console variable'),
+      const _MenuForSubset('Store all instances as a console variable'),
     ];

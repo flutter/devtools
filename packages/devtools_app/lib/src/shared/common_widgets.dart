@@ -2609,7 +2609,7 @@ class ContextMenuButton extends StatelessWidget {
       builder:
           (BuildContext context, MenuController controller, Widget? child) {
         return SizedBox(
-          width: ContextMenuButton.width,
+          width: width,
           child: TextButton(
             child: Text('⋮', style: style, textAlign: TextAlign.center),
             onPressed: () {
