@@ -21,7 +21,7 @@ TODO: Remove this section if there are not any general updates.
 TODO: Remove this section if there are not any general updates.
 
 ## Debugger updates
-TODO: Remove this section if there are not any general updates.
+- Added support for browser navigation history when navigating using the `File Explorer`.
 
 ## Network profiler updates
 TODO: Remove this section if there are not any general updates.
