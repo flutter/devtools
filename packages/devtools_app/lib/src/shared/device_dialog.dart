@@ -7,12 +7,12 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../primitives/auto_dispose_mixin.dart';
-import '../primitives/utils.dart';
 import 'common_widgets.dart';
 import 'connected_app.dart';
 import 'dialogs.dart';
 import 'globals.dart';
+import 'primitives/auto_dispose.dart';
+import 'primitives/utils.dart';
 import 'routing.dart';
 import 'table/table.dart';
 import 'table/table_data.dart';
@@ -117,7 +117,7 @@ class _VMFlagsDialogState extends State<VMFlagsDialog> with AutoDisposeMixin {
     super.initState();
 
     filterController = TextEditingController();
-    filterController.addListener(() {
+    addAutoDisposeListener(filterController, () {
       setState(() {
         _refilter();
       });
@@ -141,12 +141,9 @@ class _VMFlagsDialogState extends State<VMFlagsDialog> with AutoDisposeMixin {
   void _refilter() {
     final filter = filterController.text.trim().toLowerCase();
 
-    if (filter.isEmpty) {
-      filteredFlags = flags;
-    } else {
-      filteredFlags =
-          flags.where((flag) => flag.filterText.contains(filter)).toList();
-    }
+    filteredFlags = filter.isEmpty
+        ? flags
+        : flags.where((flag) => flag.filterText.contains(filter)).toList();
   }
 
   @override

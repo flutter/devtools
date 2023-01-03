@@ -8,14 +8,14 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
-import '../../charts/flame_chart.dart';
-import '../../primitives/simple_items.dart';
-import '../../primitives/trace_event.dart';
-import '../../primitives/trees.dart';
-import '../../primitives/utils.dart';
+import '../../shared/charts/flame_chart.dart';
 import '../../shared/globals.dart';
+import '../../shared/primitives/simple_items.dart';
+import '../../shared/primitives/trace_event.dart';
+import '../../shared/primitives/trees.dart';
+import '../../shared/primitives/utils.dart';
 import '../../shared/profiler_utils.dart';
-import '../../ui/search.dart';
+import '../../shared/ui/search.dart';
 import '../vm_developer/vm_service_private_extensions.dart';
 import 'cpu_profile_controller.dart';
 import 'cpu_profile_transformer.dart';
@@ -182,24 +182,25 @@ class CpuProfileData {
 
     // Initialize all stack frames.
     final stackFrames = <String, CpuStackFrame>{};
-    final Map<String, dynamic> stackFramesJson =
-        jsonDecode(jsonEncode(json[stackFramesKey] ?? <String, dynamic>{}));
-    for (final MapEntry<String, dynamic> entry in stackFramesJson.entries) {
-      final stackFrameJson = entry.value;
-      final resolvedUrl = stackFrameJson[resolvedUrlKey] ?? '';
-      final packageUri = stackFrameJson[resolvedPackageUriKey] ?? resolvedUrl;
+    final Map<String, Object?> stackFramesJson =
+        jsonDecode(jsonEncode(json[stackFramesKey] ?? <String, Object?>{}));
+    for (final entry in stackFramesJson.entries) {
+      final stackFrameJson = entry.value as Map<String, Object?>;
+      final resolvedUrl = (stackFrameJson[resolvedUrlKey] as String?) ?? '';
+      final packageUri =
+          (stackFrameJson[resolvedPackageUriKey] as String?) ?? resolvedUrl;
       final stackFrame = CpuStackFrame(
         id: entry.key,
-        name: getSimpleStackFrameName(stackFrameJson[nameKey]),
-        verboseName: stackFrameJson[nameKey],
-        category: stackFrameJson[categoryKey],
+        name: getSimpleStackFrameName(stackFrameJson[nameKey] as String?),
+        verboseName: stackFrameJson[nameKey] as String?,
+        category: stackFrameJson[categoryKey] as String?,
         // If the user is on a version of Flutter where resolvedUrl is not
         // included in the response, this will be null. If the frame is a native
         // frame, the this will be the empty string.
         rawUrl: resolvedUrl,
         packageUri: packageUri,
-        sourceLine: stackFrameJson[sourceLineKey],
-        parentId: stackFrameJson[parentIdKey] ?? rootId,
+        sourceLine: stackFrameJson[sourceLineKey] as int?,
+        parentId: (stackFrameJson[parentIdKey] as String?) ?? rootId,
         profileMetaData: profileMetaData,
         isTag: false,
       );
@@ -453,7 +454,7 @@ class CpuProfileData {
     final filteredCpuSamples = <CpuSampleEvent>[];
     void includeSampleOrWalkUp(
       CpuSampleEvent sample,
-      Map<String, Object> sampleJson,
+      Map<String, Object?> sampleJson,
       CpuStackFrame stackFrame,
     ) {
       if (includeFilter(stackFrame)) {
@@ -472,7 +473,7 @@ class CpuProfileData {
     }
 
     for (final sample in originalData.cpuSamples) {
-      final sampleJson = Map<String, Object>.from(sample.json);
+      final sampleJson = Map<String, Object?>.from(sample.json);
       final leafStackFrame = originalData.stackFrames[sample.leafId]!;
       includeSampleOrWalkUp(sample, sampleJson, leafStackFrame);
     }
@@ -560,7 +561,7 @@ class CpuProfileData {
     // of all stacks, regardless of entrypoint. This should never be seen in the
     // final output from this method.
     const int kRootId = 0;
-    final traceObject = <String, dynamic>{
+    final traceObject = <String, Object?>{
       CpuProfileData.sampleCountKey: cpuSamples.sampleCount,
       CpuProfileData.samplePeriodKey: cpuSamples.samplePeriod,
       CpuProfileData.stackDepthKey: cpuSamples.maxStackDepth,
@@ -584,7 +585,7 @@ class CpuProfileData {
       if (tree.frameId == kRootId) {
         continue;
       }
-      traceObject[CpuProfileData.traceEventsKey].add({
+      (traceObject[CpuProfileData.traceEventsKey]! as List<Object?>).add({
         'ph': 'P', // kind = sample event
         'name': '', // Blank to keep about:tracing happy
         'pid': cpuSamples.pid,
@@ -691,7 +692,7 @@ class CpuProfileData {
     if (!processed) return <CpuStackFrame>[];
     return _callTreeRoots ??= [
       // Don't display the root node.
-      ..._cpuProfileRoot.children.map((e) => e.deepCopy())
+      ..._cpuProfileRoot.children.map((e) => e.deepCopy()),
     ];
   }
 
@@ -763,8 +764,8 @@ class CpuProfileData {
   bool get isEmpty => profileMetaData.sampleCount == 0;
 
   @visibleForTesting
-  Map<String, dynamic> get stackFramesJson {
-    final framesJson = <String, dynamic>{};
+  Map<String, Object?> get stackFramesJson {
+    final framesJson = <String, Object?>{};
     for (final sf in stackFrames.values) {
       framesJson.addAll(sf.toJson);
     }
@@ -1036,7 +1037,7 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
       category == other.category &&
       sourceLine == other.sourceLine;
 
-  Map<String, Object> get toJson => {
+  Map<String, Object?> get toJson => {
         id: {
           CpuProfileData.nameKey: verboseName,
           CpuProfileData.categoryKey: category,
@@ -1044,7 +1045,7 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
           CpuProfileData.resolvedPackageUriKey: packageUri,
           CpuProfileData.sourceLineKey: sourceLine,
           if (parentId != null) CpuProfileData.parentIdKey: parentId,
-        }
+        },
       };
 
   @override
@@ -1084,7 +1085,7 @@ int stackFrameIdCompare(String a, String b) {
     final int aId = int.parse(a.substring(aDashIndex + 1));
     final int bId = int.parse(b.substring(bDashIndex + 1));
     return aId.compareTo(bId);
-  } catch (e) {
+  } catch (e, stackTrace) {
     String error = 'invalid stack frame ';
     if (aDashIndex == -1 && bDashIndex != -1) {
       error += 'id [$a]';
@@ -1093,7 +1094,7 @@ int stackFrameIdCompare(String a, String b) {
     } else {
       error += 'ids [$a, $b]';
     }
-    throw error;
+    Error.throwWithStackTrace(error, stackTrace);
   }
 }
 
@@ -1223,16 +1224,22 @@ class _CpuProfileTimelineTree {
   final bool isCodeTree;
   int frameId = kNoFrameId;
 
-  dynamic get _function {
+  vm_service.FuncRef? get _function {
     if (isCodeTree) {
       return _code.function!;
     }
-    return samples.functions![index].function;
+    final function = samples.functions![index].function;
+    if (function is vm_service.FuncRef) {
+      // TODO(jacobr): is this really anything else? The VMService API isn't
+      // clear.
+      return function;
+    }
+    return null;
   }
 
   vm_service.CodeRef get _code => samples.codes[index].code!;
 
-  String? get name => isCodeTree ? _code.name : _function.name;
+  String? get name => isCodeTree ? _code.name : _function?.name;
 
   String? get className {
     if (isCodeTree) return null;
@@ -1251,13 +1258,13 @@ class _CpuProfileTimelineTree {
       // TODO(bkonyi): not sure if this is a resolved URL or not, but it's not
       // critical since this is only displayed when VM developer mode is
       // enabled.
-      _function.location?.script!.uri
+      _function?.location?.script!.uri
       : samples.functions![index].resolvedUrl;
 
   int? get sourceLine {
     final function = _function;
     try {
-      return function.location?.line;
+      return function?.location?.line;
     } catch (_) {
       // Fail gracefully if `function` has no getter `location` (for example, if
       // the function is an instance of [NativeFunction]) or generally if
@@ -1303,7 +1310,7 @@ extension CpuSamplesExtension on vm_service.CpuSamples {
     int kRootId = 0,
     bool buildCodeTree = false,
   }) {
-    final traceObject = <String, dynamic>{};
+    final traceObject = <String, Object?>{};
     int nextId = kRootId;
 
     String? nameForStackFrame(_CpuProfileTimelineTree current) {

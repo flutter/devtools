@@ -4,9 +4,9 @@
 
 import 'package:flutter/material.dart';
 
-import '../primitives/history_manager.dart';
 import '../screens/debugger/common.dart';
 import 'common_widgets.dart';
+import 'primitives/history_manager.dart';
 import 'theme.dart';
 
 /// A [Widget] that allows for displaying content based on the current state of a
@@ -58,27 +58,11 @@ class _HistoryViewportState<T> extends State<HistoryViewport<T>> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return OutlineDecoration(
-      child: ValueListenableBuilder<T?>(
-        valueListenable: widget.history.current,
-        builder: (context, T? current, _) {
-          return Column(
-            children: [
-              _buildTitle(context, theme),
-              widget.contentBuilder(context, current),
-            ],
-          );
-        },
-      ),
-    );
-  }
-
-  Widget _buildTitle(BuildContext context, ThemeData theme) {
     final title = widget.generateTitle == null
         ? '  '
         : widget.generateTitle!(widget.history.current.value);
     final defaultTitleStyle = theme.textTheme.titleSmall ?? const TextStyle();
-    return debuggerSectionTitle(
+    final titleWidget = debuggerSectionTitle(
       theme,
       child: Row(
         children: [
@@ -149,6 +133,19 @@ class _HistoryViewportState<T> extends State<HistoryViewport<T>> {
             ],
           ],
         ],
+      ),
+    );
+    return OutlineDecoration(
+      child: ValueListenableBuilder<T?>(
+        valueListenable: widget.history.current,
+        builder: (context, T? current, _) {
+          return Column(
+            children: [
+              titleWidget,
+              widget.contentBuilder(context, current),
+            ],
+          );
+        },
       ),
     );
   }

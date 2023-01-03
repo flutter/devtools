@@ -10,8 +10,6 @@ The steps were tested for Mac. They may require adjustments for other platforms.
 
 1. [Configure](https://docs.flutter.dev/get-started/install) Dart or Flutter.
 
-2. Install `jq`: `brew install jq`
-
 ## Setup and start
 
 1. In your terminal `cd` to a folder where you want to clone devtools, and that does not have subfolder `devtools` yet.

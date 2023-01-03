@@ -8,10 +8,10 @@ import 'dart:core';
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart' hide Error;
 
-import '../../primitives/auto_dispose.dart';
 import '../../service/vm_service_wrapper.dart';
 import '../../shared/connected_app.dart';
 import '../../shared/globals.dart';
+import '../../shared/primitives/auto_dispose.dart';
 
 class TimelineStreamManager extends Disposer {
   static const dartTimelineStream = 'Dart';
@@ -102,7 +102,7 @@ class TimelineStreamManager extends Disposer {
   /// This method is responsible for updating the value of
   /// [TimelineStream.recorded] for each stream to match the value on the VM.
   @visibleForTesting
-  void handleTimelineEvent(Event event) async {
+  void handleTimelineEvent(Event event) {
     if (event.kind == EventKind.kTimelineStreamSubscriptionsUpdate) {
       final newRecordedStreams = event.updatedStreams ?? <String>[];
       for (final stream in _streams.values) {

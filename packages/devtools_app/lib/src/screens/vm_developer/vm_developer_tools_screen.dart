@@ -5,8 +5,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-import '../../primitives/auto_dispose_mixin.dart';
-import '../../primitives/simple_items.dart';
+import '../../shared/primitives/auto_dispose.dart';
+import '../../shared/primitives/simple_items.dart';
 import '../../shared/screen.dart';
 import '../../shared/theme.dart';
 import '../../shared/utils.dart';
@@ -40,15 +40,15 @@ abstract class VMDeveloperView {
 }
 
 class VMDeveloperToolsScreen extends Screen {
-  const VMDeveloperToolsScreen()
+  VMDeveloperToolsScreen()
       : super.conditional(
           id: id,
-          title: 'VM Tools',
+          title: ScreenMetaData.vmTools.title,
           icon: Icons.settings_applications,
           requiresVmDeveloperMode: true,
         );
 
-  static const id = ScreenIds.vmTools;
+  static final id = ScreenMetaData.vmTools.id;
 
   @override
   ValueListenable<bool> get showIsolateSelector =>
@@ -100,7 +100,7 @@ class _VMDeveloperToolsScreenState extends State<VMDeveloperToolsScreenBody>
                     NavigationRailDestination(
                       label: Text(view.title),
                       icon: Icon(view.icon),
-                    )
+                    ),
                 ],
               ),
             Expanded(
@@ -112,11 +112,11 @@ class _VMDeveloperToolsScreenState extends State<VMDeveloperToolsScreenBody>
                   index: selectedIndex,
                   children: [
                     for (final view in VMDeveloperToolsScreenBody.views)
-                      view.build(context)
+                      view.build(context),
                   ],
                 ),
               ),
-            )
+            ),
           ],
         );
       },

@@ -2,15 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/screens/debugger/breakpoint_manager.dart';
 import 'package:devtools_app/src/screens/debugger/debugger_controller.dart';
 import 'package:devtools_app/src/screens/debugger/debugger_screen.dart';
 import 'package:devtools_app/src/screens/debugger/program_explorer_model.dart';
-import 'package:devtools_app/src/scripts/script_manager.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
+import 'package:devtools_app/src/shared/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_app/src/shared/notifications.dart';
+import 'package:devtools_app/src/shared/scripts/script_manager.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -45,7 +45,7 @@ void main() {
     mockCodeViewController: mockCodeViewController,
   );
   final scripts = [
-    ScriptRef(uri: 'package:test/script.dart', id: 'test-script')
+    ScriptRef(uri: 'package:test/script.dart', id: 'test-script'),
   ];
 
   when(scriptManager.sortedScripts).thenReturn(ValueNotifier(scripts));
@@ -79,13 +79,16 @@ void main() {
     );
   }
 
-  testWidgetsWithWindowSize('File Explorer visible', windowSize,
-      (WidgetTester tester) async {
-    await pumpDebuggerScreen(tester, debuggerController);
-    // One for the button and one for the title of the File Explorer view.
-    expect(find.text('File Explorer'), findsNWidgets(2));
+  testWidgetsWithWindowSize(
+    'File Explorer visible',
+    windowSize,
+    (WidgetTester tester) async {
+      await pumpDebuggerScreen(tester, debuggerController);
+      // One for the button and one for the title of the File Explorer view.
+      expect(find.text('File Explorer'), findsNWidgets(2));
 
-    // test for items in the libraries tree
-    expect(find.text(scripts.first.uri!.split('/').first), findsOneWidget);
-  });
+      // test for items in the libraries tree
+      expect(find.text(scripts.first.uri!.split('/').first), findsOneWidget);
+    },
+  );
 }

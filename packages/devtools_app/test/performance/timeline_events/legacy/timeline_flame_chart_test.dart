@@ -3,11 +3,11 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app/devtools_app.dart';
-import 'package:devtools_app/src/charts/flame_chart.dart';
-import 'package:devtools_app/src/config_specific/import_export/import_export.dart';
 import 'package:devtools_app/src/screens/performance/panes/timeline_events/legacy/event_details.dart';
 import 'package:devtools_app/src/screens/performance/panes/timeline_events/legacy/timeline_flame_chart.dart';
 import 'package:devtools_app/src/screens/performance/tabbed_performance_view.dart';
+import 'package:devtools_app/src/shared/charts/flame_chart.dart';
+import 'package:devtools_app/src/shared/config_specific/import_export/import_export.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -21,9 +21,9 @@ void main() {
   FakeServiceManager fakeServiceManager;
   late PerformanceController controller;
 
-  Future<void> _setUpServiceManagerWithTimeline(
+  void _setUpServiceManagerWithTimeline(
     Map<String, dynamic> timelineJson,
-  ) async {
+  ) {
     fakeServiceManager = FakeServiceManager(
       service: FakeServiceManager.createFakeService(
         timelineData: vm_service.Timeline.parse(timelineJson)!,
@@ -43,8 +43,8 @@ void main() {
   }
 
   group('$TimelineEventsView', () {
-    setUp(() async {
-      await _setUpServiceManagerWithTimeline(testTimelineJson);
+    setUp(() {
+      _setUpServiceManagerWithTimeline(testTimelineJson);
     });
 
     Future<void> pumpPerformanceScreenBody(
@@ -80,7 +80,7 @@ void main() {
     testWidgetsWithWindowSize('builds header with search field', windowSize,
         (WidgetTester tester) async {
       await tester.runAsync(() async {
-        await _setUpServiceManagerWithTimeline({});
+        _setUpServiceManagerWithTimeline({});
         await pumpPerformanceScreenBody(tester);
         await tester.pumpAndSettle();
         expect(find.byType(RefreshTimelineEventsButton), findsOneWidget);
@@ -92,7 +92,7 @@ void main() {
     testWidgetsWithWindowSize('can show help dialog', windowSize,
         (WidgetTester tester) async {
       await tester.runAsync(() async {
-        await _setUpServiceManagerWithTimeline({});
+        _setUpServiceManagerWithTimeline({});
         await pumpPerformanceScreenBody(tester);
         await tester.pumpAndSettle();
 
@@ -127,7 +127,7 @@ void main() {
     testWidgetsWithWindowSize('builds flame chart with no data', windowSize,
         (WidgetTester tester) async {
       await tester.runAsync(() async {
-        await _setUpServiceManagerWithTimeline({});
+        _setUpServiceManagerWithTimeline({});
         await pumpPerformanceScreenBody(tester, runAsync: true);
         await tester.pumpAndSettle();
         expect(
@@ -168,7 +168,6 @@ void main() {
         // Await delay for golden comparison.
         await tester.pumpAndSettle(const Duration(seconds: 2));
       },
-      // ignore: avoid_redundant_argument_values
       skip: kIsWeb,
     );
   });

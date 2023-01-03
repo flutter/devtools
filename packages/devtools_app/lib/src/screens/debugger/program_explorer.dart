@@ -8,11 +8,11 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart' hide Stack;
 
-import '../../primitives/auto_dispose_mixin.dart';
-import '../../primitives/utils.dart';
 import '../../shared/common_widgets.dart';
 import '../../shared/flex_split_column.dart';
 import '../../shared/globals.dart';
+import '../../shared/primitives/auto_dispose.dart';
+import '../../shared/primitives/utils.dart';
 import '../../shared/theme.dart';
 import '../../shared/tree.dart';
 import '../../shared/utils.dart';
@@ -90,7 +90,6 @@ class _ProgramExplorerRow extends StatelessWidget {
       final func = node.object as Func;
       final isInstanceMethod = func.owner is ClassRef;
       final subtext = _buildFunctionTypeText(
-        func.name,
         func.signature!,
         isInstanceMethod: isInstanceMethod,
       );
@@ -136,7 +135,6 @@ class _ProgramExplorerRow extends StatelessWidget {
   ///   - Baz(String, [int]) -> void
   ///   - Faz(String, {String? bar, required int baz}) -> int
   String _buildFunctionTypeText(
-    String? functionName,
     InstanceRef signature, {
     bool isInstanceMethod = false,
   }) {
@@ -174,7 +172,7 @@ class _ProgramExplorerRow extends StatelessWidget {
       if (paramType != null) {
         final paramTypeName = param.parameterType?.name;
         if (paramTypeName == null) {
-          buffer.write(_buildFunctionTypeText('Function', paramType));
+          buffer.write(_buildFunctionTypeText(paramType));
         } else {
           buffer.write(paramTypeName);
         }
@@ -201,7 +199,7 @@ class _ProgramExplorerRow extends StatelessWidget {
     if (returnType != null) {
       final returnTypeName = signature.returnType?.name;
       if (returnTypeName == null) {
-        buffer.write(_buildFunctionTypeText('Function', returnType));
+        buffer.write(_buildFunctionTypeText(returnType));
       } else {
         buffer.write(returnTypeName);
       }

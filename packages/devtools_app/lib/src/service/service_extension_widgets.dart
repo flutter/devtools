@@ -8,17 +8,17 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
-import '../analytics/analytics.dart' as ga;
-import '../config_specific/logger/logger.dart';
-import '../primitives/auto_dispose_mixin.dart';
-import '../primitives/message_bus.dart';
-import '../primitives/utils.dart';
+import '../shared/analytics/analytics.dart' as ga;
 import '../shared/common_widgets.dart';
+import '../shared/config_specific/logger/logger.dart';
 import '../shared/globals.dart';
+import '../shared/primitives/auto_dispose.dart';
+import '../shared/primitives/message_bus.dart';
+import '../shared/primitives/utils.dart';
 import '../shared/theme.dart';
+import '../shared/ui/hover.dart';
+import '../shared/ui/label.dart';
 import '../shared/utils.dart';
-import '../ui/hover.dart';
-import '../ui/label.dart';
 import 'service_extension_manager.dart';
 import 'service_extensions.dart';
 import 'service_registrations.dart';
@@ -103,7 +103,6 @@ class _ServiceExtensionButtonGroupState
     if (!listEquals(oldWidget.extensions, widget.extensions)) {
       cancelListeners();
       _initExtensionState();
-      setState(() {});
     }
     super.didUpdateWidget(oldWidget);
   }
@@ -120,7 +119,7 @@ class _ServiceExtensionButtonGroupState
         onPressed: available ? _onPressed : null,
         children: <Widget>[
           for (var extensionState in _extensionStates)
-            _buildExtension(extensionState)
+            _buildExtension(extensionState),
         ],
       ),
     );
@@ -263,7 +262,7 @@ class _RegisteredServiceExtensionButton extends _ServiceExtensionWidget {
     required this.serviceDescription,
     required this.action,
     required String completedText,
-    required String Function(dynamic error) describeError,
+    required String Function(Object? error) describeError,
   }) : super(completedText: completedText, describeError: describeError);
 
   /// The service to subscribe to.
@@ -346,7 +345,7 @@ class _ServiceExtensionToggle extends _ServiceExtensionWidget {
   const _ServiceExtensionToggle({
     Key? key,
     required this.service,
-    required String Function(dynamic) describeError,
+    required String Function(Object?) describeError,
   }) : super(
           key: key,
           // Don't show messages on success or when this toggle is in progress.
@@ -444,7 +443,7 @@ class ServiceExtensionCheckbox extends _ServiceExtensionWidget {
           ),
         );
 
-  static String _errorMessage(String extensionName, dynamic error) {
+  static String _errorMessage(String extensionName, Object? error) {
     return 'Failed to update $extensionName setting: $error';
   }
 
@@ -530,7 +529,7 @@ class _ServiceExtensionCheckboxState extends State<ServiceExtensionCheckbox>
                 gaScreenName: widget.serviceExtension.gaScreenName!,
                 gaSelectedItemDescription: widget.serviceExtension.gaDocsItem!,
                 padding: const EdgeInsets.symmetric(vertical: denseSpacing),
-              )
+              ),
           ],
         );
       },
@@ -745,11 +744,11 @@ class _ServiceExtensionCheckboxGroupButtonState
     );
   }
 
-  void _mouseEnter(PointerEnterEvent event) {
+  void _mouseEnter(PointerEnterEvent _) {
     _overlayHovered = true;
   }
 
-  void _mouseExit(PointerExitEvent event) {
+  void _mouseExit(PointerExitEvent _) {
     _overlayHovered = false;
   }
 
@@ -801,7 +800,8 @@ class _ServiceExtensionCheckboxGroupOverlay extends StatelessWidget {
             color: theme.focusColor,
             width: hoverCardBorderWidth,
           ),
-          borderRadius: BorderRadius.circular(defaultBorderRadius),
+          borderRadius:
+              const BorderRadius.all(Radius.circular(defaultBorderRadius)),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -840,7 +840,7 @@ abstract class _ServiceExtensionWidget extends StatefulWidget {
   /// Callback that describes any error that occurs.
   ///
   /// This will replace the [inProgressText] in a [SnackBar].
-  final String Function(dynamic error) describeError;
+  final String Function(Object? error) describeError;
 
   @override
   _ServiceExtensionMixin<_ServiceExtensionWidget> createState();
@@ -923,7 +923,8 @@ class ServiceExtensionTooltip extends StatelessWidget {
           color: focusColor,
           width: hoverCardBorderWidth,
         ),
-        borderRadius: BorderRadius.circular(defaultBorderRadius),
+        borderRadius:
+            const BorderRadius.all(Radius.circular(defaultBorderRadius)),
       ),
       textStyle: textStyle,
       child: child,

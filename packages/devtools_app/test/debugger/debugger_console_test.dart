@@ -3,13 +3,13 @@
 // found in the LICENSE file.
 
 import 'package:ansicolor/ansicolor.dart';
-import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/screens/debugger/console.dart';
 import 'package:devtools_app/src/screens/debugger/debugger_controller.dart';
-import 'package:devtools_app/src/scripts/script_manager.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
+import 'package:devtools_app/src/shared/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_app/src/shared/notifications.dart';
+import 'package:devtools_app/src/shared/scripts/script_manager.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -61,20 +61,22 @@ void main() {
     }
 
     testWidgetsWithWindowSize(
-        'Tapping the Console Clear button clears stdio.', windowSize,
-        (WidgetTester tester) async {
-      serviceManager.consoleService.clearStdio();
-      serviceManager.consoleService.appendStdio(_ansiCodesOutput());
+      'Tapping the Console Clear button clears stdio.',
+      windowSize,
+      (WidgetTester tester) async {
+        serviceManager.consoleService.clearStdio();
+        serviceManager.consoleService.appendStdio(_ansiCodesOutput());
 
-      await pumpConsole(tester, debuggerController);
+        await pumpConsole(tester, debuggerController);
 
-      final clearButton = find.byKey(DebuggerConsole.clearStdioButtonKey);
-      expect(clearButton, findsOneWidget);
+        final clearButton = find.byKey(DebuggerConsole.clearStdioButtonKey);
+        expect(clearButton, findsOneWidget);
 
-      await tester.tap(clearButton);
+        await tester.tap(clearButton);
 
-      expect(serviceManager.consoleService.stdio.value, isEmpty);
-    });
+        expect(serviceManager.consoleService.stdio.value, isEmpty);
+      },
+    );
 
     group('Clipboard', () {
       String _clipboardContents = '';
@@ -95,19 +97,22 @@ void main() {
       });
 
       testWidgetsWithWindowSize(
-          'Tapping the Copy to Clipboard button attempts to copy stdio to clipboard.',
-          windowSize, (WidgetTester tester) async {
-        await pumpConsole(tester, debuggerController);
+        'Tapping the Copy to Clipboard button attempts to copy stdio to clipboard.',
+        windowSize,
+        (WidgetTester tester) async {
+          await pumpConsole(tester, debuggerController);
 
-        final copyButton = find.byKey(DebuggerConsole.copyToClipboardButtonKey);
-        expect(copyButton, findsOneWidget);
+          final copyButton =
+              find.byKey(DebuggerConsole.copyToClipboardButtonKey);
+          expect(copyButton, findsOneWidget);
 
-        expect(_clipboardContents, isEmpty);
+          expect(_clipboardContents, isEmpty);
 
-        await tester.tap(copyButton);
+          await tester.tap(copyButton);
 
-        expect(_clipboardContents, equals(_expected));
-      });
+          expect(_clipboardContents, equals(_expected));
+        },
+      );
     });
   });
 }

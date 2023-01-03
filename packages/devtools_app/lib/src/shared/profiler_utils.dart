@@ -4,8 +4,8 @@
 
 import 'package:flutter/foundation.dart';
 
-import '../primitives/trees.dart';
-import '../primitives/utils.dart';
+import 'primitives/trees.dart';
+import 'primitives/utils.dart';
 
 mixin ProfilableDataMixin<T extends TreeNode<T>> on TreeNode<T> {
   ProfileMetaData get profileMetaData;

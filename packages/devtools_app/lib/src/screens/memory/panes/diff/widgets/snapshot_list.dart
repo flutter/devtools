@@ -6,10 +6,11 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
-import '../../../../../analytics/analytics.dart' as ga;
-import '../../../../../analytics/constants.dart' as analytics_constants;
-import '../../../../../primitives/auto_dispose_mixin.dart';
+import '../../../../../shared/analytics/analytics.dart' as ga;
+import '../../../../../shared/analytics/constants.dart' as gac;
 import '../../../../../shared/common_widgets.dart';
+import '../../../../../shared/primitives/auto_dispose.dart';
+import '../../../../../shared/primitives/utils.dart';
 import '../../../../../shared/table/table.dart';
 import '../../../../../shared/theme.dart';
 import '../controller/diff_pane_controller.dart';
@@ -58,22 +59,22 @@ class _ListControlPane extends StatelessWidget {
               icon: Icons.fiber_manual_record,
               tooltip: 'Take heap snapshot for the selected isolate',
               onPressed: controller.takeSnapshotHandler(
-                analytics_constants.MemoryEvent.diffTakeSnapshotControlPane,
+                gac.MemoryEvent.diffTakeSnapshotControlPane,
               ),
             ),
             ToolbarAction(
               icon: Icons.block,
               tooltip: 'Clear all snapshots',
               onPressed: clearAllEnabled
-                  ? () async {
+                  ? () {
                       ga.select(
-                        analytics_constants.memory,
-                        analytics_constants.MemoryEvent.diffClearSnapshots,
+                        gac.memory,
+                        gac.MemoryEvent.diffClearSnapshots,
                       );
-                      unawaited(controller.clearSnapshots());
+                      controller.clearSnapshots();
                     }
                   : null,
-            )
+            ),
           ],
         );
       },
@@ -95,6 +96,10 @@ class _SnapshotListTitle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theItem = item;
+    final theme = Theme.of(context);
+    final textStyle =
+        selected ? theme.selectedTextStyle : theme.regularTextStyle;
+
     return ValueListenableBuilder<bool>(
       valueListenable: theItem.isProcessing,
       builder: (_, isProcessing, __) => Row(
@@ -102,15 +107,34 @@ class _SnapshotListTitle extends StatelessWidget {
           const SizedBox(width: denseRowSpacing),
           if (theItem is SnapshotInstanceItem)
             Expanded(
-              child: Text(theItem.name, overflow: TextOverflow.ellipsis),
+              child: Text(
+                theItem.name,
+                overflow: TextOverflow.ellipsis,
+                style: textStyle,
+              ),
             ),
+          if (theItem is SnapshotInstanceItem && theItem.totalSize != null) ...[
+            Text(
+              prettyPrintBytes(
+                theItem.totalSize,
+                includeUnit: true,
+                kbFractionDigits: 1,
+              )!,
+              style: textStyle,
+            ),
+            const SizedBox(width: denseRowSpacing),
+          ],
           if (theItem is SnapshotDocItem)
-            const Expanded(
-              child: Text('Snapshots', overflow: TextOverflow.ellipsis),
+            Expanded(
+              child: Text(
+                'Snapshots',
+                overflow: TextOverflow.ellipsis,
+                style: textStyle,
+              ),
             ),
           if (isProcessing) ...[
             CenteredCircularProgressIndicator(size: smallProgressSize),
-            const SizedBox(width: denseRowSpacing)
+            const SizedBox(width: denseRowSpacing),
           ],
         ],
       ),
@@ -129,7 +153,7 @@ class _SnapshotListItems extends StatefulWidget {
 
 class _SnapshotListItemsState extends State<_SnapshotListItems>
     with AutoDisposeMixin {
-  final _headerHeight = 1.20 * defaultRowHeight;
+  final _headerHeight = 1.2 * defaultRowHeight;
   late final ScrollController _scrollController;
 
   @override
@@ -174,9 +198,10 @@ class _SnapshotListItemsState extends State<_SnapshotListItems>
         shrinkWrap: true,
         itemCount: snapshots.length,
         itemBuilder: (context, index) {
+          final selected = selectedIndex == index;
           return Container(
             height: _headerHeight,
-            color: selectedIndex == index
+            color: selected
                 ? Theme.of(context).colorScheme.selectedRowColor
                 : null,
             child: InkWell(
@@ -184,7 +209,7 @@ class _SnapshotListItemsState extends State<_SnapshotListItems>
               onTap: () => widget.controller.setSnapshotIndex(index),
               child: _SnapshotListTitle(
                 item: snapshots[index],
-                selected: index == selectedIndex,
+                selected: selected,
               ),
             ),
           );

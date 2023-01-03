@@ -2,15 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/screens/debugger/breakpoint_manager.dart';
 import 'package:devtools_app/src/screens/debugger/debugger_controller.dart';
 import 'package:devtools_app/src/screens/inspector/inspector_breadcrumbs.dart';
 import 'package:devtools_app/src/screens/inspector/inspector_controller.dart';
-import 'package:devtools_app/src/screens/inspector/inspector_tree.dart';
 import 'package:devtools_app/src/screens/inspector/inspector_tree_controller.dart';
-import 'package:devtools_app/src/screens/inspector/primitives/inspector_common.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
+import 'package:devtools_app/src/shared/config_specific/ide_theme/ide_theme.dart';
+import 'package:devtools_app/src/shared/console/eval/inspector_tree.dart';
+import 'package:devtools_app/src/shared/console/primitives/simple_items.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_app/src/shared/notifications.dart';
 import 'package:devtools_app/src/shared/preferences.dart';
@@ -73,37 +73,39 @@ void main() {
   }
 
   group('InspectorTreeController', () {
-    testWidgets('Row with negative index regression test',
-        (WidgetTester tester) async {
-      final treeController = InspectorTreeController()
-        ..config = InspectorTreeConfig(
-          summaryTree: false,
-          treeType: FlutterTreeType.widget,
-          onNodeAdded: (_, __) {},
-          onClientActiveChange: (_) {},
-        );
-      await pumpInspectorTree(tester, treeController: treeController);
+    testWidgets(
+      'Row with negative index regression test',
+      (WidgetTester tester) async {
+        final treeController = InspectorTreeController()
+          ..config = InspectorTreeConfig(
+            summaryTree: false,
+            treeType: FlutterTreeType.widget,
+            onNodeAdded: (_, __) {},
+            onClientActiveChange: (_) {},
+          );
+        await pumpInspectorTree(tester, treeController: treeController);
 
-      expect(treeController.getRow(const Offset(0, -100.0)), isNull);
-      expect(treeController.getRowOffset(-1), equals(0));
+        expect(treeController.getRow(const Offset(0, -100.0)), isNull);
+        expect(treeController.getRowOffset(-1), equals(0));
 
-      expect(treeController.getRow(const Offset(0, 0.0)), isNull);
-      expect(treeController.getRowOffset(0), equals(0));
+        expect(treeController.getRow(const Offset(0, 0.0)), isNull);
+        expect(treeController.getRowOffset(0), equals(0));
 
-      treeController.root = InspectorTreeNode()
-        ..appendChild(InspectorTreeNode());
+        treeController.root = InspectorTreeNode()
+          ..appendChild(InspectorTreeNode());
 
-      await pumpInspectorTree(tester, treeController: treeController);
+        await pumpInspectorTree(tester, treeController: treeController);
 
-      expect(treeController.getRow(const Offset(0, -20))!.index, 0);
-      expect(treeController.getRowOffset(-1), equals(0));
-      expect(treeController.getRow(const Offset(0, 0.0)), isNotNull);
-      expect(treeController.getRowOffset(0), equals(0));
+        expect(treeController.getRow(const Offset(0, -20))!.index, 0);
+        expect(treeController.getRowOffset(-1), equals(0));
+        expect(treeController.getRow(const Offset(0, 0.0)), isNotNull);
+        expect(treeController.getRowOffset(0), equals(0));
 
-      // This operation would previously throw an exception in debug builds
-      // and infinite loop in release builds.
-      treeController.scrollToRect(const Rect.fromLTWH(0, -20, 100, 100));
-    });
+        // This operation would previously throw an exception in debug builds
+        // and infinite loop in release builds.
+        treeController.scrollToRect(const Rect.fromLTWH(0, -20, 100, 100));
+      },
+    );
   });
 
   group('Inspector tree content preview', () {
@@ -138,18 +140,23 @@ void main() {
       expect(find.richText('Text: "Rich text"'), findsOneWidget);
     });
 
-    testWidgets('Strips new lines from text preview',
-        (WidgetTester tester) async {
-      final diagnosticNode = await widgetToInspectorTreeDiagnosticsNode(
-        widget: const Text('Multiline\ntext\n\ncontent'),
-        tester: tester,
-      );
+    testWidgets(
+      'Strips new lines from text preview',
+      (WidgetTester tester) async {
+        final diagnosticNode = await widgetToInspectorTreeDiagnosticsNode(
+          widget: const Text('Multiline\ntext\n\ncontent'),
+          tester: tester,
+        );
 
-      final treeController = inspectorTreeControllerFromNode(diagnosticNode);
-      await pumpInspectorTree(tester, treeController: treeController);
+        final treeController = inspectorTreeControllerFromNode(diagnosticNode);
+        await pumpInspectorTree(tester, treeController: treeController);
 
-      expect(find.richText('Text: "Multiline text  content"'), findsOneWidget);
-    });
+        expect(
+          find.richText('Text: "Multiline text  content"'),
+          findsOneWidget,
+        );
+      },
+    );
 
     testWidgets('Shows breadcrumbs in Widget detail tree', (tester) async {
       final diagnosticNode = await widgetToInspectorTreeDiagnosticsNode(

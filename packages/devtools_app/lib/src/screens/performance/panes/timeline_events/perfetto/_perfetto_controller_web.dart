@@ -7,9 +7,9 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 
-import '../../../../../primitives/trace_event.dart';
-import '../../../../../primitives/utils.dart';
 import '../../../../../shared/globals.dart';
+import '../../../../../shared/primitives/trace_event.dart';
+import '../../../../../shared/primitives/utils.dart';
 import 'perfetto_controller.dart';
 
 /// Flag to enable embedding an instance of the Perfetto UI running on
@@ -106,6 +106,8 @@ class PerfettoControllerImpl extends PerfettoController {
       ..height = '100%'
       ..width = '100%';
 
+    // This ignore is required due to
+    // https://github.com/flutter/flutter/issues/41563
     // ignore: undefined_prefixed_name
     final registered = ui.platformViewRegistry.registerViewFactory(
       viewId,
@@ -130,11 +132,11 @@ class PerfettoControllerImpl extends PerfettoController {
   @override
   void loadTrace(List<TraceEventWrapper> devToolsTraceEvents) {
     if (!timelineEventsController.isActiveFeature) {
-      pendingTraceEventsToLoad = List.from(devToolsTraceEvents);
+      pendingTraceEventsToLoad = List.of(devToolsTraceEvents);
       return;
     }
     pendingTraceEventsToLoad = null;
-    _activeTraceEvents.value = List.from(devToolsTraceEvents);
+    _activeTraceEvents.value = List.of(devToolsTraceEvents);
   }
 
   @override

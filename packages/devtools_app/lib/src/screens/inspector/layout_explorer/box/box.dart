@@ -7,10 +7,10 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
-import '../../../../primitives/math_utils.dart';
-import '../../../../primitives/utils.dart';
+import '../../../../shared/console/eval/diagnostics_node.dart';
+import '../../../../shared/primitives/math_utils.dart';
+import '../../../../shared/primitives/utils.dart';
 import '../../../../shared/theme.dart';
-import '../../diagnostics_node.dart';
 import '../../inspector_controller.dart';
 import '../../inspector_data_models.dart';
 import '../ui/free_space.dart';
@@ -26,7 +26,7 @@ class BoxLayoutExplorerWidget extends LayoutExplorerWidget {
     Key? key,
   }) : super(inspectorController, key: key);
 
-  static bool shouldDisplay(RemoteDiagnosticsNode node) {
+  static bool shouldDisplay(RemoteDiagnosticsNode _) {
     // Pretend this layout explorer is always available. This layout explorer
     // will gracefully fall back to an error message if the required properties
     // are not needed.
@@ -78,11 +78,9 @@ class _BoxLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
     setState(() {
       // This implementation will need to change if we support showing more than
       // a single widget in the box visualization for the layout explorer.
-      if (newProperties != null && selectedNode == newProperties.node) {
-        highlighted = newProperties;
-      } else {
-        highlighted = null;
-      }
+      highlighted = newProperties != null && selectedNode == newProperties.node
+          ? newProperties
+          : null;
     });
   }
 
@@ -388,7 +386,7 @@ class BoxChildVisualizer extends StatelessWidget {
     final renderSize = renderProperties.size;
     final renderOffset = renderProperties.offset;
 
-    Widget buildEntranceAnimation(BuildContext context, Widget? child) {
+    Widget buildEntranceAnimation(BuildContext _, Widget? child) {
       final size = renderSize;
       // TODO(jacobr): does this entrance animation really add value.
       return Opacity(
@@ -411,7 +409,6 @@ class BoxChildVisualizer extends StatelessWidget {
       child: InkWell(
         onTap: () => unawaited(state.onTap(propertiesLocal)),
         onDoubleTap: () => state.onDoubleTap(propertiesLocal),
-        onLongPress: () => state.onDoubleTap(propertiesLocal),
         child: SizedBox(
           width: safePositiveDouble(renderSize.width),
           height: safePositiveDouble(renderSize.height),

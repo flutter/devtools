@@ -52,7 +52,6 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
     HttpProfile? httpProfile,
     SamplesMemoryJson? memoryData,
     AllocationMemoryJson? allocationData,
-    CpuProfileData? cpuProfileData,
     CpuSamples? cpuSamples,
     CpuSamples? allocationSamples,
     Map<String, String>? resolvedUriMap,

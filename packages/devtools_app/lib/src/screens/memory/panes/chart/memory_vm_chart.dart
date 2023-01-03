@@ -5,14 +5,15 @@
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/material.dart';
 
-import '../../../../charts/chart.dart';
-import '../../../../charts/chart_controller.dart';
-import '../../../../charts/chart_trace.dart' as trace;
-import '../../../../primitives/auto_dispose_mixin.dart';
+import '../../../../shared/charts/chart.dart';
+import '../../../../shared/charts/chart_controller.dart';
+import '../../../../shared/charts/chart_trace.dart' as trace;
+import '../../../../shared/charts/chart_trace.dart' show ChartType, ChartSymbol;
+import '../../../../shared/primitives/auto_dispose.dart';
 import '../../../../shared/theme.dart';
 import '../../../../shared/utils.dart';
 import '../../memory_controller.dart';
-import '../../primitives/memory_timeline.dart';
+import '../../shared/primitives/memory_timeline.dart';
 
 class VMChartController extends ChartController {
   VMChartController(this._memoryController) : super(name: 'VM Memory');
@@ -198,7 +199,7 @@ class MemoryVMChartState extends State<MemoryVMChart>
     }
 
     final externalIndex = _chartController.createTrace(
-      trace.ChartType.line,
+      ChartType.line,
       trace.PaintCharacteristics(
         color: externalColor,
         symbol: trace.ChartSymbol.disc,
@@ -215,7 +216,7 @@ class MemoryVMChartState extends State<MemoryVMChart>
 
     // Used Heap
     final usedIndex = _chartController.createTrace(
-      trace.ChartType.line,
+      ChartType.line,
       trace.PaintCharacteristics(
         color: usedColor,
         symbol: trace.ChartSymbol.disc,
@@ -232,11 +233,11 @@ class MemoryVMChartState extends State<MemoryVMChart>
 
     // Heap Capacity
     final capacityIndex = _chartController.createTrace(
-      trace.ChartType.line,
+      ChartType.line,
       trace.PaintCharacteristics(
         color: capacityColor,
         diameter: 0.0,
-        symbol: trace.ChartSymbol.dashedLine,
+        symbol: ChartSymbol.dashedLine,
       ),
       name: VmTraceName.capacity.toString(),
     );
@@ -248,10 +249,10 @@ class MemoryVMChartState extends State<MemoryVMChart>
 
     // RSS
     final rSSIndex = _chartController.createTrace(
-      trace.ChartType.line,
+      ChartType.line,
       trace.PaintCharacteristics(
         color: rssColor,
-        symbol: trace.ChartSymbol.dashedLine,
+        symbol: ChartSymbol.dashedLine,
         strokeWidth: 2,
       ),
       name: VmTraceName.rSS.toString(),

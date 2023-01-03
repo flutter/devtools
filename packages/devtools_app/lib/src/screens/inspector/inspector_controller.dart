@@ -21,18 +21,19 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../config_specific/logger/logger.dart';
-import '../../config_specific/url/url.dart';
-import '../../primitives/auto_dispose.dart';
-import '../../primitives/utils.dart';
 import '../../service/service_extensions.dart' as extensions;
+import '../../shared/config_specific/logger/logger.dart';
+import '../../shared/config_specific/url/url.dart';
+import '../../shared/console/eval/diagnostics_node.dart';
+import '../../shared/console/eval/inspector_service.dart';
+import '../../shared/console/eval/inspector_tree.dart';
+import '../../shared/console/primitives/instance_ref.dart';
+import '../../shared/console/primitives/simple_items.dart';
 import '../../shared/globals.dart';
-import 'diagnostics_node.dart';
+import '../../shared/primitives/auto_dispose.dart';
+import '../../shared/primitives/utils.dart';
 import 'inspector_screen.dart';
-import 'inspector_service.dart';
-import 'inspector_tree.dart';
 import 'inspector_tree_controller.dart';
-import 'primitives/inspector_common.dart';
 
 const inspectorRefQueryParam = 'inspectorRef';
 
@@ -65,16 +66,14 @@ class InspectorController extends DisposableController
       onExpand: _onExpand,
       onClientActiveChange: _onClientChange,
     );
-    if (isSummaryTree) {
-      details = InspectorController(
-        inspectorTree: detailsTree!,
-        treeType: treeType,
-        parent: this,
-        isSummaryTree: false,
-      );
-    } else {
-      details = null;
-    }
+    details = isSummaryTree
+        ? InspectorController(
+            inspectorTree: detailsTree!,
+            treeType: treeType,
+            parent: this,
+            isSummaryTree: false,
+          )
+        : null;
 
     await serviceManager.onServiceAvailable;
 
@@ -112,19 +111,20 @@ class InspectorController extends DisposableController
     }
 
     autoDisposeStreamSubscription(
-      serviceManager.onConnectionAvailable.listen(_handleConnectionStart),
+      serviceManager.onConnectionAvailable
+          .listen((_) => _handleConnectionStart()),
     );
     if (serviceManager.connectedAppInitialized) {
-      _handleConnectionStart(serviceManager.service!);
+      _handleConnectionStart();
     }
     autoDisposeStreamSubscription(
-      serviceManager.onConnectionClosed.listen(_handleConnectionStop),
+      serviceManager.onConnectionClosed.listen((_) => _handleConnectionStop()),
     );
 
     serviceManager.consoleService.ensureServiceInitialized();
   }
 
-  void _handleConnectionStart(VmService service) {
+  void _handleConnectionStart() {
     // Clear any existing badge/errors for older errors that were collected.
     // Do this in a post frame callback so that we are not trying to clear the
     // error notifiers for this screen while the framework is already in the
@@ -137,7 +137,7 @@ class InspectorController extends DisposableController
     filterErrors();
   }
 
-  void _handleConnectionStop(dynamic event) {
+  void _handleConnectionStop() {
     setActivate(false);
     if (isSummaryTree) {
       dispose();
@@ -328,7 +328,7 @@ class InspectorController extends DisposableController
 
     return Future.wait([
       _waitForPendingUpdateDone(),
-      detailsLocal._waitForPendingUpdateDone()
+      detailsLocal._waitForPendingUpdateDone(),
     ]);
   }
 
@@ -807,7 +807,7 @@ class InspectorController extends DisposableController
   }
 
   void selectionChanged() {
-    if (visibleToUser == false) {
+    if (!visibleToUser) {
       return;
     }
 
@@ -897,6 +897,8 @@ class InspectorController extends DisposableController
     }
   }
 
+  // TODO(jacobr): implement this method and use the parameter.
+  // ignore: avoid-unused-parameters
   void _navigateTo(RemoteDiagnosticsNode diagnostic) {
     // TODO(jacobr): dispatch an event over the inspectorService requesting a
     //  navigate operation.
@@ -948,7 +950,7 @@ class InspectorController extends DisposableController
     );
   }
 
-  Future<void> collapseDetailsToSelected() async {
+  void collapseDetailsToSelected() {
     final detailsLocal = details!;
     detailsLocal.inspectorTree.collapseToSelected();
     detailsLocal.animateTo(detailsLocal.inspectorTree.selection);

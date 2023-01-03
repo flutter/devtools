@@ -20,6 +20,7 @@ MockPerformanceController createMockPerformanceControllerWithDefaults() {
   when(controller.enhanceTracingController)
       .thenReturn(EnhanceTracingController());
   when(controller.offlinePerformanceData).thenReturn(null);
+  when(controller.selectedFeatureTabIndex).thenReturn(0);
 
   // Stubs for Flutter Frames feature.
   when(controller.flutterFramesController).thenReturn(flutterFramesController);
@@ -85,6 +86,9 @@ MockCodeViewController createMockCodeViewControllerWithDefaults({
   when(codeViewController.programExplorerController).thenReturn(
     mockProgramExplorerController,
   );
+  when(codeViewController.showProfileInformation).thenReturn(
+    const FixedValueListenable(false),
+  );
   when(codeViewController.showCodeCoverage).thenReturn(ValueNotifier(false));
   when(codeViewController.focusLine).thenReturn(ValueNotifier(-1));
 
@@ -94,6 +98,13 @@ MockCodeViewController createMockCodeViewControllerWithDefaults({
 MockDebuggerController createMockDebuggerControllerWithDefaults({
   MockCodeViewController? mockCodeViewController,
 }) {
+  final evalService = EvalService(
+    isolateRef: ValueNotifier<IsolateRef?>(null),
+    variables: ValueNotifier<List<DartObjectNode>>([]),
+    frameForEval: () => null,
+    isPaused: ValueNotifier<bool>(true),
+  );
+
   final debuggerController = MockDebuggerController();
   when(debuggerController.isPaused).thenReturn(ValueNotifier(false));
   when(debuggerController.resuming).thenReturn(ValueNotifier(false));
@@ -103,7 +114,6 @@ MockDebuggerController createMockDebuggerControllerWithDefaults({
   when(debuggerController.stackFramesWithLocation)
       .thenReturn(ValueNotifier([]));
   when(debuggerController.selectedStackFrame).thenReturn(ValueNotifier(null));
-  when(debuggerController.hasTruncatedFrames).thenReturn(ValueNotifier(false));
 
   when(debuggerController.exceptionPauseMode)
       .thenReturn(ValueNotifier('Unhandled'));
@@ -113,6 +123,8 @@ MockDebuggerController createMockDebuggerControllerWithDefaults({
   when(debuggerController.codeViewController).thenReturn(
     mockCodeViewController,
   );
+
+  when(debuggerController.evalService).thenReturn(evalService);
 
   return debuggerController;
 }

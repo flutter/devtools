@@ -7,11 +7,11 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 
-import '../primitives/auto_dispose_mixin.dart';
-import '../primitives/utils.dart';
 import '../shared/common_widgets.dart';
 import '../shared/globals.dart';
 import '../shared/notifications.dart';
+import '../shared/primitives/auto_dispose.dart';
+import '../shared/primitives/utils.dart';
 import '../shared/theme.dart';
 import '../shared/utils.dart';
 
@@ -64,7 +64,7 @@ class _NotificationsState extends State<_Notifications> with AutoDisposeMixin {
     if (_overlayEntry == null) {
       _overlayEntry = OverlayEntry(
         maintainState: true,
-        builder: _buildOverlay,
+        builder: (_) => _NotificationOverlay(notifications: _notifications),
       );
       SchedulerBinding.instance.scheduleFrameCallback((_) {
         Overlay.of(context).insert(_overlayEntry!);
@@ -114,7 +114,7 @@ class _NotificationsState extends State<_Notifications> with AutoDisposeMixin {
     bool didDismiss = false;
     // Make a copy so we do not remove a notification from [_notifications]
     // while iterating over it.
-    final notifications = List<_Notification>.from(_notifications);
+    final notifications = List<_Notification>.of(_notifications);
     for (final notification in notifications) {
       if (notification.message.text == message) {
         _notifications.remove(notification);
@@ -139,7 +139,21 @@ class _NotificationsState extends State<_Notifications> with AutoDisposeMixin {
     });
   }
 
-  Widget _buildOverlay(BuildContext context) {
+  @override
+  Widget build(BuildContext context) {
+    return widget.child;
+  }
+}
+
+class _NotificationOverlay extends StatelessWidget {
+  const _NotificationOverlay({
+    required List<_Notification> notifications,
+  }) : _notifications = notifications;
+
+  final List<_Notification> _notifications;
+
+  @override
+  Widget build(BuildContext context) {
     return Align(
       alignment: Alignment.bottomRight,
       child: Padding(
@@ -161,11 +175,6 @@ class _NotificationsState extends State<_Notifications> with AutoDisposeMixin {
         ),
       ),
     );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return widget.child;
   }
 }
 
@@ -245,9 +254,9 @@ class _NotificationState extends State<_Notification>
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildMessage(),
+                  _NotificationMessage(widget: widget, context: context),
                   const SizedBox(height: defaultSpacing),
-                  _buildActions(),
+                  _NotificationActions(widget: widget),
                 ],
               ),
             ),
@@ -256,8 +265,19 @@ class _NotificationState extends State<_Notification>
       ),
     );
   }
+}
 
-  Widget _buildMessage() {
+class _NotificationMessage extends StatelessWidget {
+  const _NotificationMessage({
+    required this.widget,
+    required this.context,
+  });
+
+  final _Notification widget;
+  final BuildContext context;
+
+  @override
+  Widget build(BuildContext context) {
     return Text(
       widget.message.text,
       style: Theme.of(context).textTheme.bodyLarge,
@@ -265,13 +285,22 @@ class _NotificationState extends State<_Notification>
       maxLines: 6,
     );
   }
+}
 
-  Widget _buildActions() {
-    if (widget.message.actions.isEmpty) return const SizedBox();
+class _NotificationActions extends StatelessWidget {
+  const _NotificationActions({
+    required this.widget,
+  });
+
+  final _Notification widget;
+
+  @override
+  Widget build(BuildContext context) {
+    final actions = widget.message.actions;
+    if (actions.isEmpty) return const SizedBox();
     return Row(
       mainAxisAlignment: MainAxisAlignment.end,
-      children:
-          widget.message.actions.joinWith(const SizedBox(width: denseSpacing)),
+      children: actions.joinWith(const SizedBox(width: denseSpacing)),
     );
   }
 }

@@ -7,18 +7,18 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 
-import '../../analytics/constants.dart' as analytics_constants;
-import '../../charts/flame_chart.dart';
-import '../../primitives/auto_dispose_mixin.dart';
+import '../../shared/analytics/constants.dart' as gac;
+import '../../shared/charts/flame_chart.dart';
 import '../../shared/common_widgets.dart';
 import '../../shared/dialogs.dart';
 import '../../shared/globals.dart';
+import '../../shared/primitives/auto_dispose.dart';
 import '../../shared/theme.dart';
+import '../../shared/ui/colors.dart';
+import '../../shared/ui/filter.dart';
+import '../../shared/ui/search.dart';
+import '../../shared/ui/tab.dart';
 import '../../shared/utils.dart';
-import '../../ui/colors.dart';
-import '../../ui/filter.dart';
-import '../../ui/search.dart';
-import '../../ui/tab.dart';
 import 'cpu_profile_bottom_up.dart';
 import 'cpu_profile_call_tree.dart';
 import 'cpu_profile_controller.dart';
@@ -110,9 +110,7 @@ class _CpuProfilerState extends State<CpuProfiler>
       _initTabController();
     }
     if (widget.data != oldWidget.data) {
-      setState(() {
-        data = widget.data;
-      });
+      data = widget.data;
     }
   }
 
@@ -178,9 +176,10 @@ class _CpuProfilerState extends State<CpuProfiler>
                 isFilterActive: widget.controller.isToggleFilterActive,
               ),
               const SizedBox(width: denseSpacing),
-              if (currentTab.key != CpuProfiler.flameChartTab)
+              if (currentTab.key != CpuProfiler.flameChartTab) ...[
                 const DisplayTreeGuidelinesToggle(),
-              const SizedBox(width: denseSpacing),
+                const SizedBox(width: denseSpacing),
+              ],
               UserTagDropdown(widget.controller),
               const SizedBox(width: denseSpacing),
               ValueListenableBuilder<bool>(
@@ -202,9 +201,9 @@ class _CpuProfilerState extends State<CpuProfiler>
               if (widget.searchFieldKey != null) _buildSearchField(),
               FlameChartHelpButton(
                 gaScreen: widget.standaloneProfiler
-                    ? analytics_constants.cpuProfiler
-                    : analytics_constants.performance,
-                gaSelection: analytics_constants.cpuProfileFlameChartHelp,
+                    ? gac.cpuProfiler
+                    : gac.performance,
+                gaSelection: gac.cpuProfileFlameChartHelp,
                 additionalInfo: [
                   ...dialogSubHeader(Theme.of(context), 'Legend'),
                   Legend(
@@ -494,13 +493,13 @@ class UserTagDropdown extends StatelessWidget {
                       _buildMenuItem(
                         display: 'Group by: VM Tag',
                         value: CpuProfilerController.groupByVmTag,
-                      )
+                      ),
                   ],
                   onChanged: userTags.isEmpty ||
                           (userTags.length == 1 &&
                               userTags.first == UserTag.defaultTag.label)
                       ? null
-                      : (String? tag) => _onUserTagChanged(tag!, context),
+                      : (String? tag) => _onUserTagChanged(tag!),
                 );
               },
             ),
@@ -520,7 +519,7 @@ class UserTagDropdown extends StatelessWidget {
     );
   }
 
-  void _onUserTagChanged(String newTag, BuildContext context) async {
+  void _onUserTagChanged(String newTag) async {
     try {
       await controller.loadDataWithTag(newTag);
     } catch (e) {

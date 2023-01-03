@@ -7,13 +7,13 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 
-import '../analytics/analytics.dart' as ga;
-import '../analytics/constants.dart' as analytics_constants;
-import '../primitives/auto_dispose.dart';
-import '../primitives/utils.dart';
-import '../screens/inspector/inspector_service.dart';
 import '../service/vm_service_wrapper.dart';
+import 'analytics/analytics.dart' as ga;
+import 'analytics/constants.dart' as gac;
+import 'console/eval/inspector_service.dart';
 import 'globals.dart';
+import 'primitives/auto_dispose.dart';
+import 'primitives/utils.dart';
 
 /// A controller for global application preferences.
 class PreferencesController extends DisposableController
@@ -118,7 +118,8 @@ class InspectorPreferencesController extends DisposableController
 
   Future<void> init() async {
     await _initHoverEvalMode();
-    await _initCustomPubRootDirectories();
+    // TODO(jacobr): consider initializing this first as it is not blocking.
+    _initCustomPubRootDirectories();
   }
 
   Future<void> _initHoverEvalMode() async {
@@ -137,7 +138,7 @@ class InspectorPreferencesController extends DisposableController
     });
   }
 
-  Future<void> _initCustomPubRootDirectories() async {
+  void _initCustomPubRootDirectories() {
     autoDisposeStreamSubscription(
       serviceManager.onConnectionAvailable
           .listen(_handleConnectionToNewService),
@@ -159,13 +160,13 @@ class InspectorPreferencesController extends DisposableController
           if (debuggerState?.isPaused.value == false) {
             // the isolate is already unpaused, we can try to load
             // the directories
-            preferences.inspector.loadCustomPubRootDirectories();
+            unawaited(preferences.inspector.loadCustomPubRootDirectories());
           } else {
             late Function() pausedListener;
 
             pausedListener = () {
               if (debuggerState?.isPaused.value == false) {
-                preferences.inspector.loadCustomPubRootDirectories();
+                unawaited(preferences.inspector.loadCustomPubRootDirectories());
 
                 debuggerState?.isPaused.removeListener(pausedListener);
               }
@@ -179,12 +180,12 @@ class InspectorPreferencesController extends DisposableController
     );
   }
 
-  void _handleConnectionClosed(dynamic _) async {
+  void _handleConnectionClosed(Object? _) {
     _mainScriptDir = null;
     _customPubRootDirectories.clear();
   }
 
-  Future<void> _handleConnectionToNewService(VmServiceWrapper wrapper) async {
+  Future<void> _handleConnectionToNewService(VmServiceWrapper _) async {
     await _updateMainScriptRef();
 
     _customPubRootDirectories.clear();
@@ -250,8 +251,8 @@ class InspectorPreferencesController extends DisposableController
       final freshPubRootDirectories =
           await localInspectorService.getPubRootDirectories();
       if (freshPubRootDirectories != null) {
-        final newSet = Set<String>.from(freshPubRootDirectories);
-        final oldSet = Set<String>.from(_customPubRootDirectories.value);
+        final newSet = Set<String>.of(freshPubRootDirectories);
+        final oldSet = Set<String>.of(_customPubRootDirectories.value);
         final directoriesToAdd = newSet.difference(oldSet);
         final directoriesToRemove = oldSet.difference(newSet);
 
@@ -323,8 +324,8 @@ class MemoryPreferencesController extends DisposableController
         );
         if (androidCollectionEnabled.value) {
           ga.select(
-            analytics_constants.memory,
-            analytics_constants.MemoryEvent.chartAndroid,
+            gac.memory,
+            gac.MemoryEvent.chartAndroid,
           );
         }
       },
@@ -341,10 +342,10 @@ class MemoryPreferencesController extends DisposableController
         );
 
         ga.select(
-          analytics_constants.memory,
+          gac.memory,
           showChart.value
-              ? analytics_constants.MemoryEvent.showChart
-              : analytics_constants.MemoryEvent.hideChart,
+              ? gac.MemoryEvent.showChart
+              : gac.MemoryEvent.hideChart,
         );
       },
     );
@@ -355,8 +356,9 @@ class MemoryPreferencesController extends DisposableController
 class CpuProfilerPreferencesController extends DisposableController
     with AutoDisposeControllerMixin {
   final displayTreeGuidelines = ValueNotifier<bool>(false);
-  static const _displayTreeGuidelinesId =
-      '${analytics_constants.cpuProfiler}.${analytics_constants.cpuProfileDisplayTreeGuidelines}';
+
+  static final _displayTreeGuidelinesId =
+      '${gac.cpuProfiler}.${gac.cpuProfileDisplayTreeGuidelines}';
 
   Future<void> init() async {
     addAutoDisposeListener(
@@ -367,8 +369,8 @@ class CpuProfilerPreferencesController extends DisposableController
           displayTreeGuidelines.value.toString(),
         );
         ga.select(
-          analytics_constants.cpuProfiler,
-          analytics_constants.cpuProfileDisplayTreeGuidelines,
+          gac.cpuProfiler,
+          gac.cpuProfileDisplayTreeGuidelines,
           value: displayTreeGuidelines.value ? 1 : 0,
         );
       },

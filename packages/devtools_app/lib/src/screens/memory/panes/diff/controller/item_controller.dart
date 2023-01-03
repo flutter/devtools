@@ -4,7 +4,7 @@
 
 import 'package:flutter/foundation.dart';
 
-import '../../../../../primitives/auto_dispose.dart';
+import '../../../../../shared/primitives/auto_dispose.dart';
 import '../../../shared/heap/heap.dart';
 import '../../../shared/heap/model.dart';
 
@@ -60,4 +60,6 @@ class SnapshotInstanceItem extends SnapshotItem {
 
   @override
   bool get hasData => heap != null;
+
+  int? get totalSize => heap?.data.totalSize;
 }

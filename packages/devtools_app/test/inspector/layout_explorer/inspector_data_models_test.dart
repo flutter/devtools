@@ -2,11 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
-import 'package:devtools_app/src/primitives/math_utils.dart';
 import 'package:devtools_app/src/screens/inspector/inspector_data_models.dart';
 import 'package:devtools_app/src/screens/inspector/layout_explorer/ui/theme.dart';
+import 'package:devtools_app/src/shared/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/shared/globals.dart';
+import 'package:devtools_app/src/shared/primitives/math_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -39,22 +39,24 @@ void main() {
       return FlexLayoutProperties.fromDiagnostics(flexDiagnostics);
     }
 
-    testWidgets('FlexLayoutProperties.fromJson creates correct value from enum',
-        (tester) async {
-      final widget = Row(
-        textDirection: TextDirection.ltr,
-        children: const [SizedBox()],
-      );
-      final flexProperties =
-          await toFlexLayoutProperties(widget, tester: tester);
-      expect(flexProperties.direction, Axis.horizontal);
-      expect(flexProperties.mainAxisAlignment, MainAxisAlignment.start);
-      expect(flexProperties.mainAxisSize, MainAxisSize.max);
-      expect(flexProperties.crossAxisAlignment, CrossAxisAlignment.center);
-      expect(flexProperties.textDirection, TextDirection.ltr);
-      expect(flexProperties.verticalDirection, VerticalDirection.down);
-      expect(flexProperties.textBaseline, null);
-    });
+    testWidgets(
+      'FlexLayoutProperties.fromJson creates correct value from enum',
+      (tester) async {
+        final widget = Row(
+          textDirection: TextDirection.ltr,
+          children: const [SizedBox()],
+        );
+        final flexProperties =
+            await toFlexLayoutProperties(widget, tester: tester);
+        expect(flexProperties.direction, Axis.horizontal);
+        expect(flexProperties.mainAxisAlignment, MainAxisAlignment.start);
+        expect(flexProperties.mainAxisSize, MainAxisSize.max);
+        expect(flexProperties.crossAxisAlignment, CrossAxisAlignment.center);
+        expect(flexProperties.textDirection, TextDirection.ltr);
+        expect(flexProperties.verticalDirection, VerticalDirection.down);
+        expect(flexProperties.textBaseline, null);
+      },
+    );
 
     testWidgets('startIsTopLeft should return false', (tester) async {
       final columnWidget = Column(
@@ -75,38 +77,43 @@ void main() {
     });
 
     testWidgets(
-        'displayChildren is the same as children when start is top left',
-        (tester) async {
-      final widget = Column(
-        children: [
-          const SizedBox(),
-          Container(),
-        ],
-      );
-      final properties = await toFlexLayoutProperties(widget, tester: tester);
-      expect(properties.startIsTopLeft, true);
-      expect(properties.displayChildren[0].description, 'SizedBox');
-      expect(properties.displayChildren[1].description, 'Container');
-    });
+      'displayChildren is the same as children when start is top left',
+      (tester) async {
+        final widget = Column(
+          children: [
+            const SizedBox(),
+            Container(),
+          ],
+        );
+        final properties = await toFlexLayoutProperties(widget, tester: tester);
+        expect(properties.startIsTopLeft, true);
+        expect(properties.displayChildren[0].description, 'SizedBox');
+        expect(properties.displayChildren[1].description, 'Container');
+      },
+    );
 
     testWidgets(
-        'displayChildren is a reversed children when start is not top left',
-        (tester) async {
-      final widget = Column(
-        verticalDirection: VerticalDirection.up,
-        children: [
-          const SizedBox(),
-          Container(),
-        ],
-      );
-      final properties = await toFlexLayoutProperties(widget, tester: tester);
-      expect(properties.startIsTopLeft, false);
-      expect(properties.displayChildren[0].description, 'Container');
-      expect(properties.displayChildren[1].description, 'SizedBox');
-    });
+      'displayChildren is a reversed children when start is not top left',
+      (tester) async {
+        final widget = Column(
+          verticalDirection: VerticalDirection.up,
+          children: [
+            const SizedBox(),
+            Container(),
+          ],
+        );
+        final properties = await toFlexLayoutProperties(widget, tester: tester);
+        expect(properties.startIsTopLeft, false);
+        expect(properties.displayChildren[0].description, 'Container');
+        expect(properties.displayChildren[1].description, 'SizedBox');
+      },
+    );
 
     group('childrenRenderProperties tests', () {
       const maxMainAxisDimension = 500.0;
+
+      // This is a false positive.
+      // ignore: avoid-unused-parameters
       double maxSizeAvailable(Axis axis) => maxMainAxisDimension;
 
       List<RenderProperties> childrenRenderProperties(
@@ -131,45 +138,46 @@ void main() {
       ];
 
       testWidgets(
-          'returns correct RenderProperties with main axis not flipped when start is top left',
-          (tester) async {
-        final widget = Row(children: childrenWidgets);
-        final properties = await toFlexLayoutProperties(
-          widget,
-          width: maxMainAxisDimension,
-          tester: tester,
-          subtreeDepth: 3,
-        );
-        final renderProps = properties.childrenRenderProperties(
-          smallestRenderWidth: minRenderWidth,
-          largestRenderWidth: defaultMaxRenderWidth,
-          smallestRenderHeight: minRenderHeight,
-          largestRenderHeight: defaultMaxRenderHeight,
-          maxSizeAvailable: maxSizeAvailable,
-        );
-        expect(renderProps.length, 3);
-        expect(renderProps, [
-          RenderProperties(
-            axis: Axis.horizontal,
-            size: const Size(250, 250),
-            realSize: const Size(50.0, 0.0),
-            offset: const Offset(0.0, 125.0),
-          ),
-          RenderProperties(
-            axis: Axis.horizontal,
-            size: const Size(261.50, 500),
-            realSize: const Size(75.0, 25.0),
-            offset: const Offset(250.0, 0.0),
-          ),
-          RenderProperties(
-            axis: Axis.horizontal,
-            size: const Size(400, 500),
-            realSize: const Size(375.0, 25.0),
-            offset: const Offset(511.5, 0.0),
-            isFreeSpace: true,
-          ),
-        ]);
-      });
+        'returns correct RenderProperties with main axis not flipped when start is top left',
+        (tester) async {
+          final widget = Row(children: childrenWidgets);
+          final properties = await toFlexLayoutProperties(
+            widget,
+            width: maxMainAxisDimension,
+            tester: tester,
+            subtreeDepth: 3,
+          );
+          final renderProps = properties.childrenRenderProperties(
+            smallestRenderWidth: minRenderWidth,
+            largestRenderWidth: defaultMaxRenderWidth,
+            smallestRenderHeight: minRenderHeight,
+            largestRenderHeight: defaultMaxRenderHeight,
+            maxSizeAvailable: maxSizeAvailable,
+          );
+          expect(renderProps.length, 3);
+          expect(renderProps, [
+            RenderProperties(
+              axis: Axis.horizontal,
+              size: const Size(250, 250),
+              realSize: const Size(50.0, 0.0),
+              offset: const Offset(0.0, 125.0),
+            ),
+            RenderProperties(
+              axis: Axis.horizontal,
+              size: const Size(261.5, 500),
+              realSize: const Size(75.0, 25.0),
+              offset: const Offset(250.0, 0.0),
+            ),
+            RenderProperties(
+              axis: Axis.horizontal,
+              size: const Size(400, 500),
+              realSize: const Size(375.0, 25.0),
+              offset: const Offset(511.5, 0.0),
+              isFreeSpace: true,
+            ),
+          ]);
+        },
+      );
 
       testWidgets(
         'returns correct RenderProperties with main axis flipped when start is not top left',
@@ -217,46 +225,48 @@ void main() {
       );
 
       testWidgets(
-          'when the start is not top left, render properties should be equals to its mirrored version',
-          (tester) async {
-        Row buildWidget({
-          required bool flipMainAxis,
-          required MainAxisAlignment mainAxisAlignment,
-        }) =>
-            Row(
-              textDirection:
-                  flipMainAxis ? TextDirection.rtl : TextDirection.ltr,
-              mainAxisAlignment:
-                  flipMainAxis ? mainAxisAlignment.reversed : mainAxisAlignment,
-              children: flipMainAxis
-                  ? childrenWidgets.reversed.toList()
-                  : childrenWidgets,
+        'when the start is not top left, render properties should be equals to its mirrored version',
+        (tester) async {
+          Row buildWidget({
+            required bool flipMainAxis,
+            required MainAxisAlignment mainAxisAlignment,
+          }) =>
+              Row(
+                textDirection:
+                    flipMainAxis ? TextDirection.rtl : TextDirection.ltr,
+                mainAxisAlignment: flipMainAxis
+                    ? mainAxisAlignment.reversed
+                    : mainAxisAlignment,
+                children: flipMainAxis
+                    ? childrenWidgets.reversed.toList()
+                    : childrenWidgets,
+              );
+          for (final mainAxisAlignment in MainAxisAlignment.values) {
+            final originalWidgetRenderProperties = childrenRenderProperties(
+              await toFlexLayoutProperties(
+                buildWidget(
+                  flipMainAxis: false,
+                  mainAxisAlignment: mainAxisAlignment,
+                ),
+                tester: tester,
+              ),
             );
-        for (final mainAxisAlignment in MainAxisAlignment.values) {
-          final originalWidgetRenderProperties = childrenRenderProperties(
-            await toFlexLayoutProperties(
-              buildWidget(
-                flipMainAxis: false,
-                mainAxisAlignment: mainAxisAlignment,
+            final mirroredWidgetRenderProperties = childrenRenderProperties(
+              await toFlexLayoutProperties(
+                buildWidget(
+                  flipMainAxis: true,
+                  mainAxisAlignment: mainAxisAlignment,
+                ),
+                tester: tester,
               ),
-              tester: tester,
-            ),
-          );
-          final mirroredWidgetRenderProperties = childrenRenderProperties(
-            await toFlexLayoutProperties(
-              buildWidget(
-                flipMainAxis: true,
-                mainAxisAlignment: mainAxisAlignment,
-              ),
-              tester: tester,
-            ),
-          );
-          expect(
-            originalWidgetRenderProperties,
-            mirroredWidgetRenderProperties,
-          );
-        }
-      });
+            );
+            expect(
+              originalWidgetRenderProperties,
+              mirroredWidgetRenderProperties,
+            );
+          }
+        },
+      );
     });
   });
 
@@ -405,49 +415,52 @@ void main() {
 
   group('computeRenderSizes', () {
     test(
-        'scale sizes so the largestSize maps to largestRenderSize with forceToOccupyMaxSize=false',
-        () {
-      final renderSizes = computeRenderSizes(
-        sizes: [100.0, 200.0, 300.0],
-        smallestSize: 100.0,
-        largestSize: 300.0,
-        smallestRenderSize: 200.0,
-        largestRenderSize: 600.0,
-        maxSizeAvailable: 2000,
-        useMaxSizeAvailable: false,
-      );
-      expect(renderSizes, [200.0, 400.0, 600.0]);
-      expect(sum(renderSizes), lessThan(2000));
-    });
+      'scale sizes so the largestSize maps to largestRenderSize with forceToOccupyMaxSize=false',
+      () {
+        final renderSizes = computeRenderSizes(
+          sizes: [100.0, 200.0, 300.0],
+          smallestSize: 100.0,
+          largestSize: 300.0,
+          smallestRenderSize: 200.0,
+          largestRenderSize: 600.0,
+          maxSizeAvailable: 2000,
+          useMaxSizeAvailable: false,
+        );
+        expect(renderSizes, [200.0, 400.0, 600.0]);
+        expect(sum(renderSizes), lessThan(2000));
+      },
+    );
 
     test(
-        'scale sizes so the items fit maxSizeAvailable with forceToOccupyMaxSize=true',
-        () {
-      final renderSizes = computeRenderSizes(
-        sizes: [100.0, 200.0, 300.0],
-        smallestSize: 100.0,
-        largestSize: 300.0,
-        smallestRenderSize: 200.0,
-        largestRenderSize: 600.0,
-        maxSizeAvailable: 2000,
-      );
-      expect(renderSizes, [200.0, 666.6666666666667, 1133.3333333333335]);
-      expect(sum(renderSizes) - 2000.0, lessThan(0.01));
-    });
+      'scale sizes so the items fit maxSizeAvailable with forceToOccupyMaxSize=true',
+      () {
+        final renderSizes = computeRenderSizes(
+          sizes: [100.0, 200.0, 300.0],
+          smallestSize: 100.0,
+          largestSize: 300.0,
+          smallestRenderSize: 200.0,
+          largestRenderSize: 600.0,
+          maxSizeAvailable: 2000,
+        );
+        expect(renderSizes, [200.0, 666.6666666666667, 1133.3333333333335]);
+        expect(sum(renderSizes) - 2000.0, lessThan(0.01));
+      },
+    );
 
     test(
-        'scale sizes when the items exceeds maxSizeAvailable with forceToOccupyMaxSize=true should not change any behavior',
-        () {
-      final renderSizes = computeRenderSizes(
-        sizes: [100.0, 200.0, 300.0],
-        smallestSize: 100.0,
-        largestSize: 300.0,
-        smallestRenderSize: 300.0,
-        largestRenderSize: 900.0,
-        maxSizeAvailable: 250.0,
-      );
-      expect(renderSizes, [300.0, 600.0, 900.0]);
-      expect(sum(renderSizes), greaterThan(250.0));
-    });
+      'scale sizes when the items exceeds maxSizeAvailable with forceToOccupyMaxSize=true should not change any behavior',
+      () {
+        final renderSizes = computeRenderSizes(
+          sizes: [100.0, 200.0, 300.0],
+          smallestSize: 100.0,
+          largestSize: 300.0,
+          smallestRenderSize: 300.0,
+          largestRenderSize: 900.0,
+          maxSizeAvailable: 250.0,
+        );
+        expect(renderSizes, [300.0, 600.0, 900.0]);
+        expect(sum(renderSizes), greaterThan(250.0));
+      },
+    );
   });
 }

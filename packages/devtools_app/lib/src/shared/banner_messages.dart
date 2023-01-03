@@ -8,11 +8,11 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../analytics/constants.dart' as analytics_constants;
-import '../primitives/utils.dart';
 import '../screens/performance/performance_utils.dart';
+import 'analytics/constants.dart' as gac;
 import 'common_widgets.dart';
 import 'globals.dart';
+import 'primitives/utils.dart';
 import 'screen.dart';
 import 'theme.dart';
 import 'version.dart';
@@ -108,7 +108,7 @@ class BannerMessages extends StatelessWidget {
         ),
         Expanded(
           child: screen.build(context),
-        )
+        ),
       ],
     );
   }
@@ -315,12 +315,14 @@ class DebugModePerformanceMessage {
   }
 }
 
+// TODO(jacobr): cleanup this class that looks like a Widget but can't quite be
+// a widget due to some questionable design choices involving BannerMessage.
 class ProviderUnknownErrorBanner {
   const ProviderUnknownErrorBanner({required this.screenId});
 
   final String screenId;
 
-  BannerMessage build(BuildContext context) {
+  BannerMessage build() {
     return _BannerError(
       key: Key('ProviderUnknownErrorBanner - $screenId'),
       screenId: screenId,
@@ -371,8 +373,7 @@ To pre-compile shaders, see the instructions at ''',
             display: preCompileShadersDocsUrl,
             url: preCompileShadersDocsUrl,
             gaScreenName: screenId,
-            gaSelectedItemDescription:
-                analytics_constants.shaderCompilationDocs,
+            gaSelectedItemDescription: gac.shaderCompilationDocs,
           ),
           context: context,
           style: theme.errorMessageLinkStyle,
@@ -411,7 +412,7 @@ You are opting in to a high CPU sampling rate. This may affect the performance o
             display: 'documentation',
             url: _cpuSamplingRateDocsUrl,
             gaScreenName: screenId,
-            gaSelectedItemDescription: analytics_constants.cpuSamplingRateDocs,
+            gaSelectedItemDescription: gac.cpuSamplingRateDocs,
           ),
           context: context,
           style: theme.warningMessageLinkStyle,
@@ -471,7 +472,7 @@ class UnsupportedFlutterVersionWarning {
 
   final SemanticVersion supportedFlutterVersion;
 
-  BannerMessage build(BuildContext context) {
+  BannerMessage build() {
     return _BannerWarning(
       key: Key('UnsupportedFlutterVersionWarning - $screenId'),
       textSpans: [
@@ -510,7 +511,7 @@ void maybePushUnsupportedFlutterVersionWarning(
         screenId: screenId,
         currentFlutterVersion: currentVersion,
         supportedFlutterVersion: supportedFlutterVersion,
-      ).build(context),
+      ).build(),
     );
   }
 }
@@ -572,7 +573,7 @@ LinkTextSpan _runInProfileModeTextSpan(
       display: 'profile mode',
       url: _runInProfileModeDocsUrl,
       gaScreenName: screenId,
-      gaSelectedItemDescription: analytics_constants.profileModeDocs,
+      gaSelectedItemDescription: gac.profileModeDocs,
     ),
     context: context,
     style: style,

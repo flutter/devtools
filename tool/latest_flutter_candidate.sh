@@ -7,25 +7,12 @@
 # Any subsequent commands failure will cause this script to exit immediately
 set -e
 
-if ! command -v jq &> /dev/null
-then
-    echo "jq could not be found. If you are on mac you can install this with `brew install jq`"
-    exit 1
-fi
-
-RESPONSE=$(gh api --paginate /repos/flutter/flutter/branches)
-
-CANDIDATES=$(echo "$RESPONSE" | jq '.[].name' | grep candidate)
-
-VERSIONS=$(echo "$CANDIDATES" | sed -E 's/.*([0-9]+\.[0-9]+-candidate\.[0-9]+).*/\1/' )
-
-LATEST_VERSION=$(echo "$VERSIONS" |  sort --version-sort | tail  -n 1 )
-
-if [ -z ${LATEST_VERSION+x} ]; then
-    echo "Unable to get Latest flutter candidate version"
-    exit 1
-fi
-
-LATEST_FLUTTER_CANDIDATE="flutter-$LATEST_VERSION"
+LATEST_FLUTTER_CANDIDATE=$(git ls-remote --heads --sort='-v:refname' https://flutter.googlesource.com/mirrors/flutter/ \
+  | grep "refs/heads/flutter-.*-candidate" \
+  | cut -f2 \
+  | sort --version-sort \
+  | tail -n1 \
+  | sed 's/^.*\(flutter.*\)$/\1/'\
+  )
 
 echo $LATEST_FLUTTER_CANDIDATE

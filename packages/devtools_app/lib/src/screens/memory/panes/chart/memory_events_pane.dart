@@ -5,14 +5,15 @@
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/material.dart';
 
-import '../../../../charts/chart.dart';
-import '../../../../charts/chart_controller.dart';
-import '../../../../charts/chart_trace.dart' as trace;
-import '../../../../primitives/auto_dispose_mixin.dart';
+import '../../../../shared/charts/chart.dart';
+import '../../../../shared/charts/chart_controller.dart';
+import '../../../../shared/charts/chart_trace.dart' as trace;
+import '../../../../shared/charts/chart_trace.dart' show ChartType;
+import '../../../../shared/primitives/auto_dispose.dart';
 import '../../../../shared/theme.dart';
 import '../../../../shared/utils.dart';
 import '../../memory_controller.dart';
-import '../../primitives/memory_timeline.dart';
+import '../../shared/primitives/memory_timeline.dart';
 
 // TODO(terry): Consider custom painter?
 const _base = 'assets/img/legend/';
@@ -280,6 +281,9 @@ class MemoryEventsPaneState extends State<MemoryEventsPane>
     }
 
     final extensionEventsIndex = _chartController.createTrace(
+      // TODO(jacobr): prefer-moving-to-variable doesn't understand that enum
+      // entries don't need to be moved to variables.
+      // ignore: prefer-moving-to-variable
       trace.ChartType.symbol,
       trace.PaintCharacteristics(
         color: Colors.purpleAccent[100]!,
@@ -299,6 +303,9 @@ class MemoryEventsPaneState extends State<MemoryEventsPane>
     );
 
     final snapshotIndex = _chartController.createTrace(
+      // TODO(jacobr): prefer-moving-to-variable doesn't understand that enum
+      // entries don't need to be moved to variables.
+      // ignore: prefer-moving-to-variable
       trace.ChartType.symbol,
       trace.PaintCharacteristics(
         color: Colors.green,
@@ -317,7 +324,7 @@ class MemoryEventsPaneState extends State<MemoryEventsPane>
 
     // Auto-snapshot
     final autoSnapshotIndex = _chartController.createTrace(
-      trace.ChartType.symbol,
+      ChartType.symbol,
       trace.PaintCharacteristics(
         color: Colors.red,
         strokeWidth: 3,
@@ -335,7 +342,7 @@ class MemoryEventsPaneState extends State<MemoryEventsPane>
 
     // Manual GC
     final manualGCIndex = _chartController.createTrace(
-      trace.ChartType.symbol,
+      ChartType.symbol,
       trace.PaintCharacteristics(
         color: Colors.blue,
         strokeWidth: 3,
@@ -356,7 +363,7 @@ class MemoryEventsPaneState extends State<MemoryEventsPane>
 
     // Monitor
     final monitorIndex = _chartController.createTrace(
-      trace.ChartType.symbol,
+      ChartType.symbol,
       trace.PaintCharacteristics(
         color: mainMonitorColor,
         strokeWidth: 3,
@@ -373,7 +380,7 @@ class MemoryEventsPaneState extends State<MemoryEventsPane>
     );
 
     final monitorResetIndex = _chartController.createTrace(
-      trace.ChartType.symbol,
+      ChartType.symbol,
       trace.PaintCharacteristics.concentric(
         color: Colors.grey[600]!,
         strokeWidth: 4,
@@ -393,7 +400,7 @@ class MemoryEventsPaneState extends State<MemoryEventsPane>
 
     // VM GC
     final gcIndex = _chartController.createTrace(
-      trace.ChartType.symbol,
+      ChartType.symbol,
       trace.PaintCharacteristics(
         color: Colors.blue,
         symbol: trace.ChartSymbol.disc,

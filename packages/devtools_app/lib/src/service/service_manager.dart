@@ -9,16 +9,16 @@ import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart' hide Error;
 
-import '../analytics/analytics.dart' as ga;
-import '../config_specific/logger/logger.dart';
-import '../primitives/utils.dart';
-import '../screens/inspector/inspector_service.dart';
 import '../screens/logging/vm_service_logger.dart';
 import '../screens/performance/timeline_streams.dart';
+import '../shared/analytics/analytics.dart' as ga;
+import '../shared/config_specific/logger/logger.dart';
 import '../shared/connected_app.dart';
-import '../shared/console_service.dart';
+import '../shared/console/console_service.dart';
+import '../shared/console/eval/inspector_service.dart';
 import '../shared/error_badge_manager.dart';
 import '../shared/globals.dart';
+import '../shared/primitives/utils.dart';
 import '../shared/title.dart';
 import '../shared/utils.dart';
 import 'isolate_manager.dart';
@@ -185,10 +185,14 @@ class ServiceConnectionManager {
     VmServiceWrapper service, {
     required Future<void> onClosed,
   }) async {
+    // Getting and setting a variable should not count as repeated references.
+    // ignore: prefer-moving-to-variable
     if (service == this.service) {
       // Service already opened.
       return;
     }
+    // Getting and setting a variable should not count as repeated references.
+    // ignore: prefer-moving-to-variable
     this.service = service;
     if (_serviceAvailable.isCompleted) {
       _serviceAvailable = Completer();
@@ -218,6 +222,8 @@ class ServiceConnectionManager {
     _inspectorService?.dispose();
     _inspectorService = null;
 
+    // Value may have changes between repeated references.
+    // ignore: prefer-moving-to-variable
     if (service != this.service) {
       // A different service has been opened.
       return;
@@ -225,6 +231,8 @@ class ServiceConnectionManager {
 
     vm = await service.getVM();
 
+    // Value may have changes between repeated references.
+    // ignore: prefer-moving-to-variable
     if (service != this.service) {
       // A different service has been opened.
       return;
@@ -297,6 +305,8 @@ class ServiceConnectionManager {
         }
       }
     }
+    // Value may have changes between repeated references.
+    // ignore: prefer-moving-to-variable
     if (service != this.service) {
       // A different service has been opened.
       return;
@@ -306,6 +316,8 @@ class ServiceConnectionManager {
 
     final isolates = vm?.isolatesForDevToolsMode() ?? <IsolateRef>[];
     await isolateManager.init(isolates);
+    // Value may have changes between repeated references.
+    // ignore: prefer-moving-to-variable
     if (service != this.service) {
       // A different service has been opened.
       return;
@@ -314,6 +326,8 @@ class ServiceConnectionManager {
     // This needs to be called before calling
     // `ga.setupUserApplicationDimensions()`.
     await connectedApp!.initializeValues();
+    // Value may have changes between repeated references.
+    // ignore: prefer-moving-to-variable
     if (service != this.service) {
       // A different service has been opened.
       return;
@@ -323,6 +337,8 @@ class ServiceConnectionManager {
 
     // Set up analytics dimensions for the connected app.
     ga.setupUserApplicationDimensions();
+    // Value may have changes between repeated references.
+    // ignore: prefer-moving-to-variable
     if (service != this.service) {
       // A different service has been opened.
       return;
@@ -439,8 +455,8 @@ class ServiceConnectionManager {
     final flutterViewListResponse = await _callServiceExtensionOnMainIsolate(
       registrations.flutterListViews,
     );
-    final List<dynamic> views =
-        flutterViewListResponse.json!['views'].cast<Map<String, dynamic>>();
+    final List<Map<String, Object?>> views =
+        flutterViewListResponse.json!['views'].cast<Map<String, Object?>>();
 
     // Each isolate should only have one FlutterView.
     final flutterView = views.firstWhereOrNull(
@@ -454,7 +470,7 @@ class ServiceConnectionManager {
       throw Exception(message);
     }
 
-    return flutterView['id'];
+    return flutterView['id'] as String;
   }
 
   /// Flutter engine returns estimate how much memory is used by layer/picture raster

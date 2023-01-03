@@ -9,19 +9,19 @@ import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-import '../../../../../charts/flame_chart.dart';
-import '../../../../../primitives/auto_dispose_mixin.dart';
-import '../../../../../primitives/flutter_widgets/linked_scroll_controller.dart';
-import '../../../../../primitives/geometry.dart';
-import '../../../../../primitives/trace_event.dart';
-import '../../../../../primitives/utils.dart';
+import '../../../../../shared/charts/flame_chart.dart';
 import '../../../../../shared/common_widgets.dart';
 import '../../../../../shared/globals.dart';
+import '../../../../../shared/primitives/auto_dispose.dart';
+import '../../../../../shared/primitives/flutter_widgets/linked_scroll_controller.dart';
+import '../../../../../shared/primitives/geometry.dart';
+import '../../../../../shared/primitives/trace_event.dart';
+import '../../../../../shared/primitives/utils.dart';
 import '../../../../../shared/split.dart';
 import '../../../../../shared/theme.dart';
+import '../../../../../shared/ui/colors.dart';
+import '../../../../../shared/ui/utils.dart';
 import '../../../../../shared/utils.dart';
-import '../../../../../ui/colors.dart';
-import '../../../../../ui/utils.dart';
 import '../../../performance_controller.dart';
 import '../../../performance_model.dart';
 import '../../../performance_utils.dart';
@@ -194,9 +194,18 @@ class TimelineFlameChartState
   @override
   void initState() {
     super.initState();
+    // addAndGet has crucial side effects so moving to a variable is not
+    // feasible.
+    // ignore: prefer-moving-to-variable
     _groupLabelScrollController = verticalControllerGroup.addAndGet();
     _previousInGroupButtonsScrollController =
+        // addAndGet has crucial side effects so moving to a variable is not
+        // feasible.
+        // ignore: prefer-moving-to-variable
         verticalControllerGroup.addAndGet();
+    // addAndGet has crucial side effects so moving to a variable is not
+    // feasible.
+    // ignore: prefer-moving-to-variable
     _nextInGroupButtonsScrollController = verticalControllerGroup.addAndGet();
   }
 
@@ -450,7 +459,7 @@ class TimelineFlameChartState
         rect: Rect.fromLTRB(left, flameChartNodeTop, right, rowHeight),
         colorPair: ThemedColorPair.from(colorPair),
         data: event,
-        onSelected: (dynamic event) => widget.onDataSelected(event),
+        onSelected: widget.onDataSelected,
         sectionIndex: section,
       );
       chartNodesByEvent[event] = node;

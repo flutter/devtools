@@ -8,18 +8,18 @@ import 'package:codicon/codicon.dart';
 import 'package:flutter/material.dart' hide Stack;
 import 'package:vm_service/vm_service.dart';
 
-import '../../primitives/auto_dispose_mixin.dart';
 import '../../shared/common_widgets.dart';
 import '../../shared/globals.dart';
+import '../../shared/primitives/auto_dispose.dart';
 import '../../shared/theme.dart';
+import '../../shared/ui/label.dart';
 import '../../shared/utils.dart';
-import '../../ui/label.dart';
 import 'debugger_controller.dart';
 
 class DebuggingControls extends StatefulWidget {
   const DebuggingControls({Key? key}) : super(key: key);
 
-  static const minWidthBeforeScaling = 1600.0;
+  static const minWidthBeforeScaling = 1750.0;
 
   @override
   _DebuggingControlsState createState() => _DebuggingControlsState();
@@ -57,7 +57,7 @@ class _DebuggingControlsState extends State<DebuggingControls>
           BreakOnExceptionsControl(controller: controller),
           if (isVmApp) ...[
             const SizedBox(width: denseSpacing),
-            CodeCoverageToggle(controller: controller),
+            CodeStatisticsControls(controller: controller),
           ],
           const Expanded(child: SizedBox(width: denseSpacing)),
           _librariesButton(),
@@ -79,7 +79,9 @@ class _DebuggingControlsState extends State<DebuggingControls>
             icon: Codicons.debugPause,
             autofocus: true,
             // Disable when paused or selected isolate is a system isolate.
-            onPressed: (isPaused || isSystemIsolate) ? null : controller.pause,
+            onPressed: (isPaused || isSystemIsolate)
+                ? null
+                : () => unawaited(controller.pause()),
           ),
           LeftBorder(
             child: DebuggerButton(
@@ -88,7 +90,7 @@ class _DebuggingControlsState extends State<DebuggingControls>
               // Enable while paused + not resuming and selected isolate is not
               // a system isolate.
               onPressed: ((isPaused && !resuming) && !isSystemIsolate)
-                  ? controller.resume
+                  ? () => unawaited(controller.resume())
                   : null,
             ),
           ),
@@ -104,20 +106,20 @@ class _DebuggingControlsState extends State<DebuggingControls>
           DebuggerButton(
             title: 'Step Over',
             icon: Codicons.debugStepOver,
-            onPressed: canStep ? controller.stepOver : null,
+            onPressed: canStep ? () => unawaited(controller.stepOver()) : null,
           ),
           LeftBorder(
             child: DebuggerButton(
               title: 'Step In',
               icon: Codicons.debugStepInto,
-              onPressed: canStep ? controller.stepIn : null,
+              onPressed: canStep ? () => unawaited(controller.stepIn()) : null,
             ),
           ),
           LeftBorder(
             child: DebuggerButton(
               title: 'Step Out',
               icon: Codicons.debugStepOut,
-              onPressed: canStep ? controller.stepOut : null,
+              onPressed: canStep ? () => unawaited(controller.stepOut()) : null,
             ),
           ),
         ],
@@ -144,8 +146,8 @@ class _DebuggingControlsState extends State<DebuggingControls>
   }
 }
 
-class CodeCoverageToggle extends StatelessWidget {
-  const CodeCoverageToggle({
+class CodeStatisticsControls extends StatelessWidget {
+  const CodeStatisticsControls({
     super.key,
     required this.controller,
   });
@@ -155,10 +157,11 @@ class CodeCoverageToggle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return RoundedOutlinedBorder(
-      child: ValueListenableBuilder<bool>(
-        valueListenable: controller.codeViewController.showCodeCoverage,
-        builder: (context, selected, _) {
-          final isInSmallMode = MediaQuery.of(context).size.width <
+      child: DualValueListenableBuilder<bool, bool>(
+        firstListenable: controller.codeViewController.showCodeCoverage,
+        secondListenable: controller.codeViewController.showProfileInformation,
+        builder: (context, showCodeCoverage, showProfileInformation, _) {
+          final isInSmallMode = MediaQuery.of(context).size.width <=
               DebuggingControls.minWidthBeforeScaling;
           return Row(
             children: [
@@ -166,7 +169,7 @@ class CodeCoverageToggle extends StatelessWidget {
                 label: isInSmallMode ? null : 'Show Coverage',
                 message: 'Show code coverage',
                 icon: Codicons.checklist,
-                isSelected: selected,
+                isSelected: showCodeCoverage,
                 outlined: false,
                 shape: const RoundedRectangleBorder(
                   borderRadius: BorderRadius.only(
@@ -177,12 +180,27 @@ class CodeCoverageToggle extends StatelessWidget {
                 onPressed: controller.codeViewController.toggleShowCodeCoverage,
               ),
               LeftBorder(
+                child: ToggleButton(
+                  label: isInSmallMode ? null : 'Show Profile',
+                  message: 'Show profiler hits',
+                  icon: Codicons.flame,
+                  isSelected: showProfileInformation,
+                  outlined: false,
+                  shape: const ContinuousRectangleBorder(),
+                  onPressed: controller
+                      .codeViewController.toggleShowProfileInformation,
+                ),
+              ),
+              LeftBorder(
                 child: IconLabelButton(
                   label: '',
-                  tooltip: 'Refresh code coverage statistics',
+                  tooltip: 'Refresh statistics',
                   outlined: false,
-                  onPressed: selected
-                      ? controller.codeViewController.refreshCodeCoverage
+                  onPressed: showCodeCoverage || showProfileInformation
+                      ? () => unawaited(
+                            controller.codeViewController
+                                .refreshCodeStatistics(),
+                          )
                       : null,
                   minScreenWidthForTextBeforeScaling: 20000,
                   icon: Icons.refresh,
@@ -227,7 +245,7 @@ class BreakOnExceptionsControl extends StatelessWidget {
                 child: Text(
                   isInSmallMode ? mode.name : mode.description,
                 ),
-              )
+              ),
           ],
         );
       },

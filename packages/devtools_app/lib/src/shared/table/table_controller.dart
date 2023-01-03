@@ -3,9 +3,9 @@ import 'dart:collection';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
-import '../../primitives/auto_dispose.dart';
-import '../../primitives/trees.dart';
-import '../../primitives/utils.dart';
+import '../primitives/auto_dispose.dart';
+import '../primitives/trees.dart';
+import '../primitives/utils.dart';
 import 'column_widths.dart';
 import 'table_data.dart';
 
@@ -46,7 +46,7 @@ class FlatTableController<T> extends TableControllerBase<T> {
   @override
   void setData(List<T> data, String key) {
     _originalData = UnmodifiableListView(
-      List.from(data),
+      List.of(data),
     );
 
     // Look up the UI state for [key], and sort accordingly.
@@ -66,7 +66,7 @@ class FlatTableController<T> extends TableControllerBase<T> {
     ColumnData<T>? secondarySortColumn,
     String? dataKey,
   }) {
-    var data = List<T>.from(_originalData);
+    var data = List<T>.of(_originalData);
     pinnedData = <T>[];
     data.sort(
       (T a, T b) => _compareData<T>(

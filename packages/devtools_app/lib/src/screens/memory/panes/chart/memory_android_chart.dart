@@ -5,14 +5,15 @@
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/material.dart';
 
-import '../../../../charts/chart.dart';
-import '../../../../charts/chart_controller.dart';
-import '../../../../charts/chart_trace.dart' as trace;
-import '../../../../primitives/auto_dispose_mixin.dart';
+import '../../../../shared/charts/chart.dart';
+import '../../../../shared/charts/chart_controller.dart';
+import '../../../../shared/charts/chart_trace.dart' as trace;
+import '../../../../shared/charts/chart_trace.dart' show ChartSymbol, ChartType;
+import '../../../../shared/primitives/auto_dispose.dart';
 import '../../../../shared/theme.dart';
 import '../../../../shared/utils.dart';
 import '../../memory_controller.dart';
-import '../../primitives/memory_timeline.dart';
+import '../../shared/primitives/memory_timeline.dart';
 
 class AndroidChartController extends ChartController {
   AndroidChartController(this._memoryController, {sharedLabels = const <int>[]})
@@ -243,10 +244,10 @@ class MemoryAndroidChartState extends State<MemoryAndroidChart>
 
     // Stack trace
     final stackIndex = _chartController.createTrace(
-      trace.ChartType.line,
+      ChartType.line,
       trace.PaintCharacteristics(
         color: stackColor,
-        symbol: trace.ChartSymbol.disc,
+        symbol: ChartSymbol.disc,
         diameter: 1.5,
       ),
       stacked: true,
@@ -260,10 +261,10 @@ class MemoryAndroidChartState extends State<MemoryAndroidChart>
 
     // Java heap trace.
     final javaHeapIndex = _chartController.createTrace(
-      trace.ChartType.line,
+      ChartType.line,
       trace.PaintCharacteristics(
         color: javaColor,
-        symbol: trace.ChartSymbol.disc,
+        symbol: ChartSymbol.disc,
         diameter: 1.5,
       ),
       stacked: true,
@@ -277,10 +278,10 @@ class MemoryAndroidChartState extends State<MemoryAndroidChart>
 
     // Code trace
     final codeIndex = _chartController.createTrace(
-      trace.ChartType.line,
+      ChartType.line,
       trace.PaintCharacteristics(
         color: codeColor,
-        symbol: trace.ChartSymbol.disc,
+        symbol: ChartSymbol.disc,
         diameter: 1.5,
       ),
       stacked: true,
@@ -294,10 +295,10 @@ class MemoryAndroidChartState extends State<MemoryAndroidChart>
 
     // Graphics Trace
     final graphicIndex = _chartController.createTrace(
-      trace.ChartType.line,
+      ChartType.line,
       trace.PaintCharacteristics(
         color: graphicColor,
-        symbol: trace.ChartSymbol.disc,
+        symbol: ChartSymbol.disc,
         diameter: 1.5,
       ),
       stacked: true,
@@ -311,10 +312,10 @@ class MemoryAndroidChartState extends State<MemoryAndroidChart>
 
     // Native heap trace.
     final nativeHeapIndex = _chartController.createTrace(
-      trace.ChartType.line,
+      ChartType.line,
       trace.PaintCharacteristics(
         color: nativeHeapColor,
-        symbol: trace.ChartSymbol.disc,
+        symbol: ChartSymbol.disc,
         diameter: 1.5,
       ),
       stacked: true,
@@ -328,10 +329,10 @@ class MemoryAndroidChartState extends State<MemoryAndroidChart>
 
     // Other trace
     final otherIndex = _chartController.createTrace(
-      trace.ChartType.line,
+      ChartType.line,
       trace.PaintCharacteristics(
         color: otherColor,
-        symbol: trace.ChartSymbol.disc,
+        symbol: ChartSymbol.disc,
         diameter: 1.5,
       ),
       stacked: true,
@@ -345,10 +346,10 @@ class MemoryAndroidChartState extends State<MemoryAndroidChart>
 
     // System trace
     final systemIndex = _chartController.createTrace(
-      trace.ChartType.line,
+      ChartType.line,
       trace.PaintCharacteristics(
         color: systemColor,
-        symbol: trace.ChartSymbol.disc,
+        symbol: ChartSymbol.disc,
         diameter: 1.5,
       ),
       stacked: true,
@@ -365,7 +366,7 @@ class MemoryAndroidChartState extends State<MemoryAndroidChart>
       trace.ChartType.line,
       trace.PaintCharacteristics(
         color: totalColor,
-        symbol: trace.ChartSymbol.dashedLine,
+        symbol: ChartSymbol.dashedLine,
         strokeWidth: 2,
       ),
       name: AndroidTraceName.total.toString(),

@@ -9,18 +9,18 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../analytics/analytics.dart' as ga;
-import '../analytics/constants.dart' as analytics_constants;
-import '../config_specific/import_export/import_export.dart';
-import '../primitives/blocking_action_mixin.dart';
-import '../primitives/utils.dart';
+import '../shared/analytics/analytics.dart' as ga;
+import '../shared/analytics/constants.dart' as gac;
 import '../shared/common_widgets.dart';
+import '../shared/config_specific/import_export/import_export.dart';
 import '../shared/file_import.dart';
 import '../shared/globals.dart';
+import '../shared/primitives/blocking_action_mixin.dart';
+import '../shared/primitives/utils.dart';
 import '../shared/routing.dart';
 import '../shared/theme.dart';
+import '../shared/ui/label.dart';
 import '../shared/utils.dart';
-import '../ui/label.dart';
 import 'framework_core.dart';
 
 /// The landing screen when starting Dart DevTools without being connected to an
@@ -38,7 +38,7 @@ class _LandingScreenBodyState extends State<LandingScreenBody> {
   @override
   void initState() {
     super.initState();
-    ga.screen(analytics_constants.landingScreen);
+    ga.screen(gac.landingScreen);
   }
 
   @override
@@ -130,29 +130,9 @@ class _ConnectDialogState extends State<ConnectDialog>
 
   @override
   Widget build(BuildContext context) {
-    return LandingScreenSection(
-      title: 'Connect',
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Connect to a Running App',
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
-          const SizedBox(height: denseRowSpacing),
-          Text(
-            'Enter a URL to a running Dart or Flutter application',
-            style: Theme.of(context).textTheme.bodySmall,
-          ),
-          const Padding(padding: EdgeInsets.only(top: 20.0)),
-          _buildConnectInput(),
-        ],
-      ),
-    );
-  }
+    final textTheme = Theme.of(context).textTheme;
 
-  Widget _buildConnectInput() {
-    return Column(
+    final connectorInput = Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Row(
@@ -177,7 +157,7 @@ class _ConnectDialogState extends State<ConnectDialog>
             ),
             const SizedBox(width: defaultSpacing),
             ElevatedButton(
-              onPressed: actionInProgress ? null : _connect,
+              onPressed: actionInProgress ? null : () => unawaited(_connect()),
               child: const Text('Connect'),
             ),
           ],
@@ -192,6 +172,26 @@ class _ConnectDialogState extends State<ConnectDialog>
         ),
       ],
     );
+
+    return LandingScreenSection(
+      title: 'Connect',
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Connect to a Running App',
+            style: textTheme.titleMedium,
+          ),
+          const SizedBox(height: denseRowSpacing),
+          Text(
+            'Enter a URL to a running Dart or Flutter application',
+            style: textTheme.bodySmall,
+          ),
+          const Padding(padding: EdgeInsets.only(top: 20.0)),
+          connectorInput,
+        ],
+      ),
+    );
   }
 
   Future<void> _connect() async {
@@ -201,8 +201,8 @@ class _ConnectDialogState extends State<ConnectDialog>
 
   Future<void> _connectHelper() async {
     ga.select(
-      analytics_constants.landingScreen,
-      analytics_constants.connectToApp,
+      gac.landingScreen,
+      gac.connectToApp,
     );
     if (connectDialogController.text.isEmpty) {
       notificationService.push('Please enter a VM Service URL.');
@@ -251,6 +251,7 @@ class ImportFileInstructions extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
     return LandingScreenSection(
       title: 'Load DevTools Data',
       child: Column(
@@ -258,13 +259,13 @@ class ImportFileInstructions extends StatelessWidget {
         children: [
           Text(
             'Import a data file to use DevTools without an app connection.',
-            style: Theme.of(context).textTheme.titleMedium,
+            style: textTheme.titleMedium,
           ),
           const SizedBox(height: denseRowSpacing),
           Text(
             'At this time, DevTools only supports importing files that were originally'
             ' exported from DevTools.',
-            style: Theme.of(context).textTheme.bodySmall,
+            style: textTheme.bodySmall,
           ),
           const SizedBox(height: defaultSpacing),
           ElevatedButton(
@@ -281,8 +282,8 @@ class ImportFileInstructions extends StatelessWidget {
 
   Future<void> _importFile(BuildContext context) async {
     ga.select(
-      analytics_constants.landingScreen,
-      analytics_constants.importFile,
+      gac.landingScreen,
+      gac.importFile,
     );
     final DevToolsJsonFile? importedFile = await importFileFromPicker(
       acceptedTypes: ['json'],
@@ -300,6 +301,7 @@ class AppSizeToolingInstructions extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
     return LandingScreenSection(
       title: 'App Size Tooling',
       child: Column(
@@ -307,13 +309,13 @@ class AppSizeToolingInstructions extends StatelessWidget {
         children: [
           Text(
             'Analyze and view diffs for your app\'s size',
-            style: Theme.of(context).textTheme.titleMedium,
+            style: textTheme.titleMedium,
           ),
           const SizedBox(height: denseRowSpacing),
           Text(
             'Load Dart AOT snapshots or app size analysis files to '
             'track down size issues in your app.',
-            style: Theme.of(context).textTheme.bodySmall,
+            style: textTheme.bodySmall,
           ),
           const SizedBox(height: defaultSpacing),
           ElevatedButton(
@@ -327,8 +329,8 @@ class AppSizeToolingInstructions extends StatelessWidget {
 
   void _onOpenAppSizeToolSelected(BuildContext context) {
     ga.select(
-      analytics_constants.landingScreen,
-      analytics_constants.openAppSizeTool,
+      gac.landingScreen,
+      gac.openAppSizeTool,
     );
     DevToolsRouterDelegate.of(context).navigate(appSizePageId);
   }

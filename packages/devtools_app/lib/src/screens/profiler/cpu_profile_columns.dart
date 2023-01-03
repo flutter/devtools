@@ -6,8 +6,8 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../primitives/utils.dart';
 import '../../shared/globals.dart';
+import '../../shared/primitives/utils.dart';
 import '../../shared/routing.dart';
 import '../../shared/table/table.dart';
 import '../../shared/table/table_data.dart';
@@ -40,8 +40,7 @@ class SelfTimeColumn extends ColumnData<CpuStackFrame> {
   }
 
   @override
-  dynamic getValue(CpuStackFrame dataObject) =>
-      dataObject.selfTime.inMicroseconds;
+  int getValue(CpuStackFrame dataObject) => dataObject.selfTime.inMicroseconds;
 
   @override
   String getDisplayValue(CpuStackFrame dataObject) {
@@ -74,8 +73,7 @@ class TotalTimeColumn extends ColumnData<CpuStackFrame> {
   }
 
   @override
-  dynamic getValue(CpuStackFrame dataObject) =>
-      dataObject.totalTime.inMicroseconds;
+  int getValue(CpuStackFrame dataObject) => dataObject.totalTime.inMicroseconds;
 
   @override
   String getDisplayValue(CpuStackFrame dataObject) {
@@ -90,7 +88,7 @@ class TotalTimeColumn extends ColumnData<CpuStackFrame> {
 class MethodNameColumn extends TreeColumnData<CpuStackFrame> {
   MethodNameColumn() : super('Method');
   @override
-  dynamic getValue(CpuStackFrame dataObject) => dataObject.name;
+  String getValue(CpuStackFrame dataObject) => dataObject.name;
 
   @override
   String getDisplayValue(CpuStackFrame dataObject) {
@@ -110,7 +108,7 @@ class SourceColumn extends ColumnData<CpuStackFrame>
   SourceColumn() : super.wide('Source', alignment: ColumnAlignment.right);
 
   @override
-  dynamic getValue(CpuStackFrame dataObject) =>
+  String getValue(CpuStackFrame dataObject) =>
       dataObject.packageUriWithSourceLine;
 
   @override

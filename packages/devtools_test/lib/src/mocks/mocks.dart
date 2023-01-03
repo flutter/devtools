@@ -163,6 +163,13 @@ class MockLoggingController extends Mock
   final selectedLog = ValueNotifier<LogData?>(null);
 
   @override
+  List<LogData> matchesForSearch(
+    String search, {
+    bool searchPreviousMatches = false,
+  }) =>
+      [];
+
+  @override
   List<LogData> data = <LogData>[];
 }
 
@@ -196,8 +203,6 @@ class MockDebuggerControllerLegacy extends Mock implements DebuggerController {
     when(debuggerController.stackFramesWithLocation)
         .thenReturn(ValueNotifier([]));
     when(debuggerController.selectedStackFrame).thenReturn(ValueNotifier(null));
-    when(debuggerController.hasTruncatedFrames)
-        .thenReturn(ValueNotifier(false));
     when(debuggerController.exceptionPauseMode)
         .thenReturn(ValueNotifier('Unhandled'));
     when(debuggerController.variables).thenReturn(ValueNotifier([]));
@@ -226,16 +231,6 @@ class MockProgramExplorerControllerLegacy extends Mock
 }
 
 class MockVM extends Mock implements VM {}
-
-Future<void> ensureInspectorDependencies() async {
-  assert(
-    !kIsWeb,
-    'Attempted to resolve a package path from web code.\n'
-    'Package path resolution uses dart:io, which is not available in web.'
-    '\n'
-    "To fix this, mark the failing test as @TestOn('vm')",
-  );
-}
 
 void mockWebVm(VM vm) {
   when(vm.targetCPU).thenReturn('Web');
@@ -780,12 +775,42 @@ const executableLines = <int>{
   ...coverageMissLines,
 };
 
+const profilerEntries = <int, ProfileReportEntry>{
+  1: ProfileReportEntry(
+    sampleCount: 5,
+    line: 1,
+    inclusive: 2,
+    exclusive: 2,
+  ),
+  3: ProfileReportEntry(
+    sampleCount: 5,
+    line: 3,
+    inclusive: 1,
+    exclusive: 1,
+  ),
+  4: ProfileReportEntry(
+    sampleCount: 5,
+    line: 4,
+    inclusive: 1,
+    exclusive: 1,
+  ),
+  7: ProfileReportEntry(
+    sampleCount: 5,
+    line: 7,
+    inclusive: 1,
+    exclusive: 1,
+  ),
+};
+
 final mockParsedScript = ParsedScript(
   script: mockScript!,
   highlighter: mockSyntaxHighlighter,
   executableLines: executableLines,
-  coverageHitLines: coverageHitLines,
-  coverageMissedLines: coverageMissLines,
+  sourceReport: ProcessedSourceReport(
+    coverageHitLines: coverageHitLines,
+    coverageMissedLines: coverageMissLines,
+    profilerEntries: profilerEntries,
+  ),
 );
 
 final mockScriptRefs = [

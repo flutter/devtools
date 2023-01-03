@@ -6,7 +6,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 
-import '../../primitives/utils.dart';
+import '../../shared/primitives/utils.dart';
 import 'cpu_profile_model.dart';
 
 /// Process for composing [CpuProfileData] into a structured tree of
@@ -180,7 +180,7 @@ class CpuProfileTransformer {
 void mergeCpuProfileRoots(List<CpuStackFrame> roots) {
   // Loop through a copy of [roots] so that we can remove nodes from [roots]
   // once we have merged them.
-  final List<CpuStackFrame> rootsCopy = List.from(roots);
+  final List<CpuStackFrame> rootsCopy = List.of(roots);
   for (CpuStackFrame root in rootsCopy) {
     if (!roots.contains(root)) {
       // We have already merged [root] and removed it from [roots]. Do not

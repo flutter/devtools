@@ -8,8 +8,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:stack_trace/stack_trace.dart' as stack_trace;
 
-import '../analytics/analytics.dart' as ga;
-import '../config_specific/logger/logger.dart';
+import '../shared/analytics/analytics.dart' as ga;
+import '../shared/config_specific/logger/logger.dart';
 
 /// Set up error handling for the app.
 ///
@@ -21,23 +21,27 @@ import '../config_specific/logger/logger.dart';
 /// application.
 void setupErrorHandling(Future Function() appStartCallback) {
   // First, run all our code in a new zone.
-  return runZonedGuarded(() async {
-    WidgetsFlutterBinding.ensureInitialized();
+  return runZonedGuarded(
+    // ignore: avoid-passing-async-when-sync-expected this ignore should be fixed.
+    () async {
+      WidgetsFlutterBinding.ensureInitialized();
 
-    final FlutterExceptionHandler? oldHandler = FlutterError.onError;
+      final FlutterExceptionHandler? oldHandler = FlutterError.onError;
 
-    FlutterError.onError = (FlutterErrorDetails details) {
-      _reportError(details.exception, details.stack ?? StackTrace.empty);
+      FlutterError.onError = (FlutterErrorDetails details) {
+        _reportError(details.exception, details.stack ?? StackTrace.empty);
 
-      if (oldHandler != null) {
-        oldHandler(details);
-      }
-    };
+        if (oldHandler != null) {
+          oldHandler(details);
+        }
+      };
 
-    return appStartCallback();
-  }, (Object error, StackTrace stack) {
-    _reportError(error, stack);
-  });
+      return appStartCallback();
+    },
+    (Object error, StackTrace stack) {
+      _reportError(error, stack);
+    },
+  );
 }
 
 void _reportError(Object error, StackTrace stack) {

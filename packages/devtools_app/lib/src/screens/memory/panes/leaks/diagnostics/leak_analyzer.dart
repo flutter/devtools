@@ -3,10 +3,10 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'package:leak_tracker/devtools_integration.dart';
 
 import '../../../shared/heap/model.dart';
 import '../../../shared/heap/spanning_tree.dart';
-import '../instrumentation/model.dart';
 import 'model.dart';
 
 /// Analyzes notGCed leaks and returns result of the analysis.

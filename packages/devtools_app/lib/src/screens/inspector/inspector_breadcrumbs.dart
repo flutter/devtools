@@ -4,11 +4,11 @@
 
 import 'package:flutter/material.dart';
 
-import '../../primitives/utils.dart';
+import '../../shared/console/eval/inspector_tree.dart';
+import '../../shared/console/primitives/text_styles.dart';
+import '../../shared/primitives/utils.dart';
 import '../../shared/theme.dart';
 import '../../shared/utils.dart';
-import 'inspector_tree.dart';
-import 'primitives/inspector_text_styles.dart';
 
 class InspectorBreadcrumbNavigator extends StatelessWidget {
   const InspectorBreadcrumbNavigator({
@@ -68,18 +68,16 @@ class InspectorBreadcrumbNavigator extends StatelessWidget {
       );
     }).toList();
     List<_InspectorBreadcrumbData> breadcrumbs;
-    if (items.length > _maxNumberOfBreadcrumbs) {
-      breadcrumbs = [
-        items[0],
-        _InspectorBreadcrumbData.more(),
-        ...items.sublist(
-          items.length - _maxNumberOfBreadcrumbs + 1,
-          items.length,
-        ),
-      ];
-    } else {
-      breadcrumbs = items;
-    }
+    breadcrumbs = items.length > _maxNumberOfBreadcrumbs
+        ? [
+            items[0],
+            _InspectorBreadcrumbData.more(),
+            ...items.sublist(
+              items.length - _maxNumberOfBreadcrumbs + 1,
+              items.length,
+            ),
+          ]
+        : items;
 
     return breadcrumbs.joinWith(_InspectorBreadcrumbData.chevron());
   }
@@ -95,7 +93,7 @@ class _InspectorBreadcrumb extends StatelessWidget {
   static const BorderRadius _borderRadius =
       BorderRadius.all(Radius.circular(defaultBorderRadius));
 
-  static const _iconScale = .75;
+  static const _iconScale = 0.75;
 
   final _InspectorBreadcrumbData data;
   final VoidCallback onTap;
@@ -106,7 +104,8 @@ class _InspectorBreadcrumb extends StatelessWidget {
       data.text,
       maxLines: 1,
       overflow: TextOverflow.ellipsis,
-      style: regular.copyWith(fontSize: scaleByFontFactor(11)),
+      style:
+          ConsoleTextStyles.regular.copyWith(fontSize: scaleByFontFactor(11)),
     );
 
     final icon = data.icon == null

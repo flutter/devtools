@@ -8,23 +8,23 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../../analytics/analytics.dart' as ga;
-import '../../analytics/constants.dart' as analytics_constants;
-import '../../http/curl_command.dart';
-import '../../http/http_request_data.dart';
-import '../../primitives/auto_dispose_mixin.dart';
-import '../../primitives/simple_items.dart';
-import '../../primitives/utils.dart';
+import '../../shared/analytics/analytics.dart' as ga;
+import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/common_widgets.dart';
 import '../../shared/globals.dart';
+import '../../shared/http/curl_command.dart';
+import '../../shared/http/http_request_data.dart';
+import '../../shared/primitives/auto_dispose.dart';
+import '../../shared/primitives/simple_items.dart';
+import '../../shared/primitives/utils.dart';
 import '../../shared/screen.dart';
 import '../../shared/split.dart';
 import '../../shared/table/table.dart';
 import '../../shared/table/table_data.dart';
 import '../../shared/theme.dart';
+import '../../shared/ui/filter.dart';
+import '../../shared/ui/search.dart';
 import '../../shared/utils.dart';
-import '../../ui/filter.dart';
-import '../../ui/search.dart';
 import 'network_controller.dart';
 import 'network_model.dart';
 import 'network_request_inspector.dart';
@@ -32,15 +32,15 @@ import 'network_request_inspector.dart';
 final networkSearchFieldKey = GlobalKey(debugLabel: 'NetworkSearchFieldKey');
 
 class NetworkScreen extends Screen {
-  const NetworkScreen()
+  NetworkScreen()
       : super.conditional(
           id: id,
           requiresDartVm: true,
-          title: 'Network',
+          title: ScreenMetaData.network.title,
           icon: Icons.network_check,
         );
 
-  static const id = ScreenIds.network;
+  static final id = ScreenMetaData.network.id;
 
   @override
   String get docPageId => screenId;
@@ -222,8 +222,8 @@ class _NetworkProfilerControlsState extends State<_NetworkProfilerControls>
           onPressed: _recording
               ? () {
                   ga.select(
-                    analytics_constants.network,
-                    analytics_constants.pause,
+                    gac.network,
+                    gac.pause,
                   );
                   widget.controller.togglePolling(false);
                 }
@@ -238,8 +238,8 @@ class _NetworkProfilerControlsState extends State<_NetworkProfilerControls>
               ? null
               : () {
                   ga.select(
-                    analytics_constants.network,
-                    analytics_constants.resume,
+                    gac.network,
+                    gac.resume,
                   );
                   widget.controller.togglePolling(true);
                 },
@@ -250,8 +250,8 @@ class _NetworkProfilerControlsState extends State<_NetworkProfilerControls>
               _NetworkProfilerControls._includeTextWidth,
           onPressed: () {
             ga.select(
-              analytics_constants.network,
-              analytics_constants.clear,
+              gac.network,
+              gac.clear,
             );
             unawaited(widget.controller.clear());
           },
@@ -365,7 +365,7 @@ class NetworkRequestsTable extends StatelessWidget {
           typeColumn,
           durationColumn,
           timestampColumn,
-          actionsColumn
+          actionsColumn,
         ],
         selectionNotifier: networkController.selectedRequest,
         defaultSortColumn: timestampColumn,
@@ -384,7 +384,7 @@ class UriColumn extends ColumnData<NetworkRequest>
         );
 
   @override
-  dynamic getValue(NetworkRequest dataObject) {
+  String getValue(NetworkRequest dataObject) {
     return dataObject.uri;
   }
 
@@ -413,7 +413,7 @@ class MethodColumn extends ColumnData<NetworkRequest> {
   MethodColumn() : super('Method', fixedWidthPx: scaleByFontFactor(70));
 
   @override
-  dynamic getValue(NetworkRequest dataObject) {
+  String getValue(NetworkRequest dataObject) {
     return dataObject.method;
   }
 }
@@ -436,11 +436,11 @@ class ActionsColumn extends ColumnData<NetworkRequest>
   bool get includeHeader => false;
 
   @override
-  dynamic getValue(NetworkRequest dataObject) {
+  String getValue(NetworkRequest dataObject) {
     return '';
   }
 
-  List<PopupMenuItem> _buildOptions(BuildContext context, NetworkRequest data) {
+  List<PopupMenuItem> _buildOptions(NetworkRequest data) {
     return [
       if (data is DartIOHttpRequestData) ...[
         PopupMenuItem(
@@ -450,7 +450,6 @@ class ActionsColumn extends ColumnData<NetworkRequest>
               copyToClipboard(
                 data.uri,
                 'Copied the URL to the clipboard',
-                context,
               ),
             );
           },
@@ -462,12 +461,11 @@ class ActionsColumn extends ColumnData<NetworkRequest>
               copyToClipboard(
                 CurlCommand.from(data).toString(),
                 'Copied the cURL command to the clipboard',
-                context,
               ),
             );
           },
-        )
-      ]
+        ),
+      ],
     ];
   }
 
@@ -478,7 +476,7 @@ class ActionsColumn extends ColumnData<NetworkRequest>
     bool isRowSelected = false,
     VoidCallback? onPressed,
   }) {
-    final options = _buildOptions(context, data);
+    final options = _buildOptions(data);
 
     // Only show the actions button when there are options and the row is
     // currently selected.
@@ -504,7 +502,7 @@ class StatusColumn extends ColumnData<NetworkRequest>
         );
 
   @override
-  dynamic getValue(NetworkRequest dataObject) {
+  String? getValue(NetworkRequest dataObject) {
     return dataObject.status;
   }
 
@@ -539,7 +537,7 @@ class TypeColumn extends ColumnData<NetworkRequest> {
         );
 
   @override
-  dynamic getValue(NetworkRequest dataObject) {
+  String getValue(NetworkRequest dataObject) {
     return dataObject.type;
   }
 
@@ -558,7 +556,7 @@ class DurationColumn extends ColumnData<NetworkRequest> {
         );
 
   @override
-  dynamic getValue(NetworkRequest dataObject) {
+  int? getValue(NetworkRequest dataObject) {
     return dataObject.duration?.inMilliseconds;
   }
 
@@ -583,7 +581,7 @@ class TimestampColumn extends ColumnData<NetworkRequest> {
         );
 
   @override
-  dynamic getValue(NetworkRequest dataObject) {
+  DateTime? getValue(NetworkRequest dataObject) {
     return dataObject.startTimestamp;
   }
 

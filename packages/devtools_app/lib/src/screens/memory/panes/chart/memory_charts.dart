@@ -5,8 +5,8 @@
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/material.dart';
 
-import '../../../../charts/chart_trace.dart';
-import '../../../../primitives/utils.dart';
+import '../../../../shared/charts/chart_trace.dart';
+import '../../../../shared/primitives/utils.dart';
 import '../../memory_controller.dart';
 import 'memory_android_chart.dart';
 import 'memory_events_pane.dart';

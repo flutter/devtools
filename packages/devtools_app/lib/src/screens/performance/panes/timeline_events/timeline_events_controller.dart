@@ -7,20 +7,20 @@ import 'dart:async';
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 
-import '../../../../analytics/analytics.dart' as ga;
-import '../../../../analytics/constants.dart' as analytics_constants;
-import '../../../../analytics/metrics.dart';
-import '../../../../config_specific/logger/allowed_error.dart';
-import '../../../../config_specific/logger/logger.dart';
-import '../../../../http/http_service.dart';
-import '../../../../primitives/auto_dispose.dart';
-import '../../../../primitives/feature_flags.dart';
-import '../../../../primitives/trace_event.dart';
-import '../../../../primitives/trees.dart';
-import '../../../../primitives/utils.dart';
+import '../../../../shared/analytics/analytics.dart' as ga;
+import '../../../../shared/analytics/constants.dart' as gac;
+import '../../../../shared/analytics/metrics.dart';
+import '../../../../shared/config_specific/logger/allowed_error.dart';
+import '../../../../shared/config_specific/logger/logger.dart';
+import '../../../../shared/feature_flags.dart';
 import '../../../../shared/future_work_tracker.dart';
 import '../../../../shared/globals.dart';
-import '../../../../ui/search.dart';
+import '../../../../shared/http/http_service.dart' as http_service;
+import '../../../../shared/primitives/auto_dispose.dart';
+import '../../../../shared/primitives/trace_event.dart';
+import '../../../../shared/primitives/trees.dart';
+import '../../../../shared/primitives/utils.dart';
+import '../../../../shared/ui/search.dart';
 import '../../../profiler/cpu_profile_controller.dart';
 import '../../../profiler/cpu_profile_model.dart';
 import '../../../profiler/cpu_profile_service.dart';
@@ -139,7 +139,6 @@ class TimelineEventsController extends PerformanceFeatureController
     if (_perfettoMode) {
       perfettoController.onBecomingActive();
     }
-    await super.onBecomingActive();
   }
 
   Future<void> _initForServiceConnection() async {
@@ -226,7 +225,7 @@ class TimelineEventsController extends PerformanceFeatureController
     int? uiThreadId;
     int? rasterThreadId;
     for (TraceEvent event in threadNameEvents) {
-      final name = event.args!['name'];
+      final name = event.args!['name'] as String;
 
       if (isFlutterApp && isInitialUpdate) {
         // Android: "1.ui (12652)"
@@ -470,7 +469,7 @@ class TimelineEventsController extends PerformanceFeatureController
   }
 
   Future<void> toggleHttpRequestLogging(bool state) async {
-    await HttpService.toggleHttpRequestLogging(state);
+    await http_service.toggleHttpRequestLogging(state);
     _httpTimelineLoggingEnabled.value = state;
   }
 
@@ -518,7 +517,7 @@ class TimelineEventsController extends PerformanceFeatureController
         TraceEventWrapper(
           TraceEvent(trace),
           DateTime.now().microsecondsSinceEpoch,
-        )
+        ),
     ];
     allTraceEvents
       ..clear()
@@ -580,7 +579,7 @@ class LegacyTimelineEventsController with SearchControllerMixin<TimelineEvent> {
   final _selectedTimelineEventNotifier = ValueNotifier<TimelineEvent?>(null);
 
   final cpuProfilerController =
-      CpuProfilerController(analyticsScreenId: analytics_constants.performance);
+      CpuProfilerController(analyticsScreenId: gac.performance);
 
   /// The tracking index for the first unprocessed trace event collected.
   int _nextTraceIndexToProcess = 0;
@@ -668,8 +667,8 @@ class LegacyTimelineEventsController with SearchControllerMixin<TimelineEvent> {
     // for analytics.
     try {
       await ga.timeAsync(
-        analytics_constants.performance,
-        analytics_constants.traceEventProcessingTime,
+        gac.performance,
+        gac.traceEventProcessingTime,
         asyncOperation: processTraceEventsHelper,
         screenMetricsProvider: () => PerformanceScreenMetrics(
           traceEventCount: processingTraceCount,
@@ -772,7 +771,7 @@ class LegacyTimelineEventsController with SearchControllerMixin<TimelineEvent> {
         }
       }
     } else {
-      final events = List<TimelineEvent>.from(data!.timelineEvents);
+      final events = List<TimelineEvent>.of(data!.timelineEvents);
       for (final event in events) {
         breadthFirstTraversal<TimelineEvent>(
           event,

@@ -5,11 +5,11 @@
 @TestOn('vm')
 import 'dart:convert';
 
-import 'package:devtools_app/src/primitives/message_bus.dart';
 import 'package:devtools_app/src/screens/logging/logging_controller.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/shared/globals.dart';
-import 'package:devtools_app/src/ui/filter.dart';
+import 'package:devtools_app/src/shared/primitives/message_bus.dart';
+import 'package:devtools_app/src/shared/ui/filter.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -200,23 +200,24 @@ void main() {
 
   group('LogData', () {
     test(
-        'pretty prints when details are json, and returns its details otherwise.',
-        () {
-      final nonJson = LogData('some kind', 'Not json', 0);
-      final json = LogData(
-        'some kind',
-        '{"firstValue": "value", "otherValue": "value2"}',
-        1,
-      );
-      final nullDetails = LogData('some kind', null, 1);
-      const prettyJson = '{\n'
-          '  "firstValue": "value",\n'
-          '  "otherValue": "value2"\n'
-          '}';
+      'pretty prints when details are json, and returns its details otherwise.',
+      () {
+        final nonJson = LogData('some kind', 'Not json', 0);
+        final json = LogData(
+          'some kind',
+          '{"firstValue": "value", "otherValue": "value2"}',
+          1,
+        );
+        final nullDetails = LogData('some kind', null, 1);
+        const prettyJson = '{\n'
+            '  "firstValue": "value",\n'
+            '  "otherValue": "value2"\n'
+            '}';
 
-      expect(json.prettyPrinted(), prettyJson);
-      expect(nonJson.prettyPrinted(), 'Not json');
-      expect(nullDetails.prettyPrinted(), null);
-    });
+        expect(json.prettyPrinted(), prettyJson);
+        expect(nonJson.prettyPrinted(), 'Not json');
+        expect(nullDetails.prettyPrinted(), null);
+      },
+    );
   });
 }

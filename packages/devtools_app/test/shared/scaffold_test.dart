@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
-import 'package:devtools_app/src/config_specific/import_export/import_export.dart';
 import 'package:devtools_app/src/framework/scaffold.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
+import 'package:devtools_app/src/shared/config_specific/ide_theme/ide_theme.dart';
+import 'package:devtools_app/src/shared/config_specific/import_export/import_export.dart';
 import 'package:devtools_app/src/shared/framework_controller.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_app/src/shared/notifications.dart';
@@ -41,63 +41,69 @@ void main() {
   }
 
   testWidgetsWithWindowSize(
-      'displays in narrow mode without error', const Size(200.0, 1200.0),
-      (WidgetTester tester) async {
-    await tester.pumpWidget(
-      wrapScaffold(
-        wrapWithNotifications(
-          DevToolsScaffold(
-            tabs: const [_screen1, _screen2, _screen3, _screen4, _screen5],
-            ideTheme: IdeTheme(),
+    'displays in narrow mode without error',
+    const Size(200.0, 1200.0),
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        wrapScaffold(
+          wrapWithNotifications(
+            DevToolsScaffold(
+              screens: const [_screen1, _screen2, _screen3, _screen4, _screen5],
+              ideTheme: IdeTheme(),
+            ),
           ),
         ),
-      ),
-    );
-    expect(find.byKey(_k1), findsOneWidget);
-    expect(find.byKey(DevToolsScaffold.narrowWidthKey), findsOneWidget);
-    expect(find.byKey(DevToolsScaffold.fullWidthKey), findsNothing);
-  });
+      );
+      expect(find.byKey(_k1), findsOneWidget);
+      expect(find.byKey(DevToolsScaffold.narrowWidthKey), findsOneWidget);
+      expect(find.byKey(DevToolsScaffold.fullWidthKey), findsNothing);
+    },
+  );
 
   testWidgetsWithWindowSize(
-      'displays in full-width mode without error', const Size(1200.0, 1200.0),
-      (WidgetTester tester) async {
-    await tester.pumpWidget(
-      wrapScaffold(
-        wrapWithNotifications(
-          DevToolsScaffold(
-            tabs: const [_screen1, _screen2, _screen3, _screen4, _screen5],
-            ideTheme: IdeTheme(),
+    'displays in full-width mode without error',
+    const Size(1200.0, 1200.0),
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        wrapScaffold(
+          wrapWithNotifications(
+            DevToolsScaffold(
+              screens: const [_screen1, _screen2, _screen3, _screen4, _screen5],
+              ideTheme: IdeTheme(),
+            ),
           ),
         ),
-      ),
-    );
-    expect(find.byKey(_k1), findsOneWidget);
-    expect(find.byKey(DevToolsScaffold.fullWidthKey), findsOneWidget);
-    expect(find.byKey(DevToolsScaffold.narrowWidthKey), findsNothing);
-  });
+      );
+      expect(find.byKey(_k1), findsOneWidget);
+      expect(find.byKey(DevToolsScaffold.fullWidthKey), findsOneWidget);
+      expect(find.byKey(DevToolsScaffold.narrowWidthKey), findsNothing);
+    },
+  );
 
-  testWidgets('displays no tabs when only one is given',
-      (WidgetTester tester) async {
-    await tester.pumpWidget(
-      wrapScaffold(
-        wrapWithNotifications(
-          DevToolsScaffold(
-            tabs: const [_screen1],
-            ideTheme: IdeTheme(),
+  testWidgets(
+    'displays no tabs when only one is given',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        wrapScaffold(
+          wrapWithNotifications(
+            DevToolsScaffold(
+              screens: const [_screen1],
+              ideTheme: IdeTheme(),
+            ),
           ),
         ),
-      ),
-    );
-    expect(find.byKey(_k1), findsOneWidget);
-    expect(find.byKey(_t1), findsNothing);
-  });
+      );
+      expect(find.byKey(_k1), findsOneWidget);
+      expect(find.byKey(_t1), findsNothing);
+    },
+  );
 
   testWidgets('displays only the selected tab', (WidgetTester tester) async {
     await tester.pumpWidget(
       wrapScaffold(
         wrapWithNotifications(
           DevToolsScaffold(
-            tabs: const [_screen1, _screen2],
+            screens: const [_screen1, _screen2],
             ideTheme: IdeTheme(),
           ),
         ),
@@ -120,23 +126,25 @@ void main() {
     expect(find.byKey(_k2), findsNothing);
   });
 
-  testWidgets('displays the requested initial page',
-      (WidgetTester tester) async {
-    await tester.pumpWidget(
-      wrapScaffold(
-        wrapWithNotifications(
-          DevToolsScaffold(
-            tabs: const [_screen1, _screen2],
-            page: _screen2.screenId,
-            ideTheme: IdeTheme(),
+  testWidgets(
+    'displays the requested initial page',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        wrapScaffold(
+          wrapWithNotifications(
+            DevToolsScaffold(
+              screens: const [_screen1, _screen2],
+              page: _screen2.screenId,
+              ideTheme: IdeTheme(),
+            ),
           ),
         ),
-      ),
-    );
+      );
 
-    expect(find.byKey(_k1), findsNothing);
-    expect(find.byKey(_k2), findsOneWidget);
-  });
+      expect(find.byKey(_k1), findsNothing);
+      expect(find.byKey(_k2), findsOneWidget);
+    },
+  );
 }
 
 class _TestScreen extends Screen {

@@ -6,8 +6,8 @@ import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 
-import '../../../../../primitives/trace_event.dart';
-import '../../../../../primitives/utils.dart';
+import '../../../../../shared/primitives/trace_event.dart';
+import '../../../../../shared/primitives/utils.dart';
 import '../../../performance_model.dart';
 import '../timeline_event_processor.dart';
 
@@ -96,7 +96,7 @@ extension FrameIdentifierExtension on TraceEventWrapper {
   /// Returns the flutter frame number for this trace event, or null if it does
   /// not exist.
   int? get flutterFrameNumber {
-    final frameNumber = event.args?[TraceEvent.frameNumberArg];
+    final frameNumber = event.args?[TraceEvent.frameNumberArg] as String?;
     if (frameNumber == null) return null;
     return int.tryParse(frameNumber);
   }

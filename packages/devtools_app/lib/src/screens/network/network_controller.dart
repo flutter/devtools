@@ -7,13 +7,13 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../config_specific/logger/allowed_error.dart';
-import '../../http/http_request_data.dart';
-import '../../http/http_service.dart';
-import '../../primitives/utils.dart';
+import '../../shared/config_specific/logger/allowed_error.dart';
 import '../../shared/globals.dart';
-import '../../ui/filter.dart';
-import '../../ui/search.dart';
+import '../../shared/http/http_request_data.dart';
+import '../../shared/http/http_service.dart' as http_service;
+import '../../shared/primitives/utils.dart';
+import '../../shared/ui/filter.dart';
+import '../../shared/ui/search.dart';
 import 'network_model.dart';
 import 'network_screen.dart';
 import 'network_service.dart';
@@ -149,7 +149,7 @@ class NetworkController
       sockets,
       httpRequests,
       _timelineMicrosOffset,
-      currentValues: List.from(requests.value.requests),
+      currentValues: List.of(requests.value.requests),
       invalidRequests: [],
       outstandingRequestsMap: Map.from(requests.value.outstandingHttpRequests),
     );
@@ -205,7 +205,7 @@ class NetworkController
     // TODO(kenz): only call these if http logging and socket profiling are not
     // already enabled. Listen to service manager streams for this info.
     await Future.wait([
-      HttpService.toggleHttpRequestLogging(true),
+      http_service.toggleHttpRequestLogging(true),
       networkService.toggleSocketProfiling(true),
     ]);
     togglePolling(true);

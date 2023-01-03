@@ -7,9 +7,9 @@ import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 
-import '../../../../../config_specific/logger/logger.dart';
-import '../../../../../primitives/trace_event.dart';
-import '../../../../../primitives/utils.dart';
+import '../../../../../shared/config_specific/logger/logger.dart';
+import '../../../../../shared/primitives/trace_event.dart';
+import '../../../../../shared/primitives/utils.dart';
 import '../../../performance_model.dart';
 import '../timeline_event_processor.dart';
 
@@ -137,6 +137,8 @@ class LegacyEventProcessor extends BaseTraceEventProcessor {
       (a, b) =>
           a.time.start!.inMicroseconds.compareTo(b.time.start!.inMicroseconds),
     );
+    // This logic is a little clearer written with if, else.
+    // ignore: prefer-conditional-expression
     if (_data.timelineEvents.isNotEmpty) {
       _data.time = TimeRange()
         // We process trace events in timestamp order, so we can ensure the first

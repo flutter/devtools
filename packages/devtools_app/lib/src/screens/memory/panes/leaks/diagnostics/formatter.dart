@@ -3,12 +3,12 @@
 // found in the LICENSE file.
 
 import 'package:collection/collection.dart';
+import 'package:leak_tracker/devtools_integration.dart';
 
-import '../instrumentation/model.dart';
 import 'model.dart';
 
-const linkToGuidance =
-    'https://github.com/flutter/devtools/blob/master/packages/devtools_app/lib/src/screens/memory/panes/leaks/LEAK_TRACKING.md';
+// TODO(polina-c): create and link the section Leaks in DevTools documentation through enum [DocLinks].
+const linkToGuidance = 'https://github.com/dart-lang/leak_tracker';
 
 String analyzedLeaksToYaml({
   required List<LeakReport>? gcedLate,

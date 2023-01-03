@@ -28,33 +28,19 @@ class MyHomePage extends StatefulWidget {
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
-class MyIncrementer {
-  MyIncrementer(this.increment);
-
-  final VoidCallback increment;
-}
-
 class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
+  final _cachedScreens = <Scaffold>[];
 
-  late MyIncrementer _incrementer = MyIncrementer(() => setState(() {
-        _counter++;
-      }));
-
-  void _updateAndInvokeIncrementer(BuildContext context) {
-    final incrementer = _incrementer;
-
-    _incrementer = MyIncrementer(() {
-      if (identityHashCode(context) > 0) {
-        incrementer.increment();
-      }
-    });
-
-    _incrementer.increment();
+  /// Increments counter if current screen contains floating action button.
+  void _incrementCounter(BuildContext context) {
+    if (_cachedScreens.last.floatingActionButton != null) {
+      setState(() => _counter++);
+    }
   }
 
-  @override
-  Widget build(BuildContext context) {
+  Scaffold buildScreen(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
@@ -64,20 +50,38 @@ class _MyHomePageState extends State<MyHomePage> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             const Text(
-              'You have pushed the button this many times:',
+              'The counter value is:',
             ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
+            MyCounterView(value: _counter),
           ],
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => _updateAndInvokeIncrementer(context),
-        tooltip: 'Increment',
+        onPressed: () => _incrementCounter(context),
+        tooltip: 'Increment counter',
+        foregroundColor: theme.canvasColor,
         child: const Icon(Icons.add),
       ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final screen = buildScreen(context);
+    _cachedScreens.add(screen);
+    return screen;
+  }
+}
+
+class MyCounterView extends StatelessWidget {
+  const MyCounterView({super.key, required this.value});
+  final int value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      '$value',
+      style: Theme.of(context).textTheme.headlineMedium,
     );
   }
 }

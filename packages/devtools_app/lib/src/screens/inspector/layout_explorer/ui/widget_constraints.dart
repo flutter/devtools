@@ -4,8 +4,8 @@
 
 import 'package:flutter/material.dart';
 
-import '../../../../primitives/math_utils.dart';
-import '../../../../primitives/utils.dart';
+import '../../../../shared/primitives/math_utils.dart';
+import '../../../../shared/primitives/utils.dart';
 import '../../../../shared/theme.dart';
 import '../../inspector_data_models.dart';
 import 'arrow.dart';
@@ -55,7 +55,7 @@ class VisualizeWidthAndHeightWithConstraints extends StatelessWidget {
                     : TextStyle(
                         color: colorScheme.unconstrainedColor,
                       ),
-              )
+              ),
             ],
             if (showOverflowHeight)
               TextSpan(
@@ -116,13 +116,13 @@ class VisualizeWidthAndHeightWithConstraints extends StatelessWidget {
                       !warnIfUnconstrained
                   ? null
                   : TextStyle(color: colorScheme.unconstrainedColor),
-            )
+            ),
           ],
           if (showChildrenWidthsSum)
             TextSpan(
               text: '\nchildren take '
                   '${toStringAsFixed(sum(propertiesLocal.childrenWidths.cast<double>()))}',
-            )
+            ),
         ],
       ),
       propertiesLocal.isOverflowWidth,

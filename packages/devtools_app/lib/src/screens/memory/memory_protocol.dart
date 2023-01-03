@@ -8,11 +8,11 @@ import 'dart:math' as math;
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../config_specific/logger/logger.dart' as logger;
+import '../../shared/config_specific/logger/logger.dart' as logger;
 import '../../shared/globals.dart';
 import '../../shared/utils.dart';
 import 'memory_controller.dart';
-import 'primitives/memory_timeline.dart';
+import 'shared/primitives/memory_timeline.dart';
 
 class MemoryTracker {
   MemoryTracker(this.memoryController);
@@ -102,14 +102,11 @@ class MemoryTracker {
 
     // Polls for current Android meminfo using:
     //    > adb shell dumpsys meminfo -d <package_name>
-    if (serviceManager.hasConnection &&
-        serviceManager.vm!.operatingSystem == 'android' &&
-        memoryController.isAndroidChartVisibleNotifier.value) {
-      adbMemoryInfo = await _fetchAdbInfo();
-    } else {
-      // TODO(terry): TBD alternative for iOS memory info - all values zero.
-      adbMemoryInfo = AdbMemoryInfo.empty();
-    }
+    adbMemoryInfo = serviceManager.hasConnection &&
+            serviceManager.vm!.operatingSystem == 'android' &&
+            memoryController.isAndroidChartVisibleNotifier.value
+        ? await _fetchAdbInfo()
+        : AdbMemoryInfo.empty();
 
     // Query the engine's rasterCache estimate.
     rasterCache = await _fetchRasterCacheInfo();

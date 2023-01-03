@@ -2,9 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app/src/ui/search.dart';
+import 'package:devtools_app/src/shared/ui/search.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+// Set debug to true displays editing parts.
+bool debug = false;
 
 void main() {
   group('AutoComplete', () {
@@ -22,11 +25,7 @@ void main() {
       );
     }
 
-    // Set debug to true displays editing parts.
-    const debug = false;
-
     void outputResult(int num, EditingParts editingParts) {
-      // ignore: dead_code
       if (debug) {
         print(
           '$num. left=${editingParts.leftSide}, '

@@ -7,10 +7,10 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../primitives/auto_dispose.dart';
-import '../../primitives/trees.dart';
-import '../../primitives/utils.dart';
 import '../../shared/globals.dart';
+import '../../shared/primitives/auto_dispose.dart';
+import '../../shared/primitives/trees.dart';
+import '../../shared/primitives/utils.dart';
 import '../vm_developer/vm_service_private_extensions.dart';
 import 'program_explorer_model.dart';
 
@@ -367,7 +367,7 @@ class ProgramExplorerController extends DisposableController
         await service.getObject(isolateId, targetScript.id!) as Script;
     final LibraryRef targetLib = scriptObj.library!;
 
-    // Search targetLib only on the root level nodes
+    // Search targetLib only on the root level nodes.
     final libNode = _searchRootObjectNodes(targetLib)!;
 
     // If the object's owning script URI is the same as the target library URI,

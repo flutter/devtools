@@ -2,11 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
-import 'package:devtools_app/src/primitives/trees.dart';
-import 'package:devtools_app/src/primitives/utils.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
+import 'package:devtools_app/src/shared/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/shared/globals.dart';
+import 'package:devtools_app/src/shared/primitives/trees.dart';
+import 'package:devtools_app/src/shared/primitives/utils.dart';
 import 'package:devtools_app/src/shared/table/column_widths.dart';
 import 'package:devtools_app/src/shared/table/table.dart';
 import 'package:devtools_app/src/shared/table/table_controller.dart';
@@ -92,83 +92,87 @@ void main() {
     });
 
     testWidgetsWithWindowSize(
-        'displays with full content', const Size(800.0, 1200.0),
-        (WidgetTester tester) async {
-      final table = FlatTable<TestData>(
-        columns: [
-          flatNameColumn,
-          _NumberColumn(),
-        ],
-        data: flatData,
-        dataKey: 'test-data',
-        keyFactory: (d) => Key(d.name),
-        defaultSortColumn: flatNameColumn,
-        defaultSortDirection: SortDirection.ascending,
-      );
-      await tester.pumpWidget(wrap(table));
-      expect(find.byWidget(table), findsOneWidget);
+      'displays with full content',
+      const Size(800.0, 1200.0),
+      (WidgetTester tester) async {
+        final table = FlatTable<TestData>(
+          columns: [
+            flatNameColumn,
+            _NumberColumn(),
+          ],
+          data: flatData,
+          dataKey: 'test-data',
+          keyFactory: (d) => Key(d.name),
+          defaultSortColumn: flatNameColumn,
+          defaultSortDirection: SortDirection.ascending,
+        );
+        await tester.pumpWidget(wrap(table));
+        expect(find.byWidget(table), findsOneWidget);
 
-      // Column headers.
-      expect(find.text('FlatName'), findsOneWidget);
-      expect(find.text('Number'), findsOneWidget);
+        // Column headers.
+        expect(find.text('FlatName'), findsOneWidget);
+        expect(find.text('Number'), findsOneWidget);
 
-      // Table data.
-      expect(find.byKey(const Key('Foo')), findsOneWidget);
-      expect(find.byKey(const Key('Bar')), findsOneWidget);
-      // Note that two keys with the same name are allowed but not necessarily a
-      // good idea. We should be using unique identifiers for keys.
-      expect(find.byKey(const Key('Baz')), findsNWidgets(2));
-      expect(find.byKey(const Key('Qux')), findsNWidgets(2));
-      expect(find.byKey(const Key('Snap')), findsOneWidget);
-      expect(find.byKey(const Key('Crackle')), findsOneWidget);
-      expect(find.byKey(const Key('Pop')), findsOneWidget);
-    });
+        // Table data.
+        expect(find.byKey(const Key('Foo')), findsOneWidget);
+        expect(find.byKey(const Key('Bar')), findsOneWidget);
+        // Note that two keys with the same name are allowed but not necessarily a
+        // good idea. We should be using unique identifiers for keys.
+        expect(find.byKey(const Key('Baz')), findsNWidgets(2));
+        expect(find.byKey(const Key('Qux')), findsNWidgets(2));
+        expect(find.byKey(const Key('Snap')), findsOneWidget);
+        expect(find.byKey(const Key('Crackle')), findsOneWidget);
+        expect(find.byKey(const Key('Pop')), findsOneWidget);
+      },
+    );
 
     testWidgetsWithWindowSize(
-        'displays with column groups', const Size(800.0, 1200.0),
-        (WidgetTester tester) async {
-      final table = FlatTable<TestData>(
-        columns: [
-          flatNameColumn,
-          _NumberColumn(),
-        ],
-        columnGroups: [
-          ColumnGroup(
-            title: 'Group 1',
-            range: const Range(0, 1),
-          ),
-          ColumnGroup(
-            title: 'Group 2',
-            range: const Range(1, 2),
-          ),
-        ],
-        data: flatData,
-        dataKey: 'test-data',
-        keyFactory: (d) => Key(d.name),
-        defaultSortColumn: flatNameColumn,
-        defaultSortDirection: SortDirection.ascending,
-      );
-      await tester.pumpWidget(wrap(table));
-      expect(find.byWidget(table), findsOneWidget);
-      // Column group headers.
-      expect(find.text('Group 1'), findsOneWidget);
-      expect(find.text('Group 2'), findsOneWidget);
+      'displays with column groups',
+      const Size(800.0, 1200.0),
+      (WidgetTester tester) async {
+        final table = FlatTable<TestData>(
+          columns: [
+            flatNameColumn,
+            _NumberColumn(),
+          ],
+          columnGroups: [
+            ColumnGroup(
+              title: 'Group 1',
+              range: const Range(0, 1),
+            ),
+            ColumnGroup(
+              title: 'Group 2',
+              range: const Range(1, 2),
+            ),
+          ],
+          data: flatData,
+          dataKey: 'test-data',
+          keyFactory: (d) => Key(d.name),
+          defaultSortColumn: flatNameColumn,
+          defaultSortDirection: SortDirection.ascending,
+        );
+        await tester.pumpWidget(wrap(table));
+        expect(find.byWidget(table), findsOneWidget);
+        // Column group headers.
+        expect(find.text('Group 1'), findsOneWidget);
+        expect(find.text('Group 2'), findsOneWidget);
 
-      // Column headers.
-      expect(find.text('FlatName'), findsOneWidget);
-      expect(find.text('Number'), findsOneWidget);
+        // Column headers.
+        expect(find.text('FlatName'), findsOneWidget);
+        expect(find.text('Number'), findsOneWidget);
 
-      // Table data.
-      expect(find.byKey(const Key('Foo')), findsOneWidget);
-      expect(find.byKey(const Key('Bar')), findsOneWidget);
-      // Note that two keys with the same name are allowed but not necessarily a
-      // good idea. We should be using unique identifiers for keys.
-      expect(find.byKey(const Key('Baz')), findsNWidgets(2));
-      expect(find.byKey(const Key('Qux')), findsNWidgets(2));
-      expect(find.byKey(const Key('Snap')), findsOneWidget);
-      expect(find.byKey(const Key('Crackle')), findsOneWidget);
-      expect(find.byKey(const Key('Pop')), findsOneWidget);
-    });
+        // Table data.
+        expect(find.byKey(const Key('Foo')), findsOneWidget);
+        expect(find.byKey(const Key('Bar')), findsOneWidget);
+        // Note that two keys with the same name are allowed but not necessarily a
+        // good idea. We should be using unique identifiers for keys.
+        expect(find.byKey(const Key('Baz')), findsNWidgets(2));
+        expect(find.byKey(const Key('Qux')), findsNWidgets(2));
+        expect(find.byKey(const Key('Snap')), findsOneWidget);
+        expect(find.byKey(const Key('Crackle')), findsOneWidget);
+        expect(find.byKey(const Key('Pop')), findsOneWidget);
+      },
+    );
 
     testWidgets('starts with sorted data', (WidgetTester tester) async {
       expect(flatData[0].name, equals('Foo'));
@@ -266,144 +270,149 @@ void main() {
       }
     });
 
-    testWidgets('does not sort with supportsSorting == false',
-        (WidgetTester tester) async {
-      final nonSortableFlatNameColumn =
-          _NonSortableFlatNameColumn.wide('FlatName');
-      final nonSortableFlatNumColumn = _NonSortableFlatNumColumn.wide('Number');
-      final table = FlatTable<TestData>(
-        columns: [
-          nonSortableFlatNameColumn,
-          nonSortableFlatNumColumn,
-        ],
-        data: flatData,
-        dataKey: 'test-data',
-        keyFactory: (d) => Key(d.name),
-        defaultSortColumn: nonSortableFlatNameColumn,
-        defaultSortDirection: SortDirection.ascending,
-      );
-      await tester.pumpWidget(wrap(table));
-      final FlatTableState state = tester.state(find.byWidget(table));
-      {
-        final data = state.tableController.tableData.value.data;
-        expect(data[0].name, equals('Bar'));
-        expect(data[1].name, equals('Baz'));
-        expect(data[2].name, equals('Baz'));
-        expect(data[3].name, equals('Crackle'));
-        expect(data[4].name, equals('Foo'));
-        expect(data[5].name, equals('Pop'));
-        expect(data[6].name, equals('Qux'));
-        expect(data[7].name, equals('Qux'));
-        expect(data[8].name, equals('Snap'));
-      }
+    testWidgets(
+      'does not sort with supportsSorting == false',
+      (WidgetTester tester) async {
+        final nonSortableFlatNameColumn =
+            _NonSortableFlatNameColumn.wide('FlatName');
+        final nonSortableFlatNumColumn =
+            _NonSortableFlatNumColumn.wide('Number');
+        final table = FlatTable<TestData>(
+          columns: [
+            nonSortableFlatNameColumn,
+            nonSortableFlatNumColumn,
+          ],
+          data: flatData,
+          dataKey: 'test-data',
+          keyFactory: (d) => Key(d.name),
+          defaultSortColumn: nonSortableFlatNameColumn,
+          defaultSortDirection: SortDirection.ascending,
+        );
+        await tester.pumpWidget(wrap(table));
+        final FlatTableState state = tester.state(find.byWidget(table));
+        {
+          final data = state.tableController.tableData.value.data;
+          expect(data[0].name, equals('Bar'));
+          expect(data[1].name, equals('Baz'));
+          expect(data[2].name, equals('Baz'));
+          expect(data[3].name, equals('Crackle'));
+          expect(data[4].name, equals('Foo'));
+          expect(data[5].name, equals('Pop'));
+          expect(data[6].name, equals('Qux'));
+          expect(data[7].name, equals('Qux'));
+          expect(data[8].name, equals('Snap'));
+        }
 
-      // Attempt to reverse the sort direction.
-      await tester.tap(find.text('FlatName'));
-      await tester.pumpAndSettle();
+        // Attempt to reverse the sort direction.
+        await tester.tap(find.text('FlatName'));
+        await tester.pumpAndSettle();
 
-      {
-        final data = state.tableController.tableData.value.data;
-        expect(data[0].name, equals('Bar'));
-        expect(data[1].name, equals('Baz'));
-        expect(data[2].name, equals('Baz'));
-        expect(data[3].name, equals('Crackle'));
-        expect(data[4].name, equals('Foo'));
-        expect(data[5].name, equals('Pop'));
-        expect(data[6].name, equals('Qux'));
-        expect(data[7].name, equals('Qux'));
-        expect(data[8].name, equals('Snap'));
-      }
+        {
+          final data = state.tableController.tableData.value.data;
+          expect(data[0].name, equals('Bar'));
+          expect(data[1].name, equals('Baz'));
+          expect(data[2].name, equals('Baz'));
+          expect(data[3].name, equals('Crackle'));
+          expect(data[4].name, equals('Foo'));
+          expect(data[5].name, equals('Pop'));
+          expect(data[6].name, equals('Qux'));
+          expect(data[7].name, equals('Qux'));
+          expect(data[8].name, equals('Snap'));
+        }
 
-      // Attempt to change the sort column.
-      await tester.tap(find.text('Number'));
-      await tester.pumpAndSettle();
-      {
-        final data = state.tableController.tableData.value.data;
-        expect(data[0].name, equals('Bar'));
-        expect(data[1].name, equals('Baz'));
-        expect(data[2].name, equals('Baz'));
-        expect(data[3].name, equals('Crackle'));
-        expect(data[4].name, equals('Foo'));
-        expect(data[5].name, equals('Pop'));
-        expect(data[6].name, equals('Qux'));
-        expect(data[7].name, equals('Qux'));
-        expect(data[8].name, equals('Snap'));
-      }
-    });
+        // Attempt to change the sort column.
+        await tester.tap(find.text('Number'));
+        await tester.pumpAndSettle();
+        {
+          final data = state.tableController.tableData.value.data;
+          expect(data[0].name, equals('Bar'));
+          expect(data[1].name, equals('Baz'));
+          expect(data[2].name, equals('Baz'));
+          expect(data[3].name, equals('Crackle'));
+          expect(data[4].name, equals('Foo'));
+          expect(data[5].name, equals('Pop'));
+          expect(data[6].name, equals('Qux'));
+          expect(data[7].name, equals('Qux'));
+          expect(data[8].name, equals('Snap'));
+        }
+      },
+    );
 
-    testWidgets('sorts data by column and secondary column',
-        (WidgetTester tester) async {
-      final numberColumn = _NumberColumn();
-      final table = FlatTable<TestData>(
-        columns: [
-          flatNameColumn,
-          numberColumn,
-        ],
-        data: [
-          TestData('Foo', 0),
-          TestData('1 Bar', 1),
-          TestData('# Baz', 2),
-          TestData('Qux', 3),
-          TestData('Snap', 4),
-          TestData('Crackle', 4),
-          TestData('Pop', 4),
-          TestData('Bang', 4),
-          TestData('Qux', 5),
-        ],
-        dataKey: 'test-data',
-        keyFactory: (d) => Key(d.name),
-        defaultSortColumn: numberColumn,
-        defaultSortDirection: SortDirection.ascending,
-        secondarySortColumn: flatNameColumn,
-      );
-      await tester.pumpWidget(wrap(table));
-      final FlatTableState state = tester.state(find.byWidget(table));
-      {
-        final data = state.tableController.tableData.value.data;
-        expect(data[0].name, equals('Foo'));
-        expect(data[1].name, equals('1 Bar'));
-        expect(data[2].name, equals('# Baz'));
-        expect(data[3].name, equals('Qux'));
-        expect(data[4].name, equals('Bang'));
-        expect(data[5].name, equals('Crackle'));
-        expect(data[6].name, equals('Pop'));
-        expect(data[7].name, equals('Snap'));
-        expect(data[8].name, equals('Qux'));
-      }
+    testWidgets(
+      'sorts data by column and secondary column',
+      (WidgetTester tester) async {
+        final numberColumn = _NumberColumn();
+        final table = FlatTable<TestData>(
+          columns: [
+            flatNameColumn,
+            numberColumn,
+          ],
+          data: [
+            TestData('Foo', 0),
+            TestData('1 Bar', 1),
+            TestData('# Baz', 2),
+            TestData('Qux', 3),
+            TestData('Snap', 4),
+            TestData('Crackle', 4),
+            TestData('Pop', 4),
+            TestData('Bang', 4),
+            TestData('Qux', 5),
+          ],
+          dataKey: 'test-data',
+          keyFactory: (d) => Key(d.name),
+          defaultSortColumn: numberColumn,
+          defaultSortDirection: SortDirection.ascending,
+          secondarySortColumn: flatNameColumn,
+        );
+        await tester.pumpWidget(wrap(table));
+        final FlatTableState state = tester.state(find.byWidget(table));
+        {
+          final data = state.tableController.tableData.value.data;
+          expect(data[0].name, equals('Foo'));
+          expect(data[1].name, equals('1 Bar'));
+          expect(data[2].name, equals('# Baz'));
+          expect(data[3].name, equals('Qux'));
+          expect(data[4].name, equals('Bang'));
+          expect(data[5].name, equals('Crackle'));
+          expect(data[6].name, equals('Pop'));
+          expect(data[7].name, equals('Snap'));
+          expect(data[8].name, equals('Qux'));
+        }
 
-      // Reverse the sort direction.
-      await tester.tap(find.text('Number'));
-      await tester.pumpAndSettle();
+        // Reverse the sort direction.
+        await tester.tap(find.text('Number'));
+        await tester.pumpAndSettle();
 
-      {
-        final data = state.tableController.tableData.value.data;
-        expect(data[8].name, equals('Foo'));
-        expect(data[7].name, equals('1 Bar'));
-        expect(data[6].name, equals('# Baz'));
-        expect(data[5].name, equals('Qux'));
-        expect(data[4].name, equals('Bang'));
-        expect(data[3].name, equals('Crackle'));
-        expect(data[2].name, equals('Pop'));
-        expect(data[1].name, equals('Snap'));
-        expect(data[0].name, equals('Qux'));
-      }
-      // Change the sort column.
-      await tester.tap(find.text('FlatName'));
-      await tester.pumpAndSettle();
+        {
+          final data = state.tableController.tableData.value.data;
+          expect(data[8].name, equals('Foo'));
+          expect(data[7].name, equals('1 Bar'));
+          expect(data[6].name, equals('# Baz'));
+          expect(data[5].name, equals('Qux'));
+          expect(data[4].name, equals('Bang'));
+          expect(data[3].name, equals('Crackle'));
+          expect(data[2].name, equals('Pop'));
+          expect(data[1].name, equals('Snap'));
+          expect(data[0].name, equals('Qux'));
+        }
+        // Change the sort column.
+        await tester.tap(find.text('FlatName'));
+        await tester.pumpAndSettle();
 
-      {
-        final data = state.tableController.tableData.value.data;
-        expect(data[0].name, equals('# Baz'));
-        expect(data[1].name, equals('1 Bar'));
-        expect(data[2].name, equals('Bang'));
-        expect(data[3].name, equals('Crackle'));
-        expect(data[4].name, equals('Foo'));
-        expect(data[5].name, equals('Pop'));
-        expect(data[6].name, equals('Qux'));
-        expect(data[7].name, equals('Qux'));
-        expect(data[8].name, equals('Snap'));
-      }
-    });
+        {
+          final data = state.tableController.tableData.value.data;
+          expect(data[0].name, equals('# Baz'));
+          expect(data[1].name, equals('1 Bar'));
+          expect(data[2].name, equals('Bang'));
+          expect(data[3].name, equals('Crackle'));
+          expect(data[4].name, equals('Foo'));
+          expect(data[5].name, equals('Pop'));
+          expect(data[6].name, equals('Qux'));
+          expect(data[7].name, equals('Qux'));
+          expect(data[8].name, equals('Snap'));
+        }
+      },
+    );
 
     testWidgets('displays with many columns', (WidgetTester tester) async {
       final table = FlatTable<TestData>(
@@ -490,154 +499,162 @@ void main() {
       // TODO(jacobr): add a golden image test.
     });
 
-    testWidgets('displays with multiple wide columns',
-        (WidgetTester tester) async {
-      final table = FlatTable<TestData>(
-        columns: [
-          flatNameColumn,
-          _WideMinWidthColumn(),
-          _NumberColumn(),
-          _WideColumn(),
-        ],
-        data: flatData,
-        dataKey: 'test-data',
-        keyFactory: (data) => Key(data.name),
-        defaultSortColumn: flatNameColumn,
-        defaultSortDirection: SortDirection.ascending,
-      );
-      await tester.pumpWidget(
-        wrap(
-          SizedBox(
-            width: 1000.0,
-            height: 200.0,
-            child: table,
+    testWidgets(
+      'displays with multiple wide columns',
+      (WidgetTester tester) async {
+        final table = FlatTable<TestData>(
+          columns: [
+            flatNameColumn,
+            _WideMinWidthColumn(),
+            _NumberColumn(),
+            _WideColumn(),
+          ],
+          data: flatData,
+          dataKey: 'test-data',
+          keyFactory: (data) => Key(data.name),
+          defaultSortColumn: flatNameColumn,
+          defaultSortDirection: SortDirection.ascending,
+        );
+        await tester.pumpWidget(
+          wrap(
+            SizedBox(
+              width: 1000.0,
+              height: 200.0,
+              child: table,
+            ),
           ),
-        ),
-      );
-      expect(find.byWidget(table), findsOneWidget);
-      {
-        final FlatTableState<TestData> state =
-            tester.state(find.byWidget(table));
-        final columnWidths = state.tableController.computeColumnWidths(1000.0);
-        expect(columnWidths.length, equals(4));
-        expect(columnWidths[0], equals(300.0)); // Fixed width column.
-        expect(columnWidths[1], equals(110.0)); // Min width wide column
-        expect(columnWidths[2], equals(400.0)); // Fixed width column.
-        expect(columnWidths[3], equals(110.0)); // Variable width wide column.
-      }
+        );
+        expect(find.byWidget(table), findsOneWidget);
+        {
+          final FlatTableState<TestData> state =
+              tester.state(find.byWidget(table));
+          final columnWidths =
+              state.tableController.computeColumnWidths(1000.0);
+          expect(columnWidths.length, equals(4));
+          expect(columnWidths[0], equals(300.0)); // Fixed width column.
+          expect(columnWidths[1], equals(110.0)); // Min width wide column
+          expect(columnWidths[2], equals(400.0)); // Fixed width column.
+          expect(columnWidths[3], equals(110.0)); // Variable width wide column.
+        }
 
-      await tester.pumpWidget(
-        wrap(
-          SizedBox(
-            width: 200.0,
-            height: 200.0,
-            child: table,
+        await tester.pumpWidget(
+          wrap(
+            SizedBox(
+              width: 200.0,
+              height: 200.0,
+              child: table,
+            ),
           ),
-        ),
-      );
-      {
-        final FlatTableState<TestData> state =
-            tester.state(find.byWidget(table));
-        final columnWidths = state.tableController.computeColumnWidths(200.0);
-        expect(columnWidths.length, equals(4));
-        expect(columnWidths[0], equals(300.0)); // Fixed width column.
-        expect(columnWidths[1], equals(100.0)); // Min width wide column
-        expect(columnWidths[2], equals(400.0)); // Fixed width column.
-        expect(columnWidths[3], equals(0.0)); // Variable width wide column.
-      }
-    });
+        );
+        {
+          final FlatTableState<TestData> state =
+              tester.state(find.byWidget(table));
+          final columnWidths = state.tableController.computeColumnWidths(200.0);
+          expect(columnWidths.length, equals(4));
+          expect(columnWidths[0], equals(300.0)); // Fixed width column.
+          expect(columnWidths[1], equals(100.0)); // Min width wide column
+          expect(columnWidths[2], equals(400.0)); // Fixed width column.
+          expect(columnWidths[3], equals(0.0)); // Variable width wide column.
+        }
+      },
+    );
 
-    testWidgets('displays with multiple min width wide columns',
-        (WidgetTester tester) async {
-      final table = FlatTable<TestData>(
-        columns: [
-          flatNameColumn,
-          _WideMinWidthColumn(),
-          _VeryWideMinWidthColumn(),
-          _NumberColumn(),
-          _WideColumn(),
-        ],
-        data: flatData,
-        dataKey: 'test-data',
-        keyFactory: (data) => Key(data.name),
-        defaultSortColumn: flatNameColumn,
-        defaultSortDirection: SortDirection.ascending,
-      );
-      await tester.pumpWidget(
-        wrap(
-          SizedBox(
-            width: 1501.0,
-            height: 200.0,
-            child: table,
+    testWidgets(
+      'displays with multiple min width wide columns',
+      (WidgetTester tester) async {
+        final table = FlatTable<TestData>(
+          columns: [
+            flatNameColumn,
+            _WideMinWidthColumn(),
+            _VeryWideMinWidthColumn(),
+            _NumberColumn(),
+            _WideColumn(),
+          ],
+          data: flatData,
+          dataKey: 'test-data',
+          keyFactory: (data) => Key(data.name),
+          defaultSortColumn: flatNameColumn,
+          defaultSortDirection: SortDirection.ascending,
+        );
+        await tester.pumpWidget(
+          wrap(
+            SizedBox(
+              width: 1501.0,
+              height: 200.0,
+              child: table,
+            ),
           ),
-        ),
-      );
-      expect(find.byWidget(table), findsOneWidget);
-      {
-        final FlatTableState<TestData> state =
-            tester.state(find.byWidget(table));
-        final columnWidths = state.tableController.computeColumnWidths(1501.0);
-        expect(columnWidths.length, equals(5));
-        expect(columnWidths[0], equals(300.0)); // Fixed width column.
-        expect(columnWidths[1], equals(235.0)); // Min width wide column
-        expect(
-          columnWidths[2],
-          equals(235.0),
-        ); // Very wide min width wide column
-        expect(columnWidths[3], equals(400.0)); // Fixed width column.
-        expect(columnWidths[4], equals(235.0)); // Variable width wide column.
-      }
+        );
+        expect(find.byWidget(table), findsOneWidget);
+        {
+          final FlatTableState<TestData> state =
+              tester.state(find.byWidget(table));
+          final columnWidths =
+              state.tableController.computeColumnWidths(1501.0);
+          expect(columnWidths.length, equals(5));
+          expect(columnWidths[0], equals(300.0)); // Fixed width column.
+          expect(columnWidths[1], equals(235.0)); // Min width wide column
+          expect(
+            columnWidths[2],
+            equals(235.0),
+          ); // Very wide min width wide column
+          expect(columnWidths[3], equals(400.0)); // Fixed width column.
+          expect(columnWidths[4], equals(235.0)); // Variable width wide column.
+        }
 
-      await tester.pumpWidget(
-        wrap(
-          SizedBox(
-            width: 1200.0,
-            height: 200.0,
-            child: table,
+        await tester.pumpWidget(
+          wrap(
+            SizedBox(
+              width: 1200.0,
+              height: 200.0,
+              child: table,
+            ),
           ),
-        ),
-      );
-      expect(find.byWidget(table), findsOneWidget);
-      {
-        final FlatTableState<TestData> state =
-            tester.state(find.byWidget(table));
-        final columnWidths = state.tableController.computeColumnWidths(1200.0);
-        expect(columnWidths.length, equals(5));
-        expect(columnWidths[0], equals(300.0)); // Fixed width column.
-        expect(columnWidths[1], equals(122.0)); // Min width wide column
-        expect(
-          columnWidths[2],
-          equals(160.0),
-        ); // Very wide min width wide column
-        expect(columnWidths[3], equals(400.0)); // Fixed width column.
-        expect(columnWidths[4], equals(122.0)); // Variable width wide column.
-      }
+        );
+        expect(find.byWidget(table), findsOneWidget);
+        {
+          final FlatTableState<TestData> state =
+              tester.state(find.byWidget(table));
+          final columnWidths =
+              state.tableController.computeColumnWidths(1200.0);
+          expect(columnWidths.length, equals(5));
+          expect(columnWidths[0], equals(300.0)); // Fixed width column.
+          expect(columnWidths[1], equals(122.0)); // Min width wide column
+          expect(
+            columnWidths[2],
+            equals(160.0),
+          ); // Very wide min width wide column
+          expect(columnWidths[3], equals(400.0)); // Fixed width column.
+          expect(columnWidths[4], equals(122.0)); // Variable width wide column.
+        }
 
-      await tester.pumpWidget(
-        wrap(
-          SizedBox(
-            width: 1000.0,
-            height: 200.0,
-            child: table,
+        await tester.pumpWidget(
+          wrap(
+            SizedBox(
+              width: 1000.0,
+              height: 200.0,
+              child: table,
+            ),
           ),
-        ),
-      );
-      expect(find.byWidget(table), findsOneWidget);
-      {
-        final FlatTableState<TestData> state =
-            tester.state(find.byWidget(table));
-        final columnWidths = state.tableController.computeColumnWidths(1000.0);
-        expect(columnWidths.length, equals(5));
-        expect(columnWidths[0], equals(300.0)); // Fixed width column.
-        expect(columnWidths[1], equals(100.0)); // Min width wide column
-        expect(
-          columnWidths[2],
-          equals(160.0),
-        ); // Very wide min width wide column
-        expect(columnWidths[3], equals(400.0)); // Fixed width column.
-        expect(columnWidths[4], equals(0.0)); // Variable width wide column.
-      }
-    });
+        );
+        expect(find.byWidget(table), findsOneWidget);
+        {
+          final FlatTableState<TestData> state =
+              tester.state(find.byWidget(table));
+          final columnWidths =
+              state.tableController.computeColumnWidths(1000.0);
+          expect(columnWidths.length, equals(5));
+          expect(columnWidths[0], equals(300.0)); // Fixed width column.
+          expect(columnWidths[1], equals(100.0)); // Min width wide column
+          expect(
+            columnWidths[2],
+            equals(160.0),
+          ); // Very wide min width wide column
+          expect(columnWidths[3], equals(400.0)); // Fixed width column.
+          expect(columnWidths[4], equals(0.0)); // Variable width wide column.
+        }
+      },
+    );
 
     testWidgets('can select an item', (WidgetTester tester) async {
       TestData? selected;
@@ -829,111 +846,117 @@ void main() {
       expect(find.byKey(const Key('empty')), findsOneWidget);
     });
 
-    testWidgets('displays with multiple data roots',
-        (WidgetTester tester) async {
-      final table = TreeTable<TestData>(
-        columns: [treeColumn],
-        dataRoots: [tree1, tree2],
-        dataKey: 'test-data',
-        treeColumn: treeColumn,
-        keyFactory: (d) => Key(d.name),
-        defaultSortColumn: treeColumn,
-        defaultSortDirection: SortDirection.ascending,
-      );
-      await tester.pumpWidget(wrap(table));
-      expect(find.byWidget(table), findsOneWidget);
-      expect(find.byKey(const Key('Foo')), findsOneWidget);
-      expect(find.byKey(const Key('Bar')), findsOneWidget);
-      expect(find.byKey(const Key('Snap')), findsOneWidget);
-      expect(find.byKey(const Key('Foo_2')), findsOneWidget);
-      expect(find.byKey(const Key('Bar_2')), findsOneWidget);
-      expect(find.byKey(const Key('Snap_2')), findsOneWidget);
-      expect(tree1.isExpanded, isTrue);
-      expect(tree2.isExpanded, isTrue);
+    testWidgets(
+      'displays with multiple data roots',
+      (WidgetTester tester) async {
+        final table = TreeTable<TestData>(
+          columns: [treeColumn],
+          dataRoots: [tree1, tree2],
+          dataKey: 'test-data',
+          treeColumn: treeColumn,
+          keyFactory: (d) => Key(d.name),
+          defaultSortColumn: treeColumn,
+          defaultSortDirection: SortDirection.ascending,
+        );
+        await tester.pumpWidget(wrap(table));
+        expect(find.byWidget(table), findsOneWidget);
+        expect(find.byKey(const Key('Foo')), findsOneWidget);
+        expect(find.byKey(const Key('Bar')), findsOneWidget);
+        expect(find.byKey(const Key('Snap')), findsOneWidget);
+        expect(find.byKey(const Key('Foo_2')), findsOneWidget);
+        expect(find.byKey(const Key('Bar_2')), findsOneWidget);
+        expect(find.byKey(const Key('Snap_2')), findsOneWidget);
+        expect(tree1.isExpanded, isTrue);
+        expect(tree2.isExpanded, isTrue);
 
-      await tester.tap(find.byKey(const Key('Foo')));
-      await tester.pumpAndSettle();
-      expect(tree1.isExpanded, isFalse);
-      expect(tree2.isExpanded, isTrue);
+        await tester.tap(find.byKey(const Key('Foo')));
+        await tester.pumpAndSettle();
+        expect(tree1.isExpanded, isFalse);
+        expect(tree2.isExpanded, isTrue);
 
-      await tester.tap(find.byKey(const Key('Foo_2')));
-      expect(tree1.isExpanded, isFalse);
-      expect(tree2.isExpanded, isFalse);
+        await tester.tap(find.byKey(const Key('Foo_2')));
+        expect(tree1.isExpanded, isFalse);
+        expect(tree2.isExpanded, isFalse);
 
-      await tester.tap(find.byKey(const Key('Foo')));
-      expect(tree1.isExpanded, isTrue);
-      expect(tree2.isExpanded, isFalse);
-    });
+        await tester.tap(find.byKey(const Key('Foo')));
+        expect(tree1.isExpanded, isTrue);
+        expect(tree2.isExpanded, isFalse);
+      },
+    );
 
-    testWidgets('displays when widget changes dataRoots',
-        (WidgetTester tester) async {
-      final table = TreeTable<TestData>(
-        columns: [treeColumn],
-        dataRoots: [tree1, tree2],
-        dataKey: 'test-data',
-        treeColumn: treeColumn,
-        keyFactory: (d) => Key(d.name),
-        defaultSortColumn: treeColumn,
-        defaultSortDirection: SortDirection.ascending,
-      );
-      await tester.pumpWidget(wrap(table));
-      expect(find.byWidget(table), findsOneWidget);
-      expect(find.byKey(const Key('Foo')), findsOneWidget);
-      expect(find.byKey(const Key('Bar')), findsOneWidget);
-      expect(find.byKey(const Key('Snap')), findsOneWidget);
-      expect(find.byKey(const Key('Foo_2')), findsOneWidget);
-      expect(find.byKey(const Key('Bar_2')), findsOneWidget);
-      expect(find.byKey(const Key('Snap_2')), findsOneWidget);
-      expect(tree1.isExpanded, isTrue);
-      expect(tree2.isExpanded, isTrue);
+    testWidgets(
+      'displays when widget changes dataRoots',
+      (WidgetTester tester) async {
+        final table = TreeTable<TestData>(
+          columns: [treeColumn],
+          dataRoots: [tree1, tree2],
+          dataKey: 'test-data',
+          treeColumn: treeColumn,
+          keyFactory: (d) => Key(d.name),
+          defaultSortColumn: treeColumn,
+          defaultSortDirection: SortDirection.ascending,
+        );
+        await tester.pumpWidget(wrap(table));
+        expect(find.byWidget(table), findsOneWidget);
+        expect(find.byKey(const Key('Foo')), findsOneWidget);
+        expect(find.byKey(const Key('Bar')), findsOneWidget);
+        expect(find.byKey(const Key('Snap')), findsOneWidget);
+        expect(find.byKey(const Key('Foo_2')), findsOneWidget);
+        expect(find.byKey(const Key('Bar_2')), findsOneWidget);
+        expect(find.byKey(const Key('Snap_2')), findsOneWidget);
+        expect(tree1.isExpanded, isTrue);
+        expect(tree2.isExpanded, isTrue);
 
-      final newTable = TreeTable<TestData>(
-        columns: [treeColumn],
-        dataRoots: [TestData('root1', 0), TestData('root2', 1)],
-        dataKey: 'test-data',
-        treeColumn: treeColumn,
-        keyFactory: (d) => Key(d.name),
-        defaultSortColumn: treeColumn,
-        defaultSortDirection: SortDirection.descending,
-      );
-      await tester.pumpWidget(wrap(newTable));
-      expect(find.byKey(const Key('Foo')), findsNothing);
-      expect(find.byKey(const Key('Bar')), findsNothing);
-      expect(find.byKey(const Key('Snap')), findsNothing);
-      expect(find.byKey(const Key('Foo_2')), findsNothing);
-      expect(find.byKey(const Key('Bar_2')), findsNothing);
-      expect(find.byKey(const Key('Snap_2')), findsNothing);
-      expect(find.byKey(const Key('root1')), findsOneWidget);
-      expect(find.byKey(const Key('root2')), findsOneWidget);
-    });
+        final newTable = TreeTable<TestData>(
+          columns: [treeColumn],
+          dataRoots: [TestData('root1', 0), TestData('root2', 1)],
+          dataKey: 'test-data',
+          treeColumn: treeColumn,
+          keyFactory: (d) => Key(d.name),
+          defaultSortColumn: treeColumn,
+          defaultSortDirection: SortDirection.descending,
+        );
+        await tester.pumpWidget(wrap(newTable));
+        expect(find.byKey(const Key('Foo')), findsNothing);
+        expect(find.byKey(const Key('Bar')), findsNothing);
+        expect(find.byKey(const Key('Snap')), findsNothing);
+        expect(find.byKey(const Key('Foo_2')), findsNothing);
+        expect(find.byKey(const Key('Bar_2')), findsNothing);
+        expect(find.byKey(const Key('Snap_2')), findsNothing);
+        expect(find.byKey(const Key('root1')), findsOneWidget);
+        expect(find.byKey(const Key('root2')), findsOneWidget);
+      },
+    );
 
     testWidgetsWithWindowSize(
-        'displays with tree column first', const Size(800.0, 1200.0),
-        (WidgetTester tester) async {
-      final table = TreeTable<TestData>(
-        columns: [
-          treeColumn,
-          _NumberColumn(),
-        ],
-        dataRoots: [tree1],
-        dataKey: 'test-data',
-        treeColumn: treeColumn,
-        keyFactory: (d) => Key(d.name),
-        defaultSortColumn: treeColumn,
-        defaultSortDirection: SortDirection.descending,
-      );
-      await tester.pumpWidget(wrap(table));
-      expect(find.byWidget(table), findsOneWidget);
-      expect(find.byKey(const Key('Foo')), findsOneWidget);
-      expect(find.byKey(const Key('Bar')), findsOneWidget);
-      // Note that two keys with the same name are allowed but not necessarily a
-      // good idea. We should be using unique identifiers for keys.
-      expect(find.byKey(const Key('Baz')), findsNWidgets(2));
-      expect(find.byKey(const Key('Qux')), findsNWidgets(2));
-      expect(find.byKey(const Key('Snap')), findsOneWidget);
-      expect(find.byKey(const Key('Crackle')), findsOneWidget);
-      expect(find.byKey(const Key('Pop')), findsOneWidget);
-    });
+      'displays with tree column first',
+      const Size(800.0, 1200.0),
+      (WidgetTester tester) async {
+        final table = TreeTable<TestData>(
+          columns: [
+            treeColumn,
+            _NumberColumn(),
+          ],
+          dataRoots: [tree1],
+          dataKey: 'test-data',
+          treeColumn: treeColumn,
+          keyFactory: (d) => Key(d.name),
+          defaultSortColumn: treeColumn,
+          defaultSortDirection: SortDirection.descending,
+        );
+        await tester.pumpWidget(wrap(table));
+        expect(find.byWidget(table), findsOneWidget);
+        expect(find.byKey(const Key('Foo')), findsOneWidget);
+        expect(find.byKey(const Key('Bar')), findsOneWidget);
+        // Note that two keys with the same name are allowed but not necessarily a
+        // good idea. We should be using unique identifiers for keys.
+        expect(find.byKey(const Key('Baz')), findsNWidgets(2));
+        expect(find.byKey(const Key('Qux')), findsNWidgets(2));
+        expect(find.byKey(const Key('Snap')), findsOneWidget);
+        expect(find.byKey(const Key('Crackle')), findsOneWidget);
+        expect(find.byKey(const Key('Pop')), findsOneWidget);
+      },
+    );
 
     testWidgets('displays with many columns', (WidgetTester tester) async {
       final table = TreeTable<TestData>(
@@ -962,80 +985,83 @@ void main() {
       expect(find.byWidget(table), findsOneWidget);
     });
 
-    testWidgets('displays wide data with many columns',
-        (WidgetTester tester) async {
-      const strings = <String>[
-        'All work',
-        'and no play',
-        'makes Ben',
-        'a dull boy',
-        // ignore: no_adjacent_strings_in_list
-        'The quick brown fox jumps over the lazy dog, although the fox '
-            "can't jump very high and the dog is very, very small, so it really"
-            " isn't much of an achievement on the fox's part, so I'm not sure why "
-            "we're even talking about it."
-      ];
-      final root = TestData('Root', 0);
-      var current = root;
-      for (int i = 0; i < 1000; ++i) {
-        final next = TestData(strings[i % strings.length], i);
-        current.addChild(next);
-        current = next;
-      }
-      root.expandCascading();
-      final table = TreeTable<TestData>(
-        columns: [
-          _NumberColumn(),
-          _CombinedColumn(),
-          treeColumn,
-          _CombinedColumn(),
-        ],
-        dataRoots: [root],
-        dataKey: 'test-data',
-        treeColumn: treeColumn,
-        keyFactory: (d) => Key(d.name),
-        defaultSortColumn: treeColumn,
-        defaultSortDirection: SortDirection.ascending,
-      );
-      await tester.pumpWidget(
-        wrap(
-          SizedBox(
-            width: 200.0,
-            height: 200.0,
-            child: table,
+    testWidgets(
+      'displays wide data with many columns',
+      (WidgetTester tester) async {
+        const strings = <String>[
+          'All work',
+          'and no play',
+          'makes Ben',
+          'a dull boy',
+          // String is maybe a little easier to read this way.
+          // ignore: no_adjacent_strings_in_list
+          'The quick brown fox jumps over the lazy dog, although the fox '
+              "can't jump very high and the dog is very, very small, so it really"
+              " isn't much of an achievement on the fox's part, so I'm not sure why "
+              "we're even talking about it.",
+        ];
+        final root = TestData('Root', 0);
+        var current = root;
+        for (int i = 0; i < 1000; ++i) {
+          final next = TestData(strings[i % strings.length], i);
+          current.addChild(next);
+          current = next;
+        }
+        root.expandCascading();
+        final table = TreeTable<TestData>(
+          columns: [
+            _NumberColumn(),
+            _CombinedColumn(),
+            treeColumn,
+            _CombinedColumn(),
+          ],
+          dataRoots: [root],
+          dataKey: 'test-data',
+          treeColumn: treeColumn,
+          keyFactory: (d) => Key(d.name),
+          defaultSortColumn: treeColumn,
+          defaultSortDirection: SortDirection.ascending,
+        );
+        await tester.pumpWidget(
+          wrap(
+            SizedBox(
+              width: 200.0,
+              height: 200.0,
+              child: table,
+            ),
           ),
-        ),
-      );
+        );
 
-      expect(find.byWidget(table), findsOneWidget);
-      // Regression test for https://github.com/flutter/devtools/issues/4786
-      expect(
-        find.text(
-          '\u2026', // Unicode '...'
-          findRichText: true,
-          skipOffstage: false,
-        ),
-        findsNothing,
-      );
-      expect(
-        find.text(
-          'Root',
-          findRichText: true,
-          skipOffstage: false,
-        ),
-        findsOneWidget,
-      );
-      for (final str in strings) {
+        expect(find.byWidget(table), findsOneWidget);
+        // Regression test for https://github.com/flutter/devtools/issues/4786
         expect(
           find.text(
-            str,
+            '\u2026', // Unicode '...'
             findRichText: true,
             skipOffstage: false,
           ),
-          findsWidgets,
+          findsNothing,
         );
-      }
-    });
+        expect(
+          find.text(
+            'Root',
+            findRichText: true,
+            skipOffstage: false,
+          ),
+          findsOneWidget,
+        );
+        for (final str in strings) {
+          expect(
+            find.text(
+              str,
+              findRichText: true,
+              skipOffstage: false,
+            ),
+            findsWidgets,
+          );
+        }
+      },
+    );
 
     testWidgets('properly collapses and expands the tree',
         (WidgetTester tester) async {

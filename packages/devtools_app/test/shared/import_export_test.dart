@@ -3,11 +3,11 @@
 // found in the LICENSE file.
 
 import 'package:collection/collection.dart';
-import 'package:devtools_app/src/config_specific/import_export/import_export.dart';
-import 'package:devtools_app/src/primitives/utils.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
+import 'package:devtools_app/src/shared/config_specific/import_export/import_export.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_app/src/shared/notifications.dart';
+import 'package:devtools_app/src/shared/primitives/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -102,17 +102,17 @@ void main() async {
 final nonDevToolsFileJson = DevToolsJsonFile(
   name: 'nonDevToolsFileJson',
   lastModifiedTime: DateTime.fromMicrosecondsSinceEpoch(1000),
-  data: <String, dynamic>{},
+  data: <String, Object?>{},
 );
 final nonDevToolsFileJsonWithListData = DevToolsJsonFile(
   name: 'nonDevToolsFileJsonWithListData',
   lastModifiedTime: DateTime.fromMicrosecondsSinceEpoch(1000),
-  data: <Map<String, dynamic>>[],
+  data: <Map<String, Object?>>[],
 );
 final devToolsFileJson = DevToolsJsonFile(
   name: 'devToolsFileJson',
   lastModifiedTime: DateTime.fromMicrosecondsSinceEpoch(2000),
-  data: <String, dynamic>{
+  data: <String, Object?>{
     'devToolsSnapshot': true,
     'activeScreenId': 'example',
     'example': {'title': 'example custom tools'}

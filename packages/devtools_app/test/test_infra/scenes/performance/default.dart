@@ -7,8 +7,8 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:devtools_app/devtools_app.dart';
-import 'package:devtools_app/src/config_specific/import_export/import_export.dart';
-import 'package:devtools_app/src/primitives/feature_flags.dart';
+import 'package:devtools_app/src/shared/config_specific/import_export/import_export.dart';
+import 'package:devtools_app/src/shared/feature_flags.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:stager/stager.dart';
@@ -17,7 +17,7 @@ import 'package:stager/stager.dart';
 /// flutter run -t test/test_infra/scenes/performance/default.stager_app.dart -d macos
 class PerformanceDefaultScene extends Scene {
   late PerformanceController controller;
-  final screen = const PerformanceScreen();
+  final screen = PerformanceScreen();
 
   @override
   Widget build() {
@@ -31,7 +31,6 @@ class PerformanceDefaultScene extends Scene {
   Future<void> setUp() async {
     FeatureFlags.widgetRebuildstats = true;
 
-    await ensureInspectorDependencies();
     setGlobal(OfflineModeController, OfflineModeController());
     setGlobal(IdeTheme, IdeTheme());
     setGlobal(NotificationService, NotificationService());

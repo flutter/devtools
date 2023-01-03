@@ -5,13 +5,13 @@
 import 'package:flutter/material.dart';
 import 'package:image/image.dart' as image;
 
-import '../../http/http.dart';
-import '../../http/http_request_data.dart';
-import '../../primitives/utils.dart';
 import '../../shared/common_widgets.dart';
+import '../../shared/http/http.dart';
+import '../../shared/http/http_request_data.dart';
+import '../../shared/primitives/utils.dart';
 import '../../shared/table/table.dart';
 import '../../shared/theme.dart';
-import '../../ui/colors.dart';
+import '../../shared/ui/colors.dart';
 import 'network_model.dart';
 
 // Approximately double the indent of the expandable tile's title.
@@ -53,33 +53,6 @@ class HttpRequestHeadersView extends StatelessWidget {
 
   final DartIOHttpRequestData data;
 
-  Widget _buildRow(
-    BuildContext context,
-    String key,
-    dynamic value,
-    BoxConstraints constraints,
-  ) {
-    return Container(
-      width: constraints.minWidth,
-      padding: _rowPadding,
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SelectableText(
-            '$key: ',
-            style: Theme.of(context).textTheme.titleSmall,
-          ),
-          Expanded(
-            child: SelectableText(
-              value,
-              minLines: 1,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final general = data.general;
@@ -93,14 +66,7 @@ class HttpRequestHeadersView extends StatelessWidget {
               'General',
               [
                 for (final entry in general.entries)
-                  _buildRow(
-                    context,
-                    // TODO(kenz): ensure the default case of `entry.key` looks
-                    // fine.
-                    entry.key,
-                    entry.value.toString(),
-                    constraints,
-                  ),
+                  _Row(entry: entry, constraints: constraints),
               ],
               key: generalKey,
             ),
@@ -109,12 +75,7 @@ class HttpRequestHeadersView extends StatelessWidget {
               [
                 if (responseHeaders != null)
                   for (final entry in responseHeaders.entries)
-                    _buildRow(
-                      context,
-                      entry.key,
-                      entry.value.toString(),
-                      constraints,
-                    ),
+                    _Row(entry: entry, constraints: constraints),
               ],
               key: responseHeadersKey,
             ),
@@ -123,18 +84,46 @@ class HttpRequestHeadersView extends StatelessWidget {
               [
                 if (requestHeaders != null)
                   for (final entry in requestHeaders.entries)
-                    _buildRow(
-                      context,
-                      entry.key,
-                      entry.value.toString(),
-                      constraints,
-                    ),
+                    _Row(entry: entry, constraints: constraints),
               ],
               key: requestHeadersKey,
-            )
+            ),
           ],
         );
       },
+    );
+  }
+}
+
+class _Row extends StatelessWidget {
+  const _Row({
+    required this.entry,
+    required this.constraints,
+  });
+
+  final MapEntry<String, Object?> entry;
+  final BoxConstraints constraints;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: constraints.minWidth,
+      padding: _rowPadding,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SelectableText(
+            '${entry.key}: ',
+            style: Theme.of(context).textTheme.titleSmall,
+          ),
+          Expanded(
+            child: SelectableText(
+              '${entry.value}',
+              minLines: 1,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -385,7 +374,7 @@ class HttpRequestCookiesView extends StatelessWidget {
                     _buildColumn('Size', numeric: true),
                     _buildColumn('HttpOnly'),
                     _buildColumn('Secure'),
-                  ]
+                  ],
                 ],
                 rows: [
                   for (int i = 0; i < cookies.length; ++i)
@@ -513,9 +502,8 @@ class NetworkRequestOverviewView extends StatelessWidget {
       _buildRow(
         context: context,
         title: 'Timing',
-        child: data is WebSocket
-            ? _buildSocketTimeGraph(context)
-            : _buildHttpTimeGraph(context),
+        child:
+            data is WebSocket ? _buildSocketTimeGraph() : _buildHttpTimeGraph(),
       ),
       const SizedBox(height: denseSpacing),
       _buildRow(
@@ -565,7 +553,7 @@ class NetworkRequestOverviewView extends StatelessWidget {
     );
   }
 
-  Widget _buildHttpTimeGraph(BuildContext context) {
+  Widget _buildHttpTimeGraph() {
     final data = this.data as DartIOHttpRequestData;
     if (data.duration == null || data.instantEvents.isEmpty) {
       return Container(
@@ -666,7 +654,7 @@ class NetworkRequestOverviewView extends StatelessWidget {
     ];
   }
 
-  Widget _buildSocketTimeGraph(BuildContext context) {
+  Widget _buildSocketTimeGraph() {
     return Container(
       key: socketTimingGraphKey,
       height: _timingGraphHeight,

@@ -12,7 +12,7 @@ void main() {
         '_comments': [
           'uniqueId must be updated with each new survey so DevTools knows to re-prompt users.',
           'title should not exceed 45 characters.',
-          'startDate and endDate should follow ISO 8601 standard with a timezone offset.'
+          'startDate and endDate should follow ISO 8601 standard with a timezone offset.',
         ],
         'uniqueId': '2020Q4',
         'title': 'Help improve DevTools! Take our Q4 survey.',

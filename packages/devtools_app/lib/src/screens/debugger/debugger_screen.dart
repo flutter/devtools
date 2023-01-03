@@ -11,20 +11,21 @@ import 'package:flutter/scheduler.dart';
 import 'package:provider/provider.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../analytics/analytics.dart' as ga;
-import '../../analytics/constants.dart' as analytics_constants;
-import '../../primitives/auto_dispose_mixin.dart';
-import '../../primitives/listenable.dart';
-import '../../primitives/simple_items.dart';
+import '../../shared/analytics/analytics.dart' as ga;
+import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/common_widgets.dart';
+import '../../shared/console/primitives/source_location.dart';
 import '../../shared/flex_split_column.dart';
 import '../../shared/globals.dart';
+import '../../shared/primitives/auto_dispose.dart';
+import '../../shared/primitives/listenable.dart';
+import '../../shared/primitives/simple_items.dart';
 import '../../shared/routing.dart';
 import '../../shared/screen.dart';
 import '../../shared/split.dart';
 import '../../shared/theme.dart';
+import '../../shared/ui/icons.dart';
 import '../../shared/utils.dart';
-import '../../ui/icons.dart';
 import 'breakpoints.dart';
 import 'call_stack.dart';
 import 'codeview.dart';
@@ -38,16 +39,16 @@ import 'program_explorer_model.dart';
 import 'variables.dart';
 
 class DebuggerScreen extends Screen {
-  const DebuggerScreen()
+  DebuggerScreen()
       : super.conditional(
           id: id,
           requiresDebugBuild: true,
-          title: 'Debugger',
+          title: ScreenMetaData.debugger.title,
           icon: Octicons.bug,
           showFloatingDebuggerControls: false,
         );
 
-  static const id = ScreenIds.debugger;
+  static final id = ScreenMetaData.debugger.id;
 
   @override
   bool showConsole(bool embed) => true;
@@ -113,7 +114,7 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
   void initState() {
     super.initState();
     ga.screen(DebuggerScreen.id);
-    ga.timeStart(DebuggerScreen.id, analytics_constants.pageReady);
+    ga.timeStart(DebuggerScreen.id, gac.pageReady);
     _shownFirstScript = false;
     SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
       if (!_shownFirstScript) return;
@@ -150,11 +151,13 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
               child: ValueListenableBuilder<bool>(
                 valueListenable: codeViewController.fileExplorerVisible,
                 builder: (context, visible, child) {
+                  // Conditional expression
+                  // ignore: prefer-conditional-expression
                   if (visible) {
                     // TODO(devoncarew): Animate this opening and closing.
                     return Split(
                       axis: Axis.horizontal,
-                      initialFractions: const [0.70, 0.30],
+                      initialFractions: const [0.7, 0.3],
                       children: [
                         child!,
                         OutlineDecoration(
@@ -179,12 +182,12 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
                         !_shownFirstScript) {
                       ga.timeEnd(
                         DebuggerScreen.id,
-                        analytics_constants.pageReady,
+                        gac.pageReady,
                       );
                       unawaited(
                         serviceManager.sendDwdsEvent(
                           screen: DebuggerScreen.id,
-                          action: analytics_constants.pageReady,
+                          action: gac.pageReady,
                         ),
                       );
                       _shownFirstScript = true;
@@ -196,7 +199,9 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
                       debuggerController: controller,
                       scriptRef: scriptRef,
                       parsedScript: parsedScript,
-                      onSelected: breakpointManager.toggleBreakpoint,
+                      onSelected: (script, line) => unawaited(
+                        breakpointManager.toggleBreakpoint(script, line),
+                      ),
                     );
                   },
                 ),
@@ -229,7 +234,7 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
       builder: (context, constraints) {
         return FlexSplitColumn(
           totalHeight: constraints.maxHeight,
-          initialFractions: const [0.40, 0.40, 0.20],
+          initialFractions: const [0.4, 0.4, 0.2],
           minSizes: const [0.0, 0.0, 0.0],
           headers: <PreferredSizeWidget>[
             AreaPaneHeader(
@@ -282,7 +287,7 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
               child: ToolbarAction(
                 icon: Icons.delete,
                 onPressed: breakpoints.isNotEmpty
-                    ? breakpointManager.clearBreakpoints
+                    ? () => unawaited(breakpointManager.clearBreakpoints())
                     : null,
               ),
             ),
@@ -377,9 +382,14 @@ class _DebuggerStatusState extends State<DebuggerStatus> with AutoDisposeMixin {
   void initState() {
     super.initState();
 
-    addAutoDisposeListener(widget.controller.isPaused, _updateStatus);
+    addAutoDisposeListener(
+      widget.controller.isPaused,
+      () => unawaited(
+        _updateStatus(),
+      ),
+    );
 
-    _updateStatus();
+    unawaited(_updateStatus());
   }
 
   @override
@@ -387,7 +397,12 @@ class _DebuggerStatusState extends State<DebuggerStatus> with AutoDisposeMixin {
     super.didUpdateWidget(oldWidget);
 
     // todo: should we check that widget.controller != oldWidget.controller?
-    addAutoDisposeListener(widget.controller.isPaused, _updateStatus);
+    addAutoDisposeListener(
+      widget.controller.isPaused,
+      () => unawaited(
+        _updateStatus(),
+      ),
+    );
   }
 
   @override
@@ -399,7 +414,7 @@ class _DebuggerStatusState extends State<DebuggerStatus> with AutoDisposeMixin {
     );
   }
 
-  void _updateStatus() async {
+  Future<void> _updateStatus() async {
     final status = await _computeStatus();
     if (status != _status) {
       setState(() {
@@ -420,14 +435,15 @@ class _DebuggerStatusState extends State<DebuggerStatus> with AutoDisposeMixin {
     final reason =
         event.kind == EventKind.kPauseException ? ' on exception' : '';
 
-    final scriptUri = frame?.location?.script?.uri;
+    final location = frame?.location;
+    final scriptUri = location?.script?.uri;
     if (scriptUri == null) {
       return 'paused$reason';
     }
 
     final fileName = ' at ' + scriptUri.split('/').last;
-    final tokenPos = frame?.location?.tokenPos;
-    final scriptRef = frame?.location?.script;
+    final tokenPos = location?.tokenPos;
+    final scriptRef = location?.script;
     if (tokenPos == null || scriptRef == null) {
       return 'paused$reason$fileName';
     }

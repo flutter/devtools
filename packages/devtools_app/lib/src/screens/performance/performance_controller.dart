@@ -6,11 +6,11 @@ import 'dart:async';
 
 import 'package:vm_service/vm_service.dart';
 
-import '../../config_specific/import_export/import_export.dart';
-import '../../primitives/auto_dispose.dart';
-import '../../primitives/feature_flags.dart';
+import '../../shared/config_specific/import_export/import_export.dart';
+import '../../shared/console/eval/inspector_service.dart';
+import '../../shared/feature_flags.dart';
 import '../../shared/globals.dart';
-import '../inspector/inspector_service.dart';
+import '../../shared/primitives/auto_dispose.dart';
 import 'panes/controls/enhance_tracing/enhance_tracing_controller.dart';
 import 'panes/flutter_frames/flutter_frame_model.dart';
 import 'panes/flutter_frames/flutter_frames_controller.dart';
@@ -53,6 +53,14 @@ class PerformanceController extends DisposableController
   // PR for rebuild indicators lands
   //(https://github.com/flutter/devtools/pull/4566).
   final rebuildCountModel = RebuildCountModel();
+
+  /// Index of the selected feature tab.
+  ///
+  /// This value is used to set the initial tab selection of the
+  /// [TabbedPerformanceView]. This widget will be disposed and re-initialized
+  /// on DevTools screen changes, so we must store this value in the controller
+  /// instead of the widget state.
+  int selectedFeatureTabIndex = 0;
 
   bool _fetchMissingLocationsStarted = false;
   IsolateRef? _currentRebuildWidgetsIsolate;
@@ -116,8 +124,7 @@ class PerformanceController extends DisposableController
             // the last hot restart. Their data would be bogus.
             data.rebuildCountModel
                 .processRebuildEvent(event.extensionData!.data);
-            if (data.rebuildCountModel.locationMap.locationsResolved.value ==
-                    false &&
+            if (!data.rebuildCountModel.locationMap.locationsResolved.value &&
                 !_fetchMissingLocationsStarted) {
               _fetchMissingRebuildLocations();
             }
@@ -145,13 +152,13 @@ class PerformanceController extends DisposableController
       // own. This wouldn't be a big deal but suggests a logic bug
       // somewhere.
       assert(
-        data.rebuildCountModel.locationMap.locationsResolved.value == false,
+        !data.rebuildCountModel.locationMap.locationsResolved.value,
       );
       data.rebuildCountModel.locationMap.processLocationMap(json);
       // Only one call to fetch missing locations should ever be
       // needed as rebuild events include all associated locations.
       assert(
-        data.rebuildCountModel.locationMap.locationsResolved.value == true,
+        data.rebuildCountModel.locationMap.locationsResolved.value,
       );
     }
   }
@@ -254,11 +261,11 @@ abstract class PerformanceFeatureController extends DisposableController {
     }
   }
 
-  Future<void> onBecomingActive() async {}
+  Future<void> onBecomingActive();
 
-  Future<void> init() async {}
+  Future<void> init();
 
-  FutureOr<void> setOfflineData(PerformanceData offlineData);
+  Future<void> setOfflineData(PerformanceData offlineData);
 
   FutureOr<void> clearData();
 

@@ -6,10 +6,10 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
-import '../../../../primitives/utils.dart';
 import '../../../../shared/common_widgets.dart';
+import '../../../../shared/primitives/utils.dart';
 import '../../../../shared/theme.dart';
-import '../../../../ui/utils.dart';
+import '../../../../shared/ui/utils.dart';
 import 'frame_analysis_model.dart';
 
 class FrameTimeVisualizer extends StatefulWidget {
@@ -287,7 +287,7 @@ class _FramePhaseBlock extends StatelessWidget {
                     blockData.display,
                     overflow: TextOverflow.ellipsis,
                   ),
-                ]
+                ],
               ],
             );
           },

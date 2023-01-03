@@ -6,9 +6,9 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/screens/debugger/span_parser.dart';
 import 'package:devtools_app/src/screens/debugger/syntax_highlighter.dart';
+import 'package:devtools_app/src/shared/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_app/src/shared/routing.dart';
 import 'package:devtools_app/src/shared/theme.dart';

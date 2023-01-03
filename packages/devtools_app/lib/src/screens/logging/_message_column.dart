@@ -6,11 +6,11 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 
-import '../../primitives/utils.dart';
+import '../../shared/primitives/utils.dart';
 import '../../shared/table/table.dart';
 import '../../shared/table/table_data.dart';
 import '../../shared/theme.dart';
-import '../../ui/colors.dart';
+import '../../shared/ui/colors.dart';
 import 'logging_controller.dart';
 
 @visibleForTesting

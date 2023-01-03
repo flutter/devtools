@@ -9,9 +9,9 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../primitives/utils.dart';
 import '../../shared/common_widgets.dart';
 import '../../shared/globals.dart';
+import '../../shared/primitives/utils.dart';
 import '../../shared/split.dart';
 import '../../shared/table/table.dart';
 import '../../shared/theme.dart';
@@ -148,7 +148,7 @@ class VMInfoList extends StatelessWidget {
                             child: Builder(builder: row.value),
                           ),
                         ],
-                      )
+                      ),
                   ],
                 ),
               ),
@@ -252,8 +252,12 @@ String? _objectName(ObjRef? objectRef) {
 
   String? objectRefName;
 
-  if (objectRef is ClassRef || objectRef is FuncRef || objectRef is FieldRef) {
-    objectRefName = (objectRef as dynamic).name;
+  if (objectRef is ClassRef) {
+    objectRefName = objectRef.name;
+  } else if (objectRef is FuncRef) {
+    objectRefName = objectRef.name;
+  } else if (objectRef is FieldRef) {
+    objectRefName = objectRef.name;
   } else if (objectRef is LibraryRef) {
     objectRefName =
         (objectRef.name?.isEmpty ?? false) ? objectRef.uri : objectRef.name;
@@ -288,11 +292,9 @@ String? qualifiedName(ObjRef? ref) {
   if (ref is ClassRef) {
     return '${ref.name}';
   } else if (ref is FuncRef) {
-    if (ref.owner is! LibraryRef) {
-      return '${qualifiedName(ref.owner)}.${ref.name}';
-    } else {
-      return '${ref.name}';
-    }
+    return ref.owner is! LibraryRef
+        ? '${qualifiedName(ref.owner)}.${ref.name}'
+        : '${ref.name}';
   }
 
   throw Exception('Unexpected owner type: ${ref.type}');
@@ -417,9 +419,10 @@ class RetainingPathWidget extends StatelessWidget {
     BuildContext context,
     RetainingPath retainingPath,
   ) {
+    final theme = Theme.of(context);
     final emptyList = SelectableText(
       'No retaining objects',
-      style: Theme.of(context).fixedFontStyle,
+      style: theme.fixedFontStyle,
     );
     if (retainingPath.elements == null) return [emptyList];
 
@@ -427,7 +430,7 @@ class RetainingPathWidget extends StatelessWidget {
         ? SelectableText(
             _objectName(retainingPath.elements!.first.value) ??
                 '<RetainingObject>',
-            style: Theme.of(context).fixedFontStyle,
+            style: theme.fixedFontStyle,
           )
         : emptyList;
 
@@ -444,7 +447,7 @@ class RetainingPathWidget extends StatelessWidget {
               Flexible(
                 child: SelectableText(
                   _retainingObjectDescription(object),
-                  style: Theme.of(context).fixedFontStyle,
+                  style: theme.fixedFontStyle,
                 ),
               ),
             ],
@@ -453,10 +456,10 @@ class RetainingPathWidget extends StatelessWidget {
         children: [
           SelectableText(
             'Retained by a GC root of type ${retainingPath.gcRootType ?? '<unknown>'}',
-            style: Theme.of(context).fixedFontStyle,
+            style: theme.fixedFontStyle,
           ),
         ],
-      )
+      ),
     ];
 
     return prettyRows(context, retainingObjects);
@@ -776,13 +779,13 @@ class VmObjectDisplayBasicLayout extends StatelessWidget {
     );
   }
 
-  void _onExpandRetainingPath(bool expanded) {
+  void _onExpandRetainingPath(bool _) {
     if (object.retainingPath.value == null) {
       unawaited(object.requestRetainingPath());
     }
   }
 
-  void _onExpandInboundRefs(bool expanded) {
+  void _onExpandInboundRefs(bool _) {
     if (object.inboundReferences.value == null) {
       unawaited(object.requestInboundsRefs());
     }
@@ -820,17 +823,29 @@ List<MapEntry<String, WidgetBuilder>> vmObjectGeneralDataRows(
         requestFunction: object.requestRetainedSize,
       ),
     ),
-    if (object is ClassObject || object is ScriptObject)
+    if (object is ClassObject)
       serviceObjectLinkBuilderMapEntry<LibraryRef>(
         controller: controller,
         key: 'Library',
-        object: (object.obj as dynamic).library,
+        object: object.obj.library!,
       ),
-    if (object is FieldObject || object is FuncObject)
+    if (object is ScriptObject)
+      serviceObjectLinkBuilderMapEntry<LibraryRef>(
+        controller: controller,
+        key: 'Library',
+        object: object.obj.library!,
+      ),
+    if (object is FieldObject)
       serviceObjectLinkBuilderMapEntry<ObjRef>(
         controller: controller,
         key: 'Owner',
-        object: (object.obj as dynamic).owner,
+        object: object.obj.owner!,
+      ),
+    if (object is FuncObject)
+      serviceObjectLinkBuilderMapEntry<ObjRef>(
+        controller: controller,
+        key: 'Owner',
+        object: object.obj.owner!,
       ),
     if (object is! ScriptObject && object is! LibraryObject)
       serviceObjectLinkBuilderMapEntry<ScriptRef>(

@@ -33,7 +33,7 @@ class VmLibraryDisplay extends StatelessWidget {
         generalDataRows: _libraryDataRows(library),
         expandableWidgets: [
           if (dependencies != null)
-            LibraryDependencies(dependencies: dependencies)
+            LibraryDependencies(dependencies: dependencies),
         ],
       ),
     );
@@ -86,7 +86,7 @@ class LibraryDependencies extends StatelessWidget {
               ),
             ),
           ],
-        )
+        ),
     ];
   }
 

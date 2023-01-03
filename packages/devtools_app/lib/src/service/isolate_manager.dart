@@ -9,10 +9,10 @@ import 'package:collection/collection.dart' show IterableExtension;
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart' hide Error;
 
-import '../primitives/auto_dispose.dart';
-import '../primitives/message_bus.dart';
-import '../primitives/utils.dart';
 import '../shared/globals.dart';
+import '../shared/primitives/auto_dispose.dart';
+import '../shared/primitives/message_bus.dart';
+import '../shared/primitives/utils.dart';
 import '../shared/utils.dart';
 import 'isolate_state.dart';
 import 'service_extensions.dart' as extensions;

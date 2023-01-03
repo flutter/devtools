@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../shared/common_widgets.dart';
 import '../../../../shared/globals.dart';
-import '../../primitives/ui.dart';
+import '../../shared/primitives/simple_elements.dart';
 
 class PrimaryControls extends StatelessWidget {
   const PrimaryControls({
@@ -15,10 +15,12 @@ class PrimaryControls extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChartVisibilityButton(
-      showChart: preferences.memory.showChart,
+    return VisibilityButton(
+      show: preferences.memory.showChart,
       onPressed: (show) => preferences.memory.showChart.value = show,
-      minScreenWidthForTextBeforeScaling: primaryControlsMinVerboseWidth,
+      minScreenWidthForTextBeforeScaling: memoryControlsMinVerboseWidth,
+      label: 'Memory chart',
+      tooltip: 'Toggle visibility of the Memory usage chart',
     );
   }
 }

@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 @TestOn('vm')
-import 'package:devtools_app/src/primitives/extent_delegate_list.dart';
+import 'package:devtools_app/src/shared/primitives/extent_delegate_list.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -48,7 +48,7 @@ void main() {
     testWidgets('builds successfully with customPointerSignalHandler',
         (tester) async {
       int pointerSignalEventCount = 0;
-      void _handlePointerSignal(PointerSignalEvent event) {
+      void _handlePointerSignal(PointerSignalEvent _) {
         pointerSignalEventCount++;
       }
 

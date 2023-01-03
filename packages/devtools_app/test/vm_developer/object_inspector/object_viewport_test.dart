@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/screens/debugger/breakpoint_manager.dart';
 import 'package:devtools_app/src/screens/vm_developer/object_inspector/object_viewport.dart';
 import 'package:devtools_app/src/screens/vm_developer/object_inspector/vm_class_display.dart';
@@ -13,6 +12,7 @@ import 'package:devtools_app/src/screens/vm_developer/object_inspector/vm_object
 import 'package:devtools_app/src/screens/vm_developer/object_inspector/vm_script_display.dart';
 import 'package:devtools_app/src/screens/vm_developer/vm_developer_common_widgets.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
+import 'package:devtools_app/src/shared/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_app/src/shared/history_viewport.dart';
 import 'package:devtools_test/devtools_test.dart';
@@ -82,19 +82,22 @@ void main() {
       mockVmObject(mockFieldObject);
     });
 
-    testWidgetsWithWindowSize('viewport shows field display', windowSize,
-        (WidgetTester tester) async {
-      testObjectInspectorViewController.fakeObjectHistory
-          .setCurrentObject(mockFieldObject);
+    testWidgetsWithWindowSize(
+      'viewport shows field display',
+      windowSize,
+      (WidgetTester tester) async {
+        testObjectInspectorViewController.fakeObjectHistory
+            .setCurrentObject(mockFieldObject);
 
-      await tester.pumpWidget(
-        wrap(ObjectViewport(controller: testObjectInspectorViewController)),
-      );
+        await tester.pumpWidget(
+          wrap(ObjectViewport(controller: testObjectInspectorViewController)),
+        );
 
-      expect(ObjectViewport.viewportTitle(mockFieldObject), 'Field fooField');
-      expect(find.text('Field fooField'), findsOneWidget);
-      expect(find.byType(VmFieldDisplay), findsOneWidget);
-    });
+        expect(ObjectViewport.viewportTitle(mockFieldObject), 'Field fooField');
+        expect(find.text('Field fooField'), findsOneWidget);
+        expect(find.byType(VmFieldDisplay), findsOneWidget);
+      },
+    );
   });
 
   group('test for function object:', () {

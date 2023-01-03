@@ -4,7 +4,7 @@
 
 import 'package:flutter/foundation.dart';
 
-import '../../../../config_specific/logger/logger.dart' as logger;
+import '../../../../shared/config_specific/logger/logger.dart' as logger;
 import '../../../../shared/globals.dart';
 import '../../performance_controller.dart';
 import '../../performance_model.dart';
@@ -67,5 +67,15 @@ class RasterStatsController extends PerformanceFeatureController {
   @override
   void clearData() {
     setData(null);
+  }
+
+  @override
+  Future<void> init() {
+    return Future.value();
+  }
+
+  @override
+  Future<void> onBecomingActive() {
+    return Future.value();
   }
 }

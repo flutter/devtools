@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app/src/analytics/analytics_controller.dart';
-import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
-import 'package:devtools_app/src/config_specific/import_export/import_export.dart';
 import 'package:devtools_app/src/framework/scaffold.dart';
 import 'package:devtools_app/src/screens/debugger/debugger_screen.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
+import 'package:devtools_app/src/shared/analytics/analytics_controller.dart';
+import 'package:devtools_app/src/shared/config_specific/ide_theme/ide_theme.dart';
+import 'package:devtools_app/src/shared/config_specific/import_export/import_export.dart';
 import 'package:devtools_app/src/shared/framework_controller.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_app/src/shared/notifications.dart';
@@ -38,30 +38,33 @@ void main() {
   setGlobal(IdeTheme, IdeTheme());
   setGlobal(NotificationService, NotificationService());
 
-  testWidgets('displays floating debugger controls',
-      (WidgetTester tester) async {
-    final mockConnectedApp = MockConnectedAppLegacy();
-    when(mockConnectedApp.isFlutterAppNow).thenReturn(true);
-    when(mockConnectedApp.isProfileBuildNow).thenReturn(false);
-    when(mockServiceManager.connectedAppInitialized).thenReturn(true);
-    when(mockServiceManager.connectedApp).thenReturn(mockConnectedApp);
-    final mockDebuggerController = MockDebuggerController();
-    when(mockDebuggerController.isPaused).thenReturn(ValueNotifier<bool>(true));
+  testWidgets(
+    'displays floating debugger controls',
+    (WidgetTester tester) async {
+      final mockConnectedApp = MockConnectedAppLegacy();
+      when(mockConnectedApp.isFlutterAppNow).thenReturn(true);
+      when(mockConnectedApp.isProfileBuildNow).thenReturn(false);
+      when(mockServiceManager.connectedAppInitialized).thenReturn(true);
+      when(mockServiceManager.connectedApp).thenReturn(mockConnectedApp);
+      final mockDebuggerController = MockDebuggerController();
+      when(mockDebuggerController.isPaused)
+          .thenReturn(ValueNotifier<bool>(true));
 
-    await tester.pumpWidget(
-      wrapWithControllers(
-        DevToolsScaffold(
-          tabs: const [_screen1, _screen2],
-          ideTheme: IdeTheme(),
+      await tester.pumpWidget(
+        wrapWithControllers(
+          DevToolsScaffold(
+            screens: const [_screen1, _screen2],
+            ideTheme: IdeTheme(),
+          ),
+          debugger: mockDebuggerController,
+          analytics: AnalyticsController(enabled: false, firstRun: false),
         ),
-        debugger: mockDebuggerController,
-        analytics: AnalyticsController(enabled: false, firstRun: false),
-      ),
-    );
-    expect(find.byKey(_k1), findsOneWidget);
-    expect(find.byKey(_k2), findsNothing);
-    expect(find.byType(FloatingDebuggerControls), findsOneWidget);
-  });
+      );
+      expect(find.byKey(_k1), findsOneWidget);
+      expect(find.byKey(_k2), findsNothing);
+      expect(find.byType(FloatingDebuggerControls), findsOneWidget);
+    },
+  );
 }
 
 class _TestScreen extends Screen {

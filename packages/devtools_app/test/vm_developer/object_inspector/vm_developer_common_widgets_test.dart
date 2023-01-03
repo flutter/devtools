@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/screens/vm_developer/vm_developer_common_widgets.dart';
 import 'package:devtools_app/src/shared/common_widgets.dart';
+import 'package:devtools_app/src/shared/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
@@ -71,22 +71,24 @@ void main() {
     });
   });
 
-  testWidgets('test RequestableSizeWidget while fetching data',
-      (WidgetTester tester) async {
-    await tester.pumpWidget(
-      wrap(
-        RequestableSizeWidget(
-          fetching: ValueNotifier(true),
-          sizeProvider: () => mockClassObject.reachableSize,
-          requestFunction: mockClassObject.requestReachableSize,
+  testWidgets(
+    'test RequestableSizeWidget while fetching data',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        wrap(
+          RequestableSizeWidget(
+            fetching: ValueNotifier(true),
+            sizeProvider: () => mockClassObject.reachableSize,
+            requestFunction: mockClassObject.requestReachableSize,
+          ),
         ),
-      ),
-    );
+      );
 
-    await tester.pump();
+      await tester.pump();
 
-    expect(find.byType(CircularProgressIndicator), findsOneWidget);
-  });
+      expect(find.byType(CircularProgressIndicator), findsOneWidget);
+    },
+  );
 
   testWidgets('test RequestableSizeWidget', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -211,33 +213,35 @@ void main() {
   });
 
   testWidgetsWithWindowSize(
-      'test InboundReferencesWidget with data', windowSize,
-      (WidgetTester tester) async {
-    await tester.pumpWidget(
-      wrap(
-        InboundReferencesWidget(
-          inboundReferences: mockClassObject.inboundReferences,
-          onExpanded: (bool) => mockClassObject.requestInboundsRefs(),
+    'test InboundReferencesWidget with data',
+    windowSize,
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        wrap(
+          InboundReferencesWidget(
+            inboundReferences: mockClassObject.inboundReferences,
+            onExpanded: (bool) => mockClassObject.requestInboundsRefs(),
+          ),
         ),
-      ),
-    );
+      );
 
-    await tester.tap(find.byType(AreaPaneHeader));
+      await tester.tap(find.byType(AreaPaneHeader));
 
-    await tester.pumpAndSettle();
+      await tester.pumpAndSettle();
 
-    expect(find.byType(SelectableText), findsNWidgets(3));
-    expect(
-      find.text('Referenced by fooFunction'),
-      findsOneWidget,
-    );
-    expect(
-      find.text('Referenced by fooParentField of Field fooField of fooLib'),
-      findsOneWidget,
-    );
-    expect(
-      find.text('Referenced by element [1] of <parentListName>'),
-      findsOneWidget,
-    );
-  });
+      expect(find.byType(SelectableText), findsNWidgets(3));
+      expect(
+        find.text('Referenced by fooFunction'),
+        findsOneWidget,
+      );
+      expect(
+        find.text('Referenced by fooParentField of Field fooField of fooLib'),
+        findsOneWidget,
+      );
+      expect(
+        find.text('Referenced by element [1] of <parentListName>'),
+        findsOneWidget,
+      );
+    },
+  );
 }

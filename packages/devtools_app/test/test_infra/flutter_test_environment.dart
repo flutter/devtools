@@ -6,8 +6,8 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:devtools_app/devtools_app.dart';
-import 'package:devtools_app/src/config_specific/framework_initialize/_framework_initialize_desktop.dart';
-import 'package:devtools_app/src/primitives/message_bus.dart';
+import 'package:devtools_app/src/shared/config_specific/framework_initialize/_framework_initialize_desktop.dart';
+import 'package:devtools_app/src/shared/primitives/message_bus.dart';
 
 import 'flutter_test_driver.dart';
 
@@ -83,6 +83,8 @@ class FlutterTestEnvironment {
 
   bool _needsSetup = true;
 
+  Completer<bool>? _setupInProgress;
+
   // Switch this flag to false to debug issues with non-atomic test behavior.
   bool reuseTestEnvironment = true;
 
@@ -92,50 +94,60 @@ class FlutterTestEnvironment {
     bool force = false,
     FlutterRunConfiguration? config,
   }) async {
+    final setupInProgress = _setupInProgress;
+    if (setupInProgress != null && !setupInProgress.isCompleted) {
+      await setupInProgress.future;
+    }
     // Setting up the environment is slow so we reuse the existing environment
     // when possible.
     if (force ||
         _needsSetup ||
         !reuseTestEnvironment ||
         _isNewRunConfig(config)) {
-      // If we already have a running test device, stop it before setting up a
-      // new one.
-      if (_flutter != null) await tearDownEnvironment(force: true);
+      _setupInProgress = Completer();
+      try {
+        // If we already have a running test device, stop it before setting up a
+        // new one.
+        if (_flutter != null) await tearDownEnvironment(force: true);
 
-      // Update the run configuration if we have a new one.
-      if (_isNewRunConfig(config)) _runConfig = config!;
+        // Update the run configuration if we have a new one.
+        if (_isNewRunConfig(config)) _runConfig = config!;
 
-      _needsSetup = false;
+        _flutter = _flutterDriverFactory(Directory(testAppDirectory))
+            as FlutterRunTestDriver?;
+        await _flutter!.run(
+          flutterExecutable: _flutterExe,
+          runConfig: _runConfig,
+        );
 
-      _flutter = _flutterDriverFactory(Directory(testAppDirectory))
-          as FlutterRunTestDriver?;
-      await _flutter!.run(
-        flutterExecutable: _flutterExe,
-        runConfig: _runConfig,
-      );
+        _service = _flutter!.vmService!;
 
-      _service = _flutter!.vmService!;
+        final preferencesController = PreferencesController();
+        _preferencesController = preferencesController;
 
-      _preferencesController = PreferencesController();
+        setGlobal(IdeTheme, IdeTheme());
+        setGlobal(Storage, FlutterDesktopStorage());
+        setGlobal(ServiceConnectionManager, ServiceConnectionManager());
+        setGlobal(PreferencesController, preferencesController);
+        setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
+        setGlobal(MessageBus, MessageBus());
+        setGlobal(ScriptManager, ScriptManager());
+        setGlobal(BreakpointManager, BreakpointManager());
 
-      setGlobal(IdeTheme, IdeTheme());
-      setGlobal(Storage, FlutterDesktopStorage());
-      setGlobal(ServiceConnectionManager, ServiceConnectionManager());
-      setGlobal(PreferencesController, _preferencesController);
-      setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
-      setGlobal(MessageBus, MessageBus());
-      setGlobal(ScriptManager, ScriptManager());
-      setGlobal(BreakpointManager, BreakpointManager());
+        // Clear out VM service calls from the test driver.
+        // ignore: invalid_use_of_visible_for_testing_member
+        _service.clearVmServiceCalls();
 
-      // Clear out VM service calls from the test driver.
-      // ignore: invalid_use_of_visible_for_testing_member
-      _service.clearVmServiceCalls();
+        await serviceManager.vmServiceOpened(
+          _service,
+          onClosed: Completer().future,
+        );
+        await _preferencesController!.init();
 
-      await serviceManager.vmServiceOpened(
-        _service,
-        onClosed: Completer().future,
-      );
-      await _preferencesController!.init();
+        _needsSetup = false;
+      } finally {
+        _setupInProgress!.complete(!_needsSetup);
+      }
 
       if (_afterNewSetup != null) await _afterNewSetup!();
     }

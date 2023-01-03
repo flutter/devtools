@@ -4,13 +4,13 @@
 
 import 'package:flutter/foundation.dart';
 
-import '../../../../../analytics/analytics.dart' as ga;
-import '../../../../../analytics/constants.dart' as analytics_constants;
-import '../../../../../analytics/metrics.dart';
-import '../../../../../primitives/utils.dart';
-import '../../../primitives/class_name.dart';
+import '../../../../../shared/analytics/analytics.dart' as ga;
+import '../../../../../shared/analytics/constants.dart' as gac;
+import '../../../../../shared/analytics/metrics.dart';
+import '../../../../../shared/primitives/utils.dart';
 import '../../../shared/heap/heap.dart';
 import '../../../shared/heap/model.dart';
+import '../../../shared/primitives/class_name.dart';
 
 /// Stores already calculated comparisons for heap couples.
 class HeapDiffStore {
@@ -27,8 +27,8 @@ class HeapDiffStore {
 DiffHeapClasses _calculateDiffGaWrapper(_HeapCouple couple) {
   late final DiffHeapClasses result;
   ga.timeSync(
-    analytics_constants.memory,
-    analytics_constants.MemoryTime.calculateDiff,
+    gac.memory,
+    gac.MemoryTime.calculateDiff,
     syncOperation: () => result = DiffHeapClasses(couple),
     screenMetricsProvider: () => MemoryScreenMetrics(
       heapDiffObjectsBefore: couple.older.data.objects.length,
@@ -166,13 +166,17 @@ class ObjectSetDiff {
       final object = before.objectsByCodes[code] ?? after.objectsByCodes[code]!;
 
       if (inBefore) {
-        deleted.countInstance(object);
-        delta.uncountInstance(object);
+        final excludeFromRetained =
+            before.notCountedInRetained.contains(object.code);
+        deleted.countInstance(object, excludeFromRetained: excludeFromRetained);
+        delta.uncountInstance(object, excludeFromRetained: excludeFromRetained);
         continue;
       }
       if (inAfter) {
-        created.countInstance(object);
-        delta.countInstance(object);
+        final excludeFromRetained =
+            after.notCountedInRetained.contains(object.code);
+        created.countInstance(object, excludeFromRetained: excludeFromRetained);
+        delta.countInstance(object, excludeFromRetained: excludeFromRetained);
         continue;
       }
       assert(false);

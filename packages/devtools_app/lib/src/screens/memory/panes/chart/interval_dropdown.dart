@@ -4,8 +4,8 @@
 
 import 'package:flutter/material.dart';
 
-import '../../../../analytics/analytics.dart' as ga;
-import '../../../../analytics/constants.dart' as analytics_constants;
+import '../../../../shared/analytics/analytics.dart' as ga;
+import '../../../../shared/analytics/constants.dart' as gac;
 import '../../../../shared/common_widgets.dart';
 import '../../../../shared/utils.dart';
 import '../../memory_controller.dart';
@@ -56,8 +56,8 @@ class _IntervalDropdownState extends State<IntervalDropdown>
         final value = newValue!;
         setState(() {
           ga.select(
-            analytics_constants.memory,
-            '${analytics_constants.MemoryEvent.chartInterval}-${value.displayName}',
+            gac.memory,
+            '${gac.MemoryEvent.chartInterval}-${value.displayName}',
           );
           controller.displayInterval = value;
           final duration = value.duration;

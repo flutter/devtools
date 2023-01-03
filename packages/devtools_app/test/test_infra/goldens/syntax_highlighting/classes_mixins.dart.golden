@@ -1,0 +1,43 @@
+>// Copyright 2022 The Chromium Authors. All rights reserved.
+#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ comment.line.double-slash.dart
+>// Use of this source code is governed by a BSD-style license that can be
+#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ comment.line.double-slash.dart
+>// found in the LICENSE file.
+#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ comment.line.double-slash.dart
+>
+>class A {
+#^^^^^ keyword.declaration.dart
+#      ^ support.class.dart
+>  String get name => '';
+#  ^^^^^^ support.class.dart
+#         ^^^ keyword.declaration.dart
+#             ^^^^ entity.name.function.dart
+#                     ^^ string.interpolated.single.dart
+#                       ^ punctuation.terminator.dart
+>  set name(String value) {}
+#  ^^^ keyword.declaration.dart
+#      ^^^^ entity.name.function.dart
+#           ^^^^^^ support.class.dart
+>
+>  void method() {}
+#  ^^^^ storage.type.primitive.dart
+#       ^^^^^^ entity.name.function.dart
+>  void get() {}
+#  ^^^^ storage.type.primitive.dart
+#       ^^^ entity.name.function.dart
+>  void set() {}
+#  ^^^^ storage.type.primitive.dart
+#       ^^^ entity.name.function.dart
+>}
+>
+>mixin MyMixin<T> on List<T> {}
+#^^^^^ keyword.declaration.dart
+#      ^^^^^^^ support.class.dart
+#             ^ other.source.dart
+#              ^ support.class.dart
+#               ^ other.source.dart
+#                 ^^ keyword.control.catch-exception.dart
+#                    ^^^^ support.class.dart
+#                        ^ other.source.dart
+#                         ^ support.class.dart
+#                          ^ other.source.dart

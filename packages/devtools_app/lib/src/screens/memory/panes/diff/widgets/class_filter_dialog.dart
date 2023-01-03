@@ -6,8 +6,8 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
-import '../../../../../analytics/analytics.dart' as ga;
-import '../../../../../analytics/constants.dart' as analytics_constants;
+import '../../../../../shared/analytics/analytics.dart' as ga;
+import '../../../../../shared/analytics/constants.dart' as gac;
 import '../../../../../shared/common_widgets.dart';
 import '../../../../../shared/dialogs.dart';
 import '../../../../../shared/theme.dart';
@@ -95,15 +95,15 @@ class _ClassFilterDialogState extends State<ClassFilterDialog> {
       helpText: _helpText,
       onResetDefaults: () {
         ga.select(
-          analytics_constants.memory,
-          analytics_constants.MemoryEvent.diffSnapshotFilterReset,
+          gac.memory,
+          gac.MemoryEvent.diffSnapshotFilterReset,
         );
         setState(() => _loadStateFromFilter(ClassFilter.empty()));
       },
       onApply: () {
         ga.select(
-          analytics_constants.memory,
-          '${analytics_constants.MemoryEvent.diffSnapshotFilterType}-$_type',
+          gac.memory,
+          '${gac.MemoryEvent.diffSnapshotFilterType}-$_type',
         );
         final newFilter = ClassFilter(
           filterType: _type,
@@ -135,5 +135,5 @@ const _helpText = 'Choose and customize the filter.\n'
     '  MyClass\n'
     '  package:myPackage/src/\n\n'
     'Specify:\n'
-    '  - ${ClassFilter.noPackageLibrariesAlias} for classes without package prefix\n'
+    '  - ${ClassFilter.dartInternalAlias} for dart internal objects, not assigned to any package\n'
     '  - ${ClassFilter.dartAndFlutterLibrariesAlias} for most "dart:" and "package:" libraries published by Dart and Flutter orgs.';

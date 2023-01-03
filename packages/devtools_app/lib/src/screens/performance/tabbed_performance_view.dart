@@ -6,16 +6,16 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
-import '../../analytics/constants.dart' as analytics_constants;
-import '../../charts/flame_chart.dart';
-import '../../primitives/auto_dispose_mixin.dart';
-import '../../primitives/feature_flags.dart';
+import '../../shared/analytics/constants.dart' as gac;
+import '../../shared/charts/flame_chart.dart';
 import '../../shared/common_widgets.dart';
+import '../../shared/feature_flags.dart';
 import '../../shared/globals.dart';
+import '../../shared/primitives/auto_dispose.dart';
 import '../../shared/theme.dart';
+import '../../shared/ui/search.dart';
+import '../../shared/ui/tab.dart';
 import '../../shared/utils.dart';
-import '../../ui/search.dart';
-import '../../ui/tab.dart';
 import 'panes/flutter_frames/flutter_frame_model.dart';
 import 'panes/flutter_frames/flutter_frames_controller.dart';
 import 'panes/frame_analysis/frame_analysis.dart';
@@ -101,8 +101,10 @@ class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
     return AnalyticsTabbedView(
       tabs: tabs,
       tabViews: tabViews,
-      gaScreen: analytics_constants.performance,
+      initialSelectedIndex: controller.selectedFeatureTabIndex,
+      gaScreen: gac.performance,
       onTabChanged: (int index) {
+        controller.selectedFeatureTabIndex = index;
         final featureController = featureControllers[index];
         unawaited(controller.setActiveFeature(featureController));
       },
@@ -113,17 +115,15 @@ class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
     assert(serviceManager.connectedApp!.isFlutterAppNow!);
     Widget frameAnalysisView;
     final selectedFrame = _selectedFlutterFrame;
-    if (selectedFrame != null) {
-      frameAnalysisView = FlutterFrameAnalysisView(
-        frameAnalysis: selectedFrame.frameAnalysis,
-        enhanceTracingController: controller.enhanceTracingController,
-        rebuildCountModel: controller.data!.rebuildCountModel,
-      );
-    } else {
-      frameAnalysisView = const Center(
-        child: Text('Select a frame above to view analysis data.'),
-      );
-    }
+    frameAnalysisView = selectedFrame != null
+        ? FlutterFrameAnalysisView(
+            frameAnalysis: selectedFrame.frameAnalysis,
+            enhanceTracingController: controller.enhanceTracingController,
+            rebuildCountModel: controller.data!.rebuildCountModel,
+          )
+        : const Center(
+            child: Text('Select a frame above to view analysis data.'),
+          );
     return _PerformanceTabRecord(
       tab: _buildTab(tabName: 'Frame Analysis'),
       tabView: KeepAliveWrapper(
@@ -182,9 +182,9 @@ class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
                       return _buildSearchField(searchFieldEnabled);
                     },
                   ),
-                  const FlameChartHelpButton(
+                  FlameChartHelpButton(
                     gaScreen: PerformanceScreen.id,
-                    gaSelection: analytics_constants.timelineFlameChartHelp,
+                    gaSelection: gac.timelineFlameChartHelp,
                   ),
                 ],
                 if (!offlineController.offlineMode.value)
@@ -265,8 +265,8 @@ class RefreshTimelineEventsButton extends StatelessWidget {
       iconData: Icons.refresh,
       onPressed: controller.processAllTraceEvents,
       tooltip: 'Refresh timeline events',
-      gaScreen: analytics_constants.performance,
-      gaSelection: analytics_constants.refreshTimelineEvents,
+      gaScreen: gac.performance,
+      gaSelection: gac.refreshTimelineEvents,
     );
   }
 }

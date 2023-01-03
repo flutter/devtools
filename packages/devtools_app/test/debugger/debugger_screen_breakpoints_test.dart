@@ -2,15 +2,16 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/screens/debugger/breakpoint_manager.dart';
 import 'package:devtools_app/src/screens/debugger/debugger_controller.dart';
 import 'package:devtools_app/src/screens/debugger/debugger_model.dart';
 import 'package:devtools_app/src/screens/debugger/debugger_screen.dart';
-import 'package:devtools_app/src/scripts/script_manager.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
+import 'package:devtools_app/src/shared/config_specific/ide_theme/ide_theme.dart';
+import 'package:devtools_app/src/shared/console/primitives/source_location.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_app/src/shared/notifications.dart';
+import 'package:devtools_app/src/shared/scripts/script_manager.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -48,14 +49,14 @@ void main() {
         line: 10,
       ),
       enabled: true,
-    )
+    ),
   ];
 
   final breakpointsWithLocation = [
     BreakpointAndSourcePosition.create(
       breakpoints.first,
       const SourcePosition(line: 10, column: 1),
-    )
+    ),
   ];
   final codeViewController = debuggerController.codeViewController;
   when(mockBreakpointManager.breakpoints)
@@ -79,20 +80,23 @@ void main() {
     );
   }
 
-  testWidgetsWithWindowSize('Breakpoints show items', windowSize,
-      (WidgetTester tester) async {
-    await pumpDebuggerScreen(tester, debuggerController);
+  testWidgetsWithWindowSize(
+    'Breakpoints show items',
+    windowSize,
+    (WidgetTester tester) async {
+      await pumpDebuggerScreen(tester, debuggerController);
 
-    expect(find.text('Breakpoints'), findsOneWidget);
+      expect(find.text('Breakpoints'), findsOneWidget);
 
-    // test for items in the breakpoint list
-    expect(
-      find.byWidgetPredicate(
-        (Widget widget) =>
-            widget is RichText &&
-            widget.text.toPlainText().contains('script.dart:10'),
-      ),
-      findsOneWidget,
-    );
-  });
+      // test for items in the breakpoint list
+      expect(
+        find.byWidgetPredicate(
+          (Widget widget) =>
+              widget is RichText &&
+              widget.text.toPlainText().contains('script.dart:10'),
+        ),
+        findsOneWidget,
+      );
+    },
+  );
 }

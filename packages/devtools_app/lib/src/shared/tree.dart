@@ -7,9 +7,9 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide Stack;
 
-import '../primitives/auto_dispose_mixin.dart';
-import '../primitives/trees.dart';
 import 'collapsible_mixin.dart';
+import 'primitives/auto_dispose.dart';
+import 'primitives/trees.dart';
 import 'theme.dart';
 
 class TreeView<T extends TreeNode<T>> extends StatefulWidget {
@@ -74,7 +74,7 @@ class _TreeViewState<T extends TreeNode<T>> extends State<TreeView<T>>
   }
 
   void _updateTreeView() {
-    dataRoots = List.from(widget.dataRootsListenable.value);
+    dataRoots = List.of(widget.dataRootsListenable.value);
     _updateItems();
   }
 
@@ -171,30 +171,28 @@ class _TreeViewItemState<T extends TreeNode<T>> extends State<_TreeViewItem<T>>
     with TickerProviderStateMixin, CollapsibleAnimationMixin {
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.only(left: nodeIndent(widget.data)),
-      child: Container(
-        color: widget.data.isSelected
-            ? Theme.of(context).colorScheme.selectedRowColor
-            : null,
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            widget.data.isExpandable
-                ? InkWell(
-                    onTap: _onExpanded,
-                    child: RotationTransition(
-                      turns: expandArrowAnimation,
-                      child: Icon(
-                        Icons.keyboard_arrow_down,
-                        size: defaultIconSize,
-                      ),
+    return Container(
+      margin: EdgeInsets.only(left: nodeIndent(widget.data)),
+      color: widget.data.isSelected
+          ? Theme.of(context).colorScheme.selectedRowColor
+          : null,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          widget.data.isExpandable
+              ? InkWell(
+                  onTap: _onExpanded,
+                  child: RotationTransition(
+                    turns: expandArrowAnimation,
+                    child: Icon(
+                      Icons.keyboard_arrow_down,
+                      size: defaultIconSize,
                     ),
-                  )
-                : SizedBox(width: defaultIconSize),
-            Expanded(child: widget.buildDisplay(_onSelected)),
-          ],
-        ),
+                  ),
+                )
+              : SizedBox(width: defaultIconSize),
+          Expanded(child: widget.buildDisplay(_onSelected)),
+        ],
       ),
     );
   }

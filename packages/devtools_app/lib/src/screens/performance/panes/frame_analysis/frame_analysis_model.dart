@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '../../../../primitives/trees.dart';
-import '../../../../primitives/utils.dart';
+import '../../../../shared/primitives/trees.dart';
+import '../../../../shared/primitives/utils.dart';
 import '../../performance_model.dart';
 import '../flutter_frames/flutter_frame_model.dart';
 
@@ -71,10 +71,12 @@ class FrameAnalysis {
         final _buildChildren = layoutEvent.shallowNodesWithCondition(
           (event) => event.name == FramePhaseType.build.eventName,
         );
-        final buildDuration = _buildChildren.fold<Duration>(Duration.zero,
-            (previous, TimelineEvent event) {
-          return previous + event.time.duration;
-        });
+        final buildDuration = _buildChildren.fold<Duration>(
+          Duration.zero,
+          (previous, TimelineEvent event) {
+            return previous + event.time.duration;
+          },
+        );
 
         return FramePhase.layout(
           events: <SyncTimelineEvent>[layoutEvent as SyncTimelineEvent],
@@ -122,7 +124,7 @@ class FrameAnalysis {
   bool get hasUiData => _hasUiData ??= [
         ...buildPhase.events,
         ...layoutPhase.events,
-        ...paintPhase.events
+        ...paintPhase.events,
       ].isNotEmpty;
 
   bool? _hasUiData;

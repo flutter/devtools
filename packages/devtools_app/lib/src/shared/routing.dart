@@ -8,9 +8,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import '../primitives/auto_dispose.dart';
-import '../primitives/utils.dart';
 import 'globals.dart';
+import 'primitives/auto_dispose.dart';
+import 'primitives/utils.dart';
 
 /// The page ID (used in routing) for the standalone app-size page.
 ///
@@ -141,18 +141,16 @@ class DevToolsRouterDelegate extends RouterDelegate<DevToolsRouteConfiguration>
     return Navigator(
       key: navigatorKey,
       pages: [_getPage(context, page, args, state)],
-      onPopPage: _handleOnPopPage,
+      onPopPage: (_, __) {
+        if (routes.length <= 1) {
+          return false;
+        }
+
+        routes.removeLast();
+        notifyListeners();
+        return true;
+      },
     );
-  }
-
-  bool _handleOnPopPage(Route<dynamic> route, dynamic result) {
-    if (routes.length <= 1) {
-      return false;
-    }
-
-    routes.removeLast();
-    notifyListeners();
-    return true;
   }
 
   /// Navigates to a new page, optionally updating arguments and state.

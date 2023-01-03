@@ -3,12 +3,12 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app/devtools.dart' as devtools;
-import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/extension_points/extensions_base.dart';
 import 'package:devtools_app/src/extension_points/extensions_external.dart';
 import 'package:devtools_app/src/framework/about_dialog.dart';
 import 'package:devtools_app/src/framework/release_notes/release_notes.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
+import 'package:devtools_app/src/shared/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -38,22 +38,25 @@ void main() {
       expect(find.text('About DevTools'), findsOneWidget);
     });
 
-    testWidgets('DevTools section', (WidgetTester tester) async {
+    testWidgets('content renders correctly', (WidgetTester tester) async {
       await tester.pumpWidget(wrap(aboutDialog));
       expect(find.text('About DevTools'), findsOneWidget);
-      expect(findSubstring(aboutDialog, devtools.version), findsOneWidget);
+      expect(findSubstring(devtools.version), findsOneWidget);
       expect(find.text('release notes'), findsOneWidget);
-    });
-
-    testWidgets('Feedback section', (WidgetTester tester) async {
-      await tester.pumpWidget(wrap(aboutDialog));
-      expect(find.text('Feedback'), findsOneWidget);
+      expect(find.textContaining('Encountered an issue?'), findsOneWidget);
       expect(
-        findSubstring(aboutDialog, 'github.com/flutter/devtools'),
+        findSubstring('github.com/flutter/devtools/issues/new'),
         findsOneWidget,
       );
+      expect(find.text('Contributing'), findsOneWidget);
       expect(
-        findSubstring(aboutDialog, 'Discord'),
+        find.textContaining('Want to contribute to DevTools?'),
+        findsOneWidget,
+      );
+      expect(findSubstring('CONTRIBUTING'), findsOneWidget);
+      expect(find.textContaining('connect with us on'), findsOneWidget);
+      expect(
+        findSubstring('Discord'),
         findsOneWidget,
       );
     });

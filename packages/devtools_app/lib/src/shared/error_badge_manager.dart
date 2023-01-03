@@ -9,17 +9,17 @@ import 'package:collection/collection.dart' show IterableExtension;
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../primitives/auto_dispose.dart';
-import '../primitives/listenable.dart';
-import '../primitives/utils.dart';
-import '../screens/inspector/diagnostics_node.dart';
 import '../screens/inspector/inspector_screen.dart';
 import '../screens/logging/logging_screen.dart';
 import '../screens/network/network_screen.dart';
 import '../screens/performance/performance_screen.dart';
 import '../service/service_extensions.dart' as extensions;
 import '../service/vm_service_wrapper.dart';
+import 'console/eval/diagnostics_node.dart';
 import 'globals.dart';
+import 'primitives/auto_dispose.dart';
+import 'primitives/listenable.dart';
+import 'primitives/utils.dart';
 
 class ErrorBadgeManager extends DisposableController
     with AutoDisposeControllerMixin {
@@ -56,7 +56,7 @@ class ErrorBadgeManager extends DisposableController
     );
   }
 
-  void _handleExtensionEvent(Event e) async {
+  void _handleExtensionEvent(Event e) {
     if (e.extensionKind == 'Flutter.Error') {
       incrementBadgeCount(LoggingScreen.id);
 
@@ -97,7 +97,7 @@ class ErrorBadgeManager extends DisposableController
     return InspectableWidgetError(errorMessage, inspectorRef);
   }
 
-  void _handleStdErr(Event e) {
+  void _handleStdErr(Event _) {
     incrementBadgeCount(LoggingScreen.id);
   }
 

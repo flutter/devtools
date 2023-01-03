@@ -7,13 +7,13 @@ import 'dart:convert';
 import 'package:flutter/widgets.dart';
 import 'package:http/http.dart';
 
-import '../analytics/analytics.dart' as ga;
-import '../config_specific/launch_url/launch_url.dart';
-import '../config_specific/logger/logger.dart';
-import '../config_specific/server/server.dart' as server;
-import '../primitives/utils.dart';
 import '../shared/notifications.dart';
+import 'analytics/analytics.dart' as ga;
+import 'config_specific/launch_url/launch_url.dart';
+import 'config_specific/logger/logger.dart';
+import 'config_specific/server/server.dart' as server;
 import 'globals.dart';
+import 'primitives/utils.dart';
 
 class SurveyService {
   static const _noThanksLabel = 'NO THANKS';
@@ -49,7 +49,7 @@ class SurveyService {
     return null;
   }
 
-  void maybeShowSurveyPrompt(BuildContext context) async {
+  void maybeShowSurveyPrompt() async {
     final survey = await activeSurvey;
     if (survey != null) {
       final message = survey.title!;
@@ -58,7 +58,6 @@ class SurveyService {
           _noThanksLabel,
           () => _noThanksPressed(
             message: message,
-            context: context,
           ),
         ),
         NotificationAction(
@@ -66,7 +65,6 @@ class SurveyService {
           () => _takeSurveyPressed(
             surveyUrl: _generateSurveyUrl(survey.url!),
             message: message,
-            context: context,
           ),
           isPrimary: true,
         ),
@@ -130,7 +128,6 @@ class SurveyService {
 
   void _noThanksPressed({
     required String message,
-    required BuildContext context,
   }) async {
     await server.setSurveyActionTaken();
     notificationService.dismiss(message);
@@ -139,9 +136,8 @@ class SurveyService {
   void _takeSurveyPressed({
     required String surveyUrl,
     required String message,
-    required BuildContext context,
   }) async {
-    await launchUrl(surveyUrl, context);
+    await launchUrl(surveyUrl);
     await server.setSurveyActionTaken();
     notificationService.dismiss(message);
   }

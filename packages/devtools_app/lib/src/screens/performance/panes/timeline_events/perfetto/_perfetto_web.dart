@@ -9,11 +9,10 @@ import 'dart:html' as html;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-import '../../../../../primitives/auto_dispose.dart';
-import '../../../../../primitives/auto_dispose_mixin.dart';
-import '../../../../../primitives/trace_event.dart';
-import '../../../../../primitives/utils.dart';
 import '../../../../../shared/globals.dart';
+import '../../../../../shared/primitives/auto_dispose.dart';
+import '../../../../../shared/primitives/trace_event.dart';
+import '../../../../../shared/primitives/utils.dart';
 import '_perfetto_controller_web.dart';
 import 'perfetto_controller.dart';
 
@@ -54,9 +53,7 @@ class _PerfettoState extends State<Perfetto> with AutoDisposeMixin {
   }
 
   void _loadActiveTrace() {
-    unawaited(
-      _viewController._loadTrace(_perfettoController.activeTraceEvents.value),
-    );
+    _viewController._loadTrace(_perfettoController.activeTraceEvents.value);
   }
 
   void _scrollToActiveTimeRange() {
@@ -169,7 +166,7 @@ class _PerfettoViewController extends DisposableController
     }
   }
 
-  Future<void> _loadTrace(List<TraceEventWrapper> devToolsTraceEvents) async {
+  void _loadTrace(List<TraceEventWrapper> devToolsTraceEvents) {
     final encodedJson = jsonEncode({
       'traceEvents': devToolsTraceEvents
           .map((eventWrapper) => eventWrapper.event.json)
@@ -182,7 +179,7 @@ class _PerfettoViewController extends DisposableController
         'buffer': buffer,
         'title': 'DevTools timeline trace',
         'keepApiOpen': true,
-      }
+      },
     });
   }
 
@@ -205,7 +202,7 @@ class _PerfettoViewController extends DisposableController
         'timeEnd': timeRange.end!.inMicroseconds / 1000000,
         // The time range should take up 80% of the visible window.
         'viewPercentage': 0.8,
-      }
+      },
     });
   }
 
@@ -222,7 +219,7 @@ class _PerfettoViewController extends DisposableController
     );
   }
 
-  void _postMessage(dynamic message) async {
+  void _postMessage(Object message) async {
     await _perfettoIFrameReady.future;
     assert(
       perfettoController.perfettoIFrame.contentWindow != null,
@@ -237,10 +234,10 @@ class _PerfettoViewController extends DisposableController
 
   void _postMessageWithId(
     String id, {
-    Map<String, dynamic> args = const {},
+    Map<String, Object> args = const {},
     bool perfettoIgnore = false,
   }) {
-    final message = <String, dynamic>{
+    final message = <String, Object>{
       'msgId': id,
       if (perfettoIgnore) 'perfettoIgnore': true,
     }..addAll(args);

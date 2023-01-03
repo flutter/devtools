@@ -8,8 +8,8 @@ import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-import '../primitives/listenable.dart';
 import 'globals.dart';
+import 'primitives/listenable.dart';
 import 'theme.dart';
 import 'version.dart';
 

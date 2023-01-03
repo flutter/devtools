@@ -9,16 +9,16 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide TableRow;
 import 'package:flutter/services.dart';
 
-import '../../primitives/auto_dispose_mixin.dart';
-import '../../primitives/flutter_widgets/linked_scroll_controller.dart';
-import '../../primitives/trees.dart';
-import '../../primitives/utils.dart';
-import '../../ui/colors.dart';
-import '../../ui/search.dart';
-import '../../ui/utils.dart';
 import '../collapsible_mixin.dart';
 import '../common_widgets.dart';
+import '../primitives/auto_dispose.dart';
+import '../primitives/flutter_widgets/linked_scroll_controller.dart';
+import '../primitives/trees.dart';
+import '../primitives/utils.dart';
 import '../theme.dart';
+import '../ui/colors.dart';
+import '../ui/search.dart';
+import '../ui/utils.dart';
 import '../utils.dart';
 import 'column_widths.dart';
 import 'table_controller.dart';
@@ -165,6 +165,8 @@ class FlatTableState<T> extends State<FlatTable<T>> with AutoDisposeMixin {
     addAutoDisposeListener(tableController.tableData);
 
     if (tableController.pinBehavior != FlatTablePinBehavior.none &&
+        // TODO(jacobr): this lint appears to be firing incorrectly.
+        // ignore: avoid-unnecessary-type-assertions
         this is! State<FlatTable<PinnableListEntry>>) {
       throw StateError('$T must implement PinnableListEntry');
     }
@@ -247,6 +249,9 @@ class FlatTableState<T> extends State<FlatTable<T>> with AutoDisposeMixin {
   }
 
   Widget _buildRow({
+    // Unused parameters doesn't understand that this parameter is required to
+    // match the signature for the rowBuilder Function.
+    // ignore: avoid-unused-parameters
     required BuildContext context,
     required LinkedScrollControllerGroup linkedScrollControllerGroup,
     required int index,
@@ -599,6 +604,9 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
     required LinkedScrollControllerGroup linkedScrollControllerGroup,
     required int index,
     required List<double> columnWidths,
+    // Unused parameters doesn't understand that this parameter is required to
+    // match the signature for the rowBuilder Function.
+    // ignore: avoid-unused-parameters
     required bool isPinned,
   }) {
     Widget rowForNode(T node) {
@@ -646,7 +654,7 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
       LogicalKeyboardKey.arrowDown,
       LogicalKeyboardKey.arrowUp,
       LogicalKeyboardKey.arrowLeft,
-      LogicalKeyboardKey.arrowRight
+      LogicalKeyboardKey.arrowRight,
     ].contains(event.logicalKey)) return KeyEventResult.ignored;
 
     // If there is no selected node, choose the first one.
@@ -942,6 +950,8 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
     );
   }
 
+  List<T> get pinnedData => widget.tableController.pinnedData;
+
   @override
   Widget build(BuildContext context) {
     // If we're at the end already, scroll to expose the new content.
@@ -994,11 +1004,10 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
                 secondarySortColumn: widget.tableController.secondarySortColumn,
                 onSortChanged: widget.tableController.sortDataAndNotify,
               ),
-              if (widget.tableController.pinnedData.isNotEmpty) ...[
+              if (pinnedData.isNotEmpty) ...[
                 SizedBox(
                   height: min(
-                    widget.rowItemExtent! *
-                        widget.tableController.pinnedData.length,
+                    widget.rowItemExtent! * pinnedData.length,
                     constraints.maxHeight / 2,
                   ),
                   child: Scrollbar(
@@ -1006,7 +1015,7 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
                     controller: pinnedScrollController,
                     child: ListView.builder(
                       controller: pinnedScrollController,
-                      itemCount: widget.tableController.pinnedData.length,
+                      itemCount: pinnedData.length,
                       itemExtent: widget.rowItemExtent,
                       itemBuilder: (context, index) => _buildItem(
                         context,
@@ -1435,6 +1444,10 @@ class _TableRowState<T> extends State<TableRow<T>>
         // widget class.
         final padding = column.getNodeIndentPx(node);
         assert(padding >= 0);
+        // TODO(jacobr): is this assert really always false or is this lint too
+        // aggressive? Consider factoring the code so this is check is less
+        // is for a subclass of the type of Column.
+        // ignore: avoid-unrelated-type-assertions
         if (column is ColumnRenderer) {
           content = (column as ColumnRenderer).build(
             context,
@@ -1455,7 +1468,7 @@ class _TableRowState<T> extends State<TableRow<T>>
                   style: const TextStyle(
                     fontStyle: FontStyle.italic,
                   ),
-                )
+                ),
             ],
             style: contentTextStyle(column),
           ),

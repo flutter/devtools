@@ -5,8 +5,7 @@
 // ignore_for_file: invalid_use_of_protected_member
 import 'dart:async';
 
-import 'package:devtools_app/src/primitives/auto_dispose.dart';
-import 'package:devtools_app/src/primitives/auto_dispose_mixin.dart';
+import 'package:devtools_app/src/shared/primitives/auto_dispose.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -33,7 +32,7 @@ class _AutoDisposedWidgetState extends State<AutoDisposedWidget>
     autoDisposeStreamSubscription(widget.stream.listen(_onData));
   }
 
-  void _onData(dynamic data) {
+  void _onData(Object? _) {
     eventCount++;
   }
 

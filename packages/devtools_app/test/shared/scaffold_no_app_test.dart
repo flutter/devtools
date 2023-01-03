@@ -2,11 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
-import 'package:devtools_app/src/config_specific/import_export/import_export.dart';
 import 'package:devtools_app/src/framework/scaffold.dart';
 import 'package:devtools_app/src/screens/debugger/debugger_screen.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
+import 'package:devtools_app/src/shared/config_specific/ide_theme/ide_theme.dart';
+import 'package:devtools_app/src/shared/config_specific/import_export/import_export.dart';
 import 'package:devtools_app/src/shared/framework_controller.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_app/src/shared/notifications.dart';
@@ -42,23 +42,24 @@ void main() {
   }
 
   testWidgets(
-      'does not display floating debugger tab controls when no app is connected',
-      (WidgetTester tester) async {
-    when(mockServiceManager.connectedAppInitialized).thenReturn(false);
-    await tester.pumpWidget(
-      wrapScaffold(
-        wrapWithNotifications(
-          DevToolsScaffold(
-            tabs: const [_screen1, _screen2],
-            ideTheme: IdeTheme(),
+    'does not display floating debugger tab controls when no app is connected',
+    (WidgetTester tester) async {
+      when(mockServiceManager.connectedAppInitialized).thenReturn(false);
+      await tester.pumpWidget(
+        wrapScaffold(
+          wrapWithNotifications(
+            DevToolsScaffold(
+              screens: const [_screen1, _screen2],
+              ideTheme: IdeTheme(),
+            ),
           ),
         ),
-      ),
-    );
-    expect(find.byKey(_k1), findsOneWidget);
-    expect(find.byKey(_k2), findsNothing);
-    expect(find.byType(FloatingDebuggerControls), findsNothing);
-  });
+      );
+      expect(find.byKey(_k1), findsOneWidget);
+      expect(find.byKey(_k2), findsNothing);
+      expect(find.byType(FloatingDebuggerControls), findsNothing);
+    },
+  );
 }
 
 class _TestScreen extends Screen {

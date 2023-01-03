@@ -2,19 +2,19 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
-import 'package:devtools_app/src/config_specific/import_export/import_export.dart';
 import 'package:devtools_app/src/screens/profiler/cpu_profiler.dart';
 import 'package:devtools_app/src/screens/profiler/profiler_screen.dart';
 import 'package:devtools_app/src/screens/profiler/profiler_screen_controller.dart';
-import 'package:devtools_app/src/scripts/script_manager.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/service/vm_flags.dart' as vm_flags;
 import 'package:devtools_app/src/shared/common_widgets.dart';
+import 'package:devtools_app/src/shared/config_specific/ide_theme/ide_theme.dart';
+import 'package:devtools_app/src/shared/config_specific/import_export/import_export.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_app/src/shared/notifications.dart';
 import 'package:devtools_app/src/shared/preferences.dart';
-import 'package:devtools_app/src/ui/vm_flag_widgets.dart';
+import 'package:devtools_app/src/shared/scripts/script_manager.dart';
+import 'package:devtools_app/src/shared/ui/vm_flag_widgets.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -54,13 +54,10 @@ void main() {
         ValueNotifier<List<ScriptRef>>([]),
       );
       setGlobal(ScriptManager, mockScriptManager);
-      screen = const ProfilerScreen();
+      screen = ProfilerScreen();
     });
 
-    void verifyBaseState(
-      ProfilerScreenBody perfScreenBody,
-      WidgetTester tester,
-    ) {
+    void verifyBaseState() {
       expect(find.byType(RecordButton), findsOneWidget);
       expect(find.byType(StopRecordingButton), findsOneWidget);
       expect(find.byType(ClearButton), findsOneWidget);
@@ -101,24 +98,29 @@ void main() {
       expect(find.text('CPU Profiler'), findsOneWidget);
     });
 
-    testWidgetsWithWindowSize('builds base state for Dart CLI app', windowSize,
-        (WidgetTester tester) async {
-      const perfScreenBody = ProfilerScreenBody();
-      await pumpProfilerScreenBody(tester, perfScreenBody);
-      expect(find.byType(ProfilerScreenBody), findsOneWidget);
-      verifyBaseState(perfScreenBody, tester);
-    });
+    testWidgetsWithWindowSize(
+      'builds base state for Dart CLI app',
+      windowSize,
+      (WidgetTester tester) async {
+        const perfScreenBody = ProfilerScreenBody();
+        await pumpProfilerScreenBody(tester, perfScreenBody);
+        expect(find.byType(ProfilerScreenBody), findsOneWidget);
+        verifyBaseState();
+      },
+    );
 
     testWidgetsWithWindowSize(
-        'builds base state for Flutter native app', windowSize,
-        (WidgetTester tester) async {
-      when(fakeServiceManager.connectedApp!.isFlutterNativeAppNow)
-          .thenReturn(true);
-      const perfScreenBody = ProfilerScreenBody();
-      await pumpProfilerScreenBody(tester, perfScreenBody);
-      expect(find.byType(ProfilerScreenBody), findsOneWidget);
-      verifyBaseState(perfScreenBody, tester);
-    });
+      'builds base state for Flutter native app',
+      windowSize,
+      (WidgetTester tester) async {
+        when(fakeServiceManager.connectedApp!.isFlutterNativeAppNow)
+            .thenReturn(true);
+        const perfScreenBody = ProfilerScreenBody();
+        await pumpProfilerScreenBody(tester, perfScreenBody);
+        expect(find.byType(ProfilerScreenBody), findsOneWidget);
+        verifyBaseState();
+      },
+    );
 
     testWidgetsWithWindowSize(
       'builds proper content for recording state',
@@ -127,7 +129,7 @@ void main() {
         const perfScreenBody = ProfilerScreenBody();
         await pumpProfilerScreenBody(tester, perfScreenBody);
         expect(find.byType(ProfilerScreenBody), findsOneWidget);
-        verifyBaseState(perfScreenBody, tester);
+        verifyBaseState();
 
         // Start recording.
         await tester.tap(find.byType(RecordButton));
@@ -149,29 +151,32 @@ void main() {
         // Clear the profile.
         await tester.tap(find.byType(ClearButton));
         await tester.pump();
-        verifyBaseState(perfScreenBody, tester);
+        verifyBaseState();
       },
     );
 
-    testWidgetsWithWindowSize('builds for disabled profiler', windowSize,
-        (WidgetTester tester) async {
-      await serviceManager.service!.setFlag(vm_flags.profiler, 'false');
-      const perfScreenBody = ProfilerScreenBody();
-      await pumpProfilerScreenBody(tester, perfScreenBody);
-      expect(find.byType(CpuProfilerDisabled), findsOneWidget);
-      expect(
-        find.byKey(ProfilerScreen.recordingInstructionsKey),
-        findsNothing,
-      );
-      expect(find.byType(RecordButton), findsNothing);
-      expect(find.byType(StopRecordingButton), findsNothing);
-      expect(find.byType(ClearButton), findsNothing);
-      expect(find.byType(CpuSamplingRateDropdown), findsNothing);
+    testWidgetsWithWindowSize(
+      'builds for disabled profiler',
+      windowSize,
+      (WidgetTester tester) async {
+        await serviceManager.service!.setFlag(vm_flags.profiler, 'false');
+        const perfScreenBody = ProfilerScreenBody();
+        await pumpProfilerScreenBody(tester, perfScreenBody);
+        expect(find.byType(CpuProfilerDisabled), findsOneWidget);
+        expect(
+          find.byKey(ProfilerScreen.recordingInstructionsKey),
+          findsNothing,
+        );
+        expect(find.byType(RecordButton), findsNothing);
+        expect(find.byType(StopRecordingButton), findsNothing);
+        expect(find.byType(ClearButton), findsNothing);
+        expect(find.byType(CpuSamplingRateDropdown), findsNothing);
 
-      await tester.tap(find.text('Enable profiler'));
-      await tester.pumpAndSettle();
+        await tester.tap(find.text('Enable profiler'));
+        await tester.pumpAndSettle();
 
-      verifyBaseState(perfScreenBody, tester);
-    });
+        verifyBaseState();
+      },
+    );
   });
 }

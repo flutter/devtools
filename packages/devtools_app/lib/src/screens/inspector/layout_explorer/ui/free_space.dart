@@ -4,8 +4,8 @@
 
 import 'package:flutter/material.dart';
 
-import '../../../../primitives/utils.dart';
 import '../../../../shared/common_widgets.dart';
+import '../../../../shared/primitives/utils.dart';
 import '../../inspector_data_models.dart';
 import 'arrow.dart';
 import 'dimension.dart';
@@ -25,8 +25,8 @@ class FreeSpaceVisualizerWidget extends StatelessWidget {
     final heightDescription =
         'h=${toStringAsFixed(renderProperties.realHeight)}';
     final widthDescription = 'w=${toStringAsFixed(renderProperties.realWidth)}';
-    final showWidth = renderProperties.realWidth !=
-        (renderProperties.layoutProperties?.width);
+    final showWidth =
+        renderProperties.realWidth != renderProperties.layoutProperties?.width;
     final widthWidget = Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [

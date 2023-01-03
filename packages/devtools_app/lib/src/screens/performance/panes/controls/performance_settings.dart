@@ -6,9 +6,9 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
-import '../../../../primitives/feature_flags.dart';
 import '../../../../shared/common_widgets.dart';
 import '../../../../shared/dialogs.dart';
+import '../../../../shared/feature_flags.dart';
 import '../../../../shared/globals.dart';
 import '../../../../shared/theme.dart';
 import '../../performance_controller.dart';
@@ -73,7 +73,7 @@ class TimelineStreamSettings extends StatelessWidget {
           style: theme.subtleTextStyle,
         ),
       ),
-      ..._timelineStreams(theme, advanced: false),
+      ..._timelineStreams(advanced: false),
       // Special case "Network Traffic" because it is not implemented as a
       // Timeline recorded stream in the VM. The user does not need to be aware of
       // the distinction, however.
@@ -98,12 +98,11 @@ class TimelineStreamSettings extends StatelessWidget {
           style: theme.subtleTextStyle,
         ),
       ),
-      ..._timelineStreams(theme, advanced: true),
+      ..._timelineStreams(advanced: true),
     ];
   }
 
-  List<Widget> _timelineStreams(
-    ThemeData theme, {
+  List<Widget> _timelineStreams({
     required bool advanced,
   }) {
     final streams = advanced

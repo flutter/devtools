@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 import 'package:devtools_app/devtools_app.dart';
-import 'package:devtools_app/src/config_specific/import_export/import_export.dart';
+import 'package:devtools_app/src/shared/config_specific/import_export/import_export.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 
 // TODO(kenz): add better test coverage for [PerformanceController].
 
-void main() async {
+void main() {
   late PerformanceController controller;
   late MockServiceConnectionManager mockServiceManager;
 
@@ -31,17 +31,17 @@ void main() async {
       controller = PerformanceController();
     });
 
-    test('setActiveFeature', () {
+    test('setActiveFeature', () async {
       expect(controller.flutterFramesController.isActiveFeature, isTrue);
       expect(controller.timelineEventsController.isActiveFeature, isFalse);
       expect(controller.rasterStatsController.isActiveFeature, isFalse);
 
-      controller.setActiveFeature(controller.timelineEventsController);
+      await controller.setActiveFeature(controller.timelineEventsController);
       expect(controller.flutterFramesController.isActiveFeature, isTrue);
       expect(controller.timelineEventsController.isActiveFeature, isTrue);
       expect(controller.rasterStatsController.isActiveFeature, isFalse);
 
-      controller.setActiveFeature(controller.rasterStatsController);
+      await controller.setActiveFeature(controller.rasterStatsController);
       expect(controller.flutterFramesController.isActiveFeature, isTrue);
       expect(controller.timelineEventsController.isActiveFeature, isFalse);
       expect(controller.rasterStatsController.isActiveFeature, isTrue);

@@ -2,13 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/screens/debugger/breakpoint_manager.dart';
 import 'package:devtools_app/src/screens/vm_developer/object_inspector/object_inspector_view_controller.dart';
 import 'package:devtools_app/src/screens/vm_developer/object_inspector/vm_library_display.dart';
 import 'package:devtools_app/src/screens/vm_developer/vm_developer_common_widgets.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/shared/common_widgets.dart';
+import 'package:devtools_app/src/shared/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
@@ -46,34 +46,37 @@ void main() {
       when(mockLibraryObject.scriptRef).thenReturn(testScript);
     });
 
-    testWidgetsWithWindowSize(' - basic layout', windowSize,
-        (WidgetTester tester) async {
-      await tester.pumpWidget(
-        wrap(
-          VmLibraryDisplay(
-            library: mockLibraryObject,
-            controller: ObjectInspectorViewController(),
+    testWidgetsWithWindowSize(
+      ' - basic layout',
+      windowSize,
+      (WidgetTester tester) async {
+        await tester.pumpWidget(
+          wrap(
+            VmLibraryDisplay(
+              library: mockLibraryObject,
+              controller: ObjectInspectorViewController(),
+            ),
           ),
-        ),
-      );
+        );
 
-      expect(find.byType(VmObjectDisplayBasicLayout), findsOneWidget);
-      expect(find.byType(VMInfoCard), findsOneWidget);
-      expect(find.text('General Information'), findsOneWidget);
-      expect(find.text('1 KB'), findsOneWidget);
-      expect(find.text('URI:'), findsOneWidget);
-      expect(find.text('fooLib.dart'), findsOneWidget);
-      expect(find.text('VM Name:'), findsOneWidget);
-      expect(find.text('fooDartLibrary'), findsOneWidget);
+        expect(find.byType(VmObjectDisplayBasicLayout), findsOneWidget);
+        expect(find.byType(VMInfoCard), findsOneWidget);
+        expect(find.text('General Information'), findsOneWidget);
+        expect(find.text('1 KB'), findsOneWidget);
+        expect(find.text('URI:'), findsOneWidget);
+        expect(find.text('fooLib.dart'), findsOneWidget);
+        expect(find.text('VM Name:'), findsOneWidget);
+        expect(find.text('fooDartLibrary'), findsOneWidget);
 
-      expect(find.byType(RequestableSizeWidget), findsNWidgets(2));
+        expect(find.byType(RequestableSizeWidget), findsNWidgets(2));
 
-      expect(find.byType(RetainingPathWidget), findsOneWidget);
+        expect(find.byType(RetainingPathWidget), findsOneWidget);
 
-      expect(find.byType(InboundReferencesWidget), findsOneWidget);
+        expect(find.byType(InboundReferencesWidget), findsOneWidget);
 
-      expect(find.byType(LibraryDependencies), findsOneWidget);
-    });
+        expect(find.byType(LibraryDependencies), findsOneWidget);
+      },
+    );
 
     testWidgetsWithWindowSize(' - with null dependencies', windowSize,
         (WidgetTester tester) async {

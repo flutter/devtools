@@ -4,12 +4,12 @@
 
 import 'package:vm_service/vm_service.dart';
 
-import '../../../../analytics/analytics.dart' as ga;
-import '../../../../analytics/constants.dart' as analytics_constants;
-import '../../../../analytics/metrics.dart';
-import '../../../../primitives/utils.dart';
-import '../../primitives/class_name.dart';
-import '../../primitives/memory_utils.dart';
+import '../../../../shared/analytics/analytics.dart' as ga;
+import '../../../../shared/analytics/constants.dart' as gac;
+import '../../../../shared/analytics/metrics.dart';
+import '../../../../shared/primitives/utils.dart';
+import '../primitives/class_name.dart';
+import '../primitives/memory_utils.dart';
 
 /// Names for json fields.
 class _JsonFields {
@@ -39,8 +39,8 @@ class AdaptedHeapData {
     final createdJson = json[_JsonFields.created];
 
     return AdaptedHeapData(
-      (json[_JsonFields.objects] as List<dynamic>)
-          .map((e) => AdaptedHeapObject.fromJson(e))
+      (json[_JsonFields.objects] as List<Object?>)
+          .map((e) => AdaptedHeapObject.fromJson(e as Map<String, Object?>))
           .toList(),
       created: createdJson == null ? null : DateTime.parse(createdJson),
       rootIndex: json[_JsonFields.rootIndex] ?? _defaultRootIndex,
@@ -102,27 +102,37 @@ class AdaptedHeapData {
 
     return HeapPath(result.reversed.toList(growable: false));
   }
+
+  late final totalSize = () {
+    if (!isSpanningTreeBuilt) throw StateError('Spanning tree should be built');
+    return objects[rootIndex].retainedSize!;
+  }();
 }
 
 /// Result of invocation of [identityHashCode].
 typedef IdentityHashCode = int;
 
 /// Sequence of ids of objects in the heap.
-///
-/// TODO(polina-c): maybe we do not need to store path by objects.
-/// It can be that only classes are interesting, and we can save some
-/// performance on this object. It will become clear when the leak tracking
-/// feature stabilizes.
 class HeapPath {
   HeapPath(this.objects);
 
   final List<AdaptedHeapObject> objects;
 
+  late final bool isRetainedBySameClass = () {
+    if (objects.length < 2) return false;
+
+    final theClass = objects.last.heapClass;
+
+    return objects
+        .take(objects.length - 1)
+        .any((object) => object.heapClass == theClass);
+  }();
+
   /// Retaining path for the object in string format.
-  String? shortPath() => '/${objects.map((o) => o.shortName).join('/')}/';
+  String shortPath() => '/${objects.map((o) => o.shortName).join('/')}/';
 
   /// Retaining path for the object as an array of the retaining objects.
-  List<String>? detailedPath() =>
+  List<String> detailedPath() =>
       objects.map((o) => o.name).toList(growable: false);
 }
 
@@ -228,21 +238,21 @@ class AdaptedHeapObject {
   factory AdaptedHeapObject.fromHeapSnapshotObject(HeapSnapshotObject object) {
     return AdaptedHeapObject(
       code: object.identityHashCode,
-      references: List.from(object.references),
+      references: List.of(object.references),
       heapClass: HeapClassName.fromHeapSnapshotClass(object.klass),
       shallowSize: object.shallowSize,
     );
   }
 
-  factory AdaptedHeapObject.fromJson(Map<String, dynamic> json) =>
+  factory AdaptedHeapObject.fromJson(Map<String, Object?> json) =>
       AdaptedHeapObject(
-        code: json[_JsonFields.code],
-        references: (json[_JsonFields.references] as List<dynamic>).cast<int>(),
+        code: json[_JsonFields.code] as int,
+        references: (json[_JsonFields.references] as List<Object?>).cast<int>(),
         heapClass: HeapClassName(
-          className: json[_JsonFields.klass],
+          className: json[_JsonFields.klass] as String,
           library: json[_JsonFields.library],
         ),
-        shallowSize: json[_JsonFields.shallowSize] ?? 0,
+        shallowSize: (json[_JsonFields.shallowSize] ?? 0) as int,
       );
 
   final List<int> references;
@@ -288,8 +298,8 @@ class SnapshotTaker {
 AdaptedHeapData _adaptSnapshotGaWrapper(HeapSnapshotGraph graph) {
   late final AdaptedHeapData result;
   ga.timeSync(
-    analytics_constants.memory,
-    analytics_constants.MemoryTime.adaptSnapshot,
+    gac.memory,
+    gac.MemoryTime.adaptSnapshot,
     syncOperation: () => result = AdaptedHeapData.fromHeapSnapshot(graph),
     screenMetricsProvider: () => MemoryScreenMetrics(
       heapObjectsTotal: graph.objects.length,

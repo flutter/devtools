@@ -4,8 +4,8 @@
 
 import 'dart:math' as math;
 
-import '../../../../primitives/trace_event.dart';
-import '../../../../primitives/utils.dart';
+import '../../../../shared/primitives/trace_event.dart';
+import '../../../../shared/primitives/utils.dart';
 import '../../performance_model.dart';
 import '../controls/enhance_tracing/enhance_tracing_model.dart';
 import '../frame_analysis/frame_analysis_model.dart';

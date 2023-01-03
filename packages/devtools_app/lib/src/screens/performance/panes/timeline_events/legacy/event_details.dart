@@ -5,12 +5,12 @@
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart' hide TimelineEvent;
 
-import '../../../../../primitives/trace_event.dart';
-import '../../../../../primitives/utils.dart';
 import '../../../../../shared/common_widgets.dart';
 import '../../../../../shared/globals.dart';
+import '../../../../../shared/primitives/trace_event.dart';
+import '../../../../../shared/primitives/utils.dart';
 import '../../../../../shared/theme.dart';
-import '../../../../../ui/vm_flag_widgets.dart';
+import '../../../../../shared/ui/vm_flag_widgets.dart';
 import '../../../../profiler/cpu_profile_controller.dart';
 import '../../../../profiler/cpu_profile_model.dart';
 import '../../../../profiler/cpu_profiler.dart';
@@ -37,30 +37,39 @@ class EventDetails extends StatelessWidget {
     // (see html_event_details.dart).
     final theme = Theme.of(context);
     return OutlineDecoration(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          AreaPaneHeader(
-            needsTopBorder: false,
-            tall: true,
-            title: Text(_generateHeaderText()),
-            actions: [
-              CpuSamplingRateDropdown(
-                screenId: PerformanceScreen.id,
-                profilePeriodFlagNotifier:
-                    legacyController.cpuProfilerController.profilePeriodFlag!,
+      child: DualValueListenableBuilder<bool, Flag>(
+        firstListenable: offlineController.offlineMode,
+        secondListenable:
+            legacyController.cpuProfilerController.profilerFlagNotifier!,
+        builder: (context, offline, profilerFlag, _) {
+          final profilerEnabled = profilerFlag.valueAsString == 'true';
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              AreaPaneHeader(
+                needsTopBorder: false,
+                tall: true,
+                title: Text(_generateHeaderText()),
+                actions: [
+                  if (selectedEvent != null &&
+                      selectedEvent!.isUiEvent &&
+                      !offline &&
+                      profilerEnabled)
+                    CpuSamplingRateDropdown(
+                      screenId: PerformanceScreen.id,
+                      profilePeriodFlagNotifier: legacyController
+                          .cpuProfilerController.profilePeriodFlag!,
+                    ),
+                ],
+              ),
+              Expanded(
+                child: selectedEvent != null
+                    ? _buildDetails(offline, profilerEnabled)
+                    : _buildInstructions(theme),
               ),
             ],
-          ),
-          Expanded(
-            child: selectedEvent != null
-                ? ValueListenableBuilder<bool>(
-                    valueListenable: offlineController.offlineMode,
-                    builder: (context, offline, _) => _buildDetails(offline),
-                  )
-                : _buildInstructions(theme),
-          ),
-        ],
+          );
+        },
       ),
     );
   }
@@ -74,7 +83,7 @@ class EventDetails extends StatelessWidget {
         '${selected.name} (${msText(selected.time.duration)})';
   }
 
-  Widget _buildDetails(bool offlineMode) {
+  Widget _buildDetails(bool offlineMode, bool profilerEnabled) {
     final selected = selectedEvent!;
     if (selected.isUiEvent) {
       // In [offlineController.offlineMode], we do not need to worry about
@@ -82,15 +91,9 @@ class EventDetails extends StatelessWidget {
       if (offlineMode) {
         return _buildCpuProfiler(legacyController.cpuProfilerController);
       }
-      return ValueListenableBuilder<Flag>(
-        valueListenable:
-            legacyController.cpuProfilerController.profilerFlagNotifier!,
-        builder: (context, profilerFlag, _) {
-          return profilerFlag.valueAsString == 'true'
-              ? _buildCpuProfiler(legacyController.cpuProfilerController)
-              : CpuProfilerDisabled(legacyController.cpuProfilerController);
-        },
-      );
+      return profilerEnabled
+          ? _buildCpuProfiler(legacyController.cpuProfilerController)
+          : CpuProfilerDisabled(legacyController.cpuProfilerController);
     }
     return EventSummary(selected);
   }
@@ -140,7 +143,7 @@ class EventSummary extends StatelessWidget {
           if (event.isAsyncEvent)
             ...event.children
                 .cast<AsyncTimelineEvent>()
-                .where((e) => e.isAsyncInstantEvent)
+                .where((e) => e.isAsyncInstantEvent),
         ],
         _eventArgs = Map.from(event.traceEvents.first.event.args!)
           ..addAll({for (var trace in event.traceEvents) ...trace.event.args!});
@@ -190,7 +193,7 @@ class EventSummary extends StatelessWidget {
               if (event.isAsyncEvent)
                 Flexible(
                   fit: FlexFit.tight,
-                  child: _asyncIdTile(context),
+                  child: _asyncIdTile(),
                 ),
               Flexible(
                 fit: FlexFit.tight,
@@ -209,35 +212,33 @@ class EventSummary extends StatelessWidget {
             ],
           ),
         ),
-        if (_connectedEvents.isNotEmpty) _buildConnectedEvents(context),
-        if (_eventArgs.isNotEmpty) _buildArguments(context),
+        if (_connectedEvents.isNotEmpty) _buildConnectedEvents(),
+        if (_eventArgs.isNotEmpty) _buildArguments(),
       ],
     );
   }
 
-  Widget _asyncIdTile(BuildContext context) {
+  Widget _asyncIdTile() {
     late final String asyncId;
-    if (event is OfflineTimelineEvent) {
-      asyncId = event.traceEvents.first.event.id;
-    } else {
-      asyncId = (event as AsyncTimelineEvent).asyncId;
-    }
+    asyncId = event is OfflineTimelineEvent
+        ? event.traceEvents.first.event.id as String
+        : (event as AsyncTimelineEvent).asyncId;
     return EventMetaData(
       title: 'Async id',
       inlineValue: asyncId,
     );
   }
 
-  Widget _buildConnectedEvents(BuildContext context) {
+  Widget _buildConnectedEvents() {
     return ExpandingEventMetaData(
       title: 'Connected events',
       children: [
-        for (var e in _connectedEvents) _buildConnectedEvent(context, e),
+        for (var e in _connectedEvents) _buildConnectedEvent(e),
       ],
     );
   }
 
-  Widget _buildConnectedEvent(BuildContext context, TimelineEvent e) {
+  Widget _buildConnectedEvent(TimelineEvent e) {
     final eventArgs = {
       'startTime': msText(e.time.start! - event.time.start!),
       'args': e.traceEvents.first.event.args,
@@ -251,7 +252,7 @@ class EventSummary extends StatelessWidget {
     );
   }
 
-  Widget _buildArguments(BuildContext context) {
+  Widget _buildArguments() {
     return ExpandingEventMetaData(
       title: 'Arguments',
       children: [

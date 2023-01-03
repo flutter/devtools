@@ -8,41 +8,41 @@ import 'dart:collection';
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart' hide Stack;
 
-import '../../analytics/analytics.dart' as ga;
-import '../../analytics/constants.dart' as analytics_constants;
-import '../../primitives/auto_dispose_mixin.dart';
-import '../../primitives/blocking_action_mixin.dart';
-import '../../primitives/simple_items.dart';
 import '../../service/service_extension_widgets.dart';
 import '../../service/service_extensions.dart' as extensions;
+import '../../shared/analytics/analytics.dart' as ga;
+import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/common_widgets.dart';
 import '../../shared/connected_app.dart';
+import '../../shared/console/eval/inspector_tree.dart';
 import '../../shared/dialogs.dart';
 import '../../shared/editable_list.dart';
 import '../../shared/error_badge_manager.dart';
 import '../../shared/globals.dart';
+import '../../shared/primitives/auto_dispose.dart';
+import '../../shared/primitives/blocking_action_mixin.dart';
+import '../../shared/primitives/simple_items.dart';
 import '../../shared/screen.dart';
 import '../../shared/split.dart';
 import '../../shared/theme.dart';
+import '../../shared/ui/icons.dart';
+import '../../shared/ui/search.dart';
 import '../../shared/utils.dart';
-import '../../ui/icons.dart';
-import '../../ui/search.dart';
 import 'inspector_controller.dart';
 import 'inspector_screen_details_tab.dart';
-import 'inspector_tree.dart';
 import 'inspector_tree_controller.dart';
 
 class InspectorScreen extends Screen {
-  const InspectorScreen()
+  InspectorScreen()
       : super.conditional(
           id: id,
           requiresLibrary: flutterLibraryUri,
           requiresDebugBuild: true,
-          title: 'Flutter Inspector',
+          title: ScreenMetaData.inspector.title,
           icon: Octicons.deviceMobile,
         );
 
-  static const id = ScreenIds.inspector;
+  static final id = ScreenMetaData.inspector.id;
 
   // There is not enough room to safely show the console in the embed view of
   // the DevTools and IDEs have their own consoles.
@@ -146,7 +146,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
     }
 
     if (!controller.firstInspectorTreeLoadCompleted) {
-      ga.timeStart(InspectorScreen.id, analytics_constants.pageReady);
+      ga.timeStart(InspectorScreen.id, gac.pageReady);
     }
 
     _summaryTreeController.setSearchTarget(searchTarget);
@@ -189,7 +189,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
                   extensions: [
                     selectModeSupported
                         ? extensions.toggleSelectWidgetMode
-                        : extensions.toggleOnDeviceWidgetInspector
+                        : extensions.toggleOnDeviceWidgetInspector,
                   ],
                   minScreenWidthForTextBeforeScaling:
                       minScreenWidthForTextBeforeScaling,
@@ -265,7 +265,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
                     );
                   },
                 ),
-              )
+              ),
             ],
           ),
         );
@@ -312,7 +312,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
   }
 
   void _refreshInspector() {
-    ga.select(analytics_constants.inspector, analytics_constants.refresh);
+    ga.select(gac.inspector, gac.refresh);
     unawaited(
       blockWhileInProgress(() async {
         // If the user is force refreshing the inspector before the first load has
@@ -323,11 +323,11 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
           // refresh will skew the results.
           ga.cancelTimingOperation(
             InspectorScreen.id,
-            analytics_constants.pageReady,
+            gac.pageReady,
           );
           ga.select(
-            analytics_constants.inspector,
-            analytics_constants.refreshEmptyTree,
+            gac.inspector,
+            gac.refreshEmptyTree,
           );
           controller.firstInspectorTreeLoadCompleted = true;
         }
@@ -352,7 +352,7 @@ class FlutterInspectorSettingsDialog extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             ...dialogSubHeader(
-              Theme.of(context),
+              theme,
               'General',
             ),
             CheckboxSetting(
@@ -361,10 +361,10 @@ class FlutterInspectorSettingsDialog extends StatelessWidget {
               title: 'Enable hover inspection',
               description:
                   'Hovering over any widget displays its properties and values.',
-              gaItem: analytics_constants.inspectorHoverEvalMode,
+              gaItem: gac.inspectorHoverEvalMode,
             ),
             const SizedBox(height: denseSpacing),
-            ...dialogSubHeader(Theme.of(context), 'Package Directories'),
+            ...dialogSubHeader(theme, 'Package Directories'),
             Text(
               'Widgets in these directories will show up in your summary tree.',
               style: theme.subtleTextStyle,
@@ -429,7 +429,7 @@ class InspectorSummaryTreeControls extends StatelessWidget {
                   : [
                       constraints.maxWidth >= _searchBreakpoint
                           ? _buildSearchControls()
-                          : const Spacer()
+                          : const Spacer(),
                     ],
               ToolbarAction(
                 icon: Icons.refresh,

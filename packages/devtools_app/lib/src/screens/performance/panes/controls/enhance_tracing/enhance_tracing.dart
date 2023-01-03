@@ -6,12 +6,12 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
-import '../../../../../primitives/auto_dispose_mixin.dart';
 import '../../../../../service/service_extension_manager.dart';
 import '../../../../../service/service_extension_widgets.dart';
 import '../../../../../service/service_extensions.dart' as extensions;
 import '../../../../../shared/common_widgets.dart';
 import '../../../../../shared/globals.dart';
+import '../../../../../shared/primitives/auto_dispose.dart';
 import '../../../../../shared/theme.dart';
 import '../../../performance_screen.dart';
 import 'enhance_tracing_controller.dart';
@@ -66,7 +66,7 @@ class EnhanceTracingButton extends StatelessWidget {
                   'to reproduce activity in your app to see the enhanced '
                   'tracing in the timeline.',
               style: textStyle,
-            )
+            ),
           ],
         ),
       ),
@@ -206,6 +206,8 @@ class _TrackWidgetBuildsSettingState extends State<TrackWidgetBuildsSetting>
 
     assert(!(trackAllWidgets && trackUserWidgets));
     _tracked.value = trackUserWidgets || trackAllWidgets;
+    // Double nested conditinoal expressions are hard to read.
+    // ignore: prefer-conditional-expression
     if (_tracked.value) {
       _selectedScope.value = trackUserWidgets
           ? TrackWidgetBuildsScope.userCreated
@@ -306,7 +308,7 @@ class TrackWidgetBuildsCheckbox extends StatelessWidget {
             extension.extension,
             enabled: false,
             value: extension.disabledValue,
-          )
+          ),
       ]);
     }
   }

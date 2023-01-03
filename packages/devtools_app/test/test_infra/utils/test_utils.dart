@@ -6,8 +6,8 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:devtools_app/src/primitives/trace_event.dart';
 import 'package:devtools_app/src/screens/performance/performance_model.dart';
+import 'package:devtools_app/src/shared/primitives/trace_event.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -38,9 +38,9 @@ void setupClipboardCopyListener({
         clipboardContentsCallback(call.arguments['text']);
         break;
       case 'Clipboard.getData':
-        return Future.value(<String, dynamic>{});
+        return Future.value(<String, Object?>{});
       case 'Clipboard.hasStrings':
-        return Future.value(<String, dynamic>{'value': true});
+        return Future.value(<String, Object?>{'value': true});
       default:
         break;
     }

@@ -8,9 +8,9 @@ import 'dart:core';
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart' hide Error;
 
-import '../config_specific/logger/logger.dart';
-import '../primitives/auto_dispose.dart';
+import '../shared/config_specific/logger/logger.dart';
 import '../shared/connected_app.dart';
+import '../shared/primitives/auto_dispose.dart';
 import 'isolate_manager.dart';
 import 'service_extensions.dart' as extensions;
 import 'service_extensions.dart';
@@ -110,7 +110,7 @@ class ServiceExtensionManager extends Disposer {
   ) async {
     final extension = extensions.serviceExtensionsAllowlist[name];
     if (extension != null) {
-      final dynamic extensionValue = _getExtensionValue(name, encodedValue);
+      final extensionValue = _getExtensionValue(name, encodedValue);
       final enabled =
           extension is extensions.ToggleableServiceExtensionDescription
               ? extensionValue == extension.enabledValue
@@ -128,7 +128,7 @@ class ServiceExtensionManager extends Disposer {
     }
   }
 
-  dynamic _getExtensionValue(String name, String encodedValue) {
+  Object? _getExtensionValue(String name, String encodedValue) {
     final expectedValueType =
         extensions.serviceExtensionsAllowlist[name]!.values.first.runtimeType;
     switch (expectedValueType) {
@@ -153,7 +153,7 @@ class ServiceExtensionManager extends Disposer {
     _pendingServiceExtensions.clear();
     await Future.wait([
       for (String extension in extensionsToProcess)
-        _addServiceExtension(extension)
+        _addServiceExtension(extension),
     ]);
   }
 
@@ -189,12 +189,12 @@ class ServiceExtensionManager extends Disposer {
         }
         await Future.wait([
           for (String extension in mainIsolate.extensionRPCs!)
-            _maybeAddServiceExtension(extension)
+            _maybeAddServiceExtension(extension),
         ]);
       } else {
         await Future.wait([
           for (String extension in mainIsolate.extensionRPCs!)
-            _addServiceExtension(extension)
+            _addServiceExtension(extension),
         ]);
       }
     }
@@ -261,6 +261,8 @@ class ServiceExtensionManager extends Disposer {
     }
   }
 
+  IsolateRef? get _mainIsolate => _isolateManager.mainIsolate.value;
+
   Future<void> _restoreExtensionFromDevice(String name) async {
     final isolateRef = _isolateManager.mainIsolate.value;
     if (isolateRef == null) return;
@@ -273,14 +275,14 @@ class ServiceExtensionManager extends Disposer {
 
     Future<void> restore() async {
       // The restore request is obsolete if the isolate has changed.
-      if (isolateRef != _isolateManager.mainIsolate.value) return;
+      if (isolateRef != _mainIsolate) return;
       try {
         final response = await _service!.callServiceExtension(
           name,
           isolateId: isolateRef.id,
         );
 
-        if (isolateRef != _isolateManager.mainIsolate.value) return;
+        if (isolateRef != _mainIsolate) return;
 
         switch (expectedValueType) {
           case bool:
@@ -312,10 +314,10 @@ class ServiceExtensionManager extends Disposer {
       }
     }
 
-    if (isolateRef != _isolateManager.mainIsolate.value) return;
+    if (isolateRef != _mainIsolate) return;
 
     final Isolate? isolate = await _isolateManager.getIsolateCached(isolateRef);
-    if (isolateRef != _isolateManager.mainIsolate.value) return;
+    if (isolateRef != _mainIsolate) return;
 
     // Do not try to restore Dart IO extensions for a paused isolate.
     if (extensions.isDartIoExtension(name) &&
@@ -326,7 +328,7 @@ class ServiceExtensionManager extends Disposer {
     }
   }
 
-  Future<void> _maybeRestoreExtension(String name, dynamic value) async {
+  Future<void> _maybeRestoreExtension(String name, Object? value) async {
     final extensionDescription = extensions.serviceExtensionsAllowlist[name];
     if (extensionDescription
         is extensions.ToggleableServiceExtensionDescription) {
@@ -348,7 +350,7 @@ class ServiceExtensionManager extends Disposer {
     }
   }
 
-  Future<void> _callServiceExtension(String name, dynamic value) async {
+  Future<void> _callServiceExtension(String name, Object? value) async {
     if (_service == null) {
       return;
     }
@@ -441,7 +443,7 @@ class ServiceExtensionManager extends Disposer {
   Future<void> setServiceExtensionState(
     String name, {
     required bool enabled,
-    required dynamic value,
+    required Object? value,
     bool callExtension = true,
   }) async {
     if (callExtension && _serviceExtensions.contains(name)) {
@@ -560,7 +562,7 @@ class ServiceExtensionState {
 
   // For boolean service extensions, [enabled] should equal [value].
   final bool enabled;
-  final dynamic value;
+  final Object? value;
 
   @override
   bool operator ==(Object other) {

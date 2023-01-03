@@ -2,13 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app/src/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/screens/debugger/breakpoint_manager.dart';
 import 'package:devtools_app/src/screens/vm_developer/object_inspector/object_inspector_view_controller.dart';
 import 'package:devtools_app/src/screens/vm_developer/object_inspector/vm_field_display.dart';
 import 'package:devtools_app/src/screens/vm_developer/vm_developer_common_widgets.dart';
 import 'package:devtools_app/src/screens/vm_developer/vm_service_private_extensions.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
+import 'package:devtools_app/src/shared/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
@@ -83,22 +83,25 @@ void main() {
       expect(find.byType(InboundReferencesWidget), findsOneWidget);
     });
 
-    testWidgetsWithWindowSize('observed type single - nullable', windowSize,
-        (WidgetTester tester) async {
-      when(mockFieldObject.guardClass).thenReturn(testClass);
-      when(mockFieldObject.guardNullable).thenReturn(true);
-      when(mockFieldObject.guardClassKind).thenReturn(GuardClassKind.single);
+    testWidgetsWithWindowSize(
+      'observed type single - nullable',
+      windowSize,
+      (WidgetTester tester) async {
+        when(mockFieldObject.guardClass).thenReturn(testClass);
+        when(mockFieldObject.guardNullable).thenReturn(true);
+        when(mockFieldObject.guardClassKind).thenReturn(GuardClassKind.single);
 
-      await tester.pumpWidget(
-        wrap(
-          VmFieldDisplay(
-            field: mockFieldObject,
-            controller: ObjectInspectorViewController(),
+        await tester.pumpWidget(
+          wrap(
+            VmFieldDisplay(
+              field: mockFieldObject,
+              controller: ObjectInspectorViewController(),
+            ),
           ),
-        ),
-      );
-      expect(find.text('FooClass - null observed'), findsOneWidget);
-    });
+        );
+        expect(find.text('FooClass - null observed'), findsOneWidget);
+      },
+    );
 
     testWidgetsWithWindowSize(
         'observed type dynamic - non-nullable', windowSize,
@@ -119,25 +122,27 @@ void main() {
     });
 
     testWidgetsWithWindowSize(
-        'observed type unknown - null unknown', windowSize,
-        (WidgetTester tester) async {
-      when(mockFieldObject.guardClass).thenReturn(null);
-      when(mockFieldObject.guardNullable).thenReturn(null);
-      when(mockFieldObject.guardClassKind).thenReturn(GuardClassKind.unknown);
+      'observed type unknown - null unknown',
+      windowSize,
+      (WidgetTester tester) async {
+        when(mockFieldObject.guardClass).thenReturn(null);
+        when(mockFieldObject.guardNullable).thenReturn(null);
+        when(mockFieldObject.guardClassKind).thenReturn(GuardClassKind.unknown);
 
-      await tester.pumpWidget(
-        wrap(
-          VmFieldDisplay(
-            field: mockFieldObject,
-            controller: ObjectInspectorViewController(),
+        await tester.pumpWidget(
+          wrap(
+            VmFieldDisplay(
+              field: mockFieldObject,
+              controller: ObjectInspectorViewController(),
+            ),
           ),
-        ),
-      );
-      expect(
-        find.text('none'),
-        findsOneWidget,
-      );
-    });
+        );
+        expect(
+          find.text('none'),
+          findsOneWidget,
+        );
+      },
+    );
 
     testWidgetsWithWindowSize('static value is not InstanceRef', windowSize,
         (WidgetTester tester) async {

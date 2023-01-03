@@ -4,7 +4,7 @@
 
 import 'package:flutter/foundation.dart';
 
-import '../../primitives/class_name.dart';
+import '../primitives/class_name.dart';
 
 enum ClassFilterType {
   showAll,
@@ -36,7 +36,7 @@ class ClassFilter {
   ClassFilter.empty()
       : this(
           filterType: ClassFilterType.showAll,
-          except: '$noPackageLibrariesAlias\n$dartAndFlutterLibrariesAlias',
+          except: '$dartInternalAlias\n$dartAndFlutterLibrariesAlias',
           only: null,
         );
 
@@ -44,7 +44,7 @@ class ClassFilter {
       value.split('\n').map((e) => e.trim()).join('\n');
 
   static const String dartAndFlutterLibrariesAlias = '\$dart-flutter-libraries';
-  static const String noPackageLibrariesAlias = '\$no-package-libraries';
+  static const String dartInternalAlias = '\$dart-internal-objects';
 
   final ClassFilterType filterType;
   final String except;
@@ -125,6 +125,8 @@ class ClassFilter {
   }
 
   bool apply(HeapClassName className) {
+    if (className.isRoot) return false;
+
     if (filterType == ClassFilterType.showAll) return true;
 
     for (var filter in filters) {
@@ -140,8 +142,7 @@ class ClassFilter {
     if (className.fullName.contains(filter)) return true;
     if (filter == dartAndFlutterLibrariesAlias && className.isDartOrFlutter)
       return true;
-    if (filter == noPackageLibrariesAlias && className.isPackageless)
-      return true;
+    if (filter == dartInternalAlias && className.isPackageless) return true;
     return false;
   }
 }

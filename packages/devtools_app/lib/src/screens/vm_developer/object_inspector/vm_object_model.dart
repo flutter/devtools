@@ -6,10 +6,10 @@ import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../../primitives/utils.dart';
 import '../../../service/vm_service_wrapper.dart';
+import '../../../shared/console/primitives/source_location.dart';
 import '../../../shared/globals.dart';
-import '../../debugger/debugger_model.dart';
+import '../../../shared/primitives/utils.dart';
 import '../vm_service_private_extensions.dart';
 
 /// Wrapper class for storing Dart VM objects with their relevant VM
@@ -201,11 +201,8 @@ class FieldObject extends VmObject {
 
     guardClassKind = obj.guardClassKind();
 
-    if (guardClassKind == GuardClassKind.single) {
-      guardClass = await obj.guardClass;
-    } else {
-      guardClass = null;
-    }
+    guardClass =
+        guardClassKind == GuardClassKind.single ? await obj.guardClass : null;
   }
 }
 
