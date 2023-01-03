@@ -42,11 +42,8 @@ class DebuggerController extends DisposableController
     if (routerDelegate != null) {
       codeViewController.subscribeToRouterEvents(routerDelegate);
     }
-    addAutoDisposeListener(_selectedStackFrame, () => _updateCurrentFrame());
-    addAutoDisposeListener(
-      _stackFramesWithLocation,
-      () => _updateCurrentFrame(),
-    );
+    addAutoDisposeListener(_selectedStackFrame, _updateCurrentFrame);
+    addAutoDisposeListener(_stackFramesWithLocation, _updateCurrentFrame);
 
     if (serviceManager.hasService) {
       _initialize();
