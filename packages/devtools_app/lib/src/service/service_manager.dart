@@ -94,6 +94,8 @@ class ServiceConnectionManager {
 
   ConnectedApp? connectedApp;
 
+  // TODO (polina-c and kenzieschmoll): make appState member of ConnectedApp.
+  // https://github.com/flutter/devtools/pull/4993#discussion_r1061774726
   AppState get appState => _appState!;
   AppState? _appState;
 
