@@ -166,6 +166,10 @@ class DebuggerController extends DisposableController
   }
 
   void _switchToIsolate(IsolateRef? ref) async {
+    // TODO(polina-c and jacob314): move this logic to appState
+    // and modify to detect if app is paused from the isolate
+    // https://github.com/flutter/devtools/pull/4993#discussion_r1060845351
+
     serviceManager.appState
       ..setIsolateRef(ref)
       ..setPausedOnBreakpoint(false);
