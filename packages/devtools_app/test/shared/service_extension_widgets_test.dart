@@ -19,11 +19,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 
-void main() {
+Future<void> main() async {
   final mockServiceManager = MockServiceConnectionManager();
   when(mockServiceManager.serviceExtensionManager)
       .thenReturn(FakeServiceExtensionManager());
   when(mockServiceManager.appState).thenReturn(AppState());
+  when(mockServiceManager.runDeviceBusyTask(Future<void>.value()))
+      .thenAnswer((_) => Future<void>.value());
   setGlobal(ServiceConnectionManager, mockServiceManager);
   setGlobal(NotificationService, NotificationService());
 
