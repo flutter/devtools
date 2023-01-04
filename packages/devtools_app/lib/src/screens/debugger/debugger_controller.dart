@@ -20,9 +20,6 @@ import '../../shared/routing.dart';
 import 'codeview_controller.dart';
 import 'debugger_model.dart';
 
-// TODO(devoncarew): Add some delayed resume value notifiers (to be used to
-// help debounce stepping operations).
-
 // Make sure this a checked in with `mute: true`.
 final _log = DebugTimingLogger('debugger', mute: true);
 
@@ -82,7 +79,6 @@ class DebuggerController extends DisposableController
 
     final appState = serviceManager.appState;
 
-    appState.setIsolateRef(null);
     appState.setPausedOnBreakpoint(false);
     _resuming.value = false;
     _lastEvent = null;
@@ -102,14 +98,17 @@ class DebuggerController extends DisposableController
     _initialize();
   }
 
+  ValueListenable<IsolateRef?> get _isolate =>
+      serviceManager.isolateManager.selectedIsolate;
+
   void _initialize() {
     if (_initialSwitchToIsolate) {
-      assert(serviceManager.isolateManager.selectedIsolate.value != null);
-      _switchToIsolate(serviceManager.isolateManager.selectedIsolate.value);
+      assert(_isolate.value != null);
+      _switchToIsolate(_isolate.value);
     }
 
-    addAutoDisposeListener(serviceManager.isolateManager.selectedIsolate, () {
-      _switchToIsolate(serviceManager.isolateManager.selectedIsolate.value);
+    addAutoDisposeListener(_isolate, () {
+      _switchToIsolate(_isolate.value);
     });
     autoDisposeStreamSubscription(
       _service.onDebugEvent.listen(_handleDebugEvent),
@@ -156,11 +155,10 @@ class DebuggerController extends DisposableController
 
   ValueListenable<String?> get exceptionPauseMode => _exceptionPauseMode;
 
-  bool get isSystemIsolate =>
-      serviceManager.appState.isolateRef.value?.isSystemIsolate ?? false;
+  bool get isSystemIsolate => _isolate.value?.isSystemIsolate ?? false;
 
   String get _isolateRefId {
-    final id = serviceManager.appState.isolateRef.value?.id;
+    final id = _isolate.value?.id;
     if (id == null) return '';
     return id;
   }
@@ -170,9 +168,7 @@ class DebuggerController extends DisposableController
     // and modify to detect if app is paused from the isolate
     // https://github.com/flutter/devtools/pull/4993#discussion_r1060845351
 
-    serviceManager.appState
-      ..setIsolateRef(ref)
-      ..setPausedOnBreakpoint(false);
+    serviceManager.appState.setPausedOnBreakpoint(false);
     await _pause(false);
 
     _clearCaches();
@@ -315,7 +311,7 @@ class DebuggerController extends DisposableController
     // ignore: unused_local_variable
     final status = reloadEvent.status;
 
-    final theIsolateRef = serviceManager.appState.isolateRef.value;
+    final theIsolateRef = _isolate.value;
     if (theIsolateRef == null) return;
     // Refresh the list of scripts.
     final previousScriptRefs = scriptManager.sortedScripts.value;
@@ -469,7 +465,7 @@ class DebuggerController extends DisposableController
   }
 
   Future<void> _populateScripts(Isolate isolate) async {
-    final theIsolateRef = serviceManager.appState.isolateRef.value;
+    final theIsolateRef = _isolate.value;
     if (theIsolateRef == null) return;
     final scriptRefs =
         await scriptManager.retrieveAndSortScripts(theIsolateRef);
@@ -540,7 +536,7 @@ class DebuggerController extends DisposableController
         .map(
           (v) => DartObjectNode.create(
             v,
-            serviceManager.appState.isolateRef.value,
+            _isolate.value,
           ),
         )
         .toList();

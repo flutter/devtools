@@ -13,14 +13,15 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 
 void main() {
-  final appState = AppState();
   final mockServiceManager = MockServiceConnectionManager();
   when(mockServiceManager.service).thenReturn(null);
   when(mockServiceManager.connectedAppInitialized).thenReturn(false);
   when(mockServiceManager.connectedState).thenReturn(
     ValueNotifier<ConnectedState>(const ConnectedState(false)),
   );
-  when(mockServiceManager.appState).thenReturn(appState);
+  when(mockServiceManager.isolateManager).thenReturn(FakeIsolateManager());
+  when(mockServiceManager.appState)
+      .thenReturn(AppState(mockServiceManager.isolateManager.selectedIsolate));
 
   final mockErrorBadgeManager = MockErrorBadgeManager();
   when(mockServiceManager.errorBadgeManager).thenReturn(mockErrorBadgeManager);

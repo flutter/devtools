@@ -26,7 +26,9 @@ void main() {
   when(mockServiceManager.connectedState).thenReturn(
     ValueNotifier<ConnectedState>(const ConnectedState(false)),
   );
-  when(mockServiceManager.appState).thenReturn(AppState());
+  when(mockServiceManager.isolateManager).thenReturn(FakeIsolateManager());
+  when(mockServiceManager.appState)
+      .thenReturn(AppState(mockServiceManager.isolateManager.selectedIsolate));
 
   final mockErrorBadgeManager = MockErrorBadgeManager();
   when(mockServiceManager.errorBadgeManager).thenReturn(mockErrorBadgeManager);
@@ -43,13 +45,15 @@ void main() {
   testWidgets(
     'displays floating debugger controls',
     (WidgetTester tester) async {
-      final appState = AppState();
       final mockConnectedApp = MockConnectedAppLegacy();
       when(mockConnectedApp.isFlutterAppNow).thenReturn(true);
       when(mockConnectedApp.isProfileBuildNow).thenReturn(false);
       when(mockServiceManager.connectedAppInitialized).thenReturn(true);
       when(mockServiceManager.connectedApp).thenReturn(mockConnectedApp);
-      when(mockServiceManager.appState).thenReturn(appState);
+      when(mockServiceManager.isolateManager).thenReturn(FakeIsolateManager());
+      when(mockServiceManager.appState).thenReturn(
+        AppState(mockServiceManager.isolateManager.selectedIsolate),
+      );
       final mockDebuggerController = MockDebuggerController();
       mockServiceManager.appState.setPausedOnBreakpoint(true);
 

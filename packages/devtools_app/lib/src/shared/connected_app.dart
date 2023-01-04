@@ -14,6 +14,7 @@ import 'console/primitives/eval_history.dart';
 import 'eval_on_dart_library.dart';
 import 'globals.dart';
 import 'object_tree.dart';
+import 'primitives/auto_dispose.dart';
 import 'title.dart';
 import 'version.dart';
 
@@ -239,15 +240,9 @@ class AutocompleteCache {
   }
 }
 
-class AppState {
-  // TODO(CoderDake or polina-c): It might be good to move the isolateRef
-  // lifecycle code to this context from DebuggerController.
-  ValueListenable<IsolateRef?> get isolateRef => _isolateRef;
-  final _isolateRef = ValueNotifier<IsolateRef?>(null);
-  void setIsolateRef(IsolateRef? value) {
-    if (value == isolateRef.value) return;
-    _isolateRef.value = value;
-    cache._clear();
+class AppState extends DisposableController with AutoDisposeControllerMixin {
+  AppState(ValueListenable<IsolateRef?> isolateRef) {
+    addAutoDisposeListener(isolateRef, () => cache._clear());
   }
 
   // TODO(polina-c): add explanation for variables.
@@ -269,9 +264,11 @@ class AppState {
 
   final cache = AutocompleteCache();
 
+  @override
   void dispose() {
     _variables.dispose();
     _isPaused.dispose();
     _currentFrame.dispose();
+    super.dispose();
   }
 }

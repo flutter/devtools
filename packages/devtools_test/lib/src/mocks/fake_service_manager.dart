@@ -92,7 +92,7 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
   ConnectedApp? connectedApp = MockConnectedApp();
 
   @override
-  AppState appState = AppState();
+  late final AppState appState = AppState(isolateManager.selectedIsolate);
 
   @override
   final ConsoleService consoleService = ConsoleService();

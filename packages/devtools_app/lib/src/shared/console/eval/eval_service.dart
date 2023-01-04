@@ -16,7 +16,7 @@ class EvalService extends DisposableController with AutoDisposeControllerMixin {
   }
 
   String get _isolateRefId {
-    final id = serviceManager.appState.isolateRef.value?.id;
+    final id = serviceManager.isolateManager.selectedIsolate.value?.id;
     // TODO(polina-c): it is not clear why returning '' is ok.
     if (id == null) return '';
     return id;
