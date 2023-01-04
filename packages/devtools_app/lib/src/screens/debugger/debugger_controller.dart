@@ -83,7 +83,7 @@ class DebuggerController extends DisposableController
     final appState = serviceManager.appState;
 
     appState.setIsolateRef(null);
-    appState.setPaused(false);
+    appState.setPausedOnBreakpoint(false);
     _resuming.value = false;
     _lastEvent = null;
     _stackFramesWithLocation.value = [];
@@ -168,7 +168,7 @@ class DebuggerController extends DisposableController
   void _switchToIsolate(IsolateRef? ref) async {
     serviceManager.appState
       ..setIsolateRef(ref)
-      ..setPaused(false);
+      ..setPausedOnBreakpoint(false);
     await _pause(false);
 
     _clearCaches();
@@ -373,7 +373,7 @@ class DebuggerController extends DisposableController
     // serviceManager.isolateManager.selectedIsolateState.isPaused.value;
     // listening for changes there instead of having separate logic.
     await _getStackOperation?.cancel();
-    serviceManager.appState.setPaused(paused);
+    serviceManager.appState.setPausedOnBreakpoint(paused);
 
     _log.log('_pause(running: ${!paused})');
 

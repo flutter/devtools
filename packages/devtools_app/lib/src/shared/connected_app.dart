@@ -257,7 +257,9 @@ class AppState {
 
   ValueListenable<bool> get isPaused => _isPaused;
   final _isPaused = ValueNotifier<bool>(false);
-  void setPaused(bool value) => _isPaused.value = value;
+
+  /// This setter should be invoked only by debugger.
+  void setPausedOnBreakpoint(bool value) => _isPaused.value = value;
 
   ValueListenable<Frame?> get currentFrame => _currentFrame;
   final _currentFrame = ValueNotifier<Frame?>(null);

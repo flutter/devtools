@@ -80,7 +80,7 @@ void main() {
   }
 
   setUp(() {
-    fakeServiceManager.appState.setPaused(true);
+    fakeServiceManager.appState.setPausedOnBreakpoint(true);
   });
 
   testWidgetsWithWindowSize(
