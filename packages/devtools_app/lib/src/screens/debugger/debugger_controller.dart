@@ -82,7 +82,6 @@ class DebuggerController extends DisposableController
 
     final appState = serviceManager.appState;
 
-    appState.setIsolateRef(null);
     appState.setPausedOnBreakpoint(false);
     _resuming.value = false;
     _lastEvent = null;
@@ -157,10 +156,11 @@ class DebuggerController extends DisposableController
   ValueListenable<String?> get exceptionPauseMode => _exceptionPauseMode;
 
   bool get isSystemIsolate =>
-      serviceManager.appState.isolateRef.value?.isSystemIsolate ?? false;
+      serviceManager.isolateManager.selectedIsolate.value?.isSystemIsolate ??
+      false;
 
   String get _isolateRefId {
-    final id = serviceManager.appState.isolateRef.value?.id;
+    final id = serviceManager.isolateManager.selectedIsolate.value?.id;
     if (id == null) return '';
     return id;
   }
@@ -170,9 +170,7 @@ class DebuggerController extends DisposableController
     // and modify to detect if app is paused from the isolate
     // https://github.com/flutter/devtools/pull/4993#discussion_r1060845351
 
-    serviceManager.appState
-      ..setIsolateRef(ref)
-      ..setPausedOnBreakpoint(false);
+    serviceManager.appState..setPausedOnBreakpoint(false);
     await _pause(false);
 
     _clearCaches();
@@ -315,7 +313,7 @@ class DebuggerController extends DisposableController
     // ignore: unused_local_variable
     final status = reloadEvent.status;
 
-    final theIsolateRef = serviceManager.appState.isolateRef.value;
+    final theIsolateRef = serviceManager.isolateManager.selectedIsolate.value;
     if (theIsolateRef == null) return;
     // Refresh the list of scripts.
     final previousScriptRefs = scriptManager.sortedScripts.value;
@@ -469,7 +467,7 @@ class DebuggerController extends DisposableController
   }
 
   Future<void> _populateScripts(Isolate isolate) async {
-    final theIsolateRef = serviceManager.appState.isolateRef.value;
+    final theIsolateRef = serviceManager.isolateManager.selectedIsolate.value;
     if (theIsolateRef == null) return;
     final scriptRefs =
         await scriptManager.retrieveAndSortScripts(theIsolateRef);
@@ -540,7 +538,7 @@ class DebuggerController extends DisposableController
         .map(
           (v) => DartObjectNode.create(
             v,
-            serviceManager.appState.isolateRef.value,
+            serviceManager.isolateManager.selectedIsolate.value,
           ),
         )
         .toList();
