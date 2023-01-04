@@ -6,11 +6,11 @@
 
 import 'package:ansi_up/ansi_up.dart';
 import 'package:ansicolor/ansicolor.dart';
-import 'package:devtools_app/src/screens/debugger/console.dart';
 import 'package:devtools_app/src/screens/debugger/debugger_controller.dart';
 import 'package:devtools_app/src/screens/logging/logging_controller.dart';
 import 'package:devtools_app/src/screens/logging/logging_screen.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
+import 'package:devtools_app/src/shared/console/widgets/console_pane.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_app/src/shared/primitives/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
@@ -247,8 +247,8 @@ void main() {
         wrapWithControllers(
           Row(
             children: [
-              Flexible(child: DebuggerConsole.buildHeader()),
-              const Expanded(child: DebuggerConsole()),
+              Flexible(child: ConsolePaneHeader()),
+              const Expanded(child: ConsolePane()),
             ],
           ),
           debugger: controller,

@@ -5,12 +5,15 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
+import 'package:vm_service/vm_service.dart';
 
 import '../service/service_registrations.dart' as registrations;
 import 'config_specific/import_export/import_export.dart';
 import 'config_specific/logger/logger.dart' as logger;
+import 'console/primitives/eval_history.dart';
 import 'eval_on_dart_library.dart';
 import 'globals.dart';
+import 'object_tree.dart';
 import 'title.dart';
 import 'version.dart';
 
@@ -209,4 +212,66 @@ class OfflineConnectedApp extends ConnectedApp {
 
   @override
   final bool? isRunningOnDartVM;
+}
+
+class AutocompleteCache {
+  final classes = <ClassRef, Class>{};
+
+  /// Cache of autocomplete matches for a library for code written within that
+  /// library.
+  ///
+  /// This cache includes autocompletes from all libraries imported and exported
+  /// by the library as well as all private autocompletes for the library.
+  final libraryMemberAndImportsAutocomplete =
+      <LibraryRef, Future<Set<String?>>>{};
+
+  /// Cache of autocomplete matches to show for a library when that library is
+  /// imported.
+  ///
+  /// This cache includes autocompletes from libraries exported by the library
+  /// but does not include autocompletes for libraries imported by this library.
+  final libraryMemberAutocomplete = <LibraryRef, Future<Set<String?>>>{};
+
+  void _clear() {
+    classes.clear();
+    libraryMemberAndImportsAutocomplete.clear();
+    libraryMemberAutocomplete.clear();
+  }
+}
+
+class AppState {
+  // TODO(CoderDake or polina-c): It might be good to move the isolateRef
+  // lifecycle code to this context from DebuggerController.
+  ValueListenable<IsolateRef?> get isolateRef => _isolateRef;
+  final _isolateRef = ValueNotifier<IsolateRef?>(null);
+  void setIsolateRef(IsolateRef? value) {
+    if (value == isolateRef.value) return;
+    _isolateRef.value = value;
+    cache._clear();
+  }
+
+  // TODO(polina-c): add explanation for variables.
+  ValueListenable<List<DartObjectNode>> get variables => _variables;
+  final _variables = ValueNotifier<List<DartObjectNode>>([]);
+  void setVariables(List<DartObjectNode> value) => _variables.value = value;
+
+  ValueListenable<bool> get isPaused => _isPaused;
+  final _isPaused = ValueNotifier<bool>(false);
+
+  /// This setter should be invoked only by debugger.
+  void setPausedOnBreakpoint(bool value) => _isPaused.value = value;
+
+  ValueListenable<Frame?> get currentFrame => _currentFrame;
+  final _currentFrame = ValueNotifier<Frame?>(null);
+  void setCurrentFrame(Frame? value) => _currentFrame.value = value;
+
+  final EvalHistory evalHistory = EvalHistory();
+
+  final cache = AutocompleteCache();
+
+  void dispose() {
+    _variables.dispose();
+    _isPaused.dispose();
+    _currentFrame.dispose();
+  }
 }

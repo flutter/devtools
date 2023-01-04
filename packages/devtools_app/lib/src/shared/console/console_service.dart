@@ -164,11 +164,7 @@ class ConsoleService extends Disposer {
   ///
   /// Note that this output might be truncated after significant output.
   ValueListenable<List<ConsoleLine>> get stdio {
-    assert(
-      _serviceInitialized,
-      '`ConsoleService.ensureServiceInitialized` must be called before '
-      'interacting with the ConsoleService.',
-    );
+    ensureServiceInitialized();
     return _stdio;
   }
 

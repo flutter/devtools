@@ -4,71 +4,22 @@
 
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../../service/vm_service_wrapper.dart';
 import '../../globals.dart';
-import '../../object_tree.dart';
 import '../../primitives/auto_dispose.dart';
-import '../primitives/eval_history.dart';
-
-class AutocompleteCache {
-  final classes = <ClassRef, Class>{};
-
-  /// Cache of autocomplete matches for a library for code written within that
-  /// library.
-  ///
-  /// This cache includes autocompletes from all libraries imported and exported
-  /// by the library as well as all private autocompletes for the library.
-  final libraryMemberAndImportsAutocomplete =
-      <LibraryRef, Future<Set<String?>>>{};
-
-  /// Cache of autocomplete matches to show for a library when that library is
-  /// imported.
-  ///
-  /// This cache includes autocompletes from libraries exported by the library
-  /// but does not include autocompletes for libraries imported by this library.
-  final libraryMemberAutocomplete = <LibraryRef, Future<Set<String?>>>{};
-
-  void _clear() {
-    classes.clear();
-    libraryMemberAndImportsAutocomplete.clear();
-    libraryMemberAutocomplete.clear();
-  }
-}
 
 class EvalService extends DisposableController with AutoDisposeControllerMixin {
-  EvalService({
-    required this.isolateRef,
-    required this.variables,
-    required this.frameForEval,
-    required this.isPaused,
-  }) {
-    addAutoDisposeListener(isolateRef, () => cache._clear());
+  VmServiceWrapper get _service {
+    return serviceManager.service!;
   }
 
-  final ValueListenable<IsolateRef?> isolateRef;
-
-  final ValueListenable<bool> isPaused;
-
-  final Frame? Function() frameForEval;
-
-  final ValueListenable<List<DartObjectNode>> variables;
-
-  final EvalHistory evalHistory = EvalHistory();
-
-  final cache = AutocompleteCache();
-
   String get _isolateRefId {
-    final id = isolateRef.value?.id;
+    final id = serviceManager.appState.isolateRef.value?.id;
     // TODO(polina-c): it is not clear why returning '' is ok.
     if (id == null) return '';
     return id;
-  }
-
-  VmServiceWrapper get _service {
-    return serviceManager.service!;
   }
 
   /// Returns the class for the provided [ClassRef].
@@ -76,7 +27,8 @@ class EvalService extends DisposableController with AutoDisposeControllerMixin {
   /// May return null.
   Future<Class?> classFor(ClassRef classRef) async {
     try {
-      return cache.classes[classRef] ??= await getObject(classRef) as Class;
+      return serviceManager.appState.cache.classes[classRef] ??=
+          await getObject(classRef) as Class;
     } catch (_) {}
     return null;
   }
@@ -114,7 +66,9 @@ class EvalService extends DisposableController with AutoDisposeControllerMixin {
   ///
   /// This will fail if the application is not currently paused.
   Future<Response> evalAtCurrentFrame(String expression) {
-    if (!isPaused.value) {
+    final appState = serviceManager.appState;
+
+    if (!appState.isPaused.value) {
       return Future.error(
         RPCError.withDetails(
           'evaluateInFrame',
@@ -124,7 +78,7 @@ class EvalService extends DisposableController with AutoDisposeControllerMixin {
       );
     }
 
-    final frame = frameForEval();
+    final frame = appState.currentFrame.value;
 
     if (frame == null) {
       return Future.error(

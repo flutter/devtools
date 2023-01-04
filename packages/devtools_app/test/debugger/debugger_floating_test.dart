@@ -26,7 +26,8 @@ void main() {
   setGlobal(ScriptManager, scriptManager);
   setGlobal(NotificationService, NotificationService());
   fakeServiceManager.consoleService.ensureServiceInitialized();
-  when(debuggerController.isPaused).thenReturn(ValueNotifier<bool>(true));
+
+  fakeServiceManager.appState.setPausedOnBreakpoint(true);
 
   Future<void> pumpControls(WidgetTester tester) async {
     await tester.pumpWidget(
@@ -84,7 +85,7 @@ void main() {
   });
 
   testWidgets('are hidden when app is not paused', (WidgetTester tester) async {
-    when(debuggerController.isPaused).thenReturn(ValueNotifier<bool>(false));
+    fakeServiceManager.appState.setPausedOnBreakpoint(false);
     await pumpControls(tester);
     final animatedOpacityFinder = find.byType(AnimatedOpacity);
     expect(animatedOpacityFinder, findsOneWidget);

@@ -10,7 +10,6 @@ import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../service/vm_service_wrapper.dart';
-import '../../shared/console/eval/eval_service.dart';
 import '../../shared/console/primitives/source_location.dart';
 import '../../shared/globals.dart';
 import '../../shared/object_tree.dart';
@@ -42,15 +41,8 @@ class DebuggerController extends DisposableController
     if (routerDelegate != null) {
       codeViewController.subscribeToRouterEvents(routerDelegate);
     }
-
-    evalService = EvalService(
-      isolateRef: isolateRef,
-      variables: variables,
-      frameForEval: () =>
-          _selectedStackFrame.value?.frame ??
-          _stackFramesWithLocation.value.safeFirst?.frame,
-      isPaused: isPaused,
-    );
+    addAutoDisposeListener(_selectedStackFrame, _updateCurrentFrame);
+    addAutoDisposeListener(_stackFramesWithLocation, _updateCurrentFrame);
 
     if (serviceManager.hasService) {
       _initialize();
@@ -59,9 +51,14 @@ class DebuggerController extends DisposableController
 
   final codeViewController = CodeViewController();
 
-  late final EvalService evalService;
-
   bool _firstDebuggerScreenLoaded = false;
+
+  void _updateCurrentFrame() {
+    serviceManager.appState.setCurrentFrame(
+      _selectedStackFrame.value?.frame ??
+          _stackFramesWithLocation.value.safeFirst?.frame,
+    );
+  }
 
   /// Callback to be called when the debugger screen is first loaded.
   ///
@@ -83,13 +80,15 @@ class DebuggerController extends DisposableController
     unawaited(_getStackOperation?.cancel());
     _getStackOperation = null;
 
-    _isolateRef.value = null;
-    _isPaused.value = false;
+    final appState = serviceManager.appState;
+
+    appState.setIsolateRef(null);
+    appState.setPausedOnBreakpoint(false);
     _resuming.value = false;
     _lastEvent = null;
     _stackFramesWithLocation.value = [];
     _selectedStackFrame.value = null;
-    _variables.value = [];
+    appState.setVariables([]);
     _selectedBreakpoint.value = null;
     _firstDebuggerScreenLoaded = false;
   }
@@ -126,10 +125,6 @@ class DebuggerController extends DisposableController
     return serviceManager.service!;
   }
 
-  final _isPaused = ValueNotifier<bool>(false);
-
-  ValueListenable<bool> get isPaused => _isPaused;
-
   final _resuming = ValueNotifier<bool>(false);
 
   /// This indicates that we've requested a resume (or step) operation from the
@@ -151,10 +146,6 @@ class DebuggerController extends DisposableController
   ValueListenable<StackFrameAndSourcePosition?> get selectedStackFrame =>
       _selectedStackFrame;
 
-  final _variables = ValueNotifier<List<DartObjectNode>>([]);
-
-  ValueListenable<List<DartObjectNode>> get variables => _variables;
-
   final _selectedBreakpoint = ValueNotifier<BreakpointAndSourcePosition?>(null);
 
   ValueListenable<BreakpointAndSourcePosition?> get selectedBreakpoint =>
@@ -165,21 +156,23 @@ class DebuggerController extends DisposableController
 
   ValueListenable<String?> get exceptionPauseMode => _exceptionPauseMode;
 
-  final _isolateRef = ValueNotifier<IsolateRef?>(null);
-
-  ValueListenable<IsolateRef?> get isolateRef => _isolateRef;
-
-  bool get isSystemIsolate => isolateRef.value?.isSystemIsolate ?? false;
+  bool get isSystemIsolate =>
+      serviceManager.appState.isolateRef.value?.isSystemIsolate ?? false;
 
   String get _isolateRefId {
-    final id = isolateRef.value?.id;
+    final id = serviceManager.appState.isolateRef.value?.id;
     if (id == null) return '';
     return id;
   }
 
   void _switchToIsolate(IsolateRef? ref) async {
-    _isolateRef.value = ref;
-    _isPaused.value = false;
+    // TODO(polina-c and jacob314): move this logic to appState
+    // and modify to detect if app is paused from the isolate
+    // https://github.com/flutter/devtools/pull/4993#discussion_r1060845351
+
+    serviceManager.appState
+      ..setIsolateRef(ref)
+      ..setPausedOnBreakpoint(false);
     await _pause(false);
 
     _clearCaches();
@@ -322,7 +315,7 @@ class DebuggerController extends DisposableController
     // ignore: unused_local_variable
     final status = reloadEvent.status;
 
-    final theIsolateRef = isolateRef.value;
+    final theIsolateRef = serviceManager.appState.isolateRef.value;
     if (theIsolateRef == null) return;
     // Refresh the list of scripts.
     final previousScriptRefs = scriptManager.sortedScripts.value;
@@ -384,7 +377,7 @@ class DebuggerController extends DisposableController
     // serviceManager.isolateManager.selectedIsolateState.isPaused.value;
     // listening for changes there instead of having separate logic.
     await _getStackOperation?.cancel();
-    _isPaused.value = paused;
+    serviceManager.appState.setPausedOnBreakpoint(paused);
 
     _log.log('_pause(running: ${!paused})');
 
@@ -476,7 +469,7 @@ class DebuggerController extends DisposableController
   }
 
   Future<void> _populateScripts(Isolate isolate) async {
-    final theIsolateRef = isolateRef.value;
+    final theIsolateRef = serviceManager.appState.isolateRef.value;
     if (theIsolateRef == null) return;
     final scriptRefs =
         await scriptManager.retrieveAndSortScripts(theIsolateRef);
@@ -524,8 +517,9 @@ class DebuggerController extends DisposableController
   void selectStackFrame(StackFrameAndSourcePosition? frame) {
     _selectedStackFrame.value = frame;
 
-    _variables.value =
-        frame != null ? _createVariablesForFrame(frame.frame) : [];
+    serviceManager.appState.setVariables(
+      frame != null ? _createVariablesForFrame(frame.frame) : [],
+    );
 
     final scriptRef = frame?.scriptRef;
     final position = frame?.position;
@@ -543,7 +537,12 @@ class DebuggerController extends DisposableController
     }
 
     final variables = frame.vars!
-        .map((v) => DartObjectNode.create(v, isolateRef.value))
+        .map(
+          (v) => DartObjectNode.create(
+            v,
+            serviceManager.appState.isolateRef.value,
+          ),
+        )
         .toList();
     // TODO(jacobr): would be nice to be able to remove this call to unawaited
     // but it would require a significant refactor.
