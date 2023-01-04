@@ -10,7 +10,7 @@ import 'package:devtools_app/src/screens/debugger/debugger_controller.dart';
 import 'package:devtools_app/src/screens/logging/logging_controller.dart';
 import 'package:devtools_app/src/screens/logging/logging_screen.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
-import 'package:devtools_app/src/shared/console/widgets/consolePane.dart';
+import 'package:devtools_app/src/shared/console/widgets/console_pane.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_app/src/shared/primitives/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
