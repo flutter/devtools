@@ -11,6 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../../connected_app.dart';
 import '../../globals.dart';
 import '../../primitives/auto_dispose.dart';
 import '../../primitives/utils.dart';
@@ -311,12 +312,12 @@ class ExpressionEvalFieldState extends State<ExpressionEvalField>
     serviceManager.consoleService.appendStdio('> $expressionText\n');
     setState(() {
       historyPosition = -1;
-      _evalService.appState.evalHistory.pushEvalHistory(expressionText);
+      _appState.evalHistory.pushEvalHistory(expressionText);
     });
 
     try {
       // Response is either a ErrorRef, InstanceRef, or Sentinel.
-      final isolateRef = _evalService.appState.isolateRef.value;
+      final isolateRef = _appState.isolateRef.value;
       final response = await _evalService.evalAtCurrentFrame(expressionText);
 
       // Display the response to the user.
@@ -363,7 +364,7 @@ class ExpressionEvalFieldState extends State<ExpressionEvalField>
     super.dispose();
   }
 
-  EvalHistory get _evalHistory => _evalService.appState.evalHistory;
+  EvalHistory get _evalHistory => _appState.evalHistory;
 
   void _historyNavUp() {
     if (!_evalHistory.canNavigateUp) {
@@ -398,13 +399,15 @@ class ExpressionEvalFieldState extends State<ExpressionEvalField>
   }
 }
 
+AppState get _appState => serviceManager.appState;
+
 Future<List<String>> autoCompleteResultsFor(
   EditingParts parts,
   EvalService evalService,
 ) async {
   final result = <String>{};
   if (!parts.isField) {
-    final variables = evalService.appState.variables.value;
+    final variables = _appState.variables.value;
     result.addAll(removeNullValues(variables.map((variable) => variable.name)));
 
     final thisVariable = variables.firstWhereOrNull(
@@ -435,7 +438,7 @@ Future<List<String>> autoCompleteResultsFor(
         }
       }
     }
-    final frame = evalService.appState.currentFrame.value;
+    final frame = _appState.currentFrame.value;
     if (frame != null) {
       final function = frame.function;
       if (function != null) {
@@ -497,8 +500,7 @@ Future<Set<String>> libraryMemberAndImportsAutocompletes(
   EvalService evalService,
 ) async {
   final values = removeNullValues(
-    await evalService.appState.cache.libraryMemberAndImportsAutocomplete
-        .putIfAbsent(
+    await _appState.cache.libraryMemberAndImportsAutocomplete.putIfAbsent(
       libraryRef,
       () => _libraryMemberAndImportsAutocompletes(libraryRef, evalService),
     ),
@@ -556,7 +558,7 @@ Future<Set<String>> libraryMemberAutocompletes(
   required bool includePrivates,
 }) async {
   var result = removeNullValues(
-    await evalService.appState.cache.libraryMemberAutocomplete.putIfAbsent(
+    await _appState.cache.libraryMemberAutocomplete.putIfAbsent(
       libraryRef,
       () => _libraryMemberAutocompletes(evalService, libraryRef),
     ),
@@ -735,7 +737,7 @@ bool _isAccessible(
   Class? clazz,
   EvalService evalService,
 ) {
-  final frame = evalService.appState.currentFrame.value!;
+  final frame = _appState.currentFrame.value!;
   final currentScript = frame.location!.script;
   return !isPrivate(member) || currentScript!.id == clazz?.location?.script?.id;
 }

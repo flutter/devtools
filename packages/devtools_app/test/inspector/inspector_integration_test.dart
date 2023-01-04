@@ -5,7 +5,6 @@
 import 'package:devtools_app/src/screens/debugger/breakpoint_manager.dart';
 import 'package:devtools_app/src/screens/inspector/inspector_screen.dart';
 import 'package:devtools_app/src/shared/config_specific/ide_theme/ide_theme.dart';
-import 'package:devtools_app/src/shared/connected_app.dart';
 import 'package:devtools_app/src/shared/console/eval/inspector_service.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_app/src/shared/notifications.dart';
@@ -32,8 +31,6 @@ void main() async {
   );
 
   env.afterEverySetup = () async {
-    serviceManager.appState = AppState();
-
     final service = serviceManager.inspectorService;
     if (env.reuseTestEnvironment) {
       // Ensure the previous test did not set the selection on the device.

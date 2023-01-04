@@ -80,7 +80,7 @@ void main() {
   }
 
   setUp(() {
-    debuggerController.appState.setPaused(true);
+    fakeServiceManager.appState.setPaused(true);
   });
 
   testWidgetsWithWindowSize(

@@ -93,7 +93,9 @@ class ServiceConnectionManager {
   late final ServiceExtensionManager _serviceExtensionManager;
 
   ConnectedApp? connectedApp;
-  AppState appState = AppState();
+
+  AppState get appState => _appState!;
+  AppState? _appState;
 
   VmServiceWrapper? service;
   VM? vm;
@@ -204,8 +206,8 @@ class ServiceConnectionManager {
 
     connectedApp = ConnectedApp();
 
-    appState.dispose();
-    appState = AppState();
+    _appState?.dispose();
+    _appState = AppState();
 
     // It is critical we call vmServiceOpened on each manager class before
     // performing any async operations. Otherwise, we may get end up with

@@ -51,7 +51,6 @@ void main() {
       when(mockServiceManager.connectedApp).thenReturn(mockConnectedApp);
       when(mockServiceManager.appState).thenReturn(appState);
       final mockDebuggerController = MockDebuggerController();
-      when(mockDebuggerController.appState).thenReturn(appState);
       mockServiceManager.appState.setPaused(true);
 
       await tester.pumpWidget(

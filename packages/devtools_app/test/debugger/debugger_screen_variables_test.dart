@@ -43,7 +43,7 @@ void main() {
     when(fakeServiceManager.errorBadgeManager.errorCountNotifier('debugger'))
         .thenReturn(ValueNotifier<int>(0));
     debuggerController = createMockDebuggerControllerWithDefaults();
-    when(debuggerController.appState).thenReturn(fakeServiceManager.appState);
+    when(fakeServiceManager.appState).thenReturn(fakeServiceManager.appState);
 
     _resetRef();
     _resetRoot();
@@ -65,7 +65,7 @@ void main() {
     'Variables shows items',
     windowSize,
     (WidgetTester tester) async {
-      debuggerController.appState.setVariables(
+      fakeServiceManager.appState.setVariables(
         [
           _buildListVariable(),
           _buildMapVariable(),

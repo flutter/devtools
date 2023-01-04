@@ -250,6 +250,7 @@ class AppState {
     cache._clear();
   }
 
+  // TODO(polina-c): add explanation for variables.
   ValueListenable<List<DartObjectNode>> get variables => _variables;
   final _variables = ValueNotifier<List<DartObjectNode>>([]);
   void setVariables(List<DartObjectNode> value) => _variables.value = value;

@@ -48,7 +48,6 @@ class DebuggerScreen extends Screen {
 
   static final id = ScreenMetaData.debugger.id;
 
-  // TODO(polina-c): when embedded and console features should be in native console in VSCode
   @override
   bool showConsole(bool embed) => true;
 

@@ -43,7 +43,6 @@ void main() {
       when(mockServiceManager.connectedAppInitialized).thenReturn(true);
       when(mockServiceManager.connectedApp).thenReturn(mockConnectedApp);
       final mockDebuggerController = MockDebuggerController();
-      when(mockDebuggerController.appState).thenReturn(appState);
 
       const debuggerScreenKey = Key('debugger screen');
       const debuggerTabKey = Key('debugger tab');

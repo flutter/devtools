@@ -7,19 +7,16 @@ import 'dart:async';
 import 'package:vm_service/vm_service.dart';
 
 import '../../../service/vm_service_wrapper.dart';
-import '../../connected_app.dart';
 import '../../globals.dart';
 import '../../primitives/auto_dispose.dart';
 
 class EvalService extends DisposableController with AutoDisposeControllerMixin {
-  AppState get appState => serviceManager.appState;
-
   VmServiceWrapper get _service {
     return serviceManager.service!;
   }
 
   String get _isolateRefId {
-    final id = appState.isolateRef.value?.id;
+    final id = serviceManager.appState.isolateRef.value?.id;
     // TODO(polina-c): it is not clear why returning '' is ok.
     if (id == null) return '';
     return id;
@@ -30,7 +27,7 @@ class EvalService extends DisposableController with AutoDisposeControllerMixin {
   /// May return null.
   Future<Class?> classFor(ClassRef classRef) async {
     try {
-      return appState.cache.classes[classRef] ??=
+      return serviceManager.appState.cache.classes[classRef] ??=
           await getObject(classRef) as Class;
     } catch (_) {}
     return null;
@@ -69,6 +66,8 @@ class EvalService extends DisposableController with AutoDisposeControllerMixin {
   ///
   /// This will fail if the application is not currently paused.
   Future<Response> evalAtCurrentFrame(String expression) {
+    final appState = serviceManager.appState;
+
     if (!appState.isPaused.value) {
       return Future.error(
         RPCError.withDetails(
