@@ -48,8 +48,6 @@ class ExpressionEvalFieldState extends State<ExpressionEvalField>
 
   final evalTextFieldKey = GlobalKey(debugLabel: 'evalTextFieldKey');
 
-  final _evalService = EvalService();
-
   @override
   void initState() {
     super.initState();
@@ -158,7 +156,7 @@ class ExpressionEvalFieldState extends State<ExpressionEvalField>
       final matches =
           parts.activeWord.startsWith(_activeWord) && _activeWord.isNotEmpty
               ? _filterMatches(_matches, parts.activeWord)
-              : await widget.getAutoCompleteResults(parts, _evalService);
+              : await widget.getAutoCompleteResults(parts, evalService);
 
       _matches = matches;
       _activeWord = parts.activeWord;
@@ -318,7 +316,7 @@ class ExpressionEvalFieldState extends State<ExpressionEvalField>
     try {
       // Response is either a ErrorRef, InstanceRef, or Sentinel.
       final isolateRef = _appState.isolateRef.value;
-      final response = await _evalService.evalAtCurrentFrame(expressionText);
+      final response = await evalService.evalAtCurrentFrame(expressionText);
 
       // Display the response to the user.
       if (response is InstanceRef) {

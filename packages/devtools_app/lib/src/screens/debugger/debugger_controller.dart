@@ -10,7 +10,6 @@ import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../service/vm_service_wrapper.dart';
-import '../../shared/console/eval/eval_service.dart';
 import '../../shared/console/primitives/source_location.dart';
 import '../../shared/globals.dart';
 import '../../shared/object_tree.dart';
@@ -49,8 +48,6 @@ class DebuggerController extends DisposableController
       _initialize();
     }
   }
-
-  late final evalService = EvalService();
 
   final codeViewController = CodeViewController();
 
