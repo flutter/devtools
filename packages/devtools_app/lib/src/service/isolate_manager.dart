@@ -270,6 +270,7 @@ class IsolateManager extends Disposer {
     );
   }
 
+  /// The method will return immediatly after isolate is loaded first time.
   Future<bool> isIsolatePaused(IsolateRef ref) async {
     final state = isolateState(ref);
     await state.waitForIsolateToLoad();
