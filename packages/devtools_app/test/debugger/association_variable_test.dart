@@ -29,147 +29,153 @@ void main() {
     setGlobal(ServiceConnectionManager, manager);
   });
 
-  test('Creates bound variables for Map with String key and Double value',
-      () async {
-    final instance = Instance(
-      kind: InstanceKind.kMap,
-      id: objectId,
-      length: 2,
-      associations: [
-        MapAssociation(
-          key: InstanceRef(
-            id: '4',
-            kind: InstanceKind.kString,
-            valueAsString: 'Hey',
+  test(
+    'Creates bound variables for Map with String key and Double value',
+    () async {
+      final instance = Instance(
+        kind: InstanceKind.kMap,
+        id: objectId,
+        length: 2,
+        associations: [
+          MapAssociation(
+            key: InstanceRef(
+              id: '4',
+              kind: InstanceKind.kString,
+              valueAsString: 'Hey',
+            ),
+            value: InstanceRef(
+              id: '5',
+              kind: InstanceKind.kDouble,
+              valueAsString: '12.34',
+            ),
           ),
-          value: InstanceRef(
-            id: '5',
-            kind: InstanceKind.kDouble,
-            valueAsString: '12.34',
-          ),
+        ],
+      );
+      final isolateRef = IsolateRef(
+        id: isolateId,
+        number: '1',
+        name: 'my-isolate',
+        isSystemIsolate: false,
+      );
+      final variable = DartObjectNode.create(
+        BoundVariable(
+          name: 'test',
+          value: instance,
         ),
-      ],
-    );
-    final isolateRef = IsolateRef(
-      id: isolateId,
-      number: '1',
-      name: 'my-isolate',
-      isSystemIsolate: false,
-    );
-    final variable = DartObjectNode.create(
-      BoundVariable(
-        name: 'test',
-        value: instance,
-      ),
-      isolateRef,
-    );
-    when(manager.service!.getObject(isolateId, objectId, offset: 0, count: 2))
-        .thenAnswer((_) async {
-      return instance;
-    });
+        isolateRef,
+      );
+      when(manager.service!.getObject(isolateId, objectId, offset: 0, count: 2))
+          .thenAnswer((_) async {
+        return instance;
+      });
 
-    await buildVariablesTree(variable);
+      await buildVariablesTree(variable);
 
-    expect(variable.children, [
-      matchesVariable(name: 'Hey', value: '12.34'),
-    ]);
-  });
+      expect(variable.children, [
+        matchesVariable(name: 'Hey', value: '12.34'),
+      ]);
+    },
+  );
 
-  test('Creates bound variables for Map with Int key and Double value',
-      () async {
-    final isolateRef = IsolateRef(
-      id: isolateId,
-      number: '1',
-      name: 'my-isolate',
-      isSystemIsolate: false,
-    );
-    final instance = Instance(
-      kind: InstanceKind.kMap,
-      id: objectId,
-      length: 2,
-      associations: [
-        MapAssociation(
-          key: InstanceRef(
-            id: '4',
-            kind: InstanceKind.kInt,
-            valueAsString: '1',
+  test(
+    'Creates bound variables for Map with Int key and Double value',
+    () async {
+      final isolateRef = IsolateRef(
+        id: isolateId,
+        number: '1',
+        name: 'my-isolate',
+        isSystemIsolate: false,
+      );
+      final instance = Instance(
+        kind: InstanceKind.kMap,
+        id: objectId,
+        length: 2,
+        associations: [
+          MapAssociation(
+            key: InstanceRef(
+              id: '4',
+              kind: InstanceKind.kInt,
+              valueAsString: '1',
+            ),
+            value: InstanceRef(
+              id: '5',
+              kind: InstanceKind.kDouble,
+              valueAsString: '12.34',
+            ),
           ),
-          value: InstanceRef(
-            id: '5',
-            kind: InstanceKind.kDouble,
-            valueAsString: '12.34',
-          ),
+        ],
+      );
+      final variable = DartObjectNode.create(
+        BoundVariable(
+          name: 'test',
+          value: instance,
         ),
-      ],
-    );
-    final variable = DartObjectNode.create(
-      BoundVariable(
-        name: 'test',
-        value: instance,
-      ),
-      isolateRef,
-    );
-    when(manager.service!.getObject(isolateId, objectId, offset: 0, count: 2))
-        .thenAnswer((_) async {
-      return instance;
-    });
+        isolateRef,
+      );
+      when(manager.service!.getObject(isolateId, objectId, offset: 0, count: 2))
+          .thenAnswer((_) async {
+        return instance;
+      });
 
-    await buildVariablesTree(variable);
+      await buildVariablesTree(variable);
 
-    expect(variable.children, [
-      matchesVariable(name: '1', value: '12.34'),
-    ]);
-  });
+      expect(variable.children, [
+        matchesVariable(name: '1', value: '12.34'),
+      ]);
+    },
+  );
 
-  test('Creates bound variables for Map with Object key and Double value',
-      () async {
-    final isolateRef = IsolateRef(
-      id: isolateId,
-      number: '1',
-      name: 'my-isolate',
-      isSystemIsolate: false,
-    );
-    final instance = Instance(
-      kind: InstanceKind.kMap,
-      id: objectId,
-      length: 2,
-      associations: [
-        MapAssociation(
-          key: InstanceRef(
-            classRef: ClassRef(id: 'a', name: 'Foo', library: libraryRef),
-            id: '4',
-            kind: InstanceKind.kPlainInstance,
+  test(
+    'Creates bound variables for Map with Object key and Double value',
+    () async {
+      final isolateRef = IsolateRef(
+        id: isolateId,
+        number: '1',
+        name: 'my-isolate',
+        isSystemIsolate: false,
+      );
+      final instance = Instance(
+        kind: InstanceKind.kMap,
+        id: objectId,
+        length: 2,
+        associations: [
+          MapAssociation(
+            key: InstanceRef(
+              classRef: ClassRef(id: 'a', name: 'Foo', library: libraryRef),
+              id: '4',
+              kind: InstanceKind.kPlainInstance,
+            ),
+            value: InstanceRef(
+              id: '5',
+              kind: InstanceKind.kDouble,
+              valueAsString: '12.34',
+            ),
           ),
-          value: InstanceRef(
-            id: '5',
-            kind: InstanceKind.kDouble,
-            valueAsString: '12.34',
-          ),
+        ],
+      );
+      final variable = DartObjectNode.create(
+        BoundVariable(
+          name: 'test',
+          value: instance,
         ),
-      ],
-    );
-    final variable = DartObjectNode.create(
-      BoundVariable(
-        name: 'test',
-        value: instance,
-      ),
-      isolateRef,
-    );
-    when(manager.service!.getObject(isolateId, objectId, offset: 0, count: 2))
-        .thenAnswer((_) async {
-      return instance;
-    });
+        isolateRef,
+      );
+      when(manager.service!.getObject(isolateId, objectId, offset: 0, count: 2))
+          .thenAnswer((_) async {
+        return instance;
+      });
 
-    await buildVariablesTree(variable);
+      await buildVariablesTree(variable);
 
-    expect(variable.children, [
-      matchesVariable(name: null, value: '[Entry 0]'),
-    ]);
-    expect(variable.children.first.children, [
-      matchesVariable(name: '[key]', value: 'Foo'),
-      matchesVariable(name: '[value]', value: '12.34'),
-    ]);
-  });
+      expect(variable.children, [
+        matchesVariable(name: null, value: '[Entry 0]'),
+      ]);
+      expect(variable.children.first.children, [
+        matchesVariable(name: '[key]', value: 'Foo'),
+        matchesVariable(name: '[value]', value: '12.34'),
+      ]);
+    },
+  );
 }
 
 Matcher matchesVariable({

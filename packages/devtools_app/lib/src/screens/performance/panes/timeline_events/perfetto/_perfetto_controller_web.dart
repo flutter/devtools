@@ -106,6 +106,8 @@ class PerfettoControllerImpl extends PerfettoController {
       ..height = '100%'
       ..width = '100%';
 
+    // This ignore is required due to
+    // https://github.com/flutter/flutter/issues/41563
     // ignore: undefined_prefixed_name
     final registered = ui.platformViewRegistry.registerViewFactory(
       viewId,
@@ -130,11 +132,11 @@ class PerfettoControllerImpl extends PerfettoController {
   @override
   void loadTrace(List<TraceEventWrapper> devToolsTraceEvents) {
     if (!timelineEventsController.isActiveFeature) {
-      pendingTraceEventsToLoad = List.from(devToolsTraceEvents);
+      pendingTraceEventsToLoad = List.of(devToolsTraceEvents);
       return;
     }
     pendingTraceEventsToLoad = null;
-    _activeTraceEvents.value = List.from(devToolsTraceEvents);
+    _activeTraceEvents.value = List.of(devToolsTraceEvents);
   }
 
   @override

@@ -1,5 +1,5 @@
 # For memory leaks troubleshooting tips see
-# https://github.com/flutter/devtools/blob/master/packages/devtools_app/lib/src/screens/memory/panes/leaks/LEAK_TRACKING.md
+# https://github.com/dart-lang/leak_tracker
 
 not-gced:
   total: 2

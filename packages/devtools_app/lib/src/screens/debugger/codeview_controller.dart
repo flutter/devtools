@@ -8,6 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../shared/config_specific/logger/logger.dart';
+import '../../shared/console/primitives/source_location.dart';
 import '../../shared/globals.dart';
 import '../../shared/primitives/auto_dispose.dart';
 import '../../shared/primitives/history_manager.dart';
@@ -122,7 +123,12 @@ class CodeViewController extends DisposableController
   /// connecting to low-end devices.
   Future<void> maybeSetupProgramExplorer() async {
     await _maybeSetUpProgramExplorer();
-    addAutoDisposeListener(currentScriptRef, _maybeSetUpProgramExplorer);
+    addAutoDisposeListener(
+      currentScriptRef,
+      () => unawaited(
+        _maybeSetUpProgramExplorer(),
+      ),
+    );
   }
 
   Future<void> _maybeSetUpProgramExplorer() async {

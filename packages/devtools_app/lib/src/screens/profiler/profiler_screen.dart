@@ -99,20 +99,25 @@ class _ProfilerScreenBodyState extends State<ProfilerScreenBody>
       });
     });
 
-    addAutoDisposeListener(controller.cpuProfilerController.processingNotifier,
-        () {
-      setState(() {
-        processing = controller.cpuProfilerController.processingNotifier.value;
-      });
-    });
+    addAutoDisposeListener(
+      controller.cpuProfilerController.processingNotifier,
+      () {
+        setState(() {
+          processing =
+              controller.cpuProfilerController.processingNotifier.value;
+        });
+      },
+    );
 
     addAutoDisposeListener(
-        controller.cpuProfilerController.transformer.progressNotifier, () {
-      setState(() {
-        processingProgress =
-            controller.cpuProfilerController.transformer.progressNotifier.value;
-      });
-    });
+      controller.cpuProfilerController.transformer.progressNotifier,
+      () {
+        setState(() {
+          processingProgress = controller
+              .cpuProfilerController.transformer.progressNotifier.value;
+        });
+      },
+    );
 
     // Load offline profiler data if available.
     if (shouldLoadOfflineData()) {
@@ -416,7 +421,7 @@ class _SecondaryControls extends StatelessWidget {
                     gac.cpuProfiler,
                     gac.export,
                   );
-                  _exportPerformance(context);
+                  _exportPerformance();
                 }
               : null,
           minScreenWidthForTextBeforeScaling:
@@ -426,7 +431,7 @@ class _SecondaryControls extends StatelessWidget {
     );
   }
 
-  void _exportPerformance(BuildContext context) {
+  void _exportPerformance() {
     controller.exportData();
     // TODO(kenz): investigate if we need to do any error handling here. Is the
     // download always successful?

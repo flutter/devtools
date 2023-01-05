@@ -12,9 +12,9 @@ import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../screens/debugger/debugger_controller.dart';
-import '../screens/debugger/variables.dart';
 import 'analytics/analytics.dart' as ga;
 import 'config_specific/launch_url/launch_url.dart';
+import 'console/widgets/expandable_variable.dart';
 import 'dialogs.dart';
 import 'globals.dart';
 import 'object_tree.dart';
@@ -663,7 +663,7 @@ class RecordingInstructions extends StatelessWidget {
           children: [
             const Text('Click the record button '),
             const Icon(Icons.fiber_manual_record),
-            Text(' to start recording $recordedObject.')
+            Text(' to start recording $recordedObject.'),
           ],
         ),
         stopOrPauseRow,
@@ -949,15 +949,15 @@ class AreaPaneHeader extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final borderSide = defaultBorderSide(theme);
     return SizedBox.fromSize(
       size: preferredSize,
       child: Container(
         decoration: BoxDecoration(
           border: Border(
-            top: needsTopBorder ? defaultBorderSide(theme) : BorderSide.none,
-            bottom:
-                needsBottomBorder ? defaultBorderSide(theme) : BorderSide.none,
-            left: needsLeftBorder ? defaultBorderSide(theme) : BorderSide.none,
+            top: needsTopBorder ? borderSide : BorderSide.none,
+            bottom: needsBottomBorder ? borderSide : BorderSide.none,
+            left: needsLeftBorder ? borderSide : BorderSide.none,
           ),
           color: backgroundColor ?? theme.titleSolidBackgroundColor,
         ),
@@ -1073,7 +1073,7 @@ class InformationButton extends StatelessWidget {
       message: tooltip,
       child: IconButton(
         icon: const Icon(Icons.help_outline),
-        onPressed: () async => await launchUrl(link, context),
+        onPressed: () async => await launchUrl(link),
       ),
     );
   }
@@ -1143,7 +1143,7 @@ class ToggleButton extends StatelessWidget {
                   ),
                   label!,
                 ),
-              ]
+              ],
             ],
           ),
         ),
@@ -1847,7 +1847,6 @@ class _JsonViewerState extends State<JsonViewer>
               return Container();
             return ExpandableVariable(
               variable: variable,
-              debuggerController: controller,
             );
           },
         ),
@@ -1877,7 +1876,7 @@ class MoreInfoLink extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return InkWell(
-      onTap: () => _onLinkTap(context),
+      onTap: _onLinkTap,
       borderRadius: BorderRadius.circular(defaultBorderRadius),
       child: Padding(
         padding: padding ?? const EdgeInsets.all(denseSpacing),
@@ -1894,15 +1893,15 @@ class MoreInfoLink extends StatelessWidget {
               Icons.launch,
               size: tooltipIconSize,
               color: theme.colorScheme.toggleButtonsTitle,
-            )
+            ),
           ],
         ),
       ),
     );
   }
 
-  void _onLinkTap(BuildContext context) {
-    unawaited(launchUrl(url, context));
+  void _onLinkTap() {
+    unawaited(launchUrl(url));
     ga.select(gaScreenName, gaSelectedItemDescription);
   }
 }
@@ -1921,7 +1920,7 @@ class LinkTextSpan extends TextSpan {
                 link.gaScreenName,
                 link.gaSelectedItemDescription,
               );
-              await launchUrl(link.url, context);
+              await launchUrl(link.url);
             },
         );
 }
@@ -2053,7 +2052,7 @@ class CopyToClipboardControl extends StatelessWidget {
               ga.select(gaScreen!, gaItem!);
             }
             unawaited(
-              copyToClipboard(dataProvider!() ?? '', successMessage, context),
+              copyToClipboard(dataProvider!() ?? '', successMessage),
             );
           };
 
@@ -2584,6 +2583,48 @@ class RadioButton<T> extends StatelessWidget {
         ),
         Expanded(child: Text(label, overflow: TextOverflow.ellipsis)),
       ],
+    );
+  }
+}
+
+class ContextMenuButton extends StatelessWidget {
+  const ContextMenuButton({
+    this.style,
+    this.gaScreen,
+    this.gaItem,
+    required this.menu,
+  });
+
+  static const double width = 14;
+
+  final TextStyle? style;
+  final String? gaScreen;
+  final String? gaItem;
+  final List<Widget> menu;
+
+  @override
+  Widget build(BuildContext context) {
+    return MenuAnchor(
+      menuChildren: menu,
+      builder:
+          (BuildContext context, MenuController controller, Widget? child) {
+        return SizedBox(
+          width: width,
+          child: TextButton(
+            child: Text('⋮', style: style, textAlign: TextAlign.center),
+            onPressed: () {
+              if (gaScreen != null && gaItem != null) {
+                ga.select(gaScreen!, gaItem!);
+              }
+              if (controller.isOpen) {
+                controller.close();
+              } else {
+                controller.open();
+              }
+            },
+          ),
+        );
+      },
     );
   }
 }

@@ -26,7 +26,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - name: git clone devtools
-        uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8
+        uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b
 
       - name: Get Latest Flutter Candidate
         id: flutter-candidate
@@ -77,7 +77,7 @@ jobs:
       fail-fast: false
     steps:
       - name: git clone
-        uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8
+        uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b
       - name: Load Cached Flutter SDK
         uses: actions/cache@v3
         with:
@@ -104,7 +104,7 @@ jobs:
           - test_dart2js
     steps:
       - name: git clone
-        uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8
+        uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b
       - name: Load Cached Flutter SDK
         uses: actions/cache@v3
         with:
@@ -131,7 +131,7 @@ jobs:
         
     steps:
       - name: git clone
-        uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8
+        uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b
       - name: Load Cached Flutter SDK
         uses: actions/cache@v3
         with:
@@ -152,6 +152,29 @@ jobs:
           name: golden_image_failures.${{ matrix.bot }}
           path: packages/devtools_app/test/**/failures/*.png
 
+  integration-test:
+    name: integration-test ${{ matrix.bot }}
+    needs: flutter-prep
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        bot:
+          # Consider running integration tests in ddc mode, too.
+          - integration_dart2js
+    steps:
+      - name: git clone
+        uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8
+      - name: Load Cached Flutter SDK
+        uses: actions/cache@v3
+        with:
+          path: |
+            ./flutter-sdk
+          key: flutter-sdk-${{ runner.os }}-${{ needs.flutter-prep.outputs.latest_flutter_candidate }} 
+      - name: tool/bots.sh
+        env:
+          BOT: ${{ matrix.bot }}
+        run: ./tool/bots.sh
 
 # TODO(https://github.com/flutter/devtools/issues/1715): add a windows compatible version of tool/bots.sh
 # and run it from this job.
@@ -165,7 +188,7 @@ jobs:
 #          - test_dart2js
 #    steps:
 #      - name: git clone
-#        uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8
+#        uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b
 #
 #      - name: tool/bots.sh
 #        env:
@@ -185,7 +208,7 @@ jobs:
 #          - integration_dart2js
 #    steps:
 #      - name: git clone
-#        uses: actions/checkout@93ea575cb5d8a053eaa0ac8fa3b40d7e05a33cc8
+#        uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b
 #      - name: tool/bots.sh
 #        env:
 #          BOT: ${{ matrix.bot }}

@@ -137,6 +137,8 @@ class LegacyEventProcessor extends BaseTraceEventProcessor {
       (a, b) =>
           a.time.start!.inMicroseconds.compareTo(b.time.start!.inMicroseconds),
     );
+    // This logic is a little clearer written with if, else.
+    // ignore: prefer-conditional-expression
     if (_data.timelineEvents.isNotEmpty) {
       _data.time = TimeRange()
         // We process trace events in timestamp order, so we can ensure the first

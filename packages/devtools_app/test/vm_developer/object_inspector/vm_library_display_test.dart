@@ -46,34 +46,37 @@ void main() {
       when(mockLibraryObject.scriptRef).thenReturn(testScript);
     });
 
-    testWidgetsWithWindowSize(' - basic layout', windowSize,
-        (WidgetTester tester) async {
-      await tester.pumpWidget(
-        wrap(
-          VmLibraryDisplay(
-            library: mockLibraryObject,
-            controller: ObjectInspectorViewController(),
+    testWidgetsWithWindowSize(
+      ' - basic layout',
+      windowSize,
+      (WidgetTester tester) async {
+        await tester.pumpWidget(
+          wrap(
+            VmLibraryDisplay(
+              library: mockLibraryObject,
+              controller: ObjectInspectorViewController(),
+            ),
           ),
-        ),
-      );
+        );
 
-      expect(find.byType(VmObjectDisplayBasicLayout), findsOneWidget);
-      expect(find.byType(VMInfoCard), findsOneWidget);
-      expect(find.text('General Information'), findsOneWidget);
-      expect(find.text('1 KB'), findsOneWidget);
-      expect(find.text('URI:'), findsOneWidget);
-      expect(find.text('fooLib.dart'), findsOneWidget);
-      expect(find.text('VM Name:'), findsOneWidget);
-      expect(find.text('fooDartLibrary'), findsOneWidget);
+        expect(find.byType(VmObjectDisplayBasicLayout), findsOneWidget);
+        expect(find.byType(VMInfoCard), findsOneWidget);
+        expect(find.text('General Information'), findsOneWidget);
+        expect(find.text('1 KB'), findsOneWidget);
+        expect(find.text('URI:'), findsOneWidget);
+        expect(find.text('fooLib.dart'), findsOneWidget);
+        expect(find.text('VM Name:'), findsOneWidget);
+        expect(find.text('fooDartLibrary'), findsOneWidget);
 
-      expect(find.byType(RequestableSizeWidget), findsNWidgets(2));
+        expect(find.byType(RequestableSizeWidget), findsNWidgets(2));
 
-      expect(find.byType(RetainingPathWidget), findsOneWidget);
+        expect(find.byType(RetainingPathWidget), findsOneWidget);
 
-      expect(find.byType(InboundReferencesWidget), findsOneWidget);
+        expect(find.byType(InboundReferencesWidget), findsOneWidget);
 
-      expect(find.byType(LibraryDependencies), findsOneWidget);
-    });
+        expect(find.byType(LibraryDependencies), findsOneWidget);
+      },
+    );
 
     testWidgetsWithWindowSize(' - with null dependencies', windowSize,
         (WidgetTester tester) async {

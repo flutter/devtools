@@ -108,7 +108,7 @@ class BannerMessages extends StatelessWidget {
         ),
         Expanded(
           child: screen.build(context),
-        )
+        ),
       ],
     );
   }
@@ -315,12 +315,14 @@ class DebugModePerformanceMessage {
   }
 }
 
+// TODO(jacobr): cleanup this class that looks like a Widget but can't quite be
+// a widget due to some questionable design choices involving BannerMessage.
 class ProviderUnknownErrorBanner {
   const ProviderUnknownErrorBanner({required this.screenId});
 
   final String screenId;
 
-  BannerMessage build(BuildContext context) {
+  BannerMessage build() {
     return _BannerError(
       key: Key('ProviderUnknownErrorBanner - $screenId'),
       screenId: screenId,
@@ -470,7 +472,7 @@ class UnsupportedFlutterVersionWarning {
 
   final SemanticVersion supportedFlutterVersion;
 
-  BannerMessage build(BuildContext context) {
+  BannerMessage build() {
     return _BannerWarning(
       key: Key('UnsupportedFlutterVersionWarning - $screenId'),
       textSpans: [
@@ -509,7 +511,7 @@ void maybePushUnsupportedFlutterVersionWarning(
         screenId: screenId,
         currentFlutterVersion: currentVersion,
         supportedFlutterVersion: supportedFlutterVersion,
-      ).build(context),
+      ).build(),
     );
   }
 }

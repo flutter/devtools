@@ -116,6 +116,8 @@ class LinkedScrollControllerGroup {
 ///
 /// This change notifier de-duplicates change events by only firing listeners
 /// when the scroll offset of the group has changed.
+// TODO(jacobr): create a shorter tye name.
+// ignore: prefer-correct-type-name
 class _LinkedScrollControllerGroupOffsetNotifier extends ChangeNotifier {
   _LinkedScrollControllerGroupOffsetNotifier(this.controllerGroup);
 
@@ -325,7 +327,6 @@ class _LinkedScrollPosition extends ScrollPositionWithSingleContext {
 
   // We override this method to make it public (overridden method is protected)
   @override
-  // ignore: unnecessary_overrides
   void updateUserScrollDirection(ScrollDirection value) {
     super.updateUserScrollDirection(value);
   }

@@ -3,12 +3,13 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app/src/screens/debugger/breakpoint_manager.dart';
-import 'package:devtools_app/src/screens/debugger/console.dart';
 import 'package:devtools_app/src/screens/debugger/controls.dart';
 import 'package:devtools_app/src/screens/debugger/debugger_controller.dart';
 import 'package:devtools_app/src/screens/debugger/debugger_screen.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/shared/config_specific/ide_theme/ide_theme.dart';
+import 'package:devtools_app/src/shared/console/eval/eval_service.dart';
+import 'package:devtools_app/src/shared/console/widgets/console_pane.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_app/src/shared/notifications.dart';
 import 'package:devtools_app/src/shared/scripts/script_manager.dart';
@@ -36,6 +37,7 @@ void main() {
   setGlobal(ScriptManager, scriptManager);
   setGlobal(NotificationService, NotificationService());
   setGlobal(BreakpointManager, BreakpointManager());
+  setGlobal(EvalService, MockEvalService());
   fakeServiceManager.consoleService.ensureServiceInitialized();
   when(fakeServiceManager.errorBadgeManager.errorCountNotifier('debugger'))
       .thenReturn(ValueNotifier<int>(0));
@@ -51,8 +53,8 @@ void main() {
       wrapWithControllers(
         Row(
           children: [
-            Flexible(child: DebuggerConsole.buildHeader()),
-            const Expanded(child: DebuggerConsole()),
+            Flexible(child: ConsolePaneHeader()),
+            const Expanded(child: ConsolePane()),
           ],
         ),
         debugger: controller,
@@ -65,17 +67,20 @@ void main() {
     expect(find.text('Debugger'), findsOneWidget);
   });
 
-  testWidgetsWithWindowSize('has Console / stdio area', windowSize,
-      (WidgetTester tester) async {
-    serviceManager.consoleService.appendStdio('test stdio');
+  testWidgetsWithWindowSize(
+    'has Console / stdio area',
+    windowSize,
+    (WidgetTester tester) async {
+      serviceManager.consoleService.appendStdio('test stdio');
 
-    await pumpConsole(tester, debuggerController);
+      await pumpConsole(tester, debuggerController);
 
-    expect(find.text('Console'), findsOneWidget);
+      expect(find.text('Console'), findsOneWidget);
 
-    // test for stdio output.
-    expect(find.selectableText('test stdio'), findsOneWidget);
-  });
+      // test for stdio output.
+      expect(find.selectableText('test stdio'), findsOneWidget);
+    },
+  );
 
   WidgetPredicate createDebuggerButtonPredicate(String title) {
     return (Widget widget) {
@@ -86,56 +91,64 @@ void main() {
     };
   }
 
-  testWidgetsWithWindowSize('debugger controls running', windowSize,
-      (WidgetTester tester) async {
-    await tester.pumpWidget(
-      wrapWithControllers(
-        Builder(builder: screen.build),
-        debugger: debuggerController,
-      ),
-    );
+  testWidgetsWithWindowSize(
+    'debugger controls running',
+    windowSize,
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        wrapWithControllers(
+          Builder(builder: screen.build),
+          debugger: debuggerController,
+        ),
+      );
 
-    expect(
-      find.byWidgetPredicate(createDebuggerButtonPredicate('Pause')),
-      findsOneWidget,
-    );
-    final pause = _getWidgetFromFinder(
-      find.byWidgetPredicate(createDebuggerButtonPredicate('Pause')),
-    ) as DebuggerButton;
-    expect(pause.onPressed, isNotNull);
+      expect(
+        find.byWidgetPredicate(createDebuggerButtonPredicate('Pause')),
+        findsOneWidget,
+      );
+      final pause = _getWidgetFromFinder(
+        find.byWidgetPredicate(createDebuggerButtonPredicate('Pause')),
+      ) as DebuggerButton;
+      expect(pause.onPressed, isNotNull);
 
-    expect(
-      find.byWidgetPredicate(createDebuggerButtonPredicate('Resume')),
-      findsOneWidget,
-    );
-    final resume = _getWidgetFromFinder(
-      find.byWidgetPredicate(createDebuggerButtonPredicate('Resume')),
-    ) as DebuggerButton;
-    expect(resume.onPressed, isNull);
-  });
-
-  testWidgetsWithWindowSize('debugger controls break on exceptions', windowSize,
-      (WidgetTester tester) async {
-    await tester.pumpWidget(
-      wrapWithControllers(
-        Builder(builder: screen.build),
-        debugger: debuggerController,
-      ),
-    );
-    expect(find.text("Don't stop on exceptions"), findsOneWidget);
-  });
+      expect(
+        find.byWidgetPredicate(createDebuggerButtonPredicate('Resume')),
+        findsOneWidget,
+      );
+      final resume = _getWidgetFromFinder(
+        find.byWidgetPredicate(createDebuggerButtonPredicate('Resume')),
+      ) as DebuggerButton;
+      expect(resume.onPressed, isNull);
+    },
+  );
 
   testWidgetsWithWindowSize(
-      'debugger controls break on exceptions abbreviated on small window',
-      smallWindowSize, (WidgetTester tester) async {
-    await tester.pumpWidget(
-      wrapWithControllers(
-        Builder(builder: screen.build),
-        debugger: debuggerController,
-      ),
-    );
-    expect(find.text('Ignore exceptions'), findsOneWidget);
-  });
+    'debugger controls break on exceptions',
+    windowSize,
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        wrapWithControllers(
+          Builder(builder: screen.build),
+          debugger: debuggerController,
+        ),
+      );
+      expect(find.text("Don't stop on exceptions"), findsOneWidget);
+    },
+  );
+
+  testWidgetsWithWindowSize(
+    'debugger controls break on exceptions abbreviated on small window',
+    smallWindowSize,
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        wrapWithControllers(
+          Builder(builder: screen.build),
+          debugger: debuggerController,
+        ),
+      );
+      expect(find.text('Ignore exceptions'), findsOneWidget);
+    },
+  );
 }
 
 Widget _getWidgetFromFinder(Finder finder) {

@@ -3,10 +3,10 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app/src/screens/debugger/breakpoint_manager.dart';
-import 'package:devtools_app/src/screens/debugger/debugger_controller.dart';
-import 'package:devtools_app/src/screens/debugger/evaluate.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/shared/config_specific/ide_theme/ide_theme.dart';
+import 'package:devtools_app/src/shared/console/eval/eval_service.dart';
+import 'package:devtools_app/src/shared/console/widgets/evaluate.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_app/src/shared/ui/search.dart';
 import 'package:devtools_test/devtools_test.dart';
@@ -22,6 +22,7 @@ void main() {
       final service = createMockVmServiceWrapperWithDefaults();
 
       manager = FakeServiceManager(service: service);
+      setGlobal(EvalService, EvalService());
       setGlobal(ServiceConnectionManager, manager);
       setGlobal(IdeTheme, getIdeTheme());
       setGlobal(BreakpointManager, BreakpointManager());
@@ -231,10 +232,7 @@ class _EvalFieldTestObjects {
 Future<_EvalFieldTestObjects> _setupEvalFieldObjects(
   WidgetTester tester,
 ) async {
-  final debuggerController = DebuggerController(initialSwitchToIsolate: false);
-
   final evalField = ExpressionEvalField(
-    controller: debuggerController,
     getAutoCompleteResults: (value, controller) async {
       return ['foo', 'bar', 'bazz', 'fozz', 'barz']
           // Simple implementation of search

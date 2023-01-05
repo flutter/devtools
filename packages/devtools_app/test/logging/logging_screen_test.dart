@@ -26,7 +26,6 @@ void main() async {
   late MockLoggingController mockLoggingController;
   const windowSize = Size(1000.0, 1000.0);
 
-  await ensureInspectorDependencies();
   mockLoggingController = MockLoggingController();
 
   final FakeServiceManager fakeServiceManager = FakeServiceManager();
@@ -46,7 +45,7 @@ void main() async {
       );
     }
 
-    setUp(() async {
+    setUp(() {
       setGlobal(ServiceConnectionManager, fakeServiceManager);
       setGlobal(IdeTheme, IdeTheme());
 
@@ -58,58 +57,71 @@ void main() async {
       expect(find.text('Logging'), findsOneWidget);
     });
 
-    testWidgetsWithWindowSize('builds with no data', windowSize,
-        (WidgetTester tester) async {
-      await pumpLoggingScreen(tester);
-      expect(find.byType(LoggingScreenBody), findsOneWidget);
-      expect(find.byType(LogsTable), findsOneWidget);
-      expect(find.byType(LogDetails), findsOneWidget);
-      expect(find.text('Clear'), findsOneWidget);
-      expect(find.byType(TextField), findsOneWidget);
-      expect(find.byType(StructuredErrorsToggle), findsOneWidget);
-    });
-
-    testWidgetsWithWindowSize('can clear logs', windowSize,
-        (WidgetTester tester) async {
-      await pumpLoggingScreen(tester);
-      verifyNever(mockLoggingController.clear());
-      await tester.tap(find.text('Clear'));
-      verify(mockLoggingController.clear()).called(1);
-    });
+    testWidgetsWithWindowSize(
+      'builds with no data',
+      windowSize,
+      (WidgetTester tester) async {
+        await pumpLoggingScreen(tester);
+        expect(find.byType(LoggingScreenBody), findsOneWidget);
+        expect(find.byType(LogsTable), findsOneWidget);
+        expect(find.byType(LogDetails), findsOneWidget);
+        expect(find.text('Clear'), findsOneWidget);
+        expect(find.byType(TextField), findsOneWidget);
+        expect(find.byType(StructuredErrorsToggle), findsOneWidget);
+      },
+    );
 
     testWidgetsWithWindowSize(
-        'search field is disabled with no data', windowSize,
-        (WidgetTester tester) async {
-      await pumpLoggingScreen(tester);
-      verifyNever(mockLoggingController.clear());
+      'can clear logs',
+      windowSize,
+      (WidgetTester tester) async {
+        await pumpLoggingScreen(tester);
+        verifyNever(mockLoggingController.clear());
+        await tester.tap(find.text('Clear'));
+        verify(mockLoggingController.clear()).called(1);
+      },
+    );
 
-      final textFieldFinder = find.byKey(loggingSearchFieldKey);
-      expect(textFieldFinder, findsOneWidget);
-      final TextField textField = tester.widget(textFieldFinder) as TextField;
-      expect(textField.enabled, isFalse);
-    });
+    testWidgetsWithWindowSize(
+      'search field is disabled with no data',
+      windowSize,
+      (WidgetTester tester) async {
+        await pumpLoggingScreen(tester);
+        verifyNever(mockLoggingController.clear());
 
-    testWidgetsWithWindowSize('can toggle structured errors', windowSize,
-        (WidgetTester tester) async {
-      final serviceManager = FakeServiceManager();
-      when(serviceManager.connectedApp!.isFlutterWebAppNow).thenReturn(false);
-      when(serviceManager.connectedApp!.isProfileBuildNow).thenReturn(false);
-      setGlobal(
-        ServiceConnectionManager,
-        serviceManager,
-      );
-      await pumpLoggingScreen(tester);
-      Switch toggle = tester.widget(find.byType(Switch));
-      expect(toggle.value, false);
+        final textFieldFinder = find.byKey(loggingSearchFieldKey);
+        expect(textFieldFinder, findsOneWidget);
+        final TextField textField = tester.widget(textFieldFinder) as TextField;
+        expect(textField.enabled, isFalse);
+      },
+    );
 
-      serviceManager.serviceExtensionManager
-          .fakeServiceExtensionStateChanged(structuredErrors.extension, 'true');
-      await tester.pumpAndSettle();
-      toggle = tester.widget(find.byType(Switch));
-      expect(toggle.value, true);
+    testWidgetsWithWindowSize(
+      'can toggle structured errors',
+      windowSize,
+      (WidgetTester tester) async {
+        final serviceManager = FakeServiceManager();
+        when(serviceManager.connectedApp!.isFlutterWebAppNow).thenReturn(false);
+        when(serviceManager.connectedApp!.isProfileBuildNow).thenReturn(false);
+        setGlobal(
+          ServiceConnectionManager,
+          serviceManager,
+        );
+        await pumpLoggingScreen(tester);
+        Switch toggle = tester.widget(find.byType(Switch));
+        expect(toggle.value, false);
 
-      // TODO(djshuckerow): Hook up fake extension state querying.
-    });
+        serviceManager.serviceExtensionManager.fakeServiceExtensionStateChanged(
+          structuredErrors.extension,
+          'true',
+        );
+        await tester.pumpAndSettle();
+        toggle = tester.widget(find.byType(Switch));
+        expect(toggle.value, true);
+
+        // TODO(djshuckerow): Hook up fake extension state querying.
+      },
+    );
 
     group('MessageColumn', () {
       late MessageColumn column;

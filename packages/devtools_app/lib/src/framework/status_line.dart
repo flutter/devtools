@@ -88,7 +88,7 @@ class StatusLine extends StatelessWidget {
             OpenAboutAction(),
           ],
         ),
-      ]
+      ],
     ];
   }
 
@@ -186,7 +186,7 @@ class StatusLine extends StatelessWidget {
                           style: textTheme.bodyMedium,
                           overflow: TextOverflow.clip,
                         ),
-                      ]
+                      ],
                     ],
                   ),
                 ),

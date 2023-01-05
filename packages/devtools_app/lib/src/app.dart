@@ -24,7 +24,6 @@ import 'screens/debugger/debugger_screen.dart';
 import 'screens/inspector/inspector_controller.dart';
 import 'screens/inspector/inspector_screen.dart';
 import 'screens/inspector/inspector_tree_controller.dart';
-import 'screens/inspector/primitives/inspector_common.dart';
 import 'screens/logging/logging_controller.dart';
 import 'screens/logging/logging_screen.dart';
 import 'screens/memory/memory_controller.dart';
@@ -44,6 +43,7 @@ import 'shared/analytics/analytics_controller.dart';
 import 'shared/analytics/constants.dart' as gac;
 import 'shared/common_widgets.dart';
 import 'shared/config_specific/server/server.dart';
+import 'shared/console/primitives/simple_items.dart';
 import 'shared/dialogs.dart';
 import 'shared/globals.dart';
 import 'shared/primitives/auto_dispose.dart';
@@ -112,21 +112,21 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
     });
 
     _isDarkThemeEnabled = preferences.darkModeTheme.value;
-    preferences.darkModeTheme.addListener(() {
+    addAutoDisposeListener(preferences.darkModeTheme, () {
       setState(() {
         _isDarkThemeEnabled = preferences.darkModeTheme.value;
       });
     });
 
     _vmDeveloperModeEnabled = preferences.vmDeveloperModeEnabled.value;
-    preferences.vmDeveloperModeEnabled.addListener(() {
+    addAutoDisposeListener(preferences.vmDeveloperModeEnabled, () {
       setState(() {
         _vmDeveloperModeEnabled = preferences.vmDeveloperModeEnabled.value;
       });
     });
 
     _denseModeEnabled = preferences.denseModeEnabled.value;
-    preferences.denseModeEnabled.addListener(() {
+    addAutoDisposeListener(preferences.denseModeEnabled, () {
       setState(() {
         _denseModeEnabled = preferences.denseModeEnabled.value;
       });
@@ -191,10 +191,10 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
   }
 
   Widget _buildTabbedPage(
-    BuildContext context,
+    BuildContext _,
     String? page,
     Map<String, String?> params,
-    DevToolsNavigationState? state,
+    DevToolsNavigationState? __,
   ) {
     final vmServiceUri = params['uri'];
 
@@ -229,17 +229,18 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
         return ValueListenableBuilder<bool>(
           valueListenable: preferences.vmDeveloperModeEnabled,
           builder: (_, __, child) {
-            final tabs = _visibleScreens()
+            final screens = _visibleScreens()
                 .where((p) => embed && page != null ? p.screenId == page : true)
                 .where((p) => !hide.contains(p.screenId))
                 .toList();
-            if (tabs.isEmpty) return child ?? const SizedBox.shrink();
-            return _providedControllers(
+            if (screens.isEmpty) return child ?? const SizedBox.shrink();
+            return MultiProvider(
+              providers: _providedControllers(),
               child: DevToolsScaffold(
                 embed: embed,
                 ideTheme: ideTheme,
                 page: page,
-                tabs: tabs,
+                screens: screens,
                 actions: [
                   // TODO(https://github.com/flutter/devtools/issues/1941)
                   if (serviceManager.connectedApp!.isFlutterAppNow!) ...[
@@ -277,8 +278,8 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
         return DevToolsScaffold.withChild(
           key: UniqueKey(),
           ideTheme: ideTheme,
-          child: _providedControllers(
-            offline: true,
+          child: MultiProvider(
+            providers: _providedControllers(offline: true),
             child: SnapshotScreenBody(snapshotArgs, _screens),
           ),
         );
@@ -292,7 +293,8 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
             ReportFeedbackButton(),
             OpenAboutAction(),
           ],
-          child: _providedControllers(
+          child: MultiProvider(
+            providers: _providedControllers(),
             child: const AppSizeBody(),
           ),
         );
@@ -308,18 +310,13 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
 
   List<Screen> _visibleScreens() => _screens.where(shouldShowScreen).toList();
 
-  Widget _providedControllers({required Widget child, bool offline = false}) {
-    final _providers = widget.screens
+  List<Provider> _providedControllers({bool offline = false}) {
+    return widget.screens
         .where(
           (s) => s.providesController && (offline ? s.supportsOffline : true),
         )
         .map((s) => s.controllerProvider(routerDelegate))
         .toList();
-
-    return MultiProvider(
-      providers: _providers,
-      child: child,
-    );
   }
 
   @override
@@ -456,7 +453,7 @@ class OpenSettingsAction extends StatelessWidget {
     return DevToolsTooltip(
       message: 'Settings',
       child: InkWell(
-        onTap: () async {
+        onTap: () {
           unawaited(
             showDialog(
               context: context,
@@ -505,7 +502,8 @@ class SettingsDialog extends StatelessWidget {
             CheckboxSetting(
               label: const Text('Enable analytics'),
               listenable: analyticsController.analyticsEnabled,
-              toggle: analyticsController.toggleAnalyticsEnabled,
+              toggle: (enable) =>
+                  unawaited(analyticsController.toggleAnalyticsEnabled(enable)),
               gaItem: gac.analytics,
             ),
           CheckboxSetting(
@@ -537,7 +535,7 @@ class CheckboxSetting extends StatelessWidget {
 
   final ValueListenable<bool> listenable;
 
-  final Function(bool) toggle;
+  final void Function(bool) toggle;
 
   final String gaItem;
 
@@ -576,7 +574,7 @@ class CheckboxSetting extends StatelessWidget {
 /// Conditional screens can be added to this list, and they will automatically
 /// be shown or hidden based on the [Screen.conditionalLibrary] provided.
 List<DevToolsScreen> get defaultScreens {
-  return <DevToolsScreen>[
+  return devtoolsScreens ??= <DevToolsScreen>[
     DevToolsScreen<InspectorController>(
       InspectorScreen(),
       createController: (_) => InspectorController(
@@ -634,3 +632,6 @@ List<DevToolsScreen> get defaultScreens {
       ),
   ];
 }
+
+@visibleForTesting
+List<DevToolsScreen>? devtoolsScreens;

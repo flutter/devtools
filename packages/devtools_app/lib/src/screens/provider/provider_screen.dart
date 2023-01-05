@@ -144,7 +144,7 @@ class ProviderScreenBody extends ConsumerWidget {
                     rootPath: InstancePath.fromProviderId(selectedProviderId),
                     showInternalProperties: ref.watch(_showInternals),
                   ),
-                )
+                ),
             ],
           ),
         ),
@@ -158,7 +158,7 @@ void showProviderErrorBanner(BuildContext context) {
     context,
     listen: false,
   ).addMessage(
-    ProviderUnknownErrorBanner(screenId: ProviderScreen.id).build(context),
+    ProviderUnknownErrorBanner(screenId: ProviderScreen.id).build(),
   );
 }
 
@@ -189,7 +189,7 @@ class _StateInspectorSettingsDialog extends ConsumerWidget {
                 ),
               ],
             ),
-          )
+          ),
         ],
       ),
       actions: const [

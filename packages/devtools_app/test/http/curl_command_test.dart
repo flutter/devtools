@@ -49,7 +49,7 @@ void main() {
           uri: Uri.parse('https://www.example.com'),
           headers: {
             'accept-language': ['en-GB,de-DE'],
-            'user-agent': ['SomeUserAgent/5.0 (Macintosh; Intel Mac OS X)']
+            'user-agent': ['SomeUserAgent/5.0 (Macintosh; Intel Mac OS X)'],
           },
         ),
       );
@@ -67,7 +67,7 @@ void main() {
           uri: Uri.parse('https://www.example.com'),
           headers: {
             'accept-language': ['en-GB,de-DE'],
-            'user-agent': ['SomeUserAgent/5.0 (Macintosh; Intel Mac OS X)']
+            'user-agent': ['SomeUserAgent/5.0 (Macintosh; Intel Mac OS X)'],
           },
           requestBody: Uint8List.fromList(
             'It\'s a request body!\nHopefully this works.'.codeUnits,
@@ -122,7 +122,7 @@ void main() {
           uri: Uri.parse('https://www.example.com/search?q=\'test\''),
           headers: {
             'accept-language': ['en-GB,de-DE'],
-            'user-agent': ['SomeUserAgent/5.0 (Macintosh; Intel Mac OS X)']
+            'user-agent': ['SomeUserAgent/5.0 (Macintosh; Intel Mac OS X)'],
           },
         ),
       );
@@ -140,7 +140,7 @@ void main() {
           uri: Uri.parse('https://www.example.com'),
           headers: {
             'accept-language': ['en-GB,de-DE'],
-            'authorization': ['Bearer \'this is a\' test']
+            'authorization': ['Bearer \'this is a\' test'],
           },
         ),
       );
@@ -158,7 +158,7 @@ void main() {
           uri: Uri.parse('https://www.example.com'),
           headers: {
             'accept-language': ['en-GB,de-DE'],
-            'authorization': ['Bearer \'this is a\' test']
+            'authorization': ['Bearer \'this is a\' test'],
           },
           requestBody: Uint8List(0),
         ),

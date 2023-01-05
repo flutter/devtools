@@ -135,5 +135,5 @@ const _helpText = 'Choose and customize the filter.\n'
     '  MyClass\n'
     '  package:myPackage/src/\n\n'
     'Specify:\n'
-    '  - ${ClassFilter.noPackageLibrariesAlias} for classes without package prefix\n'
+    '  - ${ClassFilter.dartInternalAlias} for dart internal objects, not assigned to any package\n'
     '  - ${ClassFilter.dartAndFlutterLibrariesAlias} for most "dart:" and "package:" libraries published by Dart and Flutter orgs.';

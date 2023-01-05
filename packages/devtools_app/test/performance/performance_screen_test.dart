@@ -77,7 +77,6 @@ void main() {
 
   group('PerformanceScreen', () {
     setUp(() async {
-      await ensureInspectorDependencies();
       await _setUpServiceManagerWithTimeline(testTimelineJson);
       controller = PerformanceController();
       await controller.initialized;

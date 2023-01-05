@@ -14,15 +14,15 @@ import 'package:vm_service/vm_service.dart';
 
 import '../../service/vm_service_wrapper.dart';
 import '../../shared/config_specific/logger/logger.dart' as logger;
+import '../../shared/console/eval/diagnostics_node.dart';
+import '../../shared/console/eval/inspector_service.dart';
+import '../../shared/console/eval/inspector_tree.dart';
 import '../../shared/globals.dart';
 import '../../shared/primitives/auto_dispose.dart';
 import '../../shared/primitives/message_bus.dart';
 import '../../shared/primitives/utils.dart';
 import '../../shared/ui/filter.dart';
 import '../../shared/ui/search.dart';
-import '../inspector/diagnostics_node.dart';
-import '../inspector/inspector_service.dart';
-import '../inspector/inspector_tree.dart';
 import '../inspector/inspector_tree_controller.dart';
 import 'logging_screen.dart';
 
@@ -238,7 +238,7 @@ class LoggingController extends DisposableController
     serviceManager.errorBadgeManager.clearErrors(LoggingScreen.id);
   }
 
-  void _handleConnectionStart(VmServiceWrapper service) async {
+  void _handleConnectionStart(VmServiceWrapper service) {
     // Log stdout events.
     final _StdoutEventHandler stdoutHandler =
         _StdoutEventHandler(this, 'stdout');
@@ -395,7 +395,7 @@ class LoggingController extends DisposableController
         '${e.json!['reason']} collection in $time ms • '
         '${printMB(usedBytes, includeUnit: true)} used of ${printMB(capacityBytes, includeUnit: true)}';
 
-    final event = <String, dynamic>{
+    final event = <String, Object>{
       'reason': e.json!['reason'],
       'new': newSpace.json,
       'old': oldSpace.json,
@@ -496,10 +496,10 @@ class LoggingController extends DisposableController
     );
   }
 
-  void _handleConnectionStop(dynamic event) {}
+  void _handleConnectionStop(Object? _) {}
 
   void log(LogData log) {
-    List<LogData> currentLogs = List.from(data);
+    List<LogData> currentLogs = List.of(data);
 
     // Insert the new item and clamped the list to kMaxLogItemsLength.
     currentLogs.add(log);
@@ -967,5 +967,5 @@ class ServiceExtensionStateChangedInfo {
   }
 
   final String? extension;
-  final dynamic value;
+  final Object value;
 }

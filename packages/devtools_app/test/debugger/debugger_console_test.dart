@@ -3,10 +3,11 @@
 // found in the LICENSE file.
 
 import 'package:ansicolor/ansicolor.dart';
-import 'package:devtools_app/src/screens/debugger/console.dart';
 import 'package:devtools_app/src/screens/debugger/debugger_controller.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/shared/config_specific/ide_theme/ide_theme.dart';
+import 'package:devtools_app/src/shared/console/eval/eval_service.dart';
+import 'package:devtools_app/src/shared/console/widgets/console_pane.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_app/src/shared/notifications.dart';
 import 'package:devtools_app/src/shared/scripts/script_manager.dart';
@@ -30,6 +31,7 @@ void main() {
   setGlobal(IdeTheme, IdeTheme());
   setGlobal(ScriptManager, MockScriptManager());
   setGlobal(NotificationService, NotificationService());
+  setGlobal(EvalService, MockEvalService());
   fakeServiceManager.consoleService.ensureServiceInitialized();
   when(fakeServiceManager.errorBadgeManager.errorCountNotifier('debugger'))
       .thenReturn(ValueNotifier<int>(0));
@@ -42,8 +44,8 @@ void main() {
       wrapWithControllers(
         Row(
           children: [
-            Flexible(child: DebuggerConsole.buildHeader()),
-            const Expanded(child: DebuggerConsole()),
+            Flexible(child: ConsolePaneHeader()),
+            const Expanded(child: ConsolePane()),
           ],
         ),
         debugger: controller,
@@ -61,20 +63,22 @@ void main() {
     }
 
     testWidgetsWithWindowSize(
-        'Tapping the Console Clear button clears stdio.', windowSize,
-        (WidgetTester tester) async {
-      serviceManager.consoleService.clearStdio();
-      serviceManager.consoleService.appendStdio(_ansiCodesOutput());
+      'Tapping the Console Clear button clears stdio.',
+      windowSize,
+      (WidgetTester tester) async {
+        serviceManager.consoleService.clearStdio();
+        serviceManager.consoleService.appendStdio(_ansiCodesOutput());
 
-      await pumpConsole(tester, debuggerController);
+        await pumpConsole(tester, debuggerController);
 
-      final clearButton = find.byKey(DebuggerConsole.clearStdioButtonKey);
-      expect(clearButton, findsOneWidget);
+        final clearButton = find.byKey(ConsolePane.clearStdioButtonKey);
+        expect(clearButton, findsOneWidget);
 
-      await tester.tap(clearButton);
+        await tester.tap(clearButton);
 
-      expect(serviceManager.consoleService.stdio.value, isEmpty);
-    });
+        expect(serviceManager.consoleService.stdio.value, isEmpty);
+      },
+    );
 
     group('Clipboard', () {
       String _clipboardContents = '';
@@ -95,19 +99,21 @@ void main() {
       });
 
       testWidgetsWithWindowSize(
-          'Tapping the Copy to Clipboard button attempts to copy stdio to clipboard.',
-          windowSize, (WidgetTester tester) async {
-        await pumpConsole(tester, debuggerController);
+        'Tapping the Copy to Clipboard button attempts to copy stdio to clipboard.',
+        windowSize,
+        (WidgetTester tester) async {
+          await pumpConsole(tester, debuggerController);
 
-        final copyButton = find.byKey(DebuggerConsole.copyToClipboardButtonKey);
-        expect(copyButton, findsOneWidget);
+          final copyButton = find.byKey(ConsolePane.copyToClipboardButtonKey);
+          expect(copyButton, findsOneWidget);
 
-        expect(_clipboardContents, isEmpty);
+          expect(_clipboardContents, isEmpty);
 
-        await tester.tap(copyButton);
+          await tester.tap(copyButton);
 
-        expect(_clipboardContents, equals(_expected));
-      });
+          expect(_clipboardContents, equals(_expected));
+        },
+      );
     });
   });
 }

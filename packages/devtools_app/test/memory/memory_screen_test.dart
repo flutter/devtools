@@ -82,7 +82,6 @@ void main() {
 
   group('MemoryScreen', () {
     setUp(() async {
-      await ensureInspectorDependencies();
       setGlobal(OfflineModeController, OfflineModeController());
       fakeServiceManager = FakeServiceManager();
       when(fakeServiceManager.connectedApp!.isDartWebAppNow).thenReturn(false);

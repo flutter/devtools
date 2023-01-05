@@ -287,7 +287,7 @@ class _FramePhaseBlock extends StatelessWidget {
                     blockData.display,
                     overflow: TextOverflow.ellipsis,
                   ),
-                ]
+                ],
               ],
             );
           },

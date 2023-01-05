@@ -163,6 +163,13 @@ class MockLoggingController extends Mock
   final selectedLog = ValueNotifier<LogData?>(null);
 
   @override
+  List<LogData> matchesForSearch(
+    String search, {
+    bool searchPreviousMatches = false,
+  }) =>
+      [];
+
+  @override
   List<LogData> data = <LogData>[];
 }
 
@@ -189,18 +196,14 @@ class MockDebuggerControllerLegacy extends Mock implements DebuggerController {
 
   factory MockDebuggerControllerLegacy.withDefaults() {
     final debuggerController = MockDebuggerControllerLegacy();
-    when(debuggerController.isPaused).thenReturn(ValueNotifier(false));
     when(debuggerController.resuming).thenReturn(ValueNotifier(false));
     when(debuggerController.isSystemIsolate).thenReturn(false);
     when(debuggerController.selectedBreakpoint).thenReturn(ValueNotifier(null));
     when(debuggerController.stackFramesWithLocation)
         .thenReturn(ValueNotifier([]));
     when(debuggerController.selectedStackFrame).thenReturn(ValueNotifier(null));
-    when(debuggerController.hasTruncatedFrames)
-        .thenReturn(ValueNotifier(false));
     when(debuggerController.exceptionPauseMode)
         .thenReturn(ValueNotifier('Unhandled'));
-    when(debuggerController.variables).thenReturn(ValueNotifier([]));
     return debuggerController;
   }
 }
@@ -226,16 +229,6 @@ class MockProgramExplorerControllerLegacy extends Mock
 }
 
 class MockVM extends Mock implements VM {}
-
-Future<void> ensureInspectorDependencies() async {
-  assert(
-    !kIsWeb,
-    'Attempted to resolve a package path from web code.\n'
-    'Package path resolution uses dart:io, which is not available in web.'
-    '\n'
-    "To fix this, mark the failing test as @TestOn('vm')",
-  );
-}
 
 void mockWebVm(VM vm) {
   when(vm.targetCPU).thenReturn('Web');

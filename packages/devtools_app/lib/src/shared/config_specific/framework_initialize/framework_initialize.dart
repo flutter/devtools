@@ -7,7 +7,7 @@ import '_framework_initialize_stub.dart'
     if (dart.library.html) '_framework_initialize_web.dart'
     if (dart.library.io) '_framework_initialize_desktop.dart';
 
-Future initializeFramework() async {
+Future<void> initializeFramework() async {
   FrameworkCore.initGlobals();
   await initializePlatform();
   FrameworkCore.init();

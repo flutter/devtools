@@ -111,11 +111,11 @@ class JsonToServiceCache {
 
   /// Recursively inserts fake [Instance] entries in the cache, returning the
   /// root [Instance] of the JSON object.
-  Instance insertJsonObject(dynamic json) {
+  Instance insertJsonObject(Object? json) {
     if (json is List) {
       return _insertList(json);
     } else if (json is Map) {
-      return _insertMap(json.cast<String, dynamic>());
+      return _insertMap(json.cast<String, Object?>());
     }
     return _insertPrimitive(json);
   }
@@ -135,14 +135,11 @@ class JsonToServiceCache {
         removeJsonObject(entry.value);
       }
     } else if (root.kind == InstanceKind.kList) {
-      // ignore: prefer_foreach
-      for (final entry in root.elements!) {
-        removeJsonObject(entry);
-      }
+      root.elements!.cast<Instance>().forEach(removeJsonObject);
     }
   }
 
-  Instance _insertMap(Map<String, dynamic> json) {
+  Instance _insertMap(Map<String, Object?> json) {
     final map = Instance(
       kind: InstanceKind.kMap,
       identityHashCode: -1,
@@ -154,7 +151,7 @@ class JsonToServiceCache {
       for (final entry in json.entries)
         MapAssociation(
           key: insertJsonObject(entry.key),
-          value: insertJsonObject(entry.value),
+          value: insertJsonObject(entry.value!),
         ),
     ];
     map.length = json.length;
@@ -163,7 +160,7 @@ class JsonToServiceCache {
     return map;
   }
 
-  Instance _insertList(List<dynamic> json) {
+  Instance _insertList(List<Object?> json) {
     final list = Instance(
       kind: InstanceKind.kList,
       identityHashCode: -1,
@@ -178,7 +175,7 @@ class JsonToServiceCache {
     return list;
   }
 
-  Instance _insertPrimitive(dynamic json) {
+  Instance _insertPrimitive(Object? json) {
     assert(
       json == null ||
           json is String ||

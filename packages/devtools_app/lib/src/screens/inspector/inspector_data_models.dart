@@ -6,10 +6,10 @@ import 'dart:math' as math;
 
 import 'package:flutter/rendering.dart';
 
+import '../../shared/console/eval/diagnostics_node.dart';
 import '../../shared/primitives/enum_utils.dart';
 import '../../shared/primitives/math_utils.dart';
 import '../../shared/primitives/utils.dart';
-import 'diagnostics_node.dart';
 import 'layout_explorer/flex/utils.dart';
 
 const overflowEpsilon = 0.1;
@@ -76,7 +76,7 @@ List<double> computeRenderSizes({
           (s - smallestSize) *
                   (largestRenderSize - smallestRenderSize) /
                   (largestSize - smallestSize) +
-              smallestRenderSize
+              smallestRenderSize,
       ];
 
   var renderSizes = transformToRenderSize(largestRenderSize);
@@ -297,7 +297,7 @@ extension MainAxisAlignmentExtension on MainAxisAlignment {
   }
 }
 
-/// TODO(albertusangga): Move this to [RemoteDiagnosticsNode] once dart:html app is removed
+/// TODO(albertusangga): Move this to [RemoteDiagnosticsNode] once dart:html app is removed.
 class FlexLayoutProperties extends LayoutProperties {
   FlexLayoutProperties({
     required Size size,
@@ -382,7 +382,7 @@ class FlexLayoutProperties extends LayoutProperties {
 
   static FlexLayoutProperties _buildNode(RemoteDiagnosticsNode node) {
     final Map<String, Object?> renderObjectJson = node.renderObject!.json;
-    final properties = renderObjectJson['properties'] as List<dynamic>;
+    final properties = renderObjectJson['properties'] as List<Object?>;
     final data = Map<String, Object?>.fromIterable(
       properties,
       key: (property) => property['name'],

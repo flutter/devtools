@@ -52,7 +52,6 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
     HttpProfile? httpProfile,
     SamplesMemoryJson? memoryData,
     AllocationMemoryJson? allocationData,
-    CpuProfileData? cpuProfileData,
     CpuSamples? cpuSamples,
     CpuSamples? allocationSamples,
     Map<String, String>? resolvedUriMap,
@@ -91,6 +90,9 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
 
   @override
   ConnectedApp? connectedApp = MockConnectedApp();
+
+  @override
+  late final AppState appState = AppState(isolateManager.selectedIsolate);
 
   @override
   final ConsoleService consoleService = ConsoleService();

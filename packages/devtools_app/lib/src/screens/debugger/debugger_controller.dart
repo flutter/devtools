@@ -9,8 +9,8 @@ import 'package:collection/collection.dart' show IterableExtension;
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../service/isolate_state.dart';
 import '../../service/vm_service_wrapper.dart';
+import '../../shared/console/primitives/source_location.dart';
 import '../../shared/globals.dart';
 import '../../shared/object_tree.dart';
 import '../../shared/primitives/auto_dispose.dart';
@@ -19,9 +19,6 @@ import '../../shared/primitives/utils.dart';
 import '../../shared/routing.dart';
 import 'codeview_controller.dart';
 import 'debugger_model.dart';
-
-// TODO(devoncarew): Add some delayed resume value notifiers (to be used to
-// help debounce stepping operations).
 
 // Make sure this a checked in with `mute: true`.
 final _log = DebugTimingLogger('debugger', mute: true);
@@ -33,22 +30,32 @@ class DebuggerController extends DisposableController
   // in `switchToIsolate`.
   DebuggerController({
     DevToolsRouterDelegate? routerDelegate,
-    this.initialSwitchToIsolate = true,
-  }) {
+    bool initialSwitchToIsolate = true,
+  }) : _initialSwitchToIsolate = initialSwitchToIsolate {
     autoDisposeStreamSubscription(
       serviceManager.onConnectionAvailable.listen(_handleConnectionAvailable),
     );
     if (routerDelegate != null) {
       codeViewController.subscribeToRouterEvents(routerDelegate);
     }
+    addAutoDisposeListener(_selectedStackFrame, _updateCurrentFrame);
+    addAutoDisposeListener(_stackFramesWithLocation, _updateCurrentFrame);
+
     if (serviceManager.hasService) {
-      initialize();
+      _initialize();
     }
   }
 
   final codeViewController = CodeViewController();
 
   bool _firstDebuggerScreenLoaded = false;
+
+  void _updateCurrentFrame() {
+    serviceManager.appState.setCurrentFrame(
+      _selectedStackFrame.value?.frame ??
+          _stackFramesWithLocation.value.safeFirst?.frame,
+    );
+  }
 
   /// Callback to be called when the debugger screen is first loaded.
   ///
@@ -63,20 +70,21 @@ class DebuggerController extends DisposableController
   }
 
   /// Method to call after the vm service shuts down.
-  void onServiceShutdown() {
+  void _onServiceShutdown() {
     _clearCaches();
 
     _hasTruncatedFrames.value = false;
     unawaited(_getStackOperation?.cancel());
     _getStackOperation = null;
 
-    isolateRef = null;
-    _isPaused.value = false;
+    final appState = serviceManager.appState;
+
+    appState.setPausedOnBreakpoint(false);
     _resuming.value = false;
     _lastEvent = null;
     _stackFramesWithLocation.value = [];
     _selectedStackFrame.value = null;
-    _variables.value = [];
+    appState.setVariables([]);
     _selectedBreakpoint.value = null;
     _firstDebuggerScreenLoaded = false;
   }
@@ -86,18 +94,21 @@ class DebuggerController extends DisposableController
   void _handleConnectionAvailable(VmServiceWrapper service) {
     if (service == _lastService) return;
     _lastService = service;
-    onServiceShutdown();
-    initialize();
+    _onServiceShutdown();
+    _initialize();
   }
 
-  void initialize() {
-    if (initialSwitchToIsolate) {
-      assert(serviceManager.isolateManager.selectedIsolate.value != null);
-      switchToIsolate(serviceManager.isolateManager.selectedIsolate.value);
+  ValueListenable<IsolateRef?> get _isolate =>
+      serviceManager.isolateManager.selectedIsolate;
+
+  void _initialize() {
+    if (_initialSwitchToIsolate) {
+      assert(_isolate.value != null);
+      _switchToIsolate(_isolate.value);
     }
 
-    addAutoDisposeListener(serviceManager.isolateManager.selectedIsolate, () {
-      switchToIsolate(serviceManager.isolateManager.selectedIsolate.value);
+    addAutoDisposeListener(_isolate, () {
+      _switchToIsolate(_isolate.value);
     });
     autoDisposeStreamSubscription(
       _service.onDebugEvent.listen(_handleDebugEvent),
@@ -107,34 +118,11 @@ class DebuggerController extends DisposableController
     );
   }
 
-  final bool initialSwitchToIsolate;
-
-  IsolateState? get isolateDebuggerState =>
-      serviceManager.isolateManager.isolateDebuggerState(isolateRef);
+  final bool _initialSwitchToIsolate;
 
   VmServiceWrapper get _service {
     return serviceManager.service!;
   }
-
-  /// Cache of autocomplete matches to show for a library when that library is
-  /// imported.
-  ///
-  /// This cache includes autocompletes from libraries exported by the library
-  /// but does not include autocompletes for libraries imported by this library.
-
-  final libraryMemberAutocompleteCache = <LibraryRef, Future<Set<String?>>>{};
-
-  /// Cache of autocomplete matches for a library for code written within that
-  /// library.
-  ///
-  /// This cache includes autocompletes from all libraries imported and exported
-  /// by the library as well as all private autocompletes for the library.
-  final libraryMemberAndImportsAutocompleteCache =
-      <LibraryRef, Future<Set<String?>>>{};
-
-  final _isPaused = ValueNotifier<bool>(false);
-
-  ValueListenable<bool> get isPaused => _isPaused;
 
   final _resuming = ValueNotifier<bool>(false);
 
@@ -145,39 +133,6 @@ class DebuggerController extends DisposableController
   Event? _lastEvent;
 
   Event? get lastEvent => _lastEvent;
-
-  final _clazzCache = <ClassRef, Class>{};
-
-  /// Find the owner library for a ClassRef, FuncRef, or LibraryRef.
-  ///
-  /// If Dart had union types, ref would be type ClassRef | FuncRef | LibraryRef
-  Future<LibraryRef?> findOwnerLibrary(Object? ref) async {
-    if (ref is LibraryRef) {
-      return ref;
-    }
-    if (ref is ClassRef) {
-      if (ref.library != null) {
-        return ref.library;
-      }
-      // Fallback for older VMService versions.
-      final clazz = await classFor(ref);
-      return clazz?.library;
-    }
-    if (ref is FuncRef) {
-      return findOwnerLibrary(ref.owner);
-    }
-    return null;
-  }
-
-  /// Returns the class for the provided [ClassRef].
-  ///
-  /// May return null.
-  Future<Class?> classFor(ClassRef classRef) async {
-    try {
-      return _clazzCache[classRef] ??= await getObject(classRef) as Class;
-    } catch (_) {}
-    return null;
-  }
 
   final _stackFramesWithLocation =
       ValueNotifier<List<StackFrameAndSourcePosition>>([]);
@@ -190,14 +145,6 @@ class DebuggerController extends DisposableController
   ValueListenable<StackFrameAndSourcePosition?> get selectedStackFrame =>
       _selectedStackFrame;
 
-  Frame? get frameForEval =>
-      _selectedStackFrame.value?.frame ??
-      _stackFramesWithLocation.value.safeFirst?.frame;
-
-  final _variables = ValueNotifier<List<DartObjectNode>>([]);
-
-  ValueListenable<List<DartObjectNode>> get variables => _variables;
-
   final _selectedBreakpoint = ValueNotifier<BreakpointAndSourcePosition?>(null);
 
   ValueListenable<BreakpointAndSourcePosition?> get selectedBreakpoint =>
@@ -208,21 +155,20 @@ class DebuggerController extends DisposableController
 
   ValueListenable<String?> get exceptionPauseMode => _exceptionPauseMode;
 
-  IsolateRef? isolateRef;
-
-  bool get isSystemIsolate => isolateRef?.isSystemIsolate ?? false;
+  bool get isSystemIsolate => _isolate.value?.isSystemIsolate ?? false;
 
   String get _isolateRefId {
-    final id = isolateRef?.id;
+    final id = _isolate.value?.id;
     if (id == null) return '';
     return id;
   }
 
-  final EvalHistory evalHistory = EvalHistory();
+  void _switchToIsolate(IsolateRef? ref) async {
+    // TODO(polina-c and jacob314): move this logic to appState
+    // and modify to detect if app is paused from the isolate
+    // https://github.com/flutter/devtools/pull/4993#discussion_r1060845351
 
-  void switchToIsolate(IsolateRef? ref) async {
-    isolateRef = ref;
-    _isPaused.value = false;
+    serviceManager.appState.setPausedOnBreakpoint(false);
     await _pause(false);
 
     _clearCaches();
@@ -297,65 +243,6 @@ class DebuggerController extends DisposableController
     return _service.resume(_isolateRefId, step: StepOption.kOut);
   }
 
-  /// Evaluate the given expression in the context of the currently selected
-  /// stack frame, or the top frame if there is no current selection.
-  ///
-  /// This will fail if the application is not currently paused.
-  Future<Response> evalAtCurrentFrame(String expression) async {
-    if (!isPaused.value) {
-      return Future.error(
-        RPCError.withDetails(
-          'evaluateInFrame',
-          RPCError.kInvalidParams,
-          'Isolate not paused',
-        ),
-      );
-    }
-
-    if (stackFramesWithLocation.value.isEmpty) {
-      return Future.error(
-        RPCError.withDetails(
-          'evaluateInFrame',
-          RPCError.kInvalidParams,
-          'No frames available',
-        ),
-      );
-    }
-
-    final frame = selectedStackFrame.value?.frame ??
-        stackFramesWithLocation.value.first.frame;
-
-    return _service.evaluateInFrame(
-      _isolateRefId,
-      frame.index!,
-      expression,
-      disableBreakpoints: true,
-    );
-  }
-
-  /// Call `toString()` on the given instance and return the result.
-  Future<Response> invokeToString(InstanceRef instance) {
-    return _service.invoke(
-      _isolateRefId,
-      instance.id!,
-      'toString',
-      <String>[],
-      disableBreakpoints: true,
-    );
-  }
-
-  /// Retrieves the full string value of a [stringRef].
-  Future<String?> retrieveFullStringValue(
-    InstanceRef stringRef, {
-    String onUnavailable(String? truncatedValue)?,
-  }) async {
-    return _service.retrieveFullStringValue(
-      _isolateRefId,
-      stringRef,
-      onUnavailable: onUnavailable,
-    );
-  }
-
   Future<void> setIsolatePauseMode(String mode) async {
     await _service.setIsolatePauseMode(
       _isolateRefId,
@@ -424,15 +311,21 @@ class DebuggerController extends DisposableController
     // ignore: unused_local_variable
     final status = reloadEvent.status;
 
-    _clearAutocompleteCaches();
-    if (isolateRef == null) return;
+    final theIsolateRef = _isolate.value;
+    if (theIsolateRef == null) return;
     // Refresh the list of scripts.
     final previousScriptRefs = scriptManager.sortedScripts.value;
     final currentScriptRefs =
-        await scriptManager.retrieveAndSortScripts(isolateRef!);
+        await scriptManager.retrieveAndSortScripts(theIsolateRef);
     final removedScripts =
+        // There seems to be a bug in how this lint is working with type
+        // inference.
+        // ignore: avoid-collection-methods-with-unrelated-types
         Set.of(previousScriptRefs).difference(Set.of(currentScriptRefs));
     final addedScripts =
+        // There seems to be a bug in how this lint is working with type
+        // inference.
+        // ignore: avoid-collection-methods-with-unrelated-types
         Set.of(currentScriptRefs).difference(Set.of(previousScriptRefs));
 
     // TODO(devoncarew): Show a message in the logging view.
@@ -473,8 +366,6 @@ class DebuggerController extends DisposableController
 
   final _hasTruncatedFrames = ValueNotifier<bool>(false);
 
-  ValueListenable<bool> get hasTruncatedFrames => _hasTruncatedFrames;
-
   CancelableOperation<_StackInfo>? _getStackOperation;
 
   Future<void> _pause(bool paused, {Event? pauseEvent}) async {
@@ -482,7 +373,7 @@ class DebuggerController extends DisposableController
     // serviceManager.isolateManager.selectedIsolateState.isPaused.value;
     // listening for changes there instead of having separate logic.
     await _getStackOperation?.cancel();
-    _isPaused.value = paused;
+    serviceManager.appState.setPausedOnBreakpoint(paused);
 
     _log.log('_pause(running: ${!paused})');
 
@@ -571,25 +462,13 @@ class DebuggerController extends DisposableController
   void _clearCaches() {
     _lastEvent = null;
     breakpointManager.clearCache();
-    _clearAutocompleteCaches();
-  }
-
-  void _clearAutocompleteCaches() {
-    _clazzCache.clear();
-    libraryMemberAutocompleteCache.clear();
-    libraryMemberAndImportsAutocompleteCache.clear();
-  }
-
-  /// Get the populated [Obj] object, given an [ObjRef].
-  ///
-  /// The return value can be one of [Obj] or [Sentinel].
-  Future<Obj> getObject(ObjRef objRef) {
-    return _service.getObject(_isolateRefId, objRef.id!);
   }
 
   Future<void> _populateScripts(Isolate isolate) async {
-    if (isolateRef == null) return;
-    final scriptRefs = await scriptManager.retrieveAndSortScripts(isolateRef!);
+    final theIsolateRef = _isolate.value;
+    if (theIsolateRef == null) return;
+    final scriptRefs =
+        await scriptManager.retrieveAndSortScripts(theIsolateRef);
 
     // Update the selected script.
     final mainScriptRef = scriptRefs.firstWhereOrNull((ref) {
@@ -634,8 +513,9 @@ class DebuggerController extends DisposableController
   void selectStackFrame(StackFrameAndSourcePosition? frame) {
     _selectedStackFrame.value = frame;
 
-    _variables.value =
-        frame != null ? _createVariablesForFrame(frame.frame) : [];
+    serviceManager.appState.setVariables(
+      frame != null ? _createVariablesForFrame(frame.frame) : [],
+    );
 
     final scriptRef = frame?.scriptRef;
     final position = frame?.position;
@@ -652,10 +532,18 @@ class DebuggerController extends DisposableController
       return [];
     }
 
-    final variables =
-        frame.vars!.map((v) => DartObjectNode.create(v, isolateRef)).toList();
+    final variables = frame.vars!
+        .map(
+          (v) => DartObjectNode.create(
+            v,
+            _isolate.value,
+          ),
+        )
+        .toList();
+    // TODO(jacobr): would be nice to be able to remove this call to unawaited
+    // but it would require a significant refactor.
     variables
-      ..forEach(buildVariablesTree)
+      ..forEach((v) => unawaited(buildVariablesTree(v)))
       ..sort((a, b) => sortFieldsByName(a.name!, b.name!));
     return variables;
   }
@@ -688,62 +576,13 @@ class DebuggerController extends DisposableController
           name: '<exception>',
           value: reportedException,
         ),
-        ...frame.vars ?? []
+        ...frame.vars ?? [],
       ];
 
       frames = [newFrame, ...frames.sublist(1)];
     }
 
     return frames;
-  }
-}
-
-/// Store and manipulate the expression evaluation history.
-class EvalHistory {
-  var _historyPosition = -1;
-
-  /// Get the expression evaluation history.
-  List<String> get evalHistory => _evalHistory.toList();
-
-  final _evalHistory = <String>[];
-
-  /// Push a new entry onto the expression evaluation history.
-  void pushEvalHistory(String expression) {
-    if (_evalHistory.isNotEmpty && _evalHistory.last == expression) {
-      return;
-    }
-
-    _evalHistory.add(expression);
-    _historyPosition = -1;
-  }
-
-  bool get canNavigateUp {
-    return _evalHistory.isNotEmpty && _historyPosition != 0;
-  }
-
-  void navigateUp() {
-    if (_historyPosition == -1) {
-      _historyPosition = _evalHistory.length - 1;
-    } else if (_historyPosition > 0) {
-      _historyPosition--;
-    }
-  }
-
-  bool get canNavigateDown {
-    return _evalHistory.isNotEmpty && _historyPosition != -1;
-  }
-
-  void navigateDown() {
-    if (_historyPosition != -1) {
-      _historyPosition++;
-    }
-    if (_historyPosition >= _evalHistory.length) {
-      _historyPosition = -1;
-    }
-  }
-
-  String? get currentText {
-    return _historyPosition == -1 ? null : _evalHistory[_historyPosition];
   }
 }
 

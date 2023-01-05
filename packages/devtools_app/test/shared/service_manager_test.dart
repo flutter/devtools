@@ -456,7 +456,7 @@ void main() async {
         final numericArgs = {
           numericExtensionDescription.extension.substring(
             numericExtensionDescription.extension.lastIndexOf('.') + 1,
-          ): numericExtensionDescription.enabledValue
+          ): numericExtensionDescription.enabledValue,
         };
         const numericEvalExpression = 'timeDilation';
         final numericLibrary = EvalOnDartLibrary(
@@ -532,7 +532,7 @@ Future<void> _verifyInitialExtensionStateInServiceManager(
 Future<void> _verifyExtensionStateInServiceManager(
   String extensionName,
   bool enabled,
-  dynamic value,
+  Object? value,
 ) async {
   final stateListenable = serviceManager.serviceExtensionManager
       .getServiceExtensionState(extensionName);

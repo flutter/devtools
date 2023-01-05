@@ -187,7 +187,7 @@ void main() {
         }
       }
 
-      Future<void> validateOverviewTab(NetworkRequest data) async {
+      Future<void> validateOverviewTab() async {
         // Switch to overview tab.
         await tester.tap(find.byKey(NetworkRequestInspector.overviewTabKey));
         await tester.pumpAndSettle();
@@ -268,7 +268,7 @@ void main() {
           await validateResponseTab(selection);
           await validateCookiesTab(selection);
         }
-        await validateOverviewTab(selection);
+        await validateOverviewTab();
       }
 
       // Pause recording.

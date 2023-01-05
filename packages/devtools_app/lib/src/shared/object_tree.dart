@@ -12,9 +12,9 @@ import 'package:stack_trace/stack_trace.dart' as stack_trace;
 import 'package:vm_service/vm_service.dart';
 
 import '../screens/debugger/debugger_model.dart';
-import '../screens/inspector/diagnostics_node.dart';
-import '../screens/inspector/inspector_service.dart';
 import 'config_specific/logger/logger.dart';
+import 'console/eval/diagnostics_node.dart';
+import 'console/eval/inspector_service.dart';
 import 'globals.dart';
 import 'primitives/trees.dart';
 import 'primitives/utils.dart';
@@ -113,7 +113,7 @@ Future<void> buildVariablesTree(
       }
     } else if (instanceRef != null && serviceManager.service != null) {
       final variableId = variable.ref!.isolateRef!.id!;
-      final dynamic result = await serviceManager.service!.getObject(
+      final result = await serviceManager.service!.getObject(
         variableId,
         instanceRef.id!,
         offset: variable.offset,
@@ -326,7 +326,7 @@ List<DartObjectNode> _createVariablesForStackTrace(
         isolateRef: isolateRef,
         artificialName: true,
         artificialValue: true,
-      )
+      ),
   ];
 }
 
@@ -482,7 +482,7 @@ List<DartObjectNode> _createVariablesForFunctionType(
               name: 'required',
               value: parameter.required,
               isolateRef: isolateRef,
-            )
+            ),
           ],
           DartObjectNode.fromValue(
             name: 'type',
@@ -688,7 +688,7 @@ List<DartObjectNode> _createVariablesForBytes(
 ) {
   final bytes = base64.decode(instance.bytes!);
   final variables = <DartObjectNode>[];
-  List<dynamic> result;
+  List<Object?> result;
   switch (instance.kind) {
     case InstanceKind.kUint8ClampedList:
     case InstanceKind.kUint8List:
@@ -1004,9 +1004,8 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
       }
       return instanceRef.valueAsString == null;
     }
-    return (ref?.value is! String?) &&
-        (ref?.value is! num?) &&
-        (ref?.value is! bool?);
+    final value = ref?.value;
+    return (value is! String?) && (value is! num?) && (value is! bool?);
   }
 
   Object? get value => ref?.value;

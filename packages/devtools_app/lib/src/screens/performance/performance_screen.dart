@@ -104,7 +104,7 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
         offlineController.offlineDataJson[PerformanceScreen.id],
       )..addAll({
           PerformanceData.traceEventsKey:
-              offlineController.offlineDataJson[PerformanceData.traceEventsKey]
+              offlineController.offlineDataJson[PerformanceData.traceEventsKey],
         });
       final offlinePerformanceData = OfflinePerformanceData.parse(timelineJson);
       if (!offlinePerformanceData.isEmpty) {
@@ -119,13 +119,13 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
         controller.offlinePerformanceData != null &&
         controller.offlinePerformanceData!.frames.isNotEmpty;
 
+    final offlineMode = offlineController.offlineMode.value;
     final performanceScreen = Column(
       children: [
-        if (!offlineController.offlineMode.value) _buildPerformanceControls(),
+        if (!offlineMode) _buildPerformanceControls(),
         const SizedBox(height: denseRowSpacing),
         if (isOfflineFlutterApp ||
-            (!offlineController.offlineMode.value &&
-                serviceManager.connectedApp!.isFlutterAppNow!))
+            (!offlineMode && serviceManager.connectedApp!.isFlutterAppNow!))
           FlutterFramesChart(controller.flutterFramesController),
         const Expanded(child: TabbedPerformanceView()),
       ],
@@ -256,7 +256,7 @@ class SecondaryPerformanceControls extends StatelessWidget {
         OutlinedIconButton(
           icon: Icons.file_download,
           tooltip: 'Export data',
-          onPressed: () => _exportPerformanceData(context),
+          onPressed: _exportPerformanceData,
         ),
         const SizedBox(width: denseSpacing),
         SettingsOutlinedButton(
@@ -266,7 +266,7 @@ class SecondaryPerformanceControls extends StatelessWidget {
     );
   }
 
-  void _exportPerformanceData(BuildContext context) {
+  void _exportPerformanceData() {
     ga.select(gac.performance, gac.export);
     controller.exportData();
     // TODO(kenz): investigate if we need to do any error handling here. Is the

@@ -8,12 +8,12 @@ import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+import '../../../../shared/console/eval/diagnostics_node.dart';
+import '../../../../shared/console/eval/inspector_service.dart';
 import '../../../../shared/primitives/math_utils.dart';
 import '../../../../shared/theme.dart';
-import '../../diagnostics_node.dart';
 import '../../inspector_controller.dart';
 import '../../inspector_data_models.dart';
-import '../../inspector_service.dart';
 import '../ui/arrow.dart';
 import '../ui/free_space.dart';
 import '../ui/layout_explorer_widget.dart';
@@ -177,7 +177,7 @@ class _FlexLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
                       ),
                     ),
                   ],
-                )
+                ),
             ];
           },
           items: [
@@ -215,7 +215,7 @@ class _FlexLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
                     ],
                   ),
                 ),
-              )
+              ),
           ],
           onChanged: (Object? newSelection) async {
             // newSelection is an object instead of type here because
@@ -223,15 +223,13 @@ class _FlexLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
             // if the axis is the main axis the type should be [MainAxisAlignment]
             // if the axis is the cross axis the type should be [CrossAxisAlignment]
             FlexLayoutProperties changedProperties;
-            if (axis == direction) {
-              changedProperties = propertiesLocal.copyWith(
-                mainAxisAlignment: newSelection as MainAxisAlignment?,
-              );
-            } else {
-              changedProperties = propertiesLocal.copyWith(
-                crossAxisAlignment: newSelection as CrossAxisAlignment?,
-              );
-            }
+            changedProperties = axis == direction
+                ? propertiesLocal.copyWith(
+                    mainAxisAlignment: newSelection as MainAxisAlignment?,
+                  )
+                : propertiesLocal.copyWith(
+                    crossAxisAlignment: newSelection as CrossAxisAlignment?,
+                  );
             final valueRef = propertiesLocal.node.valueRef;
             markAsDirty();
             await objectGroup!.invokeSetFlexProperties(
@@ -506,7 +504,7 @@ class _VisualizeFlexChildrenState extends State<VisualizeFlexChildren> {
           final freeSpacesWidgets = [
             for (var renderProperties in [
               ...mainAxisSpaces,
-              ...crossAxisSpaces
+              ...crossAxisSpaces,
             ])
               FreeSpaceVisualizerWidget(renderProperties),
           ];
@@ -658,7 +656,7 @@ class FlexChildVisualizer extends StatelessWidget {
       items: <DropdownMenuItem<FlexFit>>[
         buildMenuItem(FlexFit.loose),
         if (propertiesLocal.description != 'Expanded')
-          buildMenuItem(FlexFit.tight)
+          buildMenuItem(FlexFit.tight),
       ],
     );
   }
@@ -707,7 +705,7 @@ class FlexChildVisualizer extends StatelessWidget {
     final propertiesLocal = properties;
     final rootLocal = root;
 
-    Widget buildEntranceAnimation(BuildContext context, Widget? child) {
+    Widget buildEntranceAnimation(BuildContext _, Widget? child) {
       final vertical = rootLocal.isMainAxisVertical;
       final horizontal = rootLocal.isMainAxisHorizontal;
 

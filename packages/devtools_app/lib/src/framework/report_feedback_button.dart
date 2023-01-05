@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../shared/analytics/analytics.dart' as ga;
@@ -17,14 +19,15 @@ class ReportFeedbackButton extends StatelessWidget {
     return DevToolsTooltip(
       message: 'Report feedback',
       child: InkWell(
-        onTap: () async {
+        onTap: () {
           ga.select(
             gac.devToolsMain,
             gac.feedbackButton,
           );
-          await launchUrl(
-            devToolsExtensionPoints.issueTrackerLink().url,
-            context,
+          unawaited(
+            launchUrl(
+              devToolsExtensionPoints.issueTrackerLink().url,
+            ),
           );
         },
         child: Container(

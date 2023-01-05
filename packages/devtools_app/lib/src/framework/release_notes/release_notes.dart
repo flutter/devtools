@@ -166,8 +166,7 @@ class ReleaseNotes extends AnimatedWidget {
                 : Expanded(
                     child: Markdown(
                       data: markdownData!,
-                      onTapLink: (_, href, __) =>
-                          unawaited(launchUrl(href!, context)),
+                      onTapLink: (_, href, __) => unawaited(launchUrl(href!)),
                     ),
                   ),
           ],

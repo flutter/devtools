@@ -14,7 +14,7 @@ Future<VmServiceWrapper> _connectWithSse(
   Uri uri,
   void onError(error),
   Completer<void> finishedCompleter,
-) async {
+) {
   final serviceCompleter = Completer<VmServiceWrapper>();
 
   uri = uri.scheme == 'sse'

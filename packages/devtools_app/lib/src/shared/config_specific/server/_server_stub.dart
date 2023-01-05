@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be found
 // in the LICENSE file.
 
+// Avoid unused parameters does not understand conditional imports.
+// ignore_for_file: avoid-unused-parameters
 import 'dart:async';
 
 import '../../primitives/utils.dart';
@@ -11,7 +13,7 @@ const unsupportedMessage =
 
 bool get isDevToolsServerAvailable => false;
 
-Future<dynamic> request(String url) async {
+Future<Object?> request(String url) async {
   throw Exception(unsupportedMessage);
 }
 

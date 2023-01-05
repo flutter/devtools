@@ -8,14 +8,14 @@
 class TraceEvent {
   /// Creates a timeline event given JSON-encoded event data.
   TraceEvent(this.json)
-      : name = json[nameKey],
-        category = json[categoryKey],
-        phase = json[phaseKey],
-        processId = json[processIdKey],
-        threadId = json[threadIdKey],
-        duration = json[durationKey],
-        timestampMicros = json[timestampKey],
-        args = json[argsKey];
+      : name = json[nameKey] as String?,
+        category = json[categoryKey] as String?,
+        phase = json[phaseKey] as String?,
+        processId = json[processIdKey] as int?,
+        threadId = json[threadIdKey] as int?,
+        duration = json[durationKey] as int?,
+        timestampMicros = json[timestampKey] as int?,
+        args = json[argsKey] as Map<String, Object?>?;
 
   static const nameKey = 'name';
   static const categoryKey = 'cat';
@@ -44,7 +44,7 @@ class TraceEvent {
   static const frameNumberArg = 'frame_number';
 
   /// The original event JSON.
-  final Map<String, dynamic> json;
+  final Map<String, Object?> json;
 
   /// The name of the event.
   ///
@@ -74,12 +74,12 @@ class TraceEvent {
 
   /// Each async event has an additional required parameter id. We consider the
   /// events with the same category and id as events from the same event tree.
-  dynamic get id => json[idKey];
+  String? get id => json[idKey] as String?;
 
   /// An optional scope string can be specified to avoid id conflicts, in which
   /// case we consider events with the same category, scope, and id as events
   /// from the same event tree.
-  String? get scope => json[scopeKey];
+  String? get scope => json[scopeKey] as String?;
 
   /// The duration of the event, in microseconds.
   ///
@@ -93,7 +93,7 @@ class TraceEvent {
   final int? timestampMicros;
 
   /// Arbitrary data attached to the event.
-  final Map<String, dynamic>? args;
+  final Map<String, Object?>? args;
 
   String get asyncUID =>
       generateAsyncUID(id: id, category: category, scope: scope);
