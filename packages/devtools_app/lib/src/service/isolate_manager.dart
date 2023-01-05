@@ -253,16 +253,6 @@ class IsolateManager extends Disposer {
     _mainIsolate.value = null;
   }
 
-  /// Resturns isolate by its reference.
-  ///
-  /// The method will return immediately in most cases
-  /// because the value is cached. The value will be accurate,
-  /// as the cache is reset on reconnect.
-  Future<Isolate?> isolateCached(IsolateRef isolateRef) {
-    final state = isolateState(isolateRef);
-    return state.isolate;
-  }
-
   IsolateState isolateState(IsolateRef isolateRef) {
     return _isolateStates.putIfAbsent(
       isolateRef,

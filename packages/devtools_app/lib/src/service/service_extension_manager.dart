@@ -165,7 +165,8 @@ class ServiceExtensionManager extends Disposer {
     _checkForFirstFrameStarted = false;
 
     final isolateRef = _isolateManager.mainIsolate.value!;
-    final Isolate? isolate = await _isolateManager.isolateCached(isolateRef);
+    final Isolate? isolate =
+        await _isolateManager.isolateState(isolateRef).isolate;
 
     if (isolate == null) return;
 
@@ -316,7 +317,8 @@ class ServiceExtensionManager extends Disposer {
 
     if (isolateRef != _mainIsolate) return;
 
-    final Isolate? isolate = await _isolateManager.isolateCached(isolateRef);
+    final Isolate? isolate =
+        await _isolateManager.isolateState(isolateRef).isolate;
     if (isolateRef != _mainIsolate) return;
 
     // Do not try to restore Dart IO extensions for a paused isolate.
@@ -399,7 +401,8 @@ class ServiceExtensionManager extends Disposer {
     }
 
     if (mainIsolate == null) return;
-    final Isolate? isolate = await _isolateManager.isolateCached(mainIsolate);
+    final Isolate? isolate =
+        await _isolateManager.isolateState(mainIsolate).isolate;
     if (_isolateManager.mainIsolate.value != mainIsolate) return;
 
     // Do not try to call Dart IO extensions for a paused isolate.
@@ -544,7 +547,8 @@ class ServiceExtensionManager extends Disposer {
     final mainIsolateRef = _isolateManager.mainIsolate.value;
     if (mainIsolateRef != null) {
       _checkForFirstFrameStarted = false;
-      final mainIsolate = await _isolateManager.isolateCached(mainIsolateRef);
+      final mainIsolate =
+          await _isolateManager.isolateState(mainIsolateRef).isolate;
       if (mainIsolate != null)
         await _registerMainIsolate(mainIsolate, mainIsolateRef);
     }
