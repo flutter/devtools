@@ -19,6 +19,6 @@ in compliance with [Flutter repo style guide]( https://github.com/flutter/flutte
 
 In compliance with [Flutter repo style guide](https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo#naming-rules-for-typedefs-and-function-variables) we name:
 
-1. Typedefs for functions: `FooCallback`
-2. Arguments and properties for functions: `onFoo`
-3. Methods and functions for event handling: `handleFoo`
+1. Use Typedefs to define callbacks: `FooCallback`
+2. For callback argument/property use: `onFoo`
+3. For a method that is passed as a callback: `handleFoo`
