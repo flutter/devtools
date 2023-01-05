@@ -1145,7 +1145,7 @@ class _LineItemState extends State<LineItem>
     // ignore: avoid-unused-parameters
     required bool Function() isHoverStale,
   }) async {
-    if (!controller.isPaused.value) return null;
+    if (!serviceManager.appState.isPaused.value) return null;
 
     final word = wordForHover(
       event.localPosition.dx,
@@ -1154,8 +1154,8 @@ class _LineItemState extends State<LineItem>
 
     if (word != '') {
       try {
-        final response = await controller.evalService.evalAtCurrentFrame(word);
-        final isolateRef = controller.isolateRef.value;
+        final response = await evalService.evalAtCurrentFrame(word);
+        final isolateRef = serviceManager.isolateManager.selectedIsolate.value;
         if (response is! InstanceRef) return null;
         final variable = DartObjectNode.fromValue(
           value: response,

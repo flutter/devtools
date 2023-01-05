@@ -365,7 +365,7 @@ class _DebuggerStatusState extends State<DebuggerStatus> with AutoDisposeMixin {
     super.initState();
 
     addAutoDisposeListener(
-      widget.controller.isPaused,
+      serviceManager.appState.isPaused,
       () => unawaited(
         _updateStatus(),
       ),
@@ -380,7 +380,7 @@ class _DebuggerStatusState extends State<DebuggerStatus> with AutoDisposeMixin {
 
     // todo: should we check that widget.controller != oldWidget.controller?
     addAutoDisposeListener(
-      widget.controller.isPaused,
+      serviceManager.appState.isPaused,
       () => unawaited(
         _updateStatus(),
       ),
@@ -406,7 +406,7 @@ class _DebuggerStatusState extends State<DebuggerStatus> with AutoDisposeMixin {
   }
 
   Future<String> _computeStatus() async {
-    final paused = widget.controller.isPaused.value;
+    final paused = serviceManager.appState.isPaused.value;
 
     if (!paused) {
       return 'running';
@@ -455,11 +455,11 @@ class _FloatingDebuggerControlsState extends State<FloatingDebuggerControls>
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (!initController()) return;
-    paused = controller.isPaused.value;
+    paused = serviceManager.appState.isPaused.value;
     controlHeight = paused ? defaultButtonHeight : 0.0;
-    addAutoDisposeListener(controller.isPaused, () {
+    addAutoDisposeListener(serviceManager.appState.isPaused, () {
       setState(() {
-        paused = controller.isPaused.value;
+        paused = serviceManager.appState.isPaused.value;
         if (paused) {
           controlHeight = defaultButtonHeight;
         }

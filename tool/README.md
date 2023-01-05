@@ -121,8 +121,6 @@ to add release notes to Flutter website
   - make sure to also follow the instructions to test them.
 
 
-[1]: ../packages/devtools_app/lib/src/framework/release_notes/release-notes-next.md
-
 ### Upload the DevTools binary to CIPD
 - Use the update.sh script to build and upload the DevTools binary to CIPD:
    ```shell

@@ -29,14 +29,15 @@ void main() {
 
   late Disposable isAlive;
   late DebuggerController debuggerController;
-  late EvalService evalService;
   late EvalOnDartLibrary eval;
+
   setUp(() async {
     setGlobal(BreakpointManager, BreakpointManager());
+    setGlobal(EvalService, EvalService());
     isAlive = Disposable();
     await env.setupEnvironment();
     debuggerController = DebuggerController();
-    evalService = debuggerController.evalService;
+
     eval = EvalOnDartLibrary(
       'package:flutter_app/src/autocomplete.dart',
       serviceManager.service!,
