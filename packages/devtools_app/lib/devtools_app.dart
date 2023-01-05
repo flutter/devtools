@@ -63,7 +63,7 @@ export 'src/shared/connected_app.dart';
 export 'src/shared/console/console_service.dart';
 export 'src/shared/console/eval/diagnostics_node.dart';
 export 'src/shared/console/eval/eval_service.dart';
-export 'src/shared/console/eval/inspector_service.dart';
+export 'src/shared/inspector_service.dart';
 export 'src/shared/console/eval/inspector_tree.dart';
 export 'src/shared/console/primitives/simple_items.dart';
 export 'src/shared/console/widgets/description.dart';

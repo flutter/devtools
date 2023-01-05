@@ -10,7 +10,7 @@ import 'package:flutter/foundation.dart';
 import '../service/vm_service_wrapper.dart';
 import 'analytics/analytics.dart' as ga;
 import 'analytics/constants.dart' as gac;
-import 'console/eval/inspector_service.dart';
+import 'inspector_service.dart';
 import 'globals.dart';
 import 'primitives/auto_dispose.dart';
 import 'primitives/utils.dart';

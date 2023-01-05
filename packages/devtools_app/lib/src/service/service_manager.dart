@@ -15,7 +15,7 @@ import '../shared/analytics/analytics.dart' as ga;
 import '../shared/config_specific/logger/logger.dart';
 import '../shared/connected_app.dart';
 import '../shared/console/console_service.dart';
-import '../shared/console/eval/inspector_service.dart';
+import '../shared/inspector_service.dart';
 import '../shared/error_badge_manager.dart';
 import '../shared/globals.dart';
 import '../shared/primitives/utils.dart';

@@ -13,7 +13,7 @@ import '../object_tree.dart';
 import '../primitives/auto_dispose.dart';
 import '../primitives/utils.dart';
 import 'eval/diagnostics_node.dart';
-import 'eval/inspector_service.dart';
+import '../inspector_service.dart';
 
 /// A line in the console.
 ///
