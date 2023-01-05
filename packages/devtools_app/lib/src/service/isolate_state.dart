@@ -11,10 +11,13 @@ import 'package:vm_service/vm_service.dart' hide Error;
 class IsolateState {
   IsolateState(this.isolateRef);
 
+  /// The value is guaranteed to be non-null after [waitForIsolateToLoad]
+  /// is invoked.
   ValueListenable<bool?> get isPaused => _isPaused;
 
   final IsolateRef isolateRef;
 
+  /// The isolate is null if only this instance is disposed.
   Future<Isolate?> get isolate => _completer.future;
   Completer<Isolate?> _completer = Completer();
 
@@ -29,6 +32,10 @@ class IsolateState {
     _completer.complete(isolate);
     _isPaused.value ??= isolate.pauseEvent != null &&
         isolate.pauseEvent!.kind != EventKind.kResume;
+  }
+
+  Future<void> waitForIsolateToLoad() async {
+    await _completer.future;
   }
 
   void dispose() {

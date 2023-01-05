@@ -249,14 +249,31 @@ class IsolateManager extends Disposer {
       service.onDebugEvent.listen(_handleDebugEvent),
     );
 
-    // We don't yet known the main isolate.
+    // We don't know the main isolate yet.
     _mainIsolate.value = null;
   }
 
-  Future<Isolate?> getIsolateCached(IsolateRef isolateRef) {
-    final isolateState =
-        _isolateStates.putIfAbsent(isolateRef, () => IsolateState(isolateRef));
-    return isolateState.isolate;
+  /// Resturns isolate by its reference.
+  ///
+  /// The method will return immediately in most cases
+  /// because the value is cached. The value will be accurate,
+  /// as the cache is reset on reconnect.
+  Future<Isolate?> isolateCached(IsolateRef isolateRef) {
+    final state = isolateState(isolateRef);
+    return state.isolate;
+  }
+
+  IsolateState isolateState(IsolateRef isolateRef) {
+    return _isolateStates.putIfAbsent(
+      isolateRef,
+      () => IsolateState(isolateRef),
+    );
+  }
+
+  Future<bool> isIsolatePaused(IsolateRef ref) async {
+    final state = isolateState(ref);
+    await state.waitForIsolateToLoad();
+    return state.isPaused.value!;
   }
 
   void _handleDebugEvent(Event event) {
