@@ -14,8 +14,8 @@ import 'package:vm_service/vm_service.dart';
 import '../screens/debugger/debugger_model.dart';
 import 'config_specific/logger/logger.dart';
 import 'console/eval/diagnostics_node.dart';
-import 'inspector_service.dart';
 import 'globals.dart';
+import 'inspector_service.dart';
 import 'primitives/trees.dart';
 import 'primitives/utils.dart';
 

@@ -5,8 +5,8 @@
 import '../screens/debugger/codeview.dart';
 import '../shared/analytics/constants.dart' as gac;
 import '../shared/common_widgets.dart';
-import '../shared/inspector_service.dart';
 import '../shared/globals.dart';
+import '../shared/inspector_service.dart';
 import '../shared/utils.dart';
 import 'extensions_base.dart';
 

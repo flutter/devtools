@@ -9,11 +9,11 @@ import 'package:vm_service/vm_service.dart';
 
 import '../../service/vm_service_wrapper.dart';
 import '../globals.dart';
+import '../inspector_service.dart';
 import '../object_tree.dart';
 import '../primitives/auto_dispose.dart';
 import '../primitives/utils.dart';
 import 'eval/diagnostics_node.dart';
-import '../inspector_service.dart';
 
 /// A line in the console.
 ///
