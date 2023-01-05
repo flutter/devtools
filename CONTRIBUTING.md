@@ -8,11 +8,16 @@ This page instructs how to contribute code changes to DevTools.
 > If you just want to test newest functionality, follow
 [beta testing guidance](https://github.com/flutter/devtools/blob/master/BETA_TESTING.md).
 
-To contribute code you must complete the
+Before contributing code:
+
+1. Complete the
 [Contributor License Agreement](https://cla.developers.google.com/clas).
-You can do this online, and it only takes a minute. If you've never submitted code before,
-you must add your (or your organization's) name and contact info to the [AUTHORS](AUTHORS)
+You can do this online, and it only takes a minute.
+
+2. Make sure your (or your organization's) name and contact info is added to the [AUTHORS](AUTHORS)
 file.
+
+3. Understand [coding agreements](packages/README.md).
 
 ## Workflow for making changes
 

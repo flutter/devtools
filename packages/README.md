@@ -1,5 +1,9 @@
 # Coding agreements in DevTools
 
+We fully follow [Effective Dart](https://dart.dev/guides/language/effective-dart)
+and some items of
+[Style guide for Flutter repo](https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo).
+
 ## Order of getters and setters
 
 When an object owns and exposes a (listenable) value,
@@ -11,10 +15,10 @@ in compliance with [Flutter repo style guide]( https://github.com/flutter/flutte
 2. Private field
 3. Public setter (when needed)
 
-## Naming for methods and functions
+## Naming for function variables
 
 In compliance with [Flutter repo style guide](https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo#naming-rules-for-typedefs-and-function-variables) we name:
 
-1. Typedefs: `FooCallback`
+1. Typedefs for callbacks: `FooCallback`
 2. Arguments and properties: `onFoo`
 3. Methods and functions: `handleFoo`
