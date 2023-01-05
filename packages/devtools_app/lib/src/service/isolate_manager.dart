@@ -123,7 +123,7 @@ class IsolateManager extends Disposer {
     final state = _isolateStates[isolateRef];
     if (state != null) {
       // Isolate might have already been closed.
-      state.onIsolateLoaded(isolate);
+      state.handleIsolateLoad(isolate);
     }
   }
 

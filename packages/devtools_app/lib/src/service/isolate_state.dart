@@ -24,7 +24,7 @@ class IsolateState {
   /// Paused is null until we know whether the isolate is paused or not.
   final _isPaused = ValueNotifier<bool?>(null);
 
-  void onIsolateLoaded(Isolate isolate) {
+  void handleIsolateLoad(Isolate isolate) {
     _isolateNow = isolate;
     _completer.complete(isolate);
     _isPaused.value ??= isolate.pauseEvent != null &&

@@ -10,3 +10,11 @@ in compliance with [Flutter repo style guide]( https://github.com/flutter/flutte
 1. Public getter
 2. Private field
 3. Public setter (when needed)
+
+## Naming for methods and functions
+
+In compliance with [Flutter repo style guide](https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo#naming-rules-for-typedefs-and-function-variables) we name:
+
+1. Typedefs: `FooCallback`
+2. Argumants and properties: `onFoo`
+3. Methods and functions: `handleFoo`
