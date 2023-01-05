@@ -63,7 +63,7 @@ dependencies:
   # widget_icons: ^0.0.1
 
 dev_dependencies:
-  build_runner: ^2.0.4
+  build_runner: ^2.3.3
   devtools_test: 2.21.0-dev.0
   flutter_test:
     sdk: flutter

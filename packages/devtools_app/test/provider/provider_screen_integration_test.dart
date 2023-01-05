@@ -94,7 +94,10 @@ void main() async {
           await providersSub.read(),
           [
             isA<ProviderNode>().having(
-                (e) => e.type, 'type', 'ChangeNotifierProvider<Counter>'),
+              (e) => e.type,
+              'type',
+              'ChangeNotifierProvider<Counter>',
+            ),
             isA<ProviderNode>().having((e) => e.type, 'type', 'Provider<int>'),
           ],
         );
@@ -640,7 +643,10 @@ void main() async {
               complexProperties['string'],
               isA<StringInstance>()
                   .having(
-                      (e) => e.displayString, 'displayString', 'hello world')
+                    (e) => e.displayString,
+                    'displayString',
+                    'hello world',
+                  )
                   .having((e) => e.setter, 'setter', isNotNull),
             );
 
@@ -749,7 +755,10 @@ void main() async {
                     .having((e) => e.setter, 'setter', isNotNull),
                 isA<StringInstance>()
                     .having(
-                        (e) => e.displayString, 'displayString', 'number_key')
+                      (e) => e.displayString,
+                      'displayString',
+                      'number_key',
+                    )
                     .having((e) => e.setter, 'setter', isNotNull),
                 isA<StringInstance>()
                     .having((e) => e.displayString, 'displayString', 'bool_key')
