@@ -2,7 +2,7 @@
 
 We fully follow [Effective Dart](https://dart.dev/guides/language/effective-dart)
 and some items of
-[Style guide for Flutter repo](https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo).
+[Style guide for Flutter repo](https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo):
 
 ## Order of getters and setters
 
