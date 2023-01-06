@@ -301,7 +301,7 @@ class ExpressionEvalFieldState extends State<ExpressionEvalField>
 
     // Only try to eval if we are paused.
     if (!serviceManager
-        .isolateManager.mainIsolateDebuggerState!.isPaused.value!) {
+        .isolateManager.mainIsolateDebuggerState!.isPaused.value) {
       notificationService
           .push('Application must be paused to support expression evaluation.');
       return;
