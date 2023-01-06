@@ -461,7 +461,7 @@ class InspectorService extends InspectorServiceBase {
 
   /// As we aren't running from an IDE, we don't know exactly what the pub root
   /// directories are for the current project so we make a best guess if needed
-  /// based on the the root directory of the first non artificial widget in the
+  /// based on the root directory of the first non artifical widget in the
   /// tree.
   Future<List<String>> inferPubRootDirectoryIfNeeded() async {
     final group = createObjectGroup('temp');
@@ -1413,7 +1413,7 @@ abstract class InspectorServiceClient {
 /// object references associated with the current displayed UI and object
 /// references associated with the candidate next frame of UI to display. Once
 /// the next frame is ready, you determine whether you want to display it and
-/// discard the current frame and promote the next frame to the the current
+/// discard the current frame and promote the next frame to the current
 /// frame if you want to display the next frame otherwise you discard the next
 /// frame.
 ///

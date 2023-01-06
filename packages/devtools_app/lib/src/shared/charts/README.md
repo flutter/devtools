@@ -177,7 +177,7 @@ Each call to addDatum will
 1. chart the data
 1. update the X-axis.
 
- One important piece of information is adding a heartbeat. If a live chart is needed where the timeline (X axis) moves in a linear fashion requires adding a heart beat (at the grandularity requested of the X axis) a tickstamp is added to the ChartController timestamps field on every tick e.g.,
+ One important piece of information is adding a heartbeat. If a live chart is needed where the timeline (X axis) moves in a linear fashion requires adding a heart beat (at the granularity requested of the X axis) a tickstamp is added to the ChartController timestamps field on every tick e.g.,
 
 ```
             controller.addTimestamps(currentTime.millisecondsSinceEpoch)
