@@ -102,7 +102,7 @@ Future<InstanceRef> _resolveInstanceRefForPath(
 ///
 /// In rare cases, it is possible for this function to mutate the wrong property.
 /// This can happen when an object contains multiple fields with the same name
-/// (such as private properties or overriden properties), where the conflicting
+/// (such as private properties or overridden properties), where the conflicting
 /// fields are both defined in the same library.
 Future<void> _mutate(
   String newValueExpression, {

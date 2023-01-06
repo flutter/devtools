@@ -218,7 +218,7 @@ class InspectorController extends DisposableController
 
   RemoteDiagnosticsNode? subtreeRoot;
 
-  bool programaticSelectionChangeInProgress = false;
+  bool programmaticSelectionChangeInProgress = false;
 
   ValueListenable<InspectorTreeNode?> get selectedNode => _selectedNode;
   final ValueNotifier<InspectorTreeNode?> _selectedNode = ValueNotifier(null);
@@ -312,7 +312,7 @@ class InspectorController extends DisposableController
     // Wait for the selection to be resolved followed by waiting for the tree to be computed.
     await _selectionGroups?.pendingUpdateDone;
     await _treeGroups?.pendingUpdateDone;
-    // TODO(jacobr): are there race conditions we need to think mroe carefully about here?
+    // TODO(jacobr): are there race conditions we need to think more carefully about here?
   }
 
   Future<void> refresh() {
@@ -337,7 +337,7 @@ class InspectorController extends DisposableController
     // It is critical we clear all data that is kept alive by inspector object
     // references in this method as that stale data will trigger inspector
     // exceptions.
-    programaticSelectionChangeInProgress = true;
+    programmaticSelectionChangeInProgress = true;
     _treeGroups?.clear(isolateStopped);
     _selectionGroups?.clear(isolateStopped);
 
@@ -348,7 +348,7 @@ class InspectorController extends DisposableController
     subtreeRoot = null;
 
     inspectorTree.root = inspectorTree.createNode();
-    programaticSelectionChangeInProgress = false;
+    programmaticSelectionChangeInProgress = false;
     valueToInspectorTreeNode.clear();
   }
 
@@ -548,10 +548,10 @@ class InspectorController extends DisposableController
   }
 
   void syncTreeSelection() {
-    programaticSelectionChangeInProgress = true;
+    programmaticSelectionChangeInProgress = true;
     inspectorTree.selection = selectedNode.value;
     inspectorTree.expandPath(selectedNode.value);
-    programaticSelectionChangeInProgress = false;
+    programmaticSelectionChangeInProgress = false;
     animateTo(selectedNode.value);
   }
 
@@ -815,7 +815,7 @@ class InspectorController extends DisposableController
     if (node != null) {
       unawaited(inspectorTree.maybePopulateChildren(node));
     }
-    if (programaticSelectionChangeInProgress) {
+    if (programmaticSelectionChangeInProgress) {
       return;
     }
     if (node != null) {

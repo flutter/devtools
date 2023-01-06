@@ -213,7 +213,7 @@ abstract class BaseTraceEventProcessor {
               timestampMicros: fakeTimestampMicros,
               args: {
                 'message': 'Warning - the end time of this event may be '
-                    'innacurate. The end trace event was missing, so the end '
+                    'innaccurate. The end trace event was missing, so the end '
                     'time was inferred.',
               },
             ),

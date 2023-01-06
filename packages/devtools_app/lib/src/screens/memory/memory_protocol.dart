@@ -138,8 +138,9 @@ class MemoryTracker {
     _recalculate(true);
   }
 
-  /// Poll Fultter engine's Raster Cache metrics.
-  /// @returns engine's rasterCache estimates or null.
+  /// Fetch the Fultter engine's Raster Cache metrics.
+  ///
+  /// Returns engine's rasterCache estimates or null.
   Future<RasterCache?> _fetchRasterCacheInfo() async {
     final response = await serviceManager.rasterCacheMetrics;
     if (response == null) return null;
@@ -147,15 +148,17 @@ class MemoryTracker {
     return rasterCache;
   }
 
-  /// Poll ADB meminfo, ADB returns values in KB convert to total bytes.
+  /// Fetch ADB meminfo, ADB returns values in KB convert to total bytes.
   Future<AdbMemoryInfo> _fetchAdbInfo() async => AdbMemoryInfo.fromJsonInKB(
         (await serviceManager.adbMemoryInfo).json!,
       );
 
   /// Returns the MemoryUsage of a particular isolate.
-  /// @param id isolateId.
-  /// @param usage associated with the passed in isolate's id.
-  /// @returns the MemoryUsage of the isolate or null if isolate is a sentinal.
+  ///
+  /// `id`: id for the isolate
+  /// `usage`: usage associated with the passed in isolate's id.
+  ///
+  /// Returns the MemoryUsage of the isolate or null if isolate is a sentinel.
   Future<MemoryUsage?> _isolateMemoryUsage(
     String id,
     MemoryUsage? usage,
@@ -174,24 +177,24 @@ class MemoryTracker {
     for (var index = 0; index < isolateCount; index++) {
       final isolateId = keys[index];
       var usage = isolateHeaps[isolateId];
-      // Check if the isolate is dead (sentinal), null implies sentinal.
+      // Check if the isolate is dead (sentinel), null implies sentinel.
       final checkIsolateUsage = await _isolateMemoryUsage(isolateId, usage);
       if (checkIsolateUsage == null && !keysToRemove.contains(isolateId)) {
-        // Sentinal Isolate don't include in the heap computation.
+        // Sentinel Isolate don't include in the heap computation.
         keysToRemove.add(isolateId);
         // Don't use this sential isolate for any heap computation.
         usage = null;
       }
 
       if (usage != null) {
-        // Isolate is live (a null usage implies sentinal).
+        // Isolate is live (a null usage implies sentinel).
         used += usage.heapUsage!;
         capacity += usage.heapCapacity!;
         external += usage.externalUsage!;
       }
     }
 
-    // Removes any isolate that is a sentinal.
+    // Removes any isolate that is a sentinel.
     isolateHeaps.removeWhere((key, value) => keysToRemove.contains(key));
 
     final memoryTimeline = memoryController.memoryTimeline;
@@ -248,10 +251,12 @@ class MemoryTracker {
   }
 
   /// Many extension events could arrive between memory collection ticks, those
-  /// events need to be associated with a particular memory tick (timestamp). This
-  /// routine collects those new events received that are closest to a tick
+  /// events need to be associated with a particular memory tick (timestamp).
+  ///
+  /// This routine collects those new events received that are closest to a tick
   /// (time parameter)).
-  /// @returns copy of events to associate with an existing HeapSample tick
+  ///
+  /// Returns copy of events to associate with an existing HeapSample tick
   /// (contained in the EventSample). See [processEventSample] it computes the
   /// events to aggregate to an existing HeapSample or delay associating those
   /// events until the next HeapSample (tick) received see [_recalculate].

@@ -41,7 +41,7 @@ class ChartController extends DisposableController
     this.name,
     List<int>? sharedLabelimestamps,
   }) {
-    // TODO(terry): Compute dynamically based on X-axis lables text height.
+    // TODO(terry): Compute dynamically based on X-axis labels text height.
     bottomPadding = !displayXLabels ? 0.0 : 40.0;
 
     if (sharedLabelimestamps != null) {
@@ -59,7 +59,7 @@ class ChartController extends DisposableController
   /// Spacing for title iff title != null.
   double topPadding = 0.0;
 
-  // TODO(terry): Compute dynamically based on Y-axis lables text width.
+  // TODO(terry): Compute dynamically based on Y-axis labels text width.
   final leftPadding = 50.0;
 
   /// Computed minimum right padding.
@@ -575,7 +575,7 @@ class TapLocation {
   TapLocation(this.tapDownDetails, this.timestamp, this.index);
 
   /// Copy of TapLocation w/o the detail, implies not where tap occurred
-  /// but the multiple charts tied to the the same timeline should be hilighted
+  /// but the multiple charts tied to the same timeline should be hilighted
   /// (selection point).
   TapLocation.copy(TapLocation original)
       : tapDownDetails = null,
