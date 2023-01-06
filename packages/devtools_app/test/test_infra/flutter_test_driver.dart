@@ -323,13 +323,6 @@ class FlutterRunTestDriver extends FlutterTestDriver {
     );
   }
 
-  Future<void> clean({required String flutterExecutable}) async {
-    await setupProcess(
-      <String>['clean'],
-      flutterExecutable: flutterExecutable,
-    );
-  }
-
   @override
   Future<void> setupProcess(
     List<String> args, {
