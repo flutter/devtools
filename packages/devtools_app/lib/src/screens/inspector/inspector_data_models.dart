@@ -29,7 +29,7 @@ const overflowEpsilon = 0.1;
 ///
 /// if [useMaxSizeAvailable] is set to true,
 /// this method will ignore the largestRenderSize
-/// and compute it's own largestRenderSize to force
+/// and compute its own largestRenderSize to force
 /// the sum of the render size to be equals to [maxSizeAvailable]
 ///
 /// Formula for computing render size:

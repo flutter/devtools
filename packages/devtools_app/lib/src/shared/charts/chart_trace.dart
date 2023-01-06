@@ -321,7 +321,7 @@ class AxisScale {
   /// Unit for the label (exponent) e.g., 6 = 10^6
   late double labelUnitExponent;
 
-  /// Number of lables.
+  /// Number of labels.
   late double labelTicks;
 
   void _calculate() {

@@ -183,7 +183,7 @@ void main() {
             extensions.toggleSelectWidgetMode.extension],
         isFalse,
       );
-      // Verify the the other service extension's state hasn't changed.
+      // Verify the other service extension's state hasn't changed.
       expect(
         fakeExtensionManager
             .extensionValueOnDevice[extensions.debugPaint.extension],

@@ -16,7 +16,7 @@ abstract class LineSegment {
   /// Whether [this] line segment intersects [rect] along the cross axis.
   ///
   /// For [HorizontalLineSegment]s, this will return true if [this] line segment
-  /// fits withing the y bounds of the [rect]. For [VerticalLineSegment]s, this
+  /// fits within the y bounds of the [rect]. For [VerticalLineSegment]s, this
   /// will return true if [this] line segment fits within the x bounds of the
   /// [rect].
   bool crossAxisIntersects(Rect rect);
