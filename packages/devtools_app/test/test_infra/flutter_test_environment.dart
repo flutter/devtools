@@ -115,6 +115,8 @@ class FlutterTestEnvironment {
 
         _flutter = _flutterDriverFactory(Directory(testAppDirectory))
             as FlutterRunTestDriver?;
+        // Run a flutter clean for the test fixture before running the app.
+        await _flutter!.clean(flutterExecutable: _flutterExe);
         await _flutter!.run(
           flutterExecutable: _flutterExe,
           runConfig: _runConfig,
