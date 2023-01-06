@@ -67,7 +67,7 @@ class DevToolsServerConnection {
         'sse',
       ],
     );
-    final client = SseClient(sseUri.toString());
+    final client = SseClient(sseUri.toString(), debugKey: 'DevToolsServer');
     return DevToolsServerConnection._(client);
   }
 
