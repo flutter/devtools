@@ -5,7 +5,6 @@
 import 'package:collection/collection.dart';
 import 'package:devtools_app/src/screens/debugger/breakpoint_manager.dart';
 import 'package:devtools_app/src/screens/debugger/codeview_controller.dart';
-import 'package:devtools_app/src/screens/debugger/console.dart';
 import 'package:devtools_app/src/screens/debugger/controls.dart';
 import 'package:devtools_app/src/screens/debugger/debugger_controller.dart';
 import 'package:devtools_app/src/screens/debugger/debugger_model.dart';
@@ -13,6 +12,8 @@ import 'package:devtools_app/src/screens/debugger/debugger_screen.dart';
 import 'package:devtools_app/src/screens/debugger/program_explorer_model.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/shared/config_specific/ide_theme/ide_theme.dart';
+import 'package:devtools_app/src/shared/console/eval/eval_service.dart';
+import 'package:devtools_app/src/shared/console/widgets/console_pane.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_app/src/shared/notifications.dart';
 import 'package:devtools_app/src/shared/routing.dart';
@@ -54,6 +55,7 @@ Future<void> main() async {
     setGlobal(ScriptManager, scriptManager);
     setGlobal(NotificationService, NotificationService());
     setGlobal(BreakpointManager, BreakpointManager());
+    setGlobal(EvalService, MockEvalService());
     fakeServiceManager.consoleService.ensureServiceInitialized();
     when(fakeServiceManager.errorBadgeManager.errorCountNotifier('debugger'))
         .thenReturn(ValueNotifier<int>(0));
@@ -88,8 +90,8 @@ Future<void> main() async {
       wrapWithControllers(
         Row(
           children: [
-            Flexible(child: DebuggerConsole.buildHeader()),
-            const Expanded(child: DebuggerConsole()),
+            Flexible(child: ConsolePaneHeader()),
+            const Expanded(child: ConsolePane()),
           ],
         ),
         debugger: controller,

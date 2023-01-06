@@ -3,10 +3,11 @@
 // found in the LICENSE file.
 
 import 'package:ansicolor/ansicolor.dart';
-import 'package:devtools_app/src/screens/debugger/console.dart';
 import 'package:devtools_app/src/screens/debugger/debugger_controller.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/shared/config_specific/ide_theme/ide_theme.dart';
+import 'package:devtools_app/src/shared/console/eval/eval_service.dart';
+import 'package:devtools_app/src/shared/console/widgets/console_pane.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_app/src/shared/notifications.dart';
 import 'package:devtools_app/src/shared/scripts/script_manager.dart';
@@ -30,6 +31,7 @@ void main() {
   setGlobal(IdeTheme, IdeTheme());
   setGlobal(ScriptManager, MockScriptManager());
   setGlobal(NotificationService, NotificationService());
+  setGlobal(EvalService, MockEvalService());
   fakeServiceManager.consoleService.ensureServiceInitialized();
   when(fakeServiceManager.errorBadgeManager.errorCountNotifier('debugger'))
       .thenReturn(ValueNotifier<int>(0));
@@ -42,8 +44,8 @@ void main() {
       wrapWithControllers(
         Row(
           children: [
-            Flexible(child: DebuggerConsole.buildHeader()),
-            const Expanded(child: DebuggerConsole()),
+            Flexible(child: ConsolePaneHeader()),
+            const Expanded(child: ConsolePane()),
           ],
         ),
         debugger: controller,
@@ -69,7 +71,7 @@ void main() {
 
         await pumpConsole(tester, debuggerController);
 
-        final clearButton = find.byKey(DebuggerConsole.clearStdioButtonKey);
+        final clearButton = find.byKey(ConsolePane.clearStdioButtonKey);
         expect(clearButton, findsOneWidget);
 
         await tester.tap(clearButton);
@@ -102,8 +104,7 @@ void main() {
         (WidgetTester tester) async {
           await pumpConsole(tester, debuggerController);
 
-          final copyButton =
-              find.byKey(DebuggerConsole.copyToClipboardButtonKey);
+          final copyButton = find.byKey(ConsolePane.copyToClipboardButtonKey);
           expect(copyButton, findsOneWidget);
 
           expect(_clipboardContents, isEmpty);

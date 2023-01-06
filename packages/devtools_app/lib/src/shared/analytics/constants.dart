@@ -190,3 +190,16 @@ class MemoryEvent {
   static const diffSnapshotFilterType = 'diffSnapshotFilterType';
   static const diffSnapshotFilterReset = 'diffSnapshotFilterReset';
 }
+
+/// Areas of memory screen, to prefix event names, when events are emitted
+/// by a widget used in different contexts.
+enum MemoryAreas {
+  snapshotSingle('single'),
+  snapshotDiffDelta('diff-delta'),
+  snapshotDiffNew('diff-new'),
+  ;
+
+  const MemoryAreas(this.name);
+
+  final String name;
+}

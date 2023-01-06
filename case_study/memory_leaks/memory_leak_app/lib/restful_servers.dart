@@ -20,7 +20,7 @@ abstract class RestfulAPI {
 /// StarWars information server.
 class StarWars extends RestfulAPI {
   StarWars([String name = starWarsPeople]) {
-    _defaultUri = _friendlyNames[name];
+    _defaultUri = _friendlyNames[name]!;
     _activefriendlyName = name;
   }
 
@@ -40,8 +40,8 @@ class StarWars extends RestfulAPI {
     '$starWarsVehicles': 'https://swapi.co/api/vehicles',
   };
 
-  String _activefriendlyName;
-  String _defaultUri;
+  late final String _activefriendlyName;
+  late final String _defaultUri;
 
   static List<String> get friendlyNames => _friendlyNames.keys.toList();
 
@@ -140,8 +140,8 @@ class OpenWeatherMapAPI extends RestfulAPI {
     'Kansas City': 4273837,
   };
 
-  CityInformation firstCity;
-  CityInformation secondCity;
+  CityInformation? firstCity;
+  CityInformation? secondCity;
 
   String _cityIdsList({int initialStart = -1, int count = 20}) {
     final StringBuffer buff = StringBuffer();

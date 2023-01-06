@@ -134,7 +134,7 @@ class FakeVM extends Fake implements VM {
 
 class MockIsolateState extends Mock implements IsolateState {
   @override
-  ValueListenable<bool?> get isPaused => ValueNotifier<bool>(false);
+  ValueListenable<bool> get isPaused => ValueNotifier<bool>(false);
 }
 
 class MockIsolate extends Mock implements Isolate {}
@@ -196,7 +196,6 @@ class MockDebuggerControllerLegacy extends Mock implements DebuggerController {
 
   factory MockDebuggerControllerLegacy.withDefaults() {
     final debuggerController = MockDebuggerControllerLegacy();
-    when(debuggerController.isPaused).thenReturn(ValueNotifier(false));
     when(debuggerController.resuming).thenReturn(ValueNotifier(false));
     when(debuggerController.isSystemIsolate).thenReturn(false);
     when(debuggerController.selectedBreakpoint).thenReturn(ValueNotifier(null));
@@ -205,7 +204,6 @@ class MockDebuggerControllerLegacy extends Mock implements DebuggerController {
     when(debuggerController.selectedStackFrame).thenReturn(ValueNotifier(null));
     when(debuggerController.exceptionPauseMode)
         .thenReturn(ValueNotifier('Unhandled'));
-    when(debuggerController.variables).thenReturn(ValueNotifier([]));
     return debuggerController;
   }
 }

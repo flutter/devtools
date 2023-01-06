@@ -48,26 +48,29 @@ class CodeViewController extends DisposableController
   void onRouteStateUpdate(DevToolsNavigationState state) {
     switch (state.kind) {
       case CodeViewSourceLocationNavigationState.type:
-        {
-          final processedState =
-              CodeViewSourceLocationNavigationState._fromState(state);
-          final object = processedState.object;
-          showScriptLocation(processedState.location, focusLine: true);
-          if (programExplorerController.initialized.value) {
-            if (object != null) {
-              final node = programExplorerController.findOutlineNode(object);
-              if (node != null) {
-                programExplorerController.selectOutlineNode(node);
-              } else {
-                // If the object isn't associated with an outline node, clear
-                // the current outline selection.
-                programExplorerController.clearOutlineSelection();
-              }
-            } else {
-              programExplorerController.clearOutlineSelection();
-            }
-          }
+        _handleNavigationEvent(state);
+        break;
+    }
+  }
+
+  void _handleNavigationEvent(DevToolsNavigationState state) {
+    final processedState =
+        CodeViewSourceLocationNavigationState._fromState(state);
+    final object = processedState.object;
+    showScriptLocation(processedState.location, focusLine: true);
+    if (programExplorerController.initialized.value) {
+      if (object != null) {
+        final node = programExplorerController.findOutlineNode(object);
+        if (node != null) {
+          programExplorerController.selectOutlineNode(node);
+        } else {
+          // If the object isn't associated with an outline node, clear
+          // the current outline selection.
+          programExplorerController.clearOutlineSelection();
         }
+      } else {
+        programExplorerController.clearOutlineSelection();
+      }
     }
   }
 

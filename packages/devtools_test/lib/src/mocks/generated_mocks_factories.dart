@@ -97,15 +97,7 @@ MockCodeViewController createMockCodeViewControllerWithDefaults({
 MockDebuggerController createMockDebuggerControllerWithDefaults({
   MockCodeViewController? mockCodeViewController,
 }) {
-  final evalService = EvalService(
-    isolateRef: ValueNotifier<IsolateRef?>(null),
-    variables: ValueNotifier<List<DartObjectNode>>([]),
-    frameForEval: () => null,
-    isPaused: ValueNotifier<bool>(true),
-  );
-
   final debuggerController = MockDebuggerController();
-  when(debuggerController.isPaused).thenReturn(ValueNotifier(false));
   when(debuggerController.resuming).thenReturn(ValueNotifier(false));
   when(debuggerController.isSystemIsolate).thenReturn(false);
 
@@ -116,14 +108,11 @@ MockDebuggerController createMockDebuggerControllerWithDefaults({
 
   when(debuggerController.exceptionPauseMode)
       .thenReturn(ValueNotifier('Unhandled'));
-  when(debuggerController.variables).thenReturn(ValueNotifier([]));
 
   mockCodeViewController ??= createMockCodeViewControllerWithDefaults();
   when(debuggerController.codeViewController).thenReturn(
     mockCodeViewController,
   );
-
-  when(debuggerController.evalService).thenReturn(evalService);
 
   return debuggerController;
 }

@@ -123,7 +123,7 @@ class IsolateManager extends Disposer {
     final state = _isolateStates[isolateRef];
     if (state != null) {
       // Isolate might have already been closed.
-      state.onIsolateLoaded(isolate);
+      state.handleIsolateLoad(isolate);
     }
   }
 
@@ -249,14 +249,15 @@ class IsolateManager extends Disposer {
       service.onDebugEvent.listen(_handleDebugEvent),
     );
 
-    // We don't yet known the main isolate.
+    // We don't know the main isolate yet.
     _mainIsolate.value = null;
   }
 
-  Future<Isolate?> getIsolateCached(IsolateRef isolateRef) {
-    final isolateState =
-        _isolateStates.putIfAbsent(isolateRef, () => IsolateState(isolateRef));
-    return isolateState.isolate;
+  IsolateState isolateState(IsolateRef isolateRef) {
+    return _isolateStates.putIfAbsent(
+      isolateRef,
+      () => IsolateState(isolateRef),
+    );
   }
 
   void _handleDebugEvent(Event event) {

@@ -9,11 +9,11 @@ import 'package:vm_service/vm_service.dart';
 
 import '../../service/vm_service_wrapper.dart';
 import '../globals.dart';
+import '../inspector_service.dart';
 import '../object_tree.dart';
 import '../primitives/auto_dispose.dart';
 import '../primitives/utils.dart';
 import 'eval/diagnostics_node.dart';
-import 'eval/inspector_service.dart';
 
 /// A line in the console.
 ///
@@ -164,11 +164,7 @@ class ConsoleService extends Disposer {
   ///
   /// Note that this output might be truncated after significant output.
   ValueListenable<List<ConsoleLine>> get stdio {
-    assert(
-      _serviceInitialized,
-      '`ConsoleService.ensureServiceInitialized` must be called before '
-      'interacting with the ConsoleService.',
-    );
+    ensureServiceInitialized();
     return _stdio;
   }
 

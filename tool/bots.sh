@@ -105,7 +105,7 @@ elif [ "$BOT" = "build_ddc" ]; then
 
 elif [ "$BOT" = "build_dart2js" ]; then
 
-    flutter build web --release
+    flutter build web --release --no-tree-shake-icons
 
 elif [[ "$BOT" == "test_ddc" || "$BOT" == "test_dart2js" ]]; then
     if [ "$BOT" == "test_dart2js" ]; then

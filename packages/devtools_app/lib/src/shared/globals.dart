@@ -8,6 +8,7 @@ import '../service/service_manager.dart';
 import '../shared/notifications.dart';
 import 'config_specific/ide_theme/ide_theme.dart';
 import 'config_specific/import_export/import_export.dart';
+import 'console/eval/eval_service.dart';
 import 'framework_controller.dart';
 import 'preferences.dart';
 import 'primitives/message_bus.dart';
@@ -52,6 +53,8 @@ NotificationService get notificationService =>
 
 BreakpointManager get breakpointManager =>
     globals[BreakpointManager] as BreakpointManager;
+
+EvalService get evalService => globals[EvalService] as EvalService;
 
 void setGlobal(Type clazz, Object instance) {
   globals[clazz] = instance;

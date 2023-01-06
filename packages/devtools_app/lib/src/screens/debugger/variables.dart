@@ -9,23 +9,21 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart' hide Stack;
-import 'package:provider/provider.dart';
 
 import '../../shared/console/widgets/display_provider.dart';
+import '../../shared/globals.dart';
 import '../../shared/object_tree.dart';
 import '../../shared/tree.dart';
-import 'debugger_controller.dart';
 
 class Variables extends StatelessWidget {
   const Variables({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final controller = Provider.of<DebuggerController>(context);
     // TODO(kenz): preserve expanded state of tree on switching frames and
     // on stepping.
     return TreeView<DartObjectNode>(
-      dataRootsListenable: controller.variables,
+      dataRootsListenable: serviceManager.appState.variables,
       dataDisplayProvider: (variable, onPressed) => DisplayProvider(
         variable: variable,
         onTap: onPressed,

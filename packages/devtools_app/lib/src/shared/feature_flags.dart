@@ -55,6 +55,11 @@ abstract class FeatureFlags {
   /// https://github.com/flutter/devtools/issues/4564.
   static bool widgetRebuildstats = enableExperiments;
 
+  /// Flag to enable live eval and snapshot browse.
+  ///
+  /// https://github.com/flutter/devtools/issues/4962.
+  static bool evalAndBrowse = enableExperiments;
+
   /// Stores a map of all the feature flags for debugging purposes.
   ///
   /// When adding a new flag, you are responsible for adding it to this map as
@@ -62,6 +67,7 @@ abstract class FeatureFlags {
   static final _allFlags = <String, bool>{
     'embeddedPerfetto': embeddedPerfetto,
     'widgetRebuildStats': widgetRebuildstats,
+    'evalAndBrowseSnapshot': evalAndBrowse,
   };
 
   /// A helper to print the status of all the feature flags.

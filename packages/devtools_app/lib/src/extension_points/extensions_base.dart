@@ -4,7 +4,7 @@
 
 import '../screens/debugger/codeview.dart';
 import '../shared/common_widgets.dart';
-import '../shared/console/eval/inspector_service.dart';
+import '../shared/inspector_service.dart';
 
 abstract class DevToolsExtensionPoints {
   List<ScriptPopupMenuOption> buildExtraDebuggerScriptPopupMenuOptions();

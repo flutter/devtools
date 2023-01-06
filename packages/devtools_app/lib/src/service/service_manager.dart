@@ -15,9 +15,9 @@ import '../shared/analytics/analytics.dart' as ga;
 import '../shared/config_specific/logger/logger.dart';
 import '../shared/connected_app.dart';
 import '../shared/console/console_service.dart';
-import '../shared/console/eval/inspector_service.dart';
 import '../shared/error_badge_manager.dart';
 import '../shared/globals.dart';
+import '../shared/inspector_service.dart';
 import '../shared/primitives/utils.dart';
 import '../shared/title.dart';
 import '../shared/utils.dart';
@@ -93,6 +93,11 @@ class ServiceConnectionManager {
   late final ServiceExtensionManager _serviceExtensionManager;
 
   ConnectedApp? connectedApp;
+
+  // TODO (polina-c and kenzieschmoll): make appState member of ConnectedApp.
+  // https://github.com/flutter/devtools/pull/4993#discussion_r1061774726
+  AppState get appState => _appState!;
+  AppState? _appState;
 
   VmServiceWrapper? service;
   VM? vm;
@@ -202,6 +207,10 @@ class ServiceConnectionManager {
     assert(_cachedMainRootLibValue == null);
 
     connectedApp = ConnectedApp();
+
+    _appState?.dispose();
+    _appState = AppState(isolateManager.selectedIsolate);
+
     // It is critical we call vmServiceOpened on each manager class before
     // performing any async operations. Otherwise, we may get end up with
     // race conditions where managers cannot listen for events soon enough.
@@ -363,6 +372,7 @@ class ServiceConnectionManager {
     vm = null;
     sdkVersion = null;
     connectedApp = null;
+
     _cachedMainRootLibKey = null;
     _cachedMainRootLibValue = null;
     generateDevToolsTitle();

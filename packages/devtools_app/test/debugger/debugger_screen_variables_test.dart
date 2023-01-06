@@ -27,6 +27,7 @@ void main() {
   setUp(() {
     fakeServiceManager = FakeServiceManager();
     scriptManager = MockScriptManager();
+
     mockConnectedApp(
       fakeServiceManager.connectedApp!,
       isProfileBuild: false,
@@ -63,15 +64,13 @@ void main() {
     'Variables shows items',
     windowSize,
     (WidgetTester tester) async {
-      when(debuggerController.variables).thenReturn(
-        ValueNotifier(
-          [
-            _buildListVariable(),
-            _buildMapVariable(),
-            _buildStringVariable('test str'),
-            _buildBooleanVariable(true),
-          ],
-        ),
+      fakeServiceManager.appState.setVariables(
+        [
+          _buildListVariable(),
+          _buildMapVariable(),
+          _buildStringVariable('test str'),
+          _buildBooleanVariable(true),
+        ],
       );
       await pumpDebuggerScreen(tester, debuggerController);
       expect(find.text('Variables'), findsOneWidget);
@@ -129,13 +128,10 @@ void main() {
     (WidgetTester tester) async {
       final list = _buildParentListVariable(length: 380250);
       await buildVariablesTree(list);
-      when(debuggerController.variables).thenReturn(
-        ValueNotifier(
-          [
-            list,
-          ],
-        ),
-      );
+
+      final appState = serviceManager.appState;
+      appState.setVariables([list]);
+
       await pumpDebuggerScreen(tester, debuggerController);
 
       final listFinder =
@@ -190,13 +186,10 @@ void main() {
     (WidgetTester tester) async {
       final map = _buildParentMapVariable(length: 243621);
       await buildVariablesTree(map);
-      when(debuggerController.variables).thenReturn(
-        ValueNotifier(
-          [
-            map,
-          ],
-        ),
-      );
+
+      final appState = serviceManager.appState;
+      appState.setVariables([map]);
+
       await pumpDebuggerScreen(tester, debuggerController);
 
       final listFinder =

@@ -8,7 +8,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../app.dart';
-import '../screens/debugger/console.dart';
 import '../screens/debugger/debugger_screen.dart';
 import '../shared/analytics/prompt.dart';
 import '../shared/banner_messages.dart';
@@ -16,6 +15,7 @@ import '../shared/common_widgets.dart';
 import '../shared/config_specific/drag_and_drop/drag_and_drop.dart';
 import '../shared/config_specific/ide_theme/ide_theme.dart';
 import '../shared/config_specific/import_export/import_export.dart';
+import '../shared/console/widgets/console_pane.dart';
 import '../shared/framework_controller.dart';
 import '../shared/globals.dart';
 import '../shared/primitives/auto_dispose.dart';
@@ -320,6 +320,11 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
       child: Provider<ImportController>.value(
         value: _importController,
         builder: (context, _) {
+          final showConsole = serviceManager.connectedAppInitialized &&
+              !serviceManager.connectedApp!.isProfileBuildNow! &&
+              !offlineController.offlineMode.value &&
+              _currentScreen.showConsole(widget.embed);
+
           return DragAndDrop(
             handleDrop: _importController.importData,
             child: Title(
@@ -339,21 +344,18 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
                       :
                       // ignore: avoid-returning-widgets as that would make code more verbose for no clear benefit in this case.
                       _buildAppBar(scaffoldTitle),
-                  body: (serviceManager.connectedAppInitialized &&
-                          !serviceManager.connectedApp!.isProfileBuildNow! &&
-                          !offlineController.offlineMode.value &&
-                          _currentScreen.showConsole(widget.embed))
+                  body: showConsole
                       ? Split(
                           axis: Axis.vertical,
                           splitters: [
-                            DebuggerConsole.buildHeader(),
+                            ConsolePaneHeader(),
                           ],
                           initialFractions: const [0.8, 0.2],
                           children: [
                             content,
                             Padding(
                               padding: DevToolsScaffold.horizontalPadding,
-                              child: const DebuggerConsole(),
+                              child: const ConsolePane(),
                             ),
                           ],
                         )
