@@ -271,7 +271,7 @@ class _TreemapState extends State<Treemap> {
 
     final positionedTreemaps = <PositionedCell>[];
 
-    // Contruct list 1 sub-treemap.
+    // Construct list 1 sub-treemap.
     final list1SizeRatio = list1ByteSize / totalByteSize;
     final list1Width = isHorizontalRectangle ? width * list1SizeRatio : width;
     final list1Height =

@@ -59,7 +59,7 @@ class ChartController extends DisposableController
   /// Spacing for title iff title != null.
   double topPadding = 0.0;
 
-  // TODO(terry): Compute dynamically based on Y-axis labels text width.
+  // TODO(terry): Compute dynamically based on Y-axis label text width.
   final leftPadding = 50.0;
 
   /// Computed minimum right padding.
@@ -373,13 +373,13 @@ class ChartController extends DisposableController
     if (labelTimestamps.isEmpty) return;
 
     final rightLabelTimestamp = labelTimestamps.last;
-    final rightMostLableDT =
+    final rightMostLabelDT =
         DateTime.fromMillisecondsSinceEpoch(rightLabelTimestamp);
     final rightMostTimestampDT =
         DateTime.fromMillisecondsSinceEpoch(timestamps.last);
 
     final nSeconds =
-        rightMostTimestampDT.difference(rightMostLableDT).inSeconds;
+        rightMostTimestampDT.difference(rightMostLabelDT).inSeconds;
 
     if (nSeconds >= labelInterval) {
       late int foundTimestamp;

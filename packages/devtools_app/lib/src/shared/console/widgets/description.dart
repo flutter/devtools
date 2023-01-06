@@ -82,7 +82,7 @@ class DiagnosticsNodeDescription extends StatelessWidget {
     // An Icon is approximately the width of 1 character
 
     if (diagnostic?.showName == true && name != null) {
-      // The diagnostic will show it's name instead of an icon so add an
+      // The diagnostic will show its name instead of an icon so add an
       // approximate name width.
 
       if (diagnostic?.description != null) {

@@ -73,7 +73,7 @@ mixin FilterableHeapClasses<T extends ClassStats> on HeapClasses<T> {
   }
 }
 
-/// Set of heap class statistical information for single heap (not comparision between two heaps).
+/// Set of heap class statistical information for single heap (not comparison between two heaps).
 class SingleHeapClasses extends HeapClasses<SingleClassStats>
     with FilterableHeapClasses<SingleClassStats> {
   SingleHeapClasses(this.classesByName);
