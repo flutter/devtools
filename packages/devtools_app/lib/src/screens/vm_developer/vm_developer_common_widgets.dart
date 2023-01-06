@@ -452,7 +452,10 @@ class RetainingPathWidget extends StatelessWidget {
               Flexible(
                 child: DefaultTextStyle(
                   style: theme.fixedFontStyle,
-                  child: _retainingObjectDescription(context, object, onTap),
+                  child: _RetainingObjectDescription(
+                    object: object,
+                    onTap: onTap,
+                  ),
                 ),
               ),
             ],
@@ -469,14 +472,19 @@ class RetainingPathWidget extends StatelessWidget {
 
     return prettyRows(context, retainingObjects);
   }
+}
 
-  /// Describes the given RetainingObject [object] and its parentListIndex,
-  /// parentMapKey, and parentField where applicable.
-  Widget _retainingObjectDescription(
-    BuildContext context,
-    RetainingObject object,
-    Function(ObjRef?) onTap,
-  ) {
+class _RetainingObjectDescription extends StatelessWidget {
+  const _RetainingObjectDescription({
+    required this.object,
+    required this.onTap,
+  });
+
+  final RetainingObject object;
+  final Function(ObjRef? obj) onTap;
+
+  @override
+  Widget build(BuildContext context) {
     final parentListIndex = object.parentListIndex;
     if (parentListIndex != null) {
       return SelectableText.rich(
