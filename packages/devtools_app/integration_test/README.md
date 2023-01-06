@@ -34,3 +34,5 @@ app running on your local machine. This saves the cost of spinning up a new test
 do this, pass the vm service uri using the `--test-app-uri=some-uri` run flag.
 - `--enable_experiments`: enables experiments for DevTools within the integration test environment
 - `--headless`: this will run the integration test on the 'web-server' device instead of the 'chrome' device, meaning you will not be able to see the integration test run in Chrome when running locally. 
+- `--update-goldens`: behaves like the `--update-goldens` flag for Flutter unit test, updating the golden
+images to the results produced by the test run. 
