@@ -104,7 +104,9 @@ void main() async {
           await inspectorServiceLocal
               .removePubRootDirectories(initialPubRootDirectories!);
           expect(
-              await inspectorServiceLocal.getPubRootDirectories(), equals([]));
+            await inspectorServiceLocal.getPubRootDirectories(),
+            equals([]),
+          );
 
           // Can add a new pub root directory.
           await inspectorServiceLocal
@@ -134,7 +136,9 @@ void main() async {
             final group = inspectorServiceLocal.createObjectGroup('test-group');
             // These tests are moot if widget creation is not tracked.
             expect(
-                await inspectorServiceLocal.isWidgetCreationTracked(), isTrue);
+              await inspectorServiceLocal.isWidgetCreationTracked(),
+              isTrue,
+            );
             await inspectorServiceLocal.addPubRootDirectories([]);
             final List<String> rootDirectories =
                 await inspectorServiceLocal.inferPubRootDirectoryIfNeeded();
@@ -183,7 +187,9 @@ void main() async {
                 equals(['flutter_app']),
               );
               expect(
-                  inspectorServiceLocal.rootPackagePrefixes.toList(), isEmpty);
+                inspectorServiceLocal.rootPackagePrefixes.toList(),
+                isEmpty,
+              );
 
               await inspectorServiceLocal.addPubRootDirectories(
                 ['/usr/jacobr/foo/lib', '/usr/jacobr/bar/lib/bla'],
@@ -193,7 +199,9 @@ void main() async {
                 equals(['foo', 'bar']),
               );
               expect(
-                  inspectorServiceLocal.rootPackagePrefixes.toList(), isEmpty);
+                inspectorServiceLocal.rootPackagePrefixes.toList(),
+                isEmpty,
+              );
 
               expect(
                 inspectorServiceLocal.isLocalUri('package:foo/src/bar.dart'),
