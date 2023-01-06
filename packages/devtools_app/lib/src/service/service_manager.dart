@@ -460,7 +460,7 @@ class ServiceConnectionManager {
   }
 
   /// Returns the view id for the selected isolate's 'FlutterView'.
-  /// 
+  ///
   /// Throws an Exception if no 'FlutterView' is present in this isolate.
   Future<String> get flutterViewId async {
     final flutterViewListResponse = await _callServiceExtensionOnMainIsolate(

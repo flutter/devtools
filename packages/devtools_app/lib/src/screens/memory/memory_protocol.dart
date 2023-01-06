@@ -139,7 +139,7 @@ class MemoryTracker {
   }
 
   /// Fetch the Fultter engine's Raster Cache metrics.
-  /// 
+  ///
   /// Returns engine's rasterCache estimates or null.
   Future<RasterCache?> _fetchRasterCacheInfo() async {
     final response = await serviceManager.rasterCacheMetrics;
@@ -251,11 +251,11 @@ class MemoryTracker {
   }
 
   /// Many extension events could arrive between memory collection ticks, those
-  /// events need to be associated with a particular memory tick (timestamp). 
-  /// 
+  /// events need to be associated with a particular memory tick (timestamp).
+  ///
   /// This routine collects those new events received that are closest to a tick
   /// (time parameter)).
-  /// 
+  ///
   /// Returns copy of events to associate with an existing HeapSample tick
   /// (contained in the EventSample). See [processEventSample] it computes the
   /// events to aggregate to an existing HeapSample or delay associating those
