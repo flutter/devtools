@@ -4,9 +4,9 @@
 
 @TestOn('vm')
 import 'package:devtools_app/src/shared/console/eval/diagnostics_node.dart';
-import 'package:devtools_app/src/shared/console/eval/inspector_service.dart';
 import 'package:devtools_app/src/shared/console/primitives/simple_items.dart';
 import 'package:devtools_app/src/shared/globals.dart';
+import 'package:devtools_app/src/shared/inspector_service.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 

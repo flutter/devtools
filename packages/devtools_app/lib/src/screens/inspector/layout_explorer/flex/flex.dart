@@ -9,7 +9,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../shared/console/eval/diagnostics_node.dart';
-import '../../../../shared/console/eval/inspector_service.dart';
+import '../../../../shared/inspector_service.dart';
 import '../../../../shared/primitives/math_utils.dart';
 import '../../../../shared/theme.dart';
 import '../../inspector_controller.dart';
