@@ -33,9 +33,7 @@ class MyHome extends StatefulWidget {
 /// Setup Tabs
 class MyHomeState extends State<MyHome> with SingleTickerProviderStateMixin {
   // Create a tab controller
-  TabController controller;
-
-  Settings settings;
+  late final TabController controller;
 
   @override
   void initState() {
@@ -55,7 +53,6 @@ class MyHomeState extends State<MyHome> with SingleTickerProviderStateMixin {
   /// Setup the tabs.
   @override
   Widget build(BuildContext context) {
-    settings = Settings();
     return Scaffold(
       // Appbar
       appBar: AppBar(
@@ -81,7 +78,7 @@ class MyHomeState extends State<MyHome> with SingleTickerProviderStateMixin {
         backgroundColor: Colors.blue,
         // Set the bottom property of the Appbar to include a Tab Bar
       ),
-      body: settings,
+      body: Settings(),
     );
   }
 

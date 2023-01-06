@@ -39,7 +39,7 @@ void main() {
           completion(anyOf(isPositive, 0)),
         );
       },
-      timeout: const Timeout.factor(8),
+      timeout: const Timeout.factor(2),
     );
 
     group('asyncEval', () {
@@ -60,7 +60,7 @@ void main() {
               (await eval.asyncEval('Future.value(42)', isAlive: isAlive))!;
           expect(instance2.classRef!.name, '_Future');
         },
-        timeout: const Timeout.factor(8),
+        timeout: const Timeout.factor(2),
       );
 
       test(
@@ -84,7 +84,7 @@ void main() {
 
           expect(instance.valueAsString, '42');
         },
-        timeout: const Timeout.factor(8),
+        timeout: const Timeout.factor(2),
       );
 
       test(
@@ -133,7 +133,7 @@ void main() {
           );
           expect(error.valueAsString, 'foo');
         },
-        timeout: const Timeout.factor(8),
+        timeout: const Timeout.factor(2),
       );
     });
   });

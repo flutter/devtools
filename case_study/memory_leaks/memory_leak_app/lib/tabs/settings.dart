@@ -15,7 +15,7 @@ class Settings extends StatefulWidget {
 
   final Logging logs = Logging.logging;
 
-  static SettingsState state;
+  static late final SettingsState state;
 
   final RestfulAPI restfulRoot;
 
@@ -31,7 +31,7 @@ class Settings extends StatefulWidget {
 /// Which Restful Server is selected.
 String restfulApi = StarWars.starWarsPeople;
 
-RestfulAPI currentRestfulAPI;
+late RestfulAPI currentRestfulAPI;
 
 class SettingsState extends State<Settings> {
   Map<String, IconData> values = {
