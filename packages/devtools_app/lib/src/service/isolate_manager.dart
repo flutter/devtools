@@ -92,7 +92,7 @@ class IsolateManager extends Disposer {
     // It is critical that the _serviceExtensionManager is already listening
     // for events indicating that new extension rpcs are registered before this
     // call otherwise there is a race condition where service extensions are not
-    // described in the selectedIsolate or recieved as an event. It is ok if a
+    // described in the selectedIsolate or received as an event. It is ok if a
     // service extension is included in both places as duplicate extensions are
     // handled gracefully.
     await _initSelectedIsolate();

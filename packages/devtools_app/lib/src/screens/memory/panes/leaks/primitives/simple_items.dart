@@ -4,7 +4,7 @@
 
 enum AppStatus {
   leakTrackingNotSupported,
-  noCommunicationsRecieved,
+  noCommunicationsReceived,
   unsupportedProtocolVersion,
   leakTrackingStarted,
   leaksFound,

@@ -37,7 +37,7 @@ class LeaksPaneController {
   final leakSummaryHistory = ValueNotifier<String>('');
   late String appProtocolVersion;
   final appStatus =
-      ValueNotifier<AppStatus>(AppStatus.noCommunicationsRecieved);
+      ValueNotifier<AppStatus>(AppStatus.noCommunicationsReceived);
 
   LeakSummary? _lastLeakSummary;
 
@@ -175,7 +175,7 @@ class LeaksPaneController {
     switch (appStatus.value) {
       case AppStatus.leakTrackingNotSupported:
         return 'The application does not support leak tracking.';
-      case AppStatus.noCommunicationsRecieved:
+      case AppStatus.noCommunicationsReceived:
         return 'Waiting for leak tracking messages from the application...';
       case AppStatus.unsupportedProtocolVersion:
         return 'The application uses unsupported leak tracking protocol $appProtocolVersion. '
