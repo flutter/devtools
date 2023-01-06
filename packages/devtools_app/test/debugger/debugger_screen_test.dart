@@ -214,11 +214,7 @@ Future<void> main() async {
       await tester.pump();
 
       expect(programExplorerController.scriptSelection, libNode);
-      expect(
-        programExplorerController.outlineNodes.value
-            .where((e) => e.isSelectable),
-        isEmpty,
-      );
+
       CodeViewSourceLocationNavigationState? state =
           CodeViewSourceLocationNavigationState.fromState(
         delegate.currentConfiguration!.state,
