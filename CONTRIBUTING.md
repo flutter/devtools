@@ -14,10 +14,7 @@ Before contributing code:
 [Contributor License Agreement](https://cla.developers.google.com/clas).
 You can do this online, and it only takes a minute.
 
-2. Make sure your (or your organization's) name and contact info is added to the [AUTHORS](AUTHORS)
-file.
-
-3. Understand [coding agreements](packages/README.md).
+2. Understand [coding agreements](packages/README.md).
 
 ## Workflow for making changes
 
