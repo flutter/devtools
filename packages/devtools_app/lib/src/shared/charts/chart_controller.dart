@@ -575,7 +575,7 @@ class TapLocation {
   TapLocation(this.tapDownDetails, this.timestamp, this.index);
 
   /// Copy of TapLocation w/o the detail, implies not where tap occurred
-  /// but the multiple charts tied to the the same timeline should be hilighted
+  /// but the multiple charts tied to the same timeline should be hilighted
   /// (selection point).
   TapLocation.copy(TapLocation original)
       : tapDownDetails = null,
