@@ -2,19 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 
 import '../../../../../shared/analytics/analytics.dart' as ga;
 import '../../../../../shared/analytics/constants.dart' as gac;
 import '../../../../../shared/common_widgets.dart';
 import '../../../../../shared/theme.dart';
-import '../../../shared/heap/class_filter.dart';
 import '../../../shared/primitives/simple_elements.dart';
 import '../controller/diff_pane_controller.dart';
 import '../controller/item_controller.dart';
-import 'class_filter_dialog.dart';
 
 class SnapshotControlPane extends StatelessWidget {
   const SnapshotControlPane({Key? key, required this.controller})

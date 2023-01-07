@@ -11,7 +11,7 @@ import '../controller/diff_pane_controller.dart';
 import '../controller/heap_diff.dart';
 import '../controller/item_controller.dart';
 import 'class_details/class_details.dart';
-import 'class_filter.dart';
+import 'class_filter_dialog.dart';
 import 'classes_table_diff.dart';
 import 'classes_table_single.dart';
 

@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../../shared/analytics/analytics.dart' as ga;
@@ -15,6 +16,43 @@ import '../../../../../shared/utils.dart';
 import '../../../shared/heap/class_filter.dart';
 import '../controller/utils.dart';
 
+class ClassFilterButton extends StatelessWidget {
+  const ClassFilterButton({required this.filter, required this.onChanged});
+
+  final ValueListenable<ClassFilter> filter;
+  final Function(ClassFilter) onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder<ClassFilter>(
+      valueListenable: filter,
+      builder: (context, filter, _) {
+        return FilterButton(
+          onPressed: () {
+            ga.select(
+              gac.memory,
+              gac.MemoryEvent.diffSnapshotFilter,
+            );
+
+            unawaited(
+              showDialog(
+                context: context,
+                builder: (context) => ClassFilterDialog(
+                  filter,
+                  onChanged: onChanged,
+                ),
+              ),
+            );
+          },
+          isFilterActive: !filter.isEmpty,
+          message: filter.buttonTooltip,
+        );
+      },
+    );
+  }
+}
+
+@visibleForTesting
 class ClassFilterDialog extends StatefulWidget {
   const ClassFilterDialog(
     this.classFilter, {
