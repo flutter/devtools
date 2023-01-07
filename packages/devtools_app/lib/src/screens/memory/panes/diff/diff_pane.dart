@@ -7,6 +7,7 @@ import 'package:flutter_markdown/flutter_markdown.dart';
 
 import '../../../../shared/analytics/constants.dart' as gac;
 import '../../../../shared/common_widgets.dart';
+import '../../../../shared/config_specific/launch_url/launch_url.dart';
 import '../../../../shared/split.dart';
 import '../../../../shared/theme.dart';
 import '../../shared/primitives/simple_elements.dart';
@@ -60,7 +61,13 @@ class _SnapshotItemContent extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Expanded(child: Markdown(data: _snapshotDocumentation)),
+                Expanded(
+                  child: Markdown(
+                    data: _snapshotDocumentation,
+                    onTapLink: (text, url, title) async =>
+                        await launchUrl(url!),
+                  ),
+                ),
                 const SizedBox(height: denseSpacing),
                 MoreInfoLink(
                   url: DocLinks.diff.value,
@@ -107,22 +114,34 @@ class SnapshotInstanceItemPane extends StatelessWidget {
 
 /// `\v` adds vertical space
 const _snapshotDocumentation = '''
-Take a **heap snapshot** to view current memory allocation:
-
-1. In the Snapshots panel, click the ● button
-2. Use the **Filter** button to refine the results
-3. Select a class from the snapshot table to view its retaining paths
-4. View the path detail by selecting from the **Shortest Retaining Paths…** table
+1. Understand [Dart memory concepts](https://docs.flutter.dev/development/tools/devtools/memory#basic-memory-concepts).
 
 \v
 
-Check the **diff** between snapshots to detect allocation issues:
+2. Take a **heap snapshot** to view current memory allocation:
 
-1. Take a **snapshot**
-2. Execute the feature in your application
-3. Take a second snapshot
-4. While viewing the second snapshot, click **Diff with:** and select the first snapshot from the drop-down menu;
-the results area will display the diff
-5. Use the **Filter** button to refine the diff results, if needed
-6. Select a class from the diff to view its retaining paths, and see which objects hold the references to those instances
+    a. In the Snapshots panel, click the ● button
+
+    b. Use the **Filter** button to refine the results
+
+    c. Select a class from the snapshot table to view its retaining paths
+
+    d. View the path detail by selecting from the **Shortest Retaining Paths…** table
+
+\v
+
+3. Check the **diff** between snapshots to detect allocation issues:
+
+    a. Take a **snapshot**
+
+    b. Execute the feature in your application
+
+    c. Take a second snapshot
+
+    d. While viewing the second snapshot, click **Diff with:** and select the first snapshot from the drop-down menu;
+    the results area will display the diff
+
+    e. Use the **Filter** button to refine the diff results, if needed
+
+    f. Select a class from the diff to view its retaining paths, and see which objects hold the references to those instances
 ''';

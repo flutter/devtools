@@ -125,13 +125,18 @@ class _SnapshotListTitle extends StatelessWidget {
             const SizedBox(width: denseRowSpacing),
           ],
           if (theItem is SnapshotDocItem)
-            Expanded(
-              child: Text(
-                'Snapshots',
-                overflow: TextOverflow.ellipsis,
-                style: textStyle,
-              ),
+            Icon(
+              Icons.help_outline,
+              size: 18,
+              color: textStyle.color,
             ),
+          // Expanded(
+          //   child: Text(
+          //     'Snapshots',
+          //     overflow: TextOverflow.ellipsis,
+          //     style: textStyle,
+          //   ),
+          // ),
           if (isProcessing) ...[
             CenteredCircularProgressIndicator(size: smallProgressSize),
             const SizedBox(width: denseRowSpacing),
