@@ -4,6 +4,7 @@
 
 import 'package:devtools_app/src/screens/memory/panes/diff/controller/item_controller.dart';
 import 'package:devtools_app/src/screens/memory/panes/diff/diff_pane.dart';
+import 'package:devtools_app/src/screens/memory/panes/diff/widgets/class_filter.dart';
 import 'package:devtools_app/src/screens/memory/panes/diff/widgets/class_filter_dialog.dart';
 import 'package:devtools_app/src/screens/memory/panes/diff/widgets/snapshot_control_pane.dart';
 import 'package:devtools_app/src/screens/memory/shared/heap/class_filter.dart';

@@ -18,14 +18,18 @@ import '../../../shared/primitives/simple_elements.dart';
 import '../../../shared/shared_memory_widgets.dart';
 
 class _ClassNameColumn extends ColumnData<SingleClassStats>
-    implements ColumnRenderer<SingleClassStats> {
-  _ClassNameColumn()
+    implements
+        ColumnRenderer<SingleClassStats>,
+        ColumnHeaderRenderer<SingleClassStats> {
+  _ClassNameColumn(this.classFilterButton)
       : super(
           'Class',
           titleTooltip: 'Class name',
           fixedWidthPx: scaleByFontFactor(180.0),
           alignment: ColumnAlignment.left,
         );
+
+  final Widget classFilterButton;
 
   @override
   String? getValue(SingleClassStats classStats) =>
@@ -52,6 +56,20 @@ class _ClassNameColumn extends ColumnData<SingleClassStats>
       copyGaItem: gac.MemoryEvent.diffClassSingleCopy,
       textStyle:
           isRowSelected ? theme.selectedTextStyle : theme.regularTextStyle,
+    );
+  }
+
+  @override
+  Widget? buildHeader(
+    BuildContext context,
+    Widget Function() defaultHeaderRenderer,
+  ) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        defaultHeaderRenderer(),
+        classFilterButton,
+      ],
     );
   }
 }
@@ -157,14 +175,17 @@ class _RetainedSizeColumn extends ColumnData<SingleClassStats> {
 }
 
 class _ClassesTableSingleColumns {
-  _ClassesTableSingleColumns(this.totalSize);
+  _ClassesTableSingleColumns(this.totalSize, this.classFilterButton);
 
+  /// Is needed to calculate percentage.
   final int totalSize;
+
+  final Widget classFilterButton;
 
   late final retainedSizeColumn = _RetainedSizeColumn(totalSize);
 
   late final columnList = <ColumnData<SingleClassStats>>[
-    _ClassNameColumn(),
+    _ClassNameColumn(classFilterButton),
     _InstanceColumn(),
     _ShallowSizeColumn(),
     retainedSizeColumn,
@@ -177,18 +198,24 @@ class ClassesTableSingle extends StatelessWidget {
     required this.classes,
     required this.selection,
     required this.totalSize,
+    required this.classFilterButton,
   });
 
   final int totalSize;
+
+  final Widget classFilterButton;
 
   final List<SingleClassStats> classes;
   final ValueNotifier<SingleClassStats?> selection;
 
   static final _columnStore = <String, _ClassesTableSingleColumns>{};
-  static _ClassesTableSingleColumns _columns(int totalSize) =>
+  static _ClassesTableSingleColumns _columns(
+    int totalSize,
+    Widget classFilterButton,
+  ) =>
       _columnStore.putIfAbsent(
         '$totalSize',
-        () => _ClassesTableSingleColumns(totalSize),
+        () => _ClassesTableSingleColumns(totalSize, classFilterButton),
       );
 
   @override
@@ -197,7 +224,7 @@ class ClassesTableSingle extends StatelessWidget {
     // no matter what the data passed to it is.
     const dataKey = 'ClassesTableSingle';
     return FlatTable<SingleClassStats>(
-      columns: _columns(totalSize).columnList,
+      columns: _columns(totalSize, classFilterButton).columnList,
       data: classes,
       dataKey: dataKey,
       keyFactory: (e) => Key(e.heapClass.fullName),
@@ -206,7 +233,10 @@ class ClassesTableSingle extends StatelessWidget {
         gac.memory,
         gac.MemoryEvent.diffClassSingleSelect,
       ),
-      defaultSortColumn: _columns(totalSize).retainedSizeColumn,
+      defaultSortColumn: _columns(
+        totalSize,
+        classFilterButton,
+      ).retainedSizeColumn,
       defaultSortDirection: SortDirection.descending,
     );
   }

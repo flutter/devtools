@@ -41,14 +41,6 @@ class SnapshotControlPane extends StatelessWidget {
                     controller: controller,
                   ),
                   const SizedBox(width: defaultSpacing),
-                  ValueListenableBuilder<ClassFilter>(
-                    valueListenable: filter,
-                    builder: (context, filterValue, ___) => ClassFilterButton(
-                      filter: filterValue,
-                      onChanged: controller.applyFilter,
-                    ),
-                  ),
-                  const SizedBox(width: defaultSpacing),
                   ToCsvButton(
                     minScreenWidthForTextBeforeScaling:
                         memoryControlsMinVerboseWidth,
@@ -79,38 +71,6 @@ class SnapshotControlPane extends StatelessWidget {
           ],
         );
       },
-    );
-  }
-}
-
-@visibleForTesting
-class ClassFilterButton extends StatelessWidget {
-  const ClassFilterButton({required this.filter, required this.onChanged});
-
-  final ClassFilter filter;
-  final Function(ClassFilter) onChanged;
-
-  @override
-  Widget build(BuildContext context) {
-    return FilterButton(
-      onPressed: () {
-        ga.select(
-          gac.memory,
-          gac.MemoryEvent.diffSnapshotFilter,
-        );
-
-        unawaited(
-          showDialog(
-            context: context,
-            builder: (context) => ClassFilterDialog(
-              filter,
-              onChanged: onChanged,
-            ),
-          ),
-        );
-      },
-      isFilterActive: !filter.isEmpty,
-      message: filter.buttonTooltip,
     );
   }
 }
