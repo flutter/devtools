@@ -13,6 +13,7 @@ import '../../../../../shared/primitives/auto_dispose.dart';
 import '../../../../../shared/primitives/utils.dart';
 import '../../../../../shared/table/table.dart';
 import '../../../../../shared/theme.dart';
+import '../../../../../shared/utils.dart';
 import '../controller/diff_pane_controller.dart';
 import '../controller/item_controller.dart';
 
@@ -99,7 +100,7 @@ class _SnapshotListTitle extends StatelessWidget {
     final theme = Theme.of(context);
     final textStyle =
         selected ? theme.selectedTextStyle : theme.regularTextStyle;
-
+    final questionMarlSize = scaleByFontFactor(18.0);
     return ValueListenableBuilder<bool>(
       valueListenable: theItem.isProcessing,
       builder: (_, isProcessing, __) => Row(
@@ -127,16 +128,9 @@ class _SnapshotListTitle extends StatelessWidget {
           if (theItem is SnapshotDocItem)
             Icon(
               Icons.help_outline,
-              size: 18,
+              size: questionMarlSize,
               color: textStyle.color,
             ),
-          // Expanded(
-          //   child: Text(
-          //     'Snapshots',
-          //     overflow: TextOverflow.ellipsis,
-          //     style: textStyle,
-          //   ),
-          // ),
           if (isProcessing) ...[
             CenteredCircularProgressIndicator(size: smallProgressSize),
             const SizedBox(width: denseRowSpacing),
