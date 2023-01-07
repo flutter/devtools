@@ -67,7 +67,7 @@ class _ClassNameColumn extends ColumnData<SingleClassStats>
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        defaultHeaderRenderer(),
+        Expanded(child: defaultHeaderRenderer()),
         classFilterButton,
       ],
     );

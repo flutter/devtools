@@ -24,7 +24,6 @@ class SnapshotControlPane extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final filter = controller.core.classFilter;
     return ValueListenableBuilder<bool>(
       valueListenable: controller.isTakingSnapshot,
       builder: (_, isProcessing, __) {
