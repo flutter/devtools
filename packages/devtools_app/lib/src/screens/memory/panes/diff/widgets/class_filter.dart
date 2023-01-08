@@ -17,7 +17,10 @@ import '../../../shared/heap/class_filter.dart';
 import '../controller/utils.dart';
 
 class ClassFilterButton extends StatelessWidget {
-  const ClassFilterButton({required this.filter, required this.onChanged});
+  const ClassFilterButton({
+    required this.filter,
+    required this.onChanged,
+  });
 
   final ValueListenable<ClassFilter> filter;
   final Function(ClassFilter) onChanged;
@@ -46,6 +49,7 @@ class ClassFilterButton extends StatelessWidget {
           },
           isFilterActive: !filter.isEmpty,
           message: filter.buttonTooltip,
+          outlined: false,
         );
       },
     );
