@@ -100,7 +100,7 @@ class _SnapshotListTitle extends StatelessWidget {
     final theme = Theme.of(context);
     final textStyle =
         selected ? theme.selectedTextStyle : theme.regularTextStyle;
-    final questionMarlSize = scaleByFontFactor(18.0);
+    final questionMarkSize = scaleByFontFactor(18.0);
     return ValueListenableBuilder<bool>(
       valueListenable: theItem.isProcessing,
       builder: (_, isProcessing, __) => Row(
@@ -128,7 +128,7 @@ class _SnapshotListTitle extends StatelessWidget {
           if (theItem is SnapshotDocItem)
             Icon(
               Icons.help_outline,
-              size: questionMarlSize,
+              size: questionMarkSize,
               color: textStyle.color,
             ),
           if (isProcessing) ...[
