@@ -4,13 +4,12 @@ on:
   pull_request:
     types: [ assigned, opened, synchronize, reopened, edited ]
 env:
-  CURRENT_RELEASE_FILE_PATH: tool/release_notes/NEXT_RELEASE_NOTES.md
+  CURRENT_RELEASE_FILE_PATH: packages/devtools_app/NEXT_RELEASE_NOTES.md
 jobs:
   release-preparedness:
     runs-on: ubuntu-latest
     name: Verify PR Release Note Requirements
     steps:
-
       - name: Get Pull Request Number
         id: get-pull-request-number
         run: |
@@ -25,7 +24,7 @@ jobs:
         run: |
           FILES_RESPONSE=$(gh api /repos/$GITHUB_REPOSITORY/pulls/$PULL_NUMBER/files)
           echo "FILES_RESPONSE: $FILES_RESPONSE"
-          
+
           HAS_CHANGED_RELEASE_NOTES=$(echo $FILES_RESPONSE | jq '.[].filename' | jq -s '. | any(. == env.CURRENT_RELEASE_FILE_PATH)')
           echo "HAS_CHANGED_RELEASE_NOTES=$HAS_CHANGED_RELEASE_NOTES" >> $GITHUB_OUTPUT
 
