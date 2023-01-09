@@ -42,17 +42,22 @@ class _DebuggingControlsState extends State<DebuggingControls>
 
   @override
   Widget build(BuildContext context) {
-    final isPaused = serviceManager.isMainIsolatePaused;
     final resuming = controller.resuming.value;
     final hasStackFrames = controller.stackFramesWithLocation.value.isNotEmpty;
     final isSystemIsolate = controller.isSystemIsolate;
-    final canStep = isPaused && !resuming && hasStackFrames && !isSystemIsolate;
+    final canStep = serviceManager.isMainIsolatePaused &&
+        !resuming &&
+        hasStackFrames &&
+        !isSystemIsolate;
     final isVmApp = serviceManager.connectedApp?.isRunningOnDartVM ?? false;
     return SizedBox(
       height: defaultButtonHeight,
       child: Row(
         children: [
-          _pauseAndResumeButtons(isPaused: isPaused, resuming: resuming),
+          _pauseAndResumeButtons(
+            isPaused: serviceManager.isMainIsolatePaused,
+            resuming: resuming,
+          ),
           const SizedBox(width: denseSpacing),
           _stepButtons(canStep: canStep),
           const SizedBox(width: denseSpacing),

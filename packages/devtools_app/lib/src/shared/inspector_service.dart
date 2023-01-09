@@ -97,9 +97,7 @@ abstract class InspectorServiceBase extends DisposableController
   /// The VM Service protocol must be used when paused at a breakpoint as the
   /// Daemon API calls won't execute until after the current frame is done
   /// rendering.
-  bool get useDaemonApi {
-    return !serviceManager.isMainIsolatePaused;
-  }
+  bool get useDaemonApi => !serviceManager.isMainIsolatePaused;
 
   @override
   void dispose() {
