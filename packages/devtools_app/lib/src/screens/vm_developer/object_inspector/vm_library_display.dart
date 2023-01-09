@@ -29,6 +29,7 @@ class VmLibraryDisplay extends StatelessWidget {
       script: library.scriptRef!,
       object: library.obj,
       child: VmObjectDisplayBasicLayout(
+        controller: controller,
         object: library,
         generalDataRows: _libraryDataRows(library),
         expandableWidgets: [
