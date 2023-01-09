@@ -27,14 +27,18 @@ enum _SizeType {
 }
 
 class _ClassNameColumn extends ColumnData<DiffClassStats>
-    implements ColumnRenderer<DiffClassStats> {
-  _ClassNameColumn()
+    implements
+        ColumnRenderer<DiffClassStats>,
+        ColumnHeaderRenderer<DiffClassStats> {
+  _ClassNameColumn(this.classFilterButton)
       : super(
           'Class',
           titleTooltip: 'Class name',
           fixedWidthPx: scaleByFontFactor(180.0),
           alignment: ColumnAlignment.left,
         );
+
+  final Widget classFilterButton;
 
   @override
   String? getValue(DiffClassStats classStats) => classStats.heapClass.className;
@@ -60,6 +64,20 @@ class _ClassNameColumn extends ColumnData<DiffClassStats>
       copyGaItem: gac.MemoryEvent.diffClassDiffCopy,
       textStyle:
           isRowSelected ? theme.selectedTextStyle : theme.regularTextStyle,
+    );
+  }
+
+  @override
+  Widget? buildHeader(
+    BuildContext context,
+    Widget Function() defaultHeaderRenderer,
+  ) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Expanded(child: defaultHeaderRenderer()),
+        classFilterButton,
+      ],
     );
   }
 }
@@ -158,11 +176,35 @@ class _SizeColumn extends ColumnData<DiffClassStats> {
   bool get numeric => true;
 }
 
+class _ClassesTableDiffColumns {
+  _ClassesTableDiffColumns(this.classFilterButton);
+
+  final Widget classFilterButton;
+
+  final retainedSizeDeltaColumn =
+      _SizeColumn(_DataPart.delta, _SizeType.retained);
+
+  late final List<ColumnData<DiffClassStats>> columnList =
+      <ColumnData<DiffClassStats>>[
+    _ClassNameColumn(classFilterButton),
+    _InstanceColumn(_DataPart.created),
+    _InstanceColumn(_DataPart.deleted),
+    _InstanceColumn(_DataPart.delta),
+    _SizeColumn(_DataPart.created, _SizeType.shallow),
+    _SizeColumn(_DataPart.deleted, _SizeType.shallow),
+    _SizeColumn(_DataPart.delta, _SizeType.shallow),
+    _SizeColumn(_DataPart.created, _SizeType.retained),
+    _SizeColumn(_DataPart.deleted, _SizeType.retained),
+    retainedSizeDeltaColumn,
+  ];
+}
+
 class ClassesTableDiff extends StatelessWidget {
   const ClassesTableDiff({
     Key? key,
     required this.classes,
     required this.selection,
+    required this.classFilterButton,
   }) : super(key: key);
 
   final List<DiffClassStats> classes;
@@ -190,31 +232,25 @@ class ClassesTableDiff extends StatelessWidget {
     ),
   ];
 
-  static final _retainedSizeDeltaColumn =
-      _SizeColumn(_DataPart.delta, _SizeType.retained);
+  final Widget classFilterButton;
 
-  static late final List<ColumnData<DiffClassStats>> _columns =
-      <ColumnData<DiffClassStats>>[
-    _ClassNameColumn(),
-    _InstanceColumn(_DataPart.created),
-    _InstanceColumn(_DataPart.deleted),
-    _InstanceColumn(_DataPart.delta),
-    _SizeColumn(_DataPart.created, _SizeType.shallow),
-    _SizeColumn(_DataPart.deleted, _SizeType.shallow),
-    _SizeColumn(_DataPart.delta, _SizeType.shallow),
-    _SizeColumn(_DataPart.created, _SizeType.retained),
-    _SizeColumn(_DataPart.deleted, _SizeType.retained),
-    _retainedSizeDeltaColumn,
-  ];
+  static final _columnStore = <String, _ClassesTableDiffColumns>{};
+  static _ClassesTableDiffColumns _columns(
+    Widget classFilterButton,
+  ) =>
+      _columnStore.putIfAbsent(
+        '${identityHashCode(classFilterButton)}',
+        () => _ClassesTableDiffColumns(classFilterButton),
+      );
 
   @override
   Widget build(BuildContext context) {
     // We want to preserve the sorting and sort directions for ClassesTableDiff
     // no matter what the data passed to it is.
     const dataKey = 'ClassesTableDiff';
-
+    final columns = _columns(classFilterButton);
     return FlatTable<DiffClassStats>(
-      columns: _columns,
+      columns: columns.columnList,
       columnGroups: _columnGroups,
       data: classes,
       dataKey: dataKey,
@@ -224,7 +260,7 @@ class ClassesTableDiff extends StatelessWidget {
         gac.memory,
         gac.MemoryEvent.diffClassDiffSelect,
       ),
-      defaultSortColumn: _retainedSizeDeltaColumn,
+      defaultSortColumn: columns.retainedSizeDeltaColumn,
       defaultSortDirection: SortDirection.descending,
     );
   }

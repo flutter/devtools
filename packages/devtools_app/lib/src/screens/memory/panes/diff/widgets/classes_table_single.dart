@@ -214,7 +214,7 @@ class ClassesTableSingle extends StatelessWidget {
     Widget classFilterButton,
   ) =>
       _columnStore.putIfAbsent(
-        '$totalSize',
+        '$totalSize-${identityHashCode(classFilterButton)}',
         () => _ClassesTableSingleColumns(totalSize, classFilterButton),
       );
 
@@ -223,8 +223,9 @@ class ClassesTableSingle extends StatelessWidget {
     // We want to preserve the sorting and sort directions for ClassesTableDiff
     // no matter what the data passed to it is.
     const dataKey = 'ClassesTableSingle';
+    final columns = _columns(totalSize, classFilterButton);
     return FlatTable<SingleClassStats>(
-      columns: _columns(totalSize, classFilterButton).columnList,
+      columns: columns.columnList,
       data: classes,
       dataKey: dataKey,
       keyFactory: (e) => Key(e.heapClass.fullName),
@@ -233,10 +234,7 @@ class ClassesTableSingle extends StatelessWidget {
         gac.memory,
         gac.MemoryEvent.diffClassSingleSelect,
       ),
-      defaultSortColumn: _columns(
-        totalSize,
-        classFilterButton,
-      ).retainedSizeColumn,
+      defaultSortColumn: columns.retainedSizeColumn,
       defaultSortDirection: SortDirection.descending,
     );
   }

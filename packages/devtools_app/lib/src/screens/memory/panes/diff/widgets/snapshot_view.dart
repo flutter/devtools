@@ -42,6 +42,11 @@ class SnapshotView extends StatelessWidget {
 
         late Widget classTable;
 
+        final classFilterButton = ClassFilterButton(
+          filter: controller.core.classFilter,
+          onChanged: controller.applyFilter,
+        );
+
         if (singleClasses != null) {
           final totalSize =
               (controller.core.selectedItem as SnapshotInstanceItem).totalSize;
@@ -50,15 +55,13 @@ class SnapshotView extends StatelessWidget {
             classes: singleClasses,
             selection: controller.derived.selectedSingleClassStats,
             totalSize: totalSize!,
-            classFilterButton: ClassFilterButton(
-              filter: controller.core.classFilter,
-              onChanged: controller.applyFilter,
-            ),
+            classFilterButton: classFilterButton,
           );
         } else if (diffClasses != null) {
           classTable = ClassesTableDiff(
             classes: controller.derived.diffClassesToShow.value!,
             selection: controller.derived.selectedDiffClassStats,
+            classFilterButton: classFilterButton,
           );
         } else {
           throw StateError('singleClasses or diffClasses should not be null.');
