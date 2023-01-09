@@ -35,6 +35,7 @@ class VmClassDisplay extends StatelessWidget {
         children: [
           Flexible(
             child: VmObjectDisplayBasicLayout(
+              controller: controller,
               object: clazz,
               generalDataRows: _classDataRows(clazz),
             ),

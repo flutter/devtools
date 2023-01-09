@@ -31,6 +31,7 @@ class VmFuncDisplay extends StatelessWidget {
       script: function.scriptRef!,
       object: function.obj,
       child: VmObjectDisplayBasicLayout(
+        controller: controller,
         object: function,
         generalDataRows: vmObjectGeneralDataRows(controller, function),
         sideCardDataRows: _functionDetailRows(function),

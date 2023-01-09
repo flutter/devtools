@@ -74,7 +74,7 @@ void main() {
       expect(find.text('fooScript.dart:10:4'), findsOneWidget);
       expect(find.text('Observed types not found'), findsOneWidget);
       expect(find.text('Static Value:'), findsOneWidget);
-      expect(find.text('FooNumberType: 100'), findsOneWidget);
+      expect(find.text('100'), findsOneWidget);
 
       expect(find.byType(RequestableSizeWidget), findsNWidgets(2));
 
