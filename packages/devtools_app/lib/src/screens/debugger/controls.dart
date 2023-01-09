@@ -42,8 +42,7 @@ class _DebuggingControlsState extends State<DebuggingControls>
 
   @override
   Widget build(BuildContext context) {
-    final isPaused =
-        serviceManager.isolateManager.mainIsolateState?.isPaused.value ?? false;
+    final isPaused = serviceManager.isMainIsolatePaused;
     final resuming = controller.resuming.value;
     final hasStackFrames = controller.stackFramesWithLocation.value.isNotEmpty;
     final isSystemIsolate = controller.isSystemIsolate;

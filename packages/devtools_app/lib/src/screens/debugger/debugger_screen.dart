@@ -360,14 +360,13 @@ class DebuggerStatus extends StatefulWidget {
 class _DebuggerStatusState extends State<DebuggerStatus> with AutoDisposeMixin {
   String _status = '';
 
-  bool get _isPaused =>
-      serviceManager.isolateManager.mainIsolateState?.isPaused.value ?? false;
+  bool get _isPaused => serviceManager.isMainIsolatePaused;
 
   @override
   void initState() {
     super.initState();
 
-    _updateStatusOnPausing();
+    _updateStatusOnPause();
     unawaited(_updateStatus());
   }
 
@@ -377,10 +376,11 @@ class _DebuggerStatusState extends State<DebuggerStatus> with AutoDisposeMixin {
 
     if (widget.controller == oldWidget.controller) return;
 
-    _updateStatusOnPausing();
+    cancelListeners();
+    _updateStatusOnPause();
   }
 
-  void _updateStatusOnPausing() {
+  void _updateStatusOnPause() {
     addAutoDisposeListener(
       serviceManager.isolateManager.mainIsolateState!.isPaused,
       () => unawaited(
@@ -449,13 +449,13 @@ class _FloatingDebuggerControlsState extends State<FloatingDebuggerControls>
         ProvidedControllerMixin<DebuggerController, FloatingDebuggerControls> {
   late double controlHeight;
 
-  bool get _isPaused =>
-      serviceManager.isolateManager.mainIsolateState?.isPaused.value ?? false;
+  bool get _isPaused => serviceManager.isMainIsolatePaused;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (!initController()) return;
+    cancelListeners();
 
     controlHeight = _isPaused ? defaultButtonHeight : 0.0;
     addAutoDisposeListener(

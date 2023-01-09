@@ -78,6 +78,9 @@ class ServiceConnectionManager {
 
   final isolateManager = IsolateManager();
 
+  bool get isMainIsolatePaused =>
+      isolateManager.mainIsolateState?.isPaused.value ?? false;
+
   final consoleService = ConsoleService();
 
   final resolvedUriManager = ResolvedUriManager();

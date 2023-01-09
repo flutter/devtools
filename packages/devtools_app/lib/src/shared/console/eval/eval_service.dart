@@ -61,8 +61,7 @@ class EvalService extends DisposableController with AutoDisposeControllerMixin {
     return _service.getObject(_isolateRefId, objRef.id!);
   }
 
-  bool get _isPaused =>
-      serviceManager.isolateManager.mainIsolateState?.isPaused.value ?? false;
+  bool get _isPaused => serviceManager.isMainIsolatePaused;
 
   /// Evaluate the given expression in the context of the currently selected
   /// stack frame, or the top frame if there is no current selection.

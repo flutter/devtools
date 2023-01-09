@@ -98,8 +98,7 @@ abstract class InspectorServiceBase extends DisposableController
   /// Daemon API calls won't execute until after the current frame is done
   /// rendering.
   bool get useDaemonApi {
-    return !(serviceManager.isolateManager.mainIsolateState?.isPaused.value ??
-        false);
+    return !serviceManager.isMainIsolatePaused;
   }
 
   @override
