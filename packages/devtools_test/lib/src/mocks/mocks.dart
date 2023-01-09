@@ -36,9 +36,7 @@ class FakeIsolateManager extends Fake implements IsolateManager {
   }
 
   @override
-  IsolateState? get mainIsolateState {
-    return MockIsolateState();
-  }
+  IsolateState? mainIsolateState = MockIsolateState();
 
   ValueNotifier<List<IsolateRef>>? _isolates;
 
@@ -134,7 +132,7 @@ class FakeVM extends Fake implements VM {
 
 class MockIsolateState extends Mock implements IsolateState {
   @override
-  ValueListenable<bool> get isPaused => ValueNotifier<bool>(false);
+  ValueNotifier<bool> isPaused = ValueNotifier<bool>(false);
 }
 
 class MockIsolate extends Mock implements Isolate {}
