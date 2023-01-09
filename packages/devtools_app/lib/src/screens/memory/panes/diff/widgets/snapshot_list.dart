@@ -13,7 +13,6 @@ import '../../../../../shared/primitives/auto_dispose.dart';
 import '../../../../../shared/primitives/utils.dart';
 import '../../../../../shared/table/table.dart';
 import '../../../../../shared/theme.dart';
-import '../../../../../shared/utils.dart';
 import '../controller/diff_pane_controller.dart';
 import '../controller/item_controller.dart';
 
