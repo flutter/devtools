@@ -60,14 +60,10 @@ class IsolateManager extends Disposer {
     await _initIsolates(isolates);
   }
 
-  IsolateState? get mainIsolateDebuggerState {
+  IsolateState? get mainIsolateState {
     return _mainIsolate.value != null
         ? _isolateStates[_mainIsolate.value!]
         : null;
-  }
-
-  IsolateState? isolateDebuggerState(IsolateRef? isolate) {
-    return isolate != null ? _isolateStates[isolate] : null;
   }
 
   /// Return a unique, monotonically increasing number for this Isolate.

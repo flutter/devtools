@@ -36,14 +36,14 @@ class FakeIsolateManager extends Fake implements IsolateManager {
   }
 
   @override
-  IsolateState? get mainIsolateDebuggerState {
+  IsolateState? get mainIsolateState {
     return MockIsolateState();
   }
 
   ValueNotifier<List<IsolateRef>>? _isolates;
 
   @override
-  IsolateState isolateDebuggerState(IsolateRef? isolate) {
+  IsolateState isolateState(IsolateRef? isolate) {
     final state = MockIsolateState();
     final mockIsolate = MockIsolate();
     when(mockIsolate.libraries).thenReturn([]);
