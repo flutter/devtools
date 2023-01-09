@@ -92,7 +92,7 @@ class IsolateManager extends Disposer {
     // It is critical that the _serviceExtensionManager is already listening
     // for events indicating that new extension rpcs are registered before this
     // call otherwise there is a race condition where service extensions are not
-    // described in the selectedIsolate or recieved as an event. It is ok if a
+    // described in the selectedIsolate or received as an event. It is ok if a
     // service extension is included in both places as duplicate extensions are
     // handled gracefully.
     await _initSelectedIsolate();
@@ -123,7 +123,7 @@ class IsolateManager extends Disposer {
     final state = _isolateStates[isolateRef];
     if (state != null) {
       // Isolate might have already been closed.
-      state.onIsolateLoaded(isolate);
+      state.handleIsolateLoad(isolate);
     }
   }
 
@@ -249,14 +249,15 @@ class IsolateManager extends Disposer {
       service.onDebugEvent.listen(_handleDebugEvent),
     );
 
-    // We don't yet known the main isolate.
+    // We don't know the main isolate yet.
     _mainIsolate.value = null;
   }
 
-  Future<Isolate?> getIsolateCached(IsolateRef isolateRef) {
-    final isolateState =
-        _isolateStates.putIfAbsent(isolateRef, () => IsolateState(isolateRef));
-    return isolateState.isolate;
+  IsolateState isolateState(IsolateRef isolateRef) {
+    return _isolateStates.putIfAbsent(
+      isolateRef,
+      () => IsolateState(isolateRef),
+    );
   }
 
   void _handleDebugEvent(Event event) {

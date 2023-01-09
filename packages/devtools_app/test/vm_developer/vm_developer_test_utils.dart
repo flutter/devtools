@@ -48,21 +48,31 @@ final testFunction = Func(
 final testField = Field(
   name: 'fooField',
   owner: testLib,
+  declaredType: testType,
   id: '1234',
 );
 
 final testInstance = Instance(
   id: '1234',
   name: 'fooInstance',
+  classRef: testSuperClass,
 );
 
 final testSuperClass =
     ClassRef(name: 'fooSuperClass', library: testLib, id: '1234');
 
+final testType = InstanceRef(
+  kind: '',
+  id: '1234',
+  name: 'fooType',
+  classRef: testClass,
+);
+
 final testSuperType = InstanceRef(
   kind: '',
   id: '1234',
   name: 'fooSuperType',
+  classRef: testSuperClass,
 );
 
 const testPos = SourcePosition(line: 10, column: 4);

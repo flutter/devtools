@@ -33,7 +33,7 @@ Future<void> runDevTools({bool shouldEnableExperiments = false}) async {
   usePathUrlStrategy();
 
   // This may be from our Flutter integration tests. Since we call
-  // [runDevTools] from Dart code, we cannot set the 'enable_experiements'
+  // [runDevTools] from Dart code, we cannot set the 'enable_experiments'
   // environment variable before calling [runDevTools].
   if (shouldEnableExperiments) {
     setEnableExperiments();

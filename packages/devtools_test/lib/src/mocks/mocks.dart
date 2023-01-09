@@ -134,7 +134,7 @@ class FakeVM extends Fake implements VM {
 
 class MockIsolateState extends Mock implements IsolateState {
   @override
-  ValueListenable<bool?> get isPaused => ValueNotifier<bool>(false);
+  ValueListenable<bool> get isPaused => ValueNotifier<bool>(false);
 }
 
 class MockIsolate extends Mock implements Isolate {}

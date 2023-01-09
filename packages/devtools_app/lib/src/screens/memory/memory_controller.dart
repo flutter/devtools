@@ -385,7 +385,7 @@ class _MemoryLog {
 
   MemoryController controller;
 
-  /// Persist the the live memory data to a JSON file in the /tmp directory.
+  /// Persist the live memory data to a JSON file in the /tmp directory.
   List<String> exportMemory() {
     ga.select(gac.memory, gac.export);
 

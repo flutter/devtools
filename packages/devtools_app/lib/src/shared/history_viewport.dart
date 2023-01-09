@@ -13,7 +13,7 @@ import 'theme.dart';
 /// [HistoryManager]. Includes built-in controls for navigating back and forth
 /// through the content stored in the provided [HistoryManager].
 ///
-/// [history] is the [HistoryManger] that contains the data to be displayed.
+/// [history] is the [HistoryManager] that contains the data to be displayed.
 ///
 /// [contentBuilder] is invoked with the currently selected historical data
 /// when building the contents of the viewport.

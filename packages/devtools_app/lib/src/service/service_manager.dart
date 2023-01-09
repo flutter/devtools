@@ -15,9 +15,9 @@ import '../shared/analytics/analytics.dart' as ga;
 import '../shared/config_specific/logger/logger.dart';
 import '../shared/connected_app.dart';
 import '../shared/console/console_service.dart';
-import '../shared/console/eval/inspector_service.dart';
 import '../shared/error_badge_manager.dart';
 import '../shared/globals.dart';
+import '../shared/inspector_service.dart';
 import '../shared/primitives/utils.dart';
 import '../shared/title.dart';
 import '../shared/utils.dart';
@@ -459,8 +459,9 @@ class ServiceConnectionManager {
     );
   }
 
-  /// @returns view id of selected isolate's 'FlutterView'.
-  /// @throws Exception if no 'FlutterView'.
+  /// Returns the view id for the selected isolate's 'FlutterView'.
+  ///
+  /// Throws an Exception if no 'FlutterView' is present in this isolate.
   Future<String> get flutterViewId async {
     final flutterViewListResponse = await _callServiceExtensionOnMainIsolate(
       registrations.flutterListViews,

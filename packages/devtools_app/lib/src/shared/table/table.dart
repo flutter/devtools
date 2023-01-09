@@ -142,7 +142,7 @@ class FlatTable<T> extends StatefulWidget {
   /// This notifier's value will be updated when a row of the table is selected.
   final ValueNotifier<T?> selectionNotifier;
 
-  /// Whether the verical scroll position for this table should be preserved for
+  /// Whether the vertical scroll position for this table should be preserved for
   /// each data set.
   ///
   /// This should be set to true if the table is not disposed and completely
@@ -402,7 +402,7 @@ class TreeTable<T extends TreeNode<T>> extends StatefulWidget {
   /// Whether the data roots in this table should be automatically expanded.
   final bool autoExpandRoots;
 
-  /// Whether the verical scroll position for this table should be preserved for
+  /// Whether the vertical scroll position for this table should be preserved for
   /// each data set.
   ///
   /// This should be set to true if the table is not disposed and completely

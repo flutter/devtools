@@ -90,7 +90,7 @@ class SyntaxHighlighter {
   ///
   /// If there are multiple scopes for a span, styling for each scope is
   /// applied in the order the scopes are listed (i.e., later scope styles take
-  /// precidence).
+  /// precedence).
   TextStyle _getStyleForSpan() {
     if (_spanStack.isEmpty) {
       return const TextStyle();

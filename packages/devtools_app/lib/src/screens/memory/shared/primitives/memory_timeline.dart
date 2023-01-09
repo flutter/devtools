@@ -150,7 +150,7 @@ class MemoryTimeline {
   void addMonitorResetEvent() {
     final timestamp = DateTime.now().millisecondsSinceEpoch;
     // TODO(terry): Enable to make continuous events visible?
-    // displayContinousEvents();
+    // displayContinuousEvents();
 
     postEventSample(
       EventSample.accumulatorReset(
@@ -160,7 +160,7 @@ class MemoryTimeline {
     );
   }
 
-  void displayContinousEvents() {
+  void displayContinuousEvents() {
     for (var index = liveData.length - 1; index >= 0; index--) {
       final sample = liveData[index];
       if (sample.memoryEventInfo.isEventAllocationAccumulator) {
