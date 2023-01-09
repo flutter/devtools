@@ -61,6 +61,9 @@ class EvalService extends DisposableController with AutoDisposeControllerMixin {
     return _service.getObject(_isolateRefId, objRef.id!);
   }
 
+  bool get _isPaused =>
+      serviceManager.isolateManager.mainIsolateState?.isPaused.value ?? false;
+
   /// Evaluate the given expression in the context of the currently selected
   /// stack frame, or the top frame if there is no current selection.
   ///
@@ -68,7 +71,7 @@ class EvalService extends DisposableController with AutoDisposeControllerMixin {
   Future<Response> evalAtCurrentFrame(String expression) {
     final appState = serviceManager.appState;
 
-    if (!appState.isPaused.value) {
+    if (!_isPaused) {
       return Future.error(
         RPCError.withDetails(
           'evaluateInFrame',
