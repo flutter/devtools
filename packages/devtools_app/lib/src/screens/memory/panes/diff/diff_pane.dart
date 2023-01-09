@@ -122,7 +122,7 @@ const _snapshotDocumentation = '''
 
     a. In the Snapshots panel, click the ● button
 
-    b. Use the **Filter** button to refine the results
+    b. If you want to refine results, use the **Filter** button
 
     c. Select a class from the snapshot table to view its retaining paths
 

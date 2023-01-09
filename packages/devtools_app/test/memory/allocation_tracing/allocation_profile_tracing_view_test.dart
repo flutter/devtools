@@ -151,7 +151,7 @@ void main() {
         final refresh = find.text('Refresh');
         expect(refresh, findsOneWidget);
 
-        expect(find.text('Trace'), findsNWidgets(1));
+        expect(find.text('Trace'), findsOneWidget);
         expect(find.text('Class'), findsOneWidget);
         expect(find.text('Delta'), findsOneWidget);
 
@@ -316,7 +316,7 @@ void main() {
         final refresh = find.text('Refresh');
         expect(refresh, findsOneWidget);
 
-        expect(find.text('Trace'), findsNWidgets(1));
+        expect(find.text('Trace'), findsOneWidget);
         expect(find.text('Class'), findsOneWidget);
         expect(find.text('Delta'), findsOneWidget);
 

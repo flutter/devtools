@@ -205,6 +205,7 @@ class ClassesTableDiff extends StatelessWidget {
     required this.classes,
     required this.selection,
     required this.classFilterButton,
+    required this.snapshotId,
   }) : super(key: key);
 
   final List<DiffClassStats> classes;
@@ -233,13 +234,15 @@ class ClassesTableDiff extends StatelessWidget {
   ];
 
   final Widget classFilterButton;
+  final int snapshotId;
 
   static final _columnStore = <String, _ClassesTableDiffColumns>{};
   static _ClassesTableDiffColumns _columns(
-    Widget classFilterButton,
+    int snapshotId,
+    classFilterButton,
   ) =>
       _columnStore.putIfAbsent(
-        '${identityHashCode(classFilterButton)}',
+        '$snapshotId',
         () => _ClassesTableDiffColumns(classFilterButton),
       );
 
@@ -248,7 +251,7 @@ class ClassesTableDiff extends StatelessWidget {
     // We want to preserve the sorting and sort directions for ClassesTableDiff
     // no matter what the data passed to it is.
     const dataKey = 'ClassesTableDiff';
-    final columns = _columns(classFilterButton);
+    final columns = _columns(snapshotId, classFilterButton);
     return FlatTable<DiffClassStats>(
       columns: columns.columnList,
       columnGroups: _columnGroups,
