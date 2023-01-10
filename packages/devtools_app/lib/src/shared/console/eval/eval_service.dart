@@ -15,11 +15,8 @@ class EvalService extends DisposableController with AutoDisposeControllerMixin {
     return serviceManager.service!;
   }
 
-  String get _isolateRefId {
-    final id = serviceManager.isolateManager.selectedIsolate.value?.id;
-    // TODO(polina-c): it is not clear why returning '' is ok.
-    if (id == null) return '';
-    return id;
+  String? get _isolateRefId {
+    return serviceManager.isolateManager.selectedIsolate.value?.id;
   }
 
   /// Returns the class for the provided [ClassRef].
@@ -57,15 +54,17 @@ class EvalService extends DisposableController with AutoDisposeControllerMixin {
   /// Get the populated [Obj] object, given an [ObjRef].
   ///
   /// The return value can be one of [Obj] or [Sentinel].
-  Future<Obj> getObject(ObjRef objRef) {
-    return _service.getObject(_isolateRefId, objRef.id!);
+  Future<Obj?> getObject(ObjRef objRef) async {
+    final ref = _isolateRefId;
+    if (ref == null) return Future.value();
+    return await _service.getObject(ref, objRef.id!);
   }
 
   /// Evaluate the given expression in the context of the currently selected
   /// stack frame, or the top frame if there is no current selection.
   ///
   /// This will fail if the application is not currently paused.
-  Future<Response> evalAtCurrentFrame(String expression) {
+  Future<Response> evalAtCurrentFrame(String expression) async {
     final appState = serviceManager.appState;
 
     if (!serviceManager.isMainIsolatePaused) {
@@ -90,8 +89,20 @@ class EvalService extends DisposableController with AutoDisposeControllerMixin {
       );
     }
 
+    final isolateRefId = _isolateRefId;
+
+    if (isolateRefId == null) {
+      return Future.error(
+        RPCError.withDetails(
+          'evaluateInFrame',
+          RPCError.kServerError,
+          'isolateRefId is null',
+        ),
+      );
+    }
+
     return _service.evaluateInFrame(
-      _isolateRefId,
+      isolateRefId,
       frame.index!,
       expression,
       disableBreakpoints: true,
