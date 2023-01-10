@@ -80,6 +80,9 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
   final resolvedUriManager = ResolvedUriManager();
 
   @override
+  bool isMainIsolatePaused = false;
+
+  @override
   VmServiceWrapper? service;
 
   @override
