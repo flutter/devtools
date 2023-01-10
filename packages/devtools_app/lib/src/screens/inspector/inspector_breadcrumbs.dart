@@ -5,7 +5,7 @@
 import 'package:flutter/material.dart';
 
 import '../../shared/console/eval/inspector_tree.dart';
-import '../../shared/diagnostics_text_styles.dart';
+import '../../shared/console/primitives/text_styles.dart';
 import '../../shared/primitives/utils.dart';
 import '../../shared/theme.dart';
 import '../../shared/utils.dart';
@@ -104,8 +104,8 @@ class _InspectorBreadcrumb extends StatelessWidget {
       data.text,
       maxLines: 1,
       overflow: TextOverflow.ellipsis,
-      style: DiagnosticsTextStyles.regular
-          .copyWith(fontSize: scaleByFontFactor(11)),
+      style:
+          ConsoleTextStyles.regular.copyWith(fontSize: scaleByFontFactor(11)),
     );
 
     final icon = data.icon == null
