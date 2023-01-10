@@ -39,4 +39,3 @@ TODO: Remove this section if there are not any general updates.
 ## Changelog
 More details about changes and fixes are available in the DevTools
 [changelog](https://github.com/flutter/devtools/blob/master/CHANGELOG.md).
-
