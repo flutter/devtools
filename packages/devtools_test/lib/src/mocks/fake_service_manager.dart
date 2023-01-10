@@ -80,7 +80,15 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
   final resolvedUriManager = ResolvedUriManager();
 
   @override
-  bool isMainIsolatePaused = false;
+  bool get isMainIsolatePaused {
+    final state = isolateManager.mainIsolateState! as MockIsolateState;
+    return state.isPaused.value;
+  }
+
+  set isMainIsolatePaused(bool value) {
+    final state = isolateManager.mainIsolateState! as MockIsolateState;
+    state.isPaused.value = value;
+  }
 
   @override
   VmServiceWrapper? service;

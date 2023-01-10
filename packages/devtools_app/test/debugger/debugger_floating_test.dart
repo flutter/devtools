@@ -28,9 +28,7 @@ void main() {
   fakeServiceManager.consoleService.ensureServiceInitialized();
 
   setUp(() {
-    final state =
-        fakeServiceManager.isolateManager.mainIsolateState! as MockIsolateState;
-    state.isPaused.value = true;
+    fakeServiceManager.isMainIsolatePaused = true;
   });
 
   Future<void> pumpControls(WidgetTester tester) async {
