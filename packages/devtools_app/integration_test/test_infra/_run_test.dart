@@ -49,7 +49,6 @@ Future<void> runFlutterIntegrationTest(
     await testRunner.run(
       testRunnerArgs.testTarget,
       enableExperiments: testRunnerArgs.enableExperiments,
-      updateGoldens: testRunnerArgs.updateGoldens,
       headless: testRunnerArgs.headless,
       testAppArguments: {
         'service_uri': testAppUri,
@@ -99,7 +98,6 @@ class TestRunner with IOMixin {
     String testTarget, {
     bool headless = false,
     bool enableExperiments = false,
-    bool updateGoldens = false,
     Map<String, Object> testAppArguments = const <String, Object>{},
   }) async {
     _debugLog('starting the flutter drive process');
@@ -115,7 +113,6 @@ class TestRunner with IOMixin {
         if (testAppArguments.isNotEmpty)
           '--dart-define=test_args=${jsonEncode(testAppArguments)}',
         if (enableExperiments) '--dart-define=enable_experiments=true',
-        if (updateGoldens) '--dart-define=update_goldens=true',
       ],
     );
     listenToProcessOutput(
@@ -198,19 +195,16 @@ class TestArgs {
     testAppUri = argWithTestAppUri?.substring(testAppArg.length);
 
     enableExperiments = args.contains(enableExperimentsArg);
-    updateGoldens = args.contains(updateGoldensArg);
     headless = args.contains(headlessArg);
   }
 
   static const testTargetArg = '--target=';
   static const testAppArg = '--test-app-uri=';
   static const enableExperimentsArg = '--enable-experiments';
-  static const updateGoldensArg = '--update-goldens';
   static const headlessArg = '--headless';
 
   late final String testTarget;
   late final String? testAppUri;
   late final bool enableExperiments;
-  late final bool updateGoldens;
   late final bool headless;
 }
