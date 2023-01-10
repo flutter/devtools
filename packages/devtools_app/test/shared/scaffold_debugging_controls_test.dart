@@ -55,7 +55,10 @@ void main() {
         AppState(mockServiceManager.isolateManager.selectedIsolate),
       );
       final mockDebuggerController = MockDebuggerController();
-      mockServiceManager.appState.setPausedOnBreakpoint(true);
+      final state =
+          serviceManager.isolateManager.mainIsolateState! as MockIsolateState;
+      state.isPaused.value = true;
+      when(mockServiceManager.isMainIsolatePaused).thenReturn(false);
 
       await tester.pumpWidget(
         wrapWithControllers(

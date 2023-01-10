@@ -1145,7 +1145,7 @@ class _LineItemState extends State<LineItem>
     // ignore: avoid-unused-parameters
     required bool Function() isHoverStale,
   }) async {
-    if (!serviceManager.appState.isPaused.value) return null;
+    if (!serviceManager.isMainIsolatePaused) return null;
 
     final word = wordForHover(
       event.localPosition.dx,

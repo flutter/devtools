@@ -78,6 +78,12 @@ class ServiceConnectionManager {
 
   final isolateManager = IsolateManager();
 
+  /// Proxy to state inside the isolateManager, for code consizeness.
+  ///
+  /// Defaults to false if there is no main isolate.
+  bool get isMainIsolatePaused =>
+      isolateManager.mainIsolateState?.isPaused.value ?? false;
+
   final consoleService = ConsoleService();
 
   final resolvedUriManager = ResolvedUriManager();
@@ -547,7 +553,7 @@ class ServiceConnectionManager {
     if (uri == null) return false;
     assert(_serviceAvailable.isCompleted);
     assert(serviceManager.isolateManager.mainIsolate.value != null);
-    final isolate = isolateManager.mainIsolateDebuggerState!.isolateNow;
+    final isolate = isolateManager.mainIsolateState!.isolateNow;
     return (isolate?.libraries ?? [])
         .map((ref) => ref.uri)
         .toList()
