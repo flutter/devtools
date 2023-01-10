@@ -20,7 +20,8 @@ TODO: Remove this section if there are not any general updates.
 TODO: Remove this section if there are not any general updates.
 
 ## Memory updates
-TODO: Remove this section if there are not any general updates.
+
+- Improve usability of snapshot diffing [#5015](https://github.com/flutter/devtools/pull/5015)
 
 ## Debugger updates
 

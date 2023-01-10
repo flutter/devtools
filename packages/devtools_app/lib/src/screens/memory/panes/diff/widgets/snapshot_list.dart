@@ -99,7 +99,6 @@ class _SnapshotListTitle extends StatelessWidget {
     final theme = Theme.of(context);
     final textStyle =
         selected ? theme.selectedTextStyle : theme.regularTextStyle;
-
     return ValueListenableBuilder<bool>(
       valueListenable: theItem.isProcessing,
       builder: (_, isProcessing, __) => Row(
@@ -125,12 +124,10 @@ class _SnapshotListTitle extends StatelessWidget {
             const SizedBox(width: denseRowSpacing),
           ],
           if (theItem is SnapshotDocItem)
-            Expanded(
-              child: Text(
-                'Snapshots',
-                overflow: TextOverflow.ellipsis,
-                style: textStyle,
-              ),
+            Icon(
+              Icons.help_outline,
+              size: defaultIconSize,
+              color: textStyle.color,
             ),
           if (isProcessing) ...[
             CenteredCircularProgressIndicator(size: smallProgressSize),

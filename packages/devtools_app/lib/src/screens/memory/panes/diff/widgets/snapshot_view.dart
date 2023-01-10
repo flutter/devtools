@@ -11,6 +11,7 @@ import '../controller/diff_pane_controller.dart';
 import '../controller/heap_diff.dart';
 import '../controller/item_controller.dart';
 import 'class_details/class_details.dart';
+import 'class_filter.dart';
 import 'classes_table_diff.dart';
 import 'classes_table_single.dart';
 
@@ -41,19 +42,27 @@ class SnapshotView extends StatelessWidget {
 
         late Widget classTable;
 
+        final filter = controller.core.classFilter;
+
+        final classFilterButton = ClassFilterButton(
+          filter: filter,
+          onChanged: controller.applyFilter,
+        );
+
         if (singleClasses != null) {
           final totalSize =
               (controller.core.selectedItem as SnapshotInstanceItem).totalSize;
-
           classTable = ClassesTableSingle(
             classes: singleClasses,
             selection: controller.derived.selectedSingleClassStats,
             totalSize: totalSize!,
+            classFilterButton: classFilterButton,
           );
         } else if (diffClasses != null) {
           classTable = ClassesTableDiff(
             classes: controller.derived.diffClassesToShow.value!,
             selection: controller.derived.selectedDiffClassStats,
+            classFilterButton: classFilterButton,
           );
         } else {
           throw StateError('singleClasses or diffClasses should not be null.');

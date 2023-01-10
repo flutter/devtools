@@ -61,7 +61,7 @@ class MemoryTabView extends StatelessWidget {
       TabRecord(
         tab: DevToolsTab.create(
           key: MemoryScreenKeys.dartHeapTableProfileTab,
-          tabName: 'Profile',
+          tabName: 'Profile Memory',
           gaPrefix: _gaPrefix,
         ),
         tabView: KeepAliveWrapper(
@@ -74,7 +74,7 @@ class MemoryTabView extends StatelessWidget {
         tab: DevToolsTab.create(
           key: MemoryScreenKeys.diffTab,
           gaPrefix: _gaPrefix,
-          tabName: 'Diff',
+          tabName: 'Diff Snapshots',
         ),
         tabView: KeepAliveWrapper(
           child: DiffPane(
@@ -85,7 +85,7 @@ class MemoryTabView extends StatelessWidget {
       TabRecord(
         tab: DevToolsTab.create(
           key: MemoryScreenKeys.dartHeapAllocationTracingTab,
-          tabName: 'Trace',
+          tabName: 'Trace Instances',
           gaPrefix: _gaPrefix,
         ),
         tabView: const KeepAliveWrapper(
