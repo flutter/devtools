@@ -103,7 +103,8 @@ class EvalService extends DisposableController with AutoDisposeControllerMixin {
     );
   }
 
+  static const String errorKey = 'error';
   Response _errorResponse(String error) {
-    return Response()..json = {'error': error};
+    return Response()..json = {errorKey: error};
   }
 }
