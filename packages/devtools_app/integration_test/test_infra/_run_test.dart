@@ -59,7 +59,6 @@ Future<void> runFlutterIntegrationTest(
       },
     );
   } on Exception catch (e) {
-    _debugLog('exception was thrown from the flutter drive command');
     exception = e;
   } finally {
     if (testApp != null) {
@@ -76,7 +75,6 @@ Future<void> runFlutterIntegrationTest(
   }
 
   if (exception != null) {
-    _debugLog('throwing exception from test');
     throw exception;
   }
 }
@@ -104,6 +102,9 @@ class ChromeDriver with IOMixin {
 }
 
 class TestRunner with IOMixin {
+  static const _beginExceptionMarker = '| EXCEPTION CAUGHT';
+  static const _endExceptionMarker = '===========================';
+
   Future<void> run(
     String testTarget, {
     bool headless = false,
@@ -130,7 +131,9 @@ class TestRunner with IOMixin {
       ],
     );
 
-    final testExceptionCompleter = Completer<Exception>();
+    bool writeInProgress = false;
+    final exceptionBuffer = StringBuffer();
+
     listenToProcessOutput(
       process,
       onStdout: (line) {
@@ -140,19 +143,34 @@ class TestRunner with IOMixin {
               jsonDecode(testResultJson) as Map<String, Object?>;
           final result = _TestResult.parse(testResultMap);
           if (!result.result) {
-            testExceptionCompleter.complete(Exception(result.toString()));
+            exceptionBuffer
+              ..writeln('$result')
+              ..writeln();
+          }
+        }
+
+        if (line.contains(_beginExceptionMarker)) {
+          writeInProgress = true;
+        }
+        if (writeInProgress) {
+          exceptionBuffer.writeln(line);
+          // Marks the end of the exception caught by flutter.
+          if (line.contains(_endExceptionMarker) &&
+              !line.contains(_beginExceptionMarker)) {
+            writeInProgress = false;
+            exceptionBuffer.writeln();
           }
         }
       },
     );
 
-    await Future.any([testExceptionCompleter.future, process.exitCode]);
+    await process.exitCode;
 
     process.kill();
     _debugLog('flutter drive process has exited');
 
-    if (testExceptionCompleter.isCompleted) {
-      throw await testExceptionCompleter.future;
+    if (exceptionBuffer.isNotEmpty) {
+      throw Exception(exceptionBuffer.toString());
     }
   }
 }

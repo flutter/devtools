@@ -40,7 +40,7 @@ void main(List<String> args) async {
       .firstWhereOrNull((arg) => arg.startsWith(TestArgs.testTargetArg));
   if (testTarget != null) {
     // Run the single test at this path.
-    _maybeAddNoTestAppArgument(modifiableArgs, testTarget);
+    _maybeAddOfflineArgument(modifiableArgs, testTarget);
     _maybeAddExperimentsArgument(modifiableArgs, testTarget);
     final testRunnerArgs = TestArgs(modifiableArgs);
 
@@ -56,7 +56,7 @@ void main(List<String> args) async {
 
     for (final testFile in testFiles) {
       final testTarget = testFile.path;
-      _maybeAddNoTestAppArgument(modifiableArgs, testTarget);
+      _maybeAddOfflineArgument(modifiableArgs, testTarget);
       _maybeAddExperimentsArgument(modifiableArgs, testTarget);
       final testRunnerArgs = TestArgs([
         ...modifiableArgs,
@@ -67,7 +67,7 @@ void main(List<String> args) async {
   }
 }
 
-void _maybeAddNoTestAppArgument(List<String> args, String testTarget) {
+void _maybeAddOfflineArgument(List<String> args, String testTarget) {
   if (testTarget.startsWith(_offlineIndicator)) {
     args.add(TestArgs.offlineArg);
   }
