@@ -199,10 +199,7 @@ class ClassesTableSingle extends StatelessWidget {
     required this.selection,
     required this.totalSize,
     required this.classFilterButton,
-    required this.snapshotId,
   });
-
-  final int snapshotId;
 
   final int totalSize;
 
@@ -211,23 +208,12 @@ class ClassesTableSingle extends StatelessWidget {
   final List<SingleClassStats> classes;
   final ValueNotifier<SingleClassStats?> selection;
 
-  static final _columnStore = <String, _ClassesTableSingleColumns>{};
-  static _ClassesTableSingleColumns _columns(
-    int totalSize,
-    Widget classFilterButton,
-    int snapshotId,
-  ) =>
-      _columnStore.putIfAbsent(
-        '$totalSize-$snapshotId',
-        () => _ClassesTableSingleColumns(totalSize, classFilterButton),
-      );
-
   @override
   Widget build(BuildContext context) {
     // We want to preserve the sorting and sort directions for ClassesTableDiff
     // no matter what the data passed to it is.
     const dataKey = 'ClassesTableSingle';
-    final columns = _columns(totalSize, classFilterButton, snapshotId);
+    final columns = _ClassesTableSingleColumns(totalSize, classFilterButton);
     return FlatTable<SingleClassStats>(
       columns: columns.columnList,
       data: classes,

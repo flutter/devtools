@@ -20,7 +20,7 @@ final _customFilter = ClassFilter(
 );
 
 class _FilterTest {
-  _FilterTest(this.isDiff);
+  _FilterTest({required this.isDiff});
 
   final bool isDiff;
 
@@ -34,7 +34,10 @@ class _FilterTest {
       '../../../test_infra/goldens/memory_diff_filter_dialog_${type?.name ?? 'custom'}.png';
 }
 
-final _tests = [_FilterTest(false), _FilterTest(true)];
+final _tests = [
+  _FilterTest(isDiff: false),
+  _FilterTest(isDiff: true),
+];
 
 void main() {
   late DiffSnapshotScene scene;
