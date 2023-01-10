@@ -8,11 +8,11 @@ import '../../shared/diagnostics/source_location.dart';
 import '../../shared/primitives/trees.dart';
 import '../../shared/ui/search.dart';
 
-/// Whether to include properties surfaced through diagnosticsble objects as
+/// Whether to include properties surfaced through Diagnosticable objects as
 /// part of the generic Debugger view of an object.
 bool includeDiagnosticPropertiesInDebugger = true;
 
-/// Whether to include children surfaced through diagnosticsble objects as part
+/// Whether to include children surfaced through Diagnosticable objects as part
 /// of the generic Debugger view of an object.
 ///
 /// It is safer to set to false as it is hard to avoid confusing overlap between

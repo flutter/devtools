@@ -414,17 +414,17 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
     return getLevelMember('defaultLevel', DiagnosticLevel.info);
   }
 
-  /// Whether the value of the property is a diagnosticsble value itself.
-  /// Optionally, properties that are themselves diagnosticsble should be
-  /// displayed as trees of diagnosticsble properties and children.
+  /// Whether the value of the property is a Diagnosticable value itself.
+  /// Optionally, properties that are themselves Diagnosticable should be
+  /// displayed as trees of Diagnosticable properties and children.
   ///
   /// TODO(jacobr): add helpers to get the properties and children of
-  /// this diagnosticsble value even if getChildren and getProperties
+  /// this Diagnosticable value even if getChildren and getProperties
   /// would return null. This will allow showing nested data for properties
   /// that don't show children by default in other debugging output but
   /// could.
-  bool get isdiagnosticsbleValue {
-    return getBooleanMember('isdiagnosticsbleValue', false);
+  bool get isDiagnosticableValue {
+    return getBooleanMember('isDiagnosticableValue', false);
   }
 
   String? getStringMember(String memberName) {

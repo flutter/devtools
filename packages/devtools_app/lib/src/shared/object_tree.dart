@@ -269,13 +269,13 @@ Future<void> buildVariablesTree(
       if (childRef == null) return;
       if (childRef.diagnostic == null) {
         // TODO(jacobr): also check whether the InstanceRef is an instance of
-        // diagnosticsble and show the diagnosticsble properties in that case.
+        // Diagnosticable and show the Diagnosticable properties in that case.
         final instanceRef = childRef.instanceRef;
         // This is an approximation of eval('instanceRef is DiagnosticsNode')
         // TODO(jacobr): cache the full class hierarchy so we can cheaply check
         // instanceRef is DiagnosticsNode without having to do an eval.
         if (instanceRef != null &&
-            (instanceRef.classRef?.name == 'diagnosticsbleTreeNode' ||
+            (instanceRef.classRef?.name == 'DiagnosticableTreeNode' ||
                 instanceRef.classRef?.name == 'DiagnosticsProperty')) {
           // The user is expecting to see the object the DiagnosticsNode is
           // describing not the DiagnosticsNode itself.

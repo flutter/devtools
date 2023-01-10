@@ -95,10 +95,10 @@ class LoggingDetailsController {
           final InspectorTreeNode node = tree!.selection!;
           unawaited(tree!.maybePopulateChildren(node));
 
-          // TODO(jacobr): node.diagnostic.isdiagnosticsbleValue isn't quite
+          // TODO(jacobr): node.diagnostic.isDiagnosticableValue isn't quite
           // right.
           final diagnosticLocal = node.diagnostic!;
-          if (diagnosticLocal.isdiagnosticsbleValue) {
+          if (diagnosticLocal.isDiagnosticableValue) {
             // TODO(jacobr): warn if the selection can't be set as the node is
             // stale which is likely if this is an old log entry.
             onShowInspector();

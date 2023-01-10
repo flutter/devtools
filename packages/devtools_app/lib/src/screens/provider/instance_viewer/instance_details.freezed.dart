@@ -146,7 +146,7 @@ class _$ListIndexPathCopyWithImpl<$Res>
 
 /// @nodoc
 
-class _$ListIndexPath with diagnosticsbleTreeMixin implements ListIndexPath {
+class _$ListIndexPath with DiagnosticableTreeMixin implements ListIndexPath {
   const _$ListIndexPath(this.index);
 
   @override
@@ -295,7 +295,7 @@ class _$MapKeyPathCopyWithImpl<$Res> extends _$PathToPropertyCopyWithImpl<$Res>
 
 /// @nodoc
 
-class _$MapKeyPath with diagnosticsbleTreeMixin implements MapKeyPath {
+class _$MapKeyPath with DiagnosticableTreeMixin implements MapKeyPath {
   const _$MapKeyPath({required this.ref});
 
   @override
@@ -456,7 +456,7 @@ class _$PropertyPathCopyWithImpl<$Res>
 
 /// @nodoc
 
-class _$PropertyPath with diagnosticsbleTreeMixin implements PropertyPath {
+class _$PropertyPath with DiagnosticableTreeMixin implements PropertyPath {
   const _$PropertyPath(
       {required this.name, required this.ownerUri, required this.ownerName});
 
@@ -796,7 +796,7 @@ class __$ObjectFieldCopyWithImpl<$Res> extends _$ObjectFieldCopyWithImpl<$Res>
 
 /// @nodoc
 
-class _$_ObjectField extends _ObjectField with diagnosticsbleTreeMixin {
+class _$_ObjectField extends _ObjectField with DiagnosticableTreeMixin {
   _$_ObjectField(
       {required this.name,
       required this.isFinal,
@@ -1219,7 +1219,7 @@ class _$NullInstanceCopyWithImpl<$Res>
 
 /// @nodoc
 
-class _$NullInstance extends NullInstance with diagnosticsbleTreeMixin {
+class _$NullInstance extends NullInstance with DiagnosticableTreeMixin {
   _$NullInstance({required this.setter}) : super._();
 
   @override
@@ -1468,7 +1468,7 @@ class _$BoolInstanceCopyWithImpl<$Res>
 
 /// @nodoc
 
-class _$BoolInstance extends BoolInstance with diagnosticsbleTreeMixin {
+class _$BoolInstance extends BoolInstance with DiagnosticableTreeMixin {
   _$BoolInstance(this.displayString,
       {required this.instanceRefId, required this.setter})
       : super._();
@@ -1737,7 +1737,7 @@ class _$NumInstanceCopyWithImpl<$Res>
 
 /// @nodoc
 
-class _$NumInstance extends NumInstance with diagnosticsbleTreeMixin {
+class _$NumInstance extends NumInstance with DiagnosticableTreeMixin {
   _$NumInstance(this.displayString,
       {required this.instanceRefId, required this.setter})
       : super._();
@@ -2005,7 +2005,7 @@ class _$StringInstanceCopyWithImpl<$Res>
 
 /// @nodoc
 
-class _$StringInstance extends StringInstance with diagnosticsbleTreeMixin {
+class _$StringInstance extends StringInstance with DiagnosticableTreeMixin {
   _$StringInstance(this.displayString,
       {required this.instanceRefId, required this.setter})
       : super._();
@@ -2283,7 +2283,7 @@ class _$MapInstanceCopyWithImpl<$Res>
 
 /// @nodoc
 
-class _$MapInstance extends MapInstance with diagnosticsbleTreeMixin {
+class _$MapInstance extends MapInstance with DiagnosticableTreeMixin {
   _$MapInstance(this.keys,
       {required this.hash, required this.instanceRefId, required this.setter})
       : super._();
@@ -2563,7 +2563,7 @@ class _$ListInstanceCopyWithImpl<$Res>
 
 /// @nodoc
 
-class _$ListInstance extends ListInstance with diagnosticsbleTreeMixin {
+class _$ListInstance extends ListInstance with DiagnosticableTreeMixin {
   _$ListInstance(
       {required this.length,
       required this.hash,
@@ -2863,7 +2863,7 @@ class _$ObjectInstanceCopyWithImpl<$Res>
 
 /// @nodoc
 
-class _$ObjectInstance extends ObjectInstance with diagnosticsbleTreeMixin {
+class _$ObjectInstance extends ObjectInstance with DiagnosticableTreeMixin {
   _$ObjectInstance(this.fields,
       {required this.type,
       required this.hash,
@@ -3171,7 +3171,7 @@ class _$EnumInstanceCopyWithImpl<$Res>
 
 /// @nodoc
 
-class _$EnumInstance extends EnumInstance with diagnosticsbleTreeMixin {
+class _$EnumInstance extends EnumInstance with DiagnosticableTreeMixin {
   _$EnumInstance(
       {required this.type,
       required this.value,
@@ -3557,7 +3557,7 @@ class __$InstancePathFromInstanceIdCopyWithImpl<$Res>
 /// @nodoc
 
 class _$_InstancePathFromInstanceId extends _InstancePathFromInstanceId
-    with diagnosticsbleTreeMixin {
+    with DiagnosticableTreeMixin {
   const _$_InstancePathFromInstanceId(this.instanceId,
       {this.pathToProperty = const []})
       : super._();
@@ -3734,7 +3734,7 @@ class __$InstancePathFromProviderIdCopyWithImpl<$Res>
 /// @nodoc
 
 class _$_InstancePathFromProviderId extends _InstancePathFromProviderId
-    with diagnosticsbleTreeMixin {
+    with DiagnosticableTreeMixin {
   const _$_InstancePathFromProviderId(this.providerId,
       {this.pathToProperty = const []})
       : super._();

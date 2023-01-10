@@ -109,7 +109,7 @@ class DiagnosticsNodeDescription extends StatelessWidget {
     TextStyle? nodeDescriptionHighlightStyle,
   }) sync* {
     final diagnosticLocal = diagnostic!;
-    if (diagnosticLocal.isdiagnosticsbleValue) {
+    if (diagnosticLocal.isDiagnosticableValue) {
       final match = treeNodePrimaryDescriptionPattern.firstMatch(description);
       if (match != null) {
         yield TextSpan(text: match.group(1), style: textStyle);

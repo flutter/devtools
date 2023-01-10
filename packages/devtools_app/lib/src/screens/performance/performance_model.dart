@@ -757,7 +757,7 @@ abstract class TimelineEvent extends TreeNode<TimelineEvent>
     return copy;
   }
 
-  // TODO(kenz): use diagnosticsbleTreeMixin instead.
+  // TODO(kenz): use DiagnosticableTreeMixin instead.
   @override
   String toString() {
     final buf = StringBuffer();
