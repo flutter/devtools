@@ -4,8 +4,7 @@
 
 import 'package:devtools_app/src/screens/memory/panes/diff/controller/item_controller.dart';
 import 'package:devtools_app/src/screens/memory/panes/diff/diff_pane.dart';
-import 'package:devtools_app/src/screens/memory/panes/diff/widgets/class_filter_dialog.dart';
-import 'package:devtools_app/src/screens/memory/panes/diff/widgets/snapshot_control_pane.dart';
+import 'package:devtools_app/src/screens/memory/panes/diff/widgets/class_filter.dart';
 import 'package:devtools_app/src/screens/memory/shared/heap/class_filter.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
@@ -21,7 +20,7 @@ final _customFilter = ClassFilter(
 );
 
 class _FilterTest {
-  _FilterTest(this.isDiff);
+  _FilterTest({required this.isDiff});
 
   final bool isDiff;
 
@@ -35,7 +34,10 @@ class _FilterTest {
       '../../../test_infra/goldens/memory_diff_filter_dialog_${type?.name ?? 'custom'}.png';
 }
 
-final _tests = [_FilterTest(false), _FilterTest(true)];
+final _tests = [
+  _FilterTest(isDiff: false),
+  _FilterTest(isDiff: true),
+];
 
 void main() {
   late DiffSnapshotScene scene;

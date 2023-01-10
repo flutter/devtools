@@ -1,8 +1,5 @@
 name: Daily Dev Bump
 on:
-  schedule:
-    # * is a special character in YAML so you have to quote this string
-    - cron: '0 0 * * *' # Run every day at midnight
   workflow_dispatch: # Allows for manual triggering if needed
 
 permissions:
