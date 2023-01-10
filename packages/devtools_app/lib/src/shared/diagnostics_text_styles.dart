@@ -4,11 +4,11 @@
 
 import 'package:flutter/material.dart';
 
-import '../../theme.dart';
+import 'theme.dart';
 
 // Enum-like static classes are ok.
 // ignore: avoid_classes_with_only_static_members
-class ConsoleTextStyles {
+class DiagnosticsTextStyles {
   static TextStyle unimportant(ColorScheme colorScheme) => TextStyle(
         color:
             colorScheme.isLight ? Colors.grey.shade500 : Colors.grey.shade600,
