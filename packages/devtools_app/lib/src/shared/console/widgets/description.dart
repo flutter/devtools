@@ -5,6 +5,7 @@
 import 'package:flutter/material.dart';
 
 import '../../diagnostics/diagnostics_node.dart';
+import '../../diagnostics_text_styles.dart';
 import '../../globals.dart';
 import '../../object_tree.dart';
 import '../../primitives/utils.dart';
@@ -13,7 +14,6 @@ import '../../ui/hover.dart';
 import '../../ui/icons.dart';
 import '../../ui/utils.dart';
 import '../eval/inspector_tree.dart';
-import '../../diagnostics_text_styles.dart';
 import 'expandable_variable.dart';
 
 final _colorIconMaker = ColorIconMaker();
