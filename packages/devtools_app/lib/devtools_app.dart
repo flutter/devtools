@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// TODO(polinach): consider reusing CheckboxSettings from shared/common_widgets
+// and then this hide can be removed.
+export 'src/app.dart' hide CheckboxSetting;
 export 'src/extension_points/extensions_base.dart';
 export 'src/extension_points/extensions_external.dart';
 export 'src/framework/notifications_view.dart';
