@@ -47,6 +47,7 @@ import 'shared/console/primitives/simple_items.dart';
 import 'shared/dialogs.dart';
 import 'shared/globals.dart';
 import 'shared/primitives/auto_dispose.dart';
+import 'shared/primitives/utils.dart';
 import 'shared/routing.dart';
 import 'shared/screen.dart';
 import 'shared/snapshot_screen.dart';
@@ -65,11 +66,13 @@ const showVmDeveloperMode = false;
 class DevToolsApp extends StatefulWidget {
   const DevToolsApp(
     this.screens,
-    this.analyticsController,
-  );
+    this.analyticsController, {
+    this.sampleData = const [],
+  });
 
   final List<DevToolsScreen> screens;
   final AnalyticsController analyticsController;
+  final List<DevToolsJsonFile> sampleData;
 
   @override
   State<DevToolsApp> createState() => DevToolsAppState();
@@ -208,7 +211,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
           ReportFeedbackButton(),
           OpenAboutAction(),
         ],
-        child: LandingScreenBody(),
+        child: LandingScreenBody(sampleData: widget.sampleData),
       );
     }
 

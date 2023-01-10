@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:devtools_shared/devtools_shared.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -30,6 +31,10 @@ import 'framework_core.dart';
 /// available as well as to provide access to other functionality that does not
 /// require a connected Dart application.
 class LandingScreenBody extends StatefulWidget {
+  const LandingScreenBody({this.sampleData = const []});
+
+  final List<DevToolsJsonFile> sampleData;
+
   @override
   State<LandingScreenBody> createState() => _LandingScreenBodyState();
 }
@@ -45,12 +50,12 @@ class _LandingScreenBodyState extends State<LandingScreenBody> {
   Widget build(BuildContext context) {
     return Scrollbar(
       child: ListView(
-        children: const [
-          ConnectDialog(),
-          SizedBox(height: defaultSpacing),
-          ImportFileInstructions(),
-          SizedBox(height: defaultSpacing),
-          AppSizeToolingInstructions(),
+        children: [
+          const ConnectDialog(),
+          const SizedBox(height: defaultSpacing),
+          ImportFileInstructions(sampleData: widget.sampleData),
+          const SizedBox(height: defaultSpacing),
+          const AppSizeToolingInstructions(),
         ],
       ),
     );
@@ -247,7 +252,10 @@ class _ConnectDialogState extends State<ConnectDialog>
 }
 
 class ImportFileInstructions extends StatelessWidget {
-  const ImportFileInstructions({Key? key}) : super(key: key);
+  const ImportFileInstructions({Key? key, this.sampleData = const []})
+      : super(key: key);
+
+  final List<DevToolsJsonFile> sampleData;
 
   @override
   Widget build(BuildContext context) {
@@ -275,6 +283,10 @@ class ImportFileInstructions extends StatelessWidget {
               iconData: Icons.file_upload,
             ),
           ),
+          if (sampleData.isNotEmpty && !kReleaseMode) ...[
+            const SizedBox(height: defaultSpacing),
+            SampleDataDropDownButton(sampleData: sampleData),
+          ]
         ],
       ),
     );
@@ -333,5 +345,57 @@ class AppSizeToolingInstructions extends StatelessWidget {
       gac.openAppSizeTool,
     );
     DevToolsRouterDelegate.of(context).navigate(appSizePageId);
+  }
+}
+
+class SampleDataDropDownButton extends StatefulWidget {
+  const SampleDataDropDownButton({
+    super.key,
+    this.sampleData = const [],
+  });
+
+  final List<DevToolsJsonFile> sampleData;
+
+  @override
+  State<SampleDataDropDownButton> createState() =>
+      _SampleDataDropDownButtonState();
+}
+
+class _SampleDataDropDownButtonState extends State<SampleDataDropDownButton> {
+  DevToolsJsonFile? value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        RoundedDropDownButton<DevToolsJsonFile>(
+          value: value,
+          items: [
+            for (final data in widget.sampleData) _buildMenuItem(data),
+          ],
+          onChanged: (file) => setState(() {
+            value = file;
+          }),
+        ),
+        const SizedBox(width: defaultSpacing),
+        ElevatedButton(
+          onPressed: value == null
+              ? null
+              : () => Provider.of<ImportController>(context, listen: false)
+                  .importData(value!),
+          child: const MaterialIconLabel(
+            label: 'Load sample data',
+            iconData: Icons.file_upload,
+          ),
+        ),
+      ],
+    );
+  }
+
+  DropdownMenuItem<DevToolsJsonFile> _buildMenuItem(DevToolsJsonFile file) {
+    return DropdownMenuItem<DevToolsJsonFile>(
+      value: file,
+      child: Text(file.path),
+    );
   }
 }
