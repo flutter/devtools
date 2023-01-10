@@ -20,7 +20,7 @@ void main() {
       'Landing screen displays without error', const Size(2000.0, 2000.0),
       (WidgetTester tester) async {
     // Build our app and trigger a frame.
-    await tester.pumpWidget(wrap(LandingScreenBody()));
+    await tester.pumpWidget(wrap(const LandingScreenBody()));
     expect(find.text('Connect to a Running App'), findsOneWidget);
     expect(find.text('App Size Tooling'), findsOneWidget);
   });
