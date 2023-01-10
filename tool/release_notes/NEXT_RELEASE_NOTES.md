@@ -23,7 +23,8 @@ TODO: Remove this section if there are not any general updates.
 TODO: Remove this section if there are not any general updates.
 
 ## Debugger updates
-TODO: Remove this section if there are not any general updates.
+
+- Added support for viewing profiler hits in the debugger script viewer [#4831](https://github.com/flutter/devtools/pull/4831)
 
 ## Network profiler updates
 TODO: Remove this section if there are not any general updates.
