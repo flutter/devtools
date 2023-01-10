@@ -4,7 +4,7 @@
 
 import 'package:vm_service/vm_service.dart';
 
-import '../../shared/console/primitives/source_location.dart';
+import '../../shared/diagnostics/source_location.dart';
 import '../../shared/primitives/trees.dart';
 import '../../shared/ui/search.dart';
 

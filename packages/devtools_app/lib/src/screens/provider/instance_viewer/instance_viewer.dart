@@ -12,7 +12,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../shared/console/primitives/text_styles.dart';
+import '../../../shared/diagnostics_text_styles.dart';
 import '../../../shared/eval_on_dart_library.dart';
 import '../../../shared/primitives/sliver_iterable_child_delegate.dart';
 import '../../../shared/theme.dart';
@@ -382,7 +382,7 @@ class _InstanceViewerState extends ConsumerState<InstanceViewer> {
               if (field.isFinal)
                 Text(
                   'final ',
-                  style: ConsoleTextStyles.unimportant(
+                  style: DiagnosticsTextStyles.unimportant(
                     Theme.of(context).colorScheme,
                   ),
                 ),
@@ -460,7 +460,7 @@ class _ObjectHeader extends StatelessWidget {
             ),
           TextSpan(
             text: '#${shortHash(hash)}',
-            style: ConsoleTextStyles.unimportant(colorScheme),
+            style: DiagnosticsTextStyles.unimportant(colorScheme),
           ),
           TextSpan(text: startToken),
           if (meta != null) TextSpan(text: meta),

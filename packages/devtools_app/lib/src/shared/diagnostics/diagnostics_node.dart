@@ -9,12 +9,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../inspector_service.dart';
-import '../../primitives/enum_utils.dart';
-import '../../primitives/utils.dart';
-import '../../ui/icons.dart';
-import '../primitives/instance_ref.dart';
-import '../primitives/source_location.dart';
+import '../primitives/enum_utils.dart';
+import '../primitives/utils.dart';
+import '../ui/icons.dart';
+import 'inspector_service.dart';
+import 'instance_ref.dart';
+import 'source_location.dart';
 
 final diagnosticLevelUtils = EnumUtils<DiagnosticLevel>(DiagnosticLevel.values);
 
@@ -416,10 +416,10 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
 
   /// Whether the value of the property is a Diagnosticable value itself.
   /// Optionally, properties that are themselves Diagnosticable should be
-  /// displayed as trees of diagnosticable properties and children.
+  /// displayed as trees of Diagnosticable properties and children.
   ///
   /// TODO(jacobr): add helpers to get the properties and children of
-  /// this diagnosticable value even if getChildren and getProperties
+  /// this Diagnosticable value even if getChildren and getProperties
   /// would return null. This will allow showing nested data for properties
   /// that don't show children by default in other debugging output but
   /// could.

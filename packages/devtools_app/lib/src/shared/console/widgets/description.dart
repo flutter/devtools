@@ -4,6 +4,8 @@
 
 import 'package:flutter/material.dart';
 
+import '../../diagnostics/diagnostics_node.dart';
+import '../../diagnostics_text_styles.dart';
 import '../../globals.dart';
 import '../../object_tree.dart';
 import '../../primitives/utils.dart';
@@ -11,9 +13,7 @@ import '../../theme.dart';
 import '../../ui/hover.dart';
 import '../../ui/icons.dart';
 import '../../ui/utils.dart';
-import '../eval/diagnostics_node.dart';
 import '../eval/inspector_tree.dart';
-import '../primitives/text_styles.dart';
 import 'expandable_variable.dart';
 
 final _colorIconMaker = ColorIconMaker();
@@ -116,7 +116,8 @@ class DiagnosticsNodeDescription extends StatelessWidget {
         if (match.group(2)?.isNotEmpty == true) {
           yield TextSpan(
             text: match.group(2),
-            style: textStyle.merge(ConsoleTextStyles.unimportant(colorScheme)),
+            style:
+                textStyle.merge(DiagnosticsTextStyles.unimportant(colorScheme)),
           );
         }
         return;
@@ -250,7 +251,7 @@ class DiagnosticsNodeDescription extends StatelessWidget {
     final defaultStyle = DefaultTextStyle.of(context).style;
     final baseStyle = style ?? defaultStyle;
     TextStyle textStyle = baseStyle.merge(
-      ConsoleTextStyles.textStyleForLevel(
+      DiagnosticsTextStyles.textStyleForLevel(
         diagnosticLocal.level,
         colorScheme,
       ),
@@ -276,7 +277,7 @@ class DiagnosticsNodeDescription extends StatelessWidget {
       }
 
       if (diagnosticLocal.isCreatedByLocalProject) {
-        textStyle = textStyle.merge(ConsoleTextStyles.regularBold);
+        textStyle = textStyle.merge(DiagnosticsTextStyles.regularBold);
       }
 
       String description = diagnosticLocal.description ?? '';
@@ -316,7 +317,7 @@ class DiagnosticsNodeDescription extends StatelessWidget {
 
       if (_showRenderObjectPropertiesAsLinks &&
           propertyType == 'RenderObject') {
-        textStyle = textStyle..merge(ConsoleTextStyles.link(colorScheme));
+        textStyle = textStyle..merge(DiagnosticsTextStyles.link(colorScheme));
       }
 
       // TODO(jacobr): custom display for units, iterables, and padding.
@@ -348,7 +349,7 @@ class DiagnosticsNodeDescription extends StatelessWidget {
           children.add(
             Text(
               name,
-              style: ConsoleTextStyles.unimportant(colorScheme),
+              style: DiagnosticsTextStyles.unimportant(colorScheme),
             ),
           );
         } else {
@@ -376,7 +377,7 @@ class DiagnosticsNodeDescription extends StatelessWidget {
 
       if (!diagnosticLocal.isSummaryTree &&
           diagnosticLocal.isCreatedByLocalProject) {
-        textStyle = textStyle.merge(ConsoleTextStyles.regularBold);
+        textStyle = textStyle.merge(DiagnosticsTextStyles.regularBold);
       }
 
       var diagnosticDescription = buildDescription(
@@ -426,7 +427,7 @@ class DiagnosticsNodeDescription extends StatelessWidget {
         text: TextSpan(
           text:
               '${location.getFile()!.split('/').last}:${location.getLine()}:${location.getColumn()}            ',
-          style: ConsoleTextStyles.regular
+          style: DiagnosticsTextStyles.regular
               .copyWith(color: theme.colorScheme.defaultForeground),
         ),
       ),
@@ -443,8 +444,8 @@ class DiagnosticsNodeDescription extends StatelessWidget {
           // When the node is selected, the background will be an error
           // color so don't render the text the same color.
           style: isSelected
-              ? ConsoleTextStyles.regular
-              : ConsoleTextStyles.error(colorScheme),
+              ? DiagnosticsTextStyles.regular
+              : DiagnosticsTextStyles.error(colorScheme),
         ),
       ),
     );
