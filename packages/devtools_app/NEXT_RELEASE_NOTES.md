@@ -8,7 +8,6 @@ Dart & Flutter DevTools - A Suite of Performance Tools for Dart and Flutter
 ## General updates
 
 - Fix several issues in syntax highlighting that would color variable names that contain reserved words incorrectly and leave `extends`/`implements` clauses uncolored for some classes [#4948](https://github.com/flutter/devtools/pull/4948)
-
 - Fix an issue in Safari (browsers that do not support RegExp negative lookbehind) that prevented DevTools from loading [#4938](https://github.com/flutter/devtools/pull/4938)
 
 ## Inspector updates
