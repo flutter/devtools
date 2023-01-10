@@ -92,7 +92,13 @@ class EvalService extends DisposableController with AutoDisposeControllerMixin {
     final isolateRefId = _isolateRefId;
 
     if (isolateRefId == null) {
-      return Future.value(_errorResponse('isolateRef is null'));
+      return Future.error(
+        RPCError.withDetails(
+          'evaluateInFrame',
+          RPCError.kServerError,
+          'isolateRefId is null',
+        ),
+      );
     }
 
     return _service.evaluateInFrame(
@@ -101,10 +107,5 @@ class EvalService extends DisposableController with AutoDisposeControllerMixin {
       expression,
       disableBreakpoints: true,
     );
-  }
-
-  static const String errorKey = 'error';
-  Response _errorResponse(String error) {
-    return Response()..json = {errorKey: error};
   }
 }
