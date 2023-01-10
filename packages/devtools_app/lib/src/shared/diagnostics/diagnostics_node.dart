@@ -38,7 +38,7 @@ final treeStyleUtils =
 /// important. If you need to determine the exact Diagnostic class on the
 /// Dart side you can use the value of type. The raw Dart object value is
 /// also available via the getValue() method.
-class RemoteDiagnosticsNode extends diagnosticsbleTree {
+class RemoteDiagnosticsNode extends DiagnosticableTree {
   RemoteDiagnosticsNode(
     this.json,
     this.inspectorService,
