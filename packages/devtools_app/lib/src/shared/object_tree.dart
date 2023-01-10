@@ -13,7 +13,7 @@ import 'package:vm_service/vm_service.dart';
 
 import '../screens/debugger/debugger_model.dart';
 import 'config_specific/logger/logger.dart';
-import 'console/eval/diagnostics_node.dart';
+import 'diagnostics/diagnostics_node.dart';
 import 'globals.dart';
 import 'inspector_service.dart';
 import 'primitives/trees.dart';
@@ -269,13 +269,13 @@ Future<void> buildVariablesTree(
       if (childRef == null) return;
       if (childRef.diagnostic == null) {
         // TODO(jacobr): also check whether the InstanceRef is an instance of
-        // Diagnosticable and show the Diagnosticable properties in that case.
+        // diagnosticsble and show the diagnosticsble properties in that case.
         final instanceRef = childRef.instanceRef;
         // This is an approximation of eval('instanceRef is DiagnosticsNode')
         // TODO(jacobr): cache the full class hierarchy so we can cheaply check
         // instanceRef is DiagnosticsNode without having to do an eval.
         if (instanceRef != null &&
-            (instanceRef.classRef?.name == 'DiagnosticableTreeNode' ||
+            (instanceRef.classRef?.name == 'diagnosticsbleTreeNode' ||
                 instanceRef.classRef?.name == 'DiagnosticsProperty')) {
           // The user is expecting to see the object the DiagnosticsNode is
           // describing not the DiagnosticsNode itself.

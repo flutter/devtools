@@ -124,7 +124,7 @@ class __$ResultDataCopyWithImpl<T, $Res> extends _$ResultCopyWithImpl<T, $Res>
 
 /// @nodoc
 
-class _$_ResultData<T> extends _ResultData<T> with DiagnosticableTreeMixin {
+class _$_ResultData<T> extends _ResultData<T> with diagnosticsbleTreeMixin {
   _$_ResultData(this.value) : super._();
 
   @override
@@ -271,7 +271,7 @@ class __$ResultErrorCopyWithImpl<T, $Res> extends _$ResultCopyWithImpl<T, $Res>
 
 /// @nodoc
 
-class _$_ResultError<T> extends _ResultError<T> with DiagnosticableTreeMixin {
+class _$_ResultError<T> extends _ResultError<T> with diagnosticsbleTreeMixin {
   _$_ResultError(this.error, this.stackTrace) : super._();
 
   @override

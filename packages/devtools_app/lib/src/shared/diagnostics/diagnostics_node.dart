@@ -9,12 +9,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../diagnostics/instance_ref.dart';
-import '../../inspector_service.dart';
-import '../../primitives/enum_utils.dart';
-import '../../primitives/utils.dart';
-import '../../ui/icons.dart';
-import '../../diagnostics/source_location.dart';
+import '../diagnostics/source_location.dart';
+import '../inspector_service.dart';
+import '../primitives/enum_utils.dart';
+import '../primitives/utils.dart';
+import '../ui/icons.dart';
+import 'instance_ref.dart';
 
 final diagnosticLevelUtils = EnumUtils<DiagnosticLevel>(DiagnosticLevel.values);
 
@@ -38,7 +38,7 @@ final treeStyleUtils =
 /// important. If you need to determine the exact Diagnostic class on the
 /// Dart side you can use the value of type. The raw Dart object value is
 /// also available via the getValue() method.
-class RemoteDiagnosticsNode extends DiagnosticableTree {
+class RemoteDiagnosticsNode extends diagnosticsbleTree {
   RemoteDiagnosticsNode(
     this.json,
     this.inspectorService,
@@ -414,17 +414,17 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
     return getLevelMember('defaultLevel', DiagnosticLevel.info);
   }
 
-  /// Whether the value of the property is a Diagnosticable value itself.
-  /// Optionally, properties that are themselves Diagnosticable should be
-  /// displayed as trees of diagnosticable properties and children.
+  /// Whether the value of the property is a diagnosticsble value itself.
+  /// Optionally, properties that are themselves diagnosticsble should be
+  /// displayed as trees of diagnosticsble properties and children.
   ///
   /// TODO(jacobr): add helpers to get the properties and children of
-  /// this diagnosticable value even if getChildren and getProperties
+  /// this diagnosticsble value even if getChildren and getProperties
   /// would return null. This will allow showing nested data for properties
   /// that don't show children by default in other debugging output but
   /// could.
-  bool get isDiagnosticableValue {
-    return getBooleanMember('isDiagnosticableValue', false);
+  bool get isdiagnosticsbleValue {
+    return getBooleanMember('isdiagnosticsbleValue', false);
   }
 
   String? getStringMember(String memberName) {
