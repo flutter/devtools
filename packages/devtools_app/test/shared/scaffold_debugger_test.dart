@@ -27,6 +27,7 @@ void main() {
   when(mockServiceManager.errorBadgeManager).thenReturn(mockErrorBadgeManager);
   when(mockErrorBadgeManager.errorCountNotifier(any))
       .thenReturn(ValueNotifier<int>(0));
+  when(mockServiceManager.isMainIsolatePaused).thenReturn(false);
 
   setGlobal(ServiceConnectionManager, mockServiceManager);
   setGlobal(FrameworkController, FrameworkController());
