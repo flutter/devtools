@@ -775,7 +775,7 @@ class _InspectorTreeState extends State<InspectorTree>
     autoDisposeFocusNode(_focusNode);
 
     callOnceWhenReady(
-      trigger: serviceManager.isolateManager.mainIsolateDebuggerState!.isPaused,
+      trigger: serviceManager.isolateManager.mainIsolateState!.isPaused,
       callback: _bindToController,
       readyWhen: (triggerValue) => triggerValue == false,
     );

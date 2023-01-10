@@ -28,6 +28,7 @@ Future<void> main() async {
       .thenReturn(AppState(mockServiceManager.isolateManager.selectedIsolate));
   when(mockServiceManager.runDeviceBusyTask(Future<void>.value()))
       .thenAnswer((_) => Future<void>.value());
+  when(mockServiceManager.isMainIsolatePaused).thenReturn(false);
   setGlobal(ServiceConnectionManager, mockServiceManager);
   setGlobal(NotificationService, NotificationService());
 

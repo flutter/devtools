@@ -250,12 +250,6 @@ class AppState extends DisposableController with AutoDisposeControllerMixin {
   final _variables = ValueNotifier<List<DartObjectNode>>([]);
   void setVariables(List<DartObjectNode> value) => _variables.value = value;
 
-  ValueListenable<bool> get isPaused => _isPaused;
-  final _isPaused = ValueNotifier<bool>(false);
-
-  /// This setter should be invoked only by debugger.
-  void setPausedOnBreakpoint(bool value) => _isPaused.value = value;
-
   ValueListenable<Frame?> get currentFrame => _currentFrame;
   final _currentFrame = ValueNotifier<Frame?>(null);
   void setCurrentFrame(Frame? value) => _currentFrame.value = value;
@@ -267,7 +261,6 @@ class AppState extends DisposableController with AutoDisposeControllerMixin {
   @override
   void dispose() {
     _variables.dispose();
-    _isPaused.dispose();
     _currentFrame.dispose();
     super.dispose();
   }
