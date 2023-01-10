@@ -22,7 +22,7 @@ import 'test_infra/_run_test.dart';
 //    present.
 // --enable-experiments - this will run the DevTools integration tests with
 //    DevTools experiments enabled (see feature_flags.dart)
-// --update-goldens - this will update the current golden images with the 
+// --update-goldens - this will update the current golden images with the
 //   results from this test run
 // --headless - this will run the integration test on the 'web-server' device
 //    instead of the 'chrome' device, meaning you will not be able to see the
