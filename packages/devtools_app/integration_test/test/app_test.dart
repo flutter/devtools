@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app/devtools_app.dart';
-import 'package:devtools_app/src/app.dart';
 import 'package:devtools_app/src/framework/landing_screen.dart';
 import 'package:devtools_app/src/framework/release_notes/release_notes.dart';
 import 'package:devtools_app/src/shared/primitives/simple_items.dart';
