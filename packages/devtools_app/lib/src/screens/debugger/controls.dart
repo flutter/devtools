@@ -33,24 +33,31 @@ class _DebuggingControlsState extends State<DebuggingControls>
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (!initController()) return;
-    addAutoDisposeListener(serviceManager.appState.isPaused);
+    addAutoDisposeListener(
+      serviceManager.isolateManager.mainIsolateState!.isPaused,
+    );
     addAutoDisposeListener(controller.resuming);
     addAutoDisposeListener(controller.stackFramesWithLocation);
   }
 
   @override
   Widget build(BuildContext context) {
-    final isPaused = serviceManager.appState.isPaused.value;
     final resuming = controller.resuming.value;
     final hasStackFrames = controller.stackFramesWithLocation.value.isNotEmpty;
     final isSystemIsolate = controller.isSystemIsolate;
-    final canStep = isPaused && !resuming && hasStackFrames && !isSystemIsolate;
+    final canStep = serviceManager.isMainIsolatePaused &&
+        !resuming &&
+        hasStackFrames &&
+        !isSystemIsolate;
     final isVmApp = serviceManager.connectedApp?.isRunningOnDartVM ?? false;
     return SizedBox(
       height: defaultButtonHeight,
       child: Row(
         children: [
-          _pauseAndResumeButtons(isPaused: isPaused, resuming: resuming),
+          _pauseAndResumeButtons(
+            isPaused: serviceManager.isMainIsolatePaused,
+            resuming: resuming,
+          ),
           const SizedBox(width: denseSpacing),
           _stepButtons(canStep: canStep),
           const SizedBox(width: denseSpacing),

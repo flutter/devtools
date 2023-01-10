@@ -80,7 +80,9 @@ void main() {
   }
 
   setUp(() {
-    fakeServiceManager.appState.setPausedOnBreakpoint(true);
+    final state =
+        fakeServiceManager.isolateManager.mainIsolateState! as MockIsolateState;
+    state.isPaused.value = true;
   });
 
   testWidgetsWithWindowSize(

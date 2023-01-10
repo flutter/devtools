@@ -79,7 +79,6 @@ class DebuggerController extends DisposableController
 
     final appState = serviceManager.appState;
 
-    appState.setPausedOnBreakpoint(false);
     _resuming.value = false;
     _lastEvent = null;
     _stackFramesWithLocation.value = [];
@@ -168,7 +167,6 @@ class DebuggerController extends DisposableController
     // and modify to detect if app is paused from the isolate
     // https://github.com/flutter/devtools/pull/4993#discussion_r1060845351
 
-    serviceManager.appState.setPausedOnBreakpoint(false);
     await _pause(false);
 
     _clearCaches();
@@ -373,7 +371,6 @@ class DebuggerController extends DisposableController
     // serviceManager.isolateManager.selectedIsolateState.isPaused.value;
     // listening for changes there instead of having separate logic.
     await _getStackOperation?.cancel();
-    serviceManager.appState.setPausedOnBreakpoint(paused);
 
     _log.log('_pause(running: ${!paused})');
 

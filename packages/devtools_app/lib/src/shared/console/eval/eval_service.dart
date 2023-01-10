@@ -68,7 +68,7 @@ class EvalService extends DisposableController with AutoDisposeControllerMixin {
   Future<Response> evalAtCurrentFrame(String expression) {
     final appState = serviceManager.appState;
 
-    if (!appState.isPaused.value) {
+    if (!serviceManager.isMainIsolatePaused) {
       return Future.error(
         RPCError.withDetails(
           'evaluateInFrame',
