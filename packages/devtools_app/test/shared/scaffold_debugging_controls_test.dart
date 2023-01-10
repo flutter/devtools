@@ -58,6 +58,7 @@ void main() {
       final state =
           serviceManager.isolateManager.mainIsolateState! as MockIsolateState;
       state.isPaused.value = true;
+      when(mockServiceManager.isMainIsolatePaused).thenReturn(false);
 
       await tester.pumpWidget(
         wrapWithControllers(
