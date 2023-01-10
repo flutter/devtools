@@ -9,11 +9,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../../diagnostics/instance_ref.dart';
 import '../../inspector_service.dart';
 import '../../primitives/enum_utils.dart';
 import '../../primitives/utils.dart';
 import '../../ui/icons.dart';
-import '../primitives/instance_ref.dart';
 import '../../diagnostics/source_location.dart';
 
 final diagnosticLevelUtils = EnumUtils<DiagnosticLevel>(DiagnosticLevel.values);

@@ -16,7 +16,7 @@ import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
 import 'console/eval/diagnostics_node.dart';
-import 'console/primitives/instance_ref.dart';
+import 'diagnostics/instance_ref.dart';
 import 'console/primitives/simple_items.dart';
 import 'diagnostics/source_location.dart';
 import 'eval_on_dart_library.dart';
