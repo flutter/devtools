@@ -17,38 +17,64 @@ import 'test_infra/_run_test.dart';
 // --test-app-uri=<some vm service uri> - this will connect DevTools to the app
 //    you specify instead of spinning up a test app inside
 //    [runFlutterIntegrationTest].
+// --offline - indicates that we do not need to start a test app to run this
+//    test. This will take precedence if both --offline and --test-app-uri are
+//    present.
 // --enable-experiments - this will run the DevTools integration tests with
 //    DevTools experiments enabled (see feature_flags.dart)
+// --update-goldens - this will update the current golden images with the 
+//   results from this test run
 // --headless - this will run the integration test on the 'web-server' device
 //    instead of the 'chrome' device, meaning you will not be able to see the
 //    integration test run in Chrome when running locally.
 
+const _testDirectory = 'integration_test/test';
+const _testSuffix = '_test.dart';
+const _offlineIndicator = 'integration_test/test/offline';
+const _experimentalIndicator = '/experimental/';
+
 void main(List<String> args) async {
-  final targetProvided =
-      args.firstWhereOrNull((arg) => arg.startsWith(TestArgs.testTargetArg)) !=
-          null;
-  if (targetProvided) {
+  final modifiableArgs = List.of(args);
+
+  final testTarget = modifiableArgs
+      .firstWhereOrNull((arg) => arg.startsWith(TestArgs.testTargetArg));
+  if (testTarget != null) {
     // Run the single test at this path.
-    final testRunnerArgs = TestArgs(args);
+    _maybeAddNoTestAppArgument(modifiableArgs, testTarget);
+    _maybeAddExperimentsArgument(modifiableArgs, testTarget);
+    final testRunnerArgs = TestArgs(modifiableArgs);
+
+    // TODO(kenz): add support for specifying a directory as the target instead
+    // of a single file.
     await runFlutterIntegrationTest(testRunnerArgs);
   } else {
-    // Ran all tests since a target test was not provided.
-    const testSuffix = '_test.dart';
-
-    // TODO(kenz): if we end up having several subdirectories under
-    // `integration_test/test`, we could allow the directory to be modified with
-    // an argument (e.g. --directory=integration_test/test/performance).
-    final testDirectory = Directory('integration_test/test');
+    // Run all tests since a target test was not provided.
+    final testDirectory = Directory(_testDirectory);
     final testFiles = testDirectory
-        .listSync()
-        .where((testFile) => testFile.path.endsWith(testSuffix));
+        .listSync(recursive: true)
+        .where((testFile) => testFile.path.endsWith(_testSuffix));
+
     for (final testFile in testFiles) {
       final testTarget = testFile.path;
+      _maybeAddNoTestAppArgument(modifiableArgs, testTarget);
+      _maybeAddExperimentsArgument(modifiableArgs, testTarget);
       final testRunnerArgs = TestArgs([
-        ...args,
+        ...modifiableArgs,
         '${TestArgs.testTargetArg}$testTarget',
       ]);
       await runFlutterIntegrationTest(testRunnerArgs);
     }
+  }
+}
+
+void _maybeAddNoTestAppArgument(List<String> args, String testTarget) {
+  if (testTarget.startsWith(_offlineIndicator)) {
+    args.add(TestArgs.offlineArg);
+  }
+}
+
+void _maybeAddExperimentsArgument(List<String> args, String testTarget) {
+  if (testTarget.contains(_experimentalIndicator)) {
+    args.add(TestArgs.enableExperimentsArg);
   }
 }
