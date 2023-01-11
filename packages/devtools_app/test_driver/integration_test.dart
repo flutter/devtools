@@ -2,8 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io';
+
+import 'package:collection/collection.dart';
 import 'package:flutter_driver/flutter_driver.dart';
 import 'package:integration_test/integration_test_driver_extended.dart';
+
+const _goldensDirectoryPath = 'integration_test/test_infra/goldens';
 
 Future<void> main() async {
   final FlutterDriver driver = await FlutterDriver.connect();
@@ -14,8 +19,37 @@ Future<void> main() async {
       List<int> screenshotBytes, [
       Map<String, Object?>? args,
     ]) async {
-      // TODO(kenz): implement golden image testing.
-      return true;
+      final bool shouldUpdateGoldens = args?['update_goldens'] == true;
+      final goldenFile = File('$_goldensDirectoryPath/$screenshotName.png');
+
+      if (shouldUpdateGoldens) {
+        if (!goldenFile.existsSync()) {
+          goldenFile.createSync();
+        }
+        goldenFile.writeAsBytesSync(screenshotBytes);
+
+        print('Golden image updated: $screenshotName.png');
+        return true;
+      }
+
+      if (goldenFile.existsSync()) {
+        final goldenImageBytes = goldenFile.readAsBytesSync();
+        final equal = const DeepCollectionEquality().equals(
+          goldenImageBytes,
+          screenshotBytes,
+        );
+        if (!equal) {
+          print('Golden image test failed: $screenshotName.png');
+          const failuresDirectoryPath = '$_goldensDirectoryPath/failures';
+          Directory(failuresDirectoryPath)..createSync();
+          final failedGoldenFile =
+              File('$failuresDirectoryPath/$screenshotName.png')..createSync();
+          failedGoldenFile.writeAsBytesSync(screenshotBytes);
+        }
+        return equal;
+      }
+
+      return false;
     },
   );
 }

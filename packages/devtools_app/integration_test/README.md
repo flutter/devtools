@@ -32,5 +32,9 @@ xattr -d com.apple.quarantine ~/path/to/chromedriver
 - `--test-app-uri`: to speed up local development, you can pass in a vm service uri from a Dart or Flutter 
 app running on your local machine. This saves the cost of spinning up a new test app for each test run. To 
 do this, pass the vm service uri using the `--test-app-uri=some-uri` run flag.
+- `--offline`: indicates that we do not need to start a test app to run this test. This will take precedence
+if both --offline and --test-app-uri are present.
 - `--enable_experiments`: enables experiments for DevTools within the integration test environment
 - `--headless`: this will run the integration test on the 'web-server' device instead of the 'chrome' device, meaning you will not be able to see the integration test run in Chrome when running locally. 
+- `--update-goldens`: behaves like the `--update-goldens` flag for Flutter unit tests,
+updating the golden images to the results produced by the test run. 

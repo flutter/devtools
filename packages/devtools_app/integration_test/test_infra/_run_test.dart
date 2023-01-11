@@ -11,7 +11,7 @@ import 'package:collection/collection.dart';
 import 'io_utils.dart';
 import 'test_app_driver.dart';
 
-bool _debugTestScript = false;
+bool _debugTestScript = true;
 
 Future<void> runFlutterIntegrationTest(
   TestArgs testRunnerArgs, {
