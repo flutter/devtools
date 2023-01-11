@@ -16,9 +16,10 @@ class HeapSampleObtainer extends SampleObtainer {
 
   @override
   Future<void> obtain() async {
-    final isolate = serviceManager.isolateManager.mainIsolate.value!;
     final isolateId = serviceManager.isolateManager.mainIsolate.value!.id!;
     final isolateRef = serviceManager.isolateManager.mainIsolate.value!;
+    final Isolate isolate =
+        serviceManager.isolateManager.mainIsolateState!.isolateNow!;
 
     final theClass = (await serviceManager.service!.getClassList(isolateId))
         .classes!
@@ -44,7 +45,5 @@ class HeapSampleObtainer extends SampleObtainer {
     final response = await serviceManager.service!
         .evaluate(isolateId, instance.id!, 'toString()');
     print('!!!! eval result: ' + response.json!['valueAsString']);
-
-    //eval expression
   }
 }
