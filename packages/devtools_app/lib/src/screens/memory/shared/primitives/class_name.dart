@@ -123,6 +123,10 @@ class HeapClassName {
             RegExp('^${PackagePrefixes.dartInSnapshot}'),
             PackagePrefixes.dart,
           );
+
+  bool matches(ClassRef ref) {
+    return HeapClassName.fromClassRef(ref) == this;
+  }
 }
 
 /// Packages that are published by dart.dev or flutter.dev.

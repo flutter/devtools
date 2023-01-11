@@ -21,7 +21,7 @@ class HeapSampleObtainer extends SampleObtainer {
 
     final theClass = (await serviceManager.service!.getClassList(isolateId))
         .classes!
-        .firstWhere((ref) => ref.name == className.shortName);
+        .firstWhere((ref) => className.matches(ref));
 
     final instances = await serviceManager.service!.getInstances(
       isolateId,
