@@ -9,7 +9,9 @@ import '../../../../shared/analytics/constants.dart';
 import '../../../../shared/common_widgets.dart';
 import '../../../../shared/primitives/utils.dart';
 
-abstract class SampleObtainer {}
+abstract class SampleObtainer {
+  Future<void> obtain();
+}
 
 class InstanceSetView extends StatelessWidget {
   const InstanceSetView({
@@ -38,7 +40,7 @@ class InstanceSetView extends StatelessWidget {
         if (showMenu)
           ContextMenuButton(
             style: textStyle,
-            menu: _menu(),
+            menu: _menu(sampleObtainer!),
           ),
         if (!showMenu) const SizedBox(width: ContextMenuButton.width),
       ],
@@ -47,16 +49,17 @@ class InstanceSetView extends StatelessWidget {
 }
 
 class _MenuForSubset extends StatelessWidget {
-  const _MenuForSubset(this.menuText);
+  const _MenuForSubset(this.menuText, this.sampleObtainer);
 
   final String menuText;
+  final SampleObtainer sampleObtainer;
 
   @override
   Widget build(BuildContext context) {
     return SubmenuButton(
       menuChildren: <Widget>[
         MenuItemButton(
-          onPressed: () => {},
+          onPressed: sampleObtainer.obtain,
           child: const Text('Fields'),
         ),
         const MenuItemButton(
@@ -71,8 +74,17 @@ class _MenuForSubset extends StatelessWidget {
   }
 }
 
-List<Widget> _menu() => [
-      const _MenuForSubset('Store one instance as a console variable'),
-      const _MenuForSubset('Store first 100 instances as a console variable'),
-      const _MenuForSubset('Store all instances as a console variable'),
+List<Widget> _menu(SampleObtainer sampleObtainer) => [
+      _MenuForSubset(
+        'Store one instance as a console variable',
+        sampleObtainer,
+      ),
+      _MenuForSubset(
+        'Store first 100 instances as a console variable',
+        sampleObtainer,
+      ),
+      _MenuForSubset(
+        'Store all instances as a console variable',
+        sampleObtainer,
+      ),
     ];

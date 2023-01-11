@@ -16,7 +16,7 @@ import '../../../shared/heap/heap.dart';
 import '../../../shared/primitives/instance_set_view.dart';
 import '../../../shared/primitives/simple_elements.dart';
 import '../../../shared/shared_memory_widgets.dart';
-import '../controller/heap_eval.dart';
+import '../controller/obtainer.dart';
 
 class _ClassNameColumn extends ColumnData<SingleClassStats>
     implements
@@ -110,8 +110,9 @@ class _InstanceColumn extends ColumnData<SingleClassStats>
               isRowSelected ? theme.selectedTextStyle : theme.regularTextStyle,
           count: getValue(data),
           gaContext: gac.MemoryAreas.snapshotSingle,
-          sampleObtainer:
-              isRowSelected ? HeapSampleObtainer(data.classId) : null,
+          sampleObtainer: isRowSelected
+              ? HeapSampleObtainer(data.classId, data.heapClass)
+              : null,
           showMenu: isRowSelected,
         ),
       ],
