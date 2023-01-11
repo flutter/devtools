@@ -30,7 +30,7 @@ class HeapSampleObtainer extends SampleObtainer {
       //classId: theClass.id,
     );
 
-    final instance = instances.instances!.first;
+    final instance = instances.instances!.first as InstanceRef;
 
     final evalResponse = await serviceManager.service!
         .evaluate(isolateId, instance.id!, 'toString()');
@@ -38,5 +38,12 @@ class HeapSampleObtainer extends SampleObtainer {
     final result = evalResponse.json!['valueAsString'];
 
     print('!!!! eval result: $result');
+
+    // serviceManager.consoleService.appendInstanceRef(
+    //     value: instance,
+    //     diagnostic: node.diagnostic,
+    //     isolateRef: isolateRef,
+    //     forceScrollIntoView: true,
+    //   )
   }
 }
