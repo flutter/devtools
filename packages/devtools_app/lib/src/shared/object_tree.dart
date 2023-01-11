@@ -783,15 +783,24 @@ List<DartObjectNode> _createVariablesForFields(
 }) {
   final variables = <DartObjectNode>[];
   for (var field in instance.fields!) {
-    final name = field.decl!.name;
-    if (existingNames != null && existingNames.contains(name)) continue;
-    variables.add(
-      DartObjectNode.fromValue(
-        name: name,
-        value: field.value,
-        isolateRef: isolateRef,
-      ),
-    );
+    final name = field.decl?.name;
+    if (name == null) {
+      variables.add(
+        DartObjectNode.fromValue(
+          value: field.value,
+          isolateRef: isolateRef,
+        ),
+      );
+    } else {
+      if (existingNames != null && existingNames.contains(name)) continue;
+      variables.add(
+        DartObjectNode.fromValue(
+          name: name,
+          value: field.value,
+          isolateRef: isolateRef,
+        ),
+      );
+    }
   }
   return variables;
 }
@@ -1026,6 +1035,9 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
       if (kind == InstanceKind.kStackTrace) {
         final depth = children.length;
         valueStr = 'StackTrace ($depth ${pluralize('frame', depth)})';
+      } else if (kind == 'Record') {
+        // TODO(elliette): Compare against InstanceKind.kRecord when vm_service >= 10.0.0.
+        valueStr = 'Record';
       } else if (value.valueAsString == null) {
         valueStr = value.classRef?.name ?? '';
       } else {
