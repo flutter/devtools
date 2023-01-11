@@ -14,16 +14,17 @@ import '../../../../../shared/dialogs.dart';
 import '../../../../../shared/theme.dart';
 import '../../../../../shared/utils.dart';
 import '../../../shared/heap/class_filter.dart';
-import '../controller/utils.dart';
 
 class ClassFilterButton extends StatelessWidget {
   const ClassFilterButton({
     required this.filter,
     required this.onChanged,
+    required this.rootPackage,
   });
 
   final ValueListenable<ClassFilter> filter;
   final Function(ClassFilter) onChanged;
+  final String? rootPackage;
 
   @override
   Widget build(BuildContext context) {
@@ -43,6 +44,7 @@ class ClassFilterButton extends StatelessWidget {
                 builder: (context) => ClassFilterDialog(
                   filter,
                   onChanged: onChanged,
+                  rootPackage: rootPackage,
                 ),
               ),
             );
@@ -56,25 +58,30 @@ class ClassFilterButton extends StatelessWidget {
   }
 }
 
+String _adaptRootPackageForFilter(String? rootPackage) {
+  rootPackage ??= '';
+  if (rootPackage.isNotEmpty) rootPackage = '$rootPackage/';
+  return rootPackage;
+}
+
 @visibleForTesting
 class ClassFilterDialog extends StatefulWidget {
-  const ClassFilterDialog(
+  ClassFilterDialog(
     this.classFilter, {
     super.key,
     required this.onChanged,
-  });
+    required String? rootPackage,
+  }) : adaptedRootPackage = _adaptRootPackageForFilter(rootPackage);
 
   final ClassFilter classFilter;
   final Function(ClassFilter filter) onChanged;
+  final String adaptedRootPackage;
 
   @override
   State<ClassFilterDialog> createState() => _ClassFilterDialogState();
 }
 
 class _ClassFilterDialogState extends State<ClassFilterDialog> {
-  bool _initialized = false;
-  late String _rootPackage;
-
   late ClassFilterType _type;
   final _except = TextEditingController();
   final _only = TextEditingController();
@@ -82,15 +89,7 @@ class _ClassFilterDialogState extends State<ClassFilterDialog> {
   @override
   void initState() {
     super.initState();
-    unawaited(_initialize());
-  }
-
-  Future<void> _initialize() async {
-    assert(!_initialized);
-    _rootPackage = await tryToDetectRootPackage() ?? '';
-    if (_rootPackage.isNotEmpty) _rootPackage = '$_rootPackage/';
     _loadStateFromFilter(widget.classFilter);
-    setState(() => _initialized = true);
   }
 
   @override
@@ -104,13 +103,11 @@ class _ClassFilterDialogState extends State<ClassFilterDialog> {
   void _loadStateFromFilter(ClassFilter filter) {
     _type = filter.filterType;
     _except.text = filter.except;
-    _only.text = filter.only ?? _rootPackage;
+    _only.text = filter.only ?? widget.adaptedRootPackage;
   }
 
   @override
   Widget build(BuildContext context) {
-    if (!_initialized) return const CenteredCircularProgressIndicator();
-
     final textFieldLeftPadding = scaleByFontFactor(40.0);
     void onTypeChanged(ClassFilterType? type) => setState(() => _type = type!);
 

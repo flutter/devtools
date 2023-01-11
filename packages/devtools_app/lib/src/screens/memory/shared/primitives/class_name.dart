@@ -2,10 +2,26 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../../../shared/primitives/simple_items.dart';
+import '../../../../shared/ui/icons.dart';
+
+enum ClassType {
+  internalDart(Colors.white, 'I'),
+  standard(Colors.black, 'S'),
+  dependency(Colors.blue, 'D'),
+  mainPackage(Colors.orange, 'M'),
+  ;
+
+  const ClassType(this.color, this.text);
+
+  final Color color;
+  final String text;
+
+  Widget get icon => CircleIcon(color: color, text: text);
+}
 
 @immutable
 class HeapClassName {

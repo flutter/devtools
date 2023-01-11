@@ -45,6 +45,9 @@ class DiffPaneController extends DisposableController {
   // is taken, and is used to assign a unique id to each [SnapshotListItem].
   int _snapshotId = 0;
 
+  bool _initialized = false;
+  late final String? rootPackage;
+
   VoidCallback? takeSnapshotHandler(String gaEvent) {
     if (_isTakingSnapshot.value) return null;
     return () {
@@ -56,8 +59,16 @@ class DiffPaneController extends DisposableController {
     };
   }
 
+  Future<void> ensureInitialized() async {
+    if (_initialized) return;
+
+    rootPackage = await tryToDetectRootPackage();
+    _initialized = true;
+  }
+
   Future<void> takeSnapshot() async {
     _isTakingSnapshot.value = true;
+    await ensureInitialized();
     final snapshots = core._snapshots;
 
     final item = SnapshotInstanceItem(
