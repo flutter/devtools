@@ -9,7 +9,7 @@ import '../../../../shared/analytics/constants.dart';
 import '../../../../shared/common_widgets.dart';
 import '../../../../shared/primitives/utils.dart';
 
-typedef SampleObtainer = InstanceRef Function();
+abstract class SampleObtainer {}
 
 class InstanceSetView extends StatelessWidget {
   const InstanceSetView({
