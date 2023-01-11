@@ -42,8 +42,17 @@ class HeapSampleObtainer extends SampleObtainer {
     );
 
     // eval object
-    final response = await serviceManager.service!
+    final response1 = await serviceManager.service!
         .evaluate(isolateId, instance.id!, 'toString()');
-    print('!!!! eval result: ' + response.json!['valueAsString']);
+    print('!!!! eval without scope: ' + response1.json!['valueAsString']);
+
+    // eval object
+    final response2 = await serviceManager.service!.evaluate(
+      isolateId,
+      instance.id!,
+      'identityHashCode(this)',
+      scope: {'this': instance.id!},
+    );
+    print('!!!! eval with scope: ' + response2.json!['valueAsString']);
   }
 }
