@@ -150,7 +150,7 @@ class DiffPaneController extends DisposableController {
 /// Widgets should not update the fields directly, they should use
 /// [DiffPaneController] or [DerivedData] for this.
 class CoreData {
-  late final rootPackage = serviceManager.appState.rootPackage;
+  late final rootPackage = serviceManager.rootInfoNow().package;
 
   /// The list contains one item that show information and all others
   /// are snapshots.

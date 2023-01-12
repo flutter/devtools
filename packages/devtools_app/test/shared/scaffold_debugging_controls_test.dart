@@ -28,7 +28,7 @@ void main() {
   );
   when(mockServiceManager.isolateManager).thenReturn(FakeIsolateManager());
   when(mockServiceManager.appState).thenReturn(
-    AppState(mockServiceManager.isolateManager.selectedIsolate, ''),
+    AppState(mockServiceManager.isolateManager.selectedIsolate),
   );
 
   final mockErrorBadgeManager = MockErrorBadgeManager();
@@ -53,7 +53,7 @@ void main() {
       when(mockServiceManager.connectedApp).thenReturn(mockConnectedApp);
       when(mockServiceManager.isolateManager).thenReturn(FakeIsolateManager());
       when(mockServiceManager.appState).thenReturn(
-        AppState(mockServiceManager.isolateManager.selectedIsolate, ''),
+        AppState(mockServiceManager.isolateManager.selectedIsolate),
       );
       final mockDebuggerController = MockDebuggerController();
       final state =
