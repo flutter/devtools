@@ -48,7 +48,7 @@ class SnapshotView extends StatelessWidget {
         final classFilterButton = ClassFilterButton(
           filter: filter,
           onChanged: controller.applyFilter,
-          rootPackage: serviceManager.appState.rootPackage,
+          rootPackage: serviceManager.rootInfoNow().package,
         );
 
         if (singleClasses != null) {

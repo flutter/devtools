@@ -22,6 +22,7 @@ import '../shared/primitives/utils.dart';
 import '../shared/title.dart';
 import '../shared/utils.dart';
 import 'isolate_manager.dart';
+import 'isolate_state.dart';
 import 'resolved_uri_manager.dart';
 import 'service_extension_manager.dart';
 import 'service_registrations.dart' as registrations;
@@ -83,6 +84,15 @@ class ServiceConnectionManager {
   /// Defaults to false if there is no main isolate.
   bool get isMainIsolatePaused =>
       isolateManager.mainIsolateState?.isPaused.value ?? false;
+
+  Future<RootInfo?> tryToDetectMainRootInfo() async {
+    await isolateManager.mainIsolateState?.waitForIsolateLoad();
+    return isolateManager.mainIsolateState?.rootInfo;
+  }
+
+  RootInfo rootInfoNow() {
+    return isolateManager.mainIsolateState?.rootInfo ?? RootInfo(null);
+  }
 
   final consoleService = ConsoleService();
 
@@ -174,24 +184,6 @@ class ServiceConnectionManager {
     return listenable;
   }
 
-  String? _cachedMainRootLibKey;
-  String? _cachedMainRootLibValue;
-
-  /// Returns root library of the main isolate or null, if the library is not detectable.
-  Future<String?> tryToDetectMainRootLib() async {
-    final isolateId = isolateManager.mainIsolate.value?.id;
-    if (isolateId == null) return null;
-
-    final rootLibKey = '${serviceManager.service?.connectedUri}-$isolateId';
-
-    if (_cachedMainRootLibKey == rootLibKey) return _cachedMainRootLibValue;
-    _cachedMainRootLibKey = rootLibKey;
-
-    final isolate = await serviceManager.service?.getIsolate(isolateId);
-    _cachedMainRootLibValue = isolate?.rootLib?.uri;
-    return _cachedMainRootLibValue;
-  }
-
   Future<void> vmServiceOpened(
     VmServiceWrapper service, {
     required Future<void> onClosed,
@@ -208,9 +200,6 @@ class ServiceConnectionManager {
     if (_serviceAvailable.isCompleted) {
       _serviceAvailable = Completer();
     }
-
-    assert(_cachedMainRootLibKey == null);
-    assert(_cachedMainRootLibValue == null);
 
     connectedApp = ConnectedApp();
 
@@ -391,8 +380,6 @@ class ServiceConnectionManager {
     sdkVersion = null;
     connectedApp = null;
 
-    _cachedMainRootLibKey = null;
-    _cachedMainRootLibValue = null;
     generateDevToolsTitle();
 
     vmFlagManager.vmServiceClosed();

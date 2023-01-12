@@ -14,28 +14,36 @@ class IsolateState {
   final IsolateRef isolateRef;
 
   /// Returns null if only this instance of [IsolateState] is disposed.
-  Future<Isolate?> get isolate => _completer.future;
-  Completer<Isolate?> _completer = Completer();
+  Future<Isolate?> get isolate => _isolateLoadCompleter.future;
+  Completer<Isolate?> _isolateLoadCompleter = Completer();
+
+  Future<void> waitForIsolateLoad() async => _isolateLoadCompleter;
 
   Isolate? get isolateNow => _isolateNow;
   Isolate? _isolateNow;
+
+  RootInfo? rootInfo;
 
   ValueListenable<bool> get isPaused => _isPaused;
   final _isPaused = ValueNotifier<bool>(false);
 
   void handleIsolateLoad(Isolate isolate) {
     _isolateNow = isolate;
-    _completer.complete(isolate);
+
     _isPaused.value = isolate.pauseEvent != null &&
         isolate.pauseEvent!.kind != EventKind.kResume;
+
+    rootInfo = RootInfo(_isolateNow!.rootLib?.uri);
+
+    _isolateLoadCompleter.complete(isolate);
   }
 
   void dispose() {
     _isolateNow = null;
-    if (!_completer.isCompleted) {
-      _completer.complete(null);
+    if (!_isolateLoadCompleter.isCompleted) {
+      _isolateLoadCompleter.complete(null);
     } else {
-      _completer = Completer()..complete(null);
+      _isolateLoadCompleter = Completer()..complete(null);
     }
   }
 
@@ -53,5 +61,19 @@ class IsolateState {
         _isPaused.value = true;
         break;
     }
+  }
+}
+
+class RootInfo {
+  RootInfo(this.library) : package = _libraryToPackage(library);
+
+  final String? library;
+  final String? package;
+
+  static String? _libraryToPackage(String? library) {
+    if (library == null) return null;
+    final slashIndex = library.indexOf('/');
+    if (slashIndex == -1) return library;
+    return library.substring(0, slashIndex);
   }
 }

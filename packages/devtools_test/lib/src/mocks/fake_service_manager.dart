@@ -80,6 +80,9 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
   final resolvedUriManager = ResolvedUriManager();
 
   @override
+  RootInfo rootInfoNow() => RootInfo('package:myPackage/myPackage.dart');
+
+  @override
   bool get isMainIsolatePaused {
     final state = isolateManager.mainIsolateState! as MockIsolateState;
     return state.isPaused.value;
@@ -230,6 +233,5 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
   }
 
   @override
-  Future<String?> tryToDetectMainRootLib() async =>
-      'package:myPackage/myLib.dart';
+  Future<RootInfo?> tryToDetectMainRootInfo() async => RootInfo('');
 }

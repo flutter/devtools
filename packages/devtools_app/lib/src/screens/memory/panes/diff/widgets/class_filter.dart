@@ -14,18 +14,22 @@ import '../../../../../shared/dialogs.dart';
 import '../../../../../shared/theme.dart';
 import '../../../../../shared/utils.dart';
 import '../../../shared/heap/class_filter.dart';
-import '../../../shared/primitives/class_name.dart';
+
+String _adaptRootPackageForFilter(String? rootPackage) {
+  if (rootPackage == null || rootPackage.isEmpty) return '';
+  return '$rootPackage/';
+}
 
 class ClassFilterButton extends StatelessWidget {
-  const ClassFilterButton({
+  ClassFilterButton({
     required this.filter,
     required this.onChanged,
-    required this.rootPackage,
-  });
+    required String? rootPackage,
+  }) : rootPackage = _adaptRootPackageForFilter(rootPackage);
 
   final ValueListenable<ClassFilter> filter;
   final Function(ClassFilter) onChanged;
-  final String? rootPackage;
+  final String rootPackage;
 
   @override
   Widget build(BuildContext context) {
@@ -71,12 +75,12 @@ class ClassFilterDialog extends StatefulWidget {
     this.classFilter, {
     super.key,
     required this.onChanged,
-    required String? rootPackage,
-  }) : adaptedRootPackage = _adaptRootPackageForFilter(rootPackage);
+    required this.rootPackage,
+  });
 
   final ClassFilter classFilter;
   final Function(ClassFilter filter) onChanged;
-  final String adaptedRootPackage;
+  final String rootPackage;
 
   @override
   State<ClassFilterDialog> createState() => _ClassFilterDialogState();
@@ -104,7 +108,7 @@ class _ClassFilterDialogState extends State<ClassFilterDialog> {
   void _loadStateFromFilter(ClassFilter filter) {
     _type = filter.filterType;
     _except.text = filter.except;
-    _only.text = filter.only ?? widget.adaptedRootPackage;
+    _only.text = filter.only ?? widget.rootPackage;
   }
 
   @override
