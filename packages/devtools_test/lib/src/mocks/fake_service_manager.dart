@@ -80,7 +80,7 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
   final resolvedUriManager = ResolvedUriManager();
 
   @override
-  RootInfo rootInfoNow() => RootInfo('');
+  RootInfo rootInfoNow() => RootInfo('package:myPackage/myPackage.dart');
 
   @override
   bool get isMainIsolatePaused {
