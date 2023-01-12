@@ -85,6 +85,15 @@ Future<void> verifyScreenshot(
   );
 }
 
+Future<void> loadSampleData(WidgetTester tester, String fileName) async {
+  await tester.tap(find.byType(DropdownButton<DevToolsJsonFile>));
+  await tester.pumpAndSettle();
+  await tester.tap(find.text(fileName).last);
+  await tester.pump(safePumpDuration);
+  await tester.tap(find.text('Load sample data'));
+  await tester.pump(longPumpDuration);
+}
+
 const performanceFileName = 'performance_data.json';
 
 final _sampleData = <DevToolsJsonFile>[

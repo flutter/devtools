@@ -1,4 +1,4 @@
-// Copyright 2022 The Chromium Authors. All rights reserved.
+// Copyright 2023 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -22,13 +22,7 @@ void main() {
     'Perfetto trace viewer loads data and scrolls for Flutter frames',
     (tester) async {
       await pumpDevTools(tester);
-
-      await tester.tap(find.byType(DropdownButton<DevToolsJsonFile>));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text(performanceFileName).last);
-      await tester.pump(safePumpDuration);
-      await tester.tap(find.text('Load sample data'));
-      await tester.pump(longPumpDuration);
+      await loadSampleData(tester, performanceFileName);
 
       await tester.tap(find.widgetWithText(InkWell, 'Timeline Events'));
       await tester.pump(longPumpDuration);

@@ -11,7 +11,7 @@ import 'package:integration_test/integration_test_driver_extended.dart';
 const _goldensDirectoryPath = 'integration_test/test_infra/goldens';
 
 Future<void> main() async {
-  final FlutterDriver driver = await FlutterDriver.connect();
+  final driver = await FlutterDriver.connect();
   await integrationDriver(
     driver: driver,
     onScreenshot: (
@@ -24,6 +24,8 @@ Future<void> main() async {
 
       if (shouldUpdateGoldens) {
         if (!goldenFile.existsSync()) {
+          // Create the goldens directory if it does not exist.
+          Directory(_goldensDirectoryPath)..createSync();
           goldenFile.createSync();
         }
         goldenFile.writeAsBytesSync(screenshotBytes);
@@ -32,24 +34,28 @@ Future<void> main() async {
         return true;
       }
 
+      bool equal = false;
       if (goldenFile.existsSync()) {
         final goldenImageBytes = goldenFile.readAsBytesSync();
-        final equal = const DeepCollectionEquality().equals(
+        equal = const DeepCollectionEquality().equals(
           goldenImageBytes,
           screenshotBytes,
         );
-        if (!equal) {
-          print('Golden image test failed: $screenshotName.png');
-          const failuresDirectoryPath = '$_goldensDirectoryPath/failures';
-          Directory(failuresDirectoryPath)..createSync();
-          final failedGoldenFile =
-              File('$failuresDirectoryPath/$screenshotName.png')..createSync();
-          failedGoldenFile.writeAsBytesSync(screenshotBytes);
-        }
-        return equal;
+      }
+      if (!equal) {
+        print('Golden image test failed: $screenshotName.png');
+
+        // Create the goldens directory if it does not exist.
+        Directory(_goldensDirectoryPath)..createSync();
+
+        const failuresDirectoryPath = '$_goldensDirectoryPath/failures';
+        Directory(failuresDirectoryPath)..createSync();
+        final failedGoldenFile =
+            File('$failuresDirectoryPath/$screenshotName.png')..createSync();
+        failedGoldenFile.writeAsBytesSync(screenshotBytes);
       }
 
-      return false;
+      return equal;
     },
   );
 }
