@@ -80,6 +80,9 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
   final resolvedUriManager = ResolvedUriManager();
 
   @override
+  RootInfo rootInfoNow() => RootInfo('');
+
+  @override
   bool get isMainIsolatePaused {
     final state = isolateManager.mainIsolateState! as MockIsolateState;
     return state.isPaused.value;
