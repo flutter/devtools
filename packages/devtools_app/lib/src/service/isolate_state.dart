@@ -69,11 +69,11 @@ class RootInfo {
 
   final String? library;
   final String? package;
-}
 
-String? _libraryToPackage(String? library) {
-  if (library == null) return null;
-  final slashIndex = library.indexOf('/');
-  if (slashIndex == -1) return library;
-  return library.substring(0, slashIndex);
+  static String? _libraryToPackage(String? library) {
+    if (library == null) return null;
+    final slashIndex = library.indexOf('/');
+    if (slashIndex == -1) return library;
+    return library.substring(0, slashIndex);
+  }
 }
