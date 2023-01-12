@@ -106,7 +106,8 @@ class InspectorPreferencesController extends DisposableController
   String? _mainScriptDir;
 
   Future<void> _updateMainScriptRef() async {
-    final rootLibUriString = await serviceManager.tryToDetectMainRootLib();
+    final rootLibUriString =
+        (await serviceManager.tryToDetectMainRootInfo())?.library;
     final rootLibUri = Uri.parse(rootLibUriString ?? '');
     final directorySegments =
         rootLibUri.pathSegments.sublist(0, rootLibUri.pathSegments.length - 1);
