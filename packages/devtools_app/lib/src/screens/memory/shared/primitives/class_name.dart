@@ -13,34 +13,45 @@ enum ClassType {
     Colors.white,
     'I',
     '\$dart-internal',
-    'internal Dart objects',
+    'internal Dart packages',
+    'internal Dart package',
   ),
   standard(
     Colors.black,
     'S',
     '\$standard',
     'most packages published by Google',
+    'Google package',
   ),
   dependency(
     Colors.blue,
     'D',
     '\$dependency',
-    'non-standard dependencies',
+    'dependencies',
+    '',
   ),
   rootPackage(
     Colors.orange,
     'M',
     '\$root-package',
     'classes of the root package',
+    'root package',
   ),
   ;
 
-  const ClassType(this.color, this.label, this.alias, this.description);
+  const ClassType(
+    this.color,
+    this.label,
+    this.alias,
+    this.aliasDescription,
+    this.classTooltip,
+  );
 
   final Color color;
   final String label;
   final String alias;
-  final String description;
+  final String aliasDescription;
+  final String classTooltip;
 
   Widget get icon => CircleIcon(color: color, text: label);
 }

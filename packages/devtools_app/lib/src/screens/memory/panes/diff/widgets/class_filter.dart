@@ -171,7 +171,7 @@ class _ClassFilterDialogState extends State<ClassFilterDialog> {
 
 late final _helpText = () {
   final classTypesDescription = ClassType.values
-      .map((t) => '  - ${t.alias} for ${t.description}')
+      .map((t) => '  - ${t.alias} for ${t.aliasDescription}')
       .join('\n');
 
   return 'Choose and customize the filter.\n'
