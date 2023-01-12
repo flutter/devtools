@@ -14,6 +14,7 @@ import '../../../../../shared/dialogs.dart';
 import '../../../../../shared/theme.dart';
 import '../../../../../shared/utils.dart';
 import '../../../shared/heap/class_filter.dart';
+import '../../../shared/primitives/class_name.dart';
 
 String _adaptRootPackageForFilter(String? rootPackage) {
   if (rootPackage == null || rootPackage.isEmpty) return '';
@@ -63,15 +64,9 @@ class ClassFilterButton extends StatelessWidget {
   }
 }
 
-String _adaptRootPackageForFilter(String? rootPackage) {
-  rootPackage ??= '';
-  if (rootPackage.isNotEmpty) rootPackage = '$rootPackage/';
-  return rootPackage;
-}
-
 @visibleForTesting
 class ClassFilterDialog extends StatefulWidget {
-  ClassFilterDialog(
+  const ClassFilterDialog(
     this.classFilter, {
     super.key,
     required this.onChanged,
