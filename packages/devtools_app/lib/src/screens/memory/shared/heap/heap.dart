@@ -43,7 +43,7 @@ mixin FilterableHeapClasses<T extends ClassStats> on HeapClasses<T> {
   ClassFilter? _appliedFilter;
   List<T>? _filtered;
 
-  List<T> filtered(ClassFilter newFilter) {
+  List<T> filtered(ClassFilter newFilter, String? rootPackage) {
     final oldFilter = _appliedFilter;
     final oldFiltered = _filtered;
     _appliedFilter = newFilter;
@@ -67,8 +67,9 @@ mixin FilterableHeapClasses<T extends ClassStats> on HeapClasses<T> {
       throw StateError('Unexpected task: $task.');
     }
 
-    final result =
-        dataToFilter.where((e) => newFilter.apply(e.heapClass)).toList();
+    final result = dataToFilter
+        .where((e) => newFilter.apply(e.heapClass, rootPackage))
+        .toList();
     return _filtered = result;
   }
 }

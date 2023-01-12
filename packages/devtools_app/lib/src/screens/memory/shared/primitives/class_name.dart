@@ -9,29 +9,46 @@ import '../../../../shared/primitives/simple_items.dart';
 import '../../../../shared/ui/icons.dart';
 
 enum ClassType {
-  internalDart(Colors.white, 'I'),
-  standard(Colors.black, 'S'),
-  dependency(Colors.blue, 'D'),
-  mainPackage(Colors.orange, 'M'),
+  internalDart(
+    Colors.white,
+    'I',
+    '\$dart-internal',
+    'internal Dart objects',
+  ),
+  standard(
+    Colors.black,
+    'S',
+    '\$standard',
+    'most packages published by Google',
+  ),
+  dependency(
+    Colors.blue,
+    'D',
+    '\$dependency',
+    'non-standard dependencies',
+  ),
+  rootPackage(
+    Colors.orange,
+    'M',
+    '\$root-package',
+    'classes of the root package',
+  ),
   ;
 
-  const ClassType(this.color, this.text);
+  const ClassType(this.color, this.label, this.alias, this.description);
 
   final Color color;
-  final String text;
+  final String label;
+  final String alias;
+  final String description;
 
-  Widget get icon => CircleIcon(color: color, text: text);
+  Widget get icon => CircleIcon(color: color, text: label);
 }
 
 @immutable
 class HeapClassName {
   HeapClassName({required this.className, required library})
-      : library = _normalizeLibrary(library) {
-    assert(
-      !isPackageless || !isDartOrFlutter,
-      'isCore and isDartOrFlutter must be exclusive',
-    );
-  }
+      : library = _normalizeLibrary(library);
 
   HeapClassName.fromClassRef(ClassRef? classRef)
       : this(
@@ -94,6 +111,20 @@ class HeapClassName {
     return className;
   }
 
+  ClassType classType(String? rootPackage) {
+    if (rootPackage != null && library.startsWith(rootPackage)) {
+      return ClassType.rootPackage;
+    }
+
+    if (isPackageless) return ClassType.internalDart;
+
+    if (isDartOrFlutter) return ClassType.standard;
+
+    return ClassType.dependency;
+  }
+
+  bool get isCreatedByGoolge => isPackageless || isDartOrFlutter;
+
   /// True, if the library does not belong to a package.
   ///
   /// I.e. if the library does not have prefix
@@ -141,12 +172,12 @@ class HeapClassName {
           );
 }
 
-/// Packages that are published by dart.dev or flutter.dev.
+/// Packages that are published by Google.
 ///
 /// There is no active monitoring for new packages.
 /// If you see something is missing here,
 /// please, create a PR to add it.
-/// TODO(polina-c): add a test that verifies if there are missing
+/// TODO(polina-c): may be add a test that verifies if there are missing
 /// packages.
 const _dartAndFlutterPackages = {
   'flutter',
@@ -309,4 +340,12 @@ const _dartAndFlutterPackages = {
   'wifi_info_flutter',
   'wifi_info_flutter_platform_interface',
   'xdg_directories',
+
+  // https://pub.dev/publishers/material.io/packages
+  'dynamic_color',
+  'adaptive_breakpoints',
+  'adaptive_navigation',
+  'adaptive_components',
+  'material_color_utilities',
+  'google_fonts',
 };

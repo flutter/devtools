@@ -14,6 +14,7 @@ import '../../../../../shared/dialogs.dart';
 import '../../../../../shared/theme.dart';
 import '../../../../../shared/utils.dart';
 import '../../../shared/heap/class_filter.dart';
+import '../../../shared/primitives/class_name.dart';
 
 class ClassFilterButton extends StatelessWidget {
   const ClassFilterButton({
@@ -168,11 +169,16 @@ class _ClassFilterDialogState extends State<ClassFilterDialog> {
   }
 }
 
-const _helpText = 'Choose and customize the filter.\n'
-    'List full or partial class names separated by new lines. For example:\n\n'
-    '  package:myPackage/src/myFolder/myLibrary.dart/MyClass\n'
-    '  MyClass\n'
-    '  package:myPackage/src/\n\n'
-    'Specify:\n'
-    '  - ${ClassFilter.dartInternalAlias} for dart internal objects, not assigned to any package\n'
-    '  - ${ClassFilter.dartAndFlutterLibrariesAlias} for most "dart:" and "package:" libraries published by Dart and Flutter orgs.';
+late final _helpText = () {
+  final classTypesDescription = ClassType.values
+      .map((t) => '  - ${t.alias} for ${t.description}')
+      .join('\n');
+
+  return 'Choose and customize the filter.\n'
+      'List full or partial class names separated by new lines. For example:\n\n'
+      '  package:myPackage/src/myFolder/myLibrary.dart/MyClass\n'
+      '  MyClass\n'
+      '  package:myPackage/src/\n\n'
+      'Use aliases to filter classes by type:\n'
+      '$classTypesDescription';
+}();
