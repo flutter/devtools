@@ -217,6 +217,7 @@ class ServiceConnectionManager {
     _appState?.dispose();
     _appState = AppState(
       isolateManager.selectedIsolate,
+      await _tryToDetectRootPackage(),
     );
 
     // It is critical we call vmServiceOpened on each manager class before
@@ -369,6 +370,15 @@ class ServiceConnectionManager {
       connectionState:
           const ConnectedState(false, userInitiatedConnectionState: true),
     );
+  }
+
+  /// Returns root package or empty string.
+  Future<String?> _tryToDetectRootPackage() async {
+    final rootLib = await serviceManager.tryToDetectMainRootLib();
+    if (rootLib == null) return null;
+    final slashIndex = rootLib.indexOf('/');
+    if (slashIndex == -1) return null;
+    return rootLib.substring(0, slashIndex);
   }
 
   void vmServiceClosed({

@@ -5,6 +5,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../../shared/common_widgets.dart';
+import '../../../../../shared/globals.dart';
 import '../../../../../shared/split.dart';
 import '../../../shared/heap/heap.dart';
 import '../controller/diff_pane_controller.dart';
@@ -47,7 +48,7 @@ class SnapshotView extends StatelessWidget {
         final classFilterButton = ClassFilterButton(
           filter: filter,
           onChanged: controller.applyFilter,
-          rootPackage: controller.rootPackage,
+          rootPackage: serviceManager.appState.rootPackage,
         );
 
         if (singleClasses != null) {
