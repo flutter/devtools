@@ -241,9 +241,11 @@ class AutocompleteCache {
 }
 
 class AppState extends DisposableController with AutoDisposeControllerMixin {
-  AppState(ValueListenable<IsolateRef?> isolateRef) {
+  AppState(ValueListenable<IsolateRef?> isolateRef, this.rootPackage) {
     addAutoDisposeListener(isolateRef, () => cache._clear());
   }
+
+  final String? rootPackage;
 
   // TODO(polina-c): add explanation for variables.
   ValueListenable<List<DartObjectNode>> get variables => _variables;

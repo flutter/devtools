@@ -215,7 +215,9 @@ class ServiceConnectionManager {
     connectedApp = ConnectedApp();
 
     _appState?.dispose();
-    _appState = AppState(isolateManager.selectedIsolate);
+    _appState = AppState(
+      isolateManager.selectedIsolate,
+    );
 
     // It is critical we call vmServiceOpened on each manager class before
     // performing any async operations. Otherwise, we may get end up with
