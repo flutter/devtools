@@ -18,6 +18,7 @@ class HeapClassSampler extends ClassSampler {
     final isolateRef = serviceManager.isolateManager.mainIsolate.value!;
     final isolateId = isolateRef.id!;
 
+    // It would be great to find out how to avoid full scan of classes.
     final theClass = (await serviceManager.service!.getClassList(isolateId))
         .classes!
         .firstWhere((ref) => className.matches(ref));
@@ -39,6 +40,7 @@ class HeapClassSampler extends ClassSampler {
     );
 
     // TODO (polina-c): convert drafts below to separate commands
+    // before opening the flag.
 
     // eval object
     final response1 = await serviceManager.service!
