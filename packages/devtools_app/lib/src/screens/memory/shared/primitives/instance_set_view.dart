@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../../../../shared/analytics/constants.dart';
@@ -10,7 +12,7 @@ import '../../../../shared/primitives/utils.dart';
 
 abstract class ClassSampler {
   Future<void> oneVariableToConsole();
-  Future<void> browseInstanceInConsole();
+  void instanceGraphToConsole();
 }
 
 /// A button with label '...' to show near count of instances,
@@ -81,7 +83,8 @@ List<Widget> _menu(ClassSampler sampleObtainer) => [
         'Store as a console variable',
         sampleObtainer,
       ),
-      const MenuItemButton(
-        child: Text('Browse an instance in console'),
+      MenuItemButton(
+        onPressed: sampleObtainer.instanceGraphToConsole,
+        child: const Text('Browse an instance in console'),
       ),
     ];

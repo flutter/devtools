@@ -66,7 +66,7 @@ class HeapClassSampler extends ClassSampler {
   }
 
   @override
-  Future<void> browseInstanceInConsole() {
-    throw UnimplementedError();
+  Future<void> instanceGraphToConsole() async {
+    serviceManager.consoleService.appendInstanceGraph(name: 'hello');
   }
 }

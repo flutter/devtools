@@ -38,6 +38,15 @@ class ConsoleLine {
         forceScrollIntoView: forceScrollIntoView,
       );
 
+  factory ConsoleLine.dartObjectGraph(
+    String graph, {
+    bool forceScrollIntoView = false,
+  }) =>
+      GraphConsoleLine(
+        graph,
+        forceScrollIntoView: forceScrollIntoView,
+      );
+
   ConsoleLine._(this.forceScrollIntoView);
 
   // Whether this console line should be scrolled into view when it is added.
@@ -68,9 +77,35 @@ class VariableConsoleLine extends ConsoleLine {
   }
 }
 
+class GraphConsoleLine extends ConsoleLine {
+  GraphConsoleLine(this.graph, {bool forceScrollIntoView = false})
+      : super._(
+          forceScrollIntoView,
+        );
+  final String graph;
+
+  @override
+  String toString() {
+    return graph;
+  }
+}
+
 /// Source of truth for the state of the Console including both events from the
 /// VM and events emitted from other UI.
 class ConsoleService extends Disposer {
+  // TODO(polina-c): add needed parameters
+  void appendInstanceGraph({
+    required String name,
+    bool forceScrollIntoView = false,
+  }) {
+    _stdio.add(
+      ConsoleLine.dartObjectGraph(
+        name,
+        forceScrollIntoView: forceScrollIntoView,
+      ),
+    );
+  }
+
   void appendInstanceRef({
     String? name,
     required InstanceRef? value,
