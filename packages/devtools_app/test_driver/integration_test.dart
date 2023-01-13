@@ -48,10 +48,9 @@ Future<void> main() async {
         Directory(_goldensDirectoryPath)..createSync();
 
         const failuresDirectoryPath = '$_goldensDirectoryPath/failures';
-        Directory(failuresDirectoryPath)..createSync();
-        final failedGoldenFile =
-            File('$failuresDirectoryPath/$screenshotName.png')..createSync();
-        failedGoldenFile.writeAsBytesSync(screenshotBytes);
+        Directory(failuresDirectoryPath).createSync();
+        File('$failuresDirectoryPath/$screenshotName.png')
+            .writeAsBytesSync(screenshotBytes);
       }
 
       return equal;
