@@ -33,8 +33,8 @@ class DevToolsServerConnection {
   /// - https://foo/devtools/inspector => https://foo/devtools/api
   ///
   /// For compatibility with any tools that might construct URIs ending with
-  /// "/devtools" without the trailing slash, URIs ending with `devtools` are
-  /// handled specially:
+  /// "/devtools" without the trailing slash, URIs ending with `devtools` (such
+  /// as when hosted by DDS) are handled specially:
   ///
   /// - https://foo/devtools => https://foo/devtools/api
   @visibleForTesting
