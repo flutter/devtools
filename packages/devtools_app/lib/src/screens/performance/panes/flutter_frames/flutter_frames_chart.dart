@@ -32,9 +32,15 @@ import 'flutter_frames_controller.dart';
 bool debugFrames = false;
 
 class FlutterFramesChart extends StatelessWidget {
-  const FlutterFramesChart(this.framesController, {super.key});
+  const FlutterFramesChart(
+    this.framesController, {
+    super.key,
+    required this.offlineMode,
+  });
 
   final FlutterFramesController framesController;
+
+  final bool offlineMode;
 
   @override
   Widget build(BuildContext context) {
@@ -50,6 +56,7 @@ class FlutterFramesChart extends StatelessWidget {
               frames: frames,
               displayRefreshRate: displayRefreshRate,
               isVisible: show,
+              offlineMode: offlineMode,
             );
           },
         );
@@ -64,6 +71,7 @@ class _FlutterFramesChart extends StatefulWidget {
     required this.frames,
     required this.displayRefreshRate,
     required this.isVisible,
+    required this.offlineMode,
   });
 
   final FlutterFramesController framesController;
@@ -73,6 +81,8 @@ class _FlutterFramesChart extends StatefulWidget {
   final double displayRefreshRate;
 
   final bool isVisible;
+
+  final bool offlineMode;
 
   static double get frameNumberSectionHeight => scaleByFontFactor(20.0);
 
@@ -156,6 +166,7 @@ class _FlutterFramesChartState extends State<_FlutterFramesChart> {
               framesController: widget.framesController,
               frames: widget.frames,
               displayRefreshRate: widget.displayRefreshRate,
+              offlineMode: widget.offlineMode,
             ),
           ),
         ],
@@ -333,6 +344,7 @@ class FramesChartControls extends StatelessWidget {
     required this.framesController,
     required this.frames,
     required this.displayRefreshRate,
+    required this.offlineMode,
   });
 
   static const _pauseTooltip = 'Pause Flutter frame recording';
@@ -345,24 +357,27 @@ class FramesChartControls extends StatelessWidget {
 
   final double displayRefreshRate;
 
+  final bool offlineMode;
+
   @override
   Widget build(BuildContext context) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        ValueListenableBuilder<bool>(
-          valueListenable: framesController.recordingFrames,
-          builder: (context, recording, child) {
-            return PauseResumeButtonGroup(
-              paused: !recording,
-              onPause: _pauseFrameRecording,
-              onResume: _resumeFrameRecording,
-              pauseTooltip: _pauseTooltip,
-              resumeTooltip: _resumeTooltip,
-            );
-          },
-        ),
+        if (!offlineMode)
+          ValueListenableBuilder<bool>(
+            valueListenable: framesController.recordingFrames,
+            builder: (context, recording, child) {
+              return PauseResumeButtonGroup(
+                paused: !recording,
+                onPause: _pauseFrameRecording,
+                onResume: _resumeFrameRecording,
+                pauseTooltip: _pauseTooltip,
+                resumeTooltip: _resumeTooltip,
+              );
+            },
+          ),
         Legend(
           dense: true,
           entries: [
