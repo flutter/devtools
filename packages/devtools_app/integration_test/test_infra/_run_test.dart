@@ -164,10 +164,22 @@ class TestRunner with IOMixin {
       },
     );
 
-    await process.exitCode;
+    bool testTimedOut = false;
+    final timeout = Future.delayed(const Duration(minutes: 5)).then((_) {
+      testTimedOut = true;
+    });
+
+    await Future.any([
+      process.exitCode,
+      timeout,
+    ]);
 
     process.kill();
     _debugLog('flutter drive process has exited');
+
+    if (testTimedOut) {
+      throw Exception('Integration test timed out: $testTarget');
+    }
 
     if (exceptionBuffer.isNotEmpty) {
       throw Exception(exceptionBuffer.toString());
