@@ -9,19 +9,19 @@ import '../../../../shared/primitives/simple_items.dart';
 import '../../../../shared/ui/icons.dart';
 
 enum ClassType {
-  internalDart(
+  runtime(
     color: Color.fromARGB(255, 238, 109, 99),
-    label: 'I',
-    alias: '\$dart-internal',
-    aliasDescription: 'internal Dart packages',
-    classTooltip: 'internal Dart package',
+    label: 'R',
+    alias: '\$runtime',
+    aliasDescription: 'Dart runtime classes',
+    classTooltip: 'Dart runtime class',
   ),
-  standard(
+  sdk(
     color: Color.fromARGB(255, 122, 188, 124),
     label: 'S',
-    alias: '\$standard',
-    aliasDescription: 'packages published by Google',
-    classTooltip: 'standard Google package',
+    alias: '\$sdk',
+    aliasDescription: 'Dart and Flutter SDK',
+    classTooltip: 'SDK class',
   ),
   dependency(
     color: Color.fromARGB(255, 69, 153, 221),
@@ -128,9 +128,9 @@ class HeapClassName {
       return ClassType.rootPackage;
     }
 
-    if (isPackageless) return ClassType.internalDart;
+    if (isPackageless) return ClassType.runtime;
 
-    if (isDartOrFlutter) return ClassType.standard;
+    if (isDartOrFlutter) return ClassType.sdk;
 
     return ClassType.dependency;
   }

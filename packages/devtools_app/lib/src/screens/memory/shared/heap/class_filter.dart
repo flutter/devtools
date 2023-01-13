@@ -36,8 +36,7 @@ class ClassFilter {
   ClassFilter.empty()
       : this(
           filterType: ClassFilterType.showAll,
-          except:
-              '${ClassType.internalDart.alias}\n${ClassType.standard.alias}',
+          except: '${ClassType.runtime.alias}\n${ClassType.sdk.alias}',
           only: null,
         );
 
