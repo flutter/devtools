@@ -10,21 +10,21 @@ import '../../../../shared/ui/icons.dart';
 
 enum ClassType {
   internalDart(
-    color: Color.fromARGB(255, 89, 183, 92),
+    color: Color.fromARGB(255, 122, 188, 124),
     label: 'I',
     alias: '\$dart-internal',
     aliasDescription: 'internal Dart packages',
     classTooltip: 'internal Dart package',
   ),
   standard(
-    color: Colors.red,
+    color: Color.fromARGB(255, 238, 109, 99),
     label: 'S',
     alias: '\$standard',
     aliasDescription: 'packages published by Google',
     classTooltip: 'standard Google package',
   ),
   dependency(
-    color: Colors.blue,
+    color: Color.fromARGB(255, 69, 153, 221),
     label: 'D',
     alias: '\$dependency',
     aliasDescription: 'dependencies',
@@ -34,7 +34,7 @@ enum ClassType {
     color: Colors.orange,
     label: 'M',
     alias: '\$root-package',
-    aliasDescription: 'classes of the root package',
+    aliasDescription: 'classes of root package',
     classTooltip: 'root package',
   ),
   ;
