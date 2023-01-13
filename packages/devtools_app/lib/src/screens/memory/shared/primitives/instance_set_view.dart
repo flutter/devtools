@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:vm_service/vm_service.dart';
 
 import '../../../../shared/analytics/constants.dart';
 import '../../../../shared/common_widgets.dart';

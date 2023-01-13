@@ -21,7 +21,6 @@ class _JsonFields {
   static const String shallowSize = 'shallowSize';
   static const String rootIndex = 'rootIndex';
   static const String created = 'created';
-  static const String classId = 'classId';
 }
 
 /// Contains information from [HeapSnapshotGraph],
@@ -230,7 +229,6 @@ class ClassOnlyHeapPath {
 /// memory analysis on memory screen.
 class AdaptedHeapObject {
   AdaptedHeapObject({
-    required this.classId,
     required this.code,
     required this.references,
     required this.heapClass,
@@ -243,7 +241,6 @@ class AdaptedHeapObject {
       references: List.of(object.references),
       heapClass: HeapClassName.fromHeapSnapshotClass(object.klass),
       shallowSize: object.shallowSize,
-      classId: object.classId,
     );
   }
 
@@ -256,14 +253,12 @@ class AdaptedHeapObject {
           library: json[_JsonFields.library],
         ),
         shallowSize: (json[_JsonFields.shallowSize] ?? 0) as int,
-        classId: (json[_JsonFields.classId] ?? 0) as int,
       );
 
   final List<int> references;
   final HeapClassName heapClass;
   final IdentityHashCode code;
   final int shallowSize;
-  final int classId;
 
   // No serialization is needed for the fields below, because the fields are
   // calculated after the heap deserialization.

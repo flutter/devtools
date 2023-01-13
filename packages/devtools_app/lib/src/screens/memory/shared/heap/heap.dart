@@ -21,7 +21,6 @@ class AdaptedHeap {
     for (var i in Iterable.generate(data.objects.length)) {
       final object = data.objects[i];
       final className = object.heapClass;
-      final classId = object.classId;
 
       // We do not show objects that will be garbage collected soon or are
       // native.
@@ -29,7 +28,7 @@ class AdaptedHeap {
 
       final singleHeapClass = result.putIfAbsent(
         className,
-        () => SingleClassStats(className, classId),
+        () => SingleClassStats(className),
       );
       singleHeapClass.countInstance(data, i);
     }
@@ -102,7 +101,7 @@ typedef StatsByPath = Map<ClassOnlyHeapPath, ObjectSetStats>;
 typedef StatsByPathEntry = MapEntry<ClassOnlyHeapPath, ObjectSetStats>;
 
 abstract class ClassStats with Sealable {
-  ClassStats(this.statsByPath, this.heapClass, this.classId);
+  ClassStats(this.statsByPath, this.heapClass);
 
   final StatsByPath statsByPath;
   late final List<StatsByPathEntry> statsByPathEntries = _getEntries();
@@ -112,15 +111,13 @@ abstract class ClassStats with Sealable {
   }
 
   final HeapClassName heapClass;
-
-  final int classId;
 }
 
 /// Statistics for a class about a single heap.
 class SingleClassStats extends ClassStats {
-  SingleClassStats(HeapClassName heapClass, int classId)
+  SingleClassStats(HeapClassName heapClass)
       : objects = ObjectSet(),
-        super(<ClassOnlyHeapPath, ObjectSetStats>{}, heapClass, classId);
+        super(<ClassOnlyHeapPath, ObjectSetStats>{}, heapClass);
 
   final ObjectSet objects;
 
