@@ -16,7 +16,7 @@ import '../../../shared/heap/heap.dart';
 import '../../../shared/primitives/instance_set_view.dart';
 import '../../../shared/primitives/simple_elements.dart';
 import '../../../shared/shared_memory_widgets.dart';
-import '../controller/obtainer.dart';
+import '../controller/sampler.dart';
 
 class _ClassNameColumn extends ColumnData<SingleClassStats>
     implements
@@ -105,7 +105,7 @@ class _InstanceColumn extends ColumnData<SingleClassStats>
     return Row(
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
-        InstanceSetView(
+        InstanceSetButton(
           textStyle:
               isRowSelected ? theme.selectedTextStyle : theme.regularTextStyle,
           count: getValue(data),

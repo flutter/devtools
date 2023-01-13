@@ -9,11 +9,13 @@ import '../../../../shared/common_widgets.dart';
 import '../../../../shared/primitives/utils.dart';
 
 abstract class ClassSampler {
-  Future<void> obtain();
+  Future<void> oneVariableToConsole();
 }
 
-class InstanceSetView extends StatelessWidget {
-  const InstanceSetView({
+/// A button with label '...' to show near count of instances,
+/// with drop down menu to explore the instances.
+class InstanceSetButton extends StatelessWidget {
+  const InstanceSetButton({
     super.key,
     this.textStyle,
     required this.count,
@@ -47,8 +49,8 @@ class InstanceSetView extends StatelessWidget {
   }
 }
 
-class _MenuForSubset extends StatelessWidget {
-  const _MenuForSubset(this.menuText, this.sampleObtainer);
+class _StoreAsVariableMenu extends StatelessWidget {
+  const _StoreAsVariableMenu(this.menuText, this.sampleObtainer);
 
   final String menuText;
   final ClassSampler sampleObtainer;
@@ -58,14 +60,14 @@ class _MenuForSubset extends StatelessWidget {
     return SubmenuButton(
       menuChildren: <Widget>[
         MenuItemButton(
-          onPressed: sampleObtainer.obtain,
-          child: const Text('Fields'),
+          onPressed: sampleObtainer.oneVariableToConsole,
+          child: const Text('One instance'),
         ),
         const MenuItemButton(
-          child: Text('Outgoing references'),
+          child: Text('First 20 instances'),
         ),
         const MenuItemButton(
-          child: Text('Incoming references'),
+          child: Text('All instances'),
         ),
       ],
       child: Text(menuText),
@@ -74,16 +76,11 @@ class _MenuForSubset extends StatelessWidget {
 }
 
 List<Widget> _menu(ClassSampler sampleObtainer) => [
-      _MenuForSubset(
-        'Store one instance as a console variable',
+      _StoreAsVariableMenu(
+        'Store as a console variable',
         sampleObtainer,
       ),
-      _MenuForSubset(
-        'Store first 100 instances as a console variable',
-        sampleObtainer,
-      ),
-      _MenuForSubset(
-        'Store all instances as a console variable',
-        sampleObtainer,
+      const MenuItemButton(
+        child: Text('Browse an instance in console'),
       ),
     ];

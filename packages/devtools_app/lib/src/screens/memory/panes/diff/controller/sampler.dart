@@ -14,11 +14,9 @@ class HeapClassSampler extends ClassSampler {
   final HeapClassName className;
 
   @override
-  Future<void> obtain() async {
-    final isolateId = serviceManager.isolateManager.mainIsolate.value!.id!;
+  Future<void> oneVariableToConsole() async {
     final isolateRef = serviceManager.isolateManager.mainIsolate.value!;
-    final Isolate isolate =
-        serviceManager.isolateManager.mainIsolateState!.isolateNow!;
+    final isolateId = isolateRef.id!;
 
     final theClass = (await serviceManager.service!.getClassList(isolateId))
         .classes!
@@ -39,6 +37,8 @@ class HeapClassSampler extends ClassSampler {
       isolateRef: isolateRef,
       forceScrollIntoView: true,
     );
+
+    // TODO (polina-c): convert drafts below to separate commands
 
     // eval object
     final response1 = await serviceManager.service!
