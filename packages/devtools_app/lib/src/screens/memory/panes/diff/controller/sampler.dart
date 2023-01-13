@@ -5,18 +5,21 @@
 import 'package:vm_service/vm_service.dart';
 
 import '../../../../../shared/globals.dart';
+import '../../../shared/heap/heap.dart';
 import '../../../shared/primitives/class_name.dart';
 import '../../../shared/primitives/instance_set_view.dart';
 
 class HeapClassSampler extends ClassSampler {
-  HeapClassSampler(this.className);
+  HeapClassSampler(this.className, this.objects);
 
   final HeapClassName className;
+  final SingleClassStats objects;
 
-  @override
-  Future<void> oneVariableToConsole() async {
-    final isolateRef = serviceManager.isolateManager.mainIsolate.value!;
-    final isolateId = isolateRef.id!;
+  IsolateRef get _mainIsolateRef =>
+      serviceManager.isolateManager.mainIsolate.value!;
+
+  Future<InstanceRef> _oneInstance() async {
+    final isolateId = _mainIsolateRef.id!;
 
     // It would be great to find out how to avoid full scan of classes.
     final theClass = (await serviceManager.service!.getClassList(isolateId))
@@ -29,13 +32,18 @@ class HeapClassSampler extends ClassSampler {
       1,
     );
 
-    final instance = instances.instances!.first as InstanceRef;
+    return instances.instances!.first as InstanceRef;
+  }
+
+  @override
+  Future<void> oneVariableToConsole() async {
+    final instance = await _oneInstance();
 
     // drop to console
     serviceManager.consoleService.appendInstanceRef(
       value: instance,
       diagnostic: null,
-      isolateRef: isolateRef,
+      isolateRef: _mainIsolateRef,
       forceScrollIntoView: true,
     );
 
@@ -44,16 +52,21 @@ class HeapClassSampler extends ClassSampler {
 
     // eval object
     final response1 = await serviceManager.service!
-        .evaluate(isolateId, instance.id!, 'toString()');
+        .evaluate(_mainIsolateRef.id!, instance.id!, 'toString()');
     print('!!!! eval without scope: ' + response1.json!['valueAsString']);
 
     // eval object
     final response2 = await serviceManager.service!.evaluate(
-      isolateId,
+      _mainIsolateRef.id!,
       instance.id!,
       'identityHashCode(this)',
       scope: {'this': instance.id!},
     );
     print('!!!! eval with scope: ' + response2.json!['valueAsString']);
+  }
+
+  @override
+  Future<void> browseInstanceInConsole() {
+    throw UnimplementedError();
   }
 }

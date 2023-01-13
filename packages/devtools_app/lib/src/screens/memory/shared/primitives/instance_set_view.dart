@@ -10,6 +10,7 @@ import '../../../../shared/primitives/utils.dart';
 
 abstract class ClassSampler {
   Future<void> oneVariableToConsole();
+  Future<void> browseInstanceInConsole();
 }
 
 /// A button with label '...' to show near count of instances,
