@@ -152,7 +152,8 @@ class CpuProfilerController
 
   /// Notifies that the vm profiler flag has changed.
   ValueNotifier<Flag>? get profilerFlagNotifier =>
-      serviceManager.vmFlagManager.flag(vm_flags.profiler);
+      serviceManager.vmFlagManager.flag(vm_flags.profiler) ??
+      ValueNotifier<Flag>(Flag());
 
   ValueNotifier<Flag>? get profilePeriodFlag =>
       serviceManager.vmFlagManager.flag(vm_flags.profilePeriod);
