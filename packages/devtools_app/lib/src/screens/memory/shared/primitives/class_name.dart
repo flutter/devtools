@@ -32,10 +32,10 @@ enum ClassType {
   ),
   rootPackage(
     color: Color.fromARGB(255, 255, 200, 0),
-    label: 'M',
-    alias: '\$root-package',
-    aliasDescription: 'classes of root package',
-    classTooltip: 'root package',
+    label: 'P',
+    alias: '\$project',
+    aliasDescription: 'classes of the project',
+    classTooltip: 'project class',
   ),
   ;
 
