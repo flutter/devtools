@@ -115,34 +115,25 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
 
   @override
   Widget build(BuildContext context) {
-    final isOfflineFlutterApp = offlineController.offlineMode.value &&
-        controller.offlinePerformanceData != null &&
-        controller.offlinePerformanceData!.frames.isNotEmpty;
+    if (loadingOfflineData) {
+      return Container(
+        color: Theme.of(context).scaffoldBackgroundColor,
+        child: const CenteredCircularProgressIndicator(),
+      );
+    }
 
     final offlineMode = offlineController.offlineMode.value;
-    final performanceScreen = Column(
+    final isOfflineFlutterApp = offlineMode &&
+        controller.offlinePerformanceData != null &&
+        controller.offlinePerformanceData!.frames.isNotEmpty;
+    return Column(
       children: [
         if (!offlineMode) _buildPerformanceControls(),
         const SizedBox(height: denseRowSpacing),
         if (isOfflineFlutterApp ||
             (!offlineMode && serviceManager.connectedApp!.isFlutterAppNow!))
-          FlutterFramesChart(controller.flutterFramesController),
+          FlutterFramesChart(controller.flutterFramesController, offlineMode: offlineMode,),
         const Expanded(child: TabbedPerformanceView()),
-      ],
-    );
-
-    // We put these two items in a stack because the screen's UI needs to be
-    // built before offline data is processed in order to initialize listeners
-    // that respond to data processing events. The spinner hides the screen's
-    // empty UI while data is being processed.
-    return Stack(
-      children: [
-        performanceScreen,
-        if (loadingOfflineData)
-          Container(
-            color: Theme.of(context).scaffoldBackgroundColor,
-            child: const CenteredCircularProgressIndicator(),
-          ),
       ],
     );
   }

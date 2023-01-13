@@ -16,10 +16,13 @@ import '../../test_infra/test_data/performance.dart';
 void main() {
   late FlutterFramesController framesController;
 
-  Future<void> pumpChart(WidgetTester tester) async {
+  Future<void> pumpChart(
+    WidgetTester tester, {
+    bool offlineMode = false,
+  }) async {
     await tester.pumpWidget(
       wrapWithControllers(
-        FlutterFramesChart(framesController),
+        FlutterFramesChart(framesController, offlineMode: offlineMode),
         bannerMessages: BannerMessagesController(),
       ),
     );
@@ -85,6 +88,15 @@ void main() {
       expect(find.byType(Legend), findsOneWidget);
       expect(find.byType(AverageFPS), findsOneWidget);
       expect(find.byType(FlutterFramesChartItem), findsNWidgets(2));
+    });
+
+    testWidgets('builds in offline mode', (WidgetTester tester) async {
+      framesController.clearData();
+      await pumpChart(tester, offlineMode: true);
+      expect(find.byType(FramesChart), findsOneWidget);
+      expect(find.byType(FramesChartControls), findsNothing);
+      expect(find.byType(Legend), findsOneWidget);
+      expect(find.byType(AverageFPS), findsOneWidget);
     });
 
     group('starting scroll position', () {
