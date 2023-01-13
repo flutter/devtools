@@ -24,7 +24,7 @@ void main() {
       await loadSampleData(tester, performanceFileName);
 
       await tester.tap(find.widgetWithText(InkWell, 'Timeline Events'));
-      await tester.pump(longPumpDuration);
+      await tester.pumpAndSettle(longPumpDuration);
 
       logStatus('verify HtmlElementView has loaded');
       expect(find.byType(Perfetto), findsOneWidget);
@@ -34,7 +34,7 @@ void main() {
 
       logStatus('select a Flutter Frame');
       await tester.tap(find.byType(FlutterFramesChartItem).last);
-      await tester.pump(longPumpDuration);
+      await tester.pumpAndSettle(safePumpDuration);
 
       await verifyScreenshot(binding, 'perfetto_frame_selection');
 
@@ -42,12 +42,12 @@ void main() {
         'switch to a different feature tab and back to Timeline Events',
       );
       await tester.tap(find.widgetWithText(InkWell, 'Frame Analysis'));
-      await tester.pump(longPumpDuration);
+      await tester.pump(safePumpDuration);
 
       await tester.tap(find.widgetWithText(InkWell, 'Timeline Events'));
-      await tester.pump(longPumpDuration);
+      await tester.pump(safePumpDuration);
 
-      await verifyScreenshot(binding, 'perfetto_frame_selection');
+      await verifyScreenshot(binding, 'perfetto_frame_selection_2');
     },
     skip: skipTests,
   );

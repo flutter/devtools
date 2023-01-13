@@ -21,6 +21,7 @@ void main() {
   setUpAll(() {
     testApp = TestApp.fromEnvironment();
     expect(testApp.vmServiceUri, isNotNull);
+  });
 
   tearDown(() async {
     // This is required to have multiple test cases in this file.

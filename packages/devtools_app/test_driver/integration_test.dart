@@ -25,8 +25,7 @@ Future<void> main() async {
       if (shouldUpdateGoldens) {
         if (!goldenFile.existsSync()) {
           // Create the goldens directory if it does not exist.
-          Directory(_goldensDirectoryPath)..createSync();
-          goldenFile.createSync();
+          Directory(_goldensDirectoryPath).createSync();
         }
         goldenFile.writeAsBytesSync(screenshotBytes);
 
