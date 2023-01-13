@@ -131,7 +131,7 @@ class _ClassFilterDialogState extends State<ClassFilterDialog> {
 
     return StateUpdateDialog(
       title: 'Filter Classes and Packages',
-      helpText: _helpText,
+      helpBuilder: _helpBuilder,
       onResetDefaults: () {
         ga.select(
           gac.memory,
@@ -168,16 +168,38 @@ class _ClassFilterDialogState extends State<ClassFilterDialog> {
   }
 }
 
-late final _helpText = () {
-  final classTypesDescription = ClassType.values
-      .map((t) => '  - ${t.alias} for ${t.aliasDescription}')
-      .join('\n');
+Widget _helpBuilder(BuildContext context) {
+  final textStyle = DialogHelpText.textStyle(context);
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Text(_helpText, style: textStyle),
+      ...ClassType.values.map(
+        (t) => Column(
+          children: [
+            Row(
+              children: [
+                t.icon,
+                Text(
+                  ' ${t.alias} - for ${t.aliasDescription}',
+                  style: textStyle,
+                ),
+                CopyToClipboardControl(
+                  dataProvider: () => t.alias,
+                  size: tableIconSize,
+                )
+              ],
+            ),
+          ],
+        ),
+      ),
+    ],
+  );
+}
 
-  return 'Choose and customize the filter.\n'
-      'List full or partial class names separated by new lines. For example:\n\n'
-      '  package:myPackage/src/myFolder/myLibrary.dart/MyClass\n'
-      '  MyClass\n'
-      '  package:myPackage/src/\n\n'
-      'Use aliases to filter classes by type:\n'
-      '$classTypesDescription';
-}();
+const _helpText = 'Choose and customize the filter.\n'
+    'List full or partial class names separated by new lines. For example:\n\n'
+    '  package:myPackage/src/myFolder/myLibrary.dart/MyClass\n'
+    '  MyClass\n'
+    '  package:myPackage/src/\n\n'
+    'Use aliases to filter classes by type:\n';

@@ -10,42 +10,42 @@ import '../../../../shared/ui/icons.dart';
 
 enum ClassType {
   internalDart(
-    Colors.white,
-    'I',
-    '\$dart-internal',
-    'internal Dart packages',
-    'internal Dart package',
+    color: Color.fromARGB(255, 89, 183, 92),
+    label: 'I',
+    alias: '\$dart-internal',
+    aliasDescription: 'internal Dart packages',
+    classTooltip: 'internal Dart package',
   ),
   standard(
-    Colors.black,
-    'S',
-    '\$standard',
-    'most packages published by Google',
-    'Google package',
+    color: Colors.red,
+    label: 'S',
+    alias: '\$standard',
+    aliasDescription: 'packages published by Google',
+    classTooltip: 'standard Google package',
   ),
   dependency(
-    Colors.blue,
-    'D',
-    '\$dependency',
-    'dependencies',
-    '',
+    color: Colors.blue,
+    label: 'D',
+    alias: '\$dependency',
+    aliasDescription: 'dependencies',
+    classTooltip: 'dependency',
   ),
   rootPackage(
-    Colors.orange,
-    'M',
-    '\$root-package',
-    'classes of the root package',
-    'root package',
+    color: Colors.orange,
+    label: 'M',
+    alias: '\$root-package',
+    aliasDescription: 'classes of the root package',
+    classTooltip: 'root package',
   ),
   ;
 
-  const ClassType(
-    this.color,
-    this.label,
-    this.alias,
-    this.aliasDescription,
-    this.classTooltip,
-  );
+  const ClassType({
+    required this.color,
+    required this.label,
+    required this.alias,
+    required this.aliasDescription,
+    required this.classTooltip,
+  });
 
   final Color color;
   final String label;
@@ -53,7 +53,8 @@ enum ClassType {
   final String aliasDescription;
   final String classTooltip;
 
-  Widget get icon => CircleIcon(color: color, text: label);
+  Widget get icon =>
+      CircleIcon(color: color, text: label, textColor: Colors.white);
 }
 
 @immutable

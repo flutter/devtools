@@ -16,25 +16,35 @@ class HeapClassView extends StatelessWidget {
     this.showCopyButton = false,
     this.copyGaItem,
     this.textStyle,
+    required this.rootPackage,
   });
 
   final HeapClassName theClass;
   final bool showCopyButton;
   final String? copyGaItem;
   final TextStyle? textStyle;
+  final String? rootPackage;
 
   @override
   Widget build(BuildContext context) {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Expanded(
           child: maybeWrapWithTooltip(
-            tooltip: theClass.fullName,
-            child: Text(
-              theClass.shortName,
-              overflow: TextOverflow.ellipsis,
-              style: textStyle,
+            tooltip:
+                '${theClass.classType(rootPackage).classTooltip}\n${theClass.fullName}',
+            child: Row(
+              children: [
+                theClass.classType(rootPackage).icon,
+                const SizedBox(width: denseSpacing),
+                Expanded(
+                  child: Text(
+                    theClass.shortName,
+                    overflow: TextOverflow.ellipsis,
+                    style: textStyle,
+                  ),
+                )
+              ],
             ),
           ),
         ),
