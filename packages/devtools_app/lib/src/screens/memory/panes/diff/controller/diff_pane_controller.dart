@@ -35,7 +35,7 @@ class DiffPaneController extends DisposableController {
 
   final retainingPathController = RetainingPathController();
 
-  late final core = CoreData();
+  final core = CoreData();
   late final derived = DerivedData(core);
 
   /// True, if the list contains snapshots, i.e. items beyond the first
@@ -312,7 +312,9 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
     if (_core.classFilter.value.apply(
       classStats.heapClass,
       _core.rootPackage,
-    )) return classStats;
+    )) {
+      return classStats;
+    }
     return null;
   }
 
@@ -400,12 +402,16 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
     // Get class with max retained size.
     final ClassStats theClass;
     if (classes is SingleHeapClasses) {
-      final classStatsList =
-          classes.filtered(_core.classFilter.value, _core.rootPackage);
+      final classStatsList = classes.filtered(
+        _core.classFilter.value,
+        _core.rootPackage,
+      );
       theClass = classStatsList.reduce(singleWithMaxRetainedSize);
     } else if (classes is DiffHeapClasses) {
-      final classStatsList =
-          classes.filtered(_core.classFilter.value, _core.rootPackage);
+      final classStatsList = classes.filtered(
+        _core.classFilter.value,
+        _core.rootPackage,
+      );
       theClass = classStatsList.reduce(diffWithMaxRetainedSize);
     } else {
       throw StateError('Unexpected type ${classes.runtimeType}');

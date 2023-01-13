@@ -47,10 +47,19 @@ enum ClassType {
     required this.classTooltip,
   });
 
+  /// Color of the icon.
   final Color color;
+
+  /// Label for the icon.
   final String label;
+
+  /// Alias for filter string, should start with `$`.
   final String alias;
+
+  /// Description to show in filter dialog.
   final String aliasDescription;
+
+  /// String to be added to tooltip in table for class name.
   final String classTooltip;
 
   Widget get icon =>
@@ -135,7 +144,7 @@ class HeapClassName {
     return ClassType.dependency;
   }
 
-  bool get isCreatedByGoolge => isPackageless || isDartOrFlutter;
+  bool get isCreatedByGoogle => isPackageless || isDartOrFlutter;
 
   /// True, if the library does not belong to a package.
   ///
