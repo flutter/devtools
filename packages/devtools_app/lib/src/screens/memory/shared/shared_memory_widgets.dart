@@ -13,10 +13,10 @@ class HeapClassView extends StatelessWidget {
   const HeapClassView({
     super.key,
     required this.theClass,
+    required this.rootPackage,
     this.showCopyButton = false,
     this.copyGaItem,
     this.textStyle,
-    required this.rootPackage,
   });
 
   final HeapClassName theClass;

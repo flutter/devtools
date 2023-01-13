@@ -8,6 +8,7 @@ import 'package:vm_service/vm_service.dart';
 import '../../../../shared/primitives/simple_items.dart';
 import '../../../../shared/ui/icons.dart';
 
+/// Class types to color code and filter classes in tables.
 enum ClassType {
   runtime(
     color: Color.fromARGB(255, 238, 109, 99),
