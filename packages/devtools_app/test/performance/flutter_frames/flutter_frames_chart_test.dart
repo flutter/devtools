@@ -57,6 +57,7 @@ void main() {
       await pumpChart(tester);
       expect(find.byType(FramesChart), findsOneWidget);
       expect(find.byType(FramesChartControls), findsOneWidget);
+      expect(find.byType(PauseResumeButtonGroup), findsOneWidget);
       expect(find.byType(Legend), findsOneWidget);
       expect(find.byType(AverageFPS), findsOneWidget);
       expect(find.byType(FlutterFramesChartItem), findsNothing);
@@ -94,7 +95,8 @@ void main() {
       framesController.clearData();
       await pumpChart(tester, offlineMode: true);
       expect(find.byType(FramesChart), findsOneWidget);
-      expect(find.byType(FramesChartControls), findsNothing);
+      expect(find.byType(FramesChartControls), findsOneWidget);
+      expect(find.byType(PauseResumeButtonGroup), findsNothing);
       expect(find.byType(Legend), findsOneWidget);
       expect(find.byType(AverageFPS), findsOneWidget);
     });

@@ -132,7 +132,10 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
         const SizedBox(height: denseRowSpacing),
         if (isOfflineFlutterApp ||
             (!offlineMode && serviceManager.connectedApp!.isFlutterAppNow!))
-          FlutterFramesChart(controller.flutterFramesController, offlineMode: offlineMode,),
+          FlutterFramesChart(
+            controller.flutterFramesController,
+            offlineMode: offlineMode,
+          ),
         const Expanded(child: TabbedPerformanceView()),
       ],
     );
