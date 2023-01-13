@@ -57,9 +57,13 @@ enum ClassType {
   final String alias;
 
   /// Description to show in filter dialog.
+  ///
+  /// Should be in lower case.
   final String aliasDescription;
 
   /// String to be added to tooltip in table for class name.
+  ///
+  /// Should be in lower case.
   final String classTooltip;
 
   Widget get icon =>
