@@ -9,11 +9,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 
-const _testRequiresExperiments = true;
 
 void main() {
-  const skipTests = _testRequiresExperiments &&
-      (bool.fromEnvironment('enable_experiments') == false);
+  const experimentsEnabled = bool.fromEnvironment('enable_experiments') == true;
+  if (!experimentsEnabled) {
+    fail(
+      'perfetto_test.dart requires experiments to be enabled. This test should '
+      'live inside an \'experimental\' directory '
+      '(e.g. \'integration_test/test/offline/experimental/\')',
+    );
+  }
 
   final binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
