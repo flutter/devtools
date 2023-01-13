@@ -85,7 +85,7 @@ class CircleIcon extends StatelessWidget {
       ),
       alignment: Alignment.center,
       child: Padding(
-        padding: const EdgeInsets.only(left: 1, top: 1),
+        padding: const EdgeInsets.only(top: 1),
         child: Text(
           text,
           textAlign: TextAlign.center,
