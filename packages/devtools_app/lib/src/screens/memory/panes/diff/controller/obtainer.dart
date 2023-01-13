@@ -8,8 +8,8 @@ import '../../../../../shared/globals.dart';
 import '../../../shared/primitives/class_name.dart';
 import '../../../shared/primitives/instance_set_view.dart';
 
-class HeapSampleObtainer extends SampleObtainer {
-  HeapSampleObtainer(this.className);
+class HeapClassSampler extends ClassSampler {
+  HeapClassSampler(this.className);
 
   final HeapClassName className;
 

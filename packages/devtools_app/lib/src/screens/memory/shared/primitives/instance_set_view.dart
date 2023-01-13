@@ -8,7 +8,7 @@ import '../../../../shared/analytics/constants.dart';
 import '../../../../shared/common_widgets.dart';
 import '../../../../shared/primitives/utils.dart';
 
-abstract class SampleObtainer {
+abstract class ClassSampler {
   Future<void> obtain();
 }
 
@@ -23,7 +23,7 @@ class InstanceSetView extends StatelessWidget {
   }) : assert(showMenu == (sampleObtainer != null));
 
   final int count;
-  final SampleObtainer? sampleObtainer;
+  final ClassSampler? sampleObtainer;
   final bool showMenu;
   final TextStyle? textStyle;
   final MemoryAreas gaContext;
@@ -51,7 +51,7 @@ class _MenuForSubset extends StatelessWidget {
   const _MenuForSubset(this.menuText, this.sampleObtainer);
 
   final String menuText;
-  final SampleObtainer sampleObtainer;
+  final ClassSampler sampleObtainer;
 
   @override
   Widget build(BuildContext context) {
@@ -73,7 +73,7 @@ class _MenuForSubset extends StatelessWidget {
   }
 }
 
-List<Widget> _menu(SampleObtainer sampleObtainer) => [
+List<Widget> _menu(ClassSampler sampleObtainer) => [
       _MenuForSubset(
         'Store one instance as a console variable',
         sampleObtainer,

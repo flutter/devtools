@@ -111,7 +111,7 @@ class _InstanceColumn extends ColumnData<SingleClassStats>
           count: getValue(data),
           gaContext: gac.MemoryAreas.snapshotSingle,
           sampleObtainer:
-              isRowSelected ? HeapSampleObtainer(data.heapClass) : null,
+              isRowSelected ? HeapClassSampler(data.heapClass) : null,
           showMenu: isRowSelected,
         ),
       ],
