@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/performance/panes/flutter_frames/flutter_frames_chart.dart';
 import 'package:devtools_app/src/screens/performance/panes/timeline_events/perfetto/_perfetto_web.dart';
 import 'package:devtools_test/devtools_integration_test.dart';
