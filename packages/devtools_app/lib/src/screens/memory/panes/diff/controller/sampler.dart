@@ -6,6 +6,7 @@ import 'package:vm_service/vm_service.dart';
 
 import '../../../../../shared/globals.dart';
 import '../../../shared/heap/heap.dart';
+import '../../../shared/heap/model.dart';
 import '../../../shared/primitives/class_name.dart';
 import '../../../shared/primitives/instance_set_view.dart';
 
@@ -21,7 +22,7 @@ class HeapClassSampler extends ClassSampler {
   Future<InstanceRef> _oneInstance() async {
     final isolateId = _mainIsolateRef.id!;
 
-    // It would be great to find out how to avoid full scan of classes.
+    // TODO(polina-c): It would be great to find out how to avoid full scan of classes.
     final theClass = (await serviceManager.service!.getClassList(isolateId))
         .classes!
         .firstWhere((ref) => className.matches(ref));
@@ -67,6 +68,6 @@ class HeapClassSampler extends ClassSampler {
 
   @override
   Future<void> instanceGraphToConsole() async {
-    serviceManager.consoleService.appendInstanceGraph(name: 'hello');
+    serviceManager.consoleService.appendInstanceGraph(HeapObjectGraph('hello'));
   }
 }

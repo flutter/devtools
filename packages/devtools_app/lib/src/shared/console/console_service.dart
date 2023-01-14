@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../../screens/memory/shared/heap/model.dart';
 import '../../service/vm_service_wrapper.dart';
 import '../diagnostics/diagnostics_node.dart';
 import '../diagnostics/inspector_service.dart';
@@ -39,7 +40,7 @@ class ConsoleLine {
       );
 
   factory ConsoleLine.dartObjectGraph(
-    String graph, {
+    HeapObjectGraph graph, {
     bool forceScrollIntoView = false,
   }) =>
       GraphConsoleLine(
@@ -82,11 +83,11 @@ class GraphConsoleLine extends ConsoleLine {
       : super._(
           forceScrollIntoView,
         );
-  final String graph;
+  final HeapObjectGraph graph;
 
   @override
   String toString() {
-    return graph;
+    return graph.name;
   }
 }
 
@@ -94,13 +95,13 @@ class GraphConsoleLine extends ConsoleLine {
 /// VM and events emitted from other UI.
 class ConsoleService extends Disposer {
   // TODO(polina-c): add needed parameters
-  void appendInstanceGraph({
-    required String name,
+  void appendInstanceGraph(
+    HeapObjectGraph graph, {
     bool forceScrollIntoView = false,
   }) {
     _stdio.add(
       ConsoleLine.dartObjectGraph(
-        name,
+        graph,
         forceScrollIntoView: forceScrollIntoView,
       ),
     );

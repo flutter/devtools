@@ -245,7 +245,7 @@ class _ConsoleOutputState extends State<_ConsoleOutput>
               variable: line.variable,
             );
           } else if (line is GraphConsoleLine) {
-            return Text(line.graph);
+            return Text(line.graph.name);
           } else {
             assert(
               false,
