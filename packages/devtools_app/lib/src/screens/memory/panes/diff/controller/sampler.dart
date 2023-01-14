@@ -48,22 +48,21 @@ class HeapClassSampler extends ClassSampler {
       forceScrollIntoView: true,
     );
 
-    // TODO (polina-c): convert drafts below to separate commands
+    // TODO (polina-c): remove the commented code
     // before opening the flag.
+    // // eval object
+    // final response1 = await serviceManager.service!
+    //     .evaluate(_mainIsolateRef.id!, instance.id!, 'toString()');
+    // print('!!!! eval without scope: ' + response1.json!['valueAsString']);
 
-    // eval object
-    final response1 = await serviceManager.service!
-        .evaluate(_mainIsolateRef.id!, instance.id!, 'toString()');
-    print('!!!! eval without scope: ' + response1.json!['valueAsString']);
-
-    // eval object
-    final response2 = await serviceManager.service!.evaluate(
-      _mainIsolateRef.id!,
-      instance.id!,
-      'identityHashCode(this)',
-      scope: {'this': instance.id!},
-    );
-    print('!!!! eval with scope: ' + response2.json!['valueAsString']);
+    // // eval object
+    // final response2 = await serviceManager.service!.evaluate(
+    //   _mainIsolateRef.id!,
+    //   instance.id!,
+    //   'identityHashCode(this)',
+    //   scope: {'this': instance.id!},
+    // );
+    // print('!!!! eval with scope: ' + response2.json!['valueAsString']);
   }
 
   @override
