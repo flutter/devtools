@@ -111,10 +111,10 @@ class DiffHeapClasses extends HeapClasses<DiffClassStats>
 /// Comparison between two heaps for a class.
 class DiffClassStats extends ClassStats {
   DiffClassStats._({
-    required HeapClassName heapClass,
+    required super.statsByPath,
+    required super.heapClass,
     required this.total,
-    required StatsByPath objectsByPath,
-  }) : super(objectsByPath, heapClass);
+  });
 
   final ObjectSetDiff total;
 
@@ -129,7 +129,7 @@ class DiffClassStats extends ClassStats {
     final result = DiffClassStats._(
       heapClass: heapClass,
       total: ObjectSetDiff(before: before?.objects, after: after?.objects),
-      objectsByPath: subtractMaps<ClassOnlyHeapPath, ObjectSetStats,
+      statsByPath: subtractMaps<ClassOnlyHeapPath, ObjectSetStats,
           ObjectSetStats, ObjectSetStats>(
         from: after?.statsByPath,
         substract: before?.statsByPath,

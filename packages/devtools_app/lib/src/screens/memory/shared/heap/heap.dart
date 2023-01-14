@@ -28,7 +28,7 @@ class AdaptedHeap {
 
       final singleHeapClass = result.putIfAbsent(
         className,
-        () => SingleClassStats(className),
+        () => SingleClassStats(heapClass: className),
       );
       singleHeapClass.countInstance(data, i);
     }
@@ -101,7 +101,7 @@ typedef StatsByPath = Map<ClassOnlyHeapPath, ObjectSetStats>;
 typedef StatsByPathEntry = MapEntry<ClassOnlyHeapPath, ObjectSetStats>;
 
 abstract class ClassStats with Sealable {
-  ClassStats(this.statsByPath, this.heapClass);
+  ClassStats({required this.statsByPath, required this.heapClass});
 
   final StatsByPath statsByPath;
   late final List<StatsByPathEntry> statsByPathEntries = _getEntries();
@@ -115,9 +115,9 @@ abstract class ClassStats with Sealable {
 
 /// Statistics for a class about a single heap.
 class SingleClassStats extends ClassStats {
-  SingleClassStats(HeapClassName heapClass)
+  SingleClassStats({required super.heapClass})
       : objects = ObjectSet(),
-        super(<ClassOnlyHeapPath, ObjectSetStats>{}, heapClass);
+        super(statsByPath: <ClassOnlyHeapPath, ObjectSetStats>{});
 
   final ObjectSet objects;
 
