@@ -104,6 +104,7 @@ class ChromeDriver with IOMixin {
 class TestRunner with IOMixin {
   static const _beginExceptionMarker = '| EXCEPTION CAUGHT';
   static const _endExceptionMarker = '===========================';
+  static const _errorMarker = ': Error: ';
 
   Future<void> run(
     String testTarget, {
@@ -131,7 +132,8 @@ class TestRunner with IOMixin {
       ],
     );
 
-    bool writeInProgress = false;
+    bool stdOutWriteInProgress = false;
+    bool stdErrWriteInProgress = false;
     final exceptionBuffer = StringBuffer();
 
     listenToProcessOutput(
@@ -150,16 +152,24 @@ class TestRunner with IOMixin {
         }
 
         if (line.contains(_beginExceptionMarker)) {
-          writeInProgress = true;
+          stdOutWriteInProgress = true;
         }
-        if (writeInProgress) {
+        if (stdOutWriteInProgress) {
           exceptionBuffer.writeln(line);
           // Marks the end of the exception caught by flutter.
           if (line.contains(_endExceptionMarker) &&
               !line.contains(_beginExceptionMarker)) {
-            writeInProgress = false;
+            stdOutWriteInProgress = false;
             exceptionBuffer.writeln();
           }
+        }
+      },
+      onStderr: (line) {
+        if (line.contains(_errorMarker)) {
+          stdErrWriteInProgress = true;
+        }
+        if (stdErrWriteInProgress) {
+          exceptionBuffer.writeln(line);
         }
       },
     );
