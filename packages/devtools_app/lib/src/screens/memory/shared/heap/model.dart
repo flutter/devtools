@@ -321,3 +321,13 @@ mixin Sealable {
   bool get isSealed => _isSealed;
   bool _isSealed = false;
 }
+
+/// Successors and predeccessors for a heap instance, to
+/// browse in console.
+class HeapObjectGraph {
+  //TODO(polina-c): add needed fields
+
+  HeapObjectGraph(this.name);
+
+  final String name;
+}

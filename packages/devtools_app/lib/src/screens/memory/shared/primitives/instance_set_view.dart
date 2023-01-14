@@ -2,17 +2,23 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
-import 'package:vm_service/vm_service.dart';
 
 import '../../../../shared/analytics/constants.dart';
 import '../../../../shared/common_widgets.dart';
 import '../../../../shared/primitives/utils.dart';
 
-typedef SampleObtainer = InstanceRef Function();
+abstract class ClassSampler {
+  Future<void> oneVariableToConsole();
+  void instanceGraphToConsole();
+}
 
-class InstanceSetView extends StatelessWidget {
-  const InstanceSetView({
+/// A button with label '...' to show near count of instances,
+/// with drop down menu to explore the instances.
+class InstanceSetButton extends StatelessWidget {
+  const InstanceSetButton({
     super.key,
     this.textStyle,
     required this.count,
@@ -22,7 +28,7 @@ class InstanceSetView extends StatelessWidget {
   }) : assert(showMenu == (sampleObtainer != null));
 
   final int count;
-  final SampleObtainer? sampleObtainer;
+  final ClassSampler? sampleObtainer;
   final bool showMenu;
   final TextStyle? textStyle;
   final MemoryAreas gaContext;
@@ -38,7 +44,7 @@ class InstanceSetView extends StatelessWidget {
         if (showMenu)
           ContextMenuButton(
             style: textStyle,
-            menu: _menu(),
+            menu: _menu(sampleObtainer!),
           ),
         if (!showMenu) const SizedBox(width: ContextMenuButton.width),
       ],
@@ -46,24 +52,25 @@ class InstanceSetView extends StatelessWidget {
   }
 }
 
-class _MenuForSubset extends StatelessWidget {
-  const _MenuForSubset(this.menuText);
+class _StoreAsVariableMenu extends StatelessWidget {
+  const _StoreAsVariableMenu(this.menuText, this.sampleObtainer);
 
   final String menuText;
+  final ClassSampler sampleObtainer;
 
   @override
   Widget build(BuildContext context) {
     return SubmenuButton(
       menuChildren: <Widget>[
         MenuItemButton(
-          onPressed: () => {},
-          child: const Text('Fields'),
+          onPressed: sampleObtainer.oneVariableToConsole,
+          child: const Text('One instance'),
         ),
         const MenuItemButton(
-          child: Text('Outgoing references'),
+          child: Text('First 20 instances'),
         ),
         const MenuItemButton(
-          child: Text('Incoming references'),
+          child: Text('All instances'),
         ),
       ],
       child: Text(menuText),
@@ -71,8 +78,13 @@ class _MenuForSubset extends StatelessWidget {
   }
 }
 
-List<Widget> _menu() => [
-      const _MenuForSubset('Store one instance as a console variable'),
-      const _MenuForSubset('Store first 100 instances as a console variable'),
-      const _MenuForSubset('Store all instances as a console variable'),
+List<Widget> _menu(ClassSampler sampleObtainer) => [
+      _StoreAsVariableMenu(
+        'Store as a console variable',
+        sampleObtainer,
+      ),
+      MenuItemButton(
+        onPressed: sampleObtainer.instanceGraphToConsole,
+        child: const Text('Browse references for a single instance in console'),
+      ),
     ];
