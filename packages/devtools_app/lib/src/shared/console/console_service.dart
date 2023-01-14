@@ -80,9 +80,7 @@ class VariableConsoleLine extends ConsoleLine {
 
 class GraphConsoleLine extends ConsoleLine {
   GraphConsoleLine(this.graph, {bool forceScrollIntoView = false})
-      : super._(
-          forceScrollIntoView,
-        );
+      : super._(forceScrollIntoView);
   final HeapObjectGraph graph;
 
   @override
