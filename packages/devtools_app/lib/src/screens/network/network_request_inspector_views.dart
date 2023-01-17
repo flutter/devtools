@@ -135,23 +135,35 @@ class HttpRequestView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final requestHeaders = data.requestHeaders;
-    final requestContentType = requestHeaders?['content-type'] ?? '';
-    Widget child;
-    if (requestContentType.contains('json')) {
-      child = JsonViewer(encodedJson: data.requestBody!);
-    } else {
-      child = Text(
-        data.requestBody!,
-        style: theme.fixedFontStyle,
-      );
-    }
-    return Padding(
-      padding: const EdgeInsets.all(denseSpacing),
-      child: SingleChildScrollView(
-        child: child,
-      ),
+    return ValueListenableBuilder(
+      valueListenable: data.updateCount,
+      builder: (_, __, ___) {
+        final theme = Theme.of(context);
+        final requestHeaders = data.requestHeaders;
+        final requestContentType = requestHeaders?['content-type'] ?? '';
+        final isLoading = data.isFetchingFullData;
+        if (isLoading) {
+          //TODO: Determine why refreshing json view when main view refreshes (may need to have individual builders per tab)
+          return CenteredCircularProgressIndicator(
+            size: mediumProgressSize,
+          );
+        }
+        Widget child;
+        if (requestContentType.contains('json')) {
+          child = JsonViewer(encodedJson: data.requestBody!);
+        } else {
+          child = Text(
+            data.requestBody!,
+            style: theme.fixedFontStyle,
+          );
+        }
+        return Padding(
+          padding: const EdgeInsets.all(denseSpacing),
+          child: SingleChildScrollView(
+            child: child,
+          ),
+        );
+      },
     );
   }
 }
@@ -163,28 +175,41 @@ class HttpResponseView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Widget child;
-    final theme = Theme.of(context);
-    // We shouldn't try and display an image response view when using the
-    // timeline profiler since it's possible for response body data to get
-    // dropped.
-    final contentType = data.contentType;
-    final responseBody = data.responseBody!;
-    if (contentType != null && contentType.contains('image')) {
-      child = ImageResponseView(data);
-    } else if (contentType != null &&
-        contentType.contains('json') &&
-        responseBody.isNotEmpty) {
-      child = JsonViewer(encodedJson: responseBody);
-    } else {
-      child = Text(
-        responseBody,
-        style: theme.fixedFontStyle,
-      );
-    }
-    return Padding(
-      padding: const EdgeInsets.all(denseSpacing),
-      child: SingleChildScrollView(child: child),
+    return ValueListenableBuilder(
+      valueListenable: data.updateCount,
+      builder: (_, __, ___) {
+        Widget child;
+        final theme = Theme.of(context);
+        // We shouldn't try and display an image response view when using the
+        // timeline profiler since it's possible for response body data to get
+        // dropped.
+        final contentType = data.contentType;
+        final responseBody = data.responseBody!;
+        final isLoading = data.isFetchingFullData;
+        if (isLoading) {
+          //TODO: Determine why refreshing json view when main view refreshes (may need to have individual builders per tab)
+          return CenteredCircularProgressIndicator(
+            size: mediumProgressSize,
+          );
+        }
+        if (contentType != null && contentType.contains('image')) {
+          child = ImageResponseView(data);
+        } else if (contentType != null &&
+            contentType.contains('json') &&
+            responseBody.isNotEmpty) {
+          child = JsonViewer(encodedJson: responseBody);
+        } else {
+          child = Text(
+            responseBody,
+            style: theme.fixedFontStyle,
+          );
+        }
+        return Padding(
+          padding: const EdgeInsets.all(denseSpacing),
+          child: SingleChildScrollView(child: child),
+        );
+        //TODO: test Large JSON parsing if the response is large.
+      },
     );
   }
 }

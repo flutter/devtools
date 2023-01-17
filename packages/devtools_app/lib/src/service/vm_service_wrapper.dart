@@ -843,7 +843,7 @@ class VmServiceWrapper implements VmService {
 
   Future<HttpProfileRequest> getHttpProfileRequest(
     String isolateId,
-    int id,
+    String id,
   ) async {
     assert(await isHttpProfilingAvailable(isolateId));
     return trackFuture(
