@@ -87,7 +87,8 @@ class NetworkService {
       sockets.addAll(socketProfile.sockets);
     });
 
-    // TODO: add way to filter getSocketProfiles using the refreshTime
+    // TODO(https://github.com/flutter/devtools/issues/5057): 
+    // Filter lastrefreshMicros inside [service.getSocketProfile] instead.
     return sockets
         .where(
           (element) =>
