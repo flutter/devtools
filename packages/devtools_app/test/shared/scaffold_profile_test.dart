@@ -27,8 +27,9 @@ void main() {
     ValueNotifier<ConnectedState>(const ConnectedState(false)),
   );
   when(mockServiceManager.isolateManager).thenReturn(FakeIsolateManager());
-  when(mockServiceManager.appState)
-      .thenReturn(AppState(mockServiceManager.isolateManager.selectedIsolate));
+  when(mockServiceManager.appState).thenReturn(
+    AppState(mockServiceManager.isolateManager.selectedIsolate),
+  );
 
   final mockErrorBadgeManager = MockErrorBadgeManager();
   when(mockServiceManager.errorBadgeManager).thenReturn(mockErrorBadgeManager);

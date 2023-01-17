@@ -17,6 +17,7 @@ import '../../../../shared/theme.dart';
 import '../../../../shared/utils.dart';
 import '../../shared/primitives/simple_elements.dart';
 
+import '../../shared/shared_memory_widgets.dart';
 import 'allocation_profile_table_view_controller.dart';
 import 'model.dart';
 
@@ -27,7 +28,8 @@ import 'model.dart';
 /// instances, memory).
 const _defaultNumberFieldWidth = 90.0;
 
-class _FieldClassNameColumn extends ColumnData<AllocationProfileRecord> {
+class _FieldClassNameColumn extends ColumnData<AllocationProfileRecord>
+    implements ColumnRenderer<AllocationProfileRecord> {
   _FieldClassNameColumn()
       : super(
           'Class',
@@ -38,12 +40,32 @@ class _FieldClassNameColumn extends ColumnData<AllocationProfileRecord> {
   String? getValue(AllocationProfileRecord dataObject) =>
       dataObject.heapClass.className;
 
+  // We are removing the tooltip, because it is provided by [HeapClassView].
   @override
-  String getTooltip(AllocationProfileRecord dataObject) =>
-      dataObject.heapClass.fullName;
+  String getTooltip(AllocationProfileRecord dataObject) => '';
 
   @override
   bool get supportsSorting => true;
+
+  @override
+  Widget? build(
+    BuildContext context,
+    AllocationProfileRecord data, {
+    bool isRowSelected = false,
+    VoidCallback? onPressed,
+  }) {
+    if (data.isTotal) return null;
+
+    final theme = Theme.of(context);
+    return HeapClassView(
+      theClass: data.heapClass,
+      showCopyButton: isRowSelected,
+      copyGaItem: gac.MemoryEvent.diffClassSingleCopy,
+      textStyle:
+          isRowSelected ? theme.selectedTextStyle : theme.regularTextStyle,
+      rootPackage: serviceManager.rootInfoNow().package,
+    );
+  }
 }
 
 /// For more information on the Dart GC implementation, see:

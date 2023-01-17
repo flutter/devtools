@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../../shared/analytics/analytics.dart' as ga;
 import '../../../../../shared/analytics/constants.dart' as gac;
+import '../../../../../shared/globals.dart';
 import '../../../../../shared/primitives/utils.dart';
 import '../../../../../shared/table/table.dart';
 import '../../../../../shared/table/table_data.dart';
@@ -34,7 +35,7 @@ class _ClassNameColumn extends ColumnData<DiffClassStats>
       : super(
           'Class',
           titleTooltip: 'Class name',
-          fixedWidthPx: scaleByFontFactor(180.0),
+          fixedWidthPx: scaleByFontFactor(200.0),
           alignment: ColumnAlignment.left,
         );
 
@@ -64,6 +65,7 @@ class _ClassNameColumn extends ColumnData<DiffClassStats>
       copyGaItem: gac.MemoryEvent.diffClassDiffCopy,
       textStyle:
           isRowSelected ? theme.selectedTextStyle : theme.regularTextStyle,
+      rootPackage: serviceManager.rootInfoNow().package,
     );
   }
 
