@@ -24,8 +24,9 @@ Future<void> main() async {
   when(mockServiceManager.serviceExtensionManager)
       .thenReturn(FakeServiceExtensionManager());
   when(mockServiceManager.isolateManager).thenReturn(FakeIsolateManager());
-  when(mockServiceManager.appState)
-      .thenReturn(AppState(mockServiceManager.isolateManager.selectedIsolate));
+  when(mockServiceManager.appState).thenReturn(
+    AppState(mockServiceManager.isolateManager.selectedIsolate),
+  );
   when(mockServiceManager.runDeviceBusyTask(Future<void>.value()))
       .thenAnswer((_) => Future<void>.value());
   when(mockServiceManager.isMainIsolatePaused).thenReturn(false);

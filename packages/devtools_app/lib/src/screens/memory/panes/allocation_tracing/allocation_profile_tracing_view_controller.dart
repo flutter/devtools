@@ -12,6 +12,7 @@ import '../../../../shared/primitives/utils.dart';
 import '../../../../shared/table/table_data.dart';
 import '../../../profiler/cpu_profile_model.dart';
 import '../../../profiler/cpu_profile_transformer.dart';
+import '../../shared/primitives/class_name.dart';
 
 // TODO(bkonyi): make compatible with ClassHeapDetailStats for serialization /
 // deserialization support.
@@ -20,13 +21,14 @@ class TracedClass with PinnableListEntry {
   TracedClass({
     required this.cls,
   })  : traceAllocations = false,
-        instances = 0;
+        instances = 0,
+        name = HeapClassName.fromClassRef(cls);
 
   TracedClass._({
     required this.cls,
     required this.instances,
     required this.traceAllocations,
-  });
+  }) : name = HeapClassName.fromClassRef(cls);
 
   TracedClass copyWith({
     ClassRef? cls,
@@ -40,6 +42,7 @@ class TracedClass with PinnableListEntry {
     );
   }
 
+  final HeapClassName name;
   final ClassRef cls;
   final int instances;
   final bool traceAllocations;
