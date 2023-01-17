@@ -51,5 +51,5 @@ void main() {
     await tester.pump(safePumpDuration);
 
     await verifyScreenshot(binding, 'perfetto_frame_selection_2');
-  }, skip: sure);
+  });
 }

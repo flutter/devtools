@@ -142,9 +142,7 @@ elif [ "$BOT" = "integration_dart2js" ]; then
     flutter pub get
 
     # TODO(https://github.com/flutter/devtools/issues/1987): rewrite integration tests.
-    # TODO(kenz): does this fail if the test fails? Or do we need to rethrow from the dart script?
     dart run integration_test/run_tests.dart --headless
-    echo "$?"
 
 else
 
