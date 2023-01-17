@@ -19,7 +19,7 @@ class HeapClassSampler extends ClassSampler {
   IsolateRef get _mainIsolateRef =>
       serviceManager.isolateManager.mainIsolate.value!;
 
-  Future<InstanceRef> _oneInstance() async {
+  Future<InstanceRef?> _oneInstance() async {
     final isolateId = _mainIsolateRef.id!;
 
     // TODO(polina-c): It would be great to find out how to avoid full scan of classes.
@@ -33,20 +33,29 @@ class HeapClassSampler extends ClassSampler {
       1,
     );
 
-    return instances.instances!.first as InstanceRef;
+    final result = instances.instances!.first;
+
+    if (result is InstanceRef) return result;
+
+    return null;
   }
 
   @override
   Future<void> oneVariableToConsole() async {
     final instance = await _oneInstance();
 
-    // drop to console
-    serviceManager.consoleService.appendInstanceRef(
-      value: instance,
-      diagnostic: null,
-      isolateRef: _mainIsolateRef,
-      forceScrollIntoView: true,
-    );
+    if (instance == null) {
+      serviceManager.consoleService
+          .appendStdio('the instance cannot be evaluated');
+    } else {
+      // drop to console
+      serviceManager.consoleService.appendInstanceRef(
+        value: instance,
+        diagnostic: null,
+        isolateRef: _mainIsolateRef,
+        forceScrollIntoView: true,
+      );
+    }
 
     // TODO (polina-c): remove the commented code
     // before opening the flag.
