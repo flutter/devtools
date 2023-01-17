@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../../screens/memory/shared/heap/model.dart';
 import '../../service/vm_service_wrapper.dart';
 import '../diagnostics/diagnostics_node.dart';
 import '../diagnostics/inspector_service.dart';
@@ -35,6 +36,15 @@ class ConsoleLine {
   }) =>
       VariableConsoleLine(
         variable,
+        forceScrollIntoView: forceScrollIntoView,
+      );
+
+  factory ConsoleLine.dartObjectGraph(
+    HeapObjectGraph graph, {
+    bool forceScrollIntoView = false,
+  }) =>
+      GraphConsoleLine(
+        graph,
         forceScrollIntoView: forceScrollIntoView,
       );
 
@@ -68,9 +78,33 @@ class VariableConsoleLine extends ConsoleLine {
   }
 }
 
+class GraphConsoleLine extends ConsoleLine {
+  GraphConsoleLine(this.graph, {bool forceScrollIntoView = false})
+      : super._(forceScrollIntoView);
+  final HeapObjectGraph graph;
+
+  @override
+  String toString() {
+    return graph.name;
+  }
+}
+
 /// Source of truth for the state of the Console including both events from the
 /// VM and events emitted from other UI.
 class ConsoleService extends Disposer {
+  // TODO(polina-c): add needed parameters
+  void appendInstanceGraph(
+    HeapObjectGraph graph, {
+    bool forceScrollIntoView = false,
+  }) {
+    _stdio.add(
+      ConsoleLine.dartObjectGraph(
+        graph,
+        forceScrollIntoView: forceScrollIntoView,
+      ),
+    );
+  }
+
   void appendInstanceRef({
     String? name,
     required InstanceRef? value,
