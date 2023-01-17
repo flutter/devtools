@@ -118,9 +118,11 @@ class TestRunner with IOMixin {
       'flutter',
       [
         'drive',
-        // Note that debug outputs from the test will not show up in profile
-        // mode. See https://github.com/flutter/flutter/issues/69070.
-        '--profile',
+        // Debug outputs from the test will not show up in profile mode. Since
+        // we rely on debug outputs for detecting errors and exceptions from the
+        // test, we cannot run this these tests in profile mode until this issue
+        // is resolved.  See https://github.com/flutter/flutter/issues/69070.
+        // '--profile',
         '--driver=test_driver/integration_test.dart',
         '--target=$testTarget',
         '-d',
