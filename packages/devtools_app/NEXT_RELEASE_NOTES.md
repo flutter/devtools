@@ -32,7 +32,7 @@ TODO: Remove this section if there are not any general updates.
 * Added support for viewing profiler hits in the debugger script viewer - [#4831](https://github.com/flutter/devtools/pull/4831)
 
 ## Network profiler updates
-TODO: Remove this section if there are not any general updates.
+* Improve reliability and performance of the Network tab - [#5056](https://github.com/flutter/devtools/pull/5056)
 
 ## Logging updates
 TODO: Remove this section if there are not any general updates.
