@@ -45,7 +45,7 @@ Future<void> main() async {
         print('Golden image test failed: $screenshotName.png');
 
         // Create the goldens directory if it does not exist.
-        Directory(_goldensDirectoryPath)..createSync();
+        Directory(_goldensDirectoryPath).createSync();
 
         const failuresDirectoryPath = '$_goldensDirectoryPath/failures';
         Directory(failuresDirectoryPath).createSync();
