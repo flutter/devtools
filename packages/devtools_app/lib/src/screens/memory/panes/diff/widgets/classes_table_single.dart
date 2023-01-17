@@ -14,6 +14,7 @@ import '../../../../../shared/table/table_data.dart';
 import '../../../../../shared/theme.dart';
 import '../../../../../shared/utils.dart';
 import '../../../shared/heap/heap.dart';
+import '../../../shared/primitives/class_name.dart';
 import '../../../shared/primitives/instance_set_view.dart';
 import '../../../shared/primitives/simple_elements.dart';
 import '../../../shared/shared_memory_widgets.dart';
@@ -103,6 +104,9 @@ class _InstanceColumn extends ColumnData<SingleClassStats>
     if (!FeatureFlags.evalAndBrowse) return null;
 
     final theme = Theme.of(context);
+    final classType =
+        data.heapClass.classType(serviceManager.rootInfoNow().package);
+    final showMenu = isRowSelected && classType != ClassType.runtime;
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.end,
@@ -113,8 +117,8 @@ class _InstanceColumn extends ColumnData<SingleClassStats>
           count: getValue(data),
           gaContext: gac.MemoryAreas.snapshotSingle,
           sampleObtainer:
-              isRowSelected ? HeapClassSampler(data.heapClass, data) : null,
-          showMenu: isRowSelected,
+              showMenu ? HeapClassSampler(data.heapClass, data) : null,
+          showMenu: showMenu,
         ),
       ],
     );
