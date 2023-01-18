@@ -11,10 +11,10 @@ import '../../../shared/primitives/class_name.dart';
 import '../../../shared/primitives/instance_set_view.dart';
 
 class HeapClassSampler extends ClassSampler {
-  HeapClassSampler(this.className, this.objects);
+  HeapClassSampler(this.objects, this.heap);
 
-  final HeapClassName className;
   final SingleClassStats objects;
+  final AdaptedHeapData heap;
 
   IsolateRef get _mainIsolateRef =>
       serviceManager.isolateManager.mainIsolate.value!;
@@ -25,7 +25,7 @@ class HeapClassSampler extends ClassSampler {
     // TODO(polina-c): It would be great to find out how to avoid full scan of classes.
     final theClass = (await serviceManager.service!.getClassList(isolateId))
         .classes!
-        .firstWhere((ref) => className.matches(ref));
+        .firstWhere((ref) => objects.heapClass.matches(ref));
 
     final instances = await serviceManager.service!.getInstances(
       isolateId,
@@ -76,11 +76,17 @@ class HeapClassSampler extends ClassSampler {
 
   @override
   Future<void> instanceGraphToConsole() async {
-    serviceManager.consoleService.appendInstanceGraph(HeapObjectGraph('hello'));
+    serviceManager.consoleService.appendInstanceGraph(
+      HeapObjectGraph(
+        heap,
+        objects.objects.objectsByCodes.keys.first,
+        objects.heapClass,
+      ),
+    );
   }
 
   @override
   bool get isEvalEnabled =>
-      className.classType(serviceManager.rootInfoNow().package) !=
+      objects.heapClass.classType(serviceManager.rootInfoNow().package) !=
       ClassType.runtime;
 }
