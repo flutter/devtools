@@ -327,7 +327,9 @@ mixin Sealable {
 class HeapObjectGraph {
   //TODO(polina-c): add needed fields
 
-  HeapObjectGraph(this.name);
+  HeapObjectGraph(this.heap, this.identityHashCode, this.className);
 
-  final String name;
+  final int identityHashCode;
+  final HeapClassName className;
+  final AdaptedHeapData heap;
 }
