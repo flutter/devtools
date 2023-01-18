@@ -727,19 +727,7 @@ class VmServiceObjectLink<T> extends StatelessWidget {
         text = code.name!;
       } else if (object is InstanceRef) {
         final instance = object as InstanceRef;
-        if (instance.kind == InstanceKind.kTypeParameter) {
-          final buf = StringBuffer();
-          final typeParams = instance.typeParameters!;
-          buf.write('<');
-          for (int i = 0; i < typeParams.length; ++i) {
-            buf.write(typeParams[i].valueAsString);
-            if (i + 1 != typeParams.length) {
-              buf.write(', ');
-            }
-          }
-          buf.write('>');
-          text = buf.toString();
-        } else if (instance.kind == InstanceKind.kList) {
+        if (instance.kind == InstanceKind.kList) {
           text = 'List(length: ${instance.length})';
         } else if (instance.kind == InstanceKind.kMap) {
           text = 'Map(length: ${instance.length})';
