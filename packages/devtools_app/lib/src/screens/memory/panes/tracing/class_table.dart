@@ -15,7 +15,7 @@ import '../../../../shared/table/table_data.dart';
 import '../../../../shared/theme.dart';
 import '../../../../shared/utils.dart';
 import '../../shared/shared_memory_widgets.dart';
-import 'tracing_controller.dart';
+import 'tracing_pane_controller.dart';
 
 /// The default width for columns containing *mostly* numeric data (e.g.,
 /// instances, memory).
@@ -32,7 +32,7 @@ class _TraceCheckBoxColumn extends ColumnData<TracedClass>
           alignment: ColumnAlignment.left,
         );
 
-  final AllocationProfileTracingViewController controller;
+  final TracingPaneController controller;
 
   @override
   bool get supportsSorting => false;
@@ -121,7 +121,7 @@ class _InstancesColumn extends ColumnData<TracedClass> {
 class AllocationTracingTable extends StatefulWidget {
   const AllocationTracingTable({required this.controller});
 
-  final AllocationProfileTracingViewController controller;
+  final TracingPaneController controller;
 
   @override
   State<AllocationTracingTable> createState() => _AllocationTracingTableState();
@@ -175,8 +175,7 @@ class _AllocationTracingTableState extends State<AllocationTracingTable> {
           ),
         ),
         Expanded(
-          child: DualValueListenableBuilder<bool,
-              AllocationProfileTracingIsolateState>(
+          child: DualValueListenableBuilder<bool, TracingIsolateState>(
             firstListenable: widget.controller.refreshing,
             secondListenable: widget.controller.stateForIsolate,
             builder: (context, _, state, __) {

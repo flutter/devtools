@@ -12,11 +12,10 @@ import '../../../../shared/common_widgets.dart';
 import '../../../../shared/globals.dart';
 import '../../../../shared/split.dart';
 import '../../../../shared/theme.dart';
-
 import '../../shared/primitives/simple_elements.dart';
 import 'class_table.dart';
+import 'tracing_pane_controller.dart';
 import 'tracing_tree.dart';
-import 'tracing_controller.dart';
 
 class AllocationProfileTracingView extends StatefulWidget {
   const AllocationProfileTracingView({
@@ -30,12 +29,12 @@ class AllocationProfileTracingView extends StatefulWidget {
 
 class AllocationProfileTracingViewState
     extends State<AllocationProfileTracingView> {
-  late final AllocationProfileTracingViewController controller;
+  late final TracingPaneController controller;
 
   @override
   void initState() {
     super.initState();
-    controller = AllocationProfileTracingViewController();
+    controller = TracingPaneController();
     unawaited(controller.initialize());
   }
 
@@ -92,7 +91,7 @@ class _TracingControls extends StatelessWidget {
 
   final bool isProfileMode;
 
-  final AllocationProfileTracingViewController controller;
+  final TracingPaneController controller;
 
   @override
   Widget build(BuildContext context) {

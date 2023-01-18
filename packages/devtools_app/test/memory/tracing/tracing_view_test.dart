@@ -8,9 +8,7 @@ import 'dart:io';
 import 'package:devtools_app/src/screens/memory/memory_controller.dart';
 import 'package:devtools_app/src/screens/memory/memory_screen.dart';
 import 'package:devtools_app/src/screens/memory/memory_tabs.dart';
-import 'package:devtools_app/src/screens/memory/panes/allocation_tracing/allocation_profile_tracing_tree.dart';
-import 'package:devtools_app/src/screens/memory/panes/allocation_tracing/tracing_view.dart';
-import 'package:devtools_app/src/screens/memory/panes/allocation_tracing/tracing_controller.dart';
+import 'package:devtools_app/src/screens/memory/panes/tracing/tracing_pane_controller.dart';
 import 'package:devtools_app/src/screens/profiler/cpu_profile_model.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/shared/common_widgets.dart';
@@ -81,7 +79,7 @@ void main() {
   /// Clears the class filter text field.
   Future<void> clearFilter(
     WidgetTester tester,
-    AllocationProfileTracingViewController controller,
+    TracingPaneController controller,
   ) async {
     final originalClassCount = classList.classes!.length;
     final clearFilterButton = find.byIcon(Icons.clear);
@@ -120,7 +118,7 @@ void main() {
       _setUpServiceManager();
     });
 
-    Future<AllocationProfileTracingViewController> navigateToAllocationTracing(
+    Future<TracingPaneController> navigateToAllocationTracing(
       WidgetTester tester,
     ) async {
       await tester.tap(

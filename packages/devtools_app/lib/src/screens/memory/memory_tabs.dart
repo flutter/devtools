@@ -8,10 +8,10 @@ import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/common_widgets.dart';
 import '../../shared/ui/tab.dart';
 import 'memory_controller.dart';
-import 'panes/profile/profile_view.dart';
-import 'panes/tracing/tracing_view.dart';
 import 'panes/diff/diff_pane.dart';
 import 'panes/leaks/leaks_pane.dart';
+import 'panes/profile/profile_view.dart';
+import 'panes/tracing/tracing_view.dart';
 
 @visibleForTesting
 class MemoryScreenKeys {

@@ -16,10 +16,9 @@ import '../../../../shared/table/table_data.dart';
 import '../../../../shared/theme.dart';
 import '../../../../shared/utils.dart';
 import '../../shared/primitives/simple_elements.dart';
-
 import '../../shared/shared_memory_widgets.dart';
-import 'profile_pane_controller.dart';
 import 'model.dart';
+import 'profile_pane_controller.dart';
 
 // TODO(bkonyi): ensure data displayed in this view is included in the full
 // memory page export and is serializable/deserializable.

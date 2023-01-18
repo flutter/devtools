@@ -70,10 +70,10 @@ class TracedClass with PinnableListEntry {
 ///
 /// `AllocationProfileTracingController` is effectively only used to provide
 /// consumers the allocation tracing state for the currently selected isolate.
-class AllocationProfileTracingIsolateState {
-  AllocationProfileTracingIsolateState({required this.isolate});
+class TracingIsolateState {
+  TracingIsolateState({required this.isolate});
 
-  AllocationProfileTracingIsolateState._empty() : isolate = IsolateRef();
+  TracingIsolateState._empty() : isolate = IsolateRef();
 
   final IsolateRef isolate;
 
@@ -238,7 +238,7 @@ class AllocationProfileTracingIsolateState {
   }
 }
 
-class AllocationProfileTracingViewController extends DisposableController
+class TracingPaneController extends DisposableController
     with AutoDisposeControllerMixin {
   /// Set to `true` if the controller has not yet finished initializing.
   ValueListenable<bool> get initializing => _initializing;
@@ -250,14 +250,13 @@ class AllocationProfileTracingViewController extends DisposableController
   final _refreshing = ValueNotifier<bool>(false);
 
   /// The allocation tracing state for the currently selected isolate.
-  ValueListenable<AllocationProfileTracingIsolateState> get stateForIsolate =>
+  ValueListenable<TracingIsolateState> get stateForIsolate =>
       _stateForIsolateListenable;
-  final _stateForIsolateListenable =
-      ValueNotifier<AllocationProfileTracingIsolateState>(
-    AllocationProfileTracingIsolateState._empty(),
+  final _stateForIsolateListenable = ValueNotifier<TracingIsolateState>(
+    TracingIsolateState._empty(),
   );
 
-  final _stateForIsolate = <String, AllocationProfileTracingIsolateState>{};
+  final _stateForIsolate = <String, TracingIsolateState>{};
 
   /// The [TextEditingController] for the 'Class Filter' text field.
   final textEditingController = TextEditingController();
@@ -273,7 +272,7 @@ class AllocationProfileTracingViewController extends DisposableController
         // TODO(bkonyi): we don't need to request this unless we've had a hot reload.
         // We generally need to rebuild this data if we've had a hot reload or
         // switched the currently selected isolate.
-        state = AllocationProfileTracingIsolateState(isolate: isolate);
+        state = TracingIsolateState(isolate: isolate);
         await state.initialize();
         _stateForIsolate[isolateId] = state;
       }
