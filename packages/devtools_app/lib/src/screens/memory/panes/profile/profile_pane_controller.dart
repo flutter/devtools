@@ -14,7 +14,7 @@ import '../../../../shared/globals.dart';
 import '../../../../shared/primitives/auto_dispose.dart';
 import 'model.dart';
 
-class AllocationProfileTableViewController extends DisposableController
+class ProfilePaneController extends DisposableController
     with AutoDisposeControllerMixin {
   final _exportController = ExportController();
 

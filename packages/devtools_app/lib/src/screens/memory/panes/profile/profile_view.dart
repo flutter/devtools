@@ -18,7 +18,7 @@ import '../../../../shared/utils.dart';
 import '../../shared/primitives/simple_elements.dart';
 
 import '../../shared/shared_memory_widgets.dart';
-import 'profile_controller.dart';
+import 'profile_pane_controller.dart';
 import 'model.dart';
 
 // TODO(bkonyi): ensure data displayed in this view is included in the full
@@ -217,7 +217,7 @@ class AllocationProfileTableView extends StatefulWidget {
   State<AllocationProfileTableView> createState() =>
       AllocationProfileTableViewState();
 
-  final AllocationProfileTableViewController controller;
+  final ProfilePaneController controller;
 }
 
 class AllocationProfileTableViewState
@@ -297,7 +297,7 @@ class _AllocationProfileTable extends StatelessWidget {
     _FieldExternalSizeColumn(heap: _HeapGeneration.oldSpace),
   ];
 
-  final AllocationProfileTableViewController controller;
+  final ProfilePaneController controller;
 
   @override
   Widget build(BuildContext context) {
@@ -349,7 +349,7 @@ class _AllocationProfileTableControls extends StatelessWidget {
     required this.allocationProfileController,
   }) : super(key: key);
 
-  final AllocationProfileTableViewController allocationProfileController;
+  final ProfilePaneController allocationProfileController;
 
   @override
   Widget build(BuildContext context) {
@@ -384,7 +384,7 @@ class _ExportAllocationProfileButton extends StatelessWidget {
     required this.allocationProfileController,
   }) : super(key: key);
 
-  final AllocationProfileTableViewController allocationProfileController;
+  final ProfilePaneController allocationProfileController;
 
   @override
   Widget build(BuildContext context) {
@@ -410,7 +410,7 @@ class _RefreshOnGCToggleButton extends StatelessWidget {
     required this.allocationProfileController,
   }) : super(key: key);
 
-  final AllocationProfileTableViewController allocationProfileController;
+  final ProfilePaneController allocationProfileController;
 
   @override
   Widget build(BuildContext context) {
