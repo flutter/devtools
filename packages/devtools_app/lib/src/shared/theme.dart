@@ -371,7 +371,7 @@ extension DevToolsColorScheme on ColorScheme {
       );
 
   Color get selectedRowColor =>
-      isLight ? devtoolsBlue[600]! : devtoolsGrey[600]!;
+      isLight ? devtoolsBlue[400]! : devtoolsGrey[600]!;
 
   Color get performanceLowImpactColor => const Color(0xFF5CB246);
   Color get performanceMediumImpactColor => const Color(0xFFF7AC2A);
