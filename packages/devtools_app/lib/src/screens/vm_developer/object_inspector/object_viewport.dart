@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'package:vm_service/vm_service.dart';
 
 import '../../../shared/common_widgets.dart';
 import '../../../shared/history_viewport.dart';
@@ -13,6 +14,7 @@ import 'vm_class_display.dart';
 import 'vm_code_display.dart';
 import 'vm_field_display.dart';
 import 'vm_function_display.dart';
+import 'vm_instance_display.dart';
 import 'vm_library_display.dart';
 import 'vm_object_model.dart';
 import 'vm_script_display.dart';
@@ -63,6 +65,11 @@ class ObjectViewport extends StatelessWidget {
       return 'No object selected.';
     }
 
+    if (object.obj is Instance) {
+      final instance = object.obj as Instance;
+      return 'Instance of ${instance.classRef!.name}';
+    }
+
     return '${object.obj.type} ${object.name ?? '<name>'}';
   }
 
@@ -100,7 +107,10 @@ class ObjectViewport extends StatelessWidget {
       );
     }
     if (obj is InstanceObject) {
-      return const VMInfoCard(title: 'TO-DO: Display Instance object data');
+      return VmInstanceDisplay(
+        controller: controller,
+        instance: obj,
+      );
     }
     if (obj is CodeObject) {
       return VmCodeDisplay(

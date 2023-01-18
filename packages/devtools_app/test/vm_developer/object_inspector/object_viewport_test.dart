@@ -7,12 +7,14 @@ import 'package:devtools_app/src/screens/vm_developer/object_inspector/object_vi
 import 'package:devtools_app/src/screens/vm_developer/object_inspector/vm_class_display.dart';
 import 'package:devtools_app/src/screens/vm_developer/object_inspector/vm_field_display.dart';
 import 'package:devtools_app/src/screens/vm_developer/object_inspector/vm_function_display.dart';
+import 'package:devtools_app/src/screens/vm_developer/object_inspector/vm_instance_display.dart';
 import 'package:devtools_app/src/screens/vm_developer/object_inspector/vm_library_display.dart';
 import 'package:devtools_app/src/screens/vm_developer/object_inspector/vm_object_model.dart';
 import 'package:devtools_app/src/screens/vm_developer/object_inspector/vm_script_display.dart';
 import 'package:devtools_app/src/screens/vm_developer/vm_developer_common_widgets.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/shared/config_specific/ide_theme/ide_theme.dart';
+import 'package:devtools_app/src/shared/console/widgets/expandable_variable.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_app/src/shared/history_viewport.dart';
 import 'package:devtools_test/devtools_test.dart';
@@ -190,10 +192,10 @@ void main() {
       );
       expect(
         ObjectViewport.viewportTitle(testInstanceObject),
-        'Instance FooInstance',
+        'Instance of fooSuperClass',
       );
-      expect(find.text('Instance FooInstance'), findsOneWidget);
-      expect(find.byType(VMInfoCard), findsOneWidget);
+      expect(find.text('Instance of fooSuperClass'), findsOneWidget);
+      expect(find.byType(VmInstanceDisplay), findsOneWidget);
     });
   });
 

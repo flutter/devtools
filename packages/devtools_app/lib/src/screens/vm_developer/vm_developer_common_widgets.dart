@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:stack_trace/stack_trace.dart' as stack_trace;
 import 'package:vm_service/vm_service.dart';
 
 import '../../shared/common_widgets.dart';
@@ -699,6 +700,7 @@ class VmServiceObjectLink<T> extends StatelessWidget {
     final theme = Theme.of(context);
 
     String? text = textBuilder?.call(object);
+    bool isServiceObject = true;
     if (text == null) {
       if (object is LibraryRef) {
         final lib = object as LibraryRef;
@@ -743,6 +745,10 @@ class VmServiceObjectLink<T> extends StatelessWidget {
           text = 'Map(length: ${instance.length})';
         } else if (instance.kind == InstanceKind.kType) {
           text = instance.name!;
+        } else if (instance.kind == InstanceKind.kStackTrace) {
+          final trace = stack_trace.Trace.parse(instance.valueAsString!);
+          final depth = trace.frames.length;
+          text = 'StackTrace ($depth ${pluralize('frame', depth)})';
         } else {
           if (instance.valueAsString != null) {
             text = instance.valueAsString!;
@@ -760,18 +766,28 @@ class VmServiceObjectLink<T> extends StatelessWidget {
       } else if (object is Sentinel) {
         final sentinel = object as Sentinel;
         text = sentinel.valueAsString!;
+      } else {
+        isServiceObject = false;
+        text = object.toString();
       }
     }
     return TextSpan(
       text: text,
-      style: theme.linkTextStyle.apply(
-        fontFamily: theme.fixedFontStyle.fontFamily,
+      style: (isServiceObject
+              ? theme.linkTextStyle.apply(
+                  fontFamily: theme.fixedFontStyle.fontFamily,
+                  overflow: TextOverflow.ellipsis,
+                )
+              : theme.subtleFixedFontStyle)
+          .apply(
         overflow: TextOverflow.ellipsis,
       ),
-      recognizer: TapGestureRecognizer()
-        ..onTap = () async {
-          await onTap(object);
-        },
+      recognizer: isServiceObject
+          ? (TapGestureRecognizer()
+            ..onTap = () async {
+              await onTap(object);
+            })
+          : null,
     );
   }
 
