@@ -66,7 +66,7 @@ class MemoryTabView extends StatelessWidget {
         ),
         tabView: KeepAliveWrapper(
           child: AllocationProfileTableView(
-            controller: controller.allocationProfileController,
+            controller: controller.profilePaneController,
           ),
         ),
       ),

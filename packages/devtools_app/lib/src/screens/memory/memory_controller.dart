@@ -69,7 +69,7 @@ class MemoryController extends DisposableController
   /// The controller is late to enable test injection.
   late final DiffPaneController diffPaneController;
 
-  final allocationProfileController = ProfilePaneController();
+  final profilePaneController = ProfilePaneController();
 
   final tracingPaneController = TracingPaneController();
 
