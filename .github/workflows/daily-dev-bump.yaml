@@ -25,8 +25,8 @@ jobs:
 
         # TODO(https://github.com/flutter/devtools/issues/4949):  Change the author to
         # a flutter owned account
-        git config user.name "Dan Chevalier's GitHub Actions Bot"
-        git config user.email "chevalier.dan@gmail.com"
+        git config user.name "Devtool Workflow Bot"
+        git config user.email "dart-devtool-workflow-bot@google.com"
 
     - name: Bump the Dev Version
       id: version-bump
@@ -54,11 +54,12 @@ jobs:
         # Do the update
         dart tool/update_version.dart auto --type dev
 
-    - name: commit
+    - name: Create the PR
       run: |
         # Stage the file, commit and push
-
+        
         git commit -a -m "$COMMIT_MESSAGE"
         git push
+        #TODO: Create PR inst
       env:
         COMMIT_MESSAGE: ${{ steps.version-bump.outputs.COMMIT_MESSAGE }}
