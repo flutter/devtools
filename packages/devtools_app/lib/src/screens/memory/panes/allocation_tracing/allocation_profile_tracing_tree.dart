@@ -14,7 +14,7 @@ import '../../../../shared/ui/tab.dart';
 import '../../../../shared/utils.dart';
 import '../../../profiler/cpu_profile_columns.dart';
 import '../../../profiler/cpu_profile_model.dart';
-import 'allocation_profile_tracing_view_controller.dart';
+import 'tracing_controller.dart';
 
 const double _countColumnWidth = 130;
 

@@ -9,7 +9,7 @@ import '../../shared/common_widgets.dart';
 import '../../shared/ui/tab.dart';
 import 'memory_controller.dart';
 import 'panes/allocation_profile/allocation_profile_table_view.dart';
-import 'panes/allocation_tracing/allocation_profile_tracing_view.dart';
+import 'panes/allocation_tracing/tracing_view.dart';
 import 'panes/diff/diff_pane.dart';
 import 'panes/leaks/leaks_pane.dart';
 
