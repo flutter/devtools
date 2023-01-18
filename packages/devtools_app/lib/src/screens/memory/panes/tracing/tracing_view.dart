@@ -17,18 +17,16 @@ import 'class_table.dart';
 import 'tracing_pane_controller.dart';
 import 'tracing_tree.dart';
 
-class AllocationProfileTracingView extends StatefulWidget {
-  const AllocationProfileTracingView({
+class TracingPane extends StatefulWidget {
+  const TracingPane({
     Key? key,
   }) : super(key: key);
 
   @override
-  State<AllocationProfileTracingView> createState() =>
-      AllocationProfileTracingViewState();
+  State<TracingPane> createState() => TracingPaneState();
 }
 
-class AllocationProfileTracingViewState
-    extends State<AllocationProfileTracingView> {
+class TracingPaneState extends State<TracingPane> {
   late final TracingPaneController controller;
 
   @override

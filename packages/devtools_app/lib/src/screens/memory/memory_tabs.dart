@@ -89,7 +89,7 @@ class MemoryTabView extends StatelessWidget {
           gaPrefix: _gaPrefix,
         ),
         tabView: const KeepAliveWrapper(
-          child: AllocationProfileTracingView(),
+          child: TracingPane(),
         ),
       ),
       if (controller.shouldShowLeaksTab.value)

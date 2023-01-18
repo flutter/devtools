@@ -9,6 +9,8 @@ import 'package:devtools_app/src/screens/memory/memory_controller.dart';
 import 'package:devtools_app/src/screens/memory/memory_screen.dart';
 import 'package:devtools_app/src/screens/memory/memory_tabs.dart';
 import 'package:devtools_app/src/screens/memory/panes/tracing/tracing_pane_controller.dart';
+import 'package:devtools_app/src/screens/memory/panes/tracing/tracing_tree.dart';
+import 'package:devtools_app/src/screens/memory/panes/tracing/tracing_view.dart';
 import 'package:devtools_app/src/screens/profiler/cpu_profile_model.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/shared/common_widgets.dart';
@@ -126,8 +128,8 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      final view = find.byType(AllocationProfileTracingView).first;
-      final state = tester.state<AllocationProfileTracingViewState>(view);
+      final view = find.byType(TracingPane).first;
+      final state = tester.state<TracingPaneState>(view);
 
       return state.controller;
     }
@@ -175,7 +177,7 @@ void main() {
           (e) => e.traceAllocations,
         );
 
-        expect(find.byType(AllocationProfileTracingTable), findsNothing);
+        expect(find.byType(TracingTable), findsNothing);
         final traceElement = find.byKey(Key(selectedTrace.cls.id!));
         expect(traceElement, findsOneWidget);
 
@@ -202,7 +204,7 @@ void main() {
         await tester.tap(refresh);
         await tester.pumpAndSettle();
         expect(
-          find.byType(AllocationProfileTracingTable),
+          find.byType(TracingTable),
           findsOneWidget,
         );
 
@@ -340,7 +342,7 @@ void main() {
           (e) => e.traceAllocations,
         );
 
-        expect(find.byType(AllocationProfileTracingTable), findsNothing);
+        expect(find.byType(TracingTable), findsNothing);
         final traceElement = find.byKey(Key(selectedTrace.cls.id!));
         expect(traceElement, findsOneWidget);
 
@@ -367,7 +369,7 @@ void main() {
         await tester.tap(refresh);
         await tester.pumpAndSettle();
         expect(
-          find.byType(AllocationProfileTracingTable),
+          find.byType(TracingTable),
           findsOneWidget,
         );
 
