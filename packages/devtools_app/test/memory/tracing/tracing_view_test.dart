@@ -131,7 +131,7 @@ void main() {
       final view = find.byType(TracingPane).first;
       final state = tester.state<TracingPaneState>(view);
 
-      return state.controller;
+      return state.widget.controller;
     }
 
     testWidgetsWithWindowSize(
