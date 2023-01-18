@@ -78,4 +78,9 @@ class HeapClassSampler extends ClassSampler {
   Future<void> instanceGraphToConsole() async {
     serviceManager.consoleService.appendInstanceGraph(HeapObjectGraph('hello'));
   }
+
+  @override
+  bool get isEvalEnabled =>
+      className.classType(serviceManager.rootInfoNow().package) !=
+      ClassType.runtime;
 }
