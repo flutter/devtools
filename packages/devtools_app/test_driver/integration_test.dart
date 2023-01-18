@@ -48,18 +48,21 @@ Future<void> main() async {
       }
 
       if (!equal) {
+        final percentDiffDisplay = '${(percentDiff * 100).toStringAsFixed(2)}%';
         if (percentDiff < diffTolerance) {
           print(
             'Warning: $screenshotName.png differed from the golden image by '
-            '${(percentDiff * 100).toStringAsFixed(2)}%. Since this is less '
-            'than the acceptable tolerance '
-            '${(diffTolerance * 100).toStringAsFixed(2)}%, the test still '
-            'passes.',
+            '$percentDiffDisplay. Since this is less than the acceptable '
+            'tolerance ${(diffTolerance * 100).toStringAsFixed(2)}%, the '
+            'test still passes.',
           );
           return true;
         }
 
-        print('Golden image test failed: $screenshotName.png');
+        print(
+          'Golden image test failed: $screenshotName.png. The test image '
+          'differed from the golden image by $percentDiffDisplay.',
+        );
 
         // Create the goldens directory if it does not exist.
         Directory(_goldensDirectoryPath).createSync();

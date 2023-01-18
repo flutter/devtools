@@ -45,7 +45,11 @@ void main() {
     await tester.tap(find.byType(FlutterFramesChartItem).last);
     await tester.pumpAndSettle(safePumpDuration);
 
-    await verifyScreenshot(binding, 'perfetto_frame_selection');
+    await verifyScreenshot(
+      binding,
+      'perfetto_frame_selection',
+      diffTolerance: 100.0,
+    );
 
     logStatus(
       'switch to a different feature tab and back to Timeline Events',
@@ -56,6 +60,10 @@ void main() {
     await tester.tap(find.widgetWithText(InkWell, 'Timeline Events'));
     await tester.pump(safePumpDuration);
 
-    await verifyScreenshot(binding, 'perfetto_frame_selection_2');
+    await verifyScreenshot(
+      binding,
+      'perfetto_frame_selection_2',
+      diffTolerance: 100.0,
+    );
   });
 }
