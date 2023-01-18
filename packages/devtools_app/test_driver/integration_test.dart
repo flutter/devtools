@@ -46,7 +46,7 @@ Future<void> main() async {
           percentDiff = _percentDiff(goldenImageBytes, screenshotBytes);
         }
       }
-      
+
       if (!equal) {
         if (percentDiff < diffTolerance) {
           print(
