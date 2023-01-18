@@ -15,7 +15,7 @@ import '../../../../shared/theme.dart';
 
 import '../../shared/primitives/simple_elements.dart';
 import 'class_table.dart';
-import 'allocation_profile_tracing_tree.dart';
+import 'tracing_tree.dart';
 import 'tracing_controller.dart';
 
 class AllocationProfileTracingView extends StatefulWidget {
