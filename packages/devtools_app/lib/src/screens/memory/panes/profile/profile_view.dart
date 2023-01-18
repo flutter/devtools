@@ -18,7 +18,7 @@ import '../../../../shared/utils.dart';
 import '../../shared/primitives/simple_elements.dart';
 
 import '../../shared/shared_memory_widgets.dart';
-import 'allocation_profile_table_view_controller.dart';
+import 'profile_controller.dart';
 import 'model.dart';
 
 // TODO(bkonyi): ensure data displayed in this view is included in the full

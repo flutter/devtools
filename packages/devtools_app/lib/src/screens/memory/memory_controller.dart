@@ -19,7 +19,7 @@ import '../../shared/globals.dart';
 import '../../shared/primitives/auto_dispose.dart';
 import '../../shared/utils.dart';
 import 'memory_protocol.dart';
-import 'panes/allocation_profile/allocation_profile_table_view_controller.dart';
+import 'panes/profile/profile_controller.dart';
 import 'panes/chart/primitives.dart';
 import 'panes/diff/controller/diff_pane_controller.dart';
 import 'shared/heap/model.dart';
