@@ -22,6 +22,7 @@ import 'memory_protocol.dart';
 import 'panes/chart/primitives.dart';
 import 'panes/diff/controller/diff_pane_controller.dart';
 import 'panes/profile/profile_pane_controller.dart';
+import 'panes/tracing/tracing_pane_controller.dart';
 import 'shared/heap/model.dart';
 import 'shared/primitives/memory_timeline.dart';
 
@@ -68,8 +69,9 @@ class MemoryController extends DisposableController
   /// The controller is late to enable test injection.
   late final DiffPaneController diffPaneController;
 
-  /// Controller for [AllocationProfileTableView].
   final allocationProfileController = ProfilePaneController();
+
+  final tracingPaneController = TracingPaneController();
 
   /// Index of the selected feature tab.
   ///
