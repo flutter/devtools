@@ -75,13 +75,17 @@ class TestApp {
 
 Future<void> verifyScreenshot(
   IntegrationTestWidgetsFlutterBinding binding,
-  String screenshotName,
-) async {
+  String screenshotName, {
+  double? diffTolerance,
+}) async {
   const updateGoldens = bool.fromEnvironment('update_goldens');
   logStatus('verify $screenshotName screenshot');
   await binding.takeScreenshot(
     screenshotName,
-    {'update_goldens': updateGoldens},
+    {
+      'update_goldens': updateGoldens,
+      if (diffTolerance != null) 'diff_tolerance': diffTolerance,
+    },
   );
 }
 

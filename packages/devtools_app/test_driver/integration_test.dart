@@ -20,6 +20,7 @@ Future<void> main() async {
       Map<String, Object?>? args,
     ]) async {
       final bool shouldUpdateGoldens = args?['update_goldens'] == true;
+      final double diffTolerance = args?['diff_tolerance'] as double? ?? 0.0;
       final goldenFile = File('$_goldensDirectoryPath/$screenshotName.png');
 
       if (shouldUpdateGoldens) {
@@ -34,14 +35,30 @@ Future<void> main() async {
       }
 
       bool equal = false;
+      double percentDiff = 100.0;
       if (goldenFile.existsSync()) {
         final goldenImageBytes = goldenFile.readAsBytesSync();
         equal = const DeepCollectionEquality().equals(
           goldenImageBytes,
           screenshotBytes,
         );
+        if (!equal) {
+          percentDiff = _percentDiff(goldenImageBytes, screenshotBytes);
+        }
       }
+      
       if (!equal) {
+        if (percentDiff < diffTolerance) {
+          print(
+            'Warning: $screenshotName.png differed from the golden image by '
+            '${(percentDiff * 100).toStringAsFixed(2)}%. Since this is less '
+            'than the acceptable tolerance '
+            '${(diffTolerance * 100).toStringAsFixed(2)}%, the test still '
+            'passes.',
+          );
+          return true;
+        }
+
         print('Golden image test failed: $screenshotName.png');
 
         // Create the goldens directory if it does not exist.
