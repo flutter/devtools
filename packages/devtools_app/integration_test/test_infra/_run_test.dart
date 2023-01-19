@@ -105,6 +105,7 @@ class TestRunner with IOMixin {
   static const _beginExceptionMarker = '| EXCEPTION CAUGHT';
   static const _endExceptionMarker = '===========================';
   static const _errorMarker = ': Error: ';
+  static const _unhandledExceptionMarker = 'Unhandled exception:';
 
   Future<void> run(
     String testTarget, {
@@ -167,7 +168,8 @@ class TestRunner with IOMixin {
         }
       },
       onStderr: (line) {
-        if (line.contains(_errorMarker)) {
+        if (line.contains(_errorMarker) ||
+            line.contains(_unhandledExceptionMarker)) {
           stdErrWriteInProgress = true;
         }
         if (stdErrWriteInProgress) {
