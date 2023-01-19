@@ -140,6 +140,7 @@ class SourceColumn extends ColumnData<CpuStackFrame>
     return VmServiceObjectLink<ScriptRef>(
       object: script,
       textBuilder: (_) => getDisplayValue(data),
+      isSelected: isRowSelected,
       onTap: (e) {
         routerDelegate.navigate(
           DebuggerScreen.id,

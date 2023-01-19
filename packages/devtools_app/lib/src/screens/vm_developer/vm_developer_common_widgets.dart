@@ -686,6 +686,7 @@ class VmServiceObjectLink<T> extends StatelessWidget {
   const VmServiceObjectLink({
     required this.object,
     required this.onTap,
+    this.isSelected = false,
     this.preferUri = false,
     this.textBuilder,
   });
@@ -694,6 +695,7 @@ class VmServiceObjectLink<T> extends StatelessWidget {
   final bool preferUri;
   final String? Function(T)? textBuilder;
   final FutureOr<void> Function(T) onTap;
+  final bool isSelected;
 
   TextSpan buildTextSpan(BuildContext context) {
     final theme = Theme.of(context);
@@ -762,9 +764,12 @@ class VmServiceObjectLink<T> extends StatelessWidget {
         text = sentinel.valueAsString!;
       }
     }
+
+    final style =
+        isSelected ? theme.selectedLinkTextStyle : theme.linkTextStyle;
     return TextSpan(
       text: text,
-      style: theme.linkTextStyle.apply(
+      style: style.apply(
         fontFamily: theme.fixedFontStyle.fontFamily,
         overflow: TextOverflow.ellipsis,
       ),

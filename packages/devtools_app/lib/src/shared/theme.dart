@@ -296,6 +296,9 @@ extension DevToolsColorScheme on ColorScheme {
   Color get devtoolsLink =>
       isLight ? const Color(0xFF1976D2) : Colors.lightBlueAccent;
 
+  Color get devtoolsSelectedLink =>
+      isLight ? Colors.white : Colors.lightBlueAccent;
+
   // TODO(jacobr): replace this with Theme.of(context).scaffoldBackgroundColor, but we use
   // this in places where we do not have access to the context.
   Color get defaultBackgroundColor =>
@@ -428,6 +431,12 @@ extension ThemeDataExtension on ThemeData {
 
   TextStyle get linkTextStyle => TextStyle(
         color: colorScheme.devtoolsLink,
+        decoration: TextDecoration.underline,
+        fontSize: defaultFontSize,
+      );
+
+  TextStyle get selectedLinkTextStyle => TextStyle(
+        color: colorScheme.devtoolsSelectedLink,
         decoration: TextDecoration.underline,
         fontSize: defaultFontSize,
       );
