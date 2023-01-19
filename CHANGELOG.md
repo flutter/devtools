@@ -1,3 +1,6 @@
+## 2.20.1
+* Prepare a hotfix release that builds DevTools in release mode instead of profile mode.
+
 ## 2.20.0
 * Prepare for 2.20.0 release [#4843](https://github.com/flutter/devtools/pull/4843)
 * Turn off all rebuild related UI when the flag is off [#4840](https://github.com/flutter/devtools/pull/4840)
