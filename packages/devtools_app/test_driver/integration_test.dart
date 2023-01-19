@@ -10,6 +10,7 @@ import 'package:image/image.dart';
 import 'package:integration_test/integration_test_driver_extended.dart';
 
 const _goldensDirectoryPath = 'integration_test/test_infra/goldens';
+const _defaultDiffPercentage = 100.0;
 
 Future<void> main() async {
   final driver = await FlutterDriver.connect();
@@ -36,7 +37,7 @@ Future<void> main() async {
       }
 
       bool equal = false;
-      double percentDiff = 100.0;
+      double percentDiff = _defaultDiffPercentage;
       if (goldenFile.existsSync()) {
         final goldenImageBytes = goldenFile.readAsBytesSync();
         equal = const DeepCollectionEquality().equals(
@@ -100,19 +101,31 @@ void _writeImageToFile(File file, List<int> originalBytes) {
   file.writeAsBytesSync(resizedBytes);
 }
 
-double _percentDiff(List<int> imageA, List<int> imageB) {
+double _percentDiff(List<int> imageBytesA, List<int> imageBytesB) {
+  final imageA = decodeImage(imageBytesA);
+  final imageB = decodeImage(imageBytesB);
+  if (imageA == null || imageB == null) {
+    print('Cannot decode one or both of the golden images.');
+    return _defaultDiffPercentage;
+  }
+
+  if (imageA.height != imageB.height || imageA.width != imageB.width) {
+    print('The golden images have a different height or width.');
+    return _defaultDiffPercentage;
+  }
+
   // This image diff calculation code is used by the Flutter test matcher
   // [matchesReferenceImage]. The small bit of code copied here is pulled out
   // for convenient reuse.
-  assert(imageA.length == imageB.length);
+  assert(imageBytesA.length == imageBytesB.length);
   int delta = 0;
-  for (int i = 0; i < imageA.length; i += 4) {
-    if (imageA[i] != imageB[i] ||
-        imageA[i + 1] != imageB[i + 1] ||
-        imageA[i + 2] != imageB[i + 2] ||
-        imageA[i + 3] != imageB[i + 3]) {
+  for (int i = 0; i < imageBytesA.length; i += 4) {
+    if (imageBytesA[i] != imageBytesB[i] ||
+        imageBytesA[i + 1] != imageBytesB[i + 1] ||
+        imageBytesA[i + 2] != imageBytesB[i + 2] ||
+        imageBytesA[i + 3] != imageBytesB[i + 3]) {
       delta++;
     }
   }
-  return delta / imageA.length / 4;
+  return delta / imageBytesA.length / 4;
 }
