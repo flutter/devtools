@@ -77,3 +77,40 @@ Future<void> main() async {
     },
   );
 }
+
+// This is the default image width that will be created by screenshot testing
+// on the bots.
+const _defaultImageWidth = 1600;
+
+void _writeImageToFile(File file, List<int> originalBytes) {
+  final originalImage = decodeImage(originalBytes);
+  if (originalImage == null) {
+    print('Cannot decode image at ${file.path}');
+    file.writeAsBytesSync(originalBytes);
+    return;
+  }
+
+  // Resize the image to a [_defaultImageWidth].
+  final resizedImage = copyResize(originalImage, width: _defaultImageWidth);
+  final resizedBytes = encodePng(resizedImage);
+
+  // Overwrite the file with the new resized image bytes.
+  file.writeAsBytesSync(resizedBytes);
+}
+
+double _percentDiff(List<int> imageA, List<int> imageB) {
+  // This image diff calculation code is used by the Flutter test matcher
+  // [matchesReferenceImage]. The small bit of code copied here is pulled out
+  // for convenient reuse.
+  assert(imageA.length == imageB.length);
+  int delta = 0;
+  for (int i = 0; i < imageA.length; i += 4) {
+    if (imageA[i] != imageB[i] ||
+        imageA[i + 1] != imageB[i + 1] ||
+        imageA[i + 2] != imageB[i + 2] ||
+        imageA[i + 3] != imageB[i + 3]) {
+      delta++;
+    }
+  }
+  return delta / imageA.length / 4;
+}
