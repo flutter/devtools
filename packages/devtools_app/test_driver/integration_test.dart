@@ -6,6 +6,7 @@ import 'dart:io';
 
 import 'package:collection/collection.dart';
 import 'package:flutter_driver/flutter_driver.dart';
+import 'package:image/image.dart';
 import 'package:integration_test/integration_test_driver_extended.dart';
 
 const _goldensDirectoryPath = 'integration_test/test_infra/goldens';
@@ -28,7 +29,7 @@ Future<void> main() async {
           // Create the goldens directory if it does not exist.
           Directory(_goldensDirectoryPath).createSync();
         }
-        goldenFile.writeAsBytesSync(screenshotBytes);
+        _writeImageToFile(goldenFile, screenshotBytes);
 
         print('Golden image updated: $screenshotName.png');
         return true;
@@ -69,8 +70,9 @@ Future<void> main() async {
 
         const failuresDirectoryPath = '$_goldensDirectoryPath/failures';
         Directory(failuresDirectoryPath).createSync();
-        File('$failuresDirectoryPath/$screenshotName.png')
-            .writeAsBytesSync(screenshotBytes);
+        final goldenFailure =
+            File('$failuresDirectoryPath/$screenshotName.png');
+        _writeImageToFile(goldenFailure, screenshotBytes);
       }
 
       return equal;
