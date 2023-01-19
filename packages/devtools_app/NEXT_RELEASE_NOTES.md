@@ -11,6 +11,7 @@ Dart & Flutter DevTools - A Suite of Performance Tools for Dart and Flutter
 * Fix an issue in Safari (browsers that do not support RegExp negative lookbehind) that prevented DevTools from loading - [#4938](https://github.com/flutter/devtools/pull/4938)
 * Fix an issue that would prevent DevTools connecting to the backend server that would disable some functionality - [#5016](https://github.com/flutter/devtools/pull/5016)
 * Added a link to the DevTools [CONTRIBUTING](https://github.com/flutter/devtools/blob/master/CONTRIBUTING.md) guide to the About menu, and fixed the Discord link - [#4926](https://github.com/flutter/devtools/pull/4926)
+* Fix conflicting colors in light theme - [5067](https://github.com/flutter/devtools/pull/5067)
 
 ## Inspector updates
 TODO: Remove this section if there are not any general updates.
