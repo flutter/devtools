@@ -435,11 +435,8 @@ extension ThemeDataExtension on ThemeData {
         fontSize: defaultFontSize,
       );
 
-  TextStyle get selectedLinkTextStyle => TextStyle(
-        color: colorScheme.devtoolsSelectedLink,
-        decoration: TextDecoration.underline,
-        fontSize: defaultFontSize,
-      );
+  TextStyle get selectedLinkTextStyle =>
+      linkTextStyle.copyWith(color: colorScheme.devtoolsSelectedLink);
 
   TextStyle get subtleChartTextStyle => TextStyle(
         color: colorScheme.chartSubtleColor,
