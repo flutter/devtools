@@ -44,7 +44,7 @@ flutter pub get
 
 flutter build web \
   --pwa-strategy=none \
-  --profile \
+  --release \
   --dart-define=FLUTTER_WEB_USE_SKIA=true \
   --dart-define=FLUTTER_WEB_CANVASKIT_URL=canvaskit/ \
   --no-tree-shake-icons
