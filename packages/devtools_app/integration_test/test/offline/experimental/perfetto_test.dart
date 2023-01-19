@@ -48,7 +48,7 @@ void main() {
     await verifyScreenshot(
       binding,
       'perfetto_frame_selection',
-      diffTolerance: 0.99,
+      diffTolerance: _diffTolerance,
     );
 
     logStatus(
@@ -63,7 +63,7 @@ void main() {
     await verifyScreenshot(
       binding,
       'perfetto_frame_selection_2',
-      diffTolerance: 100.0,
+      diffTolerance: _diffTolerance,
     );
   });
 }
