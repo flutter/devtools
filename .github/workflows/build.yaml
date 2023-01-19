@@ -90,32 +90,32 @@ jobs:
           BOT: main
         run: ./tool/bots.sh
 
-  test:
-    name: ${{ matrix.bot }}
-    needs: flutter-prep
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        bot:
-          # - build_ddc
-          # - build_dart2js
-          # - test_ddc
-          # - test_dart2js
-    steps:
-      - name: git clone
-        uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c
-      - name: Load Cached Flutter SDK
-        uses: actions/cache@v3
-        with:
-          path: |
-            ./flutter-sdk
-          key: flutter-sdk-${{ runner.os }}-${{ needs.flutter-prep.outputs.latest_flutter_candidate }} 
-      - name: tool/bots.sh
-        env:
-          BOT: ${{ matrix.bot }}
-          PLATFORM: vm
-        run: ./tool/bots.sh
+  # test:
+  #   name: ${{ matrix.bot }}
+  #   needs: flutter-prep
+  #   runs-on: ubuntu-latest
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       bot:
+  #         - build_ddc
+  #         - build_dart2js
+  #         - test_ddc
+  #         - test_dart2js
+  #   steps:
+  #     - name: git clone
+  #       uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c
+  #     - name: Load Cached Flutter SDK
+  #       uses: actions/cache@v3
+  #       with:
+  #         path: |
+  #           ./flutter-sdk
+  #         key: flutter-sdk-${{ runner.os }}-${{ needs.flutter-prep.outputs.latest_flutter_candidate }} 
+  #     - name: tool/bots.sh
+  #       env:
+  #         BOT: ${{ matrix.bot }}
+  #         PLATFORM: vm
+  #       run: ./tool/bots.sh
                 
   macos-test:
     needs: flutter-prep
@@ -125,7 +125,7 @@ jobs:
       fail-fast: false
       matrix:
         bot:
-          # - test_dart2js
+          - test_dart2js
         only_golden:
           - true
         
