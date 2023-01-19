@@ -40,6 +40,34 @@ class OfflineFileException implements Exception {
   String toString() => message;
 }
 
+class MemoryChildControllers {
+  /// [diffPaneController] is passed for testability.
+  MemoryChildControllers(DiffPaneController? diffPaneController) {
+    diff = diffPaneController ?? DiffPaneController(SnapshotTaker());
+  }
+
+  late DiffPaneController diff;
+  ProfilePaneController profile = ProfilePaneController();
+  TracingPaneController tracing = TracingPaneController();
+
+  void reset() {
+    diff.dispose();
+    diff = DiffPaneController(SnapshotTaker());
+
+    profile.dispose();
+    profile = ProfilePaneController();
+
+    tracing.dispose();
+    tracing = TracingPaneController();
+  }
+
+  void dispose() {
+    tracing.dispose();
+    diff.dispose();
+    profile.dispose();
+  }
+}
+
 /// This class contains the business logic for [memory.dart].
 ///
 /// This class must not have direct dependencies on dart:html. This allows tests
@@ -49,8 +77,8 @@ class MemoryController extends DisposableController
   MemoryController({DiffPaneController? diffPaneController}) {
     memoryTimeline = MemoryTimeline(offline);
     memoryLog = _MemoryLog(this);
-    this.diffPaneController =
-        diffPaneController ?? DiffPaneController(SnapshotTaker());
+
+    children = MemoryChildControllers(diffPaneController);
 
     // Update the chart when the memorySource changes.
     addAutoDisposeListener(memorySourceNotifier, () async {
@@ -66,12 +94,8 @@ class MemoryController extends DisposableController
     });
   }
 
-  /// The controller is late to enable test injection.
-  late final DiffPaneController diffPaneController;
-
-  final profilePaneController = ProfilePaneController();
-
-  TracingPaneController tracingPaneController = TracingPaneController();
+  /// Sub-controllers of memory controller.
+  late final MemoryChildControllers children;
 
   /// Index of the selected feature tab.
   ///
@@ -305,9 +329,7 @@ class MemoryController extends DisposableController
     _memoryTracker?.stop();
     _memoryTrackerController.add(_memoryTracker);
 
-    tracingPaneController.dispose();
-    tracingPaneController = TracingPaneController();
-
+    children.reset();
     _disconnectController.add(null);
     hasStopped = true;
   }
@@ -379,7 +401,7 @@ class MemoryController extends DisposableController
     unawaited(_disconnectController.close());
     unawaited(_memoryTrackerController.close());
     _memoryTracker?.dispose();
-    tracingPaneController.dispose();
+    children.dispose();
   }
 }
 
