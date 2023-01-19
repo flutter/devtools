@@ -5,12 +5,13 @@
 import 'dart:io';
 
 import 'package:collection/collection.dart';
+import 'package:flutter/material.dart' hide Image;
 import 'package:flutter_driver/flutter_driver.dart';
 import 'package:image/image.dart';
 import 'package:integration_test/integration_test_driver_extended.dart';
 
 const _goldensDirectoryPath = 'integration_test/test_infra/goldens';
-const _defaultDiffPercentage = 100.0;
+const _defaultDiffPercentage = 1.0;
 
 Future<void> main() async {
   final driver = await FlutterDriver.connect();
@@ -101,31 +102,40 @@ void _writeImageToFile(File file, List<int> originalBytes) {
   file.writeAsBytesSync(resizedBytes);
 }
 
-double _percentDiff(List<int> imageBytesA, List<int> imageBytesB) {
-  final imageA = decodeImage(imageBytesA);
-  final imageB = decodeImage(imageBytesB);
-  if (imageA == null || imageB == null) {
+double _percentDiff(List<int> goldenBytes, List<int> screenshotBytes) {
+  final goldenImage = decodeImage(goldenBytes);
+  final screenshotImage = decodeImage(screenshotBytes);
+  if (goldenImage == null || screenshotImage == null) {
     print('Cannot decode one or both of the golden images.');
     return _defaultDiffPercentage;
   }
 
-  if (imageA.height != imageB.height || imageA.width != imageB.width) {
-    print('The golden images have a different height or width.');
+  if (goldenImage.height != screenshotImage.height ||
+      goldenImage.width != screenshotImage.width) {
+    print(
+      'The golden images have a different height or width. '
+      'Golden: ${goldenImage.size}'
+      'Screenshot: ${screenshotImage.size}',
+    );
     return _defaultDiffPercentage;
   }
 
   // This image diff calculation code is used by the Flutter test matcher
   // [matchesReferenceImage]. The small bit of code copied here is pulled out
   // for convenient reuse.
-  assert(imageBytesA.length == imageBytesB.length);
+  assert(goldenBytes.length == screenshotBytes.length);
   int delta = 0;
-  for (int i = 0; i < imageBytesA.length; i += 4) {
-    if (imageBytesA[i] != imageBytesB[i] ||
-        imageBytesA[i + 1] != imageBytesB[i + 1] ||
-        imageBytesA[i + 2] != imageBytesB[i + 2] ||
-        imageBytesA[i + 3] != imageBytesB[i + 3]) {
+  for (int i = 0; i < goldenBytes.length; i += 4) {
+    if (goldenBytes[i] != screenshotBytes[i] ||
+        goldenBytes[i + 1] != screenshotBytes[i + 1] ||
+        goldenBytes[i + 2] != screenshotBytes[i + 2] ||
+        goldenBytes[i + 3] != screenshotBytes[i + 3]) {
       delta++;
     }
   }
-  return delta / imageBytesA.length / 4;
+  return delta / goldenBytes.length / 4;
+}
+
+extension _ImageExtension on Image {
+  Size get size => Size(width.toDouble(), height.toDouble());
 }
