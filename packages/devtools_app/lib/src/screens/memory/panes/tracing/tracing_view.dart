@@ -20,20 +20,21 @@ import 'tracing_tree.dart';
 class TracingPane extends StatefulWidget {
   const TracingPane({
     Key? key,
+    required this.controller,
   }) : super(key: key);
+
+  final TracingPaneController controller;
 
   @override
   State<TracingPane> createState() => TracingPaneState();
 }
 
 class TracingPaneState extends State<TracingPane> {
-  late final TracingPaneController controller;
-
   @override
   void initState() {
     super.initState();
-    controller = TracingPaneController();
-    unawaited(controller.initialize());
+
+    unawaited(widget.controller.initialize());
   }
 
   @override
@@ -45,7 +46,7 @@ class TracingPaneState extends State<TracingPane> {
       children: [
         _TracingControls(
           isProfileMode: isProfileMode,
-          controller: controller,
+          controller: widget.controller,
         ),
         Expanded(
           child: isProfileMode
@@ -64,12 +65,12 @@ class TracingPaneState extends State<TracingPane> {
                     children: [
                       OutlineDecoration.onlyRight(
                         child: AllocationTracingTable(
-                          controller: controller,
+                          controller: widget.controller,
                         ),
                       ),
                       OutlineDecoration.onlyLeft(
                         child: AllocationTracingTree(
-                          controller: controller,
+                          controller: widget.controller,
                         ),
                       ),
                     ],

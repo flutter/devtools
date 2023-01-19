@@ -261,7 +261,10 @@ class TracingPaneController extends DisposableController
   /// The [TextEditingController] for the 'Class Filter' text field.
   final textEditingController = TextEditingController();
 
+  bool _initialized = false;
   Future<void> initialize() async {
+    if (_initialized) return;
+    _initialized = true;
     _initializing.value = true;
 
     final updateState = () async {
