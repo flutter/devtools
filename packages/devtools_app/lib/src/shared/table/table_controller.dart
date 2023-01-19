@@ -30,6 +30,7 @@ class FlatTableController<T> extends TableControllerBase<T> {
     required super.defaultSortDirection,
     super.secondarySortColumn,
     super.columnGroups,
+    super.includeColumnGroupHeaders,
     this.pinBehavior = FlatTablePinBehavior.none,
   });
 
@@ -213,11 +214,18 @@ abstract class TableControllerBase<T> extends DisposableController {
     required this.defaultSortColumn,
     required this.defaultSortDirection,
     this.secondarySortColumn,
+    this.includeColumnGroupHeaders = true,
   });
 
   final List<ColumnData<T>> columns;
 
   final List<ColumnGroup>? columnGroups;
+
+  /// Determines if the headers for column groups should be rendered.
+  /// 
+  /// If set to false and `columnGroups` is non-null and non-empty, only
+  /// dividing lines will be drawn for each column group boundary.
+  final bool includeColumnGroupHeaders;
 
   /// The default sort column for tables using this [TableController].
   ///

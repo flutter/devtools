@@ -1395,6 +1395,20 @@ class OutlineDecoration extends StatelessWidget {
   }
 }
 
+class ThickDivider extends StatelessWidget {
+  const ThickDivider();
+
+  static const double thickDividerHeight = 5;
+
+  @override
+  Widget build(BuildContext context) {
+    return const Divider(
+      thickness: thickDividerHeight,
+      height: thickDividerHeight,
+    );
+  }
+}
+
 class RoundedOutlinedBorder extends StatelessWidget {
   const RoundedOutlinedBorder({Key? key, this.child}) : super(key: key);
 

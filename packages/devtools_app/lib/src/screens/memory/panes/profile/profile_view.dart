@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -10,11 +12,13 @@ import '../../../../shared/analytics/constants.dart' as gac;
 import '../../../../shared/common_widgets.dart';
 import '../../../../shared/globals.dart';
 import '../../../../shared/primitives/utils.dart';
+import '../../../../shared/split.dart';
 import '../../../../shared/table/table.dart';
 import '../../../../shared/table/table_controller.dart';
 import '../../../../shared/table/table_data.dart';
 import '../../../../shared/theme.dart';
 import '../../../../shared/utils.dart';
+import '../../../vm_developer/vm_service_private_extensions.dart';
 import '../../shared/primitives/simple_elements.dart';
 import '../../shared/shared_memory_widgets.dart';
 import 'model.dart';
@@ -204,6 +208,209 @@ class _FieldSizeColumn extends ColumnData<ProfileRecord> {
   bool get numeric => true;
 }
 
+abstract class _HeapStatsColumn extends ColumnData<AdaptedProfile> {
+  _HeapStatsColumn(
+    super.title, {
+    required this.generation,
+    required super.fixedWidthPx,
+    super.titleTooltip,
+    super.alignment,
+  });
+
+  final _HeapGeneration generation;
+
+  GCStats getGCStats(AdaptedProfile profile) {
+    switch (generation) {
+      case _HeapGeneration.newSpace:
+        return profile.newSpaceGCStats;
+      case _HeapGeneration.oldSpace:
+        return profile.oldSpaceGCStats;
+      case _HeapGeneration.total:
+        return profile.totalGCStats;
+    }
+  }
+}
+
+class _HeapNameColumn extends ColumnData<AdaptedProfile> {
+  _HeapNameColumn()
+      : super(
+          '',
+          fixedWidthPx: scaleByFontFactor(200),
+        );
+
+  @override
+  String? getValue(AdaptedProfile dataObject) {
+    return 'GC Statistics';
+  }
+}
+
+class _HeapUsageColumn extends _HeapStatsColumn {
+  _HeapUsageColumn({required super.generation})
+      : super(
+          'Usage',
+          titleTooltip: 'The current amount of memory allocated from the heap',
+          alignment: ColumnAlignment.right,
+          fixedWidthPx: scaleByFontFactor(_defaultNumberFieldWidth),
+        );
+
+  @override
+  int? getValue(AdaptedProfile dataObject) {
+    return getGCStats(dataObject).usage;
+  }
+
+  @override
+  String getDisplayValue(AdaptedProfile dataObject) {
+    return prettyPrintBytes(getValue(dataObject), includeUnit: true)!;
+  }
+
+  @override
+  bool get numeric => true;
+}
+
+class _HeapCapacityColumn extends _HeapStatsColumn {
+  _HeapCapacityColumn({required super.generation})
+      : super(
+          'Capacity',
+          titleTooltip:
+              'The current size of the heap, including unallocated memory',
+          alignment: ColumnAlignment.right,
+          fixedWidthPx: scaleByFontFactor(_defaultNumberFieldWidth),
+        );
+
+  @override
+  int? getValue(AdaptedProfile dataObject) {
+    return getGCStats(dataObject).capacity;
+  }
+
+  @override
+  String getDisplayValue(AdaptedProfile dataObject) {
+    return prettyPrintBytes(getValue(dataObject), includeUnit: true)!;
+  }
+
+  @override
+  bool get numeric => true;
+}
+
+class _HeapCollectionsColumn extends _HeapStatsColumn {
+  _HeapCollectionsColumn({required super.generation})
+      : super(
+          'Collections',
+          titleTooltip: 'The number of garbage collections run on the heap',
+          alignment: ColumnAlignment.right,
+          fixedWidthPx: scaleByFontFactor(_defaultNumberFieldWidth),
+        );
+
+  @override
+  int? getValue(AdaptedProfile dataObject) {
+    return getGCStats(dataObject).collections;
+  }
+
+  @override
+  bool get numeric => true;
+}
+
+class _HeapCollectionsTime extends _HeapStatsColumn {
+  _HeapCollectionsTime({required super.generation})
+      : super(
+          'Latency',
+          titleTooltip:
+              'The average time taken to perform a garbage collection on the heap (ms)',
+          alignment: ColumnAlignment.right,
+          fixedWidthPx: scaleByFontFactor(_defaultNumberFieldWidth),
+        );
+
+  @override
+  double? getValue(AdaptedProfile dataObject) {
+    final stats = getGCStats(dataObject);
+    if (stats.averageCollectionTime.isNaN) {
+      return 0;
+    }
+    return getGCStats(dataObject).averageCollectionTime * 1000;
+  }
+
+  @override
+  String getDisplayValue(AdaptedProfile dataObject) {
+    return msText(
+      Duration(
+        microseconds: getValue(dataObject)!.toInt(),
+      ),
+      fractionDigits: 2,
+    );
+  }
+
+  @override
+  bool get numeric => true;
+}
+
+class _GCStatsTable extends StatelessWidget {
+  const _GCStatsTable({
+    Key? key,
+    required this.controller,
+  }) : super(key: key);
+
+  static final _columnGroup = [
+    ColumnGroup(
+      title: '',
+      range: const Range(0, 1),
+    ),
+    ColumnGroup(
+      title: 'Total',
+      range: const Range(1, 5),
+    ),
+    ColumnGroup(
+      title: 'New Space',
+      range: const Range(5, 9),
+    ),
+    ColumnGroup(
+      title: 'Old Space',
+      range: const Range(9, 13),
+    ),
+  ];
+
+  static final _columns = [
+    _HeapNameColumn(),
+    for (final generation in [
+      _HeapGeneration.total,
+      _HeapGeneration.newSpace,
+      _HeapGeneration.oldSpace,
+    ]) ...[
+      _HeapUsageColumn(generation: generation),
+      _HeapCapacityColumn(generation: generation),
+      _HeapCollectionsColumn(
+        generation: generation,
+      ),
+      _HeapCollectionsTime(
+        generation: generation,
+      ),
+    ],
+  ];
+
+  final ProfilePaneController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder<AdaptedProfile?>(
+      valueListenable: controller.currentAllocationProfile,
+      builder: (context, profile, _) {
+        if (profile == null) {
+          return const CenteredCircularProgressIndicator();
+        }
+        return OutlineDecoration.onlyTop(
+          child: FlatTable<AdaptedProfile>(
+            keyFactory: (element) => Key(element.hashCode.toString()),
+            data: [profile],
+            dataKey: 'gc-stats',
+            columnGroups: _columnGroup,
+            columns: _columns,
+            defaultSortColumn: _columns.first,
+            defaultSortDirection: SortDirection.ascending,
+          ),
+        );
+      },
+    );
+  }
+}
+
 /// Displays data from an [AllocationProfile] in a tabular format, with support
 /// for refreshing the data on a garbage collection (GC) event and exporting
 /// [AllocationProfile]'s to a CSV formatted file.
@@ -234,6 +441,27 @@ class AllocationProfileTableViewState
           child: _AllocationProfileTableControls(
             allocationProfileController: widget.controller,
           ),
+        ),
+        ValueListenableBuilder<bool>(
+          valueListenable: preferences.vmDeveloperModeEnabled,
+          builder: (context, vmDeveloperModeEnabled, _) {
+            if (!vmDeveloperModeEnabled) return const SizedBox.shrink();
+            return Column(
+              children: [
+                SizedBox(
+                  // _GCStatsTable is a table with two header rows (column groups
+                  // and columns) and one data row. We add a slight padding to
+                  // ensure the underlying scrollable area has enough space to not
+                  // display a scroll bar.
+                  height: defaultRowHeight + areaPaneHeaderHeight * 2 + 1,
+                  child: _GCStatsTable(
+                    controller: widget.controller,
+                  ),
+                ),
+                const ThickDivider(),
+              ],
+            );
+          },
         ),
         Expanded(
           child: _AllocationProfileTable(
@@ -329,6 +557,7 @@ class _AllocationProfileTable extends StatelessWidget {
                         _AllocationProfileTable._initialSortColumn,
                     defaultSortDirection: SortDirection.descending,
                     pinBehavior: FlatTablePinBehavior.pinOriginalToTop,
+                    includeColumnGroupHeaders: false,
                   ),
                 );
               },

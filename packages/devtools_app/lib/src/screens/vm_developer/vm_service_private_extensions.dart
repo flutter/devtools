@@ -91,6 +91,67 @@ extension ClassHeapStatsPrivateViewExtension on ClassHeapStats {
       : const HeapStats.empty();
 }
 
+class GCStats {
+  GCStats({
+    required this.heap,
+    required this.usage,
+    required this.capacity,
+    required this.collections,
+    required this.averageCollectionTime,
+  });
+
+  GCStats.parse({required this.heap, required Map<String, dynamic> json})
+      : usage = json[usedKey],
+        capacity = json[capacityKey],
+        collections = json[collectionsKey] {
+    averageCollectionTime = json[timeKey] * 1000 / collections;
+  }
+
+  static const usedKey = 'used';
+  static const capacityKey = 'capacity';
+  static const collectionsKey = 'collections';
+  static const timeKey = 'time';
+
+  final String heap;
+  final int usage;
+  final int capacity;
+  final int collections;
+  late final double averageCollectionTime;
+}
+
+extension AllocationProfilePrivateViewExtension on AllocationProfile {
+  static const heapsKey = '_heaps';
+  static const newSpaceKey = 'new';
+  static const oldSpaceKey = 'old';
+
+  GCStats get newSpaceGCStats => GCStats.parse(
+        heap: 'New Space',
+        json: json![heapsKey][newSpaceKey],
+      );
+
+  GCStats get oldSpaceGCStats => GCStats.parse(
+        heap: 'Old Space',
+        json: json![heapsKey][oldSpaceKey],
+      );
+
+  GCStats get totalGCStats {
+    final newSpace = newSpaceGCStats;
+    final oldSpace = oldSpaceGCStats;
+    final collections = newSpace.collections + oldSpace.collections;
+    final averageCollectionTime =
+        ((newSpace.collections * newSpace.averageCollectionTime) +
+                (oldSpace.collections * oldSpace.averageCollectionTime)) /
+            collections;
+    return GCStats(
+      heap: 'Total',
+      usage: newSpace.usage + oldSpace.usage,
+      capacity: newSpace.capacity + oldSpace.capacity,
+      collections: collections,
+      averageCollectionTime: averageCollectionTime,
+    );
+  }
+}
+
 /// An extension on [ObjRef] which allows for access to VM internal fields.
 extension ObjRefPrivateViewExtension on ObjRef {
   static const _icDataType = 'ICData';

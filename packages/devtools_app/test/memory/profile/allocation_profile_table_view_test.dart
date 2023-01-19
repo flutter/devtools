@@ -76,8 +76,13 @@ void main() {
         expect(find.text('External'), findsOneWidget);
         expect(find.text('Old Space'), findsNothing);
         expect(find.text('New Space'), findsNothing);
+        expect(find.text('Usage'), findsNothing);
+        expect(find.text('Capacity'), findsNothing);
+        expect(find.text('Collections'), findsNothing);
+        expect(find.text('Latency'), findsNothing);
 
-        // Enable VM Developer Mode to display new/old space column groups.
+        // Enable VM Developer Mode to display new/old space column groups as
+        // well as GC statistics.
         preferences.toggleVmDeveloperMode(true);
         await tester.pumpAndSettle();
 
@@ -90,6 +95,10 @@ void main() {
         expect(find.text('Total'), findsOneWidget);
         expect(find.text('Old Space'), findsOneWidget);
         expect(find.text('New Space'), findsOneWidget);
+        expect(find.text('Usage'), findsNWidgets(3));
+        expect(find.text('Capacity'), findsNWidgets(3));
+        expect(find.text('Collections'), findsNWidgets(3));
+        expect(find.text('Latency'), findsNWidgets(3));
       },
     );
 
