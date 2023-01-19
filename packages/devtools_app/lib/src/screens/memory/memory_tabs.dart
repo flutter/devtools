@@ -8,10 +8,10 @@ import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/common_widgets.dart';
 import '../../shared/ui/tab.dart';
 import 'memory_controller.dart';
-import 'panes/allocation_profile/allocation_profile_table_view.dart';
-import 'panes/allocation_tracing/allocation_profile_tracing_view.dart';
 import 'panes/diff/diff_pane.dart';
 import 'panes/leaks/leaks_pane.dart';
+import 'panes/profile/profile_view.dart';
+import 'panes/tracing/tracing_view.dart';
 
 @visibleForTesting
 class MemoryScreenKeys {
@@ -66,7 +66,7 @@ class MemoryTabView extends StatelessWidget {
         ),
         tabView: KeepAliveWrapper(
           child: AllocationProfileTableView(
-            controller: controller.allocationProfileController,
+            controller: controller.profilePaneController,
           ),
         ),
       ),
@@ -88,8 +88,8 @@ class MemoryTabView extends StatelessWidget {
           tabName: 'Trace Instances',
           gaPrefix: _gaPrefix,
         ),
-        tabView: const KeepAliveWrapper(
-          child: AllocationProfileTracingView(),
+        tabView: KeepAliveWrapper(
+          child: TracingPane(controller: controller.tracingPaneController),
         ),
       ),
       if (controller.shouldShowLeaksTab.value)

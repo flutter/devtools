@@ -16,9 +16,9 @@ import '../../../../shared/table/table_data.dart';
 import '../../../../shared/theme.dart';
 import '../../../../shared/utils.dart';
 import '../../shared/primitives/simple_elements.dart';
-
-import 'allocation_profile_table_view_controller.dart';
+import '../../shared/shared_memory_widgets.dart';
 import 'model.dart';
+import 'profile_pane_controller.dart';
 
 // TODO(bkonyi): ensure data displayed in this view is included in the full
 // memory page export and is serializable/deserializable.
@@ -27,7 +27,8 @@ import 'model.dart';
 /// instances, memory).
 const _defaultNumberFieldWidth = 90.0;
 
-class _FieldClassNameColumn extends ColumnData<AllocationProfileRecord> {
+class _FieldClassNameColumn extends ColumnData<ProfileRecord>
+    implements ColumnRenderer<ProfileRecord> {
   _FieldClassNameColumn()
       : super(
           'Class',
@@ -35,15 +36,34 @@ class _FieldClassNameColumn extends ColumnData<AllocationProfileRecord> {
         );
 
   @override
-  String? getValue(AllocationProfileRecord dataObject) =>
-      dataObject.heapClass.className;
+  String? getValue(ProfileRecord dataObject) => dataObject.heapClass.className;
 
+  // We are removing the tooltip, because it is provided by [HeapClassView].
   @override
-  String getTooltip(AllocationProfileRecord dataObject) =>
-      dataObject.heapClass.fullName;
+  String getTooltip(ProfileRecord dataObject) => '';
 
   @override
   bool get supportsSorting => true;
+
+  @override
+  Widget? build(
+    BuildContext context,
+    ProfileRecord data, {
+    bool isRowSelected = false,
+    VoidCallback? onPressed,
+  }) {
+    if (data.isTotal) return null;
+
+    final theme = Theme.of(context);
+    return HeapClassView(
+      theClass: data.heapClass,
+      showCopyButton: isRowSelected,
+      copyGaItem: gac.MemoryEvent.diffClassSingleCopy,
+      textStyle:
+          isRowSelected ? theme.selectedTextStyle : theme.regularTextStyle,
+      rootPackage: serviceManager.rootInfoNow().package,
+    );
+  }
 }
 
 /// For more information on the Dart GC implementation, see:
@@ -66,7 +86,7 @@ enum _HeapGeneration {
   }
 }
 
-class _FieldInstanceCountColumn extends ColumnData<AllocationProfileRecord> {
+class _FieldInstanceCountColumn extends ColumnData<ProfileRecord> {
   _FieldInstanceCountColumn({required this.heap})
       : super(
           'Instances',
@@ -78,7 +98,7 @@ class _FieldInstanceCountColumn extends ColumnData<AllocationProfileRecord> {
   final _HeapGeneration heap;
 
   @override
-  int? getValue(AllocationProfileRecord dataObject) {
+  int? getValue(ProfileRecord dataObject) {
     switch (heap) {
       case _HeapGeneration.newSpace:
         return dataObject.newSpaceInstances;
@@ -102,7 +122,7 @@ class _FieldExternalSizeColumn extends _FieldSizeColumn {
         );
 
   @override
-  int? getValue(AllocationProfileRecord dataObject) {
+  int? getValue(ProfileRecord dataObject) {
     switch (heap) {
       case _HeapGeneration.newSpace:
         return dataObject.newSpaceExternalSize;
@@ -122,7 +142,7 @@ class _FieldDartHeapSizeColumn extends _FieldSizeColumn {
         );
 
   @override
-  int? getValue(AllocationProfileRecord dataObject) {
+  int? getValue(ProfileRecord dataObject) {
     switch (heap) {
       case _HeapGeneration.newSpace:
         return dataObject.newSpaceDartHeapSize;
@@ -134,7 +154,7 @@ class _FieldDartHeapSizeColumn extends _FieldSizeColumn {
   }
 }
 
-class _FieldSizeColumn extends ColumnData<AllocationProfileRecord> {
+class _FieldSizeColumn extends ColumnData<ProfileRecord> {
   factory _FieldSizeColumn({required heap}) => _FieldSizeColumn._(
         title: 'Total Size',
         titleTooltip: "The sum of the type's total shallow memory "
@@ -157,7 +177,7 @@ class _FieldSizeColumn extends ColumnData<AllocationProfileRecord> {
   final _HeapGeneration heap;
 
   @override
-  int? getValue(AllocationProfileRecord dataObject) {
+  int? getValue(ProfileRecord dataObject) {
     switch (heap) {
       case _HeapGeneration.newSpace:
         return dataObject.newSpaceSize;
@@ -169,7 +189,7 @@ class _FieldSizeColumn extends ColumnData<AllocationProfileRecord> {
   }
 
   @override
-  String getDisplayValue(AllocationProfileRecord dataObject) =>
+  String getDisplayValue(ProfileRecord dataObject) =>
       prettyPrintBytes(
         getValue(dataObject),
         includeUnit: true,
@@ -178,8 +198,7 @@ class _FieldSizeColumn extends ColumnData<AllocationProfileRecord> {
       '';
 
   @override
-  String getTooltip(AllocationProfileRecord dataObject) =>
-      '${getValue(dataObject)} B';
+  String getTooltip(ProfileRecord dataObject) => '${getValue(dataObject)} B';
 
   @override
   bool get numeric => true;
@@ -195,7 +214,7 @@ class AllocationProfileTableView extends StatefulWidget {
   State<AllocationProfileTableView> createState() =>
       AllocationProfileTableViewState();
 
-  final AllocationProfileTableViewController controller;
+  final ProfilePaneController controller;
 }
 
 class AllocationProfileTableViewState
@@ -275,11 +294,11 @@ class _AllocationProfileTable extends StatelessWidget {
     _FieldExternalSizeColumn(heap: _HeapGeneration.oldSpace),
   ];
 
-  final AllocationProfileTableViewController controller;
+  final ProfilePaneController controller;
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<AdaptedAllocationProfile?>(
+    return ValueListenableBuilder<AdaptedProfile?>(
       valueListenable: controller.currentAllocationProfile,
       builder: (context, profile, _) {
         // TODO(bkonyi): make this an overlay so the table doesn't
@@ -294,7 +313,7 @@ class _AllocationProfileTable extends StatelessWidget {
             return LayoutBuilder(
               builder: (context, constraints) {
                 return OutlineDecoration.onlyTop(
-                  child: FlatTable<AllocationProfileRecord>(
+                  child: FlatTable<ProfileRecord>(
                     keyFactory: (element) => Key(element.heapClass.fullName),
                     data: profile.records,
                     dataKey: 'allocation-profile',
@@ -327,7 +346,7 @@ class _AllocationProfileTableControls extends StatelessWidget {
     required this.allocationProfileController,
   }) : super(key: key);
 
-  final AllocationProfileTableViewController allocationProfileController;
+  final ProfilePaneController allocationProfileController;
 
   @override
   Widget build(BuildContext context) {
@@ -362,11 +381,11 @@ class _ExportAllocationProfileButton extends StatelessWidget {
     required this.allocationProfileController,
   }) : super(key: key);
 
-  final AllocationProfileTableViewController allocationProfileController;
+  final ProfilePaneController allocationProfileController;
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<AdaptedAllocationProfile?>(
+    return ValueListenableBuilder<AdaptedProfile?>(
       valueListenable: allocationProfileController.currentAllocationProfile,
       builder: (context, currentAllocationProfile, _) {
         return ToCsvButton(
@@ -388,7 +407,7 @@ class _RefreshOnGCToggleButton extends StatelessWidget {
     required this.allocationProfileController,
   }) : super(key: key);
 
-  final AllocationProfileTableViewController allocationProfileController;
+  final ProfilePaneController allocationProfileController;
 
   @override
   Widget build(BuildContext context) {

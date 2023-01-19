@@ -14,7 +14,7 @@ import '../../../../shared/ui/tab.dart';
 import '../../../../shared/utils.dart';
 import '../../../profiler/cpu_profile_columns.dart';
 import '../../../profiler/cpu_profile_model.dart';
-import 'allocation_profile_tracing_view_controller.dart';
+import 'tracing_pane_controller.dart';
 
 const double _countColumnWidth = 130;
 
@@ -23,7 +23,7 @@ const double _countColumnWidth = 130;
 class AllocationTracingTree extends StatefulWidget {
   const AllocationTracingTree({required this.controller});
 
-  final AllocationProfileTracingViewController controller;
+  final TracingPaneController controller;
 
   static final _bottomUpTab = _buildTab(tabName: 'Bottom Up');
   static final _callTreeTab = _buildTab(tabName: 'Call Tree');
@@ -65,14 +65,14 @@ class _AllocationTracingTreeState extends State<AllocationTracingTree>
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<AllocationProfileTracingIsolateState>(
+    return ValueListenableBuilder<TracingIsolateState>(
       valueListenable: widget.controller.stateForIsolate,
       builder: (context, state, _) {
         return ValueListenableBuilder<TracedClass?>(
           valueListenable: state.selectedTracedClass,
           builder: (context, selection, _) {
             if (selection == null) {
-              return const _AllocationTracingInstructions();
+              return const _TracingInstructions();
             } else if (!selection.traceAllocations) {
               return Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -80,7 +80,7 @@ class _AllocationTracingTreeState extends State<AllocationTracingTree>
                   Text(
                     'Allocation tracing is not enabled for class ${selection.cls.name}.\n',
                   ),
-                  const _AllocationTracingInstructions(),
+                  const _TracingInstructions(),
                 ],
               );
             } else if (selection.traceAllocations &&
@@ -98,7 +98,7 @@ class _AllocationTracingTreeState extends State<AllocationTracingTree>
             }
             return Column(
               children: [
-                _AllocationProfileTracingTreeHeader(
+                _TracingTreeHeader(
                   controller: widget.controller,
                   tabController: _tabController,
                   tabs: AllocationTracingTree.tabs,
@@ -110,13 +110,13 @@ class _AllocationTracingTreeState extends State<AllocationTracingTree>
                     controller: _tabController,
                     children: [
                       // Bottom-up tree view
-                      AllocationProfileTracingTable(
+                      TracingTable(
                         cls: selection.cls,
                         dataRoots: state
                             .selectedTracedClassAllocationData!.bottomUpRoots,
                       ),
                       // Call tree view
-                      AllocationProfileTracingTable(
+                      TracingTable(
                         cls: selection.cls,
                         dataRoots: state
                             .selectedTracedClassAllocationData!.callTreeRoots,
@@ -133,8 +133,8 @@ class _AllocationTracingTreeState extends State<AllocationTracingTree>
   }
 }
 
-class _AllocationTracingInstructions extends StatelessWidget {
-  const _AllocationTracingInstructions({
+class _TracingInstructions extends StatelessWidget {
+  const _TracingInstructions({
     Key? key,
   }) : super(key: key);
 
@@ -169,8 +169,8 @@ class _AllocationTracingInstructions extends StatelessWidget {
   }
 }
 
-class _AllocationProfileTracingTreeHeader extends StatelessWidget {
-  const _AllocationProfileTracingTreeHeader({
+class _TracingTreeHeader extends StatelessWidget {
+  const _TracingTreeHeader({
     Key? key,
     required this.controller,
     required this.tabController,
@@ -178,7 +178,7 @@ class _AllocationProfileTracingTreeHeader extends StatelessWidget {
     required this.updateTreeStateCallback,
   }) : super(key: key);
 
-  final AllocationProfileTracingViewController controller;
+  final TracingPaneController controller;
   final Function(VoidCallback) updateTreeStateCallback;
   final TabController tabController;
   final List<DevToolsTab> tabs;
@@ -314,8 +314,8 @@ class _ExclusiveCountColumn extends ColumnData<CpuStackFrame> {
 }
 
 /// A table of an allocation profile tree.
-class AllocationProfileTracingTable extends StatelessWidget {
-  const AllocationProfileTracingTable({
+class TracingTable extends StatelessWidget {
+  const TracingTable({
     Key? key,
     required this.cls,
     required this.dataRoots,

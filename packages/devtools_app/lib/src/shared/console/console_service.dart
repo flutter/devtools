@@ -82,11 +82,6 @@ class GraphConsoleLine extends ConsoleLine {
   GraphConsoleLine(this.graph, {bool forceScrollIntoView = false})
       : super._(forceScrollIntoView);
   final HeapObjectGraph graph;
-
-  @override
-  String toString() {
-    return graph.name;
-  }
 }
 
 /// Source of truth for the state of the Console including both events from the
