@@ -5,7 +5,6 @@
 import 'dart:io';
 
 import 'package:collection/collection.dart';
-import 'package:flutter/material.dart' hide Image;
 import 'package:flutter_driver/flutter_driver.dart';
 import 'package:image/image.dart';
 import 'package:integration_test/integration_test_driver_extended.dart';
@@ -114,8 +113,8 @@ double _percentDiff(List<int> goldenBytes, List<int> screenshotBytes) {
       goldenImage.width != screenshotImage.width) {
     print(
       'The golden images have a different height or width. '
-      'Golden: ${goldenImage.size}'
-      'Screenshot: ${screenshotImage.size}',
+      'Golden: ${goldenImage.sizeDisplay}'
+      'Screenshot: ${screenshotImage.sizeDisplay}',
     );
     return _defaultDiffPercentage;
   }
@@ -137,5 +136,6 @@ double _percentDiff(List<int> goldenBytes, List<int> screenshotBytes) {
 }
 
 extension _ImageExtension on Image {
-  Size get size => Size(width.toDouble(), height.toDouble());
+  String get sizeDisplay =>
+      'Size(width: ${width.toDouble()}, height: ${height.toDouble()})';
 }
