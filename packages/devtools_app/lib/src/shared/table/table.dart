@@ -85,7 +85,7 @@ class FlatTable<T> extends StatefulWidget {
   final List<ColumnGroup>? columnGroups;
 
   /// Determines if the headers for column groups should be rendered.
-  /// 
+  ///
   /// If set to false and `columnGroups` is non-null and non-empty, only
   /// dividing lines will be drawn for each column group boundary.
   final bool includeColumnGroupHeaders;
