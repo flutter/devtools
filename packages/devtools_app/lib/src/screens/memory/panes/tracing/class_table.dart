@@ -7,13 +7,15 @@ import 'package:flutter/material.dart';
 import '../../../../shared/analytics/analytics.dart' as ga;
 import '../../../../shared/analytics/constants.dart' as gac;
 import '../../../../shared/common_widgets.dart';
+import '../../../../shared/globals.dart';
 import '../../../../shared/primitives/utils.dart';
 import '../../../../shared/table/table.dart';
 import '../../../../shared/table/table_controller.dart';
 import '../../../../shared/table/table_data.dart';
 import '../../../../shared/theme.dart';
 import '../../../../shared/utils.dart';
-import 'allocation_profile_tracing_view_controller.dart';
+import '../../shared/shared_memory_widgets.dart';
+import 'tracing_pane_controller.dart';
 
 /// The default width for columns containing *mostly* numeric data (e.g.,
 /// instances, memory).
@@ -30,7 +32,7 @@ class _TraceCheckBoxColumn extends ColumnData<TracedClass>
           alignment: ColumnAlignment.left,
         );
 
-  final AllocationProfileTracingViewController controller;
+  final TracingPaneController controller;
 
   @override
   bool get supportsSorting => false;
@@ -65,14 +67,37 @@ class _TraceCheckBoxColumn extends ColumnData<TracedClass>
   }
 }
 
-class _ClassNameColumn extends ColumnData<TracedClass> {
+class _ClassNameColumn extends ColumnData<TracedClass>
+    implements ColumnRenderer<TracedClass> {
   _ClassNameColumn() : super.wide('Class');
 
   @override
   String? getValue(TracedClass stats) => stats.cls.name;
 
+  // We are removing the tooltip, because it is provided by [HeapClassView].
+  @override
+  String getTooltip(TracedClass dataObject) => '';
+
   @override
   bool get supportsSorting => true;
+
+  @override
+  Widget build(
+    BuildContext context,
+    TracedClass data, {
+    bool isRowSelected = false,
+    VoidCallback? onPressed,
+  }) {
+    final theme = Theme.of(context);
+    return HeapClassView(
+      theClass: data.name,
+      showCopyButton: isRowSelected,
+      copyGaItem: gac.MemoryEvent.diffClassSingleCopy,
+      textStyle:
+          isRowSelected ? theme.selectedTextStyle : theme.regularTextStyle,
+      rootPackage: serviceManager.rootInfoNow().package,
+    );
+  }
 }
 
 class _InstancesColumn extends ColumnData<TracedClass> {
@@ -96,7 +121,7 @@ class _InstancesColumn extends ColumnData<TracedClass> {
 class AllocationTracingTable extends StatefulWidget {
   const AllocationTracingTable({required this.controller});
 
-  final AllocationProfileTracingViewController controller;
+  final TracingPaneController controller;
 
   @override
   State<AllocationTracingTable> createState() => _AllocationTracingTableState();
@@ -150,8 +175,7 @@ class _AllocationTracingTableState extends State<AllocationTracingTable> {
           ),
         ),
         Expanded(
-          child: DualValueListenableBuilder<bool,
-              AllocationProfileTracingIsolateState>(
+          child: DualValueListenableBuilder<bool, TracingIsolateState>(
             firstListenable: widget.controller.refreshing,
             secondListenable: widget.controller.stateForIsolate,
             builder: (context, _, state, __) {

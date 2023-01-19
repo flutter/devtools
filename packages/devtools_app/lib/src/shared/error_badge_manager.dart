@@ -15,7 +15,7 @@ import '../screens/network/network_screen.dart';
 import '../screens/performance/performance_screen.dart';
 import '../service/service_extensions.dart' as extensions;
 import '../service/vm_service_wrapper.dart';
-import 'console/eval/diagnostics_node.dart';
+import 'diagnostics/diagnostics_node.dart';
 import 'globals.dart';
 import 'primitives/auto_dispose.dart';
 import 'primitives/listenable.dart';

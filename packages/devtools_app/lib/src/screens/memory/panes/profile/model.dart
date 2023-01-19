@@ -8,26 +8,26 @@ import '../../../../shared/table/table_data.dart';
 import '../../../vm_developer/vm_service_private_extensions.dart';
 import '../../shared/primitives/class_name.dart';
 
-class AdaptedAllocationProfile {
-  AdaptedAllocationProfile.fromAllocationProfile(AllocationProfile profile) {
+class AdaptedProfile {
+  AdaptedProfile.fromAllocationProfile(AllocationProfile profile) {
     final elements = (profile.members ?? []).where((element) {
       return element.bytesCurrent != 0 ||
           element.newSpace.externalSize != 0 ||
           element.oldSpace.externalSize != 0;
-    }).map((e) => AllocationProfileRecord.fromClassHeapStats(e));
+    }).map((e) => ProfileRecord.fromClassHeapStats(e));
 
     records = [
-      AllocationProfileRecord.total(profile),
+      ProfileRecord.total(profile),
       ...elements,
     ];
   }
 
   /// A record per class plus one total record.
-  late final List<AllocationProfileRecord> records;
+  late final List<ProfileRecord> records;
 }
 
-class AllocationProfileRecord with PinnableListEntry {
-  AllocationProfileRecord.fromClassHeapStats(ClassHeapStats stats)
+class ProfileRecord with PinnableListEntry {
+  ProfileRecord.fromClassHeapStats(ClassHeapStats stats)
       : assert(
           stats.bytesCurrent! == stats.newSpace.size + stats.oldSpace.size,
           '${stats.bytesCurrent}, ${stats.newSpace.size}, ${stats.oldSpace.size}',
@@ -52,7 +52,7 @@ class AllocationProfileRecord with PinnableListEntry {
     _verifyIntegrity();
   }
 
-  AllocationProfileRecord.total(AllocationProfile profile)
+  ProfileRecord.total(AllocationProfile profile)
       : isTotal = true,
         heapClass = HeapClassName(className: 'All Classes', library: ''),
         totalInstances = null,

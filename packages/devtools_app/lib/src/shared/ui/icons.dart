@@ -59,6 +59,7 @@ class CircleIcon extends StatelessWidget {
   const CircleIcon({
     required this.text,
     required this.color,
+    this.textColor = const Color(0xFF231F20),
   });
 
   /// Text to display. Should be one character.
@@ -66,6 +67,9 @@ class CircleIcon extends StatelessWidget {
 
   /// Background circle color.
   final Color color;
+
+  /// Background circle color.
+  final Color textColor;
 
   @override
   Widget build(BuildContext context) {
@@ -80,12 +84,15 @@ class CircleIcon extends StatelessWidget {
         color: color,
       ),
       alignment: Alignment.center,
-      child: Text(
-        text,
-        textAlign: TextAlign.center,
-        style: TextStyle(
-          fontSize: scaleByFontFactor(9.0),
-          color: const Color(0xFF231F20),
+      child: Padding(
+        padding: const EdgeInsets.only(top: 1),
+        child: Text(
+          text,
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontSize: scaleByFontFactor(9.0),
+            color: textColor,
+          ),
         ),
       ),
     );

@@ -19,9 +19,9 @@ import '../../shared/globals.dart';
 import '../../shared/primitives/auto_dispose.dart';
 import '../../shared/utils.dart';
 import 'memory_protocol.dart';
-import 'panes/allocation_profile/allocation_profile_table_view_controller.dart';
 import 'panes/chart/primitives.dart';
 import 'panes/diff/controller/diff_pane_controller.dart';
+import 'panes/profile/profile_pane_controller.dart';
 import 'shared/heap/model.dart';
 import 'shared/primitives/memory_timeline.dart';
 
@@ -69,7 +69,7 @@ class MemoryController extends DisposableController
   late final DiffPaneController diffPaneController;
 
   /// Controller for [AllocationProfileTableView].
-  final allocationProfileController = AllocationProfileTableViewController();
+  final allocationProfileController = ProfilePaneController();
 
   /// Index of the selected feature tab.
   ///

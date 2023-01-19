@@ -14,15 +14,14 @@ import '../../../../shared/globals.dart';
 import '../../../../shared/primitives/auto_dispose.dart';
 import 'model.dart';
 
-class AllocationProfileTableViewController extends DisposableController
+class ProfilePaneController extends DisposableController
     with AutoDisposeControllerMixin {
   final _exportController = ExportController();
 
   /// The current profile being displayed.
-  ValueListenable<AdaptedAllocationProfile?> get currentAllocationProfile =>
+  ValueListenable<AdaptedProfile?> get currentAllocationProfile =>
       _currentAllocationProfile;
-  final _currentAllocationProfile =
-      ValueNotifier<AdaptedAllocationProfile?>(null);
+  final _currentAllocationProfile = ValueNotifier<AdaptedProfile?>(null);
 
   /// Specifies if the allocation profile should be refreshed when a GC event
   /// is received.
@@ -70,13 +69,13 @@ class AllocationProfileTableViewController extends DisposableController
 
     final allocationProfile = await service.getAllocationProfile(isolate.id!);
     _currentAllocationProfile.value =
-        AdaptedAllocationProfile.fromAllocationProfile(allocationProfile);
+        AdaptedProfile.fromAllocationProfile(allocationProfile);
   }
 
   /// Converts the current [AllocationProfile] to CSV format and downloads it.
   ///
   /// The returned string is the name of the downloaded CSV file.
-  void downloadMemoryTableCsv(AdaptedAllocationProfile profile) {
+  void downloadMemoryTableCsv(AdaptedProfile profile) {
     ga.select(
       gac.memory,
       gac.MemoryEvent.profileDownloadCsv,

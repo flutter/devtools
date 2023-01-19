@@ -15,11 +15,11 @@ library inspector_tree;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+import '../../diagnostics/diagnostics_node.dart';
 import '../../theme.dart';
 import '../../ui/search.dart';
 import '../../utils.dart';
 import '../primitives/simple_items.dart';
-import 'diagnostics_node.dart';
 
 /// Split text into two groups, word characters at the start of a string and all
 /// other characters.

@@ -6,7 +6,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/rendering.dart';
 
-import '../../shared/console/eval/diagnostics_node.dart';
+import '../../shared/diagnostics/diagnostics_node.dart';
 import '../../shared/primitives/enum_utils.dart';
 import '../../shared/primitives/math_utils.dart';
 import '../../shared/primitives/utils.dart';

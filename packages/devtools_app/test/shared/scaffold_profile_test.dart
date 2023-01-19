@@ -27,8 +27,9 @@ void main() {
     ValueNotifier<ConnectedState>(const ConnectedState(false)),
   );
   when(mockServiceManager.isolateManager).thenReturn(FakeIsolateManager());
-  when(mockServiceManager.appState)
-      .thenReturn(AppState(mockServiceManager.isolateManager.selectedIsolate));
+  when(mockServiceManager.appState).thenReturn(
+    AppState(mockServiceManager.isolateManager.selectedIsolate),
+  );
 
   final mockErrorBadgeManager = MockErrorBadgeManager();
   when(mockServiceManager.errorBadgeManager).thenReturn(mockErrorBadgeManager);
@@ -52,7 +53,9 @@ void main() {
       when(mockServiceManager.connectedApp).thenReturn(mockConnectedApp);
       final mockDebuggerController = MockDebuggerController();
 
-      mockServiceManager.appState.setPausedOnBreakpoint(true);
+      final state =
+          serviceManager.isolateManager.mainIsolateState! as MockIsolateState;
+      state.isPaused.value = true;
 
       await tester.pumpWidget(
         wrapWithControllers(

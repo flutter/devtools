@@ -7,15 +7,18 @@ import 'package:flutter/material.dart';
 import '../../../../../shared/analytics/analytics.dart' as ga;
 import '../../../../../shared/analytics/constants.dart' as gac;
 import '../../../../../shared/feature_flags.dart';
+import '../../../../../shared/globals.dart';
 import '../../../../../shared/primitives/utils.dart';
 import '../../../../../shared/table/table.dart';
 import '../../../../../shared/table/table_data.dart';
 import '../../../../../shared/theme.dart';
 import '../../../../../shared/utils.dart';
 import '../../../shared/heap/heap.dart';
+import '../../../shared/heap/model.dart';
 import '../../../shared/primitives/instance_set_view.dart';
 import '../../../shared/primitives/simple_elements.dart';
 import '../../../shared/shared_memory_widgets.dart';
+import '../controller/sampler.dart';
 
 class _ClassNameColumn extends ColumnData<SingleClassStats>
     implements
@@ -25,7 +28,7 @@ class _ClassNameColumn extends ColumnData<SingleClassStats>
       : super(
           'Class',
           titleTooltip: 'Class name',
-          fixedWidthPx: scaleByFontFactor(180.0),
+          fixedWidthPx: scaleByFontFactor(200.0),
           alignment: ColumnAlignment.left,
         );
 
@@ -56,6 +59,7 @@ class _ClassNameColumn extends ColumnData<SingleClassStats>
       copyGaItem: gac.MemoryEvent.diffClassSingleCopy,
       textStyle:
           isRowSelected ? theme.selectedTextStyle : theme.regularTextStyle,
+      rootPackage: serviceManager.rootInfoNow().package,
     );
   }
 
@@ -76,13 +80,15 @@ class _ClassNameColumn extends ColumnData<SingleClassStats>
 
 class _InstanceColumn extends ColumnData<SingleClassStats>
     implements ColumnRenderer<SingleClassStats> {
-  _InstanceColumn()
+  _InstanceColumn(this.heap)
       : super(
           'Instances',
           titleTooltip: nonGcableInstancesColumnTooltip,
           fixedWidthPx: scaleByFontFactor(180.0),
           alignment: ColumnAlignment.right,
         );
+
+  final AdaptedHeapData heap;
 
   @override
   int getValue(SingleClassStats classStats) => classStats.objects.instanceCount;
@@ -100,18 +106,18 @@ class _InstanceColumn extends ColumnData<SingleClassStats>
     if (!FeatureFlags.evalAndBrowse) return null;
 
     final theme = Theme.of(context);
+    final showMenu = isRowSelected;
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
-        InstanceSetView(
+        InstanceSetButton(
           textStyle:
               isRowSelected ? theme.selectedTextStyle : theme.regularTextStyle,
           count: getValue(data),
           gaContext: gac.MemoryAreas.snapshotSingle,
-          sampleObtainer:
-              isRowSelected ? () => throw UnimplementedError() : null,
-          showMenu: isRowSelected,
+          sampleObtainer: showMenu ? HeapClassSampler(data, heap) : null,
+          showMenu: showMenu,
         ),
       ],
     );
@@ -175,7 +181,7 @@ class _RetainedSizeColumn extends ColumnData<SingleClassStats> {
 }
 
 class _ClassesTableSingleColumns {
-  _ClassesTableSingleColumns(this.totalSize, this.classFilterButton);
+  _ClassesTableSingleColumns(this.totalSize, this.classFilterButton, this.heap);
 
   /// Is needed to calculate percentage.
   final int totalSize;
@@ -184,9 +190,11 @@ class _ClassesTableSingleColumns {
 
   late final retainedSizeColumn = _RetainedSizeColumn(totalSize);
 
+  final AdaptedHeapData heap;
+
   late final columnList = <ColumnData<SingleClassStats>>[
     _ClassNameColumn(classFilterButton),
-    _InstanceColumn(),
+    _InstanceColumn(heap),
     _ShallowSizeColumn(),
     retainedSizeColumn,
   ];
@@ -199,6 +207,7 @@ class ClassesTableSingle extends StatelessWidget {
     required this.selection,
     required this.totalSize,
     required this.classFilterButton,
+    required this.heap,
   });
 
   final int totalSize;
@@ -206,14 +215,21 @@ class ClassesTableSingle extends StatelessWidget {
   final Widget classFilterButton;
 
   final List<SingleClassStats> classes;
+
   final ValueNotifier<SingleClassStats?> selection;
+
+  final AdaptedHeapData heap;
 
   @override
   Widget build(BuildContext context) {
     // We want to preserve the sorting and sort directions for ClassesTableDiff
     // no matter what the data passed to it is.
     const dataKey = 'ClassesTableSingle';
-    final columns = _ClassesTableSingleColumns(totalSize, classFilterButton);
+    final columns = _ClassesTableSingleColumns(
+      totalSize,
+      classFilterButton,
+      heap,
+    );
     return FlatTable<SingleClassStats>(
       columns: columns.columnList,
       data: classes,
