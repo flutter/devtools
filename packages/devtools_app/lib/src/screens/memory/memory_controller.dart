@@ -71,7 +71,7 @@ class MemoryController extends DisposableController
 
   final profilePaneController = ProfilePaneController();
 
-  final tracingPaneController = TracingPaneController();
+  final tracingPaneController = TracingPaneController();??
 
   /// Index of the selected feature tab.
   ///
