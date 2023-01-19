@@ -71,7 +71,8 @@ class MemoryController extends DisposableController
 
   final profilePaneController = ProfilePaneController();
 
-  final tracingPaneController = TracingPaneController();??
+  TracingPaneController get tracingPaneController => _tracingPaneController!;
+  TracingPaneController? _tracingPaneController;
 
   /// Index of the selected feature tab.
   ///
@@ -218,6 +219,9 @@ class MemoryController extends DisposableController
 
   void _handleConnectionStart(ServiceConnectionManager serviceManager) {
     _refreshShouldShowLeaksTab();
+
+    _tracingPaneController = TracingPaneController();
+
     if (_memoryTracker == null) {
       _memoryTracker = MemoryTracker(this);
       _memoryTracker!.start();
@@ -303,6 +307,9 @@ class MemoryController extends DisposableController
   void _handleConnectionStop(Object? _) {
     _memoryTracker?.stop();
     _memoryTrackerController.add(_memoryTracker);
+
+    _tracingPaneController?.dispose();
+    _tracingPaneController = null;
 
     _disconnectController.add(null);
     hasStopped = true;
