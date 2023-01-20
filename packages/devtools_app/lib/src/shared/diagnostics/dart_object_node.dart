@@ -129,6 +129,11 @@ Future<void> buildVariablesTree(
               createVariablesForElements(result, isolateRef),
             );
             break;
+          case InstanceKind.kRecord:
+            variable.addAllChildren(
+              createVariablesForRecords(result, isolateRef),
+            );
+            break;
           case InstanceKind.kUint8ClampedList:
           case InstanceKind.kUint8List:
           case InstanceKind.kUint16List:
@@ -190,7 +195,7 @@ Future<void> buildVariablesTree(
           default:
             break;
         }
-        if (result.fields != null) {
+        if (result.fields != null && result.kind != InstanceKind.kRecord) {
           variable.addAllChildren(
             createVariablesForFields(
               result,
@@ -541,9 +546,9 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
       if (kind == InstanceKind.kStackTrace) {
         final depth = children.length;
         valueStr = 'StackTrace ($depth ${pluralize('frame', depth)})';
-      } else if (kind == 'Record') {
-        // TODO(elliette): Compare against InstanceKind.kRecord when vm_service >= 10.0.0.
-        valueStr = 'Record';
+      } else if (kind == InstanceKind.kRecord) {
+        final count = children.length;
+        valueStr = 'Record ($count ${pluralize('field', count)})';
       } else if (value.valueAsString == null) {
         valueStr = value.classRef?.name ?? '';
       } else {

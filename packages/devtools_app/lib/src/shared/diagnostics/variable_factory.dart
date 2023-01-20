@@ -478,6 +478,39 @@ List<DartObjectNode> createVariablesForElements(
   return variables;
 }
 
+List<DartObjectNode> createVariablesForRecords(
+  Instance instance,
+  IsolateRef? isolateRef,
+) {
+  final positionalFields = <DartObjectNode>[];
+  final namedFields = <DartObjectNode>[];
+  for (var field in instance.fields ?? []) {
+    if (_isPositionalField(field)) {
+      positionalFields.add(
+        DartObjectNode.fromValue(
+          // Positional fields are designated by their getter syntax, eg $0, $1,
+          // $2, etc:
+          name: '\$${field.name}',
+          value: field.value,
+          isolateRef: isolateRef,
+        ),
+      );
+    } else {
+      namedFields.add(
+        DartObjectNode.fromValue(
+          name: field.name,
+          value: field.value,
+          isolateRef: isolateRef,
+        ),
+      );
+    }
+  }
+  // Always show positional fields before named fields:
+  return [...positionalFields, ...namedFields];
+}
+
+bool _isPositionalField(BoundField field) => field.name is int;
+
 List<DartObjectNode> createVariablesForFields(
   Instance instance,
   IsolateRef? isolateRef, {
