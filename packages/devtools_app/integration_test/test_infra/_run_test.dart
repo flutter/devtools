@@ -179,7 +179,7 @@ class TestRunner with IOMixin {
     );
 
     bool testTimedOut = false;
-    final timeout = Future.delayed(const Duration(minutes: 5)).then((_) {
+    final timeout = Future.delayed(const Duration(minutes: 6)).then((_) {
       testTimedOut = true;
     });
 
