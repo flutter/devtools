@@ -4,9 +4,9 @@
 
 import 'package:devtools_app/src/screens/memory/panes/diff/controller/heap_diff.dart';
 import 'package:devtools_app/src/screens/memory/shared/heap/heap.dart';
-import 'package:devtools_app/src/screens/memory/shared/heap/model.dart';
 import 'package:devtools_app/src/screens/memory/shared/heap/spanning_tree.dart';
-import 'package:devtools_app/src/screens/memory/shared/primitives/class_name.dart';
+import 'package:devtools_app/src/shared/memory/adapted_heap_data.dart';
+import 'package:devtools_app/src/shared/memory/class_name.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
