@@ -118,6 +118,7 @@ Future<void> buildVariablesTree(
         count: variable.childCount,
       );
       if (result is Instance) {
+        variable.addChild(createVariableForReferences(result, isolateRef));
         switch (result.kind) {
           case InstanceKind.kMap:
             variable.addAllChildren(

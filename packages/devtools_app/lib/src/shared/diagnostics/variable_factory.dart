@@ -506,3 +506,10 @@ List<DartObjectNode> createVariablesForFields(
   }
   return variables;
 }
+
+DartObjectNode createVariableForReferences(
+  Instance instance,
+  IsolateRef? isolateRef,
+) {
+  return DartObjectNode.text('references');
+}
