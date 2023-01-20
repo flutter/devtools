@@ -4,7 +4,8 @@
 
 import '../../primitives/trees.dart';
 
-abstract class InspectableNode<T extends TreeNode<T>> extends TreeNode<T> {
+abstract class InspectableNode<T extends InspectableNode<T>>
+    extends TreeNode<T> {
   int get childCount;
 
   @override
