@@ -511,5 +511,12 @@ DartObjectNode createVariableForReferences(
   Instance instance,
   IsolateRef? isolateRef,
 ) {
-  return DartObjectNode.text('references');
+  final result = DartObjectNode.text('references');
+  final live = result.addChild(DartObjectNode.text('live'));
+  live.addChild(DartObjectNode.text('inbound'));
+  live.addChild(DartObjectNode.text('outbound'));
+  final stat = result.addChild(DartObjectNode.text('static'));
+  stat.addChild(DartObjectNode.text('inbound'));
+  stat.addChild(DartObjectNode.text('outbound'));
+  return result;
 }

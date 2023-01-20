@@ -640,7 +640,7 @@ abstract class TimelineEvent extends TreeNode<TimelineEvent>
   }
 
   @override
-  void addChild(TimelineEvent child, {int? index}) {
+  TimelineEvent addChild(TimelineEvent child, {int? index}) {
     assert(index == null);
     void _putChildInTree(TimelineEvent root) {
       // [root] is a leaf. Add child here.
@@ -691,6 +691,8 @@ abstract class TimelineEvent extends TreeNode<TimelineEvent>
     }
 
     _putChildInTree(this);
+
+    return child;
   }
 
   void _addChild(TimelineEvent child) {
@@ -982,7 +984,7 @@ class AsyncTimelineEvent extends TimelineEvent {
   }
 
   @override
-  void addChild(TimelineEvent child, {int? index}) {
+  TimelineEvent addChild(TimelineEvent child, {int? index}) {
     assert(index == null);
     final _child = child as AsyncTimelineEvent;
     // Short circuit if we are using an explicit parentId.
@@ -992,6 +994,7 @@ class AsyncTimelineEvent extends TimelineEvent {
     } else {
       super.addChild(child);
     }
+    return child;
   }
 
   @override
