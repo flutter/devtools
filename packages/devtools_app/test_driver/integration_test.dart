@@ -40,12 +40,15 @@ Future<void> main() async {
       double percentDiff = _defaultDiffPercentage;
       if (goldenFile.existsSync()) {
         final goldenImageBytes = goldenFile.readAsBytesSync();
+        // Resize the screenshot bytes to match the size we expect on the CI.
+        final screenshotImageBytes = _resizeBytes(screenshotBytes);
+
         equal = const DeepCollectionEquality().equals(
           goldenImageBytes,
-          screenshotBytes,
+          screenshotImageBytes,
         );
         if (!equal) {
-          percentDiff = _percentDiff(goldenImageBytes, screenshotBytes);
+          percentDiff = _percentDiff(goldenImageBytes, screenshotImageBytes);
         }
       }
 
@@ -85,20 +88,21 @@ Future<void> main() async {
 // on the bots.
 const _defaultImageWidth = 1600;
 
-void _writeImageToFile(File file, List<int> originalBytes) {
-  final originalImage = decodeImage(originalBytes);
-  if (originalImage == null) {
-    print('Cannot decode image at ${file.path}');
-    file.writeAsBytesSync(originalBytes);
-    return;
+void _writeImageToFile(File file, List<int> bytes) {
+  file.writeAsBytesSync(_resizeBytes(bytes));
+}
+
+List<int> _resizeBytes(List<int> bytes) {
+  final image = decodeImage(bytes);
+  if (image == null) {
+    print('Cannot decode bytes to image.');
+    return bytes;
   }
 
   // Resize the image to a [_defaultImageWidth].
-  final resizedImage = copyResize(originalImage, width: _defaultImageWidth);
+  final resizedImage = copyResize(image, width: _defaultImageWidth);
   final resizedBytes = encodePng(resizedImage);
-
-  // Overwrite the file with the new resized image bytes.
-  file.writeAsBytesSync(resizedBytes);
+  return resizedBytes;
 }
 
 double _percentDiff(List<int> goldenBytes, List<int> screenshotBytes) {
