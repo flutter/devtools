@@ -78,7 +78,7 @@ class MemoryController extends DisposableController
     memoryTimeline = MemoryTimeline(offline);
     memoryLog = _MemoryLog(this);
 
-    children = MemoryFeatureControllers(diffPaneController);
+    controllers = MemoryFeatureControllers(diffPaneController);
 
     // Update the chart when the memorySource changes.
     addAutoDisposeListener(memorySourceNotifier, () async {
@@ -95,7 +95,7 @@ class MemoryController extends DisposableController
   }
 
   /// Sub-controllers of memory controller.
-  late final MemoryFeatureControllers children;
+  late final MemoryFeatureControllers controllers;
 
   /// Index of the selected feature tab.
   ///
@@ -329,7 +329,7 @@ class MemoryController extends DisposableController
     _memoryTracker?.stop();
     _memoryTrackerController.add(_memoryTracker);
 
-    children.reset();
+    controllers.reset();
     _disconnectController.add(null);
     hasStopped = true;
   }
@@ -401,7 +401,7 @@ class MemoryController extends DisposableController
     unawaited(_disconnectController.close());
     unawaited(_memoryTrackerController.close());
     _memoryTracker?.dispose();
-    children.dispose();
+    controllers.dispose();
   }
 }
 

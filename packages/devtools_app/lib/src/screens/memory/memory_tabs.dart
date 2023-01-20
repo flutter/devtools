@@ -66,7 +66,7 @@ class MemoryTabView extends StatelessWidget {
         ),
         tabView: KeepAliveWrapper(
           child: AllocationProfileTableView(
-            controller: controller.children.profile,
+            controller: controller.controllers.profile,
           ),
         ),
       ),
@@ -78,7 +78,7 @@ class MemoryTabView extends StatelessWidget {
         ),
         tabView: KeepAliveWrapper(
           child: DiffPane(
-            diffController: controller.children.diff,
+            diffController: controller.controllers.diff,
           ),
         ),
       ),
@@ -89,7 +89,7 @@ class MemoryTabView extends StatelessWidget {
           gaPrefix: _gaPrefix,
         ),
         tabView: KeepAliveWrapper(
-          child: TracingPane(controller: controller.children.tracing),
+          child: TracingPane(controller: controller.controllers.tracing),
         ),
       ),
       if (controller.shouldShowLeaksTab.value)
