@@ -21,8 +21,6 @@ void main() {
 
   final binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
-  const _diffTolerance = 0.07;
-
   testWidgets('Perfetto trace viewer loads data and scrolls for Flutter frames',
       (tester) async {
     await pumpDevTools(tester);
@@ -35,21 +33,13 @@ void main() {
     expect(find.byType(Perfetto), findsOneWidget);
     expect(find.byType(HtmlElementView), findsOneWidget);
 
-    await verifyScreenshot(
-      binding,
-      'perfetto_initial_load',
-      diffTolerance: _diffTolerance,
-    );
+    await verifyScreenshot(binding, 'perfetto_initial_load');
 
     logStatus('select a Flutter Frame');
     await tester.tap(find.byType(FlutterFramesChartItem).last);
     await tester.pumpAndSettle(safePumpDuration);
 
-    await verifyScreenshot(
-      binding,
-      'perfetto_frame_selection',
-      diffTolerance: _diffTolerance,
-    );
+    await verifyScreenshot(binding, 'perfetto_frame_selection');
 
     logStatus(
       'switch to a different feature tab and back to Timeline Events',
@@ -63,7 +53,7 @@ void main() {
     await verifyScreenshot(
       binding,
       'perfetto_frame_selection_2',
-      diffTolerance: _diffTolerance,
+      lastScreenshot: true,
     );
   });
 }
