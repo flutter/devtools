@@ -49,6 +49,7 @@ class _ObjectColumn extends ColumnData<ObjectStoreEntry>
     return VmServiceObjectLink<ObjRef>(
       object: data.value,
       onTap: onTap,
+      isSelected: isRowSelected,
     );
   }
 }

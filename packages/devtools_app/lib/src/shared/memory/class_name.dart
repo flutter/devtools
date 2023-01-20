@@ -5,8 +5,8 @@
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../../../shared/primitives/simple_items.dart';
-import '../../../../shared/ui/icons.dart';
+import '../primitives/simple_items.dart';
+import '../ui/icons.dart';
 
 /// Class types to color code and filter classes in tables.
 enum ClassType {
