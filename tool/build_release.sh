@@ -15,17 +15,27 @@ DEVTOOLS_DIR="${TOOL_DIR}/.."
 
 pushd $TOOL_DIR
 
-# Use the Flutter SDK from flutter-sdk/.
-FLUTTER_DIR="`pwd`/flutter-sdk"
-PATH="$FLUTTER_DIR/bin":$PATH
+if [[ $1 = "--no-update-flutter" ]]
+then
+  # Use the Flutter SDK that is already on the user's PATH.
+  FLUTTER_EXE=`which flutter`
+  echo "Using the Flutter SDK that is already on PATH: $FLUTTER_EXE"
+else
+  # Use the Flutter SDK from flutter-sdk/.
+  FLUTTER_DIR="`pwd`/flutter-sdk"
+  PATH="$FLUTTER_DIR/bin":$PATH
 
-# Make sure the flutter sdk is on the correct branch.
-./update_flutter_sdk.sh
+  # Make sure the flutter sdk is on the correct branch.
+  ./update_flutter_sdk.sh
+fi
 
 popd
 
 # echo on
 set -ex
+
+which flutter
+flutter --version
 
 if [[ $1 = "--update-perfetto" ]]; then
   $TOOL_DIR/update_perfetto.sh
@@ -44,7 +54,7 @@ flutter pub get
 
 flutter build web \
   --pwa-strategy=none \
-  --profile \
+  --release \
   --dart-define=FLUTTER_WEB_USE_SKIA=true \
   --dart-define=FLUTTER_WEB_CANVASKIT_URL=canvaskit/ \
   --no-tree-shake-icons

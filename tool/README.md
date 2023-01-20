@@ -130,7 +130,15 @@ to add release notes to Flutter website
    ```shell
    cd $LOCAL_DART_SDK && \
    git rebase-update && \
-   third_party/devtools/update.sh $TARGET_COMMIT_HASH;
+   third_party/devtools/update.sh $TARGET_COMMIT_HASH [optional --no-update-flutter];
+   ```
+For cherry pick releases that need to be built from a specific version of Flutter,
+checkout the Flutter version on your local flutter repo (the Flutter SDK that
+`which flutter` points to). Then when you run the `update.sh` command, include the
+`--no-update-flutter` flag:
+
+   ```shell
+   third_party/devtools/update.sh $TARGET_COMMIT_HASH --no-update-flutter
    ```
 
 ### Update the DevTools hash in the Dart SDK
