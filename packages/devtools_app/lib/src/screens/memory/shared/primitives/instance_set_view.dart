@@ -13,6 +13,7 @@ import '../../../../shared/primitives/utils.dart';
 abstract class ClassSampler {
   Future<void> oneVariableToConsole();
   void instanceGraphToConsole();
+  bool get isEvalEnabled;
 }
 
 /// A button with label '...' to show near count of instances,
@@ -53,17 +54,23 @@ class InstanceSetButton extends StatelessWidget {
 }
 
 class _StoreAsVariableMenu extends StatelessWidget {
-  const _StoreAsVariableMenu(this.menuText, this.sampleObtainer);
+  const _StoreAsVariableMenu(this.sampleObtainer);
 
-  final String menuText;
   final ClassSampler sampleObtainer;
 
   @override
   Widget build(BuildContext context) {
+    final enabled = sampleObtainer.isEvalEnabled;
+    const menuText = 'Store as a console variable';
+
+    if (!enabled) {
+      return const MenuItemButton(child: Text(menuText));
+    }
+
     return SubmenuButton(
       menuChildren: <Widget>[
         MenuItemButton(
-          onPressed: sampleObtainer.oneVariableToConsole,
+          onPressed: enabled ? sampleObtainer.oneVariableToConsole : null,
           child: const Text('One instance'),
         ),
         const MenuItemButton(
@@ -73,16 +80,13 @@ class _StoreAsVariableMenu extends StatelessWidget {
           child: Text('All instances'),
         ),
       ],
-      child: Text(menuText),
+      child: const Text(menuText),
     );
   }
 }
 
 List<Widget> _menu(ClassSampler sampleObtainer) => [
-      _StoreAsVariableMenu(
-        'Store as a console variable',
-        sampleObtainer,
-      ),
+      _StoreAsVariableMenu(sampleObtainer),
       MenuItemButton(
         onPressed: sampleObtainer.instanceGraphToConsole,
         child: const Text('Browse references for a single instance in console'),

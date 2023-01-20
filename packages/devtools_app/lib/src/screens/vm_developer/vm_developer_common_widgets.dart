@@ -687,6 +687,7 @@ class VmServiceObjectLink<T> extends StatelessWidget {
   const VmServiceObjectLink({
     required this.object,
     required this.onTap,
+    this.isSelected = false,
     this.preferUri = false,
     this.textBuilder,
   });
@@ -695,6 +696,7 @@ class VmServiceObjectLink<T> extends StatelessWidget {
   final bool preferUri;
   final String? Function(T)? textBuilder;
   final FutureOr<void> Function(T) onTap;
+  final bool isSelected;
 
   TextSpan buildTextSpan(BuildContext context) {
     final theme = Theme.of(context);
@@ -759,17 +761,16 @@ class VmServiceObjectLink<T> extends StatelessWidget {
         text = object.toString();
       }
     }
+
+    final TextStyle style;
+    if (isServiceObject) {
+      style = isSelected ? theme.selectedLinkTextStyle : theme.linkTextStyle;
+    } else {
+      style = isSelected ? theme.selectedFixedFontStyle : theme.fixedFontStyle;
+    }
     return TextSpan(
       text: text,
-      style: (isServiceObject
-              ? theme.linkTextStyle.apply(
-                  fontFamily: theme.fixedFontStyle.fontFamily,
-                  overflow: TextOverflow.ellipsis,
-                )
-              : theme.subtleFixedFontStyle)
-          .apply(
-        overflow: TextOverflow.ellipsis,
-      ),
+      style: style.apply(overflow: TextOverflow.ellipsis),
       recognizer: isServiceObject
           ? (TapGestureRecognizer()
             ..onTap = () async {

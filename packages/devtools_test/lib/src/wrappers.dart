@@ -134,7 +134,12 @@ void testWidgetsWithContext(
     } finally {
       // restore previous global values
       for (Type type in oldValues.keys) {
-        setGlobal(type, oldValues[type]);
+        final oldGlobal = oldValues[type];
+        if (oldGlobal != null) {
+          setGlobal(type, oldGlobal);
+        } else {
+          globals.remove(type);
+        }
       }
     }
   });

@@ -4,8 +4,8 @@
 
 import 'package:devtools_app/src/screens/memory/memory_screen.dart';
 import 'package:devtools_app/src/screens/memory/memory_tabs.dart';
-import 'package:devtools_app/src/screens/memory/panes/allocation_profile/allocation_profile_table_view_controller.dart';
-import 'package:devtools_app/src/screens/memory/panes/allocation_profile/model.dart';
+import 'package:devtools_app/src/screens/memory/panes/profile/model.dart';
+import 'package:devtools_app/src/screens/memory/panes/profile/profile_pane_controller.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_app/src/shared/table/table.dart';
 import 'package:devtools_test/devtools_test.dart';
@@ -43,7 +43,7 @@ void main() {
 
     Future<void> navigateToAllocationProfile(
       WidgetTester tester,
-      AllocationProfileTableViewController allocationProfileController,
+      ProfilePaneController allocationProfileController,
     ) async {
       await tester.tap(find.byKey(MemoryScreenKeys.dartHeapTableProfileTab));
       await tester.pumpAndSettle();
@@ -62,7 +62,7 @@ void main() {
         await pumpMemoryScreen(tester);
 
         final allocationProfileController =
-            scene.controller.allocationProfileController;
+            scene.controller.controllers.profile;
 
         preferences.toggleVmDeveloperMode(false);
         await navigateToAllocationProfile(tester, allocationProfileController);
@@ -100,7 +100,7 @@ void main() {
         await pumpMemoryScreen(tester);
 
         final allocationProfileController =
-            scene.controller.allocationProfileController;
+            scene.controller.controllers.profile;
         await navigateToAllocationProfile(tester, allocationProfileController);
 
         // We'll clear it for now so we can tell when it's refreshed.
@@ -130,7 +130,7 @@ void main() {
         await pumpMemoryScreen(tester);
 
         final allocationProfileController =
-            scene.controller.allocationProfileController;
+            scene.controller.controllers.profile;
 
         await navigateToAllocationProfile(tester, allocationProfileController);
 
@@ -172,7 +172,7 @@ void main() {
       (WidgetTester tester) async {
         await pumpMemoryScreen(tester);
 
-        final table = find.byType(FlatTable<AllocationProfileRecord>);
+        final table = find.byType(FlatTable<ProfileRecord>);
         expect(table, findsOneWidget);
 
         final cls = find.text('Class');
@@ -193,8 +193,7 @@ void main() {
           expect(columnFinder, findsOneWidget);
         }
 
-        final state =
-            tester.state<FlatTableState<AllocationProfileRecord>>(table.first);
+        final state = tester.state<FlatTableState<ProfileRecord>>(table.first);
         var data = state.tableController.tableData.value.data;
 
         // Initial state should be sorted by size, largest to smallest.

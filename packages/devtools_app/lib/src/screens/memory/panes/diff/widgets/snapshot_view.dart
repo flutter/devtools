@@ -59,6 +59,10 @@ class SnapshotView extends StatelessWidget {
             selection: controller.derived.selectedSingleClassStats,
             totalSize: totalSize!,
             classFilterButton: classFilterButton,
+            heap:
+                (controller.derived.selectedItem.value as SnapshotInstanceItem)
+                    .heap!
+                    .data,
           );
         } else if (diffClasses != null) {
           classTable = ClassesTableDiff(

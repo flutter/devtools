@@ -6,13 +6,14 @@ import 'package:flutter/widgets.dart';
 
 import '../../../shared/analytics/constants.dart' as gac;
 import '../../../shared/common_widgets.dart';
+import '../../../shared/memory/class_name.dart';
 import '../../../shared/theme.dart';
-import 'primitives/class_name.dart';
 
 class HeapClassView extends StatelessWidget {
   const HeapClassView({
     super.key,
     required this.theClass,
+    required this.rootPackage,
     this.showCopyButton = false,
     this.copyGaItem,
     this.textStyle,
@@ -22,19 +23,28 @@ class HeapClassView extends StatelessWidget {
   final bool showCopyButton;
   final String? copyGaItem;
   final TextStyle? textStyle;
+  final String? rootPackage;
 
   @override
   Widget build(BuildContext context) {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Expanded(
           child: maybeWrapWithTooltip(
-            tooltip: theClass.fullName,
-            child: Text(
-              theClass.shortName,
-              overflow: TextOverflow.ellipsis,
-              style: textStyle,
+            tooltip:
+                '${theClass.classType(rootPackage).classTooltip}\n${theClass.fullName}',
+            child: Row(
+              children: [
+                theClass.classType(rootPackage).icon,
+                const SizedBox(width: denseSpacing),
+                Expanded(
+                  child: Text(
+                    theClass.shortName,
+                    overflow: TextOverflow.ellipsis,
+                    style: textStyle,
+                  ),
+                )
+              ],
             ),
           ),
         ),

@@ -5,27 +5,28 @@
 import 'package:vm_service/vm_service.dart';
 
 import '../../../../../shared/globals.dart';
+import '../../../../../shared/memory/adapted_heap_data.dart';
+import '../../../../../shared/memory/class_name.dart';
 import '../../../shared/heap/heap.dart';
 import '../../../shared/heap/model.dart';
-import '../../../shared/primitives/class_name.dart';
 import '../../../shared/primitives/instance_set_view.dart';
 
 class HeapClassSampler extends ClassSampler {
-  HeapClassSampler(this.className, this.objects);
+  HeapClassSampler(this.objects, this.heap);
 
-  final HeapClassName className;
   final SingleClassStats objects;
+  final AdaptedHeapData heap;
 
   IsolateRef get _mainIsolateRef =>
       serviceManager.isolateManager.mainIsolate.value!;
 
-  Future<InstanceRef> _oneInstance() async {
+  Future<InstanceRef?> _oneInstance() async {
     final isolateId = _mainIsolateRef.id!;
 
     // TODO(polina-c): It would be great to find out how to avoid full scan of classes.
     final theClass = (await serviceManager.service!.getClassList(isolateId))
         .classes!
-        .firstWhere((ref) => className.matches(ref));
+        .firstWhere((ref) => objects.heapClass.matches(ref));
 
     final instances = await serviceManager.service!.getInstances(
       isolateId,
@@ -33,20 +34,29 @@ class HeapClassSampler extends ClassSampler {
       1,
     );
 
-    return instances.instances!.first as InstanceRef;
+    final result = instances.instances!.first;
+
+    if (result is InstanceRef) return result;
+
+    return null;
   }
 
   @override
   Future<void> oneVariableToConsole() async {
     final instance = await _oneInstance();
 
-    // drop to console
-    serviceManager.consoleService.appendInstanceRef(
-      value: instance,
-      diagnostic: null,
-      isolateRef: _mainIsolateRef,
-      forceScrollIntoView: true,
-    );
+    if (instance == null) {
+      serviceManager.consoleService
+          .appendStdio('the instance cannot be evaluated');
+    } else {
+      // drop to console
+      serviceManager.consoleService.appendInstanceRef(
+        value: instance,
+        diagnostic: null,
+        isolateRef: _mainIsolateRef,
+        forceScrollIntoView: true,
+      );
+    }
 
     // TODO (polina-c): remove the commented code
     // before opening the flag.
@@ -67,6 +77,17 @@ class HeapClassSampler extends ClassSampler {
 
   @override
   Future<void> instanceGraphToConsole() async {
-    serviceManager.consoleService.appendInstanceGraph(HeapObjectGraph('hello'));
+    serviceManager.consoleService.appendInstanceGraph(
+      HeapObjectGraph(
+        heap,
+        objects.objects.objectsByCodes.keys.first,
+        objects.heapClass,
+      ),
+    );
   }
+
+  @override
+  bool get isEvalEnabled =>
+      objects.heapClass.classType(serviceManager.rootInfoNow().package) !=
+      ClassType.runtime;
 }

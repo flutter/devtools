@@ -2,20 +2,79 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../../../shared/primitives/simple_items.dart';
+import '../primitives/simple_items.dart';
+import '../ui/icons.dart';
+
+/// Class types to color code and filter classes in tables.
+enum ClassType {
+  runtime(
+    color: Color.fromARGB(255, 238, 109, 99),
+    label: 'R',
+    alias: '\$runtime',
+    aliasDescription: 'Dart runtime classes',
+    classTooltip: 'Dart runtime class',
+  ),
+  sdk(
+    color: Color.fromARGB(255, 122, 188, 124),
+    label: 'S',
+    alias: '\$sdk',
+    aliasDescription: 'Dart and Flutter SDK',
+    classTooltip: 'SDK class',
+  ),
+  dependency(
+    color: Color.fromARGB(255, 69, 153, 221),
+    label: 'D',
+    alias: '\$dependency',
+    aliasDescription: 'dependencies',
+    classTooltip: 'dependency',
+  ),
+  rootPackage(
+    color: Color.fromARGB(255, 255, 200, 0),
+    label: 'P',
+    alias: '\$project',
+    aliasDescription: 'classes of the project',
+    classTooltip: 'project class',
+  ),
+  ;
+
+  const ClassType({
+    required this.color,
+    required this.label,
+    required this.alias,
+    required this.aliasDescription,
+    required this.classTooltip,
+  });
+
+  /// Color of the icon.
+  final Color color;
+
+  /// Label for the icon.
+  final String label;
+
+  /// Alias for filter string, should start with `$`.
+  final String alias;
+
+  /// Description to show in filter dialog.
+  ///
+  /// Should be in lower case.
+  final String aliasDescription;
+
+  /// String to be added to tooltip in table for class name.
+  ///
+  /// Should be in lower case.
+  final String classTooltip;
+
+  Widget get icon =>
+      CircleIcon(color: color, text: label, textColor: Colors.white);
+}
 
 @immutable
 class HeapClassName {
   HeapClassName({required this.className, required library})
-      : library = _normalizeLibrary(library) {
-    assert(
-      !isPackageless || !isDartOrFlutter,
-      'isCore and isDartOrFlutter must be exclusive',
-    );
-  }
+      : library = _normalizeLibrary(library);
 
   HeapClassName.fromClassRef(ClassRef? classRef)
       : this(
@@ -78,6 +137,20 @@ class HeapClassName {
     return className;
   }
 
+  ClassType classType(String? rootPackage) {
+    if (rootPackage != null && library.startsWith(rootPackage)) {
+      return ClassType.rootPackage;
+    }
+
+    if (isPackageless) return ClassType.runtime;
+
+    if (isDartOrFlutter) return ClassType.sdk;
+
+    return ClassType.dependency;
+  }
+
+  bool get isCreatedByGoogle => isPackageless || isDartOrFlutter;
+
   /// True, if the library does not belong to a package.
   ///
   /// I.e. if the library does not have prefix
@@ -129,12 +202,12 @@ class HeapClassName {
   }
 }
 
-/// Packages that are published by dart.dev or flutter.dev.
+/// Packages that are published by Google.
 ///
 /// There is no active monitoring for new packages.
 /// If you see something is missing here,
 /// please, create a PR to add it.
-/// TODO(polina-c): add a test that verifies if there are missing
+/// TODO(polina-c): may be add a test that verifies if there are missing
 /// packages.
 const _dartAndFlutterPackages = {
   'flutter',
@@ -297,4 +370,12 @@ const _dartAndFlutterPackages = {
   'wifi_info_flutter',
   'wifi_info_flutter_platform_interface',
   'xdg_directories',
+
+  // https://pub.dev/publishers/material.io/packages
+  'dynamic_color',
+  'adaptive_breakpoints',
+  'adaptive_navigation',
+  'adaptive_components',
+  'material_color_utilities',
+  'google_fonts',
 };

@@ -11,12 +11,13 @@ import 'package:flutter/foundation.dart';
 import '../../../../../shared/analytics/analytics.dart' as ga;
 import '../../../../../shared/analytics/constants.dart' as gac;
 import '../../../../../shared/config_specific/import_export/import_export.dart';
+import '../../../../../shared/globals.dart';
+import '../../../../../shared/memory/class_name.dart';
 import '../../../../../shared/primitives/auto_dispose.dart';
 import '../../../../../shared/primitives/utils.dart';
 import '../../../shared/heap/class_filter.dart';
 import '../../../shared/heap/heap.dart';
 import '../../../shared/heap/model.dart';
-import '../../../shared/primitives/class_name.dart';
 import '../../../shared/primitives/memory_utils.dart';
 import 'heap_diff.dart';
 import 'item_controller.dart';
@@ -149,6 +150,8 @@ class DiffPaneController extends DisposableController {
 /// Widgets should not update the fields directly, they should use
 /// [DiffPaneController] or [DerivedData] for this.
 class CoreData {
+  late final rootPackage = serviceManager.rootInfoNow().package;
+
   /// The list contains one item that show information and all others
   /// are snapshots.
   ValueListenable<List<SnapshotItem>> get snapshots => _snapshots;
@@ -283,14 +286,14 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
   }) {
     final filter = _core.classFilter.value;
     if (classes is SingleHeapClasses) {
-      _singleClassesToShow.value = classes.filtered(filter);
+      _singleClassesToShow.value = classes.filtered(filter, _core.rootPackage);
       _diffClassesToShow.value = null;
       selectedSingleClassStats.value =
           _filter(classes.classesByName[className]);
       selectedDiffClassStats.value = null;
     } else if (classes is DiffHeapClasses) {
       _singleClassesToShow.value = null;
-      _diffClassesToShow.value = classes.filtered(filter);
+      _diffClassesToShow.value = classes.filtered(filter, _core.rootPackage);
       selectedSingleClassStats.value = null;
       selectedDiffClassStats.value = _filter(classes.classesByName[className]);
     } else if (classes == null) {
@@ -306,7 +309,12 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
   /// Returns [classStats] if it matches the current filter.
   T? _filter<T extends ClassStats>(T? classStats) {
     if (classStats == null) return null;
-    if (_core.classFilter.value.apply(classStats.heapClass)) return classStats;
+    if (_core.classFilter.value.apply(
+      classStats.heapClass,
+      _core.rootPackage,
+    )) {
+      return classStats;
+    }
     return null;
   }
 
@@ -394,10 +402,16 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
     // Get class with max retained size.
     final ClassStats theClass;
     if (classes is SingleHeapClasses) {
-      final classStatsList = classes.filtered(_core.classFilter.value);
+      final classStatsList = classes.filtered(
+        _core.classFilter.value,
+        _core.rootPackage,
+      );
       theClass = classStatsList.reduce(singleWithMaxRetainedSize);
     } else if (classes is DiffHeapClasses) {
-      final classStatsList = classes.filtered(_core.classFilter.value);
+      final classStatsList = classes.filtered(
+        _core.classFilter.value,
+        _core.rootPackage,
+      );
       theClass = classStatsList.reduce(diffWithMaxRetainedSize);
     } else {
       throw StateError('Unexpected type ${classes.runtimeType}');
