@@ -8,7 +8,7 @@ MaterialApp
      └─Focus
        │ state: _FocusState#00000
        │
-       └─_FocusMarker
+       └─_FocusInheritedScope
          └─Semantics
            │ container: false
            │ properties: SemanticsProperties

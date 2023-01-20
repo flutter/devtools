@@ -62,7 +62,7 @@ void main() {
         await pumpMemoryScreen(tester);
 
         final allocationProfileController =
-            scene.controller.allocationProfileController;
+            scene.controller.profilePaneController;
 
         preferences.toggleVmDeveloperMode(false);
         await navigateToAllocationProfile(tester, allocationProfileController);
@@ -100,7 +100,7 @@ void main() {
         await pumpMemoryScreen(tester);
 
         final allocationProfileController =
-            scene.controller.allocationProfileController;
+            scene.controller.profilePaneController;
         await navigateToAllocationProfile(tester, allocationProfileController);
 
         // We'll clear it for now so we can tell when it's refreshed.
@@ -130,7 +130,7 @@ void main() {
         await pumpMemoryScreen(tester);
 
         final allocationProfileController =
-            scene.controller.allocationProfileController;
+            scene.controller.profilePaneController;
 
         await navigateToAllocationProfile(tester, allocationProfileController);
 
