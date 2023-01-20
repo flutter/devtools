@@ -14,7 +14,7 @@ import '../globals.dart';
 import '../primitives/utils.dart';
 import 'diagnostics_node.dart';
 import 'inspector_service.dart';
-import 'primitives/expandable_node.dart';
+import 'primitives/inspectable_node.dart';
 import 'variable_factory.dart';
 
 Future<void> _addExpandableChildren(
