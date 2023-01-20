@@ -138,7 +138,6 @@ double _percentDiff(List<int> goldenBytes, List<int> screenshotBytes) {
   // This image diff calculation code is used by the Flutter test matcher
   // [matchesReferenceImage]. The small bit of code copied here is pulled out
   // for convenient reuse.
-  assert(goldenImageBytes.length == screenshotImageBytes.length);
   int delta = 0;
   for (int i = 0; i < goldenImageBytes.length; i += 4) {
     if (goldenImageBytes[i] != screenshotImageBytes[i] ||
@@ -148,7 +147,7 @@ double _percentDiff(List<int> goldenBytes, List<int> screenshotBytes) {
       delta++;
     }
   }
-  return delta / goldenBytes.length / 4;
+  return delta / goldenImageBytes.length / 4;
 }
 
 extension _ImageExtension on Image {
