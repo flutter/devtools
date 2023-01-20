@@ -11,10 +11,10 @@ import 'package:vm_service/vm_service.dart';
 import '../../screens/debugger/debugger_model.dart';
 import '../config_specific/logger/logger.dart';
 import '../globals.dart';
-import '../primitives/trees.dart';
 import '../primitives/utils.dart';
 import 'diagnostics_node.dart';
 import 'inspector_service.dart';
+import 'primitives/expandable_node.dart';
 import 'variable_factory.dart';
 
 Future<void> _addExpandableChildren(
@@ -79,7 +79,7 @@ Future<void> buildVariablesTree(
     }
   }
   final existingNames = <String>{};
-  for (var child in variable.children) {
+  for (final child in variable.children) {
     final name = child.name;
     if (name != null && name.isNotEmpty) {
       existingNames.add(name);
@@ -313,7 +313,7 @@ Future<void> buildVariablesTree(
 
 // TODO(jacobr): gracefully handle cases where the isolate has closed and
 // InstanceRef objects have become sentinels.
-class DartObjectNode extends TreeNode<DartObjectNode> {
+class DartObjectNode extends ExpandableNode<DartObjectNode> {
   DartObjectNode._({
     this.name,
     this.text,
@@ -481,6 +481,7 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
 
   int? _offset;
 
+  @override
   int get childCount {
     if (_childCount != null) return _childCount!;
 
@@ -526,6 +527,7 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
   Object? get value => ref?.value;
 
   // TODO(kenz): add custom display for lists with more than 100 elements
+  @override
   String? get displayValue {
     if (text != null) {
       return text;
@@ -601,6 +603,7 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
   /// Selects the object in the Flutter Widget inspector.
   ///
   /// Returns whether the inspector selection was changed
+  @override
   Future<bool> inspectWidget() async {
     if (ref?.instanceRef == null) {
       return false;
@@ -625,6 +628,7 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
     return false;
   }
 
+  @override
   Future<bool> get isInspectable async {
     if (_isInspectable != null) return _isInspectable!;
 

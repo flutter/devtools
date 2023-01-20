@@ -4,7 +4,7 @@
 
 import '../../primitives/trees.dart';
 
-abstract class ExpandableNode extends TreeNode<ExpandableNode> {
+abstract class ExpandableNode<T extends TreeNode<T>> extends TreeNode<T> {
   int get childCount;
 
   @override
