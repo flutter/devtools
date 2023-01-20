@@ -7,10 +7,10 @@ import 'package:flutter/foundation.dart';
 import '../../../../../shared/analytics/analytics.dart' as ga;
 import '../../../../../shared/analytics/constants.dart' as gac;
 import '../../../../../shared/analytics/metrics.dart';
+import '../../../../../shared/memory/class_name.dart';
 import '../../../../../shared/primitives/utils.dart';
 import '../../../shared/heap/heap.dart';
 import '../../../shared/heap/model.dart';
-import '../../../shared/primitives/class_name.dart';
 
 /// Stores already calculated comparisons for heap couples.
 class HeapDiffStore {
