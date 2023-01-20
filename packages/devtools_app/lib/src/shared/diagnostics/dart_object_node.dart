@@ -313,7 +313,7 @@ Future<void> buildVariablesTree(
 
 // TODO(jacobr): gracefully handle cases where the isolate has closed and
 // InstanceRef objects have become sentinels.
-class DartObjectNode extends ExpandableNode<DartObjectNode> {
+class DartObjectNode extends InspectableNode<DartObjectNode> {
   DartObjectNode._({
     this.name,
     this.text,
