@@ -188,3 +188,6 @@ dependency_overrides:
     path: ../devtools_shared
   devtools_test:
     path: ../devtools_test
+  vm_service: ^10.0.0
+  dds: ^2.7.2
+  dds_service_extensions: ^1.3.2
