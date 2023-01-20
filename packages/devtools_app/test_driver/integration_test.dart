@@ -123,16 +123,28 @@ double _percentDiff(List<int> goldenBytes, List<int> screenshotBytes) {
     return _defaultDiffPercentage;
   }
 
+  final goldenImageBytes = goldenImage.getBytes();
+  final screenshotImageBytes = screenshotImage.getBytes();
+
+  if (goldenImageBytes.length != screenshotImageBytes.length) {
+    print(
+      'The golden images have a different byte lengths. '
+      'Golden: ${goldenImageBytes.length} bytes\n'
+      'Screenshot: ${screenshotImageBytes.length} bytes\n',
+    );
+    return _defaultDiffPercentage;
+  }
+
   // This image diff calculation code is used by the Flutter test matcher
   // [matchesReferenceImage]. The small bit of code copied here is pulled out
   // for convenient reuse.
-  assert(goldenBytes.length == screenshotBytes.length);
+  assert(goldenImageBytes.length == screenshotImageBytes.length);
   int delta = 0;
-  for (int i = 0; i < goldenBytes.length; i += 4) {
-    if (goldenBytes[i] != screenshotBytes[i] ||
-        goldenBytes[i + 1] != screenshotBytes[i + 1] ||
-        goldenBytes[i + 2] != screenshotBytes[i + 2] ||
-        goldenBytes[i + 3] != screenshotBytes[i + 3]) {
+  for (int i = 0; i < goldenImageBytes.length; i += 4) {
+    if (goldenImageBytes[i] != screenshotImageBytes[i] ||
+        goldenImageBytes[i + 1] != screenshotImageBytes[i + 1] ||
+        goldenImageBytes[i + 2] != screenshotImageBytes[i + 2] ||
+        goldenImageBytes[i + 3] != screenshotImageBytes[i + 3]) {
       delta++;
     }
   }
