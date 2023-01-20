@@ -5,7 +5,7 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:devtools_app/src/screens/memory/shared/heap/model.dart';
+import 'package:devtools_app/src/shared/memory/adapted_hep_data.dart';
 
 import '../leaks/leaks_data.dart';
 
