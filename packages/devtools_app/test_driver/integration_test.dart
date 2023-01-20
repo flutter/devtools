@@ -113,8 +113,8 @@ double _percentDiff(List<int> goldenBytes, List<int> screenshotBytes) {
       goldenImage.width != screenshotImage.width) {
     print(
       'The golden images have a different height or width. '
-      'Golden: ${goldenImage.sizeDisplay}'
-      'Screenshot: ${screenshotImage.sizeDisplay}',
+      'Golden: ${goldenImage.sizeDisplay}\n'
+      'Screenshot: ${screenshotImage.sizeDisplay}\n',
     );
     return _defaultDiffPercentage;
   }
