@@ -10,7 +10,7 @@ import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/shared/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/shared/config_specific/import_export/import_export.dart';
 import 'package:devtools_app/src/shared/globals.dart';
-import 'package:devtools_app/src/shared/memory/adapted_hep_data.dart';
+import 'package:devtools_app/src/shared/memory/adapted_heap_data.dart';
 import 'package:devtools_app/src/shared/memory/class_name.dart';
 import 'package:devtools_app/src/shared/notifications.dart';
 import 'package:devtools_app/src/shared/preferences.dart';

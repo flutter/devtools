@@ -5,7 +5,7 @@
 import 'package:leak_tracker/devtools_integration.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../../../../shared/memory/adapted_hep_data.dart';
+import '../../../../../shared/memory/adapted_heap_data.dart';
 
 /// Names for json fields.
 class _JsonFields {

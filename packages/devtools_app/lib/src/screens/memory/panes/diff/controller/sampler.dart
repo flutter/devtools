@@ -5,7 +5,7 @@
 import 'package:vm_service/vm_service.dart';
 
 import '../../../../../shared/globals.dart';
-import '../../../../../shared/memory/adapted_hep_data.dart';
+import '../../../../../shared/memory/adapted_heap_data.dart';
 import '../../../../../shared/memory/class_name.dart';
 import '../../../shared/heap/heap.dart';
 import '../../../shared/heap/model.dart';

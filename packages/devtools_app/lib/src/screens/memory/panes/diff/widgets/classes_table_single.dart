@@ -8,7 +8,7 @@ import '../../../../../shared/analytics/analytics.dart' as ga;
 import '../../../../../shared/analytics/constants.dart' as gac;
 import '../../../../../shared/feature_flags.dart';
 import '../../../../../shared/globals.dart';
-import '../../../../../shared/memory/adapted_hep_data.dart';
+import '../../../../../shared/memory/adapted_heap_data.dart';
 import '../../../../../shared/primitives/utils.dart';
 import '../../../../../shared/table/table.dart';
 import '../../../../../shared/table/table_data.dart';

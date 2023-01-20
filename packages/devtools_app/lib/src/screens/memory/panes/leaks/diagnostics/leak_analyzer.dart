@@ -5,7 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:leak_tracker/devtools_integration.dart';
 
-import '../../../../../shared/memory/adapted_hep_data.dart';
+import '../../../../../shared/memory/adapted_heap_data.dart';
 import '../../../shared/heap/spanning_tree.dart';
 import 'model.dart';
 

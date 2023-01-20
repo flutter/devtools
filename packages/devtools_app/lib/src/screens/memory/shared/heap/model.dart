@@ -7,7 +7,7 @@ import 'package:vm_service/vm_service.dart';
 import '../../../../shared/analytics/analytics.dart' as ga;
 import '../../../../shared/analytics/constants.dart' as gac;
 import '../../../../shared/analytics/metrics.dart';
-import '../../../../shared/memory/adapted_hep_data.dart';
+import '../../../../shared/memory/adapted_heap_data.dart';
 import '../../../../shared/memory/class_name.dart';
 import '../../../../shared/primitives/utils.dart';
 import '../primitives/memory_utils.dart';

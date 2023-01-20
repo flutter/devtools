@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '../../../../shared/memory/adapted_hep_data.dart';
+import '../../../../shared/memory/adapted_heap_data.dart';
 
 /// Sets the field retainer and retainedSize for each object in the [heap], that
 /// has retaining path to the root.
