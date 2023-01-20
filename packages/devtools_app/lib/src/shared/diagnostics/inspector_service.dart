@@ -22,7 +22,7 @@ import '../primitives/auto_dispose.dart';
 import '../primitives/utils.dart';
 import 'diagnostics_node.dart';
 import 'primitives/instance_ref.dart';
-import 'source_location.dart';
+import 'primitives/source_location.dart';
 
 const inspectorLibraryUri = 'package:flutter/src/widgets/widget_inspector.dart';
 

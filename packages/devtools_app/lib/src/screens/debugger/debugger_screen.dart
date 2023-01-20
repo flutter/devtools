@@ -13,7 +13,7 @@ import 'package:vm_service/vm_service.dart';
 import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/common_widgets.dart';
-import '../../shared/diagnostics/source_location.dart';
+import '../../shared/diagnostics/primitives/source_location.dart';
 import '../../shared/flex_split_column.dart';
 import '../../shared/globals.dart';
 import '../../shared/primitives/auto_dispose.dart';
