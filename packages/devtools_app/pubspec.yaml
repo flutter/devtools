@@ -188,5 +188,3 @@ dependency_overrides:
     path: ../devtools_shared
   devtools_test:
     path: ../devtools_test
-  leak_tracker:
-    path: ../../../leak_tracker
