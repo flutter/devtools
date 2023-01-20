@@ -12,7 +12,7 @@ import '../../../../shared/primitives/utils.dart';
 import '../../../../shared/table/table_data.dart';
 import '../../../profiler/cpu_profile_model.dart';
 import '../../../profiler/cpu_profile_transformer.dart';
-import '../../shared/primitives/class_name.dart';
+import '../../../../shared/memory/class_name.dart';
 
 // TODO(bkonyi): make compatible with ClassHeapDetailStats for serialization /
 // deserialization support.

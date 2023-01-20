@@ -6,7 +6,7 @@ import 'package:devtools_app/src/screens/memory/memory_controller.dart';
 import 'package:devtools_app/src/screens/memory/memory_screen.dart';
 import 'package:devtools_app/src/screens/memory/panes/diff/controller/diff_pane_controller.dart';
 import 'package:devtools_app/src/screens/memory/shared/heap/model.dart';
-import 'package:devtools_app/src/screens/memory/shared/primitives/class_name.dart';
+import 'package:devtools_app/src/shared/memory/class_name.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/shared/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/shared/config_specific/import_export/import_export.dart';

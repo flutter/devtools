@@ -8,7 +8,7 @@ import '../../../../shared/analytics/analytics.dart' as ga;
 import '../../../../shared/analytics/constants.dart' as gac;
 import '../../../../shared/analytics/metrics.dart';
 import '../../../../shared/primitives/utils.dart';
-import '../primitives/class_name.dart';
+import '../../../../shared/memory/class_name.dart';
 import '../primitives/memory_utils.dart';
 
 /// Names for json fields.

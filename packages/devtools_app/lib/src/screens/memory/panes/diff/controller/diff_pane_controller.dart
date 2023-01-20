@@ -17,7 +17,7 @@ import '../../../../../shared/primitives/utils.dart';
 import '../../../shared/heap/class_filter.dart';
 import '../../../shared/heap/heap.dart';
 import '../../../shared/heap/model.dart';
-import '../../../shared/primitives/class_name.dart';
+import '../../../../../shared/memory/class_name.dart';
 import '../../../shared/primitives/memory_utils.dart';
 import 'heap_diff.dart';
 import 'item_controller.dart';

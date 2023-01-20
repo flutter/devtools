@@ -14,7 +14,7 @@ import '../../../../../shared/dialogs.dart';
 import '../../../../../shared/theme.dart';
 import '../../../../../shared/utils.dart';
 import '../../../shared/heap/class_filter.dart';
-import '../../../shared/primitives/class_name.dart';
+import '../../../../../shared/memory/class_name.dart';
 
 String _adaptRootPackageForFilter(String? rootPackage) {
   if (rootPackage == null || rootPackage.isEmpty) return '';

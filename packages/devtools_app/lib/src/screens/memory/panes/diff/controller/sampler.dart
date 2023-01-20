@@ -7,7 +7,7 @@ import 'package:vm_service/vm_service.dart';
 import '../../../../../shared/globals.dart';
 import '../../../shared/heap/heap.dart';
 import '../../../shared/heap/model.dart';
-import '../../../shared/primitives/class_name.dart';
+import '../../../../../shared/memory/class_name.dart';
 import '../../../shared/primitives/instance_set_view.dart';
 
 class HeapClassSampler extends ClassSampler {
