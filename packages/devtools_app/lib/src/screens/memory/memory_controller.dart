@@ -40,9 +40,9 @@ class OfflineFileException implements Exception {
   String toString() => message;
 }
 
-class MemoryChildControllers {
+class MemoryFeatureControllers {
   /// [diffPaneController] is passed for testability.
-  MemoryChildControllers(DiffPaneController? diffPaneController) {
+  MemoryFeatureControllers(DiffPaneController? diffPaneController) {
     diff = diffPaneController ?? DiffPaneController(SnapshotTaker());
   }
 
@@ -78,7 +78,7 @@ class MemoryController extends DisposableController
     memoryTimeline = MemoryTimeline(offline);
     memoryLog = _MemoryLog(this);
 
-    children = MemoryChildControllers(diffPaneController);
+    children = MemoryFeatureControllers(diffPaneController);
 
     // Update the chart when the memorySource changes.
     addAutoDisposeListener(memorySourceNotifier, () async {
@@ -95,7 +95,7 @@ class MemoryController extends DisposableController
   }
 
   /// Sub-controllers of memory controller.
-  late final MemoryChildControllers children;
+  late final MemoryFeatureControllers children;
 
   /// Index of the selected feature tab.
   ///
