@@ -17,7 +17,7 @@ import 'diagnostics_node.dart';
 import 'inspector_service.dart';
 import 'variable_factory.dart';
 
-Future<void> addExpandableChildren(
+Future<void> _addExpandableChildren(
   DartObjectNode variable,
   List<DartObjectNode> children, {
   bool expandAll = false,
@@ -58,7 +58,7 @@ Future<void> buildVariablesTree(
       List<RemoteDiagnosticsNode>? properties,
     ) async {
       if (properties == null || service == null || isolateRef == null) return;
-      await addExpandableChildren(
+      await _addExpandableChildren(
         variable,
         await createVariablesForDiagnostics(
           service,
@@ -246,7 +246,7 @@ Future<void> buildVariablesTree(
       );
       variable.addChild(childrenNode);
       if (service != null && isolateRef != null) {
-        await addExpandableChildren(
+        await _addExpandableChildren(
           childrenNode,
           await createVariablesForDiagnostics(
             service,
