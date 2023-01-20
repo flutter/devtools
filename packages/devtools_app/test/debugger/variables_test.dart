@@ -5,7 +5,7 @@
 import 'package:devtools_app/src/shared/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/shared/console/widgets/expandable_variable.dart';
 import 'package:devtools_app/src/shared/globals.dart';
-import 'package:devtools_app/src/shared/object_tree.dart';
+import 'package:devtools_app/src/shared/diagnostics/object_tree.dart';
 import 'package:devtools_app/src/shared/tree.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter_test/flutter_test.dart';

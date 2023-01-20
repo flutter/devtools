@@ -9,7 +9,7 @@ import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/shared/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_app/src/shared/notifications.dart';
-import 'package:devtools_app/src/shared/object_tree.dart';
+import 'package:devtools_app/src/shared/diagnostics/object_tree.dart';
 import 'package:devtools_app/src/shared/scripts/script_manager.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';

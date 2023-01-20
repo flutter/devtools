@@ -12,7 +12,7 @@ import 'package:flutter/material.dart' hide Stack;
 
 import '../../shared/console/widgets/display_provider.dart';
 import '../../shared/globals.dart';
-import '../../shared/object_tree.dart';
+import '../../shared/diagnostics/object_tree.dart';
 import '../../shared/tree.dart';
 
 class Variables extends StatelessWidget {

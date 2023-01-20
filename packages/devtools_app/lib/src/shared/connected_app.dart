@@ -13,7 +13,7 @@ import 'config_specific/logger/logger.dart' as logger;
 import 'console/primitives/eval_history.dart';
 import 'eval_on_dart_library.dart';
 import 'globals.dart';
-import 'object_tree.dart';
+import 'diagnostics/object_tree.dart';
 import 'primitives/auto_dispose.dart';
 import 'title.dart';
 import 'version.dart';

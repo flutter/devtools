@@ -74,7 +74,7 @@ export 'src/shared/error_badge_manager.dart';
 export 'src/shared/globals.dart';
 export 'src/shared/http/http_request_data.dart';
 export 'src/shared/notifications.dart';
-export 'src/shared/object_tree.dart';
+export 'src/shared/diagnostics/object_tree.dart';
 export 'src/shared/preferences.dart';
 export 'src/shared/primitives/auto_dispose.dart';
 export 'src/shared/primitives/listenable.dart';

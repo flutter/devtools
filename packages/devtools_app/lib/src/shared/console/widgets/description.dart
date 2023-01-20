@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import '../../diagnostics/diagnostics_node.dart';
 import '../../diagnostics_text_styles.dart';
 import '../../globals.dart';
-import '../../object_tree.dart';
+import '../../diagnostics/object_tree.dart';
 import '../../primitives/utils.dart';
 import '../../theme.dart';
 import '../../ui/hover.dart';

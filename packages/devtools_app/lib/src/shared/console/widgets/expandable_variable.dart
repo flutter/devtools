@@ -6,7 +6,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart' hide Stack;
 
-import '../../../shared/object_tree.dart';
+import '../../diagnostics/object_tree.dart';
 import '../../../shared/primitives/listenable.dart';
 import '../../../shared/tree.dart';
 import 'display_provider.dart';
