@@ -4,22 +4,30 @@ FROM ubuntu:18.04
 RUN apt update && apt install -y curl git unzip xz-utils zip libglu1-mesa openjdk-8-jdk wget
 
 # Set up new user
-# RUN useradd -ms /bin/bash developer
-# USER developer
+RUN useradd -ms /bin/bash developer
+
+ENV DEVELOPER=/home/developer
+ENV DEVTOOLS=${DEVELOPER}/devtools
+ENV BIN=${DEVELOPER}/bin
+
+WORKDIR /tmp
+
+#TODO(???): pass in driver and chrome urls to dockerfile so if they change we can reload them 
+RUN wget https://chromedriver.storage.googleapis.com/109.0.5414.74/chromedriver_linux64.zip
+RUN unzip chromedriver_linux64.zip
+RUN mkdir -p ${BIN}
+RUN mv chromedriver ${BIN}/
+ENV PATH "${BIN}:$PATH"
+
+
+RUN wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+RUN apt-get -y --fix-broken install ./google-chrome-stable_current_amd64.deb
+
+
 WORKDIR /home/developer
 
-# Prepare Android directories and system variables
-# RUN mkdir -p Android/sdk
-# ENV ANDROID_SDK_ROOT /home/developer/Android/sdk
-# RUN mkdir -p .android && touch .android/repositories.cfg
 
-# # Set up Android SDK
-# RUN wget -O sdk-tools.zip https://dl.google.com/android/repository/sdk-tools-linux-4333796.zip
-# RUN unzip sdk-tools.zip && rm sdk-tools.zip
-# RUN mv tools Android/sdk/tools
-# RUN cd Android/sdk/tools/bin && yes | ./sdkmanager --licenses
-# RUN cd Android/sdk/tools/bin && ./sdkmanager "build-tools;29.0.2" "patcher;v4" "platform-tools" "platforms;android-29" "sources;android-29"
-# ENV PATH "$PATH:/home/developer/Android/sdk/platform-tools"
+USER developer
 
 # Download Flutter SDK
 RUN git clone https://github.com/flutter/flutter.git
@@ -29,21 +37,44 @@ ENV PATH "$PATH:/home/developer/flutter/bin"
 RUN flutter doctor
 
 
-# DEVTOOLS SETUP
-COPY /packages/devtools_app/pubspec.yaml ./packages/devtools_app/pubspec.yaml
-COPY /packages/devtools_test/pubspec.yaml ./packages/devtools_test/pubspec.yaml
-COPY /packages/devtools_shared/pubspec.yaml ./packages/devtools_shared/pubspec.yaml
-COPY /third_party ./third_party
+WORKDIR ${DEVTOOLS}
 
-WORKDIR /home/developer/packages/devtools_app
+# DEVTOOLS SETUP
+COPY --chown=developer:developer packages/devtools_app/pubspec.yaml ./packages/devtools_app/pubspec.yaml
+COPY --chown=developer:developer packages/devtools_test/pubspec.yaml ./packages/devtools_test/pubspec.yaml
+COPY --chown=developer:developer packages/devtools_shared/pubspec.yaml ./packages/devtools_shared/pubspec.yaml
+COPY --chown=developer:developer tool/pubspec.yaml ./tool/pubspec.yaml
+COPY --chown=developer:developer third_party ./third_party
+# TODO WORKDIRS STILL OWNED BY ROOT
+WORKDIR ${DEVTOOLS}/packages/devtools_app
 RUN flutter pub get
 
-# WORKDIR ./packages/devtools_app
+WORKDIR ${DEVTOOLS}/packages/devtools_test
+RUN flutter pub get
 
-# RUN flutter pub get
-# WORKDIR /packages/devtools_app
+WORKDIR ${DEVTOOLS}/packages/devtools_shared
+RUN flutter pub get
 
-# RUN flutter pub get
+WORKDIR ${DEVTOOLS}/tool
+RUN flutter pub get
 
-COPY . .
+WORKDIR ${DEVTOOLS}
+
+
+COPY --chown=developer:developer . .
+
+# TODO Move this to before COPY . .
+
+# RUN ./tool/generate_code.sh
+
+# RUN chmod -R +wrx ${DEVELOPER}
+
+# To monday self. run flutter drive on it's own to see if that works now.
+
+
+
+
+
+
+
 

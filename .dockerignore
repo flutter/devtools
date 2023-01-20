@@ -1,2 +1,26 @@
-# .pub
-# .packages
+**/.dart_tool/
+**/.packages
+**/.pub/
+**/pubspec.lock
+
+.idea/
+.data_dir/
+
+case_study/
+# .DS_Store is a file that stores custom attributes of its containing folder,
+# such as the position of icons or the choice of a background image.
+.DS_Store
+
+# Generated files not intended to be checked in to version control
+**/macos
+**/.flutter-plugins
+**/.flutter-plugins-dependencies
+flutter_export_environment.sh
+Podfile
+Podfile.lock
+**/generated/not_namespaced_r_class_sources/
+**/build/
+packages/devtools_test/lib/src/mocks/generated.mocks.dart
+**/*.stager_app.dart
+**/test/**/failures/
+*.dill
