@@ -25,13 +25,11 @@ Widget createDashWidget(Color color) {
 }
 
 Widget createSolidLine(Color color) {
-  return Padding(
-    padding: const EdgeInsets.symmetric(horizontal: 1.0),
-    child: Container(
-      height: 6,
-      width: 20,
-      color: color,
-    ),
+  return Container(
+    height: 6,
+    width: 20,
+    color: color,
+    margin: const EdgeInsets.symmetric(horizontal: 1.0),
   );
 }
 

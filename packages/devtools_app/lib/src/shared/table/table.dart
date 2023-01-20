@@ -142,7 +142,7 @@ class FlatTable<T> extends StatefulWidget {
   /// This notifier's value will be updated when a row of the table is selected.
   final ValueNotifier<T?> selectionNotifier;
 
-  /// Whether the verical scroll position for this table should be preserved for
+  /// Whether the vertical scroll position for this table should be preserved for
   /// each data set.
   ///
   /// This should be set to true if the table is not disposed and completely
@@ -165,6 +165,8 @@ class FlatTableState<T> extends State<FlatTable<T>> with AutoDisposeMixin {
     addAutoDisposeListener(tableController.tableData);
 
     if (tableController.pinBehavior != FlatTablePinBehavior.none &&
+        // TODO(jacobr): this lint appears to be firing incorrectly.
+        // ignore: avoid-unnecessary-type-assertions
         this is! State<FlatTable<PinnableListEntry>>) {
       throw StateError('$T must implement PinnableListEntry');
     }
@@ -247,6 +249,9 @@ class FlatTableState<T> extends State<FlatTable<T>> with AutoDisposeMixin {
   }
 
   Widget _buildRow({
+    // Unused parameters doesn't understand that this parameter is required to
+    // match the signature for the rowBuilder Function.
+    // ignore: avoid-unused-parameters
     required BuildContext context,
     required LinkedScrollControllerGroup linkedScrollControllerGroup,
     required int index,
@@ -397,7 +402,7 @@ class TreeTable<T extends TreeNode<T>> extends StatefulWidget {
   /// Whether the data roots in this table should be automatically expanded.
   final bool autoExpandRoots;
 
-  /// Whether the verical scroll position for this table should be preserved for
+  /// Whether the vertical scroll position for this table should be preserved for
   /// each data set.
   ///
   /// This should be set to true if the table is not disposed and completely
@@ -599,6 +604,9 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
     required LinkedScrollControllerGroup linkedScrollControllerGroup,
     required int index,
     required List<double> columnWidths,
+    // Unused parameters doesn't understand that this parameter is required to
+    // match the signature for the rowBuilder Function.
+    // ignore: avoid-unused-parameters
     required bool isPinned,
   }) {
     Widget rowForNode(T node) {
@@ -646,7 +654,7 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
       LogicalKeyboardKey.arrowDown,
       LogicalKeyboardKey.arrowUp,
       LogicalKeyboardKey.arrowLeft,
-      LogicalKeyboardKey.arrowRight
+      LogicalKeyboardKey.arrowRight,
     ].contains(event.logicalKey)) return KeyEventResult.ignored;
 
     // If there is no selected node, choose the first one.
@@ -942,6 +950,8 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
     );
   }
 
+  List<T> get pinnedData => widget.tableController.pinnedData;
+
   @override
   Widget build(BuildContext context) {
     // If we're at the end already, scroll to expose the new content.
@@ -994,11 +1004,10 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
                 secondarySortColumn: widget.tableController.secondarySortColumn,
                 onSortChanged: widget.tableController.sortDataAndNotify,
               ),
-              if (widget.tableController.pinnedData.isNotEmpty) ...[
+              if (pinnedData.isNotEmpty) ...[
                 SizedBox(
                   height: min(
-                    widget.rowItemExtent! *
-                        widget.tableController.pinnedData.length,
+                    widget.rowItemExtent! * pinnedData.length,
                     constraints.maxHeight / 2,
                   ),
                   child: Scrollbar(
@@ -1006,7 +1015,7 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
                     controller: pinnedScrollController,
                     child: ListView.builder(
                       controller: pinnedScrollController,
-                      itemCount: widget.tableController.pinnedData.length,
+                      itemCount: pinnedData.length,
                       itemExtent: widget.rowItemExtent,
                       itemBuilder: (context, index) => _buildItem(
                         context,
@@ -1069,6 +1078,19 @@ abstract class ColumnRenderer<T> {
     bool isRowSelected = false,
     VoidCallback? onPressed,
   });
+}
+
+/// If a [ColumnData] implements this interface, it can override how that column
+/// header is rendered.
+abstract class ColumnHeaderRenderer<T> {
+  /// Render the column header to a [Widget].
+  ///
+  /// This method can return `null` to indicate that the default rendering
+  /// should be used instead.
+  Widget? buildHeader(
+    BuildContext context,
+    Widget Function() defaultHeaderRenderer,
+  );
 }
 
 /// Presents a [node] as a row in a table.
@@ -1423,13 +1445,21 @@ class _TableRowState<T> extends State<TableRow<T>>
       final theme = Theme.of(context);
       final node = widget.node;
       if (widget.rowType == _TableRowType.columnHeader) {
-        content = _ColumnHeader(
-          column: column,
-          isSortColumn: column == widget.sortColumn,
-          secondarySortColumn: widget.secondarySortColumn,
-          sortDirection: widget.sortDirection!,
-          onSortChanged: widget.onSortChanged,
-        );
+        Widget defaultHeaderRenderer() => _ColumnHeader(
+              column: column,
+              isSortColumn: column == widget.sortColumn,
+              secondarySortColumn: widget.secondarySortColumn,
+              sortDirection: widget.sortDirection!,
+              onSortChanged: widget.onSortChanged,
+            );
+
+        if (column is ColumnHeaderRenderer) {
+          content = (column as ColumnHeaderRenderer)
+              .buildHeader(context, defaultHeaderRenderer);
+        }
+        // If ColumnHeaderRenderer.build returns null, fall back to the default
+        // rendering.
+        content ??= defaultHeaderRenderer();
       } else if (node != null) {
         // TODO(kenz): clean up and pull all this code into _ColumnDataRow
         // widget class.
@@ -1455,7 +1485,7 @@ class _TableRowState<T> extends State<TableRow<T>>
                   style: const TextStyle(
                     fontStyle: FontStyle.italic,
                   ),
-                )
+                ),
             ],
             style: contentTextStyle(column),
           ),

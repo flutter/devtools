@@ -337,7 +337,7 @@ final togglePlatformMode = ServiceExtensionDescription<String>(
     'Platform: Android',
     'Platform: Fuchsia',
     'Platform: MacOS',
-    'Platform: Linux'
+    'Platform: Linux',
   ],
   gaScreenName: gac.inspector,
   gaItem: gac.togglePlatform,

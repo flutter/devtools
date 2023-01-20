@@ -28,6 +28,7 @@ class VmScriptDisplay extends StatelessWidget {
       script: scriptRef,
       object: scriptRef,
       child: VmObjectDisplayBasicLayout(
+        controller: controller,
         object: script,
         generalDataRows: _scriptDataRows(script),
       ),

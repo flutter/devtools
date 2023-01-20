@@ -13,6 +13,7 @@ import 'package:vm_service/vm_service.dart';
 import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/common_widgets.dart';
+import '../../shared/diagnostics/source_location.dart';
 import '../../shared/flex_split_column.dart';
 import '../../shared/globals.dart';
 import '../../shared/primitives/auto_dispose.dart';
@@ -138,11 +139,13 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
               child: ValueListenableBuilder<bool>(
                 valueListenable: codeViewController.fileExplorerVisible,
                 builder: (context, visible, child) {
+                  // Conditional expression
+                  // ignore: prefer-conditional-expression
                   if (visible) {
                     // TODO(devoncarew): Animate this opening and closing.
                     return Split(
                       axis: Axis.horizontal,
-                      initialFractions: const [0.70, 0.30],
+                      initialFractions: const [0.7, 0.3],
                       children: [
                         child!,
                         OutlineDecoration(
@@ -184,7 +187,9 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
                       debuggerController: controller,
                       scriptRef: scriptRef,
                       parsedScript: parsedScript,
-                      onSelected: breakpointManager.toggleBreakpoint,
+                      onSelected: (script, line) => unawaited(
+                        breakpointManager.toggleBreakpoint(script, line),
+                      ),
                     );
                   },
                 ),
@@ -211,7 +216,7 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
       builder: (context, constraints) {
         return FlexSplitColumn(
           totalHeight: constraints.maxHeight,
-          initialFractions: const [0.40, 0.40, 0.20],
+          initialFractions: const [0.4, 0.4, 0.2],
           minSizes: const [0.0, 0.0, 0.0],
           headers: <PreferredSizeWidget>[
             AreaPaneHeader(
@@ -264,7 +269,7 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
               child: ToolbarAction(
                 icon: Icons.delete,
                 onPressed: breakpoints.isNotEmpty
-                    ? breakpointManager.clearBreakpoints
+                    ? () => unawaited(breakpointManager.clearBreakpoints())
                     : null,
               ),
             ),
@@ -355,21 +360,33 @@ class DebuggerStatus extends StatefulWidget {
 class _DebuggerStatusState extends State<DebuggerStatus> with AutoDisposeMixin {
   String _status = '';
 
+  bool get _isPaused => serviceManager.isMainIsolatePaused;
+
   @override
   void initState() {
     super.initState();
 
-    addAutoDisposeListener(widget.controller.isPaused, _updateStatus);
-
-    _updateStatus();
+    _updateStatusOnPause();
+    unawaited(_updateStatus());
   }
 
   @override
   void didUpdateWidget(DebuggerStatus oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    // todo: should we check that widget.controller != oldWidget.controller?
-    addAutoDisposeListener(widget.controller.isPaused, _updateStatus);
+    if (widget.controller == oldWidget.controller) return;
+
+    cancelListeners();
+    _updateStatusOnPause();
+  }
+
+  void _updateStatusOnPause() {
+    addAutoDisposeListener(
+      serviceManager.isolateManager.mainIsolateState!.isPaused,
+      () => unawaited(
+        _updateStatus(),
+      ),
+    );
   }
 
   @override
@@ -381,7 +398,7 @@ class _DebuggerStatusState extends State<DebuggerStatus> with AutoDisposeMixin {
     );
   }
 
-  void _updateStatus() async {
+  Future<void> _updateStatus() async {
     final status = await _computeStatus();
     if (status != _status) {
       setState(() {
@@ -391,9 +408,7 @@ class _DebuggerStatusState extends State<DebuggerStatus> with AutoDisposeMixin {
   }
 
   Future<String> _computeStatus() async {
-    final paused = widget.controller.isPaused.value;
-
-    if (!paused) {
+    if (!_isPaused) {
       return 'running';
     }
 
@@ -402,14 +417,15 @@ class _DebuggerStatusState extends State<DebuggerStatus> with AutoDisposeMixin {
     final reason =
         event.kind == EventKind.kPauseException ? ' on exception' : '';
 
-    final scriptUri = frame?.location?.script?.uri;
+    final location = frame?.location;
+    final scriptUri = location?.script?.uri;
     if (scriptUri == null) {
       return 'paused$reason';
     }
 
     final fileName = ' at ' + scriptUri.split('/').last;
-    final tokenPos = frame?.location?.tokenPos;
-    final scriptRef = frame?.location?.script;
+    final tokenPos = location?.tokenPos;
+    final scriptRef = location?.script;
     if (tokenPos == null || scriptRef == null) {
       return 'paused$reason$fileName';
     }
@@ -431,20 +447,21 @@ class _FloatingDebuggerControlsState extends State<FloatingDebuggerControls>
     with
         AutoDisposeMixin,
         ProvidedControllerMixin<DebuggerController, FloatingDebuggerControls> {
-  late bool paused;
-
   late double controlHeight;
+
+  bool get _isPaused => serviceManager.isMainIsolatePaused;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (!initController()) return;
-    paused = controller.isPaused.value;
-    controlHeight = paused ? defaultButtonHeight : 0.0;
-    addAutoDisposeListener(controller.isPaused, () {
+    cancelListeners();
+
+    controlHeight = _isPaused ? defaultButtonHeight : 0.0;
+    addAutoDisposeListener(
+        serviceManager.isolateManager.mainIsolateState!.isPaused, () {
       setState(() {
-        paused = controller.isPaused.value;
-        if (paused) {
+        if (_isPaused) {
           controlHeight = defaultButtonHeight;
         }
       });
@@ -454,10 +471,10 @@ class _FloatingDebuggerControlsState extends State<FloatingDebuggerControls>
   @override
   Widget build(BuildContext context) {
     return AnimatedOpacity(
-      opacity: paused ? 1.0 : 0.0,
+      opacity: _isPaused ? 1.0 : 0.0,
       duration: longDuration,
       onEnd: () {
-        if (!paused) {
+        if (!_isPaused) {
           setState(() {
             controlHeight = 0.0;
           });

@@ -4,10 +4,9 @@
 
 import 'package:vm_service/vm_service.dart';
 
+import '../../shared/diagnostics/source_location.dart';
 import '../../shared/primitives/trees.dart';
 import '../../shared/ui/search.dart';
-import '../inspector/diagnostics_node.dart';
-import '../inspector/inspector_service.dart';
 
 /// Whether to include properties surfaced through Diagnosticable objects as
 /// part of the generic Debugger view of an object.
@@ -22,37 +21,6 @@ bool includeDiagnosticPropertiesInDebugger = true;
 /// object which might be different from children on fields for the Inspector
 /// summary tree case which has a filtered view of children.
 bool includeDiagnosticChildren = false;
-
-/// A generic [InstanceRef] using either format used by the [InspectorService]
-/// or Dart VM.
-///
-/// Either one or both of [value] and [diagnostic] may be provided. The
-/// `valueRef` getter on the [diagnostic] should refer to the same object as
-/// [instanceRef] although using the [InspectorInstanceRef] scheme.
-/// A [RemoteDiagnosticsNode] is used rather than an [InspectorInstanceRef] as
-/// the additional data provided by [RemoteDiagnosticsNode] is helpful to
-/// correctly display the object and [RemoteDiagnosticsNode] includes a
-/// reference to an [InspectorInstanceRef]. [value] must be a VM service type,
-/// Sentinel, or primitive type.
-class GenericInstanceRef {
-  GenericInstanceRef({
-    required this.isolateRef,
-    this.value,
-    this.diagnostic,
-  });
-
-  final Object? value;
-
-  InstanceRef? get instanceRef =>
-      value is InstanceRef ? value as InstanceRef? : null;
-
-  /// If both [diagnostic] and [instanceRef] are provided, [diagnostic.valueRef]
-  /// must reference the same underlying object just using the
-  /// [InspectorInstanceRef] scheme.
-  final RemoteDiagnosticsNode? diagnostic;
-
-  final IsolateRef? isolateRef;
-}
 
 /// A tuple of a script and an optional location.
 class ScriptLocation {
@@ -77,43 +45,6 @@ class ScriptLocation {
 
   @override
   String toString() => '${scriptRef.uri} $location';
-}
-
-class SourcePosition {
-  const SourcePosition({
-    required this.line,
-    required this.column,
-    this.file,
-    this.tokenPos,
-  });
-
-  factory SourcePosition.calculatePosition(Script script, int tokenPos) {
-    return SourcePosition(
-      line: script.getLineNumberFromTokenPos(tokenPos),
-      column: script.getColumnNumberFromTokenPos(tokenPos),
-      tokenPos: tokenPos,
-    );
-  }
-
-  final String? file;
-  final int? line;
-  final int? column;
-  final int? tokenPos;
-
-  @override
-  bool operator ==(other) {
-    return other is SourcePosition &&
-        other.line == line &&
-        other.column == column &&
-        other.tokenPos == tokenPos;
-  }
-
-  @override
-  int get hashCode =>
-      line != null && column != null ? (line! << 7) ^ column! : super.hashCode;
-
-  @override
-  String toString() => '$line:$column';
 }
 
 class SourceToken with DataSearchStateMixin {
@@ -399,6 +330,7 @@ class FileNode extends TreeNode<FileNode> {
   }
 }
 
+// TODO(jacobr): refactor this code.
 // ignore: avoid_classes_with_only_static_members
 class ScriptRefUtils {
   static String fileName(ScriptRef scriptRef) =>

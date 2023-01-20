@@ -5,14 +5,17 @@
 // This code is directly based on src/io/flutter/inspector/EvalOnDartLibrary.java
 // If you add a method to this class you should also add it to EvalOnDartLibrary.java
 import 'dart:async';
+import 'dart:core' hide Error;
+import 'dart:core' as core;
 import 'dart:math';
 
 import 'package:flutter/foundation.dart';
-import 'package:vm_service/vm_service.dart';
+import 'package:vm_service/vm_service.dart' hide Error;
+import 'package:vm_service/vm_service.dart' as vm_service;
 
-import '../screens/inspector/inspector_service.dart';
 import '../service/vm_service_wrapper.dart';
 import 'config_specific/logger/logger.dart';
+import 'diagnostics/inspector_service.dart';
 import 'globals.dart';
 import 'primitives/auto_dispose.dart';
 
@@ -106,7 +109,7 @@ class EvalOnDartLibrary extends DisposableController
 
     try {
       final Isolate? isolate =
-          await serviceManager.isolateManager.getIsolateCached(isolateRef);
+          await serviceManager.isolateManager.isolateState(isolateRef).isolate;
       if (_currentRequestId != requestId) {
         // The initialize request is obsolete.
         return;
@@ -251,18 +254,15 @@ class EvalOnDartLibrary extends DisposableController
     return null;
   }
 
-  void _handleError(dynamic e, StackTrace stack) {
+  void _handleError(Object e, StackTrace stack) {
     if (_disposed) return;
 
-    switch (e.runtimeType) {
-      case RPCError:
-        log('RPCError: $e', LogLevel.error);
-        break;
-      case Error:
-        log('${e.kind}: ${e.tooltip}', LogLevel.error);
-        break;
-      default:
-        log('Unrecognized error: $e', LogLevel.error);
+    if (e is RPCError) {
+      log('RPCError: $e', LogLevel.error);
+    } else if (e is vm_service.Error) {
+      log('${e.kind}: ${e.message}', LogLevel.error);
+    } else {
+      log('Unrecognized error: $e', LogLevel.error);
     }
     log(stack.toString(), LogLevel.error);
   }
@@ -521,7 +521,7 @@ class EvalOnDartLibrary extends DisposableController
       /// It also removes the need for using `!` once the devtool is migrated to NNBD
       if (isAlive?.disposed ?? true) {
         // throw before _handleError as we don't want to log cancellations.
-        throw CancelledException();
+        core.Error.throwWithStackTrace(CancelledException(), stack);
       }
 
       _handleError(err, stack);

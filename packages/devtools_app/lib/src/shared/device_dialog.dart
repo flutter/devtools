@@ -117,7 +117,7 @@ class _VMFlagsDialogState extends State<VMFlagsDialog> with AutoDisposeMixin {
     super.initState();
 
     filterController = TextEditingController();
-    filterController.addListener(() {
+    addAutoDisposeListener(filterController, () {
       setState(() {
         _refilter();
       });

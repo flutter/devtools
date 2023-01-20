@@ -321,7 +321,7 @@ class AxisScale {
   /// Unit for the label (exponent) e.g., 6 = 10^6
   late double labelUnitExponent;
 
-  /// Number of lables.
+  /// Number of labels.
   late double labelTicks;
 
   void _calculate() {
@@ -349,7 +349,7 @@ class AxisScale {
   Map _exponentFraction(double range) {
     if (range == 0) return {};
 
-    final exponent = (log10(range)).floor().toDouble();
+    final exponent = log10(range).floor().toDouble();
     final fraction = range / pow(10, exponent);
 
     return {'exponent': exponent, 'fraction': fraction};
@@ -374,7 +374,7 @@ class AxisScale {
     double fraction; // fractional part of range
     late double niceFraction; // nice, rounded fraction
 
-    exponent = (log10(range)).floor().toDouble();
+    exponent = log10(range).floor().toDouble();
     fraction = range / pow(10, exponent);
 
     if (round) {

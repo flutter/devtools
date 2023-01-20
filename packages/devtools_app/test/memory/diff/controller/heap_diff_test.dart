@@ -4,9 +4,9 @@
 
 import 'package:devtools_app/src/screens/memory/panes/diff/controller/heap_diff.dart';
 import 'package:devtools_app/src/screens/memory/shared/heap/heap.dart';
-import 'package:devtools_app/src/screens/memory/shared/heap/model.dart';
 import 'package:devtools_app/src/screens/memory/shared/heap/spanning_tree.dart';
-import 'package:devtools_app/src/screens/memory/shared/primitives/class_name.dart';
+import 'package:devtools_app/src/shared/memory/adapted_heap_data.dart';
+import 'package:devtools_app/src/shared/memory/class_name.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -80,7 +80,7 @@ SingleClassStats _createClassStats(List<AdaptedHeapObject> instances) {
   final heap = AdaptedHeapData(objects, rootIndex: 0);
   buildSpanningTree(heap);
 
-  final result = SingleClassStats(instances.first.heapClass);
+  final result = SingleClassStats(heapClass: instances.first.heapClass);
   for (var index in indexes) {
     result.countInstance(heap, index);
   }

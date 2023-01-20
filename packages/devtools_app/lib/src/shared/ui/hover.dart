@@ -228,7 +228,7 @@ class HoverCard {
 
 /// Ensures that only one [HoverCard] is ever displayed at a time.
 class HoverCardController {
-  /// The card that is currenty being displayed.
+  /// The card that is currently being displayed.
   HoverCard? _currentHoverCard;
 
   /// Sets [hoverCard] as the most recently displayed [HoverCard].

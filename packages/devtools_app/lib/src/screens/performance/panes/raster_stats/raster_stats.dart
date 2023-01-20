@@ -154,7 +154,7 @@ class LayerSnapshotTable extends StatelessWidget {
   static final List<ColumnData<LayerSnapshot>> _columns = [
     _layerColumn,
     _timeColumn,
-    _percentageColumn
+    _percentageColumn,
   ];
 
   @override

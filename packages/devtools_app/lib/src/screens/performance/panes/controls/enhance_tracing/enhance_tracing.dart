@@ -66,7 +66,7 @@ class EnhanceTracingButton extends StatelessWidget {
                   'to reproduce activity in your app to see the enhanced '
                   'tracing in the timeline.',
               style: textStyle,
-            )
+            ),
           ],
         ),
       ),
@@ -206,6 +206,8 @@ class _TrackWidgetBuildsSettingState extends State<TrackWidgetBuildsSetting>
 
     assert(!(trackAllWidgets && trackUserWidgets));
     _tracked.value = trackUserWidgets || trackAllWidgets;
+    // Double nested conditinoal expressions are hard to read.
+    // ignore: prefer-conditional-expression
     if (_tracked.value) {
       _selectedScope.value = trackUserWidgets
           ? TrackWidgetBuildsScope.userCreated
@@ -306,7 +308,7 @@ class TrackWidgetBuildsCheckbox extends StatelessWidget {
             extension.extension,
             enabled: false,
             value: extension.disabledValue,
-          )
+          ),
       ]);
     }
   }

@@ -11,13 +11,16 @@ import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:provider/provider.dart';
 
 import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/collapsible_mixin.dart';
 import '../../shared/common_widgets.dart';
 import '../../shared/config_specific/logger/logger.dart';
+import '../../shared/console/eval/inspector_tree.dart';
+import '../../shared/console/widgets/description.dart';
+import '../../shared/diagnostics/diagnostics_node.dart';
+import '../../shared/diagnostics_text_styles.dart';
 import '../../shared/error_badge_manager.dart';
 import '../../shared/globals.dart';
 import '../../shared/primitives/auto_dispose.dart';
@@ -27,14 +30,9 @@ import '../../shared/ui/colors.dart';
 import '../../shared/ui/search.dart';
 import '../../shared/ui/utils.dart';
 import '../../shared/utils.dart';
-import '../debugger/debugger_controller.dart';
-import 'diagnostics.dart';
-import 'diagnostics_node.dart';
 import 'inspector_breadcrumbs.dart';
 import 'inspector_controller.dart';
 import 'inspector_screen.dart';
-import 'inspector_tree.dart';
-import 'primitives/inspector_text_styles.dart' as inspector_text_styles;
 
 /// Presents a [TreeNode].
 class _InspectorTreeRowWidget extends StatefulWidget {
@@ -47,14 +45,12 @@ class _InspectorTreeRowWidget extends StatefulWidget {
     this.error,
     required this.scrollControllerX,
     required this.viewportWidth,
-    required this.debuggerController,
   }) : super(key: key);
 
   final _InspectorTreeState inspectorTreeState;
 
   InspectorTreeNode get node => row.node;
   final InspectorTreeRow row;
-  final DebuggerController debuggerController;
   final ScrollController scrollControllerX;
   final double viewportWidth;
 
@@ -83,7 +79,6 @@ class _InspectorTreeRowState extends State<_InspectorTreeRowWidget>
         onToggle: () {
           setExpanded(!isExpanded);
         },
-        debuggerController: widget.debuggerController,
       ),
     );
   }
@@ -763,8 +758,6 @@ class _InspectorTreeState extends State<InspectorTree>
   AnimationController? _constraintDisplayController;
   late FocusNode _focusNode;
 
-  late DebuggerController _debuggerController;
-
   /// When autoscrolling, the number of rows to pad the target location with.
   static const int _scrollPadCount = 3;
 
@@ -782,7 +775,7 @@ class _InspectorTreeState extends State<InspectorTree>
     autoDisposeFocusNode(_focusNode);
 
     callOnceWhenReady(
-      trigger: serviceManager.isolateManager.mainIsolateDebuggerState!.isPaused,
+      trigger: serviceManager.isolateManager.mainIsolateState!.isPaused,
       callback: _bindToController,
       readyWhen: (triggerValue) => triggerValue == false,
     );
@@ -791,7 +784,6 @@ class _InspectorTreeState extends State<InspectorTree>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _debuggerController = Provider.of<DebuggerController>(context);
     initController();
   }
 
@@ -1049,7 +1041,6 @@ class _InspectorTreeState extends State<InspectorTree>
                                     inspectorRef != null
                                 ? widget.widgetErrors![inspectorRef]
                                 : null,
-                            debuggerController: _debuggerController,
                           );
                         },
                         childCount: treeControllerLocal.numRows + 1,
@@ -1172,12 +1163,10 @@ class InspectorRowContent extends StatelessWidget {
     this.error,
     required this.scrollControllerX,
     required this.viewportWidth,
-    required this.debuggerController,
   });
 
   final InspectorTreeRow row;
   final InspectorTreeController controller;
-  final DebuggerController debuggerController;
   final VoidCallback onToggle;
   final Animation<double> expandArrowAnimation;
   final ScrollController scrollControllerX;
@@ -1254,10 +1243,9 @@ class InspectorRowContent extends StatelessWidget {
                           isSelected: row.isSelected,
                           searchValue: searchValue,
                           errorText: error?.errorMessage,
-                          debuggerController: debuggerController,
                           nodeDescriptionHighlightStyle:
                               searchValue.isEmpty || !row.isSearchMatch
-                                  ? inspector_text_styles.regular
+                                  ? DiagnosticsTextStyles.regular
                                   : row.isSelected
                                       ? theme.searchMatchHighlightStyleFocused
                                       : theme.searchMatchHighlightStyle,

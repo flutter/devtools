@@ -74,7 +74,7 @@ void main() {
       expect(find.text('fooScript.dart:10:4'), findsOneWidget);
       expect(find.text('Observed types not found'), findsOneWidget);
       expect(find.text('Static Value:'), findsOneWidget);
-      expect(find.text('FooNumberType: 100'), findsOneWidget);
+      expect(find.text('100'), findsOneWidget);
 
       expect(find.byType(RequestableSizeWidget), findsNWidgets(2));
 
@@ -83,22 +83,25 @@ void main() {
       expect(find.byType(InboundReferencesWidget), findsOneWidget);
     });
 
-    testWidgetsWithWindowSize('observed type single - nullable', windowSize,
-        (WidgetTester tester) async {
-      when(mockFieldObject.guardClass).thenReturn(testClass);
-      when(mockFieldObject.guardNullable).thenReturn(true);
-      when(mockFieldObject.guardClassKind).thenReturn(GuardClassKind.single);
+    testWidgetsWithWindowSize(
+      'observed type single - nullable',
+      windowSize,
+      (WidgetTester tester) async {
+        when(mockFieldObject.guardClass).thenReturn(testClass);
+        when(mockFieldObject.guardNullable).thenReturn(true);
+        when(mockFieldObject.guardClassKind).thenReturn(GuardClassKind.single);
 
-      await tester.pumpWidget(
-        wrap(
-          VmFieldDisplay(
-            field: mockFieldObject,
-            controller: ObjectInspectorViewController(),
+        await tester.pumpWidget(
+          wrap(
+            VmFieldDisplay(
+              field: mockFieldObject,
+              controller: ObjectInspectorViewController(),
+            ),
           ),
-        ),
-      );
-      expect(find.text('FooClass - null observed'), findsOneWidget);
-    });
+        );
+        expect(find.text('FooClass - null observed'), findsOneWidget);
+      },
+    );
 
     testWidgetsWithWindowSize(
         'observed type dynamic - non-nullable', windowSize,
@@ -119,25 +122,27 @@ void main() {
     });
 
     testWidgetsWithWindowSize(
-        'observed type unknown - null unknown', windowSize,
-        (WidgetTester tester) async {
-      when(mockFieldObject.guardClass).thenReturn(null);
-      when(mockFieldObject.guardNullable).thenReturn(null);
-      when(mockFieldObject.guardClassKind).thenReturn(GuardClassKind.unknown);
+      'observed type unknown - null unknown',
+      windowSize,
+      (WidgetTester tester) async {
+        when(mockFieldObject.guardClass).thenReturn(null);
+        when(mockFieldObject.guardNullable).thenReturn(null);
+        when(mockFieldObject.guardClassKind).thenReturn(GuardClassKind.unknown);
 
-      await tester.pumpWidget(
-        wrap(
-          VmFieldDisplay(
-            field: mockFieldObject,
-            controller: ObjectInspectorViewController(),
+        await tester.pumpWidget(
+          wrap(
+            VmFieldDisplay(
+              field: mockFieldObject,
+              controller: ObjectInspectorViewController(),
+            ),
           ),
-        ),
-      );
-      expect(
-        find.text('none'),
-        findsOneWidget,
-      );
-    });
+        );
+        expect(
+          find.text('none'),
+          findsOneWidget,
+        );
+      },
+    );
 
     testWidgetsWithWindowSize('static value is not InstanceRef', windowSize,
         (WidgetTester tester) async {

@@ -110,7 +110,6 @@ class _AnalyticsPromptState extends State<AnalyticsPrompt>
                 unawaited(
                   launchUrl(
                     'https://www.google.com/intl/en/policies/privacy',
-                    context,
                   ),
                 );
               },

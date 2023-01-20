@@ -10,7 +10,7 @@ import '../../../shared/eval_on_dart_library.dart';
 import 'fake_freezed_annotation.dart';
 import 'result.dart';
 
-// This part is generated using package:freezed, but without the devtool depending
+// This part is generated using `package:freezed`, but without the devtool depending
 // on the package.
 // To update the generated files, temporarily add freezed/freezed_annotation/build_runner
 // as dependencies; replace the `fake_freezed_annotation.dart` import with the
@@ -139,7 +139,7 @@ class InstanceDetails with _$InstanceDetails {
   }) = EnumInstance;
 
   bool get isExpandable {
-    bool falsy(Object obj) => false;
+    bool falsy(Object _) => false;
 
     return map(
       nill: falsy,

@@ -14,13 +14,13 @@ Future<VmServiceWrapper> _connectWithSse(
   Uri uri,
   void onError(error),
   Completer<void> finishedCompleter,
-) async {
+) {
   final serviceCompleter = Completer<VmServiceWrapper>();
 
   uri = uri.scheme == 'sse'
       ? uri.replace(scheme: 'http')
       : uri.replace(scheme: 'https');
-  final client = SseClient('$uri');
+  final client = SseClient('$uri', debugKey: 'DevToolsService');
   final Stream<String> stream =
       client.stream!.asBroadcastStream() as Stream<String>;
   final service = VmServiceWrapper.fromNewVmService(

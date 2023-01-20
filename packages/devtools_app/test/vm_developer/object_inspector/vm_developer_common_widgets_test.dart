@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app/src/screens/vm_developer/vm_developer_common_widgets.dart';
+import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/shared/common_widgets.dart';
 import 'package:devtools_app/src/shared/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/shared/globals.dart';
@@ -19,6 +20,10 @@ void main() {
 
   late MockClassObject mockClassObject;
 
+  late TestObjectInspectorViewController testObjectInspectorViewController;
+
+  late FakeServiceManager fakeServiceManager;
+
   late InstanceRef requestedSize;
 
   final fetchingSizeNotifier = ValueNotifier<bool>(false);
@@ -28,9 +33,15 @@ void main() {
   final inboundRefsNotifier = ValueNotifier<InboundReferences?>(null);
 
   setUp(() {
+    fakeServiceManager = FakeServiceManager();
+
+    setUpMockScriptManager();
+    setGlobal(ServiceConnectionManager, fakeServiceManager);
     setGlobal(IdeTheme, IdeTheme());
 
     mockClassObject = MockClassObject();
+
+    testObjectInspectorViewController = TestObjectInspectorViewController();
 
     final json = testInstance.toJson();
     requestedSize = Instance.parse(json)!;
@@ -71,22 +82,24 @@ void main() {
     });
   });
 
-  testWidgets('test RequestableSizeWidget while fetching data',
-      (WidgetTester tester) async {
-    await tester.pumpWidget(
-      wrap(
-        RequestableSizeWidget(
-          fetching: ValueNotifier(true),
-          sizeProvider: () => mockClassObject.reachableSize,
-          requestFunction: mockClassObject.requestReachableSize,
+  testWidgets(
+    'test RequestableSizeWidget while fetching data',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        wrap(
+          RequestableSizeWidget(
+            fetching: ValueNotifier(true),
+            sizeProvider: () => mockClassObject.reachableSize,
+            requestFunction: mockClassObject.requestReachableSize,
+          ),
         ),
-      ),
-    );
+      );
 
-    await tester.pump();
+      await tester.pump();
 
-    expect(find.byType(CircularProgressIndicator), findsOneWidget);
-  });
+      expect(find.byType(CircularProgressIndicator), findsOneWidget);
+    },
+  );
 
   testWidgets('test RequestableSizeWidget', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -128,6 +141,7 @@ void main() {
     await tester.pumpWidget(
       wrap(
         RetainingPathWidget(
+          controller: testObjectInspectorViewController,
           retainingPath: mockClassObject.retainingPath,
           onExpanded: (bool) => null,
         ),
@@ -153,6 +167,7 @@ void main() {
     await tester.pumpWidget(
       wrap(
         RetainingPathWidget(
+          controller: testObjectInspectorViewController,
           retainingPath: mockClassObject.retainingPath,
           onExpanded: (bool) {
             mockClassObject.requestRetainingPath();
@@ -164,23 +179,22 @@ void main() {
     await tester.tap(find.byType(AreaPaneHeader));
 
     await tester.pumpAndSettle();
-
     expect(find.byType(SelectableText), findsNWidgets(5));
     expect(find.text('FooClass'), findsOneWidget);
     expect(
-      find.text('Retained by element [1] of <parentListName>'),
+      find.text('Retained by element [1] of fooSuperClass'),
       findsOneWidget,
     );
     expect(
-      find.text('Retained by element at [fooField] of <parentMapName>'),
+      find.text('Retained by element at [fooField] of fooSuperClass'),
       findsOneWidget,
     );
     expect(
-      find.text('Retained by fooParentField of Field fooField of fooLib'),
+      find.text('Retained by fooParentField of FooClass fooField of fooLib'),
       findsOneWidget,
     );
     expect(
-      find.text('Retained by a GC root of type class table'),
+      find.text('Retained by a GC root of type: class table'),
       findsOneWidget,
     );
   });
@@ -211,33 +225,34 @@ void main() {
   });
 
   testWidgetsWithWindowSize(
-      'test InboundReferencesWidget with data', windowSize,
-      (WidgetTester tester) async {
-    await tester.pumpWidget(
-      wrap(
-        InboundReferencesWidget(
-          inboundReferences: mockClassObject.inboundReferences,
-          onExpanded: (bool) => mockClassObject.requestInboundsRefs(),
+    'test InboundReferencesWidget with data',
+    windowSize,
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        wrap(
+          InboundReferencesWidget(
+            inboundReferences: mockClassObject.inboundReferences,
+            onExpanded: (bool) => mockClassObject.requestInboundsRefs(),
+          ),
         ),
-      ),
-    );
+      );
 
-    await tester.tap(find.byType(AreaPaneHeader));
+      await tester.tap(find.byType(AreaPaneHeader));
 
-    await tester.pumpAndSettle();
-
-    expect(find.byType(SelectableText), findsNWidgets(3));
-    expect(
-      find.text('Referenced by fooFunction'),
-      findsOneWidget,
-    );
-    expect(
-      find.text('Referenced by fooParentField of Field fooField of fooLib'),
-      findsOneWidget,
-    );
-    expect(
-      find.text('Referenced by element [1] of <parentListName>'),
-      findsOneWidget,
-    );
-  });
+      await tester.pumpAndSettle();
+      expect(find.byType(SelectableText), findsNWidgets(3));
+      expect(
+        find.text('Referenced by fooFunction'),
+        findsOneWidget,
+      );
+      expect(
+        find.text('Referenced by fooParentField of fooType fooField of fooLib'),
+        findsOneWidget,
+      );
+      expect(
+        find.text('Referenced by element [1] of fooSuperClass'),
+        findsOneWidget,
+      );
+    },
+  );
 }

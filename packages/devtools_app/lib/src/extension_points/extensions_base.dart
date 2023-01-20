@@ -3,8 +3,8 @@
 // found in the LICENSE file.
 
 import '../screens/debugger/codeview.dart';
-import '../screens/inspector/inspector_service.dart';
 import '../shared/common_widgets.dart';
+import '../shared/diagnostics/inspector_service.dart';
 
 abstract class DevToolsExtensionPoints {
   List<ScriptPopupMenuOption> buildExtraDebuggerScriptPopupMenuOptions();

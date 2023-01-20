@@ -28,6 +28,7 @@ class VmFieldDisplay extends StatelessWidget {
       script: field.scriptRef!,
       object: field.obj,
       child: VmObjectDisplayBasicLayout(
+        controller: controller,
         object: field,
         generalDataRows: _fieldDataRows(field),
       ),
@@ -39,6 +40,7 @@ class VmFieldDisplay extends StatelessWidget {
   List<MapEntry<String, WidgetBuilder>> _fieldDataRows(
     FieldObject field,
   ) {
+    final staticValue = field.obj.staticValue;
     return [
       ...vmObjectGeneralDataRows(
         controller,
@@ -48,11 +50,11 @@ class VmFieldDisplay extends StatelessWidget {
         'Observed types',
         _fieldObservedTypes(field),
       ),
-      if (field.obj.staticValue is InstanceRef)
-        selectableTextBuilderMapEntry(
-          'Static Value',
-          '${field.obj.staticValue.name ?? field.obj.staticValue.classRef.name}: '
-              '${field.obj.staticValue.valueAsString ?? 'Unknown value'}',
+      if (staticValue is InstanceRef)
+        serviceObjectLinkBuilderMapEntry<InstanceRef>(
+          controller: controller,
+          key: 'Static Value',
+          object: staticValue,
         ),
     ];
   }

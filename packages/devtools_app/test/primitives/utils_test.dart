@@ -1556,9 +1556,7 @@ void main() {
           required String? subtract,
           required double? from,
         }) =>
-            // ignore: unnecessary_cast
-            _SubtractionResult(subtract: subtract, from: from)
-                as _SubtractionResult?;
+            _SubtractionResult(subtract: subtract, from: from);
 
         final result = subtractMaps<int, double, String, _SubtractionResult>(
           substract: null,
@@ -1579,9 +1577,7 @@ void main() {
           required String? subtract,
           required double? from,
         }) =>
-            // ignore: unnecessary_cast
-            _SubtractionResult(subtract: subtract, from: from)
-                as _SubtractionResult?;
+            _SubtractionResult(subtract: subtract, from: from);
 
         final result = subtractMaps<int, double, String, _SubtractionResult>(
           substract: subtract,

@@ -140,7 +140,7 @@ class _RebuildStatsViewState extends State<RebuildStatsView>
               );
             },
           ),
-        )
+        ),
       ],
     );
   }

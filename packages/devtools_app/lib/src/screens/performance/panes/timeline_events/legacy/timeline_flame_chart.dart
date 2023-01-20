@@ -194,9 +194,18 @@ class TimelineFlameChartState
   @override
   void initState() {
     super.initState();
+    // addAndGet has crucial side effects so moving to a variable is not
+    // feasible.
+    // ignore: prefer-moving-to-variable
     _groupLabelScrollController = verticalControllerGroup.addAndGet();
     _previousInGroupButtonsScrollController =
+        // addAndGet has crucial side effects so moving to a variable is not
+        // feasible.
+        // ignore: prefer-moving-to-variable
         verticalControllerGroup.addAndGet();
+    // addAndGet has crucial side effects so moving to a variable is not
+    // feasible.
+    // ignore: prefer-moving-to-variable
     _nextInGroupButtonsScrollController = verticalControllerGroup.addAndGet();
   }
 
@@ -450,7 +459,7 @@ class TimelineFlameChartState
         rect: Rect.fromLTRB(left, flameChartNodeTop, right, rowHeight),
         colorPair: ThemedColorPair.from(colorPair),
         data: event,
-        onSelected: (dynamic event) => widget.onDataSelected(event),
+        onSelected: widget.onDataSelected,
         sectionIndex: section,
       );
       chartNodesByEvent[event] = node;

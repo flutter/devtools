@@ -99,7 +99,6 @@ MockDebuggerController createMockDebuggerControllerWithDefaults({
   MockCodeViewController? mockCodeViewController,
 }) {
   final debuggerController = MockDebuggerController();
-  when(debuggerController.isPaused).thenReturn(ValueNotifier(false));
   when(debuggerController.resuming).thenReturn(ValueNotifier(false));
   when(debuggerController.isSystemIsolate).thenReturn(false);
 
@@ -107,11 +106,9 @@ MockDebuggerController createMockDebuggerControllerWithDefaults({
   when(debuggerController.stackFramesWithLocation)
       .thenReturn(ValueNotifier([]));
   when(debuggerController.selectedStackFrame).thenReturn(ValueNotifier(null));
-  when(debuggerController.hasTruncatedFrames).thenReturn(ValueNotifier(false));
 
   when(debuggerController.exceptionPauseMode)
       .thenReturn(ValueNotifier('Unhandled'));
-  when(debuggerController.variables).thenReturn(ValueNotifier([]));
 
   mockCodeViewController ??= createMockCodeViewControllerWithDefaults();
   when(debuggerController.codeViewController).thenReturn(

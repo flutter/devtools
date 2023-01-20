@@ -9,6 +9,7 @@ import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../service/vm_service_wrapper.dart';
+import '../../shared/diagnostics/source_location.dart';
 import '../../shared/globals.dart';
 import '../../shared/primitives/auto_dispose.dart';
 import 'debugger_model.dart';
@@ -22,15 +23,13 @@ class BreakpointManager extends Disposer {
 
   final _breakPositionsMap = <String, List<SourcePosition>>{};
 
-  final _breakpoints = ValueNotifier<List<Breakpoint>>([]);
-
   ValueListenable<List<Breakpoint>> get breakpoints => _breakpoints;
-
-  final _breakpointsWithLocation =
-      ValueNotifier<List<BreakpointAndSourcePosition>>([]);
+  final _breakpoints = ValueNotifier<List<Breakpoint>>([]);
 
   ValueListenable<List<BreakpointAndSourcePosition>>
       get breakpointsWithLocation => _breakpointsWithLocation;
+  final _breakpointsWithLocation =
+      ValueNotifier<List<BreakpointAndSourcePosition>>([]);
 
   IsolateRef? _isolateRef;
 
@@ -103,14 +102,15 @@ class BreakpointManager extends Disposer {
       _service.removeBreakpoint(_isolateRefId, breakpoint.id!);
 
   Future<void> toggleBreakpoint(ScriptRef script, int line) async {
-    if (serviceManager.isolateManager.selectedIsolate.value == null) {
+    final selectedIsolate = serviceManager.isolateManager.selectedIsolate.value;
+    if (selectedIsolate == null) {
       // Can't toggle breakpoints if we don't have an isolate.
       return;
     }
     // The VM doesn't support debugging for system isolates and will crash on
     // a failed assert in debug mode. Disable the toggle breakpoint
     // functionality for system isolates.
-    if (serviceManager.isolateManager.selectedIsolate.value!.isSystemIsolate!) {
+    if (selectedIsolate.isSystemIsolate!) {
       return;
     }
 
@@ -130,7 +130,7 @@ class BreakpointManager extends Disposer {
   }
 
   void _updateAfterIsolateReload(
-    Event reloadEvent,
+    Event _,
   ) async {
     // TODO(devoncarew): We need to coordinate this with other debugger clients
     // as well as pause before re-setting the breakpoints.
@@ -138,10 +138,10 @@ class BreakpointManager extends Disposer {
     final previousScriptRefs = scriptManager.sortedScripts.value;
     final currentScriptRefs =
         await scriptManager.retrieveAndSortScripts(_isolateRef!);
-    final removedScripts =
-        Set.of(previousScriptRefs).difference(Set.of(currentScriptRefs));
-    final addedScripts =
-        Set.of(currentScriptRefs).difference(Set.of(previousScriptRefs));
+    final removedScripts = Set<ScriptRef>.of(previousScriptRefs)
+        .difference(Set<ScriptRef>.of(currentScriptRefs));
+    final addedScripts = Set<ScriptRef>.of(currentScriptRefs)
+        .difference(Set<ScriptRef>.of(previousScriptRefs));
     final breakpointsToRemove = <BreakpointAndSourcePosition>[];
 
     // Find all breakpoints set in files where we have newer versions of those
@@ -257,7 +257,7 @@ class BreakpointManager extends Disposer {
         _breakpoints.value = [
           for (var b in _breakpoints.value)
             if (b != event.breakpoint) b,
-          breakpoint
+          breakpoint,
         ];
 
         unawaited(
@@ -279,12 +279,12 @@ class BreakpointManager extends Disposer {
 
         _breakpoints.value = [
           for (var b in _breakpoints.value)
-            if (b != breakpoint) b
+            if (b != breakpoint) b,
         ];
 
         _breakpointsWithLocation.value = [
           for (var b in _breakpointsWithLocation.value)
-            if (b.breakpoint != breakpoint) b
+            if (b.breakpoint != breakpoint) b,
         ];
 
         break;

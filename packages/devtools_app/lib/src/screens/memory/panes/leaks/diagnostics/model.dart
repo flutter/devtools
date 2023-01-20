@@ -5,7 +5,7 @@
 import 'package:leak_tracker/devtools_integration.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../../shared/heap/model.dart';
+import '../../../../../shared/memory/adapted_heap_data.dart';
 
 /// Names for json fields.
 class _JsonFields {
@@ -37,13 +37,14 @@ class NotGCedAnalyzerTask {
     required this.reports,
   });
 
-  factory NotGCedAnalyzerTask.fromJson(Map<String, dynamic> json) =>
+  factory NotGCedAnalyzerTask.fromJson(Map<String, Object?> json) =>
       NotGCedAnalyzerTask(
-        reports: (json[_JsonFields.reports] as List<dynamic>)
-            .cast<Map<String, dynamic>>()
-            .map((e) => LeakReport.fromJson(e))
+        reports: (json[_JsonFields.reports] as List<Object?>)
+            .map((e) => LeakReport.fromJson((e as Map).cast<String, Object?>()))
             .toList(),
-        heap: AdaptedHeapData.fromJson(json[_JsonFields.heap]),
+        heap: AdaptedHeapData.fromJson(
+          json[_JsonFields.heap] as Map<String, Object?>,
+        ),
       );
 
   static Future<NotGCedAnalyzerTask> fromSnapshot(
@@ -59,7 +60,7 @@ class NotGCedAnalyzerTask {
   final AdaptedHeapData heap;
   final List<LeakReport> reports;
 
-  Map<String, dynamic> toJson() => {
+  Map<String, Object?> toJson() => {
         _JsonFields.reports: reports.map((e) => e.toJson()).toList(),
         _JsonFields.heap: heap.toJson(),
       };

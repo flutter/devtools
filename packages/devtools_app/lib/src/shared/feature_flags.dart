@@ -6,6 +6,10 @@ import 'package:flutter/foundation.dart';
 
 import 'globals.dart';
 
+@visibleForTesting
+bool get enableExperiments =>
+    _experimentsEnabledByEnvironment || _experimentsEnabledFromMain;
+
 /// If true, features under construction will be enabled for release build.
 ///
 /// By default, the constant is false.
@@ -16,10 +20,14 @@ import 'globals.dart';
 ///   "args": [
 ///     "--dart-define=enable_experiments=true"
 ///   ]
-const bool _kEnableExperiments = bool.fromEnvironment('enable_experiments');
+const bool _experimentsEnabledByEnvironment =
+    bool.fromEnvironment('enable_experiments');
 
-@visibleForTesting
-bool enableExperiments = _kEnableExperiments;
+bool _experimentsEnabledFromMain = false;
+
+void setEnableExperiments() {
+  _experimentsEnabledFromMain = true;
+}
 
 @visibleForTesting
 bool get enableBeta => enableExperiments || !isExternalBuild;
@@ -47,6 +55,11 @@ abstract class FeatureFlags {
   /// https://github.com/flutter/devtools/issues/4564.
   static bool widgetRebuildstats = enableExperiments;
 
+  /// Flag to enable live eval and snapshot browse.
+  ///
+  /// https://github.com/flutter/devtools/issues/4962.
+  static bool evalAndBrowse = enableExperiments;
+
   /// Stores a map of all the feature flags for debugging purposes.
   ///
   /// When adding a new flag, you are responsible for adding it to this map as
@@ -54,6 +67,7 @@ abstract class FeatureFlags {
   static final _allFlags = <String, bool>{
     'embeddedPerfetto': embeddedPerfetto,
     'widgetRebuildStats': widgetRebuildstats,
+    'evalAndBrowseSnapshot': evalAndBrowse,
   };
 
   /// A helper to print the status of all the feature flags.

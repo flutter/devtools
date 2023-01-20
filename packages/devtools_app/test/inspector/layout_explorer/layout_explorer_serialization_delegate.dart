@@ -32,6 +32,7 @@ class LayoutExplorerSerializationDelegate
                           includeProperties: true,
                         ),
                       );
+              // Required for test.
               // ignore: invalid_use_of_protected_member
               final Constraints constraints = renderObject.constraints;
 

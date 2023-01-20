@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// TODO(polinach): consider reusing CheckboxSettings from shared/common_widgets
+// and then this hide can be removed.
+export 'src/app.dart' hide CheckboxSetting;
 export 'src/extension_points/extensions_base.dart';
 export 'src/extension_points/extensions_external.dart';
 export 'src/framework/notifications_view.dart';
@@ -15,14 +18,9 @@ export 'src/screens/debugger/program_explorer_controller.dart';
 export 'src/screens/debugger/program_explorer_model.dart';
 export 'src/screens/debugger/span_parser.dart';
 export 'src/screens/debugger/syntax_highlighter.dart';
-export 'src/screens/inspector/diagnostics.dart';
-export 'src/screens/inspector/diagnostics_node.dart';
 export 'src/screens/inspector/inspector_controller.dart';
 export 'src/screens/inspector/inspector_screen.dart';
-export 'src/screens/inspector/inspector_service.dart';
-export 'src/screens/inspector/inspector_tree.dart';
 export 'src/screens/inspector/inspector_tree_controller.dart';
-export 'src/screens/inspector/primitives/inspector_common.dart';
 export 'src/screens/logging/logging_controller.dart';
 export 'src/screens/logging/logging_screen.dart';
 export 'src/screens/memory/memory_controller.dart';
@@ -65,11 +63,18 @@ export 'src/shared/charts/treemap.dart';
 export 'src/shared/common_widgets.dart';
 export 'src/shared/config_specific/ide_theme/ide_theme.dart';
 export 'src/shared/connected_app.dart';
-export 'src/shared/console_service.dart';
+export 'src/shared/console/console_service.dart';
+export 'src/shared/console/eval/eval_service.dart';
+export 'src/shared/console/eval/inspector_tree.dart';
+export 'src/shared/console/primitives/simple_items.dart';
+export 'src/shared/console/widgets/description.dart';
+export 'src/shared/diagnostics/diagnostics_node.dart';
+export 'src/shared/diagnostics/inspector_service.dart';
 export 'src/shared/error_badge_manager.dart';
 export 'src/shared/globals.dart';
 export 'src/shared/http/http_request_data.dart';
 export 'src/shared/notifications.dart';
+export 'src/shared/object_tree.dart';
 export 'src/shared/preferences.dart';
 export 'src/shared/primitives/auto_dispose.dart';
 export 'src/shared/primitives/listenable.dart';

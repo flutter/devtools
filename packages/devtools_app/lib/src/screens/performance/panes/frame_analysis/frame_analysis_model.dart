@@ -71,10 +71,12 @@ class FrameAnalysis {
         final _buildChildren = layoutEvent.shallowNodesWithCondition(
           (event) => event.name == FramePhaseType.build.eventName,
         );
-        final buildDuration = _buildChildren.fold<Duration>(Duration.zero,
-            (previous, TimelineEvent event) {
-          return previous + event.time.duration;
-        });
+        final buildDuration = _buildChildren.fold<Duration>(
+          Duration.zero,
+          (previous, TimelineEvent event) {
+            return previous + event.time.duration;
+          },
+        );
 
         return FramePhase.layout(
           events: <SyncTimelineEvent>[layoutEvent as SyncTimelineEvent],
@@ -122,7 +124,7 @@ class FrameAnalysis {
   bool get hasUiData => _hasUiData ??= [
         ...buildPhase.events,
         ...layoutPhase.events,
-        ...paintPhase.events
+        ...paintPhase.events,
       ].isNotEmpty;
 
   bool? _hasUiData;

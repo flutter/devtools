@@ -48,8 +48,6 @@ class ProgramExplorerController extends DisposableController
   ValueListenable<int> get selectedNodeIndex => _selectedNodeIndex;
   final _selectedNodeIndex = ValueNotifier<int>(0);
 
-  IsolateRef? _isolate;
-
   /// Notifies that the controller has finished initializing.
   ValueListenable<bool> get initialized => _initialized;
   final _initialized = ValueNotifier<bool>(false);
@@ -76,10 +74,10 @@ class ProgramExplorerController extends DisposableController
     }
     _initializing = true;
 
-    _isolate = serviceManager.isolateManager.selectedIsolate.value;
-    final libraries = _isolate != null
+    final isolate = serviceManager.isolateManager.selectedIsolate.value;
+    final libraries = isolate != null
         ? serviceManager.isolateManager
-            .isolateDebuggerState(_isolate)!
+            .isolateState(isolate)
             .isolateNow!
             .libraries!
         : <LibraryRef>[];
@@ -356,7 +354,7 @@ class ProgramExplorerController extends DisposableController
         await service.getObject(isolateId, targetScript.id!) as Script;
     final LibraryRef targetLib = scriptObj.library!;
 
-    // Search targetLib only on the root level nodes
+    // Search targetLib only on the root level nodes.
     final libNode = _searchRootObjectNodes(targetLib)!;
 
     // If the object's owning script URI is the same as the target library URI,

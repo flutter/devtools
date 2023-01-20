@@ -28,12 +28,19 @@ import 'flutter_frame_model.dart';
 import 'flutter_frames_controller.dart';
 
 // Turn this flag on to see when flutter frames are linked with timeline events.
+// ignore: avoid-global-state
 bool debugFrames = false;
 
 class FlutterFramesChart extends StatelessWidget {
-  const FlutterFramesChart(this.framesController, {super.key});
+  const FlutterFramesChart(
+    this.framesController, {
+    super.key,
+    required this.offlineMode,
+  });
 
   final FlutterFramesController framesController;
+
+  final bool offlineMode;
 
   @override
   Widget build(BuildContext context) {
@@ -49,6 +56,7 @@ class FlutterFramesChart extends StatelessWidget {
               frames: frames,
               displayRefreshRate: displayRefreshRate,
               isVisible: show,
+              offlineMode: offlineMode,
             );
           },
         );
@@ -63,6 +71,7 @@ class _FlutterFramesChart extends StatefulWidget {
     required this.frames,
     required this.displayRefreshRate,
     required this.isVisible,
+    required this.offlineMode,
   });
 
   final FlutterFramesController framesController;
@@ -72,6 +81,8 @@ class _FlutterFramesChart extends StatefulWidget {
   final double displayRefreshRate;
 
   final bool isVisible;
+
+  final bool offlineMode;
 
   static double get frameNumberSectionHeight => scaleByFontFactor(20.0);
 
@@ -155,6 +166,7 @@ class _FlutterFramesChartState extends State<_FlutterFramesChart> {
               framesController: widget.framesController,
               frames: widget.frames,
               displayRefreshRate: widget.displayRefreshRate,
+              offlineMode: widget.offlineMode,
             ),
           ),
         ],
@@ -332,6 +344,7 @@ class FramesChartControls extends StatelessWidget {
     required this.framesController,
     required this.frames,
     required this.displayRefreshRate,
+    required this.offlineMode,
   });
 
   static const _pauseTooltip = 'Pause Flutter frame recording';
@@ -344,24 +357,27 @@ class FramesChartControls extends StatelessWidget {
 
   final double displayRefreshRate;
 
+  final bool offlineMode;
+
   @override
   Widget build(BuildContext context) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        ValueListenableBuilder<bool>(
-          valueListenable: framesController.recordingFrames,
-          builder: (context, recording, child) {
-            return PauseResumeButtonGroup(
-              paused: !recording,
-              onPause: _pauseFrameRecording,
-              onResume: _resumeFrameRecording,
-              pauseTooltip: _pauseTooltip,
-              resumeTooltip: _resumeTooltip,
-            );
-          },
-        ),
+        if (!offlineMode)
+          ValueListenableBuilder<bool>(
+            valueListenable: framesController.recordingFrames,
+            builder: (context, recording, child) {
+              return PauseResumeButtonGroup(
+                paused: !recording,
+                onPause: _pauseFrameRecording,
+                onResume: _resumeFrameRecording,
+                pauseTooltip: _pauseTooltip,
+                resumeTooltip: _resumeTooltip,
+              );
+            },
+          ),
         Legend(
           dense: true,
           entries: [
@@ -443,11 +459,11 @@ class FlutterFramesChartItem extends StatelessWidget {
 
     if (debugFrames) {
       if (frame.timelineEventData.uiEvent == null) {
-        uiColor = uiColor.darken(.5);
+        uiColor = uiColor.darken(0.5);
       }
       if (frame.timelineEventData.rasterEvent == null) {
-        rasterColor = rasterColor.darken(.5);
-        shaderColor = shaderColor.darken(.5);
+        rasterColor = rasterColor.darken(0.5);
+        shaderColor = shaderColor.darken(0.5);
       }
     }
 
@@ -461,17 +477,16 @@ class FlutterFramesChartItem extends StatelessWidget {
       color: uiColor,
     );
 
-    final shaderToRasterRatio =
-        frame.shaderDuration.inMilliseconds / frame.rasterTime.inMilliseconds;
+    final shaderDuration = frame.shaderDuration.inMilliseconds;
+    final rasterTime = frame.rasterTime.inMilliseconds;
+    final shaderToRasterRatio = shaderDuration / rasterTime;
 
     final raster = Column(
       children: [
         Container(
           key: Key('frame ${frame.id} - raster'),
           width: defaultFrameWidth / 2,
-          height: ((frame.rasterTime.inMilliseconds -
-                      frame.shaderDuration.inMilliseconds) /
-                  msPerPx)
+          height: ((frame.rasterTime.inMilliseconds - shaderDuration) / msPerPx)
               .clamp(0.0, availableChartHeight * (1 - shaderToRasterRatio)),
           color: rasterColor,
         ),
@@ -479,7 +494,7 @@ class FlutterFramesChartItem extends StatelessWidget {
           Container(
             key: Key('frame ${frame.id} - shaders'),
             width: defaultFrameWidth / 2,
-            height: (frame.shaderDuration.inMilliseconds / msPerPx)
+            height: (shaderDuration / msPerPx)
                 .clamp(0.0, availableChartHeight * shaderToRasterRatio),
             color: shaderColor,
           ),
@@ -546,7 +561,7 @@ class FlutterFramesChartItem extends StatelessWidget {
                   '${frame.id}',
                   style: themeData.subtleChartTextStyle,
                 ),
-              )
+              ),
             ],
           )
         : content;

@@ -11,6 +11,7 @@ import '../service/service_manager.dart';
 import '../service/vm_service_wrapper.dart';
 import '../shared/config_specific/import_export/import_export.dart';
 import '../shared/config_specific/logger/logger.dart';
+import '../shared/console/eval/eval_service.dart';
 import '../shared/framework_controller.dart';
 import '../shared/globals.dart';
 import '../shared/notifications.dart';
@@ -19,8 +20,9 @@ import '../shared/primitives/utils.dart';
 import '../shared/scripts/script_manager.dart';
 import '../shared/survey.dart';
 
-typedef ErrorReporter = void Function(String title, dynamic error);
+typedef ErrorReporter = void Function(String title, Object error);
 
+// TODO(jacobr): refactor this class to not use static members.
 // ignore: avoid_classes_with_only_static_members
 class FrameworkCore {
   static void initGlobals() {
@@ -32,6 +34,7 @@ class FrameworkCore {
     setGlobal(ScriptManager, ScriptManager());
     setGlobal(NotificationService, NotificationService());
     setGlobal(BreakpointManager, BreakpointManager());
+    setGlobal(EvalService, EvalService());
   }
 
   static void init() {

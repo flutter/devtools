@@ -7,10 +7,10 @@ import 'dart:async';
 import 'package:vm_service/vm_service.dart';
 
 import '../../shared/config_specific/import_export/import_export.dart';
+import '../../shared/diagnostics/inspector_service.dart';
 import '../../shared/feature_flags.dart';
 import '../../shared/globals.dart';
 import '../../shared/primitives/auto_dispose.dart';
-import '../inspector/inspector_service.dart';
 import 'panes/controls/enhance_tracing/enhance_tracing_controller.dart';
 import 'panes/flutter_frames/flutter_frame_model.dart';
 import 'panes/flutter_frames/flutter_frames_controller.dart';
@@ -261,11 +261,11 @@ abstract class PerformanceFeatureController extends DisposableController {
     }
   }
 
-  Future<void> onBecomingActive() async {}
+  Future<void> onBecomingActive();
 
-  Future<void> init() async {}
+  Future<void> init();
 
-  FutureOr<void> setOfflineData(PerformanceData offlineData);
+  Future<void> setOfflineData(PerformanceData offlineData);
 
   FutureOr<void> clearData();
 

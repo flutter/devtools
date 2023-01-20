@@ -42,23 +42,24 @@ void main() {
   }
 
   testWidgets(
-      'does not display floating debugger tab controls when no app is connected',
-      (WidgetTester tester) async {
-    when(mockServiceManager.connectedAppInitialized).thenReturn(false);
-    await tester.pumpWidget(
-      wrapScaffold(
-        wrapWithNotifications(
-          DevToolsScaffold(
-            tabs: const [_screen1, _screen2],
-            ideTheme: IdeTheme(),
+    'does not display floating debugger tab controls when no app is connected',
+    (WidgetTester tester) async {
+      when(mockServiceManager.connectedAppInitialized).thenReturn(false);
+      await tester.pumpWidget(
+        wrapScaffold(
+          wrapWithNotifications(
+            DevToolsScaffold(
+              screens: const [_screen1, _screen2],
+              ideTheme: IdeTheme(),
+            ),
           ),
         ),
-      ),
-    );
-    expect(find.byKey(_k1), findsOneWidget);
-    expect(find.byKey(_k2), findsNothing);
-    expect(find.byType(FloatingDebuggerControls), findsNothing);
-  });
+      );
+      expect(find.byKey(_k1), findsOneWidget);
+      expect(find.byKey(_k2), findsNothing);
+      expect(find.byType(FloatingDebuggerControls), findsNothing);
+    },
+  );
 }
 
 class _TestScreen extends Screen {

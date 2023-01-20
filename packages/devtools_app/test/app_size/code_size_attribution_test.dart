@@ -35,14 +35,16 @@ void main() {
       );
     });
 
-    testWidgets('builds dominator tree by default',
-        (WidgetTester tester) async {
-      await tester.pumpWidget(wrap(callGraphWithDominators));
-      expect(find.text('Dominator Tree'), findsOneWidget);
-      expect(find.text('Call Graph'), findsNothing);
-      expect(find.byType(DominatorTree), findsOneWidget);
-      expect(find.byType(CallGraphView), findsNothing);
-    });
+    testWidgets(
+      'builds dominator tree by default',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(wrap(callGraphWithDominators));
+        expect(find.text('Dominator Tree'), findsOneWidget);
+        expect(find.text('Call Graph'), findsNothing);
+        expect(find.byType(DominatorTree), findsOneWidget);
+        expect(find.byType(CallGraphView), findsNothing);
+      },
+    );
 
     testWidgets('builds call graph', (WidgetTester tester) async {
       await tester.pumpWidget(wrap(callGraphWithDominators));
@@ -73,7 +75,7 @@ void main() {
 
   group('CallGraphView', () {
     late CallGraphView callGraphView;
-    setUp(() async {
+    setUp(() {
       callGraphView = CallGraphView(node: callGraph.root);
     });
 
@@ -136,7 +138,7 @@ void main() {
   group('DominatorTree', () {
     late DominatorTree dominatorTree;
 
-    setUp(() async {
+    setUp(() {
       dominatorTree = DominatorTree(
         dominatorTreeRoot: DominatorTreeNode.from(callGraph.root.dominatorRoot),
         selectedNode: callGraph.root,

@@ -68,4 +68,14 @@ class RasterStatsController extends PerformanceFeatureController {
   void clearData() {
     setData(null);
   }
+
+  @override
+  Future<void> init() {
+    return Future.value();
+  }
+
+  @override
+  Future<void> onBecomingActive() {
+    return Future.value();
+  }
 }

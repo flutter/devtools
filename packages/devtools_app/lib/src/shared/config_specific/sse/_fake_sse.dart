@@ -10,7 +10,7 @@ import 'dart:async';
 /// available, like the Flutter desktop embedder.
 // TODO(https://github.com/flutter/devtools/issues/1122): Make SSE work without dart:html.
 class SseClient {
-  SseClient(String endpoint);
+  SseClient(String endpoint, {String? debugKey});
 
   Stream? get stream => null;
 

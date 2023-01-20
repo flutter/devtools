@@ -16,16 +16,32 @@ import 'src/shared/config_specific/framework_initialize/framework_initialize.dar
 import 'src/shared/config_specific/ide_theme/ide_theme.dart';
 import 'src/shared/config_specific/url/url.dart';
 import 'src/shared/config_specific/url_strategy/url_strategy.dart';
+import 'src/shared/feature_flags.dart';
 import 'src/shared/globals.dart';
 import 'src/shared/preferences.dart';
 import 'src/shared/primitives/url_utils.dart';
+import 'src/shared/primitives/utils.dart';
 
 void main() async {
+  await runDevTools();
+}
+
+Future<void> runDevTools({
+  bool shouldEnableExperiments = false,
+  List<DevToolsJsonFile> sampleData = const [],
+}) async {
   // Before switching to URL path strategy, check if this URL is in the legacy
   // fragment format and redirect if necessary.
   if (_handleLegacyUrl()) return;
 
   usePathUrlStrategy();
+
+  // This may be set to true from our Flutter integration tests. Since we call
+  // [runDevTools] from Dart code, we cannot set the 'enable_experiments'
+  // environment variable before calling [runDevTools].
+  if (shouldEnableExperiments) {
+    setEnableExperiments();
+  }
 
   // Initialize the framework before we do anything else, otherwise the
   // StorageController won't be initialized and preferences won't be loaded.
@@ -49,7 +65,11 @@ void main() async {
     runApp(
       ProviderScope(
         observers: const [ErrorLoggerObserver()],
-        child: DevToolsApp(defaultScreens, await analyticsController),
+        child: DevToolsApp(
+          defaultScreens,
+          await analyticsController,
+          sampleData: sampleData,
+        ),
       ),
     );
   });

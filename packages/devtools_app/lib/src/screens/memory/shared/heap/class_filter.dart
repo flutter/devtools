@@ -4,7 +4,7 @@
 
 import 'package:flutter/foundation.dart';
 
-import '../primitives/class_name.dart';
+import '../../../../shared/memory/class_name.dart';
 
 enum ClassFilterType {
   showAll,
@@ -36,15 +36,12 @@ class ClassFilter {
   ClassFilter.empty()
       : this(
           filterType: ClassFilterType.showAll,
-          except: '$noPackageLibrariesAlias\n$dartAndFlutterLibrariesAlias',
+          except: '${ClassType.runtime.alias}\n${ClassType.sdk.alias}',
           only: null,
         );
 
   static String _trimByLine(String value) =>
       value.split('\n').map((e) => e.trim()).join('\n');
-
-  static const String dartAndFlutterLibrariesAlias = '\$dart-flutter-libraries';
-  static const String noPackageLibrariesAlias = '\$no-package-libraries';
 
   final ClassFilterType filterType;
   final String except;
@@ -124,11 +121,13 @@ class ClassFilter {
     }
   }
 
-  bool apply(HeapClassName className) {
+  bool apply(HeapClassName className, String? rootPackage) {
+    if (className.isRoot) return false;
+
     if (filterType == ClassFilterType.showAll) return true;
 
     for (var filter in filters) {
-      if (_isMatch(className, filter)) {
+      if (_isMatch(className, filter, rootPackage)) {
         return filterType == ClassFilterType.only;
       }
     }
@@ -136,12 +135,10 @@ class ClassFilter {
     return filterType == ClassFilterType.except;
   }
 
-  bool _isMatch(HeapClassName className, String filter) {
+  bool _isMatch(HeapClassName className, String filter, String? rootPackage) {
     if (className.fullName.contains(filter)) return true;
-    if (filter == dartAndFlutterLibrariesAlias && className.isDartOrFlutter)
-      return true;
-    if (filter == noPackageLibrariesAlias && className.isPackageless)
-      return true;
-    return false;
+
+    final classType = className.classType(rootPackage);
+    return filter == classType.alias;
   }
 }

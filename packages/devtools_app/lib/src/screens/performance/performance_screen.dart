@@ -104,7 +104,7 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
         offlineController.offlineDataJson[PerformanceScreen.id],
       )..addAll({
           PerformanceData.traceEventsKey:
-              offlineController.offlineDataJson[PerformanceData.traceEventsKey]
+              offlineController.offlineDataJson[PerformanceData.traceEventsKey],
         });
       final offlinePerformanceData = OfflinePerformanceData.parse(timelineJson);
       if (!offlinePerformanceData.isEmpty) {
@@ -115,34 +115,28 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
 
   @override
   Widget build(BuildContext context) {
-    final isOfflineFlutterApp = offlineController.offlineMode.value &&
+    if (loadingOfflineData) {
+      return Container(
+        color: Theme.of(context).scaffoldBackgroundColor,
+        child: const CenteredCircularProgressIndicator(),
+      );
+    }
+
+    final offlineMode = offlineController.offlineMode.value;
+    final isOfflineFlutterApp = offlineMode &&
         controller.offlinePerformanceData != null &&
         controller.offlinePerformanceData!.frames.isNotEmpty;
-
-    final performanceScreen = Column(
+    return Column(
       children: [
-        if (!offlineController.offlineMode.value) _buildPerformanceControls(),
+        if (!offlineMode) _buildPerformanceControls(),
         const SizedBox(height: denseRowSpacing),
         if (isOfflineFlutterApp ||
-            (!offlineController.offlineMode.value &&
-                serviceManager.connectedApp!.isFlutterAppNow!))
-          FlutterFramesChart(controller.flutterFramesController),
-        const Expanded(child: TabbedPerformanceView()),
-      ],
-    );
-
-    // We put these two items in a stack because the screen's UI needs to be
-    // built before offline data is processed in order to initialize listeners
-    // that respond to data processing events. The spinner hides the screen's
-    // empty UI while data is being processed.
-    return Stack(
-      children: [
-        performanceScreen,
-        if (loadingOfflineData)
-          Container(
-            color: Theme.of(context).scaffoldBackgroundColor,
-            child: const CenteredCircularProgressIndicator(),
+            (!offlineMode && serviceManager.connectedApp!.isFlutterAppNow!))
+          FlutterFramesChart(
+            controller.flutterFramesController,
+            offlineMode: offlineMode,
           ),
+        const Expanded(child: TabbedPerformanceView()),
       ],
     );
   }
@@ -256,7 +250,7 @@ class SecondaryPerformanceControls extends StatelessWidget {
         OutlinedIconButton(
           icon: Icons.file_download,
           tooltip: 'Export data',
-          onPressed: () => _exportPerformanceData(context),
+          onPressed: _exportPerformanceData,
         ),
         const SizedBox(width: denseSpacing),
         SettingsOutlinedButton(
@@ -266,7 +260,7 @@ class SecondaryPerformanceControls extends StatelessWidget {
     );
   }
 
-  void _exportPerformanceData(BuildContext context) {
+  void _exportPerformanceData() {
     ga.select(gac.performance, gac.export);
     controller.exportData();
     // TODO(kenz): investigate if we need to do any error handling here. Is the

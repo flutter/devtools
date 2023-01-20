@@ -10,13 +10,13 @@ class Logging {
     model = TimeModel(this)..start();
   }
 
-  TimeModel model;
+  late final TimeModel model;
 
-  static Logging _theLogging;
+  static Logging? _theLogging;
 
   static Logging get logging {
     _theLogging ??= Logging();
-    return _theLogging;
+    return _theLogging!;
   }
 
   final List<String> _logs = [];
@@ -31,24 +31,27 @@ class Logging {
 }
 
 class TimeStamp {
-  TimeStamp()
-      : time = '',
-        date = '',
-        meridiem = '';
+  TimeStamp({
+    time = '',
+    date = '',
+    meridiem = '',
+  });
 
-  TimeStamp.record(DateTime now) {
-    time = currentTime.format(now);
-    date = currentDate.format(now);
-    meridiem = currentMeridiem.format(now);
+  factory TimeStamp.record(DateTime now) {
+    return TimeStamp(
+      time: currentTime.format(now),
+      date: currentDate.format(now),
+      meridiem: currentMeridiem.format(now),
+    );
   }
 
-  String time;
-  String date;
-  String meridiem;
+  late String time;
+  late String date;
+  late String meridiem;
 
-  DateFormat currentTime = DateFormat('H:mm:ss', 'en_US');
-  DateFormat currentDate = DateFormat('EEEE, MMM d', 'en_US');
-  DateFormat currentMeridiem = DateFormat('aaa', 'en_US');
+  static DateFormat currentTime = DateFormat('H:mm:ss', 'en_US');
+  static DateFormat currentDate = DateFormat('EEEE, MMM d', 'en_US');
+  static DateFormat currentMeridiem = DateFormat('aaa', 'en_US');
 }
 
 class TimeModel {
@@ -61,7 +64,7 @@ class TimeModel {
   final String _time = '';
   final String _date = '';
   final String _meridiem = '';
-  Timer _clockUpdateTimer;
+  Timer? _clockUpdateTimer;
   DateTime now = DateTime.now();
 
   /// Start updating.
@@ -76,7 +79,7 @@ class TimeModel {
 
   /// Stop updating.
   void stop() {
-    _clockUpdateTimer.cancel();
+    _clockUpdateTimer?.cancel();
     _clockUpdateTimer = null;
   }
 

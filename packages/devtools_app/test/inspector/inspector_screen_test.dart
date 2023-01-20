@@ -7,18 +7,18 @@
 
 import 'dart:convert';
 
-import 'package:devtools_app/src/screens/inspector/diagnostics_node.dart';
 import 'package:devtools_app/src/screens/inspector/inspector_controller.dart';
 import 'package:devtools_app/src/screens/inspector/inspector_screen.dart';
-import 'package:devtools_app/src/screens/inspector/inspector_tree.dart';
 import 'package:devtools_app/src/screens/inspector/inspector_tree_controller.dart';
 import 'package:devtools_app/src/screens/inspector/layout_explorer/flex/flex.dart';
 import 'package:devtools_app/src/screens/inspector/layout_explorer/layout_explorer.dart';
-import 'package:devtools_app/src/screens/inspector/primitives/inspector_common.dart';
 import 'package:devtools_app/src/service/service_extensions.dart' as extensions;
 import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/shared/common_widgets.dart';
 import 'package:devtools_app/src/shared/config_specific/ide_theme/ide_theme.dart';
+import 'package:devtools_app/src/shared/console/eval/inspector_tree.dart';
+import 'package:devtools_app/src/shared/console/primitives/simple_items.dart';
+import 'package:devtools_app/src/shared/diagnostics/diagnostics_node.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_app/src/shared/notifications.dart';
 import 'package:devtools_app/src/shared/preferences.dart';
@@ -102,143 +102,157 @@ void main() {
     fakeExtensionManager.fakeFrame();
   }
 
-  testWidgetsWithWindowSize('builds its tab', windowSize,
-      (WidgetTester tester) async {
-    await tester.pumpWidget(buildInspectorScreen());
-    await tester.pumpAndSettle();
-    expect(find.byType(InspectorScreenBody), findsOneWidget);
-  });
+  testWidgetsWithWindowSize(
+    'builds its tab',
+    windowSize,
+    (WidgetTester tester) async {
+      await tester.pumpWidget(buildInspectorScreen());
+      await tester.pumpAndSettle();
+      expect(find.byType(InspectorScreenBody), findsOneWidget);
+    },
+  );
 
   group('Widget Errors', () {
     // Display of error navigator/indicators is tested by a golden in
     // inspector_integration_test.dart
 
     testWidgetsWithWindowSize(
-        'does not render error navigator if no errors', windowSize,
-        (WidgetTester tester) async {
+      'does not render error navigator if no errors',
+      windowSize,
+      (WidgetTester tester) async {
+        await tester.pumpWidget(buildInspectorScreen());
+        expect(find.byType(ErrorNavigator), findsNothing);
+      },
+    );
+  });
+
+  testWidgetsWithWindowSize(
+    'builds with no data',
+    windowSize,
+    (WidgetTester tester) async {
+      // Make sure the window is wide enough to display description text.
+
       await tester.pumpWidget(buildInspectorScreen());
-      expect(find.byType(ErrorNavigator), findsNothing);
-    });
-  });
-
-  testWidgetsWithWindowSize('builds with no data', windowSize,
-      (WidgetTester tester) async {
-    // Make sure the window is wide enough to display description text.
-
-    await tester.pumpWidget(buildInspectorScreen());
-    expect(find.byType(InspectorScreenBody), findsOneWidget);
-    expect(find.byTooltip('Refresh Tree'), findsOneWidget);
-    expect(find.text(extensions.debugPaint.title), findsOneWidget);
-    // Make sure there is not an overflow if the window is narrow.
-    // TODO(jacobr): determine why there are overflows in the test environment
-    // but not on the actual device for this cae.
-    // await setWindowSize(const Size(1000.0, 1200.0));
-    // Verify that description text is no-longer shown.
-    // expect(find.text(extensions.debugPaint.description), findsOneWidget);
-  });
+      expect(find.byType(InspectorScreenBody), findsOneWidget);
+      expect(find.byTooltip('Refresh Tree'), findsOneWidget);
+      expect(find.text(extensions.debugPaint.title), findsOneWidget);
+      // Make sure there is not an overflow if the window is narrow.
+      // TODO(jacobr): determine why there are overflows in the test environment
+      // but not on the actual device for this cae.
+      // await setWindowSize(const Size(1000.0, 1200.0));
+      // Verify that description text is no-longer shown.
+      // expect(find.text(extensions.debugPaint.description), findsOneWidget);
+    },
+  );
 
   testWidgetsWithWindowSize(
-      'Test toggling service extension buttons', windowSize,
-      (WidgetTester tester) async {
-    mockExtensions();
-    expect(
-      fakeExtensionManager
-          .extensionValueOnDevice[extensions.debugPaint.extension],
-      isFalse,
-    );
-    expect(
-      fakeExtensionManager.extensionValueOnDevice[
-          extensions.toggleOnDeviceWidgetInspector.extension],
-      isTrue,
-    );
+    'Test toggling service extension buttons',
+    windowSize,
+    (WidgetTester tester) async {
+      mockExtensions();
+      expect(
+        fakeExtensionManager
+            .extensionValueOnDevice[extensions.debugPaint.extension],
+        isFalse,
+      );
+      expect(
+        fakeExtensionManager.extensionValueOnDevice[
+            extensions.toggleOnDeviceWidgetInspector.extension],
+        isTrue,
+      );
 
-    await tester.pumpWidget(buildInspectorScreen());
+      await tester.pumpWidget(buildInspectorScreen());
 
-    expect(
-      fakeExtensionManager
-          .extensionValueOnDevice[extensions.toggleSelectWidgetMode.extension],
-      isTrue,
-    );
+      expect(
+        fakeExtensionManager.extensionValueOnDevice[
+            extensions.toggleSelectWidgetMode.extension],
+        isTrue,
+      );
 
-    // We need a frame to find out that the service extension state has changed.
-    expect(find.byType(InspectorScreenBody), findsOneWidget);
-    expect(
-      find.text(extensions.toggleSelectWidgetMode.title),
-      findsOneWidget,
-    );
-    expect(find.text(extensions.debugPaint.title), findsOneWidget);
-    await tester.pump();
-    await tester.tap(find.text(extensions.toggleSelectWidgetMode.title));
-    expect(
-      fakeExtensionManager
-          .extensionValueOnDevice[extensions.toggleSelectWidgetMode.extension],
-      isFalse,
-    );
-    // Verify the the other service extension's state hasn't changed.
-    expect(
-      fakeExtensionManager
-          .extensionValueOnDevice[extensions.debugPaint.extension],
-      isFalse,
-    );
+      // We need a frame to find out that the service extension state has changed.
+      expect(find.byType(InspectorScreenBody), findsOneWidget);
+      expect(
+        find.text(extensions.toggleSelectWidgetMode.title),
+        findsOneWidget,
+      );
+      expect(find.text(extensions.debugPaint.title), findsOneWidget);
+      await tester.pump();
+      await tester.tap(find.text(extensions.toggleSelectWidgetMode.title));
+      expect(
+        fakeExtensionManager.extensionValueOnDevice[
+            extensions.toggleSelectWidgetMode.extension],
+        isFalse,
+      );
+      // Verify the other service extension's state hasn't changed.
+      expect(
+        fakeExtensionManager
+            .extensionValueOnDevice[extensions.debugPaint.extension],
+        isFalse,
+      );
 
-    await tester.tap(find.text(extensions.toggleSelectWidgetMode.title));
-    expect(
-      fakeExtensionManager
-          .extensionValueOnDevice[extensions.toggleSelectWidgetMode.extension],
-      isTrue,
-    );
+      await tester.tap(find.text(extensions.toggleSelectWidgetMode.title));
+      expect(
+        fakeExtensionManager.extensionValueOnDevice[
+            extensions.toggleSelectWidgetMode.extension],
+        isTrue,
+      );
 
-    await tester.tap(find.text(extensions.debugPaint.title));
-    expect(
-      fakeExtensionManager
-          .extensionValueOnDevice[extensions.debugPaint.extension],
-      isTrue,
-    );
-  });
+      await tester.tap(find.text(extensions.debugPaint.title));
+      expect(
+        fakeExtensionManager
+            .extensionValueOnDevice[extensions.debugPaint.extension],
+        isTrue,
+      );
+    },
+  );
 
   testWidgetsWithWindowSize(
-      'Test toggling service extension buttons with no extensions available',
-      windowSize, (WidgetTester tester) async {
-    mockNoExtensionsAvailable();
-    expect(
-      fakeExtensionManager
-          .extensionValueOnDevice[extensions.debugPaint.extension],
-      isFalse,
-    );
-    expect(
-      fakeExtensionManager.extensionValueOnDevice[
-          extensions.toggleOnDeviceWidgetInspector.extension],
-      isTrue,
-    );
+    'Test toggling service extension buttons with no extensions available',
+    windowSize,
+    (WidgetTester tester) async {
+      mockNoExtensionsAvailable();
+      expect(
+        fakeExtensionManager
+            .extensionValueOnDevice[extensions.debugPaint.extension],
+        isFalse,
+      );
+      expect(
+        fakeExtensionManager.extensionValueOnDevice[
+            extensions.toggleOnDeviceWidgetInspector.extension],
+        isTrue,
+      );
 
-    await tester.pumpWidget(buildInspectorScreen());
-    await tester.pump();
-    expect(find.byType(InspectorScreenBody), findsOneWidget);
-    expect(
-      find.text(extensions.toggleOnDeviceWidgetInspector.title),
-      findsOneWidget,
-    );
-    expect(find.text(extensions.debugPaint.title), findsOneWidget);
-    await tester.pump();
+      await tester.pumpWidget(buildInspectorScreen());
+      await tester.pump();
+      expect(find.byType(InspectorScreenBody), findsOneWidget);
+      expect(
+        find.text(extensions.toggleOnDeviceWidgetInspector.title),
+        findsOneWidget,
+      );
+      expect(find.text(extensions.debugPaint.title), findsOneWidget);
+      await tester.pump();
 
-    await tester.tap(find.text(extensions.toggleOnDeviceWidgetInspector.title));
-    // Verify the service extension state has not changed.
-    expect(
-      fakeExtensionManager.extensionValueOnDevice[
-          extensions.toggleOnDeviceWidgetInspector.extension],
-      isTrue,
-    );
-    await tester.tap(find.text(extensions.toggleOnDeviceWidgetInspector.title));
-    // Verify the service extension state has not changed.
-    expect(
-      fakeExtensionManager.extensionValueOnDevice[
-          extensions.toggleOnDeviceWidgetInspector.extension],
-      isTrue,
-    );
+      await tester
+          .tap(find.text(extensions.toggleOnDeviceWidgetInspector.title));
+      // Verify the service extension state has not changed.
+      expect(
+        fakeExtensionManager.extensionValueOnDevice[
+            extensions.toggleOnDeviceWidgetInspector.extension],
+        isTrue,
+      );
+      await tester
+          .tap(find.text(extensions.toggleOnDeviceWidgetInspector.title));
+      // Verify the service extension state has not changed.
+      expect(
+        fakeExtensionManager.extensionValueOnDevice[
+            extensions.toggleOnDeviceWidgetInspector.extension],
+        isTrue,
+      );
 
-    // TODO(jacobr): also verify that the service extension buttons look
-    // visually disabled.
-  });
+      // TODO(jacobr): also verify that the service extension buttons look
+      // visually disabled.
+    },
+  );
 
   group('LayoutDetailsTab', () {
     final renderObjectJson = jsonDecode(
@@ -285,39 +299,44 @@ void main() {
       null,
     );
     final treeNode = InspectorTreeNode()..diagnostic = diagnostic;
-    testWidgetsWithWindowSize('should render StoryOfYourFlexWidget', windowSize,
-        (WidgetTester tester) async {
-      final controller = TestInspectorController()..setSelectedNode(treeNode);
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: LayoutExplorerTab(
-              controller: controller,
+    testWidgetsWithWindowSize(
+      'should render StoryOfYourFlexWidget',
+      windowSize,
+      (WidgetTester tester) async {
+        final controller = TestInspectorController()..setSelectedNode(treeNode);
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: LayoutExplorerTab(
+                controller: controller,
+              ),
             ),
           ),
-        ),
-      );
-      expect(find.byType(FlexLayoutExplorerWidget), findsOneWidget);
-    });
+        );
+        expect(find.byType(FlexLayoutExplorerWidget), findsOneWidget);
+      },
+    );
 
     testWidgetsWithWindowSize(
-        'should listen to controller selection event', windowSize,
-        (WidgetTester tester) async {
-      final controller = TestInspectorController();
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: LayoutExplorerTab(
-              controller: controller,
+      'should listen to controller selection event',
+      windowSize,
+      (WidgetTester tester) async {
+        final controller = TestInspectorController();
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: LayoutExplorerTab(
+                controller: controller,
+              ),
             ),
           ),
-        ),
-      );
-      expect(find.byType(FlexLayoutExplorerWidget), findsNothing);
-      controller.setSelectedNode(treeNode);
-      await tester.pumpAndSettle();
-      expect(find.byType(FlexLayoutExplorerWidget), findsOneWidget);
-    });
+        );
+        expect(find.byType(FlexLayoutExplorerWidget), findsNothing);
+        controller.setSelectedNode(treeNode);
+        await tester.pumpAndSettle();
+        expect(find.byType(FlexLayoutExplorerWidget), findsOneWidget);
+      },
+    );
   });
 
   group(
@@ -330,32 +349,34 @@ void main() {
       });
 
       testWidgetsWithWindowSize(
-          'can update hover inspection setting', windowSize,
-          (WidgetTester tester) async {
-        await tester.pumpWidget(buildInspectorScreen());
+        'can update hover inspection setting',
+        windowSize,
+        (WidgetTester tester) async {
+          await tester.pumpWidget(buildInspectorScreen());
 
-        await tester.tap(find.byType(SettingsOutlinedButton));
-        await tester.pumpAndSettle();
-        expect(
-          find.byType(FlutterInspectorSettingsDialog),
-          findsOneWidget,
-        );
+          await tester.tap(find.byType(SettingsOutlinedButton));
+          await tester.pumpAndSettle();
+          expect(
+            find.byType(FlutterInspectorSettingsDialog),
+            findsOneWidget,
+          );
 
-        final hoverCheckBoxSetting = find.ancestor(
-          of: find.richTextContaining('Enable hover inspection'),
-          matching: find.byType(CheckboxSetting),
-        );
-        final hoverModeCheckBox = find.descendant(
-          of: hoverCheckBoxSetting,
-          matching: find.byType(NotifierCheckbox),
-        );
-        await tester.tap(hoverModeCheckBox);
-        await tester.pumpAndSettle();
-        expect(
-          preferences.inspector.hoverEvalModeEnabled.value,
-          !startingHoverEvalModeValue,
-        );
-      });
+          final hoverCheckBoxSetting = find.ancestor(
+            of: find.richTextContaining('Enable hover inspection'),
+            matching: find.byType(CheckboxSetting),
+          );
+          final hoverModeCheckBox = find.descendant(
+            of: hoverCheckBoxSetting,
+            matching: find.byType(NotifierCheckbox),
+          );
+          await tester.tap(hoverModeCheckBox);
+          await tester.pumpAndSettle();
+          expect(
+            preferences.inspector.hoverEvalModeEnabled.value,
+            !startingHoverEvalModeValue,
+          );
+        },
+      );
     },
   );
 

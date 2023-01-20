@@ -60,7 +60,7 @@ class CurlCommand {
         parts.addAll([
           if (multiline) _lineBreak,
           '--header',
-          _escapeString('$headerKey: $headerValue')
+          _escapeString('$headerKey: $headerValue'),
         ]);
       }
     }
@@ -95,10 +95,10 @@ class CurlCommand {
     return "'$content'";
   }
 
-  static String? _unwrapHeaderValue(dynamic value) {
+  static String? _unwrapHeaderValue(Object? value) {
     if (value is String) {
       return value;
-    } else if (value is List<dynamic>) {
+    } else if (value is List<Object?>) {
       return value.safeFirst as String?;
     }
 

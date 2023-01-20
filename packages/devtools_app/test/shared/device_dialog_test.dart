@@ -17,9 +17,9 @@ void main() {
   const windowSize = Size(2000.0, 1000.0);
 
   group('DeviceDialog', () {
-    Future<void> initServiceManager({
+    void initServiceManager({
       bool flutterVersionServiceAvailable = true,
-    }) async {
+    }) {
       final availableServices = [
         if (flutterVersionServiceAvailable)
           registrations.flutterVersion.service,
@@ -44,8 +44,8 @@ void main() {
 
     DeviceDialog deviceDialog;
 
-    setUp(() async {
-      await initServiceManager();
+    setUp(() {
+      initServiceManager();
     });
 
     testWidgetsWithWindowSize('builds dialog for dart web app', windowSize,
@@ -282,7 +282,7 @@ void main() {
       expect(find.richText('VM Flags'), findsOneWidget);
       expect(find.richText('flag 1 name'), findsOneWidget);
       final RichText commentText = tester.firstWidget<RichText>(
-        findSubstring(vmFlagsDialog, 'flag 1 comment'),
+        findSubstring('flag 1 comment'),
       );
       expect(commentText, isNotNull);
     });

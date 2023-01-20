@@ -33,24 +33,31 @@ class _DebuggingControlsState extends State<DebuggingControls>
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (!initController()) return;
-    addAutoDisposeListener(controller.isPaused);
+    addAutoDisposeListener(
+      serviceManager.isolateManager.mainIsolateState!.isPaused,
+    );
     addAutoDisposeListener(controller.resuming);
     addAutoDisposeListener(controller.stackFramesWithLocation);
   }
 
   @override
   Widget build(BuildContext context) {
-    final isPaused = controller.isPaused.value;
     final resuming = controller.resuming.value;
     final hasStackFrames = controller.stackFramesWithLocation.value.isNotEmpty;
     final isSystemIsolate = controller.isSystemIsolate;
-    final canStep = isPaused && !resuming && hasStackFrames && !isSystemIsolate;
+    final canStep = serviceManager.isMainIsolatePaused &&
+        !resuming &&
+        hasStackFrames &&
+        !isSystemIsolate;
     final isVmApp = serviceManager.connectedApp?.isRunningOnDartVM ?? false;
     return SizedBox(
       height: defaultButtonHeight,
       child: Row(
         children: [
-          _pauseAndResumeButtons(isPaused: isPaused, resuming: resuming),
+          _pauseAndResumeButtons(
+            isPaused: serviceManager.isMainIsolatePaused,
+            resuming: resuming,
+          ),
           const SizedBox(width: denseSpacing),
           _stepButtons(canStep: canStep),
           const SizedBox(width: denseSpacing),
@@ -79,7 +86,9 @@ class _DebuggingControlsState extends State<DebuggingControls>
             icon: Codicons.debugPause,
             autofocus: true,
             // Disable when paused or selected isolate is a system isolate.
-            onPressed: (isPaused || isSystemIsolate) ? null : controller.pause,
+            onPressed: (isPaused || isSystemIsolate)
+                ? null
+                : () => unawaited(controller.pause()),
           ),
           LeftBorder(
             child: DebuggerButton(
@@ -88,7 +97,7 @@ class _DebuggingControlsState extends State<DebuggingControls>
               // Enable while paused + not resuming and selected isolate is not
               // a system isolate.
               onPressed: ((isPaused && !resuming) && !isSystemIsolate)
-                  ? controller.resume
+                  ? () => unawaited(controller.resume())
                   : null,
             ),
           ),
@@ -104,20 +113,20 @@ class _DebuggingControlsState extends State<DebuggingControls>
           DebuggerButton(
             title: 'Step Over',
             icon: Codicons.debugStepOver,
-            onPressed: canStep ? controller.stepOver : null,
+            onPressed: canStep ? () => unawaited(controller.stepOver()) : null,
           ),
           LeftBorder(
             child: DebuggerButton(
               title: 'Step In',
               icon: Codicons.debugStepInto,
-              onPressed: canStep ? controller.stepIn : null,
+              onPressed: canStep ? () => unawaited(controller.stepIn()) : null,
             ),
           ),
           LeftBorder(
             child: DebuggerButton(
               title: 'Step Out',
               icon: Codicons.debugStepOut,
-              onPressed: canStep ? controller.stepOut : null,
+              onPressed: canStep ? () => unawaited(controller.stepOut()) : null,
             ),
           ),
         ],
@@ -195,7 +204,10 @@ class CodeStatisticsControls extends StatelessWidget {
                   tooltip: 'Refresh statistics',
                   outlined: false,
                   onPressed: showCodeCoverage || showProfileInformation
-                      ? controller.codeViewController.refreshCodeStatistics
+                      ? () => unawaited(
+                            controller.codeViewController
+                                .refreshCodeStatistics(),
+                          )
                       : null,
                   minScreenWidthForTextBeforeScaling: 20000,
                   icon: Icons.refresh,
@@ -240,7 +252,7 @@ class BreakOnExceptionsControl extends StatelessWidget {
                 child: Text(
                   isInSmallMode ? mode.name : mode.description,
                 ),
-              )
+              ),
           ],
         );
       },

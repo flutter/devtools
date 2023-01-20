@@ -8,9 +8,11 @@ import 'package:devtools_app/src/screens/provider/instance_viewer/instance_detai
 import 'package:devtools_app/src/screens/provider/instance_viewer/instance_providers.dart';
 import 'package:devtools_app/src/screens/provider/provider_nodes.dart';
 import 'package:devtools_app/src/shared/config_specific/ide_theme/ide_theme.dart';
+import 'package:devtools_app/src/shared/console/eval/eval_service.dart';
 import 'package:devtools_app/src/shared/eval_on_dart_library.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_app/src/shared/primitives/storage.dart';
+import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vm_service/vm_service.dart' hide SentinelException;
@@ -33,6 +35,7 @@ void main() async {
     setGlobal(IdeTheme, getIdeTheme());
     setGlobal(BreakpointManager, BreakpointManager());
     setGlobal(Storage, FlutterTestStorage());
+    setGlobal(EvalService, MockEvalService());
 
     await env.setupEnvironment(
       config: const FlutterRunConfiguration(withDebugger: true),
@@ -87,8 +90,11 @@ void main() async {
       expect(
         await providersSub.read(),
         [
-          isA<ProviderNode>()
-              .having((e) => e.type, 'type', 'ChangeNotifierProvider<Counter>'),
+          isA<ProviderNode>().having(
+            (e) => e.type,
+            'type',
+            'ChangeNotifierProvider<Counter>',
+          ),
           isA<ProviderNode>().having((e) => e.type, 'type', 'Provider<int>'),
         ],
       );
@@ -630,7 +636,11 @@ void main() async {
           expect(
             complexProperties['string'],
             isA<StringInstance>()
-                .having((e) => e.displayString, 'displayString', 'hello world')
+                .having(
+                  (e) => e.displayString,
+                  'displayString',
+                  'hello world',
+                )
                 .having((e) => e.setter, 'setter', isNotNull),
           );
 
@@ -738,7 +748,11 @@ void main() async {
                   .having((e) => e.displayString, 'displayString', 'string')
                   .having((e) => e.setter, 'setter', isNotNull),
               isA<StringInstance>()
-                  .having((e) => e.displayString, 'displayString', 'number_key')
+                  .having(
+                    (e) => e.displayString,
+                    'displayString',
+                    'number_key',
+                  )
                   .having((e) => e.setter, 'setter', isNotNull),
               isA<StringInstance>()
                   .having((e) => e.displayString, 'displayString', 'bool_key')

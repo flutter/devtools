@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app/src/screens/memory/shared/heap/model.dart';
 import 'package:devtools_app/src/screens/memory/shared/heap/spanning_tree.dart';
-import 'package:devtools_app/src/screens/memory/shared/primitives/class_name.dart';
+import 'package:devtools_app/src/shared/memory/adapted_heap_data.dart';
+import 'package:devtools_app/src/shared/memory/class_name.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -230,14 +230,9 @@ class _SizeTest {
     required this.unreachableSize,
   }) : assert(_assertHeapIndexIsCode(heap));
 
-  /// For convenience of testing each heap object has code equal to the
-  /// index in array.
   final AdaptedHeapData heap;
-
   final String name;
-
   final int rootRetainedSize;
-
   final int unreachableSize;
 }
 
@@ -272,6 +267,8 @@ AdaptedHeapObject _createOneByteWeakObject(
   return result;
 }
 
+/// For convenience of testing each heap object has code equal to the
+/// index in array.
 bool _assertHeapIndexIsCode(AdaptedHeapData heap) => heap.objects
     .asMap()
     .entries

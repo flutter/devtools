@@ -4,9 +4,9 @@
 
 import 'package:flutter/foundation.dart';
 
+import '../../../../../shared/memory/adapted_heap_data.dart';
 import '../../../../../shared/primitives/auto_dispose.dart';
 import '../../../shared/heap/heap.dart';
-import '../../../shared/heap/model.dart';
 
 abstract class SnapshotItem extends DisposableController {
   /// Number, that if shown in name, should be unique in the list.
@@ -44,7 +44,7 @@ class SnapshotInstanceItem extends SnapshotItem {
 
   AdaptedHeap? heap;
 
-  /// This method is expected to be called once when heap is actually recieved.
+  /// This method is expected to be called once when heap is actually received.
   void initializeHeapData(AdaptedHeapData? data) {
     assert(heap == null);
     if (data != null) heap = AdaptedHeap(data);
@@ -60,4 +60,6 @@ class SnapshotInstanceItem extends SnapshotItem {
 
   @override
   bool get hasData => heap != null;
+
+  int? get totalSize => heap?.data.totalSize;
 }

@@ -41,11 +41,11 @@ void main() {
     testWidgets('content renders correctly', (WidgetTester tester) async {
       await tester.pumpWidget(wrap(aboutDialog));
       expect(find.text('About DevTools'), findsOneWidget);
-      expect(findSubstring(aboutDialog, devtools.version), findsOneWidget);
+      expect(findSubstring(devtools.version), findsOneWidget);
       expect(find.text('release notes'), findsOneWidget);
       expect(find.textContaining('Encountered an issue?'), findsOneWidget);
       expect(
-        findSubstring(aboutDialog, 'github.com/flutter/devtools/issues/new'),
+        findSubstring('github.com/flutter/devtools/issues/new'),
         findsOneWidget,
       );
       expect(find.text('Contributing'), findsOneWidget);
@@ -53,10 +53,10 @@ void main() {
         find.textContaining('Want to contribute to DevTools?'),
         findsOneWidget,
       );
-      expect(findSubstring(aboutDialog, 'CONTRIBUTING'), findsOneWidget);
+      expect(findSubstring('CONTRIBUTING'), findsOneWidget);
       expect(find.textContaining('connect with us on'), findsOneWidget);
       expect(
-        findSubstring(aboutDialog, 'Discord'),
+        findSubstring('Discord'),
         findsOneWidget,
       );
     });

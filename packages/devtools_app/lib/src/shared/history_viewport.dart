@@ -13,7 +13,7 @@ import 'theme.dart';
 /// [HistoryManager]. Includes built-in controls for navigating back and forth
 /// through the content stored in the provided [HistoryManager].
 ///
-/// [history] is the [HistoryManger] that contains the data to be displayed.
+/// [history] is the [HistoryManager] that contains the data to be displayed.
 ///
 /// [contentBuilder] is invoked with the currently selected historical data
 /// when building the contents of the viewport.
@@ -58,27 +58,11 @@ class _HistoryViewportState<T> extends State<HistoryViewport<T>> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return OutlineDecoration(
-      child: ValueListenableBuilder<T?>(
-        valueListenable: widget.history.current,
-        builder: (context, T? current, _) {
-          return Column(
-            children: [
-              _buildTitle(context, theme),
-              widget.contentBuilder(context, current),
-            ],
-          );
-        },
-      ),
-    );
-  }
-
-  Widget _buildTitle(BuildContext context, ThemeData theme) {
     final title = widget.generateTitle == null
         ? '  '
         : widget.generateTitle!(widget.history.current.value);
     final defaultTitleStyle = theme.textTheme.titleSmall ?? const TextStyle();
-    return debuggerSectionTitle(
+    final titleWidget = debuggerSectionTitle(
       theme,
       child: Row(
         children: [
@@ -149,6 +133,19 @@ class _HistoryViewportState<T> extends State<HistoryViewport<T>> {
             ],
           ],
         ],
+      ),
+    );
+    return OutlineDecoration(
+      child: ValueListenableBuilder<T?>(
+        valueListenable: widget.history.current,
+        builder: (context, T? current, _) {
+          return Column(
+            children: [
+              titleWidget,
+              widget.contentBuilder(context, current),
+            ],
+          );
+        },
       ),
     );
   }

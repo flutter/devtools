@@ -4,6 +4,7 @@
 
 import 'package:vm_service/vm_service.dart';
 
+import '../../shared/diagnostics/source_location.dart';
 import '../../shared/globals.dart';
 import '../../shared/primitives/trees.dart';
 import '../vm_developer/vm_service_private_extensions.dart';
@@ -85,7 +86,7 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
         final service = serviceManager.service!;
         final isolate = serviceManager.isolateManager.selectedIsolate.value!;
         final libRef = serviceManager.isolateManager
-            .isolateDebuggerState(isolate)!
+            .isolateState(isolate)
             .isolateNow!
             .libraries!
             .firstWhere(
@@ -193,7 +194,7 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
     // part of a package. Otherwise, it's a file path and its directory should
     // appear near the top of the list anyway.
     final rootLibUri = serviceManager
-        .isolateManager.mainIsolateDebuggerState?.isolateNow?.rootLib?.uri;
+        .isolateManager.mainIsolateState?.isolateNow?.rootLib?.uri;
     if (rootLibUri != null) {
       if (rootLibUri.startsWith('package:') ||
           rootLibUri.startsWith('google3:')) {
@@ -342,11 +343,19 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
     }
     ScriptRef? scriptRef = script;
     int? tokenPos = 0;
-    if (object != null &&
-        (object is FieldRef || object is FuncRef || object is ClassRef)) {
-      final location = (object as dynamic).location;
-      tokenPos = location.tokenPos;
-      scriptRef = location.script;
+    final object = this.object;
+
+    SourceLocation? sourceLocation;
+    if (object is FieldRef) {
+      sourceLocation = object.location;
+    } else if (object is FuncRef) {
+      sourceLocation = object.location;
+    } else if (object is ClassRef) {
+      sourceLocation = object.location;
+    }
+    if (sourceLocation != null) {
+      tokenPos = sourceLocation.tokenPos;
+      scriptRef = sourceLocation.script;
     }
 
     if (scriptRef != null) {

@@ -5,8 +5,8 @@
 import 'dart:convert';
 
 import 'package:devtools_app/src/screens/memory/panes/leaks/diagnostics/model.dart';
-import 'package:devtools_app/src/screens/memory/shared/heap/model.dart';
-import 'package:devtools_app/src/screens/memory/shared/primitives/class_name.dart';
+import 'package:devtools_app/src/shared/memory/adapted_heap_data.dart';
+import 'package:devtools_app/src/shared/memory/class_name.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker/devtools_integration.dart';
 
@@ -16,7 +16,7 @@ void main() {
       reports: [
         LeakReport(
           type: 'type',
-          context: const <String, dynamic>{},
+          context: const <String, Object?>{},
           code: 2,
           trackedClass: 'trackedClass',
         )

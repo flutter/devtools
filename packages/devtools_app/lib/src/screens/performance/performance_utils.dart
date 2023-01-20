@@ -7,6 +7,7 @@ import 'package:flutter/foundation.dart';
 import '../../shared/primitives/utils.dart';
 import 'performance_model.dart';
 
+// TODO(jacobr): make this a top level method.
 // ignore: avoid_classes_with_only_static_members
 class PerformanceUtils {
   static String computeEventGroupKey(

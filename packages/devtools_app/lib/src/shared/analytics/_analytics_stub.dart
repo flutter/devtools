@@ -2,6 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// Avoid unused parameters does not play well with conditional imports.
+// ignore_for_file: avoid-unused-parameters
+// ignore_for_file: avoid-redundant-async
+library _analytics_stub;
+
 import 'dart:async';
 
 import 'analytics_common.dart';

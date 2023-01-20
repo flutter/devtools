@@ -35,15 +35,17 @@ class StateUpdateDialog extends StatelessWidget {
     super.key,
     required this.title,
     required this.child,
-    required this.helpText,
     required this.onResetDefaults,
     required this.onApply,
     this.onCancel,
     this.dialogWidth,
+    this.helpText,
+    this.helpBuilder,
   });
 
   final String title;
   final String? helpText;
+  final Widget Function(BuildContext)? helpBuilder;
   final VoidCallback? onResetDefaults;
   final VoidCallback? onApply;
   final VoidCallback? onCancel;
@@ -70,6 +72,10 @@ class StateUpdateDialog extends StatelessWidget {
               const SizedBox(height: defaultSpacing),
               DialogHelpText(helpText: helpText!),
             ],
+            if (helpBuilder != null) ...[
+              const SizedBox(height: defaultSpacing),
+              helpBuilder!.call(context),
+            ]
           ],
         ),
       ),
@@ -106,13 +112,15 @@ class _StateUpdateDialogTitle extends StatelessWidget {
 class DialogHelpText extends StatelessWidget {
   const DialogHelpText({super.key, required this.helpText});
 
+  static TextStyle? textStyle(context) => Theme.of(context).subtleTextStyle;
+
   final String helpText;
 
   @override
   Widget build(BuildContext context) {
     return Text(
       helpText,
-      style: Theme.of(context).subtleTextStyle,
+      style: textStyle(context),
     );
   }
 }

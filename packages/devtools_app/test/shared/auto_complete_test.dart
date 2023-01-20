@@ -6,6 +6,9 @@ import 'package:devtools_app/src/shared/ui/search.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+// Set debug to true displays editing parts.
+bool debug = false;
+
 void main() {
   group('AutoComplete', () {
     setUp(() {
@@ -22,11 +25,7 @@ void main() {
       );
     }
 
-    // Set debug to true displays editing parts.
-    const debug = false;
-
     void outputResult(int num, EditingParts editingParts) {
-      // ignore: dead_code
       if (debug) {
         print(
           '$num. left=${editingParts.leftSide}, '

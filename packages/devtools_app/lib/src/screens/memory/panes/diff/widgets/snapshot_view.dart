@@ -5,11 +5,14 @@
 import 'package:flutter/material.dart';
 
 import '../../../../../shared/common_widgets.dart';
+import '../../../../../shared/globals.dart';
 import '../../../../../shared/split.dart';
 import '../../../shared/heap/heap.dart';
 import '../controller/diff_pane_controller.dart';
 import '../controller/heap_diff.dart';
+import '../controller/item_controller.dart';
 import 'class_details/class_details.dart';
+import 'class_filter.dart';
 import 'classes_table_diff.dart';
 import 'classes_table_single.dart';
 
@@ -40,15 +43,32 @@ class SnapshotView extends StatelessWidget {
 
         late Widget classTable;
 
+        final filter = controller.core.classFilter;
+
+        final classFilterButton = ClassFilterButton(
+          filter: filter,
+          onChanged: controller.applyFilter,
+          rootPackage: serviceManager.rootInfoNow().package,
+        );
+
         if (singleClasses != null) {
+          final totalSize =
+              (controller.core.selectedItem as SnapshotInstanceItem).totalSize;
           classTable = ClassesTableSingle(
             classes: singleClasses,
             selection: controller.derived.selectedSingleClassStats,
+            totalSize: totalSize!,
+            classFilterButton: classFilterButton,
+            heap:
+                (controller.derived.selectedItem.value as SnapshotInstanceItem)
+                    .heap!
+                    .data,
           );
         } else if (diffClasses != null) {
           classTable = ClassesTableDiff(
             classes: controller.derived.diffClassesToShow.value!,
             selection: controller.derived.selectedDiffClassStats,
+            classFilterButton: classFilterButton,
           );
         } else {
           throw StateError('singleClasses or diffClasses should not be null.');
@@ -61,7 +81,7 @@ class SnapshotView extends StatelessWidget {
             selection: controller.derived.selectedPathEntry,
             isDiff: classes is DiffHeapClasses,
             pathController: controller.retainingPathController,
-            className: controller.core.className?.className,
+            className: controller.core.className_?.className,
           ),
         );
 

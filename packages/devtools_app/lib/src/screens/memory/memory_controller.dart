@@ -19,9 +19,10 @@ import '../../shared/globals.dart';
 import '../../shared/primitives/auto_dispose.dart';
 import '../../shared/utils.dart';
 import 'memory_protocol.dart';
-import 'panes/allocation_profile/allocation_profile_table_view_controller.dart';
 import 'panes/chart/primitives.dart';
 import 'panes/diff/controller/diff_pane_controller.dart';
+import 'panes/profile/profile_pane_controller.dart';
+import 'panes/tracing/tracing_pane_controller.dart';
 import 'shared/heap/model.dart';
 import 'shared/primitives/memory_timeline.dart';
 
@@ -39,6 +40,34 @@ class OfflineFileException implements Exception {
   String toString() => message;
 }
 
+class MemoryFeatureControllers {
+  /// [diffPaneController] is passed for testability.
+  MemoryFeatureControllers(DiffPaneController? diffPaneController) {
+    diff = diffPaneController ?? DiffPaneController(SnapshotTaker());
+  }
+
+  late DiffPaneController diff;
+  ProfilePaneController profile = ProfilePaneController();
+  TracingPaneController tracing = TracingPaneController();
+
+  void reset() {
+    diff.dispose();
+    diff = DiffPaneController(SnapshotTaker());
+
+    profile.dispose();
+    profile = ProfilePaneController();
+
+    tracing.dispose();
+    tracing = TracingPaneController();
+  }
+
+  void dispose() {
+    tracing.dispose();
+    diff.dispose();
+    profile.dispose();
+  }
+}
+
 /// This class contains the business logic for [memory.dart].
 ///
 /// This class must not have direct dependencies on dart:html. This allows tests
@@ -48,8 +77,8 @@ class MemoryController extends DisposableController
   MemoryController({DiffPaneController? diffPaneController}) {
     memoryTimeline = MemoryTimeline(offline);
     memoryLog = _MemoryLog(this);
-    this.diffPaneController =
-        diffPaneController ?? DiffPaneController(SnapshotTaker());
+
+    controllers = MemoryFeatureControllers(diffPaneController);
 
     // Update the chart when the memorySource changes.
     addAutoDisposeListener(memorySourceNotifier, () async {
@@ -65,11 +94,8 @@ class MemoryController extends DisposableController
     });
   }
 
-  /// The controller is late to enable test injection.
-  late final DiffPaneController diffPaneController;
-
-  /// Controller for [AllocationProfileTableView].
-  final allocationProfileController = AllocationProfileTableViewController();
+  /// Sub-controllers of memory controller.
+  late final MemoryFeatureControllers controllers;
 
   /// Index of the selected feature tab.
   ///
@@ -214,8 +240,9 @@ class MemoryController extends DisposableController
         .value;
   }
 
-  void _handleConnectionStart(ServiceConnectionManager serviceManager) async {
+  void _handleConnectionStart(ServiceConnectionManager serviceManager) {
     _refreshShouldShowLeaksTab();
+
     if (_memoryTracker == null) {
       _memoryTracker = MemoryTracker(this);
       _memoryTracker!.start();
@@ -298,15 +325,16 @@ class MemoryController extends DisposableController
         isOfflineAndAndroidData || isConnectedToAndroidAndAndroidEnabled;
   }
 
-  void _handleConnectionStop(dynamic event) {
+  void _handleConnectionStop(Object? _) {
     _memoryTracker?.stop();
     _memoryTrackerController.add(_memoryTracker);
 
+    controllers.reset();
     _disconnectController.add(null);
     hasStopped = true;
   }
 
-  Future<void> startTimeline() async {
+  void startTimeline() {
     addAutoDisposeListener(
       serviceManager.isolateManager.selectedIsolate,
       _handleIsolateChanged,
@@ -373,6 +401,7 @@ class MemoryController extends DisposableController
     unawaited(_disconnectController.close());
     unawaited(_memoryTrackerController.close());
     _memoryTracker?.dispose();
+    controllers.dispose();
   }
 }
 
@@ -385,7 +414,7 @@ class _MemoryLog {
 
   MemoryController controller;
 
-  /// Persist the the live memory data to a JSON file in the /tmp directory.
+  /// Persist the live memory data to a JSON file in the /tmp directory.
   List<String> exportMemory() {
     ga.select(gac.memory, gac.export);
 
