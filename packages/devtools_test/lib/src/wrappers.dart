@@ -136,7 +136,7 @@ void testWidgetsWithContext(
       for (Type type in oldValues.keys) {
         final oldGlobal = oldValues[type];
         if (oldGlobal != null) {
-          setGlobal(type, oldValues[type]);
+          setGlobal(type, oldGlobal);
         } else {
           globals.remove(type);
         }
