@@ -3,8 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app/src/service/service_manager.dart';
+import 'package:devtools_app/src/shared/diagnostics/dart_object_node.dart';
 import 'package:devtools_app/src/shared/globals.dart';
-import 'package:devtools_app/src/shared/diagnostics/object_tree.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';

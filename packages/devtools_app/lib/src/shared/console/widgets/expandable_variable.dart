@@ -6,9 +6,9 @@ import 'dart:async';
 
 import 'package:flutter/material.dart' hide Stack;
 
-import '../../diagnostics/object_tree.dart';
 import '../../../shared/primitives/listenable.dart';
 import '../../../shared/tree.dart';
+import '../../diagnostics/dart_object_node.dart';
 import 'display_provider.dart';
 
 class ExpandableVariable extends StatelessWidget {

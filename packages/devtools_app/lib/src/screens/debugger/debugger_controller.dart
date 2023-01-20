@@ -10,9 +10,9 @@ import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../service/vm_service_wrapper.dart';
+import '../../shared/diagnostics/dart_object_node.dart';
 import '../../shared/diagnostics/source_location.dart';
 import '../../shared/globals.dart';
-import '../../shared/diagnostics/object_tree.dart';
 import '../../shared/primitives/auto_dispose.dart';
 import '../../shared/primitives/message_bus.dart';
 import '../../shared/primitives/utils.dart';

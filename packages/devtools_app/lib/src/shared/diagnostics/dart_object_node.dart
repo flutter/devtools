@@ -3,12 +3,9 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert';
 import 'dart:math';
-import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
-import 'package:stack_trace/stack_trace.dart' as stack_trace;
 import 'package:vm_service/vm_service.dart';
 
 import '../../screens/debugger/debugger_model.dart';
