@@ -7,7 +7,6 @@ import 'package:leak_tracker/devtools_integration.dart';
 
 import 'model.dart';
 
-// TODO(polina-c): create and link the section Leaks in DevTools documentation through enum [DocLinks].
 const linkToGuidance = 'https://github.com/dart-lang/leak_tracker';
 
 String analyzedLeaksToYaml({

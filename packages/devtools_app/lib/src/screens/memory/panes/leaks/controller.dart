@@ -67,9 +67,10 @@ class LeaksPaneController {
       if (message.matches(_lastLeakSummary)) return;
       _lastLeakSummary = message;
 
-      leakSummaryHistory.value =
-          '${formatDateTime(message.time)}: ${message.toMessage()}\n'
-          '${leakSummaryHistory.value}';
+      _addToLeakSummaryHistory(
+        '${formatDateTime(message.time)}: ${message.toMessage()}',
+      );
+
       return;
     }
 
@@ -92,6 +93,8 @@ class LeaksPaneController {
           await _invokeLeakExtension<RequestForLeakDetails, Leaks>(
         RequestForLeakDetails(),
       );
+
+      _addToLeakSummaryHistory('Collected leaks.');
 
       final notGCed = leakDetails.byType[LeakType.notGCed] ?? [];
 
@@ -185,5 +188,10 @@ class LeaksPaneController {
       case AppStatus.leaksFound:
         throw StateError('There is no UI message for ${AppStatus.leaksFound}.');
     }
+  }
+
+  void _addToLeakSummaryHistory(String entry) {
+    leakSummaryHistory.value = '$entry\n'
+        '${leakSummaryHistory.value}';
   }
 }
