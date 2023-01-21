@@ -43,6 +43,7 @@ Future<void> main() async {
       }
 
       bool equal = false;
+      double percentDiff = 1.0;
       if (goldenFile.existsSync()) {
         final goldenBytes = goldenFile.readAsBytesSync();
         equal = const DeepCollectionEquality().equals(
