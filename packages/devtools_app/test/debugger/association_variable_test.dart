@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app/src/service/service_manager.dart';
-import 'package:devtools_app/src/shared/diagnostics/values_node.dart';
+import 'package:devtools_app/src/shared/diagnostics/values_object_node.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -57,7 +57,7 @@ void main() {
         name: 'my-isolate',
         isSystemIsolate: false,
       );
-      final variable = ValuesNode.create(
+      final variable = ValuesObjectNode.create(
         BoundVariable(
           name: 'test',
           value: instance,
@@ -105,7 +105,7 @@ void main() {
           ),
         ],
       );
-      final variable = ValuesNode.create(
+      final variable = ValuesObjectNode.create(
         BoundVariable(
           name: 'test',
           value: instance,
@@ -153,7 +153,7 @@ void main() {
           ),
         ],
       );
-      final variable = ValuesNode.create(
+      final variable = ValuesObjectNode.create(
         BoundVariable(
           name: 'test',
           value: instance,
@@ -182,7 +182,7 @@ Matcher matchesVariable({
   required String? name,
   required Object value,
 }) {
-  return const TypeMatcher<ValuesNode>()
+  return const TypeMatcher<ValuesObjectNode>()
       .having(
         (v) => v.displayValue,
         'displayValue',

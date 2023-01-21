@@ -6,7 +6,7 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:devtools_app/src/service/service_manager.dart';
-import 'package:devtools_app/src/shared/diagnostics/values_node.dart';
+import 'package:devtools_app/src/shared/diagnostics/values_object_node.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/foundation.dart';
@@ -42,7 +42,7 @@ void main() {
       bytes: base64.encode(bytes.buffer.asUint8List()),
       length: 4,
     );
-    final variable = ValuesNode.create(
+    final variable = ValuesObjectNode.create(
       BoundVariable(
         name: 'test',
         value: instance,
@@ -73,7 +73,7 @@ void main() {
       bytes: base64.encode(bytes.buffer.asUint8List()),
       length: 4,
     );
-    final variable = ValuesNode.create(
+    final variable = ValuesObjectNode.create(
       BoundVariable(
         name: 'test',
         value: instance,
@@ -103,7 +103,7 @@ void main() {
       bytes: base64.encode(bytes.buffer.asUint8List()),
       length: 4,
     );
-    final variable = ValuesNode.create(
+    final variable = ValuesObjectNode.create(
       BoundVariable(
         name: 'test',
         value: instance,
@@ -133,7 +133,7 @@ void main() {
       bytes: base64.encode(bytes.buffer.asUint8List()),
       length: 4,
     );
-    final variable = ValuesNode.create(
+    final variable = ValuesObjectNode.create(
       BoundVariable(
         name: 'test',
         value: instance,
@@ -166,7 +166,7 @@ void main() {
         bytes: base64.encode(bytes.buffer.asUint8List()),
         length: 4,
       );
-      final variable = ValuesNode.create(
+      final variable = ValuesObjectNode.create(
         BoundVariable(
           name: 'test',
           value: instance,
@@ -198,7 +198,7 @@ void main() {
       bytes: base64.encode(bytes.buffer.asUint8List()),
       length: 4,
     );
-    final variable = ValuesNode.create(
+    final variable = ValuesObjectNode.create(
       BoundVariable(
         name: 'test',
         value: instance,
@@ -228,7 +228,7 @@ void main() {
       bytes: base64.encode(bytes.buffer.asUint8List()),
       length: 4,
     );
-    final variable = ValuesNode.create(
+    final variable = ValuesObjectNode.create(
       BoundVariable(
         name: 'test',
         value: instance,
@@ -258,7 +258,7 @@ void main() {
       bytes: base64.encode(bytes.buffer.asUint8List()),
       length: 4,
     );
-    final variable = ValuesNode.create(
+    final variable = ValuesObjectNode.create(
       BoundVariable(
         name: 'test',
         value: instance,
@@ -291,7 +291,7 @@ void main() {
         bytes: base64.encode(bytes.buffer.asUint8List()),
         length: 4,
       );
-      final variable = ValuesNode.create(
+      final variable = ValuesObjectNode.create(
         BoundVariable(
           name: 'test',
           value: instance,
@@ -324,7 +324,7 @@ void main() {
       bytes: base64.encode(bytes.buffer.asUint8List()),
       length: 4,
     );
-    final variable = ValuesNode.create(
+    final variable = ValuesObjectNode.create(
       BoundVariable(
         name: 'test',
         value: instance,
@@ -354,7 +354,7 @@ void main() {
       length: 4,
     );
 
-    final variable = ValuesNode.create(
+    final variable = ValuesObjectNode.create(
       BoundVariable(
         name: 'test',
         value: instance,
@@ -385,7 +385,7 @@ void main() {
       length: 4,
     );
 
-    final variable = ValuesNode.create(
+    final variable = ValuesObjectNode.create(
       BoundVariable(
         name: 'test',
         value: instance,
@@ -422,7 +422,7 @@ void main() {
       length: 4,
     );
 
-    final variable = ValuesNode.create(
+    final variable = ValuesObjectNode.create(
       BoundVariable(
         name: 'test',
         value: instance,
@@ -457,7 +457,7 @@ void main() {
       length: 4,
     );
 
-    final variable = ValuesNode.create(
+    final variable = ValuesObjectNode.create(
       BoundVariable(
         name: 'test',
         value: instance,
@@ -491,7 +491,7 @@ void main() {
         id: objectId,
         length: 332,
       );
-      final variable = ValuesNode.create(
+      final variable = ValuesObjectNode.create(
         BoundVariable(
           name: 'test',
           value: instance,
@@ -518,7 +518,7 @@ void main() {
         id: objectId,
         length: 300,
       );
-      final variable = ValuesNode.create(
+      final variable = ValuesObjectNode.create(
         BoundVariable(
           name: 'test',
           value: instance,
@@ -541,10 +541,10 @@ Matcher matchesVariable({
   required String name,
   required Object value,
 }) {
-  return const TypeMatcher<ValuesNode>().having(
+  return const TypeMatcher<ValuesObjectNode>().having(
     (v) => v,
     'boundVar',
-    const TypeMatcher<ValuesNode>()
+    const TypeMatcher<ValuesObjectNode>()
         .having((v) => v.name, 'name', equals(name))
         .having((v) => v.ref!.value, 'value', equals(value)),
   );
@@ -554,10 +554,10 @@ Matcher matchesVariableGroup({
   required int start,
   required int end,
 }) {
-  return const TypeMatcher<ValuesNode>().having(
+  return const TypeMatcher<ValuesObjectNode>().having(
     (v) => v,
     'boundVar',
-    const TypeMatcher<ValuesNode>()
+    const TypeMatcher<ValuesObjectNode>()
         .having((v) => v.text, 'text', equals('[$start - $end]')),
   );
 }

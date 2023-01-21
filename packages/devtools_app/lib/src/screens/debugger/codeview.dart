@@ -13,7 +13,7 @@ import 'package:vm_service/vm_service.dart' hide Stack;
 import '../../shared/common_widgets.dart';
 import '../../shared/config_specific/logger/logger.dart';
 import '../../shared/console/widgets/expandable_variable.dart';
-import '../../shared/diagnostics/values_node.dart';
+import '../../shared/diagnostics/values_object_node.dart';
 import '../../shared/diagnostics/primitives/source_location.dart';
 import '../../shared/dialogs.dart';
 import '../../shared/globals.dart';
@@ -1157,7 +1157,7 @@ class _LineItemState extends State<LineItem>
         final response = await evalService.evalAtCurrentFrame(word);
         final isolateRef = serviceManager.isolateManager.selectedIsolate.value;
         if (response is! InstanceRef) return null;
-        final variable = ValuesNode.fromValue(
+        final variable = ValuesObjectNode.fromValue(
           value: response,
           isolateRef: isolateRef,
         );

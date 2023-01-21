@@ -5,7 +5,7 @@
 import 'package:devtools_app/src/shared/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/shared/console/widgets/expandable_variable.dart';
 import 'package:devtools_app/src/shared/diagnostics/primitives/object_node.dart';
-import 'package:devtools_app/src/shared/diagnostics/values_node.dart';
+import 'package:devtools_app/src/shared/diagnostics/values_object_node.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_app/src/shared/tree.dart';
 import 'package:devtools_test/devtools_test.dart';
@@ -13,16 +13,16 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('debugger variables', () {
-    late ValuesNode objectNode;
+    late ValuesObjectNode objectNode;
 
     setUp(() {
       setGlobal(IdeTheme, IdeTheme());
-      objectNode = ValuesNode.text('test node');
+      objectNode = ValuesObjectNode.text('test node');
     });
 
     Future<void> pumpExpandableVariable(
       WidgetTester tester,
-      ValuesNode? variable,
+      ValuesObjectNode? variable,
     ) async {
       await tester.pumpWidget(
         wrap(

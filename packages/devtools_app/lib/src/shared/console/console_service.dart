@@ -9,7 +9,7 @@ import 'package:vm_service/vm_service.dart';
 
 import '../../screens/memory/shared/heap/model.dart';
 import '../../service/vm_service_wrapper.dart';
-import '../diagnostics/values_node.dart';
+import '../diagnostics/values_object_node.dart';
 import '../diagnostics/diagnostics_node.dart';
 import '../diagnostics/inspector_service.dart';
 import '../globals.dart';
@@ -31,7 +31,7 @@ class ConsoleLine {
       );
 
   factory ConsoleLine.dartObjectNode(
-    ValuesNode variable, {
+    ValuesObjectNode variable, {
     bool forceScrollIntoView = false,
   }) =>
       VariableConsoleLine(
@@ -70,7 +70,7 @@ class VariableConsoleLine extends ConsoleLine {
       : super._(
           forceScrollIntoView,
         );
-  final ValuesNode variable;
+  final ValuesObjectNode variable;
 
   @override
   String toString() {
@@ -109,7 +109,7 @@ class ConsoleService extends Disposer {
     bool expandAll = false,
   }) async {
     _stdioTrailingNewline = false;
-    final variable = ValuesNode.fromValue(
+    final variable = ValuesObjectNode.fromValue(
       name: name,
       value: value,
       diagnostic: diagnostic,

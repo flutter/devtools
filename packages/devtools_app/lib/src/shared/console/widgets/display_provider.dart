@@ -12,7 +12,7 @@ import '../../../shared/primitives/utils.dart';
 import '../../../shared/routing.dart';
 import '../../../shared/theme.dart';
 import '../../diagnostics/primitives/object_node.dart';
-import '../../diagnostics/values_node.dart';
+import '../../diagnostics/values_object_node.dart';
 import '../../primitives/simple_items.dart';
 import 'description.dart';
 
@@ -29,7 +29,7 @@ class DisplayProvider extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theVariable = variable;
-    if (theVariable is ValuesNode)
+    if (theVariable is ValuesObjectNode)
       return ValuesDisplayProvider(
         variable: theVariable,
         onTap: onTap,
@@ -46,7 +46,7 @@ class ValuesDisplayProvider extends StatelessWidget {
     required this.onTap,
   });
 
-  final ValuesNode variable;
+  final ValuesObjectNode variable;
   final VoidCallback onTap;
 
   @override

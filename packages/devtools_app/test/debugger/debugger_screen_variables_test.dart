@@ -7,7 +7,7 @@ import 'package:devtools_app/src/screens/debugger/debugger_controller.dart';
 import 'package:devtools_app/src/screens/debugger/debugger_screen.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/shared/config_specific/ide_theme/ide_theme.dart';
-import 'package:devtools_app/src/shared/diagnostics/values_node.dart';
+import 'package:devtools_app/src/shared/diagnostics/values_object_node.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_app/src/shared/notifications.dart';
 import 'package:devtools_app/src/shared/scripts/script_manager.dart';
@@ -271,8 +271,8 @@ void _resetRoot() {
   _rootNumber = 0;
 }
 
-ValuesNode _buildParentListVariable({int length = 2}) {
-  return ValuesNode.create(
+ValuesObjectNode _buildParentListVariable({int length = 2}) {
+  return ValuesObjectNode.create(
     BoundVariable(
       name: _incrementRoot(),
       value: InstanceRef(
@@ -290,12 +290,12 @@ ValuesNode _buildParentListVariable({int length = 2}) {
   );
 }
 
-ValuesNode _buildListVariable({int length = 2}) {
+ValuesObjectNode _buildListVariable({int length = 2}) {
   final listVariable = _buildParentListVariable(length: length);
 
   for (int i = 0; i < length; i++) {
     listVariable.addChild(
-      ValuesNode.create(
+      ValuesObjectNode.create(
         BoundVariable(
           name: '$i',
           value: InstanceRef(
@@ -318,8 +318,8 @@ ValuesNode _buildListVariable({int length = 2}) {
   return listVariable;
 }
 
-ValuesNode _buildParentMapVariable({int length = 2}) {
-  return ValuesNode.create(
+ValuesObjectNode _buildParentMapVariable({int length = 2}) {
+  return ValuesObjectNode.create(
     BoundVariable(
       name: _incrementRoot(),
       value: InstanceRef(
@@ -337,12 +337,12 @@ ValuesNode _buildParentMapVariable({int length = 2}) {
   );
 }
 
-ValuesNode _buildMapVariable({int length = 2}) {
+ValuesObjectNode _buildMapVariable({int length = 2}) {
   final mapVariable = _buildParentMapVariable(length: length);
 
   for (int i = 0; i < length; i++) {
     mapVariable.addChild(
-      ValuesNode.create(
+      ValuesObjectNode.create(
         BoundVariable(
           name: "['key${i + 1}']",
           value: InstanceRef(
@@ -365,8 +365,8 @@ ValuesNode _buildMapVariable({int length = 2}) {
   return mapVariable;
 }
 
-ValuesNode _buildStringVariable(String value) {
-  return ValuesNode.create(
+ValuesObjectNode _buildStringVariable(String value) {
+  return ValuesObjectNode.create(
     BoundVariable(
       name: _incrementRoot(),
       value: InstanceRef(
@@ -385,8 +385,8 @@ ValuesNode _buildStringVariable(String value) {
   );
 }
 
-ValuesNode _buildBooleanVariable(bool value) {
-  return ValuesNode.create(
+ValuesObjectNode _buildBooleanVariable(bool value) {
+  return ValuesObjectNode.create(
     BoundVariable(
       name: _incrementRoot(),
       value: InstanceRef(

@@ -10,7 +10,7 @@ import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../service/vm_service_wrapper.dart';
-import '../../shared/diagnostics/values_node.dart';
+import '../../shared/diagnostics/values_object_node.dart';
 import '../../shared/diagnostics/primitives/source_location.dart';
 import '../../shared/globals.dart';
 import '../../shared/primitives/auto_dispose.dart';
@@ -523,7 +523,7 @@ class DebuggerController extends DisposableController
     }
   }
 
-  List<ValuesNode> _createVariablesForFrame(Frame frame) {
+  List<ValuesObjectNode> _createVariablesForFrame(Frame frame) {
     // vars can be null for async frames.
     if (frame.vars == null) {
       return [];
@@ -531,7 +531,7 @@ class DebuggerController extends DisposableController
 
     final variables = frame.vars!
         .map(
-          (v) => ValuesNode.create(
+          (v) => ValuesObjectNode.create(
             v,
             _isolate.value,
           ),

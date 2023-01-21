@@ -19,8 +19,8 @@ import 'primitives/object_node.dart';
 import 'variable_factory.dart';
 
 Future<void> _addExpandableChildren(
-  ValuesNode variable,
-  List<ValuesNode> children, {
+  ValuesObjectNode variable,
+  List<ValuesObjectNode> children, {
   bool expandAll = false,
 }) async {
   final tasks = <Future>[];
@@ -35,14 +35,14 @@ Future<void> _addExpandableChildren(
   }
 }
 
-/// Builds the tree representation for a [ValuesNode] object by querying
-/// data, creating child [ValuesNode] objects, and assigning parent-child
+/// Builds the tree representation for a [ValuesObjectNode] object by querying
+/// data, creating child [ValuesObjectNode] objects, and assigning parent-child
 /// relationships.
 ///
 /// We call this method as we expand variables in the variable tree, because
 /// building the tree for all variable data at once is very expensive.
 Future<void> buildVariablesTree(
-  ValuesNode variable, {
+  ValuesObjectNode variable, {
   bool expandAll = false,
 }) async {
   final ref = variable.ref;
@@ -81,7 +81,7 @@ Future<void> buildVariablesTree(
   }
   final existingNames = <String>{};
   for (var child in variable.children) {
-    final name = child is ValuesNode ? child.name : null;
+    final name = child is ValuesObjectNode ? child.name : null;
     if (name != null && name.isNotEmpty) {
       existingNames.add(name);
       if (!isPrivate(name)) {
@@ -93,20 +93,20 @@ Future<void> buildVariablesTree(
   }
 
   try {
-    if (variable.childCount > ValuesNode.MAX_CHILDREN_IN_GROUPING) {
-      final numChildrenInGrouping =
-          variable.childCount >= pow(ValuesNode.MAX_CHILDREN_IN_GROUPING, 2)
-              ? (roundToNearestPow10(variable.childCount) /
-                      ValuesNode.MAX_CHILDREN_IN_GROUPING)
-                  .floor()
-              : ValuesNode.MAX_CHILDREN_IN_GROUPING;
+    if (variable.childCount > ValuesObjectNode.MAX_CHILDREN_IN_GROUPING) {
+      final numChildrenInGrouping = variable.childCount >=
+              pow(ValuesObjectNode.MAX_CHILDREN_IN_GROUPING, 2)
+          ? (roundToNearestPow10(variable.childCount) /
+                  ValuesObjectNode.MAX_CHILDREN_IN_GROUPING)
+              .floor()
+          : ValuesObjectNode.MAX_CHILDREN_IN_GROUPING;
 
       var start = variable.offset;
       final end = start + variable.childCount;
       while (start < end) {
         final count = min(end - start, numChildrenInGrouping);
         variable.addChild(
-          ValuesNode.grouping(variable.ref, offset: start, count: count),
+          ValuesObjectNode.grouping(variable.ref, offset: start, count: count),
         );
         start += count;
       }
@@ -242,7 +242,7 @@ Future<void> buildVariablesTree(
     final ObjectGroupBase? service = diagnostic.inspectorService;
     final diagnosticChildren = await diagnostic.children;
     if (diagnosticChildren != null && diagnosticChildren.isNotEmpty) {
-      final childrenNode = ValuesNode.text(
+      final childrenNode = ValuesObjectNode.text(
         pluralize('child', diagnosticChildren.length, plural: 'children'),
       );
       variable.addChild(childrenNode);
@@ -314,8 +314,8 @@ Future<void> buildVariablesTree(
 
 // TODO(jacobr): gracefully handle cases where the isolate has closed and
 // InstanceRef objects have become sentinels.
-class ValuesNode extends ObjectNode {
-  ValuesNode._({
+class ValuesObjectNode extends ObjectNode {
+  ValuesObjectNode._({
     this.name,
     this.text,
     GenericInstanceRef? ref,
@@ -339,7 +339,7 @@ class ValuesNode extends ObjectNode {
   /// determine styling of `Text(name)` and `Text(displayValue)` respectively.
   /// Artificial names and values are rendered using `subtleFixedFontStyle` to
   /// put less emphasis on the name (e.g., for the root node of a JSON tree).
-  factory ValuesNode.fromValue({
+  factory ValuesObjectNode.fromValue({
     String? name,
     required Object? value,
     bool artificialName = false,
@@ -348,7 +348,7 @@ class ValuesNode extends ObjectNode {
     required IsolateRef? isolateRef,
   }) {
     name = name ?? '';
-    return ValuesNode._(
+    return ValuesObjectNode._(
       name: name,
       ref: GenericInstanceRef(
         isolateRef: isolateRef,
@@ -362,13 +362,13 @@ class ValuesNode extends ObjectNode {
 
   /// Creates a variable from a `String` which displays [value] with quotation
   /// marks.
-  factory ValuesNode.fromString({
+  factory ValuesObjectNode.fromString({
     String? name,
     required String? value,
     required IsolateRef? isolateRef,
   }) {
     name = name ?? '';
-    return ValuesNode._(
+    return ValuesObjectNode._(
       name: name,
       ref: GenericInstanceRef(
         isolateRef: isolateRef,
@@ -390,17 +390,17 @@ class ValuesNode extends ObjectNode {
   /// [artificialChildValues] determines styling of `Text(displayValue)` for
   /// child nodes. Artificial values are rendered using `subtleFixedFontStyle`
   /// to put less emphasis on the value.
-  factory ValuesNode.fromList({
+  factory ValuesObjectNode.fromList({
     String? name,
     required String? type,
     required List<Object?>? list,
     required IsolateRef? isolateRef,
     Object? Function(Object?)? displayNameBuilder,
-    List<ValuesNode> Function(Object?)? childBuilder,
+    List<ValuesObjectNode> Function(Object?)? childBuilder,
     bool artificialChildValues = true,
   }) {
     name = name ?? '';
-    return ValuesNode._(
+    return ValuesObjectNode._(
       name: name,
       ref: GenericInstanceRef(
         isolateRef: isolateRef,
@@ -411,7 +411,7 @@ class ValuesNode extends ObjectNode {
     )..addAllChildren([
         if (list != null)
           for (int i = 0; i < list.length; ++i)
-            ValuesNode.fromValue(
+            ValuesObjectNode.fromValue(
               name: '[$i]',
               value: displayNameBuilder?.call(list[i]) ?? list[i],
               isolateRef: isolateRef,
@@ -423,12 +423,12 @@ class ValuesNode extends ObjectNode {
       ]);
   }
 
-  factory ValuesNode.create(
+  factory ValuesObjectNode.create(
     BoundVariable variable,
     IsolateRef? isolateRef,
   ) {
     final value = variable.value;
-    return ValuesNode._(
+    return ValuesObjectNode._(
       name: variable.name,
       ref: GenericInstanceRef(
         isolateRef: isolateRef,
@@ -437,19 +437,19 @@ class ValuesNode extends ObjectNode {
     );
   }
 
-  factory ValuesNode.text(String text) {
-    return ValuesNode._(
+  factory ValuesObjectNode.text(String text) {
+    return ValuesObjectNode._(
       text: text,
       artificialName: true,
     );
   }
 
-  factory ValuesNode.grouping(
+  factory ValuesObjectNode.grouping(
     GenericInstanceRef? ref, {
     required int offset,
     required int count,
   }) {
-    return ValuesNode._(
+    return ValuesObjectNode._(
       ref: ref,
       text: '[$offset - ${offset + count - 1}]',
       offset: offset,
@@ -653,7 +653,7 @@ class ValuesNode extends ObjectNode {
   bool? _isInspectable;
 
   @override
-  ValuesNode shallowCopy() {
+  ValuesObjectNode shallowCopy() {
     throw UnimplementedError(
       'This method is not implemented. Implement if you '
       'need to call `shallowCopy` on an instance of this class.',

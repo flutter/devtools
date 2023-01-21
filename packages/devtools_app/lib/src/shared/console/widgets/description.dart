@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 
-import '../../diagnostics/values_node.dart';
+import '../../diagnostics/values_object_node.dart';
 import '../../diagnostics/diagnostics_node.dart';
 import '../../diagnostics_text_styles.dart';
 import '../../globals.dart';
@@ -195,7 +195,7 @@ class DiagnosticsNodeDescription extends StatelessWidget {
         final value =
             await group.toObservatoryInstanceRef(diagnosticLocal.valueRef);
 
-        final variable = ValuesNode.fromValue(
+        final variable = ValuesObjectNode.fromValue(
           value: value,
           isolateRef: inspectorService.isolateRef,
           diagnostic: diagnosticLocal,
@@ -206,7 +206,7 @@ class DiagnosticsNodeDescription extends StatelessWidget {
         final tasks = <Future<void>>[];
         for (final child in variable.children) {
           tasks.add(() async {
-            if (!isHoverStale() && child is ValuesNode)
+            if (!isHoverStale() && child is ValuesObjectNode)
               await buildVariablesTree(child);
           }());
         }

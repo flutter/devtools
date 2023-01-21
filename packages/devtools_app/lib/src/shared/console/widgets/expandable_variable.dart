@@ -9,7 +9,7 @@ import 'package:flutter/material.dart' hide Stack;
 import '../../../shared/primitives/listenable.dart';
 import '../../../shared/tree.dart';
 import '../../diagnostics/primitives/object_node.dart';
-import '../../diagnostics/values_node.dart';
+import '../../diagnostics/values_object_node.dart';
 import 'display_provider.dart';
 
 class ExpandableVariable extends StatelessWidget {
@@ -21,7 +21,7 @@ class ExpandableVariable extends StatelessWidget {
   @visibleForTesting
   static const emptyExpandableVariableKey = Key('empty expandable variable');
 
-  final ValuesNode? variable;
+  final ValuesObjectNode? variable;
 
   @override
   Widget build(BuildContext context) {
@@ -31,7 +31,8 @@ class ExpandableVariable extends StatelessWidget {
     // TODO(kenz): preserve expanded state of tree on switching frames and
     // on stepping.
     return TreeView<ObjectNode>(
-      dataRootsListenable: FixedValueListenable<List<ValuesNode>>([variable]),
+      dataRootsListenable:
+          FixedValueListenable<List<ValuesObjectNode>>([variable]),
       shrinkWrap: true,
       dataDisplayProvider: (variable, onPressed) => DisplayProvider(
         variable: variable,
@@ -47,7 +48,7 @@ class ExpandableVariable extends StatelessWidget {
     // On expansion, lazily build the variables tree for performance reasons.
     if (v.isExpanded) {
       await Future.wait(v.children.map((c) async {
-        if (c is ValuesNode) await buildVariablesTree(c);
+        if (c is ValuesObjectNode) await buildVariablesTree(c);
       }));
     }
   }

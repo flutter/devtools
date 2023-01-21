@@ -11,7 +11,7 @@ import '../service/service_registrations.dart' as registrations;
 import 'config_specific/import_export/import_export.dart';
 import 'config_specific/logger/logger.dart' as logger;
 import 'console/primitives/eval_history.dart';
-import 'diagnostics/values_node.dart';
+import 'diagnostics/values_object_node.dart';
 import 'eval_on_dart_library.dart';
 import 'globals.dart';
 import 'primitives/auto_dispose.dart';
@@ -246,9 +246,9 @@ class AppState extends DisposableController with AutoDisposeControllerMixin {
   }
 
   // TODO(polina-c): add explanation for variables.
-  ValueListenable<List<ValuesNode>> get variables => _variables;
-  final _variables = ValueNotifier<List<ValuesNode>>([]);
-  void setVariables(List<ValuesNode> value) => _variables.value = value;
+  ValueListenable<List<ValuesObjectNode>> get variables => _variables;
+  final _variables = ValueNotifier<List<ValuesObjectNode>>([]);
+  void setVariables(List<ValuesObjectNode> value) => _variables.value = value;
 
   ValueListenable<Frame?> get currentFrame => _currentFrame;
   final _currentFrame = ValueNotifier<Frame?>(null);

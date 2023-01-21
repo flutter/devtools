@@ -15,7 +15,7 @@ import '../screens/debugger/debugger_controller.dart';
 import 'analytics/analytics.dart' as ga;
 import 'config_specific/launch_url/launch_url.dart';
 import 'console/widgets/expandable_variable.dart';
-import 'diagnostics/values_node.dart';
+import 'diagnostics/values_object_node.dart';
 import 'dialogs.dart';
 import 'globals.dart';
 import 'primitives/auto_dispose.dart';
@@ -1791,7 +1791,7 @@ class JsonViewer extends StatefulWidget {
 class _JsonViewerState extends State<JsonViewer>
     with ProvidedControllerMixin<DebuggerController, JsonViewer> {
   late Future<void> _initializeTree;
-  late ValuesNode variable;
+  late ValuesObjectNode variable;
 
   @override
   void initState() {
@@ -1802,7 +1802,7 @@ class _JsonViewerState extends State<JsonViewer>
     // the `ExpandableVariable` widget.
     final root =
         serviceManager.service!.fakeServiceCache.insertJsonObject(responseJson);
-    variable = ValuesNode.fromValue(
+    variable = ValuesObjectNode.fromValue(
       name: '[root]',
       value: root,
       artificialName: true,
