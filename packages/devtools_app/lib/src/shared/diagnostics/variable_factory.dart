@@ -482,34 +482,52 @@ List<DartObjectNode> createVariablesForRecords(
   Instance instance,
   IsolateRef? isolateRef,
 ) {
-  final positionalFields = <DartObjectNode>[];
-  final namedFields = <DartObjectNode>[];
-  for (var field in instance.fields ?? []) {
+  final positionalFields = <BoundField>[];
+  final namedFields = <BoundField>[];
+  for (final field in instance.fields ?? []) {
     if (_isPositionalField(field)) {
-      positionalFields.add(
-        DartObjectNode.fromValue(
-          // Positional fields are designated by their getter syntax, eg $0, $1,
-          // $2, etc:
-          name: '\$${field.name}',
-          value: field.value,
-          isolateRef: isolateRef,
-        ),
-      );
+      positionalFields.add(field);
     } else {
-      namedFields.add(
-        DartObjectNode.fromValue(
-          name: field.name,
-          value: field.value,
-          isolateRef: isolateRef,
-        ),
-      );
+      namedFields.add(field);
     }
   }
+  // Sort positional fields in ascending order:
+  _sortPositionalFields(positionalFields);
+  final variables = <DartObjectNode>[];
   // Always show positional fields before named fields:
-  return [...positionalFields, ...namedFields];
+  for (final field in positionalFields) {
+    variables.add(
+      DartObjectNode.fromValue(
+        // Positional fields are designated by their getter syntax, eg $0, $1,
+        // $2, etc:
+        name: '\$${field.name}',
+        value: field.value,
+        isolateRef: isolateRef,
+      ),
+    );
+  }
+  for (final field in namedFields) {
+    variables.add(
+      DartObjectNode.fromValue(
+        name: field.name,
+        value: field.value,
+        isolateRef: isolateRef,
+      ),
+    );
+  }
+  return variables;
 }
 
 bool _isPositionalField(BoundField field) => field.name is int;
+
+void _sortPositionalFields(List<BoundField> fields) {
+  fields.sort((field1, field2) {
+    assert(field1.name is int && field2.name is int);
+    final name1 = field1.name as int;
+    final name2 = field2.name as int;
+    return name1.compareTo(name2);
+  });
+}
 
 List<DartObjectNode> createVariablesForFields(
   Instance instance,
