@@ -613,7 +613,6 @@ class ValuesObjectNode extends ObjectNode {
   /// Selects the object in the Flutter Widget inspector.
   ///
   /// Returns whether the inspector selection was changed
-  @override
   Future<bool> inspectWidget() async {
     if (ref?.instanceRef == null) {
       return false;
@@ -638,7 +637,6 @@ class ValuesObjectNode extends ObjectNode {
     return false;
   }
 
-  @override
   Future<bool> get isInspectable async {
     if (_isInspectable != null) return _isInspectable!;
 

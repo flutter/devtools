@@ -10,15 +10,7 @@ class ReferencesObjectNode extends ObjectNode {
   int get childCount => 0;
 
   @override
-  Future<bool> get isInspectable async => false;
-
-  @override
   TreeNode<ObjectNode> shallowCopy() {
     throw StateError('Should not be invoked');
-  }
-
-  @override
-  Future<bool> inspectWidget() async {
-    return false;
   }
 }
