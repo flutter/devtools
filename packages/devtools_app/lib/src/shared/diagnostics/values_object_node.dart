@@ -10,6 +10,7 @@ import 'package:vm_service/vm_service.dart';
 
 import '../../screens/debugger/debugger_model.dart';
 import '../config_specific/logger/logger.dart';
+import '../feature_flags.dart';
 import '../globals.dart';
 import '../primitives/utils.dart';
 import 'diagnostics_node.dart';
@@ -117,7 +118,11 @@ Future<void> buildVariablesTree(
         offset: variable.offset,
         count: variable.childCount,
       );
+
       if (result is Instance) {
+        if (FeatureFlags.evalAndBrowse) {
+          variable.addChild(createVariableForReferences(result, isolateRef));
+        }
         switch (result.kind) {
           case InstanceKind.kMap:
             variable.addAllChildren(

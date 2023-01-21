@@ -13,6 +13,7 @@ import 'package:vm_service/vm_service.dart';
 import '../primitives/utils.dart';
 import 'diagnostics_node.dart';
 import 'inspector_service.dart';
+import 'primitives/object_node.dart';
 import 'values_object_node.dart';
 
 List<ValuesObjectNode> createVariablesForStackTrace(
@@ -505,4 +506,30 @@ List<ValuesObjectNode> createVariablesForFields(
     }
   }
   return variables;
+}
+
+ObjectNode createVariableForReferences(
+  Instance instance,
+  IsolateRef? isolateRef,
+) {
+  final live = ValuesObjectNode.text('live')
+    ..addAllChildren(
+      [
+        ValuesObjectNode.text('inbound'),
+        ValuesObjectNode.text('outbound'),
+      ],
+    );
+
+  final stat = ValuesObjectNode.text('static')
+    ..addAllChildren(
+      [
+        ValuesObjectNode.text('inbound'),
+        ValuesObjectNode.text('outbound'),
+      ],
+    );
+
+  final result = ValuesObjectNode.text('references')
+    ..addAllChildren([live, stat]);
+
+  return result;
 }

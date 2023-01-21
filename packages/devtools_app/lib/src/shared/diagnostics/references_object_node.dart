@@ -1,0 +1,27 @@
+// Copyright 2018 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+import '../primitives/trees.dart';
+import 'primitives/object_node.dart';
+
+class ReferencesObjectNode extends ObjectNode {
+  @override
+  int get childCount => 0;
+
+  @override
+  String? get displayValue => 'references :)';
+
+  @override
+  Future<bool> get isInspectable async => false;
+
+  @override
+  TreeNode<ObjectNode> shallowCopy() {
+    throw StateError('Should not be invoked');
+  }
+
+  @override
+  Future<bool> inspectWidget() async {
+    return false;
+  }
+}
