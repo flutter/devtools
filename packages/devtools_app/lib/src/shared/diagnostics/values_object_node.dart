@@ -54,21 +54,6 @@ Future<void> buildVariablesTree(
   final instanceRef = ref.instanceRef;
   final diagnostic = ref.diagnostic;
 
-  Obj? object;
-  if (instanceRef != null && serviceManager.service != null) {
-    final variableId = variable.ref!.isolateRef!.id!;
-    object = await serviceManager.service!.getObject(
-      variableId,
-      instanceRef.id!,
-      offset: variable.offset,
-      count: variable.childCount,
-    );
-  }
-
-  if (object is Instance && FeatureFlags.evalAndBrowse) {
-    variable.addChild(createVariableForReferences(object, isolateRef));
-  }
-
   if (diagnostic != null && includeDiagnosticPropertiesInDebugger) {
     final service = diagnostic.inspectorService;
     Future<void> _addPropertiesHelper(
@@ -126,7 +111,19 @@ Future<void> buildVariablesTree(
         );
         start += count;
       }
-    } else if (object != null) {
+    } else if (instanceRef != null && serviceManager.service != null) {
+      final variableId = variable.ref!.isolateRef!.id!;
+      final object = await serviceManager.service!.getObject(
+        variableId,
+        instanceRef.id!,
+        offset: variable.offset,
+        count: variable.childCount,
+      );
+
+      if (object is Instance && FeatureFlags.evalAndBrowse) {
+        variable.addChild(createVariableForReferences(object, isolateRef));
+      }
+
       if (object is Instance) {
         switch (object.kind) {
           case InstanceKind.kMap:

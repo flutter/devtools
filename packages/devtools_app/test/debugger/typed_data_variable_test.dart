@@ -465,9 +465,9 @@ void main() {
       isolateRef,
     );
     when(manager.service!.getObject(isolateId, objectId, offset: 0, count: 4))
-        .thenAnswer((_) async {
-      return instance;
-    });
+        .thenAnswer((_) async => instance);
+    when(manager.service!.getObject(isolateId, objectId, offset: 0, count: 332))
+        .thenAnswer((_) async => instance);
 
     await buildVariablesTree(variable);
 
