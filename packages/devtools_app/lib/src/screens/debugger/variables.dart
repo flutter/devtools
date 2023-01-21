@@ -11,6 +11,7 @@ import 'dart:async';
 import 'package:flutter/material.dart' hide Stack;
 
 import '../../shared/console/widgets/display_provider.dart';
+import '../../shared/diagnostics/primitives/object_node.dart';
 import '../../shared/diagnostics/values_node.dart';
 import '../../shared/globals.dart';
 import '../../shared/tree.dart';
@@ -22,7 +23,7 @@ class Variables extends StatelessWidget {
   Widget build(BuildContext context) {
     // TODO(kenz): preserve expanded state of tree on switching frames and
     // on stepping.
-    return TreeView<ValuesNode>(
+    return TreeView<ObjectNode>(
       dataRootsListenable: serviceManager.appState.variables,
       dataDisplayProvider: (variable, onPressed) => DisplayProvider(
         variable: variable,
@@ -33,11 +34,15 @@ class Variables extends StatelessWidget {
   }
 
   Future<void> onItemPressed(
-    ValuesNode v,
+    ObjectNode v,
   ) async {
     // On expansion, lazily build the variables tree for performance reasons.
     if (v.isExpanded) {
-      await Future.wait(v.children.map(buildVariablesTree));
+      await Future.wait(
+        v.children.map((c) async {
+          if (c is ValuesNode) await buildVariablesTree(c);
+        }),
+      );
     }
   }
 }

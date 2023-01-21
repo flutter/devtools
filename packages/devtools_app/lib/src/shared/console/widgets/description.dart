@@ -204,9 +204,10 @@ class DiagnosticsNodeDescription extends StatelessWidget {
         if (isHoverStale()) return Future.value();
         await buildVariablesTree(variable);
         final tasks = <Future<void>>[];
-        for (var child in variable.children) {
+        for (final child in variable.children) {
           tasks.add(() async {
-            if (!isHoverStale()) await buildVariablesTree(child);
+            if (!isHoverStale() && child is ValuesNode)
+              await buildVariablesTree(child);
           }());
         }
         await Future.wait(tasks);

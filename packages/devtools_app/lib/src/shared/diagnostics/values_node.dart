@@ -15,6 +15,7 @@ import '../primitives/trees.dart';
 import '../primitives/utils.dart';
 import 'diagnostics_node.dart';
 import 'inspector_service.dart';
+import 'primitives/object_node.dart';
 import 'variable_factory.dart';
 
 Future<void> _addExpandableChildren(
@@ -80,7 +81,7 @@ Future<void> buildVariablesTree(
   }
   final existingNames = <String>{};
   for (var child in variable.children) {
-    final name = child.name;
+    final name = child is ValuesNode ? child.name : null;
     if (name != null && name.isNotEmpty) {
       existingNames.add(name);
       if (!isPrivate(name)) {
@@ -262,7 +263,7 @@ Future<void> buildVariablesTree(
   if (inspectorService != null) {
     final tasks = <Future>[];
     ObjectGroupBase? group;
-    Future<void> _maybeUpdateRef(ValuesNode child) async {
+    Future<void> _maybeUpdateRef(ObjectNode child) async {
       final childRef = child.ref;
       if (childRef == null) return;
       if (childRef.diagnostic == null) {
@@ -284,7 +285,7 @@ Future<void> buildVariablesTree(
               childRef,
             );
             // TODO(jacobr): add the Diagnostics properties as well?
-            child._ref = GenericInstanceRef(
+            child.ref = GenericInstanceRef(
               isolateRef: isolateRef,
               value: valueInstanceRef,
             );
@@ -313,7 +314,7 @@ Future<void> buildVariablesTree(
 
 // TODO(jacobr): gracefully handle cases where the isolate has closed and
 // InstanceRef objects have become sentinels.
-class ValuesNode extends TreeNode<ValuesNode> {
+class ValuesNode extends ObjectNode {
   ValuesNode._({
     this.name,
     this.text,

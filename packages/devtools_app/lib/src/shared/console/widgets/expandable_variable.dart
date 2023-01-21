@@ -8,6 +8,7 @@ import 'package:flutter/material.dart' hide Stack;
 
 import '../../../shared/primitives/listenable.dart';
 import '../../../shared/tree.dart';
+import '../../diagnostics/primitives/object_node.dart';
 import '../../diagnostics/values_node.dart';
 import 'display_provider.dart';
 
@@ -29,7 +30,7 @@ class ExpandableVariable extends StatelessWidget {
       return const SizedBox(key: emptyExpandableVariableKey);
     // TODO(kenz): preserve expanded state of tree on switching frames and
     // on stepping.
-    return TreeView<ValuesNode>(
+    return TreeView<ObjectNode>(
       dataRootsListenable: FixedValueListenable<List<ValuesNode>>([variable]),
       shrinkWrap: true,
       dataDisplayProvider: (variable, onPressed) => DisplayProvider(
@@ -41,11 +42,13 @@ class ExpandableVariable extends StatelessWidget {
   }
 
   Future<void> onItemPressed(
-    ValuesNode v,
+    ObjectNode v,
   ) async {
     // On expansion, lazily build the variables tree for performance reasons.
     if (v.isExpanded) {
-      await Future.wait(v.children.map(buildVariablesTree));
+      await Future.wait(v.children.map((c) async {
+        if (c is ValuesNode) await buildVariablesTree(c);
+      }));
     }
   }
 }

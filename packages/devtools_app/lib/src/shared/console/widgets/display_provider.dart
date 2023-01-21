@@ -11,12 +11,36 @@ import '../../../shared/primitives/selection_controls.dart';
 import '../../../shared/primitives/utils.dart';
 import '../../../shared/routing.dart';
 import '../../../shared/theme.dart';
+import '../../diagnostics/primitives/object_node.dart';
 import '../../diagnostics/values_node.dart';
 import '../../primitives/simple_items.dart';
 import 'description.dart';
 
 class DisplayProvider extends StatelessWidget {
   const DisplayProvider({
+    super.key,
+    required this.variable,
+    required this.onTap,
+  });
+
+  final ObjectNode variable;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final theVariable = variable;
+    if (theVariable is ValuesNode)
+      return ValuesDisplayProvider(
+        variable: theVariable,
+        onTap: onTap,
+      );
+
+    throw StateError('unexpected type ${theVariable.runtimeType}');
+  }
+}
+
+class ValuesDisplayProvider extends StatelessWidget {
+  const ValuesDisplayProvider({
     super.key,
     required this.variable,
     required this.onTap,

@@ -4,6 +4,7 @@
 
 import 'package:devtools_app/src/shared/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/shared/console/widgets/expandable_variable.dart';
+import 'package:devtools_app/src/shared/diagnostics/primitives/object_node.dart';
 import 'package:devtools_app/src/shared/diagnostics/values_node.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_app/src/shared/tree.dart';
@@ -38,7 +39,7 @@ void main() {
       'ExpandableVariable builds without error',
       (WidgetTester tester) async {
         await pumpExpandableVariable(tester, objectNode);
-        expect(find.byType(TreeView<ValuesNode>), findsOneWidget);
+        expect(find.byType(TreeView<ObjectNode>), findsOneWidget);
         expect(
           find.byKey(ExpandableVariable.emptyExpandableVariableKey),
           findsNothing,
@@ -50,7 +51,7 @@ void main() {
       'ExpandableVariable builds for null variable',
       (WidgetTester tester) async {
         await pumpExpandableVariable(tester, null);
-        expect(find.byType(TreeView<ValuesNode>), findsNothing);
+        expect(find.byType(TreeView<ObjectNode>), findsNothing);
         expect(
           find.byKey(ExpandableVariable.emptyExpandableVariableKey),
           findsOneWidget,
