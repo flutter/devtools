@@ -9,9 +9,9 @@ import 'package:vm_service/vm_service.dart';
 
 import '../../screens/memory/shared/heap/model.dart';
 import '../../service/vm_service_wrapper.dart';
-import '../diagnostics/values_object_node.dart';
 import '../diagnostics/diagnostics_node.dart';
 import '../diagnostics/inspector_service.dart';
+import '../diagnostics/values_object_node.dart';
 import '../globals.dart';
 import '../primitives/auto_dispose.dart';
 import '../primitives/utils.dart';

@@ -49,7 +49,7 @@ class ExpandableVariable extends StatelessWidget {
     if (v.isExpanded) {
       await Future.wait(v.children.map((c) async {
         if (c is ValuesObjectNode) await buildVariablesTree(c);
-      }));
+      }),);
     }
   }
 }

@@ -4,8 +4,8 @@
 
 import 'package:flutter/material.dart';
 
-import '../../diagnostics/values_object_node.dart';
 import '../../diagnostics/diagnostics_node.dart';
+import '../../diagnostics/values_object_node.dart';
 import '../../diagnostics_text_styles.dart';
 import '../../globals.dart';
 import '../../primitives/utils.dart';

@@ -11,7 +11,6 @@ import 'package:vm_service/vm_service.dart';
 import '../../screens/debugger/debugger_model.dart';
 import '../config_specific/logger/logger.dart';
 import '../globals.dart';
-import '../primitives/trees.dart';
 import '../primitives/utils.dart';
 import 'diagnostics_node.dart';
 import 'inspector_service.dart';
@@ -473,6 +472,7 @@ class ValuesObjectNode extends ObjectNode {
   /// names).
   final bool artificialValue;
 
+  @override
   GenericInstanceRef? get ref => _ref;
   GenericInstanceRef? _ref;
 
@@ -482,6 +482,7 @@ class ValuesObjectNode extends ObjectNode {
 
   int? _offset;
 
+  @override
   int get childCount {
     if (_childCount != null) return _childCount!;
 
@@ -527,6 +528,7 @@ class ValuesObjectNode extends ObjectNode {
   Object? get value => ref?.value;
 
   // TODO(kenz): add custom display for lists with more than 100 elements
+  @override
   String? get displayValue {
     if (text != null) {
       return text;
@@ -602,6 +604,7 @@ class ValuesObjectNode extends ObjectNode {
   /// Selects the object in the Flutter Widget inspector.
   ///
   /// Returns whether the inspector selection was changed
+  @override
   Future<bool> inspectWidget() async {
     if (ref?.instanceRef == null) {
       return false;
@@ -626,6 +629,7 @@ class ValuesObjectNode extends ObjectNode {
     return false;
   }
 
+  @override
   Future<bool> get isInspectable async {
     if (_isInspectable != null) return _isInspectable!;
 
