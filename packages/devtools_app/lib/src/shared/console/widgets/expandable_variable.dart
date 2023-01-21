@@ -47,9 +47,11 @@ class ExpandableVariable extends StatelessWidget {
   ) async {
     // On expansion, lazily build the variables tree for performance reasons.
     if (v.isExpanded) {
-      await Future.wait(v.children.map((c) async {
-        if (c is ValuesObjectNode) await buildVariablesTree(c);
-      }),);
+      await Future.wait(
+        v.children.map((c) async {
+          if (c is ValuesObjectNode) await buildVariablesTree(c);
+        }),
+      );
     }
   }
 }
