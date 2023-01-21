@@ -13,7 +13,7 @@ import '../primitives/enum_utils.dart';
 import '../primitives/utils.dart';
 import '../ui/icons.dart';
 import 'inspector_service.dart';
-import 'instance_ref.dart';
+import 'primitives/instance_ref.dart';
 import 'source_location.dart';
 
 final diagnosticLevelUtils = EnumUtils<DiagnosticLevel>(DiagnosticLevel.values);
