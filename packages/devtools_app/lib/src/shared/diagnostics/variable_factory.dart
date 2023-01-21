@@ -15,14 +15,14 @@ import 'values_node.dart';
 import 'diagnostics_node.dart';
 import 'inspector_service.dart';
 
-List<DartObjectNode> createVariablesForStackTrace(
+List<ValuesNode> createVariablesForStackTrace(
   Instance stackTrace,
   IsolateRef? isolateRef,
 ) {
   final trace = stack_trace.Trace.parse(stackTrace.valueAsString!);
   return [
     for (int i = 0; i < trace.frames.length; ++i)
-      DartObjectNode.fromValue(
+      ValuesNode.fromValue(
         name: '[$i]',
         value: trace.frames[i].toString(),
         isolateRef: isolateRef,
@@ -32,23 +32,23 @@ List<DartObjectNode> createVariablesForStackTrace(
   ];
 }
 
-List<DartObjectNode> createVariablesForParameter(
+List<ValuesNode> createVariablesForParameter(
   Parameter parameter,
   IsolateRef? isolateRef,
 ) {
   return [
     if (parameter.name != null)
-      DartObjectNode.fromString(
+      ValuesNode.fromString(
         name: 'name',
         value: parameter.name,
         isolateRef: isolateRef,
       ),
-    DartObjectNode.fromValue(
+    ValuesNode.fromValue(
       name: 'required',
       value: parameter.required ?? false,
       isolateRef: isolateRef,
     ),
-    DartObjectNode.fromValue(
+    ValuesNode.fromValue(
       name: 'type',
       value: parameter.parameterType,
       isolateRef: isolateRef,
@@ -56,23 +56,23 @@ List<DartObjectNode> createVariablesForParameter(
   ];
 }
 
-List<DartObjectNode> createVariablesForContext(
+List<ValuesNode> createVariablesForContext(
   Context context,
   IsolateRef isolateRef,
 ) {
   return [
-    DartObjectNode.fromValue(
+    ValuesNode.fromValue(
       name: 'length',
       value: context.length,
       isolateRef: isolateRef,
     ),
     if (context.parent != null)
-      DartObjectNode.fromValue(
+      ValuesNode.fromValue(
         name: 'parent',
         value: context.parent,
         isolateRef: isolateRef,
       ),
-    DartObjectNode.fromList(
+    ValuesNode.fromList(
       name: 'variables',
       type: '_ContextElement',
       list: context.variables,
@@ -83,22 +83,22 @@ List<DartObjectNode> createVariablesForContext(
   ];
 }
 
-List<DartObjectNode> createVariablesForFunc(
+List<ValuesNode> createVariablesForFunc(
   Func function,
   IsolateRef isolateRef,
 ) {
   return [
-    DartObjectNode.fromString(
+    ValuesNode.fromString(
       name: 'name',
       value: function.name,
       isolateRef: isolateRef,
     ),
-    DartObjectNode.fromValue(
+    ValuesNode.fromValue(
       name: 'signature',
       value: function.signature,
       isolateRef: isolateRef,
     ),
-    DartObjectNode.fromValue(
+    ValuesNode.fromValue(
       name: 'owner',
       value: function.owner,
       isolateRef: isolateRef,
@@ -107,17 +107,17 @@ List<DartObjectNode> createVariablesForFunc(
   ];
 }
 
-List<DartObjectNode> createVariablesForWeakProperty(
+List<ValuesNode> createVariablesForWeakProperty(
   Instance result,
   IsolateRef? isolateRef,
 ) {
   return [
-    DartObjectNode.fromValue(
+    ValuesNode.fromValue(
       name: 'key',
       value: result.propertyKey,
       isolateRef: isolateRef,
     ),
-    DartObjectNode.fromValue(
+    ValuesNode.fromValue(
       name: 'value',
       value: result.propertyValue,
       isolateRef: isolateRef,
@@ -125,7 +125,7 @@ List<DartObjectNode> createVariablesForWeakProperty(
   ];
 }
 
-List<DartObjectNode> createVariablesForTypeParameters(
+List<ValuesNode> createVariablesForTypeParameters(
   Instance result,
   IsolateRef? isolateRef,
 ) {
@@ -137,12 +137,12 @@ List<DartObjectNode> createVariablesForTypeParameters(
     //   value: result.parameterizedClass,
     //   isolateRef: isolateRef,
     // ),
-    DartObjectNode.fromValue(
+    ValuesNode.fromValue(
       name: 'index',
       value: result.parameterIndex,
       isolateRef: isolateRef,
     ),
-    DartObjectNode.fromValue(
+    ValuesNode.fromValue(
       name: 'bound',
       value: result.bound,
       isolateRef: isolateRef,
@@ -150,23 +150,23 @@ List<DartObjectNode> createVariablesForTypeParameters(
   ];
 }
 
-List<DartObjectNode> createVariablesForFunctionType(
+List<ValuesNode> createVariablesForFunctionType(
   Instance result,
   IsolateRef? isolateRef,
 ) {
   return [
-    DartObjectNode.fromValue(
+    ValuesNode.fromValue(
       name: 'returnType',
       value: result.returnType,
       isolateRef: isolateRef,
     ),
     if (result.typeParameters != null)
-      DartObjectNode.fromValue(
+      ValuesNode.fromValue(
         name: 'typeParameters',
         value: result.typeParameters,
         isolateRef: isolateRef,
       ),
-    DartObjectNode.fromList(
+    ValuesNode.fromList(
       name: 'parameters',
       type: '_Parameters',
       list: result.parameters,
@@ -175,18 +175,18 @@ List<DartObjectNode> createVariablesForFunctionType(
         final parameter = e as Parameter;
         return [
           if (parameter.name != null) ...[
-            DartObjectNode.fromString(
+            ValuesNode.fromString(
               name: 'name',
               value: parameter.name,
               isolateRef: isolateRef,
             ),
-            DartObjectNode.fromValue(
+            ValuesNode.fromValue(
               name: 'required',
               value: parameter.required,
               isolateRef: isolateRef,
             ),
           ],
-          DartObjectNode.fromValue(
+          ValuesNode.fromValue(
             name: 'type',
             value: parameter.parameterType,
             isolateRef: isolateRef,
@@ -198,12 +198,12 @@ List<DartObjectNode> createVariablesForFunctionType(
   ];
 }
 
-List<DartObjectNode> createVariablesForType(
+List<ValuesNode> createVariablesForType(
   Instance result,
   IsolateRef? isolateRef,
 ) {
   return [
-    DartObjectNode.fromString(
+    ValuesNode.fromString(
       name: 'name',
       value: result.name,
       isolateRef: isolateRef,
@@ -216,13 +216,13 @@ List<DartObjectNode> createVariablesForType(
     //   isolateRef: isolateRef,
     // ),
     if (result.typeArguments != null)
-      DartObjectNode.fromValue(
+      ValuesNode.fromValue(
         name: 'typeArguments',
         value: result.typeArguments,
         isolateRef: isolateRef,
       ),
     if (result.targetType != null)
-      DartObjectNode.fromValue(
+      ValuesNode.fromValue(
         name: 'targetType',
         value: result.targetType,
         isolateRef: isolateRef,
@@ -230,23 +230,23 @@ List<DartObjectNode> createVariablesForType(
   ];
 }
 
-List<DartObjectNode> createVariablesForReceivePort(
+List<ValuesNode> createVariablesForReceivePort(
   Instance result,
   IsolateRef? isolateRef,
 ) {
   return [
     if (result.debugName!.isNotEmpty)
-      DartObjectNode.fromString(
+      ValuesNode.fromString(
         name: 'debugName',
         value: result.debugName,
         isolateRef: isolateRef,
       ),
-    DartObjectNode.fromValue(
+    ValuesNode.fromValue(
       name: 'portId',
       value: result.portId,
       isolateRef: isolateRef,
     ),
-    DartObjectNode.fromValue(
+    ValuesNode.fromValue(
       name: 'allocationLocation',
       value: result.allocationLocation,
       isolateRef: isolateRef,
@@ -254,18 +254,18 @@ List<DartObjectNode> createVariablesForReceivePort(
   ];
 }
 
-List<DartObjectNode> createVariablesForClosure(
+List<ValuesNode> createVariablesForClosure(
   Instance result,
   IsolateRef? isolateRef,
 ) {
   return [
-    DartObjectNode.fromValue(
+    ValuesNode.fromValue(
       name: 'function',
       value: result.closureFunction,
       isolateRef: isolateRef,
       artificialValue: true,
     ),
-    DartObjectNode.fromValue(
+    ValuesNode.fromValue(
       name: 'context',
       value: result.closureContext,
       isolateRef: isolateRef,
@@ -274,22 +274,22 @@ List<DartObjectNode> createVariablesForClosure(
   ];
 }
 
-List<DartObjectNode> createVariablesForRegExp(
+List<ValuesNode> createVariablesForRegExp(
   Instance result,
   IsolateRef? isolateRef,
 ) {
   return [
-    DartObjectNode.fromValue(
+    ValuesNode.fromValue(
       name: 'pattern',
       value: result.pattern,
       isolateRef: isolateRef,
     ),
-    DartObjectNode.fromValue(
+    ValuesNode.fromValue(
       name: 'isCaseSensitive',
       value: result.isCaseSensitive,
       isolateRef: isolateRef,
     ),
-    DartObjectNode.fromValue(
+    ValuesNode.fromValue(
       name: 'isMultiline',
       value: result.isMultiLine,
       isolateRef: isolateRef,
@@ -297,14 +297,14 @@ List<DartObjectNode> createVariablesForRegExp(
   ];
 }
 
-Future<DartObjectNode> _buildVariable(
+Future<ValuesNode> _buildVariable(
   RemoteDiagnosticsNode diagnostic,
   ObjectGroupBase inspectorService,
   IsolateRef? isolateRef,
 ) async {
   final instanceRef =
       await inspectorService.toObservatoryInstanceRef(diagnostic.valueRef);
-  return DartObjectNode.fromValue(
+  return ValuesNode.fromValue(
     name: diagnostic.name,
     value: instanceRef,
     diagnostic: diagnostic,
@@ -312,12 +312,12 @@ Future<DartObjectNode> _buildVariable(
   );
 }
 
-Future<List<DartObjectNode>> createVariablesForDiagnostics(
+Future<List<ValuesNode>> createVariablesForDiagnostics(
   ObjectGroupBase inspectorService,
   List<RemoteDiagnosticsNode> diagnostics,
   IsolateRef isolateRef,
 ) async {
-  final variables = <Future<DartObjectNode>>[];
+  final variables = <Future<ValuesNode>>[];
   for (var diagnostic in diagnostics) {
     // Omit hidden properties.
     if (diagnostic.level == DiagnosticLevel.hidden) continue;
@@ -326,11 +326,11 @@ Future<List<DartObjectNode>> createVariablesForDiagnostics(
   return variables.isNotEmpty ? await Future.wait(variables) : const [];
 }
 
-List<DartObjectNode> createVariablesForAssociations(
+List<ValuesNode> createVariablesForAssociations(
   Instance instance,
   IsolateRef? isolateRef,
 ) {
-  final variables = <DartObjectNode>[];
+  final variables = <ValuesNode>[];
   final associations = instance.associations ?? [];
 
   // If the key type for the provided associations is not primitive, we want to
@@ -348,20 +348,20 @@ List<DartObjectNode> createVariablesForAssociations(
     }
     if (hasPrimitiveKey) {
       variables.add(
-        DartObjectNode.fromValue(
+        ValuesNode.fromValue(
           name: association.key.valueAsString,
           value: association.value,
           isolateRef: isolateRef,
         ),
       );
     } else {
-      final key = DartObjectNode.fromValue(
+      final key = ValuesNode.fromValue(
         name: '[key]',
         value: association.key,
         isolateRef: isolateRef,
         artificialName: true,
       );
-      final value = DartObjectNode.fromValue(
+      final value = ValuesNode.fromValue(
         name: '[value]',
         value: association.value,
         isolateRef: isolateRef,
@@ -369,7 +369,7 @@ List<DartObjectNode> createVariablesForAssociations(
       );
       final entryNum = instance.offset == null ? i : i + instance.offset!;
       variables.add(
-        DartObjectNode.text('[Entry $entryNum]')
+        ValuesNode.text('[Entry $entryNum]')
           ..addChild(key)
           ..addChild(value),
       );
@@ -384,12 +384,12 @@ List<DartObjectNode> createVariablesForAssociations(
 ///
 /// This method does not currently support [Uint64List] or
 /// [Int64List].
-List<DartObjectNode> createVariablesForBytes(
+List<ValuesNode> createVariablesForBytes(
   Instance instance,
   IsolateRef? isolateRef,
 ) {
   final bytes = base64.decode(instance.bytes!);
-  final variables = <DartObjectNode>[];
+  final variables = <ValuesNode>[];
   List<Object?> result;
   switch (instance.kind) {
     case InstanceKind.kUint8ClampedList:
@@ -405,7 +405,7 @@ List<DartObjectNode> createVariablesForBytes(
     case InstanceKind.kUint64List:
       // TODO: https://github.com/flutter/devtools/issues/2159
       if (kIsWeb) {
-        return <DartObjectNode>[];
+        return <ValuesNode>[];
       }
       result = Uint64List.view(bytes.buffer);
       break;
@@ -421,7 +421,7 @@ List<DartObjectNode> createVariablesForBytes(
     case InstanceKind.kInt64List:
       // TODO: https://github.com/flutter/devtools/issues/2159
       if (kIsWeb) {
-        return <DartObjectNode>[];
+        return <ValuesNode>[];
       }
       result = Int64List.view(bytes.buffer);
       break;
@@ -447,7 +447,7 @@ List<DartObjectNode> createVariablesForBytes(
   for (int i = 0; i < result.length; i++) {
     final name = instance.offset == null ? i : i + instance.offset!;
     variables.add(
-      DartObjectNode.fromValue(
+      ValuesNode.fromValue(
         name: '[$name]',
         value: result[i],
         isolateRef: isolateRef,
@@ -458,16 +458,16 @@ List<DartObjectNode> createVariablesForBytes(
   return variables;
 }
 
-List<DartObjectNode> createVariablesForElements(
+List<ValuesNode> createVariablesForElements(
   Instance instance,
   IsolateRef? isolateRef,
 ) {
-  final variables = <DartObjectNode>[];
+  final variables = <ValuesNode>[];
   final elements = instance.elements ?? [];
   for (int i = 0; i < elements.length; i++) {
     final name = instance.offset == null ? i : i + instance.offset!;
     variables.add(
-      DartObjectNode.fromValue(
+      ValuesNode.fromValue(
         name: '[$name]',
         value: elements[i],
         isolateRef: isolateRef,
@@ -478,17 +478,17 @@ List<DartObjectNode> createVariablesForElements(
   return variables;
 }
 
-List<DartObjectNode> createVariablesForFields(
+List<ValuesNode> createVariablesForFields(
   Instance instance,
   IsolateRef? isolateRef, {
   Set<String>? existingNames,
 }) {
-  final variables = <DartObjectNode>[];
+  final variables = <ValuesNode>[];
   for (var field in instance.fields!) {
     final name = field.decl?.name;
     if (name == null) {
       variables.add(
-        DartObjectNode.fromValue(
+        ValuesNode.fromValue(
           value: field.value,
           isolateRef: isolateRef,
         ),
@@ -496,7 +496,7 @@ List<DartObjectNode> createVariablesForFields(
     } else {
       if (existingNames != null && existingNames.contains(name)) continue;
       variables.add(
-        DartObjectNode.fromValue(
+        ValuesNode.fromValue(
           name: name,
           value: field.value,
           isolateRef: isolateRef,

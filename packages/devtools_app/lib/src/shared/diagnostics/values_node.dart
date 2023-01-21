@@ -18,8 +18,8 @@ import 'inspector_service.dart';
 import 'variable_factory.dart';
 
 Future<void> addExpandableChildren(
-  DartObjectNode variable,
-  List<DartObjectNode> children, {
+  ValuesNode variable,
+  List<ValuesNode> children, {
   bool expandAll = false,
 }) async {
   final tasks = <Future>[];
@@ -34,14 +34,14 @@ Future<void> addExpandableChildren(
   }
 }
 
-/// Builds the tree representation for a [DartObjectNode] object by querying
-/// data, creating child [DartObjectNode] objects, and assigning parent-child
+/// Builds the tree representation for a [ValuesNode] object by querying
+/// data, creating child [ValuesNode] objects, and assigning parent-child
 /// relationships.
 ///
 /// We call this method as we expand variables in the variable tree, because
 /// building the tree for all variable data at once is very expensive.
 Future<void> buildVariablesTree(
-  DartObjectNode variable, {
+  ValuesNode variable, {
   bool expandAll = false,
 }) async {
   final ref = variable.ref;
@@ -92,20 +92,20 @@ Future<void> buildVariablesTree(
   }
 
   try {
-    if (variable.childCount > DartObjectNode.MAX_CHILDREN_IN_GROUPING) {
+    if (variable.childCount > ValuesNode.MAX_CHILDREN_IN_GROUPING) {
       final numChildrenInGrouping =
-          variable.childCount >= pow(DartObjectNode.MAX_CHILDREN_IN_GROUPING, 2)
+          variable.childCount >= pow(ValuesNode.MAX_CHILDREN_IN_GROUPING, 2)
               ? (roundToNearestPow10(variable.childCount) /
-                      DartObjectNode.MAX_CHILDREN_IN_GROUPING)
+                      ValuesNode.MAX_CHILDREN_IN_GROUPING)
                   .floor()
-              : DartObjectNode.MAX_CHILDREN_IN_GROUPING;
+              : ValuesNode.MAX_CHILDREN_IN_GROUPING;
 
       var start = variable.offset;
       final end = start + variable.childCount;
       while (start < end) {
         final count = min(end - start, numChildrenInGrouping);
         variable.addChild(
-          DartObjectNode.grouping(variable.ref, offset: start, count: count),
+          ValuesNode.grouping(variable.ref, offset: start, count: count),
         );
         start += count;
       }
@@ -241,7 +241,7 @@ Future<void> buildVariablesTree(
     final ObjectGroupBase? service = diagnostic.inspectorService;
     final diagnosticChildren = await diagnostic.children;
     if (diagnosticChildren != null && diagnosticChildren.isNotEmpty) {
-      final childrenNode = DartObjectNode.text(
+      final childrenNode = ValuesNode.text(
         pluralize('child', diagnosticChildren.length, plural: 'children'),
       );
       variable.addChild(childrenNode);
@@ -262,7 +262,7 @@ Future<void> buildVariablesTree(
   if (inspectorService != null) {
     final tasks = <Future>[];
     ObjectGroupBase? group;
-    Future<void> _maybeUpdateRef(DartObjectNode child) async {
+    Future<void> _maybeUpdateRef(ValuesNode child) async {
       final childRef = child.ref;
       if (childRef == null) return;
       if (childRef.diagnostic == null) {
@@ -313,8 +313,8 @@ Future<void> buildVariablesTree(
 
 // TODO(jacobr): gracefully handle cases where the isolate has closed and
 // InstanceRef objects have become sentinels.
-class DartObjectNode extends TreeNode<DartObjectNode> {
-  DartObjectNode._({
+class ValuesNode extends TreeNode<ValuesNode> {
+  ValuesNode._({
     this.name,
     this.text,
     GenericInstanceRef? ref,
@@ -338,7 +338,7 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
   /// determine styling of `Text(name)` and `Text(displayValue)` respectively.
   /// Artificial names and values are rendered using `subtleFixedFontStyle` to
   /// put less emphasis on the name (e.g., for the root node of a JSON tree).
-  factory DartObjectNode.fromValue({
+  factory ValuesNode.fromValue({
     String? name,
     required Object? value,
     bool artificialName = false,
@@ -347,7 +347,7 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
     required IsolateRef? isolateRef,
   }) {
     name = name ?? '';
-    return DartObjectNode._(
+    return ValuesNode._(
       name: name,
       ref: GenericInstanceRef(
         isolateRef: isolateRef,
@@ -361,13 +361,13 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
 
   /// Creates a variable from a `String` which displays [value] with quotation
   /// marks.
-  factory DartObjectNode.fromString({
+  factory ValuesNode.fromString({
     String? name,
     required String? value,
     required IsolateRef? isolateRef,
   }) {
     name = name ?? '';
-    return DartObjectNode._(
+    return ValuesNode._(
       name: name,
       ref: GenericInstanceRef(
         isolateRef: isolateRef,
@@ -389,17 +389,17 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
   /// [artificialChildValues] determines styling of `Text(displayValue)` for
   /// child nodes. Artificial values are rendered using `subtleFixedFontStyle`
   /// to put less emphasis on the value.
-  factory DartObjectNode.fromList({
+  factory ValuesNode.fromList({
     String? name,
     required String? type,
     required List<Object?>? list,
     required IsolateRef? isolateRef,
     Object? Function(Object?)? displayNameBuilder,
-    List<DartObjectNode> Function(Object?)? childBuilder,
+    List<ValuesNode> Function(Object?)? childBuilder,
     bool artificialChildValues = true,
   }) {
     name = name ?? '';
-    return DartObjectNode._(
+    return ValuesNode._(
       name: name,
       ref: GenericInstanceRef(
         isolateRef: isolateRef,
@@ -410,7 +410,7 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
     )..addAllChildren([
         if (list != null)
           for (int i = 0; i < list.length; ++i)
-            DartObjectNode.fromValue(
+            ValuesNode.fromValue(
               name: '[$i]',
               value: displayNameBuilder?.call(list[i]) ?? list[i],
               isolateRef: isolateRef,
@@ -422,12 +422,12 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
       ]);
   }
 
-  factory DartObjectNode.create(
+  factory ValuesNode.create(
     BoundVariable variable,
     IsolateRef? isolateRef,
   ) {
     final value = variable.value;
-    return DartObjectNode._(
+    return ValuesNode._(
       name: variable.name,
       ref: GenericInstanceRef(
         isolateRef: isolateRef,
@@ -436,19 +436,19 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
     );
   }
 
-  factory DartObjectNode.text(String text) {
-    return DartObjectNode._(
+  factory ValuesNode.text(String text) {
+    return ValuesNode._(
       text: text,
       artificialName: true,
     );
   }
 
-  factory DartObjectNode.grouping(
+  factory ValuesNode.grouping(
     GenericInstanceRef? ref, {
     required int offset,
     required int count,
   }) {
-    return DartObjectNode._(
+    return ValuesNode._(
       ref: ref,
       text: '[$offset - ${offset + count - 1}]',
       offset: offset,
@@ -652,7 +652,7 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
   bool? _isInspectable;
 
   @override
-  DartObjectNode shallowCopy() {
+  ValuesNode shallowCopy() {
     throw UnimplementedError(
       'This method is not implemented. Implement if you '
       'need to call `shallowCopy` on an instance of this class.',

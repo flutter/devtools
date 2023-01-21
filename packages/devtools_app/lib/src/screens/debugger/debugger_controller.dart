@@ -523,7 +523,7 @@ class DebuggerController extends DisposableController
     }
   }
 
-  List<DartObjectNode> _createVariablesForFrame(Frame frame) {
+  List<ValuesNode> _createVariablesForFrame(Frame frame) {
     // vars can be null for async frames.
     if (frame.vars == null) {
       return [];
@@ -531,7 +531,7 @@ class DebuggerController extends DisposableController
 
     final variables = frame.vars!
         .map(
-          (v) => DartObjectNode.create(
+          (v) => ValuesNode.create(
             v,
             _isolate.value,
           ),

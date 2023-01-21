@@ -22,7 +22,7 @@ class DisplayProvider extends StatelessWidget {
     required this.onTap,
   });
 
-  final DartObjectNode variable;
+  final ValuesNode variable;
   final VoidCallback onTap;
 
   @override

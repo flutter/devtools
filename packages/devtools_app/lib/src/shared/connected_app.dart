@@ -246,9 +246,9 @@ class AppState extends DisposableController with AutoDisposeControllerMixin {
   }
 
   // TODO(polina-c): add explanation for variables.
-  ValueListenable<List<DartObjectNode>> get variables => _variables;
-  final _variables = ValueNotifier<List<DartObjectNode>>([]);
-  void setVariables(List<DartObjectNode> value) => _variables.value = value;
+  ValueListenable<List<ValuesNode>> get variables => _variables;
+  final _variables = ValueNotifier<List<ValuesNode>>([]);
+  void setVariables(List<ValuesNode> value) => _variables.value = value;
 
   ValueListenable<Frame?> get currentFrame => _currentFrame;
   final _currentFrame = ValueNotifier<Frame?>(null);

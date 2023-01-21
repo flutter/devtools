@@ -22,7 +22,7 @@ class Variables extends StatelessWidget {
   Widget build(BuildContext context) {
     // TODO(kenz): preserve expanded state of tree on switching frames and
     // on stepping.
-    return TreeView<DartObjectNode>(
+    return TreeView<ValuesNode>(
       dataRootsListenable: serviceManager.appState.variables,
       dataDisplayProvider: (variable, onPressed) => DisplayProvider(
         variable: variable,
@@ -33,7 +33,7 @@ class Variables extends StatelessWidget {
   }
 
   Future<void> onItemPressed(
-    DartObjectNode v,
+    ValuesNode v,
   ) async {
     // On expansion, lazily build the variables tree for performance reasons.
     if (v.isExpanded) {

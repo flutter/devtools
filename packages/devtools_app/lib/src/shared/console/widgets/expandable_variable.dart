@@ -20,7 +20,7 @@ class ExpandableVariable extends StatelessWidget {
   @visibleForTesting
   static const emptyExpandableVariableKey = Key('empty expandable variable');
 
-  final DartObjectNode? variable;
+  final ValuesNode? variable;
 
   @override
   Widget build(BuildContext context) {
@@ -29,9 +29,8 @@ class ExpandableVariable extends StatelessWidget {
       return const SizedBox(key: emptyExpandableVariableKey);
     // TODO(kenz): preserve expanded state of tree on switching frames and
     // on stepping.
-    return TreeView<DartObjectNode>(
-      dataRootsListenable:
-          FixedValueListenable<List<DartObjectNode>>([variable]),
+    return TreeView<ValuesNode>(
+      dataRootsListenable: FixedValueListenable<List<ValuesNode>>([variable]),
       shrinkWrap: true,
       dataDisplayProvider: (variable, onPressed) => DisplayProvider(
         variable: variable,
@@ -42,7 +41,7 @@ class ExpandableVariable extends StatelessWidget {
   }
 
   Future<void> onItemPressed(
-    DartObjectNode v,
+    ValuesNode v,
   ) async {
     // On expansion, lazily build the variables tree for performance reasons.
     if (v.isExpanded) {

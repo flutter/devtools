@@ -42,7 +42,7 @@ void main() {
       bytes: base64.encode(bytes.buffer.asUint8List()),
       length: 4,
     );
-    final variable = DartObjectNode.create(
+    final variable = ValuesNode.create(
       BoundVariable(
         name: 'test',
         value: instance,
@@ -73,7 +73,7 @@ void main() {
       bytes: base64.encode(bytes.buffer.asUint8List()),
       length: 4,
     );
-    final variable = DartObjectNode.create(
+    final variable = ValuesNode.create(
       BoundVariable(
         name: 'test',
         value: instance,
@@ -103,7 +103,7 @@ void main() {
       bytes: base64.encode(bytes.buffer.asUint8List()),
       length: 4,
     );
-    final variable = DartObjectNode.create(
+    final variable = ValuesNode.create(
       BoundVariable(
         name: 'test',
         value: instance,
@@ -133,7 +133,7 @@ void main() {
       bytes: base64.encode(bytes.buffer.asUint8List()),
       length: 4,
     );
-    final variable = DartObjectNode.create(
+    final variable = ValuesNode.create(
       BoundVariable(
         name: 'test',
         value: instance,
@@ -166,7 +166,7 @@ void main() {
         bytes: base64.encode(bytes.buffer.asUint8List()),
         length: 4,
       );
-      final variable = DartObjectNode.create(
+      final variable = ValuesNode.create(
         BoundVariable(
           name: 'test',
           value: instance,
@@ -198,7 +198,7 @@ void main() {
       bytes: base64.encode(bytes.buffer.asUint8List()),
       length: 4,
     );
-    final variable = DartObjectNode.create(
+    final variable = ValuesNode.create(
       BoundVariable(
         name: 'test',
         value: instance,
@@ -228,7 +228,7 @@ void main() {
       bytes: base64.encode(bytes.buffer.asUint8List()),
       length: 4,
     );
-    final variable = DartObjectNode.create(
+    final variable = ValuesNode.create(
       BoundVariable(
         name: 'test',
         value: instance,
@@ -258,7 +258,7 @@ void main() {
       bytes: base64.encode(bytes.buffer.asUint8List()),
       length: 4,
     );
-    final variable = DartObjectNode.create(
+    final variable = ValuesNode.create(
       BoundVariable(
         name: 'test',
         value: instance,
@@ -291,7 +291,7 @@ void main() {
         bytes: base64.encode(bytes.buffer.asUint8List()),
         length: 4,
       );
-      final variable = DartObjectNode.create(
+      final variable = ValuesNode.create(
         BoundVariable(
           name: 'test',
           value: instance,
@@ -324,7 +324,7 @@ void main() {
       bytes: base64.encode(bytes.buffer.asUint8List()),
       length: 4,
     );
-    final variable = DartObjectNode.create(
+    final variable = ValuesNode.create(
       BoundVariable(
         name: 'test',
         value: instance,
@@ -354,7 +354,7 @@ void main() {
       length: 4,
     );
 
-    final variable = DartObjectNode.create(
+    final variable = ValuesNode.create(
       BoundVariable(
         name: 'test',
         value: instance,
@@ -385,7 +385,7 @@ void main() {
       length: 4,
     );
 
-    final variable = DartObjectNode.create(
+    final variable = ValuesNode.create(
       BoundVariable(
         name: 'test',
         value: instance,
@@ -422,7 +422,7 @@ void main() {
       length: 4,
     );
 
-    final variable = DartObjectNode.create(
+    final variable = ValuesNode.create(
       BoundVariable(
         name: 'test',
         value: instance,
@@ -457,7 +457,7 @@ void main() {
       length: 4,
     );
 
-    final variable = DartObjectNode.create(
+    final variable = ValuesNode.create(
       BoundVariable(
         name: 'test',
         value: instance,
@@ -491,7 +491,7 @@ void main() {
         id: objectId,
         length: 332,
       );
-      final variable = DartObjectNode.create(
+      final variable = ValuesNode.create(
         BoundVariable(
           name: 'test',
           value: instance,
@@ -518,7 +518,7 @@ void main() {
         id: objectId,
         length: 300,
       );
-      final variable = DartObjectNode.create(
+      final variable = ValuesNode.create(
         BoundVariable(
           name: 'test',
           value: instance,
@@ -541,10 +541,10 @@ Matcher matchesVariable({
   required String name,
   required Object value,
 }) {
-  return const TypeMatcher<DartObjectNode>().having(
+  return const TypeMatcher<ValuesNode>().having(
     (v) => v,
     'boundVar',
-    const TypeMatcher<DartObjectNode>()
+    const TypeMatcher<ValuesNode>()
         .having((v) => v.name, 'name', equals(name))
         .having((v) => v.ref!.value, 'value', equals(value)),
   );
@@ -554,10 +554,10 @@ Matcher matchesVariableGroup({
   required int start,
   required int end,
 }) {
-  return const TypeMatcher<DartObjectNode>().having(
+  return const TypeMatcher<ValuesNode>().having(
     (v) => v,
     'boundVar',
-    const TypeMatcher<DartObjectNode>()
+    const TypeMatcher<ValuesNode>()
         .having((v) => v.text, 'text', equals('[$start - $end]')),
   );
 }

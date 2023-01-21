@@ -12,16 +12,16 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('debugger variables', () {
-    late DartObjectNode objectNode;
+    late ValuesNode objectNode;
 
     setUp(() {
       setGlobal(IdeTheme, IdeTheme());
-      objectNode = DartObjectNode.text('test node');
+      objectNode = ValuesNode.text('test node');
     });
 
     Future<void> pumpExpandableVariable(
       WidgetTester tester,
-      DartObjectNode? variable,
+      ValuesNode? variable,
     ) async {
       await tester.pumpWidget(
         wrap(
@@ -38,7 +38,7 @@ void main() {
       'ExpandableVariable builds without error',
       (WidgetTester tester) async {
         await pumpExpandableVariable(tester, objectNode);
-        expect(find.byType(TreeView<DartObjectNode>), findsOneWidget);
+        expect(find.byType(TreeView<ValuesNode>), findsOneWidget);
         expect(
           find.byKey(ExpandableVariable.emptyExpandableVariableKey),
           findsNothing,
@@ -50,7 +50,7 @@ void main() {
       'ExpandableVariable builds for null variable',
       (WidgetTester tester) async {
         await pumpExpandableVariable(tester, null);
-        expect(find.byType(TreeView<DartObjectNode>), findsNothing);
+        expect(find.byType(TreeView<ValuesNode>), findsNothing);
         expect(
           find.byKey(ExpandableVariable.emptyExpandableVariableKey),
           findsOneWidget,

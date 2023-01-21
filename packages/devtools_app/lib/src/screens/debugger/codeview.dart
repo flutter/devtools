@@ -1157,7 +1157,7 @@ class _LineItemState extends State<LineItem>
         final response = await evalService.evalAtCurrentFrame(word);
         final isolateRef = serviceManager.isolateManager.selectedIsolate.value;
         if (response is! InstanceRef) return null;
-        final variable = DartObjectNode.fromValue(
+        final variable = ValuesNode.fromValue(
           value: response,
           isolateRef: isolateRef,
         );

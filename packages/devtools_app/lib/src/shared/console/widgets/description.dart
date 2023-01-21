@@ -195,7 +195,7 @@ class DiagnosticsNodeDescription extends StatelessWidget {
         final value =
             await group.toObservatoryInstanceRef(diagnosticLocal.valueRef);
 
-        final variable = DartObjectNode.fromValue(
+        final variable = ValuesNode.fromValue(
           value: value,
           isolateRef: inspectorService.isolateRef,
           diagnostic: diagnosticLocal,
