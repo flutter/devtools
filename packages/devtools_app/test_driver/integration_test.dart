@@ -12,6 +12,7 @@ import 'package:integration_test/integration_test_driver_extended.dart';
 const _goldensDirectoryPath = 'integration_test/test_infra/goldens';
 const _failuresDirectoryPath = '$_goldensDirectoryPath/failures';
 const _defaultDiffPercentage = 1.0;
+const _defaultDiffTolerance = 0.01;
 
 Future<void> main() async {
   final driver = await FlutterDriver.connect();
@@ -58,14 +59,13 @@ Future<void> main() async {
       final failuresDirectory = Directory(_failuresDirectoryPath);
 
       if (!equal) {
-        const diffTolerance = .99;
         final percentDiffDisplay = '${(percentDiff * 100).toStringAsFixed(2)}%';
-        if (percentDiff < diffTolerance) {
+        if (percentDiff < _defaultDiffTolerance) {
           print(
             'Warning: $screenshotName.png differed from the golden image by '
             '$percentDiffDisplay. Since this is less than the acceptable '
-            'tolerance ${(diffTolerance * 100).toStringAsFixed(2)}%, the '
-            'test still passes.',
+            'tolerance ${(_defaultDiffTolerance * 100).toStringAsFixed(2)}%, '
+            'the test still passes.',
           );
           return true;
         }
