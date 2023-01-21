@@ -11,7 +11,7 @@ import 'package:stack_trace/stack_trace.dart' as stack_trace;
 import 'package:vm_service/vm_service.dart';
 
 import '../primitives/utils.dart';
-import 'dart_object_node.dart';
+import 'values_node.dart';
 import 'diagnostics_node.dart';
 import 'inspector_service.dart';
 

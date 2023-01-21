@@ -11,7 +11,7 @@ import '../service/service_registrations.dart' as registrations;
 import 'config_specific/import_export/import_export.dart';
 import 'config_specific/logger/logger.dart' as logger;
 import 'console/primitives/eval_history.dart';
-import 'diagnostics/dart_object_node.dart';
+import 'diagnostics/values_node.dart';
 import 'eval_on_dart_library.dart';
 import 'globals.dart';
 import 'primitives/auto_dispose.dart';
