@@ -11,8 +11,6 @@ abstract class ObjectNode extends TreeNode<ObjectNode> {
   @override
   bool get isExpandable;
 
-  String? get displayValue;
-
   GenericInstanceRef? ref;
 
   /// Selects the object in the Flutter Widget inspector.

@@ -10,9 +10,6 @@ class ReferencesObjectNode extends ObjectNode {
   int get childCount => 0;
 
   @override
-  String? get displayValue => 'references :)';
-
-  @override
   Future<bool> get isInspectable async => false;
 
   @override

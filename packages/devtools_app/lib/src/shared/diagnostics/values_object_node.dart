@@ -538,7 +538,6 @@ class ValuesObjectNode extends ObjectNode {
   Object? get value => ref?.value;
 
   // TODO(kenz): add custom display for lists with more than 100 elements
-  @override
   String? get displayValue {
     if (text != null) {
       return text;
