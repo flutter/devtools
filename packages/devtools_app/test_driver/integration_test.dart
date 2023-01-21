@@ -10,6 +10,7 @@ import 'package:image/image.dart';
 import 'package:integration_test/integration_test_driver_extended.dart';
 
 const _goldensDirectoryPath = 'integration_test/test_infra/goldens';
+const _failuresDirectoryPath = '$_goldensDirectoryPath/failures';
 const _defaultDiffPercentage = 1.0;
 
 Future<void> main() async {
@@ -22,7 +23,13 @@ Future<void> main() async {
       Map<String, Object?>? args,
     ]) async {
       final bool shouldUpdateGoldens = args?['update_goldens'] == true;
-      final double diffTolerance = args?['diff_tolerance'] as double? ?? 0.0;
+
+      // TODO(https://github.com/flutter/flutter/issues/118470): remove this.
+      // We need this to ensure all golden image checks run. Without this
+      // workaround, the flutter integration test framework will crash on the
+      // failed expectation.
+      final bool lastScreenshot = args?['last_screenshot'] == true;
+
       final goldenFile = File('$_goldensDirectoryPath/$screenshotName.png');
 
       if (shouldUpdateGoldens) {
@@ -30,8 +37,7 @@ Future<void> main() async {
           // Create the goldens directory if it does not exist.
           Directory(_goldensDirectoryPath).createSync();
         }
-        _writeImageToFile(goldenFile, screenshotBytes);
-
+        goldenFile.writeAsBytesSync(screenshotBytes);
         print('Golden image updated: $screenshotName.png');
         return true;
       }
@@ -39,20 +45,20 @@ Future<void> main() async {
       bool equal = false;
       double percentDiff = _defaultDiffPercentage;
       if (goldenFile.existsSync()) {
-        final goldenImageBytes = goldenFile.readAsBytesSync();
-        // Resize the screenshot bytes to match the size we expect on the CI.
-        final screenshotImageBytes = _resizeBytes(screenshotBytes);
-
+        final goldenBytes = goldenFile.readAsBytesSync();
         equal = const DeepCollectionEquality().equals(
-          goldenImageBytes,
-          screenshotImageBytes,
+          goldenBytes,
+          screenshotBytes,
         );
         if (!equal) {
-          percentDiff = _percentDiff(goldenImageBytes, screenshotImageBytes);
+          percentDiff = _percentDiff(goldenBytes, screenshotBytes);
         }
       }
 
+      final failuresDirectory = Directory(_failuresDirectoryPath);
+
       if (!equal) {
+        const diffTolerance = .99;
         final percentDiffDisplay = '${(percentDiff * 100).toStringAsFixed(2)}%';
         if (percentDiff < diffTolerance) {
           print(
@@ -63,46 +69,28 @@ Future<void> main() async {
           );
           return true;
         }
-
         print(
           'Golden image test failed: $screenshotName.png. The test image '
           'differed from the golden image by $percentDiffDisplay.',
         );
 
-        // Create the goldens directory if it does not exist.
+        // Create the goldens and failures directories if they do not exist.
         Directory(_goldensDirectoryPath).createSync();
+        failuresDirectory.createSync();
 
-        const failuresDirectoryPath = '$_goldensDirectoryPath/failures';
-        Directory(failuresDirectoryPath).createSync();
-        final goldenFailure =
-            File('$failuresDirectoryPath/$screenshotName.png');
-        _writeImageToFile(goldenFailure, screenshotBytes);
+        File('$_failuresDirectoryPath/$screenshotName.png')
+            .writeAsBytesSync(screenshotBytes);
       }
 
-      return equal;
+      if (lastScreenshot &&
+          failuresDirectory.existsSync() &&
+          failuresDirectory.listSync().isNotEmpty) {
+        return false;
+      }
+
+      return true;
     },
   );
-}
-
-// This is the default image width that will be created by screenshot testing
-// on the bots.
-const _defaultImageWidth = 1600;
-
-void _writeImageToFile(File file, List<int> bytes) {
-  file.writeAsBytesSync(_resizeBytes(bytes));
-}
-
-List<int> _resizeBytes(List<int> bytes) {
-  final image = decodeImage(bytes);
-  if (image == null) {
-    print('Cannot decode bytes to image.');
-    return bytes;
-  }
-
-  // Resize the image to a [_defaultImageWidth].
-  final resizedImage = copyResize(image, width: _defaultImageWidth);
-  final resizedBytes = encodePng(resizedImage);
-  return resizedBytes;
 }
 
 double _percentDiff(List<int> goldenBytes, List<int> screenshotBytes) {

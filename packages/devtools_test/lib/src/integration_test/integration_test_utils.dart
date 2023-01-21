@@ -76,7 +76,8 @@ class TestApp {
 Future<void> verifyScreenshot(
   IntegrationTestWidgetsFlutterBinding binding,
   String screenshotName, {
-  double? diffTolerance,
+  // TODO(https://github.com/flutter/flutter/issues/118470): remove this.
+  bool lastScreenshot = false,
 }) async {
   const updateGoldens = bool.fromEnvironment('update_goldens');
   logStatus('verify $screenshotName screenshot');
@@ -84,7 +85,7 @@ Future<void> verifyScreenshot(
     screenshotName,
     {
       'update_goldens': updateGoldens,
-      if (diffTolerance != null) 'diff_tolerance': diffTolerance,
+      'last_screenshot': lastScreenshot,
     },
   );
 }
