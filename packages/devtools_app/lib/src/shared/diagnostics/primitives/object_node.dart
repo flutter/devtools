@@ -8,8 +8,5 @@ import '../diagnostics_node.dart';
 abstract class ObjectNode extends TreeNode<ObjectNode> {
   int get childCount;
 
-  @override
-  bool get isExpandable;
-
   GenericInstanceRef? ref;
 }
