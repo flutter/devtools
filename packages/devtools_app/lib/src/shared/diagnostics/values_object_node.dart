@@ -53,6 +53,22 @@ Future<void> buildVariablesTree(
   final isolateRef = ref.isolateRef;
   final instanceRef = ref.instanceRef;
   final diagnostic = ref.diagnostic;
+
+  Obj? object;
+  if (instanceRef != null && serviceManager.service != null) {
+    final variableId = variable.ref!.isolateRef!.id!;
+    object = await serviceManager.service!.getObject(
+      variableId,
+      instanceRef.id!,
+      offset: variable.offset,
+      count: variable.childCount,
+    );
+  }
+
+  if (object is Instance && FeatureFlags.evalAndBrowse) {
+    variable.addChild(createVariableForReferences(object, isolateRef));
+  }
+
   if (diagnostic != null && includeDiagnosticPropertiesInDebugger) {
     final service = diagnostic.inspectorService;
     Future<void> _addPropertiesHelper(
@@ -110,28 +126,17 @@ Future<void> buildVariablesTree(
         );
         start += count;
       }
-    } else if (instanceRef != null && serviceManager.service != null) {
-      final variableId = variable.ref!.isolateRef!.id!;
-      final result = await serviceManager.service!.getObject(
-        variableId,
-        instanceRef.id!,
-        offset: variable.offset,
-        count: variable.childCount,
-      );
-
-      if (result is Instance) {
-        if (FeatureFlags.evalAndBrowse) {
-          variable.addChild(createVariableForReferences(result, isolateRef));
-        }
-        switch (result.kind) {
+    } else if (object != null) {
+      if (object is Instance) {
+        switch (object.kind) {
           case InstanceKind.kMap:
             variable.addAllChildren(
-              createVariablesForAssociations(result, isolateRef),
+              createVariablesForAssociations(object, isolateRef),
             );
             break;
           case InstanceKind.kList:
             variable.addAllChildren(
-              createVariablesForElements(result, isolateRef),
+              createVariablesForElements(object, isolateRef),
             );
             break;
           case InstanceKind.kUint8ClampedList:
@@ -149,56 +154,56 @@ Future<void> buildVariablesTree(
           case InstanceKind.kFloat32x4List:
           case InstanceKind.kFloat64x2List:
             variable.addAllChildren(
-              createVariablesForBytes(result, isolateRef),
+              createVariablesForBytes(object, isolateRef),
             );
             break;
           case InstanceKind.kRegExp:
             variable.addAllChildren(
-              createVariablesForRegExp(result, isolateRef),
+              createVariablesForRegExp(object, isolateRef),
             );
             break;
           case InstanceKind.kClosure:
             variable.addAllChildren(
-              createVariablesForClosure(result, isolateRef),
+              createVariablesForClosure(object, isolateRef),
             );
             break;
           case InstanceKind.kReceivePort:
             variable.addAllChildren(
-              createVariablesForReceivePort(result, isolateRef),
+              createVariablesForReceivePort(object, isolateRef),
             );
             break;
           case InstanceKind.kType:
             variable.addAllChildren(
-              createVariablesForType(result, isolateRef),
+              createVariablesForType(object, isolateRef),
             );
             break;
           case InstanceKind.kTypeParameter:
             variable.addAllChildren(
-              createVariablesForTypeParameters(result, isolateRef),
+              createVariablesForTypeParameters(object, isolateRef),
             );
             break;
           case InstanceKind.kFunctionType:
             variable.addAllChildren(
-              createVariablesForFunctionType(result, isolateRef),
+              createVariablesForFunctionType(object, isolateRef),
             );
             break;
           case InstanceKind.kWeakProperty:
             variable.addAllChildren(
-              createVariablesForWeakProperty(result, isolateRef),
+              createVariablesForWeakProperty(object, isolateRef),
             );
             break;
           case InstanceKind.kStackTrace:
             variable.addAllChildren(
-              createVariablesForStackTrace(result, isolateRef),
+              createVariablesForStackTrace(object, isolateRef),
             );
             break;
           default:
             break;
         }
-        if (result.fields != null) {
+        if (object.fields != null) {
           variable.addAllChildren(
             createVariablesForFields(
-              result,
+              object,
               isolateRef,
               existingNames: existingNames,
             ),

@@ -14,6 +14,7 @@ import '../primitives/utils.dart';
 import 'diagnostics_node.dart';
 import 'inspector_service.dart';
 import 'primitives/object_node.dart';
+import 'references_object_node.dart';
 import 'values_object_node.dart';
 
 List<ValuesObjectNode> createVariablesForStackTrace(
@@ -515,21 +516,18 @@ ObjectNode createVariableForReferences(
   final live = ValuesObjectNode.text('live')
     ..addAllChildren(
       [
-        ValuesObjectNode.text('inbound'),
-        ValuesObjectNode.text('outbound'),
+        ReferencesObjectNode(),
+        ReferencesObjectNode(),
       ],
     );
 
   final stat = ValuesObjectNode.text('static')
     ..addAllChildren(
       [
-        ValuesObjectNode.text('inbound'),
-        ValuesObjectNode.text('outbound'),
+        ReferencesObjectNode(),
+        ReferencesObjectNode(),
       ],
     );
 
-  final result = ValuesObjectNode.text('references')
-    ..addAllChildren([live, stat]);
-
-  return result;
+  return ValuesObjectNode.text('references')..addAllChildren([live, stat]);
 }
