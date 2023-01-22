@@ -11,6 +11,7 @@ import '../../screens/memory/shared/heap/model.dart';
 import '../../service/vm_service_wrapper.dart';
 import '../diagnostics/dart_object_node.dart';
 import '../diagnostics/diagnostics_node.dart';
+import '../diagnostics/generic_instance_reference.dart';
 import '../diagnostics/inspector_service.dart';
 import '../diagnostics/tree_builder.dart';
 import '../globals.dart';
