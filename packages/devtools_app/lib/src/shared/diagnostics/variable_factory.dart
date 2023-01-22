@@ -13,6 +13,7 @@ import 'package:vm_service/vm_service.dart';
 import '../primitives/utils.dart';
 import 'diagnostics_node.dart';
 import 'inspector_service.dart';
+import 'object_node/inbound_live_refs_object_node.dart';
 import 'object_node/references_object_node.dart';
 import 'object_node/values_object_node.dart';
 import 'primitives/object_node.dart';
@@ -516,7 +517,7 @@ ObjectNode createVariableForReferences(
   final live = ValuesObjectNode.text('live')
     ..addAllChildren(
       [
-        ReferencesObjectNode(),
+        InboundLiveRefsObjectNode(),
         ReferencesObjectNode(),
       ],
     );
