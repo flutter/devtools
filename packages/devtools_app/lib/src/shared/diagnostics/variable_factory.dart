@@ -515,21 +515,36 @@ DartObjectNode createVariableForReferences(
   final live = DartObjectNode.text('live')
     ..addAllChildren(
       [
-        DartObjectNode.fromValue(
-          name: 'inbound',
+        DartObjectNode.references(
+          text: 'inbound',
           expandType: ExpandType.liveInboundRefs,
           value: instanceRef,
           isolateRef: isolateRef,
         ),
-        // DartObjectNode(),
+        DartObjectNode.references(
+          text: 'outbound',
+          expandType: ExpandType.liveOutboundRefs,
+          value: instanceRef,
+          isolateRef: isolateRef,
+        ),
       ],
     );
 
   final stat = DartObjectNode.text('static')
     ..addAllChildren(
       [
-        // DartObjectNode(),
-        // DartObjectNode(),
+        DartObjectNode.references(
+          text: 'inbound',
+          expandType: ExpandType.staticInboundRefs,
+          value: instanceRef,
+          isolateRef: isolateRef,
+        ),
+        DartObjectNode.references(
+          text: 'outbound',
+          expandType: ExpandType.staticOutboundRefs,
+          value: instanceRef,
+          isolateRef: isolateRef,
+        ),
       ],
     );
 

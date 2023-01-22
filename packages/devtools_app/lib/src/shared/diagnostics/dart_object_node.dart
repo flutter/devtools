@@ -48,20 +48,34 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
     bool artificialValue = false,
     RemoteDiagnosticsNode? diagnostic,
     required IsolateRef? isolateRef,
-    ExpandType expandType = ExpandType.fields,
   }) {
     name = name ?? '';
     return DartObjectNode._(
       name: name,
-      text: expandType == ExpandType.fields ? null : name,
       ref: GenericInstanceRef(
         isolateRef: isolateRef,
         diagnostic: diagnostic,
         value: value,
-        expandType: expandType,
       ),
       artificialName: artificialName,
       artificialValue: artificialValue,
+    );
+  }
+
+  factory DartObjectNode.references({
+    required String text,
+    required Object value,
+    required IsolateRef? isolateRef,
+    required ExpandType expandType,
+  }) {
+    assert(expandType != ExpandType.fields);
+    return DartObjectNode._(
+      text: text,
+      ref: GenericInstanceRef(
+        isolateRef: isolateRef,
+        value: value,
+        expandType: expandType,
+      ),
     );
   }
 
