@@ -8,8 +8,8 @@ import 'package:flutter/material.dart' hide Stack;
 
 import '../../../shared/primitives/listenable.dart';
 import '../../../shared/tree.dart';
-import '../../diagnostics/primitives/object_node.dart';
 import '../../diagnostics/object_node/values_object_node.dart';
+import '../../diagnostics/primitives/object_node.dart';
 import 'display_provider.dart';
 
 class ExpandableVariable extends StatelessWidget {

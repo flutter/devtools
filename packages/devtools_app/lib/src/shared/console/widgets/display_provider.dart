@@ -11,9 +11,9 @@ import '../../../shared/primitives/selection_controls.dart';
 import '../../../shared/primitives/utils.dart';
 import '../../../shared/routing.dart';
 import '../../../shared/theme.dart';
-import '../../diagnostics/primitives/object_node.dart';
-import '../../diagnostics/references_object_node.dart';
+import '../../diagnostics/object_node/references_object_node.dart';
 import '../../diagnostics/object_node/values_object_node.dart';
+import '../../diagnostics/primitives/object_node.dart';
 import '../../primitives/simple_items.dart';
 import 'description.dart';
 

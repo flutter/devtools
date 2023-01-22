@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '../primitives/trees.dart';
-import 'primitives/object_node.dart';
+import '../../primitives/trees.dart';
+import '../primitives/object_node.dart';
 
 /// This is placeholder, that will be replaced with concrete implementations.
 class ReferencesObjectNode extends ObjectNode {
