@@ -14,6 +14,7 @@ import '../primitives/utils.dart';
 import 'dart_object_node.dart';
 import 'diagnostics_node.dart';
 import 'inspector_service.dart';
+import 'primitives/expand_type.dart';
 
 List<DartObjectNode> createVariablesForStackTrace(
   Instance stackTrace,
@@ -505,4 +506,28 @@ List<DartObjectNode> createVariablesForFields(
     }
   }
   return variables;
+}
+
+DartObjectNode createVariableForReferences(
+  InstanceRef instanceRef,
+  IsolateRef? isolateRef,
+) {
+  final live = DartObjectNode.text('live')
+    ..addAllChildren(
+      [
+        DartObjectNode.fromValue(
+            expandType: ExpandType.liveInboundRefs, value: instanceRef),
+        DartObjectNode(),
+      ],
+    );
+
+  final stat = DartObjectNode.text('static')
+    ..addAllChildren(
+      [
+        DartObjectNode(),
+        DartObjectNode(),
+      ],
+    );
+
+  return DartObjectNode.text('references')..addAllChildren([live, stat]);
 }

@@ -12,6 +12,7 @@ import '../primitives/trees.dart';
 import '../primitives/utils.dart';
 import 'diagnostics_node.dart';
 import 'inspector_service.dart';
+import 'primitives/expand_type.dart';
 
 // TODO(jacobr): gracefully handle cases where the isolate has closed and
 // InstanceRef objects have become sentinels.
@@ -46,6 +47,7 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
     bool artificialValue = false,
     RemoteDiagnosticsNode? diagnostic,
     required IsolateRef? isolateRef,
+    ExpandType expandType = ExpandType.fields,
   }) {
     name = name ?? '';
     return DartObjectNode._(
@@ -54,6 +56,7 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
         isolateRef: isolateRef,
         diagnostic: diagnostic,
         value: value,
+        expandType: expandType,
       ),
       artificialName: artificialName,
       artificialValue: artificialValue,
