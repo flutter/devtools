@@ -52,46 +52,6 @@ class DisplayProvider extends StatelessWidget {
         style: theme.fixedFontStyle,
       );
     }
-    TextStyle variableDisplayStyle() {
-      final style = theme.subtleFixedFontStyle;
-      String? kind = variable.ref?.instanceRef?.kind;
-      // Handle nodes with primative values.
-      if (kind == null) {
-        final value = variable.ref?.value;
-        if (value != null) {
-          switch (value.runtimeType) {
-            case String:
-              kind = InstanceKind.kString;
-              break;
-            case num:
-              kind = InstanceKind.kInt;
-              break;
-            case bool:
-              kind = InstanceKind.kBool;
-              break;
-          }
-        }
-        kind ??= InstanceKind.kNull;
-      }
-      switch (kind) {
-        case InstanceKind.kString:
-          return style.apply(
-            color: theme.colorScheme.stringSyntaxColor,
-          );
-        case InstanceKind.kInt:
-        case InstanceKind.kDouble:
-          return style.apply(
-            color: theme.colorScheme.numericConstantSyntaxColor,
-          );
-        case InstanceKind.kBool:
-        case InstanceKind.kNull:
-          return style.apply(
-            color: theme.colorScheme.modifierSyntaxColor,
-          );
-        default:
-          return style;
-      }
-    }
 
     final hasName = variable.name?.isNotEmpty ?? false;
     return DevToolsTooltip(
@@ -115,7 +75,7 @@ class DisplayProvider extends StatelessWidget {
               text: variable.displayValue.toString(),
               style: variable.artificialValue
                   ? theme.subtleFixedFontStyle
-                  : variableDisplayStyle(),
+                  : _variableDisplayStyle(theme, variable),
             ),
           ],
         ),
@@ -147,5 +107,46 @@ class DisplayProvider extends StatelessWidget {
         onTap: onTap,
       ),
     );
+  }
+}
+
+TextStyle _variableDisplayStyle(ThemeData theme, DartObjectNode variable) {
+  final style = theme.subtleFixedFontStyle;
+  String? kind = variable.ref?.instanceRef?.kind;
+  // Handle nodes with primative values.
+  if (kind == null) {
+    final value = variable.ref?.value;
+    if (value != null) {
+      switch (value.runtimeType) {
+        case String:
+          kind = InstanceKind.kString;
+          break;
+        case num:
+          kind = InstanceKind.kInt;
+          break;
+        case bool:
+          kind = InstanceKind.kBool;
+          break;
+      }
+    }
+    kind ??= InstanceKind.kNull;
+  }
+  switch (kind) {
+    case InstanceKind.kString:
+      return style.apply(
+        color: theme.colorScheme.stringSyntaxColor,
+      );
+    case InstanceKind.kInt:
+    case InstanceKind.kDouble:
+      return style.apply(
+        color: theme.colorScheme.numericConstantSyntaxColor,
+      );
+    case InstanceKind.kBool:
+    case InstanceKind.kNull:
+      return style.apply(
+        color: theme.colorScheme.modifierSyntaxColor,
+      );
+    default:
+      return style;
   }
 }
