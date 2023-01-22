@@ -53,6 +53,7 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
     name = name ?? '';
     return DartObjectNode._(
       name: name,
+      text: expandType == ExpandType.fields ? null : name,
       ref: GenericInstanceRef(
         isolateRef: isolateRef,
         diagnostic: diagnostic,
