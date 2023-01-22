@@ -13,6 +13,7 @@ import '../globals.dart';
 import '../primitives/utils.dart';
 import 'dart_object_node.dart';
 import 'diagnostics_node.dart';
+import 'generic_instance_reference.dart';
 import 'inspector_service.dart';
 import 'variable_factory.dart';
 
