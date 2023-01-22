@@ -6,7 +6,7 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:devtools_app/src/service/service_manager.dart';
-import 'package:devtools_app/src/shared/diagnostics/values_object_node.dart';
+import 'package:devtools_app/src/shared/diagnostics/object_node/values_object_node.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/foundation.dart';

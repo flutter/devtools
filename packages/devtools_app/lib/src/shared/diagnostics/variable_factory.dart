@@ -15,7 +15,7 @@ import 'diagnostics_node.dart';
 import 'inspector_service.dart';
 import 'primitives/object_node.dart';
 import 'references_object_node.dart';
-import 'values_object_node.dart';
+import 'object_node/values_object_node.dart';
 
 List<ValuesObjectNode> createVariablesForStackTrace(
   Instance stackTrace,

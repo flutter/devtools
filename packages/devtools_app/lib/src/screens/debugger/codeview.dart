@@ -14,7 +14,7 @@ import '../../shared/common_widgets.dart';
 import '../../shared/config_specific/logger/logger.dart';
 import '../../shared/console/widgets/expandable_variable.dart';
 import '../../shared/diagnostics/primitives/source_location.dart';
-import '../../shared/diagnostics/values_object_node.dart';
+import '../../shared/diagnostics/object_node/values_object_node.dart';
 import '../../shared/dialogs.dart';
 import '../../shared/globals.dart';
 import '../../shared/history_viewport.dart';

@@ -8,15 +8,15 @@ import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../screens/debugger/debugger_model.dart';
-import '../config_specific/logger/logger.dart';
-import '../feature_flags.dart';
-import '../globals.dart';
-import '../primitives/utils.dart';
-import 'diagnostics_node.dart';
-import 'inspector_service.dart';
-import 'primitives/object_node.dart';
-import 'variable_factory.dart';
+import '../../../screens/debugger/debugger_model.dart';
+import '../../config_specific/logger/logger.dart';
+import '../../feature_flags.dart';
+import '../../globals.dart';
+import '../../primitives/utils.dart';
+import '../diagnostics_node.dart';
+import '../inspector_service.dart';
+import '../primitives/object_node.dart';
+import '../variable_factory.dart';
 
 Future<void> _addExpandableChildren(
   ValuesObjectNode variable,

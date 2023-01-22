@@ -5,7 +5,7 @@
 import 'package:devtools_app/src/shared/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/shared/console/widgets/expandable_variable.dart';
 import 'package:devtools_app/src/shared/diagnostics/primitives/object_node.dart';
-import 'package:devtools_app/src/shared/diagnostics/values_object_node.dart';
+import 'package:devtools_app/src/shared/diagnostics/object_node/values_object_node.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_app/src/shared/tree.dart';
 import 'package:devtools_test/devtools_test.dart';
