@@ -5,6 +5,7 @@
 import 'package:vm_service/vm_service.dart';
 
 import 'diagnostics_node.dart';
+import 'primitives/expand_type.dart';
 
 /// A generic [InstanceRef] using either format used by the [InspectorService]
 /// or Dart VM.
@@ -22,9 +23,12 @@ class GenericInstanceRef {
     required this.isolateRef,
     this.value,
     this.diagnostic,
+    this.expandType = ExpandType.fields,
   });
 
   final Object? value;
+
+  final ExpandType expandType;
 
   InstanceRef? get instanceRef =>
       value is InstanceRef ? value as InstanceRef? : null;

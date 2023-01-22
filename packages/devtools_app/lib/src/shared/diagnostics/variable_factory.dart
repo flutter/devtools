@@ -516,16 +516,19 @@ DartObjectNode createVariableForReferences(
     ..addAllChildren(
       [
         DartObjectNode.fromValue(
-            expandType: ExpandType.liveInboundRefs, value: instanceRef),
-        DartObjectNode(),
+          expandType: ExpandType.liveInboundRefs,
+          value: instanceRef,
+          isolateRef: isolateRef,
+        ),
+        // DartObjectNode(),
       ],
     );
 
   final stat = DartObjectNode.text('static')
     ..addAllChildren(
       [
-        DartObjectNode(),
-        DartObjectNode(),
+        // DartObjectNode(),
+        // DartObjectNode(),
       ],
     );
 
