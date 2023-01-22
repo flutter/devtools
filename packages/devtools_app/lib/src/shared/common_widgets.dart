@@ -16,6 +16,7 @@ import 'analytics/analytics.dart' as ga;
 import 'config_specific/launch_url/launch_url.dart';
 import 'console/widgets/expandable_variable.dart';
 import 'diagnostics/dart_object_node.dart';
+import 'diagnostics/tree_builder.dart';
 import 'dialogs.dart';
 import 'globals.dart';
 import 'primitives/auto_dispose.dart';
