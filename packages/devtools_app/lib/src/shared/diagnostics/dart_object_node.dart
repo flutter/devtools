@@ -3,19 +3,15 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../screens/debugger/debugger_model.dart';
-import '../config_specific/logger/logger.dart';
 import '../globals.dart';
 import '../primitives/trees.dart';
 import '../primitives/utils.dart';
 import 'diagnostics_node.dart';
 import 'inspector_service.dart';
-import 'variable_factory.dart';
 
 // TODO(jacobr): gracefully handle cases where the isolate has closed and
 // InstanceRef objects have become sentinels.
@@ -23,13 +19,12 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
   DartObjectNode._({
     this.name,
     this.text,
-    GenericInstanceRef? ref,
+    this.ref,
     int? offset,
     int? childCount,
     this.artificialName = false,
     this.artificialValue = false,
-  })  : ref = ref,
-        _offset = offset,
+  })  : _offset = offset,
         _childCount = childCount {
     indentChildren = ref?.diagnostic?.style != DiagnosticsTreeStyle.flat;
   }

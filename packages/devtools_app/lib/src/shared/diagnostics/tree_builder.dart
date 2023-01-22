@@ -5,13 +5,11 @@
 import 'dart:async';
 import 'dart:math';
 
-import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../screens/debugger/debugger_model.dart';
 import '../config_specific/logger/logger.dart';
 import '../globals.dart';
-import '../primitives/trees.dart';
 import '../primitives/utils.dart';
 import 'dart_object_node.dart';
 import 'diagnostics_node.dart';
