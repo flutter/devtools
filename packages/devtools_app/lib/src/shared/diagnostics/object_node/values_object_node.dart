@@ -203,9 +203,6 @@ class ValuesObjectNode extends ObjectNode {
 
   int? _childCount;
 
-  bool treeInitializeStarted = false;
-  bool treeInitializeComplete = false;
-
   @override
   bool get isExpandable {
     if (treeInitializeComplete || children.isNotEmpty || childCount > 0) {

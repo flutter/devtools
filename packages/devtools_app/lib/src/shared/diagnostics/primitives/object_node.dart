@@ -9,4 +9,8 @@ abstract class ObjectNode extends TreeNode<ObjectNode> {
   int get childCount;
 
   GenericInstanceRef? ref;
+
+  bool treeInitializeStarted = false;
+
+  bool treeInitializeComplete = false;
 }
