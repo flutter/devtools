@@ -12,6 +12,7 @@ import '../../service/vm_service_wrapper.dart';
 import '../diagnostics/dart_object_node.dart';
 import '../diagnostics/diagnostics_node.dart';
 import '../diagnostics/inspector_service.dart';
+import '../diagnostics/tree_builder.dart';
 import '../globals.dart';
 import '../primitives/auto_dispose.dart';
 import '../primitives/utils.dart';
