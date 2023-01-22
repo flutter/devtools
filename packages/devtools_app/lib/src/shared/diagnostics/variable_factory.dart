@@ -516,6 +516,7 @@ DartObjectNode createVariableForReferences(
     ..addAllChildren(
       [
         DartObjectNode.fromValue(
+          name: 'inbound',
           expandType: ExpandType.liveInboundRefs,
           value: instanceRef,
           isolateRef: isolateRef,
