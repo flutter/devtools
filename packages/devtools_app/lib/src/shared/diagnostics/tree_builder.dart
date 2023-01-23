@@ -142,7 +142,10 @@ Future<void> _addInstanceRefItems(
     count: variable.childCount,
   );
   if (result is Instance) {
-    createVariableForReferences(instanceRef, isolateRef);
+    variable.addChild(
+      createVariableForReferences(instanceRef, isolateRef),
+      index: 0,
+    );
 
     switch (result.kind) {
       case InstanceKind.kMap:
