@@ -39,7 +39,7 @@ void main() {
     await tester.tap(find.byType(FlutterFramesChartItem).last);
     await tester.pumpAndSettle(safePumpDuration);
 
-    await verifyScreenshot(binding, 'perfetto_frame_selection');
+    await verifyScreenshot(binding, 'perfetto_initial_load');
 
     logStatus(
       'switch to a different feature tab and back to Timeline Events',
