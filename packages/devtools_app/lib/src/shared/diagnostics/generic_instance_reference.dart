@@ -4,6 +4,7 @@
 
 import 'package:vm_service/vm_service.dart';
 
+import '../memory/adapted_heap_data.dart';
 import 'diagnostics_node.dart';
 import 'primitives/expand_type.dart';
 
@@ -24,11 +25,14 @@ class GenericInstanceRef {
     this.value,
     this.diagnostic,
     this.expandType = ExpandType.fields,
+    this.heap,
   });
 
   final Object? value;
 
   final ExpandType expandType;
+
+  final AdaptedHeapData? heap;
 
   InstanceRef? get instanceRef =>
       value is InstanceRef ? value as InstanceRef? : null;
