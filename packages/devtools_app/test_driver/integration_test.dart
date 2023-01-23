@@ -111,11 +111,13 @@ double _percentDiff(List<int> goldenBytes, List<int> screenshotBytes) {
     return _defaultDiffPercentage;
   }
 
-  if (goldenBytes.length != screenshotBytes.length) {
+  final goldenImageBytes = goldenImage.getBytes();
+  final screenshotImageBytes = screenshotImage.getBytes();
+  if (goldenImageBytes.length != screenshotImageBytes.length) {
     print(
       'The golden images have a different byte lengths. '
-      'Golden: ${goldenBytes.length} bytes\n'
-      'Screenshot: ${screenshotBytes.length} bytes\n',
+      'Golden: ${goldenImageBytes.length} bytes\n'
+      'Screenshot: ${screenshotImageBytes.length} bytes\n',
     );
     return _defaultDiffPercentage;
   }
@@ -124,15 +126,15 @@ double _percentDiff(List<int> goldenBytes, List<int> screenshotBytes) {
   // [matchesReferenceImage]. The small bit of code copied here is pulled out
   // for convenient reuse.
   int delta = 0;
-  for (int i = 0; i < goldenBytes.length; i += 4) {
-    if (goldenBytes[i] != screenshotBytes[i] ||
-        goldenBytes[i + 1] != screenshotBytes[i + 1] ||
-        goldenBytes[i + 2] != screenshotBytes[i + 2] ||
-        goldenBytes[i + 3] != screenshotBytes[i + 3]) {
+  for (int i = 0; i < goldenImageBytes.length; i += 4) {
+    if (goldenImageBytes[i] != screenshotImageBytes[i] ||
+        goldenImageBytes[i + 1] != screenshotImageBytes[i + 1] ||
+        goldenImageBytes[i + 2] != screenshotImageBytes[i + 2] ||
+        goldenImageBytes[i + 3] != screenshotImageBytes[i + 3]) {
       delta++;
     }
   }
-  return delta / goldenBytes.length / 4;
+  return delta / goldenImageBytes.length / 4;
 }
 
 extension _ImageExtension on Image {
