@@ -327,36 +327,55 @@ Future<void> _addReferences(
   DartObjectNode variable,
   GenericInstanceRef ref,
 ) async {
+  final List<DartObjectNode> children;
   switch (ref.expandType) {
     case ExpandType.fields:
-      // TODO: Handle this case.
-      break;
+      throw StateError('Unexpected value ${ExpandType.fields}');
     case ExpandType.liveInboundRefs:
       // Does not work with vm_service v 9
       final refs = await serviceManager.service!
           .getInboundReferences(ref.isolateRef!.id!, ref.instanceRef!.id!, 100);
-      final children = refs.references
-          ?.map(
-            (r) => DartObjectNode.references(
-              text: r.runtimeType.toString(),
-              value: r,
-              isolateRef: ref.isolateRef,
-              expandType: ref.expandType,
-            ),
-          )
-          .toList();
-      await _addExpandableChildren(variable, children ?? []);
+      children = refs.references
+              ?.map(
+                (r) => DartObjectNode.references(
+                  text: r.runtimeType.toString(),
+                  value: r,
+                  isolateRef: ref.isolateRef,
+                  expandType: ref.expandType,
+                ),
+              )
+              .toList() ??
+          [];
+
       break;
     case ExpandType.liveOutboundRefs:
-      // TODO: Handle this case.
+      children = [];
+      // TODO(polina-c): Handle this case.
       break;
     case ExpandType.staticInboundRefs:
-      // TODO: Handle this case.
+      children = [];
+      // TODO(polina-c): Handle this case.
       break;
     case ExpandType.staticOutboundRefs:
-      // TODO: Handle this case.
+      final heap = ref.heap!;
+      final hashCode = ref.instanceRef!.identityHashCode;
+
+      final indexInHeap = heap.objectIndexByIdentityHashCode(hashCode ?? -1);
+      if (indexInHeap == null) return;
+
+      final indexes = heap.objects[indexInHeap].references;
+
+      DartObjectNode toNode(int index) => DartObjectNode.staticReferences(
+            heap: heap,
+            indexInHeap: index,
+            expandType: ref.expandType,
+          );
+
+      children = indexes.map(toNode).toList();
       break;
   }
+
+  await _addExpandableChildren(variable, children);
 }
 
 /// Builds the tree representation for a [DartObjectNode] object by querying

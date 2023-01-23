@@ -24,15 +24,29 @@ class GenericInstanceRef {
     required this.isolateRef,
     this.value,
     this.diagnostic,
-    this.expandType = ExpandType.fields,
     this.heap,
-  });
+    this.expandType = ExpandType.fields,
+  })  : assert(expandType.isLive),
+        indexInHeap = null;
+
+  GenericInstanceRef.heap({
+    required this.expandType,
+    required this.heap,
+    required this.indexInHeap,
+  })  : assert(!expandType.isLive),
+        assert(heap != null),
+        assert(indexInHeap != null),
+        value = null,
+        diagnostic = null,
+        isolateRef = null;
 
   final Object? value;
 
   final ExpandType expandType;
 
   final AdaptedHeapData? heap;
+
+  final int? indexInHeap;
 
   InstanceRef? get instanceRef =>
       value is InstanceRef ? value as InstanceRef? : null;

@@ -43,12 +43,12 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
   /// Artificial names and values are rendered using `subtleFixedFontStyle` to
   /// put less emphasis on the name (e.g., for the root node of a JSON tree).
   factory DartObjectNode.fromValue({
-    String? name,
     required Object? value,
+    required IsolateRef? isolateRef,
+    String? name,
     bool artificialName = false,
     bool artificialValue = false,
     RemoteDiagnosticsNode? diagnostic,
-    required IsolateRef? isolateRef,
     AdaptedHeapData? heap,
   }) {
     name = name ?? '';
@@ -78,6 +78,25 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
         isolateRef: isolateRef,
         value: value,
         expandType: expandType,
+      ),
+    );
+  }
+
+  factory DartObjectNode.staticReferences({
+    required AdaptedHeapData heap,
+    required int indexInHeap,
+    required ExpandType expandType,
+  }) {
+    assert(!expandType.isLive);
+    final object = heap.objects[indexInHeap];
+
+    return DartObjectNode._(
+      text:
+          '${object.heapClass.shortName}:${prettyPrintBytes(object.retainedSize)}',
+      ref: GenericInstanceRef.heap(
+        expandType: expandType,
+        heap: heap,
+        indexInHeap: indexInHeap,
       ),
     );
   }

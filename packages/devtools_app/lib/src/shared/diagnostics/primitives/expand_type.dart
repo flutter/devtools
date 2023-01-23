@@ -3,9 +3,14 @@
 // found in the LICENSE file.
 
 enum ExpandType {
-  fields,
-  liveInboundRefs,
-  liveOutboundRefs,
-  staticInboundRefs,
-  staticOutboundRefs,
+  fields(isLive: true),
+  liveInboundRefs(isLive: true),
+  liveOutboundRefs(isLive: true),
+  staticInboundRefs(isLive: false),
+  staticOutboundRefs(isLive: false),
+  ;
+
+  const ExpandType({required this.isLive});
+
+  final bool isLive;
 }
