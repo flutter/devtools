@@ -106,6 +106,7 @@ class TestRunner with IOMixin {
   static const _endExceptionMarker = '===========================';
   static const _errorMarker = ': Error: ';
   static const _unhandledExceptionMarker = 'Unhandled exception:';
+  static const _retries = 1;
 
   Future<void> run(
     String testTarget, {
@@ -114,90 +115,104 @@ class TestRunner with IOMixin {
     bool updateGoldens = false,
     Map<String, Object> testAppArguments = const <String, Object>{},
   }) async {
-    _debugLog('starting the flutter drive process');
-    final process = await Process.start(
-      'flutter',
-      [
-        'drive',
-        // Debug outputs from the test will not show up in profile mode. Since
-        // we rely on debug outputs for detecting errors and exceptions from the
-        // test, we cannot run this these tests in profile mode until this issue
-        // is resolved.  See https://github.com/flutter/flutter/issues/69070.
-        // '--profile',
-        '--driver=test_driver/integration_test.dart',
-        '--target=$testTarget',
-        '-d',
-        headless ? 'web-server' : 'chrome',
-        if (testAppArguments.isNotEmpty)
-          '--dart-define=test_args=${jsonEncode(testAppArguments)}',
-        if (enableExperiments) '--dart-define=enable_experiments=true',
-        if (updateGoldens) '--dart-define=update_goldens=true',
-      ],
-    );
+    Future<void> _run({required int attemptNumber}) async {
+      _debugLog('starting the flutter drive process');
+      final process = await Process.start(
+        'flutter',
+        [
+          'drive',
+          // Debug outputs from the test will not show up in profile mode. Since
+          // we rely on debug outputs for detecting errors and exceptions from the
+          // test, we cannot run this these tests in profile mode until this issue
+          // is resolved.  See https://github.com/flutter/flutter/issues/69070.
+          // '--profile',
+          '--driver=test_driver/integration_test.dart',
+          '--target=$testTarget',
+          '-d',
+          headless ? 'web-server' : 'chrome',
+          if (testAppArguments.isNotEmpty)
+            '--dart-define=test_args=${jsonEncode(testAppArguments)}',
+          if (enableExperiments) '--dart-define=enable_experiments=true',
+          if (updateGoldens) '--dart-define=update_goldens=true',
+        ],
+      );
 
-    bool stdOutWriteInProgress = false;
-    bool stdErrWriteInProgress = false;
-    final exceptionBuffer = StringBuffer();
+      bool stdOutWriteInProgress = false;
+      bool stdErrWriteInProgress = false;
+      final exceptionBuffer = StringBuffer();
 
-    listenToProcessOutput(
-      process,
-      onStdout: (line) {
-        if (line.startsWith(_TestResult.testResultPrefix)) {
-          final testResultJson = line.substring(line.indexOf('{'));
-          final testResultMap =
-              jsonDecode(testResultJson) as Map<String, Object?>;
-          final result = _TestResult.parse(testResultMap);
-          if (!result.result) {
-            exceptionBuffer
-              ..writeln('$result')
-              ..writeln();
+      listenToProcessOutput(
+        process,
+        onStdout: (line) {
+          if (line.startsWith(_TestResult.testResultPrefix)) {
+            final testResultJson = line.substring(line.indexOf('{'));
+            final testResultMap =
+                jsonDecode(testResultJson) as Map<String, Object?>;
+            final result = _TestResult.parse(testResultMap);
+            if (!result.result) {
+              exceptionBuffer
+                ..writeln('$result')
+                ..writeln();
+            }
           }
-        }
 
-        if (line.contains(_beginExceptionMarker)) {
-          stdOutWriteInProgress = true;
-        }
-        if (stdOutWriteInProgress) {
-          exceptionBuffer.writeln(line);
-          // Marks the end of the exception caught by flutter.
-          if (line.contains(_endExceptionMarker) &&
-              !line.contains(_beginExceptionMarker)) {
-            stdOutWriteInProgress = false;
-            exceptionBuffer.writeln();
+          if (line.contains(_beginExceptionMarker)) {
+            stdOutWriteInProgress = true;
           }
+          if (stdOutWriteInProgress) {
+            exceptionBuffer.writeln(line);
+            // Marks the end of the exception caught by flutter.
+            if (line.contains(_endExceptionMarker) &&
+                !line.contains(_beginExceptionMarker)) {
+              stdOutWriteInProgress = false;
+              exceptionBuffer.writeln();
+            }
+          }
+        },
+        onStderr: (line) {
+          if (line.contains(_errorMarker) ||
+              line.contains(_unhandledExceptionMarker)) {
+            stdErrWriteInProgress = true;
+          }
+          if (stdErrWriteInProgress) {
+            exceptionBuffer.writeln(line);
+          }
+        },
+      );
+
+      bool testTimedOut = false;
+      final timeout = Future.delayed(const Duration(minutes: 6)).then((_) {
+        testTimedOut = true;
+      });
+
+      await Future.any([
+        process.exitCode,
+        timeout,
+      ]);
+
+      process.kill();
+      _debugLog('flutter drive process has exited');
+
+      if (testTimedOut) {
+        if (attemptNumber < _retries) {
+          throw Exception(
+            'Integration test timed out on try #${attemptNumber}: $testTarget',
+          );
+        } else {
+          _debugLog(
+            'Integration test timed out on try #${attemptNumber}. Retrying '
+            '$testTarget now.',
+          );
+          await _run(attemptNumber: ++attemptNumber);
         }
-      },
-      onStderr: (line) {
-        if (line.contains(_errorMarker) ||
-            line.contains(_unhandledExceptionMarker)) {
-          stdErrWriteInProgress = true;
-        }
-        if (stdErrWriteInProgress) {
-          exceptionBuffer.writeln(line);
-        }
-      },
-    );
+      }
 
-    bool testTimedOut = false;
-    final timeout = Future.delayed(const Duration(minutes: 6)).then((_) {
-      testTimedOut = true;
-    });
-
-    await Future.any([
-      process.exitCode,
-      timeout,
-    ]);
-
-    process.kill();
-    _debugLog('flutter drive process has exited');
-
-    if (testTimedOut) {
-      throw Exception('Integration test timed out: $testTarget');
+      if (exceptionBuffer.isNotEmpty) {
+        throw Exception(exceptionBuffer.toString());
+      }
     }
 
-    if (exceptionBuffer.isNotEmpty) {
-      throw Exception(exceptionBuffer.toString());
-    }
+    await _run(attemptNumber: 0);
   }
 }
 
