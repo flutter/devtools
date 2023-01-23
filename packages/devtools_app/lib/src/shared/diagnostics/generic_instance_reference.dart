@@ -7,6 +7,7 @@ import 'package:vm_service/vm_service.dart';
 import '../memory/adapted_heap_data.dart';
 import 'diagnostics_node.dart';
 import 'primitives/expand_type.dart';
+import 'diagnostics_node.dart';
 
 /// A generic [InstanceRef] using either format used by the [InspectorService]
 /// or Dart VM.
