@@ -325,7 +325,10 @@ Future<void> _addReferences(
   DartObjectNode variable,
   GenericInstanceRef ref,
 ) async {
-  if (ref.expandType == ExpandType.liveInboundRefs) {}
+  if (ref.expandType == ExpandType.liveInboundRefs) {
+    final refs = await serviceManager.service!
+        .getInboundReferences(ref.isolateRef!.id!, ref.instanceRef!.id!, 100);
+  }
 }
 
 /// Builds the tree representation for a [DartObjectNode] object by querying
