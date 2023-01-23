@@ -328,6 +328,12 @@ Future<void> _addReferences(
   if (ref.expandType == ExpandType.liveInboundRefs) {
     final refs = await serviceManager.service!
         .getInboundReferences(ref.isolateRef!.id!, ref.instanceRef!.id!, 100);
+    final children = refs.references
+        ?.map(
+          (r) => DartObjectNode.fromValue(value: r, isolateRef: ref.isolateRef),
+        )
+        .toList();
+    await _addExpandableChildren(variable, children ?? []);
   }
 }
 
