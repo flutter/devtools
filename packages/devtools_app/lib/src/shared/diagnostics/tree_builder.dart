@@ -15,6 +15,7 @@ import 'dart_object_node.dart';
 import 'diagnostics_node.dart';
 import 'generic_instance_reference.dart';
 import 'inspector_service.dart';
+import 'primitives/expand_type.dart';
 import 'variable_factory.dart';
 
 Future<void> _addExpandableChildren(
@@ -320,6 +321,13 @@ Future<void> _addInspectorItems(variable, IsolateRef? isolateRef) async {
   }
 }
 
+Future<void> _addReferences(
+  DartObjectNode variable,
+  GenericInstanceRef ref,
+) async {
+  if (ref.expandType == ExpandType.liveInboundRefs) {}
+}
+
 /// Builds the tree representation for a [DartObjectNode] object by querying
 /// data, creating child [DartObjectNode] objects, and assigning parent-child
 /// relationships.
@@ -339,36 +347,40 @@ Future<void> buildVariablesTree(
   final instanceRef = ref.instanceRef;
   final diagnostic = ref.diagnostic;
 
-  await _addDiagnosticsIfNeeded(
-    diagnostic,
-    isolateRef,
-    variable,
-  );
+  if (ref.expandType == ExpandType.fields) {
+    await _addDiagnosticsIfNeeded(
+      diagnostic,
+      isolateRef,
+      variable,
+    );
 
-  try {
-    if (variable.childCount > DartObjectNode.MAX_CHILDREN_IN_GROUPING) {
-      _setupGrouping(variable);
-    } else if (instanceRef != null && serviceManager.service != null) {
-      await _addInstanceRefItems(variable, instanceRef, isolateRef);
-    } else if (variable.value != null) {
-      final value = variable.value;
-      await _addValueItems(variable, isolateRef, value);
+    try {
+      if (variable.childCount > DartObjectNode.MAX_CHILDREN_IN_GROUPING) {
+        _setupGrouping(variable);
+      } else if (instanceRef != null && serviceManager.service != null) {
+        await _addInstanceRefItems(variable, instanceRef, isolateRef);
+      } else if (variable.value != null) {
+        final value = variable.value;
+        await _addValueItems(variable, isolateRef, value);
+      }
+    } on SentinelException {
+      // Fail gracefully if calling `getObject` throws a SentinelException.
     }
-  } on SentinelException {
-    // Fail gracefully if calling `getObject` throws a SentinelException.
+
+    await _addDiagnosticChildrenIfNeeded(
+      variable,
+      diagnostic,
+      isolateRef,
+      expandAll,
+    );
+
+    await _addInspectorItems(
+      variable,
+      isolateRef,
+    );
+  } else {
+    await _addReferences(variable, ref);
   }
-
-  await _addDiagnosticChildrenIfNeeded(
-    variable,
-    diagnostic,
-    isolateRef,
-    expandAll,
-  );
-
-  await _addInspectorItems(
-    variable,
-    isolateRef,
-  );
 
   variable.treeInitializeComplete = true;
 }
