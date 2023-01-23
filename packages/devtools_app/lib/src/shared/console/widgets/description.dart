@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 
 import '../../diagnostics/dart_object_node.dart';
 import '../../diagnostics/diagnostics_node.dart';
+import '../../diagnostics/tree_builder.dart';
 import '../../diagnostics_text_styles.dart';
 import '../../globals.dart';
 import '../../primitives/utils.dart';
