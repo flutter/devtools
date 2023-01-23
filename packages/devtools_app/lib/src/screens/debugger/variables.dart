@@ -12,6 +12,7 @@ import 'package:flutter/material.dart' hide Stack;
 
 import '../../shared/console/widgets/display_provider.dart';
 import '../../shared/diagnostics/dart_object_node.dart';
+import '../../shared/diagnostics/tree_builder.dart';
 import '../../shared/globals.dart';
 import '../../shared/tree.dart';
 
