@@ -196,11 +196,11 @@ class TestRunner with IOMixin {
       if (testTimedOut) {
         if (attemptNumber < _retriesOnTimeout) {
           throw Exception(
-            'Integration test timed out on try #${attemptNumber}: $testTarget',
+            'Integration test timed out on try #$attemptNumber: $testTarget',
           );
         } else {
           _debugLog(
-            'Integration test timed out on try #${attemptNumber}. Retrying '
+            'Integration test timed out on try #$attemptNumber. Retrying '
             '$testTarget now.',
           );
           await _run(attemptNumber: ++attemptNumber);
