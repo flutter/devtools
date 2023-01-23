@@ -1,4 +1,4 @@
-FROM ubuntu:18.04
+FROM ubuntu:22.04
 # Flutter setup instructions from https://blog.codemagic.io/how-to-dockerize-flutter-apps/
 # Prerequisites
 RUN apt update && apt install -y curl git unzip xz-utils zip libglu1-mesa openjdk-8-jdk wget
@@ -30,7 +30,7 @@ WORKDIR /home/developer
 USER developer
 
 # Download Flutter SDK
-RUN git clone https://github.com/flutter/flutter.git
+RUN git clone --single-branch https://github.com/flutter/flutter.git
 ENV PATH "$PATH:/home/developer/flutter/bin"
 
 # Run basic check to download Dark SDK
