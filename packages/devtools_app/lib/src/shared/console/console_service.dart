@@ -15,6 +15,7 @@ import '../diagnostics/generic_instance_reference.dart';
 import '../diagnostics/inspector_service.dart';
 import '../diagnostics/tree_builder.dart';
 import '../globals.dart';
+import '../memory/adapted_heap_data.dart';
 import '../primitives/auto_dispose.dart';
 import '../primitives/utils.dart';
 
@@ -109,6 +110,7 @@ class ConsoleService extends Disposer {
     required IsolateRef? isolateRef,
     bool forceScrollIntoView = false,
     bool expandAll = false,
+    AdaptedHeapData? heap,
   }) async {
     _stdioTrailingNewline = false;
     final variable = DartObjectNode.fromValue(
@@ -116,6 +118,7 @@ class ConsoleService extends Disposer {
       value: value,
       diagnostic: diagnostic,
       isolateRef: isolateRef,
+      heap: heap,
     );
     // TODO(jacobr): fix out of order issues by tracking raw order.
     await buildVariablesTree(variable, expandAll: expandAll);

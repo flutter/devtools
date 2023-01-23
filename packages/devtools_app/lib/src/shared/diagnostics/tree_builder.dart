@@ -10,6 +10,7 @@ import 'package:vm_service/vm_service.dart';
 import '../../screens/debugger/debugger_model.dart';
 import '../config_specific/logger/logger.dart';
 import '../globals.dart';
+import '../memory/adapted_heap_data.dart';
 import '../primitives/utils.dart';
 import 'dart_object_node.dart';
 import 'diagnostics_node.dart';
@@ -121,6 +122,7 @@ Future<void> _addInstanceRefItems(
   DartObjectNode variable,
   InstanceRef instanceRef,
   IsolateRef? isolateRef,
+  AdaptedHeapData? heap,
 ) async {
   final existingNames = <String>{};
   for (var child in variable.children) {
@@ -144,7 +146,7 @@ Future<void> _addInstanceRefItems(
   );
   if (result is Instance) {
     variable.addChild(
-      createVariableForReferences(instanceRef, isolateRef),
+      createVariableForReferences(instanceRef, isolateRef, heap),
       index: 0,
     );
 
@@ -325,15 +327,35 @@ Future<void> _addReferences(
   DartObjectNode variable,
   GenericInstanceRef ref,
 ) async {
-  if (ref.expandType == ExpandType.liveInboundRefs) {
-    final refs = await serviceManager.service!
-        .getInboundReferences(ref.isolateRef!.id!, ref.instanceRef!.id!, 100);
-    final children = refs.references
-        ?.map(
-          (r) => DartObjectNode.fromValue(value: r, isolateRef: ref.isolateRef),
-        )
-        .toList();
-    await _addExpandableChildren(variable, children ?? []);
+  switch (ref.expandType) {
+    case ExpandType.fields:
+      // TODO: Handle this case.
+      break;
+    case ExpandType.liveInboundRefs:
+      // Does not work with vm_service v 9
+      final refs = await serviceManager.service!
+          .getInboundReferences(ref.isolateRef!.id!, ref.instanceRef!.id!, 100);
+      final children = refs.references
+          ?.map(
+            (r) => DartObjectNode.references(
+              text: r.runtimeType.toString(),
+              value: r,
+              isolateRef: ref.isolateRef,
+              expandType: ref.expandType,
+            ),
+          )
+          .toList();
+      await _addExpandableChildren(variable, children ?? []);
+      break;
+    case ExpandType.liveOutboundRefs:
+      // TODO: Handle this case.
+      break;
+    case ExpandType.staticInboundRefs:
+      // TODO: Handle this case.
+      break;
+    case ExpandType.staticOutboundRefs:
+      // TODO: Handle this case.
+      break;
   }
 }
 
@@ -367,7 +389,7 @@ Future<void> buildVariablesTree(
       if (variable.childCount > DartObjectNode.MAX_CHILDREN_IN_GROUPING) {
         _setupGrouping(variable);
       } else if (instanceRef != null && serviceManager.service != null) {
-        await _addInstanceRefItems(variable, instanceRef, isolateRef);
+        await _addInstanceRefItems(variable, instanceRef, isolateRef, ref.heap);
       } else if (variable.value != null) {
         final value = variable.value;
         await _addValueItems(variable, isolateRef, value);

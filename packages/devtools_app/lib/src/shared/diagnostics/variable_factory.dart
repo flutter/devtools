@@ -10,6 +10,7 @@ import 'package:flutter/foundation.dart';
 import 'package:stack_trace/stack_trace.dart' as stack_trace;
 import 'package:vm_service/vm_service.dart';
 
+import '../memory/adapted_heap_data.dart';
 import '../primitives/utils.dart';
 import 'dart_object_node.dart';
 import 'diagnostics_node.dart';
@@ -511,6 +512,7 @@ List<DartObjectNode> createVariablesForFields(
 DartObjectNode createVariableForReferences(
   InstanceRef instanceRef,
   IsolateRef? isolateRef,
+  AdaptedHeapData? heap,
 ) {
   final live = DartObjectNode.text('live')
     ..addAllChildren(
@@ -530,23 +532,29 @@ DartObjectNode createVariableForReferences(
       ],
     );
 
-  final stat = DartObjectNode.text('static')
-    ..addAllChildren(
-      [
-        DartObjectNode.references(
-          text: 'inbound',
-          expandType: ExpandType.staticInboundRefs,
-          value: instanceRef,
-          isolateRef: isolateRef,
-        ),
-        DartObjectNode.references(
-          text: 'outbound',
-          expandType: ExpandType.staticOutboundRefs,
-          value: instanceRef,
-          isolateRef: isolateRef,
-        ),
-      ],
-    );
+  final DartObjectNode? stat;
+  if (heap == null) {
+    stat = DartObjectNode.text('static')
+      ..addAllChildren(
+        [
+          DartObjectNode.references(
+            text: 'inbound',
+            expandType: ExpandType.staticInboundRefs,
+            value: instanceRef,
+            isolateRef: isolateRef,
+          ),
+          DartObjectNode.references(
+            text: 'outbound',
+            expandType: ExpandType.staticOutboundRefs,
+            value: instanceRef,
+            isolateRef: isolateRef,
+          ),
+        ],
+      );
+  } else {
+    stat = null;
+  }
 
-  return DartObjectNode.text('references')..addAllChildren([live, stat]);
+  return DartObjectNode.text('references')
+    ..addAllChildren([live, if (stat != null) stat]);
 }

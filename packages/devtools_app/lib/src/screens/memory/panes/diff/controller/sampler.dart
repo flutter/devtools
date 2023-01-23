@@ -55,6 +55,7 @@ class HeapClassSampler extends ClassSampler {
         diagnostic: null,
         isolateRef: _mainIsolateRef,
         forceScrollIntoView: true,
+        heap: heap,
       );
     }
 

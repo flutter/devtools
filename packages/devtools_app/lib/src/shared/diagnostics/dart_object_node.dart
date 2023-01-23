@@ -8,6 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../globals.dart';
+import '../memory/adapted_heap_data.dart';
 import '../primitives/trees.dart';
 import '../primitives/utils.dart';
 import 'diagnostics_node.dart';
@@ -48,6 +49,7 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
     bool artificialValue = false,
     RemoteDiagnosticsNode? diagnostic,
     required IsolateRef? isolateRef,
+    AdaptedHeapData? heap,
   }) {
     name = name ?? '';
     return DartObjectNode._(
@@ -56,6 +58,7 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
         isolateRef: isolateRef,
         diagnostic: diagnostic,
         value: value,
+        heap: heap,
       ),
       artificialName: artificialName,
       artificialValue: artificialValue,
