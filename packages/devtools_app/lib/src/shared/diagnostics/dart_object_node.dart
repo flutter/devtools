@@ -205,10 +205,11 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
 
     final value = this.value;
     if (value is InstanceRef) {
-      if (value.kind != null &&
-          (value.kind!.endsWith('List') ||
-              value.kind == InstanceKind.kList ||
-              value.kind == InstanceKind.kMap)) {
+      final kind = value.kind;
+      if (kind != null &&
+          (kind.endsWith('List') ||
+              kind == InstanceKind.kList ||
+              kind == InstanceKind.kMap)) {
         return value.length ?? 0;
       }
     }
