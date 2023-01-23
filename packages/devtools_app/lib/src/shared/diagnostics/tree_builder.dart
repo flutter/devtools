@@ -153,6 +153,11 @@ Future<void> _addInstanceRefItems(
           createVariablesForElements(result, isolateRef),
         );
         break;
+      case InstanceKind.kRecord:
+        variable.addAllChildren(
+          createVariablesForRecords(result, isolateRef),
+        );
+        break;
       case InstanceKind.kUint8ClampedList:
       case InstanceKind.kUint8List:
       case InstanceKind.kUint16List:
@@ -214,7 +219,7 @@ Future<void> _addInstanceRefItems(
       default:
         break;
     }
-    if (result.fields != null) {
+    if (result.fields != null && result.kind != InstanceKind.kRecord) {
       variable.addAllChildren(
         createVariablesForFields(
           result,
