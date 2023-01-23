@@ -106,7 +106,7 @@ class TestRunner with IOMixin {
   static const _endExceptionMarker = '===========================';
   static const _errorMarker = ': Error: ';
   static const _unhandledExceptionMarker = 'Unhandled exception:';
-  static const _retries = 1;
+  static const _retriesOnTimeout = 1;
 
   Future<void> run(
     String testTarget, {
@@ -194,7 +194,7 @@ class TestRunner with IOMixin {
       _debugLog('flutter drive process has exited');
 
       if (testTimedOut) {
-        if (attemptNumber < _retries) {
+        if (attemptNumber < _retriesOnTimeout) {
           throw Exception(
             'Integration test timed out on try #${attemptNumber}: $testTarget',
           );
