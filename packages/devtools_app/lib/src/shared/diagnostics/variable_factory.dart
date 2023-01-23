@@ -533,21 +533,24 @@ DartObjectNode createVariableForReferences(
     );
 
   final DartObjectNode? stat;
-  if (heap == null) {
+  if (heap != null) {
+    final index =
+        heap.objectIndexByIdentityHashCode(instanceRef.identityHashCode!)!;
+
     stat = DartObjectNode.text('static')
       ..addAllChildren(
         [
-          DartObjectNode.references(
-            text: 'inbound',
+          DartObjectNode.staticReferences(
+            name: 'inbound',
+            heap: heap,
+            indexInHeap: index,
             expandType: ExpandType.staticInboundRefs,
-            value: instanceRef,
-            isolateRef: isolateRef,
           ),
-          DartObjectNode.references(
-            text: 'outbound',
+          DartObjectNode.staticReferences(
+            name: 'outbound',
+            heap: heap,
+            indexInHeap: index,
             expandType: ExpandType.staticOutboundRefs,
-            value: instanceRef,
-            isolateRef: isolateRef,
           ),
         ],
       );
