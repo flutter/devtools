@@ -3,3 +3,4 @@
 // found in the LICENSE file.
 
 export 'src/integration_test/integration_test_utils.dart';
+export 'src/integration_test/test_data/performance.dart';

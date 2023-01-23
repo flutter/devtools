@@ -8,6 +8,9 @@ import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/main.dart' as app;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:integration_test/integration_test.dart';
+
+import 'test_data/performance.dart';
 
 const safePumpDuration = Duration(seconds: 3);
 const longPumpDuration = Duration(seconds: 6);
@@ -20,6 +23,7 @@ Future<void> pumpDevTools(WidgetTester tester) async {
   await app.runDevTools(
     // ignore: avoid_redundant_argument_values
     shouldEnableExperiments: shouldEnableExperiments,
+    sampleData: _sampleData,
   );
 
   // Await a delay to ensure the widget tree has loaded.
@@ -68,3 +72,39 @@ class TestApp {
 
   final String vmServiceUri;
 }
+
+Future<void> verifyScreenshot(
+  IntegrationTestWidgetsFlutterBinding binding,
+  String screenshotName, {
+  // TODO(https://github.com/flutter/flutter/issues/118470): remove this.
+  bool lastScreenshot = false,
+}) async {
+  const updateGoldens = bool.fromEnvironment('update_goldens');
+  logStatus('verify $screenshotName screenshot');
+  await binding.takeScreenshot(
+    screenshotName,
+    {
+      'update_goldens': updateGoldens,
+      'last_screenshot': lastScreenshot,
+    },
+  );
+}
+
+Future<void> loadSampleData(WidgetTester tester, String fileName) async {
+  await tester.tap(find.byType(DropdownButton<DevToolsJsonFile>));
+  await tester.pumpAndSettle();
+  await tester.tap(find.text(fileName).last);
+  await tester.pump(safePumpDuration);
+  await tester.tap(find.text('Load sample data'));
+  await tester.pump(longPumpDuration);
+}
+
+const performanceFileName = 'performance_data.json';
+
+final _sampleData = <DevToolsJsonFile>[
+  DevToolsJsonFile(
+    name: performanceFileName,
+    lastModifiedTime: DateTime.now(),
+    data: jsonDecode(jsonEncode(samplePerformanceData)),
+  ),
+];

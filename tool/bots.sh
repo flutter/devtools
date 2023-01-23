@@ -141,8 +141,15 @@ elif [ "$BOT" = "integration_dart2js" ]; then
 
     flutter pub get
 
+    # TODO(https://github.com/flutter/flutter/issues/118470): remove this warning.
+    echo "Preparing to run integration tests.\nWarning: if you see the exception \
+'Web Driver Command WebDriverCommandType.screenshot failed while waiting for driver side', \
+this is a known issue and likely means that the golden image check failed (see \
+https://github.com/flutter/flutter/issues/118470). Run the test locally to see if new \
+images under a 'failures/' directory are created as a result of the test run:\n\
+$ dart run integration_test/run_tests.dart --headless"
+
     # TODO(https://github.com/flutter/devtools/issues/1987): rewrite integration tests.
-    # TODO(kenz): does this fail if the test fails? Or do we need to rethrow from the dart script?
     dart run integration_test/run_tests.dart --headless
 
 else
