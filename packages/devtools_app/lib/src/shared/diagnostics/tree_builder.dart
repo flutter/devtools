@@ -142,6 +142,8 @@ Future<void> _addInstanceRefItems(
     count: variable.childCount,
   );
   if (result is Instance) {
+    createVariableForReferences(instanceRef, isolateRef);
+
     switch (result.kind) {
       case InstanceKind.kMap:
         variable.addAllChildren(
