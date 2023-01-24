@@ -121,7 +121,7 @@ Future<void> _addInstanceRefItems(
   InstanceRef instanceRef,
   IsolateRef? isolateRef,
 ) async {
-  if (variable.ref!.refType == RefType.refRoot) {
+  if (variable.ref!.expandType != ExpandType.members) {
     variable.addChild(DartObjectNode.references(variable.ref!));
     return;
   }

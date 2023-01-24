@@ -19,13 +19,13 @@ import 'diagnostics_node.dart';
 /// Sentinel, or primitive type.
 class GenericInstanceRef {
   GenericInstanceRef({
-    this.refType = RefType.members,
+    this.expandType = ExpandType.members,
     required this.isolateRef,
     this.value,
     this.diagnostic,
   });
 
-  final RefType refType;
+  final ExpandType expandType;
 
   final Object? value;
 
@@ -40,7 +40,7 @@ class GenericInstanceRef {
   final IsolateRef? isolateRef;
 }
 
-enum RefType {
+enum ExpandType {
   members,
   refRoot,
 
