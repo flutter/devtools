@@ -9,6 +9,7 @@ import 'package:vm_service/vm_service.dart';
 
 import '../../screens/debugger/debugger_model.dart';
 import '../config_specific/logger/logger.dart';
+import '../feature_flags.dart';
 import '../globals.dart';
 import '../primitives/utils.dart';
 import 'dart_object_node.dart';
@@ -118,10 +119,10 @@ void _setupGrouping(DartObjectNode variable) {
 
 void addChildReferences(
   DartObjectNode variable,
-  RefNodeType expandType,
+  RefNodeType refNodeType,
 ) {
   final ref = variable.ref!;
-  switch (expandType) {
+  switch (refNodeType) {
     case RefNodeType.refRoot:
       variable.addAllChildren([
         DartObjectNode.references(RefNodeType.liveRefRoot, 'live', ref),
@@ -215,14 +216,16 @@ Future<void> _addInstanceRefItems(
     count: variable.childCount,
   );
   if (result is Instance) {
-    variable.addChild(
-      DartObjectNode.references(
-        RefNodeType.refRoot,
-        'references',
-        variable.ref!,
-      ),
-      index: 0,
-    );
+    if (FeatureFlags.evalAndBrowse) {
+      variable.addChild(
+        DartObjectNode.references(
+          RefNodeType.refRoot,
+          'references',
+          variable.ref!,
+        ),
+        index: 0,
+      );
+    }
     switch (result.kind) {
       case InstanceKind.kMap:
         variable.addAllChildren(
