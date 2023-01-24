@@ -280,12 +280,19 @@ class RefreshTimelineEventsButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return DevToolsIconButton(
-      iconData: Icons.refresh,
-      onPressed: controller.processAllTraceEvents,
-      tooltip: 'Refresh timeline events',
-      gaScreen: gac.performance,
-      gaSelection: gac.refreshTimelineEvents,
+    return ValueListenableBuilder<EventsControllerStatus>(
+      valueListenable: controller.status,
+      builder: (context, status, _) {
+        return DevToolsIconButton(
+          iconData: Icons.refresh,
+          onPressed: status == EventsControllerStatus.processing
+              ? null
+              : controller.processAllTraceEvents,
+          tooltip: 'Refresh timeline events',
+          gaScreen: gac.performance,
+          gaSelection: gac.refreshTimelineEvents,
+        );
+      },
     );
   }
 }
