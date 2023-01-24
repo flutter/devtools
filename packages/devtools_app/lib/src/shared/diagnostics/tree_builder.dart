@@ -116,13 +116,45 @@ void _setupGrouping(DartObjectNode variable) {
   }
 }
 
+void addChildReferences(
+  DartObjectNode variable,
+  ExpandType expandType,
+) {
+  switch (expandType) {
+    case ExpandType.members:
+      throw StateError('Unexpected: $expandType');
+    case ExpandType.refRoot:
+      variable.addChild(DartObjectNode.references(variable.ref!));
+      break;
+    case ExpandType.staticRefRoot:
+      variable.addChild(DartObjectNode.references(variable.ref!));
+      break;
+    case ExpandType.staticInboundRoot:
+      variable.addChild(DartObjectNode.references(variable.ref!));
+      break;
+    case ExpandType.staticOutboundRoot:
+      variable.addChild(DartObjectNode.references(variable.ref!));
+      break;
+    case ExpandType.liveRefRoot:
+      variable.addChild(DartObjectNode.references(variable.ref!));
+      break;
+    case ExpandType.liveInboundRoot:
+      variable.addChild(DartObjectNode.references(variable.ref!));
+      break;
+    case ExpandType.liveOutboundRoot:
+      variable.addChild(DartObjectNode.references(variable.ref!));
+      break;
+  }
+}
+
 Future<void> _addInstanceRefItems(
   DartObjectNode variable,
   InstanceRef instanceRef,
   IsolateRef? isolateRef,
 ) async {
-  if (variable.ref!.expandType != ExpandType.members) {
-    variable.addChild(DartObjectNode.references(variable.ref!));
+  final expandType = variable.ref!.expandType;
+  if (expandType != ExpandType.members) {
+    addChildReferences(variable, expandType);
     return;
   }
 
