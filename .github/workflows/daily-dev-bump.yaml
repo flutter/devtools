@@ -58,10 +58,11 @@ jobs:
 
     - name: Create the PR
       run: |
+        BRANCH_NAME="auto-bump-$(date +%s)"
         # Stage the file, commit and push
-        git checkout -b "auto-bump-$(date +%s)"
+        git checkout -b "$BRANCH_NAME"
         git commit -a -m "$COMMIT_MESSAGE"
-        git push
+        git push -u origin "$BRANCH_NAME"
 
         gh pr create -d --title "$COMMIT_MESSAGE" --body "RELEASE_NOTE_EXCEPTION=Automated Version Bump"
         #TODO: Create PR inst
