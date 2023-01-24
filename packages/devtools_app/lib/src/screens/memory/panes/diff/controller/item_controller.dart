@@ -4,9 +4,9 @@
 
 import 'package:flutter/foundation.dart';
 
+import '../../../../../shared/memory/adapted_heap_data.dart';
 import '../../../../../shared/primitives/auto_dispose.dart';
 import '../../../shared/heap/heap.dart';
-import '../../../shared/heap/model.dart';
 
 abstract class SnapshotItem extends DisposableController {
   /// Number, that if shown in name, should be unique in the list.
