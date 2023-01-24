@@ -21,7 +21,6 @@ import 'utils/network_test_utils.dart';
 void main() {
   group('NetworkScreen NetworkRequestsTable', () {
     late NetworkController controller;
-    late CurrentNetworkRequests currentRequests;
     late FakeServiceManager fakeServiceManager;
     late SocketProfile socketProfile;
     late HttpProfile httpProfile;
@@ -41,12 +40,11 @@ void main() {
 
       // Bypass controller recording so timelineMicroOffset is not time dependant
       controller = NetworkController();
-      currentRequests = CurrentNetworkRequests(onDataUpdate: () {});
       final networkRequests = controller.processNetworkTrafficHelper(
         socketProfile.sockets,
         httpProfile.requests,
         0,
-        currentRequests: currentRequests,
+        currentValues: [],
         invalidRequests: [],
         outstandingRequestsMap: {},
       );

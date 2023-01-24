@@ -78,18 +78,6 @@ class NetworkRequestInspector extends StatelessWidget {
               _buildTab(tabName: NetworkRequestInspector._cookiesTabTitle),
           ],
         ];
-        final tabViews = [
-          if (data != null) ...[
-            NetworkRequestOverviewView(data),
-            if (data is DartIOHttpRequestData) ...[
-              HttpRequestHeadersView(data),
-              if (data.requestBody != null) HttpRequestView(data),
-              if (data.responseBody != null) HttpResponseView(data),
-              if (data.hasCookies) HttpRequestCookiesView(data),
-            ],
-          ]
-        ].map((e) => OutlineDecoration.onlyTop(child: e)).toList();
-
         return Card(
           margin: EdgeInsets.zero,
           color: Theme.of(context).canvasColor,
@@ -104,7 +92,15 @@ class NetworkRequestInspector extends StatelessWidget {
                   )
                 : AnalyticsTabbedView(
                     tabs: tabs,
-                    tabViews: tabViews,
+                    tabViews: [
+                      NetworkRequestOverviewView(data),
+                      if (data is DartIOHttpRequestData) ...[
+                        HttpRequestHeadersView(data),
+                        if (data.requestBody != null) HttpRequestView(data),
+                        if (data.responseBody != null) HttpResponseView(data),
+                        if (data.hasCookies) HttpRequestCookiesView(data),
+                      ],
+                    ],
                     gaScreen: gac.network,
                     // TODO(kenz): Consider using the outlined style
                     outlined: false,

@@ -56,35 +56,14 @@ class DartIOHttpRequestData extends NetworkRequest {
   HttpProfileRequestRef _request;
 
   final int wrapperId;
-  bool isOutStanding = false;
 
-  /// A notifier that changes when the request data, or it's response body
-  /// changes.
-  ValueNotifier<int> updateCount = ValueNotifier<int>(0);
-  bool isFetchingFullData = false;
-
-  Future<void> getFullRequestData() async {
-    print('${_request.id} START: getFullRequestData');
-    try {
-      // TODO: test theis already fetching shortcircuit
-      if (isFetchingFullData) return; // We are already fetching
-      isFetchingFullData = true;
-      final updated = await serviceManager.service!.getHttpProfileRequest(
+  Future<void> getFullRequestData() {
+    return serviceManager.service!
+        .getHttpProfileRequest(
         _request.isolateId,
         _request.id,
-      );
-      print('${_request.id} END: getFullRequestData');
-      _request = updated;
-      updateCount.value++;
-      final fullRequest = _request as HttpProfileRequest;
-      _responseBody = utf8.decode(fullRequest.responseBody!);
-      _requestBody = utf8.decode(fullRequest.requestBody!);
-      return;
-    } catch (_) {
-      rethrow;
-    } finally {
-      isFetchingFullData = false;
-    }
+        )
+        .then((updated) => _request = updated);
   }
 
   static List<Cookie> _parseCookies(List<String>? cookies) {
@@ -251,7 +230,6 @@ class DartIOHttpRequestData extends NetworkRequest {
 
   /// Merges the information from another [HttpRequestData] into this instance.
   void merge(DartIOHttpRequestData data) {
-    updateCount.value++; //TODO: Is this ok?
     _request = data._request;
   }
 

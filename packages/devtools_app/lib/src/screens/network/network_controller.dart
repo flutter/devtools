@@ -24,7 +24,6 @@ class NetworkController
         FilterControllerMixin<NetworkRequest> {
   NetworkController() {
     _networkService = NetworkService(this);
-    _currentNetworkRequests = CurrentNetworkRequests(onDataUpdate: _updateData);
   }
 
   static const methodFilterId = 'network-method-filter';
@@ -45,7 +44,6 @@ class NetworkController
   final _requests = ValueNotifier<NetworkRequests>(NetworkRequests());
 
   final selectedRequest = ValueNotifier<NetworkRequest?>(null);
-  late CurrentNetworkRequests _currentNetworkRequests;
 
   /// Notifies that the timeline is currently being recorded.
   ValueListenable<bool> get recordingNotifier => _recordingNotifier;
@@ -74,11 +72,32 @@ class NetworkController
   void _processHttpProfileRequests({
     required int timelineMicrosOffset,
     required List<HttpProfileRequest> httpRequests,
-    required CurrentNetworkRequests currentRequests,
+    required List<NetworkRequest> currentValues,
     required Map<String, DartIOHttpRequestData> outstandingRequestsMap,
   }) {
     for (final request in httpRequests) {
-      currentRequests.updateOrAdd(request, timelineMicrosOffset);
+      final wrapped = DartIOHttpRequestData(
+        timelineMicrosOffset,
+        request,
+      );
+      final id = request.id.toString();
+      if (outstandingRequestsMap.containsKey(id)) {
+        final request = outstandingRequestsMap[id]!;
+        request.merge(wrapped);
+        if (!request.inProgress) {
+          final data =
+              outstandingRequestsMap.remove(id) as DartIOHttpRequestData;
+
+          unawaited(data.getFullRequestData().then((value) => _updateData()));
+        }
+        continue;
+      } else if (wrapped.inProgress) {
+        outstandingRequestsMap.putIfAbsent(id, () => wrapped);
+      } else {
+        // If the response has completed, send a request for body data.
+        unawaited(wrapped.getFullRequestData().then((value) => _updateData()));
+      }
+      currentValues.add(wrapped);
     }
   }
 
@@ -87,29 +106,35 @@ class NetworkController
     List<SocketStatistic> sockets,
     List<HttpProfileRequest>? httpRequests,
     int timelineMicrosOffset, {
-    required CurrentNetworkRequests currentRequests,
+    required List<NetworkRequest> currentValues,
     required List<DartIOHttpRequestData> invalidRequests,
     required Map<String, DartIOHttpRequestData> outstandingRequestsMap,
   }) {
-    currentRequests.updateWebSocketRequests(sockets, timelineMicrosOffset);
-
-    // If we have updated data for the selected web socket, we need to update
-    // the value.
-    final currentSelectedRequestId = selectedRequest.value?.id;
-    if (currentSelectedRequestId != null) {
-      selectedRequest.value ??=
-          currentRequests.requestsMapping[currentSelectedRequestId];
+    // [currentValues] contains all the current requests we have in the
+    // profiler, which will contain web socket requests if they exist. The new
+    // [sockets] may contain web sockets with the same ids as ones we already
+    // have, so we remove the current web sockets and replace them with updated
+    // data.
+    currentValues.removeWhere((value) => value is WebSocket);
+    for (final socket in sockets) {
+      final webSocket = WebSocket(socket, timelineMicrosOffset);
+      // If we have updated data for the selected web socket, update the value.
+      if (selectedRequest.value is WebSocket &&
+          (selectedRequest.value as WebSocket).id == webSocket.id) {
+        selectedRequest.value = webSocket;
+      }
+      currentValues.add(webSocket);
     }
 
     _processHttpProfileRequests(
       timelineMicrosOffset: timelineMicrosOffset,
       httpRequests: httpRequests!,
-      currentRequests: currentRequests,
+      currentValues: currentValues,
       outstandingRequestsMap: outstandingRequestsMap,
     );
 
     return NetworkRequests(
-      requests: currentRequests.requestsMapping.values.toList(),
+      requests: currentValues,
       invalidHttpRequests: invalidRequests,
       outstandingHttpRequests: outstandingRequestsMap,
     );
@@ -124,7 +149,7 @@ class NetworkController
       sockets,
       httpRequests,
       _timelineMicrosOffset,
-      currentRequests: _currentNetworkRequests,
+      currentValues: List.of(requests.value.requests),
       invalidRequests: [],
       outstandingRequestsMap: Map.from(requests.value.outstandingHttpRequests),
     );
@@ -218,7 +243,6 @@ class NetworkController
   Future<void> clear() async {
     await _networkService.clearData();
     _requests.value = NetworkRequests();
-    _currentNetworkRequests.clear();
     resetFilter();
     _updateData();
     _updateSelection();
@@ -329,50 +353,5 @@ class NetworkController
     if (r.didFail) {
       serviceManager.errorBadgeManager.incrementBadgeCount(NetworkScreen.id);
     }
-  }
-}
-
-class CurrentNetworkRequests {
-  CurrentNetworkRequests({required this.onDataUpdate});
-
-  Map<String, NetworkRequest> requestsMapping = <String, NetworkRequest>{};
-  VoidCallback onDataUpdate; // TODO: Callback naming rules
-
-  void updateOrAdd(
-    HttpProfileRequest request,
-    int timelineMicrosOffset,
-  ) {
-    final wrapped = DartIOHttpRequestData(
-      timelineMicrosOffset,
-      request,
-      requestFullDataFromVmService: false,
-    );
-    if (!requestsMapping.containsKey(request.id)) {
-      requestsMapping[wrapped.id] = wrapped;
-    } else {
-      (requestsMapping[request.id] as DartIOHttpRequestData).merge(wrapped);
-    }
-  }
-
-  void updateWebSocketRequests(
-    List<SocketStatistic> sockets,
-    int timelineMicrosOffset,
-  ) {
-    for (final socket in sockets) {
-      final webSocket = WebSocket(socket, timelineMicrosOffset);
-
-      if (requestsMapping.containsKey(webSocket.id)) {
-        // If we override an entry that is not a Websocket then that means
-        // the ids of the requestMapping entries may collide with other types
-        // of requests.
-        assert(requestsMapping[webSocket.id] is WebSocket);
-      }
-
-      requestsMapping[webSocket.id] = webSocket;
-    }
-  }
-
-  void clear() {
-    requestsMapping.clear();
   }
 }

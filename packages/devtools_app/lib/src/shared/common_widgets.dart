@@ -1797,19 +1797,10 @@ class _JsonViewerState extends State<JsonViewer>
     with ProvidedControllerMixin<DebuggerController, JsonViewer> {
   late Future<void> _initializeTree;
   late DartObjectNode variable;
-  Future<void> _buildAndExpand(
-    DartObjectNode variable,
-  ) async {
-    // Build the root node
-    await buildVariablesTree(variable);
-    // Build the contents of all children
-    await Future.wait(variable.children.map(buildVariablesTree));
 
-    // Expand the root node to show the first level of contents
-    variable.expand();
-  }
-
-  void _updateVariablesTree() {
+  @override
+  void initState() {
+    super.initState();
     assert(widget.encodedJson.isNotEmpty);
     final responseJson = json.decode(widget.encodedJson);
     // Insert the JSON data into the fake service cache so we can use it with
@@ -1829,19 +1820,7 @@ class _JsonViewerState extends State<JsonViewer>
     );
     // Intended to be unawaited.
     // ignore: discarded_futures
-    _initializeTree = _buildAndExpand(variable);
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _updateVariablesTree();
-  }
-
-  @override
-  void didUpdateWidget(covariant JsonViewer oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    _updateVariablesTree();
+    _initializeTree = buildVariablesTree(variable);
   }
 
   @override

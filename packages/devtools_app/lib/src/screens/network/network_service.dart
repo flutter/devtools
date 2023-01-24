@@ -37,9 +37,10 @@ class NetworkService {
   /// recorded Socket traffic.
   Future<void> refreshNetworkData() async {
     if (serviceManager.service == null) return;
+
     final timestampObj = await serviceManager.service!.getVMTimelineMicros();
     final timestamp = timestampObj.timestamp!;
-    final sockets = await _refreshSockets(timestamp);
+    final sockets = await _refreshSockets();
     List<HttpProfileRequest>? httpRequests;
     httpRequests = await _refreshHttpProfile();
     networkController.lastRefreshMicros = timestamp;
@@ -78,7 +79,7 @@ class NetworkService {
     });
   }
 
-  Future<List<SocketStatistic>> _refreshSockets(int lastRefreshMicros) async {
+  Future<List<SocketStatistic>> _refreshSockets() async {
     final service = serviceManager.service;
     if (service == null) return [];
     final sockets = <SocketStatistic>[];
@@ -86,18 +87,7 @@ class NetworkService {
       final socketProfile = await service.getSocketProfile(isolate.id!);
       sockets.addAll(socketProfile.sockets);
     });
-
-    // TODO(https://github.com/flutter/devtools/issues/5057): 
-    // Filter lastrefreshMicros inside [service.getSocketProfile] instead.
-    return sockets
-        .where(
-          (element) =>
-              element.startTime > lastRefreshMicros ||
-              (element.endTime ?? 0) > lastRefreshMicros ||
-              (element.lastReadTime ?? 0) > lastRefreshMicros ||
-              (element.lastWriteTime ?? 0) > lastRefreshMicros,
-        )
-        .toList();
+    return sockets;
   }
 
   Future<void> _clearSocketProfile() async {
