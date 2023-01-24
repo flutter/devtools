@@ -54,7 +54,7 @@ class PerfettoControllerImpl extends PerfettoController {
   static const _embeddedModeQuery = '?mode=embedded&hideSidebar=true';
 
   /// Delay to allow the Perfetto UI to load a trace.
-  /// 
+  ///
   /// This is a heuristic to continue blocking UI elements on the DevTools side
   /// while the trace is still loading on the Perfetto side (for example,
   /// the [RefreshTimelineEventsButton]).
