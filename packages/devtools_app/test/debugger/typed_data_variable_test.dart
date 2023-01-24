@@ -8,6 +8,7 @@ import 'dart:typed_data';
 import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/shared/diagnostics/dart_object_node.dart';
 import 'package:devtools_app/src/shared/diagnostics/tree_builder.dart';
+import 'package:devtools_app/src/shared/feature_flags.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/foundation.dart';
@@ -36,6 +37,12 @@ void main() {
   });
 
   test('Creates bound variables for Uint8ClampedList instance', () async {
+    /// Should be removed before merge.
+    print(
+      '!!!!!!!!!!!!!!! FeatureFlags.evalAndBrowse: ' +
+          FeatureFlags.evalAndBrowse.toString(),
+    );
+
     final bytes = Uint8ClampedList.fromList([0, 1, 2, 3]);
     final instance = Instance(
       kind: InstanceKind.kUint8ClampedList,
