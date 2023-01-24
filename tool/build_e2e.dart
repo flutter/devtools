@@ -6,9 +6,15 @@ import 'dart:io';
 
 const argDevToolsBuild = 'devtools-build';
 const argUpdatePerfetto = '--update-perfetto';
+const argNoUpdateFlutter = '--no-update-flutter';
 
 void main(List<String> args) async {
   final shouldUpdatePerfetto = args.contains(argUpdatePerfetto);
+  final noUpdateFlutter = args.contains(argNoUpdateFlutter);
+
+  final argsCopy = List.of(args)
+    ..remove(argUpdatePerfetto)
+    ..remove(argNoUpdateFlutter);
 
   final mainDevToolsDirectory = Directory.current;
   if (!mainDevToolsDirectory.path.endsWith('/devtools')) {
@@ -28,6 +34,7 @@ void main(List<String> args) async {
     './tool/build_release.sh',
     [
       if (shouldUpdatePerfetto) argUpdatePerfetto,
+      if (noUpdateFlutter) argNoUpdateFlutter,
     ],
     workingDirectory: mainDevToolsDirectory.path,
   );
@@ -60,7 +67,7 @@ void main(List<String> args) async {
       // Pass any args that were provided to our script along. This allows IDEs
       // to pass `--machine` (etc.) so that this script can behave the same as
       // the "dart devtools" command for testing local DevTools/server changes.
-      ...args,
+      ...argsCopy,
     ],
     workingDirectory: localDartSdkLocation,
   );

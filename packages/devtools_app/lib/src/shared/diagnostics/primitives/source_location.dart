@@ -4,7 +4,7 @@
 
 import 'package:vm_service/vm_service.dart';
 
-import '../primitives/utils.dart';
+import '../../primitives/utils.dart';
 
 class _JsonFields {
   static const String file = 'file';

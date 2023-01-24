@@ -177,7 +177,6 @@ class TimelineEventsController extends PerformanceFeatureController
   }) async {
     final service = serviceManager.service;
     if (service == null) return;
-
     final currentVmTime = await service.getVMTimelineMicros();
     debugTraceEventCallback(
       () => log(
