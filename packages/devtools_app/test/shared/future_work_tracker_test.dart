@@ -12,18 +12,18 @@ void main() {
     test('tracker returns future', () async {
       final tracker = FutureWorkTracker();
       final completer = Completer<Object?>();
-      expect(tracker.track(completer.future), equals(completer.future));
+      expect(tracker.track(() => completer.future), equals(completer.future));
     });
 
     test('tracks work', () async {
       final tracker = FutureWorkTracker();
       expect(tracker.active.value, isFalse);
       final completer1 = Completer<Object?>();
-      unawaited(tracker.track(completer1.future));
+      unawaited(tracker.track(() => completer1.future));
 
       expect(tracker.active.value, isTrue);
       final completer2 = Completer<Object?>();
-      unawaited(tracker.track(completer2.future));
+      unawaited(tracker.track(() => completer2.future));
       expect(tracker.active.value, isTrue);
       completer1.complete(null);
       await completer1.future;
@@ -37,12 +37,12 @@ void main() {
       final tracker = FutureWorkTracker();
       expect(tracker.active.value, isFalse);
       final completer1 = Completer<Object?>();
-      unawaited(tracker.track(completer1.future));
+      unawaited(tracker.track(() => completer1.future));
       expect(tracker.active.value, isTrue);
       tracker.clear();
       expect(tracker.active.value, isFalse);
       final completer2 = Completer<Object?>();
-      unawaited(tracker.track(completer2.future));
+      unawaited(tracker.track(() => completer2.future));
       expect(tracker.active.value, isTrue);
       completer2.complete(null);
       await completer2.future;
@@ -54,10 +54,10 @@ void main() {
         final tracker = FutureWorkTracker();
         expect(tracker.active.value, isFalse);
         final completer1 = Completer<Object?>();
-        unawaited(tracker.track(completer1.future));
+        unawaited(tracker.track(() => completer1.future));
         expect(tracker.active.value, isTrue);
         final completer2 = Completer<Object?>();
-        unawaited(tracker.track(completer2.future));
+        unawaited(tracker.track(() => completer2.future));
         expect(tracker.active.value, isTrue);
         completer1.completeError('bad');
         try {

@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:html' as html;
 import 'dart:ui' as ui;
 
@@ -51,6 +52,13 @@ class PerfettoControllerImpl extends PerfettoController {
 
   /// These query parameters have side effects in the Perfetto web app.
   static const _embeddedModeQuery = '?mode=embedded&hideSidebar=true';
+
+  /// Delay to allow the Perfetto UI to load a trace.
+  /// 
+  /// This is a heuristic to continue blocking UI elements on the DevTools side
+  /// while the trace is still loading on the Perfetto side (for example,
+  /// the [RefreshTimelineEventsButton]).
+  static const _postTraceDelay = Duration(seconds: 1);
 
   String get perfettoUrl {
     if (_debugUseLocalPerfetto) {
@@ -120,7 +128,7 @@ class PerfettoControllerImpl extends PerfettoController {
   void onBecomingActive() {
     assert(timelineEventsController.isActiveFeature);
     if (pendingTraceEventsToLoad != null) {
-      loadTrace(pendingTraceEventsToLoad!);
+      unawaited(loadTrace(pendingTraceEventsToLoad!));
       pendingTraceEventsToLoad = null;
     }
     if (pendingScrollToTimeRange != null) {
@@ -130,13 +138,14 @@ class PerfettoControllerImpl extends PerfettoController {
   }
 
   @override
-  void loadTrace(List<TraceEventWrapper> devToolsTraceEvents) {
+  Future<void> loadTrace(List<TraceEventWrapper> devToolsTraceEvents) async {
     if (!timelineEventsController.isActiveFeature) {
       pendingTraceEventsToLoad = List.of(devToolsTraceEvents);
       return;
     }
     pendingTraceEventsToLoad = null;
     _activeTraceEvents.value = List.of(devToolsTraceEvents);
+    await Future.delayed(_postTraceDelay);
   }
 
   @override
@@ -150,7 +159,7 @@ class PerfettoControllerImpl extends PerfettoController {
   }
 
   @override
-  void clear() {
-    loadTrace([]);
+  Future<void> clear() async {
+    await loadTrace([]);
   }
 }
