@@ -59,7 +59,7 @@ jobs:
     - name: Create the PR
       run: |
         # Stage the file, commit and push
-        
+        git checkout -b "auto-bump-$(date +%s)"
         git commit -a -m "$COMMIT_MESSAGE"
         git push
 
