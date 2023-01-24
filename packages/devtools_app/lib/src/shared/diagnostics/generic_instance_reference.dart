@@ -42,5 +42,11 @@ class GenericInstanceRef {
 
 enum RefType {
   members,
-  references,
+  refRoot,
+
+  staticRefRoot,
+  staticInboundRoot,
+  staticOutboundRoot,
+
+  liveRefRoot,
 }

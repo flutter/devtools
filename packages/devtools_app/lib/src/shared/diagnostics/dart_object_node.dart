@@ -166,7 +166,7 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
       ref: GenericInstanceRef(
         isolateRef: ref.isolateRef,
         value: ref.value,
-        refType: RefType.references,
+        refType: RefType.refRoot,
       ),
     );
   }
