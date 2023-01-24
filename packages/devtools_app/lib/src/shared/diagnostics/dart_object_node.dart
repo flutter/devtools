@@ -159,14 +159,16 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
   }
 
   factory DartObjectNode.references(
+    ExpandType expandType,
+    String text,
     GenericInstanceRef ref,
   ) {
     return DartObjectNode._(
-      text: 'experiment',
+      text: text,
       ref: GenericInstanceRef(
         isolateRef: ref.isolateRef,
         value: ref.value,
-        expandType: ExpandType.refRoot,
+        expandType: expandType,
       ),
     );
   }

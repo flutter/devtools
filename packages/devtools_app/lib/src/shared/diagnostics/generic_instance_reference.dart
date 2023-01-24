@@ -45,10 +45,10 @@ enum ExpandType {
   refRoot,
 
   staticRefRoot,
-  staticInboundRoot,
-  staticOutboundRoot,
+  staticInRefs,
+  staticOutRefs,
 
   liveRefRoot,
-  liveInboundRoot,
-  liveOutboundRoot,
+  liveInRefs,
+  liveOutRefs,
 }
