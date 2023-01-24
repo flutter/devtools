@@ -6,13 +6,15 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 
+import 'primitives/utils.dart';
+
 /// Class that tracks whether work defined by when futures complete is still in
 /// progress.
 ///
 /// Work is added by calling [track] and completed when the [Future]s tracked
 /// complete or when [clear] is called.
 class FutureWorkTracker {
-  final _inProgress = <Future<void>>{};
+  final _inProgress = <Future<Object?>>{};
 
   /// ValueNotifier that returns whether any of the futures added since last
   /// [clear] are still in progress.
@@ -31,15 +33,23 @@ class FutureWorkTracker {
   ///
   /// Unless [clear] is called, [active] will now return true until [future]
   /// completes either with a value or an error.
-  Future<void> track(Future<void> future) {
-    _inProgress.add(future);
+  Future<Object?> track(Future<Object?> Function() futureCallback) async {
     _active.value = true;
-    future.whenComplete(() {
-      _inProgress.remove(future);
-      if (_inProgress.isEmpty) {
-        _active.value = false;
-      }
-    });
+
+    // Release the UI thread so that listeners of the [_active] notifier can
+    // react before [futureCallback] is called.
+    await delayToReleaseUiThread();
+
+    final future = futureCallback();
+    _inProgress.add(future);
+    unawaited(
+      future.whenComplete(() {
+        _inProgress.remove(future);
+        if (_inProgress.isEmpty) {
+          _active.value = false;
+        }
+      }),
+    );
     return future;
   }
 }

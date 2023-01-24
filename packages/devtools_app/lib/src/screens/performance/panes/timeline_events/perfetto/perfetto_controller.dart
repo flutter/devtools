@@ -37,9 +37,9 @@ abstract class PerfettoController extends DisposableController {
 
   void onBecomingActive() {}
 
-  void loadTrace(List<TraceEventWrapper> devToolsTraceEvents) {}
+  Future<void> loadTrace(List<TraceEventWrapper> devToolsTraceEvents) async {}
 
   void scrollToTimeRange(TimeRange timeRange) {}
 
-  void clear() {}
+  Future<void> clear() async {}
 }
