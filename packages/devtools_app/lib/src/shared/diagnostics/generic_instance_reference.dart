@@ -49,4 +49,6 @@ enum RefType {
   staticOutboundRoot,
 
   liveRefRoot,
+  liveInboundRoot,
+  liveOutboundRoot,
 }
