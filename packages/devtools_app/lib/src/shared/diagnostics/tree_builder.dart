@@ -121,6 +121,11 @@ Future<void> _addInstanceRefItems(
   InstanceRef instanceRef,
   IsolateRef? isolateRef,
 ) async {
+  if (variable.ref!.refType == RefType.references) {
+    variable.addChild(DartObjectNode.references(variable.ref!));
+    return;
+  }
+
   final existingNames = <String>{};
   for (var child in variable.children) {
     final name = child.name;
@@ -142,6 +147,7 @@ Future<void> _addInstanceRefItems(
     count: variable.childCount,
   );
   if (result is Instance) {
+    variable.addChild(DartObjectNode.references(variable.ref!), index: 0);
     switch (result.kind) {
       case InstanceKind.kMap:
         variable.addAllChildren(

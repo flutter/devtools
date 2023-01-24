@@ -158,6 +158,19 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
     );
   }
 
+  factory DartObjectNode.references(
+    GenericInstanceRef ref,
+  ) {
+    return DartObjectNode._(
+      text: 'experiment',
+      ref: GenericInstanceRef(
+        isolateRef: ref.isolateRef,
+        value: ref.value,
+        refType: RefType.references,
+      ),
+    );
+  }
+
   static const MAX_CHILDREN_IN_GROUPING = 100;
 
   final String? text;
