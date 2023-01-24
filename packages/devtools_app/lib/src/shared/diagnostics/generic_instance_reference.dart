@@ -51,21 +51,21 @@ enum RefNodeType {
   /// Root item for references.
   refRoot,
 
-  /// Subitem of [refRoot].
+  /// Subitem of [refRoot] for static references.
   staticRefRoot,
 
-  /// Subitem [staticRefRoot] for inbound static references.
+  /// Subitem of [staticRefRoot] for inbound static references.
   staticInRefs,
 
-  /// Subitem [staticRefRoot] for outbound static references.
+  /// Subitem of [staticRefRoot] for outbound static references.
   staticOutRefs,
 
-  /// Subitem of [refRoot].
+  /// Subitem of [refRoot] for kive references.
   liveRefRoot,
 
-  /// Subitem [liveRefRoot] for inbound live references.
+  /// Subitem of [liveRefRoot] for inbound live references.
   liveInRefs,
 
-  /// Subitem [liveRefRoot] for outbound live references.
+  /// Subitem of [liveRefRoot] for outbound live references.
   liveOutRefs,
 }
