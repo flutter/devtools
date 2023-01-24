@@ -100,7 +100,7 @@ void main() {
             expectSync(error, equals('bad'));
           }
           expect(tracker.active.value, isTrue);
-      
+
           completer2.completeError('bad');
           try {
             unawaited(completer2.future);
