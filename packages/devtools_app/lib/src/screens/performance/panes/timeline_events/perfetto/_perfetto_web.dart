@@ -58,9 +58,7 @@ class _PerfettoState extends State<Perfetto> with AutoDisposeMixin {
 
   void _loadActiveTrace() {
     assert(_perfettoController.activeTraceEvents.value != null);
-    _viewController._loadTrace(
-      _perfettoController.activeTraceEvents.value ?? [],
-    );
+    _viewController._loadTrace(_perfettoController.activeTraceEvents.value!);
   }
 
   void _scrollToActiveTimeRange() {
