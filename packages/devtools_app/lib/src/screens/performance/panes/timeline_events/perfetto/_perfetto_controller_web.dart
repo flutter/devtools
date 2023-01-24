@@ -67,9 +67,11 @@ class PerfettoControllerImpl extends PerfettoController {
   late final html.IFrameElement _perfettoIFrame;
 
   /// The set of trace events that should be shown in the Perfetto trace viewer.
-  ValueListenable<List<TraceEventWrapper>> get activeTraceEvents =>
+  /// 
+  /// This set will start in a null state before the first trace is been loaded.
+  ValueListenable<List<TraceEventWrapper>?> get activeTraceEvents =>
       _activeTraceEvents;
-  final _activeTraceEvents = ValueNotifier<List<TraceEventWrapper>>([]);
+  final _activeTraceEvents = ValueNotifier<List<TraceEventWrapper>?>(null);
 
   /// The time range that should be scrolled to, or focused, in the Perfetto
   /// trace viewer.

@@ -26,7 +26,6 @@ import 'panes/controls/performance_settings.dart';
 import 'panes/flutter_frames/flutter_frames_chart.dart';
 import 'panes/timeline_events/timeline_events_controller.dart';
 import 'performance_controller.dart';
-import 'performance_model.dart';
 import 'tabbed_performance_view.dart';
 
 // TODO(kenz): handle small screen widths better by using Wrap instead of Row
@@ -61,7 +60,6 @@ class PerformanceScreenBody extends StatefulWidget {
 class PerformanceScreenBodyState extends State<PerformanceScreenBody>
     with
         AutoDisposeMixin,
-        OfflineScreenMixin<PerformanceScreenBody, OfflinePerformanceData>,
         ProvidedControllerMixin<PerformanceController, PerformanceScreenBody> {
   @override
   void initState() {
@@ -91,31 +89,13 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
     if (!initController()) return;
 
     cancelListeners();
-
+    addAutoDisposeListener(controller.loadingOfflineData);
     addAutoDisposeListener(controller.flutterFramesController.selectedFrame);
-
-    // Load offline timeline data if available.
-    if (shouldLoadOfflineData()) {
-      // This is a workaround to guarantee that DevTools exports are compatible
-      // with other trace viewers (catapult, perfetto, chrome://tracing), which
-      // require a top level field named "traceEvents". See how timeline data is
-      // encoded in [ExportController.encode].
-      final timelineJson = Map<String, dynamic>.from(
-        offlineController.offlineDataJson[PerformanceScreen.id],
-      )..addAll({
-          PerformanceData.traceEventsKey:
-              offlineController.offlineDataJson[PerformanceData.traceEventsKey],
-        });
-      final offlinePerformanceData = OfflinePerformanceData.parse(timelineJson);
-      if (!offlinePerformanceData.isEmpty) {
-        unawaited(loadOfflineData(offlinePerformanceData));
-      }
-    }
   }
 
   @override
   Widget build(BuildContext context) {
-    if (loadingOfflineData) {
+    if (controller.loadingOfflineData.value) {
       return Container(
         color: Theme.of(context).scaffoldBackgroundColor,
         child: const CenteredCircularProgressIndicator(),
@@ -159,18 +139,6 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
         SecondaryPerformanceControls(controller: controller),
       ],
     );
-  }
-
-  @override
-  FutureOr<void> processOfflineData(OfflinePerformanceData offlineData) async {
-    await controller.processOfflineData(offlineData);
-  }
-
-  @override
-  bool shouldLoadOfflineData() {
-    return offlineController.shouldLoadOfflineData(PerformanceScreen.id) &&
-        offlineController.offlineDataJson[PerformanceData.traceEventsKey] !=
-            null;
   }
 }
 

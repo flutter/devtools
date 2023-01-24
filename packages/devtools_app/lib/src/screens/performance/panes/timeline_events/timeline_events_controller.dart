@@ -135,7 +135,7 @@ class TimelineEventsController extends PerformanceFeatureController
   }
 
   @override
-  Future<void> onBecomingActive() async {
+  void onBecomingActive() {
     if (_perfettoMode) {
       perfettoController.onBecomingActive();
     }
