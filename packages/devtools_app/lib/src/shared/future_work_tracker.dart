@@ -37,7 +37,7 @@ class FutureWorkTracker {
     _active.value = true;
 
     // Release the UI thread so that listeners of the [_active] notifier can
-    // reacy before [futureCallback] is called.
+    // react before [futureCallback] is called.
     await delayToReleaseUiThread();
 
     final future = futureCallback();
