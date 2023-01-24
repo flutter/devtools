@@ -18,8 +18,8 @@ import 'utils/network_test_utils.dart';
 void main() {
   group('WebSocket', () {
     test('id returns correct value', () {
-      expect(testSocket1.id, equals(0));
-      expect(testSocket2.id, equals(1));
+      expect(testSocket1.id, equals('10000'));
+      expect(testSocket2.id, equals('11111'));
     });
 
     test('lastReadTimestamp returns correct value', () {

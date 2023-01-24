@@ -56,7 +56,6 @@ class DartIOHttpRequestData extends NetworkRequest {
   HttpProfileRequestRef _request;
 
   final int wrapperId;
-  bool hasFetchedData = false;
   bool isOutStanding = false;
 
   /// A notifier that changes when the request data, or it's response body
@@ -67,13 +66,14 @@ class DartIOHttpRequestData extends NetworkRequest {
   Future<void> getFullRequestData() async {
     print('${_request.id} START: getFullRequestData');
     try {
+      // TODO: test theis already fetching shortcircuit
+      if (isFetchingFullData) return; // We are already fetching
       isFetchingFullData = true;
       final updated = await serviceManager.service!.getHttpProfileRequest(
         _request.isolateId,
         _request.id,
       );
       print('${_request.id} END: getFullRequestData');
-      hasFetchedData = true;
       _request = updated;
       updateCount.value++;
       final fullRequest = _request as HttpProfileRequest;
@@ -253,7 +253,6 @@ class DartIOHttpRequestData extends NetworkRequest {
   void merge(DartIOHttpRequestData data) {
     updateCount.value++; //TODO: Is this ok?
     _request = data._request;
-    hasFetchedData = false;
   }
 
   @override
