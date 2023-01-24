@@ -1,6 +1,8 @@
 name: Daily Dev Bump
 on:
   workflow_dispatch: # Allows for manual triggering if needed
+  label: # TODO: Delete this trigger before merging
+    types: [created, deleted]
 
 permissions:
   contents: write
