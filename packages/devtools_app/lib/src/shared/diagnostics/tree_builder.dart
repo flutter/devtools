@@ -118,61 +118,63 @@ void _setupGrouping(DartObjectNode variable) {
 
 void addChildReferences(
   DartObjectNode variable,
-  ExpandType expandType,
+  RefNodeType expandType,
 ) {
   final ref = variable.ref!;
   switch (expandType) {
-    case ExpandType.members:
-      throw StateError('Unexpected: $expandType');
-    case ExpandType.refRoot:
+    case RefNodeType.refRoot:
       variable.addAllChildren([
-        DartObjectNode.references(ExpandType.liveRefRoot, 'live', ref),
-        DartObjectNode.references(ExpandType.staticRefRoot, 'static', ref),
+        DartObjectNode.references(RefNodeType.liveRefRoot, 'live', ref),
+        DartObjectNode.references(RefNodeType.staticRefRoot, 'static', ref),
       ]);
       break;
-    case ExpandType.staticRefRoot:
+    case RefNodeType.staticRefRoot:
       variable.addAllChildren([
-        DartObjectNode.references(ExpandType.staticInRefs, 'inbound', ref),
-        DartObjectNode.references(ExpandType.staticOutRefs, 'outbound', ref),
+        DartObjectNode.references(RefNodeType.staticInRefs, 'inbound', ref),
+        DartObjectNode.references(RefNodeType.staticOutRefs, 'outbound', ref),
       ]);
       break;
-    case ExpandType.staticInRefs:
+    case RefNodeType.staticInRefs:
       variable.addChild(
         DartObjectNode.references(
-          ExpandType.staticInRefs,
+          RefNodeType.staticInRefs,
+          // Temporary placeholder
           '<static inbound refs>',
           ref,
         ),
       );
       break;
-    case ExpandType.staticOutRefs:
+    case RefNodeType.staticOutRefs:
       variable.addChild(
         DartObjectNode.references(
-          ExpandType.staticOutRefs,
+          RefNodeType.staticOutRefs,
+          // Temporary placeholder
           '<static outbound refs>',
           variable.ref!,
         ),
       );
       break;
-    case ExpandType.liveRefRoot:
+    case RefNodeType.liveRefRoot:
       variable.addAllChildren([
-        DartObjectNode.references(ExpandType.liveInRefs, 'inbound', ref),
-        DartObjectNode.references(ExpandType.liveOutRefs, 'outbound', ref),
+        DartObjectNode.references(RefNodeType.liveInRefs, 'inbound', ref),
+        DartObjectNode.references(RefNodeType.liveOutRefs, 'outbound', ref),
       ]);
       break;
-    case ExpandType.liveInRefs:
+    case RefNodeType.liveInRefs:
       variable.addChild(
         DartObjectNode.references(
-          ExpandType.liveInRefs,
+          RefNodeType.liveInRefs,
+          // Temporary placeholder
           '<live in refs>',
           variable.ref!,
         ),
       );
       break;
-    case ExpandType.liveOutRefs:
+    case RefNodeType.liveOutRefs:
       variable.addChild(
         DartObjectNode.references(
-          ExpandType.liveOutRefs,
+          RefNodeType.liveOutRefs,
+          // Temporary placeholder
           '<live out refs>',
           variable.ref!,
         ),
@@ -186,9 +188,9 @@ Future<void> _addInstanceRefItems(
   InstanceRef instanceRef,
   IsolateRef? isolateRef,
 ) async {
-  final expandType = variable.ref!.expandType;
-  if (expandType != ExpandType.members) {
-    addChildReferences(variable, expandType);
+  final ref = variable.ref;
+  if (ref is ObjectReferences) {
+    addChildReferences(variable, RefNodeType.refRoot);
     return;
   }
 
@@ -215,7 +217,7 @@ Future<void> _addInstanceRefItems(
   if (result is Instance) {
     variable.addChild(
       DartObjectNode.references(
-        ExpandType.refRoot,
+        RefNodeType.refRoot,
         'references',
         variable.ref!,
       ),
