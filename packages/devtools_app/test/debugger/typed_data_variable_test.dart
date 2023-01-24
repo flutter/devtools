@@ -37,12 +37,6 @@ void main() {
   });
 
   test('Creates bound variables for Uint8ClampedList instance', () async {
-    /// Should be removed before merge.
-    print(
-      '!!!!!!!!!!!!!!! FeatureFlags.evalAndBrowse: ' +
-          FeatureFlags.evalAndBrowse.toString(),
-    );
-
     final bytes = Uint8ClampedList.fromList([0, 1, 2, 3]);
     final instance = Instance(
       kind: InstanceKind.kUint8ClampedList,
