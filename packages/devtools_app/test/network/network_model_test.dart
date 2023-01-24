@@ -62,8 +62,8 @@ void main() {
     });
 
     test('equals and hash return the correct value', () {
-      expect(testSocket1.hashCode, equals(0));
-      expect(testSocket2.hashCode, equals(1));
+      expect(testSocket1.hashCode, equals(0.hashCode));
+      expect(testSocket2.hashCode, equals(1.hashCode));
       expect(testSocket1 == testSocket2, isFalse);
       expect(testSocket1 == testSocket3, isTrue);
     });
