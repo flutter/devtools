@@ -342,9 +342,10 @@ class TimelineEventsController extends PerformanceFeatureController
           perfettoController.processor.hasProcessedEventsForFrame(frame.id);
       if (!hasProcessedTimelineEventsForFrame) {
         await _workTracker.track(
-          () => Future.delayed(_timelinePollingInterval, () async {
-            await _processAllTraceEvents();
-          }),
+          () => Future.delayed(
+            _timelinePollingInterval,
+            _processAllTraceEvents,
+          ),
         );
       }
     }
@@ -377,7 +378,7 @@ class TimelineEventsController extends PerformanceFeatureController
         await _workTracker.track(
           () => Future.delayed(_timelinePollingInterval, () async {
             if (framesController.currentFrameBeingSelected != frame) return;
-            await _processAllTraceEvents();
+            return await _processAllTraceEvents();
           }),
         );
       }
