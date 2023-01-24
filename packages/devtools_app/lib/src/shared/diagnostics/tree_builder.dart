@@ -145,9 +145,17 @@ Future<void> _addInstanceRefItems(
     count: variable.childCount,
   );
   if (result is Instance) {
-    variable.addChild(
-      createVariableForReferences(instanceRef, isolateRef, heap),
-      index: 0,
+    await _addExpandableChildren(
+      variable,
+      [
+        DartObjectNode.references(
+          text: 'references',
+          heap: heap,
+          expandType: ExpandType.staticOutboundRefs,
+          isolateRef: isolateRef,
+          value: instanceRef,
+        ),
+      ],
     );
 
     switch (result.kind) {
@@ -324,34 +332,33 @@ Future<void> _addInspectorItems(variable, IsolateRef? isolateRef) async {
 }
 
 Future<void> _addReferences(
-  DartObjectNode variable,
-  GenericInstanceRef ref,
-) async {
+  DartObjectNode variable, {
+  required bool isRoot,
+}) async {
+  final ref = variable.ref!;
   final List<DartObjectNode> children;
-  switch (ref.expandType) {
-    case ExpandType.fields:
-      throw StateError('Unexpected value ${ExpandType.fields}');
-    case ExpandType.liveInboundRefs:
-      // Does not work with vm_service v 9
-      final refs = await serviceManager.service!
-          .getInboundReferences(ref.isolateRef!.id!, ref.instanceRef!.id!, 100);
-      children = refs.references
-              ?.map(
-                (r) => DartObjectNode.references(
-                  text: r.runtimeType.toString(),
-                  value: r,
-                  isolateRef: ref.isolateRef,
-                  expandType: ref.expandType,
-                ),
-              )
-              .toList() ??
-          [];
 
-      break;
-    case ExpandType.liveOutboundRefs:
-      children = [];
-      // TODO(polina-c): Handle this case.
-      break;
+  print('!!! _addReferences $ref.expandType');
+  switch (ref.expandType) {
+    case ExpandType.members:
+      throw StateError('Unexpected value ${ExpandType.members}');
+    // case ExpandType.liveInboundRefs:
+    //   // // Does not work with vm_service v 9
+    //   // final refs = await serviceManager.service!
+    //   //     .getInboundReferences(ref.isolateRef!.id!, ref.instanceRef!.id!, 100);
+    //   // children = refs.references
+    //   //         ?.map(
+    //   //           (r) => DartObjectNode.references(
+    //   //             text: r.runtimeType.toString(),
+    //   //             value: r,
+    //   //             isolateRef: ref.isolateRef,
+    //   //             expandType: ref.expandType,
+    //   //           ),
+    //   //         )
+    //   //         .toList() ??
+    //   //     [];
+    //   children = [];
+    //   break;
     case ExpandType.staticInboundRefs:
       children = [];
       // TODO(polina-c): Handle this case.
@@ -363,7 +370,9 @@ Future<void> _addReferences(
       final indexInHeap = heap.objectIndexByIdentityHashCode(hashCode ?? -1);
       if (indexInHeap == null) return;
 
-      final indexes = heap.objects[indexInHeap].references;
+      //final indexes = heap.objects[indexInHeap].references;
+
+      final indexes = [1, 2, 3];
 
       DartObjectNode toNode(int index) => DartObjectNode.staticReferences(
             heap: heap,
@@ -372,6 +381,18 @@ Future<void> _addReferences(
           );
 
       children = indexes.map(toNode).toList();
+      break;
+    case ExpandType.refRoot:
+      children = [
+        DartObjectNode.staticReferences(
+          name: 'static outbound',
+          heap: ref.heap!,
+          expandType: ExpandType.staticOutboundRefs,
+        )
+      ];
+      break;
+    case ExpandType.staticRefRoot:
+      children = [];
       break;
   }
 
@@ -389,15 +410,19 @@ Future<void> buildVariablesTree(
   bool expandAll = false,
 }) async {
   final ref = variable.ref;
+  print(
+      '!!! buildVariablesTree ${ref} ${variable.isExpandable} ${variable.treeInitializeStarted}');
   if (!variable.isExpandable || variable.treeInitializeStarted || ref == null)
     return;
   variable.treeInitializeStarted = true;
+
+  print('!!! buildVariablesTree ${ref.expandType}');
 
   final isolateRef = ref.isolateRef;
   final instanceRef = ref.instanceRef;
   final diagnostic = ref.diagnostic;
 
-  if (ref.expandType == ExpandType.fields) {
+  if (ref.expandType == ExpandType.members) {
     await _addDiagnosticsIfNeeded(
       diagnostic,
       isolateRef,
@@ -429,7 +454,7 @@ Future<void> buildVariablesTree(
       isolateRef,
     );
   } else {
-    await _addReferences(variable, ref);
+    await _addReferences(variable, isRoot: false);
   }
 
   variable.treeInitializeComplete = true;

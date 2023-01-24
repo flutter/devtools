@@ -3,14 +3,26 @@
 // found in the LICENSE file.
 
 enum ExpandType {
-  fields(isLive: true),
-  liveInboundRefs(isLive: true),
-  liveOutboundRefs(isLive: true),
+  /// Members of class or items in lists/maps.
+  members(isLive: true),
+
+  /// Root for references.
+  refRoot(isLive: true),
+
+  // /// Live references.
+  // liveRefRoot(isLive: true),
+
+  // /// Live inbound references.
+  // liveInboundRefs(isLive: true),
+
+  // liveOutboundRefs(isLive: true),
+  staticRefRoot(isLive: false),
   staticInboundRefs(isLive: false),
   staticOutboundRefs(isLive: false),
   ;
 
   const ExpandType({required this.isLive});
 
+  /// Live if true, static if false.
   final bool isLive;
 }

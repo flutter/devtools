@@ -509,55 +509,56 @@ List<DartObjectNode> createVariablesForFields(
   return variables;
 }
 
-DartObjectNode createVariableForReferences(
-  InstanceRef instanceRef,
-  IsolateRef? isolateRef,
-  AdaptedHeapData? heap,
-) {
-  final live = DartObjectNode.text('live')
-    ..addAllChildren(
-      [
-        DartObjectNode.references(
-          text: 'inbound',
-          expandType: ExpandType.liveInboundRefs,
-          value: instanceRef,
-          isolateRef: isolateRef,
-        ),
-        DartObjectNode.references(
-          text: 'outbound',
-          expandType: ExpandType.liveOutboundRefs,
-          value: instanceRef,
-          isolateRef: isolateRef,
-        ),
-      ],
-    );
+// DartObjectNode ____createVariableForReferences(
+//   InstanceRef instanceRef,
+//   IsolateRef? isolateRef,
+//   AdaptedHeapData? heap,
+//   ExpandType expandType,
+// ) {
+  // final live = DartObjectNode.text('live')
+  //   ..addAllChildren(
+  //     [
+  //       DartObjectNode.references(
+  //         text: 'inbound',
+  //         expandType: ExpandType.liveInboundRefs,
+  //         value: instanceRef,
+  //         isolateRef: isolateRef,
+  //       ),
+  //       DartObjectNode.references(
+  //         text: 'outbound',
+  //         expandType: ExpandType.liveOutboundRefs,
+  //         value: instanceRef,
+  //         isolateRef: isolateRef,
+  //       ),
+  //     ],
+  //   );
 
-  final DartObjectNode? stat;
-  if (heap != null) {
-    final index =
-        heap.objectIndexByIdentityHashCode(instanceRef.identityHashCode!)!;
+  // final DartObjectNode? stat;
+  // if (heap != null) {
+  //   final index =
+  //       heap.objectIndexByIdentityHashCode(instanceRef.identityHashCode!)!;
 
-    stat = DartObjectNode.text('static')
-      ..addAllChildren(
-        [
-          DartObjectNode.staticReferences(
-            name: 'inbound',
-            heap: heap,
-            indexInHeap: index,
-            expandType: ExpandType.staticInboundRefs,
-          ),
-          DartObjectNode.staticReferences(
-            name: 'outbound',
-            heap: heap,
-            indexInHeap: index,
-            expandType: ExpandType.staticOutboundRefs,
-          ),
-        ],
-      );
-  } else {
-    stat = null;
-  }
+  //   stat = DartObjectNode.text('static')
+  //     ..addAllChildren(
+  //       [
+  //         DartObjectNode.staticReferences(
+  //           name: 'inbound',
+  //           heap: heap,
+  //           indexInHeap: index,
+  //           expandType: ExpandType.staticInboundRefs,
+  //         ),
+  //         DartObjectNode.staticReferences(
+  //           name: 'outbound',
+  //           heap: heap,
+  //           indexInHeap: index,
+  //           expandType: ExpandType.staticOutboundRefs,
+  //         ),
+  //       ],
+  //     );
+  // } else {
+  //   stat = null;
+  // }
 
-  return DartObjectNode.text('references')
-    ..addAllChildren([live, if (stat != null) stat]);
-}
+  // return DartObjectNode.text('references')
+  //   ..addAllChildren([live, if (stat != null) stat]);
+//}

@@ -25,8 +25,8 @@ class GenericInstanceRef {
     this.value,
     this.diagnostic,
     this.heap,
-    this.expandType = ExpandType.fields,
-  })  : assert(expandType.isLive),
+    this.expandType = ExpandType.members,
+  }) : //assert(expandType.isLive),
         indexInHeap = null;
 
   GenericInstanceRef.heap({

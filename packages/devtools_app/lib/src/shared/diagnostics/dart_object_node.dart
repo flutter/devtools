@@ -70,29 +70,45 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
     required Object value,
     required IsolateRef? isolateRef,
     required ExpandType expandType,
+    AdaptedHeapData? heap,
   }) {
-    assert(expandType != ExpandType.fields);
+    assert(expandType != ExpandType.members);
     return DartObjectNode._(
       text: text,
       ref: GenericInstanceRef(
         isolateRef: isolateRef,
         value: value,
         expandType: expandType,
+        heap: heap,
       ),
     );
   }
 
   factory DartObjectNode.staticReferences({
     required AdaptedHeapData heap,
-    required int indexInHeap,
     required ExpandType expandType,
+    int? indexInHeap,
+    String? name,
   }) {
     assert(!expandType.isLive);
-    final object = heap.objects[indexInHeap];
 
+    if (expandType != ExpandType.staticOutboundRefs) {
+      assert(name != null);
+      return DartObjectNode._(
+        text: name,
+        ref: GenericInstanceRef.heap(
+          expandType: expandType,
+          heap: heap,
+          indexInHeap: indexInHeap,
+        ),
+      );
+    }
+
+    if (indexInHeap == null) throw 'index should not be null here';
+    final object = heap.objects[indexInHeap];
+    name ??= object.heapClass.shortName;
     return DartObjectNode._(
-      text:
-          '${object.heapClass.shortName}:${prettyPrintBytes(object.retainedSize)}',
+      text: '$name:${prettyPrintBytes(object.retainedSize, includeUnit: true)}',
       ref: GenericInstanceRef.heap(
         expandType: expandType,
         heap: heap,
