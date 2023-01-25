@@ -284,7 +284,7 @@ Future<void> _addInstanceRefItems(
     count: variable.childCount,
   );
   if (result is Instance) {
-    if (FeatureFlags.evalAndBrowse) {
+    if (FeatureFlags.evalAndBrowse && ref?.heapSelection != null) {
       final ref = variable.ref!;
       variable.addChild(
         DartObjectNode.references(
