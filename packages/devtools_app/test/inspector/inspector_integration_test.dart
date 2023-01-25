@@ -2,12 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app/src/screens/debugger/breakpoint_manager.dart';
-import 'package:devtools_app/src/screens/inspector/inspector_screen.dart';
-import 'package:devtools_app/src/shared/config_specific/ide_theme/ide_theme.dart';
-import 'package:devtools_app/src/shared/diagnostics/inspector_service.dart';
-import 'package:devtools_app/src/shared/globals.dart';
-import 'package:devtools_app/src/shared/notifications.dart';
+import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -48,6 +43,7 @@ void main() async {
     }
   };
 
+  setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
   setGlobal(BreakpointManager, BreakpointManager());
   setGlobal(IdeTheme, IdeTheme());
   setGlobal(NotificationService, NotificationService());
