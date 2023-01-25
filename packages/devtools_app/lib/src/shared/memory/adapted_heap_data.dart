@@ -24,7 +24,7 @@ class HeapObjectSelection {
   final AdaptedHeapData heap;
   final AdaptedHeapObject object;
 
-  List<HeapObjectSelection> outbound() => object.references
+  List<HeapObjectSelection> outboundReferences() => object.references
       .map((i) => HeapObjectSelection(heap, heap.objects[i]))
       .toList();
 }

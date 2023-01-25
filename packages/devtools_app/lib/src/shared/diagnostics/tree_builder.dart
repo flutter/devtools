@@ -182,7 +182,19 @@ void addChildReferences(
         ),
       );
 
-      final selection = ref.heapSelection!;
+      final children = ref.heapSelection!
+          .outboundReferences()
+          .map(
+            (s) => DartObjectNode.references(
+              'child',
+              ObjectReferences(
+                refNodeType: RefNodeType.staticOutRefs,
+                heapSelection: s,
+              ),
+            ),
+          )
+          .toList();
+      variable.addAllChildren(children);
 
       // for (final i in ref.detectHeapObject()!.references) {
       //   final child = heap.objects[i];
