@@ -2,17 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:collection/collection.dart' show IterableExtension;
-import 'package:devtools_app/src/screens/profiler/profiler_screen.dart';
-import 'package:devtools_app/src/screens/profiler/sampling_rate.dart';
-import 'package:devtools_app/src/service/service_manager.dart';
+import 'package:collection/collection.dart';
+import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/service/vm_flags.dart' as vm_flags;
-import 'package:devtools_app/src/shared/banner_messages.dart';
-import 'package:devtools_app/src/shared/common_widgets.dart';
-import 'package:devtools_app/src/shared/config_specific/ide_theme/ide_theme.dart';
-import 'package:devtools_app/src/shared/globals.dart';
-import 'package:devtools_app/src/shared/notifications.dart';
-import 'package:devtools_app/src/shared/theme.dart';
 import 'package:devtools_app/src/shared/ui/vm_flag_widgets.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
@@ -28,6 +20,7 @@ void main() {
 
     setUp(() async {
       fakeServiceManager = FakeServiceManager();
+      setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
       setGlobal(ServiceConnectionManager, fakeServiceManager);
       setGlobal(IdeTheme, IdeTheme());
       setGlobal(NotificationService, NotificationService());
