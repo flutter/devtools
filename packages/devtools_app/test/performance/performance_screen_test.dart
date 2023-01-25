@@ -19,6 +19,7 @@ import 'package:vm_service/vm_service.dart' as vm_service;
 import '../test_infra/test_data/performance.dart';
 
 void main() {
+  setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
   setGlobal(IdeTheme, IdeTheme());
   setGlobal(PreferencesController, PreferencesController());
   late PerformanceController controller;
@@ -47,7 +48,6 @@ void main() {
     when(app.isProfileBuildNow).thenReturn(true);
     when(app.isDartWebApp).thenAnswer((_) async => false);
     when(app.isProfileBuild).thenAnswer((_) async => false);
-    setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
     setGlobal(ServiceConnectionManager, fakeServiceManager);
     setGlobal(NotificationService, NotificationService());
     setGlobal(OfflineModeController, OfflineModeController());
