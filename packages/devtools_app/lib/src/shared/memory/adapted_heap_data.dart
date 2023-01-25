@@ -23,6 +23,10 @@ class HeapObjectSelection {
 
   final AdaptedHeapData heap;
   final AdaptedHeapObject object;
+
+  List<HeapObjectSelection> outbound() => object.references
+      .map((i) => HeapObjectSelection(heap, heap.objects[i]))
+      .toList();
 }
 
 /// Contains information from [HeapSnapshotGraph],

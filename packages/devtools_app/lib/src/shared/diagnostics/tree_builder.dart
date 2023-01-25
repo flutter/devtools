@@ -182,7 +182,7 @@ void addChildReferences(
         ),
       );
 
-      // final heap = ref.heap!;
+      final selection = ref.heapSelection!;
 
       // for (final i in ref.detectHeapObject()!.references) {
       //   final child = heap.objects[i];
