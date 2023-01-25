@@ -130,10 +130,19 @@ void addChildReferences(
       ]);
       break;
     case RefNodeType.staticRefRoot:
-      variable.addAllChildren([
-        DartObjectNode.references(RefNodeType.staticInRefs, 'inbound', ref),
-        DartObjectNode.references(RefNodeType.staticOutRefs, 'outbound', ref),
-      ]);
+      final heap = ref.heap;
+      if (heap == null) {
+        variable.addChild(
+          DartObjectNode.text(
+            'Take snapshot on Memory screen to get static values.',
+          ),
+        );
+      } else {
+        variable.addAllChildren([
+          DartObjectNode.references(RefNodeType.staticInRefs, 'inbound', ref),
+          DartObjectNode.references(RefNodeType.staticOutRefs, 'outbound', ref),
+        ]);
+      }
       break;
     case RefNodeType.staticInRefs:
       variable.addChild(
