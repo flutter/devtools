@@ -823,7 +823,7 @@ class DevToolsIconButton extends StatelessWidget {
 
   final Widget? iconWidget;
 
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed;
 
   final String tooltip;
 
@@ -839,16 +839,20 @@ class DevToolsIconButton extends StatelessWidget {
             size: defaultIconSize,
           )
         : iconWidget;
+
+    final _onPressed = onPressed != null
+        ? () {
+            ga.select(gaScreen, gaSelection);
+            onPressed!();
+          }
+        : null;
     return SizedBox(
       // This is required to force the button height.
       height: defaultButtonHeight,
       child: DevToolsTooltip(
         message: tooltip,
         child: TextButton(
-          onPressed: () {
-            ga.select(gaScreen, gaSelection);
-            onPressed();
-          },
+          onPressed: _onPressed,
           child: SizedBox(
             height: defaultButtonHeight,
             width: defaultButtonHeight,

@@ -135,7 +135,7 @@ class TimelineEventsController extends PerformanceFeatureController
   }
 
   @override
-  Future<void> onBecomingActive() async {
+  void onBecomingActive() {
     if (_perfettoMode) {
       perfettoController.onBecomingActive();
     }
@@ -273,13 +273,13 @@ class TimelineEventsController extends PerformanceFeatureController
   }
 
   Future<void> processAllTraceEvents() async {
-    await _workTracker.track(_processAllTraceEvents());
+    await _workTracker.track(_processAllTraceEvents);
   }
 
   Future<void> _processAllTraceEvents() async {
     if (_perfettoMode) {
       await perfettoController.processor.processData(allTraceEvents);
-      perfettoController.loadTrace(allTraceEvents);
+      await perfettoController.loadTrace(allTraceEvents);
     } else {
       await legacyController.processTraceEvents(
         allTraceEvents,
@@ -342,9 +342,10 @@ class TimelineEventsController extends PerformanceFeatureController
           perfettoController.processor.hasProcessedEventsForFrame(frame.id);
       if (!hasProcessedTimelineEventsForFrame) {
         await _workTracker.track(
-          Future.delayed(_timelinePollingInterval, () async {
-            await _processAllTraceEvents();
-          }),
+          () => Future.delayed(
+            _timelinePollingInterval,
+            _processAllTraceEvents,
+          ),
         );
       }
     }
@@ -375,9 +376,9 @@ class TimelineEventsController extends PerformanceFeatureController
       // VM has been polled one more time.
       if (!frame.isWellFormed && !frameBeforeFirstWellFormedFrame) {
         await _workTracker.track(
-          Future.delayed(_timelinePollingInterval, () async {
+          () => Future.delayed(_timelinePollingInterval, () async {
             if (framesController.currentFrameBeingSelected != frame) return;
-            await _processAllTraceEvents();
+            return await _processAllTraceEvents();
           }),
         );
       }
@@ -538,7 +539,7 @@ class TimelineEventsController extends PerformanceFeatureController
   }
 
   @override
-  void clearData() {
+  Future<void> clearData() async {
     allTraceEvents.clear();
     _unassignedFlutterFrameEvents.clear();
 
@@ -547,7 +548,7 @@ class TimelineEventsController extends PerformanceFeatureController
     legacyController.clearData();
     _status.value = EventsControllerStatus.empty;
     if (FeatureFlags.embeddedPerfetto) {
-      perfettoController.clear();
+      await perfettoController.clear();
     }
   }
 

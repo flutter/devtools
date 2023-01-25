@@ -63,7 +63,7 @@ class LegacyEventProcessor extends BaseTraceEventProcessor {
 
       // Await a small delay to give the UI thread a chance to update the
       // progress indicator.
-      await delayForBatchProcessing();
+      await delayToReleaseUiThread();
     }
   }
 
