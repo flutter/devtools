@@ -36,3 +36,36 @@ class GenericInstanceRef {
 
   final IsolateRef? isolateRef;
 }
+
+class ObjectReferences extends GenericInstanceRef {
+  ObjectReferences({
+    required this.refNodeType,
+    required super.isolateRef,
+    super.value,
+  });
+
+  final RefNodeType refNodeType;
+}
+
+enum RefNodeType {
+  /// Root item for references.
+  refRoot,
+
+  /// Subitem of [refRoot] for static references.
+  staticRefRoot,
+
+  /// Subitem of [staticRefRoot] for inbound static references.
+  staticInRefs,
+
+  /// Subitem of [staticRefRoot] for outbound static references.
+  staticOutRefs,
+
+  /// Subitem of [refRoot] for live references.
+  liveRefRoot,
+
+  /// Subitem of [liveRefRoot] for inbound live references.
+  liveInRefs,
+
+  /// Subitem of [liveRefRoot] for outbound live references.
+  liveOutRefs,
+}
