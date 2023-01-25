@@ -110,7 +110,7 @@ class ConsoleService extends Disposer {
     required IsolateRef? isolateRef,
     bool forceScrollIntoView = false,
     bool expandAll = false,
-    AdaptedHeapData? heap,
+    HeapObjectSelection? heapSelection,
   }) async {
     _stdioTrailingNewline = false;
     final variable = DartObjectNode.fromValue(
@@ -118,7 +118,7 @@ class ConsoleService extends Disposer {
       value: value,
       diagnostic: diagnostic,
       isolateRef: isolateRef,
-      heap: heap,
+      heapSelection: heapSelection,
     );
     // TODO(jacobr): fix out of order issues by tracking raw order.
     await buildVariablesTree(variable, expandAll: expandAll);

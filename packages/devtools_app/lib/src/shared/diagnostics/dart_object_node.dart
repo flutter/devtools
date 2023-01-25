@@ -47,7 +47,7 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
     bool artificialName = false,
     bool artificialValue = false,
     RemoteDiagnosticsNode? diagnostic,
-    AdaptedHeapData? heap,
+    HeapObjectSelection? heapSelection,
     required IsolateRef? isolateRef,
   }) {
     name = name ?? '';
@@ -57,7 +57,7 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
         isolateRef: isolateRef,
         diagnostic: diagnostic,
         value: value,
-        heap: heap,
+        heapSelection: heapSelection,
       ),
       artificialName: artificialName,
       artificialValue: artificialValue,
@@ -162,18 +162,12 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
   }
 
   factory DartObjectNode.references(
-    RefNodeType refNodeType,
     String text,
-    GenericInstanceRef ref,
+    ObjectReferences ref,
   ) {
     return DartObjectNode._(
       text: text,
-      ref: ObjectReferences(
-        isolateRef: ref.isolateRef,
-        refNodeType: refNodeType,
-        value: ref.value,
-        heap: ref.heap,
-      ),
+      ref: ref,
     );
   }
 

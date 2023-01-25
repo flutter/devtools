@@ -23,12 +23,12 @@ class GenericInstanceRef {
     required this.isolateRef,
     this.value,
     this.diagnostic,
-    this.heap,
+    this.heapSelection,
   });
 
   final Object? value;
 
-  final AdaptedHeapData? heap;
+  final HeapObjectSelection? heapSelection;
 
   InstanceRef? get instanceRef =>
       value is InstanceRef ? value as InstanceRef? : null;
@@ -46,24 +46,10 @@ class ObjectReferences extends GenericInstanceRef {
     required this.refNodeType,
     super.isolateRef,
     super.value,
-    super.heap,
-    this.heapObject,
+    super.heapSelection,
   });
 
   final RefNodeType refNodeType;
-
-  final AdaptedHeapObject? heapObject;
-
-  AdaptedHeapObject? detectHeapObject() {
-    if (heapObject != null) return heapObject;
-    final theHeap = heap;
-    if (theHeap == null) return null;
-
-    final hashCode = instanceRef?.identityHashCode;
-    final index = theHeap.objectIndexByIdentityHashCode(hashCode ?? -1);
-    if (index == null) return null;
-    return theHeap.objects[index];
-  }
 }
 
 enum RefNodeType {

@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:collection/collection.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../../../../shared/globals.dart';
@@ -20,7 +21,7 @@ class HeapClassSampler extends ClassSampler {
   IsolateRef get _mainIsolateRef =>
       serviceManager.isolateManager.mainIsolate.value!;
 
-  Future<InstanceRef?> _oneInstance() async {
+  Future<List<ObjRef>> _instances() async {
     final isolateId = _mainIsolateRef.id!;
 
     // TODO(polina-c): It would be great to find out how to avoid full scan of classes.
@@ -34,30 +35,38 @@ class HeapClassSampler extends ClassSampler {
       1,
     );
 
-    final result = instances.instances!.first;
-
-    if (result is InstanceRef) return result;
-
-    return null;
+    return instances.instances ?? [];
   }
 
   @override
   Future<void> oneVariableToConsole() async {
-    final instance = await _oneInstance();
+    final instances = await _instances();
 
-    if (instance == null) {
+    final instanceRef = instances.firstWhereOrNull(
+      (objRef) =>
+          objRef is InstanceRef &&
+          objects.objects.objectsByCodes.containsKey(objRef.identityHashCode),
+    ) as InstanceRef?;
+
+    if (instanceRef == null) {
       serviceManager.consoleService
-          .appendStdio('the instance cannot be evaluated');
-    } else {
-      // drop to console
-      serviceManager.consoleService.appendInstanceRef(
-        value: instance,
-        diagnostic: null,
-        isolateRef: _mainIsolateRef,
-        forceScrollIntoView: true,
-        heap: heap,
-      );
+          .appendStdio('the instance cannot be selected');
+      return;
     }
+
+    final heapObject =
+        objects.objects.objectsByCodes[instanceRef.identityHashCode!]!;
+
+    final heapSelection = HeapObjectSelection(heap, heapObject);
+
+    // drop to console
+    serviceManager.consoleService.appendInstanceRef(
+      value: instanceRef,
+      diagnostic: null,
+      isolateRef: _mainIsolateRef,
+      forceScrollIntoView: true,
+      heapSelection: heapSelection,
+    );
 
     // TODO (polina-c): remove the commented code
     // before opening the flag.

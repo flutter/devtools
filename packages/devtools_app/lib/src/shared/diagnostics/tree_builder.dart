@@ -121,10 +121,12 @@ void addChildReferences(
   DartObjectNode variable,
 ) {
   final ref = variable.ref!;
-  var refNodeType = RefNodeType.refRoot;
-  if (ref is ObjectReferences) {
-    refNodeType = ref.refNodeType;
+  if (ref is! ObjectReferences) {
+    throw StateError('Wrong type: ${ref.runtimeType}');
   }
+
+  final refNodeType = ref.refNodeType;
+
   switch (refNodeType) {
     case RefNodeType.refRoot:
       variable.addAllChildren([
@@ -158,24 +160,25 @@ void addChildReferences(
       );
       break;
     case RefNodeType.staticOutRefs:
-      if (ref is! ObjectReferences) break;
-      final object = ref.detectHeapObject();
-      if (object == null) break;
       final heap = ref.heap!;
 
-      for (final i in object.references) {
-        final object = heap.objects[i];
+      for (final i in ref.detectHeapObject()!.references) {
+        final child = heap.objects[i];
         variable.addChild(
           DartObjectNode.references(
             RefNodeType.staticOutRefs,
-            '${object.heapClass.className} ${prettyPrintBytes(
-              object.retainedSize,
+            '${child.heapClass.className} ${prettyPrintBytes(
+              child.retainedSize,
               includeUnit: true,
             )}',
             ObjectReferences(
               refNodeType: RefNodeType.staticOutRefs,
               heap: heap,
-              heapObject: object,
+              heapObject: child,
+
+              /// ???
+              // isolateRef: ref.isolateRef,
+              // value: ref.value,
             ),
           ),
         );

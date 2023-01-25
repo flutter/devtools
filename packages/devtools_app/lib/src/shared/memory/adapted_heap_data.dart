@@ -18,6 +18,13 @@ class _JsonFields {
   static const String created = 'created';
 }
 
+class HeapObjectSelection {
+  HeapObjectSelection(this.heap, this.object);
+
+  final AdaptedHeapData heap;
+  final AdaptedHeapObject object;
+}
+
 /// Contains information from [HeapSnapshotGraph],
 /// needed for memory screen.
 class AdaptedHeapData {
