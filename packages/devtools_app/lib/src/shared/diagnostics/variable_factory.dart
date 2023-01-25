@@ -493,10 +493,9 @@ List<DartObjectNode> createVariablesForRecords(
   }
   // Sort positional fields in ascending order:
   _sortPositionalFields(positionalFields);
-  final variables = <DartObjectNode>[];
-  // Always show positional fields before named fields:
-  for (final field in positionalFields) {
-    variables.add(
+  return [
+    // Always show positional fields before named fields:
+    for (final field in positionalFields)
       DartObjectNode.fromValue(
         // Positional fields are designated by their getter syntax, eg $0, $1,
         // $2, etc:
@@ -504,18 +503,13 @@ List<DartObjectNode> createVariablesForRecords(
         value: field.value,
         isolateRef: isolateRef,
       ),
-    );
-  }
-  for (final field in namedFields) {
-    variables.add(
+    for (final field in namedFields)
       DartObjectNode.fromValue(
         name: field.name,
         value: field.value,
         isolateRef: isolateRef,
       ),
-    );
-  }
-  return variables;
+  ];
 }
 
 bool _isPositionalField(BoundField field) => field.name is int;
