@@ -120,6 +120,7 @@ void _setupGrouping(DartObjectNode variable) {
 void addChildReferences(
   DartObjectNode variable,
 ) {
+  assert(FeatureFlags.evalAndBrowse);
   final ref = variable.ref!;
   if (ref is! ObjectReferences) {
     throw StateError('Wrong type: ${ref.runtimeType}');
