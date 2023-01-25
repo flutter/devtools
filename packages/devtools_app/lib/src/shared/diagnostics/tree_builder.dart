@@ -9,6 +9,7 @@ import 'package:vm_service/vm_service.dart';
 
 import '../../screens/debugger/debugger_model.dart';
 import '../config_specific/logger/logger.dart';
+import '../feature_flags.dart';
 import '../globals.dart';
 import '../primitives/utils.dart';
 import 'dart_object_node.dart';
@@ -116,11 +117,85 @@ void _setupGrouping(DartObjectNode variable) {
   }
 }
 
+void addChildReferences(
+  DartObjectNode variable,
+  RefNodeType refNodeType,
+) {
+  assert(FeatureFlags.evalAndBrowse);
+  final ref = variable.ref!;
+  switch (refNodeType) {
+    case RefNodeType.refRoot:
+      variable.addAllChildren([
+        DartObjectNode.references(RefNodeType.liveRefRoot, 'live', ref),
+        DartObjectNode.references(RefNodeType.staticRefRoot, 'static', ref),
+      ]);
+      break;
+    case RefNodeType.staticRefRoot:
+      variable.addAllChildren([
+        DartObjectNode.references(RefNodeType.staticInRefs, 'inbound', ref),
+        DartObjectNode.references(RefNodeType.staticOutRefs, 'outbound', ref),
+      ]);
+      break;
+    case RefNodeType.staticInRefs:
+      variable.addChild(
+        DartObjectNode.references(
+          RefNodeType.staticInRefs,
+          // Temporary placeholder
+          '<static inbound refs>',
+          ref,
+        ),
+      );
+      break;
+    case RefNodeType.staticOutRefs:
+      variable.addChild(
+        DartObjectNode.references(
+          RefNodeType.staticOutRefs,
+          // Temporary placeholder
+          '<static outbound refs>',
+          variable.ref!,
+        ),
+      );
+      break;
+    case RefNodeType.liveRefRoot:
+      variable.addAllChildren([
+        DartObjectNode.references(RefNodeType.liveInRefs, 'inbound', ref),
+        DartObjectNode.references(RefNodeType.liveOutRefs, 'outbound', ref),
+      ]);
+      break;
+    case RefNodeType.liveInRefs:
+      variable.addChild(
+        DartObjectNode.references(
+          RefNodeType.liveInRefs,
+          // Temporary placeholder
+          '<live in refs>',
+          variable.ref!,
+        ),
+      );
+      break;
+    case RefNodeType.liveOutRefs:
+      variable.addChild(
+        DartObjectNode.references(
+          RefNodeType.liveOutRefs,
+          // Temporary placeholder
+          '<live out refs>',
+          variable.ref!,
+        ),
+      );
+      break;
+  }
+}
+
 Future<void> _addInstanceRefItems(
   DartObjectNode variable,
   InstanceRef instanceRef,
   IsolateRef? isolateRef,
 ) async {
+  final ref = variable.ref;
+  if (ref is ObjectReferences) {
+    addChildReferences(variable, RefNodeType.refRoot);
+    return;
+  }
+
   final existingNames = <String>{};
   for (var child in variable.children) {
     final name = child.name;
@@ -142,6 +217,16 @@ Future<void> _addInstanceRefItems(
     count: variable.childCount,
   );
   if (result is Instance) {
+    if (FeatureFlags.evalAndBrowse) {
+      variable.addChild(
+        DartObjectNode.references(
+          RefNodeType.refRoot,
+          'references',
+          variable.ref!,
+        ),
+        index: 0,
+      );
+    }
     switch (result.kind) {
       case InstanceKind.kMap:
         variable.addAllChildren(
