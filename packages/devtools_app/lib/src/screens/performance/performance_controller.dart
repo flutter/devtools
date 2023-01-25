@@ -11,6 +11,7 @@ import '../../shared/diagnostics/inspector_service.dart';
 import '../../shared/feature_flags.dart';
 import '../../shared/globals.dart';
 import '../../shared/primitives/auto_dispose.dart';
+import '../../shared/utils.dart';
 import 'panes/controls/enhance_tracing/enhance_tracing_controller.dart';
 import 'panes/flutter_frames/flutter_frame_model.dart';
 import 'panes/flutter_frames/flutter_frames_controller.dart';
@@ -26,8 +27,12 @@ import 'performance_screen.dart';
 /// which handle things like data processing and communication with the view
 /// to give and receive data updates.
 class PerformanceController extends DisposableController
-    with AutoDisposeControllerMixin {
+    with
+        AutoDisposeControllerMixin,
+        OfflineScreenControllerMixin<OfflinePerformanceData> {
   PerformanceController() {
+    // TODO(https://github.com/flutter/devtools/issues/5100): clean this up to
+    // only create a controller when it is needed,
     flutterFramesController = FlutterFramesController(this);
     timelineEventsController = TimelineEventsController(this);
     rasterStatsController = RasterStatsController(this);
@@ -89,12 +94,13 @@ class PerformanceController extends DisposableController
   /// in selected timeline event, selected frame, etc.).
   PerformanceData? offlinePerformanceData;
 
-  late final Future<void> _initialized;
+  final _initialized = Completer<void>();
 
-  Future<void> get initialized => _initialized;
+  Future<void> get initialized => _initialized.future;
 
-  Future<void> _init() {
-    return _initialized = _initHelper();
+  Future<void> _init() async {
+    await _initHelper();
+    _initialized.complete();
   }
 
   Future<void> _initHelper() async {
@@ -131,6 +137,28 @@ class PerformanceController extends DisposableController
           }
         }),
       );
+    } else {
+      final shouldLoadOfflineData = offlineController
+              .shouldLoadOfflineData(PerformanceScreen.id) &&
+          offlineController.offlineDataJson[PerformanceData.traceEventsKey] !=
+              null;
+      if (shouldLoadOfflineData) {
+        // This is a workaround to guarantee that DevTools exports are compatible
+        // with other trace viewers (catapult, perfetto, chrome://tracing), which
+        // require a top level field named "traceEvents". See how timeline data is
+        // encoded in [ExportController.encode].
+        final timelineJson = Map<String, dynamic>.from(
+          offlineController.offlineDataJson[PerformanceScreen.id],
+        )..addAll({
+            PerformanceData.traceEventsKey: offlineController
+                .offlineDataJson[PerformanceData.traceEventsKey],
+          });
+        final offlinePerformanceData =
+            OfflinePerformanceData.parse(timelineJson);
+        if (!offlinePerformanceData.isEmpty) {
+          await loadOfflineData(offlinePerformanceData);
+        }
+      }
     }
   }
 
@@ -206,6 +234,7 @@ class PerformanceController extends DisposableController
     );
   }
 
+  @override
   FutureOr<void> processOfflineData(OfflinePerformanceData offlineData) async {
     await clearData();
     offlinePerformanceData = offlineData.shallowClone();
@@ -255,13 +284,16 @@ abstract class PerformanceFeatureController extends DisposableController {
   bool _isActiveFeature = false;
 
   Future<void> setIsActiveFeature(bool value) async {
+    // Before allowing any feature controller to become "active", verify that
+    // the [performanceController] has completed initializing.
+    await performanceController.initialized;
     _isActiveFeature = value;
     if (value) {
-      await onBecomingActive();
+      onBecomingActive();
     }
   }
 
-  Future<void> onBecomingActive();
+  void onBecomingActive();
 
   Future<void> init();
 
