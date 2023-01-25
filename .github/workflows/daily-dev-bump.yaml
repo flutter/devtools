@@ -69,3 +69,4 @@ jobs:
         #TODO: Create PR inst
       env:
         COMMIT_MESSAGE: ${{ steps.version-bump.outputs.COMMIT_MESSAGE }}
+        GH_TOKEN: ${{ secrets.DEVTOOLS_WORKFLOW_BOT_TOKEN }}
