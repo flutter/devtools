@@ -119,9 +119,12 @@ void _setupGrouping(DartObjectNode variable) {
 
 void addChildReferences(
   DartObjectNode variable,
-  RefNodeType refNodeType,
 ) {
   final ref = variable.ref!;
+  var refNodeType = RefNodeType.refRoot;
+  if (ref is ObjectReferences) {
+    refNodeType = ref.refNodeType;
+  }
   switch (refNodeType) {
     case RefNodeType.refRoot:
       variable.addAllChildren([
@@ -214,7 +217,7 @@ Future<void> _addInstanceRefItems(
 ) async {
   final ref = variable.ref;
   if (ref is ObjectReferences) {
-    addChildReferences(variable, RefNodeType.refRoot);
+    addChildReferences(variable);
     return;
   }
 
