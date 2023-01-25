@@ -7,8 +7,9 @@ import 'package:vm_service/vm_service.dart';
 
 import '../../../shared/common_widgets.dart';
 import '../../../shared/console/widgets/expandable_variable.dart';
+import '../../../shared/diagnostics/dart_object_node.dart';
+import '../../../shared/diagnostics/tree_builder.dart';
 import '../../../shared/globals.dart';
-import '../../../shared/object_tree.dart';
 import '../../../shared/primitives/utils.dart';
 import '../../../shared/split.dart';
 import '../../../shared/theme.dart';
