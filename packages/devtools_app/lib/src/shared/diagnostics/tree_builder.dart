@@ -121,6 +121,7 @@ void addChildReferences(
   DartObjectNode variable,
   RefNodeType refNodeType,
 ) {
+  assert(FeatureFlags.evalAndBrowse);
   final ref = variable.ref!;
   switch (refNodeType) {
     case RefNodeType.refRoot:
