@@ -4,6 +4,7 @@
 
 import 'package:vm_service/vm_service.dart';
 
+import '../memory/adapted_heap_data.dart';
 import 'diagnostics_node.dart';
 
 /// A generic [InstanceRef] using either format used by the [InspectorService]
@@ -22,9 +23,12 @@ class GenericInstanceRef {
     required this.isolateRef,
     this.value,
     this.diagnostic,
+    this.heap,
   });
 
   final Object? value;
+
+  final AdaptedHeapData? heap;
 
   InstanceRef? get instanceRef =>
       value is InstanceRef ? value as InstanceRef? : null;
@@ -42,6 +46,7 @@ class ObjectReferences extends GenericInstanceRef {
     required this.refNodeType,
     required super.isolateRef,
     super.value,
+    super.heap,
   });
 
   final RefNodeType refNodeType;
