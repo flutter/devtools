@@ -146,7 +146,9 @@ void addChildReferences(
       if (selection == null) {
         variable.addChild(
           DartObjectNode.text(
-            'Take snapshot on Memory screen to get static values.',
+            'To get static values and retained size\n'
+            'save an instance to console from\n'
+            'heap snapshot on memory screen.',
           ),
         );
       } else {
