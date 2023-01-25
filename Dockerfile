@@ -64,8 +64,7 @@ WORKDIR ${DEVTOOLS}
 COPY --chown=developer:developer . .
 
 # TODO Move this to before COPY . .
-
-# RUN ./tool/generate_code.sh
+RUN ./tool/generate_code.sh
 
 # RUN chmod -R +wrx ${DEVELOPER}
 
