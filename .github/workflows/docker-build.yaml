@@ -1,0 +1,25 @@
+# Copyright 2023 The Chromium Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+name: Docker Build
+
+on:
+  # pull_request:
+  push:
+    branches:
+      - dock
+  # push:
+  #   branches:
+  #     - master
+
+jobs:
+  build-docker-image:
+    name: Build Docker Image
+    runs-on: ubuntu-latest
+    steps:
+      - name: git clone devtools
+        uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c
+      - name: Build Devtools Image
+        run: |
+          docker build --tag devtools:TEST .
