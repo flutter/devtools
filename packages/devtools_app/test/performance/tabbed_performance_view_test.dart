@@ -69,11 +69,13 @@ void main() {
           .thenReturn(LegacyTimelineEventsController(controller));
       when(controller.timelineEventsController)
           .thenReturn(mockTimelineEventsController);
+      when(mockTimelineEventsController.isActiveFeature).thenReturn(false);
       mockFlutterFramesController = MockFlutterFramesController();
       when(mockFlutterFramesController.displayRefreshRate)
           .thenReturn(const FixedValueListenable<double>(defaultRefreshRate));
       when(mockFlutterFramesController.selectedFrame)
           .thenReturn(const FixedValueListenable<FlutterFrame?>(null));
+      when(mockFlutterFramesController.isActiveFeature).thenReturn(false);
       when(controller.flutterFramesController)
           .thenReturn(mockFlutterFramesController);
     });
