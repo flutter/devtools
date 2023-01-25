@@ -159,7 +159,7 @@ void addChildReferences(
           ),
           DartObjectNode.references(
             'outbound',
-            ObjectReferences.withType(ref, RefNodeType.staticInRefs),
+            ObjectReferences.withType(ref, RefNodeType.staticOutRefs),
           ),
         ]);
       }
@@ -293,6 +293,7 @@ Future<void> _addInstanceRefItems(
             refNodeType: RefNodeType.refRoot,
             value: ref.value,
             isolateRef: ref.isolateRef,
+            heapSelection: ref.heapSelection,
           ),
         ),
         index: 0,
