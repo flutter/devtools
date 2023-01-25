@@ -2,11 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/memory/memory_screen.dart';
 import 'package:devtools_app/src/screens/memory/memory_tabs.dart';
 import 'package:devtools_app/src/screens/memory/panes/profile/model.dart';
 import 'package:devtools_app/src/screens/memory/panes/profile/profile_pane_controller.dart';
 import 'package:devtools_app/src/shared/globals.dart';
+import 'package:devtools_app/src/shared/primitives/utils.dart';
 import 'package:devtools_app/src/shared/table/table.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
@@ -30,7 +32,7 @@ void main() {
   }
 
   // Set a wide enough screen width that we do not run into overflow.
-  const windowSize = Size(2225.0, 1000.0);
+  const windowSize = Size(2225.0, 1200.0);
   //setGlobal(NotificationService, NotificationService());
 
   group('Allocation Profile Table', () {
@@ -99,6 +101,59 @@ void main() {
         expect(find.text('Capacity'), findsNWidgets(3));
         expect(find.text('Collections'), findsNWidgets(3));
         expect(find.text('Latency'), findsNWidgets(3));
+        final currentProfile =
+            allocationProfileController.currentAllocationProfile.value!;
+
+        void checkGCStats(GCStats stats) {
+          // Usage
+          expect(
+            find.text(
+              prettyPrintBytes(
+                stats.usage,
+                includeUnit: true,
+              )!,
+              findRichText: true,
+            ),
+            findsOneWidget,
+          );
+
+          // Capacity
+          expect(
+            find.text(
+              prettyPrintBytes(
+                stats.capacity,
+                includeUnit: true,
+              )!,
+              findRichText: true,
+            ),
+            findsOneWidget,
+          );
+
+          // Average collection time
+          expect(
+            find.text(
+              msText(
+                Duration(milliseconds: stats.averageCollectionTime.toInt()),
+                fractionDigits: 2,
+              ),
+              findRichText: true,
+            ),
+            findsOneWidget,
+          );
+
+          // # of collections
+          expect(
+            find.text(
+              stats.collections.toString(),
+              findRichText: true,
+            ),
+            findsOneWidget,
+          );
+        }
+
+        checkGCStats(currentProfile.newSpaceGCStats);
+        checkGCStats(currentProfile.oldSpaceGCStats);
+        checkGCStats(currentProfile.totalGCStats);
       },
     );
 

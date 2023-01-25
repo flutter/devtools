@@ -5,6 +5,7 @@
 import 'package:vm_service/vm_service.dart';
 
 import '../../shared/globals.dart';
+import '../memory/panes/profile/profile_view.dart';
 
 /// NOTE: this file contains extensions to classes provided by
 /// `package:vm_service` in order to expose VM internal fields in a controlled
@@ -125,12 +126,12 @@ extension AllocationProfilePrivateViewExtension on AllocationProfile {
   static const oldSpaceKey = 'old';
 
   GCStats get newSpaceGCStats => GCStats.parse(
-        heap: 'New Space',
+        heap: HeapGeneration.newSpace.toString(),
         json: json![heapsKey][newSpaceKey],
       );
 
   GCStats get oldSpaceGCStats => GCStats.parse(
-        heap: 'Old Space',
+        heap: HeapGeneration.oldSpace.toString(),
         json: json![heapsKey][oldSpaceKey],
       );
 
@@ -143,7 +144,7 @@ extension AllocationProfilePrivateViewExtension on AllocationProfile {
                 (oldSpace.collections * oldSpace.averageCollectionTime)) /
             collections;
     return GCStats(
-      heap: 'Total',
+      heap: HeapGeneration.total.toString(),
       usage: newSpace.usage + oldSpace.usage,
       capacity: newSpace.capacity + oldSpace.capacity,
       collections: collections,

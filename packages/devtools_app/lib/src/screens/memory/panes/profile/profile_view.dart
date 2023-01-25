@@ -69,7 +69,7 @@ class _FieldClassNameColumn extends ColumnData<ProfileRecord>
 
 /// For more information on the Dart GC implementation, see:
 /// https://medium.com/flutter/flutter-dont-fear-the-garbage-collector-d69b3ff1ca30
-enum _HeapGeneration {
+enum HeapGeneration {
   newSpace,
   oldSpace,
   total;
@@ -77,11 +77,11 @@ enum _HeapGeneration {
   @override
   String toString() {
     switch (this) {
-      case _HeapGeneration.newSpace:
+      case HeapGeneration.newSpace:
         return 'New Space';
-      case _HeapGeneration.oldSpace:
+      case HeapGeneration.oldSpace:
         return 'Old Space';
-      case _HeapGeneration.total:
+      case HeapGeneration.total:
         return 'Total';
     }
   }
@@ -96,16 +96,16 @@ class _FieldInstanceCountColumn extends ColumnData<ProfileRecord> {
           fixedWidthPx: scaleByFontFactor(_defaultNumberFieldWidth),
         );
 
-  final _HeapGeneration heap;
+  final HeapGeneration heap;
 
   @override
   int? getValue(ProfileRecord dataObject) {
     switch (heap) {
-      case _HeapGeneration.newSpace:
+      case HeapGeneration.newSpace:
         return dataObject.newSpaceInstances;
-      case _HeapGeneration.oldSpace:
+      case HeapGeneration.oldSpace:
         return dataObject.oldSpaceInstances;
-      case _HeapGeneration.total:
+      case HeapGeneration.total:
         return dataObject.totalInstances;
     }
   }
@@ -125,11 +125,11 @@ class _FieldExternalSizeColumn extends _FieldSizeColumn {
   @override
   int? getValue(ProfileRecord dataObject) {
     switch (heap) {
-      case _HeapGeneration.newSpace:
+      case HeapGeneration.newSpace:
         return dataObject.newSpaceExternalSize;
-      case _HeapGeneration.oldSpace:
+      case HeapGeneration.oldSpace:
         return dataObject.oldSpaceExternalSize;
-      case _HeapGeneration.total:
+      case HeapGeneration.total:
         return dataObject.totalExternalSize;
     }
   }
@@ -145,11 +145,11 @@ class _FieldDartHeapSizeColumn extends _FieldSizeColumn {
   @override
   int? getValue(ProfileRecord dataObject) {
     switch (heap) {
-      case _HeapGeneration.newSpace:
+      case HeapGeneration.newSpace:
         return dataObject.newSpaceDartHeapSize;
-      case _HeapGeneration.oldSpace:
+      case HeapGeneration.oldSpace:
         return dataObject.oldSpaceDartHeapSize;
-      case _HeapGeneration.total:
+      case HeapGeneration.total:
         return dataObject.totalDartHeapSize;
     }
   }
@@ -175,16 +175,16 @@ class _FieldSizeColumn extends ColumnData<ProfileRecord> {
           fixedWidthPx: scaleByFontFactor(_defaultNumberFieldWidth),
         );
 
-  final _HeapGeneration heap;
+  final HeapGeneration heap;
 
   @override
   int? getValue(ProfileRecord dataObject) {
     switch (heap) {
-      case _HeapGeneration.newSpace:
+      case HeapGeneration.newSpace:
         return dataObject.newSpaceSize;
-      case _HeapGeneration.oldSpace:
+      case HeapGeneration.oldSpace:
         return dataObject.oldSpaceSize;
-      case _HeapGeneration.total:
+      case HeapGeneration.total:
         return dataObject.totalSize;
     }
   }
@@ -205,8 +205,8 @@ class _FieldSizeColumn extends ColumnData<ProfileRecord> {
   bool get numeric => true;
 }
 
-abstract class _HeapStatsColumn extends ColumnData<AdaptedProfile> {
-  _HeapStatsColumn(
+abstract class _GCHeapStatsColumn extends ColumnData<AdaptedProfile> {
+  _GCHeapStatsColumn(
     super.title, {
     required this.generation,
     required super.fixedWidthPx,
@@ -214,22 +214,22 @@ abstract class _HeapStatsColumn extends ColumnData<AdaptedProfile> {
     super.alignment,
   });
 
-  final _HeapGeneration generation;
+  final HeapGeneration generation;
 
   GCStats getGCStats(AdaptedProfile profile) {
     switch (generation) {
-      case _HeapGeneration.newSpace:
+      case HeapGeneration.newSpace:
         return profile.newSpaceGCStats;
-      case _HeapGeneration.oldSpace:
+      case HeapGeneration.oldSpace:
         return profile.oldSpaceGCStats;
-      case _HeapGeneration.total:
+      case HeapGeneration.total:
         return profile.totalGCStats;
     }
   }
 }
 
-class _HeapNameColumn extends ColumnData<AdaptedProfile> {
-  _HeapNameColumn()
+class _GCHeapNameColumn extends ColumnData<AdaptedProfile> {
+  _GCHeapNameColumn()
       : super(
           '',
           fixedWidthPx: scaleByFontFactor(200),
@@ -241,8 +241,8 @@ class _HeapNameColumn extends ColumnData<AdaptedProfile> {
   }
 }
 
-class _HeapUsageColumn extends _HeapStatsColumn {
-  _HeapUsageColumn({required super.generation})
+class _GCHeapUsageColumn extends _GCHeapStatsColumn {
+  _GCHeapUsageColumn({required super.generation})
       : super(
           'Usage',
           titleTooltip: 'The current amount of memory allocated from the heap',
@@ -264,8 +264,8 @@ class _HeapUsageColumn extends _HeapStatsColumn {
   bool get numeric => true;
 }
 
-class _HeapCapacityColumn extends _HeapStatsColumn {
-  _HeapCapacityColumn({required super.generation})
+class _GCHeapCapacityColumn extends _GCHeapStatsColumn {
+  _GCHeapCapacityColumn({required super.generation})
       : super(
           'Capacity',
           titleTooltip:
@@ -288,8 +288,8 @@ class _HeapCapacityColumn extends _HeapStatsColumn {
   bool get numeric => true;
 }
 
-class _HeapCollectionsColumn extends _HeapStatsColumn {
-  _HeapCollectionsColumn({required super.generation})
+class _GCCountColumn extends _GCHeapStatsColumn {
+  _GCCountColumn({required super.generation})
       : super(
           'Collections',
           titleTooltip: 'The number of garbage collections run on the heap',
@@ -306,8 +306,8 @@ class _HeapCollectionsColumn extends _HeapStatsColumn {
   bool get numeric => true;
 }
 
-class _HeapCollectionsTime extends _HeapStatsColumn {
-  _HeapCollectionsTime({required super.generation})
+class _GCLatencyColumn extends _GCHeapStatsColumn {
+  _GCLatencyColumn({required super.generation})
       : super(
           'Latency',
           titleTooltip:
@@ -322,14 +322,14 @@ class _HeapCollectionsTime extends _HeapStatsColumn {
     if (stats.averageCollectionTime.isNaN) {
       return 0;
     }
-    return getGCStats(dataObject).averageCollectionTime * 1000;
+    return getGCStats(dataObject).averageCollectionTime;
   }
 
   @override
   String getDisplayValue(AdaptedProfile dataObject) {
     return msText(
       Duration(
-        microseconds: getValue(dataObject)!.toInt(),
+        milliseconds: getValue(dataObject)!.toInt(),
       ),
       fractionDigits: 2,
     );
@@ -351,32 +351,32 @@ class _GCStatsTable extends StatelessWidget {
       range: const Range(0, 1),
     ),
     ColumnGroup(
-      title: 'Total',
+      title: HeapGeneration.total.toString(),
       range: const Range(1, 5),
     ),
     ColumnGroup(
-      title: 'New Space',
+      title: HeapGeneration.newSpace.toString(),
       range: const Range(5, 9),
     ),
     ColumnGroup(
-      title: 'Old Space',
+      title: HeapGeneration.oldSpace.toString(),
       range: const Range(9, 13),
     ),
   ];
 
   static final _columns = [
-    _HeapNameColumn(),
+    _GCHeapNameColumn(),
     for (final generation in [
-      _HeapGeneration.total,
-      _HeapGeneration.newSpace,
-      _HeapGeneration.oldSpace,
+      HeapGeneration.total,
+      HeapGeneration.newSpace,
+      HeapGeneration.oldSpace,
     ]) ...[
-      _HeapUsageColumn(generation: generation),
-      _HeapCapacityColumn(generation: generation),
-      _HeapCollectionsColumn(
+      _GCHeapUsageColumn(generation: generation),
+      _GCHeapCapacityColumn(generation: generation),
+      _GCCountColumn(
         generation: generation,
       ),
-      _HeapCollectionsTime(
+      _GCLatencyColumn(
         generation: generation,
       ),
     ],
@@ -483,40 +483,40 @@ class _AllocationProfileTable extends StatelessWidget {
       range: const Range(0, 1),
     ),
     ColumnGroup(
-      title: 'Total',
+      title: HeapGeneration.total.toString(),
       range: const Range(1, 5),
     ),
     ColumnGroup(
-      title: 'New Space',
+      title: HeapGeneration.newSpace.toString(),
       range: const Range(5, 9),
     ),
     ColumnGroup(
-      title: 'Old Space',
+      title: HeapGeneration.oldSpace.toString(),
       range: const Range(9, 13),
     ),
   ];
 
   static final _initialSortColumn = _FieldSizeColumn(
-    heap: _HeapGeneration.total,
+    heap: HeapGeneration.total,
   );
 
   static final _columns = [
     _FieldClassNameColumn(),
-    _FieldInstanceCountColumn(heap: _HeapGeneration.total),
+    _FieldInstanceCountColumn(heap: HeapGeneration.total),
     _initialSortColumn,
-    _FieldDartHeapSizeColumn(heap: _HeapGeneration.total),
-    _FieldExternalSizeColumn(heap: _HeapGeneration.total),
+    _FieldDartHeapSizeColumn(heap: HeapGeneration.total),
+    _FieldExternalSizeColumn(heap: HeapGeneration.total),
   ];
 
   static final _vmDeveloperModeColumns = [
-    _FieldInstanceCountColumn(heap: _HeapGeneration.newSpace),
-    _FieldSizeColumn(heap: _HeapGeneration.newSpace),
-    _FieldDartHeapSizeColumn(heap: _HeapGeneration.newSpace),
-    _FieldExternalSizeColumn(heap: _HeapGeneration.newSpace),
-    _FieldInstanceCountColumn(heap: _HeapGeneration.oldSpace),
-    _FieldSizeColumn(heap: _HeapGeneration.oldSpace),
-    _FieldDartHeapSizeColumn(heap: _HeapGeneration.oldSpace),
-    _FieldExternalSizeColumn(heap: _HeapGeneration.oldSpace),
+    _FieldInstanceCountColumn(heap: HeapGeneration.newSpace),
+    _FieldSizeColumn(heap: HeapGeneration.newSpace),
+    _FieldDartHeapSizeColumn(heap: HeapGeneration.newSpace),
+    _FieldExternalSizeColumn(heap: HeapGeneration.newSpace),
+    _FieldInstanceCountColumn(heap: HeapGeneration.oldSpace),
+    _FieldSizeColumn(heap: HeapGeneration.oldSpace),
+    _FieldDartHeapSizeColumn(heap: HeapGeneration.oldSpace),
+    _FieldExternalSizeColumn(heap: HeapGeneration.oldSpace),
   ];
 
   final ProfilePaneController controller;
