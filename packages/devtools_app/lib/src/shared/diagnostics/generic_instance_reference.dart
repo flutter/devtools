@@ -44,12 +44,26 @@ class GenericInstanceRef {
 class ObjectReferences extends GenericInstanceRef {
   ObjectReferences({
     required this.refNodeType,
-    required super.isolateRef,
+    super.isolateRef,
     super.value,
     super.heap,
+    this.heapObject,
   });
 
   final RefNodeType refNodeType;
+
+  final AdaptedHeapObject? heapObject;
+
+  AdaptedHeapObject? detectHeapObject() {
+    if (heapObject != null) return heapObject;
+    final theHeap = heap;
+    if (theHeap == null) return null;
+
+    final hashCode = instanceRef?.identityHashCode;
+    final index = theHeap.objectIndexByIdentityHashCode(hashCode ?? -1);
+    if (index == null) return null;
+    return theHeap.objects[index];
+  }
 }
 
 enum RefNodeType {

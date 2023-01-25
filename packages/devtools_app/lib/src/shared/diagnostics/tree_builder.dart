@@ -155,14 +155,28 @@ void addChildReferences(
       );
       break;
     case RefNodeType.staticOutRefs:
-      variable.addChild(
-        DartObjectNode.references(
-          RefNodeType.staticOutRefs,
-          // Temporary placeholder
-          '<static outbound refs>',
-          variable.ref!,
-        ),
-      );
+      if (ref is! ObjectReferences) break;
+      final object = ref.detectHeapObject();
+      if (object == null) break;
+      final heap = ref.heap!;
+
+      for (final i in object.references) {
+        final object = heap.objects[i];
+        variable.addChild(
+          DartObjectNode.references(
+            RefNodeType.staticOutRefs,
+            '${object.heapClass.className} ${prettyPrintBytes(
+              object.retainedSize,
+              includeUnit: true,
+            )}',
+            ObjectReferences(
+              refNodeType: RefNodeType.staticOutRefs,
+              heap: heap,
+              heapObject: object,
+            ),
+          ),
+        );
+      }
       break;
     case RefNodeType.liveRefRoot:
       variable.addAllChildren([
