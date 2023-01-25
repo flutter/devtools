@@ -49,6 +49,13 @@ class ObjectReferences extends GenericInstanceRef {
     super.heapSelection,
   });
 
+  ObjectReferences.withType(ObjectReferences ref, this.refNodeType)
+      : super(
+          isolateRef: ref.isolateRef,
+          value: ref.value,
+          heapSelection: ref.heapSelection,
+        );
+
   final RefNodeType refNodeType;
 }
 

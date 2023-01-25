@@ -131,13 +131,19 @@ void addChildReferences(
   switch (refNodeType) {
     case RefNodeType.refRoot:
       variable.addAllChildren([
-        DartObjectNode.references(RefNodeType.liveRefRoot, 'live', ref),
-        DartObjectNode.references(RefNodeType.staticRefRoot, 'static', ref),
+        DartObjectNode.references(
+          'live',
+          ObjectReferences.withType(ref, RefNodeType.liveRefRoot),
+        ),
+        DartObjectNode.references(
+          'static',
+          ObjectReferences.withType(ref, RefNodeType.staticRefRoot),
+        ),
       ]);
       break;
     case RefNodeType.staticRefRoot:
-      final heap = ref.heap;
-      if (heap == null) {
+      final selection = ref.heapSelection;
+      if (selection == null) {
         variable.addChild(
           DartObjectNode.text(
             'Take snapshot on Memory screen to get static values.',
@@ -145,69 +151,87 @@ void addChildReferences(
         );
       } else {
         variable.addAllChildren([
-          DartObjectNode.references(RefNodeType.staticInRefs, 'inbound', ref),
-          DartObjectNode.references(RefNodeType.staticOutRefs, 'outbound', ref),
+          DartObjectNode.references(
+            'inbound',
+            ObjectReferences.withType(ref, RefNodeType.staticInRefs),
+          ),
+          DartObjectNode.references(
+            'outbound',
+            ObjectReferences.withType(ref, RefNodeType.staticInRefs),
+          ),
         ]);
       }
       break;
     case RefNodeType.staticInRefs:
       variable.addChild(
         DartObjectNode.references(
-          RefNodeType.staticInRefs,
           // Temporary placeholder
           '<static inbound refs>',
-          ref,
+          ObjectReferences.withType(ref, RefNodeType.staticInRefs),
         ),
       );
       break;
     case RefNodeType.staticOutRefs:
-      final heap = ref.heap!;
+      variable.addChild(
+        DartObjectNode.references(
+          // Temporary placeholder
+          '<static inbound refs>',
+          ObjectReferences.withType(ref, RefNodeType.staticOutRefs),
+        ),
+      );
 
-      for (final i in ref.detectHeapObject()!.references) {
-        final child = heap.objects[i];
-        variable.addChild(
-          DartObjectNode.references(
-            RefNodeType.staticOutRefs,
-            '${child.heapClass.className} ${prettyPrintBytes(
-              child.retainedSize,
-              includeUnit: true,
-            )}',
-            ObjectReferences(
-              refNodeType: RefNodeType.staticOutRefs,
-              heap: heap,
-              heapObject: child,
+      // final heap = ref.heap!;
 
-              /// ???
-              // isolateRef: ref.isolateRef,
-              // value: ref.value,
-            ),
-          ),
-        );
-      }
+      // for (final i in ref.detectHeapObject()!.references) {
+      //   final child = heap.objects[i];
+      //   variable.addChild(
+      //     DartObjectNode.references(
+      //       RefNodeType.staticOutRefs,
+      //       '${child.heapClass.className} ${prettyPrintBytes(
+      //         child.retainedSize,
+      //         includeUnit: true,
+      //       )}',
+      //       ObjectReferences(
+      //         refNodeType: RefNodeType.staticOutRefs,
+      //         heap: heap,
+      //         heapObject: child,
+
+      //         /// ???
+      //         // isolateRef: ref.isolateRef,
+      //         // value: ref.value,
+      //       ),
+      //     ),
+      //   );
+      // }
       break;
     case RefNodeType.liveRefRoot:
       variable.addAllChildren([
-        DartObjectNode.references(RefNodeType.liveInRefs, 'inbound', ref),
-        DartObjectNode.references(RefNodeType.liveOutRefs, 'outbound', ref),
+        DartObjectNode.references(
+          'inbound',
+          ObjectReferences.withType(ref, RefNodeType.liveInRefs),
+        ),
+        DartObjectNode.references(
+          'outbound',
+          ObjectReferences.withType(ref, RefNodeType.liveOutRefs),
+        ),
       ]);
+
       break;
     case RefNodeType.liveInRefs:
       variable.addChild(
         DartObjectNode.references(
-          RefNodeType.liveInRefs,
           // Temporary placeholder
-          '<live in refs>',
-          variable.ref!,
+          '<live inbound refs>',
+          ObjectReferences.withType(ref, RefNodeType.liveInRefs),
         ),
       );
       break;
     case RefNodeType.liveOutRefs:
       variable.addChild(
         DartObjectNode.references(
-          RefNodeType.liveOutRefs,
           // Temporary placeholder
-          '<live out refs>',
-          variable.ref!,
+          '<live outbound refs>',
+          ObjectReferences.withType(ref, RefNodeType.liveOutRefs),
         ),
       );
       break;
@@ -247,11 +271,15 @@ Future<void> _addInstanceRefItems(
   );
   if (result is Instance) {
     if (FeatureFlags.evalAndBrowse) {
+      final ref = variable.ref!;
       variable.addChild(
         DartObjectNode.references(
-          RefNodeType.refRoot,
           'references',
-          variable.ref!,
+          ObjectReferences(
+            refNodeType: RefNodeType.refRoot,
+            value: ref.value,
+            isolateRef: ref.isolateRef,
+          ),
         ),
         index: 0,
       );
