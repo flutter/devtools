@@ -879,37 +879,49 @@ class VmObjectDisplayBasicLayout extends StatelessWidget {
   }
 }
 
+MapEntry<String, WidgetBuilder> shallowSizeRowBuilder(VmObject object) {
+  return selectableTextBuilderMapEntry(
+    'Shallow Size',
+    prettyPrintBytes(
+      object.obj.size ?? 0,
+      includeUnit: true,
+      kbFractionDigits: 1,
+      maxBytes: 512,
+    ),
+  );
+}
+
+MapEntry<String, WidgetBuilder> reachableSizeRowBuilder(VmObject object) {
+  return MapEntry(
+    'Reachable Size',
+    (context) => RequestableSizeWidget(
+      fetching: object.fetchingReachableSize,
+      sizeProvider: () => object.reachableSize,
+      requestFunction: object.requestReachableSize,
+    ),
+  );
+}
+
+MapEntry<String, WidgetBuilder> retainedSizeRowBuilder(VmObject object) {
+  return MapEntry(
+    'Retained Size',
+    (context) => RequestableSizeWidget(
+      fetching: object.fetchingRetainedSize,
+      sizeProvider: () => object.retainedSize,
+      requestFunction: object.requestRetainedSize,
+    ),
+  );
+}
+
 List<MapEntry<String, WidgetBuilder>> vmObjectGeneralDataRows(
   ObjectInspectorViewController controller,
   VmObject object,
 ) {
   return [
     selectableTextBuilderMapEntry('Object Class', object.obj.type),
-    selectableTextBuilderMapEntry(
-      'Shallow Size',
-      prettyPrintBytes(
-        object.obj.size ?? 0,
-        includeUnit: true,
-        kbFractionDigits: 1,
-        maxBytes: 512,
-      ),
-    ),
-    MapEntry(
-      'Reachable Size',
-      (context) => RequestableSizeWidget(
-        fetching: object.fetchingReachableSize,
-        sizeProvider: () => object.reachableSize,
-        requestFunction: object.requestReachableSize,
-      ),
-    ),
-    MapEntry(
-      'Retained Size',
-      (context) => RequestableSizeWidget(
-        fetching: object.fetchingRetainedSize,
-        sizeProvider: () => object.retainedSize,
-        requestFunction: object.requestRetainedSize,
-      ),
-    ),
+    shallowSizeRowBuilder(object),
+    reachableSizeRowBuilder(object),
+    retainedSizeRowBuilder(object),
     if (object is ClassObject)
       serviceObjectLinkBuilderMapEntry<LibraryRef>(
         controller: controller,
@@ -934,7 +946,9 @@ List<MapEntry<String, WidgetBuilder>> vmObjectGeneralDataRows(
         key: 'Owner',
         object: object.obj.owner!,
       ),
-    if (object is! ScriptObject && object is! LibraryObject)
+    if (object is! ScriptObject &&
+        object is! LibraryObject &&
+        object.script != null)
       serviceObjectLinkBuilderMapEntry<ScriptRef>(
         controller: controller,
         key: 'Script',

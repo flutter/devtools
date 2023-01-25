@@ -134,31 +134,9 @@ class _InstanceViewer extends StatelessWidget {
           key: 'Object Class',
           object: instance.obj.classRef!,
         ),
-        selectableTextBuilderMapEntry(
-          'Shallow Size',
-          prettyPrintBytes(
-            instance.obj.size ?? 0,
-            includeUnit: true,
-            kbFractionDigits: 1,
-            maxBytes: 512,
-          ),
-        ),
-        MapEntry(
-          'Reachable Size',
-          (context) => RequestableSizeWidget(
-            fetching: instance.fetchingReachableSize,
-            sizeProvider: () => instance.reachableSize,
-            requestFunction: instance.requestReachableSize,
-          ),
-        ),
-        MapEntry(
-          'Retained Size',
-          (context) => RequestableSizeWidget(
-            fetching: instance.fetchingRetainedSize,
-            sizeProvider: () => instance.retainedSize,
-            requestFunction: instance.requestRetainedSize,
-          ),
-        ),
+        shallowSizeRowBuilder(instance),
+        reachableSizeRowBuilder(instance),
+        retainedSizeRowBuilder(instance),
       ],
     );
   }
@@ -179,11 +157,6 @@ class DisplayProvider extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-
-    // TODO(devoncarew): Here, we want to wait until the tooltip wants to show,
-    // then call toString() on variable and render the result in a tooltip. We
-    // should also include the type of the value in the tooltip if the variable
-    // is not null.
     if (variable.text != null) {
       return SelectableText.rich(
         TextSpan(
