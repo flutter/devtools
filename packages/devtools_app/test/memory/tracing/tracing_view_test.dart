@@ -5,22 +5,12 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:devtools_app/src/screens/memory/memory_controller.dart';
-import 'package:devtools_app/src/screens/memory/memory_screen.dart';
+import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/memory/memory_tabs.dart';
 import 'package:devtools_app/src/screens/memory/panes/tracing/tracing_pane_controller.dart';
 import 'package:devtools_app/src/screens/memory/panes/tracing/tracing_tree.dart';
 import 'package:devtools_app/src/screens/memory/panes/tracing/tracing_view.dart';
-import 'package:devtools_app/src/screens/profiler/cpu_profile_model.dart';
-import 'package:devtools_app/src/service/service_manager.dart';
-import 'package:devtools_app/src/shared/common_widgets.dart';
-import 'package:devtools_app/src/shared/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/shared/config_specific/import_export/import_export.dart';
-import 'package:devtools_app/src/shared/globals.dart';
-import 'package:devtools_app/src/shared/notifications.dart';
-import 'package:devtools_app/src/shared/preferences.dart';
-import 'package:devtools_app/src/shared/primitives/trees.dart';
-import 'package:devtools_app/src/shared/scripts/script_manager.dart';
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
@@ -108,6 +98,7 @@ void main() {
     });
 
     setUp(() {
+      setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
       setGlobal(NotificationService, NotificationService());
       setGlobal(OfflineModeController, OfflineModeController());
       setGlobal(IdeTheme, IdeTheme());

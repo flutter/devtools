@@ -47,6 +47,7 @@ void main() {
     when(app.isProfileBuildNow).thenReturn(true);
     when(app.isDartWebApp).thenAnswer((_) async => false);
     when(app.isProfileBuild).thenAnswer((_) async => false);
+    setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
     setGlobal(ServiceConnectionManager, fakeServiceManager);
     setGlobal(NotificationService, NotificationService());
     setGlobal(OfflineModeController, OfflineModeController());

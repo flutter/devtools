@@ -3,15 +3,11 @@
 // found in the LICENSE file.
 
 @TestOn('vm')
-import 'package:devtools_app/src/screens/debugger/breakpoint_manager.dart';
+import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/provider/instance_viewer/instance_details.dart';
 import 'package:devtools_app/src/screens/provider/instance_viewer/instance_providers.dart';
 import 'package:devtools_app/src/screens/provider/provider_nodes.dart';
-import 'package:devtools_app/src/shared/config_specific/ide_theme/ide_theme.dart';
-import 'package:devtools_app/src/shared/console/eval/eval_service.dart';
 import 'package:devtools_app/src/shared/eval_on_dart_library.dart';
-import 'package:devtools_app/src/shared/globals.dart';
-import 'package:devtools_app/src/shared/primitives/storage.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -32,6 +28,7 @@ void main() async {
   late Disposable isAlive;
 
   setUp(() async {
+    setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
     setGlobal(IdeTheme, getIdeTheme());
     setGlobal(BreakpointManager, BreakpointManager());
     setGlobal(Storage, FlutterTestStorage());
