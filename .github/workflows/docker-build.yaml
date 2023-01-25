@@ -20,3 +20,6 @@ jobs:
       - name: Build Devtools Image
         run: |
           docker build --tag devtools:TEST .
+      - name: Main
+        run: |
+          docker run devtools:TEST --entrypoint="cd packages/devtools_app; flutter test test/"
