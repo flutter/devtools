@@ -75,7 +75,5 @@ class RasterStatsController extends PerformanceFeatureController {
   }
 
   @override
-  Future<void> onBecomingActive() {
-    return Future.value();
-  }
+  void onBecomingActive() {}
 }
