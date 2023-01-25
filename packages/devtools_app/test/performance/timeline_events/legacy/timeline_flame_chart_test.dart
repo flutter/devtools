@@ -50,15 +50,12 @@ void main() {
     Future<void> pumpPerformanceScreenBody(
       WidgetTester tester, {
       PerformanceController? performanceController,
-      bool runAsync = false,
     }) async {
       controller = performanceController ?? PerformanceController();
 
-      if (runAsync) {
-        // Await a small delay to allow the PerformanceController to complete
-        // initialization.
-        await Future.delayed(const Duration(seconds: 1));
-      }
+      // Await a small delay to allow the PerformanceController to complete
+      // initialization.
+      await Future.delayed(const Duration(seconds: 1));
 
       await tester.pumpWidget(
         wrapWithControllers(
@@ -66,7 +63,7 @@ void main() {
           performance: controller,
         ),
       );
-      await tester.pumpAndSettle();
+      await tester.pump();
 
       // Ensure the Timeline Events tab is selected.
       final timelineEventsTabFinder = find.text('Timeline Events');
@@ -82,7 +79,6 @@ void main() {
       await tester.runAsync(() async {
         _setUpServiceManagerWithTimeline({});
         await pumpPerformanceScreenBody(tester);
-        await tester.pumpAndSettle();
         expect(find.byType(RefreshTimelineEventsButton), findsOneWidget);
         expect(find.byKey(timelineSearchFieldKey), findsOneWidget);
         expect(find.byType(FlameChartHelpButton), findsOneWidget);
@@ -94,7 +90,6 @@ void main() {
       await tester.runAsync(() async {
         _setUpServiceManagerWithTimeline({});
         await pumpPerformanceScreenBody(tester);
-        await tester.pumpAndSettle();
 
         final helpButtonFinder = find.byType(FlameChartHelpButton);
         expect(helpButtonFinder, findsOneWidget);
@@ -107,7 +102,7 @@ void main() {
     testWidgetsWithWindowSize('builds flame chart with data', windowSize,
         (WidgetTester tester) async {
       await tester.runAsync(() async {
-        await pumpPerformanceScreenBody(tester, runAsync: true);
+        await pumpPerformanceScreenBody(tester);
         expect(
           find.byKey(TimelineEventsView.emptyTimelineKey),
           findsNothing,
@@ -128,8 +123,7 @@ void main() {
         (WidgetTester tester) async {
       await tester.runAsync(() async {
         _setUpServiceManagerWithTimeline({});
-        await pumpPerformanceScreenBody(tester, runAsync: true);
-        await tester.pumpAndSettle();
+        await pumpPerformanceScreenBody(tester);
         expect(
           find.byKey(TimelineEventsView.emptyTimelineKey),
           findsOneWidget,
@@ -146,7 +140,7 @@ void main() {
       windowSize,
       (WidgetTester tester) async {
         await tester.runAsync(() async {
-          await pumpPerformanceScreenBody(tester, runAsync: true);
+          await pumpPerformanceScreenBody(tester);
           controller
             ..flutterFramesController.addFrame(testFrame1.shallowCopy())
             ..timelineEventsController.addTimelineEvent(goldenUiTimelineEvent)

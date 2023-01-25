@@ -54,7 +54,7 @@ void main() {
       when(mockPerformanceController.data).thenReturn(data);
       when(mockPerformanceController.clearData()).thenAnswer((_) async {
         data.clear();
-        timelineEventsController.clearData();
+        await timelineEventsController.clearData();
       });
       processor = timelineEventsController.legacyController.processor
         ..primeThreadIds(

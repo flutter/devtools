@@ -8,6 +8,7 @@
 
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -174,6 +175,19 @@ mixin ProvidedControllerMixin<T, V extends StatefulWidget> on State<V> {
     if (newController == _controller) return false;
     _controller = newController;
     return true;
+  }
+}
+
+mixin OfflineScreenControllerMixin<T> {
+  ValueListenable<bool> get loadingOfflineData => _loadingOfflineData;
+  final _loadingOfflineData = ValueNotifier<bool>(false);
+
+  FutureOr<void> processOfflineData(T offlineData);
+
+  Future<void> loadOfflineData(T offlineData) async {
+    _loadingOfflineData.value = true;
+    await processOfflineData(offlineData);
+    _loadingOfflineData.value = false;
   }
 }
 

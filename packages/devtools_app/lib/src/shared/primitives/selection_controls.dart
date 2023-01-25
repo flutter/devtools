@@ -12,10 +12,10 @@ import 'package:flutter/material.dart' hide Stack;
 /// Android Material styled text selection controls.
 class VariableSelectionControls extends MaterialTextSelectionControls {
   VariableSelectionControls({
-    required this.handleInspect,
+    required this.onInspect,
   });
 
-  final void Function(TextSelectionDelegate delegate)? handleInspect;
+  final void Function(TextSelectionDelegate delegate)? onInspect;
 
   /// Builder for material-style copy/paste text selection toolbar with added
   /// Dart DevTools specific functionality.
@@ -43,8 +43,7 @@ class VariableSelectionControls extends MaterialTextSelectionControls {
           canPaste(delegate) ? () => unawaited(handlePaste(delegate)) : null,
       handleSelectAll:
           canSelectAll(delegate) ? () => handleSelectAll(delegate) : null,
-      handleInspect:
-          handleInspect != null ? () => handleInspect!(delegate) : null,
+      handleInspect: onInspect != null ? () => onInspect!(delegate) : null,
     );
   }
 }

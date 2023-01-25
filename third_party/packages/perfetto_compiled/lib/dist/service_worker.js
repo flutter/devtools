@@ -492,8 +492,8 @@ function installAppVersionIntoCache(version) {
             console.log(LOG_TAG + 'installation completed for ' + version);
         }
         catch (err) {
-            yield caches.delete(CACHE_NAME);
             console.error(LOG_TAG + `Installation failed for ${manifestUrl}`, err);
+            yield caches.delete(CACHE_NAME);
             throw err;
         }
     });
