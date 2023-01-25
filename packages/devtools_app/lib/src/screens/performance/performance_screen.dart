@@ -95,29 +95,35 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
 
   @override
   Widget build(BuildContext context) {
-    if (controller.loadingOfflineData.value) {
-      return Container(
-        color: Theme.of(context).scaffoldBackgroundColor,
-        child: const CenteredCircularProgressIndicator(),
-      );
-    }
+    return FutureBuilder(
+      future: controller.initialized,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState != ConnectionState.done ||
+            controller.loadingOfflineData.value) {
+          return Container(
+            color: Theme.of(context).scaffoldBackgroundColor,
+            child: const CenteredCircularProgressIndicator(),
+          );
+        }
 
-    final offlineMode = offlineController.offlineMode.value;
-    final isOfflineFlutterApp = offlineMode &&
-        controller.offlinePerformanceData != null &&
-        controller.offlinePerformanceData!.frames.isNotEmpty;
-    return Column(
-      children: [
-        if (!offlineMode) _buildPerformanceControls(),
-        const SizedBox(height: denseRowSpacing),
-        if (isOfflineFlutterApp ||
-            (!offlineMode && serviceManager.connectedApp!.isFlutterAppNow!))
-          FlutterFramesChart(
-            controller.flutterFramesController,
-            offlineMode: offlineMode,
-          ),
-        const Expanded(child: TabbedPerformanceView()),
-      ],
+        final offlineMode = offlineController.offlineMode.value;
+        final isOfflineFlutterApp = offlineMode &&
+            controller.offlinePerformanceData != null &&
+            controller.offlinePerformanceData!.frames.isNotEmpty;
+        return Column(
+          children: [
+            if (!offlineMode) _buildPerformanceControls(),
+            const SizedBox(height: denseRowSpacing),
+            if (isOfflineFlutterApp ||
+                (!offlineMode && serviceManager.connectedApp!.isFlutterAppNow!))
+              FlutterFramesChart(
+                controller.flutterFramesController,
+                offlineMode: offlineMode,
+              ),
+            const Expanded(child: TabbedPerformanceView()),
+          ],
+        );
+      },
     );
   }
 
