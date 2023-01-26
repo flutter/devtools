@@ -848,7 +848,13 @@ class VmServiceWrapper implements VmService {
     assert(await isHttpProfilingAvailable(isolateId));
     return trackFuture(
       'getHttpProfileRequest',
-      _vmService.getHttpProfileRequest(isolateId, id),
+      _vmService.callMethod(
+        'getHttpProfileRequest',
+        isolateId: isolateId,
+        args: <String, dynamic>{
+          'id': id,
+        },
+      ).then((r) => r as HttpProfileRequest),
     );
   }
 

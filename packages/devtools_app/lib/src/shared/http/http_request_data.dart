@@ -61,10 +61,10 @@ class DartIOHttpRequestData extends NetworkRequest {
     return serviceManager.service!
         .getHttpProfileRequest(
           _request.isolateId,
-          _request.id,
+          _request.id.toString(),
         )
         .then((updated) => _request = updated);
-  }
+    }
 
   static List<Cookie> _parseCookies(List<String>? cookies) {
     if (cookies == null) return [];
@@ -72,7 +72,7 @@ class DartIOHttpRequestData extends NetworkRequest {
   }
 
   @override
-  String get id => _request.id;
+  String get id => _request.id.toString();
 
   bool get _hasError => _request.request?.hasError ?? false;
 
