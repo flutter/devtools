@@ -137,7 +137,7 @@ mixin Sealable {
   bool _isSealed = false;
 }
 
-/// Successors and predeccessors for a heap instance, to
+/// Successors and predecessors for a heap instance, to
 /// browse in console.
 class HeapObjectGraph {
   //TODO(polina-c): add needed fields
