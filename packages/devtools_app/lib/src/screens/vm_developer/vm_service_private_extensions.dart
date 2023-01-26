@@ -5,6 +5,7 @@
 import 'package:vm_service/vm_service.dart';
 
 import '../../shared/globals.dart';
+import '../memory/panes/profile/profile_view.dart';
 
 /// NOTE: this file contains extensions to classes provided by
 /// `package:vm_service` in order to expose VM internal fields in a controlled
@@ -89,6 +90,67 @@ extension ClassHeapStatsPrivateViewExtension on ClassHeapStats {
   HeapStats get oldSpace => json!.containsKey(_oldSpaceKey)
       ? HeapStats.parse(json![_oldSpaceKey].cast<int>())
       : const HeapStats.empty();
+}
+
+class GCStats {
+  GCStats({
+    required this.heap,
+    required this.usage,
+    required this.capacity,
+    required this.collections,
+    required this.averageCollectionTime,
+  });
+
+  GCStats.parse({required this.heap, required Map<String, dynamic> json})
+      : usage = json[usedKey],
+        capacity = json[capacityKey],
+        collections = json[collectionsKey] {
+    averageCollectionTime = json[timeKey] * 1000 / collections;
+  }
+
+  static const usedKey = 'used';
+  static const capacityKey = 'capacity';
+  static const collectionsKey = 'collections';
+  static const timeKey = 'time';
+
+  final String heap;
+  final int usage;
+  final int capacity;
+  final int collections;
+  late final double averageCollectionTime;
+}
+
+extension AllocationProfilePrivateViewExtension on AllocationProfile {
+  static const heapsKey = '_heaps';
+  static const newSpaceKey = 'new';
+  static const oldSpaceKey = 'old';
+
+  GCStats get newSpaceGCStats => GCStats.parse(
+        heap: HeapGeneration.newSpace.toString(),
+        json: json![heapsKey][newSpaceKey],
+      );
+
+  GCStats get oldSpaceGCStats => GCStats.parse(
+        heap: HeapGeneration.oldSpace.toString(),
+        json: json![heapsKey][oldSpaceKey],
+      );
+
+  GCStats get totalGCStats {
+    final newSpace = newSpaceGCStats;
+    final oldSpace = oldSpaceGCStats;
+    final collections = newSpace.collections + oldSpace.collections;
+    final averageCollectionTime =
+        ((newSpace.collections * newSpace.averageCollectionTime) +
+                (oldSpace.collections * oldSpace.averageCollectionTime)) /
+            collections;
+    return GCStats(
+      heap: HeapGeneration.total.toString(),
+      usage: newSpace.usage + oldSpace.usage,
+      capacity: newSpace.capacity + oldSpace.capacity,
+      collections: collections,
+      averageCollectionTime: averageCollectionTime,
+    );
+  }
 }
 
 /// An extension on [ObjRef] which allows for access to VM internal fields.
