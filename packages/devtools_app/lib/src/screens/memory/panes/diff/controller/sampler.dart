@@ -49,8 +49,7 @@ class HeapClassSampler extends ClassSampler {
     ) as InstanceRef?;
 
     if (instanceRef == null) {
-      serviceManager.consoleService
-          .appendStdio('the instance cannot be selected');
+      serviceManager.consoleService.appendStdio('Unable to select instance.');
       return;
     }
 
