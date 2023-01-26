@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 
 import '../../shared/analytics/constants.dart' as gac;
@@ -102,17 +103,31 @@ class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
       featureControllers.add(record.featureController);
     }
 
+    // If there is not an active feature, activate the first.
+    if (featureControllers.firstWhereOrNull(
+          (controller) => controller?.isActiveFeature ?? false,
+        ) ==
+        null) {
+      _setActiveFeature(0, featureControllers[0]);
+    }
+
     return AnalyticsTabbedView(
       tabs: tabs,
       tabViews: tabViews,
       initialSelectedIndex: controller.selectedFeatureTabIndex,
       gaScreen: gac.performance,
       onTabChanged: (int index) {
-        controller.selectedFeatureTabIndex = index;
-        final featureController = featureControllers[index];
-        unawaited(controller.setActiveFeature(featureController));
+        _setActiveFeature(index, featureControllers[index]);
       },
     );
+  }
+
+  void _setActiveFeature(
+    int index,
+    PerformanceFeatureController? featureController,
+  ) {
+    controller.selectedFeatureTabIndex = index;
+    unawaited(controller.setActiveFeature(featureController));
   }
 
   _PerformanceTabRecord _frameAnalysisRecord() {
@@ -265,12 +280,19 @@ class RefreshTimelineEventsButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return DevToolsIconButton(
-      iconData: Icons.refresh,
-      onPressed: controller.processAllTraceEvents,
-      tooltip: 'Refresh timeline events',
-      gaScreen: gac.performance,
-      gaSelection: gac.refreshTimelineEvents,
+    return ValueListenableBuilder<EventsControllerStatus>(
+      valueListenable: controller.status,
+      builder: (context, status, _) {
+        return DevToolsIconButton(
+          iconData: Icons.refresh,
+          onPressed: status == EventsControllerStatus.processing
+              ? null
+              : controller.processAllTraceEvents,
+          tooltip: 'Refresh timeline events',
+          gaScreen: gac.performance,
+          gaSelection: gac.refreshTimelineEvents,
+        );
+      },
     );
   }
 }

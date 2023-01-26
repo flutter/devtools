@@ -174,6 +174,7 @@ class ProgramExplorerController extends DisposableController
     _scriptSelection = null;
     _outlineNodes.clear();
     _outlineSelection = null;
+    rootObjectNodesInternal.notifyListeners();
   }
 
   void clearOutlineSelection() {
@@ -352,10 +353,6 @@ class ProgramExplorerController extends DisposableController
       targetScript = ownerFunction?.location?.script;
     } else if (object is ScriptRef) {
       targetScript = object;
-    } else if (object is InstanceRef) {
-      // Since instances are not currently supported, it will search for
-      // the node of the class it belongs to.
-      targetScript = object.classRef?.location?.script;
     }
     if (targetScript == null) {
       throw StateError('Could not find script');

@@ -41,7 +41,7 @@ void main() {
 
     testWidgetsWithWindowSize('records and deletes snapshots', windowSize,
         (WidgetTester tester) async {
-      final snapshots = scene.controller.diffPaneController.core.snapshots;
+      final snapshots = scene.controller.controllers.diff.core.snapshots;
       // Check the list contains only documentation item.
       expect(snapshots.value.length, equals(1));
       await pumpScene(tester);

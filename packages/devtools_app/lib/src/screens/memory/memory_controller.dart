@@ -40,6 +40,34 @@ class OfflineFileException implements Exception {
   String toString() => message;
 }
 
+class MemoryFeatureControllers {
+  /// [diffPaneController] is passed for testability.
+  MemoryFeatureControllers(DiffPaneController? diffPaneController) {
+    diff = diffPaneController ?? DiffPaneController(SnapshotTaker());
+  }
+
+  late DiffPaneController diff;
+  ProfilePaneController profile = ProfilePaneController();
+  TracingPaneController tracing = TracingPaneController();
+
+  void reset() {
+    diff.dispose();
+    diff = DiffPaneController(SnapshotTaker());
+
+    profile.dispose();
+    profile = ProfilePaneController();
+
+    tracing.dispose();
+    tracing = TracingPaneController();
+  }
+
+  void dispose() {
+    tracing.dispose();
+    diff.dispose();
+    profile.dispose();
+  }
+}
+
 /// This class contains the business logic for [memory.dart].
 ///
 /// This class must not have direct dependencies on dart:html. This allows tests
@@ -49,8 +77,8 @@ class MemoryController extends DisposableController
   MemoryController({DiffPaneController? diffPaneController}) {
     memoryTimeline = MemoryTimeline(offline);
     memoryLog = _MemoryLog(this);
-    this.diffPaneController =
-        diffPaneController ?? DiffPaneController(SnapshotTaker());
+
+    controllers = MemoryFeatureControllers(diffPaneController);
 
     // Update the chart when the memorySource changes.
     addAutoDisposeListener(memorySourceNotifier, () async {
@@ -66,12 +94,8 @@ class MemoryController extends DisposableController
     });
   }
 
-  /// The controller is late to enable test injection.
-  late final DiffPaneController diffPaneController;
-
-  final profilePaneController = ProfilePaneController();
-
-  final tracingPaneController = TracingPaneController();
+  /// Sub-controllers of memory controller.
+  late final MemoryFeatureControllers controllers;
 
   /// Index of the selected feature tab.
   ///
@@ -218,6 +242,7 @@ class MemoryController extends DisposableController
 
   void _handleConnectionStart(ServiceConnectionManager serviceManager) {
     _refreshShouldShowLeaksTab();
+
     if (_memoryTracker == null) {
       _memoryTracker = MemoryTracker(this);
       _memoryTracker!.start();
@@ -304,6 +329,7 @@ class MemoryController extends DisposableController
     _memoryTracker?.stop();
     _memoryTrackerController.add(_memoryTracker);
 
+    controllers.reset();
     _disconnectController.add(null);
     hasStopped = true;
   }
@@ -375,6 +401,7 @@ class MemoryController extends DisposableController
     unawaited(_disconnectController.close());
     unawaited(_memoryTrackerController.close());
     _memoryTracker?.dispose();
+    controllers.dispose();
   }
 }
 

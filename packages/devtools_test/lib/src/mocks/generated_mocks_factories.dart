@@ -21,6 +21,7 @@ MockPerformanceController createMockPerformanceControllerWithDefaults() {
       .thenReturn(EnhanceTracingController());
   when(controller.offlinePerformanceData).thenReturn(null);
   when(controller.selectedFeatureTabIndex).thenReturn(0);
+  when(controller.initialized).thenAnswer((_) => Future.value());
 
   // Stubs for Flutter Frames feature.
   when(controller.flutterFramesController).thenReturn(flutterFramesController);

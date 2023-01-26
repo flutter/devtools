@@ -6,7 +6,9 @@ import 'package:devtools_app/src/screens/memory/memory_screen.dart';
 import 'package:devtools_app/src/screens/memory/memory_tabs.dart';
 import 'package:devtools_app/src/screens/memory/panes/profile/model.dart';
 import 'package:devtools_app/src/screens/memory/panes/profile/profile_pane_controller.dart';
+import 'package:devtools_app/src/screens/vm_developer/vm_service_private_extensions.dart';
 import 'package:devtools_app/src/shared/globals.dart';
+import 'package:devtools_app/src/shared/primitives/utils.dart';
 import 'package:devtools_app/src/shared/table/table.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
@@ -30,7 +32,7 @@ void main() {
   }
 
   // Set a wide enough screen width that we do not run into overflow.
-  const windowSize = Size(2225.0, 1000.0);
+  const windowSize = Size(2225.0, 1200.0);
   //setGlobal(NotificationService, NotificationService());
 
   group('Allocation Profile Table', () {
@@ -62,7 +64,7 @@ void main() {
         await pumpMemoryScreen(tester);
 
         final allocationProfileController =
-            scene.controller.profilePaneController;
+            scene.controller.controllers.profile;
 
         preferences.toggleVmDeveloperMode(false);
         await navigateToAllocationProfile(tester, allocationProfileController);
@@ -76,8 +78,13 @@ void main() {
         expect(find.text('External'), findsOneWidget);
         expect(find.text('Old Space'), findsNothing);
         expect(find.text('New Space'), findsNothing);
+        expect(find.text('Usage'), findsNothing);
+        expect(find.text('Capacity'), findsNothing);
+        expect(find.text('Collections'), findsNothing);
+        expect(find.text('Latency'), findsNothing);
 
-        // Enable VM Developer Mode to display new/old space column groups.
+        // Enable VM Developer Mode to display new/old space column groups as
+        // well as GC statistics.
         preferences.toggleVmDeveloperMode(true);
         await tester.pumpAndSettle();
 
@@ -90,6 +97,63 @@ void main() {
         expect(find.text('Total'), findsOneWidget);
         expect(find.text('Old Space'), findsOneWidget);
         expect(find.text('New Space'), findsOneWidget);
+        expect(find.text('Usage'), findsNWidgets(3));
+        expect(find.text('Capacity'), findsNWidgets(3));
+        expect(find.text('Collections'), findsNWidgets(3));
+        expect(find.text('Latency'), findsNWidgets(3));
+        final currentProfile =
+            allocationProfileController.currentAllocationProfile.value!;
+
+        void checkGCStats(GCStats stats) {
+          // Usage
+          expect(
+            find.text(
+              prettyPrintBytes(
+                stats.usage,
+                includeUnit: true,
+              )!,
+              findRichText: true,
+            ),
+            findsOneWidget,
+          );
+
+          // Capacity
+          expect(
+            find.text(
+              prettyPrintBytes(
+                stats.capacity,
+                includeUnit: true,
+              )!,
+              findRichText: true,
+            ),
+            findsOneWidget,
+          );
+
+          // Average collection time
+          expect(
+            find.text(
+              msText(
+                Duration(milliseconds: stats.averageCollectionTime.toInt()),
+                fractionDigits: 2,
+              ),
+              findRichText: true,
+            ),
+            findsOneWidget,
+          );
+
+          // # of collections
+          expect(
+            find.text(
+              stats.collections.toString(),
+              findRichText: true,
+            ),
+            findsOneWidget,
+          );
+        }
+
+        checkGCStats(currentProfile.newSpaceGCStats);
+        checkGCStats(currentProfile.oldSpaceGCStats);
+        checkGCStats(currentProfile.totalGCStats);
       },
     );
 
@@ -100,7 +164,7 @@ void main() {
         await pumpMemoryScreen(tester);
 
         final allocationProfileController =
-            scene.controller.profilePaneController;
+            scene.controller.controllers.profile;
         await navigateToAllocationProfile(tester, allocationProfileController);
 
         // We'll clear it for now so we can tell when it's refreshed.
@@ -130,7 +194,7 @@ void main() {
         await pumpMemoryScreen(tester);
 
         final allocationProfileController =
-            scene.controller.profilePaneController;
+            scene.controller.controllers.profile;
 
         await navigateToAllocationProfile(tester, allocationProfileController);
 

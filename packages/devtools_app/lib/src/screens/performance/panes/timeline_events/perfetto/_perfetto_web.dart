@@ -39,7 +39,11 @@ class _PerfettoState extends State<Perfetto> with AutoDisposeMixin {
     _perfettoController = widget.perfettoController as PerfettoControllerImpl;
     _viewController = _PerfettoViewController(_perfettoController)..init();
 
-    _loadActiveTrace();
+    // If [_perfettoController.activeTraceEvents] has a null value, the trace
+    // data has not yet been initialized.
+    if (_perfettoController.activeTraceEvents.value != null) {
+      _loadActiveTrace();
+    }
     addAutoDisposeListener(
       _perfettoController.activeTraceEvents,
       _loadActiveTrace,
@@ -53,7 +57,8 @@ class _PerfettoState extends State<Perfetto> with AutoDisposeMixin {
   }
 
   void _loadActiveTrace() {
-    _viewController._loadTrace(_perfettoController.activeTraceEvents.value);
+    assert(_perfettoController.activeTraceEvents.value != null);
+    _viewController._loadTrace(_perfettoController.activeTraceEvents.value!);
   }
 
   void _scrollToActiveTimeRange() {

@@ -6,21 +6,24 @@ import 'dart:async';
 
 import 'package:flutter/material.dart' hide Stack;
 
-import '../../../shared/object_tree.dart';
 import '../../../shared/primitives/listenable.dart';
 import '../../../shared/tree.dart';
+import '../../diagnostics/dart_object_node.dart';
+import '../../diagnostics/tree_builder.dart';
 import 'display_provider.dart';
 
 class ExpandableVariable extends StatelessWidget {
   const ExpandableVariable({
     Key? key,
     this.variable,
+    this.dataDisplayProvider,
   }) : super(key: key);
 
   @visibleForTesting
   static const emptyExpandableVariableKey = Key('empty expandable variable');
 
   final DartObjectNode? variable;
+  final Widget Function(DartObjectNode, void Function())? dataDisplayProvider;
 
   @override
   Widget build(BuildContext context) {
@@ -33,10 +36,11 @@ class ExpandableVariable extends StatelessWidget {
       dataRootsListenable:
           FixedValueListenable<List<DartObjectNode>>([variable]),
       shrinkWrap: true,
-      dataDisplayProvider: (variable, onPressed) => DisplayProvider(
-        variable: variable,
-        onTap: onPressed,
-      ),
+      dataDisplayProvider: dataDisplayProvider ??
+          (variable, onPressed) => DisplayProvider(
+                variable: variable,
+                onTap: onPressed,
+              ),
       onItemSelected: onItemPressed,
     );
   }
