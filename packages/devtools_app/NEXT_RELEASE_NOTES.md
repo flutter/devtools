@@ -35,7 +35,7 @@ TODO: Remove this section if there are not any general updates.
 * Added support for viewing profiler hits in the debugger script viewer - [#4831](https://github.com/flutter/devtools/pull/4831)
 
 ## Network profiler updates
-* Fix bug in network inspector where requests don't show up because of integer overflows. - [#5105](https://github.com/flutter/devtools/pull/5105)
+TODO: Remove this section if there are not any general updates.
 
 ## Logging updates
 TODO: Remove this section if there are not any general updates.
