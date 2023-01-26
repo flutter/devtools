@@ -142,27 +142,17 @@ void addChildReferences(
       ]);
       break;
     case RefNodeType.staticRefRoot:
-      final selection = ref.heapSelection;
-      if (selection == null) {
-        variable.addChild(
-          DartObjectNode.text(
-            'To get static values and retained size\n'
-            'save an instance to console from\n'
-            'heap snapshot on memory screen.',
-          ),
-        );
-      } else {
-        variable.addAllChildren([
-          DartObjectNode.references(
-            'inbound',
-            ObjectReferences.withType(ref, RefNodeType.staticInRefs),
-          ),
-          DartObjectNode.references(
-            'outbound',
-            ObjectReferences.withType(ref, RefNodeType.staticOutRefs),
-          ),
-        ]);
-      }
+      variable.addAllChildren([
+        DartObjectNode.references(
+          'inbound',
+          ObjectReferences.withType(ref, RefNodeType.staticInRefs),
+        ),
+        DartObjectNode.references(
+          'outbound',
+          ObjectReferences.withType(ref, RefNodeType.staticOutRefs),
+        ),
+      ]);
+
       break;
     case RefNodeType.staticInRefs:
       variable.addChild(
@@ -174,19 +164,13 @@ void addChildReferences(
       );
       break;
     case RefNodeType.staticOutRefs:
-      variable.addChild(
-        DartObjectNode.references(
-          // Temporary placeholder
-          '<static inbound refs>',
-          ObjectReferences.withType(ref, RefNodeType.staticOutRefs),
-        ),
-      );
-
       final children = ref.heapSelection!
           .outboundReferences()
           .map(
             (s) => DartObjectNode.references(
-              'child',
+              '${s.object.heapClass.className}, ${prettyPrintRetainedSize(
+                s.object.retainedSize,
+              )}',
               ObjectReferences(
                 refNodeType: RefNodeType.staticOutRefs,
                 heapSelection: s,
@@ -196,27 +180,6 @@ void addChildReferences(
           .toList();
       variable.addAllChildren(children);
 
-      // for (final i in ref.detectHeapObject()!.references) {
-      //   final child = heap.objects[i];
-      //   variable.addChild(
-      //     DartObjectNode.references(
-      //       RefNodeType.staticOutRefs,
-      //       '${child.heapClass.className} ${prettyPrintBytes(
-      //         child.retainedSize,
-      //         includeUnit: true,
-      //       )}',
-      //       ObjectReferences(
-      //         refNodeType: RefNodeType.staticOutRefs,
-      //         heap: heap,
-      //         heapObject: child,
-
-      //         /// ???
-      //         // isolateRef: ref.isolateRef,
-      //         // value: ref.value,
-      //       ),
-      //     ),
-      //   );
-      // }
       break;
     case RefNodeType.liveRefRoot:
       variable.addAllChildren([
@@ -258,10 +221,7 @@ Future<void> _addInstanceRefItems(
   IsolateRef? isolateRef,
 ) async {
   final ref = variable.ref;
-  if (ref is ObjectReferences) {
-    addChildReferences(variable);
-    return;
-  }
+  assert(ref is! ObjectReferences);
 
   final existingNames = <String>{};
   for (var child in variable.children) {
@@ -500,6 +460,8 @@ Future<void> buildVariablesTree(
   try {
     if (variable.childCount > DartObjectNode.MAX_CHILDREN_IN_GROUPING) {
       _setupGrouping(variable);
+    } else if (ref is ObjectReferences) {
+      addChildReferences(variable);
     } else if (instanceRef != null && serviceManager.service != null) {
       await _addInstanceRefItems(variable, instanceRef, isolateRef);
     } else if (variable.value != null) {

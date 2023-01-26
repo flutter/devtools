@@ -52,6 +52,13 @@ final NumberFormat nf = NumberFormat.decimalPattern();
 
 String percent2(double d) => '${(d * 100).toStringAsFixed(2)}%';
 
+/// Unifies printing of retained size to avoid confusion related to different rounding.
+String? prettyPrintRetainedSize(int? bites) => prettyPrintBytes(
+      bites,
+      includeUnit: true,
+      kbFractionDigits: 1,
+    );
+
 String? prettyPrintBytes(
   num? bytes, {
   int kbFractionDigits = 0,

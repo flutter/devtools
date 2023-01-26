@@ -27,6 +27,8 @@ class HeapObjectSelection {
   List<HeapObjectSelection> outboundReferences() => object.references
       .map((i) => HeapObjectSelection(heap, heap.objects[i]))
       .toList();
+
+  int get countOfOutboundReferences => object.references.length;
 }
 
 /// Contains information from [HeapSnapshotGraph],
