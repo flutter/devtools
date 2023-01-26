@@ -228,7 +228,7 @@ class DevToolsRouterDelegate extends RouterDelegate<DevToolsRouteConfiguration>
   ///
   /// Existing arguments (for example &uri=) will be preserved unless
   /// overwritten by [argUpdates].
-  void updateArgsIfNotCurrent(Map<String, String> argUpdates) {
+  void updateArgsIfChanged(Map<String, String> argUpdates) {
     final argsChanged = _changesArgs(argUpdates);
     if (!argsChanged) {
       return;
@@ -275,7 +275,7 @@ class DevToolsRouterDelegate extends RouterDelegate<DevToolsRouteConfiguration>
   /// Updates state for the current page.
   ///
   /// Existing state will be preserved unless overwritten by [stateUpdate].
-  void updateStateIfNotCurrent(
+  void updateStateIfChanged(
     DevToolsNavigationState stateUpdate,
   ) {
     final stateChanged = _changesState(stateUpdate);
@@ -348,7 +348,7 @@ class DevToolsNavigationState {
   /// Creates a new [DevToolsNavigationState] by merging this instance with
   /// [other].
   ///
-  /// State contained in [other] will take presidence over state contained in
+  /// State contained in [other] will take precedence over state contained in
   /// this instance (e.g., if both instances have state with the same key, the
   /// state in [other] will be used).
   DevToolsNavigationState merge(DevToolsNavigationState other) {

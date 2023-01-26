@@ -119,7 +119,7 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
     SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
       if (!_shownFirstScript) return;
       final routerDelegate = DevToolsRouterDelegate.of(context);
-      routerDelegate.updateStateIfNotCurrent(
+      routerDelegate.updateStateIfChanged(
         CodeViewSourceLocationNavigationState(
           script: controller.codeViewController.currentScriptRef.value!,
           line: 0,
@@ -218,7 +218,7 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
     if (node != null && location != null) {
       final routerDelegate = DevToolsRouterDelegate.of(context);
       Router.navigate(context, () {
-        routerDelegate.updateStateIfNotCurrent(
+        routerDelegate.updateStateIfChanged(
           CodeViewSourceLocationNavigationState(
             script: location.scriptRef,
             line: location.location?.line ?? -1,
