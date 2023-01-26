@@ -168,10 +168,8 @@ class _SizeColumn extends ColumnData<DiffClassStats> {
   }
 
   @override
-  String getDisplayValue(DiffClassStats classStats) => prettyPrintBytes(
+  String getDisplayValue(DiffClassStats classStats) => prettyPrintRetainedSize(
         getValue(classStats),
-        includeUnit: true,
-        kbFractionDigits: 1,
       )!;
 
   @override

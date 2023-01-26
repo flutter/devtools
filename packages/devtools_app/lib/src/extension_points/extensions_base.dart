@@ -16,4 +16,6 @@ abstract class DevToolsExtensionPoints {
   String loadingAppSizeDataMessage();
 
   InspectorServiceBase? inspectorServiceProvider();
+
+  bool get defaultIsDarkTheme;
 }

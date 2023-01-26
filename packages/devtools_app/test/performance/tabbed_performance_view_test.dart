@@ -52,6 +52,7 @@ void main() {
   group('TabbedPerformanceView', () {
     setUp(() async {
       await _setUpServiceManagerWithTimeline(testTimelineJson);
+      setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
       setGlobal(IdeTheme, IdeTheme());
       setGlobal(PreferencesController, PreferencesController());
       setGlobal(NotificationService, NotificationService());

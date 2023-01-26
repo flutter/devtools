@@ -87,8 +87,4 @@ class _StoreAsVariableMenu extends StatelessWidget {
 
 List<Widget> _menu(ClassSampler sampleObtainer) => [
       _StoreAsVariableMenu(sampleObtainer),
-      MenuItemButton(
-        onPressed: sampleObtainer.instanceGraphToConsole,
-        child: const Text('Browse references for a single instance in console'),
-      ),
     ];
