@@ -27,6 +27,9 @@ import '../../../simple_trace_example.dart';
 import '../../flutter_frames/flutter_frame_model.dart';
 import 'legacy_event_processor.dart';
 
+/// Debugging flag to load sample trace events from [simple_trace_example.dart].
+bool debugSimpleTrace = false;
+
 class LegacyTimelineEventsController with SearchControllerMixin<TimelineEvent> {
   LegacyTimelineEventsController(this.performanceController) {
     processor = LegacyEventProcessor(performanceController);

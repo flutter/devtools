@@ -23,9 +23,6 @@ import 'legacy/legacy_events_controller.dart';
 import 'perfetto/perfetto_controller.dart';
 import 'timeline_event_processor.dart';
 
-/// Debugging flag to load sample trace events from [simple_trace_example.dart].
-bool debugSimpleTrace = false;
-
 enum EventsControllerStatus {
   empty,
   processing,
