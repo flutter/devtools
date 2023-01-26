@@ -52,11 +52,16 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
   }) {
     name = name ?? '';
 
-    final String? text = heapSelection == null
-        ? null
-        : '${heapSelection.object.heapClass.className}, retained size ${prettyPrintRetainedSize(
-            heapSelection.object.retainedSize,
-          )}';
+    final String? text;
+    if (heapSelection == null) {
+      text = null;
+    } else {
+      final className = heapSelection.object.heapClass.className;
+      final size = prettyPrintRetainedSize(
+        heapSelection.object.retainedSize,
+      );
+      text = '$className, retained size $size';
+    }
 
     return DartObjectNode._(
       name: name,
