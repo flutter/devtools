@@ -46,6 +46,7 @@ class FakeIsolateManager extends Fake implements IsolateManager {
     final mockIsolate = MockIsolate();
     when(mockIsolate.libraries).thenReturn([]);
     when(state.isolateNow).thenReturn(mockIsolate);
+    when(state.isolate).thenAnswer((_) => Future.value(mockIsolate));
     return state;
   }
 }
