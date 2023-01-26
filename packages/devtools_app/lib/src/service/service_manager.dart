@@ -15,13 +15,14 @@ import '../shared/analytics/analytics.dart' as ga;
 import '../shared/config_specific/logger/logger.dart';
 import '../shared/connected_app.dart';
 import '../shared/console/console_service.dart';
+import '../shared/diagnostics/inspector_service.dart';
 import '../shared/error_badge_manager.dart';
 import '../shared/globals.dart';
-import '../shared/inspector_service.dart';
 import '../shared/primitives/utils.dart';
 import '../shared/title.dart';
 import '../shared/utils.dart';
 import 'isolate_manager.dart';
+import 'isolate_state.dart';
 import 'resolved_uri_manager.dart';
 import 'service_extension_manager.dart';
 import 'service_registrations.dart' as registrations;
@@ -77,6 +78,21 @@ class ServiceConnectionManager {
   final timelineStreamManager = TimelineStreamManager();
 
   final isolateManager = IsolateManager();
+
+  /// Proxy to state inside the isolateManager, for code consizeness.
+  ///
+  /// Defaults to false if there is no main isolate.
+  bool get isMainIsolatePaused =>
+      isolateManager.mainIsolateState?.isPaused.value ?? false;
+
+  Future<RootInfo?> tryToDetectMainRootInfo() async {
+    await isolateManager.mainIsolateState?.waitForIsolateLoad();
+    return isolateManager.mainIsolateState?.rootInfo;
+  }
+
+  RootInfo rootInfoNow() {
+    return isolateManager.mainIsolateState?.rootInfo ?? RootInfo(null);
+  }
 
   final consoleService = ConsoleService();
 
@@ -168,24 +184,6 @@ class ServiceConnectionManager {
     return listenable;
   }
 
-  String? _cachedMainRootLibKey;
-  String? _cachedMainRootLibValue;
-
-  /// Returns root library of the main isolate or null, if the library is not detectable.
-  Future<String?> tryToDetectMainRootLib() async {
-    final isolateId = isolateManager.mainIsolate.value?.id;
-    if (isolateId == null) return null;
-
-    final rootLibKey = '${serviceManager.service?.connectedUri}-$isolateId';
-
-    if (_cachedMainRootLibKey == rootLibKey) return _cachedMainRootLibValue;
-    _cachedMainRootLibKey = rootLibKey;
-
-    final isolate = await serviceManager.service?.getIsolate(isolateId);
-    _cachedMainRootLibValue = isolate?.rootLib?.uri;
-    return _cachedMainRootLibValue;
-  }
-
   Future<void> vmServiceOpened(
     VmServiceWrapper service, {
     required Future<void> onClosed,
@@ -202,9 +200,6 @@ class ServiceConnectionManager {
     if (_serviceAvailable.isCompleted) {
       _serviceAvailable = Completer();
     }
-
-    assert(_cachedMainRootLibKey == null);
-    assert(_cachedMainRootLibValue == null);
 
     connectedApp = ConnectedApp();
 
@@ -373,8 +368,6 @@ class ServiceConnectionManager {
     sdkVersion = null;
     connectedApp = null;
 
-    _cachedMainRootLibKey = null;
-    _cachedMainRootLibValue = null;
     generateDevToolsTitle();
 
     vmFlagManager.vmServiceClosed();
@@ -459,8 +452,9 @@ class ServiceConnectionManager {
     );
   }
 
-  /// @returns view id of selected isolate's 'FlutterView'.
-  /// @throws Exception if no 'FlutterView'.
+  /// Returns the view id for the selected isolate's 'FlutterView'.
+  ///
+  /// Throws an Exception if no 'FlutterView' is present in this isolate.
   Future<String> get flutterViewId async {
     final flutterViewListResponse = await _callServiceExtensionOnMainIsolate(
       registrations.flutterListViews,
@@ -546,7 +540,7 @@ class ServiceConnectionManager {
     if (uri == null) return false;
     assert(_serviceAvailable.isCompleted);
     assert(serviceManager.isolateManager.mainIsolate.value != null);
-    final isolate = isolateManager.mainIsolateDebuggerState!.isolateNow;
+    final isolate = isolateManager.mainIsolateState!.isolateNow;
     return (isolate?.libraries ?? [])
         .map((ref) => ref.uri)
         .toList()

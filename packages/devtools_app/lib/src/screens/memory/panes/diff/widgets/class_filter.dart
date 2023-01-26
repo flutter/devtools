@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../../shared/analytics/analytics.dart' as ga;
@@ -13,26 +14,74 @@ import '../../../../../shared/dialogs.dart';
 import '../../../../../shared/theme.dart';
 import '../../../../../shared/utils.dart';
 import '../../../shared/heap/class_filter.dart';
-import '../controller/utils.dart';
+import '../../../shared/primitives/class_name.dart';
 
+String _adaptRootPackageForFilter(String? rootPackage) {
+  if (rootPackage == null || rootPackage.isEmpty) return '';
+  return '$rootPackage/';
+}
+
+class ClassFilterButton extends StatelessWidget {
+  ClassFilterButton({
+    required this.filter,
+    required this.onChanged,
+    required String? rootPackage,
+  }) : rootPackage = _adaptRootPackageForFilter(rootPackage);
+
+  final ValueListenable<ClassFilter> filter;
+  final Function(ClassFilter) onChanged;
+  final String rootPackage;
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder<ClassFilter>(
+      valueListenable: filter,
+      builder: (context, filter, _) {
+        return FilterButton(
+          onPressed: () {
+            ga.select(
+              gac.memory,
+              gac.MemoryEvent.diffSnapshotFilter,
+            );
+
+            unawaited(
+              showDialog(
+                context: context,
+                builder: (context) => ClassFilterDialog(
+                  filter,
+                  onChanged: onChanged,
+                  rootPackage: rootPackage,
+                ),
+              ),
+            );
+          },
+          isFilterActive: !filter.isEmpty,
+          message: filter.buttonTooltip,
+          outlined: false,
+        );
+      },
+    );
+  }
+}
+
+@visibleForTesting
 class ClassFilterDialog extends StatefulWidget {
   const ClassFilterDialog(
     this.classFilter, {
     super.key,
     required this.onChanged,
+    required this.rootPackage,
   });
 
   final ClassFilter classFilter;
   final Function(ClassFilter filter) onChanged;
+  final String rootPackage;
 
   @override
   State<ClassFilterDialog> createState() => _ClassFilterDialogState();
 }
 
 class _ClassFilterDialogState extends State<ClassFilterDialog> {
-  bool _initialized = false;
-  late String _rootPackage;
-
   late ClassFilterType _type;
   final _except = TextEditingController();
   final _only = TextEditingController();
@@ -40,15 +89,7 @@ class _ClassFilterDialogState extends State<ClassFilterDialog> {
   @override
   void initState() {
     super.initState();
-    unawaited(_initialize());
-  }
-
-  Future<void> _initialize() async {
-    assert(!_initialized);
-    _rootPackage = await tryToDetectRootPackage() ?? '';
-    if (_rootPackage.isNotEmpty) _rootPackage = '$_rootPackage/';
     _loadStateFromFilter(widget.classFilter);
-    setState(() => _initialized = true);
   }
 
   @override
@@ -62,13 +103,11 @@ class _ClassFilterDialogState extends State<ClassFilterDialog> {
   void _loadStateFromFilter(ClassFilter filter) {
     _type = filter.filterType;
     _except.text = filter.except;
-    _only.text = filter.only ?? _rootPackage;
+    _only.text = filter.only ?? widget.rootPackage;
   }
 
   @override
   Widget build(BuildContext context) {
-    if (!_initialized) return const CenteredCircularProgressIndicator();
-
     final textFieldLeftPadding = scaleByFontFactor(40.0);
     void onTypeChanged(ClassFilterType? type) => setState(() => _type = type!);
 
@@ -92,7 +131,7 @@ class _ClassFilterDialogState extends State<ClassFilterDialog> {
 
     return StateUpdateDialog(
       title: 'Filter Classes and Packages',
-      helpText: _helpText,
+      helpBuilder: _helpBuilder,
       onResetDefaults: () {
         ga.select(
           gac.memory,
@@ -129,11 +168,38 @@ class _ClassFilterDialogState extends State<ClassFilterDialog> {
   }
 }
 
+Widget _helpBuilder(BuildContext context) {
+  final textStyle = DialogHelpText.textStyle(context);
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Text(_helpText, style: textStyle),
+      ...ClassType.values.map(
+        (t) => Column(
+          children: [
+            Row(
+              children: [
+                t.icon,
+                Text(
+                  ' ${t.alias} - for ${t.aliasDescription}',
+                  style: textStyle,
+                ),
+                CopyToClipboardControl(
+                  dataProvider: () => t.alias,
+                  size: tableIconSize,
+                )
+              ],
+            ),
+          ],
+        ),
+      ),
+    ],
+  );
+}
+
 const _helpText = 'Choose and customize the filter.\n'
     'List full or partial class names separated by new lines. For example:\n\n'
     '  package:myPackage/src/myFolder/myLibrary.dart/MyClass\n'
     '  MyClass\n'
     '  package:myPackage/src/\n\n'
-    'Specify:\n'
-    '  - ${ClassFilter.dartInternalAlias} for dart internal objects, not assigned to any package\n'
-    '  - ${ClassFilter.dartAndFlutterLibrariesAlias} for most "dart:" and "package:" libraries published by Dart and Flutter orgs.';
+    'Use aliases to filter classes by type:\n';

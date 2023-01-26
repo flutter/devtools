@@ -4,7 +4,7 @@
 
 import 'package:vm_service/vm_service.dart';
 
-import '../../shared/console/primitives/source_location.dart';
+import '../../shared/diagnostics/source_location.dart';
 import '../../shared/globals.dart';
 import '../../shared/primitives/trees.dart';
 import '../vm_developer/vm_service_private_extensions.dart';
@@ -86,7 +86,7 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
         final service = serviceManager.service!;
         final isolate = serviceManager.isolateManager.selectedIsolate.value!;
         final libRef = serviceManager.isolateManager
-            .isolateDebuggerState(isolate)!
+            .isolateState(isolate)
             .isolateNow!
             .libraries!
             .firstWhere(
@@ -194,7 +194,7 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
     // part of a package. Otherwise, it's a file path and its directory should
     // appear near the top of the list anyway.
     final rootLibUri = serviceManager
-        .isolateManager.mainIsolateDebuggerState?.isolateNow?.rootLib?.uri;
+        .isolateManager.mainIsolateState?.isolateNow?.rootLib?.uri;
     if (rootLibUri != null) {
       if (rootLibUri.startsWith('package:') ||
           rootLibUri.startsWith('google3:')) {

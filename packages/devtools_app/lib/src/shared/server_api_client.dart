@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
 import 'config_specific/logger/logger.dart';
@@ -25,25 +26,29 @@ class DevToolsServerConnection {
     initFrameworkController();
   }
 
+  /// Returns a URI for the backend ./api folder for a DevTools page being hosted
+  /// at `baseUri`. Trailing slashes are important to support Path-URL Strategy:
+  ///
+  /// - https://foo/devtools/ => https://foo/devtools/api
+  /// - https://foo/devtools/inspector => https://foo/devtools/api
+  ///
+  /// For compatibility with any tools that might construct URIs ending with
+  /// "/devtools" without the trailing slash, URIs ending with `devtools` (such
+  /// as when hosted by DDS) are handled specially:
+  ///
+  /// - https://foo/devtools => https://foo/devtools/api
+  @visibleForTesting
+  static Uri apiUriFor(Uri baseUri) => baseUri.path.endsWith('devtools')
+      ? baseUri.resolve('devtools/api/')
+      : baseUri.resolve('api/');
+
   static Future<DevToolsServerConnection?> connect() async {
-    final baseUri = Uri.base;
-    // Ensure we don't drop portions of the path at which DevTools is hosted.
-    final baseUriPathSegments = baseUri.pathSegments.where(
-      (e) => e.isNotEmpty,
-    );
-    final uri = Uri(
-      scheme: baseUri.scheme,
-      host: baseUri.host,
-      port: baseUri.port,
-      pathSegments: [
-        ...baseUriPathSegments,
-        'api',
-        'ping',
-      ],
-    );
+    final apiUri = apiUriFor(Uri.base);
+    final pingUri = apiUri.resolve('ping');
 
     try {
-      final response = await http.get(uri).timeout(const Duration(seconds: 5));
+      final response =
+          await http.get(pingUri).timeout(const Duration(seconds: 5));
       // When running with the local dev server Flutter may serve its index page
       // for missing files to support the hashless url strategy. Check the response
       // content to confirm it came from our server.
@@ -59,15 +64,8 @@ class DevToolsServerConnection {
       return null;
     }
 
-    final sseUri = Uri(
-      pathSegments: [
-        '', // Leading '/'
-        ...baseUriPathSegments,
-        'api',
-        'sse',
-      ],
-    );
-    final client = SseClient(sseUri.toString());
+    final sseUri = apiUri.resolve('sse');
+    final client = SseClient(sseUri.toString(), debugKey: 'DevToolsServer');
     return DevToolsServerConnection._(client);
   }
 

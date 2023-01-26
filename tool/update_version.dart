@@ -79,7 +79,7 @@ Future<void> resetReleaseNotes({
   await File('./tool/release_notes/images/.gitkeep').create();
 
   final currentReleaseNotesFile =
-      File('./tool/release_notes/NEXT_RELEASE_NOTES.md');
+      File('./packages/devtools_app/NEXT_RELEASE_NOTES.md');
   if (currentReleaseNotesFile.existsSync()) {
     await currentReleaseNotesFile.delete();
   }

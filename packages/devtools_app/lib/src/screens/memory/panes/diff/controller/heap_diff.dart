@@ -48,7 +48,7 @@ class _HeapCouple {
   late final AdaptedHeap older;
   late final AdaptedHeap younger;
 
-  /// Tries to declare earliest heap in a determenistic way.
+  /// Tries to declare earliest heap in a deterministic way.
   ///
   /// If the earliest heap cannot be identified, returns the first argument.
   static AdaptedHeap _older(AdaptedHeap heap1, AdaptedHeap heap2) {
@@ -78,7 +78,7 @@ class _HeapCouple {
   int get hashCode => Object.hash(older, younger);
 }
 
-/// List of classes with per-class comparision between two heaps.
+/// List of classes with per-class comparison between two heaps.
 class DiffHeapClasses extends HeapClasses<DiffClassStats>
     with FilterableHeapClasses<DiffClassStats> {
   DiffHeapClasses(_HeapCouple couple) {
@@ -108,16 +108,13 @@ class DiffHeapClasses extends HeapClasses<DiffClassStats>
   List<DiffClassStats> get classStatsList => classes;
 }
 
-/// Comparision between two heaps for a class.
+/// Comparison between two heaps for a class.
 class DiffClassStats extends ClassStats {
   DiffClassStats._({
-    required this.heapClass,
+    required super.statsByPath,
+    required super.heapClass,
     required this.total,
-    required StatsByPath objectsByPath,
-  }) : super(objectsByPath);
-
-  @override
-  final HeapClassName heapClass;
+  });
 
   final ObjectSetDiff total;
 
@@ -132,7 +129,7 @@ class DiffClassStats extends ClassStats {
     final result = DiffClassStats._(
       heapClass: heapClass,
       total: ObjectSetDiff(before: before?.objects, after: after?.objects),
-      objectsByPath: subtractMaps<ClassOnlyHeapPath, ObjectSetStats,
+      statsByPath: subtractMaps<ClassOnlyHeapPath, ObjectSetStats,
           ObjectSetStats, ObjectSetStats>(
         from: after?.statsByPath,
         substract: before?.statsByPath,
@@ -148,7 +145,7 @@ class DiffClassStats extends ClassStats {
   bool isZero() => total.isZero;
 }
 
-/// Comparision between two sets of objects.
+/// Comparison between two sets of objects.
 class ObjectSetDiff {
   ObjectSetDiff({ObjectSet? before, ObjectSet? after}) {
     before ??= ObjectSet.empty;

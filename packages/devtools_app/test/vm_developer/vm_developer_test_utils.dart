@@ -6,7 +6,7 @@ import 'package:devtools_app/src/screens/debugger/program_explorer_controller.da
 import 'package:devtools_app/src/screens/vm_developer/object_inspector/object_inspector_view_controller.dart';
 import 'package:devtools_app/src/screens/vm_developer/object_inspector/object_viewport.dart';
 import 'package:devtools_app/src/screens/vm_developer/object_inspector/vm_object_model.dart';
-import 'package:devtools_app/src/shared/console/primitives/source_location.dart';
+import 'package:devtools_app/src/shared/diagnostics/source_location.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_app/src/shared/primitives/listenable.dart';
 import 'package:devtools_app/src/shared/primitives/utils.dart';
@@ -48,21 +48,31 @@ final testFunction = Func(
 final testField = Field(
   name: 'fooField',
   owner: testLib,
+  declaredType: testType,
   id: '1234',
 );
 
 final testInstance = Instance(
   id: '1234',
   name: 'fooInstance',
+  classRef: testSuperClass,
 );
 
 final testSuperClass =
     ClassRef(name: 'fooSuperClass', library: testLib, id: '1234');
 
+final testType = InstanceRef(
+  kind: '',
+  id: '1234',
+  name: 'fooType',
+  classRef: testClass,
+);
+
 final testSuperType = InstanceRef(
   kind: '',
   id: '1234',
   name: 'fooSuperType',
+  classRef: testSuperClass,
 );
 
 const testPos = SourcePosition(line: 10, column: 4);

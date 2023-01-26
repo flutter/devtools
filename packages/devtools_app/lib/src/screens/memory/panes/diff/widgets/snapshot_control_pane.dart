@@ -2,19 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 
 import '../../../../../shared/analytics/analytics.dart' as ga;
 import '../../../../../shared/analytics/constants.dart' as gac;
 import '../../../../../shared/common_widgets.dart';
 import '../../../../../shared/theme.dart';
-import '../../../shared/heap/class_filter.dart';
 import '../../../shared/primitives/simple_elements.dart';
 import '../controller/diff_pane_controller.dart';
 import '../controller/item_controller.dart';
-import 'class_filter_dialog.dart';
 
 class SnapshotControlPane extends StatelessWidget {
   const SnapshotControlPane({Key? key, required this.controller})
@@ -24,7 +20,6 @@ class SnapshotControlPane extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final filter = controller.core.classFilter;
     return ValueListenableBuilder<bool>(
       valueListenable: controller.isTakingSnapshot,
       builder: (_, isProcessing, __) {
@@ -39,14 +34,6 @@ class SnapshotControlPane extends StatelessWidget {
                   _DiffDropdown(
                     current: current,
                     controller: controller,
-                  ),
-                  const SizedBox(width: defaultSpacing),
-                  ValueListenableBuilder<ClassFilter>(
-                    valueListenable: filter,
-                    builder: (context, filterValue, ___) => ClassFilterButton(
-                      filter: filterValue,
-                      onChanged: controller.applyFilter,
-                    ),
                   ),
                   const SizedBox(width: defaultSpacing),
                   ToCsvButton(
@@ -79,38 +66,6 @@ class SnapshotControlPane extends StatelessWidget {
           ],
         );
       },
-    );
-  }
-}
-
-@visibleForTesting
-class ClassFilterButton extends StatelessWidget {
-  const ClassFilterButton({required this.filter, required this.onChanged});
-
-  final ClassFilter filter;
-  final Function(ClassFilter) onChanged;
-
-  @override
-  Widget build(BuildContext context) {
-    return FilterButton(
-      onPressed: () {
-        ga.select(
-          gac.memory,
-          gac.MemoryEvent.diffSnapshotFilter,
-        );
-
-        unawaited(
-          showDialog(
-            context: context,
-            builder: (context) => ClassFilterDialog(
-              filter,
-              onChanged: onChanged,
-            ),
-          ),
-        );
-      },
-      isFilterActive: !filter.isEmpty,
-      message: filter.buttonTooltip,
     );
   }
 }

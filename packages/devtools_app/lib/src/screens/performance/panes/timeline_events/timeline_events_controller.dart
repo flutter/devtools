@@ -175,7 +175,9 @@ class TimelineEventsController extends PerformanceFeatureController
   Future<void> _pullTraceEventsFromVmTimeline({
     bool isInitialPull = false,
   }) async {
-    final service = serviceManager.service!;
+    final service = serviceManager.service;
+    if (service == null) return;
+
     final currentVmTime = await service.getVMTimelineMicros();
     debugTraceEventCallback(
       () => log(

@@ -80,7 +80,7 @@ SingleClassStats _createClassStats(List<AdaptedHeapObject> instances) {
   final heap = AdaptedHeapData(objects, rootIndex: 0);
   buildSpanningTree(heap);
 
-  final result = SingleClassStats(instances.first.heapClass);
+  final result = SingleClassStats(heapClass: instances.first.heapClass);
   for (var index in indexes) {
     result.countInstance(heap, index);
   }

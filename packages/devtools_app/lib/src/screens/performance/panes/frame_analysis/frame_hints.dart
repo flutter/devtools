@@ -152,7 +152,7 @@ class EnhanceTracingHint extends StatelessWidget {
     final phaseType = phase.type;
     // TODO(kenz): when [enhanceTracingState] is not available, use heuristics
     // to detect whether tracing was enhanced for a frame (e.g. the depth or
-    // quanity of child events under build / layout / paint).
+    // quantity of child events under build / layout / paint).
     final tracingEnhanced =
         enhanceTracingState?.enhancedFor(phaseType) ?? false;
     switch (phaseType) {

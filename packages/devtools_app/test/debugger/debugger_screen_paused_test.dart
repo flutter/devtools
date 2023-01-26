@@ -8,7 +8,7 @@ import 'package:devtools_app/src/screens/debugger/debugger_model.dart';
 import 'package:devtools_app/src/screens/debugger/debugger_screen.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/shared/config_specific/ide_theme/ide_theme.dart';
-import 'package:devtools_app/src/shared/console/primitives/source_location.dart';
+import 'package:devtools_app/src/shared/diagnostics/source_location.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_app/src/shared/notifications.dart';
 import 'package:devtools_app/src/shared/scripts/script_manager.dart';
@@ -80,7 +80,9 @@ void main() {
   }
 
   setUp(() {
-    fakeServiceManager.appState.setPausedOnBreakpoint(true);
+    final state =
+        fakeServiceManager.isolateManager.mainIsolateState! as MockIsolateState;
+    state.isPaused.value = true;
   });
 
   testWidgetsWithWindowSize(

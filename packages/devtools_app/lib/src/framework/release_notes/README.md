@@ -1,7 +1,7 @@
 ## Generating Release notes
 - Release notes for DevTools are hosted on the flutter website (see [archive](https://docs.flutter.dev/development/tools/devtools/release-notes)).
 - To add release notes for the latest release, create a PR with the appropriate changes for your release.
-    - The [NEXT_RELEASE_NOTES.md](../../../../../../tool/release_notes/NEXT_RELEASE_NOTES.md) file contains the running release notes for the current version.
+    - The [NEXT_RELEASE_NOTES.md](../../../../../../packages/devtools_app/NEXT_RELEASE_NOTES.md) file contains the running release notes for the current version.
     - see example [PR](https://github.com/flutter/website/pull/6791) for an idea of how to add those to the Flutter website.
 - Test these changes locally before creating the PR.
     - See [README.md](https://github.com/flutter/website/blob/main/README.md)
@@ -46,7 +46,7 @@ for getting setup to run the Flutter website locally.
     ```
 
 ### Testing the release notes in DevTools
-- In `release_notes.dart` flip the `debugTestReleaseNotes` flag to true. 
+- In `release_notes.dart` flip the `debugTestReleaseNotes` flag to true.
 
 - from the main `devtools/` directory, run the following:
     ```shell

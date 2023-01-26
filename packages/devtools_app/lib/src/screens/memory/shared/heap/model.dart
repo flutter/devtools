@@ -164,9 +164,9 @@ class ClassOnlyHeapPath {
     if (hideStandard) {
       data = [];
       for (var item in classes.asMap().entries) {
-        final isStandard =
-            item.value.isDartOrFlutter || item.value.isPackageless;
-        if (item.key == 0 || item.key == classes.length - 1 || !isStandard) {
+        if (item.key == 0 ||
+            item.key == classes.length - 1 ||
+            !item.value.isCreatedByGoogle) {
           data.add(item.value.fullName);
           justAddedEllipsis = false;
         } else if (!justAddedEllipsis) {
@@ -320,4 +320,16 @@ mixin Sealable {
   /// See doc for the mixin [Sealable].
   bool get isSealed => _isSealed;
   bool _isSealed = false;
+}
+
+/// Successors and predeccessors for a heap instance, to
+/// browse in console.
+class HeapObjectGraph {
+  //TODO(polina-c): add needed fields
+
+  HeapObjectGraph(this.heap, this.identityHashCode, this.className);
+
+  final int identityHashCode;
+  final HeapClassName className;
+  final AdaptedHeapData heap;
 }

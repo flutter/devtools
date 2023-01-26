@@ -14,7 +14,7 @@ import 'package:vm_service/vm_service.dart';
 import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/common_widgets.dart';
-import '../../shared/console/primitives/source_location.dart';
+import '../../shared/diagnostics/source_location.dart';
 import '../../shared/flex_split_column.dart';
 import '../../shared/globals.dart';
 import '../../shared/primitives/auto_dispose.dart';
@@ -378,17 +378,13 @@ class DebuggerStatus extends StatefulWidget {
 class _DebuggerStatusState extends State<DebuggerStatus> with AutoDisposeMixin {
   String _status = '';
 
+  bool get _isPaused => serviceManager.isMainIsolatePaused;
+
   @override
   void initState() {
     super.initState();
 
-    addAutoDisposeListener(
-      serviceManager.appState.isPaused,
-      () => unawaited(
-        _updateStatus(),
-      ),
-    );
-
+    _updateStatusOnPause();
     unawaited(_updateStatus());
   }
 
@@ -396,9 +392,15 @@ class _DebuggerStatusState extends State<DebuggerStatus> with AutoDisposeMixin {
   void didUpdateWidget(DebuggerStatus oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    // todo: should we check that widget.controller != oldWidget.controller?
+    if (widget.controller == oldWidget.controller) return;
+
+    cancelListeners();
+    _updateStatusOnPause();
+  }
+
+  void _updateStatusOnPause() {
     addAutoDisposeListener(
-      serviceManager.appState.isPaused,
+      serviceManager.isolateManager.mainIsolateState!.isPaused,
       () => unawaited(
         _updateStatus(),
       ),
@@ -424,9 +426,7 @@ class _DebuggerStatusState extends State<DebuggerStatus> with AutoDisposeMixin {
   }
 
   Future<String> _computeStatus() async {
-    final paused = serviceManager.appState.isPaused.value;
-
-    if (!paused) {
+    if (!_isPaused) {
       return 'running';
     }
 
@@ -465,20 +465,21 @@ class _FloatingDebuggerControlsState extends State<FloatingDebuggerControls>
     with
         AutoDisposeMixin,
         ProvidedControllerMixin<DebuggerController, FloatingDebuggerControls> {
-  late bool paused;
-
   late double controlHeight;
+
+  bool get _isPaused => serviceManager.isMainIsolatePaused;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (!initController()) return;
-    paused = serviceManager.appState.isPaused.value;
-    controlHeight = paused ? defaultButtonHeight : 0.0;
-    addAutoDisposeListener(serviceManager.appState.isPaused, () {
+    cancelListeners();
+
+    controlHeight = _isPaused ? defaultButtonHeight : 0.0;
+    addAutoDisposeListener(
+        serviceManager.isolateManager.mainIsolateState!.isPaused, () {
       setState(() {
-        paused = serviceManager.appState.isPaused.value;
-        if (paused) {
+        if (_isPaused) {
           controlHeight = defaultButtonHeight;
         }
       });
@@ -488,10 +489,10 @@ class _FloatingDebuggerControlsState extends State<FloatingDebuggerControls>
   @override
   Widget build(BuildContext context) {
     return AnimatedOpacity(
-      opacity: paused ? 1.0 : 0.0,
+      opacity: _isPaused ? 1.0 : 0.0,
       duration: longDuration,
       onEnd: () {
-        if (!paused) {
+        if (!_isPaused) {
           setState(() {
             controlHeight = 0.0;
           });

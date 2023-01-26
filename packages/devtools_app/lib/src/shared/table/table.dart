@@ -142,7 +142,7 @@ class FlatTable<T> extends StatefulWidget {
   /// This notifier's value will be updated when a row of the table is selected.
   final ValueNotifier<T?> selectionNotifier;
 
-  /// Whether the verical scroll position for this table should be preserved for
+  /// Whether the vertical scroll position for this table should be preserved for
   /// each data set.
   ///
   /// This should be set to true if the table is not disposed and completely
@@ -402,7 +402,7 @@ class TreeTable<T extends TreeNode<T>> extends StatefulWidget {
   /// Whether the data roots in this table should be automatically expanded.
   final bool autoExpandRoots;
 
-  /// Whether the verical scroll position for this table should be preserved for
+  /// Whether the vertical scroll position for this table should be preserved for
   /// each data set.
   ///
   /// This should be set to true if the table is not disposed and completely
@@ -1080,6 +1080,19 @@ abstract class ColumnRenderer<T> {
   });
 }
 
+/// If a [ColumnData] implements this interface, it can override how that column
+/// header is rendered.
+abstract class ColumnHeaderRenderer<T> {
+  /// Render the column header to a [Widget].
+  ///
+  /// This method can return `null` to indicate that the default rendering
+  /// should be used instead.
+  Widget? buildHeader(
+    BuildContext context,
+    Widget Function() defaultHeaderRenderer,
+  );
+}
+
 /// Presents a [node] as a row in a table.
 ///
 /// When the given [node] is null, this widget will instead present
@@ -1432,22 +1445,26 @@ class _TableRowState<T> extends State<TableRow<T>>
       final theme = Theme.of(context);
       final node = widget.node;
       if (widget.rowType == _TableRowType.columnHeader) {
-        content = _ColumnHeader(
-          column: column,
-          isSortColumn: column == widget.sortColumn,
-          secondarySortColumn: widget.secondarySortColumn,
-          sortDirection: widget.sortDirection!,
-          onSortChanged: widget.onSortChanged,
-        );
+        Widget defaultHeaderRenderer() => _ColumnHeader(
+              column: column,
+              isSortColumn: column == widget.sortColumn,
+              secondarySortColumn: widget.secondarySortColumn,
+              sortDirection: widget.sortDirection!,
+              onSortChanged: widget.onSortChanged,
+            );
+
+        if (column is ColumnHeaderRenderer) {
+          content = (column as ColumnHeaderRenderer)
+              .buildHeader(context, defaultHeaderRenderer);
+        }
+        // If ColumnHeaderRenderer.build returns null, fall back to the default
+        // rendering.
+        content ??= defaultHeaderRenderer();
       } else if (node != null) {
         // TODO(kenz): clean up and pull all this code into _ColumnDataRow
         // widget class.
         final padding = column.getNodeIndentPx(node);
         assert(padding >= 0);
-        // TODO(jacobr): is this assert really always false or is this lint too
-        // aggressive? Consider factoring the code so this is check is less
-        // is for a subclass of the type of Column.
-        // ignore: avoid-unrelated-type-assertions
         if (column is ColumnRenderer) {
           content = (column as ColumnRenderer).build(
             context,

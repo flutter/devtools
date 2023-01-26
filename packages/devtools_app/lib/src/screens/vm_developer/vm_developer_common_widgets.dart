@@ -377,10 +377,12 @@ class SizedCircularProgressIndicator extends StatelessWidget {
 /// An expandable list to display the retaining objects for a given RetainingPath.
 class RetainingPathWidget extends StatelessWidget {
   const RetainingPathWidget({
+    required this.controller,
     required this.retainingPath,
     this.onExpanded,
   });
 
+  final ObjectInspectorViewController controller;
   final ValueListenable<RetainingPath?> retainingPath;
   final void Function(bool)? onExpanded;
 
@@ -419,6 +421,10 @@ class RetainingPathWidget extends StatelessWidget {
     BuildContext context,
     RetainingPath retainingPath,
   ) {
+    final onTap = (ObjRef? obj) async {
+      if (obj == null) return;
+      await controller.findAndSelectNodeForObject(obj);
+    };
     final theme = Theme.of(context);
     final emptyList = SelectableText(
       'No retaining objects',
@@ -427,10 +433,9 @@ class RetainingPathWidget extends StatelessWidget {
     if (retainingPath.elements == null) return [emptyList];
 
     final firstRetainingObject = retainingPath.elements!.isNotEmpty
-        ? SelectableText(
-            _objectName(retainingPath.elements!.first.value) ??
-                '<RetainingObject>',
-            style: theme.fixedFontStyle,
+        ? VmServiceObjectLink(
+            object: retainingPath.elements!.first.value,
+            onTap: onTap,
           )
         : emptyList;
 
@@ -445,9 +450,12 @@ class RetainingPathWidget extends StatelessWidget {
           Row(
             children: [
               Flexible(
-                child: SelectableText(
-                  _retainingObjectDescription(object),
+                child: DefaultTextStyle(
                   style: theme.fixedFontStyle,
+                  child: _RetainingObjectDescription(
+                    object: object,
+                    onTap: onTap,
+                  ),
                 ),
               ),
             ],
@@ -455,7 +463,7 @@ class RetainingPathWidget extends StatelessWidget {
       Row(
         children: [
           SelectableText(
-            'Retained by a GC root of type ${retainingPath.gcRootType ?? '<unknown>'}',
+            'Retained by a GC root of type: ${retainingPath.gcRootType ?? '<unknown>'}',
             style: theme.fixedFontStyle,
           ),
         ],
@@ -464,38 +472,97 @@ class RetainingPathWidget extends StatelessWidget {
 
     return prettyRows(context, retainingObjects);
   }
+}
 
-  /// Describes the given RetainingObject [object] and its parentListIndex,
-  /// parentMapKey, and parentField where applicable.
-  String _retainingObjectDescription(RetainingObject object) {
+class _RetainingObjectDescription extends StatelessWidget {
+  const _RetainingObjectDescription({
+    required this.object,
+    required this.onTap,
+  });
+
+  final RetainingObject object;
+  final Function(ObjRef? obj) onTap;
+
+  @override
+  Widget build(BuildContext context) {
     final parentListIndex = object.parentListIndex;
     if (parentListIndex != null) {
-      return 'Retained by ${_parentListElementDescription(
-        parentListIndex,
-        object.value,
-      )}';
+      return SelectableText.rich(
+        TextSpan(
+          children: [
+            TextSpan(text: 'Retained by element [$parentListIndex] of '),
+            VmServiceObjectLink(
+              object: object.value,
+              onTap: onTap,
+            ).buildTextSpan(context),
+          ],
+        ),
+      );
     }
 
     if (object.parentMapKey != null) {
-      final ref = object.value;
-      final parentMapKey = _objectName(object.parentMapKey);
-
-      final parentMapName = _instanceClassName(ref) ?? '<parentMapName>';
-
-      return 'Retained by element at [$parentMapKey] of $parentMapName';
+      return SelectableText.rich(
+        TextSpan(
+          children: [
+            const TextSpan(text: 'Retained by element at ['),
+            VmServiceObjectLink(object: object.parentMapKey, onTap: onTap)
+                .buildTextSpan(context),
+            const TextSpan(text: '] of '),
+            VmServiceObjectLink(object: object.value, onTap: onTap)
+                .buildTextSpan(context),
+          ],
+        ),
+      );
     }
 
-    final description = StringBuffer('Retained by ');
+    final entries = <TextSpan>[
+      const TextSpan(text: 'Retained by '),
+    ];
 
     if (object.parentField != null) {
-      description.write('${object.parentField} of ');
+      entries.add(TextSpan(text: '${object.parentField} of '));
     }
 
-    description.write(
-      _objectDescription(object.value) ?? '<object>',
+    if (object.value is FieldRef) {
+      final field = object.value as FieldRef;
+      entries.addAll(
+        [
+          VmServiceObjectLink(
+            object: field.declaredType,
+            onTap: onTap,
+          ).buildTextSpan(context),
+          const TextSpan(text: ' '),
+          VmServiceObjectLink(
+            object: field,
+            onTap: onTap,
+          ).buildTextSpan(context),
+          const TextSpan(text: ' of '),
+          VmServiceObjectLink(
+            object: field.owner,
+            onTap: onTap,
+          ).buildTextSpan(context),
+        ],
+      );
+    } else if (object.value is FuncRef) {
+      final func = object.value as FuncRef;
+      entries.add(
+        VmServiceObjectLink(
+          object: func,
+          onTap: onTap,
+        ).buildTextSpan(context),
+      );
+    } else {
+      entries.addAll([
+        const TextSpan(text: 'of '),
+        VmServiceObjectLink(
+          object: object.value,
+          onTap: onTap,
+        ).buildTextSpan(context),
+      ]);
+    }
+    return SelectableText.rich(
+      TextSpan(children: entries),
     );
-
-    return description.toString();
   }
 }
 
@@ -625,13 +692,14 @@ class VmServiceObjectLink<T> extends StatelessWidget {
 
   final T object;
   final bool preferUri;
-  final String Function(T)? textBuilder;
+  final String? Function(T)? textBuilder;
   final FutureOr<void> Function(T) onTap;
 
-  @override
-  Widget build(BuildContext context) {
-    String text = '';
-    if (textBuilder == null) {
+  TextSpan buildTextSpan(BuildContext context) {
+    final theme = Theme.of(context);
+
+    String? text = textBuilder?.call(object);
+    if (text == null) {
       if (object is LibraryRef) {
         final lib = object as LibraryRef;
         if (lib.uri!.startsWith('dart') || preferUri) {
@@ -671,6 +739,8 @@ class VmServiceObjectLink<T> extends StatelessWidget {
           text = buf.toString();
         } else if (instance.kind == InstanceKind.kList) {
           text = 'List(length: ${instance.length})';
+        } else if (instance.kind == InstanceKind.kMap) {
+          text = 'Map(length: ${instance.length})';
         } else if (instance.kind == InstanceKind.kType) {
           text = instance.name!;
         } else {
@@ -678,34 +748,43 @@ class VmServiceObjectLink<T> extends StatelessWidget {
             text = instance.valueAsString!;
           } else {
             final cls = instance.classRef!;
-            text = 'Instance of ${cls.name}';
+            text = '${cls.name}';
           }
         }
+      } else if (object is ContextRef) {
+        final context = object as ContextRef;
+        text = 'Context(length: ${context.length})';
       } else if (object is TypeArgumentsRef) {
         final typeArgs = object as TypeArgumentsRef;
         text = typeArgs.name!;
+      } else if (object is Sentinel) {
+        final sentinel = object as Sentinel;
+        text = sentinel.valueAsString!;
       }
-    } else {
-      text = textBuilder!(object);
     }
+    return TextSpan(
+      text: text,
+      style: theme.linkTextStyle.apply(
+        fontFamily: theme.fixedFontStyle.fontFamily,
+        overflow: TextOverflow.ellipsis,
+      ),
+      recognizer: TapGestureRecognizer()
+        ..onTap = () async {
+          await onTap(object);
+        },
+    );
+  }
 
+  @override
+  Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return SelectableText.rich(
       style: theme.linkTextStyle.apply(
+        fontFamily: theme.fixedFontStyle.fontFamily,
         overflow: TextOverflow.ellipsis,
       ),
       maxLines: 1,
-      TextSpan(
-        text: text,
-        style: theme.linkTextStyle.apply(
-          fontFamily: theme.fixedFontStyle.fontFamily,
-          overflow: TextOverflow.ellipsis,
-        ),
-        recognizer: TapGestureRecognizer()
-          ..onTap = () async {
-            await onTap(object);
-          },
-      ),
+      buildTextSpan(context),
     );
   }
 }
@@ -714,6 +793,7 @@ class VmServiceObjectLink<T> extends StatelessWidget {
 /// layout of information widgets related to VM object types.
 class VmObjectDisplayBasicLayout extends StatelessWidget {
   const VmObjectDisplayBasicLayout({
+    required this.controller,
     required this.object,
     required this.generalDataRows,
     this.sideCardDataRows,
@@ -722,6 +802,7 @@ class VmObjectDisplayBasicLayout extends StatelessWidget {
     this.expandableWidgets,
   });
 
+  final ObjectInspectorViewController controller;
   final VmObject object;
   final List<MapEntry<String, WidgetBuilder>> generalDataRows;
   final List<MapEntry<String, WidgetBuilder>>? sideCardDataRows;
@@ -764,6 +845,7 @@ class VmObjectDisplayBasicLayout extends StatelessWidget {
           child: ListView(
             children: [
               RetainingPathWidget(
+                controller: controller,
                 retainingPath: object.retainingPath,
                 onExpanded: _onExpandRetainingPath,
               ),

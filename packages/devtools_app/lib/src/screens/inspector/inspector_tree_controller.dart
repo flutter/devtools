@@ -17,10 +17,10 @@ import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/collapsible_mixin.dart';
 import '../../shared/common_widgets.dart';
 import '../../shared/config_specific/logger/logger.dart';
-import '../../shared/console/eval/diagnostics_node.dart';
 import '../../shared/console/eval/inspector_tree.dart';
-import '../../shared/console/primitives/text_styles.dart';
 import '../../shared/console/widgets/description.dart';
+import '../../shared/diagnostics/diagnostics_node.dart';
+import '../../shared/diagnostics_text_styles.dart';
 import '../../shared/error_badge_manager.dart';
 import '../../shared/globals.dart';
 import '../../shared/primitives/auto_dispose.dart';
@@ -775,7 +775,7 @@ class _InspectorTreeState extends State<InspectorTree>
     autoDisposeFocusNode(_focusNode);
 
     callOnceWhenReady(
-      trigger: serviceManager.isolateManager.mainIsolateDebuggerState!.isPaused,
+      trigger: serviceManager.isolateManager.mainIsolateState!.isPaused,
       callback: _bindToController,
       readyWhen: (triggerValue) => triggerValue == false,
     );
@@ -1245,7 +1245,7 @@ class InspectorRowContent extends StatelessWidget {
                           errorText: error?.errorMessage,
                           nodeDescriptionHighlightStyle:
                               searchValue.isEmpty || !row.isSearchMatch
-                                  ? ConsoleTextStyles.regular
+                                  ? DiagnosticsTextStyles.regular
                                   : row.isSelected
                                       ? theme.searchMatchHighlightStyleFocused
                                       : theme.searchMatchHighlightStyle,

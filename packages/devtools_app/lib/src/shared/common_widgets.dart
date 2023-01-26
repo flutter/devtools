@@ -1158,11 +1158,13 @@ class FilterButton extends StatelessWidget {
     required this.onPressed,
     required this.isFilterActive,
     this.message = 'Filter',
+    this.outlined = true,
   }) : super(key: key);
 
   final VoidCallback onPressed;
   final bool isFilterActive;
   final String message;
+  final bool outlined;
 
   @override
   Widget build(BuildContext context) {
@@ -1171,6 +1173,7 @@ class FilterButton extends StatelessWidget {
       isSelected: isFilterActive,
       message: message,
       icon: Icons.filter_list,
+      outlined: outlined,
     );
   }
 }

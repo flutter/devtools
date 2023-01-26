@@ -26,8 +26,10 @@ class AdaptedHeap {
       // native.
       if (object.retainedSize == null || className.isSentinel) continue;
 
-      final singleHeapClass =
-          result.putIfAbsent(className, () => SingleClassStats(className));
+      final singleHeapClass = result.putIfAbsent(
+        className,
+        () => SingleClassStats(heapClass: className),
+      );
       singleHeapClass.countInstance(data, i);
     }
 
@@ -43,7 +45,7 @@ mixin FilterableHeapClasses<T extends ClassStats> on HeapClasses<T> {
   ClassFilter? _appliedFilter;
   List<T>? _filtered;
 
-  List<T> filtered(ClassFilter newFilter) {
+  List<T> filtered(ClassFilter newFilter, String? rootPackage) {
     final oldFilter = _appliedFilter;
     final oldFiltered = _filtered;
     _appliedFilter = newFilter;
@@ -67,13 +69,14 @@ mixin FilterableHeapClasses<T extends ClassStats> on HeapClasses<T> {
       throw StateError('Unexpected task: $task.');
     }
 
-    final result =
-        dataToFilter.where((e) => newFilter.apply(e.heapClass)).toList();
+    final result = dataToFilter
+        .where((e) => newFilter.apply(e.heapClass, rootPackage))
+        .toList();
     return _filtered = result;
   }
 }
 
-/// Set of heap class statistical information for single heap (not comparision between two heaps).
+/// Set of heap class statistical information for single heap (not comparison between two heaps).
 class SingleHeapClasses extends HeapClasses<SingleClassStats>
     with FilterableHeapClasses<SingleClassStats> {
   SingleHeapClasses(this.classesByName);
@@ -99,7 +102,7 @@ typedef StatsByPath = Map<ClassOnlyHeapPath, ObjectSetStats>;
 typedef StatsByPathEntry = MapEntry<ClassOnlyHeapPath, ObjectSetStats>;
 
 abstract class ClassStats with Sealable {
-  ClassStats(this.statsByPath);
+  ClassStats({required this.statsByPath, required this.heapClass});
 
   final StatsByPath statsByPath;
   late final List<StatsByPathEntry> statsByPathEntries = _getEntries();
@@ -108,17 +111,14 @@ abstract class ClassStats with Sealable {
     return statsByPath.entries.toList(growable: false);
   }
 
-  HeapClassName get heapClass;
+  final HeapClassName heapClass;
 }
 
 /// Statistics for a class about a single heap.
 class SingleClassStats extends ClassStats {
-  SingleClassStats(this.heapClass)
+  SingleClassStats({required super.heapClass})
       : objects = ObjectSet(),
-        super(<ClassOnlyHeapPath, ObjectSetStats>{});
-
-  @override
-  final HeapClassName heapClass;
+        super(statsByPath: <ClassOnlyHeapPath, ObjectSetStats>{});
 
   final ObjectSet objects;
 

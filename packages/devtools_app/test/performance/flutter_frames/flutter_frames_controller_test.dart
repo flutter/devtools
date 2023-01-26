@@ -89,7 +89,7 @@ void main() async {
         framesController.selectedFrame.value,
         equals(frame0),
       );
-      // Verify the the other feature controller handlers are called when a
+      // Verify the other feature controller handlers are called when a
       // frame is selected.
       expect(timelineControllerHandlerCalled, isTrue);
 
