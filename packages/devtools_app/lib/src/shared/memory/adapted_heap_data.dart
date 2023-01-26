@@ -18,6 +18,19 @@ class _JsonFields {
   static const String created = 'created';
 }
 
+class HeapObjectSelection {
+  HeapObjectSelection(this.heap, this.object);
+
+  final AdaptedHeapData heap;
+  final AdaptedHeapObject object;
+
+  List<HeapObjectSelection> outboundReferences() => object.references
+      .map((i) => HeapObjectSelection(heap, heap.objects[i]))
+      .toList();
+
+  int get countOfOutboundReferences => object.references.length;
+}
+
 /// Contains information from [HeapSnapshotGraph],
 /// needed for memory screen.
 class AdaptedHeapData {
