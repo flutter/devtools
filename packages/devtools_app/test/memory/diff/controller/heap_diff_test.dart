@@ -78,7 +78,7 @@ SingleClassStats _createClassStats(List<AdaptedHeapObject> instances) {
   ];
 
   final heap = AdaptedHeapData(objects, rootIndex: 0);
-  buildSpanningTree(heap);
+  buildSpanningTreeAndSetInRefs(heap);
 
   final result = SingleClassStats(heapClass: instances.first.heapClass);
   for (var index in indexes) {
@@ -95,7 +95,7 @@ AdaptedHeapObject _createObject(
 ) =>
     AdaptedHeapObject(
       code: code,
-      references: references,
+      outRefs: references,
       heapClass: className,
       shallowSize: 1,
     );
@@ -105,7 +105,7 @@ AdaptedHeap _createSimplestHeap() => AdaptedHeap(
         [
           AdaptedHeapObject(
             code: 0,
-            references: [],
+            outRefs: [],
             heapClass: HeapClassName(className: 'root', library: 'lib'),
             shallowSize: 1,
           )

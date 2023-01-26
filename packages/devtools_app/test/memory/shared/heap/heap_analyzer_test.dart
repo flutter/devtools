@@ -11,7 +11,7 @@ void main() {
   for (var t in _sizeTests) {
     group(t.name, () {
       test('has expected root and unreachable sizes.', () {
-        buildSpanningTree(t.heap);
+        buildSpanningTreeAndSetInRefs(t.heap);
         expect(t.heap.root.retainedSize, equals(t.rootRetainedSize));
 
         var actualUnreachableSize = 0;
@@ -242,7 +242,7 @@ AdaptedHeapObject _createOneByteObject(
 ) =>
     AdaptedHeapObject(
       code: codeAndIndex,
-      references: references,
+      outRefs: references,
       heapClass: HeapClassName(
         className: 'MyClass',
         library: 'my_lib',
@@ -256,7 +256,7 @@ AdaptedHeapObject _createOneByteWeakObject(
 ) {
   final result = AdaptedHeapObject(
     code: codeAndIndex,
-    references: references,
+    outRefs: references,
     heapClass: HeapClassName(
       className: '_WeakProperty',
       library: 'dart.core',

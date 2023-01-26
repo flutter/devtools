@@ -24,11 +24,11 @@ class HeapObjectSelection {
   final AdaptedHeapData heap;
   final AdaptedHeapObject object;
 
-  List<HeapObjectSelection> outboundReferences() => object.references
+  List<HeapObjectSelection> outboundReferences() => object.outRefs
       .map((i) => HeapObjectSelection(heap, heap.objects[i]))
       .toList();
 
-  int get countOfOutboundReferences => object.references.length;
+  int get countOfOutboundReferences => object.outRefs.length;
 }
 
 /// Contains information from [HeapSnapshotGraph],
@@ -75,7 +75,7 @@ class AdaptedHeapData {
 
   final List<AdaptedHeapObject> objects;
 
-  bool isSpanningTreeBuilt = false;
+  bool allFieldsCalculated = false;
 
   late DateTime created;
 
@@ -96,7 +96,7 @@ class AdaptedHeapData {
       _objectsByCode[code];
 
   HeapPath? retainingPath(int objectIndex) {
-    assert(isSpanningTreeBuilt);
+    assert(allFieldsCalculated);
 
     if (objects[objectIndex].retainer == null) return null;
 
@@ -112,7 +112,7 @@ class AdaptedHeapData {
   }
 
   late final totalSize = () {
-    if (!isSpanningTreeBuilt) throw StateError('Spanning tree should be built');
+    if (!allFieldsCalculated) throw StateError('Spanning tree should be built');
     return objects[rootIndex].retainedSize!;
   }();
 }
@@ -125,7 +125,7 @@ typedef IdentityHashCode = int;
 class AdaptedHeapObject {
   AdaptedHeapObject({
     required this.code,
-    required this.references,
+    required this.outRefs,
     required this.heapClass,
     required this.shallowSize,
   });
@@ -133,7 +133,7 @@ class AdaptedHeapObject {
   factory AdaptedHeapObject.fromHeapSnapshotObject(HeapSnapshotObject object) {
     return AdaptedHeapObject(
       code: object.identityHashCode,
-      references: List.of(object.references),
+      outRefs: List.of(object.references),
       heapClass: HeapClassName.fromHeapSnapshotClass(object.klass),
       shallowSize: object.shallowSize,
     );
@@ -142,7 +142,7 @@ class AdaptedHeapObject {
   factory AdaptedHeapObject.fromJson(Map<String, Object?> json) =>
       AdaptedHeapObject(
         code: json[_JsonFields.code] as int,
-        references: (json[_JsonFields.references] as List<Object?>).cast<int>(),
+        outRefs: (json[_JsonFields.references] as List<Object?>).cast<int>(),
         heapClass: HeapClassName(
           className: json[_JsonFields.klass] as String,
           library: json[_JsonFields.library],
@@ -150,7 +150,8 @@ class AdaptedHeapObject {
         shallowSize: (json[_JsonFields.shallowSize] ?? 0) as int,
       );
 
-  final List<int> references;
+  final List<int> outRefs;
+  final List<int> inRefs = [];
   final HeapClassName heapClass;
   final IdentityHashCode code;
   final int shallowSize;
@@ -170,7 +171,7 @@ class AdaptedHeapObject {
 
   Map<String, dynamic> toJson() => {
         _JsonFields.code: code,
-        _JsonFields.references: references,
+        _JsonFields.references: outRefs,
         _JsonFields.klass: heapClass.className,
         _JsonFields.library: heapClass.library,
         _JsonFields.shallowSize: shallowSize,

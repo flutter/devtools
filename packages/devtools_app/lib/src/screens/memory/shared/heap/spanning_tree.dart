@@ -6,10 +6,11 @@ import '../../../../shared/memory/adapted_heap_data.dart';
 
 /// Sets the field retainer and retainedSize for each object in the [heap], that
 /// has retaining path to the root.
-void buildSpanningTree(AdaptedHeapData heap) {
-  assert(!heap.isSpanningTreeBuilt);
+/// Also populates [AdaptedHeapObject.inRefs].
+void buildSpanningTreeAndSetInRefs(AdaptedHeapData heap) {
+  assert(!heap.allFieldsCalculated);
   _setRetainers(heap);
-  heap.isSpanningTreeBuilt = true;
+  heap.allFieldsCalculated = true;
   _verifyHeapIntegrity(heap);
 }
 
@@ -32,7 +33,8 @@ void _setRetainers(AdaptedHeapData heap) {
     final nextCut = <int>[];
     for (var r in cut) {
       final retainer = heap.objects[r];
-      for (var c in retainer.references) {
+      for (var c in retainer.outRefs) {
+        _setInRef(heap, from: r, to: c);
         final child = heap.objects[c];
 
         if (child.retainer != null) continue;
@@ -49,6 +51,12 @@ void _setRetainers(AdaptedHeapData heap) {
     if (nextCut.isEmpty) return;
     cut = nextCut;
   }
+}
+
+/// Sets inbound reference for the object [to].
+void _setInRef(AdaptedHeapData heap, {required int from, required int to}) {
+  final toObject = heap.objects[to];
+  toObject.inRefs.add(from);
 }
 
 /// Assuming the [object] is leaf, initializes its retained size
@@ -69,7 +77,7 @@ void _propagateSize(AdaptedHeapObject object, AdaptedHeapData heap) {
 
 bool _isRetainer(AdaptedHeapObject object) {
   if (object.heapClass.isWeakEntry) return false;
-  return object.references.isNotEmpty;
+  return object.outRefs.isNotEmpty;
 }
 
 /// Verifies heap integrity rules.
@@ -78,9 +86,13 @@ bool _isRetainer(AdaptedHeapObject object) {
 ///
 /// 2. Root's 'retainedSize' should be sum of shallow sizes of all reachable
 /// objects.
+///
+/// 3. All inRefs don't contain duplicates.
 void _verifyHeapIntegrity(AdaptedHeapData heap) {
   assert(() {
     var totalReachableSize = 0;
+    var totalInRefs = 0;
+    var totalOutRefs = 0;
 
     for (var object in heap.objects) {
       assert(
@@ -88,7 +100,15 @@ void _verifyHeapIntegrity(AdaptedHeapData heap) {
         'retainedSize = ${object.retainedSize}, retainer = ${object.retainer}',
       );
       if (object.retainer != null) totalReachableSize += object.shallowSize;
+
+      totalInRefs += object.inRefs.length;
+      totalOutRefs += object.outRefs.length;
+
+      // There is no duplicates in inRefs.
+      assert(object.inRefs.toSet().length == object.inRefs.length);
     }
+
+    assert(totalInRefs == totalOutRefs, 'Error in inRefs calculation.');
 
     assert(
       heap.root.retainedSize == totalReachableSize,

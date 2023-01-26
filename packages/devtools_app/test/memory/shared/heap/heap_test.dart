@@ -15,7 +15,7 @@ class _ClassSizeTest {
     required this.heap,
     required this.expectedClassARetainedSize,
   }) : assert(_assertHeapIndexIsCode(heap)) {
-    buildSpanningTree(heap);
+    buildSpanningTreeAndSetInRefs(heap);
   }
 
   final AdaptedHeapData heap;
@@ -106,7 +106,7 @@ AdaptedHeapObject _createOneByteObject(
 ) =>
     AdaptedHeapObject(
       code: codeAndIndex,
-      references: references,
+      outRefs: references,
       heapClass: theClass,
       shallowSize: 1,
     );
