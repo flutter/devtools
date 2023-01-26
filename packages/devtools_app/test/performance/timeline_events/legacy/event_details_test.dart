@@ -44,6 +44,7 @@ void main() {
 
     setUp(() {
       final fakeServiceManager = FakeServiceManager();
+      setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
       setGlobal(ServiceConnectionManager, fakeServiceManager);
       setGlobal(OfflineModeController, OfflineModeController());
       setGlobal(IdeTheme, IdeTheme());

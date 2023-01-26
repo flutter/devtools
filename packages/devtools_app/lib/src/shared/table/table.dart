@@ -75,6 +75,7 @@ class FlatTable<T> extends StatefulWidget {
     this.searchMatchesNotifier,
     this.activeSearchMatchNotifier,
     this.preserveVerticalScrollPosition = false,
+    this.includeColumnGroupHeaders = true,
     ValueNotifier<T?>? selectionNotifier,
   })  : selectionNotifier = selectionNotifier ?? ValueNotifier<T?>(null),
         super(key: key);
@@ -82,6 +83,12 @@ class FlatTable<T> extends StatefulWidget {
   final List<ColumnData<T>> columns;
 
   final List<ColumnGroup>? columnGroups;
+
+  /// Determines if the headers for column groups should be rendered.
+  ///
+  /// If set to false and `columnGroups` is non-null and non-empty, only
+  /// the vertical dividing lines will be drawn for each column group boundary.
+  final bool includeColumnGroupHeaders;
 
   /// Data set to show as rows in this table.
   final List<T> data;
@@ -198,6 +205,7 @@ class FlatTableState<T> extends State<FlatTable<T>> with AutoDisposeMixin {
         defaultSortDirection: widget.defaultSortDirection,
         secondarySortColumn: widget.secondarySortColumn,
         columnGroups: widget.columnGroups,
+        includeColumnGroupHeaders: widget.includeColumnGroupHeaders,
         pinBehavior: widget.pinBehavior,
       );
     }
@@ -806,8 +814,6 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
   late ScrollController scrollController;
   late ScrollController pinnedScrollController;
 
-  static const double pinnedItemDividerHeight = 5;
-
   late List<T> _data;
 
   @override
@@ -962,6 +968,8 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
     }
 
     final columnGroups = widget.tableController.columnGroups;
+    final includeColumnGroupHeaders =
+        widget.tableController.includeColumnGroupHeaders;
     final tableUiState = widget.tableController.tableUiState;
     final sortColumn =
         widget.tableController.columns[tableUiState.sortColumnIndex];
@@ -980,7 +988,9 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              if (columnGroups != null && columnGroups.isNotEmpty)
+              if (columnGroups != null &&
+                  columnGroups.isNotEmpty &&
+                  includeColumnGroupHeaders)
                 TableRow<T>.tableColumnGroupHeader(
                   linkedScrollControllerGroup:
                       _linkedHorizontalScrollControllerGroup,
@@ -1025,10 +1035,7 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
                     ),
                   ),
                 ),
-                const Divider(
-                  thickness: pinnedItemDividerHeight,
-                  height: pinnedItemDividerHeight,
-                ),
+                const ThickDivider(),
               ],
               Expanded(
                 child: Scrollbar(

@@ -2,24 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/profiler/cpu_profile_bottom_up.dart';
 import 'package:devtools_app/src/screens/profiler/cpu_profile_call_tree.dart';
 import 'package:devtools_app/src/screens/profiler/cpu_profile_controller.dart';
 import 'package:devtools_app/src/screens/profiler/cpu_profile_flame_chart.dart';
-import 'package:devtools_app/src/screens/profiler/cpu_profile_model.dart';
 import 'package:devtools_app/src/screens/profiler/cpu_profile_transformer.dart';
 import 'package:devtools_app/src/screens/profiler/cpu_profiler.dart';
-import 'package:devtools_app/src/screens/profiler/profiler_screen.dart';
-import 'package:devtools_app/src/screens/profiler/profiler_screen_controller.dart';
-import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/shared/charts/flame_chart.dart';
-import 'package:devtools_app/src/shared/common_widgets.dart';
-import 'package:devtools_app/src/shared/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/shared/config_specific/import_export/import_export.dart';
-import 'package:devtools_app/src/shared/globals.dart';
-import 'package:devtools_app/src/shared/notifications.dart';
-import 'package:devtools_app/src/shared/preferences.dart';
-import 'package:devtools_app/src/shared/scripts/script_manager.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -49,6 +40,7 @@ void main() {
       processId: 'test',
     );
 
+    setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
     setGlobal(ServiceConnectionManager, fakeServiceManager);
     setGlobal(OfflineModeController, OfflineModeController());
     setGlobal(NotificationService, NotificationService());
