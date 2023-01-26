@@ -64,7 +64,7 @@ class DartIOHttpRequestData extends NetworkRequest {
           _request.id.toString(),
         )
         .then((updated) => _request = updated);
-    }
+  }
 
   static List<Cookie> _parseCookies(List<String>? cookies) {
     if (cookies == null) return [];
