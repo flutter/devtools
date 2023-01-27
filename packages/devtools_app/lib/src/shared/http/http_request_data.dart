@@ -6,7 +6,6 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 
-import 'package:flutter/widgets.dart';
 import 'package:mime/mime.dart';
 import 'package:vm_service/vm_service.dart';
 
