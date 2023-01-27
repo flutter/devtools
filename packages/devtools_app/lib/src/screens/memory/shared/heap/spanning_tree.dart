@@ -97,19 +97,19 @@ void _verifyHeapIntegrity(AdaptedHeapData heap) {
     var totalInRefs = 0;
     var totalOutRefs = 0;
 
-    for (var object in heap.objects) {
+    for (final i in Iterable.generate(heap.objects.length)) {
+      final object = heap.objects[i];
       assert(
         (object.retainedSize == null) == (object.retainer == null),
         'retainedSize = ${object.retainedSize}, retainer = ${object.retainer}',
       );
       if (object.retainer != null) totalReachableSize += object.shallowSize;
 
+      assert(!object.inRefs.contains(i));
+      assert(!object.outRefs.contains(i));
+
       totalInRefs += object.inRefs.length;
       totalOutRefs += object.outRefs.length;
-
-      // There is no duplicates in refs.
-      assert(object.outRefs.toSet().length == object.outRefs.length);
-      //assert(object.inRefs.toSet().length == object.inRefs.length);
     }
 
     assert(totalInRefs == totalOutRefs, 'Error in inRefs calculation.');
