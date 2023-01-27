@@ -180,7 +180,7 @@ class AdaptedHeapObject {
 
   Map<String, dynamic> toJson() => {
         _JsonFields.code: code,
-        _JsonFields.references: outRefs,
+        _JsonFields.references: outRefs.toList(),
         _JsonFields.klass: heapClass.className,
         _JsonFields.library: heapClass.library,
         _JsonFields.shallowSize: shallowSize,
