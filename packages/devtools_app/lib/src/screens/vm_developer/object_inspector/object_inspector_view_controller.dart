@@ -19,7 +19,10 @@ import 'vm_object_model.dart';
 /// the object history and the object viewport.
 class ObjectInspectorViewController extends DisposableController
     with AutoDisposeControllerMixin {
-  ObjectInspectorViewController() {
+  ObjectInspectorViewController({
+    ClassHierarchyExplorerController? classHierarchyController,
+  }) : classHierarchyController =
+            classHierarchyController ?? ClassHierarchyExplorerController() {
     addAutoDisposeListener(
       scriptManager.sortedScripts,
       _initializeForCurrentIsolate,
@@ -34,7 +37,7 @@ class ObjectInspectorViewController extends DisposableController
   final programExplorerController =
       ProgramExplorerController(showCodeNodes: true);
 
-  final classHierarchyController = ClassHierarchyExplorerController();
+  final ClassHierarchyExplorerController classHierarchyController;
   final codeViewController = CodeViewController();
   final objectStoreController = ObjectStoreController();
 

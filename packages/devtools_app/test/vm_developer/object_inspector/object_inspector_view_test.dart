@@ -4,7 +4,9 @@
 
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/debugger/program_explorer.dart';
+import 'package:devtools_app/src/screens/vm_developer/object_inspector/class_hierarchy_explorer_controller.dart';
 import 'package:devtools_app/src/screens/vm_developer/object_inspector/object_inspector_view.dart';
+import 'package:devtools_app/src/screens/vm_developer/object_inspector/object_inspector_view_controller.dart';
 import 'package:devtools_app/src/screens/vm_developer/object_inspector/object_viewport.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
@@ -47,7 +49,11 @@ void main() {
         Builder(
           builder: objectInspector.build,
         ),
-        vmDeveloperTools: VMDeveloperToolsController(),
+        vmDeveloperTools: VMDeveloperToolsController(
+          objectInspectorViewController: ObjectInspectorViewController(
+            classHierarchyController: TestClassHierarchyExplorerController(),
+          ),
+        ),
       ),
     );
     expect(find.byType(Split), findsNWidgets(2));

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+export 'src/mocks/fake_class_hierarchy_explorer_controller.dart';
+export 'src/mocks/fake_object_inspector_view_controller.dart';
 export 'src/mocks/fake_program_explorer_controller.dart';
 export 'src/mocks/fake_service_extension_manager.dart';
 export 'src/mocks/fake_service_manager.dart';

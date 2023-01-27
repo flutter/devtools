@@ -8,20 +8,12 @@ import 'package:devtools_app/src/screens/vm_developer/object_inspector/class_hie
 import 'package:devtools_app/src/screens/vm_developer/object_inspector/object_inspector_view_controller.dart';
 import 'package:devtools_app/src/screens/vm_developer/vm_developer_common_widgets.dart';
 import 'package:devtools_test/devtools_test.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../test_infra/utils/tree_utils.dart';
-
-class FakeObjectInspectorViewController extends Fake
-    implements ObjectInspectorViewController {
-  @override
-  final classHierarchyController = ClassHierarchyExplorerController();
-
-  @override
-  Future<void> findAndSelectNodeForObject(ObjRef obj) async {}
-}
 
 void main() {
   const windowSize = Size(2560.0, 1338.0);
@@ -131,6 +123,8 @@ void main() {
     expect(find.text('NoSub'), findsOneWidget);
 
     expect(
-        find.byType(VmServiceObjectLink<Class>), findsNWidgets(classes.length));
+      find.byType(VmServiceObjectLink<Class>),
+      findsNWidgets(classes.length),
+    );
   });
 }
