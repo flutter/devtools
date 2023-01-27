@@ -4,11 +4,8 @@
 
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/vm_developer/object_inspector/class_hierarchy_explorer.dart';
-import 'package:devtools_app/src/screens/vm_developer/object_inspector/class_hierarchy_explorer_controller.dart';
-import 'package:devtools_app/src/screens/vm_developer/object_inspector/object_inspector_view_controller.dart';
 import 'package:devtools_app/src/screens/vm_developer/vm_developer_common_widgets.dart';
 import 'package:devtools_test/devtools_test.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vm_service/vm_service.dart';
