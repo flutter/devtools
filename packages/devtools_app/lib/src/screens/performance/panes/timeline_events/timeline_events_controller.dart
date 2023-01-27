@@ -7,6 +7,9 @@ import 'dart:async';
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 
+import '../../../../shared/analytics/analytics.dart' as ga;
+import '../../../../shared/analytics/constants.dart' as gac;
+import '../../../../shared/analytics/metrics.dart';
 import '../../../../shared/config_specific/logger/logger.dart';
 import '../../../../shared/feature_flags.dart';
 import '../../../../shared/future_work_tracker.dart';
@@ -100,6 +103,9 @@ class TimelineEventsController extends PerformanceFeatureController
   static const _timelinePollingInterval = Duration(seconds: 1);
 
   RateLimiter? _timelinePollingRateLimiter;
+
+  /// The tracking index for the first unprocessed trace event collected.
+  int _nextTraceIndexToProcess = 0;
 
   /// The collection of [TimelineEvent]s that should be linked to
   /// [FlutterFrame]s but have not yet been assigned.
@@ -264,7 +270,38 @@ class TimelineEventsController extends PerformanceFeatureController
 
   Future<void> _processAllTraceEvents() async {
     if (_perfettoMode) {
-      await perfettoController.processor.processData(allTraceEvents);
+      final traceEventCount = allTraceEvents.length;
+      debugTraceEventCallback(
+        () => log(
+          'processing traceEvents at startIndex '
+          '$_nextTraceIndexToProcess',
+        ),
+      );
+      final processingTraceCount = traceEventCount - _nextTraceIndexToProcess;
+      Future<void> processTraceEventsHelper() async {
+        await perfettoController.processor.processData(
+          allTraceEvents,
+          startIndex: _nextTraceIndexToProcess,
+        );
+        debugTraceEventCallback(
+          () => log(
+            'after processing traceEvents at startIndex $_nextTraceIndexToProcess, '
+            'and now _nextTraceIndexToProcess = $traceEventCount',
+          ),
+        );
+        _nextTraceIndexToProcess = traceEventCount;
+      }
+
+      // Process trace events [processTraceEventsHelper] and time the operation
+      // for analytics.
+      await ga.timeAsync(
+        gac.performance,
+        gac.perfettoModeTraceEventProcessingTime,
+        asyncOperation: processTraceEventsHelper,
+        screenMetricsProvider: () => PerformanceScreenMetrics(
+          traceEventCount: processingTraceCount,
+        ),
+      );
       await perfettoController.loadTrace(allTraceEvents);
     } else {
       await legacyController.processTraceEvents(
@@ -527,6 +564,7 @@ class TimelineEventsController extends PerformanceFeatureController
   @override
   Future<void> clearData() async {
     allTraceEvents.clear();
+    _nextTraceIndexToProcess = 0;
     _unassignedFlutterFrameEvents.clear();
 
     threadNamesById.clear();
