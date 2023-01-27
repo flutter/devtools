@@ -17,8 +17,8 @@ void buildSpanningTreeAndSetInRefs(AdaptedHeapData heap) {
 
 void _setInboundRefs(AdaptedHeapData heap) {
   for (final from in Iterable.generate(heap.objects.length)) {
-    for (final to in heap.objects) {
-      to.inRefs.add(from);
+    for (final to in heap.objects[from].outRefs) {
+      heap.objects[to].inRefs.add(from);
     }
   }
 }
@@ -106,11 +106,9 @@ void _verifyHeapIntegrity(AdaptedHeapData heap) {
       totalInRefs += object.inRefs.length;
       totalOutRefs += object.outRefs.length;
 
-      if (object.inRefs.toSet().length != object.inRefs.length) {
-        print('!!!!!!! ${object.inRefs}');
-      }
-      // There is no duplicates in inRefs.
+      // There is no duplicates in refs.
       assert(object.inRefs.toSet().length == object.inRefs.length);
+      assert(object.outRefs.toSet().length == object.outRefs.length);
     }
 
     assert(totalInRefs == totalOutRefs, 'Error in inRefs calculation.');
