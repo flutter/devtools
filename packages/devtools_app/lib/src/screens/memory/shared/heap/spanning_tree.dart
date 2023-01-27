@@ -10,8 +10,17 @@ import '../../../../shared/memory/adapted_heap_data.dart';
 void buildSpanningTreeAndSetInRefs(AdaptedHeapData heap) {
   assert(!heap.allFieldsCalculated);
   _setRetainers(heap);
+  _setInboundRefs(heap);
   heap.allFieldsCalculated = true;
   _verifyHeapIntegrity(heap);
+}
+
+void _setInboundRefs(AdaptedHeapData heap) {
+  for (final from in Iterable.generate(heap.objects.length)) {
+    for (final to in heap.objects) {
+      to.inRefs.add(from);
+    }
+  }
 }
 
 /// The algorithm takes O(number of references in the heap).
@@ -34,7 +43,6 @@ void _setRetainers(AdaptedHeapData heap) {
     for (var r in cut) {
       final retainer = heap.objects[r];
       for (var c in retainer.outRefs) {
-        _setInRef(heap, from: r, to: c);
         final child = heap.objects[c];
 
         if (child.retainer != null) continue;
@@ -51,12 +59,6 @@ void _setRetainers(AdaptedHeapData heap) {
     if (nextCut.isEmpty) return;
     cut = nextCut;
   }
-}
-
-/// Sets inbound reference for the object [to].
-void _setInRef(AdaptedHeapData heap, {required int from, required int to}) {
-  final toObject = heap.objects[to];
-  toObject.inRefs.add(from);
 }
 
 /// Assuming the [object] is leaf, initializes its retained size
@@ -104,6 +106,9 @@ void _verifyHeapIntegrity(AdaptedHeapData heap) {
       totalInRefs += object.inRefs.length;
       totalOutRefs += object.outRefs.length;
 
+      if (object.inRefs.toSet().length != object.inRefs.length) {
+        print('!!!!!!! ${object.inRefs}');
+      }
       // There is no duplicates in inRefs.
       assert(object.inRefs.toSet().length == object.inRefs.length);
     }
