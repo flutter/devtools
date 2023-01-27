@@ -131,7 +131,7 @@ var _nextCode = 1;
 
 AdaptedHeapObject _createObject(String className) => AdaptedHeapObject(
       code: _nextCode++,
-      outRefs: [],
+      outRefs: {},
       heapClass: HeapClassName(
         className: className,
         library: 'my_lib',
