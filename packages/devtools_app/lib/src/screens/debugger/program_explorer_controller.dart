@@ -352,12 +352,16 @@ class ProgramExplorerController extends DisposableController
     final LibraryRef targetLib = scriptObj.library!;
 
     // Search targetLib only on the root level nodes.
-    final libNode = _searchRootObjectNodes(targetLib)!;
+    var libNode = _searchRootObjectNodes(targetLib);
+    libNode ??= breadthFirstSearchObject(
+      scriptObj,
+      rootObjectNodes.value,
+    );
 
     // If the object's owning script URI is the same as the target library URI,
     // return the library node as the match.
     if (targetLib.uri == targetScript.uri) {
-      return libNode;
+      return libNode!;
     }
 
     // Find the script node nested under the library.

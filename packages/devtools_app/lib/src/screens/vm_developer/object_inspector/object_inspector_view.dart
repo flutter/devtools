@@ -14,6 +14,7 @@ import '../../debugger/program_explorer.dart';
 import '../../debugger/program_explorer_model.dart';
 import '../vm_developer_tools_controller.dart';
 import '../vm_developer_tools_screen.dart';
+import 'class_hierarchy_explorer.dart';
 import 'object_inspector_view_controller.dart';
 import 'object_store.dart';
 import 'object_viewport.dart';
@@ -71,6 +72,10 @@ class _ObjectInspectorViewState extends State<_ObjectInspectorView>
               tabName: 'Object Store',
               gaPrefix: gac.objectStore,
             ),
+            DevToolsTab.create(
+              tabName: 'Class Hierarchy',
+              gaPrefix: gac.classHierarchy,
+            )
           ],
           tabViews: [
             ProgramExplorer(
@@ -81,6 +86,9 @@ class _ObjectInspectorViewState extends State<_ObjectInspectorView>
             ObjectStoreViewer(
               controller: controller.objectStoreController,
               onLinkTapped: controller.findAndSelectNodeForObject,
+            ),
+            ClassHierarchyExplorer(
+              controller: controller,
             ),
           ],
         ),

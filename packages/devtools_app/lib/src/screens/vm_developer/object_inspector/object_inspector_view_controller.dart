@@ -10,6 +10,7 @@ import '../../../shared/globals.dart';
 import '../../../shared/primitives/auto_dispose.dart';
 import '../../debugger/codeview_controller.dart';
 import '../../debugger/program_explorer_controller.dart';
+import 'class_hierarchy_explorer_controller.dart';
 import 'object_store_controller.dart';
 import 'object_viewport.dart';
 import 'vm_object_model.dart';
@@ -33,6 +34,7 @@ class ObjectInspectorViewController extends DisposableController
   final programExplorerController =
       ProgramExplorerController(showCodeNodes: true);
 
+  final classHierarchyController = ClassHierarchyExplorerController();
   final codeViewController = CodeViewController();
   final objectStoreController = ObjectStoreController();
 
@@ -172,6 +174,7 @@ class ObjectInspectorViewController extends DisposableController
   void _initializeForCurrentIsolate() async {
     objectHistory.clear();
     await objectStoreController.refresh();
+    await classHierarchyController.refresh();
 
     final scriptRefs = scriptManager.sortedScripts.value;
     final service = serviceManager.service!;
@@ -205,7 +208,7 @@ class ObjectInspectorViewController extends DisposableController
     ScriptRef? script;
     try {
       final node = await programExplorerController.searchFileExplorer(obj);
-      script = node.location!.scriptRef;
+      script = node.script ?? node.location!.scriptRef;
     } on StateError {
       // The node doesn't exist, so it must be an instance or an object from
       // the object store.
