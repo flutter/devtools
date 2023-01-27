@@ -106,7 +106,7 @@ AdaptedHeapObject _createOneByteObject(
 ) =>
     AdaptedHeapObject(
       code: codeAndIndex,
-      outRefs: references,
+      outRefs: references.toSet(),
       heapClass: theClass,
       shallowSize: 1,
     );

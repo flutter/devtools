@@ -16,7 +16,7 @@ import '../../../../profiler/cpu_profile_model.dart';
 import '../../../../profiler/cpu_profiler.dart';
 import '../../../performance_model.dart';
 import '../../../performance_screen.dart';
-import '../timeline_events_controller.dart';
+import 'legacy_events_controller.dart';
 
 class EventDetails extends StatelessWidget {
   const EventDetails(this.selectedEvent, this.legacyController);

@@ -10,8 +10,18 @@ import '../../../../shared/memory/adapted_heap_data.dart';
 void buildSpanningTreeAndSetInRefs(AdaptedHeapData heap) {
   assert(!heap.allFieldsCalculated);
   _setRetainers(heap);
+  _setInboundRefs(heap);
   heap.allFieldsCalculated = true;
   _verifyHeapIntegrity(heap);
+}
+
+void _setInboundRefs(AdaptedHeapData heap) {
+  for (final from in Iterable.generate(heap.objects.length)) {
+    for (final to in heap.objects[from].outRefs) {
+      assert(from != to);
+      heap.objects[to].inRefs.add(from);
+    }
+  }
 }
 
 /// The algorithm takes O(number of references in the heap).
@@ -34,7 +44,6 @@ void _setRetainers(AdaptedHeapData heap) {
     for (var r in cut) {
       final retainer = heap.objects[r];
       for (var c in retainer.outRefs) {
-        _setInRef(heap, from: r, to: c);
         final child = heap.objects[c];
 
         if (child.retainer != null) continue;
@@ -94,18 +103,19 @@ void _verifyHeapIntegrity(AdaptedHeapData heap) {
     var totalInRefs = 0;
     var totalOutRefs = 0;
 
-    for (var object in heap.objects) {
+    for (final i in Iterable.generate(heap.objects.length)) {
+      final object = heap.objects[i];
       assert(
         (object.retainedSize == null) == (object.retainer == null),
         'retainedSize = ${object.retainedSize}, retainer = ${object.retainer}',
       );
       if (object.retainer != null) totalReachableSize += object.shallowSize;
 
+      assert(!object.inRefs.contains(i));
+      assert(!object.outRefs.contains(i));
+
       totalInRefs += object.inRefs.length;
       totalOutRefs += object.outRefs.length;
-
-      // There is no duplicates in inRefs.
-      assert(object.inRefs.toSet().length == object.inRefs.length);
     }
 
     assert(totalInRefs == totalOutRefs, 'Error in inRefs calculation.');

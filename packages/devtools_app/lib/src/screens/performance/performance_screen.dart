@@ -21,7 +21,7 @@ import '../../shared/theme.dart';
 import '../../shared/ui/icons.dart';
 import '../../shared/utils.dart';
 import 'panes/controls/enhance_tracing/enhance_tracing.dart';
-import 'panes/controls/layer_debugging_options.dart';
+import 'panes/controls/more_debugging_options.dart';
 import 'panes/controls/performance_settings.dart';
 import 'panes/flutter_frames/flutter_frames_chart.dart';
 import 'panes/timeline_events/timeline_events_controller.dart';

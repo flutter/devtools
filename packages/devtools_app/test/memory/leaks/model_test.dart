@@ -28,7 +28,7 @@ void main() {
               className: 'class',
               library: 'library',
             ),
-            outRefs: [2, 3, 4],
+            outRefs: {2, 3, 4},
             code: 6,
             shallowSize: 1,
           ),
