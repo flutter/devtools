@@ -31,14 +31,14 @@ void main() {
   test('$DiffClassStats calculates mix of cases as expected', () {
     final className = HeapClassName(className: 'myClass', library: 'library');
 
-    final deleted = _createObject(className, 1, []);
-    final persistedBefore = _createObject(className, 2, []);
-    final persistedAfter = _createObject(className, 2, []);
-    final created1 = _createObject(className, 3, []);
-    final created2 = _createObject(className, 4, []);
+    final deleted = _createObject(className, 1, {});
+    final persistedBefore = _createObject(className, 2, {});
+    final persistedAfter = _createObject(className, 2, {});
+    final created1 = _createObject(className, 3, {});
+    final created2 = _createObject(className, 4, {});
 
-    final statsBefore = _createClassStats([deleted, persistedBefore]);
-    final statsAfter = _createClassStats([persistedAfter, created1, created2]);
+    final statsBefore = _createClassStats({deleted, persistedBefore});
+    final statsAfter = _createClassStats({persistedAfter, created1, created2});
 
     final stats = DiffClassStats.diff(before: statsBefore, after: statsAfter)!;
 
@@ -51,9 +51,9 @@ void main() {
   test('$DiffClassStats calculates deletion as expected', () {
     final className = HeapClassName(className: 'myClass', library: 'library');
 
-    final deleted = _createObject(className, 1, []);
+    final deleted = _createObject(className, 1, {});
 
-    final statsBefore = _createClassStats([deleted]);
+    final statsBefore = _createClassStats({deleted});
 
     final stats = DiffClassStats.diff(before: statsBefore, after: null)!;
 
@@ -64,9 +64,9 @@ void main() {
   });
 }
 
-SingleClassStats _createClassStats(List<AdaptedHeapObject> instances) {
+SingleClassStats _createClassStats(Set<AdaptedHeapObject> instances) {
   final indexes =
-      Iterable<int>.generate(instances.length).map((i) => i + 1).toList();
+      Iterable<int>.generate(instances.length).map((i) => i + 1).toSet();
 
   final objects = [
     _createObject(
@@ -78,7 +78,7 @@ SingleClassStats _createClassStats(List<AdaptedHeapObject> instances) {
   ];
 
   final heap = AdaptedHeapData(objects, rootIndex: 0);
-  buildSpanningTree(heap);
+  buildSpanningTreeAndSetInRefs(heap);
 
   final result = SingleClassStats(heapClass: instances.first.heapClass);
   for (var index in indexes) {
@@ -91,11 +91,11 @@ SingleClassStats _createClassStats(List<AdaptedHeapObject> instances) {
 AdaptedHeapObject _createObject(
   HeapClassName className,
   int code,
-  List<int> references,
+  Set<int> references,
 ) =>
     AdaptedHeapObject(
       code: code,
-      references: references,
+      outRefs: references,
       heapClass: className,
       shallowSize: 1,
     );
@@ -105,7 +105,7 @@ AdaptedHeap _createSimplestHeap() => AdaptedHeap(
         [
           AdaptedHeapObject(
             code: 0,
-            references: [],
+            outRefs: {},
             heapClass: HeapClassName(className: 'root', library: 'lib'),
             shallowSize: 1,
           )

@@ -37,7 +37,7 @@ void analyzeHeapAndSetRetainingPaths(
   AdaptedHeapData heap,
   List<LeakReport> notGCedLeaks,
 ) {
-  if (!heap.isSpanningTreeBuilt) buildSpanningTree(heap);
+  if (!heap.allFieldsCalculated) buildSpanningTreeAndSetInRefs(heap);
 
   for (var l in notGCedLeaks) {
     l.retainingPath = _pathByIdentityHashCode(heap, l.code)?.shortPath();
@@ -46,7 +46,7 @@ void analyzeHeapAndSetRetainingPaths(
 
 /// Sets [detailedPath] to each leak.
 void setDetailedPaths(AdaptedHeapData heap, List<LeakReport> notGCedLeaks) {
-  assert(heap.isSpanningTreeBuilt);
+  assert(heap.allFieldsCalculated);
 
   for (var l in notGCedLeaks) {
     l.detailedPath = _pathByIdentityHashCode(heap, l.code)?.detailedPath();
