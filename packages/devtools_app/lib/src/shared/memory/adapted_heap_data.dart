@@ -5,6 +5,7 @@
 import 'package:vm_service/vm_service.dart';
 
 import 'class_name.dart';
+import 'simple_items.dart';
 
 /// Names for json fields.
 class _JsonFields {
@@ -24,11 +25,21 @@ class HeapObjectSelection {
   final AdaptedHeapData heap;
   final AdaptedHeapObject object;
 
-  List<HeapObjectSelection> outboundReferences() => object.outRefs
-      .map((i) => HeapObjectSelection(heap, heap.objects[i]))
-      .toList();
+  List<int> _refs(RefDirection direction) {
+    switch (direction) {
+      case RefDirection.inbound:
+        return object.inRefs;
+      case RefDirection.outbound:
+        return object.outRefs;
+    }
+  }
 
-  int get countOfOutboundReferences => object.outRefs.length;
+  List<HeapObjectSelection> references(RefDirection direction) =>
+      _refs(direction)
+          .map((i) => HeapObjectSelection(heap, heap.objects[i]))
+          .toList();
+
+  int countOfReferences(RefDirection direction) => _refs(direction).length;
 }
 
 /// Contains information from [HeapSnapshotGraph],

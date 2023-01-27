@@ -155,17 +155,23 @@ void addChildReferences(
 
       break;
     case RefNodeType.staticInRefs:
-      variable.addChild(
-        DartObjectNode.references(
-          // Temporary placeholder
-          '<static inbound refs>',
-          ObjectReferences.withType(ref, RefNodeType.staticInRefs),
-        ),
-      );
+      final children = ref.heapSelection!
+          .references(ref.refNodeType.direction!)
+          .map(
+            (s) => DartObjectNode.references(
+              s.object.heapClass.className,
+              ObjectReferences(
+                refNodeType: RefNodeType.staticInRefs,
+                heapSelection: s,
+              ),
+            ),
+          )
+          .toList();
+      variable.addAllChildren(children);
       break;
     case RefNodeType.staticOutRefs:
       final children = ref.heapSelection!
-          .outboundReferences()
+          .references(ref.refNodeType.direction!)
           .map(
             (s) => DartObjectNode.references(
               '${s.object.heapClass.className}, ${prettyPrintRetainedSize(
@@ -179,7 +185,6 @@ void addChildReferences(
           )
           .toList();
       variable.addAllChildren(children);
-
       break;
     case RefNodeType.liveRefRoot:
       variable.addAllChildren([

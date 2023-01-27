@@ -181,7 +181,8 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
     return DartObjectNode._(
       text: text,
       ref: ref,
-      childCount: ref.heapSelection?.countOfOutboundReferences,
+      childCount:
+          ref.heapSelection?.countOfReferences(ref.refNodeType.direction!),
     );
   }
 
