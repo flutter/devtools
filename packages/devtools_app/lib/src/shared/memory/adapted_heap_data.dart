@@ -26,7 +26,7 @@ class HeapObjectSelection {
   final AdaptedHeapData heap;
   final AdaptedHeapObject object;
 
-  List<int> _refs(RefDirection direction) {
+  Iterable<int> _refs(RefDirection direction) {
     switch (direction) {
       case RefDirection.inbound:
         return object.inRefs;

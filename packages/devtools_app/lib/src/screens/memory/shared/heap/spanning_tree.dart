@@ -62,12 +62,6 @@ void _setRetainers(AdaptedHeapData heap) {
   }
 }
 
-/// Sets inbound reference for the object [to].
-void _setInRef(AdaptedHeapData heap, {required int from, required int to}) {
-  final toObject = heap.objects[to];
-  toObject.inRefs.add(from);
-}
-
 /// Assuming the [object] is leaf, initializes its retained size
 /// and adds the size to all its retainers.
 void _propagateSize(AdaptedHeapObject object, AdaptedHeapData heap) {
