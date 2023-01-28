@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:collection/collection.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../../../shared/analytics/analytics.dart' as ga;
@@ -89,16 +90,18 @@ class ClassOnlyHeapPath {
     return data.join().trim();
   }
 
+  late final _listEquality = const ListEquality().equals;
+
   @override
   bool operator ==(Object other) {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is ClassOnlyHeapPath && other.toLongString() == toLongString();
+    return other is ClassOnlyHeapPath && _listEquality(classes, other.classes);
   }
 
   @override
-  int get hashCode => toLongString().hashCode;
+  late final int hashCode = Object.hashAll(classes);
 }
 
 /// This class is needed to make the snapshot taking operation mockable.
