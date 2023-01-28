@@ -232,7 +232,7 @@ Future<void> delayToReleaseUiThread({int micros = 0}) async {
 
 /// Use in long calculations, to release UI thread after each N steps.
 class UiReleaser {
-  UiReleaser({this.setpsBetweenDelays = 1000, this.delayLength = 0})
+  UiReleaser({this.setpsBetweenDelays = 10000, this.delayLength = 0})
       : assert(setpsBetweenDelays > 0);
 
   final int setpsBetweenDelays;

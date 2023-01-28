@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import '../../../../../devtools_app.dart';
 import '../../../../shared/memory/adapted_heap_data.dart';
 import '../../../../shared/memory/class_name.dart';
 import 'class_filter.dart';
@@ -26,6 +27,8 @@ class AdaptedHeap {
     _classes = await _heapStatistics();
   }
 
+  final _uiReleaser = UiReleaser();
+
   Future<SingleHeapClasses> _heapStatistics() async {
     final sw = Stopwatch()..start();
     print('151 ${sw.elapsed}');
@@ -34,6 +37,7 @@ class AdaptedHeap {
 
     print('152 ${sw.elapsed}');
     for (var i in Iterable.generate(data.objects.length)) {
+      await _uiReleaser.step();
       final object = data.objects[i];
       final className = object.heapClass;
 
