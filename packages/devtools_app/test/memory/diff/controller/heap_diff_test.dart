@@ -12,9 +12,9 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   test(
       '$HeapDiffStore does not create new $DiffHeapClasses for the same couple',
-      () {
-    final heap1 = _createSimplestHeap();
-    final heap2 = _createSimplestHeap();
+      () async {
+    final heap1 = await _createSimplestHeap();
+    final heap2 = await _createSimplestHeap();
 
     expect(heap1 == heap2, false);
 
@@ -100,7 +100,8 @@ AdaptedHeapObject _createObject(
       shallowSize: 1,
     );
 
-AdaptedHeap _createSimplestHeap() => AdaptedHeap(
+Future<AdaptedHeap> _createSimplestHeap() async =>
+    await AdaptedHeap.adaptedHeap(
       AdaptedHeapData(
         [
           AdaptedHeapObject(

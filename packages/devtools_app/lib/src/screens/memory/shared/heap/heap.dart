@@ -9,16 +9,30 @@ import 'model.dart';
 import 'spanning_tree.dart';
 
 class AdaptedHeap {
-  AdaptedHeap(this.data);
+  AdaptedHeap._(this.data);
+
+  static Future<AdaptedHeap> adaptedHeap(AdaptedHeapData data) async {
+    final result = AdaptedHeap._(data);
+    await result._initialize();
+    return result;
+  }
 
   final AdaptedHeapData data;
 
-  late final SingleHeapClasses classes = _heapStatistics();
+  SingleHeapClasses get classes => _classes;
+  late final SingleHeapClasses _classes;
 
-  SingleHeapClasses _heapStatistics() {
+  Future<void> _initialize() async {
+    _classes = await _heapStatistics();
+  }
+
+  Future<SingleHeapClasses> _heapStatistics() async {
+    final sw = Stopwatch()..start();
+    print('151 ${sw.elapsed}');
     final result = <HeapClassName, SingleClassStats>{};
     if (!data.allFieldsCalculated) buildSpanningTreeAndSetInRefs(data);
 
+    print('152 ${sw.elapsed}');
     for (var i in Iterable.generate(data.objects.length)) {
       final object = data.objects[i];
       final className = object.heapClass;
@@ -34,6 +48,7 @@ class AdaptedHeap {
       singleHeapClass.countInstance(data, i);
     }
 
+    print('159 ${sw.elapsed}');
     return SingleHeapClasses(result)..seal();
   }
 }
