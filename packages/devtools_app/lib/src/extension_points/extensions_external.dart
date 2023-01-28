@@ -49,4 +49,7 @@ class ExternalDevToolsExtensionPoints implements DevToolsExtensionPoints {
       serviceManager.connectedApp!.isFlutterAppNow == true
           ? InspectorService()
           : null;
+
+  @override
+  bool get defaultIsDarkTheme => true;
 }

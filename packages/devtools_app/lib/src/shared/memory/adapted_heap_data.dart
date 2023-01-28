@@ -2,9 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:collection/collection.dart';
 import 'package:vm_service/vm_service.dart';
 
 import 'class_name.dart';
+import 'simple_items.dart';
 
 /// Names for json fields.
 class _JsonFields {
@@ -16,6 +18,30 @@ class _JsonFields {
   static const String shallowSize = 'shallowSize';
   static const String rootIndex = 'rootIndex';
   static const String created = 'created';
+}
+
+class HeapObjectSelection {
+  HeapObjectSelection(this.heap, this.object);
+
+  final AdaptedHeapData heap;
+  final AdaptedHeapObject object;
+
+  Iterable<int> _refs(RefDirection direction) {
+    switch (direction) {
+      case RefDirection.inbound:
+        return object.inRefs;
+      case RefDirection.outbound:
+        return object.outRefs;
+    }
+  }
+
+  List<HeapObjectSelection> references(RefDirection direction) =>
+      _refs(direction)
+          .map((i) => HeapObjectSelection(heap, heap.objects[i]))
+          .toList();
+
+  int? countOfReferences(RefDirection? direction) =>
+      direction == null ? null : _refs(direction).length;
 }
 
 /// Contains information from [HeapSnapshotGraph],
@@ -35,7 +61,9 @@ class AdaptedHeapData {
 
     return AdaptedHeapData(
       (json[_JsonFields.objects] as List<Object?>)
-          .map((e) => AdaptedHeapObject.fromJson(e as Map<String, Object?>))
+          .mapIndexed(
+            (i, e) => AdaptedHeapObject.fromJson(e as Map<String, Object?>, i),
+          )
           .toList(),
       created: createdJson == null ? null : DateTime.parse(createdJson),
       rootIndex: json[_JsonFields.rootIndex] ?? _defaultRootIndex,
@@ -45,8 +73,8 @@ class AdaptedHeapData {
   static AdaptedHeapData fromHeapSnapshot(
     HeapSnapshotGraph graph,
   ) {
-    final objects = graph.objects.map((e) {
-      return AdaptedHeapObject.fromHeapSnapshotObject(e);
+    final objects = graph.objects.mapIndexed((i, e) {
+      return AdaptedHeapObject.fromHeapSnapshotObject(e, i);
     }).toList();
 
     return AdaptedHeapData(objects);
@@ -62,7 +90,7 @@ class AdaptedHeapData {
 
   final List<AdaptedHeapObject> objects;
 
-  bool isSpanningTreeBuilt = false;
+  bool allFieldsCalculated = false;
 
   late DateTime created;
 
@@ -83,7 +111,7 @@ class AdaptedHeapData {
       _objectsByCode[code];
 
   HeapPath? retainingPath(int objectIndex) {
-    assert(isSpanningTreeBuilt);
+    assert(allFieldsCalculated);
 
     if (objects[objectIndex].retainer == null) return null;
 
@@ -99,7 +127,7 @@ class AdaptedHeapData {
   }
 
   late final totalSize = () {
-    if (!isSpanningTreeBuilt) throw StateError('Spanning tree should be built');
+    if (!allFieldsCalculated) throw StateError('Spanning tree should be built');
     return objects[rootIndex].retainedSize!;
   }();
 }
@@ -112,24 +140,30 @@ typedef IdentityHashCode = int;
 class AdaptedHeapObject {
   AdaptedHeapObject({
     required this.code,
-    required this.references,
+    required this.outRefs,
     required this.heapClass,
     required this.shallowSize,
   });
 
-  factory AdaptedHeapObject.fromHeapSnapshotObject(HeapSnapshotObject object) {
+  factory AdaptedHeapObject.fromHeapSnapshotObject(
+    HeapSnapshotObject object,
+    int index,
+  ) {
     return AdaptedHeapObject(
       code: object.identityHashCode,
-      references: List.of(object.references),
+      outRefs: Set.of(object.references.where((i) => i != index)),
       heapClass: HeapClassName.fromHeapSnapshotClass(object.klass),
       shallowSize: object.shallowSize,
     );
   }
 
-  factory AdaptedHeapObject.fromJson(Map<String, Object?> json) =>
+  factory AdaptedHeapObject.fromJson(Map<String, Object?> json, int index) =>
       AdaptedHeapObject(
         code: json[_JsonFields.code] as int,
-        references: (json[_JsonFields.references] as List<Object?>).cast<int>(),
+        outRefs: (json[_JsonFields.references] as List<Object?>)
+            .cast<int>()
+            .where((i) => i != index)
+            .toSet(),
         heapClass: HeapClassName(
           className: json[_JsonFields.klass] as String,
           library: json[_JsonFields.library],
@@ -137,7 +171,8 @@ class AdaptedHeapObject {
         shallowSize: (json[_JsonFields.shallowSize] ?? 0) as int,
       );
 
-  final List<int> references;
+  final Set<int> outRefs;
+  final Set<int> inRefs = {};
   final HeapClassName heapClass;
   final IdentityHashCode code;
   final int shallowSize;
@@ -157,7 +192,7 @@ class AdaptedHeapObject {
 
   Map<String, dynamic> toJson() => {
         _JsonFields.code: code,
-        _JsonFields.references: references,
+        _JsonFields.references: outRefs.toList(),
         _JsonFields.klass: heapClass.className,
         _JsonFields.library: heapClass.library,
         _JsonFields.shallowSize: shallowSize,

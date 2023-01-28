@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:pointer_interceptor/pointer_interceptor.dart';
 
 import '../shared/analytics/analytics.dart' as ga;
 import '../shared/common_widgets.dart';
@@ -791,27 +792,29 @@ class _ServiceExtensionCheckboxGroupOverlay extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Material(
-      child: Container(
-        width: width,
-        padding: const EdgeInsets.all(defaultSpacing),
-        decoration: BoxDecoration(
-          color: theme.colorScheme.defaultBackgroundColor,
-          border: Border.all(
-            color: theme.focusColor,
-            width: hoverCardBorderWidth,
+      child: PointerInterceptor(
+        child: Container(
+          width: width,
+          padding: const EdgeInsets.all(defaultSpacing),
+          decoration: BoxDecoration(
+            color: theme.colorScheme.defaultBackgroundColor,
+            border: Border.all(
+              color: theme.focusColor,
+              width: hoverCardBorderWidth,
+            ),
+            borderRadius:
+                const BorderRadius.all(Radius.circular(defaultBorderRadius)),
           ),
-          borderRadius:
-              const BorderRadius.all(Radius.circular(defaultBorderRadius)),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            description,
-            const SizedBox(height: denseSpacing),
-            for (final serviceExtension in extensions)
-              _extensionSetting(serviceExtension),
-          ],
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              description,
+              const SizedBox(height: denseSpacing),
+              for (final serviceExtension in extensions)
+                _extensionSetting(serviceExtension),
+            ],
+          ),
         ),
       ),
     );

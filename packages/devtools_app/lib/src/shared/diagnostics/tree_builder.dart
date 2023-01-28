@@ -9,6 +9,7 @@ import 'package:vm_service/vm_service.dart';
 
 import '../../screens/debugger/debugger_model.dart';
 import '../config_specific/logger/logger.dart';
+import '../feature_flags.dart';
 import '../globals.dart';
 import '../primitives/utils.dart';
 import 'dart_object_node.dart';
@@ -116,11 +117,117 @@ void _setupGrouping(DartObjectNode variable) {
   }
 }
 
+void addChildReferences(
+  DartObjectNode variable,
+) {
+  assert(FeatureFlags.evalAndBrowse);
+  final ref = variable.ref!;
+  if (ref is! ObjectReferences) {
+    throw StateError('Wrong type: ${ref.runtimeType}');
+  }
+
+  final refNodeType = ref.refNodeType;
+
+  switch (refNodeType) {
+    case RefNodeType.refRoot:
+      variable.addAllChildren([
+        DartObjectNode.references(
+          'live',
+          ObjectReferences.withType(ref, RefNodeType.liveRefRoot),
+        ),
+        DartObjectNode.references(
+          'static',
+          ObjectReferences.withType(ref, RefNodeType.staticRefRoot),
+        ),
+      ]);
+      break;
+    case RefNodeType.staticRefRoot:
+      variable.addAllChildren([
+        DartObjectNode.references(
+          'inbound',
+          ObjectReferences.withType(ref, RefNodeType.staticInRefs),
+        ),
+        DartObjectNode.references(
+          'outbound',
+          ObjectReferences.withType(ref, RefNodeType.staticOutRefs),
+        ),
+      ]);
+
+      break;
+    case RefNodeType.staticInRefs:
+      final children = ref.heapSelection!
+          .references(ref.refNodeType.direction!)
+          .map(
+            (s) => DartObjectNode.references(
+              s.object.heapClass.className,
+              ObjectReferences(
+                refNodeType: RefNodeType.staticInRefs,
+                heapSelection: s,
+              ),
+            ),
+          )
+          .toList();
+      variable.addAllChildren(children);
+      break;
+    case RefNodeType.staticOutRefs:
+      final children = ref.heapSelection!
+          .references(ref.refNodeType.direction!)
+          .map(
+            (s) => DartObjectNode.references(
+              '${s.object.heapClass.className}, ${prettyPrintRetainedSize(
+                s.object.retainedSize,
+              )}',
+              ObjectReferences(
+                refNodeType: RefNodeType.staticOutRefs,
+                heapSelection: s,
+              ),
+            ),
+          )
+          .toList();
+      variable.addAllChildren(children);
+      break;
+    case RefNodeType.liveRefRoot:
+      variable.addAllChildren([
+        DartObjectNode.references(
+          'inbound',
+          ObjectReferences.withType(ref, RefNodeType.liveInRefs),
+        ),
+        DartObjectNode.references(
+          'outbound',
+          ObjectReferences.withType(ref, RefNodeType.liveOutRefs),
+        ),
+      ]);
+
+      break;
+    case RefNodeType.liveInRefs:
+      variable.addChild(
+        DartObjectNode.references(
+          // Temporary placeholder
+          '<live inbound refs>',
+          ObjectReferences.withType(ref, RefNodeType.liveInRefs),
+        ),
+      );
+      break;
+    case RefNodeType.liveOutRefs:
+      variable.addChild(
+        DartObjectNode.references(
+          // Temporary placeholder
+          '<live outbound refs>',
+          ObjectReferences.withType(ref, RefNodeType.liveOutRefs),
+        ),
+      );
+      break;
+  }
+}
+
 Future<void> _addInstanceRefItems(
   DartObjectNode variable,
   InstanceRef instanceRef,
   IsolateRef? isolateRef,
 ) async {
+  final ref = variable.ref;
+  assert(ref is! ObjectReferences);
+
   final existingNames = <String>{};
   for (var child in variable.children) {
     final name = child.name;
@@ -142,6 +249,21 @@ Future<void> _addInstanceRefItems(
     count: variable.childCount,
   );
   if (result is Instance) {
+    if (FeatureFlags.evalAndBrowse && ref?.heapSelection != null) {
+      final ref = variable.ref!;
+      variable.addChild(
+        DartObjectNode.references(
+          'references',
+          ObjectReferences(
+            refNodeType: RefNodeType.refRoot,
+            value: ref.value,
+            isolateRef: ref.isolateRef,
+            heapSelection: ref.heapSelection,
+          ),
+        ),
+        index: 0,
+      );
+    }
     switch (result.kind) {
       case InstanceKind.kMap:
         variable.addAllChildren(
@@ -343,6 +465,8 @@ Future<void> buildVariablesTree(
   try {
     if (variable.childCount > DartObjectNode.MAX_CHILDREN_IN_GROUPING) {
       _setupGrouping(variable);
+    } else if (ref is ObjectReferences) {
+      addChildReferences(variable);
     } else if (instanceRef != null && serviceManager.service != null) {
       await _addInstanceRefItems(variable, instanceRef, isolateRef);
     } else if (variable.value != null) {

@@ -57,96 +57,97 @@ class _HistoryViewportState<T> extends State<HistoryViewport<T>> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final title = widget.generateTitle == null
-        ? '  '
-        : widget.generateTitle!(widget.history.current.value);
-    final defaultTitleStyle = theme.textTheme.titleSmall ?? const TextStyle();
-    final titleWidget = debuggerSectionTitle(
-      theme,
-      child: Row(
-        children: [
-          if (widget.historyEnabled) ...[
-            ToolbarAction(
-              icon: Icons.chevron_left,
-              onPressed: widget.history.hasPrevious
-                  ? () {
-                      widget.history.moveBack();
-                      if (widget.onChange != null) {
-                        widget.onChange!(
-                          widget.history.current.value,
-                          widget.history.peekNext(),
-                        );
-                      }
-                    }
-                  : null,
-            ),
-            ToolbarAction(
-              icon: Icons.chevron_right,
-              onPressed: widget.history.hasNext
-                  ? () {
-                      final current = widget.history.current.value!;
-                      widget.history.moveForward();
-                      if (widget.onChange != null) {
-                        widget.onChange!(
-                          widget.history.current.value,
-                          current,
-                        );
-                      }
-                    }
-                  : null,
-            ),
-            const SizedBox(width: denseSpacing),
-            const VerticalDivider(thickness: 1.0),
-            const SizedBox(width: defaultSpacing),
-          ],
-          Expanded(
-            child: widget.onTitleTap == null
-                ? Text(
-                    title,
-                    style: defaultTitleStyle,
-                  )
-                : MouseRegion(
-                    cursor: SystemMouseCursors.click,
-                    onExit: (_) => _updateTitleStyle(defaultTitleStyle),
-                    onEnter: (_) {
-                      _updateTitleStyle(
-                        defaultTitleStyle.copyWith(
-                          color: theme.colorScheme.devtoolsLink,
-                        ),
-                      );
-                    },
-                    child: GestureDetector(
-                      onTap: widget.onTitleTap,
-                      child: Text(
+    return ValueListenableBuilder<T?>(
+      valueListenable: widget.history.current,
+      builder: (context, T? current, _) {
+        final theme = Theme.of(context);
+        final title = widget.generateTitle == null
+            ? '  '
+            : widget.generateTitle!(current);
+        final defaultTitleStyle =
+            theme.textTheme.titleSmall ?? const TextStyle();
+        final titleWidget = debuggerSectionTitle(
+          theme,
+          child: Row(
+            children: [
+              if (widget.historyEnabled) ...[
+                ToolbarAction(
+                  icon: Icons.chevron_left,
+                  onPressed: widget.history.hasPrevious
+                      ? () {
+                          widget.history.moveBack();
+                          if (widget.onChange != null) {
+                            widget.onChange!(
+                              widget.history.current.value,
+                              widget.history.peekNext(),
+                            );
+                          }
+                        }
+                      : null,
+                ),
+                ToolbarAction(
+                  icon: Icons.chevron_right,
+                  onPressed: widget.history.hasNext
+                      ? () {
+                          final current = widget.history.current.value!;
+                          widget.history.moveForward();
+                          if (widget.onChange != null) {
+                            widget.onChange!(
+                              widget.history.current.value,
+                              current,
+                            );
+                          }
+                        }
+                      : null,
+                ),
+                const SizedBox(width: denseSpacing),
+                const VerticalDivider(thickness: 1.0),
+                const SizedBox(width: defaultSpacing),
+              ],
+              Expanded(
+                child: widget.onTitleTap == null
+                    ? Text(
                         title,
-                        style: _titleStyle ?? theme.textTheme.titleSmall,
+                        style: defaultTitleStyle,
+                      )
+                    : MouseRegion(
+                        cursor: SystemMouseCursors.click,
+                        onExit: (_) => _updateTitleStyle(defaultTitleStyle),
+                        onEnter: (_) {
+                          _updateTitleStyle(
+                            defaultTitleStyle.copyWith(
+                              color: theme.colorScheme.devtoolsLink,
+                            ),
+                          );
+                        },
+                        child: GestureDetector(
+                          onTap: widget.onTitleTap,
+                          child: Text(
+                            title,
+                            style: _titleStyle ?? theme.textTheme.titleSmall,
+                          ),
+                        ),
                       ),
-                    ),
-                  ),
-          ),
-          if (widget.controls != null) ...[
-            const SizedBox(width: denseSpacing),
-            for (final widget in widget.controls!) ...[
-              widget,
-              const SizedBox(width: denseSpacing),
+              ),
+              if (widget.controls != null) ...[
+                const SizedBox(width: denseSpacing),
+                for (final widget in widget.controls!) ...[
+                  widget,
+                  const SizedBox(width: denseSpacing),
+                ],
+              ],
             ],
-          ],
-        ],
-      ),
-    );
-    return OutlineDecoration(
-      child: ValueListenableBuilder<T?>(
-        valueListenable: widget.history.current,
-        builder: (context, T? current, _) {
-          return Column(
+          ),
+        );
+        return OutlineDecoration(
+          child: Column(
             children: [
               titleWidget,
               widget.contentBuilder(context, current),
             ],
-          );
-        },
-      ),
+          ),
+        );
+      },
     );
   }
 }

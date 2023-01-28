@@ -179,8 +179,10 @@ abstract class _TestApp with IOMixin {
   }
 
   Future<int> _killForcefully() {
-    _debugPrint('Sending SIGKILL to $runProcessId..');
-    Process.killPid(runProcessId, ProcessSignal.sigkill);
+    // Use sigint here instead of sigkill. See
+    // https://github.com/flutter/flutter/issues/117415.
+    _debugPrint('Sending SIGINT to $runProcessId..');
+    Process.killPid(runProcessId, ProcessSignal.sigint);
     return runProcess!.exitCode;
   }
 

@@ -21,6 +21,7 @@ void main() {
       when(mockServiceManager.renderFrameWithRasterStats).thenAnswer(
         (_) => Future.value(Response.parse(rasterStatsFromServiceJson)),
       );
+      setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
       setGlobal(ServiceConnectionManager, mockServiceManager);
       setGlobal(IdeTheme, IdeTheme());
 

@@ -311,7 +311,7 @@ class AppSizeController {
     // Free up the thread for the app size page to display the loading message.
     // Without passing in a high value, the value listenable builder in the app
     // size screen does not get updated.
-    await delayForBatchProcessing(micros: 10000);
+    await delayToReleaseUiThread(micros: 10000);
 
     Map<String, dynamic> processedJson;
     if (jsonFile.isAnalyzeSizeFile) {
@@ -424,7 +424,7 @@ class AppSizeController {
     // Free up the thread for the app size page to display the loading message.
     // Without passing in a high value, the value listenable builder in the app
     // size screen does not get updated.
-    await delayForBatchProcessing(micros: 10000);
+    await delayToReleaseUiThread(micros: 10000);
 
     Map<String, dynamic> diffMap;
     Map<String, dynamic>? mainDiffMap;

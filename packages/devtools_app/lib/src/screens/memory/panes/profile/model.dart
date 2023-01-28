@@ -9,7 +9,10 @@ import '../../../../shared/table/table_data.dart';
 import '../../../vm_developer/vm_service_private_extensions.dart';
 
 class AdaptedProfile {
-  AdaptedProfile.fromAllocationProfile(AllocationProfile profile) {
+  AdaptedProfile.fromAllocationProfile(AllocationProfile profile)
+      : newSpaceGCStats = profile.newSpaceGCStats,
+        oldSpaceGCStats = profile.oldSpaceGCStats,
+        totalGCStats = profile.totalGCStats {
     final elements = (profile.members ?? []).where((element) {
       return element.bytesCurrent != 0 ||
           element.newSpace.externalSize != 0 ||
@@ -24,6 +27,10 @@ class AdaptedProfile {
 
   /// A record per class plus one total record.
   late final List<ProfileRecord> records;
+
+  final GCStats newSpaceGCStats;
+  final GCStats oldSpaceGCStats;
+  final GCStats totalGCStats;
 }
 
 class ProfileRecord with PinnableListEntry {

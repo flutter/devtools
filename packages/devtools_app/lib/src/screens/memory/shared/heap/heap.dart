@@ -17,7 +17,7 @@ class AdaptedHeap {
 
   SingleHeapClasses _heapStatistics() {
     final result = <HeapClassName, SingleClassStats>{};
-    if (!data.isSpanningTreeBuilt) buildSpanningTree(data);
+    if (!data.allFieldsCalculated) buildSpanningTreeAndSetInRefs(data);
 
     for (var i in Iterable.generate(data.objects.length)) {
       final object = data.objects[i];
