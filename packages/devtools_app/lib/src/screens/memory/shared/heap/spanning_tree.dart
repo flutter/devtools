@@ -3,20 +3,29 @@
 // found in the LICENSE file.
 
 import '../../../../shared/memory/adapted_heap_data.dart';
+import '../../../../shared/primitives/utils.dart';
+
+final _uiReleaser = UiReleaser();
 
 /// Sets the field retainer and retainedSize for each object in the [heap], that
 /// has retaining path to the root.
 /// Also populates [AdaptedHeapObject.inRefs].
-void buildSpanningTreeAndSetInRefs(AdaptedHeapData heap) {
+Future<void> buildSpanningTreeAndSetInRefs(AdaptedHeapData heap) async {
+  final sw = Stopwatch()..start();
+  print('1511 ${sw.elapsed}');
   assert(!heap.allFieldsCalculated);
-  _setRetainers(heap);
-  _setInboundRefs(heap);
+  await _setRetainers(heap);
+  print('1512 ${sw.elapsed}');
+  await _setInboundRefs(heap);
+  print('1513 ${sw.elapsed}');
   heap.allFieldsCalculated = true;
   _verifyHeapIntegrity(heap);
+  print('1514 ${sw.elapsed}');
 }
 
-void _setInboundRefs(AdaptedHeapData heap) {
+Future<void> _setInboundRefs(AdaptedHeapData heap) async {
   for (final from in Iterable.generate(heap.objects.length)) {
+    await _uiReleaser.step();
     for (final to in heap.objects[from].outRefs) {
       assert(from != to);
       heap.objects[to].inRefs.add(from);
@@ -25,7 +34,7 @@ void _setInboundRefs(AdaptedHeapData heap) {
 }
 
 /// The algorithm takes O(number of references in the heap).
-void _setRetainers(AdaptedHeapData heap) {
+Future<void> _setRetainers(AdaptedHeapData heap) async {
   heap.root.retainer = -1;
   heap.root.retainedSize = heap.root.shallowSize;
 
@@ -40,6 +49,7 @@ void _setRetainers(AdaptedHeapData heap) {
   // On each step of algorithm we know that all nodes at distance n or closer to
   // root, has parent initialized.
   while (true) {
+    await _uiReleaser.step();
     final nextCut = <int>[];
     for (var r in cut) {
       final retainer = heap.objects[r];

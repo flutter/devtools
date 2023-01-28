@@ -25,7 +25,7 @@ void main() {
       // We need the test to make sure (1) the code does not fail and (2)
       // to see the changes in the output file in code reviews.
       test('has leaks.', () async {
-        final result = analyseNotGCed(task);
+        final result = await analyseNotGCed(task);
 
         final yaml = analyzedLeaksToYaml(
           gcedLate: [],

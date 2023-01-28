@@ -47,7 +47,7 @@ class SnapshotInstanceItem extends SnapshotItem {
   /// This method is expected to be called once when heap is actually received.
   Future<void> initializeHeapData(AdaptedHeapData? data) async {
     assert(heap == null);
-    if (data != null) heap = await AdaptedHeap.adaptedHeap(data);
+    if (data != null) heap = await AdaptedHeap.create(data);
     _isProcessing.value = false;
   }
 

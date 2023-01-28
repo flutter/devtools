@@ -230,6 +230,25 @@ Future<void> delayToReleaseUiThread({int micros = 0}) async {
   await Future.delayed(Duration(microseconds: micros));
 }
 
+/// Use in long calculations, to release UI thread after each N steps.
+class UiReleaser {
+  UiReleaser({this.setpsBetweenDelays = 1000, this.delayLength = 0})
+      : assert(setpsBetweenDelays > 0);
+
+  final int setpsBetweenDelays;
+  final int delayLength;
+
+  int _stepCount = 0;
+
+  Future<void> step() async {
+    _stepCount++;
+    if (_stepCount == setpsBetweenDelays) {
+      _stepCount = 0;
+      await delayToReleaseUiThread(micros: _stepCount);
+    }
+  }
+}
+
 /// Creates a [Future] that completes either when `operation` completes or the
 /// duration specified by `timeoutMillis` has passed.
 ///

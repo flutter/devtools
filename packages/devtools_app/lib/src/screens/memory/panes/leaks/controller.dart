@@ -105,7 +105,7 @@ class LeaksPaneController {
         await _setMessageWithDelay('Taking heap snapshot...');
         task = await _createAnalysisTask(notGCed);
         await _setMessageWithDelay('Detecting retaining paths...');
-        notGCedAnalyzed = analyseNotGCed(task);
+        notGCedAnalyzed = await analyseNotGCed(task);
       }
 
       await _setMessageWithDelay('Formatting...');
