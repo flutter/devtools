@@ -60,7 +60,8 @@ const performanceOverlay = 'performanceOverlay';
 const performanceOverlayDocs = 'performanceOverlayDocs';
 const timelineFlameChartHelp = 'timelineFlameChartHelp';
 const selectFlutterFrame = 'selectFlutterFrame';
-const perfettoModeTraceEventProcessingTime = 'traceEventProcessingTime-perfettoMode';
+const perfettoModeTraceEventProcessingTime =
+    'traceEventProcessingTime-perfettoMode';
 const traceEventProcessingTime = 'traceEventProcessingTime';
 const trackRebuilds = 'trackRebuilds';
 const trackWidgetBuildsDocs = 'trackWidgetBuildsDocs';
