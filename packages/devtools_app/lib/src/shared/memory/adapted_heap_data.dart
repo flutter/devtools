@@ -5,6 +5,7 @@
 import 'package:collection/collection.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../../../devtools_app.dart';
 import 'class_name.dart';
 import 'simple_items.dart';
 
@@ -70,14 +71,26 @@ class AdaptedHeapData {
     );
   }
 
-  static AdaptedHeapData fromHeapSnapshot(
-    HeapSnapshotGraph graph,
-  ) {
-    final objects = graph.objects.mapIndexed((i, e) {
-      return AdaptedHeapObject.fromHeapSnapshotObject(e, i);
-    }).toList();
+  static final _uiReleaser = UiReleaser();
 
-    return AdaptedHeapData(objects);
+  static Future<AdaptedHeapData> fromHeapSnapshot(
+    HeapSnapshotGraph graph,
+  ) async {
+    final sw = Stopwatch()..start();
+    print('02211 ${sw.elapsed}');
+
+    final objects = <AdaptedHeapObject>[];
+    for (final i in Iterable.generate(graph.objects.length)) {
+      await _uiReleaser.step();
+      final object =
+          AdaptedHeapObject.fromHeapSnapshotObject(graph.objects[i], i);
+      objects.add(object);
+    }
+
+    print('02213 ${sw.elapsed}');
+    final result = AdaptedHeapData(objects);
+    print('02214 ${sw.elapsed}');
+    return result;
   }
 
   /// Default value for rootIndex is taken from the doc:

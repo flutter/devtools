@@ -58,6 +58,8 @@ class DiffPaneController extends DisposableController {
   }
 
   Future<void> takeSnapshot() async {
+    final sw = Stopwatch()..start();
+    print('01 ${sw.elapsed}');
     _isTakingSnapshot.value = true;
     final snapshots = core._snapshots;
 
@@ -69,7 +71,9 @@ class DiffPaneController extends DisposableController {
 
     snapshots.add(item);
 
+    print('02 ${sw.elapsed}');
     final heapData = await snapshotTaker.take();
+    print('03 ${sw.elapsed}');
     await item.initializeHeapData(heapData);
 
     final newElementIndex = snapshots.value.length - 1;
