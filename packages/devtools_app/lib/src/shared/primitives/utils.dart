@@ -232,21 +232,25 @@ Future<void> delayToReleaseUiThread({int micros = 0}) async {
 
 /// Use in long calculations, to release UI thread after each N steps.
 class UiReleaser {
-  UiReleaser({this.setpsBetweenDelays = 10000, this.delayLength = 0})
-      : assert(setpsBetweenDelays > 0);
+  UiReleaser({this.stepsBetweenDelays = 100000, this.delayLength = 0})
+      : assert(stepsBetweenDelays > 0);
 
-  final int setpsBetweenDelays;
+  final int stepsBetweenDelays;
   final int delayLength;
 
   int _stepCount = 0;
 
-  Future<void> step() async {
+  /// Returns true if it is time to invoke [releaseUi].
+  bool step() {
     _stepCount++;
-    if (_stepCount == setpsBetweenDelays) {
+    if (_stepCount == stepsBetweenDelays) {
       _stepCount = 0;
-      await delayToReleaseUiThread(micros: _stepCount);
+      return true;
     }
+    return false;
   }
+
+  Future<void> releaseUi() => delayToReleaseUiThread(micros: delayLength);
 }
 
 /// Creates a [Future] that completes either when `operation` completes or the

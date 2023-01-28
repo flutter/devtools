@@ -25,7 +25,7 @@ Future<void> buildSpanningTreeAndSetInRefs(AdaptedHeapData heap) async {
 
 Future<void> _setInboundRefs(AdaptedHeapData heap) async {
   for (final from in Iterable.generate(heap.objects.length)) {
-    await _uiReleaser.step();
+    if (_uiReleaser.step()) await _uiReleaser.releaseUi();
     for (final to in heap.objects[from].outRefs) {
       assert(from != to);
       heap.objects[to].inRefs.add(from);
@@ -49,7 +49,7 @@ Future<void> _setRetainers(AdaptedHeapData heap) async {
   // On each step of algorithm we know that all nodes at distance n or closer to
   // root, has parent initialized.
   while (true) {
-    await _uiReleaser.step();
+    if (_uiReleaser.step()) await _uiReleaser.releaseUi();
     final nextCut = <int>[];
     for (var r in cut) {
       final retainer = heap.objects[r];

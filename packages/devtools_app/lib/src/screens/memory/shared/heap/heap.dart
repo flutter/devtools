@@ -37,7 +37,7 @@ class AdaptedHeap {
 
     print('152 ${sw.elapsed}');
     for (var i in Iterable.generate(data.objects.length)) {
-      await _uiReleaser.step();
+      if (_uiReleaser.step()) await _uiReleaser.releaseUi();
       final object = data.objects[i];
       final className = object.heapClass;
 
