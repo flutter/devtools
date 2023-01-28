@@ -30,12 +30,9 @@ class AdaptedHeap {
   final _uiReleaser = UiReleaser();
 
   Future<SingleHeapClasses> _heapStatistics() async {
-    final sw = Stopwatch()..start();
-    print('151 ${sw.elapsed}');
     final result = <HeapClassName, SingleClassStats>{};
     if (!data.allFieldsCalculated) await buildSpanningTreeAndSetInRefs(data);
 
-    print('152 ${sw.elapsed}');
     for (var i in Iterable.generate(data.objects.length)) {
       if (_uiReleaser.step()) await _uiReleaser.releaseUi();
       final object = data.objects[i];
@@ -52,7 +49,6 @@ class AdaptedHeap {
       singleHeapClass.countInstance(data, i);
     }
 
-    print('159 ${sw.elapsed}');
     return SingleHeapClasses(result)..seal();
   }
 }

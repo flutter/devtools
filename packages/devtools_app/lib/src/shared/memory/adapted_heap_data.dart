@@ -76,9 +76,6 @@ class AdaptedHeapData {
   static Future<AdaptedHeapData> fromHeapSnapshot(
     HeapSnapshotGraph graph,
   ) async {
-    final sw = Stopwatch()..start();
-    print('02211 ${sw.elapsed}');
-
     final objects = <AdaptedHeapObject>[];
     for (final i in Iterable.generate(graph.objects.length)) {
       if (_uiReleaser.step()) await _uiReleaser.releaseUi();
@@ -87,9 +84,7 @@ class AdaptedHeapData {
       objects.add(object);
     }
 
-    print('02213 ${sw.elapsed}');
     final result = AdaptedHeapData(objects);
-    print('02214 ${sw.elapsed}');
     return result;
   }
 

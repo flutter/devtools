@@ -58,8 +58,6 @@ class DiffPaneController extends DisposableController {
   }
 
   Future<void> takeSnapshot() async {
-    final sw = Stopwatch()..start();
-    print('01 ${sw.elapsed}');
     _isTakingSnapshot.value = true;
     final snapshots = core._snapshots;
 
@@ -71,9 +69,7 @@ class DiffPaneController extends DisposableController {
 
     snapshots.add(item);
 
-    print('02 ${sw.elapsed}');
     final heapData = await snapshotTaker.take();
-    print('03 ${sw.elapsed}');
     await item.initializeHeapData(heapData);
 
     final newElementIndex = snapshots.value.length - 1;
@@ -275,22 +271,13 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
 
   /// Classes for the selected snapshot with diffing applied.
   HeapClasses? _snapshotClassesAfterDiffing() {
-    final sw = Stopwatch()..start();
-    print('11 ${sw.elapsed}');
     final theItem = _core.selectedItem;
-    print('12 ${sw.elapsed}');
     if (theItem is! SnapshotInstanceItem) return null;
-    print('13 ${sw.elapsed}');
     final heap = theItem.heap;
     if (heap == null) return null;
-    print('14 ${sw.elapsed}');
     final itemToDiffWith = theItem.diffWith.value;
-    print('15 ${sw.elapsed}');
     if (itemToDiffWith == null) return heap.classes;
-    print('16 ${sw.elapsed}');
     final result = _diffStore.compare(heap, itemToDiffWith.heap!);
-    print('17 ${sw.elapsed}');
-
     return result;
   }
 
@@ -337,28 +324,22 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
 
   /// Updates fields in this instance based on the values in [core].
   void _updateValues() {
-    final sw = Stopwatch()..start();
     _startUpdatingValues();
 
     // Set class to show.
-    print('1 ${sw.elapsed}');
     final classes = _snapshotClassesAfterDiffing();
-    print('2 ${sw.elapsed}');
     heapClasses.value = classes;
-    print('3 ${sw.elapsed}');
     _setSelections();
     _updateClasses(
       classes: classes,
       className: _core.className_,
     );
-    print('4 ${sw.elapsed}');
     // Set paths to show.
     final theClass =
         selectedSingleClassStats.value ?? selectedDiffClassStats.value;
     final thePathEntries = pathEntries.value = theClass?.statsByPathEntries;
     final paths = theClass?.statsByPath;
     StatsByPathEntry? thePathEntry;
-    print('5 ${sw.elapsed}');
     if (_core.path != null && paths != null && thePathEntries != null) {
       final pathStats = paths[_core.path];
       if (pathStats != null) {
@@ -368,10 +349,8 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
     }
 
     selectedPathEntry.value = thePathEntry;
-    print('6 ${sw.elapsed}');
     // Set current snapshot.
     _selectedItem.value = _core.selectedItem;
-    print('7 ${sw.elapsed}');
     _endUpdatingValues();
   }
 

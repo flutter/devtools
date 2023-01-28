@@ -107,21 +107,15 @@ class ClassOnlyHeapPath {
 /// This class is needed to make the snapshot taking operation mockable.
 class SnapshotTaker {
   Future<AdaptedHeapData?> take() async {
-    final sw = Stopwatch()..start();
-    print('021 ${sw.elapsed}');
     final snapshot = await snapshotMemory();
-    print('022 ${sw.elapsed}');
     if (snapshot == null) return null;
     final result = await _adaptSnapshotGaWrapper(snapshot);
-    print('023 ${sw.elapsed}');
     return result;
   }
 }
 
 Future<AdaptedHeapData> _adaptSnapshotGaWrapper(HeapSnapshotGraph graph) async {
   late final AdaptedHeapData result;
-  final sw = Stopwatch()..start();
-  print('0221 ${sw.elapsed}');
   await ga.timeAsync(
     gac.memory,
     gac.MemoryTime.adaptSnapshot,
@@ -131,7 +125,6 @@ Future<AdaptedHeapData> _adaptSnapshotGaWrapper(HeapSnapshotGraph graph) async {
       heapObjectsTotal: graph.objects.length,
     ),
   );
-  print('0222 ${sw.elapsed}');
   return result;
 }
 

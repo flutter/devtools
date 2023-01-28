@@ -11,16 +11,11 @@ final _uiReleaser = UiReleaser();
 /// has retaining path to the root.
 /// Also populates [AdaptedHeapObject.inRefs].
 Future<void> buildSpanningTreeAndSetInRefs(AdaptedHeapData heap) async {
-  final sw = Stopwatch()..start();
-  print('1511 ${sw.elapsed}');
   assert(!heap.allFieldsCalculated);
   await _setRetainers(heap);
-  print('1512 ${sw.elapsed}');
   await _setInboundRefs(heap);
-  print('1513 ${sw.elapsed}');
   heap.allFieldsCalculated = true;
   _verifyHeapIntegrity(heap);
-  print('1514 ${sw.elapsed}');
 }
 
 Future<void> _setInboundRefs(AdaptedHeapData heap) async {
