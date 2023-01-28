@@ -29,6 +29,7 @@ TODO: Remove this section if there are not any general updates.
 * UI polish and cleanup - [#4855](https://github.com/flutter/devtools/pull/4855)
 * Color code classes [#5030](https://github.com/flutter/devtools/pull/5030)
 * Fix state management for tracing [#5062](https://github.com/flutter/devtools/pull/5062)
+* Improve performance of heap snapshot taking [#5134](https://github.com/flutter/devtools/pull/5134)
 
 ## Debugger updates
 
