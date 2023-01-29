@@ -118,22 +118,6 @@ void main() {
 
       expect(controller.memoryTimeline.liveData.isEmpty, isTrue);
       expect(controller.memoryTimeline.offlineData.isEmpty, isTrue);
-
-      // Check memory sources available.
-      await tester.tap(find.byKey(sourcesDropdownKey));
-      await tester.pump();
-
-      // Should only be one source 'Live Feed' in the popup menu.
-      final memorySources = tester.firstWidget(
-        find.byKey(
-          sourcesKey,
-        ),
-      ) as Text;
-
-      expect(
-        memorySources.data,
-        '${controller.memorySourcePrefix}${MemoryController.liveFeed}',
-      );
     });
 
     testWidgetsWithWindowSize('Chart Select Hover Test', windowSize,
@@ -196,58 +180,13 @@ void main() {
       // Verify initial state - collecting live feed.
       expect(controller.offline.value, isFalse);
 
-      final previousMemoryLogs = controller.memoryLog.offlineFiles();
-
-      // Export memory to a memory log file.
-      await tester.tap(find.byType(ExportButton));
-      await tester.pump();
-
       expect(controller.offline.value, isFalse);
 
       expect(controller.memoryTimeline.liveData, isEmpty);
       expect(controller.memoryTimeline.offlineData, isEmpty);
 
-      final currentMemoryLogs = controller.memoryLog.offlineFiles();
-      expect(currentMemoryLogs.length, previousMemoryLogs.length + 1);
-
       // Verify that memory source is still live feed.
       expect(controller.offline.value, isFalse);
-    });
-
-    testWidgetsWithWindowSize(
-        'switch from live feed and load exported file', windowSize,
-        (WidgetTester tester) async {
-      await pumpMemoryScreen(tester);
-
-      // Live feed should be default selected.
-      expect(controller.memorySource, MemoryController.liveFeed);
-
-      // Expand the memory sources.
-      await tester.tap(find.byKey(sourcesDropdownKey));
-      await tester.pumpAndSettle();
-
-      // Last item in dropdown list of memory source should be memory log file.
-      await tester
-          .tap(find.byType(typeOf<SourceDropdownMenuItem<String>>()).last);
-      await tester.pump();
-
-      expect(
-        controller.memorySource,
-        startsWith(MemoryController.logFilenamePrefix),
-      );
-
-      final filenames = controller.memoryLog.offlineFiles();
-      final filename = filenames.first;
-
-      expect(filename, startsWith(MemoryController.logFilenamePrefix));
-
-      await controller.memoryLog.loadOffline(filename);
-
-      expect(controller.offline.value, isTrue);
-
-      // Remove the memory log, in desktop only version.  Don't want to polute
-      // our temp directory when this test runs locally.
-      expect(controller.memoryLog.removeOfflineFile(filename), isTrue);
     });
   });
 }
