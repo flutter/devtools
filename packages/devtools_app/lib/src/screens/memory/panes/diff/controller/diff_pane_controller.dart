@@ -277,8 +277,7 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
     if (heap == null) return null;
     final itemToDiffWith = theItem.diffWith.value;
     if (itemToDiffWith == null) return heap.classes;
-    final result = _diffStore.compare(heap, itemToDiffWith.heap!);
-    return result;
+    return _diffStore.compare(heap, itemToDiffWith.heap!);
   }
 
   void _updateClasses({
@@ -347,8 +346,8 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
             thePathEntries.firstWhereOrNull((e) => e.key == _core.path);
       }
     }
-
     selectedPathEntry.value = thePathEntry;
+
     // Set current snapshot.
     _selectedItem.value = _core.selectedItem;
     _endUpdatingValues();
