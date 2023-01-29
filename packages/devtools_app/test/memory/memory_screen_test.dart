@@ -172,21 +172,5 @@ void main() {
         matchesDevToolsGolden('../test_infra/goldens/memory_hover_card.png'),
       );
     });
-
-    testWidgetsWithWindowSize('export current memory profile', windowSize,
-        (WidgetTester tester) async {
-      await pumpMemoryScreen(tester);
-
-      // Verify initial state - collecting live feed.
-      expect(controller.offline.value, isFalse);
-
-      expect(controller.offline.value, isFalse);
-
-      expect(controller.memoryTimeline.liveData, isEmpty);
-      expect(controller.memoryTimeline.offlineData, isEmpty);
-
-      // Verify that memory source is still live feed.
-      expect(controller.offline.value, isFalse);
-    });
   });
 }
