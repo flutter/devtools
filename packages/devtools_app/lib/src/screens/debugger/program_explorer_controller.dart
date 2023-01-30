@@ -351,8 +351,13 @@ class ProgramExplorerController extends DisposableController
         await service.getObject(isolateId, targetScript.id!) as Script;
     final LibraryRef targetLib = scriptObj.library!;
 
-    // Search targetLib only on the root level nodes.
+    // Search targetLib only on the root level nodes (this is the most common
+    // scenario).
     var libNode = _searchRootObjectNodes(targetLib);
+
+    // If we couldn't the target library as a root node, it's possible we have
+    // a library defined using the `library` keyword by the user, which will
+    // likely be under a directory node.
     libNode ??= breadthFirstSearchObject(
       scriptObj,
       rootObjectNodes.value,
