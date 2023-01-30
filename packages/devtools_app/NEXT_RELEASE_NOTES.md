@@ -18,6 +18,8 @@ Dart & Flutter DevTools - A Suite of Performance Tools for Dart and Flutter
 TODO: Remove this section if there are not any general updates.
 
 ## Performance updates
+* Replace the DevTools timeline trace viewer with the Perfetto UI - [#5142](https://github.com/flutter/devtools/pull/5142)
+TODO: add screenshot.
 * Fix several issues with loading a Performance snapshot into DevTools - [#5048](https://github.com/flutter/devtools/pull/5048), [#4929](https://github.com/flutter/devtools/pull/4929)
 * UI polish and cleanup - [#4889](https://github.com/flutter/devtools/pull/4889)
 
