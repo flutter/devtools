@@ -218,7 +218,7 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
       if (value.kind != null &&
           (value.kind!.endsWith('List') ||
               value.kind == InstanceKind.kList ||
-              value.kind == InstanceKind.kMap || 
+              value.kind == InstanceKind.kMap ||
               value.kind == InstanceKind.kRecord)) {
         return value.length ?? 0;
       }
@@ -272,6 +272,9 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
         final depth = children.length;
         valueStr = 'StackTrace ($depth ${pluralize('frame', depth)})';
       } else if (kind == InstanceKind.kRecord) {
+        // Note: `value.length` was added in vm_service >10.1.2, so we fall back
+        // to `children.length` if it's not provide (this means we don't get
+        // the count until the record is expanded):
         final count = value.length ?? children.length;
         valueStr = count == 0
             ? 'Record'
