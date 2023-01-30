@@ -520,7 +520,10 @@ class _RetainingObjectDescription extends StatelessWidget {
       const TextSpan(text: 'Retained by '),
     ];
 
-    if (object.parentField != null) {
+    if (object.parentField is int) {
+      assert((object.value as InstanceRef).kind == InstanceKind.kRecord);
+      entries.add(TextSpan(text: '\$${object.parentField} of '));
+    } else if (object.parentField != null) {
       entries.add(TextSpan(text: '${object.parentField} of '));
     }
 
@@ -553,13 +556,12 @@ class _RetainingObjectDescription extends StatelessWidget {
         ).buildTextSpan(context),
       );
     } else {
-      entries.addAll([
-        const TextSpan(text: 'of '),
+      entries.add(
         VmServiceObjectLink(
           object: object.value,
           onTap: onTap,
         ).buildTextSpan(context),
-      ]);
+      );
     }
     return SelectableText.rich(
       TextSpan(children: entries),
@@ -669,7 +671,13 @@ class InboundReferencesWidget extends StatelessWidget {
       );
     }
 
-    if (inboundRef.parentField != null) {
+    if (inboundRef.parentField is int) {
+      assert((inboundRef.source as InstanceRef).kind == InstanceKind.kRecord);
+      description.write('\$${inboundRef.parentField} of ');
+    } else if (inboundRef.parentField is String) {
+      assert((inboundRef.source as InstanceRef).kind == InstanceKind.kRecord);
+      description.write('${inboundRef.parentField} of ');
+    } else if (inboundRef.parentField is FieldRef) {
       description.write(
         '${_objectName(inboundRef.parentField)} of ',
       );
@@ -733,6 +741,8 @@ class VmServiceObjectLink<T> extends StatelessWidget {
           text = 'List(length: ${instance.length})';
         } else if (instance.kind == InstanceKind.kMap) {
           text = 'Map(length: ${instance.length})';
+        } else if (instance.kind == InstanceKind.kRecord) {
+          text = 'Record';
         } else if (instance.kind == InstanceKind.kType) {
           text = instance.name!;
         } else if (instance.kind == InstanceKind.kStackTrace) {
