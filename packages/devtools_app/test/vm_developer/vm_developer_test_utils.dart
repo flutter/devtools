@@ -58,6 +58,12 @@ final testInstance = Instance(
   classRef: testSuperClass,
 );
 
+final testRecordInstance = Instance(
+  id: '1234',
+  kind: InstanceKind.kRecord,
+  name: 'fooRecord',
+);
+
 final testSuperClass =
     ClassRef(name: 'fooSuperClass', library: testLib, id: '1234');
 
@@ -104,12 +110,18 @@ final testRetainingObjects = [
   RetainingObject(
     value: testInstance,
     parentListIndex: 1,
+  ),
+  RetainingObject(
+    value: testRecordInstance,
+    parentField: 1,
+  ),
+  RetainingObject(
+    value: testRecordInstance,
     parentField: 'fooParentField',
   ),
   RetainingObject(
     value: testInstance,
     parentMapKey: testField,
-    parentField: 'fooParentField',
   ),
   RetainingObject(
     value: testField,
@@ -130,9 +142,16 @@ final testInboundRefList = [
     parentField: testParentField,
   ),
   InboundReference(
+    source: testRecordInstance,
+    parentField: 'fooParentField',
+  ),
+  InboundReference(
+    source: testRecordInstance,
+    parentField: 1,
+  ),
+  InboundReference(
     source: testInstance,
     parentListIndex: 1,
-    parentField: testParentField,
   ),
 ];
 

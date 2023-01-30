@@ -62,7 +62,7 @@ void main() {
       [
         AdaptedHeapObject(
           code: 1,
-          references: [3, 4, 5],
+          outRefs: {3, 4, 5},
           heapClass: HeapClassName(
             className: 'class',
             library: 'library',
@@ -91,7 +91,7 @@ void main() {
 AdaptedHeapObject _objectForClass(String lib, String theClass) =>
     AdaptedHeapObject(
       code: 1,
-      references: [],
+      outRefs: {},
       heapClass: HeapClassName(className: theClass, library: lib),
       shallowSize: 1,
     );
