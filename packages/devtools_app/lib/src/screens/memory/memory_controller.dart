@@ -75,23 +75,10 @@ class MemoryFeatureControllers {
 class MemoryController extends DisposableController
     with AutoDisposeControllerMixin {
   MemoryController({DiffPaneController? diffPaneController}) {
-    memoryTimeline = MemoryTimeline(offline);
+    memoryTimeline = MemoryTimeline();
     memoryLog = _MemoryLog(this);
 
     controllers = MemoryFeatureControllers(diffPaneController);
-
-    // Update the chart when the memorySource changes.
-    addAutoDisposeListener(memorySourceNotifier, () async {
-      try {
-        await updatedMemorySource();
-      } catch (e) {
-        final errorMessage = '$e';
-        memorySource = MemoryController.liveFeed;
-        notificationService.push(errorMessage);
-      }
-
-      refreshAllCharts();
-    });
   }
 
   /// Sub-controllers of memory controller.
@@ -114,10 +101,6 @@ class MemoryController extends DisposableController
 
   late _MemoryLog memoryLog;
 
-  /// Source of memory heap samples. False live data, True loaded from a
-  /// memory_log file.
-  final offline = ValueNotifier<bool>(false);
-
   HeapSample? _selectedDartSample;
 
   HeapSample? _selectedAndroidSample;
@@ -135,19 +118,6 @@ class MemoryController extends DisposableController
   }
 
   static const liveFeed = 'Live Feed';
-
-  String? memorySourcePrefix;
-
-  /// Notifies that the source of the memory feed has changed.
-  ValueListenable get memorySourceNotifier => _memorySourceNotifier;
-
-  final _memorySourceNotifier = ValueNotifier<String>(liveFeed);
-
-  set memorySource(String source) {
-    _memorySourceNotifier.value = source;
-  }
-
-  String get memorySource => _memorySourceNotifier.value;
 
   ValueListenable get refreshCharts => _refreshCharts;
 
@@ -171,29 +141,6 @@ class MemoryController extends DisposableController
   }
 
   ChartInterval get displayInterval => _displayIntervalNotifier.value;
-
-  /// MemorySource has changed update the view.
-  /// Return value of null implies offline file loaded.
-  /// Return value of String is an error message.
-  Future<void> updatedMemorySource() async {
-    if (memorySource == MemoryController.liveFeed) {
-      if (offline.value) {
-        // User is switching back to 'Live Feed'.
-        memoryTimeline.offlineData.clear();
-        offline.value = false; // We're live again...
-      } else {
-        // Still a live feed - keep collecting.
-        assert(!offline.value);
-      }
-    } else {
-      // Switching to an offline memory log (JSON file in /tmp).
-      await memoryLog.loadOffline(memorySource).catchError((e) {
-        throw OfflineFileException(e.toString());
-      });
-    }
-
-    _updateAndroidChartVisibility();
-  }
 
   final _paused = ValueNotifier<bool>(false);
 
@@ -313,9 +260,12 @@ class MemoryController extends DisposableController
     );
   }
 
+  /// This flag will be needed for offline mode implementation.
+  bool offline = false;
+
   void _updateAndroidChartVisibility() {
     final bool isOfflineAndAndroidData =
-        offline.value && memoryTimeline.data.first.adbMemoryInfo.realtime > 0;
+        offline && memoryTimeline.data.first.adbMemoryInfo.realtime > 0;
 
     final bool isConnectedToAndroidAndAndroidEnabled =
         isConnectedDeviceAndroid &&
@@ -397,7 +347,6 @@ class MemoryController extends DisposableController
   void dispose() {
     super.dispose();
     _displayIntervalNotifier.dispose();
-    _memorySourceNotifier.dispose();
     unawaited(_disconnectController.close());
     unawaited(_memoryTrackerController.close());
     _memoryTracker?.dispose();
@@ -488,7 +437,7 @@ class _MemoryLog {
 
     assert(memoryJson.isMemoryPayload);
 
-    controller.offline.value = true;
+    controller.offline = true;
     controller.memoryTimeline.offlineData.clear();
     controller.memoryTimeline.offlineData.addAll(memoryJson.data);
   }

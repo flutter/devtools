@@ -83,9 +83,7 @@ class _ChartControlPaneState extends State<ChartControlPane>
             ),
             const SizedBox(width: defaultSpacing),
             ClearButton(
-              onPressed: controller.memorySource == MemoryController.liveFeed
-                  ? _clearTimeline
-                  : null,
+              onPressed: controller.offline ? null : _clearTimeline,
               minScreenWidthForTextBeforeScaling: memoryControlsMinVerboseWidth,
               tooltip: 'Clear memory chart.',
             ),

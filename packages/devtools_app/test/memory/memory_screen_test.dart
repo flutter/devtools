@@ -48,7 +48,7 @@ void main() {
   }
 
   void initControllerState() {
-    controller.offline.value = true;
+    controller.offline = true;
     controller.memoryTimeline.offlineData.clear();
     controller.memoryTimeline.offlineData.addAll(memoryJson.data);
     controller.memoryTimeline.liveData.clear();
@@ -102,13 +102,11 @@ void main() {
       await pumpMemoryScreen(tester);
 
       // Should be collecting live feed.
-      expect(controller.offline.value, isFalse);
+      expect(controller.offline, isFalse);
 
       // Verify Memory, Memory Source, and Memory Sources content.
       expect(find.byTooltip(ChartPaneTooltips.pauseTooltip), findsOneWidget);
       expect(find.byTooltip(ChartPaneTooltips.resumeTooltip), findsOneWidget);
-
-      expect(controller.memorySource, MemoryController.liveFeed);
 
       expect(find.text('GC'), findsOneWidget);
 
@@ -123,7 +121,7 @@ void main() {
       await pumpMemoryScreen(tester);
       initControllerState();
 
-      expect(controller.offline.value, isTrue);
+      expect(controller.offline, isTrue);
 
       // Verify default event pane and vm chart exists.
       expect(find.byType(MemoryEventsPane), findsOneWidget);

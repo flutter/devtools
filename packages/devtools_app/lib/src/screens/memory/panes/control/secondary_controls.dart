@@ -13,7 +13,6 @@ import '../../../../shared/theme.dart';
 import '../../memory_controller.dart';
 import '../../shared/primitives/simple_elements.dart';
 import '../chart/chart_pane_controller.dart';
-import 'primitives.dart';
 import 'settings_dialog.dart';
 
 /// Controls related to the entire memory screen.
@@ -29,11 +28,6 @@ class SecondaryControls extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final mediaWidth = MediaQuery.of(context).size.width;
-    controller.memorySourcePrefix = mediaWidth > memoryControlsMinVerboseWidth
-        ? memorySourceMenuItemPrefix
-        : '';
-
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
