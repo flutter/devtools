@@ -190,7 +190,8 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
       if (value.kind != null &&
           (value.kind!.endsWith('List') ||
               value.kind == InstanceKind.kList ||
-              value.kind == InstanceKind.kMap)) {
+              value.kind == InstanceKind.kMap || 
+              value.kind == InstanceKind.kRecord)) {
         return value.length ?? 0;
       }
     }
