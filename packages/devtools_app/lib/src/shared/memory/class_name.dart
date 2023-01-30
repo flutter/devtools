@@ -110,7 +110,10 @@ class HeapClassName {
 
   /// Whether a class can hold a reference to an object
   /// without preventing garbage collection.
-  late final bool isWeakEntry = () {
+  late final bool isWeakEntry = _isWeakEntry(className, library);
+
+  /// See [isWeakEntry].
+  static bool _isWeakEntry(String className, String library) {
     // Classes that hold reference to an object without preventing
     // its collection.
     const weakHolders = {
@@ -130,20 +133,15 @@ class HeapClassName {
     // class names.
     assert(false, 'Unexpected library for $className: $library.');
     return false;
-  }();
+  }
 
-  late final shortName = () {
-    if (className == 'Context' && library == '') return 'Closure Context';
-    return className;
-  }();
+  late final shortName =
+      className == 'Context' && library == '' ? 'Closure Context' : className;
 
   ClassType? _cachedClassType;
 
-  ClassType classType(String? rootPackage) {
-    if (_cachedClassType != null) return _cachedClassType!;
-    _cachedClassType = _classType(rootPackage);
-    return _cachedClassType!;
-  }
+  ClassType classType(String? rootPackage) =>
+      _cachedClassType ??= _classType(rootPackage);
 
   ClassType _classType(String? rootPackage) {
     if (rootPackage != null && library.startsWith(rootPackage)) {

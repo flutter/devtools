@@ -5,7 +5,7 @@
 import 'package:collection/collection.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../../devtools_app.dart';
+import '../primitives/utils.dart';
 import 'class_name.dart';
 import 'simple_items.dart';
 
