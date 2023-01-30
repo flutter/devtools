@@ -244,10 +244,7 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
         final depth = children.length;
         valueStr = 'StackTrace ($depth ${pluralize('frame', depth)})';
       } else if (kind == InstanceKind.kRecord) {
-        final count = children.length;
-        // TODO(elliette): Use `value.length` instead of `children.length` when
-        // https://github.com/dart-lang/sdk/issues/51104 is resolved. Currently
-        // the field count can only be computed once the record is expanded:
+        final count = value.length ?? children.length;
         valueStr = count == 0
             ? 'Record'
             : 'Record ($count ${pluralize('field', count)})';
