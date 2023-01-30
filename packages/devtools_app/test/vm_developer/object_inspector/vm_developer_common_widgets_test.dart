@@ -179,10 +179,18 @@ void main() {
     await tester.tap(find.byType(AreaPaneHeader));
 
     await tester.pumpAndSettle();
-    expect(find.byType(SelectableText), findsNWidgets(5));
+    expect(find.byType(SelectableText), findsNWidgets(7));
     expect(find.text('FooClass'), findsOneWidget);
     expect(
       find.text('Retained by element [1] of fooSuperClass'),
+      findsOneWidget,
+    );
+    expect(
+      find.text('Retained by \$1 of Record'),
+      findsOneWidget,
+    );
+    expect(
+      find.text('Retained by fooParentField of Record'),
       findsOneWidget,
     );
     expect(
@@ -240,13 +248,21 @@ void main() {
       await tester.tap(find.byType(AreaPaneHeader));
 
       await tester.pumpAndSettle();
-      expect(find.byType(SelectableText), findsNWidgets(3));
+      expect(find.byType(SelectableText), findsNWidgets(5));
       expect(
         find.text('Referenced by fooFunction'),
         findsOneWidget,
       );
       expect(
         find.text('Referenced by fooParentField of fooType fooField of fooLib'),
+        findsOneWidget,
+      );
+      expect(
+        find.text('Referenced by fooParentField of fooRecord'),
+        findsOneWidget,
+      );
+      expect(
+        find.text('Referenced by \$1 of fooRecord'),
         findsOneWidget,
       );
       expect(

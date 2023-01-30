@@ -33,7 +33,7 @@ void main() async {
       });
 
       test('has path to the object of type ${t.appClassName}.', () async {
-        buildSpanningTreeAndSetInRefs(heap);
+        await buildSpanningTreeAndSetInRefs(heap);
         final appObject = heap.objects
             .where((o) => o.heapClass.className == t.appClassName)
             .first;

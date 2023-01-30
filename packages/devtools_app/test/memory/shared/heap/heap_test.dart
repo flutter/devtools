@@ -14,9 +14,9 @@ class _ClassSizeTest {
     required this.name,
     required this.heap,
     required this.expectedClassARetainedSize,
-  }) : assert(_assertHeapIndexIsCode(heap)) {
-    buildSpanningTreeAndSetInRefs(heap);
-  }
+  }) : assert(_assertHeapIndexIsCode(heap));
+
+  Future<void> initialize() => buildSpanningTreeAndSetInRefs(heap);
 
   final AdaptedHeapData heap;
   final String name;
@@ -84,6 +84,12 @@ final _classSizeTests = <_ClassSizeTest>[
 ];
 
 void main() {
+  setUp(() async {
+    for (final t in _classSizeTests) {
+      await t.initialize();
+    }
+  });
+
   test('$SingleClassStats does not double-count self-referenced classes.', () {
     for (final t in _classSizeTests) {
       final classes = SingleClassStats(heapClass: _classA);

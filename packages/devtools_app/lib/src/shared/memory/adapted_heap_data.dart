@@ -5,6 +5,7 @@
 import 'package:collection/collection.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../primitives/utils.dart';
 import 'class_name.dart';
 import 'simple_items.dart';
 
@@ -70,12 +71,18 @@ class AdaptedHeapData {
     );
   }
 
-  static AdaptedHeapData fromHeapSnapshot(
+  static final _uiReleaser = UiReleaser();
+
+  static Future<AdaptedHeapData> fromHeapSnapshot(
     HeapSnapshotGraph graph,
-  ) {
-    final objects = graph.objects.mapIndexed((i, e) {
-      return AdaptedHeapObject.fromHeapSnapshotObject(e, i);
-    }).toList();
+  ) async {
+    final objects = <AdaptedHeapObject>[];
+    for (final i in Iterable.generate(graph.objects.length)) {
+      if (_uiReleaser.step()) await _uiReleaser.releaseUi();
+      final object =
+          AdaptedHeapObject.fromHeapSnapshotObject(graph.objects[i], i);
+      objects.add(object);
+    }
 
     return AdaptedHeapData(objects);
   }
