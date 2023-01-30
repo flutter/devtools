@@ -169,7 +169,9 @@ class HeapClassName {
 
   /// True, if the package has prefix `dart:` or has perfix `package:` and is
   /// published by Dart or Flutter org.
-  late final isDartOrFlutter = () {
+  late final isDartOrFlutter = _isDartOrFlutter(library);
+
+  static bool _isDartOrFlutter(String library) {
     if (library.startsWith(PackagePrefixes.dart)) return true;
     if (library.startsWith(PackagePrefixes.flutterPackage)) return true;
 
@@ -183,7 +185,7 @@ class HeapClassName {
     );
 
     return _dartAndFlutterPackages.contains(packageName);
-  }();
+  }
 
   @override
   bool operator ==(Object other) {

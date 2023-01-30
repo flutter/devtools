@@ -84,8 +84,7 @@ class AdaptedHeapData {
       objects.add(object);
     }
 
-    final result = AdaptedHeapData(objects);
-    return result;
+    return AdaptedHeapData(objects);
   }
 
   /// Default value for rootIndex is taken from the doc:
