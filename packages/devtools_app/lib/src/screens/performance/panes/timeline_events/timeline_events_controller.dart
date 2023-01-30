@@ -581,6 +581,7 @@ class TimelineEventsController extends PerformanceFeatureController
   @override
   Future<void> clearData() async {
     allTraceEvents.clear();
+    threadNameTraceEvents.clear();
     _nextTraceIndexToProcess = 0;
     _unassignedFlutterFrameEvents.clear();
 

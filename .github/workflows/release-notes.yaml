@@ -4,7 +4,7 @@ on:
   pull_request:
     types: [ assigned, opened, synchronize, reopened, edited ]
 env:
-  CURRENT_RELEASE_FILE_PATH: packages/devtools_app/NEXT_RELEASE_NOTES.md
+  CURRENT_RELEASE_FILE_PATH: packages/devtools_app/release_notes/NEXT_RELEASE_NOTES.md
 jobs:
   release-preparedness:
     runs-on: ubuntu-latest
