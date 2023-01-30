@@ -9,6 +9,8 @@ import 'dart:html' as html;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+import '../../../../../shared/analytics/analytics.dart' as ga;
+import '../../../../../shared/analytics/constants.dart' as gac;
 import '../../../../../shared/globals.dart';
 import '../../../../../shared/primitives/auto_dispose.dart';
 import '../../../../../shared/primitives/trace_event.dart';
@@ -179,6 +181,7 @@ class _PerfettoViewController extends DisposableController
     });
     final buffer = Uint8List.fromList(encodedJson.codeUnits);
 
+    ga.select(gac.performance, gac.perfettoLoadTrace);
     _postMessage({
       'perfetto': {
         'buffer': buffer,
@@ -200,6 +203,7 @@ class _PerfettoViewController extends DisposableController
       return;
     }
     await _pingPerfettoUntilReady();
+    ga.select(gac.performance, gac.perfettoScrollToTimeRange);
     _postMessage({
       'perfetto': {
         // Pass the values to Perfetto in seconds.

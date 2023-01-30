@@ -116,7 +116,7 @@ for details on where to add DevTools release notes to Flutter website and how to
 - Follow the release notes
 [README.md](https://github.com/flutter/devtools/blob/master/packages/devtools_app/lib/src/framework/release_notes/README.md)
 to add release notes to Flutter website
-  - On the `$DEVTOOLS_RELEASE_BRANCH` copy the release notes from [NEXT_RELEASE_NOTES.md](../packages/devtools_app/NEXT_RELEASE_NOTES.md)
+  - On the `$DEVTOOLS_RELEASE_BRANCH` copy the release notes from [NEXT_RELEASE_NOTES.md](../packages/devtools_app/release_notes/NEXT_RELEASE_NOTES.md)
     - These are the release notes you will submit through the flutter/website PR.
   - make sure to also follow the instructions to test them.
 

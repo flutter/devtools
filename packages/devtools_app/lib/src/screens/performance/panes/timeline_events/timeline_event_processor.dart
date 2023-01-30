@@ -145,7 +145,9 @@ abstract class BaseTraceEventProcessor {
         //
         debugTraceEventCallback(
           () => log(
-            'Duplicate duration end event - skipping processing: $eventJson',
+            'Duplicate duration end event - skipping processing.\n'
+            'Current event: $eventJson\n'
+            'Previous event: ${_previousDurationEndEvents[eventThreadId]?.json}',
           ),
         );
         return;
@@ -233,7 +235,10 @@ abstract class BaseTraceEventProcessor {
 
           // Do not return early. Now that the tree is rebalanced, we can
           // continue processing [event].
-          assert(current != null && event.name != current.name);
+          assert(
+            current != null && event.name != current.name,
+            'Current: ${current?.name}, Event: ${event.name}',
+          );
         }
       } else {
         // The current event node has fallen into an unrecoverable state. Reset
