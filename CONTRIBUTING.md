@@ -32,7 +32,7 @@ You can do this online, and it only takes a minute.
 ### Announcing your changes
 
 If your improvement is user-facing, document it in
-[NEXT_RELEASE_NOTES.md](packages/devtools_app/NEXT_RELEASE_NOTES.md).
+[NEXT_RELEASE_NOTES.md](packages/devtools_app/release_notes/NEXT_RELEASE_NOTES.md).
 
 ## Development prep
 
