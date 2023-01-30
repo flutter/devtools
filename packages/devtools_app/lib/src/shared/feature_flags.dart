@@ -47,8 +47,9 @@ abstract class FeatureFlags {
 
   /// Flag to enable the embedded perfetto trace viewer.
   ///
-  /// https://github.com/flutter/devtools/issues/4207.
-  static bool embeddedPerfetto = enableBeta;
+  /// TODO(https://github.com/flutter/devtools/issues/4207): remove all uses of
+  /// this flag.
+  static bool embeddedPerfetto = true;
 
   /// Flag to enable widget rebuild stats ui.
   ///

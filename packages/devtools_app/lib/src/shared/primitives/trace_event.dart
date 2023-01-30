@@ -43,6 +43,9 @@ class TraceEvent {
 
   static const frameNumberArg = 'frame_number';
 
+  /// Event name for thread name metadata events.
+  static const threadNameEvent = 'thread_name';
+
   /// The original event JSON.
   final Map<String, Object?> json;
 

@@ -12,12 +12,16 @@ Dart & Flutter DevTools - A Suite of Performance Tools for Dart and Flutter
 * Fix an issue that would prevent DevTools connecting to the backend server that would disable some functionality - [#5016](https://github.com/flutter/devtools/pull/5016)
 * Add a link to the DevTools [CONTRIBUTING](https://github.com/flutter/devtools/blob/master/CONTRIBUTING.md) guide to the About menu, and fixed the Discord link - [#4926](https://github.com/flutter/devtools/pull/4926)
 * Fix conflicting colors in light theme - [5067](https://github.com/flutter/devtools/pull/5067)
-* Update `package:vm_service` constraint to `^10.1.0`.
 
 ## Inspector updates
 TODO: Remove this section if there are not any general updates.
 
 ## Performance updates
+
+* Replace the DevTools timeline trace viewer with the Perfetto trace viewer - [#5142](https://github.com/flutter/devtools/pull/5142)
+
+![perfetto trace viewer](images/image1.png "perfetto_trace_viewer")
+
 * Fix several issues with loading a Performance snapshot into DevTools - [#5048](https://github.com/flutter/devtools/pull/5048), [#4929](https://github.com/flutter/devtools/pull/4929)
 * UI polish and cleanup - [#4889](https://github.com/flutter/devtools/pull/4889)
 

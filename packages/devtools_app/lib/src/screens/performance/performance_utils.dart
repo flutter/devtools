@@ -4,6 +4,7 @@
 
 import 'package:flutter/foundation.dart';
 
+import '../../shared/primitives/trace_event.dart';
 import '../../shared/primitives/utils.dart';
 import 'performance_model.dart';
 
@@ -85,3 +86,9 @@ void debugTraceEventCallback(VoidCallback callback) {
 }
 
 const preCompileShadersDocsUrl = 'https://docs.flutter.dev/perf/shader';
+
+extension TraceEventExtension on TraceEvent {
+  bool get isThreadNameEvent =>
+      phase == TraceEvent.metadataEventPhase &&
+      name == TraceEvent.threadNameEvent;
+}

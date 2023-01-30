@@ -79,7 +79,7 @@ Future<void> resetReleaseNotes({
   await File('./tool/release_notes/images/.gitkeep').create();
 
   final currentReleaseNotesFile =
-      File('./packages/devtools_app/NEXT_RELEASE_NOTES.md');
+      File('./packages/devtools_app/release_notes/NEXT_RELEASE_NOTES.md');
   if (currentReleaseNotesFile.existsSync()) {
     await currentReleaseNotesFile.delete();
   }
@@ -95,7 +95,7 @@ Future<void> resetReleaseNotes({
   final normalizedVersionNumber = '$major.$minor.0';
 
   final templateFile =
-      File('./tool/release_notes/helpers/release_notes_template.md');
+      File('./devtools_app/release_notes/helpers/release_notes_template.md');
   final templateFileContents = await templateFile.readAsString();
   currentReleaseNotesFile.writeAsString(
     templateFileContents.replaceAll(
