@@ -1149,6 +1149,29 @@ void main() {
       });
     });
 
+    group('SetExtension', () {
+      test('containsWhere', () {
+        final set = {1, 2, 3, 4};
+        expect(set.containsWhere((element) => element == 1), isTrue);
+        expect(set.containsWhere((element) => element == 5), isFalse);
+        expect(set.containsWhere((element) => element + 2 == 3), isTrue);
+
+        final otherSet = {'hi', 'hey', 'foo', 'bar'};
+        expect(
+          otherSet.containsWhere((element) => element.contains('h')),
+          isTrue,
+        );
+        expect(
+          otherSet.containsWhere((element) => element.startsWith('ba')),
+          isTrue,
+        );
+        expect(
+          otherSet.containsWhere((element) => element.endsWith('ba')),
+          isFalse,
+        );
+      });
+    });
+
     group('ListValueNotifier', () {
       late ListValueNotifier<int> notifier;
 

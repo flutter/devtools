@@ -62,8 +62,11 @@ class TimelineEventsController extends PerformanceFeatureController
   /// This list is cleared and repopulated each time "Refresh" is clicked.
   final allTraceEvents = <TraceEventWrapper>[];
 
-  /// Trace event name for the events used to populate [threadNamesById].
-  static const _threadNameEvent = 'thread_name';
+  /// Set of thread_name trace events.
+  ///
+  /// These events are returned with each [VMService.getVMTimeline] response,
+  /// and we do not want to store duplicates in [allTraceEvents].
+  final threadNameTraceEvents = <TraceEvent>{};
 
   /// Maps thread names, which are gathererd from the "thread_name" trace
   /// events, to their thread ids.
@@ -189,12 +192,26 @@ class TimelineEventsController extends PerformanceFeatureController
         traceEvent,
         DateTime.now().millisecondsSinceEpoch,
       );
-      if (traceEvent.phase == TraceEvent.metadataEventPhase &&
-          traceEvent.name == _threadNameEvent) {
-        threadNameEvents.add(traceEvent);
+
+      // Speacial handling for thread name events since they are returned with
+      // each [VMService.getVMTimeline] response.
+      if (traceEvent.isThreadNameEvent) {
+        // TODO(kenz): watch that this doesn't become a performance bottleneck
+        // for [_pullTraceEventsFromVmTimeline].
+        final duplicateThreadNameEvent = threadNameTraceEvents.containsWhere(
+          (event) => collectionEquals(event.json, traceEvent.json),
+        );
+        if (!duplicateThreadNameEvent) {
+          // Only add this thread name event to [allTraceEvents] if we have not
+          // already added it. Otherwise, it will be a duplicate and will
+          // consume unecessary space and processing time.
+          threadNameEvents.add(traceEvent);
+          threadNameTraceEvents.add(traceEvent);
+          allTraceEvents.add(eventWrapper);
+        }
+      } else {
+        allTraceEvents.add(eventWrapper);
       }
-      allTraceEvents.add(eventWrapper);
-      debugTraceEventCallback(() => log(eventWrapper.event.json));
     }
 
     updateThreadIds(threadNameEvents, isInitialUpdate: isInitialPull);
