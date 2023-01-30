@@ -78,12 +78,14 @@ void main() {
         isolateRef,
       );
 
-      when(manager.service!.getObject(
-        isolateId,
-        objectId,
-        offset: 0,
-        count: 3,
-      )).thenAnswer((_) async {
+      when(
+        manager.service!.getObject(
+          isolateId,
+          objectId,
+          offset: 0,
+          count: 3,
+        ),
+      ).thenAnswer((_) async {
         return instance;
       });
 
