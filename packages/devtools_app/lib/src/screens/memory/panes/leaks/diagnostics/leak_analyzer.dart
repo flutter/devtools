@@ -10,8 +10,8 @@ import '../../../shared/heap/spanning_tree.dart';
 import 'model.dart';
 
 /// Analyzes notGCed leaks and returns result of the analysis.
-NotGCedAnalyzed analyseNotGCed(NotGCedAnalyzerTask task) {
-  analyzeHeapAndSetRetainingPaths(task.heap, task.reports);
+Future<NotGCedAnalyzed> analyzeNotGCed(NotGCedAnalyzerTask task) async {
+  await analyzeHeapAndSetRetainingPaths(task.heap, task.reports);
 
   final leaksWithPath = task.reports.where((r) => r.retainingPath != null);
   final leaksWithoutPath = task.reports.where((r) => r.retainingPath == null);
@@ -33,11 +33,11 @@ NotGCedAnalyzed analyseNotGCed(NotGCedAnalyzerTask task) {
 }
 
 /// Sets [retainingPath] to each [notGCedLeaks].
-void analyzeHeapAndSetRetainingPaths(
+Future<void> analyzeHeapAndSetRetainingPaths(
   AdaptedHeapData heap,
   List<LeakReport> notGCedLeaks,
-) {
-  if (!heap.allFieldsCalculated) buildSpanningTreeAndSetInRefs(heap);
+) async {
+  if (!heap.allFieldsCalculated) await buildSpanningTreeAndSetInRefs(heap);
 
   for (var l in notGCedLeaks) {
     l.retainingPath = _pathByIdentityHashCode(heap, l.code)?.shortPath();
