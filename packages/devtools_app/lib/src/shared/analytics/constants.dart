@@ -60,8 +60,6 @@ const performanceOverlay = 'performanceOverlay';
 const performanceOverlayDocs = 'performanceOverlayDocs';
 const timelineFlameChartHelp = 'timelineFlameChartHelp';
 const selectFlutterFrame = 'selectFlutterFrame';
-const perfettoModeTraceEventProcessingTime =
-    'traceEventProcessingTime-perfettoMode';
 const traceEventProcessingTime = 'traceEventProcessingTime';
 const trackRebuilds = 'trackRebuilds';
 const trackWidgetBuildsDocs = 'trackWidgetBuildsDocs';
@@ -83,6 +81,10 @@ const shaderCompilationDocs = 'shaderCompilationDocs';
 const shaderCompilationDocsTooltipLink = 'shaderCompilationDocsTooltipLink';
 const analyzeSelectedFrame = 'analyzeSelectedFrame';
 const collectRasterStats = 'collectRasterStats';
+const perfettoModeTraceEventProcessingTime =
+    'traceEventProcessingTime-perfettoMode';
+const perfettoLoadTrace = 'perfettoLoadTrace';
+const perfettoScrollToTimeRange = 'perfettoScrollToTimeRange';
 
 // CPU profiler UX actions:
 const cpuSamplingRatePrefix = 'profileGranularity';

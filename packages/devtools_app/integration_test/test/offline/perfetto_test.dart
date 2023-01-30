@@ -10,15 +10,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 
 void main() {
-  const experimentsEnabled = bool.fromEnvironment('enable_experiments') == true;
-  if (!experimentsEnabled) {
-    fail(
-      'perfetto_test.dart requires experiments to be enabled. This test should '
-      'live inside an \'experimental\' directory '
-      '(e.g. \'integration_test/test/offline/experimental/\')',
-    );
-  }
-
   final binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
   testWidgets('Perfetto trace viewer loads data and scrolls for Flutter frames',
