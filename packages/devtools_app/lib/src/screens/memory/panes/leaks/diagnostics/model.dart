@@ -52,7 +52,7 @@ class NotGCedAnalyzerTask {
     List<LeakReport> reports,
   ) async {
     return NotGCedAnalyzerTask(
-      heap: AdaptedHeapData.fromHeapSnapshot(graph),
+      heap: await AdaptedHeapData.fromHeapSnapshot(graph),
       reports: reports,
     );
   }

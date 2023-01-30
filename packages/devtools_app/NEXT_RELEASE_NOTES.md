@@ -12,6 +12,7 @@ Dart & Flutter DevTools - A Suite of Performance Tools for Dart and Flutter
 * Fix an issue that would prevent DevTools connecting to the backend server that would disable some functionality - [#5016](https://github.com/flutter/devtools/pull/5016)
 * Add a link to the DevTools [CONTRIBUTING](https://github.com/flutter/devtools/blob/master/CONTRIBUTING.md) guide to the About menu, and fixed the Discord link - [#4926](https://github.com/flutter/devtools/pull/4926)
 * Fix conflicting colors in light theme - [5067](https://github.com/flutter/devtools/pull/5067)
+* Update `package:vm_service` constraint to `^10.1.0`.
 
 ## Inspector updates
 TODO: Remove this section if there are not any general updates.
@@ -29,6 +30,7 @@ TODO: Remove this section if there are not any general updates.
 * UI polish and cleanup - [#4855](https://github.com/flutter/devtools/pull/4855)
 * Color code classes [#5030](https://github.com/flutter/devtools/pull/5030)
 * Fix state management for tracing [#5062](https://github.com/flutter/devtools/pull/5062)
+* Improve performance of heap snapshot taking [#5134](https://github.com/flutter/devtools/pull/5134)
 
 ## Debugger updates
 

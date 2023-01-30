@@ -71,7 +71,6 @@ enum ClassType {
       CircleIcon(color: color, text: label, textColor: Colors.white);
 }
 
-@immutable
 class HeapClassName {
   HeapClassName({required this.className, required library})
       : library = _normalizeLibrary(library);
@@ -102,15 +101,19 @@ class HeapClassName {
   final String className;
   final String library;
 
-  String get fullName => library.isNotEmpty ? '$library/$shortName' : shortName;
+  late final String fullName =
+      library.isNotEmpty ? '$library/$shortName' : shortName;
 
-  bool get isSentinel => className == 'Sentinel' && library.isEmpty;
+  late final isSentinel = className == 'Sentinel' && library.isEmpty;
 
-  bool get isRoot => className == 'Root' && library.isEmpty;
+  late final isRoot = className == 'Root' && library.isEmpty;
 
   /// Whether a class can hold a reference to an object
   /// without preventing garbage collection.
-  bool get isWeakEntry {
+  late final bool isWeakEntry = _isWeakEntry(className, library);
+
+  /// See [isWeakEntry].
+  static bool _isWeakEntry(String className, String library) {
     // Classes that hold reference to an object without preventing
     // its collection.
     const weakHolders = {
@@ -132,12 +135,15 @@ class HeapClassName {
     return false;
   }
 
-  String get shortName {
-    if (className == 'Context' && library == '') return 'Closure Context';
-    return className;
-  }
+  late final shortName =
+      className == 'Context' && library == '' ? 'Closure Context' : className;
 
-  ClassType classType(String? rootPackage) {
+  ClassType? _cachedClassType;
+
+  ClassType classType(String? rootPackage) =>
+      _cachedClassType ??= _classType(rootPackage);
+
+  ClassType _classType(String? rootPackage) {
     if (rootPackage != null && library.startsWith(rootPackage)) {
       return ClassType.rootPackage;
     }
@@ -149,7 +155,7 @@ class HeapClassName {
     return ClassType.dependency;
   }
 
-  bool get isCreatedByGoogle => isPackageless || isDartOrFlutter;
+  late final bool isCreatedByGoogle = isPackageless || isDartOrFlutter;
 
   /// True, if the library does not belong to a package.
   ///
@@ -157,14 +163,15 @@ class HeapClassName {
   /// `dart:` or `package:`.
   /// Examples of such classes: Code, Function, Class, Field,
   /// number_symbols/NumberSymbols, vector_math_64/Matrix4.
-  bool get isPackageless =>
-      library.isEmpty ||
+  late final bool isPackageless = library.isEmpty ||
       (!library.startsWith(PackagePrefixes.dart) &&
           !library.startsWith(PackagePrefixes.genericDartPackage));
 
   /// True, if the package has prefix `dart:` or has perfix `package:` and is
   /// published by Dart or Flutter org.
-  bool get isDartOrFlutter {
+  late final isDartOrFlutter = _isDartOrFlutter(library);
+
+  static bool _isDartOrFlutter(String library) {
     if (library.startsWith(PackagePrefixes.dart)) return true;
     if (library.startsWith(PackagePrefixes.flutterPackage)) return true;
 
@@ -189,7 +196,7 @@ class HeapClassName {
   }
 
   @override
-  int get hashCode => fullName.hashCode;
+  late final hashCode = fullName.hashCode;
 
   static String _normalizeLibrary(String library) =>
       library.trim().replaceFirst(
