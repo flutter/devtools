@@ -10,7 +10,7 @@ import '../../../shared/heap/spanning_tree.dart';
 import 'model.dart';
 
 /// Analyzes notGCed leaks and returns result of the analysis.
-Future<NotGCedAnalyzed> analyseNotGCed(NotGCedAnalyzerTask task) async {
+Future<NotGCedAnalyzed> analyzeNotGCed(NotGCedAnalyzerTask task) async {
   await analyzeHeapAndSetRetainingPaths(task.heap, task.reports);
 
   final leaksWithPath = task.reports.where((r) => r.retainingPath != null);

@@ -275,7 +275,8 @@ class VmServiceWrapper implements VmService {
     String isolateId,
     String objectId,
     int limit, {
-    String? classId,
+    bool? includeSubclasses,
+    bool? includeImplementers,
   }) async {
     return trackFuture(
       'getInstances',
