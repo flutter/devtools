@@ -1161,6 +1161,17 @@ extension ListExtension<T> on List<T> {
   }
 }
 
+extension SetExtension<T> on Set<T> {
+  bool containsWhere(bool test(T element)) {
+    for (var e in this) {
+      if (test(e)) {
+        return true;
+      }
+    }
+    return false;
+  }
+}
+
 extension UiListExtension<T> on List<T> {
   int get numSpacers => max(0, length - 1);
 }
