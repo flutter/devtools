@@ -19,8 +19,6 @@ enum ContinuesState {
 
 /// All Raw data received from the VM and offline data loaded from a memory log file.
 class MemoryTimeline {
-  MemoryTimeline();
-
   /// Version of timeline data (HeapSample) JSON payload.
   static const version = 1;
 
