@@ -73,17 +73,6 @@ class AdaptedHeapData {
 
   static final _uiReleaser = UiReleaser();
 
-  static Future<AdaptedHeapData> _fromHeapSnapshot(
-    HeapSnapshotGraph graph,
-  ) async {
-    final objects = <AdaptedHeapObject>[];
-    for (final i in Iterable.generate(graph.objects.length)) {
-      if (_uiReleaser.step()) await _uiReleaser.releaseUi();
-      final object =
-          AdaptedHeapObject.fromHeapSnapshotObject(graph.objects[i], i);
-      objects.add(object);
-    }
-
   static Future<AdaptedHeapData> fromHeapSnapshot(
     HeapSnapshotGraph graph,
   ) async {
@@ -95,8 +84,7 @@ class AdaptedHeapData {
       objects.add(object);
     }
 
-    final result = AdaptedHeapData(objects);
-    return result;
+    return AdaptedHeapData(objects);
   }
 
   /// Default value for rootIndex is taken from the doc:

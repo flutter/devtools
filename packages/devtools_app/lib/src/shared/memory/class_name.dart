@@ -133,7 +133,7 @@ class HeapClassName {
     // class names.
     assert(false, 'Unexpected library for $className: $library.');
     return false;
-  }();
+  }
 
   late final shortName =
       className == 'Context' && library == '' ? 'Closure Context' : className;
@@ -185,7 +185,7 @@ class HeapClassName {
     );
 
     return _dartAndFlutterPackages.contains(packageName);
-  }();
+  }
 
   @override
   bool operator ==(Object other) {
