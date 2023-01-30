@@ -458,7 +458,7 @@ class InspectorService extends InspectorServiceBase {
 
   /// As we aren't running from an IDE, we don't know exactly what the pub root
   /// directories are for the current project so we make a best guess if needed
-  /// based on the root directory of the first non artifical widget in the
+  /// based on the root directory of the first non artificial widget in the
   /// tree.
   Future<List<String>> inferPubRootDirectoryIfNeeded() async {
     final group = createObjectGroup('temp');

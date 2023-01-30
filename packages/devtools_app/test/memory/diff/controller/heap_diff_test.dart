@@ -12,9 +12,9 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   test(
       '$HeapDiffStore does not create new $DiffHeapClasses for the same couple',
-      () {
-    final heap1 = _createSimplestHeap();
-    final heap2 = _createSimplestHeap();
+      () async {
+    final heap1 = await _createSimplestHeap();
+    final heap2 = await _createSimplestHeap();
 
     expect(heap1 == heap2, false);
 
@@ -28,17 +28,18 @@ void main() {
     expect(couple1, couple3);
   });
 
-  test('$DiffClassStats calculates mix of cases as expected', () {
+  test('$DiffClassStats calculates mix of cases as expected', () async {
     final className = HeapClassName(className: 'myClass', library: 'library');
 
-    final deleted = _createObject(className, 1, []);
-    final persistedBefore = _createObject(className, 2, []);
-    final persistedAfter = _createObject(className, 2, []);
-    final created1 = _createObject(className, 3, []);
-    final created2 = _createObject(className, 4, []);
+    final deleted = _createObject(className, 1, {});
+    final persistedBefore = _createObject(className, 2, {});
+    final persistedAfter = _createObject(className, 2, {});
+    final created1 = _createObject(className, 3, {});
+    final created2 = _createObject(className, 4, {});
 
-    final statsBefore = _createClassStats([deleted, persistedBefore]);
-    final statsAfter = _createClassStats([persistedAfter, created1, created2]);
+    final statsBefore = await _createClassStats({deleted, persistedBefore});
+    final statsAfter =
+        await _createClassStats({persistedAfter, created1, created2});
 
     final stats = DiffClassStats.diff(before: statsBefore, after: statsAfter)!;
 
@@ -48,12 +49,12 @@ void main() {
     expect(stats.total.delta.instanceCount, 1);
   });
 
-  test('$DiffClassStats calculates deletion as expected', () {
+  test('$DiffClassStats calculates deletion as expected', () async {
     final className = HeapClassName(className: 'myClass', library: 'library');
 
-    final deleted = _createObject(className, 1, []);
+    final deleted = _createObject(className, 1, {});
 
-    final statsBefore = _createClassStats([deleted]);
+    final statsBefore = await _createClassStats({deleted});
 
     final stats = DiffClassStats.diff(before: statsBefore, after: null)!;
 
@@ -64,9 +65,11 @@ void main() {
   });
 }
 
-SingleClassStats _createClassStats(List<AdaptedHeapObject> instances) {
+Future<SingleClassStats> _createClassStats(
+  Set<AdaptedHeapObject> instances,
+) async {
   final indexes =
-      Iterable<int>.generate(instances.length).map((i) => i + 1).toList();
+      Iterable<int>.generate(instances.length).map((i) => i + 1).toSet();
 
   final objects = [
     _createObject(
@@ -78,7 +81,7 @@ SingleClassStats _createClassStats(List<AdaptedHeapObject> instances) {
   ];
 
   final heap = AdaptedHeapData(objects, rootIndex: 0);
-  buildSpanningTree(heap);
+  await buildSpanningTreeAndSetInRefs(heap);
 
   final result = SingleClassStats(heapClass: instances.first.heapClass);
   for (var index in indexes) {
@@ -91,21 +94,21 @@ SingleClassStats _createClassStats(List<AdaptedHeapObject> instances) {
 AdaptedHeapObject _createObject(
   HeapClassName className,
   int code,
-  List<int> references,
+  Set<int> references,
 ) =>
     AdaptedHeapObject(
       code: code,
-      references: references,
+      outRefs: references,
       heapClass: className,
       shallowSize: 1,
     );
 
-AdaptedHeap _createSimplestHeap() => AdaptedHeap(
+Future<AdaptedHeap> _createSimplestHeap() async => await AdaptedHeap.create(
       AdaptedHeapData(
         [
           AdaptedHeapObject(
             code: 0,
-            references: [],
+            outRefs: {},
             heapClass: HeapClassName(className: 'root', library: 'lib'),
             shallowSize: 1,
           )

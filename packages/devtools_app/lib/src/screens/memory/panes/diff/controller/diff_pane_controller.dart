@@ -70,7 +70,7 @@ class DiffPaneController extends DisposableController {
     snapshots.add(item);
 
     final heapData = await snapshotTaker.take();
-    item.initializeHeapData(heapData);
+    await item.initializeHeapData(heapData);
 
     final newElementIndex = snapshots.value.length - 1;
     core._selectedSnapshotIndex.value = newElementIndex;
@@ -328,14 +328,11 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
     // Set class to show.
     final classes = _snapshotClassesAfterDiffing();
     heapClasses.value = classes;
-
     _setSelections();
-
     _updateClasses(
       classes: classes,
       className: _core.className_,
     );
-
     // Set paths to show.
     final theClass =
         selectedSingleClassStats.value ?? selectedDiffClassStats.value;
@@ -353,7 +350,6 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
 
     // Set current snapshot.
     _selectedItem.value = _core.selectedItem;
-
     _endUpdatingValues();
   }
 

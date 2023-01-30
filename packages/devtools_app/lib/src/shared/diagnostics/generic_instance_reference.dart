@@ -4,6 +4,8 @@
 
 import 'package:vm_service/vm_service.dart';
 
+import '../memory/adapted_heap_data.dart';
+import '../memory/simple_items.dart';
 import 'diagnostics_node.dart';
 
 /// A generic [InstanceRef] using either format used by the [InspectorService]
@@ -22,9 +24,12 @@ class GenericInstanceRef {
     required this.isolateRef,
     this.value,
     this.diagnostic,
+    this.heapSelection,
   });
 
   final Object? value;
+
+  final HeapObjectSelection? heapSelection;
 
   InstanceRef? get instanceRef =>
       value is InstanceRef ? value as InstanceRef? : null;
@@ -35,4 +40,50 @@ class GenericInstanceRef {
   final RemoteDiagnosticsNode? diagnostic;
 
   final IsolateRef? isolateRef;
+}
+
+class ObjectReferences extends GenericInstanceRef {
+  ObjectReferences({
+    required this.refNodeType,
+    super.isolateRef,
+    super.value,
+    super.heapSelection,
+  });
+
+  ObjectReferences.withType(ObjectReferences ref, this.refNodeType)
+      : super(
+          isolateRef: ref.isolateRef,
+          value: ref.value,
+          heapSelection: ref.heapSelection,
+        );
+
+  final RefNodeType refNodeType;
+}
+
+enum RefNodeType {
+  /// Root item for references.
+  refRoot,
+
+  /// Subitem of [refRoot] for static references.
+  staticRefRoot,
+
+  /// Subitem of [staticRefRoot] for inbound static references.
+  staticInRefs(RefDirection.inbound),
+
+  /// Subitem of [staticRefRoot] for outbound static references.
+  staticOutRefs(RefDirection.outbound),
+
+  /// Subitem of [refRoot] for live references.
+  liveRefRoot,
+
+  /// Subitem of [liveRefRoot] for inbound live references.
+  liveInRefs(RefDirection.inbound),
+
+  /// Subitem of [liveRefRoot] for outbound live references.
+  liveOutRefs(RefDirection.outbound),
+  ;
+
+  const RefNodeType([this.direction]);
+
+  final RefDirection? direction;
 }

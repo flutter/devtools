@@ -2,18 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app/src/screens/debugger/breakpoint_manager.dart';
-import 'package:devtools_app/src/screens/debugger/debugger_controller.dart';
+import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/inspector/inspector_breadcrumbs.dart';
-import 'package:devtools_app/src/screens/inspector/inspector_controller.dart';
-import 'package:devtools_app/src/screens/inspector/inspector_tree_controller.dart';
-import 'package:devtools_app/src/service/service_manager.dart';
-import 'package:devtools_app/src/shared/config_specific/ide_theme/ide_theme.dart';
-import 'package:devtools_app/src/shared/console/eval/inspector_tree.dart';
-import 'package:devtools_app/src/shared/console/primitives/simple_items.dart';
-import 'package:devtools_app/src/shared/globals.dart';
-import 'package:devtools_app/src/shared/notifications.dart';
-import 'package:devtools_app/src/shared/preferences.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart' hide Fake;
@@ -31,6 +21,7 @@ void main() {
     when(app.isFlutterAppNow).thenReturn(true);
     when(app.isProfileBuildNow).thenReturn(false);
 
+    setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
     setGlobal(ServiceConnectionManager, fakeServiceManager);
     setGlobal(IdeTheme, IdeTheme());
     setGlobal(PreferencesController, PreferencesController());

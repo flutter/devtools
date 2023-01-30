@@ -29,14 +29,14 @@ class DevToolsServerConnection {
   /// Returns a URI for the backend ./api folder for a DevTools page being hosted
   /// at `baseUri`. Trailing slashes are important to support Path-URL Strategy:
   ///
-  /// - https://foo/devtools/ => https://foo/devtools/api
-  /// - https://foo/devtools/inspector => https://foo/devtools/api
+  /// - http://foo/devtools/ => http://foo/devtools/api
+  /// - http://foo/devtools/inspector => http://foo/devtools/api
   ///
   /// For compatibility with any tools that might construct URIs ending with
   /// "/devtools" without the trailing slash, URIs ending with `devtools` (such
   /// as when hosted by DDS) are handled specially:
   ///
-  /// - https://foo/devtools => https://foo/devtools/api
+  /// - http://foo/devtools => http://foo/devtools/api
   @visibleForTesting
   static Uri apiUriFor(Uri baseUri) => baseUri.path.endsWith('devtools')
       ? baseUri.resolve('devtools/api/')

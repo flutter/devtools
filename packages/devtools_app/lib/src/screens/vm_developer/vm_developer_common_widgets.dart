@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:stack_trace/stack_trace.dart' as stack_trace;
 import 'package:vm_service/vm_service.dart';
 
 import '../../shared/common_widgets.dart';
@@ -519,7 +520,10 @@ class _RetainingObjectDescription extends StatelessWidget {
       const TextSpan(text: 'Retained by '),
     ];
 
-    if (object.parentField != null) {
+    if (object.parentField is int) {
+      assert((object.value as InstanceRef).kind == InstanceKind.kRecord);
+      entries.add(TextSpan(text: '\$${object.parentField} of '));
+    } else if (object.parentField != null) {
       entries.add(TextSpan(text: '${object.parentField} of '));
     }
 
@@ -552,13 +556,12 @@ class _RetainingObjectDescription extends StatelessWidget {
         ).buildTextSpan(context),
       );
     } else {
-      entries.addAll([
-        const TextSpan(text: 'of '),
+      entries.add(
         VmServiceObjectLink(
           object: object.value,
           onTap: onTap,
         ).buildTextSpan(context),
-      ]);
+      );
     }
     return SelectableText.rich(
       TextSpan(children: entries),
@@ -668,7 +671,13 @@ class InboundReferencesWidget extends StatelessWidget {
       );
     }
 
-    if (inboundRef.parentField != null) {
+    if (inboundRef.parentField is int) {
+      assert((inboundRef.source as InstanceRef).kind == InstanceKind.kRecord);
+      description.write('\$${inboundRef.parentField} of ');
+    } else if (inboundRef.parentField is String) {
+      assert((inboundRef.source as InstanceRef).kind == InstanceKind.kRecord);
+      description.write('${inboundRef.parentField} of ');
+    } else if (inboundRef.parentField is FieldRef) {
       description.write(
         '${_objectName(inboundRef.parentField)} of ',
       );
@@ -701,6 +710,7 @@ class VmServiceObjectLink<T> extends StatelessWidget {
     final theme = Theme.of(context);
 
     String? text = textBuilder?.call(object);
+    bool isServiceObject = true;
     if (text == null) {
       if (object is LibraryRef) {
         final lib = object as LibraryRef;
@@ -727,24 +737,18 @@ class VmServiceObjectLink<T> extends StatelessWidget {
         text = code.name!;
       } else if (object is InstanceRef) {
         final instance = object as InstanceRef;
-        if (instance.kind == InstanceKind.kTypeParameter) {
-          final buf = StringBuffer();
-          final typeParams = instance.typeParameters!;
-          buf.write('<');
-          for (int i = 0; i < typeParams.length; ++i) {
-            buf.write(typeParams[i].valueAsString);
-            if (i + 1 != typeParams.length) {
-              buf.write(', ');
-            }
-          }
-          buf.write('>');
-          text = buf.toString();
-        } else if (instance.kind == InstanceKind.kList) {
+        if (instance.kind == InstanceKind.kList) {
           text = 'List(length: ${instance.length})';
         } else if (instance.kind == InstanceKind.kMap) {
           text = 'Map(length: ${instance.length})';
+        } else if (instance.kind == InstanceKind.kRecord) {
+          text = 'Record';
         } else if (instance.kind == InstanceKind.kType) {
           text = instance.name!;
+        } else if (instance.kind == InstanceKind.kStackTrace) {
+          final trace = stack_trace.Trace.parse(instance.valueAsString!);
+          final depth = trace.frames.length;
+          text = 'StackTrace ($depth ${pluralize('frame', depth)})';
         } else {
           if (instance.valueAsString != null) {
             text = instance.valueAsString!;
@@ -762,21 +766,27 @@ class VmServiceObjectLink<T> extends StatelessWidget {
       } else if (object is Sentinel) {
         final sentinel = object as Sentinel;
         text = sentinel.valueAsString!;
+      } else {
+        isServiceObject = false;
+        text = object.toString();
       }
     }
 
-    final style =
-        isSelected ? theme.selectedLinkTextStyle : theme.linkTextStyle;
+    final TextStyle style;
+    if (isServiceObject) {
+      style = isSelected ? theme.selectedLinkTextStyle : theme.linkTextStyle;
+    } else {
+      style = isSelected ? theme.selectedFixedFontStyle : theme.fixedFontStyle;
+    }
     return TextSpan(
       text: text,
-      style: style.apply(
-        fontFamily: theme.fixedFontStyle.fontFamily,
-        overflow: TextOverflow.ellipsis,
-      ),
-      recognizer: TapGestureRecognizer()
-        ..onTap = () async {
-          await onTap(object);
-        },
+      style: style.apply(overflow: TextOverflow.ellipsis),
+      recognizer: isServiceObject
+          ? (TapGestureRecognizer()
+            ..onTap = () async {
+              await onTap(object);
+            })
+          : null,
     );
   }
 
@@ -879,37 +889,49 @@ class VmObjectDisplayBasicLayout extends StatelessWidget {
   }
 }
 
+MapEntry<String, WidgetBuilder> shallowSizeRowBuilder(VmObject object) {
+  return selectableTextBuilderMapEntry(
+    'Shallow Size',
+    prettyPrintBytes(
+      object.obj.size ?? 0,
+      includeUnit: true,
+      kbFractionDigits: 1,
+      maxBytes: 512,
+    ),
+  );
+}
+
+MapEntry<String, WidgetBuilder> reachableSizeRowBuilder(VmObject object) {
+  return MapEntry(
+    'Reachable Size',
+    (context) => RequestableSizeWidget(
+      fetching: object.fetchingReachableSize,
+      sizeProvider: () => object.reachableSize,
+      requestFunction: object.requestReachableSize,
+    ),
+  );
+}
+
+MapEntry<String, WidgetBuilder> retainedSizeRowBuilder(VmObject object) {
+  return MapEntry(
+    'Retained Size',
+    (context) => RequestableSizeWidget(
+      fetching: object.fetchingRetainedSize,
+      sizeProvider: () => object.retainedSize,
+      requestFunction: object.requestRetainedSize,
+    ),
+  );
+}
+
 List<MapEntry<String, WidgetBuilder>> vmObjectGeneralDataRows(
   ObjectInspectorViewController controller,
   VmObject object,
 ) {
   return [
     selectableTextBuilderMapEntry('Object Class', object.obj.type),
-    selectableTextBuilderMapEntry(
-      'Shallow Size',
-      prettyPrintBytes(
-        object.obj.size ?? 0,
-        includeUnit: true,
-        kbFractionDigits: 1,
-        maxBytes: 512,
-      ),
-    ),
-    MapEntry(
-      'Reachable Size',
-      (context) => RequestableSizeWidget(
-        fetching: object.fetchingReachableSize,
-        sizeProvider: () => object.reachableSize,
-        requestFunction: object.requestReachableSize,
-      ),
-    ),
-    MapEntry(
-      'Retained Size',
-      (context) => RequestableSizeWidget(
-        fetching: object.fetchingRetainedSize,
-        sizeProvider: () => object.retainedSize,
-        requestFunction: object.requestRetainedSize,
-      ),
-    ),
+    shallowSizeRowBuilder(object),
+    reachableSizeRowBuilder(object),
+    retainedSizeRowBuilder(object),
     if (object is ClassObject)
       serviceObjectLinkBuilderMapEntry<LibraryRef>(
         controller: controller,
@@ -934,7 +956,9 @@ List<MapEntry<String, WidgetBuilder>> vmObjectGeneralDataRows(
         key: 'Owner',
         object: object.obj.owner!,
       ),
-    if (object is! ScriptObject && object is! LibraryObject)
+    if (object is! ScriptObject &&
+        object is! LibraryObject &&
+        object.script != null)
       serviceObjectLinkBuilderMapEntry<ScriptRef>(
         controller: controller,
         key: 'Script',
