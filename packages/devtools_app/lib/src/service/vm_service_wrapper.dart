@@ -280,7 +280,13 @@ class VmServiceWrapper implements VmService {
   }) async {
     return trackFuture(
       'getInstances',
-      _vmService.getInstances(isolateId, objectId, limit),
+      _vmService.getInstances(
+        isolateId,
+        objectId,
+        limit,
+        includeSubclasses: includeSubclasses,
+        includeImplementers: includeImplementers,
+      ),
     );
   }
 
