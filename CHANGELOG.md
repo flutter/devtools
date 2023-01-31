@@ -1,4 +1,5 @@
 ## 2.21.0
+* Remove export and source from memory screen - [#5135](https://github.com/flutter/devtools/pull/5135)
 * Support record inspection - [#5084](https://github.com/flutter/devtools/pull/5084)
 * Fix one bug with perfetto feature and add image to release notes - [#5143](https://github.com/flutter/devtools/pull/5143)
 * Enable the embedded perfetto trace viewer by default and add analytics [#5142](https://github.com/flutter/devtools/pull/5142)
