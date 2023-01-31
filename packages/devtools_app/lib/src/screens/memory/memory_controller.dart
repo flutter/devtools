@@ -264,15 +264,11 @@ class MemoryController extends DisposableController
   bool offline = false;
 
   void _updateAndroidChartVisibility() {
-    final bool isOfflineAndAndroidData =
-        offline && memoryTimeline.data.first.adbMemoryInfo.realtime > 0;
-
     final bool isConnectedToAndroidAndAndroidEnabled =
         isConnectedDeviceAndroid &&
             preferences.memory.androidCollectionEnabled.value;
 
-    isAndroidChartVisibleNotifier.value =
-        isOfflineAndAndroidData || isConnectedToAndroidAndAndroidEnabled;
+    isAndroidChartVisibleNotifier.value = isConnectedToAndroidAndAndroidEnabled;
   }
 
   void _handleConnectionStop(Object? _) {
