@@ -98,7 +98,9 @@ if [ "$BOT" = "main" ]; then
     pushd packages/devtools_app
     echo `pwd`
 
-    if [! grep -nr "/devtools_app.dart';" lib/src]; then
+    WRONG_IMPORTS=$(grep -nr "/devtools_app.dart';" lib/src)
+    if [[ ! -z "$WRONG_IMPORTS" ]] ; then
+        echo $WRONG_IMPORTS
         echo "Avoid importing the root devtools_app library from src/"
         exit 1;
     fi
