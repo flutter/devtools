@@ -67,7 +67,7 @@ class MemoryDefaultScene extends Scene {
     controller = MemoryController(
       diffPaneController: DiffPaneController(_TestSnapshotTaker()),
     )
-      ..offline.value = true
+      ..offline = true
       ..memoryTimeline.offlineData.clear()
       ..memoryTimeline.offlineData.addAll(memoryJson.data);
   }
@@ -120,7 +120,7 @@ AdaptedHeapData _createHeap(Map<String, int> classToInstanceCount) {
       objects.add(_createObject(entry.key));
       leafCount++;
       final objectIndex = leafCount;
-      objects[rootIndex].references.add(objectIndex);
+      objects[rootIndex].outRefs.add(objectIndex);
     }
   }
 
@@ -131,7 +131,7 @@ var _nextCode = 1;
 
 AdaptedHeapObject _createObject(String className) => AdaptedHeapObject(
       code: _nextCode++,
-      references: [],
+      outRefs: {},
       heapClass: HeapClassName(
         className: className,
         library: 'my_lib',

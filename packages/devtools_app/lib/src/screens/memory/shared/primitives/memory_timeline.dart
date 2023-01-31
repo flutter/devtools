@@ -19,8 +19,6 @@ enum ContinuesState {
 
 /// All Raw data received from the VM and offline data loaded from a memory log file.
 class MemoryTimeline {
-  MemoryTimeline(this.offline);
-
   /// Version of timeline data (HeapSample) JSON payload.
   static const version = 1;
 
@@ -54,16 +52,16 @@ class MemoryTimeline {
   static const delayMs = 500;
   static const Duration updateDelay = Duration(milliseconds: delayMs);
 
-  final ValueListenable<bool> offline;
+  /// This flag will be needed for offline mode implementation.
+  final offline = false;
 
   /// Return the data payload that is active.
-  List<HeapSample> get data => offline.value ? offlineData : liveData;
+  List<HeapSample> get data => offline ? offlineData : liveData;
 
-  int get startingIndex =>
-      offline.value ? offlineStartingIndex : liveStartingIndex;
+  int get startingIndex => offline ? offlineStartingIndex : liveStartingIndex;
 
   set startingIndex(int value) {
-    offline.value ? offlineStartingIndex = value : liveStartingIndex = value;
+    offline ? offlineStartingIndex = value : liveStartingIndex = value;
   }
 
   int get endingIndex => data.isNotEmpty ? data.length - 1 : -1;
@@ -292,7 +290,7 @@ class MemoryTimeline {
 
     // Only notify that new sample has arrived if the
     // memory source is 'Live Feed'.
-    if (!offline.value) {
+    if (!offline) {
       _sampleAddedNotifier.value = sample;
       sampleEventNotifier.value++;
     }
