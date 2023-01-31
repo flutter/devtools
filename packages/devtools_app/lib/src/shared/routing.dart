@@ -259,7 +259,7 @@ class DevToolsRouterDelegate extends RouterDelegate<DevToolsRouteConfiguration>
 
     final path = '/${currentConfig.page}';
     // Create a new map in case the one we were given was unmodifiable.
-    final params = {...currentConfig.args};
+    final params = Map.of(currentConfig.args);
     params.removeWhere((key, value) => value == null);
     await SystemNavigator.selectMultiEntryHistory();
     await SystemNavigator.routeInformationUpdated(
@@ -275,9 +275,7 @@ class DevToolsRouterDelegate extends RouterDelegate<DevToolsRouteConfiguration>
   /// Updates state for the current page.
   ///
   /// Existing state will be preserved unless overwritten by [stateUpdate].
-  void updateStateIfChanged(
-    DevToolsNavigationState stateUpdate,
-  ) {
+  void updateStateIfChanged(DevToolsNavigationState stateUpdate) {
     final stateChanged = _changesState(stateUpdate);
     if (!stateChanged) {
       return;

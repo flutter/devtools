@@ -41,6 +41,7 @@ TODO: Remove this section if there are not any general updates.
 
 * Added support for viewing profiler hits in the debugger script viewer - [#4831](https://github.com/flutter/devtools/pull/4831)
 * Added support for inspecting records - [#5084](https://github.com/flutter/devtools/pull/5084)
+* Added support for browser navigation history when navigating using the `File Explorer` [#4906](https://github.com/flutter/devtools/pull/4906).
 
 ## Network profiler updates
 TODO: Remove this section if there are not any general updates.

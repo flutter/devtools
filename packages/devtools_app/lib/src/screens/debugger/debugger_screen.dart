@@ -215,14 +215,14 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
 
   void _onNodeSelected(VMServiceObjectNode? node) {
     final location = node?.location;
-    if (node != null && location != null) {
+    if (location != null) {
       final routerDelegate = DevToolsRouterDelegate.of(context);
       Router.navigate(context, () {
         routerDelegate.updateStateIfChanged(
           CodeViewSourceLocationNavigationState(
             script: location.scriptRef,
-            line: location.location?.line ?? -1,
-            object: node.object,
+            line: location.location?.line ?? 0,
+            object: node!.object,
           ),
         );
       });

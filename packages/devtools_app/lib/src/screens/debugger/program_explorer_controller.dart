@@ -130,9 +130,7 @@ class ProgramExplorerController extends DisposableController
     }
   }
 
-  VMServiceObjectNode? findOutlineNode(
-    ObjRef object,
-  ) {
+  VMServiceObjectNode? findOutlineNode(ObjRef object) {
     return breadthFirstSearchObject(object, _outlineNodes.value);
   }
 
