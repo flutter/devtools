@@ -94,12 +94,12 @@ extension TraceEventExtension on TraceEvent {
 }
 
 /// Returns the url (as a string) where the DevTools assets are served.
-/// 
+///
 /// For Flutter apps and when DevTools is served via the `dart devtools`
 /// command, this url should be equivalent to [html.window.location.origin].
 /// However, when DevTools is served directly from DDS via the --observe flag,
 /// the authentication token and 'devtools/' path part are also required.
-/// 
+///
 /// Examples:
 /// * 'http://127.0.0.1:61962/mb9Sw4gCYvU=/devtools/performance'
 ///     ==> 'http://127.0.0.1:61962/mb9Sw4gCYvU=/devtools'
