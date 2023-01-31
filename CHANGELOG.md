@@ -1,13 +1,15 @@
 ## 2.21.1
-* Prep for 2.21.1 release
+* Prep for 2.21.1 release [#5156](https://github.com/flutter/devtools/pull/5156)
 * Fix the perfetto asset path when DevTools is served via `--observe` [#5155](https://github.com/flutter/devtools/pull/5155)
 * Make httpProfile* requests flexible for both int and String [#5127](https://github.com/flutter/devtools/pull/5127)
 * Tighten vm_service constraint in devtools_app to disallow major version 12 [#5152](https://github.com/flutter/devtools/pull/5152)
 
 ## 2.21.0
-* Remove export and source from memory screen - [#5135](https://github.com/flutter/devtools/pull/5135)
-* Support record inspection - [#5084](https://github.com/flutter/devtools/pull/5084)
-* Fix one bug with perfetto feature and add image to release notes - [#5143](https://github.com/flutter/devtools/pull/5143)
+* Fix build release script [#5149](https://github.com/flutter/devtools/pull/5149)
+* Prepare for 2.21.0 release [#5144](https://github.com/flutter/devtools/pull/5144)
+* Remove export and source from memory screen [#5135](https://github.com/flutter/devtools/pull/5135)
+* Support record inspection [#5084](https://github.com/flutter/devtools/pull/5084)
+* Fix one bug with perfetto feature and add image to release notes [#5143](https://github.com/flutter/devtools/pull/5143)
 * Enable the embedded perfetto trace viewer by default and add analytics [#5142](https://github.com/flutter/devtools/pull/5142)
 * Stop duplicating events in Performance exports [#5133](https://github.com/flutter/devtools/pull/5133)
 * Improve performance of heap snapshot [#5134](https://github.com/flutter/devtools/pull/5134)
