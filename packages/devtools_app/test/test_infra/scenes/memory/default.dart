@@ -67,7 +67,7 @@ class MemoryDefaultScene extends Scene {
     controller = MemoryController(
       diffPaneController: DiffPaneController(_TestSnapshotTaker()),
     )
-      ..offline.value = true
+      ..offline = true
       ..memoryTimeline.offlineData.clear()
       ..memoryTimeline.offlineData.addAll(memoryJson.data);
   }
