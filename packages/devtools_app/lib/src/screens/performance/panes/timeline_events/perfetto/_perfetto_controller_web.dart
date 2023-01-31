@@ -64,8 +64,18 @@ class PerfettoControllerImpl extends PerfettoController {
     if (_debugUseLocalPerfetto) {
       return _debugPerfettoUrl;
     }
+    final pageUrl = Uri.parse(html.window.location.href);
+    final location = Uri(
+      scheme: pageUrl.scheme,
+      host: pageUrl.host,
+      port: pageUrl.port,
+      pathSegments: pageUrl.pathSegments.sublist(
+        0,
+        pageUrl.pathSegments.length - 1,
+      ),
+    );
     final baseUrl = isExternalBuild
-        ? '${html.window.location.origin}/assets/packages/perfetto_compiled/dist/index.html'
+        ? '${location}/assets/packages/perfetto_compiled/dist/index.html'
         : 'https://ui.perfetto.dev';
     return '$baseUrl$_embeddedModeQuery';
   }
