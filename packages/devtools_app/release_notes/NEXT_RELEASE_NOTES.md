@@ -35,6 +35,7 @@ TODO: Remove this section if there are not any general updates.
 * Color code classes [#5030](https://github.com/flutter/devtools/pull/5030)
 * Fix state management for tracing [#5062](https://github.com/flutter/devtools/pull/5062)
 * Improve performance of heap snapshot taking [#5134](https://github.com/flutter/devtools/pull/5134)
+* Retire broken import/export feature [#5135](https://github.com/flutter/devtools/pull/5135)
 
 ## Debugger updates
 
