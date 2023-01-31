@@ -11,6 +11,7 @@ import 'package:flutter/foundation.dart';
 import '../../../../../shared/globals.dart';
 import '../../../../../shared/primitives/trace_event.dart';
 import '../../../../../shared/primitives/utils.dart';
+import '../../../performance_utils.dart';
 import 'perfetto_controller.dart';
 
 /// Flag to enable embedding an instance of the Perfetto UI running on
@@ -64,8 +65,12 @@ class PerfettoControllerImpl extends PerfettoController {
     if (_debugUseLocalPerfetto) {
       return _debugPerfettoUrl;
     }
+    final assetsPath = assetUrlHelper(
+      origin: html.window.location.origin,
+      path: html.window.location.pathname ?? '',
+    );
     final baseUrl = isExternalBuild
-        ? '${html.window.location.origin}/assets/packages/perfetto_compiled/dist/index.html'
+        ? '$assetsPath/assets/packages/perfetto_compiled/dist/index.html'
         : 'https://ui.perfetto.dev';
     return '$baseUrl$_embeddedModeQuery';
   }
