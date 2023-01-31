@@ -98,6 +98,11 @@ if [ "$BOT" = "main" ]; then
     pushd packages/devtools_app
     echo `pwd`
 
+    if [! grep -nr "/devtools_app.dart';" lib/src]; then
+        echo "Avoid importing the root devtools_app library from src/"
+        exit 1;
+    fi
+
 elif [ "$BOT" = "build_ddc" ]; then
 
     # TODO(https://github.com/flutter/flutter/issues/43538): Remove workaround.
