@@ -98,6 +98,8 @@ if [ "$BOT" = "main" ]; then
     pushd packages/devtools_app
     echo `pwd`
 
+    grep -nr "/devtools_app.dart';" lib/src
+
     WRONG_IMPORTS=$(grep -nr "/devtools_app.dart';" lib/src)
     if [[ ! -z "$WRONG_IMPORTS" ]] ; then
         echo $WRONG_IMPORTS
