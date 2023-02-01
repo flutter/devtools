@@ -348,6 +348,7 @@ const _dartAndFlutterPackages = {
   'share',
   'shared_preferences',
   'shared_preferences_android',
+  'shared_preferences_foundation',
   'shared_preferences_ios',
   'shared_preferences_linux',
   'shared_preferences_macos',
