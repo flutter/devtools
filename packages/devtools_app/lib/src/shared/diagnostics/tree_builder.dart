@@ -241,12 +241,10 @@ Future<void> _addInstanceRefItems(
     }
   }
 
-  final variableId = variable.ref!.isolateRef!.id!;
-  final result = await serviceManager.service!.getObject(
-    variableId,
-    instanceRef.id!,
-    offset: variable.offset,
-    count: variable.childCount,
+  final result = await _getObject(
+    variable.ref!.isolateRef,
+    instanceRef,
+    variable: variable,
   );
   if (result is Instance) {
     if (FeatureFlags.evalAndBrowse && ref?.heapSelection != null) {
@@ -281,6 +279,7 @@ Future<void> _addChildrenToInstanceVariable({
   IsolateRef? isolateRef,
   Set<String>? existingNames,
 }) async {
+  if (asReferences) return;
   switch (value.kind) {
     case InstanceKind.kMap:
       variable.addAllChildren(
@@ -369,16 +368,26 @@ Future<void> _addChildrenToInstanceVariable({
   }
 }
 
+Future<Object?> _getObject(
+  IsolateRef? isolateRef,
+  ObjRef value, {
+  DartObjectNode? variable,
+}) async {
+  return await serviceManager.service!.getObject(
+    isolateRef!.id!,
+    value.id!,
+    offset: variable?.offset,
+    count: variable?.childCount,
+  );
+}
+
 Future<void> _addValueItems(
   DartObjectNode variable,
   IsolateRef? isolateRef,
   Object? value,
 ) async {
   if (value is ObjRef) {
-    value = await serviceManager.service!.getObject(
-      isolateRef!.id!,
-      value.id!,
-    );
+    value = await _getObject(isolateRef!, value);
     switch (value.runtimeType) {
       case Func:
         final function = value as Func;
