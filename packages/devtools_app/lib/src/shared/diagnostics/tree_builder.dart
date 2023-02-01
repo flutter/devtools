@@ -342,13 +342,21 @@ Future<void> _addInstanceRefItems(
         break;
     }
     if (result.fields != null && result.kind != InstanceKind.kRecord) {
-      variable.addAllChildren(
-        createVariablesForFields(
+      final List<DartObjectNode> children;
+      if (variable.ref is ObjectReferences) {
+        children = createVariablesForFields(
           result,
           isolateRef,
           existingNames: existingNames,
-        ),
-      );
+        );
+      } else {
+        children = createVariablesForFieldsAsLiveOutRefs(
+          result,
+          isolateRef,
+          existingNames: existingNames,
+        );
+      }
+      variable.addAllChildren(children);
     }
   }
 }

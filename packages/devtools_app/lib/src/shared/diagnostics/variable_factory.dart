@@ -13,6 +13,7 @@ import 'package:vm_service/vm_service.dart';
 import '../primitives/utils.dart';
 import 'dart_object_node.dart';
 import 'diagnostics_node.dart';
+import 'generic_instance_reference.dart';
 import 'inspector_service.dart';
 
 List<DartObjectNode> createVariablesForStackTrace(
@@ -550,4 +551,25 @@ List<DartObjectNode> createVariablesForFields(
     }
   }
   return variables;
+}
+
+List<DartObjectNode> createVariablesForFieldsAsLiveOutRefs(
+  Instance instance,
+  IsolateRef? isolateRef, {
+  Set<String>? existingNames,
+}) {
+  final result = <DartObjectNode>[];
+  for (var field in instance.fields!) {
+    result.add(
+      DartObjectNode.references(
+        'hi',
+        ObjectReferences(
+          refNodeType: RefNodeType.liveOutRefs,
+          isolateRef: isolateRef,
+          value: field.value,
+        ),
+      ),
+    );
+  }
+  return result;
 }
