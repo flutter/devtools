@@ -198,7 +198,6 @@ final Map<String, dynamic> goldenCpuSamplesJson = {
   'samplePeriod': 50,
   'maxStackDepth': 128,
   'sampleCount': 8,
-  'timeSpan': -1,
   'timeOriginMicros': 47377796685,
   'timeExtentMicros': 3000,
   'pid': 77616,

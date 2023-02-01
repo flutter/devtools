@@ -168,11 +168,7 @@ class _RetainedSizeColumn extends ColumnData<SingleClassStats> {
   String getDisplayValue(SingleClassStats classStats) {
     final value = getValue(classStats);
 
-    final bytes = prettyPrintBytes(
-      value,
-      includeUnit: true,
-      kbFractionDigits: 1,
-    )!;
+    final bytes = prettyPrintRetainedSize(value)!;
 
     final percents = '${(value * 100 / totalSize).round()}%';
 

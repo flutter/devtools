@@ -33,6 +33,7 @@ export 'src/screens/performance/panes/flutter_frames/flutter_frame_model.dart';
 export 'src/screens/performance/panes/flutter_frames/flutter_frames_controller.dart';
 export 'src/screens/performance/panes/frame_analysis/frame_analysis_model.dart';
 export 'src/screens/performance/panes/raster_stats/raster_stats_controller.dart';
+export 'src/screens/performance/panes/timeline_events/legacy/legacy_events_controller.dart';
 export 'src/screens/performance/panes/timeline_events/timeline_events_controller.dart';
 export 'src/screens/performance/performance_controller.dart';
 export 'src/screens/performance/performance_model.dart';

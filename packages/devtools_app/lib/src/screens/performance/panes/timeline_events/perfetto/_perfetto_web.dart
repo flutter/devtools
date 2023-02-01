@@ -9,6 +9,8 @@ import 'dart:html' as html;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+import '../../../../../shared/analytics/analytics.dart' as ga;
+import '../../../../../shared/analytics/constants.dart' as gac;
 import '../../../../../shared/globals.dart';
 import '../../../../../shared/primitives/auto_dispose.dart';
 import '../../../../../shared/primitives/trace_event.dart';
@@ -39,7 +41,11 @@ class _PerfettoState extends State<Perfetto> with AutoDisposeMixin {
     _perfettoController = widget.perfettoController as PerfettoControllerImpl;
     _viewController = _PerfettoViewController(_perfettoController)..init();
 
-    _loadActiveTrace();
+    // If [_perfettoController.activeTraceEvents] has a null value, the trace
+    // data has not yet been initialized.
+    if (_perfettoController.activeTraceEvents.value != null) {
+      _loadActiveTrace();
+    }
     addAutoDisposeListener(
       _perfettoController.activeTraceEvents,
       _loadActiveTrace,
@@ -53,7 +59,8 @@ class _PerfettoState extends State<Perfetto> with AutoDisposeMixin {
   }
 
   void _loadActiveTrace() {
-    _viewController._loadTrace(_perfettoController.activeTraceEvents.value);
+    assert(_perfettoController.activeTraceEvents.value != null);
+    _viewController._loadTrace(_perfettoController.activeTraceEvents.value!);
   }
 
   void _scrollToActiveTimeRange() {
@@ -174,6 +181,7 @@ class _PerfettoViewController extends DisposableController
     });
     final buffer = Uint8List.fromList(encodedJson.codeUnits);
 
+    ga.select(gac.performance, gac.perfettoLoadTrace);
     _postMessage({
       'perfetto': {
         'buffer': buffer,
@@ -195,6 +203,7 @@ class _PerfettoViewController extends DisposableController
       return;
     }
     await _pingPerfettoUntilReady();
+    ga.select(gac.performance, gac.perfettoScrollToTimeRange);
     _postMessage({
       'perfetto': {
         // Pass the values to Perfetto in seconds.

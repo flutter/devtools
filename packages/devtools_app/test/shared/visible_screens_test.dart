@@ -2,26 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app/src/app.dart';
-import 'package:devtools_app/src/screens/app_size/app_size_screen.dart';
-import 'package:devtools_app/src/screens/debugger/breakpoint_manager.dart';
-import 'package:devtools_app/src/screens/debugger/debugger_screen.dart';
-import 'package:devtools_app/src/screens/inspector/inspector_screen.dart';
-import 'package:devtools_app/src/screens/logging/logging_screen.dart';
-import 'package:devtools_app/src/screens/memory/memory_screen.dart';
-import 'package:devtools_app/src/screens/network/network_screen.dart';
-import 'package:devtools_app/src/screens/performance/performance_screen.dart';
-import 'package:devtools_app/src/screens/profiler/profiler_screen.dart';
-import 'package:devtools_app/src/screens/vm_developer/vm_developer_tools_screen.dart';
-import 'package:devtools_app/src/service/service_manager.dart';
+import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/shared/config_specific/import_export/import_export.dart';
 import 'package:devtools_app/src/shared/framework_controller.dart';
-import 'package:devtools_app/src/shared/globals.dart';
-import 'package:devtools_app/src/shared/preferences.dart';
-import 'package:devtools_app/src/shared/primitives/listenable.dart';
-import 'package:devtools_app/src/shared/primitives/utils.dart';
-import 'package:devtools_app/src/shared/screen.dart';
-import 'package:devtools_app/src/shared/scripts/script_manager.dart';
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -34,6 +17,7 @@ void main() {
 
     setUp(() async {
       fakeServiceManager = FakeServiceManager(availableLibraries: []);
+      setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
       setGlobal(ServiceConnectionManager, fakeServiceManager);
       setGlobal(BreakpointManager, BreakpointManager());
       setGlobal(FrameworkController, FrameworkController());

@@ -72,6 +72,7 @@ class ObjectInspectorViewController extends DisposableController
         // Couldn't find a node for the newly pushed object. It's likely that
         // this is an object from the object store that isn't otherwise
         // reachable from the isolate's libraries, or it's an instance object.
+        programExplorerController.clearSelection();
         return;
       }
 

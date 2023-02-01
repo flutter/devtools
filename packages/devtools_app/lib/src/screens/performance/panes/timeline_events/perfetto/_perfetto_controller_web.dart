@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:html' as html;
 import 'dart:ui' as ui;
 
@@ -10,6 +11,7 @@ import 'package:flutter/foundation.dart';
 import '../../../../../shared/globals.dart';
 import '../../../../../shared/primitives/trace_event.dart';
 import '../../../../../shared/primitives/utils.dart';
+import '../../../performance_utils.dart';
 import 'perfetto_controller.dart';
 
 /// Flag to enable embedding an instance of the Perfetto UI running on
@@ -52,12 +54,23 @@ class PerfettoControllerImpl extends PerfettoController {
   /// These query parameters have side effects in the Perfetto web app.
   static const _embeddedModeQuery = '?mode=embedded&hideSidebar=true';
 
+  /// Delay to allow the Perfetto UI to load a trace.
+  ///
+  /// This is a heuristic to continue blocking UI elements on the DevTools side
+  /// while the trace is still loading on the Perfetto side (for example,
+  /// the [RefreshTimelineEventsButton]).
+  static const _postTraceDelay = Duration(seconds: 1);
+
   String get perfettoUrl {
     if (_debugUseLocalPerfetto) {
       return _debugPerfettoUrl;
     }
+    final assetsPath = assetUrlHelper(
+      origin: html.window.location.origin,
+      path: html.window.location.pathname ?? '',
+    );
     final baseUrl = isExternalBuild
-        ? '${html.window.location.origin}/assets/packages/perfetto_compiled/dist/index.html'
+        ? '$assetsPath/assets/packages/perfetto_compiled/dist/index.html'
         : 'https://ui.perfetto.dev';
     return '$baseUrl$_embeddedModeQuery';
   }
@@ -67,9 +80,11 @@ class PerfettoControllerImpl extends PerfettoController {
   late final html.IFrameElement _perfettoIFrame;
 
   /// The set of trace events that should be shown in the Perfetto trace viewer.
-  ValueListenable<List<TraceEventWrapper>> get activeTraceEvents =>
+  ///
+  /// This set will start in a null state before the first trace is been loaded.
+  ValueListenable<List<TraceEventWrapper>?> get activeTraceEvents =>
       _activeTraceEvents;
-  final _activeTraceEvents = ValueNotifier<List<TraceEventWrapper>>([]);
+  final _activeTraceEvents = ValueNotifier<List<TraceEventWrapper>?>(null);
 
   /// The time range that should be scrolled to, or focused, in the Perfetto
   /// trace viewer.
@@ -120,7 +135,7 @@ class PerfettoControllerImpl extends PerfettoController {
   void onBecomingActive() {
     assert(timelineEventsController.isActiveFeature);
     if (pendingTraceEventsToLoad != null) {
-      loadTrace(pendingTraceEventsToLoad!);
+      unawaited(loadTrace(pendingTraceEventsToLoad!));
       pendingTraceEventsToLoad = null;
     }
     if (pendingScrollToTimeRange != null) {
@@ -130,13 +145,14 @@ class PerfettoControllerImpl extends PerfettoController {
   }
 
   @override
-  void loadTrace(List<TraceEventWrapper> devToolsTraceEvents) {
+  Future<void> loadTrace(List<TraceEventWrapper> devToolsTraceEvents) async {
     if (!timelineEventsController.isActiveFeature) {
       pendingTraceEventsToLoad = List.of(devToolsTraceEvents);
       return;
     }
     pendingTraceEventsToLoad = null;
     _activeTraceEvents.value = List.of(devToolsTraceEvents);
+    await Future.delayed(_postTraceDelay);
   }
 
   @override
@@ -150,7 +166,7 @@ class PerfettoControllerImpl extends PerfettoController {
   }
 
   @override
-  void clear() {
-    loadTrace([]);
+  Future<void> clear() async {
+    await loadTrace([]);
   }
 }

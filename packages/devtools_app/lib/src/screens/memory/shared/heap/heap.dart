@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import '../../../../../devtools_app.dart';
 import '../../../../shared/memory/adapted_heap_data.dart';
 import '../../../../shared/memory/class_name.dart';
 import 'class_filter.dart';
@@ -9,17 +10,31 @@ import 'model.dart';
 import 'spanning_tree.dart';
 
 class AdaptedHeap {
-  AdaptedHeap(this.data);
+  AdaptedHeap._(this.data);
+
+  static Future<AdaptedHeap> create(AdaptedHeapData data) async {
+    final result = AdaptedHeap._(data);
+    await result._initialize();
+    return result;
+  }
 
   final AdaptedHeapData data;
 
-  late final SingleHeapClasses classes = _heapStatistics();
+  SingleHeapClasses get classes => _classes;
+  late final SingleHeapClasses _classes;
 
-  SingleHeapClasses _heapStatistics() {
+  Future<void> _initialize() async {
+    _classes = await _heapStatistics();
+  }
+
+  final _uiReleaser = UiReleaser();
+
+  Future<SingleHeapClasses> _heapStatistics() async {
     final result = <HeapClassName, SingleClassStats>{};
-    if (!data.isSpanningTreeBuilt) buildSpanningTree(data);
+    if (!data.allFieldsCalculated) await buildSpanningTreeAndSetInRefs(data);
 
     for (var i in Iterable.generate(data.objects.length)) {
+      if (_uiReleaser.step()) await _uiReleaser.releaseUi();
       final object = data.objects[i];
       final className = object.heapClass;
 

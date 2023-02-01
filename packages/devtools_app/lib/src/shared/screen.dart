@@ -200,6 +200,8 @@ abstract class Screen {
   }
 }
 
+// TODO(https://github.com/flutter/devtools/issues/5101): delete this mixin and
+// use OfflineScreenControllerMixin for remaining uses.
 mixin OfflineScreenMixin<T extends StatefulWidget, U> on State<T> {
   bool get loadingOfflineData => _loadingOfflineData;
   bool _loadingOfflineData = false;

@@ -32,7 +32,7 @@ void main() {
     });
 
     test('setActiveFeature', () async {
-      expect(controller.flutterFramesController.isActiveFeature, isTrue);
+      expect(controller.flutterFramesController.isActiveFeature, isFalse);
       expect(controller.timelineEventsController.isActiveFeature, isFalse);
       expect(controller.rasterStatsController.isActiveFeature, isFalse);
 

@@ -105,7 +105,7 @@ class LeaksPaneController {
         await _setMessageWithDelay('Taking heap snapshot...');
         task = await _createAnalysisTask(notGCed);
         await _setMessageWithDelay('Detecting retaining paths...');
-        notGCedAnalyzed = analyseNotGCed(task);
+        notGCedAnalyzed = await analyzeNotGCed(task);
       }
 
       await _setMessageWithDelay('Formatting...');
@@ -159,7 +159,7 @@ class LeaksPaneController {
 
   Future<void> _setMessageWithDelay(String message) async {
     analysisStatus.message.value = message;
-    await delayForBatchProcessing(micros: 5000);
+    await delayToReleaseUiThread(micros: 5000);
   }
 
   Future<R> _invokeLeakExtension<M extends Object, R extends Object>(
