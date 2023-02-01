@@ -65,7 +65,7 @@ jobs:
         git commit -a -m "$COMMIT_MESSAGE"
         git push -u origin "$BRANCH_NAME"
 
-        gh pr create -d --title "$COMMIT_MESSAGE" --body "RELEASE_NOTE_EXCEPTION=Automated Version Bump"
+        gh pr create -d --title "$COMMIT_MESSAGE" --body "RELEASE_NOTE_EXCEPTION=Automated Version Bump" -l autosubmit
         #TODO: Create PR inst
       env:
         COMMIT_MESSAGE: ${{ steps.version-bump.outputs.COMMIT_MESSAGE }}
