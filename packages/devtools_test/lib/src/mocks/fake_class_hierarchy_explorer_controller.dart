@@ -2,8 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore: implementation_imports
-import 'package:devtools_app/src/screens/vm_developer/object_inspector/class_hierarchy_explorer_controller.dart';
+import 'package:devtools_app/devtools_app.dart';
 
 class TestClassHierarchyExplorerController
     extends ClassHierarchyExplorerController {

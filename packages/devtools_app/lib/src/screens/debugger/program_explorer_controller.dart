@@ -355,9 +355,9 @@ class ProgramExplorerController extends DisposableController
     // scenario).
     var libNode = _searchRootObjectNodes(targetLib);
 
-    // If we couldn't the target library as a root node, it's possible we have
-    // a library defined using the `library` keyword by the user, which will
-    // likely be under a directory node.
+    // If we couldn't find the target library as a root node, it's possible we
+    // have a library defined using the `library` keyword by the user, which
+    // will likely be under a directory node.
     libNode ??= breadthFirstSearchObject(
       scriptObj,
       rootObjectNodes.value,

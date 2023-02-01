@@ -44,6 +44,8 @@ export 'src/screens/profiler/profiler_screen.dart';
 export 'src/screens/profiler/profiler_screen_controller.dart';
 export 'src/screens/profiler/sampling_rate.dart';
 export 'src/screens/provider/provider_screen.dart';
+export 'src/screens/vm_developer/object_inspector/class_hierarchy_explorer.dart';
+export 'src/screens/vm_developer/object_inspector/object_inspector_view_controller.dart';
 export 'src/screens/vm_developer/object_inspector/vm_object_model.dart';
 export 'src/screens/vm_developer/vm_developer_tools_controller.dart';
 export 'src/screens/vm_developer/vm_developer_tools_screen.dart';
