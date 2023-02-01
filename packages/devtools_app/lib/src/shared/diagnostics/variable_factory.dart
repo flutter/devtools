@@ -555,21 +555,23 @@ List<DartObjectNode> createVariablesForFields(
 
 List<DartObjectNode> createVariablesForFieldsAsLiveOutRefs(
   Instance instance,
-  IsolateRef? isolateRef, {
-  Set<String>? existingNames,
-}) {
+  IsolateRef? isolateRef,
+) {
   final result = <DartObjectNode>[];
   for (var field in instance.fields!) {
-    result.add(
-      DartObjectNode.references(
-        'hi',
-        ObjectReferences(
-          refNodeType: RefNodeType.liveOutRefs,
-          isolateRef: isolateRef,
-          value: field.value,
+    final value = field.value;
+    if (value is InstanceRef) {
+      result.add(
+        DartObjectNode.references(
+          value.classRef?.name ?? '?',
+          ObjectReferences(
+            refNodeType: RefNodeType.liveOutRefs,
+            isolateRef: isolateRef,
+            value: field.value,
+          ),
         ),
-      ),
-    );
+      );
+    }
   }
   return result;
 }

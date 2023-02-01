@@ -117,9 +117,9 @@ void _setupGrouping(DartObjectNode variable) {
   }
 }
 
-void addChildReferences(
+Future<void> addChildReferences(
   DartObjectNode variable,
-) {
+) async {
   assert(FeatureFlags.evalAndBrowse);
   final ref = variable.ref!;
   if (ref is! ObjectReferences) {
@@ -209,13 +209,24 @@ void addChildReferences(
       );
       break;
     case RefNodeType.liveOutRefs:
-      variable.addChild(
-        DartObjectNode.references(
-          // Temporary placeholder
-          '<live outbound refs>',
-          ObjectReferences.withType(ref, RefNodeType.liveOutRefs),
-        ),
+      final variableId = variable.ref!.isolateRef!.id!;
+      final result = await serviceManager.service!.getObject(
+        variableId,
+        ref.instanceRef!.id!,
+        offset: variable.offset,
+        count: variable.childCount,
       );
+      if (result is Instance) {
+        if (result.fields != null && result.kind != InstanceKind.kRecord) {
+          variable.addAllChildren(
+            createVariablesForFieldsAsLiveOutRefs(
+              result,
+              ref.isolateRef,
+            ),
+          );
+        }
+      }
+
       break;
   }
 }
@@ -342,21 +353,13 @@ Future<void> _addInstanceRefItems(
         break;
     }
     if (result.fields != null && result.kind != InstanceKind.kRecord) {
-      final List<DartObjectNode> children;
-      if (variable.ref is ObjectReferences) {
-        children = createVariablesForFields(
+      variable.addAllChildren(
+        createVariablesForFields(
           result,
           isolateRef,
           existingNames: existingNames,
-        );
-      } else {
-        children = createVariablesForFieldsAsLiveOutRefs(
-          result,
-          isolateRef,
-          existingNames: existingNames,
-        );
-      }
-      variable.addAllChildren(children);
+        ),
+      );
     }
   }
 }
@@ -479,7 +482,7 @@ Future<void> buildVariablesTree(
     if (variable.childCount > DartObjectNode.MAX_CHILDREN_IN_GROUPING) {
       _setupGrouping(variable);
     } else if (ref is ObjectReferences) {
-      addChildReferences(variable);
+      await addChildReferences(variable);
     } else if (instanceRef != null && serviceManager.service != null) {
       await _addInstanceRefItems(variable, instanceRef, isolateRef);
     } else if (variable.value != null) {
