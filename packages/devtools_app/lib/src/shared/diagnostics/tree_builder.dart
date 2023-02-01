@@ -272,6 +272,9 @@ Future<void> _addInstanceRefItems(
   }
 }
 
+/// Adds children to the variable.
+///
+/// If [asReferences] is true, shows them as references, otherwize as field values.
 Future<void> _addChildrenToInstanceVariable({
   required DartObjectNode variable,
   required Instance value,
@@ -279,6 +282,7 @@ Future<void> _addChildrenToInstanceVariable({
   IsolateRef? isolateRef,
   Set<String>? existingNames,
 }) async {
+  /// TODO(polina-c): cover references.
   if (asReferences) return;
   switch (value.kind) {
     case InstanceKind.kMap:
