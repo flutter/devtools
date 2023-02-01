@@ -102,7 +102,7 @@ if [ "$BOT" = "main" ]; then
     if [[ ! -z "$WRONG_IMPORTS" ]] ; then
         echo $WRONG_IMPORTS
         echo "Avoid importing the root devtools_app library from src/"
-        exit 1;
+        exit 2;
     fi
 
 elif [ "$BOT" = "build_ddc" ]; then
