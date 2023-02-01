@@ -265,20 +265,22 @@ Future<void> _addInstanceRefItems(
       );
     }
     await _addChildrenToInstanceVariable(
-      variable,
-      result,
-      isolateRef,
-      existingNames,
+      variable: variable,
+      value: result,
+      isolateRef: isolateRef,
+      existingNames: existingNames,
+      asReferences: false,
     );
   }
 }
 
-Future<void> _addChildrenToInstanceVariable(
-  DartObjectNode variable,
-  Instance value,
+Future<void> _addChildrenToInstanceVariable({
+  required DartObjectNode variable,
+  required Instance value,
+  required bool asReferences,
   IsolateRef? isolateRef,
   Set<String>? existingNames,
-) async {
+}) async {
   switch (value.kind) {
     case InstanceKind.kMap:
       variable.addAllChildren(
