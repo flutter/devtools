@@ -85,13 +85,22 @@ class TotalTimeColumn extends ColumnData<CpuStackFrame> {
   String getTooltip(CpuStackFrame dataObject) => '';
 }
 
-class MethodNameColumn extends TreeColumnData<CpuStackFrame> {
-  MethodNameColumn() : super('Method');
+class MethodAndSourceColumn extends TreeColumnData<CpuStackFrame>
+    implements ColumnRenderer<CpuStackFrame> {
+  MethodAndSourceColumn() : super('Method');
+
+  static const _separator = ' - ';
+
   @override
   String getValue(CpuStackFrame dataObject) => dataObject.name;
 
   @override
   String getDisplayValue(CpuStackFrame dataObject) {
+    final script = _scriptFor(dataObject);
+    final showSourceUri = script != null;
+    if (showSourceUri) {
+      return '${dataObject.name}$_separator${_sourceDisplay(dataObject)}';
+    }
     return dataObject.name;
   }
 
@@ -99,29 +108,7 @@ class MethodNameColumn extends TreeColumnData<CpuStackFrame> {
   bool get supportsSorting => true;
 
   @override
-  String getTooltip(CpuStackFrame dataObject) => dataObject.name;
-}
-
-// TODO(kenz): make these urls clickable once we can jump to source.
-class SourceColumn extends ColumnData<CpuStackFrame>
-    implements ColumnRenderer<CpuStackFrame> {
-  SourceColumn() : super.wide('Source', alignment: ColumnAlignment.right);
-
-  @override
-  String getValue(CpuStackFrame dataObject) =>
-      dataObject.packageUriWithSourceLine;
-
-  @override
-  String getDisplayValue(CpuStackFrame dataObject) {
-    return dataObject.packageUriWithSourceLine;
-  }
-
-  @override
-  String getTooltip(CpuStackFrame dataObject) =>
-      dataObject.packageUriWithSourceLine;
-
-  @override
-  bool get supportsSorting => true;
+  String getTooltip(CpuStackFrame dataObject) => '';
 
   @override
   Widget? build(
@@ -130,27 +117,55 @@ class SourceColumn extends ColumnData<CpuStackFrame>
     bool isRowSelected = false,
     VoidCallback? onPressed,
   }) {
-    final script = scriptManager.sortedScripts.value.firstWhereOrNull(
-      (element) => element.uri == data.packageUri,
-    );
-    if (script == null) {
-      return null;
-    }
-    final routerDelegate = DevToolsRouterDelegate.of(context);
-    return VmServiceObjectLink<ScriptRef>(
-      object: script,
-      textBuilder: (_) => getDisplayValue(data),
-      isSelected: isRowSelected,
-      onTap: (e) {
-        routerDelegate.navigate(
-          DebuggerScreen.id,
-          const {},
-          CodeViewSourceLocationNavigationState(
-            script: script,
-            line: data.sourceLine!,
+    final script = _scriptFor(data);
+    final showSourceUri = script != null;
+    return Row(
+      children: [
+        RichText(
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          text: TextSpan(
+            text: data.name,
+            style: contentTextStyle(
+              context,
+              data,
+              isSelected: isRowSelected,
+            ),
+            children: showSourceUri
+                ? [
+                    const TextSpan(text: _separator),
+                    VmServiceObjectLink(
+                      object: script,
+                      textBuilder: (_) => _sourceDisplay(data),
+                      isSelected: isRowSelected,
+                      onTap: (e) {
+                        DevToolsRouterDelegate.of(context).navigate(
+                          DebuggerScreen.id,
+                          const {},
+                          CodeViewSourceLocationNavigationState(
+                            script: script,
+                            line: data.sourceLine!,
+                          ),
+                        );
+                      },
+                    ).buildTextSpan(context),
+                  ]
+                : null,
           ),
-        );
-      },
+        ),
+        // Include this [Spacer] so that the clickable [VmServiceObjectLink]
+        // does not extend all the way to the end of the row.
+        const Spacer(),
+      ],
     );
   }
+
+  ScriptRef? _scriptFor(CpuStackFrame data) {
+    return scriptManager.sortedScripts.value.firstWhereOrNull(
+      (element) => element.uri == data.packageUri,
+    );
+  }
+
+  String _sourceDisplay(CpuStackFrame data) =>
+      '(${data.packageUriWithSourceLine})';
 }

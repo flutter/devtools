@@ -1494,7 +1494,11 @@ class _TableRowState<T> extends State<TableRow<T>>
                   ),
                 ),
             ],
-            style: contentTextStyle(column),
+            style: column.contentTextStyle(
+              context,
+              node,
+              isSelected: widget.isSelected,
+            ),
           ),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
@@ -1637,14 +1641,6 @@ class _TableRowState<T> extends State<TableRow<T>>
         },
       ),
     );
-  }
-
-  TextStyle contentTextStyle(ColumnData<T> column) {
-    final textColor = widget.isSelected
-        ? defaultSelectionForegroundColor
-        : column.getTextColor(widget.node!);
-    final fontStyle = Theme.of(context).fixedFontStyle;
-    return textColor == null ? fontStyle : fontStyle.copyWith(color: textColor);
   }
 
   @override
