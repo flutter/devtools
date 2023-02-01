@@ -222,7 +222,7 @@ Future<void> main() async {
 
       expect(state, isNotNull);
       expect(state!.script, libScriptRef);
-      expect(state.line, -1);
+      expect(state.line, 0);
 
       // There should be three children total, one root with two children.
       expect(programExplorerController.outlineNodes.value.length, 1);
