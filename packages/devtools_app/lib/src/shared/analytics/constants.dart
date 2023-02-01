@@ -117,6 +117,7 @@ const inspectorHoverEvalMode = 'inspectorHoverEvalMode';
 const objectInspectorScreen = 'objectInspector';
 const programExplorer = 'programExplorer';
 const objectStore = 'objectStore';
+const classHierarchy = 'classHierarchy';
 
 // Common actions shared across screens.
 // These actions will be tracked per screen, so they will still be

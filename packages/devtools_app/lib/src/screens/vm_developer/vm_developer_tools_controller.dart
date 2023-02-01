@@ -8,10 +8,15 @@ import 'object_inspector/object_inspector_view_controller.dart';
 import 'vm_developer_tools_screen.dart';
 
 class VMDeveloperToolsController {
+  VMDeveloperToolsController({
+    ObjectInspectorViewController? objectInspectorViewController,
+  }) : objectInspectorViewController =
+            objectInspectorViewController ?? ObjectInspectorViewController();
+
   ValueListenable<int> get selectedIndex => _selectedIndex;
   final _selectedIndex = ValueNotifier<int>(0);
 
-  final objectInspectorViewController = ObjectInspectorViewController();
+  final ObjectInspectorViewController objectInspectorViewController;
 
   void selectIndex(int index) {
     _selectedIndex.value = index;
