@@ -119,7 +119,7 @@ void _setupGrouping(DartObjectNode variable) {
 
 void addChildReferences(
   DartObjectNode variable,
-) {
+) async {
   assert(FeatureFlags.evalAndBrowse);
   final ref = variable.ref!;
   if (ref is! ObjectReferences) {
@@ -209,13 +209,21 @@ void addChildReferences(
       );
       break;
     case RefNodeType.liveOutRefs:
-      variable.addChild(
-        DartObjectNode.references(
-          // Temporary placeholder
-          '<live outbound refs>',
-          ObjectReferences.withType(ref, RefNodeType.liveOutRefs),
-        ),
+      final isolateRef = variable.ref!.isolateRef;
+      final instance = await _getObject(
+        isolateRef,
+        ref.instanceRef!,
+        variable: variable,
       );
+
+      if (instance is Instance) {
+        await _addChildrenToInstanceVariable(
+          variable: variable,
+          value: instance,
+          asReferences: true,
+          isolateRef: isolateRef,
+        );
+      }
       break;
   }
 }
@@ -279,7 +287,7 @@ Future<void> _addChildrenToInstanceVariable({
   required DartObjectNode variable,
   required Instance value,
   required bool asReferences,
-  IsolateRef? isolateRef,
+  required IsolateRef? isolateRef,
   Set<String>? existingNames,
 }) async {
   /// TODO(polina-c): implement references.
@@ -367,6 +375,7 @@ Future<void> _addChildrenToInstanceVariable({
         value,
         isolateRef,
         existingNames: existingNames,
+        asReferences: asReferences,
       ),
     );
   }
