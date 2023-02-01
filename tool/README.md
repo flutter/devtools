@@ -50,7 +50,7 @@ These packages always have their version numbers updated in lock, so we don't ha
    * that the version for the CHANGELOG entry was correctly generated
    * that the entries don't have any syntax errors.
 
-### Test the CLEAN_BRANCH
+### Test the `$DEVTOOLS_RELEASE_BRANCH`
 > You only need to do this on the `$DEVTOOLS_RELEASE_BRANCH` branch
 
 - Checkout the `$DEVTOOLS_RELEASE_BRANCH`,
@@ -110,7 +110,7 @@ From the git GUI tool or from github.com directly:
 ### Verify and Submit the release notes
 
 See the release notes
-[README.md](https://github.com/flutter/devtools/blob/master/packages/devtools_app/lib/src/framework/release_notes/README.md)
+[README.md](https://github.com/flutter/devtools/blob/master/packages/devtools_app/release_notes/release_notes/README.md)
 for details on where to add DevTools release notes to Flutter website and how to test them.
 
 - Follow the release notes
