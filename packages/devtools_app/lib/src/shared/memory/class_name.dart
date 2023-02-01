@@ -218,6 +218,7 @@ class HeapClassName {
 /// packages.
 const _dartAndFlutterPackages = {
   'flutter',
+  'flutter_localizations',
 
   // https://pub.dev/publishers/dart.dev/packages
   'args',
