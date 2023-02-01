@@ -35,7 +35,7 @@ class ClassHierarchyExplorer extends StatelessWidget {
           controller.classHierarchyController.selectedIsolateClassHierarchy,
       dataDisplayProvider: (node, onPressed) => VmServiceObjectLink<Class>(
         object: node.cls,
-        onTap: (cls) async => await controller.findAndSelectNodeForObject(cls),
+        onTap: controller.findAndSelectNodeForObject,
       ),
       onItemSelected: (_) => null,
       emptyTreeViewBuilder: () => const CenteredCircularProgressIndicator(),
