@@ -218,6 +218,7 @@ class HeapClassName {
 /// packages.
 const _dartAndFlutterPackages = {
   'flutter',
+  'flutter_localizations',
 
   // https://pub.dev/publishers/dart.dev/packages
   'args',
@@ -347,6 +348,7 @@ const _dartAndFlutterPackages = {
   'share',
   'shared_preferences',
   'shared_preferences_android',
+  'shared_preferences_foundation',
   'shared_preferences_ios',
   'shared_preferences_linux',
   'shared_preferences_macos',
