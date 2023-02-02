@@ -211,8 +211,8 @@ void addChildReferences(
     case RefNodeType.liveOutRefs:
       final isolateRef = variable.ref!.isolateRef;
       final instance = await _getObject(
-        isolateRef,
-        ref.instanceRef!,
+        isolateRef: isolateRef,
+        value: ref.instanceRef!,
         variable: variable,
       );
 
