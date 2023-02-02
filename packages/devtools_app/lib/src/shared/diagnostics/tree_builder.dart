@@ -241,12 +241,10 @@ Future<void> _addInstanceRefItems(
     }
   }
 
-  final variableId = variable.ref!.isolateRef!.id!;
-  final result = await serviceManager.service!.getObject(
-    variableId,
-    instanceRef.id!,
-    offset: variable.offset,
-    count: variable.childCount,
+  final result = await _getObject(
+    variable: variable,
+    isolateRef: variable.ref!.isolateRef,
+    value: instanceRef,
   );
   if (result is Instance) {
     if (FeatureFlags.evalAndBrowse && ref?.heapSelection != null) {
@@ -265,20 +263,27 @@ Future<void> _addInstanceRefItems(
       );
     }
     await _addChildrenToInstanceVariable(
-      variable,
-      result,
-      isolateRef,
-      existingNames,
+      variable: variable,
+      value: result,
+      isolateRef: isolateRef,
+      existingNames: existingNames,
+      asReferences: false,
     );
   }
 }
 
-Future<void> _addChildrenToInstanceVariable(
-  DartObjectNode variable,
-  Instance value,
+/// Adds children to the variable.
+///
+/// If [asReferences] is true, shows them as references, otherwize as field values.
+Future<void> _addChildrenToInstanceVariable({
+  required DartObjectNode variable,
+  required Instance value,
+  required bool asReferences,
   IsolateRef? isolateRef,
   Set<String>? existingNames,
-) async {
+}) async {
+  /// TODO(polina-c): implement references.
+  if (asReferences) return;
   switch (value.kind) {
     case InstanceKind.kMap:
       variable.addAllChildren(
@@ -367,16 +372,26 @@ Future<void> _addChildrenToInstanceVariable(
   }
 }
 
+Future<Object?> _getObject({
+  required IsolateRef? isolateRef,
+  required ObjRef value,
+  DartObjectNode? variable,
+}) async {
+  return await serviceManager.service!.getObject(
+    isolateRef!.id!,
+    value.id!,
+    offset: variable?.offset,
+    count: variable?.childCount,
+  );
+}
+
 Future<void> _addValueItems(
   DartObjectNode variable,
   IsolateRef? isolateRef,
   Object? value,
 ) async {
   if (value is ObjRef) {
-    value = await serviceManager.service!.getObject(
-      isolateRef!.id!,
-      value.id!,
-    );
+    value = await _getObject(isolateRef: isolateRef!, value: value);
     switch (value.runtimeType) {
       case Func:
         final function = value as Func;
