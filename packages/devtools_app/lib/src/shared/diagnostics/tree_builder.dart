@@ -241,12 +241,10 @@ Future<void> _addInstanceRefItems(
     }
   }
 
-  final variableId = variable.ref!.isolateRef!.id!;
-  final result = await serviceManager.service!.getObject(
-    variableId,
-    instanceRef.id!,
-    offset: variable.offset,
-    count: variable.childCount,
+  final result = await _getObject(
+    variable: variable,
+    isolateRef: variable.ref!.isolateRef,
+    value: instanceRef,
   );
   if (result is Instance) {
     if (FeatureFlags.evalAndBrowse && ref?.heapSelection != null) {
@@ -264,93 +262,127 @@ Future<void> _addInstanceRefItems(
         index: 0,
       );
     }
-    switch (result.kind) {
-      case InstanceKind.kMap:
-        variable.addAllChildren(
-          createVariablesForAssociations(result, isolateRef),
-        );
-        break;
-      case InstanceKind.kList:
-        variable.addAllChildren(
-          createVariablesForElements(result, isolateRef),
-        );
-        break;
-      case InstanceKind.kRecord:
-        variable.addAllChildren(
-          createVariablesForRecords(result, isolateRef),
-        );
-        break;
-      case InstanceKind.kUint8ClampedList:
-      case InstanceKind.kUint8List:
-      case InstanceKind.kUint16List:
-      case InstanceKind.kUint32List:
-      case InstanceKind.kUint64List:
-      case InstanceKind.kInt8List:
-      case InstanceKind.kInt16List:
-      case InstanceKind.kInt32List:
-      case InstanceKind.kInt64List:
-      case InstanceKind.kFloat32List:
-      case InstanceKind.kFloat64List:
-      case InstanceKind.kInt32x4List:
-      case InstanceKind.kFloat32x4List:
-      case InstanceKind.kFloat64x2List:
-        variable.addAllChildren(
-          createVariablesForBytes(result, isolateRef),
-        );
-        break;
-      case InstanceKind.kRegExp:
-        variable.addAllChildren(
-          createVariablesForRegExp(result, isolateRef),
-        );
-        break;
-      case InstanceKind.kClosure:
-        variable.addAllChildren(
-          createVariablesForClosure(result, isolateRef),
-        );
-        break;
-      case InstanceKind.kReceivePort:
-        variable.addAllChildren(
-          createVariablesForReceivePort(result, isolateRef),
-        );
-        break;
-      case InstanceKind.kType:
-        variable.addAllChildren(
-          createVariablesForType(result, isolateRef),
-        );
-        break;
-      case InstanceKind.kTypeParameter:
-        variable.addAllChildren(
-          createVariablesForTypeParameters(result, isolateRef),
-        );
-        break;
-      case InstanceKind.kFunctionType:
-        variable.addAllChildren(
-          createVariablesForFunctionType(result, isolateRef),
-        );
-        break;
-      case InstanceKind.kWeakProperty:
-        variable.addAllChildren(
-          createVariablesForWeakProperty(result, isolateRef),
-        );
-        break;
-      case InstanceKind.kStackTrace:
-        variable.addAllChildren(
-          createVariablesForStackTrace(result, isolateRef),
-        );
-        break;
-      default:
-        break;
-    }
-    if (result.fields != null && result.kind != InstanceKind.kRecord) {
-      variable.addAllChildren(
-        createVariablesForFields(
-          result,
-          isolateRef,
-          existingNames: existingNames,
-        ),
-      );
-    }
+    await _addChildrenToInstanceVariable(
+      variable: variable,
+      value: result,
+      isolateRef: isolateRef,
+      existingNames: existingNames,
+      asReferences: false,
+    );
   }
+}
+
+/// Adds children to the variable.
+///
+/// If [asReferences] is true, shows them as references, otherwize as field values.
+Future<void> _addChildrenToInstanceVariable({
+  required DartObjectNode variable,
+  required Instance value,
+  required bool asReferences,
+  IsolateRef? isolateRef,
+  Set<String>? existingNames,
+}) async {
+  /// TODO(polina-c): implement references.
+  if (asReferences) return;
+  switch (value.kind) {
+    case InstanceKind.kMap:
+      variable.addAllChildren(
+        createVariablesForAssociations(value, isolateRef),
+      );
+      break;
+    case InstanceKind.kList:
+      variable.addAllChildren(
+        createVariablesForElements(value, isolateRef),
+      );
+      break;
+    case InstanceKind.kRecord:
+      variable.addAllChildren(
+        createVariablesForRecords(value, isolateRef),
+      );
+      break;
+    case InstanceKind.kUint8ClampedList:
+    case InstanceKind.kUint8List:
+    case InstanceKind.kUint16List:
+    case InstanceKind.kUint32List:
+    case InstanceKind.kUint64List:
+    case InstanceKind.kInt8List:
+    case InstanceKind.kInt16List:
+    case InstanceKind.kInt32List:
+    case InstanceKind.kInt64List:
+    case InstanceKind.kFloat32List:
+    case InstanceKind.kFloat64List:
+    case InstanceKind.kInt32x4List:
+    case InstanceKind.kFloat32x4List:
+    case InstanceKind.kFloat64x2List:
+      variable.addAllChildren(
+        createVariablesForBytes(value, isolateRef),
+      );
+      break;
+    case InstanceKind.kRegExp:
+      variable.addAllChildren(
+        createVariablesForRegExp(value, isolateRef),
+      );
+      break;
+    case InstanceKind.kClosure:
+      variable.addAllChildren(
+        createVariablesForClosure(value, isolateRef),
+      );
+      break;
+    case InstanceKind.kReceivePort:
+      variable.addAllChildren(
+        createVariablesForReceivePort(value, isolateRef),
+      );
+      break;
+    case InstanceKind.kType:
+      variable.addAllChildren(
+        createVariablesForType(value, isolateRef),
+      );
+      break;
+    case InstanceKind.kTypeParameter:
+      variable.addAllChildren(
+        createVariablesForTypeParameters(value, isolateRef),
+      );
+      break;
+    case InstanceKind.kFunctionType:
+      variable.addAllChildren(
+        createVariablesForFunctionType(value, isolateRef),
+      );
+      break;
+    case InstanceKind.kWeakProperty:
+      variable.addAllChildren(
+        createVariablesForWeakProperty(value, isolateRef),
+      );
+      break;
+    case InstanceKind.kStackTrace:
+      variable.addAllChildren(
+        createVariablesForStackTrace(value, isolateRef),
+      );
+      break;
+    default:
+      break;
+  }
+  if (value.fields != null && value.kind != InstanceKind.kRecord) {
+    variable.addAllChildren(
+      createVariablesForFields(
+        value,
+        isolateRef,
+        existingNames: existingNames,
+      ),
+    );
+  }
+}
+
+Future<Object?> _getObject({
+  required IsolateRef? isolateRef,
+  required ObjRef value,
+  DartObjectNode? variable,
+}) async {
+  return await serviceManager.service!.getObject(
+    isolateRef!.id!,
+    value.id!,
+    offset: variable?.offset,
+    count: variable?.childCount,
+  );
 }
 
 Future<void> _addValueItems(
@@ -359,10 +391,7 @@ Future<void> _addValueItems(
   Object? value,
 ) async {
   if (value is ObjRef) {
-    value = await serviceManager.service!.getObject(
-      isolateRef!.id!,
-      value.id!,
-    );
+    value = await _getObject(isolateRef: isolateRef!, value: value);
     switch (value.runtimeType) {
       case Func:
         final function = value as Func;

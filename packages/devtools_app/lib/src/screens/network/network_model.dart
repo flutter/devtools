@@ -36,6 +36,8 @@ abstract class NetworkRequest with DataSearchStateMixin {
   /// True if the request hasn't completed yet.
   bool get inProgress;
 
+  String get id;
+
   String get durationDisplay {
     final duration = this.duration;
     return 'Duration: ${duration != null ? msText(duration) : 'Pending'}';
@@ -81,8 +83,8 @@ class WebSocket extends NetworkRequest {
   WebSocket(this._socket, int timelineMicrosBase) : super(timelineMicrosBase);
 
   final SocketStatistic _socket;
-
-  int get id => _socket.id;
+  @override
+  String get id => _socket.id.toString();
 
   @override
   Duration? get duration {
@@ -165,7 +167,7 @@ class WebSocket extends NetworkRequest {
   bool operator ==(other) => other is WebSocket && id == other.id;
 
   @override
-  int get hashCode => id;
+  int get hashCode => id.hashCode;
 }
 
 /// Contains all state relevant to completed and in-progress network requests.
