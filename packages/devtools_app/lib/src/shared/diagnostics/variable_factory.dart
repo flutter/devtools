@@ -329,8 +329,10 @@ Future<List<DartObjectNode>> createVariablesForDiagnostics(
 
 List<DartObjectNode> createVariablesForAssociations(
   Instance instance,
-  IsolateRef? isolateRef,
-) {
+  IsolateRef? isolateRef, {
+  required bool asReferences,
+}) {
+  //TODO(polina-c): handle asReferences
   final variables = <DartObjectNode>[];
   final associations = instance.associations ?? [];
 

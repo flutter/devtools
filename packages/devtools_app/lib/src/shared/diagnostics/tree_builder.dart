@@ -293,7 +293,11 @@ Future<void> _addChildrenToInstanceVariable({
   switch (value.kind) {
     case InstanceKind.kMap:
       variable.addAllChildren(
-        createVariablesForAssociations(value, isolateRef),
+        createVariablesForAssociations(
+          value,
+          isolateRef,
+          asReferences: asReferences,
+        ),
       );
       break;
     case InstanceKind.kList:
