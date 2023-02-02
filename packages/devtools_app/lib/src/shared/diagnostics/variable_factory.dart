@@ -13,6 +13,7 @@ import 'package:vm_service/vm_service.dart';
 import '../primitives/utils.dart';
 import 'dart_object_node.dart';
 import 'diagnostics_node.dart';
+import 'generic_instance_reference.dart';
 import 'inspector_service.dart';
 
 List<DartObjectNode> createVariablesForStackTrace(
@@ -328,8 +329,10 @@ Future<List<DartObjectNode>> createVariablesForDiagnostics(
 
 List<DartObjectNode> createVariablesForAssociations(
   Instance instance,
-  IsolateRef? isolateRef,
-) {
+  IsolateRef? isolateRef, {
+  required bool asReferences,
+}) {
+  //TODO(polina-c): handle asReferences
   final variables = <DartObjectNode>[];
   final associations = instance.associations ?? [];
 
@@ -460,20 +463,34 @@ List<DartObjectNode> createVariablesForBytes(
 
 List<DartObjectNode> createVariablesForElements(
   Instance instance,
-  IsolateRef? isolateRef,
-) {
+  IsolateRef? isolateRef, {
+  required bool asReferences,
+}) {
   final variables = <DartObjectNode>[];
   final elements = instance.elements ?? [];
   for (int i = 0; i < elements.length; i++) {
-    final name = instance.offset == null ? i : i + instance.offset!;
-    variables.add(
-      DartObjectNode.fromValue(
-        name: '[$name]',
+    final index = instance.offset == null ? i : i + instance.offset!;
+    final name = '[$index]${instance.classRef!.name}';
+
+    final DartObjectNode node;
+    if (asReferences) {
+      node = DartObjectNode.references(
+        name,
+        ObjectReferences(
+          refNodeType: RefNodeType.liveOutRefs,
+          isolateRef: isolateRef,
+          value: elements[i],
+        ),
+      );
+    } else {
+      node = DartObjectNode.fromValue(
+        name: name,
         value: elements[i],
         isolateRef: isolateRef,
         artificialName: true,
-      ),
-    );
+      );
+    }
+    variables.add(node);
   }
   return variables;
 }
@@ -527,12 +544,33 @@ List<DartObjectNode> createVariablesForFields(
   Instance instance,
   IsolateRef? isolateRef, {
   Set<String>? existingNames,
+  required bool asReferences,
 }) {
-  final variables = <DartObjectNode>[];
+  final result = <DartObjectNode>[];
+
+  if (asReferences) {
+    for (var field in instance.fields!) {
+      final value = field.value;
+      if (value is InstanceRef) {
+        result.add(
+          DartObjectNode.references(
+            value.classRef?.name ?? '?',
+            ObjectReferences(
+              refNodeType: RefNodeType.liveOutRefs,
+              isolateRef: isolateRef,
+              value: field.value,
+            ),
+          ),
+        );
+      }
+    }
+    return result;
+  }
+
   for (var field in instance.fields!) {
     final name = field.decl?.name;
     if (name == null) {
-      variables.add(
+      result.add(
         DartObjectNode.fromValue(
           value: field.value,
           isolateRef: isolateRef,
@@ -540,7 +578,7 @@ List<DartObjectNode> createVariablesForFields(
       );
     } else {
       if (existingNames != null && existingNames.contains(name)) continue;
-      variables.add(
+      result.add(
         DartObjectNode.fromValue(
           name: name,
           value: field.value,
@@ -549,5 +587,5 @@ List<DartObjectNode> createVariablesForFields(
       );
     }
   }
-  return variables;
+  return result;
 }

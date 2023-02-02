@@ -117,9 +117,9 @@ void _setupGrouping(DartObjectNode variable) {
   }
 }
 
-void addChildReferences(
+Future<void> addChildReferences(
   DartObjectNode variable,
-) {
+) async {
   assert(FeatureFlags.evalAndBrowse);
   final ref = variable.ref!;
   if (ref is! ObjectReferences) {
@@ -209,13 +209,21 @@ void addChildReferences(
       );
       break;
     case RefNodeType.liveOutRefs:
-      variable.addChild(
-        DartObjectNode.references(
-          // Temporary placeholder
-          '<live outbound refs>',
-          ObjectReferences.withType(ref, RefNodeType.liveOutRefs),
-        ),
+      final isolateRef = variable.ref!.isolateRef;
+      final instance = await _getObject(
+        isolateRef: isolateRef,
+        value: ref.instanceRef!,
+        variable: variable,
       );
+
+      if (instance is Instance) {
+        await _addChildrenToInstanceVariable(
+          variable: variable,
+          value: instance,
+          asReferences: true,
+          isolateRef: isolateRef,
+        );
+      }
       break;
   }
 }
@@ -279,20 +287,26 @@ Future<void> _addChildrenToInstanceVariable({
   required DartObjectNode variable,
   required Instance value,
   required bool asReferences,
-  IsolateRef? isolateRef,
+  required IsolateRef? isolateRef,
   Set<String>? existingNames,
 }) async {
-  /// TODO(polina-c): implement references.
-  if (asReferences) return;
   switch (value.kind) {
     case InstanceKind.kMap:
       variable.addAllChildren(
-        createVariablesForAssociations(value, isolateRef),
+        createVariablesForAssociations(
+          value,
+          isolateRef,
+          asReferences: asReferences,
+        ),
       );
       break;
     case InstanceKind.kList:
       variable.addAllChildren(
-        createVariablesForElements(value, isolateRef),
+        createVariablesForElements(
+          value,
+          isolateRef,
+          asReferences: asReferences,
+        ),
       );
       break;
     case InstanceKind.kRecord:
@@ -367,6 +381,7 @@ Future<void> _addChildrenToInstanceVariable({
         value,
         isolateRef,
         existingNames: existingNames,
+        asReferences: asReferences,
       ),
     );
   }
@@ -500,7 +515,7 @@ Future<void> buildVariablesTree(
     if (variable.childCount > DartObjectNode.MAX_CHILDREN_IN_GROUPING) {
       _setupGrouping(variable);
     } else if (ref is ObjectReferences) {
-      addChildReferences(variable);
+      await addChildReferences(variable);
     } else if (instanceRef != null && serviceManager.service != null) {
       await _addInstanceRefItems(variable, instanceRef, isolateRef);
     } else if (variable.value != null) {
