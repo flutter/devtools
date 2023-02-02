@@ -298,7 +298,11 @@ Future<void> _addChildrenToInstanceVariable({
       break;
     case InstanceKind.kList:
       variable.addAllChildren(
-        createVariablesForElements(value, isolateRef),
+        createVariablesForElements(
+          value,
+          isolateRef,
+          asReferences: asReferences,
+        ),
       );
       break;
     case InstanceKind.kRecord:
