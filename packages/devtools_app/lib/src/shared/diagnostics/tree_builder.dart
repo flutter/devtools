@@ -250,9 +250,9 @@ Future<void> _addInstanceRefItems(
   }
 
   final result = await _getObject(
-    variable.ref!.isolateRef,
-    instanceRef,
     variable: variable,
+    isolateRef: variable.ref!.isolateRef,
+    value: instanceRef,
   );
   if (result is Instance) {
     if (FeatureFlags.evalAndBrowse && ref?.heapSelection != null) {
@@ -381,9 +381,9 @@ Future<void> _addChildrenToInstanceVariable({
   }
 }
 
-Future<Object?> _getObject(
-  IsolateRef? isolateRef,
-  ObjRef value, {
+Future<Object?> _getObject({
+  required IsolateRef? isolateRef,
+  required ObjRef value,
   DartObjectNode? variable,
 }) async {
   return await serviceManager.service!.getObject(
@@ -400,7 +400,7 @@ Future<void> _addValueItems(
   Object? value,
 ) async {
   if (value is ObjRef) {
-    value = await _getObject(isolateRef!, value);
+    value = await _getObject(isolateRef: isolateRef!, value: value);
     switch (value.runtimeType) {
       case Func:
         final function = value as Func;
