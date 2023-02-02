@@ -290,8 +290,6 @@ Future<void> _addChildrenToInstanceVariable({
   required IsolateRef? isolateRef,
   Set<String>? existingNames,
 }) async {
-  /// TODO(polina-c): implement references.
-  if (asReferences) return;
   switch (value.kind) {
     case InstanceKind.kMap:
       variable.addAllChildren(
