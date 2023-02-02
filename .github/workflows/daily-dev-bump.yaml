@@ -2,7 +2,7 @@ name: Daily Dev Bump
 on:
   workflow_dispatch: # Allows for manual triggering if needed
   pull_request: # TODO: Delete this trigger before merging
-    types: [labeled, unlabeled]
+    types: [labeled, unlabeled, closed]
 
 permissions:
   contents: write
@@ -66,7 +66,15 @@ jobs:
         git push -u origin "$BRANCH_NAME"
 
         gh pr create --title "$COMMIT_MESSAGE" --body "RELEASE_NOTE_EXCEPTION=Automated Version Bump" --label autosubmit
-        #TODO: Create PR inst
       env:
         COMMIT_MESSAGE: ${{ steps.version-bump.outputs.COMMIT_MESSAGE }}
         GH_TOKEN: ${{ secrets.DEVTOOLS_WORKFLOW_BOT_TOKEN }}
+
+    - name: Clean up branches
+      if: ${{ github.event_name == 'pull_request' && github.event.action == 'closed'  && github.event.pull_request.user.login == 'DartDevtoolWorkflowBot'}}
+      run: |
+        # Only grab the suffixes of the branch names to make the delete operation a bit safer
+        BRANCH_SUFFIXES=$(gh pr list -A DartDevtoolWorkflowBot -s closed -L 5 --search sort:created-desc | grep auto-bump- | sed 's|.*auto-bump-\([[:digit:]]*\).*|\1|' )
+        
+        echo $BRANCH_SUFFIXES | xargs -I {}  gh api  /repos/flutter/devtools/git/refs/heads/auto-bump-{} -X DELETE
+
