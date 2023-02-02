@@ -117,7 +117,7 @@ void _setupGrouping(DartObjectNode variable) {
   }
 }
 
-void addChildReferences(
+Future<void> addChildReferences(
   DartObjectNode variable,
 ) async {
   assert(FeatureFlags.evalAndBrowse);
@@ -515,7 +515,7 @@ Future<void> buildVariablesTree(
     if (variable.childCount > DartObjectNode.MAX_CHILDREN_IN_GROUPING) {
       _setupGrouping(variable);
     } else if (ref is ObjectReferences) {
-      addChildReferences(variable);
+      await addChildReferences(variable);
     } else if (instanceRef != null && serviceManager.service != null) {
       await _addInstanceRefItems(variable, instanceRef, isolateRef);
     } else if (variable.value != null) {
