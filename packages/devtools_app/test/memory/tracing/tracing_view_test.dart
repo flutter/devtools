@@ -73,6 +73,10 @@ void main() {
     });
 
     setUp(() async {
+      // Modify the character width that will be used to calculate column sizes
+      // in the profiler table. The flutter_tester device uses a redacted font.
+      setAssumedMonospaceCharacterWidth(14.0);
+
       scene = MemoryDefaultScene();
       await scene.setUp(classList: classList);
       mockConnectedApp(
