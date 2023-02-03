@@ -94,6 +94,7 @@ const profileAppStartUp = 'profileAppStartUp';
 const cpuProfileFlameChartHelp = 'cpuProfileFlameChartHelp';
 const cpuProfileProcessingTime = 'cpuProfileProcessingTime';
 const cpuProfileDisplayTreeGuidelines = 'cpuProfileDisplayTreeGuidelines';
+const cpuProfileViewStatistics = 'cpuProfileViewStatistics';
 
 // Logging UX actions:
 const structuredErrors = 'structuredErrors';

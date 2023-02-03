@@ -252,6 +252,7 @@ class _CpuProfilerState extends State<CpuProfiler>
                 },
               ),
             ],
+            CpuProfileStatisticsButton(data: data),
           ],
         ),
         ValueListenableBuilder<CpuProfilerViewType>(
@@ -355,6 +356,87 @@ class _CpuProfilerState extends State<CpuProfiler>
     setState(() {
       roots.forEach(callback);
     });
+  }
+}
+
+class CpuProfileStatisticsButton extends StatelessWidget {
+  const CpuProfileStatisticsButton({
+    required this.data,
+  });
+
+  final CpuProfileData data;
+
+  @override
+  Widget build(BuildContext context) {
+    return DevToolsIconButton(
+      gaScreen: gac.cpuProfiler,
+      gaSelection: gac.cpuProfileViewStatistics,
+      onPressed: () {
+        unawaited(
+          showDialog(
+            context: context,
+            builder: (context) {
+              final metadata = data.profileMetaData;
+              final samplingPeriod =
+                  const Duration(seconds: 1).inMicroseconds ~/
+                      metadata.samplePeriod;
+              return DevToolsDialog(
+                title: const DialogTitleText('CPU Profile Statistics'),
+                content: Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: const [
+                          DevToolsTooltip(
+                            message:
+                                'The duration of time spanned by the CPU samples',
+                            child: Text('Duration: '),
+                          ),
+                          DevToolsTooltip(
+                            message:
+                                'The number of samples included in the profile',
+                            child: Text('Sample count: '),
+                          ),
+                          DevToolsTooltip(
+                            message:
+                                'The frequency at which samples are collected by the profiler',
+                            child: Text('Sampling rate: '),
+                          ),
+                          DevToolsTooltip(
+                            message: 'The maximum stack trace depth of a collected sample',
+                            child: Text('Sampling depth: '),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Expanded(
+                      child: DefaultTextStyle(
+                        style: Theme.of(context).fixedFontStyle,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Text(metadata.time!.duration.toString()),
+                            Text(metadata.sampleCount.toString()),
+                            Text('$samplingPeriod Hz'),
+                            Text(metadata.stackDepth.toString()),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                actions: const [
+                  DialogCloseButton(),
+                ],
+              );
+            },
+          ),
+        );
+      },
+      iconData: Icons.bar_chart,
+      tooltip: 'View CPU profile statistics',
+    );
   }
 }
 

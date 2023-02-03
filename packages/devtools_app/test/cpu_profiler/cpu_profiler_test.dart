@@ -501,6 +501,36 @@ void main() {
       },
     );
 
+    testWidgetsWithWindowSize(
+        'can show help CPU profile statistics', windowSize,
+        (WidgetTester tester) async {
+      cpuProfiler = CpuProfiler(
+        data: cpuProfileData,
+        controller: controller,
+        searchFieldKey: searchFieldKey,
+      );
+      await tester.pumpWidget(wrap(cpuProfiler));
+
+      final cpuProfileStatsButtonFinder =
+          find.byType(CpuProfileStatisticsButton);
+      expect(cpuProfileStatsButtonFinder, findsOneWidget);
+
+      await tester.tap(cpuProfileStatsButtonFinder);
+      await tester.pumpAndSettle();
+
+      final metadata = controller.dataNotifier.value!.profileMetaData;
+      expect(find.text('CPU Profile Statistics'), findsOneWidget);
+      expect(find.text('Duration: '), findsOneWidget);
+      expect(find.text(metadata.time!.duration.toString()), findsOneWidget);
+      expect(find.text('Sample count: '), findsOneWidget);
+      expect(find.text(metadata.sampleCount.toString()), findsOneWidget);
+      expect(find.text('Sampling rate: '), findsOneWidget);
+      final samplingRateHz = const Duration(seconds: 1).inMicroseconds ~/ metadata.samplePeriod;
+      expect(find.text(samplingRateHz.toString()), findsOneWidget);
+      expect(find.text('Sampling depth: '), findsOneWidget);
+      expect(find.text(metadata.stackDepth.toString()), findsOneWidget);
+    });
+
     group('UserTag filters', () {
       late ProfilerScreenController controller;
 
