@@ -1,6 +1,6 @@
 # memory_app
 
-A new Flutter project.
+App for running DevTools integration and manual memory-related tests.
 
 ## Getting Started
 
