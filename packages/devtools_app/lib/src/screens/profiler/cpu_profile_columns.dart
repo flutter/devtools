@@ -2,9 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
-import 'package:vm_service/vm_service.dart';
 
 import '../../shared/globals.dart';
 import '../../shared/primitives/utils.dart';
