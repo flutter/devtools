@@ -86,6 +86,12 @@ void main() {
       when(mockScriptManager.sortedScripts).thenReturn(
         ValueNotifier<List<ScriptRef>>([]),
       );
+      when(mockScriptManager.scriptRefForUri(any)).thenReturn(
+        ScriptRef(
+          uri: 'package:test/script.dart',
+          id: 'script.dart',
+        ),
+      );
       setGlobal(ScriptManager, mockScriptManager);
     });
 

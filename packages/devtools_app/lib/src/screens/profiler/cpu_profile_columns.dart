@@ -119,9 +119,7 @@ class MethodAndSourceColumn extends TreeColumnData<CpuStackFrame>
     if (data.packageUriWithSourceLine.isNotEmpty) {
       sourceTextSpans.add(const TextSpan(text: _separator));
 
-      final script = scriptManager.sortedScripts.value.firstWhereOrNull(
-        (element) => element.uri == data.packageUri,
-      );
+      final script = scriptManager.scriptRefForUri(data.packageUri);
       final showSourceAsLink = script != null;
       if (showSourceAsLink) {
         sourceTextSpans.add(

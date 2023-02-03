@@ -32,6 +32,10 @@ void main() {
   when(app.isDebugFlutterAppNow).thenReturn(false);
 
   setUp(() async {
+    // Modify the character width that will be used to calculate column sizes
+    // in the profiler table. The flutter_tester device uses a redacted font.
+    setAssumedMonospaceCharacterWidth(14.0);
+    
     final transformer = CpuProfileTransformer();
     controller = CpuProfilerController();
     cpuProfileData = CpuProfileData.parse(goldenCpuProfileDataJson);
@@ -49,6 +53,12 @@ void main() {
     final mockScriptManager = MockScriptManager();
     when(mockScriptManager.sortedScripts).thenReturn(
       ValueNotifier<List<ScriptRef>>([]),
+    );
+    when(mockScriptManager.scriptRefForUri(any)).thenReturn(
+      ScriptRef(
+        uri: 'package:test/script.dart',
+        id: 'script.dart',
+      ),
     );
     setGlobal(ScriptManager, mockScriptManager);
   });
@@ -560,12 +570,12 @@ void main() {
             equals(250),
           );
 
-          expect(find.richText('Frame1'), findsOneWidget);
-          expect(find.richText('Frame2'), findsOneWidget);
-          expect(find.richText('Frame3'), findsOneWidget);
-          expect(find.richText('Frame4'), findsOneWidget);
-          expect(find.richText('Frame5'), findsOneWidget);
-          expect(find.richText('Frame6'), findsOneWidget);
+          expect(find.richTextContaining('Frame1'), findsOneWidget);
+          expect(find.richTextContaining('Frame2'), findsOneWidget);
+          expect(find.richTextContaining('Frame3'), findsOneWidget);
+          expect(find.richTextContaining('Frame4'), findsOneWidget);
+          expect(find.richTextContaining('Frame5'), findsOneWidget);
+          expect(find.richTextContaining('Frame6'), findsOneWidget);
           expect(find.text('userTagA'), findsNothing);
           expect(find.text('userTagB'), findsNothing);
           expect(find.text('userTagC'), findsNothing);
@@ -581,12 +591,12 @@ void main() {
                 .cpuProfileData!.profileMetaData.time!.duration.inMicroseconds,
             equals(100),
           );
-          expect(find.text('Frame1'), findsNothing);
-          expect(find.richText('Frame2'), findsOneWidget);
-          expect(find.text('Frame3'), findsNothing);
-          expect(find.text('Frame4'), findsNothing);
-          expect(find.richText('Frame5'), findsOneWidget);
-          expect(find.text('Frame6'), findsNothing);
+          expect(find.richTextContaining('Frame1'), findsNothing);
+          expect(find.richTextContaining('Frame2'), findsOneWidget);
+          expect(find.richTextContaining('Frame3'), findsNothing);
+          expect(find.richTextContaining('Frame4'), findsNothing);
+          expect(find.richTextContaining('Frame5'), findsOneWidget);
+          expect(find.richTextContaining('Frame6'), findsNothing);
           expect(find.text('userTagA'), findsNothing);
           expect(find.text('userTagB'), findsNothing);
           expect(find.text('userTagC'), findsNothing);
@@ -602,12 +612,12 @@ void main() {
                 .cpuProfileData!.profileMetaData.time!.duration.inMicroseconds,
             equals(50),
           );
-          expect(find.text('Frame1'), findsNothing);
-          expect(find.richText('Frame2'), findsOneWidget);
-          expect(find.text('Frame3'), findsNothing);
-          expect(find.text('Frame4'), findsNothing);
-          expect(find.text('Frame5'), findsNothing);
-          expect(find.text('Frame6'), findsNothing);
+          expect(find.richTextContaining('Frame1'), findsNothing);
+          expect(find.richTextContaining('Frame2'), findsOneWidget);
+          expect(find.richTextContaining('Frame3'), findsNothing);
+          expect(find.richTextContaining('Frame4'), findsNothing);
+          expect(find.richTextContaining('Frame5'), findsNothing);
+          expect(find.richTextContaining('Frame6'), findsNothing);
           expect(find.text('userTagA'), findsNothing);
           expect(find.text('userTagB'), findsNothing);
           expect(find.text('userTagC'), findsNothing);
@@ -623,12 +633,12 @@ void main() {
                 .cpuProfileData!.profileMetaData.time!.duration.inMicroseconds,
             equals(100),
           );
-          expect(find.text('Frame1'), findsNothing);
-          expect(find.text('Frame2'), findsNothing);
-          expect(find.text('Frame3'), findsNothing);
-          expect(find.text('Frame4'), findsNothing);
-          expect(find.richText('Frame5'), findsOneWidget);
-          expect(find.richText('Frame6'), findsOneWidget);
+          expect(find.richTextContaining('Frame1'), findsNothing);
+          expect(find.richTextContaining('Frame2'), findsNothing);
+          expect(find.richTextContaining('Frame3'), findsNothing);
+          expect(find.richTextContaining('Frame4'), findsNothing);
+          expect(find.richTextContaining('Frame5'), findsOneWidget);
+          expect(find.richTextContaining('Frame6'), findsOneWidget);
           expect(find.text('userTagA'), findsNothing);
           expect(find.text('userTagB'), findsNothing);
           expect(find.text('userTagC'), findsNothing);
@@ -687,12 +697,12 @@ void main() {
         await tester.tap(find.text('Expand All'));
         await tester.pumpAndSettle();
 
-        expect(find.richText('Frame1'), findsNWidgets(3));
-        expect(find.richText('Frame2'), findsNWidgets(2));
-        expect(find.richText('Frame3'), findsNWidgets(1));
-        expect(find.richText('Frame4'), findsNWidgets(1));
-        expect(find.richText('Frame5'), findsNWidgets(2));
-        expect(find.richText('Frame6'), findsNWidgets(1));
+        expect(find.richTextContaining('Frame1'), findsNWidgets(3));
+        expect(find.richTextContaining('Frame2'), findsNWidgets(2));
+        expect(find.richTextContaining('Frame3'), findsNWidgets(1));
+        expect(find.richTextContaining('Frame4'), findsNWidgets(1));
+        expect(find.richTextContaining('Frame5'), findsNWidgets(2));
+        expect(find.richTextContaining('Frame6'), findsNWidgets(1));
         expect(find.richText('userTagA'), findsOneWidget);
         expect(find.richText('userTagB'), findsOneWidget);
         expect(find.richText('userTagC'), findsOneWidget);
@@ -719,12 +729,12 @@ void main() {
         await tester.tap(find.text('Expand All'));
         await tester.pumpAndSettle();
 
-        expect(find.richText('Frame1'), findsNWidgets(3));
-        expect(find.richText('Frame2'), findsNWidgets(2));
-        expect(find.richText('Frame3'), findsNWidgets(1));
-        expect(find.richText('Frame4'), findsNWidgets(1));
-        expect(find.richText('Frame5'), findsNWidgets(2));
-        expect(find.richText('Frame6'), findsNWidgets(1));
+        expect(find.richTextContaining('Frame1'), findsNWidgets(3));
+        expect(find.richTextContaining('Frame2'), findsNWidgets(2));
+        expect(find.richTextContaining('Frame3'), findsNWidgets(1));
+        expect(find.richTextContaining('Frame4'), findsNWidgets(1));
+        expect(find.richTextContaining('Frame5'), findsNWidgets(2));
+        expect(find.richTextContaining('Frame6'), findsNWidgets(1));
         expect(find.richText('vmTagA'), findsOneWidget);
         expect(find.richText('vmTagB'), findsOneWidget);
         expect(find.richText('vmTagC'), findsOneWidget);
