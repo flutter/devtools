@@ -96,9 +96,7 @@ class MethodAndSourceColumn extends TreeColumnData<CpuStackFrame>
 
   @override
   String getDisplayValue(CpuStackFrame dataObject) {
-    final script = _scriptFor(dataObject);
-    final showSourceUri = script != null;
-    if (showSourceUri) {
+    if (dataObject.packageUriWithSourceLine.isNotEmpty) {
       return '${dataObject.name}$_separator${_sourceDisplay(dataObject)}';
     }
     return dataObject.name;
@@ -117,8 +115,45 @@ class MethodAndSourceColumn extends TreeColumnData<CpuStackFrame>
     bool isRowSelected = false,
     VoidCallback? onPressed,
   }) {
-    final script = _scriptFor(data);
-    final showSourceUri = script != null;
+    final sourceTextSpans = <TextSpan>[];
+    if (data.packageUriWithSourceLine.isNotEmpty) {
+      sourceTextSpans.add(const TextSpan(text: _separator));
+
+      final script = scriptManager.sortedScripts.value.firstWhereOrNull(
+        (element) => element.uri == data.packageUri,
+      );
+      final showSourceAsLink = script != null;
+      if (showSourceAsLink) {
+        sourceTextSpans.add(
+          VmServiceObjectLink(
+            object: script,
+            textBuilder: (_) => _sourceDisplay(data),
+            isSelected: isRowSelected,
+            onTap: (e) {
+              DevToolsRouterDelegate.of(context).navigate(
+                DebuggerScreen.id,
+                const {},
+                CodeViewSourceLocationNavigationState(
+                  script: script,
+                  line: data.sourceLine!,
+                ),
+              );
+            },
+          ).buildTextSpan(context),
+        );
+      } else {
+        sourceTextSpans.add(
+          TextSpan(
+            text: _sourceDisplay(data),
+            style: contentTextStyle(
+              context,
+              data,
+              isSelected: isRowSelected,
+            ),
+          ),
+        );
+      }
+    }
     return Row(
       children: [
         RichText(
@@ -131,38 +166,13 @@ class MethodAndSourceColumn extends TreeColumnData<CpuStackFrame>
               data,
               isSelected: isRowSelected,
             ),
-            children: showSourceUri
-                ? [
-                    const TextSpan(text: _separator),
-                    VmServiceObjectLink(
-                      object: script,
-                      textBuilder: (_) => _sourceDisplay(data),
-                      isSelected: isRowSelected,
-                      onTap: (e) {
-                        DevToolsRouterDelegate.of(context).navigate(
-                          DebuggerScreen.id,
-                          const {},
-                          CodeViewSourceLocationNavigationState(
-                            script: script,
-                            line: data.sourceLine!,
-                          ),
-                        );
-                      },
-                    ).buildTextSpan(context),
-                  ]
-                : null,
+            children: sourceTextSpans,
           ),
         ),
         // Include this [Spacer] so that the clickable [VmServiceObjectLink]
         // does not extend all the way to the end of the row.
         const Spacer(),
       ],
-    );
-  }
-
-  ScriptRef? _scriptFor(CpuStackFrame data) {
-    return scriptManager.sortedScripts.value.firstWhereOrNull(
-      (element) => element.uri == data.packageUri,
     );
   }
 
