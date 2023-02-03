@@ -31,11 +31,6 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
   final _cachedScreens = <Scaffold>[];
-  final someMap = {
-    [1]: [1, 1],
-    [2]: [2, 2],
-    [3]: [3, 3]
-  };
 
   /// Increments counter if current screen contains floating action button.
   void _incrementCounter(BuildContext context) {
