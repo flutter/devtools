@@ -36,7 +36,7 @@ macos/**/*
 web/**/*
 windows/**/*
 
-# Files, auto-generated when runing the fixture.
+# Files, auto-generated when runing the fixture on a platform.
 test/**/*
 analysis_options.yaml
 .metadata
