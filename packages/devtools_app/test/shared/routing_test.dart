@@ -36,6 +36,12 @@ void main() {
       'state': '1',
     },
   );
+
+  late final duplicateOriginalState = DevToolsNavigationState(
+    kind: originalState.kind,
+    state: originalState.state,
+  );
+
   final updatedState = DevToolsNavigationState(
     kind: 'Test',
     state: {
@@ -121,6 +127,60 @@ void main() {
       routerDelegate.navigateIfNotCurrent(page, updatedArgs, originalState);
       expect(controller.count, 1);
       expectConfigArgs(updatedArgs);
+    });
+
+    testWidgets('replaces state', (tester) async {
+      WidgetsFlutterBinding.ensureInitialized();
+      expect(controller.count, 0);
+
+      routerDelegate.navigate(page, null, originalState);
+      expect(controller.count, 1);
+      expect(
+        routerDelegate.currentConfiguration!.state!.hasChanges(originalState),
+        false,
+      );
+
+      await routerDelegate.replaceState(updatedState);
+      expect(controller.count, 1);
+      expect(
+        routerDelegate.currentConfiguration!.state!.hasChanges(originalState),
+        true,
+      );
+      expect(
+        routerDelegate.currentConfiguration!.state!.hasChanges(updatedState),
+        false,
+      );
+    });
+
+    testWidgets('updates state if not current', (tester) async {
+      WidgetsFlutterBinding.ensureInitialized();
+      expect(controller.count, 0);
+
+      routerDelegate.navigate(page, null, originalState);
+      expect(
+        routerDelegate.currentConfiguration!.state!.hasChanges(originalState),
+        false,
+      );
+      expect(controller.count, 1);
+
+      // Try to update state to an identical copy of the original state.
+      routerDelegate.updateStateIfChanged(duplicateOriginalState);
+      expect(controller.count, 1);
+      expect(
+        routerDelegate.currentConfiguration!.state!.hasChanges(originalState),
+        false,
+      );
+
+      routerDelegate.updateStateIfChanged(updatedState);
+      expect(controller.count, 2);
+      expect(
+        routerDelegate.currentConfiguration!.state!.hasChanges(originalState),
+        true,
+      );
+      expect(
+        routerDelegate.currentConfiguration!.state!.hasChanges(updatedState),
+        false,
+      );
     });
   });
 }
