@@ -33,11 +33,13 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  final _garbage = <_MyGarbage>[];
   int _counter = 0;
 
   void _incrementCounter() {
     setState(() {
       _counter++;
+      _garbage.add(_MyGarbage(0));
     });
   }
 
@@ -68,4 +70,29 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
     );
   }
+}
+
+class _MyGarbage {
+  _MyGarbage(this._level);
+
+  static const _depth = 100;
+  static const _width = 200;
+
+  final int _level;
+
+  late final _MyGarbage? childClass =
+      _level > _depth ? null : _MyGarbage(_level + 1);
+
+  late final List<_MyGarbage>? childList = _level > _depth
+      ? null
+      : Iterable.generate(_width, (_) => _MyGarbage(_level + 1)).toList();
+
+  late final childMapSimple = Map.fromIterable(Iterable.generate(_width));
+
+  late final Map<int, _MyGarbage>? childMapSimpleKey = _level > _depth
+      ? null
+      : Map.fromIterable(
+          Iterable.generate(_width),
+          value: (_) => _MyGarbage(_level + 1),
+        );
 }
