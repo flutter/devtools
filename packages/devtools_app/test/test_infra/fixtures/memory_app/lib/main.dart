@@ -95,4 +95,19 @@ class _MyGarbage {
           Iterable.generate(_width),
           value: (_) => _MyGarbage(_level + 1),
         );
+
+  late final Map<_MyGarbage, int>? childMapSimpleValue = _level > _depth
+      ? null
+      : Map.fromIterable(
+          Iterable.generate(_width),
+          key: (_) => _MyGarbage(_level + 1),
+        );
+
+  late final Map<_MyGarbage, _MyGarbage>? childMap = _level > _depth
+      ? null
+      : Map.fromIterable(
+          Iterable.generate(_width),
+          key: (_) => _MyGarbage(_level + 1),
+          value: (_) => _MyGarbage(_level + 1),
+        );
 }
