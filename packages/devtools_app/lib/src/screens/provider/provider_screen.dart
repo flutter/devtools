@@ -105,9 +105,9 @@ class ProviderScreenBody extends ConsumerWidget {
       axis: splitAxis,
       initialFractions: const [0.33, 0.67],
       children: [
-        OutlineDecoration(
+        const OutlineDecoration(
           child: Column(
-            children: const [
+            children: [
               AreaPaneHeader(
                 needsTopBorder: false,
                 title: Text('Providers'),

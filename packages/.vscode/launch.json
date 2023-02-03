@@ -51,6 +51,18 @@
             "program": "devtools_app/test/test_infra/scenes/performance/default.stager_app.dart",
         },
         {
+            "name": "fixtures/flutter_app",
+            "request": "launch",
+            "type": "dart",
+            "program": "devtools_app/test/test_infra/fixtures/flutter_app/lib/main.dart",
+        },
+        {
+            "name": "fixtures/memory_app",
+            "request": "launch",
+            "type": "dart",
+            "program": "devtools_app/test/test_infra/fixtures/memory_app/lib/main.dart",
+        },
+        {
             "name": "attach",
             "type": "dart",
             "request": "attach",

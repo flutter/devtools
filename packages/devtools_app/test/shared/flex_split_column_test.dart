@@ -71,7 +71,7 @@ void main() {
     });
 
     testWidgets('buildChildrenWithFirstHeader', (WidgetTester tester) async {
-      await tester.pumpWidget(Column(children: children));
+      await tester.pumpWidget(const Column(children: children));
       expect(find.byKey(firstHeaderKey), findsNothing);
 
       // Wrap each child in a container so we can build the elements in a
