@@ -72,42 +72,56 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 }
 
+/// Contains references of different types to
+/// test representation of a heap instance in DevTools console.
 class _MyGarbage {
-  _MyGarbage(this._level);
+  _MyGarbage(this._level) {
+    _instances++;
+    print('creating instance of $_MyGarbage #$_instances');
 
-  static const _depth = 100;
-  static const _width = 200;
+    if (_level >= _depth) {
+      childClass = null;
+      childList = null;
+      childMapSimpleKey = null;
+      childMapSimpleValue = null;
+      childMap = null;
+    } else {
+      childClass = _MyGarbage(_level + 1);
+
+      childList =
+          Iterable.generate(_width, (_) => _MyGarbage(_level + 1)).toList();
+
+      childMapSimpleKey = Map.fromIterable(
+        Iterable.generate(_width),
+        value: (_) => _MyGarbage(_level + 1),
+      );
+
+      childMapSimpleValue = Map.fromIterable(
+        Iterable.generate(_width),
+        key: (_) => _MyGarbage(_level + 1),
+      );
+
+      childMap = Map.fromIterable(
+        Iterable.generate(_width),
+        key: (_) => _MyGarbage(_level + 1),
+        value: (_) => _MyGarbage(_level + 1),
+      );
+    }
+
+    print('created instance of $_MyGarbage #$_instances');
+  }
+
+  static int _instances = 0;
+
+  static const _depth = 2;
+  static const _width = 3;
 
   final int _level;
 
-  late final _MyGarbage? childClass =
-      _level > _depth ? null : _MyGarbage(_level + 1);
-
-  late final List<_MyGarbage>? childList = _level > _depth
-      ? null
-      : Iterable.generate(_width, (_) => _MyGarbage(_level + 1)).toList();
-
-  late final childMapSimple = Map.fromIterable(Iterable.generate(_width));
-
-  late final Map<int, _MyGarbage>? childMapSimpleKey = _level > _depth
-      ? null
-      : Map.fromIterable(
-          Iterable.generate(_width),
-          value: (_) => _MyGarbage(_level + 1),
-        );
-
-  late final Map<_MyGarbage, int>? childMapSimpleValue = _level > _depth
-      ? null
-      : Map.fromIterable(
-          Iterable.generate(_width),
-          key: (_) => _MyGarbage(_level + 1),
-        );
-
-  late final Map<_MyGarbage, _MyGarbage>? childMap = _level > _depth
-      ? null
-      : Map.fromIterable(
-          Iterable.generate(_width),
-          key: (_) => _MyGarbage(_level + 1),
-          value: (_) => _MyGarbage(_level + 1),
-        );
+  late final _MyGarbage? childClass;
+  late final List<_MyGarbage>? childList;
+  final Map childMapSimple = Map.fromIterable(Iterable.generate(_width));
+  late final Map<dynamic, _MyGarbage>? childMapSimpleKey;
+  late final Map<_MyGarbage, dynamic>? childMapSimpleValue;
+  late final Map<_MyGarbage, _MyGarbage>? childMap;
 }
