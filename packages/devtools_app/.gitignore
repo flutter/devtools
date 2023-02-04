@@ -13,7 +13,7 @@ test/widget_test.dart
 android/**/*
 ios/**/*
 linux/**/*
-macos/**/*
+
 windows/**/*
 
 # This should only be present as a byproduct of running the publish
