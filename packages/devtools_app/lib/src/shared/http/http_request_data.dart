@@ -60,7 +60,7 @@ class DartIOHttpRequestData extends NetworkRequest {
     return serviceManager.service!
         .getHttpProfileRequest(
           _request.isolateId,
-          _request.id.toString(),
+          _request.id,
         )
         .then((updated) => _request = updated);
   }
