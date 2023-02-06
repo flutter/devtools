@@ -173,7 +173,7 @@ void main() {
       ]);
       expect(variable.children.first.children, [
         matchesVariable(name: '[key]', value: 'Foo'),
-        matchesVariable(name: '[value]', value: '12.34'),
+        matchesVariable(name: '[val]', value: '12.34'),
       ]);
     },
   );
