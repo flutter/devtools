@@ -11,19 +11,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../test_infra/scenes/cpu_profiler/default.dart';
+import '../test_infra/utils/test_utils.dart';
 
 void main() {
   late CpuProfilerDefaultScene scene;
 
   setUp(() async {
-    // Modify the character width that will be used to calculate column sizes
-    // in the profiler table. The flutter_tester device uses a redacted font.
-    setAssumedMonospaceCharacterWidth(14.0);
+    setCharacterWidthForTables();
     scene = CpuProfilerDefaultScene();
     await scene.setUp();
   });
 
-  const windowSize = Size(15000.0, 15000.0);
+  const windowSize = Size(2000.0, 1000.0);
 
   group('ProfilerScreen', () {
     void verifyBaseState() {

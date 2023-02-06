@@ -19,6 +19,7 @@ import 'package:vm_service/vm_service.dart';
 
 import '../test_infra/matchers/matchers.dart';
 import '../test_infra/test_data/cpu_profile.dart';
+import '../test_infra/utils/test_utils.dart';
 
 void main() {
   late CpuProfiler cpuProfiler;
@@ -32,9 +33,7 @@ void main() {
   when(app.isDebugFlutterAppNow).thenReturn(false);
 
   setUp(() async {
-    // Modify the character width that will be used to calculate column sizes
-    // in the profiler table. The flutter_tester device uses a redacted font.
-    setAssumedMonospaceCharacterWidth(14.0);
+    setCharacterWidthForTables();
 
     final transformer = CpuProfileTransformer();
     controller = CpuProfilerController();

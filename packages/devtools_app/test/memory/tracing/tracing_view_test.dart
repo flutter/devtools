@@ -16,6 +16,7 @@ import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../test_infra/scenes/memory/default.dart';
+import '../../test_infra/utils/test_utils.dart';
 
 // TODO(bkonyi): add tests for multi-isolate support.
 // See https://github.com/flutter/devtools/issues/4537.
@@ -73,9 +74,7 @@ void main() {
     });
 
     setUp(() async {
-      // Modify the character width that will be used to calculate column sizes
-      // in the profiler table. The flutter_tester device uses a redacted font.
-      setAssumedMonospaceCharacterWidth(14.0);
+      setCharacterWidthForTables();
 
       scene = MemoryDefaultScene();
       await scene.setUp(classList: classList);
