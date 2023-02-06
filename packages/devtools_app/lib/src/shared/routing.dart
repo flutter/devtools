@@ -6,6 +6,7 @@ import 'dart:collection';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import 'globals.dart';
 import 'primitives/auto_dispose.dart';
@@ -219,6 +220,7 @@ class DevToolsRouterDelegate extends RouterDelegate<DevToolsRouteConfiguration>
   @override
   Future<void> setNewRoutePath(DevToolsRouteConfiguration configuration) {
     _replaceStack(configuration);
+    notifyListeners();
     return SynchronousFuture<void>(null);
   }
 
@@ -226,7 +228,7 @@ class DevToolsRouterDelegate extends RouterDelegate<DevToolsRouteConfiguration>
   ///
   /// Existing arguments (for example &uri=) will be preserved unless
   /// overwritten by [argUpdates].
-  void updateArgsIfNotCurrent(Map<String, String> argUpdates) {
+  void updateArgsIfChanged(Map<String, String> argUpdates) {
     final argsChanged = _changesArgs(argUpdates);
     if (!argsChanged) {
       return;
@@ -242,6 +244,51 @@ class DevToolsRouterDelegate extends RouterDelegate<DevToolsRouteConfiguration>
         currentConfig.state,
       ),
     );
+    notifyListeners();
+  }
+
+  Future<void> replaceState(DevToolsNavigationState state) async {
+    final currentConfig = currentConfiguration!;
+    _replaceStack(
+      DevToolsRouteConfiguration(
+        currentConfig.page,
+        currentConfig.args,
+        state,
+      ),
+    );
+
+    final path = '/${currentConfig.page}';
+    // Create a new map in case the one we were given was unmodifiable.
+    final params = Map.of(currentConfig.args);
+    params.removeWhere((key, value) => value == null);
+    await SystemNavigator.routeInformationUpdated(
+      location: Uri(
+        path: path,
+        queryParameters: params,
+      ).toString(),
+      state: state,
+      replace: true,
+    );
+  }
+
+  /// Updates state for the current page.
+  ///
+  /// Existing state will be preserved unless overwritten by [stateUpdate].
+  void updateStateIfChanged(DevToolsNavigationState stateUpdate) {
+    final stateChanged = _changesState(stateUpdate);
+    if (!stateChanged) {
+      return;
+    }
+
+    final currentConfig = currentConfiguration!;
+    _replaceStack(
+      DevToolsRouteConfiguration(
+        currentConfig.page,
+        currentConfig.args,
+        currentConfig.state?.merge(stateUpdate) ?? stateUpdate,
+      ),
+    );
+    // Add the new state to the browser history.
     notifyListeners();
   }
 
@@ -293,6 +340,20 @@ class DevToolsNavigationState {
       {...state, ...?other?.state},
       state,
     );
+  }
+
+  /// Creates a new [DevToolsNavigationState] by merging this instance with
+  /// [other].
+  ///
+  /// State contained in [other] will take precedence over state contained in
+  /// this instance (e.g., if both instances have state with the same key, the
+  /// state in [other] will be used).
+  DevToolsNavigationState merge(DevToolsNavigationState other) {
+    final newState = <String, String?>{
+      ..._state,
+      ...other._state,
+    };
+    return DevToolsNavigationState(kind: kind, state: newState);
   }
 
   @override

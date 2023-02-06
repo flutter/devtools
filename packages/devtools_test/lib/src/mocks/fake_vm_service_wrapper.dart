@@ -399,11 +399,12 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
   @override
   Future<HttpProfileRequest> getHttpProfileRequest(
     String isolateId,
-    int id,
+    String id,
   ) async {
     final httpProfile = await getHttpProfile(isolateId);
     return Future.value(
-      httpProfile.requests.firstWhereOrNull((request) => request.id == id),
+      httpProfile.requests
+          .firstWhereOrNull((request) => request.id.toString() == id),
     );
   }
 

@@ -193,15 +193,15 @@ class _AnalyticsTabbedViewState extends State<AnalyticsTabbedView>
     Widget tabBar = Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        TabBar(
-          labelColor: theme.textTheme.bodyLarge?.color,
-          controller: _tabController,
-          tabs: widget.tabs,
-          isScrollable: true,
-        ),
         Expanded(
-          child: widget.trailingWidgets[_currentTabControllerIndex],
+          child: TabBar(
+            labelColor: theme.textTheme.bodyLarge?.color,
+            controller: _tabController,
+            tabs: widget.tabs,
+            isScrollable: true,
+          ),
         ),
+        widget.trailingWidgets[_currentTabControllerIndex],
       ],
     );
     if (widget.outlined) {
