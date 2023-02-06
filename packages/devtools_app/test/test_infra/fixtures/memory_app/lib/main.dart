@@ -77,7 +77,6 @@ class _MyHomePageState extends State<MyHomePage> {
 class _MyGarbage {
   _MyGarbage(this._level) {
     _instances++;
-    print('creating instance of $_MyGarbage #$_instances');
 
     if (_level >= _depth) {
       childClass = null;
@@ -107,8 +106,6 @@ class _MyGarbage {
         value: (_) => _MyGarbage(_level + 1),
       );
     }
-
-    print('created instance of $_MyGarbage #$_instances');
   }
 
   static int _instances = 0;
