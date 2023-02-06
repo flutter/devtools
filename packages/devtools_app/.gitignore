@@ -6,10 +6,14 @@ doc/api/
 
 # Generated files not intended to be checked in to version control
 .flutter-plugins-dependencies
-android/
-ios/
-macos/Runner/
-macos/Flutter/
+test/widget_test.dart
+.metadata
+
+# Platforms related
+android/**/*
+ios/**/*
+linux/**/*
+windows/**/*
 
 # This should only be present as a byproduct of running the publish
 # script. It should not be committed.

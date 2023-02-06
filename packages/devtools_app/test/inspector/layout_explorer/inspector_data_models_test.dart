@@ -42,9 +42,9 @@ void main() {
     testWidgets(
       'FlexLayoutProperties.fromJson creates correct value from enum',
       (tester) async {
-        final widget = Row(
+        const widget = Row(
           textDirection: TextDirection.ltr,
-          children: const [SizedBox()],
+          children: [SizedBox()],
         );
         final flexProperties =
             await toFlexLayoutProperties(widget, tester: tester);
@@ -59,17 +59,17 @@ void main() {
     );
 
     testWidgets('startIsTopLeft should return false', (tester) async {
-      final columnWidget = Column(
+      const columnWidget = Column(
         verticalDirection: VerticalDirection.up,
-        children: const [SizedBox()],
+        children: [SizedBox()],
       );
       final columnProperties =
           await toFlexLayoutProperties(columnWidget, tester: tester);
       expect(columnProperties.startIsTopLeft, false);
 
-      final rowWidget = Row(
+      const rowWidget = Row(
         textDirection: TextDirection.rtl,
-        children: const [SizedBox()],
+        children: [SizedBox()],
       );
       final rowProperties =
           await toFlexLayoutProperties(rowWidget, tester: tester);
@@ -283,8 +283,8 @@ void main() {
         width: size.width,
         height: size.height,
         constraints: constraints,
-        child: Row(
-          children: const [SizedBox()],
+        child: const Row(
+          children: [SizedBox()],
         ),
       );
       final diagnosticsNode = await widgetToLayoutExplorerRemoteDiagnosticsNode(

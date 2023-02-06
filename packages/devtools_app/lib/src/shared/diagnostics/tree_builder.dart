@@ -282,7 +282,7 @@ Future<void> _addInstanceRefItems(
 
 /// Adds children to the variable.
 ///
-/// If [asReferences] is true, shows them as references, otherwize as field values.
+/// If [asReferences] is true, shows them as references, otherwize as values.
 Future<void> _addChildrenToInstanceVariable({
   required DartObjectNode variable,
   required Instance value,
@@ -293,7 +293,7 @@ Future<void> _addChildrenToInstanceVariable({
   switch (value.kind) {
     case InstanceKind.kMap:
       variable.addAllChildren(
-        createVariablesForAssociations(
+        createVariablesForMap(
           value,
           isolateRef,
           asReferences: asReferences,
@@ -302,7 +302,7 @@ Future<void> _addChildrenToInstanceVariable({
       break;
     case InstanceKind.kList:
       variable.addAllChildren(
-        createVariablesForElements(
+        createVariablesForList(
           value,
           isolateRef,
           asReferences: asReferences,
