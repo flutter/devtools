@@ -11,7 +11,6 @@ import '../primitives/utils.dart';
 import 'dart_object_node.dart';
 import 'generic_instance_reference.dart';
 import 'helpers.dart';
-import 'variable_factory.dart';
 
 void addReferencesRoot(DartObjectNode variable, GenericInstanceRef ref) {
   variable.addChild(
@@ -156,71 +155,15 @@ Future<void> _addOutboundLiveReferences({
       variable.addAllChildren(_createLiveReferencesForList(value, isolateRef));
       break;
     case InstanceKind.kRecord:
-      variable.addAllChildren(
-        createVariablesForRecords(value, isolateRef),
-      );
-      break;
-    case InstanceKind.kUint8ClampedList:
-    case InstanceKind.kUint8List:
-    case InstanceKind.kUint16List:
-    case InstanceKind.kUint32List:
-    case InstanceKind.kUint64List:
-    case InstanceKind.kInt8List:
-    case InstanceKind.kInt16List:
-    case InstanceKind.kInt32List:
-    case InstanceKind.kInt64List:
-    case InstanceKind.kFloat32List:
-    case InstanceKind.kFloat64List:
-    case InstanceKind.kInt32x4List:
-    case InstanceKind.kFloat32x4List:
-    case InstanceKind.kFloat64x2List:
-      variable.addAllChildren(
-        createVariablesForBytes(value, isolateRef),
-      );
-      break;
-    case InstanceKind.kRegExp:
-      variable.addAllChildren(
-        createVariablesForRegExp(value, isolateRef),
-      );
+      // TODO: add references
       break;
     case InstanceKind.kClosure:
-      variable.addAllChildren(
-        createVariablesForClosure(value, isolateRef),
-      );
-      break;
-    case InstanceKind.kReceivePort:
-      variable.addAllChildren(
-        createVariablesForReceivePort(value, isolateRef),
-      );
-      break;
-    case InstanceKind.kType:
-      variable.addAllChildren(
-        createVariablesForType(value, isolateRef),
-      );
-      break;
-    case InstanceKind.kTypeParameter:
-      variable.addAllChildren(
-        createVariablesForTypeParameters(value, isolateRef),
-      );
-      break;
-    case InstanceKind.kFunctionType:
-      variable.addAllChildren(
-        createVariablesForFunctionType(value, isolateRef),
-      );
-      break;
-    case InstanceKind.kWeakProperty:
-      variable.addAllChildren(
-        createVariablesForWeakProperty(value, isolateRef),
-      );
-      break;
-    case InstanceKind.kStackTrace:
-      variable.addAllChildren(
-        createVariablesForStackTrace(value, isolateRef),
-      );
+      // TODO: add references
       break;
     default:
       break;
   }
+
   if (value.fields != null && value.kind != InstanceKind.kRecord) {
     variable.addAllChildren(
       _createLiveReferencesForFields(value, isolateRef),
