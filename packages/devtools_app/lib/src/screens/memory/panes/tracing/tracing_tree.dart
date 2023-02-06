@@ -321,13 +321,12 @@ class TracingTable extends StatelessWidget {
     required this.dataRoots,
   }) : super(key: key);
 
-  static final treeColumn = MethodNameColumn();
+  static final treeColumn = MethodAndSourceColumn();
   static final startingSortColumn = _InclusiveCountColumn();
   static final columns = List<ColumnData<CpuStackFrame>>.unmodifiable([
     startingSortColumn,
     _ExclusiveCountColumn(),
     treeColumn,
-    SourceColumn(),
   ]);
 
   final ClassRef cls;

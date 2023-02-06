@@ -8,6 +8,8 @@ import 'package:flutter/material.dart';
 
 import '../primitives/trees.dart';
 import '../primitives/utils.dart';
+import '../theme.dart';
+import '../ui/colors.dart';
 import '../utils.dart';
 
 // TODO(peterdjlee): Remove get from method names.
@@ -72,6 +74,17 @@ abstract class ColumnData<T> {
 
   /// Get the cell's text color from the given [dataObject].
   Color? getTextColor(T dataObject) => null;
+
+  TextStyle? contentTextStyle(
+    BuildContext context,
+    T dataObject, {
+    bool isSelected = false,
+  }) {
+    final textColor =
+        isSelected ? defaultSelectionForegroundColor : getTextColor(dataObject);
+    final fontStyle = Theme.of(context).fixedFontStyle;
+    return textColor == null ? fontStyle : fontStyle.copyWith(color: textColor);
+  }
 
   @override
   String toString() => title;

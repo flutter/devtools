@@ -15,7 +15,9 @@ TODO: Remove this section if there are not any general updates.
 TODO: Remove this section if there are not any general updates.
 
 ## CPU profiler updates
-TODO: Remove this section if there are not any general updates.
+
+* Display stack frame uri inline with method name to ensure the uri is always visible
+in deeply nested trees - [#5181](https://github.com/flutter/devtools/pull/5181)
 
 ## Memory updates
 TODO: Remove this section if there are not any general updates.
