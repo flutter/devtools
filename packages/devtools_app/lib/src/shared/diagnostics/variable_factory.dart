@@ -365,7 +365,7 @@ List<DartObjectNode> createVariablesForMap(
     false,
     (p, e) => p || isPrimativeInstanceKind(e.key.kind),
   );
-  for (final i in Iterable.generate(associations.length)) {
+  for (var i = 0; i < associations.length; i++) {
     final association = associations[i];
 
     if (asReferences) {
