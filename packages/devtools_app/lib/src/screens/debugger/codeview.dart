@@ -175,6 +175,10 @@ class _CodeViewState extends State<CodeView>
         _handleScriptLocationChanged,
       );
     }
+
+    if (oldWidget.scriptRef != widget.scriptRef) {
+      verticalController.resetScroll();
+    }
   }
 
   @override
@@ -348,8 +352,6 @@ class _CodeViewState extends State<CodeView>
         );
       }
     }
-
-    _updateScrollPosition(animate: false);
 
     final contentBuilder = (context, ScriptRef? script) {
       if (lines.isNotEmpty) {
@@ -893,6 +895,7 @@ class Gutter extends StatelessWidget {
       ),
       child: ListView.builder(
         controller: scrollController,
+        physics: const ClampingScrollPhysics(),
         itemExtent: CodeView.rowHeight,
         itemCount: lineCount,
         itemBuilder: (context, index) {
@@ -1085,6 +1088,7 @@ class _LinesState extends State<Lines> with AutoDisposeMixin {
     final pausedLine = widget.pausedFrame?.line;
     return ListView.builder(
       controller: widget.scrollController,
+      physics: const ClampingScrollPhysics(),
       itemExtent: CodeView.rowHeight,
       itemCount: widget.lines.length,
       itemBuilder: (context, index) {

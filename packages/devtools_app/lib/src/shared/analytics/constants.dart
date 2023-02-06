@@ -81,6 +81,10 @@ const shaderCompilationDocs = 'shaderCompilationDocs';
 const shaderCompilationDocsTooltipLink = 'shaderCompilationDocsTooltipLink';
 const analyzeSelectedFrame = 'analyzeSelectedFrame';
 const collectRasterStats = 'collectRasterStats';
+const perfettoModeTraceEventProcessingTime =
+    'traceEventProcessingTime-perfettoMode';
+const perfettoLoadTrace = 'perfettoLoadTrace';
+const perfettoScrollToTimeRange = 'perfettoScrollToTimeRange';
 
 // CPU profiler UX actions:
 const cpuSamplingRatePrefix = 'profileGranularity';
@@ -113,6 +117,7 @@ const inspectorHoverEvalMode = 'inspectorHoverEvalMode';
 const objectInspectorScreen = 'objectInspector';
 const programExplorer = 'programExplorer';
 const objectStore = 'objectStore';
+const classHierarchy = 'classHierarchy';
 
 // Common actions shared across screens.
 // These actions will be tracked per screen, so they will still be

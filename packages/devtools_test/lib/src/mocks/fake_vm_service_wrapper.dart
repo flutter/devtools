@@ -185,6 +185,23 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
     );
 
     allocationProfile.json = allocationProfile.toJson();
+    // Fake GC statistics
+    allocationProfile.json![AllocationProfilePrivateViewExtension.heapsKey] =
+        <String, dynamic>{
+      AllocationProfilePrivateViewExtension.newSpaceKey: <String, dynamic>{
+        GCStats.usedKey: 1234,
+        GCStats.capacityKey: 12345,
+        GCStats.collectionsKey: 42,
+        GCStats.timeKey: 69,
+      },
+      AllocationProfilePrivateViewExtension.oldSpaceKey: <String, dynamic>{
+        GCStats.usedKey: 4321,
+        GCStats.capacityKey: 54321,
+        GCStats.collectionsKey: 24,
+        GCStats.timeKey: 96,
+      },
+    };
+
     return allocationProfile;
   }
 
@@ -386,7 +403,8 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
   ) async {
     final httpProfile = await getHttpProfile(isolateId);
     return Future.value(
-      httpProfile.requests.firstWhereOrNull((request) => request.id == id),
+      httpProfile.requests
+          .firstWhereOrNull((request) => request.id.toString() == id),
     );
   }
 

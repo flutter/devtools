@@ -32,7 +32,7 @@ You can do this online, and it only takes a minute.
 ### Announcing your changes
 
 If your improvement is user-facing, document it in
-[NEXT_RELEASE_NOTES.md](packages/devtools_app/NEXT_RELEASE_NOTES.md).
+[NEXT_RELEASE_NOTES.md](packages/devtools_app/release_notes/NEXT_RELEASE_NOTES.md).
 
 ## Development prep
 
@@ -88,11 +88,11 @@ To enable all experiments by default when you are running with VS Code, add the 
 ## Development (DevTools server + DevTools Flutter web app)
 
 To develop with a workflow that exercises the DevTools server <==> DevTools client connection,
-change to the `packages/devtools` directory, and run:
+from the main devtools/ directory run:
 
 ```
-flutter pub get
-dart bin/devtools.dart --debug
+export LOCAL_DART_SDK=/path/to/dart-sdk
+dart ./tool/build_e2e.dart
 ```
 
 That will:
@@ -157,21 +157,6 @@ using the VS Code tasks without having to run in a terminal window:
 This will serve the application in the background and launch Google Chrome. Subsequent
 launches will just re-launch the browser since the task remains running in the background
 and rebuilding as necessary.
-
-### DevTools Server
-
-Run and debug the local version of the server with a release build:
-- In VS Code on the Debug side bar, switch to the `Run Server with Release Build` config. Press F5.
-This will produce a release build of DevTools and then debug the server (`bin/devtools.dart`)
-to serve it.
-- From CLI, you can run the publish script to create a release build (`./devtools/tool/publish.sh`).
-Then `cd packages/devtools` and run `dart bin/devtools.dart`.
-
-If you need to make breaking changes to DevTools that require changes to the server
-(such that DevTools cannot run against the live Pub version of devtools_server) it's
-critical that the devtools_server is released first and the version numbers in
-`packages/devtools/pubspec.yaml` and `packages/devtools_app/pubspec.yaml` are updated.
- Please make sure this is clear on any PRs you open.
 
 ## Automated Testing
 

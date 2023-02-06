@@ -105,7 +105,7 @@ class _InitializerState extends State<Initializer>
   /// IDE via the server API to reuse the DevTools window after being disconnected
   /// (for example if the user stops a debug session then launches a new one).
   void _connectVm(event) {
-    DevToolsRouterDelegate.of(context).updateArgsIfNotCurrent({
+    DevToolsRouterDelegate.of(context).updateArgsIfChanged({
       'uri': event.serviceProtocolUri.toString(),
       if (event.notify) 'notify': 'true',
     });

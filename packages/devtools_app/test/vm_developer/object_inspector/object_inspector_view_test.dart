@@ -2,18 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/debugger/program_explorer.dart';
 import 'package:devtools_app/src/screens/vm_developer/object_inspector/object_inspector_view.dart';
 import 'package:devtools_app/src/screens/vm_developer/object_inspector/object_viewport.dart';
-import 'package:devtools_app/src/screens/vm_developer/vm_developer_tools_controller.dart';
-import 'package:devtools_app/src/service/service_manager.dart';
-import 'package:devtools_app/src/service/vm_service_wrapper.dart';
-import 'package:devtools_app/src/shared/config_specific/ide_theme/ide_theme.dart';
-import 'package:devtools_app/src/shared/globals.dart';
-import 'package:devtools_app/src/shared/notifications.dart';
-import 'package:devtools_app/src/shared/preferences.dart';
-import 'package:devtools_app/src/shared/scripts/script_manager.dart';
-import 'package:devtools_app/src/shared/split.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -38,6 +30,7 @@ void main() {
     when(fakeServiceManager.connectedApp!.isProfileBuildNow).thenReturn(false);
     when(fakeServiceManager.connectedApp!.isDartWebAppNow).thenReturn(false);
 
+    setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
     setGlobal(PreferencesController, PreferencesController());
     setGlobal(ServiceConnectionManager, fakeServiceManager);
     setGlobal(ScriptManager, scriptManager);
@@ -54,7 +47,11 @@ void main() {
         Builder(
           builder: objectInspector.build,
         ),
-        vmDeveloperTools: VMDeveloperToolsController(),
+        vmDeveloperTools: VMDeveloperToolsController(
+          objectInspectorViewController: ObjectInspectorViewController(
+            classHierarchyController: TestClassHierarchyExplorerController(),
+          ),
+        ),
       ),
     );
     expect(find.byType(Split), findsNWidgets(2));
@@ -62,6 +59,8 @@ void main() {
     expect(find.byType(ObjectViewport), findsOneWidget);
     expect(find.text('Program Explorer'), findsOneWidget);
     expect(find.text('Outline'), findsOneWidget);
+    expect(find.text('Object Store'), findsOneWidget);
+    expect(find.text('Class Hierarchy'), findsOneWidget);
     expect(find.text('No object selected.'), findsOneWidget);
     expect(find.byTooltip('Refresh'), findsOneWidget);
   });

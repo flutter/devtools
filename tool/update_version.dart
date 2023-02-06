@@ -16,6 +16,8 @@ final _pubspecs = [
   'packages/devtools_test/pubspec.yaml',
   'packages/devtools_shared/pubspec.yaml',
 ].map((path) => File(path)).toList();
+  
+const _releaseNoteDirPath = './packages/devtools_app/release_notes';
 
 void main(List<String> args) async {
   final runner = CommandRunner(
@@ -69,17 +71,16 @@ Future<void> resetReleaseNotes({
   required String version,
 }) async {
   print('Resetting the release notes');
-
   // Clear out the current notes
-  final imagesDir = Directory('./tool/release_notes/images');
+  final imagesDir = Directory('$_releaseNoteDirPath/images');
   if (imagesDir.existsSync()) {
     await imagesDir.delete(recursive: true);
   }
   imagesDir.create();
-  await File('./tool/release_notes/images/.gitkeep').create();
+  await File('$_releaseNoteDirPath/images/.gitkeep').create();
 
   final currentReleaseNotesFile =
-      File('./packages/devtools_app/NEXT_RELEASE_NOTES.md');
+      File('$_releaseNoteDirPath/NEXT_RELEASE_NOTES.md');
   if (currentReleaseNotesFile.existsSync()) {
     await currentReleaseNotesFile.delete();
   }
@@ -95,7 +96,7 @@ Future<void> resetReleaseNotes({
   final normalizedVersionNumber = '$major.$minor.0';
 
   final templateFile =
-      File('./tool/release_notes/helpers/release_notes_template.md');
+      File('$_releaseNoteDirPath/helpers/release_notes_template.md');
   final templateFileContents = await templateFile.readAsString();
   currentReleaseNotesFile.writeAsString(
     templateFileContents.replaceAll(

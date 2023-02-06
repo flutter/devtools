@@ -52,6 +52,13 @@ final NumberFormat nf = NumberFormat.decimalPattern();
 
 String percent2(double d) => '${(d * 100).toStringAsFixed(2)}%';
 
+/// Unifies printing of retained size to avoid confusion related to different rounding.
+String? prettyPrintRetainedSize(int? bites) => prettyPrintBytes(
+      bites,
+      includeUnit: true,
+      kbFractionDigits: 1,
+    );
+
 String? prettyPrintBytes(
   num? bytes, {
   int kbFractionDigits = 0,
@@ -221,6 +228,29 @@ Future<void> delayToReleaseUiThread({int micros = 0}) async {
   // Even with a delay of 0 microseconds, awaiting this delay is enough to free
   // the UI thread to update the UI.
   await Future.delayed(Duration(microseconds: micros));
+}
+
+/// Use in long calculations, to release UI thread after each N steps.
+class UiReleaser {
+  UiReleaser({this.stepsBetweenDelays = 100000, this.delayLength = 0})
+      : assert(stepsBetweenDelays > 0);
+
+  final int stepsBetweenDelays;
+  final int delayLength;
+
+  int _stepCount = 0;
+
+  /// Returns true if it is time to invoke [releaseUi].
+  bool step() {
+    _stepCount++;
+    if (_stepCount == stepsBetweenDelays) {
+      _stepCount = 0;
+      return true;
+    }
+    return false;
+  }
+
+  Future<void> releaseUi() => delayToReleaseUiThread(micros: delayLength);
 }
 
 /// Creates a [Future] that completes either when `operation` completes or the
@@ -1121,6 +1151,17 @@ extension ListExtension<T> on List<T> {
     return whereList;
   }
 
+  bool containsWhere(bool test(T element)) {
+    for (var e in this) {
+      if (test(e)) {
+        return true;
+      }
+    }
+    return false;
+  }
+}
+
+extension SetExtension<T> on Set<T> {
   bool containsWhere(bool test(T element)) {
     for (var e in this) {
       if (test(e)) {

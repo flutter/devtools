@@ -45,6 +45,7 @@ void main() {
       ''',
     );
     setUp(() {
+      setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
       setGlobal(PreferencesController, PreferencesController());
       setGlobal(IdeTheme, IdeTheme());
       setGlobal(ServiceConnectionManager, FakeServiceManager());

@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:collection/collection.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../../../shared/analytics/analytics.dart' as ga;
@@ -89,16 +90,18 @@ class ClassOnlyHeapPath {
     return data.join().trim();
   }
 
+  late final _listEquality = const ListEquality().equals;
+
   @override
   bool operator ==(Object other) {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is ClassOnlyHeapPath && other.toLongString() == toLongString();
+    return other is ClassOnlyHeapPath && _listEquality(classes, other.classes);
   }
 
   @override
-  int get hashCode => toLongString().hashCode;
+  late final int hashCode = Object.hashAll(classes);
 }
 
 /// This class is needed to make the snapshot taking operation mockable.
@@ -106,16 +109,18 @@ class SnapshotTaker {
   Future<AdaptedHeapData?> take() async {
     final snapshot = await snapshotMemory();
     if (snapshot == null) return null;
-    return _adaptSnapshotGaWrapper(snapshot);
+    final result = await _adaptSnapshotGaWrapper(snapshot);
+    return result;
   }
 }
 
-AdaptedHeapData _adaptSnapshotGaWrapper(HeapSnapshotGraph graph) {
+Future<AdaptedHeapData> _adaptSnapshotGaWrapper(HeapSnapshotGraph graph) async {
   late final AdaptedHeapData result;
-  ga.timeSync(
+  await ga.timeAsync(
     gac.memory,
     gac.MemoryTime.adaptSnapshot,
-    syncOperation: () => result = AdaptedHeapData.fromHeapSnapshot(graph),
+    asyncOperation: () async =>
+        result = await AdaptedHeapData.fromHeapSnapshot(graph),
     screenMetricsProvider: () => MemoryScreenMetrics(
       heapObjectsTotal: graph.objects.length,
     ),
@@ -137,7 +142,7 @@ mixin Sealable {
   bool _isSealed = false;
 }
 
-/// Successors and predeccessors for a heap instance, to
+/// Successors and predecessors for a heap instance, to
 /// browse in console.
 class HeapObjectGraph {
   //TODO(polina-c): add needed fields

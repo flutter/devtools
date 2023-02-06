@@ -8,6 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../globals.dart';
+import '../memory/adapted_heap_data.dart';
 import '../primitives/trees.dart';
 import '../primitives/utils.dart';
 import 'diagnostics_node.dart';
@@ -46,15 +47,30 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
     bool artificialName = false,
     bool artificialValue = false,
     RemoteDiagnosticsNode? diagnostic,
+    HeapObjectSelection? heapSelection,
     required IsolateRef? isolateRef,
   }) {
     name = name ?? '';
+
+    final String? text;
+    if (heapSelection == null) {
+      text = null;
+    } else {
+      final className = heapSelection.object.heapClass.className;
+      final size = prettyPrintRetainedSize(
+        heapSelection.object.retainedSize,
+      );
+      text = '$className, retained size $size';
+    }
+
     return DartObjectNode._(
       name: name,
+      text: text,
       ref: GenericInstanceRef(
         isolateRef: isolateRef,
         diagnostic: diagnostic,
         value: value,
+        heapSelection: heapSelection,
       ),
       artificialName: artificialName,
       artificialValue: artificialValue,
@@ -159,17 +175,14 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
   }
 
   factory DartObjectNode.references(
-    RefNodeType refNodeType,
     String text,
-    GenericInstanceRef ref,
+    ObjectReferences ref,
   ) {
     return DartObjectNode._(
       text: text,
-      ref: ObjectReferences(
-        isolateRef: ref.isolateRef,
-        refNodeType: refNodeType,
-        value: ref.value,
-      ),
+      ref: ref,
+      childCount:
+          ref.heapSelection?.countOfReferences(ref.refNodeType.direction),
     );
   }
 
@@ -205,7 +218,8 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
       if (value.kind != null &&
           (value.kind!.endsWith('List') ||
               value.kind == InstanceKind.kList ||
-              value.kind == InstanceKind.kMap)) {
+              value.kind == InstanceKind.kMap ||
+              value.kind == InstanceKind.kRecord)) {
         return value.length ?? 0;
       }
     }
@@ -257,9 +271,14 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
       if (kind == InstanceKind.kStackTrace) {
         final depth = children.length;
         valueStr = 'StackTrace ($depth ${pluralize('frame', depth)})';
-      } else if (kind == 'Record') {
-        // TODO(elliette): Compare against InstanceKind.kRecord when vm_service >= 10.0.0.
-        valueStr = 'Record';
+      } else if (kind == InstanceKind.kRecord) {
+        // Note: `value.length` was added in vm_service >10.1.2, so we fall back
+        // to `children.length` if it's not provide (this means we don't get
+        // the count until the record is expanded):
+        final count = value.length ?? children.length;
+        valueStr = count == 0
+            ? 'Record'
+            : 'Record ($count ${pluralize('field', count)})';
       } else if (value.valueAsString == null) {
         valueStr = value.classRef?.name ?? '';
       } else {

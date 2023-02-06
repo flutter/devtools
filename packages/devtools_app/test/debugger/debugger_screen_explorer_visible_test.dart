@@ -39,7 +39,7 @@ void main() {
   final mockProgramExplorerController =
       createMockProgramExplorerControllerWithDefaults();
   final mockCodeViewController = createMockCodeViewControllerWithDefaults(
-    mockProgramExplorerController: mockProgramExplorerController,
+    programExplorerController: mockProgramExplorerController,
   );
   final debuggerController = createMockDebuggerControllerWithDefaults(
     mockCodeViewController: mockCodeViewController,

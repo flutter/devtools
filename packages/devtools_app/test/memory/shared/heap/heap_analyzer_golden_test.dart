@@ -20,7 +20,7 @@ void main() async {
       test('has many objects and roots.', () {
         expect(heap.objects.length, greaterThan(1000));
         expect(
-          heap.objects[heap.rootIndex].references.length,
+          heap.objects[heap.rootIndex].outRefs.length,
           greaterThan(1000),
           reason: t.name,
         );
@@ -33,7 +33,7 @@ void main() async {
       });
 
       test('has path to the object of type ${t.appClassName}.', () async {
-        buildSpanningTree(heap);
+        await buildSpanningTreeAndSetInRefs(heap);
         final appObject = heap.objects
             .where((o) => o.heapClass.className == t.appClassName)
             .first;

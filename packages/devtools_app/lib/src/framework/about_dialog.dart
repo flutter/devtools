@@ -44,8 +44,8 @@ class DevToolsAboutDialog extends StatelessWidget {
             ],
           ),
           const SizedBox(height: denseSpacing),
-          Wrap(
-            children: const [
+          const Wrap(
+            children: [
               Text('Encountered an issue? Let us know at '),
               _FeedbackLink(),
               Text('.'),
@@ -53,15 +53,15 @@ class DevToolsAboutDialog extends StatelessWidget {
           ),
           const SizedBox(height: defaultSpacing),
           ...dialogSubHeader(theme, 'Contributing'),
-          Wrap(
-            children: const [
+          const Wrap(
+            children: [
               Text('Want to contribute to DevTools? Please see our '),
               _ContributingLink(),
               Text(' guide, or '),
             ],
           ),
-          Wrap(
-            children: const [
+          const Wrap(
+            children: [
               Text('connect with us on '),
               _DiscordLink(),
               Text('.'),

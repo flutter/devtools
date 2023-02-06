@@ -11,6 +11,9 @@ import 'dart:async';
 import 'package:collection/collection.dart' show IterableExtension;
 import 'package:dds_service_extensions/dds_service_extensions.dart';
 import 'package:flutter/foundation.dart';
+// TODO(CoderDake): remove after migration to vm_service:11.0.0
+// ignore: implementation_imports
+import 'package:vm_service/src/vm_service.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../screens/vm_developer/vm_service_private_extensions.dart';
@@ -275,11 +278,18 @@ class VmServiceWrapper implements VmService {
     String isolateId,
     String objectId,
     int limit, {
-    String? classId,
+    bool? includeSubclasses,
+    bool? includeImplementers,
   }) async {
     return trackFuture(
       'getInstances',
-      _vmService.getInstances(isolateId, objectId, limit),
+      _vmService.getInstances(
+        isolateId,
+        objectId,
+        limit,
+        includeSubclasses: includeSubclasses,
+        includeImplementers: includeImplementers,
+      ),
     );
   }
 
@@ -846,10 +856,29 @@ class VmServiceWrapper implements VmService {
     String id,
   ) async {
     assert(await isHttpProfilingAvailable(isolateId));
-    return trackFuture(
-      'getHttpProfileRequest',
-      _vmService.getHttpProfileRequest(isolateId, id),
-    );
+    final dartIOVersion = await getDartIOVersion(isolateId);
+    final majorVersion = dartIOVersion.major;
+    // TODO(CoderDake): switch back to _vmService.getHttpProfileRequest call
+    // when upgrading to vm_service:11.0.0
+    if (majorVersion == null || majorVersion < 2) {
+      return trackFuture(
+        'ext.dart.io.getHttpProfileRequest',
+        extensionCallHelper(
+            _vmService, 'ext.dart.io.getHttpProfileRequest', <String, dynamic>{
+          'id': int.parse(id),
+          'isolateId': isolateId,
+        }),
+      ).then((r) => r as HttpProfileRequest);
+    } else {
+      return trackFuture(
+        'ext.dart.io.getHttpProfileRequest',
+        extensionCallHelper(
+            _vmService, 'ext.dart.io.getHttpProfileRequest', <String, dynamic>{
+          'id': id,
+          'isolateId': isolateId,
+        }),
+      ).then((r) => r as HttpProfileRequest);
+    }
   }
 
   /// The `clearHttpProfile` RPC is used to clear previously recorded HTTP
