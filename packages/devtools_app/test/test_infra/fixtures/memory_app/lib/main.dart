@@ -76,8 +76,6 @@ class _MyHomePageState extends State<MyHomePage> {
 /// test representation of a heap instance in DevTools console.
 class _MyGarbage {
   _MyGarbage(this._level) {
-    _instances++;
-
     if (_level >= _depth) {
       childClass = null;
       childList = null;
@@ -107,8 +105,6 @@ class _MyGarbage {
       );
     }
   }
-
-  static int _instances = 0;
 
   static const _depth = 2;
   static const _width = 3;

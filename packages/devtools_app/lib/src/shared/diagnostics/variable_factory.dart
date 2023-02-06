@@ -327,7 +327,28 @@ Future<List<DartObjectNode>> createVariablesForDiagnostics(
   return variables.isNotEmpty ? await Future.wait(variables) : const [];
 }
 
-List<DartObjectNode> createVariablesForAssociations(
+void _addLiveReference(
+  List<DartObjectNode> variables,
+  IsolateRef? isolateRef,
+  Object? instance,
+  String namePrefix,
+) {
+  if (instance is! InstanceRef) return;
+  if (isPrimativeInstanceKind(instance.kind)) return;
+
+  variables.add(
+    DartObjectNode.references(
+      '$namePrefix${instance.classRef!.name}',
+      ObjectReferences(
+        refNodeType: RefNodeType.liveOutRefs,
+        isolateRef: isolateRef,
+        value: instance,
+      ),
+    ),
+  );
+}
+
+List<DartObjectNode> createVariablesForMap(
   Instance instance,
   IsolateRef? isolateRef, {
   required bool asReferences,
@@ -344,8 +365,25 @@ List<DartObjectNode> createVariablesForAssociations(
     false,
     (p, e) => p || isPrimativeInstanceKind(e.key.kind),
   );
-  for (var i = 0; i < associations.length; i++) {
+  for (final i in Iterable.generate(associations.length)) {
     final association = associations[i];
+
+    if (asReferences) {
+      _addLiveReference(
+        variables,
+        isolateRef,
+        association.key,
+        '[$i, key]',
+      );
+      _addLiveReference(
+        variables,
+        isolateRef,
+        association.value,
+        '[$i, val]', // `val`, not `value`, to align keys and values visually
+      );
+      continue;
+    }
+
     if (association.key is! InstanceRef) {
       continue;
     }
@@ -365,7 +403,7 @@ List<DartObjectNode> createVariablesForAssociations(
         artificialName: true,
       );
       final value = DartObjectNode.fromValue(
-        name: '[value]',
+        name: '[val]', // `val`, not `value`, to align keys and values visually
         value: association.value,
         isolateRef: isolateRef,
         artificialName: true,
@@ -461,7 +499,7 @@ List<DartObjectNode> createVariablesForBytes(
   return variables;
 }
 
-List<DartObjectNode> createVariablesForElements(
+List<DartObjectNode> createVariablesForList(
   Instance instance,
   IsolateRef? isolateRef, {
   required bool asReferences,
