@@ -5,57 +5,32 @@
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/profiler/cpu_profiler.dart';
 import 'package:devtools_app/src/service/vm_flags.dart' as vm_flags;
-import 'package:devtools_app/src/shared/config_specific/import_export/import_export.dart';
 import 'package:devtools_app/src/shared/ui/vm_flag_widgets.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/mockito.dart';
-import 'package:vm_service/vm_service.dart';
 
-import '../test_infra/test_data/cpu_profile.dart';
+import '../test_infra/scenes/cpu_profiler/default.dart';
+import '../test_infra/utils/test_utils.dart';
 
 void main() {
-  late ProfilerScreen screen;
-  late FakeServiceManager fakeServiceManager;
+  late CpuProfilerDefaultScene scene;
+
+  setUp(() async {
+    setCharacterWidthForTables();
+    scene = CpuProfilerDefaultScene();
+    await scene.setUp();
+  });
 
   const windowSize = Size(2000.0, 1000.0);
 
   group('ProfilerScreen', () {
-    setUp(() async {
-      fakeServiceManager = FakeServiceManager(
-        service: FakeServiceManager.createFakeService(
-          cpuSamples: CpuSamples.parse(goldenCpuSamplesJson),
-        ),
-      );
-      final app = fakeServiceManager.connectedApp!;
-      when(app.isDartWebAppNow).thenReturn(false);
-      when(app.isDebugFlutterAppNow).thenReturn(false);
-      when(app.isFlutterNativeAppNow).thenReturn(false);
-      when(app.isDartCliAppNow).thenReturn(true);
-      when(app.isFlutterAppNow).thenReturn(false);
-      when(fakeServiceManager.errorBadgeManager.errorCountNotifier('profiler'))
-          .thenReturn(ValueNotifier<int>(0));
-      setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
-      setGlobal(ServiceConnectionManager, fakeServiceManager);
-      setGlobal(OfflineModeController, OfflineModeController());
-      setGlobal(IdeTheme, IdeTheme());
-      setGlobal(NotificationService, NotificationService());
-      setGlobal(PreferencesController, PreferencesController());
-      final mockScriptManager = MockScriptManager();
-      when(mockScriptManager.sortedScripts).thenReturn(
-        ValueNotifier<List<ScriptRef>>([]),
-      );
-      setGlobal(ScriptManager, mockScriptManager);
-      screen = ProfilerScreen();
-    });
-
     void verifyBaseState() {
       expect(find.byType(RecordButton), findsOneWidget);
       expect(find.byType(StopRecordingButton), findsOneWidget);
       expect(find.byType(ClearButton), findsOneWidget);
       expect(find.text('Load all CPU samples'), findsOneWidget);
-      if (fakeServiceManager.connectedApp!.isFlutterNativeAppNow) {
+      if (scene.fakeServiceManager.connectedApp!.isFlutterNativeAppNow) {
         expect(find.text('Profile app start up'), findsOneWidget);
       }
       expect(find.byType(CpuSamplingRateDropdown), findsOneWidget);
@@ -69,22 +44,17 @@ void main() {
       expect(find.byType(ModeDropdown), findsNothing);
     }
 
-    Future<void> pumpProfilerScreenBody(
-      WidgetTester tester,
-      ProfilerScreenBody body,
-    ) async {
-      await tester.pumpWidget(
-        wrapWithControllers(
-          body,
-          profiler: ProfilerScreenController(),
-        ),
-      );
+    Future<void> pumpProfilerScreen(WidgetTester tester) async {
+      await tester.pumpWidget(scene.build());
+      // Delay to ensure the memory profiler has collected data.
+      await tester.pumpAndSettle(const Duration(seconds: 1));
+      expect(find.byType(ProfilerScreenBody), findsOneWidget);
     }
 
     testWidgets('builds its tab', (WidgetTester tester) async {
       await tester.pumpWidget(
         wrapWithControllers(
-          Builder(builder: screen.buildTab),
+          Builder(builder: scene.screen.buildTab),
           profiler: ProfilerScreenController(),
         ),
       );
@@ -95,9 +65,7 @@ void main() {
       'builds base state for Dart CLI app',
       windowSize,
       (WidgetTester tester) async {
-        const perfScreenBody = ProfilerScreenBody();
-        await pumpProfilerScreenBody(tester, perfScreenBody);
-        expect(find.byType(ProfilerScreenBody), findsOneWidget);
+        await pumpProfilerScreen(tester);
         verifyBaseState();
       },
     );
@@ -106,11 +74,13 @@ void main() {
       'builds base state for Flutter native app',
       windowSize,
       (WidgetTester tester) async {
-        when(fakeServiceManager.connectedApp!.isFlutterNativeAppNow)
-            .thenReturn(true);
-        const perfScreenBody = ProfilerScreenBody();
-        await pumpProfilerScreenBody(tester, perfScreenBody);
-        expect(find.byType(ProfilerScreenBody), findsOneWidget);
+        mockConnectedApp(
+          scene.fakeServiceManager.connectedApp!,
+          isFlutterApp: true,
+          isProfileBuild: true,
+          isWebApp: false,
+        );
+        await pumpProfilerScreen(tester);
         verifyBaseState();
       },
     );
@@ -119,14 +89,12 @@ void main() {
       'builds proper content for recording state',
       windowSize,
       (WidgetTester tester) async {
-        const perfScreenBody = ProfilerScreenBody();
-        await pumpProfilerScreenBody(tester, perfScreenBody);
-        expect(find.byType(ProfilerScreenBody), findsOneWidget);
+        await pumpProfilerScreen(tester);
         verifyBaseState();
 
         // Start recording.
         await tester.tap(find.byType(RecordButton));
-        await tester.pump();
+        await tester.pump(const Duration(seconds: 1));
         expect(
           find.byKey(ProfilerScreen.recordingInstructionsKey),
           findsNothing,
@@ -137,7 +105,8 @@ void main() {
 
         // Stop recording.
         await tester.tap(find.byType(StopRecordingButton));
-        await tester.pumpAndSettle();
+        await tester.pumpAndSettle(const Duration(seconds: 2));
+
         expect(find.byType(CircularProgressIndicator), findsNothing);
         expect(find.byType(CpuProfiler), findsOneWidget);
 
@@ -152,9 +121,12 @@ void main() {
       'builds for disabled profiler',
       windowSize,
       (WidgetTester tester) async {
-        await serviceManager.service!.setFlag(vm_flags.profiler, 'false');
-        const perfScreenBody = ProfilerScreenBody();
-        await pumpProfilerScreenBody(tester, perfScreenBody);
+        await scene.fakeServiceManager.service!.setFlag(
+          vm_flags.profiler,
+          'false',
+        );
+        await pumpProfilerScreen(tester);
+
         expect(find.byType(CpuProfilerDisabled), findsOneWidget);
         expect(
           find.byKey(ProfilerScreen.recordingInstructionsKey),

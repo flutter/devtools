@@ -13,6 +13,7 @@ import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stager/stager.dart';
+import 'package:vm_service/vm_service.dart';
 
 import '../../../test_infra/test_data/memory.dart';
 import '../../../test_infra/test_data/memory/heap/heap_data.dart';
@@ -33,7 +34,7 @@ class MemoryDefaultScene extends Scene {
   }
 
   @override
-  Future<void> setUp() async {
+  Future<void> setUp({ClassList? classList}) async {
     setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
     setGlobal(OfflineModeController, OfflineModeController());
     setGlobal(IdeTheme, IdeTheme());
@@ -53,6 +54,7 @@ class MemoryDefaultScene extends Scene {
       service: FakeServiceManager.createFakeService(
         memoryData: memoryJson,
         allocationData: allocationJson,
+        classList: classList,
       ),
     );
     final app = fakeServiceManager.connectedApp!;

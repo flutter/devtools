@@ -725,9 +725,9 @@ class ShaderJankWarningIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
+    return const Row(
       mainAxisAlignment: MainAxisAlignment.center,
-      children: const [
+      children: [
         BlinkingIcon(
           icon: Icons.warning_amber_rounded,
           color: Colors.amber,

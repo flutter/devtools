@@ -27,12 +27,12 @@ class _OverflowingAppState extends State<OverflowingApp> {
         home: Column(
           children: [
             for (var i = 0; i < 5; i++)
-              Row(
+              const Row(
                 children: [
                   Column(
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    children: const [
+                    children: [
                       Text(
                         'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed'
                         ' do eiusmod tempor incididunt ut labore et dolore magna '

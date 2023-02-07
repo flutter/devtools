@@ -326,10 +326,11 @@ Future<List<DartObjectNode>> createVariablesForDiagnostics(
   return variables.isNotEmpty ? await Future.wait(variables) : const [];
 }
 
-List<DartObjectNode> createVariablesForAssociations(
+List<DartObjectNode> createVariablesForMap(
   Instance instance,
   IsolateRef? isolateRef,
 ) {
+  //TODO(polina-c): handle asReferences
   final variables = <DartObjectNode>[];
   final associations = instance.associations ?? [];
 
@@ -343,6 +344,7 @@ List<DartObjectNode> createVariablesForAssociations(
   );
   for (var i = 0; i < associations.length; i++) {
     final association = associations[i];
+
     if (association.key is! InstanceRef) {
       continue;
     }
@@ -362,7 +364,7 @@ List<DartObjectNode> createVariablesForAssociations(
         artificialName: true,
       );
       final value = DartObjectNode.fromValue(
-        name: '[value]',
+        name: '[val]', // `val`, not `value`, to align keys and values visually
         value: association.value,
         isolateRef: isolateRef,
         artificialName: true,
@@ -458,17 +460,19 @@ List<DartObjectNode> createVariablesForBytes(
   return variables;
 }
 
-List<DartObjectNode> createVariablesForElements(
+List<DartObjectNode> createVariablesForList(
   Instance instance,
   IsolateRef? isolateRef,
 ) {
   final variables = <DartObjectNode>[];
   final elements = instance.elements ?? [];
   for (int i = 0; i < elements.length; i++) {
-    final name = instance.offset == null ? i : i + instance.offset!;
+    final index = instance.offset == null ? i : i + instance.offset!;
+    final name = '[$index]${instance.classRef!.name}';
+
     variables.add(
       DartObjectNode.fromValue(
-        name: '[$name]',
+        name: name,
         value: elements[i],
         isolateRef: isolateRef,
         artificialName: true,
@@ -528,11 +532,12 @@ List<DartObjectNode> createVariablesForFields(
   IsolateRef? isolateRef, {
   Set<String>? existingNames,
 }) {
-  final variables = <DartObjectNode>[];
+  final result = <DartObjectNode>[];
+
   for (var field in instance.fields!) {
     final name = field.decl?.name;
     if (name == null) {
-      variables.add(
+      result.add(
         DartObjectNode.fromValue(
           value: field.value,
           isolateRef: isolateRef,
@@ -540,7 +545,7 @@ List<DartObjectNode> createVariablesForFields(
       );
     } else {
       if (existingNames != null && existingNames.contains(name)) continue;
-      variables.add(
+      result.add(
         DartObjectNode.fromValue(
           name: name,
           value: field.value,
@@ -549,5 +554,5 @@ List<DartObjectNode> createVariablesForFields(
       );
     }
   }
-  return variables;
+  return result;
 }

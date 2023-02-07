@@ -108,6 +108,8 @@ class HeapClassName {
 
   late final isRoot = className == 'Root' && library.isEmpty;
 
+  late final bool isNull = className == 'Null' && library == 'dart:core';
+
   /// Whether a class can hold a reference to an object
   /// without preventing garbage collection.
   late final bool isWeakEntry = _isWeakEntry(className, library);
@@ -218,6 +220,7 @@ class HeapClassName {
 /// packages.
 const _dartAndFlutterPackages = {
   'flutter',
+  'flutter_localizations',
 
   // https://pub.dev/publishers/dart.dev/packages
   'args',
@@ -347,6 +350,7 @@ const _dartAndFlutterPackages = {
   'share',
   'shared_preferences',
   'shared_preferences_android',
+  'shared_preferences_foundation',
   'shared_preferences_ios',
   'shared_preferences_linux',
   'shared_preferences_macos',
