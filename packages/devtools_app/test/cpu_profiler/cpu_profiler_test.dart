@@ -34,6 +34,7 @@ void main() {
 
   setUp(() async {
     setCharacterWidthForTables();
+    setGlobal(ServiceConnectionManager, fakeServiceManager);
 
     final transformer = CpuProfileTransformer();
     controller = CpuProfilerController();
@@ -44,7 +45,6 @@ void main() {
     );
 
     setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
-    setGlobal(ServiceConnectionManager, fakeServiceManager);
     setGlobal(OfflineModeController, OfflineModeController());
     setGlobal(NotificationService, NotificationService());
     setGlobal(PreferencesController, PreferencesController());
@@ -77,20 +77,20 @@ void main() {
           searchFieldKey: searchFieldKey,
         );
         await tester.pumpWidget(wrap(cpuProfiler));
-        expect(find.byType(TabBar), findsNothing);
+        expect(find.byType(TabBar), findsOneWidget);
         expect(find.byKey(CpuProfiler.dataProcessingKey), findsNothing);
-        expect(find.byType(CpuProfileFlameChart), findsNothing);
+        expect(find.byType(CpuBottomUpTable), findsOneWidget);
         expect(find.byType(CpuCallTreeTable), findsNothing);
-        expect(find.byType(CpuBottomUpTable), findsNothing);
-        expect(find.byType(DisplayTreeGuidelinesToggle), findsNothing);
-        expect(find.byType(UserTagDropdown), findsNothing);
-        expect(find.byType(ExpandAllButton), findsNothing);
-        expect(find.byType(CollapseAllButton), findsNothing);
+        expect(find.byType(CpuProfileFlameChart), findsNothing);
+        expect(find.byType(DisplayTreeGuidelinesToggle), findsOneWidget);
+        expect(find.byType(UserTagDropdown), findsOneWidget);
+        expect(find.byType(ExpandAllButton), findsOneWidget);
+        expect(find.byType(CollapseAllButton), findsOneWidget);
         expect(find.byType(FlameChartHelpButton), findsNothing);
         expect(find.byKey(searchFieldKey), findsNothing);
-        expect(find.byKey(CpuProfiler.flameChartTab), findsNothing);
-        expect(find.byKey(CpuProfiler.callTreeTab), findsNothing);
-        expect(find.byKey(CpuProfiler.bottomUpTab), findsNothing);
+        expect(find.byKey(CpuProfiler.flameChartTab), findsOneWidget);
+        expect(find.byKey(CpuProfiler.callTreeTab), findsOneWidget);
+        expect(find.byKey(CpuProfiler.bottomUpTab), findsOneWidget);
         expect(find.byKey(CpuProfiler.summaryTab), findsNothing);
       },
     );
@@ -110,18 +110,18 @@ void main() {
         await tester.pumpWidget(wrap(cpuProfiler));
         expect(find.byType(TabBar), findsOneWidget);
         expect(find.byKey(CpuProfiler.dataProcessingKey), findsNothing);
-        expect(find.byType(CpuProfileFlameChart), findsNothing);
-        expect(find.byType(CpuCallTreeTable), findsNothing);
         expect(find.byType(CpuBottomUpTable), findsNothing);
+        expect(find.byType(CpuCallTreeTable), findsNothing);
+        expect(find.byType(CpuProfileFlameChart), findsNothing);
         expect(find.byType(DisplayTreeGuidelinesToggle), findsNothing);
         expect(find.byType(UserTagDropdown), findsNothing);
         expect(find.byType(ExpandAllButton), findsNothing);
         expect(find.byType(CollapseAllButton), findsNothing);
         expect(find.byType(FlameChartHelpButton), findsNothing);
         expect(find.byKey(searchFieldKey), findsNothing);
-        expect(find.byKey(CpuProfiler.flameChartTab), findsNothing);
-        expect(find.byKey(CpuProfiler.callTreeTab), findsNothing);
-        expect(find.byKey(CpuProfiler.bottomUpTab), findsNothing);
+        expect(find.byKey(CpuProfiler.flameChartTab), findsOneWidget);
+        expect(find.byKey(CpuProfiler.callTreeTab), findsOneWidget);
+        expect(find.byKey(CpuProfiler.bottomUpTab), findsOneWidget);
         expect(find.byKey(CpuProfiler.summaryTab), findsOneWidget);
         expect(find.byKey(summaryViewKey), findsOneWidget);
       },

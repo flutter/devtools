@@ -149,9 +149,6 @@ class _CpuProfilerState extends State<CpuProfiler>
     final theme = Theme.of(context);
     final textTheme = theme.textTheme;
     final colorScheme = theme.colorScheme;
-    if (widget.tabs.isEmpty) {
-      return Container();
-    }
     final currentTab = widget.tabs[_tabController.index];
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
