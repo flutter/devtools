@@ -171,13 +171,15 @@ class LoggingController extends DisposableController
       serviceManager.onConnectionClosed.listen(_handleConnectionStop),
     );
     _handleBusEvents();
+    subscribeToFilterChanges();
   }
 
   static const kindFilterId = 'logging-kind-filter';
 
-  final filterArgs = {
-    kindFilterId: QueryFilterArgument(keys: ['kind', 'k']),
-  };
+  @override
+  Map<String, QueryFilterArgument> createQueryFilterArgs() => {
+        kindFilterId: QueryFilterArgument(keys: ['kind', 'k']),
+      };
 
   final StreamController<String> _logStatusController =
       StreamController.broadcast();
@@ -651,8 +653,10 @@ class LoggingController extends DisposableController
   }
 
   @override
-  void filterData(Filter<LogData>? filter) {
-    if (filter?.queryFilter == null) {
+  void filterData(Filter<LogData> filter) {
+    super.filterData(filter);
+    final queryFilter = filter.queryFilter;
+    if (queryFilter.isEmpty) {
       filteredData
         ..clear()
         ..addAll(data);
@@ -661,29 +665,23 @@ class LoggingController extends DisposableController
         ..clear()
         ..addAll(
           data.where((log) {
-            final kindArg = filter!.queryFilter!.filterArguments[kindFilterId];
+            final kindArg = filter.queryFilter.filterArguments[kindFilterId];
             if (kindArg != null &&
                 !kindArg.matchesValue(log.kind.toLowerCase())) {
               return false;
             }
 
-            if (filter.queryFilter!.substrings.isNotEmpty) {
-              for (final substring in filter.queryFilter!.substrings) {
-                final caseInsensitiveSubstring = substring.toLowerCase();
-                final matchesKind =
-                    log.kind.toLowerCase().contains(caseInsensitiveSubstring);
+            if (filter.queryFilter.substrings.isNotEmpty) {
+              for (final substring in filter.queryFilter.substrings) {
+                final matchesKind = log.kind.caseInsensitiveContains(substring);
                 if (matchesKind) return true;
 
                 final matchesSummary = log.summary != null &&
-                    log.summary!
-                        .toLowerCase()
-                        .contains(caseInsensitiveSubstring);
+                    log.summary!.caseInsensitiveContains(substring);
                 if (matchesSummary) return true;
 
                 final matchesDetails = log.details != null &&
-                    log.summary!
-                        .toLowerCase()
-                        .contains(caseInsensitiveSubstring);
+                    log.summary!.caseInsensitiveContains(substring);
                 if (matchesDetails) return true;
               }
               return false;
@@ -692,7 +690,6 @@ class LoggingController extends DisposableController
           }).toList(),
         );
     }
-    activeFilter.value = filter;
   }
 }
 

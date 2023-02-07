@@ -12,6 +12,7 @@ import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/analytics/metrics.dart';
 import '../../shared/globals.dart';
+import '../../shared/primitives/auto_dispose.dart';
 import '../../shared/primitives/utils.dart';
 import '../../shared/ui/filter.dart';
 import '../../shared/ui/search.dart';
@@ -34,11 +35,14 @@ enum CpuProfilerTagType {
   vm,
 }
 
-class CpuProfilerController
+class CpuProfilerController extends DisposableController
     with
         SearchControllerMixin<CpuStackFrame>,
-        FilterControllerMixin<CpuStackFrame> {
-  CpuProfilerController({this.analyticsScreenId});
+        FilterControllerMixin<CpuStackFrame>,
+        AutoDisposeControllerMixin {
+  CpuProfilerController({this.analyticsScreenId}) {
+    subscribeToFilterChanges();
+  }
 
   /// Tag to represent when no user tag filters are applied.
   ///
@@ -115,15 +119,9 @@ class CpuProfilerController
   final _viewType =
       ValueNotifier<CpuProfilerViewType>(CpuProfilerViewType.function);
 
-  bool get isToggleFilterActive =>
-      toggleFilters.any((filter) => filter.enabled.value);
-
   /// The toggle filters available for the CPU profiler.
-  ///
-  /// This is a getter so that `serviceManager` is initialized by the time we
-  /// access this list.
-  // TODO(kenz): make this late once we migrate to null safety.
-  List<ToggleFilter<CpuStackFrame>> get toggleFilters => _toggleFilters ??= [
+  @override
+  List<ToggleFilter<CpuStackFrame>> createToggleFilters() => [
         ToggleFilter<CpuStackFrame>(
           name: 'Hide Native code',
           includeCallback: (stackFrame) => !stackFrame.isNative,
@@ -140,7 +138,12 @@ class CpuProfilerController
           ),
       ];
 
-  List<ToggleFilter<CpuStackFrame>>? _toggleFilters;
+  static const uriFilterId = 'cpu-profiler-uri-filter';
+
+  @override
+  Map<String, QueryFilterArgument> createQueryFilterArgs() => {
+        uriFilterId: QueryFilterArgument(keys: ['uri', 'u']),
+      };
 
   int selectedProfilerTabIndex = 0;
 
@@ -248,7 +251,7 @@ class CpuProfilerController
       );
     }
     if (shouldApplyFilters) {
-      cpuProfiles = applyToggleFilters(cpuProfiles);
+      cpuProfiles = _filterData(cpuProfiles);
       await cpuProfiles.process(
         transformer: transformer,
         processId: processId,
@@ -256,7 +259,7 @@ class CpuProfilerController
       if (storeAsUserTagNone) {
         cpuProfileStore.storeProfile(
           cpuProfiles,
-          label: _wrapWithFilterSuffix(userTagNone),
+          label: _wrapWithFilterTag(userTagNone),
         );
       }
     }
@@ -339,20 +342,9 @@ class CpuProfilerController
     );
   }
 
-  @visibleForTesting
-  String generateToggleFilterSuffix() {
-    final suffixList = <String>[];
-    for (final toggleFilter in toggleFilters) {
-      if (toggleFilter.enabled.value) {
-        suffixList.add(toggleFilter.name);
-      }
-    }
-    return suffixList.join(',');
-  }
-
-  String _wrapWithFilterSuffix(String label) {
-    final filterSuffix = generateToggleFilterSuffix();
-    return '$label${filterSuffix.isNotEmpty ? '-$filterSuffix' : ''}';
+  String _wrapWithFilterTag(String label, {String? filterTag}) {
+    filterTag ??= activeFilterTag();
+    return '$label${filterTag.isNotEmpty ? '-$filterTag' : ''}';
   }
 
   Future<void> loadAppStartUpProfile() async {
@@ -361,7 +353,7 @@ class CpuProfilerController
     _dataNotifier.value = null;
 
     final storedProfileWithFilters = cpuProfileStore.lookupProfile(
-      label: _wrapWithFilterSuffix(appStartUpUserTag),
+      label: _wrapWithFilterTag(appStartUpUserTag),
     );
     if (storedProfileWithFilters != null) {
       _dataNotifier.value = storedProfileWithFilters.getActive(viewType.value);
@@ -402,8 +394,8 @@ class CpuProfilerController
 
     _userTagFilter.value = appStartUpUserTag;
 
-    if (isToggleFilterActive) {
-      final filteredAppStartUpProfile = applyToggleFilters(appStartUpProfile);
+    if (isFilterActive) {
+      final filteredAppStartUpProfile = _filterData(appStartUpProfile);
       await processAndSetData(
         filteredAppStartUpProfile,
         processId: 'filter app start up profile',
@@ -413,7 +405,7 @@ class CpuProfilerController
       );
       cpuProfileStore.storeProfile(
         filteredAppStartUpProfile,
-        label: _wrapWithFilterSuffix(appStartUpUserTag),
+        label: _wrapWithFilterTag(appStartUpUserTag),
       );
       return;
     }
@@ -458,7 +450,7 @@ class CpuProfilerController
     } catch (e, stackTrace) {
       // In the event of an error, reset the data to the original CPU profile.
       final filteredOriginalData = cpuProfileStore.lookupProfile(
-        label: _wrapWithFilterSuffix(userTagNone),
+        label: _wrapWithFilterTag(userTagNone),
       )!;
       _dataNotifier.value = filteredOriginalData.getActive(viewType.value);
       Error.throwWithStackTrace(
@@ -471,7 +463,7 @@ class CpuProfilerController
   }
 
   Future<CpuProfilePair> processDataForTag(String tag) async {
-    final profileLabel = _wrapWithFilterSuffix(tag);
+    final profileLabel = _wrapWithFilterTag(tag);
     final filteredDataForTag = cpuProfileStore.lookupProfile(
       label: profileLabel,
     );
@@ -484,14 +476,9 @@ class CpuProfilerController
       }
       return filteredDataForTag;
     }
-    var data = cpuProfileStore.lookupProfile(
-      label: tag,
-    );
+    var data = cpuProfileStore.lookupProfile(label: tag);
     if (data == null) {
-      final fullData = cpuProfileStore.lookupProfile(
-        label: userTagNone,
-      )!;
-
+      final fullData = cpuProfileStore.lookupProfile(label: userTagNone)!;
       data = tag == groupByUserTag || tag == groupByVmTag
           ? CpuProfilePair.withTagRoots(
               fullData,
@@ -500,24 +487,17 @@ class CpuProfilerController
                   : CpuProfilerTagType.vm,
             )
           : CpuProfilePair.fromUserTag(fullData, tag);
-      cpuProfileStore.storeProfile(
-        data,
-        label: tag,
-      );
+      cpuProfileStore.storeProfile(data, label: tag);
     }
 
-    data = applyToggleFilters(data);
+    data = _filterData(data);
     if (!data.processed) {
       await data.process(
         transformer: transformer,
         processId: 'data with toggle filters applied',
       );
     }
-    cpuProfileStore.storeProfile(
-      data,
-      label: _wrapWithFilterSuffix(tag),
-    );
-
+    cpuProfileStore.storeProfile(data, label: _wrapWithFilterTag(tag));
     return data;
   }
 
@@ -525,7 +505,7 @@ class CpuProfilerController
     _viewType.value = view;
     _dataNotifier.value = cpuProfileStore
         .lookupProfile(
-          label: _wrapWithFilterSuffix(_userTagFilter.value),
+          label: _wrapWithFilterTag(_userTagFilter.value),
         )
         ?.getActive(view);
   }
@@ -551,11 +531,13 @@ class CpuProfilerController
     resetSearch();
   }
 
+  @override
   void dispose() {
     _dataNotifier.dispose();
     _selectedCpuStackFrameNotifier.dispose();
     _processingNotifier.dispose();
     transformer.dispose();
+    super.dispose();
   }
 
   /// Tracks the identifier for the attempt to filter the data.
@@ -566,19 +548,54 @@ class CpuProfilerController
 
   @override
   void filterData(Filter<CpuStackFrame> filter) {
-    final dataLabel = _wrapWithFilterSuffix(_userTagFilter.value);
-    var filteredData = cpuProfileStore.lookupProfile(
-      label: dataLabel,
+    super.filterData(filter);
+    final dataForCurrentTag = cpuProfileStore.lookupProfile(
+      label: _userTagFilter.value,
     );
-    if (filteredData == null) {
-      final originalData = cpuProfileStore.lookupProfile(
-        label: _userTagFilter.value,
-      )!;
-      filteredData = _filterData(originalData, filter);
-      cpuProfileStore.storeProfile(
-        filteredData,
+    if (dataForCurrentTag == null) {
+      // We have nothing to filter from, so bail out early.
+      return;
+    }
+
+    CpuProfilePair? filteredData;
+    if (filter.isEmpty) {
+      // If the filter is empty, no need to filter. Just look up the current
+      // unfiltered profile.
+      filteredData = dataForCurrentTag;
+    } else {
+      // Lookup the cpu profile from the cached [cpuProfileStore] if present.
+      final dataLabel = _wrapWithFilterTag(_userTagFilter.value);
+      filteredData = cpuProfileStore.lookupProfile(
         label: dataLabel,
       );
+
+      if (filteredData == null) {
+        // TODO(https://github.com/flutter/devtools/issues/5203): optimize
+        // filtering by filtering from already filtered data when possible. The
+        // below code is intentionally left in comments for reference.
+        // CpuProfilePair? filterFrom;
+        // if (!filter.queryFilter.isEmpty) {
+        //   // Lookup the cpu profile without the query filter, and filter from
+        //   // that profile to optimize performance.
+        //   final filterTagWithoutQuery = activeFilterTag()
+        //       .split(FilterControllerMixin.filterTagSeparator)
+        //       .first;
+        //   final label = _wrapWithFilterTag(
+        //     _userTagFilter.value,
+        //     filterTag: filterTagWithoutQuery,
+        //   );
+        //   filterFrom = cpuProfileStore.lookupProfile(
+        //     label: label,
+        //   );
+        // }
+
+        final filterFrom = dataForCurrentTag;
+        filteredData = _filterData(filterFrom, filter: filter);
+        cpuProfileStore.storeProfile(
+          filteredData,
+          label: dataLabel,
+        );
+      }
     }
     unawaited(
       processAndSetData(
@@ -593,24 +610,43 @@ class CpuProfilerController
   }
 
   CpuProfilePair _filterData(
-    CpuProfilePair originalData,
-    Filter<CpuStackFrame> filter,
-  ) {
+    CpuProfilePair originalData, {
+    Filter<CpuStackFrame>? filter,
+  }) {
+    filter ??= activeFilter.value;
     final filterCallback = (CpuStackFrame stackFrame) {
-      var shouldInclude = true;
-      for (final toggleFilter in filter.toggleFilters!) {
+      for (final toggleFilter in filter!.toggleFilters) {
         if (toggleFilter.enabled.value) {
-          shouldInclude =
-              shouldInclude && toggleFilter.includeCallback(stackFrame);
-          if (!shouldInclude) return false;
+          if (!toggleFilter.includeCallback(stackFrame)) return false;
         }
       }
-      return shouldInclude;
+
+      final queryFilter = filter.queryFilter;
+      if (!queryFilter.isEmpty) {
+        final uriArg = queryFilter.filterArguments[uriFilterId];
+        if (uriArg != null &&
+            !uriArg.matchesValue(
+              stackFrame.packageUri,
+              substringMatch: true,
+            )) {
+          return false;
+        }
+
+        if (queryFilter.substrings.isNotEmpty) {
+          for (final substring in queryFilter.substrings) {
+            bool matches(String? stringToMatch) {
+              return stringToMatch?.caseInsensitiveContains(substring) ?? false;
+            }
+
+            if (matches(stackFrame.name)) return true;
+            if (matches(stackFrame.packageUri)) return true;
+          }
+          return false;
+        }
+      }
+
+      return true;
     };
     return CpuProfilePair.filterFrom(originalData, filterCallback);
-  }
-
-  CpuProfilePair applyToggleFilters(CpuProfilePair data) {
-    return _filterData(data, Filter(toggleFilters: toggleFilters));
   }
 }

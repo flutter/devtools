@@ -185,7 +185,8 @@ void main() {
       late ProfilerScreenController controller;
 
       Future<void> loadData() async {
-        for (final filter in controller.cpuProfilerController.toggleFilters) {
+        for (final filter in controller
+            .cpuProfilerController.activeFilter.value.toggleFilters) {
           filter.enabled.value = false;
         }
         final data = CpuProfilePair(
@@ -652,7 +653,8 @@ void main() {
         controller = ProfilerScreenController();
         preferences.toggleVmDeveloperMode(true);
         cpuProfileData = CpuProfileData.parse(cpuProfileDataWithUserTagsJson);
-        for (final filter in controller.cpuProfilerController.toggleFilters) {
+        for (final filter in controller
+            .cpuProfilerController.activeFilter.value.toggleFilters) {
           filter.enabled.value = false;
         }
         final data = CpuProfilePair(

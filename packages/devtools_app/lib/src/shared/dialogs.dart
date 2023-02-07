@@ -55,7 +55,10 @@ class StateUpdateDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DevToolsDialog(
-      title: _StateUpdateDialogTitle(onResetDefaults: onResetDefaults),
+      title: _StateUpdateDialogTitle(
+        title: title,
+        onResetDefaults: onResetDefaults,
+      ),
       content: Container(
         padding: const EdgeInsets.only(
           left: defaultSpacing,
@@ -88,7 +91,9 @@ class StateUpdateDialog extends StatelessWidget {
 }
 
 class _StateUpdateDialogTitle extends StatelessWidget {
-  const _StateUpdateDialogTitle({this.onResetDefaults});
+  const _StateUpdateDialogTitle({required this.title, this.onResetDefaults});
+
+  final String title;
   final VoidCallback? onResetDefaults;
 
   @override
@@ -96,7 +101,7 @@ class _StateUpdateDialogTitle extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        const DialogTitleText('Filters'),
+        DialogTitleText(title),
         TextButton(
           onPressed: onResetDefaults,
           child: const MaterialIconLabel(

@@ -11,6 +11,7 @@ import '../../shared/config_specific/logger/allowed_error.dart';
 import '../../shared/globals.dart';
 import '../../shared/http/http_request_data.dart';
 import '../../shared/http/http_service.dart' as http_service;
+import '../../shared/primitives/auto_dispose.dart';
 import '../../shared/primitives/utils.dart';
 import '../../shared/ui/filter.dart';
 import '../../shared/ui/search.dart';
@@ -18,12 +19,14 @@ import 'network_model.dart';
 import 'network_screen.dart';
 import 'network_service.dart';
 
-class NetworkController
+class NetworkController extends DisposableController
     with
         SearchControllerMixin<NetworkRequest>,
-        FilterControllerMixin<NetworkRequest> {
+        FilterControllerMixin<NetworkRequest>,
+        AutoDisposeControllerMixin {
   NetworkController() {
     _networkService = NetworkService(this);
+    subscribeToFilterChanges();
   }
 
   static const methodFilterId = 'network-method-filter';
@@ -32,11 +35,12 @@ class NetworkController
 
   static const typeFilterId = 'network-type-filter';
 
-  final filterArgs = {
-    methodFilterId: QueryFilterArgument(keys: ['method', 'm']),
-    statusFilterId: QueryFilterArgument(keys: ['status', 's']),
-    typeFilterId: QueryFilterArgument(keys: ['type', 't']),
-  };
+  @override
+  Map<String, QueryFilterArgument> createQueryFilterArgs() => {
+        methodFilterId: QueryFilterArgument(keys: ['method', 'm']),
+        statusFilterId: QueryFilterArgument(keys: ['status', 's']),
+        typeFilterId: QueryFilterArgument(keys: ['type', 't']),
+      };
 
   /// Notifies that new Network requests have been processed.
   ValueListenable<NetworkRequests> get requests => _requests;
@@ -289,10 +293,11 @@ class NetworkController
   }
 
   @override
-  void filterData(Filter<NetworkRequest>? filter) {
+  void filterData(Filter<NetworkRequest> filter) {
+    super.filterData(filter);
     serviceManager.errorBadgeManager.clearErrors(NetworkScreen.id);
-    final queryFilter = filter?.queryFilter;
-    if (queryFilter == null) {
+    final queryFilter = filter.queryFilter;
+    if (queryFilter.isEmpty) {
       _requests.value.requests.forEach(_checkForError);
       filteredData
         ..clear()
@@ -303,30 +308,24 @@ class NetworkController
         ..addAll(
           _requests.value.requests.where((NetworkRequest r) {
             final methodArg = queryFilter.filterArguments[methodFilterId];
-            if (methodArg != null &&
-                !methodArg.matchesValue(r.method.toLowerCase())) {
+            if (methodArg != null && !methodArg.matchesValue(r.method)) {
               return false;
             }
 
             final statusArg = queryFilter.filterArguments[statusFilterId];
-            if (statusArg != null &&
-                !statusArg.matchesValue(r.status?.toLowerCase())) {
+            if (statusArg != null && !statusArg.matchesValue(r.status)) {
               return false;
             }
 
             final typeArg = queryFilter.filterArguments[typeFilterId];
-            if (typeArg != null &&
-                !typeArg.matchesValue(r.type.toLowerCase())) {
+            if (typeArg != null && !typeArg.matchesValue(r.type)) {
               return false;
             }
 
             if (queryFilter.substrings.isNotEmpty) {
               for (final substring in queryFilter.substrings) {
-                final caseInsensitiveSubstring = substring.toLowerCase();
                 bool matches(String? stringToMatch) {
-                  if (stringToMatch
-                          ?.toLowerCase()
-                          .contains(caseInsensitiveSubstring) ==
+                  if (stringToMatch?.caseInsensitiveContains(substring) ==
                       true) {
                     _checkForError(r);
                     return true;
@@ -346,7 +345,6 @@ class NetworkController
           }).toList(),
         );
     }
-    activeFilter.value = filter;
   }
 
   void _checkForError(NetworkRequest r) {

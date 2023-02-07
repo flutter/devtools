@@ -39,11 +39,9 @@ class CpuProfiler extends StatefulWidget {
         tabs = [
           if (summaryView != null)
             _buildTab(key: summaryTab, tabName: 'Summary'),
-          if (!data.isEmpty) ...[
-            _buildTab(key: bottomUpTab, tabName: 'Bottom Up'),
-            _buildTab(key: callTreeTab, tabName: 'Call Tree'),
-            _buildTab(key: flameChartTab, tabName: 'CPU Flame Chart'),
-          ],
+          _buildTab(key: bottomUpTab, tabName: 'Bottom Up'),
+          _buildTab(key: callTreeTab, tabName: 'Call Tree'),
+          _buildTab(key: flameChartTab, tabName: 'CPU Flame Chart'),
         ];
 
   static DevToolsTab _buildTab({Key? key, required String tabName}) {
@@ -173,7 +171,7 @@ class _CpuProfilerState extends State<CpuProfiler>
             if (currentTab.key != CpuProfiler.summaryTab) ...[
               FilterButton(
                 onPressed: _showFilterDialog,
-                isFilterActive: widget.controller.isToggleFilterActive,
+                isFilterActive: widget.controller.isFilterActive,
               ),
               const SizedBox(width: denseSpacing),
               if (currentTab.key != CpuProfiler.flameChartTab) ...[
@@ -337,11 +335,9 @@ class _CpuProfilerState extends State<CpuProfiler>
     // TODO(kenz): make this order configurable.
     return [
       if (summaryView != null) summaryView,
-      if (!data.isEmpty) ...[
-        bottomUp,
-        callTree,
-        cpuFlameChart,
-      ],
+      bottomUp,
+      callTree,
+      cpuFlameChart,
     ];
   }
 
@@ -381,37 +377,33 @@ class DisplayTreeGuidelinesToggle extends StatelessWidget {
 }
 
 class CpuProfileFilterDialog extends StatelessWidget {
-  CpuProfileFilterDialog({
-    required this.controller,
-    Key? key,
-  })  : oldToggleFilterValues = List.generate(
-          controller.toggleFilters.length,
-          (index) => controller.toggleFilters[index].enabled.value,
-        ),
-        super(key: key);
+  const CpuProfileFilterDialog({required this.controller, Key? key})
+      : super(key: key);
+
+  static const filterQueryInstructions = '''
+Type a filter query to show or hide specific stack frames.
+
+Any text that is not paired with an available filter key below will be queried against all categories (method, uri).
+
+Available filters:
+    'uri', 'u'       (e.g. 'uri:my_dart_package/some_lib.dart', '-u:some_lib_to_hide')
+
+Example queries:
+    'someMethodName uri:my_dart_package,b_dart_package'
+    '.toString -uri:flutter'
+''';
 
   double get _filterDialogWidth => scaleByFontFactor(400.0);
 
   final CpuProfilerController controller;
 
-  final List<bool> oldToggleFilterValues;
-
   @override
   Widget build(BuildContext context) {
-    return FilterDialog<CpuProfilerController, CpuStackFrame>(
-      includeQueryFilter: false,
+    return FilterDialog<CpuStackFrame>(
       dialogWidth: _filterDialogWidth,
       controller: controller,
-      onCancel: restoreOldValues,
-      toggleFilters: controller.toggleFilters,
+      queryInstructions: filterQueryInstructions,
     );
-  }
-
-  void restoreOldValues() {
-    for (var i = 0; i < controller.toggleFilters.length; i++) {
-      final filter = controller.toggleFilters[i];
-      filter.enabled.value = oldToggleFilterValues[i];
-    }
   }
 }
 

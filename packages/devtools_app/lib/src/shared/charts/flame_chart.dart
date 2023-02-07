@@ -183,9 +183,12 @@ abstract class FlameChartState<T extends FlameChart,
   double get maxZoomLevel {
     // The max zoom level is hit when 1 microsecond is the width of each grid
     // interval (this may bottom out at 2 micros per interval due to rounding).
-    return baseTimelineGridIntervalPx *
-        widget.time.duration.inMicroseconds /
-        widget.startingContentWidth;
+    return math.max(
+      FlameChart.minZoomLevel,
+      baseTimelineGridIntervalPx *
+          widget.time.duration.inMicroseconds /
+          widget.startingContentWidth,
+    );
   }
 
   /// Provides widgets to be layered on top of the flame chart, if overridden.
