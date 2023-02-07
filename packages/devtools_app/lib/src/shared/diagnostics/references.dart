@@ -116,7 +116,7 @@ Future<void> addChildReferences(
 
       break;
     case RefNodeType.liveInRefs:
-      const limit = 100;
+      final limit = preferences.memory.refLimit.value;
       final refs = (await serviceManager.service!.getInboundReferences(
             ref.isolateRef!.id!,
             ref.instanceRef!.id!,
