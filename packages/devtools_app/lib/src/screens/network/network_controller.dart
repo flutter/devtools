@@ -89,7 +89,6 @@ class NetworkController
     int timelineMicrosOffset, {
     required CurrentNetworkRequests currentRequests,
     required List<DartIOHttpRequestData> invalidRequests,
-    required Map<String, DartIOHttpRequestData> outstandingRequestsMap,
   }) {
     currentRequests.updateWebSocketRequests(sockets, timelineMicrosOffset);
 
@@ -111,7 +110,6 @@ class NetworkController
     return NetworkRequests(
       requests: currentRequests.requestsMapping.values.toList(),
       invalidHttpRequests: invalidRequests,
-      outstandingHttpRequests: outstandingRequestsMap,
     );
   }
 
@@ -126,7 +124,6 @@ class NetworkController
       _timelineMicrosOffset,
       currentRequests: _currentNetworkRequests,
       invalidRequests: [],
-      outstandingRequestsMap: Map.from(requests.value.outstandingHttpRequests),
     );
     _updateData();
     _updateSelection();

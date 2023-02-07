@@ -81,7 +81,6 @@ void main() {
       NetworkRequests profile = requestsNotifier.value;
       // Check profile is initially empty.
       expect(profile.requests.isEmpty, true);
-      expect(profile.outstandingHttpRequests.isEmpty, true);
 
       // The number of valid requests recorded in the test data.
       const numSockets = 2;
@@ -102,7 +101,6 @@ void main() {
       await controller.networkService.refreshNetworkData();
       profile = requestsNotifier.value;
       expect(profile.requests.length, numRequests);
-      expect(profile.outstandingHttpRequests.isEmpty, false);
       final List<DartIOHttpRequestData> httpRequests = profile.requests
           .whereType<DartIOHttpRequestData>()
           .cast<DartIOHttpRequestData>()
@@ -118,7 +116,6 @@ void main() {
       await controller.clear();
       profile = requestsNotifier.value;
       expect(profile.requests.isEmpty, true);
-      expect(profile.outstandingHttpRequests.isEmpty, true);
       controller.stopRecording();
     });
 

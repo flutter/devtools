@@ -206,7 +206,6 @@ class HttpResponseView extends StatelessWidget {
           padding: const EdgeInsets.all(denseSpacing),
           child: SingleChildScrollView(child: child),
         );
-        //TODO: test Large JSON parsing if the response is large.
       },
     );
   }

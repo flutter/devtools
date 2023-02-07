@@ -249,7 +249,7 @@ class DartIOHttpRequestData extends NetworkRequest {
 
   /// Merges the information from another [HttpRequestData] into this instance.
   void merge(DartIOHttpRequestData data) {
-    updateCount.value++; //TODO: Is this ok?
+    updateCount.value++;
     _request = data._request;
   }
 
