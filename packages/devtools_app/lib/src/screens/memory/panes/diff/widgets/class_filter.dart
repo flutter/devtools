@@ -123,6 +123,7 @@ class _ClassFilterDialogState extends State<ClassFilterDialog> {
     Widget textField(TextEditingController controller) => Padding(
           padding: EdgeInsets.only(left: textFieldLeftPadding),
           child: TextField(
+            decoration: dialogTextFieldDecoration,
             keyboardType: TextInputType.multiline,
             maxLines: null,
             controller: controller,
