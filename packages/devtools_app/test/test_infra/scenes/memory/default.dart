@@ -69,7 +69,8 @@ class MemoryDefaultScene extends Scene {
 
     final diffController = DiffPaneController(_TestSnapshotTaker());
     diffController.applyFilter(
-        ClassFilter(filterType: ClassFilterType.showAll, except: '', only: ''));
+      ClassFilter(filterType: ClassFilterType.showAll, except: '', only: ''),
+    );
     controller = MemoryController(
       diffPaneController: diffController,
     )
