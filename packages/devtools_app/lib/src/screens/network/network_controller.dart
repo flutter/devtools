@@ -75,7 +75,6 @@ class NetworkController
     required int timelineMicrosOffset,
     required List<HttpProfileRequest> httpRequests,
     required CurrentNetworkRequests currentRequests,
-    required Map<String, DartIOHttpRequestData> outstandingRequestsMap,
   }) {
     for (final request in httpRequests) {
       currentRequests.updateOrAdd(request, timelineMicrosOffset);
@@ -104,7 +103,6 @@ class NetworkController
       timelineMicrosOffset: timelineMicrosOffset,
       httpRequests: httpRequests!,
       currentRequests: currentRequests,
-      outstandingRequestsMap: outstandingRequestsMap,
     );
 
     return NetworkRequests(

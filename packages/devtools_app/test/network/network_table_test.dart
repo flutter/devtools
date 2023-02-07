@@ -48,7 +48,6 @@ void main() {
         0,
         currentRequests: currentRequests,
         invalidRequests: [],
-        outstandingRequestsMap: {},
       );
       requests = networkRequests.requests;
     });
