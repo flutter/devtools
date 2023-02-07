@@ -8,9 +8,10 @@ import 'dart:math';
 
 import 'package:vm_service/vm_service.dart';
 
-import '../../../devtools_app.dart';
 import '../feature_flags.dart';
+import '../globals.dart';
 import '../memory/class_name.dart';
+import '../primitives/utils.dart';
 import 'dart_object_node.dart';
 import 'generic_instance_reference.dart';
 import 'helpers.dart';
