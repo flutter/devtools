@@ -79,26 +79,26 @@ class _MyGarbage {
     if (_level >= _depth) {
       childClass = null;
       childList = null;
-      childMapSimpleKey = null;
-      childMapSimpleValue = null;
-      childMap = null;
+      mapSimpleKey = null;
+      mapSimpleValue = null;
+      map = null;
     } else {
       childClass = _MyGarbage(_level + 1);
 
       childList =
           Iterable.generate(_width, (_) => _MyGarbage(_level + 1)).toList();
 
-      childMapSimpleKey = Map.fromIterable(
+      mapSimpleKey = Map.fromIterable(
         Iterable.generate(_width),
         value: (_) => _MyGarbage(_level + 1),
       );
 
-      childMapSimpleValue = Map.fromIterable(
+      mapSimpleValue = Map.fromIterable(
         Iterable.generate(_width),
         key: (_) => _MyGarbage(_level + 1),
       );
 
-      childMap = Map.fromIterable(
+      map = Map.fromIterable(
         Iterable.generate(_width),
         key: (_) => _MyGarbage(_level + 1),
         value: (_) => _MyGarbage(_level + 1),
@@ -113,8 +113,10 @@ class _MyGarbage {
 
   late final _MyGarbage? childClass;
   late final List<_MyGarbage>? childList;
-  final Map childMapSimple = Map.fromIterable(Iterable.generate(_width));
-  late final Map<dynamic, _MyGarbage>? childMapSimpleKey;
-  late final Map<_MyGarbage, dynamic>? childMapSimpleValue;
-  late final Map<_MyGarbage, _MyGarbage>? childMap;
+  final Map mapSimple = Map.fromIterable(Iterable.generate(_width));
+  final Map mapEmpty = {};
+  final Map mapOfNulls = {null: null};
+  late final Map<dynamic, _MyGarbage>? mapSimpleKey;
+  late final Map<_MyGarbage, dynamic>? mapSimpleValue;
+  late final Map<_MyGarbage, _MyGarbage>? map;
 }

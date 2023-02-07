@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:vm_service/vm_service.dart';
 
 import '../feature_flags.dart';
+import '../memory/class_name.dart';
 import '../primitives/utils.dart';
 import 'dart_object_node.dart';
 import 'generic_instance_reference.dart';
@@ -67,6 +68,7 @@ Future<void> addChildReferences(
     case RefNodeType.staticInRefs:
       final children = ref.heapSelection!
           .references(ref.refNodeType.direction!)
+          .where((s) => !s.object.heapClass.isNull)
           .map(
             (s) => DartObjectNode.references(
               s.object.heapClass.className,
@@ -82,6 +84,7 @@ Future<void> addChildReferences(
     case RefNodeType.staticOutRefs:
       final children = ref.heapSelection!
           .references(ref.refNodeType.direction!)
+          .where((s) => !s.object.heapClass.isNull)
           .map(
             (s) => DartObjectNode.references(
               '${s.object.heapClass.className}, ${prettyPrintRetainedSize(
@@ -178,11 +181,12 @@ void _addLiveReference(
   String namePrefix,
 ) {
   if (instance is! InstanceRef) return;
-  if (isPrimativeInstanceKind(instance.kind)) return;
+  final classRef = instance.classRef!;
+  if (HeapClassName.fromClassRef(classRef).isNull) return;
 
   variables.add(
     DartObjectNode.references(
-      '$namePrefix${instance.classRef!.name}',
+      '$namePrefix${classRef.name}',
       ObjectReferences(
         refNodeType: RefNodeType.liveOutRefs,
         isolateRef: isolateRef,
