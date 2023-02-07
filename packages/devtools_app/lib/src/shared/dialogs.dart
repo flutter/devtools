@@ -28,6 +28,12 @@ List<Widget> dialogSubHeader(ThemeData theme, String titleText) {
   ];
 }
 
+final dialogTextFieldDecoration = InputDecoration(
+  border: OutlineInputBorder(
+    borderRadius: BorderRadius.circular(10.0),
+  ),
+);
+
 /// A standardized dialog with help text and buttons `Reset to default`,
 /// `APPLY` and `CANCEL`.
 class StateUpdateDialog extends StatelessWidget {
