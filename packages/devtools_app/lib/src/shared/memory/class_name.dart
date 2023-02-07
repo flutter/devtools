@@ -108,6 +108,8 @@ class HeapClassName {
 
   late final isRoot = className == 'Root' && library.isEmpty;
 
+  late final bool isNull = className == 'Null' && library == 'dart:core';
+
   /// Whether a class can hold a reference to an object
   /// without preventing garbage collection.
   late final bool isWeakEntry = _isWeakEntry(className, library);
