@@ -17,13 +17,12 @@ class CpuBottomUpTable extends StatelessWidget {
     Key? key,
     required bool displayTreeGuidelines,
   }) {
-    final treeColumn = MethodNameColumn();
+    final treeColumn = MethodAndSourceColumn();
     final startingSortColumn = SelfTimeColumn(titleTooltip: selfTimeTooltip);
     final columns = List<ColumnData<CpuStackFrame>>.unmodifiable([
       TotalTimeColumn(titleTooltip: totalTimeTooltip),
       startingSortColumn,
       treeColumn,
-      SourceColumn(),
     ]);
     return CpuBottomUpTable._(
       key,

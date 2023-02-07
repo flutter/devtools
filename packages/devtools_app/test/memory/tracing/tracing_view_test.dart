@@ -9,23 +9,19 @@ import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/memory/memory_tabs.dart';
 import 'package:devtools_app/src/screens/memory/panes/tracing/tracing_pane_controller.dart';
 import 'package:devtools_app/src/screens/memory/panes/tracing/tracing_tree.dart';
-import 'package:devtools_app/src/screens/memory/panes/tracing/tracing_view.dart';
-import 'package:devtools_app/src/shared/config_specific/import_export/import_export.dart';
-import 'package:devtools_shared/devtools_shared.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../test_infra/test_data/memory_allocation.dart';
+import '../../test_infra/scenes/memory/default.dart';
+import '../../test_infra/utils/test_utils.dart';
 
 // TODO(bkonyi): add tests for multi-isolate support.
 // See https://github.com/flutter/devtools/issues/4537.
 
 void main() {
-  late FakeServiceManager fakeServiceManager;
-
   final classList = ClassList(
     classes: [
       ClassRef(id: 'cls/1', name: 'ClassA'),
@@ -34,39 +30,6 @@ void main() {
       ClassRef(id: 'cls/4', name: 'Foo'),
     ],
   );
-
-  void _setUpServiceManager() {
-    // Load canned data testHeapSampleData.
-    final allocationJson =
-        AllocationMemoryJson.decode(argJsonString: testAllocationData);
-
-    fakeServiceManager = FakeServiceManager(
-      service: FakeServiceManager.createFakeService(
-        allocationData: allocationJson,
-        classList: classList,
-      ),
-    );
-    mockConnectedApp(
-      fakeServiceManager.connectedApp!,
-      isFlutterApp: true,
-      isProfileBuild: false,
-      isWebApp: false,
-    );
-    setGlobal(ServiceConnectionManager, fakeServiceManager);
-  }
-
-  Future<void> pumpMemoryScreen(WidgetTester tester) async {
-    await tester.pumpWidget(
-      wrapWithControllers(
-        const MemoryBody(),
-        memory: MemoryController(),
-      ),
-    );
-
-    // Delay to ensure the memory profiler has collected data.
-    await tester.pumpAndSettle(const Duration(seconds: 1));
-    expect(find.byType(MemoryBody), findsOneWidget);
-  }
 
   /// Clears the class filter text field.
   Future<void> clearFilter(
@@ -88,50 +51,64 @@ void main() {
   const windowSize = Size(2225.0, 1000.0);
 
   group('Allocation Tracing', () {
+    late MemoryDefaultScene scene;
+
     late final CpuSamples allocationTracingProfile;
 
-    setUpAll(() {
+    Future<void> pumpScene(WidgetTester tester) async {
+      await tester.pumpWidget(scene.build());
+      // Delay to ensure the memory profiler has collected data.
+      await tester.pumpAndSettle(const Duration(seconds: 1));
+      expect(find.byType(MemoryBody), findsOneWidget);
+      await tester.tap(
+        find.byKey(MemoryScreenKeys.dartHeapAllocationTracingTab),
+      );
+      await tester.pumpAndSettle();
+    }
+
+    setUpAll(() async {
       final rawProfile = File(
         'test/test_infra/test_data/memory/allocation_tracing/allocation_trace.json',
       ).readAsStringSync();
       allocationTracingProfile = CpuSamples.parse(jsonDecode(rawProfile))!;
     });
 
-    setUp(() {
-      setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
-      setGlobal(NotificationService, NotificationService());
-      setGlobal(OfflineModeController, OfflineModeController());
-      setGlobal(IdeTheme, IdeTheme());
-      setGlobal(PreferencesController, PreferencesController());
+    setUp(() async {
+      setCharacterWidthForTables();
+
+      scene = MemoryDefaultScene();
+      await scene.setUp(classList: classList);
+      mockConnectedApp(
+        scene.fakeServiceManager.connectedApp!,
+        isFlutterApp: true,
+        isProfileBuild: false,
+        isWebApp: false,
+      );
+
       final mockScriptManager = MockScriptManager();
       when(mockScriptManager.sortedScripts).thenReturn(
         ValueNotifier<List<ScriptRef>>([]),
       );
+      when(mockScriptManager.scriptRefForUri(any)).thenReturn(
+        ScriptRef(
+          uri: 'package:test/script.dart',
+          id: 'script.dart',
+        ),
+      );
       setGlobal(ScriptManager, mockScriptManager);
-      _setUpServiceManager();
     });
 
-    Future<TracingPaneController> navigateToAllocationTracing(
-      WidgetTester tester,
-    ) async {
-      await tester.tap(
-        find.byKey(MemoryScreenKeys.dartHeapAllocationTracingTab),
-      );
-      await tester.pumpAndSettle();
-
-      final view = find.byType(TracingPane).first;
-      final state = tester.state<TracingPaneState>(view);
-
-      return state.widget.controller;
-    }
+    tearDown(() async {
+      scene.tearDown();
+    });
 
     testWidgetsWithWindowSize(
       'basic tracing flow',
       windowSize,
       (WidgetTester tester) async {
-        await pumpMemoryScreen(tester);
+        await pumpScene(tester);
 
-        final controller = await navigateToAllocationTracing(tester);
+        final controller = scene.controller.controllers.tracing;
         final state = controller.stateForIsolate.value;
         expect(state.filteredClassList.value.isNotEmpty, isTrue);
         expect(controller.initializing.value, isFalse);
@@ -208,7 +185,6 @@ void main() {
         expect(find.text('Inclusive'), findsOneWidget);
         expect(find.text('Exclusive'), findsOneWidget);
         expect(find.text('Method'), findsOneWidget);
-        expect(find.text('Source'), findsOneWidget);
 
         final bottomUpRoots =
             state.selectedTracedClassAllocationData!.bottomUpRoots;
@@ -294,9 +270,9 @@ void main() {
       'clear state',
       windowSize,
       (WidgetTester tester) async {
-        await pumpMemoryScreen(tester);
+        await pumpScene(tester);
 
-        final controller = await navigateToAllocationTracing(tester);
+        final controller = scene.controller.controllers.tracing;
         final state = controller.stateForIsolate.value;
         expect(state.filteredClassList.value.isNotEmpty, isTrue);
         expect(controller.initializing.value, isFalse);
@@ -364,10 +340,8 @@ void main() {
           findsOneWidget,
         );
 
-        final clearButtons = find.byType(ClearButton);
-        expect(clearButtons, findsNWidgets(2));
-
-        final clearButton = clearButtons.last;
+        final clearButton = find.byType(ClearButton);
+        expect(clearButton, findsOneWidget);
         await tester.tap(clearButton);
         await tester.pumpAndSettle();
 
@@ -399,9 +373,9 @@ void main() {
 
     group('filtering', () {
       testWidgetsWithWindowSize('simple', windowSize, (tester) async {
-        await pumpMemoryScreen(tester);
+        await pumpScene(tester);
 
-        final controller = await navigateToAllocationTracing(tester);
+        final controller = scene.controller.controllers.tracing;
         final state = controller.stateForIsolate.value;
 
         final filterTextField = find.byType(DevToolsClearableTextField);
@@ -426,9 +400,9 @@ void main() {
         'persisted tracing state',
         windowSize,
         (tester) async {
-          await pumpMemoryScreen(tester);
+          await pumpScene(tester);
 
-          final controller = await navigateToAllocationTracing(tester);
+          final controller = scene.controller.controllers.tracing;
           final state = controller.stateForIsolate.value;
 
           final checkboxes = find.byType(Checkbox);
@@ -467,9 +441,9 @@ void main() {
         'persisted selection state',
         windowSize,
         (tester) async {
-          await pumpMemoryScreen(tester);
+          await pumpScene(tester);
 
-          final controller = await navigateToAllocationTracing(tester);
+          final controller = scene.controller.controllers.tracing;
           final state = controller.stateForIsolate.value;
 
           expect(state.selectedTracedClass.value, isNull);
