@@ -30,7 +30,7 @@ List<Widget> dialogSubHeader(ThemeData theme, String titleText) {
 
 final dialogTextFieldDecoration = InputDecoration(
   border: OutlineInputBorder(
-    borderRadius: BorderRadius.circular(10.0),
+    borderRadius: BorderRadius.circular(defaultBorderRadius),
   ),
 );
 
