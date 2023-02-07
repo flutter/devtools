@@ -186,6 +186,7 @@ const densePadding = 4.0;
 const noPadding = 0.0;
 
 double get smallProgressSize => scaleByFontFactor(12.0);
+double get mediumProgressSize => scaleByFontFactor(24.0);
 
 double get defaultListItemHeight => scaleByFontFactor(28.0);
 
@@ -417,9 +418,6 @@ extension ThemeDataExtension on ThemeData {
 
   TextStyle get subtleFixedFontStyle =>
       fixedFontStyle.copyWith(color: unselectedWidgetColor);
-
-  TextStyle get selectedFixedFontStyle =>
-      fixedFontStyle.copyWith(color: colorScheme.devtoolsSelectedLink);
 
   TextStyle get toolTipFixedFontStyle => fixedFontStyle.copyWith(
         color: colorScheme.tooltipTextColor,
