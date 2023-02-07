@@ -18,7 +18,7 @@ class MemorySettingDialogKeys {
 }
 
 class MemorySettingsDialog extends StatelessWidget {
-  MemorySettingsDialog(this.controller);
+  const MemorySettingsDialog(this.controller);
 
   final MemoryController controller;
 
@@ -58,7 +58,8 @@ class MemorySettingsDialog extends StatelessWidget {
                     inputFormatters: <TextInputFormatter>[
                       // Only positive integers.
                       FilteringTextInputFormatter.allow(
-                          RegExp(r'^[1-9][0-9]*')),
+                        RegExp(r'^[1-9][0-9]*'),
+                      ),
                     ],
                     onChanged: (String text) {
                       final newValue = int.parse(text);
