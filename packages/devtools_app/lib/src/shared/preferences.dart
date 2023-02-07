@@ -324,7 +324,8 @@ class MemoryPreferencesController extends DisposableController
 
   /// Number of references to request from vm service,
   /// when browsing references in console.
-  final refLimit = ValueNotifier<int>(100);
+  final refLimit = ValueNotifier<int>(_defaultRefLimit);
+  static const _defaultRefLimit = 100;
   static const _refLimitStorageId = 'memory.refLimit';
 
   Future<void> init() async {
@@ -379,7 +380,8 @@ class MemoryPreferencesController extends DisposableController
       },
     );
     refLimit.value =
-        int.tryParse(await storage.getValue(_refLimitStorageId) ?? '') ?? 100;
+        int.tryParse(await storage.getValue(_refLimitStorageId) ?? '') ??
+            _defaultRefLimit;
   }
 }
 
