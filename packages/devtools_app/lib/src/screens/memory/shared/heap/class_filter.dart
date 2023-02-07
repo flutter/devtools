@@ -35,7 +35,7 @@ class ClassFilter {
 
   ClassFilter.empty()
       : this(
-          filterType: ClassFilterType.showAll,
+          filterType: ClassFilterType.except,
           except: '${ClassType.runtime.alias}\n${ClassType.sdk.alias}',
           only: null,
         );
