@@ -64,7 +64,6 @@ class DartIOHttpRequestData extends NetworkRequest {
   bool isFetchingFullData = false;
 
   Future<void> getFullRequestData() async {
-    print('${_request.id} START: getFullRequestData');
     try {
       // TODO: test theis already fetching shortcircuit
       if (isFetchingFullData) return; // We are already fetching
@@ -73,7 +72,6 @@ class DartIOHttpRequestData extends NetworkRequest {
         _request.isolateId,
         _request.id,
       );
-      print('${_request.id} END: getFullRequestData');
       _request = updated;
       updateCount.value++;
       final fullRequest = _request as HttpProfileRequest;
