@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../shared/analytics/constants.dart';
 import '../../../../shared/common_widgets.dart';
+import '../../../../shared/globals.dart';
 import '../../../../shared/primitives/utils.dart';
 
 abstract class ClassSampler {
@@ -62,6 +63,7 @@ class _StoreAsVariableMenu extends StatelessWidget {
   Widget build(BuildContext context) {
     final enabled = sampleObtainer.isEvalEnabled;
     const menuText = 'Store as a console variable';
+    final limit = preferences.memory.refLimit.value;
 
     if (!enabled) {
       return const MenuItemButton(child: Text(menuText));
@@ -71,13 +73,17 @@ class _StoreAsVariableMenu extends StatelessWidget {
       menuChildren: <Widget>[
         MenuItemButton(
           onPressed: enabled ? sampleObtainer.oneVariableToConsole : null,
-          child: const Text('One instance'),
+          child: const Text(
+            'One instance from snapshot, currently alive in application',
+          ),
         ),
-        const MenuItemButton(
-          child: Text('First 20 instances'),
+        MenuItemButton(
+          child: Text('Up to $limit instances currently alive in application'),
         ),
-        const MenuItemButton(
-          child: Text('All instances'),
+        MenuItemButton(
+          child: Text(
+            'Up to $limit instances from snapshot, currently alive in application',
+          ),
         ),
       ],
       child: const Text(menuText),
