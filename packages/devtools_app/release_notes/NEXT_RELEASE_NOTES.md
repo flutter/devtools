@@ -26,7 +26,7 @@ TODO: Remove this section if there are not any general updates.
 * Added support for browser navigation history when navigating using the `File Explorer` [#4906](https://github.com/flutter/devtools/pull/4906).
 
 ## Network profiler updates
-TODO: Remove this section if there are not any general updates.
+* Improve reliability and performance of the Network tab - [#5056](https://github.com/flutter/devtools/pull/5056)
 
 ## Logging updates
 TODO: Remove this section if there are not any general updates.
