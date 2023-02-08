@@ -134,7 +134,9 @@ Future<void> addChildReferences(
 
       if (refs.length > limit)
         variable.addChild(
-          DartObjectNode.text('...\nConfigure number of items in settings'),
+          DartObjectNode.text(
+            '...\nConfigure number of items in memory screen settings',
+          ),
         );
 
       break;
