@@ -71,12 +71,3 @@ jobs:
       env:
         COMMIT_MESSAGE: ${{ steps.version-bump.outputs.COMMIT_MESSAGE }}
         GH_TOKEN: ${{ secrets.DEVTOOLS_WORKFLOW_BOT_TOKEN }}
-
-    - name: Clean up branches
-      if: ${{ github.event_name == 'pull_request' && github.event.action == 'closed'  && github.event.pull_request.user.login == 'DartDevtoolWorkflowBot'}}
-      run: |
-        # Only grab the suffixes of the branch names to make the delete operation a bit safer
-        BRANCH_SUFFIXES=$(gh pr list -A DartDevtoolWorkflowBot -s closed -L 5 --search sort:created-desc | grep auto-bump- | sed 's|.*auto-bump-\([[:digit:]]*\).*|\1|' )
-        
-        echo $BRANCH_SUFFIXES | xargs -I {}  gh api  /repos/flutter/devtools/git/refs/heads/auto-bump-{} -X DELETE
-
