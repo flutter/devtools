@@ -194,6 +194,8 @@ class MemoryEvent {
 
   static const diffSnapshotFilterType = 'diffSnapshotFilterType';
   static const diffSnapshotFilterReset = 'diffSnapshotFilterReset';
+
+  static const browseRefLimit = 'browseRefLimit';
 }
 
 /// Areas of memory screen, to prefix event names, when events are emitted

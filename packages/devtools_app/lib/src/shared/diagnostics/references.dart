@@ -132,7 +132,10 @@ Future<void> addChildReferences(
         variable.addChild(DartObjectNode.text(jsonEncode(item.toJson())));
       }
 
-      if (refs.length > limit) variable.addChild(DartObjectNode.text('...'));
+      if (refs.length > limit)
+        variable.addChild(
+          DartObjectNode.text('...\nConfigure number of items in settings'),
+        );
 
       break;
     case RefNodeType.liveOutRefs:

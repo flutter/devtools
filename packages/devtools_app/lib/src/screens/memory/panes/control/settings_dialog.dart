@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../../../../shared/common_widgets.dart';
 import '../../../../shared/dialogs.dart';
@@ -23,6 +24,7 @@ class MemorySettingsDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return DevToolsDialog(
       title: const DialogTitleText('Memory Settings'),
       includeDivider: false,
@@ -37,6 +39,49 @@ class MemorySettingsDialog extends StatelessWidget {
               title:
                   'Show Android memory chart in addition to Dart memory chart',
               checkboxKey: MemorySettingDialogKeys.showAndroidChartCheckBox,
+            ),
+            const SizedBox(height: defaultSpacing),
+            Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Limit for number of listed items in console.',
+                        style: theme.regularTextStyle,
+                      ),
+                      Text(
+                        'Number of listed items may be less in case of filtering. '
+                        'For example, when the screen '
+                        'first requests live items from application and then '
+                        'shows only items presented in heap snapshot.',
+                        style: theme.subtleTextStyle,
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: defaultSpacing),
+                SizedBox(
+                  width: defaultTextFieldNumberWidth,
+                  child: TextField(
+                    decoration: dialogTextFieldDecoration,
+                    controller: TextEditingController(
+                      text: preferences.memory.refLimit.value.toString(),
+                    ),
+                    inputFormatters: <TextInputFormatter>[
+                      // Only positive integers.
+                      FilteringTextInputFormatter.allow(
+                        RegExp(r'^[1-9][0-9]*'),
+                      ),
+                    ],
+                    onChanged: (String text) {
+                      final newValue = int.parse(text);
+                      preferences.memory.refLimit.value = newValue;
+                    },
+                  ),
+                ),
+              ],
             ),
           ],
         ),
