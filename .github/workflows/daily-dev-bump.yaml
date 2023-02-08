@@ -1,4 +1,4 @@
-name: Daily Dev Bump
+name: Bump Dev Version 
 on:
   workflow_dispatch: # Allows for manual triggering if needed
   pull_request: # TODO: Delete this trigger before merging
@@ -61,9 +61,10 @@ jobs:
       run: |
         BRANCH_NAME="auto-bump-$(date +%s)"
         # Stage the file, commit and push
+        git remote add bot_origin git@github.com:DartDevtoolWorkflowBot/devtools.git
         git checkout -b "$BRANCH_NAME"
         git commit -a -m "$COMMIT_MESSAGE"
-        git push -u origin "$BRANCH_NAME"
+        git push -u bot_origin "$BRANCH_NAME"
 
         gh pr create --title "$COMMIT_MESSAGE" --body "RELEASE_NOTE_EXCEPTION=Automated Version Bump" --label "autosubmit"
 

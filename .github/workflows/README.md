@@ -35,4 +35,11 @@ DartDevtoolWorkflowBot is a Github account that is used to author the version bu
 DartDevtoolWorkflowBot's Personal Access Token must be cycled every 90 days.
 The instructions to rotate the token can be found in the email for the Dart DevTool Workflow Token rotation.
 
+## Manually Performing a Dev Version Bump
+
+To manually trigger a Dev Version Bump:
+- Navigate to the [Action entry for Dev Bumps](https://github.com/flutter/devtools/actions/workflows/daily-dev-bump.yaml)
+- Select `Run workflow`
+- Run the workflow from `master`
+
 
