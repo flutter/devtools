@@ -182,5 +182,77 @@ void main() {
         false,
       );
     });
+
+    testWidgets('keeps track of history', (tester) async {
+      WidgetsFlutterBinding.ensureInitialized();
+      expect(controller.count, 0);
+      expect(routerDelegate.currentConfigurationIndex, -1);
+
+      routerDelegate.navigate(page, null, originalState);
+      expect(routerDelegate.currentConfigurationIndex, 0);
+      expect(controller.count, 1);
+
+      routerDelegate.navigate('Page2', {'foo': 'bar'});
+      expect(routerDelegate.currentConfigurationIndex, 1);
+      final page2Config = routerDelegate.currentConfiguration!;
+      final page2Index = routerDelegate.currentConfigurationIndex;
+
+      routerDelegate.navigate('Page3', null, originalState);
+      expect(routerDelegate.currentConfigurationIndex, 2);
+      final page3Config = routerDelegate.currentConfiguration!;
+      final page3Index = routerDelegate.currentConfigurationIndex;
+
+      // Simulate the system navigator handling a back event. This should bring
+      // us back to Page2.
+      await routerDelegate.setNewRoutePath(page2Config);
+      expect(routerDelegate.currentConfigurationIndex, page2Index);
+      expect(routerDelegate.routes.length, 3);
+
+      // Simulate the system navigator handling a forward event, bringing us
+      // back to Page3.
+      await routerDelegate.setNewRoutePath(page3Config);
+      expect(routerDelegate.currentConfigurationIndex, page3Index);
+      expect(routerDelegate.routes.length, 3);
+
+      // Go back to Page2 in preparation for navigating to Page4, replacing the
+      // entry for Page3 in the router's history.
+      await routerDelegate.setNewRoutePath(page2Config);
+      expect(routerDelegate.currentConfigurationIndex, page2Index);
+      expect(routerDelegate.routes.length, 3);
+
+      // Navigate to Page4, which will remove Page3 from the router's history.
+      routerDelegate.navigate('Page4');
+      expect(routerDelegate.currentConfigurationIndex, 2);
+      expect(routerDelegate.routes.length, 3);
+
+      // Navigate again to Page4, which should not change the router state.
+      routerDelegate.navigateIfNotCurrent('Page4');
+      expect(routerDelegate.currentConfigurationIndex, 2);
+      expect(routerDelegate.routes.length, 3);
+
+      // Update args for Page4, which should result in a new entry in the
+      // history.
+      routerDelegate.updateArgsIfChanged({'baz': 'bar'});
+      expect(routerDelegate.currentConfigurationIndex, 3);
+      expect(routerDelegate.routes.length, 4);
+      final page4WithArgsIndex = routerDelegate.currentConfigurationIndex;
+      final page4WithArgsConfig = routerDelegate.currentConfiguration!;
+
+      // Update state for Page4, which should result in a new entry in the
+      // history.
+      routerDelegate.updateStateIfChanged(
+        DevToolsNavigationState(
+          kind: 'foo',
+          state: {},
+        ),
+      );
+      expect(routerDelegate.currentConfigurationIndex, 4);
+      expect(routerDelegate.routes.length, 5);
+
+      // Navigate back to Page4 with arguments.
+      await routerDelegate.setNewRoutePath(page4WithArgsConfig);
+      expect(routerDelegate.currentConfigurationIndex, page4WithArgsIndex);
+      expect(routerDelegate.routes.length, 5);
+    });
   });
 }

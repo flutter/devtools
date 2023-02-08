@@ -2,12 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+import 'dart:convert';
+
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../../shared/globals.dart';
 import '../../../shared/primitives/auto_dispose.dart';
+import '../../../shared/routing.dart';
 import '../../debugger/codeview_controller.dart';
 import '../../debugger/program_explorer_controller.dart';
 import 'class_hierarchy_explorer_controller.dart';
@@ -18,16 +23,11 @@ import 'vm_object_model.dart';
 /// Stores the state information for the object inspector view related to
 /// the object history and the object viewport.
 class ObjectInspectorViewController extends DisposableController
-    with AutoDisposeControllerMixin {
+    with AutoDisposeControllerMixin, RouteStateHandlerMixin {
   ObjectInspectorViewController({
     ClassHierarchyExplorerController? classHierarchyController,
   }) : classHierarchyController =
             classHierarchyController ?? ClassHierarchyExplorerController() {
-    addAutoDisposeListener(
-      scriptManager.sortedScripts,
-      _initializeForCurrentIsolate,
-    );
-
     addAutoDisposeListener(
       objectHistory.current,
       _onCurrentObjectChanged,
@@ -50,13 +50,44 @@ class ObjectInspectorViewController extends DisposableController
 
   bool _initialized = false;
 
-  void init() {
+  void init(BuildContext context) {
     if (!_initialized) {
       programExplorerController
         ..initialize()
         ..initListeners();
-      _initializeForCurrentIsolate();
+      initializeForCurrentIsolate(context);
       _initialized = true;
+    }
+  }
+
+  @override
+  void onRouteStateUpdate(DevToolsNavigationState state) {
+    switch (state.kind) {
+      case ObjectInspectorNavigationState.type:
+        _handleNavigationEvent(state);
+        break;
+    }
+  }
+
+  void _handleNavigationEvent(DevToolsNavigationState state) async {
+    final processedState = ObjectInspectorNavigationState._fromState(state);
+    final objRef = processedState.object;
+    final scriptRef = processedState.script;
+    final next = objectHistory.peekNext();
+    if (next != null && next.obj.id == objRef.id) {
+      objectHistory.moveForward();
+      return;
+    }
+
+    final previous = objectHistory.peekPrevious();
+    if (previous != null && previous.obj.id == objRef.id) {
+      objectHistory.moveBack();
+      return;
+    }
+
+    final object = await createVmObject(objRef, scriptRef: scriptRef);
+    if (object != null) {
+      objectHistory.pushEntry(object);
     }
   }
 
@@ -116,13 +147,25 @@ class ObjectInspectorViewController extends DisposableController
     _refreshing.value = false;
   }
 
-  Future<void> pushObject(ObjRef objRef, {ScriptRef? scriptRef}) async {
+  Future<void> pushObject(
+    BuildContext context,
+    ObjRef objRef, {
+    ScriptRef? scriptRef,
+  }) async {
     _refreshing.value = true;
 
-    final object = await createVmObject(objRef, scriptRef: scriptRef);
-    if (object != null) {
-      objectHistory.pushEntry(object);
-    }
+    Router.navigate(context, () async {
+      final object = await createVmObject(objRef, scriptRef: scriptRef);
+      if (object != null) {
+        objectHistory.pushEntry(object);
+        routerDelegate?.updateStateIfChanged(
+          ObjectInspectorNavigationState(
+            object: objRef,
+            script: scriptRef,
+          ),
+        );
+      }
+    });
 
     _refreshing.value = false;
   }
@@ -174,7 +217,7 @@ class ObjectInspectorViewController extends DisposableController
 
   /// Re-initializes the object inspector's state when building it for the
   /// first time or when the selected isolate is updated.
-  void _initializeForCurrentIsolate() async {
+  void initializeForCurrentIsolate(BuildContext context) async {
     objectHistory.clear();
     await objectStoreController.refresh();
     await classHierarchyController.refresh();
@@ -198,15 +241,18 @@ class ObjectInspectorViewController extends DisposableController
       if (parts.isEmpty) {
         for (final lib in libraries) {
           if (lib.uri == mainScriptRef.uri) {
-            return await pushObject(lib, scriptRef: mainScriptRef);
+            return await pushObject(context, lib, scriptRef: mainScriptRef);
           }
         }
       }
-      await pushObject(mainScriptRef, scriptRef: mainScriptRef);
+      await pushObject(context, mainScriptRef, scriptRef: mainScriptRef);
     }
   }
 
-  Future<void> findAndSelectNodeForObject(ObjRef obj) async {
+  Future<void> findAndSelectNodeForObject(
+    BuildContext context,
+    ObjRef obj,
+  ) async {
     codeViewController.clearState();
     ScriptRef? script;
     try {
@@ -217,6 +263,55 @@ class ObjectInspectorViewController extends DisposableController
       // the object store.
       programExplorerController.clearSelection();
     }
-    await pushObject(obj, scriptRef: script);
+    await pushObject(context, obj, scriptRef: script);
+  }
+}
+
+/// State used to inform [CodeViewController]s listening for
+/// [DevToolsNavigationState] changes to display a specific source location.
+class ObjectInspectorNavigationState extends DevToolsNavigationState {
+  ObjectInspectorNavigationState({
+    required ObjRef object,
+    ScriptRef? script,
+  }) : super(
+          kind: type,
+          state: <String, String?>{
+            _kObject: json.encode(object.json),
+            _kScript: json.encode(script?.json),
+          },
+        );
+
+  ObjectInspectorNavigationState._fromState(
+    DevToolsNavigationState state,
+  ) : super(
+          kind: type,
+          state: state.state,
+        );
+
+  static ObjectInspectorNavigationState? fromState(
+    DevToolsNavigationState? state,
+  ) {
+    if (state?.kind != type) return null;
+    return ObjectInspectorNavigationState._fromState(state!);
+  }
+
+  static const _kObject = 'object';
+  static const _kScript = 'script';
+  static const type = 'objectInspectorNavigationState';
+
+  ObjRef get object {
+    final obj = state[_kObject];
+    return createServiceObject(json.decode(obj!), const []) as ObjRef;
+  }
+
+  ScriptRef? get script {
+    final script = state[_kScript];
+    return createServiceObject(json.decode(script ?? '{}'), const [])
+        as ScriptRef;
+  }
+
+  @override
+  String toString() {
+    return 'kind: $kind object: ${object.id} script: ${script?.id}';
   }
 }

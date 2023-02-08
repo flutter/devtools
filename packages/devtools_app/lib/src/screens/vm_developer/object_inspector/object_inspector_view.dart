@@ -8,6 +8,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../shared/analytics/constants.dart' as gac;
+import '../../../shared/globals.dart';
+import '../../../shared/primitives/auto_dispose.dart';
 import '../../../shared/split.dart';
 import '../../../shared/ui/tab.dart';
 import '../../debugger/program_explorer.dart';
@@ -43,8 +45,18 @@ class _ObjectInspectorView extends StatefulWidget {
 }
 
 class _ObjectInspectorViewState extends State<_ObjectInspectorView>
-    with TickerProviderStateMixin {
+    with TickerProviderStateMixin, AutoDisposeMixin {
   late ObjectInspectorViewController controller;
+
+  @override
+  void initState() {
+    super.initState();
+
+    addAutoDisposeListener(
+      scriptManager.sortedScripts,
+      () => controller.initializeForCurrentIsolate(context),
+    );
+  }
 
   @override
   void didChangeDependencies() {
@@ -52,7 +64,7 @@ class _ObjectInspectorViewState extends State<_ObjectInspectorView>
     final vmDeveloperToolsController =
         Provider.of<VMDeveloperToolsController>(context);
     controller = vmDeveloperToolsController.objectInspectorViewController
-      ..init();
+      ..init(context);
   }
 
   @override
@@ -85,7 +97,9 @@ class _ObjectInspectorViewState extends State<_ObjectInspectorView>
             ),
             ObjectStoreViewer(
               controller: controller.objectStoreController,
-              onLinkTapped: controller.findAndSelectNodeForObject,
+              onLinkTapped: (objRef) => unawaited(
+                controller.findAndSelectNodeForObject(context, objRef),
+              ),
             ),
             ClassHierarchyExplorer(
               controller: controller,
@@ -104,7 +118,13 @@ class _ObjectInspectorViewState extends State<_ObjectInspectorView>
     final location = node.location;
     if (objRef != null &&
         objRef != controller.objectHistory.current.value?.ref) {
-      unawaited(controller.pushObject(objRef, scriptRef: location?.scriptRef));
+      unawaited(
+        controller.pushObject(
+          context,
+          objRef,
+          scriptRef: location?.scriptRef,
+        ),
+      );
     }
   }
 }

@@ -208,7 +208,7 @@ class DisplayProvider extends StatelessWidget {
             },
             onTap: (object) async {
               if (object is ObjRef) {
-                await controller.findAndSelectNodeForObject(object);
+                await controller.findAndSelectNodeForObject(context, object);
               }
             },
           )

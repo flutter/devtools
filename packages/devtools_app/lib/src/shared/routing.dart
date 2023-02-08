@@ -28,6 +28,22 @@ class DevToolsRouteConfiguration {
   final String page;
   final Map<String, String?> args;
   final DevToolsNavigationState? state;
+
+  @override
+  bool operator ==(Object other) {
+    return other is DevToolsRouteConfiguration &&
+        page == other.page &&
+        mapEquals(args, other.args) &&
+        state == other.state;
+  }
+
+  @override
+  int get hashCode => Object.hash(page, args, state);
+
+  @override
+  String toString() {
+    return 'page: $page args: $args state: ${state?._state.entries}';
+  }
 }
 
 /// Converts between structured [DevToolsRouteConfiguration] (our internal data
@@ -122,14 +138,16 @@ class DevToolsRouterDelegate extends RouterDelegate<DevToolsRouteConfiguration>
   ) _getPage;
 
   /// A list of any routes/pages on the stack.
-  ///
-  /// This will usually only contain a single item (it's the visible stack,
-  /// not the history).
-  final routes = ListQueue<DevToolsRouteConfiguration>();
+  ListQueue<DevToolsRouteConfiguration> get routes => _routes;
+  var _routes = ListQueue<DevToolsRouteConfiguration>();
+
+  /// The index of the current route configuration in [routes].
+  int get currentConfigurationIndex => _currentConfigurationIndex;
+  int _currentConfigurationIndex = -1;
 
   @override
   DevToolsRouteConfiguration? get currentConfiguration =>
-      routes.isEmpty ? null : routes.last;
+      _routes.isEmpty ? null : _routes.elementAt(_currentConfigurationIndex);
 
   @override
   Widget build(BuildContext context) {
@@ -142,11 +160,11 @@ class DevToolsRouterDelegate extends RouterDelegate<DevToolsRouteConfiguration>
       key: navigatorKey,
       pages: [_getPage(context, page, args, state)],
       onPopPage: (_, __) {
-        if (routes.length <= 1) {
+        if (_routes.length <= 1) {
           return false;
         }
 
-        routes.removeLast();
+        _routes.removeLast();
         notifyListeners();
         return true;
       },
@@ -211,15 +229,50 @@ class DevToolsRouterDelegate extends RouterDelegate<DevToolsRouteConfiguration>
   }
 
   /// Replaces the navigation stack with a new route.
+  ///
+  /// If the navigation stack is non-empty, the stack of routes will be
+  /// truncated after the current route configuration and the new configuration
+  /// will be pushed on to the resulting stack.
+  ///
+  /// This method should be called when forward history should be discarded as
+  /// a result of navigation.
   void _replaceStack(DevToolsRouteConfiguration configuration) {
-    routes
-      ..clear()
-      ..add(configuration);
+    if (_routes.isNotEmpty) {
+      _routes = ListQueue.of(
+          _routes.toList().sublist(0, _currentConfigurationIndex + 1));
+      _routes.add(configuration);
+      _currentConfigurationIndex = _routes.length - 1;
+    } else {
+      _routes.add(configuration);
+      _currentConfigurationIndex = 0;
+    }
+  }
+
+  /// Pushes a new route onto the router's history stack.
+  void _pushStack(DevToolsRouteConfiguration configuration) {
+    _routes.add(configuration);
+    _currentConfigurationIndex++;
   }
 
   @override
   Future<void> setNewRoutePath(DevToolsRouteConfiguration configuration) {
-    _replaceStack(configuration);
+    // Move back in the history.
+    if (_routes.isNotEmpty &&
+        _currentConfigurationIndex > 0 &&
+        _routes.elementAt(_currentConfigurationIndex - 1) == configuration) {
+      _currentConfigurationIndex--;
+    }
+    // Move forward in the history.
+    else if (_routes.isNotEmpty &&
+        _currentConfigurationIndex < _routes.length - 1 &&
+        _routes.elementAt(_currentConfigurationIndex + 1) == configuration) {
+      _currentConfigurationIndex++;
+    }
+    // Otherwise, this is a new route. Add the new route to the end of
+    // the history stack.
+    else {
+      _pushStack(configuration);
+    }
     notifyListeners();
     return SynchronousFuture<void>(null);
   }
@@ -237,7 +290,7 @@ class DevToolsRouterDelegate extends RouterDelegate<DevToolsRouteConfiguration>
     final currentConfig = currentConfiguration!;
     final currentPage = currentConfig.page;
     final newArgs = {...currentConfig.args, ...argUpdates};
-    _replaceStack(
+    _pushStack(
       DevToolsRouteConfiguration(
         currentPage,
         newArgs,
@@ -281,7 +334,7 @@ class DevToolsRouterDelegate extends RouterDelegate<DevToolsRouteConfiguration>
     }
 
     final currentConfig = currentConfiguration!;
-    _replaceStack(
+    _pushStack(
       DevToolsRouteConfiguration(
         currentConfig.page,
         currentConfig.args,
@@ -357,6 +410,16 @@ class DevToolsNavigationState {
   }
 
   @override
+  bool operator ==(Object other) {
+    return other is DevToolsNavigationState &&
+        kind == other.kind &&
+        mapEquals(_state, other._state);
+  }
+
+  @override
+  int get hashCode => Object.hash(kind, _state);
+
+  @override
   String toString() => _state.toString();
 
   Map<String, dynamic> toJson() => _state;
@@ -365,25 +428,25 @@ class DevToolsNavigationState {
 /// Mixin that gives controllers the ability to respond to changes in router
 /// navigation state.
 mixin RouteStateHandlerMixin on DisposableController {
-  DevToolsRouterDelegate? _delegate;
+  DevToolsRouterDelegate? routerDelegate;
 
   @override
   void dispose() {
     super.dispose();
-    _delegate?.removeListener(_onRouteStateUpdate);
+    routerDelegate?.removeListener(_onRouteStateUpdate);
   }
 
   void subscribeToRouterEvents(DevToolsRouterDelegate delegate) {
-    final oldDelegate = _delegate;
+    final oldDelegate = routerDelegate;
     if (oldDelegate != null) {
       oldDelegate.removeListener(_onRouteStateUpdate);
     }
     delegate.addListener(_onRouteStateUpdate);
-    _delegate = delegate;
+    routerDelegate = delegate;
   }
 
   void _onRouteStateUpdate() {
-    final state = _delegate?.currentConfiguration?.state;
+    final state = routerDelegate?.currentConfiguration?.state;
     if (state == null) return;
     onRouteStateUpdate(state);
   }

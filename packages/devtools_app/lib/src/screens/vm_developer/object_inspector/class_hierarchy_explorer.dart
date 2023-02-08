@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -35,7 +37,9 @@ class ClassHierarchyExplorer extends StatelessWidget {
           controller.classHierarchyController.selectedIsolateClassHierarchy,
       dataDisplayProvider: (node, onPressed) => VmServiceObjectLink<Class>(
         object: node.cls,
-        onTap: controller.findAndSelectNodeForObject,
+        onTap: (cls) => unawaited(
+          controller.findAndSelectNodeForObject(context, cls),
+        ),
       ),
       onItemSelected: (_) => null,
       emptyTreeViewBuilder: () => const CenteredCircularProgressIndicator(),

@@ -624,7 +624,9 @@ List<DevToolsScreen> get defaultScreens {
     ),
     DevToolsScreen<VMDeveloperToolsController>(
       VMDeveloperToolsScreen(),
-      createController: (_) => VMDeveloperToolsController(),
+      createController: (routerDelegate) => VMDeveloperToolsController(
+        routerDelegate: routerDelegate,
+      ),
     ),
     // Show the sample DevTools screen.
     if (debugEnableSampleScreen && (kDebugMode || kProfileMode))

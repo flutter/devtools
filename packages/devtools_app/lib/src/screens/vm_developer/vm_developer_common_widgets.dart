@@ -96,7 +96,7 @@ MapEntry<String, WidgetBuilder>
       textBuilder: textBuilder,
       preferUri: preferUri,
       onTap: (object) async {
-        await controller.findAndSelectNodeForObject(object);
+        await controller.findAndSelectNodeForObject(context, object);
       },
     ),
   );
@@ -424,7 +424,7 @@ class RetainingPathWidget extends StatelessWidget {
   ) {
     final onTap = (ObjRef? obj) async {
       if (obj == null) return;
-      await controller.findAndSelectNodeForObject(obj);
+      await controller.findAndSelectNodeForObject(context, obj);
     };
     final theme = Theme.of(context);
     final emptyList = SelectableText(
