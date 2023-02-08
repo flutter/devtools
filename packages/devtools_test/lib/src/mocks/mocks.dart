@@ -154,23 +154,6 @@ class FakeConnectedApp extends Mock implements ConnectedApp {}
 class MockBannerMessagesController extends Mock
     implements BannerMessagesController {}
 
-class MockLoggingController extends Mock
-    with SearchControllerMixin<LogData>, FilterControllerMixin<LogData>
-    implements LoggingController {
-  @override
-  final selectedLog = ValueNotifier<LogData?>(null);
-
-  @override
-  List<LogData> matchesForSearch(
-    String search, {
-    bool searchPreviousMatches = false,
-  }) =>
-      [];
-
-  @override
-  List<LogData> data = <LogData>[];
-}
-
 class MockMemoryController extends Mock implements MemoryController {}
 
 class MockFlutterMemoryController extends Mock implements MemoryController {}

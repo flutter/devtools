@@ -9,7 +9,6 @@ import '../../../../../shared/globals.dart';
 import '../../../../../shared/memory/adapted_heap_data.dart';
 import '../../../../../shared/memory/class_name.dart';
 import '../../../shared/heap/heap.dart';
-import '../../../shared/heap/model.dart';
 import '../../../shared/primitives/instance_set_view.dart';
 
 class HeapClassSampler extends ClassSampler {
@@ -24,7 +23,6 @@ class HeapClassSampler extends ClassSampler {
   Future<List<ObjRef>> _instances() async {
     final isolateId = _mainIsolateRef.id!;
 
-    // TODO(polina-c): It would be great to find out how to avoid full scan of classes.
     final theClass = (await serviceManager.service!.getClassList(isolateId))
         .classes!
         .firstWhere((ref) => objects.heapClass.matches(ref));
@@ -32,14 +30,14 @@ class HeapClassSampler extends ClassSampler {
     final instances = await serviceManager.service!.getInstances(
       isolateId,
       theClass.id!,
-      1,
+      preferences.memory.refLimit.value,
     );
 
     return instances.instances ?? [];
   }
 
   @override
-  Future<void> oneVariableToConsole() async {
+  Future<void> oneLiveStaticToConsole() async {
     final instances = await _instances();
 
     final instanceRef = instances.firstWhereOrNull(
@@ -49,7 +47,9 @@ class HeapClassSampler extends ClassSampler {
     ) as InstanceRef?;
 
     if (instanceRef == null) {
-      serviceManager.consoleService.appendStdio('Unable to select instance.');
+      serviceManager.consoleService.appendStdio(
+          'Unable to select instance that exist in snapshot and still alive in application.\n'
+          'You may want to increase "${preferences.memory.refLimitTitle}" in memory settings.');
       return;
     }
 
@@ -82,17 +82,6 @@ class HeapClassSampler extends ClassSampler {
     //   scope: {'this': instance.id!},
     // );
     // print('!!!! eval with scope: ' + response2.json!['valueAsString']);
-  }
-
-  @override
-  Future<void> instanceGraphToConsole() async {
-    serviceManager.consoleService.appendInstanceGraph(
-      HeapObjectGraph(
-        heap,
-        objects.objects.objectsByCodes.keys.first,
-        objects.heapClass,
-      ),
-    );
   }
 
   @override
