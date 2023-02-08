@@ -1,7 +1,7 @@
 name: Bump Dev Version 
 on:
   workflow_dispatch: # Allows for manual triggering if needed
-  pull_request: # TODO: Delete this trigger before merging
+  pull_request:
     types: [closed]
   schedule:
     # * is a special character in YAML so you have to quote this string
@@ -31,7 +31,7 @@ jobs:
 
         # TODO(https://github.com/flutter/devtools/issues/4949):  Change the author to
         # a flutter owned account
-        git config user.name "Devtool Workflow Bot"
+        git config user.name "DevTools Workflow Bot"
         git config user.email "dart-devtool-workflow-bot@google.com"
 
     - name: Bump the Dev Version
@@ -97,6 +97,3 @@ jobs:
             gh api  /repos/flutter/devtools/git/refs/heads/$CLOSED_BRANCH -X DELETE
           fi
         done
-
-
-

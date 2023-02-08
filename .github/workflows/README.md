@@ -41,5 +41,3 @@ To manually trigger a Dev Version Bump:
 - Navigate to the [Action entry for Dev Bumps](https://github.com/flutter/devtools/actions/workflows/daily-dev-bump.yaml)
 - Select `Run workflow`
 - Run the workflow from `master`
-
-
