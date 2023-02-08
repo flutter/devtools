@@ -9,7 +9,6 @@ import '../../../../../shared/globals.dart';
 import '../../../../../shared/memory/adapted_heap_data.dart';
 import '../../../../../shared/memory/class_name.dart';
 import '../../../shared/heap/heap.dart';
-import '../../../shared/heap/model.dart';
 import '../../../shared/primitives/instance_set_view.dart';
 
 class HeapClassSampler extends ClassSampler {
@@ -83,17 +82,6 @@ class HeapClassSampler extends ClassSampler {
     //   scope: {'this': instance.id!},
     // );
     // print('!!!! eval with scope: ' + response2.json!['valueAsString']);
-  }
-
-  @override
-  Future<void> instanceGraphToConsole() async {
-    serviceManager.consoleService.appendInstanceGraph(
-      HeapObjectGraph(
-        heap,
-        objects.objects.objectsByCodes.keys.first,
-        objects.heapClass,
-      ),
-    );
   }
 
   @override

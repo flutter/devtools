@@ -15,8 +15,6 @@ abstract class ClassSampler {
   /// Drop one variable that exists in static set and still alive in app, to console.
   Future<void> oneLiveStaticToConsole();
 
-  void instanceGraphToConsole();
-
   bool get isEvalEnabled;
 }
 
