@@ -312,12 +312,21 @@ class InspectorPreferencesController extends DisposableController
 
 class MemoryPreferencesController extends DisposableController
     with AutoDisposeControllerMixin {
+  /// If true, android chart will be shown in addition to
+  /// dart chart.
   final androidCollectionEnabled = ValueNotifier<bool>(false);
   static const _androidCollectionEnabledStorageId =
       'memory.androidCollectionEnabled';
 
+  /// If false, mamory chart will be collapsed.
   final showChart = ValueNotifier<bool>(true);
   static const _showChartStorageId = 'memory.showChart';
+
+  /// Number of references to request from vm service,
+  /// when browsing references in console.
+  final refLimit = ValueNotifier<int>(_defaultRefLimit);
+  static const _defaultRefLimit = 100;
+  static const _refLimitStorageId = 'memory.refLimit';
 
   Future<void> init() async {
     addAutoDisposeListener(
@@ -355,6 +364,24 @@ class MemoryPreferencesController extends DisposableController
       },
     );
     showChart.value = await storage.getValue(_showChartStorageId) == 'true';
+
+    addAutoDisposeListener(
+      refLimit,
+      () {
+        storage.setValue(
+          _refLimitStorageId,
+          refLimit.value.toString(),
+        );
+
+        ga.select(
+          gac.memory,
+          gac.MemoryEvent.browseRefLimit,
+        );
+      },
+    );
+    refLimit.value =
+        int.tryParse(await storage.getValue(_refLimitStorageId) ?? '') ??
+            _defaultRefLimit;
   }
 }
 

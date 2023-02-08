@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '../../../../../devtools_app.dart';
 import '../../../../shared/memory/adapted_heap_data.dart';
 import '../../../../shared/memory/class_name.dart';
+import '../../../../shared/primitives/utils.dart';
 import 'class_filter.dart';
 import 'model.dart';
 import 'spanning_tree.dart';
