@@ -95,12 +95,12 @@ void main() {
         test,
       );
 
-      // await _switchFilter(
-      //   ClassFilterType.only,
-      //   ClassFilterType.showAll,
-      //   tester,
-      //   test,
-      // );
+      await _switchFilter(
+        ClassFilterType.only,
+        ClassFilterType.showAll,
+        tester,
+        test,
+      );
     });
   }
 
