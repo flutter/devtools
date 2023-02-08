@@ -2,8 +2,10 @@ name: Bump Dev Version
 on:
   workflow_dispatch: # Allows for manual triggering if needed
   pull_request: # TODO: Delete this trigger before merging
-    types: [labeled, unlabeled, closed]
-
+    types: [closed]
+  schedule:
+    # * is a special character in YAML so you have to quote this string
+    - cron: '0 0 * * *' # Run every day at midnight
 permissions:
   contents: write
   pull-requests: write
@@ -14,6 +16,7 @@ env:
 
 jobs:
   bump-dev-version:
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event_name == 'schedule' }}
     name: Bump Dev Version
     runs-on: ubuntu-latest
     steps:
@@ -67,7 +70,6 @@ jobs:
         git push -u origin "$BRANCH_NAME"
 
         PR_URL=$(gh pr create --title "$COMMIT_MESSAGE" --body "RELEASE_NOTE_EXCEPTION=Automated Version Bump")
-        echo $PR_URL
 
         # Change github credentials back to the actions bot.
         GH_TOKEN="$ORIGINAL_GH_TOKEN"
@@ -77,9 +79,13 @@ jobs:
         COMMIT_MESSAGE: ${{ steps.version-bump.outputs.COMMIT_MESSAGE }}
         GH_TOKEN: ${{ secrets.DEVTOOLS_WORKFLOW_BOT_TOKEN }}
         ORIGINAL_GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
+  clean-up-branches:
+    # If a pr is closed on a workflow bot PR, then clean up workflow bot branches.
+    if: ${{ github.event_name == 'pull_request' && github.event.action == 'closed'  && github.event.pull_request.user.login == 'DartDevtoolWorkflowBot'}}
+    name: Clean up Dev Bump Branches
+    runs-on: ubuntu-latest
+    steps:
     - name: Clean up branches
-      if: ${{ github.event_name == 'pull_request' && github.event.action == 'closed'  && github.event.pull_request.user.login == 'DartDevtoolWorkflowBot'}}
       run: |
         # Get 5 most recent branches of closed DartDevtoolWorkflowBot PRs.
         CLOSED_BRANCH_NAMES=$(gh pr list -A DartDevtoolWorkflowBot -s closed -L 5 --search sort:created-desc | grep auto-bump- | sed 's|.*\(auto-bump-[[:digit:]]*\).*|\1|')
