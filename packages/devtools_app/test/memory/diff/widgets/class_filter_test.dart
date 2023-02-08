@@ -88,12 +88,12 @@ void main() {
         test,
       );
 
-      // await _switchFilter(
-      //   ClassFilterType.except,
-      //   ClassFilterType.only,
-      //   tester,
-      //   test,
-      // );
+      await _switchFilter(
+        ClassFilterType.except,
+        ClassFilterType.only,
+        tester,
+        test,
+      );
 
       // await _switchFilter(
       //   ClassFilterType.only,
