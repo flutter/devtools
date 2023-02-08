@@ -384,6 +384,8 @@ Future<void> buildVariablesTree(
     }
   } on SentinelException {
     // Fail gracefully if calling `getObject` throws a SentinelException.
+  } catch (ex, stack) {
+    variable.addChild(DartObjectNode.text('error: $ex\n$stack'));
   }
 
   await _addDiagnosticChildrenIfNeeded(
