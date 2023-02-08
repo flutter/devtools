@@ -85,6 +85,7 @@ jobs:
     - name: Debug output
       run: |
         echo "1:${{ github.event_name }} 2:${{github.event.action }} 3:${{github.event.pull_request.user.login}}"
+        gh auth status
     - name: git clone devtools
       uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c
     - name: Clean up branches
