@@ -80,12 +80,16 @@ jobs:
         ORIGINAL_GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   clean-up-branches:
     # If a pr is closed on a workflow bot PR, then clean up workflow bot branches.
-    if: ${{ github.event_name == 'pull_request' && github.event.action == 'closed'  && github.event.pull_request.user.login == 'DartDevtoolWorkflowBot'}}
+    # if: ${{ github.event_name == 'pull_request' && github.event.action == 'closed'  && github.event.pull_request.user.login == 'DartDevtoolWorkflowBot'}}
     name: Clean up Dev Bump Branches
     runs-on: ubuntu-latest
     steps:
+    - name: Debug output
+      run: |
+        echo "1:${{ github.event_name }} 2:${{github.event.action }} 3:${{github.event.pull_request.user.login}}"
     - name: Clean up branches
       run: |
+        exit 1;
         # Get 5 most recent branches of closed DartDevtoolWorkflowBot PRs.
         CLOSED_BRANCH_NAMES=$(gh pr list -A DartDevtoolWorkflowBot -s closed -L 5 --search sort:created-desc | grep auto-bump- | sed 's|.*\(auto-bump-[[:digit:]]*\).*|\1|')
 
