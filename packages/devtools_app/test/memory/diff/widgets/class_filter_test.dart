@@ -110,9 +110,9 @@ void main() {
         windowSize, (WidgetTester tester) async {
       await pumpScene(tester, test);
 
-      // // Customize filter.
-      // scene.diffController.applyFilter(_customFilter);
-      // await _checkDataGolden(null, tester, test);
+      // Customize filter.
+      scene.diffController.applyFilter(_customFilter);
+      await _checkDataGolden(null, tester, test);
 
       // // Open dialog.
       // await tester.tap(find.byType(ClassFilterButton));
