@@ -6,13 +6,13 @@ on:
   schedule:
     # * is a special character in YAML so you have to quote this string
     - cron: '0 0 * * *' # Run every day at midnight
-permissions: write-all
 
 env:
   GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 jobs:
   bump-dev-version:
+    permissions: write-all
     if: ${{ github.event_name == 'workflow_dispatch' || github.event_name == 'schedule' }}
     name: Bump Dev Version
     runs-on: ubuntu-latest
@@ -77,6 +77,7 @@ jobs:
         GH_TOKEN: ${{ secrets.DEVTOOLS_WORKFLOW_BOT_TOKEN }}
         ORIGINAL_GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   clean-up-branches:
+    permissions: write-all
     # If a pr is closed on a workflow bot PR, then clean up workflow bot branches.
     # if: ${{ github.event_name == 'pull_request' && github.event.action == 'closed'  && github.event.pull_request.user.login == 'DartDevtoolWorkflowBot'}}
     name: Clean up Dev Bump Branches
