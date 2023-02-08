@@ -81,12 +81,12 @@ void main() {
         (WidgetTester tester) async {
       await pumpScene(tester, test);
 
-      // await _switchFilter(
-      //   ClassFilterType.showAll,
-      //   ClassFilterType.except,
-      //   tester,
-      //   test,
-      // );
+      await _switchFilter(
+        ClassFilterType.showAll,
+        ClassFilterType.except,
+        tester,
+        test,
+      );
 
       // await _switchFilter(
       //   ClassFilterType.except,
