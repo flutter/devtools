@@ -61,14 +61,30 @@ jobs:
       run: |
         BRANCH_NAME="auto-bump-$(date +%s)"
         # Stage the file, commit and push
-        git remote add bot_origin git@github.com:DartDevtoolWorkflowBot/devtools.git
         git checkout -b "$BRANCH_NAME"
         git commit -a -m "$COMMIT_MESSAGE"
-        git push -u bot_origin "$BRANCH_NAME"
+        git push -u origin "$BRANCH_NAME"
 
         gh pr create --title "$COMMIT_MESSAGE" --body "RELEASE_NOTE_EXCEPTION=Automated Version Bump" --label "autosubmit"
 
       env:
         COMMIT_MESSAGE: ${{ steps.version-bump.outputs.COMMIT_MESSAGE }}
         GH_TOKEN: ${{ secrets.DEVTOOLS_WORKFLOW_BOT_TOKEN }}
-        GITHUB_TOKEN: ${{ secrets.DEVTOOLS_WORKFLOW_BOT_TOKEN }}
+
+    - name: Clean up branches
+      if: ${{ github.event_name == 'pull_request' && github.event.action == 'closed'  && github.event.pull_request.user.login == 'DartDevtoolWorkflowBot'}}
+      run: |
+        # Get 5 most recent branches of closed DartDevtoolWorkflowBot PRs.
+        CLOSED_BRANCH_NAMES=$(gh pr list -A DartDevtoolWorkflowBot -s closed -L 5 --search sort:created-desc | grep auto-bump- | sed 's|.*\(auto-bump-[[:digit:]]*\).*|\1|')
+
+        # Get list of refs(branches) that exist on the remote
+        EXISTING_REFS=$(git ls-remote --heads | grep refs/heads/auto-bump-) 
+        for CLOSED_BRANCH in $CLOSED_BRANCH_NAMES; do
+          if echo "$EXISTING_REFS" | grep -q "$CLOSED_BRANCH" ; then
+            # If the branch still exists then we will delete it
+            gh api  /repos/flutter/devtools/git/refs/heads/$CLOSED_BRANCH -X DELETE
+          fi
+        done
+
+
+
