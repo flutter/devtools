@@ -9,7 +9,6 @@ on:
 permissions:
   contents: write
   pull-requests: write
-  issues: write
 
 env:
   GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
