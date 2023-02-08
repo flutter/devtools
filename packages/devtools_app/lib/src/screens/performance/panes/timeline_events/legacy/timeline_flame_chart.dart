@@ -456,7 +456,7 @@ class TimelineFlameChartState
       final node = FlameChartNode<TimelineEvent>(
         key: Key('${event.name} ${event.traceEvents.first.wrapperId}'),
         text: event.name!,
-        rect: Rect.fromLTRB(left, flameChartNodeTop, right, rowHeight),
+        rect: Rect.fromLTRB(left, flameChartNodeTop, right, chartRowHeight),
         colorPair: ThemedColorPair.from(colorPair),
         data: event,
         onSelected: widget.onDataSelected,
@@ -554,7 +554,7 @@ class TimelineFlameChartState
           // returns the Y value at the bottom of the flame chart node, and we
           // want the Y value at the top of the node.
           yForEvent: (event) =>
-              _calculateVerticalGuidelineStartY(event) - rowHeight,
+              _calculateVerticalGuidelineStartY(event) - chartRowHeight,
           colorScheme: colorScheme,
         ),
       ),
@@ -575,11 +575,11 @@ class TimelineFlameChartState
         // Add spacing to account for timestamps at top of chart.
         topSpacer +=
             sectionSpacing * TimelineFlameChart.rowOffsetForTopPadding -
-                rowHeight;
+                chartRowHeight;
       }
       if (i == eventGroups.length - 1) {
         // Add spacing to account for bottom row of padding.
-        bottomSpacer = rowHeight;
+        bottomSpacer = chartRowHeight;
       }
 
       final groupName = eventGroups.keys.elementAt(i);
@@ -612,7 +612,7 @@ class TimelineFlameChartState
     }
 
     return Positioned(
-      top: rowHeight, // Adjust for row of timestamps
+      top: chartRowHeight, // Adjust for row of timestamps
       left: 0.0,
       height: constraints.maxHeight,
       width: widget.startInset,
@@ -636,10 +636,11 @@ class TimelineFlameChartState
       // Add spacing to account for timestamps at top of chart.
       final topSpacer = index == 0
           ? sectionSpacing * TimelineFlameChart.rowOffsetForTopPadding -
-              rowHeight
+              chartRowHeight
           : 0.0;
       // Add spacing to account for bottom row of padding.
-      final bottomSpacer = index == eventGroups.length - 1 ? rowHeight : 0.0;
+      final bottomSpacer =
+          index == eventGroups.length - 1 ? chartRowHeight : 0.0;
 
       final groupName = eventGroups.keys.elementAt(index);
       final group = eventGroups[groupName]!;
@@ -674,7 +675,7 @@ class TimelineFlameChartState
 
     return [
       Positioned(
-        top: rowHeight, // Adjust for row of timestamps
+        top: chartRowHeight, // Adjust for row of timestamps
         left: 0.0,
         height: constraints.maxHeight,
         width: threadButtonContainerWidth,
@@ -686,7 +687,7 @@ class TimelineFlameChartState
         ),
       ),
       Positioned(
-        top: rowHeight, // Adjust for row of timestamps
+        top: chartRowHeight, // Adjust for row of timestamps
         right: 0.0,
         height: constraints.maxHeight,
         width: threadButtonContainerWidth,
@@ -864,7 +865,7 @@ class TimelineFlameChartState
     return spacerRowsBeforeEvent * sectionSpacing +
         (chartNodesByEvent[event]!.row.index - spacerRowsBeforeEvent) *
             rowHeightWithPadding +
-        rowHeight;
+        chartRowHeight;
   }
 
   double _calculateHorizontalGuidelineY(TimelineEvent event) {
@@ -872,7 +873,7 @@ class TimelineFlameChartState
     return spacerRowsBeforeEvent * sectionSpacing +
         (chartNodesByEvent[event]!.row.index - spacerRowsBeforeEvent) *
             rowHeightWithPadding +
-        rowHeight / 2;
+        chartRowHeight / 2;
   }
 }
 
@@ -1056,9 +1057,9 @@ class SelectedFrameBracketPainter extends FlameChartPainter {
     canvas.clipRect(
       Rect.fromLTWH(
         0.0,
-        rowHeight, // We do not want to paint inside the timestamp section.
+        chartRowHeight, // We do not want to paint inside the timestamp section.
         constraints.maxWidth,
-        constraints.maxHeight - rowHeight,
+        constraints.maxHeight - chartRowHeight,
       ),
     );
 
