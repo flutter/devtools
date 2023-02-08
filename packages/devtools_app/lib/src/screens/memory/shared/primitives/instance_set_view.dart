@@ -16,7 +16,7 @@ abstract class ClassSampler {
   Future<void> oneLiveStaticToConsole();
 
   /// Drop all live instances, to console.
-  Future<void> allLiveToConsole();
+  Future<void> manyLiveToConsole();
 
   bool get isEvalEnabled;
 }
@@ -79,10 +79,11 @@ class _StoreAsVariableMenu extends StatelessWidget {
         MenuItemButton(
           onPressed: sampleObtainer.oneLiveStaticToConsole,
           child: const Text(
-            'One instance from snapshot, alive in application',
+            'One instance that exists in snapshot, and is alive in application',
           ),
         ),
         MenuItemButton(
+          onPressed: sampleObtainer.manyLiveToConsole,
           child: Text('Up to $limit instances currently alive in application'),
         ),
       ],

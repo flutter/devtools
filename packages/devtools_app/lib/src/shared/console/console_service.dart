@@ -104,6 +104,32 @@ class ConsoleService extends Disposer {
     );
   }
 
+  void appendInstanceSet({
+    String? name,
+    required InstanceSet instanceSet,
+    required RemoteDiagnosticsNode? diagnostic,
+    required IsolateRef? isolateRef,
+    bool forceScrollIntoView = false,
+    bool expandAll = false,
+    HeapObjectSelection? heapSelection,
+  }) async {
+    _stdioTrailingNewline = false;
+    final variable = DartObjectNode.fromList(
+        type: null, list: instanceSet.instances, isolateRef: isolateRef);
+
+    await buildVariablesTree(variable, expandAll: expandAll);
+
+    if (expandAll) {
+      variable.expandCascading();
+    }
+    _stdio.add(
+      ConsoleLine.dartObjectNode(
+        variable,
+        forceScrollIntoView: forceScrollIntoView,
+      ),
+    );
+  }
+
   final _stdio = ListValueNotifier<ConsoleLine>([]);
   bool _stdioTrailingNewline = false;
 

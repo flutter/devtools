@@ -88,15 +88,14 @@ class HeapClassSampler extends ClassSampler {
       ClassType.runtime;
 
   @override
-  Future<void> allLiveToConsole() async {
+  Future<void> manyLiveToConsole() async {
     final instances = await _liveInstances();
 
-    // serviceManager.consoleService.appendInstanceRef(
-    //   value: instances,
-    //   diagnostic: null,
-    //   isolateRef: _mainIsolateRef,
-    //   forceScrollIntoView: true,
-    //   heapSelection: heapSelection,
-    // );
+    serviceManager.consoleService.appendInstanceSet(
+      instanceSet: instances,
+      diagnostic: null,
+      isolateRef: _mainIsolateRef,
+      forceScrollIntoView: true,
+    );
   }
 }
