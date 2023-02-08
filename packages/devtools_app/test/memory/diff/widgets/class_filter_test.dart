@@ -114,9 +114,9 @@ void main() {
       scene.diffController.applyFilter(_customFilter);
       await _checkDataGolden(null, tester, test);
 
-      // // Open dialog.
-      // await tester.tap(find.byType(ClassFilterButton));
-      // await _checkFilterGolden(null, tester);
+      // Open dialog.
+      await tester.tap(find.byType(ClassFilterButton));
+      await _checkFilterGolden(null, tester);
 
       // // Reset to default.
       // await tester.tap(find.text('Reset to default'));
