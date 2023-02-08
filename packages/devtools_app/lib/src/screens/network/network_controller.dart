@@ -342,6 +342,10 @@ class CurrentNetworkRequests {
     if (!requestsMapping.containsKey(request.id)) {
       requestsMapping[wrapped.id] = wrapped;
     } else {
+      // If we override an entry that is not a DartIOHttpRequestData then that means
+      // the ids of the requestMapping entries may collide with other types
+      // of requests.
+      assert(requestsMapping[request.id] is DartIOHttpRequestData);
       (requestsMapping[request.id] as DartIOHttpRequestData).merge(wrapped);
     }
   }
