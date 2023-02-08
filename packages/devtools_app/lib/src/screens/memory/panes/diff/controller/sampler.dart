@@ -89,13 +89,9 @@ class HeapClassSampler extends ClassSampler {
 
   @override
   Future<void> manyLiveToConsole() async {
-    final instances = await _liveInstances();
-
     serviceManager.consoleService.appendInstanceSet(
-      instanceSet: instances,
-      diagnostic: null,
+      instanceSet: await _liveInstances(),
       isolateRef: _mainIsolateRef,
-      forceScrollIntoView: true,
     );
   }
 }
