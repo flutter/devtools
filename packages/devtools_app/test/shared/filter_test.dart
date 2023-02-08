@@ -72,6 +72,13 @@ void main() {
         equals('[0-Foo-foobar, 1-FooBar-foobar, 3-Baz-foobar]'),
       );
 
+      // Ain't nothin' but a hound dog
+      controller.setActiveFilter(query: 'Basset');
+      expect(
+        controller.filteredData.value.toString(),
+        equals('[5-Basset Hound-dog]'),
+      );
+
       // Only toggle filter.
       controller.toggleFilters[1].enabled.value = true;
       controller.setActiveFilter(
@@ -107,12 +114,12 @@ void main() {
       controller.toggleFilters[0].enabled.value = true;
       controller.toggleFilters[1].enabled.value = false;
       controller.setActiveFilter();
-      expect(controller.isFilterActive, equals(true));
+      expect(controller.isFilterActive, isTrue);
 
       controller.toggleFilters[0].enabled.value = false;
       controller.toggleFilters[1].enabled.value = true;
       controller.setActiveFilter();
-      expect(controller.isFilterActive, equals(true));
+      expect(controller.isFilterActive, isTrue);
 
       controller.toggleFilters[0].enabled.value = false;
       controller.toggleFilters[1].enabled.value = false;
@@ -120,10 +127,10 @@ void main() {
       expect(controller.isFilterActive, equals(false));
 
       controller.setActiveFilter(query: 'bar');
-      expect(controller.isFilterActive, equals(true));
+      expect(controller.isFilterActive, isTrue);
 
       controller.setActiveFilter(query: 'cat:foobar');
-      expect(controller.isFilterActive, equals(true));
+      expect(controller.isFilterActive, isTrue);
     });
 
     test('activeFilterTag', () {
@@ -226,48 +233,48 @@ class _TestController extends DisposableController
       filteredData
         ..clear()
         ..addAll(data);
-    } else {
-      final filterCallback = (_TestDataClass element) {
-        // First filter by the toggle filters.
-        final toggleFilters = filter.toggleFilters;
-        for (final toggleFilter in toggleFilters) {
-          if (toggleFilter.enabled.value) {
-            if (!toggleFilter.includeCallback(element)) return false;
-          }
-        }
-
-        final queryFilter = filter.queryFilter;
-        if (!queryFilter.isEmpty) {
-          // Match the query argument to [_TestDataClass.category].
-          final categoryArg =
-              filter.queryFilter.filterArguments[categoryFilterId];
-          if (categoryArg != null &&
-              !categoryArg.matchesValue(element.category)) {
-            return false;
-          }
-
-          // Match substrings to [_TestDataClass.label].
-          if (queryFilter.substrings.isNotEmpty) {
-            for (final substring in queryFilter.substrings) {
-              bool matches(String? stringToMatch) {
-                if (stringToMatch?.caseInsensitiveContains(substring) == true) {
-                  return true;
-                }
-                return false;
-              }
-
-              if (matches(element.label)) return true;
-            }
-            return false;
-          }
-        }
-
-        return true;
-      };
-      filteredData
-        ..clear()
-        ..addAll(data.where(filterCallback));
+      return;
     }
+    final filterCallback = (_TestDataClass element) {
+      // First filter by the toggle filters.
+      final toggleFilters = filter.toggleFilters;
+      for (final toggleFilter in toggleFilters) {
+        if (toggleFilter.enabled.value) {
+          if (!toggleFilter.includeCallback(element)) return false;
+        }
+      }
+
+      final queryFilter = filter.queryFilter;
+      if (!queryFilter.isEmpty) {
+        // Match the query argument to [_TestDataClass.category].
+        final categoryArg =
+            filter.queryFilter.filterArguments[categoryFilterId];
+        if (categoryArg != null &&
+            !categoryArg.matchesValue(element.category)) {
+          return false;
+        }
+
+        // Match substrings to [_TestDataClass.label].
+        if (queryFilter.substrings.isNotEmpty) {
+          for (final substring in queryFilter.substrings) {
+            bool matches(String? stringToMatch) {
+              if (stringToMatch?.caseInsensitiveContains(substring) == true) {
+                return true;
+              }
+              return false;
+            }
+
+            if (matches(element.label)) return true;
+          }
+          return false;
+        }
+      }
+
+      return true;
+    };
+    filteredData
+      ..clear()
+      ..addAll(data.where(filterCallback));
   }
 }
 

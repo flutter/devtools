@@ -302,49 +302,48 @@ class NetworkController extends DisposableController
       filteredData
         ..clear()
         ..addAll(_requests.value.requests);
-    } else {
-      filteredData
-        ..clear()
-        ..addAll(
-          _requests.value.requests.where((NetworkRequest r) {
-            final methodArg = queryFilter.filterArguments[methodFilterId];
-            if (methodArg != null && !methodArg.matchesValue(r.method)) {
-              return false;
-            }
-
-            final statusArg = queryFilter.filterArguments[statusFilterId];
-            if (statusArg != null && !statusArg.matchesValue(r.status)) {
-              return false;
-            }
-
-            final typeArg = queryFilter.filterArguments[typeFilterId];
-            if (typeArg != null && !typeArg.matchesValue(r.type)) {
-              return false;
-            }
-
-            if (queryFilter.substrings.isNotEmpty) {
-              for (final substring in queryFilter.substrings) {
-                bool matches(String? stringToMatch) {
-                  if (stringToMatch?.caseInsensitiveContains(substring) ==
-                      true) {
-                    _checkForError(r);
-                    return true;
-                  }
-                  return false;
-                }
-
-                if (matches(r.uri)) return true;
-                if (matches(r.method)) return true;
-                if (matches(r.status)) return true;
-                if (matches(r.type)) return true;
-              }
-              return false;
-            }
-            _checkForError(r);
-            return true;
-          }).toList(),
-        );
+      return;
     }
+    filteredData
+      ..clear()
+      ..addAll(
+        _requests.value.requests.where((NetworkRequest r) {
+          final methodArg = queryFilter.filterArguments[methodFilterId];
+          if (methodArg != null && !methodArg.matchesValue(r.method)) {
+            return false;
+          }
+
+          final statusArg = queryFilter.filterArguments[statusFilterId];
+          if (statusArg != null && !statusArg.matchesValue(r.status)) {
+            return false;
+          }
+
+          final typeArg = queryFilter.filterArguments[typeFilterId];
+          if (typeArg != null && !typeArg.matchesValue(r.type)) {
+            return false;
+          }
+
+          if (queryFilter.substrings.isNotEmpty) {
+            for (final substring in queryFilter.substrings) {
+              bool matches(String? stringToMatch) {
+                if (stringToMatch?.caseInsensitiveContains(substring) == true) {
+                  _checkForError(r);
+                  return true;
+                }
+                return false;
+              }
+
+              if (matches(r.uri)) return true;
+              if (matches(r.method)) return true;
+              if (matches(r.status)) return true;
+              if (matches(r.type)) return true;
+            }
+            return false;
+          }
+          _checkForError(r);
+          return true;
+        }).toList(),
+      );
   }
 
   void _checkForError(NetworkRequest r) {

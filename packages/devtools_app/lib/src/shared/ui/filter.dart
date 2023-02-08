@@ -24,13 +24,13 @@ import '../theme.dart';
 /// [DisposableController] and mixin [AutoDisposeControllerMixin], and a class
 /// can subscribe to updates to the active filter by calling
 /// [subscribeToFilterChanges].
-mixin FilterControllerMixin<T> implements AutoDisposeControllerMixin {
+mixin FilterControllerMixin<T> on DisposableController
+    implements AutoDisposeControllerMixin {
   static const filterTagSeparator = '-#-';
 
   final filteredData = ListValueNotifier<T>([]);
 
-  // TODO(kenz): replace [Filter] class with a pattern when available. All we
-  // really need here is a tuple or pair, not a data class.
+  // TODO(kenz): replace [Filter] class with a record when available.
   ValueListenable<Filter<T>> get activeFilter => _activeFilter;
 
   late final _activeFilter = ValueNotifier<Filter<T>>(

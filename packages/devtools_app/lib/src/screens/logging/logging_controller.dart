@@ -660,36 +660,36 @@ class LoggingController extends DisposableController
       filteredData
         ..clear()
         ..addAll(data);
-    } else {
-      filteredData
-        ..clear()
-        ..addAll(
-          data.where((log) {
-            final kindArg = filter.queryFilter.filterArguments[kindFilterId];
-            if (kindArg != null &&
-                !kindArg.matchesValue(log.kind.toLowerCase())) {
-              return false;
-            }
-
-            if (filter.queryFilter.substrings.isNotEmpty) {
-              for (final substring in filter.queryFilter.substrings) {
-                final matchesKind = log.kind.caseInsensitiveContains(substring);
-                if (matchesKind) return true;
-
-                final matchesSummary = log.summary != null &&
-                    log.summary!.caseInsensitiveContains(substring);
-                if (matchesSummary) return true;
-
-                final matchesDetails = log.details != null &&
-                    log.summary!.caseInsensitiveContains(substring);
-                if (matchesDetails) return true;
-              }
-              return false;
-            }
-            return true;
-          }).toList(),
-        );
+      return;
     }
+    filteredData
+      ..clear()
+      ..addAll(
+        data.where((log) {
+          final kindArg = filter.queryFilter.filterArguments[kindFilterId];
+          if (kindArg != null &&
+              !kindArg.matchesValue(log.kind.toLowerCase())) {
+            return false;
+          }
+
+          if (filter.queryFilter.substrings.isNotEmpty) {
+            for (final substring in filter.queryFilter.substrings) {
+              final matchesKind = log.kind.caseInsensitiveContains(substring);
+              if (matchesKind) return true;
+
+              final matchesSummary = log.summary != null &&
+                  log.summary!.caseInsensitiveContains(substring);
+              if (matchesSummary) return true;
+
+              final matchesDetails = log.details != null &&
+                  log.summary!.caseInsensitiveContains(substring);
+              if (matchesDetails) return true;
+            }
+            return false;
+          }
+          return true;
+        }).toList(),
+      );
   }
 }
 

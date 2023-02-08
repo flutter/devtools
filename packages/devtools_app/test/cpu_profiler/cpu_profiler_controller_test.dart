@@ -31,6 +31,9 @@ void main() {
         filter.enabled.value = false;
       }
       controller.setActiveFilter();
+      // [CpuProfilerController.filterData], which is triggered by the call to
+      // [setActiveFilter] via a listener callback, calls an unawaited future.
+      // We await a short delay here to ensure that that future completes.
       await shortDelay();
     }
 
@@ -133,6 +136,10 @@ void main() {
       var filteredData = controller.dataNotifier.value!;
       expect(filteredData.stackFrames.values.length, equals(12));
 
+      // [CpuProfilerController.filterData], which is triggered by the call to
+      // [setActiveFilter] via a listener callback, calls an unawaited future.
+      // We await a short delay here and below to ensure that that future
+      // completes.
       controller.setActiveFilter(query: 'uri:dart:vm');
       await shortDelay();
       filteredData = controller.dataNotifier.value!;

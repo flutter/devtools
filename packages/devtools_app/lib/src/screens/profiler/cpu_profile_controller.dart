@@ -616,8 +616,9 @@ class CpuProfilerController extends DisposableController
     filter ??= activeFilter.value;
     final filterCallback = (CpuStackFrame stackFrame) {
       for (final toggleFilter in filter!.toggleFilters) {
-        if (toggleFilter.enabled.value) {
-          if (!toggleFilter.includeCallback(stackFrame)) return false;
+        if (toggleFilter.enabled.value &&
+            !toggleFilter.includeCallback(stackFrame)) {
+          return false;
         }
       }
 

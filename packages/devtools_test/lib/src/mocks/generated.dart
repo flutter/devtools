@@ -21,6 +21,7 @@ import 'package:vm_service/vm_service.dart';
   FlutterFramesController,
   TimelineEventsController,
   LegacyTimelineEventsController,
+  LoggingController,
   RasterStatsController,
   ProgramExplorerController,
   ScriptManager,
