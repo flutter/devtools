@@ -8,11 +8,13 @@ import 'package:flutter/material.dart';
 
 import '../../../../shared/analytics/constants.dart';
 import '../../../../shared/common_widgets.dart';
+import '../../../../shared/globals.dart';
 import '../../../../shared/primitives/utils.dart';
 
 abstract class ClassSampler {
-  Future<void> oneVariableToConsole();
-  void instanceGraphToConsole();
+  /// Drop one variable that exists in static set and still alive in app, to console.
+  Future<void> oneLiveStaticToConsole();
+
   bool get isEvalEnabled;
 }
 
@@ -62,22 +64,23 @@ class _StoreAsVariableMenu extends StatelessWidget {
   Widget build(BuildContext context) {
     final enabled = sampleObtainer.isEvalEnabled;
     const menuText = 'Store as a console variable';
+    final limit = preferences.memory.refLimit.value;
 
     if (!enabled) {
       return const MenuItemButton(child: Text(menuText));
     }
 
     return SubmenuButton(
+      // TODO(polina-c): change structure of the menu before opening the feature.
       menuChildren: <Widget>[
         MenuItemButton(
-          onPressed: enabled ? sampleObtainer.oneVariableToConsole : null,
-          child: const Text('One instance'),
+          onPressed: sampleObtainer.oneLiveStaticToConsole,
+          child: const Text(
+            'One instance from snapshot, alive in application',
+          ),
         ),
-        const MenuItemButton(
-          child: Text('First 20 instances'),
-        ),
-        const MenuItemButton(
-          child: Text('All instances'),
+        MenuItemButton(
+          child: Text('Up to $limit instances currently alive in application'),
         ),
       ],
       child: const Text(menuText),

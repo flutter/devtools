@@ -3,10 +3,13 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert';
+import 'dart:math';
 
 import 'package:vm_service/vm_service.dart';
 
 import '../feature_flags.dart';
+import '../globals.dart';
 import '../memory/class_name.dart';
 import '../primitives/utils.dart';
 import 'dart_object_node.dart';
@@ -113,13 +116,29 @@ Future<void> addChildReferences(
 
       break;
     case RefNodeType.liveInRefs:
-      variable.addChild(
-        DartObjectNode.references(
-          // Temporary placeholder
-          '<live inbound refs>',
-          ObjectReferences.withType(ref, RefNodeType.liveInRefs),
-        ),
-      );
+      final limit = preferences.memory.refLimit.value;
+      final refs = (await serviceManager.service!.getInboundReferences(
+            ref.isolateRef!.id!,
+            ref.instanceRef!.id!,
+            limit + 1,
+          ))
+              .references ??
+          [];
+
+      final refsToShow = min(limit, refs.length);
+
+      for (var i = 0; i < refsToShow; i++) {
+        final item = refs[i];
+        variable.addChild(DartObjectNode.text(jsonEncode(item.toJson())));
+      }
+
+      if (refs.length > limit)
+        variable.addChild(
+          DartObjectNode.text(
+            '...\nConfigure number of items in memory screen settings',
+          ),
+        );
+
       break;
     case RefNodeType.liveOutRefs:
       final isolateRef = variable.ref!.isolateRef;

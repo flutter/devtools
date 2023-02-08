@@ -61,7 +61,7 @@ class _CpuProfileFlameChartState
       final node = FlameChartNode<CpuStackFrame>(
         key: Key('${stackFrame.id}'),
         text: stackFrame.name,
-        rect: Rect.fromLTWH(left, flameChartNodeTop, width, rowHeight),
+        rect: Rect.fromLTWH(left, flameChartNodeTop, width, chartRowHeight),
         colorPair: colorPair,
         data: stackFrame,
         onSelected: (CpuStackFrame frame) => widget.onDataSelected(frame),
