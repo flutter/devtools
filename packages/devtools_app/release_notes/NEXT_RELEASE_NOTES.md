@@ -16,8 +16,9 @@ TODO: Remove this section if there are not any general updates.
 
 ## CPU profiler updates
 
-* Display stack frame uri inline with method name to ensure the uri is always visible
+* Display stack frame uri inline with method name to ensure the URI is always visible
 in deeply nested trees - [#5181](https://github.com/flutter/devtools/pull/5181)
+* Add the ability to filter by method name or source URI - [#5204](https://github.com/flutter/devtools/pull/5204)
 
 ## Memory updates
 TODO: Remove this section if there are not any general updates.

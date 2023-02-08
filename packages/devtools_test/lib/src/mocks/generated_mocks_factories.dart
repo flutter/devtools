@@ -149,3 +149,22 @@ MockVmServiceWrapper createMockVmServiceWrapperWithDefaults() {
   });
   return service;
 }
+
+MockLoggingController createMockLoggingControllerWithDefaults({
+  List<LogData> data = const [],
+}) {
+  final mockLoggingController = MockLoggingController();
+  when(mockLoggingController.data).thenReturn(data);
+  when(mockLoggingController.filteredData)
+      .thenReturn(ListValueNotifier<LogData>(data));
+  when(mockLoggingController.selectedLog)
+      .thenReturn(ValueNotifier<LogData?>(null));
+  when(mockLoggingController.searchMatches)
+      .thenReturn(const FixedValueListenable(<LogData>[]));
+  when(mockLoggingController.activeSearchMatch)
+      .thenReturn(const FixedValueListenable<LogData?>(null));
+  when(mockLoggingController.searchInProgressNotifier)
+      .thenReturn(const FixedValueListenable(false));
+  when(mockLoggingController.matchIndex).thenReturn(ValueNotifier<int>(0));
+  return mockLoggingController;
+}

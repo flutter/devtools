@@ -27,8 +27,8 @@ import '../utils.dart';
 const double rowPadding = 2.0;
 // Flame chart rows contain text so are not readable if they do not scale with
 // the font factor.
-double get rowHeight => scaleByFontFactor(22.0);
-double get rowHeightWithPadding => rowHeight + rowPadding;
+double get chartRowHeight => scaleByFontFactor(22.0);
+double get rowHeightWithPadding => chartRowHeight + rowPadding;
 
 // This spacing needs to be scaled by the font factor otherwise section
 // labels will not have enough room. Typically spacing values should not depend
@@ -183,9 +183,12 @@ abstract class FlameChartState<T extends FlameChart,
   double get maxZoomLevel {
     // The max zoom level is hit when 1 microsecond is the width of each grid
     // interval (this may bottom out at 2 micros per interval due to rounding).
-    return baseTimelineGridIntervalPx *
-        widget.time.duration.inMicroseconds /
-        widget.startingContentWidth;
+    return math.max(
+      FlameChart.minZoomLevel,
+      baseTimelineGridIntervalPx *
+          widget.time.duration.inMicroseconds /
+          widget.startingContentWidth,
+    );
   }
 
   /// Provides widgets to be layered on top of the flame chart, if overridden.
@@ -1350,7 +1353,7 @@ class TimelineGridPainter extends FlameChartPainter {
         0.0,
         0.0,
         constraints.maxWidth,
-        math.min(constraints.maxHeight, rowHeight),
+        math.min(constraints.maxHeight, chartRowHeight),
       ),
       Paint()..color = colorScheme.defaultBackgroundColor,
     );
