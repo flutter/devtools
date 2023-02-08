@@ -120,11 +120,13 @@ void main() {
 
       // Reset to default.
       await tester.tap(find.text('Reset to default'));
-      await _checkFilterGolden(ClassFilterType.showAll, tester);
-
-      // Close dialog.
+      await tester.pumpAndSettle();
       await tester.tap(find.text('APPLY'));
-      await _checkDataGolden(ClassFilterType.showAll, tester, test);
+      await tester.pumpAndSettle();
+
+      final actualFilter = scene.diffController.core.classFilter.value;
+      expect(actualFilter.filterType, equals(ClassFilterType.except));
+      expect(actualFilter.except, equals(ClassFilter.defaultExceptString));
     });
   }
 }

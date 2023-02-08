@@ -4,6 +4,7 @@
 
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/memory/panes/diff/controller/diff_pane_controller.dart';
+import 'package:devtools_app/src/screens/memory/shared/heap/class_filter.dart';
 import 'package:devtools_app/src/screens/memory/shared/heap/model.dart';
 import 'package:devtools_app/src/shared/config_specific/import_export/import_export.dart';
 import 'package:devtools_app/src/shared/memory/adapted_heap_data.dart';
@@ -66,8 +67,12 @@ class MemoryDefaultScene extends Scene {
     );
     setGlobal(ServiceConnectionManager, fakeServiceManager);
 
+    final diffController = DiffPaneController(_TestSnapshotTaker());
+    diffController.applyFilter(
+      ClassFilter(filterType: ClassFilterType.showAll, except: '', only: ''),
+    );
     controller = MemoryController(
-      diffPaneController: DiffPaneController(_TestSnapshotTaker()),
+      diffPaneController: diffController,
     )
       ..offline = true
       ..memoryTimeline.offlineData.clear()
