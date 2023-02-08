@@ -87,9 +87,10 @@ jobs:
     - name: Debug output
       run: |
         echo "1:${{ github.event_name }} 2:${{github.event.action }} 3:${{github.event.pull_request.user.login}}"
+    - name: git clone devtools
+      uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c
     - name: Clean up branches
       run: |
-        exit 1;
         # Get 5 most recent branches of closed DartDevtoolWorkflowBot PRs.
         CLOSED_BRANCH_NAMES=$(gh pr list -A DartDevtoolWorkflowBot -s closed -L 5 --search sort:created-desc | grep auto-bump- | sed 's|.*\(auto-bump-[[:digit:]]*\).*|\1|')
 
