@@ -48,14 +48,11 @@ class MemorySettingsDialog extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Limit for number of listed items in console.',
+                        preferences.memory.refLimitTitle,
                         style: theme.regularTextStyle,
                       ),
                       Text(
-                        'Number of listed items may be less in case of filtering. '
-                        'For example, when the screen '
-                        'first requests live items from application and then '
-                        'shows only items presented in heap snapshot.',
+                        'Used to explore live references in console.',
                         style: theme.subtleTextStyle,
                       ),
                     ],

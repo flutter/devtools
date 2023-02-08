@@ -24,7 +24,6 @@ class HeapClassSampler extends ClassSampler {
   Future<List<ObjRef>> _instances() async {
     final isolateId = _mainIsolateRef.id!;
 
-    // TODO(polina-c): It would be great to find out how to avoid full scan of classes.
     final theClass = (await serviceManager.service!.getClassList(isolateId))
         .classes!
         .firstWhere((ref) => objects.heapClass.matches(ref));
@@ -32,14 +31,14 @@ class HeapClassSampler extends ClassSampler {
     final instances = await serviceManager.service!.getInstances(
       isolateId,
       theClass.id!,
-      1,
+      preferences.memory.refLimit.value,
     );
 
     return instances.instances ?? [];
   }
 
   @override
-  Future<void> oneVariableToConsole() async {
+  Future<void> oneLiveStaticToConsole() async {
     final instances = await _instances();
 
     final instanceRef = instances.firstWhereOrNull(
@@ -49,7 +48,9 @@ class HeapClassSampler extends ClassSampler {
     ) as InstanceRef?;
 
     if (instanceRef == null) {
-      serviceManager.consoleService.appendStdio('Unable to select instance.');
+      serviceManager.consoleService.appendStdio(
+          'Unable to select instance that exist in snapshot and still alive in application.\n'
+          'You may want to increase "${preferences.memory.refLimitTitle}" in memory settings.');
       return;
     }
 

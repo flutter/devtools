@@ -12,8 +12,11 @@ import '../../../../shared/globals.dart';
 import '../../../../shared/primitives/utils.dart';
 
 abstract class ClassSampler {
-  Future<void> oneVariableToConsole();
+  /// Drop one variable that exists in static set and still alive in app, to console.
+  Future<void> oneLiveStaticToConsole();
+
   void instanceGraphToConsole();
+
   bool get isEvalEnabled;
 }
 
@@ -73,9 +76,9 @@ class _StoreAsVariableMenu extends StatelessWidget {
       // TODO(polina-c): change structure of the menu before opening the feature.
       menuChildren: <Widget>[
         MenuItemButton(
-          onPressed: sampleObtainer.oneVariableToConsole,
+          onPressed: sampleObtainer.oneLiveStaticToConsole,
           child: const Text(
-            'One instance from snapshot, currently alive in application',
+            'One instance from snapshot, alive in application',
           ),
         ),
         MenuItemButton(
