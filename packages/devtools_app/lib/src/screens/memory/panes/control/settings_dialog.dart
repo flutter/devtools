@@ -43,20 +43,23 @@ class MemorySettingsDialog extends StatelessWidget {
             const SizedBox(height: defaultSpacing),
             Row(
               children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Limit for number of listed items in console.',
-                      style: theme.regularTextStyle,
-                    ),
-                    Text(
-                      'Number of listed items may be less in case of filtering. For example,\n'
-                      'when the screen first requests live items from application and\n'
-                      'then shows only items presented in heap snapshot.',
-                      style: theme.subtleTextStyle,
-                    ),
-                  ],
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Limit for number of listed items in console.',
+                        style: theme.regularTextStyle,
+                      ),
+                      Text(
+                        'Number of listed items may be less in case of filtering. '
+                        'For example, when the screen '
+                        'first requests live items from application and then '
+                        'shows only items presented in heap snapshot.',
+                        style: theme.subtleTextStyle,
+                      ),
+                    ],
+                  ),
                 ),
                 const SizedBox(width: defaultSpacing),
                 SizedBox(
