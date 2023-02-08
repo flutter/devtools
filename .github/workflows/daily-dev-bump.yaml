@@ -66,11 +66,17 @@ jobs:
         git commit -a -m "$COMMIT_MESSAGE"
         git push -u origin "$BRANCH_NAME"
 
-        gh pr create --title "$COMMIT_MESSAGE" --body "RELEASE_NOTE_EXCEPTION=Automated Version Bump" --label "autosubmit"
+        PR_URL=$(gh pr create --title "$COMMIT_MESSAGE" --body "RELEASE_NOTE_EXCEPTION=Automated Version Bump")
+        echo $PR_URL
+
+        # Change github credentials back to the actions bot.
+        GH_TOKEN="$ORIGINAL_GH_TOKEN"
+        gh pr edit $PR_URL --add-label "autosubmit"
 
       env:
         COMMIT_MESSAGE: ${{ steps.version-bump.outputs.COMMIT_MESSAGE }}
         GH_TOKEN: ${{ secrets.DEVTOOLS_WORKFLOW_BOT_TOKEN }}
+        ORIGINAL_GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Clean up branches
       if: ${{ github.event_name == 'pull_request' && github.event.action == 'closed'  && github.event.pull_request.user.login == 'DartDevtoolWorkflowBot'}}
