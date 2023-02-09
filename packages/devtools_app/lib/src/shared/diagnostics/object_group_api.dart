@@ -30,4 +30,6 @@ abstract class ObjectGroupApi {
     bool summaryTree,
     DiagnosticableTree? parent,
   );
+
+  bool isLocalClass(DiagnosticableTree node);
 }
