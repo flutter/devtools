@@ -4,9 +4,8 @@
 
 import 'dart:async';
 import 'dart:convert';
-import 'dart:typed_data';
 
-import 'package:flutter/widgets.dart';
+import 'package:flutter/foundation.dart';
 import 'package:mime/mime.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -54,13 +53,15 @@ class DartIOHttpRequestData extends NetworkRequest {
   static const _localPortKey = 'localPort';
 
   HttpProfileRequestRef _request;
-
+  
   final int wrapperId;
   bool isOutStanding = false;
 
+  final ValueNotifier<int> _updateCount = ValueNotifier<int>(0);
+
   /// A notifier that changes when the request data, or it's response body
   /// changes.
-  ValueNotifier<int> updateCount = ValueNotifier<int>(0);
+  ValueListenable<int> get updateCount => _updateCount;
   bool isFetchingFullData = false;
 
   Future<void> getFullRequestData() async {
@@ -73,13 +74,11 @@ class DartIOHttpRequestData extends NetworkRequest {
         _request.id.toString(),
       );
       _request = updated;
-      updateCount.value++;
+      _updateCount.value++;
       final fullRequest = _request as HttpProfileRequest;
       _responseBody = utf8.decode(fullRequest.responseBody!);
       _requestBody = utf8.decode(fullRequest.requestBody!);
       return;
-    } catch (_) {
-      rethrow;
     } finally {
       isFetchingFullData = false;
     }
@@ -249,7 +248,7 @@ class DartIOHttpRequestData extends NetworkRequest {
 
   /// Merges the information from another [HttpRequestData] into this instance.
   void merge(DartIOHttpRequestData data) {
-    updateCount.value++;
+    _updateCount.value++;
     _request = data._request;
   }
 

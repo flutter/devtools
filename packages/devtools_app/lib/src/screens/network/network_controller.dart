@@ -99,8 +99,8 @@ class NetworkController extends DisposableController
     // the value.
     final currentSelectedRequestId = selectedRequest.value?.id;
     if (currentSelectedRequestId != null) {
-      selectedRequest.value ??=
-          currentRequests.requestsMapping[currentSelectedRequestId];
+      selectedRequest.value =
+          currentRequests.getRequest(currentSelectedRequestId);
     }
 
     _processHttpProfileRequests(
@@ -110,7 +110,7 @@ class NetworkController extends DisposableController
     );
 
     return NetworkRequests(
-      requests: currentRequests.requestsMapping.values.toList(),
+      requests: currentRequests.requests,
       invalidHttpRequests: invalidRequests,
     );
   }
@@ -324,11 +324,16 @@ class NetworkController extends DisposableController
   }
 }
 
+/// Class for managing the set of all current websocket requests, and
+/// http profile requests.
 class CurrentNetworkRequests {
   CurrentNetworkRequests({required this.onDataUpdate});
 
-  Map<String, NetworkRequest> requestsMapping = <String, NetworkRequest>{};
-  VoidCallback onDataUpdate; // TODO: Callback naming rules
+  List<NetworkRequest> get requests => _requestsById.values.toList();
+  final _requestsById = <String, NetworkRequest>{};
+  VoidCallback onDataUpdate;
+
+  NetworkRequest? getRequest(String id) => _requestsById[id];
 
   void updateOrAdd(
     HttpProfileRequest request,
@@ -339,14 +344,14 @@ class CurrentNetworkRequests {
       request,
       requestFullDataFromVmService: false,
     );
-    if (!requestsMapping.containsKey(request.id)) {
-      requestsMapping[wrapped.id] = wrapped;
+    if (!_requestsById.containsKey(request.id)) {
+      _requestsById[wrapped.id] = wrapped;
     } else {
       // If we override an entry that is not a DartIOHttpRequestData then that means
       // the ids of the requestMapping entries may collide with other types
       // of requests.
-      assert(requestsMapping[request.id] is DartIOHttpRequestData);
-      (requestsMapping[request.id] as DartIOHttpRequestData).merge(wrapped);
+      assert(_requestsById[request.id] is DartIOHttpRequestData);
+      (_requestsById[request.id] as DartIOHttpRequestData).merge(wrapped);
     }
   }
 
@@ -357,18 +362,21 @@ class CurrentNetworkRequests {
     for (final socket in sockets) {
       final webSocket = WebSocket(socket, timelineMicrosOffset);
 
-      if (requestsMapping.containsKey(webSocket.id)) {
+      if (_requestsById.containsKey(webSocket.id)) {
         // If we override an entry that is not a Websocket then that means
         // the ids of the requestMapping entries may collide with other types
         // of requests.
-        assert(requestsMapping[webSocket.id] is WebSocket);
+        assert(_requestsById[webSocket.id] is WebSocket);
       }
 
-      requestsMapping[webSocket.id] = webSocket;
+    // The new [sockets] may contain web sockets with the same ids as ones we
+    // already have, so we remove the current web sockets and replace them with
+    // updated data.
+      _requestsById[webSocket.id] = webSocket;
     }
   }
 
   void clear() {
-    requestsMapping.clear();
+    _requestsById.clear();
   }
 }
