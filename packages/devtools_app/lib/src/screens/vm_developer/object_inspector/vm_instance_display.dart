@@ -198,7 +198,7 @@ class DisplayProvider extends StatelessWidget {
         ),
         if (variable.ref!.value is! Sentinel)
           VmServiceObjectLink(
-            object: variable.ref!.value,
+            object: variable.ref!.value as ObjRef?,
             textBuilder: (object) {
               if (object is InstanceRef &&
                   object.kind == InstanceKind.kString) {

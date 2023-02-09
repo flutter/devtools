@@ -10,6 +10,7 @@ import '../../../shared/globals.dart';
 import '../../../shared/primitives/auto_dispose.dart';
 import '../../debugger/codeview_controller.dart';
 import '../../debugger/program_explorer_controller.dart';
+import '../vm_service_private_extensions.dart';
 import 'class_hierarchy_explorer_controller.dart';
 import 'object_store_controller.dart';
 import 'object_viewport.dart';
@@ -163,6 +164,10 @@ class ObjectInspectorViewController extends DisposableController
       );
     } else if (objRef is CodeRef) {
       object = CodeObject(
+        ref: objRef,
+      );
+    } else if (objRef.isICData) {
+      object = ICDataObject(
         ref: objRef,
       );
     }

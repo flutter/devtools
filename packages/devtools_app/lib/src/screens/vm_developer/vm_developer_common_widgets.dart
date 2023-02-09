@@ -375,6 +375,45 @@ class SizedCircularProgressIndicator extends StatelessWidget {
   }
 }
 
+class ExpansionTileInstanceList extends StatelessWidget {
+  const ExpansionTileInstanceList({
+    required this.controller,
+    required this.title,
+    required this.elements,
+  });
+
+  final ObjectInspectorViewController controller;
+  final String title;
+  final List<ObjRef?> elements;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final children = <Row>[
+      for (int i = 0; i < elements.length; ++i)
+        Row(
+          children: [
+            Text(
+              '[$i]: ',
+              style: theme.subtleFixedFontStyle,
+            ),
+            VmServiceObjectLink<ObjRef?>(
+              object: elements[i],
+              onTap: (e) {
+                if (e == null) return;
+                unawaited(controller.findAndSelectNodeForObject(e));
+              },
+            ),
+          ],
+        ),
+    ];
+    return VmExpansionTile(
+      title: '$title (${elements.length})',
+      children: prettyRows(context, children),
+    );
+  }
+}
+
 /// An expandable list to display the retaining objects for a given RetainingPath.
 class RetainingPathWidget extends StatelessWidget {
   const RetainingPathWidget({
@@ -691,7 +730,7 @@ class InboundReferencesWidget extends StatelessWidget {
   }
 }
 
-class VmServiceObjectLink<T> extends StatelessWidget {
+class VmServiceObjectLink<T extends ObjRef?> extends StatelessWidget {
   const VmServiceObjectLink({
     required this.object,
     required this.onTap,
@@ -766,6 +805,9 @@ class VmServiceObjectLink<T> extends StatelessWidget {
       } else if (object is Sentinel) {
         final sentinel = object as Sentinel;
         text = sentinel.valueAsString!;
+      } else if (object?.isICData ?? false) {
+        final icData = object!.asICData;
+        text = 'ICData(${icData.selector})';
       } else {
         isServiceObject = false;
         text = object.toString();
