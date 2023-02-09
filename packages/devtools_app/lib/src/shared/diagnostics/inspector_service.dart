@@ -1141,6 +1141,9 @@ class ObjectGroup extends ObjectGroupBase {
   @override
   final InspectorService inspectorService;
 
+  @override
+  bool canSetSelectionInspector = true;
+
   Future<RemoteDiagnosticsNode?> getRoot(FlutterTreeType type) {
     // There is no excuse to call this method on a disposed group.
     assert(!disposed);

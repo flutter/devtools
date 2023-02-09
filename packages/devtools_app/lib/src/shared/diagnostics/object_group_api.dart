@@ -8,8 +8,9 @@ import 'package:vm_service/vm_service.dart';
 import '../eval_on_dart_library.dart';
 import 'primitives/instance_ref.dart';
 
-abstract class ObjectGroupApi<T extends DiagnosticableTree> implements Disposable {
-  final bool canSetSelectionInspector = false;
+abstract class ObjectGroupApi<T extends DiagnosticableTree>
+    implements Disposable {
+  bool get canSetSelectionInspector => false;
 
   Future<bool> setSelectionInspector(
     InspectorInstanceRef selection,

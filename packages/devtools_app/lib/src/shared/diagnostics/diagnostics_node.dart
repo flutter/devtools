@@ -12,7 +12,6 @@ import 'package:vm_service/vm_service.dart';
 import '../primitives/enum_utils.dart';
 import '../primitives/utils.dart';
 import '../ui/icons.dart';
-import 'inspector_service.dart';
 import 'object_group_api.dart';
 import 'primitives/instance_ref.dart';
 import 'primitives/source_location.dart';
@@ -698,7 +697,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
 
   Future<void> setSelectionInspector(bool uiAlreadyUpdated) async {
     final objectGroup = objectGroupApi;
-    if (objectGroup is ObjectGroup) {
+    if (objectGroup != null && objectGroup.canSetSelectionInspector) {
       await objectGroup.setSelectionInspector(valueRef, uiAlreadyUpdated);
     }
   }
