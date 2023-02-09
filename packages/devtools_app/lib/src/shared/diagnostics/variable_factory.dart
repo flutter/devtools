@@ -4,6 +4,7 @@
 
 import 'dart:async';
 import 'dart:convert';
+import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
@@ -489,7 +490,8 @@ List<DartObjectNode> createVariablesForInstanceSet(
   IsolateRef? isolateRef,
 ) {
   final variables = <DartObjectNode>[];
-  for (int i = offset; i < offset + childCount; i++) {
+  final loopLimit = min(offset + childCount, instances.length);
+  for (int i = offset; i < loopLimit; i++) {
     variables.add(
       DartObjectNode.fromValue(
         name: '[$i]',

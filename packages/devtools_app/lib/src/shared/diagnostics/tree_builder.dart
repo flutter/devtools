@@ -124,8 +124,7 @@ Future<void> _addInstanceSetItems(
   IsolateRef? isolateRef,
   InstanceSet instanceSet,
 ) async {
-  final instances = instanceSet.instances;
-  if (instances == null) return;
+  final instances = instanceSet.instances ?? [];
   variable.addAllChildren(
     createVariablesForInstanceSet(
       variable.offset,
