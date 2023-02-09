@@ -25,10 +25,10 @@ abstract class ObjectGroupApi {
     final List<String> propertyNames,
   );
 
-  Future<List<DiagnosticableTree>> getChildren(
+  Future<List<T>> getChildren<T>(
     InspectorInstanceRef instanceRef,
     bool summaryTree,
-    DiagnosticableTree? parent,
+    T? parent,
   );
 
   bool isLocalClass(DiagnosticableTree node);
