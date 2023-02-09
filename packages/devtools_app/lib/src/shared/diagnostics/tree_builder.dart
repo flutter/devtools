@@ -126,8 +126,7 @@ Future<void> _addInstanceSetItems(
   InstanceSet instanceSet,
   AdaptedHeapData heap,
 ) async {
-  final instances = instanceSet.instances;
-  if (instances == null) return;
+  final instances = instanceSet.instances ?? [];
   variable.addAllChildren(
     createVariablesForInstanceSet(
       variable.offset,
