@@ -364,7 +364,7 @@ class MemoryPreferencesController extends DisposableController
         );
       },
     );
-    showChart.value = await storage.getValue(_showChartStorageId) == 'true';
+    showChart.value = await storage.getValue(_showChartStorageId) != 'false';
 
     addAutoDisposeListener(
       refLimit,
