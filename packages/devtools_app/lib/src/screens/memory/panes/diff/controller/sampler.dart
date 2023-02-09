@@ -20,25 +20,23 @@ class HeapClassSampler extends ClassSampler {
   IsolateRef get _mainIsolateRef =>
       serviceManager.isolateManager.mainIsolate.value!;
 
-  Future<List<ObjRef>> _instances() async {
+  Future<InstanceSet> _liveInstances() async {
     final isolateId = _mainIsolateRef.id!;
 
     final theClass = (await serviceManager.service!.getClassList(isolateId))
         .classes!
         .firstWhere((ref) => objects.heapClass.matches(ref));
 
-    final instances = await serviceManager.service!.getInstances(
+    return await serviceManager.service!.getInstances(
       isolateId,
       theClass.id!,
       preferences.memory.refLimit.value,
     );
-
-    return instances.instances ?? [];
   }
 
   @override
   Future<void> oneLiveStaticToConsole() async {
-    final instances = await _instances();
+    final instances = (await _liveInstances()).instances ?? [];
 
     final instanceRef = instances.firstWhereOrNull(
       (objRef) =>
@@ -88,4 +86,13 @@ class HeapClassSampler extends ClassSampler {
   bool get isEvalEnabled =>
       objects.heapClass.classType(serviceManager.rootInfoNow().package) !=
       ClassType.runtime;
+
+  @override
+  Future<void> manyLiveToConsole() async {
+    serviceManager.consoleService.appendInstanceSet(
+      type: objects.heapClass.shortName,
+      instanceSet: await _liveInstances(),
+      isolateRef: _mainIsolateRef,
+    );
+  }
 }
