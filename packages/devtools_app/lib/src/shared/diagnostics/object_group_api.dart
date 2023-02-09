@@ -2,11 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
 import 'primitives/instance_ref.dart';
 
-abstract class ObjectGroupApi {
+abstract class ObjectGroupApi<T extends DiagnosticableTree> {
   final bool canSetSelectionInspector = false;
 
   Future<bool> setSelectionInspector(
@@ -24,17 +25,15 @@ abstract class ObjectGroupApi {
     final List<String> propertyNames,
   );
 
-  Future<List<RemoteDiagnosticsNodeApi>> getChildren(
+  Future<List<T>> getChildren(
     InspectorInstanceRef instanceRef,
     bool summaryTree,
-    RemoteDiagnosticsNodeApi? parent,
+    T? parent,
   );
 
-  bool isLocalClass(RemoteDiagnosticsNodeApi node);
+  bool isLocalClass(T node);
 
   Future<InstanceRef?> toObservatoryInstanceRef(
     InspectorInstanceRef inspectorInstanceRef,
   );
 }
-
-abstract class RemoteDiagnosticsNodeApi {}
