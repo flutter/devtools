@@ -53,7 +53,7 @@ class DartIOHttpRequestData extends NetworkRequest {
   static const _localPortKey = 'localPort';
 
   HttpProfileRequestRef _request;
-  
+
   final int wrapperId;
   bool isOutStanding = false;
 

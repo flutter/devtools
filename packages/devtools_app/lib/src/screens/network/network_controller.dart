@@ -369,9 +369,9 @@ class CurrentNetworkRequests {
         assert(_requestsById[webSocket.id] is WebSocket);
       }
 
-    // The new [sockets] may contain web sockets with the same ids as ones we
-    // already have, so we remove the current web sockets and replace them with
-    // updated data.
+      // The new [sockets] may contain web sockets with the same ids as ones we
+      // already have, so we remove the current web sockets and replace them with
+      // updated data.
       _requestsById[webSocket.id] = webSocket;
     }
   }
