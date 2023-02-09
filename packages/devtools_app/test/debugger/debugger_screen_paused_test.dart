@@ -82,7 +82,7 @@ void main() {
   setUp(() {
     final state =
         fakeServiceManager.isolateManager.mainIsolateState! as MockIsolateState;
-    state.isPaused.value = true;
+    when(state.isPaused).thenReturn(ValueNotifier(true));
   });
 
   testWidgetsWithWindowSize(

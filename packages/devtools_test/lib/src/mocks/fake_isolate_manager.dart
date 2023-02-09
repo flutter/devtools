@@ -7,13 +7,17 @@ import 'package:flutter/foundation.dart';
 import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart';
 
-import 'mocks.dart';
+import 'generated.mocks.dart';
 
 class FakeIsolateManager extends Fake implements IsolateManager {
   @override
   ValueListenable<IsolateRef?> get selectedIsolate => _selectedIsolate;
-  final _selectedIsolate =
-      ValueNotifier(IsolateRef.parse({'id': 'fake_isolate_id'}));
+  final _selectedIsolate = ValueNotifier(
+    IsolateRef.parse({
+      'id': 'fake_isolate_id',
+      'name': 'selected-isolate',
+    }),
+  );
 
   @override
   ValueListenable<IsolateRef?> get mainIsolate => _mainIsolate;
@@ -22,7 +26,23 @@ class FakeIsolateManager extends Fake implements IsolateManager {
 
   @override
   ValueNotifier<List<IsolateRef>> get isolates {
-    return _isolates ??= ValueNotifier([_selectedIsolate.value!]);
+    final value = _selectedIsolate.value;
+    _isolates ??= ValueNotifier([if (value != null) value]);
+    return _isolates!;
+  }
+
+  final _pausedState = ValueNotifier<bool>(false);
+
+  @visibleForTesting
+  void setMainIsolatePausedState(bool paused) {
+    _pausedState.value = paused;
+  }
+
+  @override
+  IsolateState? get mainIsolateState {
+    final state = MockIsolateState();
+    when(state.isPaused).thenReturn(_pausedState);
+    return state;
   }
 
   ValueNotifier<List<IsolateRef>>? _isolates;
