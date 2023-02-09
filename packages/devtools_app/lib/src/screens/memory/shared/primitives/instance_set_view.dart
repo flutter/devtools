@@ -12,10 +12,10 @@ import '../../../../shared/globals.dart';
 import '../../../../shared/primitives/utils.dart';
 
 abstract class ClassSampler {
-  /// Drop one variable that exists in static set and still alive in app, to console.
+  /// Drop one variable, which exists in static set and still alive in app, to console.
   Future<void> oneLiveStaticToConsole();
 
-  /// Drop all live instances, to console.
+  /// Drop all live instances to console.
   Future<void> manyLiveToConsole();
 
   bool get isEvalEnabled;
