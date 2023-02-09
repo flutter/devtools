@@ -44,7 +44,7 @@ Future<void> _addDiagnosticsIfNeeded(
 ) async {
   if (diagnostic == null || !includeDiagnosticPropertiesInDebugger) return;
 
-  final service = diagnostic.inspectorService;
+  final service = diagnostic.objectGroupApi;
   Future<void> _addPropertiesHelper(
     List<RemoteDiagnosticsNode>? properties,
   ) async {
@@ -79,7 +79,7 @@ Future<void> _addDiagnosticChildrenIfNeeded(
   if (diagnostic == null || !includeDiagnosticChildren) return;
 
   // Always add children last after properties to avoid confusion.
-  final ObjectGroupBase? service = diagnostic.inspectorService;
+  final ObjectGroupBase? service = diagnostic.objectGroupApi;
   final diagnosticChildren = await diagnostic.children;
   if (diagnosticChildren != null && diagnosticChildren.isNotEmpty) {
     final childrenNode = DartObjectNode.text(

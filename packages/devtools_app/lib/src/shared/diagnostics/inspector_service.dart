@@ -1023,8 +1023,8 @@ abstract class ObjectGroupBase implements Disposable {
         throw UnimplementedError(
           'getSourcePosition not implemented. $location',
         );
-//        return inspectorLibrary.getSourcePosition(
-//            debugProcess, location.script, location.tokenPos, this);
+        // return inspectorLibrary.getSourcePosition(
+        // debugProcess, location.script, location.tokenPos, this);
       }
     }
     final ClassRef? superClass = clazz.superClass;

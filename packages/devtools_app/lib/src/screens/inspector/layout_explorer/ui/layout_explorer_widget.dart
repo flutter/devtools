@@ -183,7 +183,7 @@ abstract class LayoutExplorerWidgetState<W extends LayoutExplorerWidget,
   // this is required so that we don't change focus
   //   when tapping on a child is also Flex-based widget.
   Future<void> setSelectionInspector(RemoteDiagnosticsNode node) async {
-    final service = node.inspectorService;
+    final service = node.objectGroupApi;
     if (service is ObjectGroup) {
       await service.setSelectionInspector(node.valueRef, false);
     }

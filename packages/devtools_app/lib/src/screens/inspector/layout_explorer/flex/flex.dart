@@ -44,7 +44,7 @@ class _FlexLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
   Axis get direction => properties!.direction;
 
   ObjectGroup? get objectGroup =>
-      properties!.node.inspectorService as ObjectGroup?;
+      properties!.node.objectGroupApi as ObjectGroup?;
 
   Color horizontalColor(ColorScheme colorScheme) =>
       properties!.isMainAxisHorizontal
@@ -576,7 +576,7 @@ class FlexChildVisualizer extends StatelessWidget {
   LayoutProperties get properties => renderProperties.layoutProperties!;
 
   ObjectGroup? get objectGroup =>
-      properties.node.inspectorService as ObjectGroup?;
+      properties.node.objectGroupApi as ObjectGroup?;
 
   void onChangeFlexFactor(int? newFlexFactor) async {
     state.markAsDirty();
