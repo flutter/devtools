@@ -494,8 +494,10 @@ List<DartObjectNode> createVariablesForInstanceSet(
   for (int i = offset; i < offset + childCount; i++) {
     final instance = instances[i];
     final index = heap.objectIndexByIdentityHashCode(instance.hashCode);
-    final heapSelection = HeapObjectSelection(heap,
-        object: index == null ? null : heap.objects[index]);
+    final heapSelection = HeapObjectSelection(
+      heap,
+      object: index == null ? null : heap.objects[index],
+    );
     variables.add(
       DartObjectNode.fromValue(
         name: '[$i]',

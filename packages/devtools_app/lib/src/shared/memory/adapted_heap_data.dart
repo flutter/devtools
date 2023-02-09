@@ -42,8 +42,11 @@ class HeapObjectSelection {
           .map((i) => HeapObjectSelection(heap, object: heap.objects[i]))
           .toList();
 
-  int? countOfReferences(RefDirection? direction) =>
-      direction == null ? null : _refs(direction).length;
+  int? countOfReferences(RefDirection? direction) {
+    if (direction == null) return null;
+    if (object == null) return null;
+    return _refs(direction).length;
+  }
 }
 
 /// Contains information from [HeapSnapshotGraph],

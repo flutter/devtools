@@ -49,10 +49,11 @@ Future<void> addChildReferences(
           'live',
           ObjectReferences.withType(ref, RefNodeType.liveRefRoot),
         ),
-        DartObjectNode.references(
-          'static',
-          ObjectReferences.withType(ref, RefNodeType.staticRefRoot),
-        ),
+        if (ref.heapSelection?.object != null)
+          DartObjectNode.references(
+            'static',
+            ObjectReferences.withType(ref, RefNodeType.staticRefRoot),
+          ),
       ]);
       break;
     case RefNodeType.staticRefRoot:
@@ -66,7 +67,6 @@ Future<void> addChildReferences(
           ObjectReferences.withType(ref, RefNodeType.staticOutRefs),
         ),
       ]);
-
       break;
     case RefNodeType.staticInRefs:
       final children = ref.heapSelection!
@@ -131,7 +131,11 @@ Future<void> addChildReferences(
 
       for (var i = 0; i < refsToShow; i++) {
         final item = refs[i];
-        variable.addChild(DartObjectNode.text(jsonEncode(item.toJson())));
+        variable.addChild(
+          DartObjectNode.text(
+            jsonEncode(item.toJson(), toEncodable: (o) => o.toString()),
+          ),
+        );
       }
 
       if (refs.length > limit)
