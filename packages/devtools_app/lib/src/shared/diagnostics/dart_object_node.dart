@@ -53,12 +53,13 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
     name = name ?? '';
 
     final String? text;
-    if (heapSelection == null) {
+    final object = heapSelection?.object;
+    if (object == null) {
       text = null;
     } else {
-      final className = heapSelection.object.heapClass.className;
+      final className = object.heapClass.className;
       final size = prettyPrintRetainedSize(
-        heapSelection.object.retainedSize,
+        object.retainedSize,
       );
       text = '$className, retained size $size';
     }
@@ -144,12 +145,14 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
     required String text,
     required InstanceSet instanceSet,
     required IsolateRef? isolateRef,
+    required AdaptedHeapData heap,
   }) {
     return DartObjectNode._(
       text: text,
       ref: GenericInstanceRef(
         isolateRef: isolateRef,
         value: instanceSet,
+        heapSelection: HeapObjectSelection(heap, object: null),
       ),
       artificialValue: true,
       artificialName: true,

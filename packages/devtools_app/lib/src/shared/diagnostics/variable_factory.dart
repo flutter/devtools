@@ -10,6 +10,7 @@ import 'package:flutter/foundation.dart';
 import 'package:stack_trace/stack_trace.dart' as stack_trace;
 import 'package:vm_service/vm_service.dart';
 
+import '../memory/adapted_heap_data.dart';
 import '../primitives/utils.dart';
 import 'dart_object_node.dart';
 import 'diagnostics_node.dart';
@@ -487,14 +488,20 @@ List<DartObjectNode> createVariablesForInstanceSet(
   int childCount,
   List<ObjRef> instances,
   IsolateRef? isolateRef,
+  AdaptedHeapData heap,
 ) {
   final variables = <DartObjectNode>[];
   for (int i = offset; i < offset + childCount; i++) {
+    final instance = instances[i];
+    final index = heap.objectIndexByIdentityHashCode(instance.hashCode);
+    final heapSelection = HeapObjectSelection(heap,
+        object: index == null ? null : heap.objects[index]);
     variables.add(
       DartObjectNode.fromValue(
         name: '[$i]',
-        value: instances[i],
+        value: instance,
         isolateRef: isolateRef,
+        heapSelection: heapSelection,
       ),
     );
   }

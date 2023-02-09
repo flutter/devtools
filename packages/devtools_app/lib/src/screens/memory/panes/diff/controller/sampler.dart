@@ -52,9 +52,9 @@ class HeapClassSampler extends ClassSampler {
     }
 
     final heapObject =
-        objects.objects.objectsByCodes[instanceRef.identityHashCode!]!;
+        objects.objects.objectsByCodes[instanceRef.identityHashCode!];
 
-    final heapSelection = HeapObjectSelection(heap, heapObject);
+    final heapSelection = HeapObjectSelection(heap, object: heapObject);
 
     // drop to console
     serviceManager.consoleService.appendInstanceRef(
@@ -93,6 +93,7 @@ class HeapClassSampler extends ClassSampler {
       type: objects.heapClass.shortName,
       instanceSet: await _liveInstances(),
       isolateRef: _mainIsolateRef,
+      heap: heap,
     );
   }
 }

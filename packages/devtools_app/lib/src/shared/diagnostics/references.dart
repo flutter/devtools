@@ -71,10 +71,10 @@ Future<void> addChildReferences(
     case RefNodeType.staticInRefs:
       final children = ref.heapSelection!
           .references(ref.refNodeType.direction!)
-          .where((s) => !s.object.heapClass.isNull)
+          .where((s) => !(s.object?.heapClass.isNull ?? true))
           .map(
             (s) => DartObjectNode.references(
-              s.object.heapClass.className,
+              s.object!.heapClass.className,
               ObjectReferences(
                 refNodeType: RefNodeType.staticInRefs,
                 heapSelection: s,
@@ -87,19 +87,21 @@ Future<void> addChildReferences(
     case RefNodeType.staticOutRefs:
       final children = ref.heapSelection!
           .references(ref.refNodeType.direction!)
-          .where((s) => !s.object.heapClass.isNull)
+          .where((s) => !(s.object?.heapClass.isNull ?? true))
           .map(
-            (s) => DartObjectNode.references(
-              '${s.object.heapClass.className}, ${prettyPrintRetainedSize(
-                s.object.retainedSize,
-              )}',
-              ObjectReferences(
-                refNodeType: RefNodeType.staticOutRefs,
-                heapSelection: s,
-              ),
+        (s) {
+          final object = s.object!;
+          return DartObjectNode.references(
+            '${object.heapClass.className}, ${prettyPrintRetainedSize(
+              object.retainedSize,
+            )}',
+            ObjectReferences(
+              refNodeType: RefNodeType.staticOutRefs,
+              heapSelection: s,
             ),
-          )
-          .toList();
+          );
+        },
+      ).toList();
       variable.addAllChildren(children);
       break;
     case RefNodeType.liveRefRoot:

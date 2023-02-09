@@ -108,6 +108,7 @@ class ConsoleService extends Disposer {
     required String type,
     required InstanceSet instanceSet,
     required IsolateRef? isolateRef,
+    required AdaptedHeapData heap,
   }) async {
     _stdioTrailingNewline = false;
     final variable = DartObjectNode.fromInstanceSet(
@@ -115,6 +116,7 @@ class ConsoleService extends Disposer {
           '$type (${instanceSet.instances?.length ?? 0} out of ${instanceSet.totalCount} instances)',
       instanceSet: instanceSet,
       isolateRef: isolateRef,
+      heap: heap,
     );
 
     await buildVariablesTree(variable);

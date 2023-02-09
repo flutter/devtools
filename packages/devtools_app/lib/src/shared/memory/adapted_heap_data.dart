@@ -22,23 +22,24 @@ class _JsonFields {
 }
 
 class HeapObjectSelection {
-  HeapObjectSelection(this.heap, this.object);
+  HeapObjectSelection(this.heap, {required this.object});
 
   final AdaptedHeapData heap;
-  final AdaptedHeapObject object;
+  final AdaptedHeapObject? object;
 
   Iterable<int> _refs(RefDirection direction) {
+    final theObject = object!;
     switch (direction) {
       case RefDirection.inbound:
-        return object.inRefs;
+        return theObject.inRefs;
       case RefDirection.outbound:
-        return object.outRefs;
+        return theObject.outRefs;
     }
   }
 
   List<HeapObjectSelection> references(RefDirection direction) =>
       _refs(direction)
-          .map((i) => HeapObjectSelection(heap, heap.objects[i]))
+          .map((i) => HeapObjectSelection(heap, object: heap.objects[i]))
           .toList();
 
   int? countOfReferences(RefDirection? direction) =>

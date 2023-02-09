@@ -11,6 +11,7 @@ import '../../screens/debugger/debugger_model.dart';
 import '../config_specific/logger/logger.dart';
 import '../feature_flags.dart';
 import '../globals.dart';
+import '../memory/adapted_heap_data.dart';
 import '../primitives/utils.dart';
 import 'dart_object_node.dart';
 import 'diagnostics_node.dart';
@@ -123,6 +124,7 @@ Future<void> _addInstanceSetItems(
   DartObjectNode variable,
   IsolateRef? isolateRef,
   InstanceSet instanceSet,
+  AdaptedHeapData heap,
 ) async {
   final instances = instanceSet.instances;
   if (instances == null) return;
@@ -132,6 +134,7 @@ Future<void> _addInstanceSetItems(
       variable.childCount,
       instances,
       isolateRef,
+      heap,
     ),
   );
 }
@@ -397,7 +400,12 @@ Future<void> buildVariablesTree(
     } else if (instanceRef != null && serviceManager.service != null) {
       await _addInstanceRefItems(variable, instanceRef, isolateRef);
     } else if (value is InstanceSet) {
-      await _addInstanceSetItems(variable, isolateRef, value);
+      await _addInstanceSetItems(
+        variable,
+        isolateRef,
+        value,
+        ref.heapSelection!.heap,
+      );
     } else if (value != null) {
       await _addValueItems(variable, isolateRef, value);
     }
