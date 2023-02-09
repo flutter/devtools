@@ -137,7 +137,7 @@ class HttpRequestView extends StatelessWidget {
   Widget build(BuildContext context) {
     return ValueListenableBuilder(
       valueListenable: data.updateCount,
-      builder: (_, __, ___) {
+      builder: (context, __, ___) {
         final theme = Theme.of(context);
         final requestHeaders = data.requestHeaders;
         final requestContentType = requestHeaders?['content-type'] ?? '';
