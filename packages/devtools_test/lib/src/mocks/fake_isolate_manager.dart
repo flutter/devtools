@@ -47,9 +47,14 @@ class FakeIsolateManager extends Fake implements IsolateManager {
   IsolateState isolateState(IsolateRef? isolate) {
     final state = MockIsolateState();
     final mockIsolate = MockIsolate();
+    final rootLib = LibraryRef(id: '0', uri: 'pacakge:my_app/main.dart');
     when(mockIsolate.libraries).thenReturn(
-      [LibraryRef(id: '1', uri: 'dart:io')],
+      [
+        rootLib,
+        LibraryRef(id: '1', uri: 'dart:io'),
+      ],
     );
+    when(mockIsolate.rootLib).thenReturn(rootLib);
     when(state.isolateNow).thenReturn(mockIsolate);
     when(state.isPaused).thenReturn(_pausedState);
     when(state.isolate).thenAnswer((_) => Future.value(mockIsolate));
