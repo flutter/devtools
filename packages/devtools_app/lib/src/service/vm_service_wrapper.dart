@@ -856,7 +856,7 @@ class VmServiceWrapper implements VmService {
     String id,
   ) async {
     assert(await isHttpProfilingAvailable(isolateId));
-        final dartIOVersion = await getDartIOVersion(isolateId);
+    final dartIOVersion = await getDartIOVersion(isolateId);
     final majorVersion = dartIOVersion.major;
     // TODO(CoderDake): switch back to _vmService.getHttpProfileRequest call
     // when upgrading to vm_service:11.0.0
