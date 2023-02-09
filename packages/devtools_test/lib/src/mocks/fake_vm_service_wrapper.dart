@@ -404,7 +404,7 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
     final httpProfile = await getHttpProfile(isolateId);
     return Future.value(
       httpProfile.requests
-          .firstWhereOrNull((request) => request.id == id),
+          .firstWhereOrNull((request) => request.id.toString() == id),
     );
   }
 

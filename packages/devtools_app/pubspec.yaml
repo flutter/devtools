@@ -189,4 +189,3 @@ dependency_overrides:
     path: ../devtools_shared
   devtools_test:
     path: ../devtools_test
-  vm_service: ^11.0.0 #TODO: Remove when new flutter candidate posted

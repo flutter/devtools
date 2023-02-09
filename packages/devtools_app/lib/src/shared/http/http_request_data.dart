@@ -70,7 +70,7 @@ class DartIOHttpRequestData extends NetworkRequest {
       isFetchingFullData = true;
       final updated = await serviceManager.service!.getHttpProfileRequest(
         _request.isolateId,
-        _request.id,
+        _request.id.toString(),
       );
       _request = updated;
       updateCount.value++;
@@ -91,7 +91,7 @@ class DartIOHttpRequestData extends NetworkRequest {
   }
 
   @override
-  String get id => _request.id;
+  String get id => _request.id.toString();
 
   bool get _hasError => _request.request?.hasError ?? false;
 

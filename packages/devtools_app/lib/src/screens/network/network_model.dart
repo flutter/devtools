@@ -84,7 +84,7 @@ class WebSocket extends NetworkRequest {
 
   final SocketStatistic _socket;
   @override
-  String get id => _socket.id;
+  String get id => _socket.id.toString();
 
   @override
   Duration? get duration {
