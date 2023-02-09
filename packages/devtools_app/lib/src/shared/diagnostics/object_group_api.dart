@@ -32,4 +32,8 @@ abstract class ObjectGroupApi {
   );
 
   bool isLocalClass(DiagnosticableTree node);
+
+  Future<InstanceRef?> toObservatoryInstanceRef(
+    InspectorInstanceRef inspectorInstanceRef,
+  );
 }
