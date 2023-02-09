@@ -47,7 +47,7 @@ jobs:
         Ensure that that current version has been properly bumped to a '-dev.*' \
         pre-release version, in order to continue daily dev bumps."
 
-          echo "::error ,title=Cannot Bump A Release Version ($CURRENT_VERSION)::$ERROR_DESCRIPTION" 
+          echo "::error ,title=Cannot Bump A Release Version ($CURRENT_VERSION)::$ERROR_DESCRIPTION" /intl/en/about/products
           exit 1;
         fi
     
@@ -60,13 +60,15 @@ jobs:
 
     - name: Create the PR
       run: |
+        set -x
         BRANCH_NAME="auto-bump-$(date +%s)"
         # Stage the file, commit and push
         git checkout -b "$BRANCH_NAME"
+        git remote add bot_origin git@github.com:DartDevtoolWorkflowBot/devtools.git
         git commit -a -m "$COMMIT_MESSAGE"
-        git push -u origin "$BRANCH_NAME"
+        git push -u bot_origin "$BRANCH_NAME"
 
-        PR_URL=$(gh pr create --title "$COMMIT_MESSAGE" --body "RELEASE_NOTE_EXCEPTION=Automated Version Bump")
+        PR_URL=$(gh pr create -d --title "$COMMIT_MESSAGE" --body "RELEASE_NOTE_EXCEPTION=Automated Version Bump")
 
         # Change github credentials back to the actions bot.
         GH_TOKEN="$ORIGINAL_GH_TOKEN"
@@ -76,30 +78,30 @@ jobs:
         COMMIT_MESSAGE: ${{ steps.version-bump.outputs.COMMIT_MESSAGE }}
         GH_TOKEN: ${{ secrets.DEVTOOLS_WORKFLOW_BOT_TOKEN }}
         ORIGINAL_GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  clean-up-branches:
-    permissions: write-all
-    # If a pr is closed on a workflow bot PR, then clean up workflow bot branches.
-    # if: ${{ github.event_name == 'pull_request' && github.event.action == 'closed'  && github.event.pull_request.user.login == 'DartDevtoolWorkflowBot'}}
-    name: Clean up Dev Bump Branches
-    runs-on: ubuntu-latest
-    steps:
-    - name: Debug output
-      run: |
-        echo "1:${{ github.event_name }} 2:${{github.event.action }} 3:${{github.event.pull_request.user.login}}"
-        gh auth status
-    - name: git clone devtools
-      uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c
-    - name: Clean up branches
-      run: |
-        set -x
-        # Get 5 most recent branches of closed DartDevtoolWorkflowBot PRs.
-        CLOSED_BRANCH_NAMES=$(gh pr list -A DartDevtoolWorkflowBot -s closed -L 5 --search sort:created-desc | grep auto-bump- | sed 's|.*\(auto-bump-[[:digit:]]*\).*|\1|')
+  # clean-up-branches:
+  #   permissions: write-all
+  #   # If a pr is closed on a workflow bot PR, then clean up workflow bot branches.
+  #   # if: ${{ github.event_name == 'pull_request' && github.event.action == 'closed'  && github.event.pull_request.user.login == 'DartDevtoolWorkflowBot'}}
+  #   name: Clean up Dev Bump Branches
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #   - name: Debug output
+  #     run: |
+  #       echo "1:${{ github.event_name }} 2:${{github.event.action }} 3:${{github.event.pull_request.user.login}}"
+  #       gh auth status
+  #   - name: git clone devtools
+  #     uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c
+  #   - name: Clean up branches
+  #     run: |
+  #       set -x
+  #       # Get 5 most recent branches of closed DartDevtoolWorkflowBot PRs.
+  #       CLOSED_BRANCH_NAMES=$(gh pr list -A DartDevtoolWorkflowBot -s closed -L 5 --search sort:created-desc | grep auto-bump- | sed 's|.*\(auto-bump-[[:digit:]]*\).*|\1|')
 
-        # Get list of refs(branches) that exist on the remote
-        EXISTING_REFS=$(git ls-remote --heads | grep refs/heads/auto-bump-) 
-        for CLOSED_BRANCH in $CLOSED_BRANCH_NAMES; do
-          if echo "$EXISTING_REFS" | grep -q "$CLOSED_BRANCH" ; then
-            # If the branch still exists then we will delete it
-            gh api  /repos/flutter/devtools/git/refs/heads/$CLOSED_BRANCH -X DELETE
-          fi
-        done
+  #       # Get list of refs(branches) that exist on the remote
+  #       EXISTING_REFS=$(git ls-remote --heads | grep refs/heads/auto-bump-) 
+  #       for CLOSED_BRANCH in $CLOSED_BRANCH_NAMES; do
+  #         if echo "$EXISTING_REFS" | grep -q "$CLOSED_BRANCH" ; then
+  #           # If the branch still exists then we will delete it
+  #           gh api  /repos/flutter/devtools/git/refs/heads/$CLOSED_BRANCH -X DELETE
+  #         fi
+  #       done
