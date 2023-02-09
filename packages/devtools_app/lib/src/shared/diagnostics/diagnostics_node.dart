@@ -157,7 +157,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
 
   bool get isLocalClass {
     final objectGroup = objectGroupApi;
-    if (objectGroup is ObjectGroupBase) {
+    if (objectGroup != null) {
       return _isLocalClass ??= objectGroup.inspectorService.isLocalClass(this);
     } else {
       // TODO(jacobr): if objectGroup is a Future<ObjectGroup> we cannot compute

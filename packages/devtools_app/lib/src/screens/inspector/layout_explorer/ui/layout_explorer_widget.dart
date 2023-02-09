@@ -184,7 +184,7 @@ abstract class LayoutExplorerWidgetState<W extends LayoutExplorerWidget,
   //   when tapping on a child is also Flex-based widget.
   Future<void> setSelectionInspector(RemoteDiagnosticsNode node) async {
     final service = node.objectGroupApi;
-    if (service is ObjectGroup) {
+    if (service != null && service is ObjectGroup) {
       await service.setSelectionInspector(node.valueRef, false);
     }
   }
