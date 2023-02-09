@@ -74,7 +74,7 @@ class _StoreAsVariableMenu extends StatelessWidget {
     }
 
     return SubmenuButton(
-      // TODO(polina-c): change structure of the menu before opening the feature.
+      // TODO(polina-c): change structure and review texts before opening the feature.
       menuChildren: <Widget>[
         MenuItemButton(
           onPressed: sampleObtainer.oneLiveStaticToConsole,
@@ -84,7 +84,7 @@ class _StoreAsVariableMenu extends StatelessWidget {
         ),
         MenuItemButton(
           onPressed: sampleObtainer.manyLiveToConsole,
-          child: Text('Up to $limit instances currently alive in application'),
+          child: Text('Up to $limit instances, currently alive in application'),
         ),
       ],
       child: const Text(menuText),

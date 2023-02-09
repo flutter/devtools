@@ -140,19 +140,6 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
       ]);
   }
 
-  /// Creates a list node from a list of values that must be VM service objects
-  /// or primitives.
-  ///
-  /// [list] should be a list of VM service objects or primitives.
-  ///
-  /// [displayNameBuilder] is used to transform a list element that will be the
-  /// child node's `value`.
-  ///
-  /// [childBuilder] is used to generate nodes for each child.
-  ///
-  /// [artificialChildValues] determines styling of `Text(displayValue)` for
-  /// child nodes. Artificial values are rendered using `subtleFixedFontStyle`
-  /// to put less emphasis on the value.
   factory DartObjectNode.fromInstanceSet({
     required String text,
     required InstanceSet instanceSet,

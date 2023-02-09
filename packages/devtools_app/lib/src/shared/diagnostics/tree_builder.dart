@@ -389,9 +389,6 @@ Future<void> buildVariablesTree(
     variable,
   );
 
-  if (variable.text == '!!!!!') {
-    print('found');
-  }
   try {
     if (variable.childCount > DartObjectNode.MAX_CHILDREN_IN_GROUPING) {
       _setupGrouping(variable);
