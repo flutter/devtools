@@ -21,10 +21,10 @@ in deeply nested trees - [#5181](https://github.com/flutter/devtools/pull/5181)
 * Add the ability to filter by method name or source URI - [#5204](https://github.com/flutter/devtools/pull/5204)
 
 ## Memory updates
-TODO: Remove this section if there are not any general updates.
+* Change filter default to show only project and 3rd party dependencies [#5201](https://github.com/flutter/devtools/pull/5201).
 
 ## Debugger updates
-* Added support for browser navigation history when navigating using the `File Explorer` [#4906](https://github.com/flutter/devtools/pull/4906).
+* Add support for browser navigation history when navigating using the `File Explorer` [#4906](https://github.com/flutter/devtools/pull/4906).
 
 ## Network profiler updates
 TODO: Remove this section if there are not any general updates.
