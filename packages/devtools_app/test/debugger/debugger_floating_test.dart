@@ -90,7 +90,7 @@ void main() {
   });
 
   testWidgets('are hidden when app is not paused', (WidgetTester tester) async {
-        fakeServiceManager.isMainIsolatePaused = false;
+    fakeServiceManager.isMainIsolatePaused = false;
     (fakeServiceManager.isolateManager as FakeIsolateManager)
         .setMainIsolatePausedState(false);
     await pumpControls(tester);
