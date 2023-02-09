@@ -105,14 +105,15 @@ class ConsoleService extends Disposer {
   }
 
   void appendInstanceSet({
-    String? name,
+    required String type,
     required InstanceSet instanceSet,
     required IsolateRef? isolateRef,
   }) async {
     _stdioTrailingNewline = false;
-    final variable = DartObjectNode.fromList(
-      type: null,
-      list: instanceSet.instances,
+    final variable = DartObjectNode.fromInstanceSet(
+      text:
+          '$type (${instanceSet.instances?.length ?? 0} out of ${instanceSet.totalCount} instances)',
+      instanceSet: instanceSet,
       isolateRef: isolateRef,
     );
 

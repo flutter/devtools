@@ -482,6 +482,25 @@ List<DartObjectNode> createVariablesForList(
   return variables;
 }
 
+List<DartObjectNode> createVariablesForInstanceSet(
+  int offset,
+  int childCount,
+  List<ObjRef> instances,
+  IsolateRef? isolateRef,
+) {
+  final variables = <DartObjectNode>[];
+  for (int i = offset; i < offset + childCount; i++) {
+    variables.add(
+      DartObjectNode.fromValue(
+        name: '[$i]',
+        value: instances[i],
+        isolateRef: isolateRef,
+      ),
+    );
+  }
+  return variables;
+}
+
 List<DartObjectNode> createVariablesForRecords(
   Instance instance,
   IsolateRef? isolateRef,
