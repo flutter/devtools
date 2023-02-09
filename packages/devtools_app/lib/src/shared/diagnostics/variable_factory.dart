@@ -14,7 +14,7 @@ import 'package:vm_service/vm_service.dart';
 import '../primitives/utils.dart';
 import 'dart_object_node.dart';
 import 'diagnostics_node.dart';
-import 'inspector_service.dart';
+import 'object_group_api.dart';
 
 List<DartObjectNode> createVariablesForStackTrace(
   Instance stackTrace,
@@ -300,11 +300,11 @@ List<DartObjectNode> createVariablesForRegExp(
 
 Future<DartObjectNode> _buildVariable(
   RemoteDiagnosticsNode diagnostic,
-  ObjectGroupBase inspectorService,
+  ObjectGroupApi<RemoteDiagnosticsNode> objectGroup,
   IsolateRef? isolateRef,
 ) async {
   final instanceRef =
-      await inspectorService.toObservatoryInstanceRef(diagnostic.valueRef);
+      await objectGroup.toObservatoryInstanceRef(diagnostic.valueRef);
   return DartObjectNode.fromValue(
     name: diagnostic.name,
     value: instanceRef,
@@ -314,7 +314,7 @@ Future<DartObjectNode> _buildVariable(
 }
 
 Future<List<DartObjectNode>> createVariablesForDiagnostics(
-  ObjectGroupBase inspectorService,
+  ObjectGroupApi<RemoteDiagnosticsNode> objectGroupApi,
   List<RemoteDiagnosticsNode> diagnostics,
   IsolateRef isolateRef,
 ) async {
@@ -322,7 +322,7 @@ Future<List<DartObjectNode>> createVariablesForDiagnostics(
   for (var diagnostic in diagnostics) {
     // Omit hidden properties.
     if (diagnostic.level == DiagnosticLevel.hidden) continue;
-    variables.add(_buildVariable(diagnostic, inspectorService, isolateRef));
+    variables.add(_buildVariable(diagnostic, objectGroupApi, isolateRef));
   }
   return variables.isNotEmpty ? await Future.wait(variables) : const [];
 }

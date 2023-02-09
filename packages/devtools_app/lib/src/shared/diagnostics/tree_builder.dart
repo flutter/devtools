@@ -17,6 +17,7 @@ import 'diagnostics_node.dart';
 import 'generic_instance_reference.dart';
 import 'helpers.dart';
 import 'inspector_service.dart';
+import 'object_group_api.dart';
 import 'references.dart';
 import 'variable_factory.dart';
 
@@ -79,7 +80,8 @@ Future<void> _addDiagnosticChildrenIfNeeded(
   if (diagnostic == null || !includeDiagnosticChildren) return;
 
   // Always add children last after properties to avoid confusion.
-  final ObjectGroupBase? service = diagnostic.objectGroupApi;
+  final ObjectGroupApi<RemoteDiagnosticsNode>? service =
+      diagnostic.objectGroupApi;
   final diagnosticChildren = await diagnostic.children;
   if (diagnosticChildren != null && diagnosticChildren.isNotEmpty) {
     final childrenNode = DartObjectNode.text(

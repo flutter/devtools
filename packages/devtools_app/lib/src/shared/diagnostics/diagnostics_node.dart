@@ -13,6 +13,7 @@ import '../primitives/enum_utils.dart';
 import '../primitives/utils.dart';
 import '../ui/icons.dart';
 import 'inspector_service.dart';
+import 'object_group_api.dart';
 import 'primitives/instance_ref.dart';
 import 'primitives/source_location.dart';
 
@@ -94,7 +95,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
 
   /// Service used to retrieve more detailed information about the value of
   /// the property and its children and properties.
-  final ObjectGroupBase? objectGroupApi;
+  final ObjectGroupApi<RemoteDiagnosticsNode>? objectGroupApi;
 
   /// JSON describing the diagnostic node.
   final Map<String, Object?> json;
@@ -158,7 +159,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   bool get isLocalClass {
     final objectGroup = objectGroupApi;
     if (objectGroup != null) {
-      return _isLocalClass ??= objectGroup.inspectorService.isLocalClass(this);
+      return _isLocalClass ??= objectGroup.isLocalClass(this);
     } else {
       // TODO(jacobr): if objectGroup is a Future<ObjectGroup> we cannot compute
       // whether classes are local as for convenience we need this method to
@@ -624,7 +625,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   }
 
   Future<List<RemoteDiagnosticsNode>> getProperties(
-    ObjectGroupBase objectGroup,
+    ObjectGroupApi<RemoteDiagnosticsNode> objectGroup,
   ) async {
     return await objectGroup.getProperties(dartDiagnosticRef);
   }

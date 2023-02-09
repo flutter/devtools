@@ -5,9 +5,10 @@
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../eval_on_dart_library.dart';
 import 'primitives/instance_ref.dart';
 
-abstract class ObjectGroupApi<T extends DiagnosticableTree> {
+abstract class ObjectGroupApi<T extends DiagnosticableTree> implements Disposable {
   final bool canSetSelectionInspector = false;
 
   Future<bool> setSelectionInspector(
@@ -36,4 +37,6 @@ abstract class ObjectGroupApi<T extends DiagnosticableTree> {
   Future<InstanceRef?> toObservatoryInstanceRef(
     InspectorInstanceRef inspectorInstanceRef,
   );
+
+  Future<List<T>> getProperties(InspectorInstanceRef instanceRef);
 }

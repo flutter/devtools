@@ -22,6 +22,7 @@ import '../primitives/auto_dispose.dart';
 import '../primitives/utils.dart';
 import 'diagnostics_node.dart';
 import 'generic_instance_reference.dart';
+import 'object_group_api.dart';
 import 'primitives/instance_ref.dart';
 import 'primitives/source_location.dart';
 
@@ -572,7 +573,7 @@ class InspectorService extends InspectorServiceBase {
   }
 }
 
-abstract class ObjectGroupBase implements Disposable {
+abstract class ObjectGroupBase extends ObjectGroupApi<RemoteDiagnosticsNode> {
   ObjectGroupBase(
     String debugName,
   ) : groupName = '${debugName}_${InspectorServiceBase.nextGroupId}' {
@@ -894,6 +895,7 @@ abstract class ObjectGroupBase implements Disposable {
     return jsonDecode(json);
   }
 
+  @override
   Future<InstanceRef?> toObservatoryInstanceRef(
     InspectorInstanceRef inspectorInstanceRef,
   ) async {
@@ -936,6 +938,7 @@ abstract class ObjectGroupBase implements Disposable {
   /// fields.
   ///
   /// The future will immediately complete to null if the inspectorInstanceRef is null.
+  @override
   Future<Map<String, InstanceRef>?> getDartObjectProperties(
     InspectorInstanceRef inspectorInstanceRef,
     final List<String> propertyNames,
@@ -965,6 +968,7 @@ abstract class ObjectGroupBase implements Disposable {
     return properties;
   }
 
+  @override
   Future<Map<String, InstanceRef>?> getEnumPropertyValues(
     InspectorInstanceRef ref,
   ) async {
@@ -1095,6 +1099,7 @@ abstract class ObjectGroupBase implements Disposable {
     }
   }
 
+  @override
   Future<List<RemoteDiagnosticsNode>> getProperties(
     InspectorInstanceRef instanceRef,
   ) {
@@ -1106,6 +1111,7 @@ abstract class ObjectGroupBase implements Disposable {
     );
   }
 
+  @override
   Future<List<RemoteDiagnosticsNode>> getChildren(
     InspectorInstanceRef instanceRef,
     bool summaryTree,
@@ -1241,6 +1247,7 @@ class ObjectGroup extends ObjectGroupBase {
         : newSelection;
   }
 
+  @override
   Future<bool> setSelectionInspector(
     InspectorInstanceRef selection,
     bool uiAlreadyUpdated,
@@ -1393,6 +1400,10 @@ class ObjectGroup extends ObjectGroupBase {
     final directories = (invocationResult as List?)?.cast<Object>();
     return List.from(directories ?? []);
   }
+
+  @override
+  bool isLocalClass(RemoteDiagnosticsNode node) =>
+      inspectorService.isLocalClass(node);
 }
 
 abstract class InspectorServiceClient {
