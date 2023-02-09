@@ -39,11 +39,7 @@ class FakeIsolateManager extends Fake implements IsolateManager {
   }
 
   @override
-  IsolateState? get mainIsolateState {
-    final state = MockIsolateState();
-    when(state.isPaused).thenReturn(_pausedState);
-    return state;
-  }
+  IsolateState? get mainIsolateState => isolateState(null);
 
   ValueNotifier<List<IsolateRef>>? _isolates;
 
@@ -51,8 +47,12 @@ class FakeIsolateManager extends Fake implements IsolateManager {
   IsolateState isolateState(IsolateRef? isolate) {
     final state = MockIsolateState();
     final mockIsolate = MockIsolate();
-    when(mockIsolate.libraries).thenReturn([]);
+    when(mockIsolate.libraries).thenReturn(
+      [LibraryRef(id: '1', uri: 'dart:io')],
+    );
     when(state.isolateNow).thenReturn(mockIsolate);
+    when(state.isPaused).thenReturn(_pausedState);
+    when(state.isolate).thenAnswer((_) => Future.value(mockIsolate));
     return state;
   }
 }
