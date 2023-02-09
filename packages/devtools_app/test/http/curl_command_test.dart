@@ -246,7 +246,7 @@ DartIOHttpRequestData _testDartIOHttpRequestData({
   return _TestDartIOHttpRequestData(
     0,
     HttpProfileRequest(
-      id: '0',
+      id: 0,
       isolateId: '0',
       method: method,
       uri: uri,
