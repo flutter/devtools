@@ -41,8 +41,7 @@ class DartIOHttpRequestData extends NetworkRequest {
     int timelineMicrosBase,
     this._request, {
     bool requestFullDataFromVmService = true,
-  })  : wrapperId = _dartIoHttpRequestWrapperId++,
-        super(timelineMicrosBase) {
+  }) : super(timelineMicrosBase) {
     if (requestFullDataFromVmService && _request.isResponseComplete) {
       unawaited(getFullRequestData());
     }
@@ -54,7 +53,6 @@ class DartIOHttpRequestData extends NetworkRequest {
 
   HttpProfileRequestRef _request;
 
-  final int wrapperId;
   bool isOutStanding = false;
 
   final ValueNotifier<int> _updateCount = ValueNotifier<int>(0);
@@ -328,14 +326,12 @@ class DartIOHttpRequestData extends NetworkRequest {
 
   @override
   bool operator ==(other) {
-    return other is DartIOHttpRequestData &&
-        wrapperId == other.wrapperId &&
-        super == other;
+    return other is DartIOHttpRequestData && id == other.id && super == other;
   }
 
   @override
   int get hashCode => Object.hash(
-        wrapperId,
+        id,
         method,
         uri,
         contentType,
