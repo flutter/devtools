@@ -13,6 +13,7 @@ import 'vm_class_display.dart';
 import 'vm_code_display.dart';
 import 'vm_field_display.dart';
 import 'vm_function_display.dart';
+import 'vm_ic_data_display.dart';
 import 'vm_instance_display.dart';
 import 'vm_library_display.dart';
 import 'vm_object_model.dart';
@@ -115,6 +116,12 @@ class ObjectViewport extends StatelessWidget {
       return VmCodeDisplay(
         controller: controller,
         code: obj,
+      );
+    }
+    if (obj is ICDataObject) {
+      return VmICDataDisplay(
+        controller: controller,
+        icData: obj,
       );
     }
     return const SizedBox.shrink();
