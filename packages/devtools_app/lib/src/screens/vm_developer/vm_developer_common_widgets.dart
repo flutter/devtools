@@ -691,7 +691,7 @@ class InboundReferencesWidget extends StatelessWidget {
   }
 }
 
-class VmServiceObjectLink<T> extends StatelessWidget {
+class VmServiceObjectLink<T extends ObjRef?> extends StatelessWidget {
   const VmServiceObjectLink({
     required this.object,
     required this.onTap,
@@ -766,6 +766,9 @@ class VmServiceObjectLink<T> extends StatelessWidget {
       } else if (object is Sentinel) {
         final sentinel = object as Sentinel;
         text = sentinel.valueAsString!;
+      } else if (object?.isICData ?? false) {
+        final icData = object!.asICData;
+        text = 'ICData(${icData.selector})';
       } else {
         isServiceObject = false;
         text = object.toString();
