@@ -769,7 +769,8 @@ class VmServiceObjectLink<T extends Response?> extends StatelessWidget {
       } else if (object is Obj? && ((object as Obj?)?.isICData ?? false)) {
         final icData = (object as Obj).asICData;
         text = 'ICData(${icData.selector})';
-      } else if (object is ObjRef? && ((object as ObjRef?)?.isObjectPool ?? false)) {
+      } else if (object is ObjRef? &&
+          ((object as ObjRef?)?.isObjectPool ?? false)) {
         final objectPool = (object as ObjRef).asObjectPool;
         text = 'Object Pool(length: ${objectPool.length})';
       } else {
@@ -798,20 +799,15 @@ class VmServiceObjectLink<T extends Response?> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    try {
-      final theme = Theme.of(context);
-      return SelectableText.rich(
-        style: theme.linkTextStyle.apply(
-          fontFamily: theme.fixedFontStyle.fontFamily,
-          overflow: TextOverflow.ellipsis,
-        ),
-        maxLines: 1,
-        buildTextSpan(context),
-      );
-    } catch (e, st) {
-      print("ERROR: $e\n$st");
-    }
-    return Container();
+    final theme = Theme.of(context);
+    return SelectableText.rich(
+      style: theme.linkTextStyle.apply(
+        fontFamily: theme.fixedFontStyle.fontFamily,
+        overflow: TextOverflow.ellipsis,
+      ),
+      maxLines: 1,
+      buildTextSpan(context),
+    );
   }
 }
 
