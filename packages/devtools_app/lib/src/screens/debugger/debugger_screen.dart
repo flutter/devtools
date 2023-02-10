@@ -479,14 +479,16 @@ class _FloatingDebuggerControlsState extends State<FloatingDebuggerControls>
     cancelListeners();
 
     controlHeight = _isPaused ? defaultButtonHeight : 0.0;
-    addAutoDisposeListener(
-        serviceManager.isolateManager.mainIsolateState?.isPaused ?? false, () {
-      setState(() {
-        if (_isPaused) {
-          controlHeight = defaultButtonHeight;
-        }
+    final mainIsolateState = serviceManager.isolateManager.mainIsolateState;
+    if (mainIsolateState != null) {
+      addAutoDisposeListener(mainIsolateState.isPaused, () {
+        setState(() {
+          if (_isPaused) {
+            controlHeight = defaultButtonHeight;
+          }
+        });
       });
-    });
+    }
   }
 
   @override
