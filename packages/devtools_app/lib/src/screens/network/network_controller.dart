@@ -26,7 +26,8 @@ class NetworkController extends DisposableController
         AutoDisposeControllerMixin {
   NetworkController() {
     _networkService = NetworkService(this);
-    _currentNetworkRequests = CurrentNetworkRequests(onDataUpdate: _updateData);
+    _currentNetworkRequests =
+        CurrentNetworkRequests(onRequestDataChange: _handleRequestListChanges);
     subscribeToFilterChanges();
   }
 
@@ -127,7 +128,7 @@ class NetworkController extends DisposableController
       currentRequests: _currentNetworkRequests,
       invalidRequests: [],
     );
-    _updateData();
+    _handleRequestListChanges();
     _updateSelection();
   }
 
@@ -219,11 +220,11 @@ class NetworkController extends DisposableController
     _requests.value = NetworkRequests();
     _currentNetworkRequests.clear();
     resetFilter();
-    _updateData();
+    _handleRequestListChanges();
     _updateSelection();
   }
 
-  void _updateData() {
+  void _handleRequestListChanges() {
     filterData(activeFilter.value);
     refreshSearchMatches();
   }
@@ -327,14 +328,19 @@ class NetworkController extends DisposableController
 /// Class for managing the set of all current websocket requests, and
 /// http profile requests.
 class CurrentNetworkRequests {
-  CurrentNetworkRequests({required this.onDataUpdate});
+  CurrentNetworkRequests({required this.onRequestDataChange});
 
   List<NetworkRequest> get requests => _requestsById.values.toList();
   final _requestsById = <String, NetworkRequest>{};
-  VoidCallback onDataUpdate;
+
+  /// Triggered whenever the request's data changes on it's own.
+  VoidCallback onRequestDataChange;
 
   NetworkRequest? getRequest(String id) => _requestsById[id];
 
+  /// Update or add the [request] to the [requests] depending on whether or not
+  /// it's [request.id] already exists in the list.
+  ///
   void updateOrAdd(
     HttpProfileRequest request,
     int timelineMicrosOffset,
@@ -345,6 +351,7 @@ class CurrentNetworkRequests {
       requestFullDataFromVmService: false,
     );
     if (!_requestsById.containsKey(request.id)) {
+      wrapped.requestUpdatedNotifier.addListener(() => onRequestDataChange());
       _requestsById[wrapped.id] = wrapped;
     } else {
       // If we override an entry that is not a DartIOHttpRequestData then that means
@@ -373,6 +380,7 @@ class CurrentNetworkRequests {
       // already have, so we remove the current web sockets and replace them with
       // updated data.
       _requestsById[webSocket.id] = webSocket;
+      onRequestDataChange();
     }
   }
 

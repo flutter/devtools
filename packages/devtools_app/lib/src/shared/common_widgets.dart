@@ -1818,6 +1818,7 @@ class _JsonViewerState extends State<JsonViewer>
     with ProvidedControllerMixin<DebuggerController, JsonViewer> {
   late Future<void> _initializeTree;
   late DartObjectNode variable;
+
   Future<void> _buildAndExpand(
     DartObjectNode variable,
   ) async {
@@ -1860,7 +1861,7 @@ class _JsonViewerState extends State<JsonViewer>
   }
 
   @override
-  void didUpdateWidget(covariant JsonViewer oldWidget) {
+  void didUpdateWidget(JsonViewer oldWidget) {
     super.didUpdateWidget(oldWidget);
     _updateVariablesTree();
   }

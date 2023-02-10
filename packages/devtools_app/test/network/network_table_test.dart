@@ -41,7 +41,7 @@ void main() {
 
       // Bypass controller recording so timelineMicroOffset is not time dependant
       controller = NetworkController();
-      currentRequests = CurrentNetworkRequests(onDataUpdate: () {});
+      currentRequests = CurrentNetworkRequests(onRequestDataChange: () {});
       final networkRequests = controller.processNetworkTrafficHelper(
         socketProfile.sockets,
         httpProfile.requests,

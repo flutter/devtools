@@ -50,7 +50,7 @@ class NetworkRequestInspector extends StatelessWidget {
     return ValueListenableBuilder<NetworkRequest?>(
       valueListenable: controller.selectedRequest,
       builder: (context, data, _) {
-        final tabs = <DevToolsTab>[
+        late final tabs = <DevToolsTab>[
           _buildTab(tabName: NetworkRequestInspector._overviewTabTitle),
           if (data is DartIOHttpRequestData) ...[
             _buildTab(tabName: NetworkRequestInspector._headersTabTitle),
@@ -78,7 +78,7 @@ class NetworkRequestInspector extends StatelessWidget {
               _buildTab(tabName: NetworkRequestInspector._cookiesTabTitle),
           ],
         ];
-        final tabViews = [
+        late final tabViews = [
           if (data != null) ...[
             NetworkRequestOverviewView(data),
             if (data is DartIOHttpRequestData) ...[

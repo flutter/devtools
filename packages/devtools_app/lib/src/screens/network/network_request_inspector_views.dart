@@ -136,7 +136,7 @@ class HttpRequestView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder(
-      valueListenable: data.updateCount,
+      valueListenable: data.requestUpdatedNotifier,
       builder: (context, __, ___) {
         final theme = Theme.of(context);
         final requestHeaders = data.requestHeaders;
@@ -148,14 +148,12 @@ class HttpRequestView extends StatelessWidget {
           );
         }
         Widget child;
-        if (requestContentType.contains('json')) {
-          child = JsonViewer(encodedJson: data.requestBody!);
-        } else {
-          child = Text(
-            data.requestBody!,
-            style: theme.fixedFontStyle,
-          );
-        }
+        child = (requestContentType.contains('json'))
+            ? JsonViewer(encodedJson: data.requestBody!)
+            : Text(
+                data.requestBody!,
+                style: theme.fixedFontStyle,
+              );
         return Padding(
           padding: const EdgeInsets.all(denseSpacing),
           child: SingleChildScrollView(
@@ -175,8 +173,8 @@ class HttpResponseView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder(
-      valueListenable: data.updateCount,
-      builder: (_, __, ___) {
+      valueListenable: data.requestUpdatedNotifier,
+      builder: (context, __, ___) {
         Widget child;
         final theme = Theme.of(context);
         // We shouldn't try and display an image response view when using the
