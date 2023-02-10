@@ -156,6 +156,7 @@ extension AllocationProfilePrivateViewExtension on AllocationProfile {
 /// An extension on [ObjRef] which allows for access to VM internal fields.
 extension ObjRefPrivateViewExtension on ObjRef {
   static const _icDataType = 'ICData';
+  static const _objectPoolType = 'ObjectPool';
 
   /// The internal type of the object.
   ///
@@ -168,6 +169,17 @@ extension ObjRefPrivateViewExtension on ObjRef {
 
   /// Casts the current [ObjRef] into an instance of [ICData].
   ICData get asICData => ICData.parse(json!);
+
+  /// `true` if this object is an instance of [ObjectPool].
+  bool get isObjectPool => vmType == _objectPoolType;
+
+  /// Casts the current [ObjRef] into an instance of [ObjectPoolRef].
+  ObjectPoolRef get asObjectPool => ObjectPoolRef.parse(json!);
+}
+
+extension ObjPrivateViewExtension on Obj {
+  /// Casts the current [Obj] into an instance of [ObjectPool].
+  ObjectPool get asObjectPool => ObjectPool.parse(json!);
 }
 
 /// A representation of the Dart VM's Inline Cache (IC).
@@ -335,12 +347,137 @@ extension CodeRefPrivateViewExtension on CodeRef {
 /// An extension on [Code] which allows for access to VM internal fields.
 extension CodePrivateViewExtension on Code {
   static const _disassemblyKey = '_disassembly';
+  static const _kindKey = 'kind';
+  static const _objectPoolKey = '_objectPool';
 
   /// Returns the disassembly of the [Code], which is the generated assembly
   /// instructions for the code's function.
   Disassembly get disassembly => Disassembly.parse(json![_disassemblyKey]);
   set disassembly(Disassembly disassembly) =>
       json![_disassemblyKey] = disassembly.toJson();
+
+  /// The kind of code object represented by this instance.
+  ///
+  /// Can be one of:
+  ///   - Dart
+  ///   - Stub
+  String get kind => json![_kindKey];
+
+  ObjectPoolRef get objectPool => ObjectPoolRef.parse(json![_objectPoolKey]);
+}
+
+class ObjectPoolRef extends ObjRef {
+  ObjectPoolRef({
+    required Map<String, dynamic> json,
+    required super.id,
+    required this.length,
+  }) {
+    super.json = json;
+  }
+
+  static const _idKey = 'id';
+  static const _lengthKey = 'length';
+
+  static ObjectPoolRef parse(Map<String, dynamic> json) => ObjectPoolRef(
+        id: json[_idKey],
+        length: json[_lengthKey],
+        json: json,
+      );
+
+  final int length;
+}
+
+class ObjectPool extends ObjectPoolRef implements Obj {
+  ObjectPool({
+    required super.json,
+    required super.id,
+    required this.entries,
+    required super.length,
+  }) : super();
+
+  static const _entriesKey = '_entries';
+
+  static ObjectPool parse(Map<String, dynamic> json) {
+    print(json.keys.toList());
+    return ObjectPool(
+      json: json,
+      id: json[ObjectPoolRef._idKey],
+      entries: (json[_entriesKey] as List)
+          .map((e) => ObjectPoolEntry.parse(e))
+          .toList(),
+      length: json[ObjectPoolRef._lengthKey],
+    );
+  }
+
+  @override
+  String get type => 'ObjectPool';
+
+  @override
+  ClassRef? classRef;
+
+  @override
+  int? size;
+
+  List<ObjectPoolEntry> entries;
+}
+
+enum ObjectPoolEntryKind {
+  object,
+  immediate,
+  nativeFunction;
+
+  static const _kObject = 'Object';
+  static const _kImm = 'Immediate';
+  static const _kNativeFunction = 'NativeFunction';
+
+  static ObjectPoolEntryKind fromString(String type) {
+    switch (type) {
+      case _kObject:
+        return object;
+      case _kImm:
+        return immediate;
+      case _kNativeFunction:
+        return nativeFunction;
+      default:
+        throw UnsupportedError('Unsupported ObjectPoolType: $type');
+    }
+  }
+
+  @override
+  String toString() {
+    switch (this) {
+      case object:
+        return _kObject;
+      case immediate:
+        return _kImm;
+      case nativeFunction:
+        return 'Native Function';
+    }
+  }
+}
+
+class ObjectPoolEntry {
+  const ObjectPoolEntry({
+    required this.offset,
+    required this.kind,
+    required this.value,
+  });
+
+  static const _offsetKey = 'offset';
+  static const _kindKey = 'kind';
+  static const _valueKey = 'value';
+
+  static ObjectPoolEntry parse(Map<String, dynamic> json) => ObjectPoolEntry(
+        offset: json[_offsetKey],
+        kind: ObjectPoolEntryKind.fromString(json[_kindKey]),
+        value: createServiceObject(json[_valueKey], [])!,
+      );
+
+  final int offset;
+
+  final ObjectPoolEntryKind kind;
+
+  final Object value;
 }
 
 /// An extension on [Field] which allows for access to VM internal fields.

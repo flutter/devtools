@@ -266,3 +266,16 @@ class CodeObject extends VmObject {
   @override
   String? get name => obj.name;
 }
+
+class ObjectPoolObject extends VmObject {
+  ObjectPoolObject({required super.ref, super.scriptRef});
+
+  @override
+  ObjectPool get obj => _obj.asObjectPool;
+
+  @override
+  SourceLocation? get _sourceLocation => null;
+
+  @override
+  String? get name => null;
+}

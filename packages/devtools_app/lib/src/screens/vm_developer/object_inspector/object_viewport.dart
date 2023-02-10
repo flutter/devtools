@@ -16,6 +16,7 @@ import 'vm_function_display.dart';
 import 'vm_instance_display.dart';
 import 'vm_library_display.dart';
 import 'vm_object_model.dart';
+import 'vm_object_pool_display.dart';
 import 'vm_script_display.dart';
 
 /// Displays the VM information for the currently selected object in the
@@ -69,7 +70,7 @@ class ObjectViewport extends StatelessWidget {
       return 'Instance of ${instance.classRef!.name}';
     }
 
-    return '${object.obj.type} ${object.name ?? '<name>'}';
+    return '${object.obj.type} ${object.name ?? ''}';
   }
 
   /// Calls the object VM statistics card builder according to the VM Object type.
@@ -117,6 +118,12 @@ class ObjectViewport extends StatelessWidget {
         code: obj,
       );
     }
+    if (obj is ObjectPoolObject) {
+      return VmObjectPoolDisplay(
+        controller: controller,
+        objectPool: obj,
+      );
+    }
     return const SizedBox.shrink();
   }
 }
@@ -127,7 +134,7 @@ String viewportTitle(VmObject? object) {
     return 'No object selected.';
   }
 
-  return '${object.obj.type} ${object.name ?? '<name>'}';
+  return '${object.obj.type} ${object.name ?? ''}';
 }
 
 /// Manages the history of selected ObjRefs to make them accessible on a

@@ -691,7 +691,7 @@ class InboundReferencesWidget extends StatelessWidget {
   }
 }
 
-class VmServiceObjectLink<T extends ObjRef?> extends StatelessWidget {
+class VmServiceObjectLink<T extends Response?> extends StatelessWidget {
   const VmServiceObjectLink({
     required this.object,
     required this.onTap,
@@ -765,10 +765,13 @@ class VmServiceObjectLink<T extends ObjRef?> extends StatelessWidget {
         text = typeArgs.name!;
       } else if (object is Sentinel) {
         final sentinel = object as Sentinel;
-        text = sentinel.valueAsString!;
-      } else if (object?.isICData ?? false) {
-        final icData = object!.asICData;
+        text = 'Sentinel ${sentinel.valueAsString!}';
+      } else if (object is Obj? && ((object as Obj?)?.isICData ?? false)) {
+        final icData = (object as Obj).asICData;
         text = 'ICData(${icData.selector})';
+      } else if (object is ObjRef? && ((object as ObjRef?)?.isObjectPool ?? false)) {
+        final objectPool = (object as ObjRef).asObjectPool;
+        text = 'Object Pool(length: ${objectPool.length})';
       } else {
         isServiceObject = false;
         text = object.toString();
@@ -795,15 +798,20 @@ class VmServiceObjectLink<T extends ObjRef?> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return SelectableText.rich(
-      style: theme.linkTextStyle.apply(
-        fontFamily: theme.fixedFontStyle.fontFamily,
-        overflow: TextOverflow.ellipsis,
-      ),
-      maxLines: 1,
-      buildTextSpan(context),
-    );
+    try {
+      final theme = Theme.of(context);
+      return SelectableText.rich(
+        style: theme.linkTextStyle.apply(
+          fontFamily: theme.fixedFontStyle.fontFamily,
+          overflow: TextOverflow.ellipsis,
+        ),
+        maxLines: 1,
+        buildTextSpan(context),
+      );
+    } catch (e, st) {
+      print("ERROR: $e\n$st");
+    }
+    return Container();
   }
 }
 
