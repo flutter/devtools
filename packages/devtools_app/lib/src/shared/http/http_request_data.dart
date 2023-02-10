@@ -33,8 +33,6 @@ class DartIOHttpInstantEvent {
   TimeRange? _timeRange;
 }
 
-int _dartIoHttpRequestWrapperId = 0;
-
 /// An abstraction of an HTTP request made through dart:io.
 class DartIOHttpRequestData extends NetworkRequest {
   DartIOHttpRequestData(
