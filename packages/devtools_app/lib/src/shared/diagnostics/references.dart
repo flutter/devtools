@@ -116,7 +116,7 @@ Future<void> addChildReferences(
 
       break;
     case RefNodeType.liveInRefs:
-      const limit = 100;
+      final limit = preferences.memory.refLimit.value;
       final refs = (await serviceManager.service!.getInboundReferences(
             ref.isolateRef!.id!,
             ref.instanceRef!.id!,
@@ -134,7 +134,9 @@ Future<void> addChildReferences(
 
       if (refs.length > limit)
         variable.addChild(
-          DartObjectNode.text('...\nConfigure number of items in settings'),
+          DartObjectNode.text(
+            '...\nConfigure number of items in memory screen settings',
+          ),
         );
 
       break;

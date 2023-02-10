@@ -116,6 +116,7 @@ class _MyGarbage {
   final Map mapSimple = Map.fromIterable(Iterable.generate(_width));
   final Map mapEmpty = {};
   final Map mapOfNulls = {null: null};
+  final listOfInt = Iterable.generate(300).toList();
   late final Map<dynamic, _MyGarbage>? mapSimpleKey;
   late final Map<_MyGarbage, dynamic>? mapSimpleValue;
   late final Map<_MyGarbage, _MyGarbage>? map;

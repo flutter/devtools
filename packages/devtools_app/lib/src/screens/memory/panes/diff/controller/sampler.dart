@@ -9,7 +9,6 @@ import '../../../../../shared/globals.dart';
 import '../../../../../shared/memory/adapted_heap_data.dart';
 import '../../../../../shared/memory/class_name.dart';
 import '../../../shared/heap/heap.dart';
-import '../../../shared/heap/model.dart';
 import '../../../shared/primitives/instance_set_view.dart';
 
 class HeapClassSampler extends ClassSampler {
@@ -21,26 +20,23 @@ class HeapClassSampler extends ClassSampler {
   IsolateRef get _mainIsolateRef =>
       serviceManager.isolateManager.mainIsolate.value!;
 
-  Future<List<ObjRef>> _instances() async {
+  Future<InstanceSet> _liveInstances() async {
     final isolateId = _mainIsolateRef.id!;
 
-    // TODO(polina-c): It would be great to find out how to avoid full scan of classes.
     final theClass = (await serviceManager.service!.getClassList(isolateId))
         .classes!
         .firstWhere((ref) => objects.heapClass.matches(ref));
 
-    final instances = await serviceManager.service!.getInstances(
+    return await serviceManager.service!.getInstances(
       isolateId,
       theClass.id!,
-      1,
+      preferences.memory.refLimit.value,
     );
-
-    return instances.instances ?? [];
   }
 
   @override
-  Future<void> oneVariableToConsole() async {
-    final instances = await _instances();
+  Future<void> oneLiveStaticToConsole() async {
+    final instances = (await _liveInstances()).instances ?? [];
 
     final instanceRef = instances.firstWhereOrNull(
       (objRef) =>
@@ -49,7 +45,9 @@ class HeapClassSampler extends ClassSampler {
     ) as InstanceRef?;
 
     if (instanceRef == null) {
-      serviceManager.consoleService.appendStdio('Unable to select instance.');
+      serviceManager.consoleService.appendStdio(
+          'Unable to select instance that exist in snapshot and still alive in application.\n'
+          'You may want to increase "${preferences.memory.refLimitTitle}" in memory settings.');
       return;
     }
 
@@ -85,18 +83,16 @@ class HeapClassSampler extends ClassSampler {
   }
 
   @override
-  Future<void> instanceGraphToConsole() async {
-    serviceManager.consoleService.appendInstanceGraph(
-      HeapObjectGraph(
-        heap,
-        objects.objects.objectsByCodes.keys.first,
-        objects.heapClass,
-      ),
-    );
-  }
-
-  @override
   bool get isEvalEnabled =>
       objects.heapClass.classType(serviceManager.rootInfoNow().package) !=
       ClassType.runtime;
+
+  @override
+  Future<void> manyLiveToConsole() async {
+    serviceManager.consoleService.appendInstanceSet(
+      type: objects.heapClass.shortName,
+      instanceSet: await _liveInstances(),
+      isolateRef: _mainIsolateRef,
+    );
+  }
 }

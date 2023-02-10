@@ -235,7 +235,7 @@ void main() {
 
   group('Debugger Screen', () {
     late FakeServiceManager fakeServiceManager;
-    late MockDebuggerControllerLegacy debuggerController;
+    late MockDebuggerController debuggerController;
 
     const windowSize = Size(4000.0, 4000.0);
 
@@ -280,7 +280,7 @@ void main() {
       // when(fakeServiceManager.errorBadgeManager.errorCountNotifier(any))
       //     .thenReturn(ValueNotifier<int>(0));
 
-      debuggerController = MockDebuggerControllerLegacy.withDefaults();
+      debuggerController = createMockDebuggerControllerWithDefaults();
     });
 
     testWidgetsWithWindowSize(
