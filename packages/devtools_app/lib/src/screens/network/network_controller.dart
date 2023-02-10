@@ -78,10 +78,10 @@ class NetworkController extends DisposableController
 
   void _processHttpProfileRequests({
     required int timelineMicrosOffset,
-    required List<HttpProfileRequest> httpRequests,
+    required List<HttpProfileRequest> newOrUpdatedHttpRequests,
     required CurrentNetworkRequests currentRequests,
   }) {
-    for (final request in httpRequests) {
+    for (final request in newOrUpdatedHttpRequests) {
       currentRequests.updateOrAdd(request, timelineMicrosOffset);
     }
   }
@@ -106,7 +106,7 @@ class NetworkController extends DisposableController
 
     _processHttpProfileRequests(
       timelineMicrosOffset: timelineMicrosOffset,
-      httpRequests: httpRequests!,
+      newOrUpdatedHttpRequests: httpRequests!,
       currentRequests: currentRequests,
     );
 
