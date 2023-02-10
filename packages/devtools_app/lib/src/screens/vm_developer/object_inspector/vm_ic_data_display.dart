@@ -10,15 +10,11 @@ import 'package:vm_service/vm_service.dart';
 import '../../../shared/common_widgets.dart';
 import '../../../shared/globals.dart';
 import '../vm_developer_common_widgets.dart';
-import '../vm_service_private_extensions.dart';
 import 'object_inspector_view_controller.dart';
 import 'vm_object_model.dart';
 
-// TODO(mtaylee): Finish implementation of [ICDataArrayWidget] and add it to
-// the [VmFuncDisplay].
-
 /// A widget for the object inspector historyViewport displaying information
-/// related to function (Func type) objects in the Dart VM.
+/// related to ICData objects in the Dart VM.
 class VmICDataDisplay extends StatefulWidget {
   const VmICDataDisplay({
     required this.controller,
@@ -63,15 +59,14 @@ class _VmICDataDisplayState extends State<VmICDataDisplay> {
     }
 
     final icData = widget.icData.obj;
-    if (icData.argumentsDescriptor is Instance && icData.entries is Instance) {
-      populateLists(
-        icData.argumentsDescriptor as Instance,
-        icData.entries as Instance,
-      );
+    final icDataArgsDescriptor = icData.argumentsDescriptor;
+    final icDataEntries = icData.entries;
+    if (icDataArgsDescriptor is Instance && icDataEntries is Instance) {
+      populateLists(icDataArgsDescriptor, icDataEntries);
       _initialized = Future.value();
       return;
     }
-    
+
     final isolateId = serviceManager.isolateManager.selectedIsolate.value!.id!;
     final service = serviceManager.service!;
     final argumentsDescriptorFuture = service
