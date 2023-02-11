@@ -1,7 +1,7 @@
 name: devtools_shared
 description: Package of shared structures between devtools_app, dds, and other tools.
 
-version: 2.22.0-dev.5
+version: 2.22.0-dev.6
 
 repository: https://github.com/flutter/devtools/tree/master/packages/devtools_shared
 
