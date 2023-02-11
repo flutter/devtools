@@ -83,14 +83,15 @@ class ConsoleService extends Disposer {
       final object = heapSelection?.object;
       if (object == null || isolateRef == null) {
         serviceManager.consoleService.appendStdio(
-          'Not enough information to browse instance.',
+          'Not enough information to browse the instance.',
         );
         return;
       }
 
       instanceRef = await evalService.findObject(object, isolateRef);
     }
-    assert(instanceRef != null);
+
+    // If instanceRef is null at this point, user will see static references.
 
     appendInstanceRef(
       value: instanceRef,
