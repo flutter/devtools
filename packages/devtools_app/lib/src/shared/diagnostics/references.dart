@@ -56,6 +56,7 @@ Future<void> addChildReferences(
       ]);
       break;
     case RefNodeType.staticRefRoot:
+      if (ref.heapSelection?.object == null) break;
       variable.addAllChildren([
         DartObjectNode.references(
           'inbound',
@@ -71,14 +72,15 @@ Future<void> addChildReferences(
     case RefNodeType.staticInRefs:
       final children = ref.heapSelection!
           .references(ref.refNodeType.direction!)
-          .where((s) => !s.object.heapClass.isNull)
+          .where((s) => !s.object!.heapClass.isNull)
           .map(
             (s) => DartObjectNode.references(
-              s.object.heapClass.className,
+              s.object!.heapClass.className,
               ObjectReferences(
                 refNodeType: RefNodeType.staticInRefs,
                 heapSelection: s,
               ),
+              isRerootable: true,
             ),
           )
           .toList();
@@ -87,16 +89,17 @@ Future<void> addChildReferences(
     case RefNodeType.staticOutRefs:
       final children = ref.heapSelection!
           .references(ref.refNodeType.direction!)
-          .where((s) => !s.object.heapClass.isNull)
+          .where((s) => !s.object!.heapClass.isNull)
           .map(
             (s) => DartObjectNode.references(
-              '${s.object.heapClass.className}, ${prettyPrintRetainedSize(
-                s.object.retainedSize,
+              '${s.object!.heapClass.className}, ${prettyPrintRetainedSize(
+                s.object!.retainedSize,
               )}',
               ObjectReferences(
                 refNodeType: RefNodeType.staticOutRefs,
                 heapSelection: s,
               ),
+              isRerootable: true,
             ),
           )
           .toList();
@@ -141,12 +144,15 @@ Future<void> addChildReferences(
 
       break;
     case RefNodeType.liveOutRefs:
-      final isolateRef = variable.ref!.isolateRef;
+      final isolateRef = ref.isolateRef;
+
       final instance = await getObject(
         isolateRef: isolateRef,
         value: ref.instanceRef!,
         variable: variable,
       );
+
+      // ?????
 
       if (instance is Instance) {
         await _addOutboundLiveReferences(
@@ -211,6 +217,7 @@ void _addLiveReference(
         isolateRef: isolateRef,
         value: instance,
       ),
+      isRerootable: true,
     ),
   );
 }

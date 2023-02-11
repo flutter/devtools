@@ -25,14 +25,16 @@ class HeapObjectSelection {
   HeapObjectSelection(this.heap, this.object);
 
   final AdaptedHeapData heap;
-  final AdaptedHeapObject object;
+
+  /// If onject is null, it exists in live app, but not in heap.
+  final AdaptedHeapObject? object;
 
   Iterable<int> _refs(RefDirection direction) {
     switch (direction) {
       case RefDirection.inbound:
-        return object.inRefs;
+        return object?.inRefs ?? [];
       case RefDirection.outbound:
-        return object.outRefs;
+        return object?.outRefs ?? [];
     }
   }
 

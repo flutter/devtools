@@ -74,6 +74,33 @@ class VariableConsoleLine extends ConsoleLine {
 /// Source of truth for the state of the Console including both events from the
 /// VM and events emitted from other UI.
 class ConsoleService extends Disposer {
+  void appendBrowsableInstance({
+    required InstanceRef? instanceRef,
+    required IsolateRef? isolateRef,
+    required HeapObjectSelection? heapSelection,
+  }) async {
+    if (instanceRef == null) {
+      final object = heapSelection?.object;
+      if (object == null || isolateRef == null) {
+        serviceManager.consoleService.appendStdio(
+          'Not enough information to browse instance.',
+        );
+        return;
+      }
+
+      instanceRef = await evalService.findObject(object, isolateRef);
+    }
+    assert(instanceRef != null);
+
+    appendInstanceRef(
+      value: instanceRef,
+      diagnostic: null,
+      isolateRef: isolateRef,
+      forceScrollIntoView: true,
+      heapSelection: heapSelection,
+    );
+  }
+
   void appendInstanceRef({
     String? name,
     required InstanceRef? value,
