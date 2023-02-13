@@ -46,6 +46,7 @@ void main() {
       ]);
 
       when(mockCodeObject.obj).thenReturn(testCode);
+      when(mockCodeObject.script).thenReturn(null);
     });
 
     void verifyAddressOrder(List<Instruction> data) {
