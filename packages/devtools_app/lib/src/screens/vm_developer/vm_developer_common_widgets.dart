@@ -808,9 +808,7 @@ class VmServiceObjectLink<T extends Response?> extends StatelessWidget {
     } else if (object != null && object is Obj && object.isICData) {
       final icData = object.asICData;
       text = 'ICData(${icData.selector})';
-    } else if (object != null &&
-        object is ObjRef &&
-        object.isObjectPool) {
+    } else if (object != null && object is ObjRef && object.isObjectPool) {
       final objectPool = object.asObjectPool;
       text = 'Object Pool(length: ${objectPool.length})';
     }

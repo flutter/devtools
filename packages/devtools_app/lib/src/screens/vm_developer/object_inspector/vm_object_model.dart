@@ -277,7 +277,7 @@ class ObjectPoolObject extends VmObject {
 
   @override
   String? get name => null;
-  
+
   @override
   SourceLocation? get _sourceLocation => null;
 }

@@ -167,7 +167,6 @@ extension ObjRefPrivateViewExtension on ObjRef {
   /// `true` if this object is an instance of [ICDataRef].
   bool get isICData => vmType == _icDataType;
 
-
   /// Casts the current [ObjRef] into an instance of [ICDataRef].
   ICDataRef get asICData => ICDataRef.parse(json!)!;
 

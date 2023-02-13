@@ -67,12 +67,11 @@ class _DartObjectColumn extends _ObjectPoolColumnData
   }) {
     if (data.value is int) return Text(data.value.toString());
     return VmServiceObjectLink<Response>(
-      object: data.value as Response,
-      onTap: (e) {
-        if (e is! ObjRef) return;
-        unawaited(controller.findAndSelectNodeForObject(e));
-      }
-    );
+        object: data.value as Response,
+        onTap: (e) {
+          if (e is! ObjRef) return;
+          unawaited(controller.findAndSelectNodeForObject(e));
+        });
   }
 }
 
