@@ -5,7 +5,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:string_scanner/string_scanner.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../../shared/common_widgets.dart';
@@ -13,14 +12,10 @@ import '../../../shared/primitives/utils.dart';
 import '../../../shared/split.dart';
 import '../../../shared/table/table.dart';
 import '../../../shared/table/table_data.dart';
-import '../../../shared/theme.dart';
 import '../vm_developer_common_widgets.dart';
 import '../vm_service_private_extensions.dart';
 import 'object_inspector_view_controller.dart';
 import 'vm_object_model.dart';
-
-// TODO(bkonyi): remove once profile ticks are populated for instructions.
-const profilerTicksEnabled = false;
 
 abstract class _ObjectPoolColumnData extends ColumnData<ObjectPoolEntry> {
   _ObjectPoolColumnData(super.title, {required super.fixedWidthPx});
@@ -67,11 +62,12 @@ class _DartObjectColumn extends _ObjectPoolColumnData
   }) {
     if (data.value is int) return Text(data.value.toString());
     return VmServiceObjectLink<Response>(
-        object: data.value as Response,
-        onTap: (e) {
-          if (e is! ObjRef) return;
-          unawaited(controller.findAndSelectNodeForObject(e));
-        });
+      object: data.value as Response,
+      onTap: (e) {
+        if (e is! ObjRef) return;
+        unawaited(controller.findAndSelectNodeForObject(e));
+      },
+    );
   }
 }
 
