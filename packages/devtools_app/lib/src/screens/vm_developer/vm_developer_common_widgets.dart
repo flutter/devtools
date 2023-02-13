@@ -805,7 +805,7 @@ class VmServiceObjectLink<T extends Response?> extends StatelessWidget {
     } else if (object is Sentinel) {
       final sentinel = object;
       text = 'Sentinel ${sentinel.valueAsString!}';
-    } else if (object != null && object is Obj && object.isICData) {
+    } else if (object != null && object is ObjRef && object.isICData) {
       final icData = object.asICData;
       text = 'ICData(${icData.selector})';
     } else if (object != null && object is ObjRef && object.isObjectPool) {
