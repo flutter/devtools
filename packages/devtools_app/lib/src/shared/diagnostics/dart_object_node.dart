@@ -202,7 +202,7 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
       text: text,
       ref: ref,
       childCount:
-          ref.heapSelection?.countOfReferences(ref.refNodeType.direction),
+          ref.heapSelection.countOfReferences(ref.refNodeType.direction),
       isRerootable: isRerootable,
     );
   }

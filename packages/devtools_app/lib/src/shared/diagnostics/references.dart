@@ -57,7 +57,7 @@ Future<void> addChildReferences(
       ]);
       break;
     case RefNodeType.staticRefRoot:
-      if (ref.heapSelection?.object == null) break;
+      if (ref.heapSelection.object == null) break;
       variable.addAllChildren([
         DartObjectNode.references(
           'inbound',
@@ -71,7 +71,7 @@ Future<void> addChildReferences(
 
       break;
     case RefNodeType.staticInRefs:
-      final children = ref.heapSelection!
+      final children = ref.heapSelection
           .references(ref.refNodeType.direction!)
           .where((s) => !s.object!.heapClass.isNull)
           .map(
@@ -90,7 +90,7 @@ Future<void> addChildReferences(
       variable.addAllChildren(children);
       break;
     case RefNodeType.staticOutRefs:
-      final children = ref.heapSelection!
+      final children = ref.heapSelection
           .references(ref.refNodeType.direction!)
           .where((s) => !s.object!.heapClass.isNull)
           .map(
@@ -126,7 +126,7 @@ Future<void> addChildReferences(
     case RefNodeType.liveInRefs:
       final limit = preferences.memory.refLimit.value;
       final refs = (await serviceManager.service!.getInboundReferences(
-            ref.isolateRef!.id!,
+            ref.isolateRef.id!,
             ref.instanceRef!.id!,
             limit + 1,
           ))

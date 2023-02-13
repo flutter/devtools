@@ -48,7 +48,8 @@ class ObjectReferences extends GenericInstanceRef {
     required super.isolateRef,
     required super.value,
     required super.heapSelection,
-  });
+  })  : assert(heapSelection != null),
+        assert(isolateRef != null);
 
   ObjectReferences.withType(ObjectReferences ref, this.refNodeType)
       : super(
@@ -58,6 +59,12 @@ class ObjectReferences extends GenericInstanceRef {
         );
 
   final RefNodeType refNodeType;
+
+  @override
+  HeapObjectSelection get heapSelection => super.heapSelection!;
+
+  @override
+  IsolateRef get isolateRef => super.isolateRef!;
 }
 
 enum RefNodeType {
