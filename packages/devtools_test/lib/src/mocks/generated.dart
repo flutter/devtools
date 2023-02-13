@@ -37,6 +37,7 @@ import 'package:vm_service/vm_service.dart';
   ScriptObject,
   LibraryObject,
   ObjectPoolObject,
+  ICDataObject,
   CodeViewController,
   BreakpointManager,
   EvalService,

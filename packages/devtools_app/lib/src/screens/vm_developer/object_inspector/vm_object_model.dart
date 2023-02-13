@@ -267,6 +267,8 @@ class CodeObject extends VmObject {
   String? get name => obj.name;
 }
 
+/// Stores an 'ObjectPool' VM object and provides an interface for obtaining
+/// then Dart VM information related to this object.
 class ObjectPoolObject extends VmObject {
   ObjectPoolObject({required super.ref, super.scriptRef});
 
@@ -274,8 +276,23 @@ class ObjectPoolObject extends VmObject {
   ObjectPool get obj => _obj.asObjectPool;
 
   @override
+  String? get name => null;
+  
+  @override
+  SourceLocation? get _sourceLocation => null;
+}
+
+/// Stores an 'ICData' VM object and provides an interface for obtaining the
+/// Dart VM information related to this object.
+class ICDataObject extends VmObject {
+  ICDataObject({required super.ref});
+
+  @override
   SourceLocation? get _sourceLocation => null;
 
   @override
-  String? get name => null;
+  String? get name => '(${obj.selector})';
+
+  @override
+  ICData get obj => _obj.asICData;
 }

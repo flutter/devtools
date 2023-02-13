@@ -5,3 +5,9 @@ targets:
         options:
           dart2js_args:
           - -O1
+      # We don't generate any mocks in this package.
+      mockito|mockBuilder:
+        enabled: false
+      stager|stagerAppBuilder:
+        generate_for:
+          - test/test_infra/scenes/**.dart
