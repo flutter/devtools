@@ -326,7 +326,7 @@ class MemoryPreferencesController extends DisposableController
   /// when browsing references in console.
   final refLimitTitle = 'Limit for number of requested live instances.';
   final refLimit = ValueNotifier<int>(_defaultRefLimit);
-  static const _defaultRefLimit = 100;
+  static const _defaultRefLimit = 10000;
   static const _refLimitStorageId = 'memory.refLimit';
 
   Future<void> init() async {
