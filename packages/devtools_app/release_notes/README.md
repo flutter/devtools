@@ -3,6 +3,7 @@
 - To add release notes for the latest release, create a PR with the appropriate changes for your release.
     - The [NEXT_RELEASE_NOTES.md](NEXT_RELEASE_NOTES.md) file contains the running release notes for the current version.
     - see example [PR](https://github.com/flutter/website/pull/6791) for an idea of how to add those to the Flutter website.
+    - NOTE: when adding images, be cognizant that the images will be rendered in a relatively small window in DevTools, and should be sized accordingly.
 - Test these changes locally before creating the PR.
     - See [README.md](https://github.com/flutter/website/blob/main/README.md)
 for getting setup to run the Flutter website locally.
