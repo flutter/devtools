@@ -818,14 +818,12 @@ class VmServiceObjectLink<T extends Response?> extends StatelessWidget {
   TextSpan buildTextSpan(BuildContext context) {
     final theme = Theme.of(context);
 
-    String? text = textBuilder?.call(object);
+    String? text = textBuilder?.call(object) ??
+        defaultTextBuilder(object, preferUri: preferUri);
     bool isServiceObject = true;
     if (text == null) {
-      text = defaultTextBuilder(object, preferUri: preferUri);
-      if (text == null) {
-        isServiceObject = false;
-        text = object.toString();
-      }
+      isServiceObject = false;
+      text = object.toString();
     }
 
     final TextStyle style;

@@ -71,7 +71,7 @@ class ObjectViewport extends StatelessWidget {
       return 'Instance of ${instance.classRef!.name}';
     }
 
-    return '${object.obj.type} ${object.name ?? ''}';
+    return '${object.obj.type} ${object.name ?? ''}'.trim();
   }
 
   /// Calls the object VM statistics card builder according to the VM Object type.
@@ -141,7 +141,7 @@ String viewportTitle(VmObject? object) {
     return 'No object selected.';
   }
 
-  return '${object.obj.type} ${object.name ?? ''}';
+  return '${object.obj.type} ${object.name ?? ''}'.trim();
 }
 
 /// Manages the history of selected ObjRefs to make them accessible on a

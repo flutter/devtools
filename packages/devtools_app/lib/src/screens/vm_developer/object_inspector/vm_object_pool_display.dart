@@ -1,4 +1,4 @@
-// Copyright 2022 The Chromium Authors. All rights reserved.
+// Copyright 2023 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -64,6 +64,8 @@ class _DartObjectColumn extends _ObjectPoolColumnData
     return VmServiceObjectLink<Response>(
       object: data.value as Response,
       onTap: (e) {
+        // TODO(bkonyi): add support for non-object responses (e.g., Sentinels)
+        // See https://github.com/flutter/devtools/issues/5241
         if (e is! ObjRef) return;
         unawaited(controller.findAndSelectNodeForObject(e));
       },
@@ -72,7 +74,7 @@ class _DartObjectColumn extends _ObjectPoolColumnData
 }
 
 /// A widget for the object inspector historyViewport displaying information
-/// related to [Code] objects in the Dart VM.
+/// related to [ObjectPool] objects in the Dart VM.
 class VmObjectPoolDisplay extends StatelessWidget {
   const VmObjectPoolDisplay({
     required this.controller,

@@ -465,12 +465,11 @@ class ObjectPool extends ObjectPoolRef implements Obj {
     required super.id,
     required this.entries,
     required super.length,
-  }) : super();
+  });
 
   static const _entriesKey = '_entries';
 
   static ObjectPool parse(Map<String, dynamic> json) {
-    print(json.keys.toList());
     return ObjectPool(
       json: json,
       id: json[ObjectPoolRef._idKey],
