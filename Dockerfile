@@ -60,11 +60,16 @@ RUN flutter pub get
 
 WORKDIR ${DEVTOOLS}
 
+COPY --chown=developer:developer packages/devtools_app/test/test_infra/scenes/**.dart ./packages/devtools_app/test/test_infra/scenes/
+COPY --chown=developer:developer packages/devtools_test/lib/src/mocks/** ./packages/devtools_test/lib/src/mocks/
+COPY --chown=developer:developer tool/generate_code.sh ./tool/generate_code.sh
+
+RUN ./tool/generate_code.sh
+
 
 COPY --chown=developer:developer . .
 
 # TODO Move this to before COPY . .
-RUN ./tool/generate_code.sh
 
 # RUN chmod -R +wrx ${DEVELOPER}
 
