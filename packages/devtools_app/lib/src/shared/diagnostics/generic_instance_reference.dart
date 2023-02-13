@@ -45,11 +45,10 @@ class GenericInstanceRef {
 class ObjectReferences extends GenericInstanceRef {
   ObjectReferences({
     required this.refNodeType,
-    required super.isolateRef,
+    required IsolateRef super.isolateRef,
     required super.value,
-    required super.heapSelection,
-  })  : assert(heapSelection != null),
-        assert(isolateRef != null);
+    required HeapObjectSelection super.heapSelection,
+  });
 
   ObjectReferences.withType(ObjectReferences ref, this.refNodeType)
       : super(

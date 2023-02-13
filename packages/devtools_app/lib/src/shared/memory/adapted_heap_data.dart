@@ -49,11 +49,10 @@ class HeapObjectSelection {
   int? countOfReferences(RefDirection? direction) =>
       direction == null ? null : _refs(direction).length;
 
-  static HeapObjectSelection? withoutObject(
-    HeapObjectSelection? heapSelection,
+  static HeapObjectSelection withoutObject(
+    HeapObjectSelection heapSelection,
   ) {
-    if (heapSelection == null) return null;
-    if (heapSelection.object == null) return null;
+    if (heapSelection.object == null) return heapSelection;
     return HeapObjectSelection(heapSelection.heap, object: null);
   }
 }

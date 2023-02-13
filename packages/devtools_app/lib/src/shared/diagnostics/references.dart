@@ -24,8 +24,8 @@ void addReferencesRoot(DartObjectNode variable, GenericInstanceRef ref) {
       ObjectReferences(
         refNodeType: RefNodeType.refRoot,
         value: ref.value,
-        isolateRef: ref.isolateRef,
-        heapSelection: ref.heapSelection,
+        isolateRef: ref.isolateRef!,
+        heapSelection: ref.heapSelection!,
       ),
     ),
     index: 0,
@@ -174,8 +174,8 @@ Future<void> addChildReferences(
 Future<void> _addOutboundLiveReferences({
   required DartObjectNode variable,
   required Instance value,
-  required IsolateRef? isolateRef,
-  required HeapObjectSelection? heapSelection,
+  required IsolateRef isolateRef,
+  required HeapObjectSelection heapSelection,
 }) async {
   switch (value.kind) {
     case InstanceKind.kMap:
@@ -219,10 +219,10 @@ Future<void> _addOutboundLiveReferences({
 
 void _addLiveReference(
   List<DartObjectNode> variables,
-  IsolateRef? isolateRef,
+  IsolateRef isolateRef,
   Object? instance,
   String namePrefix,
-  HeapObjectSelection? heapSelection,
+  HeapObjectSelection heapSelection,
 ) {
   if (instance is! InstanceRef) return;
   final classRef = instance.classRef!;
@@ -244,8 +244,8 @@ void _addLiveReference(
 
 List<DartObjectNode> _createLiveReferencesForMap(
   Instance instance,
-  IsolateRef? isolateRef,
-  HeapObjectSelection? heapSelection,
+  IsolateRef isolateRef,
+  HeapObjectSelection heapSelection,
 ) {
   final variables = <DartObjectNode>[];
   final associations = instance.associations ?? [];
@@ -274,8 +274,8 @@ List<DartObjectNode> _createLiveReferencesForMap(
 
 List<DartObjectNode> _createLiveReferencesForList(
   Instance instance,
-  IsolateRef? isolateRef,
-  HeapObjectSelection? heapSelection,
+  IsolateRef isolateRef,
+  HeapObjectSelection heapSelection,
 ) {
   final variables = <DartObjectNode>[];
   final elements = instance.elements ?? [];
@@ -294,8 +294,8 @@ List<DartObjectNode> _createLiveReferencesForList(
 
 List<DartObjectNode> _createLiveReferencesForFields(
   Instance instance,
-  IsolateRef? isolateRef,
-  HeapObjectSelection? heapSelection,
+  IsolateRef isolateRef,
+  HeapObjectSelection heapSelection,
 ) {
   final variables = <DartObjectNode>[];
 
