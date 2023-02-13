@@ -266,3 +266,18 @@ class CodeObject extends VmObject {
   @override
   String? get name => obj.name;
 }
+
+/// Stores an 'ICData' VM object and provides an interface for obtaining the
+/// Dart VM information related to this object.
+class ICDataObject extends VmObject {
+  ICDataObject({required super.ref});
+
+  @override
+  SourceLocation? get _sourceLocation => null;
+
+  @override
+  String? get name => '(${obj.selector})';
+
+  @override
+  ICData get obj => _obj.asICData;
+}

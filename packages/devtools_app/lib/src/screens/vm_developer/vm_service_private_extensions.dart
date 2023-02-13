@@ -163,22 +163,96 @@ extension ObjRefPrivateViewExtension on ObjRef {
   /// value.
   String? get vmType => json!['_vmType'];
 
-  /// `true` if this object is an instance of [ICData].
+  /// `true` if this object is an instance of [ICDataRef].
   bool get isICData => vmType == _icDataType;
 
-  /// Casts the current [ObjRef] into an instance of [ICData].
-  ICData get asICData => ICData.parse(json!);
+  /// Casts the current [ObjRef] into an instance of [ICDataRef].
+  ICDataRef get asICData => ICDataRef.parse(json!)!;
 }
 
-/// A representation of the Dart VM's Inline Cache (IC).
+/// An extension on [Obj] which allows for access to VM internal fields.
+extension ObjPrivateViewExtension on Obj {
+  /// Casts the current [Obj] into an instance of [ICData].
+  ICData get asICData => ICData.parse(json!)!;
+}
+
+/// A partially-populated representation of the Dart VM's Inline Cache (IC).
 ///
 /// For more information:
 ///  - [Slava's Dart VM intro](https://mrale.ph/dartvm/)
 ///  - [Dart VM implementation](https://github.com/dart-lang/sdk/blob/2d064faf748d6c7700f08d223fb76c84c4335c5f/runtime/vm/raw_object.h#L2103)
-class ICData {
-  ICData.parse(Map<String, dynamic> json) : selector = json['_selector'];
+class ICDataRef implements ObjRef {
+  ICDataRef({
+    required this.id,
+    required this.json,
+    required this.owner,
+    required this.selector,
+  });
 
+  static ICDataRef? parse(Map<String, dynamic> json) => ICDataRef(
+        id: json['id'],
+        owner: createServiceObject(json['_owner'], []) as ObjRef,
+        selector: json['_selector'],
+        json: json,
+      );
+
+  final ObjRef owner;
   final String selector;
+
+  @override
+  bool? fixedId;
+
+  @override
+  String? id;
+
+  @override
+  Map<String, dynamic>? json;
+
+  @override
+  Map<String, dynamic> toJson() => json!;
+
+  @override
+  String get type => 'ICData';
+}
+
+/// A fully-populated representation of the Dart VM's Inline Cache (IC).
+///
+/// For more information:
+///  - [Slava's Dart VM intro](https://mrale.ph/dartvm/)
+///  - [Dart VM implementation](https://github.com/dart-lang/sdk/blob/2d064faf748d6c7700f08d223fb76c84c4335c5f/runtime/vm/raw_object.h#L2103)
+class ICData extends ICDataRef implements Obj {
+  ICData({
+    required super.id,
+    required super.json,
+    required super.owner,
+    required super.selector,
+    required this.classRef,
+    required this.size,
+    required this.argumentsDescriptor,
+    required this.entries,
+  }) : super();
+
+  static ICData? parse(Map<String, dynamic> json) => ICData(
+        id: json['id'],
+        owner: createServiceObject(json['_owner'], []) as ObjRef,
+        selector: json['_selector'],
+        classRef: createServiceObject(json['class'], []) as ClassRef,
+        size: json['size'],
+        argumentsDescriptor:
+            createServiceObject(json['_argumentsDescriptor'], [])!
+                as InstanceRef,
+        entries: createServiceObject(json['_entries'], [])! as InstanceRef,
+        json: json,
+      );
+
+  @override
+  ClassRef? classRef;
+
+  @override
+  int? size;
+
+  final InstanceRef argumentsDescriptor;
+  final InstanceRef entries;
 }
 
 /// A single assembly instruction from a [Func]'s generated code disassembly.
