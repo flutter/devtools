@@ -4,11 +4,8 @@
 
 import 'dart:math';
 
-import 'package:devtools_app/src/screens/vm_developer/object_inspector/object_inspector_view_controller.dart';
+import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/vm_developer/object_inspector/vm_code_display.dart';
-import 'package:devtools_app/src/screens/vm_developer/vm_service_private_extensions.dart';
-import 'package:devtools_app/src/shared/config_specific/ide_theme/ide_theme.dart';
-import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_app/src/shared/table/table.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
@@ -34,7 +31,13 @@ void main() {
         kind: 'Dart',
         name: 'testFuncCode',
       );
-      testCode.json = {};
+      testCode.json = {
+        'function': testFunction.toJson(),
+        '_objectPool': {
+          'id': 'pool-id',
+          'length': 0,
+        }
+      };
       final offset = pow(2, 20) as int;
       testCode.disassembly = Disassembly.parse(<Object?>[
         for (int i = 0; i < 1000; ++i) ...[
@@ -47,6 +50,20 @@ void main() {
 
       when(mockCodeObject.obj).thenReturn(testCode);
       when(mockCodeObject.script).thenReturn(null);
+      when(mockCodeObject.retainingPath).thenReturn(
+        const FixedValueListenable<RetainingPath?>(null),
+      );
+      when(mockCodeObject.inboundReferences).thenReturn(
+        const FixedValueListenable<InboundReferences?>(null),
+      );
+      when(mockCodeObject.fetchingReachableSize).thenReturn(
+        const FixedValueListenable<bool>(false),
+      );
+      when(mockCodeObject.fetchingRetainedSize).thenReturn(
+        const FixedValueListenable<bool>(false),
+      );
+      when(mockCodeObject.retainedSize).thenReturn(null);
+      when(mockCodeObject.reachableSize).thenReturn(null);
     });
 
     void verifyAddressOrder(List<Instruction> data) {
