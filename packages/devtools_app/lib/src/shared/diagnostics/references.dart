@@ -258,14 +258,14 @@ List<DartObjectNode> _createLiveReferencesForMap(
       isolateRef,
       association.key,
       '[$i, key]',
-      heapSelection,
+      HeapObjectSelection.withoutObject(heapSelection),
     );
     _addLiveReference(
       variables,
       isolateRef,
       association.value,
       '[$i, val]', // `val`, not `value`, to align keys and values visually
-      heapSelection,
+      HeapObjectSelection.withoutObject(heapSelection),
     );
     continue;
   }
@@ -286,7 +286,7 @@ List<DartObjectNode> _createLiveReferencesForList(
       isolateRef,
       elements[i],
       '[$index]',
-      heapSelection,
+      HeapObjectSelection.withoutObject(heapSelection),
     );
   }
   return variables;
@@ -305,7 +305,7 @@ List<DartObjectNode> _createLiveReferencesForFields(
       isolateRef,
       field.value,
       '${field.decl?.name}:',
-      heapSelection,
+      HeapObjectSelection.withoutObject(heapSelection),
     );
   }
   return variables;

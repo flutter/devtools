@@ -28,7 +28,8 @@ class HeapObjectSelection {
 
   final AdaptedHeapData heap;
 
-  /// If onject is null, it exists in live app, but not in heap.
+  /// If onject is null, it exists in live app, but is not
+  /// located in heap.
   final AdaptedHeapObject? object;
 
   Iterable<int> _refs(RefDirection direction) {
