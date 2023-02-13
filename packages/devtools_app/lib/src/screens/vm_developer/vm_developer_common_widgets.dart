@@ -821,7 +821,7 @@ class VmServiceObjectLink<T extends Response?> extends StatelessWidget {
     String? text = textBuilder?.call(object);
     bool isServiceObject = true;
     if (text == null) {
-      text = defaultTextBuilder(object);
+      text = defaultTextBuilder(object, preferUri: preferUri);
       if (text == null) {
         isServiceObject = false;
         text = object.toString();
