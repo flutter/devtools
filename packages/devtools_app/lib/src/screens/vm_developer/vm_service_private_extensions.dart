@@ -411,7 +411,7 @@ extension CodeRefPrivateViewExtension on CodeRef {
 
   /// Returns the function from which this code object was generated.
   FuncRef? get function {
-    final functionJson = json![_functionKey] as Map<String, dynamic>;
+    final functionJson = json![_functionKey] as Map<String, dynamic>?;
     return FuncRef.parse(functionJson);
   }
 }
