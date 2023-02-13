@@ -706,74 +706,86 @@ class VmServiceObjectLink<T extends Response?> extends StatelessWidget {
   final FutureOr<void> Function(T) onTap;
   final bool isSelected;
 
+  @visibleForTesting
+  static String? defaultTextBuilder(
+    Object? object, {
+    bool preferUri = false,
+  }) {
+    String? text;
+    if (object is LibraryRef) {
+      final lib = object;
+      if (lib.uri!.startsWith('dart') || preferUri) {
+        text = lib.uri!;
+      } else {
+        final name = lib.name;
+        text = name!.isEmpty ? lib.uri! : name;
+      }
+    } else if (object is FieldRef) {
+      final field = object;
+      text = field.name!;
+    } else if (object is FuncRef) {
+      final func = object;
+      text = func.name!;
+    } else if (object is ScriptRef) {
+      final script = object;
+      text = script.uri!;
+    } else if (object is ClassRef) {
+      final cls = object;
+      text = cls.name!;
+    } else if (object is CodeRef) {
+      final code = object;
+      text = code.name!;
+    } else if (object is InstanceRef) {
+      final instance = object;
+      if (instance.kind == InstanceKind.kList) {
+        text = 'List(length: ${instance.length})';
+      } else if (instance.kind == InstanceKind.kMap) {
+        text = 'Map(length: ${instance.length})';
+      } else if (instance.kind == InstanceKind.kRecord) {
+        text = 'Record';
+      } else if (instance.kind == InstanceKind.kType) {
+        text = instance.name!;
+      } else if (instance.kind == InstanceKind.kStackTrace) {
+        final trace = stack_trace.Trace.parse(instance.valueAsString!);
+        final depth = trace.frames.length;
+        text = 'StackTrace ($depth ${pluralize('frame', depth)})';
+      } else {
+        if (instance.valueAsString != null) {
+          text = instance.valueAsString!;
+        } else {
+          final cls = instance.classRef!;
+          text = '${cls.name}';
+        }
+      }
+    } else if (object is ContextRef) {
+      final context = object;
+      text = 'Context(length: ${context.length})';
+    } else if (object is TypeArgumentsRef) {
+      final typeArgs = object;
+      text = typeArgs.name!;
+    } else if (object is Sentinel) {
+      final sentinel = object;
+      text = 'Sentinel ${sentinel.valueAsString!}';
+    } else if (object != null && object is Obj && object.isICData) {
+      final icData = object.asICData;
+      text = 'ICData(${icData.selector})';
+    } else if (object != null &&
+        object is ObjRef &&
+        object.isObjectPool) {
+      final objectPool = object.asObjectPool;
+      text = 'Object Pool(length: ${objectPool.length})';
+    }
+    return text;
+  }
+
   TextSpan buildTextSpan(BuildContext context) {
     final theme = Theme.of(context);
 
     String? text = textBuilder?.call(object);
     bool isServiceObject = true;
     if (text == null) {
-      if (object is LibraryRef) {
-        final lib = object as LibraryRef;
-        if (lib.uri!.startsWith('dart') || preferUri) {
-          text = lib.uri!;
-        } else {
-          final name = lib.name;
-          text = name!.isEmpty ? lib.uri! : name;
-        }
-      } else if (object is FieldRef) {
-        final field = object as FieldRef;
-        text = field.name!;
-      } else if (object is FuncRef) {
-        final func = object as FuncRef;
-        text = func.name!;
-      } else if (object is ScriptRef) {
-        final script = object as ScriptRef;
-        text = script.uri!;
-      } else if (object is ClassRef) {
-        final cls = object as ClassRef;
-        text = cls.name!;
-      } else if (object is CodeRef) {
-        final code = object as CodeRef;
-        text = code.name!;
-      } else if (object is InstanceRef) {
-        final instance = object as InstanceRef;
-        if (instance.kind == InstanceKind.kList) {
-          text = 'List(length: ${instance.length})';
-        } else if (instance.kind == InstanceKind.kMap) {
-          text = 'Map(length: ${instance.length})';
-        } else if (instance.kind == InstanceKind.kRecord) {
-          text = 'Record';
-        } else if (instance.kind == InstanceKind.kType) {
-          text = instance.name!;
-        } else if (instance.kind == InstanceKind.kStackTrace) {
-          final trace = stack_trace.Trace.parse(instance.valueAsString!);
-          final depth = trace.frames.length;
-          text = 'StackTrace ($depth ${pluralize('frame', depth)})';
-        } else {
-          if (instance.valueAsString != null) {
-            text = instance.valueAsString!;
-          } else {
-            final cls = instance.classRef!;
-            text = '${cls.name}';
-          }
-        }
-      } else if (object is ContextRef) {
-        final context = object as ContextRef;
-        text = 'Context(length: ${context.length})';
-      } else if (object is TypeArgumentsRef) {
-        final typeArgs = object as TypeArgumentsRef;
-        text = typeArgs.name!;
-      } else if (object is Sentinel) {
-        final sentinel = object as Sentinel;
-        text = 'Sentinel ${sentinel.valueAsString!}';
-      } else if (object is Obj? && ((object as Obj?)?.isICData ?? false)) {
-        final icData = (object as Obj).asICData;
-        text = 'ICData(${icData.selector})';
-      } else if (object is ObjRef? &&
-          ((object as ObjRef?)?.isObjectPool ?? false)) {
-        final objectPool = (object as ObjRef).asObjectPool;
-        text = 'Object Pool(length: ${objectPool.length})';
-      } else {
+      text = defaultTextBuilder(object);
+      if (text == null) {
         isServiceObject = false;
         text = object.toString();
       }
