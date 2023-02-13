@@ -54,7 +54,7 @@ class HeapClassSampler extends ClassSampler {
     final heapObject =
         objects.objects.objectsByCodes[instanceRef.identityHashCode!]!;
 
-    final heapSelection = HeapObjectSelection(heap, heapObject);
+    final heapSelection = HeapObjectSelection(heap, object: heapObject);
 
     // drop to console
     serviceManager.consoleService.appendBrowsableInstance(

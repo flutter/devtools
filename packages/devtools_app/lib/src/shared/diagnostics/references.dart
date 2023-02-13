@@ -10,6 +10,7 @@ import 'package:vm_service/vm_service.dart';
 
 import '../feature_flags.dart';
 import '../globals.dart';
+import '../memory/adapted_heap_data.dart';
 import '../memory/class_name.dart';
 import '../primitives/utils.dart';
 import 'dart_object_node.dart';
@@ -79,6 +80,8 @@ Future<void> addChildReferences(
               ObjectReferences(
                 refNodeType: RefNodeType.staticInRefs,
                 heapSelection: s,
+                isolateRef: ref.isolateRef,
+                value: null,
               ),
               isRerootable: true,
             ),
@@ -98,6 +101,8 @@ Future<void> addChildReferences(
               ObjectReferences(
                 refNodeType: RefNodeType.staticOutRefs,
                 heapSelection: s,
+                isolateRef: ref.isolateRef,
+                value: null,
               ),
               isRerootable: true,
             ),
@@ -159,6 +164,7 @@ Future<void> addChildReferences(
           variable: variable,
           value: instance,
           isolateRef: isolateRef,
+          heapSelection: ref.heapSelection,
         );
       }
       break;
@@ -169,6 +175,7 @@ Future<void> _addOutboundLiveReferences({
   required DartObjectNode variable,
   required Instance value,
   required IsolateRef? isolateRef,
+  required HeapObjectSelection? heapSelection,
 }) async {
   switch (value.kind) {
     case InstanceKind.kMap:
@@ -176,11 +183,18 @@ Future<void> _addOutboundLiveReferences({
         _createLiveReferencesForMap(
           value,
           isolateRef,
+          HeapObjectSelection.withoutObject(heapSelection),
         ),
       );
       break;
     case InstanceKind.kList:
-      variable.addAllChildren(_createLiveReferencesForList(value, isolateRef));
+      variable.addAllChildren(
+        _createLiveReferencesForList(
+          value,
+          isolateRef,
+          HeapObjectSelection.withoutObject(heapSelection),
+        ),
+      );
       break;
     case InstanceKind.kRecord:
       // TODO: add references
@@ -194,7 +208,11 @@ Future<void> _addOutboundLiveReferences({
 
   if (value.fields != null && value.kind != InstanceKind.kRecord) {
     variable.addAllChildren(
-      _createLiveReferencesForFields(value, isolateRef),
+      _createLiveReferencesForFields(
+        value,
+        isolateRef,
+        HeapObjectSelection.withoutObject(heapSelection),
+      ),
     );
   }
 }
@@ -204,6 +222,7 @@ void _addLiveReference(
   IsolateRef? isolateRef,
   Object? instance,
   String namePrefix,
+  HeapObjectSelection? heapSelection,
 ) {
   if (instance is! InstanceRef) return;
   final classRef = instance.classRef!;
@@ -216,6 +235,7 @@ void _addLiveReference(
         refNodeType: RefNodeType.liveOutRefs,
         isolateRef: isolateRef,
         value: instance,
+        heapSelection: heapSelection,
       ),
       isRerootable: true,
     ),
@@ -225,6 +245,7 @@ void _addLiveReference(
 List<DartObjectNode> _createLiveReferencesForMap(
   Instance instance,
   IsolateRef? isolateRef,
+  HeapObjectSelection? heapSelection,
 ) {
   final variables = <DartObjectNode>[];
   final associations = instance.associations ?? [];
@@ -237,12 +258,14 @@ List<DartObjectNode> _createLiveReferencesForMap(
       isolateRef,
       association.key,
       '[$i, key]',
+      heapSelection,
     );
     _addLiveReference(
       variables,
       isolateRef,
       association.value,
       '[$i, val]', // `val`, not `value`, to align keys and values visually
+      heapSelection,
     );
     continue;
   }
@@ -252,12 +275,19 @@ List<DartObjectNode> _createLiveReferencesForMap(
 List<DartObjectNode> _createLiveReferencesForList(
   Instance instance,
   IsolateRef? isolateRef,
+  HeapObjectSelection? heapSelection,
 ) {
   final variables = <DartObjectNode>[];
   final elements = instance.elements ?? [];
   for (int i = 0; i < elements.length; i++) {
     final index = instance.offset == null ? i : i + instance.offset!;
-    _addLiveReference(variables, isolateRef, elements[i], '[$index]');
+    _addLiveReference(
+      variables,
+      isolateRef,
+      elements[i],
+      '[$index]',
+      heapSelection,
+    );
   }
   return variables;
 }
@@ -265,6 +295,7 @@ List<DartObjectNode> _createLiveReferencesForList(
 List<DartObjectNode> _createLiveReferencesForFields(
   Instance instance,
   IsolateRef? isolateRef,
+  HeapObjectSelection? heapSelection,
 ) {
   final variables = <DartObjectNode>[];
 
@@ -274,6 +305,7 @@ List<DartObjectNode> _createLiveReferencesForFields(
       isolateRef,
       field.value,
       '${field.decl?.name}:',
+      heapSelection,
     );
   }
   return variables;

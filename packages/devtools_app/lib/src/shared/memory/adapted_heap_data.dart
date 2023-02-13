@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:collection/collection.dart';
+import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../primitives/utils.dart';
@@ -21,8 +22,9 @@ class _JsonFields {
   static const String created = 'created';
 }
 
+@immutable
 class HeapObjectSelection {
-  HeapObjectSelection(this.heap, this.object);
+  const HeapObjectSelection(this.heap, {required this.object});
 
   final AdaptedHeapData heap;
 
@@ -40,11 +42,19 @@ class HeapObjectSelection {
 
   List<HeapObjectSelection> references(RefDirection direction) =>
       _refs(direction)
-          .map((i) => HeapObjectSelection(heap, heap.objects[i]))
+          .map((i) => HeapObjectSelection(heap, object: heap.objects[i]))
           .toList();
 
   int? countOfReferences(RefDirection? direction) =>
       direction == null ? null : _refs(direction).length;
+
+  static HeapObjectSelection? withoutObject(
+    HeapObjectSelection? heapSelection,
+  ) {
+    if (heapSelection == null) return null;
+    if (heapSelection.object == null) return null;
+    return HeapObjectSelection(heapSelection.heap, object: null);
+  }
 }
 
 /// Contains information from [HeapSnapshotGraph],
