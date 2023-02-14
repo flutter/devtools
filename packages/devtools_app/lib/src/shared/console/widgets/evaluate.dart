@@ -312,8 +312,12 @@ class ExpressionEvalFieldState extends State<ExpressionEvalField>
       if (serviceManager.isMainIsolatePaused) {
         response = await evalService.evalAtCurrentFrame(expressionText);
       } else {
+        if (isolateRef == null) {
+          _emitToConsole('Isolate should be defined for evaluation.');
+          return;
+        }
         response =
-            await evalService.evalInRunningApp(isolateRef!, expressionText);
+            await evalService.evalInRunningApp(isolateRef, expressionText);
       }
 
       // Display the response to the user.

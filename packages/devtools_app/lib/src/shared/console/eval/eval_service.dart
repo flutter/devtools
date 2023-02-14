@@ -60,6 +60,7 @@ class EvalService extends DisposableController with AutoDisposeControllerMixin {
     return await _service.getObject(ref, objRef.id!);
   }
 
+  /// Evaluates the expression in the isolate's root library.
   Future<Response> evalInRunningApp(
     IsolateRef isolateRef,
     String expressionText,
