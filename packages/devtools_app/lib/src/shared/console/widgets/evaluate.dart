@@ -299,13 +299,6 @@ class ExpressionEvalFieldState extends State<ExpressionEvalField>
 
     if (expressionText.isEmpty) return;
 
-    // Only try to eval if we are paused.
-    if (!serviceManager.isMainIsolatePaused) {
-      notificationService
-          .push('Application must be paused to support expression evaluation.');
-      return;
-    }
-
     serviceManager.consoleService.appendStdio('> $expressionText\n');
     setState(() {
       historyPosition = -1;
@@ -315,7 +308,19 @@ class ExpressionEvalFieldState extends State<ExpressionEvalField>
     try {
       // Response is either a ErrorRef, InstanceRef, or Sentinel.
       final isolateRef = serviceManager.isolateManager.selectedIsolate.value;
-      final response = await evalService.evalAtCurrentFrame(expressionText);
+      final Response response;
+      if (serviceManager.isMainIsolatePaused) {
+        response = await evalService.evalAtCurrentFrame(expressionText);
+      } else {
+        if (isolateRef == null) {
+          _emitToConsole(
+            'Cannot evaluate expression because the selected isolate is null.',
+          );
+          return;
+        }
+        response =
+            await evalService.evalInRunningApp(isolateRef, expressionText);
+      }
 
       // Display the response to the user.
       if (response is InstanceRef) {
