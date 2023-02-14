@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:vm_service/vm_service.dart';
 
 import '../vm_developer_common_widgets.dart';
 import 'object_inspector_view_controller.dart';

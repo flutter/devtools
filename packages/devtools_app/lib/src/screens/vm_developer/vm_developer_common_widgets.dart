@@ -94,10 +94,7 @@ MapEntry<String, WidgetBuilder> serviceObjectLinkBuilderMapEntry({
       object: object,
       textBuilder: textBuilder,
       preferUri: preferUri,
-      onTap: (object) async {
-        if (object == null) return;
-        await controller.findAndSelectNodeForObject(object);
-      },
+      onTap: controller.findAndSelectNodeForObject,
     ),
   );
 }
@@ -399,10 +396,7 @@ class ExpansionTileInstanceList extends StatelessWidget {
             ),
             VmServiceObjectLink(
               object: elements[i],
-              onTap: (e) {
-                if (e == null) return;
-                unawaited(controller.findAndSelectNodeForObject(e));
-              },
+              onTap: controller.findAndSelectNodeForObject,
             ),
           ],
         ),
