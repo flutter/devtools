@@ -399,15 +399,12 @@ class _DebuggerStatusState extends State<DebuggerStatus> with AutoDisposeMixin {
   }
 
   void _updateStatusOnPause() {
-    final mainIsolateState = serviceManager.isolateManager.mainIsolateState;
-    if (mainIsolateState != null) {
-      addAutoDisposeListener(
-        mainIsolateState.isPaused,
-        () => unawaited(
-          _updateStatus(),
-        ),
-      );
-    }
+    addAutoDisposeListener(
+      serviceManager.isolateManager.mainIsolateState?.isPaused,
+      () => unawaited(
+        _updateStatus(),
+      ),
+    );
   }
 
   @override
@@ -479,16 +476,14 @@ class _FloatingDebuggerControlsState extends State<FloatingDebuggerControls>
     cancelListeners();
 
     controlHeight = _isPaused ? defaultButtonHeight : 0.0;
-    final mainIsolateState = serviceManager.isolateManager.mainIsolateState;
-    if (mainIsolateState != null) {
-      addAutoDisposeListener(mainIsolateState.isPaused, () {
-        setState(() {
-          if (_isPaused) {
-            controlHeight = defaultButtonHeight;
-          }
-        });
+    addAutoDisposeListener(
+        serviceManager.isolateManager.mainIsolateState?.isPaused, () {
+      setState(() {
+        if (_isPaused) {
+          controlHeight = defaultButtonHeight;
+        }
       });
-    }
+    });
   }
 
   @override

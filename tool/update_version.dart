@@ -16,7 +16,7 @@ final _pubspecs = [
   'packages/devtools_test/pubspec.yaml',
   'packages/devtools_shared/pubspec.yaml',
 ].map((path) => File(path)).toList();
-  
+
 const _releaseNoteDirPath = './packages/devtools_app/release_notes';
 
 void main(List<String> args) async {
