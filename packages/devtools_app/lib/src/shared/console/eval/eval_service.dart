@@ -127,7 +127,7 @@ class EvalService extends DisposableController with AutoDisposeControllerMixin {
       preferences.memory.refLimit.value,
     );
 
-    return (instances.instances ?? []).firstWhereOrNull(
+    return (instances.instances ?? const []).firstWhereOrNull(
       (i) => i is InstanceRef && i.identityHashCode == object.code,
     ) as InstanceRef?;
   }
