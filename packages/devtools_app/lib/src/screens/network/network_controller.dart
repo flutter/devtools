@@ -26,8 +26,9 @@ class NetworkController extends DisposableController
         AutoDisposeControllerMixin {
   NetworkController() {
     _networkService = NetworkService(this);
-    _currentNetworkRequests =
-        CurrentNetworkRequests(onRequestDataChange: _handleRequestListChanges);
+    _currentNetworkRequests = CurrentNetworkRequests(
+      onRequestDataChange: _filterAndRefreshSearchMatches,
+    );
     subscribeToFilterChanges();
   }
 
@@ -128,7 +129,7 @@ class NetworkController extends DisposableController
       currentRequests: _currentNetworkRequests,
       invalidRequests: [],
     );
-    _handleRequestListChanges();
+    _filterAndRefreshSearchMatches();
     _updateSelection();
   }
 
@@ -220,11 +221,11 @@ class NetworkController extends DisposableController
     _requests.value = NetworkRequests();
     _currentNetworkRequests.clear();
     resetFilter();
-    _handleRequestListChanges();
+    _filterAndRefreshSearchMatches();
     _updateSelection();
   }
 
-  void _handleRequestListChanges() {
+  void _filterAndRefreshSearchMatches() {
     filterData(activeFilter.value);
     refreshSearchMatches();
   }
