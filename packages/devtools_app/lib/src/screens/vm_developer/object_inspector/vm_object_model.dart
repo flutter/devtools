@@ -296,3 +296,18 @@ class ICDataObject extends VmObject {
   @override
   ICData get obj => _obj.asICData;
 }
+
+/// Stores a 'SubtypeTestCache' VM object and provides an interface for
+/// obtaining the Dart VM information related to this object.
+class SubtypeTestCacheObject extends VmObject {
+  SubtypeTestCacheObject({required super.ref});
+
+  @override
+  SourceLocation? get _sourceLocation => null;
+
+  @override
+  String? get name => null;
+
+  @override
+  SubtypeTestCache get obj => _obj.asSubtypeTestCache;
+}

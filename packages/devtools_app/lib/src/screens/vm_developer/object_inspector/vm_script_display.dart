@@ -45,7 +45,7 @@ class VmScriptDisplay extends StatelessWidget {
         controller,
         field,
       ),
-      serviceObjectLinkBuilderMapEntry<ScriptRef>(
+      serviceObjectLinkBuilderMapEntry(
         controller: controller,
         key: 'URI',
         object: script.obj,

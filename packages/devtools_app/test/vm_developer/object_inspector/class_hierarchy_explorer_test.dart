@@ -119,7 +119,7 @@ void main() {
     expect(find.text('NoSub'), findsOneWidget);
 
     expect(
-      find.byType(VmServiceObjectLink<Class>),
+      find.byType(VmServiceObjectLink),
       findsNWidgets(classes.length),
     );
   });

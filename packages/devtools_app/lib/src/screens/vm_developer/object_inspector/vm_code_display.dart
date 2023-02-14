@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:string_scanner/string_scanner.dart';
 import 'package:vm_service/vm_service.dart';
@@ -167,7 +169,7 @@ class _DartObjectColumn extends _CodeColumnData
   final ObjectInspectorViewController controller;
 
   @override
-  ObjRef? getValue(Instruction inst) => inst.object;
+  Response? getValue(Instruction inst) => inst.object;
 
   @override
   Widget? build(
@@ -177,7 +179,7 @@ class _DartObjectColumn extends _CodeColumnData
     VoidCallback? onPressed,
   }) {
     if (data.object == null) return Container();
-    return VmServiceObjectLink<ObjRef>(
+    return VmServiceObjectLink(
       object: data.object!,
       onTap: controller.findAndSelectNodeForObject,
     );

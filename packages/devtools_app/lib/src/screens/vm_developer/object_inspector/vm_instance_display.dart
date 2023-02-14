@@ -130,7 +130,7 @@ class _InstanceViewer extends StatelessWidget {
       controller: controller,
       object: instance,
       generalDataRows: [
-        serviceObjectLinkBuilderMapEntry<ClassRef>(
+        serviceObjectLinkBuilderMapEntry(
           controller: controller,
           key: 'Object Class',
           object: instance.obj.classRef!,
