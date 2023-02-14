@@ -15,7 +15,7 @@ jobs:
         with:
           debug-only: true # TODO: Delete this line when we are ready to implement this for our process.
           only-issue-labels: "waiting for customer response"
-          days-before-issue-stale: 30
+          days-before-issue-stale: 14
           days-before-issue-close: 14
           stale-issue-label: "stale"
           stale-issue-message: "This issue is stale because it has been open for 30 days with no activity."
