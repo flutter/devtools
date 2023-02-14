@@ -20,6 +20,7 @@ import '../../ui/search.dart';
 import '../../ui/utils.dart';
 import '../eval/eval_service.dart';
 import '../primitives/eval_history.dart';
+import '../primitives/simple_items.dart';
 
 typedef AutoCompleteResultsFunction = Future<List<String>> Function(
   EditingParts parts,
@@ -401,7 +402,12 @@ class ExpressionEvalFieldState extends State<ExpressionEvalField>
   }
 
   bool _tryProcessAssignment(String expressionText) {
-    return false;
+    final assignment = ConsoleVariableAssignment.tryParse(expressionText);
+    if (assignment == null) return false;
+
+    i
+
+    return true;
   }
 }
 

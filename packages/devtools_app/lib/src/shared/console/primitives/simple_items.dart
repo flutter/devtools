@@ -7,3 +7,14 @@ enum FlutterTreeType {
   renderObject // ('Render');
 // TODO(jacobr): add semantics, and layer trees.
 }
+
+class ConsoleVariableAssignment {
+  ConsoleVariableAssignment._(this.consoleItemIndex, this.variableName);
+
+  final int consoleItemIndex;
+  final String variableName;
+
+  static ConsoleVariableAssignment? tryParse(String expression) {
+    return ConsoleVariableAssignment._(0, 'x');
+  }
+}
