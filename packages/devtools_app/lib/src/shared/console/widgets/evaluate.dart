@@ -316,7 +316,9 @@ class ExpressionEvalFieldState extends State<ExpressionEvalField>
         response = await evalService.evalAtCurrentFrame(expressionText);
       } else {
         if (isolateRef == null) {
-          _emitToConsole('Isolate should be defined for evaluation.');
+          _emitToConsole(
+            'Cannot evaluate expression because the selected isolate is null.',
+          );
           return;
         }
         response =

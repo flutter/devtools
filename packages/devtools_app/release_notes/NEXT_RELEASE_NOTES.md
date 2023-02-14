@@ -6,7 +6,7 @@ This is draft for future release notes, that are going to land on
 Dart & Flutter DevTools - A Suite of Performance Tools for Dart and Flutter
 
 ## General updates
-TODO: Remove this section if there are not any general updates.
+* Prevent crashes if there is no main isolate - [#5232](https://github.com/flutter/devtools/pull/5232)
 
 ## Inspector updates
 TODO: Remove this section if there are not any general updates.
