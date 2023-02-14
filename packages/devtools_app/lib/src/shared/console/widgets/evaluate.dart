@@ -17,8 +17,8 @@ import '../../ui/search.dart';
 import '../../ui/utils.dart';
 import '../eval/auto_complete.dart';
 import '../eval/eval_service.dart';
+import '../primitives/assignment.dart';
 import '../primitives/eval_history.dart';
-import '../primitives/simple_items.dart';
 
 typedef AutoCompleteResultsFunction = Future<List<String>> Function(
   EditingParts parts,
