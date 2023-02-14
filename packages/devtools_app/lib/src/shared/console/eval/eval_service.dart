@@ -75,7 +75,7 @@ class EvalService extends DisposableController with AutoDisposeControllerMixin {
       isolateRef.id!,
       (await isolate.isolate)!.rootLib!.id!,
       expressionText,
-      scope: {},
+      scope: scope,
     );
   }
 

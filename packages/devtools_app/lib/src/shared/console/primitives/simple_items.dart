@@ -15,6 +15,8 @@ class ConsoleVariableAssignment {
   final String variableName;
 
   static ConsoleVariableAssignment? tryParse(String expression) {
+    if (expression != 'var x=\$0') return null; //var x=$0
+
     return ConsoleVariableAssignment._(0, 'x');
   }
 }

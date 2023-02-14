@@ -305,14 +305,14 @@ class ExpressionEvalFieldState extends State<ExpressionEvalField>
     });
 
     try {
-      if (_tryProcessAssignment(expressionText)) return;
+      final isolateRef = serviceManager.isolateManager.selectedIsolate.value;
 
       // Response is either a ErrorRef, InstanceRef, or Sentinel.
-      final isolateRef = serviceManager.isolateManager.selectedIsolate.value;
       final Response response;
       if (serviceManager.isMainIsolatePaused) {
         response = await evalService.evalAtCurrentFrame(expressionText);
       } else {
+        if (_tryProcessAssignment(expressionText)) return;
         if (isolateRef == null) {
           _emitToConsole(
             'Cannot evaluate expression because the selected isolate is null.',
@@ -404,6 +404,22 @@ class ExpressionEvalFieldState extends State<ExpressionEvalField>
   bool _tryProcessAssignment(String expressionText) {
     final assignment = ConsoleVariableAssignment.tryParse(expressionText);
     if (assignment == null) return false;
+
+    final variable =
+        serviceManager.consoleService.itemAt(assignment.consoleItemIndex + 1);
+    final value = variable?.value;
+    if (value is! InstanceRef) {
+      _emitToConsole(
+        'Item #${assignment.consoleItemIndex} cannot be assigned to variable.',
+      );
+      return true;
+    }
+
+    evalService.scope[assignment.variableName] = value.id!;
+
+    _emitToConsole(
+        'Variable ${assignment.variableName} is created and can be used in expressions.\n'
+        'Note that it is not available for expressions at debugging breakpoint.');
 
     return true;
   }

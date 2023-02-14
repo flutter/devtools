@@ -174,6 +174,15 @@ class ConsoleService extends Disposer {
     }
   }
 
+  DartObjectNode? itemAt(int invertedIndex) {
+    assert(invertedIndex >= 0);
+    final list = _stdio.value;
+    if (invertedIndex > list.length - 1) return null;
+    final item = list[list.length - 1 - invertedIndex];
+    if (item is! VariableConsoleLine) return null;
+    return item.variable;
+  }
+
   /// Append to the stdout / stderr buffer.
   void appendStdio(String text) {
     const int kMaxLogItemsLowerBound = 5000;
