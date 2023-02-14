@@ -166,6 +166,10 @@ class ObjectInspectorViewController extends DisposableController
       object = CodeObject(
         ref: objRef,
       );
+    } else if (objRef.isObjectPool) {
+      object = ObjectPoolObject(
+        ref: objRef,
+      );
     } else if (objRef.isICData) {
       object = ICDataObject(
         ref: objRef,

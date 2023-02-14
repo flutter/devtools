@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:vm_service/vm_service.dart';
 
 import '../../../shared/common_widgets.dart';
 import '../../../shared/tree.dart';
@@ -33,7 +32,7 @@ class ClassHierarchyExplorer extends StatelessWidget {
     return TreeView<ClassHierarchyNode>(
       dataRootsListenable:
           controller.classHierarchyController.selectedIsolateClassHierarchy,
-      dataDisplayProvider: (node, onPressed) => VmServiceObjectLink<Class>(
+      dataDisplayProvider: (node, onPressed) => VmServiceObjectLink(
         object: node.cls,
         onTap: controller.findAndSelectNodeForObject,
       ),

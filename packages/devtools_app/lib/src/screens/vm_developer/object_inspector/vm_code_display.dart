@@ -6,7 +6,9 @@ import 'package:flutter/material.dart';
 import 'package:string_scanner/string_scanner.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../../../shared/common_widgets.dart';
 import '../../../shared/primitives/utils.dart';
+import '../../../shared/split.dart';
 import '../../../shared/table/table.dart';
 import '../../../shared/table/table_data.dart';
 import '../../../shared/theme.dart';
@@ -195,10 +197,50 @@ class VmCodeDisplay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CodeTable(
-      code: code,
-      controller: controller,
+    return Split(
+      initialFractions: const [0.4, 0.6],
+      axis: Axis.vertical,
+      children: [
+        OutlineDecoration.onlyBottom(
+          child: VmObjectDisplayBasicLayout(
+            controller: controller,
+            object: code,
+            generalDataRows: vmObjectGeneralDataRows(controller, code),
+            sideCardTitle: 'Code Details',
+            sideCardDataRows: _codeDetailRows(code),
+          ),
+        ),
+        OutlineDecoration.onlyTop(
+          child: CodeTable(
+            code: code,
+            controller: controller,
+          ),
+        ),
+      ],
     );
+  }
+
+  /// Returns a list of key-value pairs (map entries)
+  /// containing detailed information of a VM Func object [function].
+  List<MapEntry<String, Widget Function(BuildContext)>> _codeDetailRows(
+    CodeObject code,
+  ) {
+    return [
+      selectableTextBuilderMapEntry(
+        'Kind',
+        code.obj.kind,
+      ),
+      serviceObjectLinkBuilderMapEntry(
+        controller: controller,
+        key: 'Function',
+        object: code.obj.function!,
+      ),
+      serviceObjectLinkBuilderMapEntry(
+        controller: controller,
+        key: 'Object Pool',
+        object: code.obj.objectPool,
+      ),
+    ];
   }
 }
 
