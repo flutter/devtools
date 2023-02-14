@@ -407,8 +407,6 @@ class ExpressionEvalFieldState extends State<ExpressionEvalField>
     final assignment = ConsoleVariableAssignment.tryParse(expressionText);
     if (assignment == null) return false;
 
-    i
-
     return true;
   }
 }
