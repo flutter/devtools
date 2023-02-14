@@ -306,6 +306,8 @@ class ExpressionEvalFieldState extends State<ExpressionEvalField>
     });
 
     try {
+      if (_tryProcessAssignment(expressionText)) return;
+
       // Response is either a ErrorRef, InstanceRef, or Sentinel.
       final isolateRef = serviceManager.isolateManager.selectedIsolate.value;
       final Response response;
@@ -396,6 +398,10 @@ class ExpressionEvalFieldState extends State<ExpressionEvalField>
         selection: TextSelection.collapsed(offset: text.length),
       );
     });
+  }
+
+  bool _tryProcessAssignment(String expressionText) {
+    return false;
   }
 }
 
