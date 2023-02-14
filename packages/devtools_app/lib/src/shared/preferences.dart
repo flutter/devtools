@@ -326,7 +326,7 @@ class MemoryPreferencesController extends DisposableController
   /// when browsing references in console.
   final refLimitTitle = 'Limit for number of requested live instances.';
   final refLimit = ValueNotifier<int>(_defaultRefLimit);
-  static const _defaultRefLimit = 100;
+  static const _defaultRefLimit = 100000;
   static const _refLimitStorageId = 'memory.refLimit';
 
   Future<void> init() async {
@@ -364,7 +364,7 @@ class MemoryPreferencesController extends DisposableController
         );
       },
     );
-    showChart.value = await storage.getValue(_showChartStorageId) == 'true';
+    showChart.value = await storage.getValue(_showChartStorageId) != 'false';
 
     addAutoDisposeListener(
       refLimit,
