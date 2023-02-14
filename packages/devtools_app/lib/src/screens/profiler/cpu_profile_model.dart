@@ -21,6 +21,8 @@ import '../vm_developer/vm_service_private_extensions.dart';
 import 'cpu_profile_controller.dart';
 import 'cpu_profile_transformer.dart';
 
+import '_simple_profile.dart';
+
 /// A convenience wrapper for managing CPU profiles with both function and code
 /// profile views.
 ///
@@ -168,6 +170,7 @@ class CpuProfileData {
   }
 
   factory CpuProfileData.parse(Map<String, dynamic> json) {
+    json = simpleCpuProfile;
     final profileMetaData = CpuProfileMetaData(
       sampleCount: json[sampleCountKey] ?? 0,
       samplePeriod: json[samplePeriodKey] ?? 0,
@@ -211,7 +214,7 @@ class CpuProfileData {
     // Initialize all CPU samples.
     final stackTraceEvents =
         (json[traceEventsKey] ?? []).cast<Map<String, dynamic>>();
-    final samples = stackTraceEvents
+    final List<CpuSampleEvent> samples = stackTraceEvents
         .map((trace) => CpuSampleEvent.parse(trace))
         .toList()
         .cast<CpuSampleEvent>();
@@ -704,7 +707,7 @@ class CpuProfileData {
   List<CpuStackFrame> get bottomUpRoots {
     if (!processed) return <CpuStackFrame>[];
     return _bottomUpRoots ??=
-        BottomUpTransformer<CpuStackFrame>().bottomUpRootsFor(
+        CpuBottomUpTransformer().bottomUpRootsFor(
       topDownRoot: _cpuProfileRoot,
       mergeSamples: mergeCpuProfileRoots,
       rootedAtTags: rootedAtTags,

@@ -64,10 +64,10 @@ void main() {
   });
 
   group('BottomUpTransformer', () {
-    late BottomUpTransformer<CpuStackFrame> transformer;
+    late CpuBottomUpTransformer transformer;
 
     setUp(() {
-      transformer = BottomUpTransformer<CpuStackFrame>();
+      transformer = CpuBottomUpTransformer();
     });
 
     test('cascadeSampleCounts', () {

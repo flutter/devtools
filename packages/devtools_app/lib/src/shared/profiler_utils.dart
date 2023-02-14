@@ -4,6 +4,7 @@
 
 import 'package:flutter/foundation.dart';
 
+import '../screens/profiler/cpu_profile_model.dart';
 import 'primitives/trees.dart';
 import 'primitives/utils.dart';
 
@@ -100,26 +101,27 @@ class ProfileMetaData {
   final TimeRange? time;
 }
 
-/// Process for converting a [ProfilableDataMixin] into a bottom-up
+/// Process for converting a [CpuStackFrame] into a bottom-up
 /// representation of the profile.
 ///
 /// [rootedAtTags] specifies whether or not the top-down tree is rooted
 /// at synthetic nodes representing user / VM tags.
-class BottomUpTransformer<T extends ProfilableDataMixin<T>> {
-  List<T> bottomUpRootsFor({
-    required T topDownRoot,
-    required void Function(List<T>) mergeSamples,
+class CpuBottomUpTransformer {
+  List<CpuStackFrame> bottomUpRootsFor({
+    required CpuStackFrame topDownRoot,
+    required void Function(List<CpuStackFrame>) mergeSamples,
     // TODO(bkonyi): can this take a list instead of a single root?
     required bool rootedAtTags,
+    Map<String, Object?>? shallowCopyArgs = const {},
   }) {
-    List<T> bottomUpRoots;
+    List<CpuStackFrame> bottomUpRoots;
     // If the top-down tree has synthetic tag nodes as its roots, we need to
     // skip the synthetic nodes when inverting the tree and re-insert them at
     // the root.
     if (rootedAtTags) {
-      bottomUpRoots = <T>[];
+      bottomUpRoots = <CpuStackFrame>[];
       for (final tagRoot in topDownRoot.children) {
-        final root = tagRoot.shallowCopy() as T;
+        final root = tagRoot.shallowCopy();
 
         // Generate bottom up roots for each child of the synthetic tag node
         // and insert them into the new synthetic tag node, [root].
@@ -128,7 +130,7 @@ class BottomUpTransformer<T extends ProfilableDataMixin<T>> {
             generateBottomUpRoots(
               node: child,
               currentBottomUpRoot: null,
-              bottomUpRoots: <T>[],
+              bottomUpRoots: <CpuStackFrame>[],
             ),
           );
         }
@@ -144,7 +146,7 @@ class BottomUpTransformer<T extends ProfilableDataMixin<T>> {
       bottomUpRoots = generateBottomUpRoots(
         node: topDownRoot,
         currentBottomUpRoot: null,
-        bottomUpRoots: <T>[],
+        bottomUpRoots: <CpuStackFrame>[],
       );
 
       // Set the bottom up sample counts for each sample.
@@ -179,12 +181,15 @@ class BottomUpTransformer<T extends ProfilableDataMixin<T>> {
   /// counts will not reflect the bottom up sample counts. These steps will
   /// occur later in the bottom-up conversion process.
   @visibleForTesting
-  List<T> generateBottomUpRoots({
-    required T node,
-    required T? currentBottomUpRoot,
-    required List<T> bottomUpRoots,
+  List<CpuStackFrame> generateBottomUpRoots({
+    required CpuStackFrame node,
+    required CpuStackFrame? currentBottomUpRoot,
+    required List<CpuStackFrame> bottomUpRoots,
   }) {
-    final copy = node.shallowCopy() as T;
+    final copy = node.shallowCopy();
+    // final copy = node.shallowCopy(
+    //   args: {'resetInclusiveSampleCount': false},
+    // ) as CpuStackFrame;
 
     if (currentBottomUpRoot != null) {
       copy.addChild(currentBottomUpRoot.deepCopy());
@@ -197,7 +202,7 @@ class BottomUpTransformer<T extends ProfilableDataMixin<T>> {
       // This node is a leaf node, meaning it is a bottom up root.
       bottomUpRoots.add(currentBottomUpRoot);
     }
-    for (final child in node.children.cast<T>()) {
+    for (final child in node.children.cast<CpuStackFrame>()) {
       generateBottomUpRoots(
         node: child,
         currentBottomUpRoot: currentBottomUpRoot,
@@ -214,9 +219,9 @@ class BottomUpTransformer<T extends ProfilableDataMixin<T>> {
   /// [generateBottomUpRoots] and the [mergeSamples] callback passed to
   /// [bottomUpRootsFor].
   @visibleForTesting
-  void cascadeSampleCounts(T node) {
+  void cascadeSampleCounts(CpuStackFrame node) {
     node.inclusiveSampleCount = node.exclusiveSampleCount;
-    for (final child in node.children.cast<T>()) {
+    for (final child in node.children.cast<CpuStackFrame>()) {
       child.exclusiveSampleCount = node.exclusiveSampleCount;
       cascadeSampleCounts(child);
     }
