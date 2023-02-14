@@ -191,8 +191,6 @@ Future<void> addChildReferences(
         variable: variable,
       );
 
-      // ?????
-
       if (instance is Instance) {
         await _addOutboundLiveReferences(
           variable: variable,
