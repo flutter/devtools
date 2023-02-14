@@ -28,7 +28,7 @@ class HeapObjectSelection {
 
   final AdaptedHeapData heap;
 
-  /// If onject is null, it exists in live app, but is not
+  /// If object is null, it exists in live app, but is not
   /// located in heap.
   final AdaptedHeapObject? object;
 
