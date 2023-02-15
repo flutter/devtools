@@ -68,7 +68,8 @@ jobs:
           set -x
 
           git commit -a -m "$COMMIT_MESSAGE"
-          git push -uf origin daily-dev-bump--bot-branch
+          git push --set-upstream origin daily-dev-bump--bot-branch
+          git push -f origin daily-dev-bump--bot-branch 
 
           # PR_URL=$(gh pr create -d --title "$COMMIT_MESSAGE" --body "RELEASE_NOTE_EXCEPTION=Automated Version Bump")
 
