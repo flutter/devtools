@@ -13,6 +13,9 @@ import '../../memory/adapted_heap_data.dart';
 import '../../primitives/auto_dispose.dart';
 
 class EvalService extends DisposableController with AutoDisposeControllerMixin {
+  /// Parameter `scope` for `serviceManager.service!.evaluate(...)`.
+  final scope = <String, String>{};
+
   VmServiceWrapper get _service {
     return serviceManager.service!;
   }
@@ -72,7 +75,7 @@ class EvalService extends DisposableController with AutoDisposeControllerMixin {
       isolateRef.id!,
       (await isolate.isolate)!.rootLib!.id!,
       expressionText,
-      scope: {},
+      scope: scope,
     );
   }
 

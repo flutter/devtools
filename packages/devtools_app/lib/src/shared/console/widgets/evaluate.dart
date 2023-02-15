@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../../feature_flags.dart';
 import '../../globals.dart';
 import '../../primitives/auto_dispose.dart';
 import '../../theme.dart';
@@ -17,6 +18,7 @@ import '../../ui/search.dart';
 import '../../ui/utils.dart';
 import '../eval/auto_complete.dart';
 import '../eval/eval_service.dart';
+import '../primitives/assignment.dart';
 import '../primitives/eval_history.dart';
 
 typedef AutoCompleteResultsFunction = Future<List<String>> Function(
@@ -304,12 +306,14 @@ class ExpressionEvalFieldState extends State<ExpressionEvalField>
     });
 
     try {
-      // Response is either a ErrorRef, InstanceRef, or Sentinel.
       final isolateRef = serviceManager.isolateManager.selectedIsolate.value;
+
+      // Response is either a ErrorRef, InstanceRef, or Sentinel.
       final Response response;
       if (serviceManager.isMainIsolatePaused) {
         response = await evalService.evalAtCurrentFrame(expressionText);
       } else {
+        if (_tryProcessAssignment(expressionText)) return;
         if (isolateRef == null) {
           _emitToConsole(
             'Cannot evaluate expression because the selected isolate is null.',
@@ -396,5 +400,34 @@ class ExpressionEvalFieldState extends State<ExpressionEvalField>
         selection: TextSelection.collapsed(offset: text.length),
       );
     });
+  }
+
+  /// If [expressionText] is assignment like `var x=$1`, processes it.
+  ///
+  /// Returns true is the text was parsed as assignment.
+  bool _tryProcessAssignment(String expressionText) {
+    if (!FeatureFlags.evalAndBrowse) return false;
+
+    final assignment = ConsoleVariableAssignment.tryParse(expressionText);
+    if (assignment == null) return false;
+
+    final variable =
+        serviceManager.consoleService.itemAt(assignment.consoleItemIndex + 1);
+    final value = variable?.value;
+    if (value is! InstanceRef) {
+      _emitToConsole(
+        'Item #${assignment.consoleItemIndex} cannot be assigned to a variable.',
+      );
+      return true;
+    }
+
+    evalService.scope[assignment.variableName] = value.id!;
+
+    _emitToConsole(
+      'Variable ${assignment.variableName} is created can now be used in expression evaluation '
+      'if application is not stopped.\n',
+    );
+
+    return true;
   }
 }
