@@ -174,6 +174,10 @@ class ObjectInspectorViewController extends DisposableController
       object = ICDataObject(
         ref: objRef,
       );
+    } else if (objRef.isSubtypeTestCache) {
+      object = SubtypeTestCacheObject(
+        ref: objRef,
+      );
     }
 
     await object?.initialize();

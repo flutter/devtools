@@ -81,23 +81,20 @@ MapEntry<String, WidgetBuilder> selectableTextBuilderMapEntry(
   );
 }
 
-MapEntry<String, WidgetBuilder>
-    serviceObjectLinkBuilderMapEntry<T extends ObjRef>({
+MapEntry<String, WidgetBuilder> serviceObjectLinkBuilderMapEntry({
   required ObjectInspectorViewController controller,
   required String key,
-  required T object,
+  required Response? object,
   bool preferUri = false,
-  String Function(T)? textBuilder,
+  String Function(Response?)? textBuilder,
 }) {
   return MapEntry(
     key,
-    (context) => VmServiceObjectLink<T>(
+    (context) => VmServiceObjectLink(
       object: object,
       textBuilder: textBuilder,
       preferUri: preferUri,
-      onTap: (object) async {
-        await controller.findAndSelectNodeForObject(object);
-      },
+      onTap: controller.findAndSelectNodeForObject,
     ),
   );
 }
@@ -397,12 +394,9 @@ class ExpansionTileInstanceList extends StatelessWidget {
               '[$i]: ',
               style: theme.subtleFixedFontStyle,
             ),
-            VmServiceObjectLink<ObjRef?>(
+            VmServiceObjectLink(
               object: elements[i],
-              onTap: (e) {
-                if (e == null) return;
-                unawaited(controller.findAndSelectNodeForObject(e));
-              },
+              onTap: controller.findAndSelectNodeForObject,
             ),
           ],
         ),
@@ -730,7 +724,7 @@ class InboundReferencesWidget extends StatelessWidget {
   }
 }
 
-class VmServiceObjectLink<T extends Response?> extends StatelessWidget {
+class VmServiceObjectLink extends StatelessWidget {
   const VmServiceObjectLink({
     required this.object,
     required this.onTap,
@@ -739,10 +733,10 @@ class VmServiceObjectLink<T extends Response?> extends StatelessWidget {
     this.textBuilder,
   });
 
-  final T object;
+  final Response? object;
   final bool preferUri;
-  final String? Function(T)? textBuilder;
-  final FutureOr<void> Function(T) onTap;
+  final String? Function(Response?)? textBuilder;
+  final FutureOr<void> Function(ObjRef) onTap;
   final bool isSelected;
 
   @visibleForTesting
@@ -782,7 +776,8 @@ class VmServiceObjectLink<T extends Response?> extends StatelessWidget {
         text = 'Map(length: ${instance.length})';
       } else if (instance.kind == InstanceKind.kRecord) {
         text = 'Record';
-      } else if (instance.kind == InstanceKind.kType) {
+      } else if (instance.kind == InstanceKind.kType ||
+          instance.kind == InstanceKind.kTypeParameter) {
         text = instance.name!;
       } else if (instance.kind == InstanceKind.kStackTrace) {
         final trace = stack_trace.Trace.parse(instance.valueAsString!);
@@ -811,6 +806,10 @@ class VmServiceObjectLink<T extends Response?> extends StatelessWidget {
     } else if (object != null && object is ObjRef && object.isObjectPool) {
       final objectPool = object.asObjectPool;
       text = 'Object Pool(length: ${objectPool.length})';
+    } else if (object != null &&
+        object is ObjRef &&
+        object.isSubtypeTestCache) {
+      text = 'SubtypeTestCache';
     }
     return text;
   }
@@ -820,11 +819,10 @@ class VmServiceObjectLink<T extends Response?> extends StatelessWidget {
 
     String? text = textBuilder?.call(object) ??
         defaultTextBuilder(object, preferUri: preferUri);
-    bool isServiceObject = true;
-    if (text == null) {
-      isServiceObject = false;
-      text = object.toString();
-    }
+
+    // Sentinels aren't objects that can be inspected.
+    final isServiceObject = object is! Sentinel && text != null;
+    text ??= object.toString();
 
     final TextStyle style;
     if (isServiceObject) {
@@ -838,7 +836,10 @@ class VmServiceObjectLink<T extends Response?> extends StatelessWidget {
       recognizer: isServiceObject
           ? (TapGestureRecognizer()
             ..onTap = () async {
-              await onTap(object);
+              final obj = object;
+              if (obj is ObjRef) {
+                await onTap(obj);
+              }
             })
           : null,
     );
@@ -987,25 +988,25 @@ List<MapEntry<String, WidgetBuilder>> vmObjectGeneralDataRows(
     reachableSizeRowBuilder(object),
     retainedSizeRowBuilder(object),
     if (object is ClassObject)
-      serviceObjectLinkBuilderMapEntry<LibraryRef>(
+      serviceObjectLinkBuilderMapEntry(
         controller: controller,
         key: 'Library',
         object: object.obj.library!,
       ),
     if (object is ScriptObject)
-      serviceObjectLinkBuilderMapEntry<LibraryRef>(
+      serviceObjectLinkBuilderMapEntry(
         controller: controller,
         key: 'Library',
         object: object.obj.library!,
       ),
     if (object is FieldObject)
-      serviceObjectLinkBuilderMapEntry<ObjRef>(
+      serviceObjectLinkBuilderMapEntry(
         controller: controller,
         key: 'Owner',
         object: object.obj.owner!,
       ),
     if (object is FuncObject)
-      serviceObjectLinkBuilderMapEntry<ObjRef>(
+      serviceObjectLinkBuilderMapEntry(
         controller: controller,
         key: 'Owner',
         object: object.obj.owner!,
@@ -1013,11 +1014,12 @@ List<MapEntry<String, WidgetBuilder>> vmObjectGeneralDataRows(
     if (object is! ScriptObject &&
         object is! LibraryObject &&
         object.script != null)
-      serviceObjectLinkBuilderMapEntry<ScriptRef>(
+      serviceObjectLinkBuilderMapEntry(
         controller: controller,
         key: 'Script',
         object: object.script!,
-        textBuilder: (script) {
+        textBuilder: (s) {
+          final script = s as ScriptRef;
           return '${fileNameFromUri(script.uri) ?? ''}:${object.pos?.toString() ?? ''}';
         },
       ),

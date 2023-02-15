@@ -167,7 +167,7 @@ class _DartObjectColumn extends _CodeColumnData
   final ObjectInspectorViewController controller;
 
   @override
-  ObjRef? getValue(Instruction inst) => inst.object;
+  Response? getValue(Instruction inst) => inst.object;
 
   @override
   Widget? build(
@@ -177,7 +177,7 @@ class _DartObjectColumn extends _CodeColumnData
     VoidCallback? onPressed,
   }) {
     if (data.object == null) return Container();
-    return VmServiceObjectLink<ObjRef>(
+    return VmServiceObjectLink(
       object: data.object!,
       onTap: controller.findAndSelectNodeForObject,
     );

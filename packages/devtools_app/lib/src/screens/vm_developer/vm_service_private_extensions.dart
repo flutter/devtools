@@ -157,6 +157,7 @@ extension AllocationProfilePrivateViewExtension on AllocationProfile {
 extension ObjRefPrivateViewExtension on ObjRef {
   static const _icDataType = 'ICData';
   static const _objectPoolType = 'ObjectPool';
+  static const _subtypeTestCache = 'SubtypeTestCache';
 
   /// The internal type of the object.
   ///
@@ -168,13 +169,20 @@ extension ObjRefPrivateViewExtension on ObjRef {
   bool get isICData => vmType == _icDataType;
 
   /// Casts the current [ObjRef] into an instance of [ICDataRef].
-  ICDataRef get asICData => ICDataRef.parse(json!)!;
+  ICDataRef get asICData => ICDataRef.parse(json!);
 
   /// `true` if this object is an instance of [ObjectPool].
   bool get isObjectPool => vmType == _objectPoolType;
 
   /// Casts the current [ObjRef] into an instance of [ObjectPoolRef].
   ObjectPoolRef get asObjectPool => ObjectPoolRef.parse(json!);
+
+  /// `true` if this object is an instance of [SubtypeTestCacheRef].
+  bool get isSubtypeTestCache => vmType == _subtypeTestCache;
+
+  /// Casts the current [ObjRef] into an instance of [SubtypeTestCacheRef].
+  SubtypeTestCacheRef get asSubtypeTestCache =>
+      SubtypeTestCacheRef.parse(json!);
 }
 
 /// An extension on [Obj] which allows for access to VM internal fields.
@@ -183,7 +191,67 @@ extension ObjPrivateViewExtension on Obj {
   ObjectPool get asObjectPool => ObjectPool.parse(json!);
 
   /// Casts the current [Obj] into an instance of [ICData].
-  ICData get asICData => ICData.parse(json!)!;
+  ICData get asICData => ICData.parse(json!);
+
+  /// Casts the current [Obj] into an instance of [SubtypeTestCache].
+  SubtypeTestCache get asSubtypeTestCache => SubtypeTestCache.parse(json!);
+}
+
+/// A partially-populated representation of the Dart VM's subtype test cache.
+class SubtypeTestCacheRef implements ObjRef {
+  SubtypeTestCacheRef({
+    required this.id,
+    required this.json,
+  });
+
+  factory SubtypeTestCacheRef.parse(Map<String, dynamic> json) =>
+      SubtypeTestCacheRef(
+        id: json['id'],
+        json: json,
+      );
+
+  @override
+  bool? fixedId;
+
+  @override
+  String? id;
+
+  @override
+  Map<String, dynamic>? json;
+
+  @override
+  Map<String, dynamic> toJson() => json!;
+
+  @override
+  String get type => 'SubtypeTestCache';
+}
+
+/// A fully-populated representation of the Dart VM's subtype test cache.
+class SubtypeTestCache extends SubtypeTestCacheRef implements Obj {
+  SubtypeTestCache({
+    required super.id,
+    required super.json,
+    required this.size,
+    required this.classRef,
+    required this.cache,
+  });
+
+  factory SubtypeTestCache.parse(Map<String, dynamic> json) => SubtypeTestCache(
+        id: json['id'],
+        size: json['size'],
+        cache: createServiceObject(json['_cache'], [])! as InstanceRef,
+        classRef: createServiceObject(json['class'], [])! as ClassRef,
+        json: json,
+      );
+
+  /// An array of objects which make up the cache.
+  final InstanceRef cache;
+
+  @override
+  ClassRef? classRef;
+
+  @override
+  int? size;
 }
 
 /// A partially-populated representation of the Dart VM's Inline Cache (IC).
@@ -199,7 +267,7 @@ class ICDataRef implements ObjRef {
     required this.selector,
   });
 
-  static ICDataRef? parse(Map<String, dynamic> json) => ICDataRef(
+  factory ICDataRef.parse(Map<String, dynamic> json) => ICDataRef(
         id: json['id'],
         owner: createServiceObject(json['_owner'], []) as ObjRef,
         selector: json['_selector'],
@@ -242,7 +310,7 @@ class ICData extends ICDataRef implements Obj {
     required this.entries,
   }) : super();
 
-  static ICData? parse(Map<String, dynamic> json) => ICData(
+  factory ICData.parse(Map<String, dynamic> json) => ICData(
         id: json['id'],
         owner: createServiceObject(json['_owner'], []) as ObjRef,
         selector: json['_selector'],
@@ -278,7 +346,7 @@ class Instruction {
     final rawObject = data[3] as Map<String, dynamic>;
     object = rawObject['type'].contains('Instance')
         ? InstanceRef.parse(rawObject)
-        : createServiceObject(data[3], const <String>[]) as ObjRef;
+        : createServiceObject(data[3], const <String>[]) as Response?;
   }
 
   /// The instruction's address in memory.
@@ -291,7 +359,7 @@ class Instruction {
   final String instruction;
 
   /// The Dart object this instruction is acting upon directly.
-  late final ObjRef? object;
+  late final Response? object;
 
   List toJson() => [
         address,

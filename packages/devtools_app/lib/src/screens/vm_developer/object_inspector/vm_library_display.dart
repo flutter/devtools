@@ -50,7 +50,7 @@ class VmLibraryDisplay extends StatelessWidget {
         controller,
         library,
       ),
-      serviceObjectLinkBuilderMapEntry<ObjRef>(
+      serviceObjectLinkBuilderMapEntry(
         controller: controller,
         key: 'URI',
         preferUri: true,

@@ -38,6 +38,7 @@ import 'package:vm_service/vm_service.dart';
   LibraryObject,
   ObjectPoolObject,
   ICDataObject,
+  SubtypeTestCacheObject,
   CodeViewController,
   BreakpointManager,
   EvalService,
