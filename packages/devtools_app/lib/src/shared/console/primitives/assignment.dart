@@ -6,7 +6,7 @@
 class ConsoleVariableAssignment {
   ConsoleVariableAssignment._(this.consoleItemIndex, this.variableName);
 
-  /// Ziro based bottom up index for items in console.
+  /// Zero based bottom up index for items in console.
   final int consoleItemIndex;
 
   final String variableName;
@@ -19,7 +19,7 @@ class ConsoleVariableAssignment {
     const indexGroup = '([_012345])';
 
     final regex =
-        RegExp(r'var\s+' + variableNameGroup + r'\s*=\s*\$' + indexGroup);
+        RegExp(r'var\s+' '$variableNameGroup' r'\s*=\s*\$' '$indexGroup');
 
     final matches = regex.allMatches(expression);
     if (matches.length != 1) return null;
