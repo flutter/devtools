@@ -19,6 +19,7 @@ import 'vm_library_display.dart';
 import 'vm_object_model.dart';
 import 'vm_object_pool_display.dart';
 import 'vm_script_display.dart';
+import 'vm_subtype_test_cache_display.dart';
 
 /// Displays the VM information for the currently selected object in the
 /// program explorer.
@@ -129,6 +130,12 @@ class ObjectViewport extends StatelessWidget {
       return VmICDataDisplay(
         controller: controller,
         icData: obj,
+      );
+    }
+    if (obj is SubtypeTestCacheObject) {
+      return VmSubtypeTestCacheDisplay(
+        controller: controller,
+        subtypeTestCache: obj,
       );
     }
     return const SizedBox.shrink();

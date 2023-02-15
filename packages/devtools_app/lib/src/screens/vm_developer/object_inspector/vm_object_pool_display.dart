@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -61,14 +59,9 @@ class _DartObjectColumn extends _ObjectPoolColumnData
     VoidCallback? onPressed,
   }) {
     if (data.value is int) return Text(data.value.toString());
-    return VmServiceObjectLink<Response>(
+    return VmServiceObjectLink(
       object: data.value as Response,
-      onTap: (e) {
-        // TODO(bkonyi): add support for non-object responses (e.g., Sentinels)
-        // See https://github.com/flutter/devtools/issues/5241
-        if (e is! ObjRef) return;
-        unawaited(controller.findAndSelectNodeForObject(e));
-      },
+      onTap: controller.findAndSelectNodeForObject,
     );
   }
 }

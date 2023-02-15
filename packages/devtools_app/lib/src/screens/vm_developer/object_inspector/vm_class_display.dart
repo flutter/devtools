@@ -65,7 +65,7 @@ class VmClassDisplay extends StatelessWidget {
         clazz,
       ),
       if (superClass != null)
-        serviceObjectLinkBuilderMapEntry<ClassRef>(
+        serviceObjectLinkBuilderMapEntry(
           controller: controller,
           key: 'Superclass',
           object: superClass,
