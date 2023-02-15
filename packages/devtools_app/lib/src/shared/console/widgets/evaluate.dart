@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../../feature_flags.dart';
 import '../../globals.dart';
 import '../../primitives/auto_dispose.dart';
 import '../../theme.dart';
@@ -401,7 +402,12 @@ class ExpressionEvalFieldState extends State<ExpressionEvalField>
     });
   }
 
+  /// If [expressionText] is assignment like `var x=$1`, processes it.
+  ///
+  /// Returns true is the text was parsed as assignment.
   bool _tryProcessAssignment(String expressionText) {
+    if (!FeatureFlags.evalAndBrowse) return false;
+
     final assignment = ConsoleVariableAssignment.tryParse(expressionText);
     if (assignment == null) return false;
 
