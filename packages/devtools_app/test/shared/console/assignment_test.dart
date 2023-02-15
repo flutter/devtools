@@ -6,8 +6,12 @@ import 'package:devtools_app/src/shared/console/primitives/assignment.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 class _AssignmentParsingTest {
-  _AssignmentParsingTest(this.name, this.input, this.variableName, this.index)
-      : assert((variableName == null) == (index == null));
+  _AssignmentParsingTest(
+    this.name,
+    this.input,
+    this.variableName,
+    this.index,
+  ) : assert((variableName == null) == (index == null));
 
   final String name;
   final String input;

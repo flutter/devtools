@@ -416,7 +416,7 @@ class ExpressionEvalFieldState extends State<ExpressionEvalField>
     final value = variable?.value;
     if (value is! InstanceRef) {
       _emitToConsole(
-        'Item #${assignment.consoleItemIndex} cannot be assigned to variable.',
+        'Item #${assignment.consoleItemIndex} cannot be assigned to a variable.',
       );
       return true;
     }
