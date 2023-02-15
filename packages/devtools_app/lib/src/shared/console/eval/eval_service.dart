@@ -125,6 +125,7 @@ class EvalService extends DisposableController with AutoDisposeControllerMixin {
       frame.index!,
       expression,
       disableBreakpoints: true,
+      scope: scope,
     );
   }
 
