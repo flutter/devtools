@@ -13,9 +13,9 @@ import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart';
 
 void main() {
-  late final ObjectInspectorView objectInspector;
+  late ObjectInspectorView objectInspector;
 
-  late final FakeServiceManager fakeServiceManager;
+  late FakeServiceManager fakeServiceManager;
 
   late MockScriptManager scriptManager;
 

@@ -26,6 +26,7 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
     int? childCount,
     this.artificialName = false,
     this.artificialValue = false,
+    this.isRerootable = false,
   })  : _offset = offset,
         _childCount = childCount {
     indentChildren = ref?.diagnostic?.style != DiagnosticsTreeStyle.flat;
@@ -53,12 +54,13 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
     name = name ?? '';
 
     final String? text;
-    if (heapSelection == null) {
+    final heapObject = heapSelection?.object;
+    if (heapObject == null) {
       text = null;
     } else {
-      final className = heapSelection.object.heapClass.className;
+      final className = heapObject.heapClass.className;
       final size = prettyPrintRetainedSize(
-        heapSelection.object.retainedSize,
+        heapObject.retainedSize,
       );
       text = '$className, retained size $size';
     }
@@ -140,6 +142,23 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
       ]);
   }
 
+  factory DartObjectNode.fromInstanceSet({
+    required String text,
+    required InstanceSet instanceSet,
+    required IsolateRef? isolateRef,
+  }) {
+    return DartObjectNode._(
+      text: text,
+      ref: GenericInstanceRef(
+        isolateRef: isolateRef,
+        value: instanceSet,
+      ),
+      artificialValue: true,
+      artificialName: true,
+      childCount: instanceSet.instances?.length,
+    );
+  }
+
   factory DartObjectNode.create(
     BoundVariable variable,
     IsolateRef? isolateRef,
@@ -174,12 +193,17 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
     );
   }
 
-  factory DartObjectNode.references(String text, ObjectReferences ref) {
+  factory DartObjectNode.references(
+    String text,
+    ObjectReferences ref, {
+    bool isRerootable = false,
+  }) {
     return DartObjectNode._(
       text: text,
       ref: ref,
       childCount:
-          ref.heapSelection?.countOfReferences(ref.refNodeType.direction),
+          ref.heapSelection.countOfReferences(ref.refNodeType.direction),
+      isRerootable: isRerootable,
     );
   }
 
@@ -206,6 +230,9 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
   int get offset => _offset ?? 0;
 
   int? _offset;
+
+  /// If true, the variable can be saved to console as a root.
+  final bool isRerootable;
 
   int get childCount {
     if (_childCount != null) return _childCount!;

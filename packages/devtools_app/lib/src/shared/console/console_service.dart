@@ -74,6 +74,34 @@ class VariableConsoleLine extends ConsoleLine {
 /// Source of truth for the state of the Console including both events from the
 /// VM and events emitted from other UI.
 class ConsoleService extends Disposer {
+  void appendBrowsableInstance({
+    required InstanceRef? instanceRef,
+    required IsolateRef? isolateRef,
+    required HeapObjectSelection? heapSelection,
+  }) async {
+    if (instanceRef == null) {
+      final object = heapSelection?.object;
+      if (object == null || isolateRef == null) {
+        serviceManager.consoleService.appendStdio(
+          'Not enough information to browse the instance.',
+        );
+        return;
+      }
+
+      instanceRef = await evalService.findObject(object, isolateRef);
+    }
+
+    // If instanceRef is null at this point, user will see static references.
+
+    appendInstanceRef(
+      value: instanceRef,
+      diagnostic: null,
+      isolateRef: isolateRef,
+      forceScrollIntoView: true,
+      heapSelection: heapSelection,
+    );
+  }
+
   void appendInstanceRef({
     String? name,
     required InstanceRef? value,
@@ -104,6 +132,26 @@ class ConsoleService extends Disposer {
     );
   }
 
+  void appendInstanceSet({
+    required String type,
+    required InstanceSet instanceSet,
+    required IsolateRef? isolateRef,
+  }) async {
+    _stdioTrailingNewline = false;
+    final variable = DartObjectNode.fromInstanceSet(
+      text:
+          '$type (${instanceSet.instances?.length ?? 0} out of ${instanceSet.totalCount} instances)',
+      instanceSet: instanceSet,
+      isolateRef: isolateRef,
+    );
+
+    await buildVariablesTree(variable);
+
+    _stdio.add(
+      ConsoleLine.dartObjectNode(variable),
+    );
+  }
+
   final _stdio = ListValueNotifier<ConsoleLine>([]);
   bool _stdioTrailingNewline = false;
 
@@ -124,6 +172,15 @@ class ConsoleService extends Disposer {
     if (_stdio.value.isNotEmpty) {
       _stdio.clear();
     }
+  }
+
+  DartObjectNode? itemAt(int invertedIndex) {
+    assert(invertedIndex >= 0);
+    final list = _stdio.value;
+    if (invertedIndex > list.length - 1) return null;
+    final item = list[list.length - 1 - invertedIndex];
+    if (item is! VariableConsoleLine) return null;
+    return item.variable;
   }
 
   /// Append to the stdout / stderr buffer.

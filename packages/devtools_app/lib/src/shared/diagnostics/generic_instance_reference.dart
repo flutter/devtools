@@ -45,19 +45,29 @@ class GenericInstanceRef {
 class ObjectReferences extends GenericInstanceRef {
   ObjectReferences({
     required this.refNodeType,
-    super.isolateRef,
-    super.value,
-    super.heapSelection,
+    required IsolateRef super.isolateRef,
+    required super.value,
+    required HeapObjectSelection super.heapSelection,
   });
 
-  ObjectReferences.withType(ObjectReferences ref, this.refNodeType)
-      : super(
+  ObjectReferences.copyWith(
+    ObjectReferences ref, {
+    RefNodeType? refNodeType,
+    HeapObjectSelection? heapSelection,
+  })  : refNodeType = refNodeType ?? ref.refNodeType,
+        super(
           isolateRef: ref.isolateRef,
           value: ref.value,
-          heapSelection: ref.heapSelection,
+          heapSelection: heapSelection ?? ref.heapSelection,
         );
 
   final RefNodeType refNodeType;
+
+  @override
+  HeapObjectSelection get heapSelection => super.heapSelection!;
+
+  @override
+  IsolateRef get isolateRef => super.isolateRef!;
 }
 
 enum RefNodeType {

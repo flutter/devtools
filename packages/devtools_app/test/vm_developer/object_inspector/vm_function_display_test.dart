@@ -50,6 +50,13 @@ void main() {
     when(mockFuncObject.isRecognized).thenReturn(false);
     when(mockFuncObject.isNative).thenReturn(null);
     when(mockFuncObject.vmName).thenReturn('fooDartFunction');
+    when(mockFuncObject.icDataArray).thenReturn(
+      Instance(
+        id: 'ic-data-array-id',
+        length: 0,
+        elements: [],
+      ),
+    );
   });
 
   group('function display test', () {
@@ -95,10 +102,9 @@ void main() {
         expect(find.text('fooDartFunction'), findsOneWidget);
 
         expect(find.byType(RequestableSizeWidget), findsNWidgets(2));
-
         expect(find.byType(RetainingPathWidget), findsOneWidget);
-
         expect(find.byType(InboundReferencesWidget), findsOneWidget);
+        expect(find.byType(CallSiteDataArrayWidget), findsOneWidget);
       },
     );
 

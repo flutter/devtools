@@ -13,43 +13,6 @@ import 'package:vm_service/vm_service.dart';
 
 import 'generated_mocks_factories.dart';
 
-class FakeIsolateManager extends Fake implements IsolateManager {
-  @override
-  ValueListenable<IsolateRef?> get selectedIsolate => _selectedIsolate;
-  final _selectedIsolate = ValueNotifier(
-    IsolateRef.parse({
-      'id': 'fake_isolate_id',
-      'name': 'selected-isolate',
-    }),
-  );
-
-  @override
-  ValueListenable<IsolateRef?> get mainIsolate => _mainIsolate;
-  final _mainIsolate =
-      ValueNotifier(IsolateRef.parse({'id': 'fake_main_isolate_id'}));
-
-  @override
-  ValueNotifier<List<IsolateRef>> get isolates {
-    final value = _selectedIsolate.value;
-    _isolates ??= ValueNotifier([if (value != null) value]);
-    return _isolates!;
-  }
-
-  @override
-  IsolateState? mainIsolateState = MockIsolateState();
-
-  ValueNotifier<List<IsolateRef>>? _isolates;
-
-  @override
-  IsolateState isolateState(IsolateRef? isolate) {
-    final state = MockIsolateState();
-    final mockIsolate = MockIsolate();
-    when(mockIsolate.libraries).thenReturn([]);
-    when(state.isolateNow).thenReturn(mockIsolate);
-    return state;
-  }
-}
-
 class FakeInspectorService extends Fake implements InspectorService {
   final pubRootDirectories = <String>{};
   @override
@@ -101,9 +64,6 @@ class FakeInspectorService extends Fake implements InspectorService {
   }
 }
 
-class MockInspectorTreeController extends Mock
-    implements InspectorTreeController {}
-
 class TestInspectorController extends Fake implements InspectorController {
   InspectorService service = FakeInspectorService();
 
@@ -130,85 +90,12 @@ class FakeVM extends Fake implements VM {
   };
 }
 
-class MockIsolateState extends Mock implements IsolateState {
-  @override
-  ValueNotifier<bool> isPaused = ValueNotifier<bool>(false);
-}
-
-class MockIsolate extends Mock implements Isolate {}
-
-class MockObj extends Mock implements Obj {}
-
-class MockCpuSamples extends Mock implements CpuSamples {}
-
-// TODO(kenz): make it easier to mock a connected app by adding a constructor
-// that will override the public getters on the class (e.g. isFlutterAppNow,
-// isProfileBuildNow, etc.). Do this after devtools_app is migrated to null
-// safety so that we can use null-safety here.
-// TODO(polinach): delete this class.
-// See https://github.com/flutter/devtools/issues/4029.
-class MockConnectedAppLegacy extends Mock implements ConnectedApp {}
-
-class FakeConnectedApp extends Mock implements ConnectedApp {}
-
-class MockBannerMessagesController extends Mock
-    implements BannerMessagesController {}
-
-class MockMemoryController extends Mock implements MemoryController {}
-
-class MockFlutterMemoryController extends Mock implements MemoryController {}
-
-class MockProfilerScreenController extends Mock
-    implements ProfilerScreenController {}
-
-class MockStorage extends Mock implements Storage {}
-
 class TestCodeViewController extends CodeViewController {
   @override
   ProgramExplorerController get programExplorerController =>
       _explorerController;
   final _explorerController = createMockProgramExplorerControllerWithDefaults();
 }
-
-// TODO(polinach): delete this class.
-// See https://github.com/flutter/devtools/issues/4029.
-class MockDebuggerControllerLegacy extends Mock implements DebuggerController {
-  MockDebuggerControllerLegacy();
-
-  factory MockDebuggerControllerLegacy.withDefaults() {
-    final debuggerController = MockDebuggerControllerLegacy();
-    when(debuggerController.resuming).thenReturn(ValueNotifier(false));
-    when(debuggerController.isSystemIsolate).thenReturn(false);
-    when(debuggerController.selectedBreakpoint).thenReturn(ValueNotifier(null));
-    when(debuggerController.stackFramesWithLocation)
-        .thenReturn(ValueNotifier([]));
-    when(debuggerController.selectedStackFrame).thenReturn(ValueNotifier(null));
-    when(debuggerController.exceptionPauseMode)
-        .thenReturn(ValueNotifier('Unhandled'));
-    return debuggerController;
-  }
-}
-
-class MockScriptManagerLegacy extends Mock implements ScriptManager {}
-
-// TODO(polinach): delete this class.
-// See https://github.com/flutter/devtools/issues/4029.
-class MockProgramExplorerControllerLegacy extends Mock
-    implements ProgramExplorerController {
-  MockProgramExplorerControllerLegacy();
-
-  factory MockProgramExplorerControllerLegacy.withDefaults() {
-    final controller = MockProgramExplorerControllerLegacy();
-    when(controller.initialized).thenReturn(ValueNotifier(true));
-    when(controller.rootObjectNodes).thenReturn(ValueNotifier([]));
-    when(controller.outlineNodes).thenReturn(ValueNotifier([]));
-    when(controller.isLoadingOutline).thenReturn(ValueNotifier(false));
-
-    return controller;
-  }
-}
-
-class MockVM extends Mock implements VM {}
 
 void mockWebVm(VM vm) {
   when(vm.targetCPU).thenReturn('Web');

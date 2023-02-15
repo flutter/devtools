@@ -21,13 +21,13 @@ import 'package:vm_service/vm_service.dart';
 void main() {
   late FakeServiceManager fakeServiceManager;
   late MockDebuggerController debuggerController;
-  late MockScriptManagerLegacy scriptManager;
+  late MockScriptManager scriptManager;
 
   const windowSize = Size(4000.0, 4000.0);
 
   setUp(() {
     fakeServiceManager = FakeServiceManager();
-    scriptManager = MockScriptManagerLegacy();
+    scriptManager = MockScriptManager();
     mockConnectedApp(
       fakeServiceManager.connectedApp!,
       isProfileBuild: false,

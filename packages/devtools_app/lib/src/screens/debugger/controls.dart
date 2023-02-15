@@ -34,7 +34,7 @@ class _DebuggingControlsState extends State<DebuggingControls>
     super.didChangeDependencies();
     if (!initController()) return;
     addAutoDisposeListener(
-      serviceManager.isolateManager.mainIsolateState!.isPaused,
+      serviceManager.isolateManager.mainIsolateState?.isPaused,
     );
     addAutoDisposeListener(controller.resuming);
     addAutoDisposeListener(controller.stackFramesWithLocation);

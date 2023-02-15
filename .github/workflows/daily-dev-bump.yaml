@@ -5,14 +5,16 @@ on:
     types: [closed, labeled, unlabeled]
   schedule:
     # * is a special character in YAML so you have to quote this string
-    - cron: "0 0 * * *" # Run every day at midnight
+    - cron: "0 8 * * *" # Run every day at midnight Pacific Time
+permissions:
+  contents: write
+  pull-requests: write
 
 env:
   GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 jobs:
   bump-dev-version:
-    permissions: write-all
     name: Bump Dev Version
     runs-on: ubuntu-latest
     steps:
@@ -46,7 +48,7 @@ jobs:
           Ensure that that current version has been properly bumped to a '-dev.*' \
           pre-release version, in order to continue daily dev bumps."
 
-            echo "::error ,title=Cannot Bump A Release Version ($CURRENT_VERSION)::$ERROR_DESCRIPTION" /intl/en/about/products
+            echo "::error ,title=Cannot Bump A Release Version ($CURRENT_VERSION)::$ERROR_DESCRIPTION" 
             exit 1;
           fi
 
