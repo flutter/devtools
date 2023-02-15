@@ -6,19 +6,19 @@ import 'dart:async';
 import 'dart:math';
 import 'dart:ui';
 
-import 'package:collection/collection.dart' show IterableExtension;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../connected_app.dart';
+import '../../feature_flags.dart';
 import '../../globals.dart';
 import '../../primitives/auto_dispose.dart';
-import '../../primitives/utils.dart';
 import '../../theme.dart';
 import '../../ui/search.dart';
 import '../../ui/utils.dart';
+import '../eval/auto_complete.dart';
 import '../eval/eval_service.dart';
+import '../primitives/assignment.dart';
 import '../primitives/eval_history.dart';
 
 typedef AutoCompleteResultsFunction = Future<List<String>> Function(
@@ -299,23 +299,30 @@ class ExpressionEvalFieldState extends State<ExpressionEvalField>
 
     if (expressionText.isEmpty) return;
 
-    // Only try to eval if we are paused.
-    if (!serviceManager.isMainIsolatePaused) {
-      notificationService
-          .push('Application must be paused to support expression evaluation.');
-      return;
-    }
-
     serviceManager.consoleService.appendStdio('> $expressionText\n');
     setState(() {
       historyPosition = -1;
-      _appState.evalHistory.pushEvalHistory(expressionText);
+      serviceManager.appState.evalHistory.pushEvalHistory(expressionText);
     });
 
     try {
-      // Response is either a ErrorRef, InstanceRef, or Sentinel.
       final isolateRef = serviceManager.isolateManager.selectedIsolate.value;
-      final response = await evalService.evalAtCurrentFrame(expressionText);
+
+      // Response is either a ErrorRef, InstanceRef, or Sentinel.
+      final Response response;
+      if (serviceManager.isMainIsolatePaused) {
+        response = await evalService.evalAtCurrentFrame(expressionText);
+      } else {
+        if (_tryProcessAssignment(expressionText)) return;
+        if (isolateRef == null) {
+          _emitToConsole(
+            'Cannot evaluate expression because the selected isolate is null.',
+          );
+          return;
+        }
+        response =
+            await evalService.evalInRunningApp(isolateRef, expressionText);
+      }
 
       // Display the response to the user.
       if (response is InstanceRef) {
@@ -361,7 +368,7 @@ class ExpressionEvalFieldState extends State<ExpressionEvalField>
     super.dispose();
   }
 
-  EvalHistory get _evalHistory => _appState.evalHistory;
+  EvalHistory get _evalHistory => serviceManager.appState.evalHistory;
 
   void _historyNavUp() {
     if (!_evalHistory.canNavigateUp) {
@@ -394,347 +401,33 @@ class ExpressionEvalFieldState extends State<ExpressionEvalField>
       );
     });
   }
-}
 
-AppState get _appState => serviceManager.appState;
+  /// If [expressionText] is assignment like `var x=$1`, processes it.
+  ///
+  /// Returns true is the text was parsed as assignment.
+  bool _tryProcessAssignment(String expressionText) {
+    if (!FeatureFlags.evalAndBrowse) return false;
 
-Future<List<String>> autoCompleteResultsFor(
-  EditingParts parts,
-  EvalService evalService,
-) async {
-  final result = <String>{};
-  if (!parts.isField) {
-    final variables = _appState.variables.value;
-    result.addAll(removeNullValues(variables.map((variable) => variable.name)));
+    final assignment = ConsoleVariableAssignment.tryParse(expressionText);
+    if (assignment == null) return false;
 
-    final thisVariable = variables.firstWhereOrNull(
-      (variable) => variable.name == 'this',
-    );
-    if (thisVariable != null) {
-      // If a variable named `this` is in scope, we should provide autocompletes
-      // for all static and instance members of that class as they are in scope
-      // in Dart. For example, if you evaluate `foo()` that will be equivalent
-      // to `this.foo()` if foo is an instance member and `ThisClass.foo() if
-      // foo is a static member.
-      final thisValue = thisVariable.value;
-      if (thisValue is InstanceRef) {
-        await _addAllInstanceMembersToAutocompleteList(
-          result,
-          thisValue,
-          evalService,
-        );
-        final classRef = thisValue.classRef;
-        if (classRef != null) {
-          result.addAll(
-            await _autoCompleteMembersFor(
-              classRef,
-              evalService,
-              staticContext: true,
-            ),
-          );
-        }
-      }
-    }
-    final frame = _appState.currentFrame.value;
-    if (frame != null) {
-      final function = frame.function;
-      if (function != null) {
-        final libraryRef = await evalService.findOwnerLibrary(function);
-        if (libraryRef != null) {
-          result.addAll(
-            await libraryMemberAndImportsAutocompletes(
-              libraryRef,
-              evalService,
-            ),
-          );
-        }
-      }
-    }
-  } else {
-    var left = parts.leftSide.split(' ').last;
-    // Removing trailing `.`.
-    left = left.substring(0, left.length - 1);
-    try {
-      final response = await evalService.evalAtCurrentFrame(left);
-      if (response is InstanceRef) {
-        final typeClass = response.typeClass;
-        if (typeClass != null) {
-          // Assume we want static members for a type class not members of the
-          // Type object. This is reasonable as Type objects are rarely useful
-          // in Dart and we will end up with accidental Type objects if the user
-          // writes `SomeClass.` in the evaluate window.
-          result.addAll(
-            await _autoCompleteMembersFor(
-              typeClass,
-              evalService,
-              staticContext: true,
-            ),
-          );
-        } else {
-          await _addAllInstanceMembersToAutocompleteList(
-            result,
-            response,
-            evalService,
-          );
-        }
-      }
-    } catch (_) {}
-  }
-  return removeNullValues(result)
-      .where((name) => name.startsWith(parts.activeWord))
-      .toList();
-}
-
-// Due to https://github.com/dart-lang/sdk/issues/46221
-// we cannot tell what the show clause for an export was so it is unsafe to
-// surface exports as if they were library members as there tend to be
-// significant false positives for libraries such as Flutter where all of
-// dart:ui shows up as in scope from flutter:foundation when it should not be.
-bool debugIncludeExports = true;
-
-Future<Set<String>> libraryMemberAndImportsAutocompletes(
-  LibraryRef libraryRef,
-  EvalService evalService,
-) async {
-  final values = removeNullValues(
-    await _appState.cache.libraryMemberAndImportsAutocomplete.putIfAbsent(
-      libraryRef,
-      () => _libraryMemberAndImportsAutocompletes(libraryRef, evalService),
-    ),
-  );
-  return values.toSet();
-}
-
-Future<Set<String>> _libraryMemberAndImportsAutocompletes(
-  LibraryRef libraryRef,
-  EvalService evalService,
-) async {
-  final result = <String>{};
-  try {
-    final List<Future<Set<String>>> futures = <Future<Set<String>>>[];
-    futures.add(
-      libraryMemberAutocompletes(
-        evalService,
-        libraryRef,
-        includePrivates: true,
-      ),
-    );
-
-    final Library library = await evalService.getObject(libraryRef) as Library;
-    final dependencies = library.dependencies;
-
-    if (dependencies != null) {
-      for (var dependency in library.dependencies!) {
-        final prefix = dependency.prefix;
-        final target = dependency.target;
-        if (prefix != null && prefix.isNotEmpty) {
-          // We won't give a list of autocompletes once you enter a prefix
-          // but at least we do include the prefix in the autocompletes list.
-          result.add(prefix);
-        } else if (target != null) {
-          futures.add(
-            libraryMemberAutocompletes(
-              evalService,
-              target,
-              includePrivates: false,
-            ),
-          );
-        }
-      }
-    }
-    (await Future.wait(futures)).forEach(result.addAll);
-  } catch (_) {
-    // Silently skip library completions if there is a failure.
-  }
-  return result;
-}
-
-Future<Set<String>> libraryMemberAutocompletes(
-  EvalService evalService,
-  LibraryRef libraryRef, {
-  required bool includePrivates,
-}) async {
-  var result = removeNullValues(
-    await _appState.cache.libraryMemberAutocomplete.putIfAbsent(
-      libraryRef,
-      () => _libraryMemberAutocompletes(evalService, libraryRef),
-    ),
-  );
-  if (!includePrivates) {
-    result = result.where((name) => !isPrivate(name));
-  }
-  return result.toSet();
-}
-
-Future<Set<String>> _libraryMemberAutocompletes(
-  EvalService evalService,
-  LibraryRef libraryRef,
-) async {
-  final result = <String>{};
-  final Library library = await evalService.getObject(libraryRef) as Library;
-  final variables = library.variables;
-  if (variables != null) {
-    final fields = variables.map((field) => field.name);
-    result.addAll(removeNullValues(fields));
-  }
-  final functions = library.functions;
-  if (functions != null) {
-    // The VM shows setters as `<member>=`.
-    final members =
-        functions.map((funcRef) => funcRef.name!.replaceAll('=', ''));
-    result.addAll(removeNullValues(members));
-  }
-  final classes = library.classes;
-  if (classes != null) {
-    // Autocomplete class names as well
-    final classNames = classes.map((clazz) => clazz.name);
-    result.addAll(removeNullValues(classNames));
-  }
-
-  if (debugIncludeExports) {
-    final List<Future<Set<String>>> futures = <Future<Set<String>>>[];
-    for (var dependency in library.dependencies!) {
-      if (!dependency.isImport!) {
-        final prefix = dependency.prefix;
-        final target = dependency.target;
-        if (prefix != null && prefix.isNotEmpty) {
-          result.add(prefix);
-        } else if (target != null) {
-          futures.add(
-            libraryMemberAutocompletes(
-              evalService,
-              target,
-              includePrivates: false,
-            ),
-          );
-        }
-      }
-    }
-    if (futures.isNotEmpty) {
-      (await Future.wait(futures)).forEach(result.addAll);
-    }
-  }
-  return result;
-}
-
-Future<void> _addAllInstanceMembersToAutocompleteList(
-  Set<String> result,
-  InstanceRef response,
-  EvalService controller,
-) async {
-  final Instance instance = await controller.getObject(response) as Instance;
-  final classRef = instance.classRef;
-  if (classRef == null) return;
-  result.addAll(
-    await _autoCompleteMembersFor(
-      classRef,
-      controller,
-      staticContext: false,
-    ),
-  );
-  // TODO(grouma) - This shouldn't be necessary but package:dwds does
-  // not properly provide superclass information.
-  final fields = instance.fields;
-  if (fields == null) return;
-  final clazz = await controller.classFor(classRef);
-  final fieldNames = fields
-      .where((field) => field.decl?.isStatic != null && !field.decl!.isStatic!)
-      .map((field) => field.decl?.name);
-  result.addAll(
-    removeNullValues(fieldNames).where(
-      (member) => _isAccessible(member, clazz, controller),
-    ),
-  );
-}
-
-Future<Set<String>> _autoCompleteMembersFor(
-  ClassRef classRef,
-  EvalService controller, {
-  required bool staticContext,
-}) async {
-  final result = <String>{};
-  final clazz = await controller.classFor(classRef);
-  if (clazz != null) {
-    final fields = clazz.fields;
-    if (fields != null) {
-      final fieldNames = fields
-          .where((f) => f.isStatic == staticContext)
-          .map((field) => field.name);
-      result.addAll(removeNullValues(fieldNames));
-    }
-
-    final functions = clazz.functions;
-    if (functions != null) {
-      for (var funcRef in functions) {
-        if (_validFunction(funcRef, clazz, staticContext)) {
-          final isConstructor = _isConstructor(funcRef, clazz);
-          final funcName = funcRef.name;
-          if (funcName == null) continue;
-          // The VM shows setters as `<member>=`.
-          var name = funcName.replaceAll('=', '');
-          if (isConstructor) {
-            final clazzName = clazz.name!;
-            assert(name.startsWith(clazzName));
-            if (name.length <= clazzName.length + 1) continue;
-            name = name.substring(clazzName.length + 1);
-          }
-          result.add(name);
-        }
-      }
-    }
-    final superClass = clazz.superClass;
-    if (!staticContext && superClass != null) {
-      result.addAll(
-        await _autoCompleteMembersFor(
-          superClass,
-          controller,
-          staticContext: staticContext,
-        ),
+    final variable =
+        serviceManager.consoleService.itemAt(assignment.consoleItemIndex + 1);
+    final value = variable?.value;
+    if (value is! InstanceRef) {
+      _emitToConsole(
+        'Item #${assignment.consoleItemIndex} cannot be assigned to a variable.',
       );
+      return true;
     }
-    result.removeWhere((member) => !_isAccessible(member, clazz, controller));
+
+    evalService.scope[assignment.variableName] = value.id!;
+
+    _emitToConsole(
+      'Variable ${assignment.variableName} is created can now be used in expression evaluation '
+      'if application is not stopped.\n',
+    );
+
+    return true;
   }
-  return result;
-}
-
-bool _validFunction(FuncRef funcRef, Class clazz, bool staticContext) {
-  // TODO(jacobr): we should include named constructors in static contexts.
-  return ((_isConstructor(funcRef, clazz) || funcRef.isStatic!) ==
-          staticContext) &&
-      !_isOperator(funcRef);
-}
-
-bool _isOperator(FuncRef funcRef) => const {
-      '==',
-      '+',
-      '-',
-      '*',
-      '/',
-      '&',
-      '~',
-      '|',
-      '>',
-      '<',
-      '>=',
-      '<=',
-      '>>',
-      '<<',
-      '>>>',
-      '^',
-      '%',
-      '~/',
-      'unary-',
-    }.contains(funcRef.name);
-
-bool _isConstructor(FuncRef funcRef, Class clazz) =>
-    funcRef.name == clazz.name || funcRef.name!.startsWith('${clazz.name}.');
-
-bool _isAccessible(
-  String member,
-  Class? clazz,
-  EvalService evalService,
-) {
-  final frame = _appState.currentFrame.value!;
-  final currentScript = frame.location!.script;
-  return !isPrivate(member) || currentScript!.id == clazz?.location?.script?.id;
 }

@@ -4,13 +4,18 @@
 
 import 'dart:async';
 
+import 'package:collection/collection.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../../service/vm_service_wrapper.dart';
 import '../../globals.dart';
+import '../../memory/adapted_heap_data.dart';
 import '../../primitives/auto_dispose.dart';
 
 class EvalService extends DisposableController with AutoDisposeControllerMixin {
+  /// Parameter `scope` for `serviceManager.service!.evaluate(...)`.
+  final scope = <String, String>{};
+
   VmServiceWrapper get _service {
     return serviceManager.service!;
   }
@@ -60,6 +65,20 @@ class EvalService extends DisposableController with AutoDisposeControllerMixin {
     return await _service.getObject(ref, objRef.id!);
   }
 
+  /// Evaluates the expression in the isolate's root library.
+  Future<Response> evalInRunningApp(
+    IsolateRef isolateRef,
+    String expressionText,
+  ) async {
+    final isolate = serviceManager.isolateManager.isolateState(isolateRef);
+    return await serviceManager.service!.evaluate(
+      isolateRef.id!,
+      (await isolate.isolate)!.rootLib!.id!,
+      expressionText,
+      scope: scope,
+    );
+  }
+
   /// Evaluate the given expression in the context of the currently selected
   /// stack frame, or the top frame if there is no current selection.
   ///
@@ -107,5 +126,26 @@ class EvalService extends DisposableController with AutoDisposeControllerMixin {
       expression,
       disableBreakpoints: true,
     );
+  }
+
+  Future<InstanceRef?> findObject(
+    AdaptedHeapObject object,
+    IsolateRef isolateRef,
+  ) async {
+    final isolateId = isolateRef.id!;
+
+    final theClass = (await serviceManager.service!.getClassList(isolateId))
+        .classes!
+        .firstWhere((ref) => object.heapClass.matches(ref));
+
+    final instances = await serviceManager.service!.getInstances(
+      isolateId,
+      theClass.id!,
+      preferences.memory.refLimit.value,
+    );
+
+    return (instances.instances ?? const []).firstWhereOrNull(
+      (i) => i is InstanceRef && i.identityHashCode == object.code,
+    ) as InstanceRef?;
   }
 }

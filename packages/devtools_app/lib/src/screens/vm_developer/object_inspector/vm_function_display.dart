@@ -36,6 +36,13 @@ class VmFuncDisplay extends StatelessWidget {
         generalDataRows: vmObjectGeneralDataRows(controller, function),
         sideCardDataRows: _functionDetailRows(function),
         sideCardTitle: 'Function Details',
+        expandableWidgets: [
+          if (function.icDataArray != null)
+            CallSiteDataArrayWidget(
+              controller: controller,
+              callSiteDataArray: function.icDataArray!,
+            ),
+        ],
       ),
     );
   }
@@ -113,18 +120,33 @@ class VmFuncDisplay extends StatelessWidget {
   }
 }
 
-// TODO(mtaylee): Finish widget implementation.
-/// An expansion tile showing the elements inside a function's IC data array.
-class ICDataArrayWidget extends StatelessWidget {
-  const ICDataArrayWidget({required this.icDataArray});
+class CallSiteDataArrayWidget extends StatelessWidget {
+  const CallSiteDataArrayWidget({
+    required this.controller,
+    required this.callSiteDataArray,
+  });
 
-  final Instance icDataArray;
+  final ObjectInspectorViewController controller;
+  final Instance callSiteDataArray;
 
   @override
   Widget build(BuildContext context) {
     return VmExpansionTile(
-      title: icDataArray.name ?? 'Instance of ${icDataArray.classRef?.name}',
-      children: const [],
+      title: 'Call Site Data (${callSiteDataArray.length})',
+      children: prettyRows(
+        context,
+        [
+          for (final entry in callSiteDataArray.elements!)
+            Row(
+              children: [
+                VmServiceObjectLink(
+                  object: entry as ObjRef,
+                  onTap: controller.findAndSelectNodeForObject,
+                ),
+              ],
+            ),
+        ],
+      ),
     );
   }
 }

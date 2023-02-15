@@ -79,12 +79,6 @@ void main() {
     };
   }
 
-  setUp(() {
-    final state =
-        fakeServiceManager.isolateManager.mainIsolateState! as MockIsolateState;
-    state.isPaused.value = true;
-  });
-
   testWidgetsWithWindowSize(
     'debugger controls paused',
     windowSize,
@@ -95,6 +89,8 @@ void main() {
           debugger: debuggerController,
         ),
       );
+      (serviceManager.isolateManager as FakeIsolateManager)
+          .setMainIsolatePausedState(true);
 
       expect(
         find.byWidgetPredicate(createDebuggerButtonPredicate('Pause')),

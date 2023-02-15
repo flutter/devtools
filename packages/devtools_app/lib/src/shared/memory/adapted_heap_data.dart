@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:collection/collection.dart';
+import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../primitives/utils.dart';
@@ -21,28 +22,37 @@ class _JsonFields {
   static const String created = 'created';
 }
 
+@immutable
 class HeapObjectSelection {
-  HeapObjectSelection(this.heap, this.object);
+  const HeapObjectSelection(this.heap, {required this.object});
 
   final AdaptedHeapData heap;
-  final AdaptedHeapObject object;
+
+  /// If object is null, it exists in live app, but is not
+  /// located in heap.
+  final AdaptedHeapObject? object;
 
   Iterable<int> _refs(RefDirection direction) {
     switch (direction) {
       case RefDirection.inbound:
-        return object.inRefs;
+        return object?.inRefs ?? [];
       case RefDirection.outbound:
-        return object.outRefs;
+        return object?.outRefs ?? [];
     }
   }
 
   List<HeapObjectSelection> references(RefDirection direction) =>
       _refs(direction)
-          .map((i) => HeapObjectSelection(heap, heap.objects[i]))
+          .map((i) => HeapObjectSelection(heap, object: heap.objects[i]))
           .toList();
 
   int? countOfReferences(RefDirection? direction) =>
       direction == null ? null : _refs(direction).length;
+
+  HeapObjectSelection withoutObject() {
+    if (object == null) return this;
+    return HeapObjectSelection(heap, object: null);
+  }
 }
 
 /// Contains information from [HeapSnapshotGraph],
