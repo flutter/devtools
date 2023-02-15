@@ -424,8 +424,8 @@ class ExpressionEvalFieldState extends State<ExpressionEvalField>
     evalService.scope[assignment.variableName] = value.id!;
 
     _emitToConsole(
-      'Variable ${assignment.variableName} is created and can be used '
-      'in expressions against running application.\n',
+      'Variable ${assignment.variableName} is created can now be used in expression evaluation '
+      'if application is not stopped.\n',
     );
 
     return true;
