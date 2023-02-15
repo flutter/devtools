@@ -16,11 +16,11 @@ jobs:
         with:
           debug-only: true # TODO: Delete this line when we are ready to implement this for our process.
           only-issue-labels: "waiting for customer response"
-          days-before-issue-stale: 14
+          days-before-issue-stale: -1
           days-before-issue-close: 14
           stale-issue-label: "stale"
           stale-issue-message: "This issue is stale because it has been open for 30 days with no activity."
-          close-issue-message: "This issue was closed because it has been inactive for 14 days since being marked as stale."
+          close-issue-message: "Without additional information we're unfortunately not sure how to resolve this issue. We're going to close this issue for now, but please don't hesitate to comment on the issue if you have any more information for us; we're happy to reopen. Thanks for your contribution!"
           days-before-pr-stale: -1
           days-before-pr-close: -1
           repo-token: ${{ secrets.GITHUB_TOKEN }}
