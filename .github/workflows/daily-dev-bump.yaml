@@ -32,7 +32,12 @@ jobs:
           # a flutter owned account
           git config user.name "DevTools Workflow Bot"
           git config user.email "dart-devtool-workflow-bot@google.com"
-
+      - name: Checkout a clean version of the branch
+        run: |
+          BRANCH_NAME="daily-dev-bump--bot-branch"
+          # Stage the file, commit and push
+          git checkout -b "$BRANCH_NAME"
+          git reset --hard origin/master
       - name: Bump the Dev Version
         id: version-bump
         run: |
@@ -62,12 +67,9 @@ jobs:
       - name: Create the PR
         run: |
           set -x
-          BRANCH_NAME="daily-dev-bump--bot-branch"
-          # Stage the file, commit and push
-          git checkout -b "$BRANCH_NAME"
-          git reset --hard origin/master
+
           git commit -a -m "$COMMIT_MESSAGE"
-          git push -uf origin "$BRANCH_NAME"
+          git push -uf origin
 
           # PR_URL=$(gh pr create -d --title "$COMMIT_MESSAGE" --body "RELEASE_NOTE_EXCEPTION=Automated Version Bump")
 
