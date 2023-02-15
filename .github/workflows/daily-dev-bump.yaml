@@ -34,9 +34,8 @@ jobs:
           git config user.email "dart-devtool-workflow-bot@google.com"
       - name: Checkout a clean version of the branch
         run: |
-          BRANCH_NAME="daily-dev-bump--bot-branch"
           # Stage the file, commit and push
-          git checkout -b "$BRANCH_NAME"
+          git checkout -b daily-dev-bump--bot-branch
           git reset --hard origin/master
       - name: Bump the Dev Version
         id: version-bump
@@ -69,7 +68,7 @@ jobs:
           set -x
 
           git commit -a -m "$COMMIT_MESSAGE"
-          git push -uf origin
+          git push -uf origin daily-dev-bump--bot-branch
 
           # PR_URL=$(gh pr create -d --title "$COMMIT_MESSAGE" --body "RELEASE_NOTE_EXCEPTION=Automated Version Bump")
 
