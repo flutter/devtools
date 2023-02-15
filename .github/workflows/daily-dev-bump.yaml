@@ -62,7 +62,7 @@ jobs:
       - name: Create the PR
         run: |
           set -x
-          BRANCH_NAME="--daily-dev-bump-bot-branch"
+          BRANCH_NAME="daily-dev-bump--bot-branch"
           # Stage the file, commit and push
           git checkout -b "$BRANCH_NAME"
           git reset --hard origin/master
