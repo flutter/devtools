@@ -79,14 +79,14 @@ void main() {
       when(mockCodeObject.ticksTable).thenReturn(ticksTable);
     });
 
-    void verifyAddressOrder(List<Instruction> data, CpuProfilerTicksTable ticks) {
+    void verifyAddressOrder(List<Instruction> data, CpuProfilerTicksTable? ticks) {
       int lastAddress = 0;
       for (final instr in data) {
         final currentAddress = int.parse(instr.address, radix: 16);
         expect(currentAddress > lastAddress, isTrue);
         lastAddress = currentAddress;
 
-        final tick = ticks[instr.unpaddedAddress];
+        final tick = ticks![instr.unpaddedAddress];
         expect(tick, isNotNull);
         expect(tick!.inclusiveTicks, 1);
         expect(tick.exclusiveTicks, 1);

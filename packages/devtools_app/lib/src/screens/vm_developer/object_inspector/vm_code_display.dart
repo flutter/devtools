@@ -280,12 +280,12 @@ class CodeTable extends StatelessWidget {
     _DartObjectColumn(controller: controller),
     if (ticks != null) ...[
       _ProfileTicksColumn(
-        'Total',
+        'Total %',
         ticks: code.ticksTable,
         inclusive: true,
       ),
       _ProfileTicksColumn(
-        'Self',
+        'Self %',
         ticks: code.ticksTable,
         inclusive: false,
       ),
