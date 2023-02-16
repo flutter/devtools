@@ -79,7 +79,10 @@ void main() {
       when(mockCodeObject.ticksTable).thenReturn(ticksTable);
     });
 
-    void verifyAddressOrder(List<Instruction> data, CpuProfilerTicksTable? ticks) {
+    void verifyAddressOrder(
+      List<Instruction> data,
+      CpuProfilerTicksTable? ticks,
+    ) {
       int lastAddress = 0;
       for (final instr in data) {
         final currentAddress = int.parse(instr.address, radix: 16);
