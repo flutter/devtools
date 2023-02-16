@@ -4,6 +4,8 @@
 
 import 'package:vm_service/vm_service.dart';
 
+import '../../globals.dart';
+
 class EvalScope {
   /// Parameter `scope` for `serviceManager.service!.evaluate(...)`.
   ///
@@ -28,12 +30,32 @@ class EvalScope {
     const refreshThreshold = Duration(milliseconds: 500);
     if (_lastRefresh.add(refreshThreshold).isBefore(DateTime.now())) return;
 
-    for (final name in _refs.keys){
-
-    }
+    for (final name in _refs.keys) {}
 
     _lastRefresh = DateTime.now();
   }
 
-  static InstanceRef _refreshRef
+  Future<InstanceRef?> refreshRef(
+    InstanceRef ref,
+    IsolateRef isolateRef,
+  ) async {
+    final isolateId = isolateRef.id;
+    if (isolateId == null) return null;
+
+    Obj? result;
+
+    try {
+      result = await serviceManager.service!.getObject(
+        isolateId,
+        ref.id!,
+      );
+    } catch (e) {
+      // If we could not get object, we need to recover it
+    }
+
+    // For some reasons type is not promoted here :(.
+    if (result is InstanceRef) return result as InstanceRef;
+
+    return null;
+  }
 }
