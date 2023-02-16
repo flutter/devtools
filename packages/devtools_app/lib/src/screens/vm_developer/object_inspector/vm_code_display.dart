@@ -17,9 +17,6 @@ import '../vm_service_private_extensions.dart';
 import 'object_inspector_view_controller.dart';
 import 'vm_object_model.dart';
 
-// TODO(bkonyi): remove once profile ticks are populated for instructions.
-const profilerTicksEnabled = false;
-
 abstract class _CodeColumnData extends ColumnData<Instruction> {
   _CodeColumnData(super.title, {required super.fixedWidthPx});
   _CodeColumnData.wide(super.title) : super.wide();
@@ -47,12 +44,36 @@ class _AddressColumn extends _CodeColumnData {
   }
 }
 
+// TODO(bkonyi): consider coloring the background similarly to how we indicate
+// code "hotness" in the debugger tab. To do this properly here, we'd need to
+// modify the table column padding logic to allow for custom column rendering
+// that can fill the entire column which is a can of worms I'd rather not open
+// for some rather niche functionality. We can revisit this once we can use the
+// table implementation from the Flutter framework.
 class _ProfileTicksColumn extends _CodeColumnData {
-  _ProfileTicksColumn(super.title) : super(fixedWidthPx: 80);
+  _ProfileTicksColumn(
+    super.title, {
+    required this.inclusive,
+    required this.ticks,
+  }) : super(fixedWidthPx: 120);
+
+  final bool inclusive;
+  final CpuProfilerTicksTable? ticks;
 
   @override
-  Object? getValue(Instruction dataObject) {
-    return '';
+  int? getValue(Instruction dataObject) {
+    if (ticks == null) return null;
+    final tick = ticks![dataObject.unpaddedAddress];
+    return inclusive ? tick?.inclusiveTicks : tick?.exclusiveTicks;
+  }
+
+  @override
+  String getDisplayValue(Instruction dataObject) {
+    final value = getValue(dataObject);
+    if (value == null) return '';
+
+    final percentage = percent2(value / ticks!.sampleCount);
+    return '$percentage ($value)';
   }
 }
 
@@ -214,6 +235,7 @@ class VmCodeDisplay extends StatelessWidget {
           child: CodeTable(
             code: code,
             controller: controller,
+            ticks: code.ticksTable,
           ),
         ),
       ],
@@ -249,20 +271,30 @@ class CodeTable extends StatelessWidget {
     Key? key,
     required this.code,
     required this.controller,
+    required this.ticks,
   }) : super(key: key);
 
   late final columns = <ColumnData<Instruction>>[
     _AddressColumn(),
     _InstructionColumn(),
     _DartObjectColumn(controller: controller),
-    if (profilerTicksEnabled) ...[
-      _ProfileTicksColumn('Inclusive'),
-      _ProfileTicksColumn('Exclusive'),
+    if (ticks != null) ...[
+      _ProfileTicksColumn(
+        'Total',
+        ticks: code.ticksTable,
+        inclusive: true,
+      ),
+      _ProfileTicksColumn(
+        'Self',
+        ticks: code.ticksTable,
+        inclusive: false,
+      ),
     ],
   ];
 
   final ObjectInspectorViewController controller;
   final CodeObject code;
+  final CpuProfilerTicksTable? ticks;
 
   @override
   Widget build(BuildContext context) {
@@ -272,12 +304,53 @@ class CodeTable extends StatelessWidget {
       keyFactory: (instruction) => Key(instruction.address),
       columnGroups: [
         ColumnGroup(title: 'Instructions', range: const Range(0, 3)),
-        if (profilerTicksEnabled)
-          ColumnGroup(title: 'Profiler Ticks', range: const Range(4, 6)),
+        if (ticks != null)
+          ColumnGroup(title: 'Profiler Ticks', range: const Range(3, 5)),
       ],
       columns: columns,
       defaultSortColumn: columns[0],
       defaultSortDirection: SortDirection.ascending,
     );
   }
+}
+
+/// A mapping of [Instruction] addresses to corresponding CPU profiler ticks.
+class CpuProfilerTicksTable {
+  CpuProfilerTicksTable.parse({
+    required this.sampleCount,
+    required List<dynamic> ticks,
+  }) : assert(ticks.length % 3 == 0) {
+    // Ticks are built up of groups of 3 elements:
+    // [address, exclusiveTicks, inclusiveTicks]
+    for (int i = 0; i < ticks.length; i += 3) {
+      _table[ticks[i] as String] = CodeTicks(
+        exclusiveTicks: ticks[i + 1],
+        inclusiveTicks: ticks[i + 2],
+      );
+    }
+  }
+
+  /// The total number of samples in the original [CpuSamples] response.
+  final int sampleCount;
+
+  /// Retrieves CPU profiler [CodeTicks] associated with a given [Instruction]
+  /// address.
+  ///
+  /// If no CPU samples were collected for a given instruction address, null is
+  /// returned.
+  CodeTicks? operator [](String address) => _table[address];
+
+  final _table = <String, CodeTicks>{};
+}
+
+/// Tracks inclusive and exclusive CPU profiler ticks for a single
+/// [Instruction].
+class CodeTicks {
+  const CodeTicks({
+    required this.inclusiveTicks,
+    required this.exclusiveTicks,
+  });
+
+  final int exclusiveTicks;
+  final int inclusiveTicks;
 }

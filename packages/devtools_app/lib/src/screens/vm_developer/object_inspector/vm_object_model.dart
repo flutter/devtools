@@ -11,6 +11,7 @@ import '../../../shared/diagnostics/primitives/source_location.dart';
 import '../../../shared/globals.dart';
 import '../../../shared/primitives/utils.dart';
 import '../vm_service_private_extensions.dart';
+import 'vm_code_display.dart';
 
 /// Wrapper class for storing Dart VM objects with their relevant VM
 /// information.
@@ -240,7 +241,6 @@ class ScriptObject extends VmObject {
   DateTime get loadTime => DateTime.fromMillisecondsSinceEpoch(obj.loadTime);
 }
 
-//TODO(mtaylee): finish class implementation.
 class InstanceObject extends VmObject {
   InstanceObject({required super.ref, super.scriptRef});
 
@@ -265,6 +265,46 @@ class CodeObject extends VmObject {
 
   @override
   String? get name => obj.name;
+
+  /// A collection of CPU profiler information for individual [Instruction]s.
+  ///
+  /// Returns null if the CPU profiler is disabled.
+  CpuProfilerTicksTable? get ticksTable => _table;
+  CpuProfilerTicksTable? _table;
+
+  @override
+  Future<void> initialize() async {
+    await super.initialize();
+
+    final service = serviceManager.service!;
+    final isolateId = serviceManager.isolateManager.selectedIsolate.value!.id!;
+
+    // Attempt to retrieve the CPU profile data for this code object.
+    try {
+      final samples = await service.getCpuSamples(isolateId, 0, ~0);
+      final codes = samples.codes;
+
+      ProfileCode? match;
+      for (final profileCode in codes) {
+        if (profileCode.code == ref) {
+          match = profileCode;
+          break;
+        }
+      }
+
+      if (match == null) {
+        throw StateError('Unable to find matching ProfileCode');
+      }
+
+      _table = CpuProfilerTicksTable.parse(
+        sampleCount: samples.sampleCount!,
+        ticks: match.ticks!,
+      );
+    } on RPCError {
+      // This can happen when the profiler is disabled, so we just can't show
+      // CPU profiling ticks for the code disassembly.
+    }
+  }
 }
 
 /// Stores an 'ObjectPool' VM object and provides an interface for obtaining
