@@ -1,0 +1,26 @@
+name: Close inactive issues
+on:
+  schedule:
+    - cron: "30 18 * * *" # 10:30am PT
+  workflow_dispatch: # Allows for manual triggering if needed
+jobs:
+  close-issues:
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      pull-requests: write
+    steps:
+      # See https://github.com/actions/stale for
+      # details on the parameters for this action
+      - uses: actions/stale@v7
+        with:
+          debug-only: true # TODO: Delete this line when we are ready to implement this for our process.
+          stale-issue-label: "waiting for customer response"
+          only-issue-labels: "waiting for customer response"
+          labels-to-remove-when-unstale: "waiting for customer response"
+          days-before-issue-stale: -1
+          days-before-issue-close: 14
+          close-issue-message: "Without additional information we're unfortunately not sure how to resolve this issue. We're going to close this issue for now, but please don't hesitate to comment on the issue if you have any more information for us; we're happy to reopen. Thanks for your contribution!"
+          days-before-pr-stale: -1
+          days-before-pr-close: -1
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
