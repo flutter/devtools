@@ -518,17 +518,14 @@ List<DartObjectNode> createVariablesForRecords(
   }
   // Sort positional fields in ascending order:
   _sortPositionalFields(positionalFields);
-  // Determine whether the VM service is indexing positional fields at 0 or 1,
-  // see https://github.com/dart-lang/sdk/issues/51451 for details:
-  final startsAtZero = _positionalFieldsStartAtZero(positionalFields);
   return [
     // Always show positional fields before named fields:
-    for (final field in positionalFields)
+    for (var i = 0; i < positionalFields.length; i++)
       DartObjectNode.fromValue(
         // Positional fields are designated by their getter syntax, eg $1, $2,
         // $3, etc:
-        name: _positionalFieldName(field, startsAtZero: startsAtZero),
-        value: field.value,
+        name: '\$${i + 1}',
+        value: positionalFields[i].value,
         isolateRef: isolateRef,
       ),
     for (final field in namedFields)
@@ -549,18 +546,6 @@ void _sortPositionalFields(List<BoundField> fields) {
     final name2 = field2.name as int;
     return name1.compareTo(name2);
   });
-}
-
-bool _positionalFieldsStartAtZero(List<BoundField> fields) {
-  if (fields.isEmpty) return false;
-  final firstFieldName = fields.first.name as int;
-  return firstFieldName == 0;
-}
-
-String _positionalFieldName(BoundField field, {required bool startsAtZero}) {
-  final name = field.name as int;
-  final fieldNum = startsAtZero ? name + 1 : name;
-  return '\$$fieldNum';
 }
 
 List<DartObjectNode> createVariablesForFields(
