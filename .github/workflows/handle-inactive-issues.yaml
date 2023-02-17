@@ -1,4 +1,4 @@
-name: Close inactive issues
+name: Handle Inactive Issues
 on:
   schedule:
     - cron: "30 18 * * *" # 10:30am PT
