@@ -15,7 +15,7 @@ jobs:
       - uses: actions/stale@v7
         with:
           debug-only: true # TODO: Delete this line when we are ready to implement this for our process.
-          exempt-issue-assignees: "jacob314,kenzieschmoll,CoderDake,polina-c"
+          exempt-issue-assignees: "jacob314,kenzieschmoll,CoderDake,polina-c,helin24,elliette"
           stale-issue-label: "waiting for customer response"
           only-issue-labels: "waiting for customer response"
           labels-to-remove-when-unstale: "waiting for customer response"
