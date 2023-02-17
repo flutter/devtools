@@ -5,6 +5,7 @@
 import 'package:vm_service/vm_service.dart';
 
 import '../../globals.dart';
+import '../../vm_utils.dart';
 
 class EvalScope {
   /// Parameter `scope` for `serviceManager.service!.evaluate(...)`.
@@ -21,42 +22,49 @@ class EvalScope {
     _refs[isolateId]![variableName] = ref;
   }
 
-  /// If scope variables changed during refresh, this field will contain message to show to user.
-  String? refreshScopeChangeMessage;
+  /// List of variables, removed during last refresh.
+  final removedVariables = <String>[];
 
   /// Refreshes variables in scope in response to failed eval.
   ///
   /// Returns true, if eval should retry.
   /// Sets [refreshScopeChangeMessage] if scope changed.
-  bool refreshRefs(String isolateId) {
-    refreshScopeChangeMessage = null;
+  Future<bool> refreshRefs(String isolateId) async {
+    removedVariables.clear();
+    final isolateItems = _refs[isolateId] ?? {};
     var result = false;
 
-    for (final name in _refs.keys) {}
+    for (final name in isolateItems.keys) {
+      final refreshedItem = await _refreshRef(isolateItems[name]!, isolateId);
+      if (refreshedItem != isolateItems[name]) result = true;
+      if (refreshedItem == null) {
+        isolateItems.remove(name);
+        removedVariables.add(name);
+      }
+    }
+
     return result;
   }
 
   Future<InstanceRef?> _refreshRef(
     InstanceRef ref,
-    IsolateRef isolateRef,
+    String isolateId,
   ) async {
-    final isolateId = isolateRef.id;
-    if (isolateId == null) return null;
-
-    Obj? result;
-
+    Obj? object;
     try {
-      result = await serviceManager.service!.getObject(
+      object = await serviceManager.service!.getObject(
         isolateId,
         ref.id!,
       );
-    } catch (e) {
-      // If we could not get object, we need to recover it
+    } on RPCError {
+      // If we could not get object, we need to recover it.
     }
+    if (object != null) return ref;
 
-    // For some reasons type is not promoted here :(.
-    if (result is InstanceRef) return result as InstanceRef;
-
-    return null;
+    return await findInstance(
+      isolateId,
+      ref.classRef?.id,
+      ref.identityHashCode,
+    );
   }
 }

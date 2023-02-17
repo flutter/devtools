@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:vm_service/vm_service.dart';
 import 'package:collection/collection.dart';
+import 'package:vm_service/vm_service.dart';
 
 import 'globals.dart';
 import 'memory/class_name.dart';
@@ -28,9 +28,9 @@ Future<ClassRef?> findClass(String? isolateId, HeapClassName className) async {
 Future<InstanceRef?> findInstance(
   String? isolateId,
   String? classId,
-  int hashCode,
+  int? hashCode,
 ) async {
-  if (classId == null || isolateId == null) return null;
+  if (classId == null || isolateId == null || hashCode == null) return null;
 
   final result = (await serviceManager.service!.getInstances(
     isolateId,

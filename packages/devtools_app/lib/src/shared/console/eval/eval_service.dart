@@ -88,17 +88,23 @@ class EvalService extends DisposableController with AutoDisposeControllerMixin {
     } on RPCError catch (e) {
       const expressionCompilationErrorCode = 113;
       if (e.code != expressionCompilationErrorCode) rethrow;
-      final shouldRetry = scope.refreshRefs(isolateId);
-      final message = scope.refreshScopeChangeMessage;
-      if (message != null) {
-        serviceManager.consoleService.appendStdio(message);
-      }
+      final shouldRetry = await scope.refreshRefs(isolateId);
+      _showScopeChangeMessageIfNeeded();
       if (shouldRetry) {
         return await eval();
       } else {
         rethrow;
       }
     }
+  }
+
+  void _showScopeChangeMessageIfNeeded() {
+    if (scope.removedVariables.isEmpty) return;
+    final variables = scope.removedVariables.join(', ');
+    serviceManager.consoleService.appendStdio(
+      'Variables were removed from the scope, '
+      'because the instances were garbage collected: $variables.',
+    );
   }
 
   /// Evaluate the given expression in the context of the currently selected
