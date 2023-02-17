@@ -11,10 +11,12 @@ import '../../../service/vm_service_wrapper.dart';
 import '../../globals.dart';
 import '../../memory/adapted_heap_data.dart';
 import '../../primitives/auto_dispose.dart';
+import '../../vm_utils.dart';
+import '../primitives/scope.dart';
 
 class EvalService extends DisposableController with AutoDisposeControllerMixin {
   /// Parameter `scope` for `serviceManager.service!.evaluate(...)`.
-  final scope = <String, String>{};
+  final scope = EvalScope();
 
   VmServiceWrapper get _service {
     return serviceManager.service!;
@@ -71,12 +73,32 @@ class EvalService extends DisposableController with AutoDisposeControllerMixin {
     String expressionText,
   ) async {
     final isolate = serviceManager.isolateManager.isolateState(isolateRef);
-    return await serviceManager.service!.evaluate(
-      isolateRef.id!,
-      (await isolate.isolate)!.rootLib!.id!,
-      expressionText,
-      scope: scope,
-    );
+
+    final isolateId = isolateRef.id!;
+
+    Future<Response> eval() async => await serviceManager.service!.evaluate(
+          isolateId,
+          (await isolate.isolate)!.rootLib!.id!,
+          expressionText,
+          scope: scope.value(isolateId: isolateId),
+        );
+
+    try {
+      return await eval();
+    } on RPCError catch (e) {
+      const expressionCompilationErrorCode = 113;
+      if (e.code != expressionCompilationErrorCode) rethrow;
+      final shouldRetry = scope.refreshRefs(isolateId);
+      final message = scope.refreshScopeChangeMessage;
+      if (message != null) {
+        serviceManager.consoleService.appendStdio(message);
+      }
+      if (shouldRetry) {
+        return await eval();
+      } else {
+        rethrow;
+      }
+    }
   }
 
   /// Evaluate the given expression in the context of the currently selected
@@ -125,7 +147,7 @@ class EvalService extends DisposableController with AutoDisposeControllerMixin {
       frame.index!,
       expression,
       disableBreakpoints: true,
-      scope: scope,
+      scope: scope.value(isolateId: isolateRefId),
     );
   }
 
@@ -137,16 +159,8 @@ class EvalService extends DisposableController with AutoDisposeControllerMixin {
 
     final theClass = (await serviceManager.service!.getClassList(isolateId))
         .classes!
-        .firstWhere((ref) => object.heapClass.matches(ref));
+        .firstWhereOrNull((ref) => object.heapClass.matches(ref));
 
-    final instances = await serviceManager.service!.getInstances(
-      isolateId,
-      theClass.id!,
-      preferences.memory.refLimit.value,
-    );
-
-    return (instances.instances ?? const []).firstWhereOrNull(
-      (i) => i is InstanceRef && i.identityHashCode == object.code,
-    ) as InstanceRef?;
+    return await findInstance(isolateId, theClass?.id, object.code);
   }
 }

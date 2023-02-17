@@ -10,32 +10,33 @@ class EvalScope {
   /// Parameter `scope` for `serviceManager.service!.evaluate(...)`.
   ///
   /// Maps variable name to targetId.
-  Map<String, String> forEval() {
-    _refreshRefsIfOutdated();
-    return _refs.map((key, value) => MapEntry(key, value.id!));
+  Map<String, String> value({required String isolateId}) =>
+      (_refs[isolateId] ?? {}).map((key, value) => MapEntry(key, value.id!));
+
+  /// Maps isolate name to list of context variables.
+  final _refs = <String, Map<String, InstanceRef>>{};
+
+  void add(String isolateId, String variableName, InstanceRef ref) {
+    _refs.putIfAbsent(isolateId, () => {});
+    _refs[isolateId]![variableName] = ref;
   }
 
-  DateTime _lastRefresh = DateTime.now();
+  /// If scope variables changed during refresh, this field will contain message to show to user.
+  String? refreshScopeChangeMessage;
 
-  final _refs = <String, InstanceRef>{};
-
-  void add(String name, InstanceRef ref) {
-    if (_refs.isEmpty) _lastRefresh = DateTime.now();
-    _refs[name] = ref;
-  }
-
-  /// If variables live too long, refresh them to avoid hitting expired references.
-  void _refreshRefsIfOutdated() {
-    if (_refs.isEmpty) return;
-    const refreshThreshold = Duration(milliseconds: 500);
-    if (_lastRefresh.add(refreshThreshold).isBefore(DateTime.now())) return;
+  /// Refreshes variables in scope in response to failed eval.
+  ///
+  /// Returns true, if eval should retry.
+  /// Sets [refreshScopeChangeMessage] if scope changed.
+  bool refreshRefs(String isolateId) {
+    refreshScopeChangeMessage = null;
+    var result = false;
 
     for (final name in _refs.keys) {}
-
-    _lastRefresh = DateTime.now();
+    return result;
   }
 
-  Future<InstanceRef?> refreshRef(
+  Future<InstanceRef?> _refreshRef(
     InstanceRef ref,
     IsolateRef isolateRef,
   ) async {

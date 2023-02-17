@@ -421,10 +421,21 @@ class ExpressionEvalFieldState extends State<ExpressionEvalField>
       return true;
     }
 
-    evalService.scope[assignment.variableName] = value.id!;
+    final isolateId = serviceManager.isolateManager.selectedIsolate.value?.id;
+    final isolateName =
+        serviceManager.isolateManager.selectedIsolate.value?.name;
+
+    if (isolateId == null || isolateName == null) {
+      _emitToConsole(
+        'Selected isolate cannot be detected.',
+      );
+      return true;
+    }
+
+    evalService.scope.add(isolateId, assignment.variableName, value);
 
     _emitToConsole(
-      'Variable ${assignment.variableName} is created and now be used in expression evaluation.',
+      'Variable ${assignment.variableName} is created and now be used in expression evaluation for the isolate "$isolateName".',
     );
 
     return true;
