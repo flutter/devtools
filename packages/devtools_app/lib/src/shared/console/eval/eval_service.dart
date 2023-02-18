@@ -84,7 +84,8 @@ class EvalService extends DisposableController with AutoDisposeControllerMixin {
         );
 
     try {
-      return await eval();
+      final result = await eval();
+      return result;
     } on RPCError catch (e) {
       const expressionCompilationErrorCode = 113;
       if (e.code != expressionCompilationErrorCode) rethrow;
@@ -102,8 +103,8 @@ class EvalService extends DisposableController with AutoDisposeControllerMixin {
     if (scope.removedVariables.isEmpty) return;
     final variables = scope.removedVariables.join(', ');
     serviceManager.consoleService.appendStdio(
-      'Variables were removed from the scope, '
-      'because the instances were garbage collected: $variables.',
+      'Garbage collected instances were removed from the scope: $variables. '
+      'Stop application to make variables persistent.\n',
     );
   }
 

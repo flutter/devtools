@@ -80,8 +80,8 @@ class LeaksPaneController {
   Future<NotGCedAnalyzerTask> _createAnalysisTask(
     List<LeakReport> reports,
   ) async {
-    final graph = (await snapshotMemory())!;
-    return NotGCedAnalyzerTask.fromSnapshot(graph, reports);
+    final graph = (await snapshotMemoryInSelectedIsolate())!;
+    return NotGCedAnalyzerTask.fromSnapshot(graph, reports, selectedIsolateId!);
   }
 
   Future<void> requestLeaksAndSaveToYaml() async {

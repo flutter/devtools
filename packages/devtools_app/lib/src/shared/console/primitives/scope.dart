@@ -34,9 +34,11 @@ class EvalScope {
     final isolateItems = _refs[isolateId] ?? {};
     var result = false;
 
-    for (final name in isolateItems.keys) {
-      final refreshedItem = await _refreshRef(isolateItems[name]!, isolateId);
-      if (refreshedItem != isolateItems[name]) result = true;
+    final variableNames = [...isolateItems.keys];
+    for (final name in variableNames) {
+      final oldItem = isolateItems[name]!;
+      final refreshedItem = await _refreshRef(oldItem, isolateId);
+      if (refreshedItem != oldItem) result = true;
       if (refreshedItem == null) {
         isolateItems.remove(name);
         removedVariables.add(name);
@@ -57,6 +59,8 @@ class EvalScope {
         ref.id!,
       );
     } on RPCError {
+      // If we could not get object, we need to recover it.
+    } on SentinelException {
       // If we could not get object, we need to recover it.
     }
     if (object != null) return ref;

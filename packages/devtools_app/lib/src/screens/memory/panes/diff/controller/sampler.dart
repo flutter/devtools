@@ -22,11 +22,13 @@ class HeapClassSampler extends ClassSampler {
       serviceManager.isolateManager.mainIsolate.value!;
 
   Future<InstanceSet?> _liveInstances() async {
-    final theClass = await findClass(_mainIsolateRef.id, objects.heapClass);
+    final isolateId = _mainIsolateRef.id!;
+
+    final theClass = await findClass(isolateId, objects.heapClass);
     if (theClass == null) return null;
 
     return await serviceManager.service!.getInstances(
-      _mainIsolateRef.id!,
+      isolateId,
       theClass.id!,
       preferences.memory.refLimit.value,
     );

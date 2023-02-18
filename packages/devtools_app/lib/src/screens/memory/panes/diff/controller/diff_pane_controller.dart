@@ -64,7 +64,7 @@ class DiffPaneController extends DisposableController {
     final item = SnapshotInstanceItem(
       id: _snapshotId++,
       displayNumber: _nextDisplayNumber(),
-      isolateName: currentIsolateName ?? '<isolate-not-detected>',
+      isolateName: selectedIsolateName ?? '<isolate-not-detected>',
     );
 
     snapshots.add(item);
