@@ -83,8 +83,15 @@ class EvalService extends DisposableController with AutoDisposeControllerMixin {
           scope: scope.value(isolateId: isolateId),
         );
 
+    return await _evalWithVariablesRefresh(eval, isolateId);
+  }
+
+  Future<Response> _evalWithVariablesRefresh(
+    Future<Response> Function() evalFunction,
+    String isolateId,
+  ) async {
     try {
-      final result = await eval();
+      final result = await evalFunction();
       return result;
     } on RPCError catch (e) {
       const expressionCompilationErrorCode = 113;
@@ -92,7 +99,7 @@ class EvalService extends DisposableController with AutoDisposeControllerMixin {
       final shouldRetry = await scope.refreshRefs(isolateId);
       _showScopeChangeMessageIfNeeded();
       if (shouldRetry) {
-        return await eval();
+        return await evalFunction();
       } else {
         rethrow;
       }
@@ -149,13 +156,15 @@ class EvalService extends DisposableController with AutoDisposeControllerMixin {
       );
     }
 
-    return _service.evaluateInFrame(
-      isolateRefId,
-      frame.index!,
-      expression,
-      disableBreakpoints: true,
-      scope: scope.value(isolateId: isolateRefId),
-    );
+    Future<Response> evalFunction() => _service.evaluateInFrame(
+          isolateRefId,
+          frame.index!,
+          expression,
+          disableBreakpoints: true,
+          scope: scope.value(isolateId: isolateRefId),
+        );
+
+    return await _evalWithVariablesRefresh(evalFunction, isolateRefId);
   }
 
   Future<InstanceRef?> findObject(
