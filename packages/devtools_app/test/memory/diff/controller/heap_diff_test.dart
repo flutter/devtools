@@ -80,7 +80,11 @@ Future<SingleClassStats> _createClassStats(
     ...instances,
   ];
 
-  final heap = AdaptedHeapData(objects, rootIndex: 0);
+  final heap = AdaptedHeapData(
+    objects,
+    rootIndex: 0,
+    isolateId: '',
+  );
   await buildSpanningTreeAndSetInRefs(heap);
 
   final result = SingleClassStats(heapClass: instances.first.heapClass);
@@ -114,5 +118,6 @@ Future<AdaptedHeap> _createSimplestHeap() async => await AdaptedHeap.create(
           )
         ],
         rootIndex: 0,
+        isolateId: '',
       ),
     );

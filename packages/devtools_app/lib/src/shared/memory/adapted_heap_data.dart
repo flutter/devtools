@@ -20,6 +20,7 @@ class _JsonFields {
   static const String shallowSize = 'shallowSize';
   static const String rootIndex = 'rootIndex';
   static const String created = 'created';
+  static const String isolateId = 'isolateId';
 }
 
 @immutable
@@ -60,6 +61,7 @@ class HeapObjectSelection {
 class AdaptedHeapData {
   AdaptedHeapData(
     this.objects, {
+    required this.isolateId,
     this.rootIndex = _defaultRootIndex,
     DateTime? created,
   })  : assert(objects.isNotEmpty),
@@ -78,14 +80,16 @@ class AdaptedHeapData {
           .toList(),
       created: createdJson == null ? null : DateTime.parse(createdJson),
       rootIndex: json[_JsonFields.rootIndex] ?? _defaultRootIndex,
+      isolateId: json[_JsonFields.isolateId] ?? '',
     );
   }
 
   static final _uiReleaser = UiReleaser();
 
   static Future<AdaptedHeapData> fromHeapSnapshot(
-    HeapSnapshotGraph graph,
-  ) async {
+    HeapSnapshotGraph graph, {
+    required String isolateId,
+  }) async {
     final objects = <AdaptedHeapObject>[];
     for (final i in Iterable.generate(graph.objects.length)) {
       if (_uiReleaser.step()) await _uiReleaser.releaseUi();
@@ -94,7 +98,7 @@ class AdaptedHeapData {
       objects.add(object);
     }
 
-    return AdaptedHeapData(objects);
+    return AdaptedHeapData(objects, isolateId: isolateId);
   }
 
   /// Default value for rootIndex is taken from the doc:
@@ -106,6 +110,8 @@ class AdaptedHeapData {
   AdaptedHeapObject get root => objects[rootIndex];
 
   final List<AdaptedHeapObject> objects;
+
+  final String isolateId;
 
   bool allFieldsCalculated = false;
 

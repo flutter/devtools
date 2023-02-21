@@ -8,6 +8,7 @@ import 'package:vm_service/vm_service.dart';
 import '../../../../../shared/globals.dart';
 import '../../../../../shared/memory/adapted_heap_data.dart';
 import '../../../../../shared/memory/class_name.dart';
+import '../../../../../shared/vm_utils.dart';
 import '../../../shared/heap/heap.dart';
 import '../../../shared/primitives/instance_set_view.dart';
 
@@ -20,12 +21,11 @@ class HeapClassSampler extends ClassSampler {
   IsolateRef get _mainIsolateRef =>
       serviceManager.isolateManager.mainIsolate.value!;
 
-  Future<InstanceSet> _liveInstances() async {
+  Future<InstanceSet?> _liveInstances() async {
     final isolateId = _mainIsolateRef.id!;
 
-    final theClass = (await serviceManager.service!.getClassList(isolateId))
-        .classes!
-        .firstWhere((ref) => objects.heapClass.matches(ref));
+    final theClass = await findClass(isolateId, objects.heapClass);
+    if (theClass == null) return null;
 
     return await serviceManager.service!.getInstances(
       isolateId,
@@ -36,9 +36,9 @@ class HeapClassSampler extends ClassSampler {
 
   @override
   Future<void> oneLiveStaticToConsole() async {
-    final instances = (await _liveInstances()).instances ?? [];
+    final instances = (await _liveInstances())?.instances;
 
-    final instanceRef = instances.firstWhereOrNull(
+    final instanceRef = instances?.firstWhereOrNull(
       (objRef) =>
           objRef is InstanceRef &&
           objects.objects.objectsByCodes.containsKey(objRef.identityHashCode),
@@ -62,22 +62,6 @@ class HeapClassSampler extends ClassSampler {
       isolateRef: _mainIsolateRef,
       heapSelection: heapSelection,
     );
-
-    // TODO (polina-c): remove the commented code
-    // before opening the flag.
-    // // eval object
-    // final response1 = await serviceManager.service!
-    //     .evaluate(_mainIsolateRef.id!, instance.id!, 'toString()');
-    // print('!!!! eval without scope: ' + response1.json!['valueAsString']);
-
-    // // eval object
-    // final response2 = await serviceManager.service!.evaluate(
-    //   _mainIsolateRef.id!,
-    //   instance.id!,
-    //   'identityHashCode(this)',
-    //   scope: {'this': instance.id!},
-    // );
-    // print('!!!! eval with scope: ' + response2.json!['valueAsString']);
   }
 
   @override
@@ -89,7 +73,7 @@ class HeapClassSampler extends ClassSampler {
   Future<void> manyLiveToConsole() async {
     serviceManager.consoleService.appendInstanceSet(
       type: objects.heapClass.shortName,
-      instanceSet: await _liveInstances(),
+      instanceSet: (await _liveInstances())!,
       isolateRef: _mainIsolateRef,
     );
   }
