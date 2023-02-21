@@ -35,10 +35,14 @@ class ClassFilter {
 
   ClassFilter.empty()
       : this(
-          filterType: ClassFilterType.showAll,
-          except: '${ClassType.runtime.alias}\n${ClassType.sdk.alias}',
+          filterType: ClassFilterType.except,
+          except: defaultExceptString,
           only: null,
         );
+
+  @visibleForTesting
+  static final defaultExceptString =
+      '${ClassType.runtime.alias}\n${ClassType.sdk.alias}';
 
   static String _trimByLine(String value) =>
       value.split('\n').map((e) => e.trim()).join('\n');

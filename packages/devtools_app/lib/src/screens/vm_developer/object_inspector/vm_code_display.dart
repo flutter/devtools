@@ -6,10 +6,13 @@ import 'package:flutter/material.dart';
 import 'package:string_scanner/string_scanner.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../../../shared/common_widgets.dart';
 import '../../../shared/primitives/utils.dart';
+import '../../../shared/split.dart';
 import '../../../shared/table/table.dart';
 import '../../../shared/table/table_data.dart';
 import '../../../shared/theme.dart';
+import '../vm_developer_common_widgets.dart';
 import '../vm_service_private_extensions.dart';
 import 'object_inspector_view_controller.dart';
 import 'vm_object_model.dart';
@@ -157,67 +160,27 @@ class _InstructionColumn extends _CodeColumnData
   }
 }
 
-class _DartObjectColumn extends _CodeColumnData {
-  _DartObjectColumn() : super.wide('Object');
+class _DartObjectColumn extends _CodeColumnData
+    implements ColumnRenderer<Instruction> {
+  _DartObjectColumn({required this.controller}) : super.wide('Object');
+
+  final ObjectInspectorViewController controller;
 
   @override
-  String getValue(Instruction dataObject) =>
-      _objectToDisplayValue(dataObject.object);
+  Response? getValue(Instruction inst) => inst.object;
 
-  // TODO(bkonyi): verify this covers all cases.
-  String _objectToDisplayValue(Object? object) {
-    if (object is InstanceRef) {
-      final instance = object;
-      switch (instance.kind!) {
-        case InstanceKind.kNull:
-          return 'null';
-        case InstanceKind.kBool:
-          return instance.valueAsString!;
-        case InstanceKind.kList:
-          return 'List(${instance.length})';
-        case InstanceKind.kString:
-          return '"${instance.valueAsString}"';
-        case InstanceKind.kPlainInstance:
-          return 'TODO(PlainInstance)';
-        case InstanceKind.kClosure:
-          return instance.closureFunction!.name!;
-      }
-    }
-
-    if (object is FuncRef) {
-      final func = object;
-      return '${func.owner.name}.${func.name!}';
-    }
-
-    if (object is CodeRef) {
-      final code = object;
-      return code.name!;
-    }
-
-    if (object is FieldRef) {
-      final field = object;
-      return '${field.declaredType!.name} ${field.name}';
-    }
-
-    if (object is TypeArgumentsRef) {
-      final typeArgsRef = object;
-      return 'TypeArguments(${typeArgsRef.name!})';
-    }
-
-    // Note: this check should be last as [ObjRef] is a super type to most
-    // other types in package:vm_service.
-    if (object is ObjRef) {
-      final objRef = object;
-      if (objRef.isICData) {
-        final icData = objRef.asICData;
-        return 'ICData (${icData.selector})';
-      }
-      if (objRef.vmType != null) {
-        return objRef.vmType!;
-      }
-    }
-
-    return object?.toString() ?? '';
+  @override
+  Widget? build(
+    BuildContext context,
+    Instruction data, {
+    bool isRowSelected = false,
+    VoidCallback? onPressed,
+  }) {
+    if (data.object == null) return Container();
+    return VmServiceObjectLink(
+      object: data.object!,
+      onTap: controller.findAndSelectNodeForObject,
+    );
   }
 }
 
@@ -234,7 +197,50 @@ class VmCodeDisplay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CodeTable(code: code);
+    return Split(
+      initialFractions: const [0.4, 0.6],
+      axis: Axis.vertical,
+      children: [
+        OutlineDecoration.onlyBottom(
+          child: VmObjectDisplayBasicLayout(
+            controller: controller,
+            object: code,
+            generalDataRows: vmObjectGeneralDataRows(controller, code),
+            sideCardTitle: 'Code Details',
+            sideCardDataRows: _codeDetailRows(code),
+          ),
+        ),
+        OutlineDecoration.onlyTop(
+          child: CodeTable(
+            code: code,
+            controller: controller,
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// Returns a list of key-value pairs (map entries)
+  /// containing detailed information of a VM Func object [function].
+  List<MapEntry<String, Widget Function(BuildContext)>> _codeDetailRows(
+    CodeObject code,
+  ) {
+    return [
+      selectableTextBuilderMapEntry(
+        'Kind',
+        code.obj.kind,
+      ),
+      serviceObjectLinkBuilderMapEntry(
+        controller: controller,
+        key: 'Function',
+        object: code.obj.function!,
+      ),
+      serviceObjectLinkBuilderMapEntry(
+        controller: controller,
+        key: 'Object Pool',
+        object: code.obj.objectPool,
+      ),
+    ];
   }
 }
 
@@ -242,18 +248,20 @@ class CodeTable extends StatelessWidget {
   CodeTable({
     Key? key,
     required this.code,
+    required this.controller,
   }) : super(key: key);
 
-  final columns = <ColumnData<Instruction>>[
+  late final columns = <ColumnData<Instruction>>[
     _AddressColumn(),
     _InstructionColumn(),
-    _DartObjectColumn(),
+    _DartObjectColumn(controller: controller),
     if (profilerTicksEnabled) ...[
       _ProfileTicksColumn('Inclusive'),
       _ProfileTicksColumn('Exclusive'),
     ],
   ];
 
+  final ObjectInspectorViewController controller;
   final CodeObject code;
 
   @override

@@ -194,7 +194,8 @@ class _ProfilerScreenBodyState extends State<ProfilerScreenBody>
                     CpuProfilerController.emptyAppStartUpProfile) {
                   return emptyAppStartUpProfileView;
                 }
-                if (cpuProfileData.isEmpty) {
+                if (cpuProfileData.isEmpty &&
+                    !controller.cpuProfilerController.isFilterActive) {
                   return emptyProfileView;
                 }
                 return CpuProfiler(

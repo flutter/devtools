@@ -22,6 +22,10 @@ void main() {
       aboutDialog = DevToolsAboutDialog(ReleaseNotesController());
       final fakeServiceManager = FakeServiceManager();
       when(fakeServiceManager.vm.version).thenReturn('1.9.1');
+      when(fakeServiceManager.vm.targetCPU).thenReturn('arm64');
+      when(fakeServiceManager.vm.architectureBits).thenReturn(64);
+      when(fakeServiceManager.vm.operatingSystem).thenReturn('android');
+
       mockConnectedApp(
         fakeServiceManager.connectedApp!,
         isFlutterApp: true,
