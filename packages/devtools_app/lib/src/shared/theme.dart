@@ -186,6 +186,7 @@ const densePadding = 4.0;
 const noPadding = 0.0;
 
 double get smallProgressSize => scaleByFontFactor(12.0);
+double get mediumProgressSize => scaleByFontFactor(24.0);
 
 double get defaultListItemHeight => scaleByFontFactor(28.0);
 

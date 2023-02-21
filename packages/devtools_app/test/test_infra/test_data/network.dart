@@ -74,7 +74,7 @@ final httpGetResponseBodyData = [
 
 final testSocket1 = WebSocket(SocketStatistic.parse(testSocket1Json)!, 0);
 final Map<String, dynamic> testSocket1Json = {
-  'id': '0',
+  'id': '10000',
   'startTime': 1000000,
   'endTime': 2000000,
   'lastReadTime': 1800000,
@@ -88,7 +88,7 @@ final Map<String, dynamic> testSocket1Json = {
 
 final testSocket2 = WebSocket(SocketStatistic.parse(testSocket2Json)!, 0);
 final Map<String, dynamic> testSocket2Json = {
-  'id': '1',
+  'id': '11111',
   'startTime': 3000000,
   // This socket has no end time.
   'lastReadTime': 3500000,
@@ -102,7 +102,7 @@ final Map<String, dynamic> testSocket2Json = {
 
 final testSocket3 = WebSocket(SocketStatistic.parse(testSocket3Json)!, 0);
 final Map<String, dynamic> testSocket3Json = {
-  'id': '0',
+  'id': '10000',
   'startTime': 1000000,
   'endTime': 2000000,
   'lastReadTime': 1800000,
