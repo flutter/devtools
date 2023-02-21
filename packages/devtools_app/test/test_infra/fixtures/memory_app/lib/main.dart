@@ -35,11 +35,16 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   final _garbage = <_MyGarbage>[];
   int _counter = 0;
+  _MyGarbage _gcableItem = _MyGarbage(0);
 
   void _incrementCounter() {
     setState(() {
       _counter++;
       _garbage.add(_MyGarbage(0));
+      if (identityHashCode(_gcableItem) < 0) {
+        print('we need this line to use the field');
+      }
+      _gcableItem = _MyGarbage(0);
     });
   }
 
