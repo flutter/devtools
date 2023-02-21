@@ -42,7 +42,7 @@ class _MyHomePageState extends State<MyHomePage> {
       _counter++;
       _garbage.add(_MyGarbage(0));
       if (identityHashCode(_gcableItem) < 0) {
-        print('we need this line to use the field');
+        // We need this block to show compiler [_gcableItem] is in use.
       }
       _gcableItem = _MyGarbage(0);
     });
