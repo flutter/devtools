@@ -12,8 +12,8 @@ version: 2.22.2-dev.0
 repository: https://github.com/flutter/devtools/tree/master/packages/devtools_test
 
 environment:
-  sdk: '>=2.17.0 <4.0.0'
-  flutter: '>=3.0.0'
+  sdk: ">=2.17.0 <4.0.0"
+  flutter: ">=3.0.0"
 
 dependencies:
   async: ^2.0.0
@@ -29,7 +29,7 @@ dependencies:
   provider: ^6.0.2
   vm_service: ">=10.1.0 <12.0.0"
   vm_snapshot_analysis: ^0.7.1
-  webkit_inspection_protocol: '>=0.5.0 <2.0.0'
+  webkit_inspection_protocol: ">=0.5.0 <2.0.0"
 
 dependency_overrides:
   # The '#OVERRIDE_FOR_DEVELOPMENT' lines are stripped out when we publish.
