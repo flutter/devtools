@@ -91,8 +91,7 @@ class EvalService extends DisposableController with AutoDisposeControllerMixin {
     String isolateId,
   ) async {
     try {
-      final result = await evalFunction();
-      return result;
+      return await evalFunction();
     } on RPCError catch (e) {
       const expressionCompilationErrorCode = 113;
       if (e.code != expressionCompilationErrorCode) rethrow;
