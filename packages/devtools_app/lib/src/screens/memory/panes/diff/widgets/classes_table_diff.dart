@@ -118,6 +118,13 @@ class _InstanceColumn extends ColumnData<DiffClassStats> {
   }
 
   @override
+  String getDisplayValue(DiffClassStats classStats) {
+    final value = getValue(classStats);
+    if (value <= 0) return value.toString();
+    return '+$value';
+  }
+
+  @override
   bool get numeric => true;
 }
 
@@ -168,9 +175,12 @@ class _SizeColumn extends ColumnData<DiffClassStats> {
   }
 
   @override
-  String getDisplayValue(DiffClassStats classStats) => prettyPrintRetainedSize(
-        getValue(classStats),
-      )!;
+  String getDisplayValue(DiffClassStats classStats) {
+    final value = getValue(classStats);
+    final asSize = prettyPrintRetainedSize(value)!;
+    if (value <= 0) return asSize;
+    return '+$asSize';
+  }
 
   @override
   bool get numeric => true;
