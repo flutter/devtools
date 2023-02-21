@@ -20,6 +20,7 @@ enum _DataPart {
   created,
   deleted,
   delta,
+  persisted,
 }
 
 enum _SizeType {
@@ -102,6 +103,8 @@ class _InstanceColumn extends ColumnData<DiffClassStats> {
         return 'Released';
       case _DataPart.delta:
         return 'Delta';
+      case _DataPart.persisted:
+        return 'Persisted';
     }
   }
 
@@ -114,6 +117,8 @@ class _InstanceColumn extends ColumnData<DiffClassStats> {
         return classStats.total.deleted.instanceCount;
       case _DataPart.delta:
         return classStats.total.delta.instanceCount;
+      case _DataPart.persisted:
+        return classStats.total.persisted.instanceCount;
     }
   }
 
@@ -148,6 +153,8 @@ class _SizeColumn extends ColumnData<DiffClassStats> {
         return 'Freed';
       case _DataPart.delta:
         return 'Delta';
+      case _DataPart.persisted:
+        return 'Persisted';
     }
   }
 
@@ -162,6 +169,8 @@ class _SizeColumn extends ColumnData<DiffClassStats> {
             return classStats.total.deleted.shallowSize;
           case _DataPart.delta:
             return classStats.total.delta.shallowSize;
+          case _DataPart.persisted:
+            return classStats.total.persisted.shallowSize;
         }
       case _SizeType.retained:
         switch (dataPart) {
@@ -171,6 +180,8 @@ class _SizeColumn extends ColumnData<DiffClassStats> {
             return classStats.total.deleted.retainedSize;
           case _DataPart.delta:
             return classStats.total.delta.retainedSize;
+          case _DataPart.persisted:
+            return classStats.total.persisted.retainedSize;
         }
     }
   }

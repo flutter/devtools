@@ -215,6 +215,9 @@ class ObjectSet extends ObjectSetStats {
   static ObjectSet empty = ObjectSet()..seal();
 
   final objectsByCodes = <IdentityHashCode, AdaptedHeapObject>{};
+
+  /// Subset of objects which size is not included bu the method [countInstance]
+  /// into retained size of this set.
   final notCountedInRetained = <IdentityHashCode>{};
 
   @override
