@@ -1215,6 +1215,8 @@ class RoundedDropDownButton<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bgColor = Theme.of(context).colorScheme.defaultBackgroundColor;
+
     return RoundedOutlinedBorder(
       child: Center(
         child: Container(
@@ -1231,6 +1233,7 @@ class RoundedDropDownButton<T> extends StatelessWidget {
               style: style,
               selectedItemBuilder: selectedItemBuilder,
               items: items,
+              focusColor: bgColor,
             ),
           ),
         ),
