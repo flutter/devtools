@@ -213,12 +213,15 @@ class _ClassesTableDiffColumns {
     _InstanceColumn(_DataPart.created),
     _InstanceColumn(_DataPart.deleted),
     _InstanceColumn(_DataPart.delta),
+    _InstanceColumn(_DataPart.persisted),
     _SizeColumn(_DataPart.created, _SizeType.shallow),
     _SizeColumn(_DataPart.deleted, _SizeType.shallow),
     _SizeColumn(_DataPart.delta, _SizeType.shallow),
+    _SizeColumn(_DataPart.persisted, _SizeType.shallow),
     _SizeColumn(_DataPart.created, _SizeType.retained),
     _SizeColumn(_DataPart.deleted, _SizeType.retained),
     retainedSizeDeltaColumn,
+    _SizeColumn(_DataPart.persisted, _SizeType.retained),
   ];
 }
 
@@ -240,17 +243,17 @@ class ClassesTableDiff extends StatelessWidget {
     ),
     ColumnGroup(
       title: 'Instances',
-      range: const Range(1, 4),
+      range: const Range(1, 5),
       tooltip: nonGcableInstancesColumnTooltip,
     ),
     ColumnGroup(
       title: 'Shallow Dart Size',
-      range: const Range(4, 7),
+      range: const Range(5, 9),
       tooltip: shallowSizeColumnTooltip,
     ),
     ColumnGroup(
       title: 'Retained Dart Size',
-      range: const Range(7, 10),
+      range: const Range(9, 13),
       tooltip: retainedSizeColumnTooltip,
     ),
   ];
