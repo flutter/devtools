@@ -78,7 +78,7 @@ Future<void> addChildReferences(
         ),
         if (selection.object != null)
           DartObjectNode.references(
-            'static (application state at time of snapshot ${selection.heap.snapshotName})',
+            'static (application state at time of the snapshot ${selection.heap.snapshotName})',
             ObjectReferences.copyWith(
               ref,
               refNodeType: RefNodeType.staticRefRoot,
