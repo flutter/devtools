@@ -69,7 +69,7 @@ Future<void> addChildReferences(
 
       variable.addAllChildren([
         DartObjectNode.references(
-          'live (application in its current state)',
+          'live (objects currently alive in the application)',
           ObjectReferences.copyWith(
             ref,
             refNodeType: RefNodeType.liveRefRoot,
@@ -78,7 +78,7 @@ Future<void> addChildReferences(
         ),
         if (selection.object != null)
           DartObjectNode.references(
-            'static (application state at time of the snapshot ${selection.heap.snapshotName})',
+            'static (objects alive at the time of snapshot ${selection.heap.snapshotName})',
             ObjectReferences.copyWith(
               ref,
               refNodeType: RefNodeType.staticRefRoot,
