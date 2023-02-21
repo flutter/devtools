@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert';
 import 'dart:math';
 
 import 'package:vm_service/vm_service.dart';
@@ -168,16 +167,26 @@ Future<void> addChildReferences(
           [];
 
       final refsToShow = min(limit, refs.length);
+      final children = <DartObjectNode>[];
 
       for (var i = 0; i < refsToShow; i++) {
         final item = refs[i];
-        variable.addChild(DartObjectNode.text(jsonEncode(item.toJson())));
+
+        _addLiveReferenceToNode(
+          children,
+          ref.isolateRef,
+          item.source,
+          RefNodeType.liveInRefs,
+          ref.heapSelection.withoutObject(),
+        );
       }
+
+      variable.addAllChildren(children);
 
       if (refs.length > limit)
         variable.addChild(
           DartObjectNode.text(
-            '...\nConfigure number of items in memory screen settings',
+            '...\nTo get more items, increase "${preferences.memory.refLimitTitle}" in memory settings.',
           ),
         );
 
@@ -212,7 +221,7 @@ Future<void> _addOutboundLiveReferences({
   switch (value.kind) {
     case InstanceKind.kMap:
       variable.addAllChildren(
-        _createLiveReferencesForMap(
+        _createLiveOutboundReferencesForMap(
           value,
           isolateRef,
           heapSelection.withoutObject(),
@@ -221,7 +230,7 @@ Future<void> _addOutboundLiveReferences({
       break;
     case InstanceKind.kList:
       variable.addAllChildren(
-        _createLiveReferencesForList(
+        _createLiveOutboundReferencesForList(
           value,
           isolateRef,
           heapSelection.withoutObject(),
@@ -249,13 +258,14 @@ Future<void> _addOutboundLiveReferences({
   }
 }
 
-void _addLiveReference(
+void _addLiveReferenceToNode(
   List<DartObjectNode> variables,
   IsolateRef isolateRef,
   Object? instance,
-  String namePrefix,
-  HeapObjectSelection heapSelection,
-) {
+  RefNodeType refNodeType,
+  HeapObjectSelection heapSelection, {
+  String namePrefix = '',
+}) {
   if (instance is! InstanceRef) return;
   final classRef = instance.classRef!;
   if (HeapClassName.fromClassRef(classRef).isNull) return;
@@ -264,7 +274,7 @@ void _addLiveReference(
     DartObjectNode.references(
       '$namePrefix${classRef.name}',
       ObjectReferences(
-        refNodeType: RefNodeType.liveOutRefs,
+        refNodeType: refNodeType,
         isolateRef: isolateRef,
         value: instance,
         heapSelection: heapSelection,
@@ -274,7 +284,7 @@ void _addLiveReference(
   );
 }
 
-List<DartObjectNode> _createLiveReferencesForMap(
+List<DartObjectNode> _createLiveOutboundReferencesForMap(
   Instance instance,
   IsolateRef isolateRef,
   HeapObjectSelection heapSelection,
@@ -285,26 +295,29 @@ List<DartObjectNode> _createLiveReferencesForMap(
   for (var i = 0; i < associations.length; i++) {
     final association = associations[i];
 
-    _addLiveReference(
+    _addLiveReferenceToNode(
       variables,
       isolateRef,
       association.key,
-      '[$i, key]',
+      RefNodeType.liveOutRefs,
       heapSelection.withoutObject(),
+      namePrefix: '[$i, key]',
     );
-    _addLiveReference(
+    _addLiveReferenceToNode(
       variables,
       isolateRef,
       association.value,
-      '[$i, val]', // `val`, not `value`, to align keys and values visually
+      RefNodeType.liveOutRefs,
       heapSelection.withoutObject(),
+      namePrefix:
+          '[$i, val]', // `val`, not `value`, to align keys and values visually
     );
     continue;
   }
   return variables;
 }
 
-List<DartObjectNode> _createLiveReferencesForList(
+List<DartObjectNode> _createLiveOutboundReferencesForList(
   Instance instance,
   IsolateRef isolateRef,
   HeapObjectSelection heapSelection,
@@ -313,12 +326,13 @@ List<DartObjectNode> _createLiveReferencesForList(
   final elements = instance.elements ?? [];
   for (int i = 0; i < elements.length; i++) {
     final index = instance.offset == null ? i : i + instance.offset!;
-    _addLiveReference(
+    _addLiveReferenceToNode(
       variables,
       isolateRef,
       elements[i],
-      '[$index]',
+      RefNodeType.liveOutRefs,
       heapSelection.withoutObject(),
+      namePrefix: '[$index]',
     );
   }
   return variables;
@@ -332,12 +346,13 @@ List<DartObjectNode> _createLiveReferencesForFields(
   final variables = <DartObjectNode>[];
 
   for (var field in instance.fields!) {
-    _addLiveReference(
+    _addLiveReferenceToNode(
       variables,
       isolateRef,
       field.value,
-      '${field.decl?.name}:',
+      RefNodeType.liveOutRefs,
       heapSelection.withoutObject(),
+      namePrefix: '${field.decl?.name}:',
     );
   }
   return variables;
