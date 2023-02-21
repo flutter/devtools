@@ -4,13 +4,14 @@
 
 import 'dart:async';
 import 'dart:convert';
+import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 import 'package:stack_trace/stack_trace.dart' as stack_trace;
 import 'package:vm_service/vm_service.dart';
 
-import '../primitives/utils.dart';
+import '../vm_utils.dart';
 import 'dart_object_node.dart';
 import 'diagnostics_node.dart';
 import 'inspector_service.dart';
@@ -476,6 +477,26 @@ List<DartObjectNode> createVariablesForList(
         value: elements[i],
         isolateRef: isolateRef,
         artificialName: true,
+      ),
+    );
+  }
+  return variables;
+}
+
+List<DartObjectNode> createVariablesForInstanceSet(
+  int offset,
+  int childCount,
+  List<ObjRef> instances,
+  IsolateRef? isolateRef,
+) {
+  final variables = <DartObjectNode>[];
+  final loopLimit = min(offset + childCount, instances.length);
+  for (int i = offset; i < loopLimit; i++) {
+    variables.add(
+      DartObjectNode.fromValue(
+        name: '[$i]',
+        value: instances[i],
+        isolateRef: isolateRef,
       ),
     );
   }

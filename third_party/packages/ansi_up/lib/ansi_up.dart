@@ -413,7 +413,7 @@ class StyledText {
 
     String? decoration;
     if (underline) {
-      decoration = (decoration == null) ? 'underline' : '$decoration underline';
+      decoration = 'underline';
     }
     if (strikethrough) {
       decoration =

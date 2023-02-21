@@ -9,6 +9,7 @@ import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../../shared/charts/flame_chart.dart';
+import '../../shared/config_specific/logger/logger.dart';
 import '../../shared/globals.dart';
 import '../../shared/primitives/simple_items.dart';
 import '../../shared/primitives/trace_event.dart';
@@ -447,6 +448,8 @@ class CpuProfileData {
   /// the condition specified by [includeFilter].
   ///
   /// [originalData] does not need to be [processed] to run this operation.
+  // TODO(https://github.com/flutter/devtools/issues/5203): ensure we can filter
+  // from an already filtered profile. This throws a null exception.
   factory CpuProfileData.filterFrom(
     CpuProfileData originalData,
     bool Function(CpuStackFrame) includeFilter,
@@ -1186,6 +1189,11 @@ class CpuProfileStore {
   void clear() {
     _profilesByTime.clear();
     _profilesByLabel.clear();
+  }
+
+  void debugPrintKeys() {
+    log('_profilesByLabel: ${_profilesByLabel.keys}');
+    log('_profilesByTime: ${_profilesByTime.keys}');
   }
 }
 

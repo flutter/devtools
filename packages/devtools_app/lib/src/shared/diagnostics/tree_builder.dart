@@ -119,6 +119,22 @@ void _setupGrouping(DartObjectNode variable) {
   }
 }
 
+Future<void> _addInstanceSetItems(
+  DartObjectNode variable,
+  IsolateRef? isolateRef,
+  InstanceSet instanceSet,
+) async {
+  final instances = instanceSet.instances ?? [];
+  variable.addAllChildren(
+    createVariablesForInstanceSet(
+      variable.offset,
+      variable.childCount,
+      instances,
+      isolateRef,
+    ),
+  );
+}
+
 Future<void> _addInstanceRefItems(
   DartObjectNode variable,
   InstanceRef instanceRef,
@@ -364,6 +380,7 @@ Future<void> buildVariablesTree(
   final isolateRef = ref.isolateRef;
   final instanceRef = ref.instanceRef;
   final diagnostic = ref.diagnostic;
+  final value = variable.value;
 
   await _addDiagnosticsIfNeeded(
     diagnostic,
@@ -378,8 +395,9 @@ Future<void> buildVariablesTree(
       await addChildReferences(variable);
     } else if (instanceRef != null && serviceManager.service != null) {
       await _addInstanceRefItems(variable, instanceRef, isolateRef);
-    } else if (variable.value != null) {
-      final value = variable.value;
+    } else if (value is InstanceSet) {
+      await _addInstanceSetItems(variable, isolateRef, value);
+    } else if (value != null) {
       await _addValueItems(variable, isolateRef, value);
     }
   } on SentinelException {

@@ -4,6 +4,7 @@
 
 import 'package:devtools_app/src/screens/memory/panes/diff/controller/diff_pane_controller.dart';
 import 'package:devtools_app/src/screens/memory/panes/diff/diff_pane.dart';
+import 'package:devtools_app/src/screens/memory/shared/heap/class_filter.dart';
 import 'package:devtools_app/src/screens/memory/shared/heap/model.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/shared/config_specific/ide_theme/ide_theme.dart';
@@ -48,6 +49,9 @@ class DiffSnapshotScene extends Scene {
     setGlobal(ServiceConnectionManager, fakeServiceManager);
 
     diffController = DiffPaneController(_TestSnapshotTaker());
+    diffController.applyFilter(
+      ClassFilter(filterType: ClassFilterType.showAll, except: '', only: ''),
+    );
 
     await diffController.takeSnapshot();
     await diffController.takeSnapshot();
