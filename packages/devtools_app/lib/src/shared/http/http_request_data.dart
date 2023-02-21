@@ -84,7 +84,7 @@ class DartIOHttpRequestData extends NetworkRequest {
   }
 
   @override
-  String get id => _request.id.toString();
+  String get id => _request.id;
 
   bool get _hasError => _request.request?.hasError ?? false;
 
