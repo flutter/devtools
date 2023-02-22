@@ -42,18 +42,20 @@ class InstanceSetButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    bool shouldShowMenu = (showMenu && count > 0);
+
     return Row(
       children: [
         Text(
           nf.format(count),
           style: textStyle,
         ),
-        if (showMenu && count > 0)
+        if (shouldShowMenu)
           ContextMenuButton(
             style: textStyle,
             menu: _menu(sampleObtainer!),
           ),
-        if (!showMenu) const SizedBox(width: ContextMenuButton.width),
+        if (!shouldShowMenu) const SizedBox(width: ContextMenuButton.width),
       ],
     );
   }
