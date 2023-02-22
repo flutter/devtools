@@ -223,21 +223,21 @@ class ClassesTableDiff extends StatelessWidget {
   final ValueNotifier<DiffClassStats?> selection;
 
   static final _columnGroups = [
-    ColumnGroup(
+    ColumnGroup.fromText(
       title: '',
       range: const Range(0, 1),
     ),
-    ColumnGroup(
+    ColumnGroup.fromText(
       title: 'Instances',
       range: const Range(1, 4),
       tooltip: nonGcableInstancesColumnTooltip,
     ),
-    ColumnGroup(
+    ColumnGroup.fromText(
       title: 'Shallow Dart Size',
       range: const Range(4, 7),
       tooltip: shallowSizeColumnTooltip,
     ),
-    ColumnGroup(
+    ColumnGroup.fromText(
       title: 'Retained Dart Size',
       range: const Range(7, 10),
       tooltip: retainedSizeColumnTooltip,

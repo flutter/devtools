@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import '../common_widgets.dart';
 import '../primitives/trees.dart';
 import '../primitives/utils.dart';
 import '../theme.dart';
@@ -129,10 +130,16 @@ mixin PinnableListEntry {
 /// will be drawn between groups and an additional header row will be added to
 /// the table to display the column group titles.
 class ColumnGroup {
-  ColumnGroup({required this.title, required this.range, this.tooltip});
+  ColumnGroup({required this.title, required this.range});
 
-  ColumnGroup.fromText(
-      {required Sting title, required String? tooltip, required this.range});
+  ColumnGroup.fromText({
+    required String title,
+    required Range range,
+    String? tooltip,
+  }) : this(
+          title: maybeWrapWithTooltip(child: Text(title), tooltip: tooltip),
+          range: range,
+        );
 
   final Widget title;
 
