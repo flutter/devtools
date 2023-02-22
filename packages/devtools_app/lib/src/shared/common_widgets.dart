@@ -12,6 +12,7 @@ import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../screens/debugger/debugger_controller.dart';
+import '../screens/inspector/layout_explorer/ui/theme.dart';
 import 'analytics/analytics.dart' as ga;
 import 'config_specific/launch_url/launch_url.dart';
 import 'console/widgets/expandable_variable.dart';
@@ -1215,7 +1216,7 @@ class RoundedDropDownButton<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bgColor = Theme.of(context).colorScheme.defaultBackgroundColor;
+    final bgColor = Theme.of(context).colorScheme.backgroundColorSelected;
 
     return RoundedOutlinedBorder(
       child: Center(
