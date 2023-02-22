@@ -162,7 +162,7 @@ class _InstanceColumn extends ColumnData<DiffClassStats>
 
     if (objects is! ObjectSet || theHeap == null) {
       throw StateError(
-        'Other than ${_DataPart.delta} columns should have details provided.',
+        'All columns except ${_DataPart.delta} should have objects and heap data available.',
       );
     }
 
