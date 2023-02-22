@@ -131,12 +131,13 @@ mixin PinnableListEntry {
 class ColumnGroup {
   ColumnGroup({required this.title, required this.range, this.tooltip});
 
-  final String title;
+  ColumnGroup.fromText(
+      {required Sting title, required String? tooltip, required this.range});
+
+  final Widget title;
 
   /// The range of column indices for columns that make up this group.
   final Range range;
-
-  final String? tooltip;
 }
 
 extension ColumnDataExtension<T> on ColumnData<T> {
