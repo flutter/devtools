@@ -31,7 +31,8 @@ class InstanceSetButton extends StatelessWidget {
     required this.sampleObtainer,
     required this.showMenu,
     required this.gaContext,
-  }) : assert(showMenu == (sampleObtainer != null));
+  })  : assert(showMenu == (sampleObtainer != null)),
+        assert(count >= 0);
 
   final int count;
   final ClassSampler? sampleObtainer;
@@ -47,7 +48,7 @@ class InstanceSetButton extends StatelessWidget {
           nf.format(count),
           style: textStyle,
         ),
-        if (showMenu)
+        if (showMenu && count > 0)
           ContextMenuButton(
             style: textStyle,
             menu: _menu(sampleObtainer!),
