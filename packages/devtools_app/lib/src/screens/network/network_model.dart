@@ -84,7 +84,7 @@ class WebSocket extends NetworkRequest {
 
   final SocketStatistic _socket;
   @override
-  String get id => _socket.id.toString();
+  String get id => _socket.id;
 
   @override
   Duration? get duration {
@@ -175,7 +175,6 @@ class NetworkRequests {
   NetworkRequests({
     this.requests = const [],
     this.invalidHttpRequests = const [],
-    this.outstandingHttpRequests = const {},
   });
 
   /// A list of network requests.
@@ -189,12 +188,7 @@ class NetworkRequests {
   /// information to display normally in the UI.
   List<DartIOHttpRequestData> invalidHttpRequests;
 
-  /// A mapping of timeline IDs to instances of HttpRequestData which are
-  /// currently in-progress.
-  Map<String, DartIOHttpRequestData> outstandingHttpRequests;
-
   void clear() {
     requests.clear();
-    outstandingHttpRequests.clear();
   }
 }

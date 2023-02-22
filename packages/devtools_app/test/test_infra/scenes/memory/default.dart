@@ -133,7 +133,11 @@ AdaptedHeapData _createHeap(Map<String, int> classToInstanceCount) {
     }
   }
 
-  return AdaptedHeapData(objects, rootIndex: rootIndex);
+  return AdaptedHeapData(
+    objects,
+    rootIndex: rootIndex,
+    isolateId: '',
+  );
 }
 
 var _nextCode = 1;

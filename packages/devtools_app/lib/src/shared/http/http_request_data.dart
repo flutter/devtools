@@ -4,8 +4,8 @@
 
 import 'dart:async';
 import 'dart:convert';
-import 'dart:typed_data';
 
+import 'package:flutter/foundation.dart';
 import 'package:mime/mime.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -33,16 +33,13 @@ class DartIOHttpInstantEvent {
   TimeRange? _timeRange;
 }
 
-int _dartIoHttpRequestWrapperId = 0;
-
 /// An abstraction of an HTTP request made through dart:io.
 class DartIOHttpRequestData extends NetworkRequest {
   DartIOHttpRequestData(
     int timelineMicrosBase,
     this._request, {
     bool requestFullDataFromVmService = true,
-  })  : wrapperId = _dartIoHttpRequestWrapperId++,
-        super(timelineMicrosBase) {
+  }) : super(timelineMicrosBase) {
     if (requestFullDataFromVmService && _request.isResponseComplete) {
       unawaited(getFullRequestData());
     }
@@ -54,15 +51,31 @@ class DartIOHttpRequestData extends NetworkRequest {
 
   HttpProfileRequestRef _request;
 
-  final int wrapperId;
+  bool isOutStanding = false;
 
-  Future<void> getFullRequestData() {
-    return serviceManager.service!
-        .getHttpProfileRequest(
-          _request.isolateId,
-          _request.id.toString(),
-        )
-        .then((updated) => _request = updated);
+  final ValueNotifier<int> _updateCount = ValueNotifier<int>(0);
+
+  /// A notifier that changes when the request data, or it's response body
+  /// changes.
+  ValueListenable<void> get requestUpdatedNotifier => _updateCount;
+  bool isFetchingFullData = false;
+
+  Future<void> getFullRequestData() async {
+    try {
+      if (isFetchingFullData) return; // We are already fetching
+      isFetchingFullData = true;
+      final updated = await serviceManager.service!.getHttpProfileRequest(
+        _request.isolateId,
+        _request.id.toString(),
+      );
+      _request = updated;
+      _updateCount.value++;
+      final fullRequest = _request as HttpProfileRequest;
+      _responseBody = utf8.decode(fullRequest.responseBody!);
+      _requestBody = utf8.decode(fullRequest.requestBody!);
+    } finally {
+      isFetchingFullData = false;
+    }
   }
 
   static List<Cookie> _parseCookies(List<String>? cookies) {
@@ -71,7 +84,7 @@ class DartIOHttpRequestData extends NetworkRequest {
   }
 
   @override
-  String get id => _request.id.toString();
+  String get id => _request.id;
 
   bool get _hasError => _request.request?.hasError ?? false;
 
@@ -230,6 +243,7 @@ class DartIOHttpRequestData extends NetworkRequest {
   /// Merges the information from another [HttpRequestData] into this instance.
   void merge(DartIOHttpRequestData data) {
     _request = data._request;
+    _updateCount.value++;
   }
 
   @override
@@ -310,14 +324,12 @@ class DartIOHttpRequestData extends NetworkRequest {
 
   @override
   bool operator ==(other) {
-    return other is DartIOHttpRequestData &&
-        wrapperId == other.wrapperId &&
-        super == other;
+    return other is DartIOHttpRequestData && id == other.id && super == other;
   }
 
   @override
   int get hashCode => Object.hash(
-        wrapperId,
+        id,
         method,
         uri,
         contentType,

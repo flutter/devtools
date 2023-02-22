@@ -425,7 +425,7 @@ void main() {
       expect(find.text('Content type: '), findsOneWidget);
       expect(find.text('websocket'), findsOneWidget);
       expect(find.text('Socket id: '), findsOneWidget);
-      expect(find.text('0'), findsOneWidget);
+      expect(find.text('10000'), findsOneWidget);
       expect(find.text('Socket type: '), findsOneWidget);
       expect(find.text('tcp'), findsOneWidget);
       expect(find.text('Read bytes: '), findsOneWidget);
@@ -475,7 +475,7 @@ void main() {
       expect(find.text('Content type: '), findsOneWidget);
       expect(find.text('websocket'), findsOneWidget);
       expect(find.text('Socket id: '), findsOneWidget);
-      expect(find.text('1'), findsOneWidget);
+      expect(find.text('11111'), findsOneWidget);
       expect(find.text('Socket type: '), findsOneWidget);
       expect(find.text('tcp'), findsOneWidget);
       expect(find.text('Read bytes: '), findsOneWidget);

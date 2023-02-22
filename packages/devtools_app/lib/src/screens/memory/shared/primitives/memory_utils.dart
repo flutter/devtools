@@ -6,7 +6,7 @@ import 'package:vm_service/vm_service.dart';
 
 import '../../../../shared/globals.dart';
 
-Future<HeapSnapshotGraph?> snapshotMemory() async {
+Future<HeapSnapshotGraph?> snapshotMemoryInSelectedIsolate() async {
   final isolate = serviceManager.isolateManager.selectedIsolate.value;
   if (isolate == null) return null;
   return await serviceManager.service?.getHeapSnapshotGraph(
@@ -14,5 +14,8 @@ Future<HeapSnapshotGraph?> snapshotMemory() async {
   );
 }
 
-String? get currentIsolateName =>
+String? get selectedIsolateName =>
     serviceManager.isolateManager.selectedIsolate.value?.name;
+
+String? get selectedIsolateId =>
+    serviceManager.isolateManager.selectedIsolate.value?.id;
