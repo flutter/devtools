@@ -175,7 +175,7 @@ class _InstanceColumn extends ColumnData<DiffClassStats>
           textStyle:
               isRowSelected ? theme.selectedTextStyle : theme.regularTextStyle,
           count: getValue(data),
-          gaContext: gac.MemoryAreas.snapshotSingle,
+          gaContext: gac.MemoryAreas.snapshotDiff,
           sampleObtainer: sampleObtainer,
           showMenu: showMenu,
         ),
