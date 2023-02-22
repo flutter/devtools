@@ -15,11 +15,10 @@ import '../../../../../shared/table/table_data.dart';
 import '../../../../../shared/theme.dart';
 import '../../../../../shared/utils.dart';
 import '../../../shared/heap/heap.dart';
-import '../../../shared/primitives/instance_set_button.dart';
 import '../../../shared/primitives/simple_elements.dart';
 import '../../../shared/shared_memory_widgets.dart';
 import '../controller/heap_diff.dart';
-import '../controller/sampler.dart';
+import 'instances.dart';
 
 enum _DataPart {
   created,
@@ -162,24 +161,12 @@ class _InstanceColumn extends ColumnData<DiffClassStats>
     }
     assert(dataPart != _DataPart.delta);
 
-    final theme = Theme.of(context);
-    final showMenu = isRowSelected;
-
-    final sampleObtainer =
-        showMenu ? HeapClassSampler(objects, theHeap, data.heapClass) : null;
-
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.end,
-      children: [
-        InstanceSetButton(
-          textStyle:
-              isRowSelected ? theme.selectedTextStyle : theme.regularTextStyle,
-          count: getValue(data),
-          gaContext: gac.MemoryAreas.snapshotDiff,
-          sampleObtainer: sampleObtainer,
-          showMenu: showMenu,
-        ),
-      ],
+    return InstanceTableCell(
+      objects,
+      theHeap,
+      data.heapClass,
+      isSelected: isRowSelected,
+      gaContext: gac.MemoryAreas.snapshotDiff,
     );
   }
 }
