@@ -156,7 +156,11 @@ class _InstanceColumn extends ColumnData<DiffClassStats>
     final theHeap = heap;
 
     // There is no detailed information, if [dataPart] equals to [_DataPart.delta].
-    if (objects is! ObjectSet || theHeap == null) return null;
+    if (objects is! ObjectSet || theHeap == null) {
+      assert(dataPart == _DataPart.delta);
+      return null;
+    }
+    assert(dataPart != _DataPart.delta);
 
     final theme = Theme.of(context);
     final showMenu = isRowSelected;
