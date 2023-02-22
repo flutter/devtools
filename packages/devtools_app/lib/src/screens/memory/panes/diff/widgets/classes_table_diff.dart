@@ -6,20 +6,25 @@ import 'package:flutter/material.dart';
 
 import '../../../../../shared/analytics/analytics.dart' as ga;
 import '../../../../../shared/analytics/constants.dart' as gac;
+import '../../../../../shared/feature_flags.dart';
 import '../../../../../shared/globals.dart';
+import '../../../../../shared/memory/adapted_heap_data.dart';
 import '../../../../../shared/primitives/utils.dart';
 import '../../../../../shared/table/table.dart';
 import '../../../../../shared/table/table_data.dart';
 import '../../../../../shared/theme.dart';
 import '../../../../../shared/utils.dart';
+import '../../../shared/heap/heap.dart';
 import '../../../shared/primitives/simple_elements.dart';
 import '../../../shared/shared_memory_widgets.dart';
 import '../controller/heap_diff.dart';
+import 'instances.dart';
 
 enum _DataPart {
   created,
   deleted,
   delta,
+  persisted,
 }
 
 enum _SizeType {
@@ -84,8 +89,9 @@ class _ClassNameColumn extends ColumnData<DiffClassStats>
   }
 }
 
-class _InstanceColumn extends ColumnData<DiffClassStats> {
-  _InstanceColumn(this.dataPart)
+class _InstanceColumn extends ColumnData<DiffClassStats>
+    implements ColumnRenderer<DiffClassStats> {
+  _InstanceColumn(this.dataPart, this.heap)
       : super(
           columnTitle(dataPart),
           fixedWidthPx: scaleByFontFactor(80.0),
@@ -93,6 +99,8 @@ class _InstanceColumn extends ColumnData<DiffClassStats> {
         );
 
   final _DataPart dataPart;
+
+  final AdaptedHeapData? heap;
 
   static String columnTitle(_DataPart dataPart) {
     switch (dataPart) {
@@ -102,18 +110,25 @@ class _InstanceColumn extends ColumnData<DiffClassStats> {
         return 'Released';
       case _DataPart.delta:
         return 'Delta';
+      case _DataPart.persisted:
+        return 'Persisted';
     }
   }
 
   @override
-  int getValue(DiffClassStats classStats) {
+  int getValue(DiffClassStats classStats) =>
+      _instances(classStats).instanceCount;
+
+  ObjectSetStats _instances(DiffClassStats classStats) {
     switch (dataPart) {
       case _DataPart.created:
-        return classStats.total.created.instanceCount;
+        return classStats.total.created;
       case _DataPart.deleted:
-        return classStats.total.deleted.instanceCount;
+        return classStats.total.deleted;
       case _DataPart.delta:
-        return classStats.total.delta.instanceCount;
+        return classStats.total.delta;
+      case _DataPart.persisted:
+        return classStats.total.persisted;
     }
   }
 
@@ -127,6 +142,38 @@ class _InstanceColumn extends ColumnData<DiffClassStats> {
 
   @override
   bool get numeric => true;
+
+  @override
+  Widget? build(
+    BuildContext context,
+    DiffClassStats data, {
+    bool isRowSelected = false,
+    VoidCallback? onPressed,
+  }) {
+    if (!FeatureFlags.evalAndBrowse) return null;
+    final objects = _instances(data);
+    final theHeap = heap;
+
+    if (dataPart == _DataPart.delta) {
+      assert(theHeap == null);
+      assert(objects is! ObjectSet);
+      return null;
+    }
+
+    if (objects is! ObjectSet || theHeap == null) {
+      throw StateError(
+        'All columns except ${_DataPart.delta} should have objects and heap data available.',
+      );
+    }
+
+    return InstanceTableCell(
+      objects,
+      theHeap,
+      data.heapClass,
+      isSelected: isRowSelected,
+      gaContext: gac.MemoryAreas.snapshotDiff,
+    );
+  }
 }
 
 class _SizeColumn extends ColumnData<DiffClassStats> {
@@ -148,6 +195,8 @@ class _SizeColumn extends ColumnData<DiffClassStats> {
         return 'Freed';
       case _DataPart.delta:
         return 'Delta';
+      case _DataPart.persisted:
+        return 'Persisted';
     }
   }
 
@@ -162,6 +211,8 @@ class _SizeColumn extends ColumnData<DiffClassStats> {
             return classStats.total.deleted.shallowSize;
           case _DataPart.delta:
             return classStats.total.delta.shallowSize;
+          case _DataPart.persisted:
+            return classStats.total.persisted.shallowSize;
         }
       case _SizeType.retained:
         switch (dataPart) {
@@ -171,6 +222,8 @@ class _SizeColumn extends ColumnData<DiffClassStats> {
             return classStats.total.deleted.retainedSize;
           case _DataPart.delta:
             return classStats.total.delta.retainedSize;
+          case _DataPart.persisted:
+            return classStats.total.persisted.retainedSize;
         }
     }
   }
@@ -189,25 +242,35 @@ class _SizeColumn extends ColumnData<DiffClassStats> {
 }
 
 class _ClassesTableDiffColumns {
-  _ClassesTableDiffColumns(this.classFilterButton);
+  _ClassesTableDiffColumns(
+    this.classFilterButton, {
+    required this.before,
+    required this.after,
+  });
 
   final Widget classFilterButton;
 
   final retainedSizeDeltaColumn =
       _SizeColumn(_DataPart.delta, _SizeType.retained);
 
+  final AdaptedHeapData before;
+  final AdaptedHeapData after;
+
   late final List<ColumnData<DiffClassStats>> columnList =
       <ColumnData<DiffClassStats>>[
     _ClassNameColumn(classFilterButton),
-    _InstanceColumn(_DataPart.created),
-    _InstanceColumn(_DataPart.deleted),
-    _InstanceColumn(_DataPart.delta),
+    _InstanceColumn(_DataPart.created, after),
+    _InstanceColumn(_DataPart.deleted, before),
+    _InstanceColumn(_DataPart.delta, null),
+    _InstanceColumn(_DataPart.persisted, after),
     _SizeColumn(_DataPart.created, _SizeType.shallow),
     _SizeColumn(_DataPart.deleted, _SizeType.shallow),
     _SizeColumn(_DataPart.delta, _SizeType.shallow),
+    _SizeColumn(_DataPart.persisted, _SizeType.shallow),
     _SizeColumn(_DataPart.created, _SizeType.retained),
     _SizeColumn(_DataPart.deleted, _SizeType.retained),
     retainedSizeDeltaColumn,
+    _SizeColumn(_DataPart.persisted, _SizeType.retained),
   ];
 }
 
@@ -217,10 +280,14 @@ class ClassesTableDiff extends StatelessWidget {
     required this.classes,
     required this.selection,
     required this.classFilterButton,
+    required this.before,
+    required this.after,
   }) : super(key: key);
 
   final List<DiffClassStats> classes;
   final ValueNotifier<DiffClassStats?> selection;
+  final AdaptedHeapData before;
+  final AdaptedHeapData after;
 
   static final _columnGroups = [
     ColumnGroup(
@@ -229,17 +296,17 @@ class ClassesTableDiff extends StatelessWidget {
     ),
     ColumnGroup(
       title: 'Instances',
-      range: const Range(1, 4),
+      range: const Range(1, 5),
       tooltip: nonGcableInstancesColumnTooltip,
     ),
     ColumnGroup(
       title: 'Shallow Dart Size',
-      range: const Range(4, 7),
+      range: const Range(5, 9),
       tooltip: shallowSizeColumnTooltip,
     ),
     ColumnGroup(
       title: 'Retained Dart Size',
-      range: const Range(7, 10),
+      range: const Range(9, 13),
       tooltip: retainedSizeColumnTooltip,
     ),
   ];
@@ -251,7 +318,11 @@ class ClassesTableDiff extends StatelessWidget {
     // We want to preserve the sorting and sort directions for ClassesTableDiff
     // no matter what the data passed to it is.
     const dataKey = 'ClassesTableDiff';
-    final columns = _ClassesTableDiffColumns(classFilterButton);
+    final columns = _ClassesTableDiffColumns(
+      classFilterButton,
+      before: before,
+      after: after,
+    );
     return FlatTable<DiffClassStats>(
       columns: columns.columnList,
       columnGroups: _columnGroups,

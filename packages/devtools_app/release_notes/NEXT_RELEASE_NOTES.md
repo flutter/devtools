@@ -23,6 +23,7 @@ in deeply nested trees - [#5181](https://github.com/flutter/devtools/pull/5181)
 ## Memory updates
 * Change filter default to show only project and 3rd party dependencies [#5201](https://github.com/flutter/devtools/pull/5201).
 * Support expression evaluation in console for running application [#5248](https://github.com/flutter/devtools/pull/5248).
+* Add column `Persisted` for memory diffing [#5290](https://github.com/flutter/devtools/pull/5290).
 
 ## Debugger updates
 * Add support for browser navigation history when navigating using the `File Explorer` [#4906](https://github.com/flutter/devtools/pull/4906).

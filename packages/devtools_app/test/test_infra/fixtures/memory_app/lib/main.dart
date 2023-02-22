@@ -35,16 +35,16 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   final _garbage = <_MyGarbage>[];
   int _counter = 0;
-  _MyGarbage _gcableItem = _MyGarbage(0);
+  _MyGarbage _gcableItem = _MyGarbage(0, 'Should be gced, initial.');
 
   void _incrementCounter() {
     setState(() {
       _counter++;
-      _garbage.add(_MyGarbage(0));
+      _garbage.add(_MyGarbage(0, 'Never gced.'));
       if (identityHashCode(_gcableItem) < 0) {
         // We need this block to show compiler [_gcableItem] is in use.
       }
-      _gcableItem = _MyGarbage(0);
+      _gcableItem = _MyGarbage(0, 'Should be gced, initial.');
     });
   }
 
@@ -80,7 +80,7 @@ class _MyHomePageState extends State<MyHomePage> {
 /// Contains references of different types to
 /// test representation of a heap instance in DevTools console.
 class _MyGarbage {
-  _MyGarbage(this._level) {
+  _MyGarbage(this._level, this._note) {
     if (_level >= _depth) {
       childClass = null;
       childList = null;
@@ -88,25 +88,26 @@ class _MyGarbage {
       mapSimpleValue = null;
       map = null;
     } else {
-      childClass = _MyGarbage(_level + 1);
+      childClass = _MyGarbage(_level + 1, _note);
 
       childList =
-          Iterable.generate(_width, (_) => _MyGarbage(_level + 1)).toList();
+          Iterable.generate(_width, (_) => _MyGarbage(_level + 1, _note))
+              .toList();
 
       mapSimpleKey = Map.fromIterable(
         Iterable.generate(_width),
-        value: (_) => _MyGarbage(_level + 1),
+        value: (_) => _MyGarbage(_level + 1, _note),
       );
 
       mapSimpleValue = Map.fromIterable(
         Iterable.generate(_width),
-        key: (_) => _MyGarbage(_level + 1),
+        key: (_) => _MyGarbage(_level + 1, _note),
       );
 
       map = Map.fromIterable(
         Iterable.generate(_width),
-        key: (_) => _MyGarbage(_level + 1),
-        value: (_) => _MyGarbage(_level + 1),
+        key: (_) => _MyGarbage(_level + 1, _note),
+        value: (_) => _MyGarbage(_level + 1, _note),
       );
     }
   }
@@ -115,6 +116,7 @@ class _MyGarbage {
   static const _width = 3;
 
   final int _level;
+  final String _note;
 
   late final _MyGarbage? childClass;
   late final List<_MyGarbage>? childList;
