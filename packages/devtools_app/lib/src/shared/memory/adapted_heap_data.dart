@@ -117,6 +117,8 @@ class AdaptedHeapData {
 
   late DateTime created;
 
+  String snapshotName = '';
+
   /// Heap objects by identityHashCode.
   late final Map<IdentityHashCode, int> _objectsByCode = Map.fromIterable(
     Iterable.generate(objects.length),
