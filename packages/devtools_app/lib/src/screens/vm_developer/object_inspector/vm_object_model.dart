@@ -281,16 +281,12 @@ class CodeObject extends VmObject {
 
     // Attempt to retrieve the CPU profile data for this code object.
     try {
-      final samples = await service.getCpuSamples(isolateId, 0, ~0);
+      final samples = await service.getCpuSamples(isolateId, 0, maxJsInt);
       final codes = samples.codes;
 
-      ProfileCode? match;
-      for (final profileCode in codes) {
-        if (profileCode.code == ref) {
-          match = profileCode;
-          break;
-        }
-      }
+      final match = codes.firstWhereOrNull(
+        (profileCode) => profileCode.code == ref,
+      );
 
       if (match == null) {
         throw StateError('Unable to find matching ProfileCode');

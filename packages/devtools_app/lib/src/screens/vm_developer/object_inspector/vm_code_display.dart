@@ -55,7 +55,7 @@ class _ProfileTicksColumn extends _CodeColumnData {
     super.title, {
     required this.inclusive,
     required this.ticks,
-  }) : super(fixedWidthPx: 120);
+  }) : super(fixedWidthPx: 140);
 
   final bool inclusive;
   final CpuProfilerTicksTable? ticks;
