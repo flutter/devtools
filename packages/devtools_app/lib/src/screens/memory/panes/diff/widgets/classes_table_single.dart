@@ -15,7 +15,7 @@ import '../../../../../shared/table/table_data.dart';
 import '../../../../../shared/theme.dart';
 import '../../../../../shared/utils.dart';
 import '../../../shared/heap/heap.dart';
-import '../../../shared/primitives/instance_set_view.dart';
+import '../../../shared/primitives/instance_set_button.dart';
 import '../../../shared/primitives/simple_elements.dart';
 import '../../../shared/shared_memory_widgets.dart';
 import '../controller/sampler.dart';
@@ -116,7 +116,9 @@ class _InstanceColumn extends ColumnData<SingleClassStats>
               isRowSelected ? theme.selectedTextStyle : theme.regularTextStyle,
           count: getValue(data),
           gaContext: gac.MemoryAreas.snapshotSingle,
-          sampleObtainer: showMenu ? HeapClassSampler(data, heap) : null,
+          sampleObtainer: showMenu
+              ? HeapClassSampler(data.objects, heap, data.heapClass)
+              : null,
           showMenu: showMenu,
         ),
       ],

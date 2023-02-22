@@ -7,6 +7,7 @@ import 'package:flutter/foundation.dart';
 import '../../../../../shared/analytics/analytics.dart' as ga;
 import '../../../../../shared/analytics/constants.dart' as gac;
 import '../../../../../shared/analytics/metrics.dart';
+import '../../../../../shared/memory/adapted_heap_data.dart';
 import '../../../../../shared/memory/class_name.dart';
 import '../../../../../shared/primitives/utils.dart';
 import '../../../shared/heap/heap.dart';
@@ -81,7 +82,9 @@ class _HeapCouple {
 /// List of classes with per-class comparison between two heaps.
 class DiffHeapClasses extends HeapClasses<DiffClassStats>
     with FilterableHeapClasses<DiffClassStats> {
-  DiffHeapClasses(_HeapCouple couple) {
+  DiffHeapClasses(_HeapCouple couple)
+      : before = couple.younger.data,
+        after = couple.older.data {
     classesByName = subtractMaps<HeapClassName, SingleClassStats,
         SingleClassStats, DiffClassStats>(
       from: couple.younger.classes.classesByName,
@@ -95,6 +98,8 @@ class DiffHeapClasses extends HeapClasses<DiffClassStats>
   late final Map<HeapClassName, DiffClassStats> classesByName;
   late final List<DiffClassStats> classes =
       classesByName.values.toList(growable: false);
+  final AdaptedHeapData before;
+  final AdaptedHeapData after;
 
   @override
   void seal() {

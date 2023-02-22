@@ -65,10 +65,14 @@ class SnapshotView extends StatelessWidget {
                     .data,
           );
         } else if (diffClasses != null) {
+          final diffHeapClasses =
+              controller.derived.heapClasses.value as DiffHeapClasses;
           classTable = ClassesTableDiff(
             classes: controller.derived.diffClassesToShow.value!,
             selection: controller.derived.selectedDiffClassStats,
             classFilterButton: classFilterButton,
+            before: diffHeapClasses.before,
+            after: diffHeapClasses.after,
           );
         } else {
           throw StateError('singleClasses or diffClasses should not be null.');
