@@ -42,7 +42,7 @@ class InstanceSetButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    bool shouldShowMenu = (showMenu && count > 0);
+    final shouldShowMenu = showMenu && count > 0;
 
     return Row(
       children: [
