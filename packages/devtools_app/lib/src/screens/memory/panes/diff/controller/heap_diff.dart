@@ -170,7 +170,7 @@ class ObjectSetDiff {
         // We assume that state 'after' is what is most interesting for user
         // about the retained size.
         final excludeFromRetained =
-            after.notCountedInRetained.contains(object.code);
+            after.objectsExcludedFromRetainedSize.contains(object.code);
         persisted.countInstance(
           object,
           excludeFromRetained: excludeFromRetained,
@@ -180,14 +180,14 @@ class ObjectSetDiff {
 
       if (inBefore) {
         final excludeFromRetained =
-            before.notCountedInRetained.contains(object.code);
+            before.objectsExcludedFromRetainedSize.contains(object.code);
         deleted.countInstance(object, excludeFromRetained: excludeFromRetained);
         delta.uncountInstance(object, excludeFromRetained: excludeFromRetained);
         continue;
       }
       if (inAfter) {
         final excludeFromRetained =
-            after.notCountedInRetained.contains(object.code);
+            after.objectsExcludedFromRetainedSize.contains(object.code);
         created.countInstance(object, excludeFromRetained: excludeFromRetained);
         delta.countInstance(object, excludeFromRetained: excludeFromRetained);
         continue;
