@@ -109,7 +109,7 @@ class _InstanceColumn extends ColumnData<SingleClassStats>
       heap,
       data.heapClass,
       isSelected: isRowSelected,
-      gaContext: gac.MemoryAreas.snapshotDiff,
+      gaContext: gac.MemoryAreas.snapshotSingle,
     );
   }
 }

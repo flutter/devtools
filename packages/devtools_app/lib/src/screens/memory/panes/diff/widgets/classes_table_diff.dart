@@ -154,12 +154,17 @@ class _InstanceColumn extends ColumnData<DiffClassStats>
     final objects = _instances(data);
     final theHeap = heap;
 
-    // There is no detailed information, if [dataPart] equals to [_DataPart.delta].
-    if (objects is! ObjectSet || theHeap == null) {
-      assert(dataPart == _DataPart.delta);
+    if (dataPart == _DataPart.delta) {
+      assert(theHeap == null);
+      assert(objects is! ObjectSet);
       return null;
     }
-    assert(dataPart != _DataPart.delta);
+
+    if (objects is! ObjectSet || theHeap == null) {
+      throw StateError(
+        'Other than ${_DataPart.delta} columns should have details provided.',
+      );
+    }
 
     return InstanceTableCell(
       objects,
