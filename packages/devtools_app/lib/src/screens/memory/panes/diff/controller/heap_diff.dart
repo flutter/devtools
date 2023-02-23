@@ -7,6 +7,7 @@ import 'package:flutter/foundation.dart';
 import '../../../../../shared/analytics/analytics.dart' as ga;
 import '../../../../../shared/analytics/constants.dart' as gac;
 import '../../../../../shared/analytics/metrics.dart';
+import '../../../../../shared/memory/adapted_heap_data.dart';
 import '../../../../../shared/memory/class_name.dart';
 import '../../../../../shared/primitives/utils.dart';
 import '../../../shared/heap/heap.dart';
@@ -81,7 +82,9 @@ class _HeapCouple {
 /// List of classes with per-class comparison between two heaps.
 class DiffHeapClasses extends HeapClasses<DiffClassStats>
     with FilterableHeapClasses<DiffClassStats> {
-  DiffHeapClasses(_HeapCouple couple) {
+  DiffHeapClasses(_HeapCouple couple)
+      : before = couple.younger.data,
+        after = couple.older.data {
     classesByName = subtractMaps<HeapClassName, SingleClassStats,
         SingleClassStats, DiffClassStats>(
       from: couple.younger.classes.classesByName,
@@ -95,6 +98,8 @@ class DiffHeapClasses extends HeapClasses<DiffClassStats>
   late final Map<HeapClassName, DiffClassStats> classesByName;
   late final List<DiffClassStats> classes =
       classesByName.values.toList(growable: false);
+  final AdaptedHeapData before;
+  final AdaptedHeapData after;
 
   @override
   void seal() {
@@ -158,28 +163,41 @@ class ObjectSetDiff {
     for (var code in allCodes) {
       final inBefore = codesBefore.contains(code);
       final inAfter = codesAfter.contains(code);
-      if (inBefore && inAfter) continue;
 
       final object = before.objectsByCodes[code] ?? after.objectsByCodes[code]!;
 
+      if (inAfter && inBefore) {
+        // We assume that state 'after' is what is most interesting for user
+        // about the retained size.
+        final excludeFromRetained =
+            after.objectsExcludedFromRetainedSize.contains(object.code);
+        persisted.countInstance(
+          object,
+          excludeFromRetained: excludeFromRetained,
+        );
+        continue;
+      }
+
       if (inBefore) {
         final excludeFromRetained =
-            before.notCountedInRetained.contains(object.code);
+            before.objectsExcludedFromRetainedSize.contains(object.code);
         deleted.countInstance(object, excludeFromRetained: excludeFromRetained);
         delta.uncountInstance(object, excludeFromRetained: excludeFromRetained);
         continue;
       }
       if (inAfter) {
         final excludeFromRetained =
-            after.notCountedInRetained.contains(object.code);
+            after.objectsExcludedFromRetainedSize.contains(object.code);
         created.countInstance(object, excludeFromRetained: excludeFromRetained);
         delta.countInstance(object, excludeFromRetained: excludeFromRetained);
         continue;
       }
+
       assert(false);
     }
     created.seal();
     deleted.seal();
+    persisted.seal();
     delta.seal();
     assert(
       delta.instanceCount == created.instanceCount - deleted.instanceCount,
@@ -188,6 +206,7 @@ class ObjectSetDiff {
 
   final created = ObjectSet();
   final deleted = ObjectSet();
+  final persisted = ObjectSet();
   final delta = ObjectSetStats();
 
   bool get isZero => delta.isZero;
