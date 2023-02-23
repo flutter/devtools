@@ -11,6 +11,7 @@ import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/charts/flame_chart.dart';
 import '../../shared/common_widgets.dart';
 import '../../shared/dialogs.dart';
+import '../../shared/feature_flags.dart';
 import '../../shared/globals.dart';
 import '../../shared/primitives/auto_dispose.dart';
 import '../../shared/theme.dart';
@@ -19,11 +20,12 @@ import '../../shared/ui/filter.dart';
 import '../../shared/ui/search.dart';
 import '../../shared/ui/tab.dart';
 import '../../shared/utils.dart';
-import 'cpu_profile_bottom_up.dart';
-import 'cpu_profile_call_tree.dart';
 import 'cpu_profile_controller.dart';
-import 'cpu_profile_flame_chart.dart';
 import 'cpu_profile_model.dart';
+import 'panes/bottom_up.dart';
+import 'panes/call_tree.dart';
+import 'panes/cpu_flame_chart.dart';
+import 'panes/method_table.dart';
 
 // TODO(kenz): provide useful UI upon selecting a CPU stack frame.
 
@@ -41,6 +43,8 @@ class CpuProfiler extends StatefulWidget {
             _buildTab(key: summaryTab, tabName: 'Summary'),
           _buildTab(key: bottomUpTab, tabName: 'Bottom Up'),
           _buildTab(key: callTreeTab, tabName: 'Call Tree'),
+          if (FeatureFlags.methodTable)
+            _buildTab(key: methodTableTab, tabName: 'Method Table'),
           _buildTab(key: flameChartTab, tabName: 'CPU Flame Chart'),
         ];
 
@@ -70,12 +74,14 @@ class CpuProfiler extends StatefulWidget {
 
   static const Key dataProcessingKey = Key('CpuProfiler - data is processing');
 
-  // When content of the selected DevToolsTab from the tab controller has this key,
-  // we will not show the expand/collapse buttons.
+  // When content of the selected DevToolsTab from the tab controller has any
+  // of these three keys, we will not show the expand/collapse buttons.
   static const Key flameChartTab = Key('cpu profile flame chart tab');
-  static const Key callTreeTab = Key('cpu profile call tree tab');
-  static const Key bottomUpTab = Key('cpu profile bottom up tab');
+  static const Key methodTableTab = Key('cpu profile method table tab');
   static const Key summaryTab = Key('cpu profile summary tab');
+
+  static const Key bottomUpTab = Key('cpu profile bottom up tab');
+  static const Key callTreeTab = Key('cpu profile call tree tab');
 
   @override
   _CpuProfilerState createState() => _CpuProfilerState();
@@ -171,7 +177,8 @@ class _CpuProfilerState extends State<CpuProfiler>
                 isFilterActive: widget.controller.isFilterActive,
               ),
               const SizedBox(width: denseSpacing),
-              if (currentTab.key != CpuProfiler.flameChartTab) ...[
+              if (currentTab.key != CpuProfiler.flameChartTab &&
+                  currentTab.key != CpuProfiler.methodTableTab) ...[
                 const DisplayTreeGuidelinesToggle(),
                 const SizedBox(width: denseSpacing),
               ],
@@ -225,7 +232,8 @@ class _CpuProfilerState extends State<CpuProfiler>
               ),
             ],
             if (currentTab.key != CpuProfiler.flameChartTab &&
-                currentTab.key != CpuProfiler.summaryTab) ...[
+                currentTab.key != CpuProfiler.summaryTab &&
+                currentTab.key != CpuProfiler.methodTableTab) ...[
               // TODO(kenz): add a switch to order samples by user tag here
               // instead of using the filter control. This will allow users
               // to see all the tags side by side in the tree tables.
@@ -313,6 +321,9 @@ class _CpuProfilerState extends State<CpuProfiler>
         },
       ),
     );
+    const methodTable = KeepAliveWrapper(
+      child: CpuMethodTable(),
+    );
     final cpuFlameChart = KeepAliveWrapper(
       child: LayoutBuilder(
         builder: (context, constraints) {
@@ -334,6 +345,7 @@ class _CpuProfilerState extends State<CpuProfiler>
       if (summaryView != null) summaryView,
       bottomUp,
       callTree,
+      if (FeatureFlags.methodTable) methodTable,
       cpuFlameChart,
     ];
   }
