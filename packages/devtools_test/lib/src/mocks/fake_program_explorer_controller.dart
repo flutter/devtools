@@ -15,14 +15,14 @@ class TestProgramExplorerController extends ProgramExplorerController {
   ValueListenable<bool> get initialized => _initialized;
   final _initialized = ValueNotifier<bool>(false);
 
-  final Function(TestProgramExplorerController) initializer;
+  final FutureOr<void> Function(TestProgramExplorerController) initializer;
 
   @override
-  void initialize() {
+  Future<void> initialize() async {
     if (_initialized.value) {
       return;
     }
-    initializer(this);
+    await initializer(this);
     _initialized.value = true;
   }
 

@@ -306,7 +306,9 @@ class CodeTable extends StatelessWidget {
         ColumnGroup.fromText(title: 'Instructions', range: const Range(0, 3)),
         if (ticks != null)
           ColumnGroup.fromText(
-              title: 'Profiler Ticks', range: const Range(3, 5)),
+            title: 'Profiler Ticks',
+            range: const Range(3, 5),
+          ),
       ],
       columns: columns,
       defaultSortColumn: columns[0],
