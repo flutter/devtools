@@ -55,7 +55,7 @@ class ObjectInspectorViewController extends DisposableController
 
   Future<void> init() async {
     if (!_initialized) {
-      unawaited(programExplorerController.initialize());
+      await programExplorerController.initialize();
       programExplorerController.initListeners();
       _initializeForCurrentIsolate();
       _initialized = true;
