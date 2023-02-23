@@ -180,8 +180,6 @@ class Trace {
       controller.yMaxValue = datum.y;
     }
 
-    final traceIndex = controller.traceIndex(this);
-
     // New data has arrived notify listeners this data needs to be plotted.
     controller.traceChanged.value = TraceNotifier();
   }

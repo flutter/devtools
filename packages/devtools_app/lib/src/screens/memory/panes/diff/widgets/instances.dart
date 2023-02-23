@@ -4,7 +4,6 @@
 
 import 'package:flutter/material.dart';
 
-import '../../../../../shared/analytics/constants.dart';
 import '../../../../../shared/memory/adapted_heap_data.dart';
 import '../../../../../shared/memory/class_name.dart';
 import '../../../../../shared/theme.dart';
@@ -22,7 +21,6 @@ class InstanceTableCell extends StatelessWidget {
     AdaptedHeapData heap,
     HeapClassName heapClass, {
     required this.isSelected,
-    required this.gaContext,
   })  : _showMenu = _shouldShowMenu(isSelected, objects),
         _sampleObtainer = _shouldShowMenu(isSelected, objects)
             ? HeapClassSampler(objects, heap, heapClass)
@@ -35,7 +33,6 @@ class InstanceTableCell extends StatelessWidget {
   final HeapClassSampler? _sampleObtainer;
   final bool _showMenu;
   final bool isSelected;
-  final MemoryAreas gaContext;
   final int _count;
 
   @override
@@ -49,7 +46,6 @@ class InstanceTableCell extends StatelessWidget {
           textStyle:
               isSelected ? theme.selectedTextStyle : theme.regularTextStyle,
           count: _count,
-          gaContext: gaContext,
           sampleObtainer: _sampleObtainer,
           showMenu: _showMenu,
         ),

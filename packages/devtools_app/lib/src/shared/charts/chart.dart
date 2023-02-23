@@ -781,6 +781,4 @@ class ChartPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(ChartPainter oldDelegate) => chartController.isDirty;
-
-  Data _reduceHelper(Data curr, Data next) => curr.y > next.y ? curr : next;
 }
