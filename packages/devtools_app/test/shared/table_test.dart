@@ -136,11 +136,11 @@ void main() {
             _NumberColumn(),
           ],
           columnGroups: [
-            ColumnGroup(
+            ColumnGroup.fromText(
               title: 'Group 1',
               range: const Range(0, 1),
             ),
-            ColumnGroup(
+            ColumnGroup.fromText(
               title: 'Group 2',
               range: const Range(1, 2),
             ),

@@ -10,12 +10,13 @@ import '../../../../../shared/memory/adapted_heap_data.dart';
 import '../../../../../shared/memory/class_name.dart';
 import '../../../../../shared/vm_utils.dart';
 import '../../../shared/heap/heap.dart';
-import '../../../shared/primitives/instance_set_view.dart';
+import '../../../shared/primitives/instance_set_button.dart';
 
 class HeapClassSampler extends ClassSampler {
-  HeapClassSampler(this.objects, this.heap);
+  HeapClassSampler(this.objects, this.heap, this.heapClass);
 
-  final SingleClassStats objects;
+  final HeapClassName heapClass;
+  final ObjectSet objects;
   final AdaptedHeapData heap;
 
   IsolateRef get _mainIsolateRef =>
@@ -24,7 +25,7 @@ class HeapClassSampler extends ClassSampler {
   Future<InstanceSet?> _liveInstances() async {
     final isolateId = _mainIsolateRef.id!;
 
-    final theClass = await findClass(isolateId, objects.heapClass);
+    final theClass = await findClass(isolateId, heapClass);
     if (theClass == null) return null;
 
     return await serviceManager.service!.getInstances(
@@ -41,7 +42,7 @@ class HeapClassSampler extends ClassSampler {
     final instanceRef = instances?.firstWhereOrNull(
       (objRef) =>
           objRef is InstanceRef &&
-          objects.objects.objectsByCodes.containsKey(objRef.identityHashCode),
+          objects.objectsByCodes.containsKey(objRef.identityHashCode),
     ) as InstanceRef?;
 
     if (instanceRef == null) {
@@ -51,8 +52,7 @@ class HeapClassSampler extends ClassSampler {
       return;
     }
 
-    final heapObject =
-        objects.objects.objectsByCodes[instanceRef.identityHashCode!]!;
+    final heapObject = objects.objectsByCodes[instanceRef.identityHashCode!]!;
 
     final heapSelection = HeapObjectSelection(heap, object: heapObject);
 
@@ -66,13 +66,13 @@ class HeapClassSampler extends ClassSampler {
 
   @override
   bool get isEvalEnabled =>
-      objects.heapClass.classType(serviceManager.rootInfoNow().package) !=
+      heapClass.classType(serviceManager.rootInfoNow().package) !=
       ClassType.runtime;
 
   @override
   Future<void> manyLiveToConsole() async {
     serviceManager.consoleService.appendInstanceSet(
-      type: objects.heapClass.shortName,
+      type: heapClass.shortName,
       instanceSet: (await _liveInstances())!,
       isolateRef: _mainIsolateRef,
     );

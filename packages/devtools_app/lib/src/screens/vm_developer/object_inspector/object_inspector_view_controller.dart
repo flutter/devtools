@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
@@ -51,11 +53,10 @@ class ObjectInspectorViewController extends DisposableController
 
   bool _initialized = false;
 
-  void init() {
+  Future<void> init() async {
     if (!_initialized) {
-      programExplorerController
-        ..initialize()
-        ..initListeners();
+      unawaited(programExplorerController.initialize());
+      programExplorerController.initListeners();
       _initializeForCurrentIsolate();
       _initialized = true;
     }

@@ -123,7 +123,7 @@ class ObjectPoolTable extends StatelessWidget {
       dataKey: 'vm-code-display',
       keyFactory: (entry) => Key(entry.offset.toString()),
       columnGroups: [
-        ColumnGroup(title: 'Entries', range: const Range(0, 2)),
+        ColumnGroup.fromText(title: 'Entries', range: const Range(0, 2)),
       ],
       columns: columns,
       defaultSortColumn: columns[0],
