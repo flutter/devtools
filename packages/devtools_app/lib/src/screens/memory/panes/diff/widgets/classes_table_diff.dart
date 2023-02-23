@@ -319,7 +319,7 @@ class ClassesTableDiff extends StatelessWidget {
           ],
         ),
       ),
-      tooltip: sizeType.description,
+      tooltip: '${sizeType.displayName} size:\n${sizeType.description}',
     );
 
     return [
