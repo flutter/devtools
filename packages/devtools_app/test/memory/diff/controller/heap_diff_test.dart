@@ -47,6 +47,7 @@ void main() {
     expect(stats.total.created.instanceCount, 2);
     expect(stats.total.deleted.instanceCount, 1);
     expect(stats.total.delta.instanceCount, 1);
+    expect(stats.total.persisted.instanceCount, 1);
   });
 
   test('$DiffClassStats calculates deletion as expected', () async {
@@ -62,6 +63,7 @@ void main() {
     expect(stats.total.created.instanceCount, 0);
     expect(stats.total.deleted.instanceCount, 1);
     expect(stats.total.delta.instanceCount, -1);
+    expect(stats.total.persisted.instanceCount, 0);
   });
 }
 

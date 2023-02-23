@@ -211,7 +211,12 @@ class ObjectSet extends ObjectSetStats {
   static ObjectSet empty = ObjectSet()..seal();
 
   final objectsByCodes = <IdentityHashCode, AdaptedHeapObject>{};
-  final notCountedInRetained = <IdentityHashCode>{};
+
+  /// Subset of objects that are excluded from the retained size
+  /// calculation for this set.
+  ///
+  /// See [countInstance].
+  final objectsExcludedFromRetainedSize = <IdentityHashCode>{};
 
   @override
   bool get isZero => objectsByCodes.isEmpty;
@@ -224,7 +229,7 @@ class ObjectSet extends ObjectSetStats {
     if (objectsByCodes.containsKey(object.code)) return;
     super.countInstance(object, excludeFromRetained: excludeFromRetained);
     objectsByCodes[object.code] = object;
-    if (excludeFromRetained) notCountedInRetained.add(object.code);
+    if (excludeFromRetained) objectsExcludedFromRetainedSize.add(object.code);
   }
 
   @override

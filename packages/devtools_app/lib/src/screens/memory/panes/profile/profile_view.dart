@@ -346,19 +346,19 @@ class _GCStatsTable extends StatelessWidget {
   }) : super(key: key);
 
   static final _columnGroup = [
-    ColumnGroup(
+    ColumnGroup.fromText(
       title: '',
       range: const Range(0, 1),
     ),
-    ColumnGroup(
+    ColumnGroup.fromText(
       title: HeapGeneration.total.toString(),
       range: const Range(1, 5),
     ),
-    ColumnGroup(
+    ColumnGroup.fromText(
       title: HeapGeneration.newSpace.toString(),
       range: const Range(5, 9),
     ),
-    ColumnGroup(
+    ColumnGroup.fromText(
       title: HeapGeneration.oldSpace.toString(),
       range: const Range(9, 13),
     ),
@@ -478,19 +478,19 @@ class _AllocationProfileTable extends StatelessWidget {
 
   /// List of columns displayed in VM developer mode state.
   static final _vmModeColumnGroups = [
-    ColumnGroup(
+    ColumnGroup.fromText(
       title: '',
       range: const Range(0, 1),
     ),
-    ColumnGroup(
+    ColumnGroup.fromText(
       title: HeapGeneration.total.toString(),
       range: const Range(1, 5),
     ),
-    ColumnGroup(
+    ColumnGroup.fromText(
       title: HeapGeneration.newSpace.toString(),
       range: const Range(5, 9),
     ),
-    ColumnGroup(
+    ColumnGroup.fromText(
       title: HeapGeneration.oldSpace.toString(),
       range: const Range(9, 13),
     ),

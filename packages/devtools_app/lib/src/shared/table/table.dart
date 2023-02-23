@@ -1821,7 +1821,7 @@ class _ColumnGroupHeaderRow extends StatelessWidget {
           return Container(
             alignment: Alignment.center,
             width: groupWidth,
-            child: Text(group.title),
+            child: group.title,
           );
         },
       ),

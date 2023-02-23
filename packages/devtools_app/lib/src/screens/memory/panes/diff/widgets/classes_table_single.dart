@@ -15,10 +15,9 @@ import '../../../../../shared/table/table_data.dart';
 import '../../../../../shared/theme.dart';
 import '../../../../../shared/utils.dart';
 import '../../../shared/heap/heap.dart';
-import '../../../shared/primitives/instance_set_view.dart';
 import '../../../shared/primitives/simple_elements.dart';
 import '../../../shared/shared_memory_widgets.dart';
-import '../controller/sampler.dart';
+import 'instances.dart';
 
 class _ClassNameColumn extends ColumnData<SingleClassStats>
     implements
@@ -105,20 +104,12 @@ class _InstanceColumn extends ColumnData<SingleClassStats>
   }) {
     if (!FeatureFlags.evalAndBrowse) return null;
 
-    final theme = Theme.of(context);
-    final showMenu = isRowSelected;
-
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.end,
-      children: [
-        InstanceSetButton(
-          textStyle:
-              isRowSelected ? theme.selectedTextStyle : theme.regularTextStyle,
-          count: getValue(data),
-          sampleObtainer: showMenu ? HeapClassSampler(data, heap) : null,
-          showMenu: showMenu,
-        ),
-      ],
+    return InstanceTableCell(
+      data.objects,
+      heap,
+      data.heapClass,
+      isSelected: isRowSelected,
+      gaContext: gac.MemoryAreas.snapshotSingle,
     );
   }
 }
