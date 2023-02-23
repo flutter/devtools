@@ -30,7 +30,7 @@ class _RetainingPathColumn extends ColumnData<StatsByPathEntry> {
   bool get supportsSorting => true;
 
   @override
-  String getTooltip(StatsByPathEntry record) => record.key.toLongString();
+  String getTooltip(StatsByPathEntry record) => '';
 }
 
 class _InstanceColumn extends ColumnData<StatsByPathEntry> {

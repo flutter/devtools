@@ -271,9 +271,12 @@ class CodeTable extends StatelessWidget {
       dataKey: 'vm-code-display',
       keyFactory: (instruction) => Key(instruction.address),
       columnGroups: [
-        ColumnGroup(title: 'Instructions', range: const Range(0, 3)),
+        ColumnGroup.fromText(title: 'Instructions', range: const Range(0, 3)),
         if (profilerTicksEnabled)
-          ColumnGroup(title: 'Profiler Ticks', range: const Range(4, 6)),
+          ColumnGroup.fromText(
+            title: 'Profiler Ticks',
+            range: const Range(4, 6),
+          ),
       ],
       columns: columns,
       defaultSortColumn: columns[0],

@@ -2002,7 +2002,7 @@ Widget maybeWrapWithTooltip({
   EdgeInsetsGeometry? tooltipPadding,
   required Widget child,
 }) {
-  if (tooltip != null) {
+  if (tooltip != null && tooltip.isNotEmpty) {
     return DevToolsTooltip(
       message: tooltip,
       padding: tooltipPadding,

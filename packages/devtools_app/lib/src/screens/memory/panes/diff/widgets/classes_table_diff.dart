@@ -290,21 +290,21 @@ class ClassesTableDiff extends StatelessWidget {
   final AdaptedHeapData after;
 
   static final _columnGroups = [
-    ColumnGroup(
+    ColumnGroup.fromText(
       title: '',
       range: const Range(0, 1),
     ),
-    ColumnGroup(
+    ColumnGroup.fromText(
       title: 'Instances',
       range: const Range(1, 5),
       tooltip: nonGcableInstancesColumnTooltip,
     ),
-    ColumnGroup(
+    ColumnGroup.fromText(
       title: 'Shallow Dart Size',
       range: const Range(5, 9),
       tooltip: shallowSizeColumnTooltip,
     ),
-    ColumnGroup(
+    ColumnGroup.fromText(
       title: 'Retained Dart Size',
       range: const Range(9, 13),
       tooltip: retainedSizeColumnTooltip,
