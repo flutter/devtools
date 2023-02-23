@@ -261,40 +261,22 @@ class _ClassesTableDiffColumns {
     _InstanceColumn(_DataPart.deleted, before),
     _InstanceColumn(_DataPart.delta, null),
     _InstanceColumn(_DataPart.persisted, after),
-    if (sizeTypeToShow == SizeType.shallow) ...[
-      _SizeColumn(_DataPart.created, SizeType.shallow),
-      _SizeColumn(_DataPart.deleted, SizeType.shallow),
-      sizeDeltaColumn,
-      _SizeColumn(_DataPart.persisted, SizeType.shallow),
-    ],
-    if (sizeTypeToShow == SizeType.retained) ...[
-      _SizeColumn(_DataPart.created, SizeType.retained),
-      _SizeColumn(_DataPart.deleted, SizeType.retained),
-      sizeDeltaColumn,
-      _SizeColumn(_DataPart.persisted, SizeType.retained),
-    ],
+    _SizeColumn(_DataPart.created, sizeTypeToShow),
+    _SizeColumn(_DataPart.deleted, sizeTypeToShow),
+    sizeDeltaColumn,
+    _SizeColumn(_DataPart.persisted, sizeTypeToShow),
   ];
 }
 
-class ClassesTableDiff extends StatelessWidget {
-  const ClassesTableDiff({
-    Key? key,
-    required this.classes,
-    required this.selection,
-    required this.classFilterButton,
-    required this.before,
-    required this.after,
-    required this.sizeTypeToShowForDiff,
-  }) : super(key: key);
-
-  final List<DiffClassStats> classes;
-  final ValueNotifier<DiffClassStats?> selection;
-  final AdaptedHeapData before;
-  final AdaptedHeapData after;
+class _SizeTitle extends StatelessWidget {
+  const _SizeTitle({required this.sizeTypeToShowForDiff});
   final ValueNotifier<SizeType> sizeTypeToShowForDiff;
 
-  List<ColumnGroup> _columnGroups(SizeType sizeType, BuildContext context) {
-    final sizeTitle = maybeWrapWithTooltip(
+  @override
+  Widget build(BuildContext context) {
+    final sizeType = sizeTypeToShowForDiff.value;
+
+    return maybeWrapWithTooltip(
       child: Padding(
         padding: const EdgeInsets.all(densePadding),
         child: Row(
@@ -321,7 +303,27 @@ class ClassesTableDiff extends StatelessWidget {
       ),
       tooltip: '${sizeType.displayName} size:\n${sizeType.description}',
     );
+  }
+}
 
+class ClassesTableDiff extends StatelessWidget {
+  const ClassesTableDiff({
+    Key? key,
+    required this.classes,
+    required this.selection,
+    required this.classFilterButton,
+    required this.before,
+    required this.after,
+    required this.sizeTypeToShowForDiff,
+  }) : super(key: key);
+
+  final List<DiffClassStats> classes;
+  final ValueNotifier<DiffClassStats?> selection;
+  final AdaptedHeapData before;
+  final AdaptedHeapData after;
+  final ValueNotifier<SizeType> sizeTypeToShowForDiff;
+
+  List<ColumnGroup> _columnGroups(SizeType sizeType, BuildContext context) {
     return [
       ColumnGroup.fromText(
         title: '',
@@ -332,16 +334,10 @@ class ClassesTableDiff extends StatelessWidget {
         range: const Range(1, 5),
         tooltip: nonGcableInstancesColumnTooltip,
       ),
-      if (sizeType == SizeType.shallow)
-        ColumnGroup(
-          title: sizeTitle,
-          range: const Range(5, 9),
-        ),
-      if (sizeType == SizeType.retained)
-        ColumnGroup(
-          title: sizeTitle,
-          range: const Range(5, 9),
-        ),
+      ColumnGroup(
+        title: _SizeTitle(sizeTypeToShowForDiff: sizeTypeToShowForDiff),
+        range: const Range(5, 9),
+      ),
     ];
   }
 
@@ -351,7 +347,7 @@ class ClassesTableDiff extends StatelessWidget {
   Widget build(BuildContext context) {
     return ValueListenableBuilder<SizeType>(
       valueListenable: sizeTypeToShowForDiff,
-      builder: (context, sizeType, ___) {
+      builder: (context, sizeType, _) {
         // We want to preserve the sorting and sort directions for ClassesTableDiff
         // no matter what the data passed to it is.
         const dataKey = 'ClassesTableDiff';
