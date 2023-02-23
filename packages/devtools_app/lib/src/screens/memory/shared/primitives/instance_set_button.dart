@@ -15,6 +15,9 @@ abstract class ClassSampler {
   /// Drop one variable, which exists in static set and still alive in app, to console.
   Future<void> oneLiveStaticToConsole();
 
+  /// Drop one variable from static set, to console.
+  Future<void> oneStaticToConsole();
+
   /// Drop all live instances to console.
   Future<void> manyLiveToConsole();
 
@@ -31,6 +34,7 @@ class InstanceSetButton extends StatelessWidget {
     required this.sampleObtainer,
     required this.showMenu,
     required this.gaContext,
+    required this.liveItemsEnabled,
   })  : assert(showMenu == (sampleObtainer != null)),
         assert(count >= 0);
 
@@ -39,6 +43,9 @@ class InstanceSetButton extends StatelessWidget {
   final bool showMenu;
   final TextStyle? textStyle;
   final MemoryAreas gaContext;
+
+  /// If true, menu items that show live objects, will be enabled.
+  final bool liveItemsEnabled;
 
   @override
   Widget build(BuildContext context) {
@@ -53,7 +60,10 @@ class InstanceSetButton extends StatelessWidget {
         if (shouldShowMenu)
           ContextMenuButton(
             style: textStyle,
-            menu: _menu(sampleObtainer!),
+            menu: _menu(
+              sampleObtainer!,
+              liveItemsEnabled: liveItemsEnabled,
+            ),
           ),
         if (!shouldShowMenu) const SizedBox(width: ContextMenuButton.width),
       ],
@@ -62,9 +72,13 @@ class InstanceSetButton extends StatelessWidget {
 }
 
 class _StoreAsVariableMenu extends StatelessWidget {
-  const _StoreAsVariableMenu(this.sampleObtainer);
+  const _StoreAsVariableMenu(
+    this.sampleObtainer, {
+    required this.liveItemsEnabled,
+  });
 
   final ClassSampler sampleObtainer;
+  final bool liveItemsEnabled;
 
   @override
   Widget build(BuildContext context) {
@@ -80,9 +94,16 @@ class _StoreAsVariableMenu extends StatelessWidget {
       // TODO(polina-c): change structure and review texts before opening the feature.
       menuChildren: <Widget>[
         MenuItemButton(
-          onPressed: sampleObtainer.oneLiveStaticToConsole,
+          onPressed:
+              liveItemsEnabled ? sampleObtainer.oneLiveStaticToConsole : null,
           child: const Text(
             'One instance that exists in snapshot, and is alive in application',
+          ),
+        ),
+        MenuItemButton(
+          onPressed: sampleObtainer.oneStaticToConsole,
+          child: const Text(
+            'One instance from snapshot',
           ),
         ),
         MenuItemButton(
@@ -95,6 +116,10 @@ class _StoreAsVariableMenu extends StatelessWidget {
   }
 }
 
-List<Widget> _menu(ClassSampler sampleObtainer) => [
-      _StoreAsVariableMenu(sampleObtainer),
+List<Widget> _menu(
+  ClassSampler sampleObtainer, {
+  required bool liveItemsEnabled,
+}) =>
+    [
+      _StoreAsVariableMenu(sampleObtainer, liveItemsEnabled: liveItemsEnabled),
     ];
