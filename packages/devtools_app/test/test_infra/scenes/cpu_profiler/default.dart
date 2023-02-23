@@ -71,6 +71,4 @@ class CpuProfilerDefaultScene extends Scene {
 
   @override
   String get title => '$CpuProfilerDefaultScene';
-
-  void tearDown() {}
 }

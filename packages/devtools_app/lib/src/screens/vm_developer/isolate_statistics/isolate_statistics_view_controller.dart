@@ -52,8 +52,6 @@ class IsolateStatisticsViewController extends DisposableController
   List<VMTag> get tags => UnmodifiableListView(_tags);
   List<VMTag> _tags = [];
 
-  List<String> get serviceExtensions =>
-      UnmodifiableListView(_serviceExtensions);
   List<String> _serviceExtensions = [];
 
   Future<void> refresh() async => await switchToIsolate(isolate!);

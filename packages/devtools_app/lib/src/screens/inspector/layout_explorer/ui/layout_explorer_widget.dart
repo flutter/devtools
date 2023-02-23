@@ -89,8 +89,6 @@ abstract class LayoutExplorerWidgetState<W extends LayoutExplorerWidget,
   /// Whether this layout explorer can work with this kind of node.
   bool shouldDisplay(RemoteDiagnosticsNode node);
 
-  Size get size => properties!.size;
-
   List<LayoutProperties> get children => properties!.displayChildren;
 
   LayoutProperties? highlighted;

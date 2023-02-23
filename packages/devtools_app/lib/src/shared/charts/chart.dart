@@ -702,22 +702,6 @@ class ChartPainter extends CustomPainter {
     }
   }
 
-  void drawCircle(
-    Canvas canvas,
-    PaintCharacteristics characteristics,
-    double x,
-    double y,
-  ) {
-    final paint = Paint()
-      ..style = characteristics.symbol == ChartSymbol.disc
-          ? PaintingStyle.fill
-          : PaintingStyle.stroke
-      ..strokeWidth = characteristics.strokeWidth
-      ..color = characteristics.color;
-
-    canvas.drawCircle(Offset(x, y), characteristics.diameter, paint);
-  }
-
   // TODO(terry): Use bezier path.
   void drawDashed(
     Canvas canvas,
@@ -799,23 +783,4 @@ class ChartPainter extends CustomPainter {
   bool shouldRepaint(ChartPainter oldDelegate) => chartController.isDirty;
 
   Data _reduceHelper(Data curr, Data next) => curr.y > next.y ? curr : next;
-
-  /// Return the largest Y value in a particular trace if traceIndex is passed or
-  /// all traces if traceIndex is not passed in.
-  double maxValue({int? traceIndex}) {
-    var maxValue = 0.0;
-    if (traceIndex == null) {
-      for (var index = 0; index < chartController.traces.length; index++) {
-        final trace = chartController.traces[index];
-        final traceMax = trace.data.reduce(_reduceHelper).y;
-        maxValue = max(maxValue, traceMax);
-      }
-    } else {
-      final trace = chartController.traces[traceIndex];
-      maxValue =
-          trace.data.reduce((curr, next) => curr.y > next.y ? curr : next).y;
-    }
-
-    return maxValue;
-  }
 }

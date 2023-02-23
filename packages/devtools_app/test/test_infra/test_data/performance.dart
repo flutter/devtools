@@ -28,29 +28,6 @@ final threadNamesById = {
   775: 'io.flutter.1.platform (775)',
 };
 
-final frameStartEvent = testTraceEventWrapper({
-  'name': 'PipelineItem',
-  'cat': 'Embedder',
-  'tid': testUiThreadId,
-  'pid': 94955,
-  'ts': 193938741080,
-  'ph': 's',
-  'id': 'f1',
-  'args': {}
-});
-
-final frameEndEvent = testTraceEventWrapper({
-  'name': 'PipelineItem',
-  'cat': 'Embedder',
-  'tid': testRasterThreadId,
-  'pid': 94955,
-  'ts': 193938770146,
-  'ph': 'f',
-  'bp': 'e',
-  'id': 'f1',
-  'args': {}
-});
-
 final testFrame0 = FlutterFrame.parse({
   'number': 0,
   'startTime': 10000,
@@ -277,48 +254,6 @@ final goldenUiTraceEvents = <TraceEventWrapper>[
   endEngineBeginFrameTrace,
   endFrameworkWorkloadTrace,
   endAnimatorBeginFrameTrace,
-  endVsyncTrace,
-];
-
-final outOfOrderUiTraceEvents = [
-  endVsyncTrace,
-  endAnimatorBeginFrameTrace,
-  endFrameworkWorkloadTrace,
-  endEngineBeginFrameTrace,
-  frameTrace,
-  finalizeTreeTrace,
-  semanticsTrace,
-  compositingTrace,
-  paintTrace,
-  compositingBitsTrace,
-  layoutTrace,
-  buildTrace,
-  animateTrace,
-  engineBeginFrameTrace,
-  frameworkWorkloadTrace,
-  animatorBeginFrameTrace,
-  vsyncTrace,
-];
-
-final uiTraceEventsWithDuplicates = [
-  vsyncTrace,
-  vsyncTrace,
-  animatorBeginFrameTrace,
-  frameworkWorkloadTrace,
-  engineBeginFrameTrace,
-  animateTrace,
-  buildTrace,
-  layoutTrace,
-  compositingBitsTrace,
-  paintTrace,
-  compositingTrace,
-  semanticsTrace,
-  finalizeTreeTrace,
-  frameTrace,
-  endEngineBeginFrameTrace,
-  endFrameworkWorkloadTrace,
-  endAnimatorBeginFrameTrace,
-  endVsyncTrace,
   endVsyncTrace,
 ];
 
@@ -1506,9 +1441,6 @@ final gcEventEndTrace = testTraceEventWrapper({
   'ph': 'E',
   'args': {'isolateGroupId': 'isolateGroups/18139071461608741439'}
 });
-
-final gcEvent = testSyncTimelineEvent(gcEventStartTrace)
-  ..addEndEvent(gcEventEndTrace);
 
 final namedThreadEventStartTrace = testTraceEventWrapper({
   'name': 'Shell::OnPlatformViewDispatchPointerDataPacket',

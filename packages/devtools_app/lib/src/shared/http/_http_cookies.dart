@@ -33,11 +33,6 @@ class Cookie {
   bool httpOnly = false;
   bool secure = false;
 
-  Cookie(String name, String value)
-      : _name = _validateName(name),
-        _value = _validateValue(value),
-        httpOnly = true;
-
   String? get name => _name;
   String? get value => _value;
 

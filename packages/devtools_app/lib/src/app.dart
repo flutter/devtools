@@ -241,7 +241,6 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
               providers: _providedControllers(),
               child: DevToolsScaffold(
                 embed: embed,
-                ideTheme: ideTheme,
                 page: page,
                 screens: screens,
                 actions: [

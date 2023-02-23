@@ -44,10 +44,6 @@ class PerformanceDefaultScene extends Scene {
 
   @override
   String get title => '$PerformanceDefaultScene';
-
-  void tearDown() {
-    FeatureFlags.widgetRebuildstats = false;
-  }
 }
 
 Future<void> _loadOfflineSnapshot(String path) async {

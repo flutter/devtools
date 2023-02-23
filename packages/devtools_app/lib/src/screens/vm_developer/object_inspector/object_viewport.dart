@@ -142,15 +142,6 @@ class ObjectViewport extends StatelessWidget {
   }
 }
 
-@visibleForTesting
-String viewportTitle(VmObject? object) {
-  if (object == null) {
-    return 'No object selected.';
-  }
-
-  return '${object.obj.type} ${object.name ?? ''}'.trim();
-}
-
 /// Manages the history of selected ObjRefs to make them accessible on a
 /// HistoryViewport.
 class ObjectHistory extends HistoryManager<VmObject> {

@@ -272,19 +272,6 @@ Future<void> setLastShownReleaseNotesVersion(String version) async {
   }
 }
 
-/// Requests all .devtools properties to be reset to their default values in the
-/// file '~/.flutter-devtools/.devtools'.
-Future<void> resetDevToolsFile() async {
-  if (isDevToolsServerAvailable) {
-    final resp = await request(apiResetDevTools);
-    if (resp?.status == HttpStatus.ok) {
-      assert(json.decode(resp!.responseText!));
-    } else {
-      logWarning(resp, apiResetDevTools);
-    }
-  }
-}
-
 Future<DevToolsJsonFile?> requestBaseAppSizeFile(String path) {
   return requestFile(
     api: apiGetBaseAppSizeFile,

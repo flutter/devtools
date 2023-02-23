@@ -6,7 +6,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
-import '../../../../shared/analytics/constants.dart';
 import '../../../../shared/common_widgets.dart';
 import '../../../../shared/globals.dart';
 import '../../../../shared/primitives/utils.dart';
@@ -30,15 +29,12 @@ class InstanceSetButton extends StatelessWidget {
     required this.count,
     required this.sampleObtainer,
     required this.showMenu,
-    required this.gaContext,
   }) : assert(showMenu == (sampleObtainer != null));
 
   final int count;
   final ClassSampler? sampleObtainer;
   final bool showMenu;
   final TextStyle? textStyle;
-  final MemoryAreas gaContext;
-
   @override
   Widget build(BuildContext context) {
     return Row(

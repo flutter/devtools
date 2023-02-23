@@ -24,7 +24,6 @@ const boolColor = Color.fromARGB(255, 86, 156, 214);
 const nullColor = boolColor;
 const numColor = Color.fromARGB(255, 181, 206, 168);
 const stringColor = Color.fromARGB(255, 206, 145, 120);
-const propertyColor = Color.fromARGB(255, 206, 145, 120);
 
 const double rowHeight = 20.0;
 

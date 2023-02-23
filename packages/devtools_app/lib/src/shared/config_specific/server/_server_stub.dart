@@ -13,10 +13,6 @@ const unsupportedMessage =
 
 bool get isDevToolsServerAvailable => false;
 
-Future<Object?> request(String url) async {
-  throw Exception(unsupportedMessage);
-}
-
 Future<bool> isFirstRun() async {
   throw Exception(unsupportedMessage);
 }
@@ -58,10 +54,6 @@ Future<String> getLastShownReleaseNotesVersion() async {
 }
 
 Future<String> setLastShownReleaseNotesVersion(String version) async {
-  throw Exception(unsupportedMessage);
-}
-
-Future<void> resetDevToolsFile() async {
   throw Exception(unsupportedMessage);
 }
 

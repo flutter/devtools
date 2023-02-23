@@ -82,13 +82,6 @@ class ChartController extends DisposableController
   //              of the window, etc.
   final List<int?> _xAxisLabeledTimestamps = [null, null, null];
 
-  int getLabelsCount() => _xAxisLabeledTimestamps.length;
-
-  int getLabeledIndexByTimestamp(int timestamp) =>
-      _xAxisLabeledTimestamps.indexOf(timestamp);
-
-  int? getLabelTimestampByIndex(int index) => _xAxisLabeledTimestamps[index];
-
   /// If true the X axis line is rendered, if false then both the X axis line
   /// is not rendered and the labels and ticks are also not rendered.
   final bool displayXAxis;
@@ -141,7 +134,7 @@ class ChartController extends DisposableController
 
   ValueNotifier<TraceNotifier> get traceChanged => _traceNotifier;
 
-  final _traceNotifier = ValueNotifier<TraceNotifier>(TraceNotifier(-1, -1));
+  final _traceNotifier = ValueNotifier<TraceNotifier>(TraceNotifier());
 
   double _yMaxValue = 0.0;
 

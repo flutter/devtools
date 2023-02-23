@@ -40,9 +40,6 @@ class TextmateGrammar {
   List<String> get fileTypes =>
       (_definition['fileTypes'] as List).cast<String>();
 
-  /// A unique name for the grammar.
-  String? get scopeName => _definition['scopeName'];
-
   void _parseRules() {
     final Map repository = _definition['repository'];
     for (String name in repository.keys.cast<String>()) {

@@ -31,18 +31,6 @@ const String appTypeDartCLI = 'dart_cli';
 // Dimensions2 BuildType values:
 const String buildTypeDebug = 'debug';
 const String buildTypeProfile = 'profile';
-// Dimensions3 PlatformType values:
-//    android
-//    linux
-//    ios
-//    macos
-//    windows
-//    fuchsia
-//    unknown     VM Service before version 3.24
-// Dimension4 devToolsPlatformType values:
-const String devToolsPlatformTypeMac = 'MacIntel';
-const String devToolsPlatformTypeLinux = 'Linux';
-const String devToolsPlatformTypeWindows = 'Windows';
 // Start with Android_n.n.n
 const String devToolsPlatformTypeAndroid = 'Android_';
 // Dimension5 devToolsChrome starts with
@@ -747,17 +735,6 @@ void waitForDimensionsComputed(String screenName) {
       }
     }
   });
-}
-
-// Loading screen from a hash code, can't collect GA (if enabled) until we have
-// all the dimension data.
-void setupAndGaScreen(String screenName) {
-  if (!_analyticsComputed) {
-    _stillWaiting++;
-    waitForDimensionsComputed(screenName);
-  } else {
-    screen(screenName);
-  }
 }
 
 Future<void> setupDimensions() async {

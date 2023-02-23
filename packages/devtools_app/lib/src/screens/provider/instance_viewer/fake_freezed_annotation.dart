@@ -7,20 +7,10 @@
 // We could instead remove the annotations, but that would make the process of
 // updating the generated files tedious.
 
-const nullable = Object();
 const freezed = Object();
 
 class Default {
   const Default(Object value);
 }
 
-class Assert {
-  const Assert(String exp);
-}
-
-class JsonKey {
-  const JsonKey({
-    bool? ignore,
-    Object? defaultValue,
-  });
-}
+class JsonKey {}

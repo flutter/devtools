@@ -56,7 +56,6 @@ class MemoryChartLegend extends StatelessWidget {
         LegendRow(
           entry1: leftEntry,
           entry2: rightEntry,
-          chartController: chartController,
         ),
       );
     }
@@ -73,7 +72,6 @@ class MemoryChartLegend extends StatelessWidget {
       legendRows.add(
         LegendRow(
           entry1: entry,
-          chartController: chartController,
         ),
       );
     }
@@ -91,7 +89,6 @@ class MemoryChartLegend extends StatelessWidget {
         legendRows.add(
           LegendRow(
             entry1: entry,
-            chartController: chartController,
           ),
         );
       }
@@ -119,12 +116,10 @@ class MemoryChartLegend extends StatelessWidget {
 class LegendRow extends StatelessWidget {
   const LegendRow({
     Key? key,
-    required this.chartController,
     required this.entry1,
     this.entry2,
   }) : super(key: key);
 
-  final MemoryChartPaneController chartController;
   final MapEntry<String, Map<String, Object?>> entry1;
   final MapEntry<String, Map<String, Object?>>? entry2;
 

@@ -76,10 +76,8 @@ const disableOpacityLayersOptionDocs = 'disableOpacityLayersDocs';
 const disablePhysicalShapeLayersOption = 'disablePhysicalShapeLayers';
 const disablePhysicalShapeLayersOptionDocs = 'disablePhysicalShapeLayersDocs';
 const canvasSaveLayerDocs = 'canvasSaveLayerDocs';
-const intrinsicOperationsDocs = 'intrinsicOperationsDocs';
 const shaderCompilationDocs = 'shaderCompilationDocs';
 const shaderCompilationDocsTooltipLink = 'shaderCompilationDocsTooltipLink';
-const analyzeSelectedFrame = 'analyzeSelectedFrame';
 const collectRasterStats = 'collectRasterStats';
 const perfettoModeTraceEventProcessingTime =
     'traceEventProcessingTime-perfettoMode';
@@ -151,7 +149,6 @@ class MemoryTime {
 class MemoryEvent {
   static const gc = 'gc';
   static const settings = 'settings';
-  static const autoSnapshot = 'autoSnapshot';
 
   static const chartLegend = 'memoryLegend';
   static const chartAndroid = 'androidChart';
@@ -173,7 +170,6 @@ class MemoryEvent {
   static const tracingHelp = 'memoryTracingHelp';
 
   static const diffTakeSnapshotControlPane = 'diffTakeSnapshotControlPane';
-  static const diffTakeSnapshotAfterHelp = 'diffTakeSnapshotAfterHelp';
   static const diffClearSnapshots = 'diffClearSnapshots';
   static const diffHelp = 'memoryDiffHelp';
 
@@ -201,12 +197,8 @@ class MemoryEvent {
 /// Areas of memory screen, to prefix event names, when events are emitted
 /// by a widget used in different contexts.
 enum MemoryAreas {
-  snapshotSingle('single'),
-  snapshotDiffDelta('diff-delta'),
-  snapshotDiffNew('diff-new'),
+  snapshotSingle(),
   ;
 
-  const MemoryAreas(this.name);
-
-  final String name;
+  const MemoryAreas();
 }

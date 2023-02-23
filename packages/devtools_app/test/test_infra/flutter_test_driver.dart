@@ -48,13 +48,6 @@ abstract class FlutterTestDriver {
 
   VmServiceWrapper? vmService;
 
-  String get lastErrorInfo => errorBuffer.toString();
-
-  Stream<String> get stderr => stderrController.stream;
-  Stream<String> get stdout => stdoutController.stream;
-
-  Uri get vmServiceUri => _vmServiceWsUri;
-
   String _debugPrint(String msg) {
     const int maxLength = 500;
     final String truncatedMsg =
@@ -302,27 +295,6 @@ class FlutterRunTestDriver extends FlutterTestDriver {
     );
   }
 
-  Future<void> attach(
-    int port, {
-    required String flutterExecutable,
-    FlutterRunConfiguration runConfig = const FlutterRunConfiguration(),
-    File? pidFile,
-  }) async {
-    await setupProcess(
-      <String>[
-        'attach',
-        '--machine',
-        '-d',
-        'flutter-tester',
-        '--debug-port',
-        '$port',
-      ],
-      flutterExecutable: flutterExecutable,
-      runConfig: runConfig,
-      pidFile: pidFile,
-    );
-  }
-
   @override
   Future<void> setupProcess(
     List<String> args, {
@@ -425,32 +397,6 @@ class FlutterRunTestDriver extends FlutterTestDriver {
         'Hot ${fullRestart ? 'restart' : 'reload'} request failed',
       );
     }
-  }
-
-  Future<int> detach() async {
-    final vmServiceLocal = vmService;
-    if (vmServiceLocal != null) {
-      _debugPrint('Closing VM service');
-      await vmServiceLocal.dispose();
-    }
-    if (_currentRunningAppId != null) {
-      _debugPrint('Detaching from app');
-      await Future.any<void>(<Future<void>>[
-        proc.exitCode,
-        _sendRequest(
-          'app.detach',
-          <String, Object?>{'appId': _currentRunningAppId},
-        ),
-      ]).timeout(
-        quitTimeout,
-        onTimeout: () {
-          _debugPrint('app.detach did not return within $quitTimeout');
-        },
-      );
-      _currentRunningAppId = null;
-    }
-    _debugPrint('Waiting for process to end');
-    return proc.exitCode.timeout(quitTimeout, onTimeout: killGracefully);
   }
 
   Future<int> stop() async {

@@ -149,12 +149,7 @@ class DevToolsServerConnection {
   void _handleMethod(String method, Map<String, dynamic> params) {
     switch (method) {
       case 'connectToVm':
-        final String uri = params['uri'];
-        final bool notify = params['notify'] == true;
-        frameworkController.notifyConnectToVmEvent(
-          Uri.parse(uri),
-          notify: notify,
-        );
+        frameworkController.notifyConnectToVmEvent();
         return;
       case 'showPage':
         final String pageId = params['page'];

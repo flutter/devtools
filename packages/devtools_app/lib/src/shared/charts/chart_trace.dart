@@ -183,7 +183,7 @@ class Trace {
     final traceIndex = controller.traceIndex(this);
 
     // New data has arrived notify listeners this data needs to be plotted.
-    controller.traceChanged.value = TraceNotifier(traceIndex, data.length - 1);
+    controller.traceChanged.value = TraceNotifier();
   }
 
   /// Draw square centered on [x,y] point (*).
@@ -267,14 +267,7 @@ class Trace {
 }
 
 class TraceNotifier {
-  TraceNotifier(this.traceIndex, this.dataIndex);
-
-  /// Index of the trace that just changed, see ChartController field traces.
-  final int traceIndex;
-
-  /// Index of the datum that that changed for the Trace's data field (see
-  /// Trace's data field).
-  final int dataIndex;
+  TraceNotifier();
 }
 
 enum ChartType {

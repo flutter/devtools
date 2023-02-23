@@ -27,8 +27,6 @@ class NetworkRequestInspector extends StatelessWidget {
   @visibleForTesting
   static const headersTabKey = Key(_headersTabTitle);
   @visibleForTesting
-  static const requestTabKey = Key(_requestTabTitle);
-  @visibleForTesting
   static const responseTabKey = Key(_responseTabTitle);
   @visibleForTesting
   static const cookiesTabKey = Key(_cookiesTabTitle);

@@ -199,7 +199,6 @@ class WidgetTheme {
 class WidgetIcons {
   static const String root = 'icons/inspector/widget_icons/root.png';
   static const String text = 'icons/inspector/widget_icons/text.png';
-  static const String icon = 'icons/inspector/widget_icons/icon.png';
   static const String image = 'icons/inspector/widget_icons/image.png';
   static const String floatingActionButton =
       'icons/inspector/widget_icons/floatingab.png';

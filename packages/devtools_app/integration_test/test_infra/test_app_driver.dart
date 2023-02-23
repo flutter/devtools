@@ -15,8 +15,6 @@ class TestFlutterApp extends _TestApp {
   TestFlutterApp({String appPath = 'test/test_infra/fixtures/flutter_app'})
       : super(appPath);
 
-  Directory get workingDirectory => Directory(testAppPath);
-
   @override
   Future<void> startProcess() async {
     runProcess = await Process.start(

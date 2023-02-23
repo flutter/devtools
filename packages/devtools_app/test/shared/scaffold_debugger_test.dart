@@ -64,7 +64,6 @@ void main() {
               ),
               _screen2,
             ],
-            ideTheme: IdeTheme(),
           ),
           debugger: mockDebuggerController,
           analytics: AnalyticsController(enabled: false, firstRun: false),
