@@ -66,7 +66,7 @@ class ProgramExplorerController extends DisposableController
   }
 
   /// Initializes the program structure.
-  void initialize() {
+  Future<void> initialize() async {
     if (_initializing) {
       return;
     }
@@ -79,6 +79,10 @@ class ProgramExplorerController extends DisposableController
             .isolateNow!
             .libraries!
         : <LibraryRef>[];
+
+    if (scriptManager.sortedScripts.value.isEmpty && isolate != null) {
+      await scriptManager.retrieveAndSortScripts(isolate);
+    }
 
     // Build the initial tree.
     final nodes = VMServiceObjectNode.createRootsFrom(
@@ -157,7 +161,7 @@ class ProgramExplorerController extends DisposableController
   }
 
   /// Clears controller state and re-initializes.
-  void refresh() {
+  Future<void> refresh() {
     _scriptSelection = null;
     _outlineSelection = null;
     _isLoadingOutline.value = true;
