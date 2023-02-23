@@ -261,6 +261,7 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
     if (treeInitializeComplete || children.isNotEmpty || childCount > 0) {
       return children.isNotEmpty || childCount > 0;
     }
+    if (ref?.heapSelection != null) return true;
     final diagnostic = ref?.diagnostic;
     if (diagnostic != null &&
         ((diagnostic.inlineProperties.isNotEmpty) || diagnostic.hasChildren))
