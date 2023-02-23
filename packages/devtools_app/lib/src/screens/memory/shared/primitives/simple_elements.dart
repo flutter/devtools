@@ -37,3 +37,8 @@ enum DocLinks {
   final String hash;
   String get value => '$url#$hash';
 }
+
+enum SizeType {
+  shallow,
+  retained,
+}

@@ -27,11 +27,6 @@ enum _DataPart {
   persisted,
 }
 
-enum _SizeType {
-  shallow,
-  retained,
-}
-
 class _ClassNameColumn extends ColumnData<DiffClassStats>
     implements
         ColumnRenderer<DiffClassStats>,
@@ -185,7 +180,7 @@ class _SizeColumn extends ColumnData<DiffClassStats> {
         );
 
   final _DataPart dataPart;
-  final _SizeType sizeType;
+  final SizeType sizeType;
 
   static String columnTitle(_DataPart dataPart) {
     switch (dataPart) {
@@ -203,7 +198,7 @@ class _SizeColumn extends ColumnData<DiffClassStats> {
   @override
   int getValue(DiffClassStats classStats) {
     switch (sizeType) {
-      case _SizeType.shallow:
+      case SizeType.shallow:
         switch (dataPart) {
           case _DataPart.created:
             return classStats.total.created.shallowSize;
@@ -214,7 +209,7 @@ class _SizeColumn extends ColumnData<DiffClassStats> {
           case _DataPart.persisted:
             return classStats.total.persisted.shallowSize;
         }
-      case _SizeType.retained:
+      case SizeType.retained:
         switch (dataPart) {
           case _DataPart.created:
             return classStats.total.created.retainedSize;
@@ -251,7 +246,7 @@ class _ClassesTableDiffColumns {
   final Widget classFilterButton;
 
   final retainedSizeDeltaColumn =
-      _SizeColumn(_DataPart.delta, _SizeType.retained);
+      _SizeColumn(_DataPart.delta, SizeType.retained);
 
   final AdaptedHeapData before;
   final AdaptedHeapData after;
@@ -263,14 +258,14 @@ class _ClassesTableDiffColumns {
     _InstanceColumn(_DataPart.deleted, before),
     _InstanceColumn(_DataPart.delta, null),
     _InstanceColumn(_DataPart.persisted, after),
-    _SizeColumn(_DataPart.created, _SizeType.shallow),
-    _SizeColumn(_DataPart.deleted, _SizeType.shallow),
-    _SizeColumn(_DataPart.delta, _SizeType.shallow),
-    _SizeColumn(_DataPart.persisted, _SizeType.shallow),
-    _SizeColumn(_DataPart.created, _SizeType.retained),
-    _SizeColumn(_DataPart.deleted, _SizeType.retained),
+    _SizeColumn(_DataPart.created, SizeType.shallow),
+    _SizeColumn(_DataPart.deleted, SizeType.shallow),
+    _SizeColumn(_DataPart.delta, SizeType.shallow),
+    _SizeColumn(_DataPart.persisted, SizeType.shallow),
+    _SizeColumn(_DataPart.created, SizeType.retained),
+    _SizeColumn(_DataPart.deleted, SizeType.retained),
     retainedSizeDeltaColumn,
-    _SizeColumn(_DataPart.persisted, _SizeType.retained),
+    _SizeColumn(_DataPart.persisted, SizeType.retained),
   ];
 }
 
