@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../../shared/analytics/analytics.dart' as ga;
 import '../../../../../shared/analytics/constants.dart' as gac;
+import '../../../../../shared/common_widgets.dart';
 import '../../../../../shared/feature_flags.dart';
 import '../../../../../shared/globals.dart';
 import '../../../../../shared/memory/adapted_heap_data.dart';
@@ -238,18 +239,20 @@ class _SizeColumn extends ColumnData<DiffClassStats> {
 
 class _ClassesTableDiffColumns {
   _ClassesTableDiffColumns(
-    this.classFilterButton, {
+    this.classFilterButton,
+    this.sizeTypeToShow, {
     required this.before,
     required this.after,
   });
 
   final Widget classFilterButton;
 
-  final retainedSizeDeltaColumn =
-      _SizeColumn(_DataPart.delta, SizeType.retained);
+  late final sizeDeltaColumn = _SizeColumn(_DataPart.delta, sizeTypeToShow);
 
   final AdaptedHeapData before;
   final AdaptedHeapData after;
+
+  final SizeType sizeTypeToShow;
 
   late final List<ColumnData<DiffClassStats>> columnList =
       <ColumnData<DiffClassStats>>[
@@ -258,14 +261,18 @@ class _ClassesTableDiffColumns {
     _InstanceColumn(_DataPart.deleted, before),
     _InstanceColumn(_DataPart.delta, null),
     _InstanceColumn(_DataPart.persisted, after),
-    _SizeColumn(_DataPart.created, SizeType.shallow),
-    _SizeColumn(_DataPart.deleted, SizeType.shallow),
-    _SizeColumn(_DataPart.delta, SizeType.shallow),
-    _SizeColumn(_DataPart.persisted, SizeType.shallow),
-    _SizeColumn(_DataPart.created, SizeType.retained),
-    _SizeColumn(_DataPart.deleted, SizeType.retained),
-    retainedSizeDeltaColumn,
-    _SizeColumn(_DataPart.persisted, SizeType.retained),
+    if (sizeTypeToShow == SizeType.shallow) ...[
+      _SizeColumn(_DataPart.created, SizeType.shallow),
+      _SizeColumn(_DataPart.deleted, SizeType.shallow),
+      sizeDeltaColumn,
+      _SizeColumn(_DataPart.persisted, SizeType.shallow),
+    ],
+    if (sizeTypeToShow == SizeType.retained) ...[
+      _SizeColumn(_DataPart.created, SizeType.retained),
+      _SizeColumn(_DataPart.deleted, SizeType.retained),
+      sizeDeltaColumn,
+      _SizeColumn(_DataPart.persisted, SizeType.retained),
+    ],
   ];
 }
 
@@ -277,60 +284,96 @@ class ClassesTableDiff extends StatelessWidget {
     required this.classFilterButton,
     required this.before,
     required this.after,
+    required this.sizeTypeToShowForDiff,
   }) : super(key: key);
 
   final List<DiffClassStats> classes;
   final ValueNotifier<DiffClassStats?> selection;
   final AdaptedHeapData before;
   final AdaptedHeapData after;
+  final ValueNotifier<SizeType> sizeTypeToShowForDiff;
 
-  static final _columnGroups = [
-    ColumnGroup.fromText(
-      title: '',
-      range: const Range(0, 1),
-    ),
-    ColumnGroup.fromText(
-      title: 'Instances',
-      range: const Range(1, 5),
-      tooltip: nonGcableInstancesColumnTooltip,
-    ),
-    ColumnGroup.fromText(
-      title: 'Shallow Dart Size',
-      range: const Range(5, 9),
-      tooltip: shallowSizeColumnTooltip,
-    ),
-    ColumnGroup.fromText(
-      title: 'Retained Dart Size',
-      range: const Range(9, 13),
-      tooltip: retainedSizeColumnTooltip,
-    ),
-  ];
+  List<ColumnGroup> _columnGroups(SizeType sizeType) {
+    final sizeTitle = maybeWrapWithTooltip(
+      child: Row(
+        children: [
+          const Text('Size'),
+          RoundedDropDownButton<SizeType>(
+            isDense: true,
+            //style: Theme.of(context).textTheme.bodyMedium,
+            value: sizeType,
+            onChanged: (SizeType? value) =>
+                sizeTypeToShowForDiff.value = value!,
+            items: SizeType.values
+                .map(
+                  (sizeType) => DropdownMenuItem<SizeType>(
+                    value: sizeType,
+                    child: Text(sizeType.displayName),
+                  ),
+                )
+                .toList(),
+          ),
+        ],
+      ),
+      tooltip:
+          'Shallow:\n$shallowSizeColumnTooltip\nRetained:\n$retainedSizeColumnTooltip',
+    );
+
+    return [
+      ColumnGroup.fromText(
+        title: '',
+        range: const Range(0, 1),
+      ),
+      ColumnGroup.fromText(
+        title: 'Instances',
+        range: const Range(1, 5),
+        tooltip: nonGcableInstancesColumnTooltip,
+      ),
+      if (sizeType == SizeType.shallow)
+        ColumnGroup(
+          title: sizeTitle,
+          range: const Range(5, 9),
+        ),
+      if (sizeType == SizeType.retained)
+        ColumnGroup(
+          title: sizeTitle,
+          range: const Range(5, 9),
+        ),
+    ];
+  }
 
   final Widget classFilterButton;
 
   @override
   Widget build(BuildContext context) {
-    // We want to preserve the sorting and sort directions for ClassesTableDiff
-    // no matter what the data passed to it is.
-    const dataKey = 'ClassesTableDiff';
-    final columns = _ClassesTableDiffColumns(
-      classFilterButton,
-      before: before,
-      after: after,
-    );
-    return FlatTable<DiffClassStats>(
-      columns: columns.columnList,
-      columnGroups: _columnGroups,
-      data: classes,
-      dataKey: dataKey,
-      keyFactory: (e) => Key(e.heapClass.fullName),
-      selectionNotifier: selection,
-      onItemSelected: (_) => ga.select(
-        gac.memory,
-        gac.MemoryEvent.diffClassDiffSelect,
-      ),
-      defaultSortColumn: columns.retainedSizeDeltaColumn,
-      defaultSortDirection: SortDirection.descending,
+    return ValueListenableBuilder<SizeType>(
+      valueListenable: sizeTypeToShowForDiff,
+      builder: (context, sizeType, ___) {
+        // We want to preserve the sorting and sort directions for ClassesTableDiff
+        // no matter what the data passed to it is.
+        const dataKey = 'ClassesTableDiff';
+        final columns = _ClassesTableDiffColumns(
+          classFilterButton,
+          sizeType,
+          before: before,
+          after: after,
+        );
+
+        return FlatTable<DiffClassStats>(
+          columns: columns.columnList,
+          columnGroups: _columnGroups(sizeType),
+          data: classes,
+          dataKey: dataKey,
+          keyFactory: (e) => Key(e.heapClass.fullName),
+          selectionNotifier: selection,
+          onItemSelected: (_) => ga.select(
+            gac.memory,
+            gac.MemoryEvent.diffClassDiffSelect,
+          ),
+          defaultSortColumn: columns.sizeDeltaColumn,
+          defaultSortDirection: SortDirection.descending,
+        );
+      },
     );
   }
 }

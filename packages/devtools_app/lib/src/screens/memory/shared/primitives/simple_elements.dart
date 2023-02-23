@@ -39,6 +39,11 @@ enum DocLinks {
 }
 
 enum SizeType {
-  shallow,
-  retained,
+  shallow('Shallow'),
+  retained('Retained'),
+  ;
+
+  const SizeType(this.displayName);
+
+  final String displayName;
 }
