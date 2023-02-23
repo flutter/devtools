@@ -118,7 +118,7 @@ class _ShallowSizeColumn extends ColumnData<SingleClassStats> {
   _ShallowSizeColumn()
       : super(
           'Shallow\nDart Size',
-          titleTooltip: shallowSizeColumnTooltip,
+          titleTooltip: SizeType.shallow.description,
           fixedWidthPx: scaleByFontFactor(85.0),
           alignment: ColumnAlignment.right,
         );
@@ -141,7 +141,7 @@ class _RetainedSizeColumn extends ColumnData<SingleClassStats> {
   _RetainedSizeColumn(this.totalSize)
       : super(
           'Retained Dart Size',
-          titleTooltip: retainedSizeColumnTooltip,
+          titleTooltip: SizeType.retained.description,
           fixedWidthPx: scaleByFontFactor(140.0),
           alignment: ColumnAlignment.right,
         );

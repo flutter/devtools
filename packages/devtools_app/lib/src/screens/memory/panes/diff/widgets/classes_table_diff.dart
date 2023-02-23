@@ -293,30 +293,33 @@ class ClassesTableDiff extends StatelessWidget {
   final AdaptedHeapData after;
   final ValueNotifier<SizeType> sizeTypeToShowForDiff;
 
-  List<ColumnGroup> _columnGroups(SizeType sizeType) {
+  List<ColumnGroup> _columnGroups(SizeType sizeType, BuildContext context) {
     final sizeTitle = maybeWrapWithTooltip(
-      child: Row(
-        children: [
-          const Text('Size'),
-          RoundedDropDownButton<SizeType>(
-            isDense: true,
-            //style: Theme.of(context).textTheme.bodyMedium,
-            value: sizeType,
-            onChanged: (SizeType? value) =>
-                sizeTypeToShowForDiff.value = value!,
-            items: SizeType.values
-                .map(
-                  (sizeType) => DropdownMenuItem<SizeType>(
-                    value: sizeType,
-                    child: Text(sizeType.displayName),
-                  ),
-                )
-                .toList(),
-          ),
-        ],
+      child: Padding(
+        padding: const EdgeInsets.all(densePadding),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            RoundedDropDownButton<SizeType>(
+              isDense: true,
+              value: sizeType,
+              onChanged: (SizeType? value) =>
+                  sizeTypeToShowForDiff.value = value!,
+              items: SizeType.values
+                  .map(
+                    (sizeType) => DropdownMenuItem<SizeType>(
+                      value: sizeType,
+                      child: Text(sizeType.displayName),
+                    ),
+                  )
+                  .toList(),
+            ),
+            const SizedBox(width: denseSpacing),
+            const Text('Size'),
+          ],
+        ),
       ),
-      tooltip:
-          'Shallow:\n$shallowSizeColumnTooltip\nRetained:\n$retainedSizeColumnTooltip',
+      tooltip: sizeType.description,
     );
 
     return [
@@ -361,7 +364,7 @@ class ClassesTableDiff extends StatelessWidget {
 
         return FlatTable<DiffClassStats>(
           columns: columns.columnList,
-          columnGroups: _columnGroups(sizeType),
+          columnGroups: _columnGroups(sizeType, context),
           data: classes,
           dataKey: dataKey,
           keyFactory: (e) => Key(e.heapClass.fullName),
