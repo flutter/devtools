@@ -71,8 +71,8 @@ class InstanceSetButton extends StatelessWidget {
   }
 }
 
-class _StoreAsVariableMenu extends StatelessWidget {
-  const _StoreAsVariableMenu(
+class _StoreAsOneVariableMenu extends StatelessWidget {
+  const _StoreAsOneVariableMenu(
     this.sampleObtainer, {
     required this.liveItemsEnabled,
   });
@@ -83,32 +83,26 @@ class _StoreAsVariableMenu extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final enabled = sampleObtainer.isEvalEnabled;
-    const menuText = 'Store as a console variable';
-    final limit = preferences.memory.refLimit.value;
+    const menuText = 'Store one instance as a console variable';
 
     if (!enabled) {
       return const MenuItemButton(child: Text(menuText));
     }
 
     return SubmenuButton(
-      // TODO(polina-c): change structure and review texts before opening the feature.
       menuChildren: <Widget>[
+        MenuItemButton(
+          onPressed: sampleObtainer.oneStaticToConsole,
+          child: const Text(
+            'Any from snapshot',
+          ),
+        ),
         MenuItemButton(
           onPressed:
               liveItemsEnabled ? sampleObtainer.oneLiveStaticToConsole : null,
           child: const Text(
-            'One instance that exists in snapshot, and is alive in application',
+            'Not garbage collected yet',
           ),
-        ),
-        MenuItemButton(
-          onPressed: sampleObtainer.oneStaticToConsole,
-          child: const Text(
-            'One instance from snapshot',
-          ),
-        ),
-        MenuItemButton(
-          onPressed: sampleObtainer.manyLiveToConsole,
-          child: Text('Up to $limit instances, currently alive in application'),
         ),
       ],
       child: const Text(menuText),
@@ -116,10 +110,18 @@ class _StoreAsVariableMenu extends StatelessWidget {
   }
 }
 
+// TODO(polina-c): review structure/texts and add ga, before opening the feature.
 List<Widget> _menu(
   ClassSampler sampleObtainer, {
   required bool liveItemsEnabled,
-}) =>
-    [
-      _StoreAsVariableMenu(sampleObtainer, liveItemsEnabled: liveItemsEnabled),
-    ];
+}) {
+  final limit = preferences.memory.refLimit.value;
+  return [
+    _StoreAsOneVariableMenu(sampleObtainer, liveItemsEnabled: liveItemsEnabled),
+    MenuItemButton(
+      onPressed: sampleObtainer.manyLiveToConsole,
+      child:
+          Text('Store up to $limit instances, currently alive in application'),
+    ),
+  ];
+}
