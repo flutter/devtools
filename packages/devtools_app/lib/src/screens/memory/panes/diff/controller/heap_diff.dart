@@ -133,7 +133,8 @@ class DiffClassStats extends ClassStats {
 
     final result = DiffClassStats._(
       heapClass: heapClass,
-      total: ObjectSetDiff(before: before?.objects, after: after?.objects),
+      total:
+          ObjectSetDiff(setBefore: before?.objects, setAfter: after?.objects),
       statsByPath: subtractMaps<ClassOnlyHeapPath, ObjectSetStats,
           ObjectSetStats, ObjectSetStats>(
         from: after?.statsByPath,
@@ -152,55 +153,42 @@ class DiffClassStats extends ClassStats {
 
 /// Comparison between two sets of objects.
 class ObjectSetDiff {
-  ObjectSetDiff({ObjectSet? before, ObjectSet? after}) {
-    before ??= ObjectSet.empty;
-    after ??= ObjectSet.empty;
+  ObjectSetDiff({ObjectSet? setBefore, ObjectSet? setAfter}) {
+    setBefore ??= ObjectSet.empty;
+    setAfter ??= ObjectSet.empty;
 
-    final codesBefore = before.objectsByCodes.keys.toSet();
-    final codesAfter = after.objectsByCodes.keys.toSet();
+    final allCodes = _unionCodes(setBefore, setAfter);
 
-    final allCodes = codesBefore.union(codesAfter);
     for (var code in allCodes) {
-      final objectBefore = before.objectsByCodes[code];
-      final objectAfter = after.objectsByCodes[code];
+      final before = setBefore.objectsByCodes[code];
+      final after = setAfter.objectsByCodes[code];
 
-      if (objectBefore != null && objectAfter != null) {
-        // We assume that state 'after' is what is most interesting for user
+      if (before != null && after != null) {
+        // When an object exists both before and after
+        // the state 'after' is more interesting for user
         // about the retained size.
         final excludeFromRetained =
-            after.objectsExcludedFromRetainedSize.contains(objectAfter.code);
+            setAfter.objectsExcludedFromRetainedSize.contains(after.code);
         persisted.countInstance(
-          objectAfter,
+          after,
           excludeFromRetained: excludeFromRetained,
         );
         continue;
       }
 
-      if (objectBefore != null) {
+      if (before != null) {
         final excludeFromRetained =
-            before.objectsExcludedFromRetainedSize.contains(objectBefore.code);
-        deleted.countInstance(
-          objectBefore,
-          excludeFromRetained: excludeFromRetained,
-        );
-        delta.uncountInstance(
-          objectBefore,
-          excludeFromRetained: excludeFromRetained,
-        );
+            setBefore.objectsExcludedFromRetainedSize.contains(before.code);
+        deleted.countInstance(before, excludeFromRetained: excludeFromRetained);
+        delta.uncountInstance(before, excludeFromRetained: excludeFromRetained);
         continue;
       }
 
-      if (objectAfter != null) {
+      if (after != null) {
         final excludeFromRetained =
-            after.objectsExcludedFromRetainedSize.contains(objectAfter.code);
-        created.countInstance(
-          objectAfter,
-          excludeFromRetained: excludeFromRetained,
-        );
-        delta.countInstance(
-          objectAfter,
-          excludeFromRetained: excludeFromRetained,
-        );
+            setAfter.objectsExcludedFromRetainedSize.contains(after.code);
+        created.countInstance(after, excludeFromRetained: excludeFromRetained);
+        delta.countInstance(after, excludeFromRetained: excludeFromRetained);
         continue;
       }
 
@@ -213,6 +201,13 @@ class ObjectSetDiff {
     assert(
       delta.instanceCount == created.instanceCount - deleted.instanceCount,
     );
+  }
+
+  static Set<IdentityHashCode> _unionCodes(ObjectSet set1, ObjectSet set2) {
+    final codesBefore = set1.objectsByCodes.keys.toSet();
+    final codesAfter = set2.objectsByCodes.keys.toSet();
+
+    return codesBefore.union(codesAfter);
   }
 
   final created = ObjectSet();
