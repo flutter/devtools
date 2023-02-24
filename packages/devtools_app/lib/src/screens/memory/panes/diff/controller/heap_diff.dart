@@ -83,12 +83,12 @@ class _HeapCouple {
 class DiffHeapClasses extends HeapClasses<DiffClassStats>
     with FilterableHeapClasses<DiffClassStats> {
   DiffHeapClasses(_HeapCouple couple)
-      : before = couple.younger.data,
-        after = couple.older.data {
+      : before = couple.older.data,
+        after = couple.younger.data {
     classesByName = subtractMaps<HeapClassName, SingleClassStats,
         SingleClassStats, DiffClassStats>(
-      from: couple.older.classes.classesByName,
-      substract: couple.younger.classes.classesByName,
+      from: couple.younger.classes.classesByName,
+      substract: couple.older.classes.classesByName,
       subtractor: ({subtract, from}) =>
           DiffClassStats.diff(before: subtract, after: from),
     );
