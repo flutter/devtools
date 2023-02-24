@@ -87,8 +87,8 @@ class DiffHeapClasses extends HeapClasses<DiffClassStats>
         after = couple.older.data {
     classesByName = subtractMaps<HeapClassName, SingleClassStats,
         SingleClassStats, DiffClassStats>(
-      from: couple.younger.classes.classesByName,
-      substract: couple.older.classes.classesByName,
+      from: couple.older.classes.classesByName,
+      substract: couple.younger.classes.classesByName,
       subtractor: ({subtract, from}) =>
           DiffClassStats.diff(before: subtract, after: from),
     );
@@ -161,35 +161,46 @@ class ObjectSetDiff {
 
     final allCodes = codesBefore.union(codesAfter);
     for (var code in allCodes) {
-      final inBefore = codesBefore.contains(code);
-      final inAfter = codesAfter.contains(code);
+      final objectBefore = before.objectsByCodes[code];
+      final objectAfter = after.objectsByCodes[code];
 
-      final object = before.objectsByCodes[code] ?? after.objectsByCodes[code]!;
-
-      if (inAfter && inBefore) {
+      if (objectBefore != null && objectAfter != null) {
         // We assume that state 'after' is what is most interesting for user
         // about the retained size.
         final excludeFromRetained =
-            after.objectsExcludedFromRetainedSize.contains(object.code);
+            after.objectsExcludedFromRetainedSize.contains(objectAfter.code);
         persisted.countInstance(
-          object,
+          objectAfter,
           excludeFromRetained: excludeFromRetained,
         );
         continue;
       }
 
-      if (inBefore) {
+      if (objectBefore != null) {
         final excludeFromRetained =
-            before.objectsExcludedFromRetainedSize.contains(object.code);
-        deleted.countInstance(object, excludeFromRetained: excludeFromRetained);
-        delta.uncountInstance(object, excludeFromRetained: excludeFromRetained);
+            before.objectsExcludedFromRetainedSize.contains(objectBefore.code);
+        deleted.countInstance(
+          objectBefore,
+          excludeFromRetained: excludeFromRetained,
+        );
+        delta.uncountInstance(
+          objectBefore,
+          excludeFromRetained: excludeFromRetained,
+        );
         continue;
       }
-      if (inAfter) {
+
+      if (objectAfter != null) {
         final excludeFromRetained =
-            after.objectsExcludedFromRetainedSize.contains(object.code);
-        created.countInstance(object, excludeFromRetained: excludeFromRetained);
-        delta.countInstance(object, excludeFromRetained: excludeFromRetained);
+            after.objectsExcludedFromRetainedSize.contains(objectAfter.code);
+        created.countInstance(
+          objectAfter,
+          excludeFromRetained: excludeFromRetained,
+        );
+        delta.countInstance(
+          objectAfter,
+          excludeFromRetained: excludeFromRetained,
+        );
         continue;
       }
 
