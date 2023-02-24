@@ -101,7 +101,7 @@ class _StoreAsOneVariableMenu extends StatelessWidget {
           onPressed:
               liveItemsEnabled ? sampleObtainer.oneLiveStaticToConsole : null,
           child: const Text(
-            'Not garbage collected yet',
+            'Any from snapshot, not garbage collected',
           ),
         ),
       ],
