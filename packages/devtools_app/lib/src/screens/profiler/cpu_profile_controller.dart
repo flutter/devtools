@@ -19,6 +19,7 @@ import '../../shared/ui/search.dart';
 import 'cpu_profile_model.dart';
 import 'cpu_profile_service.dart';
 import 'cpu_profile_transformer.dart';
+import 'panes/method_table/method_table_controller.dart';
 
 enum CpuProfilerViewType {
   function,
@@ -88,6 +89,8 @@ class CpuProfilerController extends DisposableController
 
   /// Store of cached CPU profiles for each isolate.
   final _cpuProfileStoreByIsolateId = <String, CpuProfileStore>{};
+
+  final methodTableController = MethodTableController();
 
   /// Notifies that new cpu profile data is available.
   ValueListenable<CpuProfileData?> get dataNotifier => _dataNotifier;
@@ -528,6 +531,7 @@ class CpuProfilerController extends DisposableController
     _userTagFilter.value = userTagNone;
     transformer.reset();
     cpuProfileStore.clear();
+    methodTableController.reset();
     resetSearch();
   }
 

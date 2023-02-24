@@ -1,0 +1,285 @@
+// Copyright 2023 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+import 'package:flutter/material.dart';
+
+import '../../../../shared/common_widgets.dart';
+import '../../../../shared/primitives/auto_dispose.dart';
+import '../../../../shared/primitives/utils.dart';
+import '../../../../shared/split.dart';
+import '../../../../shared/table/table.dart';
+import '../../../../shared/table/table_data.dart';
+import '../../../../shared/theme.dart';
+import 'method_table_controller.dart';
+import 'method_table_model.dart';
+
+class CpuMethodTable extends StatelessWidget {
+  const CpuMethodTable({required this.methodTableController});
+
+  final MethodTableController methodTableController;
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder<List<MethodTableGraphNode>>(
+      valueListenable: methodTableController.methods,
+      builder: (context, methods, _) {
+        return Split(
+          axis: Axis.horizontal,
+          initialFractions: const [0.5, 0.5],
+          children: [
+            _MethodTable(methodTableController, methods),
+            _MethodGraph(methodTableController),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class _MethodTable extends StatelessWidget {
+  const _MethodTable(this._methodTableController, this._methods);
+
+  static final methodColumn = _MethodColumn();
+  static final selfTimeColumn = _SelfTimeColumn();
+  static final totalTimeColumn = _TotalTimeColumn();
+  static final columns = List<ColumnData<MethodTableGraphNode>>.unmodifiable([
+    selfTimeColumn,
+    totalTimeColumn,
+    methodColumn,
+  ]);
+
+  final MethodTableController _methodTableController;
+
+  final List<MethodTableGraphNode> _methods;
+
+  @override
+  Widget build(BuildContext context) {
+    return OutlineDecoration.onlyRight(
+      child: FlatTable<MethodTableGraphNode>(
+        keyFactory: (node) => ValueKey(node.id),
+        data: _methods,
+        dataKey: 'cpu-profile-methods',
+        columns: columns,
+        defaultSortColumn: selfTimeColumn,
+        defaultSortDirection: SortDirection.descending,
+        selectionNotifier: _methodTableController.selectedNode,
+      ),
+    );
+  }
+}
+
+class _MethodGraph extends StatefulWidget {
+  const _MethodGraph(this.methodTableController);
+
+  final MethodTableController methodTableController;
+
+  @override
+  State<_MethodGraph> createState() => _MethodGraphState();
+}
+
+class _MethodGraphState extends State<_MethodGraph> with AutoDisposeMixin {
+  MethodTableGraphNode? _selectedGraphNode;
+
+  List<MethodTableGraphNode> _callers = [];
+
+  List<MethodTableGraphNode> _callees = [];
+
+  @override
+  void initState() {
+    super.initState();
+
+    _selectedGraphNode = widget.methodTableController.selectedNode.value;
+    addAutoDisposeListener(widget.methodTableController.selectedNode, () {
+      setState(() {
+        _selectedGraphNode = widget.methodTableController.selectedNode.value;
+        _callers = _selectedGraphNode!.predecessors
+            .cast<MethodTableGraphNode>()
+            .toList();
+        _callees =
+            _selectedGraphNode!.successors.cast<MethodTableGraphNode>().toList();
+      });
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_selectedGraphNode == null) {
+      return OutlineDecoration.onlyLeft(
+        child: const Center(
+          child: Text('Select a method to view its call graph.'),
+        ),
+      );
+    }
+    return OutlineDecoration.onlyLeft(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Flexible(
+            child: OutlineDecoration.onlyBottom(
+              child: _CallersTable(
+                widget.methodTableController,
+                _callers,
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(denseSpacing),
+            child: Row(
+              children: [
+                Text('${_selectedGraphNode!.name} (${_selectedGraphNode!.packageUri})'),
+              ],
+            ),
+          ),
+          Flexible(
+            child: OutlineDecoration.onlyTop(
+              child: _CalleesTable(
+                widget.methodTableController,
+                _callees,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _CallersTable extends StatelessWidget {
+  _CallersTable(this._methodTableController, this._callers) {
+    _callerTimeColumn =
+        _CallerTimeColumn(methodTableController: _methodTableController);
+    columns = List<ColumnData<MethodTableGraphNode>>.unmodifiable([
+      _callerTimeColumn,
+      methodColumn,
+    ]);
+  }
+
+  static final methodColumn = _MethodColumn();
+
+  final MethodTableController _methodTableController;
+
+  final List<MethodTableGraphNode> _callers;
+
+  late final List<ColumnData<MethodTableGraphNode>> columns;
+
+  late final _CallerTimeColumn _callerTimeColumn;
+
+  @override
+  Widget build(BuildContext context) {
+    return FlatTable<MethodTableGraphNode>(
+      keyFactory: (node) => ValueKey(node.id),
+      data: _callers,
+      dataKey: 'cpu-profile-method-callers',
+      columns: columns,
+      defaultSortColumn: _callerTimeColumn,
+      defaultSortDirection: SortDirection.descending,
+      selectionNotifier: _methodTableController.selectedNode,
+    );
+  }
+}
+
+class _CalleesTable extends StatelessWidget {
+  _CalleesTable(this._methodTableController, this._callees) {
+    _calleeTimeColumn =
+        _CalleeTimeColumn(methodTableController: _methodTableController);
+    _columns = List<ColumnData<MethodTableGraphNode>>.unmodifiable([
+      _calleeTimeColumn,
+      _methodColumn,
+    ]);
+  }
+
+  static final _methodColumn = _MethodColumn();
+
+  final MethodTableController _methodTableController;
+
+  final List<MethodTableGraphNode> _callees;
+
+  late final List<ColumnData<MethodTableGraphNode>> _columns;
+
+  late final _CalleeTimeColumn _calleeTimeColumn;
+
+  @override
+  Widget build(BuildContext context) {
+    return FlatTable<MethodTableGraphNode>(
+      keyFactory: (node) => ValueKey(node.id),
+      data: _callees,
+      dataKey: 'cpu-profile-method-callees',
+      columns: _columns,
+      defaultSortColumn: _calleeTimeColumn,
+      defaultSortDirection: SortDirection.descending,
+      selectionNotifier: _methodTableController.selectedNode,
+    );
+  }
+}
+
+class _MethodColumn extends ColumnData<MethodTableGraphNode> {
+  _MethodColumn() : super.wide('Method');
+
+  static const _separator = ' - ';
+
+  @override
+  bool get supportsSorting => true;
+
+  @override
+  String getValue(MethodTableGraphNode dataObject) => dataObject.name;
+
+  @override
+  String getTooltip(MethodTableGraphNode dataObject) {
+    return '${dataObject.name}$_separator(${dataObject.packageUri})';
+  }
+}
+
+class _SelfTimeColumn extends TimeAndPercentageColumn<MethodTableGraphNode> {
+  _SelfTimeColumn({String? titleTooltip})
+      : super(
+          title: 'Self Time',
+          titleTooltip: titleTooltip,
+          timeProvider: (node) => node.selfTime,
+          percentAsDoubleProvider: (node) => node.selfTimeRatio,
+          secondaryCompare: (node) => node.name,
+        );
+}
+
+class _TotalTimeColumn extends TimeAndPercentageColumn<MethodTableGraphNode> {
+  _TotalTimeColumn({String? titleTooltip})
+      : super(
+          title: 'Total Time',
+          titleTooltip: titleTooltip,
+          timeProvider: (node) => node.totalTime,
+          percentAsDoubleProvider: (node) => node.totalTimeRatio,
+          secondaryCompare: (node) => node.name,
+        );
+}
+
+const _percentageOnlyWidth = 100.0;
+
+class _CallerTimeColumn extends TimeAndPercentageColumn<MethodTableGraphNode> {
+  _CallerTimeColumn({
+    required MethodTableController methodTableController,
+    String? titleTooltip,
+  }) : super(
+          title: 'Caller Time',
+          titleTooltip: titleTooltip,
+          percentageOnly: true,
+          percentAsDoubleProvider: (node) =>
+              methodTableController.callerPercentageFor(node),
+          secondaryCompare: (node) => node.name,
+          columnWidth: _percentageOnlyWidth,
+        );
+}
+
+class _CalleeTimeColumn extends TimeAndPercentageColumn<MethodTableGraphNode> {
+  _CalleeTimeColumn({
+    required MethodTableController methodTableController,
+    String? titleTooltip,
+  }) : super(
+          title: 'Callee Time',
+          titleTooltip: titleTooltip,
+          percentageOnly: true,
+          percentAsDoubleProvider: (node) =>
+              methodTableController.calleePercentageFor(node),
+          secondaryCompare: (node) => node.name,
+          columnWidth: _percentageOnlyWidth,
+        );
+}
