@@ -8,7 +8,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 
-import 'mocks/mocks.dart';
+import 'mocks/generated.mocks.dart';
 
 /// The RouterDelegate must use the same NavigatorKey when building in order
 /// for widget state to be preserved.

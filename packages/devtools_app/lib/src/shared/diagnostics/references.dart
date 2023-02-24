@@ -3,13 +3,13 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert';
 import 'dart:math';
 
 import 'package:vm_service/vm_service.dart';
 
 import '../feature_flags.dart';
 import '../globals.dart';
+import '../memory/adapted_heap_data.dart';
 import '../memory/class_name.dart';
 import '../primitives/utils.dart';
 import 'dart_object_node.dart';
@@ -23,11 +23,30 @@ void addReferencesRoot(DartObjectNode variable, GenericInstanceRef ref) {
       ObjectReferences(
         refNodeType: RefNodeType.refRoot,
         value: ref.value,
-        isolateRef: ref.isolateRef,
-        heapSelection: ref.heapSelection,
+        isolateRef: ref.isolateRef!,
+        heapSelection: ref.heapSelection!,
       ),
     ),
     index: 0,
+  );
+}
+
+HeapObjectSelection _refreshStaticSelection(
+  HeapObjectSelection selection,
+  InstanceRef? liveObject,
+) {
+  if (selection.object != null) return selection;
+  if (liveObject == null) return selection.withoutObject();
+
+  final code = liveObject.identityHashCode;
+  if (code == null) return selection.withoutObject();
+
+  final index = selection.heap.objectIndexByIdentityHashCode(code);
+  if (index == null) return selection.withoutObject();
+
+  return HeapObjectSelection(
+    selection.heap,
+    object: selection.heap.objects[index],
   );
 }
 
@@ -44,59 +63,81 @@ Future<void> addChildReferences(
 
   switch (refNodeType) {
     case RefNodeType.refRoot:
+      final selection =
+          _refreshStaticSelection(ref.heapSelection, ref.instanceRef);
+
       variable.addAllChildren([
         DartObjectNode.references(
-          'live',
-          ObjectReferences.withType(ref, RefNodeType.liveRefRoot),
+          'live (objects currently alive in the application)',
+          ObjectReferences.copyWith(
+            ref,
+            refNodeType: RefNodeType.liveRefRoot,
+            heapSelection: selection,
+          ),
         ),
-        DartObjectNode.references(
-          'static',
-          ObjectReferences.withType(ref, RefNodeType.staticRefRoot),
-        ),
+        if (selection.object != null)
+          DartObjectNode.references(
+            'static (objects alive at the time of snapshot ${selection.heap.snapshotName})',
+            ObjectReferences.copyWith(
+              ref,
+              refNodeType: RefNodeType.staticRefRoot,
+              heapSelection: selection,
+            ),
+          ),
       ]);
       break;
     case RefNodeType.staticRefRoot:
+      if (ref.heapSelection.object == null) break;
       variable.addAllChildren([
         DartObjectNode.references(
           'inbound',
-          ObjectReferences.withType(ref, RefNodeType.staticInRefs),
+          ObjectReferences.copyWith(ref, refNodeType: RefNodeType.staticInRefs),
         ),
         DartObjectNode.references(
           'outbound',
-          ObjectReferences.withType(ref, RefNodeType.staticOutRefs),
+          ObjectReferences.copyWith(
+            ref,
+            refNodeType: RefNodeType.staticOutRefs,
+          ),
         ),
       ]);
 
       break;
     case RefNodeType.staticInRefs:
-      final children = ref.heapSelection!
+      final children = ref.heapSelection
           .references(ref.refNodeType.direction!)
-          .where((s) => !s.object.heapClass.isNull)
+          .where((s) => !s.object!.heapClass.isNull)
           .map(
             (s) => DartObjectNode.references(
-              s.object.heapClass.className,
+              s.object!.heapClass.className,
               ObjectReferences(
                 refNodeType: RefNodeType.staticInRefs,
                 heapSelection: s,
+                isolateRef: ref.isolateRef,
+                value: null,
               ),
+              isRerootable: true,
             ),
           )
           .toList();
       variable.addAllChildren(children);
       break;
     case RefNodeType.staticOutRefs:
-      final children = ref.heapSelection!
+      final children = ref.heapSelection
           .references(ref.refNodeType.direction!)
-          .where((s) => !s.object.heapClass.isNull)
+          .where((s) => !s.object!.heapClass.isNull)
           .map(
             (s) => DartObjectNode.references(
-              '${s.object.heapClass.className}, ${prettyPrintRetainedSize(
-                s.object.retainedSize,
+              '${s.object!.heapClass.className}, ${prettyPrintRetainedSize(
+                s.object!.retainedSize,
               )}',
               ObjectReferences(
                 refNodeType: RefNodeType.staticOutRefs,
                 heapSelection: s,
+                isolateRef: ref.isolateRef,
+                value: null,
               ),
+              isRerootable: true,
             ),
           )
           .toList();
@@ -106,11 +147,11 @@ Future<void> addChildReferences(
       variable.addAllChildren([
         DartObjectNode.references(
           'inbound',
-          ObjectReferences.withType(ref, RefNodeType.liveInRefs),
+          ObjectReferences.copyWith(ref, refNodeType: RefNodeType.liveInRefs),
         ),
         DartObjectNode.references(
           'outbound',
-          ObjectReferences.withType(ref, RefNodeType.liveOutRefs),
+          ObjectReferences.copyWith(ref, refNodeType: RefNodeType.liveOutRefs),
         ),
       ]);
 
@@ -118,7 +159,7 @@ Future<void> addChildReferences(
     case RefNodeType.liveInRefs:
       final limit = preferences.memory.refLimit.value;
       final refs = (await serviceManager.service!.getInboundReferences(
-            ref.isolateRef!.id!,
+            ref.isolateRef.id!,
             ref.instanceRef!.id!,
             limit + 1,
           ))
@@ -126,22 +167,33 @@ Future<void> addChildReferences(
           [];
 
       final refsToShow = min(limit, refs.length);
+      final children = <DartObjectNode>[];
 
       for (var i = 0; i < refsToShow; i++) {
         final item = refs[i];
-        variable.addChild(DartObjectNode.text(jsonEncode(item.toJson())));
+
+        _addLiveReferenceToNode(
+          children,
+          ref.isolateRef,
+          item.source,
+          RefNodeType.liveInRefs,
+          ref.heapSelection.withoutObject(),
+        );
       }
+
+      variable.addAllChildren(children);
 
       if (refs.length > limit)
         variable.addChild(
           DartObjectNode.text(
-            '...\nConfigure number of items in memory screen settings',
+            '...\nTo get more items, increase "${preferences.memory.refLimitTitle}" in memory settings.',
           ),
         );
 
       break;
     case RefNodeType.liveOutRefs:
-      final isolateRef = variable.ref!.isolateRef;
+      final isolateRef = ref.isolateRef;
+
       final instance = await getObject(
         isolateRef: isolateRef,
         value: ref.instanceRef!,
@@ -153,6 +205,7 @@ Future<void> addChildReferences(
           variable: variable,
           value: instance,
           isolateRef: isolateRef,
+          heapSelection: ref.heapSelection,
         );
       }
       break;
@@ -162,19 +215,27 @@ Future<void> addChildReferences(
 Future<void> _addOutboundLiveReferences({
   required DartObjectNode variable,
   required Instance value,
-  required IsolateRef? isolateRef,
+  required IsolateRef isolateRef,
+  required HeapObjectSelection heapSelection,
 }) async {
   switch (value.kind) {
     case InstanceKind.kMap:
       variable.addAllChildren(
-        _createLiveReferencesForMap(
+        _createLiveOutboundReferencesForMap(
           value,
           isolateRef,
+          heapSelection.withoutObject(),
         ),
       );
       break;
     case InstanceKind.kList:
-      variable.addAllChildren(_createLiveReferencesForList(value, isolateRef));
+      variable.addAllChildren(
+        _createLiveOutboundReferencesForList(
+          value,
+          isolateRef,
+          heapSelection.withoutObject(),
+        ),
+      );
       break;
     case InstanceKind.kRecord:
       // TODO: add references
@@ -188,17 +249,23 @@ Future<void> _addOutboundLiveReferences({
 
   if (value.fields != null && value.kind != InstanceKind.kRecord) {
     variable.addAllChildren(
-      _createLiveReferencesForFields(value, isolateRef),
+      _createLiveReferencesForFields(
+        value,
+        isolateRef,
+        heapSelection.withoutObject(),
+      ),
     );
   }
 }
 
-void _addLiveReference(
+void _addLiveReferenceToNode(
   List<DartObjectNode> variables,
-  IsolateRef? isolateRef,
+  IsolateRef isolateRef,
   Object? instance,
-  String namePrefix,
-) {
+  RefNodeType refNodeType,
+  HeapObjectSelection heapSelection, {
+  String namePrefix = '',
+}) {
   if (instance is! InstanceRef) return;
   final classRef = instance.classRef!;
   if (HeapClassName.fromClassRef(classRef).isNull) return;
@@ -207,17 +274,20 @@ void _addLiveReference(
     DartObjectNode.references(
       '$namePrefix${classRef.name}',
       ObjectReferences(
-        refNodeType: RefNodeType.liveOutRefs,
+        refNodeType: refNodeType,
         isolateRef: isolateRef,
         value: instance,
+        heapSelection: heapSelection,
       ),
+      isRerootable: true,
     ),
   );
 }
 
-List<DartObjectNode> _createLiveReferencesForMap(
+List<DartObjectNode> _createLiveOutboundReferencesForMap(
   Instance instance,
-  IsolateRef? isolateRef,
+  IsolateRef isolateRef,
+  HeapObjectSelection heapSelection,
 ) {
   final variables = <DartObjectNode>[];
   final associations = instance.associations ?? [];
@@ -225,48 +295,64 @@ List<DartObjectNode> _createLiveReferencesForMap(
   for (var i = 0; i < associations.length; i++) {
     final association = associations[i];
 
-    _addLiveReference(
+    _addLiveReferenceToNode(
       variables,
       isolateRef,
       association.key,
-      '[$i, key]',
+      RefNodeType.liveOutRefs,
+      heapSelection.withoutObject(),
+      namePrefix: '[$i, key]',
     );
-    _addLiveReference(
+    _addLiveReferenceToNode(
       variables,
       isolateRef,
       association.value,
-      '[$i, val]', // `val`, not `value`, to align keys and values visually
+      RefNodeType.liveOutRefs,
+      heapSelection.withoutObject(),
+      namePrefix:
+          '[$i, val]', // `val`, not `value`, to align keys and values visually
     );
     continue;
   }
   return variables;
 }
 
-List<DartObjectNode> _createLiveReferencesForList(
+List<DartObjectNode> _createLiveOutboundReferencesForList(
   Instance instance,
-  IsolateRef? isolateRef,
+  IsolateRef isolateRef,
+  HeapObjectSelection heapSelection,
 ) {
   final variables = <DartObjectNode>[];
   final elements = instance.elements ?? [];
   for (int i = 0; i < elements.length; i++) {
     final index = instance.offset == null ? i : i + instance.offset!;
-    _addLiveReference(variables, isolateRef, elements[i], '[$index]');
+    _addLiveReferenceToNode(
+      variables,
+      isolateRef,
+      elements[i],
+      RefNodeType.liveOutRefs,
+      heapSelection.withoutObject(),
+      namePrefix: '[$index]',
+    );
   }
   return variables;
 }
 
 List<DartObjectNode> _createLiveReferencesForFields(
   Instance instance,
-  IsolateRef? isolateRef,
+  IsolateRef isolateRef,
+  HeapObjectSelection heapSelection,
 ) {
   final variables = <DartObjectNode>[];
 
   for (var field in instance.fields!) {
-    _addLiveReference(
+    _addLiveReferenceToNode(
       variables,
       isolateRef,
       field.value,
-      '${field.decl?.name}:',
+      RefNodeType.liveOutRefs,
+      heapSelection.withoutObject(),
+      namePrefix: '${field.decl?.name}:',
     );
   }
   return variables;

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
@@ -10,6 +12,7 @@ import '../../../shared/globals.dart';
 import '../../../shared/primitives/auto_dispose.dart';
 import '../../debugger/codeview_controller.dart';
 import '../../debugger/program_explorer_controller.dart';
+import '../vm_service_private_extensions.dart';
 import 'class_hierarchy_explorer_controller.dart';
 import 'object_store_controller.dart';
 import 'object_viewport.dart';
@@ -50,11 +53,10 @@ class ObjectInspectorViewController extends DisposableController
 
   bool _initialized = false;
 
-  void init() {
+  Future<void> init() async {
     if (!_initialized) {
-      programExplorerController
-        ..initialize()
-        ..initListeners();
+      await programExplorerController.initialize();
+      programExplorerController.initListeners();
       _initializeForCurrentIsolate();
       _initialized = true;
     }
@@ -163,6 +165,18 @@ class ObjectInspectorViewController extends DisposableController
       );
     } else if (objRef is CodeRef) {
       object = CodeObject(
+        ref: objRef,
+      );
+    } else if (objRef.isObjectPool) {
+      object = ObjectPoolObject(
+        ref: objRef,
+      );
+    } else if (objRef.isICData) {
+      object = ICDataObject(
+        ref: objRef,
+      );
+    } else if (objRef.isSubtypeTestCache) {
+      object = SubtypeTestCacheObject(
         ref: objRef,
       );
     }

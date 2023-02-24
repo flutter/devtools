@@ -46,7 +46,7 @@ class _ObjectColumn extends ColumnData<ObjectStoreEntry>
     bool isRowSelected = false,
     VoidCallback? onPressed,
   }) {
-    return VmServiceObjectLink<ObjRef>(
+    return VmServiceObjectLink(
       object: data.value,
       onTap: onTap,
       isSelected: isRowSelected,

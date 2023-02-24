@@ -22,7 +22,6 @@ import 'package:mockito/mockito.dart';
 void main() {
   final mockServiceManager = MockServiceConnectionManager();
   when(mockServiceManager.service).thenReturn(null);
-  when(mockServiceManager.connectedAppInitialized).thenReturn(false);
   when(mockServiceManager.connectedState).thenReturn(
     ValueNotifier<ConnectedState>(const ConnectedState(false)),
   );
@@ -46,16 +45,20 @@ void main() {
   testWidgets(
     'does not display floating debugger controls in profile mode',
     (WidgetTester tester) async {
-      final mockConnectedApp = MockConnectedAppLegacy();
-      when(mockConnectedApp.isFlutterAppNow).thenReturn(true);
-      when(mockConnectedApp.isProfileBuildNow).thenReturn(true);
+      final connectedApp = MockConnectedApp();
+      mockConnectedApp(
+        connectedApp,
+        isFlutterApp: true,
+        isProfileBuild: true,
+        isWebApp: false,
+      );
       when(mockServiceManager.connectedAppInitialized).thenReturn(true);
-      when(mockServiceManager.connectedApp).thenReturn(mockConnectedApp);
+      when(mockServiceManager.connectedApp).thenReturn(connectedApp);
       final mockDebuggerController = MockDebuggerController();
 
       final state =
           serviceManager.isolateManager.mainIsolateState! as MockIsolateState;
-      state.isPaused.value = true;
+      when(state.isPaused).thenReturn(ValueNotifier(true));
 
       await tester.pumpWidget(
         wrapWithControllers(

@@ -11,6 +11,7 @@ import '../../../shared/diagnostics/primitives/source_location.dart';
 import '../../../shared/globals.dart';
 import '../../../shared/primitives/utils.dart';
 import '../vm_service_private_extensions.dart';
+import 'vm_code_display.dart';
 
 /// Wrapper class for storing Dart VM objects with their relevant VM
 /// information.
@@ -240,7 +241,6 @@ class ScriptObject extends VmObject {
   DateTime get loadTime => DateTime.fromMillisecondsSinceEpoch(obj.loadTime);
 }
 
-//TODO(mtaylee): finish class implementation.
 class InstanceObject extends VmObject {
   InstanceObject({required super.ref, super.scriptRef});
 
@@ -265,4 +265,85 @@ class CodeObject extends VmObject {
 
   @override
   String? get name => obj.name;
+
+  /// A collection of CPU profiler information for individual [Instruction]s.
+  ///
+  /// Returns null if the CPU profiler is disabled.
+  CpuProfilerTicksTable? get ticksTable => _table;
+  CpuProfilerTicksTable? _table;
+
+  @override
+  Future<void> initialize() async {
+    await super.initialize();
+
+    final service = serviceManager.service!;
+    final isolateId = serviceManager.isolateManager.selectedIsolate.value!.id!;
+
+    // Attempt to retrieve the CPU profile data for this code object.
+    try {
+      final samples = await service.getCpuSamples(isolateId, 0, maxJsInt);
+      final codes = samples.codes;
+
+      final match = codes.firstWhereOrNull(
+        (profileCode) => profileCode.code == ref,
+      );
+
+      if (match == null) {
+        throw StateError('Unable to find matching ProfileCode');
+      }
+
+      _table = CpuProfilerTicksTable.parse(
+        sampleCount: samples.sampleCount!,
+        ticks: match.ticks!,
+      );
+    } on RPCError {
+      // This can happen when the profiler is disabled, so we just can't show
+      // CPU profiling ticks for the code disassembly.
+    }
+  }
+}
+
+/// Stores an 'ObjectPool' VM object and provides an interface for obtaining
+/// then Dart VM information related to this object.
+class ObjectPoolObject extends VmObject {
+  ObjectPoolObject({required super.ref, super.scriptRef});
+
+  @override
+  ObjectPool get obj => _obj.asObjectPool;
+
+  @override
+  String? get name => null;
+
+  @override
+  SourceLocation? get _sourceLocation => null;
+}
+
+/// Stores an 'ICData' VM object and provides an interface for obtaining the
+/// Dart VM information related to this object.
+class ICDataObject extends VmObject {
+  ICDataObject({required super.ref});
+
+  @override
+  SourceLocation? get _sourceLocation => null;
+
+  @override
+  String? get name => '(${obj.selector})';
+
+  @override
+  ICData get obj => _obj.asICData;
+}
+
+/// Stores a 'SubtypeTestCache' VM object and provides an interface for
+/// obtaining the Dart VM information related to this object.
+class SubtypeTestCacheObject extends VmObject {
+  SubtypeTestCacheObject({required super.ref});
+
+  @override
+  SourceLocation? get _sourceLocation => null;
+
+  @override
+  String? get name => null;
+
+  @override
+  SubtypeTestCache get obj => _obj.asSubtypeTestCache;
 }

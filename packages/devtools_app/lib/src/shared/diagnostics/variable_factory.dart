@@ -11,7 +11,7 @@ import 'package:flutter/foundation.dart';
 import 'package:stack_trace/stack_trace.dart' as stack_trace;
 import 'package:vm_service/vm_service.dart';
 
-import '../primitives/utils.dart';
+import '../vm_utils.dart';
 import 'dart_object_node.dart';
 import 'diagnostics_node.dart';
 import 'object_group_api.dart';
@@ -520,12 +520,12 @@ List<DartObjectNode> createVariablesForRecords(
   _sortPositionalFields(positionalFields);
   return [
     // Always show positional fields before named fields:
-    for (final field in positionalFields)
+    for (var i = 0; i < positionalFields.length; i++)
       DartObjectNode.fromValue(
-        // Positional fields are designated by their getter syntax, eg $0, $1,
-        // $2, etc:
-        name: '\$${field.name}',
-        value: field.value,
+        // Positional fields are designated by their getter syntax, eg $1, $2,
+        // $3, etc:
+        name: '\$${i + 1}',
+        value: positionalFields[i].value,
         isolateRef: isolateRef,
       ),
     for (final field in namedFields)

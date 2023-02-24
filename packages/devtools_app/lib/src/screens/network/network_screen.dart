@@ -369,6 +369,11 @@ class NetworkRequestsTable extends StatelessWidget {
         selectionNotifier: networkController.selectedRequest,
         defaultSortColumn: timestampColumn,
         defaultSortDirection: SortDirection.ascending,
+        onItemSelected: (item) {
+          if (item is DartIOHttpRequestData) {
+            unawaited(item.getFullRequestData());
+          }
+        },
       ),
     );
   }

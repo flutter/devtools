@@ -13,6 +13,7 @@ import 'package:devtools_shared/devtools_shared.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mockito/mockito.dart';
 import 'package:stager/stager.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -65,6 +66,7 @@ class MemoryDefaultScene extends Scene {
       isProfileBuild: true,
       isWebApp: false,
     );
+    when(fakeServiceManager.vm.operatingSystem).thenReturn('ios');
     setGlobal(ServiceConnectionManager, fakeServiceManager);
 
     final diffController = DiffPaneController(_TestSnapshotTaker());
@@ -131,7 +133,11 @@ AdaptedHeapData _createHeap(Map<String, int> classToInstanceCount) {
     }
   }
 
-  return AdaptedHeapData(objects, rootIndex: rootIndex);
+  return AdaptedHeapData(
+    objects,
+    rootIndex: rootIndex,
+    isolateId: '',
+  );
 }
 
 var _nextCode = 1;

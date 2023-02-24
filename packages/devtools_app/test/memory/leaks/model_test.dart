@@ -34,6 +34,7 @@ void main() {
           ),
         ],
         rootIndex: 0,
+        isolateId: '',
       ),
     );
 
