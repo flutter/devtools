@@ -96,8 +96,9 @@ class _MethodGraphState extends State<_MethodGraph> with AutoDisposeMixin {
         _callers = _selectedGraphNode!.predecessors
             .cast<MethodTableGraphNode>()
             .toList();
-        _callees =
-            _selectedGraphNode!.successors.cast<MethodTableGraphNode>().toList();
+        _callees = _selectedGraphNode!.successors
+            .cast<MethodTableGraphNode>()
+            .toList();
       });
     });
   }
@@ -127,7 +128,7 @@ class _MethodGraphState extends State<_MethodGraph> with AutoDisposeMixin {
             padding: const EdgeInsets.all(denseSpacing),
             child: Row(
               children: [
-                Text('${_selectedGraphNode!.name} (${_selectedGraphNode!.packageUri})'),
+                Text(_selectedGraphNode!.display),
               ],
             ),
           ),

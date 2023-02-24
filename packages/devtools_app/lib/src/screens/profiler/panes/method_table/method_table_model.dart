@@ -30,6 +30,8 @@ class MethodTableGraphNode extends GraphNode {
 
   String get id => '$name-$packageUri';
 
+  String get display => '$name ($packageUri)';
+
   // TODO(kenz): implement the calculation for exclusive and inclusive count.
 
   /// The number of cpu samples where this frame is on top of the stack.
