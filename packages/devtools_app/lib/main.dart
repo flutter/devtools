@@ -4,6 +4,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:logging/logging.dart';
 
 import 'src/app.dart';
 import 'src/extension_points/extensions_base.dart';
@@ -18,6 +19,7 @@ import 'src/shared/config_specific/url/url.dart';
 import 'src/shared/config_specific/url_strategy/url_strategy.dart';
 import 'src/shared/feature_flags.dart';
 import 'src/shared/globals.dart';
+import 'src/shared/log_storage.dart';
 import 'src/shared/preferences.dart';
 import 'src/shared/primitives/url_utils.dart';
 import 'src/shared/primitives/utils.dart';
@@ -59,6 +61,12 @@ Future<void> runDevTools({
 
   // Load the Dart syntax highlighting grammar.
   await SyntaxHighlighter.initialize();
+
+  Logger.root.onRecord.listen((record) {
+    LogStorage.root.addLog(
+      '[${record.loggerName}-${record.level.name}]: ${record.time.toUtc()}: ${record.message}',
+    );
+  });
 
   setupErrorHandling(() async {
     // Run the app.

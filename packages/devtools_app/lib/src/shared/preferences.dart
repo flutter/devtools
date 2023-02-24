@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
+import 'package:logging/logging.dart';
 
 import '../service/vm_service_wrapper.dart';
 import 'analytics/analytics.dart' as ga;
@@ -14,6 +15,8 @@ import 'diagnostics/inspector_service.dart';
 import 'globals.dart';
 import 'primitives/auto_dispose.dart';
 import 'primitives/utils.dart';
+
+final _log = Logger('Preferences');
 
 /// A controller for global application preferences.
 class PreferencesController extends DisposableController
@@ -24,6 +27,9 @@ class PreferencesController extends DisposableController
 
   ValueListenable<bool> get vmDeveloperModeEnabled => _vmDeveloperMode;
   final _vmDeveloperMode = ValueNotifier<bool>(false);
+
+  ValueListenable<bool> get verboseLoggingEnabled => _verboseLogging;
+  final _verboseLogging = ValueNotifier<bool>(Logger.root.level == Level.INFO);
 
   ValueListenable<bool> get denseModeEnabled => _denseMode;
   final _denseMode = ValueNotifier<bool>(false);
@@ -60,6 +66,23 @@ class PreferencesController extends DisposableController
       storage.setValue('ui.denseMode', '${_denseMode.value}');
     });
 
+    final String? verboseLoggingEnabledValue =
+        await storage.getValue('verboseLogging');
+
+    setVerboseLogging(verboseLoggingEnabledValue == 'true');
+
+    addAutoDisposeListener(_verboseLogging, () {
+      storage.setValue('verboseLogging', _verboseLogging.value.toString());
+
+      if (_verboseLogging.value) {
+        Logger.root.level = Level.INFO;
+        _log.warning('verboseLogging enabled');
+      } else {
+        Logger.root.level = Level.WARNING;
+        _log.warning('verboseLogging disabled');
+      }
+    });
+
     await inspector.init();
     await memory.init();
     await cpuProfiler.init();
@@ -85,6 +108,10 @@ class PreferencesController extends DisposableController
     VmServiceWrapper.enablePrivateRpcs = enableVmDeveloperMode;
   }
 
+  void setVerboseLogging(bool enableVerboseLogging) {
+    _verboseLogging.value = enableVerboseLogging;
+  }
+
   /// Change the value for the dense mode setting.
   void toggleDenseMode(bool enableDenseMode) {
     _denseMode.value = enableDenseMode;
@@ -105,6 +132,7 @@ class InspectorPreferencesController extends DisposableController
   final _customPubRootDirectories = ListValueNotifier<String>([]);
   final _customPubRootDirectoriesAreBusy = ValueNotifier<bool>(false);
   final _busyCounter = ValueNotifier<int>(0);
+  static const _verboseLoggingStorageId = 'verboseLogging';
   static const _hoverEvalModeStorageId = 'inspector.hoverEvalMode';
   static const _customPubRootDirectoriesStoragePrefix =
       'inspector.customPubRootDirectories';

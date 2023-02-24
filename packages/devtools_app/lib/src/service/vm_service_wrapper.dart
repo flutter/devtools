@@ -7,16 +7,20 @@
 library vm_service_wrapper;
 
 import 'dart:async';
+import 'dart:math';
 
 import 'package:collection/collection.dart' show IterableExtension;
 import 'package:dds_service_extensions/dds_service_extensions.dart';
 import 'package:flutter/foundation.dart';
+import 'package:logging/logging.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../screens/vm_developer/vm_service_private_extensions.dart';
 import '../shared/globals.dart';
 import '../shared/primitives/utils.dart';
 import 'json_to_service_cache.dart';
+
+final _log = Logger('vm_service_wrapper');
 
 class VmServiceWrapper implements VmService {
   VmServiceWrapper(
@@ -955,13 +959,34 @@ class VmServiceWrapper implements VmService {
 
   @visibleForTesting
   Future<T> trackFuture<T>(String name, Future<T> future) {
+    Future<T> loggedFuture = future;
+
+    if (_log.isLoggable(Level.INFO)) {
+      final futureLogId = Random().nextInt(1 << 30);
+      _log.info('[$futureLogId]-trackFuture($name,...): Started');
+      loggedFuture = loggedFuture.then(
+        (value) {
+          _log.info(
+            '[$futureLogId]-trackFuture($name,...): Succeeded',
+          );
+          return value;
+        },
+        onError: (error) {
+          _log.info(
+            '[$futureLogId]-trackFuture($name,...): Failed with: $error',
+          );
+          throw error;
+        },
+      );
+    }
+
     if (!trackFutures) {
-      return future;
+      return loggedFuture;
     }
     vmServiceCallCount++;
     vmServiceCalls.add(name);
 
-    final trackedFuture = TrackedFuture(name, future as Future<Object>);
+    final trackedFuture = TrackedFuture(name, loggedFuture as Future<Object>);
     if (_allFuturesCompleter.isCompleted) {
       _allFuturesCompleter = Completer<bool>();
     }
@@ -974,11 +999,11 @@ class VmServiceWrapper implements VmService {
       }
     }
 
-    future.then(
+    loggedFuture.then(
       (value) => futureComplete(),
       onError: (error) => futureComplete(),
     );
-    return future;
+    return loggedFuture;
   }
 
   /// Adds support for private VM RPCs that can only be used when VM developer

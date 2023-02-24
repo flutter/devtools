@@ -46,6 +46,7 @@ import 'shared/config_specific/server/server.dart';
 import 'shared/console/primitives/simple_items.dart';
 import 'shared/dialogs.dart';
 import 'shared/globals.dart';
+import 'shared/log_storage.dart';
 import 'shared/primitives/auto_dispose.dart';
 import 'shared/primitives/utils.dart';
 import 'shared/routing.dart';
@@ -514,6 +515,27 @@ class SettingsDialog extends StatelessWidget {
             listenable: preferences.vmDeveloperModeEnabled,
             toggle: preferences.toggleVmDeveloperMode,
             gaItem: gac.vmDeveloperMode,
+          ),
+          Row(
+            children: [
+              CheckboxSetting(
+                label: const Text(
+                  'Enable verbose logging',
+                ),
+                listenable: preferences.verboseLoggingEnabled,
+                toggle: (enable) => preferences.setVerboseLogging(enable),
+                gaItem: gac.verboseLogging,
+              ),
+              CopyToClipboardControl(
+                dataProvider: () => LogStorage.root.toString(),
+                tooltip: 'Copy Logs',
+              ),
+              ClearButton(
+                label: '', // TODO this needs to be better centered
+                tooltip: 'Clear Logs',
+                onPressed: () => LogStorage.root.clear(),
+              ),
+            ],
           ),
         ],
       ),
