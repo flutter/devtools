@@ -88,27 +88,35 @@ class _MyGarbage {
       mapSimpleValue = null;
       map = null;
     } else {
-      childClass = _MyGarbage(_level + 1, _note);
+      _MyGarbage createInstance({String? note}) =>
+          _MyGarbage(_level + 1, note ?? _note);
 
-      childList =
-          Iterable.generate(_width, (_) => _MyGarbage(_level + 1, _note))
-              .toList();
+      childClass = createInstance();
+
+      childList = Iterable.generate(_width, (_) => createInstance()).toList();
 
       mapSimpleKey = Map.fromIterable(
         Iterable.generate(_width),
-        value: (_) => _MyGarbage(_level + 1, _note),
+        value: (_) => createInstance(),
       );
 
       mapSimpleValue = Map.fromIterable(
         Iterable.generate(_width),
-        key: (_) => _MyGarbage(_level + 1, _note),
+        key: (_) => createInstance(),
       );
 
       map = Map.fromIterable(
         Iterable.generate(_width),
-        key: (_) => _MyGarbage(_level + 1, _note),
-        value: (_) => _MyGarbage(_level + 1, _note),
+        key: (_) => createInstance(),
+        value: (_) => createInstance(),
       );
+
+      final _closureMember = createInstance(note: 'closure');
+      closure = () {
+        if (identityHashCode(_closureMember) < 0) {
+          // We need this block to show compiler [_closureMember] is in use.
+        }
+      };
     }
   }
 
@@ -127,4 +135,5 @@ class _MyGarbage {
   late final Map<dynamic, _MyGarbage>? mapSimpleKey;
   late final Map<_MyGarbage, dynamic>? mapSimpleValue;
   late final Map<_MyGarbage, _MyGarbage>? map;
+  late final void Function() closure;
 }

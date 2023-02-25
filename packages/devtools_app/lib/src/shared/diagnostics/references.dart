@@ -241,7 +241,6 @@ Future<void> _addOutboundLiveReferences({
       // TODO: add references
       break;
     case InstanceKind.kClosure:
-      // TODO: add references
       break;
     default:
       break;
