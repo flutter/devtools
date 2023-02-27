@@ -27,15 +27,17 @@ void main() {
     mockSubtypeTestCacheObject = MockSubtypeTestCacheObject();
 
     mockVmObject(mockSubtypeTestCacheObject);
+    final cache = Instance(id: 'inst-2', length: 0, elements: []);
     when(mockSubtypeTestCacheObject.obj).thenReturn(
       SubtypeTestCache(
         id: 'subtype-test-cache-id',
         size: 64,
-        cache: Instance(id: 'inst-2', length: 0, elements: []),
+        cache: cache,
         classRef: ClassRef(id: 'cls-id-2', name: 'SubtypeTestCache'),
         json: {},
       ),
     );
+    when(mockSubtypeTestCacheObject.elementsAsInstance).thenReturn(cache);
   });
 
   group('Subtype test cache display test', () {
