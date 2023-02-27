@@ -319,9 +319,11 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
       if (kind != null && kind == InstanceKind.kList ||
           kind == InstanceKind.kMap ||
           kind!.endsWith('List')) {
-        // TODO(elliette): After https://github.com/dart-lang/sdk/issues/51550
-        // is fixed, to only use `classRef.name`. Currently we use `kind` for VM
-        // apps, because that provides us with a more readable name.
+        // TODO(elliette): Determine the type signature from type parameters.
+        // https://api.flutter.dev/flutter/vm_service/ClassRef/typeParameters.html
+        // DWDS provides us with a readable format including type parameters in
+        // the classRef name, for the vm_service we fall back to just using the
+        // kind:
         final name = _isPrivateName(valueStr) ? kind : valueStr;
         final itemLength = value.length;
         if (itemLength == null) return valueStr;
