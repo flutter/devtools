@@ -204,6 +204,9 @@ Future<void> _addChildrenToInstanceVariable({
         createVariablesForRecords(value, isolateRef),
       );
       break;
+    case InstanceKind.kSet:
+      // TODO
+      break;
     case InstanceKind.kUint8ClampedList:
     case InstanceKind.kUint8List:
     case InstanceKind.kUint16List:
