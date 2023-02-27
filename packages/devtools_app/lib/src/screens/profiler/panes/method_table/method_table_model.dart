@@ -7,6 +7,7 @@ import '../../../../shared/primitives/utils.dart';
 import '../../../../shared/profiler_utils.dart';
 import '../../cpu_profile_model.dart';
 
+/// Represents a graph node for a method in a CPU profile method table.
 class MethodTableGraphNode extends GraphNode {
   MethodTableGraphNode({
     required this.name,

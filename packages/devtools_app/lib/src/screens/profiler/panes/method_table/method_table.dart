@@ -14,6 +14,7 @@ import '../../../../shared/theme.dart';
 import 'method_table_controller.dart';
 import 'method_table_model.dart';
 
+/// Widget that displays a method table for a CPU profile.
 class CpuMethodTable extends StatelessWidget {
   const CpuMethodTable({required this.methodTableController});
 
@@ -37,6 +38,7 @@ class CpuMethodTable extends StatelessWidget {
   }
 }
 
+/// A table of methods and their timing information for a CPU profile.
 class _MethodTable extends StatelessWidget {
   const _MethodTable(this._methodTableController, this._methods);
 
@@ -69,6 +71,8 @@ class _MethodTable extends StatelessWidget {
   }
 }
 
+/// A graph for a single method that shows its predecessors (callers) and
+/// successors (callees) as well as timing information for each of those nodes.
 class _MethodGraph extends StatefulWidget {
   const _MethodGraph(this.methodTableController);
 
@@ -146,6 +150,7 @@ class _MethodGraphState extends State<_MethodGraph> with AutoDisposeMixin {
   }
 }
 
+/// A table of predecessors (callers) for a single method in a method table.
 class _CallersTable extends StatelessWidget {
   _CallersTable(this._methodTableController, this._callers) {
     _callerTimeColumn =
@@ -180,6 +185,7 @@ class _CallersTable extends StatelessWidget {
   }
 }
 
+/// A table of successors (callees) for a single method in a method table.
 class _CalleesTable extends StatelessWidget {
   _CalleesTable(this._methodTableController, this._callees) {
     _calleeTimeColumn =
