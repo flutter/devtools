@@ -1,4 +1,5 @@
-## 2.23.0
+## 2.22.2
+
 * Bump github/codeql-action from 2.2.4 to 2.2.5 [#5313](https://github.com/flutter/devtools/pull/5313)
 * Updating from 2.22.2-dev.5 to 2.22.2-dev.6 [#5312](https://github.com/flutter/devtools/pull/5312)
 * Updating from 2.22.2-dev.4 to 2.22.2-dev.5 [#5310](https://github.com/flutter/devtools/pull/5310)
@@ -16,9 +17,6 @@
 * Positional fields names for `Records` should begin at `$1` not `$0` [#5272](https://github.com/flutter/devtools/pull/5272)
 * 2.22.2-dev.0 Patch Bump [#5285](https://github.com/flutter/devtools/pull/5285)
 * Update references.dart [#5286](https://github.com/flutter/devtools/pull/5286)
-
-## 2.22.2
-TODO: update changelog
 
 ## 2.21.1
 * Prep for 2.21.1 release [#5156](https://github.com/flutter/devtools/pull/5156)
