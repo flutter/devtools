@@ -38,8 +38,7 @@ Make sure:
   - `$DEVTOOLS_RELEASE_BRANCH`
   - `$DEVTOOLS_NEXT_BRANCH`
 
-#### Verify the version changes
-> For both the `$DEVTOOLS_RELEASE_BRANCH` and the `$DEVTOOLS_NEXT_BRANCH` branches
+#### Verify the version changes for `$DEVTOOLS_RELEASE_BRANCH`
 
 Verify the version changes:
 - that release_helper.sh script updated the pubspecs under packages/
@@ -48,17 +47,13 @@ Verify the version changes:
 
 These packages always have their version numbers updated in lock, so we don't have to worry about versioning.
 
-#### Manually review the CHANGELOG.md
-> For both the `$DEVTOOLS_RELEASE_BRANCH` and the `$DEVTOOLS_NEXT_BRANCH` branches
+#### Manually review the CHANGELOG.md in `$DEVTOOLS_RELEASE_BRANCH`
 
-Verify
+Verify:
    * the version for the CHANGELOG entry was correctly generated
    * the entries don't have any syntax errors.
 
-
-
 ### Test the `$DEVTOOLS_RELEASE_BRANCH`
-> You only need to do this on the `$DEVTOOLS_RELEASE_BRANCH` branch
 
 - Checkout the `$DEVTOOLS_RELEASE_BRANCH`,
 - Build the DevTools binary and run it from your local Dart SDK.
@@ -87,8 +82,8 @@ Verify
       git checkout . && \
       git clean -f -d;
       ```
-#### Push the `$DEVTOOLS_RELEASE_BRANCH`
 
+#### Push the `$DEVTOOLS_RELEASE_BRANCH`
 
 > Ensure you are still on the `$DEVTOOLS_RELEASE_BRANCH`
 
