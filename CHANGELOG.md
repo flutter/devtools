@@ -1,5 +1,6 @@
 ## 2.22.2
 
+* Updating from 2.22.2-dev.5 to 2.22.2-dev.6 [#5312](https://github.com/flutter/devtools/pull/5312)
 * Bump github/codeql-action from 2.2.4 to 2.2.5 [#5313](https://github.com/flutter/devtools/pull/5313)
 * Updating from 2.22.2-dev.5 to 2.22.2-dev.6 [#5312](https://github.com/flutter/devtools/pull/5312)
 * Updating from 2.22.2-dev.4 to 2.22.2-dev.5 [#5310](https://github.com/flutter/devtools/pull/5310)
