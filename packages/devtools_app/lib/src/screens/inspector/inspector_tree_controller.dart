@@ -761,12 +761,12 @@ class _InspectorTreeState extends State<InspectorTree>
 
   /// When autoscrolling, the number of rows to pad the target location with.
   static const int _scrollPadCount = 3;
-  int nonSummaryTreeBuildCount = 0;
-  int summaryTreeBuildCount = 0;
+  int _buildCount = 0;
 
   @override
   void initState() {
     super.initState();
+    _buildCount = 0;
     _scrollControllerX = ScrollController();
     _scrollControllerY = ScrollController();
     // TODO(devoncarew): Commented out as per flutter/devtools/pull/2001.
@@ -977,22 +977,13 @@ class _InspectorTreeState extends State<InspectorTree>
     super.build(context);
     final treeControllerLocal = treeController;
 
-    int buildCount;
-    if (widget.isSummaryTree) {
-      summaryTreeBuildCount++;
-      buildCount = summaryTreeBuildCount;
-    } else {
-      nonSummaryTreeBuildCount++;
-      buildCount = nonSummaryTreeBuildCount;
-    }
-
     ga.select(
       gac.inspector,
       'InspectorTreeBuild',
       nonInteraction: true,
       screenMetricsProvider: () => InspectorTreeBuildMetrics(
         isSummaryTree: widget.isSummaryTree,
-        buildCount: buildCount,
+        buildCount: ++_buildCount,
         rowCount: treeControllerLocal?.numRows,
       ),
     );
