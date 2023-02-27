@@ -47,7 +47,6 @@ void main() {
       cpuProfileData,
       processId: 'test',
     );
-
     setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
     setGlobal(OfflineModeController, OfflineModeController());
     setGlobal(NotificationService, NotificationService());
@@ -542,6 +541,13 @@ void main() {
     testWidgetsWithWindowSize(
         'can show help CPU profile statistics', windowSize,
         (WidgetTester tester) async {
+      controller.loadProcessedData(
+        CpuProfilePair(
+          functionProfile: cpuProfileData,
+          codeProfile: null,
+        ),
+        storeAsUserTagNone: false,
+      );
       cpuProfiler = CpuProfiler(
         data: cpuProfileData,
         controller: controller,
@@ -563,8 +569,9 @@ void main() {
       expect(find.text('Sample count: '), findsOneWidget);
       expect(find.text(metadata.sampleCount.toString()), findsOneWidget);
       expect(find.text('Sampling rate: '), findsOneWidget);
-      final samplingRateHz = const Duration(seconds: 1).inMicroseconds ~/ metadata.samplePeriod;
-      expect(find.text(samplingRateHz.toString()), findsOneWidget);
+      final samplingRateHz =
+          const Duration(seconds: 1).inMicroseconds ~/ metadata.samplePeriod;
+      expect(find.text('${samplingRateHz.toString()} Hz'), findsOneWidget);
       expect(find.text('Sampling depth: '), findsOneWidget);
       expect(find.text(metadata.stackDepth.toString()), findsOneWidget);
     });

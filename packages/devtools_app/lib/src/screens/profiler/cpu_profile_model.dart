@@ -180,7 +180,6 @@ class CpuProfileData {
             ))
           : null,
     );
-
     // Initialize all stack frames.
     final stackFrames = <String, CpuStackFrame>{};
     final Map<String, Object?> stackFramesJson =

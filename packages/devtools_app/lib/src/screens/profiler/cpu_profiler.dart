@@ -409,7 +409,8 @@ class CpuProfileStatisticsButton extends StatelessWidget {
                             child: Text('Sampling rate: '),
                           ),
                           DevToolsTooltip(
-                            message: 'The maximum stack trace depth of a collected sample',
+                            message:
+                                'The maximum stack trace depth of a collected sample',
                             child: Text('Sampling depth: '),
                           ),
                         ],
