@@ -39,3 +39,15 @@ class ProfilerScreenMetrics extends ScreenAnalyticsMetrics {
   final int cpuSampleCount;
   final int cpuStackDepth;
 }
+
+class InspectorTreeBuildMetrics extends ScreenAnalyticsMetrics {
+  InspectorTreeBuildMetrics({
+    required this.isSummaryTree,
+    required this.buildCount,
+    required this.rowCount,
+  });
+
+  final bool isSummaryTree;
+  final int buildCount;
+  final int? rowCount;
+}

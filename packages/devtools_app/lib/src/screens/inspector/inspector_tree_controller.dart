@@ -14,6 +14,7 @@ import 'package:flutter/services.dart';
 
 import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/analytics/constants.dart' as gac;
+import '../../shared/analytics/metrics.dart';
 import '../../shared/collapsible_mixin.dart';
 import '../../shared/common_widgets.dart';
 import '../../shared/config_specific/logger/logger.dart';
@@ -760,6 +761,8 @@ class _InspectorTreeState extends State<InspectorTree>
 
   /// When autoscrolling, the number of rows to pad the target location with.
   static const int _scrollPadCount = 3;
+  int mainTreeBuildCount = 0;
+  int summaryTreeBuildCount = 0;
 
   @override
   void initState() {
@@ -973,6 +976,27 @@ class _InspectorTreeState extends State<InspectorTree>
   Widget build(BuildContext context) {
     super.build(context);
     final treeControllerLocal = treeController;
+
+    int buildCount;
+    if (widget.isSummaryTree) {
+      summaryTreeBuildCount++;
+      buildCount = summaryTreeBuildCount;
+    } else {
+      mainTreeBuildCount++;
+      buildCount = mainTreeBuildCount;
+    }
+
+    ga.select(
+      gac.inspector,
+      'InspectorTreeBuild',
+      nonInteraction: true,
+      screenMetricsProvider: () => InspectorTreeBuildMetrics(
+        isSummaryTree: widget.isSummaryTree,
+        buildCount: buildCount,
+        rowCount: treeControllerLocal?.numRows,
+      ),
+    );
+
     if (treeControllerLocal == null) {
       // Indicate the tree is loading.
       return const CenteredCircularProgressIndicator();
