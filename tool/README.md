@@ -39,10 +39,10 @@ Make sure:
 
 #### Verify the version changes for `$DEVTOOLS_RELEASE_BRANCH`
 
-Verify the version changes:
-- that release_helper.sh script updated the pubspecs under packages/
-- updated all references to those packages.
-- make sure that the version constant in `packages/devtools_app/lib/devtools.dart` was updated
+Verify release_helper.sh script:
+- updated the pubspecs under packages/
+- updated all references to those packages
+- updated the version constant in `packages/devtools_app/lib/devtools.dart`
 
 These packages always have their version numbers updated in lock, so we don't have to worry about versioning.
 
