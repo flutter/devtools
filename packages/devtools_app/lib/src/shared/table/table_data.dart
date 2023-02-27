@@ -161,6 +161,14 @@ extension ColumnDataExtension<T> on ColumnData<T> {
   }
 }
 
+/// Column that, for each row, shows a time value in milliseconds and the
+/// percentage that the time value is of the total time for this data set.
+///
+/// Both time and percentage are provided through callbacks [timeProvider] and
+/// [percentAsDoubleProvider], respectively.
+///
+/// When [percentageOnly] is true, the time value will be omitted, and only the
+/// percentage will be displayed.
 abstract class TimeAndPercentageColumn<T> extends ColumnData<T> {
   TimeAndPercentageColumn({
     required String title,

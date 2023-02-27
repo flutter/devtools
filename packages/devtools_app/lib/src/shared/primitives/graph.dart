@@ -4,6 +4,17 @@
 
 import 'package:collection/collection.dart';
 
+/// A dart object that represents a graph.
+///
+/// Each [GraphNode] has a set of [predecessors] and [successors], which
+/// represent incoming and outgoing edges, respectively. A [GraphNode] in
+/// [predecessors] or [successors] may have multiple edges to this [GraphNode].
+///
+/// For each predecessor [GraphNode] in [predecessors], the edge count to this
+/// [GraphNode] from the predecessor is stored in [predecessorEdgeCounts].
+///
+/// For each successor [GraphNode] in [successors], the edge count from this
+/// [GraphNode] to the successor is stored in [successorEdgeCounts].
 class GraphNode {
   /// Predecessors of this node.
   final predecessors = <GraphNode>{};
@@ -18,7 +29,7 @@ class GraphNode {
   ///        A (predecessor node)
   ///      /  \
   ///     |    |
-  ///     \    /
+  ///      \  /
   ///       B (this node)
   ///
   /// ==> successorEdgeCounts[A] = 2
@@ -31,7 +42,7 @@ class GraphNode {
   ///        A (this node)
   ///      /  \
   ///     |    |
-  ///     \    /
+  ///      \  /
   ///       B (successor node)
   ///
   /// ==> successorEdgeCounts[B] = 2
