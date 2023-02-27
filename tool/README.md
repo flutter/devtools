@@ -51,9 +51,11 @@ These packages always have their version numbers updated in lock, so we don't ha
 #### Manually review the CHANGELOG.md
 > For both the `$DEVTOOLS_RELEASE_BRANCH` and the `$DEVTOOLS_NEXT_BRANCH` branches
 
-* Verify
-   * that the version for the CHANGELOG entry was correctly generated
-   * that the entries don't have any syntax errors.
+Verify
+   * the version for the CHANGELOG entry was correctly generated
+   * the entries don't have any syntax errors.
+
+
 
 ### Test the `$DEVTOOLS_RELEASE_BRANCH`
 > You only need to do this on the `$DEVTOOLS_RELEASE_BRANCH` branch
