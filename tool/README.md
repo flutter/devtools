@@ -196,6 +196,7 @@ checkout the Flutter version on your local flutter repo (the Flutter SDK that
 
 ### Push the DEVTOOLS_NEXT_BRANCH
 ```shell
+git pull upstream master
 git checkout $DEVTOOLS_NEXT_BRANCH
 git push -u origin $DEVTOOLS_NEXT_BRANCH
 ```
