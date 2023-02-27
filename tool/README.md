@@ -16,8 +16,7 @@ Make sure:
        export LOCAL_DART_SDK=$DART_SDK_REPO_DIR/sdk
        ```
 
-   c. The local checkout is at `main` branch:
-      - `git rebase-update`.
+   c. The local checkout is at `main` branch: `git rebase-update`
 
 2. Your Flutter version is equal to latest candidate release branch:
     - Run `./tool/update_flutter_sdk.sh --local` from the main devtools directory.
