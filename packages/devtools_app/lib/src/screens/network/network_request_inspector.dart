@@ -50,7 +50,7 @@ class NetworkRequestInspector extends StatelessWidget {
     return ValueListenableBuilder<NetworkRequest?>(
       valueListenable: controller.selectedRequest,
       builder: (context, data, _) {
-        final tabs = <DevToolsTab>[
+        late final tabs = <DevToolsTab>[
           _buildTab(tabName: NetworkRequestInspector._overviewTabTitle),
           if (data is DartIOHttpRequestData) ...[
             _buildTab(tabName: NetworkRequestInspector._headersTabTitle),
@@ -78,6 +78,18 @@ class NetworkRequestInspector extends StatelessWidget {
               _buildTab(tabName: NetworkRequestInspector._cookiesTabTitle),
           ],
         ];
+        late final tabViews = [
+          if (data != null) ...[
+            NetworkRequestOverviewView(data),
+            if (data is DartIOHttpRequestData) ...[
+              HttpRequestHeadersView(data),
+              if (data.requestBody != null) HttpRequestView(data),
+              if (data.responseBody != null) HttpResponseView(data),
+              if (data.hasCookies) HttpRequestCookiesView(data),
+            ],
+          ]
+        ].map((e) => OutlineDecoration.onlyTop(child: e)).toList();
+
         return Card(
           margin: EdgeInsets.zero,
           color: Theme.of(context).canvasColor,
@@ -92,15 +104,7 @@ class NetworkRequestInspector extends StatelessWidget {
                   )
                 : AnalyticsTabbedView(
                     tabs: tabs,
-                    tabViews: [
-                      NetworkRequestOverviewView(data),
-                      if (data is DartIOHttpRequestData) ...[
-                        HttpRequestHeadersView(data),
-                        if (data.requestBody != null) HttpRequestView(data),
-                        if (data.responseBody != null) HttpResponseView(data),
-                        if (data.hasCookies) HttpRequestCookiesView(data),
-                      ],
-                    ],
+                    tabViews: tabViews,
                     gaScreen: gac.network,
                     // TODO(kenz): Consider using the outlined style
                     outlined: false,

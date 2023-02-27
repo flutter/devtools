@@ -15,6 +15,25 @@ import '../../diagnostics/dart_object_node.dart';
 import '../../primitives/simple_items.dart';
 import 'description.dart';
 
+VariableSelectionControls _selectionControls({
+  required DartObjectNode variable,
+  required Function(TextSelectionDelegate delegate)? onInspect,
+}) {
+  final ref = variable.ref;
+  return VariableSelectionControls(
+    onReroot: variable.isRerootable
+        ? (delegate) {
+            serviceManager.consoleService.appendBrowsableInstance(
+              instanceRef: variable.value as InstanceRef?,
+              isolateRef: ref?.isolateRef,
+              heapSelection: ref?.heapSelection,
+            );
+          }
+        : null,
+    onInspect: onInspect,
+  );
+}
+
 class DisplayProvider extends StatelessWidget {
   const DisplayProvider({
     super.key,
@@ -42,6 +61,8 @@ class DisplayProvider extends StatelessWidget {
           ),
         ),
         onTap: onTap,
+        selectionControls:
+            _selectionControls(variable: variable, onInspect: null),
       );
     }
     final diagnostic = variable.ref?.diagnostic;
@@ -79,7 +100,8 @@ class DisplayProvider extends StatelessWidget {
             ),
           ],
         ),
-        selectionControls: VariableSelectionControls(
+        selectionControls: _selectionControls(
+          variable: variable,
           onInspect: serviceManager.inspectorService == null
               ? null
               : (delegate) => _handleInspect(delegate, context),

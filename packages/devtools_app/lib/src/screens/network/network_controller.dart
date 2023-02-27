@@ -26,6 +26,9 @@ class NetworkController extends DisposableController
         AutoDisposeControllerMixin {
   NetworkController() {
     _networkService = NetworkService(this);
+    _currentNetworkRequests = CurrentNetworkRequests(
+      onRequestDataChange: _filterAndRefreshSearchMatches,
+    );
     subscribeToFilterChanges();
   }
 
@@ -48,6 +51,7 @@ class NetworkController extends DisposableController
   final _requests = ValueNotifier<NetworkRequests>(NetworkRequests());
 
   final selectedRequest = ValueNotifier<NetworkRequest?>(null);
+  late CurrentNetworkRequests _currentNetworkRequests;
 
   /// Notifies that the timeline is currently being recorded.
   ValueListenable<bool> get recordingNotifier => _recordingNotifier;
@@ -75,33 +79,11 @@ class NetworkController extends DisposableController
 
   void _processHttpProfileRequests({
     required int timelineMicrosOffset,
-    required List<HttpProfileRequest> httpRequests,
-    required List<NetworkRequest> currentValues,
-    required Map<String, DartIOHttpRequestData> outstandingRequestsMap,
+    required List<HttpProfileRequest> newOrUpdatedHttpRequests,
+    required CurrentNetworkRequests currentRequests,
   }) {
-    for (final request in httpRequests) {
-      final wrapped = DartIOHttpRequestData(
-        timelineMicrosOffset,
-        request,
-      );
-      final id = request.id.toString();
-      if (outstandingRequestsMap.containsKey(id)) {
-        final request = outstandingRequestsMap[id]!;
-        request.merge(wrapped);
-        if (!request.inProgress) {
-          final data =
-              outstandingRequestsMap.remove(id) as DartIOHttpRequestData;
-
-          unawaited(data.getFullRequestData().then((value) => _updateData()));
-        }
-        continue;
-      } else if (wrapped.inProgress) {
-        outstandingRequestsMap.putIfAbsent(id, () => wrapped);
-      } else {
-        // If the response has completed, send a request for body data.
-        unawaited(wrapped.getFullRequestData().then((value) => _updateData()));
-      }
-      currentValues.add(wrapped);
+    for (final request in newOrUpdatedHttpRequests) {
+      currentRequests.updateOrAdd(request, timelineMicrosOffset);
     }
   }
 
@@ -110,37 +92,28 @@ class NetworkController extends DisposableController
     List<SocketStatistic> sockets,
     List<HttpProfileRequest>? httpRequests,
     int timelineMicrosOffset, {
-    required List<NetworkRequest> currentValues,
+    required CurrentNetworkRequests currentRequests,
     required List<DartIOHttpRequestData> invalidRequests,
-    required Map<String, DartIOHttpRequestData> outstandingRequestsMap,
   }) {
-    // [currentValues] contains all the current requests we have in the
-    // profiler, which will contain web socket requests if they exist. The new
-    // [sockets] may contain web sockets with the same ids as ones we already
-    // have, so we remove the current web sockets and replace them with updated
-    // data.
-    currentValues.removeWhere((value) => value is WebSocket);
-    for (final socket in sockets) {
-      final webSocket = WebSocket(socket, timelineMicrosOffset);
-      // If we have updated data for the selected web socket, update the value.
-      if (selectedRequest.value is WebSocket &&
-          (selectedRequest.value as WebSocket).id == webSocket.id) {
-        selectedRequest.value = webSocket;
-      }
-      currentValues.add(webSocket);
+    currentRequests.updateWebSocketRequests(sockets, timelineMicrosOffset);
+
+    // If we have updated data for the selected web socket, we need to update
+    // the value.
+    final currentSelectedRequestId = selectedRequest.value?.id;
+    if (currentSelectedRequestId != null) {
+      selectedRequest.value =
+          currentRequests.getRequest(currentSelectedRequestId);
     }
 
     _processHttpProfileRequests(
       timelineMicrosOffset: timelineMicrosOffset,
-      httpRequests: httpRequests!,
-      currentValues: currentValues,
-      outstandingRequestsMap: outstandingRequestsMap,
+      newOrUpdatedHttpRequests: httpRequests!,
+      currentRequests: currentRequests,
     );
 
     return NetworkRequests(
-      requests: currentValues,
+      requests: currentRequests.requests,
       invalidHttpRequests: invalidRequests,
-      outstandingHttpRequests: outstandingRequestsMap,
     );
   }
 
@@ -153,11 +126,10 @@ class NetworkController extends DisposableController
       sockets,
       httpRequests,
       _timelineMicrosOffset,
-      currentValues: List.of(requests.value.requests),
+      currentRequests: _currentNetworkRequests,
       invalidRequests: [],
-      outstandingRequestsMap: Map.from(requests.value.outstandingHttpRequests),
     );
-    _updateData();
+    _filterAndRefreshSearchMatches();
     _updateSelection();
   }
 
@@ -247,12 +219,13 @@ class NetworkController extends DisposableController
   Future<void> clear() async {
     await _networkService.clearData();
     _requests.value = NetworkRequests();
+    _currentNetworkRequests.clear();
     resetFilter();
-    _updateData();
+    _filterAndRefreshSearchMatches();
     _updateSelection();
   }
 
-  void _updateData() {
+  void _filterAndRefreshSearchMatches() {
     filterData(activeFilter.value);
     refreshSearchMatches();
   }
@@ -350,5 +323,69 @@ class NetworkController extends DisposableController
     if (r.didFail) {
       serviceManager.errorBadgeManager.incrementBadgeCount(NetworkScreen.id);
     }
+  }
+}
+
+/// Class for managing the set of all current websocket requests, and
+/// http profile requests.
+class CurrentNetworkRequests {
+  CurrentNetworkRequests({required this.onRequestDataChange});
+
+  List<NetworkRequest> get requests => _requestsById.values.toList();
+  final _requestsById = <String, NetworkRequest>{};
+
+  /// Triggered whenever the request's data changes on it's own.
+  VoidCallback onRequestDataChange;
+
+  NetworkRequest? getRequest(String id) => _requestsById[id];
+
+  /// Update or add the [request] to the [requests] depending on whether or not
+  /// it's [request.id] already exists in the list.
+  ///
+  void updateOrAdd(
+    HttpProfileRequest request,
+    int timelineMicrosOffset,
+  ) {
+    final wrapped = DartIOHttpRequestData(
+      timelineMicrosOffset,
+      request,
+      requestFullDataFromVmService: false,
+    );
+    if (!_requestsById.containsKey(request.id)) {
+      wrapped.requestUpdatedNotifier.addListener(() => onRequestDataChange());
+      _requestsById[wrapped.id] = wrapped;
+    } else {
+      // If we override an entry that is not a DartIOHttpRequestData then that means
+      // the ids of the requestMapping entries may collide with other types
+      // of requests.
+      assert(_requestsById[request.id] is DartIOHttpRequestData);
+      (_requestsById[request.id] as DartIOHttpRequestData).merge(wrapped);
+    }
+  }
+
+  void updateWebSocketRequests(
+    List<SocketStatistic> sockets,
+    int timelineMicrosOffset,
+  ) {
+    for (final socket in sockets) {
+      final webSocket = WebSocket(socket, timelineMicrosOffset);
+
+      if (_requestsById.containsKey(webSocket.id)) {
+        // If we override an entry that is not a Websocket then that means
+        // the ids of the requestMapping entries may collide with other types
+        // of requests.
+        assert(_requestsById[webSocket.id] is WebSocket);
+      }
+
+      // The new [sockets] may contain web sockets with the same ids as ones we
+      // already have, so we remove the current web sockets and replace them with
+      // updated data.
+      _requestsById[webSocket.id] = webSocket;
+      onRequestDataChange();
+    }
+  }
+
+  void clear() {
+    _requestsById.clear();
   }
 }

@@ -17,7 +17,9 @@ import 'vm_ic_data_display.dart';
 import 'vm_instance_display.dart';
 import 'vm_library_display.dart';
 import 'vm_object_model.dart';
+import 'vm_object_pool_display.dart';
 import 'vm_script_display.dart';
+import 'vm_simple_list_display.dart';
 
 /// Displays the VM information for the currently selected object in the
 /// program explorer.
@@ -70,7 +72,7 @@ class ObjectViewport extends StatelessWidget {
       return 'Instance of ${instance.classRef!.name}';
     }
 
-    return '${object.obj.type} ${object.name ?? '<name>'}';
+    return '${object.obj.type} ${object.name ?? ''}'.trim();
   }
 
   /// Calls the object VM statistics card builder according to the VM Object type.
@@ -118,10 +120,22 @@ class ObjectViewport extends StatelessWidget {
         code: obj,
       );
     }
+    if (obj is ObjectPoolObject) {
+      return VmObjectPoolDisplay(
+        controller: controller,
+        objectPool: obj,
+      );
+    }
     if (obj is ICDataObject) {
       return VmICDataDisplay(
         controller: controller,
         icData: obj,
+      );
+    }
+    if (obj is VmListObject) {
+      return VmSimpleListDisplay(
+        controller: controller,
+        vmObject: obj,
       );
     }
     return const SizedBox.shrink();
@@ -134,7 +148,7 @@ String viewportTitle(VmObject? object) {
     return 'No object selected.';
   }
 
-  return '${object.obj.type} ${object.name ?? '<name>'}';
+  return '${object.obj.type} ${object.name ?? ''}'.trim();
 }
 
 /// Manages the history of selected ObjRefs to make them accessible on a

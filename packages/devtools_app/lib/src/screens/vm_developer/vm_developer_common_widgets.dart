@@ -81,23 +81,20 @@ MapEntry<String, WidgetBuilder> selectableTextBuilderMapEntry(
   );
 }
 
-MapEntry<String, WidgetBuilder>
-    serviceObjectLinkBuilderMapEntry<T extends ObjRef>({
+MapEntry<String, WidgetBuilder> serviceObjectLinkBuilderMapEntry({
   required ObjectInspectorViewController controller,
   required String key,
-  required T object,
+  required Response? object,
   bool preferUri = false,
-  String Function(T)? textBuilder,
+  String Function(Response?)? textBuilder,
 }) {
   return MapEntry(
     key,
-    (context) => VmServiceObjectLink<T>(
+    (context) => VmServiceObjectLink(
       object: object,
       textBuilder: textBuilder,
       preferUri: preferUri,
-      onTap: (object) async {
-        await controller.findAndSelectNodeForObject(object);
-      },
+      onTap: controller.findAndSelectNodeForObject,
     ),
   );
 }
@@ -384,7 +381,7 @@ class ExpansionTileInstanceList extends StatelessWidget {
 
   final ObjectInspectorViewController controller;
   final String title;
-  final List<ObjRef?> elements;
+  final List<Response?> elements;
 
   @override
   Widget build(BuildContext context) {
@@ -397,12 +394,9 @@ class ExpansionTileInstanceList extends StatelessWidget {
               '[$i]: ',
               style: theme.subtleFixedFontStyle,
             ),
-            VmServiceObjectLink<ObjRef?>(
+            VmServiceObjectLink(
               object: elements[i],
-              onTap: (e) {
-                if (e == null) return;
-                unawaited(controller.findAndSelectNodeForObject(e));
-              },
+              onTap: controller.findAndSelectNodeForObject,
             ),
           ],
         ),
@@ -730,7 +724,7 @@ class InboundReferencesWidget extends StatelessWidget {
   }
 }
 
-class VmServiceObjectLink<T extends ObjRef?> extends StatelessWidget {
+class VmServiceObjectLink extends StatelessWidget {
   const VmServiceObjectLink({
     required this.object,
     required this.onTap,
@@ -739,80 +733,99 @@ class VmServiceObjectLink<T extends ObjRef?> extends StatelessWidget {
     this.textBuilder,
   });
 
-  final T object;
+  final Response? object;
   final bool preferUri;
-  final String? Function(T)? textBuilder;
-  final FutureOr<void> Function(T) onTap;
+  final String? Function(Response?)? textBuilder;
+  final FutureOr<void> Function(ObjRef) onTap;
   final bool isSelected;
+
+  @visibleForTesting
+  static String? defaultTextBuilder(
+    Object? object, {
+    bool preferUri = false,
+  }) {
+    String? text;
+    if (object is LibraryRef) {
+      final lib = object;
+      if (lib.uri!.startsWith('dart') || preferUri) {
+        text = lib.uri!;
+      } else {
+        final name = lib.name;
+        text = name!.isEmpty ? lib.uri! : name;
+      }
+    } else if (object is FieldRef) {
+      final field = object;
+      text = field.name!;
+    } else if (object is FuncRef) {
+      final func = object;
+      text = func.name!;
+    } else if (object is ScriptRef) {
+      final script = object;
+      text = script.uri!;
+    } else if (object is ClassRef) {
+      final cls = object;
+      text = cls.name!;
+    } else if (object is CodeRef) {
+      final code = object;
+      text = code.name!;
+    } else if (object is InstanceRef) {
+      final instance = object;
+      if (instance.kind == InstanceKind.kList) {
+        text = 'List(length: ${instance.length})';
+      } else if (instance.kind == InstanceKind.kMap) {
+        text = 'Map(length: ${instance.length})';
+      } else if (instance.kind == InstanceKind.kRecord) {
+        text = 'Record';
+      } else if (instance.kind == InstanceKind.kType ||
+          instance.kind == InstanceKind.kTypeParameter) {
+        text = instance.name!;
+      } else if (instance.kind == InstanceKind.kStackTrace) {
+        final trace = stack_trace.Trace.parse(instance.valueAsString!);
+        final depth = trace.frames.length;
+        text = 'StackTrace ($depth ${pluralize('frame', depth)})';
+      } else {
+        if (instance.valueAsString != null) {
+          text = instance.valueAsString!;
+        } else {
+          final cls = instance.classRef!;
+          text = '${cls.name}';
+        }
+      }
+    } else if (object is ContextRef) {
+      final context = object;
+      text = 'Context(length: ${context.length})';
+    } else if (object is TypeArgumentsRef) {
+      final typeArgs = object;
+      text = typeArgs.name!;
+    } else if (object is Sentinel) {
+      final sentinel = object;
+      text = 'Sentinel ${sentinel.valueAsString!}';
+    } else if (object != null && object is ObjRef && object.isICData) {
+      final icData = object.asICData;
+      text = 'ICData(${icData.selector})';
+    } else if (object != null && object is ObjRef && object.isObjectPool) {
+      final objectPool = object.asObjectPool;
+      text = 'Object Pool(length: ${objectPool.length})';
+    } else if (object != null &&
+        object is ObjRef &&
+        object.isSubtypeTestCache) {
+      text = 'SubtypeTestCache';
+    } else if (object != null && object is ObjRef && object.isWeakArray) {
+      final weakArray = object.asWeakArray;
+      text = 'WeakArray(length: ${weakArray.length})';
+    }
+    return text;
+  }
 
   TextSpan buildTextSpan(BuildContext context) {
     final theme = Theme.of(context);
 
-    String? text = textBuilder?.call(object);
-    bool isServiceObject = true;
-    if (text == null) {
-      if (object is LibraryRef) {
-        final lib = object as LibraryRef;
-        if (lib.uri!.startsWith('dart') || preferUri) {
-          text = lib.uri!;
-        } else {
-          final name = lib.name;
-          text = name!.isEmpty ? lib.uri! : name;
-        }
-      } else if (object is FieldRef) {
-        final field = object as FieldRef;
-        text = field.name!;
-      } else if (object is FuncRef) {
-        final func = object as FuncRef;
-        text = func.name!;
-      } else if (object is ScriptRef) {
-        final script = object as ScriptRef;
-        text = script.uri!;
-      } else if (object is ClassRef) {
-        final cls = object as ClassRef;
-        text = cls.name!;
-      } else if (object is CodeRef) {
-        final code = object as CodeRef;
-        text = code.name!;
-      } else if (object is InstanceRef) {
-        final instance = object as InstanceRef;
-        if (instance.kind == InstanceKind.kList) {
-          text = 'List(length: ${instance.length})';
-        } else if (instance.kind == InstanceKind.kMap) {
-          text = 'Map(length: ${instance.length})';
-        } else if (instance.kind == InstanceKind.kRecord) {
-          text = 'Record';
-        } else if (instance.kind == InstanceKind.kType) {
-          text = instance.name!;
-        } else if (instance.kind == InstanceKind.kStackTrace) {
-          final trace = stack_trace.Trace.parse(instance.valueAsString!);
-          final depth = trace.frames.length;
-          text = 'StackTrace ($depth ${pluralize('frame', depth)})';
-        } else {
-          if (instance.valueAsString != null) {
-            text = instance.valueAsString!;
-          } else {
-            final cls = instance.classRef!;
-            text = '${cls.name}';
-          }
-        }
-      } else if (object is ContextRef) {
-        final context = object as ContextRef;
-        text = 'Context(length: ${context.length})';
-      } else if (object is TypeArgumentsRef) {
-        final typeArgs = object as TypeArgumentsRef;
-        text = typeArgs.name!;
-      } else if (object is Sentinel) {
-        final sentinel = object as Sentinel;
-        text = sentinel.valueAsString!;
-      } else if (object?.isICData ?? false) {
-        final icData = object!.asICData;
-        text = 'ICData(${icData.selector})';
-      } else {
-        isServiceObject = false;
-        text = object.toString();
-      }
-    }
+    String? text = textBuilder?.call(object) ??
+        defaultTextBuilder(object, preferUri: preferUri);
+
+    // Sentinels aren't objects that can be inspected.
+    final isServiceObject = object is! Sentinel && text != null;
+    text ??= object.toString();
 
     final TextStyle style;
     if (isServiceObject) {
@@ -826,7 +839,10 @@ class VmServiceObjectLink<T extends ObjRef?> extends StatelessWidget {
       recognizer: isServiceObject
           ? (TapGestureRecognizer()
             ..onTap = () async {
-              await onTap(object);
+              final obj = object;
+              if (obj is ObjRef) {
+                await onTap(obj);
+              }
             })
           : null,
     );
@@ -975,25 +991,25 @@ List<MapEntry<String, WidgetBuilder>> vmObjectGeneralDataRows(
     reachableSizeRowBuilder(object),
     retainedSizeRowBuilder(object),
     if (object is ClassObject)
-      serviceObjectLinkBuilderMapEntry<LibraryRef>(
+      serviceObjectLinkBuilderMapEntry(
         controller: controller,
         key: 'Library',
         object: object.obj.library!,
       ),
     if (object is ScriptObject)
-      serviceObjectLinkBuilderMapEntry<LibraryRef>(
+      serviceObjectLinkBuilderMapEntry(
         controller: controller,
         key: 'Library',
         object: object.obj.library!,
       ),
     if (object is FieldObject)
-      serviceObjectLinkBuilderMapEntry<ObjRef>(
+      serviceObjectLinkBuilderMapEntry(
         controller: controller,
         key: 'Owner',
         object: object.obj.owner!,
       ),
     if (object is FuncObject)
-      serviceObjectLinkBuilderMapEntry<ObjRef>(
+      serviceObjectLinkBuilderMapEntry(
         controller: controller,
         key: 'Owner',
         object: object.obj.owner!,
@@ -1001,11 +1017,12 @@ List<MapEntry<String, WidgetBuilder>> vmObjectGeneralDataRows(
     if (object is! ScriptObject &&
         object is! LibraryObject &&
         object.script != null)
-      serviceObjectLinkBuilderMapEntry<ScriptRef>(
+      serviceObjectLinkBuilderMapEntry(
         controller: controller,
         key: 'Script',
         object: object.script!,
-        textBuilder: (script) {
+        textBuilder: (s) {
+          final script = s as ScriptRef;
           return '${fileNameFromUri(script.uri) ?? ''}:${object.pos?.toString() ?? ''}';
         },
       ),

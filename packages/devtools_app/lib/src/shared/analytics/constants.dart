@@ -202,6 +202,7 @@ class MemoryEvent {
 /// by a widget used in different contexts.
 enum MemoryAreas {
   snapshotSingle('single'),
+  snapshotDiff('diff'),
   snapshotDiffDelta('diff-delta'),
   snapshotDiffNew('diff-new'),
   ;

@@ -156,6 +156,9 @@ extension AllocationProfilePrivateViewExtension on AllocationProfile {
 /// An extension on [ObjRef] which allows for access to VM internal fields.
 extension ObjRefPrivateViewExtension on ObjRef {
   static const _icDataType = 'ICData';
+  static const _objectPoolType = 'ObjectPool';
+  static const _subtypeTestCache = 'SubtypeTestCache';
+  static const _weakArrayType = 'WeakArray';
 
   /// The internal type of the object.
   ///
@@ -167,13 +170,176 @@ extension ObjRefPrivateViewExtension on ObjRef {
   bool get isICData => vmType == _icDataType;
 
   /// Casts the current [ObjRef] into an instance of [ICDataRef].
-  ICDataRef get asICData => ICDataRef.parse(json!)!;
+  ICDataRef get asICData => ICDataRef.parse(json!);
+
+  /// `true` if this object is an instance of [ObjectPool].
+  bool get isObjectPool => vmType == _objectPoolType;
+
+  /// Casts the current [ObjRef] into an instance of [ObjectPoolRef].
+  ObjectPoolRef get asObjectPool => ObjectPoolRef.parse(json!);
+
+  /// `true` if this object is an instance of [SubtypeTestCacheRef].
+  bool get isSubtypeTestCache => vmType == _subtypeTestCache;
+
+  /// Casts the current [ObjRef] into an instance of [SubtypeTestCacheRef].
+  SubtypeTestCacheRef get asSubtypeTestCache =>
+      SubtypeTestCacheRef.parse(json!);
+
+  /// `true` if this object is an instance of [WeakArrayRef].
+  bool get isWeakArray => vmType == _weakArrayType;
+
+  /// Casts the current [ObjRef] into an instance of [WeakArrayRef].
+  WeakArrayRef get asWeakArray => WeakArrayRef.parse(json!);
 }
 
 /// An extension on [Obj] which allows for access to VM internal fields.
 extension ObjPrivateViewExtension on Obj {
+  /// Casts the current [Obj] into an instance of [ObjectPool].
+  ObjectPool get asObjectPool => ObjectPool.parse(json!);
+
   /// Casts the current [Obj] into an instance of [ICData].
-  ICData get asICData => ICData.parse(json!)!;
+  ICData get asICData => ICData.parse(json!);
+
+  /// Casts the current [Obj] into an instance of [SubtypeTestCache].
+  SubtypeTestCache get asSubtypeTestCache => SubtypeTestCache.parse(json!);
+
+  /// Casts the current [Obj] into an instance of [WeakArray].
+  WeakArray get asWeakArray => WeakArray.parse(json!);
+}
+
+/// A reference to a [WeakArray], which is an array consisting of weak
+/// persistent handles.
+///
+/// References to an object from a [WeakArray] are ignored by the GC and will
+/// not prevent referenced objects from being collected when all other
+/// references to the object disappear.
+class WeakArrayRef implements ObjRef {
+  WeakArrayRef({
+    required this.id,
+    required this.json,
+    required this.length,
+  });
+
+  factory WeakArrayRef.parse(Map<String, dynamic> json) => WeakArrayRef(
+        id: json['id'],
+        json: json,
+        length: json['length'],
+      );
+
+  @override
+  bool? fixedId;
+
+  @override
+  String? id;
+
+  @override
+  Map<String, dynamic>? json;
+
+  final int length;
+
+  @override
+  Map<String, dynamic> toJson() => json!;
+
+  @override
+  String get type => 'WeakArray';
+}
+
+/// A populated representation of a [WeakArray], which is an array consisting
+/// of weak persistent handles.
+///
+/// References to an object from a [WeakArray] are ignored by the GC and will
+/// not prevent referenced objects from being collected when all other
+/// references to the object disappear.
+class WeakArray extends WeakArrayRef implements Obj {
+  WeakArray({
+    required super.id,
+    required super.json,
+    required super.length,
+    required this.elements,
+    required this.size,
+    required this.classRef,
+  });
+
+  factory WeakArray.parse(Map<String, dynamic> json) => WeakArray(
+        id: json['id'],
+        json: json,
+        length: json['length'],
+        size: json['size'],
+        elements: (createServiceObject(json['elements'], []) as List)
+            .cast<Response?>(),
+        classRef: createServiceObject(json['class'], [])! as ClassRef,
+      );
+
+  final List<Response?> elements;
+
+  @override
+  Map<String, dynamic> toJson() => json!;
+
+  @override
+  String get type => 'WeakArray';
+
+  @override
+  ClassRef? classRef;
+
+  @override
+  int? size;
+}
+
+/// A partially-populated representation of the Dart VM's subtype test cache.
+class SubtypeTestCacheRef implements ObjRef {
+  SubtypeTestCacheRef({
+    required this.id,
+    required this.json,
+  });
+
+  factory SubtypeTestCacheRef.parse(Map<String, dynamic> json) =>
+      SubtypeTestCacheRef(
+        id: json['id'],
+        json: json,
+      );
+
+  @override
+  bool? fixedId;
+
+  @override
+  String? id;
+
+  @override
+  Map<String, dynamic>? json;
+
+  @override
+  Map<String, dynamic> toJson() => json!;
+
+  @override
+  String get type => 'SubtypeTestCache';
+}
+
+/// A fully-populated representation of the Dart VM's subtype test cache.
+class SubtypeTestCache extends SubtypeTestCacheRef implements Obj {
+  SubtypeTestCache({
+    required super.id,
+    required super.json,
+    required this.size,
+    required this.classRef,
+    required this.cache,
+  });
+
+  factory SubtypeTestCache.parse(Map<String, dynamic> json) => SubtypeTestCache(
+        id: json['id'],
+        size: json['size'],
+        cache: createServiceObject(json['_cache'], [])! as InstanceRef,
+        classRef: createServiceObject(json['class'], [])! as ClassRef,
+        json: json,
+      );
+
+  /// An array of objects which make up the cache.
+  final InstanceRef cache;
+
+  @override
+  ClassRef? classRef;
+
+  @override
+  int? size;
 }
 
 /// A partially-populated representation of the Dart VM's Inline Cache (IC).
@@ -189,7 +355,7 @@ class ICDataRef implements ObjRef {
     required this.selector,
   });
 
-  static ICDataRef? parse(Map<String, dynamic> json) => ICDataRef(
+  factory ICDataRef.parse(Map<String, dynamic> json) => ICDataRef(
         id: json['id'],
         owner: createServiceObject(json['_owner'], []) as ObjRef,
         selector: json['_selector'],
@@ -232,7 +398,7 @@ class ICData extends ICDataRef implements Obj {
     required this.entries,
   }) : super();
 
-  static ICData? parse(Map<String, dynamic> json) => ICData(
+  factory ICData.parse(Map<String, dynamic> json) => ICData(
         id: json['id'],
         owner: createServiceObject(json['_owner'], []) as ObjRef,
         selector: json['_selector'],
@@ -268,11 +434,15 @@ class Instruction {
     final rawObject = data[3] as Map<String, dynamic>;
     object = rawObject['type'].contains('Instance')
         ? InstanceRef.parse(rawObject)
-        : createServiceObject(data[3], const <String>[]) as ObjRef;
+        : createServiceObject(data[3], const <String>[]) as Response?;
   }
 
   /// The instruction's address in memory.
   final String address;
+
+  /// The instruction's address in memory with leading zeros removed.
+  String get unpaddedAddress =>
+      address.substring(address.indexOf(RegExp(r'[^0]')));
 
   /// TODO(bkonyi): figure out what this value is for.
   final String unknown;
@@ -281,7 +451,7 @@ class Instruction {
   final String instruction;
 
   /// The Dart object this instruction is acting upon directly.
-  late final ObjRef? object;
+  late final Response? object;
 
   List toJson() => [
         address,
@@ -401,7 +571,7 @@ extension CodeRefPrivateViewExtension on CodeRef {
 
   /// Returns the function from which this code object was generated.
   FuncRef? get function {
-    final functionJson = json![_functionKey] as Map<String, dynamic>;
+    final functionJson = json![_functionKey] as Map<String, dynamic>?;
     return FuncRef.parse(functionJson);
   }
 }
@@ -409,12 +579,136 @@ extension CodeRefPrivateViewExtension on CodeRef {
 /// An extension on [Code] which allows for access to VM internal fields.
 extension CodePrivateViewExtension on Code {
   static const _disassemblyKey = '_disassembly';
+  static const _kindKey = 'kind';
+  static const _objectPoolKey = '_objectPool';
 
   /// Returns the disassembly of the [Code], which is the generated assembly
   /// instructions for the code's function.
   Disassembly get disassembly => Disassembly.parse(json![_disassemblyKey]);
   set disassembly(Disassembly disassembly) =>
       json![_disassemblyKey] = disassembly.toJson();
+
+  /// The kind of code object represented by this instance.
+  ///
+  /// Can be one of:
+  ///   - Dart
+  ///   - Stub
+  String get kind => json![_kindKey];
+
+  ObjectPoolRef get objectPool => ObjectPoolRef.parse(json![_objectPoolKey]);
+}
+
+class ObjectPoolRef extends ObjRef {
+  ObjectPoolRef({
+    required Map<String, dynamic> json,
+    required super.id,
+    required this.length,
+  }) {
+    super.json = json;
+  }
+
+  static const _idKey = 'id';
+  static const _lengthKey = 'length';
+
+  static ObjectPoolRef parse(Map<String, dynamic> json) => ObjectPoolRef(
+        id: json[_idKey],
+        length: json[_lengthKey],
+        json: json,
+      );
+
+  final int length;
+}
+
+class ObjectPool extends ObjectPoolRef implements Obj {
+  ObjectPool({
+    required super.json,
+    required super.id,
+    required this.entries,
+    required super.length,
+  });
+
+  static const _entriesKey = '_entries';
+
+  static ObjectPool parse(Map<String, dynamic> json) {
+    return ObjectPool(
+      json: json,
+      id: json[ObjectPoolRef._idKey],
+      entries: (json[_entriesKey] as List)
+          .map((e) => ObjectPoolEntry.parse(e))
+          .toList(),
+      length: json[ObjectPoolRef._lengthKey],
+    );
+  }
+
+  @override
+  String get type => 'ObjectPool';
+
+  @override
+  ClassRef? classRef;
+
+  @override
+  int? size;
+
+  List<ObjectPoolEntry> entries;
+}
+
+enum ObjectPoolEntryKind {
+  object,
+  immediate,
+  nativeFunction;
+
+  static const _kObject = 'Object';
+  static const _kImm = 'Immediate';
+  static const _kNativeFunction = 'NativeFunction';
+
+  static ObjectPoolEntryKind fromString(String type) {
+    switch (type) {
+      case _kObject:
+        return object;
+      case _kImm:
+        return immediate;
+      case _kNativeFunction:
+        return nativeFunction;
+      default:
+        throw UnsupportedError('Unsupported ObjectPoolType: $type');
+    }
+  }
+
+  @override
+  String toString() {
+    switch (this) {
+      case object:
+        return _kObject;
+      case immediate:
+        return _kImm;
+      case nativeFunction:
+        return 'Native Function';
+    }
+  }
+}
+
+class ObjectPoolEntry {
+  const ObjectPoolEntry({
+    required this.offset,
+    required this.kind,
+    required this.value,
+  });
+
+  static const _offsetKey = 'offset';
+  static const _kindKey = 'kind';
+  static const _valueKey = 'value';
+
+  static ObjectPoolEntry parse(Map<String, dynamic> json) => ObjectPoolEntry(
+        offset: json[_offsetKey],
+        kind: ObjectPoolEntryKind.fromString(json[_kindKey]),
+        value: createServiceObject(json[_valueKey], [])!,
+      );
+
+  final int offset;
+
+  final ObjectPoolEntryKind kind;
+
+  final Object value;
 }
 
 /// An extension on [Field] which allows for access to VM internal fields.

@@ -151,9 +151,8 @@ class CodeViewController extends DisposableController
 
   Future<void> _maybeSetUpProgramExplorer() async {
     if (!programExplorerController.initialized.value) {
-      programExplorerController
-        ..initListeners()
-        ..initialize();
+      programExplorerController.initListeners();
+      unawaited(programExplorerController.initialize());
     }
     if (currentScriptRef.value != null) {
       await programExplorerController.selectScriptNode(currentScriptRef.value);

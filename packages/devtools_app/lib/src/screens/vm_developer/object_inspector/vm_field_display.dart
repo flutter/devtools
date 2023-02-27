@@ -51,7 +51,7 @@ class VmFieldDisplay extends StatelessWidget {
         _fieldObservedTypes(field),
       ),
       if (staticValue is InstanceRef)
-        serviceObjectLinkBuilderMapEntry<InstanceRef>(
+        serviceObjectLinkBuilderMapEntry(
           controller: controller,
           key: 'Static Value',
           object: staticValue,

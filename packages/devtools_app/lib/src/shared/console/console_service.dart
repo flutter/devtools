@@ -74,6 +74,34 @@ class VariableConsoleLine extends ConsoleLine {
 /// Source of truth for the state of the Console including both events from the
 /// VM and events emitted from other UI.
 class ConsoleService extends Disposer {
+  void appendBrowsableInstance({
+    required InstanceRef? instanceRef,
+    required IsolateRef? isolateRef,
+    required HeapObjectSelection? heapSelection,
+  }) async {
+    if (instanceRef == null) {
+      final object = heapSelection?.object;
+      if (object == null || isolateRef == null) {
+        serviceManager.consoleService.appendStdio(
+          'Not enough information to browse the instance.',
+        );
+        return;
+      }
+
+      instanceRef = await evalService.findObject(object, isolateRef);
+    }
+
+    // If instanceRef is null at this point, user will see static references.
+
+    appendInstanceRef(
+      value: instanceRef,
+      diagnostic: null,
+      isolateRef: isolateRef,
+      forceScrollIntoView: true,
+      heapSelection: heapSelection,
+    );
+  }
+
   void appendInstanceRef({
     String? name,
     required InstanceRef? value,
@@ -145,6 +173,17 @@ class ConsoleService extends Disposer {
       _stdio.clear();
     }
   }
+
+  DartObjectNode? itemAt(int invertedIndex) {
+    assert(invertedIndex >= 0);
+    final list = _stdio.value;
+    if (invertedIndex > list.length - 1) return null;
+    final item = list[list.length - 1 - invertedIndex];
+    if (item is! VariableConsoleLine) return null;
+    return item.variable;
+  }
+
+  void appendMessage(String text) {}
 
   /// Append to the stdout / stderr buffer.
   void appendStdio(String text) {

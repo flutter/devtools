@@ -47,6 +47,7 @@ void main() {
     expect(stats.total.created.instanceCount, 2);
     expect(stats.total.deleted.instanceCount, 1);
     expect(stats.total.delta.instanceCount, 1);
+    expect(stats.total.persisted.instanceCount, 1);
   });
 
   test('$DiffClassStats calculates deletion as expected', () async {
@@ -62,6 +63,7 @@ void main() {
     expect(stats.total.created.instanceCount, 0);
     expect(stats.total.deleted.instanceCount, 1);
     expect(stats.total.delta.instanceCount, -1);
+    expect(stats.total.persisted.instanceCount, 0);
   });
 }
 
@@ -80,7 +82,11 @@ Future<SingleClassStats> _createClassStats(
     ...instances,
   ];
 
-  final heap = AdaptedHeapData(objects, rootIndex: 0);
+  final heap = AdaptedHeapData(
+    objects,
+    rootIndex: 0,
+    isolateId: '',
+  );
   await buildSpanningTreeAndSetInRefs(heap);
 
   final result = SingleClassStats(heapClass: instances.first.heapClass);
@@ -114,5 +120,6 @@ Future<AdaptedHeap> _createSimplestHeap() async => await AdaptedHeap.create(
           )
         ],
         rootIndex: 0,
+        isolateId: '',
       ),
     );

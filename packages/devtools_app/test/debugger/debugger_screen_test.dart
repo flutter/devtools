@@ -68,7 +68,7 @@ Future<void> main() async {
         controller.rootObjectNodesInternal.add(libraryNode);
       },
     );
-    programExplorerController.initialize();
+    await programExplorerController.initialize();
     await programExplorerController.selectNode(libraryNode);
 
     final codeViewController = createMockCodeViewControllerWithDefaults(

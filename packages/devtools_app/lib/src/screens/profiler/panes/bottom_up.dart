@@ -4,11 +4,11 @@
 
 import 'package:flutter/material.dart';
 
-import '../../shared/primitives/utils.dart';
-import '../../shared/table/table.dart';
-import '../../shared/table/table_data.dart';
-import 'cpu_profile_columns.dart';
-import 'cpu_profile_model.dart';
+import '../../../shared/primitives/utils.dart';
+import '../../../shared/table/table.dart';
+import '../../../shared/table/table_data.dart';
+import '../cpu_profile_columns.dart';
+import '../cpu_profile_model.dart';
 
 /// A table of the CPU's bottom-up call tree.
 class CpuBottomUpTable extends StatelessWidget {

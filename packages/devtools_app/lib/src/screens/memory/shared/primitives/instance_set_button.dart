@@ -31,7 +31,8 @@ class InstanceSetButton extends StatelessWidget {
     required this.sampleObtainer,
     required this.showMenu,
     required this.gaContext,
-  }) : assert(showMenu == (sampleObtainer != null));
+  })  : assert(showMenu == (sampleObtainer != null)),
+        assert(count >= 0);
 
   final int count;
   final ClassSampler? sampleObtainer;
@@ -41,18 +42,20 @@ class InstanceSetButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final shouldShowMenu = showMenu && count > 0;
+
     return Row(
       children: [
         Text(
           nf.format(count),
           style: textStyle,
         ),
-        if (showMenu)
+        if (shouldShowMenu)
           ContextMenuButton(
             style: textStyle,
             menu: _menu(sampleObtainer!),
           ),
-        if (!showMenu) const SizedBox(width: ContextMenuButton.width),
+        if (!shouldShowMenu) const SizedBox(width: ContextMenuButton.width),
       ],
     );
   }
