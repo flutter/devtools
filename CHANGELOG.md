@@ -1,3 +1,25 @@
+## 2.23.0
+* Bump github/codeql-action from 2.2.4 to 2.2.5 [#5313](https://github.com/flutter/devtools/pull/5313)
+* Updating from 2.22.2-dev.5 to 2.22.2-dev.6 [#5312](https://github.com/flutter/devtools/pull/5312)
+* Updating from 2.22.2-dev.4 to 2.22.2-dev.5 [#5310](https://github.com/flutter/devtools/pull/5310)
+* Updating from 2.22.2-dev.3 to 2.22.2-dev.4 [#5308](https://github.com/flutter/devtools/pull/5308)
+* Updating from 2.22.2-dev.2 to 2.22.2-dev.3 [#5304](https://github.com/flutter/devtools/pull/5304)
+* Add skeleton for CPU method table [#5298](https://github.com/flutter/devtools/pull/5298)
+* Add support for viewing CPU profiler ticks per instruction [#5258](https://github.com/flutter/devtools/pull/5258)
+* Combine shallow and retained size columns into one to save horizontal space [#5299](https://github.com/flutter/devtools/pull/5299)
+* Updating from 2.22.2-dev.1 to 2.22.2-dev.2 [#5300](https://github.com/flutter/devtools/pull/5300)
+* Minor improvements [#5297](https://github.com/flutter/devtools/pull/5297)
+* Add column `persisted` and saving item to console from diff [#5290](https://github.com/flutter/devtools/pull/5290)
+* Updating from 2.22.2-dev.0 to 2.22.2-dev.1 [#5293](https://github.com/flutter/devtools/pull/5293)
+* Fix drop-box colors [#5291](https://github.com/flutter/devtools/pull/5291)
+* UI polish for memory page. [#5289](https://github.com/flutter/devtools/pull/5289)
+* Positional fields names for `Records` should begin at `$1` not `$0` [#5272](https://github.com/flutter/devtools/pull/5272)
+* 2.22.2-dev.0 Patch Bump [#5285](https://github.com/flutter/devtools/pull/5285)
+* Update references.dart [#5286](https://github.com/flutter/devtools/pull/5286)
+
+## 2.22.2
+TODO: update changelog
+
 ## 2.21.1
 * Prep for 2.21.1 release [#5156](https://github.com/flutter/devtools/pull/5156)
 * Fix the perfetto asset path when DevTools is served via `--observe` [#5155](https://github.com/flutter/devtools/pull/5155)
