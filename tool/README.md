@@ -2,7 +2,9 @@
 
 ### Configure/Refresh environment
 
-1. Make sure your Dart SDK is configured:
+Make sure:
+
+1. Your Dart SDK is configured:
 
    a. You have a local checkout of the Dart SDK
       - (for getting started instructions, see [sdk/CONTRIBUTING.md](https://github.com/dart-lang/sdk/blob/main/CONTRIBUTING.md)).
