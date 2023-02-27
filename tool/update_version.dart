@@ -420,7 +420,7 @@ class AutoUpdateCommand extends Command {
           throw 'Failed to determine the newVersion.';
         }
     }
-    print('Update from $currentVersion to $newVersion');
+    print('Bump version from $currentVersion to $newVersion');
 
     if (isDryRun) {
       return;
