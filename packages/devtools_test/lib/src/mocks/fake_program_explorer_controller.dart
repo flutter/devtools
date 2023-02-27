@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:devtools_app/devtools_app.dart';
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
@@ -15,14 +17,14 @@ class TestProgramExplorerController extends ProgramExplorerController {
   ValueListenable<bool> get initialized => _initialized;
   final _initialized = ValueNotifier<bool>(false);
 
-  final Function(TestProgramExplorerController) initializer;
+  final FutureOr<void> Function(TestProgramExplorerController) initializer;
 
   @override
-  void initialize() {
+  Future<void> initialize() async {
     if (_initialized.value) {
       return;
     }
-    initializer(this);
+    await initializer(this);
     _initialized.value = true;
   }
 
