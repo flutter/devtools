@@ -76,16 +76,16 @@ void main() {
       await pumpDebuggerScreen(tester, debuggerController);
       expect(find.text('Variables'), findsOneWidget);
 
-      final listFinder = find.selectableText('Root 1: _GrowableList (2 items)');
+      final listFinder = find.selectableText('Root 1: List (2 items)');
 
       // expect a tooltip for the list value
       expect(
-        find.byTooltip('_GrowableList (2 items)'),
+        find.byTooltip('List (2 items)'),
         findsOneWidget,
       );
 
       final mapFinder = find.selectableTextContaining(
-        'Root 2: _InternalLinkedHashmap (2 items)',
+        'Root 2: Map (2 items)',
       );
       final mapElement1Finder = find.selectableTextContaining("['key1']: 1.0");
       final mapElement2Finder = find.selectableTextContaining("['key2']: 2.0");
@@ -135,8 +135,7 @@ void main() {
 
       await pumpDebuggerScreen(tester, debuggerController);
 
-      final listFinder =
-          find.selectableText('Root 1: _GrowableList (380,250 items)');
+      final listFinder = find.selectableText('Root 1: List (380,250 items)');
       final group0To9999Finder = find.selectableTextContaining('[0 - 9999]');
       final group10000To19999Finder =
           find.selectableTextContaining('[10000 - 19999]');
@@ -193,8 +192,7 @@ void main() {
 
       await pumpDebuggerScreen(tester, debuggerController);
 
-      final listFinder =
-          find.selectableText('Root 1: _InternalLinkedHashmap (243,621 items)');
+      final listFinder = find.selectableText('Root 1: Map (243,621 items)');
       final group0To9999Finder = find.selectableTextContaining('[0 - 9999]');
       final group10000To19999Finder =
           find.selectableTextContaining('[10000 - 19999]');
