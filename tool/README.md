@@ -2,20 +2,24 @@
 
 ### Configure/Refresh environment
 
-Make sure:
-1. You have a local checkout of the Dart SDK
-   - (for getting started instructions, see [sdk/CONTRIBUTING.md](https://github.com/dart-lang/sdk/blob/main/CONTRIBUTING.md)).
-2. Ensure your `.bashrc` sets `$LOCAL_DART_SDK`
+1. Make sure your Dart SDK is configured:
 
-   ```shell
-   DART_SDK_REPO_DIR=<Path to cloned dart sdk>
-   export LOCAL_DART_SDK=$DART_SDK_REPO_DIR/sdk
-   ```
-3. The local checkout is at `main` branch:
-   - `git rebase-update`.
-4. Your Flutter version is equal to latest candidate release branch:
+   a. You have a local checkout of the Dart SDK
+      - (for getting started instructions, see [sdk/CONTRIBUTING.md](https://github.com/dart-lang/sdk/blob/main/CONTRIBUTING.md)).
+
+   b. Ensure your `.bashrc` sets `$LOCAL_DART_SDK`
+
+       ```shell
+       DART_SDK_REPO_DIR=<Path to cloned dart sdk>
+       export LOCAL_DART_SDK=$DART_SDK_REPO_DIR/sdk
+       ```
+
+   c. The local checkout is at `main` branch:
+      - `git rebase-update`.
+
+2. Your Flutter version is equal to latest candidate release branch:
     - Run `./tool/update_flutter_sdk.sh --local` from the main devtools directory.
-5. You have goma [configured](http://go/ma-mac-setup).
+3. You have goma [configured](http://go/ma-mac-setup).
 
 ### Prepare the release
 
