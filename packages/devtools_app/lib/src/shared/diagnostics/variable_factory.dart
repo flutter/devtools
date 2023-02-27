@@ -469,7 +469,7 @@ List<DartObjectNode> createVariablesForList(
   final elements = instance.elements ?? [];
   for (int i = 0; i < elements.length; i++) {
     final index = instance.offset == null ? i : i + instance.offset!;
-    final name = '[$index]${instance.classRef!.name}';
+    final name = '[$index]';
 
     variables.add(
       DartObjectNode.fromValue(

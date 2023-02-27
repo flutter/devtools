@@ -319,9 +319,13 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
       if (kind != null && kind == InstanceKind.kList ||
           kind == InstanceKind.kMap ||
           kind!.endsWith('List')) {
+        // TODO(elliette): After https://github.com/dart-lang/sdk/issues/51550
+        // is fixed, to only use `classRef.name`. Currently we use `kind` for VM
+        // apps, because that provides us with a more readable name.
+        final name = _isPrivateName(valueStr) ? kind : valueStr;
         final itemLength = value.length;
         if (itemLength == null) return valueStr;
-        return '$valueStr (${_itemCount(itemLength)})';
+        return '$name (${_itemCount(itemLength)})';
       }
     } else if (value is Sentinel) {
       valueStr = value.valueAsString;
@@ -335,6 +339,8 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
 
     return valueStr;
   }
+
+  bool _isPrivateName(String name) => name.startsWith('_');
 
   static String _itemCount(int count) {
     return '${nf.format(count)} ${pluralize('item', count)}';
