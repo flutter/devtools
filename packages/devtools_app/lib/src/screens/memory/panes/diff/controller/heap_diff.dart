@@ -133,8 +133,10 @@ class DiffClassStats extends ClassStats {
 
     final result = DiffClassStats._(
       heapClass: heapClass,
-      total:
-          ObjectSetDiff(setBefore: before?.objects, setAfter: after?.objects),
+      total: ObjectSetDiff(
+        setBefore: before?.objects,
+        setAfter: after?.objects,
+      ),
       statsByPath: subtractMaps<ClassOnlyHeapPath, ObjectSetStats,
           ObjectSetStats, ObjectSetStats>(
         from: after?.statsByPath,

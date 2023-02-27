@@ -120,8 +120,9 @@ List<Widget> _menu(
     _StoreAsOneVariableMenu(sampleObtainer, liveItemsEnabled: liveItemsEnabled),
     MenuItemButton(
       onPressed: sampleObtainer.manyLiveToConsole,
-      child:
-          Text('Store up to $limit instances, currently alive in application'),
+      child: Text(
+        'Store up to $limit instances, currently alive in application',
+      ),
     ),
   ];
 }
