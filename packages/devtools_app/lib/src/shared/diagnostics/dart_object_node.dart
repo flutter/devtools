@@ -320,9 +320,15 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
       if (kind != null && kind == InstanceKind.kList ||
           kind == InstanceKind.kMap ||
           kind!.endsWith('List')) {
+        // TODO(elliette): Determine the signature from type parameters, see:
+        // https://api.flutter.dev/flutter/vm_service/ClassRef/typeParameters.html
+        // DWDS provides us with a readable format including type parameters in
+        // the classRef name, for the vm_service we fall back to just using the
+        // kind:
+        final name = _isPrivateName(valueStr) ? kind : valueStr;
         final itemLength = value.length;
         if (itemLength == null) return valueStr;
-        return '$valueStr (${_itemCount(itemLength)})';
+        return '$name (${_itemCount(itemLength)})';
       }
     } else if (value is Sentinel) {
       valueStr = value.valueAsString;
@@ -336,6 +342,8 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
 
     return valueStr;
   }
+
+  bool _isPrivateName(String name) => name.startsWith('_');
 
   static String _itemCount(int count) {
     return '${nf.format(count)} ${pluralize('item', count)}';
