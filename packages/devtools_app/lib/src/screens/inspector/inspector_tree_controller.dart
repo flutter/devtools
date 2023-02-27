@@ -761,7 +761,7 @@ class _InspectorTreeState extends State<InspectorTree>
 
   /// When autoscrolling, the number of rows to pad the target location with.
   static const int _scrollPadCount = 3;
-  int mainTreeBuildCount = 0;
+  int nonSummaryTreeBuildCount = 0;
   int summaryTreeBuildCount = 0;
 
   @override
@@ -982,8 +982,8 @@ class _InspectorTreeState extends State<InspectorTree>
       summaryTreeBuildCount++;
       buildCount = summaryTreeBuildCount;
     } else {
-      mainTreeBuildCount++;
-      buildCount = mainTreeBuildCount;
+      nonSummaryTreeBuildCount++;
+      buildCount = nonSummaryTreeBuildCount;
     }
 
     ga.select(
