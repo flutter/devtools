@@ -196,7 +196,7 @@ class DisplayProvider extends StatelessWidget {
           ),
           onTap: onTap,
         ),
-        if (variable.ref!.value is! Sentinel)
+        if (variable.ref!.value is! Sentinel && variable.ref!.value is ObjRef?)
           VmServiceObjectLink(
             object: variable.ref!.value as ObjRef?,
             textBuilder: (object) {
@@ -207,6 +207,11 @@ class DisplayProvider extends StatelessWidget {
               return null;
             },
             onTap: controller.findAndSelectNodeForObject,
+          )
+        else
+          Text(
+            variable.ref!.value.toString(),
+            style: Theme.of(context).subtleFixedFontStyle,
           )
       ],
     );

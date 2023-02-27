@@ -179,6 +179,10 @@ class ObjectInspectorViewController extends DisposableController
       object = SubtypeTestCacheObject(
         ref: objRef,
       );
+    } else if (objRef.isWeakArray) {
+      object = WeakArrayObject(
+        ref: objRef,
+      );
     }
 
     await object?.initialize();

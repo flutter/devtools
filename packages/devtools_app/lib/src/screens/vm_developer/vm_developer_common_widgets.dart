@@ -381,7 +381,7 @@ class ExpansionTileInstanceList extends StatelessWidget {
 
   final ObjectInspectorViewController controller;
   final String title;
-  final List<ObjRef?> elements;
+  final List<Response?> elements;
 
   @override
   Widget build(BuildContext context) {
@@ -810,6 +810,9 @@ class VmServiceObjectLink extends StatelessWidget {
         object is ObjRef &&
         object.isSubtypeTestCache) {
       text = 'SubtypeTestCache';
+    } else if (object != null && object is ObjRef && object.isWeakArray) {
+      final weakArray = object.asWeakArray;
+      text = 'WeakArray(length: ${weakArray.length})';
     }
     return text;
   }
