@@ -19,6 +19,7 @@ TODO: Remove this section if there are not any general updates.
 * Display stack frame uri inline with method name to ensure the URI is always visible
 in deeply nested trees - [#5181](https://github.com/flutter/devtools/pull/5181)
 * Add the ability to filter by method name or source URI - [#5204](https://github.com/flutter/devtools/pull/5204)
+* Add ability to inspect statistics for a CPU profile - [#5317](https://github.com/flutter/devtools/pull/5317)
 
 ## Memory updates
 * Change filter default to show only project and 3rd party dependencies [#5201](https://github.com/flutter/devtools/pull/5201).
