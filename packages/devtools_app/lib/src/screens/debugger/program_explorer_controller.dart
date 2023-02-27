@@ -34,11 +34,6 @@ class ProgramExplorerController extends DisposableController
   VMServiceObjectNode? get scriptSelection => _scriptSelection;
   VMServiceObjectNode? _scriptSelection;
 
-  /// The currently selected node in the Program Explorer outline.
-  ValueListenable<VMServiceObjectNode?> get outlineSelection =>
-      _outlineSelection;
-  final _outlineSelection = ValueNotifier<VMServiceObjectNode?>(null);
-
   /// The processed roots of the tree.
   ValueListenable<List<VMServiceObjectNode>> get rootObjectNodes =>
       rootObjectNodesInternal;
@@ -47,6 +42,9 @@ class ProgramExplorerController extends DisposableController
 
   ValueListenable<int> get selectedNodeIndex => _selectedNodeIndex;
   final _selectedNodeIndex = ValueNotifier<int>(0);
+
+  /// The currently selected node in the Program Explorer outline.
+  VMServiceObjectNode? _outlineSelection;
 
   /// Notifies that the controller has finished initializing.
   ValueListenable<bool> get initialized => _initialized;
@@ -68,7 +66,7 @@ class ProgramExplorerController extends DisposableController
   }
 
   /// Initializes the program structure.
-  void initialize() {
+  Future<void> initialize() async {
     if (_initializing) {
       return;
     }
@@ -81,6 +79,10 @@ class ProgramExplorerController extends DisposableController
             .isolateNow!
             .libraries!
         : <LibraryRef>[];
+
+    if (scriptManager.sortedScripts.value.isEmpty && isolate != null) {
+      await scriptManager.retrieveAndSortScripts(isolate);
+    }
 
     // Build the initial tree.
     final nodes = VMServiceObjectNode.createRootsFrom(
@@ -132,6 +134,10 @@ class ProgramExplorerController extends DisposableController
     }
   }
 
+  VMServiceObjectNode? findOutlineNode(ObjRef object) {
+    return breadthFirstSearchObject(object, _outlineNodes.value);
+  }
+
   int _calculateNodeIndex({
     bool matchingNodeCondition(VMServiceObjectNode node)?,
     bool includeCollapsedNodes = true,
@@ -155,9 +161,9 @@ class ProgramExplorerController extends DisposableController
   }
 
   /// Clears controller state and re-initializes.
-  void refresh() {
+  Future<void> refresh() {
     _scriptSelection = null;
-    _outlineSelection.value = null;
+    _outlineSelection = null;
     _isLoadingOutline.value = true;
     _outlineNodes.clear();
     _initialized.value = false;
@@ -169,8 +175,14 @@ class ProgramExplorerController extends DisposableController
     _scriptSelection?.unselect();
     _scriptSelection = null;
     _outlineNodes.clear();
-    _outlineSelection.value = null;
+    _outlineSelection = null;
     rootObjectNodesInternal.notifyListeners();
+  }
+
+  void clearOutlineSelection() {
+    _outlineSelection?.unselect();
+    _outlineSelection = null;
+    _outlineNodes.notifyListeners();
   }
 
   /// Marks [node] as the currently selected node, clearing the selection state
@@ -185,7 +197,7 @@ class ProgramExplorerController extends DisposableController
       _scriptSelection?.unselect();
       _scriptSelection = node;
       _isLoadingOutline.value = true;
-      _outlineSelection.value = null;
+      _outlineSelection = null;
       final newOutlineNodes = await _scriptSelection!.outline;
       if (newOutlineNodes != null) {
         _outlineNodes.replaceAll(newOutlineNodes);
@@ -198,10 +210,11 @@ class ProgramExplorerController extends DisposableController
     if (!node.isSelectable) {
       return;
     }
-    if (_outlineSelection.value != node) {
+    if (_outlineSelection != node) {
       node.select();
-      _outlineSelection.value?.unselect();
-      _outlineSelection.value = node;
+      _outlineSelection?.unselect();
+      _outlineSelection = node;
+      _outlineNodes.notifyListeners();
     }
   }
 
@@ -209,7 +222,7 @@ class ProgramExplorerController extends DisposableController
   /// [_outlineNodes] tree for the current [_scriptSelection] by
   /// collapsing and unselecting all nodes.
   void resetOutline() {
-    _outlineSelection.value = null;
+    _outlineSelection = null;
 
     for (final node in _outlineNodes.value) {
       breadthFirstTraversal<VMServiceObjectNode>(

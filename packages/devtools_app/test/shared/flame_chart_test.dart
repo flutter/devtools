@@ -2,20 +2,18 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app/src/screens/performance/performance_model.dart';
+import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/profiler/cpu_profile_controller.dart';
-import 'package:devtools_app/src/screens/profiler/cpu_profile_flame_chart.dart';
-import 'package:devtools_app/src/screens/profiler/cpu_profile_model.dart';
+import 'package:devtools_app/src/screens/profiler/panes/cpu_flame_chart.dart';
 import 'package:devtools_app/src/shared/charts/flame_chart.dart';
-import 'package:devtools_app/src/shared/config_specific/ide_theme/ide_theme.dart';
-import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_app/src/shared/primitives/flutter_widgets/linked_scroll_controller.dart';
-import 'package:devtools_app/src/shared/primitives/utils.dart';
 import 'package:devtools_app/src/shared/ui/colors.dart';
 import 'package:devtools_app/src/shared/ui/utils.dart';
+import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mockito/mockito.dart';
 
 import '../test_infra/test_data/cpu_profile.dart';
 import '../test_infra/test_data/performance.dart';
@@ -29,7 +27,7 @@ void main() {
   final narrowNode = FlameChartNode<TimelineEvent>(
     key: narrowNodeKey,
     text: 'Narrow test node',
-    rect: Rect.fromLTWH(23.0, 0.0, 21.9, rowHeight),
+    rect: Rect.fromLTWH(23.0, 0.0, 21.9, chartRowHeight),
     colorPair: ThemedColorPair.from(
       const ColorPair(background: Colors.blue, foreground: Colors.white),
     ),
@@ -42,7 +40,7 @@ void main() {
     key: testNodeKey,
     text: 'Test node 1',
     // 30.0 is the minimum node width for text.
-    rect: Rect.fromLTWH(70.0, 0.0, 30.0, rowHeight),
+    rect: Rect.fromLTWH(70.0, 0.0, 30.0, chartRowHeight),
     colorPair: ThemedColorPair.from(
       const ColorPair(background: Colors.blue, foreground: Colors.white),
     ),
@@ -53,7 +51,7 @@ void main() {
   final testNode2 = FlameChartNode<TimelineEvent>(
     key: narrowNodeKey,
     text: 'Test node 2',
-    rect: Rect.fromLTWH(120.0, 0.0, 50.0, rowHeight),
+    rect: Rect.fromLTWH(120.0, 0.0, 50.0, chartRowHeight),
     colorPair: ThemedColorPair.from(
       const ColorPair(background: Colors.blue, foreground: Colors.white),
     ),
@@ -64,7 +62,7 @@ void main() {
   final testNode3 = FlameChartNode<TimelineEvent>(
     key: narrowNodeKey,
     text: 'Test node 3',
-    rect: Rect.fromLTWH(180.0, 0.0, 50.0, rowHeight),
+    rect: Rect.fromLTWH(180.0, 0.0, 50.0, chartRowHeight),
     colorPair: ThemedColorPair.from(
       const ColorPair(background: Colors.blue, foreground: Colors.white),
     ),
@@ -75,7 +73,7 @@ void main() {
   final testNode4 = FlameChartNode<TimelineEvent>(
     key: narrowNodeKey,
     text: 'Test node 4',
-    rect: Rect.fromLTWH(240.0, 0.0, 300.0, rowHeight),
+    rect: Rect.fromLTWH(240.0, 0.0, 300.0, chartRowHeight),
     colorPair: ThemedColorPair.from(
       const ColorPair(background: Colors.blue, foreground: Colors.white),
     ),
@@ -94,7 +92,7 @@ void main() {
   final negativeWidthNode = FlameChartNode<TimelineEvent>(
     key: noWidthNodeKey,
     text: 'No-width node',
-    rect: Rect.fromLTWH(1.0, 0.0, -0.1, rowHeight),
+    rect: Rect.fromLTWH(1.0, 0.0, -0.1, chartRowHeight),
     colorPair: ThemedColorPair.from(
       const ColorPair(background: Colors.blue, foreground: Colors.white),
     ),
@@ -105,16 +103,8 @@ void main() {
   group('FlameChart', () {
     // Use an instance of [CpuProfileFlameChart] because the data is simple to
     // stub and [FlameChart] is an abstract class.
-    final controller = CpuProfilerController();
-    final flameChart = CpuProfileFlameChart(
-      data: CpuProfileData.parse(cpuProfileResponseJson),
-      width: 1000.0,
-      height: 1000.0,
-      selectionNotifier: ValueNotifier<CpuStackFrame?>(null),
-      searchMatchesNotifier: controller.searchMatches,
-      activeSearchMatchNotifier: controller.activeSearchMatch,
-      onDataSelected: (_) {},
-    );
+    late CpuProfilerController controller;
+    late CpuProfileFlameChart flameChart;
 
     Future<void> pumpFlameChart(WidgetTester tester) async {
       await tester.pumpWidget(
@@ -127,6 +117,28 @@ void main() {
         ),
       );
     }
+
+    setUp(() {
+      final connectedApp = MockConnectedApp();
+      setGlobal(ServiceConnectionManager, MockServiceConnectionManager());
+      when(serviceManager.connectedApp).thenReturn(connectedApp);
+      mockConnectedApp(
+        connectedApp,
+        isFlutterApp: true,
+        isProfileBuild: true,
+        isWebApp: false,
+      );
+      controller = CpuProfilerController();
+      flameChart = CpuProfileFlameChart(
+        data: CpuProfileData.parse(cpuProfileResponseJson),
+        width: 1000.0,
+        height: 1000.0,
+        selectionNotifier: ValueNotifier<CpuStackFrame?>(null),
+        searchMatchesNotifier: controller.searchMatches,
+        activeSearchMatchNotifier: controller.activeSearchMatch,
+        onDataSelected: (_) {},
+      );
+    });
 
     testWidgets('WASD keys zoom and update scroll position',
         (WidgetTester tester) async {

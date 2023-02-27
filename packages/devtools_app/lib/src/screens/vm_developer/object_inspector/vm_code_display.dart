@@ -6,16 +6,16 @@ import 'package:flutter/material.dart';
 import 'package:string_scanner/string_scanner.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../../../shared/common_widgets.dart';
 import '../../../shared/primitives/utils.dart';
+import '../../../shared/split.dart';
 import '../../../shared/table/table.dart';
 import '../../../shared/table/table_data.dart';
 import '../../../shared/theme.dart';
+import '../vm_developer_common_widgets.dart';
 import '../vm_service_private_extensions.dart';
 import 'object_inspector_view_controller.dart';
 import 'vm_object_model.dart';
-
-// TODO(bkonyi): remove once profile ticks are populated for instructions.
-const profilerTicksEnabled = false;
 
 abstract class _CodeColumnData extends ColumnData<Instruction> {
   _CodeColumnData(super.title, {required super.fixedWidthPx});
@@ -44,12 +44,36 @@ class _AddressColumn extends _CodeColumnData {
   }
 }
 
+// TODO(bkonyi): consider coloring the background similarly to how we indicate
+// code "hotness" in the debugger tab. To do this properly here, we'd need to
+// modify the table column padding logic to allow for custom column rendering
+// that can fill the entire column which is a can of worms I'd rather not open
+// for some rather niche functionality. We can revisit this once we can use the
+// table implementation from the Flutter framework.
 class _ProfileTicksColumn extends _CodeColumnData {
-  _ProfileTicksColumn(super.title) : super(fixedWidthPx: 80);
+  _ProfileTicksColumn(
+    super.title, {
+    required this.inclusive,
+    required this.ticks,
+  }) : super(fixedWidthPx: 140);
+
+  final bool inclusive;
+  final CpuProfilerTicksTable? ticks;
 
   @override
-  Object? getValue(Instruction dataObject) {
-    return '';
+  int? getValue(Instruction dataObject) {
+    if (ticks == null) return null;
+    final tick = ticks![dataObject.unpaddedAddress];
+    return inclusive ? tick?.inclusiveTicks : tick?.exclusiveTicks;
+  }
+
+  @override
+  String getDisplayValue(Instruction dataObject) {
+    final value = getValue(dataObject);
+    if (value == null) return '';
+
+    final percentage = percent2(value / ticks!.sampleCount);
+    return '$percentage ($value)';
   }
 }
 
@@ -157,67 +181,27 @@ class _InstructionColumn extends _CodeColumnData
   }
 }
 
-class _DartObjectColumn extends _CodeColumnData {
-  _DartObjectColumn() : super.wide('Object');
+class _DartObjectColumn extends _CodeColumnData
+    implements ColumnRenderer<Instruction> {
+  _DartObjectColumn({required this.controller}) : super.wide('Object');
+
+  final ObjectInspectorViewController controller;
 
   @override
-  String getValue(Instruction dataObject) =>
-      _objectToDisplayValue(dataObject.object);
+  Response? getValue(Instruction inst) => inst.object;
 
-  // TODO(bkonyi): verify this covers all cases.
-  String _objectToDisplayValue(Object? object) {
-    if (object is InstanceRef) {
-      final instance = object;
-      switch (instance.kind!) {
-        case InstanceKind.kNull:
-          return 'null';
-        case InstanceKind.kBool:
-          return instance.valueAsString!;
-        case InstanceKind.kList:
-          return 'List(${instance.length})';
-        case InstanceKind.kString:
-          return '"${instance.valueAsString}"';
-        case InstanceKind.kPlainInstance:
-          return 'TODO(PlainInstance)';
-        case InstanceKind.kClosure:
-          return instance.closureFunction!.name!;
-      }
-    }
-
-    if (object is FuncRef) {
-      final func = object;
-      return '${func.owner.name}.${func.name!}';
-    }
-
-    if (object is CodeRef) {
-      final code = object;
-      return code.name!;
-    }
-
-    if (object is FieldRef) {
-      final field = object;
-      return '${field.declaredType!.name} ${field.name}';
-    }
-
-    if (object is TypeArgumentsRef) {
-      final typeArgsRef = object;
-      return 'TypeArguments(${typeArgsRef.name!})';
-    }
-
-    // Note: this check should be last as [ObjRef] is a super type to most
-    // other types in package:vm_service.
-    if (object is ObjRef) {
-      final objRef = object;
-      if (objRef.isICData) {
-        final icData = objRef.asICData;
-        return 'ICData (${icData.selector})';
-      }
-      if (objRef.vmType != null) {
-        return objRef.vmType!;
-      }
-    }
-
-    return object?.toString() ?? '';
+  @override
+  Widget? build(
+    BuildContext context,
+    Instruction data, {
+    bool isRowSelected = false,
+    VoidCallback? onPressed,
+  }) {
+    if (data.object == null) return Container();
+    return VmServiceObjectLink(
+      object: data.object!,
+      onTap: controller.findAndSelectNodeForObject,
+    );
   }
 }
 
@@ -234,7 +218,51 @@ class VmCodeDisplay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CodeTable(code: code);
+    return Split(
+      initialFractions: const [0.4, 0.6],
+      axis: Axis.vertical,
+      children: [
+        OutlineDecoration.onlyBottom(
+          child: VmObjectDisplayBasicLayout(
+            controller: controller,
+            object: code,
+            generalDataRows: vmObjectGeneralDataRows(controller, code),
+            sideCardTitle: 'Code Details',
+            sideCardDataRows: _codeDetailRows(code),
+          ),
+        ),
+        OutlineDecoration.onlyTop(
+          child: CodeTable(
+            code: code,
+            controller: controller,
+            ticks: code.ticksTable,
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// Returns a list of key-value pairs (map entries)
+  /// containing detailed information of a VM Func object [function].
+  List<MapEntry<String, Widget Function(BuildContext)>> _codeDetailRows(
+    CodeObject code,
+  ) {
+    return [
+      selectableTextBuilderMapEntry(
+        'Kind',
+        code.obj.kind,
+      ),
+      serviceObjectLinkBuilderMapEntry(
+        controller: controller,
+        key: 'Function',
+        object: code.obj.function!,
+      ),
+      serviceObjectLinkBuilderMapEntry(
+        controller: controller,
+        key: 'Object Pool',
+        object: code.obj.objectPool,
+      ),
+    ];
   }
 }
 
@@ -242,19 +270,31 @@ class CodeTable extends StatelessWidget {
   CodeTable({
     Key? key,
     required this.code,
+    required this.controller,
+    required this.ticks,
   }) : super(key: key);
 
-  final columns = <ColumnData<Instruction>>[
+  late final columns = <ColumnData<Instruction>>[
     _AddressColumn(),
     _InstructionColumn(),
-    _DartObjectColumn(),
-    if (profilerTicksEnabled) ...[
-      _ProfileTicksColumn('Inclusive'),
-      _ProfileTicksColumn('Exclusive'),
+    _DartObjectColumn(controller: controller),
+    if (ticks != null) ...[
+      _ProfileTicksColumn(
+        'Total %',
+        ticks: code.ticksTable,
+        inclusive: true,
+      ),
+      _ProfileTicksColumn(
+        'Self %',
+        ticks: code.ticksTable,
+        inclusive: false,
+      ),
     ],
   ];
 
+  final ObjectInspectorViewController controller;
   final CodeObject code;
+  final CpuProfilerTicksTable? ticks;
 
   @override
   Widget build(BuildContext context) {
@@ -263,13 +303,57 @@ class CodeTable extends StatelessWidget {
       dataKey: 'vm-code-display',
       keyFactory: (instruction) => Key(instruction.address),
       columnGroups: [
-        ColumnGroup(title: 'Instructions', range: const Range(0, 3)),
-        if (profilerTicksEnabled)
-          ColumnGroup(title: 'Profiler Ticks', range: const Range(4, 6)),
+        ColumnGroup.fromText(title: 'Instructions', range: const Range(0, 3)),
+        if (ticks != null)
+          ColumnGroup.fromText(
+            title: 'Profiler Ticks',
+            range: const Range(3, 5),
+          ),
       ],
       columns: columns,
       defaultSortColumn: columns[0],
       defaultSortDirection: SortDirection.ascending,
     );
   }
+}
+
+/// A mapping of [Instruction] addresses to corresponding CPU profiler ticks.
+class CpuProfilerTicksTable {
+  CpuProfilerTicksTable.parse({
+    required this.sampleCount,
+    required List<dynamic> ticks,
+  }) : assert(ticks.length % 3 == 0) {
+    // Ticks are built up of groups of 3 elements:
+    // [address, exclusiveTicks, inclusiveTicks]
+    for (int i = 0; i < ticks.length; i += 3) {
+      _table[ticks[i] as String] = CodeTicks(
+        exclusiveTicks: ticks[i + 1],
+        inclusiveTicks: ticks[i + 2],
+      );
+    }
+  }
+
+  /// The total number of samples in the original [CpuSamples] response.
+  final int sampleCount;
+
+  /// Retrieves CPU profiler [CodeTicks] associated with a given [Instruction]
+  /// address.
+  ///
+  /// If no CPU samples were collected for a given instruction address, null is
+  /// returned.
+  CodeTicks? operator [](String address) => _table[address];
+
+  final _table = <String, CodeTicks>{};
+}
+
+/// Tracks inclusive and exclusive CPU profiler ticks for a single
+/// [Instruction].
+class CodeTicks {
+  const CodeTicks({
+    required this.inclusiveTicks,
+    required this.exclusiveTicks,
+  });
+
+  final int exclusiveTicks;
+  final int inclusiveTicks;
 }

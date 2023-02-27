@@ -11,6 +11,7 @@ import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/charts/flame_chart.dart';
 import '../../shared/common_widgets.dart';
 import '../../shared/dialogs.dart';
+import '../../shared/feature_flags.dart';
 import '../../shared/globals.dart';
 import '../../shared/primitives/auto_dispose.dart';
 import '../../shared/theme.dart';
@@ -19,11 +20,12 @@ import '../../shared/ui/filter.dart';
 import '../../shared/ui/search.dart';
 import '../../shared/ui/tab.dart';
 import '../../shared/utils.dart';
-import 'cpu_profile_bottom_up.dart';
-import 'cpu_profile_call_tree.dart';
 import 'cpu_profile_controller.dart';
-import 'cpu_profile_flame_chart.dart';
 import 'cpu_profile_model.dart';
+import 'panes/bottom_up.dart';
+import 'panes/call_tree.dart';
+import 'panes/cpu_flame_chart.dart';
+import 'panes/method_table.dart';
 
 // TODO(kenz): provide useful UI upon selecting a CPU stack frame.
 
@@ -39,11 +41,11 @@ class CpuProfiler extends StatefulWidget {
         tabs = [
           if (summaryView != null)
             _buildTab(key: summaryTab, tabName: 'Summary'),
-          if (!data.isEmpty) ...[
-            _buildTab(key: bottomUpTab, tabName: 'Bottom Up'),
-            _buildTab(key: callTreeTab, tabName: 'Call Tree'),
-            _buildTab(key: flameChartTab, tabName: 'CPU Flame Chart'),
-          ],
+          _buildTab(key: bottomUpTab, tabName: 'Bottom Up'),
+          _buildTab(key: callTreeTab, tabName: 'Call Tree'),
+          if (FeatureFlags.methodTable)
+            _buildTab(key: methodTableTab, tabName: 'Method Table'),
+          _buildTab(key: flameChartTab, tabName: 'CPU Flame Chart'),
         ];
 
   static DevToolsTab _buildTab({Key? key, required String tabName}) {
@@ -72,12 +74,14 @@ class CpuProfiler extends StatefulWidget {
 
   static const Key dataProcessingKey = Key('CpuProfiler - data is processing');
 
-  // When content of the selected DevToolsTab from the tab controller has this key,
-  // we will not show the expand/collapse buttons.
+  // When content of the selected DevToolsTab from the tab controller has any
+  // of these three keys, we will not show the expand/collapse buttons.
   static const Key flameChartTab = Key('cpu profile flame chart tab');
-  static const Key callTreeTab = Key('cpu profile call tree tab');
-  static const Key bottomUpTab = Key('cpu profile bottom up tab');
+  static const Key methodTableTab = Key('cpu profile method table tab');
   static const Key summaryTab = Key('cpu profile summary tab');
+
+  static const Key bottomUpTab = Key('cpu profile bottom up tab');
+  static const Key callTreeTab = Key('cpu profile call tree tab');
 
   @override
   _CpuProfilerState createState() => _CpuProfilerState();
@@ -151,9 +155,6 @@ class _CpuProfilerState extends State<CpuProfiler>
     final theme = Theme.of(context);
     final textTheme = theme.textTheme;
     final colorScheme = theme.colorScheme;
-    if (widget.tabs.isEmpty) {
-      return Container();
-    }
     final currentTab = widget.tabs[_tabController.index];
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -173,10 +174,11 @@ class _CpuProfilerState extends State<CpuProfiler>
             if (currentTab.key != CpuProfiler.summaryTab) ...[
               FilterButton(
                 onPressed: _showFilterDialog,
-                isFilterActive: widget.controller.isToggleFilterActive,
+                isFilterActive: widget.controller.isFilterActive,
               ),
               const SizedBox(width: denseSpacing),
-              if (currentTab.key != CpuProfiler.flameChartTab) ...[
+              if (currentTab.key != CpuProfiler.flameChartTab &&
+                  currentTab.key != CpuProfiler.methodTableTab) ...[
                 const DisplayTreeGuidelinesToggle(),
                 const SizedBox(width: denseSpacing),
               ],
@@ -230,7 +232,8 @@ class _CpuProfilerState extends State<CpuProfiler>
               ),
             ],
             if (currentTab.key != CpuProfiler.flameChartTab &&
-                currentTab.key != CpuProfiler.summaryTab) ...[
+                currentTab.key != CpuProfiler.summaryTab &&
+                currentTab.key != CpuProfiler.methodTableTab) ...[
               // TODO(kenz): add a switch to order samples by user tag here
               // instead of using the filter control. This will allow users
               // to see all the tags side by side in the tree tables.
@@ -319,6 +322,9 @@ class _CpuProfilerState extends State<CpuProfiler>
         },
       ),
     );
+    const methodTable = KeepAliveWrapper(
+      child: CpuMethodTable(),
+    );
     final cpuFlameChart = KeepAliveWrapper(
       child: LayoutBuilder(
         builder: (context, constraints) {
@@ -338,11 +344,10 @@ class _CpuProfilerState extends State<CpuProfiler>
     // TODO(kenz): make this order configurable.
     return [
       if (summaryView != null) summaryView,
-      if (!data.isEmpty) ...[
-        bottomUp,
-        callTree,
-        cpuFlameChart,
-      ],
+      bottomUp,
+      callTree,
+      if (FeatureFlags.methodTable) methodTable,
+      cpuFlameChart,
     ];
   }
 
@@ -463,37 +468,33 @@ class DisplayTreeGuidelinesToggle extends StatelessWidget {
 }
 
 class CpuProfileFilterDialog extends StatelessWidget {
-  CpuProfileFilterDialog({
-    required this.controller,
-    Key? key,
-  })  : oldToggleFilterValues = List.generate(
-          controller.toggleFilters.length,
-          (index) => controller.toggleFilters[index].enabled.value,
-        ),
-        super(key: key);
+  const CpuProfileFilterDialog({required this.controller, Key? key})
+      : super(key: key);
+
+  static const filterQueryInstructions = '''
+Type a filter query to show or hide specific stack frames.
+
+Any text that is not paired with an available filter key below will be queried against all categories (method, uri).
+
+Available filters:
+    'uri', 'u'       (e.g. 'uri:my_dart_package/some_lib.dart', '-u:some_lib_to_hide')
+
+Example queries:
+    'someMethodName uri:my_dart_package,b_dart_package'
+    '.toString -uri:flutter'
+''';
 
   double get _filterDialogWidth => scaleByFontFactor(400.0);
 
   final CpuProfilerController controller;
 
-  final List<bool> oldToggleFilterValues;
-
   @override
   Widget build(BuildContext context) {
-    return FilterDialog<CpuProfilerController, CpuStackFrame>(
-      includeQueryFilter: false,
+    return FilterDialog<CpuStackFrame>(
       dialogWidth: _filterDialogWidth,
       controller: controller,
-      onCancel: restoreOldValues,
-      toggleFilters: controller.toggleFilters,
+      queryInstructions: filterQueryInstructions,
     );
-  }
-
-  void restoreOldValues() {
-    for (var i = 0; i < controller.toggleFilters.length; i++) {
-      final filter = controller.toggleFilters[i];
-      filter.enabled.value = oldToggleFilterValues[i];
-    }
   }
 }
 

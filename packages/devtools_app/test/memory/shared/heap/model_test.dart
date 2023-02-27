@@ -71,6 +71,7 @@ void main() {
         )
       ],
       rootIndex: 0,
+      isolateId: '',
       created: DateTime(2000),
     ).toJson();
 

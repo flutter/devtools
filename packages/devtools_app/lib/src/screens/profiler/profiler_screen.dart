@@ -146,10 +146,10 @@ class _ProfilerScreenBodyState extends State<ProfilerScreenBody>
   }
 
   Widget _buildProfilerScreenBody(ProfilerScreenController controller) {
-    final emptyAppStartUpProfileView = Center(
+    const emptyAppStartUpProfileView = Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
-        children: const [
+        children: [
           Text(
             'There are no app start up samples available.',
             textAlign: TextAlign.center,
@@ -194,7 +194,8 @@ class _ProfilerScreenBodyState extends State<ProfilerScreenBody>
                     CpuProfilerController.emptyAppStartUpProfile) {
                   return emptyAppStartUpProfileView;
                 }
-                if (cpuProfileData.isEmpty) {
+                if (cpuProfileData.isEmpty &&
+                    !controller.cpuProfilerController.isFilterActive) {
                   return emptyProfileView;
                 }
                 return CpuProfiler(

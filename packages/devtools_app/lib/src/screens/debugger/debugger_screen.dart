@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:codicon/codicon.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide Stack;
+import 'package:flutter/scheduler.dart';
 import 'package:provider/provider.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -19,6 +20,7 @@ import '../../shared/globals.dart';
 import '../../shared/primitives/auto_dispose.dart';
 import '../../shared/primitives/listenable.dart';
 import '../../shared/primitives/simple_items.dart';
+import '../../shared/routing.dart';
 import '../../shared/screen.dart';
 import '../../shared/split.dart';
 import '../../shared/theme.dart';
@@ -114,6 +116,16 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
     ga.screen(DebuggerScreen.id);
     ga.timeStart(DebuggerScreen.id, gac.pageReady);
     _shownFirstScript = false;
+    SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
+      if (!_shownFirstScript) return;
+      final routerDelegate = DevToolsRouterDelegate.of(context);
+      routerDelegate.updateStateIfChanged(
+        CodeViewSourceLocationNavigationState(
+          script: controller.codeViewController.currentScriptRef.value!,
+          line: 0,
+        ),
+      );
+    });
   }
 
   @override
@@ -204,10 +216,16 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
   void _onNodeSelected(VMServiceObjectNode? node) {
     final location = node?.location;
     if (location != null) {
-      controller.codeViewController.showScriptLocation(
-        location,
-        focusLine: true,
-      );
+      final routerDelegate = DevToolsRouterDelegate.of(context);
+      Router.navigate(context, () {
+        routerDelegate.updateStateIfChanged(
+          CodeViewSourceLocationNavigationState(
+            script: location.scriptRef,
+            line: location.location?.line ?? 0,
+            object: node!.object,
+          ),
+        );
+      });
     }
   }
 
@@ -382,7 +400,7 @@ class _DebuggerStatusState extends State<DebuggerStatus> with AutoDisposeMixin {
 
   void _updateStatusOnPause() {
     addAutoDisposeListener(
-      serviceManager.isolateManager.mainIsolateState!.isPaused,
+      serviceManager.isolateManager.mainIsolateState?.isPaused,
       () => unawaited(
         _updateStatus(),
       ),
@@ -459,7 +477,7 @@ class _FloatingDebuggerControlsState extends State<FloatingDebuggerControls>
 
     controlHeight = _isPaused ? defaultButtonHeight : 0.0;
     addAutoDisposeListener(
-        serviceManager.isolateManager.mainIsolateState!.isPaused, () {
+        serviceManager.isolateManager.mainIsolateState?.isPaused, () {
       setState(() {
         if (_isPaused) {
           controlHeight = defaultButtonHeight;

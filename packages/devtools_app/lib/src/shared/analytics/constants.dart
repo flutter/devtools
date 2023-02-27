@@ -195,12 +195,15 @@ class MemoryEvent {
 
   static const diffSnapshotFilterType = 'diffSnapshotFilterType';
   static const diffSnapshotFilterReset = 'diffSnapshotFilterReset';
+
+  static const browseRefLimit = 'browseRefLimit';
 }
 
 /// Areas of memory screen, to prefix event names, when events are emitted
 /// by a widget used in different contexts.
 enum MemoryAreas {
   snapshotSingle('single'),
+  snapshotDiff('diff'),
   snapshotDiffDelta('diff-delta'),
   snapshotDiffNew('diff-new'),
   ;

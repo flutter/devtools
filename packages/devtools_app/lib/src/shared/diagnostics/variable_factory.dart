@@ -4,16 +4,16 @@
 
 import 'dart:async';
 import 'dart:convert';
+import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 import 'package:stack_trace/stack_trace.dart' as stack_trace;
 import 'package:vm_service/vm_service.dart';
 
-import '../primitives/utils.dart';
+import '../vm_utils.dart';
 import 'dart_object_node.dart';
 import 'diagnostics_node.dart';
-import 'generic_instance_reference.dart';
 import 'inspector_service.dart';
 
 List<DartObjectNode> createVariablesForStackTrace(
@@ -327,11 +327,10 @@ Future<List<DartObjectNode>> createVariablesForDiagnostics(
   return variables.isNotEmpty ? await Future.wait(variables) : const [];
 }
 
-List<DartObjectNode> createVariablesForAssociations(
+List<DartObjectNode> createVariablesForMap(
   Instance instance,
-  IsolateRef? isolateRef, {
-  required bool asReferences,
-}) {
+  IsolateRef? isolateRef,
+) {
   //TODO(polina-c): handle asReferences
   final variables = <DartObjectNode>[];
   final associations = instance.associations ?? [];
@@ -346,6 +345,7 @@ List<DartObjectNode> createVariablesForAssociations(
   );
   for (var i = 0; i < associations.length; i++) {
     final association = associations[i];
+
     if (association.key is! InstanceRef) {
       continue;
     }
@@ -365,7 +365,7 @@ List<DartObjectNode> createVariablesForAssociations(
         artificialName: true,
       );
       final value = DartObjectNode.fromValue(
-        name: '[value]',
+        name: '[val]', // `val`, not `value`, to align keys and values visually
         value: association.value,
         isolateRef: isolateRef,
         artificialName: true,
@@ -461,36 +461,44 @@ List<DartObjectNode> createVariablesForBytes(
   return variables;
 }
 
-List<DartObjectNode> createVariablesForElements(
+List<DartObjectNode> createVariablesForList(
   Instance instance,
-  IsolateRef? isolateRef, {
-  required bool asReferences,
-}) {
+  IsolateRef? isolateRef,
+) {
   final variables = <DartObjectNode>[];
   final elements = instance.elements ?? [];
   for (int i = 0; i < elements.length; i++) {
     final index = instance.offset == null ? i : i + instance.offset!;
     final name = '[$index]${instance.classRef!.name}';
 
-    final DartObjectNode node;
-    if (asReferences) {
-      node = DartObjectNode.references(
-        name,
-        ObjectReferences(
-          refNodeType: RefNodeType.liveOutRefs,
-          isolateRef: isolateRef,
-          value: elements[i],
-        ),
-      );
-    } else {
-      node = DartObjectNode.fromValue(
+    variables.add(
+      DartObjectNode.fromValue(
         name: name,
         value: elements[i],
         isolateRef: isolateRef,
         artificialName: true,
-      );
-    }
-    variables.add(node);
+      ),
+    );
+  }
+  return variables;
+}
+
+List<DartObjectNode> createVariablesForInstanceSet(
+  int offset,
+  int childCount,
+  List<ObjRef> instances,
+  IsolateRef? isolateRef,
+) {
+  final variables = <DartObjectNode>[];
+  final loopLimit = min(offset + childCount, instances.length);
+  for (int i = offset; i < loopLimit; i++) {
+    variables.add(
+      DartObjectNode.fromValue(
+        name: '[$i]',
+        value: instances[i],
+        isolateRef: isolateRef,
+      ),
+    );
   }
   return variables;
 }
@@ -512,12 +520,12 @@ List<DartObjectNode> createVariablesForRecords(
   _sortPositionalFields(positionalFields);
   return [
     // Always show positional fields before named fields:
-    for (final field in positionalFields)
+    for (var i = 0; i < positionalFields.length; i++)
       DartObjectNode.fromValue(
-        // Positional fields are designated by their getter syntax, eg $0, $1,
-        // $2, etc:
-        name: '\$${field.name}',
-        value: field.value,
+        // Positional fields are designated by their getter syntax, eg $1, $2,
+        // $3, etc:
+        name: '\$${i + 1}',
+        value: positionalFields[i].value,
         isolateRef: isolateRef,
       ),
     for (final field in namedFields)
@@ -544,28 +552,8 @@ List<DartObjectNode> createVariablesForFields(
   Instance instance,
   IsolateRef? isolateRef, {
   Set<String>? existingNames,
-  required bool asReferences,
 }) {
   final result = <DartObjectNode>[];
-
-  if (asReferences) {
-    for (var field in instance.fields!) {
-      final value = field.value;
-      if (value is InstanceRef) {
-        result.add(
-          DartObjectNode.references(
-            value.classRef?.name ?? '?',
-            ObjectReferences(
-              refNodeType: RefNodeType.liveOutRefs,
-              isolateRef: isolateRef,
-              value: field.value,
-            ),
-          ),
-        );
-      }
-    }
-    return result;
-  }
 
   for (var field in instance.fields!) {
     final name = field.decl?.name;

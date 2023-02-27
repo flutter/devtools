@@ -3,14 +3,16 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app/devtools_app.dart';
-import 'package:devtools_app/src/screens/profiler/cpu_profile_bottom_up.dart';
-import 'package:devtools_app/src/screens/profiler/cpu_profile_call_tree.dart';
 import 'package:devtools_app/src/screens/profiler/cpu_profile_controller.dart';
-import 'package:devtools_app/src/screens/profiler/cpu_profile_flame_chart.dart';
 import 'package:devtools_app/src/screens/profiler/cpu_profile_transformer.dart';
 import 'package:devtools_app/src/screens/profiler/cpu_profiler.dart';
+import 'package:devtools_app/src/screens/profiler/panes/bottom_up.dart';
+import 'package:devtools_app/src/screens/profiler/panes/call_tree.dart';
+import 'package:devtools_app/src/screens/profiler/panes/cpu_flame_chart.dart';
+import 'package:devtools_app/src/screens/profiler/panes/method_table.dart';
 import 'package:devtools_app/src/shared/charts/flame_chart.dart';
 import 'package:devtools_app/src/shared/config_specific/import_export/import_export.dart';
+import 'package:devtools_app/src/shared/feature_flags.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -19,6 +21,7 @@ import 'package:vm_service/vm_service.dart';
 
 import '../test_infra/matchers/matchers.dart';
 import '../test_infra/test_data/cpu_profile.dart';
+import '../test_infra/utils/test_utils.dart';
 
 void main() {
   late CpuProfiler cpuProfiler;
@@ -32,6 +35,11 @@ void main() {
   when(app.isDebugFlutterAppNow).thenReturn(false);
 
   setUp(() async {
+    FeatureFlags.methodTable = true;
+
+    setCharacterWidthForTables();
+    setGlobal(ServiceConnectionManager, fakeServiceManager);
+
     final transformer = CpuProfileTransformer();
     controller = CpuProfilerController();
     cpuProfileData = CpuProfileData.parse(goldenCpuProfileDataJson);
@@ -41,7 +49,6 @@ void main() {
     );
 
     setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
-    setGlobal(ServiceConnectionManager, fakeServiceManager);
     setGlobal(OfflineModeController, OfflineModeController());
     setGlobal(NotificationService, NotificationService());
     setGlobal(PreferencesController, PreferencesController());
@@ -49,6 +56,12 @@ void main() {
     final mockScriptManager = MockScriptManager();
     when(mockScriptManager.sortedScripts).thenReturn(
       ValueNotifier<List<ScriptRef>>([]),
+    );
+    when(mockScriptManager.scriptRefForUri(any)).thenReturn(
+      ScriptRef(
+        uri: 'package:test/script.dart',
+        id: 'script.dart',
+      ),
     );
     setGlobal(ScriptManager, mockScriptManager);
   });
@@ -68,20 +81,22 @@ void main() {
           searchFieldKey: searchFieldKey,
         );
         await tester.pumpWidget(wrap(cpuProfiler));
-        expect(find.byType(TabBar), findsNothing);
+        expect(find.byType(TabBar), findsOneWidget);
         expect(find.byKey(CpuProfiler.dataProcessingKey), findsNothing);
-        expect(find.byType(CpuProfileFlameChart), findsNothing);
+        expect(find.byType(CpuBottomUpTable), findsOneWidget);
         expect(find.byType(CpuCallTreeTable), findsNothing);
-        expect(find.byType(CpuBottomUpTable), findsNothing);
-        expect(find.byType(DisplayTreeGuidelinesToggle), findsNothing);
-        expect(find.byType(UserTagDropdown), findsNothing);
-        expect(find.byType(ExpandAllButton), findsNothing);
-        expect(find.byType(CollapseAllButton), findsNothing);
+        expect(find.byType(CpuMethodTable), findsNothing);
+        expect(find.byType(CpuProfileFlameChart), findsNothing);
+        expect(find.byType(DisplayTreeGuidelinesToggle), findsOneWidget);
+        expect(find.byType(UserTagDropdown), findsOneWidget);
+        expect(find.byType(ExpandAllButton), findsOneWidget);
+        expect(find.byType(CollapseAllButton), findsOneWidget);
         expect(find.byType(FlameChartHelpButton), findsNothing);
         expect(find.byKey(searchFieldKey), findsNothing);
-        expect(find.byKey(CpuProfiler.flameChartTab), findsNothing);
-        expect(find.byKey(CpuProfiler.callTreeTab), findsNothing);
-        expect(find.byKey(CpuProfiler.bottomUpTab), findsNothing);
+        expect(find.byKey(CpuProfiler.bottomUpTab), findsOneWidget);
+        expect(find.byKey(CpuProfiler.callTreeTab), findsOneWidget);
+        expect(find.byKey(CpuProfiler.methodTableTab), findsOneWidget);
+        expect(find.byKey(CpuProfiler.flameChartTab), findsOneWidget);
         expect(find.byKey(CpuProfiler.summaryTab), findsNothing);
       },
     );
@@ -101,18 +116,20 @@ void main() {
         await tester.pumpWidget(wrap(cpuProfiler));
         expect(find.byType(TabBar), findsOneWidget);
         expect(find.byKey(CpuProfiler.dataProcessingKey), findsNothing);
-        expect(find.byType(CpuProfileFlameChart), findsNothing);
-        expect(find.byType(CpuCallTreeTable), findsNothing);
         expect(find.byType(CpuBottomUpTable), findsNothing);
+        expect(find.byType(CpuCallTreeTable), findsNothing);
+        expect(find.byType(CpuMethodTable), findsNothing);
+        expect(find.byType(CpuProfileFlameChart), findsNothing);
         expect(find.byType(DisplayTreeGuidelinesToggle), findsNothing);
         expect(find.byType(UserTagDropdown), findsNothing);
         expect(find.byType(ExpandAllButton), findsNothing);
         expect(find.byType(CollapseAllButton), findsNothing);
         expect(find.byType(FlameChartHelpButton), findsNothing);
         expect(find.byKey(searchFieldKey), findsNothing);
-        expect(find.byKey(CpuProfiler.flameChartTab), findsNothing);
-        expect(find.byKey(CpuProfiler.callTreeTab), findsNothing);
-        expect(find.byKey(CpuProfiler.bottomUpTab), findsNothing);
+        expect(find.byKey(CpuProfiler.bottomUpTab), findsOneWidget);
+        expect(find.byKey(CpuProfiler.callTreeTab), findsOneWidget);
+        expect(find.byKey(CpuProfiler.methodTableTab), findsOneWidget);
+        expect(find.byKey(CpuProfiler.flameChartTab), findsOneWidget);
         expect(find.byKey(CpuProfiler.summaryTab), findsOneWidget);
         expect(find.byKey(summaryViewKey), findsOneWidget);
       },
@@ -137,9 +154,10 @@ void main() {
         expect(find.byType(CollapseAllButton), findsOneWidget);
         expect(find.byType(FlameChartHelpButton), findsNothing);
         expect(find.byKey(searchFieldKey), findsNothing);
-        expect(find.byKey(CpuProfiler.flameChartTab), findsOneWidget);
-        expect(find.byKey(CpuProfiler.callTreeTab), findsOneWidget);
         expect(find.byKey(CpuProfiler.bottomUpTab), findsOneWidget);
+        expect(find.byKey(CpuProfiler.callTreeTab), findsOneWidget);
+        expect(find.byKey(CpuProfiler.methodTableTab), findsOneWidget);
+        expect(find.byKey(CpuProfiler.flameChartTab), findsOneWidget);
         expect(find.byKey(CpuProfiler.summaryTab), findsNothing);
       },
     );
@@ -165,9 +183,10 @@ void main() {
         expect(find.byType(CollapseAllButton), findsNothing);
         expect(find.byType(FlameChartHelpButton), findsNothing);
         expect(find.byKey(searchFieldKey), findsNothing);
-        expect(find.byKey(CpuProfiler.flameChartTab), findsOneWidget);
-        expect(find.byKey(CpuProfiler.callTreeTab), findsOneWidget);
         expect(find.byKey(CpuProfiler.bottomUpTab), findsOneWidget);
+        expect(find.byKey(CpuProfiler.callTreeTab), findsOneWidget);
+        expect(find.byKey(CpuProfiler.methodTableTab), findsOneWidget);
+        expect(find.byKey(CpuProfiler.flameChartTab), findsOneWidget);
         expect(find.byKey(CpuProfiler.summaryTab), findsOneWidget);
       },
     );
@@ -176,7 +195,8 @@ void main() {
       late ProfilerScreenController controller;
 
       Future<void> loadData() async {
-        for (final filter in controller.cpuProfilerController.toggleFilters) {
+        for (final filter in controller
+            .cpuProfilerController.activeFilter.value.toggleFilters) {
           filter.enabled.value = false;
         }
         final data = CpuProfilePair(
@@ -315,9 +335,10 @@ void main() {
         await tester.pumpWidget(wrap(cpuProfiler));
         expect(find.byType(TabBar), findsOneWidget);
         expect(find.byKey(CpuProfiler.dataProcessingKey), findsNothing);
-        expect(find.byType(CpuProfileFlameChart), findsNothing);
-        expect(find.byType(CpuCallTreeTable), findsNothing);
         expect(find.byType(CpuBottomUpTable), findsOneWidget);
+        expect(find.byType(CpuCallTreeTable), findsNothing);
+        expect(find.byType(CpuMethodTable), findsNothing);
+        expect(find.byType(CpuProfileFlameChart), findsNothing);
         expect(find.byType(FilterButton), findsOneWidget);
         expect(find.byType(DisplayTreeGuidelinesToggle), findsOneWidget);
         expect(find.byType(UserTagDropdown), findsOneWidget);
@@ -329,9 +350,10 @@ void main() {
 
         await tester.tap(find.text('Call Tree'));
         await tester.pumpAndSettle();
-        expect(find.byType(CpuProfileFlameChart), findsNothing);
-        expect(find.byType(CpuCallTreeTable), findsOneWidget);
         expect(find.byType(CpuBottomUpTable), findsNothing);
+        expect(find.byType(CpuCallTreeTable), findsOneWidget);
+        expect(find.byType(CpuMethodTable), findsNothing);
+        expect(find.byType(CpuProfileFlameChart), findsNothing);
         expect(find.byType(FilterButton), findsOneWidget);
         expect(find.byType(DisplayTreeGuidelinesToggle), findsOneWidget);
         expect(find.byType(UserTagDropdown), findsOneWidget);
@@ -341,11 +363,27 @@ void main() {
         expect(find.byType(ModeDropdown), findsNothing);
         expect(find.byKey(searchFieldKey), findsNothing);
 
+        await tester.tap(find.text('Method Table'));
+        await tester.pumpAndSettle();
+        expect(find.byType(CpuBottomUpTable), findsNothing);
+        expect(find.byType(CpuCallTreeTable), findsNothing);
+        expect(find.byType(CpuMethodTable), findsOneWidget);
+        expect(find.byType(CpuProfileFlameChart), findsNothing);
+        expect(find.byType(FilterButton), findsOneWidget);
+        expect(find.byType(DisplayTreeGuidelinesToggle), findsNothing);
+        expect(find.byType(UserTagDropdown), findsOneWidget);
+        expect(find.byType(ExpandAllButton), findsNothing);
+        expect(find.byType(CollapseAllButton), findsNothing);
+        expect(find.byType(FlameChartHelpButton), findsNothing);
+        expect(find.byType(ModeDropdown), findsNothing);
+        expect(find.byKey(searchFieldKey), findsNothing);
+
         await tester.tap(find.text('CPU Flame Chart'));
         await tester.pumpAndSettle();
-        expect(find.byType(CpuProfileFlameChart), findsOneWidget);
-        expect(find.byType(CpuCallTreeTable), findsNothing);
         expect(find.byType(CpuBottomUpTable), findsNothing);
+        expect(find.byType(CpuCallTreeTable), findsNothing);
+        expect(find.byType(CpuMethodTable), findsNothing);
+        expect(find.byType(CpuProfileFlameChart), findsOneWidget);
         expect(find.byType(FilterButton), findsOneWidget);
         expect(find.byType(DisplayTreeGuidelinesToggle), findsNothing);
         expect(find.byType(UserTagDropdown), findsOneWidget);
@@ -590,12 +628,12 @@ void main() {
             equals(250),
           );
 
-          expect(find.richText('Frame1'), findsOneWidget);
-          expect(find.richText('Frame2'), findsOneWidget);
-          expect(find.richText('Frame3'), findsOneWidget);
-          expect(find.richText('Frame4'), findsOneWidget);
-          expect(find.richText('Frame5'), findsOneWidget);
-          expect(find.richText('Frame6'), findsOneWidget);
+          expect(find.richTextContaining('Frame1'), findsOneWidget);
+          expect(find.richTextContaining('Frame2'), findsOneWidget);
+          expect(find.richTextContaining('Frame3'), findsOneWidget);
+          expect(find.richTextContaining('Frame4'), findsOneWidget);
+          expect(find.richTextContaining('Frame5'), findsOneWidget);
+          expect(find.richTextContaining('Frame6'), findsOneWidget);
           expect(find.text('userTagA'), findsNothing);
           expect(find.text('userTagB'), findsNothing);
           expect(find.text('userTagC'), findsNothing);
@@ -611,12 +649,12 @@ void main() {
                 .cpuProfileData!.profileMetaData.time!.duration.inMicroseconds,
             equals(100),
           );
-          expect(find.text('Frame1'), findsNothing);
-          expect(find.richText('Frame2'), findsOneWidget);
-          expect(find.text('Frame3'), findsNothing);
-          expect(find.text('Frame4'), findsNothing);
-          expect(find.richText('Frame5'), findsOneWidget);
-          expect(find.text('Frame6'), findsNothing);
+          expect(find.richTextContaining('Frame1'), findsNothing);
+          expect(find.richTextContaining('Frame2'), findsOneWidget);
+          expect(find.richTextContaining('Frame3'), findsNothing);
+          expect(find.richTextContaining('Frame4'), findsNothing);
+          expect(find.richTextContaining('Frame5'), findsOneWidget);
+          expect(find.richTextContaining('Frame6'), findsNothing);
           expect(find.text('userTagA'), findsNothing);
           expect(find.text('userTagB'), findsNothing);
           expect(find.text('userTagC'), findsNothing);
@@ -632,12 +670,12 @@ void main() {
                 .cpuProfileData!.profileMetaData.time!.duration.inMicroseconds,
             equals(50),
           );
-          expect(find.text('Frame1'), findsNothing);
-          expect(find.richText('Frame2'), findsOneWidget);
-          expect(find.text('Frame3'), findsNothing);
-          expect(find.text('Frame4'), findsNothing);
-          expect(find.text('Frame5'), findsNothing);
-          expect(find.text('Frame6'), findsNothing);
+          expect(find.richTextContaining('Frame1'), findsNothing);
+          expect(find.richTextContaining('Frame2'), findsOneWidget);
+          expect(find.richTextContaining('Frame3'), findsNothing);
+          expect(find.richTextContaining('Frame4'), findsNothing);
+          expect(find.richTextContaining('Frame5'), findsNothing);
+          expect(find.richTextContaining('Frame6'), findsNothing);
           expect(find.text('userTagA'), findsNothing);
           expect(find.text('userTagB'), findsNothing);
           expect(find.text('userTagC'), findsNothing);
@@ -653,12 +691,12 @@ void main() {
                 .cpuProfileData!.profileMetaData.time!.duration.inMicroseconds,
             equals(100),
           );
-          expect(find.text('Frame1'), findsNothing);
-          expect(find.text('Frame2'), findsNothing);
-          expect(find.text('Frame3'), findsNothing);
-          expect(find.text('Frame4'), findsNothing);
-          expect(find.richText('Frame5'), findsOneWidget);
-          expect(find.richText('Frame6'), findsOneWidget);
+          expect(find.richTextContaining('Frame1'), findsNothing);
+          expect(find.richTextContaining('Frame2'), findsNothing);
+          expect(find.richTextContaining('Frame3'), findsNothing);
+          expect(find.richTextContaining('Frame4'), findsNothing);
+          expect(find.richTextContaining('Frame5'), findsOneWidget);
+          expect(find.richTextContaining('Frame6'), findsOneWidget);
           expect(find.text('userTagA'), findsNothing);
           expect(find.text('userTagB'), findsNothing);
           expect(find.text('userTagC'), findsNothing);
@@ -673,7 +711,8 @@ void main() {
         controller = ProfilerScreenController();
         preferences.toggleVmDeveloperMode(true);
         cpuProfileData = CpuProfileData.parse(cpuProfileDataWithUserTagsJson);
-        for (final filter in controller.cpuProfilerController.toggleFilters) {
+        for (final filter in controller
+            .cpuProfilerController.activeFilter.value.toggleFilters) {
           filter.enabled.value = false;
         }
         final data = CpuProfilePair(
@@ -717,12 +756,12 @@ void main() {
         await tester.tap(find.text('Expand All'));
         await tester.pumpAndSettle();
 
-        expect(find.richText('Frame1'), findsNWidgets(3));
-        expect(find.richText('Frame2'), findsNWidgets(2));
-        expect(find.richText('Frame3'), findsNWidgets(1));
-        expect(find.richText('Frame4'), findsNWidgets(1));
-        expect(find.richText('Frame5'), findsNWidgets(2));
-        expect(find.richText('Frame6'), findsNWidgets(1));
+        expect(find.richTextContaining('Frame1'), findsNWidgets(3));
+        expect(find.richTextContaining('Frame2'), findsNWidgets(2));
+        expect(find.richTextContaining('Frame3'), findsNWidgets(1));
+        expect(find.richTextContaining('Frame4'), findsNWidgets(1));
+        expect(find.richTextContaining('Frame5'), findsNWidgets(2));
+        expect(find.richTextContaining('Frame6'), findsNWidgets(1));
         expect(find.richText('userTagA'), findsOneWidget);
         expect(find.richText('userTagB'), findsOneWidget);
         expect(find.richText('userTagC'), findsOneWidget);
@@ -749,12 +788,12 @@ void main() {
         await tester.tap(find.text('Expand All'));
         await tester.pumpAndSettle();
 
-        expect(find.richText('Frame1'), findsNWidgets(3));
-        expect(find.richText('Frame2'), findsNWidgets(2));
-        expect(find.richText('Frame3'), findsNWidgets(1));
-        expect(find.richText('Frame4'), findsNWidgets(1));
-        expect(find.richText('Frame5'), findsNWidgets(2));
-        expect(find.richText('Frame6'), findsNWidgets(1));
+        expect(find.richTextContaining('Frame1'), findsNWidgets(3));
+        expect(find.richTextContaining('Frame2'), findsNWidgets(2));
+        expect(find.richTextContaining('Frame3'), findsNWidgets(1));
+        expect(find.richTextContaining('Frame4'), findsNWidgets(1));
+        expect(find.richTextContaining('Frame5'), findsNWidgets(2));
+        expect(find.richTextContaining('Frame6'), findsNWidgets(1));
         expect(find.richText('vmTagA'), findsOneWidget);
         expect(find.richText('vmTagB'), findsOneWidget);
         expect(find.richText('vmTagC'), findsOneWidget);

@@ -17,7 +17,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
-import 'package:vm_service/vm_service.dart';
 
 bool isPrivate(String member) => member.startsWith('_');
 
@@ -186,29 +185,6 @@ int log2(num x) => logBase(x: x.floor(), base: 2).floor();
 
 int roundToNearestPow10(int x) =>
     pow(10, logBase(x: x, base: 10).ceil()).floor();
-
-String isolateName(IsolateRef ref) {
-  // analysis_server.dart.snapshot$main
-  String name = ref.name!;
-  name = name.replaceFirst(r'.snapshot', '');
-  if (name.contains(r'.dart$')) {
-    name = name + '()';
-  }
-  return name;
-}
-
-String? funcRefName(FuncRef ref) {
-  if (ref.owner is LibraryRef) {
-    //(ref.owner as LibraryRef).uri;
-    return ref.name;
-  } else if (ref.owner is ClassRef) {
-    return '${ref.owner.name}.${ref.name}';
-  } else if (ref.owner is FuncRef) {
-    return '${funcRefName(ref.owner as FuncRef)}.${ref.name}';
-  } else {
-    return ref.name;
-  }
-}
 
 void executeWithDelay(
   Duration delay,
@@ -1550,14 +1526,6 @@ extension UriExtension on Uri {
 
 Iterable<T> removeNullValues<T>(Iterable<T?> values) {
   return values.whereType<T>();
-}
-
-bool isPrimativeInstanceKind(String? kind) {
-  return kind == InstanceKind.kBool ||
-      kind == InstanceKind.kDouble ||
-      kind == InstanceKind.kInt ||
-      kind == InstanceKind.kNull ||
-      kind == InstanceKind.kString;
 }
 
 // TODO(mtaylee): Prefer to use this helper method whenever a call to

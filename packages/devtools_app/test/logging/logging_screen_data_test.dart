@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 @TestOn('vm')
-
 import 'package:ansicolor/ansicolor.dart';
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/logging/_log_details.dart';
@@ -14,7 +13,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 
 void main() async {
-  final MockLoggingController mockLoggingController = MockLoggingController();
+  late MockLoggingController mockLoggingController;
   const windowSize = Size(1000.0, 1000.0);
   final fakeServiceManager = FakeServiceManager();
 
@@ -27,18 +26,17 @@ void main() async {
     );
   }
 
-  when(fakeServiceManager.connectedApp!.isFlutterWebAppNow).thenReturn(false);
-  when(fakeServiceManager.connectedApp!.isProfileBuildNow).thenReturn(false);
-  when(fakeServiceManager.errorBadgeManager.errorCountNotifier('logging'))
-      .thenReturn(ValueNotifier<int>(0));
-  setGlobal(ServiceConnectionManager, fakeServiceManager);
-  setGlobal(NotificationService, NotificationService());
-  setGlobal(IdeTheme, IdeTheme());
-
   setUp(() {
-    mockLoggingController.data = fakeLogData;
-    mockLoggingController.filteredData.clear();
-    mockLoggingController.filteredData.addAll(fakeLogData);
+    mockLoggingController =
+        createMockLoggingControllerWithDefaults(data: fakeLogData);
+
+    when(fakeServiceManager.connectedApp!.isFlutterWebAppNow).thenReturn(false);
+    when(fakeServiceManager.connectedApp!.isProfileBuildNow).thenReturn(false);
+    when(fakeServiceManager.errorBadgeManager.errorCountNotifier('logging'))
+        .thenReturn(ValueNotifier<int>(0));
+    setGlobal(ServiceConnectionManager, fakeServiceManager);
+    setGlobal(NotificationService, NotificationService());
+    setGlobal(IdeTheme, IdeTheme());
   });
 
   testWidgetsWithWindowSize(

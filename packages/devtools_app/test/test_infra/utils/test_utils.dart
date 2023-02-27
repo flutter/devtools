@@ -6,8 +6,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:devtools_app/src/screens/performance/performance_model.dart';
-import 'package:devtools_app/src/shared/primitives/trace_event.dart';
+import 'package:devtools_app/devtools_app.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -63,4 +62,10 @@ Future<String> loadPageHtmlContent(String url) async {
   );
   await completer.future;
   return content.toString();
+}
+
+void setCharacterWidthForTables() {
+  // Modify the character width that will be used to calculate column sizes
+  // in the tree table. The flutter_tester device uses a redacted font.
+  setAssumedMonospaceCharacterWidth(14.0);
 }

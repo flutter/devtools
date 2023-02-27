@@ -12,6 +12,7 @@ import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../screens/debugger/debugger_controller.dart';
+import '../screens/inspector/layout_explorer/ui/theme.dart';
 import 'analytics/analytics.dart' as ga;
 import 'config_specific/launch_url/launch_url.dart';
 import 'console/widgets/expandable_variable.dart';
@@ -35,7 +36,14 @@ const debuggerDeviceWidth = 800.0;
 
 const defaultDialogRadius = 20.0;
 double get areaPaneHeaderHeight => scaleByFontFactor(36.0);
-double get assumedMonospaceCharacterWidth => scaleByFontFactor(9.0);
+
+double get assumedMonospaceCharacterWidth =>
+    scaleByFontFactor(_assumedMonospaceCharacterWidth);
+double _assumedMonospaceCharacterWidth = 9.0;
+@visibleForTesting
+void setAssumedMonospaceCharacterWidth(double width) {
+  _assumedMonospaceCharacterWidth = width;
+}
 
 /// Convenience [Divider] with [Padding] that provides a good divider in forms.
 class PaddedDivider extends StatelessWidget {
@@ -1208,6 +1216,8 @@ class RoundedDropDownButton<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bgColor = Theme.of(context).colorScheme.backgroundColorSelected;
+
     return RoundedOutlinedBorder(
       child: Center(
         child: Container(
@@ -1224,6 +1234,7 @@ class RoundedDropDownButton<T> extends StatelessWidget {
               style: style,
               selectedItemBuilder: selectedItemBuilder,
               items: items,
+              focusColor: bgColor,
             ),
           ),
         ),
@@ -1812,9 +1823,19 @@ class _JsonViewerState extends State<JsonViewer>
   late Future<void> _initializeTree;
   late DartObjectNode variable;
 
-  @override
-  void initState() {
-    super.initState();
+  Future<void> _buildAndExpand(
+    DartObjectNode variable,
+  ) async {
+    // Build the root node
+    await buildVariablesTree(variable);
+    // Build the contents of all children
+    await Future.wait(variable.children.map(buildVariablesTree));
+
+    // Expand the root node to show the first level of contents
+    variable.expand();
+  }
+
+  void _updateVariablesTree() {
     assert(widget.encodedJson.isNotEmpty);
     final responseJson = json.decode(widget.encodedJson);
     // Insert the JSON data into the fake service cache so we can use it with
@@ -1834,7 +1855,19 @@ class _JsonViewerState extends State<JsonViewer>
     );
     // Intended to be unawaited.
     // ignore: discarded_futures
-    _initializeTree = buildVariablesTree(variable);
+    _initializeTree = _buildAndExpand(variable);
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _updateVariablesTree();
+  }
+
+  @override
+  void didUpdateWidget(JsonViewer oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _updateVariablesTree();
   }
 
   @override
@@ -1969,7 +2002,7 @@ Widget maybeWrapWithTooltip({
   EdgeInsetsGeometry? tooltipPadding,
   required Widget child,
 }) {
-  if (tooltip != null) {
+  if (tooltip != null && tooltip.isNotEmpty) {
     return DevToolsTooltip(
       message: tooltip,
       padding: tooltipPadding,

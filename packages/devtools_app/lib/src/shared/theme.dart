@@ -186,6 +186,7 @@ const densePadding = 4.0;
 const noPadding = 0.0;
 
 double get smallProgressSize => scaleByFontFactor(12.0);
+double get mediumProgressSize => scaleByFontFactor(24.0);
 
 double get defaultListItemHeight => scaleByFontFactor(28.0);
 
@@ -524,6 +525,7 @@ const extraWideSearchTextWidth = 600.0;
 const wideSearchTextWidth = 400.0;
 const defaultSearchTextWidth = 200.0;
 double get defaultTextFieldHeight => scaleByFontFactor(32.0);
+double get defaultTextFieldNumberWidth => scaleByFontFactor(100.0);
 
 double get maxHoverCardHeight => scaleByFontFactor(250.0);
 const hoverCardBorderWidth = 2.0;

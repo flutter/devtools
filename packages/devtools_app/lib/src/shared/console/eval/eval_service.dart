@@ -4,13 +4,20 @@
 
 import 'dart:async';
 
+import 'package:collection/collection.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../../service/vm_service_wrapper.dart';
 import '../../globals.dart';
+import '../../memory/adapted_heap_data.dart';
 import '../../primitives/auto_dispose.dart';
+import '../../vm_utils.dart';
+import '../primitives/scope.dart';
 
 class EvalService extends DisposableController with AutoDisposeControllerMixin {
+  /// Parameter `scope` for `serviceManager.service!.evaluate(...)`.
+  final scope = EvalScope();
+
   VmServiceWrapper get _service {
     return serviceManager.service!;
   }
@@ -60,6 +67,53 @@ class EvalService extends DisposableController with AutoDisposeControllerMixin {
     return await _service.getObject(ref, objRef.id!);
   }
 
+  /// Evaluates the expression in the isolate's root library.
+  Future<Response> evalInRunningApp(
+    IsolateRef isolateRef,
+    String expressionText,
+  ) async {
+    final isolate = serviceManager.isolateManager.isolateState(isolateRef);
+
+    final isolateId = isolateRef.id!;
+
+    Future<Response> eval() async => await serviceManager.service!.evaluate(
+          isolateId,
+          (await isolate.isolate)!.rootLib!.id!,
+          expressionText,
+          scope: scope.value(isolateId: isolateId),
+        );
+
+    return await _evalWithVariablesRefresh(eval, isolateId);
+  }
+
+  Future<Response> _evalWithVariablesRefresh(
+    Future<Response> Function() evalFunction,
+    String isolateId,
+  ) async {
+    try {
+      return await evalFunction();
+    } on RPCError catch (e) {
+      const expressionCompilationErrorCode = 113;
+      if (e.code != expressionCompilationErrorCode) rethrow;
+      final shouldRetry = await scope.refreshRefs(isolateId);
+      _showScopeChangeMessageIfNeeded();
+      if (shouldRetry) {
+        return await evalFunction();
+      } else {
+        rethrow;
+      }
+    }
+  }
+
+  void _showScopeChangeMessageIfNeeded() {
+    if (scope.removedVariables.isEmpty) return;
+    final variables = scope.removedVariables.join(', ');
+    serviceManager.consoleService.appendStdio(
+      'Garbage collected instances were removed from the scope: $variables. '
+      'Stop application to make variables persistent.\n',
+    );
+  }
+
   /// Evaluate the given expression in the context of the currently selected
   /// stack frame, or the top frame if there is no current selection.
   ///
@@ -101,11 +155,27 @@ class EvalService extends DisposableController with AutoDisposeControllerMixin {
       );
     }
 
-    return _service.evaluateInFrame(
-      isolateRefId,
-      frame.index!,
-      expression,
-      disableBreakpoints: true,
-    );
+    Future<Response> evalFunction() => _service.evaluateInFrame(
+          isolateRefId,
+          frame.index!,
+          expression,
+          disableBreakpoints: true,
+          scope: scope.value(isolateId: isolateRefId),
+        );
+
+    return await _evalWithVariablesRefresh(evalFunction, isolateRefId);
+  }
+
+  Future<InstanceRef?> findObject(
+    AdaptedHeapObject object,
+    IsolateRef isolateRef,
+  ) async {
+    final isolateId = isolateRef.id!;
+
+    final theClass = (await serviceManager.service!.getClassList(isolateId))
+        .classes!
+        .firstWhereOrNull((ref) => object.heapClass.matches(ref));
+
+    return await findInstance(isolateId, theClass?.id, object.code);
   }
 }

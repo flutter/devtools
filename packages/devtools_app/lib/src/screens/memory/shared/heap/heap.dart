@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '../../../../../devtools_app.dart';
 import '../../../../shared/memory/adapted_heap_data.dart';
 import '../../../../shared/memory/class_name.dart';
+import '../../../../shared/primitives/utils.dart';
 import 'class_filter.dart';
 import 'model.dart';
 import 'spanning_tree.dart';
@@ -215,7 +215,12 @@ class ObjectSet extends ObjectSetStats {
   static ObjectSet empty = ObjectSet()..seal();
 
   final objectsByCodes = <IdentityHashCode, AdaptedHeapObject>{};
-  final notCountedInRetained = <IdentityHashCode>{};
+
+  /// Subset of objects that are excluded from the retained size
+  /// calculation for this set.
+  ///
+  /// See [countInstance].
+  final objectsExcludedFromRetainedSize = <IdentityHashCode>{};
 
   @override
   bool get isZero => objectsByCodes.isEmpty;
@@ -228,7 +233,7 @@ class ObjectSet extends ObjectSetStats {
     if (objectsByCodes.containsKey(object.code)) return;
     super.countInstance(object, excludeFromRetained: excludeFromRetained);
     objectsByCodes[object.code] = object;
-    if (excludeFromRetained) notCountedInRetained.add(object.code);
+    if (excludeFromRetained) objectsExcludedFromRetainedSize.add(object.code);
   }
 
   @override

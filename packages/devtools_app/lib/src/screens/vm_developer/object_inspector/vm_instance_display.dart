@@ -130,7 +130,7 @@ class _InstanceViewer extends StatelessWidget {
       controller: controller,
       object: instance,
       generalDataRows: [
-        serviceObjectLinkBuilderMapEntry<ClassRef>(
+        serviceObjectLinkBuilderMapEntry(
           controller: controller,
           key: 'Object Class',
           object: instance.obj.classRef!,
@@ -198,7 +198,7 @@ class DisplayProvider extends StatelessWidget {
         ),
         if (variable.ref!.value is! Sentinel)
           VmServiceObjectLink(
-            object: variable.ref!.value,
+            object: variable.ref!.value as ObjRef?,
             textBuilder: (object) {
               if (object is InstanceRef &&
                   object.kind == InstanceKind.kString) {
@@ -206,11 +206,7 @@ class DisplayProvider extends StatelessWidget {
               }
               return null;
             },
-            onTap: (object) async {
-              if (object is ObjRef) {
-                await controller.findAndSelectNodeForObject(object);
-              }
-            },
+            onTap: controller.findAndSelectNodeForObject,
           )
       ],
     );

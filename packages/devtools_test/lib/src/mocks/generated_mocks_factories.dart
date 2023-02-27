@@ -59,14 +59,13 @@ MockProgramExplorerController
   when(controller.initialized).thenReturn(ValueNotifier(true));
   when(controller.rootObjectNodes).thenReturn(ValueNotifier([]));
   when(controller.outlineNodes).thenReturn(ValueNotifier([]));
-  when(controller.outlineSelection).thenReturn(ValueNotifier(null));
   when(controller.isLoadingOutline).thenReturn(ValueNotifier(false));
   when(controller.selectedNodeIndex).thenReturn(ValueNotifier(0));
   return controller;
 }
 
 MockCodeViewController createMockCodeViewControllerWithDefaults({
-  MockProgramExplorerController? mockProgramExplorerController,
+  ProgramExplorerController? programExplorerController,
 }) {
   final codeViewController = MockCodeViewController();
   when(codeViewController.fileExplorerVisible).thenReturn(ValueNotifier(false));
@@ -82,10 +81,10 @@ MockCodeViewController createMockCodeViewControllerWithDefaults({
   when(codeViewController.searchInProgressNotifier)
       .thenReturn(const FixedValueListenable<bool>(false));
   when(codeViewController.matchIndex).thenReturn(ValueNotifier<int>(0));
-  mockProgramExplorerController ??=
+  programExplorerController ??=
       createMockProgramExplorerControllerWithDefaults();
   when(codeViewController.programExplorerController).thenReturn(
-    mockProgramExplorerController,
+    programExplorerController,
   );
   when(codeViewController.showProfileInformation).thenReturn(
     const FixedValueListenable(false),
@@ -149,4 +148,23 @@ MockVmServiceWrapper createMockVmServiceWrapperWithDefaults() {
     return const Stream.empty();
   });
   return service;
+}
+
+MockLoggingController createMockLoggingControllerWithDefaults({
+  List<LogData> data = const [],
+}) {
+  final mockLoggingController = MockLoggingController();
+  when(mockLoggingController.data).thenReturn(data);
+  when(mockLoggingController.filteredData)
+      .thenReturn(ListValueNotifier<LogData>(data));
+  when(mockLoggingController.selectedLog)
+      .thenReturn(ValueNotifier<LogData?>(null));
+  when(mockLoggingController.searchMatches)
+      .thenReturn(const FixedValueListenable(<LogData>[]));
+  when(mockLoggingController.activeSearchMatch)
+      .thenReturn(const FixedValueListenable<LogData?>(null));
+  when(mockLoggingController.searchInProgressNotifier)
+      .thenReturn(const FixedValueListenable(false));
+  when(mockLoggingController.matchIndex).thenReturn(ValueNotifier<int>(0));
+  return mockLoggingController;
 }

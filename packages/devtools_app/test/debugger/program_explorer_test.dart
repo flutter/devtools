@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:collection/collection.dart';
 import 'package:devtools_app/src/screens/debugger/debugger_model.dart';
 import 'package:devtools_app/src/screens/debugger/program_explorer.dart';
 import 'package:devtools_app/src/screens/debugger/program_explorer_model.dart';
@@ -103,7 +104,7 @@ void main() {
         },
       );
       final explorer = ProgramExplorer(controller: programExplorerController);
-      programExplorerController.initialize();
+      await programExplorerController.initialize();
       await tester.pumpWidget(
         wrap(
           Builder(
@@ -150,7 +151,11 @@ void main() {
         // No node has been selected yet, so the outline should be empty.
         expect(programExplorerController.outlineNodes.value.isEmpty, true);
         expect(programExplorerController.scriptSelection, isNull);
-        expect(programExplorerController.outlineSelection.value, isNull);
+        expect(
+          programExplorerController.outlineNodes.value
+              .where((e) => e.isSelected),
+          isEmpty,
+        );
 
         // Select the library node and ensure the outline is populated.
         final libNodeFinder = find.text(libNode.name);
@@ -159,7 +164,11 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(programExplorerController.scriptSelection, libNode);
-        expect(programExplorerController.outlineSelection.value, isNull);
+        expect(
+          programExplorerController.outlineNodes.value
+              .where((e) => e.isSelected),
+          isEmpty,
+        );
 
         // There should be three children total, one root with two children.
         expect(programExplorerController.outlineNodes.value.length, 1);
@@ -174,7 +183,11 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(programExplorerController.scriptSelection, libNode);
-        expect(programExplorerController.outlineSelection.value, outlineNode);
+        expect(
+          programExplorerController.outlineNodes.value
+              .singleWhereOrNull((e) => e.isSelected),
+          outlineNode,
+        );
       },
     );
   });

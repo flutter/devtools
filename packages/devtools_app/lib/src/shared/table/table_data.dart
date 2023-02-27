@@ -6,8 +6,11 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import '../common_widgets.dart';
 import '../primitives/trees.dart';
 import '../primitives/utils.dart';
+import '../theme.dart';
+import '../ui/colors.dart';
 import '../utils.dart';
 
 // TODO(peterdjlee): Remove get from method names.
@@ -73,6 +76,17 @@ abstract class ColumnData<T> {
   /// Get the cell's text color from the given [dataObject].
   Color? getTextColor(T dataObject) => null;
 
+  TextStyle? contentTextStyle(
+    BuildContext context,
+    T dataObject, {
+    bool isSelected = false,
+  }) {
+    final textColor =
+        isSelected ? defaultSelectionForegroundColor : getTextColor(dataObject);
+    final fontStyle = Theme.of(context).fixedFontStyle;
+    return textColor == null ? fontStyle : fontStyle.copyWith(color: textColor);
+  }
+
   @override
   String toString() => title;
 }
@@ -116,14 +130,21 @@ mixin PinnableListEntry {
 /// will be drawn between groups and an additional header row will be added to
 /// the table to display the column group titles.
 class ColumnGroup {
-  ColumnGroup({required this.title, required this.range, this.tooltip});
+  ColumnGroup({required this.title, required this.range});
 
-  final String title;
+  ColumnGroup.fromText({
+    required String title,
+    required Range range,
+    String? tooltip,
+  }) : this(
+          title: maybeWrapWithTooltip(child: Text(title), tooltip: tooltip),
+          range: range,
+        );
+
+  final Widget title;
 
   /// The range of column indices for columns that make up this group.
   final Range range;
-
-  final String? tooltip;
 }
 
 extension ColumnDataExtension<T> on ColumnData<T> {

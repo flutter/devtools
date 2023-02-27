@@ -244,8 +244,6 @@ class _ConsoleOutputState extends State<_ConsoleOutput>
             return ExpandableVariable(
               variable: line.variable,
             );
-          } else if (line is GraphConsoleLine) {
-            return Text(line.graph.toString());
           } else {
             assert(
               false,
