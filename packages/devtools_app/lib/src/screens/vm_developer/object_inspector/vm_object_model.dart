@@ -107,10 +107,10 @@ abstract class VmObject {
 
 /// A class of [VmObject] for VM objects that simply provide a list of elements
 /// to be displayed.
-/// 
+///
 /// All instances of [VmListObject] will be displaying using the
 /// [VmSimpleListDisplay] view.
-/// 
+///
 /// Implementers of this interface must have a non-null return value for one of
 /// `elementsAsList` or `elementsAsInstance`.
 abstract class VmListObject extends VmObject {

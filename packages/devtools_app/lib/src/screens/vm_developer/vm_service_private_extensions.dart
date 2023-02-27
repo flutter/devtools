@@ -209,7 +209,7 @@ extension ObjPrivateViewExtension on Obj {
 
 /// A reference to a [WeakArray], which is an array consisting of weak
 /// persistent handles.
-/// 
+///
 /// References to an object from a [WeakArray] are ignored by the GC and will
 /// not prevent referenced objects from being collected when all other
 /// references to the object disappear.
@@ -246,7 +246,7 @@ class WeakArrayRef implements ObjRef {
 
 /// A populated representation of a [WeakArray], which is an array consisting
 /// of weak persistent handles.
-/// 
+///
 /// References to an object from a [WeakArray] are ignored by the GC and will
 /// not prevent referenced objects from being collected when all other
 /// references to the object disappear.
@@ -265,7 +265,8 @@ class WeakArray extends WeakArrayRef implements Obj {
         json: json,
         length: json['length'],
         size: json['size'],
-        elements: (createServiceObject(json['elements'], []) as List).cast<Response?>(),
+        elements: (createServiceObject(json['elements'], []) as List)
+            .cast<Response?>(),
         classRef: createServiceObject(json['class'], [])! as ClassRef,
       );
 
