@@ -62,7 +62,8 @@ class _VmSimpleListDisplayState extends State<VmSimpleListDisplay> {
           serviceManager.isolateManager.selectedIsolate.value!.id!;
       final service = serviceManager.service!;
       _initialized = service.getObject(isolateId, elementsInstance.id!).then(
-          (e) => entries.addAll((e as Instance).elements!.cast<Response?>()));
+            (e) => entries.addAll((e as Instance).elements!.cast<Response?>()),
+          );
       return;
     }
     final elementsList = widget.vmObject.elementsAsList;
