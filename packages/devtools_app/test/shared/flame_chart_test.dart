@@ -4,7 +4,7 @@
 
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/profiler/cpu_profile_controller.dart';
-import 'package:devtools_app/src/screens/profiler/cpu_profile_flame_chart.dart';
+import 'package:devtools_app/src/screens/profiler/panes/cpu_flame_chart.dart';
 import 'package:devtools_app/src/shared/charts/flame_chart.dart';
 import 'package:devtools_app/src/shared/primitives/flutter_widgets/linked_scroll_controller.dart';
 import 'package:devtools_app/src/shared/ui/colors.dart';

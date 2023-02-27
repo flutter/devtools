@@ -51,6 +51,13 @@ abstract class FeatureFlags {
   /// this flag.
   static bool embeddedPerfetto = true;
 
+  /// Flag to enable the CPU profiler method table.
+  ///
+  /// This feature is under development.
+  /// TODO(https://github.com/flutter/devtools/issues/841): remove this flag and
+  /// enable by default when complete.
+  static bool methodTable = enableExperiments;
+
   /// Flag to enable widget rebuild stats ui.
   ///
   /// https://github.com/flutter/devtools/issues/4564.

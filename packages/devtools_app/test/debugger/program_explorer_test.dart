@@ -104,7 +104,7 @@ void main() {
         },
       );
       final explorer = ProgramExplorer(controller: programExplorerController);
-      programExplorerController.initialize();
+      await programExplorerController.initialize();
       await tester.pumpWidget(
         wrap(
           Builder(
