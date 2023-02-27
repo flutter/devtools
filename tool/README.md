@@ -3,19 +3,24 @@
 ### Configure/Refresh environment
 
 Make sure:
-1. You have a local checkout of the Dart SDK
-   - (for getting started instructions, see [sdk/CONTRIBUTING.md](https://github.com/dart-lang/sdk/blob/main/CONTRIBUTING.md)).
-2. Ensure your `.bashrc` sets `$LOCAL_DART_SDK`
 
-   ```shell
-   DART_SDK_REPO_DIR=<Path to cloned dart sdk>
-   export LOCAL_DART_SDK=$DART_SDK_REPO_DIR/sdk
-   ```
-3. The local checkout is at `main` branch:
-   - `git rebase-update`.
-4. Your Flutter version is equal to latest candidate release branch:
+1. Your Dart SDK is configured:
+
+   a. You have a local checkout of the Dart SDK
+      - (for getting started instructions, see [sdk/CONTRIBUTING.md](https://github.com/dart-lang/sdk/blob/main/CONTRIBUTING.md)).
+
+   b. Ensure your `.bashrc` sets `$LOCAL_DART_SDK`
+
+       ```shell
+       DART_SDK_REPO_DIR=<Path to cloned dart sdk>
+       export LOCAL_DART_SDK=$DART_SDK_REPO_DIR/sdk
+       ```
+
+   c. The local checkout is at `main` branch: `git rebase-update`
+
+2. Your Flutter version is equal to latest candidate release branch:
     - Run `./tool/update_flutter_sdk.sh --local` from the main devtools directory.
-5. You have goma [configured](http://go/ma-mac-setup).
+3. You have goma [configured](http://go/ma-mac-setup).
 
 ### Prepare the release
 
@@ -33,8 +38,7 @@ Make sure:
   - `$DEVTOOLS_RELEASE_BRANCH`
   - `$DEVTOOLS_NEXT_BRANCH`
 
-#### Verify the version changes
-> For both the `$DEVTOOLS_RELEASE_BRANCH` and the `$DEVTOOLS_NEXT_BRANCH` branches
+#### Verify the version changes for `$DEVTOOLS_RELEASE_BRANCH`
 
 Verify the version changes:
 - that release_helper.sh script updated the pubspecs under packages/
@@ -43,15 +47,13 @@ Verify the version changes:
 
 These packages always have their version numbers updated in lock, so we don't have to worry about versioning.
 
-#### Manually review the CHANGELOG.md
-> For both the `$DEVTOOLS_RELEASE_BRANCH` and the `$DEVTOOLS_NEXT_BRANCH` branches
+#### Manually review the CHANGELOG.md in `$DEVTOOLS_RELEASE_BRANCH`
 
-* Verify
-   * that the version for the CHANGELOG entry was correctly generated
-   * that the entries don't have any syntax errors.
+Verify:
+   * the version for the CHANGELOG entry was correctly generated
+   * the entries don't have any syntax errors.
 
 ### Test the `$DEVTOOLS_RELEASE_BRANCH`
-> You only need to do this on the `$DEVTOOLS_RELEASE_BRANCH` branch
 
 - Checkout the `$DEVTOOLS_RELEASE_BRANCH`,
 - Build the DevTools binary and run it from your local Dart SDK.
@@ -80,8 +82,8 @@ These packages always have their version numbers updated in lock, so we don't ha
       git checkout . && \
       git clean -f -d;
       ```
-#### Push the `$DEVTOOLS_RELEASE_BRANCH`
 
+#### Push the `$DEVTOOLS_RELEASE_BRANCH`
 
 > Ensure you are still on the `$DEVTOOLS_RELEASE_BRANCH`
 
@@ -194,6 +196,7 @@ checkout the Flutter version on your local flutter repo (the Flutter SDK that
 
 ### Push the DEVTOOLS_NEXT_BRANCH
 ```shell
+git pull upstream master
 git checkout $DEVTOOLS_NEXT_BRANCH
 git push -u origin $DEVTOOLS_NEXT_BRANCH
 ```
