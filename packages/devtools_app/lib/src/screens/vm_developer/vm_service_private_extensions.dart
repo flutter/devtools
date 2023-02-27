@@ -158,6 +158,7 @@ extension ObjRefPrivateViewExtension on ObjRef {
   static const _icDataType = 'ICData';
   static const _objectPoolType = 'ObjectPool';
   static const _subtypeTestCache = 'SubtypeTestCache';
+  static const _weakArrayType = 'WeakArray';
 
   /// The internal type of the object.
   ///
@@ -183,6 +184,12 @@ extension ObjRefPrivateViewExtension on ObjRef {
   /// Casts the current [ObjRef] into an instance of [SubtypeTestCacheRef].
   SubtypeTestCacheRef get asSubtypeTestCache =>
       SubtypeTestCacheRef.parse(json!);
+
+  /// `true` if this object is an instance of [WeakArrayRef].
+  bool get isWeakArray => vmType == _weakArrayType;
+
+  /// Casts the current [ObjRef] into an instance of [WeakArrayRef].
+  WeakArrayRef get asWeakArray => WeakArrayRef.parse(json!);
 }
 
 /// An extension on [Obj] which allows for access to VM internal fields.
@@ -195,6 +202,86 @@ extension ObjPrivateViewExtension on Obj {
 
   /// Casts the current [Obj] into an instance of [SubtypeTestCache].
   SubtypeTestCache get asSubtypeTestCache => SubtypeTestCache.parse(json!);
+
+  /// Casts the current [Obj] into an instance of [WeakArray].
+  WeakArray get asWeakArray => WeakArray.parse(json!);
+}
+
+/// A reference to a [WeakArray], which is an array consisting of weak
+/// persistent handles.
+/// 
+/// References to an object from a [WeakArray] are ignored by the GC and will
+/// not prevent referenced objects from being collected when all other
+/// references to the object disappear.
+class WeakArrayRef implements ObjRef {
+  WeakArrayRef({
+    required this.id,
+    required this.json,
+    required this.length,
+  });
+
+  factory WeakArrayRef.parse(Map<String, dynamic> json) => WeakArrayRef(
+        id: json['id'],
+        json: json,
+        length: json['length'],
+      );
+
+  @override
+  bool? fixedId;
+
+  @override
+  String? id;
+
+  @override
+  Map<String, dynamic>? json;
+
+  final int length;
+
+  @override
+  Map<String, dynamic> toJson() => json!;
+
+  @override
+  String get type => 'WeakArray';
+}
+
+/// A populated representation of a [WeakArray], which is an array consisting
+/// of weak persistent handles.
+/// 
+/// References to an object from a [WeakArray] are ignored by the GC and will
+/// not prevent referenced objects from being collected when all other
+/// references to the object disappear.
+class WeakArray extends WeakArrayRef implements Obj {
+  WeakArray({
+    required super.id,
+    required super.json,
+    required super.length,
+    required this.elements,
+    required this.size,
+    required this.classRef,
+  });
+
+  factory WeakArray.parse(Map<String, dynamic> json) => WeakArray(
+        id: json['id'],
+        json: json,
+        length: json['length'],
+        size: json['size'],
+        elements: (createServiceObject(json['elements'], []) as List).cast<Response?>(),
+        classRef: createServiceObject(json['class'], [])! as ClassRef,
+      );
+
+  final List<Response?> elements;
+
+  @override
+  Map<String, dynamic> toJson() => json!;
+
+  @override
+  String get type => 'WeakArray';
+
+  @override
+  ClassRef? classRef;
+
+  @override
+  int? size;
 }
 
 /// A partially-populated representation of the Dart VM's subtype test cache.

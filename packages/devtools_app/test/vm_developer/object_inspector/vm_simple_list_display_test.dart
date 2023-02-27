@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app/devtools_app.dart';
-import 'package:devtools_app/src/screens/vm_developer/object_inspector/vm_subtype_test_cache_display.dart';
+import 'package:devtools_app/src/screens/vm_developer/object_inspector/vm_simple_list_display.dart';
 import 'package:devtools_app/src/screens/vm_developer/vm_developer_common_widgets.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
@@ -45,8 +45,8 @@ void main() {
       (WidgetTester tester) async {
         await tester.pumpWidget(
           wrap(
-            VmSubtypeTestCacheDisplay(
-              subtypeTestCache: mockSubtypeTestCacheObject,
+            VmSimpleListDisplay(
+              vmObject: mockSubtypeTestCacheObject,
               controller: ObjectInspectorViewController(),
             ),
           ),

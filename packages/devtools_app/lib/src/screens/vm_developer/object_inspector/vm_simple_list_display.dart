@@ -14,23 +14,22 @@ import 'object_inspector_view_controller.dart';
 import 'vm_object_model.dart';
 
 /// A widget for the object inspector historyViewport displaying information
-/// related to ICData objects in the Dart VM.
-class VmSubtypeTestCacheDisplay extends StatefulWidget {
-  const VmSubtypeTestCacheDisplay({
+/// related to list-like VM objects (e.g., subtype test cache, WeakArray, etc). 
+class VmSimpleListDisplay<T extends VmListObject> extends StatefulWidget {
+  const VmSimpleListDisplay({
     required this.controller,
-    required this.subtypeTestCache,
+    required this.vmObject,
   });
 
   final ObjectInspectorViewController controller;
-  final SubtypeTestCacheObject subtypeTestCache;
+  final T vmObject;
 
   @override
-  State<VmSubtypeTestCacheDisplay> createState() =>
-      _VmSubtypeTestCacheDisplayState();
+  State<VmSimpleListDisplay> createState() => _VmSimpleListDisplayState();
 }
 
-class _VmSubtypeTestCacheDisplayState extends State<VmSubtypeTestCacheDisplay> {
-  final entries = <ObjRef?>[];
+class _VmSimpleListDisplayState extends State<VmSimpleListDisplay> {
+  final entries = <Response?>[];
 
   late Future<void> _initialized;
 
@@ -41,9 +40,9 @@ class _VmSubtypeTestCacheDisplayState extends State<VmSubtypeTestCacheDisplay> {
   }
 
   @override
-  void didUpdateWidget(VmSubtypeTestCacheDisplay oldWidget) {
+  void didUpdateWidget(VmSimpleListDisplay oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.subtypeTestCache == oldWidget.subtypeTestCache) {
+    if (widget.vmObject == oldWidget.vmObject) {
       return;
     }
     _initialize();
@@ -51,20 +50,28 @@ class _VmSubtypeTestCacheDisplayState extends State<VmSubtypeTestCacheDisplay> {
 
   void _initialize() async {
     entries.clear();
+    final elementsInstance = widget.vmObject.elementsAsInstance;
+    if (elementsInstance != null) {
+      if (elementsInstance is Instance) {
+        entries.addAll(elementsInstance.elements!.cast<Response?>());
+        _initialized = Future.value();
+        return;
+      }
 
-    final subtypeTestCache = widget.subtypeTestCache.obj;
-    final cache = subtypeTestCache.cache;
-    if (cache is Instance) {
-      entries.addAll(cache.elements!.cast<ObjRef?>());
-      _initialized = Future.value();
+      final isolateId =
+          serviceManager.isolateManager.selectedIsolate.value!.id!;
+      final service = serviceManager.service!;
+      _initialized = service.getObject(isolateId, elementsInstance.id!).then(
+          (e) => entries.addAll((e as Instance).elements!.cast<Response?>()));
       return;
     }
-
-    final isolateId = serviceManager.isolateManager.selectedIsolate.value!.id!;
-    final service = serviceManager.service!;
-    _initialized = service
-        .getObject(isolateId, cache.id!)
-        .then((e) => entries.addAll((e as Instance).elements!.cast<ObjRef?>()));
+    final elementsList = widget.vmObject.elementsAsList;
+    assert(
+      elementsList != null,
+      'One of elementsAsList or elementsAsInstance must be non-null',
+    );
+    entries.addAll(elementsList!);
+    _initialized = Future.value();
   }
 
   @override
@@ -76,11 +83,11 @@ class _VmSubtypeTestCacheDisplayState extends State<VmSubtypeTestCacheDisplay> {
           return const CenteredCircularProgressIndicator();
         return VmObjectDisplayBasicLayout(
           controller: widget.controller,
-          object: widget.subtypeTestCache,
+          object: widget.vmObject,
           generalDataRows: [
             ...vmObjectGeneralDataRows(
               widget.controller,
-              widget.subtypeTestCache,
+              widget.vmObject,
             ),
           ],
           expandableWidgets: [

@@ -105,6 +105,22 @@ abstract class VmObject {
   }
 }
 
+/// A class of [VmObject] for VM objects that simply provide a list of elements
+/// to be displayed.
+/// 
+/// All instances of [VmListObject] will be displaying using the
+/// [VmSimpleListDisplay] view.
+/// 
+/// Implementers of this interface must have a non-null return value for one of
+/// `elementsAsList` or `elementsAsInstance`.
+abstract class VmListObject extends VmObject {
+  VmListObject({required super.ref});
+
+  List<Response?>? get elementsAsList;
+
+  InstanceRef? get elementsAsInstance;
+}
+
 /// Stores a 'Class' VM object and provides an interface for obtaining the
 /// Dart VM information related to this object.
 class ClassObject extends VmObject {
@@ -299,7 +315,7 @@ class ICDataObject extends VmObject {
 
 /// Stores a 'SubtypeTestCache' VM object and provides an interface for
 /// obtaining the Dart VM information related to this object.
-class SubtypeTestCacheObject extends VmObject {
+class SubtypeTestCacheObject extends VmListObject {
   SubtypeTestCacheObject({required super.ref});
 
   @override
@@ -310,4 +326,31 @@ class SubtypeTestCacheObject extends VmObject {
 
   @override
   SubtypeTestCache get obj => _obj.asSubtypeTestCache;
+
+  @override
+  InstanceRef get elementsAsInstance => obj.cache;
+
+  @override
+  List<Response?>? get elementsAsList => null;
+}
+
+/// Stores a 'WeakArray' VM object and provides an interface for
+/// obtaining the Dart VM information related to this object.
+class WeakArrayObject extends VmListObject {
+  WeakArrayObject({required super.ref});
+
+  @override
+  SourceLocation? get _sourceLocation => null;
+
+  @override
+  String? get name => null;
+
+  @override
+  WeakArray get obj => _obj.asWeakArray;
+
+  @override
+  InstanceRef? get elementsAsInstance => null;
+
+  @override
+  List<Response?>? get elementsAsList => obj.asWeakArray.elements;
 }
