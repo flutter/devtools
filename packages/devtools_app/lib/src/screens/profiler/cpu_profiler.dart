@@ -25,7 +25,7 @@ import 'cpu_profile_model.dart';
 import 'panes/bottom_up.dart';
 import 'panes/call_tree.dart';
 import 'panes/cpu_flame_chart.dart';
-import 'panes/method_table.dart';
+import 'panes/method_table/method_table.dart';
 
 // TODO(kenz): provide useful UI upon selecting a CPU stack frame.
 
@@ -321,8 +321,10 @@ class _CpuProfilerState extends State<CpuProfiler>
         },
       ),
     );
-    const methodTable = KeepAliveWrapper(
-      child: CpuMethodTable(),
+    final methodTable = KeepAliveWrapper(
+      child: CpuMethodTable(
+        methodTableController: widget.controller.methodTableController,
+      ),
     );
     final cpuFlameChart = KeepAliveWrapper(
       child: LayoutBuilder(

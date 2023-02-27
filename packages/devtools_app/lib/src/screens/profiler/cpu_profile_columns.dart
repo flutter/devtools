@@ -17,6 +17,7 @@ import 'cpu_profile_model.dart';
 
 const timeColumnWidthPx = 180.0;
 
+// TODO(kenz): clean up to use TimeAndPercentageColumn.
 class SelfTimeColumn extends ColumnData<CpuStackFrame> {
   SelfTimeColumn({String? titleTooltip})
       : super(
@@ -50,6 +51,7 @@ class SelfTimeColumn extends ColumnData<CpuStackFrame> {
   String getTooltip(CpuStackFrame dataObject) => '';
 }
 
+// TODO(kenz): clean up to use TimeAndPercentageColumn.
 class TotalTimeColumn extends ColumnData<CpuStackFrame> {
   TotalTimeColumn({String? titleTooltip})
       : super(
