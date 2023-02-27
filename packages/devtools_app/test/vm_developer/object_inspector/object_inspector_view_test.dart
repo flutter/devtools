@@ -12,6 +12,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../vm_developer_test_utils.dart';
+
 void main() {
   late ObjectInspectorView objectInspector;
 
@@ -26,7 +28,13 @@ void main() {
     fakeServiceManager = FakeServiceManager();
     scriptManager = MockScriptManager();
 
-    when(scriptManager.sortedScripts).thenReturn(ValueNotifier(<ScriptRef>[]));
+    when(scriptManager.sortedScripts).thenReturn(
+      ValueNotifier(<ScriptRef>[testScript]),
+    );
+    // ignore: discarded_futures
+    when(scriptManager.retrieveAndSortScripts(any)).thenAnswer(
+      (_) => Future.value([testScript]),
+    );
     when(fakeServiceManager.connectedApp!.isProfileBuildNow).thenReturn(false);
     when(fakeServiceManager.connectedApp!.isDartWebAppNow).thenReturn(false);
 

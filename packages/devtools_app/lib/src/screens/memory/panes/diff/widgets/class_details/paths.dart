@@ -54,7 +54,7 @@ class _ShallowSizeColumn extends ColumnData<StatsByPathEntry> {
   _ShallowSizeColumn(bool isDiff)
       : super(
           isDiff ? 'Shallow\nSize Delta' : 'Shallow\nDart Size',
-          titleTooltip: shallowSizeColumnTooltip,
+          titleTooltip: SizeType.shallow.description,
           fixedWidthPx: scaleByFontFactor(85.0),
           alignment: ColumnAlignment.right,
         );
@@ -77,7 +77,7 @@ class _RetainedSizeColumn extends ColumnData<StatsByPathEntry> {
   _RetainedSizeColumn(bool isDiff)
       : super(
           isDiff ? 'Retained\nSize Delta' : 'Retained\nDart Size',
-          titleTooltip: retainedSizeColumnTooltip,
+          titleTooltip: SizeType.retained.description,
           fixedWidthPx: scaleByFontFactor(85.0),
           alignment: ColumnAlignment.right,
         );

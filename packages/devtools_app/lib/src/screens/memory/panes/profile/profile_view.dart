@@ -139,7 +139,7 @@ class _FieldDartHeapSizeColumn extends _FieldSizeColumn {
   _FieldDartHeapSizeColumn({required super.heap})
       : super._(
           title: 'Dart Heap',
-          titleTooltip: shallowSizeColumnTooltip,
+          titleTooltip: SizeType.shallow.description,
         );
 
   @override

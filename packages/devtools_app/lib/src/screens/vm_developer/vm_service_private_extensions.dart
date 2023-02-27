@@ -352,6 +352,10 @@ class Instruction {
   /// The instruction's address in memory.
   final String address;
 
+  /// The instruction's address in memory with leading zeros removed.
+  String get unpaddedAddress =>
+      address.substring(address.indexOf(RegExp(r'[^0]')));
+
   /// TODO(bkonyi): figure out what this value is for.
   final String unknown;
 
