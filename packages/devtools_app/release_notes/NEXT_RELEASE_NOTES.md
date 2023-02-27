@@ -28,6 +28,7 @@ in deeply nested trees - [#5181](https://github.com/flutter/devtools/pull/5181)
 ## Debugger updates
 * Add support for browser navigation history when navigating using the `File Explorer` [#4906](https://github.com/flutter/devtools/pull/4906).
 * Designate positional fields for `Record` types with the getter syntax beginning at `$1` [#5272](https://github.com/flutter/devtools/pull/5272)
+* Fix variable inspection for `Map` and `List` instances: [#5320](https://github.com/flutter/devtools/pull/5320)
 
 ## Network profiler updates
 * Improve reliability and performance of the Network tab - [#5056](https://github.com/flutter/devtools/pull/5056)

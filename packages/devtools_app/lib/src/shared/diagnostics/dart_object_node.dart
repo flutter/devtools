@@ -319,7 +319,7 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
       if (kind != null && kind == InstanceKind.kList ||
           kind == InstanceKind.kMap ||
           kind!.endsWith('List')) {
-        // TODO(elliette): Determine the type signature from type parameters.
+        // TODO(elliette): Determine the signature from type parameters, see:
         // https://api.flutter.dev/flutter/vm_service/ClassRef/typeParameters.html
         // DWDS provides us with a readable format including type parameters in
         // the classRef name, for the vm_service we fall back to just using the
