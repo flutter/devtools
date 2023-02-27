@@ -13,7 +13,8 @@ import '../../../shared/heap/heap.dart';
 import '../../../shared/primitives/instance_set_button.dart';
 
 class HeapClassSampler extends ClassSampler {
-  HeapClassSampler(this.objects, this.heap, this.heapClass);
+  HeapClassSampler(this.objects, this.heap, this.heapClass)
+      : assert(objects.objectsByCodes.isNotEmpty);
 
   final HeapClassName heapClass;
   final ObjectSet objects;
@@ -75,6 +76,19 @@ class HeapClassSampler extends ClassSampler {
       type: heapClass.shortName,
       instanceSet: (await _liveInstances())!,
       isolateRef: _mainIsolateRef,
+    );
+  }
+
+  @override
+  Future<void> oneStaticToConsole() async {
+    final heapObject = objects.objectsByCodes.values.first;
+    final heapSelection = HeapObjectSelection(heap, object: heapObject);
+
+    // drop to console
+    serviceManager.consoleService.appendBrowsableInstance(
+      instanceRef: null,
+      isolateRef: _mainIsolateRef,
+      heapSelection: heapSelection,
     );
   }
 }
