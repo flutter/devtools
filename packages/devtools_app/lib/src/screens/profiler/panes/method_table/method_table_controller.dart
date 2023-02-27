@@ -4,7 +4,6 @@
 
 import 'package:flutter/foundation.dart';
 
-import '../../../../shared/primitives/utils.dart';
 import '../../cpu_profile_model.dart';
 import 'method_table_model.dart';
 
