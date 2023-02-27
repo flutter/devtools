@@ -24,7 +24,6 @@ Make sure:
 
 ### Prepare the release
 
-
 #### Update the DevTools version number
 
 - Make sure your working branch is clean
@@ -49,9 +48,19 @@ These packages always have their version numbers updated in lock, so we don't ha
 
 #### Manually review the CHANGELOG.md in `$DEVTOOLS_RELEASE_BRANCH`
 
-Verify:
-   * the version for the CHANGELOG entry was correctly generated
-   * the entries don't have any syntax errors.
+Review/update `CHANGELOG.md`:
+
+1. Verify all changes are here:
+
+    * Open [commits](https://github.com/flutter/devtools/commits/master)
+    * Search for last PR, commented for previous version in CHANGELOG
+    * Make sure all PRs since the found one are included.
+      You may want to re-run `dart tool/bin/repo_tool.dart generate-changelog  --since-tag=<tag like v1.5.2>` with passed parameter
+      for the tag.
+
+2. Verify the version for the CHANGELOG entry was correctly generated.
+3. Verify each item is a complete sentence, written as though it was an order, and there is no syntax errors.
+4. Create draft PR for the branch and add the item for it to the top.
 
 ### Test the `$DEVTOOLS_RELEASE_BRANCH`
 
