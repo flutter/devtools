@@ -389,10 +389,10 @@ class CpuProfileStatisticsButton extends StatelessWidget {
                 title: const DialogTitleText('CPU Profile Statistics'),
                 content: Row(
                   children: [
-                    Expanded(
+                    const Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
-                        children: const [
+                        children: [
                           DevToolsTooltip(
                             message:
                                 'The duration of time spanned by the CPU samples',
