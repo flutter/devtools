@@ -761,7 +761,7 @@ class _InspectorTreeState extends State<InspectorTree>
 
   /// When autoscrolling, the number of rows to pad the target location with.
   static const int _scrollPadCount = 3;
-  int _buildCount = 0;
+  late int _buildCount;
 
   @override
   void initState() {
