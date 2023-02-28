@@ -533,7 +533,9 @@ class SettingsDialog extends StatelessWidget {
                     tooltip: 'Copy Logs',
                   ),
                   ClearButton(
-                    label: '', // TODO this needs to be better centered
+                    label: 'Clear Logs',
+                    minScreenWidthForTextBeforeScaling:
+                        double.infinity, // Forces Icon only mode for button
                     tooltip: 'Clear Logs',
                     onPressed: () => LogStorage.root.clear(),
                   ),
@@ -541,9 +543,15 @@ class SettingsDialog extends StatelessWidget {
               ),
               const Row(
                 children: [
+                  SizedBox(
+                    width: defaultSpacing,
+                  ),
                   Icon(Icons.warning),
+                  SizedBox(
+                    width: defaultSpacing,
+                  ),
                   Text(
-                    'Logs may contain sensitive information. Always check them before sharing.',
+                    'Logs may contain sensitive information. Always check their contents before sharing.',
                   )
                 ],
               ),
