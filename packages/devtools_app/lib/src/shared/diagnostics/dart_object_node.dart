@@ -243,7 +243,8 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
           (value.kind!.endsWith('List') ||
               value.kind == InstanceKind.kList ||
               value.kind == InstanceKind.kMap ||
-              value.kind == InstanceKind.kRecord)) {
+              value.kind == InstanceKind.kRecord ||
+              isSet)) {
         return value.length ?? 0;
       }
     }
@@ -253,6 +254,20 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
 
   int? _childCount;
 
+  // TODO(elliette): Can remove this workaround once DWDS correctly returns
+  // InstanceKind.kSet for the kind of `Sets`. See:
+  // https://github.com/dart-lang/webdev/issues/2001
+  bool get isSet {
+    final value = this.value;
+    if (value is InstanceRef) {
+      final kind = value.kind ?? '';
+      if (kind == InstanceKind.kSet) return true;
+      final name = value.classRef?.name ?? '';
+      if (name.contains('Set')) return true;
+    }
+    return false;
+  }
+
   bool treeInitializeStarted = false;
   bool treeInitializeComplete = false;
 
@@ -261,6 +276,7 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
     if (treeInitializeComplete || children.isNotEmpty || childCount > 0) {
       return children.isNotEmpty || childCount > 0;
     }
+    if (ref?.heapSelection != null) return true;
     final diagnostic = ref?.diagnostic;
     if (diagnostic != null &&
         ((diagnostic.inlineProperties.isNotEmpty) || diagnostic.hasChildren))
@@ -318,10 +334,17 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
       // List, Map, Uint8List, Uint16List, etc...
       if (kind != null && kind == InstanceKind.kList ||
           kind == InstanceKind.kMap ||
+          kind == InstanceKind.kSet ||
           kind!.endsWith('List')) {
+        // TODO(elliette): Determine the signature from type parameters, see:
+        // https://api.flutter.dev/flutter/vm_service/ClassRef/typeParameters.html
+        // DWDS provides us with a readable format including type parameters in
+        // the classRef name, for the vm_service we fall back to just using the
+        // kind:
+        final name = _isPrivateName(valueStr) ? kind : valueStr;
         final itemLength = value.length;
         if (itemLength == null) return valueStr;
-        return '$valueStr (${_itemCount(itemLength)})';
+        return '$name (${_itemCount(itemLength)})';
       }
     } else if (value is Sentinel) {
       valueStr = value.valueAsString;
@@ -335,6 +358,8 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
 
     return valueStr;
   }
+
+  bool _isPrivateName(String name) => name.startsWith('_');
 
   static String _itemCount(int count) {
     return '${nf.format(count)} ${pluralize('item', count)}';

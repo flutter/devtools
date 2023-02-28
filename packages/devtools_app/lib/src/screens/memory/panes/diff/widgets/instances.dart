@@ -23,6 +23,7 @@ class InstanceTableCell extends StatelessWidget {
     HeapClassName heapClass, {
     required this.isSelected,
     required this.gaContext,
+    this.liveItemsEnabled = true,
   })  : _showMenu = _shouldShowMenu(isSelected, objects),
         _sampleObtainer = _shouldShowMenu(isSelected, objects)
             ? HeapClassSampler(objects, heap, heapClass)
@@ -37,6 +38,7 @@ class InstanceTableCell extends StatelessWidget {
   final bool isSelected;
   final MemoryAreas gaContext;
   final int _count;
+  final bool liveItemsEnabled;
 
   @override
   Widget build(BuildContext context) {
@@ -52,6 +54,7 @@ class InstanceTableCell extends StatelessWidget {
           gaContext: gaContext,
           sampleObtainer: _sampleObtainer,
           showMenu: _showMenu,
+          liveItemsEnabled: liveItemsEnabled,
         ),
       ],
     );
