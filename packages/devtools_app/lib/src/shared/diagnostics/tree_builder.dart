@@ -204,9 +204,6 @@ Future<void> _addChildrenToInstanceVariable({
         createVariablesForRecords(value, isolateRef),
       );
       break;
-    case InstanceKind.kSet:
-      // TODO
-      break;
     case InstanceKind.kUint8ClampedList:
     case InstanceKind.kUint8List:
     case InstanceKind.kUint16List:
@@ -268,6 +265,11 @@ Future<void> _addChildrenToInstanceVariable({
     default:
       break;
   }
+
+  if (variable.isSet) {
+    variable.addAllChildren(createVariablesForSets(value, isolateRef));
+  }
+
   if (value.fields != null && value.kind != InstanceKind.kRecord) {
     variable.addAllChildren(
       createVariablesForFields(
