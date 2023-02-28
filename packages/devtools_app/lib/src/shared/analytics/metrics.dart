@@ -40,8 +40,8 @@ class ProfilerScreenMetrics extends ScreenAnalyticsMetrics {
   final int cpuStackDepth;
 }
 
-class InspectorTreeBuildMetrics extends ScreenAnalyticsMetrics {
-  InspectorTreeBuildMetrics({
+class InspectorTreeControllerMetrics extends ScreenAnalyticsMetrics {
+  InspectorTreeControllerMetrics({
     required this.rootSetCount,
     required this.rowCount,
     required this.inspectorTreeControllerId,

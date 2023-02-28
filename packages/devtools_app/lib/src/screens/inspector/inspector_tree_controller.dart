@@ -105,7 +105,18 @@ class _InspectorTreeRowState extends State<_InspectorTreeRowWidget>
 
 class InspectorTreeController extends Object
     with SearchControllerMixin<InspectorTreeRow> {
-  InspectorTreeController({required this.gaId});
+  InspectorTreeController({required this.gaId}) {
+    ga.select(
+      gac.inspector,
+      'InspectorTreeControllerInitialized',
+      nonInteraction: true,
+      screenMetricsProvider: () => InspectorTreeControllerMetrics(
+        inspectorTreeControllerId: gaId,
+        rootSetCount: _rootSetCount,
+        rowCount: _root?.subtreeSize,
+      ),
+    );
+  }
 
   /// Clients the controller notifies to trigger changes to the UI.
   final Set<InspectorControllerClient> _clients = {};
@@ -156,7 +167,7 @@ class InspectorTreeController extends Object
         gac.inspector,
         'InspectorTreeControllerRootChange',
         nonInteraction: true,
-        screenMetricsProvider: () => InspectorTreeBuildMetrics(
+        screenMetricsProvider: () => InspectorTreeControllerMetrics(
           inspectorTreeControllerId: gaId,
           rootSetCount: ++_rootSetCount,
           rowCount: _root?.subtreeSize,
