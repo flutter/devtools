@@ -42,12 +42,12 @@ class ProfilerScreenMetrics extends ScreenAnalyticsMetrics {
 
 class InspectorTreeBuildMetrics extends ScreenAnalyticsMetrics {
   InspectorTreeBuildMetrics({
-    required this.isSummaryTree,
-    required this.buildCount,
+    required this.rootSetCount,
     required this.rowCount,
+    required this.inspectorTreeControllerId,
   });
 
-  final bool isSummaryTree;
-  final int buildCount;
+  final int rootSetCount;
   final int? rowCount;
+  final String inspectorTreeControllerId;
 }

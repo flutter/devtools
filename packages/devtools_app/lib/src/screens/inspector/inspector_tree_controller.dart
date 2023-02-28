@@ -105,12 +105,15 @@ class _InspectorTreeRowState extends State<_InspectorTreeRowWidget>
 
 class InspectorTreeController extends Object
     with SearchControllerMixin<InspectorTreeRow> {
+  InspectorTreeController({required this.gaId});
+
   /// Clients the controller notifies to trigger changes to the UI.
   final Set<InspectorControllerClient> _clients = {};
-
+  final String gaId;
   InspectorTreeNode createNode() => InspectorTreeNode();
 
   SearchTargetType _searchTarget = SearchTargetType.widget;
+  int _rootSetCount = 0;
 
   void addClient(InspectorControllerClient value) {
     final firstClient = _clients.isEmpty;
@@ -148,6 +151,17 @@ class InspectorTreeController extends Object
     setState(() {
       _root = node;
       _populateSearchableCachedRows();
+
+      ga.select(
+        gac.inspector,
+        'InspectorTreeControllerRootChange',
+        nonInteraction: true,
+        screenMetricsProvider: () => InspectorTreeBuildMetrics(
+          inspectorTreeControllerId: gaId,
+          rootSetCount: ++_rootSetCount,
+          rowCount: _root?.subtreeSize,
+        ),
+      );
     });
   }
 
@@ -761,12 +775,10 @@ class _InspectorTreeState extends State<InspectorTree>
 
   /// When autoscrolling, the number of rows to pad the target location with.
   static const int _scrollPadCount = 3;
-  late int _buildCount;
 
   @override
   void initState() {
     super.initState();
-    _buildCount = 0;
     _scrollControllerX = ScrollController();
     _scrollControllerY = ScrollController();
     // TODO(devoncarew): Commented out as per flutter/devtools/pull/2001.
@@ -976,18 +988,6 @@ class _InspectorTreeState extends State<InspectorTree>
   Widget build(BuildContext context) {
     super.build(context);
     final treeControllerLocal = treeController;
-
-    ga.select(
-      gac.inspector,
-      'InspectorTreeBuild',
-      nonInteraction: true,
-      screenMetricsProvider: () => InspectorTreeBuildMetrics(
-        isSummaryTree: widget.isSummaryTree,
-        buildCount: ++_buildCount,
-        rowCount: treeControllerLocal?.numRows,
-      ),
-    );
-
     if (treeControllerLocal == null) {
       // Indicate the tree is loading.
       return const CenteredCircularProgressIndicator();

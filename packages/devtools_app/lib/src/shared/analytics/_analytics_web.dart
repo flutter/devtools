@@ -104,9 +104,9 @@ class GtagEventDevTools extends GtagEvent {
     int? heap_diff_objects_before, // metric7
     int? heap_diff_objects_after, // metric8
     int? heap_objects_total, // metric9
-    bool? is_summary_tree, // metric10
-    int? build_count, // metric11
-    int? row_count, // metric12
+    int? root_set_count, // metric10
+    int? row_count, // metric11
+    String? inspector_tree_controller_id, // metric12
   });
 
   @override
@@ -229,14 +229,14 @@ GtagEventDevTools _gtagEvent({
         ? screenMetrics.heapObjectsTotal
         : null,
     // [InspectorTreeBuildMetrics]
-    is_summary_tree: screenMetrics is InspectorTreeBuildMetrics
-        ? screenMetrics.isSummaryTree
-        : null,
-    build_count: screenMetrics is InspectorTreeBuildMetrics
-        ? screenMetrics.buildCount
+    root_set_count: screenMetrics is InspectorTreeBuildMetrics
+        ? screenMetrics.rootSetCount
         : null,
     row_count: screenMetrics is InspectorTreeBuildMetrics
         ? screenMetrics.rowCount
+        : null,
+    inspector_tree_controller_id: screenMetrics is InspectorTreeBuildMetrics
+        ? screenMetrics.inspectorTreeControllerId
         : null,
   );
 }
