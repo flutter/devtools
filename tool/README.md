@@ -112,7 +112,7 @@ Receive an LGTM for the PR, squash and commit.
 ### Verify and Submit the release notes
 
 See the release notes
-[README.md](https://github.com/flutter/devtools/blob/master/packages/devtools_app/release_notes/release_notes/README.md)
+[README.md](https://github.com/flutter/devtools/blob/master/packages/devtools_app/release_notes/README.md)
 for details on where to add DevTools release notes to Flutter website and how to test them.
 
 - Follow the release notes
