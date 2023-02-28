@@ -9,7 +9,7 @@ import 'package:devtools_app/src/screens/profiler/cpu_profiler.dart';
 import 'package:devtools_app/src/screens/profiler/panes/bottom_up.dart';
 import 'package:devtools_app/src/screens/profiler/panes/call_tree.dart';
 import 'package:devtools_app/src/screens/profiler/panes/cpu_flame_chart.dart';
-import 'package:devtools_app/src/screens/profiler/panes/method_table.dart';
+import 'package:devtools_app/src/screens/profiler/panes/method_table/method_table.dart';
 import 'package:devtools_app/src/shared/charts/flame_chart.dart';
 import 'package:devtools_app/src/shared/config_specific/import_export/import_export.dart';
 import 'package:devtools_app/src/shared/feature_flags.dart';

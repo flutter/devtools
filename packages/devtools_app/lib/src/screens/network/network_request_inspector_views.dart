@@ -391,7 +391,8 @@ class HttpRequestCookiesView extends StatelessWidget {
                     ),
               child: DataTable(
                 key: key,
-                dataRowHeight: defaultRowHeight,
+                dataRowMinHeight: defaultRowHeight,
+                dataRowMaxHeight: defaultRowHeight,
                 // NOTE: if this list of columns change, _buildRow will need
                 // to be updated to match.
                 columns: [
