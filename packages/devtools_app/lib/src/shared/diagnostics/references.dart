@@ -241,6 +241,13 @@ Future<void> _addOutboundLiveReferences({
       // TODO: add references
       break;
     case InstanceKind.kClosure:
+      variable.addAllChildren(
+        _createLiveOutboundReferencesForClosure(
+          value,
+          isolateRef,
+          heapSelection.withoutObject(),
+        ),
+      );
       break;
     default:
       break;
@@ -248,7 +255,7 @@ Future<void> _addOutboundLiveReferences({
 
   if (value.fields != null && value.kind != InstanceKind.kRecord) {
     variable.addAllChildren(
-      _createLiveReferencesForFields(
+      _createLiveOutboundReferencesForFields(
         value,
         isolateRef,
         heapSelection.withoutObject(),
@@ -337,7 +344,28 @@ List<DartObjectNode> _createLiveOutboundReferencesForList(
   return variables;
 }
 
-List<DartObjectNode> _createLiveReferencesForFields(
+List<DartObjectNode> _createLiveOutboundReferencesForClosure(
+  Instance instance,
+  IsolateRef isolateRef,
+  HeapObjectSelection heapSelection,
+) {
+  return [
+    DartObjectNode.fromValue(
+      name: 'function',
+      value: instance.closureFunction,
+      isolateRef: isolateRef,
+      artificialValue: true,
+    ),
+    DartObjectNode.fromValue(
+      name: 'context',
+      value: instance.closureContext,
+      isolateRef: isolateRef,
+      artificialValue: instance.closureContext != null,
+    ),
+  ];
+}
+
+List<DartObjectNode> _createLiveOutboundReferencesForFields(
   Instance instance,
   IsolateRef isolateRef,
   HeapObjectSelection heapSelection,

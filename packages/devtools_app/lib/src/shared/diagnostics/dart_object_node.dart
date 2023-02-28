@@ -201,8 +201,6 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
     return DartObjectNode._(
       text: text,
       ref: ref,
-      childCount:
-          ref.heapSelection.countOfReferences(ref.refNodeType.direction),
       isRerootable: isRerootable,
     );
   }
@@ -234,10 +232,15 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
   /// If true, the variable can be saved to console as a root.
   final bool isRerootable;
 
-  int get childCount {
-    if (_childCount != null) return _childCount!;
+  late final int childCount = _calculateChildCount(_childCount, value);
+  int? _childCount;
 
-    final value = this.value;
+  static int _calculateChildCount(
+    int? providedChildCount,
+    Object? value,
+  ) {
+    if (providedChildCount != null) return providedChildCount;
+
     if (value is InstanceRef) {
       if (value.kind != null &&
           (value.kind!.endsWith('List') ||
@@ -250,8 +253,6 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
 
     return 0;
   }
-
-  int? _childCount;
 
   bool treeInitializeStarted = false;
   bool treeInitializeComplete = false;
