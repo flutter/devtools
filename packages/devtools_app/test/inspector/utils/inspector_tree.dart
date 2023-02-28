@@ -12,13 +12,14 @@ import 'package:flutter_test/flutter_test.dart';
 InspectorTreeController inspectorTreeControllerFromNode(
   RemoteDiagnosticsNode node,
 ) {
-  final controller = InspectorTreeController()
-    ..config = InspectorTreeConfig(
-      summaryTree: false,
-      treeType: FlutterTreeType.widget,
-      onNodeAdded: (_, __) {},
-      onClientActiveChange: (_) {},
-    );
+  final controller =
+      InspectorTreeController(gaId: 'inspectorTreeControllerFromNode')
+        ..config = InspectorTreeConfig(
+          summaryTree: false,
+          treeType: FlutterTreeType.widget,
+          onNodeAdded: (_, __) {},
+          onClientActiveChange: (_) {},
+        );
 
   controller.root = InspectorTreeNode()
     ..appendChild(

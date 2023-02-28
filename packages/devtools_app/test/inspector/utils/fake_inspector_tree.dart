@@ -11,7 +11,7 @@ import 'package:flutter/material.dart';
 const double fakeRowWidth = 200.0;
 
 class FakeInspectorTree extends InspectorTreeController {
-  FakeInspectorTree();
+  FakeInspectorTree() : super(gaId: 'fakeInspectorTree');
 
   final List<Rect> scrollToRequests = [];
 

@@ -41,6 +41,7 @@ import 'service/service_extension_widgets.dart';
 import 'shared/analytics/analytics.dart' as ga;
 import 'shared/analytics/analytics_controller.dart';
 import 'shared/analytics/constants.dart' as gac;
+import 'shared/analytics/metrics.dart';
 import 'shared/common_widgets.dart';
 import 'shared/config_specific/server/server.dart';
 import 'shared/console/primitives/simple_items.dart';
@@ -581,8 +582,12 @@ List<DevToolsScreen> get defaultScreens {
     DevToolsScreen<InspectorController>(
       InspectorScreen(),
       createController: (_) => InspectorController(
-        inspectorTree: InspectorTreeController(gaId: 'inspectorTree'),
-        detailsTree: InspectorTreeController(gaId: 'detailsTree'),
+        inspectorTree: InspectorTreeController(
+          gaId: InspectorTreeControllerMetrics.inspectorTreeGaId,
+        ),
+        detailsTree: InspectorTreeController(
+          gaId: InspectorTreeControllerMetrics.detailsTreeGaId,
+        ),
         treeType: FlutterTreeType.widget,
       ),
     ),

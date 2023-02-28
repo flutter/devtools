@@ -120,7 +120,11 @@ class InspectorTreeController extends Object
 
   /// Clients the controller notifies to trigger changes to the UI.
   final Set<InspectorControllerClient> _clients = {};
+
+  /// Identifier used when sending Google Analytics about events in this
+  /// [InspectorTreeController].
   final String gaId;
+
   InspectorTreeNode createNode() => InspectorTreeNode();
 
   SearchTargetType _searchTarget = SearchTargetType.widget;
