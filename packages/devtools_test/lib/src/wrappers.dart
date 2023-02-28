@@ -103,8 +103,12 @@ Widget wrapWithNotifications(Widget child) {
 
 Widget wrapWithInspectorControllers(Widget widget) {
   final inspectorController = InspectorController(
-    inspectorTree: InspectorTreeController(),
-    detailsTree: InspectorTreeController(),
+    inspectorTree: InspectorTreeController(
+      gaId: 'wrapWithInspectorControllersInspectorTree',
+    ),
+    detailsTree: InspectorTreeController(
+      gaId: 'wrapWithInspectorControllersDetailsTree',
+    ),
     treeType: FlutterTreeType.widget,
   );
   return wrapWithControllers(
