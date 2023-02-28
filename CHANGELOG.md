@@ -1,5 +1,6 @@
 ## 2.22.2
 
+* Bump version from 2.22.2-dev.6 to 2.22.2 [#5324](https://github.com/flutter/devtools/pull/5324)
 * Support `Set` instance inspection in debugger page [#5323](https://github.com/flutter/devtools/pull/5323)
 * Stop passing scope for web [#5321](https://github.com/flutter/devtools/pull/5321)
 * Fix variable inspection for `List` and `Map` instances [#5320](https://github.com/flutter/devtools/pull/5320)
