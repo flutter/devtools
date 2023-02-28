@@ -516,24 +516,36 @@ class SettingsDialog extends StatelessWidget {
             toggle: preferences.toggleVmDeveloperMode,
             gaItem: gac.vmDeveloperMode,
           ),
-          Row(
+          Column(
             children: [
-              CheckboxSetting(
-                label: const Text(
-                  'Enable verbose logging',
-                ),
-                listenable: preferences.verboseLoggingEnabled,
-                toggle: (enable) => preferences.setVerboseLogging(enable),
-                gaItem: gac.verboseLogging,
+              Row(
+                children: [
+                  CheckboxSetting(
+                    label: const Text(
+                      'Enable verbose logging',
+                    ),
+                    listenable: preferences.verboseLoggingEnabled,
+                    toggle: (enable) => preferences.setVerboseLogging(enable),
+                    gaItem: gac.verboseLogging,
+                  ),
+                  CopyToClipboardControl(
+                    dataProvider: () => LogStorage.root.toString(),
+                    tooltip: 'Copy Logs',
+                  ),
+                  ClearButton(
+                    label: '', // TODO this needs to be better centered
+                    tooltip: 'Clear Logs',
+                    onPressed: () => LogStorage.root.clear(),
+                  ),
+                ],
               ),
-              CopyToClipboardControl(
-                dataProvider: () => LogStorage.root.toString(),
-                tooltip: 'Copy Logs',
-              ),
-              ClearButton(
-                label: '', // TODO this needs to be better centered
-                tooltip: 'Clear Logs',
-                onPressed: () => LogStorage.root.clear(),
+              const Row(
+                children: [
+                  Icon(Icons.warning),
+                  Text(
+                    'Logs may contain sensitive information. Always check them before sharing.',
+                  )
+                ],
               ),
             ],
           ),
