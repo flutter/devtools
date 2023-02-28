@@ -94,16 +94,7 @@ Review/update `CHANGELOG.md`:
 
 #### Push the `$DEVTOOLS_RELEASE_BRANCH`
 
-> Ensure you are still on the `$DEVTOOLS_RELEASE_BRANCH`
-
-```shell
-git push -u origin $DEVTOOLS_RELEASE_BRANCH
-```
-
-From the git GUI tool or from github.com directly:
-1. Create a PR.
-2. Add the entry about the created PR to the CHANGELOG.md manually, and push to the PR.
-3. Receive an LGTM, squash and commit.
+Receive an LGTM for the PR, squash and commit.
 
 
 ### Tag the release
