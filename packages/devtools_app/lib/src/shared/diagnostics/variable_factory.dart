@@ -461,6 +461,19 @@ List<DartObjectNode> createVariablesForBytes(
   return variables;
 }
 
+List<DartObjectNode> createVariablesForSets(
+  Instance instance,
+  IsolateRef? isolateRef,
+) {
+  final elements = instance.elements ?? [];
+  return elements.map((element) {
+    return DartObjectNode.fromValue(
+      value: element,
+      isolateRef: isolateRef,
+    );
+  }).toList();
+}
+
 List<DartObjectNode> createVariablesForList(
   Instance instance,
   IsolateRef? isolateRef,
