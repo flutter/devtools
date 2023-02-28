@@ -228,7 +228,7 @@ GtagEventDevTools _gtagEvent({
     heap_objects_total: screenMetrics is MemoryScreenMetrics
         ? screenMetrics.heapObjectsTotal
         : null,
-    // [InspectorTreeBuildMetrics]
+    // [InspectorTreeControllerMetrics]
     root_set_count: screenMetrics is InspectorTreeControllerMetrics
         ? screenMetrics.rootSetCount
         : null,
