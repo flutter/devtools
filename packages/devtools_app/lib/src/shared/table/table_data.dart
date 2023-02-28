@@ -160,3 +160,66 @@ extension ColumnDataExtension<T> on ColumnData<T> {
     }
   }
 }
+
+/// Column that, for each row, shows a time value in milliseconds and the
+/// percentage that the time value is of the total time for this data set.
+///
+/// Both time and percentage are provided through callbacks [timeProvider] and
+/// [percentAsDoubleProvider], respectively.
+///
+/// When [percentageOnly] is true, the time value will be omitted, and only the
+/// percentage will be displayed.
+abstract class TimeAndPercentageColumn<T> extends ColumnData<T> {
+  TimeAndPercentageColumn({
+    required String title,
+    required this.percentAsDoubleProvider,
+    this.timeProvider,
+    this.secondaryCompare,
+    this.percentageOnly = false,
+    double columnWidth = _defaultTimeColumnWidth,
+    super.titleTooltip,
+  })  : assert(percentageOnly == (timeProvider == null)),
+        super(
+          title,
+          fixedWidthPx: scaleByFontFactor(columnWidth),
+        );
+
+  static const _defaultTimeColumnWidth = 180.0;
+
+  Duration Function(T)? timeProvider;
+
+  double Function(T) percentAsDoubleProvider;
+
+  Comparable Function(T)? secondaryCompare;
+
+  final bool percentageOnly;
+
+  @override
+  bool get numeric => true;
+
+  @override
+  int compare(T a, T b) {
+    final int result = super.compare(a, b);
+    if (result == 0 && secondaryCompare != null) {
+      return secondaryCompare!(a).compareTo(secondaryCompare!(b));
+    }
+    return result;
+  }
+
+  @override
+  double getValue(T dataObject) => percentageOnly
+      ? percentAsDoubleProvider(dataObject)
+      : timeProvider!(dataObject).inMicroseconds.toDouble();
+
+  @override
+  String getDisplayValue(T dataObject) {
+    final percentDisplay = '${percent2(percentAsDoubleProvider(dataObject))}';
+    if (percentageOnly) {
+      return percentDisplay;
+    }
+    return '${msText(timeProvider!(dataObject), fractionDigits: 2)} ($percentDisplay)';
+  }
+
+  @override
+  String getTooltip(T dataObject) => '';
+}

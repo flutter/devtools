@@ -163,12 +163,6 @@ Future<void> _addInstanceRefItems(
   );
 
   if (result is Instance) {
-    if (FeatureFlags.evalAndBrowse &&
-        ref != null &&
-        ref.heapSelection != null) {
-      addReferencesRoot(variable, ref);
-    }
-
     await _addChildrenToInstanceVariable(
       variable: variable,
       value: result,
@@ -409,6 +403,12 @@ Future<void> buildVariablesTree(
     // Fail gracefully if calling `getObject` throws a SentinelException.
   } catch (ex, stack) {
     variable.addChild(DartObjectNode.text('error: $ex\n$stack'));
+  }
+
+  if (FeatureFlags.evalAndBrowse &&
+      ref.heapSelection != null &&
+      ref is! ObjectReferences) {
+    addReferencesRoot(variable, ref);
   }
 
   await _addDiagnosticChildrenIfNeeded(
