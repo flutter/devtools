@@ -331,7 +331,6 @@ List<DartObjectNode> createVariablesForMap(
   Instance instance,
   IsolateRef? isolateRef,
 ) {
-  //TODO(polina-c): handle asReferences
   final variables = <DartObjectNode>[];
   final associations = instance.associations ?? [];
 
@@ -341,7 +340,7 @@ List<DartObjectNode> createVariablesForMap(
   // representation.
   final hasPrimitiveKey = associations.fold<bool>(
     false,
-    (p, e) => p || isPrimativeInstanceKind(e.key.kind),
+    (p, e) => p || isPrimitiveInstanceKind(e.key.kind),
   );
   for (var i = 0; i < associations.length; i++) {
     final association = associations[i];

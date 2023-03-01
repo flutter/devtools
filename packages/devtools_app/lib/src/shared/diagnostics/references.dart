@@ -197,7 +197,6 @@ Future<void> addChildReferences(
       final instance = await getObject(
         isolateRef: isolateRef,
         value: ref.instanceRef!,
-        variable: variable,
       );
 
       if (instance is Instance) {

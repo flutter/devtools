@@ -8,7 +8,7 @@ import 'package:vm_service/vm_service.dart';
 import 'globals.dart';
 import 'memory/class_name.dart';
 
-bool isPrimativeInstanceKind(String? kind) {
+bool isPrimitiveInstanceKind(String? kind) {
   return kind == InstanceKind.kBool ||
       kind == InstanceKind.kDouble ||
       kind == InstanceKind.kInt ||

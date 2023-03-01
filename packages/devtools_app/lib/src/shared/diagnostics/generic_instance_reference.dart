@@ -96,4 +96,6 @@ enum RefNodeType {
   const RefNodeType([this.direction]);
 
   final RefDirection? direction;
+
+  bool get isRoot => {refRoot, staticRefRoot, liveRefRoot}.contains(this);
 }
