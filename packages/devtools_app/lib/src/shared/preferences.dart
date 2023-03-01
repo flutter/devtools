@@ -81,6 +81,7 @@ class PreferencesController extends DisposableController
         Logger.root.level = Level.WARNING;
         _log.warning('verboseLogging disabled');
       }
+      print('Logger Level Changed: ${Logger.root.level}');
     });
 
     await inspector.init();

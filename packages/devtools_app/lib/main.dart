@@ -15,6 +15,7 @@ import 'src/screens/provider/riverpod_error_logger_observer.dart';
 import 'src/shared/analytics/analytics_controller.dart';
 import 'src/shared/config_specific/framework_initialize/framework_initialize.dart';
 import 'src/shared/config_specific/ide_theme/ide_theme.dart';
+import 'src/shared/config_specific/logger/logger.dart';
 import 'src/shared/config_specific/url/url.dart';
 import 'src/shared/config_specific/url_strategy/url_strategy.dart';
 import 'src/shared/feature_flags.dart';
@@ -32,6 +33,15 @@ Future<void> runDevTools({
   bool shouldEnableExperiments = false,
   List<DevToolsJsonFile> sampleData = const [],
 }) async {
+  print('DAKE: This is a runDevTools print');
+  log('DAKE: Running Devtools');
+  log('DAKE: Setting Up ONLISTEN');
+  Logger.root.onRecord.listen((record) {
+    log('DAKE: LOGGER GOT MESSAGE');
+    LogStorage.root.addLog(
+      '[${record.loggerName}-${record.level.name}]: ${record.time.toUtc()}: ${record.message}',
+    );
+  });
   // Before switching to URL path strategy, check if this URL is in the legacy
   // fragment format and redirect if necessary.
   if (_handleLegacyUrl()) return;
@@ -44,7 +54,7 @@ Future<void> runDevTools({
   if (shouldEnableExperiments) {
     setEnableExperiments();
   }
-
+  log('DAKE: before initializeFramework');
   // Initialize the framework before we do anything else, otherwise the
   // StorageController won't be initialized and preferences won't be loaded.
   await initializeFramework();
@@ -61,12 +71,6 @@ Future<void> runDevTools({
 
   // Load the Dart syntax highlighting grammar.
   await SyntaxHighlighter.initialize();
-
-  Logger.root.onRecord.listen((record) {
-    LogStorage.root.addLog(
-      '[${record.loggerName}-${record.level.name}]: ${record.time.toUtc()}: ${record.message}',
-    );
-  });
 
   setupErrorHandling(() async {
     // Run the app.
