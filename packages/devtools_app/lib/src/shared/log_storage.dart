@@ -7,7 +7,6 @@ class LogStorage {
   final Queue<String> _logs = Queue<String>();
 
   void addLog(String message) {
-    print('Adding Log: $message');
     _logs.add(message);
     if (_logs.length > maxLogEntries) {
       _logs.removeFirst();
@@ -15,13 +14,11 @@ class LogStorage {
   }
 
   void clear() {
-    print('Clearing Logs');
     _logs.clear();
   }
 
   @override
   String toString() {
-    print('Logs toString ${_logs.join('\n')}');
     return _logs.join('\n');
   }
 

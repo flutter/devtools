@@ -13,6 +13,7 @@ import 'analytics/analytics.dart' as ga;
 import 'analytics/constants.dart' as gac;
 import 'diagnostics/inspector_service.dart';
 import 'globals.dart';
+import 'log_storage.dart';
 import 'primitives/auto_dispose.dart';
 import 'primitives/utils.dart';
 
@@ -81,7 +82,12 @@ class PreferencesController extends DisposableController
         Logger.root.level = Level.WARNING;
         _log.warning('verboseLogging disabled');
       }
-      print('Logger Level Changed: ${Logger.root.level}');
+    });
+
+    Logger.root.onRecord.listen((record) {
+      LogStorage.root.addLog(
+        '[${record.loggerName}-${record.level.name}]: ${record.time.toUtc()}: ${record.message}',
+      );
     });
 
     await inspector.init();
