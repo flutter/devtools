@@ -201,6 +201,8 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
     return DartObjectNode._(
       text: text,
       ref: ref,
+      childCount:
+          ref.heapSelection.countOfReferences(ref.refNodeType.direction),
       isRerootable: isRerootable,
     );
   }
@@ -232,26 +234,38 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
   /// If true, the variable can be saved to console as a root.
   final bool isRerootable;
 
-  late final int childCount = _calculateChildCount(_childCount, value);
-  int? _childCount;
+  int get childCount {
+    if (_childCount != null) return _childCount!;
 
-  static int _calculateChildCount(
-    int? providedChildCount,
-    Object? value,
-  ) {
-    if (providedChildCount != null) return providedChildCount;
-
+    final value = this.value;
     if (value is InstanceRef) {
       if (value.kind != null &&
           (value.kind!.endsWith('List') ||
               value.kind == InstanceKind.kList ||
               value.kind == InstanceKind.kMap ||
-              value.kind == InstanceKind.kRecord)) {
+              value.kind == InstanceKind.kRecord ||
+              isSet)) {
         return value.length ?? 0;
       }
     }
 
     return 0;
+  }
+
+  int? _childCount;
+
+  // TODO(elliette): Can remove this workaround once DWDS correctly returns
+  // InstanceKind.kSet for the kind of `Sets`. See:
+  // https://github.com/dart-lang/webdev/issues/2001
+  bool get isSet {
+    final value = this.value;
+    if (value is InstanceRef) {
+      final kind = value.kind ?? '';
+      if (kind == InstanceKind.kSet) return true;
+      final name = value.classRef?.name ?? '';
+      if (name.contains('Set')) return true;
+    }
+    return false;
   }
 
   bool treeInitializeStarted = false;
@@ -320,10 +334,17 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
       // List, Map, Uint8List, Uint16List, etc...
       if (kind != null && kind == InstanceKind.kList ||
           kind == InstanceKind.kMap ||
+          kind == InstanceKind.kSet ||
           kind!.endsWith('List')) {
+        // TODO(elliette): Determine the signature from type parameters, see:
+        // https://api.flutter.dev/flutter/vm_service/ClassRef/typeParameters.html
+        // DWDS provides us with a readable format including type parameters in
+        // the classRef name, for the vm_service we fall back to just using the
+        // kind:
+        final name = _isPrivateName(valueStr) ? kind : valueStr;
         final itemLength = value.length;
         if (itemLength == null) return valueStr;
-        return '$valueStr (${_itemCount(itemLength)})';
+        return '$name (${_itemCount(itemLength)})';
       }
     } else if (value is Sentinel) {
       valueStr = value.valueAsString;
@@ -337,6 +358,8 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
 
     return valueStr;
   }
+
+  bool _isPrivateName(String name) => name.startsWith('_');
 
   static String _itemCount(int count) {
     return '${nf.format(count)} ${pluralize('item', count)}';
