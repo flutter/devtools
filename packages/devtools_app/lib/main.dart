@@ -3,9 +3,11 @@
 // found in the LICENSE file.
 
 import 'initialization.dart';
+import 'src/app.dart';
 import 'src/extension_points/extensions_base.dart';
 import 'src/extension_points/extensions_external.dart';
 import 'src/shared/globals.dart';
+import 'src/shared/primitives/utils.dart';
 
 /// This is the entrypoint for running DevTools normally.
 ///
@@ -15,6 +17,16 @@ import 'src/shared/globals.dart';
 void main() async {
   // Set the extension points global.
   setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
+}
 
-  await runDevTools();
+Future<void> externalRunDevTools({
+  bool shouldEnableExperiments = false,
+  List<DevToolsJsonFile> sampleData = const [],
+  List<DevToolsScreen>? screens,
+}) async {
+  await runDevTools(
+    shouldEnableExperiments: shouldEnableExperiments,
+    sampleData: sampleData,
+    screens: screens,
+  );
 }

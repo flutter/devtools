@@ -5,7 +5,7 @@
 import 'dart:convert';
 
 import 'package:devtools_app/devtools_app.dart';
-import 'package:devtools_app/initialization.dart' as app;
+import 'package:devtools_app/main.dart' as app;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
@@ -20,7 +20,7 @@ Future<void> pumpDevTools(WidgetTester tester) async {
   // integration_test/test_infra? When trying to import, we get an error:
   // Error when reading 'org-dartlang-app:/test_infra/shared.dart': File not found
   const shouldEnableExperiments = bool.fromEnvironment('enable_experiments');
-  await app.runDevTools(
+  await app.externalRunDevTools(
     // ignore: avoid_redundant_argument_values
     shouldEnableExperiments: shouldEnableExperiments,
     sampleData: _sampleData,
