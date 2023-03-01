@@ -241,7 +241,7 @@ Future<void> _addOutboundLiveReferences({
       break;
     case InstanceKind.kClosure:
       variable.addAllChildren(
-        _createLiveOutboundReferencesForClosure(
+        await _createLiveOutboundReferencesForClosure(
           value,
           isolateRef,
           heapSelection.withoutObject(),
@@ -271,13 +271,18 @@ void _addLiveReferenceToNode(
   HeapObjectSelection heapSelection, {
   String namePrefix = '',
 }) {
-  if (instance is! InstanceRef) return;
-  final classRef = instance.classRef!;
-  if (HeapClassName.fromClassRef(classRef).isNull) return;
+  if (instance is! InstanceRef && instance is! ContextRef) return;
+
+  var name = '';
+  if (instance is InstanceRef) {
+    final classRef = instance.classRef!;
+    if (HeapClassName.fromClassRef(classRef).isNull) return;
+    name = classRef.name ?? '';
+  }
 
   variables.add(
     DartObjectNode.references(
-      '$namePrefix${classRef.name}',
+      '$namePrefix$name',
       ObjectReferences(
         refNodeType: refNodeType,
         isolateRef: isolateRef,
@@ -343,25 +348,42 @@ List<DartObjectNode> _createLiveOutboundReferencesForList(
   return variables;
 }
 
-List<DartObjectNode> _createLiveOutboundReferencesForClosure(
+Future<List<DartObjectNode>> _createLiveOutboundReferencesForClosure(
   Instance instance,
   IsolateRef isolateRef,
   HeapObjectSelection heapSelection,
-) {
-  return [
-    DartObjectNode.fromValue(
-      name: 'function',
-      value: instance.closureFunction,
-      isolateRef: isolateRef,
-      artificialValue: true,
-    ),
-    DartObjectNode.fromValue(
-      name: 'context',
-      value: instance.closureContext,
-      isolateRef: isolateRef,
-      artificialValue: instance.closureContext != null,
-    ),
-  ];
+) async {
+  final variables = <DartObjectNode>[];
+  final contextRef = instance.closureContext;
+  if (contextRef == null) return [];
+
+  final context = await getObject(isolateRef: isolateRef, value: contextRef);
+  if (context is! Context) return [];
+
+  if (context.parent != null) {
+    _addLiveReferenceToNode(
+      variables,
+      isolateRef,
+      context.parent,
+      RefNodeType.liveOutRefs,
+      heapSelection.withoutObject(),
+      namePrefix: 'parent',
+    );
+  }
+
+  final contextVariables = context.variables ?? [];
+  for (int i = 0; i < contextVariables.length; i++) {
+    _addLiveReferenceToNode(
+      variables,
+      isolateRef,
+      contextVariables[i].value,
+      RefNodeType.liveOutRefs,
+      heapSelection.withoutObject(),
+      namePrefix: '[$i]',
+    );
+  }
+
+  return variables;
 }
 
 List<DartObjectNode> _createLiveOutboundReferencesForFields(
