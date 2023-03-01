@@ -58,7 +58,7 @@ flutter pub get
 
 flutter build web \
   --web-renderer canvaskit \
-  --pwa-strategy=none \
+  --pwa-strategy=offline-first \
   --release \
   --dart-define=FLUTTER_WEB_CANVASKIT_URL=canvaskit/ \
   --no-tree-shake-icons
