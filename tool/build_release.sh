@@ -60,6 +60,7 @@ flutter build web \
   --web-renderer canvaskit \
   --pwa-strategy=offline-first \
   --release \
+  --dart-define=FLUTTER_WEB_CANVASKIT_URL=canvaskit/ \
   --no-tree-shake-icons
 
 # Ensure permissions are set correctly on canvaskit binaries.
