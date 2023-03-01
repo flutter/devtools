@@ -112,7 +112,10 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
             controller.offlinePerformanceData!.frames.isNotEmpty;
         return Column(
           children: [
-            if (!offlineMode) _buildPerformanceControls(),
+            PerformanceControls(
+              controller: controller,
+              onClear: () => setState(() {}),
+            ),
             const SizedBox(height: denseRowSpacing),
             if (isOfflineFlutterApp ||
                 (!offlineMode && serviceManager.connectedApp!.isFlutterAppNow!))
@@ -126,24 +129,46 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
       },
     );
   }
+}
 
-  Widget _buildPerformanceControls() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        ValueListenableBuilder<EventsControllerStatus>(
-          valueListenable: controller.timelineEventsController.status,
-          builder: (context, status, _) {
-            return _PrimaryControls(
-              controller: controller,
-              processing: status == EventsControllerStatus.processing,
-              onClear: () => setState(() {}),
-            );
-          },
-        ),
-        const SizedBox(width: defaultSpacing),
-        SecondaryPerformanceControls(controller: controller),
-      ],
+class PerformanceControls extends StatelessWidget {
+  const PerformanceControls({
+    required this.controller,
+    required this.onClear,
+  });
+
+  static const minScreenWidthForTextBeforeScaling = 920.0;
+
+  final PerformanceController controller;
+
+  final VoidCallback onClear;
+
+  @override
+  Widget build(BuildContext context) {
+    return OfflineAwareControls(
+      controlsBuilder: (offline) {
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            ValueListenableBuilder<EventsControllerStatus>(
+              valueListenable: controller.timelineEventsController.status,
+              builder: (context, status, _) {
+                return _PrimaryControls(
+                  controller: controller,
+                  processing: status == EventsControllerStatus.processing,
+                  offline: offline,
+                  onClear: onClear,
+                );
+              },
+            ),
+            if (!offline)
+              Padding(
+                padding: const EdgeInsets.only(left: defaultSpacing),
+                child: _SecondaryPerformanceControls(controller: controller),
+              ),
+          ],
+        );
+      },
     );
   }
 }
@@ -153,12 +178,15 @@ class _PrimaryControls extends StatelessWidget {
     Key? key,
     required this.controller,
     required this.processing,
+    required this.offline,
     required this.onClear,
   }) : super(key: key);
 
   final PerformanceController controller;
 
   final bool processing;
+
+  final bool offline;
 
   final VoidCallback onClear;
 
@@ -168,7 +196,7 @@ class _PrimaryControls extends StatelessWidget {
       children: [
         if (serviceManager.connectedApp!.isFlutterAppNow!) ...[
           VisibilityButton(
-            show: controller.flutterFramesController.showFlutterFramesChart,
+            show: preferences.performance.showFlutterFramesChart,
             onPressed:
                 controller.flutterFramesController.toggleShowFlutterFrames,
             label: 'Flutter frames',
@@ -176,11 +204,12 @@ class _PrimaryControls extends StatelessWidget {
           ),
           const SizedBox(width: denseSpacing),
         ],
-        OutlinedIconButton(
-          icon: Icons.block,
-          tooltip: 'Clear all data on the Performance screen',
-          onPressed: processing ? null : _clearPerformanceData,
-        ),
+        if (!offline)
+          OutlinedIconButton(
+            icon: Icons.block,
+            tooltip: 'Clear all data on the Performance screen',
+            onPressed: processing ? null : _clearPerformanceData,
+          ),
       ],
     );
   }
@@ -192,13 +221,11 @@ class _PrimaryControls extends StatelessWidget {
   }
 }
 
-class SecondaryPerformanceControls extends StatelessWidget {
-  const SecondaryPerformanceControls({
+class _SecondaryPerformanceControls extends StatelessWidget {
+  const _SecondaryPerformanceControls({
     Key? key,
     required this.controller,
   }) : super(key: key);
-
-  static const minScreenWidthForTextBeforeScaling = 920.0;
 
   final PerformanceController controller;
 
@@ -210,7 +237,7 @@ class SecondaryPerformanceControls extends StatelessWidget {
         if (serviceManager.connectedApp!.isFlutterAppNow!) ...[
           ServiceExtensionButtonGroup(
             minScreenWidthForTextBeforeScaling:
-                minScreenWidthForTextBeforeScaling,
+                PerformanceControls.minScreenWidthForTextBeforeScaling,
             extensions: [
               extensions.performanceOverlay,
             ],

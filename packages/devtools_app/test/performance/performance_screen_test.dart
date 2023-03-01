@@ -9,6 +9,7 @@ import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/performance/panes/flutter_frames/flutter_frames_chart.dart';
 import 'package:devtools_app/src/screens/performance/panes/timeline_events/legacy/event_details.dart';
 import 'package:devtools_app/src/screens/performance/panes/timeline_events/legacy/timeline_flame_chart.dart';
+import 'package:devtools_app/src/screens/performance/tabbed_performance_view.dart';
 import 'package:devtools_app/src/shared/config_specific/import_export/import_export.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
@@ -19,65 +20,69 @@ import 'package:vm_service/vm_service.dart' as vm_service;
 import '../test_infra/test_data/performance.dart';
 
 void main() {
-  setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
-  setGlobal(IdeTheme, IdeTheme());
-  setGlobal(PreferencesController, PreferencesController());
-  late PerformanceController controller;
-  late FakeServiceManager fakeServiceManager;
-
-  Future<void> _setUpServiceManagerWithTimeline(
-    Map<String, dynamic> timelineJson,
-  ) async {
-    fakeServiceManager = FakeServiceManager(
-      service: FakeServiceManager.createFakeService(
-        timelineData: vm_service.Timeline.parse(timelineJson),
-      ),
-    );
-    when(
-      fakeServiceManager.errorBadgeManager.errorCountNotifier('performance'),
-    ).thenReturn(ValueNotifier<int>(0));
-    final app = fakeServiceManager.connectedApp!;
-    when(app.initialized).thenReturn(Completer()..complete(true));
-    when(app.isDartWebAppNow).thenReturn(false);
-    when(app.isFlutterAppNow).thenReturn(true);
-    when(app.isProfileBuild).thenAnswer((_) => Future.value(false));
-    when(app.flutterVersionNow).thenReturn(
-      FlutterVersion.parse((await fakeServiceManager.flutterVersion).json!),
-    );
-    when(app.isDartCliAppNow).thenReturn(false);
-    when(app.isProfileBuildNow).thenReturn(true);
-    when(app.isDartWebApp).thenAnswer((_) async => false);
-    when(app.isProfileBuild).thenAnswer((_) async => false);
-    setGlobal(ServiceConnectionManager, fakeServiceManager);
-    setGlobal(NotificationService, NotificationService());
-    setGlobal(OfflineModeController, OfflineModeController());
-  }
-
-  Future<void> pumpPerformanceScreen(
-    WidgetTester tester, {
-    bool runAsync = false,
-  }) async {
-    await tester.pumpWidget(
-      wrapWithControllers(
-        const PerformanceScreenBody(),
-        performance: controller,
-      ),
-    );
-    await tester.pumpAndSettle();
-
-    if (runAsync) {
-      // Await a small delay to allow the PerformanceController to complete
-      // initialization.
-      await Future.delayed(const Duration(seconds: 1));
-    }
-
-    expect(find.byType(PerformanceScreenBody), findsOneWidget);
-  }
-
   const windowSize = Size(3000.0, 1000.0);
 
-  group('PerformanceScreen', () {
+  setUp(() {
+    setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
+    setGlobal(IdeTheme, IdeTheme());
+    setGlobal(PreferencesController, PreferencesController());
+    setGlobal(OfflineModeController, OfflineModeController());
+    setGlobal(NotificationService, NotificationService());
+  });
+
+  group('$PerformanceScreen', () {
+    late PerformanceController controller;
+    late FakeServiceManager fakeServiceManager;
+
+    Future<void> _setUpServiceManagerWithTimeline(
+      Map<String, dynamic> timelineJson,
+    ) async {
+      fakeServiceManager = FakeServiceManager(
+        service: FakeServiceManager.createFakeService(
+          timelineData: vm_service.Timeline.parse(timelineJson),
+        ),
+      );
+      when(
+        fakeServiceManager.errorBadgeManager.errorCountNotifier('performance'),
+      ).thenReturn(ValueNotifier<int>(0));
+      final app = fakeServiceManager.connectedApp!;
+      when(app.initialized).thenReturn(Completer()..complete(true));
+      when(app.isDartWebAppNow).thenReturn(false);
+      when(app.isFlutterAppNow).thenReturn(true);
+      when(app.isProfileBuild).thenAnswer((_) => Future.value(false));
+      when(app.flutterVersionNow).thenReturn(
+        FlutterVersion.parse((await fakeServiceManager.flutterVersion).json!),
+      );
+      when(app.isDartCliAppNow).thenReturn(false);
+      when(app.isProfileBuildNow).thenReturn(true);
+      when(app.isDartWebApp).thenAnswer((_) async => false);
+      when(app.isProfileBuild).thenAnswer((_) async => false);
+      setGlobal(ServiceConnectionManager, fakeServiceManager);
+    }
+
+    Future<void> pumpPerformanceScreen(
+      WidgetTester tester, {
+      bool runAsync = false,
+    }) async {
+      await tester.pumpWidget(
+        wrapWithControllers(
+          const PerformanceScreenBody(),
+          performance: controller,
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      if (runAsync) {
+        // Await a small delay to allow the PerformanceController to complete
+        // initialization.
+        await Future.delayed(const Duration(seconds: 1));
+      }
+
+      expect(find.byType(PerformanceScreenBody), findsOneWidget);
+    }
+
     setUp(() async {
+      preferences.performance.showFlutterFramesChart.value = true;
       await _setUpServiceManagerWithTimeline(testTimelineJson);
       controller = PerformanceController();
       await controller.initialized;
@@ -99,18 +104,13 @@ void main() {
       await tester.runAsync(() async {
         await pumpPerformanceScreen(tester, runAsync: true);
         await tester.pumpAndSettle();
+        expect(find.byType(PerformanceControls), findsOneWidget);
         expect(find.byType(FlutterFramesChart), findsOneWidget);
+        expect(find.byType(TabbedPerformanceView), findsOneWidget);
         expect(
           find.text('Select a frame above to view analysis data.'),
           findsOneWidget,
         );
-        expect(find.byType(VisibilityButton), findsOneWidget);
-        expect(find.byIcon(Icons.block), findsOneWidget);
-        expect(find.text('Performance Overlay'), findsOneWidget);
-        expect(find.text('Enhance Tracing'), findsOneWidget);
-        expect(find.text('More debugging options'), findsOneWidget);
-        expect(find.byIcon(Icons.file_download), findsOneWidget);
-        expect(find.byIcon(Icons.settings), findsOneWidget);
       });
     });
 
@@ -126,6 +126,7 @@ void main() {
         );
         await pumpPerformanceScreen(tester, runAsync: true);
         await tester.pumpAndSettle();
+        expect(find.byType(PerformanceControls), findsOneWidget);
         expect(find.byType(FlutterFramesChart), findsNothing);
         expect(find.byType(TimelineFlameChart), findsOneWidget);
         expect(
@@ -133,13 +134,6 @@ void main() {
           findsNothing,
         );
         expect(find.byType(EventDetails), findsOneWidget);
-        expect(find.byType(VisibilityButton), findsNothing);
-        expect(find.byIcon(Icons.block), findsOneWidget);
-        expect(find.text('Performance Overlay'), findsNothing);
-        expect(find.text('Enhance Tracing'), findsNothing);
-        expect(find.text('More debugging options'), findsNothing);
-        expect(find.byIcon(Icons.file_download), findsOneWidget);
-        expect(find.byIcon(Icons.settings), findsOneWidget);
 
         // Verify the state of the splitter.
         final splitFinder = find.byType(Split);
@@ -149,7 +143,7 @@ void main() {
       });
     });
 
-    group('Performance controls', () {
+    group('controls', () {
       testWidgetsWithWindowSize(
           'can expand and collapse flutter frames chart', windowSize,
           (WidgetTester tester) async {
@@ -163,7 +157,7 @@ void main() {
           // The flutter frames chart is visible.
           expect(find.byType(FramesChartControls), findsOneWidget);
           expect(
-            controller.flutterFramesController.showFlutterFramesChart.value,
+            preferences.performance.showFlutterFramesChart.value,
             isTrue,
           );
 
@@ -173,7 +167,7 @@ void main() {
           // The flutter frames chart should no longer be visible.
           expect(find.byType(FramesChartControls), findsNothing);
           expect(
-            controller.flutterFramesController.showFlutterFramesChart.value,
+            preferences.performance.showFlutterFramesChart.value,
             isFalse,
           );
 
@@ -183,7 +177,7 @@ void main() {
           // The flutter frames chart should be visible again.
           expect(find.byType(FramesChartControls), findsOneWidget);
           expect(
-            controller.flutterFramesController.showFlutterFramesChart.value,
+            preferences.performance.showFlutterFramesChart.value,
             isTrue,
           );
         });
@@ -312,6 +306,92 @@ void main() {
           );
         });
       });
+    });
+  });
+
+  group('$PerformanceControls', () {
+    late MockServiceConnectionManager mockServiceManager;
+    late MockPerformanceController mockPerformanceController;
+
+    setUp(() {
+      mockServiceManager = MockServiceConnectionManager();
+      when(mockServiceManager.serviceExtensionManager)
+          .thenReturn(FakeServiceExtensionManager());
+      final connectedApp = MockConnectedApp();
+      mockConnectedApp(
+        connectedApp,
+        isFlutterApp: true,
+        isProfileBuild: false,
+        isWebApp: false,
+      );
+      when(mockServiceManager.connectedApp).thenReturn(connectedApp);
+      setGlobal(ServiceConnectionManager, mockServiceManager);
+      mockPerformanceController = createMockPerformanceControllerWithDefaults();
+    });
+
+    tearDown(() {
+      offlineController.exitOfflineMode();
+    });
+
+    Future<void> _pumpControls(WidgetTester tester) async {
+      await tester.pumpWidget(
+        wrapWithControllers(
+          PerformanceControls(
+            controller: mockPerformanceController,
+            onClear: () {},
+          ),
+          performance: mockPerformanceController,
+        ),
+      );
+      await tester.pumpAndSettle();
+    }
+
+    testWidgetsWithWindowSize('builds for Flutter app', windowSize,
+        (WidgetTester tester) async {
+      await _pumpControls(tester);
+      expect(find.byType(ExitOfflineButton), findsNothing);
+      expect(find.byType(VisibilityButton), findsOneWidget);
+      expect(find.byIcon(Icons.block), findsOneWidget);
+      expect(find.text('Performance Overlay'), findsOneWidget);
+      expect(find.text('Enhance Tracing'), findsOneWidget);
+      expect(find.text('More debugging options'), findsOneWidget);
+      expect(find.byIcon(Icons.file_download), findsOneWidget);
+      expect(find.byIcon(Icons.settings), findsOneWidget);
+    });
+
+    testWidgetsWithWindowSize('builds for non flutter app', windowSize,
+        (WidgetTester tester) async {
+      mockConnectedApp(
+        mockServiceManager.connectedApp!,
+        isFlutterApp: false,
+        isProfileBuild: false,
+        isWebApp: false,
+      );
+      await _pumpControls(tester);
+
+      expect(find.byType(ExitOfflineButton), findsNothing);
+      expect(find.byType(VisibilityButton), findsNothing);
+      expect(find.byIcon(Icons.block), findsOneWidget);
+      expect(find.text('Performance Overlay'), findsNothing);
+      expect(find.text('Enhance Tracing'), findsNothing);
+      expect(find.text('More debugging options'), findsNothing);
+      expect(find.byIcon(Icons.file_download), findsOneWidget);
+      expect(find.byIcon(Icons.settings), findsOneWidget);
+    });
+
+    testWidgetsWithWindowSize('builds for offline mode', windowSize,
+        (WidgetTester tester) async {
+      offlineController.enterOfflineMode();
+      await _pumpControls(tester);
+      expect(find.byType(ExitOfflineButton), findsOneWidget);
+      expect(find.byType(VisibilityButton), findsOneWidget);
+      expect(find.byIcon(Icons.block), findsNothing);
+      expect(find.text('Performance Overlay'), findsNothing);
+      expect(find.text('Enhance Tracing'), findsNothing);
+      expect(find.text('More debugging options'), findsNothing);
+      expect(find.byIcon(Icons.file_download), findsNothing);
+      expect(find.byIcon(Icons.settings), findsNothing);
+      offlineController.exitOfflineMode();
     });
   });
 }

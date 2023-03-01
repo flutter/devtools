@@ -23,7 +23,7 @@ class MoreDebuggingOptionsButton extends StatelessWidget {
       icon: Icons.build,
       tooltip: 'Opens a list of options you can use to help debug performance',
       minScreenWidthForTextBeforeScaling:
-          SecondaryPerformanceControls.minScreenWidthForTextBeforeScaling,
+          PerformanceControls.minScreenWidthForTextBeforeScaling,
       extensions: [
         extensions.disableClipLayers,
         extensions.disableOpacityLayers,
