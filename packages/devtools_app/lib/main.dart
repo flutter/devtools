@@ -10,9 +10,9 @@ import 'src/shared/primitives/utils.dart';
 
 /// This is the entrypoint for running DevTools normally.
 ///
-/// WARNING: This entrypoint is not used when running DevTools in google3.
-/// Any intialization that needs to occur for all contexts should be added to
-/// [runDevTools].
+/// WARNING: This is the external entrypoint for running DevTools.
+/// Any intialization that needs to occur, both internally and externally,
+/// should be added to [runDevTools].
 void main() async {
   // Set the extension points global.
   setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());

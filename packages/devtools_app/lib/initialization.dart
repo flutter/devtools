@@ -21,9 +21,8 @@ import 'src/shared/primitives/utils.dart';
 /// Any initialization that needs to happen before running DevTools, regardless
 /// of context, should happen here.
 ///
-/// If the intialization is specific to running Devtools normally or
-/// running in DevTools in g3, then it should be added to that respective
-/// main.dart file.
+/// If the intialization is specific to running Devtools internally or
+/// externally, then it should be added to that respective main.dart file.
 Future<void> runDevTools({
   bool shouldEnableExperiments = false,
   List<DevToolsJsonFile> sampleData = const [],
