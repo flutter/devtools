@@ -341,10 +341,9 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
         }
       }
       // List, Map, Uint8List, Uint16List, etc...
-      if (kind != null && kind == InstanceKind.kList ||
+      if (isList(value) ||
           kind == InstanceKind.kMap ||
-          kind == InstanceKind.kSet ||
-          kind!.endsWith('List')) {
+          kind == InstanceKind.kSet) {
         // TODO(elliette): Determine the signature from type parameters, see:
         // https://api.flutter.dev/flutter/vm_service/ClassRef/typeParameters.html
         // DWDS provides us with a readable format including type parameters in
