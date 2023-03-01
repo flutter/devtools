@@ -52,10 +52,6 @@ flutter pub get
 # as code size doesn't matter very much for us as minification makes some
 # crashes harder to debug. For example, https://github.com/flutter/devtools/issues/2125
 
-# TODO(https://github.com/flutter/devtools/issues/5148): remove the FLUTTER_WEB_CANVASKIT_URL
-# flag and set `canvasKitBaseUrl` in `initializeEngine` instead.
-# See https://docs.flutter.dev/development/platform-integration/web/initialization.
-
 flutter build web \
   --web-renderer canvaskit \
   --pwa-strategy=offline-first \
