@@ -742,7 +742,10 @@ class ExitOfflineButton extends StatelessWidget {
 }
 
 class OfflineAwareControls extends StatelessWidget {
-  const OfflineAwareControls({required this.controlsBuilder, super.key});
+  const OfflineAwareControls({
+    required this.controlsBuilder,
+    super.key,
+  });
 
   final Widget Function(bool) controlsBuilder;
 
