@@ -244,8 +244,7 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
       if (value.kind != null &&
           (isList(value) ||
               value.kind == InstanceKind.kMap ||
-              value.kind == InstanceKind.kRecord ||
-              isSet)) {
+              value.kind == InstanceKind.kRecord)) {
         return value.length ?? 0;
       }
     }
@@ -254,20 +253,6 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
   }
 
   int? _childCount;
-
-  // TODO(elliette): Can remove this workaround once DWDS correctly returns
-  // InstanceKind.kSet for the kind of `Sets`. See:
-  // https://github.com/dart-lang/webdev/issues/2001
-  bool get isSet {
-    final value = this.value;
-    if (value is InstanceRef) {
-      final kind = value.kind ?? '';
-      if (kind == InstanceKind.kSet) return true;
-      final name = value.classRef?.name ?? '';
-      if (name.contains('Set')) return true;
-    }
-    return false;
-  }
 
   bool treeInitializeStarted = false;
   bool treeInitializeComplete = false;
