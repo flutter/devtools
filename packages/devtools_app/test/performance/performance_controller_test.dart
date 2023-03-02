@@ -17,6 +17,8 @@ void main() {
     setUp(() {
       setGlobal(IdeTheme, IdeTheme());
       setGlobal(OfflineModeController, OfflineModeController());
+      setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
+      setGlobal(PreferencesController, PreferencesController());
       mockServiceManager = MockServiceConnectionManager();
       final connectedApp = MockConnectedApp();
       mockConnectedApp(

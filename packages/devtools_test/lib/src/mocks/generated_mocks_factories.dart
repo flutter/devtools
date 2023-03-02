@@ -43,6 +43,9 @@ MockPerformanceController createMockPerformanceControllerWithDefaults() {
       .thenReturn(ValueNotifier<bool>(true));
   when(timelineEventsController.legacyController)
       .thenReturn(legacyTimelineEventsController);
+  when(timelineEventsController.status).thenReturn(
+    ValueNotifier<EventsControllerStatus>(EventsControllerStatus.empty),
+  );
   when(legacyTimelineEventsController.searchMatches)
       .thenReturn(const FixedValueListenable<List<TimelineEvent>>([]));
   when(legacyTimelineEventsController.searchInProgressNotifier)

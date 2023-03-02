@@ -168,6 +168,7 @@ class _InstanceColumn extends ColumnData<DiffClassStats>
       data.heapClass,
       isSelected: isRowSelected,
       gaContext: gac.MemoryAreas.snapshotDiff,
+      liveItemsEnabled: dataPart != _DataPart.deleted,
     );
   }
 }

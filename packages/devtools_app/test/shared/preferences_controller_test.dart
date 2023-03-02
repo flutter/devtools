@@ -221,4 +221,55 @@ void main() {
       );
     });
   });
+
+  group('$PerformancePreferencesController', () {
+    late PerformancePreferencesController controller;
+    late FlutterTestStorage storage;
+
+    setUp(() async {
+      setGlobal(Storage, storage = FlutterTestStorage());
+      controller = PerformancePreferencesController();
+      await controller.init();
+    });
+
+    test('has expected default values', () async {
+      expect(controller.showFlutterFramesChart.value, isTrue);
+    });
+
+    test('stores values and reads them on init', () async {
+      storage.values.clear();
+
+      // Remember original values.
+      final showFramesChart = controller.showFlutterFramesChart.value;
+
+      // Flip the values in controller.
+      controller.showFlutterFramesChart.value = !showFramesChart;
+
+      // Check the values are stored.
+      expect(storage.values, hasLength(1));
+
+      // Reload the values from storage.
+      await controller.init();
+
+      // Check they did not change back to default.
+      expect(
+        controller.showFlutterFramesChart.value,
+        !showFramesChart,
+      );
+
+      // Flip the values in storage.
+      for (var key in storage.values.keys) {
+        storage.values[key] = (!(storage.values[key] == 'true')).toString();
+      }
+
+      // Reload the values from storage.
+      await controller.init();
+
+      // Check they flipped values are loaded.
+      expect(
+        controller.showFlutterFramesChart.value,
+        showFramesChart,
+      );
+    });
+  });
 }

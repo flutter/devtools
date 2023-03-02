@@ -15,6 +15,7 @@ import '../vm_utils.dart';
 import 'dart_object_node.dart';
 import 'diagnostics_node.dart';
 import 'inspector_service.dart';
+import 'primitives/record_fields.dart';
 
 List<DartObjectNode> createVariablesForStackTrace(
   Instance stackTrace,
@@ -331,7 +332,6 @@ List<DartObjectNode> createVariablesForMap(
   Instance instance,
   IsolateRef? isolateRef,
 ) {
-  //TODO(polina-c): handle asReferences
   final variables = <DartObjectNode>[];
   final associations = instance.associations ?? [];
 
@@ -341,7 +341,7 @@ List<DartObjectNode> createVariablesForMap(
   // representation.
   final hasPrimitiveKey = associations.fold<bool>(
     false,
-    (p, e) => p || isPrimativeInstanceKind(e.key.kind),
+    (p, e) => p || isPrimitiveInstanceKind(e.key.kind),
   );
   for (var i = 0; i < associations.length; i++) {
     final association = associations[i];
@@ -461,6 +461,19 @@ List<DartObjectNode> createVariablesForBytes(
   return variables;
 }
 
+List<DartObjectNode> createVariablesForSets(
+  Instance instance,
+  IsolateRef? isolateRef,
+) {
+  final elements = instance.elements ?? [];
+  return elements.map((element) {
+    return DartObjectNode.fromValue(
+      value: element,
+      isolateRef: isolateRef,
+    );
+  }).toList();
+}
+
 List<DartObjectNode> createVariablesForList(
   Instance instance,
   IsolateRef? isolateRef,
@@ -469,7 +482,7 @@ List<DartObjectNode> createVariablesForList(
   final elements = instance.elements ?? [];
   for (int i = 0; i < elements.length; i++) {
     final index = instance.offset == null ? i : i + instance.offset!;
-    final name = '[$index]${instance.classRef!.name}';
+    final name = '[$index]';
 
     variables.add(
       DartObjectNode.fromValue(
@@ -507,45 +520,25 @@ List<DartObjectNode> createVariablesForRecords(
   Instance instance,
   IsolateRef? isolateRef,
 ) {
-  final positionalFields = <BoundField>[];
-  final namedFields = <BoundField>[];
-  for (final field in instance.fields ?? []) {
-    if (_isPositionalField(field)) {
-      positionalFields.add(field);
-    } else {
-      namedFields.add(field);
-    }
-  }
-  // Sort positional fields in ascending order:
-  _sortPositionalFields(positionalFields);
+  final fields = RecordFields(instance.fields);
+
   return [
     // Always show positional fields before named fields:
-    for (var i = 0; i < positionalFields.length; i++)
+    for (var i = 0; i < fields.positional.length; i++)
       DartObjectNode.fromValue(
         // Positional fields are designated by their getter syntax, eg $1, $2,
         // $3, etc:
         name: '\$${i + 1}',
-        value: positionalFields[i].value,
+        value: fields.positional[i].value,
         isolateRef: isolateRef,
       ),
-    for (final field in namedFields)
+    for (final field in fields.named)
       DartObjectNode.fromValue(
         name: field.name,
         value: field.value,
         isolateRef: isolateRef,
       ),
   ];
-}
-
-bool _isPositionalField(BoundField field) => field.name is int;
-
-void _sortPositionalFields(List<BoundField> fields) {
-  fields.sort((field1, field2) {
-    assert(field1.name is int && field2.name is int);
-    final name1 = field1.name as int;
-    final name2 = field2.name as int;
-    return name1.compareTo(name2);
-  });
 }
 
 List<DartObjectNode> createVariablesForFields(
