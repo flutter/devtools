@@ -15,6 +15,7 @@ import '../primitives/utils.dart';
 import 'dart_object_node.dart';
 import 'generic_instance_reference.dart';
 import 'helpers.dart';
+import 'primitives/record_fields.dart';
 
 void addReferencesRoot(DartObjectNode variable, GenericInstanceRef ref) {
   variable.addChild(
@@ -237,7 +238,13 @@ Future<void> _addOutboundLiveReferences({
       );
       break;
     case InstanceKind.kRecord:
-      // TODO: add references
+      variable.addAllChildren(
+        _createLiveOutboundReferencesForRecord(
+          value,
+          isolateRef,
+          heapSelection.withoutObject(),
+        ),
+      );
       break;
     case InstanceKind.kClosure:
       variable.addAllChildren(
@@ -380,6 +387,41 @@ Future<List<DartObjectNode>> _createLiveOutboundReferencesForClosure(
       RefNodeType.liveOutRefs,
       heapSelection.withoutObject(),
       namePrefix: '[$i]',
+    );
+  }
+
+  return variables;
+}
+
+List<DartObjectNode> _createLiveOutboundReferencesForRecord(
+  Instance instance,
+  IsolateRef isolateRef,
+  HeapObjectSelection heapSelection,
+) {
+  final variables = <DartObjectNode>[];
+  final fields = RecordFields(instance.fields);
+
+  // Always show positional fields before named fields:
+  for (var i = 0; i < fields.positional.length; i++) {
+    final field = fields.positional[i];
+    _addLiveReferenceToNode(
+      variables,
+      isolateRef,
+      field.value,
+      RefNodeType.liveOutRefs,
+      heapSelection.withoutObject(),
+      namePrefix: '[$i]',
+    );
+  }
+
+  for (final field in fields.named) {
+    _addLiveReferenceToNode(
+      variables,
+      isolateRef,
+      field.value,
+      RefNodeType.liveOutRefs,
+      heapSelection.withoutObject(),
+      namePrefix: '${field.name}:',
     );
   }
 
