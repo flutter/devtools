@@ -277,7 +277,7 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
     final theRef = ref;
     final instanceRef = theRef?.instanceRef;
     if (theRef is ObjectReferences) {
-      if (theRef.instanceRef?.length == 0) return false;
+      if (instanceRef?.length == 0) return false;
       return theRef.refNodeType.isRoot ||
           children.isNotEmpty ||
           childCount > 0 ||
