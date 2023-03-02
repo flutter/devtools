@@ -12,7 +12,7 @@ TODO: Remove this section if there are not any general updates.
 TODO: Remove this section if there are not any general updates.
 
 ## Performance updates
-TODO: Remove this section if there are not any general updates.
+* Persist a user's preference for whether the Flutter Frames chart should be shown by default. - [#5339](https://github.com/flutter/devtools/pull/5339)
 
 ## CPU profiler updates
 TODO: Remove this section if there are not any general updates.

@@ -99,7 +99,8 @@ class _OfflineLoadError extends StatelessWidget {
 class OfflineDataArguments {
   OfflineDataArguments(this.screenId);
 
-  OfflineDataArguments.fromArgs(Map<String, String?> args) : this(args['screen']);
+  OfflineDataArguments.fromArgs(Map<String, String?> args)
+      : this(args['screen']);
 
   final String? screenId;
 }
