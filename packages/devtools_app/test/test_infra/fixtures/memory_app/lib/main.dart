@@ -87,6 +87,7 @@ class _MyGarbage {
       mapSimpleKey = null;
       mapSimpleValue = null;
       map = null;
+      record = null;
     } else {
       _MyGarbage createInstance({String? note}) =>
           _MyGarbage(_level + 1, note ?? _note);
@@ -117,6 +118,8 @@ class _MyGarbage {
           // We need this block to show compiler [_closureMember] is in use.
         }
       };
+
+      record = ('foo', count: 100, garbage: createInstance(note: 'record'));
     }
   }
 
@@ -136,5 +139,5 @@ class _MyGarbage {
   late final Map<_MyGarbage, dynamic>? mapSimpleValue;
   late final Map<_MyGarbage, _MyGarbage>? map;
   late final void Function() closure;
-  final record = (count: 100, 'foo', garbage: _MyGarbage(0, 'record'));
+  late final (String, {int count, _MyGarbage garbage})? record;
 }
