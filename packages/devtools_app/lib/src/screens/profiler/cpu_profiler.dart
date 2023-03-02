@@ -379,8 +379,10 @@ class CpuProfileStats extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final samplingPeriod =
-        const Duration(seconds: 1).inMicroseconds ~/ metadata.samplePeriod;
+    final samplePeriodValid = metadata.samplePeriod > 0;
+    final samplingPeriodDisplay = samplePeriodValid
+        ? const Duration(seconds: 1).inMicroseconds ~/ metadata.samplePeriod
+        : '--';
     return OutlineDecoration(
       child: Container(
         height: _statsRowHeight,
@@ -398,8 +400,9 @@ class CpuProfileStats extends StatelessWidget {
             ),
             _stat(
               tooltip:
-                  'The frequency at which samples are collected by the profiler',
-              text: 'Sampling rate: $samplingPeriod Hz',
+                  'The frequency at which samples are collected by the profiler'
+                  '${samplePeriodValid ? ' (once every ${metadata.samplePeriod} micros)' : ''}',
+              text: 'Sampling rate: $samplingPeriodDisplay Hz',
             ),
             _stat(
               tooltip: 'The maximum stack trace depth of a collected sample',
