@@ -13,7 +13,7 @@ import '../../../../../shared/common_widgets.dart';
 import '../../../../../shared/globals.dart';
 import '../../../../../shared/primitives/auto_dispose.dart';
 import '../../../../../shared/theme.dart';
-import '../../../performance_screen.dart';
+import '../performance_controls.dart';
 import 'enhance_tracing_controller.dart';
 
 class EnhanceTracingButton extends StatelessWidget {

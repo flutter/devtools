@@ -6,11 +6,13 @@
 import 'dart:async';
 
 import 'package:devtools_app/devtools_app.dart';
+import 'package:devtools_app/src/screens/performance/panes/controls/performance_controls.dart';
 import 'package:devtools_app/src/screens/performance/panes/flutter_frames/flutter_frames_chart.dart';
 import 'package:devtools_app/src/screens/performance/panes/timeline_events/legacy/event_details.dart';
 import 'package:devtools_app/src/screens/performance/panes/timeline_events/legacy/timeline_flame_chart.dart';
 import 'package:devtools_app/src/screens/performance/tabbed_performance_view.dart';
 import 'package:devtools_app/src/shared/config_specific/import_export/import_export.dart';
+import 'package:devtools_shared/devtools_test_utils.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -84,6 +86,7 @@ void main() {
     setUp(() async {
       preferences.performance.showFlutterFramesChart.value = true;
       await _setUpServiceManagerWithTimeline(testTimelineJson);
+      await shortDelay();
       controller = PerformanceController();
       await controller.initialized;
     });
@@ -306,92 +309,6 @@ void main() {
           );
         });
       });
-    });
-  });
-
-  group('$PerformanceControls', () {
-    late MockServiceConnectionManager mockServiceManager;
-    late MockPerformanceController mockPerformanceController;
-
-    setUp(() {
-      mockServiceManager = MockServiceConnectionManager();
-      when(mockServiceManager.serviceExtensionManager)
-          .thenReturn(FakeServiceExtensionManager());
-      final connectedApp = MockConnectedApp();
-      mockConnectedApp(
-        connectedApp,
-        isFlutterApp: true,
-        isProfileBuild: false,
-        isWebApp: false,
-      );
-      when(mockServiceManager.connectedApp).thenReturn(connectedApp);
-      setGlobal(ServiceConnectionManager, mockServiceManager);
-      mockPerformanceController = createMockPerformanceControllerWithDefaults();
-    });
-
-    tearDown(() {
-      offlineController.exitOfflineMode();
-    });
-
-    Future<void> _pumpControls(WidgetTester tester) async {
-      await tester.pumpWidget(
-        wrapWithControllers(
-          PerformanceControls(
-            controller: mockPerformanceController,
-            onClear: () {},
-          ),
-          performance: mockPerformanceController,
-        ),
-      );
-      await tester.pumpAndSettle();
-    }
-
-    testWidgetsWithWindowSize('builds for Flutter app', windowSize,
-        (WidgetTester tester) async {
-      await _pumpControls(tester);
-      expect(find.byType(ExitOfflineButton), findsNothing);
-      expect(find.byType(VisibilityButton), findsOneWidget);
-      expect(find.byIcon(Icons.block), findsOneWidget);
-      expect(find.text('Performance Overlay'), findsOneWidget);
-      expect(find.text('Enhance Tracing'), findsOneWidget);
-      expect(find.text('More debugging options'), findsOneWidget);
-      expect(find.byIcon(Icons.file_download), findsOneWidget);
-      expect(find.byIcon(Icons.settings), findsOneWidget);
-    });
-
-    testWidgetsWithWindowSize('builds for non flutter app', windowSize,
-        (WidgetTester tester) async {
-      mockConnectedApp(
-        mockServiceManager.connectedApp!,
-        isFlutterApp: false,
-        isProfileBuild: false,
-        isWebApp: false,
-      );
-      await _pumpControls(tester);
-
-      expect(find.byType(ExitOfflineButton), findsNothing);
-      expect(find.byType(VisibilityButton), findsNothing);
-      expect(find.byIcon(Icons.block), findsOneWidget);
-      expect(find.text('Performance Overlay'), findsNothing);
-      expect(find.text('Enhance Tracing'), findsNothing);
-      expect(find.text('More debugging options'), findsNothing);
-      expect(find.byIcon(Icons.file_download), findsOneWidget);
-      expect(find.byIcon(Icons.settings), findsOneWidget);
-    });
-
-    testWidgetsWithWindowSize('builds for offline mode', windowSize,
-        (WidgetTester tester) async {
-      offlineController.enterOfflineMode();
-      await _pumpControls(tester);
-      expect(find.byType(ExitOfflineButton), findsOneWidget);
-      expect(find.byType(VisibilityButton), findsOneWidget);
-      expect(find.byIcon(Icons.block), findsNothing);
-      expect(find.text('Performance Overlay'), findsNothing);
-      expect(find.text('Enhance Tracing'), findsNothing);
-      expect(find.text('More debugging options'), findsNothing);
-      expect(find.byIcon(Icons.file_download), findsNothing);
-      expect(find.byIcon(Icons.settings), findsNothing);
-      offlineController.exitOfflineMode();
     });
   });
 }
