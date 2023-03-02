@@ -14,7 +14,6 @@ import 'package:vm_service/vm_service.dart';
 import '../vm_utils.dart';
 import 'dart_object_node.dart';
 import 'diagnostics_node.dart';
-import 'helpers.dart';
 import 'inspector_service.dart';
 import 'primitives/record_fields.dart';
 
