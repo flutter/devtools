@@ -58,6 +58,24 @@
 <body>
 
   <script>
+    // Unregister the old custom DevTools service worker (if it exists). It was
+    // removed in: https://github.com/flutter/devtools/pull/5331
+    if ('serviceWorker' in navigator) {
+      const DEVTOOLS_SW_NAME = 'service_worker.js';
+      const FLUTTER_SW_NAME = 'flutter_service_worker.js';
+      navigator.serviceWorker.getRegistrations().then(function(registrations) {
+          for (let registration of registrations) {
+              const activeWorker = registration.active;
+              if (activeWorker != null) {
+                  const url = activeWorker.scriptURL;
+                  if (url.includes(DEVTOOLS_SW_NAME) && !url.includes(FLUTTER_SW_NAME)) {
+                      registration.unregister();
+                  }
+              }
+          }
+      });
+    }
+
     window.addEventListener('load', function(ev) {
       // Download main.dart.js
       _flutter.loader.loadEntrypoint({
