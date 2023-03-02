@@ -15,7 +15,7 @@ TODO: Remove this section if there are not any general updates.
 TODO: Remove this section if there are not any general updates.
 
 ## CPU profiler updates
-TODO: Remove this section if there are not any general updates.
+* Add ability to inspect statistics for a CPU profile - [#5340](https://github.com/flutter/devtools/pull/5340)
 
 ## Memory updates
 TODO: Remove this section if there are not any general updates.
