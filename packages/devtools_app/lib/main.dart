@@ -15,8 +15,6 @@ import 'src/shared/primitives/utils.dart';
 /// Any intialization that needs to occur, for both google3 and externally,
 /// should be added to [runDevTools].
 void main() async {
-  // Set the extension points global.
-  setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
   await externalRunDevTools();
 }
 
@@ -25,6 +23,9 @@ Future<void> externalRunDevTools({
   List<DevToolsJsonFile> sampleData = const [],
   List<DevToolsScreen>? screens,
 }) async {
+  // Set the extension points global.
+  setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
+
   await runDevTools(
     shouldEnableExperiments: shouldEnableExperiments,
     sampleData: sampleData,
