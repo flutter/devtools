@@ -1232,14 +1232,13 @@ class _CpuProfileTimelineTree {
   final bool isCodeTree;
   int frameId = kNoFrameId;
 
-  vm_service.FuncRef? get _function {
+  Object? get _function {
     if (isCodeTree) {
       return _code.function!;
     }
     final function = samples.functions![index].function;
-    if (function is vm_service.FuncRef) {
-      // TODO(jacobr): is this really anything else? The VMService API isn't
-      // clear.
+    if (function is vm_service.FuncRef ||
+        function is vm_service.NativeFunction) {
       return function;
     }
     return null;
@@ -1247,7 +1246,16 @@ class _CpuProfileTimelineTree {
 
   vm_service.CodeRef get _code => samples.codes[index].code!;
 
-  String? get name => isCodeTree ? _code.name : _function?.name;
+  String? get name {
+    if (isCodeTree) return _code.name;
+    switch (_function.runtimeType) {
+      case vm_service.FuncRef:
+        return (_function as vm_service.FuncRef?)?.name;
+      case vm_service.NativeFunction:
+        return (_function as vm_service.NativeFunction?)?.name;
+    }
+    return null;
+  }
 
   String? get className {
     if (isCodeTree) return null;
@@ -1261,18 +1269,21 @@ class _CpuProfileTimelineTree {
     return null;
   }
 
-  String? get resolvedUrl => isCodeTree
+  String? get resolvedUrl => isCodeTree && _function is vm_service.FuncRef?
       ?
       // TODO(bkonyi): not sure if this is a resolved URL or not, but it's not
       // critical since this is only displayed when VM developer mode is
       // enabled.
-      _function?.location?.script!.uri
+      (_function as vm_service.FuncRef?)?.location?.script?.uri
       : samples.functions![index].resolvedUrl;
 
   int? get sourceLine {
     final function = _function;
     try {
-      return function?.location?.line;
+      if (function is vm_service.FuncRef?) {
+        return function?.location?.line;
+      }
+      return null;
     } catch (_) {
       // Fail gracefully if `function` has no getter `location` (for example, if
       // the function is an instance of [NativeFunction]) or generally if
