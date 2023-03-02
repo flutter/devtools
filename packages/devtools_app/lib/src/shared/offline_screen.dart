@@ -87,7 +87,7 @@ class _OfflineLoadError extends StatelessWidget {
     return Column(
       children: [
         CenteredMessage(
-          'Cannot load snapshot for screen \'$screenId\'',
+          'Cannot load offline data for screen \'$screenId\'',
         ),
         const SizedBox(height: defaultSpacing),
         const ExitOfflineButton(),
