@@ -21,7 +21,6 @@ void main() async {
 Future<void> externalRunDevTools({
   bool shouldEnableExperiments = false,
   List<DevToolsJsonFile> sampleData = const [],
-  List<DevToolsScreen>? screens,
 }) async {
   // Set the extension points global.
   setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
@@ -29,6 +28,5 @@ Future<void> externalRunDevTools({
   await runDevTools(
     shouldEnableExperiments: shouldEnableExperiments,
     sampleData: sampleData,
-    screens: screens,
   );
 }
