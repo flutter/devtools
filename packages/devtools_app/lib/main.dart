@@ -17,6 +17,7 @@ import 'src/shared/primitives/utils.dart';
 void main() async {
   // Set the extension points global.
   setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
+  await externalRunDevTools();
 }
 
 Future<void> externalRunDevTools({
