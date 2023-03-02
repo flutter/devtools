@@ -259,7 +259,6 @@ Future<void> _addChildrenToInstanceVariable({
     default:
       break;
   }
-
   if (value.fields != null && value.kind != InstanceKind.kRecord) {
     variable.addAllChildren(
       createVariablesForFields(
