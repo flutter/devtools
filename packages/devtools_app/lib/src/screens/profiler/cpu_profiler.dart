@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:developer';
 
 import 'package:flutter/material.dart';
 
@@ -14,9 +13,9 @@ import '../../shared/dialogs.dart';
 import '../../shared/feature_flags.dart';
 import '../../shared/globals.dart';
 import '../../shared/primitives/auto_dispose.dart';
+import '../../shared/primitives/utils.dart';
 import '../../shared/theme.dart';
 import '../../shared/ui/colors.dart';
-import '../../shared/ui/filter.dart';
 import '../../shared/ui/search.dart';
 import '../../shared/ui/tab.dart';
 import '../../shared/utils.dart';
@@ -24,6 +23,7 @@ import 'cpu_profile_controller.dart';
 import 'cpu_profile_model.dart';
 import 'panes/bottom_up.dart';
 import 'panes/call_tree.dart';
+import 'panes/controls/profiler_controls.dart';
 import 'panes/cpu_flame_chart.dart';
 import 'panes/method_table/method_table.dart';
 
@@ -269,6 +269,8 @@ class _CpuProfilerState extends State<CpuProfiler>
             );
           },
         ),
+        if (currentTab.key != CpuProfiler.summaryTab)
+          CpuProfileStats(metadata: data.profileMetaData),
       ],
     );
   }
@@ -365,224 +367,62 @@ class _CpuProfilerState extends State<CpuProfiler>
   }
 }
 
-class DisplayTreeGuidelinesToggle extends StatelessWidget {
-  const DisplayTreeGuidelinesToggle();
+// TODO(kenz): one improvement we could make on this is to show the denominator
+// for filtered profiles (e.g. 'Sample count: 10/14), or to at least show the
+// original value in the tooltip for each of these stats.
+class CpuProfileStats extends StatelessWidget {
+  CpuProfileStats({required this.metadata});
+
+  final CpuProfileMetaData metadata;
+
+  final _statsRowHeight = scaleByFontFactor(25.0);
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<bool>(
-      valueListenable: preferences.cpuProfiler.displayTreeGuidelines,
-      builder: (context, displayTreeGuidelines, _) {
-        return ToggleButton(
-          onPressed: () {
-            preferences.cpuProfiler.displayTreeGuidelines.value =
-                !displayTreeGuidelines;
-          },
-          isSelected: displayTreeGuidelines,
-          message: 'Display guidelines',
-          icon: Icons.stacked_bar_chart,
-        );
-      },
-    );
-  }
-}
-
-class CpuProfileFilterDialog extends StatelessWidget {
-  const CpuProfileFilterDialog({required this.controller, Key? key})
-      : super(key: key);
-
-  static const filterQueryInstructions = '''
-Type a filter query to show or hide specific stack frames.
-
-Any text that is not paired with an available filter key below will be queried against all categories (method, uri).
-
-Available filters:
-    'uri', 'u'       (e.g. 'uri:my_dart_package/some_lib.dart', '-u:some_lib_to_hide')
-
-Example queries:
-    'someMethodName uri:my_dart_package,b_dart_package'
-    '.toString -uri:flutter'
-''';
-
-  double get _filterDialogWidth => scaleByFontFactor(400.0);
-
-  final CpuProfilerController controller;
-
-  @override
-  Widget build(BuildContext context) {
-    return FilterDialog<CpuStackFrame>(
-      dialogWidth: _filterDialogWidth,
-      controller: controller,
-      queryInstructions: filterQueryInstructions,
-    );
-  }
-}
-
-class CpuProfilerDisabled extends StatelessWidget {
-  const CpuProfilerDisabled(this.controller);
-
-  final CpuProfilerController controller;
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          const Text('CPU profiler is disabled.'),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: ElevatedButton(
-              onPressed: controller.enableCpuProfiler,
-              child: const Text('Enable profiler'),
+    final samplingPeriod =
+        const Duration(seconds: 1).inMicroseconds ~/ metadata.samplePeriod;
+    return OutlineDecoration(
+      child: Container(
+        height: _statsRowHeight,
+        padding: const EdgeInsets.all(densePadding),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            _stat(
+              tooltip: 'The duration of time spanned by the CPU samples',
+              text: 'Duration: ${msText(metadata.time!.duration)}',
             ),
-          ),
-        ],
+            _stat(
+              tooltip: 'The number of samples included in the profile',
+              text: 'Sample count: ${metadata.sampleCount}',
+            ),
+            _stat(
+              tooltip:
+                  'The frequency at which samples are collected by the profiler',
+              text: 'Sampling rate: $samplingPeriod Hz',
+            ),
+            _stat(
+              tooltip: 'The maximum stack trace depth of a collected sample',
+              text: 'Sampling depth: ${metadata.stackDepth}',
+            ),
+          ],
+        ),
       ),
     );
   }
-}
 
-/// DropdownButton that controls the value of
-/// [ProfilerScreenController.userTagFilter].
-class UserTagDropdown extends StatelessWidget {
-  const UserTagDropdown(this.controller);
-
-  final CpuProfilerController controller;
-
-  @override
-  Widget build(BuildContext context) {
-    const filterByTag = 'Filter by tag:';
-    return ValueListenableBuilder<String>(
-      valueListenable: controller.userTagFilter,
-      builder: (context, userTag, _) {
-        final userTags = controller.userTags;
-        final tooltip = userTags.isNotEmpty
-            ? 'Filter the CPU profile by the given UserTag'
-            : 'No UserTags found for this CPU profile';
-        return SizedBox(
-          height: defaultButtonHeight,
-          child: DevToolsTooltip(
-            message: tooltip,
-            child: ValueListenableBuilder<bool>(
-              valueListenable: preferences.vmDeveloperModeEnabled,
-              builder: (context, vmDeveloperModeEnabled, _) {
-                return RoundedDropDownButton<String>(
-                  isDense: true,
-                  style: Theme.of(context).textTheme.bodyMedium,
-                  value: userTag,
-                  items: [
-                    _buildMenuItem(
-                      display:
-                          '$filterByTag ${CpuProfilerController.userTagNone}',
-                      value: CpuProfilerController.userTagNone,
-                    ),
-                    // We don't want to show the 'Default' tag if it is the only
-                    // tag available. The 'none' tag above is equivalent in this
-                    // case.
-                    if (!(userTags.length == 1 &&
-                        userTags.first == UserTag.defaultTag.label)) ...[
-                      for (final tag in userTags)
-                        _buildMenuItem(
-                          display: '$filterByTag $tag',
-                          value: tag,
-                        ),
-                      _buildMenuItem(
-                        display: 'Group by: User Tag',
-                        value: CpuProfilerController.groupByUserTag,
-                      ),
-                    ],
-                    if (vmDeveloperModeEnabled)
-                      _buildMenuItem(
-                        display: 'Group by: VM Tag',
-                        value: CpuProfilerController.groupByVmTag,
-                      ),
-                  ],
-                  onChanged: userTags.isEmpty ||
-                          (userTags.length == 1 &&
-                              userTags.first == UserTag.defaultTag.label)
-                      ? null
-                      : (String? tag) => _onUserTagChanged(tag!),
-                );
-              },
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  DropdownMenuItem<String> _buildMenuItem({
-    required String display,
-    required String value,
+  Widget _stat({
+    required String text,
+    required String tooltip,
   }) {
-    return DropdownMenuItem<String>(
-      value: value,
-      child: Text(display),
-    );
-  }
-
-  void _onUserTagChanged(String newTag) async {
-    try {
-      await controller.loadDataWithTag(newTag);
-    } catch (e) {
-      notificationService.push(e.toString());
-    }
-  }
-}
-
-/// DropdownButton that controls the value of
-/// [ProfilerScreenController.viewType].
-class ModeDropdown extends StatelessWidget {
-  const ModeDropdown(this.controller);
-
-  final CpuProfilerController controller;
-
-  @override
-  Widget build(BuildContext context) {
-    const mode = 'View:';
-    return ValueListenableBuilder<CpuProfilerViewType>(
-      valueListenable: controller.viewType,
-      builder: (context, viewType, _) {
-        final tooltip = viewType == CpuProfilerViewType.function
-            ? 'Display the profile in terms of the Dart call stack '
-                '(i.e., inlined frames are expanded)'
-            : 'Display the profile in terms of native stack frames '
-                '(i.e., inlined frames are not expanded, display code objects '
-                'rather than individual functions)';
-        return SizedBox(
-          height: defaultButtonHeight,
-          child: DevToolsTooltip(
-            message: tooltip,
-            child: RoundedDropDownButton<CpuProfilerViewType>(
-              isDense: true,
-              style: Theme.of(context).textTheme.bodyMedium,
-              value: viewType,
-              items: [
-                _buildMenuItem(
-                  display: '$mode ${CpuProfilerViewType.function}',
-                  value: CpuProfilerViewType.function,
-                ),
-                _buildMenuItem(
-                  display: '$mode ${CpuProfilerViewType.code}',
-                  value: CpuProfilerViewType.code,
-                ),
-              ],
-              onChanged: (type) => controller.updateView(type!),
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  DropdownMenuItem<CpuProfilerViewType> _buildMenuItem({
-    required String display,
-    required CpuProfilerViewType value,
-  }) {
-    return DropdownMenuItem<CpuProfilerViewType>(
-      value: value,
-      child: Text(display),
+    return Flexible(
+      child: DevToolsTooltip(
+        message: tooltip,
+        child: Text(
+          text,
+          overflow: TextOverflow.ellipsis,
+        ),
+      ),
     );
   }
 }

@@ -24,13 +24,11 @@ import '../../shared/utils.dart';
 import 'cpu_profile_controller.dart';
 import 'cpu_profile_model.dart';
 import 'cpu_profiler.dart';
+import 'panes/controls/profiler_controls.dart';
 import 'profiler_screen_controller.dart';
 
 final profilerScreenSearchFieldKey =
     GlobalKey(debugLabel: 'ProfilerScreenSearchFieldKey');
-
-const iosProfilerWorkaround =
-    'https://github.com/flutter/flutter/issues/88466#issuecomment-905830680';
 
 class ProfilerScreen extends Screen {
   ProfilerScreen()

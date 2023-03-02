@@ -8,6 +8,7 @@ import 'package:devtools_app/src/screens/profiler/cpu_profile_transformer.dart';
 import 'package:devtools_app/src/screens/profiler/cpu_profiler.dart';
 import 'package:devtools_app/src/screens/profiler/panes/bottom_up.dart';
 import 'package:devtools_app/src/screens/profiler/panes/call_tree.dart';
+import 'package:devtools_app/src/screens/profiler/panes/controls/profiler_controls.dart';
 import 'package:devtools_app/src/screens/profiler/panes/cpu_flame_chart.dart';
 import 'package:devtools_app/src/screens/profiler/panes/method_table/method_table.dart';
 import 'package:devtools_app/src/shared/charts/flame_chart.dart';
@@ -87,6 +88,7 @@ void main() {
         expect(find.byType(CpuCallTreeTable), findsNothing);
         expect(find.byType(CpuMethodTable), findsNothing);
         expect(find.byType(CpuProfileFlameChart), findsNothing);
+        expect(find.byType(CpuProfileStats), findsOneWidget);
         expect(find.byType(DisplayTreeGuidelinesToggle), findsOneWidget);
         expect(find.byType(UserTagDropdown), findsOneWidget);
         expect(find.byType(ExpandAllButton), findsOneWidget);
@@ -120,6 +122,7 @@ void main() {
         expect(find.byType(CpuCallTreeTable), findsNothing);
         expect(find.byType(CpuMethodTable), findsNothing);
         expect(find.byType(CpuProfileFlameChart), findsNothing);
+        expect(find.byType(CpuProfileStats), findsNothing);
         expect(find.byType(DisplayTreeGuidelinesToggle), findsNothing);
         expect(find.byType(UserTagDropdown), findsNothing);
         expect(find.byType(ExpandAllButton), findsNothing);
@@ -148,6 +151,7 @@ void main() {
         expect(find.byType(TabBar), findsOneWidget);
         expect(find.byKey(CpuProfiler.dataProcessingKey), findsNothing);
         expect(find.byType(CpuBottomUpTable), findsOneWidget);
+        expect(find.byType(CpuProfileStats), findsOneWidget);
         expect(find.byType(DisplayTreeGuidelinesToggle), findsOneWidget);
         expect(find.byType(UserTagDropdown), findsOneWidget);
         expect(find.byType(ExpandAllButton), findsOneWidget);
@@ -177,8 +181,9 @@ void main() {
         expect(find.byType(TabBar), findsOneWidget);
         expect(find.byKey(CpuProfiler.dataProcessingKey), findsNothing);
         expect(find.byKey(summaryViewKey), findsOneWidget);
-        expect(find.byType(UserTagDropdown), findsNothing);
+        expect(find.byType(CpuProfileStats), findsNothing);
         expect(find.byType(DisplayTreeGuidelinesToggle), findsNothing);
+        expect(find.byType(UserTagDropdown), findsNothing);
         expect(find.byType(ExpandAllButton), findsNothing);
         expect(find.byType(CollapseAllButton), findsNothing);
         expect(find.byType(FlameChartHelpButton), findsNothing);
