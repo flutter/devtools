@@ -54,15 +54,15 @@ class SnapshotView extends StatelessWidget {
         if (singleClasses != null) {
           final totalSize =
               (controller.core.selectedItem as SnapshotInstanceItem).totalSize;
+          final heap =
+              (controller.core.selectedItem as SnapshotInstanceItem).heap!;
+
           classTable = ClassesTableSingle(
             classes: singleClasses,
             selection: controller.derived.selectedSingleClassStats,
             totalSize: totalSize!,
             classFilterButton: classFilterButton,
-            heap:
-                (controller.derived.selectedItem.value as SnapshotInstanceItem)
-                    .heap!
-                    .data,
+            heap: heap.data,
           );
         } else if (diffClasses != null) {
           final diffHeapClasses =

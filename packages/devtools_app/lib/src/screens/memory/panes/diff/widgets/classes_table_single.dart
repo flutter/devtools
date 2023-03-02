@@ -85,7 +85,9 @@ class _InstanceColumn extends ColumnData<SingleClassStats>
           titleTooltip: nonGcableInstancesColumnTooltip,
           fixedWidthPx: scaleByFontFactor(180.0),
           alignment: ColumnAlignment.right,
-        );
+        ) {
+    print('!!! in _InstanceColumn constructor: ${heap.snapshotName}');
+  }
 
   final AdaptedHeapData heap;
 
@@ -103,6 +105,8 @@ class _InstanceColumn extends ColumnData<SingleClassStats>
     VoidCallback? onPressed,
   }) {
     if (!FeatureFlags.evalAndBrowse) return null;
+
+    print('!!! in _InstanceColumn build: ${heap.snapshotName}');
 
     return InstanceTableCell(
       data.objects,
@@ -167,7 +171,10 @@ class _RetainedSizeColumn extends ColumnData<SingleClassStats> {
 }
 
 class _ClassesTableSingleColumns {
-  _ClassesTableSingleColumns(this.totalSize, this.classFilterButton, this.heap);
+  _ClassesTableSingleColumns(
+      this.totalSize, this.classFilterButton, this.heap) {
+    print('!!! in columns: ${heap.snapshotName}');
+  }
 
   /// Is needed to calculate percentage.
   final int totalSize;
@@ -187,7 +194,7 @@ class _ClassesTableSingleColumns {
 }
 
 class ClassesTableSingle extends StatelessWidget {
-  const ClassesTableSingle({
+  ClassesTableSingle({
     super.key,
     required this.classes,
     required this.selection,
@@ -206,16 +213,18 @@ class ClassesTableSingle extends StatelessWidget {
 
   final AdaptedHeapData heap;
 
+  late final columns = _ClassesTableSingleColumns(
+    totalSize,
+    classFilterButton,
+    heap,
+  );
+
   @override
   Widget build(BuildContext context) {
     // We want to preserve the sorting and sort directions for ClassesTableDiff
     // no matter what the data passed to it is.
     const dataKey = 'ClassesTableSingle';
-    final columns = _ClassesTableSingleColumns(
-      totalSize,
-      classFilterButton,
-      heap,
-    );
+
     return FlatTable<SingleClassStats>(
       columns: columns.columnList,
       data: classes,
