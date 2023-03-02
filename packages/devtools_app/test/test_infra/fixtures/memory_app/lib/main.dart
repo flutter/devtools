@@ -136,4 +136,5 @@ class _MyGarbage {
   late final Map<_MyGarbage, dynamic>? mapSimpleValue;
   late final Map<_MyGarbage, _MyGarbage>? map;
   late final void Function() closure;
+  final record = (count: 100, 'foo', garbage: _MyGarbage(0, 'record'));
 }
