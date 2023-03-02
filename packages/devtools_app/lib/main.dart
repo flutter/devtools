@@ -9,7 +9,7 @@ import 'src/extension_points/extensions_external.dart';
 import 'src/shared/globals.dart';
 import 'src/shared/primitives/utils.dart';
 
-/// This is the entrypoint for running DevTools normally.
+/// This is the entrypoint for running DevTools externally.
 ///
 /// WARNING: This is the external entrypoint for running DevTools.
 /// Any intialization that needs to occur, for both google3 and externally,
