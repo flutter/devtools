@@ -259,6 +259,11 @@ Future<void> _addChildrenToInstanceVariable({
     default:
       break;
   }
+
+  if (variable.isSet) {
+    variable.addAllChildren(createVariablesForSets(value, isolateRef));
+  }
+
   if (value.fields != null && value.kind != InstanceKind.kRecord) {
     variable.addAllChildren(
       createVariablesForFields(
