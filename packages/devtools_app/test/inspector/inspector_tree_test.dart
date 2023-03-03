@@ -35,12 +35,8 @@ void main() {
     );
 
     inspectorController = InspectorController(
-      inspectorTree: InspectorTreeController(
-        gaId: 'inspectorTree',
-      ),
-      detailsTree: InspectorTreeController(
-        gaId: 'detailsTree',
-      ),
+      inspectorTree: InspectorTreeController(),
+      detailsTree: InspectorTreeController(),
       treeType: FlutterTreeType.widget,
     )..firstInspectorTreeLoadCompleted = true;
   });
@@ -51,11 +47,8 @@ void main() {
     bool isSummaryTree = false,
   }) async {
     final debuggerController = DebuggerController();
-    final summaryTreeController = isSummaryTree
-        ? null
-        : InspectorTreeController(
-            gaId: 'pumpInspectorTree',
-          );
+    final summaryTreeController =
+        isSummaryTree ? null : InspectorTreeController();
     await tester.pumpWidget(
       wrapWithControllers(
         inspector: inspectorController,
@@ -74,9 +67,8 @@ void main() {
     testWidgets(
       'Row with negative index regression test',
       (WidgetTester tester) async {
-        final treeController = InspectorTreeController(
-          gaId: 'negativeIndexRegressionTree',
-        )..config = InspectorTreeConfig(
+        final treeController = InspectorTreeController()
+          ..config = InspectorTreeConfig(
             summaryTree: false,
             treeType: FlutterTreeType.widget,
             onNodeAdded: (_, __) {},

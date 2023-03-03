@@ -57,12 +57,8 @@ void main() {
     fakeServiceManager.consoleService.ensureServiceInitialized();
 
     inspectorController = InspectorController(
-      inspectorTree: InspectorTreeController(
-        gaId: 'inspectorTree',
-      ),
-      detailsTree: InspectorTreeController(
-        gaId: 'detailsTree',
-      ),
+      inspectorTree: InspectorTreeController(),
+      detailsTree: InspectorTreeController(),
       treeType: FlutterTreeType.widget,
     )..firstInspectorTreeLoadCompleted = true;
   });
