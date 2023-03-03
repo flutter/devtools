@@ -5,84 +5,40 @@
 import 'package:flutter/material.dart';
 
 import '../../shared/globals.dart';
-import '../../shared/primitives/utils.dart';
 import '../../shared/routing.dart';
 import '../../shared/table/table.dart';
 import '../../shared/table/table_data.dart';
-import '../../shared/utils.dart';
 import '../debugger/codeview_controller.dart';
 import '../debugger/debugger_screen.dart';
 import '../vm_developer/vm_developer_common_widgets.dart';
 import 'cpu_profile_model.dart';
 
-const timeColumnWidthPx = 180.0;
-
-// TODO(kenz): clean up to use TimeAndPercentageColumn.
-class SelfTimeColumn extends ColumnData<CpuStackFrame> {
-  SelfTimeColumn({String? titleTooltip})
-      : super(
-          'Self Time',
+class SelfTimeColumn extends TimeAndPercentageColumn<CpuStackFrame> {
+  SelfTimeColumn({
+    String? titleTooltip,
+    InlineSpan? Function(CpuStackFrame, BuildContext)? dataTooltipProvider,
+  }) : super(
+          title: 'Self Time',
           titleTooltip: titleTooltip,
-          fixedWidthPx: scaleByFontFactor(timeColumnWidthPx),
+          timeProvider: (stackFrame) => stackFrame.selfTime,
+          percentAsDoubleProvider: (stackFrame) => stackFrame.selfTimeRatio,
+          richTooltipProvider: dataTooltipProvider,
+          secondaryCompare: (stackFrame) => stackFrame.name,
         );
-
-  @override
-  bool get numeric => true;
-
-  @override
-  int compare(CpuStackFrame a, CpuStackFrame b) {
-    final int result = super.compare(a, b);
-    if (result == 0) {
-      return a.name.compareTo(b.name);
-    }
-    return result;
-  }
-
-  @override
-  int getValue(CpuStackFrame dataObject) => dataObject.selfTime.inMicroseconds;
-
-  @override
-  String getDisplayValue(CpuStackFrame dataObject) {
-    return '${msText(dataObject.selfTime, fractionDigits: 2)} '
-        '(${percent2(dataObject.selfTimeRatio)})';
-  }
-
-  @override
-  String getTooltip(CpuStackFrame dataObject) => '';
 }
 
-// TODO(kenz): clean up to use TimeAndPercentageColumn.
-class TotalTimeColumn extends ColumnData<CpuStackFrame> {
-  TotalTimeColumn({String? titleTooltip})
-      : super(
-          'Total Time',
+class TotalTimeColumn extends TimeAndPercentageColumn<CpuStackFrame> {
+  TotalTimeColumn({
+    String? titleTooltip,
+    InlineSpan? Function(CpuStackFrame, BuildContext)? dataTooltipProvider,
+  }) : super(
+          title: 'Total Time',
           titleTooltip: titleTooltip,
-          fixedWidthPx: scaleByFontFactor(timeColumnWidthPx),
+          timeProvider: (stackFrame) => stackFrame.totalTime,
+          percentAsDoubleProvider: (stackFrame) => stackFrame.totalTimeRatio,
+          richTooltipProvider: dataTooltipProvider,
+          secondaryCompare: (stackFrame) => stackFrame.name,
         );
-
-  @override
-  bool get numeric => true;
-
-  @override
-  int compare(CpuStackFrame a, CpuStackFrame b) {
-    final int result = super.compare(a, b);
-    if (result == 0) {
-      return a.name.compareTo(b.name);
-    }
-    return result;
-  }
-
-  @override
-  int getValue(CpuStackFrame dataObject) => dataObject.totalTime.inMicroseconds;
-
-  @override
-  String getDisplayValue(CpuStackFrame dataObject) {
-    return '${msText(dataObject.totalTime, fractionDigits: 2)} '
-        '(${percent2(dataObject.totalTimeRatio)})';
-  }
-
-  @override
-  String getTooltip(CpuStackFrame dataObject) => '';
 }
 
 class MethodAndSourceColumn extends TreeColumnData<CpuStackFrame>
