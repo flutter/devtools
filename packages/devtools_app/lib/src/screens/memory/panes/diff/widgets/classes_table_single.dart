@@ -90,7 +90,7 @@ class SingleInstanceColumn extends ColumnData<SingleClassStats>
   static late HeapDataObtainer heapOpbtainer;
 
   @override
-  int getValue(SingleClassStats classStats) => classStats.objects.instanceCount;
+  int getValue(SingleClassStats dataObject) => dataObject.objects.instanceCount;
 
   @override
   bool get numeric => true;
