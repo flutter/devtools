@@ -21,7 +21,7 @@ import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../test_infra/matchers/matchers.dart';
-import '../test_infra/test_data/cpu_profile.dart';
+import '../test_infra/test_data/cpu_profiler/cpu_profile.dart';
 import '../test_infra/utils/test_utils.dart';
 
 void main() {

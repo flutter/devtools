@@ -145,6 +145,7 @@ class BottomUpTransformer<T extends ProfilableDataMixin<T>> {
         node: topDownRoot,
         currentBottomUpRoot: null,
         bottomUpRoots: <T>[],
+        skipRoot: true,
       );
 
       // Set the bottom up sample counts for each sample.
@@ -156,13 +157,13 @@ class BottomUpTransformer<T extends ProfilableDataMixin<T>> {
     }
 
     if (rootedAtTags) {
-      // Calculate the total time for each tag root. The sum of the inclusive
+      // Calculate the total time for each tag root. The sum of the exclusive
       // times for each child for the tag node is the total time spent with the
       // given tag active.
       for (final tagRoot in bottomUpRoots) {
-        tagRoot._inclusiveSampleCount = tagRoot.children.fold<int>(
+        tagRoot.inclusiveSampleCount = tagRoot.children.fold<int>(
           0,
-          (prev, e) => prev + e._inclusiveSampleCount!,
+          (prev, e) => prev + e.exclusiveSampleCount,
         );
       }
     }
@@ -183,9 +184,13 @@ class BottomUpTransformer<T extends ProfilableDataMixin<T>> {
     required T node,
     required T? currentBottomUpRoot,
     required List<T> bottomUpRoots,
+    bool skipRoot = false,
   }) {
-    // Do not include the root node at the leaf of each bottom up tree.
-    if (!node.isRoot) {
+    if (skipRoot && node.isRoot) {
+      // When [skipRoot] is true, do not include the root node at the leaf of
+      // each bottom up tree. This is to avoid having the 'all' node at the
+      // at the bottom of each bottom up path.
+    } else {
       // Inclusive and exclusive sample counts are copied by default.
       final copy = node.shallowCopy() as T;
 
@@ -219,7 +224,8 @@ class BottomUpTransformer<T extends ProfilableDataMixin<T>> {
     return bottomUpRoots;
   }
 
-  /// Sets sample counts of [node] and all children to [exclusiveSampleCount].
+  /// Cascades the [exclusiveSampleCount] and [inclusiveSampleCount] of [node]
+  /// to all of its children (recursive).
   ///
   /// This is necessary for the transformation of a [ProfilableDataMixin] to its
   /// bottom-up representation. This is an intermediate step between

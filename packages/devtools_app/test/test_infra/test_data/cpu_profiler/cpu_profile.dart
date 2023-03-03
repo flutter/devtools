@@ -1367,6 +1367,9 @@ final CpuStackFrame stackFrameG = CpuStackFrame(
   isTag: false,
 )..exclusiveSampleCount = 1;
 
+final CpuStackFrame testStackFrameWithRoot = CpuStackFrame.root(profileMetaData)
+  ..addChild(testStackFrame.deepCopy());
+
 final CpuStackFrame testStackFrame = stackFrameA
   ..addChild(
     stackFrameB
@@ -1380,8 +1383,21 @@ final CpuStackFrame testStackFrame = stackFrameA
 
 final CpuStackFrame testTagRootedStackFrame = tagFrameA
   ..addChild(
-    testStackFrame,
+    testStackFrame.deepCopy(),
   );
+
+const String testStackFrameWithRootStringGolden = '''
+  all - children: 1 - excl: 0 - incl: 10
+    A - children: 1 - excl: 0 - incl: 10
+      B - children: 2 - excl: 0 - incl: 10
+        C - children: 0 - excl: 2 - incl: 2
+        D - children: 2 - excl: 2 - incl: 8
+          E - children: 1 - excl: 1 - incl: 2
+            F - children: 1 - excl: 0 - incl: 1
+              C - children: 0 - excl: 1 - incl: 1
+          F - children: 1 - excl: 3 - incl: 4
+            C - children: 0 - excl: 1 - incl: 1
+''';
 
 const String testStackFrameStringGolden = '''
   A - children: 1 - excl: 0 - incl: 10
@@ -1400,14 +1416,14 @@ const String bottomUpPreMergeGolden = '''
     B - children: 1 - excl: 2 - incl: 2
       A - children: 0 - excl: 2 - incl: 2
 
-  D - children: 1 - excl: 2 - incl: 2
-    B - children: 1 - excl: 2 - incl: 2
-      A - children: 0 - excl: 2 - incl: 2
+  D - children: 1 - excl: 2 - incl: 8
+    B - children: 1 - excl: 2 - incl: 8
+      A - children: 0 - excl: 2 - incl: 8
 
-  E - children: 1 - excl: 1 - incl: 1
-    D - children: 1 - excl: 1 - incl: 1
-      B - children: 1 - excl: 1 - incl: 1
-        A - children: 0 - excl: 1 - incl: 1
+  E - children: 1 - excl: 1 - incl: 2
+    D - children: 1 - excl: 1 - incl: 2
+      B - children: 1 - excl: 1 - incl: 2
+        A - children: 0 - excl: 1 - incl: 2
 
   C - children: 1 - excl: 1 - incl: 1
     F - children: 1 - excl: 1 - incl: 1
@@ -1416,10 +1432,10 @@ const String bottomUpPreMergeGolden = '''
           B - children: 1 - excl: 1 - incl: 1
             A - children: 0 - excl: 1 - incl: 1
 
-  F - children: 1 - excl: 3 - incl: 3
-    D - children: 1 - excl: 3 - incl: 3
-      B - children: 1 - excl: 3 - incl: 3
-        A - children: 0 - excl: 3 - incl: 3
+  F - children: 1 - excl: 3 - incl: 4
+    D - children: 1 - excl: 3 - incl: 4
+      B - children: 1 - excl: 3 - incl: 4
+        A - children: 0 - excl: 3 - incl: 4
 
   C - children: 1 - excl: 1 - incl: 1
     F - children: 1 - excl: 1 - incl: 1
@@ -1442,19 +1458,19 @@ const String bottomUpGolden = '''
         B - children: 1 - excl: 1 - incl: 1
           A - children: 0 - excl: 1 - incl: 1
 
-  D - children: 1 - excl: 2 - incl: 2
-    B - children: 1 - excl: 2 - incl: 2
-      A - children: 0 - excl: 2 - incl: 2
+  D - children: 1 - excl: 2 - incl: 8
+    B - children: 1 - excl: 2 - incl: 8
+      A - children: 0 - excl: 2 - incl: 8
 
-  E - children: 1 - excl: 1 - incl: 1
-    D - children: 1 - excl: 1 - incl: 1
-      B - children: 1 - excl: 1 - incl: 1
-        A - children: 0 - excl: 1 - incl: 1
+  E - children: 1 - excl: 1 - incl: 2
+    D - children: 1 - excl: 1 - incl: 2
+      B - children: 1 - excl: 1 - incl: 2
+        A - children: 0 - excl: 1 - incl: 2
 
-  F - children: 1 - excl: 3 - incl: 3
-    D - children: 1 - excl: 3 - incl: 3
-      B - children: 1 - excl: 3 - incl: 3
-        A - children: 0 - excl: 3 - incl: 3
+  F - children: 1 - excl: 3 - incl: 4
+    D - children: 1 - excl: 3 - incl: 4
+      B - children: 1 - excl: 3 - incl: 4
+        A - children: 0 - excl: 3 - incl: 4
 
 ''';
 
@@ -1484,17 +1500,17 @@ const String tagRootedBottomUpGolden = '''
         D - children: 1 - excl: 1 - incl: 1
           B - children: 1 - excl: 1 - incl: 1
             A - children: 0 - excl: 1 - incl: 1
-    D - children: 1 - excl: 2 - incl: 2
-      B - children: 1 - excl: 2 - incl: 2
-        A - children: 0 - excl: 2 - incl: 2
-    E - children: 1 - excl: 1 - incl: 1
-      D - children: 1 - excl: 1 - incl: 1
-        B - children: 1 - excl: 1 - incl: 1
-          A - children: 0 - excl: 1 - incl: 1
-    F - children: 1 - excl: 3 - incl: 3
-      D - children: 1 - excl: 3 - incl: 3
-        B - children: 1 - excl: 3 - incl: 3
-          A - children: 0 - excl: 3 - incl: 3
+    D - children: 1 - excl: 2 - incl: 8
+      B - children: 1 - excl: 2 - incl: 8
+        A - children: 0 - excl: 2 - incl: 8
+    E - children: 1 - excl: 1 - incl: 2
+      D - children: 1 - excl: 1 - incl: 2
+        B - children: 1 - excl: 1 - incl: 2
+          A - children: 0 - excl: 1 - incl: 2
+    F - children: 1 - excl: 3 - incl: 4
+      D - children: 1 - excl: 3 - incl: 4
+        B - children: 1 - excl: 3 - incl: 4
+          A - children: 0 - excl: 3 - incl: 4
 
 ''';
 

@@ -13,52 +13,28 @@ import '../cpu_profile_model.dart';
 
 /// A table of the bottom up tree for a CPU profile.
 class CpuBottomUpTable extends StatelessWidget {
-  factory CpuBottomUpTable(
-    List<CpuStackFrame> bottomUpRoots, {
-    Key? key,
-    required bool displayTreeGuidelines,
-  }) {
-    final treeColumn = MethodAndSourceColumn();
-    final selfTimeColumn = SelfTimeColumn(
-      titleTooltip: selfTimeTooltip,
-      dataTooltipProvider: (stackFrame, context) =>
-          _bottomUpTimeTooltipBuilder(_TimeType.self, stackFrame, context),
-    );
-    final totalTimeColumn = TotalTimeColumn(
-      titleTooltip: totalTimeTooltip,
-      dataTooltipProvider: (stackFrame, context) =>
-          _bottomUpTimeTooltipBuilder(_TimeType.total, stackFrame, context),
-    );
-    final columns = List<ColumnData<CpuStackFrame>>.unmodifiable([
-      totalTimeColumn,
-      selfTimeColumn,
-      treeColumn,
-    ]);
+  const CpuBottomUpTable({
+    required this.bottomUpRoots,
+    required this.displayTreeGuidelines,
+    super.key,
+  });
 
-    return CpuBottomUpTable._(
-      key,
-      bottomUpRoots,
-      treeColumn,
-      selfTimeColumn,
-      columns,
-      displayTreeGuidelines,
-    );
-  }
-
-  const CpuBottomUpTable._(
-    Key? key,
-    this.bottomUpRoots,
-    this.treeColumn,
-    this.sortColumn,
-    this.columns,
-    this.displayTreeGuidelines,
-  ) : super(key: key);
-
-  final TreeColumnData<CpuStackFrame> treeColumn;
-  final ColumnData<CpuStackFrame> sortColumn;
-  final List<ColumnData<CpuStackFrame>> columns;
-  final List<CpuStackFrame> bottomUpRoots;
-  final bool displayTreeGuidelines;
+  static final methodColumn = MethodAndSourceColumn();
+  static final selfTimeColumn = SelfTimeColumn(
+    titleTooltip: selfTimeTooltip,
+    dataTooltipProvider: (stackFrame, context) =>
+        _bottomUpTimeTooltipBuilder(_TimeType.self, stackFrame, context),
+  );
+  static final totalTimeColumn = TotalTimeColumn(
+    titleTooltip: totalTimeTooltip,
+    dataTooltipProvider: (stackFrame, context) =>
+        _bottomUpTimeTooltipBuilder(_TimeType.total, stackFrame, context),
+  );
+  static final columns = List<ColumnData<CpuStackFrame>>.unmodifiable([
+    totalTimeColumn,
+    selfTimeColumn,
+    methodColumn,
+  ]);
 
   static const totalTimeTooltip = '''
 For top-level methods in the bottom-up tree (stack frames that were at the top of at
@@ -74,6 +50,10 @@ least one CPU sample), this is the time the method spent executing only its own 
 
 For children methods in the bottom-up tree (the callers), this is the self time of
 the top-level method (the callee) when called through the child method (the caller).''';
+
+  final List<CpuStackFrame> bottomUpRoots;
+
+  final bool displayTreeGuidelines;
 
   static InlineSpan? _bottomUpTimeTooltipBuilder(
     _TimeType type,
@@ -134,8 +114,8 @@ the top-level method (the callee) when called through the child method (the call
       dataRoots: bottomUpRoots,
       dataKey: 'cpu-bottom-up',
       columns: columns,
-      treeColumn: treeColumn,
-      defaultSortColumn: sortColumn,
+      treeColumn: methodColumn,
+      defaultSortColumn: selfTimeColumn,
       defaultSortDirection: SortDirection.descending,
     );
   }

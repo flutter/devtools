@@ -17,7 +17,7 @@ TODO: Remove this section if there are not any general updates.
 ## CPU profiler updates
 * Add ability to inspect statistics for a CPU profile - [#5340](https://github.com/flutter/devtools/pull/5340)
 * Fix a bug where Native stack frames were missing their name - [#5344](https://github.com/flutter/devtools/pull/5344)
-* Fix an error in total and self time calculations for the bottom up tree - []()
+* Fix an error in total and self time calculations for the bottom up tree - [#5348](https://github.com/flutter/devtools/pull/5348)
 
 ## Memory updates
 TODO: Remove this section if there are not any general updates.
