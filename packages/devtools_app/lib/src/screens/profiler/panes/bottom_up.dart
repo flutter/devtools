@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import '../../../shared/primitives/utils.dart';
 import '../../../shared/table/table.dart';
 import '../../../shared/table/table_data.dart';
+import '../../../shared/theme.dart';
 import '../cpu_profile_columns.dart';
 import '../cpu_profile_model.dart';
 
@@ -18,17 +19,27 @@ class CpuBottomUpTable extends StatelessWidget {
     required bool displayTreeGuidelines,
   }) {
     final treeColumn = MethodAndSourceColumn();
-    final startingSortColumn = SelfTimeColumn(titleTooltip: selfTimeTooltip);
+    final selfTimeColumn = SelfTimeColumn(
+      titleTooltip: selfTimeTooltip,
+      dataTooltipProvider: (stackFrame, context) =>
+          _bottomUpTimeTooltipBuilder('Self', stackFrame, context),
+    );
+    final totalTimeColumn = TotalTimeColumn(
+      titleTooltip: totalTimeTooltip,
+      dataTooltipProvider: (stackFrame, context) =>
+          _bottomUpTimeTooltipBuilder('Total', stackFrame, context),
+    );
     final columns = List<ColumnData<CpuStackFrame>>.unmodifiable([
-      TotalTimeColumn(titleTooltip: totalTimeTooltip),
-      startingSortColumn,
+      totalTimeColumn,
+      selfTimeColumn,
       treeColumn,
     ]);
+
     return CpuBottomUpTable._(
       key,
       bottomUpRoots,
       treeColumn,
-      startingSortColumn,
+      selfTimeColumn,
       columns,
       displayTreeGuidelines,
     );
@@ -49,16 +60,47 @@ class CpuBottomUpTable extends StatelessWidget {
   final List<CpuStackFrame> bottomUpRoots;
   final bool displayTreeGuidelines;
 
-  static const totalTimeTooltip =
-      'Time that a method spent executing its own code as well as the code for '
-      'the\nmethod that it called (which is displayed as an ancestor in the '
-      'bottom up tree).';
+  static const totalTimeTooltip = '''
+For top-level methods in the bottom-up tree (stack frames that were at the top of at
+least one CPU sample), this is the time the method spent executing its own code,
+as well as the code for any methods that it called.
 
-  static const selfTimeTooltip =
-      'For top-level methods in the bottom-up tree (leaf stack frames in the '
-      'CPU profile),\nthis is the time the method spent executing only its own '
-      'code. For sub nodes (the\ncallers in the CPU profile), this is the self '
-      'time of the callee when being called by\nthe caller. ';
+For children methods in the bottom-up tree (the callers), this is the total time of
+the top-level method (the callee) when called through the child method (the caller).''';
+
+  static const selfTimeTooltip = '''
+For top-level methods in the bottom-up tree (stack frames that were at the top of at
+least one CPU sample), this is the time the method spent executing only its own code.
+
+For children methods in the bottom-up tree (the callers), this is the self time of
+the top-level method (the callee) when called through the child method (the caller).''';
+
+  static InlineSpan? _bottomUpTimeTooltipBuilder(
+    String type,
+    CpuStackFrame stackFrame,
+    BuildContext context,
+  ) {
+    // TODO(kenz): consider adding a tooltip for root nodes as well if this is
+    // a point of confusion for the user.
+    if (stackFrame.isRoot) {
+      return null;
+    }
+    final fixedStyle = Theme.of(context).tooltipFixedFontStyle;
+    return TextSpan(
+      children: [
+        TextSpan(text: '$type time for '),
+        TextSpan(
+          text: stackFrame.root.name,
+          style: fixedStyle,
+        ),
+        const TextSpan(text: '\nwhen called through '),
+        TextSpan(
+          text: stackFrame.name,
+          style: fixedStyle,
+        ),
+      ],
+    );
+  }
 
   @override
   Widget build(BuildContext context) {

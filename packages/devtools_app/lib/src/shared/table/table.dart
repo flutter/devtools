@@ -1506,9 +1506,11 @@ class _TableRowState<T> extends State<TableRow<T>>
         );
 
         final tooltip = column.getTooltip(node);
-        if (tooltip.isNotEmpty) {
+        final richTooltip = column.getRichTooltip(node, context);
+        if (tooltip.isNotEmpty || richTooltip != null) {
           content = DevToolsTooltip(
-            message: tooltip,
+            message: richTooltip == null ? tooltip : null,
+            richMessage: richTooltip,
             waitDuration: tooltipWaitLong,
             child: content,
           );
