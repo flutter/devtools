@@ -228,17 +228,15 @@ GtagEventDevTools _gtagEvent({
     heap_objects_total: screenMetrics is MemoryScreenMetrics
         ? screenMetrics.heapObjectsTotal
         : null,
-    // [InspectorTreeControllerMetrics]
-    root_set_count: screenMetrics is InspectorTreeControllerMetrics
+    // [InspectorScreenMetrics]
+    root_set_count: screenMetrics is InspectorScreenMetrics
         ? screenMetrics.rootSetCount
         : null,
-    row_count: screenMetrics is InspectorTreeControllerMetrics
-        ? screenMetrics.rowCount
+    row_count:
+        screenMetrics is InspectorScreenMetrics ? screenMetrics.rowCount : null,
+    inspector_tree_controller_id: screenMetrics is InspectorScreenMetrics
+        ? screenMetrics.inspectorTreeControllerId
         : null,
-    inspector_tree_controller_id:
-        screenMetrics is InspectorTreeControllerMetrics
-            ? screenMetrics.inspectorTreeControllerId
-            : null,
   );
 }
 

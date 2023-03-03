@@ -40,8 +40,8 @@ class ProfilerScreenMetrics extends ScreenAnalyticsMetrics {
   final int cpuStackDepth;
 }
 
-class InspectorTreeControllerMetrics extends ScreenAnalyticsMetrics {
-  InspectorTreeControllerMetrics({
+class InspectorScreenMetrics extends ScreenAnalyticsMetrics {
+  InspectorScreenMetrics({
     required this.rootSetCount,
     required this.rowCount,
     required this.inspectorTreeControllerId,
@@ -50,7 +50,7 @@ class InspectorTreeControllerMetrics extends ScreenAnalyticsMetrics {
   static const String inspectorTreeGaId = 'inspectorTree';
   static const String detailsTreeGaId = 'detailsTree';
 
-  final int rootSetCount;
+  final int? rootSetCount;
   final int? rowCount;
-  final String inspectorTreeControllerId;
+  final String? inspectorTreeControllerId;
 }

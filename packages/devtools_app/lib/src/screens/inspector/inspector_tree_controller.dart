@@ -105,12 +105,12 @@ class _InspectorTreeRowState extends State<_InspectorTreeRowWidget>
 
 class InspectorTreeController extends Object
     with SearchControllerMixin<InspectorTreeRow> {
-  InspectorTreeController({required this.gaId}) {
+  InspectorTreeController({this.gaId}) {
     ga.select(
       gac.inspector,
       'InspectorTreeControllerInitialized',
       nonInteraction: true,
-      screenMetricsProvider: () => InspectorTreeControllerMetrics(
+      screenMetricsProvider: () => InspectorScreenMetrics(
         inspectorTreeControllerId: gaId,
         rootSetCount: _rootSetCount,
         rowCount: _root?.subtreeSize,
@@ -123,7 +123,7 @@ class InspectorTreeController extends Object
 
   /// Identifier used when sending Google Analytics about events in this
   /// [InspectorTreeController].
-  final String gaId;
+  final String? gaId;
 
   InspectorTreeNode createNode() => InspectorTreeNode();
 
@@ -171,7 +171,7 @@ class InspectorTreeController extends Object
         gac.inspector,
         'InspectorTreeControllerRootChange',
         nonInteraction: true,
-        screenMetricsProvider: () => InspectorTreeControllerMetrics(
+        screenMetricsProvider: () => InspectorScreenMetrics(
           inspectorTreeControllerId: gaId,
           rootSetCount: ++_rootSetCount,
           rowCount: _root?.subtreeSize,
