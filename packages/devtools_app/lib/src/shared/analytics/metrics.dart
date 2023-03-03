@@ -50,7 +50,15 @@ class InspectorScreenMetrics extends ScreenAnalyticsMetrics {
   static const String inspectorTreeGaId = 'inspectorTree';
   static const String detailsTreeGaId = 'detailsTree';
 
+  /// The number of times the root has been set, since the
+  /// [InspectorTreeController] with id [inspectorTreeControllerId], has been
+  /// initialized.
   final int? rootSetCount;
+
+  /// The number of rows that are in the root being shown to the user, from the
+  /// [InspectorTreeController] with id [inspectorTreeControllerId].
   final int? rowCount;
+
+  /// The id of the [InspectorTreeController], for which this event is tracking.
   final String? inspectorTreeControllerId;
 }
