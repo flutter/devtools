@@ -1,9 +1,6 @@
 ## 2.22.3-dev.0
 * Dev version
 
-## 2.23.0-dev.0
-* Dev version
-
 ## 2.22.2
 * Bump version from 2.22.2-dev.6 to 2.22.2 [#5324](https://github.com/flutter/devtools/pull/5324)
 * Support `Set` instance inspection in debugger page [#5323](https://github.com/flutter/devtools/pull/5323)
