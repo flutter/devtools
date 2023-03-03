@@ -19,11 +19,11 @@ import '../../../shared/primitives/simple_elements.dart';
 import '../../../shared/shared_memory_widgets.dart';
 import 'instances.dart';
 
-class _ClassNameColumn extends ColumnData<SingleClassStats>
+class SingleClassNameColumn extends ColumnData<SingleClassStats>
     implements
         ColumnRenderer<SingleClassStats>,
         ColumnHeaderRenderer<SingleClassStats> {
-  _ClassNameColumn(this.classFilterButton)
+  SingleClassNameColumn()
       : super(
           'Class',
           titleTooltip: 'Class name',
@@ -31,11 +31,11 @@ class _ClassNameColumn extends ColumnData<SingleClassStats>
           alignment: ColumnAlignment.left,
         );
 
-  final Widget classFilterButton;
+  static late Widget classFilterButton;
 
   @override
-  String? getValue(SingleClassStats classStats) =>
-      classStats.heapClass.className;
+  String? getValue(SingleClassStats dataObject) =>
+      dataObject.heapClass.className;
 
   @override
   bool get supportsSorting => true;
@@ -77,19 +77,17 @@ class _ClassNameColumn extends ColumnData<SingleClassStats>
   }
 }
 
-class _InstanceColumn extends ColumnData<SingleClassStats>
+class SingleInstanceColumn extends ColumnData<SingleClassStats>
     implements ColumnRenderer<SingleClassStats> {
-  _InstanceColumn(this.heap)
+  SingleInstanceColumn()
       : super(
           'Instances',
           titleTooltip: nonGcableInstancesColumnTooltip,
           fixedWidthPx: scaleByFontFactor(180.0),
           alignment: ColumnAlignment.right,
-        ) {
-    print('!!! in _InstanceColumn constructor: ${heap.snapshotName}');
-  }
+        );
 
-  final AdaptedHeapData heap;
+  static late HeapDataObtainer heapOpbtainer;
 
   @override
   int getValue(SingleClassStats classStats) => classStats.objects.instanceCount;
@@ -106,11 +104,9 @@ class _InstanceColumn extends ColumnData<SingleClassStats>
   }) {
     if (!FeatureFlags.evalAndBrowse) return null;
 
-    print('!!! in _InstanceColumn build: ${heap.snapshotName}');
-
     return InstanceTableCell(
       data.objects,
-      heap,
+      heapOpbtainer,
       data.heapClass,
       isSelected: isRowSelected,
       gaContext: gac.MemoryAreas.snapshotSingle,
@@ -141,8 +137,8 @@ class _ShallowSizeColumn extends ColumnData<SingleClassStats> {
       )!;
 }
 
-class _RetainedSizeColumn extends ColumnData<SingleClassStats> {
-  _RetainedSizeColumn(this.totalSize)
+class SingleRetainedSizeColumn extends ColumnData<SingleClassStats> {
+  SingleRetainedSizeColumn()
       : super(
           'Retained Dart Size',
           titleTooltip: SizeType.retained.description,
@@ -150,74 +146,53 @@ class _RetainedSizeColumn extends ColumnData<SingleClassStats> {
           alignment: ColumnAlignment.right,
         );
 
-  final int totalSize;
+  static late final HeapSizeObtainer totalSizeObtainer;
 
   @override
-  int getValue(SingleClassStats classStats) => classStats.objects.retainedSize;
+  int getValue(SingleClassStats dataObject) => dataObject.objects.retainedSize;
 
   @override
   bool get numeric => true;
 
   @override
-  String getDisplayValue(SingleClassStats classStats) {
-    final value = getValue(classStats);
+  String getDisplayValue(SingleClassStats dataObject) {
+    final value = getValue(dataObject);
 
     final bytes = prettyPrintRetainedSize(value)!;
 
-    final percents = '${(value * 100 / totalSize).round()}%';
+    final percents = '${(value * 100 / totalSizeObtainer()).round()}%';
 
     return '$bytes ($percents)';
   }
 }
 
 class _ClassesTableSingleColumns {
-  _ClassesTableSingleColumns(
-      this.totalSize, this.classFilterButton, this.heap) {
-    print('!!! in columns: ${heap.snapshotName}');
-  }
+  _ClassesTableSingleColumns();
 
-  /// Is needed to calculate percentage.
-  final int totalSize;
-
-  final Widget classFilterButton;
-
-  late final retainedSizeColumn = _RetainedSizeColumn(totalSize);
-
-  final AdaptedHeapData heap;
+  late final retainedSizeColumn = SingleRetainedSizeColumn();
 
   late final columnList = <ColumnData<SingleClassStats>>[
-    _ClassNameColumn(classFilterButton),
-    _InstanceColumn(heap),
+    SingleClassNameColumn(),
+    SingleInstanceColumn(),
     _ShallowSizeColumn(),
     retainedSizeColumn,
   ];
 }
 
+typedef HeapSizeObtainer = int Function();
+
 class ClassesTableSingle extends StatelessWidget {
-  ClassesTableSingle({
+  const ClassesTableSingle({
     super.key,
     required this.classes,
     required this.selection,
-    required this.totalSize,
-    required this.classFilterButton,
-    required this.heap,
   });
-
-  final int totalSize;
-
-  final Widget classFilterButton;
 
   final List<SingleClassStats> classes;
 
   final ValueNotifier<SingleClassStats?> selection;
 
-  final AdaptedHeapData heap;
-
-  late final columns = _ClassesTableSingleColumns(
-    totalSize,
-    classFilterButton,
-    heap,
-  );
+  static final columns = _ClassesTableSingleColumns();
 
   @override
   Widget build(BuildContext context) {

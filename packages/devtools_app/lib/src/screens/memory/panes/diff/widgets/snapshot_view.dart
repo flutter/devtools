@@ -16,25 +16,67 @@ import 'class_filter.dart';
 import 'classes_table_diff.dart';
 import 'classes_table_single.dart';
 
-class SnapshotView extends StatelessWidget {
+class SnapshotView extends StatefulWidget {
   const SnapshotView({Key? key, required this.controller}) : super(key: key);
 
   final DiffPaneController controller;
 
   @override
+  State<SnapshotView> createState() => _SnapshotViewState();
+}
+
+class _SnapshotViewState extends State<SnapshotView> {
+  @override
+  void initState() {
+    super.initState();
+    _initStaticFields(widget.controller);
+  }
+
+  @override
+  void didUpdateWidget(SnapshotView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final DiffPaneController newController = widget.controller;
+    if (oldWidget.controller == newController) return;
+    _initStaticFields(newController);
+  }
+
+  static void _initStaticFields(DiffPaneController controller) {
+    SingleInstanceColumn.heapOpbtainer =
+        () => (controller.core.selectedItem as SnapshotInstanceItem).heap!.data;
+
+    SingleRetainedSizeColumn.totalSizeObtainer =
+        () => (controller.core.selectedItem as SnapshotInstanceItem).totalSize!;
+
+    SingleClassNameColumn.classFilterButton =
+        DiffClassNameColumn.classFilterButton = ClassFilterButton(
+      filter: controller.core.classFilter,
+      onChanged: controller.applyFilter,
+      rootPackage: serviceManager.rootInfoNow().package,
+    );
+
+    ClassesTableDiff.sizeTypeToShowForDiff = controller.sizeTypeToShowForDiff;
+
+    final diffHeapClasses = controller.derived.heapClasses;
+    ClassesTableDiffColumns.before =
+        () => (diffHeapClasses.value as DiffHeapClasses).before;
+    ClassesTableDiffColumns.after =
+        () => (diffHeapClasses.value as DiffHeapClasses).after;
+  }
+
+  @override
   Widget build(BuildContext context) {
     return DualValueListenableBuilder<List<SingleClassStats>?,
         List<DiffClassStats>?>(
-      firstListenable: controller.derived.singleClassesToShow,
-      secondListenable: controller.derived.diffClassesToShow,
+      firstListenable: widget.controller.derived.singleClassesToShow,
+      secondListenable: widget.controller.derived.diffClassesToShow,
       builder: (_, singleClasses, diffClasses, __) {
-        if (controller.derived.updatingValues) {
+        if (widget.controller.derived.updatingValues) {
           return const Center(child: Text('Calculating...'));
         }
 
-        final classes = controller.derived.heapClasses.value;
+        final classes = widget.controller.derived.heapClasses.value;
         if (classes == null) {
-          return controller.isTakingSnapshot.value
+          return widget.controller.isTakingSnapshot.value
               ? const SizedBox.shrink()
               : const Center(child: Text('Could not take snapshot.'));
         }
@@ -43,50 +85,28 @@ class SnapshotView extends StatelessWidget {
 
         late Widget classTable;
 
-        final filter = controller.core.classFilter;
-
-        final classFilterButton = ClassFilterButton(
-          filter: filter,
-          onChanged: controller.applyFilter,
-          rootPackage: serviceManager.rootInfoNow().package,
-        );
-
         if (singleClasses != null) {
-          final totalSize =
-              (controller.core.selectedItem as SnapshotInstanceItem).totalSize;
-          final heap =
-              (controller.core.selectedItem as SnapshotInstanceItem).heap!;
-
           classTable = ClassesTableSingle(
             classes: singleClasses,
-            selection: controller.derived.selectedSingleClassStats,
-            totalSize: totalSize!,
-            classFilterButton: classFilterButton,
-            heap: heap.data,
+            selection: widget.controller.derived.selectedSingleClassStats,
           );
         } else if (diffClasses != null) {
-          final diffHeapClasses =
-              controller.derived.heapClasses.value as DiffHeapClasses;
           classTable = ClassesTableDiff(
-            classes: controller.derived.diffClassesToShow.value!,
-            selection: controller.derived.selectedDiffClassStats,
-            classFilterButton: classFilterButton,
-            before: diffHeapClasses.before,
-            after: diffHeapClasses.after,
-            sizeTypeToShowForDiff: controller.sizeTypeToShowForDiff,
+            classes: widget.controller.derived.diffClassesToShow.value!,
+            selection: widget.controller.derived.selectedDiffClassStats,
           );
         } else {
           throw StateError('singleClasses or diffClasses should not be null.');
         }
 
         final pathTable = ValueListenableBuilder<List<StatsByPathEntry>?>(
-          valueListenable: controller.derived.pathEntries,
+          valueListenable: widget.controller.derived.pathEntries,
           builder: (_, entries, __) => HeapClassDetails(
             entries: entries,
-            selection: controller.derived.selectedPathEntry,
+            selection: widget.controller.derived.selectedPathEntry,
             isDiff: classes is DiffHeapClasses,
-            pathController: controller.retainingPathController,
-            className: controller.core.className_?.className,
+            pathController: widget.controller.retainingPathController,
+            className: widget.controller.core.className_?.className,
           ),
         );
 

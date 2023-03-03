@@ -28,11 +28,11 @@ enum _DataPart {
   persisted,
 }
 
-class _ClassNameColumn extends ColumnData<DiffClassStats>
+class DiffClassNameColumn extends ColumnData<DiffClassStats>
     implements
         ColumnRenderer<DiffClassStats>,
         ColumnHeaderRenderer<DiffClassStats> {
-  _ClassNameColumn(this.classFilterButton)
+  DiffClassNameColumn()
       : super(
           'Class',
           titleTooltip: 'Class name',
@@ -40,17 +40,17 @@ class _ClassNameColumn extends ColumnData<DiffClassStats>
           alignment: ColumnAlignment.left,
         );
 
-  final Widget classFilterButton;
+  static late Widget classFilterButton;
 
   @override
-  String? getValue(DiffClassStats classStats) => classStats.heapClass.className;
+  String? getValue(DiffClassStats dataObject) => dataObject.heapClass.className;
 
   @override
   bool get supportsSorting => true;
 
   @override
   // We are removing the tooltip, because it is provided by [HeapClassView].
-  String getTooltip(DiffClassStats classStats) => '';
+  String getTooltip(DiffClassStats dataObject) => '';
 
   @override
   Widget build(
@@ -96,7 +96,7 @@ class _InstanceColumn extends ColumnData<DiffClassStats>
 
   final _DataPart dataPart;
 
-  final AdaptedHeapData? heap;
+  final HeapDataObtainer? heap;
 
   static String columnTitle(_DataPart dataPart) {
     switch (dataPart) {
@@ -238,26 +238,19 @@ class _SizeColumn extends ColumnData<DiffClassStats> {
   bool get numeric => true;
 }
 
-class _ClassesTableDiffColumns {
-  _ClassesTableDiffColumns(
-    this.classFilterButton,
-    this.sizeTypeToShow, {
-    required this.before,
-    required this.after,
-  });
-
-  final Widget classFilterButton;
+class ClassesTableDiffColumns {
+  ClassesTableDiffColumns(this.sizeTypeToShow);
 
   late final sizeDeltaColumn = _SizeColumn(_DataPart.delta, sizeTypeToShow);
 
-  final AdaptedHeapData before;
-  final AdaptedHeapData after;
+  static late HeapDataObtainer before;
+  static late HeapDataObtainer after;
 
   final SizeType sizeTypeToShow;
 
   late final List<ColumnData<DiffClassStats>> columnList =
       <ColumnData<DiffClassStats>>[
-    _ClassNameColumn(classFilterButton),
+    DiffClassNameColumn(),
     _InstanceColumn(_DataPart.created, after),
     _InstanceColumn(_DataPart.deleted, before),
     _InstanceColumn(_DataPart.delta, null),
@@ -269,8 +262,9 @@ class _ClassesTableDiffColumns {
   ];
 }
 
-class _SizeTitle extends StatelessWidget {
-  const _SizeTitle({required this.sizeTypeToShowForDiff});
+class _SizeGroupTitle extends StatelessWidget {
+  const _SizeGroupTitle(this.sizeTypeToShowForDiff);
+
   final ValueNotifier<SizeType> sizeTypeToShowForDiff;
 
   @override
@@ -312,17 +306,12 @@ class ClassesTableDiff extends StatelessWidget {
     Key? key,
     required this.classes,
     required this.selection,
-    required this.classFilterButton,
-    required this.before,
-    required this.after,
-    required this.sizeTypeToShowForDiff,
   }) : super(key: key);
 
   final List<DiffClassStats> classes;
   final ValueNotifier<DiffClassStats?> selection;
-  final AdaptedHeapData before;
-  final AdaptedHeapData after;
-  final ValueNotifier<SizeType> sizeTypeToShowForDiff;
+
+  static late ValueNotifier<SizeType> sizeTypeToShowForDiff;
 
   List<ColumnGroup> _columnGroups(SizeType sizeType, BuildContext context) {
     return [
@@ -336,13 +325,17 @@ class ClassesTableDiff extends StatelessWidget {
         tooltip: nonGcableInstancesColumnTooltip,
       ),
       ColumnGroup(
-        title: _SizeTitle(sizeTypeToShowForDiff: sizeTypeToShowForDiff),
+        title: _SizeGroupTitle(sizeTypeToShowForDiff),
         range: const Range(5, 9),
       ),
     ];
   }
 
-  final Widget classFilterButton;
+  static final _columns = Map.fromIterable(
+    SizeType.values,
+    key: (k) => k,
+    value: (k) => ClassesTableDiffColumns(k),
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -352,12 +345,8 @@ class ClassesTableDiff extends StatelessWidget {
         // We want to preserve the sorting and sort directions for ClassesTableDiff
         // no matter what the data passed to it is.
         const dataKey = 'ClassesTableDiff';
-        final columns = _ClassesTableDiffColumns(
-          classFilterButton,
-          sizeType,
-          before: before,
-          after: after,
-        );
+
+        final columns = _columns[sizeType]!;
 
         return FlatTable<DiffClassStats>(
           columns: columns.columnList,
