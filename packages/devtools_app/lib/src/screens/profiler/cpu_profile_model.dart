@@ -1285,9 +1285,7 @@ class _CpuProfileTimelineTree {
       }
       return null;
     } catch (_) {
-      // Fail gracefully if `function` has no getter `location` (for example, if
-      // the function is an instance of [NativeFunction]) or generally if
-      // `function.location.line` throws an exception.
+      // Fail gracefully if `function.location.line` throws an exception.
       return null;
     }
   }
