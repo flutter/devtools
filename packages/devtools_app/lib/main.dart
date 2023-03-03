@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'initialization.dart';
-import 'src/app.dart';
 import 'src/extension_points/extensions_base.dart';
 import 'src/extension_points/extensions_external.dart';
 import 'src/shared/globals.dart';
