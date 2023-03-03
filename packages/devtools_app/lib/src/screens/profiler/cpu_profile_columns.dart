@@ -16,7 +16,7 @@ import 'cpu_profile_model.dart';
 class SelfTimeColumn extends TimeAndPercentageColumn<CpuStackFrame> {
   SelfTimeColumn({
     String? titleTooltip,
-    InlineSpan? Function(CpuStackFrame, BuildContext)? dataTooltipProvider,
+    RichTooltipBuilder<CpuStackFrame>? dataTooltipProvider,
   }) : super(
           title: 'Self Time',
           titleTooltip: titleTooltip,
@@ -30,7 +30,7 @@ class SelfTimeColumn extends TimeAndPercentageColumn<CpuStackFrame> {
 class TotalTimeColumn extends TimeAndPercentageColumn<CpuStackFrame> {
   TotalTimeColumn({
     String? titleTooltip,
-    InlineSpan? Function(CpuStackFrame, BuildContext)? dataTooltipProvider,
+    RichTooltipBuilder<CpuStackFrame>? dataTooltipProvider,
   }) : super(
           title: 'Total Time',
           titleTooltip: titleTooltip,
