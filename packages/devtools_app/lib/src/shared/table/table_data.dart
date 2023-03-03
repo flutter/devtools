@@ -69,9 +69,14 @@ abstract class ColumnData<T> {
 
   String? getCaption(T dataObject) => null;
 
-  // TODO(kenz): this isn't hooked up to the table elements. Do this.
   /// Get the cell's tooltip value from the given [dataObject].
   String getTooltip(T dataObject) => getDisplayValue(dataObject);
+
+  /// Get the cell's rich tooltip span from the given [dataObject].
+  ///
+  /// If both [getTooltip] and [getRichTooltip] are provided, the rich tooltip
+  /// will take precedence.
+  InlineSpan? getRichTooltip(T dataObject, BuildContext context) => null;
 
   /// Get the cell's text color from the given [dataObject].
   Color? getTextColor(T dataObject) => null;
@@ -174,6 +179,8 @@ abstract class TimeAndPercentageColumn<T> extends ColumnData<T> {
     required String title,
     required this.percentAsDoubleProvider,
     this.timeProvider,
+    this.tooltipProvider,
+    this.richTooltipProvider,
     this.secondaryCompare,
     this.percentageOnly = false,
     double columnWidth = _defaultTimeColumnWidth,
@@ -189,6 +196,10 @@ abstract class TimeAndPercentageColumn<T> extends ColumnData<T> {
   Duration Function(T)? timeProvider;
 
   double Function(T) percentAsDoubleProvider;
+
+  String Function(T)? tooltipProvider;
+
+  InlineSpan? Function(T, BuildContext)? richTooltipProvider;
 
   Comparable Function(T)? secondaryCompare;
 
@@ -221,5 +232,9 @@ abstract class TimeAndPercentageColumn<T> extends ColumnData<T> {
   }
 
   @override
-  String getTooltip(T dataObject) => '';
+  String getTooltip(T dataObject) => tooltipProvider?.call(dataObject) ?? '';
+
+  @override
+  InlineSpan? getRichTooltip(T dataObject, BuildContext context) =>
+      richTooltipProvider?.call(dataObject, context);
 }
