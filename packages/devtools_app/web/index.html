@@ -60,39 +60,64 @@
   <script>
     // Unregister the old custom DevTools service worker (if it exists). It was
     // removed in: https://github.com/flutter/devtools/pull/5331
-    if ('serviceWorker' in navigator) {
-      const DEVTOOLS_SW_NAME = 'service_worker.js';
-      const FLUTTER_SW_NAME = 'flutter_service_worker.js';
-      navigator.serviceWorker.getRegistrations().then(function(registrations) {
-          for (let registration of registrations) {
-              const activeWorker = registration.active;
-              if (activeWorker != null) {
-                  const url = activeWorker.scriptURL;
-                  if (url.includes(DEVTOOLS_SW_NAME) && !url.includes(FLUTTER_SW_NAME)) {
-                      registration.unregister();
-                  }
-              }
+    function unregisterDevToolsServiceWorker() {
+      if ('serviceWorker' in navigator) {
+        const DEVTOOLS_SW = 'service_worker.js';
+        const FLUTTER_SW = 'flutter_service_worker.js';
+        navigator.serviceWorker.getRegistrations().then(function(registrations) {
+            for (let registration of registrations) {
+                const activeWorker = registration.active;
+                if (activeWorker != null) {
+                    const url = activeWorker.scriptURL;
+                    if (url.includes(DEVTOOLS_SW) && !url.includes(FLUTTER_SW)) {
+                        registration.unregister();
+                    }
+                }
+            }
+        });
+      }
+    }
+
+    // Bootstrap app for 3P environments:
+    function bootstrapAppFor3P() {
+      window.addEventListener('load', function(ev) {
+        // Download main.dart.js
+        _flutter.loader.loadEntrypoint({
+          serviceWorker: {
+            serviceWorkerVersion: serviceWorkerVersion,
+          },
+          onEntrypointLoaded: function(engineInitializer) {
+            engineInitializer.initializeEngine({
+              renderer: 'canvaskit',
+              canvasKitBaseUrl: 'canvaskit/'
+            })
+            .then(function(appRunner) {
+              appRunner.runApp();
+            });
           }
+        });
       });
     }
 
-    window.addEventListener('load', function(ev) {
-      // Download main.dart.js
-      _flutter.loader.loadEntrypoint({
-        serviceWorker: {
-          serviceWorkerVersion: serviceWorkerVersion,
-        },
-        onEntrypointLoaded: function(engineInitializer) {
-          engineInitializer.initializeEngine({
-            renderer: 'canvaskit',
-            canvasKitBaseUrl: 'canvaskit/'
-          })
-          .then(function(appRunner) {
-            appRunner.runApp();
-          });
-        }
+    // Bootstrap app for 1P environments:
+    function bootstrapAppFor1P() {
+      window.addEventListener('load', function(ev) {
+        // Download main.dart.js
+        _flutter.loader.loadEntrypoint({
+          onEntrypointLoaded: function(engineInitializer) {
+            engineInitializer.initializeEngine({
+              renderer: 'canvaskit',
+            })
+            .then(function(appRunner) {
+              appRunner.runApp();
+            });
+          }
+        });
       });
-    });
+    }
+
+    unregisterDevToolsServiceWorker();
+    bootstrapAppFor3P();
   </script>
 </body>
 
