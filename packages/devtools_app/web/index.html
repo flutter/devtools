@@ -45,88 +45,79 @@
       window.location.href = '/unsupported-browser.html';
     }
   </script>
+
+  <script>
+    // The value below is injected by flutter build, do not touch.
+    var serviceWorkerVersion = null;
+  </script>
+  <!-- This script adds the flutter initialization JS code -->
+  <script src="flutter.js" defer></script> 
+
 </head>
 
 <body>
-  <!-- This script installs service_worker.js to provide PWA functionality to
-       application. For more information, see:
-       https://developers.google.com/web/fundamentals/primers/service-workers -->
+
   <script>
-    var version = '2.22.2';
-    var scriptLoaded = false;
-    function loadMainDartJs() {
-      if (scriptLoaded) {
-        return;
+    // Unregister the old custom DevTools service worker (if it exists). It was
+    // removed in: https://github.com/flutter/devtools/pull/5331
+    function unregisterDevToolsServiceWorker() {
+      if ('serviceWorker' in navigator) {
+        const DEVTOOLS_SW = 'service_worker.js';
+        const FLUTTER_SW = 'flutter_service_worker.js';
+        navigator.serviceWorker.getRegistrations().then(function(registrations) {
+            for (let registration of registrations) {
+                const activeWorker = registration.active;
+                if (activeWorker != null) {
+                    const url = activeWorker.scriptURL;
+                    if (url.includes(DEVTOOLS_SW) && !url.includes(FLUTTER_SW)) {
+                        registration.unregister();
+                    }
+                }
+            }
+        });
       }
-      scriptLoaded = true;
-      var scriptTag = document.createElement('script');
-      scriptTag.src = 'main.dart.js';
-      scriptTag.type = 'application/javascript';
-      document.body.append(scriptTag);
     }
 
-    if ('serviceWorker' in navigator) {
-      if (window.location.href.includes('index.ddc.html')) {
-        // If we are running DevTools locally, immediately load `main.dart.js` and
-        // unregister any service workers:
-        loadMainDartJs();
-        navigator.serviceWorker.getRegistrations().then(function (registrations) {
-          for (let registration of registrations) {
-            registration.unregister();
+    // Bootstrap app for 3P environments:
+    function bootstrapAppFor3P() {
+      window.addEventListener('load', function(ev) {
+        // Download main.dart.js
+        _flutter.loader.loadEntrypoint({
+          serviceWorker: {
+            serviceWorkerVersion: serviceWorkerVersion,
+          },
+          onEntrypointLoaded: function(engineInitializer) {
+            engineInitializer.initializeEngine({
+              renderer: 'canvaskit',
+              canvasKitBaseUrl: 'canvaskit/'
+            })
+            .then(function(appRunner) {
+              appRunner.runApp();
+            });
           }
         });
-      } else {
-        // Service workers are supported. Use them.
-        window.addEventListener('load', function () {
-          // Wait for registration to finish before dropping the <script> tag.
-          // Otherwise, the browser will load the script multiple times,
-          // potentially different versions.
-          var serviceWorkerUrl = 'service_worker.js?v=' + version;
-          navigator.serviceWorker.register(serviceWorkerUrl)
-            .then((reg) => {
-              function waitForActivation(serviceWorker) {
-                serviceWorker.addEventListener('statechange', () => {
-                  if (serviceWorker.state == 'activated') {
-                    loadMainDartJs();
-                  }
-                });
-              }
-              if (!reg.active && (reg.installing || reg.waiting)) {
-                // No active web worker and we have installed or are installing
-                // one for the first time. Simply wait for it to activate.
-                waitForActivation(reg.installing || reg.waiting);
-              } else if (!reg.active.scriptURL.endsWith(version)) {
-                // When the app updates the version changes, so we
-                // need to ask the service worker to update.
-                reg.update();
-                waitForActivation(reg.installing);
-              } else {
-                // Existing service worker is still good.
-                loadMainDartJs();
-              }
-            })
-            .catch((err) => {
-              console.warn(
-                ` Falling back to plain <script> tag. Error loading service worker: ${err}`);
-              loadMainDartJs();
-            });
-
-          // If service worker doesn't succeed in a reasonable amount of time,
-          // fallback to plain <script> tag.
-          setTimeout(() => {
-            if (!scriptLoaded) {
-              console.warn(
-                'Failed to load app from service worker. Falling back to plain <script> tag.',
-              );
-              loadMainDartJs();
-            }
-          }, 4000);
-        });
-      }
-    } else {
-      // Service workers not supported. Just drop the <script> tag.
-      loadMainDartJs();
+      });
     }
+
+    // Bootstrap app for 1P environments:
+    function bootstrapAppFor1P() {
+      window.addEventListener('load', function(ev) {
+        // Download main.dart.js
+        _flutter.loader.loadEntrypoint({
+          onEntrypointLoaded: function(engineInitializer) {
+            engineInitializer.initializeEngine({
+              renderer: 'canvaskit',
+            })
+            .then(function(appRunner) {
+              appRunner.runApp();
+            });
+          }
+        });
+      });
+    }
+
+    unregisterDevToolsServiceWorker();
+    bootstrapAppFor3P();
   </script>
 </body>
 

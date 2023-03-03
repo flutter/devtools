@@ -166,6 +166,8 @@ extension ColumnDataExtension<T> on ColumnData<T> {
   }
 }
 
+typedef RichTooltipBuilder<T> = InlineSpan? Function(T, BuildContext);
+
 /// Column that, for each row, shows a time value in milliseconds and the
 /// percentage that the time value is of the total time for this data set.
 ///
@@ -199,7 +201,7 @@ abstract class TimeAndPercentageColumn<T> extends ColumnData<T> {
 
   String Function(T)? tooltipProvider;
 
-  InlineSpan? Function(T, BuildContext)? richTooltipProvider;
+  RichTooltipBuilder<T>? richTooltipProvider;
 
   Comparable Function(T)? secondaryCompare;
 
