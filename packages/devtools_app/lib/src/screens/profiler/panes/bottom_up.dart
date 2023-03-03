@@ -22,12 +22,12 @@ class CpuBottomUpTable extends StatelessWidget {
     final selfTimeColumn = SelfTimeColumn(
       titleTooltip: selfTimeTooltip,
       dataTooltipProvider: (stackFrame, context) =>
-          _bottomUpTimeTooltipBuilder('Self', stackFrame, context),
+          _bottomUpTimeTooltipBuilder(_TimeType.self, stackFrame, context),
     );
     final totalTimeColumn = TotalTimeColumn(
       titleTooltip: totalTimeTooltip,
       dataTooltipProvider: (stackFrame, context) =>
-          _bottomUpTimeTooltipBuilder('Total', stackFrame, context),
+          _bottomUpTimeTooltipBuilder(_TimeType.total, stackFrame, context),
     );
     final columns = List<ColumnData<CpuStackFrame>>.unmodifiable([
       totalTimeColumn,
@@ -76,26 +76,50 @@ For children methods in the bottom-up tree (the callers), this is the self time 
 the top-level method (the callee) when called through the child method (the caller).''';
 
   static InlineSpan? _bottomUpTimeTooltipBuilder(
-    String type,
+    _TimeType type,
     CpuStackFrame stackFrame,
     BuildContext context,
   ) {
-    // TODO(kenz): consider adding a tooltip for root nodes as well if this is
-    // a point of confusion for the user.
-    if (stackFrame.isRoot) {
-      return null;
-    }
     final fixedStyle = Theme.of(context).tooltipFixedFontStyle;
+    if (stackFrame.isRoot) {
+      switch (type) {
+        case _TimeType.total:
+          return TextSpan(
+            children: [
+              const TextSpan(text: 'Time that '),
+              TextSpan(
+                text: '[${stackFrame.name}]',
+                style: fixedStyle,
+              ),
+              const TextSpan(
+                text: ' spent executing its own code,\nas well as the code for'
+                    ' any methods that it called.',
+              ),
+            ],
+          );
+        case _TimeType.self:
+          return TextSpan(
+            children: [
+              const TextSpan(text: 'Time that '),
+              TextSpan(
+                text: '[${stackFrame.name}]',
+                style: fixedStyle,
+              ),
+              const TextSpan(text: ' spent executing its own code.'),
+            ],
+          );
+      }
+    }
     return TextSpan(
       children: [
-        TextSpan(text: '$type time for '),
+        TextSpan(text: '$type time for root '),
         TextSpan(
-          text: stackFrame.root.name,
+          text: '[${stackFrame.root.name}]',
           style: fixedStyle,
         ),
         const TextSpan(text: '\nwhen called through '),
         TextSpan(
-          text: stackFrame.name,
+          text: '[${stackFrame.name}]',
           style: fixedStyle,
         ),
       ],
@@ -114,5 +138,20 @@ the top-level method (the callee) when called through the child method (the call
       defaultSortColumn: sortColumn,
       defaultSortDirection: SortDirection.descending,
     );
+  }
+}
+
+enum _TimeType {
+  self,
+  total;
+
+  @override
+  String toString() {
+    switch (this) {
+      case self:
+        return 'Self';
+      case total:
+        return 'Total';
+    }
   }
 }

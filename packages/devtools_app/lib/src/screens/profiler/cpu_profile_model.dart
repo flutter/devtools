@@ -21,8 +21,6 @@ import '../vm_developer/vm_service_private_extensions.dart';
 import 'cpu_profile_controller.dart';
 import 'cpu_profile_transformer.dart';
 
-import '_simple_profile.dart';
-
 /// A convenience wrapper for managing CPU profiles with both function and code
 /// profile views.
 ///
@@ -170,7 +168,6 @@ class CpuProfileData {
   }
 
   factory CpuProfileData.parse(Map<String, dynamic> json) {
-    json = simpleCpuProfile;
     final profileMetaData = CpuProfileMetaData(
       sampleCount: json[sampleCountKey] ?? 0,
       samplePeriod: json[samplePeriodKey] ?? 0,
@@ -193,9 +190,10 @@ class CpuProfileData {
       final resolvedUrl = (stackFrameJson[resolvedUrlKey] as String?) ?? '';
       final packageUri =
           (stackFrameJson[resolvedPackageUriKey] as String?) ?? resolvedUrl;
+      final name = getSimpleStackFrameName(stackFrameJson[nameKey] as String?);
       final stackFrame = CpuStackFrame(
         id: entry.key,
-        name: getSimpleStackFrameName(stackFrameJson[nameKey] as String?),
+        name: name,
         verboseName: stackFrameJson[nameKey] as String?,
         category: stackFrameJson[categoryKey] as String?,
         // If the user is on a version of Flutter where resolvedUrl is not
@@ -707,7 +705,7 @@ class CpuProfileData {
   List<CpuStackFrame> get bottomUpRoots {
     if (!processed) return <CpuStackFrame>[];
     return _bottomUpRoots ??=
-        CpuBottomUpTransformer().bottomUpRootsFor(
+        BottomUpTransformer<CpuStackFrame>().bottomUpRootsFor(
       topDownRoot: _cpuProfileRoot,
       mergeSamples: mergeCpuProfileRoots,
       rootedAtTags: rootedAtTags,
@@ -998,7 +996,6 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
     int? sourceLine,
     CpuProfileMetaData? profileMetaData,
     bool copySampleCounts = true,
-    bool resetInclusiveSampleCount = true,
   }) {
     final copy = CpuStackFrame._(
       id: id ?? this.id,
@@ -1015,8 +1012,7 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
     if (copySampleCounts) {
       copy
         ..exclusiveSampleCount = exclusiveSampleCount
-        ..inclusiveSampleCount =
-            resetInclusiveSampleCount ? null : inclusiveSampleCount;
+        ..inclusiveSampleCount = inclusiveSampleCount;
     }
     return copy;
   }
@@ -1026,7 +1022,7 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
   /// The returned copy stack frame will have a null parent.
   @override
   CpuStackFrame deepCopy() {
-    final copy = shallowCopy(resetInclusiveSampleCount: false);
+    final copy = shallowCopy();
     for (CpuStackFrame child in children) {
       copy.addChild(child.deepCopy());
     }

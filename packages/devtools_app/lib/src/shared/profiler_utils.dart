@@ -4,7 +4,6 @@
 
 import 'package:flutter/foundation.dart';
 
-import '../screens/profiler/cpu_profile_model.dart';
 import 'primitives/trees.dart';
 import 'primitives/utils.dart';
 
@@ -101,27 +100,26 @@ class ProfileMetaData {
   final TimeRange? time;
 }
 
-/// Process for converting a [CpuStackFrame] into a bottom-up
+/// Process for converting a [ProfilableDataMixin] into a bottom-up
 /// representation of the profile.
 ///
 /// [rootedAtTags] specifies whether or not the top-down tree is rooted
 /// at synthetic nodes representing user / VM tags.
-class CpuBottomUpTransformer {
-  List<CpuStackFrame> bottomUpRootsFor({
-    required CpuStackFrame topDownRoot,
-    required void Function(List<CpuStackFrame>) mergeSamples,
+class BottomUpTransformer<T extends ProfilableDataMixin<T>> {
+  List<T> bottomUpRootsFor({
+    required T topDownRoot,
+    required void Function(List<T>) mergeSamples,
     // TODO(bkonyi): can this take a list instead of a single root?
     required bool rootedAtTags,
-    Map<String, Object?>? shallowCopyArgs = const {},
   }) {
-    List<CpuStackFrame> bottomUpRoots;
+    List<T> bottomUpRoots;
     // If the top-down tree has synthetic tag nodes as its roots, we need to
     // skip the synthetic nodes when inverting the tree and re-insert them at
     // the root.
     if (rootedAtTags) {
-      bottomUpRoots = <CpuStackFrame>[];
+      bottomUpRoots = <T>[];
       for (final tagRoot in topDownRoot.children) {
-        final root = tagRoot.shallowCopy();
+        final root = tagRoot.shallowCopy() as T;
 
         // Generate bottom up roots for each child of the synthetic tag node
         // and insert them into the new synthetic tag node, [root].
@@ -130,7 +128,7 @@ class CpuBottomUpTransformer {
             generateBottomUpRoots(
               node: child,
               currentBottomUpRoot: null,
-              bottomUpRoots: <CpuStackFrame>[],
+              bottomUpRoots: <T>[],
             ),
           );
         }
@@ -146,7 +144,7 @@ class CpuBottomUpTransformer {
       bottomUpRoots = generateBottomUpRoots(
         node: topDownRoot,
         currentBottomUpRoot: null,
-        bottomUpRoots: <CpuStackFrame>[],
+        bottomUpRoots: <T>[],
       );
 
       // Set the bottom up sample counts for each sample.
@@ -181,28 +179,37 @@ class CpuBottomUpTransformer {
   /// counts will not reflect the bottom up sample counts. These steps will
   /// occur later in the bottom-up conversion process.
   @visibleForTesting
-  List<CpuStackFrame> generateBottomUpRoots({
-    required CpuStackFrame node,
-    required CpuStackFrame? currentBottomUpRoot,
-    required List<CpuStackFrame> bottomUpRoots,
+  List<T> generateBottomUpRoots({
+    required T node,
+    required T? currentBottomUpRoot,
+    required List<T> bottomUpRoots,
   }) {
-    final copy = node.shallowCopy();
-    // final copy = node.shallowCopy(
-    //   args: {'resetInclusiveSampleCount': false},
-    // ) as CpuStackFrame;
+    // Do not include the root node at the leaf of each bottom up tree.
+    if (!node.isRoot) {
+      // Inclusive and exclusive sample counts are copied by default.
+      final copy = node.shallowCopy() as T;
 
-    if (currentBottomUpRoot != null) {
-      copy.addChild(currentBottomUpRoot.deepCopy());
+      if (currentBottomUpRoot != null) {
+        copy.addChild(currentBottomUpRoot.deepCopy());
+      }
+
+      // [copy] is the new root of the bottom up stack.
+      currentBottomUpRoot = copy;
+
+      if (node.exclusiveSampleCount > 0) {
+        // This node is a leaf node, meaning that one or more CPU samples
+        // contain [currentBottomUpRoot] as the top stack frame. This means it
+        // is a bottom up root.
+        bottomUpRoots.add(currentBottomUpRoot);
+      } else {
+        // If [currentBottomUpRoot] is not a bottom up root, the inclusive count
+        // should be set to null. This will allow the inclusive count to be
+        // recalculated now that this node is part of it's parent's bottom up
+        // tree, not its own.
+        currentBottomUpRoot.inclusiveSampleCount = null;
+      }
     }
-
-    // [copy] is the new root of the bottom up stack.
-    currentBottomUpRoot = copy;
-
-    if (node.exclusiveSampleCount > 0) {
-      // This node is a leaf node, meaning it is a bottom up root.
-      bottomUpRoots.add(currentBottomUpRoot);
-    }
-    for (final child in node.children.cast<CpuStackFrame>()) {
+    for (final child in node.children.cast<T>()) {
       generateBottomUpRoots(
         node: child,
         currentBottomUpRoot: currentBottomUpRoot,
@@ -219,10 +226,10 @@ class CpuBottomUpTransformer {
   /// [generateBottomUpRoots] and the [mergeSamples] callback passed to
   /// [bottomUpRootsFor].
   @visibleForTesting
-  void cascadeSampleCounts(CpuStackFrame node) {
-    node.inclusiveSampleCount = node.exclusiveSampleCount;
-    for (final child in node.children.cast<CpuStackFrame>()) {
+  void cascadeSampleCounts(T node) {
+    for (final child in node.children.cast<T>()) {
       child.exclusiveSampleCount = node.exclusiveSampleCount;
+      child.inclusiveSampleCount = node.inclusiveSampleCount;
       cascadeSampleCounts(child);
     }
   }

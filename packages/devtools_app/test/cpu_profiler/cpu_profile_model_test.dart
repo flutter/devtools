@@ -275,8 +275,7 @@ void main() {
     test('shallowCopy', () {
       expect(stackFrameD.children.length, equals(2));
       expect(stackFrameD.parent, equals(stackFrameB));
-      CpuStackFrame copy =
-          stackFrameD.shallowCopy(resetInclusiveSampleCount: false);
+      CpuStackFrame copy = stackFrameD.shallowCopy();
       expect(copy.children, isEmpty);
       expect(copy.parent, isNull);
       expect(
