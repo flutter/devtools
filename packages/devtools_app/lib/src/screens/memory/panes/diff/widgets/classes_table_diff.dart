@@ -85,9 +85,9 @@ class DiffClassNameColumn extends ColumnData<DiffClassStats>
   }
 }
 
-class _InstanceColumn extends ColumnData<DiffClassStats>
+class DiffInstanceColumn extends ColumnData<DiffClassStats>
     implements ColumnRenderer<DiffClassStats> {
-  _InstanceColumn(this.dataPart, this.heap)
+  DiffInstanceColumn(this.dataPart)
       : super(
           columnTitle(dataPart),
           fixedWidthPx: scaleByFontFactor(80.0),
@@ -95,8 +95,6 @@ class _InstanceColumn extends ColumnData<DiffClassStats>
         );
 
   final _DataPart dataPart;
-
-  final HeapDataObtainer? heap;
 
   static String columnTitle(_DataPart dataPart) {
     switch (dataPart) {
@@ -112,8 +110,8 @@ class _InstanceColumn extends ColumnData<DiffClassStats>
   }
 
   @override
-  int getValue(DiffClassStats classStats) =>
-      _instances(classStats).instanceCount;
+  int getValue(DiffClassStats dataObject) =>
+      _instances(dataObject).instanceCount;
 
   ObjectSetStats _instances(DiffClassStats classStats) {
     switch (dataPart) {
@@ -127,6 +125,9 @@ class _InstanceColumn extends ColumnData<DiffClassStats>
         return classStats.total.persisted;
     }
   }
+
+  static late HeapDataObtainer before;
+  static late HeapDataObtainer after;
 
   @override
   String getDisplayValue(DiffClassStats classStats) {
@@ -148,23 +149,23 @@ class _InstanceColumn extends ColumnData<DiffClassStats>
   }) {
     if (!FeatureFlags.evalAndBrowse) return null;
     final objects = _instances(data);
-    final theHeap = heap;
 
     if (dataPart == _DataPart.delta) {
-      assert(theHeap == null);
       assert(objects is! ObjectSet);
       return null;
     }
 
-    if (objects is! ObjectSet || theHeap == null) {
+    final heapObtainer = dataPart == _DataPart.deleted ? before : after;
+
+    if (objects is! ObjectSet) {
       throw StateError(
-        'All columns except ${_DataPart.delta} should have objects and heap data available.',
+        'All columns except ${_DataPart.delta} should have objects available.',
       );
     }
 
     return InstanceTableCell(
       objects,
-      theHeap,
+      heapObtainer,
       data.heapClass,
       isSelected: isRowSelected,
       gaContext: gac.MemoryAreas.snapshotDiff,
@@ -243,18 +244,15 @@ class ClassesTableDiffColumns {
 
   late final sizeDeltaColumn = _SizeColumn(_DataPart.delta, sizeTypeToShow);
 
-  static late HeapDataObtainer before;
-  static late HeapDataObtainer after;
-
   final SizeType sizeTypeToShow;
 
   late final List<ColumnData<DiffClassStats>> columnList =
       <ColumnData<DiffClassStats>>[
     DiffClassNameColumn(),
-    _InstanceColumn(_DataPart.created, after),
-    _InstanceColumn(_DataPart.deleted, before),
-    _InstanceColumn(_DataPart.delta, null),
-    _InstanceColumn(_DataPart.persisted, after),
+    DiffInstanceColumn(_DataPart.created),
+    DiffInstanceColumn(_DataPart.deleted),
+    DiffInstanceColumn(_DataPart.delta),
+    DiffInstanceColumn(_DataPart.persisted),
     _SizeColumn(_DataPart.created, sizeTypeToShow),
     _SizeColumn(_DataPart.deleted, sizeTypeToShow),
     sizeDeltaColumn,
@@ -333,8 +331,8 @@ class ClassesTableDiff extends StatelessWidget {
 
   static final _columns = Map.fromIterable(
     SizeType.values,
-    key: (k) => k,
-    value: (k) => ClassesTableDiffColumns(k),
+    key: (t) => t,
+    value: (t) => ClassesTableDiffColumns(t),
   );
 
   @override

@@ -57,9 +57,9 @@ class _SnapshotViewState extends State<SnapshotView> {
     ClassesTableDiff.sizeTypeToShowForDiff = controller.sizeTypeToShowForDiff;
 
     final diffHeapClasses = controller.derived.heapClasses;
-    ClassesTableDiffColumns.before =
+    DiffInstanceColumn.before =
         () => (diffHeapClasses.value as DiffHeapClasses).before;
-    ClassesTableDiffColumns.after =
+    DiffInstanceColumn.after =
         () => (diffHeapClasses.value as DiffHeapClasses).after;
   }
 
