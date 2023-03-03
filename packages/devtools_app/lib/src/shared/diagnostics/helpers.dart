@@ -10,7 +10,7 @@ import '../globals.dart';
 import 'dart_object_node.dart';
 
 /// Gets object by object reference using offset and childCount from [variable]
-/// to get list items.
+/// for list items.
 Future<Object?> getObject({
   required IsolateRef? isolateRef,
   required ObjRef value,
@@ -22,4 +22,11 @@ Future<Object?> getObject({
     offset: variable?.offset,
     count: variable?.childCount,
   );
+}
+
+bool isList(ObjRef? ref) {
+  if (ref is! InstanceRef) return false;
+  final kind = ref.kind;
+  if (kind == null) return false;
+  return kind.endsWith('List') || kind == InstanceKind.kList;
 }
