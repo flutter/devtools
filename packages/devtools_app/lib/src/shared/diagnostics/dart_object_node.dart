@@ -241,7 +241,9 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
 
     final value = this.value;
     if (value is InstanceRef) {
-      return value.length ?? 0;
+      final instanceLength = value.length;
+      if (instanceLength == null) return 0;
+      return instanceLength - offset;
     }
 
     return 0;
@@ -251,13 +253,13 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
 
   bool get isPartialObject {
     final value = this.value;
-    // Only instances kinds can be partial:
+    // Only instance kinds can be partial:
     if (value is InstanceRef) {
       // Only instance kinds with a length property can be partial. See:
       // https://api.flutter.dev/flutter/vm_service/Instance/length.html
       final instanceLength = value.length;
       if (instanceLength == null) return false;
-      return childCount < instanceLength;
+      return offset != 0 || childCount < instanceLength;
     }
 
     return false;
