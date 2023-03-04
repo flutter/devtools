@@ -1335,6 +1335,32 @@ extension CpuSamplesExtension on vm_service.CpuSamples {
       if (className != null) {
         return '$className.${current.name}';
       }
+      if (current.name == anonymousClosureName &&
+          current._function is vm_service.FuncRef) {
+        final nameParts = <String?>[current.name];
+
+        final function = current._function as vm_service.FuncRef;
+        var owner = function.owner;
+        switch (owner.runtimeType) {
+          case vm_service.FuncRef:
+            owner = owner as vm_service.FuncRef;
+            final functionName = owner.name;
+
+            String? className;
+            if (owner.owner is vm_service.ClassRef) {
+              className = (owner.owner as vm_service.ClassRef).name;
+            }
+
+            nameParts.insertAll(0, [className, functionName]);
+            break;
+          case vm_service.ClassRef:
+            final className = (owner as vm_service.ClassRef).name;
+            nameParts.insert(0, className);
+        }
+
+        nameParts.removeWhere((element) => element == null);
+        return nameParts.join('.');
+      }
       return current.name;
     }
 
