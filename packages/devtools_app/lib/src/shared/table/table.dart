@@ -80,6 +80,10 @@ class FlatTable<T> extends StatefulWidget {
   })  : selectionNotifier = selectionNotifier ?? ValueNotifier<T?>(null),
         super(key: key);
 
+  /// List of columns to render.
+  ///
+  /// If different column instances are provided for two instances of the table
+  /// with the same [dataKey], the table will render first instances.
   final List<ColumnData<T>> columns;
 
   final List<ColumnGroup>? columnGroups;
