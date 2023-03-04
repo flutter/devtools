@@ -7,7 +7,6 @@ import 'package:devtools_app/src/screens/debugger/debugger_controller.dart';
 import 'package:devtools_app/src/screens/debugger/debugger_screen.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/shared/config_specific/ide_theme/ide_theme.dart';
-import 'package:devtools_app/src/shared/diagnostics/dart_object_node.dart';
 import 'package:devtools_app/src/shared/diagnostics/tree_builder.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_app/src/shared/notifications.dart';
@@ -16,7 +15,8 @@ import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
-import 'package:vm_service/vm_service.dart';
+
+import '../test_infra/utils/variable_utils.dart';
 
 void main() {
   late FakeServiceManager fakeServiceManager;
@@ -45,8 +45,8 @@ void main() {
         .thenReturn(ValueNotifier<int>(0));
     debuggerController = createMockDebuggerControllerWithDefaults();
 
-    _resetRef();
-    _resetRoot();
+    resetRef();
+    resetRoot();
   });
 
   Future<void> pumpDebuggerScreen(
@@ -67,10 +67,10 @@ void main() {
     (WidgetTester tester) async {
       fakeServiceManager.appState.setVariables(
         [
-          _buildListVariable(),
-          _buildMapVariable(),
-          _buildStringVariable('test str'),
-          _buildBooleanVariable(true),
+          buildListVariable(),
+          buildMapVariable(),
+          buildStringVariable('test str'),
+          buildBooleanVariable(true),
         ],
       );
       await pumpDebuggerScreen(tester, debuggerController);
@@ -127,7 +127,7 @@ void main() {
     'Children in large list variables are grouped',
     windowSize,
     (WidgetTester tester) async {
-      final list = _buildParentListVariable(length: 380250);
+      final list = buildParentListVariable(length: 380250);
       await buildVariablesTree(list);
 
       final appState = serviceManager.appState;
@@ -184,7 +184,7 @@ void main() {
     'Children in large map variables are grouped',
     windowSize,
     (WidgetTester tester) async {
-      final map = _buildParentMapVariable(length: 243621);
+      final map = buildParentMapVariable(length: 243621);
       await buildVariablesTree(map);
 
       final appState = serviceManager.appState;
@@ -232,174 +232,5 @@ void main() {
       expect(group100To199Finder, findsOneWidget);
       expect(group200To299Finder, findsOneWidget);
     },
-  );
-}
-
-final _libraryRef = LibraryRef(
-  name: 'some library',
-  uri: 'package:foo/foo.dart',
-  id: 'lib-id-1',
-);
-
-final _isolateRef = IsolateRef(
-  id: '433',
-  number: '1',
-  name: 'my-isolate',
-  isSystemIsolate: false,
-);
-
-int _refNumber = 0;
-
-String _incrementRef() {
-  _refNumber++;
-  return 'ref$_refNumber';
-}
-
-void _resetRef() {
-  _refNumber = 0;
-}
-
-int _rootNumber = 0;
-
-String _incrementRoot() {
-  _rootNumber++;
-  return 'Root $_rootNumber';
-}
-
-void _resetRoot() {
-  _rootNumber = 0;
-}
-
-DartObjectNode _buildParentListVariable({int length = 2}) {
-  return DartObjectNode.create(
-    BoundVariable(
-      name: _incrementRoot(),
-      value: InstanceRef(
-        id: _incrementRef(),
-        kind: InstanceKind.kList,
-        classRef: ClassRef(
-          name: '_GrowableList',
-          id: _incrementRef(),
-          library: _libraryRef,
-        ),
-        length: length,
-      ),
-    ),
-    _isolateRef,
-  );
-}
-
-DartObjectNode _buildListVariable({int length = 2}) {
-  final listVariable = _buildParentListVariable(length: length);
-
-  for (int i = 0; i < length; i++) {
-    listVariable.addChild(
-      DartObjectNode.create(
-        BoundVariable(
-          name: '$i',
-          value: InstanceRef(
-            id: _incrementRef(),
-            kind: InstanceKind.kInt,
-            classRef: ClassRef(
-              name: 'Integer',
-              id: _incrementRef(),
-              library: _libraryRef,
-            ),
-            valueAsString: '$i',
-            valueAsStringIsTruncated: false,
-          ),
-        ),
-        _isolateRef,
-      ),
-    );
-  }
-
-  return listVariable;
-}
-
-DartObjectNode _buildParentMapVariable({int length = 2}) {
-  return DartObjectNode.create(
-    BoundVariable(
-      name: _incrementRoot(),
-      value: InstanceRef(
-        id: _incrementRef(),
-        kind: InstanceKind.kMap,
-        classRef: ClassRef(
-          name: '_InternalLinkedHashmap',
-          id: _incrementRef(),
-          library: _libraryRef,
-        ),
-        length: length,
-      ),
-    ),
-    _isolateRef,
-  );
-}
-
-DartObjectNode _buildMapVariable({int length = 2}) {
-  final mapVariable = _buildParentMapVariable(length: length);
-
-  for (int i = 0; i < length; i++) {
-    mapVariable.addChild(
-      DartObjectNode.create(
-        BoundVariable(
-          name: "['key${i + 1}']",
-          value: InstanceRef(
-            id: _incrementRef(),
-            kind: InstanceKind.kDouble,
-            classRef: ClassRef(
-              name: 'Double',
-              id: _incrementRef(),
-              library: _libraryRef,
-            ),
-            valueAsString: '${i + 1}.0',
-            valueAsStringIsTruncated: false,
-          ),
-        ),
-        _isolateRef,
-      ),
-    );
-  }
-
-  return mapVariable;
-}
-
-DartObjectNode _buildStringVariable(String value) {
-  return DartObjectNode.create(
-    BoundVariable(
-      name: _incrementRoot(),
-      value: InstanceRef(
-        id: _incrementRef(),
-        kind: InstanceKind.kString,
-        classRef: ClassRef(
-          name: 'String',
-          id: _incrementRef(),
-          library: _libraryRef,
-        ),
-        valueAsString: value,
-        valueAsStringIsTruncated: true,
-      ),
-    ),
-    _isolateRef,
-  );
-}
-
-DartObjectNode _buildBooleanVariable(bool value) {
-  return DartObjectNode.create(
-    BoundVariable(
-      name: _incrementRoot(),
-      value: InstanceRef(
-        id: _incrementRef(),
-        kind: InstanceKind.kBool,
-        classRef: ClassRef(
-          name: 'Boolean',
-          id: _incrementRef(),
-          library: _libraryRef,
-        ),
-        valueAsString: '$value',
-        valueAsStringIsTruncated: false,
-      ),
-    ),
-    _isolateRef,
   );
 }

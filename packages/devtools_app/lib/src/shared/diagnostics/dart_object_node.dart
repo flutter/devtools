@@ -241,19 +241,27 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
 
     final value = this.value;
     if (value is InstanceRef) {
-      if (value.kind != null &&
-          (isList(value) ||
-              value.kind == InstanceKind.kMap ||
-              value.kind == InstanceKind.kRecord ||
-              isSet)) {
-        return value.length ?? 0;
-      }
+      return value.length ?? 0;
     }
 
     return 0;
   }
 
   int? _childCount;
+
+  bool get isPartialObject {
+    final value = this.value;
+    // Only instances kinds can be partial:
+    if (value is InstanceRef) {
+      // Only instance kinds with a length property can be partial. See:
+      // https://api.flutter.dev/flutter/vm_service/Instance/length.html
+      final instanceLength = value.length;
+      if (instanceLength == null) return false;
+      return childCount < instanceLength;
+    }
+
+    return false;
+  }
 
   // TODO(elliette): Can remove this workaround once DWDS correctly returns
   // InstanceKind.kSet for the kind of `Sets`. See:
