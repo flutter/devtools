@@ -306,7 +306,7 @@ class _CpuProfilerState extends State<CpuProfiler>
         valueListenable: preferences.cpuProfiler.displayTreeGuidelines,
         builder: (context, displayTreeGuidelines, _) {
           return CpuBottomUpTable(
-            widget.bottomUpRoots,
+            bottomUpRoots: widget.bottomUpRoots,
             displayTreeGuidelines: displayTreeGuidelines,
           );
         },
@@ -317,7 +317,7 @@ class _CpuProfilerState extends State<CpuProfiler>
         valueListenable: preferences.cpuProfiler.displayTreeGuidelines,
         builder: (context, displayTreeGuidelines, _) {
           return CpuCallTreeTable(
-            widget.callTreeRoots,
+            dataRoots: widget.callTreeRoots,
             displayTreeGuidelines: displayTreeGuidelines,
           );
         },

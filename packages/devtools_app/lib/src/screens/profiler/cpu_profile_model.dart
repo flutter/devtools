@@ -190,9 +190,10 @@ class CpuProfileData {
       final resolvedUrl = (stackFrameJson[resolvedUrlKey] as String?) ?? '';
       final packageUri =
           (stackFrameJson[resolvedPackageUriKey] as String?) ?? resolvedUrl;
+      final name = getSimpleStackFrameName(stackFrameJson[nameKey] as String?);
       final stackFrame = CpuStackFrame(
         id: entry.key,
-        name: getSimpleStackFrameName(stackFrameJson[nameKey] as String?),
+        name: name,
         verboseName: stackFrameJson[nameKey] as String?,
         category: stackFrameJson[categoryKey] as String?,
         // If the user is on a version of Flutter where resolvedUrl is not
@@ -995,7 +996,6 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
     int? sourceLine,
     CpuProfileMetaData? profileMetaData,
     bool copySampleCounts = true,
-    bool resetInclusiveSampleCount = true,
   }) {
     final copy = CpuStackFrame._(
       id: id ?? this.id,
@@ -1012,8 +1012,7 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
     if (copySampleCounts) {
       copy
         ..exclusiveSampleCount = exclusiveSampleCount
-        ..inclusiveSampleCount =
-            resetInclusiveSampleCount ? null : inclusiveSampleCount;
+        ..inclusiveSampleCount = inclusiveSampleCount;
     }
     return copy;
   }
@@ -1023,7 +1022,7 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
   /// The returned copy stack frame will have a null parent.
   @override
   CpuStackFrame deepCopy() {
-    final copy = shallowCopy(resetInclusiveSampleCount: false);
+    final copy = shallowCopy();
     for (CpuStackFrame child in children) {
       copy.addChild(child.deepCopy());
     }
