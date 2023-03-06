@@ -9,7 +9,6 @@ import '../../../../../shared/analytics/constants.dart' as gac;
 import '../../../../../shared/common_widgets.dart';
 import '../../../../../shared/feature_flags.dart';
 import '../../../../../shared/globals.dart';
-import '../../../../../shared/memory/adapted_heap_data.dart';
 import '../../../../../shared/primitives/utils.dart';
 import '../../../../../shared/table/table.dart';
 import '../../../../../shared/table/table_data.dart';
@@ -19,6 +18,7 @@ import '../../../shared/heap/heap.dart';
 import '../../../shared/primitives/simple_elements.dart';
 import '../../../shared/shared_memory_widgets.dart';
 import '../controller/heap_diff.dart';
+import '../controller/simple_controllers.dart';
 import 'instances.dart';
 
 enum _DataPart {
@@ -32,7 +32,7 @@ class DiffClassNameColumn extends ColumnData<DiffClassStats>
     implements
         ColumnRenderer<DiffClassStats>,
         ColumnHeaderRenderer<DiffClassStats> {
-  DiffClassNameColumn()
+  DiffClassNameColumn(this.controller)
       : super(
           'Class',
           titleTooltip: 'Class name',
@@ -40,7 +40,7 @@ class DiffClassNameColumn extends ColumnData<DiffClassStats>
           alignment: ColumnAlignment.left,
         );
 
-  static late Widget classFilterButton;
+  final ClassesTableDiffController controller;
 
   @override
   String? getValue(DiffClassStats dataObject) => dataObject.heapClass.className;
@@ -79,7 +79,7 @@ class DiffClassNameColumn extends ColumnData<DiffClassStats>
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Expanded(child: defaultHeaderRenderer()),
-        classFilterButton,
+        controller.classFilterButton,
       ],
     );
   }
@@ -87,7 +87,7 @@ class DiffClassNameColumn extends ColumnData<DiffClassStats>
 
 class DiffInstanceColumn extends ColumnData<DiffClassStats>
     implements ColumnRenderer<DiffClassStats> {
-  DiffInstanceColumn(this.dataPart)
+  DiffInstanceColumn(this.dataPart, this.controller)
       : super(
           columnTitle(dataPart),
           fixedWidthPx: scaleByFontFactor(80.0),
@@ -95,6 +95,8 @@ class DiffInstanceColumn extends ColumnData<DiffClassStats>
         );
 
   final _DataPart dataPart;
+
+  final ClassesTableDiffController controller;
 
   static String columnTitle(_DataPart dataPart) {
     switch (dataPart) {
@@ -126,13 +128,10 @@ class DiffInstanceColumn extends ColumnData<DiffClassStats>
     }
   }
 
-  static late HeapDataObtainer before;
-  static late HeapDataObtainer after;
-
   @override
-  String getDisplayValue(DiffClassStats classStats) {
+  String getDisplayValue(DiffClassStats dataObject) {
     // Add leading sign for delta values.
-    final value = getValue(classStats);
+    final value = getValue(dataObject);
     if (dataPart != _DataPart.delta || value <= 0) return value.toString();
     return '+$value';
   }
@@ -155,7 +154,8 @@ class DiffInstanceColumn extends ColumnData<DiffClassStats>
       return null;
     }
 
-    final heapObtainer = dataPart == _DataPart.deleted ? before : after;
+    final heapObtainer =
+        dataPart == _DataPart.deleted ? controller.before : controller.after;
 
     if (objects is! ObjectSet) {
       throw StateError(
@@ -240,34 +240,35 @@ class _SizeColumn extends ColumnData<DiffClassStats> {
 }
 
 class ClassesTableDiffColumns {
-  ClassesTableDiffColumns(this.sizeTypeToShow);
+  ClassesTableDiffColumns(this.sizeType, this.controller);
 
-  late final sizeDeltaColumn = _SizeColumn(_DataPart.delta, sizeTypeToShow);
+  final SizeType sizeType;
+  final ClassesTableDiffController controller;
 
-  final SizeType sizeTypeToShow;
+  late final sizeDeltaColumn = _SizeColumn(_DataPart.delta, sizeType);
 
   late final List<ColumnData<DiffClassStats>> columnList =
       <ColumnData<DiffClassStats>>[
-    DiffClassNameColumn(),
-    DiffInstanceColumn(_DataPart.created),
-    DiffInstanceColumn(_DataPart.deleted),
-    DiffInstanceColumn(_DataPart.delta),
-    DiffInstanceColumn(_DataPart.persisted),
-    _SizeColumn(_DataPart.created, sizeTypeToShow),
-    _SizeColumn(_DataPart.deleted, sizeTypeToShow),
+    DiffClassNameColumn(controller),
+    DiffInstanceColumn(_DataPart.created, controller),
+    DiffInstanceColumn(_DataPart.deleted, controller),
+    DiffInstanceColumn(_DataPart.delta, controller),
+    DiffInstanceColumn(_DataPart.persisted, controller),
+    _SizeColumn(_DataPart.created, sizeType),
+    _SizeColumn(_DataPart.deleted, sizeType),
     sizeDeltaColumn,
-    _SizeColumn(_DataPart.persisted, sizeTypeToShow),
+    _SizeColumn(_DataPart.persisted, sizeType),
   ];
 }
 
 class _SizeGroupTitle extends StatelessWidget {
-  const _SizeGroupTitle(this.sizeTypeToShowForDiff);
+  const _SizeGroupTitle(this.controller);
 
-  final ValueNotifier<SizeType> sizeTypeToShowForDiff;
+  final ClassesTableDiffController controller;
 
   @override
   Widget build(BuildContext context) {
-    final sizeType = sizeTypeToShowForDiff.value;
+    final sizeType = controller.selectedSizeType.value;
 
     return maybeWrapWithTooltip(
       child: Padding(
@@ -279,7 +280,7 @@ class _SizeGroupTitle extends StatelessWidget {
               isDense: true,
               value: sizeType,
               onChanged: (SizeType? value) =>
-                  sizeTypeToShowForDiff.value = value!,
+                  controller.selectedSizeType.value = value!,
               items: SizeType.values
                   .map(
                     (sizeType) => DropdownMenuItem<SizeType>(
@@ -303,13 +304,11 @@ class ClassesTableDiff extends StatelessWidget {
   const ClassesTableDiff({
     Key? key,
     required this.classes,
-    required this.selection,
+    required this.controller,
   }) : super(key: key);
 
   final List<DiffClassStats> classes;
-  final ValueNotifier<DiffClassStats?> selection;
-
-  static late ValueNotifier<SizeType> sizeTypeToShowForDiff;
+  final ClassesTableDiffController controller;
 
   List<ColumnGroup> _columnGroups(SizeType sizeType, BuildContext context) {
     return [
@@ -323,28 +322,27 @@ class ClassesTableDiff extends StatelessWidget {
         tooltip: nonGcableInstancesColumnTooltip,
       ),
       ColumnGroup(
-        title: _SizeGroupTitle(sizeTypeToShowForDiff),
+        title: _SizeGroupTitle(controller),
         range: const Range(5, 9),
       ),
     ];
   }
 
-  static final _columns = Map.fromIterable(
-    SizeType.values,
-    key: (t) => t,
-    value: (t) => ClassesTableDiffColumns(t),
-  );
+  static final _columns = <SizeType, ClassesTableDiffColumns>{};
 
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<SizeType>(
-      valueListenable: sizeTypeToShowForDiff,
+      valueListenable: controller.selectedSizeType,
       builder: (context, sizeType, _) {
         // We want to preserve the sorting and sort directions for ClassesTableDiff
         // no matter what the data passed to it is.
         const dataKey = 'ClassesTableDiff';
 
-        final columns = _columns[sizeType]!;
+        final columns = _columns.putIfAbsent(
+          sizeType,
+          () => ClassesTableDiffColumns(sizeType, controller),
+        );
 
         return FlatTable<DiffClassStats>(
           columns: columns.columnList,
@@ -352,7 +350,7 @@ class ClassesTableDiff extends StatelessWidget {
           data: classes,
           dataKey: dataKey,
           keyFactory: (e) => Key(e.heapClass.fullName),
-          selectionNotifier: selection,
+          selectionNotifier: controller.selection,
           onItemSelected: (_) => ga.select(
             gac.memory,
             gac.MemoryEvent.diffClassDiffSelect,

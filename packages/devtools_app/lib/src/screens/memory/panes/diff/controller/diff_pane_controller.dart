@@ -19,7 +19,7 @@ import '../../../shared/heap/class_filter.dart';
 import '../../../shared/heap/heap.dart';
 import '../../../shared/heap/model.dart';
 import '../../../shared/primitives/memory_utils.dart';
-import '../../../shared/primitives/simple_elements.dart';
+import '../widgets/class_filter.dart';
 import 'heap_diff.dart';
 import 'item_controller.dart';
 import 'simple_controllers.dart';
@@ -35,8 +35,6 @@ class DiffPaneController extends DisposableController {
   final _isTakingSnapshot = ValueNotifier<bool>(false);
 
   final retainingPathController = RetainingPathController();
-
-  final sizeTypeToShowForDiff = ValueNotifier<SizeType>(SizeType.retained);
 
   final core = CoreData();
   late final derived = DerivedData(core);
@@ -146,6 +144,28 @@ class DiffPaneController extends DisposableController {
       ),
     );
   }
+
+  ClassFilterButton _classFilterButton() => ClassFilterButton(
+        filter: core.classFilter,
+        onChanged: applyFilter,
+        rootPackage: serviceManager.rootInfoNow().package,
+      );
+
+  late final ClassesTableSingleController classesTableSingleController =
+      ClassesTableSingleController(
+    selection: derived.selectedSingleClassStats,
+    heap: () => (core.selectedItem as SnapshotInstanceItem).heap!.data,
+    totalHeapSize: () => (core.selectedItem as SnapshotInstanceItem).totalSize!,
+    filterButton: _classFilterButton(),
+  );
+
+  late final ClassesTableDiffController classesTableDiffController =
+      ClassesTableDiffController(
+    selection: derived.selectedDiffClassStats,
+    classFilterButton: _classFilterButton(),
+    before: () => (derived.heapClasses.value as DiffHeapClasses).before,
+    after: () => (derived.heapClasses.value as DiffHeapClasses).after,
+  );
 }
 
 /// Values that define what data to show on diff screen.

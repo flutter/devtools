@@ -8,7 +8,6 @@ import '../../../../../shared/analytics/analytics.dart' as ga;
 import '../../../../../shared/analytics/constants.dart' as gac;
 import '../../../../../shared/feature_flags.dart';
 import '../../../../../shared/globals.dart';
-import '../../../../../shared/memory/adapted_heap_data.dart';
 import '../../../../../shared/primitives/utils.dart';
 import '../../../../../shared/table/table.dart';
 import '../../../../../shared/table/table_data.dart';
@@ -17,13 +16,14 @@ import '../../../../../shared/utils.dart';
 import '../../../shared/heap/heap.dart';
 import '../../../shared/primitives/simple_elements.dart';
 import '../../../shared/shared_memory_widgets.dart';
+import '../controller/simple_controllers.dart';
 import 'instances.dart';
 
-class SingleClassNameColumn extends ColumnData<SingleClassStats>
+class _ClassNameColumn extends ColumnData<SingleClassStats>
     implements
         ColumnRenderer<SingleClassStats>,
         ColumnHeaderRenderer<SingleClassStats> {
-  SingleClassNameColumn()
+  _ClassNameColumn(this.controller)
       : super(
           'Class',
           titleTooltip: 'Class name',
@@ -31,7 +31,7 @@ class SingleClassNameColumn extends ColumnData<SingleClassStats>
           alignment: ColumnAlignment.left,
         );
 
-  static late Widget classFilterButton;
+  final ClassesTableSingleController controller;
 
   @override
   String? getValue(SingleClassStats dataObject) =>
@@ -71,15 +71,15 @@ class SingleClassNameColumn extends ColumnData<SingleClassStats>
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Expanded(child: defaultHeaderRenderer()),
-        classFilterButton,
+        controller.filterButton,
       ],
     );
   }
 }
 
-class SingleInstanceColumn extends ColumnData<SingleClassStats>
+class _InstanceColumn extends ColumnData<SingleClassStats>
     implements ColumnRenderer<SingleClassStats> {
-  SingleInstanceColumn()
+  _InstanceColumn(this.controller)
       : super(
           'Instances',
           titleTooltip: nonGcableInstancesColumnTooltip,
@@ -87,7 +87,7 @@ class SingleInstanceColumn extends ColumnData<SingleClassStats>
           alignment: ColumnAlignment.right,
         );
 
-  static late HeapDataObtainer heapOpbtainer;
+  final ClassesTableSingleController controller;
 
   @override
   int getValue(SingleClassStats dataObject) => dataObject.objects.instanceCount;
@@ -106,7 +106,7 @@ class SingleInstanceColumn extends ColumnData<SingleClassStats>
 
     return InstanceTableCell(
       data.objects,
-      heapOpbtainer,
+      controller.heap,
       data.heapClass,
       isSelected: isRowSelected,
       gaContext: gac.MemoryAreas.snapshotSingle,
@@ -137,8 +137,8 @@ class _ShallowSizeColumn extends ColumnData<SingleClassStats> {
       )!;
 }
 
-class SingleRetainedSizeColumn extends ColumnData<SingleClassStats> {
-  SingleRetainedSizeColumn()
+class _RetainedSizeColumn extends ColumnData<SingleClassStats> {
+  _RetainedSizeColumn(this.controller)
       : super(
           'Retained Dart Size',
           titleTooltip: SizeType.retained.description,
@@ -146,7 +146,7 @@ class SingleRetainedSizeColumn extends ColumnData<SingleClassStats> {
           alignment: ColumnAlignment.right,
         );
 
-  static late final HeapSizeObtainer totalSizeObtainer;
+  final ClassesTableSingleController controller;
 
   @override
   int getValue(SingleClassStats dataObject) => dataObject.objects.retainedSize;
@@ -160,20 +160,22 @@ class SingleRetainedSizeColumn extends ColumnData<SingleClassStats> {
 
     final bytes = prettyPrintRetainedSize(value)!;
 
-    final percents = '${(value * 100 / totalSizeObtainer()).round()}%';
+    final percents = '${(value * 100 / controller.totalHeapSize()).round()}%';
 
     return '$bytes ($percents)';
   }
 }
 
 class _ClassesTableSingleColumns {
-  _ClassesTableSingleColumns();
+  _ClassesTableSingleColumns(this.controller);
 
-  late final retainedSizeColumn = SingleRetainedSizeColumn();
+  late final retainedSizeColumn = _RetainedSizeColumn(controller);
+
+  final ClassesTableSingleController controller;
 
   late final columnList = <ColumnData<SingleClassStats>>[
-    SingleClassNameColumn(),
-    SingleInstanceColumn(),
+    _ClassNameColumn(controller),
+    _InstanceColumn(controller),
     _ShallowSizeColumn(),
     retainedSizeColumn,
   ];
@@ -185,14 +187,14 @@ class ClassesTableSingle extends StatelessWidget {
   const ClassesTableSingle({
     super.key,
     required this.classes,
-    required this.selection,
+    required this.controller,
   });
 
   final List<SingleClassStats> classes;
 
-  final ValueNotifier<SingleClassStats?> selection;
+  final ClassesTableSingleController controller;
 
-  static final columns = _ClassesTableSingleColumns();
+  static _ClassesTableSingleColumns? _columns;
 
   @override
   Widget build(BuildContext context) {
@@ -200,12 +202,14 @@ class ClassesTableSingle extends StatelessWidget {
     // no matter what the data passed to it is.
     const dataKey = 'ClassesTableSingle';
 
+    final columns = _columns ??= _ClassesTableSingleColumns(controller);
+
     return FlatTable<SingleClassStats>(
       columns: columns.columnList,
       data: classes,
       dataKey: dataKey,
       keyFactory: (e) => Key(e.heapClass.fullName),
-      selectionNotifier: selection,
+      selectionNotifier: controller.selection,
       onItemSelected: (_) => ga.select(
         gac.memory,
         gac.MemoryEvent.diffClassSingleSelect,
