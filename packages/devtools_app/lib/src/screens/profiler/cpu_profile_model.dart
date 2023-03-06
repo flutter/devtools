@@ -212,7 +212,7 @@ class CpuProfileData {
     // Initialize all CPU samples.
     final stackTraceEvents =
         (json[traceEventsKey] ?? []).cast<Map<String, dynamic>>();
-    final List<CpuSampleEvent> samples = stackTraceEvents
+    final samples = stackTraceEvents
         .map((trace) => CpuSampleEvent.parse(trace))
         .toList()
         .cast<CpuSampleEvent>();
