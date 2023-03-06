@@ -123,6 +123,56 @@ DartObjectNode buildMapGroupingVariable({
   );
 }
 
+DartObjectNode buildParentSetVariable({int length = 2}) {
+  return DartObjectNode.create(
+    BoundVariable(
+      name: _incrementRoot(),
+      value: _buildInstanceRefForSet(length: length),
+    ),
+    _isolateRef,
+  );
+}
+
+DartObjectNode buildSetVariable({int length = 2}) {
+  final setVariable = buildParentSetVariable(length: length);
+
+  for (int i = 0; i < length; i++) {
+    setVariable.addChild(
+      DartObjectNode.fromValue(
+        value: InstanceRef(
+          id: _incrementRef(),
+          kind: InstanceKind.kString,
+          classRef: ClassRef(
+            name: 'String',
+            id: _incrementRef(),
+            library: _libraryRef,
+          ),
+          valueAsString: 'set value $i',
+          valueAsStringIsTruncated: false,
+        ),
+        isolateRef: _isolateRef,
+      ),
+    );
+  }
+
+  return setVariable;
+}
+
+DartObjectNode buildSetGroupingVariable({
+  required int length,
+  required int offset,
+  required int count,
+}) {
+  return DartObjectNode.grouping(
+    GenericInstanceRef(
+      isolateRef: isolateRef,
+      value: _buildInstanceRefForSet(length: length),
+    ),
+    offset: offset,
+    count: count,
+  );
+}
+
 DartObjectNode buildStringVariable(String value) {
   return DartObjectNode.create(
     BoundVariable(
@@ -179,6 +229,17 @@ InstanceRef _buildInstanceRefForList({required int length}) => InstanceRef(
       kind: InstanceKind.kList,
       classRef: ClassRef(
         name: '_GrowableList',
+        id: _incrementRef(),
+        library: _libraryRef,
+      ),
+      length: length,
+    );
+
+InstanceRef _buildInstanceRefForSet({required int length}) => InstanceRef(
+      id: _incrementRef(),
+      kind: InstanceKind.kSet,
+      classRef: ClassRef(
+        name: '_Set',
         id: _incrementRef(),
         library: _libraryRef,
       ),
