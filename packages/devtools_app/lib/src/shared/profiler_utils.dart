@@ -145,6 +145,7 @@ class BottomUpTransformer<T extends ProfilableDataMixin<T>> {
         node: topDownRoot,
         currentBottomUpRoot: null,
         bottomUpRoots: <T>[],
+        skipRoot: true,
       );
 
       // Set the bottom up sample counts for each sample.
@@ -156,13 +157,13 @@ class BottomUpTransformer<T extends ProfilableDataMixin<T>> {
     }
 
     if (rootedAtTags) {
-      // Calculate the total time for each tag root. The sum of the inclusive
+      // Calculate the total time for each tag root. The sum of the exclusive
       // times for each child for the tag node is the total time spent with the
       // given tag active.
       for (final tagRoot in bottomUpRoots) {
-        tagRoot._inclusiveSampleCount = tagRoot.children.fold<int>(
+        tagRoot.inclusiveSampleCount = tagRoot.children.fold<int>(
           0,
-          (prev, e) => prev + e._inclusiveSampleCount!,
+          (prev, e) => prev + e.exclusiveSampleCount,
         );
       }
     }
@@ -183,19 +184,35 @@ class BottomUpTransformer<T extends ProfilableDataMixin<T>> {
     required T node,
     required T? currentBottomUpRoot,
     required List<T> bottomUpRoots,
+    bool skipRoot = false,
   }) {
-    final copy = node.shallowCopy() as T;
+    if (skipRoot && node.isRoot) {
+      // When [skipRoot] is true, do not include the root node at the leaf of
+      // each bottom up tree. This is to avoid having the 'all' node at the
+      // at the bottom of each bottom up path.
+    } else {
+      // Inclusive and exclusive sample counts are copied by default.
+      final copy = node.shallowCopy() as T;
 
-    if (currentBottomUpRoot != null) {
-      copy.addChild(currentBottomUpRoot.deepCopy());
-    }
+      if (currentBottomUpRoot != null) {
+        copy.addChild(currentBottomUpRoot.deepCopy());
+      }
 
-    // [copy] is the new root of the bottom up stack.
-    currentBottomUpRoot = copy;
+      // [copy] is the new root of the bottom up stack.
+      currentBottomUpRoot = copy;
 
-    if (node.exclusiveSampleCount > 0) {
-      // This node is a leaf node, meaning it is a bottom up root.
-      bottomUpRoots.add(currentBottomUpRoot);
+      if (node.exclusiveSampleCount > 0) {
+        // This node is a leaf node, meaning that one or more CPU samples
+        // contain [currentBottomUpRoot] as the top stack frame. This means it
+        // is a bottom up root.
+        bottomUpRoots.add(currentBottomUpRoot);
+      } else {
+        // If [currentBottomUpRoot] is not a bottom up root, the inclusive count
+        // should be set to null. This will allow the inclusive count to be
+        // recalculated now that this node is part of it's parent's bottom up
+        // tree, not its own.
+        currentBottomUpRoot.inclusiveSampleCount = null;
+      }
     }
     for (final child in node.children.cast<T>()) {
       generateBottomUpRoots(
@@ -207,7 +224,8 @@ class BottomUpTransformer<T extends ProfilableDataMixin<T>> {
     return bottomUpRoots;
   }
 
-  /// Sets sample counts of [node] and all children to [exclusiveSampleCount].
+  /// Cascades the [exclusiveSampleCount] and [inclusiveSampleCount] of [node]
+  /// to all of its children (recursive).
   ///
   /// This is necessary for the transformation of a [ProfilableDataMixin] to its
   /// bottom-up representation. This is an intermediate step between
@@ -215,9 +233,9 @@ class BottomUpTransformer<T extends ProfilableDataMixin<T>> {
   /// [bottomUpRootsFor].
   @visibleForTesting
   void cascadeSampleCounts(T node) {
-    node.inclusiveSampleCount = node.exclusiveSampleCount;
     for (final child in node.children.cast<T>()) {
       child.exclusiveSampleCount = node.exclusiveSampleCount;
+      child.inclusiveSampleCount = node.inclusiveSampleCount;
       cascadeSampleCounts(child);
     }
   }

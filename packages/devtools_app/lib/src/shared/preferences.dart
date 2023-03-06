@@ -34,6 +34,9 @@ class PreferencesController extends DisposableController
   MemoryPreferencesController get memory => _memory;
   final _memory = MemoryPreferencesController();
 
+  PerformancePreferencesController get performance => _performance;
+  final _performance = PerformancePreferencesController();
+
   CpuProfilerPreferencesController get cpuProfiler => _cpuProfiler;
   final _cpuProfiler = CpuProfilerPreferencesController();
 
@@ -62,6 +65,7 @@ class PreferencesController extends DisposableController
 
     await inspector.init();
     await memory.init();
+    await performance.init();
     await cpuProfiler.init();
 
     setGlobal(PreferencesController, this);
@@ -71,6 +75,8 @@ class PreferencesController extends DisposableController
   void dispose() {
     inspector.dispose();
     memory.dispose();
+    performance.dispose();
+    cpuProfiler.dispose();
     super.dispose();
   }
 
@@ -410,5 +416,32 @@ class CpuProfilerPreferencesController extends DisposableController
     );
     displayTreeGuidelines.value =
         await storage.getValue(_displayTreeGuidelinesId) == 'true';
+  }
+}
+
+class PerformancePreferencesController extends DisposableController
+    with AutoDisposeControllerMixin {
+  final showFlutterFramesChart = ValueNotifier<bool>(true);
+
+  static final _showFlutterFramesChartId =
+      '${gac.performance}.${gac.framesChartVisibility}';
+
+  Future<void> init() async {
+    addAutoDisposeListener(
+      showFlutterFramesChart,
+      () {
+        storage.setValue(
+          _showFlutterFramesChartId,
+          showFlutterFramesChart.value.toString(),
+        );
+        ga.select(
+          gac.performance,
+          gac.framesChartVisibility,
+          value: showFlutterFramesChart.value ? 1 : 0,
+        );
+      },
+    );
+    showFlutterFramesChart.value =
+        await storage.getValue(_showFlutterFramesChartId) != 'false';
   }
 }

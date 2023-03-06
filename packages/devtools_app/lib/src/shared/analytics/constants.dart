@@ -59,6 +59,7 @@ const refreshTimelineEvents = 'refreshTimelineEvents';
 const performanceOverlay = 'performanceOverlay';
 const performanceOverlayDocs = 'performanceOverlayDocs';
 const timelineFlameChartHelp = 'timelineFlameChartHelp';
+const framesChartVisibility = 'framesChartVisibility';
 const selectFlutterFrame = 'selectFlutterFrame';
 const traceEventProcessingTime = 'traceEventProcessingTime';
 const trackRebuilds = 'trackRebuilds';
@@ -79,7 +80,6 @@ const canvasSaveLayerDocs = 'canvasSaveLayerDocs';
 const intrinsicOperationsDocs = 'intrinsicOperationsDocs';
 const shaderCompilationDocs = 'shaderCompilationDocs';
 const shaderCompilationDocsTooltipLink = 'shaderCompilationDocsTooltipLink';
-const analyzeSelectedFrame = 'analyzeSelectedFrame';
 const collectRasterStats = 'collectRasterStats';
 const perfettoModeTraceEventProcessingTime =
     'traceEventProcessingTime-perfettoMode';

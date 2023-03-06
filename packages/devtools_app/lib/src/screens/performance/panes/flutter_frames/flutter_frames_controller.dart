@@ -28,12 +28,10 @@ class FlutterFramesController extends PerformanceFeatureController {
   ValueListenable<List<FlutterFrame>> get flutterFrames => _flutterFrames;
   final _flutterFrames = ListValueNotifier<FlutterFrame>([]);
 
-  /// Whether we should show the Flutter frames chart.
-  ValueListenable<bool> get showFlutterFramesChart => _showFlutterFramesChart;
-  final _showFlutterFramesChart = ValueNotifier<bool>(true);
+  /// Controls the visibility of the Flutter frames chart.
   void toggleShowFlutterFrames(bool value) {
-    _showFlutterFramesChart.value = value;
-    unawaited(setIsActiveFeature(_showFlutterFramesChart.value));
+    preferences.performance.showFlutterFramesChart.value = value;
+    unawaited(setIsActiveFeature(value));
   }
 
   /// Whether flutter frames are currently being recorded.
@@ -93,7 +91,9 @@ class FlutterFramesController extends PerformanceFeatureController {
   @override
   Future<void> setIsActiveFeature(bool value) async {
     final isFlutterApp = serviceManager.connectedApp?.isFlutterAppNow ?? false;
-    value = isFlutterApp && _showFlutterFramesChart.value;
+    final shouldShowFramesChart =
+        preferences.performance.showFlutterFramesChart.value;
+    value = isFlutterApp && shouldShowFramesChart;
     await super.setIsActiveFeature(value);
   }
 

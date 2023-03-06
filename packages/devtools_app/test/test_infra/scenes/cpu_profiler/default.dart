@@ -12,7 +12,7 @@ import 'package:mockito/mockito.dart';
 import 'package:stager/stager.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../test_data/cpu_profile.dart';
+import '../../test_data/cpu_profiler/cpu_profile.dart';
 
 /// To run:
 /// flutter run -t test/test_infra/scenes/cpu_profiler/default.stager_app.dart -d macos

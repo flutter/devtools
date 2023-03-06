@@ -5,6 +5,7 @@
 import 'package:vm_service/vm_service.dart';
 
 import '../../shared/diagnostics/primitives/source_location.dart';
+import '../../shared/primitives/simple_items.dart';
 import '../../shared/primitives/trees.dart';
 import '../../shared/ui/search.dart';
 
@@ -212,8 +213,6 @@ class StackFrameAndSourcePosition {
   String get description {
     const unoptimized = '[Unoptimized] ';
     const none = '<none>';
-    const anonymousClosure = '<anonymous closure>';
-    const closure = '<closure>';
     const asyncBreak = '<async break>';
 
     if (frame.kind == FrameKind.kAsyncSuspensionMarker) {
@@ -224,7 +223,7 @@ class StackFrameAndSourcePosition {
     if (name.startsWith(unoptimized)) {
       name = name.substring(unoptimized.length);
     }
-    name = name.replaceAll(anonymousClosure, closure);
+    name = name.replaceAll(anonymousClosureName, closureName);
     name = name == none ? name : '$name';
     return name;
   }

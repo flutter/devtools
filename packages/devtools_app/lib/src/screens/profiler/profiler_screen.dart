@@ -24,13 +24,11 @@ import '../../shared/utils.dart';
 import 'cpu_profile_controller.dart';
 import 'cpu_profile_model.dart';
 import 'cpu_profiler.dart';
+import 'panes/controls/profiler_controls.dart';
 import 'profiler_screen_controller.dart';
 
 final profilerScreenSearchFieldKey =
     GlobalKey(debugLabel: 'ProfilerScreenSearchFieldKey');
-
-const iosProfilerWorkaround =
-    'https://github.com/flutter/flutter/issues/88466#issuecomment-905830680';
 
 class ProfilerScreen extends Screen {
   ProfilerScreen()
@@ -173,12 +171,12 @@ class _ProfilerScreenBodyState extends State<ProfilerScreenBody>
     );
     final profilerScreen = Column(
       children: [
-        if (!offlineController.offlineMode.value)
-          ProfilerScreenControls(
-            controller: controller,
-            recording: recording,
-            processing: processing,
-          ),
+        ProfilerScreenControls(
+          controller: controller,
+          recording: recording,
+          processing: processing,
+          offline: offlineController.offlineMode.value,
+        ),
         const SizedBox(height: denseRowSpacing),
         Expanded(
           child: OutlineDecoration(
@@ -263,6 +261,7 @@ class ProfilerScreenControls extends StatelessWidget {
     required this.controller,
     required this.recording,
     required this.processing,
+    required this.offline,
   });
 
   final ProfilerScreenController controller;
@@ -271,20 +270,29 @@ class ProfilerScreenControls extends StatelessWidget {
 
   final bool processing;
 
+  final bool offline;
+
   @override
   Widget build(BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        _PrimaryControls(
-          controller: controller,
-          recording: recording,
-        ),
-        const SizedBox(width: defaultSpacing),
-        _SecondaryControls(
-          controller: controller,
-          profilerBusy: recording || processing,
-        ),
+        if (offline)
+          const Padding(
+            padding: EdgeInsets.only(right: defaultSpacing),
+            child: ExitOfflineButton(),
+          )
+        else ...[
+          _PrimaryControls(
+            controller: controller,
+            recording: recording,
+          ),
+          const SizedBox(width: defaultSpacing),
+          _SecondaryControls(
+            controller: controller,
+            profilerBusy: recording || processing,
+          ),
+        ],
       ],
     );
   }

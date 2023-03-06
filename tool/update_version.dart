@@ -56,10 +56,6 @@ Future<void> performTheVersionUpdate({
     writeVersionToChangelog(File('CHANGELOG.md'), newVersion);
   }
 
-  print('Updating index.html to version $newVersion...');
-  writeVersionToIndexHtml(
-      File('packages/devtools_app/web/index.html'), currentVersion, newVersion);
-
   final process = await Process.start('./tool/pub_upgrade.sh', []);
   process.stdout.asBroadcastStream().listen((event) {
     print(utf8.decode(event));
@@ -207,32 +203,6 @@ void writeVersionToChangelog(File changelog, String version) {
     isDevVersion(version) ? '* Dev version\n' : 'TODO: update changelog\n',
     ...lines,
   ].joinWithNewLine());
-}
-
-void writeVersionToIndexHtml(
-  File indexHtml,
-  String oldVersion,
-  String newVersion,
-) {
-  var updatedVersion = false;
-  final lines = indexHtml.readAsLinesSync();
-  final revisedLines = <String>[];
-  for (final line in lines) {
-    if (line.contains(oldVersion)) {
-      final versionStart = line.indexOf(oldVersion);
-      final lineSegmentBefore = line.substring(0, versionStart);
-      final lineSegmentAfter = line.substring(versionStart + oldVersion.length);
-      final newLine = '$lineSegmentBefore$newVersion$lineSegmentAfter';
-      revisedLines.add(newLine);
-      updatedVersion = true;
-    } else {
-      revisedLines.add(line);
-    }
-  }
-  if (!updatedVersion) {
-    throw Exception('Unable to update version in index.html');
-  }
-  indexHtml.writeAsStringSync(revisedLines.joinWithNewLine());
 }
 
 String incrementDevVersion(String currentVersion) {

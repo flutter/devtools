@@ -6,16 +6,18 @@ This is draft for future release notes, that are going to land on
 Dart & Flutter DevTools - A Suite of Performance Tools for Dart and Flutter
 
 ## General updates
-TODO: Remove this section if there are not any general updates.
+* Use the default Flutter service worker - [#5331](https://github.com/flutter/devtools/pull/5331)
 
 ## Inspector updates
 TODO: Remove this section if there are not any general updates.
 
 ## Performance updates
-TODO: Remove this section if there are not any general updates.
+* Persist a user's preference for whether the Flutter Frames chart should be shown by default. - [#5339](https://github.com/flutter/devtools/pull/5339)
 
 ## CPU profiler updates
-TODO: Remove this section if there are not any general updates.
+* Add ability to inspect statistics for a CPU profile - [#5340](https://github.com/flutter/devtools/pull/5340)
+* Fix a bug where Native stack frames were missing their name - [#5344](https://github.com/flutter/devtools/pull/5344)
+* Fix an error in total and self time calculations for the bottom up tree - [#5348](https://github.com/flutter/devtools/pull/5348)
 
 ## Memory updates
 TODO: Remove this section if there are not any general updates.
