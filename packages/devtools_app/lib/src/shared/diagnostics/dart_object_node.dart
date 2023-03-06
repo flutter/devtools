@@ -276,13 +276,9 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
   bool get isExpandable {
     final theRef = ref;
     final instanceRef = theRef?.instanceRef;
-    if (theRef is ObjectReferences) {
-      if (instanceRef?.length == 0) return false;
-      return theRef.refNodeType.isRoot ||
-          children.isNotEmpty ||
-          childCount > 0 ||
-          !isPrimitiveInstanceKind(instanceRef?.kind);
-    }
+
+    if (isRootForReferences(ref)) return true;
+
     if (treeInitializeComplete || children.isNotEmpty || childCount > 0) {
       return children.isNotEmpty || childCount > 0;
     }
