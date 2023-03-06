@@ -86,7 +86,7 @@ class FlatTable<T> extends StatefulWidget {
   /// the table will render first instance of the provided column type.
   ///
   /// So, if you have many instances of a concrete table, it is recommended to
-  /// make columns static.
+  /// make columns static and share between table instances.
   final List<ColumnData<T>> columns;
 
   final List<ColumnGroup>? columnGroups;
