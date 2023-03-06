@@ -11,7 +11,6 @@ import '../globals.dart';
 import '../memory/adapted_heap_data.dart';
 import '../primitives/trees.dart';
 import '../primitives/utils.dart';
-import '../vm_utils.dart';
 import 'diagnostics_node.dart';
 import 'generic_instance_reference.dart';
 import 'helpers.dart';

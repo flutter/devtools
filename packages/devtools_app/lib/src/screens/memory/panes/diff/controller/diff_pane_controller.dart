@@ -19,7 +19,6 @@ import '../../../shared/heap/class_filter.dart';
 import '../../../shared/heap/heap.dart';
 import '../../../shared/heap/model.dart';
 import '../../../shared/primitives/memory_utils.dart';
-import '../widgets/class_filter.dart';
 import 'heap_diff.dart';
 import 'item_controller.dart';
 import 'simple_controllers.dart';
@@ -145,24 +144,24 @@ class DiffPaneController extends DisposableController {
     );
   }
 
-  ClassFilterButton _classFilterButton() => ClassFilterButton(
-        filter: core.classFilter,
-        onChanged: applyFilter,
-        rootPackage: serviceManager.rootInfoNow().package,
-      );
+  late final _classFilterController = ClassFilterController(
+    filter: core.classFilter,
+    onChanged: applyFilter,
+    rootPackage: serviceManager.rootInfoNow().package,
+  );
 
   late final ClassesTableSingleController classesTableSingleController =
       ClassesTableSingleController(
     selection: derived.selectedSingleClassStats,
     heap: () => (core.selectedItem as SnapshotInstanceItem).heap!.data,
     totalHeapSize: () => (core.selectedItem as SnapshotInstanceItem).totalSize!,
-    filterButton: _classFilterButton(),
+    filterController: _classFilterController,
   );
 
   late final ClassesTableDiffController classesTableDiffController =
       ClassesTableDiffController(
     selection: derived.selectedDiffClassStats,
-    classFilterButton: _classFilterButton(),
+    filterController: _classFilterController,
     before: () => (derived.heapClasses.value as DiffHeapClasses).before,
     after: () => (derived.heapClasses.value as DiffHeapClasses).after,
   );

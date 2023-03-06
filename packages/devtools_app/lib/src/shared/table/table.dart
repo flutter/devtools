@@ -83,7 +83,10 @@ class FlatTable<T> extends StatefulWidget {
   /// List of columns to render.
   ///
   /// If different column instances are provided for two instances of the table
-  /// with the same [dataKey], the table will render first instances.
+  /// the table will render first instance of the provided column type.
+  ///
+  /// So, if you have many instances of a concrete table, it is recommended to
+  /// make columns static.
   final List<ColumnData<T>> columns;
 
   final List<ColumnGroup>? columnGroups;

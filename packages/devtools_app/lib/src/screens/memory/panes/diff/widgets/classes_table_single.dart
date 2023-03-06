@@ -17,6 +17,7 @@ import '../../../shared/heap/heap.dart';
 import '../../../shared/primitives/simple_elements.dart';
 import '../../../shared/shared_memory_widgets.dart';
 import '../controller/simple_controllers.dart';
+import 'class_filter.dart';
 import 'instances.dart';
 
 class _ClassNameColumn extends ColumnData<SingleClassStats>
@@ -71,7 +72,7 @@ class _ClassNameColumn extends ColumnData<SingleClassStats>
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Expanded(child: defaultHeaderRenderer()),
-        controller.filterButton,
+        ClassFilterButton(controller.filterController),
       ],
     );
   }

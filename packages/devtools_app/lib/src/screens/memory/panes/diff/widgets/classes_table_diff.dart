@@ -19,6 +19,7 @@ import '../../../shared/primitives/simple_elements.dart';
 import '../../../shared/shared_memory_widgets.dart';
 import '../controller/heap_diff.dart';
 import '../controller/simple_controllers.dart';
+import 'class_filter.dart';
 import 'instances.dart';
 
 enum _DataPart {
@@ -79,7 +80,7 @@ class DiffClassNameColumn extends ColumnData<DiffClassStats>
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Expanded(child: defaultHeaderRenderer()),
-        controller.classFilterButton,
+        ClassFilterButton(controller.filterController),
       ],
     );
   }
