@@ -4,14 +4,9 @@
 
 import 'package:flutter/material.dart';
 
-import '../../shared/globals.dart';
 import '../../shared/profiler_utils.dart';
-import '../../shared/routing.dart';
 import '../../shared/table/table.dart';
 import '../../shared/table/table_data.dart';
-import '../debugger/codeview_controller.dart';
-import '../debugger/debugger_screen.dart';
-import '../vm_developer/vm_developer_common_widgets.dart';
 import 'cpu_profile_model.dart';
 
 class SelfTimeColumn extends TimeAndPercentageColumn<CpuStackFrame> {

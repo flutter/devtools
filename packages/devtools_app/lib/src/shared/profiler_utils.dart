@@ -2,13 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../devtools_app.dart';
 import '../screens/vm_developer/vm_developer_common_widgets.dart';
-import 'primitives/trees.dart';
-import 'primitives/utils.dart';
 import 'ui/colors.dart';
 
 mixin ProfilableDataMixin<T extends TreeNode<T>> on TreeNode<T> {
