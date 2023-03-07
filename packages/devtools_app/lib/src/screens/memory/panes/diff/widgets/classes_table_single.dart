@@ -182,8 +182,6 @@ class _ClassesTableSingleColumns {
   ];
 }
 
-typedef HeapSizeObtainer = int Function();
-
 class ClassesTableSingle extends StatelessWidget {
   const ClassesTableSingle({
     super.key,

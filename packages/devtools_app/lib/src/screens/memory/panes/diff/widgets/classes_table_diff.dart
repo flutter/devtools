@@ -302,11 +302,17 @@ class _SizeGroupTitle extends StatelessWidget {
 }
 
 class ClassesTableDiff extends StatelessWidget {
-  const ClassesTableDiff({
+  ClassesTableDiff({
     Key? key,
     required this.classes,
     required this.controller,
-  }) : super(key: key);
+  }) : super(key: key) {
+    _columns = Map.fromIterable(
+      SizeType.values,
+      key: (sizeType) => sizeType,
+      value: (sizeType) => ClassesTableDiffColumns(sizeType, controller),
+    );
+  }
 
   final List<DiffClassStats> classes;
   final ClassesTableDiffController controller;
@@ -329,7 +335,7 @@ class ClassesTableDiff extends StatelessWidget {
     ];
   }
 
-  static final _columns = <SizeType, ClassesTableDiffColumns>{};
+  static late final Map<SizeType, ClassesTableDiffColumns> _columns;
 
   @override
   Widget build(BuildContext context) {
@@ -340,10 +346,7 @@ class ClassesTableDiff extends StatelessWidget {
         // no matter what the data passed to it is.
         const dataKey = 'ClassesTableDiff';
 
-        final columns = _columns.putIfAbsent(
-          sizeType,
-          () => ClassesTableDiffColumns(sizeType, controller),
-        );
+        final columns = _columns[sizeType]!;
 
         return FlatTable<DiffClassStats>(
           columns: columns.columnList,

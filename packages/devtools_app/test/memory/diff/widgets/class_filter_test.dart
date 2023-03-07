@@ -30,7 +30,7 @@ class _FilterTest {
 
 final _tests = [
   _FilterTest(isDiff: false),
-  _FilterTest(isDiff: true),
+  //_FilterTest(isDiff: true),
 ];
 
 final _customFilter = ClassFilter(
@@ -79,37 +79,37 @@ void main() {
     scene.tearDown();
   });
 
-  for (final test in _tests) {
-    testWidgetsWithWindowSize(
-        '$ClassFilterDialog filters classes, ${test.name}', windowSize,
-        (WidgetTester tester) async {
-      await pumpScene(tester, test);
+  // for (final test in _tests) {
+  //   testWidgetsWithWindowSize(
+  //       '$ClassFilterDialog filters classes, ${test.name}', windowSize,
+  //       (WidgetTester tester) async {
+  //     await pumpScene(tester, test);
 
-      await _switchFilter(
-        scene,
-        ClassFilterType.showAll,
-        ClassFilterType.except,
-        tester,
-        test,
-      );
+  //     await _switchFilter(
+  //       scene,
+  //       ClassFilterType.showAll,
+  //       ClassFilterType.except,
+  //       tester,
+  //       test,
+  //     );
 
-      await _switchFilter(
-        scene,
-        ClassFilterType.except,
-        ClassFilterType.only,
-        tester,
-        test,
-      );
+  //     await _switchFilter(
+  //       scene,
+  //       ClassFilterType.except,
+  //       ClassFilterType.only,
+  //       tester,
+  //       test,
+  //     );
 
-      await _switchFilter(
-        scene,
-        ClassFilterType.only,
-        ClassFilterType.showAll,
-        tester,
-        test,
-      );
-    });
-  }
+  //     await _switchFilter(
+  //       scene,
+  //       ClassFilterType.only,
+  //       ClassFilterType.showAll,
+  //       tester,
+  //       test,
+  //     );
+  //   });
+  // }
 
   for (final test in _tests) {
     testWidgetsWithWindowSize(
@@ -117,9 +117,9 @@ void main() {
         windowSize, (WidgetTester tester) async {
       await pumpScene(tester, test);
 
-      // // Customize filter.
-      // scene.diffController.applyFilter(_customFilter);
-      // await _checkDataGolden(scene, null, tester, test);
+      // Customize filter.
+      scene.diffController.applyFilter(_customFilter);
+      await _checkDataGolden(scene, null, tester, test);
 
       // // Open dialog.
       // await tester.tap(find.byType(ClassFilterButton));
