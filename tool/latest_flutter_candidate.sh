@@ -7,8 +7,8 @@
 # Any subsequent commands failure will cause this script to exit immediately
 set -e
 
-LATEST_FLUTTER_CANDIDATE=$(git ls-remote --heads --sort='-v:refname' https://flutter.googlesource.com/mirrors/flutter/ \
-  | grep "refs/heads/flutter-.*-candidate" \
+LATEST_FLUTTER_CANDIDATE=$(git ls-remote --tags --sort='-v:refname' https://flutter.googlesource.com/mirrors/flutter/ \
+  | grep "refs/tags/flutter-.*-candidate" \
   | cut -f2 \
   | sort --version-sort \
   | tail -n1 \
