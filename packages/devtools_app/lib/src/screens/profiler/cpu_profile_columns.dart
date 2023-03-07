@@ -5,6 +5,7 @@
 import 'package:flutter/material.dart';
 
 import '../../shared/globals.dart';
+import '../../shared/profiler_utils.dart';
 import '../../shared/routing.dart';
 import '../../shared/table/table.dart';
 import '../../shared/table/table_data.dart';
@@ -45,18 +46,8 @@ class MethodAndSourceColumn extends TreeColumnData<CpuStackFrame>
     implements ColumnRenderer<CpuStackFrame> {
   MethodAndSourceColumn() : super('Method');
 
-  static const _separator = ' - ';
-
   @override
   String getValue(CpuStackFrame dataObject) => dataObject.name;
-
-  @override
-  String getDisplayValue(CpuStackFrame dataObject) {
-    if (dataObject.packageUriWithSourceLine.isNotEmpty) {
-      return '${dataObject.name}$_separator${_sourceDisplay(dataObject)}';
-    }
-    return dataObject.name;
-  }
 
   @override
   bool get supportsSorting => true;
@@ -71,65 +62,11 @@ class MethodAndSourceColumn extends TreeColumnData<CpuStackFrame>
     bool isRowSelected = false,
     VoidCallback? onPressed,
   }) {
-    final sourceTextSpans = <TextSpan>[];
-    if (data.packageUriWithSourceLine.isNotEmpty) {
-      sourceTextSpans.add(const TextSpan(text: _separator));
-
-      final script = scriptManager.scriptRefForUri(data.packageUri);
-      final showSourceAsLink = script != null;
-      if (showSourceAsLink) {
-        sourceTextSpans.add(
-          VmServiceObjectLink(
-            object: script,
-            textBuilder: (_) => _sourceDisplay(data),
-            isSelected: isRowSelected,
-            onTap: (e) {
-              DevToolsRouterDelegate.of(context).navigate(
-                DebuggerScreen.id,
-                const {},
-                CodeViewSourceLocationNavigationState(
-                  script: script,
-                  line: data.sourceLine!,
-                ),
-              );
-            },
-          ).buildTextSpan(context),
-        );
-      } else {
-        sourceTextSpans.add(
-          TextSpan(
-            text: _sourceDisplay(data),
-            style: contentTextStyle(
-              context,
-              data,
-              isSelected: isRowSelected,
-            ),
-          ),
-        );
-      }
-    }
-    return Row(
-      children: [
-        RichText(
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          text: TextSpan(
-            text: data.name,
-            style: contentTextStyle(
-              context,
-              data,
-              isSelected: isRowSelected,
-            ),
-            children: sourceTextSpans,
-          ),
-        ),
-        // Include this [Spacer] so that the clickable [VmServiceObjectLink]
-        // does not extend all the way to the end of the row.
-        const Spacer(),
-      ],
+    return MethodAndSourceDisplay(
+      methodName: data.name,
+      packageUri: data.packageUri,
+      sourceLine: data.sourceLine,
+      isSelected: isRowSelected,
     );
   }
-
-  String _sourceDisplay(CpuStackFrame data) =>
-      '(${data.packageUriWithSourceLine})';
 }

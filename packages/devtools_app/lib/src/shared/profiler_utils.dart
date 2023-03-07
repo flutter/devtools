@@ -3,9 +3,13 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 
+import '../../devtools_app.dart';
+import '../screens/vm_developer/vm_developer_common_widgets.dart';
 import 'primitives/trees.dart';
 import 'primitives/utils.dart';
+import 'ui/colors.dart';
 
 mixin ProfilableDataMixin<T extends TreeNode<T>> on TreeNode<T> {
   ProfileMetaData get profileMetaData;
@@ -240,3 +244,87 @@ class BottomUpTransformer<T extends ProfilableDataMixin<T>> {
     }
   }
 }
+
+class MethodAndSourceDisplay extends StatelessWidget {
+  const MethodAndSourceDisplay({
+    required this.methodName,
+    required this.packageUri,
+    this.sourceLine,
+    required this.isSelected,
+    super.key,
+  });
+
+  static const separator = ' - ';
+
+  final String methodName;
+
+  final String packageUri;
+
+  final int? sourceLine;
+
+  final bool isSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    final textColor = isSelected ? defaultSelectionForegroundColor : null;
+    var fontStyle = Theme.of(context).fixedFontStyle;
+    fontStyle =
+        textColor == null ? fontStyle : fontStyle.copyWith(color: textColor);
+
+    final sourceTextSpans = <TextSpan>[];
+    final packageUriWithSourceLine = uriWithSourceLine(packageUri, sourceLine);
+
+    if (packageUriWithSourceLine.isNotEmpty) {
+      sourceTextSpans.add(const TextSpan(text: separator));
+
+      final sourceDisplay = '($packageUriWithSourceLine)';
+      final script = scriptManager.scriptRefForUri(packageUri);
+      final showSourceAsLink = script != null;
+      if (showSourceAsLink) {
+        sourceTextSpans.add(
+          VmServiceObjectLink(
+            object: script,
+            textBuilder: (_) => sourceDisplay,
+            isSelected: isSelected,
+            onTap: (e) {
+              DevToolsRouterDelegate.of(context).navigate(
+                DebuggerScreen.id,
+                const {},
+                CodeViewSourceLocationNavigationState(
+                  script: script,
+                  line: sourceLine!,
+                ),
+              );
+            },
+          ).buildTextSpan(context),
+        );
+      } else {
+        sourceTextSpans.add(
+          TextSpan(
+            text: sourceDisplay,
+            style: fontStyle,
+          ),
+        );
+      }
+    }
+    return Row(
+      children: [
+        RichText(
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          text: TextSpan(
+            text: methodName,
+            style: fontStyle,
+            children: sourceTextSpans,
+          ),
+        ),
+        // Include this [Spacer] so that the clickable [VmServiceObjectLink]
+        // does not extend all the way to the end of the row.
+        const Spacer(),
+      ],
+    );
+  }
+}
+
+String uriWithSourceLine(String uri, int? sourceLine) =>
+    '$uri${sourceLine != null ? ':$sourceLine' : ''}';
