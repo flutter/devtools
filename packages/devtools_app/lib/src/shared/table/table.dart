@@ -212,6 +212,7 @@ class FlatTableState<T> extends State<FlatTable<T>> with AutoDisposeMixin {
         columnGroups: widget.columnGroups,
         includeColumnGroupHeaders: widget.includeColumnGroupHeaders,
         pinBehavior: widget.pinBehavior,
+        sizeToFit: widget.sizeToFit,
       );
     }
 
@@ -256,7 +257,7 @@ class FlatTableState<T> extends State<FlatTable<T>> with AutoDisposeMixin {
     if (widget.sizeToFit || tableController.columnWidths == null) {
       return LayoutBuilder(
         builder: (context, constraints) => _buildTable(
-          tableController.computeColumnWidthsForManyWideColumns(
+          tableController.computeColumnWidthsSizeToFit(
             constraints.maxWidth,
           ),
         ),

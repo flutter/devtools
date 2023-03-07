@@ -32,12 +32,17 @@ class FlatTableController<T> extends TableControllerBase<T> {
     super.columnGroups,
     super.includeColumnGroupHeaders,
     this.pinBehavior = FlatTablePinBehavior.none,
+    this.sizeToFit = true,
   });
 
   /// Determines how elements that request to be pinned are displayed.
   ///
   /// Defaults to [FlatTablePinBehavior.none], which disables pinnning.
   FlatTablePinBehavior pinBehavior;
+
+  /// Whether the columns for this table should be sized so that the entire
+  /// table fits in view (e.g. so that there is no horizontal scrolling).
+  final bool sizeToFit;
 
   /// The unmodified, original data for the active data set [_tableData.value].
   ///
@@ -95,9 +100,8 @@ class FlatTableController<T> extends TableControllerBase<T> {
       data = dataCopy;
     }
 
-    final wideColumnCount = columns.where((c) => c.fixedWidthPx == null).length;
-    if (wideColumnCount <= 1) {
-      columnWidths = computeColumnWidthsForSingleWideColumn(data);
+    if (!sizeToFit) {
+      columnWidths = computeColumnWidthsSizeToContent(data);
     }
     _tableData.value = TableData<T>(
       data: data,

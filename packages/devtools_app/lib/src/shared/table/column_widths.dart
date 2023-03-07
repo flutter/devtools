@@ -20,7 +20,7 @@ const columnGroupSpacingWithPadding = columnGroupSpacing + 2 * defaultSpacing;
 const columnSpacing = defaultSpacing;
 
 extension FlatColumnWidthExtension<T> on FlatTableController<T> {
-  List<double> computeColumnWidthsForSingleWideColumn(List<T> data) {
+  List<double> computeColumnWidthsSizeToContent(List<T> data) {
     final widths = <double>[];
     for (var column in columns) {
       double width;
@@ -53,7 +53,7 @@ extension FlatColumnWidthExtension<T> on FlatTableController<T> {
     return widths;
   }
 
-  List<double> computeColumnWidthsForManyWideColumns(double maxWidth) {
+  List<double> computeColumnWidthsSizeToFit(double maxWidth) {
     // Subtract width from outer padding around table.
     maxWidth -= 2 * defaultSpacing;
     final numColumnGroupSpacers = columnGroups?.numSpacers ?? 0;
