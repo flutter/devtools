@@ -513,7 +513,8 @@ void main() {
       {
         final FlatTableState<TestData> state =
             tester.state(find.byWidget(table));
-        final columnWidths = state.tableController.computeColumnWidthsSizeToFit(200.0);
+        final columnWidths =
+            state.tableController.computeColumnWidthsSizeToFit(200.0);
         expect(columnWidths.length, equals(3));
         expect(columnWidths[0], equals(300.0)); // Fixed width column.
         expect(columnWidths[1], equals(400.0)); // Fixed width column.
