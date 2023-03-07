@@ -76,6 +76,7 @@ class FlatTable<T> extends StatefulWidget {
     this.activeSearchMatchNotifier,
     this.preserveVerticalScrollPosition = false,
     this.includeColumnGroupHeaders = true,
+    this.sizeToFit = true,
     ValueNotifier<T?>? selectionNotifier,
   })  : selectionNotifier = selectionNotifier ?? ValueNotifier<T?>(null),
         super(key: key);
@@ -83,6 +84,10 @@ class FlatTable<T> extends StatefulWidget {
   final List<ColumnData<T>> columns;
 
   final List<ColumnGroup>? columnGroups;
+
+  /// Whether the columns for this table should be sized so that the entire
+  /// table fits in view (e.g. so that there is no horizontal scrolling).
+  final bool sizeToFit;
 
   /// Determines if the headers for column groups should be rendered.
   ///
@@ -248,7 +253,7 @@ class FlatTableState<T> extends State<FlatTable<T>> with AutoDisposeMixin {
           rowItemExtent: defaultRowHeight,
           preserveVerticalScrollPosition: widget.preserveVerticalScrollPosition,
         );
-    if (tableController.columnWidths == null) {
+    if (widget.sizeToFit || tableController.columnWidths == null) {
       return LayoutBuilder(
         builder: (context, constraints) => _buildTable(
           tableController.computeColumnWidthsForManyWideColumns(
