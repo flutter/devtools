@@ -71,10 +71,9 @@ void main() {
     });
 
     testWidgets('displays with simple content', (WidgetTester tester) async {
-      final simpleData = [TestData('empty', 0)];
       final table = FlatTable<TestData>(
         columns: [flatNameColumn],
-        data: simpleData,
+        data: [TestData('empty', 0)],
         dataKey: 'test-data',
         keyFactory: (d) => Key(d.name),
         defaultSortColumn: flatNameColumn,
