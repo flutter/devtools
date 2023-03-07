@@ -45,6 +45,16 @@ class MethodAndSourceColumn extends TreeColumnData<CpuStackFrame>
   String getValue(CpuStackFrame dataObject) => dataObject.name;
 
   @override
+  String getDisplayValue(CpuStackFrame dataObject) {
+    if (dataObject.packageUriWithSourceLine.isNotEmpty) {
+      return '${dataObject.name}'
+          '${MethodAndSourceDisplay.separator}'
+          '(${dataObject.packageUriWithSourceLine})';
+    }
+    return dataObject.name;
+  }
+
+  @override
   bool get supportsSorting => true;
 
   @override
