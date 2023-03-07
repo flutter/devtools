@@ -108,7 +108,7 @@ class InspectorTreeController extends Object
   InspectorTreeController({this.gaId}) {
     ga.select(
       gac.inspector,
-      'InspectorTreeControllerInitialized',
+      gac.inspectorTreeControllerInitialized,
       nonInteraction: true,
       screenMetricsProvider: () => InspectorScreenMetrics(
         inspectorTreeControllerId: gaId,
@@ -169,7 +169,7 @@ class InspectorTreeController extends Object
 
       ga.select(
         gac.inspector,
-        'InspectorTreeControllerRootChange',
+        gac.inspectorTreeControllerRootChange,
         nonInteraction: true,
         screenMetricsProvider: () => InspectorScreenMetrics(
           inspectorTreeControllerId: gaId,

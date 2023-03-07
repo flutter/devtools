@@ -583,7 +583,7 @@ List<DevToolsScreen> get defaultScreens {
       InspectorScreen(),
       createController: (_) => InspectorController(
         inspectorTree: InspectorTreeController(
-          gaId: InspectorScreenMetrics.inspectorTreeGaId,
+          gaId: InspectorScreenMetrics.summaryTreeGaId,
         ),
         detailsTree: InspectorTreeController(
           gaId: InspectorScreenMetrics.detailsTreeGaId,

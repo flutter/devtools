@@ -47,7 +47,7 @@ class InspectorScreenMetrics extends ScreenAnalyticsMetrics {
     required this.inspectorTreeControllerId,
   });
 
-  static const String inspectorTreeGaId = 'inspectorTree';
+  static const String summaryTreeGaId = 'summaryTree';
   static const String detailsTreeGaId = 'detailsTree';
 
   /// The number of times the root has been set, since the
