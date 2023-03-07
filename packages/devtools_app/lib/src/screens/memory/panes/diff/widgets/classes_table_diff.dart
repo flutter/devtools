@@ -335,7 +335,7 @@ class ClassesTableDiff extends StatelessWidget {
     ];
   }
 
-  static late final Map<SizeType, ClassesTableDiffColumns> _columns;
+  late final Map<SizeType, ClassesTableDiffColumns> _columns;
 
   @override
   Widget build(BuildContext context) {

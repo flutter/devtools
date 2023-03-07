@@ -30,7 +30,7 @@ class _FilterTest {
 
 final _tests = [
   _FilterTest(isDiff: false),
-  //_FilterTest(isDiff: true),
+  _FilterTest(isDiff: true),
 ];
 
 final _customFilter = ClassFilter(
@@ -121,19 +121,19 @@ void main() {
       scene.diffController.applyFilter(_customFilter);
       await _checkDataGolden(scene, null, tester, test);
 
-      // // Open dialog.
-      // await tester.tap(find.byType(ClassFilterButton));
-      // await _checkFilterGolden(null, tester);
+      // Open dialog.
+      await tester.tap(find.byType(ClassFilterButton));
+      await _checkFilterGolden(null, tester);
 
-      // // Reset to default.
-      // await tester.tap(find.text('Reset to default'));
-      // await tester.pumpAndSettle();
-      // await tester.tap(find.text('APPLY'));
-      // await tester.pumpAndSettle();
+      // Reset to default.
+      await tester.tap(find.text('Reset to default'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('APPLY'));
+      await tester.pumpAndSettle();
 
-      // final actualFilter = scene.diffController.core.classFilter.value;
-      // expect(actualFilter.filterType, equals(ClassFilterType.except));
-      // expect(actualFilter.except, equals(ClassFilter.defaultExceptString));
+      final actualFilter = scene.diffController.core.classFilter.value;
+      expect(actualFilter.filterType, equals(ClassFilterType.except));
+      expect(actualFilter.except, equals(ClassFilter.defaultExceptString));
     });
   }
 }
@@ -183,7 +183,11 @@ Future<void> _checkDataGolden(
   _FilterTest test,
 ) async {
   await tester.pumpAndSettle();
-  expect(scene.diffController.core.classFilter.value.filterType, type);
+
+  final currentFilterType =
+      scene.diffController.core.classFilter.value.filterType;
+  expect(currentFilterType, type ?? _customFilter.filterType);
+
   await expectLater(
     find.byType(SnapshotInstanceItemPane),
     matchesDevToolsGolden(test.snapshotGolden(type)),
