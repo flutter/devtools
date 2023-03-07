@@ -119,6 +119,10 @@ const programExplorer = 'programExplorer';
 const objectStore = 'objectStore';
 const classHierarchy = 'classHierarchy';
 
+// Network Events:
+const inspectorTreeControllerInitialized = 'InspectorTreeControllerInitialized';
+const inspectorTreeControllerRootChange = 'InspectorTreeControllerRootChange';
+
 // Common actions shared across screens.
 // These actions will be tracked per screen, so they will still be
 // distinguishable from one screen to the other.
