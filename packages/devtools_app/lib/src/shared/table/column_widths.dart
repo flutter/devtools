@@ -20,7 +20,40 @@ const columnGroupSpacingWithPadding = columnGroupSpacing + 2 * defaultSpacing;
 const columnSpacing = defaultSpacing;
 
 extension FlatColumnWidthExtension<T> on FlatTableController<T> {
-  List<double> computeColumnWidths(double maxWidth) {
+  List<double> computeColumnWidthsForSingleWideColumn(List<T> data) {
+    final widths = <double>[];
+    for (var column in columns) {
+      double width;
+      if (column.fixedWidthPx != null) {
+        width = column.fixedWidthPx!;
+      } else {
+        // Note: this is assuming that we're always using a monospace font in
+        // our tree tables. This will almost certainly cause overflows if we
+        // try to use non-monospace fonts.
+        //
+        // `characterWidth` was determined through trial and error to roughly
+        // approximate the width of a single character.
+        final characterWidth = assumedMonospaceCharacterWidth;
+        double longestWidth = 0;
+        for (var node in data) {
+          final width = column.getDisplayValue(node).length * characterWidth;
+          if (width > longestWidth) {
+            longestWidth = width;
+          }
+        }
+        // Ensure we account for the [minWidthPx] value and that we always
+        // display the full column title.
+        width = max(
+          max(longestWidth, column.minWidthPx ?? 0),
+          column.title.length * characterWidth,
+        );
+      }
+      widths.add(width);
+    }
+    return widths;
+  }
+
+  List<double> computeColumnWidthsForManyWideColumns(double maxWidth) {
     // Subtract width from outer padding around table.
     maxWidth -= 2 * defaultSpacing;
     final numColumnGroupSpacers = columnGroups?.numSpacers ?? 0;

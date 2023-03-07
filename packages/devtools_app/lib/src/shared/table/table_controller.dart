@@ -94,6 +94,11 @@ class FlatTableController<T> extends TableControllerBase<T> {
       }
       data = dataCopy;
     }
+
+    final wideColumnCount = columns.where((c) => c.fixedWidthPx == null).length;
+    if (wideColumnCount <= 1) {
+      columnWidths = computeColumnWidthsForSingleWideColumn(data);
+    }
     _tableData.value = TableData<T>(
       data: data,
       key: dataKey ?? _tableData.value.key,
@@ -120,8 +125,6 @@ class TreeTableController<T extends TreeNode<T>>
   final TreeColumnData<T> treeColumn;
 
   final bool autoExpandRoots;
-
-  late List<double> columnWidths;
 
   late List<T> dataRoots;
 
@@ -220,6 +223,8 @@ abstract class TableControllerBase<T> extends DisposableController {
   final List<ColumnData<T>> columns;
 
   final List<ColumnGroup>? columnGroups;
+
+  List<double>? columnWidths;
 
   /// Determines if the headers for column groups should be rendered.
   ///

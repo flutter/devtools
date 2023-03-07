@@ -239,11 +239,7 @@ class FlatTableState<T> extends State<FlatTable<T>> with AutoDisposeMixin {
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final columnWidths =
-            tableController.computeColumnWidths(constraints.maxWidth);
-        return _Table<T>(
+    Widget _buildTable(List<double> columnWidths) => _Table<T>(
           tableController: tableController,
           columnWidths: columnWidths,
           autoScrollContent: widget.autoScrollContent,
@@ -252,8 +248,16 @@ class FlatTableState<T> extends State<FlatTable<T>> with AutoDisposeMixin {
           rowItemExtent: defaultRowHeight,
           preserveVerticalScrollPosition: widget.preserveVerticalScrollPosition,
         );
-      },
-    );
+    if (tableController.columnWidths == null) {
+      return LayoutBuilder(
+        builder: (context, constraints) => _buildTable(
+          tableController.computeColumnWidthsForManyWideColumns(
+            constraints.maxWidth,
+          ),
+        ),
+      );
+    }
+    return _buildTable(tableController.columnWidths!);
   }
 
   Widget _buildRow({
@@ -598,7 +602,7 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
   Widget build(BuildContext context) {
     return _Table<T>(
       tableController: tableController,
-      columnWidths: tableController.columnWidths,
+      columnWidths: tableController.columnWidths!,
       rowBuilder: _buildRow,
       focusNode: _focusNode,
       handleKeyEvent: _handleKeyEvent,
