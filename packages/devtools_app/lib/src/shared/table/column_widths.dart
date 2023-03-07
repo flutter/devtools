@@ -20,13 +20,17 @@ const columnGroupSpacingWithPadding = columnGroupSpacing + 2 * defaultSpacing;
 const columnSpacing = defaultSpacing;
 
 extension FlatColumnWidthExtension<T> on FlatTableController<T> {
+  /// Calculates [FlatTable] column widths when the columns should be sized as
+  /// either 1) the [fixedWidthPx] specified by the column, or 2) the size of
+  /// the column's widest content.
+  /// 
+  /// If the sum of the column widths exceeds the available screen space, the
+  /// table will scroll horizontally.
   List<double> computeColumnWidthsSizeToContent(List<T> data) {
     final widths = <double>[];
     for (var column in columns) {
-      double width;
-      if (column.fixedWidthPx != null) {
-        width = column.fixedWidthPx!;
-      } else {
+      var width = column.fixedWidthPx;
+      if (width == null) {
         // Note: this is assuming that we're always using a monospace font in
         // our tree tables. This will almost certainly cause overflows if we
         // try to use non-monospace fonts.
@@ -53,6 +57,11 @@ extension FlatColumnWidthExtension<T> on FlatTableController<T> {
     return widths;
   }
 
+  /// Calculates [FlatTable] column widths such that they will take up the
+  /// entire width available [maxWidth].
+  /// 
+  /// When this calculation method is used, the table will not scroll
+  /// horizontally since there will not be any content outside of the viewport.
   List<double> computeColumnWidthsSizeToFit(double maxWidth) {
     // Subtract width from outer padding around table.
     maxWidth -= 2 * defaultSpacing;
