@@ -18,6 +18,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
 
+import 'simple_items.dart';
+
 bool isPrivate(String member) => member.startsWith('_');
 
 /// Public properties first, then sort alphabetically
@@ -292,7 +294,7 @@ String pluralize(String word, int count, {String? plural}) =>
 /// See (https://github.com/dart-lang/sdk/issues/36999).
 String getSimpleStackFrameName(String? name) {
   name ??= '';
-  final newName = name.replaceAll('<anonymous closure>', '<closure>');
+  final newName = name.replaceAll(anonymousClosureName, closureName);
 
   // If the class name contains a space, then it is not a valid Dart name. We
   // throw out simplified names with spaces to prevent simplifying C++ class

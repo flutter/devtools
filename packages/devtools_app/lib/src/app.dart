@@ -47,11 +47,11 @@ import 'shared/console/primitives/simple_items.dart';
 import 'shared/dialogs.dart';
 import 'shared/globals.dart';
 import 'shared/log_storage.dart';
+import 'shared/offline_screen.dart';
 import 'shared/primitives/auto_dispose.dart';
 import 'shared/primitives/utils.dart';
 import 'shared/routing.dart';
 import 'shared/screen.dart';
-import 'shared/snapshot_screen.dart';
 import 'shared/theme.dart';
 import 'shared/ui/hover.dart';
 
@@ -278,13 +278,13 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
       for (final screen in widget.screens)
         screen.screen.screenId: _buildTabbedPage,
       snapshotPageId: (_, __, args, ___) {
-        final snapshotArgs = SnapshotArguments.fromArgs(args);
+        final snapshotArgs = OfflineDataArguments.fromArgs(args);
         return DevToolsScaffold.withChild(
           key: UniqueKey(),
           ideTheme: ideTheme,
           child: MultiProvider(
             providers: _providedControllers(offline: true),
-            child: SnapshotScreenBody(snapshotArgs, _screens),
+            child: OfflineScreenBody(snapshotArgs, _screens),
           ),
         );
       },

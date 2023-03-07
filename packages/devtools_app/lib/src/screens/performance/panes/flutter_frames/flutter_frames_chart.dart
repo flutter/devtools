@@ -49,7 +49,7 @@ class FlutterFramesChart extends StatelessWidget {
       secondListenable: framesController.displayRefreshRate,
       builder: (context, frames, displayRefreshRate, child) {
         return ValueListenableBuilder<bool>(
-          valueListenable: framesController.showFlutterFramesChart,
+          valueListenable: preferences.performance.showFlutterFramesChart,
           builder: (context, show, _) {
             return _FlutterFramesChart(
               framesController: framesController,

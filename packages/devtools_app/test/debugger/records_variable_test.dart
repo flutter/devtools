@@ -82,8 +82,6 @@ void main() {
         manager.service!.getObject(
           isolateId,
           objectId,
-          offset: 0,
-          count: 3,
         ),
       ).thenAnswer((_) async {
         return instance;
