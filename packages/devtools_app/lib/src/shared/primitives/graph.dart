@@ -69,13 +69,13 @@ class GraphNode {
   }
 
   /// Create outgoing edge from [this] node to the given node [n].
-  void outgoingEdge(GraphNode n, {int edgeCount = 1}) {
+  void outgoingEdge(GraphNode n, {int edgeWeight = 1}) {
     n.predecessors.add(this);
     final predEdgeCount = n.predecessorEdgeCounts[this] ?? 0;
-    n.predecessorEdgeCounts[this] = predEdgeCount + edgeCount;
+    n.predecessorEdgeCounts[this] = predEdgeCount + edgeWeight;
 
     successors.add(n);
     final succEdgeCount = successorEdgeCounts[n] ?? 0;
-    successorEdgeCounts[n] = succEdgeCount + edgeCount;
+    successorEdgeCounts[n] = succEdgeCount + edgeWeight;
   }
 }

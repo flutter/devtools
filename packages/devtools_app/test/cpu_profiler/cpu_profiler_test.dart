@@ -13,7 +13,6 @@ import 'package:devtools_app/src/screens/profiler/panes/cpu_flame_chart.dart';
 import 'package:devtools_app/src/screens/profiler/panes/method_table/method_table.dart';
 import 'package:devtools_app/src/shared/charts/flame_chart.dart';
 import 'package:devtools_app/src/shared/config_specific/import_export/import_export.dart';
-import 'package:devtools_app/src/shared/feature_flags.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -36,8 +35,6 @@ void main() {
   when(app.isDebugFlutterAppNow).thenReturn(false);
 
   setUp(() async {
-    FeatureFlags.methodTable = true;
-
     setCharacterWidthForTables();
     setGlobal(ServiceConnectionManager, fakeServiceManager);
 

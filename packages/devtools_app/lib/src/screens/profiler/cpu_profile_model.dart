@@ -912,7 +912,7 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
   final String packageUri;
 
   String get packageUriWithSourceLine =>
-      '$packageUri${sourceLine != null ? ':$sourceLine' : ''}';
+      uriWithSourceLine(packageUri, sourceLine);
 
   final int? sourceLine;
 

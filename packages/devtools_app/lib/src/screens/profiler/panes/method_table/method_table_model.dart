@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:collection/collection.dart';
+
 import '../../../../shared/primitives/graph.dart';
 import '../../../../shared/primitives/utils.dart';
 import '../../../../shared/profiler_utils.dart';
@@ -12,13 +14,21 @@ class MethodTableGraphNode extends GraphNode {
   MethodTableGraphNode({
     required this.name,
     required this.packageUri,
+    required this.sourceLine,
+    required int totalCount,
+    required int selfCount,
     required this.profileMetaData,
-  });
+  })  : _totalCount = totalCount,
+        _selfCount = selfCount,
+        _sourceUri = uriWithSourceLine(packageUri, sourceLine);
 
   factory MethodTableGraphNode.fromStackFrame(CpuStackFrame frame) {
     return MethodTableGraphNode(
       name: frame.name,
       packageUri: frame.packageUri,
+      sourceLine: frame.sourceLine,
+      totalCount: frame.inclusiveSampleCount,
+      selfCount: frame.exclusiveSampleCount,
       profileMetaData: frame.profileMetaData,
     );
   }
@@ -27,48 +37,102 @@ class MethodTableGraphNode extends GraphNode {
 
   final String packageUri;
 
+  final int? sourceLine;
+
+  final String _sourceUri;
+
   final ProfileMetaData profileMetaData;
 
-  String get id => '$name-$packageUri';
+  String get id => '$name-$_sourceUri';
 
-  String get display => '$name ($packageUri)';
+  String get display =>
+      '$name${_sourceUri.isNotEmpty ? ' - ($_sourceUri)' : ''}';
 
-  // TODO(kenz): implement the calculation for exclusive and inclusive count.
+  /// The number of cpu samples where this method is on top of the stack.
+  int get selfCount => _selfCount;
+  late int _selfCount;
 
-  /// The number of cpu samples where this frame is on top of the stack.
-  ///
-  /// This count is used to calculate self time.
-  int exclusiveSampleCount = 0;
+  /// The number of cpu samples where this method is anywhere on the stack.
+  int get totalCount => _totalCount;
+  late int _totalCount;
 
-  /// The number of cpu samples where this frame is anywhere on the stack.
-  ///
-  /// This count is used to calculate total time.
-  int inclusiveSampleCount = 0;
+  double get selfTimeRatio =>
+      safeDivide(selfCount, profileMetaData.sampleCount);
 
-  late double totalTimeRatio =
-      safeDivide(inclusiveSampleCount, profileMetaData.sampleCount);
-
-  late Duration totalTime = Duration(
-    microseconds:
-        (totalTimeRatio * profileMetaData.time!.duration.inMicroseconds)
-            .round(),
-  );
-
-  late double selfTimeRatio =
-      safeDivide(exclusiveSampleCount, profileMetaData.sampleCount);
-
-  late Duration selfTime = Duration(
-    microseconds:
-        (selfTimeRatio * profileMetaData.time!.duration.inMicroseconds).round(),
-  );
-
-  double get inclusiveSampleRatio => safeDivide(
-        inclusiveSampleCount,
-        profileMetaData.sampleCount,
+  Duration get selfTime => Duration(
+        microseconds:
+            (selfTimeRatio * profileMetaData.time!.duration.inMicroseconds)
+                .round(),
       );
 
-  double get exclusiveSampleRatio => safeDivide(
-        exclusiveSampleCount,
-        profileMetaData.sampleCount,
+  double get totalTimeRatio =>
+      safeDivide(totalCount, profileMetaData.sampleCount);
+
+  Duration get totalTime => Duration(
+        microseconds:
+            (totalTimeRatio * profileMetaData.time!.duration.inMicroseconds)
+                .round(),
       );
+
+  void merge(MethodTableGraphNode other) {
+    if (!shallowEquals(other)) return;
+    _totalCount += other.totalCount;
+    _selfCount += other.selfCount;
+  }
+
+  bool shallowEquals(other) {
+    return other is MethodTableGraphNode &&
+        other.name == name &&
+        other._sourceUri == _sourceUri;
+  }
+
+  @override
+  String toString() {
+    String generateDisplayFor(
+      Set<GraphNode> nodes, {
+      required double Function(MethodTableGraphNode) percentCallback,
+    }) {
+      return nodes
+          .cast<MethodTableGraphNode>()
+          // Sort in descending order.
+          .sorted((a, b) => percentCallback(b).compareTo(percentCallback(a)))
+          .map(
+            (node) => '${node.display} - ${percent2(percentCallback(node))}',
+          )
+          .join('\n    ');
+    }
+
+    final callers = generateDisplayFor(
+      predecessors,
+      percentCallback: predecessorEdgePercentage,
+    );
+
+    final callees = generateDisplayFor(
+      successors,
+      percentCallback: successorEdgePercentage,
+    );
+
+    return '''
+$display ($totalCount samples)
+  Callers:
+    ${callers.isEmpty ? '[]' : callers}
+  Callees:
+    ${callees.isEmpty ? '[]' : callees}
+''';
+  }
+
+  MethodTableGraphNode copy() {
+    return MethodTableGraphNode(
+      name: name,
+      packageUri: packageUri,
+      sourceLine: sourceLine,
+      totalCount: totalCount,
+      selfCount: selfCount,
+      profileMetaData: profileMetaData,
+    );
+  }
+}
+
+extension MethodTableExtension on CpuStackFrame {
+  String get methodTableId => '$name-$packageUriWithSourceLine';
 }
