@@ -23,7 +23,7 @@ extension FlatColumnWidthExtension<T> on FlatTableController<T> {
   /// Calculates [FlatTable] column widths when the columns should be sized as
   /// either 1) the [fixedWidthPx] specified by the column, or 2) the size of
   /// the column's widest content.
-  /// 
+  ///
   /// If the sum of the column widths exceeds the available screen space, the
   /// table will scroll horizontally.
   List<double> computeColumnWidthsSizeToContent(List<T> data) {
@@ -59,7 +59,7 @@ extension FlatColumnWidthExtension<T> on FlatTableController<T> {
 
   /// Calculates [FlatTable] column widths such that they will take up the
   /// entire width available [maxWidth].
-  /// 
+  ///
   /// When this calculation method is used, the table will not scroll
   /// horizontally since there will not be any content outside of the viewport.
   List<double> computeColumnWidthsSizeToFit(double maxWidth) {
