@@ -8,8 +8,8 @@ import 'dart:io';
 
 import 'package:collection/collection.dart';
 
-import 'io_utils.dart';
-import 'test_app_driver.dart';
+import '_io_utils.dart';
+import '_test_app_driver.dart';
 
 bool _debugTestScript = false;
 
