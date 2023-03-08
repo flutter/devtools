@@ -97,21 +97,22 @@ void main() {
         test,
       );
 
-      // await _switchFilter(
-      //   scene,
-      //   ClassFilterType.except,
-      //   ClassFilterType.only,
-      //   tester,
-      //   test,
-      // );
+      await _switchFilter(
+        scene,
+        ClassFilterType.except,
+        ClassFilterType.only,
+        tester,
+        test,
+      );
 
-      // await _switchFilter(
-      //   scene,
-      //   ClassFilterType.only,
-      //   ClassFilterType.showAll,
-      //   tester,
-      //   test,
-      // );
+      await _switchFilter(
+        scene,
+        ClassFilterType.only,
+        ClassFilterType.showAll,
+        tester,
+        test,
+      );
+
       print(
           '!!! scene: ${identityHashCode(scene)}, test: ${test.name}, controller: ${identityHashCode(scene.diffController)}, end');
     });
