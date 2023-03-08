@@ -5,8 +5,6 @@
 import 'dart:ui' as ui;
 
 import 'package:devtools_app/devtools_app.dart';
-import 'package:devtools_app/src/framework/landing_screen.dart';
-import 'package:devtools_app/src/framework/release_notes/release_notes.dart';
 import 'package:devtools_app/src/shared/primitives/simple_items.dart';
 import 'package:devtools_test/devtools_integration_test.dart';
 import 'package:flutter/material.dart';
