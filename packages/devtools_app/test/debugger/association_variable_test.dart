@@ -65,7 +65,7 @@ void main() {
         ),
         isolateRef,
       );
-      when(manager.service!.getObject(isolateId, objectId, offset: 0, count: 2))
+      when(manager.service!.getObject(isolateId, objectId))
           .thenAnswer((_) async {
         return instance;
       });
@@ -113,7 +113,7 @@ void main() {
         ),
         isolateRef,
       );
-      when(manager.service!.getObject(isolateId, objectId, offset: 0, count: 2))
+      when(manager.service!.getObject(isolateId, objectId))
           .thenAnswer((_) async {
         return instance;
       });
@@ -161,7 +161,7 @@ void main() {
         ),
         isolateRef,
       );
-      when(manager.service!.getObject(isolateId, objectId, offset: 0, count: 2))
+      when(manager.service!.getObject(isolateId, objectId))
           .thenAnswer((_) async {
         return instance;
       });
