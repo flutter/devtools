@@ -278,31 +278,31 @@ void main() {
       expect(stackFrameB.ancestorIds.toList(), ['id_0', 'cpuProfileRoot']);
       expect(
         stackFrameC.ancestorIds.toList(),
-        ['id_1','id_0', 'cpuProfileRoot'],
+        ['id_1', 'id_0', 'cpuProfileRoot'],
       );
       expect(
         stackFrameD.ancestorIds.toList(),
-        ['id_1','id_0', 'cpuProfileRoot'],
+        ['id_1', 'id_0', 'cpuProfileRoot'],
       );
       expect(
         stackFrameE.ancestorIds.toList(),
-        ['id_3', 'id_1','id_0', 'cpuProfileRoot'],
+        ['id_3', 'id_1', 'id_0', 'cpuProfileRoot'],
       );
       expect(
         stackFrameF.ancestorIds.toList(),
-        ['id_4', 'id_3', 'id_1','id_0', 'cpuProfileRoot'],
+        ['id_4', 'id_3', 'id_1', 'id_0', 'cpuProfileRoot'],
       );
       expect(
         stackFrameF2.ancestorIds.toList(),
-        ['id_3', 'id_1','id_0', 'cpuProfileRoot'],
+        ['id_3', 'id_1', 'id_0', 'cpuProfileRoot'],
       );
       expect(
         stackFrameC2.ancestorIds.toList(),
-        ['id_5', 'id_4', 'id_3', 'id_1','id_0', 'cpuProfileRoot'],
+        ['id_5', 'id_4', 'id_3', 'id_1', 'id_0', 'cpuProfileRoot'],
       );
       expect(
         stackFrameC3.ancestorIds.toList(),
-        ['id_6', 'id_3', 'id_1','id_0', 'cpuProfileRoot'],
+        ['id_6', 'id_3', 'id_1', 'id_0', 'cpuProfileRoot'],
       );
     });
 

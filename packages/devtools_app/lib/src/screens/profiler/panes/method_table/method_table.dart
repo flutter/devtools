@@ -97,18 +97,26 @@ class _MethodGraphState extends State<_MethodGraph> with AutoDisposeMixin {
   void initState() {
     super.initState();
 
-    _selectedGraphNode = widget.methodTableController.selectedNode.value;
+    _initGraphNodes();
     addAutoDisposeListener(widget.methodTableController.selectedNode, () {
       setState(() {
-        _selectedGraphNode = widget.methodTableController.selectedNode.value;
-        _callers = _selectedGraphNode!.predecessors
-            .cast<MethodTableGraphNode>()
-            .toList();
-        _callees = _selectedGraphNode!.successors
-            .cast<MethodTableGraphNode>()
-            .toList();
+        _initGraphNodes();
       });
     });
+  }
+
+  void _initGraphNodes() {
+    _selectedGraphNode = widget.methodTableController.selectedNode.value;
+    if (_selectedGraphNode == null) {
+      _callers = <MethodTableGraphNode>[];
+      _callees = <MethodTableGraphNode>[];
+    } else {
+      _callers = _selectedGraphNode!.predecessors
+          .cast<MethodTableGraphNode>()
+          .toList();
+      _callees =
+          _selectedGraphNode!.successors.cast<MethodTableGraphNode>().toList();
+    }
   }
 
   @override
@@ -185,7 +193,7 @@ class _CallersTable extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FlatTable<MethodTableGraphNode>(
-      keyFactory: (node) => ValueKey(node.id),
+      keyFactory: (node) => ValueKey('caller-${node.id}'),
       data: _callers,
       dataKey: 'cpu-profile-method-callers',
       columns: columns,
@@ -221,7 +229,7 @@ class _CalleesTable extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FlatTable<MethodTableGraphNode>(
-      keyFactory: (node) => ValueKey(node.id),
+      keyFactory: (node) => ValueKey('callee-${node.id}'),
       data: _callees,
       dataKey: 'cpu-profile-method-callees',
       columns: _columns,
