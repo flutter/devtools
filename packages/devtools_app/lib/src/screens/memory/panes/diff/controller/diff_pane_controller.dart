@@ -159,7 +159,7 @@ class CoreData {
       _snapshots.value[_selectedSnapshotIndex.value];
 
   /// Full name for the selected class (cross-snapshot).
-  HeapClassName? className_;
+  HeapClassName? className;
 
   /// Selected retaining path (cross-snapshot).
   ClassOnlyHeapPath? path;
@@ -248,8 +248,8 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
 
   /// Updates cross-snapshot class if the argument is not null.
   void _setClassIfNotNull(HeapClassName? theClass) {
-    if (theClass == null || theClass == _core.className_) return;
-    _core.className_ = theClass;
+    if (theClass == null || theClass == _core.className) return;
+    _core.className = theClass;
     _updateValues();
   }
 
@@ -350,7 +350,7 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
     _setSelections();
     _updateClasses(
       classes: classes,
-      className: _core.className_,
+      className: _core.className,
     );
     // Set paths to show.
     final theClass =
@@ -397,7 +397,7 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
 
   /// Set initial selection of class and path, for discoverability of detailed view.
   void _setSelections() {
-    if (_core.className_ != null) return;
+    if (_core.className != null) return;
 
     final classes = heapClasses.value;
     if (classes == null) return;
@@ -431,7 +431,7 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
     } else {
       throw StateError('Unexpected type ${classes.runtimeType}');
     }
-    _core.className_ = theClass.heapClass;
+    _core.className = theClass.heapClass;
 
     // Get path with max retained size.
     final path = theClass.statsByPathEntries.reduce((v, e) {
