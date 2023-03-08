@@ -86,8 +86,6 @@ void main() {
         '$ClassFilterDialog filters classes, ${test.name}', windowSize,
         (WidgetTester tester) async {
       final scene = await pumpScene(tester, test);
-      print(
-          '!!! scene: ${identityHashCode(scene)}, test: ${test.name}, controller: ${identityHashCode(scene.diffController)},start');
 
       await _switchFilter(
         scene,
@@ -112,9 +110,6 @@ void main() {
         tester,
         test,
       );
-
-      print(
-          '!!! scene: ${identityHashCode(scene)}, test: ${test.name}, controller: ${identityHashCode(scene.diffController)}, end');
     });
   }
 
@@ -123,11 +118,8 @@ void main() {
         '$ClassFilterDialog customizes and resets to default, ${test.name}',
         windowSize, (WidgetTester tester) async {
       final scene = await pumpScene(tester, test);
-      print(
-          '!!! scene: ${identityHashCode(scene)}, test: ${test.name}, controller: ${identityHashCode(scene.diffController)},start');
 
       // Customize filter.
-      print('!!! test: setting custom');
       scene.diffController.applyFilter(_customFilter);
       await _checkDataGolden(scene, null, tester, test);
 
@@ -136,20 +128,15 @@ void main() {
       await _checkFilterGolden(null, tester);
 
       // Reset to default.
-      print('!!! test: reset to default');
       await tester.tap(find.text('Reset to default'));
       await tester.pumpAndSettle();
-      print('!!! resetting to default');
       await tester.tap(find.text('APPLY'));
       await tester.pumpAndSettle();
       await tester.pumpAndSettle();
 
       final actualFilter = scene.diffController.core.classFilter.value;
-      print('!!! testing for ${identityHashCode(scene.diffController)}');
       expect(actualFilter.filterType, equals(ClassFilterType.except));
       expect(actualFilter.except, equals(ClassFilter.defaultExceptString));
-      print(
-          '!!! scene: ${identityHashCode(scene)}, test: ${test.name}, controller: ${identityHashCode(scene.diffController)}, end');
     });
   }
 }
@@ -202,7 +189,6 @@ Future<void> _checkDataGolden(
 
   final currentFilterType =
       scene.diffController.core.classFilter.value.filterType;
-  print('!!! 2, testing for ${identityHashCode(scene.diffController)}');
   expect(currentFilterType, type ?? _customFilter.filterType);
 
   await expectLater(
