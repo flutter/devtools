@@ -59,7 +59,7 @@ class DiffSnapshotScene extends Scene {
   String get title => '$DiffSnapshotScene';
 
   void setClassFilterToShowAll() {
-    diffController.applyFilter(
+    diffController.derived.applyFilter(
       ClassFilter(filterType: ClassFilterType.showAll, except: '', only: ''),
     );
   }

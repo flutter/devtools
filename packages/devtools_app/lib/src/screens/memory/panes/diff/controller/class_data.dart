@@ -15,6 +15,8 @@ class RetainingPathController {
   final invert = ValueNotifier<bool>(true);
 }
 
+typedef ApplyFilterCallback = Function(ClassFilter);
+
 class ClassFilterData {
   ClassFilterData({
     required this.filter,
@@ -23,13 +25,12 @@ class ClassFilterData {
   });
 
   final ValueListenable<ClassFilter> filter;
-  final Function(ClassFilter) onChanged;
+  final ApplyFilterCallback onChanged;
   final String? rootPackage;
 }
 
 class ClassesTableSingleData {
   ClassesTableSingleData({
-    required this.selection,
     required this.heap,
     required this.totalHeapSize,
     required this.filterController,
@@ -41,12 +42,11 @@ class ClassesTableSingleData {
   final HeapDataCallback heap;
   final int Function() totalHeapSize;
   final ClassFilterData filterController;
-  final ValueNotifier<SingleClassStats?> selection;
+  final selection = ValueNotifier<SingleClassStats?>(null);
 }
 
 class ClassesTableDiffData {
   ClassesTableDiffData({
-    required this.selection,
     required this.before,
     required this.after,
     required this.filterController,
@@ -60,5 +60,5 @@ class ClassesTableDiffData {
   final HeapDataCallback before;
   final HeapDataCallback after;
   final ClassFilterData filterController;
-  final ValueNotifier<DiffClassStats?> selection;
+  final selection = ValueNotifier<DiffClassStats?>(null);
 }

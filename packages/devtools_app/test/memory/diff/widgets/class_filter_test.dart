@@ -123,7 +123,7 @@ void main() {
       final scene = await pumpScene(tester, test);
 
       // Customize filter.
-      scene.diffController.applyFilter(_customFilter);
+      scene.diffController.derived.applyFilter(_customFilter);
       await _checkDataGolden(scene, null, tester, test);
 
       // Open dialog.
