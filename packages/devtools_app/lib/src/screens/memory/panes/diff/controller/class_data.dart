@@ -15,8 +15,6 @@ class RetainingPathController {
   final invert = ValueNotifier<bool>(true);
 }
 
-typedef ApplyFilterCallback = Function(ClassFilter);
-
 class ClassFilterData {
   ClassFilterData({
     required this.filter,
