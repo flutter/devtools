@@ -86,7 +86,7 @@ class _InstanceColumn extends ColumnData<SingleClassStats>
           fixedWidthPx: scaleByFontFactor(180.0),
           alignment: ColumnAlignment.right,
         ) {
-    print('!!! in _InstanceColumn constructor: ${heap.snapshotName}');
+    print('!!! column ${identityHashCode(this)}, constructor');
   }
 
   final AdaptedHeapData heap;
@@ -106,7 +106,7 @@ class _InstanceColumn extends ColumnData<SingleClassStats>
   }) {
     if (!FeatureFlags.evalAndBrowse) return null;
 
-    print('!!! in _InstanceColumn build: ${heap.snapshotName}');
+    print('!!! column ${identityHashCode(this)}, build');
 
     return InstanceTableCell(
       data.objects,
@@ -172,9 +172,10 @@ class _RetainedSizeColumn extends ColumnData<SingleClassStats> {
 
 class _ClassesTableSingleColumns {
   _ClassesTableSingleColumns(
-      this.totalSize, this.classFilterButton, this.heap) {
-    print('!!! in columns: ${heap.snapshotName}');
-  }
+    this.totalSize,
+    this.classFilterButton,
+    this.heap,
+  );
 
   /// Is needed to calculate percentage.
   final int totalSize;
@@ -201,7 +202,9 @@ class ClassesTableSingle extends StatelessWidget {
     required this.totalSize,
     required this.classFilterButton,
     required this.heap,
-  });
+  }) {
+    print('!!! table ${identityHashCode(this)}, constructor');
+  }
 
   final int totalSize;
 
@@ -221,6 +224,11 @@ class ClassesTableSingle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final instanceColumn = columns.columnList[1];
+    print(
+      '!!! table ${identityHashCode(this)}, build, with instanceColumn ${identityHashCode(instanceColumn)}',
+    );
+
     // We want to preserve the sorting and sort directions for ClassesTableDiff
     // no matter what the data passed to it is.
     const dataKey = 'ClassesTableSingle';
