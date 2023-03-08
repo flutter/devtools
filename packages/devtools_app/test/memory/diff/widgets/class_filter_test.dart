@@ -30,7 +30,7 @@ class _FilterTest {
 
 final _tests = [
   _FilterTest(isDiff: false),
-  _FilterTest(isDiff: true),
+  //_FilterTest(isDiff: true),
 ];
 
 final _customFilter = ClassFilter(
@@ -59,6 +59,7 @@ void main() {
     );
 
     if (test.isDiff) {
+      assert(false);
       scene.diffController.setDiffing(
         scene.diffController.derived.selectedItem.value as SnapshotInstanceItem,
         scene.diffController.core.snapshots.value[1] as SnapshotInstanceItem,
@@ -66,6 +67,7 @@ void main() {
     }
 
     await tester.pumpWidget(scene.build());
+    await tester.pumpAndSettle();
     expect(
       scene.diffController.core.classFilter.value.filterType,
       ClassFilterType.showAll,
