@@ -19,7 +19,7 @@ import '../controller/sampler.dart';
 class InstanceTableCell extends StatelessWidget {
   InstanceTableCell(
     ObjectSet objects,
-    HeapDataObtainer heap,
+    HeapDataCallback heap,
     HeapClassName heapClass, {
     required this.isSelected,
     required this.gaContext,

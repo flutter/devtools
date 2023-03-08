@@ -16,7 +16,7 @@ import '../../../../../shared/utils.dart';
 import '../../../shared/heap/heap.dart';
 import '../../../shared/primitives/simple_elements.dart';
 import '../../../shared/shared_memory_widgets.dart';
-import '../controller/simple_controllers.dart';
+import '../controller/class_data.dart';
 import 'class_filter.dart';
 import 'instances.dart';
 
@@ -32,7 +32,7 @@ class _ClassNameColumn extends ColumnData<SingleClassStats>
           alignment: ColumnAlignment.left,
         );
 
-  final ClassesTableSingleController controller;
+  final ClassesTableSingleData controller;
 
   @override
   String? getValue(SingleClassStats dataObject) =>
@@ -88,7 +88,7 @@ class _InstanceColumn extends ColumnData<SingleClassStats>
           alignment: ColumnAlignment.right,
         );
 
-  final ClassesTableSingleController controller;
+  final ClassesTableSingleData controller;
 
   @override
   int getValue(SingleClassStats dataObject) => dataObject.objects.instanceCount;
@@ -147,7 +147,7 @@ class _RetainedSizeColumn extends ColumnData<SingleClassStats> {
           alignment: ColumnAlignment.right,
         );
 
-  final ClassesTableSingleController controller;
+  final ClassesTableSingleData controller;
 
   @override
   int getValue(SingleClassStats dataObject) => dataObject.objects.retainedSize;
@@ -172,7 +172,7 @@ class _ClassesTableSingleColumns {
 
   late final retainedSizeColumn = _RetainedSizeColumn(controller);
 
-  final ClassesTableSingleController controller;
+  final ClassesTableSingleData controller;
 
   late final columnList = <ColumnData<SingleClassStats>>[
     _ClassNameColumn(controller),
@@ -183,17 +183,17 @@ class _ClassesTableSingleColumns {
 }
 
 class ClassesTableSingle extends StatelessWidget {
-  const ClassesTableSingle({
+  ClassesTableSingle({
     super.key,
     required this.classes,
     required this.controller,
-  });
+  }) : _columns = _ClassesTableSingleColumns(controller);
 
   final List<SingleClassStats> classes;
 
-  final ClassesTableSingleController controller;
+  final ClassesTableSingleData controller;
 
-  static _ClassesTableSingleColumns? _columns;
+  final _ClassesTableSingleColumns _columns;
 
   @override
   Widget build(BuildContext context) {
@@ -201,10 +201,8 @@ class ClassesTableSingle extends StatelessWidget {
     // no matter what the data passed to it is.
     const dataKey = 'ClassesTableSingle';
 
-    final columns = _columns ??= _ClassesTableSingleColumns(controller);
-
     return FlatTable<SingleClassStats>(
-      columns: columns.columnList,
+      columns: _columns.columnList,
       data: classes,
       dataKey: dataKey,
       keyFactory: (e) => Key(e.heapClass.fullName),
@@ -213,7 +211,7 @@ class ClassesTableSingle extends StatelessWidget {
         gac.memory,
         gac.MemoryEvent.diffClassSingleSelect,
       ),
-      defaultSortColumn: columns.retainedSizeColumn,
+      defaultSortColumn: _columns.retainedSizeColumn,
       defaultSortDirection: SortDirection.descending,
     );
   }

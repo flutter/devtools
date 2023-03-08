@@ -43,12 +43,12 @@ class SnapshotView extends StatelessWidget {
         if (singleClasses != null) {
           classTable = ClassesTableSingle(
             classes: singleClasses,
-            controller: controller.classesTableSingleController,
+            controller: controller.classesTableSingleData,
           );
         } else if (diffClasses != null) {
           classTable = ClassesTableDiff(
             classes: controller.derived.diffClassesToShow.value!,
-            controller: controller.classesTableDiffController,
+            controller: controller.classesTableDiffData,
           );
         } else {
           throw StateError('singleClasses or diffClasses should not be null.');

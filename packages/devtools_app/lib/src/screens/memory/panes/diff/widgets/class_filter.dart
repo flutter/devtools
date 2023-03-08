@@ -14,7 +14,7 @@ import '../../../../../shared/memory/class_name.dart';
 import '../../../../../shared/theme.dart';
 import '../../../../../shared/utils.dart';
 import '../../../shared/heap/class_filter.dart';
-import '../controller/simple_controllers.dart';
+import '../controller/class_data.dart';
 
 String _adaptRootPackageForFilter(String? rootPackage) {
   if (rootPackage == null || rootPackage.isEmpty) return '';
@@ -25,7 +25,7 @@ class ClassFilterButton extends StatelessWidget {
   ClassFilterButton(this.controller)
       : rootPackage = _adaptRootPackageForFilter(controller.rootPackage);
 
-  final ClassFilterController controller;
+  final ClassFilterData controller;
   final String rootPackage;
 
   @override

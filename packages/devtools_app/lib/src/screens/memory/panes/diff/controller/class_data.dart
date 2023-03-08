@@ -15,8 +15,8 @@ class RetainingPathController {
   final invert = ValueNotifier<bool>(true);
 }
 
-class ClassFilterController {
-  ClassFilterController({
+class ClassFilterData {
+  ClassFilterData({
     required this.filter,
     required this.onChanged,
     required this.rootPackage,
@@ -27,8 +27,8 @@ class ClassFilterController {
   final String? rootPackage;
 }
 
-class ClassesTableSingleController {
-  ClassesTableSingleController({
+class ClassesTableSingleData {
+  ClassesTableSingleData({
     required this.selection,
     required this.heap,
     required this.totalHeapSize,
@@ -38,14 +38,14 @@ class ClassesTableSingleController {
   // We use functions, not [ValueListener], where we do not want widgets
   // to subscribe for the changes, for performance reasons.
 
-  final HeapDataObtainer heap;
+  final HeapDataCallback heap;
   final int Function() totalHeapSize;
-  final ClassFilterController filterController;
+  final ClassFilterData filterController;
   final ValueNotifier<SingleClassStats?> selection;
 }
 
-class ClassesTableDiffController {
-  ClassesTableDiffController({
+class ClassesTableDiffData {
+  ClassesTableDiffData({
     required this.selection,
     required this.before,
     required this.after,
@@ -57,8 +57,8 @@ class ClassesTableDiffController {
   // We use functions, not [ValueListener], where we do not want widgets
   // to subscribe for the changes, for performance reasons.
 
-  final HeapDataObtainer before;
-  final HeapDataObtainer after;
-  final ClassFilterController filterController;
+  final HeapDataCallback before;
+  final HeapDataCallback after;
+  final ClassFilterData filterController;
   final ValueNotifier<DiffClassStats?> selection;
 }

@@ -81,13 +81,16 @@ class FlatTable<T> extends StatefulWidget {
   })  : selectionNotifier = selectionNotifier ?? ValueNotifier<T?>(null),
         super(key: key);
 
-  /// List of columns to render.
+  /// List of columns to display.
   ///
-  /// If different column instances are provided to different instances of the table
-  /// all table instances will render first instance of the provided column type.
+  /// These [ColumnData] elements should be defined as static
+  /// OR if they cannot be defined as static,
+  /// they should not manage stateful data.
   ///
-  /// So, if you have many instances of a concrete table, it is recommended to
-  /// make columns static and share between table instances.
+  /// [FlatTableState.didUpdateWidget] checks if the columns have
+  /// changed before re-initializing the table controller,
+  /// and the columns are compared by title only.
+  /// See also [FlatTableState. _tableConfigurationChanged].
   final List<ColumnData<T>> columns;
 
   final List<ColumnGroup>? columnGroups;

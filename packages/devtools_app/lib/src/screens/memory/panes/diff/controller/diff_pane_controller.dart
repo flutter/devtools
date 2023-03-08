@@ -21,7 +21,7 @@ import '../../../shared/heap/model.dart';
 import '../../../shared/primitives/memory_utils.dart';
 import 'heap_diff.dart';
 import 'item_controller.dart';
-import 'simple_controllers.dart';
+import 'class_data.dart';
 import 'utils.dart';
 
 class DiffPaneController extends DisposableController {
@@ -144,24 +144,23 @@ class DiffPaneController extends DisposableController {
     );
   }
 
-  late final _classFilterController = ClassFilterController(
+  late final _classFilterData = ClassFilterData(
     filter: core.classFilter,
     onChanged: applyFilter,
     rootPackage: serviceManager.rootInfoNow().package,
   );
 
-  late final ClassesTableSingleController classesTableSingleController =
-      ClassesTableSingleController(
+  late final ClassesTableSingleData classesTableSingleData =
+      ClassesTableSingleData(
     selection: derived.selectedSingleClassStats,
     heap: () => (core.selectedItem as SnapshotInstanceItem).heap!.data,
     totalHeapSize: () => (core.selectedItem as SnapshotInstanceItem).totalSize!,
-    filterController: _classFilterController,
+    filterController: _classFilterData,
   );
 
-  late final ClassesTableDiffController classesTableDiffController =
-      ClassesTableDiffController(
+  late final ClassesTableDiffData classesTableDiffData = ClassesTableDiffData(
     selection: derived.selectedDiffClassStats,
-    filterController: _classFilterController,
+    filterController: _classFilterData,
     before: () => (derived.heapClasses.value as DiffHeapClasses).before,
     after: () => (derived.heapClasses.value as DiffHeapClasses).after,
   );

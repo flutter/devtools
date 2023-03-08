@@ -18,7 +18,7 @@ import '../../../shared/heap/heap.dart';
 import '../../../shared/primitives/simple_elements.dart';
 import '../../../shared/shared_memory_widgets.dart';
 import '../controller/heap_diff.dart';
-import '../controller/simple_controllers.dart';
+import '../controller/class_data.dart';
 import 'class_filter.dart';
 import 'instances.dart';
 
@@ -41,7 +41,7 @@ class DiffClassNameColumn extends ColumnData<DiffClassStats>
           alignment: ColumnAlignment.left,
         );
 
-  final ClassesTableDiffController controller;
+  final ClassesTableDiffData controller;
 
   @override
   String? getValue(DiffClassStats dataObject) => dataObject.heapClass.className;
@@ -97,7 +97,7 @@ class DiffInstanceColumn extends ColumnData<DiffClassStats>
 
   final _DataPart dataPart;
 
-  final ClassesTableDiffController controller;
+  final ClassesTableDiffData controller;
 
   static String columnTitle(_DataPart dataPart) {
     switch (dataPart) {
@@ -244,7 +244,7 @@ class ClassesTableDiffColumns {
   ClassesTableDiffColumns(this.sizeType, this.controller);
 
   final SizeType sizeType;
-  final ClassesTableDiffController controller;
+  final ClassesTableDiffData controller;
 
   late final sizeDeltaColumn = _SizeColumn(_DataPart.delta, sizeType);
 
@@ -265,7 +265,7 @@ class ClassesTableDiffColumns {
 class _SizeGroupTitle extends StatelessWidget {
   const _SizeGroupTitle(this.controller);
 
-  final ClassesTableDiffController controller;
+  final ClassesTableDiffData controller;
 
   @override
   Widget build(BuildContext context) {
@@ -315,7 +315,7 @@ class ClassesTableDiff extends StatelessWidget {
   }
 
   final List<DiffClassStats> classes;
-  final ClassesTableDiffController controller;
+  final ClassesTableDiffData controller;
 
   List<ColumnGroup> _columnGroups(SizeType sizeType, BuildContext context) {
     return [
