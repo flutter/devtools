@@ -29,8 +29,8 @@ class _FilterTest {
 }
 
 final _tests = [
-  _FilterTest(isDiff: false),
-  //_FilterTest(isDiff: true),
+  //_FilterTest(isDiff: false),
+  _FilterTest(isDiff: true),
 ];
 
 final _customFilter = ClassFilter(
@@ -59,7 +59,6 @@ void main() {
     );
 
     if (test.isDiff) {
-      assert(false);
       scene.diffController.setDiffing(
         scene.diffController.derived.selectedItem.value as SnapshotInstanceItem,
         scene.diffController.core.snapshots.value[1] as SnapshotInstanceItem,
