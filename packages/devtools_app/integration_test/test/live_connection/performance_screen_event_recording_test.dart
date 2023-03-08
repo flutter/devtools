@@ -11,6 +11,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 
+import '../../test_infra/utils/connection.dart';
+
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
@@ -23,20 +25,7 @@ void main() {
 
   testWidgets('refreshing the timeline does not duplicate recorded events',
       (tester) async {
-    await pumpDevTools(tester);
-    await connectToTestApp(tester, testApp);
-
-    // If the release notes viewer is open, close it.
-    final releaseNotesView =
-        tester.widget<ReleaseNotes>(find.byType(ReleaseNotes));
-    if (releaseNotesView.releaseNotesController.releaseNotesVisible.value) {
-      final closeReleaseNotesButton = find.descendant(
-        of: find.byType(ReleaseNotes),
-        matching: find.byType(IconButton),
-      );
-      expect(closeReleaseNotesButton, findsOneWidget);
-      await tester.tap(closeReleaseNotesButton);
-    }
+    await pumpAndConnectDevTools(tester, testApp);
 
     logStatus(
       'Open the Performance screen and switch to the Timeline Events tab',
