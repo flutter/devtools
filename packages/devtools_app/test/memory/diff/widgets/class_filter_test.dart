@@ -29,7 +29,7 @@ class _FilterTest {
 }
 
 final _tests = [
-  //_FilterTest(isDiff: false),
+  _FilterTest(isDiff: false),
   _FilterTest(isDiff: true),
 ];
 
@@ -58,12 +58,18 @@ void main() {
       hasLength(2),
     );
 
+    final SnapshotInstanceItem? diffWith;
     if (test.isDiff) {
-      scene.diffController.setDiffing(
-        scene.diffController.derived.selectedItem.value as SnapshotInstanceItem,
-        scene.diffController.core.snapshots.value[1] as SnapshotInstanceItem,
-      );
+      diffWith =
+          scene.diffController.core.snapshots.value[1] as SnapshotInstanceItem;
+    } else {
+      diffWith = null;
     }
+
+    scene.diffController.setDiffing(
+      scene.diffController.derived.selectedItem.value as SnapshotInstanceItem,
+      diffWith,
+    );
 
     await tester.pumpWidget(scene.build());
     await tester.pumpAndSettle();
