@@ -5,6 +5,7 @@
 import 'package:flutter/foundation.dart';
 
 import '../../../../shared/primitives/trees.dart';
+import '../../../../shared/primitives/utils.dart';
 import '../../cpu_profile_model.dart';
 import 'method_table_model.dart';
 
@@ -19,8 +20,6 @@ class MethodTableController {
 
   final _methods = ValueNotifier<List<MethodTableGraphNode>>([]);
 
-  // BLOCKER - TODO(kenz): before submitting figure out why total time
-  // percentages are greater than 100%.
   void createMethodTableGraph(CpuProfileData cpuProfileData) {
     reset();
     assert(cpuProfileData.processed);
@@ -51,9 +50,13 @@ class MethodTableController {
           var graphNode = MethodTableGraphNode.fromStackFrame(frame);
           final existingNode = methodMap[frame.methodTableId];
           if (existingNode != null) {
+            // Do not merge the total time if the [existingNode] already counted
+            // the total time for one of [frame]'s ancestors.
+            final shouldMergeTotalTime =
+                !existingNode.stackFrameIds.containsAny(frame.ancestorIds);
             // If the graph node already exists, merge the new one with the old
             // one and use the existing instance.
-            existingNode.merge(graphNode);
+            existingNode.merge(graphNode, mergeTotalTime: shouldMergeTotalTime);
             graphNode = existingNode;
           }
           methodMap[graphNode.id] = graphNode;

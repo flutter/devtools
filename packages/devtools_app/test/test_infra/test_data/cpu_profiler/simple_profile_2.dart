@@ -78,6 +78,14 @@ final _profileStackFrames = {
     'packageUri': 'package:my_app/src/c.dart',
     'sourceLine': 333,
   },
+  '140357727781376-9': {
+    'category': 'Dart',
+    'name': 'A',
+    'parent': '140357727781376-5',
+    'resolvedUrl': 'path/to/my_app/packages/my_app/lib/src/a.dart',
+    'packageUri': 'package:my_app/src/a.dart',
+    'sourceLine': 111,
+  },
 };
 
 final List<Map<String, dynamic>> _profileTraceEvents = [
@@ -209,7 +217,7 @@ final List<Map<String, dynamic>> _profileTraceEvents = [
       'userTag': 'Default',
       'vmTag': 'VM',
     },
-    'sf': '140357727781376-5'
+    'sf': '140357727781376-9'
   },
 ];
 
@@ -218,44 +226,45 @@ const String simpleProfile2Golden = '''
     B - children: 1 - excl: 1 - incl: 4
       C - children: 0 - excl: 3 - incl: 3
     D - children: 1 - excl: 0 - incl: 2
-      C - children: 0 - excl: 2 - incl: 2
+      C - children: 1 - excl: 1 - incl: 2
+        A - children: 0 - excl: 1 - incl: 1
     F - children: 1 - excl: 0 - incl: 3
       B - children: 1 - excl: 2 - incl: 3
         C - children: 0 - excl: 1 - incl: 1
 ''';
 
 const String simpleProfile2MethodTableGolden = '''
-A (package:my_app/src/a.dart:111) (10 samples)
+A - (package:my_app/src/a.dart:111) (10 samples)
   Callers:
-    []
+    C - (package:my_app/src/c.dart:333) - 100.00%
   Callees:
-    B (package:my_app/src/b.dart:222) - 44.44%
-    F (package:my_app/src/f.dart:555) - 33.33%
-    D (package:my_app/src/d.dart:444) - 22.22%
+    B - (package:my_app/src/b.dart:222) - 44.44%
+    F - (package:my_app/src/f.dart:555) - 33.33%
+    D - (package:my_app/src/d.dart:444) - 22.22%
 
-B (package:my_app/src/b.dart:222) (7 samples)
+B - (package:my_app/src/b.dart:222) (7 samples)
   Callers:
-    A (package:my_app/src/a.dart:111) - 57.14%
-    F (package:my_app/src/f.dart:555) - 42.86%
+    A - (package:my_app/src/a.dart:111) - 57.14%
+    F - (package:my_app/src/f.dart:555) - 42.86%
   Callees:
-    C (package:my_app/src/c.dart:333) - 100.00%
+    C - (package:my_app/src/c.dart:333) - 100.00%
 
-C (package:my_app/src/c.dart:333) (6 samples)
+C - (package:my_app/src/c.dart:333) (6 samples)
   Callers:
-    B (package:my_app/src/b.dart:222) - 66.67%
-    D (package:my_app/src/d.dart:444) - 33.33%
+    B - (package:my_app/src/b.dart:222) - 66.67%
+    D - (package:my_app/src/d.dart:444) - 33.33%
   Callees:
-    []
+    A - (package:my_app/src/a.dart:111) - 100.00%
 
-F (package:my_app/src/f.dart:555) (3 samples)
+F - (package:my_app/src/f.dart:555) (3 samples)
   Callers:
-    A (package:my_app/src/a.dart:111) - 100.00%
+    A - (package:my_app/src/a.dart:111) - 100.00%
   Callees:
-    B (package:my_app/src/b.dart:222) - 100.00%
+    B - (package:my_app/src/b.dart:222) - 100.00%
 
-D (package:my_app/src/d.dart:444) (2 samples)
+D - (package:my_app/src/d.dart:444) (2 samples)
   Callers:
-    A (package:my_app/src/a.dart:111) - 100.00%
+    A - (package:my_app/src/a.dart:111) - 100.00%
   Callees:
-    C (package:my_app/src/c.dart:333) - 100.00%
+    C - (package:my_app/src/c.dart:333) - 100.00%
 ''';

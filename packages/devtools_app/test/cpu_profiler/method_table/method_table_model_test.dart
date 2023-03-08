@@ -21,6 +21,7 @@ void main() {
           ..start = Duration.zero
           ..end = const Duration(seconds: 1),
       ),
+      stackFrameIds: {'1'},
     );
     final node2 = MethodTableGraphNode(
       name: 'node 1',
@@ -34,6 +35,7 @@ void main() {
           ..start = Duration.zero
           ..end = const Duration(seconds: 1),
       ),
+      stackFrameIds: {'2'},
     );
     final node3 = MethodTableGraphNode(
       name: 'node 1',
@@ -47,6 +49,7 @@ void main() {
           ..start = Duration.zero
           ..end = const Duration(seconds: 1),
       ),
+      stackFrameIds: {'3'},
     );
     final node4 = MethodTableGraphNode(
       name: 'different_name',
@@ -60,6 +63,7 @@ void main() {
           ..start = Duration.zero
           ..end = const Duration(seconds: 1),
       ),
+      stackFrameIds: {'4'},
     );
 
     test('shallowEquals ', () async {

@@ -210,29 +210,29 @@ const String simpleProfile1GroupedByTagGolden = '''
 ''';
 
 const String simpleProfile1MethodTableGolden = '''
-A (package:my_app/src/a.dart:111) (10 samples)
+A - (package:my_app/src/a.dart:111) (10 samples)
   Callers:
     []
   Callees:
-    B (package:my_app/src/b.dart:222) - 77.78%
-    D (package:my_app/src/d.dart:444) - 22.22%
+    B - (package:my_app/src/b.dart:222) - 77.78%
+    D - (package:my_app/src/d.dart:444) - 22.22%
 
-B (package:my_app/src/b.dart:222) (7 samples)
+B - (package:my_app/src/b.dart:222) (7 samples)
   Callers:
-    A (package:my_app/src/a.dart:111) - 100.00%
+    A - (package:my_app/src/a.dart:111) - 100.00%
   Callees:
-    C (package:my_app/src/c.dart:333) - 100.00%
+    C - (package:my_app/src/c.dart:333) - 100.00%
 
-C (package:my_app/src/c.dart:333) (6 samples)
+C - (package:my_app/src/c.dart:333) (6 samples)
   Callers:
-    B (package:my_app/src/b.dart:222) - 66.67%
-    D (package:my_app/src/d.dart:444) - 33.33%
+    B - (package:my_app/src/b.dart:222) - 66.67%
+    D - (package:my_app/src/d.dart:444) - 33.33%
   Callees:
     []
 
-D (package:my_app/src/d.dart:444) (2 samples)
+D - (package:my_app/src/d.dart:444) (2 samples)
   Callers:
-    A (package:my_app/src/a.dart:111) - 100.00%
+    A - (package:my_app/src/a.dart:111) - 100.00%
   Callees:
-    C (package:my_app/src/c.dart:333) - 100.00%
+    C - (package:my_app/src/c.dart:333) - 100.00%
 ''';

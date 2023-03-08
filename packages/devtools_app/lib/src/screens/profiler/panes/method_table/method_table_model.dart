@@ -18,6 +18,7 @@ class MethodTableGraphNode extends GraphNode {
     required int totalCount,
     required int selfCount,
     required this.profileMetaData,
+    required this.stackFrameIds,
   })  : _totalCount = totalCount,
         _selfCount = selfCount,
         _sourceUri = uriWithSourceLine(packageUri, sourceLine);
@@ -30,6 +31,7 @@ class MethodTableGraphNode extends GraphNode {
       totalCount: frame.inclusiveSampleCount,
       selfCount: frame.exclusiveSampleCount,
       profileMetaData: frame.profileMetaData,
+      stackFrameIds: {frame.id},
     );
   }
 
@@ -42,6 +44,10 @@ class MethodTableGraphNode extends GraphNode {
   final String _sourceUri;
 
   final ProfileMetaData profileMetaData;
+
+  /// The set of all [CpuStackFrame.id]s that contribute to this method table
+  /// node for a profile.
+  final Set<String> stackFrameIds;
 
   String get id => '$name-$_sourceUri';
 
@@ -74,10 +80,13 @@ class MethodTableGraphNode extends GraphNode {
                 .round(),
       );
 
-  void merge(MethodTableGraphNode other) {
+  void merge(MethodTableGraphNode other, {bool mergeTotalTime = false}) {
     if (!shallowEquals(other)) return;
-    _totalCount += other.totalCount;
+    stackFrameIds.addAll(other.stackFrameIds);
     _selfCount += other.selfCount;
+    if (mergeTotalTime) {
+      _totalCount += other.totalCount;
+    }
   }
 
   bool shallowEquals(other) {
@@ -92,6 +101,7 @@ class MethodTableGraphNode extends GraphNode {
       Set<GraphNode> nodes, {
       required double Function(MethodTableGraphNode) percentCallback,
     }) {
+      const newLineAndIndent = '\n    ';
       return nodes
           .cast<MethodTableGraphNode>()
           // Sort in descending order.
@@ -99,7 +109,7 @@ class MethodTableGraphNode extends GraphNode {
           .map(
             (node) => '${node.display} - ${percent2(percentCallback(node))}',
           )
-          .join('\n    ');
+          .join(newLineAndIndent);
     }
 
     final callers = generateDisplayFor(
@@ -129,6 +139,7 @@ $display ($totalCount samples)
       totalCount: totalCount,
       selfCount: selfCount,
       profileMetaData: profileMetaData,
+      stackFrameIds: Set.from(stackFrameIds),
     );
   }
 }
