@@ -19,6 +19,8 @@ class MethodTableController {
 
   final _methods = ValueNotifier<List<MethodTableGraphNode>>([]);
 
+  // BLOCKER - TODO(kenz): before submitting figure out why total time
+  // percentages are greater than 100%.
   void createMethodTableGraph(CpuProfileData cpuProfileData) {
     reset();
     assert(cpuProfileData.processed);
