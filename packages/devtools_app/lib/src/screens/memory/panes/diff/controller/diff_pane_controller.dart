@@ -25,7 +25,11 @@ import 'simple_controllers.dart';
 import 'utils.dart';
 
 class DiffPaneController extends DisposableController {
-  DiffPaneController(this.snapshotTaker);
+  DiffPaneController(this.snapshotTaker) {
+    print('!!! created diff-controller ${identityHashCode(this)}');
+    // print('!!! created diff-controller stacktrace:');
+    // print(StackTrace.current);
+  }
 
   final SnapshotTaker snapshotTaker;
 
@@ -121,9 +125,15 @@ class DiffPaneController extends DisposableController {
   }
 
   void applyFilter(ClassFilter filter) {
-    if (filter.equals(core._classFilter.value)) return;
+    print('!!! want to apply ${filter.filterType}');
+    if (filter.equals(core.classFilter.value)) return;
+    print('!!! applying      ${filter.filterType}');
     core._classFilter.value = filter;
+    print('!!! applied       ${core.classFilter.value.filterType}');
     derived._updateValues();
+    print('!!! applyFilter for ${identityHashCode(this)}');
+    print(StackTrace.current);
+    print('!!! still         ${core.classFilter.value.filterType}');
   }
 
   void downloadCurrentItemToCsv() {
