@@ -563,13 +563,11 @@ void select(
   ScreenAnalyticsMetrics Function()? screenMetricsProvider,
 }) {
   _log.info(
-    [
-      '[select]',
-      'screenName:$screenName',
-      'selectedItem:$selectedItem',
-      'value:$value',
-      ' nonInteraction:$nonInteraction',
-    ].join(' '),
+    '[select] '
+    'screenName:$screenName '
+    'selectedItem:$selectedItem '
+    'value:$value '
+    ' nonInteraction:$nonInteraction ',
   );
   GTag.event(
     screenName,

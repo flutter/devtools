@@ -175,7 +175,6 @@ class HttpResponseView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    _log.info('HttpResponseView: building');
     return ValueListenableBuilder(
       valueListenable: data.requestUpdatedNotifier,
       builder: (context, __, ___) {
@@ -188,23 +187,17 @@ class HttpResponseView extends StatelessWidget {
         final responseBody = data.responseBody!;
         final isLoading = data.isFetchingFullData;
         if (isLoading) {
-          _log.info('HttpResponseView: loading');
           return CenteredCircularProgressIndicator(
             size: mediumProgressSize,
           );
         }
-        _log.info('HttpResponseView: DONE loading');
-
         if (contentType != null && contentType.contains('image')) {
-          _log.info('HttpResponseView: showing an image response');
           child = ImageResponseView(data);
         } else if (contentType != null &&
             contentType.contains('json') &&
             responseBody.isNotEmpty) {
-          _log.info('HttpResponseView: showing JSONVIewer');
           child = JsonViewer(encodedJson: responseBody);
         } else {
-          _log.info('HttpResponseView: showing text');
           child = Text(
             responseBody,
             style: theme.fixedFontStyle,
