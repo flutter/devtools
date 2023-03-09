@@ -81,11 +81,34 @@ void main() {
       );
       await tester.pumpWidget(wrap(table));
       expect(find.byWidget(table), findsOneWidget);
-      debugDumpApp();
       expect(find.text('FlatName'), findsOneWidget);
 
       final FlatTableState state = tester.state(find.byWidget(table));
-      final columnWidths = state.tableController.computeColumnWidths(1000);
+      final columnWidths =
+          state.tableController.computeColumnWidthsSizeToFit(1000);
+      expect(columnWidths.length, 1);
+      expect(columnWidths.first, 300);
+      expect(find.byKey(const Key('empty')), findsOneWidget);
+    });
+
+    testWidgets('displays with simple content size to content',
+        (WidgetTester tester) async {
+      final table = FlatTable<TestData>(
+        columns: [flatNameColumn],
+        data: [TestData('empty', 0)],
+        dataKey: 'test-data',
+        keyFactory: (d) => Key(d.name),
+        defaultSortColumn: flatNameColumn,
+        defaultSortDirection: SortDirection.ascending,
+        sizeToFit: false,
+      );
+      await tester.pumpWidget(wrap(table));
+      expect(find.byWidget(table), findsOneWidget);
+      expect(find.text('FlatName'), findsOneWidget);
+
+      final FlatTableState state = tester.state(find.byWidget(table));
+      expect(state.tableController.columnWidths, isNotNull);
+      final columnWidths = state.tableController.columnWidths!;
       expect(columnWidths.length, 1);
       expect(columnWidths.first, 300);
       expect(find.byKey(const Key('empty')), findsOneWidget);
@@ -136,11 +159,11 @@ void main() {
             _NumberColumn(),
           ],
           columnGroups: [
-            ColumnGroup(
+            ColumnGroup.fromText(
               title: 'Group 1',
               range: const Range(0, 1),
             ),
-            ColumnGroup(
+            ColumnGroup.fromText(
               title: 'Group 2',
               range: const Range(1, 2),
             ),
@@ -467,7 +490,8 @@ void main() {
       {
         final FlatTableState<TestData> state =
             tester.state(find.byWidget(table));
-        final columnWidths = state.tableController.computeColumnWidths(800.0);
+        final columnWidths =
+            state.tableController.computeColumnWidthsSizeToFit(800.0);
         expect(columnWidths.length, equals(3));
         expect(columnWidths[0], equals(300.0));
         expect(columnWidths[1], equals(400.0));
@@ -489,11 +513,74 @@ void main() {
       {
         final FlatTableState<TestData> state =
             tester.state(find.byWidget(table));
-        final columnWidths = state.tableController.computeColumnWidths(200.0);
+        final columnWidths =
+            state.tableController.computeColumnWidthsSizeToFit(200.0);
         expect(columnWidths.length, equals(3));
         expect(columnWidths[0], equals(300.0)); // Fixed width column.
         expect(columnWidths[1], equals(400.0)); // Fixed width column.
         expect(columnWidths[2], equals(0.0)); // Variable width column.
+      }
+
+      // TODO(jacobr): add a golden image test.
+    });
+
+    testWidgets('displays with wide column size to content',
+        (WidgetTester tester) async {
+      final table = FlatTable<TestData>(
+        columns: [
+          flatNameColumn,
+          _NumberColumn(),
+          _WideColumn(),
+        ],
+        data: flatData,
+        dataKey: 'test-data',
+        keyFactory: (data) => Key(data.name),
+        defaultSortColumn: flatNameColumn,
+        defaultSortDirection: SortDirection.ascending,
+        sizeToFit: false,
+      );
+      await tester.pumpWidget(
+        wrap(
+          SizedBox(
+            width: 800.0,
+            height: 200.0,
+            child: table,
+          ),
+        ),
+      );
+      expect(find.byWidget(table), findsOneWidget);
+      {
+        final FlatTableState<TestData> state =
+            tester.state(find.byWidget(table));
+        expect(state.tableController.columnWidths, isNotNull);
+        final columnWidths = state.tableController.columnWidths!;
+        expect(columnWidths.length, equals(3));
+        expect(columnWidths[0], equals(300.0));
+        expect(columnWidths[1], equals(400.0));
+        expect(columnWidths[2], equals(369.0));
+      }
+
+      // TODO(jacobr): add a golden image test.
+
+      await tester.pumpWidget(
+        wrap(
+          SizedBox(
+            width: 200.0,
+            height: 200.0,
+            child: table,
+          ),
+        ),
+      );
+
+      {
+        final FlatTableState<TestData> state =
+            tester.state(find.byWidget(table));
+        expect(state.tableController.columnWidths, isNotNull);
+        final columnWidths = state.tableController.columnWidths!;
+        expect(columnWidths.length, equals(3));
+        expect(columnWidths[0], equals(300.0)); // Fixed width column.
+        expect(columnWidths[1], equals(400.0)); // Fixed width column.
+        expect(columnWidths[2], equals(369.0)); // Variable width column.
       }
 
       // TODO(jacobr): add a golden image test.
@@ -529,7 +616,7 @@ void main() {
           final FlatTableState<TestData> state =
               tester.state(find.byWidget(table));
           final columnWidths =
-              state.tableController.computeColumnWidths(1000.0);
+              state.tableController.computeColumnWidthsSizeToFit(1000.0);
           expect(columnWidths.length, equals(4));
           expect(columnWidths[0], equals(300.0)); // Fixed width column.
           expect(columnWidths[1], equals(110.0)); // Min width wide column
@@ -549,7 +636,8 @@ void main() {
         {
           final FlatTableState<TestData> state =
               tester.state(find.byWidget(table));
-          final columnWidths = state.tableController.computeColumnWidths(200.0);
+          final columnWidths =
+              state.tableController.computeColumnWidthsSizeToFit(200.0);
           expect(columnWidths.length, equals(4));
           expect(columnWidths[0], equals(300.0)); // Fixed width column.
           expect(columnWidths[1], equals(100.0)); // Min width wide column
@@ -590,7 +678,7 @@ void main() {
           final FlatTableState<TestData> state =
               tester.state(find.byWidget(table));
           final columnWidths =
-              state.tableController.computeColumnWidths(1501.0);
+              state.tableController.computeColumnWidthsSizeToFit(1501.0);
           expect(columnWidths.length, equals(5));
           expect(columnWidths[0], equals(300.0)); // Fixed width column.
           expect(columnWidths[1], equals(235.0)); // Min width wide column
@@ -616,7 +704,7 @@ void main() {
           final FlatTableState<TestData> state =
               tester.state(find.byWidget(table));
           final columnWidths =
-              state.tableController.computeColumnWidths(1200.0);
+              state.tableController.computeColumnWidthsSizeToFit(1200.0);
           expect(columnWidths.length, equals(5));
           expect(columnWidths[0], equals(300.0)); // Fixed width column.
           expect(columnWidths[1], equals(122.0)); // Min width wide column
@@ -642,7 +730,7 @@ void main() {
           final FlatTableState<TestData> state =
               tester.state(find.byWidget(table));
           final columnWidths =
-              state.tableController.computeColumnWidths(1000.0);
+              state.tableController.computeColumnWidthsSizeToFit(1000.0);
           expect(columnWidths.length, equals(5));
           expect(columnWidths[0], equals(300.0)); // Fixed width column.
           expect(columnWidths[1], equals(100.0)); // Min width wide column
@@ -1141,8 +1229,8 @@ void main() {
       );
       await tester.pumpWidget(wrap(table));
       final TreeTableState state = tester.state(find.byWidget(table));
-      expect(state.tableController.columnWidths[0], equals(400));
-      expect(state.tableController.columnWidths[1], equals(81));
+      expect(state.tableController.columnWidths![0], equals(400));
+      expect(state.tableController.columnWidths![1], equals(81));
       final tree = state.tableController.dataRoots[0];
       expect(tree.children[0].name, equals('Bar'));
       expect(tree.children[0].children[0].name, equals('Baz'));

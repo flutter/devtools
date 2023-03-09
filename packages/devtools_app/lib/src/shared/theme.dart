@@ -422,7 +422,7 @@ extension ThemeDataExtension on ThemeData {
   TextStyle get selectedFixedFontStyle =>
       fixedFontStyle.copyWith(color: colorScheme.devtoolsSelectedLink);
 
-  TextStyle get toolTipFixedFontStyle => fixedFontStyle.copyWith(
+  TextStyle get tooltipFixedFontStyle => fixedFontStyle.copyWith(
         color: colorScheme.tooltipTextColor,
       );
 

@@ -7,7 +7,6 @@ import 'package:devtools_app/src/screens/debugger/debugger_controller.dart';
 import 'package:devtools_app/src/screens/debugger/debugger_screen.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/shared/config_specific/ide_theme/ide_theme.dart';
-import 'package:devtools_app/src/shared/diagnostics/dart_object_node.dart';
 import 'package:devtools_app/src/shared/diagnostics/tree_builder.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_app/src/shared/notifications.dart';
@@ -16,7 +15,8 @@ import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
-import 'package:vm_service/vm_service.dart';
+
+import '../test_infra/utils/variable_utils.dart';
 
 void main() {
   late FakeServiceManager fakeServiceManager;
@@ -45,8 +45,8 @@ void main() {
         .thenReturn(ValueNotifier<int>(0));
     debuggerController = createMockDebuggerControllerWithDefaults();
 
-    _resetRef();
-    _resetRoot();
+    resetRef();
+    resetRoot();
   });
 
   Future<void> pumpDebuggerScreen(
@@ -61,31 +61,76 @@ void main() {
     );
   }
 
+  Future<void> verifyGroupings(
+    WidgetTester tester, {
+    required Finder parentFinder,
+  }) async {
+    final group0To9999Finder = find.selectableTextContaining('[0 - 9999]');
+    final group10000To19999Finder =
+        find.selectableTextContaining('[10000 - 19999]');
+    final group230000To239999Finder =
+        find.selectableTextContaining('[230000 - 239999]');
+    final group240000To243620Finder =
+        find.selectableTextContaining('[240000 - 243620]');
+
+    final group0To99Finder = find.selectableTextContaining('[0 - 99]');
+    final group100To199Finder = find.selectableTextContaining('[100 - 199]');
+    final group200To299Finder = find.selectableTextContaining('[200 - 299]');
+
+    // Initially the parent variable is not expanded.
+    expect(parentFinder, findsOneWidget);
+    expect(group0To9999Finder, findsNothing);
+    expect(group10000To19999Finder, findsNothing);
+    expect(group230000To239999Finder, findsNothing);
+    expect(group240000To243620Finder, findsNothing);
+
+    // Expand the parent variable.
+    await tester.tap(parentFinder);
+    await tester.pump();
+    expect(group0To9999Finder, findsOneWidget);
+    expect(group10000To19999Finder, findsOneWidget);
+    expect(group230000To239999Finder, findsOneWidget);
+    expect(group240000To243620Finder, findsOneWidget);
+
+    // Initially group [0 - 9999] is not expanded.
+    expect(group0To99Finder, findsNothing);
+    expect(group100To199Finder, findsNothing);
+    expect(group200To299Finder, findsNothing);
+
+    // Expand group [0 - 9999].
+    await tester.tap(group0To9999Finder);
+    await tester.pump();
+    expect(group0To99Finder, findsOneWidget);
+    expect(group100To199Finder, findsOneWidget);
+    expect(group200To299Finder, findsOneWidget);
+  }
+
   testWidgetsWithWindowSize(
     'Variables shows items',
     windowSize,
     (WidgetTester tester) async {
       fakeServiceManager.appState.setVariables(
         [
-          _buildListVariable(),
-          _buildMapVariable(),
-          _buildStringVariable('test str'),
-          _buildBooleanVariable(true),
+          buildListVariable(),
+          buildMapVariable(),
+          buildStringVariable('test str'),
+          buildBooleanVariable(true),
+          buildSetVariable(),
         ],
       );
       await pumpDebuggerScreen(tester, debuggerController);
       expect(find.text('Variables'), findsOneWidget);
 
-      final listFinder = find.selectableText('Root 1: _GrowableList (2 items)');
+      final listFinder = find.selectableText('Root 1: List (2 items)');
 
       // expect a tooltip for the list value
       expect(
-        find.byTooltip('_GrowableList (2 items)'),
+        find.byTooltip('List (2 items)'),
         findsOneWidget,
       );
 
       final mapFinder = find.selectableTextContaining(
-        'Root 2: _InternalLinkedHashmap (2 items)',
+        'Root 2: Map (2 items)',
       );
       final mapElement1Finder = find.selectableTextContaining("['key1']: 1.0");
       final mapElement2Finder = find.selectableTextContaining("['key2']: 2.0");
@@ -120,6 +165,20 @@ void main() {
       await tester.pump();
       expect(mapElement1Finder, findsOneWidget);
       expect(mapElement2Finder, findsOneWidget);
+
+      // Expect a tooltip for the set instance.
+      final setFinder = find.selectableText('Root 5: Set (2 items)');
+      expect(setFinder, findsOneWidget);
+
+      // Initially set is not expanded.
+      expect(find.selectableTextContaining('set value 0'), findsNothing);
+      expect(find.selectableTextContaining('set value 1'), findsNothing);
+
+      // Expand set
+      await tester.tap(setFinder);
+      await tester.pump();
+      expect(find.selectableTextContaining('set value 0'), findsOneWidget);
+      expect(find.selectableTextContaining('set value 1'), findsOneWidget);
     },
   );
 
@@ -127,7 +186,7 @@ void main() {
     'Children in large list variables are grouped',
     windowSize,
     (WidgetTester tester) async {
-      final list = _buildParentListVariable(length: 380250);
+      final list = buildParentListVariable(length: 243621);
       await buildVariablesTree(list);
 
       final appState = serviceManager.appState;
@@ -135,49 +194,8 @@ void main() {
 
       await pumpDebuggerScreen(tester, debuggerController);
 
-      final listFinder =
-          find.selectableText('Root 1: _GrowableList (380,250 items)');
-      final group0To9999Finder = find.selectableTextContaining('[0 - 9999]');
-      final group10000To19999Finder =
-          find.selectableTextContaining('[10000 - 19999]');
-      final group370000To379999Finder =
-          find.selectableTextContaining('[370000 - 379999]');
-      final group380000To380249Finder =
-          find.selectableTextContaining('[380000 - 380249]');
-
-      final group370000To370099Finder =
-          find.selectableTextContaining('[370000 - 370099]');
-      final group370100To370199Finder =
-          find.selectableTextContaining('[370100 - 370199]');
-      final group370200To370299Finder =
-          find.selectableTextContaining('[370200 - 370299]');
-
-      // Initially list is not expanded.
-      expect(listFinder, findsOneWidget);
-      expect(group0To9999Finder, findsNothing);
-      expect(group10000To19999Finder, findsNothing);
-      expect(group370000To379999Finder, findsNothing);
-      expect(group380000To380249Finder, findsNothing);
-
-      // Expand list.
-      await tester.tap(listFinder);
-      await tester.pump();
-      expect(group0To9999Finder, findsOneWidget);
-      expect(group10000To19999Finder, findsOneWidget);
-      expect(group370000To379999Finder, findsOneWidget);
-      expect(group380000To380249Finder, findsOneWidget);
-
-      // Initially group [370000 - 379999] is not expanded.
-      expect(group370000To370099Finder, findsNothing);
-      expect(group370100To370199Finder, findsNothing);
-      expect(group370200To370299Finder, findsNothing);
-
-      // Expand group [370000 - 379999].
-      await tester.tap(group370000To379999Finder);
-      await tester.pump();
-      expect(group370000To370099Finder, findsOneWidget);
-      expect(group370100To370199Finder, findsOneWidget);
-      expect(group370200To370299Finder, findsOneWidget);
+      final listFinder = find.selectableText('Root 1: List (243,621 items)');
+      await verifyGroupings(tester, parentFinder: listFinder);
     },
   );
 
@@ -185,7 +203,7 @@ void main() {
     'Children in large map variables are grouped',
     windowSize,
     (WidgetTester tester) async {
-      final map = _buildParentMapVariable(length: 243621);
+      final map = buildParentMapVariable(length: 243621);
       await buildVariablesTree(map);
 
       final appState = serviceManager.appState;
@@ -193,215 +211,25 @@ void main() {
 
       await pumpDebuggerScreen(tester, debuggerController);
 
-      final listFinder =
-          find.selectableText('Root 1: _InternalLinkedHashmap (243,621 items)');
-      final group0To9999Finder = find.selectableTextContaining('[0 - 9999]');
-      final group10000To19999Finder =
-          find.selectableTextContaining('[10000 - 19999]');
-      final group230000To239999Finder =
-          find.selectableTextContaining('[230000 - 239999]');
-      final group240000To243620Finder =
-          find.selectableTextContaining('[240000 - 243620]');
-
-      final group0To99Finder = find.selectableTextContaining('[0 - 99]');
-      final group100To199Finder = find.selectableTextContaining('[100 - 199]');
-      final group200To299Finder = find.selectableTextContaining('[200 - 299]');
-
-      // Initially map is not expanded.
-      expect(listFinder, findsOneWidget);
-      expect(group0To9999Finder, findsNothing);
-      expect(group10000To19999Finder, findsNothing);
-      expect(group230000To239999Finder, findsNothing);
-      expect(group240000To243620Finder, findsNothing);
-
-      // Expand map.
-      await tester.tap(listFinder);
-      await tester.pump();
-      expect(group0To9999Finder, findsOneWidget);
-      expect(group10000To19999Finder, findsOneWidget);
-      expect(group230000To239999Finder, findsOneWidget);
-      expect(group240000To243620Finder, findsOneWidget);
-
-      // Initially group [0 - 9999] is not expanded.
-      expect(group0To99Finder, findsNothing);
-      expect(group100To199Finder, findsNothing);
-      expect(group200To299Finder, findsNothing);
-
-      // Expand group [0 - 9999].
-      await tester.tap(group0To9999Finder);
-      await tester.pump();
-      expect(group0To99Finder, findsOneWidget);
-      expect(group100To199Finder, findsOneWidget);
-      expect(group200To299Finder, findsOneWidget);
+      final mapFinder = find.selectableText('Root 1: Map (243,621 items)');
+      await verifyGroupings(tester, parentFinder: mapFinder);
     },
   );
-}
 
-final _libraryRef = LibraryRef(
-  name: 'some library',
-  uri: 'package:foo/foo.dart',
-  id: 'lib-id-1',
-);
+  testWidgetsWithWindowSize(
+    'Children in large set variables are grouped',
+    windowSize,
+    (WidgetTester tester) async {
+      final set = buildParentSetVariable(length: 243621);
+      await buildVariablesTree(set);
 
-final _isolateRef = IsolateRef(
-  id: '433',
-  number: '1',
-  name: 'my-isolate',
-  isSystemIsolate: false,
-);
+      final appState = serviceManager.appState;
+      appState.setVariables([set]);
 
-int _refNumber = 0;
+      await pumpDebuggerScreen(tester, debuggerController);
 
-String _incrementRef() {
-  _refNumber++;
-  return 'ref$_refNumber';
-}
-
-void _resetRef() {
-  _refNumber = 0;
-}
-
-int _rootNumber = 0;
-
-String _incrementRoot() {
-  _rootNumber++;
-  return 'Root $_rootNumber';
-}
-
-void _resetRoot() {
-  _rootNumber = 0;
-}
-
-DartObjectNode _buildParentListVariable({int length = 2}) {
-  return DartObjectNode.create(
-    BoundVariable(
-      name: _incrementRoot(),
-      value: InstanceRef(
-        id: _incrementRef(),
-        kind: InstanceKind.kList,
-        classRef: ClassRef(
-          name: '_GrowableList',
-          id: _incrementRef(),
-          library: _libraryRef,
-        ),
-        length: length,
-      ),
-    ),
-    _isolateRef,
-  );
-}
-
-DartObjectNode _buildListVariable({int length = 2}) {
-  final listVariable = _buildParentListVariable(length: length);
-
-  for (int i = 0; i < length; i++) {
-    listVariable.addChild(
-      DartObjectNode.create(
-        BoundVariable(
-          name: '$i',
-          value: InstanceRef(
-            id: _incrementRef(),
-            kind: InstanceKind.kInt,
-            classRef: ClassRef(
-              name: 'Integer',
-              id: _incrementRef(),
-              library: _libraryRef,
-            ),
-            valueAsString: '$i',
-            valueAsStringIsTruncated: false,
-          ),
-        ),
-        _isolateRef,
-      ),
-    );
-  }
-
-  return listVariable;
-}
-
-DartObjectNode _buildParentMapVariable({int length = 2}) {
-  return DartObjectNode.create(
-    BoundVariable(
-      name: _incrementRoot(),
-      value: InstanceRef(
-        id: _incrementRef(),
-        kind: InstanceKind.kMap,
-        classRef: ClassRef(
-          name: '_InternalLinkedHashmap',
-          id: _incrementRef(),
-          library: _libraryRef,
-        ),
-        length: length,
-      ),
-    ),
-    _isolateRef,
-  );
-}
-
-DartObjectNode _buildMapVariable({int length = 2}) {
-  final mapVariable = _buildParentMapVariable(length: length);
-
-  for (int i = 0; i < length; i++) {
-    mapVariable.addChild(
-      DartObjectNode.create(
-        BoundVariable(
-          name: "['key${i + 1}']",
-          value: InstanceRef(
-            id: _incrementRef(),
-            kind: InstanceKind.kDouble,
-            classRef: ClassRef(
-              name: 'Double',
-              id: _incrementRef(),
-              library: _libraryRef,
-            ),
-            valueAsString: '${i + 1}.0',
-            valueAsStringIsTruncated: false,
-          ),
-        ),
-        _isolateRef,
-      ),
-    );
-  }
-
-  return mapVariable;
-}
-
-DartObjectNode _buildStringVariable(String value) {
-  return DartObjectNode.create(
-    BoundVariable(
-      name: _incrementRoot(),
-      value: InstanceRef(
-        id: _incrementRef(),
-        kind: InstanceKind.kString,
-        classRef: ClassRef(
-          name: 'String',
-          id: _incrementRef(),
-          library: _libraryRef,
-        ),
-        valueAsString: value,
-        valueAsStringIsTruncated: true,
-      ),
-    ),
-    _isolateRef,
-  );
-}
-
-DartObjectNode _buildBooleanVariable(bool value) {
-  return DartObjectNode.create(
-    BoundVariable(
-      name: _incrementRoot(),
-      value: InstanceRef(
-        id: _incrementRef(),
-        kind: InstanceKind.kBool,
-        classRef: ClassRef(
-          name: 'Boolean',
-          id: _incrementRef(),
-          library: _libraryRef,
-        ),
-        valueAsString: '$value',
-        valueAsStringIsTruncated: false,
-      ),
-    ),
-    _isolateRef,
+      final setFinder = find.selectableText('Root 1: Set (243,621 items)');
+      await verifyGroupings(tester, parentFinder: setFinder);
+    },
   );
 }

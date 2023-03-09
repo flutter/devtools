@@ -19,6 +19,7 @@ import '../../../shared/heap/class_filter.dart';
 import '../../../shared/heap/heap.dart';
 import '../../../shared/heap/model.dart';
 import '../../../shared/primitives/memory_utils.dart';
+import '../../../shared/primitives/simple_elements.dart';
 import 'heap_diff.dart';
 import 'item_controller.dart';
 import 'simple_controllers.dart';
@@ -34,6 +35,8 @@ class DiffPaneController extends DisposableController {
   final _isTakingSnapshot = ValueNotifier<bool>(false);
 
   final retainingPathController = RetainingPathController();
+
+  final sizeTypeToShowForDiff = ValueNotifier<SizeType>(SizeType.retained);
 
   final core = CoreData();
   late final derived = DerivedData(core);
@@ -64,7 +67,7 @@ class DiffPaneController extends DisposableController {
     final item = SnapshotInstanceItem(
       id: _snapshotId++,
       displayNumber: _nextDisplayNumber(),
-      isolateName: currentIsolateName ?? '<isolate-not-detected>',
+      isolateName: selectedIsolateName ?? '<isolate-not-detected>',
     );
 
     snapshots.add(item);

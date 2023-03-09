@@ -59,6 +59,7 @@ const refreshTimelineEvents = 'refreshTimelineEvents';
 const performanceOverlay = 'performanceOverlay';
 const performanceOverlayDocs = 'performanceOverlayDocs';
 const timelineFlameChartHelp = 'timelineFlameChartHelp';
+const framesChartVisibility = 'framesChartVisibility';
 const selectFlutterFrame = 'selectFlutterFrame';
 const traceEventProcessingTime = 'traceEventProcessingTime';
 const trackRebuilds = 'trackRebuilds';
@@ -79,7 +80,6 @@ const canvasSaveLayerDocs = 'canvasSaveLayerDocs';
 const intrinsicOperationsDocs = 'intrinsicOperationsDocs';
 const shaderCompilationDocs = 'shaderCompilationDocs';
 const shaderCompilationDocsTooltipLink = 'shaderCompilationDocsTooltipLink';
-const analyzeSelectedFrame = 'analyzeSelectedFrame';
 const collectRasterStats = 'collectRasterStats';
 const perfettoModeTraceEventProcessingTime =
     'traceEventProcessingTime-perfettoMode';
@@ -118,6 +118,10 @@ const objectInspectorScreen = 'objectInspector';
 const programExplorer = 'programExplorer';
 const objectStore = 'objectStore';
 const classHierarchy = 'classHierarchy';
+
+// Network Events:
+const inspectorTreeControllerInitialized = 'InspectorTreeControllerInitialized';
+const inspectorTreeControllerRootChange = 'InspectorTreeControllerRootChange';
 
 // Common actions shared across screens.
 // These actions will be tracked per screen, so they will still be
@@ -202,6 +206,7 @@ class MemoryEvent {
 /// by a widget used in different contexts.
 enum MemoryAreas {
   snapshotSingle('single'),
+  snapshotDiff('diff'),
   snapshotDiffDelta('diff-delta'),
   snapshotDiffNew('diff-new'),
   ;

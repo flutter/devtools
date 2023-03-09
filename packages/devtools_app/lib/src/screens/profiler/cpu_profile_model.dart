@@ -190,9 +190,10 @@ class CpuProfileData {
       final resolvedUrl = (stackFrameJson[resolvedUrlKey] as String?) ?? '';
       final packageUri =
           (stackFrameJson[resolvedPackageUriKey] as String?) ?? resolvedUrl;
+      final name = getSimpleStackFrameName(stackFrameJson[nameKey] as String?);
       final stackFrame = CpuStackFrame(
         id: entry.key,
-        name: getSimpleStackFrameName(stackFrameJson[nameKey] as String?),
+        name: name,
         verboseName: stackFrameJson[nameKey] as String?,
         category: stackFrameJson[categoryKey] as String?,
         // If the user is on a version of Flutter where resolvedUrl is not
@@ -995,7 +996,6 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
     int? sourceLine,
     CpuProfileMetaData? profileMetaData,
     bool copySampleCounts = true,
-    bool resetInclusiveSampleCount = true,
   }) {
     final copy = CpuStackFrame._(
       id: id ?? this.id,
@@ -1012,8 +1012,7 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
     if (copySampleCounts) {
       copy
         ..exclusiveSampleCount = exclusiveSampleCount
-        ..inclusiveSampleCount =
-            resetInclusiveSampleCount ? null : inclusiveSampleCount;
+        ..inclusiveSampleCount = inclusiveSampleCount;
     }
     return copy;
   }
@@ -1023,7 +1022,7 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
   /// The returned copy stack frame will have a null parent.
   @override
   CpuStackFrame deepCopy() {
-    final copy = shallowCopy(resetInclusiveSampleCount: false);
+    final copy = shallowCopy();
     for (CpuStackFrame child in children) {
       copy.addChild(child.deepCopy());
     }
@@ -1232,14 +1231,13 @@ class _CpuProfileTimelineTree {
   final bool isCodeTree;
   int frameId = kNoFrameId;
 
-  vm_service.FuncRef? get _function {
+  Object? get _function {
     if (isCodeTree) {
       return _code.function!;
     }
     final function = samples.functions![index].function;
-    if (function is vm_service.FuncRef) {
-      // TODO(jacobr): is this really anything else? The VMService API isn't
-      // clear.
+    if (function is vm_service.FuncRef ||
+        function is vm_service.NativeFunction) {
       return function;
     }
     return null;
@@ -1247,7 +1245,16 @@ class _CpuProfileTimelineTree {
 
   vm_service.CodeRef get _code => samples.codes[index].code!;
 
-  String? get name => isCodeTree ? _code.name : _function?.name;
+  String? get name {
+    if (isCodeTree) return _code.name;
+    switch (_function.runtimeType) {
+      case vm_service.FuncRef:
+        return (_function as vm_service.FuncRef?)?.name;
+      case vm_service.NativeFunction:
+        return (_function as vm_service.NativeFunction?)?.name;
+    }
+    return null;
+  }
 
   String? get className {
     if (isCodeTree) return null;
@@ -1261,22 +1268,23 @@ class _CpuProfileTimelineTree {
     return null;
   }
 
-  String? get resolvedUrl => isCodeTree
+  String? get resolvedUrl => isCodeTree && _function is vm_service.FuncRef?
       ?
       // TODO(bkonyi): not sure if this is a resolved URL or not, but it's not
       // critical since this is only displayed when VM developer mode is
       // enabled.
-      _function?.location?.script!.uri
+      (_function as vm_service.FuncRef?)?.location?.script?.uri
       : samples.functions![index].resolvedUrl;
 
   int? get sourceLine {
     final function = _function;
     try {
-      return function?.location?.line;
+      if (function is vm_service.FuncRef?) {
+        return function?.location?.line;
+      }
+      return null;
     } catch (_) {
-      // Fail gracefully if `function` has no getter `location` (for example, if
-      // the function is an instance of [NativeFunction]) or generally if
-      // `function.location.line` throws an exception.
+      // Fail gracefully if `function.location.line` throws an exception.
       return null;
     }
   }
@@ -1325,6 +1333,32 @@ extension CpuSamplesExtension on vm_service.CpuSamples {
       final className = current.className;
       if (className != null) {
         return '$className.${current.name}';
+      }
+      if (current.name == anonymousClosureName &&
+          current._function is vm_service.FuncRef) {
+        final nameParts = <String?>[current.name];
+
+        final function = current._function as vm_service.FuncRef;
+        var owner = function.owner;
+        switch (owner.runtimeType) {
+          case vm_service.FuncRef:
+            owner = owner as vm_service.FuncRef;
+            final functionName = owner.name;
+
+            String? className;
+            if (owner.owner is vm_service.ClassRef) {
+              className = (owner.owner as vm_service.ClassRef).name;
+            }
+
+            nameParts.insertAll(0, [className, functionName]);
+            break;
+          case vm_service.ClassRef:
+            final className = (owner as vm_service.ClassRef).name;
+            nameParts.insert(0, className);
+        }
+
+        nameParts.removeWhere((element) => element == null);
+        return nameParts.join('.');
       }
       return current.name;
     }

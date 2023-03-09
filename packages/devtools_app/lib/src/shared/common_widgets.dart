@@ -12,6 +12,7 @@ import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../screens/debugger/debugger_controller.dart';
+import '../screens/inspector/layout_explorer/ui/theme.dart';
 import 'analytics/analytics.dart' as ga;
 import 'config_specific/launch_url/launch_url.dart';
 import 'console/widgets/expandable_variable.dart';
@@ -22,6 +23,7 @@ import 'globals.dart';
 import 'primitives/auto_dispose.dart';
 import 'primitives/flutter_widgets/linked_scroll_controller.dart';
 import 'primitives/utils.dart';
+import 'routing.dart';
 import 'theme.dart';
 import 'ui/icons.dart';
 import 'ui/label.dart';
@@ -716,21 +718,57 @@ class ProcessingInfo extends StatelessWidget {
 }
 
 /// Common button for exiting offline mode.
-///
-/// Consumers of this widget will be responsible for including the following in
-/// onPressed:
-///
-/// setState(() {
-///   offlineController.exitOfflineMode();
-/// }
-class ExitOfflineButton extends IconLabelButton {
-  const ExitOfflineButton({required VoidCallback onPressed})
-      : super(
-          key: const Key('exit offline button'),
-          onPressed: onPressed,
-          label: 'Exit offline mode',
-          icon: Icons.clear,
+class ExitOfflineButton extends StatelessWidget {
+  const ExitOfflineButton({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final routerDelegate = DevToolsRouterDelegate.of(context);
+    return IconLabelButton(
+      key: const Key('exit offline button'),
+      label: 'Exit offline mode',
+      icon: Icons.clear,
+      onPressed: () {
+        offlineController.exitOfflineMode();
+        // Use Router.neglect to replace the current history entry with
+        // the homepage so that clicking Back will not return here.
+        Router.neglect(
+          context,
+          () => routerDelegate.navigateHome(clearScreenParam: true),
         );
+      },
+    );
+  }
+}
+
+class OfflineAwareControls extends StatelessWidget {
+  const OfflineAwareControls({
+    required this.controlsBuilder,
+    super.key,
+  });
+
+  final Widget Function(bool) controlsBuilder;
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder<bool>(
+      valueListenable: offlineController.offlineMode,
+      builder: (context, offline, _) {
+        return Row(
+          children: [
+            if (offlineController.offlineMode.value)
+              const Padding(
+                padding: EdgeInsets.only(right: defaultSpacing),
+                child: ExitOfflineButton(),
+              ),
+            Expanded(
+              child: controlsBuilder(offline),
+            ),
+          ],
+        );
+      },
+    );
+  }
 }
 
 /// A small element containing some accessory information, often a numeric
@@ -1215,6 +1253,8 @@ class RoundedDropDownButton<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bgColor = Theme.of(context).colorScheme.backgroundColorSelected;
+
     return RoundedOutlinedBorder(
       child: Center(
         child: Container(
@@ -1231,6 +1271,7 @@ class RoundedDropDownButton<T> extends StatelessWidget {
               style: style,
               selectedItemBuilder: selectedItemBuilder,
               items: items,
+              focusColor: bgColor,
             ),
           ),
         ),
@@ -1998,7 +2039,7 @@ Widget maybeWrapWithTooltip({
   EdgeInsetsGeometry? tooltipPadding,
   required Widget child,
 }) {
-  if (tooltip != null) {
+  if (tooltip != null && tooltip.isNotEmpty) {
     return DevToolsTooltip(
       message: tooltip,
       padding: tooltipPadding,

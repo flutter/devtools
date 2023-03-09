@@ -2,10 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 
-import 'primitives/trees.dart';
-import 'primitives/utils.dart';
+import '../../devtools_app.dart';
+import '../screens/vm_developer/vm_developer_common_widgets.dart';
+import 'ui/colors.dart';
 
 mixin ProfilableDataMixin<T extends TreeNode<T>> on TreeNode<T> {
   ProfileMetaData get profileMetaData;
@@ -145,6 +146,7 @@ class BottomUpTransformer<T extends ProfilableDataMixin<T>> {
         node: topDownRoot,
         currentBottomUpRoot: null,
         bottomUpRoots: <T>[],
+        skipRoot: true,
       );
 
       // Set the bottom up sample counts for each sample.
@@ -156,13 +158,13 @@ class BottomUpTransformer<T extends ProfilableDataMixin<T>> {
     }
 
     if (rootedAtTags) {
-      // Calculate the total time for each tag root. The sum of the inclusive
+      // Calculate the total time for each tag root. The sum of the exclusive
       // times for each child for the tag node is the total time spent with the
       // given tag active.
       for (final tagRoot in bottomUpRoots) {
-        tagRoot._inclusiveSampleCount = tagRoot.children.fold<int>(
+        tagRoot.inclusiveSampleCount = tagRoot.children.fold<int>(
           0,
-          (prev, e) => prev + e._inclusiveSampleCount!,
+          (prev, e) => prev + e.exclusiveSampleCount,
         );
       }
     }
@@ -183,19 +185,35 @@ class BottomUpTransformer<T extends ProfilableDataMixin<T>> {
     required T node,
     required T? currentBottomUpRoot,
     required List<T> bottomUpRoots,
+    bool skipRoot = false,
   }) {
-    final copy = node.shallowCopy() as T;
+    if (skipRoot && node.isRoot) {
+      // When [skipRoot] is true, do not include the root node at the leaf of
+      // each bottom up tree. This is to avoid having the 'all' node at the
+      // at the bottom of each bottom up path.
+    } else {
+      // Inclusive and exclusive sample counts are copied by default.
+      final copy = node.shallowCopy() as T;
 
-    if (currentBottomUpRoot != null) {
-      copy.addChild(currentBottomUpRoot.deepCopy());
-    }
+      if (currentBottomUpRoot != null) {
+        copy.addChild(currentBottomUpRoot.deepCopy());
+      }
 
-    // [copy] is the new root of the bottom up stack.
-    currentBottomUpRoot = copy;
+      // [copy] is the new root of the bottom up stack.
+      currentBottomUpRoot = copy;
 
-    if (node.exclusiveSampleCount > 0) {
-      // This node is a leaf node, meaning it is a bottom up root.
-      bottomUpRoots.add(currentBottomUpRoot);
+      if (node.exclusiveSampleCount > 0) {
+        // This node is a leaf node, meaning that one or more CPU samples
+        // contain [currentBottomUpRoot] as the top stack frame. This means it
+        // is a bottom up root.
+        bottomUpRoots.add(currentBottomUpRoot);
+      } else {
+        // If [currentBottomUpRoot] is not a bottom up root, the inclusive count
+        // should be set to null. This will allow the inclusive count to be
+        // recalculated now that this node is part of its parent's bottom up
+        // tree, not its own.
+        currentBottomUpRoot.inclusiveSampleCount = null;
+      }
     }
     for (final child in node.children.cast<T>()) {
       generateBottomUpRoots(
@@ -207,7 +225,8 @@ class BottomUpTransformer<T extends ProfilableDataMixin<T>> {
     return bottomUpRoots;
   }
 
-  /// Sets sample counts of [node] and all children to [exclusiveSampleCount].
+  /// Cascades the [exclusiveSampleCount] and [inclusiveSampleCount] of [node]
+  /// to all of its children (recursive).
   ///
   /// This is necessary for the transformation of a [ProfilableDataMixin] to its
   /// bottom-up representation. This is an intermediate step between
@@ -215,10 +234,94 @@ class BottomUpTransformer<T extends ProfilableDataMixin<T>> {
   /// [bottomUpRootsFor].
   @visibleForTesting
   void cascadeSampleCounts(T node) {
-    node.inclusiveSampleCount = node.exclusiveSampleCount;
     for (final child in node.children.cast<T>()) {
       child.exclusiveSampleCount = node.exclusiveSampleCount;
+      child.inclusiveSampleCount = node.inclusiveSampleCount;
       cascadeSampleCounts(child);
     }
   }
 }
+
+class MethodAndSourceDisplay extends StatelessWidget {
+  const MethodAndSourceDisplay({
+    required this.methodName,
+    required this.packageUri,
+    this.sourceLine,
+    required this.isSelected,
+    super.key,
+  });
+
+  static const separator = ' - ';
+
+  final String methodName;
+
+  final String packageUri;
+
+  final int? sourceLine;
+
+  final bool isSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    final textColor = isSelected ? defaultSelectionForegroundColor : null;
+    var fontStyle = Theme.of(context).fixedFontStyle;
+    fontStyle =
+        textColor == null ? fontStyle : fontStyle.copyWith(color: textColor);
+
+    final sourceTextSpans = <TextSpan>[];
+    final packageUriWithSourceLine = uriWithSourceLine(packageUri, sourceLine);
+
+    if (packageUriWithSourceLine.isNotEmpty) {
+      sourceTextSpans.add(const TextSpan(text: separator));
+
+      final sourceDisplay = '($packageUriWithSourceLine)';
+      final script = scriptManager.scriptRefForUri(packageUri);
+      final showSourceAsLink = script != null;
+      if (showSourceAsLink) {
+        sourceTextSpans.add(
+          VmServiceObjectLink(
+            object: script,
+            textBuilder: (_) => sourceDisplay,
+            isSelected: isSelected,
+            onTap: (e) {
+              DevToolsRouterDelegate.of(context).navigate(
+                DebuggerScreen.id,
+                const {},
+                CodeViewSourceLocationNavigationState(
+                  script: script,
+                  line: sourceLine!,
+                ),
+              );
+            },
+          ).buildTextSpan(context),
+        );
+      } else {
+        sourceTextSpans.add(
+          TextSpan(
+            text: sourceDisplay,
+            style: fontStyle,
+          ),
+        );
+      }
+    }
+    return Row(
+      children: [
+        RichText(
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          text: TextSpan(
+            text: methodName,
+            style: fontStyle,
+            children: sourceTextSpans,
+          ),
+        ),
+        // Include this [Spacer] so that the clickable [VmServiceObjectLink]
+        // does not extend all the way to the end of the row.
+        const Spacer(),
+      ],
+    );
+  }
+}
+
+String uriWithSourceLine(String uri, int? sourceLine) =>
+    '$uri${sourceLine != null ? ':$sourceLine' : ''}';

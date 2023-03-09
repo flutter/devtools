@@ -8,24 +8,26 @@ import 'package:vm_service/vm_service.dart';
 import '../../../../../shared/globals.dart';
 import '../../../../../shared/memory/adapted_heap_data.dart';
 import '../../../../../shared/memory/class_name.dart';
+import '../../../../../shared/vm_utils.dart';
 import '../../../shared/heap/heap.dart';
-import '../../../shared/primitives/instance_set_view.dart';
+import '../../../shared/primitives/instance_set_button.dart';
 
 class HeapClassSampler extends ClassSampler {
-  HeapClassSampler(this.objects, this.heap);
+  HeapClassSampler(this.objects, this.heap, this.heapClass)
+      : assert(objects.objectsByCodes.isNotEmpty);
 
-  final SingleClassStats objects;
+  final HeapClassName heapClass;
+  final ObjectSet objects;
   final AdaptedHeapData heap;
 
   IsolateRef get _mainIsolateRef =>
       serviceManager.isolateManager.mainIsolate.value!;
 
-  Future<InstanceSet> _liveInstances() async {
+  Future<InstanceSet?> _liveInstances() async {
     final isolateId = _mainIsolateRef.id!;
 
-    final theClass = (await serviceManager.service!.getClassList(isolateId))
-        .classes!
-        .firstWhere((ref) => objects.heapClass.matches(ref));
+    final theClass = await findClass(isolateId, heapClass);
+    if (theClass == null) return null;
 
     return await serviceManager.service!.getInstances(
       isolateId,
@@ -36,12 +38,12 @@ class HeapClassSampler extends ClassSampler {
 
   @override
   Future<void> oneLiveStaticToConsole() async {
-    final instances = (await _liveInstances()).instances ?? [];
+    final instances = (await _liveInstances())?.instances;
 
-    final instanceRef = instances.firstWhereOrNull(
+    final instanceRef = instances?.firstWhereOrNull(
       (objRef) =>
           objRef is InstanceRef &&
-          objects.objects.objectsByCodes.containsKey(objRef.identityHashCode),
+          objects.objectsByCodes.containsKey(objRef.identityHashCode),
     ) as InstanceRef?;
 
     if (instanceRef == null) {
@@ -51,8 +53,7 @@ class HeapClassSampler extends ClassSampler {
       return;
     }
 
-    final heapObject =
-        objects.objects.objectsByCodes[instanceRef.identityHashCode!]!;
+    final heapObject = objects.objectsByCodes[instanceRef.identityHashCode!]!;
 
     final heapSelection = HeapObjectSelection(heap, object: heapObject);
 
@@ -62,35 +63,32 @@ class HeapClassSampler extends ClassSampler {
       isolateRef: _mainIsolateRef,
       heapSelection: heapSelection,
     );
-
-    // TODO (polina-c): remove the commented code
-    // before opening the flag.
-    // // eval object
-    // final response1 = await serviceManager.service!
-    //     .evaluate(_mainIsolateRef.id!, instance.id!, 'toString()');
-    // print('!!!! eval without scope: ' + response1.json!['valueAsString']);
-
-    // // eval object
-    // final response2 = await serviceManager.service!.evaluate(
-    //   _mainIsolateRef.id!,
-    //   instance.id!,
-    //   'identityHashCode(this)',
-    //   scope: {'this': instance.id!},
-    // );
-    // print('!!!! eval with scope: ' + response2.json!['valueAsString']);
   }
 
   @override
   bool get isEvalEnabled =>
-      objects.heapClass.classType(serviceManager.rootInfoNow().package) !=
+      heapClass.classType(serviceManager.rootInfoNow().package) !=
       ClassType.runtime;
 
   @override
   Future<void> manyLiveToConsole() async {
     serviceManager.consoleService.appendInstanceSet(
-      type: objects.heapClass.shortName,
-      instanceSet: await _liveInstances(),
+      type: heapClass.shortName,
+      instanceSet: (await _liveInstances())!,
       isolateRef: _mainIsolateRef,
+    );
+  }
+
+  @override
+  Future<void> oneStaticToConsole() async {
+    final heapObject = objects.objectsByCodes.values.first;
+    final heapSelection = HeapObjectSelection(heap, object: heapObject);
+
+    // drop to console
+    serviceManager.consoleService.appendBrowsableInstance(
+      instanceRef: null,
+      isolateRef: _mainIsolateRef,
+      heapSelection: heapSelection,
     );
   }
 }

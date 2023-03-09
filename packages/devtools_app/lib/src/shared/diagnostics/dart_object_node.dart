@@ -11,8 +11,10 @@ import '../globals.dart';
 import '../memory/adapted_heap_data.dart';
 import '../primitives/trees.dart';
 import '../primitives/utils.dart';
+import '../vm_utils.dart';
 import 'diagnostics_node.dart';
 import 'generic_instance_reference.dart';
+import 'helpers.dart';
 import 'inspector_service.dart';
 
 // TODO(jacobr): gracefully handle cases where the isolate has closed and
@@ -239,13 +241,9 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
 
     final value = this.value;
     if (value is InstanceRef) {
-      if (value.kind != null &&
-          (value.kind!.endsWith('List') ||
-              value.kind == InstanceKind.kList ||
-              value.kind == InstanceKind.kMap ||
-              value.kind == InstanceKind.kRecord)) {
-        return value.length ?? 0;
-      }
+      final instanceLength = value.length;
+      if (instanceLength == null) return 0;
+      return instanceLength - offset;
     }
 
     return 0;
@@ -253,27 +251,64 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
 
   int? _childCount;
 
+  bool get isPartialObject {
+    final value = this.value;
+    // Only instance kinds can be partial:
+    if (value is InstanceRef) {
+      // Only instance kinds with a length property can be partial. See:
+      // https://api.flutter.dev/flutter/vm_service/Instance/length.html
+      final instanceLength = value.length;
+      if (instanceLength == null) return false;
+      return offset != 0 || childCount < instanceLength;
+    }
+
+    return false;
+  }
+
+  // TODO(elliette): Can remove this workaround once DWDS correctly returns
+  // InstanceKind.kSet for the kind of `Sets`. See:
+  // https://github.com/dart-lang/webdev/issues/2001
+  bool get isSet {
+    final value = this.value;
+    if (value is InstanceRef) {
+      final kind = value.kind ?? '';
+      if (kind == InstanceKind.kSet) return true;
+      final name = value.classRef?.name ?? '';
+      if (name.contains('Set')) return true;
+    }
+    return false;
+  }
+
   bool treeInitializeStarted = false;
   bool treeInitializeComplete = false;
 
   @override
   bool get isExpandable {
+    final theRef = ref;
+    final instanceRef = theRef?.instanceRef;
+    if (theRef is ObjectReferences) {
+      if (instanceRef?.length == 0) return false;
+      return theRef.refNodeType.isRoot ||
+          children.isNotEmpty ||
+          childCount > 0 ||
+          !isPrimitiveInstanceKind(instanceRef?.kind);
+    }
     if (treeInitializeComplete || children.isNotEmpty || childCount > 0) {
       return children.isNotEmpty || childCount > 0;
     }
-    final diagnostic = ref?.diagnostic;
+    final diagnostic = theRef?.diagnostic;
     if (diagnostic != null &&
         ((diagnostic.inlineProperties.isNotEmpty) || diagnostic.hasChildren))
       return true;
+
     // TODO(jacobr): do something smarter to avoid expandable variable flicker.
-    final instanceRef = ref?.instanceRef;
     if (instanceRef != null) {
       if (instanceRef.kind == InstanceKind.kStackTrace) {
         return true;
       }
       return instanceRef.valueAsString == null;
     }
-    final value = ref?.value;
+    final value = theRef?.value;
     return (value is! String?) && (value is! num?) && (value is! bool?);
   }
 
@@ -316,12 +351,18 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
         }
       }
       // List, Map, Uint8List, Uint16List, etc...
-      if (kind != null && kind == InstanceKind.kList ||
+      if (isList(value) ||
           kind == InstanceKind.kMap ||
-          kind!.endsWith('List')) {
+          kind == InstanceKind.kSet) {
+        // TODO(elliette): Determine the signature from type parameters, see:
+        // https://api.flutter.dev/flutter/vm_service/ClassRef/typeParameters.html
+        // DWDS provides us with a readable format including type parameters in
+        // the classRef name, for the vm_service we fall back to just using the
+        // kind:
+        final name = _isPrivateName(valueStr) ? kind : valueStr;
         final itemLength = value.length;
         if (itemLength == null) return valueStr;
-        return '$valueStr (${_itemCount(itemLength)})';
+        return '$name (${_itemCount(itemLength)})';
       }
     } else if (value is Sentinel) {
       valueStr = value.valueAsString;
@@ -335,6 +376,8 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
 
     return valueStr;
   }
+
+  bool _isPrivateName(String name) => name.startsWith('_');
 
   static String _itemCount(int count) {
     return '${nf.format(count)} ${pluralize('item', count)}';

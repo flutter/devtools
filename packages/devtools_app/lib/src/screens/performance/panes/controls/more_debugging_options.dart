@@ -9,7 +9,7 @@ import '../../../../service/service_extensions.dart' as extensions;
 import '../../../../shared/feature_flags.dart';
 import '../../../../shared/globals.dart';
 import '../../../../shared/theme.dart';
-import '../../performance_screen.dart';
+import 'performance_controls.dart';
 
 class MoreDebuggingOptionsButton extends StatelessWidget {
   const MoreDebuggingOptionsButton({Key? key}) : super(key: key);
@@ -23,7 +23,7 @@ class MoreDebuggingOptionsButton extends StatelessWidget {
       icon: Icons.build,
       tooltip: 'Opens a list of options you can use to help debug performance',
       minScreenWidthForTextBeforeScaling:
-          SecondaryPerformanceControls.minScreenWidthForTextBeforeScaling,
+          PerformanceControls.minScreenWidthForTextBeforeScaling,
       extensions: [
         extensions.disableClipLayers,
         extensions.disableOpacityLayers,

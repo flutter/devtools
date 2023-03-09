@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import '../common_widgets.dart';
 import '../primitives/trees.dart';
 import '../primitives/utils.dart';
 import '../theme.dart';
@@ -68,9 +69,14 @@ abstract class ColumnData<T> {
 
   String? getCaption(T dataObject) => null;
 
-  // TODO(kenz): this isn't hooked up to the table elements. Do this.
   /// Get the cell's tooltip value from the given [dataObject].
   String getTooltip(T dataObject) => getDisplayValue(dataObject);
+
+  /// Get the cell's rich tooltip span from the given [dataObject].
+  ///
+  /// If both [getTooltip] and [getRichTooltip] are provided, the rich tooltip
+  /// will take precedence.
+  InlineSpan? getRichTooltip(T dataObject, BuildContext context) => null;
 
   /// Get the cell's text color from the given [dataObject].
   Color? getTextColor(T dataObject) => null;
@@ -129,14 +135,21 @@ mixin PinnableListEntry {
 /// will be drawn between groups and an additional header row will be added to
 /// the table to display the column group titles.
 class ColumnGroup {
-  ColumnGroup({required this.title, required this.range, this.tooltip});
+  ColumnGroup({required this.title, required this.range});
 
-  final String title;
+  ColumnGroup.fromText({
+    required String title,
+    required Range range,
+    String? tooltip,
+  }) : this(
+          title: maybeWrapWithTooltip(child: Text(title), tooltip: tooltip),
+          range: range,
+        );
+
+  final Widget title;
 
   /// The range of column indices for columns that make up this group.
   final Range range;
-
-  final String? tooltip;
 }
 
 extension ColumnDataExtension<T> on ColumnData<T> {
@@ -151,4 +164,79 @@ extension ColumnDataExtension<T> on ColumnData<T> {
         return MainAxisAlignment.start;
     }
   }
+}
+
+typedef RichTooltipBuilder<T> = InlineSpan? Function(T, BuildContext);
+
+/// Column that, for each row, shows a time value in milliseconds and the
+/// percentage that the time value is of the total time for this data set.
+///
+/// Both time and percentage are provided through callbacks [timeProvider] and
+/// [percentAsDoubleProvider], respectively.
+///
+/// When [percentageOnly] is true, the time value will be omitted, and only the
+/// percentage will be displayed.
+abstract class TimeAndPercentageColumn<T> extends ColumnData<T> {
+  TimeAndPercentageColumn({
+    required String title,
+    required this.percentAsDoubleProvider,
+    this.timeProvider,
+    this.tooltipProvider,
+    this.richTooltipProvider,
+    this.secondaryCompare,
+    this.percentageOnly = false,
+    double columnWidth = _defaultTimeColumnWidth,
+    super.titleTooltip,
+  })  : assert(percentageOnly == (timeProvider == null)),
+        super(
+          title,
+          fixedWidthPx: scaleByFontFactor(columnWidth),
+        );
+
+  static const _defaultTimeColumnWidth = 180.0;
+
+  Duration Function(T)? timeProvider;
+
+  double Function(T) percentAsDoubleProvider;
+
+  String Function(T)? tooltipProvider;
+
+  RichTooltipBuilder<T>? richTooltipProvider;
+
+  Comparable Function(T)? secondaryCompare;
+
+  final bool percentageOnly;
+
+  @override
+  bool get numeric => true;
+
+  @override
+  int compare(T a, T b) {
+    final int result = super.compare(a, b);
+    if (result == 0 && secondaryCompare != null) {
+      return secondaryCompare!(a).compareTo(secondaryCompare!(b));
+    }
+    return result;
+  }
+
+  @override
+  double getValue(T dataObject) => percentageOnly
+      ? percentAsDoubleProvider(dataObject)
+      : timeProvider!(dataObject).inMicroseconds.toDouble();
+
+  @override
+  String getDisplayValue(T dataObject) {
+    final percentDisplay = '${percent2(percentAsDoubleProvider(dataObject))}';
+    if (percentageOnly) {
+      return percentDisplay;
+    }
+    return '${msText(timeProvider!(dataObject), fractionDigits: 2)} ($percentDisplay)';
+  }
+
+  @override
+  String getTooltip(T dataObject) => tooltipProvider?.call(dataObject) ?? '';
+
+  @override
+  InlineSpan? getRichTooltip(T dataObject, BuildContext context) =>
+      richTooltipProvider?.call(dataObject, context);
 }
