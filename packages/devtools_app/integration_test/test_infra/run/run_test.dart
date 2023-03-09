@@ -13,6 +13,10 @@ import '_test_app_driver.dart';
 
 bool _debugTestScript = false;
 
+/// Runs one test.
+///
+/// Do not use this method directly, but instead use the run_tests.dart
+/// which performs essential set up steps.
 Future<void> runFlutterIntegrationTest(
   TestArgs testRunnerArgs, {
   String testAppPath = 'test/test_infra/fixtures/flutter_app',
