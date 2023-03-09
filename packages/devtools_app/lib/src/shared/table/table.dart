@@ -204,6 +204,12 @@ class FlatTableState<T> extends State<FlatTable<T>> with AutoDisposeMixin {
     }
   }
 
+  @override
+  void dispose() {
+    _tableController = null;
+    super.dispose();
+  }
+
   /// Sets up the [tableController] for the property values in [widget].
   ///
   /// [reset] determines whether or not we should re-initialize
@@ -492,6 +498,12 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
     if (oldWidget.selectionNotifier != widget.selectionNotifier) {
       _initSelectionListener();
     }
+  }
+
+  @override
+  void dispose() {
+    _tableController = null;
+    super.dispose();
   }
 
   /// Sets up the [tableController] for the property values in [widget].
