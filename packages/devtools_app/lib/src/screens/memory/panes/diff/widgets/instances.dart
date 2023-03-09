@@ -19,14 +19,14 @@ import '../controller/sampler.dart';
 class InstanceTableCell extends StatelessWidget {
   InstanceTableCell(
     ObjectSet objects,
-    AdaptedHeapData heap,
+    HeapDataCallback heap,
     HeapClassName heapClass, {
     required this.isSelected,
     required this.gaContext,
     this.liveItemsEnabled = true,
   })  : _showMenu = _shouldShowMenu(isSelected, objects),
         _sampleObtainer = _shouldShowMenu(isSelected, objects)
-            ? HeapClassSampler(objects, heap, heapClass)
+            ? HeapClassSampler(objects, heap(), heapClass)
             : null,
         _count = objects.instanceCount;
 

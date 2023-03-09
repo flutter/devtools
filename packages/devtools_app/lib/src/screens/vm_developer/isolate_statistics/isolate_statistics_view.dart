@@ -264,7 +264,7 @@ class _PercentageColumn extends ColumnData<VMTag> {
   double getValue(VMTag dataObject) => dataObject.percentage;
 
   @override
-  String getDisplayValue(VMTag dataObject) => percent2(dataObject.percentage);
+  String getDisplayValue(VMTag dataObject) => percent(dataObject.percentage);
 }
 
 class _PortIDColumn extends ColumnData<InstanceRef> {

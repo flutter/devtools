@@ -1069,7 +1069,7 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
     buf.write('- ${msText(totalTime, fractionDigits: 2)} ');
     buf.write('($inclusiveSampleCount ');
     buf.write(inclusiveSampleCount == 1 ? 'sample' : 'samples');
-    buf.write(', ${percent2(totalTimeRatio)})');
+    buf.write(', ${percent(totalTimeRatio)})');
     return buf.toString();
   }
 }

@@ -248,5 +248,5 @@ abstract class TimeAndPercentageColumn<T> extends ColumnData<T> {
       '${msText(timeProvider!(dataObject), fractionDigits: 2)} (${_percentDisplay(dataObject)})';
 
   String _percentDisplay(T dataObject) =>
-      '${percent2(percentAsDoubleProvider(dataObject))}';
+      '${percent(percentAsDoubleProvider(dataObject))}';
 }

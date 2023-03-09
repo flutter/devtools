@@ -13,12 +13,6 @@ import 'package:flutter_test/flutter_test.dart';
 import '../../../test_infra/matchers/matchers.dart';
 import '../../../test_infra/scenes/memory/diff_snapshot.dart';
 
-final _customFilter = ClassFilter(
-  filterType: ClassFilterType.only,
-  except: '',
-  only: '',
-);
-
 class _FilterTest {
   _FilterTest({required this.isDiff});
 
@@ -39,49 +33,67 @@ final _tests = [
   _FilterTest(isDiff: true),
 ];
 
-void main() {
-  late DiffSnapshotScene scene;
+final _customFilter = ClassFilter(
+  filterType: ClassFilterType.only,
+  except: '',
+  only: '',
+);
 
-  Future<void> pumpScene(WidgetTester tester, _FilterTest test) async {
+void main() {
+  final scene = DiffSnapshotScene();
+  // The setup should happen one time, so that there is only one instance of
+  // DiffPaneController accross tests.
+  // Otherwize tests may exchange controllers, because, for performance purposes,
+  // table builds only first provided instance of column accross table instances.
+  // See [FlatTable.columns].
+  setUpAll(() async => await scene.setUp());
+
+  Future<DiffSnapshotScene> pumpScene(
+    WidgetTester tester,
+    _FilterTest test,
+  ) async {
+    scene.setClassFilterToShowAll();
+
     expect(
       scene.diffController.core.snapshots.value
           .where((element) => element.hasData),
       hasLength(2),
     );
 
-    if (test.isDiff) {
-      scene.diffController.setDiffing(
-        scene.diffController.derived.selectedItem.value as SnapshotInstanceItem,
-        scene.diffController.core.snapshots.value[1] as SnapshotInstanceItem,
-      );
-    }
+    final diffWith = test.isDiff
+        ? scene.diffController.core.snapshots.value[1] as SnapshotInstanceItem
+        : null;
+
+    scene.diffController.setDiffing(
+      scene.diffController.derived.selectedItem.value as SnapshotInstanceItem,
+      diffWith,
+    );
 
     await tester.pumpWidget(scene.build());
+    await tester.pumpAndSettle();
+    expect(
+      scene.diffController.core.classFilter.value.filterType,
+      ClassFilterType.showAll,
+    );
     await expectLater(
       find.byType(SnapshotInstanceItemPane),
       matchesDevToolsGolden(test.sceneGolden),
     );
+
+    return scene;
   }
 
   // Set a wide enough screen width that we do not run into overflow.
   const windowSize = Size(2225.0, 1000.0);
 
-  setUp(() async {
-    scene = DiffSnapshotScene();
-    await scene.setUp();
-  });
-
-  tearDown(() async {
-    scene.tearDown();
-  });
-
   for (final test in _tests) {
     testWidgetsWithWindowSize(
         '$ClassFilterDialog filters classes, ${test.name}', windowSize,
         (WidgetTester tester) async {
-      await pumpScene(tester, test);
+      final scene = await pumpScene(tester, test);
 
       await _switchFilter(
+        scene,
         ClassFilterType.showAll,
         ClassFilterType.except,
         tester,
@@ -89,6 +101,7 @@ void main() {
       );
 
       await _switchFilter(
+        scene,
         ClassFilterType.except,
         ClassFilterType.only,
         tester,
@@ -96,6 +109,7 @@ void main() {
       );
 
       await _switchFilter(
+        scene,
         ClassFilterType.only,
         ClassFilterType.showAll,
         tester,
@@ -108,11 +122,11 @@ void main() {
     testWidgetsWithWindowSize(
         '$ClassFilterDialog customizes and resets to default, ${test.name}',
         windowSize, (WidgetTester tester) async {
-      await pumpScene(tester, test);
+      final scene = await pumpScene(tester, test);
 
       // Customize filter.
-      scene.diffController.applyFilter(_customFilter);
-      await _checkDataGolden(null, tester, test);
+      scene.diffController.derived.applyFilter(_customFilter);
+      await _checkDataGolden(scene, null, tester, test);
 
       // Open dialog.
       await tester.tap(find.byType(ClassFilterButton));
@@ -123,12 +137,38 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(find.text('APPLY'));
       await tester.pumpAndSettle();
+      await tester.pumpAndSettle();
 
       final actualFilter = scene.diffController.core.classFilter.value;
       expect(actualFilter.filterType, equals(ClassFilterType.except));
       expect(actualFilter.except, equals(ClassFilter.defaultExceptString));
     });
   }
+}
+
+/// Verifies original and new state of filter and data.
+Future<void> _switchFilter(
+  DiffSnapshotScene scene,
+  ClassFilterType from,
+  ClassFilterType to,
+  WidgetTester tester,
+  _FilterTest test,
+) async {
+  await _checkDataGolden(scene, from, tester, test);
+
+  // Open dialog.
+  await tester.tap(find.byType(ClassFilterButton));
+  await _checkFilterGolden(from, tester);
+
+  // Select new filter.
+  final radioButton = find.byKey(Key(to.toString()));
+  await tester.tap(radioButton);
+  await _checkFilterGolden(to, tester);
+
+  // Close dialog.
+  await tester.tap(find.text('APPLY'));
+
+  await _checkDataGolden(scene, to, tester, test);
 }
 
 /// If type is null, filter is [_customFilter].
@@ -145,36 +185,19 @@ Future<void> _checkFilterGolden(
 
 /// If type is null, filter is [_customFilter].
 Future<void> _checkDataGolden(
+  DiffSnapshotScene scene,
   ClassFilterType? type,
   WidgetTester tester,
   _FilterTest test,
 ) async {
   await tester.pumpAndSettle();
+
+  final currentFilterType =
+      scene.diffController.core.classFilter.value.filterType;
+  expect(currentFilterType, type ?? _customFilter.filterType);
+
   await expectLater(
     find.byType(SnapshotInstanceItemPane),
     matchesDevToolsGolden(test.snapshotGolden(type)),
   );
-}
-
-/// Verifies original and new state of filter and data.
-Future<void> _switchFilter(
-  ClassFilterType from,
-  ClassFilterType to,
-  WidgetTester tester,
-  _FilterTest test,
-) async {
-  await _checkDataGolden(from, tester, test);
-
-  // Open dialog.
-  await tester.tap(find.byType(ClassFilterButton));
-  await _checkFilterGolden(from, tester);
-
-  // Select new filter.
-  await tester.tap(find.byKey(Key(to.toString())));
-  await _checkFilterGolden(to, tester);
-
-  // Close dialog.
-  await tester.tap(find.text('APPLY'));
-
-  await _checkDataGolden(to, tester, test);
 }
