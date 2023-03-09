@@ -80,7 +80,7 @@ class MethodTableGraphNode extends GraphNode {
                 .round(),
       );
 
-  void merge(MethodTableGraphNode other, {bool mergeTotalTime = false}) {
+  void merge(MethodTableGraphNode other, {required bool mergeTotalTime}) {
     if (!shallowEquals(other)) return;
     stackFrameIds.addAll(other.stackFrameIds);
     _selfCount += other.selfCount;

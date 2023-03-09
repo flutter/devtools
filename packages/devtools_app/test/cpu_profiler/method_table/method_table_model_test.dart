@@ -92,17 +92,31 @@ void main() {
       expect(node1Copy.selfCount, 1);
 
       // Attempt the unsuccessful merges first and verify nothing is changed.
-      node1Copy.merge(node3);
+      node1Copy.merge(node3, mergeTotalTime: true);
       expect(node1Copy.totalCount, 2);
       expect(node1Copy.selfCount, 1);
-      node1Copy.merge(node3);
+      node1Copy.merge(node3, mergeTotalTime: true);
       expect(node1Copy.totalCount, 2);
       expect(node1Copy.selfCount, 1);
 
       expect(node2.totalCount, 4);
       expect(node2.selfCount, 4);
-      node1Copy.merge(node2);
+      node1Copy.merge(node2, mergeTotalTime: true);
       expect(node1Copy.totalCount, 6);
+      expect(node1Copy.selfCount, 5);
+    });
+
+    test('merge without total time', () async {
+      // Make a copy so that we do not modify the original nodes.
+      final node1Copy = node1.copy();
+
+      expect(node1Copy.totalCount, 2);
+      expect(node1Copy.selfCount, 1);
+      expect(node2.totalCount, 4);
+      expect(node2.selfCount, 4);
+      
+      node1Copy.merge(node2, mergeTotalTime: false);
+      expect(node1Copy.totalCount, 2);
       expect(node1Copy.selfCount, 5);
     });
   });

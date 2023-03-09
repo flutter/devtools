@@ -479,7 +479,7 @@ void main() {
         await expectLater(
           find.byType(CpuProfiler),
           matchesDevToolsGolden(
-            '../test_infra/goldens/cpu_profiler_call_tree_no_guidelines.png',
+            '../test_infra/goldens/cpu_profiler/call_tree_no_guidelines.png',
           ),
         );
         await tester.tap(find.byType(DisplayTreeGuidelinesToggle));
@@ -489,7 +489,7 @@ void main() {
         await expectLater(
           find.byType(CpuProfiler),
           matchesDevToolsGolden(
-            '../test_infra/goldens/cpu_profiler_call_tree_guidelines.png',
+            '../test_infra/goldens/cpu_profiler/call_tree_guidelines.png',
           ),
         );
         await tester.tap(find.byType(DisplayTreeGuidelinesToggle));
@@ -499,7 +499,7 @@ void main() {
         await expectLater(
           find.byType(CpuProfiler),
           matchesDevToolsGolden(
-            '../test_infra/goldens/cpu_profiler_call_tree_no_guidelines.png',
+            '../test_infra/goldens/cpu_profiler/call_tree_no_guidelines.png',
           ),
         );
 
@@ -515,7 +515,7 @@ void main() {
         await expectLater(
           find.byType(CpuProfiler),
           matchesDevToolsGolden(
-            '../test_infra/goldens/cpu_profiler_bottom_up_no_guidelines.png',
+            '../test_infra/goldens/cpu_profiler/bottom_up_no_guidelines.png',
           ),
         );
         await tester.tap(find.byType(DisplayTreeGuidelinesToggle));
@@ -525,7 +525,7 @@ void main() {
         await expectLater(
           find.byType(CpuProfiler),
           matchesDevToolsGolden(
-            '../test_infra/goldens/cpu_profiler_bottom_up_guidelines.png',
+            '../test_infra/goldens/cpu_profiler/bottom_up_guidelines.png',
           ),
         );
         await tester.tap(find.byType(DisplayTreeGuidelinesToggle));
@@ -535,7 +535,7 @@ void main() {
         await expectLater(
           find.byType(CpuProfiler),
           matchesDevToolsGolden(
-            '../test_infra/goldens/cpu_profiler_bottom_up_no_guidelines.png',
+            '../test_infra/goldens/cpu_profiler/bottom_up_no_guidelines.png',
           ),
         );
       },
