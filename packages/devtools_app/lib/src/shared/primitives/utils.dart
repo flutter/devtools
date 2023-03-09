@@ -1149,6 +1149,15 @@ extension SetExtension<T> on Set<T> {
     }
     return false;
   }
+
+  bool containsAny(Iterable<T> any) {
+    for (var e in any) {
+      if (contains(e)) {
+        return true;
+      }
+    }
+    return false;
+  }
 }
 
 extension UiListExtension<T> on List<T> {
