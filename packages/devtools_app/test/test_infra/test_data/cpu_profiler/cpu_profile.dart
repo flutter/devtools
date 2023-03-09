@@ -41,6 +41,7 @@ final Map<String, dynamic> cpuProfileDataWithUserTagsJson = {
       'parent': 'cpuProfileRoot',
       'resolvedUrl': '',
       'packageUri': '',
+      'sourceLine': 111,
     },
     '140357727781376-2': {
       'category': 'Dart',
@@ -48,6 +49,7 @@ final Map<String, dynamic> cpuProfileDataWithUserTagsJson = {
       'parent': '140357727781376-1',
       'resolvedUrl':
           'org-dartlang-sdk:///third_party/dart/sdk/lib/vm/compact_hash.dart',
+      'sourceLine': 222,
     },
     '140357727781376-3': {
       'category': 'Dart',
@@ -55,6 +57,7 @@ final Map<String, dynamic> cpuProfileDataWithUserTagsJson = {
       'parent': '140357727781376-2',
       'resolvedUrl': '',
       'packageUri': '',
+      'sourceLine': 333,
     },
     '140357727781376-4': {
       'category': 'Dart',
@@ -62,6 +65,7 @@ final Map<String, dynamic> cpuProfileDataWithUserTagsJson = {
       'parent': '140357727781376-2',
       'resolvedUrl': '',
       'packageUri': '',
+      'sourceLine': 444,
     },
     '140357727781376-5': {
       'category': 'Dart',
@@ -69,6 +73,7 @@ final Map<String, dynamic> cpuProfileDataWithUserTagsJson = {
       'parent': '140357727781376-1',
       'resolvedUrl':
           'org-dartlang-sdk:///third_party/dart/sdk/lib/vm/compact_hash.dart',
+      'sourceLine': 555,
     },
     '140357727781376-6': {
       'category': 'Dart',
@@ -76,6 +81,7 @@ final Map<String, dynamic> cpuProfileDataWithUserTagsJson = {
       'parent': '140357727781376-5',
       'resolvedUrl':
           'path/to/flutter/packages/flutter/lib/src/rendering/custom_layout.dart',
+      'sourceLine': 666,
     },
   },
   'traceEvents': [
@@ -146,6 +152,40 @@ final Map<String, dynamic> cpuProfileDataWithUserTagsJson = {
     },
   ],
 };
+
+const profileGroupedByUserTagsGolden = '''
+  all - children: 3 - excl: 0 - incl: 5
+    userTagA - children: 1 - excl: 0 - incl: 2
+      Frame1 - children: 2 - excl: 0 - incl: 2
+        Frame2 - children: 1 - excl: 0 - incl: 1
+          Frame3 - children: 0 - excl: 1 - incl: 1
+        Frame5 - children: 0 - excl: 1 - incl: 1
+    userTagB - children: 1 - excl: 0 - incl: 1
+      Frame1 - children: 1 - excl: 0 - incl: 1
+        Frame2 - children: 1 - excl: 0 - incl: 1
+          Frame4 - children: 0 - excl: 1 - incl: 1
+    userTagC - children: 1 - excl: 0 - incl: 2
+      Frame1 - children: 1 - excl: 0 - incl: 2
+        Frame5 - children: 1 - excl: 1 - incl: 2
+          Frame6 - children: 0 - excl: 1 - incl: 1
+''';
+
+const profileGroupedByVmTagsGolden = '''
+  all - children: 3 - excl: 0 - incl: 5
+    vmTagA - children: 1 - excl: 0 - incl: 2
+      Frame1 - children: 2 - excl: 0 - incl: 2
+        Frame2 - children: 1 - excl: 0 - incl: 1
+          Frame3 - children: 0 - excl: 1 - incl: 1
+        Frame5 - children: 0 - excl: 1 - incl: 1
+    vmTagB - children: 1 - excl: 0 - incl: 1
+      Frame1 - children: 1 - excl: 0 - incl: 1
+        Frame2 - children: 1 - excl: 0 - incl: 1
+          Frame4 - children: 0 - excl: 1 - incl: 1
+    vmTagC - children: 1 - excl: 0 - incl: 2
+      Frame1 - children: 1 - excl: 0 - incl: 2
+        Frame5 - children: 1 - excl: 1 - incl: 2
+          Frame6 - children: 0 - excl: 1 - incl: 1
+''';
 
 const goldenCpuProfileString = '''
   all - children: 2 - excl: 0 - incl: 8

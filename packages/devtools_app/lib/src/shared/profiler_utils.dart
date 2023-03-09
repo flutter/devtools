@@ -246,8 +246,9 @@ class MethodAndSourceDisplay extends StatelessWidget {
   const MethodAndSourceDisplay({
     required this.methodName,
     required this.packageUri,
-    this.sourceLine,
+    required this.sourceLine,
     required this.isSelected,
+    this.displayInRow = true,
     super.key,
   });
 
@@ -260,6 +261,8 @@ class MethodAndSourceDisplay extends StatelessWidget {
   final int? sourceLine;
 
   final bool isSelected;
+
+  final bool displayInRow;
 
   @override
   Widget build(BuildContext context) {
@@ -304,22 +307,26 @@ class MethodAndSourceDisplay extends StatelessWidget {
         );
       }
     }
-    return Row(
-      children: [
-        RichText(
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          text: TextSpan(
-            text: methodName,
-            style: fontStyle,
-            children: sourceTextSpans,
-          ),
-        ),
-        // Include this [Spacer] so that the clickable [VmServiceObjectLink]
-        // does not extend all the way to the end of the row.
-        const Spacer(),
-      ],
+    final richText = RichText(
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+      text: TextSpan(
+        text: methodName,
+        style: fontStyle,
+        children: sourceTextSpans,
+      ),
     );
+    if (displayInRow) {
+      return Row(
+        children: [
+          richText,
+          // Include this [Spacer] so that the clickable [VmServiceObjectLink]
+          // does not extend all the way to the end of the row.
+          const Spacer(),
+        ],
+      );
+    }
+    return richText;
   }
 }
 

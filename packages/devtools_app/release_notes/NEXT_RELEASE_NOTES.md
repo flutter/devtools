@@ -15,6 +15,10 @@ TODO: Remove this section if there are not any general updates.
 * Persist a user's preference for whether the Flutter Frames chart should be shown by default. - [#5339](https://github.com/flutter/devtools/pull/5339)
 
 ## CPU profiler updates
+* Add a Method Table to the CPU profiler - [#5366](https://github.com/flutter/devtools/pull/5366)
+
+![method table](images/image1.png "method_table")
+
 * Add ability to inspect statistics for a CPU profile - [#5340](https://github.com/flutter/devtools/pull/5340)
 * Fix a bug where Native stack frames were missing their name - [#5344](https://github.com/flutter/devtools/pull/5344)
 * Fix an error in total and self time calculations for the bottom up tree - [#5348](https://github.com/flutter/devtools/pull/5348)
