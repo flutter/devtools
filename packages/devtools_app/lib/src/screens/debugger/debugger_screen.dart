@@ -435,7 +435,7 @@ class _DebuggerStatusState extends State<DebuggerStatus> with AutoDisposeMixin {
     final Frame? frame;
 
     if (event == null) {
-      // If paused from debugger screen, event may be null.
+      // If paused from debugger screen, the event may be null.
       reason = '';
       frame = null;
     } else {
