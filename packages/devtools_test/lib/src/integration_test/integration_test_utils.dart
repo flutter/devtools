@@ -15,6 +15,32 @@ import 'test_data/performance.dart';
 const safePumpDuration = Duration(seconds: 3);
 const longPumpDuration = Duration(seconds: 6);
 
+Future<void> pumpAndConnectDevTools(
+  WidgetTester tester,
+  TestApp testApp,
+) async {
+  await pumpDevTools(tester);
+  expect(find.byType(LandingScreenBody), findsOneWidget);
+  expect(find.text('No client connection'), findsOneWidget);
+
+  logStatus('verify that we can connect to an app');
+  await connectToTestApp(tester, testApp);
+  expect(find.byType(LandingScreenBody), findsNothing);
+  expect(find.text('No client connection'), findsNothing);
+
+  // If the release notes viewer is open, close it.
+  final releaseNotesView =
+      tester.widget<ReleaseNotes>(find.byType(ReleaseNotes));
+  if (releaseNotesView.releaseNotesController.releaseNotesVisible.value) {
+    final closeReleaseNotesButton = find.descendant(
+      of: find.byType(ReleaseNotes),
+      matching: find.byType(IconButton),
+    );
+    expect(closeReleaseNotesButton, findsOneWidget);
+    await tester.tap(closeReleaseNotesButton);
+  }
+}
+
 Future<void> pumpDevTools(WidgetTester tester) async {
   // TODO(kenz): how can we share code across integration_test/test and
   // integration_test/test_infra? When trying to import, we get an error:
