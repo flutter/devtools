@@ -81,6 +81,16 @@ class FlatTable<T> extends StatefulWidget {
   })  : selectionNotifier = selectionNotifier ?? ValueNotifier<T?>(null),
         super(key: key);
 
+  /// List of columns to display.
+  ///
+  /// These [ColumnData] elements should be defined as static
+  /// OR if they cannot be defined as static,
+  /// they should not manage stateful data.
+  ///
+  /// [FlatTableState.didUpdateWidget] checks if the columns have
+  /// changed before re-initializing the table controller,
+  /// and the columns are compared by title only.
+  /// See also [FlatTableState. _tableConfigurationChanged].
   final List<ColumnData<T>> columns;
 
   final List<ColumnGroup>? columnGroups;

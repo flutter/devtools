@@ -68,14 +68,15 @@ Future<void> addChildReferences(
           _refreshStaticSelection(ref.heapSelection, ref.instanceRef);
 
       variable.addAllChildren([
-        DartObjectNode.references(
-          'live (objects currently alive in the application)',
-          ObjectReferences.copyWith(
-            ref,
-            refNodeType: RefNodeType.liveRefRoot,
-            heapSelection: selection,
+        if (ref.instanceRef != null)
+          DartObjectNode.references(
+            'live (objects currently alive in the application)',
+            ObjectReferences.copyWith(
+              ref,
+              refNodeType: RefNodeType.liveRefRoot,
+              heapSelection: selection,
+            ),
           ),
-        ),
         if (selection.object != null)
           DartObjectNode.references(
             'static (objects alive at the time of snapshot ${selection.heap.snapshotName})',

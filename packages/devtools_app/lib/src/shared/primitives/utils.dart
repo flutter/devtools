@@ -51,7 +51,8 @@ String escape(String? text) => text == null ? '' : htmlEscape.convert(text);
 
 final NumberFormat nf = NumberFormat.decimalPattern();
 
-String percent2(double d) => '${(d * 100).toStringAsFixed(2)}%';
+String percent(double d, {int fractionDigits = 2}) =>
+    '${(d * 100).toStringAsFixed(fractionDigits)}%';
 
 /// Unifies printing of retained size to avoid confusion related to different rounding.
 String? prettyPrintRetainedSize(int? bites) => prettyPrintBytes(

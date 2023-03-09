@@ -6,7 +6,7 @@ import 'dart:io';
 
 import 'package:collection/collection.dart';
 
-import 'test_infra/_run_test.dart';
+import 'test_infra/run/run_test.dart';
 
 // To run this test, run the following from `devtools_app/`:
 // `dart run integration_test/run_test.dart`
