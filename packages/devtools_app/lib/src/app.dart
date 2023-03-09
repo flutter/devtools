@@ -55,6 +55,7 @@ import 'shared/routing.dart';
 import 'shared/screen.dart';
 import 'shared/theme.dart';
 import 'shared/ui/hover.dart';
+import 'shared/utils.dart';
 
 // Assign to true to use a sample implementation of a conditional screen.
 // WARNING: Do not check in this file if debugEnableSampleScreen is true.
@@ -529,15 +530,22 @@ class SettingsDialog extends StatelessWidget {
                     toggle: (enable) => preferences.setVerboseLogging(enable),
                     gaItem: gac.verboseLogging,
                   ),
-                  CopyToClipboardControl(
-                    dataProvider: () => LogStorage.root.toString(),
-                    tooltip: 'Copy Logs',
+                  const SizedBox(
+                    width: defaultSpacing,
+                  ),
+                  IconLabelButton(
+                    label: 'Copy Logs',
+                    icon: Icons.copy,
+                    onPressed: () async => copyToClipboard(
+                      LogStorage.root.toString(),
+                      'Successfully Copied Logs',
+                    ),
+                  ),
+                  const SizedBox(
+                    width: defaultSpacing,
                   ),
                   ClearButton(
                     label: 'Clear Logs',
-                    minScreenWidthForTextBeforeScaling:
-                        double.infinity, // Forces Icon only mode for button
-                    tooltip: 'Clear Logs',
                     onPressed: () => LogStorage.root.clear(),
                   ),
                 ],
@@ -552,7 +560,8 @@ class SettingsDialog extends StatelessWidget {
                     width: defaultSpacing,
                   ),
                   Text(
-                    'Logs may contain sensitive information. Always check their contents before sharing.',
+                    'Logs may contain sensitive information.\n'
+                    'Always check their contents before sharing.',
                   )
                 ],
               ),
