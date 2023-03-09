@@ -116,6 +116,10 @@ class EvalService extends DisposableController with AutoDisposeControllerMixin {
     );
   }
 
+  bool get isStoppedAtFrame =>
+      serviceManager.isMainIsolatePaused &&
+      serviceManager.appState.currentFrame.value != null;
+
   /// Evaluate the given expression in the context of the currently selected
   /// stack frame, or the top frame if there is no current selection.
   ///
