@@ -184,7 +184,16 @@ class _CallGraphViewState extends State<CallGraphView> {
 
 enum _CallGraphTableType {
   from,
-  to,
+  to;
+
+  String get dataKey {
+    switch (this) {
+      case from:
+        return 'call-graph-from';
+      case to:
+        return 'call-graph-to';
+    }
+  }
 }
 
 class _CallGraphTable extends StatelessWidget {
@@ -194,8 +203,6 @@ class _CallGraphTable extends StatelessWidget {
     required this.onNodeSelected,
   });
 
-  static const _fromDataKey = 'call-graph-from';
-  static const _toDataKey = 'call-graph-to';
   static final _toColumn = ToColumn();
   static final _fromColumn = FromColumn();
 
@@ -215,8 +222,7 @@ class _CallGraphTable extends StatelessWidget {
       data: tableType == _CallGraphTableType.from
           ? selectedNode.pred
           : selectedNode.succ,
-      dataKey:
-          tableType == _CallGraphTableType.from ? _fromDataKey : _toDataKey,
+      dataKey: tableType.dataKey,
       columns: [tableColumn],
       onItemSelected: onNodeSelected,
       defaultSortColumn: tableColumn,
