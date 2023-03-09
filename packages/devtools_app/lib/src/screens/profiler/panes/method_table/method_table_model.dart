@@ -107,7 +107,7 @@ class MethodTableGraphNode extends GraphNode {
           // Sort in descending order.
           .sorted((a, b) => percentCallback(b).compareTo(percentCallback(a)))
           .map(
-            (node) => '${node.display} - ${percent2(percentCallback(node))}',
+            (node) => '${node.display} - ${percent(percentCallback(node))}',
           )
           .join(newLineAndIndent);
     }
