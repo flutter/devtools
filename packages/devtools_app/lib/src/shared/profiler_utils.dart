@@ -210,7 +210,7 @@ class BottomUpTransformer<T extends ProfilableDataMixin<T>> {
       } else {
         // If [currentBottomUpRoot] is not a bottom up root, the inclusive count
         // should be set to null. This will allow the inclusive count to be
-        // recalculated now that this node is part of it's parent's bottom up
+        // recalculated now that this node is part of its parent's bottom up
         // tree, not its own.
         currentBottomUpRoot.inclusiveSampleCount = null;
       }
