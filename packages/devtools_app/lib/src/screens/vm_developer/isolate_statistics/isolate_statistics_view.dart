@@ -220,7 +220,7 @@ class TagStatisticsWidget extends StatelessWidget {
 
   static final _name = _TagColumn();
   static final _percentage = _PercentageColumn();
-  static final List<ColumnData<VMTag>> columns = [_name, _percentage];
+  static final _columns = <ColumnData<VMTag>>[_name, _percentage];
 
   final IsolateStatisticsViewController controller;
 
@@ -236,7 +236,7 @@ class TagStatisticsWidget extends StatelessWidget {
                   keyFactory: (VMTag tag) => ValueKey<String>(tag.name),
                   data: controller.tags,
                   dataKey: 'tag-statistics',
-                  columns: columns,
+                  columns: _columns,
                   defaultSortColumn: _percentage,
                   defaultSortDirection: SortDirection.descending,
                 )
@@ -303,10 +303,11 @@ class _StackTraceViewerFrameColumn extends ColumnData<String> {
 // TODO(bkonyi): merge with debugger stack trace viewer.
 /// A simple table to display a stack trace, sorted by frame number.
 class StackTraceViewerWidget extends StatelessWidget {
-  StackTraceViewerWidget({required this.stackTrace});
+  const StackTraceViewerWidget({required this.stackTrace});
+
+  static final frame = _StackTraceViewerFrameColumn();
 
   final InstanceRef? stackTrace;
-  final frame = _StackTraceViewerFrameColumn();
 
   @override
   Widget build(BuildContext context) {
@@ -327,9 +328,7 @@ class StackTraceViewerWidget extends StatelessWidget {
                 keyFactory: (String s) => ValueKey<String>(s),
                 data: lines,
                 dataKey: 'stack-trace-viewer',
-                columns: [
-                  frame,
-                ],
+                columns: [frame],
                 defaultSortColumn: frame,
                 defaultSortDirection: SortDirection.ascending,
               ),
@@ -355,10 +354,7 @@ class IsolatePortsWidget extends StatefulWidget {
 class _IsolatePortsWidgetState extends State<IsolatePortsWidget> {
   static final _id = _PortIDColumn();
   static final _name = _PortNameColumn();
-  static final List<ColumnData<InstanceRef>> _columns = [
-    _name,
-    _id,
-  ];
+  static final _columns = <ColumnData<InstanceRef>>[_name, _id];
 
   final selectedPort = ValueNotifier<InstanceRef?>(null);
 
@@ -421,10 +417,7 @@ class ServiceExtensionsWidget extends StatelessWidget {
   const ServiceExtensionsWidget({required this.controller});
 
   static final _name = _ServiceExtensionNameColumn();
-
-  static final List<ColumnData<String>> _columns = [
-    _name,
-  ];
+  static final _columns = <ColumnData<String>>[_name];
 
   final IsolateStatisticsViewController controller;
 

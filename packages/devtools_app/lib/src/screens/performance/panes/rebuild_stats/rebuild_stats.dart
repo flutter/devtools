@@ -182,7 +182,6 @@ class _RebuildTableState extends State<RebuildTable> {
   }
 
   static final _widgetColumn = _WidgetColumn();
-
   static final _locationColumn = _LocationColumn();
 
   List<ColumnData<RebuildLocationStats>> get _columns =>

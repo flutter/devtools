@@ -83,9 +83,6 @@ class _CallGraphWithDominatorsState extends State<CallGraphWithDominators> {
 class CallGraphView extends StatefulWidget {
   const CallGraphView({required this.node});
 
-  static const Key fromTableKey = Key('CallGraphView - From table');
-  static const Key toTableKey = Key('CallGraphView - To table');
-
   final CallGraphNode node;
 
   @override
@@ -93,10 +90,6 @@ class CallGraphView extends StatefulWidget {
 }
 
 class _CallGraphViewState extends State<CallGraphView> {
-  final _fromColumn = FromColumn();
-
-  final _toColumn = ToColumn();
-
   late CallGraphNode selectedNode;
 
   @override
@@ -115,28 +108,6 @@ class _CallGraphViewState extends State<CallGraphView> {
 
   @override
   Widget build(BuildContext context) {
-    final fromTable = FlatTable<CallGraphNode>(
-      key: CallGraphView.fromTableKey,
-      keyFactory: (CallGraphNode node) => ValueKey<CallGraphNode>(node),
-      data: selectedNode.pred,
-      dataKey: 'call-graph-from',
-      columns: [_fromColumn],
-      onItemSelected: (CallGraphNode? node) => _selectMainNode(node!),
-      defaultSortColumn: _fromColumn,
-      defaultSortDirection: SortDirection.descending,
-    );
-
-    final toTable = FlatTable<CallGraphNode>(
-      key: CallGraphView.toTableKey,
-      keyFactory: (CallGraphNode node) => ValueKey<CallGraphNode>(node),
-      data: selectedNode.succ,
-      dataKey: 'call-graph-to',
-      columns: [_toColumn],
-      onItemSelected: (CallGraphNode? node) => _selectMainNode(node!),
-      defaultSortColumn: _toColumn,
-      defaultSortDirection: SortDirection.descending,
-    );
-
     final mainNode = Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -170,7 +141,11 @@ class _CallGraphViewState extends State<CallGraphView> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Flexible(
-                  child: fromTable,
+                  child: _CallGraphTable(
+                    tableType: _CallGraphTableType.from,
+                    selectedNode: selectedNode,
+                    onNodeSelected: _selectMainNode,
+                  ),
                 ),
                 Container(
                   height: constraints.maxHeight,
@@ -178,7 +153,11 @@ class _CallGraphViewState extends State<CallGraphView> {
                   color: Theme.of(context).titleSolidBackgroundColor,
                 ),
                 Flexible(
-                  child: toTable,
+                  child: _CallGraphTable(
+                    tableType: _CallGraphTableType.to,
+                    selectedNode: selectedNode,
+                    onNodeSelected: _selectMainNode,
+                  ),
                 ),
               ],
             ),
@@ -193,10 +172,56 @@ class _CallGraphViewState extends State<CallGraphView> {
     );
   }
 
-  void _selectMainNode(CallGraphNode node) {
+  // TODO(kenz): store the selected node in a controller and pass the notifier
+  // to the tables instead of storing the [selectedNode] value in the state
+  // class.
+  void _selectMainNode(CallGraphNode? node) {
     setState(() {
-      selectedNode = node;
+      selectedNode = node!;
     });
+  }
+}
+
+enum _CallGraphTableType {
+  from,
+  to,
+}
+
+class _CallGraphTable extends StatelessWidget {
+  const _CallGraphTable({
+    required this.tableType,
+    required this.selectedNode,
+    required this.onNodeSelected,
+  });
+
+  static const _fromDataKey = 'call-graph-from';
+  static const _toDataKey = 'call-graph-to';
+  static final _toColumn = ToColumn();
+  static final _fromColumn = FromColumn();
+
+  final _CallGraphTableType tableType;
+
+  final CallGraphNode selectedNode;
+
+  final void Function(CallGraphNode? node) onNodeSelected;
+
+  ColumnData<CallGraphNode> get tableColumn =>
+      tableType == _CallGraphTableType.from ? _fromColumn : _toColumn;
+
+  @override
+  Widget build(BuildContext context) {
+    return FlatTable<CallGraphNode>(
+      keyFactory: (CallGraphNode node) => ValueKey<CallGraphNode>(node),
+      data: tableType == _CallGraphTableType.from
+          ? selectedNode.pred
+          : selectedNode.succ,
+      dataKey:
+          tableType == _CallGraphTableType.from ? _fromDataKey : _toDataKey,
+      columns: [tableColumn],
+      onItemSelected: onNodeSelected,
+      defaultSortColumn: tableColumn,
+      defaultSortDirection: SortDirection.descending,
+    );
   }
 }
 
