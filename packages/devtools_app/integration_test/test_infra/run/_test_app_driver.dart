@@ -6,7 +6,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'io_utils.dart';
+import '_io_utils.dart';
 
 // Set this to true for debugging to get JSON written to stdout.
 const bool _printDebugOutputToStdOut = false;
