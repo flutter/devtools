@@ -36,16 +36,15 @@ class HeapClassSampler extends ClassSampler {
     );
   }
 
-  Future<InstanceSet?> _liveInstancesAsArray() async {
+  Future<InstanceRef?> _liveInstancesAsList() async {
     final isolateId = _mainIsolateRef.id!;
 
     final theClass = await findClass(isolateId, heapClass);
     if (theClass == null) return null;
 
-    return await serviceManager.service!.getInstances(
+    return await serviceManager.service!.getInstancesAsList(
       isolateId,
       theClass.id!,
-      preferences.memory.refLimit.value,
     );
   }
 
@@ -85,17 +84,21 @@ class HeapClassSampler extends ClassSampler {
 
   @override
   Future<void> allLiveToConsole() async {
-    await serviceManager.service!.getInstances(
-      isolateId,
-      theClass.id!,
-      preferences.memory.refLimit.value,
-    );
+    final list = await _liveInstancesAsList();
 
-    // serviceManager.consoleService.appendInstanceSet(
-    //   type: heapClass.shortName,
-    //   instanceSet: (await _liveInstances())!,
-    //   isolateRef: _mainIsolateRef,
-    // );
+    if (list == null) {
+      serviceManager.consoleService.appendStdio(
+        'Unable to select instances for the class ${heapClass.fullName}.',
+      );
+      return;
+    }
+
+    // drop to console
+    serviceManager.consoleService.appendBrowsableInstance(
+      instanceRef: list,
+      isolateRef: _mainIsolateRef,
+      heapSelection: HeapObjectSelection(heap, object: null),
+    );
   }
 
   @override
