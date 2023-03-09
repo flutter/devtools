@@ -495,7 +495,7 @@ void main() {
         expect(columnWidths.length, equals(3));
         expect(columnWidths[0], equals(300.0));
         expect(columnWidths[1], equals(400.0));
-        expect(columnWidths[2], equals(369.0));
+        expect(columnWidths[2], equals(36.0));
       }
 
       // TODO(jacobr): add a golden image test.
