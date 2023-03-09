@@ -162,7 +162,7 @@ class _RetainedSizeColumn extends ColumnData<SingleClassStats> {
     final bytes = prettyPrintRetainedSize(value)!;
 
     final percents =
-        percent2(value / classData.totalHeapSize(), fractionDigits: 0);
+        percent(value / classData.totalHeapSize(), fractionDigits: 0);
 
     return '$bytes ($percents)';
   }

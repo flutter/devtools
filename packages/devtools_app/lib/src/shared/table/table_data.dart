@@ -226,7 +226,7 @@ abstract class TimeAndPercentageColumn<T> extends ColumnData<T> {
 
   @override
   String getDisplayValue(T dataObject) {
-    final percentDisplay = '${percent2(percentAsDoubleProvider(dataObject))}';
+    final percentDisplay = '${percent(percentAsDoubleProvider(dataObject))}';
     if (percentageOnly) {
       return percentDisplay;
     }
