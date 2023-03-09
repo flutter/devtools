@@ -436,6 +436,9 @@ class _DebuggerStatusState extends State<DebuggerStatus> with AutoDisposeMixin {
 
     if (event == null) {
       // If paused from debugger screen, the event may be null.
+      // TODO(polina-c): if it is paused on exception first and then from debugger screen,
+      // we will give reason 'exception', that will be misleading.
+      // May be we should not give reason at all.
       reason = '';
       frame = null;
     } else {
