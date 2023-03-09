@@ -123,7 +123,7 @@ class InspectorTreeController extends Object
 
   /// Identifier used when sending Google Analytics about events in this
   /// [InspectorTreeController].
-  final String? gaId;
+  final int? gaId;
 
   InspectorTreeNode createNode() => InspectorTreeNode();
 
