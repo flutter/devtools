@@ -43,7 +43,11 @@ void main() {
   final scene = DiffSnapshotScene();
   // The setup should happen one time, so that there is only one instance of
   // DiffPaneController accross tests.
-  // Otherwize tests may exchange controllers.
+  // Otherwize tests may exchange controllers, because table builds
+  // only first provided instance of column accross table instances.
+  // See [FlatTable.columns].
+  // TODO(polina-c): we need to revisit state management to get
+  // rid of such limitations.
   setUpAll(() async => await scene.setUp());
 
   Future<DiffSnapshotScene> pumpScene(

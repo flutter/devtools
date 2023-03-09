@@ -80,7 +80,7 @@ class _ClassNameColumn extends ColumnData<SingleClassStats>
 
 class _InstanceColumn extends ColumnData<SingleClassStats>
     implements ColumnRenderer<SingleClassStats> {
-  _InstanceColumn(this.classedData)
+  _InstanceColumn(this.classData)
       : super(
           'Instances',
           titleTooltip: nonGcableInstancesColumnTooltip,
@@ -88,7 +88,7 @@ class _InstanceColumn extends ColumnData<SingleClassStats>
           alignment: ColumnAlignment.right,
         );
 
-  final ClassesTableSingleData classedData;
+  final ClassesTableSingleData classData;
 
   @override
   int getValue(SingleClassStats dataObject) => dataObject.objects.instanceCount;
@@ -107,7 +107,7 @@ class _InstanceColumn extends ColumnData<SingleClassStats>
 
     return InstanceTableCell(
       data.objects,
-      classedData.heap,
+      classData.heap,
       data.heapClass,
       isSelected: isRowSelected,
       gaContext: gac.MemoryAreas.snapshotSingle,
@@ -139,7 +139,7 @@ class _ShallowSizeColumn extends ColumnData<SingleClassStats> {
 }
 
 class _RetainedSizeColumn extends ColumnData<SingleClassStats> {
-  _RetainedSizeColumn(this.classedData)
+  _RetainedSizeColumn(this.classData)
       : super(
           'Retained Dart Size',
           titleTooltip: SizeType.retained.description,
@@ -147,7 +147,7 @@ class _RetainedSizeColumn extends ColumnData<SingleClassStats> {
           alignment: ColumnAlignment.right,
         );
 
-  final ClassesTableSingleData classedData;
+  final ClassesTableSingleData classData;
 
   @override
   int getValue(SingleClassStats dataObject) => dataObject.objects.retainedSize;
@@ -161,22 +161,23 @@ class _RetainedSizeColumn extends ColumnData<SingleClassStats> {
 
     final bytes = prettyPrintRetainedSize(value)!;
 
-    final percents = '${(value * 100 / classedData.totalHeapSize()).round()}%';
+    final percents =
+        percent2(value / classData.totalHeapSize(), fractionDigits: 0);
 
     return '$bytes ($percents)';
   }
 }
 
 class _ClassesTableSingleColumns {
-  _ClassesTableSingleColumns(this.classedData);
+  _ClassesTableSingleColumns(this.classData);
 
-  late final retainedSizeColumn = _RetainedSizeColumn(classedData);
+  late final retainedSizeColumn = _RetainedSizeColumn(classData);
 
-  final ClassesTableSingleData classedData;
+  final ClassesTableSingleData classData;
 
   late final columnList = <ColumnData<SingleClassStats>>[
-    _ClassNameColumn(classedData),
-    _InstanceColumn(classedData),
+    _ClassNameColumn(classData),
+    _InstanceColumn(classData),
     _ShallowSizeColumn(),
     retainedSizeColumn,
   ];
