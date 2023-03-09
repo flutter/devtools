@@ -912,11 +912,21 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
   final String packageUri;
 
   String get packageUriWithSourceLine =>
-      '$packageUri${sourceLine != null ? ':$sourceLine' : ''}';
+      uriWithSourceLine(packageUri, sourceLine);
 
   final int? sourceLine;
 
   final String? parentId;
+
+  /// The set of ids for all ancesctors of this [CpuStackFrame].
+  ///
+  /// This is late and final, so it will only be created once for performance
+  /// reasons. This method should only be called when the [CpuStackFrame] is
+  /// part of a processed CPU profile.
+  late final Set<String> ancestorIds = {
+    if (parentId != null) parentId!,
+    ...parent?.ancestorIds ?? {}
+  };
 
   @override
   CpuProfileMetaData get profileMetaData => _profileMetaData;
