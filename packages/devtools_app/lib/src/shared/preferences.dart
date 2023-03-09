@@ -89,7 +89,7 @@ class PreferencesController extends DisposableController
 
     Logger.root.onRecord.listen((record) {
       LogStorage.root.addLog(
-        '[${record.loggerName}-${record.level.name}]: ${record.time.toUtc()}: ${record.message}',
+        '${record.time.toUtc()}[${record.level.name}][${record.loggerName}]: ${record.message}',
       );
     });
 
