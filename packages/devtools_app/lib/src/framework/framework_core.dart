@@ -39,7 +39,7 @@ class FrameworkCore {
 
   static void init() {
     // Print the version number at startup.
-    log('zzzDevTools version ${devtools.version}.');
+    log('DevTools version ${devtools.version}.');
   }
 
   /// Returns true if we're able to connect to a device and false otherwise.
