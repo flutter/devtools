@@ -25,7 +25,7 @@ import 'src/shared/primitives/utils.dart';
 /// Any initialization that needs to happen before running DevTools, regardless
 /// of context, should happen here.
 ///
-/// If the intialization is specific to running Devtools in google3 or
+/// If the initialization is specific to running Devtools in google3 or
 /// externally, then it should be added to that respective main.dart file.
 Future<void> runDevTools({
   bool shouldEnableExperiments = false,

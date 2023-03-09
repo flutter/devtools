@@ -11,7 +11,7 @@ import 'src/shared/primitives/utils.dart';
 /// This is the entrypoint for running DevTools externally.
 ///
 /// WARNING: This is the external entrypoint for running DevTools.
-/// Any intialization that needs to occur, for both google3 and externally,
+/// Any initialization that needs to occur, for both google3 and externally,
 /// should be added to [runDevTools].
 void main() async {
   await externalRunDevTools();
