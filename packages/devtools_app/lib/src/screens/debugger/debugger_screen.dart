@@ -430,10 +430,18 @@ class _DebuggerStatusState extends State<DebuggerStatus> with AutoDisposeMixin {
       return 'running';
     }
 
-    final event = widget.controller.lastEvent!;
-    final frame = event.topFrame;
-    final reason =
-        event.kind == EventKind.kPauseException ? ' on exception' : '';
+    final event = widget.controller.lastEvent;
+    final String reason;
+    final Frame? frame;
+
+    if (event == null) {
+      // If paused from debugger screen, event may be null.
+      reason = '';
+      frame = null;
+    } else {
+      frame = event.topFrame;
+      reason = event.kind == EventKind.kPauseException ? ' on exception' : '';
+    }
 
     final location = frame?.location;
     final scriptUri = location?.script?.uri;

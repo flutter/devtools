@@ -112,7 +112,7 @@ class EvalService extends DisposableController with AutoDisposeControllerMixin {
     final variables = scope.removedVariables.join(', ');
     serviceManager.consoleService.appendStdio(
       'Garbage collected instances were removed from the scope: $variables. '
-      'Stop application to make variables persistent.\n',
+      'Pause application (use DevTools > Debugger) to make the variables persisting.\n',
     );
   }
 
