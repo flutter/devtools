@@ -11,6 +11,7 @@ import 'dart:async';
 import 'dart:html';
 
 import 'package:js/js.dart';
+import 'package:logging/logging.dart';
 
 import '../../../devtools.dart' as devtools show version;
 import '../config_specific/logger/logger.dart';
@@ -54,6 +55,8 @@ const String devToolsChromeOS = 'CrOS'; // Chrome OS
 // Dimension7 ideLaunched
 const String ideLaunchedQuery = 'ide'; // '&ide=' query parameter
 const String ideLaunchedCLI = 'CLI'; // Command Line Interface
+
+final _log = Logger('_analytics_web');
 
 @JS('initializeGA')
 external void initializeGA();
@@ -396,6 +399,7 @@ void screen(
   String screenName, [
   int value = 0,
 ]) {
+  _log.info('[screen] screenName:$screenName value:$value');
   GTag.event(
     screenName,
     gaEventProvider: () => _gtagEvent(
@@ -558,6 +562,15 @@ void select(
   bool nonInteraction = false,
   ScreenAnalyticsMetrics Function()? screenMetricsProvider,
 }) {
+  _log.info(
+    [
+      '[select]',
+      'screenName:$screenName',
+      'selectedItem:$selectedItem',
+      'value:$value',
+      ' nonInteraction:$nonInteraction',
+    ].join(' '),
+  );
   GTag.event(
     screenName,
     gaEventProvider: () => _gtagEvent(
