@@ -36,6 +36,19 @@ class HeapClassSampler extends ClassSampler {
     );
   }
 
+  Future<InstanceSet?> _liveInstancesAsArray() async {
+    final isolateId = _mainIsolateRef.id!;
+
+    final theClass = await findClass(isolateId, heapClass);
+    if (theClass == null) return null;
+
+    return await serviceManager.service!.getInstances(
+      isolateId,
+      theClass.id!,
+      preferences.memory.refLimit.value,
+    );
+  }
+
   @override
   Future<void> oneLiveStaticToConsole() async {
     final instances = (await _liveInstances())?.instances;
@@ -71,12 +84,18 @@ class HeapClassSampler extends ClassSampler {
       ClassType.runtime;
 
   @override
-  Future<void> manyLiveToConsole() async {
-    serviceManager.consoleService.appendInstanceSet(
-      type: heapClass.shortName,
-      instanceSet: (await _liveInstances())!,
-      isolateRef: _mainIsolateRef,
+  Future<void> allLiveToConsole() async {
+    await serviceManager.service!.getInstances(
+      isolateId,
+      theClass.id!,
+      preferences.memory.refLimit.value,
     );
+
+    // serviceManager.consoleService.appendInstanceSet(
+    //   type: heapClass.shortName,
+    //   instanceSet: (await _liveInstances())!,
+    //   isolateRef: _mainIsolateRef,
+    // );
   }
 
   @override

@@ -132,25 +132,25 @@ class ConsoleService extends Disposer {
     );
   }
 
-  void appendInstanceSet({
-    required String type,
-    required InstanceSet instanceSet,
-    required IsolateRef? isolateRef,
-  }) async {
-    _stdioTrailingNewline = false;
-    final variable = DartObjectNode.fromInstanceSet(
-      text:
-          '$type (${instanceSet.instances?.length ?? 0} out of ${instanceSet.totalCount} instances)',
-      instanceSet: instanceSet,
-      isolateRef: isolateRef,
-    );
+  // void appendInstanceSet({
+  //   required String type,
+  //   required InstanceSet instanceSet,
+  //   required IsolateRef? isolateRef,
+  // }) async {
+  //   _stdioTrailingNewline = false;
+  //   final variable = DartObjectNode.fromInstanceSet(
+  //     text:
+  //         '$type (${instanceSet.instances?.length ?? 0} out of ${instanceSet.totalCount} instances)',
+  //     instanceSet: instanceSet,
+  //     isolateRef: isolateRef,
+  //   );
 
-    await buildVariablesTree(variable);
+  //   await buildVariablesTree(variable);
 
-    _stdio.add(
-      ConsoleLine.dartObjectNode(variable),
-    );
-  }
+  //   _stdio.add(
+  //     ConsoleLine.dartObjectNode(variable),
+  //   );
+  // }
 
   final _stdio = ListValueNotifier<ConsoleLine>([]);
   bool _stdioTrailingNewline = false;

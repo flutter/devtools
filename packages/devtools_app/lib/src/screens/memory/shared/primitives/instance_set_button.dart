@@ -19,7 +19,7 @@ abstract class ClassSampler {
   Future<void> oneStaticToConsole();
 
   /// Drop all live instances to console.
-  Future<void> manyLiveToConsole();
+  Future<void> allLiveToConsole();
 
   bool get isEvalEnabled;
 }
@@ -119,7 +119,7 @@ List<Widget> _menu(
   return [
     _StoreAsOneVariableMenu(sampleObtainer, liveItemsEnabled: liveItemsEnabled),
     MenuItemButton(
-      onPressed: sampleObtainer.manyLiveToConsole,
+      onPressed: sampleObtainer.allLiveToConsole,
       child: Text(
         'Store up to $limit instances, currently alive in application',
       ),
