@@ -29,11 +29,18 @@ void setupErrorHandling(Future Function() appStartCallback) {
       final FlutterExceptionHandler? oldHandler = FlutterError.onError;
 
       FlutterError.onError = (FlutterErrorDetails details) {
+        // Flutter Framework errors are caught here.
         _reportError(details.exception, details.stack ?? StackTrace.empty);
 
         if (oldHandler != null) {
           oldHandler(details);
         }
+      };
+
+      PlatformDispatcher.instance.onError = (error, stack) {
+        // Unhandled errors on the root isolate are caught here.
+        _reportError(error, stack);
+        return true;
       };
 
       return appStartCallback();
@@ -47,7 +54,7 @@ void setupErrorHandling(Future Function() appStartCallback) {
 void _reportError(Object error, StackTrace stack) {
   final terseStackTrace = stack_trace.Trace.from(stack).terse.toString();
 
-  log('$error', LogLevel.error);
+  log('$error\n$terseStackTrace', LogLevel.error);
 
   ga.reportError('$error\n$terseStackTrace');
 }
