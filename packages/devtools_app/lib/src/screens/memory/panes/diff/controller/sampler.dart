@@ -83,7 +83,10 @@ class HeapClassSampler extends ClassSampler {
       ClassType.runtime;
 
   @override
-  Future<void> allLiveToConsole() async {
+  Future<void> allLiveToConsole({
+    required bool includeSubclasses,
+    required bool includeImplementers,
+  }) async {
     final list = await _liveInstancesAsList();
 
     if (list == null) {
