@@ -178,18 +178,17 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
     final classFilterData = ClassFilterData(
       filter: _core.classFilter,
       onChanged: applyFilter,
-      rootPackage: serviceManager.rootInfoNow().package,
     );
 
     classesTableSingle = ClassesTableSingleData(
       heap: () => (_core.selectedItem as SnapshotInstanceItem).heap!.data,
       totalHeapSize: () =>
           (_core.selectedItem as SnapshotInstanceItem).totalSize!,
-      filterController: classFilterData,
+      filterData: classFilterData,
     );
 
     classesTableDiff = ClassesTableDiffData(
-      filterController: classFilterData,
+      filterData: classFilterData,
       before: () => (heapClasses.value as DiffHeapClasses).before,
       after: () => (heapClasses.value as DiffHeapClasses).after,
     );

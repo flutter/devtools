@@ -22,16 +22,16 @@ String _adaptRootPackageForFilter(String? rootPackage) {
 }
 
 class ClassFilterButton extends StatelessWidget {
-  ClassFilterButton(this.controller)
-      : rootPackage = _adaptRootPackageForFilter(controller.rootPackage);
+  ClassFilterButton(this.data)
+      : _rootPackage = _adaptRootPackageForFilter(data.rootPackage);
 
-  final ClassFilterData controller;
-  final String rootPackage;
+  final ClassFilterData data;
+  final String _rootPackage;
 
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<ClassFilter>(
-      valueListenable: controller.filter,
+      valueListenable: data.filter,
       builder: (context, filter, _) {
         return FilterButton(
           onPressed: () {
@@ -45,8 +45,8 @@ class ClassFilterButton extends StatelessWidget {
                 context: context,
                 builder: (context) => ClassFilterDialog(
                   filter,
-                  onChanged: controller.onChanged,
-                  rootPackage: rootPackage,
+                  onChanged: data.onChanged,
+                  rootPackage: _rootPackage,
                 ),
               ),
             );

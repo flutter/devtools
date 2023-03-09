@@ -24,7 +24,7 @@ class _ClassNameColumn extends ColumnData<SingleClassStats>
     implements
         ColumnRenderer<SingleClassStats>,
         ColumnHeaderRenderer<SingleClassStats> {
-  _ClassNameColumn(this.controller)
+  _ClassNameColumn(this.data)
       : super(
           'Class',
           titleTooltip: 'Class name',
@@ -32,7 +32,7 @@ class _ClassNameColumn extends ColumnData<SingleClassStats>
           alignment: ColumnAlignment.left,
         );
 
-  final ClassesTableSingleData controller;
+  final ClassesTableSingleData data;
 
   @override
   String? getValue(SingleClassStats dataObject) =>
@@ -72,7 +72,7 @@ class _ClassNameColumn extends ColumnData<SingleClassStats>
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Expanded(child: defaultHeaderRenderer()),
-        ClassFilterButton(controller.filterController),
+        ClassFilterButton(data.filterData),
       ],
     );
   }
@@ -80,7 +80,7 @@ class _ClassNameColumn extends ColumnData<SingleClassStats>
 
 class _InstanceColumn extends ColumnData<SingleClassStats>
     implements ColumnRenderer<SingleClassStats> {
-  _InstanceColumn(this.controller)
+  _InstanceColumn(this.classedData)
       : super(
           'Instances',
           titleTooltip: nonGcableInstancesColumnTooltip,
@@ -88,7 +88,7 @@ class _InstanceColumn extends ColumnData<SingleClassStats>
           alignment: ColumnAlignment.right,
         );
 
-  final ClassesTableSingleData controller;
+  final ClassesTableSingleData classedData;
 
   @override
   int getValue(SingleClassStats dataObject) => dataObject.objects.instanceCount;
@@ -107,7 +107,7 @@ class _InstanceColumn extends ColumnData<SingleClassStats>
 
     return InstanceTableCell(
       data.objects,
-      controller.heap,
+      classedData.heap,
       data.heapClass,
       isSelected: isRowSelected,
       gaContext: gac.MemoryAreas.snapshotSingle,
@@ -139,7 +139,7 @@ class _ShallowSizeColumn extends ColumnData<SingleClassStats> {
 }
 
 class _RetainedSizeColumn extends ColumnData<SingleClassStats> {
-  _RetainedSizeColumn(this.controller)
+  _RetainedSizeColumn(this.classedData)
       : super(
           'Retained Dart Size',
           titleTooltip: SizeType.retained.description,
@@ -147,7 +147,7 @@ class _RetainedSizeColumn extends ColumnData<SingleClassStats> {
           alignment: ColumnAlignment.right,
         );
 
-  final ClassesTableSingleData controller;
+  final ClassesTableSingleData classedData;
 
   @override
   int getValue(SingleClassStats dataObject) => dataObject.objects.retainedSize;
@@ -161,22 +161,22 @@ class _RetainedSizeColumn extends ColumnData<SingleClassStats> {
 
     final bytes = prettyPrintRetainedSize(value)!;
 
-    final percents = '${(value * 100 / controller.totalHeapSize()).round()}%';
+    final percents = '${(value * 100 / classedData.totalHeapSize()).round()}%';
 
     return '$bytes ($percents)';
   }
 }
 
 class _ClassesTableSingleColumns {
-  _ClassesTableSingleColumns(this.controller);
+  _ClassesTableSingleColumns(this.classedData);
 
-  late final retainedSizeColumn = _RetainedSizeColumn(controller);
+  late final retainedSizeColumn = _RetainedSizeColumn(classedData);
 
-  final ClassesTableSingleData controller;
+  final ClassesTableSingleData classedData;
 
   late final columnList = <ColumnData<SingleClassStats>>[
-    _ClassNameColumn(controller),
-    _InstanceColumn(controller),
+    _ClassNameColumn(classedData),
+    _InstanceColumn(classedData),
     _ShallowSizeColumn(),
     retainedSizeColumn,
   ];
@@ -186,12 +186,12 @@ class ClassesTableSingle extends StatelessWidget {
   ClassesTableSingle({
     super.key,
     required this.classes,
-    required this.controller,
-  }) : _columns = _ClassesTableSingleColumns(controller);
+    required this.classesData,
+  }) : _columns = _ClassesTableSingleColumns(classesData);
 
   final List<SingleClassStats> classes;
 
-  final ClassesTableSingleData controller;
+  final ClassesTableSingleData classesData;
 
   final _ClassesTableSingleColumns _columns;
 
@@ -206,7 +206,7 @@ class ClassesTableSingle extends StatelessWidget {
       data: classes,
       dataKey: dataKey,
       keyFactory: (e) => Key(e.heapClass.fullName),
-      selectionNotifier: controller.selection,
+      selectionNotifier: classesData.selection,
       onItemSelected: (_) => ga.select(
         gac.memory,
         gac.MemoryEvent.diffClassSingleSelect,

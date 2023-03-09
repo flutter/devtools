@@ -29,11 +29,11 @@ enum _DataPart {
   persisted,
 }
 
-class DiffClassNameColumn extends ColumnData<DiffClassStats>
+class _ClassNameColumn extends ColumnData<DiffClassStats>
     implements
         ColumnRenderer<DiffClassStats>,
         ColumnHeaderRenderer<DiffClassStats> {
-  DiffClassNameColumn(this.controller)
+  _ClassNameColumn(this.diffData)
       : super(
           'Class',
           titleTooltip: 'Class name',
@@ -41,7 +41,7 @@ class DiffClassNameColumn extends ColumnData<DiffClassStats>
           alignment: ColumnAlignment.left,
         );
 
-  final ClassesTableDiffData controller;
+  final ClassesTableDiffData diffData;
 
   @override
   String? getValue(DiffClassStats dataObject) => dataObject.heapClass.className;
@@ -80,15 +80,15 @@ class DiffClassNameColumn extends ColumnData<DiffClassStats>
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Expanded(child: defaultHeaderRenderer()),
-        ClassFilterButton(controller.filterController),
+        ClassFilterButton(diffData.filterData),
       ],
     );
   }
 }
 
-class DiffInstanceColumn extends ColumnData<DiffClassStats>
+class _InstanceColumn extends ColumnData<DiffClassStats>
     implements ColumnRenderer<DiffClassStats> {
-  DiffInstanceColumn(this.dataPart, this.controller)
+  _InstanceColumn(this.dataPart, this.diffData)
       : super(
           columnTitle(dataPart),
           fixedWidthPx: scaleByFontFactor(80.0),
@@ -97,7 +97,7 @@ class DiffInstanceColumn extends ColumnData<DiffClassStats>
 
   final _DataPart dataPart;
 
-  final ClassesTableDiffData controller;
+  final ClassesTableDiffData diffData;
 
   static String columnTitle(_DataPart dataPart) {
     switch (dataPart) {
@@ -155,8 +155,8 @@ class DiffInstanceColumn extends ColumnData<DiffClassStats>
       return null;
     }
 
-    final heapObtainer =
-        dataPart == _DataPart.deleted ? controller.before : controller.after;
+    final heapCallback =
+        dataPart == _DataPart.deleted ? diffData.before : diffData.after;
 
     if (objects is! ObjectSet) {
       throw StateError(
@@ -166,7 +166,7 @@ class DiffInstanceColumn extends ColumnData<DiffClassStats>
 
     return InstanceTableCell(
       objects,
-      heapObtainer,
+      heapCallback,
       data.heapClass,
       isSelected: isRowSelected,
       gaContext: gac.MemoryAreas.snapshotDiff,
@@ -241,20 +241,20 @@ class _SizeColumn extends ColumnData<DiffClassStats> {
 }
 
 class ClassesTableDiffColumns {
-  ClassesTableDiffColumns(this.sizeType, this.controller);
+  ClassesTableDiffColumns(this.sizeType, this.diffData);
 
   final SizeType sizeType;
-  final ClassesTableDiffData controller;
+  final ClassesTableDiffData diffData;
 
   late final sizeDeltaColumn = _SizeColumn(_DataPart.delta, sizeType);
 
   late final List<ColumnData<DiffClassStats>> columnList =
       <ColumnData<DiffClassStats>>[
-    DiffClassNameColumn(controller),
-    DiffInstanceColumn(_DataPart.created, controller),
-    DiffInstanceColumn(_DataPart.deleted, controller),
-    DiffInstanceColumn(_DataPart.delta, controller),
-    DiffInstanceColumn(_DataPart.persisted, controller),
+    _ClassNameColumn(diffData),
+    _InstanceColumn(_DataPart.created, diffData),
+    _InstanceColumn(_DataPart.deleted, diffData),
+    _InstanceColumn(_DataPart.delta, diffData),
+    _InstanceColumn(_DataPart.persisted, diffData),
     _SizeColumn(_DataPart.created, sizeType),
     _SizeColumn(_DataPart.deleted, sizeType),
     sizeDeltaColumn,
@@ -263,13 +263,13 @@ class ClassesTableDiffColumns {
 }
 
 class _SizeGroupTitle extends StatelessWidget {
-  const _SizeGroupTitle(this.controller);
+  const _SizeGroupTitle(this.diffData);
 
-  final ClassesTableDiffData controller;
+  final ClassesTableDiffData diffData;
 
   @override
   Widget build(BuildContext context) {
-    final sizeType = controller.selectedSizeType.value;
+    final sizeType = diffData.selectedSizeType.value;
 
     return maybeWrapWithTooltip(
       child: Padding(
@@ -281,7 +281,7 @@ class _SizeGroupTitle extends StatelessWidget {
               isDense: true,
               value: sizeType,
               onChanged: (SizeType? value) =>
-                  controller.selectedSizeType.value = value!,
+                  diffData.selectedSizeType.value = value!,
               items: SizeType.values
                   .map(
                     (sizeType) => DropdownMenuItem<SizeType>(
@@ -305,17 +305,17 @@ class ClassesTableDiff extends StatelessWidget {
   ClassesTableDiff({
     Key? key,
     required this.classes,
-    required this.controller,
+    required this.diffData,
   }) : super(key: key) {
     _columns = Map.fromIterable(
       SizeType.values,
       key: (sizeType) => sizeType,
-      value: (sizeType) => ClassesTableDiffColumns(sizeType, controller),
+      value: (sizeType) => ClassesTableDiffColumns(sizeType, diffData),
     );
   }
 
   final List<DiffClassStats> classes;
-  final ClassesTableDiffData controller;
+  final ClassesTableDiffData diffData;
 
   List<ColumnGroup> _columnGroups(SizeType sizeType, BuildContext context) {
     return [
@@ -329,7 +329,7 @@ class ClassesTableDiff extends StatelessWidget {
         tooltip: nonGcableInstancesColumnTooltip,
       ),
       ColumnGroup(
-        title: _SizeGroupTitle(controller),
+        title: _SizeGroupTitle(diffData),
         range: const Range(5, 9),
       ),
     ];
@@ -340,7 +340,7 @@ class ClassesTableDiff extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<SizeType>(
-      valueListenable: controller.selectedSizeType,
+      valueListenable: diffData.selectedSizeType,
       builder: (context, sizeType, _) {
         // We want to preserve the sorting and sort directions for ClassesTableDiff
         // no matter what the data passed to it is.
@@ -354,7 +354,7 @@ class ClassesTableDiff extends StatelessWidget {
           data: classes,
           dataKey: dataKey,
           keyFactory: (e) => Key(e.heapClass.fullName),
-          selectionNotifier: controller.selection,
+          selectionNotifier: diffData.selection,
           onItemSelected: (_) => ga.select(
             gac.memory,
             gac.MemoryEvent.diffClassDiffSelect,
