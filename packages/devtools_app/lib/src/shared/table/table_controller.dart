@@ -32,12 +32,17 @@ class FlatTableController<T> extends TableControllerBase<T> {
     super.columnGroups,
     super.includeColumnGroupHeaders,
     this.pinBehavior = FlatTablePinBehavior.none,
+    this.sizeToFit = true,
   });
 
   /// Determines how elements that request to be pinned are displayed.
   ///
   /// Defaults to [FlatTablePinBehavior.none], which disables pinnning.
   FlatTablePinBehavior pinBehavior;
+
+  /// Whether the columns for this table should be sized so that the entire
+  /// table fits in view (e.g. so that there is no horizontal scrolling).
+  final bool sizeToFit;
 
   /// The unmodified, original data for the active data set [_tableData.value].
   ///
@@ -94,6 +99,10 @@ class FlatTableController<T> extends TableControllerBase<T> {
       }
       data = dataCopy;
     }
+
+    if (!sizeToFit) {
+      columnWidths = computeColumnWidthsSizeToContent(data);
+    }
     _tableData.value = TableData<T>(
       data: data,
       key: dataKey ?? _tableData.value.key,
@@ -120,8 +129,6 @@ class TreeTableController<T extends TreeNode<T>>
   final TreeColumnData<T> treeColumn;
 
   final bool autoExpandRoots;
-
-  late List<double> columnWidths;
 
   late List<T> dataRoots;
 
@@ -220,6 +227,8 @@ abstract class TableControllerBase<T> extends DisposableController {
   final List<ColumnData<T>> columns;
 
   final List<ColumnGroup>? columnGroups;
+
+  List<double>? columnWidths;
 
   /// Determines if the headers for column groups should be rendered.
   ///
