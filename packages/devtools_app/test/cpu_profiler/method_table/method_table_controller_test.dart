@@ -17,7 +17,11 @@ void main() {
     late MethodTableController controller;
 
     setUp(() {
-      controller = MethodTableController();
+      controller = MethodTableController(
+        dataNotifier: FixedValueListenable<CpuProfileData>(
+          CpuProfileData.empty(),
+        ),
+      );
     });
 
     Future<CpuProfileData> _initSingleRootData({

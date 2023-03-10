@@ -38,8 +38,11 @@ void main() {
     setGlobal(ScriptManager, mockScriptManager);
     final data = CpuProfileData.parse(simpleCpuProfile2);
     await CpuProfileTransformer().processData(data, processId: 'test');
-    methodTableController = MethodTableController()
-      ..createMethodTableGraph(data);
+    methodTableController = MethodTableController(
+      dataNotifier: FixedValueListenable<CpuProfileData>(
+        CpuProfileData.empty(),
+      ),
+    )..createMethodTableGraph(data);
   });
 
   const windowSize = Size(2000.0, 1000.0);
