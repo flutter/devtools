@@ -536,7 +536,7 @@ class CpuProfilerController extends DisposableController
     _userTagFilter.value = userTagNone;
     transformer.reset();
     cpuProfileStore.clear();
-    methodTableController.reset();
+    methodTableController.reset(shouldResetSearch: true);
     resetSearch();
   }
 
@@ -546,6 +546,7 @@ class CpuProfilerController extends DisposableController
     _selectedCpuStackFrameNotifier.dispose();
     _processingNotifier.dispose();
     transformer.dispose();
+    methodTableController.dispose();
     super.dispose();
   }
 

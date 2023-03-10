@@ -38,9 +38,12 @@ class MethodTableController extends DisposableController
     refreshSearchMatches();
   }
 
+  @visibleForTesting
   void createMethodTableGraph(CpuProfileData? cpuProfileData) {
     reset();
-    if (cpuProfileData == null) return;
+    if (cpuProfileData == null ||
+        cpuProfileData == CpuProfilerController.baseStateCpuProfileData ||
+        cpuProfileData == CpuProfilerController.emptyAppStartUpProfile) return;
 
     assert(cpuProfileData.processed);
 
@@ -99,8 +102,11 @@ class MethodTableController extends DisposableController
     return selectedNode.value?.successorEdgePercentage(node) ?? 0.0;
   }
 
-  void reset() {
+  void reset({bool shouldResetSearch = false}) {
     selectedNode.value = null;
+    if (shouldResetSearch) {
+      resetSearch();
+    }
     _setData([]);
   }
 

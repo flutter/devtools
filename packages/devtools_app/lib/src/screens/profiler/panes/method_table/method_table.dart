@@ -61,7 +61,8 @@ class _MethodTable extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return OutlineDecoration.onlyRight(
-      child: FlatTable<MethodTableGraphNode>(
+      child: SearchableFlatTable<MethodTableGraphNode>(
+        searchController: _methodTableController,
         keyFactory: (node) => ValueKey(node.id),
         data: _methods,
         dataKey: 'cpu-profile-methods',
@@ -70,8 +71,6 @@ class _MethodTable extends StatelessWidget {
         defaultSortDirection: SortDirection.descending,
         sortOriginalData: true,
         selectionNotifier: _methodTableController.selectedNode,
-        searchMatchesNotifier: _methodTableController.searchMatches,
-        activeSearchMatchNotifier: _methodTableController.activeSearchMatch,
         sizeColumnsToFit: false,
       ),
     );

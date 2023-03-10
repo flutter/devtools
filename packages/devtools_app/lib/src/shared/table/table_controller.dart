@@ -34,6 +34,7 @@ class FlatTableController<T> extends TableControllerBase<T> {
     this.pinBehavior = FlatTablePinBehavior.none,
     this.sizeColumnsToFit = true,
     this.sortOriginalData = false,
+    this.onDataSorted,
   });
 
   /// Determines how elements that request to be pinned are displayed.
@@ -50,6 +51,9 @@ class FlatTableController<T> extends TableControllerBase<T> {
   /// Whether the table controller should sort the original data list instead of
   /// creating a copy.
   final bool sortOriginalData;
+
+  /// Callback that will be called after each table sort operation.
+  final VoidCallback? onDataSorted;
 
   /// The unmodified, original data for the active data set [_tableData.value].
   ///
@@ -136,6 +140,7 @@ class FlatTableController<T> extends TableControllerBase<T> {
     );
 
     setTableUiState(sortColumn: column, sortDirection: direction);
+    onDataSorted?.call();
   }
 }
 

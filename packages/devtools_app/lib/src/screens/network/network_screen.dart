@@ -359,6 +359,7 @@ class NetworkRequestsTable extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return OutlineDecoration(
+      // TODO(kenz): use SearchableFlatTable instead.
       child: FlatTable<NetworkRequest?>(
         keyFactory: (NetworkRequest? data) => ValueKey<NetworkRequest?>(data),
         data: requests,

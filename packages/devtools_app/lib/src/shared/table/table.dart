@@ -53,6 +53,37 @@ enum ScrollKind {
   parent,
 }
 
+class SearchableFlatTable<T extends DataSearchStateMixin> extends FlatTable {
+  SearchableFlatTable({
+    Key? key,
+    required SearchControllerMixin<T> searchController,
+    required super.keyFactory,
+    required super.data,
+    required super.dataKey,
+    required super.columns,
+    required super.defaultSortColumn,
+    required super.defaultSortDirection,
+    super.secondarySortColumn,
+    super.sortOriginalData = false,
+    super.pinBehavior = FlatTablePinBehavior.none,
+    super.columnGroups,
+    super.autoScrollContent = false,
+    super.onItemSelected,
+    super.preserveVerticalScrollPosition = false,
+    super.includeColumnGroupHeaders = true,
+    super.sizeColumnsToFit = true,
+    super.selectionNotifier,
+  }) : super(
+          searchMatchesNotifier: searchController.searchMatches,
+          activeSearchMatchNotifier: searchController.activeSearchMatch,
+          onDataSorted: () => WidgetsBinding.instance.addPostFrameCallback((_) {
+            // This needs to be in a post frame callback so that the search
+            // matches are not updated in the middle of a table build.
+            searchController.refreshSearchMatches();
+          }),
+        );
+}
+
 /// A table that displays in a collection of [data], based on a collection of
 /// [ColumnData].
 ///
@@ -70,6 +101,7 @@ class FlatTable<T> extends StatefulWidget {
     this.onItemSelected,
     required this.defaultSortColumn,
     required this.defaultSortDirection,
+    this.onDataSorted,
     this.sortOriginalData = false,
     this.pinBehavior = FlatTablePinBehavior.none,
     this.secondarySortColumn,
@@ -158,6 +190,9 @@ class FlatTable<T> extends StatefulWidget {
   /// [TableControllerBase.sortDataAndNotify].
   final ColumnData<T>? secondarySortColumn;
 
+  /// Callback that will be called after each table sort operation.
+  final VoidCallback? onDataSorted;
+
   /// Notifies with the list of data items that should be marked as search
   /// matches.
   final ValueListenable<List<T>>? searchMatchesNotifier;
@@ -237,6 +272,7 @@ class FlatTableState<T> extends State<FlatTable<T>> with AutoDisposeMixin {
         pinBehavior: widget.pinBehavior,
         sizeColumnsToFit: widget.sizeColumnsToFit,
         sortOriginalData: widget.sortOriginalData,
+        onDataSorted: widget.onDataSorted,
       );
     }
 

@@ -33,9 +33,9 @@ class CpuProfiler extends StatefulWidget {
   CpuProfiler({
     required this.data,
     required this.controller,
-    this.searchFieldKey,
     this.standaloneProfiler = true,
     this.summaryView,
+    List<Key>? searchableTabKeys,
   })  : callTreeRoots = data.callTreeRoots,
         bottomUpRoots = data.bottomUpRoots,
         tabs = [
@@ -63,8 +63,6 @@ class CpuProfiler extends StatefulWidget {
 
   final List<CpuStackFrame> bottomUpRoots;
 
-  final GlobalKey? searchFieldKey;
-
   final bool standaloneProfiler;
 
   final Widget? summaryView;
@@ -81,6 +79,8 @@ class CpuProfiler extends StatefulWidget {
 
   static const Key bottomUpTab = Key('cpu profile bottom up tab');
   static const Key callTreeTab = Key('cpu profile call tree tab');
+
+  static const searchableTabKeys = <Key>[methodTableTab, flameChartTab];
 
   @override
   _CpuProfilerState createState() => _CpuProfilerState();
@@ -198,13 +198,15 @@ class _CpuProfilerState extends State<CpuProfiler>
             ],
             // TODO(kenz): support search for call tree and bottom up tabs as
             // well. This will require implementing search for tree tables.
-            if (currentTab.key == CpuProfiler.methodTableTab)
-              _buildSearchField<MethodTableGraphNode>(
-                widget.controller.methodTableController,
-              ),
-            if (currentTab.key == CpuProfiler.flameChartTab) ...[
-              if (widget.searchFieldKey != null)
+            if (CpuProfiler.searchableTabKeys.contains(currentTab.key)) ...[
+              if (currentTab.key == CpuProfiler.methodTableTab)
+                _buildSearchField<MethodTableGraphNode>(
+                  widget.controller.methodTableController,
+                )
+              else
                 _buildSearchField<CpuStackFrame>(widget.controller),
+            ],
+            if (currentTab.key == CpuProfiler.flameChartTab) ...[
               FlameChartHelpButton(
                 gaScreen: widget.standaloneProfiler
                     ? gac.cpuProfiler
