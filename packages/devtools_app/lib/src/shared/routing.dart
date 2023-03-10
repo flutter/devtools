@@ -72,11 +72,7 @@ class DevToolsRouteInformationParser
     final configuration = DevToolsRouteConfiguration(
       path,
       uri.queryParameters,
-      routeInformation.state == null
-          ? null
-          : DevToolsNavigationState._(
-              (routeInformation.state as Map).cast<String, String?>(),
-            ),
+      _navigationStateFromRouteInformation(routeInformation),
     );
     return SynchronousFuture<DevToolsRouteConfiguration>(configuration);
   }
@@ -98,6 +94,20 @@ class DevToolsRouteInformationParser
       ).toString(),
       state: configuration.state,
     );
+  }
+
+  DevToolsNavigationState? _navigationStateFromRouteInformation(
+    RouteInformation routeInformation,
+  ) {
+    final routeState = routeInformation.state;
+    if (routeState == null) return null;
+    try {
+      return DevToolsNavigationState._(
+        (routeState as Map).cast<String, String?>(),
+      );
+    } catch (_) {
+      return null;
+    }
   }
 }
 
