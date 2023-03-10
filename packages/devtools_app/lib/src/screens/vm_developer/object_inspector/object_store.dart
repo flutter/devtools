@@ -60,7 +60,7 @@ class ObjectStoreViewer extends StatelessWidget {
     required this.controller,
   });
 
-  final _entryColumn = _EntryColumn();
+  static final _entryColumn = _EntryColumn();
   late final _objectColumn = _ObjectColumn(onTap: onLinkTapped);
   late final _columns = <ColumnData<ObjectStoreEntry>>[
     _entryColumn,

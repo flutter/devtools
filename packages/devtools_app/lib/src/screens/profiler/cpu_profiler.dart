@@ -10,7 +10,6 @@ import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/charts/flame_chart.dart';
 import '../../shared/common_widgets.dart';
 import '../../shared/dialogs.dart';
-import '../../shared/feature_flags.dart';
 import '../../shared/globals.dart';
 import '../../shared/primitives/auto_dispose.dart';
 import '../../shared/primitives/utils.dart';
@@ -43,8 +42,7 @@ class CpuProfiler extends StatefulWidget {
             _buildTab(key: summaryTab, tabName: 'Summary'),
           _buildTab(key: bottomUpTab, tabName: 'Bottom Up'),
           _buildTab(key: callTreeTab, tabName: 'Call Tree'),
-          if (FeatureFlags.methodTable)
-            _buildTab(key: methodTableTab, tabName: 'Method Table'),
+          _buildTab(key: methodTableTab, tabName: 'Method Table'),
           _buildTab(key: flameChartTab, tabName: 'CPU Flame Chart'),
         ];
 
@@ -349,7 +347,7 @@ class _CpuProfilerState extends State<CpuProfiler>
       if (summaryView != null) summaryView,
       bottomUp,
       callTree,
-      if (FeatureFlags.methodTable) methodTable,
+      methodTable,
       cpuFlameChart,
     ];
   }

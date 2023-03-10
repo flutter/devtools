@@ -272,6 +272,40 @@ void main() {
       expect(stackFrameF.selfTime.inMicroseconds, equals(0));
     });
 
+    test('ancestorIds', () {
+      expect(testStackFrame.ancestorIds.toList(), ['cpuProfileRoot']);
+      expect(stackFrameA.ancestorIds.toList(), ['cpuProfileRoot']);
+      expect(stackFrameB.ancestorIds.toList(), ['id_0', 'cpuProfileRoot']);
+      expect(
+        stackFrameC.ancestorIds.toList(),
+        ['id_1', 'id_0', 'cpuProfileRoot'],
+      );
+      expect(
+        stackFrameD.ancestorIds.toList(),
+        ['id_1', 'id_0', 'cpuProfileRoot'],
+      );
+      expect(
+        stackFrameE.ancestorIds.toList(),
+        ['id_3', 'id_1', 'id_0', 'cpuProfileRoot'],
+      );
+      expect(
+        stackFrameF.ancestorIds.toList(),
+        ['id_4', 'id_3', 'id_1', 'id_0', 'cpuProfileRoot'],
+      );
+      expect(
+        stackFrameF2.ancestorIds.toList(),
+        ['id_3', 'id_1', 'id_0', 'cpuProfileRoot'],
+      );
+      expect(
+        stackFrameC2.ancestorIds.toList(),
+        ['id_5', 'id_4', 'id_3', 'id_1', 'id_0', 'cpuProfileRoot'],
+      );
+      expect(
+        stackFrameC3.ancestorIds.toList(),
+        ['id_6', 'id_3', 'id_1', 'id_0', 'cpuProfileRoot'],
+      );
+    });
+
     test('shallowCopy', () {
       expect(stackFrameD.children.length, 2);
       expect(stackFrameD.parent, stackFrameB);
