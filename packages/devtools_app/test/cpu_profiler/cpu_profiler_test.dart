@@ -3,9 +3,9 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app/devtools_app.dart';
-import 'package:devtools_app/src/screens/profiler/cpu_profile_controller.dart';
 import 'package:devtools_app/src/screens/profiler/cpu_profile_transformer.dart';
 import 'package:devtools_app/src/screens/profiler/cpu_profiler.dart';
+import 'package:devtools_app/src/screens/profiler/cpu_profiler_controller.dart';
 import 'package:devtools_app/src/screens/profiler/panes/bottom_up.dart';
 import 'package:devtools_app/src/screens/profiler/panes/call_tree.dart';
 import 'package:devtools_app/src/screens/profiler/panes/controls/profiler_controls.dart';

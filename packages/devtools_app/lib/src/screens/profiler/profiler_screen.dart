@@ -21,9 +21,9 @@ import '../../shared/theme.dart';
 import '../../shared/ui/icons.dart';
 import '../../shared/ui/vm_flag_widgets.dart';
 import '../../shared/utils.dart';
-import 'cpu_profile_controller.dart';
 import 'cpu_profile_model.dart';
 import 'cpu_profiler.dart';
+import 'cpu_profiler_controller.dart';
 import 'panes/controls/profiler_controls.dart';
 import 'profiler_screen_controller.dart';
 

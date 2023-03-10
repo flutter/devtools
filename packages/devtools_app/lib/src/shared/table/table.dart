@@ -70,13 +70,14 @@ class FlatTable<T> extends StatefulWidget {
     this.onItemSelected,
     required this.defaultSortColumn,
     required this.defaultSortDirection,
+    this.sortOriginalData = false,
     this.pinBehavior = FlatTablePinBehavior.none,
     this.secondarySortColumn,
     this.searchMatchesNotifier,
     this.activeSearchMatchNotifier,
     this.preserveVerticalScrollPosition = false,
     this.includeColumnGroupHeaders = true,
-    this.sizeToFit = true,
+    this.sizeColumnsToFit = true,
     ValueNotifier<T?>? selectionNotifier,
   })  : selectionNotifier = selectionNotifier ?? ValueNotifier<T?>(null),
         super(key: key);
@@ -97,7 +98,13 @@ class FlatTable<T> extends StatefulWidget {
 
   /// Whether the columns for this table should be sized so that the entire
   /// table fits in view (e.g. so that there is no horizontal scrolling).
-  final bool sizeToFit;
+  final bool sizeColumnsToFit;
+
+  // TODO(kenz): should we enable this behavior by default? Does it ever matter
+  // to preserve the order of the original data passed to a flat table?
+  /// Whether table sorting should sort the original data list instead of
+  /// creating a copy.
+  final bool sortOriginalData;
 
   /// Determines if the headers for column groups should be rendered.
   ///
@@ -228,7 +235,8 @@ class FlatTableState<T> extends State<FlatTable<T>> with AutoDisposeMixin {
         columnGroups: widget.columnGroups,
         includeColumnGroupHeaders: widget.includeColumnGroupHeaders,
         pinBehavior: widget.pinBehavior,
-        sizeToFit: widget.sizeToFit,
+        sizeColumnsToFit: widget.sizeColumnsToFit,
+        sortOriginalData: widget.sortOriginalData,
       );
     }
 
@@ -270,7 +278,7 @@ class FlatTableState<T> extends State<FlatTable<T>> with AutoDisposeMixin {
           rowItemExtent: defaultRowHeight,
           preserveVerticalScrollPosition: widget.preserveVerticalScrollPosition,
         );
-    if (widget.sizeToFit || tableController.columnWidths == null) {
+    if (widget.sizeColumnsToFit || tableController.columnWidths == null) {
       return LayoutBuilder(
         builder: (context, constraints) => _buildTable(
           tableController.computeColumnWidthsSizeToFit(

@@ -100,7 +100,7 @@ void main() {
         keyFactory: (d) => Key(d.name),
         defaultSortColumn: flatNameColumn,
         defaultSortDirection: SortDirection.ascending,
-        sizeToFit: false,
+        sizeColumnsToFit: false,
       );
       await tester.pumpWidget(wrap(table));
       expect(find.byWidget(table), findsOneWidget);
@@ -537,7 +537,7 @@ void main() {
         keyFactory: (data) => Key(data.name),
         defaultSortColumn: flatNameColumn,
         defaultSortDirection: SortDirection.ascending,
-        sizeToFit: false,
+        sizeColumnsToFit: false,
       );
       await tester.pumpWidget(
         wrap(

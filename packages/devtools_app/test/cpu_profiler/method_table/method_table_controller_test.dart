@@ -3,8 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app/devtools_app.dart';
-import 'package:devtools_app/src/screens/profiler/cpu_profile_controller.dart';
 import 'package:devtools_app/src/screens/profiler/cpu_profile_transformer.dart';
+import 'package:devtools_app/src/screens/profiler/cpu_profiler_controller.dart';
 import 'package:devtools_app/src/screens/profiler/panes/method_table/method_table_controller.dart';
 import 'package:devtools_app/src/screens/profiler/panes/method_table/method_table_model.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -102,6 +102,16 @@ void main() {
 
       controller.reset();
       expect(controller.selectedNode.value, isNull);
+    });
+
+    test('matchesForSearch', () async {
+      final data = await initSimpleData2();
+      controller.createMethodTableGraph(data);
+
+      expect(controller.matchesForSearch(''), isEmpty);
+      expect(controller.matchesForSearch('a.dart|b.dart').length, 2);
+      expect(controller.matchesForSearch('package:my_app').length, 5);
+      expect(controller.matchesForSearch('some_bogus_search'), isEmpty);
     });
 
     group('caller and callee percentage', () {

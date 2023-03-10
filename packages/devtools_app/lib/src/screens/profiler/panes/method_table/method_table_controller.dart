@@ -4,8 +4,10 @@
 
 import 'package:flutter/foundation.dart';
 
+import '../../../../shared/primitives/auto_dispose.dart';
 import '../../../../shared/primitives/trees.dart';
 import '../../../../shared/primitives/utils.dart';
+import '../../../../shared/ui/search.dart';
 import '../../cpu_profile_model.dart';
 import 'method_table_model.dart';
 
@@ -13,7 +15,8 @@ import 'method_table_model.dart';
 ///
 /// This controller is responsible for managing state of the Method table UI
 /// and for providing utility methods to interact with the active data.
-class MethodTableController {
+class MethodTableController extends DisposableController
+    with SearchControllerMixin<MethodTableGraphNode> {
   final selectedNode = ValueNotifier<MethodTableGraphNode?>(null);
 
   ValueListenable<List<MethodTableGraphNode>> get methods => _methods;
@@ -88,5 +91,33 @@ class MethodTableController {
   String graphAsString() {
     methods.value.sort((m1, m2) => m2.totalCount.compareTo(m1.totalCount));
     return methods.value.map((node) => node.toString()).toList().join('\n');
+  }
+
+  @override
+  List<MethodTableGraphNode> matchesForSearch(
+    String search, {
+    bool searchPreviousMatches = false,
+  }) {
+    if (search.isEmpty) return <MethodTableGraphNode>[];
+    final regexSearch = RegExp(search, caseSensitive: false);
+    final matches = <MethodTableGraphNode>[];
+    if (searchPreviousMatches) {
+      final previousMatches = searchMatches.value;
+      for (final previousMatch in previousMatches) {
+        if (previousMatch.name.caseInsensitiveContains(regexSearch) ||
+            previousMatch.packageUri.caseInsensitiveContains(regexSearch)) {
+          matches.add(previousMatch);
+        }
+      }
+    } else {
+      final currentMethods = methods.value;
+      for (final method in currentMethods) {
+        if (method.name.caseInsensitiveContains(regexSearch) ||
+            method.packageUri.caseInsensitiveContains(regexSearch)) {
+          matches.add(method);
+        }
+      }
+    }
+    return matches;
   }
 }

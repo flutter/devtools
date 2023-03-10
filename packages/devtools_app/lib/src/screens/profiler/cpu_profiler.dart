@@ -18,13 +18,14 @@ import '../../shared/ui/colors.dart';
 import '../../shared/ui/search.dart';
 import '../../shared/ui/tab.dart';
 import '../../shared/utils.dart';
-import 'cpu_profile_controller.dart';
 import 'cpu_profile_model.dart';
+import 'cpu_profiler_controller.dart';
 import 'panes/bottom_up.dart';
 import 'panes/call_tree.dart';
 import 'panes/controls/profiler_controls.dart';
 import 'panes/cpu_flame_chart.dart';
 import 'panes/method_table/method_table.dart';
+import 'panes/method_table/method_table_model.dart';
 
 // TODO(kenz): provide useful UI upon selecting a CPU stack frame.
 
@@ -197,8 +198,13 @@ class _CpuProfilerState extends State<CpuProfiler>
             ],
             // TODO(kenz): support search for call tree and bottom up tabs as
             // well. This will require implementing search for tree tables.
+            if (currentTab.key == CpuProfiler.methodTableTab)
+              _buildSearchField<MethodTableGraphNode>(
+                widget.controller.methodTableController,
+              ),
             if (currentTab.key == CpuProfiler.flameChartTab) ...[
-              if (widget.searchFieldKey != null) _buildSearchField(),
+              if (widget.searchFieldKey != null)
+                _buildSearchField<CpuStackFrame>(widget.controller),
               FlameChartHelpButton(
                 gaScreen: widget.standaloneProfiler
                     ? gac.cpuProfiler
@@ -284,12 +290,14 @@ class _CpuProfilerState extends State<CpuProfiler>
     );
   }
 
-  Widget _buildSearchField() {
+  Widget _buildSearchField<T extends DataSearchStateMixin>(
+    SearchControllerMixin<T> searchController,
+  ) {
     return Container(
       width: wideSearchTextWidth,
       height: defaultTextFieldHeight,
       child: buildSearchField(
-        controller: widget.controller,
+        controller: searchController,
         searchFieldKey: widget.searchFieldKey!,
         searchFieldEnabled: true,
         shouldRequestFocus: false,

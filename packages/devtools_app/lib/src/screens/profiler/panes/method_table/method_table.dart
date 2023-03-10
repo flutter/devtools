@@ -68,8 +68,11 @@ class _MethodTable extends StatelessWidget {
         columns: columns,
         defaultSortColumn: totalTimeColumn,
         defaultSortDirection: SortDirection.descending,
+        sortOriginalData: true,
         selectionNotifier: _methodTableController.selectedNode,
-        sizeToFit: false,
+        searchMatchesNotifier: _methodTableController.searchMatches,
+        activeSearchMatchNotifier: _methodTableController.activeSearchMatch,
+        sizeColumnsToFit: false,
       ),
     );
   }
@@ -200,7 +203,7 @@ class _CallersTable extends StatelessWidget {
       defaultSortColumn: _callerTimeColumn,
       defaultSortDirection: SortDirection.descending,
       selectionNotifier: _methodTableController.selectedNode,
-      sizeToFit: false,
+      sizeColumnsToFit: false,
     );
   }
 }
@@ -236,7 +239,7 @@ class _CalleesTable extends StatelessWidget {
       defaultSortColumn: _calleeTimeColumn,
       defaultSortDirection: SortDirection.descending,
       selectionNotifier: _methodTableController.selectedNode,
-      sizeToFit: false,
+      sizeColumnsToFit: false,
     );
   }
 }
