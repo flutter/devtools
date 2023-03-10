@@ -21,6 +21,7 @@ import 'screens/app_size/app_size_controller.dart';
 import 'screens/app_size/app_size_screen.dart';
 import 'screens/debugger/debugger_controller.dart';
 import 'screens/debugger/debugger_screen.dart';
+import 'screens/deep_link/deep_link_screen.dart';
 import 'screens/inspector/inspector_controller.dart';
 import 'screens/inspector/inspector_screen.dart';
 import 'screens/inspector/inspector_tree_controller.dart';
@@ -579,6 +580,10 @@ class CheckboxSetting extends StatelessWidget {
 /// be shown or hidden based on the [Screen.conditionalLibrary] provided.
 List<DevToolsScreen> get defaultScreens {
   return devtoolsScreens ??= <DevToolsScreen>[
+    DevToolsScreen<void>(
+      DeepLinkScreen(),
+      createController: (_) {},
+    ),
     DevToolsScreen<InspectorController>(
       InspectorScreen(),
       createController: (_) => InspectorController(

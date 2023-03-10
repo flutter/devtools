@@ -31,6 +31,7 @@ enum ScreenMetaData {
   cpuProfiler('cpu-profiler', 'CPU Profiler'),
   memory('memory', 'Memory'),
   debugger('debugger', 'Debugger'),
+  deepLink('deep-link', 'Deep Link'),
   network('network', 'Network'),
   logging('logging', 'Logging'),
   provider('provider', 'Provider'),
