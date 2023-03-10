@@ -90,7 +90,8 @@ class CpuProfilerController extends DisposableController
   /// Store of cached CPU profiles for each isolate.
   final _cpuProfileStoreByIsolateId = <String, CpuProfileStore>{};
 
-  final methodTableController = MethodTableController();
+  late final methodTableController =
+      MethodTableController(dataNotifier: dataNotifier);
 
   /// Notifies that new cpu profile data is available.
   ValueListenable<CpuProfileData?> get dataNotifier => _dataNotifier;
@@ -270,10 +271,6 @@ class CpuProfilerController extends DisposableController
         );
       }
     }
-    // TODO(kenz): consider implementing the "active feature" logic that we use
-    // on the performance page to defer the work of creating the method table
-    // until we need it.
-    methodTableController.createMethodTableGraph(cpuProfiles.functionProfile);
     return cpuProfiles;
   }
 

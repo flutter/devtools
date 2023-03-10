@@ -16,15 +16,32 @@ import 'method_table_model.dart';
 /// This controller is responsible for managing state of the Method table UI
 /// and for providing utility methods to interact with the active data.
 class MethodTableController extends DisposableController
-    with SearchControllerMixin<MethodTableGraphNode> {
+    with
+        SearchControllerMixin<MethodTableGraphNode>,
+        AutoDisposeControllerMixin {
+  MethodTableController({
+    required ValueListenable<CpuProfileData?> dataNotifier,
+  }) {
+    addAutoDisposeListener(dataNotifier, () {
+      createMethodTableGraph(dataNotifier.value);
+    });
+  }
+
   final selectedNode = ValueNotifier<MethodTableGraphNode?>(null);
 
   ValueListenable<List<MethodTableGraphNode>> get methods => _methods;
 
   final _methods = ValueNotifier<List<MethodTableGraphNode>>([]);
 
-  void createMethodTableGraph(CpuProfileData cpuProfileData) {
+  void _setData(List<MethodTableGraphNode> data) {
+    _methods.value = data;
+    refreshSearchMatches();
+  }
+
+  void createMethodTableGraph(CpuProfileData? cpuProfileData) {
     reset();
+    if (cpuProfileData == null) return;
+
     assert(cpuProfileData.processed);
 
     List<CpuStackFrame> profileRoots = cpuProfileData.callTreeRoots;
@@ -71,7 +88,7 @@ class MethodTableController extends DisposableController
         },
       );
     }
-    _methods.value = methodMap.values.toList();
+    _setData(methodMap.values.toList());
   }
 
   double callerPercentageFor(MethodTableGraphNode node) {
@@ -84,7 +101,7 @@ class MethodTableController extends DisposableController
 
   void reset() {
     selectedNode.value = null;
-    _methods.value = <MethodTableGraphNode>[];
+    _setData([]);
   }
 
   @visibleForTesting
