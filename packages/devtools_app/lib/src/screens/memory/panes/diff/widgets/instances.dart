@@ -36,8 +36,8 @@ class InstanceTableCell extends StatelessWidget {
   final HeapClassSampler? _sampleObtainer;
   final bool _showMenu;
   final bool isSelected;
-  final int _count;
   final MemoryAreas gaContext;
+  final int _count;
   final bool liveItemsEnabled;
 
   @override
@@ -51,9 +51,9 @@ class InstanceTableCell extends StatelessWidget {
           textStyle:
               isSelected ? theme.selectedTextStyle : theme.regularTextStyle,
           count: _count,
+          gaContext: gaContext,
           sampleObtainer: _sampleObtainer,
           showMenu: _showMenu,
-          gaContext: gaContext,
           liveItemsEnabled: liveItemsEnabled,
         ),
       ],
