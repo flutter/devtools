@@ -50,6 +50,11 @@ abstract class FlutterTestDriver {
 
   String get lastErrorInfo => errorBuffer.toString();
 
+  Stream<String> get stderr => stderrController.stream;
+  Stream<String> get stdout => stdoutController.stream;
+
+  Uri get vmServiceUri => _vmServiceWsUri;
+
   String _debugPrint(String msg) {
     const int maxLength = 500;
     final String truncatedMsg =
