@@ -181,6 +181,8 @@ class Trace {
     }
 
     // New data has arrived notify listeners this data needs to be plotted.
+    // TODO(polina-c): should we use stream instead notifier?
+    // https://github.com/flutter/devtools/pull/5301#discussion_r1126792303
     controller.traceChanged.value = TraceNotifier();
   }
 
