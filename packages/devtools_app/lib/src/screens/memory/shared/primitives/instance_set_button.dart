@@ -123,7 +123,7 @@ class _StoreAllAsVariableMenu extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final enabled = sampler.isEvalEnabled;
-    const menuText = 'Store all instances, currently alive in application';
+    const menuText = 'Store all instances currently alive in application';
 
     if (!enabled) {
       return const MenuItemButton(child: Text(menuText));
@@ -148,7 +148,7 @@ class _StoreAllAsVariableMenu extends StatelessWidget {
         item('Direct and subclasses', implementers: false, subclasses: false),
         item('Direct and implementers', implementers: false, subclasses: false),
         item(
-          'Direct, subclasses and implementers',
+          'Direct, subclasses, and implementers',
           implementers: false,
           subclasses: false,
         ),

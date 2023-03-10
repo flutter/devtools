@@ -24,28 +24,42 @@ class HeapClassSampler extends ClassSampler {
       serviceManager.isolateManager.mainIsolate.value!;
 
   Future<InstanceSet?> _liveInstances() async {
-    final isolateId = _mainIsolateRef.id!;
+    try {
+      final isolateId = _mainIsolateRef.id!;
 
-    final theClass = await findClass(isolateId, heapClass);
-    if (theClass == null) return null;
+      final theClass = await findClass(isolateId, heapClass);
+      if (theClass == null) return null;
 
-    return await serviceManager.service!.getInstances(
-      isolateId,
-      theClass.id!,
-      preferences.memory.refLimit.value,
-    );
+      return await serviceManager.service!.getInstances(
+        isolateId,
+        theClass.id!,
+        preferences.memory.refLimit.value,
+      );
+    } catch (error, trace) {
+      _outputError(error, trace);
+      return null;
+    }
   }
 
   Future<InstanceRef?> _liveInstancesAsList() async {
-    final isolateId = _mainIsolateRef.id!;
+    try {
+      final isolateId = _mainIsolateRef.id!;
 
-    final theClass = await findClass(isolateId, heapClass);
-    if (theClass == null) return null;
+      final theClass = await findClass(isolateId, heapClass);
+      if (theClass == null) return null;
 
-    return await serviceManager.service!.getInstancesAsList(
-      isolateId,
-      theClass.id!,
-    );
+      return await serviceManager.service!.getInstancesAsList(
+        isolateId,
+        theClass.id!,
+      );
+    } catch (error, trace) {
+      _outputError(error, trace);
+      return null;
+    }
+  }
+
+  void _outputError(Object error, StackTrace trace) {
+    serviceManager.consoleService.appendStdio('$error\ntrace');
   }
 
   @override

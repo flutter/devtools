@@ -143,23 +143,6 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
       ]);
   }
 
-  // factory DartObjectNode.fromInstanceSet({
-  //   required String text,
-  //   required InstanceSet instanceSet,
-  //   required IsolateRef? isolateRef,
-  // }) {
-  //   return DartObjectNode._(
-  //     text: text,
-  //     ref: GenericInstanceRef(
-  //       isolateRef: isolateRef,
-  //       value: instanceSet,
-  //     ),
-  //     artificialValue: true,
-  //     artificialName: true,
-  //     childCount: instanceSet.instances?.length,
-  //   );
-  // }
-
   factory DartObjectNode.create(
     BoundVariable variable,
     IsolateRef? isolateRef,

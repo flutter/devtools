@@ -435,14 +435,12 @@ class _DebuggerStatusState extends State<DebuggerStatus> with AutoDisposeMixin {
     final Frame? frame;
 
     if (event == null) {
-      // If paused from debugger screen, the event may be null.
-      // TODO(polina-c): if it is paused on exception first and then from debugger screen,
-      // we will give reason 'exception', that will be misleading.
-      // May be we should not give reason at all.
       reason = '';
       frame = null;
     } else {
       frame = event.topFrame;
+      // TODO(polina-c): https://github.com/flutter/devtools/issues/5387
+      // Reason may be wrong.
       reason = event.kind == EventKind.kPauseException ? ' on exception' : '';
     }
 
