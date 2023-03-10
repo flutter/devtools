@@ -48,7 +48,7 @@ class _ProgramExplorerRow extends StatelessWidget {
 
     return DevToolsTooltip(
       message: toolTip ?? node.name,
-      textStyle: theme.toolTipFixedFontStyle,
+      textStyle: theme.tooltipFixedFontStyle,
       child: InkWell(
         onTap: onTap,
         child: Row(

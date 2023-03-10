@@ -59,6 +59,7 @@ const refreshTimelineEvents = 'refreshTimelineEvents';
 const performanceOverlay = 'performanceOverlay';
 const performanceOverlayDocs = 'performanceOverlayDocs';
 const timelineFlameChartHelp = 'timelineFlameChartHelp';
+const framesChartVisibility = 'framesChartVisibility';
 const selectFlutterFrame = 'selectFlutterFrame';
 const traceEventProcessingTime = 'traceEventProcessingTime';
 const trackRebuilds = 'trackRebuilds';
@@ -116,6 +117,10 @@ const objectInspectorScreen = 'objectInspector';
 const programExplorer = 'programExplorer';
 const objectStore = 'objectStore';
 const classHierarchy = 'classHierarchy';
+
+// Network Events:
+const inspectorTreeControllerInitialized = 'InspectorTreeControllerInitialized';
+const inspectorTreeControllerRootChange = 'InspectorTreeControllerRootChange';
 
 // Common actions shared across screens.
 // These actions will be tracked per screen, so they will still be

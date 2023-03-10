@@ -5,6 +5,8 @@
 /// The DevTools application version
 // This version should only be updated by running tools/update_version.dart
 // that updates all versions for DevTools.
-// Note: a regexp in tools/update_version.dart matches the following line so
-// if you change it you must also modify tools/update_version.dart.
-const String version = '2.22.2-dev.2';
+// Note: a regexp in tools/update_version.dart matches
+// the constant declaration `const String version =`.
+// If you change the declaration you must also modify the regex in
+// tools/update_version.dart.
+const String version = '2.23.0-dev.7';

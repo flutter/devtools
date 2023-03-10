@@ -202,5 +202,6 @@ class OfflineModeController {
   void exitOfflineMode() {
     serviceManager.connectedApp = _previousConnectedApp;
     _offlineMode.value = false;
+    offlineDataJson.clear();
   }
 }

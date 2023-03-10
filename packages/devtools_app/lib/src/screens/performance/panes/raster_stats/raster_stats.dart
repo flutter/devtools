@@ -140,22 +140,18 @@ class LayerSnapshotTable extends StatelessWidget {
     required this.snapshots,
   }) : super(key: key);
 
-  final RasterStatsController controller;
-
-  final List<LayerSnapshot> snapshots;
-
-  static final ColumnData<LayerSnapshot> _layerColumn = _LayerColumn();
-
-  static final ColumnData<LayerSnapshot> _timeColumn = _RenderingTimeColumn();
-
-  static final ColumnData<LayerSnapshot> _percentageColumn =
-      _RenderingTimePercentageColumn();
-
-  static final List<ColumnData<LayerSnapshot>> _columns = [
+  static final _layerColumn = _LayerColumn();
+  static final _timeColumn = _RenderingTimeColumn();
+  static final _percentageColumn = _RenderingTimePercentageColumn();
+  static final _columns = <ColumnData<LayerSnapshot>>[
     _layerColumn,
     _timeColumn,
     _percentageColumn,
   ];
+
+  final RasterStatsController controller;
+
+  final List<LayerSnapshot> snapshots;
 
   @override
   Widget build(BuildContext context) {

@@ -18,6 +18,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
 
+import 'simple_items.dart';
+
 bool isPrivate(String member) => member.startsWith('_');
 
 /// Public properties first, then sort alphabetically
@@ -49,7 +51,8 @@ String escape(String? text) => text == null ? '' : htmlEscape.convert(text);
 
 final NumberFormat nf = NumberFormat.decimalPattern();
 
-String percent2(double d) => '${(d * 100).toStringAsFixed(2)}%';
+String percent(double d, {int fractionDigits = 2}) =>
+    '${(d * 100).toStringAsFixed(fractionDigits)}%';
 
 /// Unifies printing of retained size to avoid confusion related to different rounding.
 String? prettyPrintRetainedSize(int? bites) => prettyPrintBytes(
@@ -292,7 +295,7 @@ String pluralize(String word, int count, {String? plural}) =>
 /// See (https://github.com/dart-lang/sdk/issues/36999).
 String getSimpleStackFrameName(String? name) {
   name ??= '';
-  final newName = name.replaceAll('<anonymous closure>', '<closure>');
+  final newName = name.replaceAll(anonymousClosureName, closureName);
 
   // If the class name contains a space, then it is not a valid Dart name. We
   // throw out simplified names with spaces to prevent simplifying C++ class
@@ -1141,6 +1144,15 @@ extension SetExtension<T> on Set<T> {
   bool containsWhere(bool test(T element)) {
     for (var e in this) {
       if (test(e)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  bool containsAny(Iterable<T> any) {
+    for (var e in any) {
+      if (contains(e)) {
         return true;
       }
     }

@@ -39,14 +39,26 @@ void main() {
         }
       };
       final offset = pow(2, 20) as int;
+      const addressCount = 1000;
       testCode.disassembly = Disassembly.parse(<Object?>[
-        for (int i = 0; i < 1000; ++i) ...[
+        for (int i = 0; i < addressCount; ++i) ...[
           (i * 4 + offset).toRadixString(16),
           'unknown',
           'noop',
           null,
         ]
       ]);
+
+      final ticksTable = CpuProfilerTicksTable.parse(
+        sampleCount: 1000,
+        ticks: [
+          for (int i = 0; i < addressCount; ++i) ...[
+            (i * 4 + offset).toRadixString(16),
+            1,
+            1,
+          ],
+        ],
+      );
 
       when(mockCodeObject.obj).thenReturn(testCode);
       when(mockCodeObject.script).thenReturn(null);
@@ -64,14 +76,23 @@ void main() {
       );
       when(mockCodeObject.retainedSize).thenReturn(null);
       when(mockCodeObject.reachableSize).thenReturn(null);
+      when(mockCodeObject.ticksTable).thenReturn(ticksTable);
     });
 
-    void verifyAddressOrder(List<Instruction> data) {
+    void verifyAddressOrder(
+      List<Instruction> data,
+      CpuProfilerTicksTable? ticks,
+    ) {
       int lastAddress = 0;
       for (final instr in data) {
         final currentAddress = int.parse(instr.address, radix: 16);
         expect(currentAddress > lastAddress, isTrue);
         lastAddress = currentAddress;
+
+        final tick = ticks![instr.unpaddedAddress];
+        expect(tick, isNotNull);
+        expect(tick!.inclusiveTicks, 1);
+        expect(tick.exclusiveTicks, 1);
       }
     }
 
@@ -91,8 +112,22 @@ void main() {
       final FlatTableState<Instruction> state =
           tester.state(find.byType(FlatTable<Instruction>));
 
+      // Check that the profiler columns render ticks correctly.
+      final profilerColumns = state.tableController.columns.where(
+        (c) => c.title == 'Total %' || c.title == 'Self %',
+      );
+      expect(profilerColumns.length, 2);
+      for (final profilerColumn in profilerColumns) {
+        for (final instr in state.tableController.tableData.value.data) {
+          expect(profilerColumn.getDisplayValue(instr), '0.10% (1)');
+        }
+      }
+
       // Ensure ordering is correct.
-      verifyAddressOrder(state.tableController.tableData.value.data);
+      verifyAddressOrder(
+        state.tableController.tableData.value.data,
+        mockCodeObject.ticksTable,
+      );
 
       final columns = state.widget.columns;
 
@@ -100,7 +135,10 @@ void main() {
       for (final column in columns) {
         await tester.tap(find.text(column.title));
         await tester.pumpAndSettle();
-        verifyAddressOrder(state.tableController.tableData.value.data);
+        verifyAddressOrder(
+          state.tableController.tableData.value.data,
+          mockCodeObject.ticksTable,
+        );
       }
     });
   });

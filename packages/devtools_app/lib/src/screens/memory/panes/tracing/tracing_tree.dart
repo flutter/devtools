@@ -273,7 +273,7 @@ class _InclusiveCountColumn extends ColumnData<CpuStackFrame> {
   @override
   String getDisplayValue(CpuStackFrame dataObject) {
     return '${dataObject.inclusiveSampleCount} '
-        '(${percent2(dataObject.inclusiveSampleRatio)})';
+        '(${percent(dataObject.inclusiveSampleRatio)})';
   }
 }
 
@@ -306,7 +306,7 @@ class _ExclusiveCountColumn extends ColumnData<CpuStackFrame> {
   @override
   String getDisplayValue(CpuStackFrame dataObject) {
     return '${dataObject.exclusiveSampleCount} '
-        '(${percent2(dataObject.exclusiveSampleRatio)})';
+        '(${percent(dataObject.exclusiveSampleRatio)})';
   }
 }
 

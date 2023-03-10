@@ -19,6 +19,7 @@ import '../../shared/ui/search.dart';
 import 'cpu_profile_model.dart';
 import 'cpu_profile_service.dart';
 import 'cpu_profile_transformer.dart';
+import 'panes/method_table/method_table_controller.dart';
 
 enum CpuProfilerViewType {
   function,
@@ -88,6 +89,8 @@ class CpuProfilerController extends DisposableController
 
   /// Store of cached CPU profiles for each isolate.
   final _cpuProfileStoreByIsolateId = <String, CpuProfileStore>{};
+
+  final methodTableController = MethodTableController();
 
   /// Notifies that new cpu profile data is available.
   ValueListenable<CpuProfileData?> get dataNotifier => _dataNotifier;
@@ -252,6 +255,10 @@ class CpuProfilerController extends DisposableController
     }
     if (shouldApplyFilters) {
       cpuProfiles = _filterData(cpuProfiles);
+      // TODO(kenz): this could be a performance bottleneck we can improve. We
+      // are processing the data twice (here and above in this method) when
+      // filters are applied. We shouldn't need the data to be processed in
+      // order to filter it.
       await cpuProfiles.process(
         transformer: transformer,
         processId: processId,
@@ -263,6 +270,10 @@ class CpuProfilerController extends DisposableController
         );
       }
     }
+    // TODO(kenz): consider implementing the "active feature" logic that we use
+    // on the performance page to defer the work of creating the method table
+    // until we need it.
+    methodTableController.createMethodTableGraph(cpuProfiles.functionProfile);
     return cpuProfiles;
   }
 
@@ -528,6 +539,7 @@ class CpuProfilerController extends DisposableController
     _userTagFilter.value = userTagNone;
     transformer.reset();
     cpuProfileStore.clear();
+    methodTableController.reset();
     resetSearch();
   }
 

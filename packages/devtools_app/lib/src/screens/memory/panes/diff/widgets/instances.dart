@@ -4,6 +4,7 @@
 
 import 'package:flutter/material.dart';
 
+import '../../../../../shared/analytics/constants.dart';
 import '../../../../../shared/memory/adapted_heap_data.dart';
 import '../../../../../shared/memory/class_name.dart';
 import '../../../../../shared/theme.dart';
@@ -18,12 +19,14 @@ import '../controller/sampler.dart';
 class InstanceTableCell extends StatelessWidget {
   InstanceTableCell(
     ObjectSet objects,
-    AdaptedHeapData heap,
+    HeapDataCallback heap,
     HeapClassName heapClass, {
     required this.isSelected,
+    required this.gaContext,
+    this.liveItemsEnabled = true,
   })  : _showMenu = _shouldShowMenu(isSelected, objects),
         _sampleObtainer = _shouldShowMenu(isSelected, objects)
-            ? HeapClassSampler(objects, heap, heapClass)
+            ? HeapClassSampler(objects, heap(), heapClass)
             : null,
         _count = objects.instanceCount;
 
@@ -34,6 +37,8 @@ class InstanceTableCell extends StatelessWidget {
   final bool _showMenu;
   final bool isSelected;
   final int _count;
+  final MemoryAreas gaContext;
+  final bool liveItemsEnabled;
 
   @override
   Widget build(BuildContext context) {
@@ -48,6 +53,8 @@ class InstanceTableCell extends StatelessWidget {
           count: _count,
           sampleObtainer: _sampleObtainer,
           showMenu: _showMenu,
+          gaContext: gaContext,
+          liveItemsEnabled: liveItemsEnabled,
         ),
       ],
     );
