@@ -21,6 +21,7 @@ import 'program_explorer_model.dart';
 
 const containerIcon = Icons.folder;
 const libraryIcon = Icons.insert_drive_file;
+
 double get _programExplorerRowHeight => scaleByFontFactor(22.0);
 double get _selectedNodeTopSpacing => _programExplorerRowHeight * 3;
 

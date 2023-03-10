@@ -36,8 +36,13 @@ class FrameworkController {
   Stream<ConnectVmEvent> get onConnectVmEvent => _connectVmController.stream;
 
   /// Notify the controller of a connect to VM event.
-  void notifyConnectToVmEvent() {
-    _connectVmController.add(ConnectVmEvent());
+  void notifyConnectToVmEvent(Uri serviceProtocolUri, {bool notify = false}) {
+    _connectVmController.add(
+      ConnectVmEvent(
+        serviceProtocolUri: serviceProtocolUri,
+        notify: notify,
+      ),
+    );
   }
 
   /// Notifies when DevTools connects to a device.
@@ -70,7 +75,10 @@ class FrameworkController {
 }
 
 class ConnectVmEvent {
-  ConnectVmEvent();
+  ConnectVmEvent({required this.serviceProtocolUri, this.notify = false});
+
+  final Uri serviceProtocolUri;
+  final bool notify;
 }
 
 class PageChangeEvent {

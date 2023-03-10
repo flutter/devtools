@@ -52,8 +52,6 @@ class IsolateStatisticsViewController extends DisposableController
   List<VMTag> get tags => UnmodifiableListView(_tags);
   List<VMTag> _tags = [];
 
-  List<String> _serviceExtensions = [];
-
   Future<void> refresh() async => await switchToIsolate(isolate!);
 
   Future<void> switchToIsolate(IsolateRef isolateRef) async {
@@ -65,8 +63,6 @@ class IsolateStatisticsViewController extends DisposableController
     final isolate = _isolate!;
     _updateTagCounters(isolate);
     _ports = (await _service.getPorts(isolateId)).ports!;
-    _serviceExtensions = isolate.extensionRPCs ?? [];
-    _serviceExtensions.sort();
     _refreshing.value = false;
   }
 

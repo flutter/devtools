@@ -39,6 +39,12 @@ bool get enableBeta => enableExperiments || !isExternalBuild;
 /// When adding a new feature flag, the developer is respsonsible for adding it
 /// to the [_allFlags] map for debugging purposes.
 abstract class FeatureFlags {
+  /// Example usage of a flag for a beta feature.
+  static bool myBetaFeature = enableBeta;
+
+  /// Example usage of a flag for an experimental feature.
+  static bool myExperimentalFeature = enableExperiments;
+
   /// Flag to enable the embedded perfetto trace viewer.
   ///
   /// TODO(https://github.com/flutter/devtools/issues/4207): remove all uses of
@@ -54,4 +60,21 @@ abstract class FeatureFlags {
   ///
   /// https://github.com/flutter/devtools/issues/4962.
   static bool evalAndBrowse = enableExperiments;
+
+  /// Stores a map of all the feature flags for debugging purposes.
+  ///
+  /// When adding a new flag, you are responsible for adding it to this map as
+  /// well.
+  static final _allFlags = <String, bool>{
+    'embeddedPerfetto': embeddedPerfetto,
+    'widgetRebuildStats': widgetRebuildstats,
+    'evalAndBrowseSnapshot': evalAndBrowse,
+  };
+
+  /// A helper to print the status of all the feature flags.
+  static void debugPrintFeatureFlags() {
+    for (final entry in _allFlags.entries) {
+      print('${entry.key}: ${entry.value}');
+    }
+  }
 }

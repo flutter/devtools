@@ -546,6 +546,7 @@ class CodeViewEmptyState extends StatelessWidget {
   });
 
   final CodeView widget;
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);

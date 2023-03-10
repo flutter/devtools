@@ -77,6 +77,7 @@ const disableOpacityLayersOptionDocs = 'disableOpacityLayersDocs';
 const disablePhysicalShapeLayersOption = 'disablePhysicalShapeLayers';
 const disablePhysicalShapeLayersOptionDocs = 'disablePhysicalShapeLayersDocs';
 const canvasSaveLayerDocs = 'canvasSaveLayerDocs';
+const intrinsicOperationsDocs = 'intrinsicOperationsDocs';
 const shaderCompilationDocs = 'shaderCompilationDocs';
 const shaderCompilationDocsTooltipLink = 'shaderCompilationDocsTooltipLink';
 const collectRasterStats = 'collectRasterStats';

@@ -54,6 +54,7 @@ double get minWidthToAllowTruncating => scaleByFontFactor(375.0);
 // Story of Layout colors
 const mainAxisLightColor = Color(0xff2c5daa);
 const mainAxisDarkColor = Color(0xff2c5daa);
+
 const textColor = Color(0xff55767f);
 const emphasizedTextColor = Color(0xff009aca);
 

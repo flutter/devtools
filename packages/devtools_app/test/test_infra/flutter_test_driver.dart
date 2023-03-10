@@ -48,6 +48,8 @@ abstract class FlutterTestDriver {
 
   VmServiceWrapper? vmService;
 
+  String get lastErrorInfo => errorBuffer.toString();
+
   String _debugPrint(String msg) {
     const int maxLength = 500;
     final String truncatedMsg =

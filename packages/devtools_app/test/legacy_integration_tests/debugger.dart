@@ -400,6 +400,12 @@ class DebuggingManager {
     return result.cast<String>();
   }
 
+  Future<bool> supportsScripts() async {
+    final AppResponse response =
+        await tools.tabInstance.send('debugger.supportsScripts');
+    return response.result as bool;
+  }
+
   Future<List<String>> getCallStackFrames() async {
     final AppResponse response =
         await tools.tabInstance.send('debugger.getCallStackFrames');

@@ -57,6 +57,10 @@ Future<String> setLastShownReleaseNotesVersion(String version) async {
   throw Exception(unsupportedMessage);
 }
 
+Future<void> resetDevToolsFile() async {
+  throw Exception(unsupportedMessage);
+}
+
 Future<DevToolsJsonFile?> requestBaseAppSizeFile(String path) async {
   throw Exception(unsupportedMessage);
 }
