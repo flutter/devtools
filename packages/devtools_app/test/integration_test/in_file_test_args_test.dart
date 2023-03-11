@@ -8,14 +8,16 @@ import '../../integration_test/test_infra/run/_in_file_args.dart';
 
 const _testAppPath = 'test/test_infra/fixtures/memory_app';
 
+late final _defaultArgs = InFileArgs.private({});
+
 final tests = [
   _InFileTestArgsTest(
     name: 'empty',
     input: '',
-    output: InFileArgs.private(
-      experimentsOn: false,
-      appPath: InFileArgs.defaultAppPath,
-    ),
+    output: InFileArgs.private({
+      InFileArgItems.experimentsOn: _defaultArgs.experimentsOn,
+      InFileArgItems.appPath: _defaultArgs.appPath,
+    }),
   ),
   _InFileTestArgsTest(
     name: 'non-empty',
@@ -25,15 +27,15 @@ final tests = [
 // found in the LICENSE file.
 
 // Do not delete these arguments. They are parsed parsed by test runner.
-// test-argument:experiments=true
-// test-argument:app-path=$_testAppPath
+// test-argument:experimentsOn=true
+// test-argument:appPath="$_testAppPath"
 
 import 'dart:ui' as ui;
 ''',
-    output: InFileArgs.private(
-      experimentsOn: true,
-      appPath: _testAppPath,
-    ),
+    output: InFileArgs.private({
+      InFileArgItems.experimentsOn: true,
+      InFileArgItems.appPath: _testAppPath,
+    }),
   ),
 ];
 

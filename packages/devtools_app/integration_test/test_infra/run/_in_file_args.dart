@@ -20,17 +20,14 @@ class InFileArgs {
       values.putIfAbsent(arg, () => null);
     }
 
-    return InFileArgs.private(
-      experimentsOn: values[_Args.experimentsOn],
-      appPath: values[_Args.appPath],
-    );
+    return InFileArgs.private(values);
   }
 
   @visibleForTesting
-  InFileArgs.private({
-    this.experimentsOn = false,
-    this.appPath = 'test/test_infra/fixtures/flutter_app',
-  });
+  InFileArgs.private(Map<InFileArgItems, dynamic> values)
+      : experimentsOn = values[InFileArgItems.experimentsOn] ?? false,
+        appPath = values[InFileArgItems.appPath] ??
+            'test/test_infra/fixtures/flutter_app';
 
   final bool experimentsOn;
   final String appPath;
@@ -38,25 +35,28 @@ class InFileArgs {
 
 const _argPrefix = '// test-argument:';
 
-Map<_Args, dynamic> _parseFileContent(String fileContent) {
-  final lines =
-      fileContent.split('\n').where((line) => line.startsWith(_argPrefix));
+Map<InFileArgItems, dynamic> _parseFileContent(String fileContent) {
+  final lines = fileContent
+      .split('\n')
+      .where((line) => line.startsWith(_argPrefix))
+      .map((line) => line.substring(_argPrefix.length));
 
   return Map.fromEntries(lines.map((line) => _parseLine(line)));
 }
 
-MapEntry<_Args, dynamic> _parseLine(String line) {
-  // Should match items like '// test-argument:experiments=true'
-  final match = RegExp('\$$_argPrefix(.*)=(.*)^').firstMatch(line);
-  if (match == null) throw '[$line] does not match pattern.';
+MapEntry<InFileArgItems, dynamic> _parseLine(String line) {
+  final nameValue = line.split('=');
 
-  final name = match.group(1) ?? '';
-  final value = match.group(2) ?? '';
+  if (nameValue.length != 2) throw '[$line] does not match pattern name=value.';
 
-  return MapEntry(_Args.values.byName(name), jsonDecode(value));
+  final name = nameValue[0];
+  final value = nameValue[1];
+
+  return MapEntry(InFileArgItems.values.byName(name), jsonDecode(value));
 }
 
-enum _Args {
+@visibleForTesting
+enum InFileArgItems {
   experimentsOn,
   appPath,
 }
