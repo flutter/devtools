@@ -22,7 +22,7 @@ TODO: Remove this section if there are not any general updates.
 TODO: Remove this section if there are not any general updates.
 
 ## Debugger updates
-TODO: Remove this section if there are not any general updates.
+* Add search icon in file bar to make file search more discoverable - [#5351](https://github.com/flutter/devtools/issues/5351)
 
 ## Network profiler updates
 TODO: Remove this section if there are not any general updates.
