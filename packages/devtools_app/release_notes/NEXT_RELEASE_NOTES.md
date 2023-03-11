@@ -22,7 +22,7 @@ TODO: Remove this section if there are not any general updates.
 TODO: Remove this section if there are not any general updates.
 
 ## Debugger updates
-TODO: Remove this section if there are not any general updates.
+* Fix file search bug where last letter disappeared when searching at end of file name - [#5397](https://github.com/flutter/devtools/pull/5397)
 
 ## Network profiler updates
 TODO: Remove this section if there are not any general updates.

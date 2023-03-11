@@ -431,18 +431,7 @@ void main() {
           ],
         ),
       );
-      autoCompleteController.search = 'carton.dar';
-      expect(
-        getAutoCompleteMatch(
-          autoCompleteController.searchAutoComplete.value,
-        ),
-        equals(
-          [
-            // Exact full path matches:
-            'kitchen:food/milk/CARTON.DARt',
-          ],
-        ),
-      );
+
       autoCompleteController.search = 'carton.dar';
       expect(
         getAutoCompleteMatch(
