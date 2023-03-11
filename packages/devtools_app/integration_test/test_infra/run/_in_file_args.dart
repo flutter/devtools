@@ -5,8 +5,6 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:flutter/material.dart';
-
 /// Test arguments, defined inside the test file as a comment.
 class InFileArgs {
   factory InFileArgs(String testFilePath) {
@@ -14,7 +12,6 @@ class InFileArgs {
     return InFileArgs.fromFileContent(content);
   }
 
-  @visibleForTesting
   factory InFileArgs.fromFileContent(String fileContent) {
     final values = _parseFileContent(fileContent);
 
@@ -25,7 +22,6 @@ class InFileArgs {
     return InFileArgs.fromValues(values);
   }
 
-  @visibleForTesting
   InFileArgs.fromValues(Map<InFileArgItems, dynamic> values)
       : experimentsOn = values[InFileArgItems.experimentsOn] ?? false,
         appPath = values[InFileArgItems.appPath] ??
@@ -57,7 +53,6 @@ MapEntry<InFileArgItems, dynamic> _parseLine(String line) {
   return MapEntry(InFileArgItems.values.byName(name), jsonDecode(value));
 }
 
-@visibleForTesting
 enum InFileArgItems {
   experimentsOn,
   appPath,

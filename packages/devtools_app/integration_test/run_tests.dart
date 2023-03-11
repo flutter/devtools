@@ -4,8 +4,6 @@
 
 import 'dart:io';
 
-import 'package:collection/collection.dart';
-
 import 'test_infra/run/run_test.dart';
 
 // To run this test, run the following from `devtools_app/`:
@@ -34,10 +32,17 @@ const _testSuffix = '_test.dart';
 void main(List<String> args) async {
   final modifiableArgs = List.of(args);
 
-  final testTarget = modifiableArgs
-      .firstWhereOrNull((arg) => arg.startsWith(TestArgs.testTargetArg));
+  final testRunnerArgs = TestArgs(modifiableArgs);
+  final testTargetProvided = testRunnerArgs.testTarget.isNotEmpty;
 
-  if (testTarget == null) {
+  if (testTargetProvided) {
+    // TODO(kenz): add support for specifying a directory as the target instead
+    // of a single file.
+    await runFlutterIntegrationTest(
+      modifiableArgs,
+      testFilePath: testRunnerArgs.testTarget,
+    );
+  } else {
     // Run all tests since a target test was not provided.
     final testDirectory = Directory(_testDirectory);
     final testFiles = testDirectory
@@ -45,13 +50,9 @@ void main(List<String> args) async {
         .where((testFile) => testFile.path.endsWith(_testSuffix));
 
     for (final testFile in testFiles) {
-      final testTarget = testFile.path;
-      modifiableArgs.add('${TestArgs.testTargetArg}$testTarget');
-      await runFlutterIntegrationTest(modifiableArgs, testFilePath: testTarget);
+      final filePath = testFile.path;
+      modifiableArgs.add('${TestArgs.testTargetArg}$filePath');
+      await runFlutterIntegrationTest(modifiableArgs, testFilePath: filePath);
     }
-  } else {
-    // TODO(kenz): add support for specifying a directory as the target instead
-    // of a single file.
-    await runFlutterIntegrationTest(modifiableArgs, testFilePath: testTarget);
   }
 }
