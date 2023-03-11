@@ -7,6 +7,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:collection/collection.dart';
+import 'package:devtools_test/devtools_test.dart';
 
 import '_io_utils.dart';
 import '_test_app_driver.dart';
@@ -17,10 +18,9 @@ bool _debugTestScript = false;
 ///
 /// Do not use this method directly, but instead use the run_tests.dart
 /// which performs essential set up steps.
-Future<void> runFlutterIntegrationTest(
-  TestArgs testRunnerArgs, {
-  String testAppPath = 'test/test_infra/fixtures/flutter_app',
-}) async {
+Future<void> runFlutterIntegrationTest(TestArgs testRunnerArgs) async {
+  final inFileArgs = InFileTestArgs();
+
   TestFlutterApp? testApp;
   late String testAppUri;
 
