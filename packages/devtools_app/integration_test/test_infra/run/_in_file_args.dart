@@ -3,13 +3,15 @@
 // found in the LICENSE file.
 
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 
 /// Test arguments, defined inside the test file as a comment.
 class InFileArgs {
-  factory InFileArgs(String filePath) {
-    return InFileArgs.fromFileContent('');
+  factory InFileArgs(String testFilePath) {
+    final content = File(testFilePath).readAsStringSync();
+    return InFileArgs.fromFileContent(content);
   }
 
   @visibleForTesting
@@ -20,11 +22,11 @@ class InFileArgs {
       values.putIfAbsent(arg, () => null);
     }
 
-    return InFileArgs.private(values);
+    return InFileArgs.fromValues(values);
   }
 
   @visibleForTesting
-  InFileArgs.private(Map<InFileArgItems, dynamic> values)
+  InFileArgs.fromValues(Map<InFileArgItems, dynamic> values)
       : experimentsOn = values[InFileArgItems.experimentsOn] ?? false,
         appPath = values[InFileArgItems.appPath] ??
             'test/test_infra/fixtures/flutter_app';

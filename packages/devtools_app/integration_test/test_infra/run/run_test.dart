@@ -7,8 +7,8 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:collection/collection.dart';
-import 'package:devtools_test/devtools_test.dart';
 
+import '_in_file_args.dart';
 import '_io_utils.dart';
 import '_test_app_driver.dart';
 
@@ -18,8 +18,17 @@ bool _debugTestScript = false;
 ///
 /// Do not use this method directly, but instead use the run_tests.dart
 /// which performs essential set up steps.
-Future<void> runFlutterIntegrationTest(TestArgs testRunnerArgs) async {
-  final inFileArgs = InFileTestArgs();
+Future<void> runFlutterIntegrationTest(
+  List<String> modifiableArgs, {
+  required String testFilePath,
+}) async {
+  _maybeAddOfflineArgument(modifiableArgs, testFilePath);
+  final inFileArgs = InFileArgs(testFilePath);
+  if (inFileArgs.experimentsOn) {
+    modifiableArgs.add(TestArgs.enableExperimentsArg);
+  }
+
+  final testRunnerArgs = TestArgs(modifiableArgs);
 
   TestFlutterApp? testApp;
   late String testAppUri;
@@ -29,7 +38,7 @@ Future<void> runFlutterIntegrationTest(TestArgs testRunnerArgs) async {
       // Create the test app and start it.
       // TODO(kenz): support running Dart CLI test apps from here too.
       try {
-        testApp = TestFlutterApp(appPath: testAppPath);
+        testApp = TestFlutterApp(appPath: inFileArgs.appPath);
         await testApp.start();
       } catch (e) {
         throw Exception('Error starting test app: $e');
@@ -80,6 +89,13 @@ Future<void> runFlutterIntegrationTest(TestArgs testRunnerArgs) async {
 
   if (exception != null) {
     throw exception;
+  }
+}
+
+void _maybeAddOfflineArgument(List<String> args, String testTarget) {
+  const offlineIndicator = 'integration_test/test/offline';
+  if (testTarget.startsWith(offlineIndicator)) {
+    args.add(TestArgs.offlineArg);
   }
 }
 
