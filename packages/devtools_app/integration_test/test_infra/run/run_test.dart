@@ -23,15 +23,16 @@ Future<void> runFlutterIntegrationTest(
   required String testFilePath,
 }) async {
   _maybeAddOfflineArgument(modifiableArgs, testFilePath);
+
   final inFileArgs = InFileArgs(testFilePath);
+  TestFlutterApp? testApp;
+  late String testAppUri;
+
   if (inFileArgs.experimentsOn) {
     modifiableArgs.add(TestArgs.enableExperimentsArg);
   }
 
   final testRunnerArgs = TestArgs(modifiableArgs);
-
-  TestFlutterApp? testApp;
-  late String testAppUri;
 
   if (!testRunnerArgs.offline) {
     if (testRunnerArgs.testAppUri == null) {
