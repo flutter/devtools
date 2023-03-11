@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// test-argument:experiments=true
-// test-argument:app-path=test/test_infra/fixtures/memory_app
+// test-argument:experimentsOn=true
+// test-argument:appPath="test/test_infra/fixtures/memory_app"
 
 import 'dart:ui' as ui;
 
