@@ -32,6 +32,7 @@ class HistoryViewport<T> extends StatefulWidget {
     this.onChange,
     this.historyEnabled = true,
     this.onTitleTap,
+    this.titleIcon,
   });
 
   final HistoryManager<T> history;
@@ -41,6 +42,7 @@ class HistoryViewport<T> extends StatefulWidget {
   final void Function(T?, T?)? onChange;
   final bool historyEnabled;
   final VoidCallback? onTitleTap;
+  final IconData? titleIcon;
 
   @override
   State<HistoryViewport<T>> createState() => _HistoryViewportState<T>();
@@ -48,10 +50,17 @@ class HistoryViewport<T> extends StatefulWidget {
 
 class _HistoryViewportState<T> extends State<HistoryViewport<T>> {
   TextStyle? _titleStyle;
+  Color? _iconColor;
 
   void _updateTitleStyle(TextStyle style) {
     setState(() {
       _titleStyle = style;
+    });
+  }
+
+  void _updateIconColor(Color? color) {
+    setState(() {
+      _iconColor = color;
     });
   }
 
@@ -106,25 +115,44 @@ class _HistoryViewportState<T> extends State<HistoryViewport<T>> {
               ],
               Expanded(
                 child: widget.onTitleTap == null
-                    ? Text(
-                        title,
-                        style: defaultTitleStyle,
+                    ? Row(
+                        children: [
+                          if (widget.titleIcon != null) Icon(widget.titleIcon),
+                          Text(
+                            title,
+                            style: defaultTitleStyle,
+                          ),
+                        ],
                       )
                     : MouseRegion(
                         cursor: SystemMouseCursors.click,
-                        onExit: (_) => _updateTitleStyle(defaultTitleStyle),
+                        onExit: (_) {
+                          _updateTitleStyle(defaultTitleStyle);
+                          _updateIconColor(defaultTitleStyle.color);
+                        },
                         onEnter: (_) {
                           _updateTitleStyle(
                             defaultTitleStyle.copyWith(
                               color: theme.colorScheme.devtoolsLink,
                             ),
                           );
+                          _updateIconColor(theme.colorScheme.devtoolsLink);
                         },
                         child: GestureDetector(
                           onTap: widget.onTitleTap,
-                          child: Text(
-                            title,
-                            style: _titleStyle ?? theme.textTheme.titleSmall,
+                          child: Row(
+                            children: [
+                              if (widget.titleIcon != null)
+                                Icon(
+                                  widget.titleIcon,
+                                  color: _iconColor,
+                                ),
+                              Text(
+                                title,
+                                style:
+                                    _titleStyle ?? theme.textTheme.titleSmall,
+                              ),
+                            ],
                           ),
                         ),
                       ),
