@@ -457,8 +457,9 @@ class _CodeViewState extends State<CodeView>
           return scriptUri;
         },
         titleIcon: Icons.search,
-        onTitleTap: () =>
-            widget.codeViewController.toggleFileOpenerVisibility(true),
+        onTitleTap: () => widget.codeViewController
+          ..toggleFileOpenerVisibility(true)
+          ..toggleSearchInFileVisibility(false),
         controls: [
           ScriptPopupMenu(widget.codeViewController),
           ScriptHistoryPopupMenu(
