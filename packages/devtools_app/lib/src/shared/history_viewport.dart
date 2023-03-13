@@ -140,10 +140,12 @@ class _HistoryViewportState<T> extends State<HistoryViewport<T>> {
                                   widget.titleIcon,
                                   color: _iconColor,
                                 ),
-                              Text(
-                                title,
-                                style:
-                                    _titleStyle ?? theme.textTheme.titleSmall,
+                              Expanded(
+                                child: Text(
+                                  title,
+                                  style:
+                                      _titleStyle ?? theme.textTheme.titleSmall,
+                                ),
                               ),
                             ],
                           ),
