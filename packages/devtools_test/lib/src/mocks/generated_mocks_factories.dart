@@ -5,7 +5,6 @@
 import 'dart:async';
 
 import 'package:devtools_app/devtools_app.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart' hide TimelineEvent;
