@@ -4,11 +4,18 @@
 
 library service_extensions;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter/scheduler.dart';
 
 import '../shared/analytics/constants.dart' as gac;
 import '../shared/theme.dart';
 import '../shared/ui/icons.dart';
+
+const _dartIOExtensionPrefix = 'ext.dart.io.';
+const _flutterExtensionPrefix = 'ext.flutter.';
+const inspectorExtensionPrefix = 'ext.flutter.inspector';
 
 // Each service extension needs to be added to [_extensionDescriptions].
 class ToggleableServiceExtensionDescription<T>
@@ -113,7 +120,8 @@ class ServiceExtensionDescription<T> {
 }
 
 final debugAllowBanner = ToggleableServiceExtensionDescription<bool>._(
-  extension: 'ext.flutter.debugAllowBanner',
+  extension:
+      '$_flutterExtensionPrefix${WidgetsServiceExtensions.debugAllowBanner.name}',
   title: 'Debug Banner',
   enabledIcon: const AssetImageIcon(asset: 'icons/debug_banner@2x.png'),
   enabledValue: true,
@@ -124,7 +132,8 @@ final debugAllowBanner = ToggleableServiceExtensionDescription<bool>._(
 );
 
 final invertOversizedImages = ToggleableServiceExtensionDescription<bool>._(
-  extension: 'ext.flutter.invertOversizedImages',
+  extension:
+      '$_flutterExtensionPrefix${RenderingServiceExtensions.invertOversizedImages.name}',
   title: 'Highlight Oversized Images',
   enabledIcon: const ThemedImageIcon(
     lightModeAsset: 'icons/images-white.png',
@@ -146,7 +155,8 @@ final invertOversizedImages = ToggleableServiceExtensionDescription<bool>._(
 );
 
 final debugPaint = ToggleableServiceExtensionDescription<bool>._(
-  extension: 'ext.flutter.debugPaint',
+  extension:
+      '$_flutterExtensionPrefix${RenderingServiceExtensions.debugPaint.name}',
   title: 'Show Guidelines',
   enabledIcon: const ThemedImageIcon(
     lightModeAsset: 'icons/guidelines-white.png',
@@ -167,7 +177,8 @@ final debugPaint = ToggleableServiceExtensionDescription<bool>._(
 );
 
 final debugPaintBaselines = ToggleableServiceExtensionDescription<bool>._(
-  extension: 'ext.flutter.debugPaintBaselinesEnabled',
+  extension:
+      '$_flutterExtensionPrefix${RenderingServiceExtensions.debugPaintBaselinesEnabled.name}',
   title: 'Show Baselines',
   enabledIcon: const ThemedImageIcon(
     lightModeAsset: 'icons/baselines-white.png',
@@ -189,7 +200,8 @@ final debugPaintBaselines = ToggleableServiceExtensionDescription<bool>._(
 );
 
 final performanceOverlay = ToggleableServiceExtensionDescription<bool>._(
-  extension: 'ext.flutter.showPerformanceOverlay',
+  extension:
+      '$_flutterExtensionPrefix${WidgetsServiceExtensions.showPerformanceOverlay.name}',
   title: 'Performance Overlay',
   enabledIcon: const ThemedImageIcon(
     lightModeAsset: 'icons/performance-white.png',
@@ -210,7 +222,8 @@ final performanceOverlay = ToggleableServiceExtensionDescription<bool>._(
 );
 
 final profileWidgetBuilds = ToggleableServiceExtensionDescription<bool>._(
-  extension: 'ext.flutter.profileWidgetBuilds',
+  extension:
+      '$_flutterExtensionPrefix${WidgetsServiceExtensions.profileWidgetBuilds.name}',
   title: 'Track Widget Builds',
   enabledIcon: const ThemedImageIcon(
     lightModeAsset: 'icons/trackwidget-white.png',
@@ -232,7 +245,8 @@ final profileWidgetBuilds = ToggleableServiceExtensionDescription<bool>._(
 );
 
 final profileUserWidgetBuilds = ToggleableServiceExtensionDescription<bool>._(
-  extension: 'ext.flutter.profileUserWidgetBuilds',
+  extension:
+      '$_flutterExtensionPrefix${WidgetsServiceExtensions.profileUserWidgetBuilds.name}',
   title: 'Track User-Created Widget Builds',
   enabledIcon: const ThemedImageIcon(
     lightModeAsset: 'icons/trackwidget-white.png',
@@ -252,7 +266,8 @@ final profileUserWidgetBuilds = ToggleableServiceExtensionDescription<bool>._(
 );
 
 final profileRenderObjectPaints = ToggleableServiceExtensionDescription<bool>._(
-  extension: 'ext.flutter.profileRenderObjectPaints',
+  extension:
+      '$_flutterExtensionPrefix${RenderingServiceExtensions.profileRenderObjectPaints.name}',
   title: 'Track Paints',
   enabledIcon: Icon(Icons.format_paint, size: defaultIconSize),
   disabledIcon: Icon(Icons.format_paint, size: defaultIconSize),
@@ -269,7 +284,8 @@ final profileRenderObjectPaints = ToggleableServiceExtensionDescription<bool>._(
 
 final profileRenderObjectLayouts =
     ToggleableServiceExtensionDescription<bool>._(
-  extension: 'ext.flutter.profileRenderObjectLayouts',
+  extension:
+      '$_flutterExtensionPrefix${RenderingServiceExtensions.profileRenderObjectLayouts.name}',
   title: 'Track Layouts',
   enabledIcon: Icon(Icons.auto_awesome_mosaic, size: defaultIconSize),
   disabledIcon: Icon(Icons.auto_awesome_mosaic, size: defaultIconSize),
@@ -285,7 +301,8 @@ final profileRenderObjectLayouts =
 );
 
 final repaintRainbow = ToggleableServiceExtensionDescription<bool>._(
-  extension: 'ext.flutter.repaintRainbow',
+  extension:
+      '$_flutterExtensionPrefix${RenderingServiceExtensions.repaintRainbow.name}',
   title: 'Highlight Repaints',
   enabledIcon: const ThemedImageIcon(
     lightModeAsset: 'icons/repaints-white.png',
@@ -307,7 +324,8 @@ final repaintRainbow = ToggleableServiceExtensionDescription<bool>._(
 );
 
 final slowAnimations = ToggleableServiceExtensionDescription<num>._(
-  extension: 'ext.flutter.timeDilation',
+  extension:
+      '$_flutterExtensionPrefix${SchedulerServiceExtensions.timeDilation.name}',
   title: 'Slow Animations',
   enabledIcon: const ThemedImageIcon(
     lightModeAsset: 'icons/slow-white.png',
@@ -328,7 +346,8 @@ final slowAnimations = ToggleableServiceExtensionDescription<num>._(
 );
 
 final togglePlatformMode = ServiceExtensionDescription<String>(
-  extension: 'ext.flutter.platformOverride',
+  extension:
+      '$_flutterExtensionPrefix${FoundationServiceExtensions.platformOverride.name}',
   title: 'Override target platform',
   enabledIcon: const AssetImageIcon(asset: 'icons/phone@2x.png'),
   values: ['iOS', 'android', 'fuchsia', 'macOS', 'linux'],
@@ -345,7 +364,8 @@ final togglePlatformMode = ServiceExtensionDescription<String>(
 );
 
 final disableClipLayers = ToggleableServiceExtensionDescription<bool>._(
-  extension: 'ext.flutter.debugDisableClipLayers',
+  extension:
+      '$_flutterExtensionPrefix${RenderingServiceExtensions.debugDisableClipLayers.name}',
   inverted: true,
   title: 'Render Clip layers',
   enabledIcon: const ThemedImageIcon(
@@ -370,7 +390,8 @@ disabled, try to reduce the use of clipping effects in your app.''',
 );
 
 final disableOpacityLayers = ToggleableServiceExtensionDescription<bool>._(
-  extension: 'ext.flutter.debugDisableOpacityLayers',
+  extension:
+      '$_flutterExtensionPrefix${RenderingServiceExtensions.debugDisableOpacityLayers.name}',
   inverted: true,
   title: 'Render Opacity layers',
   enabledIcon: const ThemedImageIcon(
@@ -396,7 +417,8 @@ option disabled, try to reduce the use of opacity effects in your app.''',
 
 final disablePhysicalShapeLayers =
     ToggleableServiceExtensionDescription<bool>._(
-  extension: 'ext.flutter.debugDisablePhysicalShapeLayers',
+  extension:
+      '$_flutterExtensionPrefix${RenderingServiceExtensions.debugDisablePhysicalShapeLayers.name}',
   inverted: true,
   title: 'Render Physical Shape layers',
   enabledIcon: const ThemedImageIcon(
@@ -422,7 +444,7 @@ use of physical modeling effects in your app.''',
 );
 
 final httpEnableTimelineLogging = ToggleableServiceExtensionDescription<bool>._(
-  extension: 'ext.dart.io.httpEnableTimelineLogging',
+  extension: '${_dartIOExtensionPrefix}httpEnableTimelineLogging',
   title: 'Whether HTTP timeline logging is enabled',
   enabledIcon: const Placeholder(),
   enabledValue: true,
@@ -434,7 +456,7 @@ final httpEnableTimelineLogging = ToggleableServiceExtensionDescription<bool>._(
 );
 
 final socketProfiling = ToggleableServiceExtensionDescription<bool>._(
-  extension: 'ext.dart.io.socketProfilingEnabled',
+  extension: '${_dartIOExtensionPrefix}socketProfilingEnabled',
   title: 'Whether socket profiling is enabled',
   enabledIcon: const Placeholder(),
   enabledValue: true,
@@ -448,7 +470,8 @@ final socketProfiling = ToggleableServiceExtensionDescription<bool>._(
 // Legacy extension to show the inspector and enable inspector select mode.
 final toggleOnDeviceWidgetInspector =
     ToggleableServiceExtensionDescription<bool>._(
-  extension: 'ext.flutter.inspector.show',
+  extension:
+      '$inspectorExtensionPrefix.${WidgetInspectorServiceExtensions.show.name}',
   // Technically this enables the on-device widget inspector but for older
   // versions of package:flutter it makes sense to describe this extension as
   // toggling widget select mode as it is the only way to toggle that mode.
@@ -468,10 +491,13 @@ final toggleOnDeviceWidgetInspector =
   tooltip: 'Toggle select widget mode',
 );
 
+// TODO(kenz): remove this if it is not needed. According to the comments,
+// [toggleOnDeviceWidgetInspector] should be the legacy extension, but that is
+// the only extension available, and [toggleSelectWidgetMode] is not.
 /// Toggle whether interacting with the device selects widgets or triggers
 /// normal interactions.
 final toggleSelectWidgetMode = ToggleableServiceExtensionDescription<bool>._(
-  extension: 'ext.flutter.inspector.selectMode',
+  extension: '$inspectorExtensionPrefix.selectMode',
   title: 'Select widget mode',
   enabledIcon: const ThemedImageIcon(
     lightModeAsset: 'icons/widget-select-white.png',
@@ -488,13 +514,18 @@ final toggleSelectWidgetMode = ToggleableServiceExtensionDescription<bool>._(
   tooltip: 'Toggle select widget mode',
 );
 
+// TODO(kenz): remove this if it is not needed. According to the comments,
+// [toggleOnDeviceWidgetInspector] should be the legacy extension, but that is
+// the only extension available, and [toggleSelectWidgetMode] is not. And in
+// DevTools code, [enableOnDeviceInspector] is only called when
+// [toggleSelectWidgetMode] is available.
 /// Toggle whether the inspector on-device overlay is enabled.
 ///
 /// When available, the inspector overlay can be enabled at any time as it will
 /// not interfere with user interaction with the app unless inspector select
 /// mode is triggered.
 final enableOnDeviceInspector = ToggleableServiceExtensionDescription<bool>._(
-  extension: 'ext.flutter.inspector.enable',
+  extension: '$inspectorExtensionPrefix.enable',
   title: 'Enable on-device inspector',
   enabledIcon: const AssetImageIcon(asset: 'icons/general/locate@2x.png'),
   enabledValue: true,
@@ -505,7 +536,8 @@ final enableOnDeviceInspector = ToggleableServiceExtensionDescription<bool>._(
 );
 
 final structuredErrors = ToggleableServiceExtensionDescription<bool>._(
-  extension: 'ext.flutter.inspector.structuredErrors',
+  extension:
+      '$inspectorExtensionPrefix.${WidgetInspectorServiceExtensions.structuredErrors.name}',
   title: 'Show structured errors',
   enabledIcon: const AssetImageIcon(asset: 'icons/perf/RedExcl@2x.png'),
   enabledValue: true,
@@ -516,7 +548,8 @@ final structuredErrors = ToggleableServiceExtensionDescription<bool>._(
 );
 
 final trackRebuildWidgets = ToggleableServiceExtensionDescription<bool>._(
-  extension: 'ext.flutter.inspector.trackRebuildDirtyWidgets',
+  extension:
+      '$inspectorExtensionPrefix.${WidgetInspectorServiceExtensions.trackRebuildDirtyWidgets.name}',
   title: 'Track widget build counts',
   enabledIcon: const AssetImageIcon(asset: 'icons/inspector/diagram@2x.png'),
   enabledValue: true,
@@ -529,7 +562,8 @@ final trackRebuildWidgets = ToggleableServiceExtensionDescription<bool>._(
 
 // This extensions below should never be displayed as a button so does not need
 // a ServiceExtensionDescription object.
-const String didSendFirstFrameEvent = 'ext.flutter.didSendFirstFrameEvent';
+final String didSendFirstFrameEvent =
+    '$_flutterExtensionPrefix${WidgetsServiceExtensions.didSendFirstFrameEvent.name}';
 
 final List<ServiceExtensionDescription> _extensionDescriptions = [
   debugPaint,
@@ -587,9 +621,9 @@ bool isUnsafeBeforeFirstFlutterFrame(String? extensionName) {
 }
 
 bool isFlutterExtension(String extensionName) {
-  return extensionName.startsWith('ext.flutter.');
+  return extensionName.startsWith(_flutterExtensionPrefix);
 }
 
 bool isDartIoExtension(String extensionName) {
-  return extensionName.startsWith('ext.dart.io.');
+  return extensionName.startsWith(_dartIOExtensionPrefix);
 }
