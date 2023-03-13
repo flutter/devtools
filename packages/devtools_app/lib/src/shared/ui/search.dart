@@ -828,12 +828,12 @@ mixin SearchFieldMixin<T extends StatefulWidget>
   SearchControllerMixin get searchController;
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    // We call this in [didChangeDependencies] in case the [searchController] is
-    // only available when [BuildContext] is available. This happens whenever a
-    // controller is provided through package:provider.
+  void initState() {
+    super.initState();
     if (this is ProvidedControllerMixin) {
+      // Controllers provided through package:provider will not be ready until
+      // [didChangeDependencies] is called, so ensure [searchController] is
+      // ready before calling [searchController.initSearch].
       (this as ProvidedControllerMixin).callWhenControllerReady((_) {
         searchController.initSearch();
       });

@@ -164,7 +164,7 @@ mixin ProvidedControllerMixin<T, V extends StatefulWidget> on State<V> {
   final _callWhenReady = <_ProvidedControllerCallback>[];
 
   /// Calls the provided [callback] once [_controller] has been initialized.
-  /// 
+  ///
   /// The [callback] will be called immediately if [_controller] has already
   /// been initialized.
   void callWhenControllerReady(_ProvidedControllerCallback callback) {
