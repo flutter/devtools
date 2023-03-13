@@ -4,7 +4,6 @@
 
 import 'package:flutter/material.dart';
 import 'package:image/image.dart' as image;
-import 'package:logging/logging.dart';
 
 import '../../shared/common_widgets.dart';
 import '../../shared/http/http.dart';
@@ -14,8 +13,6 @@ import '../../shared/table/table.dart';
 import '../../shared/theme.dart';
 import '../../shared/ui/colors.dart';
 import 'network_model.dart';
-
-final _log = Logger('network_request_inspector_views');
 
 // Approximately double the indent of the expandable tile's title.
 const double _rowIndentPadding = 30;

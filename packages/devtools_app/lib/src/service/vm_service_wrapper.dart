@@ -957,36 +957,48 @@ class VmServiceWrapper implements VmService {
     vmServiceCallCount = 0;
   }
 
+  /// Wraps a future with logs that at its start and finish.
+  ///
+  /// All logs from this run will have matching unique ids, so that they can
+  /// be associated together in the logs.
+  Future<T> _logWrappedFuture<T>(
+    String name,
+    Future<T> future,
+  ) async {
+    /// A unique id to add to each of the future's messages.
+    final futureLogId = Random().nextInt(1 << 30);
+
+    try {
+      _log.info('[$futureLogId]-trackFuture($name,...): Started');
+      final result = await future;
+      _log.info('[$futureLogId]-trackFuture($name,...): Succeeded');
+      return result;
+    } catch (error) {
+      _log.info(
+        '[$futureLogId]-trackFuture($name,...): Failed',
+        error,
+      );
+      rethrow;
+    }
+  }
+
   @visibleForTesting
   Future<T> trackFuture<T>(String name, Future<T> future) {
-    Future<T> loggedFuture = future;
+    Future<T> localFuture = future;
 
     if (_log.isLoggable(Level.INFO)) {
-      final futureLogId = Random().nextInt(1 << 30);
-      _log.info('[$futureLogId]-trackFuture($name,...): Started');
-      loggedFuture = loggedFuture.then(
-        (value) {
-          _log.info(
-            '[$futureLogId]-trackFuture($name,...): Succeeded',
-          );
-          return value;
-        },
-        onError: (error) {
-          _log.info(
-            '[$futureLogId]-trackFuture($name,...): Failed with: $error',
-          );
-          throw error;
-        },
-      );
+      // If logging is currently accepting INFO logs then wrap the future
+      // with start and finish logs.
+      localFuture = _logWrappedFuture<T>(name, future);
     }
 
     if (!trackFutures) {
-      return loggedFuture;
+      return localFuture;
     }
     vmServiceCallCount++;
     vmServiceCalls.add(name);
 
-    final trackedFuture = TrackedFuture(name, loggedFuture as Future<Object>);
+    final trackedFuture = TrackedFuture(name, localFuture as Future<Object>);
     if (_allFuturesCompleter.isCompleted) {
       _allFuturesCompleter = Completer<bool>();
     }
@@ -999,11 +1011,11 @@ class VmServiceWrapper implements VmService {
       }
     }
 
-    loggedFuture.then(
+    localFuture.then(
       (value) => futureComplete(),
       onError: (error) => futureComplete(),
     );
-    return loggedFuture;
+    return localFuture;
   }
 
   /// Adds support for private VM RPCs that can only be used when VM developer
