@@ -29,6 +29,7 @@ TODO: Remove this section if there are not any general updates.
 ## Debugger updates
 * Fix a bug where variable inspection for instances sometimes showed no children. - [#5356](https://github.com/flutter/devtools/pull/5356)
 * Hide "search in file" dialog if "file search" dialog is open - [#5393](https://github.com/flutter/devtools/pull/5393)
+* Fix file search bug where last letter disappeared when searching at end of file name - [#5397](https://github.com/flutter/devtools/pull/5397)
 
 ## Network profiler updates
 TODO: Remove this section if there are not any general updates.
