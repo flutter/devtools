@@ -30,14 +30,12 @@ class GTag {
   static const String _event = 'event';
   static const String _exception = 'exception';
 
-  static bool get shouldSendAnalytics => kReleaseMode || _debugAnalytics;
-
   /// Collect the analytic's event and its parameters.
   static void event(
     String eventName, {
     required GtagEvent Function() gaEventProvider,
   }) async {
-    if (shouldSendAnalytics && await ga.isAnalyticsEnabled()) {
+    if (_debugAnalytics || (kReleaseMode && await ga.isAnalyticsEnabled())) {
       _gTagCommandName(_event, eventName, gaEventProvider());
     }
   }
@@ -45,7 +43,7 @@ class GTag {
   static void exception({
     required GtagException Function() gaExceptionProvider,
   }) async {
-    if (shouldSendAnalytics && await ga.isAnalyticsEnabled()) {
+    if (_debugAnalytics || (kReleaseMode && await ga.isAnalyticsEnabled())) {
       _gTagCommandName(_event, _exception, gaExceptionProvider());
     }
   }

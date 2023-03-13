@@ -19,10 +19,9 @@ import '../../../shared/heap/class_filter.dart';
 import '../../../shared/heap/heap.dart';
 import '../../../shared/heap/model.dart';
 import '../../../shared/primitives/memory_utils.dart';
-import '../../../shared/primitives/simple_elements.dart';
+import 'class_data.dart';
 import 'heap_diff.dart';
 import 'item_controller.dart';
-import 'simple_controllers.dart';
 import 'utils.dart';
 
 class DiffPaneController extends DisposableController {
@@ -35,8 +34,6 @@ class DiffPaneController extends DisposableController {
   final _isTakingSnapshot = ValueNotifier<bool>(false);
 
   final retainingPathController = RetainingPathController();
-
-  final sizeTypeToShowForDiff = ValueNotifier<SizeType>(SizeType.retained);
 
   final core = CoreData();
   late final derived = DerivedData(core);
@@ -123,12 +120,6 @@ class DiffPaneController extends DisposableController {
     derived._updateValues();
   }
 
-  void applyFilter(ClassFilter filter) {
-    if (filter.equals(core._classFilter.value)) return;
-    core._classFilter.value = filter;
-    derived._updateValues();
-  }
-
   void downloadCurrentItemToCsv() {
     final classes = derived.heapClasses.value!;
     final item = core.selectedItem as SnapshotInstanceItem;
@@ -168,7 +159,7 @@ class CoreData {
       _snapshots.value[_selectedSnapshotIndex.value];
 
   /// Full name for the selected class (cross-snapshot).
-  HeapClassName? className_;
+  HeapClassName? className;
 
   /// Selected retaining path (cross-snapshot).
   ClassOnlyHeapPath? path;
@@ -184,13 +175,31 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
   DerivedData(this._core) {
     _selectedItem = ValueNotifier<SnapshotItem>(_core.selectedItem);
 
+    final classFilterData = ClassFilterData(
+      filter: _core.classFilter,
+      onChanged: applyFilter,
+    );
+
+    classesTableSingle = ClassesTableSingleData(
+      heap: () => (_core.selectedItem as SnapshotInstanceItem).heap!.data,
+      totalHeapSize: () =>
+          (_core.selectedItem as SnapshotInstanceItem).totalSize!,
+      filterData: classFilterData,
+    );
+
+    classesTableDiff = ClassesTableDiffData(
+      filterData: classFilterData,
+      before: () => (heapClasses.value as DiffHeapClasses).before,
+      after: () => (heapClasses.value as DiffHeapClasses).after,
+    );
+
     addAutoDisposeListener(
-      selectedSingleClassStats,
-      () => _setClassIfNotNull(selectedSingleClassStats.value?.heapClass),
+      classesTableSingle.selection,
+      () => _setClassIfNotNull(classesTableSingle.selection.value?.heapClass),
     );
     addAutoDisposeListener(
-      selectedDiffClassStats,
-      () => _setClassIfNotNull(selectedDiffClassStats.value?.heapClass),
+      classesTableDiff.selection,
+      () => _setClassIfNotNull(classesTableDiff.selection.value?.heapClass),
     );
     addAutoDisposeListener(
       selectedPathEntry,
@@ -207,11 +216,9 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
   /// Classes to show.
   final heapClasses = ValueNotifier<HeapClasses?>(null);
 
-  /// Selected single class item in snapshot, to take signal from the table widget.
-  final selectedSingleClassStats = ValueNotifier<SingleClassStats?>(null);
+  late final ClassesTableSingleData classesTableSingle;
 
-  /// Selected diff class item in snapshot, to take signal from the table widget.
-  final selectedDiffClassStats = ValueNotifier<DiffClassStats?>(null);
+  late final ClassesTableDiffData classesTableDiff;
 
   /// Classes to show for currently selected item, if the item is diffed.
   ValueListenable<List<DiffClassStats>?> get diffClassesToShow =>
@@ -232,10 +239,16 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
   /// Storage for already calculated diffs between snapshots.
   late final _diffStore = HeapDiffStore();
 
+  void applyFilter(ClassFilter filter) {
+    if (filter.equals(_core.classFilter.value)) return;
+    _core._classFilter.value = filter;
+    _updateValues();
+  }
+
   /// Updates cross-snapshot class if the argument is not null.
   void _setClassIfNotNull(HeapClassName? theClass) {
-    if (theClass == null || theClass == _core.className_) return;
-    _core.className_ = theClass;
+    if (theClass == null || theClass == _core.className) return;
+    _core.className = theClass;
     _updateValues();
   }
 
@@ -262,8 +275,9 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
 
       assert(singleHidden || diffHidden);
 
-      if (singleHidden) assert(selectedSingleClassStats.value == null, details);
-      if (diffHidden) assert(selectedDiffClassStats.value == null, details);
+      if (singleHidden)
+        assert(classesTableSingle.selection.value == null, details);
+      if (diffHidden) assert(classesTableDiff.selection.value == null, details);
 
       assert((singleClassesToShow.value == null) == singleHidden, details);
       assert((diffClassesToShow.value == null) == diffHidden, details);
@@ -291,19 +305,20 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
     if (classes is SingleHeapClasses) {
       _singleClassesToShow.value = classes.filtered(filter, _core.rootPackage);
       _diffClassesToShow.value = null;
-      selectedSingleClassStats.value =
+      classesTableSingle.selection.value =
           _filter(classes.classesByName[className]);
-      selectedDiffClassStats.value = null;
+      classesTableDiff.selection.value = null;
     } else if (classes is DiffHeapClasses) {
       _singleClassesToShow.value = null;
       _diffClassesToShow.value = classes.filtered(filter, _core.rootPackage);
-      selectedSingleClassStats.value = null;
-      selectedDiffClassStats.value = _filter(classes.classesByName[className]);
+      classesTableSingle.selection.value = null;
+      classesTableDiff.selection.value =
+          _filter(classes.classesByName[className]);
     } else if (classes == null) {
       _singleClassesToShow.value = null;
       _diffClassesToShow.value = null;
-      selectedSingleClassStats.value = null;
-      selectedDiffClassStats.value = null;
+      classesTableSingle.selection.value = null;
+      classesTableDiff.selection.value = null;
     } else {
       throw StateError('Unexpected type: ${classes.runtimeType}.');
     }
@@ -334,11 +349,11 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
     _setSelections();
     _updateClasses(
       classes: classes,
-      className: _core.className_,
+      className: _core.className,
     );
     // Set paths to show.
     final theClass =
-        selectedSingleClassStats.value ?? selectedDiffClassStats.value;
+        classesTableSingle.selection.value ?? classesTableDiff.selection.value;
     final thePathEntries = pathEntries.value = theClass?.statsByPathEntries;
     final paths = theClass?.statsByPath;
     StatsByPathEntry? thePathEntry;
@@ -381,7 +396,7 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
 
   /// Set initial selection of class and path, for discoverability of detailed view.
   void _setSelections() {
-    if (_core.className_ != null) return;
+    if (_core.className != null) return;
 
     final classes = heapClasses.value;
     if (classes == null) return;
@@ -415,7 +430,7 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
     } else {
       throw StateError('Unexpected type ${classes.runtimeType}');
     }
-    _core.className_ = theClass.heapClass;
+    _core.className = theClass.heapClass;
 
     // Get path with max retained size.
     final path = theClass.statsByPathEntries.reduce((v, e) {

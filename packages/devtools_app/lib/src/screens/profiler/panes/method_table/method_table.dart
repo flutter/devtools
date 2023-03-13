@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import '../../../../shared/common_widgets.dart';
 import '../../../../shared/primitives/auto_dispose.dart';
 import '../../../../shared/primitives/utils.dart';
+import '../../../../shared/profiler_utils.dart';
 import '../../../../shared/split.dart';
 import '../../../../shared/table/table.dart';
 import '../../../../shared/table/table_data.dart';
@@ -38,6 +39,8 @@ class CpuMethodTable extends StatelessWidget {
   }
 }
 
+// TODO(kenz): ensure that this table automatically scrolls to the selected
+// node from [MethodTableController].
 /// A table of methods and their timing information for a CPU profile.
 class _MethodTable extends StatelessWidget {
   const _MethodTable(this._methodTableController, this._methods);
@@ -46,8 +49,8 @@ class _MethodTable extends StatelessWidget {
   static final selfTimeColumn = _SelfTimeColumn();
   static final totalTimeColumn = _TotalTimeColumn();
   static final columns = List<ColumnData<MethodTableGraphNode>>.unmodifiable([
-    selfTimeColumn,
     totalTimeColumn,
+    selfTimeColumn,
     methodColumn,
   ]);
 
@@ -63,9 +66,10 @@ class _MethodTable extends StatelessWidget {
         data: _methods,
         dataKey: 'cpu-profile-methods',
         columns: columns,
-        defaultSortColumn: selfTimeColumn,
+        defaultSortColumn: totalTimeColumn,
         defaultSortDirection: SortDirection.descending,
         selectionNotifier: _methodTableController.selectedNode,
+        sizeToFit: false,
       ),
     );
   }
@@ -93,29 +97,39 @@ class _MethodGraphState extends State<_MethodGraph> with AutoDisposeMixin {
   void initState() {
     super.initState();
 
-    _selectedGraphNode = widget.methodTableController.selectedNode.value;
+    _initGraphNodes();
     addAutoDisposeListener(widget.methodTableController.selectedNode, () {
       setState(() {
-        _selectedGraphNode = widget.methodTableController.selectedNode.value;
-        _callers = _selectedGraphNode!.predecessors
-            .cast<MethodTableGraphNode>()
-            .toList();
-        _callees = _selectedGraphNode!.successors
-            .cast<MethodTableGraphNode>()
-            .toList();
+        _initGraphNodes();
       });
     });
   }
 
+  void _initGraphNodes() {
+    _selectedGraphNode = widget.methodTableController.selectedNode.value;
+    if (_selectedGraphNode == null) {
+      _callers = <MethodTableGraphNode>[];
+      _callees = <MethodTableGraphNode>[];
+    } else {
+      _callers = _selectedGraphNode!.predecessors
+          .cast<MethodTableGraphNode>()
+          .toList();
+      _callees =
+          _selectedGraphNode!.successors.cast<MethodTableGraphNode>().toList();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    if (_selectedGraphNode == null) {
+    final selectedNode = _selectedGraphNode;
+    if (selectedNode == null) {
       return OutlineDecoration.onlyLeft(
         child: const Center(
           child: Text('Select a method to view its call graph.'),
         ),
       );
     }
+    final selectedNodeDisplay = selectedNode.display;
     return OutlineDecoration.onlyLeft(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -128,12 +142,17 @@ class _MethodGraphState extends State<_MethodGraph> with AutoDisposeMixin {
               ),
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.all(denseSpacing),
-            child: Row(
-              children: [
-                Text(_selectedGraphNode!.display),
-              ],
+          DevToolsTooltip(
+            message: selectedNodeDisplay,
+            child: Padding(
+              padding: const EdgeInsets.all(denseSpacing),
+              child: MethodAndSourceDisplay(
+                methodName: selectedNode.name,
+                packageUri: selectedNode.packageUri,
+                sourceLine: selectedNode.sourceLine,
+                isSelected: false,
+                displayInRow: false,
+              ),
             ),
           ),
           Flexible(
@@ -174,13 +193,14 @@ class _CallersTable extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FlatTable<MethodTableGraphNode>(
-      keyFactory: (node) => ValueKey(node.id),
+      keyFactory: (node) => ValueKey('caller-${node.id}'),
       data: _callers,
       dataKey: 'cpu-profile-method-callers',
       columns: columns,
       defaultSortColumn: _callerTimeColumn,
       defaultSortDirection: SortDirection.descending,
       selectionNotifier: _methodTableController.selectedNode,
+      sizeToFit: false,
     );
   }
 }
@@ -209,21 +229,21 @@ class _CalleesTable extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FlatTable<MethodTableGraphNode>(
-      keyFactory: (node) => ValueKey(node.id),
+      keyFactory: (node) => ValueKey('callee-${node.id}'),
       data: _callees,
       dataKey: 'cpu-profile-method-callees',
       columns: _columns,
       defaultSortColumn: _calleeTimeColumn,
       defaultSortDirection: SortDirection.descending,
       selectionNotifier: _methodTableController.selectedNode,
+      sizeToFit: false,
     );
   }
 }
 
-class _MethodColumn extends ColumnData<MethodTableGraphNode> {
+class _MethodColumn extends ColumnData<MethodTableGraphNode>
+    implements ColumnRenderer<MethodTableGraphNode> {
   _MethodColumn() : super.wide('Method');
-
-  static const _separator = ' - ';
 
   @override
   bool get supportsSorting => true;
@@ -232,47 +252,68 @@ class _MethodColumn extends ColumnData<MethodTableGraphNode> {
   String getValue(MethodTableGraphNode dataObject) => dataObject.name;
 
   @override
-  String getTooltip(MethodTableGraphNode dataObject) {
-    return '${dataObject.name}$_separator(${dataObject.packageUri})';
+  String getDisplayValue(MethodTableGraphNode dataObject) => dataObject.display;
+
+  @override
+  String getTooltip(MethodTableGraphNode dataObject) => dataObject.display;
+
+  @override
+  Widget? build(
+    BuildContext context,
+    MethodTableGraphNode data, {
+    bool isRowSelected = false,
+    VoidCallback? onPressed,
+  }) {
+    return MethodAndSourceDisplay(
+      methodName: data.name,
+      packageUri: data.packageUri,
+      sourceLine: data.sourceLine,
+      isSelected: isRowSelected,
+    );
   }
 }
+
+const _totalAndSelfColumnWidth = 75.0;
+const _callGraphColumnWidth = 80.0;
 
 class _SelfTimeColumn extends TimeAndPercentageColumn<MethodTableGraphNode> {
   _SelfTimeColumn({String? titleTooltip})
       : super(
-          title: 'Self Time',
+          title: 'Self %',
           titleTooltip: titleTooltip,
+          percentageOnly: true,
           timeProvider: (node) => node.selfTime,
           percentAsDoubleProvider: (node) => node.selfTimeRatio,
           secondaryCompare: (node) => node.name,
+          columnWidth: _totalAndSelfColumnWidth,
         );
 }
 
 class _TotalTimeColumn extends TimeAndPercentageColumn<MethodTableGraphNode> {
   _TotalTimeColumn({String? titleTooltip})
       : super(
-          title: 'Total Time',
+          title: 'Total %',
           titleTooltip: titleTooltip,
+          percentageOnly: true,
           timeProvider: (node) => node.totalTime,
           percentAsDoubleProvider: (node) => node.totalTimeRatio,
           secondaryCompare: (node) => node.name,
+          columnWidth: _totalAndSelfColumnWidth,
         );
 }
-
-const _percentageOnlyWidth = 100.0;
 
 class _CallerTimeColumn extends TimeAndPercentageColumn<MethodTableGraphNode> {
   _CallerTimeColumn({
     required MethodTableController methodTableController,
     String? titleTooltip,
   }) : super(
-          title: 'Caller Time',
+          title: 'Caller %',
           titleTooltip: titleTooltip,
           percentageOnly: true,
           percentAsDoubleProvider: (node) =>
               methodTableController.callerPercentageFor(node),
           secondaryCompare: (node) => node.name,
-          columnWidth: _percentageOnlyWidth,
+          columnWidth: _callGraphColumnWidth,
         );
 }
 
@@ -281,12 +322,12 @@ class _CalleeTimeColumn extends TimeAndPercentageColumn<MethodTableGraphNode> {
     required MethodTableController methodTableController,
     String? titleTooltip,
   }) : super(
-          title: 'Callee Time',
+          title: 'Callee %',
           titleTooltip: titleTooltip,
           percentageOnly: true,
           percentAsDoubleProvider: (node) =>
               methodTableController.calleePercentageFor(node),
           secondaryCompare: (node) => node.name,
-          columnWidth: _percentageOnlyWidth,
+          columnWidth: _callGraphColumnWidth,
         );
 }
