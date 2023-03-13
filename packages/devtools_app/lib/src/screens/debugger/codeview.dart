@@ -38,9 +38,6 @@ import 'debugger_model.dart';
 import 'file_search.dart';
 import 'key_sets.dart';
 
-final debuggerCodeViewSearchKey =
-    GlobalKey(debugLabel: 'DebuggerCodeViewSearchKey');
-
 final debuggerCodeViewFileOpenerKey =
     GlobalKey(debugLabel: 'DebuggerCodeViewFileOpenerKey');
 
@@ -110,6 +107,9 @@ class _CodeViewState extends State<CodeView>
   ScriptRef? _lastScriptRef;
 
   @override
+  SearchControllerMixin get searchController => widget.codeViewController;
+
+  @override
   void initState() {
     super.initState();
 
@@ -169,7 +169,7 @@ class _CodeViewState extends State<CodeView>
 
     if (widget.codeViewController != oldWidget.codeViewController) {
       cancelListeners();
-
+      widget.codeViewController.initSearch();
       addAutoDisposeListener(
         widget.codeViewController.scriptLocation,
         _handleScriptLocationChanged,
@@ -495,9 +495,8 @@ class _CodeViewState extends State<CodeView>
     return ElevatedCard(
       width: wideSearchTextWidth,
       height: defaultTextFieldHeight + 2 * denseSpacing,
-      child: buildSearchField(
+      child: SearchField<SourceToken>(
         controller: widget.codeViewController,
-        searchFieldKey: debuggerCodeViewSearchKey,
         searchFieldEnabled: parsedScript != null,
         shouldRequestFocus: true,
         supportsNavigation: true,

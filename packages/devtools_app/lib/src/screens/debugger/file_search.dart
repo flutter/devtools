@@ -33,20 +33,22 @@ class FileSearchField extends StatefulWidget {
 
 class FileSearchFieldState extends State<FileSearchField>
     with AutoDisposeMixin, SearchFieldMixin {
-  late AutoCompleteController autoCompleteController;
+  static final fileSearchFieldKey = GlobalKey(debugLabel: 'fileSearchFieldKey');
+
+  final autoCompleteController = AutoCompleteController(fileSearchFieldKey);
 
   final _scriptsCache = <String, ScriptRef>{};
-
-  final fileSearchFieldKey = GlobalKey(debugLabel: 'fileSearchFieldKey');
 
   late String _query;
   late FileSearchResults _searchResults;
 
   @override
+  SearchControllerMixin get searchController => autoCompleteController;
+
+  @override
   void initState() {
     super.initState();
 
-    autoCompleteController = AutoCompleteController();
     autoCompleteController.setCurrentHoveredIndexValue(0);
 
     addAutoDisposeListener(
@@ -70,12 +72,11 @@ class FileSearchFieldState extends State<FileSearchField>
 
   @override
   Widget build(BuildContext context) {
-    return buildAutoCompleteSearchField(
+    return AutoCompleteSearchField(
       controller: autoCompleteController,
-      searchFieldKey: fileSearchFieldKey,
       searchFieldEnabled: true,
       shouldRequestFocus: true,
-      keyEventsToPropagate: {LogicalKeyboardKey.escape},
+      keyEventsToIgnore: {LogicalKeyboardKey.escape},
       onSelection: _onSelection,
       onClose: _onClose,
       label: 'Open file',

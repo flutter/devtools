@@ -99,6 +99,9 @@ class _CpuProfilerState extends State<CpuProfiler>
   late CpuProfileData data;
 
   @override
+  SearchControllerMixin get searchController => widget.controller;
+
+  @override
   void initState() {
     super.initState();
     data = widget.data;
@@ -198,7 +201,7 @@ class _CpuProfilerState extends State<CpuProfiler>
             // TODO(kenz): support search for call tree and bottom up tabs as
             // well. This will require implementing search for tree tables.
             if (currentTab.key == CpuProfiler.flameChartTab) ...[
-              if (widget.searchFieldKey != null) _buildSearchField(),
+              _buildSearchField(),
               FlameChartHelpButton(
                 gaScreen: widget.standaloneProfiler
                     ? gac.cpuProfiler
@@ -288,9 +291,8 @@ class _CpuProfilerState extends State<CpuProfiler>
     return Container(
       width: wideSearchTextWidth,
       height: defaultTextFieldHeight,
-      child: buildSearchField(
+      child: SearchField<CpuStackFrame>(
         controller: widget.controller,
-        searchFieldKey: widget.searchFieldKey!,
         searchFieldEnabled: true,
         shouldRequestFocus: false,
         supportsNavigation: true,

@@ -77,6 +77,9 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
 
   bool searchVisible = false;
 
+  @override
+  SearchControllerMixin get searchController => _summaryTreeController;
+
   /// Indicates whether search can be closed. The value is set to true when
   /// search target type dropdown is displayed
   /// TODO(https://github.com/flutter/devtools/issues/3489) use this variable when adding the scope dropdown
@@ -92,9 +95,9 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
 
   @override
   void dispose() {
-    controller.inspectorTree.dispose();
+    _summaryTreeController.dispose();
     if (controller.isSummaryTree && controller.details != null) {
-      controller.details!.inspectorTree.dispose();
+      _detailsTreeController.dispose();
     }
     super.dispose();
   }
@@ -103,36 +106,6 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
   void initState() {
     super.initState();
     ga.screen(InspectorScreen.id);
-
-    if (serviceManager.inspectorService == null) {
-      // The app must not be a Flutter app.
-      return;
-    }
-
-    addAutoDisposeListener(searchFieldFocusNode, () {
-      // Close the search once focus is lost and following conditions are met:
-      //  1. Search string is empty.
-      //  2. [searchPreventClose] == false (this is set true when searchTargetType Dropdown is opened).
-      if (!searchFieldFocusNode.hasFocus &&
-          _summaryTreeController.search.isEmpty &&
-          !searchPreventClose) {
-        setState(() {
-          searchVisible = false;
-        });
-      }
-
-      // Reset [searchPreventClose] state to false after the search field gains focus.
-      // Focus is returned automatically once the Dropdown menu is closed.
-      if (searchFieldFocusNode.hasFocus) {
-        searchPreventClose = false;
-      }
-    });
-    addAutoDisposeListener(preferences.inspector.customPubRootDirectories, () {
-      if (serviceManager.hasConnection &&
-          controller.firstInspectorTreeLoadCompleted) {
-        _refreshInspector();
-      }
-    });
   }
 
   @override
@@ -144,6 +117,33 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
       // The app must not be a Flutter app.
       return;
     }
+
+    cancelListeners();
+    searchVisible = searchController.search.isNotEmpty;
+    addAutoDisposeListener(searchController.searchFieldFocusNode, () {
+      // Close the search once focus is lost and following conditions are met:
+      //  1. Search string is empty.
+      //  2. [searchPreventClose] == false (this is set true when searchTargetType Dropdown is opened).
+      if (!searchController.searchFieldFocusNode!.hasFocus &&
+          searchController.search.isEmpty &&
+          !searchPreventClose) {
+        setState(() {
+          searchVisible = false;
+        });
+      }
+
+      // Reset [searchPreventClose] state to false after the search field gains focus.
+      // Focus is returned automatically once the Dropdown menu is closed.
+      if (searchController.searchFieldFocusNode!.hasFocus) {
+        searchPreventClose = false;
+      }
+    });
+    addAutoDisposeListener(preferences.inspector.customPubRootDirectories, () {
+      if (serviceManager.hasConnection &&
+          controller.firstInspectorTreeLoadCompleted) {
+        _refreshInspector();
+      }
+    });
 
     if (!controller.firstInspectorTreeLoadCompleted) {
       ga.timeStart(InspectorScreen.id, gac.pageReady);
@@ -219,11 +219,8 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
                 constraints: constraints,
                 onRefreshInspectorPressed: _refreshInspector,
                 onSearchVisibleToggle: _onSearchVisibleToggle,
-                searchFieldBuilder: () => buildSearchField(
+                searchFieldBuilder: () => SearchField<InspectorTreeRow>(
                   controller: _summaryTreeController,
-                  searchFieldKey: GlobalKey(
-                    debugLabel: 'inspectorScreenSearch',
-                  ),
                   searchFieldEnabled: true,
                   shouldRequestFocus: searchVisible,
                   supportsNavigation: true,
@@ -278,7 +275,6 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
       searchVisible = !searchVisible;
     });
     _summaryTreeController.resetSearch();
-    searchTextFieldController.clear();
   }
 
   List<Widget> getServiceExtensionWidgets() {
