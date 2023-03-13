@@ -11,7 +11,6 @@ import '../globals.dart';
 import '../memory/adapted_heap_data.dart';
 import '../primitives/trees.dart';
 import '../primitives/utils.dart';
-import '../vm_utils.dart';
 import 'diagnostics_node.dart';
 import 'generic_instance_reference.dart';
 import 'helpers.dart';
@@ -144,23 +143,6 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
       ]);
   }
 
-  factory DartObjectNode.fromInstanceSet({
-    required String text,
-    required InstanceSet instanceSet,
-    required IsolateRef? isolateRef,
-  }) {
-    return DartObjectNode._(
-      text: text,
-      ref: GenericInstanceRef(
-        isolateRef: isolateRef,
-        value: instanceSet,
-      ),
-      artificialValue: true,
-      artificialName: true,
-      childCount: instanceSet.instances?.length,
-    );
-  }
-
   factory DartObjectNode.create(
     BoundVariable variable,
     IsolateRef? isolateRef,
@@ -241,19 +223,29 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
 
     final value = this.value;
     if (value is InstanceRef) {
-      if (value.kind != null &&
-          (isList(value) ||
-              value.kind == InstanceKind.kMap ||
-              value.kind == InstanceKind.kRecord ||
-              isSet)) {
-        return value.length ?? 0;
-      }
+      final instanceLength = value.length;
+      if (instanceLength == null) return 0;
+      return instanceLength - offset;
     }
 
     return 0;
   }
 
   int? _childCount;
+
+  bool get isPartialObject {
+    final value = this.value;
+    // Only instance kinds can be partial:
+    if (value is InstanceRef) {
+      // Only instance kinds with a length property can be partial. See:
+      // https://api.flutter.dev/flutter/vm_service/Instance/length.html
+      final instanceLength = value.length;
+      if (instanceLength == null) return false;
+      return offset != 0 || childCount < instanceLength;
+    }
+
+    return false;
+  }
 
   // TODO(elliette): Can remove this workaround once DWDS correctly returns
   // InstanceKind.kSet for the kind of `Sets`. See:
@@ -276,13 +268,9 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
   bool get isExpandable {
     final theRef = ref;
     final instanceRef = theRef?.instanceRef;
-    if (theRef is ObjectReferences) {
-      if (instanceRef?.length == 0) return false;
-      return theRef.refNodeType.isRoot ||
-          children.isNotEmpty ||
-          childCount > 0 ||
-          !isPrimitiveInstanceKind(instanceRef?.kind);
-    }
+
+    if (isRootForReferences(ref)) return true;
+
     if (treeInitializeComplete || children.isNotEmpty || childCount > 0) {
       return children.isNotEmpty || childCount > 0;
     }

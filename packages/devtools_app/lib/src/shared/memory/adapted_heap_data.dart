@@ -56,6 +56,8 @@ class HeapObjectSelection {
   }
 }
 
+typedef HeapDataCallback = AdaptedHeapData Function();
+
 /// Contains information from [HeapSnapshotGraph],
 /// needed for memory screen.
 class AdaptedHeapData {

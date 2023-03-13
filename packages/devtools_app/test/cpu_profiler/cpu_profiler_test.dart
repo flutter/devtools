@@ -13,7 +13,6 @@ import 'package:devtools_app/src/screens/profiler/panes/cpu_flame_chart.dart';
 import 'package:devtools_app/src/screens/profiler/panes/method_table/method_table.dart';
 import 'package:devtools_app/src/shared/charts/flame_chart.dart';
 import 'package:devtools_app/src/shared/config_specific/import_export/import_export.dart';
-import 'package:devtools_app/src/shared/feature_flags.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -21,7 +20,7 @@ import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../test_infra/matchers/matchers.dart';
-import '../test_infra/test_data/cpu_profile.dart';
+import '../test_infra/test_data/cpu_profiler/cpu_profile.dart';
 import '../test_infra/utils/test_utils.dart';
 
 void main() {
@@ -36,8 +35,6 @@ void main() {
   when(app.isDebugFlutterAppNow).thenReturn(false);
 
   setUp(() async {
-    FeatureFlags.methodTable = true;
-
     setCharacterWidthForTables();
     setGlobal(ServiceConnectionManager, fakeServiceManager);
 
@@ -482,7 +479,7 @@ void main() {
         await expectLater(
           find.byType(CpuProfiler),
           matchesDevToolsGolden(
-            '../test_infra/goldens/cpu_profiler_call_tree_no_guidelines.png',
+            '../test_infra/goldens/cpu_profiler/call_tree_no_guidelines.png',
           ),
         );
         await tester.tap(find.byType(DisplayTreeGuidelinesToggle));
@@ -492,7 +489,7 @@ void main() {
         await expectLater(
           find.byType(CpuProfiler),
           matchesDevToolsGolden(
-            '../test_infra/goldens/cpu_profiler_call_tree_guidelines.png',
+            '../test_infra/goldens/cpu_profiler/call_tree_guidelines.png',
           ),
         );
         await tester.tap(find.byType(DisplayTreeGuidelinesToggle));
@@ -502,7 +499,7 @@ void main() {
         await expectLater(
           find.byType(CpuProfiler),
           matchesDevToolsGolden(
-            '../test_infra/goldens/cpu_profiler_call_tree_no_guidelines.png',
+            '../test_infra/goldens/cpu_profiler/call_tree_no_guidelines.png',
           ),
         );
 
@@ -518,7 +515,7 @@ void main() {
         await expectLater(
           find.byType(CpuProfiler),
           matchesDevToolsGolden(
-            '../test_infra/goldens/cpu_profiler_bottom_up_no_guidelines.png',
+            '../test_infra/goldens/cpu_profiler/bottom_up_no_guidelines.png',
           ),
         );
         await tester.tap(find.byType(DisplayTreeGuidelinesToggle));
@@ -528,7 +525,7 @@ void main() {
         await expectLater(
           find.byType(CpuProfiler),
           matchesDevToolsGolden(
-            '../test_infra/goldens/cpu_profiler_bottom_up_guidelines.png',
+            '../test_infra/goldens/cpu_profiler/bottom_up_guidelines.png',
           ),
         );
         await tester.tap(find.byType(DisplayTreeGuidelinesToggle));
@@ -538,7 +535,7 @@ void main() {
         await expectLater(
           find.byType(CpuProfiler),
           matchesDevToolsGolden(
-            '../test_infra/goldens/cpu_profiler_bottom_up_no_guidelines.png',
+            '../test_infra/goldens/cpu_profiler/bottom_up_no_guidelines.png',
           ),
         );
       },

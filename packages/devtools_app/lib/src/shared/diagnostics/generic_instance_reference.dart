@@ -6,7 +6,22 @@ import 'package:vm_service/vm_service.dart';
 
 import '../memory/adapted_heap_data.dart';
 import '../memory/simple_items.dart';
+import '../vm_utils.dart';
 import 'diagnostics_node.dart';
+
+/// True, if [ref] contains static or live information about references and thus
+/// makes the node expandable.
+bool isRootForReferences(GenericInstanceRef? ref) {
+  if (ref == null) return false;
+  if (ref is! ObjectReferences) {
+    return ref.heapSelection != null;
+  }
+
+  if (ref.instanceRef?.length == 0 ||
+      isPrimitiveInstanceKind(ref.instanceRef?.kind)) return false;
+
+  return ref.refNodeType.isRoot;
+}
 
 /// A generic [InstanceRef] using either format used by the [InspectorService]
 /// or Dart VM.
