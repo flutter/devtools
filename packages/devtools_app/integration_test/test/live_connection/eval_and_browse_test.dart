@@ -15,7 +15,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 
 // To run:
-// dart run integration_test/run_tests.dart --target=integration_test/test/live_connection/experimental/eval_and_browse_test.dart
+// dart run integration_test/run_tests.dart --target=integration_test/test/live_connection/eval_and_browse_test.dart
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
