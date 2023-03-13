@@ -71,6 +71,17 @@ class PreferencesController extends DisposableController
       storage.setValue('ui.denseMode', '${_denseMode.value}');
     });
 
+    await _initVerboseLogging();
+
+    await inspector.init();
+    await memory.init();
+    await performance.init();
+    await cpuProfiler.init();
+
+    setGlobal(PreferencesController, this);
+  }
+
+  Future<void> _initVerboseLogging() async {
     final String? verboseLoggingEnabledValue =
         await storage.getValue('verboseLogging');
 
@@ -91,13 +102,6 @@ class PreferencesController extends DisposableController
     Logger.root.onRecord.listen((record) {
       LogStorage.root.addLog(record);
     });
-
-    await inspector.init();
-    await memory.init();
-    await performance.init();
-    await cpuProfiler.init();
-
-    setGlobal(PreferencesController, this);
   }
 
   @override
