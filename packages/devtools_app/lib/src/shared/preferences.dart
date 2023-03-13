@@ -30,7 +30,8 @@ class PreferencesController extends DisposableController
   final _vmDeveloperMode = ValueNotifier<bool>(false);
 
   ValueListenable<bool> get verboseLoggingEnabled => _verboseLogging;
-  final _verboseLogging = ValueNotifier<bool>(Logger.root.level == Level.INFO);
+  final _verboseLogging =
+      ValueNotifier<bool>(Logger.root.level == Level.FINEST);
 
   ValueListenable<bool> get denseModeEnabled => _denseMode;
   final _denseMode = ValueNotifier<bool>(false);
@@ -79,7 +80,7 @@ class PreferencesController extends DisposableController
       storage.setValue('verboseLogging', _verboseLogging.value.toString());
 
       if (_verboseLogging.value) {
-        Logger.root.level = Level.INFO;
+        Logger.root.level = Level.FINEST;
         _log.warning('verboseLogging enabled');
       } else {
         Logger.root.level = Level.WARNING;
@@ -88,9 +89,7 @@ class PreferencesController extends DisposableController
     });
 
     Logger.root.onRecord.listen((record) {
-      LogStorage.root.addLog(
-        '${record.time.toUtc()}[${record.level.name}][${record.loggerName}]: ${record.message}',
-      );
+      LogStorage.root.addLog(record);
     });
 
     await inspector.init();

@@ -1,17 +1,19 @@
 import 'dart:collection';
+import 'dart:convert';
+import 'package:logging/logging.dart';
 
 /// Class for storing a limited number string messages.
 class LogStorage {
   static const int maxLogEntries = 3000;
 
-  final Queue<String> _logs = Queue<String>();
+  final Queue<LogRecord> _logs = Queue<LogRecord>();
 
   /// Adds [message] to the end of the log queue.
   ///
   /// If there are more than [maxLogEntries] messages in the logs, then the
   /// oldest message will be removed from the queue.
-  void addLog(String message) {
-    _logs.add(message);
+  void addLog(LogRecord record) {
+    _logs.add(record);
     if (_logs.length > maxLogEntries) {
       _logs.removeFirst();
     }
@@ -24,7 +26,21 @@ class LogStorage {
 
   @override
   String toString() {
-    return _logs.join('\n');
+    return toJsonLog();
+  }
+
+  String toJsonLog() {
+    return _logs
+        .map(
+          (e) => jsonEncode({
+            'level': e.level.name,
+            'message': e.message,
+            'timestamp': e.time.toUtc().toString(),
+            'loggerName': e.loggerName,
+            'data': e.object,
+          }),
+        )
+        .join('\n');
   }
 
   /// Static instance for storing the app's logs.
