@@ -24,7 +24,7 @@ TODO: Remove this section if there are not any general updates.
 * Fix an error in total and self time calculations for the bottom up tree - [#5348](https://github.com/flutter/devtools/pull/5348)
 
 ## Memory updates
-TODO: Remove this section if there are not any general updates.
+* Fix filtering bug in the "Trace Instances" view - [#5406](https://github.com/flutter/devtools/pull/5406)
 
 ## Debugger updates
 * Fix a bug where variable inspection for instances sometimes showed no children. - [#5356](https://github.com/flutter/devtools/pull/5356)
