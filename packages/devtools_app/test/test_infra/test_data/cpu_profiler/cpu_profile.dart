@@ -41,6 +41,7 @@ final Map<String, dynamic> cpuProfileDataWithUserTagsJson = {
       'parent': 'cpuProfileRoot',
       'resolvedUrl': '',
       'packageUri': '',
+      'sourceLine': 111,
     },
     '140357727781376-2': {
       'category': 'Dart',
@@ -48,6 +49,7 @@ final Map<String, dynamic> cpuProfileDataWithUserTagsJson = {
       'parent': '140357727781376-1',
       'resolvedUrl':
           'org-dartlang-sdk:///third_party/dart/sdk/lib/vm/compact_hash.dart',
+      'sourceLine': 222,
     },
     '140357727781376-3': {
       'category': 'Dart',
@@ -55,6 +57,7 @@ final Map<String, dynamic> cpuProfileDataWithUserTagsJson = {
       'parent': '140357727781376-2',
       'resolvedUrl': '',
       'packageUri': '',
+      'sourceLine': 333,
     },
     '140357727781376-4': {
       'category': 'Dart',
@@ -62,6 +65,7 @@ final Map<String, dynamic> cpuProfileDataWithUserTagsJson = {
       'parent': '140357727781376-2',
       'resolvedUrl': '',
       'packageUri': '',
+      'sourceLine': 444,
     },
     '140357727781376-5': {
       'category': 'Dart',
@@ -69,6 +73,7 @@ final Map<String, dynamic> cpuProfileDataWithUserTagsJson = {
       'parent': '140357727781376-1',
       'resolvedUrl':
           'org-dartlang-sdk:///third_party/dart/sdk/lib/vm/compact_hash.dart',
+      'sourceLine': 555,
     },
     '140357727781376-6': {
       'category': 'Dart',
@@ -76,6 +81,7 @@ final Map<String, dynamic> cpuProfileDataWithUserTagsJson = {
       'parent': '140357727781376-5',
       'resolvedUrl':
           'path/to/flutter/packages/flutter/lib/src/rendering/custom_layout.dart',
+      'sourceLine': 666,
     },
   },
   'traceEvents': [
@@ -146,6 +152,40 @@ final Map<String, dynamic> cpuProfileDataWithUserTagsJson = {
     },
   ],
 };
+
+const profileGroupedByUserTagsGolden = '''
+  all - children: 3 - excl: 0 - incl: 5
+    userTagA - children: 1 - excl: 0 - incl: 2
+      Frame1 - children: 2 - excl: 0 - incl: 2
+        Frame2 - children: 1 - excl: 0 - incl: 1
+          Frame3 - children: 0 - excl: 1 - incl: 1
+        Frame5 - children: 0 - excl: 1 - incl: 1
+    userTagB - children: 1 - excl: 0 - incl: 1
+      Frame1 - children: 1 - excl: 0 - incl: 1
+        Frame2 - children: 1 - excl: 0 - incl: 1
+          Frame4 - children: 0 - excl: 1 - incl: 1
+    userTagC - children: 1 - excl: 0 - incl: 2
+      Frame1 - children: 1 - excl: 0 - incl: 2
+        Frame5 - children: 1 - excl: 1 - incl: 2
+          Frame6 - children: 0 - excl: 1 - incl: 1
+''';
+
+const profileGroupedByVmTagsGolden = '''
+  all - children: 3 - excl: 0 - incl: 5
+    vmTagA - children: 1 - excl: 0 - incl: 2
+      Frame1 - children: 2 - excl: 0 - incl: 2
+        Frame2 - children: 1 - excl: 0 - incl: 1
+          Frame3 - children: 0 - excl: 1 - incl: 1
+        Frame5 - children: 0 - excl: 1 - incl: 1
+    vmTagB - children: 1 - excl: 0 - incl: 1
+      Frame1 - children: 1 - excl: 0 - incl: 1
+        Frame2 - children: 1 - excl: 0 - incl: 1
+          Frame4 - children: 0 - excl: 1 - incl: 1
+    vmTagC - children: 1 - excl: 0 - incl: 2
+      Frame1 - children: 1 - excl: 0 - incl: 2
+        Frame5 - children: 1 - excl: 1 - incl: 2
+          Frame6 - children: 0 - excl: 1 - incl: 1
+''';
 
 const goldenCpuProfileString = '''
   all - children: 2 - excl: 0 - incl: 8
@@ -1367,6 +1407,9 @@ final CpuStackFrame stackFrameG = CpuStackFrame(
   isTag: false,
 )..exclusiveSampleCount = 1;
 
+final CpuStackFrame testStackFrameWithRoot = CpuStackFrame.root(profileMetaData)
+  ..addChild(testStackFrame.deepCopy());
+
 final CpuStackFrame testStackFrame = stackFrameA
   ..addChild(
     stackFrameB
@@ -1380,8 +1423,21 @@ final CpuStackFrame testStackFrame = stackFrameA
 
 final CpuStackFrame testTagRootedStackFrame = tagFrameA
   ..addChild(
-    testStackFrame,
+    testStackFrame.deepCopy(),
   );
+
+const String testStackFrameWithRootStringGolden = '''
+  all - children: 1 - excl: 0 - incl: 10
+    A - children: 1 - excl: 0 - incl: 10
+      B - children: 2 - excl: 0 - incl: 10
+        C - children: 0 - excl: 2 - incl: 2
+        D - children: 2 - excl: 2 - incl: 8
+          E - children: 1 - excl: 1 - incl: 2
+            F - children: 1 - excl: 0 - incl: 1
+              C - children: 0 - excl: 1 - incl: 1
+          F - children: 1 - excl: 3 - incl: 4
+            C - children: 0 - excl: 1 - incl: 1
+''';
 
 const String testStackFrameStringGolden = '''
   A - children: 1 - excl: 0 - incl: 10
@@ -1400,14 +1456,14 @@ const String bottomUpPreMergeGolden = '''
     B - children: 1 - excl: 2 - incl: 2
       A - children: 0 - excl: 2 - incl: 2
 
-  D - children: 1 - excl: 2 - incl: 2
-    B - children: 1 - excl: 2 - incl: 2
-      A - children: 0 - excl: 2 - incl: 2
+  D - children: 1 - excl: 2 - incl: 8
+    B - children: 1 - excl: 2 - incl: 8
+      A - children: 0 - excl: 2 - incl: 8
 
-  E - children: 1 - excl: 1 - incl: 1
-    D - children: 1 - excl: 1 - incl: 1
-      B - children: 1 - excl: 1 - incl: 1
-        A - children: 0 - excl: 1 - incl: 1
+  E - children: 1 - excl: 1 - incl: 2
+    D - children: 1 - excl: 1 - incl: 2
+      B - children: 1 - excl: 1 - incl: 2
+        A - children: 0 - excl: 1 - incl: 2
 
   C - children: 1 - excl: 1 - incl: 1
     F - children: 1 - excl: 1 - incl: 1
@@ -1416,10 +1472,10 @@ const String bottomUpPreMergeGolden = '''
           B - children: 1 - excl: 1 - incl: 1
             A - children: 0 - excl: 1 - incl: 1
 
-  F - children: 1 - excl: 3 - incl: 3
-    D - children: 1 - excl: 3 - incl: 3
-      B - children: 1 - excl: 3 - incl: 3
-        A - children: 0 - excl: 3 - incl: 3
+  F - children: 1 - excl: 3 - incl: 4
+    D - children: 1 - excl: 3 - incl: 4
+      B - children: 1 - excl: 3 - incl: 4
+        A - children: 0 - excl: 3 - incl: 4
 
   C - children: 1 - excl: 1 - incl: 1
     F - children: 1 - excl: 1 - incl: 1
@@ -1442,19 +1498,19 @@ const String bottomUpGolden = '''
         B - children: 1 - excl: 1 - incl: 1
           A - children: 0 - excl: 1 - incl: 1
 
-  D - children: 1 - excl: 2 - incl: 2
-    B - children: 1 - excl: 2 - incl: 2
-      A - children: 0 - excl: 2 - incl: 2
+  D - children: 1 - excl: 2 - incl: 8
+    B - children: 1 - excl: 2 - incl: 8
+      A - children: 0 - excl: 2 - incl: 8
 
-  E - children: 1 - excl: 1 - incl: 1
-    D - children: 1 - excl: 1 - incl: 1
-      B - children: 1 - excl: 1 - incl: 1
-        A - children: 0 - excl: 1 - incl: 1
+  E - children: 1 - excl: 1 - incl: 2
+    D - children: 1 - excl: 1 - incl: 2
+      B - children: 1 - excl: 1 - incl: 2
+        A - children: 0 - excl: 1 - incl: 2
 
-  F - children: 1 - excl: 3 - incl: 3
-    D - children: 1 - excl: 3 - incl: 3
-      B - children: 1 - excl: 3 - incl: 3
-        A - children: 0 - excl: 3 - incl: 3
+  F - children: 1 - excl: 3 - incl: 4
+    D - children: 1 - excl: 3 - incl: 4
+      B - children: 1 - excl: 3 - incl: 4
+        A - children: 0 - excl: 3 - incl: 4
 
 ''';
 
@@ -1484,17 +1540,17 @@ const String tagRootedBottomUpGolden = '''
         D - children: 1 - excl: 1 - incl: 1
           B - children: 1 - excl: 1 - incl: 1
             A - children: 0 - excl: 1 - incl: 1
-    D - children: 1 - excl: 2 - incl: 2
-      B - children: 1 - excl: 2 - incl: 2
-        A - children: 0 - excl: 2 - incl: 2
-    E - children: 1 - excl: 1 - incl: 1
-      D - children: 1 - excl: 1 - incl: 1
-        B - children: 1 - excl: 1 - incl: 1
-          A - children: 0 - excl: 1 - incl: 1
-    F - children: 1 - excl: 3 - incl: 3
-      D - children: 1 - excl: 3 - incl: 3
-        B - children: 1 - excl: 3 - incl: 3
-          A - children: 0 - excl: 3 - incl: 3
+    D - children: 1 - excl: 2 - incl: 8
+      B - children: 1 - excl: 2 - incl: 8
+        A - children: 0 - excl: 2 - incl: 8
+    E - children: 1 - excl: 1 - incl: 2
+      D - children: 1 - excl: 1 - incl: 2
+        B - children: 1 - excl: 1 - incl: 2
+          A - children: 0 - excl: 1 - incl: 2
+    F - children: 1 - excl: 3 - incl: 4
+      D - children: 1 - excl: 3 - incl: 4
+        B - children: 1 - excl: 3 - incl: 4
+          A - children: 0 - excl: 3 - incl: 4
 
 ''';
 

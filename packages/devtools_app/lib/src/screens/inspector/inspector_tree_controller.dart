@@ -14,6 +14,7 @@ import 'package:flutter/services.dart';
 
 import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/analytics/constants.dart' as gac;
+import '../../shared/analytics/metrics.dart';
 import '../../shared/collapsible_mixin.dart';
 import '../../shared/common_widgets.dart';
 import '../../shared/config_specific/logger/logger.dart';
@@ -104,12 +105,30 @@ class _InspectorTreeRowState extends State<_InspectorTreeRowWidget>
 
 class InspectorTreeController extends Object
     with SearchControllerMixin<InspectorTreeRow> {
+  InspectorTreeController({this.gaId}) {
+    ga.select(
+      gac.inspector,
+      gac.inspectorTreeControllerInitialized,
+      nonInteraction: true,
+      screenMetricsProvider: () => InspectorScreenMetrics(
+        inspectorTreeControllerId: gaId,
+        rootSetCount: _rootSetCount,
+        rowCount: _root?.subtreeSize,
+      ),
+    );
+  }
+
   /// Clients the controller notifies to trigger changes to the UI.
   final Set<InspectorControllerClient> _clients = {};
+
+  /// Identifier used when sending Google Analytics about events in this
+  /// [InspectorTreeController].
+  final int? gaId;
 
   InspectorTreeNode createNode() => InspectorTreeNode();
 
   SearchTargetType _searchTarget = SearchTargetType.widget;
+  int _rootSetCount = 0;
 
   void addClient(InspectorControllerClient value) {
     final firstClient = _clients.isEmpty;
@@ -147,6 +166,17 @@ class InspectorTreeController extends Object
     setState(() {
       _root = node;
       _populateSearchableCachedRows();
+
+      ga.select(
+        gac.inspector,
+        gac.inspectorTreeControllerRootChange,
+        nonInteraction: true,
+        screenMetricsProvider: () => InspectorScreenMetrics(
+          inspectorTreeControllerId: gaId,
+          rootSetCount: ++_rootSetCount,
+          rowCount: _root?.subtreeSize,
+        ),
+      );
     });
   }
 

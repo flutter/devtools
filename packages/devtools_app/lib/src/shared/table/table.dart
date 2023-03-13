@@ -76,13 +76,28 @@ class FlatTable<T> extends StatefulWidget {
     this.activeSearchMatchNotifier,
     this.preserveVerticalScrollPosition = false,
     this.includeColumnGroupHeaders = true,
+    this.sizeToFit = true,
     ValueNotifier<T?>? selectionNotifier,
   })  : selectionNotifier = selectionNotifier ?? ValueNotifier<T?>(null),
         super(key: key);
 
+  /// List of columns to display.
+  ///
+  /// These [ColumnData] elements should be defined as static
+  /// OR if they cannot be defined as static,
+  /// they should not manage stateful data.
+  ///
+  /// [FlatTableState.didUpdateWidget] checks if the columns have
+  /// changed before re-initializing the table controller,
+  /// and the columns are compared by title only.
+  /// See also [FlatTableState. _tableConfigurationChanged].
   final List<ColumnData<T>> columns;
 
   final List<ColumnGroup>? columnGroups;
+
+  /// Whether the columns for this table should be sized so that the entire
+  /// table fits in view (e.g. so that there is no horizontal scrolling).
+  final bool sizeToFit;
 
   /// Determines if the headers for column groups should be rendered.
   ///
@@ -189,6 +204,12 @@ class FlatTableState<T> extends State<FlatTable<T>> with AutoDisposeMixin {
     }
   }
 
+  @override
+  void dispose() {
+    _tableController = null;
+    super.dispose();
+  }
+
   /// Sets up the [tableController] for the property values in [widget].
   ///
   /// [reset] determines whether or not we should re-initialize
@@ -207,6 +228,7 @@ class FlatTableState<T> extends State<FlatTable<T>> with AutoDisposeMixin {
         columnGroups: widget.columnGroups,
         includeColumnGroupHeaders: widget.includeColumnGroupHeaders,
         pinBehavior: widget.pinBehavior,
+        sizeToFit: widget.sizeToFit,
       );
     }
 
@@ -239,11 +261,7 @@ class FlatTableState<T> extends State<FlatTable<T>> with AutoDisposeMixin {
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final columnWidths =
-            tableController.computeColumnWidths(constraints.maxWidth);
-        return _Table<T>(
+    Widget _buildTable(List<double> columnWidths) => _Table<T>(
           tableController: tableController,
           columnWidths: columnWidths,
           autoScrollContent: widget.autoScrollContent,
@@ -252,8 +270,16 @@ class FlatTableState<T> extends State<FlatTable<T>> with AutoDisposeMixin {
           rowItemExtent: defaultRowHeight,
           preserveVerticalScrollPosition: widget.preserveVerticalScrollPosition,
         );
-      },
-    );
+    if (widget.sizeToFit || tableController.columnWidths == null) {
+      return LayoutBuilder(
+        builder: (context, constraints) => _buildTable(
+          tableController.computeColumnWidthsSizeToFit(
+            constraints.maxWidth,
+          ),
+        ),
+      );
+    }
+    return _buildTable(tableController.columnWidths!);
   }
 
   Widget _buildRow({
@@ -474,6 +500,12 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
     }
   }
 
+  @override
+  void dispose() {
+    _tableController = null;
+    super.dispose();
+  }
+
   /// Sets up the [tableController] for the property values in [widget].
   ///
   /// [reset] determines whether or not we should re-initialize
@@ -598,7 +630,7 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
   Widget build(BuildContext context) {
     return _Table<T>(
       tableController: tableController,
-      columnWidths: tableController.columnWidths,
+      columnWidths: tableController.columnWidths!,
       rowBuilder: _buildRow,
       focusNode: _focusNode,
       handleKeyEvent: _handleKeyEvent,

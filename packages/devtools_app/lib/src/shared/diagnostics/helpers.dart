@@ -16,11 +16,22 @@ Future<Object?> getObject({
   required ObjRef value,
   DartObjectNode? variable,
 }) async {
+  // Don't include the offset and count parameters if we are not fetching a
+  // partial object. Offset and count parameters are only necessary to request
+  // subranges of the following instance kinds:
+  // https://api.flutter.dev/flutter/vm_service/VmServiceInterface/getObject.html
+  if (variable == null || !variable.isPartialObject) {
+    return await serviceManager.service!.getObject(
+      isolateRef!.id!,
+      value.id!,
+    );
+  }
+
   return await serviceManager.service!.getObject(
     isolateRef!.id!,
     value.id!,
-    offset: variable?.offset,
-    count: variable?.childCount,
+    offset: variable.offset,
+    count: variable.childCount,
   );
 }
 

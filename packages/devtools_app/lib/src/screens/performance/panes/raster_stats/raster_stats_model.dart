@@ -157,7 +157,7 @@ class LayerSnapshot {
       duration.inMicroseconds / totalRenderingDuration!.inMicroseconds;
 
   String get percentRenderingTimeDisplay =>
-      percent2(percentRenderingTimeAsDouble);
+      percent(percentRenderingTimeAsDouble);
 
   String get displayName => 'Layer $id';
 
