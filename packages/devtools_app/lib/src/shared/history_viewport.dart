@@ -55,12 +55,7 @@ class _HistoryViewportState<T> extends State<HistoryViewport<T>> {
   void _updateTitleStyle(TextStyle style) {
     setState(() {
       _titleStyle = style;
-    });
-  }
-
-  void _updateIconColor(Color? color) {
-    setState(() {
-      _iconColor = color;
+      _iconColor = style.color;
     });
   }
 
@@ -128,7 +123,6 @@ class _HistoryViewportState<T> extends State<HistoryViewport<T>> {
                         cursor: SystemMouseCursors.click,
                         onExit: (_) {
                           _updateTitleStyle(defaultTitleStyle);
-                          _updateIconColor(defaultTitleStyle.color);
                         },
                         onEnter: (_) {
                           _updateTitleStyle(
@@ -136,7 +130,6 @@ class _HistoryViewportState<T> extends State<HistoryViewport<T>> {
                               color: theme.colorScheme.devtoolsLink,
                             ),
                           );
-                          _updateIconColor(theme.colorScheme.devtoolsLink);
                         },
                         child: GestureDetector(
                           onTap: widget.onTitleTap,
