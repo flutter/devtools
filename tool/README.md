@@ -213,3 +213,34 @@ git push -u origin $DEVTOOLS_NEXT_BRANCH
 From the git GUI tool or from github.com directly:
 1. Create a PR.
 2. Receive an LGTM, squash and commit.
+
+## Debug Logs
+
+Debug logs found in `Settings > Copy Logs` can are save such that they can be read by (lnav)[https://lnav.org/]
+
+### Configuring `lnav`
+
+- Follow the installation instructions found at https://lnav.org/downloads
+- After installation create a symbolic link to the `tool/devtools_lnav.json` file, inside the `lnav` formats:
+   ```sh
+      ln -s ${DEVTOOLS}/tool/devtools_lnav.json ~/.lnav/formats/installed/`
+   ```
+- Your `lnav` installation will now be able to format logs created by Dart DevTools.
+
+### Reading logs using `lnav`
+- Save your Dart DevTools [Debug Logs](#debug-logs) to a file.
+  ```sh
+  DEBUG_LOGS=/path/to/your/logs # Let DEBUG_LOGS represent the path to your log file.
+  ```
+- Open the logs
+  ```sh
+  lnav $DEBUG_LOGS
+  ```
+- You should now be navigating the nicely formatted Dart Devtools Logs inside `lnav`
+
+### `lnav` tips
+
+For a quick tutorial on how to navigate logs using `lnav`
+you can give [ their tutorial ](https://lnav.org/tutorials) a try.
+
+
