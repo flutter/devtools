@@ -57,6 +57,7 @@ Future<String> setLastShownReleaseNotesVersion(String version) async {
   throw Exception(unsupportedMessage);
 }
 
+// currently unused
 Future<void> resetDevToolsFile() async {
   throw Exception(unsupportedMessage);
 }
