@@ -127,19 +127,20 @@ class TracingIsolateState {
     await Future.wait(profileRequests);
   }
 
-  void updateClassFilter(String value, {bool force = false}) {
-    if (value.isEmpty && _currentFilter.isEmpty && !force) return;
-    final updatedFilteredClassList = (value.contains(_currentFilter) && !force
-            ? _filteredClassList.value
-            : unfilteredClassList)
-        .where(
-          (e) => e.cls.name!.contains(value),
-        )
-        .map((e) => tracedClasses[e.cls.id!]!)
-        .toList();
+  void updateClassFilter(String newFilter, {bool force = false}) {
+    if (newFilter.isEmpty && _currentFilter.isEmpty && !force) return;
+    final updatedFilteredClassList =
+        (newFilter.caseInsensitiveContains(_currentFilter) && !force
+                ? _filteredClassList.value
+                : unfilteredClassList)
+            .where(
+              (e) => e.cls.name!.caseInsensitiveContains(newFilter),
+            )
+            .map((e) => tracedClasses[e.cls.id!]!)
+            .toList();
 
     _filteredClassList.replaceAll(updatedFilteredClassList);
-    _currentFilter = value;
+    _currentFilter = newFilter;
   }
 
   /// Clears the allocation profiles for the currently traced classes.

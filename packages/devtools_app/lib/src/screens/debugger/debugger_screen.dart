@@ -430,10 +430,19 @@ class _DebuggerStatusState extends State<DebuggerStatus> with AutoDisposeMixin {
       return 'running';
     }
 
-    final event = widget.controller.lastEvent!;
-    final frame = event.topFrame;
-    final reason =
-        event.kind == EventKind.kPauseException ? ' on exception' : '';
+    final event = widget.controller.lastEvent;
+    final String reason;
+    final Frame? frame;
+
+    if (event == null) {
+      reason = '';
+      frame = null;
+    } else {
+      frame = event.topFrame;
+      // TODO(polina-c): https://github.com/flutter/devtools/issues/5387
+      // Reason may be wrong.
+      reason = event.kind == EventKind.kPauseException ? ' on exception' : '';
+    }
 
     final location = frame?.location;
     final scriptUri = location?.script?.uri;
