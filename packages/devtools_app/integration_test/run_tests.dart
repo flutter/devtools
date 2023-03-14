@@ -36,17 +36,16 @@ const _experimentalIndicator = '/experimental/';
 void main(List<String> args) async {
   final modifiableArgs = List.of(args);
 
-  final testTarget = modifiableArgs
-      .firstWhereOrNull((arg) => arg.startsWith(TestArgs.testTargetArg));
-  if (testTarget != null) {
-    // Run the single test at this path.
-    _maybeAddOfflineArgument(modifiableArgs, testTarget);
-    _maybeAddExperimentsArgument(modifiableArgs, testTarget);
-    final testRunnerArgs = TestArgs(modifiableArgs);
+  final testTargetProvided = modifiableArgs
+      .where((arg) => arg.startsWith(TestArgs.testTargetArg))
+      .isNotEmpty;
+
+  if (testTargetProvided) {
+    final testFilePath = TestArgs(modifiableArgs).testTarget;
 
     // TODO(kenz): add support for specifying a directory as the target instead
     // of a single file.
-    await runFlutterIntegrationTest(testRunnerArgs);
+    await _runTest(modifiableArgs, testFilePath);
   } else {
     // Run all tests since a target test was not provided.
     final testDirectory = Directory(_testDirectory);
@@ -56,15 +55,18 @@ void main(List<String> args) async {
 
     for (final testFile in testFiles) {
       final testTarget = testFile.path;
-      _maybeAddOfflineArgument(modifiableArgs, testTarget);
-      _maybeAddExperimentsArgument(modifiableArgs, testTarget);
-      final testRunnerArgs = TestArgs([
-        ...modifiableArgs,
-        '${TestArgs.testTargetArg}$testTarget',
-      ]);
-      await runFlutterIntegrationTest(testRunnerArgs);
+      modifiableArgs.add('${TestArgs.testTargetArg}$testTarget');
+      await _runTest(modifiableArgs, testTarget);
     }
   }
+}
+
+Future<void> _runTest(List<String> modifiableArgs, String testFilePath) async {
+  _maybeAddOfflineArgument(modifiableArgs, testFilePath);
+  _maybeAddExperimentsArgument(modifiableArgs, testFilePath);
+
+  final args = TestArgs(modifiableArgs);
+  await runFlutterIntegrationTest(args);
 }
 
 void _maybeAddOfflineArgument(List<String> args, String testTarget) {
