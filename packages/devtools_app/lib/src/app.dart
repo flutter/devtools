@@ -518,59 +518,60 @@ class SettingsDialog extends StatelessWidget {
             toggle: preferences.toggleVmDeveloperMode,
             gaItem: gac.vmDeveloperMode,
           ),
-          Column(
-            children: [
-              Row(
-                children: [
-                  CheckboxSetting(
-                    label: const Text(
-                      'Enable verbose logging',
-                    ),
-                    listenable: preferences.verboseLoggingEnabled,
-                    toggle: (enable) => preferences.setVerboseLogging(enable),
-                    gaItem: gac.verboseLogging,
-                  ),
-                  const SizedBox(
-                    width: defaultSpacing,
-                  ),
-                  IconLabelButton(
-                    label: 'Copy Logs',
-                    icon: Icons.copy,
-                    onPressed: () async => copyToClipboard(
-                      LogStorage.root.toString(),
-                      'Successfully Copied Logs',
-                    ),
-                  ),
-                  const SizedBox(
-                    width: defaultSpacing,
-                  ),
-                  ClearButton(
-                    label: 'Clear Logs',
-                    onPressed: () => LogStorage.root.clear(),
-                  ),
-                ],
-              ),
-              const Row(
-                children: [
-                  SizedBox(
-                    width: defaultSpacing,
-                  ),
-                  Icon(Icons.warning),
-                  SizedBox(
-                    width: defaultSpacing,
-                  ),
-                  Text(
-                    'Logs may contain sensitive information.\n'
-                    'Always check their contents before sharing.',
-                  )
-                ],
-              ),
-            ],
-          ),
+          const _VerboseLoggingSetting(),
         ],
       ),
       actions: const [
         DialogCloseButton(),
+      ],
+    );
+  }
+}
+
+class _VerboseLoggingSetting extends StatelessWidget {
+  const _VerboseLoggingSetting();
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Row(
+          children: [
+            CheckboxSetting(
+              label: const Text('Enable verbose logging'),
+              listenable: preferences.verboseLoggingEnabled,
+              toggle: (enable) => preferences.toggleVerboseLogging(enable),
+              gaItem: gac.verboseLogging,
+            ),
+            const SizedBox(width: defaultSpacing),
+            IconLabelButton(
+              label: 'Copy logs',
+              icon: Icons.copy,
+              onPressed: () async => copyToClipboard(
+                LogStorage.root.toString(),
+                'Successfully copied logs',
+              ),
+            ),
+            const SizedBox(width: defaultSpacing),
+            ClearButton(
+              label: 'Clear logs',
+              onPressed: LogStorage.root.clear,
+            ),
+          ],
+        ),
+        const Padding(
+          padding: EdgeInsets.only(left: defaultSpacing),
+          child: Row(
+            children: [
+              Icon(Icons.warning),
+              SizedBox(width: defaultSpacing),
+              Text(
+                'Logs may contain sensitive information.\n'
+                'Always check their contents before sharing.',
+              )
+            ],
+          ),
+        ),
       ],
     );
   }
