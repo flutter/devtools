@@ -4,6 +4,8 @@
 
 import 'dart:io';
 
+import 'package:devtools_app/devtools_app.dart';
+
 import 'test_infra/run/run_test.dart';
 
 // To run this test, run the following from `devtools_app/`:
@@ -32,15 +34,16 @@ const _testSuffix = '_test.dart';
 void main(List<String> args) async {
   final modifiableArgs = List.of(args);
 
-  final testRunnerArgs = TestArgs(modifiableArgs);
-  final testTargetProvided = testRunnerArgs.testTarget.isNotEmpty;
+  final testTargetProvided = modifiableArgs
+      .containsWhere((arg) => arg.startsWith(TestArgs.testTargetArg));
 
   if (testTargetProvided) {
     // TODO(kenz): add support for specifying a directory as the target instead
     // of a single file.
+
     await runFlutterIntegrationTest(
       modifiableArgs,
-      testFilePath: testRunnerArgs.testTarget,
+      testFilePath: TestArgs(modifiableArgs).testTarget,
     );
   } else {
     // Run all tests since a target test was not provided.
