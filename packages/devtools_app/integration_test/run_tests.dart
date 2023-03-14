@@ -4,8 +4,7 @@
 
 import 'dart:io';
 
-import 'package:collection/collection.dart';
-
+import 'test_infra/run/_in_file_args.dart';
 import 'test_infra/run/run_test.dart';
 
 // To run this test, run the following from `devtools_app/`:
@@ -31,7 +30,6 @@ import 'test_infra/run/run_test.dart';
 const _testDirectory = 'integration_test/test';
 const _testSuffix = '_test.dart';
 const _offlineIndicator = 'integration_test/test/offline';
-const _experimentalIndicator = '/experimental/';
 
 void main(List<String> args) async {
   final modifiableArgs = List.of(args);
@@ -63,20 +61,18 @@ void main(List<String> args) async {
 
 Future<void> _runTest(List<String> modifiableArgs, String testFilePath) async {
   _maybeAddOfflineArgument(modifiableArgs, testFilePath);
-  _maybeAddExperimentsArgument(modifiableArgs, testFilePath);
+
+  final inFileArgs = InFileArgs(testFilePath);
+  if (inFileArgs.experimentsOn) {
+    modifiableArgs.add(TestArgs.enableExperimentsArg);
+  }
 
   final args = TestArgs(modifiableArgs);
-  await runFlutterIntegrationTest(args);
+  await runFlutterIntegrationTest(args, testAppPath: inFileArgs.appPath);
 }
 
 void _maybeAddOfflineArgument(List<String> args, String testTarget) {
   if (testTarget.startsWith(_offlineIndicator)) {
     args.add(TestArgs.offlineArg);
-  }
-}
-
-void _maybeAddExperimentsArgument(List<String> args, String testTarget) {
-  if (testTarget.contains(_experimentalIndicator)) {
-    args.add(TestArgs.enableExperimentsArg);
   }
 }

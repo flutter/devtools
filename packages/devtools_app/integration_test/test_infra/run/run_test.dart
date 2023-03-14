@@ -19,8 +19,9 @@ bool _debugTestScript = false;
 /// which performs essential set up steps.
 Future<void> runFlutterIntegrationTest(
   TestArgs testRunnerArgs, {
-  String testAppPath = 'test/test_infra/fixtures/flutter_app',
+  required String testAppPath,
 }) async {
+  print('!!! testAppPath; $testAppPath');
   TestFlutterApp? testApp;
   late String testAppUri;
 
