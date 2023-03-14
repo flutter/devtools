@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 
 import 'common_widgets.dart';
@@ -395,26 +397,33 @@ extension ThemeDataExtension on ThemeData {
   /// Returns whether we are currently using a dark theme.
   bool get isDarkTheme => brightness == Brightness.dark;
 
-  TextStyle get regularTextStyle => TextStyle(
-        color: textTheme.bodyMedium!.color,
-        fontSize: defaultFontSize,
+  TextStyle get regularTextStyle => _fixBlurryText(
+        TextStyle(
+          color: textTheme.bodyMedium!.color,
+          fontSize: defaultFontSize,
+        ),
       );
 
-  TextStyle get subtleTextStyle => TextStyle(
-        color: unselectedWidgetColor,
-        fontSize: defaultFontSize,
+  TextStyle get subtleTextStyle => _fixBlurryText(
+        TextStyle(
+          color: unselectedWidgetColor,
+          fontSize: defaultFontSize,
+        ),
       );
 
   TextStyle get subtleErrorTextStyle =>
       subtleTextStyle.copyWith(color: colorScheme.errorTextColor);
 
-  TextStyle get selectedTextStyle => TextStyle(
-        color: textSelectionTheme.selectionColor,
-        fontSize: defaultFontSize,
+  TextStyle get selectedTextStyle => _fixBlurryText(
+        TextStyle(
+          color: textSelectionTheme.selectionColor,
+          fontSize: defaultFontSize,
+        ),
       );
 
-  TextStyle get fixedFontStyle =>
-      textTheme.bodyMedium!.copyWith(fontFamily: 'RobotoMono');
+  TextStyle get fixedFontStyle => _fixBlurryText(
+        textTheme.bodyMedium!.copyWith(fontFamily: 'RobotoMono'),
+      );
 
   TextStyle get subtleFixedFontStyle =>
       fixedFontStyle.copyWith(color: unselectedWidgetColor);
@@ -426,99 +435,131 @@ extension ThemeDataExtension on ThemeData {
         color: colorScheme.tooltipTextColor,
       );
 
-  TextStyle get devToolsTitleStyle =>
-      textTheme.titleLarge!.copyWith(color: Colors.white);
+  TextStyle get devToolsTitleStyle => _fixBlurryText(
+        textTheme.titleLarge!.copyWith(color: Colors.white),
+      );
 
   Color get titleSolidBackgroundColor => colorScheme.isLight
       ? colorScheme.alternatingBackgroundColor
       : canvasColor.darken(0.2);
 
-  TextStyle get linkTextStyle => TextStyle(
-        color: colorScheme.devtoolsLink,
-        decoration: TextDecoration.underline,
-        fontSize: defaultFontSize,
+  TextStyle get linkTextStyle => _fixBlurryText(
+        TextStyle(
+          color: colorScheme.devtoolsLink,
+          decoration: TextDecoration.underline,
+          fontSize: defaultFontSize,
+        ),
       );
 
-  TextStyle get selectedLinkTextStyle =>
-      linkTextStyle.copyWith(color: colorScheme.devtoolsSelectedLink);
-
-  TextStyle get subtleChartTextStyle => TextStyle(
-        color: colorScheme.chartSubtleColor,
-        fontSize: chartFontSizeSmall,
+  TextStyle get selectedLinkTextStyle => _fixBlurryText(
+        linkTextStyle.copyWith(color: colorScheme.devtoolsSelectedLink),
       );
 
-  TextStyle get searchMatchHighlightStyle => const TextStyle(
-        color: Colors.black,
-        backgroundColor: activeSearchMatchColor,
+  TextStyle get subtleChartTextStyle => _fixBlurryText(
+        TextStyle(
+          color: colorScheme.chartSubtleColor,
+          fontSize: chartFontSizeSmall,
+        ),
       );
 
-  TextStyle get searchMatchHighlightStyleFocused => const TextStyle(
-        color: Colors.black,
-        backgroundColor: searchMatchColor,
+  TextStyle get searchMatchHighlightStyle => _fixBlurryText(
+        const TextStyle(
+          color: Colors.black,
+          backgroundColor: activeSearchMatchColor,
+        ),
+      );
+
+  TextStyle get searchMatchHighlightStyleFocused => _fixBlurryText(
+        const TextStyle(
+          color: Colors.black,
+          backgroundColor: searchMatchColor,
+        ),
       );
 
   // Title of the hover card.
-  TextStyle get hoverTitleTextStyle => TextStyle(
-        color: colorScheme.defaultForeground,
-        fontWeight: FontWeight.normal,
-        fontSize: scaleByFontFactor(15.0),
-        decoration: TextDecoration.none,
+  TextStyle get hoverTitleTextStyle => _fixBlurryText(
+        TextStyle(
+          color: colorScheme.defaultForeground,
+          fontWeight: FontWeight.normal,
+          fontSize: scaleByFontFactor(15.0),
+          decoration: TextDecoration.none,
+        ),
       );
 
   // Items in the hover card.
-  TextStyle get hoverTextStyle => TextStyle(
-        color: colorScheme.defaultForeground,
-        fontWeight: FontWeight.normal,
-        fontSize: scaleByFontFactor(11.5),
-        decoration: TextDecoration.none,
+  TextStyle get hoverTextStyle => _fixBlurryText(
+        TextStyle(
+          color: colorScheme.defaultForeground,
+          fontWeight: FontWeight.normal,
+          fontSize: scaleByFontFactor(11.5),
+          decoration: TextDecoration.none,
+        ),
       );
 
   // Value of items in hover e.g., capacity, etc.
-  TextStyle get hoverValueTextStyle => TextStyle(
-        color: colorScheme.contrastForeground,
-        fontWeight: FontWeight.normal,
-        fontSize: scaleByFontFactor(11.5),
-        decoration: TextDecoration.none,
+  TextStyle get hoverValueTextStyle => _fixBlurryText(
+        TextStyle(
+          color: colorScheme.contrastForeground,
+          fontWeight: FontWeight.normal,
+          fontSize: scaleByFontFactor(11.5),
+          decoration: TextDecoration.none,
+        ),
       );
 
   // Used for custom extension event values.
-  TextStyle get hoverSmallValueTextStyle => TextStyle(
-        color: colorScheme.defaultForeground,
-        fontWeight: FontWeight.normal,
-        fontSize: scaleByFontFactor(10.0),
-        decoration: TextDecoration.none,
+  TextStyle get hoverSmallValueTextStyle => _fixBlurryText(
+        TextStyle(
+          color: colorScheme.defaultForeground,
+          fontWeight: FontWeight.normal,
+          fontSize: scaleByFontFactor(10.0),
+          decoration: TextDecoration.none,
+        ),
       );
 
   // Last allocation timestamp displayed.
-  TextStyle get italicTextStyle => TextStyle(
-        color: colorScheme.defaultForeground,
-        fontWeight: FontWeight.normal,
-        fontSize: scaleByFontFactor(14.0),
-        fontStyle: FontStyle.italic,
-        decoration: TextDecoration.none,
+  TextStyle get italicTextStyle => _fixBlurryText(
+        TextStyle(
+          color: colorScheme.defaultForeground,
+          fontWeight: FontWeight.normal,
+          fontSize: scaleByFontFactor(14.0),
+          fontStyle: FontStyle.italic,
+          decoration: TextDecoration.none,
+        ),
       );
 
   // Items in a chart's legend.
-  TextStyle get legendTextStyle => TextStyle(
-        color: colorScheme.defaultForeground,
-        fontWeight: FontWeight.normal,
-        fontSize: chartFontSizeSmall,
-        decoration: TextDecoration.none,
+  TextStyle get legendTextStyle => _fixBlurryText(
+        TextStyle(
+          color: colorScheme.defaultForeground,
+          fontWeight: FontWeight.normal,
+          fontSize: chartFontSizeSmall,
+          decoration: TextDecoration.none,
+        ),
       );
 
   /// TextStyle for callstack.
-  TextStyle get stackTraceCall => TextStyle(
-        color: colorScheme.defaultForeground,
-        fontWeight: FontWeight.normal,
-        fontSize: scaleByFontFactor(12.0),
+  TextStyle get stackTraceCall => _fixBlurryText(
+        TextStyle(
+          color: colorScheme.defaultForeground,
+          fontWeight: FontWeight.normal,
+          fontSize: scaleByFontFactor(12.0),
+        ),
       );
 
   /// TextStyle for source file displayed in callstack.
-  TextStyle get stackTraceSource => TextStyle(
-        color: colorScheme.defaultForeground,
-        fontWeight: FontWeight.w100,
-        fontSize: scaleByFontFactor(12.0),
+  TextStyle get stackTraceSource => _fixBlurryText(
+        TextStyle(
+          color: colorScheme.defaultForeground,
+          fontWeight: FontWeight.w100,
+          fontSize: scaleByFontFactor(12.0),
+        ),
       );
+
+  TextStyle _fixBlurryText(TextStyle style) {
+    return style.copyWith(
+      fontFeatures: [const FontFeature.proportionalFigures()],
+    );
+  }
 }
 
 const extraWideSearchTextWidth = 600.0;
