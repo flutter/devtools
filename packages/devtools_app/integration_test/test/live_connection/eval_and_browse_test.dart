@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// These test arguments are used to configure the test run:
+// test-argument:experimentsOn=true
+// test-argument:appPath="test/test_infra/fixtures/memory_app"
+
 import 'dart:ui' as ui;
 
 import 'package:devtools_app/devtools_app.dart';
