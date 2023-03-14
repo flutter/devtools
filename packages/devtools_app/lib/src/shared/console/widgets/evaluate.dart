@@ -51,7 +51,7 @@ class ExpressionEvalFieldState extends State<ExpressionEvalField>
   List<String> _matches = [];
 
   SearchTextEditingController get searchTextFieldController =>
-      _autoCompleteController.searchTextFieldController!;
+      _autoCompleteController.searchTextFieldController;
 
   @override
   SearchControllerMixin get searchController => _autoCompleteController;

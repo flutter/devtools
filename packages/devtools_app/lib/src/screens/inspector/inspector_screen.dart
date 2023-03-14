@@ -124,7 +124,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
       // Close the search once focus is lost and following conditions are met:
       //  1. Search string is empty.
       //  2. [searchPreventClose] == false (this is set true when searchTargetType Dropdown is opened).
-      if (!searchController.searchFieldFocusNode!.hasFocus &&
+      if (!searchController.searchFieldFocusNode.hasFocus &&
           searchController.search.isEmpty &&
           !searchPreventClose) {
         setState(() {
@@ -134,7 +134,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
 
       // Reset [searchPreventClose] state to false after the search field gains focus.
       // Focus is returned automatically once the Dropdown menu is closed.
-      if (searchController.searchFieldFocusNode!.hasFocus) {
+      if (searchController.searchFieldFocusNode.hasFocus) {
         searchPreventClose = false;
       }
     });

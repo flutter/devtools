@@ -19,7 +19,8 @@ import '../theme.dart';
 import '../ui/utils.dart';
 import '../utils.dart';
 
-// TODO(kenz): break this file up into managable pieces.
+// TODO(https://github.com/flutter/devtools/issues/5416): break this file up
+// into managable pieces.
 
 /// Top 10 matches to display in auto-complete overlay.
 const defaultTopMatchesLimit = 10;
@@ -63,11 +64,14 @@ mixin SearchControllerMixin<T extends DataSearchStateMixin> {
 
   /// Text field controller for the [SearchField] that this instance of
   /// [SearchControllerMixin] controls.
-  SearchTextEditingController? searchTextFieldController;
+  SearchTextEditingController get searchTextFieldController =>
+      _searchTextFieldController!;
+  SearchTextEditingController? _searchTextFieldController;
 
   /// Focus node for the [SearchField] that this instance of
   /// [SearchControllerMixin] controls.
-  FocusNode? searchFieldFocusNode;
+  FocusNode get searchFieldFocusNode => _searchFieldFocusNode!;
+  FocusNode? _searchFieldFocusNode;
 
   void refreshSearchMatches({bool searchPreviousMatches = false}) {
     if (_searchNotifier.value.isNotEmpty) {
@@ -200,17 +204,17 @@ mixin SearchControllerMixin<T extends DataSearchStateMixin> {
 
   void resetSearch() {
     _searchNotifier.value = '';
-    searchTextFieldController?.clear();
+    _searchTextFieldController?.clear();
     refreshSearchMatches();
   }
 
   @mustCallSuper
   void initSearch() {
-    searchTextFieldController?.dispose();
-    searchFieldFocusNode?.dispose();
-    searchTextFieldController = SearchTextEditingController()
+    _searchTextFieldController?.dispose();
+    _searchFieldFocusNode?.dispose();
+    _searchTextFieldController = SearchTextEditingController()
       ..text = _searchNotifier.value;
-    searchFieldFocusNode = FocusNode(debugLabel: 'search-field');
+    _searchFieldFocusNode = FocusNode(debugLabel: 'search-field');
   }
 
   @mustCallSuper
@@ -219,10 +223,10 @@ mixin SearchControllerMixin<T extends DataSearchStateMixin> {
     if (_searchDebounce?.isActive ?? false) {
       _searchDebounce!.cancel();
     }
-    searchTextFieldController?.dispose();
-    searchFieldFocusNode?.dispose();
-    searchTextFieldController = null;
-    searchFieldFocusNode = null;
+    _searchTextFieldController?.dispose();
+    _searchFieldFocusNode?.dispose();
+    _searchTextFieldController = null;
+    _searchFieldFocusNode = null;
   }
 }
 
@@ -539,19 +543,20 @@ mixin AutoCompleteSearchControllerMixin on SearchControllerMixin {
 
   /// [FocusNode] for the keyboard listener responsible for handling auto
   /// complete search.
-  FocusNode? rawKeyboardFocusNode;
+  FocusNode get rawKeyboardFocusNode => _rawKeyboardFocusNode!;
+  FocusNode? _rawKeyboardFocusNode;
 
   @override
   void initSearch() {
     super.initSearch();
-    rawKeyboardFocusNode?.dispose();
-    rawKeyboardFocusNode = FocusNode(debugLabel: 'search-raw-keyboard');
+    _rawKeyboardFocusNode?.dispose();
+    _rawKeyboardFocusNode = FocusNode(debugLabel: 'search-raw-keyboard');
   }
 
   @override
   void disposeSearch() {
-    rawKeyboardFocusNode?.dispose();
-    rawKeyboardFocusNode = null;
+    _rawKeyboardFocusNode?.dispose();
+    _rawKeyboardFocusNode = null;
     super.disposeSearch();
   }
 
@@ -722,14 +727,14 @@ mixin AutoCompleteSearchControllerMixin on SearchControllerMixin {
   }
 
   void selectFromSearchField(String selection) {
-    searchTextFieldController!.clear();
+    searchTextFieldController.clear();
     search = selection;
     clearSearchField(force: true);
     selectTheSearch = true;
     closeAutoCompleteOverlay();
   }
 
-  void clearSearchField({force = false}) {
+  void clearSearchField({bool force = false}) {
     if (force || search.isNotEmpty) {
       resetSearch();
       closeAutoCompleteOverlay();
@@ -740,7 +745,7 @@ mixin AutoCompleteSearchControllerMixin on SearchControllerMixin {
     required String newValue,
     required int caretPosition,
   }) {
-    searchTextFieldController!
+    searchTextFieldController
       ..text = newValue
       ..selection = TextSelection.collapsed(offset: caretPosition);
   }
@@ -924,7 +929,7 @@ class SearchField<T extends DataSearchStateMixin> extends StatelessWidget {
         controller.search = value;
       },
       onEditingComplete: () {
-        controller.searchFieldFocusNode!.requestFocus();
+        controller.searchFieldFocusNode.requestFocus();
       },
       // Guarantee that the TextField on all platforms renders in the same
       // color for border, label text, and cursor. Primarly, so golden screen
@@ -973,7 +978,7 @@ class SearchField<T extends DataSearchStateMixin> extends StatelessWidget {
     );
 
     if (shouldRequestFocus) {
-      controller.searchFieldFocusNode!.requestFocus();
+      controller.searchFieldFocusNode.requestFocus();
     }
 
     return searchField;
@@ -1089,13 +1094,13 @@ class _AutoCompleteSearchFieldState extends State<AutoCompleteSearchField>
       widget.controller.rawKeyboardFocusNode,
       _handleLostFocus,
     );
-    widget.controller.rawKeyboardFocusNode!.onKey = _handleKeyStrokes;
+    widget.controller.rawKeyboardFocusNode.onKey = _handleKeyStrokes;
   }
 
   @override
   Widget build(BuildContext context) {
     return RawKeyboardListener(
-      focusNode: widget.controller.rawKeyboardFocusNode!,
+      focusNode: widget.controller.rawKeyboardFocusNode,
       child: CompositedTransformTarget(
         link: widget.controller.autoCompleteLayerLink,
         child: SearchField(
@@ -1121,8 +1126,8 @@ class _AutoCompleteSearchFieldState extends State<AutoCompleteSearchField>
   }
 
   void _handleLostFocus() {
-    if (widget.controller.searchFieldFocusNode!.hasPrimaryFocus ||
-        widget.controller.rawKeyboardFocusNode!.hasPrimaryFocus) {
+    if (widget.controller.searchFieldFocusNode.hasPrimaryFocus ||
+        widget.controller.rawKeyboardFocusNode.hasPrimaryFocus) {
       return;
     }
 
@@ -1152,7 +1157,7 @@ class _AutoCompleteSearchFieldState extends State<AutoCompleteSearchField>
         if (key == enter ||
             key == tab ||
             (key == arrowRight &&
-                widget.controller.searchTextFieldController!.isAtEnd)) {
+                widget.controller.searchTextFieldController.isAtEnd)) {
           // Enter / Tab pressed OR right arrow pressed while text field is at the end
           String? foundExact;
 
