@@ -87,6 +87,9 @@ class VmServiceWrapper implements VmService {
   // VM service response formats to be used with APIs that require them.
   final fakeServiceCache = JsonToServiceCache();
 
+  /// Random number generator for helping identify associated logs.
+  final _logIdGenerator = Random();
+
   /// Executes `callback` for each isolate, and waiting for all callbacks to
   /// finish before completing.
   Future<void> forEachIsolate(
@@ -957,7 +960,7 @@ class VmServiceWrapper implements VmService {
     vmServiceCallCount = 0;
   }
 
-  /// Wraps a future with logs that at its start and finish.
+  /// If logging is enabled, wraps a future with logs at its start and finish.
   ///
   /// All logs from this run will have matching unique ids, so that they can
   /// be associated together in the logs.
@@ -965,8 +968,12 @@ class VmServiceWrapper implements VmService {
     String name,
     Future<T> future,
   ) async {
+    // If [_log] is currently not accepting INFO logs then there is no need to
+    // wrap the future with logs, so do nothing.
+    if (!_log.isLoggable(Level.INFO)) return future;
+
     /// A unique id to add to each of the future's messages.
-    final futureLogId = Random().nextInt(1 << 30);
+    final futureLogId = _logIdGenerator.nextInt(1 << 30);
 
     try {
       _log.info('[$futureLogId]-trackFuture($name,...): Started');
@@ -986,11 +993,7 @@ class VmServiceWrapper implements VmService {
   Future<T> trackFuture<T>(String name, Future<T> future) {
     Future<T> localFuture = future;
 
-    if (_log.isLoggable(Level.INFO)) {
-      // If logging is currently accepting INFO logs then wrap the future
-      // with start and finish logs.
-      localFuture = _logWrappedFuture<T>(name, future);
-    }
+    localFuture = _logWrappedFuture<T>(name, future);
 
     if (!trackFutures) {
       return localFuture;
