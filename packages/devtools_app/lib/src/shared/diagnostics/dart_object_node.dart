@@ -182,15 +182,14 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
     ObjectReferences ref, {
     bool isRerootable = false,
   }) {
-    if (text == '_List') {
-      print('!!! found');
-    }
-    return DartObjectNode._(
-      text: text,
+    final result = DartObjectNode._(
+      text: text + (ref.instanceRef?.identityHashCode.toString() ?? ''),
       ref: ref,
       childCount: ref.childCount,
       isRerootable: isRerootable,
     );
+
+    return result;
   }
 
   static const MAX_CHILDREN_IN_GROUPING = 100;
