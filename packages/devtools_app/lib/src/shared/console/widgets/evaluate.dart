@@ -39,22 +39,28 @@ class ExpressionEvalField extends StatefulWidget {
 }
 
 class ExpressionEvalFieldState extends State<ExpressionEvalField>
-    with AutoDisposeMixin, SearchFieldMixin {
-  late AutoCompleteController _autoCompleteController;
+    with AutoDisposeMixin, SearchFieldMixin<ExpressionEvalField> {
+  static final evalTextFieldKey = GlobalKey(debugLabel: 'evalTextFieldKey');
+
+  final _autoCompleteController = AutoCompleteController(evalTextFieldKey);
+
   int historyPosition = -1;
 
   String _activeWord = '';
+
   List<String> _matches = [];
 
-  final evalTextFieldKey = GlobalKey(debugLabel: 'evalTextFieldKey');
+  SearchTextEditingController get searchTextFieldController =>
+      _autoCompleteController.searchTextFieldController;
+
+  @override
+  SearchControllerMixin get searchController => _autoCompleteController;
 
   @override
   void initState() {
     super.initState();
 
     serviceManager.consoleService.ensureServiceInitialized();
-
-    _autoCompleteController = AutoCompleteController();
 
     addAutoDisposeListener(_autoCompleteController.searchNotifier, () {
       _autoCompleteController.handleAutoCompleteOverlay(
@@ -164,8 +170,9 @@ class ExpressionEvalFieldState extends State<ExpressionEvalField>
       if (matches.length == 1 && matches.first == parts.activeWord) {
         // It is not useful to show a single autocomplete that is exactly what
         // the already typed.
-        _autoCompleteController.clearSearchAutoComplete();
-        _autoCompleteController.clearCurrentSuggestion();
+        _autoCompleteController
+          ..clearSearchAutoComplete()
+          ..clearCurrentSuggestion();
       } else {
         final results = matches
             .sublist(
@@ -175,9 +182,10 @@ class ExpressionEvalFieldState extends State<ExpressionEvalField>
             .map((match) => AutoCompleteMatch(match))
             .toList();
 
-        _autoCompleteController.searchAutoComplete.value = results;
-        _autoCompleteController.setCurrentHoveredIndexValue(0);
-        _autoCompleteController.updateCurrentSuggestion(parts.activeWord);
+        _autoCompleteController
+          ..searchAutoComplete.value = results
+          ..setCurrentHoveredIndexValue(0)
+          ..updateCurrentSuggestion(parts.activeWord);
       }
     } else {
       _autoCompleteController.closeAutoCompleteOverlay();
@@ -206,12 +214,11 @@ class ExpressionEvalFieldState extends State<ExpressionEvalField>
 
               return KeyEventResult.ignored;
             },
-            child: buildAutoCompleteSearchField(
+            child: AutoCompleteSearchField(
               controller: _autoCompleteController,
-              searchFieldKey: evalTextFieldKey,
               searchFieldEnabled: true,
               shouldRequestFocus: false,
-              supportClearField: true,
+              clearFieldOnEscapeWhenOverlayHidden: true,
               onSelection: _onSelection,
               decoration: const InputDecoration(
                 contentPadding: EdgeInsets.all(denseSpacing),
@@ -250,9 +257,10 @@ class ExpressionEvalFieldState extends State<ExpressionEvalField>
   void _onSelection(String word) {
     setState(() {
       _replaceActiveWord(word);
-      _autoCompleteController.selectTheSearch = false;
-      _autoCompleteController.closeAutoCompleteOverlay();
-      _autoCompleteController.clearCurrentSuggestion();
+      _autoCompleteController
+        ..selectTheSearch = false
+        ..closeAutoCompleteOverlay()
+        ..clearCurrentSuggestion();
     });
   }
 
@@ -294,8 +302,9 @@ class ExpressionEvalFieldState extends State<ExpressionEvalField>
 
   void _handleExpressionEval() async {
     final expressionText = searchTextFieldController.value.text.trim();
-    updateSearchField(newValue: '', caretPosition: 0);
-    clearSearchField(_autoCompleteController, force: true);
+    _autoCompleteController
+      ..updateSearchField(newValue: '', caretPosition: 0)
+      ..clearSearchField(force: true);
 
     if (expressionText.isEmpty) return;
 

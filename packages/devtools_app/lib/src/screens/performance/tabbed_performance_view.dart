@@ -26,9 +26,8 @@ import 'panes/timeline_events/legacy/timeline_flame_chart.dart';
 import 'panes/timeline_events/perfetto/perfetto.dart';
 import 'panes/timeline_events/timeline_events_controller.dart';
 import 'performance_controller.dart';
+import 'performance_model.dart';
 import 'performance_screen.dart';
-
-final timelineSearchFieldKey = GlobalKey(debugLabel: 'TimelineSearchFieldKey');
 
 class TabbedPerformanceView extends StatefulWidget {
   const TabbedPerformanceView();
@@ -49,6 +48,10 @@ class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
   late TimelineEventsController _timelineEventsController;
 
   FlutterFrame? _selectedFlutterFrame;
+
+  @override
+  SearchControllerMixin get searchController =>
+      controller.timelineEventsController.legacyController;
 
   @override
   void didChangeDependencies() {
@@ -250,9 +253,8 @@ class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
     return Container(
       width: defaultSearchTextWidth,
       height: defaultTextFieldHeight,
-      child: buildSearchField(
+      child: SearchField<TimelineEvent>(
         controller: _timelineEventsController.legacyController,
-        searchFieldKey: timelineSearchFieldKey,
         searchFieldEnabled: searchFieldEnabled,
         shouldRequestFocus: false,
         supportsNavigation: true,

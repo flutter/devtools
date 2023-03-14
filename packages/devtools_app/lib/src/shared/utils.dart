@@ -148,6 +148,8 @@ List<String> issueLinkDetails() {
   return issueDescriptionItems;
 }
 
+typedef _ProvidedControllerCallback<T> = void Function(T);
+
 /// Mixin that provides a [controller] from package:provider for a State class.
 ///
 /// [initController] must be called from [State.didChangeDependencies]. If
@@ -158,6 +160,20 @@ mixin ProvidedControllerMixin<T, V extends StatefulWidget> on State<V> {
   T get controller => _controller!;
 
   T? _controller;
+
+  final _callWhenReady = <_ProvidedControllerCallback>[];
+
+  /// Calls the provided [callback] once [_controller] has been initialized.
+  ///
+  /// The [callback] will be called immediately if [_controller] has already
+  /// been initialized.
+  void callWhenControllerReady(_ProvidedControllerCallback callback) {
+    if (_controller != null) {
+      callback(_controller!);
+    } else {
+      _callWhenReady.add(callback);
+    }
+  }
 
   /// Initializes [_controller] from package:provider.
   ///
@@ -173,7 +189,14 @@ mixin ProvidedControllerMixin<T, V extends StatefulWidget> on State<V> {
   bool initController() {
     final newController = Provider.of<T>(context);
     if (newController == _controller) return false;
+    final firstInitialization = _controller == null;
     _controller = newController;
+    if (firstInitialization) {
+      for (final callback in _callWhenReady) {
+        callback(_controller!);
+      }
+      _callWhenReady.clear();
+    }
     return true;
   }
 }
