@@ -63,12 +63,15 @@ Future<void> _runTest(List<String> modifiableArgs, String testFilePath) async {
   _maybeAddOfflineArgument(modifiableArgs, testFilePath);
 
   final inFileArgs = InFileArgs(testFilePath);
+  final cliArgs = TestArgs(modifiableArgs);
+
   if (inFileArgs.experimentsOn) {
     modifiableArgs.add(TestArgs.enableExperimentsArg);
   }
 
-  final args = TestArgs(modifiableArgs);
-  await runFlutterIntegrationTest(args, testAppPath: inFileArgs.appPath);
+  final testAppPath = cliArgs.offline ? null : inFileArgs.appPath;
+
+  await runFlutterIntegrationTest(cliArgs, testAppPath: testAppPath);
 }
 
 void _maybeAddOfflineArgument(List<String> args, String testTarget) {

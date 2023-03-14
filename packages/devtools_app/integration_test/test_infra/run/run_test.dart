@@ -19,13 +19,12 @@ bool _debugTestScript = false;
 /// which performs essential set up steps.
 Future<void> runFlutterIntegrationTest(
   TestArgs testRunnerArgs, {
-  required String testAppPath,
+  required String? testAppPath,
 }) async {
-  print('!!! testAppPath; $testAppPath');
   TestFlutterApp? testApp;
   late String testAppUri;
 
-  if (!testRunnerArgs.offline) {
+  if (testAppPath != null) {
     if (testRunnerArgs.testAppUri == null) {
       // Create the test app and start it.
       // TODO(kenz): support running Dart CLI test apps from here too.
