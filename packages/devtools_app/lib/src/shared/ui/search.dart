@@ -1354,7 +1354,7 @@ class AutoCompleteMatch {
       segments.add(transformMatchedSegment(matchedSegment));
       previousEndIndex = segment.end as int;
     }
-    if (previousEndIndex < text.length - 1) {
+    if (previousEndIndex < text.length) {
       // Add the last unmatched segment:
       final lastSegment = text.substring(previousEndIndex);
       segments.add(transformUnmatchedSegment(lastSegment));

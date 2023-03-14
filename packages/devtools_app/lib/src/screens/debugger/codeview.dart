@@ -456,8 +456,9 @@ class _CodeViewState extends State<CodeView>
           if (scriptUri == null) return '';
           return scriptUri;
         },
-        onTitleTap: () =>
-            widget.codeViewController.toggleFileOpenerVisibility(true),
+        onTitleTap: () => widget.codeViewController
+          ..toggleFileOpenerVisibility(true)
+          ..toggleSearchInFileVisibility(false),
         controls: [
           ScriptPopupMenu(widget.codeViewController),
           ScriptHistoryPopupMenu(

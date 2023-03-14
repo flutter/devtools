@@ -291,6 +291,24 @@ class VmServiceWrapper implements VmService {
   }
 
   @override
+  Future<InstanceRef> getInstancesAsList(
+    String isolateId,
+    String objectId, {
+    bool? includeSubclasses,
+    bool? includeImplementers,
+  }) async {
+    return trackFuture(
+      'getInstancesAsList',
+      _vmService.getInstancesAsList(
+        isolateId,
+        objectId,
+        includeSubclasses: includeSubclasses,
+        includeImplementers: includeImplementers,
+      ),
+    );
+  }
+
+  @override
   Future<Isolate> getIsolate(String isolateId) {
     return trackFuture('getIsolate', _vmService.getIsolate(isolateId));
   }

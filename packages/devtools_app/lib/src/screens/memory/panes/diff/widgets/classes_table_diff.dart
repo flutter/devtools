@@ -317,7 +317,7 @@ class ClassesTableDiff extends StatelessWidget {
   final List<DiffClassStats> classes;
   final ClassesTableDiffData diffData;
 
-  List<ColumnGroup> _columnGroups(SizeType sizeType, BuildContext context) {
+  List<ColumnGroup> _columnGroups() {
     return [
       ColumnGroup.fromText(
         title: '',
@@ -350,7 +350,7 @@ class ClassesTableDiff extends StatelessWidget {
 
         return FlatTable<DiffClassStats>(
           columns: columns.columnList,
-          columnGroups: _columnGroups(sizeType, context),
+          columnGroups: _columnGroups(),
           data: classes,
           dataKey: dataKey,
           keyFactory: (e) => Key(e.heapClass.fullName),
