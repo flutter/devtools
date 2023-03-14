@@ -85,7 +85,7 @@ class PreferencesController extends DisposableController
     final String? verboseLoggingEnabledValue =
         await storage.getValue('verboseLogging');
 
-    setVerboseLogging(verboseLoggingEnabledValue == 'true');
+    toggleVerboseLogging(verboseLoggingEnabledValue == 'true');
 
     addAutoDisposeListener(_verboseLogging, () {
       storage.setValue('verboseLogging', _verboseLogging.value.toString());
@@ -124,7 +124,7 @@ class PreferencesController extends DisposableController
     VmServiceWrapper.enablePrivateRpcs = enableVmDeveloperMode;
   }
 
-  void setVerboseLogging(bool enableVerboseLogging) {
+  void toggleVerboseLogging(bool enableVerboseLogging) {
     _verboseLogging.value = enableVerboseLogging;
   }
 
