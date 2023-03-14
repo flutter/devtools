@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// These test arguments are used to configure the test run:
+// Do not delete these arguments. They are parsed parsed by test runner.
 // test-argument:experimentsOn=true
 // test-argument:appPath="test/test_infra/fixtures/memory_app"
 

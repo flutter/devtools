@@ -5,6 +5,11 @@
 import 'dart:convert';
 import 'dart:io';
 
+enum InFileArgItems {
+  experimentsOn,
+  appPath,
+}
+
 /// Test arguments, defined inside the test file as a comment.
 class InFileArgs {
   factory InFileArgs(String testFilePath) {
@@ -27,7 +32,10 @@ class InFileArgs {
         appPath = values[InFileArgItems.appPath] ??
             'test/test_infra/fixtures/flutter_app';
 
+  /// If true, experiments will be enabled in the test.
   final bool experimentsOn;
+
+  /// Path to the application to connect to.
   final String appPath;
 }
 
@@ -51,9 +59,4 @@ MapEntry<InFileArgItems, dynamic> _parseLine(String line) {
   final value = nameValue[1];
 
   return MapEntry(InFileArgItems.values.byName(name), jsonDecode(value));
-}
-
-enum InFileArgItems {
-  experimentsOn,
-  appPath,
 }
