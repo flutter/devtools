@@ -11,10 +11,10 @@ import '../../../../shared/common_widgets.dart';
 import '../../../../shared/primitives/utils.dart';
 
 abstract class ClassSampler {
-  /// Drop one variable, which exists in static set and still alive in app, to console.
+  /// Drop one variable, which exists in the static set and still alive in app, to console.
   Future<void> oneLiveStaticToConsole();
 
-  /// Drop one variable from static set, to console.
+  /// Drop one variable from the static set, to console.
   Future<void> oneStaticToConsole();
 
   /// Drop all live instances to console.

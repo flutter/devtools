@@ -33,22 +33,22 @@ class HeapObjectSelection {
   /// located in heap.
   final AdaptedHeapObject? object;
 
-  Iterable<int> _refs(RefDirection direction) {
+  Iterable<int>? _refs(RefDirection direction) {
     switch (direction) {
       case RefDirection.inbound:
-        return object?.inRefs ?? [];
+        return object?.inRefs;
       case RefDirection.outbound:
-        return object?.outRefs ?? [];
+        return object?.outRefs;
     }
   }
 
   List<HeapObjectSelection> references(RefDirection direction) =>
-      _refs(direction)
+      (_refs(direction) ?? [])
           .map((i) => HeapObjectSelection(heap, object: heap.objects[i]))
           .toList();
 
   int? countOfReferences(RefDirection? direction) =>
-      direction == null ? null : _refs(direction).length;
+      direction == null ? null : _refs(direction)?.length;
 
   HeapObjectSelection withoutObject() {
     if (object == null) return this;

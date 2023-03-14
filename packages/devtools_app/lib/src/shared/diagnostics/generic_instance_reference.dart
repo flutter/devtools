@@ -63,7 +63,9 @@ class ObjectReferences extends GenericInstanceRef {
     required IsolateRef super.isolateRef,
     required super.value,
     required HeapObjectSelection super.heapSelection,
-  });
+  }) {
+    if (refNodeType.isLive) assert(value != null);
+  }
 
   ObjectReferences.copyWith(
     ObjectReferences ref, {
@@ -83,6 +85,16 @@ class ObjectReferences extends GenericInstanceRef {
 
   @override
   IsolateRef get isolateRef => super.isolateRef!;
+
+  int? get childCount {
+    final result = heapSelection.countOfReferences(refNodeType.direction);
+    if (result != null) return result;
+
+    final inatance = value;
+    if (inatance is! InstanceRef) return null;
+
+    return inatance.length;
+  }
 }
 
 enum RefNodeType {
@@ -113,4 +125,6 @@ enum RefNodeType {
   final RefDirection? direction;
 
   bool get isRoot => {refRoot, staticRefRoot, liveRefRoot}.contains(this);
+
+  bool get isLive => {liveOutRefs, liveInRefs, liveRefRoot}.contains(this);
 }
