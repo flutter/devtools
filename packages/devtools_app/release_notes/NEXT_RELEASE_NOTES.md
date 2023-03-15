@@ -33,7 +33,7 @@ TODO: Remove this section if there are not any general updates.
 * Add search icon in file bar to make file search more discoverable - [#5351](https://github.com/flutter/devtools/issues/5351)
 
 ## Network profiler updates
-TODO: Remove this section if there are not any general updates.
+* Fix a bug viewing JSON responses with null values - [#5424](https://github.com/flutter/devtools/pull/5424)
 
 ## Logging updates
 TODO: Remove this section if there are not any general updates.
