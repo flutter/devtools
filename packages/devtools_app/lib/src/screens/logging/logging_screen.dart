@@ -23,8 +23,6 @@ import '_log_details.dart';
 import '_logs_table.dart';
 import 'logging_controller.dart';
 
-final loggingSearchFieldKey = GlobalKey(debugLabel: 'LoggingSearchFieldKey');
-
 /// Presents logs from the connected app.
 class LoggingScreen extends Screen {
   LoggingScreen()
@@ -85,6 +83,9 @@ class _LoggingScreenState extends State<LoggingScreenBody>
   late List<LogData> filteredLogs;
 
   @override
+  SearchControllerMixin get searchController => controller;
+
+  @override
   void initState() {
     super.initState();
     ga.screen(LoggingScreen.id);
@@ -130,9 +131,8 @@ class _LoggingScreenState extends State<LoggingScreenBody>
         Container(
           width: wideSearchTextWidth,
           height: defaultTextFieldHeight,
-          child: buildSearchField(
+          child: SearchField<LogData>(
             controller: controller,
-            searchFieldKey: loggingSearchFieldKey,
             searchFieldEnabled: hasData,
             shouldRequestFocus: false,
             supportsNavigation: true,

@@ -85,7 +85,7 @@ class _StoreAsOneVariableMenu extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final enabled = sampler.isEvalEnabled;
-    const menuText = 'Store one instance as a console variable';
+    const menuText = 'Store one instance from the set as a console variable';
 
     if (!enabled) {
       return const MenuItemButton(child: Text(menuText));
@@ -96,13 +96,13 @@ class _StoreAsOneVariableMenu extends StatelessWidget {
         MenuItemButton(
           onPressed: sampler.oneStaticToConsole,
           child: const Text(
-            'Any from snapshot',
+            'Any',
           ),
         ),
         MenuItemButton(
           onPressed: liveItemsEnabled ? sampler.oneLiveStaticToConsole : null,
           child: const Text(
-            'Any from snapshot, not garbage collected',
+            'Any, not garbage collected',
           ),
         ),
       ],
@@ -123,7 +123,7 @@ class _StoreAllAsVariableMenu extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final enabled = sampler.isEvalEnabled;
-    const menuText = 'Store all instances currently alive in application';
+    const menuText = 'Store all class instances currently alive in application';
 
     if (!enabled) {
       return const MenuItemButton(child: Text(menuText));
