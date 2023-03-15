@@ -11,13 +11,12 @@ import 'package:logging/logging.dart';
 import '../service/vm_service_wrapper.dart';
 import 'analytics/analytics.dart' as ga;
 import 'analytics/constants.dart' as gac;
+import 'config_specific/logger/logger_helpers.dart';
+import 'constants.dart';
 import 'diagnostics/inspector_service.dart';
 import 'globals.dart';
-import 'log_storage.dart';
 import 'primitives/auto_dispose.dart';
 import 'primitives/utils.dart';
-
-final _log = Logger('Preferences');
 
 /// A controller for global application preferences.
 class PreferencesController extends DisposableController
@@ -31,7 +30,7 @@ class PreferencesController extends DisposableController
 
   ValueListenable<bool> get verboseLoggingEnabled => _verboseLogging;
   final _verboseLogging =
-      ValueNotifier<bool>(Logger.root.level == Level.FINEST);
+      ValueNotifier<bool>(Logger.root.level == verboseLoggingLevel);
 
   ValueListenable<bool> get denseModeEnabled => _denseMode;
   final _denseMode = ValueNotifier<bool>(false);
@@ -82,8 +81,7 @@ class PreferencesController extends DisposableController
   }
 
   Future<void> _initVerboseLogging() async {
-    final String? verboseLoggingEnabledValue =
-        await storage.getValue('verboseLogging');
+    final verboseLoggingEnabledValue = await storage.getValue('verboseLogging');
 
     toggleVerboseLogging(verboseLoggingEnabledValue == 'true');
 
@@ -91,17 +89,12 @@ class PreferencesController extends DisposableController
       storage.setValue('verboseLogging', _verboseLogging.value.toString());
 
       if (_verboseLogging.value) {
-        Logger.root.level = Level.FINEST;
-        _log.warning('verboseLogging enabled');
+        setDevToolsLoggingLevel(verboseLoggingLevel);
       } else {
-        Logger.root.level = Level.WARNING;
-        _log.warning('verboseLogging disabled');
+        setDevToolsLoggingLevel(basicLoggingLevel);
       }
     });
-
-    Logger.root.onRecord.listen((record) {
-      LogStorage.root.addLog(record);
-    });
+    initDevToolsLogging();
   }
 
   @override

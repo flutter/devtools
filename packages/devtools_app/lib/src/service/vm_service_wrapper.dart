@@ -88,7 +88,7 @@ class VmServiceWrapper implements VmService {
   final fakeServiceCache = JsonToServiceCache();
 
   /// Random number generator for helping identify associated logs.
-  final _logIdGenerator = Random();
+  static var _logIdCounter = 0;
 
   /// Executes `callback` for each isolate, and waiting for all callbacks to
   /// finish before completing.
@@ -968,21 +968,16 @@ class VmServiceWrapper implements VmService {
     String name,
     Future<T> future,
   ) async {
-    // If [_log] is currently not accepting INFO logs then there is no need to
-    // wrap the future with logs, so do nothing.
-    if (!_log.isLoggable(Level.INFO)) return future;
-
     /// A unique id to add to each of the future's messages.
-    final futureLogId = _logIdGenerator.nextInt(1 << 30);
-
+    final logId = ++_logIdCounter;
     try {
-      _log.info('[$futureLogId]-trackFuture($name,...): Started');
+      _log.fine(() => '[$logId]-trackFuture($name,...): Started');
       final result = await future;
-      _log.info('[$futureLogId]-trackFuture($name,...): Succeeded');
+      _log.fine(() => '[$logId]-trackFuture($name,...): Succeeded');
       return result;
     } catch (error) {
-      _log.info(
-        '[$futureLogId]-trackFuture($name,...): Failed',
+      _log.fine(
+        '[$logId]-trackFuture($name,...): Failed',
         error,
       );
       rethrow;

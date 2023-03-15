@@ -399,7 +399,7 @@ void screen(
   String screenName, [
   int value = 0,
 ]) {
-  _log.info('Analytics Event: Screen(screenName:$screenName, value:$value)');
+  _log.fine('Event: Screen(screenName:$screenName, value:$value)');
   GTag.event(
     screenName,
     gaEventProvider: () => _gtagEvent(
@@ -543,6 +543,10 @@ void _timing(
   required int durationMicros,
   ScreenAnalyticsMetrics? screenMetrics,
 }) {
+  _log.fine('Event: _timing('
+      'screenName:$screenName, '
+      'timedOperation:$timedOperation, '
+      'durationMicros:$durationMicros)');
   GTag.event(
     screenName,
     gaEventProvider: () => _gtagEvent(
@@ -562,8 +566,8 @@ void select(
   bool nonInteraction = false,
   ScreenAnalyticsMetrics Function()? screenMetricsProvider,
 }) {
-  _log.info(
-    'Analytics Event: select('
+  _log.fine(
+    'Event: select('
     'screenName:$screenName, '
     'selectedItem:$selectedItem, '
     'value:$value, '

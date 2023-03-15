@@ -41,7 +41,8 @@ class LogStorage {
             'message': e.message,
             'timestamp': e.time.toUtc().toString(),
             'loggerName': e.loggerName,
-            if (e.error != null) 'error': e.error,
+            if (e.error != null) 'error': e.error.toString(),
+            if (e.stackTrace != null) 'stackTrace': e.stackTrace.toString(),
           }),
         )
         .join('\n');

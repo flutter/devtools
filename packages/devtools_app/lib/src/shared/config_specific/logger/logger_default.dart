@@ -12,14 +12,11 @@ void log(Object message, [LogLevel level = LogLevel.debug]) {
   switch (level) {
     case LogLevel.debug:
       print(message);
-      _log.info(message);
       break;
     case LogLevel.warning:
       print('[WARNING]: $message');
-      _log.warning(message);
       break;
     case LogLevel.error:
       print('[ERROR]: $message');
-      _log.shout(message);
   }
 }

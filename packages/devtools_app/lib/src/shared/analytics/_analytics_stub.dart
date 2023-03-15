@@ -31,7 +31,7 @@ void screen(
   String screenName, [
   int value = 0,
 ]) {
-  _log.info('Analytics Event: screen(screenName:$screenName, value:$value)');
+  _log.fine('Event: screen(screenName:$screenName, value:$value)');
 }
 
 void timeStart(String screenName, String timedOperation) {}
@@ -73,8 +73,8 @@ void select(
   bool nonInteraction = false,
   ScreenAnalyticsMetrics Function()? screenMetricsProvider,
 }) {
-  _log.info(
-    'Analytics Event: select('
+  _log.fine(
+    'Event: select('
     'screenName:$screenName, '
     'selectedItem:$selectedItem, '
     'value:$value, '

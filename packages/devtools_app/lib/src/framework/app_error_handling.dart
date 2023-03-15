@@ -6,10 +6,13 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
+import 'package:logging/logging.dart';
 import 'package:stack_trace/stack_trace.dart' as stack_trace;
 
 import '../shared/analytics/analytics.dart' as ga;
 import '../shared/config_specific/logger/logger.dart';
+
+final _log = Logger('app_error_handling');
 
 /// Set up error handling for the app.
 ///
@@ -42,7 +45,6 @@ void setupErrorHandling(Future Function() appStartCallback) {
         _reportError(error, stack);
         return true;
       };
-
       return appStartCallback();
     },
     (Object error, StackTrace stack) {
@@ -54,7 +56,7 @@ void setupErrorHandling(Future Function() appStartCallback) {
 void _reportError(Object error, StackTrace stack) {
   final terseStackTrace = stack_trace.Trace.from(stack).terse.toString();
 
-  log('$error\n$terseStackTrace', LogLevel.error);
+  _log.severe(error.toString(), error, stack);
 
   ga.reportError('$error\n$terseStackTrace');
 }
