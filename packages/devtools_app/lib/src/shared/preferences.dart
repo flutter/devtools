@@ -31,6 +31,7 @@ class PreferencesController extends DisposableController
   ValueListenable<bool> get verboseLoggingEnabled => _verboseLogging;
   final _verboseLogging =
       ValueNotifier<bool>(Logger.root.level == verboseLoggingLevel);
+  static const _verboseLoggingStorageId = 'verboseLogging';
 
   ValueListenable<bool> get denseModeEnabled => _denseMode;
   final _denseMode = ValueNotifier<bool>(false);
@@ -81,7 +82,8 @@ class PreferencesController extends DisposableController
   }
 
   Future<void> _initVerboseLogging() async {
-    final verboseLoggingEnabledValue = await storage.getValue('verboseLogging');
+    final verboseLoggingEnabledValue =
+        await storage.getValue(_verboseLoggingStorageId);
 
     toggleVerboseLogging(verboseLoggingEnabledValue == 'true');
 
@@ -94,7 +96,6 @@ class PreferencesController extends DisposableController
         setDevToolsLoggingLevel(basicLoggingLevel);
       }
     });
-    initDevToolsLogging();
   }
 
   @override
@@ -141,7 +142,6 @@ class InspectorPreferencesController extends DisposableController
   final _customPubRootDirectories = ListValueNotifier<String>([]);
   final _customPubRootDirectoriesAreBusy = ValueNotifier<bool>(false);
   final _busyCounter = ValueNotifier<int>(0);
-  static const _verboseLoggingStorageId = 'verboseLogging';
   static const _hoverEvalModeStorageId = 'inspector.hoverEvalMode';
   static const _customPubRootDirectoriesStoragePrefix =
       'inspector.customPubRootDirectories';

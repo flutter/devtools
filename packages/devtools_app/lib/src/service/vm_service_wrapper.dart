@@ -990,9 +990,7 @@ class VmServiceWrapper implements VmService {
 
   @visibleForTesting
   Future<T> trackFuture<T>(String name, Future<T> future) {
-    Future<T> localFuture = future;
-
-    localFuture = _maybeLogWrappedFuture<T>(name, future);
+    final localFuture = _maybeLogWrappedFuture<T>(name, future);
 
     if (!trackFutures) {
       return localFuture;

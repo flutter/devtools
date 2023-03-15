@@ -8,7 +8,7 @@ import 'package:logging/logging.dart';
 
 /// Class for storing a limited number string messages.
 class LogStorage {
-  static const int maxLogEntries = 3000;
+  static const int maxLogEntries = 4000;
 
   final Queue<LogRecord> _logs = Queue<LogRecord>();
 
