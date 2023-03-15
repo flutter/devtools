@@ -10,7 +10,6 @@ import 'package:logging/logging.dart';
 import 'package:stack_trace/stack_trace.dart' as stack_trace;
 
 import '../shared/analytics/analytics.dart' as ga;
-import '../shared/config_specific/logger/logger.dart';
 
 final _log = Logger('app_error_handling');
 
@@ -33,7 +32,11 @@ void setupErrorHandling(Future Function() appStartCallback) {
 
       FlutterError.onError = (FlutterErrorDetails details) {
         // Flutter Framework errors are caught here.
-        _reportError(details.exception, details.stack ?? StackTrace.empty);
+        _reportError(
+          details.exception,
+          details.stack ?? StackTrace.empty,
+          'FlutterError',
+        );
 
         if (oldHandler != null) {
           oldHandler(details);
@@ -42,21 +45,21 @@ void setupErrorHandling(Future Function() appStartCallback) {
 
       PlatformDispatcher.instance.onError = (error, stack) {
         // Unhandled errors on the root isolate are caught here.
-        _reportError(error, stack);
+        _reportError(error, stack, 'PlatformDispatcher');
         return true;
       };
       return appStartCallback();
     },
     (Object error, StackTrace stack) {
-      _reportError(error, stack);
+      _reportError(error, stack, 'zoneGuarded');
     },
   );
 }
 
-void _reportError(Object error, StackTrace stack) {
+void _reportError(Object error, StackTrace stack, String caller) {
   final terseStackTrace = stack_trace.Trace.from(stack).terse.toString();
 
-  _log.severe(error.toString(), error, stack);
+  _log.severe('[$caller]: ${error.toString()}', error, stack);
 
   ga.reportError('$error\n$terseStackTrace');
 }
