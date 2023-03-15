@@ -90,10 +90,10 @@ class ObjectReferences extends GenericInstanceRef {
     final result = heapSelection.countOfReferences(refNodeType.direction);
     if (result != null) return result;
 
-    final inatance = value;
-    if (inatance is! InstanceRef) return null;
+    final instance = value;
+    if (instance is! InstanceRef) return null;
 
-    return inatance.length;
+    return instance.length;
   }
 }
 
