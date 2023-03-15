@@ -10,6 +10,7 @@ import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../service/vm_service_wrapper.dart';
+import '../../shared/config_specific/logger/logger.dart';
 import '../../shared/diagnostics/dart_object_node.dart';
 import '../../shared/diagnostics/primitives/source_location.dart';
 import '../../shared/diagnostics/tree_builder.dart';
@@ -388,9 +389,17 @@ class DebuggerController extends DisposableController
     // we fetch all variable objects twice (once in _getFullStack and once in
     // in_createStackFrameWithLocation).
     if (await serviceManager.connectedApp!.isDartWebApp) {
+      final topFrame = pauseEvent?.topFrame;
+      if (topFrame == null) {
+        log(
+          'Pause event did not contain a frame. This likely indicates a DWDS bug.',
+          LogLevel.warning,
+        );
+        return;
+      }
       _populateFrameInfo(
         [
-          await _createStackFrameWithLocation(pauseEvent!.topFrame!),
+          await _createStackFrameWithLocation(topFrame),
         ],
         truncated: true,
       );
@@ -482,14 +491,14 @@ class DebuggerController extends DisposableController
   Future<StackFrameAndSourcePosition> _createStackFrameWithLocation(
     Frame frame,
   ) async {
-    final location = frame.location;
-    if (location == null) {
+    final scriptInfo = frame.location?.script;
+    final tokenPos = frame.location?.tokenPos ?? -1;
+    if (scriptInfo == null || tokenPos < 0) {
       return StackFrameAndSourcePosition(frame);
     }
 
-    final script = await scriptManager.getScript(location.script!);
-    final position =
-        SourcePosition.calculatePosition(script, location.tokenPos!);
+    final script = await scriptManager.getScript(scriptInfo);
+    final position = SourcePosition.calculatePosition(script, tokenPos);
     return StackFrameAndSourcePosition(frame, position: position);
   }
 
