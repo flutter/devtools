@@ -151,7 +151,7 @@ class JsonToServiceCache {
       for (final entry in json.entries)
         MapAssociation(
           key: insertJsonObject(entry.key),
-          value: insertJsonObject(entry.value ?? 'null'),
+          value: insertJsonObject(entry.value),
         ),
     ];
     map.length = json.length;
