@@ -39,24 +39,23 @@ class InFileArgs {
   final String appPath;
 }
 
-const _argPrefix = '// test-argument:';
+final _argRegex = RegExp(
+  r'^\/\/\s*test-argument\s*:\s*(\w*)\s*=\s*(\S*)\s*$',
+  multiLine: true,
+);
 
 Map<InFileArgItems, dynamic> _parseFileContent(String fileContent) {
-  final lines = fileContent
-      .split('\n')
-      .where((line) => line.startsWith(_argPrefix))
-      .map((line) => line.substring(_argPrefix.length));
+  final matches = _argRegex.allMatches(fileContent);
 
-  return Map.fromEntries(lines.map((line) => _parseLine(line)));
-}
+  final entries = matches.map<MapEntry<InFileArgItems, dynamic>>(
+    (RegExpMatch m) {
+      final name = m.group(1) ?? '';
+      if (name.isEmpty)
+        throw 'Name of test argument name should be provided: [${m.group(0)}].';
+      final value = m.group(2) ?? '';
+      return MapEntry(InFileArgItems.values.byName(name), jsonDecode(value));
+    },
+  );
 
-MapEntry<InFileArgItems, dynamic> _parseLine(String line) {
-  final nameValue = line.split('=');
-
-  if (nameValue.length != 2) throw '[$line] does not match pattern name=value.';
-
-  final name = nameValue[0];
-  final value = nameValue[1];
-
-  return MapEntry(InFileArgItems.values.byName(name), jsonDecode(value));
+  return Map.fromEntries(entries);
 }
