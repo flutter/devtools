@@ -282,7 +282,9 @@ void _addLiveReferenceToNode(
   HeapObjectSelection heapSelection, {
   String namePrefix = '',
 }) {
-  if (instance is! ObjRef) throw 'Unexpected type: ${instance.runtimeType}.';
+  if (instance is! ObjRef) {
+    throw StateError('Unexpected type: ${instance.runtimeType}.');
+  }
 
   final String name;
   if (instance is InstanceRef) {
