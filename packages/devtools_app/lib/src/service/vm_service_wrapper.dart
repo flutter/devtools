@@ -16,6 +16,7 @@ import 'package:logging/logging.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../screens/vm_developer/vm_service_private_extensions.dart';
+import '../shared/constants.dart';
 import '../shared/globals.dart';
 import '../shared/primitives/utils.dart';
 import 'json_to_service_cache.dart';
@@ -964,10 +965,12 @@ class VmServiceWrapper implements VmService {
   ///
   /// All logs from this run will have matching unique ids, so that they can
   /// be associated together in the logs.
-  Future<T> _logWrappedFuture<T>(
+  Future<T> _maybeLogWrappedFuture<T>(
     String name,
     Future<T> future,
   ) async {
+    // If the logger is not accepting FINE logs, then we won't be logging any
+    // messages. So don't just return the [future] as is.
     if (!_log.isLoggable(Level.FINE)) return future;
 
     final logId = ++_logIdCounter;
@@ -989,7 +992,7 @@ class VmServiceWrapper implements VmService {
   Future<T> trackFuture<T>(String name, Future<T> future) {
     Future<T> localFuture = future;
 
-    localFuture = _logWrappedFuture<T>(name, future);
+    localFuture = _maybeLogWrappedFuture<T>(name, future);
 
     if (!trackFutures) {
       return localFuture;

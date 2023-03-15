@@ -1,5 +1,6 @@
 import 'package:logging/logging.dart';
 
+import '../../constants.dart';
 import '../../log_storage.dart';
 import 'logger.dart';
 
@@ -15,16 +16,18 @@ void initDevToolsLogging() {
     // As long as a log was recorded then it should be added to the LogStorage.
     LogStorage.root.addLog(record);
 
-    // All logs with level [Level.INFO] and above, should be printed to the
+    // All logs with level [basicLoggingLevel] and above, should be printed to the
     // console.
-    if (record.level == Level.INFO) {
-      log(record.message);
-    } else if (record.level == Level.WARNING) {
-      log(record.message, LogLevel.warning);
-    } else if (record.level == Level.SEVERE) {
-      log(record.message, LogLevel.error);
-    } else if (record.level == Level.SHOUT) {
-      log(record.message, LogLevel.error);
+    if (record.level >= basicLoggingLevel) {
+      var logLevel = LogLevel.debug;
+      if (record.level == Level.WARNING) {
+        logLevel = LogLevel.warning;
+      } else if (record.level == Level.SEVERE) {
+        logLevel = LogLevel.error;
+      } else if (record.level == Level.SHOUT) {
+        logLevel = LogLevel.error;
+      }
+      log(record.message, logLevel);
     }
   });
 }
