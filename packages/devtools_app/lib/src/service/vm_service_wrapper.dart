@@ -87,7 +87,7 @@ class VmServiceWrapper implements VmService {
   // VM service response formats to be used with APIs that require them.
   final fakeServiceCache = JsonToServiceCache();
 
-  /// Random number generator for helping identify associated logs.
+  /// A counter for unique ids to add to each of a future's messages.
   static var _logIdCounter = 0;
 
   /// Executes `callback` for each isolate, and waiting for all callbacks to
@@ -970,7 +970,6 @@ class VmServiceWrapper implements VmService {
   ) async {
     if (!_log.isLoggable(Level.FINE)) return future;
 
-    /// A unique id to add to each of the future's messages.
     final logId = ++_logIdCounter;
     try {
       _log.fine('[$logId]-trackFuture($name,...): Started');
