@@ -8,6 +8,7 @@
 
 import 'dart:ui' as ui;
 
+import 'package:devtools_app/src/shared/console/widgets/evaluate.dart';
 import 'package:devtools_app/src/shared/primitives/simple_items.dart';
 import 'package:devtools_test/devtools_integration_test.dart';
 import 'package:flutter/material.dart';
@@ -50,7 +51,7 @@ void main() {
 
 Future<void> _testBasicEval(WidgetTester tester) async {
   // 1 + 1
-  await tester.enterText(find.byType(EditableText), '1 + 1');
+  await tester.enterText(find.byType(ExpressionEvalField), '1 + 1\n');
 }
 
 Future<void> _testRootIsAccessible(WidgetTester tester) async {}
