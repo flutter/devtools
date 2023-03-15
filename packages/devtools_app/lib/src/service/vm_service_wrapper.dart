@@ -968,12 +968,14 @@ class VmServiceWrapper implements VmService {
     String name,
     Future<T> future,
   ) async {
+    if (!_log.isLoggable(Level.FINE)) return future;
+
     /// A unique id to add to each of the future's messages.
     final logId = ++_logIdCounter;
     try {
-      _log.fine(() => '[$logId]-trackFuture($name,...): Started');
+      _log.fine('[$logId]-trackFuture($name,...): Started');
       final result = await future;
-      _log.fine(() => '[$logId]-trackFuture($name,...): Succeeded');
+      _log.fine('[$logId]-trackFuture($name,...): Succeeded');
       return result;
     } catch (error) {
       _log.fine(
