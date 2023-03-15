@@ -43,6 +43,14 @@ void main() {
     // never complete if there is an animation (e.g. a progress indicator).
     await tester.pump(safePumpDuration);
 
-    // TODO(polina-c): add test logic
+    await _testBasicEval(tester);
+    await _testRootIsAccessible(tester);
   });
 }
+
+Future<void> _testBasicEval(WidgetTester tester) async {
+  // 1 + 1
+  await tester.enterText(find.byType(EditableText), '1 + 1');
+}
+
+Future<void> _testRootIsAccessible(WidgetTester tester) async {}
