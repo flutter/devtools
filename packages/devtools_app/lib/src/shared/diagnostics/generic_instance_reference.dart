@@ -124,7 +124,8 @@ enum RefNodeType {
 
   final RefDirection? direction;
 
-  bool get isRoot => {refRoot, staticRefRoot, liveRefRoot}.contains(this);
+  bool get isRoot => const {refRoot, staticRefRoot, liveRefRoot}.contains(this);
 
-  bool get isLive => {liveOutRefs, liveInRefs, liveRefRoot}.contains(this);
+  bool get isLive =>
+      const {liveOutRefs, liveInRefs, liveRefRoot}.contains(this);
 }
