@@ -547,7 +547,7 @@ class _VerboseLoggingSetting extends StatelessWidget {
             IconLabelButton(
               label: 'Copy logs',
               icon: Icons.copy,
-              onPressed: () async => copyToClipboard(
+              onPressed: () async => await copyToClipboard(
                 LogStorage.root.toString(),
                 'Successfully copied logs',
               ),
