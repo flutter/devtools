@@ -6,8 +6,6 @@ import 'package:logging/logging.dart';
 
 import 'logger.dart';
 
-final _log = Logger('main_log');
-
 void log(Object message, [LogLevel level = LogLevel.debug]) {
   switch (level) {
     case LogLevel.debug:

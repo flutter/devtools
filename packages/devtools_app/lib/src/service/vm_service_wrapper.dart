@@ -7,7 +7,6 @@
 library vm_service_wrapper;
 
 import 'dart:async';
-import 'dart:math';
 
 import 'package:collection/collection.dart' show IterableExtension;
 import 'package:dds_service_extensions/dds_service_extensions.dart';
@@ -16,7 +15,6 @@ import 'package:logging/logging.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../screens/vm_developer/vm_service_private_extensions.dart';
-import '../shared/constants.dart';
 import '../shared/globals.dart';
 import '../shared/primitives/utils.dart';
 import 'json_to_service_cache.dart';

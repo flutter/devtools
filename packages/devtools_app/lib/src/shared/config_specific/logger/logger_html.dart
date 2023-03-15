@@ -4,8 +4,6 @@
 
 import 'dart:html';
 
-import 'package:logging/logging.dart';
-
 import 'logger.dart';
 
 void log(Object message, [LogLevel level = LogLevel.debug]) {
