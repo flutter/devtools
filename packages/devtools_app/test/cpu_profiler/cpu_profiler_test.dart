@@ -13,7 +13,6 @@ import 'package:devtools_app/src/screens/profiler/panes/cpu_flame_chart.dart';
 import 'package:devtools_app/src/screens/profiler/panes/method_table/method_table.dart';
 import 'package:devtools_app/src/shared/charts/flame_chart.dart';
 import 'package:devtools_app/src/shared/config_specific/import_export/import_export.dart';
-import 'package:devtools_app/src/shared/feature_flags.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -36,8 +35,6 @@ void main() {
   when(app.isDebugFlutterAppNow).thenReturn(false);
 
   setUp(() async {
-    FeatureFlags.methodTable = true;
-
     setCharacterWidthForTables();
     setGlobal(ServiceConnectionManager, fakeServiceManager);
 
@@ -69,7 +66,6 @@ void main() {
 
   group('CpuProfiler', () {
     const windowSize = Size(2000.0, 1000.0);
-    final searchFieldKey = GlobalKey(debugLabel: 'test search field key');
 
     testWidgetsWithWindowSize(
       'builds for empty cpuProfileData',
@@ -79,7 +75,6 @@ void main() {
         cpuProfiler = CpuProfiler(
           data: cpuProfileData,
           controller: controller,
-          searchFieldKey: searchFieldKey,
         );
         await tester.pumpWidget(wrap(cpuProfiler));
         expect(find.byType(TabBar), findsOneWidget);
@@ -94,7 +89,7 @@ void main() {
         expect(find.byType(ExpandAllButton), findsOneWidget);
         expect(find.byType(CollapseAllButton), findsOneWidget);
         expect(find.byType(FlameChartHelpButton), findsNothing);
-        expect(find.byKey(searchFieldKey), findsNothing);
+        expect(find.byType(SearchField<CpuStackFrame>), findsNothing);
         expect(find.byKey(CpuProfiler.bottomUpTab), findsOneWidget);
         expect(find.byKey(CpuProfiler.callTreeTab), findsOneWidget);
         expect(find.byKey(CpuProfiler.methodTableTab), findsOneWidget);
@@ -112,7 +107,6 @@ void main() {
         cpuProfiler = CpuProfiler(
           data: cpuProfileData,
           controller: controller,
-          searchFieldKey: searchFieldKey,
           summaryView: const SizedBox(key: summaryViewKey),
         );
         await tester.pumpWidget(wrap(cpuProfiler));
@@ -128,7 +122,7 @@ void main() {
         expect(find.byType(ExpandAllButton), findsNothing);
         expect(find.byType(CollapseAllButton), findsNothing);
         expect(find.byType(FlameChartHelpButton), findsNothing);
-        expect(find.byKey(searchFieldKey), findsNothing);
+        expect(find.byType(SearchField<CpuStackFrame>), findsNothing);
         expect(find.byKey(CpuProfiler.bottomUpTab), findsOneWidget);
         expect(find.byKey(CpuProfiler.callTreeTab), findsOneWidget);
         expect(find.byKey(CpuProfiler.methodTableTab), findsOneWidget);
@@ -145,7 +139,6 @@ void main() {
         cpuProfiler = CpuProfiler(
           data: cpuProfileData,
           controller: controller,
-          searchFieldKey: searchFieldKey,
         );
         await tester.pumpWidget(wrap(cpuProfiler));
         expect(find.byType(TabBar), findsOneWidget);
@@ -157,7 +150,7 @@ void main() {
         expect(find.byType(ExpandAllButton), findsOneWidget);
         expect(find.byType(CollapseAllButton), findsOneWidget);
         expect(find.byType(FlameChartHelpButton), findsNothing);
-        expect(find.byKey(searchFieldKey), findsNothing);
+        expect(find.byType(SearchField<CpuStackFrame>), findsNothing);
         expect(find.byKey(CpuProfiler.bottomUpTab), findsOneWidget);
         expect(find.byKey(CpuProfiler.callTreeTab), findsOneWidget);
         expect(find.byKey(CpuProfiler.methodTableTab), findsOneWidget);
@@ -174,7 +167,6 @@ void main() {
         cpuProfiler = CpuProfiler(
           data: cpuProfileData,
           controller: controller,
-          searchFieldKey: searchFieldKey,
           summaryView: const SizedBox(key: summaryViewKey),
         );
         await tester.pumpWidget(wrap(cpuProfiler));
@@ -187,7 +179,7 @@ void main() {
         expect(find.byType(ExpandAllButton), findsNothing);
         expect(find.byType(CollapseAllButton), findsNothing);
         expect(find.byType(FlameChartHelpButton), findsNothing);
-        expect(find.byKey(searchFieldKey), findsNothing);
+        expect(find.byType(SearchField<CpuStackFrame>), findsNothing);
         expect(find.byKey(CpuProfiler.bottomUpTab), findsOneWidget);
         expect(find.byKey(CpuProfiler.callTreeTab), findsOneWidget);
         expect(find.byKey(CpuProfiler.methodTableTab), findsOneWidget);
@@ -335,7 +327,6 @@ void main() {
         cpuProfiler = CpuProfiler(
           data: cpuProfileData,
           controller: controller,
-          searchFieldKey: searchFieldKey,
         );
         await tester.pumpWidget(wrap(cpuProfiler));
         expect(find.byType(TabBar), findsOneWidget);
@@ -351,7 +342,7 @@ void main() {
         expect(find.byType(CollapseAllButton), findsOneWidget);
         expect(find.byType(FlameChartHelpButton), findsNothing);
         expect(find.byType(ModeDropdown), findsNothing);
-        expect(find.byKey(searchFieldKey), findsNothing);
+        expect(find.byType(SearchField<CpuStackFrame>), findsNothing);
 
         await tester.tap(find.text('Call Tree'));
         await tester.pumpAndSettle();
@@ -366,7 +357,7 @@ void main() {
         expect(find.byType(CollapseAllButton), findsOneWidget);
         expect(find.byType(FlameChartHelpButton), findsNothing);
         expect(find.byType(ModeDropdown), findsNothing);
-        expect(find.byKey(searchFieldKey), findsNothing);
+        expect(find.byType(SearchField<CpuStackFrame>), findsNothing);
 
         await tester.tap(find.text('Method Table'));
         await tester.pumpAndSettle();
@@ -381,7 +372,7 @@ void main() {
         expect(find.byType(CollapseAllButton), findsNothing);
         expect(find.byType(FlameChartHelpButton), findsNothing);
         expect(find.byType(ModeDropdown), findsNothing);
-        expect(find.byKey(searchFieldKey), findsNothing);
+        expect(find.byType(SearchField<CpuStackFrame>), findsNothing);
 
         await tester.tap(find.text('CPU Flame Chart'));
         await tester.pumpAndSettle();
@@ -396,32 +387,7 @@ void main() {
         expect(find.byType(CollapseAllButton), findsNothing);
         expect(find.byType(FlameChartHelpButton), findsOneWidget);
         expect(find.byType(ModeDropdown), findsNothing);
-        expect(find.byKey(searchFieldKey), findsOneWidget);
-      },
-    );
-
-    testWidgetsWithWindowSize(
-      'does not include search field without search field key',
-      windowSize,
-      (WidgetTester tester) async {
-        cpuProfiler = CpuProfiler(
-          data: cpuProfileData,
-          controller: controller,
-          // No search field key.
-          // searchFieldKey: searchFieldKey,
-        );
-        await tester.pumpWidget(wrap(cpuProfiler));
-        await tester.pumpAndSettle();
-        await tester.tap(find.text('CPU Flame Chart'));
-        await tester.pumpAndSettle();
-        expect(find.byType(CpuProfileFlameChart), findsOneWidget);
-        expect(find.byType(CpuCallTreeTable), findsNothing);
-        expect(find.byType(CpuBottomUpTable), findsNothing);
-        expect(find.byType(UserTagDropdown), findsOneWidget);
-        expect(find.byType(ExpandAllButton), findsNothing);
-        expect(find.byType(CollapseAllButton), findsNothing);
-        expect(find.byType(FlameChartHelpButton), findsOneWidget);
-        expect(find.byKey(searchFieldKey), findsNothing);
+        expect(find.byType(SearchField<CpuStackFrame>), findsOneWidget);
       },
     );
 
@@ -432,7 +398,6 @@ void main() {
         cpuProfiler = CpuProfiler(
           data: cpuProfileData,
           controller: controller,
-          searchFieldKey: searchFieldKey,
         );
         await tester.pumpWidget(wrap(cpuProfiler));
         await tester.tap(find.text('Call Tree'));
@@ -467,7 +432,6 @@ void main() {
         cpuProfiler = CpuProfiler(
           data: cpuProfileData,
           controller: controller,
-          searchFieldKey: searchFieldKey,
         );
         await tester.pumpWidget(wrap(cpuProfiler));
         await tester.tap(find.text('Call Tree'));
@@ -482,7 +446,7 @@ void main() {
         await expectLater(
           find.byType(CpuProfiler),
           matchesDevToolsGolden(
-            '../test_infra/goldens/cpu_profiler_call_tree_no_guidelines.png',
+            '../test_infra/goldens/cpu_profiler/call_tree_no_guidelines.png',
           ),
         );
         await tester.tap(find.byType(DisplayTreeGuidelinesToggle));
@@ -492,7 +456,7 @@ void main() {
         await expectLater(
           find.byType(CpuProfiler),
           matchesDevToolsGolden(
-            '../test_infra/goldens/cpu_profiler_call_tree_guidelines.png',
+            '../test_infra/goldens/cpu_profiler/call_tree_guidelines.png',
           ),
         );
         await tester.tap(find.byType(DisplayTreeGuidelinesToggle));
@@ -502,7 +466,7 @@ void main() {
         await expectLater(
           find.byType(CpuProfiler),
           matchesDevToolsGolden(
-            '../test_infra/goldens/cpu_profiler_call_tree_no_guidelines.png',
+            '../test_infra/goldens/cpu_profiler/call_tree_no_guidelines.png',
           ),
         );
 
@@ -518,7 +482,7 @@ void main() {
         await expectLater(
           find.byType(CpuProfiler),
           matchesDevToolsGolden(
-            '../test_infra/goldens/cpu_profiler_bottom_up_no_guidelines.png',
+            '../test_infra/goldens/cpu_profiler/bottom_up_no_guidelines.png',
           ),
         );
         await tester.tap(find.byType(DisplayTreeGuidelinesToggle));
@@ -528,7 +492,7 @@ void main() {
         await expectLater(
           find.byType(CpuProfiler),
           matchesDevToolsGolden(
-            '../test_infra/goldens/cpu_profiler_bottom_up_guidelines.png',
+            '../test_infra/goldens/cpu_profiler/bottom_up_guidelines.png',
           ),
         );
         await tester.tap(find.byType(DisplayTreeGuidelinesToggle));
@@ -538,7 +502,7 @@ void main() {
         await expectLater(
           find.byType(CpuProfiler),
           matchesDevToolsGolden(
-            '../test_infra/goldens/cpu_profiler_bottom_up_no_guidelines.png',
+            '../test_infra/goldens/cpu_profiler/bottom_up_no_guidelines.png',
           ),
         );
       },

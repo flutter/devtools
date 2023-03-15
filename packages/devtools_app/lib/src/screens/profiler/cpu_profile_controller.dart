@@ -255,6 +255,10 @@ class CpuProfilerController extends DisposableController
     }
     if (shouldApplyFilters) {
       cpuProfiles = _filterData(cpuProfiles);
+      // TODO(kenz): this could be a performance bottleneck we can improve. We
+      // are processing the data twice (here and above in this method) when
+      // filters are applied. We shouldn't need the data to be processed in
+      // order to filter it.
       await cpuProfiles.process(
         transformer: transformer,
         processId: processId,
@@ -266,6 +270,10 @@ class CpuProfilerController extends DisposableController
         );
       }
     }
+    // TODO(kenz): consider implementing the "active feature" logic that we use
+    // on the performance page to defer the work of creating the method table
+    // until we need it.
+    methodTableController.createMethodTableGraph(cpuProfiles.functionProfile);
     return cpuProfiles;
   }
 

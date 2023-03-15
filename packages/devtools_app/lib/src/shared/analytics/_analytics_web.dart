@@ -109,7 +109,7 @@ class GtagEventDevTools extends GtagEvent {
     int? heap_objects_total, // metric9
     int? root_set_count, // metric10
     int? row_count, // metric11
-    String? inspector_tree_controller_id, // metric12
+    int? inspector_tree_controller_id, // metric12
   });
 
   @override

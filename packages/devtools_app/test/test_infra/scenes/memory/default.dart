@@ -70,7 +70,7 @@ class MemoryDefaultScene extends Scene {
     setGlobal(ServiceConnectionManager, fakeServiceManager);
 
     final diffController = DiffPaneController(_TestSnapshotTaker());
-    diffController.applyFilter(
+    diffController.derived.applyFilter(
       ClassFilter(filterType: ClassFilterType.showAll, except: '', only: ''),
     );
     controller = MemoryController(

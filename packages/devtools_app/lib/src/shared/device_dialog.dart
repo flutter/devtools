@@ -190,10 +190,10 @@ class _FlagTable extends StatelessWidget {
 
   final List<_DialogFlag> flags;
 
-  static final ColumnData<_DialogFlag> name = _NameColumn();
-  static final ColumnData<_DialogFlag> description = _DescriptionColumn();
-  static final ColumnData<_DialogFlag> value = _ValueColumn();
-  static List<ColumnData<_DialogFlag>> columns = [name, description, value];
+  static final name = _NameColumn();
+  static final description = _DescriptionColumn();
+  static final value = _ValueColumn();
+  static final columns = <ColumnData<_DialogFlag>>[name, description, value];
 
   @override
   Widget build(BuildContext context) {

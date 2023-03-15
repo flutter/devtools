@@ -10,7 +10,6 @@ import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/charts/flame_chart.dart';
 import '../../shared/common_widgets.dart';
 import '../../shared/dialogs.dart';
-import '../../shared/feature_flags.dart';
 import '../../shared/globals.dart';
 import '../../shared/primitives/auto_dispose.dart';
 import '../../shared/primitives/utils.dart';
@@ -43,8 +42,7 @@ class CpuProfiler extends StatefulWidget {
             _buildTab(key: summaryTab, tabName: 'Summary'),
           _buildTab(key: bottomUpTab, tabName: 'Bottom Up'),
           _buildTab(key: callTreeTab, tabName: 'Call Tree'),
-          if (FeatureFlags.methodTable)
-            _buildTab(key: methodTableTab, tabName: 'Method Table'),
+          _buildTab(key: methodTableTab, tabName: 'Method Table'),
           _buildTab(key: flameChartTab, tabName: 'CPU Flame Chart'),
         ];
 
@@ -99,6 +97,9 @@ class _CpuProfilerState extends State<CpuProfiler>
   late TabController _tabController;
 
   late CpuProfileData data;
+
+  @override
+  SearchControllerMixin get searchController => widget.controller;
 
   @override
   void initState() {
@@ -200,7 +201,7 @@ class _CpuProfilerState extends State<CpuProfiler>
             // TODO(kenz): support search for call tree and bottom up tabs as
             // well. This will require implementing search for tree tables.
             if (currentTab.key == CpuProfiler.flameChartTab) ...[
-              if (widget.searchFieldKey != null) _buildSearchField(),
+              _buildSearchField(),
               FlameChartHelpButton(
                 gaScreen: widget.standaloneProfiler
                     ? gac.cpuProfiler
@@ -290,9 +291,8 @@ class _CpuProfilerState extends State<CpuProfiler>
     return Container(
       width: wideSearchTextWidth,
       height: defaultTextFieldHeight,
-      child: buildSearchField(
+      child: SearchField<CpuStackFrame>(
         controller: widget.controller,
-        searchFieldKey: widget.searchFieldKey!,
         searchFieldEnabled: true,
         shouldRequestFocus: false,
         supportsNavigation: true,
@@ -349,7 +349,7 @@ class _CpuProfilerState extends State<CpuProfiler>
       if (summaryView != null) summaryView,
       bottomUp,
       callTree,
-      if (FeatureFlags.methodTable) methodTable,
+      methodTable,
       cpuFlameChart,
     ];
   }

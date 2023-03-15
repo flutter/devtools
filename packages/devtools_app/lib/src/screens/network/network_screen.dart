@@ -29,8 +29,6 @@ import 'network_controller.dart';
 import 'network_model.dart';
 import 'network_request_inspector.dart';
 
-final networkSearchFieldKey = GlobalKey(debugLabel: 'NetworkSearchFieldKey');
-
 class NetworkScreen extends Screen {
   NetworkScreen()
       : super.conditional(
@@ -187,6 +185,9 @@ class _NetworkProfilerControlsState extends State<_NetworkProfilerControls>
   bool _recording = false;
 
   @override
+  SearchControllerMixin get searchController => widget.controller;
+
+  @override
   void initState() {
     super.initState();
 
@@ -262,9 +263,8 @@ class _NetworkProfilerControlsState extends State<_NetworkProfilerControls>
         Container(
           width: wideSearchTextWidth,
           height: defaultTextFieldHeight,
-          child: buildSearchField(
+          child: SearchField<NetworkRequest>(
             controller: widget.controller,
-            searchFieldKey: networkSearchFieldKey,
             searchFieldEnabled: hasRequests,
             shouldRequestFocus: false,
             supportsNavigation: true,
@@ -334,13 +334,22 @@ class NetworkRequestsTable extends StatelessWidget {
     required this.activeSearchMatchNotifier,
   }) : super(key: key);
 
-  static MethodColumn methodColumn = MethodColumn();
-  static UriColumn addressColumn = UriColumn();
-  static StatusColumn statusColumn = StatusColumn();
-  static TypeColumn typeColumn = TypeColumn();
-  static DurationColumn durationColumn = DurationColumn();
-  static TimestampColumn timestampColumn = TimestampColumn();
-  static ActionsColumn actionsColumn = ActionsColumn();
+  static final methodColumn = MethodColumn();
+  static final addressColumn = UriColumn();
+  static final statusColumn = StatusColumn();
+  static final typeColumn = TypeColumn();
+  static final durationColumn = DurationColumn();
+  static final timestampColumn = TimestampColumn();
+  static final actionsColumn = ActionsColumn();
+  static final columns = <ColumnData<NetworkRequest>>[
+    methodColumn,
+    addressColumn,
+    statusColumn,
+    typeColumn,
+    durationColumn,
+    timestampColumn,
+    actionsColumn,
+  ];
 
   final NetworkController networkController;
   final List<NetworkRequest> requests;
@@ -357,15 +366,7 @@ class NetworkRequestsTable extends StatelessWidget {
         searchMatchesNotifier: searchMatchesNotifier,
         activeSearchMatchNotifier: activeSearchMatchNotifier,
         autoScrollContent: true,
-        columns: [
-          methodColumn,
-          addressColumn,
-          statusColumn,
-          typeColumn,
-          durationColumn,
-          timestampColumn,
-          actionsColumn,
-        ],
+        columns: columns,
         selectionNotifier: networkController.selectedRequest,
         defaultSortColumn: timestampColumn,
         defaultSortDirection: SortDirection.ascending,

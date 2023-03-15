@@ -13,7 +13,17 @@ import '../theme.dart';
 import '../ui/colors.dart';
 import '../utils.dart';
 
-// TODO(peterdjlee): Remove get from method names.
+/// Defines how a column should display data in a table.
+///
+/// [ColumnData] objects should be defined as static where possible, and should
+/// not manage any stateful data. The table controllers expect columns to be
+/// solely responsible for declaring how to layout table data.
+///
+/// Any data that can't be stored on the [dataObject] may be accessed by passing
+/// a long-living controller to the constructor of the [ColumnData] subclass.
+///
+/// The controller is expected to be alive for the duration of the app
+/// connection.
 abstract class ColumnData<T> {
   ColumnData(
     this.title, {
@@ -187,8 +197,7 @@ abstract class TimeAndPercentageColumn<T> extends ColumnData<T> {
     this.percentageOnly = false,
     double columnWidth = _defaultTimeColumnWidth,
     super.titleTooltip,
-  })  : assert(percentageOnly == (timeProvider == null)),
-        super(
+  }) : super(
           title,
           fixedWidthPx: scaleByFontFactor(columnWidth),
         );
@@ -226,17 +235,28 @@ abstract class TimeAndPercentageColumn<T> extends ColumnData<T> {
 
   @override
   String getDisplayValue(T dataObject) {
-    final percentDisplay = '${percent2(percentAsDoubleProvider(dataObject))}';
-    if (percentageOnly) {
-      return percentDisplay;
-    }
-    return '${msText(timeProvider!(dataObject), fractionDigits: 2)} ($percentDisplay)';
+    if (percentageOnly) return _percentDisplay(dataObject);
+    return _timeAndPercentage(dataObject);
   }
 
   @override
-  String getTooltip(T dataObject) => tooltipProvider?.call(dataObject) ?? '';
+  String getTooltip(T dataObject) {
+    if (tooltipProvider != null) {
+      return tooltipProvider!(dataObject);
+    }
+    if (percentageOnly && timeProvider != null) {
+      return _timeAndPercentage(dataObject);
+    }
+    return '';
+  }
 
   @override
   InlineSpan? getRichTooltip(T dataObject, BuildContext context) =>
       richTooltipProvider?.call(dataObject, context);
+
+  String _timeAndPercentage(T dataObject) =>
+      '${msText(timeProvider!(dataObject), fractionDigits: 2)} (${_percentDisplay(dataObject)})';
+
+  String _percentDisplay(T dataObject) =>
+      '${percent(percentAsDoubleProvider(dataObject))}';
 }

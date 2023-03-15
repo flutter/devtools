@@ -9,7 +9,7 @@ import '../../../../../../shared/analytics/constants.dart' as gac;
 import '../../../../../../shared/common_widgets.dart';
 import '../../../../../../shared/theme.dart';
 import '../../../../shared/heap/model.dart';
-import '../../controller/simple_controllers.dart';
+import '../../controller/class_data.dart';
 
 class RetainingPathView extends StatelessWidget {
   const RetainingPathView({

@@ -47,8 +47,8 @@ class InspectorScreenMetrics extends ScreenAnalyticsMetrics {
     required this.inspectorTreeControllerId,
   });
 
-  static const String summaryTreeGaId = 'summaryTree';
-  static const String detailsTreeGaId = 'detailsTree';
+  static const int summaryTreeGaId = 0;
+  static const int detailsTreeGaId = 1;
 
   /// The number of times the root has been set, since the
   /// [InspectorTreeController] with id [inspectorTreeControllerId], has been
@@ -60,5 +60,5 @@ class InspectorScreenMetrics extends ScreenAnalyticsMetrics {
   final int? rowCount;
 
   /// The id of the [InspectorTreeController], for which this event is tracking.
-  final String? inspectorTreeControllerId;
+  final int? inspectorTreeControllerId;
 }

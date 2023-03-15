@@ -103,7 +103,7 @@ class _InspectorTreeRowState extends State<_InspectorTreeRowWidget>
   bool shouldShow() => widget.node.shouldShow;
 }
 
-class InspectorTreeController extends Object
+class InspectorTreeController extends DisposableController
     with SearchControllerMixin<InspectorTreeRow> {
   InspectorTreeController({this.gaId}) {
     ga.select(
@@ -123,7 +123,7 @@ class InspectorTreeController extends Object
 
   /// Identifier used when sending Google Analytics about events in this
   /// [InspectorTreeController].
-  final String? gaId;
+  final int? gaId;
 
   InspectorTreeNode createNode() => InspectorTreeNode();
 
@@ -647,10 +647,6 @@ class InspectorTreeController extends Object
 
   @override
   Duration get debounceDelay => const Duration(milliseconds: 300);
-
-  void dispose() {
-    disposeSearch();
-  }
 
   @override
   List<InspectorTreeRow> matchesForSearch(

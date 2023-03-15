@@ -15,18 +15,25 @@ TODO: Remove this section if there are not any general updates.
 * Persist a user's preference for whether the Flutter Frames chart should be shown by default. - [#5339](https://github.com/flutter/devtools/pull/5339)
 
 ## CPU profiler updates
+* Add a Method Table to the CPU profiler - [#5366](https://github.com/flutter/devtools/pull/5366)
+
+![method table](images/image1.png "method_table")
+
 * Add ability to inspect statistics for a CPU profile - [#5340](https://github.com/flutter/devtools/pull/5340)
 * Fix a bug where Native stack frames were missing their name - [#5344](https://github.com/flutter/devtools/pull/5344)
 * Fix an error in total and self time calculations for the bottom up tree - [#5348](https://github.com/flutter/devtools/pull/5348)
 
 ## Memory updates
-TODO: Remove this section if there are not any general updates.
+* Fix filtering bug in the "Trace Instances" view - [#5406](https://github.com/flutter/devtools/pull/5406)
 
 ## Debugger updates
 * Fix a bug where variable inspection for instances sometimes showed no children. - [#5356](https://github.com/flutter/devtools/pull/5356)
+* Hide "search in file" dialog if "file search" dialog is open - [#5393](https://github.com/flutter/devtools/pull/5393)
+* Fix file search bug where last letter disappeared when searching at end of file name - [#5397](https://github.com/flutter/devtools/pull/5397)
+* Add search icon in file bar to make file search more discoverable - [#5351](https://github.com/flutter/devtools/issues/5351)
 
 ## Network profiler updates
-TODO: Remove this section if there are not any general updates.
+* Fix a bug viewing JSON responses with null values - [#5424](https://github.com/flutter/devtools/pull/5424)
 
 ## Logging updates
 TODO: Remove this section if there are not any general updates.

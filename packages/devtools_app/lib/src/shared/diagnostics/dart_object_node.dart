@@ -11,7 +11,6 @@ import '../globals.dart';
 import '../memory/adapted_heap_data.dart';
 import '../primitives/trees.dart';
 import '../primitives/utils.dart';
-import '../vm_utils.dart';
 import 'diagnostics_node.dart';
 import 'generic_instance_reference.dart';
 import 'helpers.dart';
@@ -144,23 +143,6 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
       ]);
   }
 
-  factory DartObjectNode.fromInstanceSet({
-    required String text,
-    required InstanceSet instanceSet,
-    required IsolateRef? isolateRef,
-  }) {
-    return DartObjectNode._(
-      text: text,
-      ref: GenericInstanceRef(
-        isolateRef: isolateRef,
-        value: instanceSet,
-      ),
-      artificialValue: true,
-      artificialName: true,
-      childCount: instanceSet.instances?.length,
-    );
-  }
-
   factory DartObjectNode.create(
     BoundVariable variable,
     IsolateRef? isolateRef,
@@ -286,13 +268,9 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
   bool get isExpandable {
     final theRef = ref;
     final instanceRef = theRef?.instanceRef;
-    if (theRef is ObjectReferences) {
-      if (instanceRef?.length == 0) return false;
-      return theRef.refNodeType.isRoot ||
-          children.isNotEmpty ||
-          childCount > 0 ||
-          !isPrimitiveInstanceKind(instanceRef?.kind);
-    }
+
+    if (isRootForReferences(ref)) return true;
+
     if (treeInitializeComplete || children.isNotEmpty || childCount > 0) {
       return children.isNotEmpty || childCount > 0;
     }
