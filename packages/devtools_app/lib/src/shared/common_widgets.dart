@@ -196,12 +196,17 @@ class DevToolsButton extends StatelessWidget {
         ),
       );
     }
-
+    final colorScheme = Theme.of(context).colorScheme;
+    var textColor = color;
+    if (textColor == null && elevatedButton) {
+      textColor =
+          onPressed == null ? colorScheme.surfaceVariant : colorScheme.onPrimary;
+    }
     final iconLabel = MaterialIconLabel(
       label: label!,
       iconData: icon,
       minScreenWidthForTextBeforeScaling: minScreenWidthForTextBeforeScaling,
-      color: color ?? Theme.of(context).colorScheme.onSurface,
+      color: textColor,
     );
     if (elevatedButton) {
       return maybeWrapWithTooltip(

@@ -256,8 +256,6 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
 
   /// Pushes the snapshot screen for an offline import.
   void _pushSnapshotScreenForImport(String screenId) {
-    // TODO(kenz): for 'performance' imports, load the legacy screen or the new
-    // screen based on the flutter version of the imported file.
     final args = {'screen': screenId};
     final routerDelegate = DevToolsRouterDelegate.of(context);
     if (!offlineController.offlineMode.value) {
@@ -281,9 +279,6 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
     final tabBodies = [
       for (var screen in widget.screens)
         Align(
-          // TODO(kenz): this padding creates a flash when dragging and dropping
-          // into the app size screen because it creates space that is outside
-          // of the [DragAndDropEventAbsorber] widget. Fix this.
           alignment: Alignment.topLeft,
           child: FocusScope(
             child: AnalyticsPrompt(

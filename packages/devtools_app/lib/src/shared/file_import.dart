@@ -109,32 +109,19 @@ class _FileImportContainerState extends State<FileImportContainer> {
 
   Widget _buildImportFileRow() {
     final rowHeight = defaultButtonHeight;
-    final theme = Theme.of(context);
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        // Horizontal spacer with flex value of 1.
-        Flexible(
-          child: SizedBox(height: rowHeight),
-        ),
+        const Spacer(),
         Flexible(
           flex: 4,
           fit: FlexFit.tight,
-          child: Container(
-            height: rowHeight,
-            padding: const EdgeInsets.all(denseSpacing),
-            decoration: BoxDecoration(
-              borderRadius:
-                  const BorderRadius.all(Radius.circular(defaultBorderRadius)),
-              border: Border(
-                top: BorderSide(color: theme.focusColor),
-                bottom: BorderSide(color: theme.focusColor),
-                left: BorderSide(color: theme.focusColor),
-                // TODO(kenz): remove right border when we add the import button
-                right: BorderSide(color: theme.focusColor),
-              ),
+          child: RoundedOutlinedBorder(
+            child: Container(
+              height: rowHeight,
+              padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
+              child: _buildImportedFileDisplay(),
             ),
-            child: _buildImportedFileDisplay(),
           ),
         ),
         const SizedBox(width: denseSpacing),
@@ -143,10 +130,7 @@ class _FileImportContainerState extends State<FileImportContainer> {
           gaScreen: widget.gaScreen,
           gaSelection: widget.gaSelectionImport,
         ),
-        // Horizontal spacer with flex value of 1.
-        Flexible(
-          child: SizedBox(height: rowHeight),
-        ),
+        const Spacer(),
       ],
     );
   }

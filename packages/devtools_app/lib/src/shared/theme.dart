@@ -100,6 +100,7 @@ ThemeData _baseTheme({
       style: ElevatedButton.styleFrom(
         minimumSize: Size(buttonMinWidth, defaultButtonHeight),
         fixedSize: Size.fromHeight(defaultButtonHeight),
+        backgroundColor: theme.colorScheme.primary,
       ),
     ),
     progressIndicatorTheme: ProgressIndicatorThemeData(
