@@ -292,7 +292,7 @@ class TestRunnerArgs {
 
   /// The Vm Service URI for the test app to connect devtools to.
   ///
-  /// This value will only be used when [offline] has not been set to true.
+  /// This value will only be used for tests with live connection.
   late final String? testAppUri;
 
   /// Whether golden images should be updated with the result of this test run.
