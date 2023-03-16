@@ -445,8 +445,9 @@ class ExpressionEvalFieldState extends State<ExpressionEvalField>
     evalService.scope.add(isolateId, assignment.variableName, value);
 
     _emitToConsole(
-        'Variable ${assignment.variableName} is created and now can be used '
-        'in expressions for the isolate "$isolateName".');
+      'Variable ${assignment.variableName} is created and now can be used '
+      'in expressions for the isolate "$isolateName".',
+    );
 
     return true;
   }
