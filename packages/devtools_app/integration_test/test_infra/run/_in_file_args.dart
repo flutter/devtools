@@ -5,31 +5,31 @@
 import 'dart:convert';
 import 'dart:io';
 
-enum InFileArgItems {
+enum TestFileArgItems {
   experimentsOn,
   appPath,
 }
 
 /// Test arguments, defined inside the test file as a comment.
-class InFileArgs {
-  factory InFileArgs(String testFilePath) {
+class TestFileArgs {
+  factory TestFileArgs(String testFilePath) {
     final content = File(testFilePath).readAsStringSync();
-    return InFileArgs.fromFileContent(content);
+    return TestFileArgs.fromFileContent(content);
   }
 
-  factory InFileArgs.fromFileContent(String fileContent) {
-    final values = _parseFileContent(fileContent);
+  factory TestFileArgs.fromFileContent(String fileContent) {
+    final testFileArgItems = _parseFileContent(fileContent);
 
-    for (final arg in values.keys) {
-      values.putIfAbsent(arg, () => null);
+    for (final arg in testFileArgItems.keys) {
+      testFileArgItems.putIfAbsent(arg, () => null);
     }
 
-    return InFileArgs.fromValues(values);
+    return TestFileArgs.parse(testFileArgItems);
   }
 
-  InFileArgs.fromValues(Map<InFileArgItems, dynamic> values)
-      : experimentsOn = values[InFileArgItems.experimentsOn] ?? false,
-        appPath = values[InFileArgItems.appPath] ??
+  TestFileArgs.parse(Map<TestFileArgItems, dynamic> map)
+      : experimentsOn = map[TestFileArgItems.experimentsOn] ?? false,
+        appPath = map[TestFileArgItems.appPath] ??
             'test/test_infra/fixtures/flutter_app';
 
   /// If true, experiments will be enabled in the test.
@@ -44,16 +44,18 @@ final _argRegex = RegExp(
   multiLine: true,
 );
 
-Map<InFileArgItems, dynamic> _parseFileContent(String fileContent) {
+Map<TestFileArgItems, dynamic> _parseFileContent(String fileContent) {
   final matches = _argRegex.allMatches(fileContent);
 
-  final entries = matches.map<MapEntry<InFileArgItems, dynamic>>(
+  final entries = matches.map<MapEntry<TestFileArgItems, dynamic>>(
     (RegExpMatch m) {
       final name = m.group(1) ?? '';
       if (name.isEmpty)
-        throw 'Name of test argument name should be provided: [${m.group(0)}].';
+        throw ArgumentError(
+          'Name of test argument should be provided: [${m.group(0)}].',
+        );
       final value = m.group(2) ?? '';
-      return MapEntry(InFileArgItems.values.byName(name), jsonDecode(value));
+      return MapEntry(TestFileArgItems.values.byName(name), jsonDecode(value));
     },
   );
 

@@ -14,6 +14,9 @@ import 'package:devtools_app/src/shared/primitives/simple_items.dart';
 import 'package:devtools_test/devtools_integration_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:devtools_app/src/shared/primitives/simple_items.dart';
+import 'package:devtools_test/devtools_integration_test.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 
