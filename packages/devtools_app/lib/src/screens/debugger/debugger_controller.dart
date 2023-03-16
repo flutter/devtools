@@ -392,8 +392,22 @@ class DebuggerController extends DisposableController
       final topFrame = pauseEvent?.topFrame;
       if (topFrame == null) {
         log(
-          'Pause event did not contain a frame. This likely indicates a DWDS bug.',
+          'Pause event has no frame. This likely indicates a DWDS bug.',
           LogLevel.warning,
+        );
+        _populateFrameInfo(
+          [
+            await _createStackFrameWithLocation(
+              Frame(
+                code: CodeRef(
+                  name: 'No Dart frames found, likely paused in JS.',
+                  kind: CodeKind.kTag,
+                  id: DateTime.now().microsecondsSinceEpoch.toString(),
+                ),
+              ),
+            ),
+          ],
+          truncated: true,
         );
         return;
       }
