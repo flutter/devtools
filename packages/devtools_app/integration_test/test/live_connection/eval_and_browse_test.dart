@@ -101,10 +101,10 @@ class _EvalTester {
       }
     } catch (e) {
       // In case of unexpected response take golden for troubleshooting.
-      print('Unexpected response: $e');
+      print(e.toString());
       await expectLater(
         find.byType(ConsolePane),
-        matchesGoldenFile('eval_and_browse_testEval.png'),
+        matchesGoldenFile('debug_golden.png'),
       );
     }
   }
