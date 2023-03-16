@@ -8,6 +8,7 @@ import 'dart:io';
 
 import 'package:collection/collection.dart';
 
+import '_in_file_args.dart';
 import '_io_utils.dart';
 import '_test_app_driver.dart';
 
@@ -18,18 +19,19 @@ bool _debugTestScript = false;
 /// Do not use this method directly, but instead use the run_tests.dart
 /// which performs essential set up steps.
 Future<void> runFlutterIntegrationTest(
-  TestRunnerArgs testRunnerArgs, {
-  required String? testAppPath,
+  TestRunnerArgs testRunnerArgs,
+  TestFileArgs testFileArgs, {
+  required bool offline,
 }) async {
   TestFlutterApp? testApp;
   late String testAppUri;
 
-  if (testAppPath != null) {
+  if (!offline) {
     if (testRunnerArgs.testAppUri == null) {
       // Create the test app and start it.
       // TODO(kenz): support running Dart CLI test apps from here too.
       try {
-        testApp = TestFlutterApp(appPath: testAppPath);
+        testApp = TestFlutterApp(appPath: testFileArgs.appPath);
         await testApp.start();
       } catch (e) {
         throw Exception('Error starting test app: $e');
@@ -55,11 +57,11 @@ Future<void> runFlutterIntegrationTest(
   try {
     await testRunner.run(
       testRunnerArgs.testTarget,
-      enableExperiments: testRunnerArgs.enableExperiments,
+      enableExperiments: testFileArgs.experimentsOn,
       updateGoldens: testRunnerArgs.updateGoldens,
       headless: testRunnerArgs.headless,
       testAppArguments: {
-        if (!testRunnerArgs.offline) 'service_uri': testAppUri,
+        if (!offline) 'service_uri': testAppUri,
       },
     );
   } on Exception catch (e) {
@@ -277,16 +279,12 @@ class TestRunnerArgs {
         args.firstWhereOrNull((arg) => arg.startsWith(testAppArg));
     testAppUri = argWithTestAppUri?.substring(testAppArg.length);
 
-    offline = args.contains(offlineArg);
-    enableExperiments = args.contains(enableExperimentsArg);
     updateGoldens = args.contains(updateGoldensArg);
     headless = args.contains(headlessArg);
   }
 
   static const testTargetArg = '--target=';
   static const testAppArg = '--test-app-uri=';
-  static const offlineArg = '--offline';
-  static const enableExperimentsArg = '--enable-experiments';
   static const updateGoldensArg = '--update-goldens';
   static const headlessArg = '--headless';
 
@@ -296,22 +294,6 @@ class TestRunnerArgs {
   ///
   /// This value will only be used when [offline] has not been set to true.
   late final String? testAppUri;
-
-  /// Indicates that a test should not be run with a test app for connecting to
-  /// DevTools.
-  ///
-  /// When [offline] is true, the test will be responsible for loading offline
-  /// data to test DevTools against.
-  ///
-  /// `integration_test/run_tests.dart` will add this flag automatically for
-  /// test targets that lives under the integration_test/test/offline directory.
-  late final bool offline;
-
-  /// Whether DevTools experiments should be enabled for a test.
-  ///
-  /// `integration_test/run_tests.dart` will add this flag automatically for
-  /// test targets that lives under an `experimental/` directory.
-  late final bool enableExperiments;
 
   /// Whether golden images should be updated with the result of this test run.
   late final bool updateGoldens;

@@ -16,11 +16,6 @@ import 'test_infra/run/run_test.dart';
 // --test-app-uri=<some vm service uri> - this will connect DevTools to the app
 //    you specify instead of spinning up a test app inside
 //    [runFlutterIntegrationTest].
-// --offline - indicates that we do not need to start a test app to run this
-//    test. This will take precedence if both --offline and --test-app-uri are
-//    present.
-// --enable-experiments - this will run the DevTools integration tests with
-//    DevTools experiments enabled (see feature_flags.dart)
 // --update-goldens - this will update the current golden images with the
 //   results from this test run
 // --headless - this will run the integration test on the 'web-server' device
@@ -60,22 +55,13 @@ void main(List<String> args) async {
 }
 
 Future<void> _runTest(List<String> modifiableArgs, String testFilePath) async {
-  _maybeAddOfflineArgument(modifiableArgs, testFilePath);
-
   final testFileArgs = TestFileArgs(testFilePath);
   final testRunnerArgs = TestRunnerArgs(modifiableArgs);
+  final offline = testFilePath.startsWith(_offlineIndicator);
 
-  if (testFileArgs.experimentsOn) {
-    modifiableArgs.add(TestRunnerArgs.enableExperimentsArg);
-  }
-
-  final testAppPath = testRunnerArgs.offline ? null : testFileArgs.appPath;
-
-  await runFlutterIntegrationTest(testRunnerArgs, testAppPath: testAppPath);
-}
-
-void _maybeAddOfflineArgument(List<String> args, String testTarget) {
-  if (testTarget.startsWith(_offlineIndicator)) {
-    args.add(TestRunnerArgs.offlineArg);
-  }
+  await runFlutterIntegrationTest(
+    testRunnerArgs,
+    testFileArgs,
+    offline: offline,
+  );
 }
