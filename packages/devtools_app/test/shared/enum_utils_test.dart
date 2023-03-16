@@ -41,6 +41,5 @@ enum Size with EnumIndexOrdering {
   xs,
   s,
   m,
-  l,
   xl,
 }

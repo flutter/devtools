@@ -45,6 +45,7 @@ class PerformanceDefaultScene extends Scene {
   @override
   String get title => '$PerformanceDefaultScene';
 
+  // TODO(kenz): call tearDown on the scenes that use this scene
   void tearDown() {
     FeatureFlags.widgetRebuildstats = false;
   }

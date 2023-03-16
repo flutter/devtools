@@ -155,7 +155,6 @@ class MemoryTime {
 class MemoryEvent {
   static const gc = 'gc';
   static const settings = 'settings';
-  static const autoSnapshot = 'autoSnapshot';
 
   static const chartLegend = 'memoryLegend';
   static const chartAndroid = 'androidChart';
@@ -177,7 +176,6 @@ class MemoryEvent {
   static const tracingHelp = 'memoryTracingHelp';
 
   static const diffTakeSnapshotControlPane = 'diffTakeSnapshotControlPane';
-  static const diffTakeSnapshotAfterHelp = 'diffTakeSnapshotAfterHelp';
   static const diffClearSnapshots = 'diffClearSnapshots';
   static const diffHelp = 'memoryDiffHelp';
 

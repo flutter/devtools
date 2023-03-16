@@ -12,8 +12,6 @@ import '../../memory_controller.dart';
 import 'chart_pane_controller.dart';
 import 'primitives.dart';
 
-const verboseDropDownMinimumWidth = 950;
-
 class IntervalDropdown extends StatefulWidget {
   const IntervalDropdown({Key? key, required this.chartController})
       : super(key: key);

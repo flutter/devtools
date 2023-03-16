@@ -266,7 +266,7 @@ class IntrinsicOperationsHint extends StatelessWidget {
       message: _ExpensiveOperationHint(
         docsUrl: _intrinsicOperationsDocs,
         gaScreenName: gac.performance,
-        gaSelectedItemDescription: gac.shaderCompilationDocs,
+        gaSelectedItemDescription: gac.intrinsicOperationsDocs,
         message: TextSpan(
           children: [
             TextSpan(
