@@ -41,6 +41,15 @@ Future<void> pumpAndConnectDevTools(
   }
 }
 
+Future<void> switchToScreen(WidgetTester tester, ScreenMetaData screen) async {
+  final screenTitle = screen.title;
+  logStatus('switching to $screenTitle screen');
+  await tester.tap(find.widgetWithText(Tab, screenTitle));
+  // We use pump here instead of pumpAndSettle because pumpAndSettle will
+  // never complete if there is an animation (e.g. a progress indicator).
+  await tester.pump(safePumpDuration);
+}
+
 Future<void> pumpDevTools(WidgetTester tester) async {
   // TODO(kenz): how can we share code across integration_test/test and
   // integration_test/test_infra? When trying to import, we get an error:

@@ -47,15 +47,10 @@ void main() {
     );
     expect(tabs.length, equals(availableScreenIds.length));
 
-    final screenTitles = (ScreenMetaData.values.toList()
-          ..removeWhere((data) => !availableScreenIds.contains(data.id)))
-        .map((data) => data.title);
-    for (final title in screenTitles) {
-      logStatus('switching to $title screen');
-      await tester.tap(find.widgetWithText(Tab, title));
-      // We use pump here instead of pumpAndSettle because pumpAndSettle will
-      // never complete if there is an animation (e.g. a progress indicator).
-      await tester.pump(safePumpDuration);
+    final screens = (ScreenMetaData.values.toList()
+      ..removeWhere((data) => !availableScreenIds.contains(data.id)));
+    for (final screen in screens) {
+      await switchToScreen(tester, screen);
     }
   });
 }

@@ -39,46 +39,44 @@ void main() {
   testWidgets('memory eval and browse', (tester) async {
     await pumpAndConnectDevTools(tester, testApp);
 
-    final screenTitle = ScreenMetaData.memory.title;
+    final evalTester = _EvalTester(tester);
 
-    logStatus('switching to $screenTitle screen');
-    await tester.tap(find.widgetWithText(Tab, screenTitle));
-    // We use pump here instead of pumpAndSettle because pumpAndSettle will
-    // never complete if there is an animation (e.g. a progress indicator).
-    await tester.pump(safePumpDuration);
+    await _testBasicEval(evalTester);
+    await _testAssignment(evalTester);
 
-    final consoleTester = _ConsoleTester(tester);
+    await switchToScreen(tester, ScreenMetaData.memory);
 
-    await _testBasicEval(consoleTester);
-    await _testAssignment(consoleTester);
-    await _testRootIsAccessible(consoleTester);
+    await _testRootIsAccessible(evalTester);
   });
 }
 
-Future<void> _testBasicEval(_ConsoleTester tester) async {
-  //await tester.eval('21 + 34', '55');
+Future<void> _testBasicEval(_EvalTester tester) async {
+  await tester.testEval('21 + 34', '55');
 }
 
-Future<void> _testAssignment(_ConsoleTester tester) async {
+Future<void> _testAssignment(_EvalTester tester) async {
   await tester.testEval('DateTime(2023)', 'DateTime');
   await tester.testEval(
     r'var x = $0',
     'Variable x is created ',
     exact: false,
   );
-  await tester.testEval(r'x.toString()', DateTime(2023).toString());
+  await tester.testEval('x.toString()', "'${DateTime(2023).toString()}'");
 }
 
-Future<void> _testRootIsAccessible(_ConsoleTester tester) async {}
+Future<void> _testRootIsAccessible(_EvalTester tester) async {
+  // TODO(polina-c): add content.
+}
 
-class _ConsoleTester {
-  _ConsoleTester(this.tester);
+class _EvalTester {
+  _EvalTester(this.tester);
 
   final WidgetTester tester;
 
   /// Tests if eval returns expected response by searching for response text.
   ///
-  /// If [exact] is false, checks the response contains expected text.
+  /// If [exact] is true, searches for exact match,
+  /// otherwise for just containment.
   Future<void> testEval(
     String expression,
     String expectedResponse, {
@@ -88,8 +86,7 @@ class _ConsoleTester {
     await tester.pump(safePumpDuration);
     await tester.enterText(find.byType(AutoCompleteSearchField), expression);
     await tester.pump(safePumpDuration);
-    await simulateKeyDownEvent(LogicalKeyboardKey.enter);
-    await simulateKeyUpEvent(LogicalKeyboardKey.enter);
+    await _pressEnter();
     await tester.pump(safePumpDuration);
 
     if (exact) {
@@ -103,5 +100,15 @@ class _ConsoleTester {
         findsOneWidget,
       );
     }
+  }
+
+  Future<void> _pressEnter() async {
+    // TODO(polina-c): Figure out why one time sometimes is not enough.
+    // https://github.com/flutter/devtools/issues/5436
+    await simulateKeyDownEvent(LogicalKeyboardKey.enter);
+    await simulateKeyUpEvent(LogicalKeyboardKey.enter);
+    await tester.pumpAndSettle();
+    await simulateKeyDownEvent(LogicalKeyboardKey.enter);
+    await simulateKeyUpEvent(LogicalKeyboardKey.enter);
   }
 }

@@ -27,10 +27,10 @@ void main() {
     logStatus(
       'Open the Performance screen and switch to the Timeline Events tab',
     );
-    await tester.tap(
-      find.widgetWithText(Tab, ScreenMetaData.performance.title),
-    );
-    await tester.pump(longPumpDuration);
+
+    await switchToScreen(tester, ScreenMetaData.performance);
+    await tester.pump(safePumpDuration);
+
     await tester.tap(find.widgetWithText(InkWell, 'Timeline Events'));
     await tester.pumpAndSettle(longPumpDuration);
 
