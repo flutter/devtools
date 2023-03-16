@@ -6,7 +6,6 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 
-import 'common_widgets.dart';
 import 'config_specific/ide_theme/ide_theme.dart';
 import 'ui/colors.dart';
 import 'utils.dart';
@@ -464,39 +463,12 @@ extension ThemeDataExtension on ThemeData {
           backgroundColor: searchMatchColor,
         ),
       );
-
+  
   // Title of the hover card.
   TextStyle get hoverTitleTextStyle => _fixBlurryText(
         TextStyle(
           fontWeight: FontWeight.normal,
           fontSize: scaleByFontFactor(15.0),
-          decoration: TextDecoration.none,
-        ),
-      );
-
-  // Items in the hover card.
-  TextStyle get hoverTextStyle => _fixBlurryText(
-        TextStyle(
-          fontWeight: FontWeight.normal,
-          fontSize: scaleByFontFactor(11.5),
-          decoration: TextDecoration.none,
-        ),
-      );
-
-  // Value of items in hover e.g., capacity, etc.
-  TextStyle get hoverValueTextStyle => _fixBlurryText(
-        TextStyle(
-          fontWeight: FontWeight.normal,
-          fontSize: scaleByFontFactor(11.5),
-          decoration: TextDecoration.none,
-        ),
-      );
-
-  // Used for custom extension event values.
-  TextStyle get hoverSmallValueTextStyle => _fixBlurryText(
-        TextStyle(
-          fontWeight: FontWeight.normal,
-          fontSize: scaleByFontFactor(10.0),
           decoration: TextDecoration.none,
         ),
       );
@@ -614,7 +586,7 @@ const defaultCurve = Curves.easeInOutCubic;
 CurvedAnimation defaultCurvedAnimation(AnimationController parent) =>
     CurvedAnimation(curve: defaultCurve, parent: parent);
 
-double get chartFontSizeSmall => scaleByFontFactor(12.0);
+double get chartFontSizeSmall => scaleByFontFactor(10.0);
 
 const lightSelection = Color(0xFFD4D7DA);
 

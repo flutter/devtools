@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 
 import '../../devtools_app.dart';
 import '../screens/vm_developer/vm_developer_common_widgets.dart';
-import 'ui/colors.dart';
 
 mixin ProfilableDataMixin<T extends TreeNode<T>> on TreeNode<T> {
   ProfileMetaData get profileMetaData;

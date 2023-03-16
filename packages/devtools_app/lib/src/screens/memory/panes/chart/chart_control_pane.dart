@@ -98,6 +98,7 @@ class _ChartControlPaneState extends State<ChartControlPane>
         Row(
           children: [
             _LegendButton(chartController: widget.chartController),
+            const SizedBox(width: denseSpacing),
             const _ChartHelpLink(),
           ],
         ),

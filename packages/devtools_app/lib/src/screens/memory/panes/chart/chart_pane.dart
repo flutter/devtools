@@ -54,7 +54,7 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
 
   // TODO(terry): Compute below heights dynamically.
   static double get _hoverHeightMinimum => scaleByFontFactor(42.0);
-  static double get hoverItemHeight => scaleByFontFactor(18.0);
+  static double get hoverItemHeight => scaleByFontFactor(17.0);
 
   /// One extension event to display (4 lines).
   static double get _hoverOneEventsHeight => scaleByFontFactor(82.0);
@@ -341,8 +341,6 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
 
     final displayTimestamp = prettyTimestamp(chartsValues.timestamp);
 
-    final hoverHeading = theme.hoverTitleTextStyle;
-
     final OverlayState overlayState = Overlay.of(context);
     _hoverOverlayEntry ??= OverlayEntry(
       builder: (context) => Positioned(
@@ -368,7 +366,7 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
                 padding: const EdgeInsets.only(bottom: 4),
                 child: Text(
                   'Time $displayTimestamp',
-                  style: hoverHeading,
+                  style: theme.legendTextStyle,
                   textAlign: TextAlign.center,
                 ),
               ),
@@ -423,15 +421,10 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
     String? image,
     Color? colorPatch,
     bool dashed = false,
-    bool bold = true,
     bool hasNumeric = false,
     bool scaleImage = false,
   }) {
     final theme = Theme.of(context);
-    final hoverTitleEntry = theme.hoverTextStyle;
-    final hoverValueEntry = theme.hoverValueTextStyle;
-    final hoverSmallEntry = theme.hoverSmallValueTextStyle;
-
     List<Widget> hoverPartImageLine(
       String name, {
       String? image,
@@ -479,8 +472,8 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
         const PaddedDivider(
           padding: EdgeInsets.only(left: denseRowSpacing),
         ),
-        Text(displayName, style: bold ? hoverTitleEntry : hoverSmallEntry),
-        Text(displayValue, style: hoverValueEntry),
+        Text(displayName, style: theme.legendTextStyle),
+        Text(displayValue, style: theme.legendTextStyle),
       ];
     }
 
@@ -541,7 +534,7 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
         /// Pull out the event name, and custom values.
         final output =
             _displayEvent(null, chartsValues.extensionEvents.first).trim();
-        widgets.add(_hoverRow(name: output, bold: false));
+        widgets.add(_hoverRow(name: output));
       }
     }
     return widgets;
@@ -575,7 +568,6 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
 
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final hoverTextStyle = theme.hoverTextStyle;
     final collapsedColor = colorScheme.defaultBackgroundColor;
 
     return Material(
@@ -596,7 +588,7 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
           ),
           backgroundColor: collapsedColor,
           collapsedBackgroundColor: collapsedColor,
-          title: Text(title, style: hoverTextStyle),
+          title: Text(title, style: theme.legendTextStyle),
           children: widgets,
         ),
       ),
@@ -606,7 +598,6 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
   Widget _cardWidget(String value) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final hoverValueEntry = theme.hoverSmallValueTextStyle;
     final expandedGradient = colorScheme.verticalGradient;
 
     return Container(
@@ -621,7 +612,7 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
           Text(
             value,
             overflow: TextOverflow.ellipsis,
-            style: hoverValueEntry,
+            style: theme.legendTextStyle,
           ),
         ],
       ),

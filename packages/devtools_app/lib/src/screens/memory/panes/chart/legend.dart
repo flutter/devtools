@@ -36,7 +36,6 @@ class MemoryChartLegend extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final legendHeading = theme.hoverTextStyle;
 
     final legendRows = <Widget>[];
 
@@ -44,7 +43,7 @@ class MemoryChartLegend extends StatelessWidget {
     legendRows.add(
       Container(
         padding: _legendTitlePadding,
-        child: Text('Events Legend', style: legendHeading),
+        child: Text('Events Legend', style: theme.legendTextStyle),
       ),
     );
 
@@ -65,7 +64,7 @@ class MemoryChartLegend extends StatelessWidget {
     legendRows.add(
       Container(
         padding: _legendTitlePadding,
-        child: Text('Memory Legend', style: legendHeading),
+        child: Text('Memory Legend', style: theme.legendTextStyle),
       ),
     );
 
@@ -83,7 +82,7 @@ class MemoryChartLegend extends StatelessWidget {
       legendRows.add(
         Container(
           padding: _legendTitlePadding,
-          child: Text('Android Legend', style: legendHeading),
+          child: Text('Android Legend', style: theme.legendTextStyle),
         ),
       );
 

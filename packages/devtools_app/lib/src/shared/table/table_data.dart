@@ -10,7 +10,6 @@ import '../common_widgets.dart';
 import '../primitives/trees.dart';
 import '../primitives/utils.dart';
 import '../theme.dart';
-import '../ui/colors.dart';
 import '../utils.dart';
 
 /// Defines how a column should display data in a table.
