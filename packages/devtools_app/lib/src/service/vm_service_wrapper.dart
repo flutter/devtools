@@ -986,7 +986,7 @@ class VmServiceWrapper implements VmService {
     Future<T> future,
   ) async {
     // If the logger is not accepting FINE logs, then we won't be logging any
-    // messages. So don't just return the [future] as-is.
+    // messages. So just return the [future] as-is.
     if (!_log.isLoggable(Level.FINE)) return future;
 
     final logId = ++_logIdCounter;
