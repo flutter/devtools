@@ -16,8 +16,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 
-import '../../../test/test_infra/matchers/matchers.dart';
-
 // To run:
 // dart run integration_test/run_tests.dart --target=integration_test/test/live_connection/eval_and_browse_test.dart
 
@@ -106,9 +104,7 @@ class _EvalTester {
       print('Unexpected response: $e');
       await expectLater(
         find.byType(ConsolePane),
-        matchesDevToolsGolden(
-          '../../test_infra/goldens/eval_and_browse_testEval.png',
-        ),
+        matchesGoldenFile('eval_and_browse_testEval.png'),
       );
     }
   }
