@@ -533,46 +533,58 @@ class _VerboseLoggingSetting extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Row(
-          children: [
-            CheckboxSetting(
-              label: const Text('Enable verbose logging'),
-              listenable: preferences.verboseLoggingEnabled,
-              toggle: (enable) => preferences.toggleVerboseLogging(enable),
-              gaItem: gac.verboseLogging,
-            ),
-            const SizedBox(width: defaultSpacing),
-            IconLabelButton(
-              label: 'Copy logs',
-              icon: Icons.copy,
-              onPressed: () async => await copyToClipboard(
-                LogStorage.root.toString(),
-                'Successfully copied logs',
-              ),
-            ),
-            const SizedBox(width: defaultSpacing),
-            ClearButton(
-              label: 'Clear logs',
-              onPressed: LogStorage.root.clear,
-            ),
-          ],
+    return Container(
+      padding: const EdgeInsets.only(
+        right: 6.0,
+        bottom: 6.0,
+      ),
+      decoration: const BoxDecoration(
+        border: Border.fromBorderSide(
+          BorderSide(width: 0.5, color: Colors.grey),
         ),
-        const Padding(
-          padding: EdgeInsets.only(left: defaultSpacing),
-          child: Row(
+      ),
+      child: Column(
+        children: [
+          Row(
             children: [
-              Icon(Icons.warning),
-              SizedBox(width: defaultSpacing),
-              Text(
-                'Logs may contain sensitive information.\n'
-                'Always check their contents before sharing.',
-              )
+              CheckboxSetting(
+                label: const Text('Enable verbose logging'),
+                listenable: preferences.verboseLoggingEnabled,
+                toggle: (enable) => preferences.toggleVerboseLogging(enable),
+                gaItem: gac.verboseLogging,
+              ),
+              const SizedBox(width: defaultSpacing),
+              IconLabelButton(
+                label: 'Copy logs',
+                icon: Icons.copy,
+                onPressed: () async => await copyToClipboard(
+                  LogStorage.root.toString(),
+                  'Successfully copied logs',
+                ),
+              ),
+              const SizedBox(width: defaultSpacing),
+              ClearButton(
+                label: 'Clear logs',
+                onPressed: LogStorage.root.clear,
+              ),
             ],
           ),
-        ),
-      ],
+          Container(
+            alignment: Alignment.center,
+            child: const Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.warning),
+                SizedBox(width: defaultSpacing),
+                Text(
+                  'Logs may contain sensitive information.\n'
+                  'Always check their contents before sharing.',
+                )
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

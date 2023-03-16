@@ -87,7 +87,7 @@ class VmServiceWrapper implements VmService {
   final fakeServiceCache = JsonToServiceCache();
 
   /// A counter for unique ids to add to each of a future's messages.
-  static var _logIdCounter = 0;
+  static int _logIdCounter = 0;
 
   /// Executes `callback` for each isolate, and waiting for all callbacks to
   /// finish before completing.
@@ -986,7 +986,7 @@ class VmServiceWrapper implements VmService {
     Future<T> future,
   ) async {
     // If the logger is not accepting FINE logs, then we won't be logging any
-    // messages. So don't just return the [future] as is.
+    // messages. So don't just return the [future] as-is.
     if (!_log.isLoggable(Level.FINE)) return future;
 
     final logId = ++_logIdCounter;
