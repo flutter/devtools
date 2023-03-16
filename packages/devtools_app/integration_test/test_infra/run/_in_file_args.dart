@@ -5,7 +5,7 @@
 import 'dart:convert';
 import 'dart:io';
 
-enum InFileArgItems {
+enum TestFileArgItems {
   experimentsOn,
   appPath,
 }
@@ -18,18 +18,18 @@ class TestFileArgs {
   }
 
   factory TestFileArgs.fromFileContent(String fileContent) {
-    final values = _parseFileContent(fileContent);
+    final testFileArgItems = _parseFileContent(fileContent);
 
-    for (final arg in values.keys) {
-      values.putIfAbsent(arg, () => null);
+    for (final arg in testFileArgItems.keys) {
+      testFileArgItems.putIfAbsent(arg, () => null);
     }
 
-    return TestFileArgs.fromValues(values);
+    return TestFileArgs.fromItems(testFileArgItems);
   }
 
-  TestFileArgs.fromValues(Map<InFileArgItems, dynamic> values)
-      : experimentsOn = values[InFileArgItems.experimentsOn] ?? false,
-        appPath = values[InFileArgItems.appPath] ??
+  TestFileArgs.fromItems(Map<TestFileArgItems, dynamic> values)
+      : experimentsOn = values[TestFileArgItems.experimentsOn] ?? false,
+        appPath = values[TestFileArgItems.appPath] ??
             'test/test_infra/fixtures/flutter_app';
 
   /// If true, experiments will be enabled in the test.
@@ -44,16 +44,17 @@ final _argRegex = RegExp(
   multiLine: true,
 );
 
-Map<InFileArgItems, dynamic> _parseFileContent(String fileContent) {
+Map<TestFileArgItems, dynamic> _parseFileContent(String fileContent) {
   final matches = _argRegex.allMatches(fileContent);
 
-  final entries = matches.map<MapEntry<InFileArgItems, dynamic>>(
+  final entries = matches.map<MapEntry<TestFileArgItems, dynamic>>(
     (RegExpMatch m) {
       final name = m.group(1) ?? '';
       if (name.isEmpty)
-        throw 'Name of test argument name should be provided: [${m.group(0)}].';
+        throw ArgumentError(
+            'Name of test argument should be provided: [${m.group(0)}].');
       final value = m.group(2) ?? '';
-      return MapEntry(InFileArgItems.values.byName(name), jsonDecode(value));
+      return MapEntry(TestFileArgItems.values.byName(name), jsonDecode(value));
     },
   );
 

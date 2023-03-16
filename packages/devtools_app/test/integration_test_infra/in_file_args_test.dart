@@ -8,15 +8,15 @@ import '../../integration_test/test_infra/run/_in_file_args.dart';
 
 const _testAppPath = 'test/test_infra/fixtures/memory_app';
 
-late final _defaultArgs = TestFileArgs.fromValues({});
+late final _defaultArgs = TestFileArgs.fromItems({});
 
 final tests = [
   _InFileTestArgsTest(
     name: 'empty',
     input: '',
-    output: TestFileArgs.fromValues({
-      InFileArgItems.experimentsOn: _defaultArgs.experimentsOn,
-      InFileArgItems.appPath: _defaultArgs.appPath,
+    output: TestFileArgs.fromItems({
+      TestFileArgItems.experimentsOn: _defaultArgs.experimentsOn,
+      TestFileArgItems.appPath: _defaultArgs.appPath,
     }),
   ),
   _InFileTestArgsTest(
@@ -33,9 +33,9 @@ final tests = [
 
 import 'dart:ui' as ui;
 ''',
-    output: TestFileArgs.fromValues({
-      InFileArgItems.experimentsOn: true,
-      InFileArgItems.appPath: _testAppPath,
+    output: TestFileArgs.fromItems({
+      TestFileArgItems.experimentsOn: true,
+      TestFileArgItems.appPath: _testAppPath,
     }),
   ),
 ];
