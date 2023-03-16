@@ -543,10 +543,12 @@ void _timing(
   required int durationMicros,
   ScreenAnalyticsMetrics? screenMetrics,
 }) {
-  _log.fine('Event: _timing('
-      'screenName:$screenName, '
-      'timedOperation:$timedOperation, '
-      'durationMicros:$durationMicros)');
+  _log.fine(
+    'Event: _timing('
+    'screenName:$screenName, '
+    'timedOperation:$timedOperation, '
+    'durationMicros:$durationMicros)',
+  );
   GTag.event(
     screenName,
     gaEventProvider: () => _gtagEvent(

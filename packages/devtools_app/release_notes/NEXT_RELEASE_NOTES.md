@@ -7,7 +7,7 @@ Dart & Flutter DevTools - A Suite of Performance Tools for Dart and Flutter
 
 ## General updates
 * Use the default Flutter service worker - [#5331](https://github.com/flutter/devtools/pull/5331)
-* Added a the new verbose logging feature for helping us debug user issues. [#5404](https://github.com/flutter/devtools/pull/5404)
+* Added the new verbose logging feature for helping us debug user issues. [#5404](https://github.com/flutter/devtools/pull/5404)
     ![verbose logging](images/verbose-logging.png "verbose_logging")
 
 ## Inspector updates

@@ -518,6 +518,7 @@ class SettingsDialog extends StatelessWidget {
             toggle: preferences.toggleVmDeveloperMode,
             gaItem: gac.vmDeveloperMode,
           ),
+          const PaddedDivider(),
           const _VerboseLoggingSetting(),
         ],
       ),
@@ -533,58 +534,48 @@ class _VerboseLoggingSetting extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.only(
-        right: 6.0,
-        bottom: 6.0,
-      ),
-      decoration: const BoxDecoration(
-        border: Border.fromBorderSide(
-          BorderSide(width: 0.5, color: Colors.grey),
+    return Column(
+      children: [
+        Row(
+          children: [
+            CheckboxSetting(
+              label: const Text('Enable verbose logging'),
+              listenable: preferences.verboseLoggingEnabled,
+              toggle: (enable) => preferences.toggleVerboseLogging(enable),
+              gaItem: gac.verboseLogging,
+            ),
+            const SizedBox(width: defaultSpacing),
+            IconLabelButton(
+              label: 'Copy logs',
+              icon: Icons.copy,
+              onPressed: () async => await copyToClipboard(
+                LogStorage.root.toString(),
+                'Successfully copied logs',
+              ),
+            ),
+            const SizedBox(width: defaultSpacing),
+            ClearButton(
+              label: 'Clear logs',
+              onPressed: LogStorage.root.clear,
+            ),
+          ],
         ),
-      ),
-      child: Column(
-        children: [
-          Row(
+        Container(
+          alignment: Alignment.center,
+          child: const Row(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              CheckboxSetting(
-                label: const Text('Enable verbose logging'),
-                listenable: preferences.verboseLoggingEnabled,
-                toggle: (enable) => preferences.toggleVerboseLogging(enable),
-                gaItem: gac.verboseLogging,
-              ),
-              const SizedBox(width: defaultSpacing),
-              IconLabelButton(
-                label: 'Copy logs',
-                icon: Icons.copy,
-                onPressed: () async => await copyToClipboard(
-                  LogStorage.root.toString(),
-                  'Successfully copied logs',
-                ),
-              ),
-              const SizedBox(width: defaultSpacing),
-              ClearButton(
-                label: 'Clear logs',
-                onPressed: LogStorage.root.clear,
-              ),
+              // TODO(kenz): style this with warning color once material 3 changes land
+              Icon(Icons.warning),
+              SizedBox(width: defaultSpacing),
+              Text(
+                'Logs may contain sensitive information.\n'
+                'Always check their contents before sharing.',
+              )
             ],
           ),
-          Container(
-            alignment: Alignment.center,
-            child: const Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(Icons.warning),
-                SizedBox(width: defaultSpacing),
-                Text(
-                  'Logs may contain sensitive information.\n'
-                  'Always check their contents before sharing.',
-                )
-              ],
-            ),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
