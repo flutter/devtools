@@ -272,6 +272,7 @@ Future<void> setLastShownReleaseNotesVersion(String version) async {
   }
 }
 
+// currently unused
 /// Requests all .devtools properties to be reset to their default values in the
 /// file '~/.flutter-devtools/.devtools'.
 Future<void> resetDevToolsFile() async {

@@ -67,20 +67,6 @@ class TestRenderingFlutterBinding extends BindingBase
     }
   }
 
-  /// Returns all exceptions caught by [FlutterError] from least recently caught to
-  /// most recently caught, and removes them from the list of captured errors.
-  ///
-  /// The returned iterable takes errors lazily. If, for example, you iterate over 2
-  /// errors, but there are 5 errors total, this binding will still fail the test.
-  /// Tests are expected to take and inspect all errors.
-  Iterable<Object> takeAllFlutterExceptions() sync* {
-    // sync* and yield are used for lazy evaluation. Otherwise, the list would be
-    // drained eagerly and allow a test pass with unexpected errors.
-    while (_errors.isNotEmpty) {
-      yield _errors.removeAt(0).exception;
-    }
-  }
-
   EnginePhase phase = EnginePhase.composite;
 
   @override
@@ -190,20 +176,6 @@ void pumpFrame({
   _renderer.drawFrame();
 }
 
-class TestCallbackPainter extends CustomPainter {
-  const TestCallbackPainter({required this.onPaint});
-
-  final VoidCallback onPaint;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    onPaint();
-  }
-
-  @override
-  bool shouldRepaint(TestCallbackPainter oldDelegate) => true;
-}
-
 class RenderSizedBox extends RenderBox {
   RenderSizedBox(this._size);
 
@@ -242,13 +214,6 @@ class RenderSizedBox extends RenderBox {
 
   @override
   bool hitTestSelf(Offset position) => true;
-}
-
-class FakeTickerProvider implements TickerProvider {
-  @override
-  Ticker createTicker(TickerCallback onTick, [bool disableAnimations = false]) {
-    return FakeTicker();
-  }
 }
 
 class FakeTicker implements Ticker {

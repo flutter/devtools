@@ -128,23 +128,6 @@ class LayoutProperties {
     }
   }
 
-  factory LayoutProperties.lerp(
-    LayoutProperties begin,
-    LayoutProperties end,
-    double t,
-  ) {
-    return LayoutProperties.values(
-      node: end.node,
-      children: end.children,
-      constraints: BoxConstraints.lerp(begin.constraints, end.constraints, t),
-      description: end.description,
-      flexFactor: begin.flexFactor! * (t + 1) - end.flexFactor! * t,
-      isFlex: begin.isFlex && end.isFlex,
-      size: Size.lerp(begin.size, end.size, t)!,
-      flexFit: end.flexFit,
-    );
-  }
-
   LayoutProperties? parent;
   final RemoteDiagnosticsNode node;
   final List<LayoutProperties> children;

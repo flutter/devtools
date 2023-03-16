@@ -68,10 +68,6 @@ const _eventsKey = 'events';
 class LocationMap {
   LocationMap();
 
-  factory LocationMap.fromJson(Map<String, dynamic> json) {
-    return LocationMap()..processLocationMap(json);
-  }
-
   final _locationMap = <int, Location>{};
 
   int _countUnknownLocations = 0;

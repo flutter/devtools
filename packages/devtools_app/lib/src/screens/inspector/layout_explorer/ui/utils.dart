@@ -52,18 +52,6 @@ class BorderLayout extends StatelessWidget {
   final double? topHeight;
   final double? bottomHeight;
 
-  CrossAxisAlignment get crossAxisAlignment {
-    if (left != null && right != null) {
-      return CrossAxisAlignment.center;
-    } else if (left == null && right != null) {
-      return CrossAxisAlignment.start;
-    } else if (left != null && right == null) {
-      return CrossAxisAlignment.end;
-    } else {
-      return CrossAxisAlignment.start;
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Stack(

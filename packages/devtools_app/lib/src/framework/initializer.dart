@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 import '../shared/analytics/analytics.dart' as ga;
 import '../shared/analytics/constants.dart' as gac;
 import '../shared/common_widgets.dart';
+import '../shared/framework_controller.dart';
 import '../shared/globals.dart';
 import '../shared/primitives/auto_dispose.dart';
 import '../shared/primitives/utils.dart';
@@ -104,7 +105,7 @@ class _InitializerState extends State<Initializer>
   /// Connects to the VM with the given URI. This request usually comes from the
   /// IDE via the server API to reuse the DevTools window after being disconnected
   /// (for example if the user stops a debug session then launches a new one).
-  void _connectVm(event) {
+  void _connectVm(ConnectVmEvent event) {
     DevToolsRouterDelegate.of(context).updateArgsIfChanged({
       'uri': event.serviceProtocolUri.toString(),
       if (event.notify) 'notify': 'true',

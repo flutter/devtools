@@ -282,7 +282,7 @@ class _CodeViewState extends State<CodeView>
         return Stack(
           children: [
             scriptRef == null
-                ? CodeViewEmptyState(widget: widget, context: context)
+                ? CodeViewEmptyState(widget: widget)
                 : buildCodeArea(context),
             if (showFileOpener)
               Positioned(
@@ -544,11 +544,9 @@ class CodeViewEmptyState extends StatelessWidget {
   const CodeViewEmptyState({
     super.key,
     required this.widget,
-    required this.context,
   });
 
   final CodeView widget;
-  final BuildContext context;
 
   @override
   Widget build(BuildContext context) {
@@ -619,10 +617,7 @@ class ProfileInformationGutter extends StatelessWidget {
                       if (data == null) {
                         return const SizedBox();
                       }
-                      return ProfileInformationGutterItem(
-                        lineNumber: lineNum,
-                        profilerData: data,
-                      );
+                      return ProfileInformationGutterItem(profilerData: data);
                     },
                   ),
                 ),
@@ -692,11 +687,8 @@ class _ProfileInformationGutterHeader extends StatelessWidget {
 class ProfileInformationGutterItem extends StatelessWidget {
   const ProfileInformationGutterItem({
     Key? key,
-    required this.lineNumber,
     required this.profilerData,
   }) : super(key: key);
-
-  final int lineNumber;
 
   final ProfileReportEntry profilerData;
 

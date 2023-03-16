@@ -33,9 +33,6 @@ class Console extends StatelessWidget {
   final List<Widget> controls;
   final ValueListenable<List<ConsoleLine>> lines;
 
-  @visibleForTesting
-  String get textContent => lines.value.join('\n');
-
   @override
   Widget build(BuildContext context) {
     return ConsoleFrame(

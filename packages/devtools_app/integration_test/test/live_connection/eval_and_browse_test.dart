@@ -44,6 +44,8 @@ void main() {
     await _testBasicEval(evalTester);
     await _testAssignment(evalTester);
 
+    await switchToScreen(tester, ScreenMetaData.memory);
+
     await _testRootIsAccessible(evalTester);
   });
 }
