@@ -29,12 +29,12 @@ xattr -d com.apple.quarantine ~/path/to/chromedriver
 
 ### Special flags:
 
-* `--test-app-uri`: to speed up local development, you can pass in a vm service uri from a Dart or Flutter 
-app running on your local machine. This saves the cost of spinning up a new test app for each test run. To 
+* `--test-app-uri`: to speed up local development, you can pass in a vm service uri from a Dart or Flutter
+app running on your local machine. This saves the cost of spinning up a new test app for each test run. To
 do this, pass the vm service uri using the `--test-app-uri=some-uri` run flag.
-* `--headless`: this will run the integration test on the 'web-server' device instead of the 'chrome' device, meaning you will not be able to see the integration test run in Chrome when running locally. 
+* `--headless`: this will run the integration test on the 'web-server' device instead of the 'chrome' device, meaning you will not be able to see the integration test run in Chrome when running locally.
 * `--update-goldens`: behaves like the `--update-goldens` flag for Flutter unit tests,
-updating the golden images to the results produced by the test run. 
+updating the golden images to the results produced by the test run.
 
 The following flags are available, but should not be used manually. To run a test with offline data
 or with experiments enabled, place the test in the proper directory, and the `run_tests.dart` script
@@ -51,13 +51,11 @@ Where you should place your integration test will depend on the answers to the f
 ["live connection"](#live-connection-integration-tests) integration test.
 2. Does your test need to use offline (and stable) test data? This is an
 ["offline"](#offline-integration-tests) integration test.
-3. Does your test require experiments to be enabled? This is an
-["experimental"](#experimental-integration-tests) integration test.
 
 ## "live connection" integration tests
 
 Tests under `integration_test/test/live_connection` will run DevTools and connect it to a live Dart or Flutter
-application. 
+application.
 
 ## "offline" integration tests
 
@@ -67,11 +65,8 @@ for testing features that will not have stable data from a live application. For
 the Performance screen timeline data will never be stable with a live applicaiton, so
 loading offline data allows for screenshot testing without flakiness.
 
-## "experimental" integration tests
+# In-file test arguments
 
-Tests under an 'experimental' directory (either `integration_test/test/live_connection/experimental`
-or `integration_test/test/offline/experimental`) will run DevTools with experiments enabled.
-If a feature that is still under construction requires integration tests, the test
-file should live under an 'experimental' directory. This directory should be a
-subdirectory of either 'live_connection' or 'offline' depending on the requirements
-of the test.
+Some test arguments located in the test file as specifically formatted comments.
+See list of such arguments and example of
+usage in [tests](../test/integration_test/in_file_args_test.dart).
