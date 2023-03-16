@@ -65,9 +65,9 @@ class DevToolsScaffold extends StatefulWidget {
   /// The padding around the content in the DevTools UI.
   EdgeInsets get appPadding => EdgeInsets.fromLTRB(
         horizontalPadding.left,
-        isEmbedded() ? 2.0 : defaultSpacing,
+        isEmbedded() ? 2.0 : intermediateSpacing,
         horizontalPadding.right,
-        isEmbedded() ? 0.0 : denseSpacing,
+        isEmbedded() ? 0.0 : intermediateSpacing,
       );
 
   // Note: when changing this value, also update `flameChartContainerOffset`
@@ -280,11 +280,10 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
     // Build the screens for each tab and wrap them in the appropriate styling.
     final tabBodies = [
       for (var screen in widget.screens)
-        Container(
+        Align(
           // TODO(kenz): this padding creates a flash when dragging and dropping
           // into the app size screen because it creates space that is outside
           // of the [DragAndDropEventAbsorber] widget. Fix this.
-          padding: widget.appPadding,
           alignment: Alignment.topLeft,
           child: FocusScope(
             child: AnalyticsPrompt(
@@ -344,22 +343,36 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
                       :
                       // ignore: avoid-returning-widgets as that would make code more verbose for no clear benefit in this case.
                       _buildAppBar(scaffoldTitle),
-                  body: showConsole
-                      ? Split(
-                          axis: Axis.vertical,
-                          splitters: [
-                            ConsolePaneHeader(),
-                          ],
-                          initialFractions: const [0.8, 0.2],
-                          children: [
-                            content,
-                            Padding(
-                              padding: DevToolsScaffold.horizontalPadding,
-                              child: const ConsolePane(),
-                            ),
-                          ],
-                        )
-                      : content,
+                  body: OutlineDecoration.onlyTop(
+                    child: Padding(
+                      padding: widget.appPadding,
+                      child: showConsole
+                          ? Split(
+                              axis: Axis.vertical,
+                              splitters: [
+                                ConsolePaneHeader(
+                                  backgroundColor: theme.colorScheme.surface,
+                                ),
+                              ],
+                              initialFractions: const [0.8, 0.2],
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.only(
+                                    bottom: intermediateSpacing,
+                                  ),
+                                  child: content,
+                                ),
+                                RoundedOutlinedBorder.onlyBottom(
+                                  child: Padding(
+                                    padding: DevToolsScaffold.horizontalPadding,
+                                    child: const ConsolePane(),
+                                  ),
+                                ),
+                              ],
+                            )
+                          : content,
+                    ),
+                  ),
                   bottomNavigationBar: StatusLine(
                     currentScreen: _currentScreen,
                     isEmbedded: widget.embed,
@@ -383,10 +396,11 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
     final isNarrow =
         MediaQuery.of(context).size.width <= _wideWidth(title, widget);
 
-    // Add a leading [BulletSpacer] to the actions if the screen is not narrow.
+    // Add a leading [VerticalLineSpacer] to the actions if the screen is not
+    // narrow.
     final actions = List<Widget>.from(widget.actions ?? []);
     if (!isNarrow && actions.isNotEmpty && widget.screens.length > 1) {
-      actions.insert(0, const BulletSpacer(useAccentColor: true));
+      actions.insert(0, VerticalLineSpacer(height: defaultToolbarHeight));
     }
 
     final bool hasMultipleTabs = widget.screens.length > 1;
@@ -398,18 +412,21 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
         tabs: [for (var screen in widget.screens) screen.buildTab(context)],
       );
       preferredSize = isNarrow
-          ? Size.fromHeight(
-              defaultToolbarHeight + scaleByFontFactor(36.0) + 4.0,
-            )
+          ? Size.fromHeight(defaultToolbarHeight * 2 + densePadding)
           : Size.fromHeight(defaultToolbarHeight);
       final alignment = isNarrow ? Alignment.bottomLeft : Alignment.centerRight;
 
-      final rightAdjust = isNarrow ? 0.0 : BulletSpacer.width;
       final rightPadding = isNarrow
           ? 0.0
           : math.max(
               0.0,
-              actionWidgetSize * (actions.length) - rightAdjust,
+              // Use [widget.actions] here instead of [actions] because we may
+              // have added a spacer element to [actions] above, which should be
+              // excluded from the width calculation.
+              actionWidgetSize * ((widget.actions ?? []).length) +
+                  (actions.first is VerticalLineSpacer
+                      ? VerticalLineSpacer.totalWidth
+                      : 0.0),
             );
 
       flexibleSpace = Align(
@@ -471,7 +488,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
     }
     final actionsLength = widget.actions?.length ?? 0;
     if (actionsLength > 0) {
-      wideWidth += actionsLength * actionWidgetSize + BulletSpacer.width;
+      wideWidth += actionsLength * actionWidgetSize;
     }
     return wideWidth;
   }

@@ -15,10 +15,12 @@ import 'evaluate.dart';
 // TODO(devoncarew): Show some small UI indicator when we receive stdout/stderr.
 
 class ConsolePaneHeader extends AreaPaneHeader {
-  ConsolePaneHeader()
+  ConsolePaneHeader({Color? backgroundColor})
       : super(
           title: const Text('Console'),
-          needsTopBorder: false,
+          includeBottomBorder: false,
+          includeLeftBorder: true,
+          includeRightBorder: true,
           actions: [
             CopyToClipboardControl(
               dataProvider: () =>

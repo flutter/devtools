@@ -597,9 +597,6 @@ class ProfileInformationGutter extends StatelessWidget {
     return OutlineDecoration.onlyRight(
       child: Container(
         width: gutterWidth,
-        decoration: BoxDecoration(
-          color: Theme.of(context).titleSolidBackgroundColor,
-        ),
         child: Stack(
           children: [
             Column(
@@ -892,7 +889,6 @@ class Gutter extends StatelessWidget {
       width: gutterWidth,
       decoration: BoxDecoration(
         border: Border(right: defaultBorderSide(theme)),
-        color: Theme.of(context).titleSolidBackgroundColor,
       ),
       child: ListView.builder(
         controller: scrollController,

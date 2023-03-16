@@ -450,7 +450,7 @@ class ProgramExplorer extends StatelessWidget {
           final fileExplorerHeader = displayHeader
               ? AreaPaneHeader(
                   title: Text(title),
-                  needsTopBorder: false,
+                  includeTopBorder: false,
                 )
               : BlankHeader();
           final fileExplorer = _FileExplorer(

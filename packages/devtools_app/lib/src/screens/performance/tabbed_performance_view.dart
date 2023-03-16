@@ -285,8 +285,9 @@ class RefreshTimelineEventsButton extends StatelessWidget {
     return ValueListenableBuilder<EventsControllerStatus>(
       valueListenable: controller.status,
       builder: (context, status, _) {
-        return DevToolsIconButton(
-          iconData: Icons.refresh,
+        return RefreshButton(
+          iconOnly: true,
+          outlined: false,
           onPressed: status == EventsControllerStatus.processing
               ? null
               : controller.processAllTraceEvents,

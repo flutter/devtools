@@ -100,7 +100,7 @@ class MemoryBodyState extends State<MemoryBody>
           chartController: _chartController,
           controller: controller,
         ),
-        const SizedBox(height: denseRowSpacing),
+        const SizedBox(height: intermediateSpacing),
         MemoryChartPane(
           chartController: _chartController,
           keyFocusNode: _focusNode,

@@ -161,12 +161,12 @@ class _CpuProfilerState extends State<CpuProfiler>
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         AreaPaneHeader(
-          needsTopBorder: false,
+          includeTopBorder: false,
           leftPadding: 0,
           tall: true,
           title: TabBar(
             labelColor:
-                textTheme.bodyLarge?.color ?? colorScheme.defaultForeground,
+                textTheme.bodyLarge?.color ?? colorScheme.onSurface,
             isScrollable: true,
             controller: _tabController,
             tabs: widget.tabs,

@@ -83,11 +83,12 @@ class _LogDetailsState extends State<LogDetails>
       _lastDetails = details;
     }
 
-    return OutlineDecoration(
+    final theme = Theme.of(context);
+    return RoundedOutlinedBorder(
       child: ConsoleFrame(
         title: AreaPaneHeader(
           title: const Text('Details'),
-          needsTopBorder: false,
+          includeTopBorder: false,
           actions: [
             CopyToClipboardControl(
               dataProvider: _dataProvider,
@@ -102,7 +103,7 @@ class _LogDetailsState extends State<LogDetails>
             child: SelectableText(
               log?.prettyPrinted() ?? '',
               textAlign: TextAlign.left,
-              style: Theme.of(context).fixedFontStyle,
+              style: theme.fixedFontStyle,
             ),
           ),
         ),

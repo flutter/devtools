@@ -127,7 +127,7 @@ void main() {
 
       final findCoverageToggle = find.text('Show Coverage');
       final findProfileToggle = find.text('Show Profile');
-      final findRefresh = find.byType(IconLabelButton);
+      final findRefresh = find.byType(DevToolsButton);
       expect(findCoverageToggle, findsOneWidget);
       expect(findProfileToggle, findsOneWidget);
       expect(findRefresh, findsOneWidget);
@@ -136,7 +136,7 @@ void main() {
       gutterItemCoverageTester(tester, false);
       gutterItemProfileInfoTester(tester, false);
       expect(
-        tester.widget<IconLabelButton>(findRefresh).onPressed,
+        tester.widget<DevToolsButton>(findRefresh).onPressed,
         isNull,
       );
 
@@ -147,7 +147,7 @@ void main() {
       gutterItemCoverageTester(tester, true);
       gutterItemProfileInfoTester(tester, false);
       expect(
-        tester.widget<IconLabelButton>(findRefresh).onPressed,
+        tester.widget<DevToolsButton>(findRefresh).onPressed,
         isNotNull,
       );
 
@@ -158,7 +158,7 @@ void main() {
       gutterItemCoverageTester(tester, true);
       gutterItemProfileInfoTester(tester, true);
       expect(
-        tester.widget<IconLabelButton>(findRefresh).onPressed,
+        tester.widget<DevToolsButton>(findRefresh).onPressed,
         isNotNull,
       );
 
@@ -173,7 +173,7 @@ void main() {
       gutterItemCoverageTester(tester, false);
       gutterItemProfileInfoTester(tester, true);
       expect(
-        tester.widget<IconLabelButton>(findRefresh).onPressed,
+        tester.widget<DevToolsButton>(findRefresh).onPressed,
         isNotNull,
       );
 
@@ -183,7 +183,7 @@ void main() {
       gutterItemCoverageTester(tester, false);
       gutterItemProfileInfoTester(tester, false);
       expect(
-        tester.widget<IconLabelButton>(findRefresh).onPressed,
+        tester.widget<DevToolsButton>(findRefresh).onPressed,
         isNull,
       );
     },

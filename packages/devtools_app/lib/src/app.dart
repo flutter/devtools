@@ -327,10 +327,16 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
   Widget build(BuildContext context) {
     return MaterialApp.router(
       debugShowCheckedModeBanner: false,
+      themeMode: isDarkThemeEnabled ? ThemeMode.dark : ThemeMode.light,
       theme: themeFor(
-        isDarkTheme: isDarkThemeEnabled,
+        isDarkTheme: false,
         ideTheme: ideTheme,
-        theme: Theme.of(context),
+        theme: ThemeData(useMaterial3: true, colorScheme: lightColorScheme),
+      ),
+      darkTheme: themeFor(
+        isDarkTheme: true,
+        ideTheme: ideTheme,
+        theme: ThemeData(useMaterial3: true, colorScheme: darkColorScheme),
       ),
       builder: (context, child) {
         return MultiProvider(
@@ -470,7 +476,7 @@ class OpenSettingsAction extends StatelessWidget {
           height: actionWidgetSize,
           alignment: Alignment.center,
           child: Icon(
-            Icons.settings,
+            Icons.settings_outlined,
             size: actionsIconSize,
           ),
         ),

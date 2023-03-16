@@ -45,7 +45,6 @@ extension FlameChartColorScheme on ColorScheme {
 }
 
 const defaultSelectionForegroundColor = Colors.white;
-Color get defaultSelectionColor => devtoolsBlue[400]!;
 
 const searchMatchColor = Colors.yellow;
 final searchMatchColorOpaque = Colors.yellow.withOpacity(0.5);

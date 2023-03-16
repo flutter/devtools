@@ -142,11 +142,12 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
       axis: Axis.horizontal,
       initialFractions: const [0.25, 0.75],
       children: [
-        OutlineDecoration(child: debuggerPanes()),
+        // TODO(kenz): the top two corners are styled in a strange way.
+        RoundedOutlinedBorder(child: debuggerPanes()),
         Column(
           children: [
             const DebuggingControls(),
-            const SizedBox(height: denseRowSpacing),
+            const SizedBox(height: intermediateSpacing),
             Expanded(
               child: ValueListenableBuilder<bool>(
                 valueListenable: codeViewController.fileExplorerVisible,
@@ -160,7 +161,7 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
                       initialFractions: const [0.7, 0.3],
                       children: [
                         child!,
-                        OutlineDecoration(
+                        RoundedOutlinedBorder(
                           child: ProgramExplorer(
                             controller:
                                 codeViewController.programExplorerController,
@@ -254,7 +255,7 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
                   buttonKey: DebuggerScreenBody.callStackCopyButtonKey,
                 ),
               ],
-              needsTopBorder: false,
+              includeTopBorder: false,
             ),
             const AreaPaneHeader(title: Text(variablesTitle)),
             AreaPaneHeader(
@@ -497,6 +498,7 @@ class _FloatingDebuggerControlsState extends State<FloatingDebuggerControls>
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return AnimatedOpacity(
       opacity: _isPaused ? 1.0 : 0.0,
       duration: longDuration,
@@ -508,7 +510,7 @@ class _FloatingDebuggerControlsState extends State<FloatingDebuggerControls>
         }
       },
       child: Container(
-        color: devtoolsWarning,
+        color: colorScheme.warningContainer,
         height: controlHeight,
         child: OutlinedRowGroup(
           // Default focus color for the light theme - since the background
@@ -522,9 +524,9 @@ class _FloatingDebuggerControlsState extends State<FloatingDebuggerControls>
               padding: const EdgeInsets.symmetric(
                 horizontal: defaultSpacing,
               ),
-              child: const Text(
+              child: Text(
                 'Main isolate is paused in the debugger',
-                style: TextStyle(color: Colors.black),
+                style: TextStyle(color: colorScheme.onWarningContainer),
               ),
             ),
             DevToolsTooltip(

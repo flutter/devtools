@@ -199,7 +199,7 @@ class _SnapshotListItemsState extends State<_SnapshotListItems>
           return Container(
             height: _headerHeight,
             color: selected
-                ? Theme.of(context).colorScheme.selectedRowColor
+                ? Theme.of(context).colorScheme.primary
                 : null,
             child: InkWell(
               canRequestFocus: false,

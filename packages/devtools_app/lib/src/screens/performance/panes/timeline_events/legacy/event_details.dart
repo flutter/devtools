@@ -37,41 +37,38 @@ class EventDetails extends StatelessWidget {
     // unavailable for snapshots and provide link to return to offline profile
     // (see html_event_details.dart).
     final theme = Theme.of(context);
-    return OutlineDecoration(
-      child: DualValueListenableBuilder<bool, Flag>(
-        firstListenable: offlineController.offlineMode,
-        secondListenable:
-            legacyController.cpuProfilerController.profilerFlagNotifier!,
-        builder: (context, offline, profilerFlag, _) {
-          final profilerEnabled = profilerFlag.valueAsString == 'true';
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              AreaPaneHeader(
-                needsTopBorder: false,
-                tall: true,
-                title: Text(_generateHeaderText()),
-                actions: [
-                  if (selectedEvent != null &&
-                      selectedEvent!.isUiEvent &&
-                      !offline &&
-                      profilerEnabled)
-                    CpuSamplingRateDropdown(
-                      screenId: PerformanceScreen.id,
-                      profilePeriodFlagNotifier: legacyController
-                          .cpuProfilerController.profilePeriodFlag!,
-                    ),
-                ],
-              ),
-              Expanded(
-                child: selectedEvent != null
-                    ? _buildDetails(offline, profilerEnabled)
-                    : _buildInstructions(theme),
-              ),
-            ],
-          );
-        },
-      ),
+    return DualValueListenableBuilder<bool, Flag>(
+      firstListenable: offlineController.offlineMode,
+      secondListenable:
+          legacyController.cpuProfilerController.profilerFlagNotifier!,
+      builder: (context, offline, profilerFlag, _) {
+        final profilerEnabled = profilerFlag.valueAsString == 'true';
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            AreaPaneHeader(
+              tall: true,
+              title: Text(_generateHeaderText()),
+              actions: [
+                if (selectedEvent != null &&
+                    selectedEvent!.isUiEvent &&
+                    !offline &&
+                    profilerEnabled)
+                  CpuSamplingRateDropdown(
+                    screenId: PerformanceScreen.id,
+                    profilePeriodFlagNotifier: legacyController
+                        .cpuProfilerController.profilePeriodFlag!,
+                  ),
+              ],
+            ),
+            Expanded(
+              child: selectedEvent != null
+                  ? _buildDetails(offline, profilerEnabled)
+                  : _buildInstructions(theme),
+            ),
+          ],
+        );
+      },
     );
   }
 

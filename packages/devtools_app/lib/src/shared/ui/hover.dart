@@ -141,7 +141,7 @@ class HoverCard {
             child: Container(
               padding: const EdgeInsets.all(denseSpacing),
               decoration: BoxDecoration(
-                color: colorScheme.defaultBackgroundColor,
+                color: colorScheme.surface,
                 border: Border.all(
                   color: focusColor,
                   width: hoverCardBorderWidth,

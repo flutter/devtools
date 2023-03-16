@@ -6,7 +6,6 @@ import 'package:devtools_app/src/framework/scaffold.dart';
 import 'package:devtools_app/src/screens/profiler/profiler_screen.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/shared/banner_messages.dart';
-import 'package:devtools_app/src/shared/common_widgets.dart';
 import 'package:devtools_app/src/shared/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_app/src/shared/notifications.dart';
@@ -145,7 +144,7 @@ void main() {
       await pumpTestFrame(tester);
       expect(find.byKey(k1), findsOneWidget);
 
-      await tester.tap(find.byType(CircularIconButton));
+      await tester.tap(find.byType(IconButton));
       await pumpTestFrame(tester);
       expect(find.byKey(k1), findsNothing);
 
@@ -171,24 +170,18 @@ const k3 = Key('test message 3');
 final testMessage1 = BannerMessage(
   key: k1,
   textSpans: const [TextSpan(text: 'Test Message 1')],
-  backgroundColor: Colors.black,
-  foregroundColor: Colors.white,
   screenId: testMessage1ScreenId,
   messageType: BannerMessageType.warning,
 );
 final testMessage2 = BannerMessage(
   key: k2,
   textSpans: const [TextSpan(text: 'Test Message 2')],
-  backgroundColor: Colors.black,
-  foregroundColor: Colors.white,
   screenId: testMessage2ScreenId,
   messageType: BannerMessageType.warning,
 );
 final testMessage3 = BannerMessage(
   key: k3,
   textSpans: const [TextSpan(text: 'Test Message 3')],
-  backgroundColor: Colors.black,
-  foregroundColor: Colors.white,
   screenId: testMessage3ScreenId,
   messageType: BannerMessageType.warning,
 );

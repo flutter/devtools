@@ -576,13 +576,13 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final hoverTextStyle = theme.hoverTextStyle;
-    final contrastForeground = colorScheme.contrastForeground;
     final collapsedColor = colorScheme.defaultBackgroundColor;
 
     return Material(
       color: Colors.transparent,
       child: Theme(
-        data: ThemeData(unselectedWidgetColor: contrastForeground),
+        // TODO(kenz): why are we using a Material and a Theme widget here?
+        data: ThemeData(),
         child: ExpansionTile(
           tilePadding: EdgeInsets.zero,
           childrenPadding: EdgeInsets.zero,

@@ -86,7 +86,7 @@ class _VmInstanceDisplayState extends State<VmInstanceDisplay> {
             children: [
               const AreaPaneHeader(
                 title: Text('Properties'),
-                needsTopBorder: false,
+                includeTopBorder: false,
               ),
               Flexible(
                 child: FutureBuilder(

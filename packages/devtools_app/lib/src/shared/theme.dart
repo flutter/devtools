@@ -11,6 +11,9 @@ import 'config_specific/ide_theme/ide_theme.dart';
 import 'ui/colors.dart';
 import 'utils.dart';
 
+// TODO(kenz): try to eliminate as many custom colors as possible, and pull
+// colors only from the [lightColorScheme] and the [darkColorScheme].
+
 const _contrastForegroundWhite = Color.fromARGB(255, 240, 240, 240);
 
 const contrastForegroundWhite = _contrastForegroundWhite;
@@ -20,92 +23,75 @@ const contrastForegroundWhite = _contrastForegroundWhite;
 ThemeData themeFor({
   required bool isDarkTheme,
   required IdeTheme ideTheme,
-  ThemeData? theme,
+  required ThemeData theme,
 }) {
-  ThemeData colorTheme;
-  // If the theme specifies a background color, use it to infer a theme.
-  if (isValidDarkColor(ideTheme.backgroundColor)) {
-    colorTheme = _darkTheme(ideTheme);
-  } else if (isValidLightColor(ideTheme.backgroundColor)) {
-    colorTheme = _lightTheme(ideTheme);
-  } else {
-    colorTheme = isDarkTheme ? _darkTheme(ideTheme) : _lightTheme(ideTheme);
-  }
+  final colorTheme = isDarkTheme
+      ? _darkTheme(ideTheme: ideTheme, theme: theme)
+      : _lightTheme(ideTheme: ideTheme, theme: theme);
 
   return colorTheme.copyWith(
-    primaryTextTheme: (theme != null
-            ? theme.primaryTextTheme.merge(colorTheme.primaryTextTheme)
-            : colorTheme.primaryTextTheme)
+    primaryTextTheme: theme.primaryTextTheme
+        .merge(colorTheme.primaryTextTheme)
         .apply(fontSizeFactor: ideTheme.fontSizeFactor),
-    textTheme: (theme != null
-            ? theme.textTheme.merge(colorTheme.textTheme)
-            : colorTheme.textTheme)
+    textTheme: theme.textTheme
+        .merge(colorTheme.textTheme)
         .apply(fontSizeFactor: ideTheme.fontSizeFactor),
   );
 }
 
-ThemeData _darkTheme(IdeTheme ideTheme) {
-  final theme = ThemeData.dark();
+ThemeData _darkTheme({
+  required IdeTheme ideTheme,
+  required ThemeData theme,
+}) {
   final background = isValidDarkColor(ideTheme.backgroundColor)
       ? ideTheme.backgroundColor!
       : theme.canvasColor;
   return _baseTheme(
     theme: theme,
-    primaryColor: devtoolsGrey[900]!,
     backgroundColor: background,
-    indicatorColor: devtoolsBlue[400]!,
-    textSelectionColor: Colors.black,
   );
 }
 
-ThemeData _lightTheme(IdeTheme ideTheme) {
-  final theme = ThemeData.light();
+ThemeData _lightTheme({
+  required IdeTheme ideTheme,
+  required ThemeData theme,
+}) {
   final background = isValidLightColor(ideTheme.backgroundColor)
       ? ideTheme.backgroundColor!
       : theme.canvasColor;
   return _baseTheme(
     theme: theme,
-    primaryColor: devtoolsBlue[600]!,
     backgroundColor: background,
-    indicatorColor: Colors.yellowAccent[400]!,
-    textSelectionColor: Colors.white,
   );
 }
 
 ThemeData _baseTheme({
   required ThemeData theme,
-  required Color primaryColor,
   required Color backgroundColor,
-  required Color indicatorColor,
-  required Color textSelectionColor,
 }) {
-  final fillColor = MaterialStateProperty.resolveWith(
-    (states) {
-      if (states.contains(MaterialState.selected) &&
-          !states.contains(MaterialState.disabled)) {
-        return devtoolsBlue[400];
-      }
-      return null;
-    },
-  );
   return theme.copyWith(
-    primaryColor: primaryColor,
-    indicatorColor: indicatorColor,
-    // Same values for both light and dark themes.
-    primaryColorDark: devtoolsBlue[700],
-    primaryColorLight: devtoolsBlue[400],
+    tabBarTheme: theme.tabBarTheme.copyWith(
+      dividerColor: Colors.transparent,
+      labelPadding:
+          const EdgeInsets.symmetric(horizontal: defaultTabBarPadding),
+    ),
     canvasColor: backgroundColor,
     scaffoldBackgroundColor: backgroundColor,
+    iconButtonTheme: IconButtonThemeData(
+      style: IconButton.styleFrom(
+        padding: const EdgeInsets.all(densePadding),
+        minimumSize: Size(defaultButtonHeight, defaultButtonHeight),
+        fixedSize: Size(defaultButtonHeight, defaultButtonHeight),
+      ),
+    ),
     outlinedButtonTheme: OutlinedButtonThemeData(
       style: OutlinedButton.styleFrom(
-        foregroundColor: theme.colorScheme.contrastForeground,
         minimumSize: Size(buttonMinWidth, defaultButtonHeight),
         fixedSize: Size.fromHeight(defaultButtonHeight),
       ),
     ),
     textButtonTheme: TextButtonThemeData(
       style: TextButton.styleFrom(
-        foregroundColor: theme.colorScheme.contrastForeground,
         minimumSize: Size(buttonMinWidth, defaultButtonHeight),
         fixedSize: Size.fromHeight(defaultButtonHeight),
       ),
@@ -116,26 +102,85 @@ ThemeData _baseTheme({
         fixedSize: Size.fromHeight(defaultButtonHeight),
       ),
     ),
-    switchTheme: SwitchThemeData(
-      thumbColor: fillColor,
-      trackColor: MaterialStateProperty.resolveWith((states) {
-        if (states.contains(MaterialState.selected) &&
-            !states.contains(MaterialState.disabled)) {
-          return devtoolsBlue[400]!.withAlpha(0x80);
-        }
-        return null;
-      }),
+    progressIndicatorTheme: ProgressIndicatorThemeData(
+      linearMinHeight: defaultLinearProgressIndicatorHeight,
     ),
-    radioTheme: RadioThemeData(fillColor: fillColor),
-    checkboxTheme: CheckboxThemeData(
-      fillColor: fillColor,
-    ),
-    textSelectionTheme: TextSelectionThemeData(
-      selectionColor: textSelectionColor,
-    ),
-    colorScheme: theme.colorScheme.copyWith(background: backgroundColor),
   );
 }
+
+/// Light theme color scheme generated from DevTools Figma file.
+/// 
+/// Do not manually change these values.
+const lightColorScheme = ColorScheme(
+  brightness: Brightness.light,
+  primary: Color(0xFF195BB9),
+  onPrimary: Color(0xFFFFFFFF),
+  primaryContainer: Color(0xFFD8E2FF),
+  onPrimaryContainer: Color(0xFF001A41),
+  secondary: Color(0xFF575E71),
+  onSecondary: Color(0xFFFFFFFF),
+  secondaryContainer: Color(0xFFDBE2F9),
+  onSecondaryContainer: Color(0xFF141B2C),
+  tertiary: Color(0xFF815600),
+  onTertiary: Color(0xFFFFFFFF),
+  tertiaryContainer: Color(0xFFFFDDB1),
+  onTertiaryContainer: Color(0xFF291800),
+  error: Color(0xFFBA1A1A),
+  errorContainer: Color(0xFFFFDAD5),
+  onError: Color(0xFFFFFFFF),
+  onErrorContainer: Color(0xFF410002),
+  background: Color(0xFFFFFFFF),
+  onBackground: Color(0xFF1B1B1F),
+  surface: Color(0xFFFFFFFF),
+  onSurface: Color(0xFF1B1B1F),
+  surfaceVariant: Color(0xFFE1E2EC),
+  onSurfaceVariant: Color(0xFF44474F),
+  outline: Color(0xFF75777F),
+  onInverseSurface: Color(0xFFF2F0F4),
+  inverseSurface: Color(0xFF303033),
+  inversePrimary: Color(0xFFADC6FF),
+  shadow: Color(0xFF000000),
+  surfaceTint: Color(0xFF195BB9),
+  outlineVariant: Color(0xFFC4C6D0),
+  scrim: Color(0xFF000000),
+);
+
+/// Dark theme color scheme generated from DevTools Figma file.
+/// 
+/// Do not manually change these values.
+const darkColorScheme = ColorScheme(
+  brightness: Brightness.dark,
+  primary: Color(0xFFADC6FF),
+  onPrimary: Color(0xFF002E69),
+  primaryContainer: Color(0xFF004494),
+  onPrimaryContainer: Color(0xFFD8E2FF),
+  secondary: Color(0xFFBFC6DC),
+  onSecondary: Color(0xFF293041),
+  secondaryContainer: Color(0xFF3F4759),
+  onSecondaryContainer: Color(0xFFDBE2F9),
+  tertiary: Color(0xFFFEBA4B),
+  onTertiary: Color(0xFF442B00),
+  tertiaryContainer: Color(0xFF624000),
+  onTertiaryContainer: Color(0xFFFFDDB1),
+  error: Color(0xFFFFB4AB),
+  errorContainer: Color(0xFF930009),
+  onError: Color(0xFF690004),
+  onErrorContainer: Color(0xFFFFDAD5),
+  background: Color(0xFF1B1B1F),
+  onBackground: Color(0xFFE3E2E6),
+  surface: Color(0xFF1B1B1F),
+  onSurface: Color(0xFFC7C6CA),
+  surfaceVariant: Color(0xFF44474F),
+  onSurfaceVariant: Color(0xFFC4C6D0),
+  outline: Color(0xFF8E9099),
+  onInverseSurface: Color(0xFF1B1B1F),
+  inverseSurface: Color(0xFFE3E2E6),
+  inversePrimary: Color(0xFF195BB9),
+  shadow: Color(0xFF000000),
+  surfaceTint: Color(0xFFADC6FF),
+  outlineVariant: Color(0xFF44474F),
+  scrim: Color(0xFF000000),
+);
 
 /// Threshold used to determine whether a colour is light/dark enough for us to
 /// override the default DevTools themes with.
@@ -160,9 +205,14 @@ bool isValidLightColor(Color? color) {
 }
 
 double get defaultToolbarHeight => scaleByFontFactor(32.0);
+double get defaultHeaderHeight =>
+    isDense() ? scaleByFontFactor(34.0) : scaleByFontFactor(38.0);
+const defaultTabBarPadding = 14.0;
 
 double get defaultButtonHeight => scaleByFontFactor(32.0);
 double get smallButtonHeight => scaleByFontFactor(20.0);
+double get defaultSwitchHeight => scaleByFontFactor(26.0);
+double get defaultLinearProgressIndicatorHeight => scaleByFontFactor(4.0);
 
 double get buttonMinWidth => scaleByFontFactor(36.0);
 
@@ -176,11 +226,12 @@ const defaultIconSizeBeforeScaling = 16.0;
 const defaultActionsIconSizeBeforeScaling = 20.0;
 
 const defaultSpacing = 16.0;
+const intermediateSpacing = 12.0;
 const denseSpacing = 8.0;
 const denseModeDenseSpacing = 2.0;
 const denseRowSpacing = 6.0;
 
-const defaultBorderRadius = 4.0;
+const defaultBorderRadius = 16.0;
 const defaultElevation = 4.0;
 
 const borderPadding = 2.0;
@@ -217,84 +268,28 @@ double get statusLineHeight => scaleByFontFactor(24.0);
 
 const chartTextFontSize = 10.0;
 
-/// Branded grey color.
-///
-/// Source: https://drive.google.com/open?id=1QBhMJqXyRt-CpRsHR6yw2LAfQtiNat4g
-const ColorSwatch<int> devtoolsGrey = ColorSwatch<int>(0xFF202124, {
-  900: Color(0xFF202124),
-  600: Color(0xFF60646B),
-  100: Color(0xFFD5D7Da),
-  50: Color(0xFFEAEBEC), // Lerped between grey100 and white
-});
-
-/// Branded yellow color.
-///
-/// Source: https://drive.google.com/open?id=1QBhMJqXyRt-CpRsHR6yw2LAfQtiNat4g
-const devtoolsYellow = ColorSwatch<int>(700, {
-  700: Color(0xFFFFC108),
-});
-
-/// Branded blue color.
-///
-/// Source: https://drive.google.com/open?id=1QBhMJqXyRt-CpRsHR6yw2LAfQtiNat4g
-const devtoolsBlue = ColorSwatch<int>(600, {
-  700: Color(0xFF02569B),
-  600: Color(0xFF0175C2),
-  400: Color(0xFF13B9FD),
-});
-
 const devtoolsGreen = Color(0xFF5BC43B);
-
-const devtoolsError = Color(0xFFAF4054);
-
-const devtoolsWarning = Color(0xFFFDFAD5);
 
 extension DevToolsColorScheme on ColorScheme {
   bool get isLight => brightness == Brightness.light;
 
   bool get isDark => brightness == Brightness.dark;
 
-  // Commonly used themed colors.
-  Color get defaultBackground => isLight ? Colors.white : Colors.black;
+  Color get warningContainer => tertiaryContainer;
 
-  Color get defaultForeground =>
-      isLight ? Colors.black : const Color.fromARGB(255, 187, 187, 187);
-
-  /// Text color [defaultForeground] is too gray, making it hard to read the text
-  /// in dark theme. We should use a more white color for dark theme, but not
-  /// jarring white #FFFFFF.
-  Color get contrastForegroundWhite => _contrastForegroundWhite;
-
-  Color get contrastForeground =>
-      isLight ? Colors.black : _contrastForegroundWhite;
+  Color get onWarningContainer => onTertiaryContainer;
 
   Color get overlayShadowColor => const Color.fromRGBO(0, 0, 0, 0.5);
 
   Color get overlayBackgroundColor =>
       isLight ? Colors.white : const Color(0xFF424242);
 
-  Color get errorTextColor =>
-      isLight ? const Color(0xFFA53725) : const Color(0xFFE09790);
-
-  Color get toggleButtonsTitle =>
-      isLight ? const Color(0xFF464646) : const Color(0xFFAEAEB1);
-
-  Color get toggleButtonsTitleSelected =>
-      isLight ? Colors.white : const Color(0xFF464646);
-
-  Color get toggleButtonsFillSelected => devtoolsBlue[400]!;
-
   Color get grey => const Color.fromARGB(255, 128, 128, 128);
 
-  Color get breakpointColor => isLight ? devtoolsBlue[600]! : Colors.white;
+  Color get breakpointColor => primary;
 
   /// Background colors for charts.
   Color get chartBackground => isLight ? Colors.white : const Color(0xFF2D2E31);
-
-  Color get defaultButtonIconColor =>
-      isLight ? const Color(0xFF24292E) : const Color(0xFF89B5F8);
-
-  Color get defaultPrimaryButtonIconColor => defaultBackground;
 
   Color get devtoolsLink =>
       isLight ? const Color(0xFF1976D2) : Colors.lightBlueAccent;
@@ -304,12 +299,18 @@ extension DevToolsColorScheme on ColorScheme {
 
   // TODO(jacobr): replace this with Theme.of(context).scaffoldBackgroundColor, but we use
   // this in places where we do not have access to the context.
+  // remove
   Color get defaultBackgroundColor =>
-      isLight ? Colors.grey[50]! : Colors.grey[850]!;
+      isLight ? Colors.grey[50]! : const Color(0xFF1B1B1F);
 
-  Color get alternatingBackgroundColor => isLight
-      ? defaultBackgroundColor.darken()
-      : defaultBackgroundColor.brighten();
+  Color get alternatingBackgroundColor1 =>
+      isLight ? defaultBackgroundColor.darken() : const Color(0xFF1B1B1F);
+  Color get alternatingBackgroundColor2 =>
+      isLight ? defaultBackgroundColor.darken() : const Color(0xFF303033);
+
+  Color get selectedRowBackgroundColor => isLight
+      ? const Color.fromARGB(255, 220, 220, 220)
+      : const Color.fromARGB(255, 73, 73, 73);
 
   Color get chartAccentColor =>
       isLight ? const Color(0xFFCCCCCC) : const Color(0xFF585858);
@@ -320,12 +321,6 @@ extension DevToolsColorScheme on ColorScheme {
       isLight ? const Color(0xFF999999) : const Color(0xFF8A8A8A);
 
   Color get tooltipTextColor => isLight ? Colors.white : Colors.black;
-
-  Color get toggleButtonBackgroundColor =>
-      isLight ? const Color(0xFFE0EEFA) : const Color(0xFF2E3C48);
-
-  // [toggleButtonForegroundColor] is the same for light and dark theme.
-  Color get toggleButtonForegroundColor => const Color(0xFF2196F3);
 
   Color get functionSyntaxColor =>
       isLight ? const Color(0xFF795E26) : const Color(0xFFDCDCAA);
@@ -376,9 +371,6 @@ extension DevToolsColorScheme on ColorScheme {
         tileMode: TileMode.repeated,
       );
 
-  Color get selectedRowColor =>
-      isLight ? devtoolsBlue[600]! : devtoolsGrey[600]!;
-
   Color get performanceLowImpactColor => const Color(0xFF5CB246);
   Color get performanceMediumImpactColor => const Color(0xFFF7AC2A);
   Color get performanceHighImpactColor => const Color(0xFFC94040);
@@ -387,7 +379,7 @@ extension DevToolsColorScheme on ColorScheme {
   Color get coverageMissColor => performanceHighImpactColor;
 
   List<Color> get treeGuidelineColors => [
-        devtoolsBlue[400]!,
+        const Color(0xFF13B9FD),
         devtoolsGreen,
       ];
 }
@@ -411,9 +403,6 @@ extension ThemeDataExtension on ThemeData {
         ),
       );
 
-  TextStyle get subtleErrorTextStyle =>
-      subtleTextStyle.copyWith(color: colorScheme.errorTextColor);
-
   TextStyle get selectedTextStyle => _fixBlurryText(
         TextStyle(
           color: textSelectionTheme.selectionColor,
@@ -435,13 +424,7 @@ extension ThemeDataExtension on ThemeData {
         color: colorScheme.tooltipTextColor,
       );
 
-  TextStyle get devToolsTitleStyle => _fixBlurryText(
-        textTheme.titleLarge!.copyWith(color: Colors.white),
-      );
-
-  Color get titleSolidBackgroundColor => colorScheme.isLight
-      ? colorScheme.alternatingBackgroundColor
-      : canvasColor.darken(0.2);
+  TextStyle get devToolsTitleStyle => _fixBlurryText(textTheme.titleMedium!);
 
   TextStyle get linkTextStyle => _fixBlurryText(
         TextStyle(
@@ -479,7 +462,6 @@ extension ThemeDataExtension on ThemeData {
   // Title of the hover card.
   TextStyle get hoverTitleTextStyle => _fixBlurryText(
         TextStyle(
-          color: colorScheme.defaultForeground,
           fontWeight: FontWeight.normal,
           fontSize: scaleByFontFactor(15.0),
           decoration: TextDecoration.none,
@@ -489,7 +471,6 @@ extension ThemeDataExtension on ThemeData {
   // Items in the hover card.
   TextStyle get hoverTextStyle => _fixBlurryText(
         TextStyle(
-          color: colorScheme.defaultForeground,
           fontWeight: FontWeight.normal,
           fontSize: scaleByFontFactor(11.5),
           decoration: TextDecoration.none,
@@ -499,7 +480,6 @@ extension ThemeDataExtension on ThemeData {
   // Value of items in hover e.g., capacity, etc.
   TextStyle get hoverValueTextStyle => _fixBlurryText(
         TextStyle(
-          color: colorScheme.contrastForeground,
           fontWeight: FontWeight.normal,
           fontSize: scaleByFontFactor(11.5),
           decoration: TextDecoration.none,
@@ -509,7 +489,6 @@ extension ThemeDataExtension on ThemeData {
   // Used for custom extension event values.
   TextStyle get hoverSmallValueTextStyle => _fixBlurryText(
         TextStyle(
-          color: colorScheme.defaultForeground,
           fontWeight: FontWeight.normal,
           fontSize: scaleByFontFactor(10.0),
           decoration: TextDecoration.none,
@@ -519,7 +498,6 @@ extension ThemeDataExtension on ThemeData {
   // Last allocation timestamp displayed.
   TextStyle get italicTextStyle => _fixBlurryText(
         TextStyle(
-          color: colorScheme.defaultForeground,
           fontWeight: FontWeight.normal,
           fontSize: scaleByFontFactor(14.0),
           fontStyle: FontStyle.italic,
@@ -530,7 +508,6 @@ extension ThemeDataExtension on ThemeData {
   // Items in a chart's legend.
   TextStyle get legendTextStyle => _fixBlurryText(
         TextStyle(
-          color: colorScheme.defaultForeground,
           fontWeight: FontWeight.normal,
           fontSize: chartFontSizeSmall,
           decoration: TextDecoration.none,
@@ -540,7 +517,6 @@ extension ThemeDataExtension on ThemeData {
   /// TextStyle for callstack.
   TextStyle get stackTraceCall => _fixBlurryText(
         TextStyle(
-          color: colorScheme.defaultForeground,
           fontWeight: FontWeight.normal,
           fontSize: scaleByFontFactor(12.0),
         ),
@@ -549,7 +525,6 @@ extension ThemeDataExtension on ThemeData {
   /// TextStyle for source file displayed in callstack.
   TextStyle get stackTraceSource => _fixBlurryText(
         TextStyle(
-          color: colorScheme.defaultForeground,
           fontWeight: FontWeight.w100,
           fontSize: scaleByFontFactor(12.0),
         ),
@@ -570,15 +545,6 @@ double get defaultTextFieldNumberWidth => scaleByFontFactor(100.0);
 
 double get maxHoverCardHeight => scaleByFontFactor(250.0);
 const hoverCardBorderWidth = 2.0;
-
-/// Default color of cursor and color used by search's TextField.
-/// Guarantee that the Search TextField on all platforms renders in the same
-/// color for border, label text, and cursor. Primarly, so golden screen
-/// snapshots will compare successfully using the exact color.
-Color searchColor = Colors.blue;
-
-/// Default Border of search's TextField.
-BorderSide searchFocusBorderColor = BorderSide(color: searchColor, width: 2);
 
 /// A short duration to use for animations.
 ///

@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../service/service_extensions.dart' as extensions;
-import '../../../../shared/analytics/analytics.dart' as ga;
 import '../../../../shared/analytics/constants.dart' as gac;
 import '../../../../shared/common_widgets.dart';
 import '../../../../shared/primitives/utils.dart';
@@ -232,17 +231,12 @@ class SmallEnhanceTracingButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return IconLabelButton(
+    return DevToolsButton(
       label: EnhanceTracingButton.title,
       icon: EnhanceTracingButton.icon,
-      color: Theme.of(context).colorScheme.toggleButtonsTitle,
-      onPressed: () {
-        ga.select(
-          gac.performance,
-          gac.smallEnhanceTracingButton,
-        );
-        enhanceTracingController.showEnhancedTracingMenu();
-      },
+      gaScreen: gac.performance,
+      gaSelection: gac.smallEnhanceTracingButton,
+      onPressed: enhanceTracingController.showEnhancedTracingMenu,
     );
   }
 }

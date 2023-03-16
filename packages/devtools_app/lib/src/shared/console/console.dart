@@ -65,6 +65,8 @@ class ConsoleFrame extends StatelessWidget {
         if (title != null) title!,
         Expanded(
           child: Material(
+            // TODO(kenz): this shouldn't need to be a stack. Revisit styling
+            // to acheive m3 rounded corners.
             child: Stack(
               children: [
                 // Fill the width of the console to expand the scrollable area.

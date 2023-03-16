@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:stack_trace/stack_trace.dart' as stack_trace;
 import 'package:vm_service/vm_service.dart';
 
+import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/common_widgets.dart';
 import '../../shared/globals.dart';
 import '../../shared/primitives/utils.dart';
@@ -121,7 +122,7 @@ class VMInfoList extends StatelessWidget {
       children: [
         AreaPaneHeader(
           title: Text(title),
-          needsTopBorder: false,
+          includeTopBorder: false,
         ),
         if (rowKeyValues != null)
           Expanded(
@@ -176,16 +177,6 @@ Widget _buildAlternatingRow(BuildContext context, int index, Widget row) {
   );
 }
 
-/// An IconLabelButton with label 'Request' and a 'call made' icon.
-class RequestDataButton extends IconLabelButton {
-  const RequestDataButton({
-    required super.onPressed,
-    super.icon = Icons.call_made,
-    super.label = 'Request',
-    super.outlined = false,
-  });
-}
-
 /// Displays a RequestDataButton if the data provided by [sizeProvider] is null,
 /// otherwise displays the size data and a ToolbarRefresh button next
 /// to it, to request that data again if required.
@@ -219,7 +210,14 @@ class RequestableSizeWidget extends StatelessWidget {
         } else {
           final size = sizeProvider();
           return size == null
-              ? RequestDataButton(onPressed: requestFunction)
+              ? DevToolsButton(
+                  icon: Icons.call_made,
+                  label: 'Request',
+                  outlined: false,
+                  gaScreen: gac.vmTools,
+                  gaSelection: gac.requestSize,
+                  onPressed: requestFunction,
+                )
               : Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
@@ -328,15 +326,11 @@ class VmExpansionTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final titleRow = AreaPaneHeader(
       title: Text(title),
-      needsTopBorder: false,
-      needsBottomBorder: false,
-      // We'll set the color in the Card so the InkWell shows a consistent
-      // color when the user hovers over the ExpansionTile.
-      backgroundColor: Colors.transparent,
+      includeTopBorder: false,
+      includeBottomBorder: false,
     );
     final theme = Theme.of(context);
     return Card(
-      color: theme.titleSolidBackgroundColor,
       child: ListTileTheme(
         data: ListTileTheme.of(context).copyWith(
           dense: true,

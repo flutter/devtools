@@ -9,6 +9,7 @@ import 'package:provider/provider.dart';
 
 import '../../service/service_extension_widgets.dart';
 import '../../shared/analytics/analytics.dart' as ga;
+import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/common_widgets.dart';
 import '../../shared/primitives/auto_dispose.dart';
 import '../../shared/primitives/simple_items.dart';
@@ -88,7 +89,7 @@ class _LoggingScreenState extends State<LoggingScreenBody>
   @override
   void initState() {
     super.initState();
-    ga.screen(LoggingScreen.id);
+    ga.screen(gac.logging);
   }
 
   @override
@@ -111,7 +112,7 @@ class _LoggingScreenState extends State<LoggingScreenBody>
     return Column(
       children: [
         _buildLoggingControls(),
-        const SizedBox(height: denseRowSpacing),
+        const SizedBox(height: intermediateSpacing),
         Expanded(
           child: _buildLoggingBody(),
         ),
@@ -123,7 +124,11 @@ class _LoggingScreenState extends State<LoggingScreenBody>
     final hasData = controller.filteredData.value.isNotEmpty;
     return Row(
       children: [
-        ClearButton(onPressed: controller.clear),
+        ClearButton(
+          onPressed: controller.clear,
+          gaScreen: gac.logging,
+          gaSelection: gac.clear,
+        ),
         const Spacer(),
         StructuredErrorsToggle(),
         const SizedBox(width: denseSpacing),
@@ -141,7 +146,7 @@ class _LoggingScreenState extends State<LoggingScreenBody>
         const SizedBox(width: denseSpacing),
         FilterButton(
           onPressed: _showFilterDialog,
-          isFilterActive: filteredLogs.length != controller.data.length,
+          isFilterActive: controller.isFilterActive,
         ),
       ],
     );
@@ -152,7 +157,7 @@ class _LoggingScreenState extends State<LoggingScreenBody>
       axis: Axis.vertical,
       initialFractions: const [0.72, 0.28],
       children: [
-        OutlineDecoration(
+        RoundedOutlinedBorder(
           child: LogsTable(
             data: filteredLogs,
             selectionNotifier: controller.selectedLog,

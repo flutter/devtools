@@ -109,7 +109,7 @@ class ProviderScreenBody extends ConsumerWidget {
           child: Column(
             children: [
               AreaPaneHeader(
-                needsTopBorder: false,
+                includeTopBorder: false,
                 title: Text('Providers'),
               ),
               Expanded(
@@ -122,7 +122,7 @@ class ProviderScreenBody extends ConsumerWidget {
           child: Column(
             children: [
               AreaPaneHeader(
-                needsTopBorder: false,
+                includeTopBorder: false,
                 title: Text(detailsTitleText),
                 actions: [
                   ToolbarAction(

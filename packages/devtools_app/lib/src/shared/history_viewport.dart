@@ -127,7 +127,7 @@ class _HistoryViewportState<T> extends State<HistoryViewport<T>> {
                         onEnter: (_) {
                           _updateTitleStyle(
                             defaultTitleStyle.copyWith(
-                              color: theme.colorScheme.devtoolsLink,
+                              color: theme.colorScheme.primary,
                             ),
                           );
                         },

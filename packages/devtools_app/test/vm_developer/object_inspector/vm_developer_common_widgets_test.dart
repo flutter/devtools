@@ -112,11 +112,11 @@ void main() {
       ),
     );
 
-    expect(find.byType(RequestDataButton), findsOneWidget);
+    expect(find.byIcon(Icons.refresh), findsOneWidget);
 
     when(mockClassObject.reachableSize).thenReturn(requestedSize);
 
-    await tester.tap(find.byType(RequestDataButton));
+    await tester.tap(find.byIcon(Icons.refresh));
 
     await tester.pumpAndSettle();
 
