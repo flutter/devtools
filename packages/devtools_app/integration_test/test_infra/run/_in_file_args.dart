@@ -24,12 +24,12 @@ class TestFileArgs {
       testFileArgItems.putIfAbsent(arg, () => null);
     }
 
-    return TestFileArgs.fromItems(testFileArgItems);
+    return TestFileArgs.parse(testFileArgItems);
   }
 
-  TestFileArgs.fromItems(Map<TestFileArgItems, dynamic> values)
-      : experimentsOn = values[TestFileArgItems.experimentsOn] ?? false,
-        appPath = values[TestFileArgItems.appPath] ??
+  TestFileArgs.parse(Map<TestFileArgItems, dynamic> map)
+      : experimentsOn = map[TestFileArgItems.experimentsOn] ?? false,
+        appPath = map[TestFileArgItems.appPath] ??
             'test/test_infra/fixtures/flutter_app';
 
   /// If true, experiments will be enabled in the test.
@@ -52,7 +52,8 @@ Map<TestFileArgItems, dynamic> _parseFileContent(String fileContent) {
       final name = m.group(1) ?? '';
       if (name.isEmpty)
         throw ArgumentError(
-            'Name of test argument should be provided: [${m.group(0)}].');
+          'Name of test argument should be provided: [${m.group(0)}].',
+        );
       final value = m.group(2) ?? '';
       return MapEntry(TestFileArgItems.values.byName(name), jsonDecode(value));
     },
