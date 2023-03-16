@@ -18,7 +18,7 @@ bool _debugTestScript = false;
 /// Do not use this method directly, but instead use the run_tests.dart
 /// which performs essential set up steps.
 Future<void> runFlutterIntegrationTest(
-  TestArgs testRunnerArgs, {
+  TestRunnerArgs testRunnerArgs, {
   required String? testAppPath,
 }) async {
   TestFlutterApp? testApp;
@@ -262,8 +262,8 @@ void _debugLog(String log) {
 
 // TODO(https://github.com/flutter/devtools/issues/4970): use package:args to
 // parse these arguments.
-class TestArgs {
-  TestArgs(List<String> args) {
+class TestRunnerArgs {
+  TestRunnerArgs(List<String> args) {
     final argWithTestTarget =
         args.firstWhereOrNull((arg) => arg.startsWith(testTargetArg));
     final target = argWithTestTarget?.substring(testTargetArg.length);

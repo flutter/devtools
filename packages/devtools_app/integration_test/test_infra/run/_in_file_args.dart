@@ -11,23 +11,23 @@ enum InFileArgItems {
 }
 
 /// Test arguments, defined inside the test file as a comment.
-class InFileArgs {
-  factory InFileArgs(String testFilePath) {
+class TestFileArgs {
+  factory TestFileArgs(String testFilePath) {
     final content = File(testFilePath).readAsStringSync();
-    return InFileArgs.fromFileContent(content);
+    return TestFileArgs.fromFileContent(content);
   }
 
-  factory InFileArgs.fromFileContent(String fileContent) {
+  factory TestFileArgs.fromFileContent(String fileContent) {
     final values = _parseFileContent(fileContent);
 
     for (final arg in values.keys) {
       values.putIfAbsent(arg, () => null);
     }
 
-    return InFileArgs.fromValues(values);
+    return TestFileArgs.fromValues(values);
   }
 
-  InFileArgs.fromValues(Map<InFileArgItems, dynamic> values)
+  TestFileArgs.fromValues(Map<InFileArgItems, dynamic> values)
       : experimentsOn = values[InFileArgItems.experimentsOn] ?? false,
         appPath = values[InFileArgItems.appPath] ??
             'test/test_infra/fixtures/flutter_app';

@@ -35,11 +35,11 @@ void main(List<String> args) async {
   final modifiableArgs = List.of(args);
 
   final testTargetProvided = modifiableArgs
-      .where((arg) => arg.startsWith(TestArgs.testTargetArg))
+      .where((arg) => arg.startsWith(TestRunnerArgs.testTargetArg))
       .isNotEmpty;
 
   if (testTargetProvided) {
-    final testFilePath = TestArgs(modifiableArgs).testTarget;
+    final testFilePath = TestRunnerArgs(modifiableArgs).testTarget;
 
     // TODO(kenz): add support for specifying a directory as the target instead
     // of a single file.
@@ -53,7 +53,7 @@ void main(List<String> args) async {
 
     for (final testFile in testFiles) {
       final testTarget = testFile.path;
-      modifiableArgs.add('${TestArgs.testTargetArg}$testTarget');
+      modifiableArgs.add('${TestRunnerArgs.testTargetArg}$testTarget');
       await _runTest(modifiableArgs, testTarget);
     }
   }
@@ -62,20 +62,20 @@ void main(List<String> args) async {
 Future<void> _runTest(List<String> modifiableArgs, String testFilePath) async {
   _maybeAddOfflineArgument(modifiableArgs, testFilePath);
 
-  final inFileArgs = InFileArgs(testFilePath);
-  final cliArgs = TestArgs(modifiableArgs);
+  final testFileArgs = TestFileArgs(testFilePath);
+  final testRunnerArgs = TestRunnerArgs(modifiableArgs);
 
-  if (inFileArgs.experimentsOn) {
-    modifiableArgs.add(TestArgs.enableExperimentsArg);
+  if (testFileArgs.experimentsOn) {
+    modifiableArgs.add(TestRunnerArgs.enableExperimentsArg);
   }
 
-  final testAppPath = cliArgs.offline ? null : inFileArgs.appPath;
+  final testAppPath = testRunnerArgs.offline ? null : testFileArgs.appPath;
 
-  await runFlutterIntegrationTest(cliArgs, testAppPath: testAppPath);
+  await runFlutterIntegrationTest(testRunnerArgs, testAppPath: testAppPath);
 }
 
 void _maybeAddOfflineArgument(List<String> args, String testTarget) {
   if (testTarget.startsWith(_offlineIndicator)) {
-    args.add(TestArgs.offlineArg);
+    args.add(TestRunnerArgs.offlineArg);
   }
 }
