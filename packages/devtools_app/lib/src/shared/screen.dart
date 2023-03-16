@@ -175,7 +175,10 @@ abstract class Screen {
                 children: [
                   CustomPaint(
                     size: Size(defaultIconSize + denseSpacing + titleWidth, 0),
-                    painter: BadgePainter(number: count),
+                    painter: BadgePainter(
+                      number: count,
+                      colorScheme: Theme.of(context).colorScheme,
+                    ),
                   ),
                   tab,
                 ],
@@ -265,21 +268,23 @@ bool shouldShowScreen(Screen screen) {
 }
 
 class BadgePainter extends CustomPainter {
-  BadgePainter({required this.number});
+  BadgePainter({required this.number, required this.colorScheme});
+
+  final ColorScheme colorScheme;
 
   final int number;
 
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = devtoolsError
+      ..color = colorScheme.errorContainer
       ..style = PaintingStyle.fill;
 
     final countPainter = TextPainter(
       text: TextSpan(
         text: '$number',
-        style: const TextStyle(
-          color: Colors.white,
+        style: TextStyle(
+          color: colorScheme.onErrorContainer,
           fontWeight: FontWeight.bold,
         ),
       ),

@@ -198,9 +198,7 @@ class _SnapshotListItemsState extends State<_SnapshotListItems>
           final selected = selectedIndex == index;
           return Container(
             height: _headerHeight,
-            color: selected
-                ? Theme.of(context).colorScheme.primary
-                : null,
+            color: selected ? Theme.of(context).colorScheme.primary : null,
             child: InkWell(
               canRequestFocus: false,
               onTap: () => widget.controller.setSnapshotIndex(index),

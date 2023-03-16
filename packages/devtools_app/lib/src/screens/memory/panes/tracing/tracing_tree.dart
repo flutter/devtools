@@ -208,8 +208,7 @@ class _TracingTreeHeader extends StatelessWidget {
       actions: [
         const Spacer(),
         TabBar(
-          labelColor:
-              textTheme.bodyLarge?.color ?? colorScheme.primary,
+          labelColor: textTheme.bodyLarge?.color ?? colorScheme.primary,
           tabs: tabs,
           isScrollable: true,
           controller: tabController,

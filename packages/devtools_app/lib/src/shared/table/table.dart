@@ -1438,8 +1438,7 @@ class _TableRowState<T> extends State<TableRow<T>>
 
   Color _searchAwareBackgroundColor() {
     final colorScheme = Theme.of(context).colorScheme;
-    final backgroundColor =
-        widget.backgroundColor ?? colorScheme.surface;
+    final backgroundColor = widget.backgroundColor ?? colorScheme.surface;
     if (widget.isSelected) {
       return colorScheme.selectedRowBackgroundColor;
     }

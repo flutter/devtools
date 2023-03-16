@@ -109,7 +109,7 @@ ThemeData _baseTheme({
 }
 
 /// Light theme color scheme generated from DevTools Figma file.
-/// 
+///
 /// Do not manually change these values.
 const lightColorScheme = ColorScheme(
   brightness: Brightness.light,
@@ -146,7 +146,7 @@ const lightColorScheme = ColorScheme(
 );
 
 /// Dark theme color scheme generated from DevTools Figma file.
-/// 
+///
 /// Do not manually change these values.
 const darkColorScheme = ColorScheme(
   brightness: Brightness.dark,
