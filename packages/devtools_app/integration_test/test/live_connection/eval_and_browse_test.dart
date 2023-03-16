@@ -8,10 +8,12 @@
 
 import 'dart:ui' as ui;
 
+import 'package:devtools_app/src/screens/memory/panes/diff/widgets/snapshot_list.dart';
 import 'package:devtools_app/src/shared/console/widgets/console_pane.dart';
 import 'package:devtools_app/src/shared/primitives/simple_items.dart';
 import 'package:devtools_app/src/shared/ui/search.dart';
 import 'package:devtools_test/devtools_integration_test.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
@@ -41,8 +43,6 @@ void main() {
 
     await _testBasicEval(evalTester);
     await _testAssignment(evalTester);
-
-    await switchToScreen(tester, ScreenMetaData.memory);
 
     await _testRootIsAccessible(evalTester);
   });
@@ -117,5 +117,13 @@ class _EvalTester {
     await tester.pumpAndSettle();
     await simulateKeyDownEvent(LogicalKeyboardKey.enter);
     await simulateKeyUpEvent(LogicalKeyboardKey.enter);
+  }
+
+  Future<void> switchToSnapshotsAndTakeOne() async {
+    await switchToScreen(tester, ScreenMetaData.memory);
+    await tester.tap(find.widgetWithText(Tab, 'Diff Snapshots'));
+    await tester.pump(longPumpDuration);
+    await tester.tap(find.byIcon(iconToTakeSnapshot));
+    await tester.pump(longPumpDuration);
   }
 }
