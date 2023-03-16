@@ -85,7 +85,7 @@ class _EvalTester {
     await tester.enterText(find.byType(AutoCompleteSearchField), expression);
     await tester.pump(safePumpDuration);
     await _pressEnter();
-    await tester.pump(safePumpDuration);
+    await tester.pump(longPumpDuration);
 
     if (exact) {
       expect(
