@@ -44,6 +44,7 @@ dependencies:
   intl: '>=0.16.1 <0.18.0'
   js: ^0.6.1+1
   leak_tracker: 2.0.1
+  logging: ^1.1.1
   mime: ^1.0.0
   path: ^1.8.0
   perfetto_compiled:
