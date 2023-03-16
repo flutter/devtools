@@ -13,6 +13,7 @@ import 'package:devtools_app/src/shared/console/widgets/evaluate.dart';
 import 'package:devtools_app/src/shared/primitives/simple_items.dart';
 import 'package:devtools_test/devtools_integration_test.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 
@@ -46,19 +47,33 @@ void main() {
     await tester.pump(safePumpDuration);
 
     await _testBasicEval(tester);
+    await _testAssignment(tester);
     await _testRootIsAccessible(tester);
   });
 }
 
 Future<void> _testBasicEval(WidgetTester tester) async {
-  String expression = '21 + 34';
-  await tester.enterText(find.byType(ExpressionEvalField), '$expression\n');
-  await tester.pump(safePumpDuration);
-  await tester.pump(safePumpDuration);
-  await tester.pump(safePumpDuration);
-  expect(find.widgetWithText(ConsolePane, '55'), findsOneWidget);
+  await _enterExpression(tester, '21 + 34', '55');
+}
 
-  expression = 'DateTime(2023)';
+Future<void> _testAssignment(WidgetTester tester) async {
+  await _enterExpression(tester, 'DateTime(2023)', 'DateTime');
+  await _enterExpression(tester, r'var x = $0', 'Variable x is created');
 }
 
 Future<void> _testRootIsAccessible(WidgetTester tester) async {}
+
+Future<void> _enterExpression(
+  WidgetTester tester,
+  String expression,
+  String expectedResponse,
+) async {
+  await tester.enterText(find.byType(ExpressionEvalField), expression);
+  await simulateKeyDownEvent(LogicalKeyboardKey.enter);
+  await tester.pump(safePumpDuration);
+  expect(find.widgetWithText(ConsolePane, expectedResponse), findsOneWidget);
+}
+
+class _ConsoleActions {
+  final WidgetTester tester;
+}
