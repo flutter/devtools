@@ -54,14 +54,13 @@ void main(List<String> args) async {
   }
 }
 
-Future<void> _runTest(List<String> modifiableArgs, String testFilePath) async {
-  final testFileArgs = TestFileArgs(testFilePath);
-  final testRunnerArgs = TestRunnerArgs(modifiableArgs);
-  final offline = testFilePath.startsWith(_offlineIndicator);
-
+Future<void> _runTest(
+  List<String> modifiableTestRunnerArgs,
+  String testFilePath,
+) async {
   await runFlutterIntegrationTest(
-    testRunnerArgs,
-    testFileArgs,
-    offline: offline,
+    TestRunnerArgs(modifiableTestRunnerArgs),
+    TestFileArgs(testFilePath),
+    offline: testFilePath.startsWith(_offlineIndicator),
   );
 }
