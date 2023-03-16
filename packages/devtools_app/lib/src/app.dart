@@ -553,27 +553,25 @@ class _VerboseLoggingSetting extends StatelessWidget {
                 'Successfully copied logs',
               ),
             ),
-            const SizedBox(width: defaultSpacing),
+            const SizedBox(width: denseSpacing),
             ClearButton(
               label: 'Clear logs',
               onPressed: LogStorage.root.clear,
             ),
           ],
         ),
-        Container(
-          alignment: Alignment.center,
-          child: const Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // TODO(kenz): style this with warning color once material 3 changes land
-              Icon(Icons.warning),
-              SizedBox(width: defaultSpacing),
-              Text(
-                'Logs may contain sensitive information.\n'
-                'Always check their contents before sharing.',
-              )
-            ],
-          ),
+        const Row(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // TODO(kenz): style this with warning color once material 3 changes land
+            Icon(Icons.warning),
+            SizedBox(width: defaultSpacing),
+            Text(
+              'Logs may contain sensitive information.\n'
+              'Always check their contents before sharing.',
+            )
+          ],
         ),
       ],
     );
