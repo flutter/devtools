@@ -996,7 +996,7 @@ class VmServiceWrapper implements VmService {
       _log.fine('[$logId]-trackFuture($name,...): Succeeded');
       return result;
     } catch (error) {
-      _log.fine(
+      _log.severe(
         '[$logId]-trackFuture($name,...): Failed',
         error,
       );
