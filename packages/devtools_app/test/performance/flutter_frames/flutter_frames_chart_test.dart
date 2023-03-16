@@ -105,7 +105,7 @@ void main() {
 
     group('starting scroll position', () {
       const totalNumFrames = 50;
-      const totalFramesInView = 14;
+      const totalFramesInView = 13;
 
       setUp(() {
         var number = 0;
@@ -166,7 +166,7 @@ void main() {
           findsNWidgets(totalFramesInView),
         );
 
-        verifyScrollOffset(tester, 666.0);
+        verifyScrollOffset(tester, 684.0);
       });
     });
 

@@ -55,13 +55,10 @@ class _FieldClassNameColumn extends ColumnData<ProfileRecord>
   }) {
     if (data.isTotal) return null;
 
-    final theme = Theme.of(context);
     return HeapClassView(
       theClass: data.heapClass,
       showCopyButton: isRowSelected,
       copyGaItem: gac.MemoryEvent.diffClassSingleCopy,
-      textStyle:
-          isRowSelected ? theme.selectedTextStyle : theme.regularTextStyle,
       rootPackage: serviceManager.rootInfoNow().package,
     );
   }

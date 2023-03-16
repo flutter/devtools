@@ -40,8 +40,9 @@ void main() async {
       when(fakeServiceManager.errorBadgeManager.errorCountNotifier('logging'))
           .thenReturn(ValueNotifier<int>(0));
       setGlobal(NotificationService, NotificationService());
-
+      setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
       setGlobal(ServiceConnectionManager, fakeServiceManager);
+      setGlobal(PreferencesController, PreferencesController());
       setGlobal(IdeTheme, IdeTheme());
 
       screen = LoggingScreen();
@@ -60,8 +61,9 @@ void main() async {
         expect(find.byType(LoggingScreenBody), findsOneWidget);
         expect(find.byType(LogsTable), findsOneWidget);
         expect(find.byType(LogDetails), findsOneWidget);
-        expect(find.text('Clear'), findsOneWidget);
+        expect(find.byType(ClearButton), findsOneWidget);
         expect(find.byType(TextField), findsOneWidget);
+        expect(find.byType(FilterButton), findsOneWidget);
         expect(find.byType(StructuredErrorsToggle), findsOneWidget);
       },
     );
@@ -72,7 +74,7 @@ void main() async {
       (WidgetTester tester) async {
         await pumpLoggingScreen(tester);
         verifyNever(mockLoggingController.clear());
-        await tester.tap(find.text('Clear'));
+        await tester.tap(find.byType(ClearButton));
         verify(mockLoggingController.clear()).called(1);
       },
     );

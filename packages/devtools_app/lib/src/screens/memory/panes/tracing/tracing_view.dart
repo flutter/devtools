@@ -103,15 +103,14 @@ class _TracingControls extends StatelessWidget {
             gaSelection: gac.MemoryEvent.tracingRefresh,
             onPressed: isProfileMode ? null : controller.refresh,
           ),
-          const SizedBox(
-            width: denseSpacing,
-          ),
+          const SizedBox(width: denseSpacing),
           ClearButton(
             tooltip: 'Clear the set of previously collected traces',
             gaScreen: gac.memory,
             gaSelection: gac.MemoryEvent.tracingClear,
             onPressed: isProfileMode ? null : controller.clear,
           ),
+          const SizedBox(width: denseSpacing),
           const _ProfileHelpLink(),
         ],
       ),

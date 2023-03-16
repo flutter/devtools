@@ -20,6 +20,7 @@ import '../shared/framework_controller.dart';
 import '../shared/globals.dart';
 import '../shared/primitives/auto_dispose.dart';
 import '../shared/primitives/simple_items.dart';
+import '../shared/primitives/utils.dart';
 import '../shared/routing.dart';
 import '../shared/screen.dart';
 import '../shared/split.dart';
@@ -419,7 +420,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
               // have added a spacer element to [actions] above, which should be
               // excluded from the width calculation.
               actionWidgetSize * ((widget.actions ?? []).length) +
-                  (actions.first is VerticalLineSpacer
+                  (actions.safeFirst is VerticalLineSpacer
                       ? VerticalLineSpacer.totalWidth
                       : 0.0),
             );

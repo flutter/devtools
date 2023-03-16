@@ -64,11 +64,7 @@ class _ProgramExplorerRow extends StatelessWidget {
                 text!,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: theme.fixedFontStyle.copyWith(
-                  color: node.isSelected
-                      ? Colors.white
-                      : theme.fixedFontStyle.color,
-                ),
+                style: theme.fixedFontStyle,
               ),
             ),
           ],

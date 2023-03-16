@@ -42,14 +42,10 @@ class InstanceTableCell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
     return Row(
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
         InstanceSetButton(
-          textStyle:
-              isSelected ? theme.selectedTextStyle : theme.regularTextStyle,
           count: _count,
           gaContext: gaContext,
           sampleObtainer: _sampleObtainer,

@@ -1554,9 +1554,7 @@ class _TableRowState<T> extends State<TableRow<T>>
                   turns: expandArrowAnimation,
                   child: Icon(
                     Icons.expand_more,
-                    color: widget.isSelected
-                        ? defaultSelectionForegroundColor
-                        : null,
+                    color: theme.colorScheme.onSurface,
                     size: defaultIconSize,
                   ),
                 )

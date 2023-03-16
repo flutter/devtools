@@ -513,7 +513,7 @@ class StatusColumn extends ColumnData<NetworkRequest>
     return Text(
       getDisplayValue(data),
       style: data.didFail
-          ? theme.regularTextStyle.copyWith(color: theme.colorScheme.error)
+          ? TextStyle(color: theme.colorScheme.error)
           : theme.regularTextStyle,
     );
   }

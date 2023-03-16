@@ -173,8 +173,9 @@ class _TreeViewItemState<T extends TreeNode<T>> extends State<_TreeViewItem<T>>
   Widget build(BuildContext context) {
     return Container(
       margin: EdgeInsets.only(left: nodeIndent(widget.data)),
-      color:
-          widget.data.isSelected ? Theme.of(context).colorScheme.primary : null,
+      color: widget.data.isSelected
+          ? Theme.of(context).colorScheme.selectedRowBackgroundColor
+          : null,
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [

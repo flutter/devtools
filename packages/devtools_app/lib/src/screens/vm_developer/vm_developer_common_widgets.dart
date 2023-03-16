@@ -722,7 +722,6 @@ class VmServiceObjectLink extends StatelessWidget {
   const VmServiceObjectLink({
     required this.object,
     required this.onTap,
-    this.isSelected = false,
     this.preferUri = false,
     this.textBuilder,
   });
@@ -731,7 +730,6 @@ class VmServiceObjectLink extends StatelessWidget {
   final bool preferUri;
   final String? Function(Response?)? textBuilder;
   final FutureOr<void> Function(ObjRef) onTap;
-  final bool isSelected;
 
   @visibleForTesting
   static String? defaultTextBuilder(
@@ -823,9 +821,9 @@ class VmServiceObjectLink extends StatelessWidget {
 
     final TextStyle style;
     if (isServiceObject) {
-      style = isSelected ? theme.selectedLinkTextStyle : theme.linkTextStyle;
+      style = theme.linkTextStyle;
     } else {
-      style = isSelected ? theme.selectedFixedFontStyle : theme.fixedFontStyle;
+      style = theme.fixedFontStyle;
     }
     return TextSpan(
       text: text,

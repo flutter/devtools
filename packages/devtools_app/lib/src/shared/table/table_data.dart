@@ -96,10 +96,9 @@ abstract class ColumnData<T> {
     T dataObject, {
     bool isSelected = false,
   }) {
-    final textColor =
-        isSelected ? defaultSelectionForegroundColor : getTextColor(dataObject);
-    final fontStyle = Theme.of(context).fixedFontStyle;
-    return textColor == null ? fontStyle : fontStyle.copyWith(color: textColor);
+    final theme = Theme.of(context);
+    final textColor = getTextColor(dataObject) ?? theme.colorScheme.onSurface;
+    return theme.fixedFontStyle.copyWith(color: textColor);
   }
 
   @override

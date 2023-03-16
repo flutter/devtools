@@ -199,8 +199,9 @@ class DevToolsButton extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     var textColor = color;
     if (textColor == null && elevatedButton) {
-      textColor =
-          onPressed == null ? colorScheme.surfaceVariant : colorScheme.onPrimary;
+      textColor = onPressed == null
+          ? colorScheme.surfaceVariant
+          : colorScheme.onPrimary;
     }
     final iconLabel = MaterialIconLabel(
       label: label!,
@@ -672,7 +673,7 @@ class ProcessingInfo extends StatelessWidget {
         children: [
           Text(
             'Processing $processedObject',
-            style: Theme.of(context).subtleTextStyle,
+            style: Theme.of(context).regularTextStyle,
           ),
           const SizedBox(height: defaultSpacing),
           SizedBox(
@@ -764,7 +765,7 @@ class Badge extends StatelessWidget {
 
     return Container(
       decoration: BoxDecoration(
-        color: theme.primaryColor,
+        color: theme.colorScheme.onSurface,
         borderRadius: BorderRadius.circular(badgeCornerRadius),
       ),
       padding: const EdgeInsets.symmetric(
@@ -774,7 +775,8 @@ class Badge extends StatelessWidget {
       child: Text(
         text,
         // Use a slightly smaller font for the badge.
-        style: (theme.primaryTextTheme.bodyMedium ?? const TextStyle())
+        style: theme.regularTextStyle
+            .copyWith(color: theme.colorScheme.surface)
             .apply(fontSizeDelta: -1),
       ),
     );

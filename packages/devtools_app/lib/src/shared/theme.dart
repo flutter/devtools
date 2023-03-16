@@ -88,10 +88,12 @@ ThemeData _baseTheme({
       style: OutlinedButton.styleFrom(
         minimumSize: Size(buttonMinWidth, defaultButtonHeight),
         fixedSize: Size.fromHeight(defaultButtonHeight),
+        foregroundColor: theme.colorScheme.onSurface,
       ),
     ),
     textButtonTheme: TextButtonThemeData(
       style: TextButton.styleFrom(
+        padding: const EdgeInsets.all(densePadding),
         minimumSize: Size(buttonMinWidth, defaultButtonHeight),
         fixedSize: Size.fromHeight(defaultButtonHeight),
       ),
@@ -101,6 +103,7 @@ ThemeData _baseTheme({
         minimumSize: Size(buttonMinWidth, defaultButtonHeight),
         fixedSize: Size.fromHeight(defaultButtonHeight),
         backgroundColor: theme.colorScheme.primary,
+        foregroundColor: theme.colorScheme.onPrimary,
       ),
     ),
     progressIndicatorTheme: ProgressIndicatorThemeData(
@@ -300,18 +303,19 @@ extension DevToolsColorScheme on ColorScheme {
 
   // TODO(jacobr): replace this with Theme.of(context).scaffoldBackgroundColor, but we use
   // this in places where we do not have access to the context.
-  // remove
+  // remove.
+  // TODO(kenz): get rid of this.
   Color get defaultBackgroundColor =>
       isLight ? Colors.grey[50]! : const Color(0xFF1B1B1F);
 
   Color get alternatingBackgroundColor1 =>
-      isLight ? defaultBackgroundColor.darken() : const Color(0xFF1B1B1F);
-  Color get alternatingBackgroundColor2 =>
-      isLight ? defaultBackgroundColor.darken() : const Color(0xFF303033);
+      isLight ? Colors.white : const Color(0xFF1B1B1F);
 
-  Color get selectedRowBackgroundColor => isLight
-      ? const Color.fromARGB(255, 220, 220, 220)
-      : const Color.fromARGB(255, 73, 73, 73);
+  Color get alternatingBackgroundColor2 =>
+      isLight ? const Color(0xFFF2F0F4) : const Color(0xFF303033);
+
+  Color get selectedRowBackgroundColor =>
+      isLight ? const Color(0xFFC7C6CA) : const Color(0xFF5E5E62);
 
   Color get chartAccentColor =>
       isLight ? const Color(0xFFCCCCCC) : const Color(0xFF585858);
@@ -392,27 +396,28 @@ extension ThemeDataExtension on ThemeData {
 
   TextStyle get regularTextStyle => _fixBlurryText(
         TextStyle(
-          color: textTheme.bodyMedium!.color,
+          color: colorScheme.onSurface,
           fontSize: defaultFontSize,
         ),
       );
 
   TextStyle get subtleTextStyle => _fixBlurryText(
         TextStyle(
-          color: unselectedWidgetColor,
-          fontSize: defaultFontSize,
+          color: const Color(0xFF919094),
+          // Slightly smaller for subtle text.
+          fontSize: defaultFontSize - 1,
         ),
       );
 
-  TextStyle get selectedTextStyle => _fixBlurryText(
-        TextStyle(
-          color: textSelectionTheme.selectionColor,
-          fontSize: defaultFontSize,
-        ),
-      );
+  TextStyle get selectedSubtleTextStyle =>
+      subtleTextStyle.copyWith(color: colorScheme.onSurface);
 
   TextStyle get fixedFontStyle => _fixBlurryText(
-        textTheme.bodyMedium!.copyWith(fontFamily: 'RobotoMono'),
+        textTheme.bodyMedium!.copyWith(
+          fontFamily: 'RobotoMono',
+          color: colorScheme.onSurface,
+          fontSize: defaultFontSize,
+        ),
       );
 
   TextStyle get subtleFixedFontStyle =>

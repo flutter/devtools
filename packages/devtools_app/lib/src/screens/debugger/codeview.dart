@@ -1470,7 +1470,7 @@ class ScriptPopupMenuOption {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: Theme.of(context).regularTextStyle),
+          Text(label),
           if (icon != null)
             Icon(
               icon,
