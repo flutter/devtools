@@ -38,6 +38,7 @@ class ExpressionEvalField extends StatefulWidget {
   ExpressionEvalFieldState createState() => ExpressionEvalFieldState();
 }
 
+@visibleForTesting
 class ExpressionEvalFieldState extends State<ExpressionEvalField>
     with AutoDisposeMixin, SearchFieldMixin<ExpressionEvalField> {
   static final evalTextFieldKey = GlobalKey(debugLabel: 'evalTextFieldKey');
@@ -444,9 +445,8 @@ class ExpressionEvalFieldState extends State<ExpressionEvalField>
     evalService.scope.add(isolateId, assignment.variableName, value);
 
     _emitToConsole(
-      'Variable ${assignment.variableName} is created and now can be used '
-      'in expression evaluation for the isolate "$isolateName".',
-    );
+        'Variable ${assignment.variableName} is created and now can be used '
+        'in expressions for the isolate "$isolateName".');
 
     return true;
   }

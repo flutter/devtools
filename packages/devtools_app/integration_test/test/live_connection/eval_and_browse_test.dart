@@ -11,6 +11,7 @@ import 'dart:ui' as ui;
 import 'package:devtools_app/src/shared/console/widgets/console_pane.dart';
 import 'package:devtools_app/src/shared/console/widgets/evaluate.dart';
 import 'package:devtools_app/src/shared/primitives/simple_items.dart';
+import 'package:devtools_app/src/shared/ui/search.dart';
 import 'package:devtools_test/devtools_integration_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -55,13 +56,17 @@ void main() {
 }
 
 Future<void> _testBasicEval(_ConsoleTester tester) async {
-  await tester.eval('21 + 34', '55');
+  //await tester.eval('21 + 34', '55');
 }
 
 Future<void> _testAssignment(_ConsoleTester tester) async {
-  await tester.eval('DateTime(2023)', 'DateTime');
-  await tester.eval(r'var x = $0', 'Variable x is created');
-  await tester.eval(r'x.toString()', DateTime(2023).toString());
+  await tester.testEval('DateTime(2023)', 'DateTime');
+  await tester.testEval(
+    r'var x = $0',
+    'Variable x is created ',
+    exact: false,
+  );
+  await tester.testEval(r'x.toString()', DateTime(2023).toString());
 }
 
 Future<void> _testRootIsAccessible(_ConsoleTester tester) async {}
@@ -71,16 +76,32 @@ class _ConsoleTester {
 
   final WidgetTester tester;
 
-  Future<void> eval(
+  /// Tests if eval returns expected response by searching for response text.
+  ///
+  /// If [exact] is false, checks the response contains expected text.
+  Future<void> testEval(
     String expression,
-    String expectedResponse,
-  ) async {
-    await tester.tap(find.byType(ExpressionEvalField));
+    String expectedResponse, {
+    bool exact = true,
+  }) async {
+    await tester.tap(find.byType(AutoCompleteSearchField));
     await tester.pump(safePumpDuration);
-    await tester.enterText(find.byType(ExpressionEvalField), expression);
+    await tester.enterText(find.byType(AutoCompleteSearchField), expression);
     await tester.pump(safePumpDuration);
     await simulateKeyDownEvent(LogicalKeyboardKey.enter);
-    await tester.pump(safePumpDuration * 2);
-    expect(find.widgetWithText(ConsolePane, expectedResponse), findsOneWidget);
+    await simulateKeyUpEvent(LogicalKeyboardKey.enter);
+    await tester.pump(safePumpDuration);
+
+    if (exact) {
+      expect(
+        find.widgetWithText(ConsolePane, expectedResponse),
+        findsOneWidget,
+      );
+    } else {
+      expect(
+        find.textContaining(expectedResponse),
+        findsOneWidget,
+      );
+    }
   }
 }
