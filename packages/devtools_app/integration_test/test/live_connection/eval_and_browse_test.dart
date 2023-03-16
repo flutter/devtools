@@ -46,34 +46,41 @@ void main() {
     // never complete if there is an animation (e.g. a progress indicator).
     await tester.pump(safePumpDuration);
 
-    await _testBasicEval(tester);
-    await _testAssignment(tester);
-    await _testRootIsAccessible(tester);
+    final consoleTester = _ConsoleTester(tester);
+
+    await _testBasicEval(consoleTester);
+    await _testAssignment(consoleTester);
+    await _testRootIsAccessible(consoleTester);
   });
 }
 
-Future<void> _testBasicEval(WidgetTester tester) async {
-  await _enterExpression(tester, '21 + 34', '55');
+Future<void> _testBasicEval(_ConsoleTester tester) async {
+  await tester.eval('21 + 34', '55');
 }
 
-Future<void> _testAssignment(WidgetTester tester) async {
-  await _enterExpression(tester, 'DateTime(2023)', 'DateTime');
-  await _enterExpression(tester, r'var x = $0', 'Variable x is created');
+Future<void> _testAssignment(_ConsoleTester tester) async {
+  await tester.eval('DateTime(2023)', 'DateTime');
+  await tester.eval(r'var x = $0', 'Variable x is created');
+  await tester.eval(r'x.toString()', DateTime(2023).toString());
 }
 
-Future<void> _testRootIsAccessible(WidgetTester tester) async {}
+Future<void> _testRootIsAccessible(_ConsoleTester tester) async {}
 
-Future<void> _enterExpression(
-  WidgetTester tester,
-  String expression,
-  String expectedResponse,
-) async {
-  await tester.enterText(find.byType(ExpressionEvalField), expression);
-  await simulateKeyDownEvent(LogicalKeyboardKey.enter);
-  await tester.pump(safePumpDuration);
-  expect(find.widgetWithText(ConsolePane, expectedResponse), findsOneWidget);
-}
+class _ConsoleTester {
+  _ConsoleTester(this.tester);
 
-class _ConsoleActions {
   final WidgetTester tester;
+
+  Future<void> eval(
+    String expression,
+    String expectedResponse,
+  ) async {
+    await tester.tap(find.byType(ExpressionEvalField));
+    await tester.pump(safePumpDuration);
+    await tester.enterText(find.byType(ExpressionEvalField), expression);
+    await tester.pump(safePumpDuration);
+    await simulateKeyDownEvent(LogicalKeyboardKey.enter);
+    await tester.pump(safePumpDuration * 2);
+    expect(find.widgetWithText(ConsolePane, expectedResponse), findsOneWidget);
+  }
 }
