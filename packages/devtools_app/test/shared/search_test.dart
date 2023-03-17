@@ -84,7 +84,7 @@ class TestSearchController extends DisposableController
   }
 }
 
-class TestSearchData with SearchableData {
+class TestSearchData with SearchableDataMixin {
   TestSearchData(this.name);
 
   final String name;

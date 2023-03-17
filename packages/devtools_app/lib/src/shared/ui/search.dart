@@ -28,7 +28,7 @@ int topMatchesLimit = defaultTopMatchesLimit;
 
 const double _searchControlDividerHeight = 24.0;
 
-mixin SearchControllerMixin<T extends SearchableData> {
+mixin SearchControllerMixin<T extends SearchableDataMixin> {
   final _searchNotifier = ValueNotifier<String>('');
   final _searchInProgress = ValueNotifier<bool>(false);
 
@@ -892,7 +892,7 @@ mixin SearchFieldMixin<T extends StatefulWidget>
 ///
 /// The widget that builds [SearchField] is responsible for mixing in
 /// [SearchFieldMixin], which manages the search field lifecycle.
-class SearchField<T extends SearchableData> extends StatelessWidget {
+class SearchField<T extends SearchableDataMixin> extends StatelessWidget {
   const SearchField({
     required this.controller,
     required this.searchFieldEnabled,
@@ -1298,7 +1298,7 @@ class SearchNavigationControls extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<List<SearchableData>>(
+    return ValueListenableBuilder<List<SearchableDataMixin>>(
       valueListenable: controller.searchMatches,
       builder: (context, matches, _) {
         final numMatches = matches.length;
@@ -1365,11 +1365,12 @@ class SearchNavigationControls extends StatelessWidget {
   }
 }
 
-mixin SearchableData {
+mixin SearchableDataMixin {
   bool isSearchMatch = false;
   bool isActiveSearchMatch = false;
 
-  /// Whether this [SearchableData] is a match for the search query [search].
+  /// Whether this [SearchableDataMixin] is a match for the search query
+  /// [search].
   ///
   /// This method is used by [SearchControllerMixin.matchesForSearch]. If
   /// [SearchControllerMixin.matchesForSearch] is overridden in such a way that
@@ -1384,7 +1385,7 @@ mixin SearchableData {
 // This mixin is used to get around the type system where a type `T` needs to
 // both extend `TreeNode<T>` and mixin `DataSearchStateMixin`.
 mixin TreeDataSearchStateMixin<T extends TreeNode<T>>
-    on TreeNode<T>, SearchableData {}
+    on TreeNode<T>, SearchableDataMixin {}
 
 class AutoCompleteController extends DisposableController
     with SearchControllerMixin, AutoCompleteSearchControllerMixin {
@@ -1398,7 +1399,7 @@ class AutoCompleteController extends DisposableController
   // matches for the search is the intended behavior for the auto-complete
   // controller.
   @override
-  List<SearchableData> matchesForSearch(
+  List<SearchableDataMixin> matchesForSearch(
     String search, {
     bool searchPreviousMatches = false,
   }) =>

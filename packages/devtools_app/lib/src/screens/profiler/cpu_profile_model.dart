@@ -843,7 +843,7 @@ class CpuSampleEvent extends TraceEvent {
 class CpuStackFrame extends TreeNode<CpuStackFrame>
     with
         ProfilableDataMixin<CpuStackFrame>,
-        SearchableData,
+        SearchableDataMixin,
         TreeDataSearchStateMixin<CpuStackFrame>,
         FlameChartDataMixin {
   factory CpuStackFrame({

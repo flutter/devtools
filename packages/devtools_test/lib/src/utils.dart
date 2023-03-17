@@ -262,8 +262,8 @@ Future<void> loadFonts() async {
 Type typeOf<T>() => T;
 
 void verifyIsSearchMatch(
-  List<SearchableData> data,
-  List<SearchableData> matches,
+  List<SearchableDataMixin> data,
+  List<SearchableDataMixin> matches,
 ) {
   for (final request in data) {
     if (matches.contains(request)) {
