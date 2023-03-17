@@ -11,6 +11,7 @@ import 'dart:ui' as ui;
 import 'package:devtools_app/src/screens/memory/panes/diff/widgets/snapshot_list.dart';
 import 'package:devtools_app/src/shared/console/widgets/console_pane.dart';
 import 'package:devtools_app/src/shared/primitives/simple_items.dart';
+import 'package:devtools_app/src/shared/table/table.dart';
 import 'package:devtools_app/src/shared/ui/search.dart';
 import 'package:devtools_test/devtools_integration_test.dart';
 import 'package:flutter/material.dart';
@@ -127,8 +128,13 @@ class _EvalTester {
     await tester.pumpAndSettle();
     await tester.tap(find.byIcon(iconToTakeSnapshot));
     await tester.pump(longPumpDuration);
+
+    // Sort by class
+    await tester.tap(find.text('Class'));
+    await tester.pumpAndSettle();
+
     expect(
-      find.text('MyHomePage'),
+      find.text('MyApp'),
       findsOneWidget,
     );
   }
