@@ -8,7 +8,6 @@
 
 import 'dart:ui' as ui;
 
-import 'package:devtools_app/src/screens/memory/panes/diff/widgets/instances.dart';
 import 'package:devtools_app/src/screens/memory/panes/diff/widgets/snapshot_list.dart';
 import 'package:devtools_app/src/shared/common_widgets.dart';
 import 'package:devtools_app/src/shared/console/widgets/console_pane.dart';
@@ -66,18 +65,21 @@ Future<void> _testAssignment(_EvalTester tester) async {
 }
 
 Future<void> _testRootIsAccessible(_EvalTester tester) async {
-  await tester.tester.tap(find.text('MyApp'));
-  await tester.tester.pumpAndSettle();
+  final widgetTester = tester.tester;
+  await widgetTester.tap(find.text('MyApp'));
+  await widgetTester.pumpAndSettle();
 
-  await tester.tester
-      .tap(find.widgetWithText(InstanceTableCell, ContextMenuButton.text));
-  await tester.tester.pumpAndSettle();
+  await widgetTester.tap(find.text(ContextMenuButton.text));
+  await widgetTester.pumpAndSettle();
 
-  await tester.tester.tap(find.textContaining('one instance'));
-  await tester.tester.pumpAndSettle();
+  await widgetTester.tap(find.textContaining('one instance'));
+  await widgetTester.pumpAndSettle();
 
-  await tester.tester.tap(find.text('Any'));
-  await tester.tester.pumpAndSettle();
+  await widgetTester.tap(find.text('Any'));
+  await widgetTester.pump(longPumpDuration);
+
+  await widgetTester.tap(find.textContaining('MyApp, retained size '));
+  await widgetTester.pumpAndSettle();
 }
 
 class _EvalTester {
