@@ -71,10 +71,3 @@ void main() {
     });
   });
 }
-
-const dartSdkUrl =
-    'org-dartlang-sdk:///third_party/dart/sdk/lib/async/zone.dart';
-const flutterUrl =
-    'file:///path/to/flutter/packages/flutter/lib/src/widgets/binding.dart';
-const flutterUrlFromNonFlutterDir =
-    'file:///path/to/non-flutter/packages/flutter/lib/src/widgets/binding.dart';

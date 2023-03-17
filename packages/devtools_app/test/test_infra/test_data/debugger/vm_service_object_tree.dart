@@ -90,11 +90,6 @@ final testField = Field(
   id: '1234',
 );
 
-final testInstance = Instance(
-  id: '1234',
-  name: 'fooInstance',
-);
-
 final testSuperClass = ClassRef(
   name: 'fooSuperClass',
   library: testLibRef,

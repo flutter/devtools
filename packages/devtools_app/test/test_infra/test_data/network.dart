@@ -505,11 +505,6 @@ final Map<String, dynamic> httpWsHandshakeJson = {
 };
 
 final httpGetPendingRequest = HttpProfileRequest.parse(httpGetPendingJson)!;
-final httpGetPending = DartIOHttpRequestData(
-  0,
-  httpGetPendingRequest,
-  requestFullDataFromVmService: false,
-);
 final Map<String, dynamic> httpGetPendingJson = {
   'type': 'HttpProfileRequest',
   'id': '7',

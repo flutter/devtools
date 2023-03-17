@@ -112,9 +112,13 @@ class EvalService extends DisposableController with AutoDisposeControllerMixin {
     final variables = scope.removedVariables.join(', ');
     serviceManager.consoleService.appendStdio(
       'Garbage collected instances were removed from the scope: $variables. '
-      'Stop application to make variables persistent.\n',
+      'Pause application (use DevTools > Debugger) to make the variables persistent.\n',
     );
   }
+
+  bool get isStoppedAtFrame =>
+      serviceManager.isMainIsolatePaused &&
+      serviceManager.appState.currentFrame.value != null;
 
   /// Evaluate the given expression in the context of the currently selected
   /// stack frame, or the top frame if there is no current selection.

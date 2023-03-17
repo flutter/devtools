@@ -47,6 +47,7 @@ import 'shared/config_specific/server/server.dart';
 import 'shared/console/primitives/simple_items.dart';
 import 'shared/dialogs.dart';
 import 'shared/globals.dart';
+import 'shared/log_storage.dart';
 import 'shared/offline_screen.dart';
 import 'shared/primitives/auto_dispose.dart';
 import 'shared/primitives/utils.dart';
@@ -54,6 +55,7 @@ import 'shared/routing.dart';
 import 'shared/screen.dart';
 import 'shared/theme.dart';
 import 'shared/ui/hover.dart';
+import 'shared/utils.dart';
 
 // Assign to true to use a sample implementation of a conditional screen.
 // WARNING: Do not check in this file if debugEnableSampleScreen is true.
@@ -242,7 +244,6 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
               providers: _providedControllers(),
               child: DevToolsScaffold(
                 embed: embed,
-                ideTheme: ideTheme,
                 page: page,
                 screens: screens,
                 actions: [
@@ -516,10 +517,61 @@ class SettingsDialog extends StatelessWidget {
             toggle: preferences.toggleVmDeveloperMode,
             gaItem: gac.vmDeveloperMode,
           ),
+          const PaddedDivider(),
+          const _VerboseLoggingSetting(),
         ],
       ),
       actions: const [
         DialogCloseButton(),
+      ],
+    );
+  }
+}
+
+class _VerboseLoggingSetting extends StatelessWidget {
+  const _VerboseLoggingSetting();
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Row(
+          children: [
+            CheckboxSetting(
+              label: const Text('Enable verbose logging'),
+              listenable: preferences.verboseLoggingEnabled,
+              toggle: (enable) => preferences.toggleVerboseLogging(enable),
+              gaItem: gac.verboseLogging,
+            ),
+            const SizedBox(width: defaultSpacing),
+            IconLabelButton(
+              label: 'Copy logs',
+              icon: Icons.copy,
+              onPressed: () async => await copyToClipboard(
+                LogStorage.root.toString(),
+                'Successfully copied logs',
+              ),
+            ),
+            const SizedBox(width: denseSpacing),
+            ClearButton(
+              label: 'Clear logs',
+              onPressed: LogStorage.root.clear,
+            ),
+          ],
+        ),
+        const Row(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // TODO(kenz): style this with warning color once material 3 changes land
+            Icon(Icons.warning),
+            SizedBox(width: defaultSpacing),
+            Text(
+              'Logs may contain sensitive information.\n'
+              'Always check their contents before sharing.',
+            )
+          ],
+        ),
       ],
     );
   }

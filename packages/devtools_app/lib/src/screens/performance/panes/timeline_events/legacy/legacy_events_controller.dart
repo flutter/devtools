@@ -12,6 +12,7 @@ import '../../../../../shared/analytics/metrics.dart';
 import '../../../../../shared/config_specific/logger/allowed_error.dart';
 import '../../../../../shared/config_specific/logger/logger.dart';
 import '../../../../../shared/globals.dart';
+import '../../../../../shared/primitives/auto_dispose.dart';
 import '../../../../../shared/primitives/trace_event.dart';
 import '../../../../../shared/primitives/trees.dart';
 import '../../../../../shared/primitives/utils.dart';
@@ -30,7 +31,8 @@ import 'legacy_event_processor.dart';
 /// Debugging flag to load sample trace events from [simple_trace_example.dart].
 bool debugSimpleTrace = false;
 
-class LegacyTimelineEventsController with SearchControllerMixin<TimelineEvent> {
+class LegacyTimelineEventsController extends DisposableController
+    with SearchControllerMixin<TimelineEvent> {
   LegacyTimelineEventsController(this.performanceController) {
     processor = LegacyEventProcessor(performanceController);
   }
@@ -297,5 +299,11 @@ class LegacyTimelineEventsController with SearchControllerMixin<TimelineEvent> {
     _nextTraceIndexToProcess = 0;
     _nextTimelineEventIndexToProcess = 0;
     _selectedTimelineEventNotifier.value = null;
+  }
+
+  @override
+  void dispose() {
+    cpuProfilerController.dispose();
+    super.dispose();
   }
 }

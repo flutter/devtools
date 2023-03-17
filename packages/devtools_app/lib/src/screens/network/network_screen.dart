@@ -29,8 +29,6 @@ import 'network_controller.dart';
 import 'network_model.dart';
 import 'network_request_inspector.dart';
 
-final networkSearchFieldKey = GlobalKey(debugLabel: 'NetworkSearchFieldKey');
-
 class NetworkScreen extends Screen {
   NetworkScreen()
       : super.conditional(
@@ -187,6 +185,9 @@ class _NetworkProfilerControlsState extends State<_NetworkProfilerControls>
   bool _recording = false;
 
   @override
+  SearchControllerMixin get searchController => widget.controller;
+
+  @override
   void initState() {
     super.initState();
 
@@ -262,9 +263,8 @@ class _NetworkProfilerControlsState extends State<_NetworkProfilerControls>
         Container(
           width: wideSearchTextWidth,
           height: defaultTextFieldHeight,
-          child: buildSearchField(
+          child: SearchField<NetworkRequest>(
             controller: widget.controller,
-            searchFieldKey: networkSearchFieldKey,
             searchFieldEnabled: hasRequests,
             shouldRequestFocus: false,
             supportsNavigation: true,

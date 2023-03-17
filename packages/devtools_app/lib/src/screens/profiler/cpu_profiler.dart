@@ -100,6 +100,9 @@ class _CpuProfilerState extends State<CpuProfiler>
   late CpuProfileData data;
 
   @override
+  SearchControllerMixin get searchController => widget.controller;
+
+  @override
   void initState() {
     super.initState();
     data = widget.data;
@@ -298,9 +301,8 @@ class _CpuProfilerState extends State<CpuProfiler>
     return Container(
       width: wideSearchTextWidth,
       height: defaultTextFieldHeight,
-      child: buildSearchField(
+      child: SearchField<T>(
         controller: searchController,
-        searchFieldKey: widget.searchFieldKey!,
         searchFieldEnabled: true,
         shouldRequestFocus: false,
         supportsNavigation: true,

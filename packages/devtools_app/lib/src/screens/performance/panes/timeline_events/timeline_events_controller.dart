@@ -103,7 +103,8 @@ class TimelineEventsController extends PerformanceFeatureController
 
   static const _timelinePollingRateLimit = 5.0;
 
-  static const _timelinePollingInterval = Duration(seconds: 1);
+  Duration get _timelinePollingInterval =>
+      _perfettoMode ? const Duration(seconds: 1) : const Duration(seconds: 2);
 
   RateLimiter? _timelinePollingRateLimiter;
 
@@ -598,7 +599,7 @@ class TimelineEventsController extends PerformanceFeatureController
   void dispose() {
     _pollingTimer?.cancel();
     _timelinePollingRateLimiter?.dispose();
-    legacyController.cpuProfilerController.dispose();
+    legacyController.dispose();
     if (FeatureFlags.embeddedPerfetto) {
       perfettoController.dispose();
     }

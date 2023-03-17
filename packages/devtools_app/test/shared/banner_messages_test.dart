@@ -184,11 +184,3 @@ final testMessage2 = BannerMessage(
   screenId: testMessage2ScreenId,
   messageType: BannerMessageType.warning,
 );
-final testMessage3 = BannerMessage(
-  key: k3,
-  textSpans: const [TextSpan(text: 'Test Message 3')],
-  backgroundColor: Colors.black,
-  foregroundColor: Colors.white,
-  screenId: testMessage3ScreenId,
-  messageType: BannerMessageType.warning,
-);

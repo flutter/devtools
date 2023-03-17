@@ -27,9 +27,6 @@ import 'cpu_profiler_controller.dart';
 import 'panes/controls/profiler_controls.dart';
 import 'profiler_screen_controller.dart';
 
-final profilerScreenSearchFieldKey =
-    GlobalKey(debugLabel: 'ProfilerScreenSearchFieldKey');
-
 class ProfilerScreen extends Screen {
   ProfilerScreen()
       : super.conditional(
@@ -199,7 +196,6 @@ class _ProfilerScreenBodyState extends State<ProfilerScreenBody>
                 return CpuProfiler(
                   data: cpuProfileData,
                   controller: controller.cpuProfilerController,
-                  searchFieldKey: profilerScreenSearchFieldKey,
                 );
               },
             ),
