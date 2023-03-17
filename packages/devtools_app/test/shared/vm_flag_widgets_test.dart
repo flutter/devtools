@@ -35,7 +35,14 @@ void main() {
     Future<void> pumpDropdown(WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
-          theme: themeFor(isDarkTheme: false, ideTheme: IdeTheme()),
+          theme: themeFor(
+            isDarkTheme: false,
+            ideTheme: IdeTheme(),
+            theme: ThemeData(
+              useMaterial3: true,
+              colorScheme: lightColorScheme,
+            ),
+          ),
           home: Material(
             child: wrapWithControllers(
               Builder(

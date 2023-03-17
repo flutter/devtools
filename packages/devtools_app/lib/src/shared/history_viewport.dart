@@ -61,6 +61,17 @@ class _HistoryViewportState<T> extends State<HistoryViewport<T>> {
 
   @override
   Widget build(BuildContext context) {
+    final titleIcon = widget.titleIcon != null
+        ? Padding(
+            padding: const EdgeInsets.only(right: densePadding),
+            child: Icon(
+              widget.titleIcon,
+              size: defaultIconSize,
+              color: _iconColor,
+            ),
+          )
+        : const SizedBox.shrink();
+
     return ValueListenableBuilder<T?>(
       valueListenable: widget.history.current,
       builder: (context, T? current, _) {
@@ -112,7 +123,7 @@ class _HistoryViewportState<T> extends State<HistoryViewport<T>> {
                 child: widget.onTitleTap == null
                     ? Row(
                         children: [
-                          if (widget.titleIcon != null) Icon(widget.titleIcon),
+                          titleIcon,
                           Text(
                             title,
                             style: defaultTitleStyle,
@@ -127,7 +138,7 @@ class _HistoryViewportState<T> extends State<HistoryViewport<T>> {
                         onEnter: (_) {
                           _updateTitleStyle(
                             defaultTitleStyle.copyWith(
-                              color: theme.colorScheme.devtoolsLink,
+                              color: theme.colorScheme.primary,
                             ),
                           );
                         },
@@ -135,11 +146,7 @@ class _HistoryViewportState<T> extends State<HistoryViewport<T>> {
                           onTap: widget.onTitleTap,
                           child: Row(
                             children: [
-                              if (widget.titleIcon != null)
-                                Icon(
-                                  widget.titleIcon,
-                                  color: _iconColor,
-                                ),
+                              titleIcon,
                               Expanded(
                                 child: Text(
                                   title,
@@ -162,7 +169,7 @@ class _HistoryViewportState<T> extends State<HistoryViewport<T>> {
             ],
           ),
         );
-        return OutlineDecoration(
+        return RoundedOutlinedBorder(
           child: Column(
             children: [
               titleWidget,

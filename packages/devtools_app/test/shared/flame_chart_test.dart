@@ -7,7 +7,6 @@ import 'package:devtools_app/src/screens/profiler/cpu_profiler_controller.dart';
 import 'package:devtools_app/src/screens/profiler/panes/cpu_flame_chart.dart';
 import 'package:devtools_app/src/shared/charts/flame_chart.dart';
 import 'package:devtools_app/src/shared/primitives/flutter_widgets/linked_scroll_controller.dart';
-import 'package:devtools_app/src/shared/ui/colors.dart';
 import 'package:devtools_app/src/shared/ui/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
@@ -441,7 +440,9 @@ void main() {
         await pumpFlameChartNode(tester, selected: true, hovered: false);
         expect(nodeFinder, findsOneWidget);
         final Container nodeWidget = tester.widget(nodeFinder);
-        expect(nodeWidget.color, equals(defaultSelectionColor));
+
+        final BuildContext context = tester.element(find.byType(Builder));
+        expect(nodeWidget.color, equals(Theme.of(context).primaryColor));
 
         expect(textFinder, findsOneWidget);
         final Text textWidget = tester.widget(textFinder);

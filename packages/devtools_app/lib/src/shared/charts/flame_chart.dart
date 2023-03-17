@@ -1135,7 +1135,7 @@ class FlameChartNode<T extends FlameChartDataMixin<T>> {
     required bool activeSearchMatch,
     required ColorScheme colorScheme,
   }) {
-    if (selected) return defaultSelectionColor;
+    if (selected) return colorScheme.primary;
     if (activeSearchMatch) return activeSearchMatchColor;
     if (searchMatch) return searchMatchColor;
     return colorPair.background.colorFor(colorScheme);

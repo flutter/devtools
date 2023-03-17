@@ -50,9 +50,9 @@ class _CallGraphWithDominatorsState extends State<CallGraphWithDominators> {
       children: [
         AreaPaneHeader(
           title: Text(showCallGraph ? 'Call Graph' : 'Dominator Tree'),
-          needsTopBorder: false,
-          needsBottomBorder: false,
-          needsLeftBorder: true,
+          includeTopBorder: false,
+          includeBottomBorder: false,
+          includeLeftBorder: true,
           actions: [
             const Text('Show call graph'),
             Switch(
@@ -147,10 +147,13 @@ class _CallGraphViewState extends State<CallGraphView> {
                     onNodeSelected: _selectMainNode,
                   ),
                 ),
+                // TODO(kenz): this seems like an odd way to be using this
+                // Container. See if we can remove since we are already using
+                // [MainAxisAlignment.spaceBetween].
                 Container(
                   height: constraints.maxHeight,
                   width: densePadding,
-                  color: Theme.of(context).titleSolidBackgroundColor,
+                  color: Theme.of(context).colorScheme.surface,
                 ),
                 Flexible(
                   child: _CallGraphTable(

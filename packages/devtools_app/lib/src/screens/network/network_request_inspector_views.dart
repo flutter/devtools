@@ -523,8 +523,9 @@ class NetworkRequestOverviewView extends StatelessWidget {
       _buildRow(
         context: context,
         title: 'Timing',
-        child:
-            data is WebSocket ? _buildSocketTimeGraph() : _buildHttpTimeGraph(),
+        child: data is WebSocket
+            ? _buildSocketTimeGraph(context)
+            : _buildHttpTimeGraph(),
       ),
       const SizedBox(height: denseSpacing),
       _buildRow(
@@ -675,11 +676,11 @@ class NetworkRequestOverviewView extends StatelessWidget {
     ];
   }
 
-  Widget _buildSocketTimeGraph() {
+  Widget _buildSocketTimeGraph(BuildContext context) {
     return Container(
       key: socketTimingGraphKey,
       height: _timingGraphHeight,
-      color: mainUiColor,
+      color: Theme.of(context).colorScheme.primary,
     );
   }
 

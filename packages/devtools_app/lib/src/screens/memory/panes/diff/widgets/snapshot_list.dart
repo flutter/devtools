@@ -97,8 +97,6 @@ class _SnapshotListTitle extends StatelessWidget {
   Widget build(BuildContext context) {
     final theItem = item;
     final theme = Theme.of(context);
-    final textStyle =
-        selected ? theme.selectedTextStyle : theme.regularTextStyle;
     return ValueListenableBuilder<bool>(
       valueListenable: theItem.isProcessing,
       builder: (_, isProcessing, __) => Row(
@@ -109,7 +107,6 @@ class _SnapshotListTitle extends StatelessWidget {
               child: Text(
                 theItem.name,
                 overflow: TextOverflow.ellipsis,
-                style: textStyle,
               ),
             ),
           if (theItem is SnapshotInstanceItem && theItem.totalSize != null) ...[
@@ -119,7 +116,6 @@ class _SnapshotListTitle extends StatelessWidget {
                 includeUnit: true,
                 kbFractionDigits: 1,
               )!,
-              style: textStyle,
             ),
             const SizedBox(width: denseRowSpacing),
           ],
@@ -127,7 +123,7 @@ class _SnapshotListTitle extends StatelessWidget {
             Icon(
               Icons.help_outline,
               size: defaultIconSize,
-              color: textStyle.color,
+              color: theme.colorScheme.onSurface,
             ),
           if (isProcessing) ...[
             CenteredCircularProgressIndicator(size: smallProgressSize),
@@ -199,7 +195,7 @@ class _SnapshotListItemsState extends State<_SnapshotListItems>
           return Container(
             height: _headerHeight,
             color: selected
-                ? Theme.of(context).colorScheme.selectedRowColor
+                ? Theme.of(context).colorScheme.selectedRowBackgroundColor
                 : null,
             child: InkWell(
               canRequestFocus: false,

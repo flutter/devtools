@@ -103,7 +103,7 @@ class _RasterPhases extends StatelessWidget {
     final data = _generateBlockData(frameAnalysis);
     return _FrameBlockGroup(
       title: 'Raster ${pluralize('phase', data.length)}:',
-      data: _generateBlockData(frameAnalysis),
+      data: data,
       hasData: frameAnalysis.hasRasterData,
     );
   }

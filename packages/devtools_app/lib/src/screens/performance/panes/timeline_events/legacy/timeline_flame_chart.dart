@@ -1064,7 +1064,7 @@ class SelectedFrameBracketPainter extends FlameChartPainter {
     );
 
     final paint = Paint()
-      ..color = defaultSelectionColor
+      ..color = colorScheme.primary
       ..style = PaintingStyle.stroke
       ..strokeWidth = strokeWidth;
 

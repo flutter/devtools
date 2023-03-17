@@ -328,10 +328,16 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
   Widget build(BuildContext context) {
     return MaterialApp.router(
       debugShowCheckedModeBanner: false,
+      themeMode: isDarkThemeEnabled ? ThemeMode.dark : ThemeMode.light,
       theme: themeFor(
-        isDarkTheme: isDarkThemeEnabled,
+        isDarkTheme: false,
         ideTheme: ideTheme,
-        theme: Theme.of(context),
+        theme: ThemeData(useMaterial3: true, colorScheme: lightColorScheme),
+      ),
+      darkTheme: themeFor(
+        isDarkTheme: true,
+        ideTheme: ideTheme,
+        theme: ThemeData(useMaterial3: true, colorScheme: darkColorScheme),
       ),
       builder: (context, child) {
         return MultiProvider(
@@ -471,7 +477,7 @@ class OpenSettingsAction extends StatelessWidget {
           height: actionWidgetSize,
           alignment: Alignment.center,
           child: Icon(
-            Icons.settings,
+            Icons.settings_outlined,
             size: actionsIconSize,
           ),
         ),
@@ -544,9 +550,11 @@ class _VerboseLoggingSetting extends StatelessWidget {
               gaItem: gac.verboseLogging,
             ),
             const SizedBox(width: defaultSpacing),
-            IconLabelButton(
+            DevToolsButton(
               label: 'Copy logs',
               icon: Icons.copy,
+              gaScreen: gac.settingsDialog,
+              gaSelection: gac.copyLogs,
               onPressed: () async => await copyToClipboard(
                 LogStorage.root.toString(),
                 'Successfully copied logs',
@@ -555,15 +563,17 @@ class _VerboseLoggingSetting extends StatelessWidget {
             const SizedBox(width: denseSpacing),
             ClearButton(
               label: 'Clear logs',
+              gaScreen: gac.settingsDialog,
+              gaSelection: gac.clearLogs,
               onPressed: LogStorage.root.clear,
             ),
           ],
         ),
+        const SizedBox(height: denseSpacing),
         const Row(
           mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // TODO(kenz): style this with warning color once material 3 changes land
+            Spacer(),
             Icon(Icons.warning),
             SizedBox(width: defaultSpacing),
             Text(

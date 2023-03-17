@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../../../shared/analytics/constants.dart' as gac;
 import '../../../shared/common_widgets.dart';
 import '../../../shared/primitives/utils.dart';
 import '../../../shared/split.dart';
@@ -48,6 +49,8 @@ class IsolateStatisticsViewBody extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             RefreshButton(
+              gaScreen: gac.vmTools,
+              gaSelection: gac.refreshIsolateStatistics,
               onPressed: controller.refresh,
             ),
             const SizedBox(height: denseRowSpacing),
@@ -373,7 +376,7 @@ class _IsolatePortsWidgetState extends State<IsolatePortsWidget> {
             child: Column(
               children: [
                 AreaPaneHeader(
-                  needsTopBorder: false,
+                  includeTopBorder: false,
                   title: Text(
                     'Open Ports (${ports.length})',
                   ),

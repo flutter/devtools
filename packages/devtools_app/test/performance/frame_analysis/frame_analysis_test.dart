@@ -16,7 +16,7 @@ import '../../test_infra/matchers/matchers.dart';
 import '../../test_infra/test_data/performance.dart';
 
 void main() {
-  const windowSize = Size(4000.0, 1000.0);
+  const windowSize = Size(1500.0, 500.0);
 
   group('FlutterFrameAnalysisView', () {
     late FlutterFrame frame;
@@ -126,7 +126,7 @@ void main() {
       });
 
       testWidgetsWithWindowSize(
-          'builds with icons only for narrow screen', const Size(200.0, 1000.0),
+          'builds with icons only for narrow screen', const Size(200.0, 500.0),
           (WidgetTester tester) async {
         await pumpVisualizer(tester, frameAnalysis);
 

@@ -34,6 +34,7 @@ class PerformanceControls extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return OfflineAwareControls(
+      gaScreen: gac.performance,
       controlsBuilder: (offline) {
         return Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -85,6 +86,7 @@ class _PrimaryControls extends StatelessWidget {
         if (serviceManager.connectedApp!.isFlutterAppNow!) ...[
           VisibilityButton(
             show: preferences.performance.showFlutterFramesChart,
+            gaScreen: gac.performance,
             onPressed:
                 controller.flutterFramesController.toggleShowFlutterFrames,
             label: 'Flutter frames',
@@ -93,8 +95,10 @@ class _PrimaryControls extends StatelessWidget {
           const SizedBox(width: denseSpacing),
         ],
         if (!offline)
-          OutlinedIconButton(
+          DevToolsButton(
             icon: Icons.block,
+            gaScreen: gac.performance,
+            gaSelection: gac.clear,
             tooltip: 'Clear all data on the Performance screen',
             onPressed: processing ? null : _clearPerformanceData,
           ),
@@ -135,14 +139,18 @@ class _SecondaryPerformanceControls extends StatelessWidget {
           const SizedBox(width: denseSpacing),
           const MoreDebuggingOptionsButton(),
         ],
-        const SizedBox(width: defaultSpacing),
-        OutlinedIconButton(
+        const SizedBox(width: denseSpacing),
+        DevToolsButton.iconOnly(
           icon: Icons.file_download,
+          gaScreen: gac.performance,
+          gaSelection: gac.export,
           tooltip: 'Export data',
           onPressed: _exportPerformanceData,
         ),
         const SizedBox(width: denseSpacing),
         SettingsOutlinedButton(
+          gaScreen: gac.performance,
+          gaSelection: gac.performanceSettings,
           onPressed: () => _openSettingsDialog(context),
         ),
       ],
