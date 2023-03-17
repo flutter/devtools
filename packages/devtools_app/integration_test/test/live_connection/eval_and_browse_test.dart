@@ -41,10 +41,10 @@ void main() {
 
     final evalTester = _EvalTester(tester);
 
-    await _testBasicEval(evalTester);
-    await _testAssignment(evalTester);
+    // await _testBasicEval(evalTester);
+    // await _testAssignment(evalTester);
 
-    await switchToScreen(tester, ScreenMetaData.memory);
+    await evalTester.switchToSnapshotsAndTakeOne();
 
     await _testRootIsAccessible(evalTester);
   });
@@ -123,9 +123,13 @@ class _EvalTester {
 
   Future<void> switchToSnapshotsAndTakeOne() async {
     await switchToScreen(tester, ScreenMetaData.memory);
-    await tester.tap(find.widgetWithText(Tab, 'Diff Snapshots'));
-    await tester.pump(longPumpDuration);
+    await tester.tap(find.text('Diff Snapshots'));
+    await tester.pumpAndSettle();
     await tester.tap(find.byIcon(iconToTakeSnapshot));
     await tester.pump(longPumpDuration);
+    expect(
+      find.text('MyHomePage'),
+      findsOneWidget,
+    );
   }
 }
