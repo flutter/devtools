@@ -280,9 +280,9 @@ class _NotificationMessage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       widget.message.text,
-      style: Theme.of(context).textTheme.bodyLarge,
+      style: Theme.of(context).textTheme.bodyMedium,
       overflow: TextOverflow.visible,
-      maxLines: 6,
+      maxLines: 10,
     );
   }
 }

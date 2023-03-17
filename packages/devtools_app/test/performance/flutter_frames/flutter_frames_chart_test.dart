@@ -166,7 +166,7 @@ void main() {
           findsNWidgets(totalFramesInView),
         );
 
-        verifyScrollOffset(tester, 666.0);
+        verifyScrollOffset(tester, 648.0);
       });
     });
 

@@ -24,6 +24,8 @@ void main() {
     setUp(() {
       setUpMockScriptManager();
       setGlobal(IdeTheme, IdeTheme());
+      setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
+      setGlobal(PreferencesController, PreferencesController());
 
       mockCodeObject = MockCodeObject();
       final testCode = Code(

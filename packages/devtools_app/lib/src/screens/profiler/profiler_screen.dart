@@ -174,31 +174,29 @@ class _ProfilerScreenBodyState extends State<ProfilerScreenBody>
           processing: processing,
           offline: offlineController.offlineMode.value,
         ),
-        const SizedBox(height: denseRowSpacing),
+        const SizedBox(height: intermediateSpacing),
         Expanded(
-          child: OutlineDecoration(
-            child: ValueListenableBuilder<CpuProfileData?>(
-              valueListenable: controller.cpuProfilerController.dataNotifier,
-              builder: (context, cpuProfileData, _) {
-                if (cpuProfileData ==
-                        CpuProfilerController.baseStateCpuProfileData ||
-                    cpuProfileData == null) {
-                  return _buildRecordingInfo();
-                }
-                if (cpuProfileData ==
-                    CpuProfilerController.emptyAppStartUpProfile) {
-                  return emptyAppStartUpProfileView;
-                }
-                if (cpuProfileData.isEmpty &&
-                    !controller.cpuProfilerController.isFilterActive) {
-                  return emptyProfileView;
-                }
-                return CpuProfiler(
-                  data: cpuProfileData,
-                  controller: controller.cpuProfilerController,
-                );
-              },
-            ),
+          child: ValueListenableBuilder<CpuProfileData?>(
+            valueListenable: controller.cpuProfilerController.dataNotifier,
+            builder: (context, cpuProfileData, _) {
+              if (cpuProfileData ==
+                      CpuProfilerController.baseStateCpuProfileData ||
+                  cpuProfileData == null) {
+                return _buildRecordingInfo();
+              }
+              if (cpuProfileData ==
+                  CpuProfilerController.emptyAppStartUpProfile) {
+                return emptyAppStartUpProfileView;
+              }
+              if (cpuProfileData.isEmpty &&
+                  !controller.cpuProfilerController.isFilterActive) {
+                return emptyProfileView;
+              }
+              return CpuProfiler(
+                data: cpuProfileData,
+                controller: controller.cpuProfilerController,
+              );
+            },
           ),
         ),
       ],
@@ -270,13 +268,14 @@ class ProfilerScreenControls extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // TODO(kenz): use the [OfflineAwareControls] helper widget.
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         if (offline)
-          const Padding(
-            padding: EdgeInsets.only(right: defaultSpacing),
-            child: ExitOfflineButton(),
+          Padding(
+            padding: const EdgeInsets.only(right: defaultSpacing),
+            child: ExitOfflineButton(gaScreen: gac.cpuProfiler),
           )
         else ...[
           _PrimaryControls(
@@ -300,7 +299,7 @@ class _PrimaryControls extends StatelessWidget {
     required this.recording,
   });
 
-  static const _primaryControlsMinIncludeTextWidth = 1050.0;
+  static const _primaryControlsMinIncludeTextWidth = 1170.0;
 
   final ProfilerScreenController controller;
 
@@ -312,42 +311,28 @@ class _PrimaryControls extends StatelessWidget {
       children: [
         RecordButton(
           recording: recording,
+          gaScreen: gac.cpuProfiler,
+          gaSelection: gac.record,
           minScreenWidthForTextBeforeScaling:
               _primaryControlsMinIncludeTextWidth,
-          onPressed: () {
-            ga.select(
-              gac.cpuProfiler,
-              gac.record,
-            );
-            unawaited(controller.startRecording());
-          },
+          onPressed: controller.startRecording,
         ),
         const SizedBox(width: denseSpacing),
         StopRecordingButton(
           recording: recording,
+          gaScreen: gac.cpuProfiler,
+          gaSelection: gac.stop,
           minScreenWidthForTextBeforeScaling:
               _primaryControlsMinIncludeTextWidth,
-          onPressed: () {
-            ga.select(
-              gac.cpuProfiler,
-              gac.stop,
-            );
-            unawaited(controller.stopRecording());
-          },
+          onPressed: controller.stopRecording,
         ),
         const SizedBox(width: denseSpacing),
         ClearButton(
+          gaScreen: gac.cpuProfiler,
+          gaSelection: gac.clear,
           minScreenWidthForTextBeforeScaling:
               _primaryControlsMinIncludeTextWidth,
-          onPressed: recording
-              ? null
-              : () {
-                  ga.select(
-                    gac.cpuProfiler,
-                    gac.clear,
-                  );
-                  unawaited(controller.clear());
-                },
+          onPressed: recording ? null : controller.clear,
         ),
       ],
     );
@@ -360,9 +345,9 @@ class _SecondaryControls extends StatelessWidget {
     required this.profilerBusy,
   });
 
-  static const _secondaryControlsMinScreenWidthForText = 1050.0;
+  static const _secondaryControlsMinScreenWidthForText = 1170.0;
 
-  static const _profilingControlsMinScreenWidthForText = 825.0;
+  static const _profilingControlsMinScreenWidthForText = 875.0;
 
   final ProfilerScreenController controller;
 
@@ -374,40 +359,30 @@ class _SecondaryControls extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
         if (serviceManager.connectedApp!.isFlutterNativeAppNow)
-          IconLabelButton(
+          DevToolsButton(
             icon: Icons.timer,
             label: 'Profile app start up',
             tooltip: 'Load all Dart CPU samples that occurred before \n'
                 'the first Flutter frame was drawn (if available)',
             tooltipPadding: const EdgeInsets.all(denseSpacing),
+            gaScreen: gac.cpuProfiler,
+            gaSelection: gac.profileAppStartUp,
             minScreenWidthForTextBeforeScaling:
                 _profilingControlsMinScreenWidthForText,
             onPressed: !profilerBusy
-                ? () {
-                    ga.select(
-                      gac.cpuProfiler,
-                      gac.profileAppStartUp,
-                    );
-                    unawaited(
-                      controller.cpuProfilerController.loadAppStartUpProfile(),
-                    );
-                  }
+                ? controller.cpuProfilerController.loadAppStartUpProfile
                 : null,
           ),
         const SizedBox(width: denseSpacing),
         RefreshButton(
           label: 'Load all CPU samples',
           tooltip: 'Load all available CPU samples from the profiler',
+          gaScreen: gac.cpuProfiler,
+          gaSelection: gac.loadAllCpuSamples,
           minScreenWidthForTextBeforeScaling:
               _profilingControlsMinScreenWidthForText,
           onPressed: !profilerBusy
-              ? () {
-                  ga.select(
-                    gac.cpuProfiler,
-                    gac.loadAllCpuSamples,
-                  );
-                  unawaited(controller.cpuProfilerController.loadAllSamples());
-                }
+              ? controller.cpuProfilerController.loadAllSamples
               : null,
         ),
         const SizedBox(width: denseSpacing),
@@ -418,16 +393,11 @@ class _SecondaryControls extends StatelessWidget {
         ),
         const SizedBox(width: denseSpacing),
         ExportButton(
+          gaScreen: gac.cpuProfiler,
           onPressed: !profilerBusy &&
                   controller.cpuProfileData != null &&
                   controller.cpuProfileData?.isEmpty == false
-              ? () {
-                  ga.select(
-                    gac.cpuProfiler,
-                    gac.export,
-                  );
-                  _exportPerformance();
-                }
+              ? _exportPerformance
               : null,
           minScreenWidthForTextBeforeScaling:
               _secondaryControlsMinScreenWidthForText,

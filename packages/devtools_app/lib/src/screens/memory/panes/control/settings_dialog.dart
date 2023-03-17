@@ -44,10 +44,7 @@ class MemorySettingsDialog extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        preferences.memory.refLimitTitle,
-                        style: theme.regularTextStyle,
-                      ),
+                      Text(preferences.memory.refLimitTitle),
                       Text(
                         'Used to explore live references in console.',
                         style: theme.subtleTextStyle,

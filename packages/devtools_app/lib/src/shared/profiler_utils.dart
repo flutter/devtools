@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 
 import '../../devtools_app.dart';
 import '../screens/vm_developer/vm_developer_common_widgets.dart';
-import 'ui/colors.dart';
 
 mixin ProfilableDataMixin<T extends TreeNode<T>> on TreeNode<T> {
   ProfileMetaData get profileMetaData;
@@ -266,11 +265,7 @@ class MethodAndSourceDisplay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textColor = isSelected ? defaultSelectionForegroundColor : null;
-    var fontStyle = Theme.of(context).fixedFontStyle;
-    fontStyle =
-        textColor == null ? fontStyle : fontStyle.copyWith(color: textColor);
-
+    final fontStyle = Theme.of(context).fixedFontStyle;
     final sourceTextSpans = <TextSpan>[];
     final packageUriWithSourceLine = uriWithSourceLine(packageUri, sourceLine);
 
@@ -285,7 +280,6 @@ class MethodAndSourceDisplay extends StatelessWidget {
           VmServiceObjectLink(
             object: script,
             textBuilder: (_) => sourceDisplay,
-            isSelected: isSelected,
             onTap: (e) {
               DevToolsRouterDelegate.of(context).navigate(
                 DebuggerScreen.id,

@@ -6,6 +6,7 @@ This is draft for future release notes, that are going to land on
 Dart & Flutter DevTools - A Suite of Performance Tools for Dart and Flutter
 
 ## General updates
+* Update DevTools to the new Material 3 design - [#5429](https://github.com/flutter/devtools/pull/5429)
 * Use the default Flutter service worker - [#5331](https://github.com/flutter/devtools/pull/5331)
 * Added the new verbose logging feature for helping us debug user issues. [#5404](https://github.com/flutter/devtools/pull/5404)
     ![verbose logging](images/verbose-logging.png "verbose_logging")
