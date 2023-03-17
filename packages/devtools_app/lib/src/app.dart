@@ -539,8 +539,6 @@ class _VerboseLoggingSetting extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
     return Column(
       children: [
         Row(
@@ -571,22 +569,16 @@ class _VerboseLoggingSetting extends StatelessWidget {
             ),
           ],
         ),
-        Row(
+        const SizedBox(height: denseSpacing),
+        const Row(
           mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // TODO(kenz): style this with warning color once material 3 changes land
-            Icon(
-              Icons.warning,
-              color: colorScheme.warningContainer,
-            ),
-            const SizedBox(width: defaultSpacing),
+            Spacer(),
+            Icon(Icons.warning),
+            SizedBox(width: defaultSpacing),
             Text(
               'Logs may contain sensitive information.\n'
               'Always check their contents before sharing.',
-              style: theme.regularTextStyle.copyWith(
-                color: colorScheme.warningContainer,
-              ),
             )
           ],
         ),
