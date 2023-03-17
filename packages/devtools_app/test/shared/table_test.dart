@@ -1388,9 +1388,9 @@ void main() {
       final crackleFinder = find.byKey(const Key('Crackle'));
 
       // Expected values returned through accessing Color.value property.
-      const color1Value = 4293848814;
-      const color2Value = 4294638330;
-      const rowSelectedColorValue = 4294638330;
+      const color1Value = 4294111476;
+      const color2Value = 4294967295;
+      const rowSelectedColorValue = 4294967295;
 
       await tester.pumpWidget(wrap(table));
       await tester.pumpAndSettle();

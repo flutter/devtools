@@ -27,7 +27,12 @@ void main() {
         (WidgetTester tester) async {
       await tester.pumpWidget(
         wrap(
-          EditableList(entries: entries([]), textFieldLabel: label),
+          EditableList(
+            entries: entries([]),
+            textFieldLabel: label,
+            gaRefreshSelection: '',
+            gaScreen: '',
+          ),
         ),
       );
       expect(find.text(label), findsOneWidget);
@@ -43,6 +48,8 @@ void main() {
         onEntryAdded: (e) {
           entryThatWasRequestedForAdd = e;
         },
+        gaRefreshSelection: '',
+        gaScreen: '',
       );
       await tester.pumpWidget(
         wrap(widget),
@@ -73,6 +80,8 @@ void main() {
         onRefreshTriggered: () {
           refreshWasCalled = true;
         },
+        gaRefreshSelection: '',
+        gaScreen: '',
       );
       await tester.pumpWidget(
         wrap(widget),
@@ -95,6 +104,8 @@ void main() {
         onEntryRemoved: (e) {
           entryThatWasRemoved = e;
         },
+        gaRefreshSelection: '',
+        gaScreen: '',
       );
       await tester.pumpWidget(
         wrap(widget),
@@ -119,6 +130,8 @@ void main() {
       final widget = EditableList(
         entries: entries([valueToCopy]),
         textFieldLabel: label,
+        gaRefreshSelection: '',
+        gaScreen: '',
       );
       await tester.pumpWidget(
         wrap(widget),
@@ -140,6 +153,8 @@ void main() {
         final widget = EditableList(
           entries: entryList,
           textFieldLabel: label,
+          gaRefreshSelection: '',
+          gaScreen: '',
         );
         await tester.pumpWidget(
           wrap(widget),
@@ -169,6 +184,8 @@ void main() {
         final widget = EditableList(
           entries: entryList,
           textFieldLabel: label,
+          gaRefreshSelection: '',
+          gaScreen: '',
         );
         await tester.pumpWidget(
           wrap(widget),

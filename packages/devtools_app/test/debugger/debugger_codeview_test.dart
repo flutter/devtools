@@ -45,6 +45,8 @@ void main() {
     setGlobal(IdeTheme, IdeTheme());
     setGlobal(ScriptManager, MockScriptManager());
     setGlobal(NotificationService, NotificationService());
+    setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
+    setGlobal(PreferencesController, PreferencesController());
     fakeServiceManager.consoleService.ensureServiceInitialized();
     when(fakeServiceManager.errorBadgeManager.errorCountNotifier('debugger'))
         .thenReturn(ValueNotifier<int>(0));

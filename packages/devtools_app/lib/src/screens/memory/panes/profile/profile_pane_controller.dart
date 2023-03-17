@@ -7,8 +7,6 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../../../shared/analytics/analytics.dart' as ga;
-import '../../../../shared/analytics/constants.dart' as gac;
 import '../../../../shared/config_specific/import_export/import_export.dart';
 import '../../../../shared/globals.dart';
 import '../../../../shared/primitives/auto_dispose.dart';
@@ -76,10 +74,6 @@ class ProfilePaneController extends DisposableController
   ///
   /// The returned string is the name of the downloaded CSV file.
   void downloadMemoryTableCsv(AdaptedProfile profile) {
-    ga.select(
-      gac.memory,
-      gac.MemoryEvent.profileDownloadCsv,
-    );
     final csvBuffer = StringBuffer();
 
     // Write the headers first.

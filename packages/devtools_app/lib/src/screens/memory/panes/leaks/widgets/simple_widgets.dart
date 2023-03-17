@@ -46,12 +46,14 @@ class AnalyzeButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return IconLabelButton(
+    return DevToolsButton(
       label: 'Analyze and Download',
       icon: Icons.file_download,
       tooltip: 'Analyze the leaks and download the result\n'
           'to ${yamlFilePrefix}_<time>.yaml.',
       onPressed: () async => await leaksController.requestLeaksAndSaveToYaml(),
+      gaScreen: gac.memory,
+      gaSelection: gac.MemoryEvent.leaksAnalyze,
       minScreenWidthForTextBeforeScaling: memoryControlsMinVerboseWidth,
     );
   }

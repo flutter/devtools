@@ -54,8 +54,7 @@ class EnhanceTracingButton extends StatelessWidget {
           children: [
             TextSpan(
               text: 'frame times may be negatively affected',
-              style:
-                  textStyle.copyWith(color: theme.colorScheme.errorTextColor),
+              style: textStyle.copyWith(color: theme.colorScheme.error),
             ),
             TextSpan(
               text: '.\n\n',

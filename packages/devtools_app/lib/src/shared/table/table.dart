@@ -1437,10 +1437,10 @@ class _TableRowState<T> extends State<TableRow<T>>
   }
 
   Color _searchAwareBackgroundColor() {
-    final backgroundColor =
-        widget.backgroundColor ?? Theme.of(context).titleSolidBackgroundColor;
+    final colorScheme = Theme.of(context).colorScheme;
+    final backgroundColor = widget.backgroundColor ?? colorScheme.surface;
     if (widget.isSelected) {
-      return Theme.of(context).colorScheme.selectedRowColor;
+      return colorScheme.selectedRowBackgroundColor;
     }
     final searchAwareBackgroundColor = isSearchMatch
         ? Color.alphaBlend(
@@ -1554,9 +1554,7 @@ class _TableRowState<T> extends State<TableRow<T>>
                   turns: expandArrowAnimation,
                   child: Icon(
                     Icons.expand_more,
-                    color: widget.isSelected
-                        ? defaultSelectionForegroundColor
-                        : null,
+                    color: theme.colorScheme.onSurface,
                     size: defaultIconSize,
                   ),
                 )
@@ -1649,7 +1647,7 @@ class _TableRowState<T> extends State<TableRow<T>>
       }
     }
 
-    return Padding(
+    final rowContent = Padding(
       padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
@@ -1675,6 +1673,10 @@ class _TableRowState<T> extends State<TableRow<T>>
         },
       ),
     );
+    if (widget.rowType == _TableRowType.columnHeader) {
+      return OutlineDecoration.onlyBottom(child: rowContent);
+    }
+    return rowContent;
   }
 
   @override

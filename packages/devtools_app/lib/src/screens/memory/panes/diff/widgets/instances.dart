@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 import '../../../../../shared/analytics/constants.dart';
 import '../../../../../shared/memory/adapted_heap_data.dart';
 import '../../../../../shared/memory/class_name.dart';
-import '../../../../../shared/theme.dart';
 import '../../../shared/heap/heap.dart';
 import '../../../shared/primitives/instance_set_button.dart';
 import '../controller/sampler.dart';
@@ -42,14 +41,10 @@ class InstanceTableCell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
     return Row(
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
         InstanceSetButton(
-          textStyle:
-              isSelected ? theme.selectedTextStyle : theme.regularTextStyle,
           count: _count,
           gaContext: gaContext,
           sampleObtainer: _sampleObtainer,

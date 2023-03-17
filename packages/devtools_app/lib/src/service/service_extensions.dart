@@ -10,8 +10,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 
 import '../shared/analytics/constants.dart' as gac;
-import '../shared/theme.dart';
-import '../shared/ui/icons.dart';
 
 const _dartIOExtensionPrefix = 'ext.dart.io.';
 const _flutterExtensionPrefix = 'ext.flutter.';
@@ -21,34 +19,21 @@ const inspectorExtensionPrefix = 'ext.flutter.inspector';
 class ToggleableServiceExtensionDescription<T>
     extends ServiceExtensionDescription {
   ToggleableServiceExtensionDescription._({
-    required Widget enabledIcon,
-    Widget? disabledIcon,
-    required String extension,
-    required String title,
+    super.iconAsset,
+    super.iconData,
+    required super.extension,
+    required super.title,
     required T enabledValue,
     required T disabledValue,
-    required String? gaScreenName,
-    required String? gaItem,
-    required String tooltip,
-    String? description,
-    String? documentationUrl,
-    String? gaDocsItem,
-    bool shouldCallOnAllIsolates = false,
+    required super.gaScreenName,
+    required super.gaItem,
+    required super.tooltip,
+    super.description,
+    super.documentationUrl,
+    super.gaDocsItem,
+    super.shouldCallOnAllIsolates = false,
     this.inverted = false,
-  }) : super(
-          extension: extension,
-          title: title,
-          enabledIcon: enabledIcon,
-          disabledIcon: disabledIcon ?? enabledIcon,
-          values: [enabledValue, disabledValue],
-          gaScreenName: gaScreenName,
-          gaItem: gaItem,
-          shouldCallOnAllIsolates: shouldCallOnAllIsolates,
-          tooltip: tooltip,
-          description: description ?? title,
-          documentationUrl: documentationUrl,
-          gaDocsItem: gaDocsItem,
-        );
+  }) : super(values: [enabledValue, disabledValue]);
 
   static const enabledValueIndex = 0;
 
@@ -70,8 +55,8 @@ class ToggleableServiceExtensionDescription<T>
 
 class ServiceExtensionDescription<T> {
   ServiceExtensionDescription({
-    required this.enabledIcon,
-    disabledIcon,
+    this.iconAsset,
+    this.iconData,
     List<String>? displayValues,
     required this.extension,
     required this.title,
@@ -85,16 +70,16 @@ class ServiceExtensionDescription<T> {
     this.shouldCallOnAllIsolates = false,
   })  : displayValues =
             displayValues ?? values.map((v) => v.toString()).toList(),
-        disabledIcon = disabledIcon ?? enabledIcon,
+        assert((iconAsset == null) != (iconData == null)),
         assert((documentationUrl == null) == (gaDocsItem == null));
 
   final String extension;
 
   final String title;
 
-  final Widget enabledIcon;
+  final String? iconAsset;
 
-  final Widget disabledIcon;
+  final IconData? iconData;
 
   final List<T> values;
 
@@ -123,7 +108,7 @@ final debugAllowBanner = ToggleableServiceExtensionDescription<bool>._(
   extension:
       '$_flutterExtensionPrefix${WidgetsServiceExtensions.debugAllowBanner.name}',
   title: 'Debug Banner',
-  enabledIcon: const AssetImageIcon(asset: 'icons/debug_banner@2x.png'),
+  iconAsset: 'icons/debug_banner@2x.png',
   enabledValue: true,
   disabledValue: false,
   gaScreenName: gac.inspector,
@@ -135,14 +120,7 @@ final invertOversizedImages = ToggleableServiceExtensionDescription<bool>._(
   extension:
       '$_flutterExtensionPrefix${RenderingServiceExtensions.invertOversizedImages.name}',
   title: 'Highlight Oversized Images',
-  enabledIcon: const ThemedImageIcon(
-    lightModeAsset: 'icons/images-white.png',
-    darkModeAsset: 'icons/images-dgrey.png',
-  ),
-  disabledIcon: const ThemedImageIcon(
-    lightModeAsset: 'icons/images-dgrey.png',
-    darkModeAsset: 'icons/images-lgrey.png',
-  ),
+  iconAsset: 'icons/images-white.png',
   enabledValue: true,
   disabledValue: false,
   gaScreenName: gac.inspector,
@@ -158,14 +136,7 @@ final debugPaint = ToggleableServiceExtensionDescription<bool>._(
   extension:
       '$_flutterExtensionPrefix${RenderingServiceExtensions.debugPaint.name}',
   title: 'Show Guidelines',
-  enabledIcon: const ThemedImageIcon(
-    lightModeAsset: 'icons/guidelines-white.png',
-    darkModeAsset: 'icons/guidelines-dgrey.png',
-  ),
-  disabledIcon: const ThemedImageIcon(
-    lightModeAsset: 'icons/guidelines-dgrey.png',
-    darkModeAsset: 'icons/guidelines-lgrey.png',
-  ),
+  iconAsset: 'icons/guidelines-white.png',
   enabledValue: true,
   disabledValue: false,
   gaScreenName: gac.inspector,
@@ -180,14 +151,7 @@ final debugPaintBaselines = ToggleableServiceExtensionDescription<bool>._(
   extension:
       '$_flutterExtensionPrefix${RenderingServiceExtensions.debugPaintBaselinesEnabled.name}',
   title: 'Show Baselines',
-  enabledIcon: const ThemedImageIcon(
-    lightModeAsset: 'icons/baselines-white.png',
-    darkModeAsset: 'icons/baselines-dgrey.png',
-  ),
-  disabledIcon: const ThemedImageIcon(
-    lightModeAsset: 'icons/baselines-dgrey.png',
-    darkModeAsset: 'icons/baselines-lgrey.png',
-  ),
+  iconAsset: 'icons/baselines-white.png',
   enabledValue: true,
   disabledValue: false,
   gaScreenName: gac.inspector,
@@ -203,14 +167,7 @@ final performanceOverlay = ToggleableServiceExtensionDescription<bool>._(
   extension:
       '$_flutterExtensionPrefix${WidgetsServiceExtensions.showPerformanceOverlay.name}',
   title: 'Performance Overlay',
-  enabledIcon: const ThemedImageIcon(
-    lightModeAsset: 'icons/performance-white.png',
-    darkModeAsset: 'icons/performance-dgrey.png',
-  ),
-  disabledIcon: const ThemedImageIcon(
-    lightModeAsset: 'icons/performance-dgrey.png',
-    darkModeAsset: 'icons/performance-lgrey.png',
-  ),
+  iconAsset: 'icons/performance-white.png',
   enabledValue: true,
   disabledValue: false,
   gaScreenName: gac.performance,
@@ -225,14 +182,7 @@ final profileWidgetBuilds = ToggleableServiceExtensionDescription<bool>._(
   extension:
       '$_flutterExtensionPrefix${WidgetsServiceExtensions.profileWidgetBuilds.name}',
   title: 'Track Widget Builds',
-  enabledIcon: const ThemedImageIcon(
-    lightModeAsset: 'icons/trackwidget-white.png',
-    darkModeAsset: 'icons/trackwidget-dgrey.png',
-  ),
-  disabledIcon: const ThemedImageIcon(
-    lightModeAsset: 'icons/trackwidget-dgrey.png',
-    darkModeAsset: 'icons/trackwidget-lgrey.png',
-  ),
+  iconAsset: 'icons/trackwidget-white.png',
   enabledValue: true,
   disabledValue: false,
   gaScreenName: gac.performance,
@@ -248,14 +198,7 @@ final profileUserWidgetBuilds = ToggleableServiceExtensionDescription<bool>._(
   extension:
       '$_flutterExtensionPrefix${WidgetsServiceExtensions.profileUserWidgetBuilds.name}',
   title: 'Track User-Created Widget Builds',
-  enabledIcon: const ThemedImageIcon(
-    lightModeAsset: 'icons/trackwidget-white.png',
-    darkModeAsset: 'icons/trackwidget-dgrey.png',
-  ),
-  disabledIcon: const ThemedImageIcon(
-    lightModeAsset: 'icons/trackwidget-dgrey.png',
-    darkModeAsset: 'icons/trackwidget-lgrey.png',
-  ),
+  iconAsset: 'icons/trackwidget-white.png',
   enabledValue: true,
   disabledValue: false,
   gaScreenName: gac.performance,
@@ -269,8 +212,7 @@ final profileRenderObjectPaints = ToggleableServiceExtensionDescription<bool>._(
   extension:
       '$_flutterExtensionPrefix${RenderingServiceExtensions.profileRenderObjectPaints.name}',
   title: 'Track Paints',
-  enabledIcon: Icon(Icons.format_paint, size: defaultIconSize),
-  disabledIcon: Icon(Icons.format_paint, size: defaultIconSize),
+  iconData: Icons.format_paint,
   enabledValue: true,
   disabledValue: false,
   gaScreenName: gac.performance,
@@ -287,8 +229,7 @@ final profileRenderObjectLayouts =
   extension:
       '$_flutterExtensionPrefix${RenderingServiceExtensions.profileRenderObjectLayouts.name}',
   title: 'Track Layouts',
-  enabledIcon: Icon(Icons.auto_awesome_mosaic, size: defaultIconSize),
-  disabledIcon: Icon(Icons.auto_awesome_mosaic, size: defaultIconSize),
+  iconData: Icons.auto_awesome_mosaic,
   enabledValue: true,
   disabledValue: false,
   gaScreenName: gac.performance,
@@ -304,14 +245,7 @@ final repaintRainbow = ToggleableServiceExtensionDescription<bool>._(
   extension:
       '$_flutterExtensionPrefix${RenderingServiceExtensions.repaintRainbow.name}',
   title: 'Highlight Repaints',
-  enabledIcon: const ThemedImageIcon(
-    lightModeAsset: 'icons/repaints-white.png',
-    darkModeAsset: 'icons/repaints-dgrey.png',
-  ),
-  disabledIcon: const ThemedImageIcon(
-    lightModeAsset: 'icons/repaints-dgrey.png',
-    darkModeAsset: 'icons/repaints-lgrey.png',
-  ),
+  iconAsset: 'icons/repaints-white.png',
   enabledValue: true,
   disabledValue: false,
   gaScreenName: gac.inspector,
@@ -327,14 +261,7 @@ final slowAnimations = ToggleableServiceExtensionDescription<num>._(
   extension:
       '$_flutterExtensionPrefix${SchedulerServiceExtensions.timeDilation.name}',
   title: 'Slow Animations',
-  enabledIcon: const ThemedImageIcon(
-    lightModeAsset: 'icons/slow-white.png',
-    darkModeAsset: 'icons/slow-dgrey.png',
-  ),
-  disabledIcon: const ThemedImageIcon(
-    lightModeAsset: 'icons/slow-dgrey.png',
-    darkModeAsset: 'icons/slow-lgrey.png',
-  ),
+  iconAsset: 'icons/slow-white.png',
   enabledValue: 5.0,
   disabledValue: 1.0,
   gaScreenName: gac.inspector,
@@ -349,7 +276,7 @@ final togglePlatformMode = ServiceExtensionDescription<String>(
   extension:
       '$_flutterExtensionPrefix${FoundationServiceExtensions.platformOverride.name}',
   title: 'Override target platform',
-  enabledIcon: const AssetImageIcon(asset: 'icons/phone@2x.png'),
+  iconAsset: 'icons/phone@2x.png',
   values: ['iOS', 'android', 'fuchsia', 'macOS', 'linux'],
   displayValues: [
     'Platform: iOS',
@@ -368,14 +295,7 @@ final disableClipLayers = ToggleableServiceExtensionDescription<bool>._(
       '$_flutterExtensionPrefix${RenderingServiceExtensions.debugDisableClipLayers.name}',
   inverted: true,
   title: 'Render Clip layers',
-  enabledIcon: const ThemedImageIcon(
-    lightModeAsset: 'icons/slow-white.png',
-    darkModeAsset: 'icons/slow-dgrey.png',
-  ),
-  disabledIcon: const ThemedImageIcon(
-    lightModeAsset: 'icons/slow-dgrey.png',
-    darkModeAsset: 'icons/slow-lgrey.png',
-  ),
+  iconData: Icons.cut,
   enabledValue: true,
   disabledValue: false,
   gaScreenName: gac.performance,
@@ -394,14 +314,7 @@ final disableOpacityLayers = ToggleableServiceExtensionDescription<bool>._(
       '$_flutterExtensionPrefix${RenderingServiceExtensions.debugDisableOpacityLayers.name}',
   inverted: true,
   title: 'Render Opacity layers',
-  enabledIcon: const ThemedImageIcon(
-    lightModeAsset: 'icons/slow-white.png',
-    darkModeAsset: 'icons/slow-dgrey.png',
-  ),
-  disabledIcon: const ThemedImageIcon(
-    lightModeAsset: 'icons/slow-dgrey.png',
-    darkModeAsset: 'icons/slow-lgrey.png',
-  ),
+  iconData: Icons.opacity,
   enabledValue: true,
   disabledValue: false,
   gaScreenName: gac.performance,
@@ -421,14 +334,7 @@ final disablePhysicalShapeLayers =
       '$_flutterExtensionPrefix${RenderingServiceExtensions.debugDisablePhysicalShapeLayers.name}',
   inverted: true,
   title: 'Render Physical Shape layers',
-  enabledIcon: const ThemedImageIcon(
-    lightModeAsset: 'icons/slow-white.png',
-    darkModeAsset: 'icons/slow-dgrey.png',
-  ),
-  disabledIcon: const ThemedImageIcon(
-    lightModeAsset: 'icons/slow-dgrey.png',
-    darkModeAsset: 'icons/slow-lgrey.png',
-  ),
+  iconData: Icons.format_shapes,
   enabledValue: true,
   disabledValue: false,
   gaScreenName: gac.performance,
@@ -446,7 +352,7 @@ use of physical modeling effects in your app.''',
 final httpEnableTimelineLogging = ToggleableServiceExtensionDescription<bool>._(
   extension: '${_dartIOExtensionPrefix}httpEnableTimelineLogging',
   title: 'Whether HTTP timeline logging is enabled',
-  enabledIcon: const Placeholder(),
+  iconData: Icons.http,
   enabledValue: true,
   disabledValue: false,
   gaScreenName: null,
@@ -458,7 +364,7 @@ final httpEnableTimelineLogging = ToggleableServiceExtensionDescription<bool>._(
 final socketProfiling = ToggleableServiceExtensionDescription<bool>._(
   extension: '${_dartIOExtensionPrefix}socketProfilingEnabled',
   title: 'Whether socket profiling is enabled',
-  enabledIcon: const Placeholder(),
+  iconData: Icons.outlet_outlined,
   enabledValue: true,
   disabledValue: false,
   gaScreenName: null,
@@ -476,14 +382,7 @@ final toggleOnDeviceWidgetInspector =
   // versions of package:flutter it makes sense to describe this extension as
   // toggling widget select mode as it is the only way to toggle that mode.
   title: 'Select Widget Mode',
-  enabledIcon: const ThemedImageIcon(
-    lightModeAsset: 'icons/widget-select-white.png',
-    darkModeAsset: 'icons/widget-select-dgrey.png',
-  ),
-  disabledIcon: const ThemedImageIcon(
-    lightModeAsset: 'icons/widget-select-dgrey.png',
-    darkModeAsset: 'icons/widget-select-lgrey.png',
-  ),
+  iconAsset: 'icons/widget-select-white.png',
   enabledValue: true,
   disabledValue: false,
   gaScreenName: gac.inspector,
@@ -499,14 +398,7 @@ final toggleOnDeviceWidgetInspector =
 final toggleSelectWidgetMode = ToggleableServiceExtensionDescription<bool>._(
   extension: '$inspectorExtensionPrefix.selectMode',
   title: 'Select widget mode',
-  enabledIcon: const ThemedImageIcon(
-    lightModeAsset: 'icons/widget-select-white.png',
-    darkModeAsset: 'icons/widget-select-dgrey.png',
-  ),
-  disabledIcon: const ThemedImageIcon(
-    lightModeAsset: 'icons/widget-select-dgrey.png',
-    darkModeAsset: 'icons/widget-select-lgrey.png',
-  ),
+  iconAsset: 'icons/widget-select-white.png',
   enabledValue: true,
   disabledValue: false,
   gaScreenName: gac.inspector,
@@ -527,7 +419,7 @@ final toggleSelectWidgetMode = ToggleableServiceExtensionDescription<bool>._(
 final enableOnDeviceInspector = ToggleableServiceExtensionDescription<bool>._(
   extension: '$inspectorExtensionPrefix.enable',
   title: 'Enable on-device inspector',
-  enabledIcon: const AssetImageIcon(asset: 'icons/general/locate@2x.png'),
+  iconAsset: 'icons/general/locate@2x.png',
   enabledValue: true,
   disabledValue: false,
   gaScreenName: gac.inspector,
@@ -539,7 +431,7 @@ final structuredErrors = ToggleableServiceExtensionDescription<bool>._(
   extension:
       '$inspectorExtensionPrefix.${WidgetInspectorServiceExtensions.structuredErrors.name}',
   title: 'Show structured errors',
-  enabledIcon: const AssetImageIcon(asset: 'icons/perf/RedExcl@2x.png'),
+  iconAsset: 'icons/perf/RedExcl@2x.png',
   enabledValue: true,
   disabledValue: false,
   gaScreenName: gac.logging,
@@ -551,7 +443,7 @@ final trackRebuildWidgets = ToggleableServiceExtensionDescription<bool>._(
   extension:
       '$inspectorExtensionPrefix.${WidgetInspectorServiceExtensions.trackRebuildDirtyWidgets.name}',
   title: 'Track widget build counts',
-  enabledIcon: const AssetImageIcon(asset: 'icons/inspector/diagram@2x.png'),
+  iconAsset: 'icons/inspector/diagram@2x.png',
   enabledValue: true,
   disabledValue: false,
   description: 'Tells you what has been rebuilt in your app\'s current screen.',

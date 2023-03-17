@@ -5,7 +5,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../shared/console/eval/inspector_tree.dart';
 import '../../shared/theme.dart';
 import 'provider_nodes.dart';
 

@@ -63,11 +63,7 @@ class _ProgramExplorerRow extends StatelessWidget {
                 text!,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: theme.fixedFontStyle.copyWith(
-                  color: node.isSelected
-                      ? Colors.white
-                      : theme.fixedFontStyle.color,
-                ),
+                style: theme.fixedFontStyle,
               ),
             ),
           ],
@@ -447,7 +443,7 @@ class ProgramExplorer extends StatelessWidget {
           final fileExplorerHeader = displayHeader
               ? AreaPaneHeader(
                   title: Text(title),
-                  needsTopBorder: false,
+                  includeTopBorder: false,
                 )
               : BlankHeader();
           final fileExplorer = _FileExplorer(
