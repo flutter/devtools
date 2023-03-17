@@ -5,6 +5,7 @@
 import 'package:vm_service/vm_service.dart';
 
 import '../../shared/globals.dart';
+import '../../shared/primitives/utils.dart';
 import '../memory/panes/profile/profile_view.dart';
 
 /// NOTE: this file contains extensions to classes provided by
@@ -596,6 +597,68 @@ extension CodePrivateViewExtension on Code {
   String get kind => json![_kindKey];
 
   ObjectPoolRef get objectPool => ObjectPoolRef.parse(json![_objectPoolKey]);
+
+  bool get hasInliningData => json!.containsKey(InliningData._inlinedFunctions);
+  InliningData get inliningData => InliningData.parse(json!);
+}
+
+extension AddressExtension on num {
+  String get asAddress =>
+      '0x${toInt().toRadixString(16).toUpperCase().padLeft(8, '0')}';
+}
+
+class InliningData {
+  const InliningData._({required this.entries});
+
+  factory InliningData.parse(Map<String, dynamic> json) {
+    final startAddress = int.parse(json[_startAddressKey], radix: 16);
+    final intervals = json[_inlinedIntervals] as List;
+    final functions = (json[_inlinedFunctions] as List)
+        .cast<Map<String, dynamic>>()
+        .map<FuncRef>((e) => FuncRef.parse(e)!)
+        .toList();
+
+    final entries = <InliningEntry>[];
+
+    // Inlining data format: [startAddress, endAddress, 0, inline functions...]
+    for (final interval in intervals) {
+      assert(interval.length >= 2);
+      final range = Range(
+        startAddress + interval[0],
+        startAddress + interval[1],
+      );
+      // We start at i = 3 as `interval[2]` is always present and set to 0,
+      // likely serving as a sentinel. `functions[0]` is not inlined for every
+      // range, so we'll ignore this value.
+      final inlinedFunctions = <FuncRef>[
+        for (int i = 3; i < interval.length; ++i) functions[interval[i]],
+      ];
+      entries.add(
+        InliningEntry(
+          addressRange: range,
+          functions: inlinedFunctions,
+        ),
+      );
+    }
+
+    return InliningData._(entries: entries);
+  }
+
+  static const _inlinedIntervals = '_inlinedIntervals';
+  static const _inlinedFunctions = '_inlinedFunctions';
+  static const _startAddressKey = '_startAddress';
+
+  final List<InliningEntry> entries;
+}
+
+class InliningEntry {
+  const InliningEntry({
+    required this.addressRange,
+    required this.functions,
+  });
+
+  final Range addressRange;
+  final List<FuncRef> functions;
 }
 
 class ObjectPoolRef extends ObjRef {
