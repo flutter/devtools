@@ -88,13 +88,10 @@ class _ClassNameColumn extends ColumnData<TracedClass>
     bool isRowSelected = false,
     VoidCallback? onPressed,
   }) {
-    final theme = Theme.of(context);
     return HeapClassView(
       theClass: data.name,
       showCopyButton: isRowSelected,
       copyGaItem: gac.MemoryEvent.diffClassSingleCopy,
-      textStyle:
-          isRowSelected ? theme.selectedTextStyle : theme.regularTextStyle,
       rootPackage: serviceManager.rootInfoNow().package,
     );
   }

@@ -68,7 +68,7 @@ void main() {
       expect(find.text('Enhance Tracing'), findsOneWidget);
       expect(find.text('More debugging options'), findsOneWidget);
       expect(find.byIcon(Icons.file_download), findsOneWidget);
-      expect(find.byIcon(Icons.settings), findsOneWidget);
+      expect(find.byIcon(Icons.settings_outlined), findsOneWidget);
     });
 
     testWidgetsWithWindowSize('builds for non flutter app', windowSize,
@@ -88,7 +88,7 @@ void main() {
       expect(find.text('Enhance Tracing'), findsNothing);
       expect(find.text('More debugging options'), findsNothing);
       expect(find.byIcon(Icons.file_download), findsOneWidget);
-      expect(find.byIcon(Icons.settings), findsOneWidget);
+      expect(find.byIcon(Icons.settings_outlined), findsOneWidget);
     });
 
     testWidgetsWithWindowSize('builds for offline mode', windowSize,
@@ -102,7 +102,7 @@ void main() {
       expect(find.text('Enhance Tracing'), findsNothing);
       expect(find.text('More debugging options'), findsNothing);
       expect(find.byIcon(Icons.file_download), findsNothing);
-      expect(find.byIcon(Icons.settings), findsNothing);
+      expect(find.byIcon(Icons.settings_outlined), findsNothing);
       offlineController.exitOfflineMode();
     });
   });

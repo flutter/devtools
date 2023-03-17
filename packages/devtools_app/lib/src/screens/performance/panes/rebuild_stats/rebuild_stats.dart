@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import '../../../../service/service_extension_manager.dart';
 import '../../../../service/service_extension_widgets.dart';
 import '../../../../service/service_extensions.dart' as extensions;
+import '../../../../shared/analytics/constants.dart' as gac;
 import '../../../../shared/common_widgets.dart';
 import '../../../../shared/globals.dart';
 import '../../../../shared/primitives/auto_dispose.dart';
@@ -100,6 +101,8 @@ class _RebuildStatsViewState extends State<RebuildStatsView>
             child: Row(
               children: [
                 ClearButton(
+                  gaScreen: gac.performance,
+                  gaSelection: gac.clearRebuildStats,
                   onPressed: widget.model.clearAllCounts,
                 ),
                 const SizedBox(width: denseSpacing),

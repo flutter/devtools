@@ -4,13 +4,8 @@
 
 import 'dart:convert';
 
-import 'package:devtools_app/src/screens/network/network_controller.dart';
+import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/network/network_request_inspector.dart';
-import 'package:devtools_app/src/service/service_manager.dart';
-import 'package:devtools_app/src/shared/common_widgets.dart';
-import 'package:devtools_app/src/shared/config_specific/ide_theme/ide_theme.dart';
-import 'package:devtools_app/src/shared/globals.dart';
-import 'package:devtools_app/src/shared/notifications.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vm_service/vm_service.dart';
@@ -28,6 +23,8 @@ void main() {
 
     setUp(() {
       setGlobal(IdeTheme, IdeTheme());
+      setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
+      setGlobal(PreferencesController, PreferencesController());
       _clipboardContents = '';
       fakeServiceManager = FakeServiceManager(
         service: FakeServiceManager.createFakeService(

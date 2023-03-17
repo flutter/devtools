@@ -151,7 +151,7 @@ class ReleaseNotes extends AnimatedWidget {
               title: const Text(
                 'What\'s new in DevTools?',
               ),
-              needsTopBorder: false,
+              includeTopBorder: false,
               actions: [
                 IconButton(
                   padding: const EdgeInsets.all(0.0),

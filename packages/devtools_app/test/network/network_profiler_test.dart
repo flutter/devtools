@@ -4,22 +4,10 @@
 
 @TestOn('vm')
 
-import 'package:devtools_app/src/screens/debugger/breakpoint_manager.dart';
-import 'package:devtools_app/src/screens/debugger/debugger_controller.dart';
-import 'package:devtools_app/src/screens/network/network_controller.dart';
-import 'package:devtools_app/src/screens/network/network_model.dart';
+import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/network/network_request_inspector.dart';
 import 'package:devtools_app/src/screens/network/network_request_inspector_views.dart';
-import 'package:devtools_app/src/screens/network/network_screen.dart';
-import 'package:devtools_app/src/service/service_manager.dart';
-import 'package:devtools_app/src/shared/common_widgets.dart';
-import 'package:devtools_app/src/shared/config_specific/ide_theme/ide_theme.dart';
-import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_app/src/shared/http/http.dart';
-import 'package:devtools_app/src/shared/http/http_request_data.dart';
-import 'package:devtools_app/src/shared/notifications.dart';
-import 'package:devtools_app/src/shared/primitives/utils.dart';
-import 'package:devtools_app/src/shared/split.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -60,6 +48,8 @@ void main() {
     socketProfile = loadSocketProfile();
     httpProfile = loadHttpProfile();
     setGlobal(IdeTheme, IdeTheme());
+    setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
+    setGlobal(PreferencesController, PreferencesController());
     setGlobal(NotificationService, NotificationService());
     setGlobal(BreakpointManager, BreakpointManager());
   });
@@ -333,7 +323,8 @@ void main() {
       expect(find.byType(NetworkRequestOverviewView), findsOneWidget);
     }
 
-    testWidgets('displays for http request', (tester) async {
+    testWidgetsWithWindowSize('displays for http request', windowSize,
+        (tester) async {
       final data = httpGet;
       await pumpView(tester, data);
 
@@ -375,7 +366,8 @@ void main() {
       expect(find.text('[810.7 ms - 811.7 ms] → 1.0 ms total'), findsOneWidget);
     });
 
-    testWidgets('displays for http request with error', (tester) async {
+    testWidgetsWithWindowSize(
+        'displays for http request with error', windowSize, (tester) async {
       final data = httpGetWithError;
       await pumpView(tester, data);
 

@@ -160,6 +160,7 @@ MockLoggingController createMockLoggingControllerWithDefaults({
   when(mockLoggingController.data).thenReturn(data);
   when(mockLoggingController.filteredData)
       .thenReturn(ListValueNotifier<LogData>(data));
+  when(mockLoggingController.isFilterActive).thenReturn(false);
   when(mockLoggingController.selectedLog)
       .thenReturn(ValueNotifier<LogData?>(null));
   when(mockLoggingController.searchFieldFocusNode).thenReturn(FocusNode());
