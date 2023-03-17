@@ -5,7 +5,7 @@
 import 'dart:async';
 
 import 'package:devtools_app/devtools_app.dart';
-import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart' hide TimelineEvent;
 
@@ -162,6 +162,9 @@ MockLoggingController createMockLoggingControllerWithDefaults({
       .thenReturn(ListValueNotifier<LogData>(data));
   when(mockLoggingController.selectedLog)
       .thenReturn(ValueNotifier<LogData?>(null));
+  when(mockLoggingController.searchFieldFocusNode).thenReturn(FocusNode());
+  when(mockLoggingController.searchTextFieldController)
+      .thenReturn(SearchTextEditingController());
   when(mockLoggingController.searchMatches)
       .thenReturn(const FixedValueListenable(<LogData>[]));
   when(mockLoggingController.activeSearchMatch)

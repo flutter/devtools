@@ -38,9 +38,6 @@ import 'debugger_model.dart';
 import 'file_search.dart';
 import 'key_sets.dart';
 
-final debuggerCodeViewSearchKey =
-    GlobalKey(debugLabel: 'DebuggerCodeViewSearchKey');
-
 final debuggerCodeViewFileOpenerKey =
     GlobalKey(debugLabel: 'DebuggerCodeViewFileOpenerKey');
 
@@ -110,6 +107,9 @@ class _CodeViewState extends State<CodeView>
   ScriptRef? _lastScriptRef;
 
   @override
+  SearchControllerMixin get searchController => widget.codeViewController;
+
+  @override
   void initState() {
     super.initState();
 
@@ -169,7 +169,7 @@ class _CodeViewState extends State<CodeView>
 
     if (widget.codeViewController != oldWidget.codeViewController) {
       cancelListeners();
-
+      widget.codeViewController.initSearch();
       addAutoDisposeListener(
         widget.codeViewController.scriptLocation,
         _handleScriptLocationChanged,
@@ -282,7 +282,7 @@ class _CodeViewState extends State<CodeView>
         return Stack(
           children: [
             scriptRef == null
-                ? CodeViewEmptyState(widget: widget, context: context)
+                ? CodeViewEmptyState(widget: widget)
                 : buildCodeArea(context),
             if (showFileOpener)
               Positioned(
@@ -456,6 +456,7 @@ class _CodeViewState extends State<CodeView>
           if (scriptUri == null) return '';
           return scriptUri;
         },
+        titleIcon: Icons.search,
         onTitleTap: () => widget.codeViewController
           ..toggleFileOpenerVisibility(true)
           ..toggleSearchInFileVisibility(false),
@@ -496,9 +497,8 @@ class _CodeViewState extends State<CodeView>
     return ElevatedCard(
       width: wideSearchTextWidth,
       height: defaultTextFieldHeight + 2 * denseSpacing,
-      child: buildSearchField(
+      child: SearchField<SourceToken>(
         controller: widget.codeViewController,
-        searchFieldKey: debuggerCodeViewSearchKey,
         searchFieldEnabled: parsedScript != null,
         shouldRequestFocus: true,
         supportsNavigation: true,
@@ -544,11 +544,9 @@ class CodeViewEmptyState extends StatelessWidget {
   const CodeViewEmptyState({
     super.key,
     required this.widget,
-    required this.context,
   });
 
   final CodeView widget;
-  final BuildContext context;
 
   @override
   Widget build(BuildContext context) {
@@ -619,10 +617,7 @@ class ProfileInformationGutter extends StatelessWidget {
                       if (data == null) {
                         return const SizedBox();
                       }
-                      return ProfileInformationGutterItem(
-                        lineNumber: lineNum,
-                        profilerData: data,
-                      );
+                      return ProfileInformationGutterItem(profilerData: data);
                     },
                   ),
                 ),
@@ -692,11 +687,8 @@ class _ProfileInformationGutterHeader extends StatelessWidget {
 class ProfileInformationGutterItem extends StatelessWidget {
   const ProfileInformationGutterItem({
     Key? key,
-    required this.lineNumber,
     required this.profilerData,
   }) : super(key: key);
-
-  final int lineNumber;
 
   final ProfileReportEntry profilerData;
 

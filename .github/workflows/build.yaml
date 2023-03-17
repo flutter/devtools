@@ -26,7 +26,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - name: git clone devtools
-        uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c
+        uses: actions/checkout@24cb9080177205b6e8c946b17badbe402adc938f
 
       - name: Get Latest Flutter Candidate
         id: flutter-candidate
@@ -77,7 +77,7 @@ jobs:
       fail-fast: false
     steps:
       - name: git clone
-        uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c
+        uses: actions/checkout@24cb9080177205b6e8c946b17badbe402adc938f
       - name: Load Cached Flutter SDK
         uses: actions/cache@88522ab9f39a2ea568f7027eddc7d8d8bc9d59c8
         with:
@@ -104,7 +104,7 @@ jobs:
           - test_dart2js
     steps:
       - name: git clone
-        uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c
+        uses: actions/checkout@24cb9080177205b6e8c946b17badbe402adc938f
       - name: Load Cached Flutter SDK
         uses: actions/cache@88522ab9f39a2ea568f7027eddc7d8d8bc9d59c8
         with:
@@ -131,7 +131,7 @@ jobs:
         
     steps:
       - name: git clone
-        uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c
+        uses: actions/checkout@24cb9080177205b6e8c946b17badbe402adc938f
       - name: Load Cached Flutter SDK
         uses: actions/cache@88522ab9f39a2ea568f7027eddc7d8d8bc9d59c8
         with:
@@ -164,7 +164,7 @@ jobs:
           - integration_dart2js
     steps:
       - name: git clone
-        uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c
+        uses: actions/checkout@24cb9080177205b6e8c946b17badbe402adc938f
       - name: Load Cached Flutter SDK
         uses: actions/cache@88522ab9f39a2ea568f7027eddc7d8d8bc9d59c8
         with:
@@ -195,7 +195,7 @@ jobs:
 #          - test_dart2js
 #    steps:
 #      - name: git clone
-#        uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c
+#        uses: actions/checkout@24cb9080177205b6e8c946b17badbe402adc938f
 #
 #      - name: tool/bots.sh
 #        env:
@@ -215,7 +215,7 @@ jobs:
 #          - integration_dart2js
 #    steps:
 #      - name: git clone
-#        uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c
+#        uses: actions/checkout@24cb9080177205b6e8c946b17badbe402adc938f
 #      - name: tool/bots.sh
 #        env:
 #          BOT: ${{ matrix.bot }}

@@ -83,6 +83,7 @@ export 'src/shared/notifications.dart';
 export 'src/shared/preferences.dart';
 export 'src/shared/primitives/auto_dispose.dart';
 export 'src/shared/primitives/listenable.dart';
+export 'src/shared/primitives/simple_items.dart';
 export 'src/shared/primitives/storage.dart';
 export 'src/shared/primitives/trace_event.dart';
 export 'src/shared/primitives/trees.dart';

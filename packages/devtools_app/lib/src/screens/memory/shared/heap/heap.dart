@@ -138,8 +138,6 @@ class SingleClassStats extends ClassStats {
 
   final ObjectSet objects;
 
-  late final entries = statsByPath.entries.toList(growable: false);
-
   void countInstance(AdaptedHeapData data, int objectIndex) {
     assert(!isSealed);
     final object = data.objects[objectIndex];
@@ -158,8 +156,6 @@ class SingleClassStats extends ClassStats {
     );
     objectsForPath.countInstance(object, excludeFromRetained: false);
   }
-
-  bool get isZero => objects.isZero;
 }
 
 /// Statistical size-information about objects.

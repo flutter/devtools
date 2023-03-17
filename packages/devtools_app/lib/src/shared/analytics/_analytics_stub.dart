@@ -9,7 +9,11 @@ library _analytics_stub;
 
 import 'dart:async';
 
+import 'package:logging/logging.dart';
+
 import 'analytics_common.dart';
+
+final _log = Logger('_analytics_stub');
 
 Future<void> setAnalyticsEnabled(bool value) async {}
 
@@ -26,7 +30,9 @@ Future<void> disableAnalytics() async {}
 void screen(
   String screenName, [
   int value = 0,
-]) {}
+]) {
+  _log.fine('Event: screen(screenName:$screenName, value:$value)');
+}
 
 void timeStart(String screenName, String timedOperation) {}
 
@@ -66,7 +72,15 @@ void select(
   int value = 0,
   bool nonInteraction = false,
   ScreenAnalyticsMetrics Function()? screenMetricsProvider,
-}) {}
+}) {
+  _log.fine(
+    'Event: select('
+    'screenName:$screenName, '
+    'selectedItem:$selectedItem, '
+    'value:$value, '
+    'nonInteraction:$nonInteraction)',
+  );
+}
 
 void reportError(
   String errorMessage, {

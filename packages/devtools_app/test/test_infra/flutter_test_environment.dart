@@ -11,8 +11,6 @@ import 'package:devtools_app/src/shared/primitives/message_bus.dart';
 
 import 'flutter_test_driver.dart';
 
-final flutterVersion = Platform.environment['FLUTTER_VERSION'];
-
 typedef FlutterDriverFactory = FlutterTestDriver Function(
   Directory testAppDirectory,
 );

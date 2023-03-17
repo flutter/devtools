@@ -40,15 +40,6 @@ class DiagnosticsTextStyles {
     fontWeight: FontWeight.w700,
   );
 
-  static const regularItalic = TextStyle(fontStyle: FontStyle.italic);
-
-  static TextStyle unimportantItalic(ColorScheme colorScheme) =>
-      unimportant(colorScheme).merge(
-        const TextStyle(
-          fontStyle: FontStyle.italic,
-        ),
-      );
-
   static TextStyle textStyleForLevel(
     DiagnosticLevel level,
     ColorScheme colorScheme,

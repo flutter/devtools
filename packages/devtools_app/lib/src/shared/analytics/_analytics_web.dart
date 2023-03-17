@@ -11,6 +11,7 @@ import 'dart:async';
 import 'dart:html';
 
 import 'package:js/js.dart';
+import 'package:logging/logging.dart';
 
 import '../../../devtools.dart' as devtools show version;
 import '../config_specific/logger/logger.dart';
@@ -31,18 +32,6 @@ const String appTypeDartCLI = 'dart_cli';
 // Dimensions2 BuildType values:
 const String buildTypeDebug = 'debug';
 const String buildTypeProfile = 'profile';
-// Dimensions3 PlatformType values:
-//    android
-//    linux
-//    ios
-//    macos
-//    windows
-//    fuchsia
-//    unknown     VM Service before version 3.24
-// Dimension4 devToolsPlatformType values:
-const String devToolsPlatformTypeMac = 'MacIntel';
-const String devToolsPlatformTypeLinux = 'Linux';
-const String devToolsPlatformTypeWindows = 'Windows';
 // Start with Android_n.n.n
 const String devToolsPlatformTypeAndroid = 'Android_';
 // Dimension5 devToolsChrome starts with
@@ -54,6 +43,8 @@ const String devToolsChromeOS = 'CrOS'; // Chrome OS
 // Dimension7 ideLaunched
 const String ideLaunchedQuery = 'ide'; // '&ide=' query parameter
 const String ideLaunchedCLI = 'CLI'; // Command Line Interface
+
+final _log = Logger('_analytics_web');
 
 @JS('initializeGA')
 external void initializeGA();
@@ -396,6 +387,7 @@ void screen(
   String screenName, [
   int value = 0,
 ]) {
+  _log.fine('Event: Screen(screenName:$screenName, value:$value)');
   GTag.event(
     screenName,
     gaEventProvider: () => _gtagEvent(
@@ -539,6 +531,12 @@ void _timing(
   required int durationMicros,
   ScreenAnalyticsMetrics? screenMetrics,
 }) {
+  _log.fine(
+    'Event: _timing('
+    'screenName:$screenName, '
+    'timedOperation:$timedOperation, '
+    'durationMicros:$durationMicros)',
+  );
   GTag.event(
     screenName,
     gaEventProvider: () => _gtagEvent(
@@ -558,6 +556,13 @@ void select(
   bool nonInteraction = false,
   ScreenAnalyticsMetrics Function()? screenMetricsProvider,
 }) {
+  _log.fine(
+    'Event: select('
+    'screenName:$screenName, '
+    'selectedItem:$selectedItem, '
+    'value:$value, '
+    'nonInteraction:$nonInteraction)',
+  );
   GTag.event(
     screenName,
     gaEventProvider: () => _gtagEvent(
@@ -759,17 +764,6 @@ void waitForDimensionsComputed(String screenName) {
       }
     }
   });
-}
-
-// Loading screen from a hash code, can't collect GA (if enabled) until we have
-// all the dimension data.
-void setupAndGaScreen(String screenName) {
-  if (!_analyticsComputed) {
-    _stillWaiting++;
-    waitForDimensionsComputed(screenName);
-  } else {
-    screen(screenName);
-  }
 }
 
 Future<void> setupDimensions() async {

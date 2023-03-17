@@ -23,8 +23,6 @@ class MemoryChartPaneController {
 
   final _legendVisibleNotifier = ValueNotifier<bool>(true);
 
-  bool get isLegendVisible => _legendVisibleNotifier.value;
-
   bool toggleLegendVisibility() =>
       _legendVisibleNotifier.value = !_legendVisibleNotifier.value;
 

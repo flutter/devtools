@@ -82,7 +82,7 @@ void main() {
         _setUpServiceManagerWithTimeline({});
         await pumpPerformanceScreenBody(tester);
         expect(find.byType(RefreshTimelineEventsButton), findsOneWidget);
-        expect(find.byKey(timelineSearchFieldKey), findsOneWidget);
+        expect(find.byType(SearchField<TimelineEvent>), findsOneWidget);
         expect(find.byType(FlameChartHelpButton), findsOneWidget);
       });
     });
