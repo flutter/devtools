@@ -42,7 +42,6 @@ class DevToolsScaffold extends StatefulWidget {
     this.page,
     this.actions,
     this.embed = false,
-    required this.ideTheme,
   }) : super(key: key);
 
   DevToolsScaffold.withChild({
@@ -53,7 +52,6 @@ class DevToolsScaffold extends StatefulWidget {
   }) : this(
           key: key,
           screens: [SimpleScreen(child)],
-          ideTheme: ideTheme,
           actions: actions,
         );
 
@@ -85,9 +83,6 @@ class DevToolsScaffold extends StatefulWidget {
 
   /// Whether to render the embedded view (without the header).
   final bool embed;
-
-  /// IDE-supplied theming.
-  final IdeTheme ideTheme;
 
   /// Actions that it's possible to perform in this Scaffold.
   ///

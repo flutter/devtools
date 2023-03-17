@@ -11,18 +11,15 @@ import '../../../../shared/common_widgets.dart';
 import '../../../../shared/theme.dart';
 import '../../memory_controller.dart';
 import '../../shared/primitives/simple_elements.dart';
-import '../chart/chart_pane_controller.dart';
 import 'settings_dialog.dart';
 
 /// Controls related to the entire memory screen.
 class SecondaryControls extends StatelessWidget {
   const SecondaryControls({
     Key? key,
-    required this.chartController,
     required this.controller,
   }) : super(key: key);
 
-  final MemoryChartPaneController chartController;
   final MemoryController controller;
 
   @override
@@ -54,7 +51,7 @@ class SecondaryControls extends StatelessWidget {
     unawaited(
       showDialog(
         context: context,
-        builder: (context) => MemorySettingsDialog(controller),
+        builder: (context) => const MemorySettingsDialog(),
       ),
     );
   }

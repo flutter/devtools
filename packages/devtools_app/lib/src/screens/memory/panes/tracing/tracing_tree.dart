@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:vm_service/vm_service.dart';
 
 import '../../../../shared/common_widgets.dart';
 import '../../../../shared/primitives/utils.dart';
@@ -111,13 +110,11 @@ class _AllocationTracingTreeState extends State<AllocationTracingTree>
                     children: [
                       // Bottom-up tree view
                       TracingTable(
-                        cls: selection.cls,
                         dataRoots: state
                             .selectedTracedClassAllocationData!.bottomUpRoots,
                       ),
                       // Call tree view
                       TracingTable(
-                        cls: selection.cls,
                         dataRoots: state
                             .selectedTracedClassAllocationData!.callTreeRoots,
                       ),
@@ -316,7 +313,6 @@ class _ExclusiveCountColumn extends ColumnData<CpuStackFrame> {
 class TracingTable extends StatelessWidget {
   const TracingTable({
     Key? key,
-    required this.cls,
     required this.dataRoots,
   }) : super(key: key);
 
@@ -327,8 +323,6 @@ class TracingTable extends StatelessWidget {
     _ExclusiveCountColumn(),
     treeColumn,
   ]);
-
-  final ClassRef cls;
 
   final List<CpuStackFrame> dataRoots;
 

@@ -25,7 +25,6 @@ class FileImportContainer extends StatefulWidget {
     this.onAction,
     this.onFileSelected,
     this.onFileCleared,
-    this.onError,
     this.extensions = const ['json'],
     super.key,
   });
@@ -42,8 +41,6 @@ class FileImportContainer extends StatefulWidget {
   final DevToolsJsonFileHandler? onFileSelected;
 
   final VoidCallback? onFileCleared;
-
-  final void Function(String error)? onError;
 
   /// The file's extensions where we are going to get the data from.
   final List<String> extensions;

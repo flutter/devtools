@@ -8,11 +8,13 @@ Dart & Flutter DevTools - A Suite of Performance Tools for Dart and Flutter
 ## General updates
 * Update DevTools to the new Material 3 design - [#5429](https://github.com/flutter/devtools/pull/5429)
 * Use the default Flutter service worker - [#5331](https://github.com/flutter/devtools/pull/5331)
+* Added the new verbose logging feature for helping us debug user issues. [#5404](https://github.com/flutter/devtools/pull/5404)
+    ![verbose logging](images/verbose-logging.png "verbose_logging")
 
 ## Inspector updates
 TODO: Remove this section if there are not any general updates.
 
-## Performance updates
+##**** Performance updates
 * Persist a user's preference for whether the Flutter Frames chart should be shown by default. - [#5339](https://github.com/flutter/devtools/pull/5339)
 
 ## CPU profiler updates

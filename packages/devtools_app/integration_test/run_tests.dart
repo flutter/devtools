@@ -4,8 +4,7 @@
 
 import 'dart:io';
 
-import 'package:collection/collection.dart';
-
+import 'test_infra/run/_in_file_args.dart';
 import 'test_infra/run/run_test.dart';
 
 // To run this test, run the following from `devtools_app/`:
@@ -17,11 +16,6 @@ import 'test_infra/run/run_test.dart';
 // --test-app-uri=<some vm service uri> - this will connect DevTools to the app
 //    you specify instead of spinning up a test app inside
 //    [runFlutterIntegrationTest].
-// --offline - indicates that we do not need to start a test app to run this
-//    test. This will take precedence if both --offline and --test-app-uri are
-//    present.
-// --enable-experiments - this will run the DevTools integration tests with
-//    DevTools experiments enabled (see feature_flags.dart)
 // --update-goldens - this will update the current golden images with the
 //   results from this test run
 // --headless - this will run the integration test on the 'web-server' device
@@ -31,22 +25,20 @@ import 'test_infra/run/run_test.dart';
 const _testDirectory = 'integration_test/test';
 const _testSuffix = '_test.dart';
 const _offlineIndicator = 'integration_test/test/offline';
-const _experimentalIndicator = '/experimental/';
 
 void main(List<String> args) async {
   final modifiableArgs = List.of(args);
 
-  final testTarget = modifiableArgs
-      .firstWhereOrNull((arg) => arg.startsWith(TestArgs.testTargetArg));
-  if (testTarget != null) {
-    // Run the single test at this path.
-    _maybeAddOfflineArgument(modifiableArgs, testTarget);
-    _maybeAddExperimentsArgument(modifiableArgs, testTarget);
-    final testRunnerArgs = TestArgs(modifiableArgs);
+  final testTargetProvided = modifiableArgs
+      .where((arg) => arg.startsWith(TestRunnerArgs.testTargetArg))
+      .isNotEmpty;
+
+  if (testTargetProvided) {
+    final testFilePath = TestRunnerArgs(modifiableArgs).testTarget;
 
     // TODO(kenz): add support for specifying a directory as the target instead
     // of a single file.
-    await runFlutterIntegrationTest(testRunnerArgs);
+    await _runTest(modifiableArgs, testFilePath);
   } else {
     // Run all tests since a target test was not provided.
     final testDirectory = Directory(_testDirectory);
@@ -56,25 +48,19 @@ void main(List<String> args) async {
 
     for (final testFile in testFiles) {
       final testTarget = testFile.path;
-      _maybeAddOfflineArgument(modifiableArgs, testTarget);
-      _maybeAddExperimentsArgument(modifiableArgs, testTarget);
-      final testRunnerArgs = TestArgs([
-        ...modifiableArgs,
-        '${TestArgs.testTargetArg}$testTarget',
-      ]);
-      await runFlutterIntegrationTest(testRunnerArgs);
+      modifiableArgs.add('${TestRunnerArgs.testTargetArg}$testTarget');
+      await _runTest(modifiableArgs, testTarget);
     }
   }
 }
 
-void _maybeAddOfflineArgument(List<String> args, String testTarget) {
-  if (testTarget.startsWith(_offlineIndicator)) {
-    args.add(TestArgs.offlineArg);
-  }
-}
-
-void _maybeAddExperimentsArgument(List<String> args, String testTarget) {
-  if (testTarget.contains(_experimentalIndicator)) {
-    args.add(TestArgs.enableExperimentsArg);
-  }
+Future<void> _runTest(
+  List<String> modifiableTestRunnerArgs,
+  String testFilePath,
+) async {
+  await runFlutterIntegrationTest(
+    TestRunnerArgs(modifiableTestRunnerArgs),
+    TestFileArgs(testFilePath),
+    offline: testFilePath.startsWith(_offlineIndicator),
+  );
 }

@@ -348,7 +348,8 @@ class ClearButton extends DevToolsButton {
     required super.gaSelection,
     required super.onPressed,
     bool iconOnly = false,
-  }) : super(icon: Icons.block, label: iconOnly ? null : 'Clear');
+    String label = 'Clear',
+  }) : super(icon: Icons.block, label: iconOnly ? null : label);
 }
 
 class RefreshButton extends DevToolsButton {

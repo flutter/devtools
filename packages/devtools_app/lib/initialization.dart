@@ -12,6 +12,7 @@ import 'src/screens/provider/riverpod_error_logger_observer.dart';
 import 'src/shared/analytics/analytics_controller.dart';
 import 'src/shared/config_specific/framework_initialize/framework_initialize.dart';
 import 'src/shared/config_specific/ide_theme/ide_theme.dart';
+import 'src/shared/config_specific/logger/logger_helpers.dart';
 import 'src/shared/config_specific/url/url.dart';
 import 'src/shared/config_specific/url_strategy/url_strategy.dart';
 import 'src/shared/feature_flags.dart';
@@ -33,6 +34,8 @@ Future<void> runDevTools({
   List<DevToolsScreen>? screens,
 }) async {
   screens ??= defaultScreens;
+
+  initDevToolsLogging();
 
   // Before switching to URL path strategy, check if this URL is in the legacy
   // fragment format and redirect if necessary.
