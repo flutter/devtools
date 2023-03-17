@@ -415,7 +415,9 @@ extension ThemeDataExtension on ThemeData {
         textTheme.bodyMedium!.copyWith(
           fontFamily: 'RobotoMono',
           color: colorScheme.onSurface,
-          fontSize: defaultFontSize,
+          // Slightly smaller for fixes font text since it will appear larger
+          // to begin with.
+          fontSize: defaultFontSize - 1,
         ),
       );
 
@@ -427,6 +429,11 @@ extension ThemeDataExtension on ThemeData {
 
   TextStyle get tooltipFixedFontStyle => fixedFontStyle.copyWith(
         color: colorScheme.tooltipTextColor,
+      );
+
+  TextStyle get fixedFontLinkStyle => fixedFontStyle.copyWith(
+        color: colorScheme.devtoolsLink,
+        decoration: TextDecoration.underline,
       );
 
   TextStyle get devToolsTitleStyle => _fixBlurryText(textTheme.titleMedium!);

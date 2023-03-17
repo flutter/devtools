@@ -821,7 +821,7 @@ class VmServiceObjectLink extends StatelessWidget {
 
     final TextStyle style;
     if (isServiceObject) {
-      style = theme.linkTextStyle;
+      style = theme.fixedFontLinkStyle;
     } else {
       style = theme.fixedFontStyle;
     }

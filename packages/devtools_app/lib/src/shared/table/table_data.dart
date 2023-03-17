@@ -200,7 +200,7 @@ abstract class TimeAndPercentageColumn<T> extends ColumnData<T> {
           fixedWidthPx: scaleByFontFactor(columnWidth),
         );
 
-  static const _defaultTimeColumnWidth = 180.0;
+  static const _defaultTimeColumnWidth = 165.0;
 
   Duration Function(T)? timeProvider;
 
