@@ -52,7 +52,6 @@ void setupErrorHandling(Future Function() appStartCallback) {
     },
     (Object error, StackTrace stack) {
       _reportError(error, stack, 'zoneGuarded');
-      throw error;
     },
   );
 }
