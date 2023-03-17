@@ -204,15 +204,17 @@ class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
                       return _buildSearchField(searchFieldEnabled);
                     },
                   ),
+                  const SizedBox(width: denseSpacing),
                   FlameChartHelpButton(
                     gaScreen: PerformanceScreen.id,
                     gaSelection: gac.timelineFlameChartHelp,
                   ),
                 ],
                 if (!offlineController.offlineMode.value)
-                  RefreshTimelineEventsButton(
-                    controller: _timelineEventsController,
-                  ),
+                  const SizedBox(width: denseSpacing),
+                RefreshTimelineEventsButton(
+                  controller: _timelineEventsController,
+                ),
               ],
             );
           },

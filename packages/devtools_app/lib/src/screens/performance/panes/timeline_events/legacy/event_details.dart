@@ -60,6 +60,7 @@ class EventDetails extends StatelessWidget {
                         .cpuProfilerController.profilePeriodFlag!,
                   ),
               ],
+              roundedTopBorder: false,
             ),
             Expanded(
               child: selectedEvent != null

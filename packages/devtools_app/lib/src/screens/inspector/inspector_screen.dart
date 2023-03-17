@@ -506,20 +506,12 @@ class ErrorNavigator extends StatelessWidget {
                 ),
               ),
             ),
-            IconButton(
-              padding: EdgeInsets.zero,
-              constraints: const BoxConstraints(),
-              splashRadius: defaultIconSize,
-              icon: const Icon(Icons.keyboard_arrow_up),
-              color: colorScheme.onErrorContainer,
+            _ErrorNavigatorButton(
+              icon: Icons.keyboard_arrow_up,
               onPressed: _previousError,
             ),
-            IconButton(
-              padding: EdgeInsets.zero,
-              constraints: const BoxConstraints(),
-              splashRadius: defaultIconSize,
-              icon: const Icon(Icons.keyboard_arrow_down),
-              color: colorScheme.onErrorContainer,
+            _ErrorNavigatorButton(
+              icon: Icons.keyboard_arrow_down,
               onPressed: _nextError,
             ),
           ],
@@ -541,6 +533,30 @@ class ErrorNavigator extends StatelessWidget {
     final newIndex = errorIndex == null ? 0 : (errorIndex! + 1) % errors.length;
 
     onSelectError(newIndex);
+  }
+}
+
+class _ErrorNavigatorButton extends StatelessWidget {
+  const _ErrorNavigatorButton({required this.icon, required this.onPressed});
+
+  final IconData icon;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      // This is required to force the button size.
+      height: defaultButtonHeight,
+      width: defaultButtonHeight,
+      child: IconButton(
+        padding: EdgeInsets.zero,
+        constraints: const BoxConstraints(),
+        splashRadius: defaultIconSize,
+        icon: Icon(icon),
+        color: Theme.of(context).colorScheme.onErrorContainer,
+        onPressed: onPressed,
+      ),
+    );
   }
 }
 

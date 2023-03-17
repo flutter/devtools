@@ -41,8 +41,8 @@ void main() async {
           .thenReturn(ValueNotifier<int>(0));
       setGlobal(NotificationService, NotificationService());
       setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
-      setGlobal(ServiceConnectionManager, fakeServiceManager);
       setGlobal(PreferencesController, PreferencesController());
+      setGlobal(ServiceConnectionManager, fakeServiceManager);
       setGlobal(IdeTheme, IdeTheme());
 
       screen = LoggingScreen();

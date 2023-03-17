@@ -142,8 +142,10 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
       axis: Axis.horizontal,
       initialFractions: const [0.25, 0.75],
       children: [
-        // TODO(kenz): the top two corners are styled in a strange way.
-        RoundedOutlinedBorder(child: debuggerPanes()),
+        RoundedOutlinedBorder(
+          clip: true,
+          child: debuggerPanes(),
+        ),
         Column(
           children: [
             const DebuggingControls(),
@@ -255,15 +257,20 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
                   buttonKey: DebuggerScreenBody.callStackCopyButtonKey,
                 ),
               ],
+              roundedTopBorder: false,
               includeTopBorder: false,
             ),
-            const AreaPaneHeader(title: Text(variablesTitle)),
+            const AreaPaneHeader(
+              title: Text(variablesTitle),
+              roundedTopBorder: false,
+            ),
             AreaPaneHeader(
               title: const Text(breakpointsTitle),
               actions: [
                 _breakpointsRightChild(),
               ],
               rightPadding: 0.0,
+              roundedTopBorder: false,
             ),
           ],
           children: const [

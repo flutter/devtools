@@ -282,6 +282,8 @@ extension DevToolsColorScheme on ColorScheme {
 
   Color get onWarningContainer => onTertiaryContainer;
 
+  Color get subtleTextColor => const Color(0xFF919094);
+
   Color get overlayShadowColor => const Color.fromRGBO(0, 0, 0, 0.5);
 
   Color get overlayBackgroundColor =>
@@ -402,14 +404,9 @@ extension ThemeDataExtension on ThemeData {
 
   TextStyle get subtleTextStyle => _fixBlurryText(
         TextStyle(
-          color: const Color(0xFF919094),
-          // Slightly smaller for subtle text.
-          fontSize: defaultFontSize - 1,
+          color: colorScheme.subtleTextColor,
         ),
       );
-
-  TextStyle get selectedSubtleTextStyle =>
-      subtleTextStyle.copyWith(color: colorScheme.onSurface);
 
   TextStyle get fixedFontStyle => _fixBlurryText(
         textTheme.bodyMedium!.copyWith(
@@ -421,11 +418,12 @@ extension ThemeDataExtension on ThemeData {
         ),
       );
 
-  TextStyle get subtleFixedFontStyle =>
-      fixedFontStyle.copyWith(color: unselectedWidgetColor);
+  TextStyle get subtleFixedFontStyle => fixedFontStyle.copyWith(
+        color: colorScheme.subtleTextColor,
+      );
 
-  TextStyle get selectedFixedFontStyle =>
-      fixedFontStyle.copyWith(color: colorScheme.devtoolsSelectedLink);
+  TextStyle get selectedSubtleTextStyle =>
+      subtleTextStyle.copyWith(color: colorScheme.onSurface);
 
   TextStyle get tooltipFixedFontStyle => fixedFontStyle.copyWith(
         color: colorScheme.tooltipTextColor,
