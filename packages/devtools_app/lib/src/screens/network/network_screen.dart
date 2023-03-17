@@ -345,6 +345,7 @@ class NetworkRequestsTable extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return RoundedOutlinedBorder(
+      clip: true,
       child: FlatTable<NetworkRequest?>(
         keyFactory: (NetworkRequest? data) => ValueKey<NetworkRequest?>(data),
         data: requests,

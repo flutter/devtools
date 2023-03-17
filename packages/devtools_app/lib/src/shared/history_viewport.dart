@@ -169,7 +169,7 @@ class _HistoryViewportState<T> extends State<HistoryViewport<T>> {
             ],
           ),
         );
-        return OutlineDecoration(
+        return RoundedOutlinedBorder(
           child: Column(
             children: [
               titleWidget,

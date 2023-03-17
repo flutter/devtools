@@ -69,11 +69,6 @@ class _LogDetailsState extends State<LogDetails>
   }
 
   Widget _buildSimpleLog(BuildContext context, LogData? log) {
-    String? Function()? _dataProvider;
-    if (log?.details != null && log!.details!.isNotEmpty) {
-      _dataProvider = log.prettyPrinted;
-    }
-
     final details = log?.details;
     if (details != _lastDetails) {
       if (scrollController.hasClients) {
@@ -85,17 +80,9 @@ class _LogDetailsState extends State<LogDetails>
 
     final theme = Theme.of(context);
     return RoundedOutlinedBorder(
+      clip: true,
       child: ConsoleFrame(
-        title: AreaPaneHeader(
-          title: const Text('Details'),
-          includeTopBorder: false,
-          actions: [
-            CopyToClipboardControl(
-              dataProvider: _dataProvider,
-              buttonKey: LogDetails.copyToClipboardButtonKey,
-            ),
-          ],
-        ),
+        title: _LogDetailsHeader(log: log),
         child: Padding(
           padding: const EdgeInsets.all(denseSpacing),
           child: SingleChildScrollView(
@@ -108,6 +95,31 @@ class _LogDetailsState extends State<LogDetails>
           ),
         ),
       ),
+    );
+  }
+}
+
+class _LogDetailsHeader extends StatelessWidget {
+  const _LogDetailsHeader({required this.log});
+
+  final LogData? log;
+
+  @override
+  Widget build(BuildContext context) {
+    String? Function()? _dataProvider;
+    if (log?.details != null && log!.details!.isNotEmpty) {
+      _dataProvider = log!.prettyPrinted;
+    }
+    return AreaPaneHeader(
+      title: const Text('Details'),
+      includeTopBorder: false,
+      roundedTopBorder: false,
+      actions: [
+        CopyToClipboardControl(
+          dataProvider: _dataProvider,
+          buttonKey: LogDetails.copyToClipboardButtonKey,
+        ),
+      ],
     );
   }
 }

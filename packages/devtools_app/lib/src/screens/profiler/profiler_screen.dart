@@ -176,29 +176,27 @@ class _ProfilerScreenBodyState extends State<ProfilerScreenBody>
         ),
         const SizedBox(height: intermediateSpacing),
         Expanded(
-          child: OutlineDecoration(
-            child: ValueListenableBuilder<CpuProfileData?>(
-              valueListenable: controller.cpuProfilerController.dataNotifier,
-              builder: (context, cpuProfileData, _) {
-                if (cpuProfileData ==
-                        CpuProfilerController.baseStateCpuProfileData ||
-                    cpuProfileData == null) {
-                  return _buildRecordingInfo();
-                }
-                if (cpuProfileData ==
-                    CpuProfilerController.emptyAppStartUpProfile) {
-                  return emptyAppStartUpProfileView;
-                }
-                if (cpuProfileData.isEmpty &&
-                    !controller.cpuProfilerController.isFilterActive) {
-                  return emptyProfileView;
-                }
-                return CpuProfiler(
-                  data: cpuProfileData,
-                  controller: controller.cpuProfilerController,
-                );
-              },
-            ),
+          child: ValueListenableBuilder<CpuProfileData?>(
+            valueListenable: controller.cpuProfilerController.dataNotifier,
+            builder: (context, cpuProfileData, _) {
+              if (cpuProfileData ==
+                      CpuProfilerController.baseStateCpuProfileData ||
+                  cpuProfileData == null) {
+                return _buildRecordingInfo();
+              }
+              if (cpuProfileData ==
+                  CpuProfilerController.emptyAppStartUpProfile) {
+                return emptyAppStartUpProfileView;
+              }
+              if (cpuProfileData.isEmpty &&
+                  !controller.cpuProfilerController.isFilterActive) {
+                return emptyProfileView;
+              }
+              return CpuProfiler(
+                data: cpuProfileData,
+                controller: controller.cpuProfilerController,
+              );
+            },
           ),
         ),
       ],
@@ -301,7 +299,7 @@ class _PrimaryControls extends StatelessWidget {
     required this.recording,
   });
 
-  static const _primaryControlsMinIncludeTextWidth = 1050.0;
+  static const _primaryControlsMinIncludeTextWidth = 1170.0;
 
   final ProfilerScreenController controller;
 
@@ -347,9 +345,9 @@ class _SecondaryControls extends StatelessWidget {
     required this.profilerBusy,
   });
 
-  static const _secondaryControlsMinScreenWidthForText = 1050.0;
+  static const _secondaryControlsMinScreenWidthForText = 1170.0;
 
-  static const _profilingControlsMinScreenWidthForText = 825.0;
+  static const _profilingControlsMinScreenWidthForText = 875.0;
 
   final ProfilerScreenController controller;
 

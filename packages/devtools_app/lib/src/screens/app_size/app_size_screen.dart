@@ -349,43 +349,50 @@ class _AnalysisViewState extends State<AnalysisView>
 
   Widget _buildTreemapAndTableSplitView() {
     final analysisCallGraphRoot = controller.analysisCallGraphRoot.value;
-    return OutlineDecoration(
-      child: Column(
-        children: [
-          AreaPaneHeader(
-            title: Text(_generateSingleFileHeaderText()),
-            maxLines: 2,
-            includeTopBorder: false,
-          ),
-          Expanded(
-            child: Split(
-              axis: Axis.vertical,
-              initialFractions: const [
-                initialFractionForTreemap,
-                initialFractionForTreeTable,
-              ],
-              children: [
-                _buildTreemap(),
-                Row(
-                  children: [
-                    Flexible(
-                      child: AppSizeAnalysisTable(
-                        rootNode: analysisRoot!.root,
-                        controller: controller,
-                      ),
-                    ),
-                    if (analysisCallGraphRoot != null)
-                      Flexible(
-                        child: CallGraphWithDominators(
-                          callGraphRoot: analysisCallGraphRoot,
-                        ),
-                      ),
-                  ],
-                ),
-              ],
+    return Padding(
+      padding: const EdgeInsets.only(top: intermediateSpacing),
+      child: RoundedOutlinedBorder(
+        clip: true,
+        child: Column(
+          children: [
+            AreaPaneHeader(
+              title: Text(_generateSingleFileHeaderText()),
+              maxLines: 2,
+              roundedTopBorder: false,
+              includeTopBorder: false,
             ),
-          ),
-        ],
+            Expanded(
+              child: Split(
+                axis: Axis.vertical,
+                initialFractions: const [
+                  initialFractionForTreemap,
+                  initialFractionForTreeTable,
+                ],
+                children: [
+                  _buildTreemap(),
+                  OutlineDecoration.onlyTop(
+                    child: Row(
+                      children: [
+                        Flexible(
+                          child: AppSizeAnalysisTable(
+                            rootNode: analysisRoot!.root,
+                            controller: controller,
+                          ),
+                        ),
+                        if (analysisCallGraphRoot != null)
+                          Flexible(
+                            child: CallGraphWithDominators(
+                              callGraphRoot: analysisCallGraphRoot,
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

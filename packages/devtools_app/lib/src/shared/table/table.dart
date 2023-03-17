@@ -1647,7 +1647,7 @@ class _TableRowState<T> extends State<TableRow<T>>
       }
     }
 
-    return Padding(
+    final rowContent = Padding(
       padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
@@ -1673,6 +1673,10 @@ class _TableRowState<T> extends State<TableRow<T>>
         },
       ),
     );
+    if (widget.rowType == _TableRowType.columnHeader) {
+      return OutlineDecoration.onlyBottom(child: rowContent);
+    }
+    return rowContent;
   }
 
   @override

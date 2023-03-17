@@ -161,7 +161,6 @@ class _CpuProfilerState extends State<CpuProfiler>
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         AreaPaneHeader(
-          includeTopBorder: false,
           leftPadding: 0,
           tall: true,
           title: TabBar(
@@ -261,10 +260,14 @@ class _CpuProfilerState extends State<CpuProfiler>
           valueListenable: widget.controller.viewType,
           builder: (context, viewType, _) {
             return Expanded(
-              child: TabBarView(
-                physics: defaultTabBarViewPhysics,
-                controller: _tabController,
-                children: _buildProfilerViews(),
+              child: OutlineDecoration(
+                showTop: false,
+                showBottom: false,
+                child: TabBarView(
+                  physics: defaultTabBarViewPhysics,
+                  controller: _tabController,
+                  children: _buildProfilerViews(),
+                ),
               ),
             );
           },
@@ -378,34 +381,42 @@ class CpuProfileStats extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final samplePeriodValid = metadata.samplePeriod > 0;
     final samplingPeriodDisplay = samplePeriodValid
         ? const Duration(seconds: 1).inMicroseconds ~/ metadata.samplePeriod
         : '--';
-    return OutlineDecoration(
+    return RoundedOutlinedBorder.onlyBottom(
       child: Container(
         height: _statsRowHeight,
-        padding: const EdgeInsets.all(densePadding),
+        padding: const EdgeInsets.symmetric(
+          vertical: densePadding,
+          horizontal: defaultSpacing,
+        ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             _stat(
               tooltip: 'The duration of time spanned by the CPU samples',
               text: 'Duration: ${msText(metadata.time!.duration)}',
+              theme: theme,
             ),
             _stat(
               tooltip: 'The number of samples included in the profile',
               text: 'Sample count: ${metadata.sampleCount}',
+              theme: theme,
             ),
             _stat(
               tooltip:
                   'The frequency at which samples are collected by the profiler'
                   '${samplePeriodValid ? ' (once every ${metadata.samplePeriod} micros)' : ''}',
               text: 'Sampling rate: $samplingPeriodDisplay Hz',
+              theme: theme,
             ),
             _stat(
               tooltip: 'The maximum stack trace depth of a collected sample',
               text: 'Sampling depth: ${metadata.stackDepth}',
+              theme: theme,
             ),
           ],
         ),
@@ -416,12 +427,14 @@ class CpuProfileStats extends StatelessWidget {
   Widget _stat({
     required String text,
     required String tooltip,
+    required ThemeData theme,
   }) {
     return Flexible(
       child: DevToolsTooltip(
         message: tooltip,
         child: Text(
           text,
+          style: theme.subtleTextStyle,
           overflow: TextOverflow.ellipsis,
         ),
       ),

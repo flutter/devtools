@@ -359,10 +359,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
                                   child: content,
                                 ),
                                 RoundedOutlinedBorder.onlyBottom(
-                                  child: Padding(
-                                    padding: DevToolsScaffold.horizontalPadding,
-                                    child: const ConsolePane(),
-                                  ),
+                                  child: const ConsolePane(),
                                 ),
                               ],
                             )

@@ -75,6 +75,7 @@ class _FileImportContainerState extends State<FileImportContainer> {
           child: DragAndDrop(
             handleDrop: _handleImportedFile,
             child: RoundedOutlinedBorder(
+              clip: true,
               child: Container(
                 color: Theme.of(context).scaffoldBackgroundColor,
                 child: Column(

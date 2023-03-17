@@ -18,9 +18,7 @@ class ConsolePaneHeader extends AreaPaneHeader {
   ConsolePaneHeader({Color? backgroundColor})
       : super(
           title: const Text('Console'),
-          includeBottomBorder: false,
-          includeLeftBorder: true,
-          includeRightBorder: true,
+          roundedTopBorder: true,
           actions: [
             CopyToClipboardControl(
               dataProvider: () =>

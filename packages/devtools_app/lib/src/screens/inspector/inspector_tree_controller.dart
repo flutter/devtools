@@ -1268,7 +1268,9 @@ class InspectorRowContent extends StatelessWidget {
                           errorText: error?.errorMessage,
                           nodeDescriptionHighlightStyle:
                               searchValue.isEmpty || !row.isSearchMatch
-                                  ? DiagnosticsTextStyles.regular(Theme.of(context).colorScheme)
+                                  ? DiagnosticsTextStyles.regular(
+                                      Theme.of(context).colorScheme,
+                                    )
                                   : row.isSelected
                                       ? theme.searchMatchHighlightStyleFocused
                                       : theme.searchMatchHighlightStyle,

@@ -120,6 +120,7 @@ class _LoggingScreenState extends State<LoggingScreenBody>
     );
   }
 
+  // TODO(kenz): replace with helper widget
   Widget _buildLoggingControls() {
     final hasData = controller.filteredData.value.isNotEmpty;
     return Row(
@@ -152,12 +153,17 @@ class _LoggingScreenState extends State<LoggingScreenBody>
     );
   }
 
+  // TODO(kenz): replace with helper widget.
   Widget _buildLoggingBody() {
     return Split(
       axis: Axis.vertical,
       initialFractions: const [0.72, 0.28],
+      // TODO(kenz): refactor so that the LogDetails header can be the splitter.
+      // This would be more consistent with other screens that use the console
+      // header as the splitter.
       children: [
         RoundedOutlinedBorder(
+          clip: true,
           child: LogsTable(
             data: filteredLogs,
             selectionNotifier: controller.selectedLog,

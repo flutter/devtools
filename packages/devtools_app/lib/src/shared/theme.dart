@@ -463,7 +463,7 @@ extension ThemeDataExtension on ThemeData {
           backgroundColor: searchMatchColor,
         ),
       );
-  
+
   // Title of the hover card.
   TextStyle get hoverTitleTextStyle => _fixBlurryText(
         TextStyle(

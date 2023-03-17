@@ -199,9 +199,8 @@ class DevToolsButton extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     var textColor = color;
     if (textColor == null && elevatedButton) {
-      textColor = onPressed == null
-          ? colorScheme.surfaceVariant
-          : colorScheme.onPrimary;
+      textColor =
+          onPressed == null ? colorScheme.onSurface : colorScheme.onPrimary;
     }
     final iconLabel = MaterialIconLabel(
       label: label!,
@@ -896,63 +895,81 @@ class AreaPaneHeader extends StatelessWidget implements PreferredSizeWidget {
     Key? key,
     required this.title,
     this.maxLines = 1,
-    this.includeTopBorder = true,
-    this.includeBottomBorder = true,
-    this.includeLeftBorder = false,
-    this.includeRightBorder = false,
     this.actions = const [],
     this.leftPadding = defaultSpacing,
     this.rightPadding = densePadding,
     this.tall = false,
+    this.roundedTopBorder = true,
+    this.includeTopBorder = true,
+    this.includeBottomBorder = true,
+    this.includeLeftBorder = false,
+    this.includeRightBorder = false,
   }) : super(key: key);
 
   final Widget title;
   final int maxLines;
-  final bool includeTopBorder;
-  final bool includeBottomBorder;
-  final bool includeLeftBorder;
-  final bool includeRightBorder;
   final List<Widget> actions;
   final double leftPadding;
   final double rightPadding;
   final bool tall;
 
+  // TODO(kenz): add support for a non uniform border to allow for
+  // rounded corners when some border sides are missing. This is a
+  // challenge for Flutter since it is not supported out of the box:
+  // https://github.com/flutter/flutter/issues/12583.
+
+  /// Whether to use a full border with rounded top corners consistent with
+  /// material 3 styling.
+  ///
+  /// When true, the rounded border will take precedence over any value
+  /// specified by [includeTopBorder], [includeBottomBorder],
+  /// [includeLeftBorder], and [includeRightBorder].
+  final bool roundedTopBorder;
+
+  final bool includeTopBorder;
+  final bool includeBottomBorder;
+  final bool includeLeftBorder;
+  final bool includeRightBorder;
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final borderSide = defaultBorderSide(theme);
+    final decoration = !roundedTopBorder
+        ? BoxDecoration(
+            border: Border(
+              top: includeTopBorder ? borderSide : BorderSide.none,
+              bottom: includeBottomBorder ? borderSide : BorderSide.none,
+              left: includeLeftBorder ? borderSide : BorderSide.none,
+              right: includeRightBorder ? borderSide : BorderSide.none,
+            ),
+            color: theme.colorScheme.surface,
+          )
+        : null;
+    Widget container = Container(
+      decoration: decoration,
+      padding: EdgeInsets.only(left: leftPadding, right: rightPadding),
+      alignment: Alignment.centerLeft,
+      child: Row(
+        children: [
+          Expanded(
+            child: DefaultTextStyle(
+              maxLines: maxLines,
+              overflow: TextOverflow.ellipsis,
+              style: theme.textTheme.titleSmall!,
+              child: title,
+            ),
+          ),
+          ...actions,
+        ],
+      ),
+    );
+    if (roundedTopBorder) {
+      container = RoundedOutlinedBorder.onlyTop(child: container);
+    }
     return SizedBox.fromSize(
       size: preferredSize,
-      child: Container(
-        decoration: BoxDecoration(
-          // TODO(kenz): add support for a non uniform border to allow for
-          // rounded corners when come border sides are missing. This is
-          // apparently a challenge for Flutter since it is not supported out
-          // of the box: https://github.com/flutter/flutter/issues/12583.
-          border: Border(
-            top: includeTopBorder ? borderSide : BorderSide.none,
-            bottom: includeBottomBorder ? borderSide : BorderSide.none,
-            left: includeLeftBorder ? borderSide : BorderSide.none,
-            right: includeRightBorder ? borderSide : BorderSide.none,
-          ),
-          color: theme.colorScheme.surface,
-        ),
-        padding: EdgeInsets.only(left: leftPadding, right: rightPadding),
-        alignment: Alignment.centerLeft,
-        child: Row(
-          children: [
-            Expanded(
-              child: DefaultTextStyle(
-                maxLines: maxLines,
-                overflow: TextOverflow.ellipsis,
-                style: theme.textTheme.titleSmall!,
-                child: title,
-              ),
-            ),
-            ...actions,
-          ],
-        ),
-      ),
+      child: container,
     );
   }
 
@@ -1362,20 +1379,29 @@ class RoundedOutlinedBorder extends StatelessWidget {
     this.showTopRight = true,
     this.showBottomLeft = true,
     this.showBottomRight = true,
+    this.clip = false,
     required this.child,
   });
 
-  factory RoundedOutlinedBorder.onlyTop({required Widget? child}) =>
+  factory RoundedOutlinedBorder.onlyTop({
+    required Widget? child,
+    bool clip = false,
+  }) =>
       RoundedOutlinedBorder(
         showBottomLeft: false,
         showBottomRight: false,
+        clip: clip,
         child: child,
       );
 
-  factory RoundedOutlinedBorder.onlyBottom({required Widget? child}) =>
+  factory RoundedOutlinedBorder.onlyBottom({
+    required Widget? child,
+    bool clip = false,
+  }) =>
       RoundedOutlinedBorder(
         showTopLeft: false,
         showTopRight: false,
+        clip: clip,
         child: child,
       );
 
@@ -1384,27 +1410,43 @@ class RoundedOutlinedBorder extends StatelessWidget {
   final bool showBottomLeft;
   final bool showBottomRight;
 
+  /// Whether we should clip [child].
+  ///
+  /// This should be used sparingly and only where necessary for performance
+  /// reasons.
+  final bool clip;
+
   final Widget? child;
 
   @override
   Widget build(BuildContext context) {
+    final borderRadius = BorderRadius.only(
+      topLeft: showTopLeft
+          ? const Radius.circular(defaultBorderRadius)
+          : Radius.zero,
+      topRight: showTopRight
+          ? const Radius.circular(defaultBorderRadius)
+          : Radius.zero,
+      bottomLeft: showBottomLeft
+          ? const Radius.circular(defaultBorderRadius)
+          : Radius.zero,
+      bottomRight: showBottomRight
+          ? const Radius.circular(defaultBorderRadius)
+          : Radius.zero,
+    );
+
+    var child = this.child;
+    if (clip) {
+      child = ClipRRect(
+        borderRadius: borderRadius,
+        clipBehavior: Clip.hardEdge,
+        child: child,
+      );
+    }
     return Container(
       decoration: BoxDecoration(
         border: Border.all(color: Theme.of(context).focusColor),
-        borderRadius: BorderRadius.only(
-          topLeft: showTopLeft
-              ? const Radius.circular(defaultBorderRadius)
-              : Radius.zero,
-          topRight: showTopRight
-              ? const Radius.circular(defaultBorderRadius)
-              : Radius.zero,
-          bottomLeft: showBottomLeft
-              ? const Radius.circular(defaultBorderRadius)
-              : Radius.zero,
-          bottomRight: showBottomRight
-              ? const Radius.circular(defaultBorderRadius)
-              : Radius.zero,
-        ),
+        borderRadius: borderRadius,
       ),
       child: child,
     );
