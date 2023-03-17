@@ -2687,6 +2687,8 @@ class ContextMenuButton extends StatelessWidget {
     required this.menu,
   });
 
+  static const text = '⋮';
+
   static const double width = 14;
 
   final TextStyle? style;
@@ -2703,7 +2705,7 @@ class ContextMenuButton extends StatelessWidget {
         return SizedBox(
           width: width,
           child: TextButton(
-            child: Text('⋮', style: style, textAlign: TextAlign.center),
+            child: Text(text, style: style, textAlign: TextAlign.center),
             onPressed: () {
               if (gaScreen != null && gaItem != null) {
                 ga.select(gaScreen!, gaItem!);

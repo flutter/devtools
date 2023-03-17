@@ -8,13 +8,13 @@
 
 import 'dart:ui' as ui;
 
+import 'package:devtools_app/src/screens/memory/panes/diff/widgets/instances.dart';
 import 'package:devtools_app/src/screens/memory/panes/diff/widgets/snapshot_list.dart';
+import 'package:devtools_app/src/shared/common_widgets.dart';
 import 'package:devtools_app/src/shared/console/widgets/console_pane.dart';
 import 'package:devtools_app/src/shared/primitives/simple_items.dart';
-import 'package:devtools_app/src/shared/table/table.dart';
 import 'package:devtools_app/src/shared/ui/search.dart';
 import 'package:devtools_test/devtools_integration_test.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
@@ -66,7 +66,18 @@ Future<void> _testAssignment(_EvalTester tester) async {
 }
 
 Future<void> _testRootIsAccessible(_EvalTester tester) async {
-  // TODO(polina-c): add content.
+  await tester.tester.tap(find.text('MyApp'));
+  await tester.tester.pumpAndSettle();
+
+  await tester.tester
+      .tap(find.widgetWithText(InstanceTableCell, ContextMenuButton.text));
+  await tester.tester.pumpAndSettle();
+
+  await tester.tester.tap(find.textContaining('one instance'));
+  await tester.tester.pumpAndSettle();
+
+  await tester.tester.tap(find.text('Any'));
+  await tester.tester.pumpAndSettle();
 }
 
 class _EvalTester {
@@ -133,9 +144,8 @@ class _EvalTester {
     await tester.tap(find.text('Class'));
     await tester.pumpAndSettle();
 
-    expect(
-      find.text('MyApp'),
-      findsOneWidget,
-    );
+    // Select class
+    await tester.tap(find.text('MyApp'));
+    await tester.pumpAndSettle();
   }
 }
