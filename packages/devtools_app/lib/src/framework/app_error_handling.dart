@@ -46,7 +46,7 @@ void setupErrorHandling(Future Function() appStartCallback) {
       PlatformDispatcher.instance.onError = (error, stack) {
         // Unhandled errors on the root isolate are caught here.
         _reportError(error, stack, 'PlatformDispatcher');
-        return true;
+        return false;
       };
       return appStartCallback();
     },
