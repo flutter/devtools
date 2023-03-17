@@ -11,7 +11,7 @@ import '../../../../shared/ui/search.dart';
 import '../../cpu_profile_model.dart';
 
 /// Represents a graph node for a method in a CPU profile method table.
-class MethodTableGraphNode extends GraphNode with DataSearchStateMixin {
+class MethodTableGraphNode extends GraphNode with SearchableData {
   MethodTableGraphNode({
     required this.name,
     required this.packageUri,
@@ -94,6 +94,12 @@ class MethodTableGraphNode extends GraphNode with DataSearchStateMixin {
     return other is MethodTableGraphNode &&
         other.name == name &&
         other._sourceUri == _sourceUri;
+  }
+
+  @override
+  bool matchesSearchToken(RegExp regExpSearch) {
+    return name.caseInsensitiveContains(regExpSearch) ||
+        packageUri.caseInsensitiveContains(regExpSearch);
   }
 
   @override

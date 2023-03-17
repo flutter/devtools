@@ -265,7 +265,7 @@ class InspectorTreeNode {
 }
 
 /// A row in the tree with all information required to render it.
-class InspectorTreeRow with DataSearchStateMixin {
+class InspectorTreeRow with SearchableData {
   InspectorTreeRow({
     required this.node,
     required this.index,

@@ -18,6 +18,7 @@ import '../../shared/ui/colors.dart';
 import '../../shared/ui/search.dart';
 import '../../shared/ui/tab.dart';
 import '../../shared/utils.dart';
+import 'common.dart';
 import 'cpu_profile_model.dart';
 import 'cpu_profiler_controller.dart';
 import 'panes/bottom_up.dart';
@@ -25,7 +26,7 @@ import 'panes/call_tree.dart';
 import 'panes/controls/profiler_controls.dart';
 import 'panes/cpu_flame_chart.dart';
 import 'panes/method_table/method_table.dart';
-import 'panes/method_table/method_table_model.dart';
+import 'panes/method_table/method_table_controller.dart';
 
 // TODO(kenz): provide useful UI upon selecting a CPU stack frame.
 
@@ -39,18 +40,17 @@ class CpuProfiler extends StatefulWidget {
   })  : callTreeRoots = data.callTreeRoots,
         bottomUpRoots = data.bottomUpRoots,
         tabs = [
-          if (summaryView != null)
-            _buildTab(key: summaryTab, tabName: 'Summary'),
-          _buildTab(key: bottomUpTab, tabName: 'Bottom Up'),
-          _buildTab(key: callTreeTab, tabName: 'Call Tree'),
-          _buildTab(key: methodTableTab, tabName: 'Method Table'),
-          _buildTab(key: flameChartTab, tabName: 'CPU Flame Chart'),
+          if (summaryView != null) _buildTab(ProfilerTab.summary),
+          _buildTab(ProfilerTab.bottomUp),
+          _buildTab(ProfilerTab.callTree),
+          _buildTab(ProfilerTab.methodTable),
+          _buildTab(ProfilerTab.cpuFlameChart),
         ];
 
-  static DevToolsTab _buildTab({Key? key, required String tabName}) {
+  static DevToolsTab _buildTab(ProfilerTab profilerTab) {
     return DevToolsTab.create(
-      key: key,
-      tabName: tabName,
+      key: profilerTab.key,
+      tabName: profilerTab.title,
       gaPrefix: 'cpuProfilerTab',
     );
   }
@@ -71,16 +71,10 @@ class CpuProfiler extends StatefulWidget {
 
   static const Key dataProcessingKey = Key('CpuProfiler - data is processing');
 
-  // When content of the selected DevToolsTab from the tab controller has any
-  // of these three keys, we will not show the expand/collapse buttons.
-  static const Key flameChartTab = Key('cpu profile flame chart tab');
-  static const Key methodTableTab = Key('cpu profile method table tab');
-  static const Key summaryTab = Key('cpu profile summary tab');
-
-  static const Key bottomUpTab = Key('cpu profile bottom up tab');
-  static const Key callTreeTab = Key('cpu profile call tree tab');
-
-  static const searchableTabKeys = <Key>[methodTableTab, flameChartTab];
+  static final searchableTabKeys = <Key>[
+    ProfilerTab.methodTable.key,
+    ProfilerTab.cpuFlameChart.key,
+  ];
 
   @override
   _CpuProfilerState createState() => _CpuProfilerState();
@@ -89,18 +83,13 @@ class CpuProfiler extends StatefulWidget {
 // TODO(kenz): preserve tab controller index when updating CpuProfiler with new
 // data. The state is being destroyed with every new cpu profile - investigate.
 class _CpuProfilerState extends State<CpuProfiler>
-    with
-        TickerProviderStateMixin,
-        AutoDisposeMixin,
-        SearchFieldMixin<CpuProfiler> {
+    with TickerProviderStateMixin, AutoDisposeMixin
+{
   bool _tabControllerInitialized = false;
 
   late TabController _tabController;
 
   late CpuProfileData data;
-
-  @override
-  SearchControllerMixin get searchController => widget.controller;
 
   @override
   void initState() {
@@ -139,7 +128,11 @@ class _CpuProfilerState extends State<CpuProfiler>
     _tabControllerInitialized = true;
 
     if (widget.controller.selectedProfilerTabIndex >= _tabController.length) {
-      widget.controller.changeSelectedProfilerTab(0);
+      const index = 0;
+      widget.controller.changeSelectedProfilerTab(
+        index,
+        ProfilerTab.byKey(widget.tabs[index].key),
+      );
     }
     _tabController
       ..index = widget.controller.selectedProfilerTabIndex
@@ -148,7 +141,11 @@ class _CpuProfilerState extends State<CpuProfiler>
 
   void _onTabChanged() {
     setState(() {
-      widget.controller.changeSelectedProfilerTab(_tabController.index);
+      final index = _tabController.index;
+      widget.controller.changeSelectedProfilerTab(
+        index,
+        ProfilerTab.byKey(widget.tabs[index].key),
+      );
     });
   }
 
@@ -171,14 +168,14 @@ class _CpuProfilerState extends State<CpuProfiler>
             tabs: widget.tabs,
           ),
           actions: [
-            if (currentTab.key != CpuProfiler.summaryTab) ...[
+            if (currentTab.key != ProfilerTab.summary.key) ...[
               FilterButton(
                 onPressed: _showFilterDialog,
                 isFilterActive: widget.controller.isFilterActive,
               ),
               const SizedBox(width: denseSpacing),
-              if (currentTab.key != CpuProfiler.flameChartTab &&
-                  currentTab.key != CpuProfiler.methodTableTab) ...[
+              if (currentTab.key != ProfilerTab.cpuFlameChart.key &&
+                  currentTab.key != ProfilerTab.methodTable.key) ...[
                 const DisplayTreeGuidelinesToggle(),
                 const SizedBox(width: denseSpacing),
               ],
@@ -200,47 +197,51 @@ class _CpuProfilerState extends State<CpuProfiler>
             // TODO(kenz): support search for call tree and bottom up tabs as
             // well. This will require implementing search for tree tables.
             if (CpuProfiler.searchableTabKeys.contains(currentTab.key)) ...[
-              if (currentTab.key == CpuProfiler.methodTableTab)
-                _buildSearchField<MethodTableGraphNode>(
-                  widget.controller.methodTableController,
+              if (currentTab.key == ProfilerTab.methodTable.key)
+                CpuProfilerSearchField<MethodTableController>(
+                  searchController: widget.controller.methodTableController,
                 )
               else
-                _buildSearchField<CpuStackFrame>(widget.controller),
+                CpuProfilerSearchField<CpuProfilerController>(
+                  searchController: widget.controller,
+                )
             ],
-            if (currentTab.key == CpuProfiler.flameChartTab) ...[
-              FlameChartHelpButton(
-                gaScreen: widget.standaloneProfiler
-                    ? gac.cpuProfiler
-                    : gac.performance,
-                gaSelection: gac.cpuProfileFlameChartHelp,
-                additionalInfo: [
-                  ...dialogSubHeader(Theme.of(context), 'Legend'),
-                  Legend(
-                    entries: [
-                      LegendEntry(
-                        'App code (code from your app and imported packages)',
-                        appCodeColor.background.colorFor(colorScheme),
-                      ),
-                      LegendEntry(
-                        'Native code (code from the native runtime - Android, iOS, etc.)',
-                        nativeCodeColor.background.colorFor(colorScheme),
-                      ),
-                      LegendEntry(
-                        'Dart core libraries (code from the Dart SDK)',
-                        dartCoreColor.background.colorFor(colorScheme),
-                      ),
-                      LegendEntry(
-                        'Flutter Framework (code from the Flutter SDK)',
-                        flutterCoreColor.background.colorFor(colorScheme),
-                      ),
-                    ],
-                  ),
-                ],
+            if (currentTab.key == ProfilerTab.cpuFlameChart.key) ...[
+              Padding(
+                padding: const EdgeInsets.only(left: denseSpacing),
+                child: FlameChartHelpButton(
+                  gaScreen: widget.standaloneProfiler
+                      ? gac.cpuProfiler
+                      : gac.performance,
+                  gaSelection: gac.cpuProfileFlameChartHelp,
+                  additionalInfo: [
+                    ...dialogSubHeader(Theme.of(context), 'Legend'),
+                    Legend(
+                      entries: [
+                        LegendEntry(
+                          'App code (code from your app and imported packages)',
+                          appCodeColor.background.colorFor(colorScheme),
+                        ),
+                        LegendEntry(
+                          'Native code (code from the native runtime - Android, iOS, etc.)',
+                          nativeCodeColor.background.colorFor(colorScheme),
+                        ),
+                        LegendEntry(
+                          'Dart core libraries (code from the Dart SDK)',
+                          dartCoreColor.background.colorFor(colorScheme),
+                        ),
+                        LegendEntry(
+                          'Flutter Framework (code from the Flutter SDK)',
+                          flutterCoreColor.background.colorFor(colorScheme),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ],
-            if (currentTab.key != CpuProfiler.flameChartTab &&
-                currentTab.key != CpuProfiler.summaryTab &&
-                currentTab.key != CpuProfiler.methodTableTab) ...[
+            if (currentTab.key == ProfilerTab.callTree.key ||
+                currentTab.key == ProfilerTab.bottomUp.key) ...[
               // TODO(kenz): add a switch to order samples by user tag here
               // instead of using the filter control. This will allow users
               // to see all the tags side by side in the tree tables.
@@ -280,7 +281,7 @@ class _CpuProfilerState extends State<CpuProfiler>
             );
           },
         ),
-        if (currentTab.key != CpuProfiler.summaryTab)
+        if (currentTab.key != ProfilerTab.summary.key)
           CpuProfileStats(metadata: data.profileMetaData),
       ],
     );
@@ -293,21 +294,6 @@ class _CpuProfilerState extends State<CpuProfiler>
         builder: (context) => CpuProfileFilterDialog(
           controller: widget.controller,
         ),
-      ),
-    );
-  }
-
-  Widget _buildSearchField<T extends DataSearchStateMixin>(
-    SearchControllerMixin<T> searchController,
-  ) {
-    return Container(
-      width: wideSearchTextWidth,
-      height: defaultTextFieldHeight,
-      child: SearchField<T>(
-        controller: searchController,
-        searchFieldEnabled: true,
-        shouldRequestFocus: false,
-        supportsNavigation: true,
       ),
     );
   }
@@ -370,12 +356,41 @@ class _CpuProfilerState extends State<CpuProfiler>
     void Function(CpuStackFrame root) callback,
     Tab currentTab,
   ) {
-    final roots = currentTab.key == CpuProfiler.callTreeTab
+    final roots = currentTab.key == ProfilerTab.callTree.key
         ? widget.callTreeRoots
         : widget.bottomUpRoots;
     setState(() {
       roots.forEach(callback);
     });
+  }
+}
+
+class CpuProfilerSearchField<T> extends StatefulWidget {
+  const CpuProfilerSearchField({required this.searchController, super.key});
+
+  final T searchController;
+
+  @override
+  State<CpuProfilerSearchField> createState() => _CpuProfilerSearchFieldState();
+}
+
+class _CpuProfilerSearchFieldState extends State<CpuProfilerSearchField>
+    with AutoDisposeMixin, SearchFieldMixin {
+  @override
+  SearchControllerMixin get searchController => widget.searchController;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: wideSearchTextWidth,
+      height: defaultTextFieldHeight,
+      child: SearchField(
+        controller: searchController,
+        searchFieldEnabled: true,
+        shouldRequestFocus: false,
+        supportsNavigation: true,
+      ),
+    );
   }
 }
 

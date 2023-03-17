@@ -843,7 +843,7 @@ class CpuSampleEvent extends TraceEvent {
 class CpuStackFrame extends TreeNode<CpuStackFrame>
     with
         ProfilableDataMixin<CpuStackFrame>,
-        DataSearchStateMixin,
+        SearchableData,
         TreeDataSearchStateMixin<CpuStackFrame>,
         FlameChartDataMixin {
   factory CpuStackFrame({
@@ -1048,6 +1048,12 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
       rawUrl == other.rawUrl &&
       category == other.category &&
       sourceLine == other.sourceLine;
+
+  @override
+  bool matchesSearchToken(RegExp regExpSearch) {
+    return name.caseInsensitiveContains(regExpSearch) ||
+        packageUri.caseInsensitiveContains(regExpSearch);
+  }
 
   Map<String, Object?> get toJson => {
         id: {

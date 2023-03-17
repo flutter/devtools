@@ -28,7 +28,7 @@ int topMatchesLimit = defaultTopMatchesLimit;
 
 const double _searchControlDividerHeight = 24.0;
 
-mixin SearchControllerMixin<T extends DataSearchStateMixin> {
+mixin SearchControllerMixin<T extends SearchableData> {
   final _searchNotifier = ValueNotifier<String>('');
   final _searchInProgress = ValueNotifier<bool>(false);
 
@@ -192,10 +192,45 @@ mixin SearchControllerMixin<T extends DataSearchStateMixin> {
     onMatchChanged(activeMatchIndex);
   }
 
+  /// The data that should be searched through when [matchesForSearch] is
+  /// called.
+  ///
+  /// If [matchesForSearch] is overridden in such a way that
+  /// [currentDataToSearchThrough] is not used, then this getter does not need
+  /// to be implemented.
+  Iterable<T> get currentDataToSearchThrough => throw UnimplementedError(
+        'Implement this getter in order to use the default'
+        ' [matchesForSearch] behavior.',
+      );
+
+  /// Default search matching logic.
+  ///
+  /// The use of this method requires both [currentDataToSearchThrough] and
+  /// [T.matchesSearchToken] to be implemented.
   List<T> matchesForSearch(
     String search, {
     bool searchPreviousMatches = false,
-  });
+  }) {
+    if (search.isEmpty) return <T>[];
+    final regexSearch = RegExp(search, caseSensitive: false);
+    final matches = <T>[];
+    if (searchPreviousMatches) {
+      final previousMatches = searchMatches.value;
+      for (final previousMatch in previousMatches) {
+        if (previousMatch.matchesSearchToken(regexSearch)) {
+          matches.add(previousMatch);
+        }
+      }
+    } else {
+      final searchData = currentDataToSearchThrough;
+      for (final data in searchData) {
+        if (data.matchesSearchToken(regexSearch)) {
+          matches.add(data);
+        }
+      }
+    }
+    return matches;
+  }
 
   /// Called when selected match index changes. Index is 0 based
   // Subclasses provide a valid implementation.
@@ -857,7 +892,7 @@ mixin SearchFieldMixin<T extends StatefulWidget>
 ///
 /// The widget that builds [SearchField] is responsible for mixing in
 /// [SearchFieldMixin], which manages the search field lifecycle.
-class SearchField<T extends DataSearchStateMixin> extends StatelessWidget {
+class SearchField<T extends SearchableData> extends StatelessWidget {
   const SearchField({
     required this.controller,
     required this.searchFieldEnabled,
@@ -1263,7 +1298,7 @@ class SearchNavigationControls extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<List<DataSearchStateMixin>>(
+    return ValueListenableBuilder<List<SearchableData>>(
       valueListenable: controller.searchMatches,
       builder: (context, matches, _) {
         final numMatches = matches.length;
@@ -1330,15 +1365,26 @@ class SearchNavigationControls extends StatelessWidget {
   }
 }
 
-mixin DataSearchStateMixin {
+mixin SearchableData {
   bool isSearchMatch = false;
   bool isActiveSearchMatch = false;
+
+  /// Whether this [SearchableData] is a match for the search query [search].
+  ///
+  /// This method is used by [SearchControllerMixin.matchesForSearch]. If
+  /// [SearchControllerMixin.matchesForSearch] is overridden in such a way that
+  /// [matchesSearchToken] is not used, then this method does not need to be
+  /// implemented.
+  bool matchesSearchToken(RegExp regExpSearch) => throw UnimplementedError(
+        'Implement this method in order to use the default'
+        ' [SearchControllerMixin.matchesForSearch] behavior.',
+      );
 }
 
 // This mixin is used to get around the type system where a type `T` needs to
 // both extend `TreeNode<T>` and mixin `DataSearchStateMixin`.
 mixin TreeDataSearchStateMixin<T extends TreeNode<T>>
-    on TreeNode<T>, DataSearchStateMixin {}
+    on TreeNode<T>, SearchableData {}
 
 class AutoCompleteController extends DisposableController
     with SearchControllerMixin, AutoCompleteSearchControllerMixin {
@@ -1352,7 +1398,7 @@ class AutoCompleteController extends DisposableController
   // matches for the search is the intended behavior for the auto-complete
   // controller.
   @override
-  List<DataSearchStateMixin> matchesForSearch(
+  List<SearchableData> matchesForSearch(
     String search, {
     bool searchPreviousMatches = false,
   }) =>

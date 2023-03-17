@@ -9,6 +9,7 @@ import '../../../../shared/primitives/trees.dart';
 import '../../../../shared/primitives/utils.dart';
 import '../../../../shared/ui/search.dart';
 import '../../cpu_profile_model.dart';
+import '../../cpu_profiler_controller.dart';
 import 'method_table_model.dart';
 
 /// Controller for the CPU profile method table.
@@ -117,30 +118,6 @@ class MethodTableController extends DisposableController
   }
 
   @override
-  List<MethodTableGraphNode> matchesForSearch(
-    String search, {
-    bool searchPreviousMatches = false,
-  }) {
-    if (search.isEmpty) return <MethodTableGraphNode>[];
-    final regexSearch = RegExp(search, caseSensitive: false);
-    final matches = <MethodTableGraphNode>[];
-    if (searchPreviousMatches) {
-      final previousMatches = searchMatches.value;
-      for (final previousMatch in previousMatches) {
-        if (previousMatch.name.caseInsensitiveContains(regexSearch) ||
-            previousMatch.packageUri.caseInsensitiveContains(regexSearch)) {
-          matches.add(previousMatch);
-        }
-      }
-    } else {
-      final currentMethods = methods.value;
-      for (final method in currentMethods) {
-        if (method.name.caseInsensitiveContains(regexSearch) ||
-            method.packageUri.caseInsensitiveContains(regexSearch)) {
-          matches.add(method);
-        }
-      }
-    }
-    return matches;
-  }
+  Iterable<MethodTableGraphNode> get currentDataToSearchThrough =>
+      methods.value;
 }

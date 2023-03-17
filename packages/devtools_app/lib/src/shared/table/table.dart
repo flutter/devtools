@@ -53,7 +53,7 @@ enum ScrollKind {
   parent,
 }
 
-class SearchableFlatTable<T extends DataSearchStateMixin> extends FlatTable {
+class SearchableFlatTable<T extends SearchableData> extends FlatTable {
   SearchableFlatTable({
     Key? key,
     required SearchControllerMixin<T> searchController,

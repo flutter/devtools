@@ -48,7 +48,7 @@ class ScriptLocation {
   String toString() => '${scriptRef.uri} $location';
 }
 
-class SourceToken with DataSearchStateMixin {
+class SourceToken with SearchableData {
   SourceToken({required this.position, required this.length});
 
   final SourcePosition position;

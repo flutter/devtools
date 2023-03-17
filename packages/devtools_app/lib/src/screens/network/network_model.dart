@@ -8,7 +8,7 @@ import '../../shared/http/http_request_data.dart';
 import '../../shared/primitives/utils.dart';
 import '../../shared/ui/search.dart';
 
-abstract class NetworkRequest with DataSearchStateMixin {
+abstract class NetworkRequest with SearchableData {
   NetworkRequest(this._timelineMicrosBase);
 
   final int _timelineMicrosBase;

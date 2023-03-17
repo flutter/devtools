@@ -16,6 +16,7 @@ import '../../shared/primitives/auto_dispose.dart';
 import '../../shared/primitives/utils.dart';
 import '../../shared/ui/filter.dart';
 import '../../shared/ui/search.dart';
+import 'common.dart';
 import 'cpu_profile_model.dart';
 import 'cpu_profile_service.dart';
 import 'cpu_profile_transformer.dart';
@@ -151,8 +152,29 @@ class CpuProfilerController extends DisposableController
 
   int selectedProfilerTabIndex = 0;
 
-  void changeSelectedProfilerTab(int index) {
+  ProfilerTab selectedProfilerTab = ProfilerTab.bottomUp;
+
+  void changeSelectedProfilerTab(int index, ProfilerTab tab) {
     selectedProfilerTabIndex = index;
+
+    // The method table has a different search field than the rest of the 
+    // profiler tabs. This is because the method table shows data of type
+    // [MethodTableGraphNode] and the other profiler tabs show data of type
+    // [CpuStackFrame].
+    //
+    // In order to ensure a consistent search experience across profiler tabs
+    // update the appropriate controller's search value to be consistent when
+    // switching to or from the method table table.
+    final oldTabWasMethodTable = selectedProfilerTab == ProfilerTab.methodTable;
+    final newTabIsMethodTable = tab == ProfilerTab.methodTable;
+    selectedProfilerTab = tab;
+    if (oldTabWasMethodTable != newTabIsMethodTable) {
+      if (newTabIsMethodTable) {
+        methodTableController.search = search;
+      } else {
+        search = methodTableController.search;
+      }
+    }
   }
 
   final transformer = CpuProfileTransformer();
@@ -312,32 +334,8 @@ class CpuProfilerController extends DisposableController
   }
 
   @override
-  List<CpuStackFrame> matchesForSearch(
-    String search, {
-    bool searchPreviousMatches = false,
-  }) {
-    if (search.isEmpty) return <CpuStackFrame>[];
-    final regexSearch = RegExp(search, caseSensitive: false);
-    final matches = <CpuStackFrame>[];
-    if (searchPreviousMatches) {
-      final previousMatches = searchMatches.value;
-      for (final previousMatch in previousMatches) {
-        if (previousMatch.name.caseInsensitiveContains(regexSearch) ||
-            previousMatch.packageUri.caseInsensitiveContains(regexSearch)) {
-          matches.add(previousMatch);
-        }
-      }
-    } else {
-      final currentStackFrames = _dataNotifier.value!.stackFrames.values;
-      for (final frame in currentStackFrames) {
-        if (frame.name.caseInsensitiveContains(regexSearch) ||
-            frame.packageUri.caseInsensitiveContains(regexSearch)) {
-          matches.add(frame);
-        }
-      }
-    }
-    return matches;
-  }
+  Iterable<CpuStackFrame> get currentDataToSearchThrough =>
+      _dataNotifier.value!.stackFrames.values;
 
   Future<void> loadAllSamples() async {
     reset();
