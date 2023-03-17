@@ -16,7 +16,7 @@ void main() {
   late MockDebuggerController debuggerController;
   late MockScriptManager scriptManager;
 
-  const windowSize = Size(3000, 4000);
+  const windowSize = Size(4000, 4000);
 
   setUp(() {
     fakeServiceManager = FakeServiceManager();
