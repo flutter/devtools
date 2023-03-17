@@ -105,10 +105,12 @@ class ProviderScreenBody extends ConsumerWidget {
       axis: splitAxis,
       initialFractions: const [0.33, 0.67],
       children: [
-        const OutlineDecoration(
+        const RoundedOutlinedBorder(
+          clip: true,
           child: Column(
             children: [
               AreaPaneHeader(
+                roundedTopBorder: false,
                 includeTopBorder: false,
                 title: Text('Providers'),
               ),
@@ -118,10 +120,12 @@ class ProviderScreenBody extends ConsumerWidget {
             ],
           ),
         ),
-        OutlineDecoration(
+        RoundedOutlinedBorder(
+          clip: true,
           child: Column(
             children: [
               AreaPaneHeader(
+                roundedTopBorder: false,
                 includeTopBorder: false,
                 title: Text(detailsTitleText),
                 actions: [
