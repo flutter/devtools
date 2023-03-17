@@ -15,6 +15,7 @@ import 'package:devtools_app/src/shared/primitives/simple_items.dart';
 import 'package:devtools_app/src/shared/ui/search.dart';
 import 'package:devtools_test/devtools_integration_test.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 
@@ -51,35 +52,36 @@ void main() {
 }
 
 Future<void> _testBasicEval(_EvalTester tester) async {
-  await tester.testEval('21 + 34', '55');
+  await tester.testEval('21 + 34', find.text('55'));
 }
 
 Future<void> _testAssignment(_EvalTester tester) async {
-  await tester.testEval('DateTime(2023)', 'DateTime');
+  await tester.testEval('DateTime(2023)', find.text('DateTime'));
   await tester.testEval(
     r'var x = $0',
-    'Variable x is created ',
-    exact: false,
+    find.textContaining('Variable x is created '),
   );
-  await tester.testEval('x.toString()', "'${DateTime(2023).toString()}'");
+  await tester.testEval(
+      'x.toString()', find.text("'${DateTime(2023).toString()}'"));
 }
 
 Future<void> _testRootIsAccessible(_EvalTester tester) async {
-  final widgetTester = tester.tester;
-  await widgetTester.tap(find.text('MyApp'));
-  await widgetTester.pumpAndSettle();
+  await tester.tapAndSettle(find.text('MyApp'));
+  await tester.tapAndSettle(find.text(ContextMenuButton.text));
+  await tester.tapAndSettle(find.textContaining('one instance'));
+  await tester.tapAndSettle(find.text('Any'), duration: longPumpDuration);
+  await tester.tapAndSettle(find.textContaining('MyApp, retained size '));
+  await tester.tester.pump(longPumpDuration);
 
-  await widgetTester.tap(find.text(ContextMenuButton.text));
-  await widgetTester.pumpAndSettle();
+  await tester.tapAndSettle(find.text('references'));
 
-  await widgetTester.tap(find.textContaining('one instance'));
-  await widgetTester.pumpAndSettle();
-
-  await widgetTester.tap(find.text('Any'));
-  await widgetTester.pump(longPumpDuration);
-
-  await widgetTester.tap(find.textContaining('MyApp, retained size '));
-  await widgetTester.pumpAndSettle();
+  await tester.tapAndSettle(find.textContaining('static ('));
+  await tester.tapAndSettle(find.text('_List').at(1));
+  await tester.tapAndSettle(find.text('Class'));
+  expect(
+    find.widgetWithText(ConsolePane, 'Root'),
+    findsOneWidget,
+  );
 }
 
 class _EvalTester {
@@ -88,14 +90,7 @@ class _EvalTester {
   final WidgetTester tester;
 
   /// Tests if eval returns expected response by searching for response text.
-  ///
-  /// If [exact] is true, searches for exact match,
-  /// otherwise for just containment.
-  Future<void> testEval(
-    String expression,
-    String expectedResponse, {
-    bool exact = true,
-  }) async {
+  Future<void> testEval(String expression, Finder expectedResponse) async {
     await tester.tap(find.byType(AutoCompleteSearchField));
     await tester.pump(safePumpDuration);
     await tester.enterText(find.byType(AutoCompleteSearchField), expression);
@@ -104,17 +99,7 @@ class _EvalTester {
     await tester.pump(longPumpDuration);
 
     try {
-      if (exact) {
-        expect(
-          find.widgetWithText(ConsolePane, expectedResponse),
-          findsOneWidget,
-        );
-      } else {
-        expect(
-          find.textContaining(expectedResponse),
-          findsOneWidget,
-        );
-      }
+      expect(expectedResponse, findsOneWidget);
     } catch (e) {
       // In case of unexpected response take golden for troubleshooting.
       print(e.toString());
@@ -149,5 +134,13 @@ class _EvalTester {
     // Select class
     await tester.tap(find.text('MyApp'));
     await tester.pumpAndSettle();
+  }
+
+  Future<void> tapAndSettle(
+    Finder finder, {
+    Duration duration = const Duration(milliseconds: 100),
+  }) async {
+    await tester.tap(finder);
+    await tester.pumpAndSettle(duration);
   }
 }
