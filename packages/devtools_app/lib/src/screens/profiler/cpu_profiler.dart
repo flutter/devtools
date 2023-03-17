@@ -83,8 +83,7 @@ class CpuProfiler extends StatefulWidget {
 // TODO(kenz): preserve tab controller index when updating CpuProfiler with new
 // data. The state is being destroyed with every new cpu profile - investigate.
 class _CpuProfilerState extends State<CpuProfiler>
-    with TickerProviderStateMixin, AutoDisposeMixin
-{
+    with TickerProviderStateMixin, AutoDisposeMixin {
   bool _tabControllerInitialized = false;
 
   late TabController _tabController;

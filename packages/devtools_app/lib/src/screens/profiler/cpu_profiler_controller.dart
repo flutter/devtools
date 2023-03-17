@@ -157,14 +157,14 @@ class CpuProfilerController extends DisposableController
   void changeSelectedProfilerTab(int index, ProfilerTab tab) {
     selectedProfilerTabIndex = index;
 
-    // The method table has a different search field than the rest of the 
+    // The method table has a different search field than the rest of the
     // profiler tabs. This is because the method table shows data of type
     // [MethodTableGraphNode] and the other profiler tabs show data of type
     // [CpuStackFrame].
     //
-    // In order to ensure a consistent search experience across profiler tabs
+    // In order to ensure a consistent search experience across profiler tabs,
     // update the appropriate controller's search value to be consistent when
-    // switching to or from the method table table.
+    // switching to or from the method table tab.
     final oldTabWasMethodTable = selectedProfilerTab == ProfilerTab.methodTable;
     final newTabIsMethodTable = tab == ProfilerTab.methodTable;
     selectedProfilerTab = tab;
