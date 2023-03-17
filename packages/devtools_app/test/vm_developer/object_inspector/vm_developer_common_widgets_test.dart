@@ -101,6 +101,7 @@ void main() {
   );
 
   testWidgets('test RequestableSizeWidget', (WidgetTester tester) async {
+    when(mockClassObject.reachableSize).thenReturn(requestedSize);
     await tester.pumpWidget(
       wrap(
         RequestableSizeWidget(
@@ -112,9 +113,6 @@ void main() {
     );
 
     expect(find.byIcon(Icons.refresh), findsOneWidget);
-
-    when(mockClassObject.reachableSize).thenReturn(requestedSize);
-
     await tester.tap(find.byIcon(Icons.refresh));
 
     await tester.pumpAndSettle();
