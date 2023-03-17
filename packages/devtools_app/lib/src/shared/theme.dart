@@ -44,7 +44,7 @@ ThemeData _darkTheme({
 }) {
   final background = isValidDarkColor(ideTheme.backgroundColor)
       ? ideTheme.backgroundColor!
-      : theme.canvasColor;
+      : theme.colorScheme.surface;
   return _baseTheme(
     theme: theme,
     backgroundColor: background,
@@ -57,7 +57,7 @@ ThemeData _lightTheme({
 }) {
   final background = isValidLightColor(ideTheme.backgroundColor)
       ? ideTheme.backgroundColor!
-      : theme.canvasColor;
+      : theme.colorScheme.surface;
   return _baseTheme(
     theme: theme,
     backgroundColor: background,
@@ -68,6 +68,8 @@ ThemeData _baseTheme({
   required ThemeData theme,
   required Color backgroundColor,
 }) {
+  // TODO(kenz): do we need to pass in the foreground color from the [IdeTheme]
+  // as well as the background color?
   return theme.copyWith(
     tabBarTheme: theme.tabBarTheme.copyWith(
       dividerColor: Colors.transparent,
