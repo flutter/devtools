@@ -539,6 +539,8 @@ class _VerboseLoggingSetting extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     return Column(
       children: [
         Row(
@@ -550,9 +552,11 @@ class _VerboseLoggingSetting extends StatelessWidget {
               gaItem: gac.verboseLogging,
             ),
             const SizedBox(width: defaultSpacing),
-            IconLabelButton(
+            DevToolsButton(
               label: 'Copy logs',
               icon: Icons.copy,
+              gaScreen: gac.settingsDialog,
+              gaSelection: gac.copyLogs,
               onPressed: () async => await copyToClipboard(
                 LogStorage.root.toString(),
                 'Successfully copied logs',
@@ -561,20 +565,28 @@ class _VerboseLoggingSetting extends StatelessWidget {
             const SizedBox(width: denseSpacing),
             ClearButton(
               label: 'Clear logs',
+              gaScreen: gac.settingsDialog,
+              gaSelection: gac.clearLogs,
               onPressed: LogStorage.root.clear,
             ),
           ],
         ),
-        const Row(
+        Row(
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             // TODO(kenz): style this with warning color once material 3 changes land
-            Icon(Icons.warning),
-            SizedBox(width: defaultSpacing),
+            Icon(
+              Icons.warning,
+              color: colorScheme.warningContainer,
+            ),
+            const SizedBox(width: defaultSpacing),
             Text(
               'Logs may contain sensitive information.\n'
               'Always check their contents before sharing.',
+              style: theme.regularTextStyle.copyWith(
+                color: colorScheme.warningContainer,
+              ),
             )
           ],
         ),

@@ -139,6 +139,8 @@ const analytics = 'analytics';
 const vmDeveloperMode = 'vmDeveloperMode';
 const verboseLogging = 'verboseLogging';
 const inspectorHoverEvalMode = 'inspectorHoverEvalMode';
+const clearLogs = 'clearLogs';
+const copyLogs = 'copyLogs';
 
 // Object explorer:
 const objectInspectorScreen = 'objectInspector';
