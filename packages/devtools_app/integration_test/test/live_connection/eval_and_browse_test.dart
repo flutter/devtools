@@ -8,7 +8,9 @@
 
 import 'dart:ui' as ui;
 
+import 'package:devtools_app/src/screens/memory/panes/control/primary_controls.dart';
 import 'package:devtools_app/src/screens/memory/panes/diff/widgets/snapshot_list.dart';
+import 'package:devtools_app/src/shared/banner_messages.dart';
 import 'package:devtools_app/src/shared/common_widgets.dart';
 import 'package:devtools_app/src/shared/console/widgets/console_pane.dart';
 import 'package:devtools_app/src/shared/primitives/simple_items.dart';
@@ -51,37 +53,20 @@ void main() {
   });
 }
 
-Future<void> _testBasicEval(_EvalTester tester) async {
-  await tester.testEval('21 + 34', find.text('55'));
-}
-
-Future<void> _testAssignment(_EvalTester tester) async {
-  await tester.testEval('DateTime(2023)', find.text('DateTime'));
-  await tester.testEval(
-    r'var x = $0',
-    find.textContaining('Variable x is created '),
-  );
-  await tester.testEval(
-      'x.toString()', find.text("'${DateTime(2023).toString()}'"));
-}
-
 Future<void> _testRootIsAccessible(_EvalTester tester) async {
-  await tester.tapAndSettle(find.text('MyApp'));
-  await tester.tapAndSettle(find.text(ContextMenuButton.text));
-  await tester.tapAndSettle(find.textContaining('one instance'));
-  await tester.tapAndSettle(find.text('Any'), duration: longPumpDuration);
-  await tester.tapAndSettle(find.textContaining('MyApp, retained size '));
-  await tester.tester.pump(longPumpDuration);
+  await tester.tapAndPump(find.text('MyApp'));
+  await tester.tapAndPump(find.text(ContextMenuButton.text));
+  await tester.tapAndPump(find.textContaining('one instance'));
+  await tester.tapAndPump(find.text('Any'), duration: longPumpDuration);
 
-  await tester.tapAndSettle(find.text('references'));
+  Finder next = find.textContaining('MyApp, retained size ');
+  next = await tester.tapAndPump(next, next: find.text('references'));
+  next = await tester.tapAndPump(next, next: find.textContaining('static ('));
+  next = await tester.tapAndPump(next, next: find.text('inbound'));
+  next = await tester.tapAndPump(next, next: find.text('_List').at(1));
+  next = await tester.tapAndPump(next, next: find.text('Class'));
 
-  await tester.tapAndSettle(find.textContaining('static ('));
-  await tester.tapAndSettle(find.text('_List').at(1));
-  await tester.tapAndSettle(find.text('Class'));
-  expect(
-    find.widgetWithText(ConsolePane, 'Root'),
-    findsOneWidget,
-  );
+  await tester.tapAndPump(next, next: find.text('Root'));
 }
 
 class _EvalTester {
@@ -91,12 +76,13 @@ class _EvalTester {
 
   /// Tests if eval returns expected response by searching for response text.
   Future<void> testEval(String expression, Finder expectedResponse) async {
-    await tester.tap(find.byType(AutoCompleteSearchField));
-    await tester.pump(safePumpDuration);
+    await tapAndPump(
+      find.byType(AutoCompleteSearchField),
+      duration: safePumpDuration,
+    );
     await tester.enterText(find.byType(AutoCompleteSearchField), expression);
     await tester.pump(safePumpDuration);
     await _pressEnter();
-    await tester.pump(longPumpDuration);
 
     try {
       expect(expectedResponse, findsOneWidget);
@@ -118,29 +104,68 @@ class _EvalTester {
     await tester.pumpAndSettle();
     await simulateKeyDownEvent(LogicalKeyboardKey.enter);
     await simulateKeyUpEvent(LogicalKeyboardKey.enter);
+    await tester.pump(longPumpDuration);
   }
 
   Future<void> switchToSnapshotsAndTakeOne() async {
+    // Open memory screen.
     await switchToScreen(tester, ScreenMetaData.memory);
-    await tester.tap(find.text('Diff Snapshots'));
-    await tester.pumpAndSettle();
-    await tester.tap(find.byIcon(iconToTakeSnapshot));
-    await tester.pump(longPumpDuration);
 
-    // Sort by class
-    await tester.tap(find.text('Class'));
-    await tester.pumpAndSettle();
+    // Close warning and chart to get screen.
+    await tapAndPump(find.byKey(DebugModeMemoryMessage.closeKey));
+    await tapAndPump(find.text(PrimaryControls.memoryChartText));
 
-    // Select class
-    await tester.tap(find.text('MyApp'));
-    await tester.pumpAndSettle();
+    // Switch to diff tab.
+    await tapAndPump(find.text('Diff Snapshots'));
+
+    // Take snapshot.
+    await tapAndPump(
+      find.byIcon(iconToTakeSnapshot),
+      duration: longPumpDuration,
+    );
+
+    // Sort by class.
+    await tapAndPump(find.text('Class'));
+
+    // Select class.
+    await tapAndPump(find.text('MyApp'));
   }
 
-  Future<void> tapAndSettle(
+  /// Taps and settles.
+  ///
+  /// If [next] is provided, will repeat and scroll till [next] returns results.
+  /// Returns [next] or [finder].
+  Future<Finder> tapAndPump(
     Finder finder, {
-    Duration duration = const Duration(milliseconds: 100),
+    Duration? duration,
+    Finder? next,
   }) async {
-    await tester.tap(finder);
-    await tester.pumpAndSettle(duration);
+    Future<void> action() async {
+      await tester.tap(finder);
+      if (duration == null) {
+        await tester.pumpAndSettle();
+      } else {
+        await tester.pump(duration);
+      }
+    }
+
+    await action();
+
+    if (next == null) return finder;
+
+    while (true) {
+      try {
+        await tester.scrollUntilVisible(
+          next,
+          20.0,
+          scrollable: find.byType(ConsolePane),
+        );
+        //tester.firstWidget<Widget>(next);
+        return next;
+      } on StateError {
+        print('\nre-tapping $finder\n\n');
+        await action();
+      }
+    }
   }
 }

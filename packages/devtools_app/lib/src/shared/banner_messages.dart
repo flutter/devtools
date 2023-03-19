@@ -126,7 +126,9 @@ class BannerMessage extends StatelessWidget {
     required this.textSpans,
     required this.screenId,
     required this.messageType,
+    this.closeKey,
   });
+  final Key? closeKey;
 
   final List<InlineSpan> textSpans;
   final String screenId;
@@ -176,6 +178,7 @@ class BannerMessage extends StatelessWidget {
                 IconButton(
                   icon: Icon(
                     Icons.close,
+                    key: closeKey,
                     color: messageType == BannerMessageType.error
                         ? colorScheme.onErrorContainer
                         : colorScheme.onWarningContainer,
@@ -215,6 +218,7 @@ class _BannerWarning extends BannerMessage {
     required super.key,
     required super.textSpans,
     required super.screenId,
+    super.closeKey,
   }) : super(messageType: BannerMessageType.warning);
 
   static const linkColor = Color(0xFF54C1EF);
@@ -358,12 +362,14 @@ You are opting in to a high CPU sampling rate. This may affect the performance o
 
 class DebugModeMemoryMessage {
   const DebugModeMemoryMessage(this.screenId);
+  static const closeKey = Key('DebugModeMemoryMessage - close');
 
   final String screenId;
 
   BannerMessage build(BuildContext context) {
     return _BannerWarning(
       key: Key('DebugModeMemoryMessage - $screenId'),
+      closeKey: closeKey,
       textSpans: [
         const TextSpan(
           text: '''
