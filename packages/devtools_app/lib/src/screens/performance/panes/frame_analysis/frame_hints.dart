@@ -8,6 +8,8 @@ import 'package:provider/provider.dart';
 import '../../../../service/service_extensions.dart' as extensions;
 import '../../../../shared/analytics/constants.dart' as gac;
 import '../../../../shared/common_widgets.dart';
+import '../../../../shared/connected_app.dart';
+import '../../../../shared/globals.dart';
 import '../../../../shared/primitives/utils.dart';
 import '../../../../shared/theme.dart';
 import '../../performance_controller.dart';
