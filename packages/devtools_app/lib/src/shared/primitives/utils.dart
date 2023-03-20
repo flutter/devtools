@@ -138,7 +138,8 @@ enum DurationDisplayUnit {
   final String display;
 
   static DurationDisplayUnit unitFor(int micros) {
-    if (micros < 1000) {
+    if (micros < 100) {
+    // Display values less than 0.1 millisecond as microseconds.
       return DurationDisplayUnit.micros;
     } else if (micros < 1000000) {
       return DurationDisplayUnit.milliseconds;
@@ -151,7 +152,10 @@ enum DurationDisplayUnit {
 /// [unit].
 ///
 /// [includeUnit] - whether to include the unit at the end of the returned value
-/// [fractionDigits] - how many fraction digits should appear after the decimal
+/// [fractionDigits] - how many fraction digits should appear after the decimal.
+/// This parameter value will be ignored when the unit is specified or inferred
+/// as [DurationDisplayUnit.micros], since there cannot be a fractional value of
+/// microseconds from the [Duration] class.
 /// [allowRoundingToZero] - when true, this method may return zero for a very
 /// small number (e.g. '0.0 ms'). When false, this method will return a minimum
 /// value with the less than operator for very small values (e.g. '< 0.1 ms').

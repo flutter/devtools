@@ -80,8 +80,12 @@ void main() {
           equals('0 μs'),
         );
         expect(
-          durationText(const Duration(microseconds: 999)),
-          equals('999 μs'),
+          durationText(const Duration(microseconds: 100)),
+          equals('0.1 ms'),
+        );
+        expect(
+          durationText(const Duration(microseconds: 99)),
+          equals('99 μs'),
         );
         expect(
           durationText(const Duration(microseconds: 1000)),
@@ -103,16 +107,16 @@ void main() {
 
       test('displays proper number of fraction digits', () {
         expect(
-          durationText(const Duration(microseconds: 999)),
-          equals('999 μs'),
+          durationText(const Duration(microseconds: 99)),
+          equals('99 μs'),
         );
         expect(
           durationText(
-            const Duration(microseconds: 999),
+            const Duration(microseconds: 99),
             // Should ignore this since this will be displayed in microseconds.
             fractionDigits: 3,
           ),
-          equals('999 μs'),
+          equals('99 μs'),
         );
         expect(
           durationText(const Duration(microseconds: 3111)),
