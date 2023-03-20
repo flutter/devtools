@@ -48,6 +48,11 @@ abstract class NetworkRequest with SearchableDataMixin {
   }
 
   @override
+  bool matchesSearchToken(RegExp regExpSearch) {
+    return uri.caseInsensitiveContains(regExpSearch);
+  }
+
+  @override
   String toString() => '$method $uri';
 
   @override

@@ -79,12 +79,8 @@ Example queries:
 class _LoggingScreenState extends State<LoggingScreenBody>
     with
         AutoDisposeMixin,
-        ProvidedControllerMixin<LoggingController, LoggingScreenBody>,
-        SearchFieldMixin<LoggingScreenBody> {
+        ProvidedControllerMixin<LoggingController, LoggingScreenBody> {
   late List<LogData> filteredLogs;
-
-  @override
-  SearchControllerMixin get searchController => controller;
 
   @override
   void initState() {
@@ -134,15 +130,10 @@ class _LoggingScreenState extends State<LoggingScreenBody>
         StructuredErrorsToggle(),
         const SizedBox(width: denseSpacing),
         // TODO(kenz): fix focus issue when state is refreshed
-        Container(
-          width: wideSearchTextWidth,
-          height: defaultTextFieldHeight,
-          child: SearchField<LogData>(
-            controller: controller,
-            searchFieldEnabled: hasData,
-            shouldRequestFocus: false,
-            supportsNavigation: true,
-          ),
+        SearchField<LoggingController>(
+          searchFieldWidth: wideSearchFieldWidth,
+          searchController: controller,
+          searchFieldEnabled: hasData,
         ),
         const SizedBox(width: denseSpacing),
         FilterButton(

@@ -757,6 +757,11 @@ abstract class TimelineEvent extends TreeNode<TimelineEvent>
     return copy;
   }
 
+  @override
+  bool matchesSearchToken(RegExp regExpSearch) {
+    return name!.caseInsensitiveContains(regExpSearch);
+  }
+
   // TODO(kenz): use DiagnosticableTreeMixin instead.
   @override
   String toString() {

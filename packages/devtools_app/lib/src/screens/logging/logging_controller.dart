@@ -625,32 +625,7 @@ class LoggingController extends DisposableController
   }
 
   @override
-  List<LogData> matchesForSearch(
-    String search, {
-    bool searchPreviousMatches = false,
-  }) {
-    if (search.isEmpty) return [];
-    final matches = <LogData>[];
-    if (searchPreviousMatches) {
-      final previousMatches = searchMatches.value;
-      for (final previousMatch in previousMatches) {
-        if (previousMatch.summary!.caseInsensitiveContains(search)) {
-          matches.add(previousMatch);
-        }
-      }
-    } else {
-      final List<LogData> currentLogs = filteredData.value;
-      for (final log in currentLogs) {
-        if ((log.summary != null &&
-                log.summary!.caseInsensitiveContains(search)) ||
-            (log.details != null &&
-                log.details!.caseInsensitiveContains(search))) {
-          matches.add(log);
-        }
-      }
-    }
-    return matches;
-  }
+  Iterable<LogData> get currentDataToSearchThrough => filteredData.value;
 
   @override
   void filterData(Filter<LogData> filter) {
@@ -849,6 +824,12 @@ class LogData with SearchableDataMixin {
     }
 
     return false;
+  }
+
+  @override
+  bool matchesSearchToken(RegExp regExpSearch) {
+    return (summary?.caseInsensitiveContains(regExpSearch) == true) ||
+        (details?.caseInsensitiveContains(regExpSearch) == true);
   }
 
   @override

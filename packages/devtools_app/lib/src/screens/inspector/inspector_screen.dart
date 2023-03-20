@@ -219,7 +219,8 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
                 constraints: constraints,
                 onRefreshInspectorPressed: _refreshInspector,
                 onSearchVisibleToggle: _onSearchVisibleToggle,
-                searchFieldBuilder: () => SearchField<InspectorTreeRow>(
+                searchFieldBuilder: () =>
+                    StatelessSearchField<InspectorTreeRow>(
                   controller: _summaryTreeController,
                   searchFieldEnabled: true,
                   shouldRequestFocus: searchVisible,
