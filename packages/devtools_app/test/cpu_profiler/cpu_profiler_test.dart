@@ -12,6 +12,7 @@ import 'package:devtools_app/src/screens/profiler/panes/call_tree.dart';
 import 'package:devtools_app/src/screens/profiler/panes/controls/profiler_controls.dart';
 import 'package:devtools_app/src/screens/profiler/panes/cpu_flame_chart.dart';
 import 'package:devtools_app/src/screens/profiler/panes/method_table/method_table.dart';
+import 'package:devtools_app/src/screens/profiler/panes/method_table/method_table_controller.dart';
 import 'package:devtools_app/src/shared/charts/flame_chart.dart';
 import 'package:devtools_app/src/shared/config_specific/import_export/import_export.dart';
 import 'package:devtools_test/devtools_test.dart';
@@ -90,7 +91,14 @@ void main() {
         expect(find.byType(ExpandAllButton), findsOneWidget);
         expect(find.byType(CollapseAllButton), findsOneWidget);
         expect(find.byType(FlameChartHelpButton), findsNothing);
-        expect(find.byType(SearchField<CpuStackFrame>), findsNothing);
+        expect(
+          find.byType(CpuProfilerSearchField<MethodTableController>),
+          findsNothing,
+        );
+        expect(
+          find.byType(CpuProfilerSearchField<CpuProfilerController>),
+          findsNothing,
+        );
         expect(find.byKey(ProfilerTab.bottomUp.key), findsOneWidget);
         expect(find.byKey(ProfilerTab.callTree.key), findsOneWidget);
         expect(find.byKey(ProfilerTab.methodTable.key), findsOneWidget);
@@ -123,7 +131,14 @@ void main() {
         expect(find.byType(ExpandAllButton), findsNothing);
         expect(find.byType(CollapseAllButton), findsNothing);
         expect(find.byType(FlameChartHelpButton), findsNothing);
-        expect(find.byType(SearchField<CpuStackFrame>), findsNothing);
+        expect(
+          find.byType(CpuProfilerSearchField<MethodTableController>),
+          findsNothing,
+        );
+        expect(
+          find.byType(CpuProfilerSearchField<CpuProfilerController>),
+          findsNothing,
+        );
         expect(find.byKey(ProfilerTab.bottomUp.key), findsOneWidget);
         expect(find.byKey(ProfilerTab.callTree.key), findsOneWidget);
         expect(find.byKey(ProfilerTab.methodTable.key), findsOneWidget);
@@ -151,7 +166,14 @@ void main() {
         expect(find.byType(ExpandAllButton), findsOneWidget);
         expect(find.byType(CollapseAllButton), findsOneWidget);
         expect(find.byType(FlameChartHelpButton), findsNothing);
-        expect(find.byType(SearchField<CpuStackFrame>), findsNothing);
+        expect(
+          find.byType(CpuProfilerSearchField<MethodTableController>),
+          findsNothing,
+        );
+        expect(
+          find.byType(CpuProfilerSearchField<CpuProfilerController>),
+          findsNothing,
+        );
         expect(find.byKey(ProfilerTab.bottomUp.key), findsOneWidget);
         expect(find.byKey(ProfilerTab.callTree.key), findsOneWidget);
         expect(find.byKey(ProfilerTab.methodTable.key), findsOneWidget);
@@ -180,7 +202,14 @@ void main() {
         expect(find.byType(ExpandAllButton), findsNothing);
         expect(find.byType(CollapseAllButton), findsNothing);
         expect(find.byType(FlameChartHelpButton), findsNothing);
-        expect(find.byType(SearchField<CpuStackFrame>), findsNothing);
+        expect(
+          find.byType(CpuProfilerSearchField<MethodTableController>),
+          findsNothing,
+        );
+        expect(
+          find.byType(CpuProfilerSearchField<CpuProfilerController>),
+          findsNothing,
+        );
         expect(find.byKey(ProfilerTab.bottomUp.key), findsOneWidget);
         expect(find.byKey(ProfilerTab.callTree.key), findsOneWidget);
         expect(find.byKey(ProfilerTab.methodTable.key), findsOneWidget);
@@ -343,7 +372,14 @@ void main() {
         expect(find.byType(CollapseAllButton), findsOneWidget);
         expect(find.byType(FlameChartHelpButton), findsNothing);
         expect(find.byType(ModeDropdown), findsNothing);
-        expect(find.byType(SearchField<CpuStackFrame>), findsNothing);
+        expect(
+          find.byType(CpuProfilerSearchField<MethodTableController>),
+          findsNothing,
+        );
+        expect(
+          find.byType(CpuProfilerSearchField<CpuProfilerController>),
+          findsNothing,
+        );
 
         await tester.tap(find.text('Call Tree'));
         await tester.pumpAndSettle();
@@ -358,7 +394,14 @@ void main() {
         expect(find.byType(CollapseAllButton), findsOneWidget);
         expect(find.byType(FlameChartHelpButton), findsNothing);
         expect(find.byType(ModeDropdown), findsNothing);
-        expect(find.byType(SearchField<CpuStackFrame>), findsNothing);
+        expect(
+          find.byType(CpuProfilerSearchField<MethodTableController>),
+          findsNothing,
+        );
+        expect(
+          find.byType(CpuProfilerSearchField<CpuProfilerController>),
+          findsNothing,
+        );
 
         await tester.tap(find.text('Method Table'));
         await tester.pumpAndSettle();
@@ -373,7 +416,14 @@ void main() {
         expect(find.byType(CollapseAllButton), findsNothing);
         expect(find.byType(FlameChartHelpButton), findsNothing);
         expect(find.byType(ModeDropdown), findsNothing);
-        expect(find.byType(SearchField<CpuStackFrame>), findsNothing);
+        expect(
+          find.byType(CpuProfilerSearchField<MethodTableController>),
+          findsOneWidget,
+        );
+        expect(
+          find.byType(CpuProfilerSearchField<CpuProfilerController>),
+          findsNothing,
+        );
 
         await tester.tap(find.text('CPU Flame Chart'));
         await tester.pumpAndSettle();
@@ -388,7 +438,14 @@ void main() {
         expect(find.byType(CollapseAllButton), findsNothing);
         expect(find.byType(FlameChartHelpButton), findsOneWidget);
         expect(find.byType(ModeDropdown), findsNothing);
-        expect(find.byType(SearchField<CpuStackFrame>), findsOneWidget);
+        expect(
+          find.byType(CpuProfilerSearchField<MethodTableController>),
+          findsNothing,
+        );
+        expect(
+          find.byType(CpuProfilerSearchField<CpuProfilerController>),
+          findsOneWidget,
+        );
       },
     );
 
