@@ -8,7 +8,6 @@ import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../service/service_registrations.dart' as registrations;
-import 'config_specific/import_export/import_export.dart';
 import 'config_specific/logger/logger.dart' as logger;
 import 'console/primitives/eval_history.dart';
 import 'diagnostics/dart_object_node.dart';
@@ -22,7 +21,12 @@ const flutterLibraryUri = 'package:flutter/src/widgets/binding.dart';
 const dartHtmlLibraryUri = 'dart:html';
 
 class ConnectedApp {
-  ConnectedApp();
+  static const isFlutterAppKey = 'isFlutterApp';
+  static const isProfileBuildKey = 'isProfileBuild';
+  static const isDartWebAppKey = 'isDartWebApp';
+  static const isRunningOnDartVMKey = 'isRunningOnDartVM';
+  static const operatingSystemKey = 'operatingSystem';
+  static const flutterVersionKey = 'flutterVersion';
 
   Completer<bool> initialized = Completer();
 
@@ -32,7 +36,13 @@ class ConnectedApp {
           _isDartWebApp == true ||
           _flutterVersion != null) &&
       _isProfileBuild != null &&
-      _isDartWebApp != null;
+      _isDartWebApp != null &&
+      _operatingSystem != null;
+
+  static const _unknownOS = 'unknown_OS';
+
+  String get operatingSystem => _operatingSystem!;
+  String? _operatingSystem;
 
   // TODO(kenz): investigate if we can use `libraryUriAvailableNow` instead.
   Future<bool> get isFlutterApp async => _isFlutterApp ??=
@@ -130,6 +140,8 @@ class ConnectedApp {
   Future<void> initializeValues() async {
     await Future.wait([isFlutterApp, isProfileBuild, isDartWebApp]);
 
+    _operatingSystem = serviceManager.vm!.operatingSystem ?? _unknownOS;
+
     if (isFlutterAppNow!) {
       final flutterVersionServiceListenable = serviceManager
           .registeredServiceListenable(registrations.flutterVersion.service);
@@ -162,6 +174,16 @@ class ConnectedApp {
     generateDevToolsTitle();
     initialized.complete(true);
   }
+
+  Map<String, Object?> toJson() => {
+        isFlutterAppKey: isFlutterAppNow,
+        isProfileBuildKey: isProfileBuildNow,
+        isDartWebAppKey: isDartWebAppNow,
+        isRunningOnDartVMKey: isRunningOnDartVM,
+        operatingSystemKey: operatingSystem,
+        if (flutterVersionNow != null)
+          flutterVersionKey: flutterVersionNow!.version,
+      };
 }
 
 /// Extension methods for the [ConnectedApp] class.
@@ -182,6 +204,8 @@ extension ConnectedAppExtension on ConnectedApp {
     }
     return identifiers.join(' ');
   }
+
+  bool get isIosApp => operatingSystem == 'ios';
 }
 
 class OfflineConnectedApp extends ConnectedApp {
@@ -190,15 +214,18 @@ class OfflineConnectedApp extends ConnectedApp {
     this.isProfileBuildNow,
     this.isDartWebAppNow,
     this.isRunningOnDartVM,
+    this.operatingSystem = ConnectedApp._unknownOS,
   });
 
   factory OfflineConnectedApp.parse(Map<String, Object>? json) {
     if (json == null) return OfflineConnectedApp();
     return OfflineConnectedApp(
-      isFlutterAppNow: json[isFlutterAppKey] as bool?,
-      isProfileBuildNow: json[isProfileBuildKey] as bool?,
-      isDartWebAppNow: json[isDartWebAppKey] as bool?,
-      isRunningOnDartVM: json[isRunningOnDartVMKey] as bool?,
+      isFlutterAppNow: json[ConnectedApp.isFlutterAppKey] as bool?,
+      isProfileBuildNow: json[ConnectedApp.isProfileBuildKey] as bool?,
+      isDartWebAppNow: json[ConnectedApp.isDartWebAppKey] as bool?,
+      isRunningOnDartVM: json[ConnectedApp.isRunningOnDartVMKey] as bool?,
+      operatingSystem: (json[ConnectedApp.operatingSystemKey] as String?) ??
+          ConnectedApp._unknownOS,
     );
   }
 
@@ -213,6 +240,9 @@ class OfflineConnectedApp extends ConnectedApp {
 
   @override
   final bool? isRunningOnDartVM;
+
+  @override
+  final String operatingSystem;
 }
 
 class AutocompleteCache {

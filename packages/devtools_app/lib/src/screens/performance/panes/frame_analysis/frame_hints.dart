@@ -8,6 +8,8 @@ import 'package:provider/provider.dart';
 import '../../../../service/service_extensions.dart' as extensions;
 import '../../../../shared/analytics/constants.dart' as gac;
 import '../../../../shared/common_widgets.dart';
+import '../../../../shared/connected_app.dart';
+import '../../../../shared/globals.dart';
 import '../../../../shared/primitives/utils.dart';
 import '../../../../shared/theme.dart';
 import '../../performance_controller.dart';
@@ -351,6 +353,29 @@ class ShaderCompilationHint extends StatelessWidget {
             ),
           ],
         ),
+        childrenSpans: serviceManager.connectedApp!.isIosApp
+            ? [
+                TextSpan(
+                  text:
+                      ' Note: pre-compiling shaders is a legacy solution with many '
+                      'pitfalls. Try ',
+                  style: theme.regularTextStyle,
+                ),
+                LinkTextSpan(
+                  link: Link(
+                    display: 'Impeller',
+                    url: impellerWikiUrl,
+                    gaScreenName: gac.performance,
+                    gaSelectedItemDescription: gac.impellerWiki,
+                  ),
+                  context: context,
+                ),
+                TextSpan(
+                  text: ' instead!',
+                  style: theme.regularTextStyle,
+                ),
+              ]
+            : [],
       ),
     );
   }
@@ -394,12 +419,14 @@ class _ExpensiveOperationHint extends StatelessWidget {
     required this.docsUrl,
     required this.gaScreenName,
     required this.gaSelectedItemDescription,
+    this.childrenSpans = const <TextSpan>[],
   }) : super(key: key);
 
   final TextSpan message;
   final String docsUrl;
   final String gaScreenName;
   final String gaSelectedItemDescription;
+  final List<TextSpan> childrenSpans;
 
   @override
   Widget build(BuildContext context) {
@@ -426,6 +453,7 @@ class _ExpensiveOperationHint extends StatelessWidget {
             text: '.',
             style: theme.regularTextStyle,
           ),
+          ...childrenSpans,
         ],
       ),
     );

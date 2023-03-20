@@ -86,6 +86,7 @@ const canvasSaveLayerDocs = 'canvasSaveLayerDocs';
 const intrinsicOperationsDocs = 'intrinsicOperationsDocs';
 const shaderCompilationDocs = 'shaderCompilationDocs';
 const shaderCompilationDocsTooltipLink = 'shaderCompilationDocsTooltipLink';
+const impellerWiki = 'impellerWikiLink';
 const collectRasterStats = 'collectRasterStats';
 const clearRasterStats = 'clearRasterStats';
 const clearRebuildStats = 'clearRebuildStats';
