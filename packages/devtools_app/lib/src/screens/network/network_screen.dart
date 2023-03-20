@@ -346,6 +346,7 @@ class NetworkRequestsTable extends StatelessWidget {
   Widget build(BuildContext context) {
     return RoundedOutlinedBorder(
       clip: true,
+      // TODO(kenz): use SearchableFlatTable instead.
       child: FlatTable<NetworkRequest?>(
         keyFactory: (NetworkRequest? data) => ValueKey<NetworkRequest?>(data),
         data: requests,

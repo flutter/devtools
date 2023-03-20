@@ -18,8 +18,8 @@ import '../../shared/primitives/utils.dart';
 import '../../shared/profiler_utils.dart';
 import '../../shared/ui/search.dart';
 import '../vm_developer/vm_service_private_extensions.dart';
-import 'cpu_profile_controller.dart';
 import 'cpu_profile_transformer.dart';
+import 'cpu_profiler_controller.dart';
 
 /// A convenience wrapper for managing CPU profiles with both function and code
 /// profile views.
@@ -843,7 +843,7 @@ class CpuSampleEvent extends TraceEvent {
 class CpuStackFrame extends TreeNode<CpuStackFrame>
     with
         ProfilableDataMixin<CpuStackFrame>,
-        DataSearchStateMixin,
+        SearchableDataMixin,
         TreeDataSearchStateMixin<CpuStackFrame>,
         FlameChartDataMixin {
   factory CpuStackFrame({
@@ -1048,6 +1048,12 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
       rawUrl == other.rawUrl &&
       category == other.category &&
       sourceLine == other.sourceLine;
+
+  @override
+  bool matchesSearchToken(RegExp regExpSearch) {
+    return name.caseInsensitiveContains(regExpSearch) ||
+        packageUri.caseInsensitiveContains(regExpSearch);
+  }
 
   Map<String, Object?> get toJson => {
         id: {
