@@ -150,7 +150,7 @@ enum DurationDisplayUnit {
 /// Converts a [Duration] into a readble text representation in the specified
 /// [unit].
 ///
-/// [includeUnit] - whether to include 'ms' at the end of the returned value
+/// [includeUnit] - whether to include the unit at the end of the returned value
 /// [fractionDigits] - how many fraction digits should appear after the decimal
 /// [allowRoundingToZero] - when true, this method may return zero for a very
 /// small number (e.g. '0.0 ms'). When false, this method will return a minimum
