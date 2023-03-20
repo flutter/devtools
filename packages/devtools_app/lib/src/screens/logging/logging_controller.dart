@@ -828,9 +828,8 @@ class LogData with SearchableDataMixin {
 
   @override
   bool matchesSearchToken(RegExp regExpSearch) {
-    return (summary != null &&
-            summary!.caseInsensitiveContains(regExpSearch)) ||
-        (details != null && details!.caseInsensitiveContains(regExpSearch));
+    return (summary?.caseInsensitiveContains(regExpSearch) == true) ||
+        (details?.caseInsensitiveContains(regExpSearch) == true);
   }
 
   @override
