@@ -63,7 +63,9 @@ Future<void> _testAssignment(_EvalTester tester) async {
     find.textContaining('Variable x is created '),
   );
   await tester.testEval(
-      'x.toString()', find.text("'${DateTime(2023).toString()}'"));
+    'x.toString()',
+    find.text("'${DateTime(2023).toString()}'"),
+  );
 }
 
 Future<void> _testRootIsAccessible(_EvalTester tester) async {
