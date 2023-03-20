@@ -7,7 +7,6 @@ import 'dart:async';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
-import '../common_widgets.dart';
 import '../config_specific/launch_url/launch_url.dart';
 import '../theme.dart';
 import '../utils.dart';
@@ -70,11 +69,9 @@ class _AnalyticsPromptState extends State<AnalyticsPrompt>
                     'Send usage statistics for DevTools?',
                     style: textTheme.headlineSmall,
                   ),
-                  CircularIconButton(
-                    icon: Icons.close,
+                  IconButton.outlined(
+                    icon: const Icon(Icons.close),
                     onPressed: controller.hidePrompt,
-                    backgroundColor: theme.canvasColor,
-                    foregroundColor: theme.colorScheme.contrastForeground,
                   ),
                 ],
               ),

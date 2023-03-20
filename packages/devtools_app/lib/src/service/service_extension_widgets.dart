@@ -140,9 +140,7 @@ class _ServiceExtensionButtonGroupState
                   : 0.0,
         ),
         child: ImageIconLabel(
-          extensionState.isSelected
-              ? description.enabledIcon
-              : description.disabledIcon,
+          ServiceExtensionIcon(extensionState: extensionState),
           description.title,
           unscaledMinIncludeTextWidth:
               widget.minScreenWidthForTextBeforeScaling,
@@ -391,7 +389,8 @@ class _ServiceExtensionToggleState extends State<_ServiceExtensionToggle>
         child: Row(
           children: <Widget>[
             SizedBox(
-              height: defaultButtonHeight,
+              // TODO(kenz): this is not working.
+              height: defaultSwitchHeight,
               child: Switch(
                 value: value,
                 onChanged: _onClick,
@@ -913,10 +912,6 @@ class ServiceExtensionTooltip extends StatelessWidget {
 
     final colorScheme = Theme.of(context).colorScheme;
     final focusColor = Theme.of(context).focusColor;
-    final textStyle = DefaultTextStyle.of(context)
-        .style
-        .copyWith(color: colorScheme.toggleButtonsTitle);
-
     return DevToolsTooltip(
       message: description.tooltip,
       preferBelow: true,
@@ -929,7 +924,6 @@ class ServiceExtensionTooltip extends StatelessWidget {
         borderRadius:
             const BorderRadius.all(Radius.circular(defaultBorderRadius)),
       ),
-      textStyle: textStyle,
       child: child,
     );
   }
@@ -958,8 +952,6 @@ class ServiceExtensionRichTooltip extends StatelessWidget {
   }
 
   HoverCardData _buildCardData(BuildContext context) {
-    final textColor = Theme.of(context).colorScheme.toggleButtonsTitle;
-
     return HoverCardData(
       position: HoverCardPosition.element,
       width: _tooltipWidth,
@@ -970,7 +962,6 @@ class ServiceExtensionRichTooltip extends StatelessWidget {
           children: [
             Text(
               description.tooltip,
-              style: TextStyle(color: textColor),
             ),
             if (description.documentationUrl != null &&
                 description.gaScreenName != null)
@@ -985,6 +976,33 @@ class ServiceExtensionRichTooltip extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class ServiceExtensionIcon extends StatelessWidget {
+  const ServiceExtensionIcon({required this.extensionState, super.key});
+
+  final ExtensionState extensionState;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final color = extensionState.isSelected
+        ? theme.colorScheme.primary
+        : theme.colorScheme.onSurface;
+    final description = extensionState.description;
+    if (description.iconData != null) {
+      return Icon(
+        description.iconData,
+        color: color,
+      );
+    }
+    return Image(
+      image: AssetImage(extensionState.description.iconAsset!),
+      height: defaultIconSize,
+      width: defaultIconSize,
+      color: color,
     );
   }
 }

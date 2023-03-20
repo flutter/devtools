@@ -200,7 +200,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
             Row(children: getServiceExtensionWidgets()),
           ],
         ),
-        const SizedBox(height: denseRowSpacing),
+        const SizedBox(height: intermediateSpacing),
         Expanded(
           child: widgetTrees,
         ),
@@ -211,7 +211,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
   Widget _buildSummaryTreeColumn() {
     return LayoutBuilder(
       builder: (context, constraints) {
-        return OutlineDecoration(
+        return RoundedOutlinedBorder(
           child: Column(
             children: [
               InspectorSummaryTreeControls(
@@ -292,6 +292,8 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
       ),
       const SizedBox(width: defaultSpacing),
       SettingsOutlinedButton(
+        gaScreen: gac.inspector,
+        gaSelection: gac.inspectorSettings,
         tooltip: 'Flutter Inspector Settings',
         onPressed: () {
           unawaited(
@@ -446,8 +448,7 @@ class InspectorSummaryTreeControls extends StatelessWidget {
 
   Container _controlsContainer(BuildContext context, Widget child) {
     return Container(
-      height: defaultButtonHeight +
-          (isDense() ? denseModeDenseSpacing : denseSpacing),
+      height: defaultHeaderHeight,
       decoration: BoxDecoration(
         border: Border(
           bottom: defaultBorderSide(Theme.of(context)),
@@ -483,11 +484,12 @@ class ErrorNavigator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     final label = errorIndex != null
         ? 'Error ${errorIndex! + 1}/${errors.length}'
         : 'Errors: ${errors.length}';
     return Container(
-      color: devtoolsError,
+      color: colorScheme.errorContainer,
       child: Padding(
         padding: const EdgeInsets.symmetric(
           horizontal: defaultSpacing,
@@ -497,20 +499,19 @@ class ErrorNavigator extends StatelessWidget {
           children: [
             Padding(
               padding: const EdgeInsets.only(right: denseSpacing),
-              child: Text(label),
+              child: Text(
+                label,
+                style: TextStyle(
+                  color: colorScheme.onErrorContainer,
+                ),
+              ),
             ),
-            IconButton(
-              padding: EdgeInsets.zero,
-              constraints: const BoxConstraints(),
-              splashRadius: defaultIconSize,
-              icon: const Icon(Icons.keyboard_arrow_up),
+            _ErrorNavigatorButton(
+              icon: Icons.keyboard_arrow_up,
               onPressed: _previousError,
             ),
-            IconButton(
-              padding: EdgeInsets.zero,
-              constraints: const BoxConstraints(),
-              splashRadius: defaultIconSize,
-              icon: const Icon(Icons.keyboard_arrow_down),
+            _ErrorNavigatorButton(
+              icon: Icons.keyboard_arrow_down,
               onPressed: _nextError,
             ),
           ],
@@ -535,6 +536,30 @@ class ErrorNavigator extends StatelessWidget {
   }
 }
 
+class _ErrorNavigatorButton extends StatelessWidget {
+  const _ErrorNavigatorButton({required this.icon, required this.onPressed});
+
+  final IconData icon;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      // This is required to force the button size.
+      height: defaultButtonHeight,
+      width: defaultButtonHeight,
+      child: IconButton(
+        padding: EdgeInsets.zero,
+        constraints: const BoxConstraints(),
+        splashRadius: defaultIconSize,
+        icon: Icon(icon),
+        color: Theme.of(context).colorScheme.onErrorContainer,
+        onPressed: onPressed,
+      ),
+    );
+  }
+}
+
 class PubRootDirectorySection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -544,6 +569,8 @@ class PubRootDirectorySection extends StatelessWidget {
         return Container(
           height: 200.0,
           child: EditableList(
+            gaScreen: gac.inspector,
+            gaRefreshSelection: gac.refreshPubRoots,
             entries: preferences.inspector.customPubRootDirectories,
             textFieldLabel: 'Enter a new package directory',
             isRefreshing:

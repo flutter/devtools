@@ -90,26 +90,20 @@ class NetworkRequestInspector extends StatelessWidget {
           ]
         ].map((e) => OutlineDecoration.onlyTop(child: e)).toList();
 
-        return Card(
-          margin: EdgeInsets.zero,
-          color: Theme.of(context).canvasColor,
-          child: RoundedOutlinedBorder(
-            child: (data == null)
-                ? Center(
-                    child: Text(
-                      'No request selected',
-                      key: NetworkRequestInspector.noRequestSelectedKey,
-                      style: Theme.of(context).textTheme.titleLarge,
-                    ),
-                  )
-                : AnalyticsTabbedView(
-                    tabs: tabs,
-                    tabViews: tabViews,
-                    gaScreen: gac.network,
-                    // TODO(kenz): Consider using the outlined style
-                    outlined: false,
+        return RoundedOutlinedBorder(
+          child: (data == null)
+              ? Center(
+                  child: Text(
+                    'No request selected',
+                    key: NetworkRequestInspector.noRequestSelectedKey,
+                    style: Theme.of(context).textTheme.titleLarge,
                   ),
-          ),
+                )
+              : AnalyticsTabbedView(
+                  tabs: tabs,
+                  tabViews: tabViews,
+                  gaScreen: gac.network,
+                ),
         );
       },
     );

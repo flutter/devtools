@@ -18,6 +18,7 @@ class MoreDebuggingOptionsButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return ServiceExtensionCheckboxGroupButton(
       title: 'More debugging options',
       icon: Icons.build,
@@ -38,7 +39,7 @@ class MoreDebuggingOptionsButton extends StatelessWidget {
             'reproduce the activity in your app to see the effects. '
             'All layers are rendered by default - disabling a '
             'layer might help identify expensive operations in your app.',
-            style: Theme.of(context).subtleTextStyle,
+            style: theme.subtleTextStyle,
           ),
           if (serviceManager.connectedApp!.isProfileBuildNow!) ...[
             const SizedBox(height: denseSpacing),
@@ -47,7 +48,8 @@ class MoreDebuggingOptionsButton extends StatelessWidget {
                 text:
                     "These debugging options aren't available in profile mode. "
                     'To use them, run your app in debug mode.',
-                style: Theme.of(context).subtleErrorTextStyle,
+                style: theme.subtleTextStyle
+                    .copyWith(color: theme.colorScheme.error),
               ),
             ),
           ],

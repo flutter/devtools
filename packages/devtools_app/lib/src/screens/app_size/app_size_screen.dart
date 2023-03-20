@@ -8,6 +8,7 @@ import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/material.dart';
 
 import '../../shared/analytics/analytics.dart' as ga;
+import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/charts/treemap.dart';
 import '../../shared/common_widgets.dart';
 import '../../shared/config_specific/drag_and_drop/drag_and_drop.dart';
@@ -109,7 +110,7 @@ class _AppSizeBodyState extends State<AppSizeBody>
   @override
   void initState() {
     super.initState();
-    ga.screen(AppSizeScreen.id);
+    ga.screen(gac.appSize);
     _tabController = TabController(length: tabs.length, vsync: this);
     addAutoDisposeListener(_tabController);
   }
@@ -292,6 +293,8 @@ class _AppSizeBodyState extends State<AppSizeBody>
 
   Widget _buildClearButton(Key activeTabKey) {
     return ClearButton(
+      gaScreen: gac.appSize,
+      gaSelection: gac.clear,
       onPressed: () => controller.clear(activeTabKey),
     );
   }
@@ -346,43 +349,50 @@ class _AnalysisViewState extends State<AnalysisView>
 
   Widget _buildTreemapAndTableSplitView() {
     final analysisCallGraphRoot = controller.analysisCallGraphRoot.value;
-    return OutlineDecoration(
-      child: Column(
-        children: [
-          AreaPaneHeader(
-            title: Text(_generateSingleFileHeaderText()),
-            maxLines: 2,
-            needsTopBorder: false,
-          ),
-          Expanded(
-            child: Split(
-              axis: Axis.vertical,
-              initialFractions: const [
-                initialFractionForTreemap,
-                initialFractionForTreeTable,
-              ],
-              children: [
-                _buildTreemap(),
-                Row(
-                  children: [
-                    Flexible(
-                      child: AppSizeAnalysisTable(
-                        rootNode: analysisRoot!.root,
-                        controller: controller,
-                      ),
-                    ),
-                    if (analysisCallGraphRoot != null)
-                      Flexible(
-                        child: CallGraphWithDominators(
-                          callGraphRoot: analysisCallGraphRoot,
-                        ),
-                      ),
-                  ],
-                ),
-              ],
+    return Padding(
+      padding: const EdgeInsets.only(top: intermediateSpacing),
+      child: RoundedOutlinedBorder(
+        clip: true,
+        child: Column(
+          children: [
+            AreaPaneHeader(
+              title: Text(_generateSingleFileHeaderText()),
+              maxLines: 2,
+              roundedTopBorder: false,
+              includeTopBorder: false,
             ),
-          ),
-        ],
+            Expanded(
+              child: Split(
+                axis: Axis.vertical,
+                initialFractions: const [
+                  initialFractionForTreemap,
+                  initialFractionForTreeTable,
+                ],
+                children: [
+                  _buildTreemap(),
+                  OutlineDecoration.onlyTop(
+                    child: Row(
+                      children: [
+                        Flexible(
+                          child: AppSizeAnalysisTable(
+                            rootNode: analysisRoot!.root,
+                            controller: controller,
+                          ),
+                        ),
+                        if (analysisCallGraphRoot != null)
+                          Flexible(
+                            child: CallGraphWithDominators(
+                              callGraphRoot: analysisCallGraphRoot,
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -434,6 +444,9 @@ class _AnalysisViewState extends State<AnalysisView>
                   title: 'Size analysis',
                   instructions: AnalysisView.importInstructions,
                   actionText: 'Analyze Size',
+                  gaScreen: gac.appSize,
+                  gaSelectionImport: gac.importFileSingle,
+                  gaSelectionAction: gac.analyzeSingle,
                   onAction: (jsonFile) {
                     controller.loadTreeFromJsonFile(
                       jsonFile: jsonFile,
@@ -511,7 +524,7 @@ class _DiffViewState extends State<DiffView>
           AreaPaneHeader(
             title: Text(_generateDualFileHeaderText()),
             maxLines: 2,
-            needsTopBorder: false,
+            includeTopBorder: false,
           ),
           Expanded(
             child: Split(
@@ -574,6 +587,10 @@ class _DiffViewState extends State<DiffView>
                   firstInstructions: DiffView.importOldInstructions,
                   secondInstructions: DiffView.importNewInstructions,
                   actionText: 'Analyze Diff',
+                  gaScreen: gac.appSize,
+                  gaSelectionImportFirst: gac.importFileDiffFirst,
+                  gaSelectionImportSecond: gac.importFileDiffSecond,
+                  gaSelectionAction: gac.analyzeDiff,
                   onAction: (oldFile, newFile, onError) =>
                       controller.loadDiffTreeFromJsonFiles(
                     oldFile: oldFile,

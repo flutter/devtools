@@ -36,6 +36,8 @@ void main() async {
         .thenReturn(ValueNotifier<int>(0));
     setGlobal(ServiceConnectionManager, fakeServiceManager);
     setGlobal(NotificationService, NotificationService());
+    setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
+    setGlobal(PreferencesController, PreferencesController());
     setGlobal(IdeTheme, IdeTheme());
   });
 

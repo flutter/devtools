@@ -4,17 +4,9 @@
 
 import 'dart:convert';
 
-import 'package:devtools_app/src/screens/app_size/app_size_controller.dart';
-import 'package:devtools_app/src/screens/app_size/app_size_screen.dart';
+import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/app_size/app_size_table.dart';
-import 'package:devtools_app/src/service/service_manager.dart';
-import 'package:devtools_app/src/shared/common_widgets.dart';
-import 'package:devtools_app/src/shared/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/shared/file_import.dart';
-import 'package:devtools_app/src/shared/globals.dart';
-import 'package:devtools_app/src/shared/notifications.dart';
-import 'package:devtools_app/src/shared/primitives/utils.dart';
-import 'package:devtools_app/src/shared/split.dart';
 import 'package:devtools_shared/devtools_test_utils.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
@@ -32,6 +24,8 @@ import '../test_infra/test_data/app_size/unsupported_file.dart';
 void main() {
   setUp(() {
     setGlobal(ServiceConnectionManager, FakeServiceManager());
+    setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
+    setGlobal(PreferencesController, PreferencesController());
     setGlobal(IdeTheme, IdeTheme());
     setGlobal(NotificationService, NotificationService());
   });

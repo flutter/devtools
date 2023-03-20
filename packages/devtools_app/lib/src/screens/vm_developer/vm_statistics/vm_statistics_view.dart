@@ -5,6 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../../../shared/analytics/constants.dart' as gac;
 import '../../../shared/common_widgets.dart';
 import '../../../shared/primitives/utils.dart';
 import '../../../shared/table/table.dart';
@@ -36,7 +37,11 @@ class VMStatisticsViewBody extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        RefreshButton(onPressed: controller.refresh),
+        RefreshButton(
+          gaScreen: gac.vmTools,
+          gaSelection: gac.refreshVmStatistics,
+          onPressed: controller.refresh,
+        ),
         const SizedBox(height: denseRowSpacing),
         Expanded(
           child: ValueListenableBuilder(

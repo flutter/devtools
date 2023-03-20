@@ -204,15 +204,17 @@ class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
                       return _buildSearchField(searchFieldEnabled);
                     },
                   ),
+                  const SizedBox(width: denseSpacing),
                   FlameChartHelpButton(
                     gaScreen: PerformanceScreen.id,
                     gaSelection: gac.timelineFlameChartHelp,
                   ),
                 ],
                 if (!offlineController.offlineMode.value)
-                  RefreshTimelineEventsButton(
-                    controller: _timelineEventsController,
-                  ),
+                  const SizedBox(width: denseSpacing),
+                RefreshTimelineEventsButton(
+                  controller: _timelineEventsController,
+                ),
               ],
             );
           },
@@ -285,8 +287,9 @@ class RefreshTimelineEventsButton extends StatelessWidget {
     return ValueListenableBuilder<EventsControllerStatus>(
       valueListenable: controller.status,
       builder: (context, status, _) {
-        return DevToolsIconButton(
-          iconData: Icons.refresh,
+        return RefreshButton(
+          iconOnly: true,
+          outlined: false,
           onPressed: status == EventsControllerStatus.processing
               ? null
               : controller.processAllTraceEvents,

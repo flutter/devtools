@@ -10,7 +10,6 @@ import '../../shared/primitives/utils.dart';
 import '../../shared/table/table.dart';
 import '../../shared/table/table_data.dart';
 import '../../shared/theme.dart';
-import '../../shared/ui/colors.dart';
 import 'logging_controller.dart';
 
 @visibleForTesting
@@ -52,11 +51,7 @@ class MessageColumn extends ColumnData<LogData>
     bool isRowSelected = false,
     VoidCallback? onPressed,
   }) {
-    TextStyle textStyle = Theme.of(context).fixedFontStyle;
-    if (isRowSelected) {
-      textStyle = textStyle.copyWith(color: defaultSelectionForegroundColor);
-    }
-
+    final textStyle = Theme.of(context).fixedFontStyle;
     if (data.kind == 'flutter.frame') {
       const Color color = Color.fromARGB(0xff, 0x00, 0x91, 0xea);
       final Text text = Text(

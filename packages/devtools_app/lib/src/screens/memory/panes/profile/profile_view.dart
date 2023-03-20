@@ -55,13 +55,10 @@ class _FieldClassNameColumn extends ColumnData<ProfileRecord>
   }) {
     if (data.isTotal) return null;
 
-    final theme = Theme.of(context);
     return HeapClassView(
       theClass: data.heapClass,
       showCopyButton: isRowSelected,
       copyGaItem: gac.MemoryEvent.diffClassSingleCopy,
-      textStyle:
-          isRowSelected ? theme.selectedTextStyle : theme.regularTextStyle,
       rootPackage: serviceManager.rootInfoNow().package,
     );
   }
@@ -582,19 +579,16 @@ class _AllocationProfileTableControls extends StatelessWidget {
           allocationProfileController: allocationProfileController,
         ),
         const SizedBox(width: denseSpacing),
-        RefreshButton.icon(
-          onPressed: () async {
-            ga.select(
-              gac.memory,
-              gac.MemoryEvent.profileRefreshManual,
-            );
-            await allocationProfileController.refresh();
-          },
+        RefreshButton(
+          gaScreen: gac.memory,
+          gaSelection: gac.MemoryEvent.profileRefreshManual,
+          onPressed: allocationProfileController.refresh,
         ),
         const SizedBox(width: denseSpacing),
         _RefreshOnGCToggleButton(
           allocationProfileController: allocationProfileController,
         ),
+        const SizedBox(width: denseSpacing),
         const _ProfileHelpLink(),
       ],
     );
@@ -615,6 +609,8 @@ class _ExportAllocationProfileButton extends StatelessWidget {
       valueListenable: allocationProfileController.currentAllocationProfile,
       builder: (context, currentAllocationProfile, _) {
         return ToCsvButton(
+          gaScreen: gac.memory,
+          gaSelection: gac.MemoryEvent.profileDownloadCsv,
           minScreenWidthForTextBeforeScaling: memoryControlsMinVerboseWidth,
           tooltip: 'Download allocation profile data in CSV format',
           onPressed: currentAllocationProfile == null

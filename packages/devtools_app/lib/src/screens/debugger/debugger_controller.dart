@@ -10,6 +10,8 @@ import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../service/vm_service_wrapper.dart';
+import '../../shared/analytics/analytics.dart' as ga;
+import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/config_specific/logger/logger.dart';
 import '../../shared/diagnostics/dart_object_node.dart';
 import '../../shared/diagnostics/primitives/source_location.dart';
@@ -409,6 +411,7 @@ class DebuggerController extends DisposableController
           ],
           truncated: true,
         );
+        ga.select(gac.debugger, gac.pausedWithNoFrames);
         return;
       }
       _populateFrameInfo(

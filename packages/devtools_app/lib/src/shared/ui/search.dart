@@ -297,7 +297,6 @@ class AutoCompleteState extends State<AutoComplete> with AutoDisposeMixin {
 
     final autoCompleteHighlightedTextStyle =
         Theme.of(context).regularTextStyle.copyWith(
-              color: searchColor,
               fontWeight: FontWeight.bold,
             );
 
@@ -940,13 +939,9 @@ class SearchField<T extends DataSearchStateMixin> extends StatelessWidget {
       decoration: decoration ??
           InputDecoration(
             contentPadding: const EdgeInsets.all(denseSpacing),
-            focusedBorder:
-                OutlineInputBorder(borderSide: searchFocusBorderColor),
-            enabledBorder:
-                OutlineInputBorder(borderSide: searchFocusBorderColor),
-            labelStyle: TextStyle(color: searchColor),
             border: const OutlineInputBorder(),
             labelText: label,
+            // TODO(kenz): add the search icon to the search field.
             prefix: prefix != null
                 ? Row(
                     mainAxisSize: MainAxisSize.min,
@@ -974,7 +969,6 @@ class SearchField<T extends DataSearchStateMixin> extends StatelessWidget {
                       )
                     : null,
           ),
-      cursorColor: searchColor,
     );
 
     if (shouldRequestFocus) {

@@ -243,7 +243,7 @@ class _ColorIconPainter extends CustomPainter {
           size.width - iconMargin,
           size.height - iconMargin,
         ),
-        Paint()..color = colorScheme.defaultBackground,
+        Paint()..color = colorScheme.background,
       )
       ..drawRect(
         Rect.fromLTRB(
@@ -271,7 +271,7 @@ class _ColorIconPainter extends CustomPainter {
         iconRect,
         Paint()
           ..style = PaintingStyle.stroke
-          ..color = colorScheme.defaultForeground,
+          ..color = colorScheme.onPrimary,
       );
   }
 
@@ -288,7 +288,7 @@ class FlutterMaterialIcons {
   FlutterMaterialIcons._();
 
   static Icon getIconForCodePoint(int charCode, ColorScheme colorScheme) {
-    return Icon(IconData(charCode), color: colorScheme.defaultForeground);
+    return Icon(IconData(charCode), color: colorScheme.onPrimary);
   }
 }
 
@@ -314,27 +314,6 @@ class AssetImageIcon extends StatelessWidget {
       height: height,
       width: width,
       fit: BoxFit.fill,
-    );
-  }
-}
-
-class ThemedImageIcon extends StatelessWidget {
-  const ThemedImageIcon({
-    required this.lightModeAsset,
-    required this.darkModeAsset,
-  });
-
-  final String lightModeAsset;
-  final String darkModeAsset;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Image(
-      image: AssetImage(theme.isDarkTheme ? darkModeAsset : lightModeAsset),
-      height: defaultIconSize,
-      width: defaultIconSize,
     );
   }
 }
