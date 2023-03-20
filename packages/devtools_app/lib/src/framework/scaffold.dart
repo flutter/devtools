@@ -345,10 +345,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
                                   backgroundColor: theme.colorScheme.surface,
                                 ),
                               ],
-                              initialFractions: const [
-                                (100 - consoleHeightPercent) / 100,
-                                consoleHeightPercent / 100
-                              ],
+                              initialFractions: const [0.8, 0.2],
                               children: [
                                 Padding(
                                   padding: const EdgeInsets.only(
