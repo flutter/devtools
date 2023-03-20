@@ -113,8 +113,6 @@ flutter:
     - packages/perfetto_compiled/dist/v31.0-61eeba8d0/perfetto.css
     - packages/perfetto_compiled/dist/v31.0-61eeba8d0/trace_processor.wasm
     - packages/perfetto_compiled/dist/v31.0-61eeba8d0/assets/brand.png
-    - packages/perfetto_compiled/dist/v31.0-61eeba8d0/assets/catapult_trace_viewer.html
-    - packages/perfetto_compiled/dist/v31.0-61eeba8d0/assets/catapult_trace_viewer.js
     - packages/perfetto_compiled/dist/v31.0-61eeba8d0/assets/favicon.png
     - packages/perfetto_compiled/dist/v31.0-61eeba8d0/assets/logo-3d.png
     - packages/perfetto_compiled/dist/v31.0-61eeba8d0/assets/logo-128.png
