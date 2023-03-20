@@ -15,8 +15,9 @@ import 'evaluate.dart';
 // TODO(devoncarew): Show some small UI indicator when we receive stdout/stderr.
 
 class ConsolePaneHeader extends AreaPaneHeader {
-  ConsolePaneHeader({Color? backgroundColor, super.key})
+  ConsolePaneHeader({Color? backgroundColor})
       : super(
+          key: theKey,
           title: const Text('Console'),
           roundedTopBorder: true,
           actions: [
@@ -32,6 +33,8 @@ class ConsolePaneHeader extends AreaPaneHeader {
             ),
           ],
         );
+
+  static const theKey = Key('ConsolePaneHeader');
 }
 
 /// Defines relative height of console in DevTools.

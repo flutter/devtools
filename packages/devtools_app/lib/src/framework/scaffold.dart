@@ -342,7 +342,6 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
                               axis: Axis.vertical,
                               splitters: [
                                 ConsolePaneHeader(
-                                  key: Key('ConsolePaneHeader'),
                                   backgroundColor: theme.colorScheme.surface,
                                 ),
                               ],

@@ -12,13 +12,11 @@ import 'package:devtools_app/src/screens/memory/panes/control/primary_controls.d
 import 'package:devtools_app/src/screens/memory/panes/diff/widgets/snapshot_list.dart';
 import 'package:devtools_app/src/shared/banner_messages.dart';
 import 'package:devtools_app/src/shared/common_widgets.dart';
-import 'package:devtools_app/src/shared/console/console_service.dart';
 import 'package:devtools_app/src/shared/console/widgets/console_pane.dart';
 import 'package:devtools_app/src/shared/primitives/simple_items.dart';
 import 'package:devtools_app/src/shared/ui/search.dart';
 import 'package:devtools_test/devtools_integration_test.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 
@@ -64,10 +62,16 @@ Future<void> _testRootIsAccessible(_EvalTester tester) async {
   next = await tester.tapAndPump(next, next: find.text('references'));
   next = await tester.tapAndPump(next, next: find.textContaining('static ('));
   next = await tester.tapAndPump(next, next: find.text('inbound'));
-  next = await tester.tapAndPump(next,
-      next: find.text('_List'), at: 1); // Second in the list
-  next = await tester.tapAndPump(next,
-      next: find.text('Class'), at: 1); // Second after column name
+  next = await tester.tapAndPump(
+    next,
+    next: find.text('_List'),
+    at: 1,
+  ); // Second in the list
+  next = await tester.tapAndPump(
+    next,
+    next: find.text('Class'),
+    at: 1,
+  ); // Second after column name
 
   await tester.tapAndPump(next, next: find.text('Root'));
 }
@@ -111,17 +115,16 @@ class _EvalTester {
     // Open memory screen.
     await switchToScreen(tester, ScreenMetaData.memory);
 
-    print(1);
-
     // Close warning and chart to get screen.
     await tapAndPump(find.byKey(DebugModeMemoryMessage.closeKey));
-    print(2);
     await tapAndPump(find.text(PrimaryControls.memoryChartText));
-    print(3);
-    await tester.drag(find.byKey(Key('ConsolePaneHeader')), Offset(0, -320));
-    print(4);
+
+    // Increase cinsole.
+    await tester.drag(
+      find.byKey(ConsolePaneHeader.theKey),
+      const Offset(0, -320),
+    );
     await tester.pumpAndSettle();
-    print(5);
 
     // Switch to diff tab.
     await tapAndPump(find.text('Diff Snapshots'));
@@ -135,18 +138,17 @@ class _EvalTester {
     );
     logStatus('Finished taking snapshot.');
 
-    print(7);
     // Sort by class.
     await tapAndPump(find.text('Class'));
-    print(8);
+
     // Select class.
     await tapAndPump(find.text('MyApp'));
   }
 
   /// Taps and settles.
   ///
-  /// If [next] is provided, will repeat the tap till [next] returns results.
-  /// Returns [next] or [finder].
+  /// If [next] is provided, will repeat the tap till [next] combined with [at] returns results.
+  /// If [next] is not null returns [next]  combined with [at, otherwise returns [finder].
   Future<Finder> tapAndPump(
     Finder finder, {
     Duration? duration,
@@ -159,19 +161,16 @@ class _EvalTester {
       logStatus("tapping #$tryNumber to find $at'th item in the finder\n"
           '[$finder]\n');
       tryNumber++;
-      print(11);
       await tester.tap(finder);
-      print(12);
       await tester.pump(duration);
-      print(13);
       await tester.pumpAndSettle();
-      print(14);
     }
 
     await action();
 
     if (next == null) return finder;
 
+    // Tthese tries are needed because tap in console is flaky.
     while (tryNumber < 10) {
       try {
         final items = tester.widgetList(next);
