@@ -59,13 +59,13 @@ class FrameHints extends StatelessWidget {
               IntrinsicOperationsHint(intrinsicOperationsCount),
           ]
         : [];
-    final rasterHints = (true || showRasterJankHints)
+    final rasterHints = showRasterJankHints
         ? [
             const Text('Raster Jank Detected'),
             const SizedBox(height: denseSpacing),
             if (saveLayerCount > 0) CanvasSaveLayerHint(saveLayerCount),
             const SizedBox(height: denseSpacing),
-            if (true || frame.hasShaderTime)
+            if (frame.hasShaderTime)
               ShaderCompilationHint(shaderTime: frame.shaderDuration),
             const SizedBox(height: denseSpacing),
             const RasterStatsHint(),
