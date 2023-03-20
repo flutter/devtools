@@ -57,13 +57,13 @@ class FrameHints extends StatelessWidget {
               IntrinsicOperationsHint(intrinsicOperationsCount),
           ]
         : [];
-    final rasterHints = showRasterJankHints
+    final rasterHints = (true || showRasterJankHints)
         ? [
             const Text('Raster Jank Detected'),
             const SizedBox(height: denseSpacing),
             if (saveLayerCount > 0) CanvasSaveLayerHint(saveLayerCount),
             const SizedBox(height: denseSpacing),
-            if (frame.hasShaderTime)
+            if (true || frame.hasShaderTime)
               ShaderCompilationHint(shaderTime: frame.shaderDuration),
             const SizedBox(height: denseSpacing),
             const RasterStatsHint(),
@@ -351,6 +351,29 @@ class ShaderCompilationHint extends StatelessWidget {
             ),
           ],
         ),
+        childrenSpans: serviceManager.connectedApp!.isIosApp
+            ? [
+                TextSpan(
+                  text:
+                      ' Note: pre-compiling shaders is a legacy solution with many '
+                      'pitfalls. Try ',
+                  style: theme.regularTextStyle,
+                ),
+                LinkTextSpan(
+                  link: Link(
+                    display: 'Impeller',
+                    url: impellerWikiUrl,
+                    gaScreenName: gac.performance,
+                    gaSelectedItemDescription: gac.impellerWiki,
+                  ),
+                  context: context,
+                ),
+                TextSpan(
+                  text: ' instead!',
+                  style: theme.regularTextStyle,
+                ),
+              ]
+            : [],
       ),
     );
   }
@@ -394,12 +417,14 @@ class _ExpensiveOperationHint extends StatelessWidget {
     required this.docsUrl,
     required this.gaScreenName,
     required this.gaSelectedItemDescription,
+    this.childrenSpans = const <TextSpan>[],
   }) : super(key: key);
 
   final TextSpan message;
   final String docsUrl;
   final String gaScreenName;
   final String gaSelectedItemDescription;
+  final List<TextSpan> childrenSpans;
 
   @override
   Widget build(BuildContext context) {
@@ -426,6 +451,7 @@ class _ExpensiveOperationHint extends StatelessWidget {
             text: '.',
             style: theme.regularTextStyle,
           ),
+          ...childrenSpans,
         ],
       ),
     );
