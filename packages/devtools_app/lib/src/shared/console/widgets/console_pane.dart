@@ -15,7 +15,7 @@ import 'evaluate.dart';
 // TODO(devoncarew): Show some small UI indicator when we receive stdout/stderr.
 
 class ConsolePaneHeader extends AreaPaneHeader {
-  ConsolePaneHeader({Color? backgroundColor})
+  ConsolePaneHeader({Color? backgroundColor, super.key})
       : super(
           title: const Text('Console'),
           roundedTopBorder: true,
@@ -33,6 +33,15 @@ class ConsolePaneHeader extends AreaPaneHeader {
           ],
         );
 }
+
+/// Defines relative height of console in DevTools.
+///
+/// To set the in debug configuration of VSCode, add value:
+///   "args": [
+///     "--dart-define=console_height_percent=90"
+///   ]
+const int consoleHeightPercent =
+    int.fromEnvironment('console_height_percent', defaultValue: 20);
 
 /// Display the stdout and stderr output from the process under debug.
 class ConsolePane extends StatelessWidget {

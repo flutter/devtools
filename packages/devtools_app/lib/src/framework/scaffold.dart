@@ -342,10 +342,14 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
                               axis: Axis.vertical,
                               splitters: [
                                 ConsolePaneHeader(
+                                  key: Key('ConsolePaneHeader'),
                                   backgroundColor: theme.colorScheme.surface,
                                 ),
                               ],
-                              initialFractions: const [0.8, 0.2],
+                              initialFractions: const [
+                                (100 - consoleHeightPercent) / 100,
+                                consoleHeightPercent / 100
+                              ],
                               children: [
                                 Padding(
                                   padding: const EdgeInsets.only(

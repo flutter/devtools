@@ -3,8 +3,8 @@
 // found in the LICENSE file.
 
 // Do not delete these arguments. They are parsed parsed by test runner.
-// test-argument:experimentsOn=true
 // test-argument:appPath="test/test_infra/fixtures/memory_app"
+// test-argument:experimentsOn=true
 
 import 'dart:ui' as ui;
 
@@ -60,13 +60,18 @@ Future<void> _testRootIsAccessible(_EvalTester tester) async {
   await tester.tapAndPump(find.text('Any'), duration: longPumpDuration);
 
   Finder next = find.textContaining('MyApp, retained size ');
-  next = await tester.tapAndPump(next, next: find.text('references'));
-  next = await tester.tapAndPump(next, next: find.textContaining('static ('));
-  next = await tester.tapAndPump(next, next: find.text('inbound'));
-  next = await tester.tapAndPump(next, next: find.text('_List').at(1));
-  next = await tester.tapAndPump(next, next: find.text('Class'));
+  next =
+      await tester.tapAndPump(next, next: find.text('references'), tapTimes: 2);
+  next = await tester.tapAndPump(next,
+      next: find.textContaining('static ('), tapTimes: 2);
+  next = await tester.tapAndPump(next, next: find.text('inbound'), tapTimes: 2);
+  next = await tester.tapAndPump(next,
+      next: find.text('_List').at(1), tapTimes: 2); // Second in the list
+  next = await tester.tapAndPump(next,
+      next: find.text('Class').at(1),
+      tapTimes: 2); // Second after column header
 
-  await tester.tapAndPump(next, next: find.text('Root'));
+  await tester.tapAndPump(next, next: find.text('Root'), tapTimes: 2);
 }
 
 class _EvalTester {
@@ -76,10 +81,7 @@ class _EvalTester {
 
   /// Tests if eval returns expected response by searching for response text.
   Future<void> testEval(String expression, Finder expectedResponse) async {
-    await tapAndPump(
-      find.byType(AutoCompleteSearchField),
-      duration: safePumpDuration,
-    );
+    await tapAndPump(find.byType(AutoCompleteSearchField));
     await tester.enterText(find.byType(AutoCompleteSearchField), expression);
     await tester.pump(safePumpDuration);
     await _pressEnter();
@@ -111,41 +113,59 @@ class _EvalTester {
     // Open memory screen.
     await switchToScreen(tester, ScreenMetaData.memory);
 
+    print(1);
+
     // Close warning and chart to get screen.
     await tapAndPump(find.byKey(DebugModeMemoryMessage.closeKey));
+    print(2);
     await tapAndPump(find.text(PrimaryControls.memoryChartText));
+    print(3);
+    await tester.drag(find.byKey(Key('ConsolePaneHeader')), Offset(0, -320));
+    print(4);
+    await tester.pumpAndSettle();
+    print(5);
 
     // Switch to diff tab.
     await tapAndPump(find.text('Diff Snapshots'));
 
+    logStatus('Started taking snapshot.');
     // Take snapshot.
+    const snapshotDuration = Duration(seconds: 20);
     await tapAndPump(
       find.byIcon(iconToTakeSnapshot),
-      duration: longPumpDuration,
+      duration: snapshotDuration,
     );
+    logStatus('Finished taking snapshot.');
 
+    print(7);
     // Sort by class.
     await tapAndPump(find.text('Class'));
-
+    print(8);
     // Select class.
     await tapAndPump(find.text('MyApp'));
   }
 
   /// Taps and settles.
   ///
-  /// If [next] is provided, will repeat and scroll till [next] returns results.
+  /// If [next] is provided, will repeat the tap till [next] returns results.
   /// Returns [next] or [finder].
   Future<Finder> tapAndPump(
     Finder finder, {
-    Duration? duration,
+    Duration duration = safePumpDuration,
     Finder? next,
+    int tapTimes = 1,
   }) async {
+    print('!!! tapAndPump for $finder');
     Future<void> action() async {
-      await tester.tap(finder);
-      if (duration == null) {
+      for (var i = 0; i < tapTimes; i++) {
+        print(11);
+        await tester.tap(finder);
+        print(12);
+        await tester.pumpAndSettle(duration);
+        // Second pump is to avoid error 'Build scheduled during frame.'
+        print(13);
         await tester.pumpAndSettle();
-      } else {
-        await tester.pump(duration);
+        print(14);
       }
     }
 
@@ -153,19 +173,15 @@ class _EvalTester {
 
     if (next == null) return finder;
 
-    while (true) {
+    for (final i in Iterable.generate(10)) {
       try {
-        await tester.scrollUntilVisible(
-          next,
-          20.0,
-          scrollable: find.byType(ConsolePane),
-        );
-        //tester.firstWidget<Widget>(next);
+        tester.firstWidget<Widget>(next);
         return next;
       } on StateError {
-        print('\nre-tapping $finder\n\n');
+        print('\nre-tapping #$i the finder [$finder]\n\n');
         await action();
       }
     }
+    throw 'Cound not find $next';
   }
 }
