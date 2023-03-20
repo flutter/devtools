@@ -535,7 +535,7 @@ abstract class TimelineEvent extends TreeNode<TimelineEvent>
   int? get threadId => traceEvents.first.event.threadId;
 
   @override
-  String get tooltip => '$name - ${msText(time.duration)}';
+  String get tooltip => '$name - ${durationText(time.duration)}';
 
   bool _isWellFormedDeep(TimelineEvent event) {
     return !subtreeHasNodeWithCondition((e) => !e.isWellFormed);

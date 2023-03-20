@@ -79,7 +79,7 @@ class EventDetails extends StatelessWidget {
     }
     final selected = selectedEvent!;
     return '${selected.isUiEvent ? 'CPU Profile: ' : ''}'
-        '${selected.name} (${msText(selected.time.duration)})';
+        '${selected.name} (${durationText(selected.time.duration)})';
   }
 
   Widget _buildDetails(bool offlineMode, bool profilerEnabled) {
@@ -167,7 +167,7 @@ class EventSummary extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
           child: EventMetaData(
             title: 'Time',
-            inlineValue: msText(event.time.duration),
+            inlineValue: durationText(event.time.duration),
             child: SelectableText(
               '[${event.time.start!.inMicroseconds} μs —  '
               '${event.time.end!.inMicroseconds} μs]',
@@ -239,7 +239,7 @@ class EventSummary extends StatelessWidget {
 
   Widget _buildConnectedEvent(TimelineEvent e) {
     final eventArgs = {
-      'startTime': msText(e.time.start! - event.time.start!),
+      'startTime': durationText(e.time.start! - event.time.start!),
       'args': e.traceEvents.first.event.args,
     };
     return EventMetaData(

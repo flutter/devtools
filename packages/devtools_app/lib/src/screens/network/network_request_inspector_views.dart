@@ -566,7 +566,7 @@ class NetworkRequestOverviewView extends StatelessWidget {
     return Flexible(
       flex: flex,
       child: DevToolsTooltip(
-        message: '$label - ${msText(duration)}',
+        message: '$label - ${durationText(duration)}',
         child: Container(
           height: _timingGraphHeight,
           color: color,
@@ -634,9 +634,9 @@ class NetworkRequestOverviewView extends StatelessWidget {
           context: context,
           title: instant.name,
           child: _valueText(
-            '[${msText(timeRange.start! - instantEventStart)} - '
-            '${msText(timeRange.end! - instantEventStart)}]'
-            ' → ${msText(timeRange.duration)} total',
+            '[${durationText(timeRange.start! - instantEventStart)} - '
+            '${durationText(timeRange.end! - instantEventStart)}]'
+            ' → ${durationText(timeRange.duration)} total',
           ),
         ),
         if (instant != data.instantEvents.last)

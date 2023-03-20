@@ -289,13 +289,17 @@ class ShaderJankMessage {
 
   BannerMessage build(BuildContext context) {
     final theme = Theme.of(context);
+    final jankDurationText = durationText(
+      jankDuration,
+      unit: DurationDisplayUnit.milliseconds,
+    );
     return _BannerError(
       key: Key('ShaderJankMessage - $screenId'),
       textSpans: [
         TextSpan(
           text: 'Shader compilation jank detected. $jankyFramesCount '
               '${pluralize('frame', jankyFramesCount)} janked with a total of '
-              '${msText(jankDuration)} spent in shader compilation. To pre-compile '
+              '$jankDurationText spent in shader compilation. To pre-compile '
               'shaders, see the instructions at ',
         ),
         LinkTextSpan(

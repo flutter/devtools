@@ -395,7 +395,7 @@ class CpuProfileStats extends StatelessWidget {
           children: [
             _stat(
               tooltip: 'The duration of time spanned by the CPU samples',
-              text: 'Duration: ${msText(metadata.time!.duration)}',
+              text: 'Duration: ${durationText(metadata.time!.duration)}',
               theme: theme,
             ),
             _stat(

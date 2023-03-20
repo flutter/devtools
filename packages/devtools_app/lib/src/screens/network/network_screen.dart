@@ -550,7 +550,7 @@ class DurationColumn extends ColumnData<NetworkRequest> {
     final ms = getValue(dataObject);
     return ms == null
         ? 'Pending'
-        : msText(
+        : durationText(
             Duration(milliseconds: ms),
             fractionDigits: 0,
           );
