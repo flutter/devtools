@@ -888,12 +888,87 @@ mixin SearchFieldMixin<T extends StatefulWidget>
   }
 }
 
-/// A text field with search capability.
+/// A stateful text field with search capability.
 ///
-/// The widget that builds [SearchField] is responsible for mixing in
-/// [SearchFieldMixin], which manages the search field lifecycle.
-class SearchField<T extends SearchableDataMixin> extends StatelessWidget {
+/// [_SearchFieldState] automatically handles the lifecycle of the search field
+/// through the [SearchFieldMixin].
+///
+/// Use this widget for simple use cases where the elements initialized and
+/// disposed in [SearchControllerMixin.initSearch] and
+/// [SearchControllerMixin.disposeSearch] are not used outside of the context
+/// of the search code.
+///
+/// If these elements need to be used by the widget state that builds the search
+/// field, consider using [StatelessSearchField] instead and manually mixing in
+/// [SearchFieldMixin] so that you can manage the lifecycle properly.
+class SearchField<T extends SearchControllerMixin> extends StatefulWidget {
   const SearchField({
+    required this.searchController,
+    this.searchFieldWidth = defaultSearchFieldWidth,
+    this.searchFieldEnabled = true,
+    this.shouldRequestFocus = false,
+    this.supportsNavigation = true,
+    this.onClose,
+    super.key,
+  });
+
+  final T searchController;
+
+  final double searchFieldWidth;
+
+  /// Whether the search text field should be enabled.
+  final bool searchFieldEnabled;
+
+  /// Whether the search text field should automatically request focus once it
+  /// is built.
+  final bool shouldRequestFocus;
+
+  /// Whether this search field includes navigation controls for traversing
+  /// search results.
+  final bool supportsNavigation;
+
+  /// Optional callback called when the search field suffix close action is
+  /// triggered.
+  final VoidCallback? onClose;
+
+  @override
+  State<SearchField> createState() => _SearchFieldState();
+}
+
+class _SearchFieldState extends State<SearchField>
+    with AutoDisposeMixin, SearchFieldMixin {
+  @override
+  SearchControllerMixin get searchController => widget.searchController;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: widget.searchFieldWidth,
+      height: defaultTextFieldHeight,
+      child: StatelessSearchField(
+        controller: searchController,
+        searchFieldEnabled: widget.searchFieldEnabled,
+        shouldRequestFocus: widget.shouldRequestFocus,
+        supportsNavigation: widget.supportsNavigation,
+        onClose: widget.onClose,
+      ),
+    );
+  }
+}
+
+/// A stateless text field with search capability.
+///
+/// The widget that builds [StatelessSearchField] is responsible for mixing in
+/// [SearchFieldMixin], which manages the search field lifecycle.
+///
+/// Use this widget for use cases where the default state management that
+/// [SearchField] provides is not sufficient for the use case. This can be the
+/// case when the elements initialized and disposed in
+/// [SearchControllerMixin.initSearch] and [SearchControllerMixin.disposeSearch]
+/// need to be accessed outside of the context of the search code.
+class StatelessSearchField<T extends SearchableDataMixin>
+    extends StatelessWidget {
+  const StatelessSearchField({
     required this.controller,
     required this.searchFieldEnabled,
     required this.shouldRequestFocus,
@@ -924,7 +999,8 @@ class SearchField<T extends SearchableDataMixin> extends StatelessWidget {
   /// Label for the search field's input text decoration.
   final String label;
 
-  /// Callback called when the search field suffix close action is triggered.
+  /// Optional callback called when the search field suffix close action is
+  /// triggered.
   final VoidCallback? onClose;
 
   /// Optional prefix to be used for the [TextField]'s decoration.
@@ -1132,7 +1208,7 @@ class _AutoCompleteSearchFieldState extends State<AutoCompleteSearchField>
       focusNode: widget.controller.rawKeyboardFocusNode,
       child: CompositedTransformTarget(
         link: widget.controller.autoCompleteLayerLink,
-        child: SearchField(
+        child: StatelessSearchField(
           controller: widget.controller,
           searchFieldKey: widget.controller.searchFieldKey,
           searchFieldEnabled: widget.searchFieldEnabled,

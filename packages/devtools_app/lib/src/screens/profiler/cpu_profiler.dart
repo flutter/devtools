@@ -197,13 +197,13 @@ class _CpuProfilerState extends State<CpuProfiler>
             // well. This will require implementing search for tree tables.
             if (CpuProfiler.searchableTabKeys.contains(currentTab.key)) ...[
               if (currentTab.key == ProfilerTab.methodTable.key)
-                CpuProfilerSearchField<MethodTableController>(
+                SearchField<MethodTableController>(
                   searchController: widget.controller.methodTableController,
                 )
               else
-                CpuProfilerSearchField<CpuProfilerController>(
+                SearchField<CpuProfilerController>(
                   searchController: widget.controller,
-                )
+                ),
             ],
             if (currentTab.key == ProfilerTab.cpuFlameChart.key) ...[
               Padding(
@@ -361,38 +361,6 @@ class _CpuProfilerState extends State<CpuProfiler>
     setState(() {
       roots.forEach(callback);
     });
-  }
-}
-
-// TODO(kenz): make other uses of [SearchFieldMixin] use a stateful search field
-// like this widget instead of having to mixin [SearchFieldMixin] everywhere.
-class CpuProfilerSearchField<T extends SearchControllerMixin>
-    extends StatefulWidget {
-  const CpuProfilerSearchField({required this.searchController, super.key});
-
-  final T searchController;
-
-  @override
-  State<CpuProfilerSearchField> createState() => _CpuProfilerSearchFieldState();
-}
-
-class _CpuProfilerSearchFieldState extends State<CpuProfilerSearchField>
-    with AutoDisposeMixin, SearchFieldMixin {
-  @override
-  SearchControllerMixin get searchController => widget.searchController;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: wideSearchTextWidth,
-      height: defaultTextFieldHeight,
-      child: SearchField(
-        controller: searchController,
-        searchFieldEnabled: true,
-        shouldRequestFocus: false,
-        supportsNavigation: true,
-      ),
-    );
   }
 }
 

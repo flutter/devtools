@@ -522,9 +522,9 @@ extension ThemeDataExtension on ThemeData {
   }
 }
 
-const extraWideSearchTextWidth = 600.0;
-const wideSearchTextWidth = 400.0;
-const defaultSearchTextWidth = 200.0;
+const extraWideSearchFieldWidth = 600.0;
+const wideSearchFieldWidth = 400.0;
+const defaultSearchFieldWidth = 200.0;
 double get defaultTextFieldHeight => scaleByFontFactor(32.0);
 double get defaultTextFieldNumberWidth => scaleByFontFactor(100.0);
 

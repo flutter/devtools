@@ -232,11 +232,12 @@ class LegacyTimelineEventsController extends DisposableController
     bool searchPreviousMatches = false,
   }) {
     if (search.isEmpty) return <TimelineEvent>[];
+    final regexSearch = RegExp(search, caseSensitive: false);
     final matches = <TimelineEvent>[];
     if (searchPreviousMatches) {
       final List<TimelineEvent> previousMatches = searchMatches.value;
       for (final previousMatch in previousMatches) {
-        if (previousMatch.name!.caseInsensitiveContains(search)) {
+        if (previousMatch.matchesSearchToken(regexSearch)) {
           matches.add(previousMatch);
         }
       }
@@ -246,7 +247,7 @@ class LegacyTimelineEventsController extends DisposableController
         breadthFirstTraversal<TimelineEvent>(
           event,
           action: (TimelineEvent e) {
-            if (e.name!.caseInsensitiveContains(search)) {
+            if (e.matchesSearchToken(regexSearch)) {
               matches.add(e);
             }
           },
