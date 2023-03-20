@@ -43,13 +43,27 @@ void main() {
 
     final evalTester = _EvalTester(tester);
 
-    // await _testBasicEval(evalTester);
-    // await _testAssignment(evalTester);
+    await _testBasicEval(evalTester);
+    await _testAssignment(evalTester);
 
     await evalTester.switchToSnapshotsAndTakeOne();
 
     await _testRootIsAccessible(evalTester);
   });
+}
+
+Future<void> _testBasicEval(_EvalTester tester) async {
+  await tester.testEval('21 + 34', find.text('55'));
+}
+
+Future<void> _testAssignment(_EvalTester tester) async {
+  await tester.testEval('DateTime(2023)', find.text('DateTime'));
+  await tester.testEval(
+    r'var x = $0',
+    find.textContaining('Variable x is created '),
+  );
+  await tester.testEval(
+      'x.toString()', find.text("'${DateTime(2023).toString()}'"));
 }
 
 Future<void> _testRootIsAccessible(_EvalTester tester) async {
