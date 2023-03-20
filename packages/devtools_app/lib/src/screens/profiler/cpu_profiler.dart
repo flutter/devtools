@@ -199,10 +199,12 @@ class _CpuProfilerState extends State<CpuProfiler>
               if (currentTab.key == ProfilerTab.methodTable.key)
                 SearchField<MethodTableController>(
                   searchController: widget.controller.methodTableController,
+                  containerPadding: const EdgeInsets.all(0.0),
                 )
               else
                 SearchField<CpuProfilerController>(
                   searchController: widget.controller,
+                  containerPadding: const EdgeInsets.all(0.0),
                 ),
             ],
             if (currentTab.key == ProfilerTab.cpuFlameChart.key) ...[

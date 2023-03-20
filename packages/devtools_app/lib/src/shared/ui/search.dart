@@ -26,8 +26,6 @@ import '../utils.dart';
 const defaultTopMatchesLimit = 10;
 int topMatchesLimit = defaultTopMatchesLimit;
 
-const double _searchControlDividerHeight = 24.0;
-
 mixin SearchControllerMixin<T extends SearchableDataMixin> {
   final _searchNotifier = ValueNotifier<String>('');
   final _searchInProgress = ValueNotifier<bool>(false);
@@ -902,19 +900,28 @@ mixin SearchFieldMixin<T extends StatefulWidget>
 /// field, consider using [StatelessSearchField] instead and manually mixing in
 /// [SearchFieldMixin] so that you can manage the lifecycle properly.
 class SearchField<T extends SearchControllerMixin> extends StatefulWidget {
-  const SearchField({
+  SearchField({
     required this.searchController,
-    this.searchFieldWidth = defaultSearchFieldWidth,
     this.searchFieldEnabled = true,
     this.shouldRequestFocus = false,
     this.supportsNavigation = true,
     this.onClose,
+    this.searchFieldWidth = defaultSearchFieldWidth,
+    double? searchFieldHeight,
+    EdgeInsets? containerPadding,
     super.key,
-  });
+  })  : searchFieldHeight = searchFieldHeight ?? defaultTextFieldHeight,
+        containerPadding =
+            containerPadding ?? const EdgeInsets.only(top: _defaultTopPadding);
 
   final T searchController;
 
   final double searchFieldWidth;
+
+  final double searchFieldHeight;
+
+  /// The padding for the [Container] that contains the search text field.
+  final EdgeInsets containerPadding;
 
   /// Whether the search text field should be enabled.
   final bool searchFieldEnabled;
@@ -931,6 +938,10 @@ class SearchField<T extends SearchControllerMixin> extends StatefulWidget {
   /// triggered.
   final VoidCallback? onClose;
 
+  /// Padding to ensure the 'Search' hint on the text field is not cut off for
+  /// the default text field height [defaultTextFieldHeight].
+  static const _defaultTopPadding = 3.0;
+
   @override
   State<SearchField> createState() => _SearchFieldState();
 }
@@ -944,7 +955,8 @@ class _SearchFieldState extends State<SearchField>
   Widget build(BuildContext context) {
     return Container(
       width: widget.searchFieldWidth,
-      height: defaultTextFieldHeight,
+      height: widget.searchFieldHeight,
+      padding: widget.containerPadding,
       child: StatelessSearchField(
         controller: searchController,
         searchFieldEnabled: widget.searchFieldEnabled,
@@ -1025,7 +1037,7 @@ class StatelessSearchField<T extends SearchableDataMixin>
 
   @override
   Widget build(BuildContext context) {
-    final textStyle = style ?? Theme.of(context).textTheme.titleMedium;
+    final textStyle = style ?? Theme.of(context).textTheme.bodyMedium;
 
     final searchField = TextField(
       key: searchFieldKey,
@@ -1049,7 +1061,10 @@ class StatelessSearchField<T extends SearchableDataMixin>
       // snapshots will compare with the exact color.
       decoration: decoration ??
           InputDecoration(
-            contentPadding: const EdgeInsets.all(denseSpacing),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: denseSpacing,
+              vertical: densePadding,
+            ),
             border: const OutlineInputBorder(),
             labelText: label,
             // TODO(kenz): add the search icon to the search field.
@@ -1060,7 +1075,7 @@ class StatelessSearchField<T extends SearchableDataMixin>
                     children: <Widget>[
                       prefix!,
                       SizedBox(
-                        height: _searchControlDividerHeight,
+                        height: inputDecorationElementHeight,
                         width: defaultIconSize,
                         child: Transform.rotate(
                           angle: degToRad(90),
@@ -1401,7 +1416,7 @@ class SearchNavigationControls extends StatelessWidget {
                 ),
                 _matchesStatus(numMatches),
                 SizedBox(
-                  height: _searchControlDividerHeight,
+                  height: inputDecorationElementHeight,
                   width: defaultIconSize,
                   child: Transform.rotate(
                     angle: degToRad(90),

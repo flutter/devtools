@@ -200,6 +200,7 @@ class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
                         searchController:
                             _timelineEventsController.legacyController,
                         searchFieldEnabled: searchFieldEnabled,
+                        searchFieldWidth: wideSearchFieldWidth,
                       );
                     },
                   ),

@@ -271,6 +271,8 @@ double get actionWidgetSize => scaleByFontFactor(48.0);
 
 double get statusLineHeight => scaleByFontFactor(24.0);
 
+double get inputDecorationElementHeight => scaleByFontFactor(20.0);
+
 const chartTextFontSize = 10.0;
 
 const devtoolsGreen = Color(0xFF5BC43B);
