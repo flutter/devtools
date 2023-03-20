@@ -4,24 +4,50 @@
 
 import 'package:flutter/foundation.dart';
 
+import '../../../../shared/primitives/auto_dispose.dart';
 import '../../../../shared/primitives/trees.dart';
 import '../../../../shared/primitives/utils.dart';
+import '../../../../shared/ui/search.dart';
 import '../../cpu_profile_model.dart';
+import '../../cpu_profiler_controller.dart';
 import 'method_table_model.dart';
 
 /// Controller for the CPU profile method table.
 ///
 /// This controller is responsible for managing state of the Method table UI
 /// and for providing utility methods to interact with the active data.
-class MethodTableController {
+class MethodTableController extends DisposableController
+    with
+        SearchControllerMixin<MethodTableGraphNode>,
+        AutoDisposeControllerMixin {
+  MethodTableController({
+    required ValueListenable<CpuProfileData?> dataNotifier,
+  }) {
+    addAutoDisposeListener(dataNotifier, () {
+      createMethodTableGraph(dataNotifier.value);
+    });
+  }
+
   final selectedNode = ValueNotifier<MethodTableGraphNode?>(null);
 
   ValueListenable<List<MethodTableGraphNode>> get methods => _methods;
 
   final _methods = ValueNotifier<List<MethodTableGraphNode>>([]);
 
-  void createMethodTableGraph(CpuProfileData cpuProfileData) {
+  void _setData(List<MethodTableGraphNode> data) {
+    _methods.value = data;
+    refreshSearchMatches();
+  }
+
+  @visibleForTesting
+  void createMethodTableGraph(CpuProfileData? cpuProfileData) {
     reset();
+    if (cpuProfileData == null ||
+        cpuProfileData == CpuProfilerController.baseStateCpuProfileData ||
+        cpuProfileData == CpuProfilerController.emptyAppStartUpProfile) {
+      return;
+    }
+
     assert(cpuProfileData.processed);
 
     List<CpuStackFrame> profileRoots = cpuProfileData.callTreeRoots;
@@ -68,7 +94,7 @@ class MethodTableController {
         },
       );
     }
-    _methods.value = methodMap.values.toList();
+    _setData(methodMap.values.toList());
   }
 
   double callerPercentageFor(MethodTableGraphNode node) {
@@ -79,9 +105,12 @@ class MethodTableController {
     return selectedNode.value?.successorEdgePercentage(node) ?? 0.0;
   }
 
-  void reset() {
+  void reset({bool shouldResetSearch = false}) {
     selectedNode.value = null;
-    _methods.value = <MethodTableGraphNode>[];
+    if (shouldResetSearch) {
+      resetSearch();
+    }
+    _setData([]);
   }
 
   @visibleForTesting
@@ -89,4 +118,8 @@ class MethodTableController {
     methods.value.sort((m1, m2) => m2.totalCount.compareTo(m1.totalCount));
     return methods.value.map((node) => node.toString()).toList().join('\n');
   }
+
+  @override
+  Iterable<MethodTableGraphNode> get currentDataToSearchThrough =>
+      methods.value;
 }

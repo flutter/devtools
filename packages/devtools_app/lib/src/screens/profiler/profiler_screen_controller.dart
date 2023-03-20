@@ -13,9 +13,9 @@ import '../../shared/config_specific/logger/allowed_error.dart';
 import '../../shared/globals.dart';
 import '../../shared/primitives/auto_dispose.dart';
 import '../../shared/primitives/utils.dart';
-import 'cpu_profile_controller.dart';
 import 'cpu_profile_model.dart';
 import 'cpu_profile_service.dart';
+import 'cpu_profiler_controller.dart';
 import 'profiler_screen.dart';
 import 'sampling_rate.dart';
 

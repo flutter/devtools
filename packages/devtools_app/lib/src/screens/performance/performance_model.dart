@@ -463,7 +463,7 @@ class OfflineTimelineEvent extends TimelineEvent {
 
 abstract class TimelineEvent extends TreeNode<TimelineEvent>
     with
-        DataSearchStateMixin,
+        SearchableDataMixin,
         TreeDataSearchStateMixin<TimelineEvent>,
         FlameChartDataMixin {
   TimelineEvent(TraceEventWrapper firstTraceEvent)
