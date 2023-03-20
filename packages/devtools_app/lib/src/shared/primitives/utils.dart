@@ -139,7 +139,7 @@ enum DurationDisplayUnit {
 
   static DurationDisplayUnit unitFor(int micros) {
     if (micros < 100) {
-    // Display values less than 0.1 millisecond as microseconds.
+      // Display values less than 0.1 millisecond as microseconds.
       return DurationDisplayUnit.micros;
     } else if (micros < 1000000) {
       return DurationDisplayUnit.milliseconds;
