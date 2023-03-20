@@ -149,7 +149,7 @@ class _EvalTester {
   /// Returns [next] or [finder].
   Future<Finder> tapAndPump(
     Finder finder, {
-    Duration duration = safePumpDuration,
+    Duration? duration,
     Finder? next,
     int at = 0,
   }) async {
@@ -163,7 +163,6 @@ class _EvalTester {
       await tester.tap(finder);
       print(12);
       await tester.pump(duration);
-      // Second pump is to avoid error 'Build scheduled during frame.'
       print(13);
       await tester.pumpAndSettle();
       print(14);
