@@ -73,7 +73,7 @@ class FlatTableController<T> extends TableControllerBase<T> {
       _modifiableOriginalData = data;
     } else {
       _unmodifiableOriginalData = UnmodifiableListView(
-        List.of(data),
+        List<T>.of(data),
       );
     }
 

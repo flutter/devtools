@@ -540,6 +540,9 @@ class CpuProfilerController extends DisposableController
 
   @override
   void dispose() {
+    // [methodTableController] needs to be disposed before [_dataNotifier] since
+    // it is late initialized with a reference to [_dataNotifier].
+    methodTableController.dispose();
     _dataNotifier.dispose();
     _selectedCpuStackFrameNotifier.dispose();
     _processingNotifier.dispose();

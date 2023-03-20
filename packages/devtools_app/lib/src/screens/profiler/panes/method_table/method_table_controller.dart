@@ -44,7 +44,9 @@ class MethodTableController extends DisposableController
     reset();
     if (cpuProfileData == null ||
         cpuProfileData == CpuProfilerController.baseStateCpuProfileData ||
-        cpuProfileData == CpuProfilerController.emptyAppStartUpProfile) return;
+        cpuProfileData == CpuProfilerController.emptyAppStartUpProfile) {
+      return;
+    }
 
     assert(cpuProfileData.processed);
 

@@ -366,7 +366,8 @@ class _CpuProfilerState extends State<CpuProfiler>
 
 // TODO(kenz): make other uses of [SearchFieldMixin] use a stateful search field
 // like this widget instead of having to mixin [SearchFieldMixin] everywhere.
-class CpuProfilerSearchField<T> extends StatefulWidget {
+class CpuProfilerSearchField<T extends SearchControllerMixin>
+    extends StatefulWidget {
   const CpuProfilerSearchField({required this.searchController, super.key});
 
   final T searchController;

@@ -53,6 +53,13 @@ enum ScrollKind {
   parent,
 }
 
+/// A [FlatTable] widget that is searchable.
+/// 
+/// The table requires a [searchController], which is responsible for feeding
+/// information about search matches and the active search match to the table.
+/// 
+/// This table will automatically refresh search matches on the
+/// [searchController] after sort operations that are triggered from the table.
 class SearchableFlatTable<T extends SearchableDataMixin> extends FlatTable {
   SearchableFlatTable({
     Key? key,
