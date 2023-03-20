@@ -12,6 +12,7 @@ import 'package:devtools_app/src/screens/memory/panes/control/primary_controls.d
 import 'package:devtools_app/src/screens/memory/panes/diff/widgets/snapshot_list.dart';
 import 'package:devtools_app/src/shared/banner_messages.dart';
 import 'package:devtools_app/src/shared/common_widgets.dart';
+import 'package:devtools_app/src/shared/console/console_service.dart';
 import 'package:devtools_app/src/shared/console/widgets/console_pane.dart';
 import 'package:devtools_app/src/shared/primitives/simple_items.dart';
 import 'package:devtools_app/src/shared/ui/search.dart';
@@ -60,18 +61,15 @@ Future<void> _testRootIsAccessible(_EvalTester tester) async {
   await tester.tapAndPump(find.text('Any'), duration: longPumpDuration);
 
   Finder next = find.textContaining('MyApp, retained size ');
-  next =
-      await tester.tapAndPump(next, next: find.text('references'), tapTimes: 2);
+  next = await tester.tapAndPump(next, next: find.text('references'));
+  next = await tester.tapAndPump(next, next: find.textContaining('static ('));
+  next = await tester.tapAndPump(next, next: find.text('inbound'));
   next = await tester.tapAndPump(next,
-      next: find.textContaining('static ('), tapTimes: 2);
-  next = await tester.tapAndPump(next, next: find.text('inbound'), tapTimes: 2);
+      next: find.text('_List'), at: 1); // Second in the list
   next = await tester.tapAndPump(next,
-      next: find.text('_List').at(1), tapTimes: 2); // Second in the list
-  next = await tester.tapAndPump(next,
-      next: find.text('Class').at(1),
-      tapTimes: 2); // Second after column header
+      next: find.text('Class'), at: 1); // Second after column name
 
-  await tester.tapAndPump(next, next: find.text('Root'), tapTimes: 2);
+  await tester.tapAndPump(next, next: find.text('Root'));
 }
 
 class _EvalTester {
@@ -153,32 +151,34 @@ class _EvalTester {
     Finder finder, {
     Duration duration = safePumpDuration,
     Finder? next,
-    int tapTimes = 1,
+    int at = 0,
   }) async {
-    print('!!! tapAndPump for $finder');
+    int tryNumber = 0;
+
     Future<void> action() async {
-      for (var i = 0; i < tapTimes; i++) {
-        print(11);
-        await tester.tap(finder);
-        print(12);
-        await tester.pumpAndSettle(duration);
-        // Second pump is to avoid error 'Build scheduled during frame.'
-        print(13);
-        await tester.pumpAndSettle();
-        print(14);
-      }
+      logStatus("tapping #$tryNumber to find $at'th item in the finder\n"
+          '[$finder]\n');
+      tryNumber++;
+      print(11);
+      await tester.tap(finder);
+      print(12);
+      await tester.pump(duration);
+      // Second pump is to avoid error 'Build scheduled during frame.'
+      print(13);
+      await tester.pumpAndSettle();
+      print(14);
     }
 
     await action();
 
     if (next == null) return finder;
 
-    for (final i in Iterable.generate(10)) {
+    while (tryNumber < 10) {
       try {
-        tester.firstWidget<Widget>(next);
-        return next;
+        final items = tester.widgetList(next);
+        if (at < items.length) return next.at(at);
+        await action();
       } on StateError {
-        print('\nre-tapping #$i the finder [$finder]\n\n');
         await action();
       }
     }

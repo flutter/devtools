@@ -39,7 +39,7 @@ mixin CollapsibleAnimationMixin<T extends StatefulWidget>
   @override
   void initState() {
     super.initState();
-    expandController = defaultAnimationController(this);
+    expandController = noAnimationController(this);
     expandCurve = defaultCurvedAnimation(expandController);
     expandArrowAnimation =
         Tween<double>(begin: 0.75, end: 1.0).animate(expandCurve);

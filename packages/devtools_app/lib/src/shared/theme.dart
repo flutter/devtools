@@ -581,6 +581,16 @@ AnimationController longAnimationController(
   );
 }
 
+/// Builds a [longDuration] animation controller.
+///
+/// This is the standard duration to use for slow animations.
+AnimationController noAnimationController(TickerProvider vsync) {
+  return AnimationController(
+    duration: Duration.zero,
+    vsync: vsync,
+  );
+}
+
 /// The default curve we use for animations.
 ///
 /// Inspector animations benefit from a symmetric animation curve which makes
