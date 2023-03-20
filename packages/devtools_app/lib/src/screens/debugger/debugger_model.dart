@@ -225,6 +225,11 @@ class StackFrameAndSourcePosition {
     }
     name = name.replaceAll(anonymousClosureName, closureName);
     name = name == none ? name : '$name';
+
+    if (frame.code?.kind == CodeKind.kNative) {
+      return '<native code: $name>';
+    }
+
     return name;
   }
 

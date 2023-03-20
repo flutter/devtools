@@ -34,6 +34,7 @@ TODO: Remove this section if there are not any general updates.
 * Hide "search in file" dialog if "file search" dialog is open - [#5393](https://github.com/flutter/devtools/pull/5393)
 * Fix file search bug where last letter disappeared when searching at end of file name - [#5397](https://github.com/flutter/devtools/pull/5397)
 * Add search icon in file bar to make file search more discoverable - [#5351](https://github.com/flutter/devtools/issues/5351)
+* Allow expression evaluation when pausing in JS for web apps - [#5427](https://github.com/flutter/devtools/pull/5427)
 
 ## Network profiler updates
 * Fix a bug viewing JSON responses with null values - [#5424](https://github.com/flutter/devtools/pull/5424)

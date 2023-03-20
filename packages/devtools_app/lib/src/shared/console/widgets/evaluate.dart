@@ -320,7 +320,7 @@ class ExpressionEvalFieldState extends State<ExpressionEvalField>
 
       // Response is either a ErrorRef, InstanceRef, or Sentinel.
       final Response response;
-      if (evalService.isStoppedAtFrame) {
+      if (evalService.isStoppedAtDartFrame) {
         response = await evalService.evalAtCurrentFrame(expressionText);
       } else {
         if (_tryProcessAssignment(expressionText)) return;

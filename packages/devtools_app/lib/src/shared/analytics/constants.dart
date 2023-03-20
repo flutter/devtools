@@ -108,6 +108,7 @@ const cpuProfileDisplayTreeGuidelines = 'cpuProfileDisplayTreeGuidelines';
 const refreshStatistics = 'refreshStatistics';
 const showFileExplorer = 'showFileExplorer';
 const hideFileExplorer = 'hideFileExplorer';
+const pausedWithNoFrames = 'pausedWithNoFrames';
 
 // Logging UX actions:
 const structuredErrors = 'structuredErrors';

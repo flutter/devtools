@@ -117,6 +117,22 @@ void main() {
           ),
           kind: FrameKind.kAsyncSuspensionMarker,
         ),
+        Frame(
+          index: 5,
+          code: CodeRef(
+            name: '_createTimer',
+            id: 'testJsCodeRefId',
+            kind: CodeKind.kNative,
+          ),
+          location: SourceLocation(
+            script: ScriptRef(
+              uri: 'http://localhost:63691/dwds/src/injected/client.js',
+              id: 'jsScriptId',
+            ),
+            tokenPos: 12,
+          ),
+          kind: FrameKind.kRegular,
+        ),
       ];
 
       final stackFramesWithLocation =
@@ -185,6 +201,17 @@ void main() {
       );
       // Stack frame 4
       expect(find.text('<async break>'), findsOneWidget);
+      // Stack frame 5
+      expect(
+        find.byWidgetPredicate(
+          (Widget widget) =>
+              widget is RichText &&
+              widget.text
+                  .toPlainText()
+                  .contains('<native code: _createTimer> client.js'),
+        ),
+        findsOneWidget,
+      );
     },
   );
 }
