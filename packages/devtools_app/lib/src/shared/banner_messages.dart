@@ -482,12 +482,12 @@ void maybePushDebugModeMemoryMessage(
 extension BannerMessageThemeExtension on ThemeData {
   TextStyle get warningMessageLinkStyle => regularTextStyle.copyWith(
         decoration: TextDecoration.underline,
-        color: colorScheme.tertiary,
+        color: colorScheme.onWarningContainerLink,
       );
 
   TextStyle get errorMessageLinkStyle => regularTextStyle.copyWith(
         decoration: TextDecoration.underline,
-        color: colorScheme.error,
+        color: colorScheme.onErrorContainerLink,
       );
 }
 
