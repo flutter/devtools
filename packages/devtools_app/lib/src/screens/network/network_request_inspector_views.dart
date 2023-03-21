@@ -634,14 +634,24 @@ class NetworkRequestOverviewView extends StatelessWidget {
     for (final instant in data.instantEvents) {
       final instantEventStart = data.instantEvents.first.timeRange!.start!;
       final timeRange = instant.timeRange!;
+      final startDisplay = durationText(
+        timeRange.start! - instantEventStart,
+        unit: DurationDisplayUnit.milliseconds,
+      );
+      final endDisplay = durationText(
+        timeRange.end! - instantEventStart,
+        unit: DurationDisplayUnit.milliseconds,
+      );
+      final totalDisplay = durationText(
+        timeRange.duration,
+        unit: DurationDisplayUnit.milliseconds,
+      );
       result.addAll([
         _buildRow(
           context: context,
           title: instant.name,
           child: _valueText(
-            '[${durationText(timeRange.start! - instantEventStart)} - '
-            '${durationText(timeRange.end! - instantEventStart)}]'
-            ' → ${durationText(timeRange.duration)} total',
+            '[$startDisplay - $endDisplay] → $totalDisplay total',
           ),
         ),
         if (instant != data.instantEvents.last)
