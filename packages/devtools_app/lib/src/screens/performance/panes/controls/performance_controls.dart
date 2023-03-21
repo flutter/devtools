@@ -25,7 +25,7 @@ class PerformanceControls extends StatelessWidget {
     required this.onClear,
   });
 
-  static const minScreenWidthForTextBeforeScaling = 920.0;
+  static const minScreenWidthForTextBeforeScaling = 1020.0;
 
   final PerformanceController controller;
 
@@ -97,9 +97,12 @@ class _PrimaryControls extends StatelessWidget {
         if (!offline)
           DevToolsButton(
             icon: Icons.block,
+            label: 'Clear all',
             gaScreen: gac.performance,
             gaSelection: gac.clear,
             tooltip: 'Clear all data on the Performance screen',
+            minScreenWidthForTextBeforeScaling:
+                PerformanceControls.minScreenWidthForTextBeforeScaling,
             onPressed: processing ? null : _clearPerformanceData,
           ),
       ],
