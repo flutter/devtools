@@ -40,6 +40,7 @@ jank is detected on an iOS device. - [#5455](https://github.com/flutter/devtools
 
 ## Network profiler updates
 * Fix a bug viewing JSON responses with null values - [#5424](https://github.com/flutter/devtools/pull/5424)
+* Fix a bug where JSON requests were shown in plain text, instead of the formatted JSON viewer - [#5463](https://github.com/flutter/devtools/pull/5463)
 
 ## Logging updates
 TODO: Remove this section if there are not any general updates.
