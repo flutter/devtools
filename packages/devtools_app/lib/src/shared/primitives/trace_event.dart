@@ -183,3 +183,28 @@ enum TimelineEventType {
   async,
   other,
 }
+
+class ThreadNameEvent {
+  const ThreadNameEvent._(this.name, this.threadId);
+
+  factory ThreadNameEvent.from(TraceEvent event) {
+    final args = event.args!;
+    return ThreadNameEvent._(
+      args[TraceEvent.nameKey] as String?,
+      event.threadId,
+    );
+  }
+
+  final String? name;
+  final int? threadId;
+
+  @override
+  bool operator ==(other) {
+    return other is ThreadNameEvent &&
+        name == other.name &&
+        threadId == other.threadId;
+  }
+
+  @override
+  int get hashCode => Object.hash(name, threadId);
+}
