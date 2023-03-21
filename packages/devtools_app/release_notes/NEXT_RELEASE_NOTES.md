@@ -18,6 +18,7 @@ TODO: Remove this section if there are not any general updates.
 * Persist a user's preference for whether the Flutter Frames chart should be shown by default. - [#5339](https://github.com/flutter/devtools/pull/5339)
 * Point users to [Impeller](https://github.com/flutter/flutter/wiki/Impeller) when shader compilation
 jank is detected on an iOS device. - [#5455](https://github.com/flutter/devtools/pull/5455)
+* Fix a performance regression in timeline event processing. - [#5460](https://github.com/flutter/devtools/pull/5460)
 
 ## CPU profiler updates
 * Add a Method Table to the CPU profiler - [#5366](https://github.com/flutter/devtools/pull/5366)
