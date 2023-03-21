@@ -192,7 +192,7 @@ class _RenderingTimeColumn extends ColumnData<LayerSnapshot> {
 
   @override
   String getDisplayValue(LayerSnapshot dataObject) =>
-      msText(dataObject.duration);
+      durationText(dataObject.duration);
 
   @override
   bool get numeric => true;

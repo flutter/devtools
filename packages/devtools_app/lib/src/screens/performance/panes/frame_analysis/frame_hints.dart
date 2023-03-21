@@ -344,7 +344,10 @@ class ShaderCompilationHint extends StatelessWidget {
         message: TextSpan(
           children: [
             TextSpan(
-              text: '${msText(shaderTime)}',
+              text: '${durationText(
+                shaderTime,
+                unit: DurationDisplayUnit.milliseconds,
+              )}',
               style: theme.fixedFontStyle,
             ),
             TextSpan(

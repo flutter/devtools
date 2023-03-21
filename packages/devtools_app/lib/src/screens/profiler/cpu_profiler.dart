@@ -387,7 +387,6 @@ class CpuProfileStats extends StatelessWidget {
       child: Container(
         height: _statsRowHeight,
         padding: const EdgeInsets.symmetric(
-          vertical: densePadding,
           horizontal: defaultSpacing,
         ),
         child: Row(
@@ -395,7 +394,7 @@ class CpuProfileStats extends StatelessWidget {
           children: [
             _stat(
               tooltip: 'The duration of time spanned by the CPU samples',
-              text: 'Duration: ${msText(metadata.time!.duration)}',
+              text: 'Duration: ${durationText(metadata.time!.duration)}',
               theme: theme,
             ),
             _stat(

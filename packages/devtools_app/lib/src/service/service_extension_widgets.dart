@@ -241,7 +241,7 @@ Future<void> _wrapReloadCall(
     await reloadCall();
     timer.stop();
     // 'restarted in 1.6s'
-    final String message = '${name}ed in ${renderDuration(timer.elapsed)}';
+    final String message = '${name}ed in ${durationText(timer.elapsed)}';
     messageBus.addEvent(BusEvent('$name.end', data: message));
     // TODO(devoncarew): Add analytics.
     //ga.select(ga.devToolsMain, ga.hotRestart, timer.elapsed.inMilliseconds);

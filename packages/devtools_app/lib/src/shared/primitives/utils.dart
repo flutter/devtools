@@ -128,22 +128,71 @@ String printGB(num bytes, {int fractionDigits = 1, bool includeUnit = false}) {
   return output;
 }
 
-/// Converts a [Duration] into a readable text representation in milliseconds.
+enum DurationDisplayUnit {
+  micros('μs'),
+  milliseconds('ms'),
+  seconds('s');
+
+  const DurationDisplayUnit(this.display);
+
+  final String display;
+
+  static DurationDisplayUnit unitFor(int micros) {
+    if (micros < 100) {
+      // Display values less than 0.1 millisecond as microseconds.
+      return DurationDisplayUnit.micros;
+    } else if (micros < 1000000) {
+      return DurationDisplayUnit.milliseconds;
+    }
+    return DurationDisplayUnit.seconds;
+  }
+}
+
+/// Converts a [Duration] into a readble text representation in the specified
+/// [unit].
 ///
-/// [includeUnit] - whether to include 'ms' at the end of the returned value
-/// [fractionDigits] - how many fraction digits should appear after the decimal
+/// [includeUnit] - whether to include the unit at the end of the returned value
+/// [fractionDigits] - how many fraction digits should appear after the decimal.
+/// This parameter value will be ignored when the unit is specified or inferred
+/// as [DurationDisplayUnit.micros], since there cannot be a fractional value of
+/// microseconds from the [Duration] class.
 /// [allowRoundingToZero] - when true, this method may return zero for a very
 /// small number (e.g. '0.0 ms'). When false, this method will return a minimum
 /// value with the less than operator for very small values (e.g. '< 0.1 ms').
 /// The value returned will always respect the specified [fractionDigits].
-String msText(
+String durationText(
   Duration dur, {
+  DurationDisplayUnit? unit,
   bool includeUnit = true,
   int fractionDigits = 1,
   bool allowRoundingToZero = true,
 }) {
-  var durationStr = (dur.inMicroseconds / 1000).toStringAsFixed(fractionDigits);
+  if (!allowRoundingToZero && unit == null) {
+    throw AssertionError('To disable rounding to zero, please specify a unit.');
+  }
 
+  final micros = dur.inMicroseconds;
+  unit ??= DurationDisplayUnit.unitFor(micros);
+  double durationAsDouble;
+  switch (unit) {
+    case DurationDisplayUnit.micros:
+      durationAsDouble = micros.toDouble();
+      break;
+    case DurationDisplayUnit.milliseconds:
+      durationAsDouble = micros / 1000;
+      break;
+    case DurationDisplayUnit.seconds:
+      durationAsDouble = micros / 1000000;
+      break;
+  }
+
+  // Hide any fraction digits when the unit is microseconds, since the
+  // duration displayed will always be a whole number in this case.
+  if (unit == DurationDisplayUnit.micros) {
+    fractionDigits = 0;
+  }
+
+  var durationStr = '${durationAsDouble.toStringAsFixed(fractionDigits)}';
   if (dur != Duration.zero && !allowRoundingToZero) {
     final zeroRegexp = RegExp(r'[0]+[.][0]+');
     if (zeroRegexp.hasMatch(durationStr)) {
@@ -155,15 +204,7 @@ String msText(
       durationStr = buf.toString();
     }
   }
-  return '$durationStr${includeUnit ? ' ms' : ''}';
-}
-
-/// Render the given [Duration] to text using either seconds or milliseconds as
-/// the units, depending on the value of the duration.
-String renderDuration(Duration duration) {
-  return duration.inMilliseconds < 1000
-      ? '${nf.format(duration.inMilliseconds)}ms'
-      : '${(duration.inMilliseconds / 1000).toStringAsFixed(1)}s';
+  return '$durationStr${includeUnit ? ' ${unit.display}' : ''}';
 }
 
 T? nullSafeMin<T extends num>(T? a, T? b) {
