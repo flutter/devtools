@@ -15,10 +15,12 @@ import '../../../../../shared/globals.dart';
 import '../../../../../shared/memory/class_name.dart';
 import '../../../../../shared/primitives/auto_dispose.dart';
 import '../../../../../shared/primitives/utils.dart';
+import '../../../../../shared/side_panel.dart';
 import '../../../shared/heap/class_filter.dart';
 import '../../../shared/heap/heap.dart';
 import '../../../shared/heap/model.dart';
 import '../../../shared/primitives/memory_utils.dart';
+import '../diff_pane.dart';
 import 'class_data.dart';
 import 'heap_diff.dart';
 import 'item_controller.dart';
@@ -32,6 +34,9 @@ class DiffPaneController extends DisposableController {
   /// If true, a snapshot is being taken.
   ValueListenable<bool> get isTakingSnapshot => _isTakingSnapshot;
   final _isTakingSnapshot = ValueNotifier<bool>(false);
+
+  final sidePanelController =
+      SidePanelControllerMarkdownString(snapshotDocumentation);
 
   final retainingPathController = RetainingPathController();
 
@@ -76,6 +81,8 @@ class DiffPaneController extends DisposableController {
     core._selectedSnapshotIndex.value = newElementIndex;
     _isTakingSnapshot.value = false;
     derived._updateValues();
+
+    if (newElementIndex == 1) sidePanelController.toggleVisibility(true);
   }
 
   void clearSnapshots() {

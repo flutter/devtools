@@ -12,8 +12,8 @@ import '../shared/analytics/constants.dart' as gac;
 import '../shared/common_widgets.dart';
 import '../shared/dialogs.dart';
 import '../shared/globals.dart';
+import '../shared/side_panel.dart';
 import '../shared/theme.dart';
-import 'release_notes/release_notes.dart';
 
 class DevToolsAboutDialog extends StatelessWidget {
   const DevToolsAboutDialog(this.releaseNotesController);

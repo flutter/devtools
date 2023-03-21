@@ -14,7 +14,6 @@ import 'framework/framework_core.dart';
 import 'framework/initializer.dart';
 import 'framework/landing_screen.dart';
 import 'framework/notifications_view.dart';
-import 'framework/release_notes/release_notes.dart';
 import 'framework/report_feedback_button.dart';
 import 'framework/scaffold.dart';
 import 'screens/app_size/app_size_controller.dart';
@@ -53,6 +52,7 @@ import 'shared/primitives/auto_dispose.dart';
 import 'shared/primitives/utils.dart';
 import 'shared/routing.dart';
 import 'shared/screen.dart';
+import 'shared/side_panel.dart';
 import 'shared/theme.dart';
 import 'shared/ui/hover.dart';
 import 'shared/utils.dart';
@@ -353,7 +353,10 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
             ),
           ],
           child: NotificationsView(
-            child: ReleaseNotesViewer(
+            child: SidePanelViewer(
+              controller: releaseNotesController,
+              title: releaseNotesTitle,
+              textIfMarkdownDataEmpty: releaseNotesTextWhenEmpty,
               child: child,
             ),
           ),

@@ -10,31 +10,42 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:http/http.dart' as http;
-import 'package:provider/provider.dart';
 
-import '../../../devtools.dart' as devtools;
-import '../../shared/common_widgets.dart';
-import '../../shared/config_specific/launch_url/launch_url.dart';
-import '../../shared/config_specific/logger/logger.dart' as logger;
-import '../../shared/config_specific/server/server.dart' as server;
-import '../../shared/primitives/auto_dispose.dart';
-import '../../shared/theme.dart';
+import '../../devtools.dart' as devtools;
+import 'common_widgets.dart';
+import 'config_specific/launch_url/launch_url.dart';
 
-const debugTestReleaseNotes = false;
+import 'config_specific/logger/logger.dart' as logger;
+import 'config_specific/server/server.dart' as server;
+import 'globals.dart';
+import 'primitives/auto_dispose.dart';
+import 'primitives/simple_items.dart';
+import 'theme.dart';
 
-class ReleaseNotesViewer extends StatefulWidget {
-  const ReleaseNotesViewer({
+const debugTestReleaseNotes = true;
+
+const releaseNotesTitle = 'What\'s new in DevTools?';
+const releaseNotesTextWhenEmpty = 'Stay tuned for updates.';
+
+class SidePanelViewer extends StatefulWidget {
+  const SidePanelViewer({
     Key? key,
-    required this.child,
+    required this.controller,
+    this.title,
+    this.textIfMarkdownDataEmpty,
+    this.child,
   }) : super(key: key);
 
+  final SidePanelController controller;
+  final String? title;
+  final String? textIfMarkdownDataEmpty;
   final Widget? child;
 
   @override
-  _ReleaseNotesViewerState createState() => _ReleaseNotesViewerState();
+  SidePanelViewerState createState() => SidePanelViewerState();
 }
 
-class _ReleaseNotesViewerState extends State<ReleaseNotesViewer>
+class SidePanelViewerState extends State<SidePanelViewer>
     with AutoDisposeMixin, SingleTickerProviderStateMixin {
   static const maxViewerWidth = 600.0;
 
@@ -48,23 +59,20 @@ class _ReleaseNotesViewerState extends State<ReleaseNotesViewer>
 
   late bool isVisible;
 
-  late ReleaseNotesController releaseNotesController;
-
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    releaseNotesController = Provider.of<ReleaseNotesController>(context);
 
-    isVisible = releaseNotesController.releaseNotesVisible.value;
-    markdownData = releaseNotesController.releaseNotesMarkdown.value;
+    isVisible = widget.controller.isVisible.value;
+    markdownData = widget.controller.markdown.value;
 
     visibilityController = longAnimationController(this);
     visibilityAnimation =
         Tween<double>(begin: 1.0, end: 0).animate(visibilityController);
 
-    addAutoDisposeListener(releaseNotesController.releaseNotesVisible, () {
+    addAutoDisposeListener(widget.controller.isVisible, () {
       setState(() {
-        isVisible = releaseNotesController.releaseNotesVisible.value;
+        isVisible = widget.controller.isVisible.value;
         if (isVisible) {
           visibilityController.forward();
         } else {
@@ -73,10 +81,10 @@ class _ReleaseNotesViewerState extends State<ReleaseNotesViewer>
       });
     });
 
-    markdownData = releaseNotesController.releaseNotesMarkdown.value;
-    addAutoDisposeListener(releaseNotesController.releaseNotesMarkdown, () {
+    markdownData = widget.controller.markdown.value;
+    addAutoDisposeListener(widget.controller.markdown, () {
       setState(() {
-        markdownData = releaseNotesController.releaseNotesMarkdown.value;
+        markdownData = widget.controller.markdown.value;
       });
     });
   }
@@ -89,16 +97,18 @@ class _ReleaseNotesViewerState extends State<ReleaseNotesViewer>
         builder: (context, constraints) {
           final widthForSmallScreen = constraints.maxWidth - 2 * densePadding;
           final width = min(
-            _ReleaseNotesViewerState.maxViewerWidth,
+            SidePanelViewerState.maxViewerWidth,
             widthForSmallScreen,
           );
           return Stack(
             children: [
               if (child != null) child,
-              ReleaseNotes(
-                releaseNotesController: releaseNotesController,
+              EdgePanel(
+                edgePanelController: widget.controller,
                 visibilityAnimation: visibilityAnimation,
+                title: widget.title,
                 markdownData: markdownData,
+                textIfMarkdownDataEmpty: widget.textIfMarkdownDataEmpty,
                 width: width,
               ),
             ],
@@ -109,19 +119,22 @@ class _ReleaseNotesViewerState extends State<ReleaseNotesViewer>
   }
 }
 
-class ReleaseNotes extends AnimatedWidget {
-  const ReleaseNotes({
+class EdgePanel extends AnimatedWidget {
+  const EdgePanel({
     Key? key,
-    required this.releaseNotesController,
+    required this.edgePanelController,
     required Animation<double> visibilityAnimation,
-    required this.markdownData,
+    this.title,
+    this.markdownData,
+    this.textIfMarkdownDataEmpty,
     required this.width,
   }) : super(key: key, listenable: visibilityAnimation);
 
-  final ReleaseNotesController releaseNotesController;
+  final SidePanelController edgePanelController;
 
+  final String? title;
   final String? markdownData;
-
+  final String? textIfMarkdownDataEmpty;
   final double width;
 
   @override
@@ -148,25 +161,23 @@ class ReleaseNotes extends AnimatedWidget {
         child: Column(
           children: [
             AreaPaneHeader(
-              title: const Text(
-                'What\'s new in DevTools?',
-              ),
+              title: Text(title ?? ''),
               includeTopBorder: false,
               actions: [
                 IconButton(
                   padding: const EdgeInsets.all(0.0),
-                  onPressed: () =>
-                      releaseNotesController.toggleReleaseNotesVisible(false),
+                  onPressed: () => edgePanelController.toggleVisibility(false),
                   icon: const Icon(Icons.close),
                 ),
               ],
             ),
-            markdownData == null
-                ? const Text('Stay tuned for updates.')
+            (markdownData == null || markdownData!.isEmpty)
+                ? Text(textIfMarkdownDataEmpty ?? '')
                 : Expanded(
                     child: Markdown(
                       data: markdownData!,
-                      onTapLink: (_, href, __) => unawaited(launchUrl(href!)),
+                      onTapLink: (text, url, title) async =>
+                          await launchUrl(url!),
                     ),
                   ),
           ],
@@ -176,7 +187,21 @@ class ReleaseNotes extends AnimatedWidget {
   }
 }
 
-class ReleaseNotesController {
+abstract class SidePanelController {
+  ValueListenable<String?> get markdown => _markdown;
+
+  final _markdown = ValueNotifier<String?>(null);
+
+  ValueListenable<bool> get isVisible => _isVisible;
+
+  final _isVisible = ValueNotifier<bool>(false);
+
+  void toggleVisibility(bool visible) {
+    _isVisible.value = visible;
+  }
+}
+
+class ReleaseNotesController extends SidePanelController {
   ReleaseNotesController() {
     _init();
   }
@@ -186,14 +211,6 @@ class ReleaseNotesController {
   String get _flutterDocsSite => debugTestReleaseNotes
       ? 'https://flutter-website-dt-staging.web.app'
       : 'https://docs.flutter.dev';
-
-  ValueListenable<String?> get releaseNotesMarkdown => _releaseNotesMarkdown;
-
-  final _releaseNotesMarkdown = ValueNotifier<String?>(null);
-
-  ValueListenable<bool> get releaseNotesVisible => _releaseNotesVisible;
-
-  final _releaseNotesVisible = ValueNotifier<bool>(false);
 
   void _init() {
     if (debugTestReleaseNotes || server.isDevToolsServerAvailable) {
@@ -222,7 +239,7 @@ class ReleaseNotesController {
       } catch (e) {
         // Fail gracefully if we cannot find release notes for the current
         // version of DevTools.
-        _releaseNotesMarkdown.value = null;
+        _markdown.value = null;
         toggleReleaseNotesVisible(false);
         logger.log(
           'Warning: could not find release notes for DevTools version '
@@ -254,7 +271,7 @@ class ReleaseNotesController {
           _flutterDocsSite,
         );
 
-        _releaseNotesMarkdown.value = releaseNotesMarkdown;
+        _markdown.value = releaseNotesMarkdown;
         toggleReleaseNotesVisible(true);
         unawaited(
           server.setLastShownReleaseNotesVersion(currentVersionString),
@@ -271,11 +288,23 @@ class ReleaseNotesController {
   }
 
   void toggleReleaseNotesVisible(bool visible) {
-    _releaseNotesVisible.value = visible;
+    _isVisible.value = visible;
   }
 
   String _releaseNotesUrl(String currentVersion) {
     return '$_flutterDocsSite/development/tools/devtools/release-notes/'
         'release-notes-$currentVersion-src.md';
+  }
+}
+
+class SidePanelControllerMarkdownString extends SidePanelController {
+  SidePanelControllerMarkdownString(
+    String markdownText,
+  ) {
+    _markdown.value = markdownText;
+  }
+
+  set markdownText(String markdownText) {
+    _markdown.value = markdownText;
   }
 }
