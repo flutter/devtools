@@ -60,7 +60,6 @@ class FlutterSettings extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        ...dialogSubHeader(Theme.of(context), 'Additional Settings'),
         CheckboxSetting(
           notifier: flutterFramesController.badgeTabForJankyFrames
               as ValueNotifier<bool?>,
