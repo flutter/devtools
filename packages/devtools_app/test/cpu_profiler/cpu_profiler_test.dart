@@ -812,11 +812,11 @@ void main() {
     testWidgets('displays correctly', (WidgetTester tester) async {
       final metadata = CpuProfileMetaData(
         sampleCount: 100,
-        samplePeriod: 50,
+        samplePeriod: 100,
         stackDepth: 128,
         time: TimeRange()
           ..start = const Duration()
-          ..end = const Duration(seconds: 1),
+          ..end = const Duration(microseconds: 10000),
       );
       await tester.pumpWidget(wrap(CpuProfileStats(metadata: metadata)));
       await tester.pumpAndSettle();
@@ -832,7 +832,7 @@ void main() {
       expect(
         find.byTooltip(
           'The frequency at which samples are collected by the profiler'
-          ' (once every 50 micros)',
+          ' (once every 100 micros)',
         ),
         findsOneWidget,
       );
@@ -840,9 +840,9 @@ void main() {
         find.byTooltip('The maximum stack trace depth of a collected sample'),
         findsOneWidget,
       );
-      expect(find.text('Duration: 1000.0 ms'), findsOneWidget);
+      expect(find.text('Duration: 10.0 ms'), findsOneWidget);
       expect(find.text('Sample count: 100'), findsOneWidget);
-      expect(find.text('Sampling rate: 20000 Hz'), findsOneWidget);
+      expect(find.text('Sampling rate: 10000 Hz'), findsOneWidget);
       expect(find.text('Sampling depth: 128'), findsOneWidget);
     });
 
@@ -854,7 +854,7 @@ void main() {
         stackDepth: 128,
         time: TimeRange()
           ..start = const Duration()
-          ..end = const Duration(seconds: 1),
+          ..end = const Duration(microseconds: 10000),
       );
       await tester.pumpWidget(wrap(CpuProfileStats(metadata: metadata)));
       await tester.pumpAndSettle();
@@ -877,7 +877,7 @@ void main() {
         find.byTooltip('The maximum stack trace depth of a collected sample'),
         findsOneWidget,
       );
-      expect(find.text('Duration: 1000.0 ms'), findsOneWidget);
+      expect(find.text('Duration: 10.0 ms'), findsOneWidget);
       expect(find.text('Sample count: 100'), findsOneWidget);
       expect(find.text('Sampling rate: -- Hz'), findsOneWidget);
       expect(find.text('Sampling depth: 128'), findsOneWidget);

@@ -387,7 +387,6 @@ class CpuProfileStats extends StatelessWidget {
       child: Container(
         height: _statsRowHeight,
         padding: const EdgeInsets.symmetric(
-          vertical: densePadding,
           horizontal: defaultSpacing,
         ),
         child: Row(
