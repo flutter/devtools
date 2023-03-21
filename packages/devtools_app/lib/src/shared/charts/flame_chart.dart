@@ -1135,7 +1135,11 @@ class FlameChartNode<T extends FlameChartDataMixin<T>> {
     required bool activeSearchMatch,
     required ColorScheme colorScheme,
   }) {
-    if (selected) return colorScheme.primary;
+    // The primary color for the Dart theme works best for selection color in
+    // the flame chart.
+    // TODO(kenz): revisit this style when we perform a V2 style upgrade on the
+    // more complex data structures in DevTools.
+    if (selected) return darkColorScheme.primary;
     if (activeSearchMatch) return activeSearchMatchColor;
     if (searchMatch) return searchMatchColor;
     return colorPair.background.colorFor(colorScheme);

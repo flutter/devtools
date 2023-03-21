@@ -221,7 +221,7 @@ class ModeDropdown extends StatelessWidget {
                   value: CpuProfilerViewType.code,
                 ),
               ],
-              onChanged: (type) => controller.updateView(type!),
+              onChanged: (type) => controller.updateViewForType(type!),
             ),
           ),
         );
