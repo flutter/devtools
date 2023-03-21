@@ -10,12 +10,12 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 
 void main() {
-  final binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
-
   testWidgets('Perfetto trace viewer loads data and scrolls for Flutter frames',
       (tester) async {
     await pumpDevTools(tester);
     await loadSampleData(tester, performanceFileName);
+
+    final binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
     await tester.tap(find.widgetWithText(InkWell, 'Timeline Events'));
     await tester.pumpAndSettle(longPumpDuration);

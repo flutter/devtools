@@ -14,8 +14,6 @@ import 'package:integration_test/integration_test.dart';
 // dart run integration_test/run_tests.dart --target=integration_test/test/live_connection/app_test.dart
 
 void main() {
-  IntegrationTestWidgetsFlutterBinding.ensureInitialized();
-
   late TestApp testApp;
 
   setUpAll(() {

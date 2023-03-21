@@ -61,6 +61,8 @@ Future<void> pumpDevTools(WidgetTester tester) async {
     sampleData: _sampleData,
   );
 
+  IntegrationTestWidgetsFlutterBinding.ensureInitialized();
+
   // Await a delay to ensure the widget tree has loaded.
   await tester.pumpAndSettle(longPumpDuration);
   expect(find.byType(DevToolsApp), findsOneWidget);
