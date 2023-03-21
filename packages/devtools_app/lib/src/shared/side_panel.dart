@@ -101,7 +101,7 @@ class SidePanelViewerState extends State<SidePanelViewer>
             children: [
               if (child != null) child,
               SidePanel(
-                edgePanelController: widget.controller,
+                sidePanelController: widget.controller,
                 visibilityAnimation: visibilityAnimation,
                 title: widget.title,
                 markdownData: markdownData,
@@ -119,7 +119,7 @@ class SidePanelViewerState extends State<SidePanelViewer>
 class SidePanel extends AnimatedWidget {
   const SidePanel({
     Key? key,
-    required this.edgePanelController,
+    required this.sidePanelController,
     required Animation<double> visibilityAnimation,
     this.title,
     this.markdownData,
@@ -127,7 +127,7 @@ class SidePanel extends AnimatedWidget {
     required this.width,
   }) : super(key: key, listenable: visibilityAnimation);
 
-  final SidePanelController edgePanelController;
+  final SidePanelController sidePanelController;
 
   final String? title;
   final String? markdownData;
@@ -163,7 +163,7 @@ class SidePanel extends AnimatedWidget {
               actions: [
                 IconButton(
                   padding: const EdgeInsets.all(0.0),
-                  onPressed: () => edgePanelController.toggleVisibility(false),
+                  onPressed: () => sidePanelController.toggleVisibility(false),
                   icon: const Icon(Icons.close),
                 ),
               ],
