@@ -169,7 +169,27 @@ class HttpRequestView extends StatelessWidget {
     );
   }
 }
-
+class HttpViewCopyButton extends StatelessWidget {
+  HttpViewCopyButton(this.data, this.dataSelector);
+  final DartIOHttpRequestData data;
+  final String? Function(DartIOHttpRequestData) dataSelector; 
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder(
+      valueListenable: data.requestUpdatedNotifier,
+      builder: (context, __, ___) {
+        final dataToCopy = dataSelector(data);
+        if(dataToCopy == null || dataToCopy == '') return Container();
+        return Align(
+                  alignment: Alignment.centerRight,
+                  child: CopyToClipboardControl(
+                    dataProvider: () => dataToCopy,
+                  ),
+                );
+      },
+    );
+  }
+}
 class HttpResponseView extends StatelessWidget {
   const HttpResponseView(this.data);
 
