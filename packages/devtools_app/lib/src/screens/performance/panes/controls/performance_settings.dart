@@ -2,16 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 
 import '../../../../shared/common_widgets.dart';
 import '../../../../shared/dialogs.dart';
-import '../../../../shared/feature_flags.dart';
 import '../../../../shared/globals.dart';
 import '../../../../shared/theme.dart';
 import '../../performance_controller.dart';
+import '../flutter_frames/flutter_frames_controller.dart';
 
 class PerformanceSettingsDialog extends StatelessWidget {
   const PerformanceSettingsDialog(this.controller);
@@ -29,11 +27,19 @@ class PerformanceSettingsDialog extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            TimelineStreamSettings(controller: controller),
             if (serviceManager.connectedApp!.isFlutterAppNow!) ...[
+              FlutterSettings(
+                flutterFramesController: controller.flutterFramesController,
+              ),
               const SizedBox(height: denseSpacing),
-              FlutterSettings(controller: controller),
             ],
+            CheckboxSetting(
+              notifier:
+                  controller.timelineEventsController.useLegacyTraceViewer,
+              title: 'Use legacy trace viewer',
+              onChanged: controller
+                  .timelineEventsController.toggleUseLegacyTraceViewer,
+            ),
           ],
         ),
       ),
@@ -44,112 +50,21 @@ class PerformanceSettingsDialog extends StatelessWidget {
   }
 }
 
-class TimelineStreamSettings extends StatelessWidget {
-  const TimelineStreamSettings({
-    Key? key,
-    required this.controller,
-  }) : super(key: key);
-
-  final PerformanceController controller;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        ...dialogSubHeader(theme, 'Recorded Timeline Streams'),
-        ..._defaultRecordedStreams(theme),
-        ..._advancedStreams(theme),
-      ],
-    );
-  }
-
-  List<Widget> _defaultRecordedStreams(ThemeData theme) {
-    return [
-      RichText(
-        text: TextSpan(
-          text: 'Default',
-          style: theme.subtleTextStyle,
-        ),
-      ),
-      ..._timelineStreams(advanced: false),
-      // Special case "Network Traffic" because it is not implemented as a
-      // Timeline recorded stream in the VM. The user does not need to be aware of
-      // the distinction, however.
-      CheckboxSetting(
-        title: 'Network',
-        description: 'Http traffic',
-        notifier: controller.timelineEventsController.httpTimelineLoggingEnabled
-            as ValueNotifier<bool?>,
-        onChanged: (value) => unawaited(
-          controller.timelineEventsController
-              .toggleHttpRequestLogging(value ?? false),
-        ),
-      ),
-    ];
-  }
-
-  List<Widget> _advancedStreams(ThemeData theme) {
-    return [
-      RichText(
-        text: TextSpan(
-          text: 'Advanced',
-          style: theme.subtleTextStyle,
-        ),
-      ),
-      ..._timelineStreams(advanced: true),
-    ];
-  }
-
-  List<Widget> _timelineStreams({
-    required bool advanced,
-  }) {
-    final streams = advanced
-        ? serviceManager.timelineStreamManager.advancedStreams
-        : serviceManager.timelineStreamManager.basicStreams;
-    final settings = streams
-        .map(
-          (stream) => CheckboxSetting(
-            title: stream.name,
-            description: stream.description,
-            notifier: stream.recorded as ValueNotifier<bool?>,
-            onChanged: (newValue) => unawaited(
-              serviceManager.timelineStreamManager.updateTimelineStream(
-                stream,
-                newValue ?? false,
-              ),
-            ),
-          ),
-        )
-        .toList();
-    return settings;
-  }
-}
-
 class FlutterSettings extends StatelessWidget {
-  const FlutterSettings({Key? key, required this.controller}) : super(key: key);
+  const FlutterSettings({required this.flutterFramesController, super.key});
 
-  final PerformanceController controller;
+  final FlutterFramesController flutterFramesController;
 
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        ...dialogSubHeader(Theme.of(context), 'Additional Settings'),
         CheckboxSetting(
-          notifier: controller.flutterFramesController.badgeTabForJankyFrames
+          notifier: flutterFramesController.badgeTabForJankyFrames
               as ValueNotifier<bool?>,
           title: 'Badge Performance tab when Flutter UI jank is detected',
         ),
-        if (FeatureFlags.embeddedPerfetto)
-          CheckboxSetting(
-            notifier: controller.timelineEventsController.useLegacyTraceViewer,
-            title: 'Use legacy trace viewer',
-            onChanged:
-                controller.timelineEventsController.toggleUseLegacyTraceViewer,
-          ),
       ],
     );
   }
