@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
@@ -67,6 +68,8 @@ void setupErrorHandling(Future Function() appStartCallback) {
 /// [WidgetsFlutterBinding.ensureInitialized]. This is not allowed since
 /// it will prevent us from logging async errors inside [runZonedGuarded]
 bool _widgetsBindingInstanceIsUninitialized() {
+  if (Platform.environment.containsKey('FLUTTER_TEST')) return true;
+
   try {
     // WidgetsBinding.instance should throw an error here since we expect
     // it to be uninitialized.
