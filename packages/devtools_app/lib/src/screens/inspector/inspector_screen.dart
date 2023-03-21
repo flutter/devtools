@@ -90,8 +90,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
   static const summaryTreeKey = Key('Summary Tree');
   static const detailsTreeKey = Key('Details Tree');
   static const minScreenWidthForTextBeforeScaling = 900.0;
-  static const unscaledIncludeRefreshTreeWidth = 1255.0;
-  static const serviceExtensionButtonsIncludeTextWidth = 1160.0;
+  static const serviceExtensionButtonsIncludeTextWidth = 1200.0;
 
   @override
   void dispose() {

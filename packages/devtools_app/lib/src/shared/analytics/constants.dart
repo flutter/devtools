@@ -95,6 +95,7 @@ const perfettoModeTraceEventProcessingTime =
 const perfettoLoadTrace = 'perfettoLoadTrace';
 const perfettoScrollToTimeRange = 'perfettoScrollToTimeRange';
 const performanceSettings = 'performanceSettings';
+const traceCategories = 'traceCategories';
 
 // CPU profiler UX actions:
 const cpuSamplingRatePrefix = 'profileGranularity';
