@@ -1,0 +1,14 @@
+name: devtools
+description: DevTools packages.
+publish_to: none
+
+repository: https://github.com/flutter/devtools/tree/master
+
+environment:
+  sdk: '>=2.17.0 <4.0.0'
+  flutter: '>=3.0.0'
+
+dependencies:
+
+dev_dependencies:
+  flutter_lints: ^2.0.0
