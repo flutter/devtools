@@ -441,8 +441,7 @@ void main() {
         expect(nodeFinder, findsOneWidget);
         final Container nodeWidget = tester.widget(nodeFinder);
 
-        final BuildContext context = tester.element(find.byType(Builder));
-        expect(nodeWidget.color, equals(Theme.of(context).primaryColor));
+        expect(nodeWidget.color, equals(darkColorScheme.primary));
 
         expect(textFinder, findsOneWidget);
         final Text textWidget = tester.widget(textFinder);
