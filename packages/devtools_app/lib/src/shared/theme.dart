@@ -286,6 +286,11 @@ extension DevToolsColorScheme on ColorScheme {
 
   Color get onWarningContainer => onTertiaryContainer;
 
+  Color get onWarningContainerLink =>
+      isLight ? tertiary : const Color(0xFFDF9F32);
+
+  Color get onErrorContainerLink => isLight ? error : const Color(0xFFFF897D);
+
   Color get subtleTextColor => const Color(0xFF919094);
 
   Color get overlayShadowColor => const Color.fromRGBO(0, 0, 0, 0.5);
