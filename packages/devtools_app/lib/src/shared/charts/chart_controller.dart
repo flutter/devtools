@@ -434,8 +434,6 @@ class ChartController extends DisposableController
     return traces[index];
   }
 
-  int traceIndex(Trace trace) => traces.indexOf(trace);
-
   int createTrace(
     ChartType chartType,
     PaintCharacteristics characteristics, {

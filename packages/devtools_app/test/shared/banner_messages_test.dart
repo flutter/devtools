@@ -163,10 +163,8 @@ BannerMessagesController bannerMessagesController(BuildContext context) {
 
 final testMessage1ScreenId = SimpleScreen.id;
 final testMessage2ScreenId = SimpleScreen.id;
-final testMessage3ScreenId = ProfilerScreen.id;
 const k1 = Key('test message 1');
 const k2 = Key('test message 2');
-const k3 = Key('test message 3');
 final testMessage1 = BannerMessage(
   key: k1,
   textSpans: const [TextSpan(text: 'Test Message 1')],
