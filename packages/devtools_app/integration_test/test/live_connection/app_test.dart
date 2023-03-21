@@ -8,7 +8,6 @@ import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_test/devtools_integration_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:integration_test/integration_test.dart';
 
 // To run:
 // dart run integration_test/run_tests.dart --target=integration_test/test/live_connection/app_test.dart
