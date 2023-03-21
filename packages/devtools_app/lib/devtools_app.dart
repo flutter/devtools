@@ -9,7 +9,6 @@ export 'src/extension_points/extensions_base.dart';
 export 'src/extension_points/extensions_external.dart';
 export 'src/framework/landing_screen.dart';
 export 'src/framework/notifications_view.dart';
-export 'src/framework/release_notes/release_notes.dart';
 export 'src/screens/app_size/app_size_controller.dart';
 export 'src/screens/app_size/app_size_screen.dart';
 export 'src/screens/debugger/breakpoint_manager.dart';
