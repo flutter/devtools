@@ -92,11 +92,11 @@ void main() {
         expect(find.byType(CollapseAllButton), findsOneWidget);
         expect(find.byType(FlameChartHelpButton), findsNothing);
         expect(
-          find.byType(CpuProfilerSearchField<MethodTableController>),
+          find.byType(SearchField<MethodTableController>),
           findsNothing,
         );
         expect(
-          find.byType(CpuProfilerSearchField<CpuProfilerController>),
+          find.byType(SearchField<CpuProfilerController>),
           findsNothing,
         );
         expect(find.byKey(ProfilerTab.bottomUp.key), findsOneWidget);
@@ -132,11 +132,11 @@ void main() {
         expect(find.byType(CollapseAllButton), findsNothing);
         expect(find.byType(FlameChartHelpButton), findsNothing);
         expect(
-          find.byType(CpuProfilerSearchField<MethodTableController>),
+          find.byType(SearchField<MethodTableController>),
           findsNothing,
         );
         expect(
-          find.byType(CpuProfilerSearchField<CpuProfilerController>),
+          find.byType(SearchField<CpuProfilerController>),
           findsNothing,
         );
         expect(find.byKey(ProfilerTab.bottomUp.key), findsOneWidget);
@@ -167,11 +167,11 @@ void main() {
         expect(find.byType(CollapseAllButton), findsOneWidget);
         expect(find.byType(FlameChartHelpButton), findsNothing);
         expect(
-          find.byType(CpuProfilerSearchField<MethodTableController>),
+          find.byType(SearchField<MethodTableController>),
           findsNothing,
         );
         expect(
-          find.byType(CpuProfilerSearchField<CpuProfilerController>),
+          find.byType(SearchField<CpuProfilerController>),
           findsNothing,
         );
         expect(find.byKey(ProfilerTab.bottomUp.key), findsOneWidget);
@@ -203,11 +203,11 @@ void main() {
         expect(find.byType(CollapseAllButton), findsNothing);
         expect(find.byType(FlameChartHelpButton), findsNothing);
         expect(
-          find.byType(CpuProfilerSearchField<MethodTableController>),
+          find.byType(SearchField<MethodTableController>),
           findsNothing,
         );
         expect(
-          find.byType(CpuProfilerSearchField<CpuProfilerController>),
+          find.byType(SearchField<CpuProfilerController>),
           findsNothing,
         );
         expect(find.byKey(ProfilerTab.bottomUp.key), findsOneWidget);
@@ -373,11 +373,11 @@ void main() {
         expect(find.byType(FlameChartHelpButton), findsNothing);
         expect(find.byType(ModeDropdown), findsNothing);
         expect(
-          find.byType(CpuProfilerSearchField<MethodTableController>),
+          find.byType(SearchField<MethodTableController>),
           findsNothing,
         );
         expect(
-          find.byType(CpuProfilerSearchField<CpuProfilerController>),
+          find.byType(SearchField<CpuProfilerController>),
           findsNothing,
         );
 
@@ -395,11 +395,11 @@ void main() {
         expect(find.byType(FlameChartHelpButton), findsNothing);
         expect(find.byType(ModeDropdown), findsNothing);
         expect(
-          find.byType(CpuProfilerSearchField<MethodTableController>),
+          find.byType(SearchField<MethodTableController>),
           findsNothing,
         );
         expect(
-          find.byType(CpuProfilerSearchField<CpuProfilerController>),
+          find.byType(SearchField<CpuProfilerController>),
           findsNothing,
         );
 
@@ -417,11 +417,11 @@ void main() {
         expect(find.byType(FlameChartHelpButton), findsNothing);
         expect(find.byType(ModeDropdown), findsNothing);
         expect(
-          find.byType(CpuProfilerSearchField<MethodTableController>),
+          find.byType(SearchField<MethodTableController>),
           findsOneWidget,
         );
         expect(
-          find.byType(CpuProfilerSearchField<CpuProfilerController>),
+          find.byType(SearchField<CpuProfilerController>),
           findsNothing,
         );
 
@@ -439,11 +439,11 @@ void main() {
         expect(find.byType(FlameChartHelpButton), findsOneWidget);
         expect(find.byType(ModeDropdown), findsNothing);
         expect(
-          find.byType(CpuProfilerSearchField<MethodTableController>),
+          find.byType(SearchField<MethodTableController>),
           findsNothing,
         );
         expect(
-          find.byType(CpuProfilerSearchField<CpuProfilerController>),
+          find.byType(SearchField<CpuProfilerController>),
           findsOneWidget,
         );
       },

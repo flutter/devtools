@@ -86,8 +86,7 @@ class CodeView extends StatefulWidget {
   _CodeViewState createState() => _CodeViewState();
 }
 
-class _CodeViewState extends State<CodeView>
-    with AutoDisposeMixin, SearchFieldMixin<CodeView> {
+class _CodeViewState extends State<CodeView> with AutoDisposeMixin {
   static const searchFieldRightPadding = 75.0;
 
   late final LinkedScrollControllerGroup verticalController;
@@ -105,9 +104,6 @@ class _CodeViewState extends State<CodeView>
   // Used to ensure we don't update the scroll position when expanding or
   // collapsing the file explorer.
   ScriptRef? _lastScriptRef;
-
-  @override
-  SearchControllerMixin get searchController => widget.codeViewController;
 
   @override
   void initState() {
@@ -484,7 +480,7 @@ class _CodeViewState extends State<CodeView>
   Widget buildFileSearchField() {
     return ElevatedCard(
       key: debuggerCodeViewFileOpenerKey,
-      width: extraWideSearchTextWidth,
+      width: extraWideSearchFieldWidth,
       height: defaultTextFieldHeight,
       padding: EdgeInsets.zero,
       child: FileSearchField(
@@ -495,13 +491,13 @@ class _CodeViewState extends State<CodeView>
 
   Widget buildSearchInFileField() {
     return ElevatedCard(
-      width: wideSearchTextWidth,
+      width: wideSearchFieldWidth,
       height: defaultTextFieldHeight + 2 * denseSpacing,
-      child: SearchField<SourceToken>(
-        controller: widget.codeViewController,
+      child: SearchField<CodeViewController>(
+        searchController: widget.codeViewController,
         searchFieldEnabled: parsedScript != null,
         shouldRequestFocus: true,
-        supportsNavigation: true,
+        searchFieldWidth: wideSearchFieldWidth,
         onClose: () =>
             widget.codeViewController.toggleSearchInFileVisibility(false),
       ),

@@ -116,7 +116,7 @@ void main() {
           .thenReturn(SearchTextEditingController());
 
       await pumpDebuggerScreen(tester, debuggerController);
-      expect(find.byType(SearchField<SourceToken>), findsOneWidget);
+      expect(find.byType(SearchField<CodeViewController>), findsOneWidget);
     },
   );
 

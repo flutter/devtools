@@ -22,11 +22,11 @@ import 'panes/flutter_frames/flutter_frames_controller.dart';
 import 'panes/frame_analysis/frame_analysis.dart';
 import 'panes/raster_stats/raster_stats.dart';
 import 'panes/rebuild_stats/rebuild_stats.dart';
+import 'panes/timeline_events/legacy/legacy_events_controller.dart';
 import 'panes/timeline_events/legacy/timeline_flame_chart.dart';
 import 'panes/timeline_events/perfetto/perfetto.dart';
 import 'panes/timeline_events/timeline_events_controller.dart';
 import 'performance_controller.dart';
-import 'performance_model.dart';
 import 'performance_screen.dart';
 
 class TabbedPerformanceView extends StatefulWidget {
@@ -39,7 +39,6 @@ class TabbedPerformanceView extends StatefulWidget {
 class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
     with
         AutoDisposeMixin,
-        SearchFieldMixin<TabbedPerformanceView>,
         ProvidedControllerMixin<PerformanceController, TabbedPerformanceView> {
   static const _gaPrefix = 'performanceTab';
 
@@ -48,10 +47,6 @@ class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
   late TimelineEventsController _timelineEventsController;
 
   FlutterFrame? _selectedFlutterFrame;
-
-  @override
-  SearchControllerMixin get searchController =>
-      controller.timelineEventsController.legacyController;
 
   @override
   void didChangeDependencies() {
@@ -201,7 +196,12 @@ class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
                     builder: (context, status, _) {
                       final searchFieldEnabled =
                           status == EventsControllerStatus.ready;
-                      return _buildSearchField(searchFieldEnabled);
+                      return SearchField<LegacyTimelineEventsController>(
+                        searchController:
+                            _timelineEventsController.legacyController,
+                        searchFieldEnabled: searchFieldEnabled,
+                        searchFieldWidth: wideSearchFieldWidth,
+                      );
                     },
                   ),
                   const SizedBox(width: denseSpacing),
@@ -248,19 +248,6 @@ class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
         },
       ),
       featureController: controller.timelineEventsController,
-    );
-  }
-
-  Widget _buildSearchField(bool searchFieldEnabled) {
-    return Container(
-      width: defaultSearchTextWidth,
-      height: defaultTextFieldHeight,
-      child: SearchField<TimelineEvent>(
-        controller: _timelineEventsController.legacyController,
-        searchFieldEnabled: searchFieldEnabled,
-        shouldRequestFocus: false,
-        supportsNavigation: true,
-      ),
     );
   }
 

@@ -108,6 +108,7 @@ void mockConnectedApp(
   required bool isFlutterApp,
   required isProfileBuild,
   required isWebApp,
+  String os = 'ios',
 }) {
   assert(!(!isFlutterApp && isProfileBuild));
 
@@ -156,6 +157,9 @@ void mockConnectedApp(
   when(connectedApp.isProfileBuildNow).thenReturn(isProfileBuild);
   when(connectedApp.isDebugFlutterAppNow)
       .thenReturn(isFlutterApp && !isProfileBuild);
+
+  // Operating system.
+  when(connectedApp.operatingSystem).thenReturn(os);
 
   // Initialized.
   when(connectedApp.connectedAppInitialized).thenReturn(true);
