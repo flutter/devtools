@@ -100,7 +100,7 @@ class SidePanelViewerState extends State<SidePanelViewer>
           return Stack(
             children: [
               if (child != null) child,
-              EdgePanel(
+              SidePanel(
                 edgePanelController: widget.controller,
                 visibilityAnimation: visibilityAnimation,
                 title: widget.title,
@@ -116,8 +116,8 @@ class SidePanelViewerState extends State<SidePanelViewer>
   }
 }
 
-class EdgePanel extends AnimatedWidget {
-  const EdgePanel({
+class SidePanel extends AnimatedWidget {
+  const SidePanel({
     Key? key,
     required this.edgePanelController,
     required Animation<double> visibilityAnimation,
