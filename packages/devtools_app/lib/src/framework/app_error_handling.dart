@@ -62,14 +62,14 @@ void setupErrorHandling(Future Function() appStartCallback) {
 /// Checks to see if [WidgetsBinding.instance] has already been set.
 ///
 /// If calling [WidgetsBinding.instance] throws a 'Binding has not yet been
-/// initialized' error, then we know that it has not bee initialized yet.
+/// initialized' error, then we know that it has not been initialized yet.
 /// Otherwise someone may have already called
 /// [WidgetsFlutterBinding.ensureInitialized]. This is not allowed since
 /// it will prevent us from logging async errors inside [runZonedGuarded]
 bool _widgetsBindingInstanceIsUninitialized() {
   try {
     // WidgetsBinding.instance should throw an error here since we expect
-    // it to uninitialized.
+    // it to be uninitialized.
     WidgetsBinding.instance;
 
     // If [WidgetsBinding.instance] did not throw, then it has already been
