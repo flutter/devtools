@@ -23,8 +23,6 @@ final _log = Logger('app_error_handling');
 /// [appStartCallback] should be a callback that creates the main Flutter
 /// application.
 void setupErrorHandling(Future Function() appStartCallback) {
-  assert(_widgetsBindingInstanceIsProperlySetUp());
-
   // First, run all our code in a new zone.
   return runZonedGuarded(
     // ignore: avoid-passing-async-when-sync-expected this ignore should be fixed.
@@ -58,35 +56,6 @@ void setupErrorHandling(Future Function() appStartCallback) {
       throw error;
     },
   );
-}
-
-/// Checks to see if [WidgetsBinding.instance] has already been set.
-///
-/// If calling [WidgetsBinding.instance] throws a 'Binding has not yet been
-/// initialized' error, then we know that it has not been initialized yet.
-/// Otherwise someone may have already called
-/// [WidgetsFlutterBinding.ensureInitialized]. This is not allowed since
-/// it will prevent us from logging async errors inside [runZonedGuarded]
-bool _widgetsBindingInstanceIsProperlySetUp() {
-  if (!kIsWeb) {
-    if (Platform.environment.containsKey('FLUTTER_TEST')) {
-      // If we are in unit tests then the binding instance will be set in non
-      // standard ways. So short-circuit this check when running tests.
-      return true;
-    }
-  }
-
-  try {
-    // WidgetsBinding.instance should throw an error here since we expect
-    // it to be uninitialized.
-    WidgetsBinding.instance;
-
-    // If [WidgetsBinding.instance] did not throw, then it has already been
-    // initialized
-    return false;
-  } catch (e) {
-    return e.toString().contains('Binding has not yet been initialized');
-  }
 }
 
 void _reportError(Object error, StackTrace stack, String caller) {
