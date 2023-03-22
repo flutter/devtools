@@ -23,6 +23,10 @@ class ProfilePaneController extends DisposableController
 
   /// Specifies if the allocation profile should be refreshed when a GC event
   /// is received.
+  ///
+  /// TODO(polina-c): set refresher on by default after resolving issue
+  /// with flickering
+  /// https://github.com/flutter/devtools/issues/5176
   ValueListenable<bool> get refreshOnGc => _refreshOnGc;
   final _refreshOnGc = ValueNotifier<bool>(false);
 
