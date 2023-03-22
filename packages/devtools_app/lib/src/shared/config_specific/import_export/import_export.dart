@@ -148,13 +148,14 @@ abstract class ExportController {
   });
 
   String encode(Map<String, dynamic> contents) {
+    final activeScreenId = contents[DevToolsExportKeys.activeScreenId.name];
     final _contents = {
       DevToolsExportKeys.devToolsSnapshot.name: true,
+      DevToolsExportKeys.activeScreenId.name: activeScreenId,
       DevToolsExportKeys.devToolsVersion.name: version,
       DevToolsExportKeys.connectedApp.name:
           serviceManager.connectedApp!.toJson(),
     };
-    final activeScreenId = contents[DevToolsExportKeys.activeScreenId.name];
     // This is a workaround to guarantee that DevTools exports are compatible
     // with other trace viewers (catapult, perfetto, chrome://tracing), which
     // require a top level field named "traceEvents".

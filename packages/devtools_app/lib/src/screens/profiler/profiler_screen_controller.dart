@@ -38,11 +38,9 @@ class ProfilerScreenController extends DisposableController
 
   Future<void> _initHelper() async {
     if (!offlineController.offlineMode.value) {
-      unawaited(
-        allowedError(
-          serviceManager.service!.setProfilePeriod(mediumProfilePeriod),
-          logError: false,
-        ),
+      await allowedError(
+        serviceManager.service!.setProfilePeriod(mediumProfilePeriod),
+        logError: false,
       );
 
       _currentIsolate = serviceManager.isolateManager.selectedIsolate.value;
