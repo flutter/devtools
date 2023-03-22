@@ -169,27 +169,36 @@ class HttpRequestView extends StatelessWidget {
     );
   }
 }
-class HttpViewCopyButton extends StatelessWidget {
-  HttpViewCopyButton(this.data, this.dataSelector);
+
+/// A button for copying [DartIOHttpRequestData] contents.
+///
+/// If there is no content to copy, the button will not show. The copy contents
+/// will update as the request's data is updated.
+class HttpViewTrailingCopyButton extends StatelessWidget {
+  const HttpViewTrailingCopyButton(this.data, this.dataSelector);
   final DartIOHttpRequestData data;
-  final String? Function(DartIOHttpRequestData) dataSelector; 
+  final String? Function(DartIOHttpRequestData) dataSelector;
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder(
       valueListenable: data.requestUpdatedNotifier,
       builder: (context, __, ___) {
         final dataToCopy = dataSelector(data);
-        if(dataToCopy == null || dataToCopy == '') return Container();
+        final isLoading = data.isFetchingFullData;
+        if (dataToCopy == null || dataToCopy == '' || isLoading)
+          return Container();
+
         return Align(
-                  alignment: Alignment.centerRight,
-                  child: CopyToClipboardControl(
-                    dataProvider: () => dataToCopy,
-                  ),
-                );
+          alignment: Alignment.centerRight,
+          child: CopyToClipboardControl(
+            dataProvider: () => dataToCopy,
+          ),
+        );
       },
     );
   }
 }
+
 class HttpResponseView extends StatelessWidget {
   const HttpResponseView(this.data);
 

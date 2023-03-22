@@ -57,12 +57,18 @@ class NetworkRequestInspector extends StatelessWidget {
             if (data.requestBody != null)
               _buildTab(
                 tabName: NetworkRequestInspector._requestTabTitle,
-                trailing: HttpViewCopyButton(data,(data) => data.requestBody),
+                trailing: HttpViewTrailingCopyButton(
+                  data,
+                  (data) => data.requestBody,
+                ),
               ),
             if (data.responseBody != null)
-              _buildTab( // These need a value listenable builder!!!!!!!!!! yuck
+              _buildTab(
                 tabName: NetworkRequestInspector._responseTabTitle,
-                trailing: HttpViewCopyButton(data,(data) => data.responseBody),
+                trailing: HttpViewTrailingCopyButton(
+                  data,
+                  (data) => data.responseBody,
+                ),
               ),
             if (data.hasCookies)
               _buildTab(tabName: NetworkRequestInspector._cookiesTabTitle),
