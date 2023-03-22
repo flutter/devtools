@@ -104,7 +104,7 @@ class _InspectorBreadcrumb extends StatelessWidget {
       data.text,
       maxLines: 1,
       overflow: TextOverflow.ellipsis,
-      style: DiagnosticsTextStyles.regular
+      style: DiagnosticsTextStyles.regular(Theme.of(context).colorScheme)
           .copyWith(fontSize: scaleByFontFactor(11)),
     );
 

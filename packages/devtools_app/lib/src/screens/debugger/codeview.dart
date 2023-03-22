@@ -38,9 +38,6 @@ import 'debugger_model.dart';
 import 'file_search.dart';
 import 'key_sets.dart';
 
-final debuggerCodeViewSearchKey =
-    GlobalKey(debugLabel: 'DebuggerCodeViewSearchKey');
-
 final debuggerCodeViewFileOpenerKey =
     GlobalKey(debugLabel: 'DebuggerCodeViewFileOpenerKey');
 
@@ -89,8 +86,7 @@ class CodeView extends StatefulWidget {
   _CodeViewState createState() => _CodeViewState();
 }
 
-class _CodeViewState extends State<CodeView>
-    with AutoDisposeMixin, SearchFieldMixin<CodeView> {
+class _CodeViewState extends State<CodeView> with AutoDisposeMixin {
   static const searchFieldRightPadding = 75.0;
 
   late final LinkedScrollControllerGroup verticalController;
@@ -169,7 +165,7 @@ class _CodeViewState extends State<CodeView>
 
     if (widget.codeViewController != oldWidget.codeViewController) {
       cancelListeners();
-
+      widget.codeViewController.initSearch();
       addAutoDisposeListener(
         widget.codeViewController.scriptLocation,
         _handleScriptLocationChanged,
@@ -282,7 +278,7 @@ class _CodeViewState extends State<CodeView>
         return Stack(
           children: [
             scriptRef == null
-                ? CodeViewEmptyState(widget: widget, context: context)
+                ? CodeViewEmptyState(widget: widget)
                 : buildCodeArea(context),
             if (showFileOpener)
               Positioned(
@@ -456,8 +452,10 @@ class _CodeViewState extends State<CodeView>
           if (scriptUri == null) return '';
           return scriptUri;
         },
-        onTitleTap: () =>
-            widget.codeViewController.toggleFileOpenerVisibility(true),
+        titleIcon: Icons.search,
+        onTitleTap: () => widget.codeViewController
+          ..toggleFileOpenerVisibility(true)
+          ..toggleSearchInFileVisibility(false),
         controls: [
           ScriptPopupMenu(widget.codeViewController),
           ScriptHistoryPopupMenu(
@@ -482,7 +480,7 @@ class _CodeViewState extends State<CodeView>
   Widget buildFileSearchField() {
     return ElevatedCard(
       key: debuggerCodeViewFileOpenerKey,
-      width: extraWideSearchTextWidth,
+      width: extraWideSearchFieldWidth,
       height: defaultTextFieldHeight,
       padding: EdgeInsets.zero,
       child: FileSearchField(
@@ -493,14 +491,13 @@ class _CodeViewState extends State<CodeView>
 
   Widget buildSearchInFileField() {
     return ElevatedCard(
-      width: wideSearchTextWidth,
+      width: wideSearchFieldWidth,
       height: defaultTextFieldHeight + 2 * denseSpacing,
-      child: buildSearchField(
-        controller: widget.codeViewController,
-        searchFieldKey: debuggerCodeViewSearchKey,
+      child: SearchField<CodeViewController>(
+        searchController: widget.codeViewController,
         searchFieldEnabled: parsedScript != null,
         shouldRequestFocus: true,
-        supportsNavigation: true,
+        searchFieldWidth: wideSearchFieldWidth,
         onClose: () =>
             widget.codeViewController.toggleSearchInFileVisibility(false),
       ),
@@ -543,11 +540,9 @@ class CodeViewEmptyState extends StatelessWidget {
   const CodeViewEmptyState({
     super.key,
     required this.widget,
-    required this.context,
   });
 
   final CodeView widget;
-  final BuildContext context;
 
   @override
   Widget build(BuildContext context) {
@@ -596,9 +591,6 @@ class ProfileInformationGutter extends StatelessWidget {
     return OutlineDecoration.onlyRight(
       child: Container(
         width: gutterWidth,
-        decoration: BoxDecoration(
-          color: Theme.of(context).titleSolidBackgroundColor,
-        ),
         child: Stack(
           children: [
             Column(
@@ -618,10 +610,7 @@ class ProfileInformationGutter extends StatelessWidget {
                       if (data == null) {
                         return const SizedBox();
                       }
-                      return ProfileInformationGutterItem(
-                        lineNumber: lineNum,
-                        profilerData: data,
-                      );
+                      return ProfileInformationGutterItem(profilerData: data);
                     },
                   ),
                 ),
@@ -691,11 +680,8 @@ class _ProfileInformationGutterHeader extends StatelessWidget {
 class ProfileInformationGutterItem extends StatelessWidget {
   const ProfileInformationGutterItem({
     Key? key,
-    required this.lineNumber,
     required this.profilerData,
   }) : super(key: key);
-
-  final int lineNumber;
 
   final ProfileReportEntry profilerData;
 
@@ -891,7 +877,6 @@ class Gutter extends StatelessWidget {
       width: gutterWidth,
       decoration: BoxDecoration(
         border: Border(right: defaultBorderSide(theme)),
-        color: Theme.of(context).titleSolidBackgroundColor,
       ),
       child: ListView.builder(
         controller: scrollController,
@@ -1473,7 +1458,7 @@ class ScriptPopupMenuOption {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: Theme.of(context).regularTextStyle),
+          Text(label),
           if (icon != null)
             Icon(
               icon,

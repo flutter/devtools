@@ -7,41 +7,29 @@ import 'package:flutter/material.dart';
 import '../../../shared/primitives/utils.dart';
 import '../../../shared/table/table.dart';
 import '../../../shared/table/table_data.dart';
-import '../cpu_profile_columns.dart';
 import '../cpu_profile_model.dart';
+import 'cpu_profile_columns.dart';
 
 /// A table of the CPU's top-down call tree.
 class CpuCallTreeTable extends StatelessWidget {
-  factory CpuCallTreeTable(
-    List<CpuStackFrame> dataRoots, {
-    Key? key,
-    required bool displayTreeGuidelines,
-  }) {
-    final treeColumn = MethodAndSourceColumn();
-    final startingSortColumn = TotalTimeColumn(titleTooltip: totalTimeTooltip);
-    final columns = List<ColumnData<CpuStackFrame>>.unmodifiable([
-      startingSortColumn,
-      SelfTimeColumn(titleTooltip: selfTimeTooltip),
-      treeColumn,
-    ]);
-    return CpuCallTreeTable._(
-      key,
-      dataRoots,
-      treeColumn,
-      startingSortColumn,
-      columns,
-      displayTreeGuidelines,
-    );
-  }
+  const CpuCallTreeTable({
+    required this.dataRoots,
+    required this.displayTreeGuidelines,
+    super.key,
+  });
 
-  const CpuCallTreeTable._(
-    Key? key,
-    this.dataRoots,
-    this.treeColumn,
-    this.sortColumn,
-    this.columns,
-    this.displayTreeGuidelines,
-  ) : super(key: key);
+  static final methodColumn = MethodAndSourceColumn();
+
+  static final selfTimeColumn = SelfTimeColumn(titleTooltip: selfTimeTooltip);
+
+  static final totalTimeColumn =
+      TotalTimeColumn(titleTooltip: totalTimeTooltip);
+
+  static final columns = List<ColumnData<CpuStackFrame>>.unmodifiable([
+    totalTimeColumn,
+    selfTimeColumn,
+    methodColumn,
+  ]);
 
   static const totalTimeTooltip =
       'Time that a method spent executing its own code\nas well as the code for '
@@ -50,10 +38,8 @@ class CpuCallTreeTable extends StatelessWidget {
   static const selfTimeTooltip =
       'Time that a method spent executing only its own code.';
 
-  final TreeColumnData<CpuStackFrame> treeColumn;
-  final ColumnData<CpuStackFrame> sortColumn;
-  final List<ColumnData<CpuStackFrame>> columns;
   final List<CpuStackFrame> dataRoots;
+
   final bool displayTreeGuidelines;
 
   @override
@@ -63,8 +49,8 @@ class CpuCallTreeTable extends StatelessWidget {
       dataRoots: dataRoots,
       dataKey: 'cpu-call-tree',
       columns: columns,
-      treeColumn: treeColumn,
-      defaultSortColumn: sortColumn,
+      treeColumn: methodColumn,
+      defaultSortColumn: totalTimeColumn,
       displayTreeGuidelines: displayTreeGuidelines,
       defaultSortDirection: SortDirection.descending,
     );

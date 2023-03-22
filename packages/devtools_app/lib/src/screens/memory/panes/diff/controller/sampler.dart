@@ -13,7 +13,8 @@ import '../../../shared/heap/heap.dart';
 import '../../../shared/primitives/instance_set_button.dart';
 
 class HeapClassSampler extends ClassSampler {
-  HeapClassSampler(this.objects, this.heap, this.heapClass);
+  HeapClassSampler(this.objects, this.heap, this.heapClass)
+      : assert(objects.objectsByCodes.isNotEmpty);
 
   final HeapClassName heapClass;
   final ObjectSet objects;
@@ -23,16 +24,42 @@ class HeapClassSampler extends ClassSampler {
       serviceManager.isolateManager.mainIsolate.value!;
 
   Future<InstanceSet?> _liveInstances() async {
-    final isolateId = _mainIsolateRef.id!;
+    try {
+      final isolateId = _mainIsolateRef.id!;
 
-    final theClass = await findClass(isolateId, heapClass);
-    if (theClass == null) return null;
+      final theClass = await findClass(isolateId, heapClass);
+      if (theClass == null) return null;
 
-    return await serviceManager.service!.getInstances(
-      isolateId,
-      theClass.id!,
-      preferences.memory.refLimit.value,
-    );
+      return await serviceManager.service!.getInstances(
+        isolateId,
+        theClass.id!,
+        preferences.memory.refLimit.value,
+      );
+    } catch (error, trace) {
+      _outputError(error, trace);
+      return null;
+    }
+  }
+
+  Future<InstanceRef?> _liveInstancesAsList() async {
+    try {
+      final isolateId = _mainIsolateRef.id!;
+
+      final theClass = await findClass(isolateId, heapClass);
+      if (theClass == null) return null;
+
+      return await serviceManager.service!.getInstancesAsList(
+        isolateId,
+        theClass.id!,
+      );
+    } catch (error, trace) {
+      _outputError(error, trace);
+      return null;
+    }
+  }
+
+  void _outputError(Object error, StackTrace trace) {
+    serviceManager.consoleService.appendStdio('$error\ntrace');
   }
 
   @override
@@ -70,11 +97,37 @@ class HeapClassSampler extends ClassSampler {
       ClassType.runtime;
 
   @override
-  Future<void> manyLiveToConsole() async {
-    serviceManager.consoleService.appendInstanceSet(
-      type: heapClass.shortName,
-      instanceSet: (await _liveInstances())!,
+  Future<void> allLiveToConsole({
+    required bool includeSubclasses,
+    required bool includeImplementers,
+  }) async {
+    final list = await _liveInstancesAsList();
+
+    if (list == null) {
+      serviceManager.consoleService.appendStdio(
+        'Unable to select instances for the class ${heapClass.fullName}.',
+      );
+      return;
+    }
+
+    // drop to console
+    serviceManager.consoleService.appendBrowsableInstance(
+      instanceRef: list,
       isolateRef: _mainIsolateRef,
+      heapSelection: HeapObjectSelection(heap, object: null),
+    );
+  }
+
+  @override
+  Future<void> oneStaticToConsole() async {
+    final heapObject = objects.objectsByCodes.values.first;
+    final heapSelection = HeapObjectSelection(heap, object: heapObject);
+
+    // drop to console
+    serviceManager.consoleService.appendBrowsableInstance(
+      instanceRef: null,
+      isolateRef: _mainIsolateRef,
+      heapSelection: heapSelection,
     );
   }
 }

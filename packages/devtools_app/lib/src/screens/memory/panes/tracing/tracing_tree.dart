@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:vm_service/vm_service.dart';
 
 import '../../../../shared/common_widgets.dart';
 import '../../../../shared/primitives/utils.dart';
@@ -12,8 +11,8 @@ import '../../../../shared/table/table_data.dart';
 import '../../../../shared/theme.dart';
 import '../../../../shared/ui/tab.dart';
 import '../../../../shared/utils.dart';
-import '../../../profiler/cpu_profile_columns.dart';
 import '../../../profiler/cpu_profile_model.dart';
+import '../../../profiler/panes/cpu_profile_columns.dart';
 import 'tracing_pane_controller.dart';
 
 const double _countColumnWidth = 130;
@@ -111,13 +110,11 @@ class _AllocationTracingTreeState extends State<AllocationTracingTree>
                     children: [
                       // Bottom-up tree view
                       TracingTable(
-                        cls: selection.cls,
                         dataRoots: state
                             .selectedTracedClassAllocationData!.bottomUpRoots,
                       ),
                       // Call tree view
                       TracingTable(
-                        cls: selection.cls,
                         dataRoots: state
                             .selectedTracedClassAllocationData!.callTreeRoots,
                       ),
@@ -204,12 +201,11 @@ class _TracingTreeHeader extends StatelessWidget {
         ),
       ),
       tall: true,
-      needsTopBorder: false,
+      includeTopBorder: false,
       actions: [
         const Spacer(),
         TabBar(
-          labelColor:
-              textTheme.bodyLarge?.color ?? colorScheme.defaultForeground,
+          labelColor: textTheme.bodyLarge?.color ?? colorScheme.primary,
           tabs: tabs,
           isScrollable: true,
           controller: tabController,
@@ -276,7 +272,7 @@ class _InclusiveCountColumn extends ColumnData<CpuStackFrame> {
   @override
   String getDisplayValue(CpuStackFrame dataObject) {
     return '${dataObject.inclusiveSampleCount} '
-        '(${percent2(dataObject.inclusiveSampleRatio)})';
+        '(${percent(dataObject.inclusiveSampleRatio)})';
   }
 }
 
@@ -309,7 +305,7 @@ class _ExclusiveCountColumn extends ColumnData<CpuStackFrame> {
   @override
   String getDisplayValue(CpuStackFrame dataObject) {
     return '${dataObject.exclusiveSampleCount} '
-        '(${percent2(dataObject.exclusiveSampleRatio)})';
+        '(${percent(dataObject.exclusiveSampleRatio)})';
   }
 }
 
@@ -317,7 +313,6 @@ class _ExclusiveCountColumn extends ColumnData<CpuStackFrame> {
 class TracingTable extends StatelessWidget {
   const TracingTable({
     Key? key,
-    required this.cls,
     required this.dataRoots,
   }) : super(key: key);
 
@@ -328,8 +323,6 @@ class TracingTable extends StatelessWidget {
     _ExclusiveCountColumn(),
     treeColumn,
   ]);
-
-  final ClassRef cls;
 
   final List<CpuStackFrame> dataRoots;
 

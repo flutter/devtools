@@ -49,7 +49,7 @@ class FlutterFramesChart extends StatelessWidget {
       secondListenable: framesController.displayRefreshRate,
       builder: (context, frames, displayRefreshRate, child) {
         return ValueListenableBuilder<bool>(
-          valueListenable: framesController.showFlutterFramesChart,
+          valueListenable: preferences.performance.showFlutterFramesChart,
           builder: (context, show, _) {
             return _FlutterFramesChart(
               framesController: framesController,
@@ -375,6 +375,9 @@ class FramesChartControls extends StatelessWidget {
                 onResume: _resumeFrameRecording,
                 pauseTooltip: _pauseTooltip,
                 resumeTooltip: _resumeTooltip,
+                gaScreen: gac.performance,
+                gaSelectionPause: gac.pause,
+                gaSelectionResume: gac.resume,
               );
             },
           ),
@@ -535,7 +538,7 @@ class FlutterFramesChartItem extends StatelessWidget {
             if (selected)
               Container(
                 key: selectedFrameIndicatorKey,
-                color: defaultSelectionColor,
+                color: colorScheme.primary,
                 height: selectedIndicatorHeight,
               ),
             if (hasShaderJank)
@@ -616,12 +619,22 @@ class FlutterFrameTooltip extends StatelessWidget {
   }
 
   HoverCardData _buildCardData(BuildContext context) {
-    final textColor = Theme.of(context).colorScheme.toggleButtonsTitle;
-    final textStyle = TextStyle(color: textColor);
-    final uiText = 'UI: ${msText(frame.buildTime)}';
-    final rasterText = 'Raster: ${msText(frame.rasterTime)}';
+    final uiText = 'UI: ${durationText(
+      frame.buildTime,
+      unit: DurationDisplayUnit.milliseconds,
+      allowRoundingToZero: false,
+    )}';
+    final rasterText = 'Raster: ${durationText(
+      frame.rasterTime,
+      unit: DurationDisplayUnit.milliseconds,
+      allowRoundingToZero: false,
+    )}';
     final shaderText = hasShaderJank
-        ? 'Shader Compilation: ${msText(frame.shaderDuration)}  -'
+        ? 'Shader Compilation: ${durationText(
+            frame.shaderDuration,
+            unit: DurationDisplayUnit.milliseconds,
+            allowRoundingToZero: false,
+          )}  -'
         : '';
     return HoverCardData(
       position: HoverCardPosition.element,
@@ -631,27 +644,17 @@ class FlutterFrameTooltip extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              uiText,
-              style: textStyle,
-            ),
+            Text(uiText),
             const SizedBox(height: densePadding),
-            Text(
-              rasterText,
-              style: textStyle,
-            ),
+            Text(rasterText),
             if (hasShaderJank)
               Row(
                 children: [
-                  Icon(
+                  const Icon(
                     Icons.subdirectory_arrow_right,
-                    color: textColor,
                     size: defaultIconSizeBeforeScaling,
                   ),
-                  Text(
-                    shaderText,
-                    style: textStyle,
-                  ),
+                  Text(shaderText),
                   MoreInfoLink(
                     url: preCompileShadersDocsUrl,
                     gaScreenName: gac.performance,
@@ -815,8 +818,9 @@ class ChartAxisPainter extends CustomPainter {
     Rect chartArea, {
     required int timeMs,
   }) {
-    final labelText = msText(
+    final labelText = durationText(
       Duration(milliseconds: timeMs),
+      unit: DurationDisplayUnit.milliseconds,
       fractionDigits: 0,
     );
 

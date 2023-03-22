@@ -12,13 +12,14 @@ import '../../../../../shared/analytics/metrics.dart';
 import '../../../../../shared/config_specific/logger/allowed_error.dart';
 import '../../../../../shared/config_specific/logger/logger.dart';
 import '../../../../../shared/globals.dart';
+import '../../../../../shared/primitives/auto_dispose.dart';
 import '../../../../../shared/primitives/trace_event.dart';
 import '../../../../../shared/primitives/trees.dart';
 import '../../../../../shared/primitives/utils.dart';
 import '../../../../../shared/ui/search.dart';
-import '../../../../profiler/cpu_profile_controller.dart';
 import '../../../../profiler/cpu_profile_model.dart';
 import '../../../../profiler/cpu_profile_service.dart';
+import '../../../../profiler/cpu_profiler_controller.dart';
 import '../../../../profiler/sampling_rate.dart';
 import '../../../performance_controller.dart';
 import '../../../performance_model.dart';
@@ -30,7 +31,8 @@ import 'legacy_event_processor.dart';
 /// Debugging flag to load sample trace events from [simple_trace_example.dart].
 bool debugSimpleTrace = false;
 
-class LegacyTimelineEventsController with SearchControllerMixin<TimelineEvent> {
+class LegacyTimelineEventsController extends DisposableController
+    with SearchControllerMixin<TimelineEvent> {
   LegacyTimelineEventsController(this.performanceController) {
     processor = LegacyEventProcessor(performanceController);
   }
@@ -230,11 +232,12 @@ class LegacyTimelineEventsController with SearchControllerMixin<TimelineEvent> {
     bool searchPreviousMatches = false,
   }) {
     if (search.isEmpty) return <TimelineEvent>[];
+    final regexSearch = RegExp(search, caseSensitive: false);
     final matches = <TimelineEvent>[];
     if (searchPreviousMatches) {
       final List<TimelineEvent> previousMatches = searchMatches.value;
       for (final previousMatch in previousMatches) {
-        if (previousMatch.name!.caseInsensitiveContains(search)) {
+        if (previousMatch.matchesSearchToken(regexSearch)) {
           matches.add(previousMatch);
         }
       }
@@ -244,7 +247,7 @@ class LegacyTimelineEventsController with SearchControllerMixin<TimelineEvent> {
         breadthFirstTraversal<TimelineEvent>(
           event,
           action: (TimelineEvent e) {
-            if (e.name!.caseInsensitiveContains(search)) {
+            if (e.matchesSearchToken(regexSearch)) {
               matches.add(e);
             }
           },
@@ -297,5 +300,11 @@ class LegacyTimelineEventsController with SearchControllerMixin<TimelineEvent> {
     _nextTraceIndexToProcess = 0;
     _nextTimelineEventIndexToProcess = 0;
     _selectedTimelineEventNotifier.value = null;
+  }
+
+  @override
+  void dispose() {
+    cpuProfilerController.dispose();
+    super.dispose();
   }
 }

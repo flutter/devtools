@@ -147,8 +147,13 @@ class HttpRequestView extends StatelessWidget {
             size: mediumProgressSize,
           );
         }
+
+        final isJson = requestContentType is List
+            ? requestContentType.any((element) => element.contains('json'))
+            : requestContentType.contains('json');
+
         Widget child;
-        child = (requestContentType.contains('json'))
+        child = isJson
             ? JsonViewer(encodedJson: data.requestBody!)
             : Text(
                 data.requestBody!,
@@ -381,7 +386,8 @@ class HttpRequestCookiesView extends StatelessWidget {
                     ),
               child: DataTable(
                 key: key,
-                dataRowHeight: defaultRowHeight,
+                dataRowMinHeight: defaultRowHeight,
+                dataRowMaxHeight: defaultRowHeight,
                 // NOTE: if this list of columns change, _buildRow will need
                 // to be updated to match.
                 columns: [
@@ -522,8 +528,9 @@ class NetworkRequestOverviewView extends StatelessWidget {
       _buildRow(
         context: context,
         title: 'Timing',
-        child:
-            data is WebSocket ? _buildSocketTimeGraph() : _buildHttpTimeGraph(),
+        child: data is WebSocket
+            ? _buildSocketTimeGraph(context)
+            : _buildHttpTimeGraph(),
       ),
       const SizedBox(height: denseSpacing),
       _buildRow(
@@ -564,7 +571,7 @@ class NetworkRequestOverviewView extends StatelessWidget {
     return Flexible(
       flex: flex,
       child: DevToolsTooltip(
-        message: '$label - ${msText(duration)}',
+        message: '$label - ${durationText(duration)}',
         child: Container(
           height: _timingGraphHeight,
           color: color,
@@ -627,14 +634,24 @@ class NetworkRequestOverviewView extends StatelessWidget {
     for (final instant in data.instantEvents) {
       final instantEventStart = data.instantEvents.first.timeRange!.start!;
       final timeRange = instant.timeRange!;
+      final startDisplay = durationText(
+        timeRange.start! - instantEventStart,
+        unit: DurationDisplayUnit.milliseconds,
+      );
+      final endDisplay = durationText(
+        timeRange.end! - instantEventStart,
+        unit: DurationDisplayUnit.milliseconds,
+      );
+      final totalDisplay = durationText(
+        timeRange.duration,
+        unit: DurationDisplayUnit.milliseconds,
+      );
       result.addAll([
         _buildRow(
           context: context,
           title: instant.name,
           child: _valueText(
-            '[${msText(timeRange.start! - instantEventStart)} - '
-            '${msText(timeRange.end! - instantEventStart)}]'
-            ' → ${msText(timeRange.duration)} total',
+            '[$startDisplay - $endDisplay] → $totalDisplay total',
           ),
         ),
         if (instant != data.instantEvents.last)
@@ -674,11 +691,11 @@ class NetworkRequestOverviewView extends StatelessWidget {
     ];
   }
 
-  Widget _buildSocketTimeGraph() {
+  Widget _buildSocketTimeGraph(BuildContext context) {
     return Container(
       key: socketTimingGraphKey,
       height: _timingGraphHeight,
-      color: mainUiColor,
+      color: Theme.of(context).colorScheme.primary,
     );
   }
 

@@ -73,44 +73,166 @@ void main() {
       expect(printMB(1000 * mb, fractionDigits: 2), '1000.00');
     });
 
-    test('msText', () {
-      expect(msText(const Duration(microseconds: 3111)), equals('3.1 ms'));
-      expect(
-        msText(const Duration(microseconds: 3199), includeUnit: false),
-        equals('3.2'),
-      );
-      expect(
-        msText(const Duration(microseconds: 3159), fractionDigits: 2),
-        equals('3.16 ms'),
-      );
-      expect(
-        msText(const Duration(microseconds: 3111), fractionDigits: 3),
-        equals('3.111 ms'),
-      );
-      expect(
-        msText(const Duration(milliseconds: 3)),
-        equals('3.0 ms'),
-      );
-      expect(
-        msText(const Duration(microseconds: 1)),
-        equals('0.0 ms'),
-      );
-      expect(
-        msText(Duration.zero, allowRoundingToZero: false),
-        equals('0.0 ms'),
-      );
-      expect(
-        msText(const Duration(microseconds: 1), allowRoundingToZero: false),
-        equals('< 0.1 ms'),
-      );
-      expect(
-        msText(
-          const Duration(microseconds: 1),
-          fractionDigits: 2,
-          allowRoundingToZero: false,
-        ),
-        equals('< 0.01 ms'),
-      );
+    group('durationText', () {
+      test('infers unit based on duration', () {
+        expect(
+          durationText(Duration.zero),
+          equals('0 μs'),
+        );
+        expect(
+          durationText(const Duration(microseconds: 100)),
+          equals('0.1 ms'),
+        );
+        expect(
+          durationText(const Duration(microseconds: 99)),
+          equals('99 μs'),
+        );
+        expect(
+          durationText(const Duration(microseconds: 1000)),
+          equals('1.0 ms'),
+        );
+        expect(
+          durationText(const Duration(microseconds: 999900)),
+          equals('999.9 ms'),
+        );
+        expect(
+          durationText(const Duration(microseconds: 1000000)),
+          equals('1.0 s'),
+        );
+        expect(
+          durationText(const Duration(microseconds: 9000000)),
+          equals('9.0 s'),
+        );
+      });
+
+      test('displays proper number of fraction digits', () {
+        expect(
+          durationText(const Duration(microseconds: 99)),
+          equals('99 μs'),
+        );
+        expect(
+          durationText(
+            const Duration(microseconds: 99),
+            // Should ignore this since this will be displayed in microseconds.
+            fractionDigits: 3,
+          ),
+          equals('99 μs'),
+        );
+        expect(
+          durationText(const Duration(microseconds: 3111)),
+          equals('3.1 ms'),
+        );
+        expect(
+          durationText(const Duration(microseconds: 3159), fractionDigits: 2),
+          equals('3.16 ms'),
+        );
+        expect(
+          durationText(const Duration(microseconds: 3111), fractionDigits: 3),
+          equals('3.111 ms'),
+        );
+      });
+
+      test('does not include unit when specified', () {
+        expect(
+          durationText(
+            const Duration(microseconds: 1000),
+            includeUnit: false,
+          ),
+          equals('1.0'),
+        );
+        expect(
+          durationText(
+            const Duration(milliseconds: 10000),
+            includeUnit: false,
+            unit: DurationDisplayUnit.seconds,
+          ),
+          equals('10.0'),
+        );
+      });
+
+      test('does not allow rounding to zero when specified', () {
+        // Setting [allowRoundingToZero] to false without specifying a unit
+        // throws an assertion error.
+        expect(
+          () {
+            durationText(Duration.zero, allowRoundingToZero: false);
+          },
+          throwsAssertionError,
+        );
+
+        // Displays zero for true zero values.
+        expect(
+          durationText(
+            Duration.zero,
+            allowRoundingToZero: false,
+            unit: DurationDisplayUnit.micros,
+          ),
+          equals('0 μs'),
+        );
+        expect(
+          durationText(
+            Duration.zero,
+            allowRoundingToZero: false,
+            unit: DurationDisplayUnit.milliseconds,
+          ),
+          equals('0.0 ms'),
+        );
+        expect(
+          durationText(
+            Duration.zero,
+            allowRoundingToZero: false,
+            unit: DurationDisplayUnit.seconds,
+          ),
+          equals('0.0 s'),
+        );
+
+        // Displays less than text for close-to-zero values.
+        expect(
+          durationText(
+            const Duration(microseconds: 1),
+            allowRoundingToZero: false,
+            unit: DurationDisplayUnit.milliseconds,
+          ),
+          equals('< 0.1 ms'),
+        );
+        expect(
+          durationText(
+            const Duration(microseconds: 1),
+            allowRoundingToZero: false,
+            unit: DurationDisplayUnit.seconds,
+          ),
+          equals('< 0.1 s'),
+        );
+
+        // Only displays less than text values that would round to zero.
+        expect(
+          durationText(
+            const Duration(microseconds: 49),
+            allowRoundingToZero: false,
+            unit: DurationDisplayUnit.milliseconds,
+          ),
+          equals('< 0.1 ms'),
+        );
+        expect(
+          durationText(
+            const Duration(microseconds: 50),
+            allowRoundingToZero: false,
+            unit: DurationDisplayUnit.milliseconds,
+          ),
+          equals('0.1 ms'),
+        );
+
+        // Displays properly with fraction digits.
+        expect(
+          durationText(
+            const Duration(microseconds: 1),
+            fractionDigits: 3,
+            allowRoundingToZero: false,
+            unit: DurationDisplayUnit.milliseconds,
+          ),
+          equals('< 0.001 ms'),
+        );
+      });
     });
 
     test('nullSafeMin', () {

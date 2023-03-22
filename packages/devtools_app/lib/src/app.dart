@@ -41,18 +41,21 @@ import 'service/service_extension_widgets.dart';
 import 'shared/analytics/analytics.dart' as ga;
 import 'shared/analytics/analytics_controller.dart';
 import 'shared/analytics/constants.dart' as gac;
+import 'shared/analytics/metrics.dart';
 import 'shared/common_widgets.dart';
 import 'shared/config_specific/server/server.dart';
 import 'shared/console/primitives/simple_items.dart';
 import 'shared/dialogs.dart';
 import 'shared/globals.dart';
+import 'shared/log_storage.dart';
+import 'shared/offline_screen.dart';
 import 'shared/primitives/auto_dispose.dart';
 import 'shared/primitives/utils.dart';
 import 'shared/routing.dart';
 import 'shared/screen.dart';
-import 'shared/snapshot_screen.dart';
 import 'shared/theme.dart';
 import 'shared/ui/hover.dart';
+import 'shared/utils.dart';
 
 // Assign to true to use a sample implementation of a conditional screen.
 // WARNING: Do not check in this file if debugEnableSampleScreen is true.
@@ -241,7 +244,6 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
               providers: _providedControllers(),
               child: DevToolsScaffold(
                 embed: embed,
-                ideTheme: ideTheme,
                 page: page,
                 screens: screens,
                 actions: [
@@ -277,13 +279,13 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
       for (final screen in widget.screens)
         screen.screen.screenId: _buildTabbedPage,
       snapshotPageId: (_, __, args, ___) {
-        final snapshotArgs = SnapshotArguments.fromArgs(args);
+        final snapshotArgs = OfflineDataArguments.fromArgs(args);
         return DevToolsScaffold.withChild(
           key: UniqueKey(),
           ideTheme: ideTheme,
           child: MultiProvider(
             providers: _providedControllers(offline: true),
-            child: SnapshotScreenBody(snapshotArgs, _screens),
+            child: OfflineScreenBody(snapshotArgs, _screens),
           ),
         );
       },
@@ -326,10 +328,16 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
   Widget build(BuildContext context) {
     return MaterialApp.router(
       debugShowCheckedModeBanner: false,
+      themeMode: isDarkThemeEnabled ? ThemeMode.dark : ThemeMode.light,
       theme: themeFor(
-        isDarkTheme: isDarkThemeEnabled,
+        isDarkTheme: false,
         ideTheme: ideTheme,
-        theme: Theme.of(context),
+        theme: ThemeData(useMaterial3: true, colorScheme: lightColorScheme),
+      ),
+      darkTheme: themeFor(
+        isDarkTheme: true,
+        ideTheme: ideTheme,
+        theme: ThemeData(useMaterial3: true, colorScheme: darkColorScheme),
       ),
       builder: (context, child) {
         return MultiProvider(
@@ -469,7 +477,7 @@ class OpenSettingsAction extends StatelessWidget {
           height: actionWidgetSize,
           alignment: Alignment.center,
           child: Icon(
-            Icons.settings,
+            Icons.settings_outlined,
             size: actionsIconSize,
           ),
         ),
@@ -515,10 +523,65 @@ class SettingsDialog extends StatelessWidget {
             toggle: preferences.toggleVmDeveloperMode,
             gaItem: gac.vmDeveloperMode,
           ),
+          const PaddedDivider(),
+          const _VerboseLoggingSetting(),
         ],
       ),
       actions: const [
         DialogCloseButton(),
+      ],
+    );
+  }
+}
+
+class _VerboseLoggingSetting extends StatelessWidget {
+  const _VerboseLoggingSetting();
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Row(
+          children: [
+            CheckboxSetting(
+              label: const Text('Enable verbose logging'),
+              listenable: preferences.verboseLoggingEnabled,
+              toggle: (enable) => preferences.toggleVerboseLogging(enable),
+              gaItem: gac.verboseLogging,
+            ),
+            const SizedBox(width: defaultSpacing),
+            DevToolsButton(
+              label: 'Copy logs',
+              icon: Icons.copy,
+              gaScreen: gac.settingsDialog,
+              gaSelection: gac.copyLogs,
+              onPressed: () async => await copyToClipboard(
+                LogStorage.root.toString(),
+                'Successfully copied logs',
+              ),
+            ),
+            const SizedBox(width: denseSpacing),
+            ClearButton(
+              label: 'Clear logs',
+              gaScreen: gac.settingsDialog,
+              gaSelection: gac.clearLogs,
+              onPressed: LogStorage.root.clear,
+            ),
+          ],
+        ),
+        const SizedBox(height: denseSpacing),
+        const Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Spacer(),
+            Icon(Icons.warning),
+            SizedBox(width: defaultSpacing),
+            Text(
+              'Logs may contain sensitive information.\n'
+              'Always check their contents before sharing.',
+            )
+          ],
+        ),
       ],
     );
   }
@@ -581,8 +644,12 @@ List<DevToolsScreen> get defaultScreens {
     DevToolsScreen<InspectorController>(
       InspectorScreen(),
       createController: (_) => InspectorController(
-        inspectorTree: InspectorTreeController(),
-        detailsTree: InspectorTreeController(),
+        inspectorTree: InspectorTreeController(
+          gaId: InspectorScreenMetrics.summaryTreeGaId,
+        ),
+        detailsTree: InspectorTreeController(
+          gaId: InspectorScreenMetrics.detailsTreeGaId,
+        ),
         treeType: FlutterTreeType.widget,
       ),
     ),

@@ -77,6 +77,9 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
 
   bool searchVisible = false;
 
+  @override
+  SearchControllerMixin get searchController => _summaryTreeController;
+
   /// Indicates whether search can be closed. The value is set to true when
   /// search target type dropdown is displayed
   /// TODO(https://github.com/flutter/devtools/issues/3489) use this variable when adding the scope dropdown
@@ -87,14 +90,13 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
   static const summaryTreeKey = Key('Summary Tree');
   static const detailsTreeKey = Key('Details Tree');
   static const minScreenWidthForTextBeforeScaling = 900.0;
-  static const unscaledIncludeRefreshTreeWidth = 1255.0;
-  static const serviceExtensionButtonsIncludeTextWidth = 1160.0;
+  static const serviceExtensionButtonsIncludeTextWidth = 1200.0;
 
   @override
   void dispose() {
-    controller.inspectorTree.dispose();
+    _summaryTreeController.dispose();
     if (controller.isSummaryTree && controller.details != null) {
-      controller.details!.inspectorTree.dispose();
+      _detailsTreeController.dispose();
     }
     super.dispose();
   }
@@ -103,36 +105,6 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
   void initState() {
     super.initState();
     ga.screen(InspectorScreen.id);
-
-    if (serviceManager.inspectorService == null) {
-      // The app must not be a Flutter app.
-      return;
-    }
-
-    addAutoDisposeListener(searchFieldFocusNode, () {
-      // Close the search once focus is lost and following conditions are met:
-      //  1. Search string is empty.
-      //  2. [searchPreventClose] == false (this is set true when searchTargetType Dropdown is opened).
-      if (!searchFieldFocusNode.hasFocus &&
-          _summaryTreeController.search.isEmpty &&
-          !searchPreventClose) {
-        setState(() {
-          searchVisible = false;
-        });
-      }
-
-      // Reset [searchPreventClose] state to false after the search field gains focus.
-      // Focus is returned automatically once the Dropdown menu is closed.
-      if (searchFieldFocusNode.hasFocus) {
-        searchPreventClose = false;
-      }
-    });
-    addAutoDisposeListener(preferences.inspector.customPubRootDirectories, () {
-      if (serviceManager.hasConnection &&
-          controller.firstInspectorTreeLoadCompleted) {
-        _refreshInspector();
-      }
-    });
   }
 
   @override
@@ -144,6 +116,33 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
       // The app must not be a Flutter app.
       return;
     }
+
+    cancelListeners();
+    searchVisible = searchController.search.isNotEmpty;
+    addAutoDisposeListener(searchController.searchFieldFocusNode, () {
+      // Close the search once focus is lost and following conditions are met:
+      //  1. Search string is empty.
+      //  2. [searchPreventClose] == false (this is set true when searchTargetType Dropdown is opened).
+      if (!searchController.searchFieldFocusNode.hasFocus &&
+          searchController.search.isEmpty &&
+          !searchPreventClose) {
+        setState(() {
+          searchVisible = false;
+        });
+      }
+
+      // Reset [searchPreventClose] state to false after the search field gains focus.
+      // Focus is returned automatically once the Dropdown menu is closed.
+      if (searchController.searchFieldFocusNode.hasFocus) {
+        searchPreventClose = false;
+      }
+    });
+    addAutoDisposeListener(preferences.inspector.customPubRootDirectories, () {
+      if (serviceManager.hasConnection &&
+          controller.firstInspectorTreeLoadCompleted) {
+        _refreshInspector();
+      }
+    });
 
     if (!controller.firstInspectorTreeLoadCompleted) {
       ga.timeStart(InspectorScreen.id, gac.pageReady);
@@ -200,7 +199,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
             Row(children: getServiceExtensionWidgets()),
           ],
         ),
-        const SizedBox(height: denseRowSpacing),
+        const SizedBox(height: intermediateSpacing),
         Expanded(
           child: widgetTrees,
         ),
@@ -211,7 +210,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
   Widget _buildSummaryTreeColumn() {
     return LayoutBuilder(
       builder: (context, constraints) {
-        return OutlineDecoration(
+        return RoundedOutlinedBorder(
           child: Column(
             children: [
               InspectorSummaryTreeControls(
@@ -219,11 +218,9 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
                 constraints: constraints,
                 onRefreshInspectorPressed: _refreshInspector,
                 onSearchVisibleToggle: _onSearchVisibleToggle,
-                searchFieldBuilder: () => buildSearchField(
+                searchFieldBuilder: () =>
+                    StatelessSearchField<InspectorTreeRow>(
                   controller: _summaryTreeController,
-                  searchFieldKey: GlobalKey(
-                    debugLabel: 'inspectorScreenSearch',
-                  ),
                   searchFieldEnabled: true,
                   shouldRequestFocus: searchVisible,
                   supportsNavigation: true,
@@ -278,7 +275,6 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
       searchVisible = !searchVisible;
     });
     _summaryTreeController.resetSearch();
-    searchTextFieldController.clear();
   }
 
   List<Widget> getServiceExtensionWidgets() {
@@ -296,6 +292,8 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
       ),
       const SizedBox(width: defaultSpacing),
       SettingsOutlinedButton(
+        gaScreen: gac.inspector,
+        gaSelection: gac.inspectorSettings,
         tooltip: 'Flutter Inspector Settings',
         onPressed: () {
           unawaited(
@@ -450,8 +448,7 @@ class InspectorSummaryTreeControls extends StatelessWidget {
 
   Container _controlsContainer(BuildContext context, Widget child) {
     return Container(
-      height: defaultButtonHeight +
-          (isDense() ? denseModeDenseSpacing : denseSpacing),
+      height: defaultHeaderHeight,
       decoration: BoxDecoration(
         border: Border(
           bottom: defaultBorderSide(Theme.of(context)),
@@ -487,11 +484,12 @@ class ErrorNavigator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     final label = errorIndex != null
         ? 'Error ${errorIndex! + 1}/${errors.length}'
         : 'Errors: ${errors.length}';
     return Container(
-      color: devtoolsError,
+      color: colorScheme.errorContainer,
       child: Padding(
         padding: const EdgeInsets.symmetric(
           horizontal: defaultSpacing,
@@ -501,20 +499,19 @@ class ErrorNavigator extends StatelessWidget {
           children: [
             Padding(
               padding: const EdgeInsets.only(right: denseSpacing),
-              child: Text(label),
+              child: Text(
+                label,
+                style: TextStyle(
+                  color: colorScheme.onErrorContainer,
+                ),
+              ),
             ),
-            IconButton(
-              padding: EdgeInsets.zero,
-              constraints: const BoxConstraints(),
-              splashRadius: defaultIconSize,
-              icon: const Icon(Icons.keyboard_arrow_up),
+            _ErrorNavigatorButton(
+              icon: Icons.keyboard_arrow_up,
               onPressed: _previousError,
             ),
-            IconButton(
-              padding: EdgeInsets.zero,
-              constraints: const BoxConstraints(),
-              splashRadius: defaultIconSize,
-              icon: const Icon(Icons.keyboard_arrow_down),
+            _ErrorNavigatorButton(
+              icon: Icons.keyboard_arrow_down,
               onPressed: _nextError,
             ),
           ],
@@ -539,6 +536,30 @@ class ErrorNavigator extends StatelessWidget {
   }
 }
 
+class _ErrorNavigatorButton extends StatelessWidget {
+  const _ErrorNavigatorButton({required this.icon, required this.onPressed});
+
+  final IconData icon;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      // This is required to force the button size.
+      height: defaultButtonHeight,
+      width: defaultButtonHeight,
+      child: IconButton(
+        padding: EdgeInsets.zero,
+        constraints: const BoxConstraints(),
+        splashRadius: defaultIconSize,
+        icon: Icon(icon),
+        color: Theme.of(context).colorScheme.onErrorContainer,
+        onPressed: onPressed,
+      ),
+    );
+  }
+}
+
 class PubRootDirectorySection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -548,6 +569,8 @@ class PubRootDirectorySection extends StatelessWidget {
         return Container(
           height: 200.0,
           child: EditableList(
+            gaScreen: gac.inspector,
+            gaRefreshSelection: gac.refreshPubRoots,
             entries: preferences.inspector.customPubRootDirectories,
             textFieldLabel: 'Enter a new package directory',
             isRefreshing:

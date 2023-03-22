@@ -7,7 +7,9 @@
 export 'src/app.dart' hide CheckboxSetting;
 export 'src/extension_points/extensions_base.dart';
 export 'src/extension_points/extensions_external.dart';
+export 'src/framework/landing_screen.dart';
 export 'src/framework/notifications_view.dart';
+export 'src/framework/release_notes/release_notes.dart';
 export 'src/screens/app_size/app_size_controller.dart';
 export 'src/screens/app_size/app_size_screen.dart';
 export 'src/screens/debugger/breakpoint_manager.dart';
@@ -81,6 +83,7 @@ export 'src/shared/notifications.dart';
 export 'src/shared/preferences.dart';
 export 'src/shared/primitives/auto_dispose.dart';
 export 'src/shared/primitives/listenable.dart';
+export 'src/shared/primitives/simple_items.dart';
 export 'src/shared/primitives/storage.dart';
 export 'src/shared/primitives/trace_event.dart';
 export 'src/shared/primitives/trees.dart';

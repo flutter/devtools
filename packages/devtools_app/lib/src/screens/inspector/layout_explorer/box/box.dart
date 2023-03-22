@@ -377,8 +377,6 @@ class BoxChildVisualizer extends StatelessWidget {
   final LayoutProperties layoutProperties;
   final RenderProperties renderProperties;
 
-  LayoutProperties? get root => state.properties;
-
   LayoutProperties? get properties => renderProperties.layoutProperties;
 
   @override

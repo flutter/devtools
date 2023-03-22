@@ -43,6 +43,8 @@ void main() {
       setGlobal(OfflineModeController, OfflineModeController());
       setGlobal(IdeTheme, IdeTheme());
       setGlobal(NotificationService, NotificationService());
+      setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
+      setGlobal(PreferencesController, PreferencesController());
 
       framesController = FlutterFramesController(
         createMockPerformanceControllerWithDefaults(),
@@ -164,7 +166,7 @@ void main() {
           findsNWidgets(totalFramesInView),
         );
 
-        verifyScrollOffset(tester, 666.0);
+        verifyScrollOffset(tester, 648.0);
       });
     });
 

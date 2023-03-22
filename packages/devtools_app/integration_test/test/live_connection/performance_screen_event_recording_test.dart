@@ -3,9 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app/devtools_app.dart';
-import 'package:devtools_app/src/framework/release_notes/release_notes.dart';
-import 'package:devtools_app/src/screens/performance/tabbed_performance_view.dart';
-import 'package:devtools_app/src/shared/primitives/simple_items.dart';
+import 'package:devtools_app/src/screens/performance/panes/timeline_events/timeline_events_view.dart';
 import 'package:devtools_test/devtools_integration_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -23,28 +21,15 @@ void main() {
 
   testWidgets('refreshing the timeline does not duplicate recorded events',
       (tester) async {
-    await pumpDevTools(tester);
-    await connectToTestApp(tester, testApp);
-
-    // If the release notes viewer is open, close it.
-    final releaseNotesView =
-        tester.widget<ReleaseNotes>(find.byType(ReleaseNotes));
-    if (releaseNotesView.releaseNotesController.releaseNotesVisible.value) {
-      final closeReleaseNotesButton = find.descendant(
-        of: find.byType(ReleaseNotes),
-        matching: find.byType(IconButton),
-      );
-      expect(closeReleaseNotesButton, findsOneWidget);
-      await tester.tap(closeReleaseNotesButton);
-    }
+    await pumpAndConnectDevTools(tester, testApp);
 
     logStatus(
       'Open the Performance screen and switch to the Timeline Events tab',
     );
-    await tester.tap(
-      find.widgetWithText(Tab, ScreenMetaData.performance.title),
-    );
-    await tester.pump(longPumpDuration);
+
+    await switchToScreen(tester, ScreenMetaData.performance);
+    await tester.pump(safePumpDuration);
+
     await tester.tap(find.widgetWithText(InkWell, 'Timeline Events'));
     await tester.pumpAndSettle(longPumpDuration);
 

@@ -32,6 +32,7 @@ class HistoryViewport<T> extends StatefulWidget {
     this.onChange,
     this.historyEnabled = true,
     this.onTitleTap,
+    this.titleIcon,
   });
 
   final HistoryManager<T> history;
@@ -41,6 +42,7 @@ class HistoryViewport<T> extends StatefulWidget {
   final void Function(T?, T?)? onChange;
   final bool historyEnabled;
   final VoidCallback? onTitleTap;
+  final IconData? titleIcon;
 
   @override
   State<HistoryViewport<T>> createState() => _HistoryViewportState<T>();
@@ -48,15 +50,28 @@ class HistoryViewport<T> extends StatefulWidget {
 
 class _HistoryViewportState<T> extends State<HistoryViewport<T>> {
   TextStyle? _titleStyle;
+  Color? _iconColor;
 
   void _updateTitleStyle(TextStyle style) {
     setState(() {
       _titleStyle = style;
+      _iconColor = style.color;
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    final titleIcon = widget.titleIcon != null
+        ? Padding(
+            padding: const EdgeInsets.only(right: densePadding),
+            child: Icon(
+              widget.titleIcon,
+              size: defaultIconSize,
+              color: _iconColor,
+            ),
+          )
+        : const SizedBox.shrink();
+
     return ValueListenableBuilder<T?>(
       valueListenable: widget.history.current,
       builder: (context, T? current, _) {
@@ -106,25 +121,40 @@ class _HistoryViewportState<T> extends State<HistoryViewport<T>> {
               ],
               Expanded(
                 child: widget.onTitleTap == null
-                    ? Text(
-                        title,
-                        style: defaultTitleStyle,
+                    ? Row(
+                        children: [
+                          titleIcon,
+                          Text(
+                            title,
+                            style: defaultTitleStyle,
+                          ),
+                        ],
                       )
                     : MouseRegion(
                         cursor: SystemMouseCursors.click,
-                        onExit: (_) => _updateTitleStyle(defaultTitleStyle),
+                        onExit: (_) {
+                          _updateTitleStyle(defaultTitleStyle);
+                        },
                         onEnter: (_) {
                           _updateTitleStyle(
                             defaultTitleStyle.copyWith(
-                              color: theme.colorScheme.devtoolsLink,
+                              color: theme.colorScheme.primary,
                             ),
                           );
                         },
                         child: GestureDetector(
                           onTap: widget.onTitleTap,
-                          child: Text(
-                            title,
-                            style: _titleStyle ?? theme.textTheme.titleSmall,
+                          child: Row(
+                            children: [
+                              titleIcon,
+                              Expanded(
+                                child: Text(
+                                  title,
+                                  style:
+                                      _titleStyle ?? theme.textTheme.titleSmall,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ),
@@ -139,7 +169,7 @@ class _HistoryViewportState<T> extends State<HistoryViewport<T>> {
             ],
           ),
         );
-        return OutlineDecoration(
+        return RoundedOutlinedBorder(
           child: Column(
             children: [
               titleWidget,

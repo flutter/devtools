@@ -87,6 +87,8 @@ void debugTraceEventCallback(VoidCallback callback) {
 
 const preCompileShadersDocsUrl = 'https://docs.flutter.dev/perf/shader';
 
+const impellerWikiUrl = 'https://github.com/flutter/flutter/wiki/Impeller';
+
 extension TraceEventExtension on TraceEvent {
   bool get isThreadNameEvent =>
       phase == TraceEvent.metadataEventPhase &&

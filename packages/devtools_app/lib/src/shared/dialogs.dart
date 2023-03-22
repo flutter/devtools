@@ -249,12 +249,9 @@ class DialogTextButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: defaultButtonHeight,
-      child: TextButton(
-        onPressed: onPressed,
-        child: child,
-      ),
+    return TextButton(
+      onPressed: onPressed,
+      child: child,
     );
   }
 }

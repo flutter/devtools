@@ -35,7 +35,7 @@ class ReportFeedbackButton extends StatelessWidget {
           height: actionWidgetSize,
           alignment: Alignment.center,
           child: Icon(
-            Icons.bug_report,
+            Icons.bug_report_outlined,
             size: actionsIconSize,
           ),
         ),

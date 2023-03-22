@@ -49,9 +49,7 @@ class DiffSnapshotScene extends Scene {
     setGlobal(ServiceConnectionManager, fakeServiceManager);
 
     diffController = DiffPaneController(_TestSnapshotTaker());
-    diffController.applyFilter(
-      ClassFilter(filterType: ClassFilterType.showAll, except: '', only: ''),
-    );
+    setClassFilterToShowAll();
 
     await diffController.takeSnapshot();
     await diffController.takeSnapshot();
@@ -60,12 +58,17 @@ class DiffSnapshotScene extends Scene {
   @override
   String get title => '$DiffSnapshotScene';
 
+  void setClassFilterToShowAll() {
+    diffController.derived.applyFilter(
+      ClassFilter(filterType: ClassFilterType.showAll, except: '', only: ''),
+    );
+  }
+
   void tearDown() {}
 }
 
 /// Provides test snapshots.
 class _TestSnapshotTaker implements SnapshotTaker {
-  bool firstTime = true;
   int _nextIndex = 0;
 
   @override

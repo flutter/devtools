@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 import '../../../../../shared/analytics/constants.dart';
 import '../../../../../shared/memory/adapted_heap_data.dart';
 import '../../../../../shared/memory/class_name.dart';
-import '../../../../../shared/theme.dart';
 import '../../../shared/heap/heap.dart';
 import '../../../shared/primitives/instance_set_button.dart';
 import '../controller/sampler.dart';
@@ -19,13 +18,14 @@ import '../controller/sampler.dart';
 class InstanceTableCell extends StatelessWidget {
   InstanceTableCell(
     ObjectSet objects,
-    AdaptedHeapData heap,
+    HeapDataCallback heap,
     HeapClassName heapClass, {
     required this.isSelected,
     required this.gaContext,
+    this.liveItemsEnabled = true,
   })  : _showMenu = _shouldShowMenu(isSelected, objects),
         _sampleObtainer = _shouldShowMenu(isSelected, objects)
-            ? HeapClassSampler(objects, heap, heapClass)
+            ? HeapClassSampler(objects, heap(), heapClass)
             : null,
         _count = objects.instanceCount;
 
@@ -37,21 +37,19 @@ class InstanceTableCell extends StatelessWidget {
   final bool isSelected;
   final MemoryAreas gaContext;
   final int _count;
+  final bool liveItemsEnabled;
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
     return Row(
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
         InstanceSetButton(
-          textStyle:
-              isSelected ? theme.selectedTextStyle : theme.regularTextStyle,
           count: _count,
           gaContext: gaContext,
           sampleObtainer: _sampleObtainer,
           showMenu: _showMenu,
+          liveItemsEnabled: liveItemsEnabled,
         ),
       ],
     );

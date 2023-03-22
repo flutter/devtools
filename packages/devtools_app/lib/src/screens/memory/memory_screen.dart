@@ -96,11 +96,8 @@ class MemoryBodyState extends State<MemoryBody>
     return Column(
       key: MemoryChartPane.hoverKey,
       children: [
-        MemoryControlPane(
-          chartController: _chartController,
-          controller: controller,
-        ),
-        const SizedBox(height: denseRowSpacing),
+        MemoryControlPane(controller: controller),
+        const SizedBox(height: intermediateSpacing),
         MemoryChartPane(
           chartController: _chartController,
           keyFocusNode: _focusNode,

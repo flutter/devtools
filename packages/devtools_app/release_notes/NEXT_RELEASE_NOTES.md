@@ -1,36 +1,49 @@
 This is draft for future release notes, that are going to land on
 [the Flutter website](https://docs.flutter.dev/development/tools/devtools/release-notes).
 
-# DevTools 2.22.0 release notes
+# DevTools 2.23.0 release notes
 
 Dart & Flutter DevTools - A Suite of Performance Tools for Dart and Flutter
 
 ## General updates
-* Prevent crashes if there is no main isolate - [#5232](https://github.com/flutter/devtools/pull/5232)
+* Update DevTools to the new Material 3 design - [#5429](https://github.com/flutter/devtools/pull/5429)
+* Use the default Flutter service worker - [#5331](https://github.com/flutter/devtools/pull/5331)
+* Added the new verbose logging feature for helping us debug user issues. [#5404](https://github.com/flutter/devtools/pull/5404)
+    ![verbose logging](images/verbose-logging.png "verbose_logging")
+* Fix a bug where some asynchronous errors were not being reported. [#5456](https://github.com/flutter/devtools/pull/5456)
 
 ## Inspector updates
 TODO: Remove this section if there are not any general updates.
 
 ## Performance updates
-TODO: Remove this section if there are not any general updates.
+* Persist a user's preference for whether the Flutter Frames chart should be shown by default. - [#5339](https://github.com/flutter/devtools/pull/5339)
+* Point users to [Impeller](https://github.com/flutter/flutter/wiki/Impeller) when shader compilation
+jank is detected on an iOS device. - [#5455](https://github.com/flutter/devtools/pull/5455)
+* Fix a performance regression in timeline event processing. - [#5460](https://github.com/flutter/devtools/pull/5460)
 
 ## CPU profiler updates
+* Add a Method Table to the CPU profiler - [#5366](https://github.com/flutter/devtools/pull/5366)
+* Improve the performance of data processing in the CPU profiler - [#5468](https://github.com/flutter/devtools/pull/5468)
 
-* Display stack frame uri inline with method name to ensure the URI is always visible
-in deeply nested trees - [#5181](https://github.com/flutter/devtools/pull/5181)
-* Add the ability to filter by method name or source URI - [#5204](https://github.com/flutter/devtools/pull/5204)
+![method table](images/image1.png "method_table")
+
+* Add ability to inspect statistics for a CPU profile - [#5340](https://github.com/flutter/devtools/pull/5340)
+* Fix a bug where Native stack frames were missing their name - [#5344](https://github.com/flutter/devtools/pull/5344)
+* Fix an error in total and self time calculations for the bottom up tree - [#5348](https://github.com/flutter/devtools/pull/5348)
 
 ## Memory updates
-* Change filter default to show only project and 3rd party dependencies [#5201](https://github.com/flutter/devtools/pull/5201).
-* Support expression evaluation in console for running application [#5248](https://github.com/flutter/devtools/pull/5248).
-* Add column `Persisted` for memory diffing [#5290](https://github.com/flutter/devtools/pull/5290).
+* Fix filtering bug in the "Trace Instances" view - [#5406](https://github.com/flutter/devtools/pull/5406)
 
 ## Debugger updates
-* Add support for browser navigation history when navigating using the `File Explorer` [#4906](https://github.com/flutter/devtools/pull/4906).
-* Designate positional fields for `Record` types with the getter syntax beginning at `$1` [#5272](https://github.com/flutter/devtools/pull/5272)
+* Fix a bug where variable inspection for instances sometimes showed no children. - [#5356](https://github.com/flutter/devtools/pull/5356)
+* Hide "search in file" dialog if "file search" dialog is open - [#5393](https://github.com/flutter/devtools/pull/5393)
+* Fix file search bug where last letter disappeared when searching at end of file name - [#5397](https://github.com/flutter/devtools/pull/5397)
+* Add search icon in file bar to make file search more discoverable - [#5351](https://github.com/flutter/devtools/issues/5351)
+* Allow expression evaluation when pausing in JS for web apps - [#5427](https://github.com/flutter/devtools/pull/5427)
 
 ## Network profiler updates
-* Improve reliability and performance of the Network tab - [#5056](https://github.com/flutter/devtools/pull/5056)
+* Fix a bug viewing JSON responses with null values - [#5424](https://github.com/flutter/devtools/pull/5424)
+* Fix a bug where JSON requests were shown in plain text, instead of the formatted JSON viewer - [#5463](https://github.com/flutter/devtools/pull/5463)
 
 ## Logging updates
 TODO: Remove this section if there are not any general updates.

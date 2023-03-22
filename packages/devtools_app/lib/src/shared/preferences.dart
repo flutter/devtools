@@ -6,10 +6,13 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
+import 'package:logging/logging.dart';
 
 import '../service/vm_service_wrapper.dart';
 import 'analytics/analytics.dart' as ga;
 import 'analytics/constants.dart' as gac;
+import 'config_specific/logger/logger_helpers.dart';
+import 'constants.dart';
 import 'diagnostics/inspector_service.dart';
 import 'globals.dart';
 import 'primitives/auto_dispose.dart';
@@ -25,6 +28,11 @@ class PreferencesController extends DisposableController
   ValueListenable<bool> get vmDeveloperModeEnabled => _vmDeveloperMode;
   final _vmDeveloperMode = ValueNotifier<bool>(false);
 
+  ValueListenable<bool> get verboseLoggingEnabled => _verboseLogging;
+  final _verboseLogging =
+      ValueNotifier<bool>(Logger.root.level == verboseLoggingLevel);
+  static const _verboseLoggingStorageId = 'verboseLogging';
+
   ValueListenable<bool> get denseModeEnabled => _denseMode;
   final _denseMode = ValueNotifier<bool>(false);
 
@@ -33,6 +41,9 @@ class PreferencesController extends DisposableController
 
   MemoryPreferencesController get memory => _memory;
   final _memory = MemoryPreferencesController();
+
+  PerformancePreferencesController get performance => _performance;
+  final _performance = PerformancePreferencesController();
 
   CpuProfilerPreferencesController get cpuProfiler => _cpuProfiler;
   final _cpuProfiler = CpuProfilerPreferencesController();
@@ -60,17 +71,39 @@ class PreferencesController extends DisposableController
       storage.setValue('ui.denseMode', '${_denseMode.value}');
     });
 
+    await _initVerboseLogging();
+
     await inspector.init();
     await memory.init();
+    await performance.init();
     await cpuProfiler.init();
 
     setGlobal(PreferencesController, this);
+  }
+
+  Future<void> _initVerboseLogging() async {
+    final verboseLoggingEnabledValue =
+        await storage.getValue(_verboseLoggingStorageId);
+
+    toggleVerboseLogging(verboseLoggingEnabledValue == 'true');
+
+    addAutoDisposeListener(_verboseLogging, () {
+      storage.setValue('verboseLogging', _verboseLogging.value.toString());
+
+      if (_verboseLogging.value) {
+        setDevToolsLoggingLevel(verboseLoggingLevel);
+      } else {
+        setDevToolsLoggingLevel(basicLoggingLevel);
+      }
+    });
   }
 
   @override
   void dispose() {
     inspector.dispose();
     memory.dispose();
+    performance.dispose();
+    cpuProfiler.dispose();
     super.dispose();
   }
 
@@ -83,6 +116,10 @@ class PreferencesController extends DisposableController
   void toggleVmDeveloperMode(bool enableVmDeveloperMode) {
     _vmDeveloperMode.value = enableVmDeveloperMode;
     VmServiceWrapper.enablePrivateRpcs = enableVmDeveloperMode;
+  }
+
+  void toggleVerboseLogging(bool enableVerboseLogging) {
+    _verboseLogging.value = enableVerboseLogging;
   }
 
   /// Change the value for the dense mode setting.
@@ -410,5 +447,32 @@ class CpuProfilerPreferencesController extends DisposableController
     );
     displayTreeGuidelines.value =
         await storage.getValue(_displayTreeGuidelinesId) == 'true';
+  }
+}
+
+class PerformancePreferencesController extends DisposableController
+    with AutoDisposeControllerMixin {
+  final showFlutterFramesChart = ValueNotifier<bool>(true);
+
+  static final _showFlutterFramesChartId =
+      '${gac.performance}.${gac.framesChartVisibility}';
+
+  Future<void> init() async {
+    addAutoDisposeListener(
+      showFlutterFramesChart,
+      () {
+        storage.setValue(
+          _showFlutterFramesChartId,
+          showFlutterFramesChart.value.toString(),
+        );
+        ga.select(
+          gac.performance,
+          gac.framesChartVisibility,
+          value: showFlutterFramesChart.value ? 1 : 0,
+        );
+      },
+    );
+    showFlutterFramesChart.value =
+        await storage.getValue(_showFlutterFramesChartId) != 'false';
   }
 }

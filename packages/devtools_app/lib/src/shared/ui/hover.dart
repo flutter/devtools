@@ -141,7 +141,7 @@ class HoverCard {
             child: Container(
               padding: const EdgeInsets.all(denseSpacing),
               decoration: BoxDecoration(
-                color: colorScheme.defaultBackgroundColor,
+                color: colorScheme.surface,
                 border: Border.all(
                   color: focusColor,
                   width: hoverCardBorderWidth,
@@ -162,7 +162,7 @@ class HoverCard {
                         textAlign: TextAlign.center,
                       ),
                     ),
-                    Divider(color: theme.hoverTextStyle.color),
+                    Divider(color: theme.focusColor),
                   ],
                   SingleChildScrollView(
                     child: Container(

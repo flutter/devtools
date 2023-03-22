@@ -76,11 +76,13 @@ class EvalService extends DisposableController with AutoDisposeControllerMixin {
 
     final isolateId = isolateRef.id!;
 
+    final scope = await _scopeIfSupported(isolateId);
+
     Future<Response> eval() async => await serviceManager.service!.evaluate(
           isolateId,
           (await isolate.isolate)!.rootLib!.id!,
           expressionText,
-          scope: scope.value(isolateId: isolateId),
+          scope: scope,
         );
 
     return await _evalWithVariablesRefresh(eval, isolateId);
@@ -110,8 +112,14 @@ class EvalService extends DisposableController with AutoDisposeControllerMixin {
     final variables = scope.removedVariables.join(', ');
     serviceManager.consoleService.appendStdio(
       'Garbage collected instances were removed from the scope: $variables. '
-      'Stop application to make variables persistent.\n',
+      'Pause application (use DevTools > Debugger) to make the variables persistent.\n',
     );
+  }
+
+  bool get isStoppedAtDartFrame {
+    return serviceManager.isMainIsolatePaused &&
+        serviceManager.appState.currentFrame.value?.code?.kind ==
+            CodeKind.kDart;
   }
 
   /// Evaluate the given expression in the context of the currently selected
@@ -155,15 +163,24 @@ class EvalService extends DisposableController with AutoDisposeControllerMixin {
       );
     }
 
+    final scope = await _scopeIfSupported(isolateRefId);
+
     Future<Response> evalFunction() => _service.evaluateInFrame(
           isolateRefId,
           frame.index!,
           expression,
           disableBreakpoints: true,
-          scope: scope.value(isolateId: isolateRefId),
+          scope: scope,
         );
 
     return await _evalWithVariablesRefresh(evalFunction, isolateRefId);
+  }
+
+  Future<Map<String, String>?> _scopeIfSupported(String isolateRefId) async {
+    // Debugging for web does not support scopes yet.
+    if (await serviceManager.connectedApp?.isDartWebApp ?? true) return null;
+
+    return scope.value(isolateId: isolateRefId);
   }
 
   Future<InstanceRef?> findObject(

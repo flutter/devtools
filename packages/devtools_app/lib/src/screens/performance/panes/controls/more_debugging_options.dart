@@ -9,7 +9,7 @@ import '../../../../service/service_extensions.dart' as extensions;
 import '../../../../shared/feature_flags.dart';
 import '../../../../shared/globals.dart';
 import '../../../../shared/theme.dart';
-import '../../performance_screen.dart';
+import 'performance_controls.dart';
 
 class MoreDebuggingOptionsButton extends StatelessWidget {
   const MoreDebuggingOptionsButton({Key? key}) : super(key: key);
@@ -18,12 +18,13 @@ class MoreDebuggingOptionsButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return ServiceExtensionCheckboxGroupButton(
       title: 'More debugging options',
       icon: Icons.build,
       tooltip: 'Opens a list of options you can use to help debug performance',
       minScreenWidthForTextBeforeScaling:
-          SecondaryPerformanceControls.minScreenWidthForTextBeforeScaling,
+          PerformanceControls.minScreenWidthForTextBeforeScaling,
       extensions: [
         extensions.disableClipLayers,
         extensions.disableOpacityLayers,
@@ -38,7 +39,7 @@ class MoreDebuggingOptionsButton extends StatelessWidget {
             'reproduce the activity in your app to see the effects. '
             'All layers are rendered by default - disabling a '
             'layer might help identify expensive operations in your app.',
-            style: Theme.of(context).subtleTextStyle,
+            style: theme.subtleTextStyle,
           ),
           if (serviceManager.connectedApp!.isProfileBuildNow!) ...[
             const SizedBox(height: denseSpacing),
@@ -47,7 +48,8 @@ class MoreDebuggingOptionsButton extends StatelessWidget {
                 text:
                     "These debugging options aren't available in profile mode. "
                     'To use them, run your app in debug mode.',
-                style: Theme.of(context).subtleErrorTextStyle,
+                style: theme.subtleTextStyle
+                    .copyWith(color: theme.colorScheme.error),
               ),
             ),
           ],

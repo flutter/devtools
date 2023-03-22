@@ -5,13 +5,13 @@
 import 'dart:ui' as ui;
 
 import 'package:devtools_app/devtools_app.dart';
-import 'package:devtools_app/src/framework/landing_screen.dart';
-import 'package:devtools_app/src/framework/release_notes/release_notes.dart';
-import 'package:devtools_app/src/shared/primitives/simple_items.dart';
 import 'package:devtools_test/devtools_integration_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
+
+// To run:
+// dart run integration_test/run_tests.dart --target=integration_test/test/live_connection/app_test.dart
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
@@ -29,26 +29,7 @@ void main() {
   });
 
   testWidgets('connect to app and switch tabs', (tester) async {
-    await pumpDevTools(tester);
-    expect(find.byType(LandingScreenBody), findsOneWidget);
-    expect(find.text('No client connection'), findsOneWidget);
-
-    logStatus('verify that we can connect to an app');
-    await connectToTestApp(tester, testApp);
-    expect(find.byType(LandingScreenBody), findsNothing);
-    expect(find.text('No client connection'), findsNothing);
-
-    // If the release notes viewer is open, close it.
-    final releaseNotesView =
-        tester.widget<ReleaseNotes>(find.byType(ReleaseNotes));
-    if (releaseNotesView.releaseNotesController.releaseNotesVisible.value) {
-      final closeReleaseNotesButton = find.descendant(
-        of: find.byType(ReleaseNotes),
-        matching: find.byType(IconButton),
-      );
-      expect(closeReleaseNotesButton, findsOneWidget);
-      await tester.tap(closeReleaseNotesButton);
-    }
+    await pumpAndConnectDevTools(tester, testApp);
 
     logStatus('verify that we can load each DevTools screen');
     final availableScreenIds = <String>[];
@@ -65,15 +46,10 @@ void main() {
     );
     expect(tabs.length, equals(availableScreenIds.length));
 
-    final screenTitles = (ScreenMetaData.values.toList()
-          ..removeWhere((data) => !availableScreenIds.contains(data.id)))
-        .map((data) => data.title);
-    for (final title in screenTitles) {
-      logStatus('switching to $title screen');
-      await tester.tap(find.widgetWithText(Tab, title));
-      // We use pump here instead of pumpAndSettle because pumpAndSettle will
-      // never complete if there is an animation (e.g. a progress indicator).
-      await tester.pump(safePumpDuration);
+    final screens = (ScreenMetaData.values.toList()
+      ..removeWhere((data) => !availableScreenIds.contains(data.id)));
+    for (final screen in screens) {
+      await switchToScreen(tester, screen);
     }
   });
 }

@@ -2,8 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app/src/shared/primitives/utils.dart';
-import 'package:devtools_app/src/shared/ui/search.dart';
+import 'package:devtools_app/devtools_app.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 // TODO(https://github.com/flutter/devtools/issues/3514): increase test coverage
@@ -70,7 +69,8 @@ void main() {
   });
 }
 
-class TestSearchController with SearchControllerMixin<TestSearchData> {
+class TestSearchController extends DisposableController
+    with SearchControllerMixin<TestSearchData> {
   final data = <TestSearchData>[];
 
   @override
@@ -84,7 +84,7 @@ class TestSearchController with SearchControllerMixin<TestSearchData> {
   }
 }
 
-class TestSearchData with DataSearchStateMixin {
+class TestSearchData with SearchableDataMixin {
   TestSearchData(this.name);
 
   final String name;

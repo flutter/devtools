@@ -18,11 +18,10 @@ import 'widgets/expandable_variable.dart';
 
 // TODO(devoncarew): Support hyperlinking to stack traces.
 
-/// Renders a ConsoleOutput widget with ConsoleControls overlaid on the
-/// top-right corner.
+/// Renders a Console widget with output [lines] and an optional [title] and
+/// [footer].
 class Console extends StatelessWidget {
   const Console({
-    this.controls = const <Widget>[],
     required this.lines,
     this.title,
     this.footer,
@@ -30,16 +29,11 @@ class Console extends StatelessWidget {
 
   final Widget? title;
   final Widget? footer;
-  final List<Widget> controls;
   final ValueListenable<List<ConsoleLine>> lines;
-
-  @visibleForTesting
-  String get textContent => lines.value.join('\n');
 
   @override
   Widget build(BuildContext context) {
     return ConsoleFrame(
-      controls: controls,
       title: title,
       child: _ConsoleOutput(lines: lines, footer: footer),
     );
@@ -48,57 +42,25 @@ class Console extends StatelessWidget {
 
 class ConsoleFrame extends StatelessWidget {
   const ConsoleFrame({
-    this.controls = const <Widget>[],
     required this.child,
     this.title,
   }) : super();
 
   final Widget? title;
   final Widget child;
-  final List<Widget> controls;
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        if (title != null) title!,
-        Expanded(
-          child: Material(
-            child: Stack(
-              children: [
-                // Fill the width of the console to expand the scrollable area.
-                Positioned.fill(child: child),
-                if (controls.isNotEmpty)
-                  _ConsoleControls(
-                    controls: controls,
-                  ),
-              ],
-            ),
+    return Padding(
+      padding: const EdgeInsets.only(bottom: densePadding),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          if (title != null) title!,
+          Expanded(
+            child: child,
           ),
-        ),
-      ],
-    );
-  }
-}
-
-/// Renders a top-right aligned ButtonBar wrapping a List of IconButtons
-/// (`controls`).
-class _ConsoleControls extends StatelessWidget {
-  const _ConsoleControls({
-    required this.controls,
-  }) : super();
-
-  final List<Widget> controls;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      alignment: Alignment.topRight,
-      child: ButtonBar(
-        buttonPadding: EdgeInsets.zero,
-        alignment: MainAxisAlignment.end,
-        children: controls,
+        ],
       ),
     );
   }
@@ -213,45 +175,48 @@ class _ConsoleOutputState extends State<_ConsoleOutput>
       controller: _scroll,
       thumbVisibility: true,
       key: _scrollBarKey,
-      child: ListView.separated(
-        padding: const EdgeInsets.all(denseSpacing),
-        itemCount: _currentLines.length + (widget.footer != null ? 1 : 0),
-        controller: _scroll,
-        // Scroll physics to try to keep content within view and avoid bouncing.
-        physics: const ClampingScrollPhysics(
-          parent: RangeMaintainingScrollPhysics(),
-        ),
-        separatorBuilder: (_, __) {
-          return const Divider();
-        },
-        itemBuilder: (context, index) {
-          if (index == _currentLines.length && widget.footer != null) {
-            return widget.footer!;
-          }
-          final line = _currentLines[index];
-          if (line is TextConsoleLine) {
-            return SelectableText.rich(
-              TextSpan(
-                // TODO(jacobr): consider caching the processed ansi terminal
-                // codes.
-                children: processAnsiTerminalCodes(
-                  line.text,
-                  theme.fixedFontStyle,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: denseSpacing),
+        child: ListView.separated(
+          padding: const EdgeInsets.all(denseSpacing),
+          itemCount: _currentLines.length + (widget.footer != null ? 1 : 0),
+          controller: _scroll,
+          // Scroll physics to try to keep content within view and avoid bouncing.
+          physics: const ClampingScrollPhysics(
+            parent: RangeMaintainingScrollPhysics(),
+          ),
+          separatorBuilder: (_, __) {
+            return const Divider();
+          },
+          itemBuilder: (context, index) {
+            if (index == _currentLines.length && widget.footer != null) {
+              return widget.footer!;
+            }
+            final line = _currentLines[index];
+            if (line is TextConsoleLine) {
+              return SelectableText.rich(
+                TextSpan(
+                  // TODO(jacobr): consider caching the processed ansi terminal
+                  // codes.
+                  children: processAnsiTerminalCodes(
+                    line.text,
+                    theme.fixedFontStyle,
+                  ),
                 ),
-              ),
-            );
-          } else if (line is VariableConsoleLine) {
-            return ExpandableVariable(
-              variable: line.variable,
-            );
-          } else {
-            assert(
-              false,
-              'ConsoleLine of unsupported type ${line.runtimeType} encountered',
-            );
-            return const SizedBox();
-          }
-        },
+              );
+            } else if (line is VariableConsoleLine) {
+              return ExpandableVariable(
+                variable: line.variable,
+              );
+            } else {
+              assert(
+                false,
+                'ConsoleLine of unsupported type ${line.runtimeType} encountered',
+              );
+              return const SizedBox();
+            }
+          },
+        ),
       ),
     );
   }

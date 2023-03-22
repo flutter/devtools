@@ -32,6 +32,9 @@ class FlatTableController<T> extends TableControllerBase<T> {
     super.columnGroups,
     super.includeColumnGroupHeaders,
     this.pinBehavior = FlatTablePinBehavior.none,
+    this.sizeColumnsToFit = true,
+    this.sortOriginalData = false,
+    this.onDataSorted,
   });
 
   /// Determines how elements that request to be pinned are displayed.
@@ -39,16 +42,40 @@ class FlatTableController<T> extends TableControllerBase<T> {
   /// Defaults to [FlatTablePinBehavior.none], which disables pinnning.
   FlatTablePinBehavior pinBehavior;
 
+  /// Whether the columns for this table should be sized so that the entire
+  /// table fits in view (e.g. so that there is no horizontal scrolling).
+  final bool sizeColumnsToFit;
+
+  // TODO(kenz): should we enable this behavior by default? Does it ever matter
+  // to preserve the order of the original data passed to a flat table?
+  /// Whether the table controller should sort the original data list instead of
+  /// creating a copy.
+  final bool sortOriginalData;
+
+  /// Callback that will be called after each table sort operation.
+  final VoidCallback? onDataSorted;
+
   /// The unmodified, original data for the active data set [_tableData.value].
   ///
-  /// This is reset each time [setData] is called.
-  late UnmodifiableListView<T> _originalData;
+  /// This is reset each time [setData] is called, when [sortOriginalData] is
+  /// false.
+  late UnmodifiableListView<T> _unmodifiableOriginalData;
+
+  /// The modifiable, original data for the active data set [_tableData.value].
+  ///
+  /// This is reset each time [setData] is called, when [sortOriginalData] is
+  /// true.
+  late List<T> _modifiableOriginalData;
 
   @override
   void setData(List<T> data, String key) {
-    _originalData = UnmodifiableListView(
-      List.of(data),
-    );
+    if (sortOriginalData) {
+      _modifiableOriginalData = data;
+    } else {
+      _unmodifiableOriginalData = UnmodifiableListView(
+        List<T>.of(data),
+      );
+    }
 
     // Look up the UI state for [key], and sort accordingly.
     final uiState = _tableUiStateForKey(key);
@@ -67,7 +94,16 @@ class FlatTableController<T> extends TableControllerBase<T> {
     ColumnData<T>? secondarySortColumn,
     String? dataKey,
   }) {
-    var data = List<T>.of(_originalData);
+    late List<T> data;
+    if (sortOriginalData) {
+      data = _modifiableOriginalData;
+    } else {
+      // TODO(kenz): copying the list for every sort could cause performance
+      // issues. We should only create a copy when sort is being called from
+      // [setData]. At all other times, the data has not been modified so there
+      // is no need to make a copy.
+      data = List<T>.of(_unmodifiableOriginalData);
+    }
     pinnedData = <T>[];
     data.sort(
       (T a, T b) => _compareData<T>(
@@ -94,12 +130,17 @@ class FlatTableController<T> extends TableControllerBase<T> {
       }
       data = dataCopy;
     }
+
+    if (!sizeColumnsToFit) {
+      columnWidths = computeColumnWidthsSizeToContent(data);
+    }
     _tableData.value = TableData<T>(
       data: data,
       key: dataKey ?? _tableData.value.key,
     );
 
     setTableUiState(sortColumn: column, sortDirection: direction);
+    onDataSorted?.call();
   }
 }
 
@@ -120,8 +161,6 @@ class TreeTableController<T extends TreeNode<T>>
   final TreeColumnData<T> treeColumn;
 
   final bool autoExpandRoots;
-
-  late List<double> columnWidths;
 
   late List<T> dataRoots;
 
@@ -220,6 +259,8 @@ abstract class TableControllerBase<T> extends DisposableController {
   final List<ColumnData<T>> columns;
 
   final List<ColumnGroup>? columnGroups;
+
+  List<double>? columnWidths;
 
   /// Determines if the headers for column groups should be rendered.
   ///

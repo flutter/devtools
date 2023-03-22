@@ -8,15 +8,20 @@ import 'package:flutter/material.dart';
 
 import '../../../../shared/analytics/constants.dart';
 import '../../../../shared/common_widgets.dart';
-import '../../../../shared/globals.dart';
 import '../../../../shared/primitives/utils.dart';
 
 abstract class ClassSampler {
-  /// Drop one variable, which exists in static set and still alive in app, to console.
+  /// Drop one variable, which exists in the static set and still alive in app, to console.
   Future<void> oneLiveStaticToConsole();
 
+  /// Drop one variable from the static set, to console.
+  Future<void> oneStaticToConsole();
+
   /// Drop all live instances to console.
-  Future<void> manyLiveToConsole();
+  Future<void> allLiveToConsole({
+    required bool includeSubclasses,
+    required bool includeImplementers,
+  });
 
   bool get isEvalEnabled;
 }
@@ -31,6 +36,7 @@ class InstanceSetButton extends StatelessWidget {
     required this.sampleObtainer,
     required this.showMenu,
     required this.gaContext,
+    required this.liveItemsEnabled,
   })  : assert(showMenu == (sampleObtainer != null)),
         assert(count >= 0);
 
@@ -39,6 +45,9 @@ class InstanceSetButton extends StatelessWidget {
   final bool showMenu;
   final TextStyle? textStyle;
   final MemoryAreas gaContext;
+
+  /// If true, menu items that show live objects, will be enabled.
+  final bool liveItemsEnabled;
 
   @override
   Widget build(BuildContext context) {
@@ -53,7 +62,10 @@ class InstanceSetButton extends StatelessWidget {
         if (shouldShowMenu)
           ContextMenuButton(
             style: textStyle,
-            menu: _menu(sampleObtainer!),
+            menu: _menu(
+              sampleObtainer!,
+              liveItemsEnabled: liveItemsEnabled,
+            ),
           ),
         if (!shouldShowMenu) const SizedBox(width: ContextMenuButton.width),
       ],
@@ -61,33 +73,37 @@ class InstanceSetButton extends StatelessWidget {
   }
 }
 
-class _StoreAsVariableMenu extends StatelessWidget {
-  const _StoreAsVariableMenu(this.sampleObtainer);
+class _StoreAsOneVariableMenu extends StatelessWidget {
+  const _StoreAsOneVariableMenu(
+    this.sampler, {
+    required this.liveItemsEnabled,
+  });
 
-  final ClassSampler sampleObtainer;
+  final ClassSampler sampler;
+  final bool liveItemsEnabled;
 
   @override
   Widget build(BuildContext context) {
-    final enabled = sampleObtainer.isEvalEnabled;
-    const menuText = 'Store as a console variable';
-    final limit = preferences.memory.refLimit.value;
+    final enabled = sampler.isEvalEnabled;
+    const menuText = 'Store one instance from the set as a console variable';
 
     if (!enabled) {
       return const MenuItemButton(child: Text(menuText));
     }
 
     return SubmenuButton(
-      // TODO(polina-c): change structure and review texts before opening the feature.
       menuChildren: <Widget>[
         MenuItemButton(
-          onPressed: sampleObtainer.oneLiveStaticToConsole,
+          onPressed: sampler.oneStaticToConsole,
           child: const Text(
-            'One instance that exists in snapshot, and is alive in application',
+            'Any',
           ),
         ),
         MenuItemButton(
-          onPressed: sampleObtainer.manyLiveToConsole,
-          child: Text('Up to $limit instances, currently alive in application'),
+          onPressed: liveItemsEnabled ? sampler.oneLiveStaticToConsole : null,
+          child: const Text(
+            'Any, not garbage collected',
+          ),
         ),
       ],
       child: const Text(menuText),
@@ -95,6 +111,60 @@ class _StoreAsVariableMenu extends StatelessWidget {
   }
 }
 
-List<Widget> _menu(ClassSampler sampleObtainer) => [
-      _StoreAsVariableMenu(sampleObtainer),
-    ];
+class _StoreAllAsVariableMenu extends StatelessWidget {
+  const _StoreAllAsVariableMenu(
+    this.sampler, {
+    required this.liveItemsEnabled,
+  });
+
+  final ClassSampler sampler;
+  final bool liveItemsEnabled;
+
+  @override
+  Widget build(BuildContext context) {
+    final enabled = sampler.isEvalEnabled;
+    const menuText = 'Store all class instances currently alive in application';
+
+    if (!enabled) {
+      return const MenuItemButton(child: Text(menuText));
+    }
+
+    MenuItemButton item(
+      title, {
+      required bool subclasses,
+      required bool implementers,
+    }) =>
+        MenuItemButton(
+          onPressed: () async => await sampler.allLiveToConsole(
+            includeImplementers: implementers,
+            includeSubclasses: subclasses,
+          ),
+          child: Text(title),
+        );
+
+    return SubmenuButton(
+      menuChildren: <Widget>[
+        item('Direct instances', implementers: false, subclasses: false),
+        item('Direct and subclasses', implementers: false, subclasses: false),
+        item('Direct and implementers', implementers: false, subclasses: false),
+        item(
+          'Direct, subclasses, and implementers',
+          implementers: false,
+          subclasses: false,
+        ),
+      ],
+      child: const Text(menuText),
+    );
+  }
+}
+
+// TODO(polina-c): review structure/texts and add ga, before opening the feature.
+List<Widget> _menu(
+  ClassSampler sampler, {
+  required bool liveItemsEnabled,
+}) {
+  return [
+    _StoreAsOneVariableMenu(sampler, liveItemsEnabled: liveItemsEnabled),
+    _StoreAllAsVariableMenu(sampler, liveItemsEnabled: liveItemsEnabled),
+  ];
+}

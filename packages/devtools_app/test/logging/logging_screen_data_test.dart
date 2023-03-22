@@ -36,6 +36,8 @@ void main() async {
         .thenReturn(ValueNotifier<int>(0));
     setGlobal(ServiceConnectionManager, fakeServiceManager);
     setGlobal(NotificationService, NotificationService());
+    setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
+    setGlobal(PreferencesController, PreferencesController());
     setGlobal(IdeTheme, IdeTheme());
   });
 
@@ -97,7 +99,7 @@ void main() async {
       await pumpLoggingScreen(tester);
       verifyNever(mockLoggingController.clear());
 
-      final textFieldFinder = find.byKey(loggingSearchFieldKey);
+      final textFieldFinder = find.byType(TextField);
       expect(textFieldFinder, findsOneWidget);
       final TextField textField = tester.widget(textFieldFinder) as TextField;
       expect(textField.enabled, isTrue);

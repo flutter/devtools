@@ -3,11 +3,10 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app/devtools_app.dart';
-import 'package:devtools_app/src/screens/profiler/cpu_profile_controller.dart';
+import 'package:devtools_app/src/screens/profiler/cpu_profiler_controller.dart';
 import 'package:devtools_app/src/screens/profiler/panes/cpu_flame_chart.dart';
 import 'package:devtools_app/src/shared/charts/flame_chart.dart';
 import 'package:devtools_app/src/shared/primitives/flutter_widgets/linked_scroll_controller.dart';
-import 'package:devtools_app/src/shared/ui/colors.dart';
 import 'package:devtools_app/src/shared/ui/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
@@ -15,7 +14,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 
-import '../test_infra/test_data/cpu_profile.dart';
+import '../test_infra/test_data/cpu_profiler/cpu_profile.dart';
 import '../test_infra/test_data/performance.dart';
 
 void main() {
@@ -441,7 +440,8 @@ void main() {
         await pumpFlameChartNode(tester, selected: true, hovered: false);
         expect(nodeFinder, findsOneWidget);
         final Container nodeWidget = tester.widget(nodeFinder);
-        expect(nodeWidget.color, equals(defaultSelectionColor));
+
+        expect(nodeWidget.color, equals(darkColorScheme.primary));
 
         expect(textFinder, findsOneWidget);
         final Text textWidget = tester.widget(textFinder);

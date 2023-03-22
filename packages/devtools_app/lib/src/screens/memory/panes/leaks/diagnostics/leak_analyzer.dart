@@ -44,15 +44,6 @@ Future<void> analyzeHeapAndSetRetainingPaths(
   }
 }
 
-/// Sets [detailedPath] to each leak.
-void setDetailedPaths(AdaptedHeapData heap, List<LeakReport> notGCedLeaks) {
-  assert(heap.allFieldsCalculated);
-
-  for (var l in notGCedLeaks) {
-    l.detailedPath = _pathByIdentityHashCode(heap, l.code)?.detailedPath();
-  }
-}
-
 HeapPath? _pathByIdentityHashCode(AdaptedHeapData heap, int code) {
   final objectIndex = heap.objectIndexByIdentityHashCode(code);
   if (objectIndex == null) return null;

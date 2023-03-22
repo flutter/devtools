@@ -10,7 +10,7 @@ import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../test_infra/test_data/cpu_profile.dart';
+import '../test_infra/test_data/cpu_profiler/cpu_profile.dart';
 
 void main() {
   group('CpuProfileData', () {
@@ -252,53 +252,78 @@ void main() {
 
     test('totalTime and selfTime', () {
       expect(testStackFrame.totalTimeRatio, equals(1.0));
-      expect(testStackFrame.totalTime.inMicroseconds, equals(100));
+      expect(testStackFrame.totalTime.inMicroseconds, equals(10000));
       expect(testStackFrame.selfTimeRatio, equals(0.0));
       expect(testStackFrame.selfTime.inMicroseconds, equals(0));
 
       expect(stackFrameC.totalTimeRatio, equals(0.2));
-      expect(stackFrameC.totalTime.inMicroseconds, equals(20));
+      expect(stackFrameC.totalTime.inMicroseconds, equals(2000));
       expect(stackFrameC.selfTimeRatio, equals(0.2));
-      expect(stackFrameC.selfTime.inMicroseconds, equals(20));
+      expect(stackFrameC.selfTime.inMicroseconds, equals(2000));
 
       expect(stackFrameD.totalTimeRatio, equals(0.8));
-      expect(stackFrameD.totalTime.inMicroseconds, equals(80));
+      expect(stackFrameD.totalTime.inMicroseconds, equals(8000));
       expect(stackFrameD.selfTimeRatio, equals(0.2));
-      expect(stackFrameD.selfTime.inMicroseconds, equals(20));
+      expect(stackFrameD.selfTime.inMicroseconds, equals(2000));
 
       expect(stackFrameF.totalTimeRatio, equals(0.1));
-      expect(stackFrameF.totalTime.inMicroseconds, equals(10));
+      expect(stackFrameF.totalTime.inMicroseconds, equals(1000));
       expect(stackFrameF.selfTimeRatio, equals(0.0));
       expect(stackFrameF.selfTime.inMicroseconds, equals(0));
     });
 
-    test('shallowCopy', () {
-      expect(stackFrameD.children.length, equals(2));
-      expect(stackFrameD.parent, equals(stackFrameB));
-      CpuStackFrame copy =
-          stackFrameD.shallowCopy(resetInclusiveSampleCount: false);
-      expect(copy.children, isEmpty);
-      expect(copy.parent, isNull);
+    test('ancestorIds', () {
+      expect(testStackFrame.ancestorIds.toList(), ['cpuProfileRoot']);
+      expect(stackFrameA.ancestorIds.toList(), ['cpuProfileRoot']);
+      expect(stackFrameB.ancestorIds.toList(), ['id_0', 'cpuProfileRoot']);
       expect(
-        copy.exclusiveSampleCount,
-        equals(stackFrameD.exclusiveSampleCount),
+        stackFrameC.ancestorIds.toList(),
+        ['id_1', 'id_0', 'cpuProfileRoot'],
       );
       expect(
-        copy.inclusiveSampleCount,
-        equals(stackFrameD.inclusiveSampleCount),
+        stackFrameD.ancestorIds.toList(),
+        ['id_1', 'id_0', 'cpuProfileRoot'],
       );
+      expect(
+        stackFrameE.ancestorIds.toList(),
+        ['id_3', 'id_1', 'id_0', 'cpuProfileRoot'],
+      );
+      expect(
+        stackFrameF.ancestorIds.toList(),
+        ['id_4', 'id_3', 'id_1', 'id_0', 'cpuProfileRoot'],
+      );
+      expect(
+        stackFrameF2.ancestorIds.toList(),
+        ['id_3', 'id_1', 'id_0', 'cpuProfileRoot'],
+      );
+      expect(
+        stackFrameC2.ancestorIds.toList(),
+        ['id_5', 'id_4', 'id_3', 'id_1', 'id_0', 'cpuProfileRoot'],
+      );
+      expect(
+        stackFrameC3.ancestorIds.toList(),
+        ['id_6', 'id_3', 'id_1', 'id_0', 'cpuProfileRoot'],
+      );
+    });
 
-      expect(stackFrameD.children.length, equals(2));
-      expect(stackFrameD.parent, equals(stackFrameB));
-      copy = stackFrameD.shallowCopy();
+    test('shallowCopy', () {
+      expect(stackFrameD.children.length, 2);
+      expect(stackFrameD.parent, stackFrameB);
+      CpuStackFrame copy = stackFrameD.shallowCopy();
       expect(copy.children, isEmpty);
       expect(copy.parent, isNull);
-      expect(
-        copy.exclusiveSampleCount,
-        equals(stackFrameD.exclusiveSampleCount),
-      );
-      expect(copy.inclusiveSampleCount, copy.exclusiveSampleCount);
-      expect(copy.sourceLine, equals(stackFrameD.sourceLine));
+      expect(copy.exclusiveSampleCount, stackFrameD.exclusiveSampleCount);
+      expect(copy.inclusiveSampleCount, stackFrameD.inclusiveSampleCount);
+      expect(copy.sourceLine, stackFrameD.sourceLine);
+
+      expect(stackFrameD.children.length, 2);
+      expect(stackFrameD.parent, stackFrameB);
+      copy = stackFrameD.shallowCopy(copySampleCounts: false);
+      expect(copy.children, isEmpty);
+      expect(copy.parent, isNull);
+      expect(copy.exclusiveSampleCount, 0);
+      expect(copy.inclusiveSampleCount, 0);
+      expect(copy.sourceLine, stackFrameD.sourceLine);
     });
 
     test('shallowCopy overrides', () {
@@ -368,16 +393,16 @@ void main() {
 
     test('tooltip', () {
       expect(
-        tagFrameA.tooltip,
-        equals('[Tag] TagA - 0.0 ms'),
+        testTagRootedStackFrame.tooltip,
+        equals('[Tag] TagA - 10.0 ms'),
       );
       expect(
         stackFrameA.tooltip,
-        equals('[Native] A - 0.1 ms'),
+        equals('[Native] A - 10.0 ms'),
       );
       expect(
         stackFrameB.tooltip,
-        equals('[Dart] B - 0.1 ms - dart:async/zone.dart:2222'),
+        equals('[Dart] B - 10.0 ms - dart:async/zone.dart:2222'),
       );
     });
 

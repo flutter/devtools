@@ -46,8 +46,6 @@ const smallTextScaleFactor = 0.8;
 /// Height for limiting asset image (selected one in the drop down).
 double get axisAlignmentAssetImageHeight => scaleByFontFactor(24.0);
 
-/// Width for limiting asset image (when drop down menu is open for the vertical).
-double get axisAlignmentAssetImageWidth => scaleByFontFactor(96.0);
 double get dropdownMaxSize => scaleByFontFactor(220.0);
 
 double get minHeightToAllowTruncating => scaleByFontFactor(375.0);
@@ -56,11 +54,6 @@ double get minWidthToAllowTruncating => scaleByFontFactor(375.0);
 // Story of Layout colors
 const mainAxisLightColor = Color(0xff2c5daa);
 const mainAxisDarkColor = Color(0xff2c5daa);
-const rowColor = Color(0xff2c5daa);
-const columnColor = Color(0xff77974d);
-const regularWidgetColor = Color(0xff88b1de);
-
-const selectedWidgetColor = Color(0xff36c6f4);
 
 const textColor = Color(0xff55767f);
 const emphasizedTextColor = Color(0xff009aca);
@@ -108,9 +101,6 @@ extension LayoutExplorerColorScheme on ColorScheme {
   Color get backgroundColorSelected =>
       isLight ? backgroundColorSelectedLight : backgroundColorSelectedDark;
 
-  Color get backgroundColor =>
-      isLight ? backgroundColorLight : backgroundColorDark;
-
   Color get unconstrainedColor =>
       isLight ? unconstrainedLightColor : unconstrainedDarkColor;
 }
@@ -123,8 +113,6 @@ const unconstrainedLightColor = Color(0xfff5846b);
 
 const widthIndicatorColor = textColor;
 const heightIndicatorColor = textColor;
-
-extension LayoutThemeDataExtension on ThemeData {}
 
 const negativeSpaceDarkAssetName =
     'assets/img/layout_explorer/negative_space_dark.png';

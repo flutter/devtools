@@ -3,17 +3,10 @@
 // found in the LICENSE file.
 
 import 'package:collection/collection.dart';
+import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/debugger/debugger_model.dart';
 import 'package:devtools_app/src/screens/debugger/program_explorer.dart';
-import 'package:devtools_app/src/screens/debugger/program_explorer_model.dart';
-import 'package:devtools_app/src/service/service_manager.dart';
-import 'package:devtools_app/src/shared/common_widgets.dart';
-import 'package:devtools_app/src/shared/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/shared/flex_split_column.dart';
-import 'package:devtools_app/src/shared/globals.dart';
-import 'package:devtools_app/src/shared/notifications.dart';
-import 'package:devtools_app/src/shared/primitives/listenable.dart';
-import 'package:devtools_app/src/shared/scripts/script_manager.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -39,6 +32,8 @@ void main() {
           createMockProgramExplorerControllerWithDefaults();
       setGlobal(IdeTheme, IdeTheme());
       setGlobal(ServiceConnectionManager, fakeServiceManager);
+      setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
+      setGlobal(PreferencesController, PreferencesController());
     });
 
     testWidgets('builds when not initialized', (WidgetTester tester) async {

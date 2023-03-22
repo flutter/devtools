@@ -6,13 +6,14 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../../../shared/analytics/constants.dart' as gac;
 import '../../../shared/common_widgets.dart';
 import '../../../shared/primitives/utils.dart';
 import '../../../shared/split.dart';
 import '../../../shared/table/table.dart';
 import '../../../shared/table/table_data.dart';
 import '../../../shared/theme.dart';
-import '../../profiler/cpu_profiler.dart';
+import '../../profiler/panes/controls/profiler_controls.dart';
 import '../vm_developer_common_widgets.dart';
 import '../vm_developer_tools_screen.dart';
 import '../vm_service_private_extensions.dart';
@@ -48,6 +49,8 @@ class IsolateStatisticsViewBody extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             RefreshButton(
+              gaScreen: gac.vmTools,
+              gaSelection: gac.refreshIsolateStatistics,
               onPressed: controller.refresh,
             ),
             const SizedBox(height: denseRowSpacing),
@@ -220,7 +223,7 @@ class TagStatisticsWidget extends StatelessWidget {
 
   static final _name = _TagColumn();
   static final _percentage = _PercentageColumn();
-  static final List<ColumnData<VMTag>> columns = [_name, _percentage];
+  static final _columns = <ColumnData<VMTag>>[_name, _percentage];
 
   final IsolateStatisticsViewController controller;
 
@@ -236,7 +239,7 @@ class TagStatisticsWidget extends StatelessWidget {
                   keyFactory: (VMTag tag) => ValueKey<String>(tag.name),
                   data: controller.tags,
                   dataKey: 'tag-statistics',
-                  columns: columns,
+                  columns: _columns,
                   defaultSortColumn: _percentage,
                   defaultSortDirection: SortDirection.descending,
                 )
@@ -264,7 +267,7 @@ class _PercentageColumn extends ColumnData<VMTag> {
   double getValue(VMTag dataObject) => dataObject.percentage;
 
   @override
-  String getDisplayValue(VMTag dataObject) => percent2(dataObject.percentage);
+  String getDisplayValue(VMTag dataObject) => percent(dataObject.percentage);
 }
 
 class _PortIDColumn extends ColumnData<InstanceRef> {
@@ -303,10 +306,11 @@ class _StackTraceViewerFrameColumn extends ColumnData<String> {
 // TODO(bkonyi): merge with debugger stack trace viewer.
 /// A simple table to display a stack trace, sorted by frame number.
 class StackTraceViewerWidget extends StatelessWidget {
-  StackTraceViewerWidget({required this.stackTrace});
+  const StackTraceViewerWidget({required this.stackTrace});
+
+  static final frame = _StackTraceViewerFrameColumn();
 
   final InstanceRef? stackTrace;
-  final frame = _StackTraceViewerFrameColumn();
 
   @override
   Widget build(BuildContext context) {
@@ -327,9 +331,7 @@ class StackTraceViewerWidget extends StatelessWidget {
                 keyFactory: (String s) => ValueKey<String>(s),
                 data: lines,
                 dataKey: 'stack-trace-viewer',
-                columns: [
-                  frame,
-                ],
+                columns: [frame],
                 defaultSortColumn: frame,
                 defaultSortDirection: SortDirection.ascending,
               ),
@@ -355,10 +357,7 @@ class IsolatePortsWidget extends StatefulWidget {
 class _IsolatePortsWidgetState extends State<IsolatePortsWidget> {
   static final _id = _PortIDColumn();
   static final _name = _PortNameColumn();
-  static final List<ColumnData<InstanceRef>> _columns = [
-    _name,
-    _id,
-  ];
+  static final _columns = <ColumnData<InstanceRef>>[_name, _id];
 
   final selectedPort = ValueNotifier<InstanceRef?>(null);
 
@@ -377,7 +376,7 @@ class _IsolatePortsWidgetState extends State<IsolatePortsWidget> {
             child: Column(
               children: [
                 AreaPaneHeader(
-                  needsTopBorder: false,
+                  includeTopBorder: false,
                   title: Text(
                     'Open Ports (${ports.length})',
                   ),
@@ -421,10 +420,7 @@ class ServiceExtensionsWidget extends StatelessWidget {
   const ServiceExtensionsWidget({required this.controller});
 
   static final _name = _ServiceExtensionNameColumn();
-
-  static final List<ColumnData<String>> _columns = [
-    _name,
-  ];
+  static final _columns = <ColumnData<String>>[_name];
 
   final IsolateStatisticsViewController controller;
 
