@@ -65,6 +65,11 @@ class CpuProfilerDefaultScene extends Scene {
     setGlobal(ScriptManager, mockScriptManager);
 
     controller = ProfilerScreenController();
+
+    // Await a small delay to allow the ProfilerScreenController to complete
+    // initialization.
+    await Future.delayed(const Duration(seconds: 1));
+
     screen = ProfilerScreen();
   }
 

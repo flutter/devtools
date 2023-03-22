@@ -583,7 +583,7 @@ void main() {
       setUp(() async {
         controller = ProfilerScreenController();
 
-        // Await a small delay to allow the PerformanceController to complete
+        // Await a small delay to allow the ProfilerScreenController to complete
         // initialization.
         await Future.delayed(const Duration(seconds: 1));
 
@@ -742,7 +742,7 @@ void main() {
       setUp(() async {
         controller = ProfilerScreenController();
 
-        // Await a small delay to allow the PerformanceController to complete
+        // Await a small delay to allow the ProfilerScreenController to complete
         // initialization.
         await Future.delayed(const Duration(seconds: 1));
 
@@ -791,7 +791,12 @@ void main() {
           await tester.tap(find.byType(UserTagDropdown));
           await tester.pumpAndSettle();
           await tester.tap(find.text('Group by: User Tag').last);
+
+          // Await a small delay to allow the CpuProfilerController to finish
+          // processing data for the new user tag.
+          await Future.delayed(const Duration(seconds: 1));
           await tester.pumpAndSettle();
+
           await tester.tap(find.text('Expand All'));
           await tester.pumpAndSettle();
 
@@ -826,7 +831,12 @@ void main() {
           await tester.tap(find.byType(UserTagDropdown));
           await tester.pumpAndSettle();
           await tester.tap(find.text('Group by: VM Tag').last);
+
+          // Await a small delay to allow the CpuProfilerController to finish
+          // processing data for the new user tag.
+          await Future.delayed(const Duration(seconds: 1));
           await tester.pumpAndSettle();
+
           await tester.tap(find.text('Expand All'));
           await tester.pumpAndSettle();
 
