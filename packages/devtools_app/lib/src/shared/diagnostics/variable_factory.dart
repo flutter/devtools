@@ -15,7 +15,6 @@ import '../vm_utils.dart';
 import 'dart_object_node.dart';
 import 'diagnostics_node.dart';
 import 'object_group_api.dart';
-import 'inspector_service.dart';
 import 'primitives/record_fields.dart';
 
 List<DartObjectNode> createVariablesForStackTrace(
