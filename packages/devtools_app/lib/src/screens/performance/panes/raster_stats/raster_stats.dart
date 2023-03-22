@@ -337,13 +337,16 @@ class _FullScreenButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.only(bottom: denseSpacing),
+      padding: const EdgeInsets.only(
+        bottom: denseSpacing,
+        right: denseSpacing,
+      ),
       alignment: Alignment.bottomRight,
-      child: IconButton(
-        icon: Icon(
-          Icons.fullscreen,
-          size: defaultButtonHeight,
-        ),
+      child: DevToolsButton.iconOnly(
+        icon: Icons.fullscreen,
+        outlined: false,
+        gaScreen: gac.performance,
+        gaSelection: gac.fullScreenLayerImage,
         onPressed: () {
           unawaited(
             showDialog(

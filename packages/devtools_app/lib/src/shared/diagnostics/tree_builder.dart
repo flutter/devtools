@@ -11,6 +11,7 @@ import '../../screens/debugger/debugger_model.dart';
 import '../config_specific/logger/logger.dart';
 import '../feature_flags.dart';
 import '../globals.dart';
+import '../memory/adapted_heap_data.dart';
 import '../primitives/utils.dart';
 import 'dart_object_node.dart';
 import 'diagnostics_node.dart';
@@ -168,6 +169,7 @@ Future<void> _addInstanceRefItems(
       value: result,
       isolateRef: isolateRef,
       existingNames: existingNames,
+      heapSelection: ref?.heapSelection?.withoutObject(),
     );
   }
 }
@@ -177,6 +179,7 @@ Future<void> _addChildrenToInstanceVariable({
   required DartObjectNode variable,
   required Instance value,
   required IsolateRef? isolateRef,
+  required HeapObjectSelection? heapSelection,
   Set<String>? existingNames,
 }) async {
   switch (value.kind) {
@@ -190,7 +193,7 @@ Future<void> _addChildrenToInstanceVariable({
       break;
     case InstanceKind.kList:
       variable.addAllChildren(
-        createVariablesForList(value, isolateRef),
+        createVariablesForList(value, isolateRef, heapSelection),
       );
       break;
     case InstanceKind.kRecord:
@@ -388,10 +391,10 @@ Future<void> buildVariablesTree(
   );
 
   try {
-    if (variable.childCount > DartObjectNode.MAX_CHILDREN_IN_GROUPING) {
-      _setupGrouping(variable);
-    } else if (ref is ObjectReferences) {
+    if (ref is ObjectReferences) {
       await addChildReferences(variable);
+    } else if (variable.childCount > DartObjectNode.MAX_CHILDREN_IN_GROUPING) {
+      _setupGrouping(variable);
     } else if (instanceRef != null && serviceManager.service != null) {
       await _addInstanceRefItems(variable, instanceRef, isolateRef);
     } else if (value is InstanceSet) {
@@ -407,7 +410,8 @@ Future<void> buildVariablesTree(
 
   if (FeatureFlags.evalAndBrowse &&
       ref.heapSelection != null &&
-      ref is! ObjectReferences) {
+      ref is! ObjectReferences &&
+      !variable.isGroup) {
     addReferencesRoot(variable, ref);
   }
 
