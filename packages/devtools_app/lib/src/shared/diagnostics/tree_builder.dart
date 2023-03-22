@@ -388,10 +388,10 @@ Future<void> buildVariablesTree(
   );
 
   try {
-    if (variable.childCount > DartObjectNode.MAX_CHILDREN_IN_GROUPING) {
-      _setupGrouping(variable);
-    } else if (ref is ObjectReferences) {
+    if (ref is ObjectReferences) {
       await addChildReferences(variable);
+    } else if (variable.childCount > DartObjectNode.MAX_CHILDREN_IN_GROUPING) {
+      _setupGrouping(variable);
     } else if (instanceRef != null && serviceManager.service != null) {
       await _addInstanceRefItems(variable, instanceRef, isolateRef);
     } else if (value is InstanceSet) {
@@ -407,7 +407,8 @@ Future<void> buildVariablesTree(
 
   if (FeatureFlags.evalAndBrowse &&
       ref.heapSelection != null &&
-      ref is! ObjectReferences) {
+      ref is! ObjectReferences &&
+      !variable.isGroup) {
     addReferencesRoot(variable, ref);
   }
 
