@@ -11,6 +11,7 @@ import '../../screens/debugger/debugger_model.dart';
 import '../config_specific/logger/logger.dart';
 import '../feature_flags.dart';
 import '../globals.dart';
+import '../memory/adapted_heap_data.dart';
 import '../primitives/utils.dart';
 import 'dart_object_node.dart';
 import 'diagnostics_node.dart';
@@ -112,6 +113,11 @@ void _setupGrouping(DartObjectNode variable) {
   final end = start + variable.childCount;
   while (start < end) {
     final count = min(end - start, numChildrenInGrouping);
+
+    final ref = variable.ref!;
+
+    print('!!!!! ${ref.heapSelection}');
+
     variable.addChild(
       DartObjectNode.grouping(variable.ref, offset: start, count: count),
     );
@@ -168,6 +174,7 @@ Future<void> _addInstanceRefItems(
       value: result,
       isolateRef: isolateRef,
       existingNames: existingNames,
+      heapSelection: ref?.heapSelection?.withoutObject(),
     );
   }
 }
@@ -178,6 +185,7 @@ Future<void> _addChildrenToInstanceVariable({
   required Instance value,
   required IsolateRef? isolateRef,
   Set<String>? existingNames,
+  required HeapObjectSelection? heapSelection,
 }) async {
   switch (value.kind) {
     case InstanceKind.kMap:
@@ -190,7 +198,7 @@ Future<void> _addChildrenToInstanceVariable({
       break;
     case InstanceKind.kList:
       variable.addAllChildren(
-        createVariablesForList(value, isolateRef),
+        createVariablesForList(value, isolateRef, heapSelection),
       );
       break;
     case InstanceKind.kRecord:
