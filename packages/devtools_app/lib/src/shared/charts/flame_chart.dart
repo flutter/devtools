@@ -1382,7 +1382,7 @@ class TimelineGridPainter extends FlameChartPainter {
     double intervalWidth,
     double lineX,
   ) {
-    final timestampText = msText(
+    final timestampText = durationText(
       Duration(microseconds: timestampMicros),
       fractionDigits: timestampMicros == 0 ? 1 : 3,
     );

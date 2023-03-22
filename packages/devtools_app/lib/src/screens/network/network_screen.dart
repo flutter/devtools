@@ -177,15 +177,12 @@ class _NetworkProfilerControls extends StatefulWidget {
 }
 
 class _NetworkProfilerControlsState extends State<_NetworkProfilerControls>
-    with AutoDisposeMixin, SearchFieldMixin<_NetworkProfilerControls> {
+    with AutoDisposeMixin {
   late NetworkRequests _requests;
 
   late List<NetworkRequest> _filteredRequests;
 
   bool _recording = false;
-
-  @override
-  SearchControllerMixin get searchController => widget.controller;
 
   @override
   void initState() {
@@ -246,15 +243,10 @@ class _NetworkProfilerControlsState extends State<_NetworkProfilerControls>
         const SizedBox(width: defaultSpacing),
         const Expanded(child: SizedBox()),
         // TODO(kenz): fix focus issue when state is refreshed
-        Container(
-          width: wideSearchTextWidth,
-          height: defaultTextFieldHeight,
-          child: SearchField<NetworkRequest>(
-            controller: widget.controller,
-            searchFieldEnabled: hasRequests,
-            shouldRequestFocus: false,
-            supportsNavigation: true,
-          ),
+        SearchField<NetworkController>(
+          searchController: widget.controller,
+          searchFieldEnabled: hasRequests,
+          searchFieldWidth: wideSearchFieldWidth,
         ),
         const SizedBox(width: denseSpacing),
         FilterButton(
@@ -346,6 +338,7 @@ class NetworkRequestsTable extends StatelessWidget {
   Widget build(BuildContext context) {
     return RoundedOutlinedBorder(
       clip: true,
+      // TODO(kenz): use SearchableFlatTable instead.
       child: FlatTable<NetworkRequest?>(
         keyFactory: (NetworkRequest? data) => ValueKey<NetworkRequest?>(data),
         data: requests,
@@ -557,7 +550,7 @@ class DurationColumn extends ColumnData<NetworkRequest> {
     final ms = getValue(dataObject);
     return ms == null
         ? 'Pending'
-        : msText(
+        : durationText(
             Duration(milliseconds: ms),
             fractionDigits: 0,
           );

@@ -8,8 +8,8 @@ import '../../../shared/primitives/utils.dart';
 import '../../../shared/table/table.dart';
 import '../../../shared/table/table_data.dart';
 import '../../../shared/theme.dart';
-import '../cpu_profile_columns.dart';
 import '../cpu_profile_model.dart';
+import 'cpu_profile_columns.dart';
 
 /// A table of the bottom up tree for a CPU profile.
 class CpuBottomUpTable extends StatelessWidget {

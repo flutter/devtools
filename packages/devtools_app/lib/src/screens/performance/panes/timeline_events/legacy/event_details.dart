@@ -11,9 +11,9 @@ import '../../../../../shared/primitives/trace_event.dart';
 import '../../../../../shared/primitives/utils.dart';
 import '../../../../../shared/theme.dart';
 import '../../../../../shared/ui/vm_flag_widgets.dart';
-import '../../../../profiler/cpu_profile_controller.dart';
 import '../../../../profiler/cpu_profile_model.dart';
 import '../../../../profiler/cpu_profiler.dart';
+import '../../../../profiler/cpu_profiler_controller.dart';
 import '../../../../profiler/panes/controls/profiler_controls.dart';
 import '../../../performance_model.dart';
 import '../../../performance_screen.dart';
@@ -79,7 +79,7 @@ class EventDetails extends StatelessWidget {
     }
     final selected = selectedEvent!;
     return '${selected.isUiEvent ? 'CPU Profile: ' : ''}'
-        '${selected.name} (${msText(selected.time.duration)})';
+        '${selected.name} (${durationText(selected.time.duration)})';
   }
 
   Widget _buildDetails(bool offlineMode, bool profilerEnabled) {
@@ -167,7 +167,7 @@ class EventSummary extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
           child: EventMetaData(
             title: 'Time',
-            inlineValue: msText(event.time.duration),
+            inlineValue: durationText(event.time.duration),
             child: SelectableText(
               '[${event.time.start!.inMicroseconds} μs —  '
               '${event.time.end!.inMicroseconds} μs]',
@@ -239,7 +239,7 @@ class EventSummary extends StatelessWidget {
 
   Widget _buildConnectedEvent(TimelineEvent e) {
     final eventArgs = {
-      'startTime': msText(e.time.start! - event.time.start!),
+      'startTime': durationText(e.time.start! - event.time.start!),
       'args': e.traceEvents.first.event.args,
     };
     return EventMetaData(

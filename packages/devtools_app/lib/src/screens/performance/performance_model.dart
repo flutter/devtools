@@ -463,7 +463,7 @@ class OfflineTimelineEvent extends TimelineEvent {
 
 abstract class TimelineEvent extends TreeNode<TimelineEvent>
     with
-        DataSearchStateMixin,
+        SearchableDataMixin,
         TreeDataSearchStateMixin<TimelineEvent>,
         FlameChartDataMixin {
   TimelineEvent(TraceEventWrapper firstTraceEvent)
@@ -535,7 +535,7 @@ abstract class TimelineEvent extends TreeNode<TimelineEvent>
   int? get threadId => traceEvents.first.event.threadId;
 
   @override
-  String get tooltip => '$name - ${msText(time.duration)}';
+  String get tooltip => '$name - ${durationText(time.duration)}';
 
   bool _isWellFormedDeep(TimelineEvent event) {
     return !subtreeHasNodeWithCondition((e) => !e.isWellFormed);
@@ -755,6 +755,11 @@ abstract class TimelineEvent extends TreeNode<TimelineEvent>
       copy._addChild(child.deepCopy());
     }
     return copy;
+  }
+
+  @override
+  bool matchesSearchToken(RegExp regExpSearch) {
+    return name!.caseInsensitiveContains(regExpSearch);
   }
 
   // TODO(kenz): use DiagnosticableTreeMixin instead.

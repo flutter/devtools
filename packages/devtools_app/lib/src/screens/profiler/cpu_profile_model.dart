@@ -18,8 +18,8 @@ import '../../shared/primitives/utils.dart';
 import '../../shared/profiler_utils.dart';
 import '../../shared/ui/search.dart';
 import '../vm_developer/vm_service_private_extensions.dart';
-import 'cpu_profile_controller.dart';
 import 'cpu_profile_transformer.dart';
+import 'cpu_profiler_controller.dart';
 
 /// A convenience wrapper for managing CPU profiles with both function and code
 /// profile views.
@@ -843,7 +843,7 @@ class CpuSampleEvent extends TraceEvent {
 class CpuStackFrame extends TreeNode<CpuStackFrame>
     with
         ProfilableDataMixin<CpuStackFrame>,
-        DataSearchStateMixin,
+        SearchableDataMixin,
         TreeDataSearchStateMixin<CpuStackFrame>,
         FlameChartDataMixin {
   factory CpuStackFrame({
@@ -978,7 +978,7 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
     final nameWithPrefix = [prefix, name].join(' ');
     return [
       nameWithPrefix,
-      msText(totalTime),
+      durationText(totalTime),
       if (packageUriWithSourceLine.isNotEmpty) packageUriWithSourceLine,
     ].join(' - ');
   }
@@ -1049,6 +1049,12 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
       category == other.category &&
       sourceLine == other.sourceLine;
 
+  @override
+  bool matchesSearchToken(RegExp regExpSearch) {
+    return name.caseInsensitiveContains(regExpSearch) ||
+        packageUri.caseInsensitiveContains(regExpSearch);
+  }
+
   Map<String, Object?> get toJson => {
         id: {
           CpuProfileData.nameKey: verboseName,
@@ -1066,7 +1072,7 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
     buf.write('$name ');
     // TODO(kenz): use a number of fractionDigits that better matches the
     // resolution of the stack frame.
-    buf.write('- ${msText(totalTime, fractionDigits: 2)} ');
+    buf.write('- ${durationText(totalTime, fractionDigits: 2)} ');
     buf.write('($inclusiveSampleCount ');
     buf.write(inclusiveSampleCount == 1 ? 'sample' : 'samples');
     buf.write(', ${percent(totalTimeRatio)})');

@@ -26,9 +26,7 @@ import '../utils.dart';
 const defaultTopMatchesLimit = 10;
 int topMatchesLimit = defaultTopMatchesLimit;
 
-const double _searchControlDividerHeight = 24.0;
-
-mixin SearchControllerMixin<T extends DataSearchStateMixin> {
+mixin SearchControllerMixin<T extends SearchableDataMixin> {
   final _searchNotifier = ValueNotifier<String>('');
   final _searchInProgress = ValueNotifier<bool>(false);
 
@@ -192,10 +190,45 @@ mixin SearchControllerMixin<T extends DataSearchStateMixin> {
     onMatchChanged(activeMatchIndex);
   }
 
+  /// The data that should be searched through when [matchesForSearch] is
+  /// called.
+  ///
+  /// If [matchesForSearch] is overridden in such a way that
+  /// [currentDataToSearchThrough] is not used, then this getter does not need
+  /// to be implemented.
+  Iterable<T> get currentDataToSearchThrough => throw UnimplementedError(
+        'Implement this getter in order to use the default'
+        ' [matchesForSearch] behavior.',
+      );
+
+  /// Default search matching logic.
+  ///
+  /// The use of this method requires both [currentDataToSearchThrough] and
+  /// [T.matchesSearchToken] to be implemented.
   List<T> matchesForSearch(
     String search, {
     bool searchPreviousMatches = false,
-  });
+  }) {
+    if (search.isEmpty) return <T>[];
+    final regexSearch = RegExp(search, caseSensitive: false);
+    final matches = <T>[];
+    if (searchPreviousMatches) {
+      final previousMatches = searchMatches.value;
+      for (final previousMatch in previousMatches) {
+        if (previousMatch.matchesSearchToken(regexSearch)) {
+          matches.add(previousMatch);
+        }
+      }
+    } else {
+      final searchData = currentDataToSearchThrough;
+      for (final data in searchData) {
+        if (data.matchesSearchToken(regexSearch)) {
+          matches.add(data);
+        }
+      }
+    }
+    return matches;
+  }
 
   /// Called when selected match index changes. Index is 0 based
   // Subclasses provide a valid implementation.
@@ -853,12 +886,101 @@ mixin SearchFieldMixin<T extends StatefulWidget>
   }
 }
 
-/// A text field with search capability.
+/// A stateful text field with search capability.
 ///
-/// The widget that builds [SearchField] is responsible for mixing in
+/// [_SearchFieldState] automatically handles the lifecycle of the search field
+/// through the [SearchFieldMixin].
+///
+/// Use this widget for simple use cases where the elements initialized and
+/// disposed in [SearchControllerMixin.initSearch] and
+/// [SearchControllerMixin.disposeSearch] are not used outside of the context
+/// of the search code.
+///
+/// If these elements need to be used by the widget state that builds the search
+/// field, consider using [StatelessSearchField] instead and manually mixing in
+/// [SearchFieldMixin] so that you can manage the lifecycle properly.
+class SearchField<T extends SearchControllerMixin> extends StatefulWidget {
+  SearchField({
+    required this.searchController,
+    this.searchFieldEnabled = true,
+    this.shouldRequestFocus = false,
+    this.supportsNavigation = true,
+    this.onClose,
+    this.searchFieldWidth = defaultSearchFieldWidth,
+    double? searchFieldHeight,
+    EdgeInsets? containerPadding,
+    super.key,
+  })  : searchFieldHeight = searchFieldHeight ?? defaultTextFieldHeight,
+        containerPadding =
+            containerPadding ?? const EdgeInsets.only(top: _defaultTopPadding);
+
+  final T searchController;
+
+  final double searchFieldWidth;
+
+  final double searchFieldHeight;
+
+  /// The padding for the [Container] that contains the search text field.
+  final EdgeInsets containerPadding;
+
+  /// Whether the search text field should be enabled.
+  final bool searchFieldEnabled;
+
+  /// Whether the search text field should automatically request focus once it
+  /// is built.
+  final bool shouldRequestFocus;
+
+  /// Whether this search field includes navigation controls for traversing
+  /// search results.
+  final bool supportsNavigation;
+
+  /// Optional callback called when the search field suffix close action is
+  /// triggered.
+  final VoidCallback? onClose;
+
+  /// Padding to ensure the 'Search' hint on the text field is not cut off for
+  /// the default text field height [defaultTextFieldHeight].
+  static const _defaultTopPadding = 3.0;
+
+  @override
+  State<SearchField> createState() => _SearchFieldState();
+}
+
+class _SearchFieldState extends State<SearchField>
+    with AutoDisposeMixin, SearchFieldMixin {
+  @override
+  SearchControllerMixin get searchController => widget.searchController;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: widget.searchFieldWidth,
+      height: widget.searchFieldHeight,
+      padding: widget.containerPadding,
+      child: StatelessSearchField(
+        controller: searchController,
+        searchFieldEnabled: widget.searchFieldEnabled,
+        shouldRequestFocus: widget.shouldRequestFocus,
+        supportsNavigation: widget.supportsNavigation,
+        onClose: widget.onClose,
+      ),
+    );
+  }
+}
+
+/// A stateless text field with search capability.
+///
+/// The widget that builds [StatelessSearchField] is responsible for mixing in
 /// [SearchFieldMixin], which manages the search field lifecycle.
-class SearchField<T extends DataSearchStateMixin> extends StatelessWidget {
-  const SearchField({
+///
+/// Use this widget for use cases where the default state management that
+/// [SearchField] provides is not sufficient for the use case. This can be the
+/// case when the elements initialized and disposed in
+/// [SearchControllerMixin.initSearch] and [SearchControllerMixin.disposeSearch]
+/// need to be accessed outside of the context of the search code.
+class StatelessSearchField<T extends SearchableDataMixin>
+    extends StatelessWidget {
+  const StatelessSearchField({
     required this.controller,
     required this.searchFieldEnabled,
     required this.shouldRequestFocus,
@@ -889,7 +1011,8 @@ class SearchField<T extends DataSearchStateMixin> extends StatelessWidget {
   /// Label for the search field's input text decoration.
   final String label;
 
-  /// Callback called when the search field suffix close action is triggered.
+  /// Optional callback called when the search field suffix close action is
+  /// triggered.
   final VoidCallback? onClose;
 
   /// Optional prefix to be used for the [TextField]'s decoration.
@@ -914,7 +1037,7 @@ class SearchField<T extends DataSearchStateMixin> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textStyle = style ?? Theme.of(context).textTheme.titleMedium;
+    final textStyle = style ?? Theme.of(context).textTheme.bodyMedium;
 
     final searchField = TextField(
       key: searchFieldKey,
@@ -938,7 +1061,10 @@ class SearchField<T extends DataSearchStateMixin> extends StatelessWidget {
       // snapshots will compare with the exact color.
       decoration: decoration ??
           InputDecoration(
-            contentPadding: const EdgeInsets.all(denseSpacing),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: denseSpacing,
+              vertical: densePadding,
+            ),
             border: const OutlineInputBorder(),
             labelText: label,
             // TODO(kenz): add the search icon to the search field.
@@ -949,7 +1075,7 @@ class SearchField<T extends DataSearchStateMixin> extends StatelessWidget {
                     children: <Widget>[
                       prefix!,
                       SizedBox(
-                        height: _searchControlDividerHeight,
+                        height: inputDecorationElementHeight,
                         width: defaultIconSize,
                         child: Transform.rotate(
                           angle: degToRad(90),
@@ -1097,7 +1223,7 @@ class _AutoCompleteSearchFieldState extends State<AutoCompleteSearchField>
       focusNode: widget.controller.rawKeyboardFocusNode,
       child: CompositedTransformTarget(
         link: widget.controller.autoCompleteLayerLink,
-        child: SearchField(
+        child: StatelessSearchField(
           controller: widget.controller,
           searchFieldKey: widget.controller.searchFieldKey,
           searchFieldEnabled: widget.searchFieldEnabled,
@@ -1263,7 +1389,7 @@ class SearchNavigationControls extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<List<DataSearchStateMixin>>(
+    return ValueListenableBuilder<List<SearchableDataMixin>>(
       valueListenable: controller.searchMatches,
       builder: (context, matches, _) {
         final numMatches = matches.length;
@@ -1290,7 +1416,7 @@ class SearchNavigationControls extends StatelessWidget {
                 ),
                 _matchesStatus(numMatches),
                 SizedBox(
-                  height: _searchControlDividerHeight,
+                  height: inputDecorationElementHeight,
                   width: defaultIconSize,
                   child: Transform.rotate(
                     angle: degToRad(90),
@@ -1330,15 +1456,27 @@ class SearchNavigationControls extends StatelessWidget {
   }
 }
 
-mixin DataSearchStateMixin {
+mixin SearchableDataMixin {
   bool isSearchMatch = false;
   bool isActiveSearchMatch = false;
+
+  /// Whether this [SearchableDataMixin] is a match for the search query
+  /// [search].
+  ///
+  /// This method is used by [SearchControllerMixin.matchesForSearch]. If
+  /// [SearchControllerMixin.matchesForSearch] is overridden in such a way that
+  /// [matchesSearchToken] is not used, then this method does not need to be
+  /// implemented.
+  bool matchesSearchToken(RegExp regExpSearch) => throw UnimplementedError(
+        'Implement this method in order to use the default'
+        ' [SearchControllerMixin.matchesForSearch] behavior.',
+      );
 }
 
 // This mixin is used to get around the type system where a type `T` needs to
 // both extend `TreeNode<T>` and mixin `DataSearchStateMixin`.
 mixin TreeDataSearchStateMixin<T extends TreeNode<T>>
-    on TreeNode<T>, DataSearchStateMixin {}
+    on TreeNode<T>, SearchableDataMixin {}
 
 class AutoCompleteController extends DisposableController
     with SearchControllerMixin, AutoCompleteSearchControllerMixin {
@@ -1352,7 +1490,7 @@ class AutoCompleteController extends DisposableController
   // matches for the search is the intended behavior for the auto-complete
   // controller.
   @override
-  List<DataSearchStateMixin> matchesForSearch(
+  List<SearchableDataMixin> matchesForSearch(
     String search, {
     bool searchPreviousMatches = false,
   }) =>

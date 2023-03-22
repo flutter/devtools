@@ -86,6 +86,7 @@ const canvasSaveLayerDocs = 'canvasSaveLayerDocs';
 const intrinsicOperationsDocs = 'intrinsicOperationsDocs';
 const shaderCompilationDocs = 'shaderCompilationDocs';
 const shaderCompilationDocsTooltipLink = 'shaderCompilationDocsTooltipLink';
+const impellerWiki = 'impellerWikiLink';
 const collectRasterStats = 'collectRasterStats';
 const clearRasterStats = 'clearRasterStats';
 const clearRebuildStats = 'clearRebuildStats';
@@ -94,6 +95,7 @@ const perfettoModeTraceEventProcessingTime =
 const perfettoLoadTrace = 'perfettoLoadTrace';
 const perfettoScrollToTimeRange = 'perfettoScrollToTimeRange';
 const performanceSettings = 'performanceSettings';
+const traceCategories = 'traceCategories';
 
 // CPU profiler UX actions:
 const cpuSamplingRatePrefix = 'profileGranularity';
@@ -108,6 +110,7 @@ const cpuProfileDisplayTreeGuidelines = 'cpuProfileDisplayTreeGuidelines';
 const refreshStatistics = 'refreshStatistics';
 const showFileExplorer = 'showFileExplorer';
 const hideFileExplorer = 'hideFileExplorer';
+const pausedWithNoFrames = 'pausedWithNoFrames';
 
 // Logging UX actions:
 const structuredErrors = 'structuredErrors';

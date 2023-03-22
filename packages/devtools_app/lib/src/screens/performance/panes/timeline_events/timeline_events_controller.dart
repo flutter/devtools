@@ -64,9 +64,9 @@ class TimelineEventsController extends PerformanceFeatureController
 
   /// Set of thread_name trace events.
   ///
-  /// These events are returned with each [VMService.getVMTimeline] response,
-  /// and we do not want to store duplicates in [allTraceEvents].
-  final threadNameTraceEvents = <TraceEvent>{};
+  /// Thread name events are returned with each [VMService.getVMTimeline]
+  /// response, and we do not want to store duplicates in [allTraceEvents].
+  final threadNameEvents = <ThreadNameEvent>{};
 
   /// Maps thread names, which are gathererd from the "thread_name" trace
   /// events, to their thread ids.
@@ -101,7 +101,7 @@ class TimelineEventsController extends PerformanceFeatureController
 
   int _nextPollStartMicros = 0;
 
-  static const _timelinePollingRateLimit = 5.0;
+  static const _timelinePollingRateLimit = 1.0;
 
   Duration get _timelinePollingInterval =>
       _perfettoMode ? const Duration(seconds: 1) : const Duration(seconds: 2);
@@ -186,7 +186,7 @@ class TimelineEventsController extends PerformanceFeatureController
     );
     _nextPollStartMicros = currentVmTime.timestamp! + 1;
 
-    final threadNameEvents = <TraceEvent>[];
+    final newThreadNameEvents = <ThreadNameEvent>[];
     for (final event in timeline.traceEvents ?? []) {
       final traceEvent = TraceEvent(event.json!);
       final eventWrapper = TraceEventWrapper(
@@ -194,20 +194,16 @@ class TimelineEventsController extends PerformanceFeatureController
         DateTime.now().millisecondsSinceEpoch,
       );
 
-      // Speacial handling for thread name events since they are returned with
+      // Special handling for thread name events since they are returned with
       // each [VMService.getVMTimeline] response.
       if (traceEvent.isThreadNameEvent) {
-        // TODO(kenz): watch that this doesn't become a performance bottleneck
-        // for [_pullTraceEventsFromVmTimeline].
-        final duplicateThreadNameEvent = threadNameTraceEvents.containsWhere(
-          (event) => collectionEquals(event.json, traceEvent.json),
-        );
-        if (!duplicateThreadNameEvent) {
+        final threadNameEvent = ThreadNameEvent.from(traceEvent);
+        final added = threadNameEvents.add(threadNameEvent);
+        if (added) {
           // Only add this thread name event to [allTraceEvents] if we have not
           // already added it. Otherwise, it will be a duplicate and will
           // consume unecessary space and processing time.
-          threadNameEvents.add(traceEvent);
-          threadNameTraceEvents.add(traceEvent);
+          newThreadNameEvents.add(threadNameEvent);
           allTraceEvents.add(eventWrapper);
         }
       } else {
@@ -215,11 +211,11 @@ class TimelineEventsController extends PerformanceFeatureController
       }
     }
 
-    updateThreadIds(threadNameEvents, isInitialUpdate: isInitialPull);
+    updateThreadIds(newThreadNameEvents, isInitialUpdate: isInitialPull);
   }
 
   void updateThreadIds(
-    List<TraceEvent> threadNameEvents, {
+    List<ThreadNameEvent> threadNameEvents, {
     bool isInitialUpdate = false,
   }) {
     // This can happen if there is a race between this method being called and
@@ -235,9 +231,8 @@ class TimelineEventsController extends PerformanceFeatureController
     // available in the engine.
     int? uiThreadId;
     int? rasterThreadId;
-    for (TraceEvent event in threadNameEvents) {
-      final name = event.args!['name'] as String;
-
+    for (ThreadNameEvent event in threadNameEvents) {
+      final name = event.name!;
       if (isFlutterApp && isInitialUpdate) {
         // Android: "1.ui (12652)"
         // iOS: "io.flutter.1.ui (12652)"
@@ -582,7 +577,7 @@ class TimelineEventsController extends PerformanceFeatureController
   @override
   Future<void> clearData() async {
     allTraceEvents.clear();
-    threadNameTraceEvents.clear();
+    threadNameEvents.clear();
     _nextTraceIndexToProcess = 0;
     _unassignedFlutterFrameEvents.clear();
 

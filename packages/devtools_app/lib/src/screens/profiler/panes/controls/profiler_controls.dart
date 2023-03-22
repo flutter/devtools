@@ -11,8 +11,8 @@ import '../../../../shared/globals.dart';
 import '../../../../shared/theme.dart';
 import '../../../../shared/ui/filter.dart';
 import '../../../../shared/utils.dart';
-import '../../cpu_profile_controller.dart';
 import '../../cpu_profile_model.dart';
+import '../../cpu_profiler_controller.dart';
 import '../../profiler_screen_controller.dart';
 
 final profilerScreenSearchFieldKey =

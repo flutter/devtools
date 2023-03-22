@@ -625,32 +625,7 @@ class LoggingController extends DisposableController
   }
 
   @override
-  List<LogData> matchesForSearch(
-    String search, {
-    bool searchPreviousMatches = false,
-  }) {
-    if (search.isEmpty) return [];
-    final matches = <LogData>[];
-    if (searchPreviousMatches) {
-      final previousMatches = searchMatches.value;
-      for (final previousMatch in previousMatches) {
-        if (previousMatch.summary!.caseInsensitiveContains(search)) {
-          matches.add(previousMatch);
-        }
-      }
-    } else {
-      final List<LogData> currentLogs = filteredData.value;
-      for (final log in currentLogs) {
-        if ((log.summary != null &&
-                log.summary!.caseInsensitiveContains(search)) ||
-            (log.details != null &&
-                log.details!.caseInsensitiveContains(search))) {
-          matches.add(log);
-        }
-      }
-    }
-    return matches;
-  }
+  Iterable<LogData> get currentDataToSearchThrough => filteredData.value;
 
   @override
   void filterData(Filter<LogData> filter) {
@@ -790,7 +765,7 @@ String? _valueAsString(InstanceRef? ref) {
 /// case, this log entry will have a non-null `detailsComputer` field. After the
 /// data is calculated, the log entry will be modified to contain the calculated
 /// `details` data.
-class LogData with DataSearchStateMixin {
+class LogData with SearchableDataMixin {
   LogData(
     this.kind,
     this._details,
@@ -849,6 +824,12 @@ class LogData with DataSearchStateMixin {
     }
 
     return false;
+  }
+
+  @override
+  bool matchesSearchToken(RegExp regExpSearch) {
+    return (summary?.caseInsensitiveContains(regExpSearch) == true) ||
+        (details?.caseInsensitiveContains(regExpSearch) == true);
   }
 
   @override

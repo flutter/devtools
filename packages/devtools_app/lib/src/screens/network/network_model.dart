@@ -8,7 +8,7 @@ import '../../shared/http/http_request_data.dart';
 import '../../shared/primitives/utils.dart';
 import '../../shared/ui/search.dart';
 
-abstract class NetworkRequest with DataSearchStateMixin {
+abstract class NetworkRequest with SearchableDataMixin {
   NetworkRequest(this._timelineMicrosBase);
 
   final int _timelineMicrosBase;
@@ -40,11 +40,22 @@ abstract class NetworkRequest with DataSearchStateMixin {
 
   String get durationDisplay {
     final duration = this.duration;
-    return 'Duration: ${duration != null ? msText(duration) : 'Pending'}';
+    final text = duration != null
+        ? durationText(
+            duration,
+            unit: DurationDisplayUnit.milliseconds,
+          )
+        : 'Pending';
+    return 'Duration: $text';
   }
 
   int timelineMicrosecondsSinceEpoch(int micros) {
     return _timelineMicrosBase + micros;
+  }
+
+  @override
+  bool matchesSearchToken(RegExp regExpSearch) {
+    return uri.caseInsensitiveContains(regExpSearch);
   }
 
   @override

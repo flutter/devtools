@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
+
 import 'initialization.dart';
 import 'src/extension_points/extensions_base.dart';
 import 'src/extension_points/extensions_external.dart';
@@ -14,6 +16,7 @@ import 'src/shared/primitives/utils.dart';
 /// Any initialization that needs to occur, for both google3 and externally,
 /// should be added to [runDevTools].
 void main() async {
+  BindingBase.debugZoneErrorsAreFatal = true;
   await externalRunDevTools();
 }
 

@@ -53,6 +53,44 @@ enum ScrollKind {
   parent,
 }
 
+/// A [FlatTable] widget that is searchable.
+///
+/// The table requires a [searchController], which is responsible for feeding
+/// information about search matches and the active search match to the table.
+///
+/// This table will automatically refresh search matches on the
+/// [searchController] after sort operations that are triggered from the table.
+class SearchableFlatTable<T extends SearchableDataMixin> extends FlatTable {
+  SearchableFlatTable({
+    Key? key,
+    required SearchControllerMixin<T> searchController,
+    required super.keyFactory,
+    required super.data,
+    required super.dataKey,
+    required super.columns,
+    required super.defaultSortColumn,
+    required super.defaultSortDirection,
+    super.secondarySortColumn,
+    super.sortOriginalData = false,
+    super.pinBehavior = FlatTablePinBehavior.none,
+    super.columnGroups,
+    super.autoScrollContent = false,
+    super.onItemSelected,
+    super.preserveVerticalScrollPosition = false,
+    super.includeColumnGroupHeaders = true,
+    super.sizeColumnsToFit = true,
+    super.selectionNotifier,
+  }) : super(
+          searchMatchesNotifier: searchController.searchMatches,
+          activeSearchMatchNotifier: searchController.activeSearchMatch,
+          onDataSorted: () => WidgetsBinding.instance.addPostFrameCallback((_) {
+            // This needs to be in a post frame callback so that the search
+            // matches are not updated in the middle of a table build.
+            searchController.refreshSearchMatches();
+          }),
+        );
+}
+
 /// A table that displays in a collection of [data], based on a collection of
 /// [ColumnData].
 ///
@@ -70,13 +108,15 @@ class FlatTable<T> extends StatefulWidget {
     this.onItemSelected,
     required this.defaultSortColumn,
     required this.defaultSortDirection,
+    this.onDataSorted,
+    this.sortOriginalData = false,
     this.pinBehavior = FlatTablePinBehavior.none,
     this.secondarySortColumn,
     this.searchMatchesNotifier,
     this.activeSearchMatchNotifier,
     this.preserveVerticalScrollPosition = false,
     this.includeColumnGroupHeaders = true,
-    this.sizeToFit = true,
+    this.sizeColumnsToFit = true,
     ValueNotifier<T?>? selectionNotifier,
   })  : selectionNotifier = selectionNotifier ?? ValueNotifier<T?>(null),
         super(key: key);
@@ -97,7 +137,13 @@ class FlatTable<T> extends StatefulWidget {
 
   /// Whether the columns for this table should be sized so that the entire
   /// table fits in view (e.g. so that there is no horizontal scrolling).
-  final bool sizeToFit;
+  final bool sizeColumnsToFit;
+
+  // TODO(kenz): should we enable this behavior by default? Does it ever matter
+  // to preserve the order of the original data passed to a flat table?
+  /// Whether table sorting should sort the original data list instead of
+  /// creating a copy.
+  final bool sortOriginalData;
 
   /// Determines if the headers for column groups should be rendered.
   ///
@@ -150,6 +196,9 @@ class FlatTable<T> extends StatefulWidget {
   /// The secondary sort column to be used in the sorting algorithm provided by
   /// [TableControllerBase.sortDataAndNotify].
   final ColumnData<T>? secondarySortColumn;
+
+  /// Callback that will be called after each table sort operation.
+  final VoidCallback? onDataSorted;
 
   /// Notifies with the list of data items that should be marked as search
   /// matches.
@@ -228,7 +277,9 @@ class FlatTableState<T> extends State<FlatTable<T>> with AutoDisposeMixin {
         columnGroups: widget.columnGroups,
         includeColumnGroupHeaders: widget.includeColumnGroupHeaders,
         pinBehavior: widget.pinBehavior,
-        sizeToFit: widget.sizeToFit,
+        sizeColumnsToFit: widget.sizeColumnsToFit,
+        sortOriginalData: widget.sortOriginalData,
+        onDataSorted: widget.onDataSorted,
       );
     }
 
@@ -270,7 +321,7 @@ class FlatTableState<T> extends State<FlatTable<T>> with AutoDisposeMixin {
           rowItemExtent: defaultRowHeight,
           preserveVerticalScrollPosition: widget.preserveVerticalScrollPosition,
         );
-    if (widget.sizeToFit || tableController.columnWidths == null) {
+    if (widget.sizeColumnsToFit || tableController.columnWidths == null) {
       return LayoutBuilder(
         builder: (context, constraints) => _buildTable(
           tableController.computeColumnWidthsSizeToFit(

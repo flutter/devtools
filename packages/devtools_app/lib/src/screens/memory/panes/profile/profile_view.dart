@@ -324,7 +324,7 @@ class _GCLatencyColumn extends _GCHeapStatsColumn {
 
   @override
   String getDisplayValue(AdaptedProfile dataObject) {
-    return msText(
+    return durationText(
       Duration(
         milliseconds: getValue(dataObject)!.toInt(),
       ),

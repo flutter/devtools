@@ -1249,6 +1249,7 @@ Widget closeSearchDropdownButton(VoidCallback? onPressed) {
 Widget inputDecorationSuffixButton(IconData icon, VoidCallback? onPressed) {
   return Container(
     padding: const EdgeInsets.symmetric(horizontal: densePadding),
+    height: inputDecorationElementHeight,
     width: defaultIconSize + denseSpacing,
     child: IconButton(
       padding: const EdgeInsets.all(0.0),

@@ -3,14 +3,16 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app/devtools_app.dart';
-import 'package:devtools_app/src/screens/profiler/cpu_profile_controller.dart';
+import 'package:devtools_app/src/screens/profiler/common.dart';
 import 'package:devtools_app/src/screens/profiler/cpu_profile_transformer.dart';
 import 'package:devtools_app/src/screens/profiler/cpu_profiler.dart';
+import 'package:devtools_app/src/screens/profiler/cpu_profiler_controller.dart';
 import 'package:devtools_app/src/screens/profiler/panes/bottom_up.dart';
 import 'package:devtools_app/src/screens/profiler/panes/call_tree.dart';
 import 'package:devtools_app/src/screens/profiler/panes/controls/profiler_controls.dart';
 import 'package:devtools_app/src/screens/profiler/panes/cpu_flame_chart.dart';
 import 'package:devtools_app/src/screens/profiler/panes/method_table/method_table.dart';
+import 'package:devtools_app/src/screens/profiler/panes/method_table/method_table_controller.dart';
 import 'package:devtools_app/src/shared/charts/flame_chart.dart';
 import 'package:devtools_app/src/shared/config_specific/import_export/import_export.dart';
 import 'package:devtools_test/devtools_test.dart';
@@ -89,12 +91,19 @@ void main() {
         expect(find.byType(ExpandAllButton), findsOneWidget);
         expect(find.byType(CollapseAllButton), findsOneWidget);
         expect(find.byType(FlameChartHelpButton), findsNothing);
-        expect(find.byType(SearchField<CpuStackFrame>), findsNothing);
-        expect(find.byKey(CpuProfiler.bottomUpTab), findsOneWidget);
-        expect(find.byKey(CpuProfiler.callTreeTab), findsOneWidget);
-        expect(find.byKey(CpuProfiler.methodTableTab), findsOneWidget);
-        expect(find.byKey(CpuProfiler.flameChartTab), findsOneWidget);
-        expect(find.byKey(CpuProfiler.summaryTab), findsNothing);
+        expect(
+          find.byType(SearchField<MethodTableController>),
+          findsNothing,
+        );
+        expect(
+          find.byType(SearchField<CpuProfilerController>),
+          findsNothing,
+        );
+        expect(find.byKey(ProfilerTab.bottomUp.key), findsOneWidget);
+        expect(find.byKey(ProfilerTab.callTree.key), findsOneWidget);
+        expect(find.byKey(ProfilerTab.methodTable.key), findsOneWidget);
+        expect(find.byKey(ProfilerTab.cpuFlameChart.key), findsOneWidget);
+        expect(find.byKey(ProfilerTab.summary.key), findsNothing);
       },
     );
 
@@ -122,12 +131,19 @@ void main() {
         expect(find.byType(ExpandAllButton), findsNothing);
         expect(find.byType(CollapseAllButton), findsNothing);
         expect(find.byType(FlameChartHelpButton), findsNothing);
-        expect(find.byType(SearchField<CpuStackFrame>), findsNothing);
-        expect(find.byKey(CpuProfiler.bottomUpTab), findsOneWidget);
-        expect(find.byKey(CpuProfiler.callTreeTab), findsOneWidget);
-        expect(find.byKey(CpuProfiler.methodTableTab), findsOneWidget);
-        expect(find.byKey(CpuProfiler.flameChartTab), findsOneWidget);
-        expect(find.byKey(CpuProfiler.summaryTab), findsOneWidget);
+        expect(
+          find.byType(SearchField<MethodTableController>),
+          findsNothing,
+        );
+        expect(
+          find.byType(SearchField<CpuProfilerController>),
+          findsNothing,
+        );
+        expect(find.byKey(ProfilerTab.bottomUp.key), findsOneWidget);
+        expect(find.byKey(ProfilerTab.callTree.key), findsOneWidget);
+        expect(find.byKey(ProfilerTab.methodTable.key), findsOneWidget);
+        expect(find.byKey(ProfilerTab.cpuFlameChart.key), findsOneWidget);
+        expect(find.byKey(ProfilerTab.summary.key), findsOneWidget);
         expect(find.byKey(summaryViewKey), findsOneWidget);
       },
     );
@@ -150,12 +166,19 @@ void main() {
         expect(find.byType(ExpandAllButton), findsOneWidget);
         expect(find.byType(CollapseAllButton), findsOneWidget);
         expect(find.byType(FlameChartHelpButton), findsNothing);
-        expect(find.byType(SearchField<CpuStackFrame>), findsNothing);
-        expect(find.byKey(CpuProfiler.bottomUpTab), findsOneWidget);
-        expect(find.byKey(CpuProfiler.callTreeTab), findsOneWidget);
-        expect(find.byKey(CpuProfiler.methodTableTab), findsOneWidget);
-        expect(find.byKey(CpuProfiler.flameChartTab), findsOneWidget);
-        expect(find.byKey(CpuProfiler.summaryTab), findsNothing);
+        expect(
+          find.byType(SearchField<MethodTableController>),
+          findsNothing,
+        );
+        expect(
+          find.byType(SearchField<CpuProfilerController>),
+          findsNothing,
+        );
+        expect(find.byKey(ProfilerTab.bottomUp.key), findsOneWidget);
+        expect(find.byKey(ProfilerTab.callTree.key), findsOneWidget);
+        expect(find.byKey(ProfilerTab.methodTable.key), findsOneWidget);
+        expect(find.byKey(ProfilerTab.cpuFlameChart.key), findsOneWidget);
+        expect(find.byKey(ProfilerTab.summary.key), findsNothing);
       },
     );
 
@@ -179,12 +202,19 @@ void main() {
         expect(find.byType(ExpandAllButton), findsNothing);
         expect(find.byType(CollapseAllButton), findsNothing);
         expect(find.byType(FlameChartHelpButton), findsNothing);
-        expect(find.byType(SearchField<CpuStackFrame>), findsNothing);
-        expect(find.byKey(CpuProfiler.bottomUpTab), findsOneWidget);
-        expect(find.byKey(CpuProfiler.callTreeTab), findsOneWidget);
-        expect(find.byKey(CpuProfiler.methodTableTab), findsOneWidget);
-        expect(find.byKey(CpuProfiler.flameChartTab), findsOneWidget);
-        expect(find.byKey(CpuProfiler.summaryTab), findsOneWidget);
+        expect(
+          find.byType(SearchField<MethodTableController>),
+          findsNothing,
+        );
+        expect(
+          find.byType(SearchField<CpuProfilerController>),
+          findsNothing,
+        );
+        expect(find.byKey(ProfilerTab.bottomUp.key), findsOneWidget);
+        expect(find.byKey(ProfilerTab.callTree.key), findsOneWidget);
+        expect(find.byKey(ProfilerTab.methodTable.key), findsOneWidget);
+        expect(find.byKey(ProfilerTab.cpuFlameChart.key), findsOneWidget);
+        expect(find.byKey(ProfilerTab.summary.key), findsOneWidget);
       },
     );
 
@@ -342,7 +372,14 @@ void main() {
         expect(find.byType(CollapseAllButton), findsOneWidget);
         expect(find.byType(FlameChartHelpButton), findsNothing);
         expect(find.byType(ModeDropdown), findsNothing);
-        expect(find.byType(SearchField<CpuStackFrame>), findsNothing);
+        expect(
+          find.byType(SearchField<MethodTableController>),
+          findsNothing,
+        );
+        expect(
+          find.byType(SearchField<CpuProfilerController>),
+          findsNothing,
+        );
 
         await tester.tap(find.text('Call Tree'));
         await tester.pumpAndSettle();
@@ -357,7 +394,14 @@ void main() {
         expect(find.byType(CollapseAllButton), findsOneWidget);
         expect(find.byType(FlameChartHelpButton), findsNothing);
         expect(find.byType(ModeDropdown), findsNothing);
-        expect(find.byType(SearchField<CpuStackFrame>), findsNothing);
+        expect(
+          find.byType(SearchField<MethodTableController>),
+          findsNothing,
+        );
+        expect(
+          find.byType(SearchField<CpuProfilerController>),
+          findsNothing,
+        );
 
         await tester.tap(find.text('Method Table'));
         await tester.pumpAndSettle();
@@ -372,7 +416,14 @@ void main() {
         expect(find.byType(CollapseAllButton), findsNothing);
         expect(find.byType(FlameChartHelpButton), findsNothing);
         expect(find.byType(ModeDropdown), findsNothing);
-        expect(find.byType(SearchField<CpuStackFrame>), findsNothing);
+        expect(
+          find.byType(SearchField<MethodTableController>),
+          findsOneWidget,
+        );
+        expect(
+          find.byType(SearchField<CpuProfilerController>),
+          findsNothing,
+        );
 
         await tester.tap(find.text('CPU Flame Chart'));
         await tester.pumpAndSettle();
@@ -387,7 +438,14 @@ void main() {
         expect(find.byType(CollapseAllButton), findsNothing);
         expect(find.byType(FlameChartHelpButton), findsOneWidget);
         expect(find.byType(ModeDropdown), findsNothing);
-        expect(find.byType(SearchField<CpuStackFrame>), findsOneWidget);
+        expect(
+          find.byType(SearchField<MethodTableController>),
+          findsNothing,
+        );
+        expect(
+          find.byType(SearchField<CpuProfilerController>),
+          findsOneWidget,
+        );
       },
     );
 
@@ -754,11 +812,11 @@ void main() {
     testWidgets('displays correctly', (WidgetTester tester) async {
       final metadata = CpuProfileMetaData(
         sampleCount: 100,
-        samplePeriod: 50,
+        samplePeriod: 100,
         stackDepth: 128,
         time: TimeRange()
           ..start = const Duration()
-          ..end = const Duration(seconds: 1),
+          ..end = const Duration(microseconds: 10000),
       );
       await tester.pumpWidget(wrap(CpuProfileStats(metadata: metadata)));
       await tester.pumpAndSettle();
@@ -774,7 +832,7 @@ void main() {
       expect(
         find.byTooltip(
           'The frequency at which samples are collected by the profiler'
-          ' (once every 50 micros)',
+          ' (once every 100 micros)',
         ),
         findsOneWidget,
       );
@@ -782,9 +840,9 @@ void main() {
         find.byTooltip('The maximum stack trace depth of a collected sample'),
         findsOneWidget,
       );
-      expect(find.text('Duration: 1000.0 ms'), findsOneWidget);
+      expect(find.text('Duration: 10.0 ms'), findsOneWidget);
       expect(find.text('Sample count: 100'), findsOneWidget);
-      expect(find.text('Sampling rate: 20000 Hz'), findsOneWidget);
+      expect(find.text('Sampling rate: 10000 Hz'), findsOneWidget);
       expect(find.text('Sampling depth: 128'), findsOneWidget);
     });
 
@@ -796,7 +854,7 @@ void main() {
         stackDepth: 128,
         time: TimeRange()
           ..start = const Duration()
-          ..end = const Duration(seconds: 1),
+          ..end = const Duration(microseconds: 10000),
       );
       await tester.pumpWidget(wrap(CpuProfileStats(metadata: metadata)));
       await tester.pumpAndSettle();
@@ -819,7 +877,7 @@ void main() {
         find.byTooltip('The maximum stack trace depth of a collected sample'),
         findsOneWidget,
       );
-      expect(find.text('Duration: 1000.0 ms'), findsOneWidget);
+      expect(find.text('Duration: 10.0 ms'), findsOneWidget);
       expect(find.text('Sample count: 100'), findsOneWidget);
       expect(find.text('Sampling rate: -- Hz'), findsOneWidget);
       expect(find.text('Sampling depth: 128'), findsOneWidget);
