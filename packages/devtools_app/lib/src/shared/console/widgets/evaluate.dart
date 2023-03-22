@@ -414,12 +414,19 @@ class ExpressionEvalFieldState extends State<ExpressionEvalField>
 
   /// If [expressionText] is assignment like `var x=$1`, processes it.
   ///
-  /// Returns true is the text was parsed as assignment.
+  /// Returns true if the text was parsed as assignment.
   bool _tryProcessAssignment(String expressionText) {
     if (!FeatureFlags.evalAndBrowse) return false;
 
     final assignment = ConsoleVariableAssignment.tryParse(expressionText);
     if (assignment == null) return false;
+    const result = true;
+
+    final message = evalService.messageIfScopeNotSupported();
+    if (message != null) {
+      _emitToConsole(message);
+      return result;
+    }
 
     final variable =
         serviceManager.consoleService.itemAt(assignment.consoleItemIndex + 1);
@@ -428,7 +435,7 @@ class ExpressionEvalFieldState extends State<ExpressionEvalField>
       _emitToConsole(
         'Item #${assignment.consoleItemIndex} cannot be assigned to a variable.',
       );
-      return true;
+      return result;
     }
 
     final isolateId = serviceManager.isolateManager.selectedIsolate.value?.id;
@@ -439,7 +446,7 @@ class ExpressionEvalFieldState extends State<ExpressionEvalField>
       _emitToConsole(
         'Selected isolate cannot be detected.',
       );
-      return true;
+      return result;
     }
 
     evalService.scope.add(isolateId, assignment.variableName, value);
@@ -449,6 +456,6 @@ class ExpressionEvalFieldState extends State<ExpressionEvalField>
       'in expressions for the isolate "$isolateName".',
     );
 
-    return true;
+    return result;
   }
 }

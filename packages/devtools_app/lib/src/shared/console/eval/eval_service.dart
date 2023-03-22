@@ -177,10 +177,21 @@ class EvalService extends DisposableController with AutoDisposeControllerMixin {
   }
 
   Future<Map<String, String>?> _scopeIfSupported(String isolateRefId) async {
-    // Debugging for web does not support scopes yet.
-    if (await serviceManager.connectedApp?.isDartWebApp ?? true) return null;
+    if (messageIfScopeNotSupported() != null) return null;
 
     return scope.value(isolateId: isolateRefId);
+  }
+
+  /// If scope is supported, returns null.
+  ///
+  /// Otherwise, returns a message explaining why scope is not supported.
+  String? messageIfScopeNotSupported() {
+    // Web does not support scopes yet.
+    final isWeb = serviceManager.connectedApp?.isDartWebAppNow ?? true;
+    if (isWeb) {
+      return 'Scope variables are not supported for web applications.';
+    }
+    return null;
   }
 
   Future<InstanceRef?> findObject(
