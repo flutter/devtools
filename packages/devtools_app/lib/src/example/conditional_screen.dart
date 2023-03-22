@@ -112,8 +112,8 @@ class ExampleController extends DisposableController
   @override
   OfflineScreenData screenDataForExport() {
     return OfflineScreenData(
-      ExampleConditionalScreen.id,
-      data.value.json,
+      screenId: ExampleConditionalScreen.id,
+      data: data.value.json,
     );
   }
 }

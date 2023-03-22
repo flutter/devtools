@@ -16,9 +16,9 @@ class OfflineModeController {
 
   ValueListenable<bool> get offlineMode => _offlineMode;
 
-  final _offlineMode = ValueNotifier(false);
+  final _offlineMode = ValueNotifier<bool>(false);
 
-  Map<String, dynamic> offlineDataJson = {};
+  var offlineDataJson = <String, dynamic>{};
 
   /// Stores the [ConnectedApp] instance temporarily while switching between
   /// offline and online modes.
@@ -67,7 +67,7 @@ mixin OfflineScreenControllerMixin<T> on AutoDisposeControllerMixin {
 }
 
 class OfflineScreenData {
-  OfflineScreenData(this.screenId, this.data);
+  OfflineScreenData({required this.screenId, required this.data});
 
   final String screenId;
 

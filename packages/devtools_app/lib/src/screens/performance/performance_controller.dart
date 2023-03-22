@@ -252,7 +252,7 @@ class PerformanceController extends DisposableController
 
   @override
   OfflineScreenData screenDataForExport() =>
-      OfflineScreenData(PerformanceScreen.id, data!.toJson());
+      OfflineScreenData(screenId: PerformanceScreen.id, data: data!.toJson());
 
   @override
   FutureOr<void> processOfflineData(OfflinePerformanceData offlineData) async {
