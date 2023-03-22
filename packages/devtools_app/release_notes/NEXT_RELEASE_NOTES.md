@@ -23,6 +23,7 @@ jank is detected on an iOS device. - [#5455](https://github.com/flutter/devtools
 
 ## CPU profiler updates
 * Add a Method Table to the CPU profiler - [#5366](https://github.com/flutter/devtools/pull/5366)
+* Improve the performance of data processing in the CPU profiler - [#5468](https://github.com/flutter/devtools/pull/5468)
 
 ![method table](images/image1.png "method_table")
 

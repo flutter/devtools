@@ -54,7 +54,7 @@ class ProfilerScreenController extends DisposableController
         // Always reset to the function view when the VM developer mode state
         // changes. The selector is hidden when VM developer mode is disabled
         // and data for code profiles won't be requested.
-        cpuProfilerController.updateView(CpuProfilerViewType.function);
+        cpuProfilerController.updateViewForType(CpuProfilerViewType.function);
       });
     }
   }
@@ -74,8 +74,6 @@ class ProfilerScreenController extends DisposableController
 
   final _recordingNotifier = ValueNotifier<bool>(false);
 
-  final int _profileStartMicros = 0;
-
   IsolateRef? _currentIsolate;
 
   void switchToIsolate(IsolateRef? ref) {
@@ -92,6 +90,8 @@ class ProfilerScreenController extends DisposableController
     cpuProfilerController.reset(data: previousData);
   }
 
+  int _profileRequestId = 0;
+
   Future<void> startRecording() async {
     await clear();
     _recordingNotifier.value = true;
@@ -100,11 +100,13 @@ class ProfilerScreenController extends DisposableController
   Future<void> stopRecording() async {
     _recordingNotifier.value = false;
     await cpuProfilerController.pullAndProcessProfile(
-      startMicros: _profileStartMicros,
+      // We start at 0 every time because [startRecording] clears the cpu
+      // samples on the VM.
+      startMicros: 0,
       // Using [maxJsInt] as [extentMicros] for the getCpuProfile requests will
       // give us all cpu samples we have available
       extentMicros: maxJsInt,
-      processId: 'Profile $_profileStartMicros',
+      processId: 'Profile ${++_profileRequestId}',
     );
   }
 
