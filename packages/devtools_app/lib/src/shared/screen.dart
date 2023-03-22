@@ -202,7 +202,6 @@ abstract class Screen {
   }
 }
 
-
 /// Check whether a screen should be shown in the UI.
 bool shouldShowScreen(Screen screen) {
   if (offlineController.offlineMode.value) {
