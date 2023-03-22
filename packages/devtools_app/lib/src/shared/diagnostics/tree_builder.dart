@@ -179,8 +179,8 @@ Future<void> _addChildrenToInstanceVariable({
   required DartObjectNode variable,
   required Instance value,
   required IsolateRef? isolateRef,
-  Set<String>? existingNames,
   required HeapObjectSelection? heapSelection,
+  Set<String>? existingNames,
 }) async {
   switch (value.kind) {
     case InstanceKind.kMap:
