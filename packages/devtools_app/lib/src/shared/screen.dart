@@ -202,8 +202,6 @@ abstract class Screen {
   }
 }
 
-// TODO(https://github.com/flutter/devtools/issues/5101): delete this mixin and
-// use OfflineScreenControllerMixin for remaining uses.
 
 /// Check whether a screen should be shown in the UI.
 bool shouldShowScreen(Screen screen) {
