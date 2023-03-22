@@ -24,7 +24,7 @@ class ProfilePaneController extends DisposableController
   /// Specifies if the allocation profile should be refreshed when a GC event
   /// is received.
   ValueListenable<bool> get refreshOnGc => _refreshOnGc;
-  final _refreshOnGc = ValueNotifier<bool>(true);
+  final _refreshOnGc = ValueNotifier<bool>(false);
 
   bool _initialized = false;
 
