@@ -7,8 +7,8 @@ import 'dart:io';
 import 'test_infra/run/_in_file_args.dart';
 import 'test_infra/run/run_test.dart';
 
-// To run this test, run the following from `devtools_app/`:
-// `dart run integration_test/run_test.dart`
+// To run integration tests, run the following from `devtools_app/`:
+// `dart run integration_test/run_tests.dart`
 //
 // Arguments that may be passed to this command:
 // --target=<path/to/test.dart> - this will run a single test at the path
@@ -26,19 +26,17 @@ const _testDirectory = 'integration_test/test';
 const _testSuffix = '_test.dart';
 const _offlineIndicator = 'integration_test/test/offline';
 
-void main(List<String> args) async {
-  final modifiableArgs = List.of(args);
-
-  final testTargetProvided = modifiableArgs
+void main(List<String> testRunnerArgs) async {
+  final testTargetProvided = testRunnerArgs
       .where((arg) => arg.startsWith(TestRunnerArgs.testTargetArg))
       .isNotEmpty;
 
   if (testTargetProvided) {
-    final testFilePath = TestRunnerArgs(modifiableArgs).testTarget;
+    final testFilePath = TestRunnerArgs(testRunnerArgs).testTarget;
 
     // TODO(kenz): add support for specifying a directory as the target instead
     // of a single file.
-    await _runTest(modifiableArgs, testFilePath);
+    await _runTest(testRunnerArgs, testFilePath);
   } else {
     // Run all tests since a target test was not provided.
     final testDirectory = Directory(_testDirectory);
@@ -48,18 +46,23 @@ void main(List<String> args) async {
 
     for (final testFile in testFiles) {
       final testTarget = testFile.path;
-      modifiableArgs.add('${TestRunnerArgs.testTargetArg}$testTarget');
-      await _runTest(modifiableArgs, testTarget);
+      await _runTest(
+        [
+          ...testRunnerArgs,
+          '${TestRunnerArgs.testTargetArg}$testTarget',
+        ],
+        testTarget,
+      );
     }
   }
 }
 
 Future<void> _runTest(
-  List<String> modifiableTestRunnerArgs,
+  List<String> testRunnerArgs,
   String testFilePath,
 ) async {
   await runFlutterIntegrationTest(
-    TestRunnerArgs(modifiableTestRunnerArgs),
+    TestRunnerArgs(testRunnerArgs),
     TestFileArgs(testFilePath),
     offline: testFilePath.startsWith(_offlineIndicator),
   );
