@@ -7,7 +7,6 @@ import 'package:devtools_app/src/screens/performance/panes/frame_analysis/frame_
 import 'package:devtools_app/src/screens/performance/panes/frame_analysis/frame_hints.dart';
 import 'package:devtools_app/src/screens/performance/panes/frame_analysis/frame_time_visualizer.dart';
 import 'package:devtools_app/src/screens/performance/panes/rebuild_stats/rebuild_stats_model.dart';
-import 'package:devtools_app/src/shared/config_specific/import_export/import_export.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';

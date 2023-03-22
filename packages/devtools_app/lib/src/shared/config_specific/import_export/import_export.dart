@@ -4,7 +4,6 @@
 
 import 'dart:convert';
 
-import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../devtools.dart';
@@ -16,10 +15,6 @@ import '_export_stub.dart'
     if (dart.library.html) '_export_web.dart'
     if (dart.library.io) '_export_desktop.dart';
 
-const devToolsSnapshotKey = 'devToolsSnapshot';
-const activeScreenIdKey = 'activeScreenId';
-const devToolsVersionKey = 'devtoolsVersion';
-const connectedAppKey = 'connectedApp';
 const nonDevToolsFileMessage = 'The imported file is not a Dart DevTools file.'
     ' At this time, DevTools only supports importing files that were originally'
     ' exported from DevTools.';
@@ -30,6 +25,13 @@ String attemptingToImportMessage(String devToolsScreen) {
 
 String successfulExportMessage(String exportedFile) {
   return 'Successfully exported $exportedFile to ~/Downloads directory';
+}
+
+enum DevToolsExportKeys {
+  devToolsSnapshot,
+  devToolsVersion,
+  connectedApp,
+  activeScreenId,
 }
 
 // TODO(kenz): we should support a file picker import for desktop.
@@ -60,8 +62,8 @@ class ImportController {
     }
     previousImportTime = now;
 
-    final isDevToolsSnapshot =
-        _json is Map<String, dynamic> && _json[devToolsSnapshotKey] == true;
+    final isDevToolsSnapshot = _json is Map<String, dynamic> &&
+        _json[DevToolsExportKeys.devToolsSnapshot.name] == true;
     if (!isDevToolsSnapshot) {
       notificationService.push(nonDevToolsFileMessage);
       return;
@@ -69,9 +71,11 @@ class ImportController {
 
     final devToolsSnapshot = _json;
     // TODO(kenz): support imports for more than one screen at a time.
-    final activeScreenId = devToolsSnapshot[activeScreenIdKey];
+    final activeScreenId =
+        devToolsSnapshot[DevToolsExportKeys.activeScreenId.name];
     final connectedApp =
-        (devToolsSnapshot[connectedAppKey] ?? <String, Object>{})
+        (devToolsSnapshot[DevToolsExportKeys.connectedApp.name] ??
+                <String, Object>{})
             .cast<String, Object>();
     offlineController
       ..enterOfflineMode()
@@ -143,13 +147,14 @@ abstract class ExportController {
     required String fileName,
   });
 
-  String encode(String activeScreenId, Map<String, dynamic> contents) {
+  String encode(Map<String, dynamic> contents) {
     final _contents = {
-      devToolsSnapshotKey: true,
-      activeScreenIdKey: activeScreenId,
-      devToolsVersionKey: version,
-      connectedAppKey: serviceManager.connectedApp!.toJson(),
+      DevToolsExportKeys.devToolsSnapshot.name: true,
+      DevToolsExportKeys.devToolsVersion.name: version,
+      DevToolsExportKeys.connectedApp.name:
+          serviceManager.connectedApp!.toJson(),
     };
+    final activeScreenId = contents[DevToolsExportKeys.activeScreenId.name];
     // This is a workaround to guarantee that DevTools exports are compatible
     // with other trace viewers (catapult, perfetto, chrome://tracing), which
     // require a top level field named "traceEvents".
@@ -161,34 +166,5 @@ abstract class ExportController {
       contents.remove(traceEventsFieldName);
     }
     return jsonEncode(_contents..addAll({activeScreenId: contents}));
-  }
-}
-
-class OfflineModeController {
-  ValueListenable<bool> get offlineMode => _offlineMode;
-
-  final _offlineMode = ValueNotifier(false);
-
-  Map<String, dynamic> offlineDataJson = {};
-
-  /// Stores the [ConnectedApp] instance temporarily while switching between
-  /// offline and online modes.
-  ConnectedApp? _previousConnectedApp;
-
-  bool shouldLoadOfflineData(String screenId) {
-    return _offlineMode.value &&
-        offlineDataJson.isNotEmpty &&
-        offlineDataJson[screenId] != null;
-  }
-
-  void enterOfflineMode() {
-    _previousConnectedApp = serviceManager.connectedApp;
-    _offlineMode.value = true;
-  }
-
-  void exitOfflineMode() {
-    serviceManager.connectedApp = _previousConnectedApp;
-    _offlineMode.value = false;
-    offlineDataJson.clear();
   }
 }

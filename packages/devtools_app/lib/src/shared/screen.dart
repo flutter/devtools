@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
@@ -205,24 +204,6 @@ abstract class Screen {
 
 // TODO(https://github.com/flutter/devtools/issues/5101): delete this mixin and
 // use OfflineScreenControllerMixin for remaining uses.
-mixin OfflineScreenMixin<T extends StatefulWidget, U> on State<T> {
-  bool get loadingOfflineData => _loadingOfflineData;
-  bool _loadingOfflineData = false;
-
-  bool shouldLoadOfflineData();
-
-  FutureOr<void> processOfflineData(U offlineData);
-
-  Future<void> loadOfflineData(U offlineData) async {
-    setState(() {
-      _loadingOfflineData = true;
-    });
-    await processOfflineData(offlineData);
-    setState(() {
-      _loadingOfflineData = false;
-    });
-  }
-}
 
 /// Check whether a screen should be shown in the UI.
 bool shouldShowScreen(Screen screen) {

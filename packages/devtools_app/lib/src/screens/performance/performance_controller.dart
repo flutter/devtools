@@ -6,12 +6,11 @@ import 'dart:async';
 
 import 'package:vm_service/vm_service.dart';
 
-import '../../shared/config_specific/import_export/import_export.dart';
 import '../../shared/diagnostics/inspector_service.dart';
 import '../../shared/feature_flags.dart';
 import '../../shared/globals.dart';
+import '../../shared/offline_mode.dart';
 import '../../shared/primitives/auto_dispose.dart';
-import '../../shared/utils.dart';
 import 'panes/controls/enhance_tracing/enhance_tracing_controller.dart';
 import 'panes/flutter_frames/flutter_frame_model.dart';
 import 'panes/flutter_frames/flutter_frames_controller.dart';
@@ -71,8 +70,6 @@ class PerformanceController extends DisposableController
   IsolateRef? _currentRebuildWidgetsIsolate;
 
   final enhanceTracingController = EnhanceTracingController();
-
-  final _exportController = ExportController();
 
   /// Active timeline data.
   ///
@@ -234,24 +231,6 @@ class PerformanceController extends DisposableController
     );
   }
 
-  @override
-  FutureOr<void> processOfflineData(OfflinePerformanceData offlineData) async {
-    await clearData();
-    offlinePerformanceData = offlineData.shallowClone();
-    data = offlineData.shallowClone();
-
-    await _applyToFeatureControllersAsync(
-      (c) => c.setOfflineData(offlinePerformanceData!),
-    );
-  }
-
-  /// Exports the current performance screen data to a .json file.
-  void exportData() {
-    final encodedData =
-        _exportController.encode(PerformanceScreen.id, data!.toJson());
-    _exportController.downloadFile(encodedData);
-  }
-
   /// Clears the timeline data currently stored by the controller as well the
   /// VM timeline if a connected app is present.
   Future<void> clearData() async {
@@ -269,6 +248,21 @@ class PerformanceController extends DisposableController
     _applyToFeatureControllers((c) => c.dispose());
     enhanceTracingController.dispose();
     super.dispose();
+  }
+
+  @override
+  OfflineScreenData screenDataForExport() =>
+      OfflineScreenData(PerformanceScreen.id, data!.toJson());
+
+  @override
+  FutureOr<void> processOfflineData(OfflinePerformanceData offlineData) async {
+    await clearData();
+    offlinePerformanceData = offlineData.shallowClone();
+    data = offlineData.shallowClone();
+
+    await _applyToFeatureControllersAsync(
+      (c) => c.setOfflineData(offlinePerformanceData!),
+    );
   }
 }
 

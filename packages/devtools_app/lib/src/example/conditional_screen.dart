@@ -6,8 +6,9 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
-import '../shared/common_widgets.dart';
 import '../shared/globals.dart';
+import '../shared/offline_mode.dart';
+import '../shared/primitives/auto_dispose.dart';
 import '../shared/screen.dart';
 import '../shared/utils.dart';
 
@@ -44,62 +45,89 @@ class _ExampleConditionalScreenBody extends StatefulWidget {
 class _ExampleConditionalScreenBodyState
     extends State<_ExampleConditionalScreenBody>
     with
-        OfflineScreenMixin<_ExampleConditionalScreenBody, String>,
         ProvidedControllerMixin<ExampleController,
             _ExampleConditionalScreenBody> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (!initController()) return;
-    if (shouldLoadOfflineData()) {
-      final json =
-          offlineController.offlineDataJson[ExampleConditionalScreen.id];
-      if (json.isNotEmpty) {
-        unawaited(loadOfflineData(json['title']));
-      }
-    }
+    initController();
   }
 
   @override
   Widget build(BuildContext context) {
-    final exampleScreen = ValueListenableBuilder<String>(
-      valueListenable: controller.title,
-      builder: (context, String value, _) {
-        return Center(child: Text(value));
+    return ValueListenableBuilder<ExampleScreenData>(
+      valueListenable: controller.data,
+      builder: (context, data, _) {
+        return Center(child: Text(data.title));
       },
     );
-
-    // We put these two items in a stack because the screen's UI needs to be
-    // built before offline data is processed in order to initialize listeners
-    // that respond to data processing events. The spinner hides the screen's
-    // empty UI while data is being processed.
-    return Stack(
-      children: [
-        exampleScreen,
-        if (loadingOfflineData)
-          Container(
-            color: Colors.grey[50],
-            child: const CenteredCircularProgressIndicator(),
-          ),
-      ],
-    );
-  }
-
-  @override
-  FutureOr<void> processOfflineData(String offlineData) async {
-    await controller.processOfflineData(offlineData);
-  }
-
-  @override
-  bool shouldLoadOfflineData() {
-    return offlineController.shouldLoadOfflineData(ExampleConditionalScreen.id);
   }
 }
 
-class ExampleController {
-  final ValueNotifier<String> title = ValueNotifier('Example screen');
-
-  FutureOr<void> processOfflineData(String offlineData) {
-    title.value = offlineData;
+class ExampleController extends DisposableController
+    with
+        AutoDisposeControllerMixin,
+        OfflineScreenControllerMixin<ExampleScreenData> {
+  ExampleController() {
+    unawaited(_init());
   }
+
+  final data =
+      ValueNotifier<ExampleScreenData>(ExampleScreenData('Example screen'));
+
+  final _initialized = Completer<void>();
+
+  Future<void> get initialized => _initialized.future;
+
+  Future<void> _init() async {
+    await _initHelper();
+    _initialized.complete();
+  }
+
+  Future<void> _initHelper() async {
+    if (!offlineController.offlineMode.value) {
+      // Do some initialization for online mode.
+    } else {
+      final shouldLoadOfflineData =
+          offlineController.shouldLoadOfflineData(ExampleConditionalScreen.id);
+      if (shouldLoadOfflineData) {
+        final exampleScreenJson = Map<String, dynamic>.from(
+          offlineController.offlineDataJson[ExampleConditionalScreen.id],
+        );
+        final offlineData = ExampleScreenData.parse(exampleScreenJson);
+        if (!offlineData.title.isNotEmpty) {
+          await loadOfflineData(offlineData);
+        }
+      }
+    }
+  }
+
+  // Overrides for [OfflineScreenControllerMixin]
+
+  @override
+  FutureOr<void> processOfflineData(ExampleScreenData offlineData) {
+    data.value = offlineData;
+  }
+
+  @override
+  OfflineScreenData screenDataForExport() {
+    return OfflineScreenData(
+      ExampleConditionalScreen.id,
+      data.value.json,
+    );
+  }
+}
+
+class ExampleScreenData {
+  ExampleScreenData(this.title);
+
+  factory ExampleScreenData.parse(Map<String, Object?> json) {
+    return ExampleScreenData(json[_titleKey] as String);
+  }
+
+  static const _titleKey = 'title';
+
+  final String title;
+
+  Map<String, Object?> get json => {_titleKey: title};
 }
