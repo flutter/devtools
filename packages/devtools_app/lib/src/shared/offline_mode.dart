@@ -54,7 +54,7 @@ mixin OfflineScreenControllerMixin<T> on AutoDisposeControllerMixin {
   OfflineScreenData screenDataForExport();
 
   /// Defines how the offline data for this screen should be processed and set.
-  /// 
+  ///
   /// Each screen controller that mixes in [OfflineScreenControllerMixin] is
   /// responsible for setting up the data models and feeding the data to the
   /// screen for offline viewing - that should occur in this method.
