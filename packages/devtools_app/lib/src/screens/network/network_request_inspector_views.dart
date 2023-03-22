@@ -178,6 +178,7 @@ class HttpViewTrailingCopyButton extends StatelessWidget {
   const HttpViewTrailingCopyButton(this.data, this.dataSelector);
   final DartIOHttpRequestData data;
   final String? Function(DartIOHttpRequestData) dataSelector;
+
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder(
@@ -185,8 +186,9 @@ class HttpViewTrailingCopyButton extends StatelessWidget {
       builder: (context, __, ___) {
         final dataToCopy = dataSelector(data);
         final isLoading = data.isFetchingFullData;
-        if (dataToCopy == null || dataToCopy == '' || isLoading)
+        if (dataToCopy == null || dataToCopy.isEmpty || isLoading){
           return Container();
+        }
 
         return Align(
           alignment: Alignment.centerRight,
