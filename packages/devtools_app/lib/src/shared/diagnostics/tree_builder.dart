@@ -113,11 +113,6 @@ void _setupGrouping(DartObjectNode variable) {
   final end = start + variable.childCount;
   while (start < end) {
     final count = min(end - start, numChildrenInGrouping);
-
-    final ref = variable.ref!;
-
-    print('!!!!! ${ref.heapSelection}');
-
     variable.addChild(
       DartObjectNode.grouping(variable.ref, offset: start, count: count),
     );
