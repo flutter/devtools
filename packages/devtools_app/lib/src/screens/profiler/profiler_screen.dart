@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart' hide Stack;
@@ -65,7 +63,6 @@ class ProfilerScreenBody extends StatefulWidget {
 class _ProfilerScreenBodyState extends State<ProfilerScreenBody>
     with
         AutoDisposeMixin,
-        OfflineScreenMixin<ProfilerScreenBody, CpuProfileData>,
         ProvidedControllerMixin<ProfilerScreenController, ProfilerScreenBody> {
   bool recording = false;
 
@@ -87,6 +84,8 @@ class _ProfilerScreenBodyState extends State<ProfilerScreenBody>
     if (!initController()) return;
 
     cancelListeners();
+
+    addAutoDisposeListener(controller.loadingOfflineData);
 
     addAutoDisposeListener(controller.recordingNotifier, () {
       setState(() {
@@ -113,17 +112,6 @@ class _ProfilerScreenBodyState extends State<ProfilerScreenBody>
         });
       },
     );
-
-    // Load offline profiler data if available.
-    if (shouldLoadOfflineData()) {
-      final profilerJson = Map<String, dynamic>.from(
-        offlineController.offlineDataJson[ProfilerScreen.id],
-      );
-      final offlineProfilerData = CpuProfileData.parse(profilerJson);
-      if (!offlineProfilerData.isEmpty) {
-        unawaited(loadOfflineData(offlineProfilerData));
-      }
-    }
   }
 
   @override
@@ -141,80 +129,79 @@ class _ProfilerScreenBodyState extends State<ProfilerScreenBody>
   }
 
   Widget _buildProfilerScreenBody(ProfilerScreenController controller) {
-    const emptyAppStartUpProfileView = Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(
-            'There are no app start up samples available.',
-            textAlign: TextAlign.center,
-          ),
-          SizedBox(height: denseSpacing),
-          Text(
-            'To avoid this, try to open the DevTools CPU profiler '
-            'sooner after starting your app.',
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
-    );
-    final emptyProfileView = Center(
-      child: RichText(
-        textAlign: TextAlign.center,
-        text: const TextSpan(
-          text: 'No CPU samples recorded.',
-        ),
-      ),
-    );
-    final profilerScreen = Column(
-      children: [
-        ProfilerScreenControls(
-          controller: controller,
-          recording: recording,
-          processing: processing,
-          offline: offlineController.offlineMode.value,
-        ),
-        const SizedBox(height: intermediateSpacing),
-        Expanded(
-          child: ValueListenableBuilder<CpuProfileData?>(
-            valueListenable: controller.cpuProfilerController.dataNotifier,
-            builder: (context, cpuProfileData, _) {
-              if (cpuProfileData ==
-                      CpuProfilerController.baseStateCpuProfileData ||
-                  cpuProfileData == null) {
-                return _buildRecordingInfo();
-              }
-              if (cpuProfileData ==
-                  CpuProfilerController.emptyAppStartUpProfile) {
-                return emptyAppStartUpProfileView;
-              }
-              if (cpuProfileData.isEmpty &&
-                  !controller.cpuProfilerController.isFilterActive) {
-                return emptyProfileView;
-              }
-              return CpuProfiler(
-                data: cpuProfileData,
-                controller: controller.cpuProfilerController,
-              );
-            },
-          ),
-        ),
-      ],
-    );
-
-    // We put these two items in a stack because the screen's UI needs to be
-    // built before offline data is processed in order to initialize listeners
-    // that respond to data processing events. The spinner hides the screen's
-    // empty UI while data is being processed.
-    return Stack(
-      children: [
-        profilerScreen,
-        if (loadingOfflineData)
-          Container(
+    return FutureBuilder(
+      future: controller.initialized,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState != ConnectionState.done ||
+            controller.loadingOfflineData.value) {
+          return Container(
             color: Theme.of(context).scaffoldBackgroundColor,
             child: const CenteredCircularProgressIndicator(),
+          );
+        }
+
+        const emptyAppStartUpProfileView = Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                'There are no app start up samples available.',
+                textAlign: TextAlign.center,
+              ),
+              SizedBox(height: denseSpacing),
+              Text(
+                'To avoid this, try to open the DevTools CPU profiler '
+                'sooner after starting your app.',
+                textAlign: TextAlign.center,
+              ),
+            ],
           ),
-      ],
+        );
+        final emptyProfileView = Center(
+          child: RichText(
+            textAlign: TextAlign.center,
+            text: const TextSpan(
+              text: 'No CPU samples recorded.',
+            ),
+          ),
+        );
+
+        return Column(
+          children: [
+            ProfilerScreenControls(
+              controller: controller,
+              recording: recording,
+              processing: processing,
+              offline: offlineController.offlineMode.value,
+            ),
+            const SizedBox(height: intermediateSpacing),
+            Expanded(
+              child: ValueListenableBuilder<CpuProfileData?>(
+                valueListenable: controller.cpuProfilerController.dataNotifier,
+                builder: (context, cpuProfileData, _) {
+                  if (cpuProfileData ==
+                          CpuProfilerController.baseStateCpuProfileData ||
+                      cpuProfileData == null) {
+                    return _buildRecordingInfo();
+                  }
+                  if (cpuProfileData ==
+                      CpuProfilerController.emptyAppStartUpProfile) {
+                    return emptyAppStartUpProfileView;
+                  }
+                  if (cpuProfileData.isEmpty &&
+                      !controller.cpuProfilerController.isFilterActive) {
+                    return emptyProfileView;
+                  }
+                  return CpuProfiler(
+                    data: cpuProfileData,
+                    controller: controller.cpuProfilerController,
+                  );
+                },
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -227,26 +214,6 @@ class _ProfilerScreenBodyState extends State<ProfilerScreenBody>
       progressValue: processingProgress,
       recordedObject: 'CPU samples',
     );
-  }
-
-  @override
-  FutureOr<void> processOfflineData(CpuProfileData offlineData) async {
-    await controller.cpuProfilerController.transformer.processData(
-      offlineData,
-      processId: 'offline data processing',
-    );
-    controller.cpuProfilerController.loadProcessedData(
-      CpuProfilePair(
-        functionProfile: offlineData,
-        codeProfile: null,
-      ),
-      storeAsUserTagNone: true,
-    );
-  }
-
-  @override
-  bool shouldLoadOfflineData() {
-    return offlineController.shouldLoadOfflineData(ProfilerScreen.id);
   }
 }
 

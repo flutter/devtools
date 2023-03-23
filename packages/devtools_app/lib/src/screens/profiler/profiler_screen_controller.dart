@@ -8,9 +8,9 @@ import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../shared/analytics/constants.dart' as gac;
-import '../../shared/config_specific/import_export/import_export.dart';
 import '../../shared/config_specific/logger/allowed_error.dart';
 import '../../shared/globals.dart';
+import '../../shared/offline_mode.dart';
 import '../../shared/primitives/auto_dispose.dart';
 import '../../shared/primitives/utils.dart';
 import 'cpu_profile_model.dart';
@@ -20,14 +20,27 @@ import 'profiler_screen.dart';
 import 'sampling_rate.dart';
 
 class ProfilerScreenController extends DisposableController
-    with AutoDisposeControllerMixin {
+    with
+        AutoDisposeControllerMixin,
+        OfflineScreenControllerMixin<CpuProfileData> {
   ProfilerScreenController() {
+    unawaited(_init());
+  }
+
+  final _initialized = Completer<void>();
+
+  Future<void> get initialized => _initialized.future;
+
+  Future<void> _init() async {
+    await _initHelper();
+    _initialized.complete();
+  }
+
+  Future<void> _initHelper() async {
     if (!offlineController.offlineMode.value) {
-      unawaited(
-        allowedError(
-          serviceManager.service!.setProfilePeriod(mediumProfilePeriod),
-          logError: false,
-        ),
+      await allowedError(
+        serviceManager.service!.setProfilePeriod(mediumProfilePeriod),
+        logError: false,
       );
 
       _currentIsolate = serviceManager.isolateManager.selectedIsolate.value;
@@ -56,13 +69,23 @@ class ProfilerScreenController extends DisposableController
         // and data for code profiles won't be requested.
         cpuProfilerController.updateViewForType(CpuProfilerViewType.function);
       });
+    } else {
+      final shouldLoadOfflineData =
+          offlineController.shouldLoadOfflineData(ProfilerScreen.id);
+      if (shouldLoadOfflineData) {
+        final profilerJson = Map<String, dynamic>.from(
+          offlineController.offlineDataJson[ProfilerScreen.id],
+        );
+        final offlineProfilerData = CpuProfileData.parse(profilerJson);
+        if (!offlineProfilerData.isEmpty) {
+          await loadOfflineData(offlineProfilerData);
+        }
+      }
     }
   }
 
   final cpuProfilerController =
       CpuProfilerController(analyticsScreenId: gac.cpuProfiler);
-
-  final _exportController = ExportController();
 
   CpuProfileData? get cpuProfileData =>
       cpuProfilerController.dataNotifier.value;
@@ -110,13 +133,25 @@ class ProfilerScreenController extends DisposableController
     );
   }
 
-  /// Exports the current profiler data to a .json file.
-  ///
-  /// This method returns the name of the file that was downloaded.
-  String exportData() {
-    final encodedData =
-        _exportController.encode(ProfilerScreen.id, cpuProfileData!.toJson);
-    return _exportController.downloadFile(encodedData);
+  @override
+  OfflineScreenData screenDataForExport() => OfflineScreenData(
+        screenId: ProfilerScreen.id,
+        data: cpuProfileData!.toJson,
+      );
+
+  @override
+  FutureOr<void> processOfflineData(CpuProfileData offlineData) async {
+    await cpuProfilerController.transformer.processData(
+      offlineData,
+      processId: 'offline data processing',
+    );
+    cpuProfilerController.loadProcessedData(
+      CpuProfilePair(
+        functionProfile: offlineData,
+        codeProfile: null,
+      ),
+      storeAsUserTagNone: true,
+    );
   }
 
   Future<void> clear() async {
