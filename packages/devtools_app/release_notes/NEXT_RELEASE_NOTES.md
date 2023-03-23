@@ -11,6 +11,9 @@ Dart & Flutter DevTools - A Suite of Performance Tools for Dart and Flutter
 * Added the new verbose logging feature for helping us debug user issues. [#5404](https://github.com/flutter/devtools/pull/5404)
     ![verbose logging](images/verbose-logging.png "verbose_logging")
 * Fix a bug where some asynchronous errors were not being reported. [#5456](https://github.com/flutter/devtools/pull/5456)
+* Added support for viewing data after an app disconnects for screens that
+support offline viewing (currently only the Performance and CPU proiler pages).
+[#5509](https://github.com/flutter/devtools/pull/5509)
 
 ## Inspector updates
 TODO: Remove this section if there are not any general updates.
