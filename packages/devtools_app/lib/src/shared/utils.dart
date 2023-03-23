@@ -12,14 +12,16 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:logging/logging.dart';
 import 'package:provider/provider.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../devtools.dart' as devtools;
 import 'common_widgets.dart';
-import 'config_specific/logger/logger.dart' as logger;
 import 'connected_app.dart';
 import 'globals.dart';
+
+final _log = Logger('lib/src/shared/utils');
 
 /// Attempts to copy a String of `data` to the clipboard.
 ///
@@ -41,7 +43,7 @@ Future<void> copyToClipboard(
 void debugLogger(String message) {
   assert(
     () {
-      logger.log('$message');
+      _log.info(message);
       return true;
     }(),
   );

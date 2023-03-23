@@ -3,8 +3,11 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
+import 'package:logging/logging.dart';
 
 import 'globals.dart';
+
+final _log = Logger('lib/src/shared/features_flags');
 
 @visibleForTesting
 bool get enableExperiments =>
@@ -74,7 +77,7 @@ abstract class FeatureFlags {
   /// A helper to print the status of all the feature flags.
   static void debugPrintFeatureFlags() {
     for (final entry in _allFlags.entries) {
-      print('${entry.key}: ${entry.value}');
+      _log.config('${entry.key}: ${entry.value}');
     }
   }
 }

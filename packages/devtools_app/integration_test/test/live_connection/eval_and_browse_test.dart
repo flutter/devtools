@@ -6,6 +6,8 @@
 // test-argument:experimentsOn=true
 // test-argument:appPath="test/test_infra/fixtures/memory_app"
 
+// ignore_for_file: avoid_print
+
 import 'dart:ui' as ui;
 
 import 'package:devtools_app/src/shared/console/widgets/console_pane.dart';

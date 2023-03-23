@@ -14,7 +14,7 @@ import 'config_specific/sse/sse_shim.dart';
 import 'framework_controller.dart';
 import 'globals.dart';
 
-final _log = Logger('server_api_client');
+final _log = Logger('lib/src/shared/server_api_client');
 
 /// This class coordinates the connection between the DevTools server and the
 /// DevTools web app.
@@ -141,10 +141,10 @@ class DevToolsServerConnection {
       } else if (request.containsKey('id')) {
         _handleResponse(request['id']!, request['result']);
       } else {
-        print('Unable to parse API message from server:\n\n$msg');
+        _log.info('Unable to parse API message from server:\n\n$msg');
       }
     } catch (e) {
-      print('Failed to handle API message from server:\n\n$msg\n\n$e');
+      _log.info('Failed to handle API message from server:\n\n$msg\n\n$e');
     }
   }
 
@@ -172,7 +172,7 @@ class DevToolsServerConnection {
         ping();
         return;
       default:
-        print('Unknown request $method from server');
+        _log.info('Unknown request $method from server');
     }
   }
 
