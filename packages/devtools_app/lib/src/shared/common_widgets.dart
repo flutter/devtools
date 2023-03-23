@@ -2506,7 +2506,7 @@ class HelpButtonWithDialog extends StatelessWidget {
 
   final bool asAction;
 
-  void _openDialog(BuildContext context) {
+  void openDialog(BuildContext context) {
     unawaited(
       showDialog(
         context: context,
@@ -2530,13 +2530,13 @@ class HelpButtonWithDialog extends StatelessWidget {
         tooltip: 'Helo',
         onPressed: () {
           ga.select(gaScreen, gaSelection);
-          _openDialog(context);
+          openDialog(context);
         },
       );
 
     return HelpButton(
       onPressed: () {
-        _openDialog(context);
+        openDialog(context);
       },
       gaScreen: gaScreen,
       gaSelection: gaSelection,

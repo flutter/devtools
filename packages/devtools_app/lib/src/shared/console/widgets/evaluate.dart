@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../../common_widgets.dart';
 import '../../feature_flags.dart';
 import '../../globals.dart';
 import '../../primitives/auto_dispose.dart';
@@ -20,6 +21,7 @@ import '../eval/auto_complete.dart';
 import '../eval/eval_service.dart';
 import '../primitives/assignment.dart';
 import '../primitives/eval_history.dart';
+import 'help_dialog.dart';
 
 typedef AutoCompleteResultsFunction = Future<List<String>> Function(
   EditingParts parts,
@@ -209,7 +211,7 @@ class ExpressionEvalFieldState extends State<ExpressionEvalField>
                 _historyNavDown();
                 return KeyEventResult.handled;
               } else if (event.isKeyPressed(LogicalKeyboardKey.enter)) {
-                _handleExpressionEval();
+                _handleExpressionEval(context);
                 return KeyEventResult.handled;
               }
 
@@ -226,7 +228,7 @@ class ExpressionEvalFieldState extends State<ExpressionEvalField>
                 border: OutlineInputBorder(),
                 focusedBorder: OutlineInputBorder(borderSide: BorderSide.none),
                 enabledBorder: OutlineInputBorder(borderSide: BorderSide.none),
-                labelText: 'Eval',
+                labelText: 'Eval. Enter "?" for help.',
               ),
               overlayXPositionBuilder:
                   (String inputValue, TextStyle? inputStyle) {
@@ -301,13 +303,18 @@ class ExpressionEvalFieldState extends State<ExpressionEvalField>
         .toList();
   }
 
-  void _handleExpressionEval() async {
+  void _handleExpressionEval(BuildContext context) async {
     final expressionText = searchTextFieldController.value.text.trim();
     _autoCompleteController
       ..updateSearchField(newValue: '', caretPosition: 0)
       ..clearSearchField(force: true);
 
     if (expressionText.isEmpty) return;
+
+    if (expressionText.trim() == '?') {
+      const ConsoleHelpLink().openDialog(context);
+      return;
+    }
 
     serviceManager.consoleService.appendStdio('> $expressionText\n');
     setState(() {
