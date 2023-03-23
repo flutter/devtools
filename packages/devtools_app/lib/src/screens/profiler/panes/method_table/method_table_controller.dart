@@ -23,6 +23,7 @@ class MethodTableController extends DisposableController
   MethodTableController({
     required ValueListenable<CpuProfileData?> dataNotifier,
   }) {
+    createMethodTableGraph(dataNotifier.value);
     addAutoDisposeListener(dataNotifier, () {
       createMethodTableGraph(dataNotifier.value);
     });

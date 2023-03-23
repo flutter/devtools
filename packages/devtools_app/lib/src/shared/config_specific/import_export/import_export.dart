@@ -78,9 +78,8 @@ class ImportController {
                 <String, Object>{})
             .cast<String, Object>();
     offlineController
-      ..enterOfflineMode()
+      ..enterOfflineMode(offlineApp: OfflineConnectedApp.parse(connectedApp))
       ..offlineDataJson = devToolsSnapshot;
-    serviceManager.connectedApp = OfflineConnectedApp.parse(connectedApp);
     notificationService.push(attemptingToImportMessage(activeScreenId));
     _pushSnapshotScreenForImport(activeScreenId);
   }
@@ -147,25 +146,34 @@ abstract class ExportController {
     required String fileName,
   });
 
-  String encode(Map<String, dynamic> contents) {
-    final activeScreenId = contents[DevToolsExportKeys.activeScreenId.name];
-    final _contents = {
+  Map<String, dynamic> generateDataForExport({
+    required Map<String, dynamic> offlineScreenData,
+    ConnectedApp? connectedApp,
+  }) {
+    final contents = {
       DevToolsExportKeys.devToolsSnapshot.name: true,
-      DevToolsExportKeys.activeScreenId.name: activeScreenId,
       DevToolsExportKeys.devToolsVersion.name: version,
       DevToolsExportKeys.connectedApp.name:
-          serviceManager.connectedApp!.toJson(),
+          connectedApp?.toJson() ?? serviceManager.connectedApp!.toJson(),
+      ...offlineScreenData,
     };
+    final activeScreenId = contents[DevToolsExportKeys.activeScreenId.name];
+
     // This is a workaround to guarantee that DevTools exports are compatible
     // with other trace viewers (catapult, perfetto, chrome://tracing), which
     // require a top level field named "traceEvents".
     if (activeScreenId == ScreenMetaData.performance.id) {
       final traceEvents = List<Map<String, dynamic>>.from(
-        contents[traceEventsFieldName],
+        contents[activeScreenId][traceEventsFieldName],
       );
-      _contents[traceEventsFieldName] = traceEvents;
-      contents.remove(traceEventsFieldName);
+      contents[traceEventsFieldName] = traceEvents;
+      contents[activeScreenId].remove(traceEventsFieldName);
     }
-    return jsonEncode(_contents..addAll({activeScreenId: contents}));
+    return contents;
+  }
+
+  String encode(Map<String, dynamic> offlineScreenData) {
+    final data = generateDataForExport(offlineScreenData: offlineScreenData);
+    return jsonEncode(data);
   }
 }

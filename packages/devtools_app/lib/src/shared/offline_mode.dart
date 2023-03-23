@@ -5,11 +5,13 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 
 import 'config_specific/import_export/import_export.dart';
 import 'connected_app.dart';
 import 'globals.dart';
 import 'primitives/auto_dispose.dart';
+import 'routing.dart';
 
 class OfflineModeController {
   bool get isOffline => _offlineMode.value;
@@ -70,6 +72,32 @@ mixin OfflineScreenControllerMixin<T> on AutoDisposeControllerMixin {
   void exportData() {
     final encodedData = _exportController.encode(screenDataForExport().json);
     _exportController.downloadFile(encodedData);
+  }
+
+  /// Adds a listener that will prepare the screen's current data for offline
+  /// viewing after an app disconnect.
+  ///
+  /// This is in preparation for the user clicking the 'Review History' button
+  /// from the disconnect screen.
+  void initReviewHistoryOnDisconnectListener() {
+    addAutoDisposeListener(serviceManager.connectedState, () {
+      final connectionState = serviceManager.connectedState.value;
+      if (!connectionState.connected &&
+          !connectionState.userInitiatedConnectionState) {
+        final currentScreenData = screenDataForExport();
+        // Only store data for the current page. We can change this in the
+        // future if we support offline imports for more than once screen at a
+        // time.
+        if (DevToolsRouterDelegate.currentPage == currentScreenData.screenId) {
+          final previouslyConnectedApp = offlineController.previousConnectedApp;
+          final offlineData = _exportController.generateDataForExport(
+            offlineScreenData: currentScreenData.json,
+            connectedApp: previouslyConnectedApp,
+          );
+          offlineController.offlineDataJson = offlineData;
+        }
+      }
+    });
   }
 }
 
