@@ -27,7 +27,7 @@ Use debug console:
 3. To analyze inbound and outbound references for objects, dropped from memory heap snapshots.
 
 Assign previously evaluated objects to variable
-using $0 (or $_), $1 … $5 e.g: var x = $0.
+using $0, $1 … $5, e.g: var x = $0.
 '''),
             MoreInfoLink(
               // TODO(polina-c): create content at link.
