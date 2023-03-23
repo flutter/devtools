@@ -5,7 +5,6 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 
 import 'config_specific/import_export/import_export.dart';
 import 'connected_app.dart';
@@ -32,8 +31,9 @@ class OfflineModeController {
         offlineDataJson[screenId] != null;
   }
 
-  void enterOfflineMode() {
+  void enterOfflineMode({required ConnectedApp offlineApp}) {
     previousConnectedApp = serviceManager.connectedApp;
+    serviceManager.connectedApp = offlineApp;
     _offlineMode.value = true;
   }
 
@@ -110,6 +110,6 @@ class OfflineScreenData {
 
   Map<String, Object?> get json => {
         DevToolsExportKeys.activeScreenId.name: screenId,
-        ...data,
+        screenId: data,
       };
 }

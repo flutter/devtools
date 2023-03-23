@@ -28,7 +28,11 @@ void main() {
       );
       when(mockServiceManager.connectedApp).thenReturn(connectedApp);
       setGlobal(ServiceConnectionManager, mockServiceManager);
-      offlineController.enterOfflineMode();
+      offlineController.enterOfflineMode(
+        offlineApp: OfflineConnectedApp.parse(
+          serviceManager.connectedApp!.toJson(),
+        ),
+      );
       controller = PerformanceController();
     });
 
