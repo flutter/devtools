@@ -550,7 +550,6 @@ List<DartObjectNode> createVariablesForFields(
   Set<String>? existingNames,
 }) {
   final result = <DartObjectNode>[];
-
   for (var field in instance.fields!) {
     final name = field.decl?.name;
     if (name == null) {
@@ -572,4 +571,36 @@ List<DartObjectNode> createVariablesForFields(
     }
   }
   return result;
+}
+
+List<DartObjectNode> createVariablesForMirrorReference(
+  Instance mirrorReference,
+  IsolateRef? isolateRef,
+) {
+  final referent = mirrorReference.mirrorReferent! as ClassRef;
+  return [
+    DartObjectNode.fromValue(
+      name: 'class',
+      value: referent.name,
+      isolateRef: isolateRef,
+    ),
+    DartObjectNode.fromValue(
+      name: 'library',
+      value: referent.library!.uri,
+      isolateRef: isolateRef,
+    ),
+  ];
+}
+
+List<DartObjectNode> createVariablesForUserTag(
+  Instance userTag,
+  IsolateRef? isolateRef,
+) {
+  return [
+    DartObjectNode.fromValue(
+      name: 'label',
+      value: userTag.label,
+      isolateRef: isolateRef,
+    ),
+  ];
 }
