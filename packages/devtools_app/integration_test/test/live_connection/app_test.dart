@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui;
-
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_test/devtools_integration_test.dart';
 import 'package:flutter/material.dart';

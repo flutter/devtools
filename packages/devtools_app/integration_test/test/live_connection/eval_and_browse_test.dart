@@ -6,8 +6,6 @@
 // test-argument:experimentsOn=true
 // test-argument:appPath="test/test_infra/fixtures/memory_app"
 
-import 'dart:ui' as ui;
-
 import 'package:devtools_app/src/shared/console/widgets/console_pane.dart';
 import 'package:devtools_app/src/shared/primitives/simple_items.dart';
 import 'package:devtools_app/src/shared/ui/search.dart';
