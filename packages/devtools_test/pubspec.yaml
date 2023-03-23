@@ -44,3 +44,5 @@ dev_dependencies:
   build_runner: ^2.3.3
   integration_test:
     sdk: flutter
+  # See https://github.com/dart-lang/test/issues/1977
+  test_api: 0.4.18
