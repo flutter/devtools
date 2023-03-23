@@ -89,6 +89,7 @@ const shaderCompilationDocsTooltipLink = 'shaderCompilationDocsTooltipLink';
 const impellerWiki = 'impellerWikiLink';
 const collectRasterStats = 'collectRasterStats';
 const clearRasterStats = 'clearRasterStats';
+const fullScreenLayerImage = 'fullScreenLayerImage';
 const clearRebuildStats = 'clearRebuildStats';
 const perfettoModeTraceEventProcessingTime =
     'traceEventProcessingTime-perfettoMode';
