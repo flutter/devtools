@@ -11,6 +11,7 @@ import '../../theme.dart';
 import '../console.dart';
 import '../console_service.dart';
 import 'evaluate.dart';
+import 'help_dialog.dart';
 
 // TODO(devoncarew): Show some small UI indicator when we receive stdout/stderr.
 
@@ -20,6 +21,7 @@ class ConsolePaneHeader extends AreaPaneHeader {
           title: const Text('Console'),
           roundedTopBorder: true,
           actions: [
+            const ConsoleHelpLink(),
             CopyToClipboardControl(
               dataProvider: () =>
                   serviceManager.consoleService.stdio.value.join('\n'),

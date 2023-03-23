@@ -2493,6 +2493,7 @@ class HelpButtonWithDialog extends StatelessWidget {
     required this.gaSelection,
     required this.dialogTitle,
     required this.child,
+    this.asAction = false,
   });
 
   final String gaScreen;
@@ -2503,24 +2504,39 @@ class HelpButtonWithDialog extends StatelessWidget {
 
   final Widget child;
 
+  final bool asAction;
+
+  void _openDialog(BuildContext context) {
+    unawaited(
+      showDialog(
+        context: context,
+        builder: (context) => DevToolsDialog(
+          title: DialogTitleText(dialogTitle),
+          includeDivider: false,
+          content: child,
+          actions: const [
+            DialogCloseButton(),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    if (asAction)
+      return ToolbarAction(
+        icon: Icons.help_outline,
+        tooltip: 'Helo',
+        onPressed: () {
+          ga.select(gaScreen, gaSelection);
+          _openDialog(context);
+        },
+      );
+
     return HelpButton(
       onPressed: () {
-        ga.select(gaScreen, gaSelection);
-        unawaited(
-          showDialog(
-            context: context,
-            builder: (context) => DevToolsDialog(
-              title: DialogTitleText(dialogTitle),
-              includeDivider: false,
-              content: child,
-              actions: const [
-                DialogCloseButton(),
-              ],
-            ),
-          ),
-        );
+        _openDialog(context);
       },
       gaScreen: gaScreen,
       gaSelection: gaSelection,
