@@ -6,14 +6,16 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
+import 'package:logging/logging.dart';
 import 'package:mime/mime.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../screens/network/network_model.dart';
-import '../config_specific/logger/logger.dart';
 import '../globals.dart';
 import '../primitives/utils.dart';
 import 'http.dart';
+
+final _log = Logger('http_request_data');
 
 /// Used to represent an instant event emitted during an HTTP request.
 class DartIOHttpInstantEvent {
@@ -230,11 +232,8 @@ class DartIOHttpRequestData extends NetworkRequest {
       if (code >= 400) {
         return true;
       }
-    } on Exception catch (_) {
-      log(
-        'Could not parse HTTP request status: $status',
-        LogLevel.error,
-      );
+    } on Exception catch (e, st) {
+      _log.shout('Could not parse HTTP request status: $status', e, st);
       return true;
     }
     return false;

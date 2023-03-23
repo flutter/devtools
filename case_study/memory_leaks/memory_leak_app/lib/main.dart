@@ -101,7 +101,7 @@ class MyHomeState extends State<MyHome> with SingleTickerProviderStateMixin {
         );
         break;
       default:
-        print('ERROR: Unhandled Menu.');
+        _log.info('ERROR: Unhandled Menu.');
     }
   }
 }

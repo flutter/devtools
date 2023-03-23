@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:async/async.dart';
 import 'package:collection/collection.dart' show IterableExtension;
 import 'package:flutter/foundation.dart';
+import 'package:logging/logging.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../service/vm_service_wrapper.dart';
@@ -25,7 +26,9 @@ import 'codeview_controller.dart';
 import 'debugger_model.dart';
 
 // Make sure this a checked in with `mute: true`.
-final _log = DebugTimingLogger('debugger', mute: true);
+final _debugTimingLog = DebugTimingLogger('debugger', mute: true);
+
+final _log = Logger('debugger_controller');
 
 /// Responsible for managing the debug state of the app.
 class DebuggerController extends DisposableController
@@ -212,13 +215,13 @@ class DebuggerController extends DisposableController
   Future<Success> pause() => _service.pause(_isolateRefId);
 
   Future<Success> resume() {
-    _log.log('resume()');
+    _debugTimingLog.log('resume()');
     _resuming.value = true;
     return _service.resume(_isolateRefId);
   }
 
   Future<Success> stepOver() {
-    _log.log('stepOver()');
+    _debugTimingLog.log('stepOver()');
     _resuming.value = true;
 
     // Handle async suspensions; issue StepOption.kOverAsyncSuspension.
@@ -230,7 +233,7 @@ class DebuggerController extends DisposableController
               ? StepOption.kOverAsyncSuspension
               : StepOption.kOver,
         )
-        .whenComplete(() => _log.log('stepOver() completed'));
+        .whenComplete(() => _debugTimingLog.log('stepOver() completed'));
   }
 
   Future<Success> stepIn() {
@@ -261,12 +264,12 @@ class DebuggerController extends DisposableController
     assert(_resuming.value);
 
     final id = event.isolate!.id!;
-    _log.log('resume() $id');
+    _debugTimingLog.log('resume() $id');
     return _service.resume(id);
   }
 
   void _handleDebugEvent(Event event) {
-    _log.log('event: ${event.kind}');
+    _debugTimingLog.log('event: ${event.kind}');
 
     // We're resuming and another isolate has started in a paused state,
     // resume any pauseState isolates.
@@ -376,7 +379,7 @@ class DebuggerController extends DisposableController
     // listening for changes there instead of having separate logic.
     await _getStackOperation?.cancel();
 
-    _log.log('_pause(running: ${!paused})');
+    _debugTimingLog.log('_pause(running: ${!paused})');
 
     // Perform an early exit if we're not paused.
     if (!paused) {
@@ -393,7 +396,7 @@ class DebuggerController extends DisposableController
     if (await serviceManager.connectedApp!.isDartWebApp) {
       final topFrame = pauseEvent?.topFrame;
       if (topFrame == null) {
-        log(
+        _log.info(
           'Pause event has no frame. This likely indicates a DWDS bug.',
           LogLevel.warning,
         );
@@ -446,9 +449,10 @@ class DebuggerController extends DisposableController
   }
 
   Future<_StackInfo> _getStackInfo({int? limit}) async {
-    _log.log('getStack() with limit: $limit');
+    _debugTimingLog.log('getStack() with limit: $limit');
     final stack = await _service.getStack(_isolateRefId, limit: limit);
-    _log.log('getStack() completed (frames: ${stack.frames!.length})');
+    _debugTimingLog
+        .log('getStack() completed (frames: ${stack.frames!.length})');
 
     final frames = _framesForCallStack(
       stack.frames ?? [],
@@ -466,7 +470,7 @@ class DebuggerController extends DisposableController
     List<StackFrameAndSourcePosition> frames, {
     required final bool truncated,
   }) {
-    _log.log('populated frame info');
+    _debugTimingLog.log('populated frame info');
     _stackFramesWithLocation.value = frames;
     _hasTruncatedFrames.value = truncated;
     if (frames.isEmpty) {

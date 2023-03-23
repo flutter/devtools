@@ -11,13 +11,13 @@ import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:logging/logging.dart';
 
 import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/analytics/metrics.dart';
 import '../../shared/collapsible_mixin.dart';
 import '../../shared/common_widgets.dart';
-import '../../shared/config_specific/logger/logger.dart';
 import '../../shared/console/eval/inspector_tree.dart';
 import '../../shared/console/widgets/description.dart';
 import '../../shared/diagnostics/diagnostics_node.dart';
@@ -34,6 +34,8 @@ import '../../shared/utils.dart';
 import 'inspector_breadcrumbs.dart';
 import 'inspector_controller.dart';
 import 'inspector_screen.dart';
+
+final _log = Logger('inspector_tree_controller');
 
 /// Presents a [TreeNode].
 class _InspectorTreeRowWidget extends StatefulWidget {
@@ -634,7 +636,7 @@ class InspectorTreeController extends DisposableController
           }
         }
       } catch (e) {
-        log(e.toString(), LogLevel.error);
+        _log.shout(e.toString(), e);
       }
     }
   }

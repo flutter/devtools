@@ -7,12 +7,14 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
+import 'package:logging/logging.dart';
 
-import 'config_specific/logger/logger.dart';
 import 'config_specific/notifications/notifications.dart';
 import 'config_specific/sse/sse_shim.dart';
 import 'framework_controller.dart';
 import 'globals.dart';
+
+final _log = Logger('server_api_client');
 
 /// This class coordinates the connection between the DevTools server and the
 /// DevTools web app.
@@ -55,12 +57,12 @@ class DevToolsServerConnection {
       // See https://github.com/flutter/flutter/issues/67053
       if (response.statusCode != 200 || response.body != 'OK') {
         // unable to locate dev server
-        log('devtools server not available (${response.statusCode})');
+        _log.info('devtools server not available (${response.statusCode})');
         return null;
       }
     } catch (e) {
       // unable to locate dev server
-      log('devtools server not available ($e)');
+      _log.info('devtools server not available ($e)');
       return null;
     }
 

@@ -8,10 +8,10 @@ import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:logging/logging.dart';
 import 'package:vm_service/vm_service.dart' hide Stack;
 
 import '../../shared/common_widgets.dart';
-import '../../shared/config_specific/logger/logger.dart';
 import '../../shared/console/widgets/expandable_variable.dart';
 import '../../shared/diagnostics/dart_object_node.dart';
 import '../../shared/diagnostics/primitives/source_location.dart';
@@ -37,6 +37,8 @@ import 'debugger_controller.dart';
 import 'debugger_model.dart';
 import 'file_search.dart';
 import 'key_sets.dart';
+
+final _log = Logger('codeview');
 
 final debuggerCodeViewFileOpenerKey =
     GlobalKey(debugLabel: 'DebuggerCodeViewFileOpenerKey');
@@ -203,7 +205,7 @@ class _CodeViewState extends State<CodeView> with AutoDisposeMixin {
     void updateScrollPositionImpl() {
       if (!verticalController.hasAttachedControllers) {
         // TODO(devoncarew): I'm uncertain why this occurs.
-        log('LinkedScrollControllerGroup has no attached controllers');
+        _log.info('LinkedScrollControllerGroup has no attached controllers');
         return;
       }
       final line =

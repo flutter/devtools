@@ -5,10 +5,10 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
+import 'package:logging/logging.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../service/service_registrations.dart' as registrations;
-import 'config_specific/logger/logger.dart' as logger;
 import 'console/primitives/eval_history.dart';
 import 'diagnostics/dart_object_node.dart';
 import 'eval_on_dart_library.dart';
@@ -16,6 +16,8 @@ import 'globals.dart';
 import 'primitives/auto_dispose.dart';
 import 'title.dart';
 import 'version.dart';
+
+final _log = Logger('connected_app');
 
 const flutterLibraryUri = 'package:flutter/src/widgets/binding.dart';
 const dartHtmlLibraryUri = 'dart:html';
@@ -162,7 +164,7 @@ class ConnectedApp {
       _flutterVersion = await _flutterVersionCompleter.future.timeout(
         _flutterVersionTimeout,
         onTimeout: () {
-          logger.log(
+          _log.info(
             'Timed out trying to fetch flutter version from '
             '`ConnectedApp.initializeValues`.',
           );

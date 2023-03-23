@@ -4,10 +4,12 @@
 
 import 'package:file/file.dart';
 import 'package:file/local.dart';
+import 'package:logging/logging.dart';
 import 'package:path/path.dart' as _path;
 
-import '../logger/logger.dart';
 import 'file.dart';
+
+final _log = Logger('_file_desktop');
 
 FileSystemDesktop createFileSystem() {
   return FileSystemDesktop();
@@ -90,13 +92,13 @@ class FileSystemDesktop implements FileIO {
 
       // Sort by newest file top-most (DateTime is in the filename).
       logs.sort((a, b) => b.compareTo(a));
-    } on FileSystemException catch (e) {
+    } on FileSystemException catch (e, st) {
       // TODO(jacobr): prompt the user to grant permission to access the
       // directory if Flutter ever provides that option or consider using an
       // alternate directory. This error should generally only occur on MacOS
       // desktop Catalina and later  where access to the Downloads folder
       // is not granted by default.
-      log(e.toString());
+      _log.info(e.toString(), e, st);
     }
 
     return logs;

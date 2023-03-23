@@ -6,15 +6,17 @@ import 'dart:async';
 import 'dart:core';
 
 import 'package:flutter/foundation.dart';
+import 'package:logging/logging.dart';
 import 'package:vm_service/vm_service.dart' hide Error;
 
-import '../shared/config_specific/logger/logger.dart';
 import '../shared/connected_app.dart';
 import '../shared/primitives/auto_dispose.dart';
 import 'isolate_manager.dart';
 import 'service_extensions.dart' as extensions;
 import 'service_extensions.dart';
 import 'vm_service_wrapper.dart';
+
+final _log = Logger('service_extension_manager');
 
 /// Manager that handles tracking the service extension for the main isolate.
 class ServiceExtensionManager extends Disposer {
@@ -95,10 +97,7 @@ class ServiceExtensionManager extends Disposer {
         try {
           await callback();
         } catch (e) {
-          log(
-            'Error running isolate callback: $e',
-            LogLevel.error,
-          );
+          _log.shout('Error running isolate callback: $e');
         }
       }
     }
@@ -451,7 +450,9 @@ class ServiceExtensionManager extends Disposer {
     if (callExtension && _serviceExtensions.contains(name)) {
       await _callServiceExtension(name, value);
     } else if (callExtension) {
-      log('Attempted to call extension \'$name\', but no service with that name exists');
+      _log.info(
+        'Attempted to call extension \'$name\', but no service with that name exists',
+      );
     }
 
     final state = ServiceExtensionState(enabled: enabled, value: value);

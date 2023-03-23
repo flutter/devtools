@@ -10,14 +10,16 @@ import 'dart:core' as core;
 import 'dart:math';
 
 import 'package:flutter/foundation.dart';
+import 'package:logging/logging.dart';
 import 'package:vm_service/vm_service.dart' hide Error;
 import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../service/vm_service_wrapper.dart';
-import 'config_specific/logger/logger.dart';
 import 'diagnostics/inspector_service.dart';
 import 'globals.dart';
 import 'primitives/auto_dispose.dart';
+
+final _log = Logger('eval_on_dart_library');
 
 class Disposable {
   bool disposed = false;
@@ -258,13 +260,13 @@ class EvalOnDartLibrary extends DisposableController
     if (_disposed) return;
 
     if (e is RPCError) {
-      log('RPCError: $e', LogLevel.error);
+      _log.shout('RPCError: $e', e, stack);
     } else if (e is vm_service.Error) {
-      log('${e.kind}: ${e.message}', LogLevel.error);
+      _log.shout('${e.kind}: ${e.message}', e, stack);
     } else {
-      log('Unrecognized error: $e', LogLevel.error);
+      _log.shout('Unrecognized error: $e', e, stack);
     }
-    log(stack.toString(), LogLevel.error);
+    _log.shout(stack.toString(), e, stack);
   }
 
   T _verifySaneValue<T>(T? value, Disposable? isAlive) {
@@ -594,9 +596,9 @@ class EvalOnDartLibrary extends DisposableController
       // Schedule this request only after the previous request completes.
       try {
         await previousDone;
-      } catch (e) {
+      } catch (e, st) {
         if (!_disposed) {
-          log(e.toString(), LogLevel.error);
+          _log.shout(e.toString(), e, st);
         }
       }
       wrappedRequest();

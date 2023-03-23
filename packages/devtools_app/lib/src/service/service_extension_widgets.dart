@@ -7,11 +7,11 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:logging/logging.dart';
 import 'package:pointer_interceptor/pointer_interceptor.dart';
 
 import '../shared/analytics/analytics.dart' as ga;
 import '../shared/common_widgets.dart';
-import '../shared/config_specific/logger/logger.dart';
 import '../shared/globals.dart';
 import '../shared/primitives/auto_dispose.dart';
 import '../shared/primitives/message_bus.dart';
@@ -23,6 +23,8 @@ import '../shared/utils.dart';
 import 'service_extension_manager.dart';
 import 'service_extensions.dart';
 import 'service_registrations.dart';
+
+final _log = Logger('service_extension_widgets');
 
 /// Group of buttons where each button toggles the state of a VMService
 /// extension.
@@ -876,7 +878,7 @@ mixin _ServiceExtensionMixin<T extends _ServiceExtensionWidget> on State<T> {
         notificationService.push(widget.completedText!);
       }
     } catch (e, st) {
-      log('$e\n$st');
+      _log.info(e.toString(), e, st);
 
       if (mounted) {
         notificationService.push(widget.describeError(e));

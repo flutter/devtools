@@ -10,6 +10,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:http/http.dart' as http;
+import 'package:logging/logging.dart';
 import 'package:provider/provider.dart';
 
 import '../../../devtools.dart' as devtools;
@@ -19,6 +20,8 @@ import '../../shared/config_specific/logger/logger.dart' as logger;
 import '../../shared/config_specific/server/server.dart' as server;
 import '../../shared/primitives/auto_dispose.dart';
 import '../../shared/theme.dart';
+
+final _log = Logger('release_notes');
 
 const debugTestReleaseNotes = false;
 
@@ -224,7 +227,7 @@ class ReleaseNotesController {
         // version of DevTools.
         _releaseNotesMarkdown.value = null;
         toggleReleaseNotesVisible(false);
-        logger.log(
+        _log.warning(
           'Warning: could not find release notes for DevTools version '
           '$parsedCurrentVersionStr. $e',
           logger.LogLevel.warning,

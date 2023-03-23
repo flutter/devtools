@@ -4,6 +4,7 @@
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:logging/logging.dart';
 
 import '../common_widgets.dart';
 import '../primitives/trees.dart';
@@ -11,7 +12,7 @@ import '../primitives/utils.dart';
 import '../theme.dart';
 import '../ui/colors.dart';
 
-enum PivotType { pivotByMiddle, pivotBySize }
+final _log = Logger('treemap');
 
 class Treemap extends StatefulWidget {
   // TODO(peterdjlee): Consider auto-expanding rootNode named 'src'.
@@ -701,7 +702,7 @@ class TreemapNode extends TreeNode<TreemapNode> {
   }
 
   void printTreeHelper(TreemapNode root, String tabs) {
-    print(tabs + '$root');
+    _log.info(tabs + '$root');
     for (final child in root.children) {
       printTreeHelper(child, tabs + '\t');
     }

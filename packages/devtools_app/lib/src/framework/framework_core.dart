@@ -4,6 +4,8 @@
 
 import 'dart:async';
 
+import 'package:logging/logging.dart';
+
 import '../../devtools.dart' as devtools show version;
 import '../screens/debugger/breakpoint_manager.dart';
 import '../service/service.dart';
@@ -22,6 +24,8 @@ import '../shared/survey.dart';
 
 typedef ErrorReporter = void Function(String title, Object error);
 
+final _log = Logger('framework_core');
+
 // TODO(jacobr): refactor this class to not use static members.
 // ignore: avoid_classes_with_only_static_members
 class FrameworkCore {
@@ -39,7 +43,7 @@ class FrameworkCore {
 
   static void init() {
     // Print the version number at startup.
-    log('DevTools version ${devtools.version}.');
+    _log.info('DevTools version ${devtools.version}.');
   }
 
   /// Returns true if we're able to connect to a device and false otherwise.
@@ -68,7 +72,7 @@ class FrameworkCore {
         breakpointManager.initialize();
         return true;
       } catch (e, st) {
-        log('$e\n$st', LogLevel.error);
+        _log.info('$e\n$st', LogLevel.error);
 
         errorReporter('Unable to connect to VM service at $uri: $e', e);
         return false;
