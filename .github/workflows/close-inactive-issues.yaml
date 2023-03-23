@@ -12,7 +12,7 @@ jobs:
     steps:
       # See https://github.com/actions/stale for
       # details on the parameters for this action
-      - uses: actions/stale@v7
+      - uses: actions/stale@v8
         with:
           debug-only: true # TODO: Delete this line when we are ready to implement this for our process.
           stale-issue-label: "waiting for customer response"
