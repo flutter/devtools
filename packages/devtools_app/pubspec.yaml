@@ -188,3 +188,5 @@ dependency_overrides:
     path: ../devtools_shared
   devtools_test:
     path: ../devtools_test
+  # See https://github.com/dart-lang/test/issues/1977
+  test_api: 0.4.18
