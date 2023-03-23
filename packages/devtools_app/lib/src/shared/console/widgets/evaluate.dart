@@ -223,12 +223,16 @@ class ExpressionEvalFieldState extends State<ExpressionEvalField>
               shouldRequestFocus: false,
               clearFieldOnEscapeWhenOverlayHidden: true,
               onSelection: _onSelection,
-              decoration: const InputDecoration(
-                contentPadding: EdgeInsets.all(denseSpacing),
-                border: OutlineInputBorder(),
-                focusedBorder: OutlineInputBorder(borderSide: BorderSide.none),
-                enabledBorder: OutlineInputBorder(borderSide: BorderSide.none),
-                labelText: 'Eval. Enter "?" for help.',
+              decoration: InputDecoration(
+                contentPadding: const EdgeInsets.all(denseSpacing),
+                border: const OutlineInputBorder(),
+                focusedBorder:
+                    const OutlineInputBorder(borderSide: BorderSide.none),
+                enabledBorder:
+                    const OutlineInputBorder(borderSide: BorderSide.none),
+                labelText: FeatureFlags.evalAndBrowse
+                    ? 'Eval. Enter "?" for help.'
+                    : 'Eval',
               ),
               overlayXPositionBuilder:
                   (String inputValue, TextStyle? inputStyle) {
@@ -311,7 +315,7 @@ class ExpressionEvalFieldState extends State<ExpressionEvalField>
 
     if (expressionText.isEmpty) return;
 
-    if (expressionText.trim() == '?') {
+    if (FeatureFlags.evalAndBrowse && expressionText.trim() == '?') {
       const ConsoleHelpLink().openDialog(context);
       return;
     }
