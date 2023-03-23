@@ -42,8 +42,6 @@ dependency_overrides:
 
 dev_dependencies:
   build_runner: ^2.3.3
-  flutter_test:
-    sdk: flutter
   integration_test:
     sdk: flutter
   # See https://github.com/dart-lang/test/issues/1977
