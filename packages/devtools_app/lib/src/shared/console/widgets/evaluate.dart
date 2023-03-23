@@ -422,9 +422,7 @@ class ExpressionEvalFieldState extends State<ExpressionEvalField>
     if (assignment == null) return false;
     const result = true;
 
-    final message = evalService.messageIfScopeNotSupported();
-    if (message != null) {
-      _emitToConsole(message);
+    if (!evalService.isScopeSupported(emitWarningToConsole: true)) {
       return result;
     }
 
