@@ -17,7 +17,5 @@ dependencies:
 
 dev_dependencies:
   test: ^1.21.2
-
-dependency_overrides:
   # See https://github.com/dart-lang/test/issues/1977
   test_api: 0.4.18

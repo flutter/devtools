@@ -76,6 +76,8 @@ dev_dependencies:
   mockito: ^5.1.0
   webkit_inspection_protocol: '>=0.5.0 <2.0.0'
   stager: ^0.1.0
+  # See https://github.com/dart-lang/test/issues/1977
+  test_api: 0.4.18
 
 flutter:
   uses-material-design: true
@@ -188,5 +190,3 @@ dependency_overrides:
     path: ../devtools_shared
   devtools_test:
     path: ../devtools_test
-  # See https://github.com/dart-lang/test/issues/1977
-  test_api: 0.4.18
