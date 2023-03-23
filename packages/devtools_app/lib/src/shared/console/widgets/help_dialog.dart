@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
 
 import '../../../shared/analytics/constants.dart' as gac;
 import '../../common_widgets.dart';
@@ -20,15 +21,19 @@ class ConsoleHelpLink extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
-            const Text(r'''
-Use debug console:
-1. To watch stdout of the application
-2. To evaluate expressions for a paused or running application.
-3. To analyze inbound and outbound references for objects, dropped from memory heap snapshots.
+            const Text(
+              r'''
+Use debug console to:
+
+1. Watch the standard output (stdout) of the application.
+2. Evaluate expressions for a paused or running application.
+3. Analyze inbound and outbound references for objects, dropped from memory heap snapshots.
 
 Assign previously evaluated objects to variable
-using $0, $1 … $5, e.g: var x = $0.
-'''),
+using $0, $1 … $5.
+Example: var x = $0
+''',
+            ),
             MoreInfoLink(
               // TODO(polina-c): create content at link.
               url:
