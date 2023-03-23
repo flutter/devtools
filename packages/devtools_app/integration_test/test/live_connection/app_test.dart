@@ -24,8 +24,7 @@ void main() {
   });
 
   tearDown(() async {
-    // This is required to have multiple test cases in this file.
-    await (ui.window as dynamic).resetHistory();
+    await resetHistory();
   });
 
   testWidgets('connect to app and switch tabs', (tester) async {
