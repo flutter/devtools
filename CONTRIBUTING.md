@@ -18,6 +18,7 @@ You can do this online, and it only takes a minute.
 
 ## Workflow for making changes
 
+- Switch to flutter master channel `flutter channel master`
 - Create a branch from your cloned repo: `git checkout -b myBranch`
 - Refresh local code: `sh tool/refresh.sh`
 - Implement your changes
@@ -143,24 +144,6 @@ Open your VS Code settings (Run the **Preferences: Open User Settings (JSON)** c
 This instructs VS Code to run the `tool/build_e2e.dart` script instead of running `dart devtools`. You must set the `cwd` and `LOCAL_DART_SDK` env variable correctly for the script to work.
 
 Next, restart VS Code (or run the **Developer: Reload Window** command from the command palette (`F1`)) and DevTools will be run from your local code. After making any code changes to DevTools or the server, you will need to re-run the **Developer: Reload Window** command to rebuild and restart the server.
-
-### Desktop Embedder
-
-You can also run the app in the Flutter desktop embedder on linux or macos.
-
-*NOTE:* The Linux desktop version only works with the master branch of Flutter (and sometimes this is true for MacOS as well). Syncing
-to a the master branch of Flutter may fail with a runner version error. If this occurs run
-`flutter create .` from `devtools/packages/devtools_app`, re-generates files in the linux and
-macos directories.
-
-Depending on your OS, set up like this:
-- `flutter config --enable-macos-desktop`
-- `flutter config --enable-linux-desktop`
-
-Now you can run with either of the following:
-
-- `flutter run -d macos`
-- `flutter run -d linux`
 
 ## Developing with VS Code
 
