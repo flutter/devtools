@@ -1495,6 +1495,7 @@ class FlameChartHelpButton extends StatelessWidget {
       gaScreen: gaScreen,
       gaSelection: gaSelection,
       dialogTitle: 'Flame Chart Help',
+      outlined: false,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
