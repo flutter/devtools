@@ -72,7 +72,7 @@ class FrameworkCore {
         breakpointManager.initialize();
         return true;
       } catch (e, st) {
-        _log.info('$e\n$st', LogLevel.error);
+        _log.shout(e, e, st);
 
         errorReporter('Unable to connect to VM service at $uri: $e', e);
         return false;

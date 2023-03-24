@@ -230,7 +230,6 @@ class ReleaseNotesController {
         _log.warning(
           'Warning: could not find release notes for DevTools version '
           '$parsedCurrentVersionStr. $e',
-          logger.LogLevel.warning,
         );
       }
     }

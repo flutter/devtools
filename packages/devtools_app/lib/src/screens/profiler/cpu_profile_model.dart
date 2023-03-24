@@ -21,7 +21,7 @@ import '../vm_developer/vm_service_private_extensions.dart';
 import 'cpu_profile_transformer.dart';
 import 'cpu_profiler_controller.dart';
 
-final _log = Logger('cpu_profile_model');
+final _log = Logger('lib/src/screens/profiler/cpu_profile_model');
 
 /// A convenience wrapper for managing CPU profiles with both function and code
 /// profile views.
