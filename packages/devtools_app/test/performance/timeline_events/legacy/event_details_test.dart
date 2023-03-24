@@ -11,7 +11,6 @@ import 'package:devtools_app/src/shared/ui/vm_flag_widgets.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/mockito.dart';
 
 import '../../../test_infra/test_data/performance.dart';
 
@@ -50,7 +49,12 @@ void main() {
       setGlobal(IdeTheme, IdeTheme());
       setGlobal(NotificationService, NotificationService());
       setGlobal(PreferencesController, PreferencesController());
-      when(serviceManager.connectedApp!.isDartWebAppNow).thenReturn(false);
+      mockConnectedApp(
+        serviceManager.connectedApp!,
+        isFlutterApp: true,
+        isProfileBuild: true,
+        isWebApp: false,
+      );
     });
 
     testWidgetsWithWindowSize('builds for UI event', windowSize,
@@ -66,7 +70,9 @@ void main() {
 
     testWidgetsWithWindowSize('builds for UI event in offline mode', windowSize,
         (WidgetTester tester) async {
-      offlineController.enterOfflineMode();
+      offlineController.enterOfflineMode(
+        offlineApp: serviceManager.connectedApp!,
+      );
       await pumpEventDetails(goldenUiTimelineEvent, tester);
       expect(find.byType(CpuProfiler), findsOneWidget);
       expect(find.byType(CpuSamplingRateDropdown), findsNothing);
