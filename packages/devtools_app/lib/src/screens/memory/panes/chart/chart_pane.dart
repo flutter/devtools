@@ -160,6 +160,8 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
       }
     });
 
+    var x = 1;
+
     addAutoDisposeListener(controller.refreshCharts, () {
       setState(() {
         widget.chartController.recomputeChartData();
