@@ -18,7 +18,8 @@ You can do this online, and it only takes a minute.
 
 ## Workflow for making changes
 
-- Switch to flutter master channel `flutter channel master`
+- Change flutter to the latest flutter candidate:
+    `./tool/update_flutter_sdk.sh --local`
 - Create a branch from your cloned repo: `git checkout -b myBranch`
 - Refresh local code: `sh tool/refresh.sh`
 - Implement your changes
