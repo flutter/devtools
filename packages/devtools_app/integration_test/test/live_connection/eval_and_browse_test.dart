@@ -8,8 +8,6 @@
 
 // ignore_for_file: avoid_print
 
-import 'dart:ui' as ui;
-
 import 'package:devtools_app/src/shared/console/widgets/console_pane.dart';
 import 'package:devtools_app/src/shared/primitives/simple_items.dart';
 import 'package:devtools_app/src/shared/ui/search.dart';
@@ -32,8 +30,7 @@ void main() {
   });
 
   tearDown(() async {
-    // This is required to have multiple test cases in this file.
-    await (ui.window as dynamic).resetHistory();
+    await resetHistory();
   });
 
   testWidgets('memory eval and browse', (tester) async {
