@@ -12,6 +12,8 @@ import '../primitives/utils.dart';
 import '../theme.dart';
 import '../ui/colors.dart';
 
+enum PivotType { pivotByMiddle, pivotBySize }
+
 final _log = Logger('lib/src/shared/charts/treemap');
 
 class Treemap extends StatefulWidget {
