@@ -497,31 +497,39 @@ class SettingsDialog extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          CheckboxSetting(
-            title: 'Use a dark theme',
-            notifier: preferences.darkModeTheme,
-            onChanged: preferences.toggleDarkModeTheme,
-            gaItem: gac.darkTheme,
+          Flexible(
+            child: CheckboxSetting(
+              title: 'Use a dark theme',
+              notifier: preferences.darkModeTheme,
+              onChanged: preferences.toggleDarkModeTheme,
+              gaItem: gac.darkTheme,
+            ),
           ),
-          CheckboxSetting(
-            title: 'Use dense mode',
-            notifier: preferences.denseModeEnabled,
-            onChanged: preferences.toggleDenseMode,
-            gaItem: gac.denseMode,
+          Flexible(
+            child: CheckboxSetting(
+              title: 'Use dense mode',
+              notifier: preferences.denseModeEnabled,
+              onChanged: preferences.toggleDenseMode,
+              gaItem: gac.denseMode,
+            ),
           ),
           if (isExternalBuild && isDevToolsServerAvailable)
-            CheckboxSetting(
-              title: 'Enable analytics',
-              notifier: analyticsController.analyticsEnabled,
-              onChanged: (enable) =>
-                  unawaited(analyticsController.toggleAnalyticsEnabled(enable)),
-              gaItem: gac.analytics,
+            Flexible(
+              child: CheckboxSetting(
+                title: 'Enable analytics',
+                notifier: analyticsController.analyticsEnabled,
+                onChanged: (enable) => unawaited(
+                    analyticsController.toggleAnalyticsEnabled(enable)),
+                gaItem: gac.analytics,
+              ),
             ),
-          CheckboxSetting(
-            title: 'Enable VM developer mode',
-            notifier: preferences.vmDeveloperModeEnabled,
-            onChanged: preferences.toggleVmDeveloperMode,
-            gaItem: gac.vmDeveloperMode,
+          Flexible(
+            child: CheckboxSetting(
+              title: 'Enable VM developer mode',
+              notifier: preferences.vmDeveloperModeEnabled,
+              onChanged: preferences.toggleVmDeveloperMode,
+              gaItem: gac.vmDeveloperMode,
+            ),
           ),
           const PaddedDivider(),
           const _VerboseLoggingSetting(),
@@ -543,11 +551,13 @@ class _VerboseLoggingSetting extends StatelessWidget {
       children: [
         Row(
           children: [
-            CheckboxSetting(
-              title: 'Enable verbose logging',
-              notifier: preferences.verboseLoggingEnabled,
-              onChanged: (enable) => preferences.toggleVerboseLogging(enable),
-              gaItem: gac.verboseLogging,
+            Flexible(
+              child: CheckboxSetting(
+                title: 'Enable verbose logging',
+                notifier: preferences.verboseLoggingEnabled,
+                onChanged: (enable) => preferences.toggleVerboseLogging(enable),
+                gaItem: gac.verboseLogging,
+              ),
             ),
             const SizedBox(width: defaultSpacing),
             DevToolsButton(
