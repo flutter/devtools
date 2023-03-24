@@ -84,6 +84,8 @@ class CpuProfiler extends StatefulWidget {
 // data. The state is being destroyed with every new cpu profile - investigate.
 class _CpuProfilerState extends State<CpuProfiler>
     with TickerProviderStateMixin, AutoDisposeMixin {
+  static const _expandCollapseMinIncludeTextWidth = 1070.0;
+
   bool _tabControllerInitialized = false;
 
   late TabController _tabController;
@@ -247,6 +249,10 @@ class _CpuProfilerState extends State<CpuProfiler>
               // instead of using the filter control. This will allow users
               // to see all the tags side by side in the tree tables.
               ExpandAllButton(
+                gaScreen: gac.cpuProfiler,
+                gaSelection: gac.expandAll,
+                minScreenWidthForTextBeforeScaling:
+                    _expandCollapseMinIncludeTextWidth,
                 onPressed: () {
                   _performOnDataRoots(
                     (root) => root.expandCascading(),
@@ -256,6 +262,10 @@ class _CpuProfilerState extends State<CpuProfiler>
               ),
               const SizedBox(width: denseSpacing),
               CollapseAllButton(
+                gaScreen: gac.cpuProfiler,
+                gaSelection: gac.collapseAll,
+                minScreenWidthForTextBeforeScaling:
+                    _expandCollapseMinIncludeTextWidth,
                 onPressed: () {
                   _performOnDataRoots(
                     (root) => root.collapseCascading(),
