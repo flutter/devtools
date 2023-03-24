@@ -26,7 +26,7 @@ import '../../shared/ui/search.dart';
 import '../inspector/inspector_tree_controller.dart';
 import 'logging_screen.dart';
 
-final _log = Logger('logging_controller');
+final _log = Logger('lib/src/screens/logging/logging_controller');
 
 // For performance reasons, we drop old logs in batches, so the log will grow
 // to kMaxLogItemsUpperBound then truncate to kMaxLogItemsLowerBound.

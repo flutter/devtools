@@ -43,7 +43,7 @@ const String devToolsChromeOS = 'CrOS'; // Chrome OS
 const String ideLaunchedQuery = 'ide'; // '&ide=' query parameter
 const String ideLaunchedCLI = 'CLI'; // Command Line Interface
 
-final _log = Logger('_analytics_web');
+final _log = Logger('lib/src/shared/analytics/_analytics_web');
 
 @JS('initializeGA')
 external void initializeGA();

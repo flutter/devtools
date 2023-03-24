@@ -1,7 +1,7 @@
 analyzer:
   #language:
-  #strict-inference: true # 34 issues
-  #strict-raw-types: true # 103 issues
+    #strict-inference: true # 34 issues
+    #strict-raw-types: true # 103 issues
   errors:
     # treat missing required parameters as a warning (not a hint)
     missing_required_param: warning
@@ -9,7 +9,7 @@ analyzer:
     missing_return: warning
   exclude:
     - build/**
-    - "**.freezed.dart"
+    - '**.freezed.dart'
     - flutter-sdk/
 
 linter:
@@ -150,24 +150,24 @@ dart_code_metrics:
   metrics-exclude:
     - test/**
   rules:
-    #    - arguments-ordering Too strict
+#    - arguments-ordering Too strict
     - avoid-banned-imports
     - avoid-cascade-after-if-null
     - avoid-collection-methods-with-unrelated-types
     - avoid-duplicate-exports
     - avoid-dynamic
-    #    - avoid-global-state   TODO(jacobr): bunch of false positives around boolean flags.
-    #    - avoid-ignoring-return-values
-    #    - avoid-late-keyword
+#    - avoid-global-state   TODO(jacobr): bunch of false positives around boolean flags.
+#    - avoid-ignoring-return-values
+#    - avoid-late-keyword
     - avoid-missing-enum-constant-in-map
     - avoid-nested-conditional-expressions
-    #    - avoid-non-ascii-symbols  TODO(jacobr): probably worth enabling.
-    #    - avoid-non-null-assertion
-    #    - avoid-passing-async-when-sync-expected TODO(jacobr): consider re-enabliing.
+#    - avoid-non-ascii-symbols  TODO(jacobr): probably worth enabling.
+#    - avoid-non-null-assertion
+#    - avoid-passing-async-when-sync-expected TODO(jacobr): consider re-enabliing.
     - avoid-redundant-async
     - avoid-throw-in-catch-block
 
-    #    - avoid-top-level-members-in-tests Doesn't seem to match our style.
+#    - avoid-top-level-members-in-tests Doesn't seem to match our style.
     - avoid-unnecessary-type-assertions
     - avoid-unnecessary-type-casts
     - avoid-unrelated-type-assertions
@@ -197,17 +197,17 @@ dart_code_metrics:
     #      - topLeft
     #      - enabledBorder
     - no-equal-then-else
-    #   - no-magic-number
-    #   - no-object-declaration Too difficult to use along with avoiding dynamic particular for JSON decoding logic.
-    #   - prefer-async-await TODO(jacobr): evaluate enabling.
+ #   - no-magic-number
+ #   - no-object-declaration Too difficult to use along with avoiding dynamic particular for JSON decoding logic.
+ #   - prefer-async-await TODO(jacobr): evaluate enabling.
     - prefer-commenting-analyzer-ignores
-    #  - prefer-conditional-expressions Too many false positives involving large conditional expressions.
-    #  - prefer-correct-identifier-length Too many false positives with fine names like i and id.
-    #  - prefer-correct-test-file-name TODO(jacobr): enable and fix violations.
+  #  - prefer-conditional-expressions Too many false positives involving large conditional expressions.
+  #  - prefer-correct-identifier-length Too many false positives with fine names like i and id.
+  #  - prefer-correct-test-file-name TODO(jacobr): enable and fix violations.
     - prefer-correct-type-name
-    #  - prefer-enums-by-name Cannot able unless lint adds a special case for orElse
-    #  - prefer-first TODO(jacobr): enable as a follow up PR.
-    #  - prefer-immediate-return TODO(jacobr): enable as a follow up PR.
+  #  - prefer-enums-by-name Cannot able unless lint adds a special case for orElse
+  #  - prefer-first TODO(jacobr): enable as a follow up PR.
+  #  - prefer-immediate-return TODO(jacobr): enable as a follow up PR.
     - prefer-iterable-of
     - prefer-last
     # - prefer-match-file-name

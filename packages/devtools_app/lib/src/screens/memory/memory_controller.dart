@@ -26,7 +26,7 @@ import 'panes/tracing/tracing_pane_controller.dart';
 import 'shared/heap/model.dart';
 import 'shared/primitives/memory_timeline.dart';
 
-final _log = Logger('memory_controller');
+final _log = Logger('lib/src/screens/memory/memory_controller');
 
 // TODO(terry): Consider supporting more than one file since app was launched.
 // Memory Log filename.

@@ -12,7 +12,7 @@ import '../primitives/utils.dart';
 import '../theme.dart';
 import '../ui/colors.dart';
 
-final _log = Logger('treemap');
+final _log = Logger('lib/src/shared/charts/treemap');
 
 class Treemap extends StatefulWidget {
   // TODO(peterdjlee): Consider auto-expanding rootNode named 'src'.

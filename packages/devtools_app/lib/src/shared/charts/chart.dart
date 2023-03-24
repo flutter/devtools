@@ -14,7 +14,7 @@ import '../theme.dart';
 import 'chart_controller.dart';
 import 'chart_trace.dart';
 
-final _log = Logger('chart');
+final _log = Logger('lib/src/shared/charts/chart');
 
 /// Perform some draw operations on a canvas after applying translate.
 ///

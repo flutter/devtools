@@ -35,7 +35,7 @@ import '../../shared/primitives/utils.dart';
 import 'inspector_screen.dart';
 import 'inspector_tree_controller.dart';
 
-final _log = Logger('inspector_controller');
+final _log = Logger('lib/src/screens/inspector/inspector_controller');
 
 const inspectorRefQueryParam = 'inspectorRef';
 

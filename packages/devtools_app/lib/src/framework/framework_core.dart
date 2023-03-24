@@ -24,7 +24,7 @@ import '../shared/survey.dart';
 
 typedef ErrorReporter = void Function(String title, Object error);
 
-final _log = Logger('framework_core');
+final _log = Logger('lib/src/framework_core');
 
 // TODO(jacobr): refactor this class to not use static members.
 // ignore: avoid_classes_with_only_static_members

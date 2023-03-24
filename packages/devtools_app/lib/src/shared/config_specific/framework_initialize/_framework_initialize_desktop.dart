@@ -12,7 +12,9 @@ import 'package:path/path.dart' as path;
 import '../../globals.dart';
 import '../../primitives/storage.dart';
 
-final _log = Logger('_framework_initialize_desktop');
+final _log = Logger(
+  'lib/src/shared/config_specific/framework_initialize/_framework_initialize_desktop',
+);
 
 /// Return the url the application is launched from.
 Future<String> initializePlatform() async {

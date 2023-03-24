@@ -20,7 +20,7 @@ import 'debugger_model.dart';
 import 'program_explorer_controller.dart';
 import 'syntax_highlighter.dart';
 
-final _log = Logger('codeview_controller');
+final _log = Logger('lib/src/screens/debugger/codeview_controller');
 
 class CodeViewController extends DisposableController
     with

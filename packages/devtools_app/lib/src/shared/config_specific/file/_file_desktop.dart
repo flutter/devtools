@@ -9,7 +9,7 @@ import 'package:path/path.dart' as _path;
 
 import 'file.dart';
 
-final _log = Logger('_file_desktop');
+final _log = Logger('lib/src/shared/config_specific/file/_file_desktop');
 
 FileSystemDesktop createFileSystem() {
   return FileSystemDesktop();

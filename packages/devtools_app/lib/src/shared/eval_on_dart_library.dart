@@ -19,7 +19,7 @@ import 'diagnostics/inspector_service.dart';
 import 'globals.dart';
 import 'primitives/auto_dispose.dart';
 
-final _log = Logger('eval_on_dart_library');
+final _log = Logger('lib/src/shared/eval_on_dart_library');
 
 class Disposable {
   bool disposed = false;

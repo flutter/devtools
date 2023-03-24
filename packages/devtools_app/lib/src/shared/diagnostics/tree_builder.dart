@@ -21,7 +21,9 @@ import 'inspector_service.dart';
 import 'references.dart';
 import 'variable_factory.dart';
 
-final _log = Logger('tree_builder');
+final _log = Logger(
+  'lib/src/shared/diagnostics/tree_builder',
+);
 
 Future<void> _addExpandableChildren(
   DartObjectNode variable,

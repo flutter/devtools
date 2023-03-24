@@ -13,7 +13,9 @@ import '../../../../../shared/primitives/utils.dart';
 import '../../../performance_model.dart';
 import '../timeline_event_processor.dart';
 
-final _log = Logger('legacy_event_processor');
+final _log = Logger(
+  'lib/src/screens/performance/panes/timeline_events/legacy/legacy_event_processor',
+);
 
 /// Processor for composing a recorded list of trace events into a timeline of
 /// [AsyncTimelineEvent]s, [SyncTimelineEvent]s, and [FlutterFrame]s.

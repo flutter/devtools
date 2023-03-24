@@ -16,7 +16,7 @@ import 'service_extensions.dart' as extensions;
 import 'service_extensions.dart';
 import 'vm_service_wrapper.dart';
 
-final _log = Logger('service_extension_manager');
+final _log = Logger('lib/src/service/service_extension_manager');
 
 /// Manager that handles tracking the service extension for the main isolate.
 class ServiceExtensionManager extends Disposer {
