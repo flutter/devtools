@@ -51,10 +51,12 @@ class _ListControlPane extends StatelessWidget {
   Future<void> _takeSnapshot(BuildContext context) async {
     try {
       await controller.takeSnapshot();
-    } catch (e) {
+    } catch (e, trace) {
       await showDialog(
         context: context,
-        builder: (context) => ErrorDialog(errorDetails: e.toString()),
+        builder: (context) => ErrorDialog(
+          errorDetails: 'Error while taking snapshot.\n$e\n$trace',
+        ),
       );
     }
   }

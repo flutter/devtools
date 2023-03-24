@@ -55,25 +55,29 @@ class DiffPaneController extends DisposableController {
       gac.MemoryEvent.diffTakeSnapshotControlPane,
     );
 
+    final item = SnapshotInstanceItem(
+      id: _snapshotId++,
+      displayNumber: _nextDisplayNumber(),
+      isolateName: selectedIsolateName ?? '<isolate-not-detected>',
+    );
+
+    final snapshots = core._snapshots;
+    snapshots.add(item);
+
     try {
       final heapData = await snapshotTaker.take();
-
-      final item = SnapshotInstanceItem(
-        id: _snapshotId++,
-        displayNumber: _nextDisplayNumber(),
-        isolateName: selectedIsolateName ?? '<isolate-not-detected>',
-      );
-
-      final snapshots = core._snapshots;
-      snapshots.add(item);
-
       await item.initializeHeapData(heapData);
 
       final newElementIndex = snapshots.value.length - 1;
       core._selectedSnapshotIndex.value = newElementIndex;
+      throw 'test error';
+    } catch (e) {
+      snapshots.remove(item);
+      core._selectedSnapshotIndex.value = 0;
+      rethrow;
     } finally {
-      _isTakingSnapshot.value = false;
       derived._updateValues();
+      _isTakingSnapshot.value = false;
     }
   }
 
@@ -345,7 +349,7 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
     // Set class to show.
     final classes = _snapshotClassesAfterDiffing();
     heapClasses.value = classes;
-    _setSelections();
+    _selectClassAndPath();
     _updateClasses(
       classes: classes,
       className: _core.className,
@@ -394,8 +398,9 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
   }
 
   /// Set initial selection of class and path, for discoverability of detailed view.
-  void _setSelections() {
+  void _selectClassAndPath() {
     if (_core.className != null) return;
+    assert(_core.path == null);
 
     final classes = heapClasses.value;
     if (classes == null) return;
@@ -419,17 +424,23 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
         _core.classFilter.value,
         _core.rootPackage,
       );
+
+      if (classStatsList.isEmpty) return;
       theClass = classStatsList.reduce(singleWithMaxRetainedSize);
     } else if (classes is DiffHeapClasses) {
       final classStatsList = classes.filtered(
         _core.classFilter.value,
         _core.rootPackage,
       );
+
+      if (classStatsList.isEmpty) return;
       theClass = classStatsList.reduce(diffWithMaxRetainedSize);
     } else {
       throw StateError('Unexpected type ${classes.runtimeType}');
     }
     _core.className = theClass.heapClass;
+
+    assert(theClass.statsByPathEntries.isNotEmpty);
 
     // Get path with max retained size.
     final path = theClass.statsByPathEntries.reduce((v, e) {
