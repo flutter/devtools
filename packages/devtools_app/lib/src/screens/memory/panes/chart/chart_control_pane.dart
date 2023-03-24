@@ -65,7 +65,7 @@ class _ChartControlPaneState extends State<ChartControlPane>
   @override
   Widget build(BuildContext context) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.end,
       children: [
         Row(
           children: [
@@ -87,10 +87,10 @@ class _ChartControlPaneState extends State<ChartControlPane>
             const SizedBox(width: defaultSpacing),
             ClearButton(
               onPressed: _clearTimeline,
-              minScreenWidthForTextBeforeScaling: memoryControlsMinVerboseWidth,
               tooltip: 'Clear memory chart.',
               gaScreen: gac.memory,
               gaSelection: gac.MemoryEvent.clearChart,
+              iconOnly: true,
             ),
           ],
         ),
@@ -98,12 +98,12 @@ class _ChartControlPaneState extends State<ChartControlPane>
         Row(
           children: [
             _LegendButton(chartController: widget.chartController),
-            const SizedBox(width: denseSpacing),
-            const _ChartHelpLink(),
           ],
         ),
         const SizedBox(height: denseSpacing),
         IntervalDropdown(chartController: widget.chartController),
+        const SizedBox(height: denseSpacing),
+        const _ChartHelpLink(),
       ],
     );
   }
