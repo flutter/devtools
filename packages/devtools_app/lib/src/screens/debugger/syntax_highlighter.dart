@@ -13,7 +13,7 @@ import '../../shared/primitives/utils.dart';
 import '../../shared/theme.dart';
 import 'span_parser.dart';
 
-final _log = Logger('lib/src/screens/debugger/syntax_highlighter');
+final _log = Logger('syntax_highlighter');
 
 class SyntaxHighlighter {
   SyntaxHighlighter({source}) : source = source ?? '';

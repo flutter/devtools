@@ -12,7 +12,7 @@ import '../../theme.dart';
 import '../url/url.dart';
 import 'ide_theme.dart';
 
-final _log = Logger('lib/src/shared/config_specific/ide_theme/ide_theme_web');
+final _log = Logger('ide_theme_web');
 
 /// Load any IDE-supplied theming.
 IdeTheme getIdeTheme() {

@@ -7,7 +7,7 @@ import 'package:logging/logging.dart';
 
 import '../../shared/eval_on_dart_library.dart';
 
-final _log = Logger('lib/src/screens/provider/riverpod_error_logger_observer');
+final _log = Logger('riverpod_error_logger_observer');
 
 class ErrorLoggerObserver extends ProviderObserver {
   const ErrorLoggerObserver();

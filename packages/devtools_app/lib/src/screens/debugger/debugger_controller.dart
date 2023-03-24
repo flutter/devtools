@@ -27,7 +27,7 @@ import 'debugger_model.dart';
 // Make sure this a checked in with `mute: true`.
 final _debugTimingLog = DebugTimingLogger('debugger', mute: true);
 
-final _log = Logger('lib/src/screens/debugger/debugger_controller');
+final _log = Logger('debugger_controller');
 
 /// Responsible for managing the debug state of the app.
 class DebuggerController extends DisposableController

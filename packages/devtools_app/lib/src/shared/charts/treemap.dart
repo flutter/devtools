@@ -14,7 +14,7 @@ import '../ui/colors.dart';
 
 enum PivotType { pivotByMiddle, pivotBySize }
 
-final _log = Logger('lib/src/shared/charts/treemap');
+final _log = Logger('charts/treemap');
 
 class Treemap extends StatefulWidget {
   // TODO(peterdjlee): Consider auto-expanding rootNode named 'src'.

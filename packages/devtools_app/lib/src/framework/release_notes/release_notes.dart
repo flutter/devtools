@@ -21,7 +21,7 @@ import '../../shared/config_specific/server/server.dart' as server;
 import '../../shared/primitives/auto_dispose.dart';
 import '../../shared/theme.dart';
 
-final _log = Logger('lib/src/framework/release_notes/release_notes');
+final _log = Logger('release_notes');
 
 const debugTestReleaseNotes = false;
 

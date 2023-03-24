@@ -35,7 +35,7 @@ import 'inspector_breadcrumbs.dart';
 import 'inspector_controller.dart';
 import 'inspector_screen.dart';
 
-final _log = Logger('lib/src/screens/inspector/inspector_tree_controller');
+final _log = Logger('inspector_tree_controller');
 
 /// Presents a [TreeNode].
 class _InspectorTreeRowWidget extends StatefulWidget {

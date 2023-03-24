@@ -29,7 +29,7 @@ import 'service_registrations.dart' as registrations;
 import 'vm_flags.dart';
 import 'vm_service_wrapper.dart';
 
-final _log = Logger('lib/src/service/service_manager');
+final _log = Logger('service_manager');
 
 // Note: don't check this in enabled.
 /// Used to debug service protocol traffic. All requests to to the VM service

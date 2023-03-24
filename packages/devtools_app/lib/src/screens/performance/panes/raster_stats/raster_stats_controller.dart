@@ -11,9 +11,7 @@ import '../../performance_model.dart';
 import '../flutter_frames/flutter_frame_model.dart';
 import 'raster_stats_model.dart';
 
-final _log = Logger(
-  'lib/src/screens/performance/panes/raster_stats/raster_stats_controller',
-);
+final _log = Logger('raster_stats_controller');
 
 class RasterStatsController extends PerformanceFeatureController {
   RasterStatsController(super.performanceController);

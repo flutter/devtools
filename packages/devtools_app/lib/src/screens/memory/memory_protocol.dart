@@ -14,7 +14,7 @@ import '../../shared/utils.dart';
 import 'memory_controller.dart';
 import 'shared/primitives/memory_timeline.dart';
 
-final _log = Logger('lib/src/screens/memory/memory_protocol');
+final _log = Logger('memory_protocol');
 
 class MemoryTracker {
   MemoryTracker(this.memoryController);

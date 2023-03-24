@@ -24,7 +24,7 @@ import 'service_extension_manager.dart';
 import 'service_extensions.dart';
 import 'service_registrations.dart';
 
-final _log = Logger('lib/src/service/service_extension_widgets');
+final _log = Logger('service_extension_widgets');
 
 /// Group of buttons where each button toggles the state of a VMService
 /// extension.

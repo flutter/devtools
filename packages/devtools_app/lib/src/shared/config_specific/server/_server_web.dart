@@ -12,9 +12,7 @@ import 'package:logging/logging.dart';
 
 import '../../primitives/utils.dart';
 
-final _log = Logger(
-  'lib/src/shared/config_specific/server/_server_web',
-);
+final _log = Logger('_server_web');
 
 // Code to check if DevTools server is available, will only be true in release
 // mode, debug mode will be set to false.

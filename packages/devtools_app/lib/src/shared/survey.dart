@@ -15,7 +15,7 @@ import 'config_specific/server/server.dart' as server;
 import 'globals.dart';
 import 'primitives/utils.dart';
 
-final _log = Logger('lib/src/shared/survey');
+final _log = Logger('survey');
 
 class SurveyService {
   static const _noThanksLabel = 'NO THANKS';

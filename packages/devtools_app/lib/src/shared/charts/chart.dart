@@ -16,7 +16,7 @@ import 'chart_trace.dart';
 
 typedef DrawCodeCallback = void Function(Canvas canvas);
 
-final _log = Logger('lib/src/shared/charts/chart');
+final _log = Logger('chart');
 
 /// Perform some draw operations on a canvas after applying translate.
 ///

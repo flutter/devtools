@@ -6,7 +6,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:logging/logging.dart';
 
-final _log = Logger('lib/src/shared/primitives/syntax_highlighting');
+final _log = Logger('syntax_highlighting');
 
 //Future<String> loadPolyfillScript() {
 //  return asset.loadString('assets/scripts/inspector_polyfill_script.dart');

@@ -38,7 +38,7 @@ import 'debugger_model.dart';
 import 'file_search.dart';
 import 'key_sets.dart';
 
-final _log = Logger('lib/src/screens/debugger/codeview');
+final _log = Logger('codeview');
 
 final debuggerCodeViewFileOpenerKey =
     GlobalKey(debugLabel: 'DebuggerCodeViewFileOpenerKey');

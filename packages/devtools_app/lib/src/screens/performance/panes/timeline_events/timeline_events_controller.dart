@@ -26,9 +26,7 @@ import 'legacy/legacy_events_controller.dart';
 import 'perfetto/perfetto_controller.dart';
 import 'timeline_event_processor.dart';
 
-final _log = Logger(
-  'lib/src/screens/performance/panes/timeline_events/timeline_events_controller',
-);
+final _log = Logger('timeline_events_controller');
 
 enum EventsControllerStatus {
   empty,

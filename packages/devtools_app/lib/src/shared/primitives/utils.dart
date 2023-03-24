@@ -21,7 +21,7 @@ import 'package:logging/logging.dart';
 
 import 'simple_items.dart';
 
-final _log = Logger('lib/src/shared/primitives/utils');
+final _log = Logger('utils');
 
 bool isPrivate(String member) => member.startsWith('_');
 

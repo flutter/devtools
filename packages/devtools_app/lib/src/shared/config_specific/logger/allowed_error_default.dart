@@ -4,9 +4,7 @@
 
 import 'package:logging/logging.dart';
 
-final _log = Logger(
-  'lib/src/shared/config_specific/logger/allowed_error_default',
-);
+final _log = Logger('allowed_error_default');
 
 /// Catch and print errors from the given future. These errors are part of
 /// normal operation for an app, and don't need to be reported to analytics

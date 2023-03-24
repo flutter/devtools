@@ -28,9 +28,7 @@ import '../../../simple_trace_example.dart';
 import '../../flutter_frames/flutter_frame_model.dart';
 import 'legacy_event_processor.dart';
 
-final _log = Logger(
-  'lib/src/screens/performance/panes/timeline_events/legacy/legacy_events_controller',
-);
+final _log = Logger('legacy_events_controller');
 
 /// Debugging flag to load sample trace events from [simple_trace_example.dart].
 bool debugSimpleTrace = false;

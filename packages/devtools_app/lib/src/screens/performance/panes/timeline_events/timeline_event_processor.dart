@@ -14,9 +14,7 @@ import '../../performance_model.dart';
 import '../../performance_utils.dart';
 import 'timeline_events_controller.dart';
 
-final _log = Logger(
-  'lib/src/screens/performance/panes/timeline_events/timeline_event_processor',
-);
+final _log = Logger('timeline_event_processor');
 
 // For documentation on the Chrome "Trace Event Format", see this document:
 // https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU/preview

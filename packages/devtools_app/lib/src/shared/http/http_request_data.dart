@@ -15,9 +15,7 @@ import '../globals.dart';
 import '../primitives/utils.dart';
 import 'http.dart';
 
-final _log = Logger(
-  'lib/src/shared/http/http_request_data',
-);
+final _log = Logger('http_request_data');
 
 /// Used to represent an instant event emitted during an HTTP request.
 class DartIOHttpInstantEvent {
