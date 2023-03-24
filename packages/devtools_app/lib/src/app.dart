@@ -498,9 +498,9 @@ class SettingsDialog extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           CheckboxSetting(
-            label: const Text('Use a dark theme'),
-            listenable: preferences.darkModeTheme,
-            toggle: preferences.toggleDarkModeTheme,
+            title: 'Use a dark theme',
+            notifier: preferences.darkModeTheme,
+            onChanged: preferences.toggleDarkModeTheme,
             gaItem: gac.darkTheme,
           ),
           CheckboxSetting(
@@ -544,7 +544,7 @@ class _VerboseLoggingSetting extends StatelessWidget {
         Row(
           children: [
             CheckboxSetting(
-              label: const Text('Enable verbose logging'),
+              title: 'Enable verbose logging',
               listenable: preferences.verboseLoggingEnabled,
               toggle: (enable) => preferences.toggleVerboseLogging(enable),
               gaItem: gac.verboseLogging,
@@ -588,7 +588,7 @@ class _VerboseLoggingSetting extends StatelessWidget {
 }
 
 // TODO(polinach): consider reusing CheckboxSettings from shared/common_widgets.
-class CheckboxSetting extends StatelessWidget {
+class CheckboxSetting2 extends StatelessWidget {
   const CheckboxSetting({
     Key? key,
     required this.label,
@@ -631,6 +631,13 @@ class CheckboxSetting extends StatelessWidget {
     toggle(newValue == true);
   }
 }
+
+  void captureSettingsAnalytics({required String gaItem, required bool newValue,}) {
+    ga.select(
+      gac.settingsDialog,
+      '$gaItem-${newValue == true ? 'enabled' : 'disabled'}',
+    );
+  }
 
 /// Screens to initialize DevTools with.
 ///
