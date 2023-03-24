@@ -44,6 +44,7 @@ jank is detected on an iOS device. - [#5455](https://github.com/flutter/devtools
 * Add search icon in file bar to make file search more discoverable - [#5351](https://github.com/flutter/devtools/issues/5351)
 * Allow expression evaluation when pausing in JS for web apps - [#5427](https://github.com/flutter/devtools/pull/5427)
 * Update syntax highlighting to [dart-lang/dart-syntax-highlight v1.2.0](https://github.com/dart-lang/dart-syntax-highlight/blob/master/CHANGELOG.md#120-2023-01-30) - [#5477](https://github.com/flutter/devtools/pull/5477)
+* Debugger panel respects "dense mode" - [#5517](https://github.com/flutter/devtools/pull/5517)
 
 ## Network profiler updates
 * Fix a bug viewing JSON responses with null values - [#5424](https://github.com/flutter/devtools/pull/5424)
