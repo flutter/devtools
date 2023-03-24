@@ -96,8 +96,8 @@ class ServiceExtensionManager extends Disposer {
       for (final callback in callbacks) {
         try {
           await callback();
-        } catch (e) {
-          _log.shout('Error running isolate callback: $e');
+        } catch (e, st) {
+          _log.shout('Error running isolate callback: $e', e, st);
         }
       }
     }

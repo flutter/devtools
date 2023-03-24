@@ -598,7 +598,7 @@ class EvalOnDartLibrary extends DisposableController
         await previousDone;
       } catch (e, st) {
         if (!_disposed) {
-          _log.shout(e.toString(), e, st);
+          _log.shout(e, e, st);
         }
       }
       wrappedRequest();

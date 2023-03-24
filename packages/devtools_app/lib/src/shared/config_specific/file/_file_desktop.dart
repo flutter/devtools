@@ -98,7 +98,7 @@ class FileSystemDesktop implements FileIO {
       // alternate directory. This error should generally only occur on MacOS
       // desktop Catalina and later  where access to the Downloads folder
       // is not granted by default.
-      _log.info(e.toString(), e, st);
+      _log.info(e, e, st);
     }
 
     return logs;

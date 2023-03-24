@@ -274,9 +274,9 @@ class CodeViewController extends DisposableController
           (last, e) => last..addAll(e.entries),
         ),
       );
-    } catch (e) {
+    } catch (e, st) {
       // Ignore - not supported for all vm service implementations.
-      _log.shout('$e');
+      _log.shout(e, e, st);
     }
     return const ProcessedSourceReport.empty();
   }
@@ -308,9 +308,9 @@ class CodeViewController extends DisposableController
         executableLines = Set.from(
           positions.where((p) => p.line != null).map((p) => p.line),
         );
-      } catch (e) {
+      } catch (e, st) {
         // Ignore - not supported for all vm service implementations.
-        _log.shout('$e');
+        _log.shout(e, e, st);
       }
 
       final processedReport = await _getSourceReport(

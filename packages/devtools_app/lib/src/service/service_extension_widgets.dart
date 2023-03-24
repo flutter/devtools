@@ -878,7 +878,7 @@ mixin _ServiceExtensionMixin<T extends _ServiceExtensionWidget> on State<T> {
         notificationService.push(widget.completedText!);
       }
     } catch (e, st) {
-      _log.info(e.toString(), e, st);
+      _log.info(e, e, st);
 
       if (mounted) {
         notificationService.push(widget.describeError(e));

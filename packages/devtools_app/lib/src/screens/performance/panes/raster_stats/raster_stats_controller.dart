@@ -42,7 +42,7 @@ class RasterStatsController extends PerformanceFeatureController {
       final rasterStats = RasterStats.parse(json);
       setData(rasterStats);
     } catch (e, st) {
-      _log.info('Error collecting raster stats: $e\n\n$st');
+      _log.info('Error collecting raster stats: $e', e, st);
       clearData();
     } finally {
       _loadingSnapshot.value = false;

@@ -17,7 +17,7 @@ import 'primitives/auto_dispose.dart';
 import 'title.dart';
 import 'version.dart';
 
-final _log = Logger('lib/src/shared');
+final _log = Logger('lib/src/shared/connected_app');
 
 const flutterLibraryUri = 'package:flutter/src/widgets/binding.dart';
 const dartHtmlLibraryUri = 'dart:html';

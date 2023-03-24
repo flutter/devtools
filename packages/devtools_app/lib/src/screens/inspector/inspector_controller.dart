@@ -471,8 +471,8 @@ class InspectorController extends DisposableController
       inspectorTree.root = rootNode;
 
       refreshSelection(newSelection, detailsSelection, setSubtreeRoot);
-    } catch (error) {
-      _log.shout(error.toString(), error);
+    } catch (error, st) {
+      _log.shout(error, error, st);
       treeGroups.cancelNext();
       return;
     }
@@ -682,9 +682,9 @@ class InspectorController extends DisposableController
       subtreeRoot = newSelection;
 
       applyNewSelection(newSelection, detailsSelection, true);
-    } catch (error) {
+    } catch (error, st) {
       if (selectionGroups.next == group) {
-        _log.shout(error.toString(), error);
+        _log.shout(error, error, st);
         selectionGroups.cancelNext();
       }
     }

@@ -635,8 +635,8 @@ class InspectorTreeController extends DisposableController
             expandPath(treeNode);
           }
         }
-      } catch (e) {
-        _log.shout(e.toString(), e);
+      } catch (e, st) {
+        _log.shout(e, e, st);
       }
     }
   }

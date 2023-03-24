@@ -429,7 +429,7 @@ class _MemoryLog {
     if (!memoryJson.isMatchedVersion) {
       final e =
           'Error loading file $filename version ${memoryJson.payloadVersion}';
-      _log.warning(e.toString(), e);
+      _log.warning(e);
       throw OfflineFileException(e);
     }
 

@@ -10,7 +10,7 @@ import 'package:vm_service/vm_service.dart';
 
 import '../../../../shared/primitives/utils.dart';
 
-final _log = Logger('lib/src/screens/memory/memory_timeline');
+final _log = Logger('lib/src/screens/memory/shared/primitives/memory_timeline');
 
 enum ContinuesState {
   none,

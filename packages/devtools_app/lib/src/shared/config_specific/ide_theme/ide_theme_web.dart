@@ -45,12 +45,13 @@ Color? _tryParseColor(String? input) {
 
   try {
     return parseCssHexColor(input);
-  } catch (e) {
+  } catch (e, st) {
     // The user can manipulate the query string so if the value is invalid
     // print the value but otherwise continue.
     _log.warning(
       'Failed to parse "$input" as a color from the querystring, ignoring: $e',
       e,
+      st,
     );
     return null;
   }
@@ -61,12 +62,13 @@ double? _tryParseDouble(String? input) {
     if (input != null) {
       return double.parse(input);
     }
-  } catch (e) {
+  } catch (e, st) {
     // The user can manipulate the query string so if the value is invalid
     // print the value but otherwise continue.
     _log.warning(
       'Failed to parse "$input" as a double from the querystring, ignoring: $e',
       e,
+      st,
     );
   }
   return null;
