@@ -70,14 +70,13 @@ class DiffPaneController extends DisposableController {
 
       final newElementIndex = snapshots.value.length - 1;
       core._selectedSnapshotIndex.value = newElementIndex;
-      throw 'test error';
     } catch (e) {
       snapshots.remove(item);
       core._selectedSnapshotIndex.value = 0;
       rethrow;
     } finally {
-      derived._updateValues();
       _isTakingSnapshot.value = false;
+      derived._updateValues();
     }
   }
 
