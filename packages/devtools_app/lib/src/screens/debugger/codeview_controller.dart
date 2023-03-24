@@ -276,7 +276,7 @@ class CodeViewController extends DisposableController
       );
     } catch (e, st) {
       // Ignore - not supported for all vm service implementations.
-      _log.shout(e, e, st);
+      _log.warning(e, e, st);
     }
     return const ProcessedSourceReport.empty();
   }
@@ -310,7 +310,7 @@ class CodeViewController extends DisposableController
         );
       } catch (e, st) {
         // Ignore - not supported for all vm service implementations.
-        _log.shout(e, e, st);
+        _log.warning(e, e, st);
       }
 
       final processedReport = await _getSourceReport(
