@@ -82,11 +82,16 @@ class _InitializerState extends State<Initializer>
           !connectionState.userInitiatedConnectionState) {
         // Try to reconnect (otherwise, will fall back to showing the
         // disconnected overlay).
-        try {
-          unawaited(_attemptUrlConnection());
-        } catch (_) {
-          _log.warning('Attempted to reconnect to the application but failed.');
-        }
+        unawaited(
+          _attemptUrlConnection(
+            logException: false,
+            errorReporter: (_, __) {
+              _log.warning(
+                'Attempted to reconnect to the application, but failed.',
+              );
+            },
+          ),
+        );
       }
     });
 
@@ -120,18 +125,25 @@ class _InitializerState extends State<Initializer>
     });
   }
 
-  Future<void> _attemptUrlConnection() async {
+  Future<void> _attemptUrlConnection({
+    ErrorReporter? errorReporter,
+    bool logException = true,
+  }) async {
     if (widget.url == null) {
       _handleNoConnection();
       return;
     }
 
+    errorReporter ??= (String message, Object error) {
+      notificationService.push('$message, $error');
+    };
+
     final uri = normalizeVmServiceUri(widget.url!);
     final connected = await FrameworkCore.initVmService(
       '',
       explicitUri: uri,
-      errorReporter: (message, error) =>
-          notificationService.push('$message, $error'),
+      errorReporter: errorReporter,
+      logException: logException,
     );
 
     if (!connected) {
@@ -176,7 +188,7 @@ class _InitializerState extends State<Initializer>
       offlineApp: offlineController.previousConnectedApp!,
     );
     hideDisconnectedOverlay();
-    final args = {
+    final args = <String, String?>{
       'uri': null,
       'screen': offlineController
           .offlineDataJson[DevToolsExportKeys.activeScreenId.name] as String
