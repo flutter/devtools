@@ -2,8 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
+import 'package:devtools_app/src/shared/globals.dart';
+import 'package:devtools_app/src/shared/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:pointer_interceptor/pointer_interceptor.dart';
+import '../shared/config_specific/launch_url/launch_url.dart';
 
 import 'common_widgets.dart';
 import 'theme.dart';
@@ -34,8 +39,9 @@ final dialogTextFieldDecoration = InputDecoration(
   ),
 );
 
-class ErrorDialog extends StatelessWidget {
-  const ErrorDialog({
+/// A dialog, that reports unexpected error and allows to copy details and create issue.
+class UnexpectedErrorDialog extends StatelessWidget {
+  const UnexpectedErrorDialog({
     super.key,
     required this.errorDetails,
   });
@@ -45,12 +51,27 @@ class ErrorDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DevToolsDialog(
-      title: Text('Error'),
+      title: const Text('Unexpected Error'),
       content: Text(errorDetails),
       actions: [
-        DialogTextButton(child: Text('Copy Details'), onPressed: () {}),
-        DialogTextButton(child: Text('Create Issue'), onPressed: () {}),
-        DialogCloseButton(),
+        DialogTextButton(
+          child: const Text('Copy Details'),
+          onPressed: () => unawaited(
+            copyToClipboard(
+              errorDetails,
+              'Error details copied to clipboard',
+            ),
+          ),
+        ),
+        DialogTextButton(
+          child: const Text('Create Issue'),
+          onPressed: () => unawaited(
+            launchUrl(
+              devToolsExtensionPoints.issueTrackerLink().url,
+            ),
+          ),
+        ),
+        const DialogCloseButton(),
       ],
     );
   }

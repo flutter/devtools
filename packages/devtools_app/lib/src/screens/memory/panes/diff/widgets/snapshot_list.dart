@@ -54,7 +54,7 @@ class _ListControlPane extends StatelessWidget {
     } catch (e, trace) {
       await showDialog(
         context: context,
-        builder: (context) => ErrorDialog(
+        builder: (context) => UnexpectedErrorDialog(
           errorDetails: 'Error while taking snapshot.\n$e\n$trace',
         ),
       );
