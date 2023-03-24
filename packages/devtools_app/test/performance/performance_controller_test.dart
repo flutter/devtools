@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_test/devtools_test.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 
@@ -27,11 +28,11 @@ void main() {
         isWebApp: false,
       );
       when(mockServiceManager.connectedApp).thenReturn(connectedApp);
+      when(mockServiceManager.connectedState)
+          .thenReturn(ValueNotifier(const ConnectedState(true)));
       setGlobal(ServiceConnectionManager, mockServiceManager);
       offlineController.enterOfflineMode(
-        offlineApp: OfflineConnectedApp.parse(
-          serviceManager.connectedApp!.toJson(),
-        ),
+        offlineApp: serviceManager.connectedApp!,
       );
       controller = PerformanceController();
     });
