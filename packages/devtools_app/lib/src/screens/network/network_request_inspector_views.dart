@@ -186,7 +186,7 @@ class HttpViewTrailingCopyButton extends StatelessWidget {
       builder: (context, __, ___) {
         final dataToCopy = dataSelector(data);
         final isLoading = data.isFetchingFullData;
-        if (dataToCopy == null || dataToCopy.isEmpty || isLoading){
+        if (dataToCopy == null || dataToCopy.isEmpty || isLoading) {
           return Container();
         }
 
