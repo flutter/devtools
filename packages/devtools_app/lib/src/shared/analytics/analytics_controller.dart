@@ -21,18 +21,17 @@ class AnalyticsController {
     this.onEnableAnalytics,
     this.onDisableAnalytics,
     this.onSetupAnalytics,
-  })  : _analyticsEnabled = ValueNotifier<bool>(enabled),
+  })  : analyticsEnabled = ValueNotifier<bool>(enabled),
         _shouldPrompt = ValueNotifier<bool>(firstRun && !enabled) {
     if (_shouldPrompt.value) {
       unawaited(toggleAnalyticsEnabled(true));
     }
-    if (_analyticsEnabled.value) {
+    if (analyticsEnabled.value) {
       setUpAnalytics();
     }
   }
 
-  ValueListenable<bool> get analyticsEnabled => _analyticsEnabled;
-  final ValueNotifier<bool> _analyticsEnabled;
+  final ValueNotifier<bool> analyticsEnabled;
 
   ValueListenable<bool> get shouldPrompt => _shouldPrompt;
   final ValueNotifier<bool> _shouldPrompt;
@@ -48,7 +47,7 @@ class AnalyticsController {
 
   Future<void> toggleAnalyticsEnabled(bool? enable) async {
     if (enable == true) {
-      _analyticsEnabled.value = true;
+      analyticsEnabled.value = true;
       if (!_analyticsInitialized) {
         setUpAnalytics();
       }
@@ -56,7 +55,7 @@ class AnalyticsController {
         await onEnableAnalytics!();
       }
     } else {
-      _analyticsEnabled.value = false;
+      analyticsEnabled.value = false;
       hidePrompt();
       if (onDisableAnalytics != null) {
         await onDisableAnalytics!();
@@ -66,7 +65,7 @@ class AnalyticsController {
 
   void setUpAnalytics() {
     if (_analyticsInitialized) return;
-    assert(_analyticsEnabled.value = true);
+    assert(analyticsEnabled.value = true);
     if (onSetupAnalytics != null) {
       onSetupAnalytics!();
     }
