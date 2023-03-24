@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import '../../../../../shared/analytics/analytics.dart' as ga;
 import '../../../../../shared/analytics/constants.dart' as gac;
 import '../../../../../shared/common_widgets.dart';
+import '../../../../../shared/dialogs.dart';
 import '../../../../../shared/primitives/auto_dispose.dart';
 import '../../../../../shared/primitives/utils.dart';
 import '../../../../../shared/table/table.dart';
@@ -47,6 +48,17 @@ class _ListControlPane extends StatelessWidget {
 
   final DiffPaneController controller;
 
+  Future<void> _takeSnapshot(BuildContext context) async {
+    try {
+      await controller.takeSnapshot();
+    } catch (e) {
+      await showDialog(
+        context: context,
+        builder: (context) => ErrorDialog(errorDetails: e.toString()),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<bool>(
@@ -58,9 +70,9 @@ class _ListControlPane extends StatelessWidget {
             ToolbarAction(
               icon: Icons.fiber_manual_record,
               tooltip: 'Take heap snapshot for the selected isolate',
-              onPressed: controller.takeSnapshotHandler(
-                gac.MemoryEvent.diffTakeSnapshotControlPane,
-              ),
+              onPressed: controller.isTakingSnapshot.value
+                  ? null
+                  : () async => _takeSnapshot(context),
             ),
             ToolbarAction(
               icon: Icons.block,

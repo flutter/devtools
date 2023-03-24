@@ -34,6 +34,28 @@ final dialogTextFieldDecoration = InputDecoration(
   ),
 );
 
+class ErrorDialog extends StatelessWidget {
+  const ErrorDialog({
+    super.key,
+    required this.errorDetails,
+  });
+
+  final String errorDetails;
+
+  @override
+  Widget build(BuildContext context) {
+    return DevToolsDialog(
+      title: Text('Error'),
+      content: Text(errorDetails),
+      actions: [
+        DialogTextButton(child: Text('Copy Details'), onPressed: () {}),
+        DialogTextButton(child: Text('Create Issue'), onPressed: () {}),
+        DialogCloseButton(),
+      ],
+    );
+  }
+}
+
 /// A standardized dialog with help text and buttons `Reset to default`,
 /// `APPLY` and `CANCEL`.
 class StateUpdateDialog extends StatelessWidget {

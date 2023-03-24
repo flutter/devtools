@@ -7,10 +7,12 @@ import 'dart:math';
 
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 
 import '../../../../../shared/analytics/analytics.dart' as ga;
 import '../../../../../shared/analytics/constants.dart' as gac;
 import '../../../../../shared/config_specific/import_export/import_export.dart';
+import '../../../../../shared/dialogs.dart';
 import '../../../../../shared/globals.dart';
 import '../../../../../shared/memory/class_name.dart';
 import '../../../../../shared/primitives/auto_dispose.dart';
@@ -46,36 +48,33 @@ class DiffPaneController extends DisposableController {
   // is taken, and is used to assign a unique id to each [SnapshotListItem].
   int _snapshotId = 0;
 
-  VoidCallback? takeSnapshotHandler(String gaEvent) {
-    if (_isTakingSnapshot.value) return null;
-    return () {
-      ga.select(
-        gac.memory,
-        gaEvent,
-      );
-      unawaited(takeSnapshot());
-    };
-  }
-
   Future<void> takeSnapshot() async {
     _isTakingSnapshot.value = true;
-    final snapshots = core._snapshots;
-
-    final item = SnapshotInstanceItem(
-      id: _snapshotId++,
-      displayNumber: _nextDisplayNumber(),
-      isolateName: selectedIsolateName ?? '<isolate-not-detected>',
+    ga.select(
+      gac.memory,
+      gac.MemoryEvent.diffTakeSnapshotControlPane,
     );
 
-    snapshots.add(item);
+    try {
+      final heapData = await snapshotTaker.take();
 
-    final heapData = await snapshotTaker.take();
-    await item.initializeHeapData(heapData);
+      final item = SnapshotInstanceItem(
+        id: _snapshotId++,
+        displayNumber: _nextDisplayNumber(),
+        isolateName: selectedIsolateName ?? '<isolate-not-detected>',
+      );
 
-    final newElementIndex = snapshots.value.length - 1;
-    core._selectedSnapshotIndex.value = newElementIndex;
-    _isTakingSnapshot.value = false;
-    derived._updateValues();
+      final snapshots = core._snapshots;
+      snapshots.add(item);
+
+      await item.initializeHeapData(heapData);
+
+      final newElementIndex = snapshots.value.length - 1;
+      core._selectedSnapshotIndex.value = newElementIndex;
+    } finally {
+      _isTakingSnapshot.value = false;
+      derived._updateValues();
+    }
   }
 
   void clearSnapshots() {
