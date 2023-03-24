@@ -504,23 +504,23 @@ class SettingsDialog extends StatelessWidget {
             gaItem: gac.darkTheme,
           ),
           CheckboxSetting(
-            label: const Text('Use dense mode'),
-            listenable: preferences.denseModeEnabled,
-            toggle: preferences.toggleDenseMode,
+            title: 'Use dense mode',
+            notifier: preferences.denseModeEnabled,
+            onChanged: preferences.toggleDenseMode,
             gaItem: gac.denseMode,
           ),
           if (isExternalBuild && isDevToolsServerAvailable)
             CheckboxSetting(
-              label: const Text('Enable analytics'),
-              listenable: analyticsController.analyticsEnabled,
-              toggle: (enable) =>
+              title: 'Enable analytics',
+              notifier: analyticsController.analyticsEnabled,
+              onChanged: (enable) =>
                   unawaited(analyticsController.toggleAnalyticsEnabled(enable)),
               gaItem: gac.analytics,
             ),
           CheckboxSetting(
-            label: const Text('Enable VM developer mode'),
-            listenable: preferences.vmDeveloperModeEnabled,
-            toggle: preferences.toggleVmDeveloperMode,
+            title: 'Enable VM developer mode',
+            notifier: preferences.vmDeveloperModeEnabled,
+            onChanged: preferences.toggleVmDeveloperMode,
             gaItem: gac.vmDeveloperMode,
           ),
           const PaddedDivider(),
@@ -545,8 +545,8 @@ class _VerboseLoggingSetting extends StatelessWidget {
           children: [
             CheckboxSetting(
               title: 'Enable verbose logging',
-              listenable: preferences.verboseLoggingEnabled,
-              toggle: (enable) => preferences.toggleVerboseLogging(enable),
+              notifier: preferences.verboseLoggingEnabled,
+              onChanged: (enable) => preferences.toggleVerboseLogging(enable),
               gaItem: gac.verboseLogging,
             ),
             const SizedBox(width: defaultSpacing),
@@ -586,58 +586,6 @@ class _VerboseLoggingSetting extends StatelessWidget {
     );
   }
 }
-
-// TODO(polinach): consider reusing CheckboxSettings from shared/common_widgets.
-class CheckboxSetting2 extends StatelessWidget {
-  const CheckboxSetting({
-    Key? key,
-    required this.label,
-    required this.listenable,
-    required this.toggle,
-    required this.gaItem,
-  }) : super(key: key);
-
-  final Text label;
-
-  final ValueListenable<bool> listenable;
-
-  final void Function(bool) toggle;
-
-  final String gaItem;
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: () => toggleSetting(!listenable.value),
-      child: Row(
-        children: [
-          ValueListenableBuilder<bool>(
-            valueListenable: listenable,
-            builder: (context, value, _) {
-              return Checkbox(value: value, onChanged: toggleSetting);
-            },
-          ),
-          label,
-        ],
-      ),
-    );
-  }
-
-  void toggleSetting(bool? newValue) {
-    ga.select(
-      gac.settingsDialog,
-      '$gaItem-${newValue == true ? 'enabled' : 'disabled'}',
-    );
-    toggle(newValue == true);
-  }
-}
-
-  void captureSettingsAnalytics({required String gaItem, required bool newValue,}) {
-    ga.select(
-      gac.settingsDialog,
-      '$gaItem-${newValue == true ? 'enabled' : 'disabled'}',
-    );
-  }
 
 /// Screens to initialize DevTools with.
 ///

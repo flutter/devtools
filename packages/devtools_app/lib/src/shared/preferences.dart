@@ -24,9 +24,9 @@ class PreferencesController extends DisposableController
   final darkModeTheme =
       ValueNotifier<bool>(devToolsExtensionPoints.defaultIsDarkTheme);
 
-  final vmDeveloperMode = ValueNotifier<bool>(false);
+  final vmDeveloperModeEnabled = ValueNotifier<bool>(false);
 
-  final verboseLogging =
+  final verboseLoggingEnabled =
       ValueNotifier<bool>(Logger.root.level == verboseLoggingLevel);
   static const _verboseLoggingStorageId = 'verboseLogging';
 
@@ -57,8 +57,8 @@ class PreferencesController extends DisposableController
 
     value = await storage.getValue('ui.vmDeveloperMode');
     toggleVmDeveloperMode(value == 'true');
-    addAutoDisposeListener(vmDeveloperMode, () {
-      storage.setValue('ui.vmDeveloperMode', '${vmDeveloperMode.value}');
+    addAutoDisposeListener(vmDeveloperModeEnabled, () {
+      storage.setValue('ui.vmDeveloperMode', '${vmDeveloperModeEnabled.value}');
     });
 
     value = await storage.getValue('ui.denseMode');
@@ -83,10 +83,10 @@ class PreferencesController extends DisposableController
 
     toggleVerboseLogging(verboseLoggingEnabledValue == 'true');
 
-    addAutoDisposeListener(verboseLogging, () {
-      storage.setValue('verboseLogging', verboseLogging.value.toString());
+    addAutoDisposeListener(verboseLoggingEnabled, () {
+      storage.setValue('verboseLogging', verboseLoggingEnabled.value.toString());
 
-      if (verboseLogging.value) {
+      if (verboseLoggingEnabled.value) {
         setDevToolsLoggingLevel(verboseLoggingLevel);
       } else {
         setDevToolsLoggingLevel(basicLoggingLevel);
@@ -111,13 +111,17 @@ class PreferencesController extends DisposableController
   }
 
   /// Change the value for the VM developer mode setting.
-  void toggleVmDeveloperMode(bool enableVmDeveloperMode) {
-    vmDeveloperMode.value = enableVmDeveloperMode;
-    VmServiceWrapper.enablePrivateRpcs = enableVmDeveloperMode;
+  void toggleVmDeveloperMode(bool? enableVmDeveloperMode) {
+    if (enableVmDeveloperMode != null) {
+      vmDeveloperModeEnabled.value = enableVmDeveloperMode;
+      VmServiceWrapper.enablePrivateRpcs = enableVmDeveloperMode;
+    }
   }
 
-  void toggleVerboseLogging(bool enableVerboseLogging) {
-    verboseLogging.value = enableVerboseLogging;
+  void toggleVerboseLogging(bool? enableVerboseLogging) {
+    if (enableVerboseLogging != null) {
+      verboseLoggingEnabled.value = enableVerboseLogging;
+    }
   }
 
   /// Change the value for the dense mode setting.
