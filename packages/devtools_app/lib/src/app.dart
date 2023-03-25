@@ -486,7 +486,6 @@ class OpenSettingsAction extends StatelessWidget {
   }
 }
 
-// TODO(kenz): merge the checkbox functionality here with [NotifierCheckbox]
 class SettingsDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
