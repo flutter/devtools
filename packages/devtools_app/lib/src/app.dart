@@ -518,7 +518,8 @@ class SettingsDialog extends StatelessWidget {
                 title: 'Enable analytics',
                 notifier: analyticsController.analyticsEnabled,
                 onChanged: (enable) => unawaited(
-                    analyticsController.toggleAnalyticsEnabled(enable),),
+                  analyticsController.toggleAnalyticsEnabled(enable),
+                ),
                 gaItem: gac.analytics,
               ),
             ),
