@@ -85,7 +85,9 @@ class PreferencesController extends DisposableController
 
     addAutoDisposeListener(verboseLoggingEnabled, () {
       storage.setValue(
-          'verboseLogging', verboseLoggingEnabled.value.toString(),);
+        'verboseLogging',
+        verboseLoggingEnabled.value.toString(),
+      );
 
       if (verboseLoggingEnabled.value) {
         setDevToolsLoggingLevel(verboseLoggingLevel);
