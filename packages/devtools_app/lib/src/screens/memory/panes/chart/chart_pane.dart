@@ -77,6 +77,8 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
               : _hoverEventsHeight)
           : 0);
 
+  static int get _timestamp => DateTime.now().millisecondsSinceEpoch;
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -89,22 +91,25 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
           _hideHover();
         }
         final tapLocation = widget.chartController.event.tapLocation.value;
-        if (tapLocation?.tapDownDetails != null) {
-          final tapData = tapLocation!;
-          final index = tapData.index;
-          final timestamp = tapData.timestamp!;
+        if (tapLocation == null) return;
+        final tapDownDetails = tapLocation.tapDownDetails;
+        if (tapDownDetails == null) return;
 
-          final copied = TapLocation.copy(tapLocation);
-          widget.chartController.vm.tapLocation.value = copied;
-          widget.chartController.android.tapLocation.value = copied;
+        final copied = TapLocation.copy(tapLocation);
+        widget.chartController.vm.tapLocation.value = copied;
+        widget.chartController.android.tapLocation.value = copied;
 
-          final allValues = ChartsValues(controller, index, timestamp);
-          _showHover(
-            context,
-            allValues,
-            tapData.tapDownDetails!.globalPosition,
-          );
-        }
+        final allValues = ChartsValues(
+          controller,
+          tapLocation.index,
+          tapLocation.timestamp ?? _timestamp,
+        );
+
+        _showHover(
+          context,
+          allValues,
+          tapDownDetails.globalPosition,
+        );
       }
     });
 
@@ -114,53 +119,54 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
           _hideHover();
         }
         final tapLocation = widget.chartController.vm.tapLocation.value;
-        if (tapLocation?.tapDownDetails != null) {
-          final tapData = tapLocation!;
-          final index = tapData.index;
-          final timestamp = tapData.timestamp!;
+        if (tapLocation == null) return;
+        final tapDownDetails = tapLocation.tapDownDetails;
+        if (tapDownDetails == null) return;
 
-          final copied = TapLocation.copy(tapLocation);
-          widget.chartController.event.tapLocation.value = copied;
-          widget.chartController.android.tapLocation.value = copied;
+        final copied = TapLocation.copy(tapLocation);
+        widget.chartController.event.tapLocation.value = copied;
+        widget.chartController.android.tapLocation.value = copied;
 
-          final allValues = ChartsValues(controller, index, timestamp);
+        final allValues = ChartsValues(
+          controller,
+          tapLocation.index,
+          tapLocation.timestamp ?? _timestamp,
+        );
 
-          _showHover(
-            context,
-            allValues,
-            tapData.tapDownDetails!.globalPosition,
-          );
-        }
+        _showHover(
+          context,
+          allValues,
+          tapDownDetails.globalPosition,
+        );
       }
     });
 
     addAutoDisposeListener(widget.chartController.android.tapLocation, () {
-      if (widget.chartController.android.tapLocation.value != null) {
-        if (_hoverOverlayEntry != null) {
-          _hideHover();
-        }
-        final tapLocation = widget.chartController.android.tapLocation.value;
-        if (tapLocation?.tapDownDetails != null) {
-          final tapData = tapLocation!;
-          final index = tapData.index;
-          final timestamp = tapData.timestamp!;
-
-          final copied = TapLocation.copy(tapLocation);
-          widget.chartController.event.tapLocation.value = copied;
-          widget.chartController.vm.tapLocation.value = copied;
-
-          final allValues = ChartsValues(controller, index, timestamp);
-
-          _showHover(
-            context,
-            allValues,
-            tapData.tapDownDetails!.globalPosition,
-          );
-        }
+      if (_hoverOverlayEntry != null) {
+        _hideHover();
       }
-    });
 
-    var x = 1;
+      final tapLocation = widget.chartController.android.tapLocation.value;
+      if (tapLocation == null) return;
+      final tapDownDetails = tapLocation.tapDownDetails;
+      if (tapDownDetails == null) return;
+
+      final copied = TapLocation.copy(tapLocation);
+      widget.chartController.event.tapLocation.value = copied;
+      widget.chartController.vm.tapLocation.value = copied;
+
+      final allValues = ChartsValues(
+        controller,
+        tapLocation.index,
+        tapLocation.timestamp ?? _timestamp,
+      );
+
+      _showHover(
+        context,
+        allValues,
+        tapDownDetails.globalPosition,
+      );
+    });
 
     addAutoDisposeListener(controller.refreshCharts, () {
       setState(() {
