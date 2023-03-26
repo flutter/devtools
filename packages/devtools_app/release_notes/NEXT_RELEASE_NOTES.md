@@ -30,6 +30,7 @@ jank is detected on an iOS device. - [#5455](https://github.com/flutter/devtools
 
 ## Memory updates
 * Fix filtering bug in the "Trace Instances" view - [#5406](https://github.com/flutter/devtools/pull/5406)
+* Add a side panel with help instructions in the Diff tab
 
 ## Debugger updates
 * Fix a bug where variable inspection for instances sometimes showed no children. - [#5356](https://github.com/flutter/devtools/pull/5356)
