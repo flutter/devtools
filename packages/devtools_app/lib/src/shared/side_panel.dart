@@ -24,6 +24,9 @@ const debugTestReleaseNotes = false;
 const releaseNotesTitle = 'What\'s new in DevTools?';
 const releaseNotesTextWhenEmpty = 'Stay tuned for updates.';
 
+const releaseNotesKey = Key('release_notes');
+const diffSnapshotsHelpPanelKey = Key('diff_snapshots_help_panel');
+
 class SidePanelViewer extends StatefulWidget {
   const SidePanelViewer({
     Key? key,

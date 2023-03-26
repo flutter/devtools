@@ -54,6 +54,7 @@ class _SnapshotItemContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SidePanelViewer(
+      key: diffSnapshotsHelpPanelKey,
       controller: controller.sidePanelController,
       title: 'Diffing memory snapshots',
       child: ValueListenableBuilder<SnapshotItem>(

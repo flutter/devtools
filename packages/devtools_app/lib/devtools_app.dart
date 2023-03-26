@@ -90,6 +90,7 @@ export 'src/shared/primitives/utils.dart';
 export 'src/shared/routing.dart';
 export 'src/shared/screen.dart';
 export 'src/shared/scripts/script_manager.dart';
+export 'src/shared/side_panel.dart';
 export 'src/shared/split.dart';
 export 'src/shared/theme.dart';
 export 'src/shared/ui/filter.dart';

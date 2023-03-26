@@ -5,6 +5,7 @@
 import 'package:devtools_app/src/screens/memory/memory_screen.dart';
 import 'package:devtools_app/src/screens/memory/memory_tabs.dart';
 import 'package:devtools_app/src/screens/memory/panes/diff/diff_pane.dart';
+import 'package:devtools_app/src/shared/side_panel.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -60,6 +61,19 @@ void main() {
         await tester.pumpAndSettle();
         expect(find.text('selected-isolate-${i + 1}'), findsOneWidget);
       }
+
+      // Hide the diff snapshots help panel
+      final diffSnapshotsHelpPanel =
+          tester.widget<SidePanelViewer>(find.byKey(diffSnapshotsHelpPanelKey));
+      expect(diffSnapshotsHelpPanel.controller.isVisible.value, isTrue);
+
+      final closeSidePanelButton = find.descendant(
+        of: find.byKey(diffSnapshotsHelpPanelKey),
+        matching: find.byType(IconButton),
+      );
+      expect(closeSidePanelButton, findsOneWidget);
+      await tester.tap(closeSidePanelButton);
+      await tester.pumpAndSettle();
 
       await expectLater(
         find.byType(DiffPane),
