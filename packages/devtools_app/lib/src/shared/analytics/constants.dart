@@ -89,12 +89,14 @@ const shaderCompilationDocsTooltipLink = 'shaderCompilationDocsTooltipLink';
 const impellerWiki = 'impellerWikiLink';
 const collectRasterStats = 'collectRasterStats';
 const clearRasterStats = 'clearRasterStats';
+const fullScreenLayerImage = 'fullScreenLayerImage';
 const clearRebuildStats = 'clearRebuildStats';
 const perfettoModeTraceEventProcessingTime =
     'traceEventProcessingTime-perfettoMode';
 const perfettoLoadTrace = 'perfettoLoadTrace';
 const perfettoScrollToTimeRange = 'perfettoScrollToTimeRange';
 const performanceSettings = 'performanceSettings';
+const traceCategories = 'traceCategories';
 
 // CPU profiler UX actions:
 const cpuSamplingRatePrefix = 'profileGranularity';
@@ -212,6 +214,8 @@ class MemoryEvent {
   static const tracingRefresh = 'tracingRefresh';
   static const tracingClassFilter = 'tracingClassFilter';
   static const tracingTraceCheck = 'tracingTraceCheck';
+  static const tracingTreeExpandAll = 'tracingTreeExpandAll';
+  static const tracingTreeCollapseAll = 'tracingTreeCollapseAll';
   static const tracingHelp = 'memoryTracingHelp';
 
   static const diffTakeSnapshotControlPane = 'diffTakeSnapshotControlPane';

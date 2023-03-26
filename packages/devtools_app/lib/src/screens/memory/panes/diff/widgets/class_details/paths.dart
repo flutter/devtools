@@ -154,6 +154,7 @@ class RetainingPathTable extends StatelessWidget {
       ),
       defaultSortColumn: columns.retainedSizeColumn,
       defaultSortDirection: SortDirection.descending,
+      tallHeaders: true,
     );
   }
 }

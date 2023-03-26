@@ -81,7 +81,7 @@
 >  String get foo => '';
 #  ^^^^^^ support.class.dart
 #         ^^^ keyword.declaration.dart
-#             ^^^ entity.name.function.dart
+#                 ^^ keyword.operator.closure.dart
 #                    ^^ string.interpolated.single.dart
 #                      ^ punctuation.terminator.dart
 >  set foo(String value) {}

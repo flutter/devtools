@@ -361,6 +361,14 @@ class ServiceConnectionManager {
   void vmServiceClosed({
     ConnectedState connectionState = const ConnectedState(false),
   }) {
+    // Set [offlineController.previousConnectedApp] in case we need it for
+    // viewing data after disconnect. This must be done before resetting the
+    // rest of the service manager state.
+    final previousConnectedApp = connectedApp != null
+        ? OfflineConnectedApp.parse(connectedApp!.toJson())
+        : null;
+    offlineController.previousConnectedApp = previousConnectedApp;
+
     _serviceAvailable = Completer();
 
     service = null;

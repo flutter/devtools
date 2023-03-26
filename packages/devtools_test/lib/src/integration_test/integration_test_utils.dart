@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:convert';
+import 'dart:ui' as ui;
 
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/main.dart' as app;
@@ -14,6 +15,11 @@ import 'test_data/performance.dart';
 
 const safePumpDuration = Duration(seconds: 3);
 const longPumpDuration = Duration(seconds: 6);
+
+/// Required to have multiple test cases in this file.
+Future<void> resetHistory() async {
+  await (ui.PlatformDispatcher.instance.views.single as dynamic).resetHistory();
+}
 
 Future<void> pumpAndConnectDevTools(
   WidgetTester tester,

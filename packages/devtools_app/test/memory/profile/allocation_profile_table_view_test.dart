@@ -132,7 +132,7 @@ void main() {
           // Average collection time
           expect(
             find.text(
-              msText(
+              durationText(
                 Duration(milliseconds: stats.averageCollectionTime.toInt()),
                 fractionDigits: 2,
               ),

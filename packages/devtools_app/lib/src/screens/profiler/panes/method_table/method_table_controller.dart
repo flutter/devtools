@@ -23,6 +23,7 @@ class MethodTableController extends DisposableController
   MethodTableController({
     required ValueListenable<CpuProfileData?> dataNotifier,
   }) {
+    createMethodTableGraph(dataNotifier.value);
     addAutoDisposeListener(dataNotifier, () {
       createMethodTableGraph(dataNotifier.value);
     });
@@ -44,11 +45,10 @@ class MethodTableController extends DisposableController
     reset();
     if (cpuProfileData == null ||
         cpuProfileData == CpuProfilerController.baseStateCpuProfileData ||
-        cpuProfileData == CpuProfilerController.emptyAppStartUpProfile) {
+        cpuProfileData == CpuProfilerController.emptyAppStartUpProfile ||
+        !cpuProfileData.processed) {
       return;
     }
-
-    assert(cpuProfileData.processed);
 
     List<CpuStackFrame> profileRoots = cpuProfileData.callTreeRoots;
     // For a profile rooted at tags, treat it as if it is not. Otherwise, the

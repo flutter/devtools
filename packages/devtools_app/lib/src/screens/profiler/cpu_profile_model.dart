@@ -978,7 +978,7 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
     final nameWithPrefix = [prefix, name].join(' ');
     return [
       nameWithPrefix,
-      msText(totalTime),
+      durationText(totalTime),
       if (packageUriWithSourceLine.isNotEmpty) packageUriWithSourceLine,
     ].join(' - ');
   }
@@ -1072,7 +1072,7 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
     buf.write('$name ');
     // TODO(kenz): use a number of fractionDigits that better matches the
     // resolution of the stack frame.
-    buf.write('- ${msText(totalTime, fractionDigits: 2)} ');
+    buf.write('- ${durationText(totalTime, fractionDigits: 2)} ');
     buf.write('($inclusiveSampleCount ');
     buf.write(inclusiveSampleCount == 1 ? 'sample' : 'samples');
     buf.write(', ${percent(totalTimeRatio)})');

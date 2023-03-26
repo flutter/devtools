@@ -9,12 +9,12 @@ import '../screens/debugger/breakpoint_manager.dart';
 import '../service/service.dart';
 import '../service/service_manager.dart';
 import '../service/vm_service_wrapper.dart';
-import '../shared/config_specific/import_export/import_export.dart';
 import '../shared/config_specific/logger/logger.dart';
 import '../shared/console/eval/eval_service.dart';
 import '../shared/framework_controller.dart';
 import '../shared/globals.dart';
 import '../shared/notifications.dart';
+import '../shared/offline_mode.dart';
 import '../shared/primitives/message_bus.dart';
 import '../shared/primitives/utils.dart';
 import '../shared/scripts/script_manager.dart';
@@ -47,6 +47,7 @@ class FrameworkCore {
     String url, {
     Uri? explicitUri,
     required ErrorReporter errorReporter,
+    bool logException = true,
   }) async {
     if (serviceManager.hasConnection) {
       // TODO(https://github.com/flutter/devtools/issues/1568): why do we call
@@ -68,8 +69,9 @@ class FrameworkCore {
         breakpointManager.initialize();
         return true;
       } catch (e, st) {
-        log('$e\n$st', LogLevel.error);
-
+        if (logException) {
+          log('$e\n$st', LogLevel.error);
+        }
         errorReporter('Unable to connect to VM service at $uri: $e', e);
         return false;
       }

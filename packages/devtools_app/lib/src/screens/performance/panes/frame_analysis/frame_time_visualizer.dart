@@ -314,12 +314,13 @@ class _FramePhaseBlockData {
   final IconData icon;
 
   String get display {
-    final durationText = duration != Duration.zero
-        ? msText(
+    final text = duration != Duration.zero
+        ? durationText(
             duration,
+            unit: DurationDisplayUnit.milliseconds,
             allowRoundingToZero: false,
           )
         : '--';
-    return '$title - $durationText';
+    return '$title - $text';
   }
 }

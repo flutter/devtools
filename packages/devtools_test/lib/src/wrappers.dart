@@ -162,21 +162,21 @@ void testWidgetsWithWindowSize(
   testWidgets(
     name,
     (WidgetTester tester) async {
-      await _setWindowSize(windowSize);
+      await _setWindowSize(tester, windowSize);
       await test(tester);
-      await _resetWindowSize();
+      await _resetWindowSize(tester);
     },
     skip: skip,
   );
 }
 
-Future<void> _setWindowSize(Size windowSize) async {
+Future<void> _setWindowSize(WidgetTester tester, Size windowSize) async {
   final binding = TestWidgetsFlutterBinding.ensureInitialized();
   await binding.setSurfaceSize(windowSize);
-  binding.window.physicalSizeTestValue = windowSize;
-  binding.window.devicePixelRatioTestValue = 1.0;
+  tester.view.physicalSize = windowSize;
+  tester.view.devicePixelRatio = 1.0;
 }
 
-Future<void> _resetWindowSize() async {
-  await _setWindowSize(const Size(800.0, 600.0));
+Future<void> _resetWindowSize(WidgetTester tester) async {
+  await _setWindowSize(tester, const Size(800.0, 600.0));
 }

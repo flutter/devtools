@@ -253,7 +253,7 @@ abstract class TimeAndPercentageColumn<T> extends ColumnData<T> {
       richTooltipProvider?.call(dataObject, context);
 
   String _timeAndPercentage(T dataObject) =>
-      '${msText(timeProvider!(dataObject), fractionDigits: 2)} (${_percentDisplay(dataObject)})';
+      '${durationText(timeProvider!(dataObject), fractionDigits: 2)} (${_percentDisplay(dataObject)})';
 
   String _percentDisplay(T dataObject) =>
       '${percent(percentAsDoubleProvider(dataObject))}';

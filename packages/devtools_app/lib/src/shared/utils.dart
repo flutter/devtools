@@ -8,7 +8,6 @@
 
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -78,7 +77,7 @@ extension VmExtension on VM {
   }
 }
 
-List<ConnectionDescription> generateDeviceDescription(
+List<_ConnectionDescription> generateDeviceDescription(
   VM vm,
   ConnectedApp connectedApp, {
   bool includeVmServiceConnection = true,
@@ -92,10 +91,10 @@ List<ConnectionDescription> generateDeviceDescription(
 
   final flutterVersion = connectedApp.flutterVersionNow;
 
-  ConnectionDescription? _vmServiceConnection;
+  _ConnectionDescription? _vmServiceConnection;
   if (includeVmServiceConnection && serviceManager.service != null) {
     final description = serviceManager.service!.connectedUri.toString();
-    _vmServiceConnection = ConnectionDescription(
+    _vmServiceConnection = _ConnectionDescription(
       title: 'VM Service Connection',
       description: description,
       actions: [CopyToClipboardControl(dataProvider: () => description)],
@@ -103,20 +102,20 @@ List<ConnectionDescription> generateDeviceDescription(
   }
 
   return [
-    ConnectionDescription(title: 'CPU / OS', description: vm.deviceDisplay),
-    ConnectionDescription(title: 'Dart Version', description: version),
+    _ConnectionDescription(title: 'CPU / OS', description: vm.deviceDisplay),
+    _ConnectionDescription(title: 'Dart Version', description: version),
     if (flutterVersion != null) ...{
-      ConnectionDescription(
+      _ConnectionDescription(
         title: 'Flutter Version',
         description: '${flutterVersion.version} / ${flutterVersion.channel}',
       ),
-      ConnectionDescription(
+      _ConnectionDescription(
         title: 'Framework / Engine',
         description: '${flutterVersion.frameworkRevision} / '
             '${flutterVersion.engineRevision}',
       ),
     },
-    ConnectionDescription(
+    _ConnectionDescription(
       title: 'Connected app type',
       description: connectedApp.display,
     ),
@@ -201,21 +200,8 @@ mixin ProvidedControllerMixin<T, V extends StatefulWidget> on State<V> {
   }
 }
 
-mixin OfflineScreenControllerMixin<T> {
-  ValueListenable<bool> get loadingOfflineData => _loadingOfflineData;
-  final _loadingOfflineData = ValueNotifier<bool>(false);
-
-  FutureOr<void> processOfflineData(T offlineData);
-
-  Future<void> loadOfflineData(T offlineData) async {
-    _loadingOfflineData.value = true;
-    await processOfflineData(offlineData);
-    _loadingOfflineData.value = false;
-  }
-}
-
-class ConnectionDescription {
-  ConnectionDescription({
+class _ConnectionDescription {
+  _ConnectionDescription({
     required this.title,
     required this.description,
     this.actions = const <Widget>[],

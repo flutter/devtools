@@ -26,14 +26,14 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - name: git clone devtools
-        uses: actions/checkout@24cb9080177205b6e8c946b17badbe402adc938f
+        uses: actions/checkout@8f4b7f84864484a7bf31766abe9204da3cbe65b3
 
       - name: Get Latest Flutter Candidate
         id: flutter-candidate
         run: |
           LATEST_FLUTTER_CANDIDATE=$(./tool/latest_flutter_candidate.sh)
           echo "FLUTTER_CANDIDATE=$LATEST_FLUTTER_CANDIDATE" >> $GITHUB_OUTPUT
-      
+
       - name: Load Cached Flutter SDK
         id: cache-flutter
         uses: actions/cache@88522ab9f39a2ea568f7027eddc7d8d8bc9d59c8
@@ -53,13 +53,13 @@ jobs:
 
       - name: Assert that the Latest Flutter Candidate is checked out
         run: |
-            cd flutter-sdk
-            HEAD_SHA=$(git rev-parse HEAD)
-            LATEST_FLUTTER_CANDIDATE_SHA=$(git rev-parse "origin/$LATEST_FLUTTER_CANDIDATE")
-            if [ "$HEAD_SHA" != "$LATEST_FLUTTER_CANDIDATE_SHA" ]; then
-              echo "::error ,title=Error checking out Latest Flutter Candidate::{expected HEAD to be at $LATEST_FLUTTER_CANDIDATE_SHA but got $HEAD_SHA}"
-              exit 1
-            fi
+          cd flutter-sdk
+          HEAD_SHA=$(git rev-parse HEAD)
+          LATEST_FLUTTER_CANDIDATE_SHA=$(git rev-list -1 "$LATEST_FLUTTER_CANDIDATE")
+          if [ "$HEAD_SHA" != "$LATEST_FLUTTER_CANDIDATE_SHA" ]; then
+            echo "::error ,title=Error checking out Latest Flutter Candidate::{expected HEAD to be at $LATEST_FLUTTER_CANDIDATE_SHA but got $HEAD_SHA}"
+            exit 1
+          fi
         env:
           LATEST_FLUTTER_CANDIDATE: ${{ steps.flutter-candidate.outputs.FLUTTER_CANDIDATE }}
 
@@ -77,13 +77,13 @@ jobs:
       fail-fast: false
     steps:
       - name: git clone
-        uses: actions/checkout@24cb9080177205b6e8c946b17badbe402adc938f
+        uses: actions/checkout@8f4b7f84864484a7bf31766abe9204da3cbe65b3
       - name: Load Cached Flutter SDK
         uses: actions/cache@88522ab9f39a2ea568f7027eddc7d8d8bc9d59c8
         with:
           path: |
             ./flutter-sdk
-          key: flutter-sdk-${{ runner.os }}-${{ needs.flutter-prep.outputs.latest_flutter_candidate }} 
+          key: flutter-sdk-${{ runner.os }}-${{ needs.flutter-prep.outputs.latest_flutter_candidate }}
 
       - name: tool/bots.sh
         env:
@@ -104,19 +104,19 @@ jobs:
           - test_dart2js
     steps:
       - name: git clone
-        uses: actions/checkout@24cb9080177205b6e8c946b17badbe402adc938f
+        uses: actions/checkout@8f4b7f84864484a7bf31766abe9204da3cbe65b3
       - name: Load Cached Flutter SDK
         uses: actions/cache@88522ab9f39a2ea568f7027eddc7d8d8bc9d59c8
         with:
           path: |
             ./flutter-sdk
-          key: flutter-sdk-${{ runner.os }}-${{ needs.flutter-prep.outputs.latest_flutter_candidate }} 
+          key: flutter-sdk-${{ runner.os }}-${{ needs.flutter-prep.outputs.latest_flutter_candidate }}
       - name: tool/bots.sh
         env:
           BOT: ${{ matrix.bot }}
           PLATFORM: vm
         run: ./tool/bots.sh
-                
+
   macos-test:
     needs: flutter-prep
     name: macos goldens ${{ matrix.bot }}
@@ -128,27 +128,27 @@ jobs:
           - test_dart2js
         only_golden:
           - true
-        
+
     steps:
       - name: git clone
-        uses: actions/checkout@24cb9080177205b6e8c946b17badbe402adc938f
+        uses: actions/checkout@8f4b7f84864484a7bf31766abe9204da3cbe65b3
       - name: Load Cached Flutter SDK
         uses: actions/cache@88522ab9f39a2ea568f7027eddc7d8d8bc9d59c8
         with:
           path: |
             ./flutter-sdk
-          key: flutter-sdk-${{ runner.os }}-${{ needs.flutter-prep.outputs.latest_flutter_candidate }} 
+          key: flutter-sdk-${{ runner.os }}-${{ needs.flutter-prep.outputs.latest_flutter_candidate }}
       - name: tool/bots.sh
         env:
           BOT: ${{ matrix.bot }}
           PLATFORM: vm
           ONLY_GOLDEN: ${{ matrix.only_golden }}
         run: ./tool/bots.sh
-  
+
       - name: Upload Golden Failure Artifacts
         uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce
         if: failure()
-        with: 
+        with:
           name: golden_image_failures.${{ matrix.bot }}
           path: packages/devtools_app/test/**/failures/*.png
 
@@ -164,13 +164,13 @@ jobs:
           - integration_dart2js
     steps:
       - name: git clone
-        uses: actions/checkout@24cb9080177205b6e8c946b17badbe402adc938f
+        uses: actions/checkout@8f4b7f84864484a7bf31766abe9204da3cbe65b3
       - name: Load Cached Flutter SDK
         uses: actions/cache@88522ab9f39a2ea568f7027eddc7d8d8bc9d59c8
         with:
           path: |
             ./flutter-sdk
-          key: flutter-sdk-${{ runner.os }}-${{ needs.flutter-prep.outputs.latest_flutter_candidate }} 
+          key: flutter-sdk-${{ runner.os }}-${{ needs.flutter-prep.outputs.latest_flutter_candidate }}
       - name: tool/bots.sh
         env:
           BOT: ${{ matrix.bot }}
@@ -179,10 +179,9 @@ jobs:
       - name: Upload Golden Failure Artifacts
         uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce
         if: failure()
-        with: 
+        with:
           name: golden_image_failures.${{ matrix.bot }}
           path: packages/devtools_app/integration_test/**/failures/*.png
-
 # TODO(https://github.com/flutter/devtools/issues/1715): add a windows compatible version of tool/bots.sh
 # and run it from this job.
 #  windows-test:
@@ -195,7 +194,7 @@ jobs:
 #          - test_dart2js
 #    steps:
 #      - name: git clone
-#        uses: actions/checkout@24cb9080177205b6e8c946b17badbe402adc938f
+#        uses: actions/checkout@8f4b7f84864484a7bf31766abe9204da3cbe65b3
 #
 #      - name: tool/bots.sh
 #        env:
@@ -215,7 +214,7 @@ jobs:
 #          - integration_dart2js
 #    steps:
 #      - name: git clone
-#        uses: actions/checkout@24cb9080177205b6e8c946b17badbe402adc938f
+#        uses: actions/checkout@8f4b7f84864484a7bf31766abe9204da3cbe65b3
 #      - name: tool/bots.sh
 #        env:
 #          BOT: ${{ matrix.bot }}

@@ -147,9 +147,9 @@ class PerformanceData {
         flutterFramesKey: frames.map((frame) => frame.json).toList(),
         displayRefreshRateKey: displayRefreshRate,
         traceEventsKey: traceEvents,
-        selectedEventKey: selectedEvent?.json ?? {},
-        cpuProfileKey: cpuProfileData?.toJson ?? {},
-        rasterStatsKey: rasterStats?.json ?? {},
+        selectedEventKey: selectedEvent?.json ?? <String, dynamic>{},
+        cpuProfileKey: cpuProfileData?.toJson ?? <String, dynamic>{},
+        rasterStatsKey: rasterStats?.json ?? <String, dynamic>{},
         rebuildCountModelKey: rebuildCountModel.toJson(),
       };
 }
@@ -535,7 +535,7 @@ abstract class TimelineEvent extends TreeNode<TimelineEvent>
   int? get threadId => traceEvents.first.event.threadId;
 
   @override
-  String get tooltip => '$name - ${msText(time.duration)}';
+  String get tooltip => '$name - ${durationText(time.duration)}';
 
   bool _isWellFormedDeep(TimelineEvent event) {
     return !subtreeHasNodeWithCondition((e) => !e.isWellFormed);
