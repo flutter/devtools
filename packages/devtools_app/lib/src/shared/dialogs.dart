@@ -56,8 +56,7 @@ class UnexpectedErrorDialog extends StatelessWidget {
       title: const Text('Unexpected Error'),
       content: Text(
         errorDetails,
-        style: theme.regularTextStyle
-            .apply(fontFamily: theme.fixedFontStyle.fontFamily),
+        style: theme.fixedFontStyle,
       ),
       actions: [
         DialogTextButton(
