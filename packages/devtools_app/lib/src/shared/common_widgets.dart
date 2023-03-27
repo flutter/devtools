@@ -2527,7 +2527,7 @@ class HelpButtonWithDialog extends StatelessWidget {
     if (asAction)
       return ToolbarAction(
         icon: Icons.help_outline,
-        tooltip: 'Helo',
+        tooltip: 'Help',
         onPressed: () {
           ga.select(gaScreen, gaSelection);
           openDialog(context);

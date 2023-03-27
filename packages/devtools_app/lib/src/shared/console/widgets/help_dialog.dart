@@ -2,26 +2,29 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../../../shared/analytics/constants.dart' as gac;
 import '../../common_widgets.dart';
+import '../../dialogs.dart';
 
-class ConsoleHelpLink extends StatelessWidget {
-  const ConsoleHelpLink({Key? key}) : super(key: key);
+class ConsoleHelpDialog extends StatelessWidget {
+  const ConsoleHelpDialog({super.key});
 
-  static const _documentationTopic = gac.consoleHelp;
+  @override
+  Widget build(BuildContext context) {
+    const documentationTopic = gac.consoleHelp;
 
-  HelpButtonWithDialog _createButton() => HelpButtonWithDialog(
-        asAction: true,
-        gaScreen: gac.memory,
-        gaSelection: gac.topicDocumentationButton(_documentationTopic),
-        dialogTitle: 'Console Help',
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            const Text(
-              r'''
+    return DevToolsDialog(
+      title: const DialogTitleText('Console Help'),
+      includeDivider: false,
+      content: Column(
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          const Text(
+            r'''
 Use debug console to:
 
 1. Watch the standard output (stdout) of the application.
@@ -32,21 +35,39 @@ Assign previously evaluated objects to variable
 using $0, $1 … $5.
 Example: var x = $0
 ''',
-            ),
-            MoreInfoLink(
-              // TODO(polina-c): create content at link.
-              url:
-                  'https://docs.flutter.dev/development/tools/devtools/console',
-              gaScreenName: '',
-              gaSelectedItemDescription:
-                  gac.topicDocumentationLink(_documentationTopic),
-            ),
-          ],
-        ),
-      );
+          ),
+          MoreInfoLink(
+            // TODO(polina-c): create content at link.
+            url: 'https://docs.flutter.dev/development/tools/devtools/console',
+            gaScreenName: gac.memory,
+            gaSelectedItemDescription:
+                gac.topicDocumentationLink(documentationTopic),
+          ),
+        ],
+      ),
+      actions: const [
+        DialogCloseButton(),
+      ],
+    );
+  }
+}
 
-  void openDialog(BuildContext context) => _createButton().openDialog(context);
+class ConsoleHelpLink extends StatelessWidget {
+  const ConsoleHelpLink({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) => _createButton();
+  Widget build(BuildContext context) {
+    return ToolbarAction(
+      icon: Icons.help_outline,
+      tooltip: 'Help',
+      onPressed: () {
+        unawaited(
+          showDialog(
+            context: context,
+            builder: (context) => const ConsoleHelpDialog(),
+          ),
+        );
+      },
+    );
+  }
 }

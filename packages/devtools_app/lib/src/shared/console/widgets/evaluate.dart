@@ -315,7 +315,12 @@ class ExpressionEvalFieldState extends State<ExpressionEvalField>
     if (expressionText.isEmpty) return;
 
     if (FeatureFlags.evalAndBrowse && expressionText.trim() == '?') {
-      const ConsoleHelpLink().openDialog(context);
+      unawaited(
+        showDialog(
+          context: context,
+          builder: (context) => const ConsoleHelpDialog(),
+        ),
+      );
       return;
     }
 
