@@ -92,7 +92,9 @@ void main() {
 
     testWidgetsWithWindowSize('builds for offline mode', windowSize,
         (WidgetTester tester) async {
-      offlineController.enterOfflineMode();
+      offlineController.enterOfflineMode(
+        offlineApp: serviceManager.connectedApp!,
+      );
       await _pumpControls(tester);
       expect(find.byType(ExitOfflineButton), findsOneWidget);
       expect(find.byType(VisibilityButton), findsOneWidget);

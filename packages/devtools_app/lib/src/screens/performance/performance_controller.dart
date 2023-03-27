@@ -102,6 +102,8 @@ class PerformanceController extends DisposableController
 
   Future<void> _initHelper() async {
     initData();
+    initReviewHistoryOnDisconnectListener();
+
     await _applyToFeatureControllersAsync((c) => c.init());
     if (!offlineController.offlineMode.value) {
       await serviceManager.onServiceAvailable;

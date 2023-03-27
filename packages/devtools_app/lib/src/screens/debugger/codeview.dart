@@ -66,7 +66,8 @@ class CodeView extends StatefulWidget {
   static const debuggerCodeViewVerticalScrollbarKey =
       Key('debuggerCodeViewVerticalScrollbarKey');
 
-  static double get rowHeight => scaleByFontFactor(20.0);
+  static double get rowHeight =>
+      isDense() ? scaleByFontFactor(16.0) : scaleByFontFactor(20.0);
 
   final CodeViewController codeViewController;
   final DebuggerController? debuggerController;
@@ -1483,7 +1484,7 @@ final copyPackagePathOption = ScriptPopupMenuOption(
   label: 'Copy package path',
   icon: Icons.content_copy,
   onSelected: (_, controller) => Clipboard.setData(
-    ClipboardData(text: controller.scriptLocation.value?.scriptRef.uri),
+    ClipboardData(text: controller.scriptLocation.value?.scriptRef.uri ?? ''),
   ),
 );
 
@@ -1492,8 +1493,9 @@ final copyFilePathOption = ScriptPopupMenuOption(
   icon: Icons.content_copy,
   onSelected: (_, controller) {
     unawaited(() async {
+      final filePath = await fetchScriptLocationFullFilePath(controller);
       await Clipboard.setData(
-        ClipboardData(text: await fetchScriptLocationFullFilePath(controller)),
+        ClipboardData(text: filePath ?? ''),
       );
     }());
   },

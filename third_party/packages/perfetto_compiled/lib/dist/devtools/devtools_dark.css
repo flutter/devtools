@@ -7,8 +7,10 @@ found in the LICENSE file.
 @import "devtools_shared.css";
 
 :root {
-    --devtools-dark-background-color: #303030;
-    --devtools-dark-primary-color: #C0C0C0;
+    /* Matches [darkColorScheme.surface] color from DevTools. */
+    --devtools-dark-background-color: #1B1B1F;
+    /* Matches [darkColorScheme.onSurface] color from DevTools. */
+    --devtools-dark-primary-color: #C7C6CA;
     --overview-timeline-non-visible-color: #6e6e6e80 !important;
     /* Perfetto CSS variable overrides. */
     /* DevTools-specific CSS variables. Prefix with 'devtools' so that
