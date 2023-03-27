@@ -435,6 +435,7 @@ class HelpButton extends StatelessWidget {
     required this.onPressed,
     required this.gaScreen,
     required this.gaSelection,
+    this.outlined = true,
   });
 
   final VoidCallback onPressed;
@@ -442,6 +443,8 @@ class HelpButton extends StatelessWidget {
   final String gaScreen;
 
   final String gaSelection;
+
+  final bool outlined;
 
   @override
   Widget build(BuildContext context) {
@@ -451,35 +454,69 @@ class HelpButton extends StatelessWidget {
       tooltip: 'Help',
       gaScreen: gaScreen,
       gaSelection: gaSelection,
+      outlined: outlined,
     );
   }
 }
 
 class ExpandAllButton extends StatelessWidget {
-  const ExpandAllButton({Key? key, required this.onPressed}) : super(key: key);
+  const ExpandAllButton({
+    super.key,
+    required this.gaScreen,
+    required this.gaSelection,
+    required this.onPressed,
+    this.minScreenWidthForTextBeforeScaling,
+  });
 
   final VoidCallback onPressed;
 
+  final String gaScreen;
+
+  final String gaSelection;
+
+  final double? minScreenWidthForTextBeforeScaling;
+
   @override
   Widget build(BuildContext context) {
-    return OutlinedButton(
+    return DevToolsButton(
+      icon: Icons.unfold_more,
+      label: 'Expand All',
+      tooltip: 'Expand All',
       onPressed: onPressed,
-      child: const Text('Expand All'),
+      gaScreen: gaScreen,
+      gaSelection: gaSelection,
+      minScreenWidthForTextBeforeScaling: minScreenWidthForTextBeforeScaling,
     );
   }
 }
 
 class CollapseAllButton extends StatelessWidget {
-  const CollapseAllButton({Key? key, required this.onPressed})
-      : super(key: key);
+  const CollapseAllButton({
+    super.key,
+    required this.gaScreen,
+    required this.gaSelection,
+    required this.onPressed,
+    this.minScreenWidthForTextBeforeScaling,
+  });
 
   final VoidCallback onPressed;
 
+  final String gaScreen;
+
+  final String gaSelection;
+
+  final double? minScreenWidthForTextBeforeScaling;
+
   @override
   Widget build(BuildContext context) {
-    return OutlinedButton(
+    return DevToolsButton(
+      icon: Icons.unfold_less,
+      label: 'Collapse All',
+      tooltip: 'Collapse All',
       onPressed: onPressed,
-      child: const Text('Collapse All'),
+      gaScreen: gaScreen,
+      gaSelection: gaSelection,
+      minScreenWidthForTextBeforeScaling: minScreenWidthForTextBeforeScaling,
     );
   }
 }
@@ -2493,6 +2530,7 @@ class HelpButtonWithDialog extends StatelessWidget {
     required this.gaSelection,
     required this.dialogTitle,
     required this.child,
+    this.outlined = true,
   });
 
   final String gaScreen;
@@ -2503,30 +2541,30 @@ class HelpButtonWithDialog extends StatelessWidget {
 
   final Widget child;
 
-  void openDialog(BuildContext context) {
-    unawaited(
-      showDialog(
-        context: context,
-        builder: (context) => DevToolsDialog(
-          title: DialogTitleText(dialogTitle),
-          includeDivider: false,
-          content: child,
-          actions: const [
-            DialogCloseButton(),
-          ],
-        ),
-      ),
-    );
-  }
+  final bool outlined;
 
   @override
   Widget build(BuildContext context) {
     return HelpButton(
       onPressed: () {
-        openDialog(context);
+        ga.select(gaScreen, gaSelection);
+        unawaited(
+          showDialog(
+            context: context,
+            builder: (context) => DevToolsDialog(
+              title: DialogTitleText(dialogTitle),
+              includeDivider: false,
+              content: child,
+              actions: const [
+                DialogCloseButton(),
+              ],
+            ),
+          ),
+        );
       },
       gaScreen: gaScreen,
       gaSelection: gaSelection,
+      outlined: outlined,
     );
   }
 }
