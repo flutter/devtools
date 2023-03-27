@@ -6,9 +6,10 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
-import '../../../../devtools_app.dart';
 import '../../../shared/analytics/constants.dart' as gac;
+import '../../common_widgets.dart';
 import '../../dialogs.dart';
+import '../../theme.dart';
 
 class ConsoleHelpDialog extends StatelessWidget {
   const ConsoleHelpDialog({super.key});
@@ -41,16 +42,14 @@ Example: ''',
                 ),
                 TextSpan(
                   text: r'var x = $0',
-                  style: textStyle.apply(
-                    fontFamily: theme.fixedFontStyle.fontFamily,
-                  ),
+                  style: theme.fixedFontStyle,
                 )
               ],
             ),
           ),
           MoreInfoLink(
-            // TODO(polina-c): create content at link.
-            url: 'https://docs.flutter.dev/development/tools/devtools/console',
+            // TODO(polina-c): create content and change url.
+            url: 'https://docs.flutter.dev/development/tools/devtools',
             gaScreenName: gac.memory,
             gaSelectedItemDescription:
                 gac.topicDocumentationLink(documentationTopic),
