@@ -20,10 +20,8 @@ jobs:
     name: Dart Code Metrics
     runs-on: ubuntu-latest
     env:
-      # DCM_EMAIL: ${{ secrets.DCM_EMAIL }}
-      # DCM_CI_KEY: ${{ secrets.DCM_CI_KEY }}
-      DCM_EMAIL: gahghaghagh
-      DCM_CI_KEY: wewoijoiwjfoej
+      DCM_EMAIL: ${{ secrets.DCM_EMAIL }}
+      DCM_CI_KEY: ${{ secrets.DCM_CI_KEY }}
     steps:
       - name: Install DCM
         run: |
@@ -32,7 +30,6 @@ jobs:
           echo 'deb [signed-by=/usr/share/keyrings/dcm.gpg arch=amd64] https://dcm.dev/debian stable main' | sudo tee /etc/apt/sources.list.d/dart_stable.list
           sudo apt-get update
           sudo apt-get install dcm
-          ls -l /usr/bin/dcm
           sudo chmod +x /usr/bin/dcm
       - name: git clone devtools
         uses: actions/checkout@8f4b7f84864484a7bf31766abe9204da3cbe65b3
