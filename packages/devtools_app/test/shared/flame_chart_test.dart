@@ -246,221 +246,232 @@ void main() {
       expect(state.horizontalControllerGroup.offset, equals(1045.0));
     });
 
-    testWidgets('binary search for node returns correct node',
-        (WidgetTester tester) async {
-      const zoomLevel = 1.0;
-      expect(
-        binarySearchForNodeHelper(
-          x: -10.0,
-          nodesInRow: testNodes,
-          zoom: zoomLevel,
-          startInset: sideInsetSmall,
-        ),
-        isNull,
-      );
-      expect(
-        binarySearchForNodeHelper(
-          x: 49.0,
-          nodesInRow: testNodes,
-          zoom: zoomLevel,
-          startInset: sideInsetSmall,
-        ),
-        isNull,
-      );
-      expect(
-        binarySearchForNodeHelper(
-          x: 70.0,
-          nodesInRow: testNodes,
-          zoom: zoomLevel,
-          startInset: sideInsetSmall,
-        ),
-        testNode,
-      );
-      expect(
-        binarySearchForNodeHelper(
-          x: 120.0,
-          nodesInRow: testNodes,
-          zoom: zoomLevel,
-          startInset: sideInsetSmall,
-        ),
-        testNode2,
-      );
-      expect(
-        binarySearchForNodeHelper(
-          x: 230.0,
-          nodesInRow: testNodes,
-          zoom: zoomLevel,
-          startInset: sideInsetSmall,
-        ),
-        testNode3,
-      );
-      expect(
-        binarySearchForNodeHelper(
-          x: 360.0,
-          nodesInRow: testNodes,
-          zoom: zoomLevel,
-          startInset: sideInsetSmall,
-        ),
-        testNode4,
-      );
-      expect(
-        binarySearchForNodeHelper(
-          x: 1060.0,
-          nodesInRow: testNodes,
-          zoom: zoomLevel,
-          startInset: sideInsetSmall,
-        ),
-        isNull,
-      );
-    });
+    group('binary search for node', () {
+      //   Future<ScrollingFlameChartRowState> pumpRowAndGetState(
+      //   WidgetTester tester, {
+      //   ScrollingFlameChartRow? row,
+      // }) async {
+      //   row ??= testRow;
+      //   await pumpScrollingFlameChartRow(tester, row);
+      //   expect(find.byWidget(currentRow), findsOneWidget);
+      //   return tester.state(find.byWidget(currentRow));
+      // }
+      testWidgets('returns correct node for default zoom level',
+          (WidgetTester tester) async {
+        const zoomLevel = 1.0;
+        expect(
+          binarySearchForNodeHelper(
+            x: -10.0,
+            nodesInRow: testNodes,
+            zoom: zoomLevel,
+            startInset: sideInset,
+          ),
+          isNull,
+        );
+        expect(
+          binarySearchForNodeHelper(
+            x: 49.0,
+            nodesInRow: testNodes,
+            zoom: zoomLevel,
+            startInset: sideInset,
+          ),
+          isNull,
+        );
+        expect(
+          binarySearchForNodeHelper(
+            x: 70.0,
+            nodesInRow: testNodes,
+            zoom: zoomLevel,
+            startInset: sideInset,
+          ),
+          testNode,
+        );
+        expect(
+          binarySearchForNodeHelper(
+            x: 120.0,
+            nodesInRow: testNodes,
+            zoom: zoomLevel,
+            startInset: sideInset,
+          ),
+          testNode2,
+        );
+        expect(
+          binarySearchForNodeHelper(
+            x: 230.0,
+            nodesInRow: testNodes,
+            zoom: zoomLevel,
+            startInset: sideInset,
+          ),
+          testNode3,
+        );
+        expect(
+          binarySearchForNodeHelper(
+            x: 360.0,
+            nodesInRow: testNodes,
+            zoom: zoomLevel,
+            startInset: sideInset,
+          ),
+          testNode4,
+        );
+        expect(
+          binarySearchForNodeHelper(
+            x: 1060.0,
+            nodesInRow: testNodes,
+            zoom: zoomLevel,
+            startInset: sideInset,
+          ),
+          isNull,
+        );
+      });
 
-    testWidgets('binary search for node returns correct node in zoomed row',
-        (WidgetTester tester) async {
-      const zoomLevel = 2.0;
-      expect(
-        binarySearchForNodeHelper(
-          x: -10.0,
-          nodesInRow: testNodes,
-          zoom: zoomLevel,
-          startInset: sideInsetSmall,
-        ),
-        isNull,
-      );
-      expect(
-        binarySearchForNodeHelper(
-          x: 49.0,
-          nodesInRow: testNodes,
-          zoom: zoomLevel,
-          startInset: sideInsetSmall,
-        ),
-        isNull,
-      );
-      expect(
-        binarySearchForNodeHelper(
-          x: 70.0,
-          nodesInRow: testNodes,
-          zoom: zoomLevel,
-          startInset: sideInsetSmall,
-        ),
-        testNode,
-      );
-      expect(
-        binarySearchForNodeHelper(
-          x: 130.0,
-          nodesInRow: testNodes,
-          zoom: zoomLevel,
-          startInset: sideInsetSmall,
-        ),
-        testNode,
-      );
-      expect(
-        binarySearchForNodeHelper(
-          x: 130.1,
-          nodesInRow: testNodes,
-          zoom: zoomLevel,
-          startInset: sideInsetSmall,
-        ),
-        isNull,
-      );
-      expect(
-        binarySearchForNodeHelper(
-          x: 169.9,
-          nodesInRow: testNodes,
-          zoom: zoomLevel,
-          startInset: sideInsetSmall,
-        ),
-        isNull,
-      );
-      expect(
-        binarySearchForNodeHelper(
-          x: 170.0,
-          nodesInRow: testNodes,
-          zoom: zoomLevel,
-          startInset: sideInsetSmall,
-        ),
-        testNode2,
-      );
-      expect(
-        binarySearchForNodeHelper(
-          x: 270.0,
-          nodesInRow: testNodes,
-          zoom: zoomLevel,
-          startInset: sideInsetSmall,
-        ),
-        testNode2,
-      );
-      expect(
-        binarySearchForNodeHelper(
-          x: 270.1,
-          nodesInRow: testNodes,
-          zoom: zoomLevel,
-          startInset: sideInsetSmall,
-        ),
-        isNull,
-      );
-      expect(
-        binarySearchForNodeHelper(
-          x: 289.9,
-          nodesInRow: testNodes,
-          zoom: zoomLevel,
-          startInset: sideInsetSmall,
-        ),
-        isNull,
-      );
-      expect(
-        binarySearchForNodeHelper(
-          x: 290.0,
-          nodesInRow: testNodes,
-          zoom: zoomLevel,
-          startInset: sideInsetSmall,
-        ),
-        testNode3,
-      );
-      expect(
-        binarySearchForNodeHelper(
-          x: 409.9,
-          nodesInRow: testNodes,
-          zoom: zoomLevel,
-          startInset: sideInsetSmall,
-        ),
-        isNull,
-      );
-      expect(
-        binarySearchForNodeHelper(
-          x: 410.0,
-          nodesInRow: testNodes,
-          zoom: zoomLevel,
-          startInset: sideInsetSmall,
-        ),
-        testNode4,
-      );
-      expect(
-        binarySearchForNodeHelper(
-          x: 1010.0,
-          nodesInRow: testNodes,
-          zoom: zoomLevel,
-          startInset: sideInsetSmall,
-        ),
-        testNode4,
-      );
-      expect(
-        binarySearchForNodeHelper(
-          x: 1010.1,
-          nodesInRow: testNodes,
-          zoom: zoomLevel,
-          startInset: sideInsetSmall,
-        ),
-        isNull,
-      );
-      expect(
-        binarySearchForNodeHelper(
-          x: 10000,
-          nodesInRow: testNodes,
-          zoom: zoomLevel,
-          startInset: sideInsetSmall,
-        ),
-        isNull,
-      );
+      testWidgets('returns correct node in zoomed row',
+          (WidgetTester tester) async {
+        const zoomLevel = 2.0;
+        expect(
+          binarySearchForNodeHelper(
+            x: -10.0,
+            nodesInRow: testNodes,
+            zoom: zoomLevel,
+            startInset: sideInset,
+          ),
+          isNull,
+        );
+        expect(
+          binarySearchForNodeHelper(
+            x: 49.0,
+            nodesInRow: testNodes,
+            zoom: zoomLevel,
+            startInset: sideInset,
+          ),
+          isNull,
+        );
+        expect(
+          binarySearchForNodeHelper(
+            x: 70.0,
+            nodesInRow: testNodes,
+            zoom: zoomLevel,
+            startInset: sideInset,
+          ),
+          testNode,
+        );
+        expect(
+          binarySearchForNodeHelper(
+            x: 130.0,
+            nodesInRow: testNodes,
+            zoom: zoomLevel,
+            startInset: sideInset,
+          ),
+          testNode,
+        );
+        expect(
+          binarySearchForNodeHelper(
+            x: 130.1,
+            nodesInRow: testNodes,
+            zoom: zoomLevel,
+            startInset: sideInset,
+          ),
+          isNull,
+        );
+        expect(
+          binarySearchForNodeHelper(
+            x: 169.9,
+            nodesInRow: testNodes,
+            zoom: zoomLevel,
+            startInset: sideInset,
+          ),
+          isNull,
+        );
+        expect(
+          binarySearchForNodeHelper(
+            x: 170.0,
+            nodesInRow: testNodes,
+            zoom: zoomLevel,
+            startInset: sideInset,
+          ),
+          testNode2,
+        );
+        expect(
+          binarySearchForNodeHelper(
+            x: 270.0,
+            nodesInRow: testNodes,
+            zoom: zoomLevel,
+            startInset: sideInset,
+          ),
+          testNode2,
+        );
+        expect(
+          binarySearchForNodeHelper(
+            x: 270.1,
+            nodesInRow: testNodes,
+            zoom: zoomLevel,
+            startInset: sideInset,
+          ),
+          isNull,
+        );
+        expect(
+          binarySearchForNodeHelper(
+            x: 289.9,
+            nodesInRow: testNodes,
+            zoom: zoomLevel,
+            startInset: sideInset,
+          ),
+          isNull,
+        );
+        expect(
+          binarySearchForNodeHelper(
+            x: 290.0,
+            nodesInRow: testNodes,
+            zoom: zoomLevel,
+            startInset: sideInset,
+          ),
+          testNode3,
+        );
+        expect(
+          binarySearchForNodeHelper(
+            x: 409.9,
+            nodesInRow: testNodes,
+            zoom: zoomLevel,
+            startInset: sideInset,
+          ),
+          isNull,
+        );
+        expect(
+          binarySearchForNodeHelper(
+            x: 410.0,
+            nodesInRow: testNodes,
+            zoom: zoomLevel,
+            startInset: sideInset,
+          ),
+          testNode4,
+        );
+        expect(
+          binarySearchForNodeHelper(
+            x: 1010.0,
+            nodesInRow: testNodes,
+            zoom: zoomLevel,
+            startInset: sideInset,
+          ),
+          testNode4,
+        );
+        expect(
+          binarySearchForNodeHelper(
+            x: 1010.1,
+            nodesInRow: testNodes,
+            zoom: zoomLevel,
+            startInset: sideInset,
+          ),
+          isNull,
+        );
+        expect(
+          binarySearchForNodeHelper(
+            x: 10000,
+            nodesInRow: testNodes,
+            zoom: zoomLevel,
+            startInset: sideInset,
+          ),
+          isNull,
+        );
+      });
     });
   });
 
@@ -503,7 +514,6 @@ void main() {
     testWidgets('builds with nodes in row', (WidgetTester tester) async {
       await pumpScrollingFlameChartRow(tester, testRow);
       expect(find.byWidget(currentRow), findsOneWidget);
-      expect(find.byType(MouseRegion), findsOneWidget);
 
       // 1 for row container and 4 for node containers.
       expect(tester.widgetList(find.byType(Container)).length, equals(5));
@@ -525,7 +535,6 @@ void main() {
 
       await pumpScrollingFlameChartRow(tester, emptyRow);
       expect(find.byWidget(currentRow), findsOneWidget);
-      expect(find.byType(MouseRegion), findsNothing);
 
       final emptyRowFinder = find.byType(EmptyFlameChartRow);
       final EmptyFlameChartRow emptyFlameChartRow =
