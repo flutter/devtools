@@ -55,7 +55,7 @@ class UnexpectedErrorDialog extends StatelessWidget {
       content: Text(errorDetails),
       actions: [
         DialogTextButton(
-          child: const Text('Copy Details'),
+          child: const Text('Copy details'),
           onPressed: () => unawaited(
             copyToClipboard(
               errorDetails,
@@ -64,7 +64,7 @@ class UnexpectedErrorDialog extends StatelessWidget {
           ),
         ),
         DialogTextButton(
-          child: const Text('Create Issue'),
+          child: const Text('Create issue'),
           onPressed: () => unawaited(
             launchUrl(
               devToolsExtensionPoints.issueTrackerLink().url,
