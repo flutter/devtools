@@ -6,8 +6,8 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import '../../../../devtools_app.dart';
 import '../../../shared/analytics/constants.dart' as gac;
-import '../../common_widgets.dart';
 import '../../dialogs.dart';
 
 class ConsoleHelpDialog extends StatelessWidget {
@@ -16,25 +16,37 @@ class ConsoleHelpDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const documentationTopic = gac.consoleHelp;
-
+    final theme = Theme.of(context);
+    final textStyle = theme.regularTextStyle;
     return DevToolsDialog(
       title: const DialogTitleText('Console Help'),
       includeDivider: false,
       content: Column(
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          const Text(
-            r'''
+          RichText(
+            text: TextSpan(
+              style: textStyle,
+              children: [
+                const TextSpan(
+                  text: r'''
 Use debug console to:
 
 1. Watch the standard output (stdout) of the application.
 2. Evaluate expressions for a paused or running application.
 3. Analyze inbound and outbound references for objects, dropped from memory heap snapshots.
 
-Assign previously evaluated objects to variable
-using $0, $1 … $5.
-Example: var x = $0
-''',
+Assign previously evaluated objects to variable using $0, $1 … $5.
+Example: ''',
+                ),
+                TextSpan(
+                  text: r'var x = $0',
+                  style: textStyle.apply(
+                    fontFamily: theme.fixedFontStyle.fontFamily,
+                  ),
+                )
+              ],
+            ),
           ),
           MoreInfoLink(
             // TODO(polina-c): create content at link.
