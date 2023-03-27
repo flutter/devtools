@@ -453,12 +453,6 @@ extension ThemeDataExtension on ThemeData {
         ),
       );
 
-  // TextStyle codeTextStyle() => _fixBlurryText(
-  //       TextStyle. (
-  //         fontFamily: fixedFontStyle.fontFamily,
-  //       ),
-  //     );
-
   TextStyle get selectedLinkTextStyle => _fixBlurryText(
         linkTextStyle.copyWith(color: colorScheme.devtoolsSelectedLink),
       );
