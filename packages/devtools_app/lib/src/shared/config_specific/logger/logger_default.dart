@@ -2,9 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// ignore_for_file: avoid_print
+
 import 'logger.dart';
 
-void log(Object message, [LogLevel level = LogLevel.debug]) {
+void printToConsole(Object message, [LogLevel level = LogLevel.debug]) {
   switch (level) {
     case LogLevel.debug:
       print(message);

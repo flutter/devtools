@@ -7,11 +7,13 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
+import 'package:logging/logging.dart';
 
-import '../../shared/config_specific/logger/logger.dart';
 import '../../shared/primitives/utils.dart';
 import '../../shared/theme.dart';
 import 'span_parser.dart';
+
+final _log = Logger('syntax_highlighter');
 
 class SyntaxHighlighter {
   SyntaxHighlighter({source}) : source = source ?? '';
@@ -49,10 +51,9 @@ class SyntaxHighlighter {
         // required by the syntax highlighting. An unhandled exception here will
         // prevent DevTools initializing, so just print the error and leave
         // syntax highlighting disabled if this happens.
-        log(
+        _log.warning(
           'Failed to load Dart Syntax Highlighting:\n'
           '$error',
-          LogLevel.warning,
         );
       }
     }

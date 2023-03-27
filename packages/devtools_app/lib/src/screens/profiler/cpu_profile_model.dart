@@ -6,10 +6,10 @@ import 'dart:collection';
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
+import 'package:logging/logging.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../../shared/charts/flame_chart.dart';
-import '../../shared/config_specific/logger/logger.dart';
 import '../../shared/globals.dart';
 import '../../shared/primitives/simple_items.dart';
 import '../../shared/primitives/trace_event.dart';
@@ -20,6 +20,8 @@ import '../../shared/ui/search.dart';
 import '../vm_developer/vm_service_private_extensions.dart';
 import 'cpu_profile_transformer.dart';
 import 'cpu_profiler_controller.dart';
+
+final _log = Logger('lib/src/screens/profiler/cpu_profile_model');
 
 /// A convenience wrapper for managing CPU profiles with both function and code
 /// profile views.
@@ -1207,8 +1209,8 @@ class CpuProfileStore {
   }
 
   void debugPrintKeys() {
-    log('_profilesByLabel: ${_profilesByLabel.keys}');
-    log('_profilesByTime: ${_profilesByTime.keys}');
+    _log.info('_profilesByLabel: ${_profilesByLabel.keys}');
+    _log.info('_profilesByTime: ${_profilesByTime.keys}');
   }
 }
 
