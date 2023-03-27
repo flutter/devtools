@@ -403,7 +403,7 @@ abstract class FlameChartState<T extends FlameChart,
   }
 
   /// Returns the nodes for the row at the given [dy] mouse position.
-  /// 
+  ///
   /// Returns null if there is not a row at the given position.
   List<FlameChartNode<V>>? _nodesForRowAtY(double dy) {
     final rowIndex = _rowIndexForY(dy);
