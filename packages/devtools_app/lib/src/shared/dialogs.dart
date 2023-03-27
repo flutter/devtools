@@ -9,7 +9,7 @@ import 'package:pointer_interceptor/pointer_interceptor.dart';
 
 import '../shared/config_specific/launch_url/launch_url.dart';
 import 'common_widgets.dart';
-import 'globals.dart';
+import 'new_issue.dart';
 import 'theme.dart';
 import 'ui/label.dart';
 import 'utils.dart';
@@ -67,7 +67,7 @@ class UnexpectedErrorDialog extends StatelessWidget {
           child: const Text('Create issue'),
           onPressed: () => unawaited(
             launchUrl(
-              devToolsExtensionPoints.issueTrackerLink().url,
+              newDevToolsIssueUri(issueDetails: errorDetails).toString(),
             ),
           ),
         ),

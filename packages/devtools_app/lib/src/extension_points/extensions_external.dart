@@ -7,7 +7,7 @@ import '../shared/analytics/constants.dart' as gac;
 import '../shared/common_widgets.dart';
 import '../shared/diagnostics/inspector_service.dart';
 import '../shared/globals.dart';
-import '../shared/utils.dart';
+import '../shared/new_issue.dart';
 import 'extensions_base.dart';
 
 class ExternalDevToolsExtensionPoints implements DevToolsExtensionPoints {
@@ -17,17 +17,9 @@ class ExternalDevToolsExtensionPoints implements DevToolsExtensionPoints {
 
   @override
   Link issueTrackerLink() {
-    final issueBodyItems = issueLinkDetails();
-    final issueBody = issueBodyItems.join('\n');
-    const githubLinkDisplay = 'github.com/flutter/devtools/issues/new';
-    final githubUri = Uri.parse('https://$githubLinkDisplay').replace(
-      queryParameters: {
-        'body': issueBody,
-      },
-    );
     return Link(
-      display: githubLinkDisplay,
-      url: githubUri.toString(),
+      display: githubNewIssueUriDisplay,
+      url: newDevToolsIssueUri().toString(),
       gaScreenName: gac.devToolsMain,
       gaSelectedItemDescription: gac.feedbackLink,
     );
