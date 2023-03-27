@@ -14,6 +14,7 @@ Dart & Flutter DevTools - A Suite of Performance Tools for Dart and Flutter
 * Added support for viewing data after an app disconnects for screens that
 support offline viewing (currently only the Performance and CPU proiler pages).
 [#5509](https://github.com/flutter/devtools/pull/5509)
+* Include settings button in the footer of the embedded view. - [#5528](https://github.com/flutter/devtools/pull/5528)
 
 ## Inspector updates
 TODO: Remove this section if there are not any general updates.
