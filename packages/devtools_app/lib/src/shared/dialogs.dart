@@ -50,9 +50,15 @@ class UnexpectedErrorDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return DevToolsDialog(
       title: const Text('Unexpected Error'),
-      content: Text(errorDetails),
+      content: Text(
+        errorDetails,
+        style: theme.regularTextStyle
+            .apply(fontFamily: theme.fixedFontStyle.fontFamily),
+      ),
       actions: [
         DialogTextButton(
           child: const Text('Copy details'),
