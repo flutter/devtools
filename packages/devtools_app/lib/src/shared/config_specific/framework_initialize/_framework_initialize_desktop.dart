@@ -6,11 +6,13 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
+import 'package:logging/logging.dart';
 import 'package:path/path.dart' as path;
 
 import '../../globals.dart';
 import '../../primitives/storage.dart';
-import '../logger/logger.dart';
+
+final _log = Logger('_framework_initialize_desktop');
 
 /// Return the url the application is launched from.
 Future<String> initializePlatform() async {
@@ -54,7 +56,7 @@ class FlutterDesktopStorage implements Storage {
       }
     } catch (e, st) {
       // ignore the error reading
-      log('$e\n$st');
+      _log.info(e, e, st);
       return {};
     }
   }
