@@ -217,7 +217,7 @@ class OfflineConnectedApp extends ConnectedApp {
     this.operatingSystem = ConnectedApp._unknownOS,
   });
 
-  factory OfflineConnectedApp.parse(Map<String, Object>? json) {
+  factory OfflineConnectedApp.parse(Map<String, Object?>? json) {
     if (json == null) return OfflineConnectedApp();
     return OfflineConnectedApp(
       isFlutterAppNow: json[ConnectedApp.isFlutterAppKey] as bool?,

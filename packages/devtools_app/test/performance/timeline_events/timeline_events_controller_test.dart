@@ -57,7 +57,9 @@ void main() {
         isNull,
       );
 
-      offlineController.enterOfflineMode();
+      offlineController.enterOfflineMode(
+        offlineApp: serviceManager.connectedApp!,
+      );
       final traceEvents = [...goldenUiTraceEvents, ...goldenRasterTraceEvents]
           .map((e) => e.json)
           .toList()

@@ -47,6 +47,7 @@ class FrameworkCore {
     String url, {
     Uri? explicitUri,
     required ErrorReporter errorReporter,
+    bool logException = true,
   }) async {
     if (serviceManager.hasConnection) {
       // TODO(https://github.com/flutter/devtools/issues/1568): why do we call
@@ -68,8 +69,9 @@ class FrameworkCore {
         breakpointManager.initialize();
         return true;
       } catch (e, st) {
-        log('$e\n$st', LogLevel.error);
-
+        if (logException) {
+          log('$e\n$st', LogLevel.error);
+        }
         errorReporter('Unable to connect to VM service at $uri: $e', e);
         return false;
       }

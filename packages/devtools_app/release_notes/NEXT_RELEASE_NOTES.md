@@ -11,6 +11,9 @@ Dart & Flutter DevTools - A Suite of Performance Tools for Dart and Flutter
 * Added the new verbose logging feature for helping us debug user issues. [#5404](https://github.com/flutter/devtools/pull/5404)
     ![verbose logging](images/verbose-logging.png "verbose_logging")
 * Fix a bug where some asynchronous errors were not being reported. [#5456](https://github.com/flutter/devtools/pull/5456)
+* Added support for viewing data after an app disconnects for screens that
+support offline viewing (currently only the Performance and CPU proiler pages).
+[#5509](https://github.com/flutter/devtools/pull/5509)
 
 ## Inspector updates
 TODO: Remove this section if there are not any general updates.
@@ -41,10 +44,12 @@ jank is detected on an iOS device. - [#5455](https://github.com/flutter/devtools
 * Add search icon in file bar to make file search more discoverable - [#5351](https://github.com/flutter/devtools/issues/5351)
 * Allow expression evaluation when pausing in JS for web apps - [#5427](https://github.com/flutter/devtools/pull/5427)
 * Update syntax highlighting to [dart-lang/dart-syntax-highlight v1.2.0](https://github.com/dart-lang/dart-syntax-highlight/blob/master/CHANGELOG.md#120-2023-01-30) - [#5477](https://github.com/flutter/devtools/pull/5477)
+* Debugger panel respects "dense mode" - [#5517](https://github.com/flutter/devtools/pull/5517)
 
 ## Network profiler updates
 * Fix a bug viewing JSON responses with null values - [#5424](https://github.com/flutter/devtools/pull/5424)
 * Fix a bug where JSON requests were shown in plain text, instead of the formatted JSON viewer - [#5463](https://github.com/flutter/devtools/pull/5463)
+* Fix a UI issue where the copy button on the response or request tab would let you copy while still loading the data - [#5476](https://github.com/flutter/devtools/pull/5476)
 
 ## Logging updates
 TODO: Remove this section if there are not any general updates.

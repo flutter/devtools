@@ -192,7 +192,9 @@ void main() {
     });
 
     testWidgets('are correct when offline', (WidgetTester tester) async {
-      offlineController.enterOfflineMode();
+      offlineController.enterOfflineMode(
+        offlineApp: serviceManager.connectedApp!,
+      );
       setupMockValues(web: true); // Web apps would normally hide
 
       expect(

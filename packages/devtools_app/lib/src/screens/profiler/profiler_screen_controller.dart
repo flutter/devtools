@@ -37,6 +37,7 @@ class ProfilerScreenController extends DisposableController
   }
 
   Future<void> _initHelper() async {
+    initReviewHistoryOnDisconnectListener();
     if (!offlineController.offlineMode.value) {
       await allowedError(
         serviceManager.service!.setProfilePeriod(mediumProfilePeriod),
@@ -45,7 +46,11 @@ class ProfilerScreenController extends DisposableController
 
       _currentIsolate = serviceManager.isolateManager.selectedIsolate.value;
       addAutoDisposeListener(serviceManager.isolateManager.selectedIsolate, () {
-        switchToIsolate(serviceManager.isolateManager.selectedIsolate.value);
+        final selectedIsolate =
+            serviceManager.isolateManager.selectedIsolate.value;
+        if (selectedIsolate != null) {
+          switchToIsolate(selectedIsolate);
+        }
       });
 
       addAutoDisposeListener(preferences.vmDeveloperModeEnabled, () async {

@@ -64,7 +64,8 @@ class CodeView extends StatefulWidget {
   static const debuggerCodeViewVerticalScrollbarKey =
       Key('debuggerCodeViewVerticalScrollbarKey');
 
-  static double get rowHeight => scaleByFontFactor(20.0);
+  static double get rowHeight =>
+      isDense() ? scaleByFontFactor(16.0) : scaleByFontFactor(20.0);
 
   final CodeViewController codeViewController;
   final DebuggerController? debuggerController;

@@ -17,7 +17,7 @@ TOOL_DIR=`dirname "${RELATIVE_PATH_TO_SCRIPT}"`
 
 pushd "$TOOL_DIR"
 dart pub get
-REQUIRED_FLUTTER_TAG="tags/$(./latest_flutter_candidate.sh)"
+REQUIRED_FLUTTER_TAG="$(./latest_flutter_candidate.sh | sed 's/^.*refs\///')"
 
 echo "REQUIRED_FLUTTER_TAG: $REQUIRED_FLUTTER_TAG"
 
@@ -29,12 +29,17 @@ if [[ $UPDATE_LOCALLY = "--local" ]]; then
   FLUTTER_DIR="$FLUTTER_BIN/.."
 
   pushd $FLUTTER_DIR
-  # TODO: add a check here to verify that upstream is the remote flutter/flutter
+
+  UPSTREAM_REMOTE_COUNT=$(git remote -v| grep -cE '^upstream[[:space:]]+git@github.com:flutter/flutter.git' || true)
+  if [ "$UPSTREAM_REMOTE_COUNT" -lt "2" ] ; then
+    echo "Error: please make sure the flutter repository 'upstream' remote is set to 'git@github.com:flutter/flutter.git'";
+    exit 1;
+  fi 
   # Stash any local flutter SDK changes if they exist.
   git stash
+  git fetch upstream
   git checkout upstream/master
   git reset --hard upstream/master
-  git fetch upstream
   git checkout $REQUIRED_FLUTTER_TAG -f
   flutter --version
   popd
