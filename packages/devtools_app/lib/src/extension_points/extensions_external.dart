@@ -18,7 +18,7 @@ class ExternalDevToolsExtensionPoints implements DevToolsExtensionPoints {
   @override
   Link issueTrackerLink() {
     return Link(
-      display: githubNewIssueUriDisplay,
+      display: newDevToolsIssueUriDisplay,
       url: newDevToolsIssueUri().toString(),
       gaScreenName: gac.devToolsMain,
       gaSelectedItemDescription: gac.feedbackLink,

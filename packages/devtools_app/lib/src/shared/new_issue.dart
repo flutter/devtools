@@ -6,14 +6,14 @@ import '../../devtools.dart' as devtools;
 import 'globals.dart';
 import 'utils.dart';
 
-const githubNewIssueUriDisplay = 'github.com/flutter/devtools/issues/new';
+const newDevToolsIssueUriDisplay = 'github.com/flutter/devtools/issues/new';
 
 Uri newDevToolsIssueUri({String? issueDetails}) {
   final issueBodyItems = _issueLinkDetails();
   if (issueDetails != null) issueBodyItems.add(issueDetails);
   final issueBody = issueBodyItems.join('\n');
 
-  return Uri.parse('https://$githubNewIssueUriDisplay').replace(
+  return Uri.parse('https://$newDevToolsIssueUriDisplay').replace(
     queryParameters: {
       'body': issueBody,
     },
