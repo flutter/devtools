@@ -20,8 +20,10 @@ jobs:
     name: Dart Code Metrics
     runs-on: ubuntu-latest
     env:
-      DCM_EMAIL: ${{ secrets.DCM_EMAIL }}
-      DCM_CI_KEY: ${{ secrets.DCM_CI_KEY }}
+      # DCM_EMAIL: ${{ secrets.DCM_EMAIL }}
+      # DCM_CI_KEY: ${{ secrets.DCM_CI_KEY }}
+      DCM_EMAIL: gahghaghagh
+      DCM_CI_KEY: wewoijoiwjfoej
     steps:
       - name: Install DCM
         run: |
