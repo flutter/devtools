@@ -29,12 +29,12 @@ jobs:
           wget -qO- https://dcm.dev/pgp-key.public | sudo gpg --dearmor -o /usr/share/keyrings/dcm.gpg
           echo 'deb [signed-by=/usr/share/keyrings/dcm.gpg arch=amd64] https://dcm.dev/debian stable main' | sudo tee /etc/apt/sources.list.d/dart_stable.list
           sudo apt-get update
-          sudo apt-get install dcm
+          apt-get install dcm
       - name: git clone devtools
         uses: actions/checkout@8f4b7f84864484a7bf31766abe9204da3cbe65b3
       - name: Run DCM
         run: |
-          sudo dcm analyze --ci-key="$DCM_CI_KEY" --email="$DCM_EMAIL" packages/devtools_app
+          dcm analyze --ci-key="$DCM_CI_KEY" --email="$DCM_EMAIL" packages/devtools_app
 
   flutter-prep:
     name: ${{ matrix.os }} Flutter Prep
