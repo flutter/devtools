@@ -4,15 +4,15 @@
 
 import 'dart:async';
 
-import 'package:devtools_app/src/shared/globals.dart';
-import 'package:devtools_app/src/shared/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:pointer_interceptor/pointer_interceptor.dart';
-import '../shared/config_specific/launch_url/launch_url.dart';
 
+import '../shared/config_specific/launch_url/launch_url.dart';
 import 'common_widgets.dart';
+import 'globals.dart';
 import 'theme.dart';
 import 'ui/label.dart';
+import 'utils.dart';
 
 const dialogDefaultContext = 'dialog';
 
