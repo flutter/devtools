@@ -2493,7 +2493,6 @@ class HelpButtonWithDialog extends StatelessWidget {
     required this.gaSelection,
     required this.dialogTitle,
     required this.child,
-    this.asAction = false,
   });
 
   final String gaScreen;
@@ -2503,8 +2502,6 @@ class HelpButtonWithDialog extends StatelessWidget {
   final String dialogTitle;
 
   final Widget child;
-
-  final bool asAction;
 
   void openDialog(BuildContext context) {
     unawaited(
@@ -2524,16 +2521,6 @@ class HelpButtonWithDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (asAction)
-      return ToolbarAction(
-        icon: Icons.help_outline,
-        tooltip: 'Help',
-        onPressed: () {
-          ga.select(gaScreen, gaSelection);
-          openDialog(context);
-        },
-      );
-
     return HelpButton(
       onPressed: () {
         openDialog(context);
