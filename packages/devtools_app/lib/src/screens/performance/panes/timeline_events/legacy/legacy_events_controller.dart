@@ -5,12 +5,12 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
+import 'package:logging/logging.dart';
 
 import '../../../../../shared/analytics/analytics.dart' as ga;
 import '../../../../../shared/analytics/constants.dart' as gac;
 import '../../../../../shared/analytics/metrics.dart';
 import '../../../../../shared/config_specific/logger/allowed_error.dart';
-import '../../../../../shared/config_specific/logger/logger.dart';
 import '../../../../../shared/globals.dart';
 import '../../../../../shared/primitives/auto_dispose.dart';
 import '../../../../../shared/primitives/trace_event.dart';
@@ -27,6 +27,8 @@ import '../../../performance_utils.dart';
 import '../../../simple_trace_example.dart';
 import '../../flutter_frames/flutter_frame_model.dart';
 import 'legacy_event_processor.dart';
+
+final _log = Logger('legacy_events_controller');
 
 /// Debugging flag to load sample trace events from [simple_trace_example.dart].
 bool debugSimpleTrace = false;
@@ -92,7 +94,7 @@ class LegacyTimelineEventsController extends DisposableController
     final traceEventCount = traceEvents.length;
 
     debugTraceEventCallback(
-      () => log(
+      () => _log.info(
         'processing traceEvents at startIndex '
         '$_nextTraceIndexToProcess',
       ),
@@ -106,7 +108,7 @@ class LegacyTimelineEventsController extends DisposableController
         startIndex: _nextTraceIndexToProcess,
       );
       debugTraceEventCallback(
-        () => log(
+        () => _log.info(
           'after processing traceEvents at startIndex $_nextTraceIndexToProcess, '
           'and now _nextTraceIndexToProcess = $traceEventCount',
         ),
@@ -114,7 +116,7 @@ class LegacyTimelineEventsController extends DisposableController
       _nextTraceIndexToProcess = traceEventCount;
 
       debugTraceEventCallback(
-        () => log(
+        () => _log.info(
           'initializing event groups at startIndex '
           '$_nextTimelineEventIndexToProcess',
         ),
@@ -124,7 +126,7 @@ class LegacyTimelineEventsController extends DisposableController
         startIndex: _nextTimelineEventIndexToProcess,
       );
       debugTraceEventCallback(
-        () => log(
+        () => _log.info(
           'after initializing event groups at startIndex '
           '$_nextTimelineEventIndexToProcess and now '
           '_nextTimelineEventIndexToProcess = ${_data.timelineEvents.length}',

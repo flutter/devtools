@@ -20,6 +20,7 @@ import '../shared/ui/utils.dart';
 import '../shared/utils.dart';
 import 'about_dialog.dart';
 import 'report_feedback_button.dart';
+import 'settings_dialog.dart';
 
 /// The status line widget displayed at the bottom of DevTools.
 ///
@@ -84,6 +85,7 @@ class StatusLine extends StatelessWidget {
         Row(
           crossAxisAlignment: CrossAxisAlignment.end,
           children: [
+            OpenSettingsAction(),
             ReportFeedbackButton(),
             OpenAboutAction(),
           ],

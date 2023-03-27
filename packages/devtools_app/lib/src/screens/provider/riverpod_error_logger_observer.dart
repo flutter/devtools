@@ -3,9 +3,11 @@
 // found in the LICENSE file.
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:logging/logging.dart';
 
-import '../../shared/config_specific/logger/logger.dart';
 import '../../shared/eval_on_dart_library.dart';
+
+final _log = Logger('riverpod_error_logger_observer');
 
 class ErrorLoggerObserver extends ProviderObserver {
   const ErrorLoggerObserver();
@@ -32,11 +34,11 @@ class ErrorLoggerObserver extends ProviderObserver {
   void _maybeLogError(ProviderBase provider, Object? value) {
     if (value is AsyncError) {
       if (value.error is SentinelException) return;
-      log('Provider $provider failed with "${value.error}"', LogLevel.error);
+      _log.shout('Provider $provider failed with "${value.error}"');
 
       final stackTrace = value.stackTrace;
       if (stackTrace != null) {
-        log(stackTrace);
+        _log.info(stackTrace);
       }
     }
   }

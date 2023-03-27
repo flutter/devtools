@@ -116,6 +116,7 @@ class FlatTable<T> extends StatefulWidget {
     this.activeSearchMatchNotifier,
     this.preserveVerticalScrollPosition = false,
     this.includeColumnGroupHeaders = true,
+    this.tallHeaders = false,
     this.sizeColumnsToFit = true,
     ValueNotifier<T?>? selectionNotifier,
   })  : selectionNotifier = selectionNotifier ?? ValueNotifier<T?>(null),
@@ -150,6 +151,10 @@ class FlatTable<T> extends StatefulWidget {
   /// If set to false and `columnGroups` is non-null and non-empty, only
   /// the vertical dividing lines will be drawn for each column group boundary.
   final bool includeColumnGroupHeaders;
+
+  /// Whether the table headers should be slightly taller than the table rows to
+  /// support multiline text.
+  final bool tallHeaders;
 
   /// Data set to show as rows in this table.
   final List<T> data;
@@ -320,6 +325,7 @@ class FlatTableState<T> extends State<FlatTable<T>> with AutoDisposeMixin {
           activeSearchMatchNotifier: widget.activeSearchMatchNotifier,
           rowItemExtent: defaultRowHeight,
           preserveVerticalScrollPosition: widget.preserveVerticalScrollPosition,
+          tallHeaders: widget.tallHeaders,
         );
     if (widget.sizeColumnsToFit || tableController.columnWidths == null) {
       return LayoutBuilder(
@@ -427,6 +433,7 @@ class TreeTable<T extends TreeNode<T>> extends StatefulWidget {
     this.autoExpandRoots = false,
     this.preserveVerticalScrollPosition = false,
     this.displayTreeGuidelines = false,
+    this.tallHeaders = false,
     ValueNotifier<Selection<T?>>? selectionNotifier,
   })  : selectionNotifier = selectionNotifier ??
             ValueNotifier<Selection<T?>>(Selection.empty()),
@@ -496,6 +503,10 @@ class TreeTable<T extends TreeNode<T>> extends StatefulWidget {
 
   /// Determines whether or not guidelines should be rendered in tree columns.
   final bool displayTreeGuidelines;
+
+  /// Whether the table headers should be slightly taller than the table rows to
+  /// support multiline text.
+  final bool tallHeaders;
 
   @override
   TreeTableState<T> createState() => TreeTableState<T>();
@@ -687,6 +698,7 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
       handleKeyEvent: _handleKeyEvent,
       selectionNotifier: widget.selectionNotifier,
       preserveVerticalScrollPosition: widget.preserveVerticalScrollPosition,
+      tallHeaders: widget.tallHeaders,
     );
   }
 
@@ -875,6 +887,7 @@ class _Table<T> extends StatefulWidget {
     this.preserveVerticalScrollPosition = false,
     this.activeSearchMatchNotifier,
     this.rowItemExtent,
+    this.tallHeaders = false,
   }) : super(key: key);
 
   final TableControllerBase<T> tableController;
@@ -887,6 +900,7 @@ class _Table<T> extends StatefulWidget {
   final ValueNotifier<Selection<T?>>? selectionNotifier;
   final ValueListenable<T?>? activeSearchMatchNotifier;
   final bool preserveVerticalScrollPosition;
+  final bool tallHeaders;
 
   @override
   _TableState<T> createState() => _TableState<T>();
@@ -1084,6 +1098,7 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
                   secondarySortColumn:
                       widget.tableController.secondarySortColumn,
                   onSortChanged: widget.tableController.sortDataAndNotify,
+                  tall: widget.tallHeaders,
                 ),
               TableRow<T>.tableColumnHeader(
                 key: const Key('Table header'),
@@ -1096,6 +1111,7 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
                 sortDirection: tableUiState.sortDirection,
                 secondarySortColumn: widget.tableController.secondarySortColumn,
                 onSortChanged: widget.tableController.sortDataAndNotify,
+                tall: widget.tallHeaders,
               ),
               if (pinnedData.isNotEmpty) ...[
                 SizedBox(
@@ -1215,6 +1231,7 @@ class TableRow<T> extends StatefulWidget {
         secondarySortColumn = null,
         onSortChanged = null,
         rowType = _TableRowType.data,
+        tall = false,
         super(key: key);
 
   /// Constructs a [TableRow] that presents the column titles instead
@@ -1230,6 +1247,7 @@ class TableRow<T> extends StatefulWidget {
     required this.onSortChanged,
     this.secondarySortColumn,
     this.onPressed,
+    this.tall = false,
   })  : node = null,
         isExpanded = false,
         isExpandable = false,
@@ -1257,6 +1275,7 @@ class TableRow<T> extends StatefulWidget {
     required this.onSortChanged,
     this.secondarySortColumn,
     this.onPressed,
+    this.tall = false,
   })  : node = null,
         isExpanded = false,
         isExpandable = false,
@@ -1288,6 +1307,8 @@ class TableRow<T> extends StatefulWidget {
   final bool isSelected;
 
   final _TableRowType rowType;
+
+  final bool tall;
 
   /// Which column, if any, should show expansion affordances
   /// and nested rows.
@@ -1413,7 +1434,8 @@ class _TableRowState<T> extends State<TableRow<T>>
     final box = SizedBox(
       height: widget.rowType == _TableRowType.data
           ? defaultRowHeight
-          : areaPaneHeaderHeight,
+          : areaPaneHeaderHeight +
+              (widget.tall ? scaleByFontFactor(densePadding) : 0.0),
       child: Material(
         color: _searchAwareBackgroundColor(),
         child: onPressed != null

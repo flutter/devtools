@@ -245,6 +245,234 @@ void main() {
       expect(state.zoomController.value, equals(3.375));
       expect(state.horizontalControllerGroup.offset, equals(1045.0));
     });
+
+    group('binary search for node', () {
+      //   Future<ScrollingFlameChartRowState> pumpRowAndGetState(
+      //   WidgetTester tester, {
+      //   ScrollingFlameChartRow? row,
+      // }) async {
+      //   row ??= testRow;
+      //   await pumpScrollingFlameChartRow(tester, row);
+      //   expect(find.byWidget(currentRow), findsOneWidget);
+      //   return tester.state(find.byWidget(currentRow));
+      // }
+      testWidgets('returns correct node for default zoom level',
+          (WidgetTester tester) async {
+        const zoomLevel = 1.0;
+        expect(
+          binarySearchForNodeHelper(
+            x: -10.0,
+            nodesInRow: testNodes,
+            zoom: zoomLevel,
+            startInset: sideInset,
+          ),
+          isNull,
+        );
+        expect(
+          binarySearchForNodeHelper(
+            x: 49.0,
+            nodesInRow: testNodes,
+            zoom: zoomLevel,
+            startInset: sideInset,
+          ),
+          isNull,
+        );
+        expect(
+          binarySearchForNodeHelper(
+            x: 70.0,
+            nodesInRow: testNodes,
+            zoom: zoomLevel,
+            startInset: sideInset,
+          ),
+          testNode,
+        );
+        expect(
+          binarySearchForNodeHelper(
+            x: 120.0,
+            nodesInRow: testNodes,
+            zoom: zoomLevel,
+            startInset: sideInset,
+          ),
+          testNode2,
+        );
+        expect(
+          binarySearchForNodeHelper(
+            x: 230.0,
+            nodesInRow: testNodes,
+            zoom: zoomLevel,
+            startInset: sideInset,
+          ),
+          testNode3,
+        );
+        expect(
+          binarySearchForNodeHelper(
+            x: 360.0,
+            nodesInRow: testNodes,
+            zoom: zoomLevel,
+            startInset: sideInset,
+          ),
+          testNode4,
+        );
+        expect(
+          binarySearchForNodeHelper(
+            x: 1060.0,
+            nodesInRow: testNodes,
+            zoom: zoomLevel,
+            startInset: sideInset,
+          ),
+          isNull,
+        );
+      });
+
+      testWidgets('returns correct node in zoomed row',
+          (WidgetTester tester) async {
+        const zoomLevel = 2.0;
+        expect(
+          binarySearchForNodeHelper(
+            x: -10.0,
+            nodesInRow: testNodes,
+            zoom: zoomLevel,
+            startInset: sideInset,
+          ),
+          isNull,
+        );
+        expect(
+          binarySearchForNodeHelper(
+            x: 49.0,
+            nodesInRow: testNodes,
+            zoom: zoomLevel,
+            startInset: sideInset,
+          ),
+          isNull,
+        );
+        expect(
+          binarySearchForNodeHelper(
+            x: 70.0,
+            nodesInRow: testNodes,
+            zoom: zoomLevel,
+            startInset: sideInset,
+          ),
+          testNode,
+        );
+        expect(
+          binarySearchForNodeHelper(
+            x: 130.0,
+            nodesInRow: testNodes,
+            zoom: zoomLevel,
+            startInset: sideInset,
+          ),
+          testNode,
+        );
+        expect(
+          binarySearchForNodeHelper(
+            x: 130.1,
+            nodesInRow: testNodes,
+            zoom: zoomLevel,
+            startInset: sideInset,
+          ),
+          isNull,
+        );
+        expect(
+          binarySearchForNodeHelper(
+            x: 169.9,
+            nodesInRow: testNodes,
+            zoom: zoomLevel,
+            startInset: sideInset,
+          ),
+          isNull,
+        );
+        expect(
+          binarySearchForNodeHelper(
+            x: 170.0,
+            nodesInRow: testNodes,
+            zoom: zoomLevel,
+            startInset: sideInset,
+          ),
+          testNode2,
+        );
+        expect(
+          binarySearchForNodeHelper(
+            x: 270.0,
+            nodesInRow: testNodes,
+            zoom: zoomLevel,
+            startInset: sideInset,
+          ),
+          testNode2,
+        );
+        expect(
+          binarySearchForNodeHelper(
+            x: 270.1,
+            nodesInRow: testNodes,
+            zoom: zoomLevel,
+            startInset: sideInset,
+          ),
+          isNull,
+        );
+        expect(
+          binarySearchForNodeHelper(
+            x: 289.9,
+            nodesInRow: testNodes,
+            zoom: zoomLevel,
+            startInset: sideInset,
+          ),
+          isNull,
+        );
+        expect(
+          binarySearchForNodeHelper(
+            x: 290.0,
+            nodesInRow: testNodes,
+            zoom: zoomLevel,
+            startInset: sideInset,
+          ),
+          testNode3,
+        );
+        expect(
+          binarySearchForNodeHelper(
+            x: 409.9,
+            nodesInRow: testNodes,
+            zoom: zoomLevel,
+            startInset: sideInset,
+          ),
+          isNull,
+        );
+        expect(
+          binarySearchForNodeHelper(
+            x: 410.0,
+            nodesInRow: testNodes,
+            zoom: zoomLevel,
+            startInset: sideInset,
+          ),
+          testNode4,
+        );
+        expect(
+          binarySearchForNodeHelper(
+            x: 1010.0,
+            nodesInRow: testNodes,
+            zoom: zoomLevel,
+            startInset: sideInset,
+          ),
+          testNode4,
+        );
+        expect(
+          binarySearchForNodeHelper(
+            x: 1010.1,
+            nodesInRow: testNodes,
+            zoom: zoomLevel,
+            startInset: sideInset,
+          ),
+          isNull,
+        );
+        expect(
+          binarySearchForNodeHelper(
+            x: 10000,
+            nodesInRow: testNodes,
+            zoom: zoomLevel,
+            startInset: sideInset,
+          ),
+          isNull,
+        );
+      });
+    });
   });
 
   group('ScrollingFlameChartRow', () {
@@ -255,25 +483,12 @@ void main() {
       nodes: testNodes,
       width: 680.0, // 680.0 fits all test nodes and sideInsets of 70.0.
       startInset: sideInset,
+      hoveredNotifier: ValueNotifier<TimelineEvent?>(null),
       selectionNotifier: ValueNotifier<TimelineEvent?>(null),
       searchMatchesNotifier: null,
       activeSearchMatchNotifier: null,
-      onTapUp: () {},
       backgroundColor: Colors.transparent,
       zoom: FlameChart.minZoomLevel,
-    );
-    final zoomedTestRow = ScrollingFlameChartRow<TimelineEvent>(
-      linkedScrollControllerGroup: linkedScrollControllerGroup,
-      nodes: testNodes,
-      // 1080.0 fits all test nodes at zoom level 2.0 and sideInsets of 70.0.
-      width: 1080.0,
-      startInset: sideInset,
-      selectionNotifier: ValueNotifier<TimelineEvent?>(null),
-      searchMatchesNotifier: null,
-      activeSearchMatchNotifier: null,
-      onTapUp: () {},
-      backgroundColor: Colors.transparent,
-      zoom: 2.0,
     );
 
     Future<void> pumpScrollingFlameChartRow(
@@ -296,20 +511,9 @@ void main() {
       );
     }
 
-    Future<ScrollingFlameChartRowState> pumpRowAndGetState(
-      WidgetTester tester, {
-      ScrollingFlameChartRow? row,
-    }) async {
-      row ??= testRow;
-      await pumpScrollingFlameChartRow(tester, row);
-      expect(find.byWidget(currentRow), findsOneWidget);
-      return tester.state(find.byWidget(currentRow));
-    }
-
     testWidgets('builds with nodes in row', (WidgetTester tester) async {
       await pumpScrollingFlameChartRow(tester, testRow);
       expect(find.byWidget(currentRow), findsOneWidget);
-      expect(find.byType(MouseRegion), findsOneWidget);
 
       // 1 for row container and 4 for node containers.
       expect(tester.widgetList(find.byType(Container)).length, equals(5));
@@ -321,55 +525,21 @@ void main() {
         nodes: const [],
         width: 500.0, // 500.0 is arbitrary.
         startInset: sideInset,
+        hoveredNotifier: ValueNotifier<CpuStackFrame?>(null),
         selectionNotifier: ValueNotifier<CpuStackFrame?>(null),
         searchMatchesNotifier: null,
         activeSearchMatchNotifier: null,
         backgroundColor: Colors.transparent,
-        onTapUp: () {},
         zoom: FlameChart.minZoomLevel,
       );
 
       await pumpScrollingFlameChartRow(tester, emptyRow);
       expect(find.byWidget(currentRow), findsOneWidget);
-      expect(find.byType(MouseRegion), findsNothing);
 
       final emptyRowFinder = find.byType(EmptyFlameChartRow);
       final EmptyFlameChartRow emptyFlameChartRow =
           tester.widget(emptyRowFinder);
       expect(emptyFlameChartRow.height, equals(sectionSpacing));
-    });
-
-    testWidgets('binary search for node returns correct node',
-        (WidgetTester tester) async {
-      final rowState = await pumpRowAndGetState(tester);
-      expect(rowState.binarySearchForNode(-10.0), isNull);
-      expect(rowState.binarySearchForNode(49.0), isNull);
-      expect(rowState.binarySearchForNode(70.0), equals(testNode));
-      expect(rowState.binarySearchForNode(120.0), equals(testNode2));
-      expect(rowState.binarySearchForNode(230.0), equals(testNode3));
-      expect(rowState.binarySearchForNode(360.0), equals(testNode4));
-      expect(rowState.binarySearchForNode(1060.0), isNull);
-    });
-
-    testWidgets('binary search for node returns correct node in zoomed row',
-        (WidgetTester tester) async {
-      final rowState = await pumpRowAndGetState(tester, row: zoomedTestRow);
-      expect(rowState.binarySearchForNode(-10.0), isNull);
-      expect(rowState.binarySearchForNode(49.0), isNull);
-      expect(rowState.binarySearchForNode(70.0), equals(testNode));
-      expect(rowState.binarySearchForNode(130.0), equals(testNode));
-      expect(rowState.binarySearchForNode(130.1), isNull);
-      expect(rowState.binarySearchForNode(169.9), isNull);
-      expect(rowState.binarySearchForNode(170.0), equals(testNode2));
-      expect(rowState.binarySearchForNode(270.0), equals(testNode2));
-      expect(rowState.binarySearchForNode(270.1), isNull);
-      expect(rowState.binarySearchForNode(289.9), isNull);
-      expect(rowState.binarySearchForNode(290.0), equals(testNode3));
-      expect(rowState.binarySearchForNode(409.9), isNull);
-      expect(rowState.binarySearchForNode(410.0), equals(testNode4));
-      expect(rowState.binarySearchForNode(1010.0), equals(testNode4));
-      expect(rowState.binarySearchForNode(1010.1), isNull);
-      expect(rowState.binarySearchForNode(10000), isNull);
     });
   });
 
