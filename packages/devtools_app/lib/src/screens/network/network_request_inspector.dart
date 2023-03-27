@@ -57,21 +57,17 @@ class NetworkRequestInspector extends StatelessWidget {
             if (data.requestBody != null)
               _buildTab(
                 tabName: NetworkRequestInspector._requestTabTitle,
-                trailing: Align(
-                  alignment: Alignment.centerRight,
-                  child: CopyToClipboardControl(
-                    dataProvider: () => data.requestBody,
-                  ),
+                trailing: HttpViewTrailingCopyButton(
+                  data,
+                  (data) => data.requestBody,
                 ),
               ),
             if (data.responseBody != null)
               _buildTab(
                 tabName: NetworkRequestInspector._responseTabTitle,
-                trailing: Align(
-                  alignment: Alignment.centerRight,
-                  child: CopyToClipboardControl(
-                    dataProvider: () => data.responseBody,
-                  ),
+                trailing: HttpViewTrailingCopyButton(
+                  data,
+                  (data) => data.responseBody,
                 ),
               ),
             if (data.hasCookies)

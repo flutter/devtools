@@ -214,6 +214,8 @@ class MemoryEvent {
   static const tracingRefresh = 'tracingRefresh';
   static const tracingClassFilter = 'tracingClassFilter';
   static const tracingTraceCheck = 'tracingTraceCheck';
+  static const tracingTreeExpandAll = 'tracingTreeExpandAll';
+  static const tracingTreeCollapseAll = 'tracingTreeCollapseAll';
   static const tracingHelp = 'memoryTracingHelp';
 
   static const diffTakeSnapshotControlPane = 'diffTakeSnapshotControlPane';
