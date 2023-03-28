@@ -22,6 +22,7 @@ final debugger = ScreenMetaData.debugger.id;
 final logging = ScreenMetaData.logging.id;
 final appSize = ScreenMetaData.appSize.id;
 final vmTools = ScreenMetaData.vmTools.id;
+const console = 'console';
 final simple = ScreenMetaData.simple.id;
 
 // GA events not associated with a any screen e.g., hotReload, hotRestart, etc
@@ -173,6 +174,9 @@ const exitOfflineMode = 'exitOfflineMode';
 // This should track the time from `initState` for a screen to the time when
 // the page data has loaded and is ready to interact with.
 const pageReady = 'pageReady';
+
+/// Console area.
+const consoleHelp = 'consoleHelp';
 
 /// Documentation actions shared across screens.
 const documentationLink = 'documentationLink';
