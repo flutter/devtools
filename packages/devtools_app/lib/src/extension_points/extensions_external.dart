@@ -85,8 +85,8 @@ Uri newDevToolsGitHubIssueUriLengthSafe({
 }
 
 Uri _newDevToolsGitHubIssueUri({
-  String? additionalInfo,
   required List<String> environment,
+  String? additionalInfo,
 }) {
   final issueBody = [
     if (additionalInfo != null) additionalInfo,
