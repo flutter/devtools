@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 
 import '../../../../../shared/analytics/analytics.dart' as ga;
 import '../../../../../shared/analytics/constants.dart' as gac;
-import '../../../../../shared/feature_flags.dart';
 import '../../../../../shared/globals.dart';
 import '../../../../../shared/primitives/utils.dart';
 import '../../../../../shared/table/table.dart';
@@ -99,8 +98,6 @@ class _InstanceColumn extends ColumnData<SingleClassStats>
     bool isRowSelected = false,
     VoidCallback? onPressed,
   }) {
-    if (!FeatureFlags.evalAndBrowse) return null;
-
     return InstanceTableCell(
       data.objects,
       classData.heap,

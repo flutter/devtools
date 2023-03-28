@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 import '../../../../../shared/analytics/analytics.dart' as ga;
 import '../../../../../shared/analytics/constants.dart' as gac;
 import '../../../../../shared/common_widgets.dart';
-import '../../../../../shared/feature_flags.dart';
 import '../../../../../shared/globals.dart';
 import '../../../../../shared/primitives/utils.dart';
 import '../../../../../shared/table/table.dart';
@@ -144,7 +143,6 @@ class _InstanceColumn extends ColumnData<DiffClassStats>
     bool isRowSelected = false,
     VoidCallback? onPressed,
   }) {
-    if (!FeatureFlags.evalAndBrowse) return null;
     final objects = _instances(data);
 
     if (dataPart == _DataPart.delta) {

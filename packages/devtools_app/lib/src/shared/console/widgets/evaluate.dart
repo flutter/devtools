@@ -10,7 +10,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../feature_flags.dart';
 import '../../globals.dart';
 import '../../primitives/auto_dispose.dart';
 import '../../theme.dart';
@@ -222,16 +221,12 @@ class ExpressionEvalFieldState extends State<ExpressionEvalField>
               shouldRequestFocus: false,
               clearFieldOnEscapeWhenOverlayHidden: true,
               onSelection: _onSelection,
-              decoration: InputDecoration(
-                contentPadding: const EdgeInsets.all(denseSpacing),
-                border: const OutlineInputBorder(),
-                focusedBorder:
-                    const OutlineInputBorder(borderSide: BorderSide.none),
-                enabledBorder:
-                    const OutlineInputBorder(borderSide: BorderSide.none),
-                labelText: FeatureFlags.evalAndBrowse
-                    ? 'Eval. Enter "?" for help.'
-                    : 'Eval',
+              decoration: const InputDecoration(
+                contentPadding: EdgeInsets.all(denseSpacing),
+                border: OutlineInputBorder(),
+                focusedBorder: OutlineInputBorder(borderSide: BorderSide.none),
+                enabledBorder: OutlineInputBorder(borderSide: BorderSide.none),
+                labelText: 'Eval. Enter "?" for help.',
               ),
               overlayXPositionBuilder:
                   (String inputValue, TextStyle? inputStyle) {
@@ -314,7 +309,7 @@ class ExpressionEvalFieldState extends State<ExpressionEvalField>
 
     if (expressionText.isEmpty) return;
 
-    if (FeatureFlags.evalAndBrowse && expressionText.trim() == '?') {
+    if (expressionText.trim() == '?') {
       unawaited(
         showDialog(
           context: context,
@@ -431,8 +426,6 @@ class ExpressionEvalFieldState extends State<ExpressionEvalField>
   ///
   /// Returns true if the text was parsed as assignment.
   bool _tryProcessAssignment(String expressionText) {
-    if (!FeatureFlags.evalAndBrowse) return false;
-
     final assignment = ConsoleVariableAssignment.tryParse(expressionText);
     if (assignment == null) return false;
     const kSuccess = true;
