@@ -37,6 +37,7 @@ jank is detected on an iOS device. - [#5455](https://github.com/flutter/devtools
 * Add ability to inspect statistics for a CPU profile - [#5340](https://github.com/flutter/devtools/pull/5340)
 * Fix a bug where Native stack frames were missing their name - [#5344](https://github.com/flutter/devtools/pull/5344)
 * Fix an error in total and self time calculations for the bottom up tree - [#5348](https://github.com/flutter/devtools/pull/5348)
+* Add support for zooming and navigating the flame chart with ,AOE keys (helpful for Dvorak users) - [#5545](https://github.com/flutter/devtools/pull/5545)
 
 ## Memory updates
 * Fix filtering bug in the "Trace Instances" view - [#5406](https://github.com/flutter/devtools/pull/5406)
