@@ -585,7 +585,6 @@ class CpuProfilerController extends DisposableController
     _dataNotifier.dispose();
     _selectedCpuStackFrameNotifier.dispose();
     _profilerBusyStatus.dispose();
-    transformer.dispose();
     methodTableController.dispose();
     super.dispose();
   }

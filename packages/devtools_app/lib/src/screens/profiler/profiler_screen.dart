@@ -64,8 +64,6 @@ class _ProfilerScreenBodyState extends State<ProfilerScreenBody>
 
   bool get profilerBusy => profilerBusyStatus != CpuProfilerBusyStatus.none;
 
-  double processingProgress = 0.0;
-
   @override
   void initState() {
     super.initState();
@@ -98,16 +96,6 @@ class _ProfilerScreenBodyState extends State<ProfilerScreenBody>
         setState(() {
           profilerBusyStatus =
               controller.cpuProfilerController.profilerBusyStatus.value;
-        });
-      },
-    );
-
-    addAutoDisposeListener(
-      controller.cpuProfilerController.transformer.progressNotifier,
-      () {
-        setState(() {
-          processingProgress = controller
-              .cpuProfilerController.transformer.progressNotifier.value;
         });
       },
     );
@@ -159,8 +147,9 @@ class _ProfilerScreenBodyState extends State<ProfilerScreenBody>
                     valueListenable:
                         controller.cpuProfilerController.dataNotifier,
                     builder: (context, cpuProfileData, _) {
-                      if (cpuProfileData == null || cpuProfileData ==
-                          CpuProfilerController.baseStateCpuProfileData) {
+                      if (cpuProfileData == null ||
+                          cpuProfileData ==
+                              CpuProfilerController.baseStateCpuProfileData) {
                         return const ProfileRecordingInstructions();
                       }
                       if (cpuProfileData ==
