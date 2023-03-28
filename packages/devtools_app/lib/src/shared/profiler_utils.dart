@@ -4,8 +4,14 @@
 
 import 'package:flutter/material.dart';
 
-import '../../devtools_app.dart';
+import '../screens/debugger/codeview_controller.dart';
+import '../screens/debugger/debugger_screen.dart';
 import '../screens/vm_developer/vm_developer_common_widgets.dart';
+import 'globals.dart';
+import 'primitives/trees.dart';
+import 'primitives/utils.dart';
+import 'routing.dart';
+import 'theme.dart';
 
 mixin ProfilableDataMixin<T extends TreeNode<T>> on TreeNode<T> {
   ProfileMetaData get profileMetaData;
