@@ -455,10 +455,11 @@ abstract class FlameChartState<T extends FlameChart,
   KeyEventResult _handleKeyEvent(RawKeyEvent event) {
     // Only handle down events so logic is not duplicated on key up.
     if (event is RawKeyDownEvent) {
-      // Handle zooming / navigation from W-A-S-D keys.
+      // Handle zooming / navigation from WASD keys or ,AOE keys (Dvorak users)
       // TODO(kenz): zoom in/out faster if key is held. It actually zooms slower
       // if the key is held currently.
-      if (event.logicalKey == LogicalKeyboardKey.keyW) {
+      if (event.logicalKey == LogicalKeyboardKey.keyW ||
+          event.logicalKey == LogicalKeyboardKey.comma) {
         unawaited(
           zoomTo(
             math.min(
@@ -468,7 +469,8 @@ abstract class FlameChartState<T extends FlameChart,
           ),
         );
         return KeyEventResult.handled;
-      } else if (event.logicalKey == LogicalKeyboardKey.keyS) {
+      } else if (event.logicalKey == LogicalKeyboardKey.keyS ||
+          event.logicalKey == LogicalKeyboardKey.keyO) {
         unawaited(
           zoomTo(
             math.max(
@@ -483,7 +485,8 @@ abstract class FlameChartState<T extends FlameChart,
         // ignore: discarded_futures
         scrollToX(horizontalControllerGroup.offset - keyboardScrollUnit);
         return KeyEventResult.handled;
-      } else if (event.logicalKey == LogicalKeyboardKey.keyD) {
+      } else if (event.logicalKey == LogicalKeyboardKey.keyD ||
+          event.logicalKey == LogicalKeyboardKey.keyE) {
         // `unawaited` does not work for FutureOr
         // ignore: discarded_futures
         scrollToX(horizontalControllerGroup.offset + keyboardScrollUnit);
