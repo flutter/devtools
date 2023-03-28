@@ -79,94 +79,55 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
 
   static int get _timestamp => DateTime.now().millisecondsSinceEpoch;
 
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    if (!initController()) return;
+  void _addTapLocationListener(
+    ValueNotifier<TapLocation?> tapLocation,
+    List<ValueNotifier<TapLocation?>> allLocations,
+  ) {
+    addAutoDisposeListener(tapLocation, () {
+      final value = tapLocation.value;
+      if (value == null) return;
 
-    // TODO(polinach): generalize three addAutoDisposeListener below.
-    addAutoDisposeListener(widget.chartController.event.tapLocation, () {
-      if (widget.chartController.event.tapLocation.value != null) {
-        if (_hoverOverlayEntry != null) {
-          _hideHover();
-        }
-        final tapLocation = widget.chartController.event.tapLocation.value;
-        if (tapLocation == null) return;
-        final tapDownDetails = tapLocation.tapDownDetails;
-        if (tapDownDetails == null) return;
-
-        final copied = TapLocation.copy(tapLocation);
-        widget.chartController.vm.tapLocation.value = copied;
-        widget.chartController.android.tapLocation.value = copied;
-
-        final allValues = ChartsValues(
-          controller,
-          tapLocation.index,
-          tapLocation.timestamp ?? _timestamp,
-        );
-
-        _showHover(
-          context,
-          allValues,
-          tapDownDetails.globalPosition,
-        );
-      }
-    });
-
-    addAutoDisposeListener(widget.chartController.vm.tapLocation, () {
-      if (widget.chartController.vm.tapLocation.value != null) {
-        if (_hoverOverlayEntry != null) {
-          _hideHover();
-        }
-        final tapLocation = widget.chartController.vm.tapLocation.value;
-        if (tapLocation == null) return;
-        final tapDownDetails = tapLocation.tapDownDetails;
-        if (tapDownDetails == null) return;
-
-        final copied = TapLocation.copy(tapLocation);
-        widget.chartController.event.tapLocation.value = copied;
-        widget.chartController.android.tapLocation.value = copied;
-
-        final allValues = ChartsValues(
-          controller,
-          tapLocation.index,
-          tapLocation.timestamp ?? _timestamp,
-        );
-
-        _showHover(
-          context,
-          allValues,
-          tapDownDetails.globalPosition,
-        );
-      }
-    });
-
-    addAutoDisposeListener(widget.chartController.android.tapLocation, () {
       if (_hoverOverlayEntry != null) {
         _hideHover();
+        return;
       }
 
-      final tapLocation = widget.chartController.android.tapLocation.value;
-      if (tapLocation == null) return;
-      final tapDownDetails = tapLocation.tapDownDetails;
-      if (tapDownDetails == null) return;
+      final details = value.tapDownDetails;
+      if (details == null) return;
 
-      final copied = TapLocation.copy(tapLocation);
-      widget.chartController.event.tapLocation.value = copied;
-      widget.chartController.vm.tapLocation.value = copied;
+      final copied = TapLocation.copy(value);
+      for (var location in allLocations) {
+        if (location != tapLocation) location.value = copied;
+      }
 
       final allValues = ChartsValues(
         controller,
-        tapLocation.index,
-        tapLocation.timestamp ?? _timestamp,
+        value.index,
+        value.timestamp ?? _timestamp,
       );
 
       _showHover(
         context,
         allValues,
-        tapDownDetails.globalPosition,
+        details.globalPosition,
       );
     });
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!initController()) return;
+
+    final allLocations = [
+      widget.chartController.event.tapLocation,
+      widget.chartController.vm.tapLocation,
+      widget.chartController.android.tapLocation,
+    ];
+
+    for (var location in allLocations) {
+      _addTapLocationListener(location, allLocations);
+    }
 
     addAutoDisposeListener(controller.refreshCharts, () {
       setState(() {
