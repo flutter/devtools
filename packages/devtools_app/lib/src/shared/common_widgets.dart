@@ -877,13 +877,18 @@ class ToolbarAction extends StatelessWidget {
     Key? key,
     this.size,
     this.style,
-  }) : super(key: key);
+    this.gaScreen,
+    this.gaSelection,
+  })  : assert((gaScreen == null) == (gaSelection == null)),
+        super(key: key);
 
   final TextStyle? style;
   final IconData icon;
   final String? tooltip;
   final VoidCallback? onPressed;
   final double? size;
+  final String? gaScreen;
+  final String? gaSelection;
 
   @override
   Widget build(BuildContext context) {
@@ -893,7 +898,12 @@ class ToolbarAction extends StatelessWidget {
         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
         textStyle: style,
       ),
-      onPressed: onPressed,
+      onPressed: () {
+        if (gaScreen != null && gaSelection != null) {
+          ga.select(gaScreen!, gaSelection!);
+        }
+        onPressed?.call();
+      },
       child: Icon(
         icon,
         size: size ?? actionsIconSize,

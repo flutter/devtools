@@ -175,13 +175,17 @@ const exitOfflineMode = 'exitOfflineMode';
 // the page data has loaded and is ready to interact with.
 const pageReady = 'pageReady';
 
-/// Console area.
-const consoleHelp = 'consoleHelp';
-
 /// Documentation actions shared across screens.
 const documentationLink = 'documentationLink';
 String topicDocumentationButton(String topic) => '${topic}DocumentationButton';
 String topicDocumentationLink(String topic) => '${topic}DocumentationLink';
+
+/// Analytic event constants specific for console.
+class ConsoleEvent {
+  static const helpInline = 'consoleHelpInline';
+  static const String evalInStoppedApp = 'consoleEvalInStoppedApp';
+  static const String evalInRunningApp = 'consoleEvalInRunningApp';
+}
 
 /// Analytic time constants specific for memory screen.
 class MemoryTime {
@@ -190,6 +194,7 @@ class MemoryTime {
   static const updateValues = 'updateValues';
 }
 
+// ignore: avoid_classes_with_only_static_members
 /// Analytic event constants specific for memory screen.
 class MemoryEvent {
   static const gc = 'gc';
@@ -245,6 +250,14 @@ class MemoryEvent {
   static const diffSnapshotFilterReset = 'diffSnapshotFilterReset';
 
   static const browseRefLimit = 'browseRefLimit';
+
+  static const dropOneLiveVariable = 'dropOneLiveVariable';
+  static const dropOneStaticVariable = 'dropOneStaticVariable';
+  static String dropAllLiveToConsole({
+    required bool includeSubclasses,
+    required bool includeImplementers,
+  }) =>
+      'dropAllVariables${includeSubclasses ? '_Subclasses' : ''}${includeImplementers ? '_Imlementers' : ''}';
 }
 
 /// Areas of memory screen, to prefix event names, when events are emitted
