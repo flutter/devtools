@@ -88,8 +88,7 @@ class ProfilerScreenController extends DisposableController
     }
   }
 
-  final cpuProfilerController =
-      CpuProfilerController();
+  final cpuProfilerController = CpuProfilerController();
 
   CpuProfileData? get cpuProfileData =>
       cpuProfilerController.dataNotifier.value;

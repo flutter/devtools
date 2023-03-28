@@ -25,8 +25,7 @@ final _log = Logger('legacy_events_controller');
 /// Debugging flag to load sample trace events from [simple_trace_example.dart].
 bool debugSimpleTrace = false;
 
-class LegacyTimelineEventsController 
-    with SearchControllerMixin<TimelineEvent> {
+class LegacyTimelineEventsController with SearchControllerMixin<TimelineEvent> {
   LegacyTimelineEventsController(this.performanceController) {
     processor = LegacyEventProcessor(performanceController);
   }
