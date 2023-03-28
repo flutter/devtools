@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:logging/logging.dart';
 
 import '../../../../../shared/analytics/analytics.dart' as ga;
 import '../../../../../shared/analytics/constants.dart' as gac;
@@ -16,6 +17,8 @@ import '../../../../../shared/table/table.dart';
 import '../../../../../shared/theme.dart';
 import '../controller/diff_pane_controller.dart';
 import '../controller/item_controller.dart';
+
+final _log = Logger('snapshot_list');
 
 class SnapshotList extends StatelessWidget {
   const SnapshotList({Key? key, required this.controller}) : super(key: key);
@@ -52,6 +55,7 @@ class _ListControlPane extends StatelessWidget {
     try {
       await controller.takeSnapshot();
     } catch (e, trace) {
+      _log.shout(e, e, trace);
       await showDialog(
         context: context,
         builder: (context) => UnexpectedErrorDialog(
