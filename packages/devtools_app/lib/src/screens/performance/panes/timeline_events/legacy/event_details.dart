@@ -3,24 +3,15 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:vm_service/vm_service.dart' hide TimelineEvent;
 
 import '../../../../../shared/common_widgets.dart';
-import '../../../../../shared/globals.dart';
 import '../../../../../shared/primitives/trace_event.dart';
 import '../../../../../shared/primitives/utils.dart';
 import '../../../../../shared/theme.dart';
-import '../../../../../shared/ui/vm_flag_widgets.dart';
-import '../../../../profiler/cpu_profile_model.dart';
-import '../../../../profiler/cpu_profiler.dart';
-import '../../../../profiler/cpu_profiler_controller.dart';
-import '../../../../profiler/profiler_status.dart';
 import '../../../performance_model.dart';
-import '../../../performance_screen.dart';
-import 'legacy_events_controller.dart';
 
 class EventDetails extends StatelessWidget {
-  const EventDetails(this.selectedEvent, this.legacyController);
+  const EventDetails(this.selectedEvent);
 
   static const instructions =
       'Select an event from the Timeline to view details';
@@ -28,48 +19,27 @@ class EventDetails extends StatelessWidget {
 
   final TimelineEvent? selectedEvent;
 
-  final LegacyTimelineEventsController legacyController;
-
   @override
   Widget build(BuildContext context) {
-    // TODO(kenz): when in offlineMode and selectedEvent doesn't match the event
-    // from the offline data, show message notifying that CPU profile data is
-    // unavailable for snapshots and provide link to return to offline profile
-    // (see html_event_details.dart).
     final theme = Theme.of(context);
-    return DualValueListenableBuilder<bool, Flag>(
-      firstListenable: offlineController.offlineMode,
-      secondListenable:
-          legacyController.cpuProfilerController.profilerFlagNotifier!,
-      builder: (context, offline, profilerFlag, _) {
-        final profilerEnabled = profilerFlag.valueAsString == 'true';
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            AreaPaneHeader(
-              tall: true,
-              title: Text(_generateHeaderText()),
-              actions: [
-                if (selectedEvent != null &&
-                    selectedEvent!.isUiEvent &&
-                    !offline &&
-                    profilerEnabled)
-                  CpuSamplingRateDropdown(
-                    screenId: PerformanceScreen.id,
-                    profilePeriodFlagNotifier: legacyController
-                        .cpuProfilerController.profilePeriodFlag!,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        AreaPaneHeader(
+          title: Text(_generateHeaderText()),
+          roundedTopBorder: false,
+        ),
+        Expanded(
+          child: selectedEvent != null
+              ? EventSummary(selectedEvent!)
+              : Center(
+                  child: Text(
+                    instructions,
+                    style: theme.subtleTextStyle,
                   ),
-              ],
-              roundedTopBorder: false,
-            ),
-            Expanded(
-              child: selectedEvent != null
-                  ? _buildDetails(offline, profilerEnabled)
-                  : _buildInstructions(theme),
-            ),
-          ],
-        );
-      },
+                ),
+        ),
+      ],
     );
   }
 
@@ -80,59 +50,6 @@ class EventDetails extends StatelessWidget {
     final selected = selectedEvent!;
     return '${selected.isUiEvent ? 'CPU Profile: ' : ''}'
         '${selected.name} (${durationText(selected.time.duration)})';
-  }
-
-  Widget _buildDetails(bool offlineMode, bool profilerEnabled) {
-    final selected = selectedEvent!;
-    if (selected.isUiEvent) {
-      // In [offlineController.offlineMode], we do not need to worry about
-      // whether the profiler is enabled.
-      if (offlineMode) {
-        return _buildCpuProfiler(legacyController.cpuProfilerController);
-      }
-      return profilerEnabled
-          ? _buildCpuProfiler(legacyController.cpuProfilerController)
-          : CpuProfilerDisabled(legacyController.cpuProfilerController);
-    }
-    return EventSummary(selected);
-  }
-
-  Widget _buildCpuProfiler(CpuProfilerController cpuProfilerController) {
-    return ValueListenableBuilder<CpuProfileData?>(
-      valueListenable: cpuProfilerController.dataNotifier,
-      builder: (context, cpuProfileData, child) {
-        if (cpuProfileData == null) {
-          return child!;
-        }
-        return CpuProfiler(
-          data: cpuProfileData,
-          controller: cpuProfilerController,
-          summaryView: EventSummary(selectedEvent!),
-        );
-      },
-      child: _buildProcessingInfo(cpuProfilerController),
-    );
-  }
-
-  Widget _buildProcessingInfo(CpuProfilerController cpuProfilerController) {
-    return ValueListenableBuilder<double>(
-      valueListenable: cpuProfilerController.transformer.progressNotifier,
-      builder: (context, progress, _) {
-        return ProcessingInfo(
-          progressValue: progress,
-          processedObject: 'CPU samples',
-        );
-      },
-    );
-  }
-
-  Widget _buildInstructions(ThemeData theme) {
-    return Center(
-      child: Text(
-        instructions,
-        style: theme.subtleTextStyle,
-      ),
-    );
   }
 }
 

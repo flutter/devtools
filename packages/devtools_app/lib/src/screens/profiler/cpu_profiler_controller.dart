@@ -50,7 +50,7 @@ class CpuProfilerController extends DisposableController
         SearchControllerMixin<CpuStackFrame>,
         FilterControllerMixin<CpuStackFrame>,
         AutoDisposeControllerMixin {
-  CpuProfilerController({this.analyticsScreenId}) {
+  CpuProfilerController() {
     subscribeToFilterChanges();
   }
 
@@ -85,9 +85,6 @@ class CpuProfilerController extends DisposableController
   /// When this data is the value of [_dataNotifier], the CPU profiler will show
   /// an empty message specific to the app start up use case.
   static CpuProfileData emptyAppStartUpProfile = CpuProfileData.empty();
-
-  /// The analytics screen id for which this controller is active.
-  final String? analyticsScreenId;
 
   /// The store of cached CPU profiles for the currently selected isolate.
   ///
@@ -246,22 +243,17 @@ class CpuProfilerController extends DisposableController
     }
 
     try {
-      if (analyticsScreenId != null) {
-        // Pull and process cpu profile data [pullAndProcessHelper] and time the
-        // operation for analytics.
-
-        await ga.timeAsync(
-          analyticsScreenId!,
-          gac.cpuProfileProcessingTime,
-          asyncOperation: pullAndProcessHelper,
-          screenMetricsProvider: () => ProfilerScreenMetrics(
-            cpuSampleCount: cpuProfiles.profileMetaData.sampleCount,
-            cpuStackDepth: cpuProfiles.profileMetaData.stackDepth,
-          ),
-        );
-      } else {
-        await pullAndProcessHelper();
-      }
+      // Pull and process cpu profile data [pullAndProcessHelper] and time the
+      // operation for analytics.
+      await ga.timeAsync(
+        gac.cpuProfiler,
+        gac.cpuProfileProcessingTime,
+        asyncOperation: pullAndProcessHelper,
+        screenMetricsProvider: () => ProfilerScreenMetrics(
+          cpuSampleCount: cpuProfiles.profileMetaData.sampleCount,
+          cpuStackDepth: cpuProfiles.profileMetaData.stackDepth,
+        ),
+      );
     } on ProcessCancelledException catch (_) {
       // Do nothing for instances of [ProcessCancelledException].
     }

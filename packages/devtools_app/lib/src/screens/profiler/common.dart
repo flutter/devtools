@@ -5,7 +5,6 @@
 import 'package:flutter/foundation.dart';
 
 enum ProfilerTab {
-  summary('Summary', _summaryTab),
   bottomUp('Bottom Up', _bottomUpTab),
   callTree('Call Tree', _callTreeTab),
   methodTable('Method Table', _methodTableTab),
@@ -20,7 +19,6 @@ enum ProfilerTab {
   // of these three keys, we will not show the expand/collapse buttons.
   static const Key _flameChartTab = Key('cpu profile flame chart tab');
   static const Key _methodTableTab = Key('cpu profile method table tab');
-  static const Key _summaryTab = Key('cpu profile summary tab');
 
   static const Key _bottomUpTab = Key('cpu profile bottom up tab');
   static const Key _callTreeTab = Key('cpu profile call tree tab');
