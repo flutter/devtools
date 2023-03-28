@@ -178,32 +178,45 @@ class CpuProfileTransformer {
 /// At the time this method is called, we assume we have a list of roots with
 /// accurate inclusive/exclusive sample counts.
 void mergeCpuProfileRoots(List<CpuStackFrame> roots) {
-  // Loop through a copy of [roots] so that we can remove nodes from [roots]
-  // once we have merged them.
-  final List<CpuStackFrame> rootsCopy = List.of(roots);
-  for (CpuStackFrame root in rootsCopy) {
-    if (!roots.contains(root)) {
-      // We have already merged [root] and removed it from [roots]. Do not
-      // attempt to merge again.
+  final mergedRoots = <CpuStackFrame>[];
+  final rootIndicesToRemove = <int>{};
+
+  // The index from which we will traverse to find root matches.
+  var traverseIndex = 0;
+
+  for (int i = 0; i < roots.length; i++) {
+    if (rootIndicesToRemove.contains(i)) {
+      // We have already merged [root]. Do not attempt to merge again.
       continue;
     }
 
-    final matchingRoots =
-        roots.where((other) => other.matches(root) && other != root).toList();
-    if (matchingRoots.isEmpty) {
-      continue;
-    }
+    final root = roots[i];
 
-    for (CpuStackFrame match in matchingRoots) {
-      match.children.forEach(root.addChild);
-      root.exclusiveSampleCount += match.exclusiveSampleCount;
-      root.inclusiveSampleCount += match.inclusiveSampleCount;
-      roots.remove(match);
-      mergeCpuProfileRoots(root.children);
+    // Begin traversing from the index after [i] since we have already seen
+    // every node at index <= [i].
+    traverseIndex = i + 1;
+
+    for (int j = traverseIndex; j < roots.length; j++) {
+      final otherRoot = roots[j];
+      final isMatch =
+          !rootIndicesToRemove.contains(j) && otherRoot.matches(root);
+      if (isMatch) {
+        otherRoot.children.forEach(root.addChild);
+        root.exclusiveSampleCount += otherRoot.exclusiveSampleCount;
+        root.inclusiveSampleCount += otherRoot.inclusiveSampleCount;
+        rootIndicesToRemove.add(j);
+        mergeCpuProfileRoots(root.children);
+      }
     }
+    mergedRoots.add(root);
   }
 
-  for (CpuStackFrame root in roots) {
-    root.index = roots.indexOf(root);
+  // Clearing and adding all the elements in [mergedRoots] is more performant
+  // than removing each root that was merged individually.
+  roots
+    ..clear()
+    ..addAll(mergedRoots);
+  for (int i = 0; i < roots.length; i++) {
+    roots[i].index = i;
   }
 }
