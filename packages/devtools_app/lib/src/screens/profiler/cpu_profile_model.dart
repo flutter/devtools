@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:collection';
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
@@ -240,11 +239,7 @@ class CpuProfileData {
         )
         .toList();
 
-    // Use a SplayTreeMap so that map iteration will be in sorted key order.
-    // This keeps the visualization of the profile as consistent as possible
-    // when applying filters.
-    final SplayTreeMap<String, CpuStackFrame> subStackFrames =
-        SplayTreeMap(stackFrameIdCompare);
+    final subStackFrames = <String, CpuStackFrame>{};
     for (final sample in subSamples) {
       final leafFrame = superProfile.stackFrames[sample.leafId]!;
       subStackFrames[sample.leafId] = leafFrame;
@@ -292,12 +287,7 @@ class CpuProfileData {
 
     final metaData = originalData.profileMetaData.copyWith();
 
-    // Use a SplayTreeMap so that map iteration will be in sorted key order.
-    // This keeps the visualization of the profile as consistent as possible
-    // when applying filters.
-    final SplayTreeMap<String, CpuStackFrame> stackFrames =
-        SplayTreeMap(stackFrameIdCompare);
-
+    final stackFrames = <String, CpuStackFrame>{};
     final samples = <CpuSampleEvent>[];
 
     int nextId = 1;
@@ -416,11 +406,7 @@ class CpuProfileData {
         ),
     );
 
-    // Use a SplayTreeMap so that map iteration will be in sorted key order.
-    // This keeps the visualization of the profile as consistent as possible
-    // when applying filters.
-    final SplayTreeMap<String, CpuStackFrame> stackFramesWithTag =
-        SplayTreeMap(stackFrameIdCompare);
+    final stackFramesWithTag = <String, CpuStackFrame>{};
 
     for (final sample in samplesWithTag) {
       String? currentId = sample.leafId;
@@ -484,11 +470,7 @@ class CpuProfileData {
       includeSampleOrWalkUp(sample, sampleJson, leafStackFrame);
     }
 
-    // Use a SplayTreeMap so that map iteration will be in sorted key order.
-    // This keeps the visualization of the profile as consistent as possible
-    // when applying filters.
-    final SplayTreeMap<String, CpuStackFrame> filteredStackFrames =
-        SplayTreeMap(stackFrameIdCompare);
+    final filteredStackFrames = <String, CpuStackFrame>{};
 
     String? filteredParentStackFrameId(CpuStackFrame? candidateParentFrame) {
       if (candidateParentFrame == null) return null;
@@ -1079,42 +1061,6 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
     buf.write(inclusiveSampleCount == 1 ? 'sample' : 'samples');
     buf.write(', ${percent(totalTimeRatio)})');
     return buf.toString();
-  }
-}
-
-@visibleForTesting
-int stackFrameIdCompare(String a, String b) {
-  if (a == b) {
-    return 0;
-  }
-  // Order the root first.
-  if (a == CpuProfileData.rootId) {
-    return -1;
-  }
-  if (b == CpuProfileData.rootId) {
-    return 1;
-  }
-
-  // Stack frame ids are structured as 140225212960768-24 (iOS) or -784070656-24
-  // (Android). We need to compare the number after the last dash to maintain
-  // the correct order.
-  const dash = '-';
-  final aDashIndex = a.lastIndexOf(dash);
-  final bDashIndex = b.lastIndexOf(dash);
-  try {
-    final int aId = int.parse(a.substring(aDashIndex + 1));
-    final int bId = int.parse(b.substring(bDashIndex + 1));
-    return aId.compareTo(bId);
-  } catch (e, stackTrace) {
-    String error = 'invalid stack frame ';
-    if (aDashIndex == -1 && bDashIndex != -1) {
-      error += 'id [$a]';
-    } else if (aDashIndex != -1 && bDashIndex == -1) {
-      error += 'id [$b]';
-    } else {
-      error += 'ids [$a, $b]';
-    }
-    Error.throwWithStackTrace(error, stackTrace);
   }
 }
 
