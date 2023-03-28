@@ -20,6 +20,7 @@ import '../eval/auto_complete.dart';
 import '../eval/eval_service.dart';
 import '../primitives/assignment.dart';
 import '../primitives/eval_history.dart';
+import 'help_dialog.dart';
 
 typedef AutoCompleteResultsFunction = Future<List<String>> Function(
   EditingParts parts,
@@ -209,7 +210,7 @@ class ExpressionEvalFieldState extends State<ExpressionEvalField>
                 _historyNavDown();
                 return KeyEventResult.handled;
               } else if (event.isKeyPressed(LogicalKeyboardKey.enter)) {
-                _handleExpressionEval();
+                _handleExpressionEval(context);
                 return KeyEventResult.handled;
               }
 
@@ -221,12 +222,16 @@ class ExpressionEvalFieldState extends State<ExpressionEvalField>
               shouldRequestFocus: false,
               clearFieldOnEscapeWhenOverlayHidden: true,
               onSelection: _onSelection,
-              decoration: const InputDecoration(
-                contentPadding: EdgeInsets.all(denseSpacing),
-                border: OutlineInputBorder(),
-                focusedBorder: OutlineInputBorder(borderSide: BorderSide.none),
-                enabledBorder: OutlineInputBorder(borderSide: BorderSide.none),
-                labelText: 'Eval',
+              decoration: InputDecoration(
+                contentPadding: const EdgeInsets.all(denseSpacing),
+                border: const OutlineInputBorder(),
+                focusedBorder:
+                    const OutlineInputBorder(borderSide: BorderSide.none),
+                enabledBorder:
+                    const OutlineInputBorder(borderSide: BorderSide.none),
+                labelText: FeatureFlags.evalAndBrowse
+                    ? 'Eval. Enter "?" for help.'
+                    : 'Eval',
               ),
               overlayXPositionBuilder:
                   (String inputValue, TextStyle? inputStyle) {
@@ -301,13 +306,23 @@ class ExpressionEvalFieldState extends State<ExpressionEvalField>
         .toList();
   }
 
-  void _handleExpressionEval() async {
+  void _handleExpressionEval(BuildContext context) async {
     final expressionText = searchTextFieldController.value.text.trim();
     _autoCompleteController
       ..updateSearchField(newValue: '', caretPosition: 0)
       ..clearSearchField(force: true);
 
     if (expressionText.isEmpty) return;
+
+    if (FeatureFlags.evalAndBrowse && expressionText.trim() == '?') {
+      unawaited(
+        showDialog(
+          context: context,
+          builder: (context) => const ConsoleHelpDialog(),
+        ),
+      );
+      return;
+    }
 
     serviceManager.consoleService.appendStdio('> $expressionText\n');
     setState(() {
