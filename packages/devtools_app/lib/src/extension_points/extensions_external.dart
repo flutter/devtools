@@ -22,7 +22,7 @@ class ExternalDevToolsExtensionPoints implements DevToolsExtensionPoints {
     return Link(
       display: _newDevToolsIssueUriDisplay,
       url: newDevToolsGitHubIssueUriLengthSafe(
-        issueDetails: issueDetails,
+        additionalInfo: issueDetails,
         environment: issueLinkDetails(),
       ).toString(),
       gaScreenName: gac.devToolsMain,
@@ -59,24 +59,25 @@ const maxGitHubUriLength = 8190;
 @visibleForTesting
 Uri newDevToolsGitHubIssueUriLengthSafe({
   required List<String> environment,
-  String? issueDetails,
+  String? additionalInfo,
 }) {
   final fullUri = _newDevToolsGitHubIssueUri(
-      issueDetails: issueDetails, environment: environment,
+    additionalInfo: additionalInfo,
+    environment: environment,
   );
 
   final lengthToCut = fullUri.toString().length - maxGitHubUriLength;
   if (lengthToCut <= 0) return fullUri;
 
-  if (issueDetails == null)
+  if (additionalInfo == null)
     throw StateError(
       'Issue details cannot be null, because length limit is reached.',
     );
-  final truncatedDetails =
-      issueDetails.substring(0, issueDetails.length - lengthToCut);
+  final truncatedInfo =
+      additionalInfo.substring(0, additionalInfo.length - lengthToCut);
 
   final truncatedUri = _newDevToolsGitHubIssueUri(
-    issueDetails: truncatedDetails,
+    additionalInfo: truncatedInfo,
     environment: environment,
   );
   assert(truncatedUri.toString().length <= maxGitHubUriLength);
@@ -84,11 +85,11 @@ Uri newDevToolsGitHubIssueUriLengthSafe({
 }
 
 Uri _newDevToolsGitHubIssueUri({
-  String? issueDetails,
+  String? additionalInfo,
   required List<String> environment,
 }) {
   final issueBody = [
-    if (issueDetails != null) issueDetails,
+    if (additionalInfo != null) additionalInfo,
     ...environment,
   ].join('\n');
 

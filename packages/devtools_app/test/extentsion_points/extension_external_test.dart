@@ -8,10 +8,10 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   test('newDevToolsGitHubIssueUriLengthSafe cuts details', () {
     const tail = 'tail';
-    final details =
+    final additionalInfo =
         Iterable.generate(maxGitHubUriLength, (_) => 'v').join() + tail;
     final uri = newDevToolsGitHubIssueUriLengthSafe(
-      issueDetails: details,
+      additionalInfo: additionalInfo,
       environment: [],
     );
     expect(uri.toString().contains(tail), false);
