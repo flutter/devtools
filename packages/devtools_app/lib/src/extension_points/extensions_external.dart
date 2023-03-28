@@ -69,10 +69,10 @@ Uri newDevToolsGitHubIssueUriLengthSafe({
   final lengthToCut = fullUri.toString().length - maxGitHubUriLength;
   if (lengthToCut <= 0) return fullUri;
 
-  if (additionalInfo == null)
-    throw StateError(
-      'Issue details cannot be null, because length limit is reached.',
-    );
+  if (additionalInfo == null) {
+    return Uri.parse(fullUri.toString().substring(0, maxGitHubUriLength));
+  }
+
   final truncatedInfo =
       additionalInfo.substring(0, additionalInfo.length - lengthToCut);
 
