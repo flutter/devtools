@@ -66,7 +66,7 @@ void main() {
         controller.dataNotifier.value,
         equals(CpuProfilerController.baseStateCpuProfileData),
       );
-      expect(controller.profilerBusyStatus.value, false);
+      expect(controller.profilerBusyStatus.value, CpuProfilerBusyStatus.none);
 
       // [startMicros] and [extentMicros] are arbitrary for testing.
       await controller.pullAndProcessProfile(
@@ -78,7 +78,7 @@ void main() {
         controller.dataNotifier.value,
         isNot(equals(CpuProfilerController.baseStateCpuProfileData)),
       );
-      expect(controller.profilerBusyStatus.value, false);
+      expect(controller.profilerBusyStatus.value, CpuProfilerBusyStatus.none);
 
       await controller.clear();
       expect(
@@ -466,7 +466,7 @@ void main() {
         equals(CpuProfilerController.baseStateCpuProfileData),
       );
       expect(controller.selectedCpuStackFrameNotifier.value, isNull);
-      expect(controller.profilerBusyStatus.value, isFalse);
+      expect(controller.profilerBusyStatus.value, CpuProfilerBusyStatus.none);
     });
 
     test('disposes', () {
