@@ -6,14 +6,16 @@ import 'dart:convert';
 
 import 'package:flutter/widgets.dart';
 import 'package:http/http.dart';
+import 'package:logging/logging.dart';
 
 import '../shared/notifications.dart';
 import 'analytics/analytics.dart' as ga;
 import 'config_specific/launch_url/launch_url.dart';
-import 'config_specific/logger/logger.dart';
 import 'config_specific/server/server.dart' as server;
 import 'globals.dart';
 import 'primitives/utils.dart';
+
+final _log = Logger('survey');
 
 class SurveyService {
   static const _noThanksLabel = 'NO THANKS';
@@ -120,8 +122,8 @@ class SurveyService {
         final Map<String, dynamic> contents = json.decode(response.body);
         return DevToolsSurvey.parse(contents);
       }
-    } on Error catch (e) {
-      log('Error fetching survey content: $e');
+    } on Error catch (e, st) {
+      _log.shout('Error fetching survey content: $e', e, st);
     }
     return null;
   }

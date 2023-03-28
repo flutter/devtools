@@ -11,6 +11,10 @@ Dart & Flutter DevTools - A Suite of Performance Tools for Dart and Flutter
 * Added the new verbose logging feature for helping us debug user issues. [#5404](https://github.com/flutter/devtools/pull/5404)
     ![verbose logging](images/verbose-logging.png "verbose_logging")
 * Fix a bug where some asynchronous errors were not being reported. [#5456](https://github.com/flutter/devtools/pull/5456)
+* Added support for viewing data after an app disconnects for screens that
+support offline viewing (currently only the Performance and CPU proiler pages).
+[#5509](https://github.com/flutter/devtools/pull/5509)
+* Include settings button in the footer of the embedded view. - [#5528](https://github.com/flutter/devtools/pull/5528)
 
 ## Inspector updates
 TODO: Remove this section if there are not any general updates.
@@ -24,6 +28,7 @@ jank is detected on an iOS device. - [#5455](https://github.com/flutter/devtools
 ## CPU profiler updates
 * Add a Method Table to the CPU profiler - [#5366](https://github.com/flutter/devtools/pull/5366)
 * Improve the performance of data processing in the CPU profiler - [#5468](https://github.com/flutter/devtools/pull/5468)
+* Polish and performance improvements for the CPU profile flame chart - [#5529](https://github.com/flutter/devtools/pull/5529)
 
 ![method table](images/image1.png "method_table")
 
@@ -42,10 +47,12 @@ jank is detected on an iOS device. - [#5455](https://github.com/flutter/devtools
 * Allow expression evaluation when pausing in JS for web apps - [#5427](https://github.com/flutter/devtools/pull/5427)
 * Update syntax highlighting to [dart-lang/dart-syntax-highlight v1.2.0](https://github.com/dart-lang/dart-syntax-highlight/blob/master/CHANGELOG.md#120-2023-01-30) - [#5477](https://github.com/flutter/devtools/pull/5477)
 * Improve support for inspecting `UserTag` and `MirrorReferent` instances - [#5490](https://github.com/flutter/devtools/pull/5490)
+* Debugger panel respects "dense mode" - [#5517](https://github.com/flutter/devtools/pull/5517)
 
 ## Network profiler updates
 * Fix a bug viewing JSON responses with null values - [#5424](https://github.com/flutter/devtools/pull/5424)
 * Fix a bug where JSON requests were shown in plain text, instead of the formatted JSON viewer - [#5463](https://github.com/flutter/devtools/pull/5463)
+* Fix a UI issue where the copy button on the response or request tab would let you copy while still loading the data - [#5476](https://github.com/flutter/devtools/pull/5476)
 
 ## Logging updates
 TODO: Remove this section if there are not any general updates.

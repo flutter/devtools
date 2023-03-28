@@ -6,7 +6,7 @@
 // test-argument:experimentsOn=true
 // test-argument:appPath="test/test_infra/fixtures/memory_app"
 
-import 'dart:ui' as ui;
+// ignore_for_file: avoid_print
 
 import 'package:devtools_app/src/shared/console/widgets/console_pane.dart';
 import 'package:devtools_app/src/shared/primitives/simple_items.dart';
@@ -30,8 +30,7 @@ void main() {
   });
 
   tearDown(() async {
-    // This is required to have multiple test cases in this file.
-    await (ui.window as dynamic).resetHistory();
+    await resetHistory();
   });
 
   testWidgets('memory eval and browse', (tester) async {

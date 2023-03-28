@@ -6,9 +6,9 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
+import 'package:logging/logging.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../shared/config_specific/logger/logger.dart';
 import '../../shared/diagnostics/primitives/source_location.dart';
 import '../../shared/globals.dart';
 import '../../shared/primitives/auto_dispose.dart';
@@ -19,6 +19,8 @@ import '../vm_developer/vm_service_private_extensions.dart';
 import 'debugger_model.dart';
 import 'program_explorer_controller.dart';
 import 'syntax_highlighter.dart';
+
+final _log = Logger('codeview_controller');
 
 class CodeViewController extends DisposableController
     with
@@ -223,7 +225,7 @@ class CodeViewController extends DisposableController
   }) {
     _currentScriptRef.value = scriptLocation.scriptRef;
     if (_currentScriptRef.value == null) {
-      log('Trying to show a location with a null script ref', LogLevel.error);
+      _log.shout('Trying to show a location with a null script ref');
     }
 
     unawaited(_parseCurrentScript());
@@ -272,9 +274,9 @@ class CodeViewController extends DisposableController
           (last, e) => last..addAll(e.entries),
         ),
       );
-    } catch (e) {
+    } catch (e, st) {
       // Ignore - not supported for all vm service implementations.
-      log('$e');
+      _log.warning(e, e, st);
     }
     return const ProcessedSourceReport.empty();
   }
@@ -306,9 +308,9 @@ class CodeViewController extends DisposableController
         executableLines = Set.from(
           positions.where((p) => p.line != null).map((p) => p.line),
         );
-      } catch (e) {
+      } catch (e, st) {
         // Ignore - not supported for all vm service implementations.
-        log('$e');
+        _log.warning(e, e, st);
       }
 
       final processedReport = await _getSourceReport(
