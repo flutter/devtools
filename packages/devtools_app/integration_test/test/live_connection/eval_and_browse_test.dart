@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// Do not delete these arguments. They are parsed parsed by test runner.
+// Do not delete these arguments. They are parsed by test runner.
 // test-argument:appPath="test/test_infra/fixtures/memory_app"
 // test-argument:experimentsOn=true
 
