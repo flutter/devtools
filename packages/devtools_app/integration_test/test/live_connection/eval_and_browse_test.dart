@@ -17,6 +17,7 @@ import 'package:devtools_app/src/shared/primitives/simple_items.dart';
 import 'package:devtools_app/src/shared/ui/search.dart';
 import 'package:devtools_test/devtools_integration_test.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 
@@ -47,7 +48,7 @@ void main() {
 
     await evalTester.switchToSnapshotsAndTakeOne();
 
-    await _testRootIsAccessible(evalTester);
+    await _inboundReferencesAreListed(evalTester);
   });
 }
 
@@ -67,28 +68,28 @@ Future<void> _testAssignment(_EvalTester tester) async {
   );
 }
 
-Future<void> _testRootIsAccessible(_EvalTester tester) async {
+Future<void> _inboundReferencesAreListed(_EvalTester tester) async {
   await tester.tapAndPump(find.text('MyApp'));
   await tester.tapAndPump(find.text(ContextMenuButton.text));
   await tester.tapAndPump(find.textContaining('one instance'));
   await tester.tapAndPump(find.text('Any'), duration: longPumpDuration);
 
-  Finder next = find.textContaining('MyApp, retained size ');
-  next = await tester.tapAndPump(next, next: find.text('references'));
-  next = await tester.tapAndPump(next, next: find.textContaining('static ('));
-  next = await tester.tapAndPump(next, next: find.text('inbound'));
+  Widget? next = await tester.tapAndPump(
+    find.textContaining('MyApp, retained size '),
+    next: find.text('references'),
+  );
   next = await tester.tapAndPump(
-    next,
-    next: find.text('_List'),
-    at: 1,
-  ); // Second in the list
+    find.byWidget(next!),
+    next: find.textContaining('static ('),
+  );
   next = await tester.tapAndPump(
-    next,
-    next: find.text('Class'),
-    at: 1,
-  ); // Second after column name
-
-  await tester.tapAndPump(next, next: find.text('Root'));
+    find.byWidget(next!),
+    next: find.text('inbound'),
+  );
+  next = await tester.tapAndPump(
+    find.byWidget(next!),
+    next: find.text('Context'),
+  );
 }
 
 class _EvalTester {
@@ -164,16 +165,15 @@ class _EvalTester {
   ///
   /// If [next] is provided, will repeat the tap till [next] combined with [at] returns results.
   /// If [next] is not null returns [next]  combined with [at, otherwise returns [finder].
-  Future<Finder> tapAndPump(
+  Future<Widget?> tapAndPump(
     Finder finder, {
     Duration? duration,
     Finder? next,
-    int at = 0,
   }) async {
     int tryNumber = 0;
 
     Future<void> action() async {
-      logStatus("tapping #$tryNumber to find $at'th item in the finder\n"
+      logStatus('tapping #$tryNumber to find \n'
           '[$finder]\n');
       tryNumber++;
       await tester.tap(finder);
@@ -183,13 +183,13 @@ class _EvalTester {
 
     await action();
 
-    if (next == null) return finder;
+    if (next == null) return null;
 
     // Tthese tries are needed because tap in console is flaky.
     while (tryNumber < 10) {
       try {
         final items = tester.widgetList(next);
-        if (at < items.length) return next.at(at);
+        if (items.isNotEmpty) return items.first;
         await action();
       } on StateError {
         await action();
