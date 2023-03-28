@@ -15,6 +15,6 @@ void main() {
       environment: [],
     );
     expect(uri.toString().contains(tail), false);
-    expect(uri.toString().length, lessThanOrEqualTo(maxGitHubUriLength));
+    expect(uri.toString().length, maxGitHubUriLength);
   });
 }
