@@ -9,8 +9,8 @@ import 'utils.dart';
 const newDevToolsIssueUriDisplay = 'github.com/flutter/devtools/issues/new';
 
 Uri newDevToolsIssueUri({String? issueDetails}) {
-  final issueBodyItems = _issueLinkDetails();
-  if (issueDetails != null) issueBodyItems.add(issueDetails);
+  final issueBodyItems = issueLinkDetails();
+  if (issueDetails != null) issueBodyItems.insert(0, issueDetails);
   final issueBody = issueBodyItems.join('\n');
 
   return Uri.parse('https://$newDevToolsIssueUriDisplay').replace(
@@ -20,7 +20,7 @@ Uri newDevToolsIssueUri({String? issueDetails}) {
   );
 }
 
-List<String> _issueLinkDetails() {
+List<String> issueLinkDetails() {
   final issueDescriptionItems = [
     '<-- Please describe your problem here. Be sure to include repro steps. -->',
     '___', // This will create a separator in the rendered markdown.
