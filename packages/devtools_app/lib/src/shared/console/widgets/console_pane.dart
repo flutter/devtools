@@ -6,11 +6,13 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../common_widgets.dart';
+import '../../feature_flags.dart';
 import '../../globals.dart';
 import '../../theme.dart';
 import '../console.dart';
 import '../console_service.dart';
 import 'evaluate.dart';
+import 'help_dialog.dart';
 
 // TODO(devoncarew): Show some small UI indicator when we receive stdout/stderr.
 
@@ -21,6 +23,7 @@ class ConsolePaneHeader extends AreaPaneHeader {
           title: const Text('Console'),
           roundedTopBorder: true,
           actions: [
+            if (FeatureFlags.evalAndBrowse) const ConsoleHelpLink(),
             CopyToClipboardControl(
               dataProvider: () =>
                   serviceManager.consoleService.stdio.value.join('\n'),

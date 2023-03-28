@@ -214,6 +214,8 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
 
   int? _offset;
 
+  bool get isGroup => _offset != null;
+
   /// If true, the variable can be saved to console as a root.
   final bool isRerootable;
 

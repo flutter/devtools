@@ -22,6 +22,7 @@ final debugger = ScreenMetaData.debugger.id;
 final logging = ScreenMetaData.logging.id;
 final appSize = ScreenMetaData.appSize.id;
 final vmTools = ScreenMetaData.vmTools.id;
+const console = 'console';
 final simple = ScreenMetaData.simple.id;
 
 // GA events not associated with a any screen e.g., hotReload, hotRestart, etc
@@ -89,6 +90,7 @@ const shaderCompilationDocsTooltipLink = 'shaderCompilationDocsTooltipLink';
 const impellerWiki = 'impellerWikiLink';
 const collectRasterStats = 'collectRasterStats';
 const clearRasterStats = 'clearRasterStats';
+const fullScreenLayerImage = 'fullScreenLayerImage';
 const clearRebuildStats = 'clearRebuildStats';
 const perfettoModeTraceEventProcessingTime =
     'traceEventProcessingTime-perfettoMode';
@@ -173,6 +175,9 @@ const exitOfflineMode = 'exitOfflineMode';
 // the page data has loaded and is ready to interact with.
 const pageReady = 'pageReady';
 
+/// Console area.
+const consoleHelp = 'consoleHelp';
+
 /// Documentation actions shared across screens.
 const documentationLink = 'documentationLink';
 String topicDocumentationButton(String topic) => '${topic}DocumentationButton';
@@ -213,6 +218,8 @@ class MemoryEvent {
   static const tracingRefresh = 'tracingRefresh';
   static const tracingClassFilter = 'tracingClassFilter';
   static const tracingTraceCheck = 'tracingTraceCheck';
+  static const tracingTreeExpandAll = 'tracingTreeExpandAll';
+  static const tracingTreeCollapseAll = 'tracingTreeCollapseAll';
   static const tracingHelp = 'memoryTracingHelp';
 
   static const diffTakeSnapshotControlPane = 'diffTakeSnapshotControlPane';

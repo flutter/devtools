@@ -8,7 +8,6 @@ import 'package:devtools_app/src/screens/performance/panes/raster_stats/raster_s
 import 'package:devtools_app/src/screens/performance/panes/timeline_events/timeline_events_view.dart';
 import 'package:devtools_app/src/screens/performance/tabbed_performance_view.dart';
 import 'package:devtools_app/src/shared/charts/flame_chart.dart';
-import 'package:devtools_app/src/shared/config_specific/import_export/import_export.dart';
 import 'package:devtools_app/src/shared/ui/tab.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
