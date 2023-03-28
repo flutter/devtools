@@ -54,7 +54,7 @@ Uri _newDevToolsGitHubIssueUri({String? issueDetails}) {
 
   final issueBody = [
     if (issueDetails != null) issueDetails,
-    ..._issueLinkDetails(),
+    ...issueLinkDetails(),
   ].join('\n');
 
   final result = Uri.parse('https://$_newDevToolsIssueUriDisplay').replace(
@@ -65,28 +65,4 @@ Uri _newDevToolsGitHubIssueUri({String? issueDetails}) {
 
   if (result.toString().length <= _maxGitHubUriLength) return result;
   return Uri.parse(result.toString().substring(0, _maxGitHubUriLength - 1));
-}
-
-List<String> _issueLinkDetails() {
-  final issueDescriptionItems = [
-    '<-- Please describe your problem here. Be sure to include repro steps. -->',
-    '___', // This will create a separator in the rendered markdown.
-    '**DevTools version**: ${devtools.version}',
-  ];
-  final vm = serviceManager.vm;
-  final connectedApp = serviceManager.connectedApp;
-  if (vm != null && connectedApp != null) {
-    final descriptionEntries = generateDeviceDescription(
-      vm,
-      connectedApp,
-      includeVmServiceConnection: false,
-    );
-    final deviceDescription = descriptionEntries
-        .map((entry) => '${entry.title}: ${entry.description}');
-    issueDescriptionItems.addAll([
-      '**Connected Device**:',
-      ...deviceDescription,
-    ]);
-  }
-  return issueDescriptionItems;
 }

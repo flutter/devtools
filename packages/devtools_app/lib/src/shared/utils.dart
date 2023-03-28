@@ -15,6 +15,7 @@ import 'package:logging/logging.dart';
 import 'package:provider/provider.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../../devtools.dart' as devtools;
 import 'common_widgets.dart';
 import 'connected_app.dart';
 import 'globals.dart';
@@ -122,6 +123,31 @@ List<_ConnectionDescription> generateDeviceDescription(
     ),
     if (_vmServiceConnection != null) _vmServiceConnection,
   ];
+}
+
+/// This method should be public, because it is used by g3 specific code.
+List<String> issueLinkDetails() {
+  final issueDescriptionItems = [
+    '<-- Please describe your problem here. Be sure to include repro steps. -->',
+    '___', // This will create a separator in the rendered markdown.
+    '**DevTools version**: ${devtools.version}',
+  ];
+  final vm = serviceManager.vm;
+  final connectedApp = serviceManager.connectedApp;
+  if (vm != null && connectedApp != null) {
+    final descriptionEntries = generateDeviceDescription(
+      vm,
+      connectedApp,
+      includeVmServiceConnection: false,
+    );
+    final deviceDescription = descriptionEntries
+        .map((entry) => '${entry.title}: ${entry.description}');
+    issueDescriptionItems.addAll([
+      '**Connected Device**:',
+      ...deviceDescription,
+    ]);
+  }
+  return issueDescriptionItems;
 }
 
 typedef _ProvidedControllerCallback<T> = void Function(T);
