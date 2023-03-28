@@ -472,7 +472,11 @@ class CpuProfileData {
             traceJson: sampleJson,
           ),
         );
-      } else if (stackFrame.parentId != CpuProfileData.rootId) {
+      }
+      // TODO(kenz): investigate why [stackFrame.parentId] is sometimes
+      // missing.
+      else if (stackFrame.parentId != CpuProfileData.rootId &&
+          originalData.stackFrames.containsKey(stackFrame.parentId)) {
         final parent = originalData.stackFrames[stackFrame.parentId]!;
         includeSampleOrWalkUp(sample, sampleJson, parent);
       }
@@ -495,7 +499,11 @@ class CpuProfileData {
 
       if (includeFilter(candidateParentFrame)) {
         return candidateParentFrame.id;
-      } else if (candidateParentFrame.parentId != CpuProfileData.rootId) {
+      }
+      // TODO(kenz): investigate why [stackFrame.parentId] is sometimes
+      // missing.
+      else if (candidateParentFrame.parentId != CpuProfileData.rootId &&
+          originalData.stackFrames.containsKey(candidateParentFrame.parentId)) {
         final parent = originalData.stackFrames[candidateParentFrame.parentId]!;
         return filteredParentStackFrameId(parent);
       }
