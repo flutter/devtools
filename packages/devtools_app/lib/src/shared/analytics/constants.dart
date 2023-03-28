@@ -194,6 +194,7 @@ class MemoryTime {
   static const updateValues = 'updateValues';
 }
 
+// ignore: avoid_classes_with_only_static_members
 /// Analytic event constants specific for memory screen.
 class MemoryEvent {
   static const gc = 'gc';
@@ -249,6 +250,14 @@ class MemoryEvent {
   static const diffSnapshotFilterReset = 'diffSnapshotFilterReset';
 
   static const browseRefLimit = 'browseRefLimit';
+
+  static const dropOneLiveVariable = 'dropOneLiveVariable';
+  static const dropOneStaticVariable = 'dropOneStaticVariable';
+  static String dropAllLiveToConsole({
+    required bool includeSubclasses,
+    required bool includeImplementers,
+  }) =>
+      'dropAllVariables${includeSubclasses ? 'Subclasses' : ''}${includeImplementers ? 'Imlementers' : ''}';
 }
 
 /// Areas of memory screen, to prefix event names, when events are emitted

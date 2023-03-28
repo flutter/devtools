@@ -6,13 +6,12 @@ import 'dart:async';
 import 'dart:math';
 import 'dart:ui';
 
-import '../../analytics/analytics.dart' as ga;
-import '../../analytics/constants.dart' as gac;
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../../analytics/analytics.dart' as ga;
+import '../../analytics/constants.dart' as gac;
 import '../../feature_flags.dart';
 import '../../globals.dart';
 import '../../primitives/auto_dispose.dart';
