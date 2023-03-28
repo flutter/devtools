@@ -257,7 +257,7 @@ class MemoryEvent {
     required bool includeSubclasses,
     required bool includeImplementers,
   }) =>
-      'dropAllVariables${includeSubclasses ? 'Subclasses' : ''}${includeImplementers ? 'Imlementers' : ''}';
+      'dropAllVariables${includeSubclasses ? '_Subclasses' : ''}${includeImplementers ? '_Imlementers' : ''}';
 }
 
 /// Areas of memory screen, to prefix event names, when events are emitted

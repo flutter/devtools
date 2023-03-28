@@ -879,7 +879,8 @@ class ToolbarAction extends StatelessWidget {
     this.style,
     this.gaScreen,
     this.gaSelection,
-  }) : super(key: key);
+  })  : assert((gaScreen == null) == (gaSelection == null)),
+        super(key: key);
 
   final TextStyle? style;
   final IconData icon;
@@ -898,8 +899,8 @@ class ToolbarAction extends StatelessWidget {
         textStyle: style,
       ),
       onPressed: () {
-        if (gaScreen != null || gaSelection != null) {
-          ga.select(gaScreen ?? '', gaSelection ?? '');
+        if (gaScreen != null && gaSelection != null) {
+          ga.select(gaScreen!, gaSelection!);
         }
         onPressed?.call();
       },
