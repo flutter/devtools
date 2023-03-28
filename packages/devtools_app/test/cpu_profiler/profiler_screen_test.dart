@@ -40,7 +40,7 @@ void main() {
         find.byType(ProfileRecordingInstructions),
         findsOneWidget,
       );
-        expect(find.byType(RecordingStatus), findsNothing);
+      expect(find.byType(RecordingStatus), findsNothing);
       expect(find.byType(CircularProgressIndicator), findsNothing);
       expect(find.byType(CpuProfiler), findsNothing);
       expect(find.byType(ModeDropdown), findsNothing);
