@@ -20,7 +20,8 @@ class ExternalDevToolsExtensionPoints implements DevToolsExtensionPoints {
   Link issueTrackerLink({String? issueDetails}) {
     return Link(
       display: _newDevToolsIssueUriDisplay,
-      url: _newDevToolsGitHubIssueUri(issueDetails: issueDetails).toString(),
+      url: _newDevToolsGitHubIssueUriLengthSafe(issueDetails: issueDetails)
+          .toString(),
       gaScreenName: gac.devToolsMain,
       gaSelectedItemDescription: gac.feedbackLink,
     );
@@ -49,20 +50,43 @@ class ExternalDevToolsExtensionPoints implements DevToolsExtensionPoints {
 
 const _newDevToolsIssueUriDisplay = 'github.com/flutter/devtools/issues/new';
 
-Uri _newDevToolsGitHubIssueUri({String? issueDetails}) {
+Uri _newDevToolsGitHubIssueUriLengthSafe({String? issueDetails}) {
   const _maxGitHubUriLength = 8190;
+  final context = issueLinkDetails();
 
+  final fullUri =
+      _newDevToolsGitHubIssueUri(issueDetails: issueDetails, context: context);
+
+  final lengthToCut = fullUri.toString().length - _maxGitHubUriLength;
+  if (lengthToCut <= 0) return fullUri;
+
+  if (issueDetails == null)
+    throw StateError(
+      'Issue details cannot be null, because length limit is reached.',
+    );
+  final truncatedDetails =
+      issueDetails.substring(0, issueDetails.length - lengthToCut);
+
+  final truncatedUri = _newDevToolsGitHubIssueUri(
+    issueDetails: truncatedDetails,
+    context: context,
+  );
+  assert(truncatedUri.toString().length <= _maxGitHubUriLength);
+  return truncatedUri;
+}
+
+Uri _newDevToolsGitHubIssueUri({
+  String? issueDetails,
+  required List<String> context,
+}) {
   final issueBody = [
     if (issueDetails != null) issueDetails,
-    ...issueLinkDetails(),
+    ...context,
   ].join('\n');
 
-  final result = Uri.parse('https://$_newDevToolsIssueUriDisplay').replace(
+  return Uri.parse('https://$_newDevToolsIssueUriDisplay').replace(
     queryParameters: {
       'body': issueBody,
     },
   );
-
-  if (result.toString().length <= _maxGitHubUriLength) return result;
-  return Uri.parse(result.toString().substring(0, _maxGitHubUriLength - 1));
 }
