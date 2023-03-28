@@ -140,7 +140,6 @@ class TimelineEventsController extends PerformanceFeatureController
   }
 
   Future<void> _initForServiceConnection() async {
-    legacyController.init();
     await serviceManager.timelineStreamManager.setDefaultTimelineStreams();
     await toggleHttpRequestLogging(true);
 
@@ -326,15 +325,9 @@ class TimelineEventsController extends PerformanceFeatureController
     }
   }
 
-  Future<void> selectTimelineEvent(
-    TimelineEvent? event, {
-    bool updateProfiler = true,
-  }) async {
+  Future<void> selectTimelineEvent(TimelineEvent? event) async {
     if (useLegacyTraceViewer.value) {
-      await legacyController.selectTimelineEvent(
-        event,
-        updateProfiler: updateProfiler,
-      );
+      await legacyController.selectTimelineEvent(event);
     } else {
       // TODO(kenz): handle event selection from Perfetto here if we ever have
       // a use case for this.
@@ -424,19 +417,7 @@ class TimelineEventsController extends PerformanceFeatureController
       if (framesController.currentFrameBeingSelected != frame) return;
     }
 
-    // We do not need to pull the CPU profile because we will pull the profile
-    // for the entire frame. The order of selecting the timeline event and
-    // pulling the CPU profile for the frame (directly below) matters here.
-    // If the selected timeline event is null, the event details section will
-    // not show the progress bar while we are processing the CPU profile.
-    await selectTimelineEvent(
-      frame.timelineEventData.uiEvent,
-      updateProfiler: false,
-    );
-
-    if (framesController.currentFrameBeingSelected != frame) return;
-
-    await legacyController.updateCpuProfileForFrame(frame);
+    await selectTimelineEvent(frame.timelineEventData.uiEvent);
   }
 
   void addTimelineEvent(TimelineEvent event) {
@@ -596,7 +577,6 @@ class TimelineEventsController extends PerformanceFeatureController
   void dispose() {
     _pollingTimer?.cancel();
     _timelinePollingRateLimiter?.dispose();
-    legacyController.dispose();
     if (FeatureFlags.embeddedPerfetto) {
       perfettoController.dispose();
     }

@@ -102,48 +102,6 @@ void main() {
         expect(find.byKey(ProfilerTab.callTree.key), findsOneWidget);
         expect(find.byKey(ProfilerTab.methodTable.key), findsOneWidget);
         expect(find.byKey(ProfilerTab.cpuFlameChart.key), findsOneWidget);
-        expect(find.byKey(ProfilerTab.summary.key), findsNothing);
-      },
-    );
-
-    testWidgetsWithWindowSize(
-      'builds for empty cpuProfileData with summary view',
-      windowSize,
-      (WidgetTester tester) async {
-        cpuProfileData = CpuProfileData.parse(emptyCpuProfileDataJson);
-        const summaryViewKey = Key('test summary view');
-        cpuProfiler = CpuProfiler(
-          data: cpuProfileData,
-          controller: controller,
-          summaryView: const SizedBox(key: summaryViewKey),
-        );
-        await tester.pumpWidget(wrap(cpuProfiler));
-        expect(find.byType(TabBar), findsOneWidget);
-        expect(find.byKey(CpuProfiler.dataProcessingKey), findsNothing);
-        expect(find.byType(CpuBottomUpTable), findsNothing);
-        expect(find.byType(CpuCallTreeTable), findsNothing);
-        expect(find.byType(CpuMethodTable), findsNothing);
-        expect(find.byType(CpuProfileFlameChart), findsNothing);
-        expect(find.byType(CpuProfileStats), findsNothing);
-        expect(find.byType(DisplayTreeGuidelinesToggle), findsNothing);
-        expect(find.byType(UserTagDropdown), findsNothing);
-        expect(find.byType(ExpandAllButton), findsNothing);
-        expect(find.byType(CollapseAllButton), findsNothing);
-        expect(find.byType(FlameChartHelpButton), findsNothing);
-        expect(
-          find.byType(SearchField<MethodTableController>),
-          findsNothing,
-        );
-        expect(
-          find.byType(SearchField<CpuProfilerController>),
-          findsNothing,
-        );
-        expect(find.byKey(ProfilerTab.bottomUp.key), findsOneWidget);
-        expect(find.byKey(ProfilerTab.callTree.key), findsOneWidget);
-        expect(find.byKey(ProfilerTab.methodTable.key), findsOneWidget);
-        expect(find.byKey(ProfilerTab.cpuFlameChart.key), findsOneWidget);
-        expect(find.byKey(ProfilerTab.summary.key), findsOneWidget);
-        expect(find.byKey(summaryViewKey), findsOneWidget);
       },
     );
 
@@ -177,43 +135,6 @@ void main() {
         expect(find.byKey(ProfilerTab.callTree.key), findsOneWidget);
         expect(find.byKey(ProfilerTab.methodTable.key), findsOneWidget);
         expect(find.byKey(ProfilerTab.cpuFlameChart.key), findsOneWidget);
-        expect(find.byKey(ProfilerTab.summary.key), findsNothing);
-      },
-    );
-
-    testWidgetsWithWindowSize(
-      'builds for valid cpuProfileData with summaryView',
-      windowSize,
-      (WidgetTester tester) async {
-        const summaryViewKey = Key('test summary view');
-        cpuProfiler = CpuProfiler(
-          data: cpuProfileData,
-          controller: controller,
-          summaryView: const SizedBox(key: summaryViewKey),
-        );
-        await tester.pumpWidget(wrap(cpuProfiler));
-        expect(find.byType(TabBar), findsOneWidget);
-        expect(find.byKey(CpuProfiler.dataProcessingKey), findsNothing);
-        expect(find.byKey(summaryViewKey), findsOneWidget);
-        expect(find.byType(CpuProfileStats), findsNothing);
-        expect(find.byType(DisplayTreeGuidelinesToggle), findsNothing);
-        expect(find.byType(UserTagDropdown), findsNothing);
-        expect(find.byType(ExpandAllButton), findsNothing);
-        expect(find.byType(CollapseAllButton), findsNothing);
-        expect(find.byType(FlameChartHelpButton), findsNothing);
-        expect(
-          find.byType(SearchField<MethodTableController>),
-          findsNothing,
-        );
-        expect(
-          find.byType(SearchField<CpuProfilerController>),
-          findsNothing,
-        );
-        expect(find.byKey(ProfilerTab.bottomUp.key), findsOneWidget);
-        expect(find.byKey(ProfilerTab.callTree.key), findsOneWidget);
-        expect(find.byKey(ProfilerTab.methodTable.key), findsOneWidget);
-        expect(find.byKey(ProfilerTab.cpuFlameChart.key), findsOneWidget);
-        expect(find.byKey(ProfilerTab.summary.key), findsOneWidget);
       },
     );
 
