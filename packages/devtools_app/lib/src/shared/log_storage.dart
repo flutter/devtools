@@ -45,7 +45,8 @@ class LogStorage {
             if (e.stackTrace != null) 'stackTrace': e.stackTrace.toString(),
           }),
         )
-        .join('\n');
+        .map((line) => line + '\n') // Each entry needs to be on it's own line
+        .join();
   }
 
   /// Static instance for storing the app's logs.
