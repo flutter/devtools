@@ -50,9 +50,10 @@ class ExternalDevToolsExtensionPoints implements DevToolsExtensionPoints {
 const _newDevToolsIssueUriDisplay = 'github.com/flutter/devtools/issues/new';
 
 Uri _newDevToolsGitHubIssueUri({String? issueDetails}) {
-  final issueBodyItems = _issueLinkDetails();
-  if (issueDetails != null) issueBodyItems.insert(0, issueDetails);
-  final issueBody = issueBodyItems.join('\n');
+  final issueBody = [
+    if (issueDetails != null) issueDetails,
+    ..._issueLinkDetails(),
+  ].join('\n');
 
   return Uri.parse('https://github.com/flutter/devtools/issues/new').replace(
     queryParameters: {
