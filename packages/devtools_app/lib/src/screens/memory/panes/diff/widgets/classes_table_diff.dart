@@ -87,7 +87,7 @@ class _InstanceColumn extends ColumnData<DiffClassStats>
   _InstanceColumn(this.dataPart, this.diffData)
       : super(
           columnTitle(dataPart),
-          fixedWidthPx: scaleByFontFactor(80.0),
+          fixedWidthPx: scaleByFontFactor(110.0),
           alignment: ColumnAlignment.right,
         );
 

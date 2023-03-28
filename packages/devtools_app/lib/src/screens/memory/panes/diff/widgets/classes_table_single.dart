@@ -79,7 +79,7 @@ class _InstanceColumn extends ColumnData<SingleClassStats>
       : super(
           'Instances',
           titleTooltip: nonGcableInstancesColumnTooltip,
-          fixedWidthPx: scaleByFontFactor(90.0),
+          fixedWidthPx: scaleByFontFactor(110.0),
           alignment: ColumnAlignment.right,
         );
 
