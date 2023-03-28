@@ -18,11 +18,11 @@ class ExternalDevToolsExtensionPoints implements DevToolsExtensionPoints {
       <ScriptPopupMenuOption>[];
 
   @override
-  Link issueTrackerLink({String? issueDetails}) {
+  Link issueTrackerLink({String? additionalInfo}) {
     return Link(
       display: _newDevToolsIssueUriDisplay,
       url: newDevToolsGitHubIssueUriLengthSafe(
-        additionalInfo: issueDetails,
+        additionalInfo: additionalInfo,
         environment: issueLinkDetails(),
       ).toString(),
       gaScreenName: gac.devToolsMain,

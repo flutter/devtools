@@ -59,7 +59,7 @@ class _ListControlPane extends StatelessWidget {
       await showDialog(
         context: context,
         builder: (context) => UnexpectedErrorDialog(
-          errorDetails:
+          additionalInfo:
               'Encountered an error while taking a heap snapshot:\n$e\n$trace',
         ),
       );

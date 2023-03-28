@@ -43,10 +43,10 @@ final dialogTextFieldDecoration = InputDecoration(
 class UnexpectedErrorDialog extends StatelessWidget {
   const UnexpectedErrorDialog({
     super.key,
-    required this.errorDetails,
+    required this.additionalInfo,
   });
 
-  final String errorDetails;
+  final String additionalInfo;
 
   @override
   Widget build(BuildContext context) {
@@ -55,7 +55,7 @@ class UnexpectedErrorDialog extends StatelessWidget {
     return DevToolsDialog(
       title: const Text('Unexpected Error'),
       content: Text(
-        errorDetails,
+        additionalInfo,
         style: theme.fixedFontStyle,
       ),
       actions: [
@@ -63,7 +63,7 @@ class UnexpectedErrorDialog extends StatelessWidget {
           child: const Text('Copy details'),
           onPressed: () => unawaited(
             copyToClipboard(
-              errorDetails,
+              additionalInfo,
               'Error details copied to clipboard',
             ),
           ),
@@ -73,7 +73,7 @@ class UnexpectedErrorDialog extends StatelessWidget {
           onPressed: () => unawaited(
             launchUrl(
               devToolsExtensionPoints
-                  .issueTrackerLink(issueDetails: errorDetails)
+                  .issueTrackerLink(additionalInfo: additionalInfo)
                   .url,
             ),
           ),
