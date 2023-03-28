@@ -7,7 +7,6 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/config_specific/logger/allowed_error.dart';
 import '../../shared/globals.dart';
 import '../../shared/offline_mode.dart';
@@ -90,7 +89,7 @@ class ProfilerScreenController extends DisposableController
   }
 
   final cpuProfilerController =
-      CpuProfilerController(analyticsScreenId: gac.cpuProfiler);
+      CpuProfilerController();
 
   CpuProfileData? get cpuProfileData =>
       cpuProfilerController.dataNotifier.value;
