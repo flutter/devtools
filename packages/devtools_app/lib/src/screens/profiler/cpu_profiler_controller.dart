@@ -37,6 +37,14 @@ enum CpuProfilerTagType {
   vm,
 }
 
+enum CpuProfilerBusyStatus {
+  fetching,
+  processing,
+  none;
+
+  String get display => name.toSentenceCase();
+}
+
 class CpuProfilerController extends DisposableController
     with
         SearchControllerMixin<CpuStackFrame>,
@@ -100,9 +108,11 @@ class CpuProfilerController extends DisposableController
   ValueListenable<CpuProfileData?> get dataNotifier => _dataNotifier;
   final _dataNotifier = ValueNotifier<CpuProfileData?>(baseStateCpuProfileData);
 
-  /// Notifies that CPU profile data is currently being processed.
-  ValueListenable get processingNotifier => _processingNotifier;
-  final _processingNotifier = ValueNotifier<bool>(false);
+  /// The current busy state of the cpu profiler.
+  ValueListenable<CpuProfilerBusyStatus> get profilerBusyStatus =>
+      _profilerBusyStatus;
+  final _profilerBusyStatus =
+      ValueNotifier<CpuProfilerBusyStatus>(CpuProfilerBusyStatus.none);
 
   /// Notifies that a cpu stack frame was selected.
   ValueListenable<CpuStackFrame?> get selectedCpuStackFrameNotifier =>
@@ -209,9 +219,7 @@ class CpuProfilerController extends DisposableController
   }) async {
     if (!profilerEnabled) return;
     assert(_dataNotifier.value != null);
-    assert(!_processingNotifier.value);
-
-    _processingNotifier.value = true;
+    assert(_profilerBusyStatus.value == CpuProfilerBusyStatus.none);
 
     var cpuProfiles = CpuProfilePair(
       functionProfile: baseStateCpuProfileData,
@@ -223,6 +231,7 @@ class CpuProfilerController extends DisposableController
     Future<void> pullAndProcessHelper() async {
       // TODO(kenz): add a cancel button to the processing UI in case pulling a
       // large payload from the vm service takes a long time.
+      _profilerBusyStatus.value = CpuProfilerBusyStatus.fetching;
       cpuProfiles = await serviceManager.service!.getCpuProfile(
         startMicros: startMicros,
         extentMicros: extentMicros,
@@ -264,6 +273,7 @@ class CpuProfilerController extends DisposableController
     required bool storeAsUserTagNone,
     required bool shouldApplyFilters,
   }) async {
+    assert(_profilerBusyStatus.value == CpuProfilerBusyStatus.processing);
     if (storeAsUserTagNone) {
       cpuProfileStore.storeProfile(
         cpuProfiles,
@@ -304,10 +314,10 @@ class CpuProfilerController extends DisposableController
     required bool shouldRefreshSearchMatches,
   }) async {
     _dataNotifier.value = null;
+    _profilerBusyStatus.value = CpuProfilerBusyStatus.processing;
     final type = viewType.value;
     CpuProfileData cpuProfileData = cpuProfiles.getActive(type);
     try {
-      _processingNotifier.value = true;
       cpuProfileData = await _processDataHelper(
         cpuProfiles,
         processId: processId,
@@ -319,10 +329,10 @@ class CpuProfilerController extends DisposableController
       if (shouldRefreshSearchMatches) {
         refreshSearchMatches();
       }
-      _processingNotifier.value = false;
+      _profilerBusyStatus.value = CpuProfilerBusyStatus.none;
     } on AssertionError catch (_) {
       _dataNotifier.value = cpuProfileData;
-      _processingNotifier.value = false;
+      _profilerBusyStatus.value = CpuProfilerBusyStatus.none;
       // Rethrow after setting notifiers so that cpu profile data is included
       // in the timeline export.
       rethrow;
@@ -395,82 +405,85 @@ class CpuProfilerController extends DisposableController
   }
 
   Future<void> loadAppStartUpProfile() async {
-    // Look up the stored app start up profiles before calling [reset]. This
-    // will save us the work of processing the startup profiles again if we have
-    // already processed them once.
-    var appStartUpProfile = await lookupProfileAndProcess(
-      label: appStartUpUserTag,
-    );
-    final appStartUpProfileWithFilters = await lookupProfileAndProcess(
-      label: _wrapWithFilterTag(appStartUpUserTag),
-    );
-
-    reset();
-    _processingNotifier.value = true;
-    _dataNotifier.value = null;
-
-    if (appStartUpProfileWithFilters != null) {
-      _dataNotifier.value =
-          appStartUpProfileWithFilters.getActive(viewType.value);
-      refreshSearchMatches();
-      _processingNotifier.value = false;
-      return;
-    }
-
-    if (appStartUpProfile == null) {
-      final cpuProfile = await serviceManager.service!.getCpuProfile(
-        startMicros: 0,
-        // Using [maxJsInt] as [extentMicros] for the getCpuProfile requests will
-        // give us all cpu samples we have available.
-        extentMicros: maxJsInt,
-      );
-      appStartUpProfile = CpuProfilePair.fromUserTag(
-        cpuProfile,
-        appStartUpUserTag,
-      );
-      cpuProfileStore.storeProfile(
-        appStartUpProfile,
-        label: userTagNone,
-      );
-      cpuProfileStore.storeProfile(
-        appStartUpProfile,
+    Future<void> loadAppStartUpProfileHelper() async {
+      // Look up the stored app start up profiles before calling [reset]. This
+      // will save us the work of processing the startup profiles again if we have
+      // already processed them once.
+      var appStartUpProfile = await lookupProfileAndProcess(
         label: appStartUpUserTag,
       );
-    }
-
-    if (appStartUpProfile.isEmpty) {
-      _processingNotifier.value = false;
-      _dataNotifier.value = emptyAppStartUpProfile;
-      return;
-    }
-
-    _userTagFilter.value = appStartUpUserTag;
-
-    if (isFilterActive) {
-      final filteredAppStartUpProfile = _filterData(appStartUpProfile);
-      await processAndSetData(
-        filteredAppStartUpProfile,
-        processId: 'filter app start up profile',
-        storeAsUserTagNone: false,
-        shouldApplyFilters: false,
-        shouldRefreshSearchMatches: true,
-      );
-      cpuProfileStore.storeProfile(
-        filteredAppStartUpProfile,
+      final appStartUpProfileWithFilters = await lookupProfileAndProcess(
         label: _wrapWithFilterTag(appStartUpUserTag),
       );
-      return;
+
+      reset();
+
+      _dataNotifier.value = null;
+
+      if (appStartUpProfileWithFilters != null) {
+        _dataNotifier.value =
+            appStartUpProfileWithFilters.getActive(viewType.value);
+        refreshSearchMatches();
+        return;
+      }
+
+      if (appStartUpProfile == null) {
+        final cpuProfile = await serviceManager.service!.getCpuProfile(
+          startMicros: 0,
+          // Using [maxJsInt] as [extentMicros] for the getCpuProfile requests will
+          // give us all cpu samples we have available.
+          extentMicros: maxJsInt,
+        );
+        appStartUpProfile = CpuProfilePair.fromUserTag(
+          cpuProfile,
+          appStartUpUserTag,
+        );
+        cpuProfileStore.storeProfile(
+          appStartUpProfile,
+          label: userTagNone,
+        );
+        cpuProfileStore.storeProfile(
+          appStartUpProfile,
+          label: appStartUpUserTag,
+        );
+      }
+
+      if (appStartUpProfile.isEmpty) {
+        _dataNotifier.value = emptyAppStartUpProfile;
+        return;
+      }
+
+      _userTagFilter.value = appStartUpUserTag;
+
+      if (isFilterActive) {
+        final filteredAppStartUpProfile = _filterData(appStartUpProfile);
+        await processAndSetData(
+          filteredAppStartUpProfile,
+          processId: 'filter app start up profile',
+          storeAsUserTagNone: false,
+          shouldApplyFilters: false,
+          shouldRefreshSearchMatches: true,
+        );
+        cpuProfileStore.storeProfile(
+          filteredAppStartUpProfile,
+          label: _wrapWithFilterTag(appStartUpUserTag),
+        );
+        return;
+      }
+
+      if (!appStartUpProfile.processed) {
+        await appStartUpProfile.process(
+          transformer: transformer,
+          processId: 'appStartUpProfile',
+        );
+      }
+
+      _dataNotifier.value = appStartUpProfile.getActive(viewType.value);
     }
 
-    if (!appStartUpProfile.processed) {
-      await appStartUpProfile.process(
-        transformer: transformer,
-        processId: 'appStartUpProfile',
-      );
-    }
-
-    _processingNotifier.value = false;
-    _dataNotifier.value = appStartUpProfile.getActive(viewType.value);
+    _profilerBusyStatus.value = CpuProfilerBusyStatus.processing;
+    await loadAppStartUpProfileHelper();
+    _profilerBusyStatus.value = CpuProfilerBusyStatus.none;
   }
 
   // TODO(kenz): filter the data before calling this method, or pass in
@@ -493,7 +506,7 @@ class CpuProfilerController extends DisposableController
     _userTagFilter.value = tag;
 
     _dataNotifier.value = null;
-    _processingNotifier.value = true;
+    _profilerBusyStatus.value = CpuProfilerBusyStatus.processing;
 
     try {
       _dataNotifier.value = await processDataForTag(tag).then(
@@ -510,7 +523,7 @@ class CpuProfilerController extends DisposableController
         stackTrace,
       );
     } finally {
-      _processingNotifier.value = false;
+      _profilerBusyStatus.value = CpuProfilerBusyStatus.none;
     }
   }
 
@@ -564,7 +577,7 @@ class CpuProfilerController extends DisposableController
   void reset({CpuProfileData? data}) {
     _selectedCpuStackFrameNotifier.value = null;
     _dataNotifier.value = data ?? baseStateCpuProfileData;
-    _processingNotifier.value = false;
+    _profilerBusyStatus.value = CpuProfilerBusyStatus.none;
     _userTagFilter.value = userTagNone;
     transformer.reset();
     cpuProfileStore.clear();
@@ -579,7 +592,7 @@ class CpuProfilerController extends DisposableController
     methodTableController.dispose();
     _dataNotifier.dispose();
     _selectedCpuStackFrameNotifier.dispose();
-    _processingNotifier.dispose();
+    _profilerBusyStatus.dispose();
     transformer.dispose();
     methodTableController.dispose();
     super.dispose();

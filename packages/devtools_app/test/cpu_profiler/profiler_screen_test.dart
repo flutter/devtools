@@ -4,7 +4,8 @@
 
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/profiler/cpu_profiler.dart';
-import 'package:devtools_app/src/screens/profiler/panes/controls/profiler_controls.dart';
+import 'package:devtools_app/src/screens/profiler/panes/controls/cpu_profiler_controls.dart';
+import 'package:devtools_app/src/screens/profiler/profiler_status.dart';
 import 'package:devtools_app/src/service/vm_flags.dart' as vm_flags;
 import 'package:devtools_app/src/shared/ui/vm_flag_widgets.dart';
 import 'package:devtools_test/devtools_test.dart';
@@ -36,10 +37,10 @@ void main() {
       }
       expect(find.byType(CpuSamplingRateDropdown), findsOneWidget);
       expect(
-        find.byKey(ProfilerScreen.recordingInstructionsKey),
+        find.byType(ProfileRecordingInstructions),
         findsOneWidget,
       );
-      expect(find.byKey(ProfilerScreen.recordingStatusKey), findsNothing);
+        expect(find.byType(RecordingStatus), findsNothing);
       expect(find.byType(CircularProgressIndicator), findsNothing);
       expect(find.byType(CpuProfiler), findsNothing);
       expect(find.byType(ModeDropdown), findsNothing);
@@ -99,10 +100,10 @@ void main() {
         await tester.tap(find.byType(RecordButton));
         await tester.pump(const Duration(seconds: 1));
         expect(
-          find.byKey(ProfilerScreen.recordingInstructionsKey),
+          find.byType(ProfileRecordingInstructions),
           findsNothing,
         );
-        expect(find.byKey(ProfilerScreen.recordingStatusKey), findsOneWidget);
+        expect(find.byType(RecordingStatus), findsOneWidget);
         expect(find.byType(CircularProgressIndicator), findsOneWidget);
         expect(find.byType(CpuProfiler), findsNothing);
 
@@ -134,7 +135,7 @@ void main() {
 
         expect(find.byType(CpuProfilerDisabled), findsOneWidget);
         expect(
-          find.byKey(ProfilerScreen.recordingInstructionsKey),
+          find.byType(ProfileRecordingInstructions),
           findsNothing,
         );
         expect(find.byType(RecordButton), findsNothing);

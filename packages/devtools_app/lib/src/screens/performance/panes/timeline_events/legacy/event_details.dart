@@ -14,7 +14,7 @@ import '../../../../../shared/ui/vm_flag_widgets.dart';
 import '../../../../profiler/cpu_profile_model.dart';
 import '../../../../profiler/cpu_profiler.dart';
 import '../../../../profiler/cpu_profiler_controller.dart';
-import '../../../../profiler/panes/controls/profiler_controls.dart';
+import '../../../../profiler/profiler_status.dart';
 import '../../../performance_model.dart';
 import '../../../performance_screen.dart';
 import 'legacy_events_controller.dart';

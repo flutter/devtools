@@ -23,7 +23,7 @@ import 'cpu_profile_model.dart';
 import 'cpu_profiler_controller.dart';
 import 'panes/bottom_up.dart';
 import 'panes/call_tree.dart';
-import 'panes/controls/profiler_controls.dart';
+import 'panes/controls/cpu_profiler_controls.dart';
 import 'panes/cpu_flame_chart.dart';
 import 'panes/method_table/method_table.dart';
 import 'panes/method_table/method_table_controller.dart';

@@ -71,31 +71,6 @@ Example queries:
   }
 }
 
-class CpuProfilerDisabled extends StatelessWidget {
-  const CpuProfilerDisabled(this.controller);
-
-  final CpuProfilerController controller;
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          const Text('CPU profiler is disabled.'),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: ElevatedButton(
-              onPressed: controller.enableCpuProfiler,
-              child: const Text('Enable profiler'),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 /// DropdownButton that controls the value of
 /// [ProfilerScreenController.userTagFilter].
 class UserTagDropdown extends StatelessWidget {
