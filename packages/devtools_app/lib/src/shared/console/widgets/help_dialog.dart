@@ -49,7 +49,7 @@ Example: ''',
           ),
           MoreInfoLink(
             // TODO(polina-c): create content and change url.
-            url: 'https://docs.flutter.dev/development/tools/devtools',
+            url: 'https://docs.flutter.dev/development/tools/devtools/console',
             gaScreenName: gac.console,
             gaSelectedItemDescription:
                 gac.topicDocumentationLink(documentationTopic),
