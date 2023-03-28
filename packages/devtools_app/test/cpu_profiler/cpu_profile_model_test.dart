@@ -172,20 +172,6 @@ void main() {
         equals(packageUri),
       );
     });
-
-    test('stackFrameIdCompare', () {
-      // iOS
-      String idA = '140225212960768-2';
-      String idB = '140225212960768-10';
-      expect(idA.compareTo(idB), equals(1));
-      expect(stackFrameIdCompare(idA, idB), equals(-1));
-
-      // Android
-      idA = '-784070656-2';
-      idB = '-784070656-10';
-      expect(idA.compareTo(idB), equals(1));
-      expect(stackFrameIdCompare(idA, idB), equals(-1));
-    });
   });
 
   group('CpuStackFrame', () {

@@ -27,10 +27,11 @@ jank is detected on an iOS device. - [#5455](https://github.com/flutter/devtools
 
 ## CPU profiler updates
 * Add a Method Table to the CPU profiler - [#5366](https://github.com/flutter/devtools/pull/5366)
-* Improve the performance of data processing in the CPU profiler - [#5468](https://github.com/flutter/devtools/pull/5468), [#5533](https://github.com/flutter/devtools/pull/5533)
-* Polish and performance improvements for the CPU profile flame chart - [#5529](https://github.com/flutter/devtools/pull/5529)
 
 ![method table](images/image1.png "method_table")
+
+* Improve the performance of data processing in the CPU profiler - [#5468](https://github.com/flutter/devtools/pull/5468), [#5533](https://github.com/flutter/devtools/pull/5533), [#5535](https://github.com/flutter/devtools/pull/5535)
+* Polish and performance improvements for the CPU profile flame chart - [#5529](https://github.com/flutter/devtools/pull/5529)
 
 * Add ability to inspect statistics for a CPU profile - [#5340](https://github.com/flutter/devtools/pull/5340)
 * Fix a bug where Native stack frames were missing their name - [#5344](https://github.com/flutter/devtools/pull/5344)
