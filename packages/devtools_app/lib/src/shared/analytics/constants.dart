@@ -175,13 +175,17 @@ const exitOfflineMode = 'exitOfflineMode';
 // the page data has loaded and is ready to interact with.
 const pageReady = 'pageReady';
 
-/// Console area.
-const consoleHelp = 'consoleHelp';
-
 /// Documentation actions shared across screens.
 const documentationLink = 'documentationLink';
 String topicDocumentationButton(String topic) => '${topic}DocumentationButton';
 String topicDocumentationLink(String topic) => '${topic}DocumentationLink';
+
+/// Analytic event constants specific for console.
+class ConsoleEvent {
+  static const helpInline = 'consoleHelpInline';
+  static const String evalInStoppedApp = 'consoleEvalInStoppedApp';
+  static const String evalInRunningApp = 'consoleEvalInRunningApp';
+}
 
 /// Analytic time constants specific for memory screen.
 class MemoryTime {

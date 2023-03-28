@@ -11,12 +11,13 @@ import '../../common_widgets.dart';
 import '../../dialogs.dart';
 import '../../theme.dart';
 
+const _documentationTopic = gac.console;
+
 class ConsoleHelpDialog extends StatelessWidget {
   const ConsoleHelpDialog({super.key});
 
   @override
   Widget build(BuildContext context) {
-    const documentationTopic = gac.consoleHelp;
     final theme = Theme.of(context);
     final textStyle = theme.regularTextStyle;
     return DevToolsDialog(
@@ -52,7 +53,7 @@ Example: ''',
             url: 'https://docs.flutter.dev/development/tools/devtools',
             gaScreenName: gac.console,
             gaSelectedItemDescription:
-                gac.topicDocumentationLink(documentationTopic),
+                gac.topicDocumentationLink(_documentationTopic),
           ),
         ],
       ),
@@ -70,7 +71,7 @@ class ConsoleHelpLink extends StatelessWidget {
   Widget build(BuildContext context) {
     return ToolbarAction(
       icon: Icons.help_outline,
-      tooltip: 'Help',
+      tooltip: 'Console Help',
       onPressed: () {
         unawaited(
           showDialog(
@@ -79,6 +80,8 @@ class ConsoleHelpLink extends StatelessWidget {
           ),
         );
       },
+      gaScreen: gac.console,
+      gaSelection: gac.topicDocumentationButton(_documentationTopic),
     );
   }
 }
