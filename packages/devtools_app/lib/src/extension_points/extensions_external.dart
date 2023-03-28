@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
+
 import '../screens/debugger/codeview.dart';
 import '../shared/analytics/constants.dart' as gac;
 import '../shared/common_widgets.dart';
@@ -19,8 +21,10 @@ class ExternalDevToolsExtensionPoints implements DevToolsExtensionPoints {
   Link issueTrackerLink({String? issueDetails}) {
     return Link(
       display: _newDevToolsIssueUriDisplay,
-      url: _newDevToolsGitHubIssueUriLengthSafe(issueDetails: issueDetails)
-          .toString(),
+      url: newDevToolsGitHubIssueUriLengthSafe(
+        issueDetails: issueDetails,
+        environment: issueLinkDetails(),
+      ).toString(),
       gaScreenName: gac.devToolsMain,
       gaSelectedItemDescription: gac.feedbackLink,
     );
@@ -49,14 +53,19 @@ class ExternalDevToolsExtensionPoints implements DevToolsExtensionPoints {
 
 const _newDevToolsIssueUriDisplay = 'github.com/flutter/devtools/issues/new';
 
-Uri _newDevToolsGitHubIssueUriLengthSafe({String? issueDetails}) {
-  const _maxGitHubUriLength = 8190;
-  final context = issueLinkDetails();
+@visibleForTesting
+const maxGitHubUriLength = 8190;
 
-  final fullUri =
-      _newDevToolsGitHubIssueUri(issueDetails: issueDetails, context: context);
+@visibleForTesting
+Uri newDevToolsGitHubIssueUriLengthSafe({
+  required List<String> environment,
+  String? issueDetails,
+}) {
+  final fullUri = _newDevToolsGitHubIssueUri(
+      issueDetails: issueDetails, environment: environment,
+  );
 
-  final lengthToCut = fullUri.toString().length - _maxGitHubUriLength;
+  final lengthToCut = fullUri.toString().length - maxGitHubUriLength;
   if (lengthToCut <= 0) return fullUri;
 
   if (issueDetails == null)
@@ -68,19 +77,19 @@ Uri _newDevToolsGitHubIssueUriLengthSafe({String? issueDetails}) {
 
   final truncatedUri = _newDevToolsGitHubIssueUri(
     issueDetails: truncatedDetails,
-    context: context,
+    environment: environment,
   );
-  assert(truncatedUri.toString().length <= _maxGitHubUriLength);
+  assert(truncatedUri.toString().length <= maxGitHubUriLength);
   return truncatedUri;
 }
 
 Uri _newDevToolsGitHubIssueUri({
   String? issueDetails,
-  required List<String> context,
+  required List<String> environment,
 }) {
   final issueBody = [
     if (issueDetails != null) issueDetails,
-    ...context,
+    ...environment,
   ].join('\n');
 
   return Uri.parse('https://$_newDevToolsIssueUriDisplay').replace(
