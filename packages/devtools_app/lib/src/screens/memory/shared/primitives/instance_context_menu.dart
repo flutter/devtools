@@ -28,7 +28,7 @@ abstract class ClassSampler {
 
 /// A display for an instance set that includes a context menu button when
 /// [showMenu] is true.
-/// 
+///
 /// The context menu provides options to explore the instances in the set.
 class InstanceDisplayWithContextMenu extends StatelessWidget {
   const InstanceDisplayWithContextMenu({
