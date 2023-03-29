@@ -6,7 +6,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../common_widgets.dart';
-import '../../feature_flags.dart';
 import '../../globals.dart';
 import '../../theme.dart';
 import '../console.dart';
@@ -22,7 +21,7 @@ class ConsolePaneHeader extends AreaPaneHeader {
           title: const Text('Console'),
           roundedTopBorder: true,
           actions: [
-            if (FeatureFlags.evalAndBrowse) const ConsoleHelpLink(),
+            const ConsoleHelpLink(),
             CopyToClipboardControl(
               dataProvider: () =>
                   serviceManager.consoleService.stdio.value.join('\n'),
