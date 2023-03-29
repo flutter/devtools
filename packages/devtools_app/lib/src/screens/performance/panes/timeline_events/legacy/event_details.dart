@@ -91,8 +91,8 @@ class EventSummary extends StatelessWidget {
                   title: 'Time',
                   inlineValue: durationText(event.time.duration),
                   child: SelectableText(
-                    '[${event.time.start!.inMicroseconds} μs —  '
-                    '${event.time.end!.inMicroseconds} μs]',
+                    '[${durationText(event.time.start!, unit: DurationDisplayUnit.micros)} —  '
+                    '${durationText(event.time.end!, unit: DurationDisplayUnit.micros)}]',
                     style: Theme.of(context).subtleFixedFontStyle,
                   ),
                 ),
