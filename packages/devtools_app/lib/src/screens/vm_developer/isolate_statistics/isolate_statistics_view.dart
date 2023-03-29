@@ -13,7 +13,7 @@ import '../../../shared/split.dart';
 import '../../../shared/table/table.dart';
 import '../../../shared/table/table_data.dart';
 import '../../../shared/theme.dart';
-import '../../profiler/panes/controls/profiler_controls.dart';
+import '../../profiler/profiler_status.dart';
 import '../vm_developer_common_widgets.dart';
 import '../vm_developer_tools_screen.dart';
 import '../vm_service_private_extensions.dart';

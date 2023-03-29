@@ -1151,6 +1151,11 @@ extension StringExtension on String {
     if (query == null) return const [];
     return toLowerCase().allMatches(query.toLowerCase());
   }
+
+  String toSentenceCase() {
+    if (isEmpty) return this;
+    return '${this[0].toUpperCase()}${substring(1).toLowerCase()}';
+  }
 }
 
 extension ListExtension<T> on List<T> {
