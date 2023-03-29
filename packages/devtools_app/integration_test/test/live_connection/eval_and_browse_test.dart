@@ -195,6 +195,7 @@ class _EvalTester {
         await action();
       }
     }
-    throw 'Cound not find $next';
+
+    expect(false, isTrue, reason: 'Could not find $next');
   }
 }
