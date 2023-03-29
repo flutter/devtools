@@ -136,9 +136,12 @@ class _EvalTester {
     await tapAndPump(find.text(PrimaryControls.memoryChartText));
 
     // Make console wider.
+    // The distance is big enough to see more items in console,
+    // but not too big to make classes in snapshot hidden.
+    const dragDistance = -320.0;
     await tester.drag(
       find.byKey(ConsolePaneHeader.theKey),
-      const Offset(0, -320),
+      const Offset(0, dragDistance),
     );
     await tester.pumpAndSettle();
 
