@@ -19,7 +19,6 @@ import 'help_dialog.dart';
 class ConsolePaneHeader extends AreaPaneHeader {
   ConsolePaneHeader({Color? backgroundColor})
       : super(
-          key: theKey,
           title: const Text('Console'),
           roundedTopBorder: true,
           actions: [
@@ -36,8 +35,6 @@ class ConsolePaneHeader extends AreaPaneHeader {
             ),
           ],
         );
-
-  static const theKey = Key('ConsolePaneHeader');
 }
 
 /// Display the stdout and stderr output from the process under debug.

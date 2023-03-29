@@ -140,7 +140,7 @@ class _EvalAndBrowseTester {
     // but not too big to make classes in snapshot hidden.
     const dragDistance = -320.0;
     await tester.drag(
-      find.byKey(ConsolePaneHeader.theKey),
+      find.byType(ConsolePaneHeader),
       const Offset(0, dragDistance),
     );
     await tester.pumpAndSettle();
