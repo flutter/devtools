@@ -41,7 +41,7 @@ void main() {
   testWidgets('memory eval and browse', (tester) async {
     await pumpAndConnectDevTools(tester, testApp);
 
-    final evalTester = _EvalTester(tester);
+    final evalTester = _EvalAndBrowseTester(tester);
 
     await _testBasicEval(evalTester);
     await _testAssignment(evalTester);
@@ -52,11 +52,11 @@ void main() {
   });
 }
 
-Future<void> _testBasicEval(_EvalTester tester) async {
+Future<void> _testBasicEval(_EvalAndBrowseTester tester) async {
   await tester.testEval('21 + 34', find.text('55'));
 }
 
-Future<void> _testAssignment(_EvalTester tester) async {
+Future<void> _testAssignment(_EvalAndBrowseTester tester) async {
   await tester.testEval('DateTime(2023)', find.text('DateTime'));
   await tester.testEval(
     r'var x = $0',
@@ -68,7 +68,7 @@ Future<void> _testAssignment(_EvalTester tester) async {
   );
 }
 
-Future<void> _inboundReferencesAreListed(_EvalTester tester) async {
+Future<void> _inboundReferencesAreListed(_EvalAndBrowseTester tester) async {
   await tester.tapAndPump(find.text('MyApp'));
   await tester.tapAndPump(find.text(ContextMenuButton.text));
   await tester.tapAndPump(find.textContaining('one instance'));
@@ -92,8 +92,8 @@ Future<void> _inboundReferencesAreListed(_EvalTester tester) async {
   );
 }
 
-class _EvalTester {
-  _EvalTester(this.tester);
+class _EvalAndBrowseTester {
+  _EvalAndBrowseTester(this.tester);
 
   final WidgetTester tester;
 
@@ -166,8 +166,8 @@ class _EvalTester {
 
   /// Taps and settles.
   ///
-  /// If [next] is provided, will repeat the tap till [next] combined with [at] returns results.
-  /// If [next] is not null returns [next]  combined with [at, otherwise returns [finder].
+  /// If [next] is provided, will repeat the tap untill [next] returns results.
+  /// If [next] is not null returns [next].
   Future<Widget?> tapAndPump(
     Finder finder, {
     Duration? duration,
