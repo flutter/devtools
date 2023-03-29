@@ -107,11 +107,12 @@ class _EvalAndBrowseTester {
     try {
       expect(expectedResponse, findsOneWidget);
     } catch (e) {
+      const goldenName = 'debug_golden.png';
       // In case of unexpected response take golden for troubleshooting.
-      print(e.toString());
+      logStatus('Unexpected response. Taking $goldenName.\n$e');
       await expectLater(
         find.byType(ConsolePane),
-        matchesGoldenFile('debug_golden.png'),
+        matchesGoldenFile(goldenName),
       );
     }
   }
