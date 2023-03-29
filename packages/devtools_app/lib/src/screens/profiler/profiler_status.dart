@@ -100,25 +100,14 @@ class ProfileRecordingInstructions extends StatelessWidget {
   }
 }
 
-class ProfilerBusyStatus extends StatelessWidget {
-  const ProfilerBusyStatus({super.key, required this.status});
-
-  final CpuProfilerBusyStatus status;
-
-  @override
-  Widget build(BuildContext context) {
-    assert(status != CpuProfilerBusyStatus.none);
-    return _Status(statusVerb: status.display);
-  }
+class ProfilerBusyStatus extends _Status {
+  ProfilerBusyStatus({required CpuProfilerBusyStatus status})
+      : assert(status != CpuProfilerBusyStatus.none),
+        super(statusVerb: status.display);
 }
 
-class RecordingStatus extends StatelessWidget {
-  const RecordingStatus({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const _Status(statusVerb: 'Recording');
-  }
+class RecordingStatus extends _Status {
+  const RecordingStatus() : super(statusVerb: 'Recording');
 }
 
 class _Status extends StatelessWidget {
