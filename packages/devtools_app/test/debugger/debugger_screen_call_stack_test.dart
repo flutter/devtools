@@ -2,16 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app/src/screens/debugger/breakpoint_manager.dart';
-import 'package:devtools_app/src/screens/debugger/debugger_controller.dart';
+import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/debugger/debugger_model.dart';
-import 'package:devtools_app/src/screens/debugger/debugger_screen.dart';
-import 'package:devtools_app/src/service/service_manager.dart';
-import 'package:devtools_app/src/shared/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/shared/diagnostics/primitives/source_location.dart';
-import 'package:devtools_app/src/shared/globals.dart';
-import 'package:devtools_app/src/shared/notifications.dart';
-import 'package:devtools_app/src/shared/scripts/script_manager.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -39,6 +32,8 @@ void main() {
     setGlobal(NotificationService, NotificationService());
     setGlobal(BreakpointManager, BreakpointManager());
     setGlobal(ScriptManager, scriptManager);
+    setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
+    setGlobal(PreferencesController, PreferencesController());
     fakeServiceManager.consoleService.ensureServiceInitialized();
     when(fakeServiceManager.errorBadgeManager.errorCountNotifier('debugger'))
         .thenReturn(ValueNotifier<int>(0));
@@ -122,6 +117,22 @@ void main() {
           ),
           kind: FrameKind.kAsyncSuspensionMarker,
         ),
+        Frame(
+          index: 5,
+          code: CodeRef(
+            name: '_createTimer',
+            id: 'testJsCodeRefId',
+            kind: CodeKind.kNative,
+          ),
+          location: SourceLocation(
+            script: ScriptRef(
+              uri: 'http://localhost:63691/dwds/src/injected/client.js',
+              id: 'jsScriptId',
+            ),
+            tokenPos: 12,
+          ),
+          kind: FrameKind.kRegular,
+        ),
       ];
 
       final stackFramesWithLocation =
@@ -190,6 +201,17 @@ void main() {
       );
       // Stack frame 4
       expect(find.text('<async break>'), findsOneWidget);
+      // Stack frame 5
+      expect(
+        find.byWidgetPredicate(
+          (Widget widget) =>
+              widget is RichText &&
+              widget.text
+                  .toPlainText()
+                  .contains('<native code: _createTimer> client.js'),
+        ),
+        findsOneWidget,
+      );
     },
   );
 }

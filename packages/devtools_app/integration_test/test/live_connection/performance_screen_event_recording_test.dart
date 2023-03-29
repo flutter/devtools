@@ -3,8 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app/devtools_app.dart';
-import 'package:devtools_app/src/screens/performance/tabbed_performance_view.dart';
-import 'package:devtools_app/src/shared/primitives/simple_items.dart';
+import 'package:devtools_app/src/screens/performance/panes/timeline_events/timeline_events_view.dart';
 import 'package:devtools_test/devtools_integration_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -27,10 +26,10 @@ void main() {
     logStatus(
       'Open the Performance screen and switch to the Timeline Events tab',
     );
-    await tester.tap(
-      find.widgetWithText(Tab, ScreenMetaData.performance.title),
-    );
-    await tester.pump(longPumpDuration);
+
+    await switchToScreen(tester, ScreenMetaData.performance);
+    await tester.pump(safePumpDuration);
+
     await tester.tap(find.widgetWithText(InkWell, 'Timeline Events'));
     await tester.pumpAndSettle(longPumpDuration);
 

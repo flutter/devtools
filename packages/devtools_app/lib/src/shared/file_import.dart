@@ -12,21 +12,22 @@ import 'config_specific/drag_and_drop/drag_and_drop.dart';
 import 'globals.dart';
 import 'primitives/utils.dart';
 import 'theme.dart';
-import 'ui/label.dart';
 import 'utils.dart';
 
 class FileImportContainer extends StatefulWidget {
   const FileImportContainer({
     required this.title,
     required this.instructions,
+    required this.gaScreen,
+    required this.gaSelectionImport,
+    this.gaSelectionAction,
     this.actionText,
     this.onAction,
     this.onFileSelected,
     this.onFileCleared,
-    this.onError,
     this.extensions = const ['json'],
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   final String title;
 
@@ -41,10 +42,14 @@ class FileImportContainer extends StatefulWidget {
 
   final VoidCallback? onFileCleared;
 
-  final void Function(String error)? onError;
-
   /// The file's extensions where we are going to get the data from.
   final List<String> extensions;
+
+  final String gaScreen;
+
+  final String gaSelectionImport;
+
+  final String? gaSelectionAction;
 
   @override
   _FileImportContainerState createState() => _FileImportContainerState();
@@ -67,6 +72,7 @@ class _FileImportContainerState extends State<FileImportContainer> {
           child: DragAndDrop(
             handleDrop: _handleImportedFile,
             child: RoundedOutlinedBorder(
+              clip: true,
               child: Container(
                 color: Theme.of(context).scaffoldBackgroundColor,
                 child: Column(
@@ -101,40 +107,28 @@ class _FileImportContainerState extends State<FileImportContainer> {
 
   Widget _buildImportFileRow() {
     final rowHeight = defaultButtonHeight;
-    final theme = Theme.of(context);
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        // Horizontal spacer with flex value of 1.
-        Flexible(
-          child: SizedBox(height: rowHeight),
-        ),
+        const Spacer(),
         Flexible(
           flex: 4,
           fit: FlexFit.tight,
-          child: Container(
-            height: rowHeight,
-            padding: const EdgeInsets.all(denseSpacing),
-            decoration: BoxDecoration(
-              borderRadius:
-                  const BorderRadius.all(Radius.circular(defaultBorderRadius)),
-              border: Border(
-                top: BorderSide(color: theme.focusColor),
-                bottom: BorderSide(color: theme.focusColor),
-                left: BorderSide(color: theme.focusColor),
-                // TODO(kenz): remove right border when we add the import button
-                right: BorderSide(color: theme.focusColor),
-              ),
+          child: RoundedOutlinedBorder(
+            child: Container(
+              height: rowHeight,
+              padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
+              child: _buildImportedFileDisplay(),
             ),
-            child: _buildImportedFileDisplay(),
           ),
         ),
         const SizedBox(width: denseSpacing),
-        FileImportButton(onPressed: _importFile),
-        // Horizontal spacer with flex value of 1.
-        Flexible(
-          child: SizedBox(height: rowHeight),
+        FileImportButton(
+          onPressed: _importFile,
+          gaScreen: widget.gaScreen,
+          gaSelection: widget.gaSelectionImport,
         ),
+        const Spacer(),
       ],
     );
   }
@@ -160,6 +154,7 @@ class _FileImportContainerState extends State<FileImportContainer> {
   Widget _buildActionButton() {
     assert(widget.actionText != null);
     assert(widget.onAction != null);
+    assert(widget.gaSelectionAction != null);
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -167,14 +162,15 @@ class _FileImportContainerState extends State<FileImportContainer> {
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            ElevatedButton(
+            DevToolsButton(
+              gaScreen: widget.gaScreen,
+              gaSelection: widget.gaSelectionAction!,
+              label: widget.actionText!,
+              icon: Icons.highlight,
+              elevatedButton: true,
               onPressed: importedFile != null
                   ? () => widget.onAction!(importedFile!)
                   : null,
-              child: MaterialIconLabel(
-                label: widget.actionText!,
-                iconData: Icons.highlight,
-              ),
             ),
           ],
         ),
@@ -237,19 +233,24 @@ Future<DevToolsJsonFile?> importFileFromPicker({
 class FileImportButton extends StatelessWidget {
   const FileImportButton({
     required this.onPressed,
+    required this.gaScreen,
+    required this.gaSelection,
     this.elevatedButton = false,
   });
 
   final VoidCallback onPressed;
-
   final bool elevatedButton;
+  final String gaScreen;
+  final String gaSelection;
 
   @override
   Widget build(BuildContext context) {
-    return IconLabelButton(
+    return DevToolsButton(
       onPressed: onPressed,
       icon: Icons.file_upload,
       label: 'Import File',
+      gaScreen: gaScreen,
+      gaSelection: gaSelection,
       elevatedButton: elevatedButton,
     );
   }
@@ -263,16 +264,21 @@ class DualFileImportContainer extends StatefulWidget {
     required this.secondInstructions,
     required this.actionText,
     required this.onAction,
+    required this.gaScreen,
+    required this.gaSelectionImportFirst,
+    required this.gaSelectionImportSecond,
+    required this.gaSelectionAction,
     Key? key,
   });
 
   final String firstFileTitle;
-
   final String secondFileTitle;
-
   final String firstInstructions;
-
   final String secondInstructions;
+  final String gaScreen;
+  final String gaSelectionImportFirst;
+  final String gaSelectionImportSecond;
+  final String gaSelectionAction;
 
   /// The title of the action button.
   final String actionText;
@@ -302,6 +308,8 @@ class _DualFileImportContainerState extends State<DualFileImportContainer> {
             instructions: widget.firstInstructions,
             onFileSelected: onFirstFileSelected,
             onFileCleared: onFirstFileCleared,
+            gaScreen: widget.gaScreen,
+            gaSelectionImport: widget.gaSelectionImportFirst,
           ),
         ),
         const SizedBox(width: defaultSpacing),
@@ -313,6 +321,8 @@ class _DualFileImportContainerState extends State<DualFileImportContainer> {
             instructions: widget.secondInstructions,
             onFileSelected: onSecondFileSelected,
             onFileCleared: onSecondFileCleared,
+            gaScreen: widget.gaScreen,
+            gaSelectionImport: widget.gaSelectionImportSecond,
           ),
         ),
       ],
@@ -361,7 +371,12 @@ class _DualFileImportContainerState extends State<DualFileImportContainer> {
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            ElevatedButton(
+            DevToolsButton(
+              gaScreen: widget.gaScreen,
+              gaSelection: widget.gaSelectionAction,
+              label: widget.actionText,
+              icon: Icons.highlight,
+              elevatedButton: true,
               onPressed: firstImportedFile != null && secondImportedFile != null
                   ? () => widget.onAction(
                         firstImportedFile!,
@@ -369,10 +384,6 @@ class _DualFileImportContainerState extends State<DualFileImportContainer> {
                         (error) => notificationService.push(error),
                       )
                   : null,
-              child: MaterialIconLabel(
-                label: widget.actionText,
-                iconData: Icons.highlight,
-              ),
             ),
           ],
         ),

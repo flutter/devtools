@@ -77,7 +77,6 @@ class AnalyticsTabbedView<T> extends StatefulWidget {
     required this.tabs,
     required this.tabViews,
     required this.gaScreen,
-    this.outlined = true,
     this.sendAnalytics = true,
     this.onTabChanged,
     this.initialSelectedIndex,
@@ -94,8 +93,6 @@ class AnalyticsTabbedView<T> extends StatefulWidget {
   final String gaScreen;
 
   final List<Widget> trailingWidgets;
-
-  final bool outlined;
 
   final int? initialSelectedIndex;
 
@@ -187,59 +184,40 @@ class _AnalyticsTabbedViewState extends State<AnalyticsTabbedView>
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final borderSide = defaultBorderSide(theme);
-
-    Widget tabBar = Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Expanded(
-          child: TabBar(
-            labelColor: theme.textTheme.bodyLarge?.color,
-            controller: _tabController,
-            tabs: widget.tabs,
-            isScrollable: true,
-          ),
+    final tabBar = OutlineDecoration.onlyBottom(
+      child: SizedBox(
+        height: defaultHeaderHeight,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Expanded(
+              child: TabBar(
+                labelColor: Theme.of(context).textTheme.bodyLarge?.color,
+                controller: _tabController,
+                tabs: widget.tabs,
+                isScrollable: true,
+              ),
+            ),
+            widget.trailingWidgets[_currentTabControllerIndex],
+          ],
         ),
-        widget.trailingWidgets[_currentTabControllerIndex],
-      ],
+      ),
     );
-    if (widget.outlined) {
-      tabBar = Container(
-        height: defaultButtonHeight +
-            (isDense() ? denseModeDenseSpacing : denseSpacing),
-        decoration: BoxDecoration(
-          border: Border.all(color: Theme.of(context).focusColor),
-        ),
-        child: tabBar,
-      );
-    }
 
-    Widget tabView = TabBarView(
-      physics: defaultTabBarViewPhysics,
-      controller: _tabController,
-      children: widget.tabViews,
-    );
-    if (widget.outlined) {
-      tabView = Container(
-        decoration: BoxDecoration(
-          border: Border(
-            left: borderSide,
-            bottom: borderSide,
-            right: borderSide,
+    return RoundedOutlinedBorder(
+      clip: true,
+      child: Column(
+        children: [
+          tabBar,
+          Expanded(
+            child: TabBarView(
+              physics: defaultTabBarViewPhysics,
+              controller: _tabController,
+              children: widget.tabViews,
+            ),
           ),
-        ),
-        child: tabView,
-      );
-    }
-
-    return Column(
-      children: [
-        tabBar,
-        Expanded(
-          child: tabView,
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

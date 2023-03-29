@@ -7,11 +7,11 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:logging/logging.dart';
 import 'package:pointer_interceptor/pointer_interceptor.dart';
 
 import '../shared/analytics/analytics.dart' as ga;
 import '../shared/common_widgets.dart';
-import '../shared/config_specific/logger/logger.dart';
 import '../shared/globals.dart';
 import '../shared/primitives/auto_dispose.dart';
 import '../shared/primitives/message_bus.dart';
@@ -23,6 +23,8 @@ import '../shared/utils.dart';
 import 'service_extension_manager.dart';
 import 'service_extensions.dart';
 import 'service_registrations.dart';
+
+final _log = Logger('service_extension_widgets');
 
 /// Group of buttons where each button toggles the state of a VMService
 /// extension.
@@ -140,9 +142,7 @@ class _ServiceExtensionButtonGroupState
                   : 0.0,
         ),
         child: ImageIconLabel(
-          extensionState.isSelected
-              ? description.enabledIcon
-              : description.disabledIcon,
+          ServiceExtensionIcon(extensionState: extensionState),
           description.title,
           unscaledMinIncludeTextWidth:
               widget.minScreenWidthForTextBeforeScaling,
@@ -243,7 +243,7 @@ Future<void> _wrapReloadCall(
     await reloadCall();
     timer.stop();
     // 'restarted in 1.6s'
-    final String message = '${name}ed in ${renderDuration(timer.elapsed)}';
+    final String message = '${name}ed in ${durationText(timer.elapsed)}';
     messageBus.addEvent(BusEvent('$name.end', data: message));
     // TODO(devoncarew): Add analytics.
     //ga.select(ga.devToolsMain, ga.hotRestart, timer.elapsed.inMilliseconds);
@@ -391,7 +391,8 @@ class _ServiceExtensionToggleState extends State<_ServiceExtensionToggle>
         child: Row(
           children: <Widget>[
             SizedBox(
-              height: defaultButtonHeight,
+              // TODO(kenz): this is not working.
+              height: defaultSwitchHeight,
               child: Switch(
                 value: value,
                 onChanged: _onClick,
@@ -877,7 +878,7 @@ mixin _ServiceExtensionMixin<T extends _ServiceExtensionWidget> on State<T> {
         notificationService.push(widget.completedText!);
       }
     } catch (e, st) {
-      log('$e\n$st');
+      _log.info(e, e, st);
 
       if (mounted) {
         notificationService.push(widget.describeError(e));
@@ -913,10 +914,6 @@ class ServiceExtensionTooltip extends StatelessWidget {
 
     final colorScheme = Theme.of(context).colorScheme;
     final focusColor = Theme.of(context).focusColor;
-    final textStyle = DefaultTextStyle.of(context)
-        .style
-        .copyWith(color: colorScheme.toggleButtonsTitle);
-
     return DevToolsTooltip(
       message: description.tooltip,
       preferBelow: true,
@@ -929,7 +926,6 @@ class ServiceExtensionTooltip extends StatelessWidget {
         borderRadius:
             const BorderRadius.all(Radius.circular(defaultBorderRadius)),
       ),
-      textStyle: textStyle,
       child: child,
     );
   }
@@ -958,8 +954,6 @@ class ServiceExtensionRichTooltip extends StatelessWidget {
   }
 
   HoverCardData _buildCardData(BuildContext context) {
-    final textColor = Theme.of(context).colorScheme.toggleButtonsTitle;
-
     return HoverCardData(
       position: HoverCardPosition.element,
       width: _tooltipWidth,
@@ -970,7 +964,6 @@ class ServiceExtensionRichTooltip extends StatelessWidget {
           children: [
             Text(
               description.tooltip,
-              style: TextStyle(color: textColor),
             ),
             if (description.documentationUrl != null &&
                 description.gaScreenName != null)
@@ -985,6 +978,33 @@ class ServiceExtensionRichTooltip extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class ServiceExtensionIcon extends StatelessWidget {
+  const ServiceExtensionIcon({required this.extensionState, super.key});
+
+  final ExtensionState extensionState;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final color = extensionState.isSelected
+        ? theme.colorScheme.primary
+        : theme.colorScheme.onSurface;
+    final description = extensionState.description;
+    if (description.iconData != null) {
+      return Icon(
+        description.iconData,
+        color: color,
+      );
+    }
+    return Image(
+      image: AssetImage(extensionState.description.iconAsset!),
+      height: defaultIconSize,
+      width: defaultIconSize,
+      color: color,
     );
   }
 }

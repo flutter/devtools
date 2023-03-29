@@ -20,6 +20,7 @@ void main() {
           true,
           null,
         ],
+        'aNullValue': null
       };
 
       final cache = JsonToServiceCache();
@@ -33,11 +34,11 @@ void main() {
 
       final instance = cache.insertJsonObject(data);
       ensureIsInCache(instance);
-      expect(cache.length, 11);
+      expect(cache.length, 12);
 
       expect(instance.kind, InstanceKind.kMap);
       final associations = instance.associations!;
-      expect(associations.length, 3);
+      expect(associations.length, 4);
 
       // 'id': 1
       expect(associations[0].key.kind, InstanceKind.kString);

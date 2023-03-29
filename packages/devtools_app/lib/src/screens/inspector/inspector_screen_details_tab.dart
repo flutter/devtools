@@ -87,23 +87,27 @@ class _InspectorExpandCollapseButtonsState
         mainAxisSize: MainAxisSize.min,
         children: [
           SizedBox(
-            child: IconLabelButton(
+            child: DevToolsButton(
               icon: Icons.unfold_more,
               onPressed: enableButtons ? _onExpandClick : null,
               label: 'Expand all',
               minScreenWidthForTextBeforeScaling:
                   InspectorScreenBodyState.minScreenWidthForTextBeforeScaling,
+              gaScreen: gac.inspector,
+              gaSelection: gac.expandAll,
               outlined: false,
             ),
           ),
           const SizedBox(width: denseSpacing),
           SizedBox(
-            child: IconLabelButton(
+            child: DevToolsButton(
               icon: Icons.unfold_less,
               onPressed: enableButtons ? _onCollapseClick : null,
               label: 'Collapse to selected',
               minScreenWidthForTextBeforeScaling:
                   InspectorScreenBodyState.minScreenWidthForTextBeforeScaling,
+              gaScreen: gac.inspector,
+              gaSelection: gac.collapseAll,
               outlined: false,
             ),
           ),

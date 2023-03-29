@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// ignore_for_file: avoid_print
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -14,8 +16,6 @@ const bool _printDebugOutputToStdOut = false;
 class TestFlutterApp extends _TestApp {
   TestFlutterApp({String appPath = 'test/test_infra/fixtures/flutter_app'})
       : super(appPath);
-
-  Directory get workingDirectory => Directory(testAppPath);
 
   @override
   Future<void> startProcess() async {

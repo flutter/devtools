@@ -6,10 +6,13 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
+import 'package:logging/logging.dart';
 
 import '../service/vm_service_wrapper.dart';
 import 'analytics/analytics.dart' as ga;
 import 'analytics/constants.dart' as gac;
+import 'config_specific/logger/logger_helpers.dart';
+import 'constants.dart';
 import 'diagnostics/inspector_service.dart';
 import 'globals.dart';
 import 'primitives/auto_dispose.dart';
@@ -18,15 +21,16 @@ import 'primitives/utils.dart';
 /// A controller for global application preferences.
 class PreferencesController extends DisposableController
     with AutoDisposeControllerMixin {
-  ValueListenable<bool> get darkModeTheme => _darkModeTheme;
-  final _darkModeTheme =
+  final darkModeTheme =
       ValueNotifier<bool>(devToolsExtensionPoints.defaultIsDarkTheme);
 
-  ValueListenable<bool> get vmDeveloperModeEnabled => _vmDeveloperMode;
-  final _vmDeveloperMode = ValueNotifier<bool>(false);
+  final vmDeveloperModeEnabled = ValueNotifier<bool>(false);
 
-  ValueListenable<bool> get denseModeEnabled => _denseMode;
-  final _denseMode = ValueNotifier<bool>(false);
+  final verboseLoggingEnabled =
+      ValueNotifier<bool>(Logger.root.level == verboseLoggingLevel);
+  static const _verboseLoggingStorageId = 'verboseLogging';
+
+  final denseModeEnabled = ValueNotifier<bool>(false);
 
   InspectorPreferencesController get inspector => _inspector;
   final _inspector = InspectorPreferencesController();
@@ -47,21 +51,23 @@ class PreferencesController extends DisposableController
         ? devToolsExtensionPoints.defaultIsDarkTheme
         : value == 'true';
     toggleDarkModeTheme(useDarkMode);
-    addAutoDisposeListener(_darkModeTheme, () {
-      storage.setValue('ui.darkMode', '${_darkModeTheme.value}');
+    addAutoDisposeListener(darkModeTheme, () {
+      storage.setValue('ui.darkMode', '${darkModeTheme.value}');
     });
 
     value = await storage.getValue('ui.vmDeveloperMode');
     toggleVmDeveloperMode(value == 'true');
-    addAutoDisposeListener(_vmDeveloperMode, () {
-      storage.setValue('ui.vmDeveloperMode', '${_vmDeveloperMode.value}');
+    addAutoDisposeListener(vmDeveloperModeEnabled, () {
+      storage.setValue('ui.vmDeveloperMode', '${vmDeveloperModeEnabled.value}');
     });
 
     value = await storage.getValue('ui.denseMode');
     toggleDenseMode(value == 'true');
-    addAutoDisposeListener(_denseMode, () {
-      storage.setValue('ui.denseMode', '${_denseMode.value}');
+    addAutoDisposeListener(denseModeEnabled, () {
+      storage.setValue('ui.denseMode', '${denseModeEnabled.value}');
     });
+
+    await _initVerboseLogging();
 
     await inspector.init();
     await memory.init();
@@ -69,6 +75,26 @@ class PreferencesController extends DisposableController
     await cpuProfiler.init();
 
     setGlobal(PreferencesController, this);
+  }
+
+  Future<void> _initVerboseLogging() async {
+    final verboseLoggingEnabledValue =
+        await storage.getValue(_verboseLoggingStorageId);
+
+    toggleVerboseLogging(verboseLoggingEnabledValue == 'true');
+
+    addAutoDisposeListener(verboseLoggingEnabled, () {
+      storage.setValue(
+        'verboseLogging',
+        verboseLoggingEnabled.value.toString(),
+      );
+
+      if (verboseLoggingEnabled.value) {
+        setDevToolsLoggingLevel(verboseLoggingLevel);
+      } else {
+        setDevToolsLoggingLevel(basicLoggingLevel);
+      }
+    });
   }
 
   @override
@@ -81,19 +107,31 @@ class PreferencesController extends DisposableController
   }
 
   /// Change the value for the dark mode setting.
-  void toggleDarkModeTheme(bool useDarkMode) {
-    _darkModeTheme.value = useDarkMode;
+  void toggleDarkModeTheme(bool? useDarkMode) {
+    if (useDarkMode != null) {
+      darkModeTheme.value = useDarkMode;
+    }
   }
 
   /// Change the value for the VM developer mode setting.
-  void toggleVmDeveloperMode(bool enableVmDeveloperMode) {
-    _vmDeveloperMode.value = enableVmDeveloperMode;
-    VmServiceWrapper.enablePrivateRpcs = enableVmDeveloperMode;
+  void toggleVmDeveloperMode(bool? enableVmDeveloperMode) {
+    if (enableVmDeveloperMode != null) {
+      vmDeveloperModeEnabled.value = enableVmDeveloperMode;
+      VmServiceWrapper.enablePrivateRpcs = enableVmDeveloperMode;
+    }
+  }
+
+  void toggleVerboseLogging(bool? enableVerboseLogging) {
+    if (enableVerboseLogging != null) {
+      verboseLoggingEnabled.value = enableVerboseLogging;
+    }
   }
 
   /// Change the value for the dense mode setting.
-  void toggleDenseMode(bool enableDenseMode) {
-    _denseMode.value = enableDenseMode;
+  void toggleDenseMode(bool? enableDenseMode) {
+    if (enableDenseMode != null) {
+      denseModeEnabled.value = enableDenseMode;
+    }
   }
 }
 

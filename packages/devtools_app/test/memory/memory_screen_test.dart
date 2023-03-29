@@ -5,7 +5,6 @@
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/memory/panes/chart/chart_control_pane.dart';
 import 'package:devtools_app/src/screens/memory/panes/chart/memory_vm_chart.dart';
-import 'package:devtools_app/src/shared/config_specific/import_export/import_export.dart';
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';

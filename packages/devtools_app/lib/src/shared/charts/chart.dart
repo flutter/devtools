@@ -6,8 +6,8 @@ import 'dart:math';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:logging/logging.dart';
 
-import '../config_specific/logger/logger.dart' as logger;
 import '../primitives/auto_dispose.dart';
 import '../primitives/utils.dart';
 import '../theme.dart';
@@ -15,6 +15,8 @@ import 'chart_controller.dart';
 import 'chart_trace.dart';
 
 typedef DrawCodeCallback = void Function(Canvas canvas);
+
+final _log = Logger('chart');
 
 /// Perform some draw operations on a canvas after applying translate.
 ///
@@ -411,7 +413,7 @@ class ChartPainter extends CustomPainter {
 
     final elapsedTime = DateTime.now().difference(startTime).inMilliseconds;
     if (debugTrackPaintTime && elapsedTime > 500) {
-      logger.log(
+      _log.info(
         '${chartController.name} ${chartController.timestampsLength} '
         'CustomPainter paint elapsed time $elapsedTime',
       );
@@ -698,24 +700,8 @@ class ChartPainter extends CustomPainter {
       default:
         final message = 'Unknown symbol ${characteristics.symbol}';
         assert(false, message);
-        logger.log(message, logger.LogLevel.error);
+        _log.shout(message);
     }
-  }
-
-  void drawCircle(
-    Canvas canvas,
-    PaintCharacteristics characteristics,
-    double x,
-    double y,
-  ) {
-    final paint = Paint()
-      ..style = characteristics.symbol == ChartSymbol.disc
-          ? PaintingStyle.fill
-          : PaintingStyle.stroke
-      ..strokeWidth = characteristics.strokeWidth
-      ..color = characteristics.color;
-
-    canvas.drawCircle(Offset(x, y), characteristics.diameter, paint);
   }
 
   // TODO(terry): Use bezier path.
@@ -797,25 +783,4 @@ class ChartPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(ChartPainter oldDelegate) => chartController.isDirty;
-
-  Data _reduceHelper(Data curr, Data next) => curr.y > next.y ? curr : next;
-
-  /// Return the largest Y value in a particular trace if traceIndex is passed or
-  /// all traces if traceIndex is not passed in.
-  double maxValue({int? traceIndex}) {
-    var maxValue = 0.0;
-    if (traceIndex == null) {
-      for (var index = 0; index < chartController.traces.length; index++) {
-        final trace = chartController.traces[index];
-        final traceMax = trace.data.reduce(_reduceHelper).y;
-        maxValue = max(maxValue, traceMax);
-      }
-    } else {
-      final trace = chartController.traces[traceIndex];
-      maxValue =
-          trace.data.reduce((curr, next) => curr.y > next.y ? curr : next).y;
-    }
-
-    return maxValue;
-  }
 }

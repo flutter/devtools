@@ -39,13 +39,9 @@ class SnapshotControlPane extends StatelessWidget {
                   ToCsvButton(
                     minScreenWidthForTextBeforeScaling:
                         memoryControlsMinVerboseWidth,
-                    onPressed: () {
-                      ga.select(
-                        gac.memory,
-                        gac.MemoryEvent.diffSnapshotDownloadCsv,
-                      );
-                      controller.downloadCurrentItemToCsv();
-                    },
+                    gaScreen: gac.memory,
+                    gaSelection: gac.MemoryEvent.diffSnapshotDownloadCsv,
+                    onPressed: controller.downloadCurrentItemToCsv,
                   ),
                 ],
               ],

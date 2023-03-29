@@ -4,7 +4,6 @@
 
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/performance/panes/controls/performance_controls.dart';
-import 'package:devtools_app/src/shared/config_specific/import_export/import_export.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -68,7 +67,7 @@ void main() {
       expect(find.text('Enhance Tracing'), findsOneWidget);
       expect(find.text('More debugging options'), findsOneWidget);
       expect(find.byIcon(Icons.file_download), findsOneWidget);
-      expect(find.byIcon(Icons.settings), findsOneWidget);
+      expect(find.byIcon(Icons.settings_outlined), findsOneWidget);
     });
 
     testWidgetsWithWindowSize('builds for non flutter app', windowSize,
@@ -88,12 +87,14 @@ void main() {
       expect(find.text('Enhance Tracing'), findsNothing);
       expect(find.text('More debugging options'), findsNothing);
       expect(find.byIcon(Icons.file_download), findsOneWidget);
-      expect(find.byIcon(Icons.settings), findsOneWidget);
+      expect(find.byIcon(Icons.settings_outlined), findsOneWidget);
     });
 
     testWidgetsWithWindowSize('builds for offline mode', windowSize,
         (WidgetTester tester) async {
-      offlineController.enterOfflineMode();
+      offlineController.enterOfflineMode(
+        offlineApp: serviceManager.connectedApp!,
+      );
       await _pumpControls(tester);
       expect(find.byType(ExitOfflineButton), findsOneWidget);
       expect(find.byType(VisibilityButton), findsOneWidget);
@@ -102,7 +103,7 @@ void main() {
       expect(find.text('Enhance Tracing'), findsNothing);
       expect(find.text('More debugging options'), findsNothing);
       expect(find.byIcon(Icons.file_download), findsNothing);
-      expect(find.byIcon(Icons.settings), findsNothing);
+      expect(find.byIcon(Icons.settings_outlined), findsNothing);
       offlineController.exitOfflineMode();
     });
   });

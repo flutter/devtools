@@ -54,7 +54,7 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
 
   // TODO(terry): Compute below heights dynamically.
   static double get _hoverHeightMinimum => scaleByFontFactor(42.0);
-  static double get hoverItemHeight => scaleByFontFactor(18.0);
+  static double get hoverItemHeight => scaleByFontFactor(17.0);
 
   /// One extension event to display (4 lines).
   static double get _hoverOneEventsHeight => scaleByFontFactor(82.0);
@@ -77,88 +77,57 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
               : _hoverEventsHeight)
           : 0);
 
+  static int get _timestamp => DateTime.now().millisecondsSinceEpoch;
+
+  void _addTapLocationListener(
+    ValueNotifier<TapLocation?> tapLocation,
+    List<ValueNotifier<TapLocation?>> allLocations,
+  ) {
+    addAutoDisposeListener(tapLocation, () {
+      final value = tapLocation.value;
+      if (value == null) return;
+
+      if (_hoverOverlayEntry != null) {
+        _hideHover();
+        return;
+      }
+
+      final details = value.tapDownDetails;
+      if (details == null) return;
+
+      final copied = TapLocation.copy(value);
+      for (var location in allLocations) {
+        if (location != tapLocation) location.value = copied;
+      }
+
+      final allValues = ChartsValues(
+        controller,
+        value.index,
+        value.timestamp ?? _timestamp,
+      );
+
+      _showHover(
+        context,
+        allValues,
+        details.globalPosition,
+      );
+    });
+  }
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (!initController()) return;
 
-    // TODO(polinach): generalize three addAutoDisposeListener below.
-    addAutoDisposeListener(widget.chartController.event.tapLocation, () {
-      if (widget.chartController.event.tapLocation.value != null) {
-        if (_hoverOverlayEntry != null) {
-          _hideHover();
-        }
-        final tapLocation = widget.chartController.event.tapLocation.value;
-        if (tapLocation?.tapDownDetails != null) {
-          final tapData = tapLocation!;
-          final index = tapData.index;
-          final timestamp = tapData.timestamp!;
+    final allLocations = [
+      widget.chartController.event.tapLocation,
+      widget.chartController.vm.tapLocation,
+      widget.chartController.android.tapLocation,
+    ];
 
-          final copied = TapLocation.copy(tapLocation);
-          widget.chartController.vm.tapLocation.value = copied;
-          widget.chartController.android.tapLocation.value = copied;
-
-          final allValues = ChartsValues(controller, index, timestamp);
-          _showHover(
-            context,
-            allValues,
-            tapData.tapDownDetails!.globalPosition,
-          );
-        }
-      }
-    });
-
-    addAutoDisposeListener(widget.chartController.vm.tapLocation, () {
-      if (widget.chartController.vm.tapLocation.value != null) {
-        if (_hoverOverlayEntry != null) {
-          _hideHover();
-        }
-        final tapLocation = widget.chartController.vm.tapLocation.value;
-        if (tapLocation?.tapDownDetails != null) {
-          final tapData = tapLocation!;
-          final index = tapData.index;
-          final timestamp = tapData.timestamp!;
-
-          final copied = TapLocation.copy(tapLocation);
-          widget.chartController.event.tapLocation.value = copied;
-          widget.chartController.android.tapLocation.value = copied;
-
-          final allValues = ChartsValues(controller, index, timestamp);
-
-          _showHover(
-            context,
-            allValues,
-            tapData.tapDownDetails!.globalPosition,
-          );
-        }
-      }
-    });
-
-    addAutoDisposeListener(widget.chartController.android.tapLocation, () {
-      if (widget.chartController.android.tapLocation.value != null) {
-        if (_hoverOverlayEntry != null) {
-          _hideHover();
-        }
-        final tapLocation = widget.chartController.android.tapLocation.value;
-        if (tapLocation?.tapDownDetails != null) {
-          final tapData = tapLocation!;
-          final index = tapData.index;
-          final timestamp = tapData.timestamp!;
-
-          final copied = TapLocation.copy(tapLocation);
-          widget.chartController.event.tapLocation.value = copied;
-          widget.chartController.vm.tapLocation.value = copied;
-
-          final allValues = ChartsValues(controller, index, timestamp);
-
-          _showHover(
-            context,
-            allValues,
-            tapData.tapDownDetails!.globalPosition,
-          );
-        }
-      }
-    });
+    for (var location in allLocations) {
+      _addTapLocationListener(location, allLocations);
+    }
 
     addAutoDisposeListener(controller.refreshCharts, () {
       setState(() {
@@ -341,8 +310,6 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
 
     final displayTimestamp = prettyTimestamp(chartsValues.timestamp);
 
-    final hoverHeading = theme.hoverTitleTextStyle;
-
     final OverlayState overlayState = Overlay.of(context);
     _hoverOverlayEntry ??= OverlayEntry(
       builder: (context) => Positioned(
@@ -368,7 +335,7 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
                 padding: const EdgeInsets.only(bottom: 4),
                 child: Text(
                   'Time $displayTimestamp',
-                  style: hoverHeading,
+                  style: theme.legendTextStyle,
                   textAlign: TextAlign.center,
                 ),
               ),
@@ -423,15 +390,10 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
     String? image,
     Color? colorPatch,
     bool dashed = false,
-    bool bold = true,
     bool hasNumeric = false,
     bool scaleImage = false,
   }) {
     final theme = Theme.of(context);
-    final hoverTitleEntry = theme.hoverTextStyle;
-    final hoverValueEntry = theme.hoverValueTextStyle;
-    final hoverSmallEntry = theme.hoverSmallValueTextStyle;
-
     List<Widget> hoverPartImageLine(
       String name, {
       String? image,
@@ -479,8 +441,8 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
         const PaddedDivider(
           padding: EdgeInsets.only(left: denseRowSpacing),
         ),
-        Text(displayName, style: bold ? hoverTitleEntry : hoverSmallEntry),
-        Text(displayValue, style: hoverValueEntry),
+        Text(displayName, style: theme.legendTextStyle),
+        Text(displayValue, style: theme.legendTextStyle),
       ];
     }
 
@@ -541,7 +503,7 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
         /// Pull out the event name, and custom values.
         final output =
             _displayEvent(null, chartsValues.extensionEvents.first).trim();
-        widgets.add(_hoverRow(name: output, bold: false));
+        widgets.add(_hoverRow(name: output));
       }
     }
     return widgets;
@@ -575,14 +537,13 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
 
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final hoverTextStyle = theme.hoverTextStyle;
-    final contrastForeground = colorScheme.contrastForeground;
     final collapsedColor = colorScheme.defaultBackgroundColor;
 
     return Material(
       color: Colors.transparent,
       child: Theme(
-        data: ThemeData(unselectedWidgetColor: contrastForeground),
+        // TODO(kenz): why are we using a Material and a Theme widget here?
+        data: ThemeData(),
         child: ExpansionTile(
           tilePadding: EdgeInsets.zero,
           childrenPadding: EdgeInsets.zero,
@@ -596,7 +557,7 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
           ),
           backgroundColor: collapsedColor,
           collapsedBackgroundColor: collapsedColor,
-          title: Text(title, style: hoverTextStyle),
+          title: Text(title, style: theme.legendTextStyle),
           children: widgets,
         ),
       ),
@@ -606,7 +567,6 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
   Widget _cardWidget(String value) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final hoverValueEntry = theme.hoverSmallValueTextStyle;
     final expandedGradient = colorScheme.verticalGradient;
 
     return Container(
@@ -621,7 +581,7 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
           Text(
             value,
             overflow: TextOverflow.ellipsis,
-            style: hoverValueEntry,
+            style: theme.legendTextStyle,
           ),
         ],
       ),

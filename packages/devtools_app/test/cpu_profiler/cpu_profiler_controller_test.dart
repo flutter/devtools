@@ -3,8 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app/devtools_app.dart';
-import 'package:devtools_app/src/screens/profiler/cpu_profile_controller.dart';
-import 'package:devtools_app/src/shared/config_specific/import_export/import_export.dart';
+import 'package:devtools_app/src/screens/profiler/cpu_profiler_controller.dart';
 import 'package:devtools_shared/devtools_test_utils.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -67,7 +66,7 @@ void main() {
         controller.dataNotifier.value,
         equals(CpuProfilerController.baseStateCpuProfileData),
       );
-      expect(controller.processingNotifier.value, false);
+      expect(controller.profilerBusyStatus.value, CpuProfilerBusyStatus.none);
 
       // [startMicros] and [extentMicros] are arbitrary for testing.
       await controller.pullAndProcessProfile(
@@ -79,7 +78,7 @@ void main() {
         controller.dataNotifier.value,
         isNot(equals(CpuProfilerController.baseStateCpuProfileData)),
       );
-      expect(controller.processingNotifier.value, false);
+      expect(controller.profilerBusyStatus.value, CpuProfilerBusyStatus.none);
 
       await controller.clear();
       expect(
@@ -467,7 +466,7 @@ void main() {
         equals(CpuProfilerController.baseStateCpuProfileData),
       );
       expect(controller.selectedCpuStackFrameNotifier.value, isNull);
-      expect(controller.processingNotifier.value, isFalse);
+      expect(controller.profilerBusyStatus.value, CpuProfilerBusyStatus.none);
     });
 
     test('disposes', () {
@@ -486,7 +485,7 @@ void main() {
       );
       expect(
         () {
-          controller.processingNotifier.addListener(() {});
+          controller.profilerBusyStatus.addListener(() {});
         },
         throwsA(anything),
       );

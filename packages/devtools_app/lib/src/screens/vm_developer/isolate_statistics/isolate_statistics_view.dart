@@ -6,13 +6,14 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../../../shared/analytics/constants.dart' as gac;
 import '../../../shared/common_widgets.dart';
 import '../../../shared/primitives/utils.dart';
 import '../../../shared/split.dart';
 import '../../../shared/table/table.dart';
 import '../../../shared/table/table_data.dart';
 import '../../../shared/theme.dart';
-import '../../profiler/panes/controls/profiler_controls.dart';
+import '../../profiler/profiler_status.dart';
 import '../vm_developer_common_widgets.dart';
 import '../vm_developer_tools_screen.dart';
 import '../vm_service_private_extensions.dart';
@@ -48,6 +49,8 @@ class IsolateStatisticsViewBody extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             RefreshButton(
+              gaScreen: gac.vmTools,
+              gaSelection: gac.refreshIsolateStatistics,
               onPressed: controller.refresh,
             ),
             const SizedBox(height: denseRowSpacing),
@@ -373,7 +376,7 @@ class _IsolatePortsWidgetState extends State<IsolatePortsWidget> {
             child: Column(
               children: [
                 AreaPaneHeader(
-                  needsTopBorder: false,
+                  includeTopBorder: false,
                   title: Text(
                     'Open Ports (${ports.length})',
                   ),

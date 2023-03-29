@@ -5,6 +5,7 @@
 import 'package:collection/collection.dart' show IterableExtension;
 import 'package:flutter/material.dart';
 
+import 'analytics/constants.dart' as gac;
 import 'common_widgets.dart';
 import 'globals.dart';
 import 'primitives/auto_dispose.dart';
@@ -90,7 +91,7 @@ class _OfflineLoadError extends StatelessWidget {
           'Cannot load offline data for screen \'$screenId\'',
         ),
         const SizedBox(height: defaultSpacing),
-        const ExitOfflineButton(),
+        ExitOfflineButton(gaScreen: gac.simple),
       ],
     );
   }

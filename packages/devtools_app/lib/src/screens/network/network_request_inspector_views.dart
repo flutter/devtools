@@ -147,8 +147,13 @@ class HttpRequestView extends StatelessWidget {
             size: mediumProgressSize,
           );
         }
+
+        final isJson = requestContentType is List
+            ? requestContentType.any((element) => element.contains('json'))
+            : requestContentType.contains('json');
+
         Widget child;
-        child = (requestContentType.contains('json'))
+        child = isJson
             ? JsonViewer(encodedJson: data.requestBody!)
             : Text(
                 data.requestBody!,
@@ -158,6 +163,37 @@ class HttpRequestView extends StatelessWidget {
           padding: const EdgeInsets.all(denseSpacing),
           child: SingleChildScrollView(
             child: child,
+          ),
+        );
+      },
+    );
+  }
+}
+
+/// A button for copying [DartIOHttpRequestData] contents.
+///
+/// If there is no content to copy, the button will not show. The copy contents
+/// will update as the request's data is updated.
+class HttpViewTrailingCopyButton extends StatelessWidget {
+  const HttpViewTrailingCopyButton(this.data, this.dataSelector);
+  final DartIOHttpRequestData data;
+  final String? Function(DartIOHttpRequestData) dataSelector;
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder(
+      valueListenable: data.requestUpdatedNotifier,
+      builder: (context, __, ___) {
+        final dataToCopy = dataSelector(data);
+        final isLoading = data.isFetchingFullData;
+        if (dataToCopy == null || dataToCopy.isEmpty || isLoading) {
+          return Container();
+        }
+
+        return Align(
+          alignment: Alignment.centerRight,
+          child: CopyToClipboardControl(
+            dataProvider: () => dataToCopy,
           ),
         );
       },
@@ -523,8 +559,9 @@ class NetworkRequestOverviewView extends StatelessWidget {
       _buildRow(
         context: context,
         title: 'Timing',
-        child:
-            data is WebSocket ? _buildSocketTimeGraph() : _buildHttpTimeGraph(),
+        child: data is WebSocket
+            ? _buildSocketTimeGraph(context)
+            : _buildHttpTimeGraph(),
       ),
       const SizedBox(height: denseSpacing),
       _buildRow(
@@ -565,7 +602,7 @@ class NetworkRequestOverviewView extends StatelessWidget {
     return Flexible(
       flex: flex,
       child: DevToolsTooltip(
-        message: '$label - ${msText(duration)}',
+        message: '$label - ${durationText(duration)}',
         child: Container(
           height: _timingGraphHeight,
           color: color,
@@ -628,14 +665,24 @@ class NetworkRequestOverviewView extends StatelessWidget {
     for (final instant in data.instantEvents) {
       final instantEventStart = data.instantEvents.first.timeRange!.start!;
       final timeRange = instant.timeRange!;
+      final startDisplay = durationText(
+        timeRange.start! - instantEventStart,
+        unit: DurationDisplayUnit.milliseconds,
+      );
+      final endDisplay = durationText(
+        timeRange.end! - instantEventStart,
+        unit: DurationDisplayUnit.milliseconds,
+      );
+      final totalDisplay = durationText(
+        timeRange.duration,
+        unit: DurationDisplayUnit.milliseconds,
+      );
       result.addAll([
         _buildRow(
           context: context,
           title: instant.name,
           child: _valueText(
-            '[${msText(timeRange.start! - instantEventStart)} - '
-            '${msText(timeRange.end! - instantEventStart)}]'
-            ' → ${msText(timeRange.duration)} total',
+            '[$startDisplay - $endDisplay] → $totalDisplay total',
           ),
         ),
         if (instant != data.instantEvents.last)
@@ -675,11 +722,11 @@ class NetworkRequestOverviewView extends StatelessWidget {
     ];
   }
 
-  Widget _buildSocketTimeGraph() {
+  Widget _buildSocketTimeGraph(BuildContext context) {
     return Container(
       key: socketTimingGraphKey,
       height: _timingGraphHeight,
-      color: mainUiColor,
+      color: Theme.of(context).colorScheme.primary,
     );
   }
 

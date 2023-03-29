@@ -60,13 +60,10 @@ class _ClassNameColumn extends ColumnData<DiffClassStats>
     bool isRowSelected = false,
     VoidCallback? onPressed,
   }) {
-    final theme = Theme.of(context);
     return HeapClassView(
       theClass: data.heapClass,
       showCopyButton: isRowSelected,
       copyGaItem: gac.MemoryEvent.diffClassDiffCopy,
-      textStyle:
-          isRowSelected ? theme.selectedTextStyle : theme.regularTextStyle,
       rootPackage: serviceManager.rootInfoNow().package,
     );
   }

@@ -11,9 +11,9 @@ import 'dart:async';
 import 'dart:html';
 
 import 'package:js/js.dart';
+import 'package:logging/logging.dart';
 
 import '../../../devtools.dart' as devtools show version;
-import '../config_specific/logger/logger.dart';
 import '../config_specific/server/server.dart' as server;
 import '../config_specific/url/url.dart';
 import '../globals.dart';
@@ -31,18 +31,6 @@ const String appTypeDartCLI = 'dart_cli';
 // Dimensions2 BuildType values:
 const String buildTypeDebug = 'debug';
 const String buildTypeProfile = 'profile';
-// Dimensions3 PlatformType values:
-//    android
-//    linux
-//    ios
-//    macos
-//    windows
-//    fuchsia
-//    unknown     VM Service before version 3.24
-// Dimension4 devToolsPlatformType values:
-const String devToolsPlatformTypeMac = 'MacIntel';
-const String devToolsPlatformTypeLinux = 'Linux';
-const String devToolsPlatformTypeWindows = 'Windows';
 // Start with Android_n.n.n
 const String devToolsPlatformTypeAndroid = 'Android_';
 // Dimension5 devToolsChrome starts with
@@ -54,6 +42,8 @@ const String devToolsChromeOS = 'CrOS'; // Chrome OS
 // Dimension7 ideLaunched
 const String ideLaunchedQuery = 'ide'; // '&ide=' query parameter
 const String ideLaunchedCLI = 'CLI'; // Command Line Interface
+
+final _log = Logger('_analytics_web');
 
 @JS('initializeGA')
 external void initializeGA();
@@ -396,6 +386,7 @@ void screen(
   String screenName, [
   int value = 0,
 ]) {
+  _log.fine('Event: Screen(screenName:$screenName, value:$value)');
   GTag.event(
     screenName,
     gaEventProvider: () => _gtagEvent(
@@ -440,11 +431,10 @@ void timeEnd(
   final startTime = _timedOperationsInProgress.remove(operationKey);
   assert(startTime != null);
   if (startTime == null) {
-    log(
+    _log.warning(
       'Could not time operation "$timedOperation" because a) `timeEnd` was '
       'called before `timeStart` or b) the `screenName` and `timedOperation`'
       'parameters for the `timeStart` and `timeEnd` calls do not match.',
-      LogLevel.warning,
     );
     return;
   }
@@ -483,10 +473,9 @@ void timeSync(
     syncOperation();
   } catch (e, st) {
     // Do not send the timing analytic to GA if the operation failed.
-    log(
+    _log.warning(
       'Could not time sync operation "$timedOperation" '
       'because an exception was thrown:\n$e\n$st',
-      LogLevel.warning,
     );
     rethrow;
   }
@@ -514,10 +503,9 @@ Future<void> timeAsync(
     await asyncOperation();
   } catch (e, st) {
     // Do not send the timing analytic to GA if the operation failed.
-    log(
+    _log.warning(
       'Could not time async operation "$timedOperation" '
       'because an exception was thrown:\n$e\n$st',
-      LogLevel.warning,
     );
     rethrow;
   }
@@ -539,6 +527,12 @@ void _timing(
   required int durationMicros,
   ScreenAnalyticsMetrics? screenMetrics,
 }) {
+  _log.fine(
+    'Event: _timing('
+    'screenName:$screenName, '
+    'timedOperation:$timedOperation, '
+    'durationMicros:$durationMicros)',
+  );
   GTag.event(
     screenName,
     gaEventProvider: () => _gtagEvent(
@@ -558,6 +552,13 @@ void select(
   bool nonInteraction = false,
   ScreenAnalyticsMetrics Function()? screenMetricsProvider,
 }) {
+  _log.fine(
+    'Event: select('
+    'screenName:$screenName, '
+    'selectedItem:$selectedItem, '
+    'value:$value, '
+    'nonInteraction:$nonInteraction)',
+  );
   GTag.event(
     screenName,
     gaEventProvider: () => _gtagEvent(
@@ -755,21 +756,10 @@ void waitForDimensionsComputed(String screenName) {
       if (_stillWaiting++ < 50) {
         waitForDimensionsComputed(screenName);
       } else {
-        log('Cancel waiting for dimensions.', LogLevel.warning);
+        _log.warning('Cancel waiting for dimensions.');
       }
     }
   });
-}
-
-// Loading screen from a hash code, can't collect GA (if enabled) until we have
-// all the dimension data.
-void setupAndGaScreen(String screenName) {
-  if (!_analyticsComputed) {
-    _stillWaiting++;
-    waitForDimensionsComputed(screenName);
-  } else {
-    screen(screenName);
-  }
 }
 
 Future<void> setupDimensions() async {

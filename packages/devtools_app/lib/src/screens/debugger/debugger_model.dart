@@ -48,7 +48,7 @@ class ScriptLocation {
   String toString() => '${scriptRef.uri} $location';
 }
 
-class SourceToken with DataSearchStateMixin {
+class SourceToken with SearchableDataMixin {
   SourceToken({required this.position, required this.length});
 
   final SourcePosition position;
@@ -225,6 +225,11 @@ class StackFrameAndSourcePosition {
     }
     name = name.replaceAll(anonymousClosureName, closureName);
     name = name == none ? name : '$name';
+
+    if (frame.code?.kind == CodeKind.kNative) {
+      return '<native code: $name>';
+    }
+
     return name;
   }
 
@@ -253,15 +258,6 @@ class FileNode extends TreeNode<FileNode> {
   /// This exists to allow for O(1) lookup of children when building the tree.
   final Map<String, FileNode> _childrenAsMap = {};
 
-  bool get hasScript => scriptRef != null;
-
-  String _fileName = '';
-
-  /// Returns the name of the file.
-  ///
-  /// May be empty.
-  String get fileName => _fileName;
-
   /// Given a flat list of service protocol scripts, return a tree of scripts
   /// representing the best hierarchical grouping.
   static List<FileNode> createRootsFrom(List<ScriptRef> scripts) {
@@ -278,7 +274,6 @@ class FileNode extends TreeNode<FileNode> {
       }
 
       node.scriptRef = script;
-      node._fileName = ScriptRefUtils.fileName(script);
     }
 
     // Clear out the _childrenAsMap map.

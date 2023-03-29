@@ -9,11 +9,11 @@ import 'dart:math' as math;
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
+import 'package:logging/logging.dart';
 import 'package:path/path.dart' as path;
 import 'package:vm_service/vm_service.dart';
 
 import '../../service/vm_service_wrapper.dart';
-import '../../shared/config_specific/logger/logger.dart' as logger;
 import '../../shared/console/eval/inspector_tree.dart';
 import '../../shared/diagnostics/diagnostics_node.dart';
 import '../../shared/diagnostics/inspector_service.dart';
@@ -25,6 +25,8 @@ import '../../shared/ui/filter.dart';
 import '../../shared/ui/search.dart';
 import '../inspector/inspector_tree_controller.dart';
 import 'logging_screen.dart';
+
+final _log = Logger('logging_controller');
 
 // For performance reasons, we drop old logs in batches, so the log will grow
 // to kMaxLogItemsUpperBound then truncate to kMaxLogItemsLowerBound.
@@ -359,7 +361,7 @@ class LoggingController extends DisposableController
       // style error.
       node.style = DiagnosticsTreeStyle.error;
       if (_verboseDebugging) {
-        logger.log('node toStringDeep:######\n${node.toStringDeep()}\n###');
+        _log.info('node toStringDeep:######\n${node.toStringDeep()}\n###');
       }
 
       final RemoteDiagnosticsNode summary = _findFirstSummary(node) ?? node;
@@ -625,32 +627,7 @@ class LoggingController extends DisposableController
   }
 
   @override
-  List<LogData> matchesForSearch(
-    String search, {
-    bool searchPreviousMatches = false,
-  }) {
-    if (search.isEmpty) return [];
-    final matches = <LogData>[];
-    if (searchPreviousMatches) {
-      final previousMatches = searchMatches.value;
-      for (final previousMatch in previousMatches) {
-        if (previousMatch.summary!.caseInsensitiveContains(search)) {
-          matches.add(previousMatch);
-        }
-      }
-    } else {
-      final List<LogData> currentLogs = filteredData.value;
-      for (final log in currentLogs) {
-        if ((log.summary != null &&
-                log.summary!.caseInsensitiveContains(search)) ||
-            (log.details != null &&
-                log.details!.caseInsensitiveContains(search))) {
-          matches.add(log);
-        }
-      }
-    }
-    return matches;
-  }
+  Iterable<LogData> get currentDataToSearchThrough => filteredData.value;
 
   @override
   void filterData(Filter<LogData> filter) {
@@ -790,7 +767,7 @@ String? _valueAsString(InstanceRef? ref) {
 /// case, this log entry will have a non-null `detailsComputer` field. After the
 /// data is calculated, the log entry will be modified to contain the calculated
 /// `details` data.
-class LogData with DataSearchStateMixin {
+class LogData with SearchableDataMixin {
   LogData(
     this.kind,
     this._details,
@@ -849,6 +826,12 @@ class LogData with DataSearchStateMixin {
     }
 
     return false;
+  }
+
+  @override
+  bool matchesSearchToken(RegExp regExpSearch) {
+    return (summary?.caseInsensitiveContains(regExpSearch) == true) ||
+        (details?.caseInsensitiveContains(regExpSearch) == true);
   }
 
   @override

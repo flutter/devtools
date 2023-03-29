@@ -172,20 +172,6 @@ void main() {
         equals(packageUri),
       );
     });
-
-    test('stackFrameIdCompare', () {
-      // iOS
-      String idA = '140225212960768-2';
-      String idB = '140225212960768-10';
-      expect(idA.compareTo(idB), equals(1));
-      expect(stackFrameIdCompare(idA, idB), equals(-1));
-
-      // Android
-      idA = '-784070656-2';
-      idB = '-784070656-10';
-      expect(idA.compareTo(idB), equals(1));
-      expect(stackFrameIdCompare(idA, idB), equals(-1));
-    });
   });
 
   group('CpuStackFrame', () {
@@ -252,22 +238,22 @@ void main() {
 
     test('totalTime and selfTime', () {
       expect(testStackFrame.totalTimeRatio, equals(1.0));
-      expect(testStackFrame.totalTime.inMicroseconds, equals(100));
+      expect(testStackFrame.totalTime.inMicroseconds, equals(10000));
       expect(testStackFrame.selfTimeRatio, equals(0.0));
       expect(testStackFrame.selfTime.inMicroseconds, equals(0));
 
       expect(stackFrameC.totalTimeRatio, equals(0.2));
-      expect(stackFrameC.totalTime.inMicroseconds, equals(20));
+      expect(stackFrameC.totalTime.inMicroseconds, equals(2000));
       expect(stackFrameC.selfTimeRatio, equals(0.2));
-      expect(stackFrameC.selfTime.inMicroseconds, equals(20));
+      expect(stackFrameC.selfTime.inMicroseconds, equals(2000));
 
       expect(stackFrameD.totalTimeRatio, equals(0.8));
-      expect(stackFrameD.totalTime.inMicroseconds, equals(80));
+      expect(stackFrameD.totalTime.inMicroseconds, equals(8000));
       expect(stackFrameD.selfTimeRatio, equals(0.2));
-      expect(stackFrameD.selfTime.inMicroseconds, equals(20));
+      expect(stackFrameD.selfTime.inMicroseconds, equals(2000));
 
       expect(stackFrameF.totalTimeRatio, equals(0.1));
-      expect(stackFrameF.totalTime.inMicroseconds, equals(10));
+      expect(stackFrameF.totalTime.inMicroseconds, equals(1000));
       expect(stackFrameF.selfTimeRatio, equals(0.0));
       expect(stackFrameF.selfTime.inMicroseconds, equals(0));
     });
@@ -393,16 +379,16 @@ void main() {
 
     test('tooltip', () {
       expect(
-        tagFrameA.tooltip,
-        equals('[Tag] TagA - 0.0 ms'),
+        testTagRootedStackFrame.tooltip,
+        equals('[Tag] TagA - 10.0 ms'),
       );
       expect(
         stackFrameA.tooltip,
-        equals('[Native] A - 0.1 ms'),
+        equals('[Native] A - 10.0 ms'),
       );
       expect(
         stackFrameB.tooltip,
-        equals('[Dart] B - 0.1 ms - dart:async/zone.dart:2222'),
+        equals('[Dart] B - 10.0 ms - dart:async/zone.dart:2222'),
       );
     });
 

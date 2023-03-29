@@ -1237,11 +1237,11 @@ final responseWithMissingLeafFrame = {
 
 final CpuProfileMetaData profileMetaData = CpuProfileMetaData(
   sampleCount: 10,
-  samplePeriod: 50,
+  samplePeriod: 1000,
   stackDepth: 128,
   time: TimeRange()
     ..start = const Duration()
-    ..end = const Duration(microseconds: 100),
+    ..end = const Duration(microseconds: 10000),
 );
 
 final CpuStackFrame tagFrameA = CpuStackFrame(

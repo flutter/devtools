@@ -21,7 +21,6 @@ import 'program_explorer_model.dart';
 
 const containerIcon = Icons.folder;
 const libraryIcon = Icons.insert_drive_file;
-const listItemHeight = 40.0;
 
 double get _programExplorerRowHeight => scaleByFontFactor(22.0);
 double get _selectedNodeTopSpacing => _programExplorerRowHeight * 3;
@@ -64,11 +63,7 @@ class _ProgramExplorerRow extends StatelessWidget {
                 text!,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: theme.fixedFontStyle.copyWith(
-                  color: node.isSelected
-                      ? Colors.white
-                      : theme.fixedFontStyle.color,
-                ),
+                style: theme.fixedFontStyle,
               ),
             ),
           ],
@@ -428,14 +423,12 @@ class ProgramExplorer extends StatelessWidget {
     required this.controller,
     this.title = 'File Explorer',
     this.onNodeSelected,
-    this.displayCodeNodes = false,
     this.displayHeader = true,
   });
 
   final ProgramExplorerController controller;
   final String title;
   final void Function(VMServiceObjectNode)? onNodeSelected;
-  final bool displayCodeNodes;
   final bool displayHeader;
 
   @override
@@ -450,7 +443,7 @@ class ProgramExplorer extends StatelessWidget {
           final fileExplorerHeader = displayHeader
               ? AreaPaneHeader(
                   title: Text(title),
-                  needsTopBorder: false,
+                  includeTopBorder: false,
                 )
               : BlankHeader();
           final fileExplorer = _FileExplorer(

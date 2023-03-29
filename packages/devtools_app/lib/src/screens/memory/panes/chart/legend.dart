@@ -36,7 +36,6 @@ class MemoryChartLegend extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    final legendHeading = theme.hoverTextStyle;
 
     final legendRows = <Widget>[];
 
@@ -44,7 +43,7 @@ class MemoryChartLegend extends StatelessWidget {
     legendRows.add(
       Container(
         padding: _legendTitlePadding,
-        child: Text('Events Legend', style: legendHeading),
+        child: Text('Events Legend', style: theme.legendTextStyle),
       ),
     );
 
@@ -56,7 +55,6 @@ class MemoryChartLegend extends StatelessWidget {
         LegendRow(
           entry1: leftEntry,
           entry2: rightEntry,
-          chartController: chartController,
         ),
       );
     }
@@ -65,7 +63,7 @@ class MemoryChartLegend extends StatelessWidget {
     legendRows.add(
       Container(
         padding: _legendTitlePadding,
-        child: Text('Memory Legend', style: legendHeading),
+        child: Text('Memory Legend', style: theme.legendTextStyle),
       ),
     );
 
@@ -73,7 +71,6 @@ class MemoryChartLegend extends StatelessWidget {
       legendRows.add(
         LegendRow(
           entry1: entry,
-          chartController: chartController,
         ),
       );
     }
@@ -83,7 +80,7 @@ class MemoryChartLegend extends StatelessWidget {
       legendRows.add(
         Container(
           padding: _legendTitlePadding,
-          child: Text('Android Legend', style: legendHeading),
+          child: Text('Android Legend', style: theme.legendTextStyle),
         ),
       );
 
@@ -91,7 +88,6 @@ class MemoryChartLegend extends StatelessWidget {
         legendRows.add(
           LegendRow(
             entry1: entry,
-            chartController: chartController,
           ),
         );
       }
@@ -119,12 +115,10 @@ class MemoryChartLegend extends StatelessWidget {
 class LegendRow extends StatelessWidget {
   const LegendRow({
     Key? key,
-    required this.chartController,
     required this.entry1,
     this.entry2,
   }) : super(key: key);
 
-  final MemoryChartPaneController chartController;
   final MapEntry<String, Map<String, Object?>> entry1;
   final MapEntry<String, Map<String, Object?>>? entry2;
 

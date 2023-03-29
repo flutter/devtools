@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 
 import '../shared/analytics/constants.dart' as gac;
 import '../shared/theme.dart';
-import '../shared/ui/icons.dart';
 
 class RegisteredServiceDescription extends RegisteredService {
   const RegisteredServiceDescription._({
@@ -29,10 +28,9 @@ class RegisteredServiceDescription extends RegisteredService {
 final hotReload = RegisteredServiceDescription._(
   service: 'reloadSources',
   title: 'Hot Reload',
-  icon: AssetImageIcon(
-    asset: 'icons/hot-reload-white@2x.png',
-    height: actionsIconSize,
-    width: actionsIconSize,
+  icon: Icon(
+    Icons.electric_bolt_outlined,
+    size: actionsIconSize,
   ),
   gaScreenName: gac.devToolsMain,
   gaItem: gac.hotReload,
@@ -45,7 +43,7 @@ final hotRestart = RegisteredServiceDescription._(
   service: 'hotRestart',
   title: 'Hot Restart',
   icon: Icon(
-    Icons.settings_backup_restore,
+    Icons.settings_backup_restore_outlined,
     size: actionsIconSize,
   ),
   gaScreenName: gac.devToolsMain,

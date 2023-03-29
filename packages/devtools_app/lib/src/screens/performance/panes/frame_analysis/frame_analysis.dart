@@ -10,7 +10,6 @@ import '../../../../shared/common_widgets.dart';
 import '../../../../shared/feature_flags.dart';
 import '../../../../shared/globals.dart';
 import '../../../../shared/theme.dart';
-import '../../../../shared/ui/colors.dart';
 import '../controls/enhance_tracing/enhance_tracing_controller.dart';
 import '../rebuild_stats/rebuild_stats.dart';
 import '../rebuild_stats/rebuild_stats_model.dart';
@@ -57,7 +56,7 @@ class FlutterFrameAnalysisView extends StatelessWidget {
                 TextSpan(
                   text: '${frameAnalysis.frame.id}',
                   style: theme.fixedFontStyle
-                      .copyWith(color: defaultSelectionColor),
+                      .copyWith(color: theme.colorScheme.primary),
                 ),
               ],
             ),

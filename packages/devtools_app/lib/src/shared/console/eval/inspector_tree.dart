@@ -13,10 +13,8 @@
 library inspector_tree;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 
 import '../../diagnostics/diagnostics_node.dart';
-import '../../theme.dart';
 import '../../ui/search.dart';
 import '../../utils.dart';
 import '../primitives/simple_items.dart';
@@ -31,15 +29,6 @@ final RegExp assertionThrownBuildingError = RegExp(
 );
 
 typedef TreeEventCallback = void Function(InspectorTreeNode node);
-
-// TODO(jacobr): merge this scheme with other color schemes in DevTools.
-extension InspectorColorScheme on ColorScheme {
-  Color get selectedRowBackgroundColor => isLight
-      ? const Color.fromARGB(255, 220, 220, 220)
-      : const Color.fromARGB(255, 73, 73, 73);
-  Color get hoverColor =>
-      isLight ? Colors.yellowAccent : const Color.fromARGB(255, 70, 73, 76);
-}
 
 const double iconPadding = 4.0;
 const double chartLineStrokeWidth = 1.0;
@@ -276,7 +265,7 @@ class InspectorTreeNode {
 }
 
 /// A row in the tree with all information required to render it.
-class InspectorTreeRow with DataSearchStateMixin {
+class InspectorTreeRow with SearchableDataMixin {
   InspectorTreeRow({
     required this.node,
     required this.index,

@@ -185,8 +185,7 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
     return DartObjectNode._(
       text: text,
       ref: ref,
-      childCount:
-          ref.heapSelection.countOfReferences(ref.refNodeType.direction),
+      childCount: ref.childCount,
       isRerootable: isRerootable,
     );
   }
@@ -214,6 +213,8 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
   int get offset => _offset ?? 0;
 
   int? _offset;
+
+  bool get isGroup => _offset != null;
 
   /// If true, the variable can be saved to console as a root.
   final bool isRerootable;

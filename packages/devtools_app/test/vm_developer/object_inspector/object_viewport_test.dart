@@ -2,18 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app/src/screens/debugger/breakpoint_manager.dart';
+import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/vm_developer/object_inspector/object_viewport.dart';
 import 'package:devtools_app/src/screens/vm_developer/object_inspector/vm_class_display.dart';
 import 'package:devtools_app/src/screens/vm_developer/object_inspector/vm_field_display.dart';
 import 'package:devtools_app/src/screens/vm_developer/object_inspector/vm_function_display.dart';
 import 'package:devtools_app/src/screens/vm_developer/object_inspector/vm_instance_display.dart';
 import 'package:devtools_app/src/screens/vm_developer/object_inspector/vm_library_display.dart';
-import 'package:devtools_app/src/screens/vm_developer/object_inspector/vm_object_model.dart';
 import 'package:devtools_app/src/screens/vm_developer/object_inspector/vm_script_display.dart';
-import 'package:devtools_app/src/service/service_manager.dart';
-import 'package:devtools_app/src/shared/config_specific/ide_theme/ide_theme.dart';
-import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_app/src/shared/history_viewport.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/widgets.dart';
@@ -37,6 +33,8 @@ void main() {
     setGlobal(ServiceConnectionManager, fakeServiceManager);
     setGlobal(IdeTheme, IdeTheme());
     setGlobal(BreakpointManager, BreakpointManager());
+    setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
+    setGlobal(PreferencesController, PreferencesController());
 
     testObjectInspectorViewController = TestObjectInspectorViewController();
   });

@@ -11,7 +11,6 @@ import '../../../../../shared/globals.dart';
 import '../../../../../shared/primitives/utils.dart';
 import '../../../../../shared/table/table.dart';
 import '../../../../../shared/table/table_data.dart';
-import '../../../../../shared/theme.dart';
 import '../../../../../shared/utils.dart';
 import '../../../shared/heap/heap.dart';
 import '../../../shared/primitives/simple_elements.dart';
@@ -52,13 +51,10 @@ class _ClassNameColumn extends ColumnData<SingleClassStats>
     bool isRowSelected = false,
     VoidCallback? onPressed,
   }) {
-    final theme = Theme.of(context);
     return HeapClassView(
       theClass: data.heapClass,
       showCopyButton: isRowSelected,
       copyGaItem: gac.MemoryEvent.diffClassSingleCopy,
-      textStyle:
-          isRowSelected ? theme.selectedTextStyle : theme.regularTextStyle,
       rootPackage: serviceManager.rootInfoNow().package,
     );
   }
@@ -84,7 +80,7 @@ class _InstanceColumn extends ColumnData<SingleClassStats>
       : super(
           'Instances',
           titleTooltip: nonGcableInstancesColumnTooltip,
-          fixedWidthPx: scaleByFontFactor(180.0),
+          fixedWidthPx: scaleByFontFactor(90.0),
           alignment: ColumnAlignment.right,
         );
 
@@ -118,9 +114,9 @@ class _InstanceColumn extends ColumnData<SingleClassStats>
 class _ShallowSizeColumn extends ColumnData<SingleClassStats> {
   _ShallowSizeColumn()
       : super(
-          'Shallow\nDart Size',
+          'Shallow Dart Size',
           titleTooltip: SizeType.shallow.description,
-          fixedWidthPx: scaleByFontFactor(85.0),
+          fixedWidthPx: scaleByFontFactor(140.0),
           alignment: ColumnAlignment.right,
         );
 

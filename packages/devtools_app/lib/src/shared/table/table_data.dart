@@ -10,7 +10,6 @@ import '../common_widgets.dart';
 import '../primitives/trees.dart';
 import '../primitives/utils.dart';
 import '../theme.dart';
-import '../ui/colors.dart';
 import '../utils.dart';
 
 /// Defines how a column should display data in a table.
@@ -96,10 +95,9 @@ abstract class ColumnData<T> {
     T dataObject, {
     bool isSelected = false,
   }) {
-    final textColor =
-        isSelected ? defaultSelectionForegroundColor : getTextColor(dataObject);
-    final fontStyle = Theme.of(context).fixedFontStyle;
-    return textColor == null ? fontStyle : fontStyle.copyWith(color: textColor);
+    final theme = Theme.of(context);
+    final textColor = getTextColor(dataObject) ?? theme.colorScheme.onSurface;
+    return theme.fixedFontStyle.copyWith(color: textColor);
   }
 
   @override
@@ -202,7 +200,7 @@ abstract class TimeAndPercentageColumn<T> extends ColumnData<T> {
           fixedWidthPx: scaleByFontFactor(columnWidth),
         );
 
-  static const _defaultTimeColumnWidth = 180.0;
+  static const _defaultTimeColumnWidth = 165.0;
 
   Duration Function(T)? timeProvider;
 
@@ -255,7 +253,7 @@ abstract class TimeAndPercentageColumn<T> extends ColumnData<T> {
       richTooltipProvider?.call(dataObject, context);
 
   String _timeAndPercentage(T dataObject) =>
-      '${msText(timeProvider!(dataObject), fractionDigits: 2)} (${_percentDisplay(dataObject)})';
+      '${durationText(timeProvider!(dataObject), fractionDigits: 2)} (${_percentDisplay(dataObject)})';
 
   String _percentDisplay(T dataObject) =>
       '${percent(percentAsDoubleProvider(dataObject))}';

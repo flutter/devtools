@@ -100,7 +100,7 @@ class TimelineEventsView extends StatelessWidget {
           ValueListenableBuilder<TimelineEvent?>(
             valueListenable: controller.legacyController.selectedTimelineEvent,
             builder: (context, selectedEvent, _) {
-              return EventDetails(selectedEvent, controller.legacyController);
+              return EventDetails(selectedEvent);
             },
           ),
         ],
@@ -1064,7 +1064,7 @@ class SelectedFrameBracketPainter extends FlameChartPainter {
     );
 
     final paint = Paint()
-      ..color = defaultSelectionColor
+      ..color = colorScheme.primary
       ..style = PaintingStyle.stroke
       ..strokeWidth = strokeWidth;
 

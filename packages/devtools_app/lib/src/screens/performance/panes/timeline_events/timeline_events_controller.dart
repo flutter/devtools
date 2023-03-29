@@ -6,11 +6,11 @@ import 'dart:async';
 
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
+import 'package:logging/logging.dart';
 
 import '../../../../shared/analytics/analytics.dart' as ga;
 import '../../../../shared/analytics/constants.dart' as gac;
 import '../../../../shared/analytics/metrics.dart';
-import '../../../../shared/config_specific/logger/logger.dart';
 import '../../../../shared/feature_flags.dart';
 import '../../../../shared/future_work_tracker.dart';
 import '../../../../shared/globals.dart';
@@ -25,6 +25,8 @@ import '../flutter_frames/flutter_frame_model.dart';
 import 'legacy/legacy_events_controller.dart';
 import 'perfetto/perfetto_controller.dart';
 import 'timeline_event_processor.dart';
+
+final _log = Logger('timeline_events_controller');
 
 enum EventsControllerStatus {
   empty,
@@ -64,9 +66,9 @@ class TimelineEventsController extends PerformanceFeatureController
 
   /// Set of thread_name trace events.
   ///
-  /// These events are returned with each [VMService.getVMTimeline] response,
-  /// and we do not want to store duplicates in [allTraceEvents].
-  final threadNameTraceEvents = <TraceEvent>{};
+  /// Thread name events are returned with each [VMService.getVMTimeline]
+  /// response, and we do not want to store duplicates in [allTraceEvents].
+  final threadNameEvents = <ThreadNameEvent>{};
 
   /// Maps thread names, which are gathererd from the "thread_name" trace
   /// events, to their thread ids.
@@ -101,9 +103,10 @@ class TimelineEventsController extends PerformanceFeatureController
 
   int _nextPollStartMicros = 0;
 
-  static const _timelinePollingRateLimit = 5.0;
+  static const _timelinePollingRateLimit = 1.0;
 
-  static const _timelinePollingInterval = Duration(seconds: 1);
+  Duration get _timelinePollingInterval =>
+      _perfettoMode ? const Duration(seconds: 1) : const Duration(seconds: 2);
 
   RateLimiter? _timelinePollingRateLimiter;
 
@@ -137,7 +140,6 @@ class TimelineEventsController extends PerformanceFeatureController
   }
 
   Future<void> _initForServiceConnection() async {
-    legacyController.init();
     await serviceManager.timelineStreamManager.setDefaultTimelineStreams();
     await toggleHttpRequestLogging(true);
 
@@ -174,7 +176,7 @@ class TimelineEventsController extends PerformanceFeatureController
     if (service == null) return;
     final currentVmTime = await service.getVMTimelineMicros();
     debugTraceEventCallback(
-      () => log(
+      () => _log.info(
         'pulling trace events from '
         '[$_nextPollStartMicros - ${currentVmTime.timestamp}]',
       ),
@@ -185,7 +187,7 @@ class TimelineEventsController extends PerformanceFeatureController
     );
     _nextPollStartMicros = currentVmTime.timestamp! + 1;
 
-    final threadNameEvents = <TraceEvent>[];
+    final newThreadNameEvents = <ThreadNameEvent>[];
     for (final event in timeline.traceEvents ?? []) {
       final traceEvent = TraceEvent(event.json!);
       final eventWrapper = TraceEventWrapper(
@@ -193,20 +195,16 @@ class TimelineEventsController extends PerformanceFeatureController
         DateTime.now().millisecondsSinceEpoch,
       );
 
-      // Speacial handling for thread name events since they are returned with
+      // Special handling for thread name events since they are returned with
       // each [VMService.getVMTimeline] response.
       if (traceEvent.isThreadNameEvent) {
-        // TODO(kenz): watch that this doesn't become a performance bottleneck
-        // for [_pullTraceEventsFromVmTimeline].
-        final duplicateThreadNameEvent = threadNameTraceEvents.containsWhere(
-          (event) => collectionEquals(event.json, traceEvent.json),
-        );
-        if (!duplicateThreadNameEvent) {
+        final threadNameEvent = ThreadNameEvent.from(traceEvent);
+        final added = threadNameEvents.add(threadNameEvent);
+        if (added) {
           // Only add this thread name event to [allTraceEvents] if we have not
           // already added it. Otherwise, it will be a duplicate and will
           // consume unecessary space and processing time.
-          threadNameEvents.add(traceEvent);
-          threadNameTraceEvents.add(traceEvent);
+          newThreadNameEvents.add(threadNameEvent);
           allTraceEvents.add(eventWrapper);
         }
       } else {
@@ -214,11 +212,11 @@ class TimelineEventsController extends PerformanceFeatureController
       }
     }
 
-    updateThreadIds(threadNameEvents, isInitialUpdate: isInitialPull);
+    updateThreadIds(newThreadNameEvents, isInitialUpdate: isInitialPull);
   }
 
   void updateThreadIds(
-    List<TraceEvent> threadNameEvents, {
+    List<ThreadNameEvent> threadNameEvents, {
     bool isInitialUpdate = false,
   }) {
     // This can happen if there is a race between this method being called and
@@ -234,9 +232,8 @@ class TimelineEventsController extends PerformanceFeatureController
     // available in the engine.
     int? uiThreadId;
     int? rasterThreadId;
-    for (TraceEvent event in threadNameEvents) {
-      final name = event.args!['name'] as String;
-
+    for (ThreadNameEvent event in threadNameEvents) {
+      final name = event.name!;
       if (isFlutterApp && isInitialUpdate) {
         // Android: "1.ui (12652)"
         // iOS: "io.flutter.1.ui (12652)"
@@ -271,7 +268,7 @@ class TimelineEventsController extends PerformanceFeatureController
 
     if (isFlutterApp && isInitialUpdate) {
       if (uiThreadId == null || rasterThreadId == null) {
-        log(
+        _log.info(
           'Could not find UI thread and / or Raster thread from names: '
           '${threadNamesById.values}',
         );
@@ -289,7 +286,7 @@ class TimelineEventsController extends PerformanceFeatureController
     if (_perfettoMode) {
       final traceEventCount = allTraceEvents.length;
       debugTraceEventCallback(
-        () => log(
+        () => _log.info(
           'processing traceEvents at startIndex '
           '$_nextTraceIndexToProcess',
         ),
@@ -301,7 +298,7 @@ class TimelineEventsController extends PerformanceFeatureController
           startIndex: _nextTraceIndexToProcess,
         );
         debugTraceEventCallback(
-          () => log(
+          () => _log.info(
             'after processing traceEvents at startIndex $_nextTraceIndexToProcess, '
             'and now _nextTraceIndexToProcess = $traceEventCount',
           ),
@@ -328,15 +325,9 @@ class TimelineEventsController extends PerformanceFeatureController
     }
   }
 
-  Future<void> selectTimelineEvent(
-    TimelineEvent? event, {
-    bool updateProfiler = true,
-  }) async {
+  Future<void> selectTimelineEvent(TimelineEvent? event) async {
     if (useLegacyTraceViewer.value) {
-      await legacyController.selectTimelineEvent(
-        event,
-        updateProfiler: updateProfiler,
-      );
+      await legacyController.selectTimelineEvent(event);
     } else {
       // TODO(kenz): handle event selection from Perfetto here if we ever have
       // a use case for this.
@@ -361,7 +352,7 @@ class TimelineEventsController extends PerformanceFeatureController
       frame.timelineEventData.rasterEvent?.format(buf, '  ');
       buf.writeln('\nRaster trace for frame ${frame.id}');
       frame.timelineEventData.rasterEvent?.writeTraceToBuffer(buf);
-      log(buf.toString());
+      _log.info(buf.toString());
     });
   }
 
@@ -426,19 +417,7 @@ class TimelineEventsController extends PerformanceFeatureController
       if (framesController.currentFrameBeingSelected != frame) return;
     }
 
-    // We do not need to pull the CPU profile because we will pull the profile
-    // for the entire frame. The order of selecting the timeline event and
-    // pulling the CPU profile for the frame (directly below) matters here.
-    // If the selected timeline event is null, the event details section will
-    // not show the progress bar while we are processing the CPU profile.
-    await selectTimelineEvent(
-      frame.timelineEventData.uiEvent,
-      updateProfiler: false,
-    );
-
-    if (framesController.currentFrameBeingSelected != frame) return;
-
-    await legacyController.updateCpuProfileForFrame(frame);
+    await selectTimelineEvent(frame.timelineEventData.uiEvent);
   }
 
   void addTimelineEvent(TimelineEvent event) {
@@ -581,7 +560,7 @@ class TimelineEventsController extends PerformanceFeatureController
   @override
   Future<void> clearData() async {
     allTraceEvents.clear();
-    threadNameTraceEvents.clear();
+    threadNameEvents.clear();
     _nextTraceIndexToProcess = 0;
     _unassignedFlutterFrameEvents.clear();
 
@@ -598,7 +577,6 @@ class TimelineEventsController extends PerformanceFeatureController
   void dispose() {
     _pollingTimer?.cancel();
     _timelinePollingRateLimiter?.dispose();
-    legacyController.cpuProfilerController.dispose();
     if (FeatureFlags.embeddedPerfetto) {
       perfettoController.dispose();
     }

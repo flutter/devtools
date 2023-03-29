@@ -8,9 +8,11 @@ import 'dart:convert';
 import 'dart:html';
 
 import 'package:devtools_shared/devtools_shared.dart';
+import 'package:logging/logging.dart';
 
 import '../../primitives/utils.dart';
-import '../logger/logger.dart';
+
+final _log = Logger('_server_web');
 
 // Code to check if DevTools server is available, will only be true in release
 // mode, debug mode will be set to false.
@@ -128,7 +130,7 @@ Future<String> flutterGAClientID() async {
           // Requested value of 'null' (Flutter tool never ran). Server request
           // apiGetFlutterGAClientId should not happen because the
           // isFlutterGAEnabled test should have been false.
-          log('$apiGetFlutterGAClientId is empty', LogLevel.warning);
+          _log.warning('$apiGetFlutterGAClientId is empty');
         }
       } else {
         logWarning(resp, apiGetFlutterGAClientId);
@@ -272,6 +274,7 @@ Future<void> setLastShownReleaseNotesVersion(String version) async {
   }
 }
 
+// currently unused
 /// Requests all .devtools properties to be reset to their default values in the
 /// file '~/.flutter-devtools/.devtools'.
 Future<void> resetDevToolsFile() async {
@@ -334,9 +337,8 @@ DevToolsJsonFile _devToolsJsonFileFromResponse(
 }
 
 void logWarning(HttpRequest? response, String apiType, [String? respText]) {
-  log(
+  _log.warning(
     'HttpRequest $apiType failed status = ${response?.status}'
     '${respText != null ? ', responseText = $respText' : ''}',
-    LogLevel.warning,
   );
 }

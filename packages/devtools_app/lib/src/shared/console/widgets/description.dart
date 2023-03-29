@@ -419,7 +419,6 @@ class DiagnosticsNodeDescription extends StatelessWidget {
   }
 
   Widget _buildLocation(BuildContext context) {
-    final theme = Theme.of(context);
     final location = diagnostic!.creationLocation!;
     return Flexible(
       child: RichText(
@@ -428,8 +427,7 @@ class DiagnosticsNodeDescription extends StatelessWidget {
         text: TextSpan(
           text:
               '${location.getFile()!.split('/').last}:${location.getLine()}:${location.getColumn()}            ',
-          style: DiagnosticsTextStyles.regular
-              .copyWith(color: theme.colorScheme.defaultForeground),
+          style: DiagnosticsTextStyles.regular(Theme.of(context).colorScheme),
         ),
       ),
     );
@@ -445,7 +443,7 @@ class DiagnosticsNodeDescription extends StatelessWidget {
           // When the node is selected, the background will be an error
           // color so don't render the text the same color.
           style: isSelected
-              ? DiagnosticsTextStyles.regular
+              ? DiagnosticsTextStyles.regular(colorScheme)
               : DiagnosticsTextStyles.error(colorScheme),
         ),
       ),

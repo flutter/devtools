@@ -6,7 +6,7 @@ import 'dart:html';
 
 import 'logger.dart';
 
-void log(Object message, [LogLevel level = LogLevel.debug]) {
+void printToConsole(Object message, [LogLevel level = LogLevel.debug]) {
   switch (level) {
     case LogLevel.debug:
       window.console.log(message);

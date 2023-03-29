@@ -203,9 +203,6 @@ class _TestController extends DisposableController
   List<ToggleFilter<_TestDataClass>> get toggleFilters =>
       activeFilter.value.toggleFilters;
 
-  Map<String, QueryFilterArgument> get queryFilterArgs =>
-      activeFilter.value.queryFilter.filterArguments;
-
   @override
   List<ToggleFilter<_TestDataClass>> createToggleFilters() => [
         ToggleFilter<_TestDataClass>(

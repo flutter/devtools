@@ -9,7 +9,6 @@ import '../../../../shared/common_widgets.dart';
 import '../../../../shared/dialogs.dart';
 import '../../../../shared/globals.dart';
 import '../../../../shared/theme.dart';
-import '../../memory_controller.dart';
 
 /// The dialog keys for testing purposes.
 @visibleForTesting
@@ -18,9 +17,7 @@ class MemorySettingDialogKeys {
 }
 
 class MemorySettingsDialog extends StatelessWidget {
-  const MemorySettingsDialog(this.controller);
-
-  final MemoryController controller;
+  const MemorySettingsDialog();
 
   @override
   Widget build(BuildContext context) {
@@ -47,10 +44,7 @@ class MemorySettingsDialog extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        preferences.memory.refLimitTitle,
-                        style: theme.regularTextStyle,
-                      ),
+                      Text(preferences.memory.refLimitTitle),
                       Text(
                         'Used to explore live references in console.',
                         style: theme.subtleTextStyle,

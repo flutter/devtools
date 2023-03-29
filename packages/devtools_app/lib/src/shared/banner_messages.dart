@@ -11,6 +11,7 @@ import 'package:provider/provider.dart';
 import '../screens/performance/performance_utils.dart';
 import 'analytics/constants.dart' as gac;
 import 'common_widgets.dart';
+import 'connected_app.dart';
 import 'globals.dart';
 import 'primitives/utils.dart';
 import 'screen.dart';
@@ -124,23 +125,22 @@ class BannerMessage extends StatelessWidget {
   const BannerMessage({
     required super.key,
     required this.textSpans,
-    required this.backgroundColor,
-    required this.foregroundColor,
     required this.screenId,
     required this.messageType,
   });
 
   final List<InlineSpan> textSpans;
-  final Color backgroundColor;
-  final Color foregroundColor;
   final String screenId;
   final BannerMessageType messageType;
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return Card(
-      color: backgroundColor,
-      margin: const EdgeInsets.only(bottom: denseRowSpacing),
+      color: messageType == BannerMessageType.error
+          ? colorScheme.errorContainer
+          : colorScheme.warningContainer,
+      margin: const EdgeInsets.only(bottom: intermediateSpacing),
       child: Padding(
         padding: const EdgeInsets.all(defaultSpacing),
         child: Column(
@@ -149,98 +149,48 @@ class BannerMessage extends StatelessWidget {
           children: [
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                  child: Icon(
+                    messageType == BannerMessageType.error
+                        ? Icons.error_outline
+                        : Icons.warning_amber_outlined,
+                    color: messageType == BannerMessageType.error
+                        ? colorScheme.onErrorContainer
+                        : colorScheme.onWarningContainer,
+                  ),
+                ),
                 Expanded(
                   child: RichText(
                     text: TextSpan(
-                      children: [
-                        _iconSpanForMessage(),
-                        ...textSpans,
-                      ],
+                      style: TextStyle(
+                        color: messageType == BannerMessageType.error
+                            ? colorScheme.onErrorContainer
+                            : colorScheme.onWarningContainer,
+                      ),
+                      children: textSpans,
                     ),
                   ),
                 ),
                 const SizedBox(width: defaultSpacing),
-                CircularIconButton(
-                  icon: Icons.close,
-                  backgroundColor: backgroundColor,
-                  foregroundColor: foregroundColor,
-                  // TODO(kenz): animate the removal of this message.
+                IconButton(
+                  icon: Icon(
+                    Icons.close,
+                    color: messageType == BannerMessageType.error
+                        ? colorScheme.onErrorContainer
+                        : colorScheme.onWarningContainer,
+                  ),
                   onPressed: () => Provider.of<BannerMessagesController>(
                     context,
                     listen: false,
                   ).removeMessage(this, dismiss: true),
-                ),
+                )
               ],
             ),
           ],
         ),
       ),
-    );
-  }
-
-  WidgetSpan _iconSpanForMessage() {
-    Widget child;
-    switch (messageType) {
-      case BannerMessageType.warning:
-        child = const _BannerWarningIcon();
-        break;
-      case BannerMessageType.error:
-      default:
-        child = const _BannerErrorIcon();
-        break;
-    }
-    return WidgetSpan(
-      child: Padding(
-        padding: const EdgeInsets.only(right: denseSpacing),
-        child: child,
-      ),
-    );
-  }
-}
-
-class _BannerWarningIcon extends StatelessWidget {
-  const _BannerWarningIcon();
-
-  static const _backdropTopOffset = 6.0;
-  static const _backdropWidth = 4.0;
-  static const _backdropHeight = 10.0;
-
-  @override
-  Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        // This positioned container is to make the exclamation point in the
-        // warning icon appear black.
-        Positioned(
-          top: _backdropTopOffset,
-          left: denseSpacing,
-          child: Container(
-            width: _backdropWidth,
-            height: _backdropHeight,
-            decoration: const BoxDecoration(color: Colors.black),
-          ),
-        ),
-        Icon(
-          Icons.warning,
-          color: Colors.amber,
-          size: actionsIconSize,
-        ),
-      ],
-    );
-  }
-}
-
-class _BannerErrorIcon extends StatelessWidget {
-  const _BannerErrorIcon();
-
-  @override
-  Widget build(BuildContext context) {
-    return Icon(
-      Icons.error_outline,
-      color: _BannerError.foreground,
-      size: actionsIconSize,
     );
   }
 }
@@ -253,14 +203,9 @@ class _BannerError extends BannerMessage {
   }) : super(
           key: key,
           textSpans: textSpans,
-          backgroundColor: devtoolsError,
-          foregroundColor: foreground,
           screenId: screenId,
           messageType: BannerMessageType.error,
         );
-
-  static const foreground = Colors.white;
-  static const linkColor = Color(0xFF54C1EF);
 }
 
 // TODO(kenz): add "Do not show this again" option to warnings.
@@ -269,14 +214,7 @@ class _BannerWarning extends BannerMessage {
     required super.key,
     required super.textSpans,
     required super.screenId,
-  }) : super(
-          backgroundColor: devtoolsWarning,
-          foregroundColor: foreground,
-          messageType: BannerMessageType.warning,
-        );
-
-  static const foreground = Colors.black87;
-  static const linkColor = Color(0xFF54C1EF);
+  }) : super(messageType: BannerMessageType.warning);
 }
 
 class DebugModePerformanceMessage {
@@ -286,11 +224,10 @@ class DebugModePerformanceMessage {
 
   BannerMessage build(BuildContext context) {
     final theme = Theme.of(context);
-    final textStyle = theme.warningMessageTextStyle;
     return _BannerWarning(
       key: Key('DebugModePerformanceMessage - $screenId'),
       textSpans: [
-        TextSpan(
+        const TextSpan(
           text:
               'You are running your app in debug mode. Debug mode performance '
               'is not indicative of release performance, but you may use debug '
@@ -298,16 +235,14 @@ class DebugModePerformanceMessage {
               'building widgets, calculating layouts, rasterizing scenes,'
               ' etc.). For precise measurement of performance, relaunch your '
               'application in ',
-          style: textStyle,
         ),
         _runInProfileModeTextSpan(
           context,
           screenId: screenId,
-          style: theme.errorMessageLinkStyle,
+          style: theme.warningMessageLinkStyle,
         ),
-        TextSpan(
+        const TextSpan(
           text: '.',
-          style: textStyle,
         ),
       ],
       screenId: screenId,
@@ -332,10 +267,7 @@ class ProviderUnknownErrorBanner {
 DevTools failed to connect with package:provider.
 
 This could be caused by an older version of package:provider; please make sure that you are using version >=5.0.0.''',
-          style: TextStyle(
-            color: _BannerError.foreground,
-            fontSize: defaultFontSize,
-          ),
+          style: TextStyle(fontSize: defaultFontSize),
         ),
       ],
     );
@@ -357,16 +289,18 @@ class ShaderJankMessage {
 
   BannerMessage build(BuildContext context) {
     final theme = Theme.of(context);
-    final textStyle = theme.errorMessageTextStyle;
+    final jankDurationText = durationText(
+      jankDuration,
+      unit: DurationDisplayUnit.milliseconds,
+    );
     return _BannerError(
       key: Key('ShaderJankMessage - $screenId'),
       textSpans: [
         TextSpan(
-          text: '''
-Shader compilation jank detected. $jankyFramesCount ${pluralize('frame', jankyFramesCount)} janked with a total of ${msText(jankDuration)} spent in shader compilation.
-
-To pre-compile shaders, see the instructions at ''',
-          style: textStyle,
+          text: 'Shader compilation jank detected. $jankyFramesCount '
+              '${pluralize('frame', jankyFramesCount)} janked with a total of '
+              '$jankDurationText spent in shader compilation. To pre-compile '
+              'shaders, see the instructions at ',
         ),
         LinkTextSpan(
           link: Link(
@@ -378,10 +312,26 @@ To pre-compile shaders, see the instructions at ''',
           context: context,
           style: theme.errorMessageLinkStyle,
         ),
-        TextSpan(
-          text: '.',
-          style: textStyle,
-        ),
+        const TextSpan(text: '.'),
+        if (serviceManager.connectedApp!.isIosApp) ...[
+          const TextSpan(
+            text: '\n\nNote: this is a legacy solution with many pitfalls. '
+                'Try ',
+          ),
+          LinkTextSpan(
+            link: Link(
+              display: 'Impeller',
+              url: impellerWikiUrl,
+              gaScreenName: screenId,
+              gaSelectedItemDescription: gac.impellerWiki,
+            ),
+            context: context,
+            style: theme.errorMessageLinkStyle,
+          ),
+          const TextSpan(
+            text: ' instead!',
+          ),
+        ]
       ],
       screenId: screenId,
     );
@@ -398,14 +348,12 @@ class HighCpuSamplingRateMessage {
 
   BannerMessage build(BuildContext context) {
     final theme = Theme.of(context);
-    final textStyle = theme.warningMessageTextStyle;
     return _BannerWarning(
       key: key,
       textSpans: [
-        TextSpan(
+        const TextSpan(
           text: '''
 You are opting in to a high CPU sampling rate. This may affect the performance of your application. Please read our ''',
-          style: textStyle,
         ),
         LinkTextSpan(
           link: Link(
@@ -417,9 +365,8 @@ You are opting in to a high CPU sampling rate. This may affect the performance o
           context: context,
           style: theme.warningMessageLinkStyle,
         ),
-        TextSpan(
+        const TextSpan(
           text: ' to understand the trade-offs associated with this setting.',
-          style: textStyle,
         ),
       ],
       screenId: screenId,
@@ -433,25 +380,21 @@ class DebugModeMemoryMessage {
   final String screenId;
 
   BannerMessage build(BuildContext context) {
-    final theme = Theme.of(context);
-    final textStyle = theme.warningMessageTextStyle;
     return _BannerWarning(
       key: Key('DebugModeMemoryMessage - $screenId'),
       textSpans: [
-        TextSpan(
+        const TextSpan(
           text: '''
 You are running your app in debug mode. Absolute memory usage may be higher in a debug build than in a release build.
 For the most accurate absolute memory stats, relaunch your application in ''',
-          style: textStyle,
         ),
         _runInProfileModeTextSpan(
           context,
           screenId: screenId,
           style: Theme.of(context).warningMessageLinkStyle,
         ),
-        TextSpan(
+        const TextSpan(
           text: '.',
-          style: textStyle,
         ),
       ],
       screenId: screenId,
@@ -482,10 +425,7 @@ class UnsupportedFlutterVersionWarning {
               ' is running on Flutter $currentFlutterVersion. Some'
               ' functionality may not work. If this causes issues, try'
               ' upgrading your Flutter version.',
-          style: TextStyle(
-            color: _BannerWarning.foreground,
-            fontSize: defaultFontSize,
-          ),
+          style: TextStyle(fontSize: defaultFontSize),
         ),
       ],
       screenId: screenId,
@@ -540,26 +480,14 @@ void maybePushDebugModeMemoryMessage(
 }
 
 extension BannerMessageThemeExtension on ThemeData {
-  TextStyle get warningMessageTextStyle => TextStyle(
-        color: _BannerWarning.foreground,
-        fontSize: defaultFontSize,
-      );
-
-  TextStyle get warningMessageLinkStyle => TextStyle(
+  TextStyle get warningMessageLinkStyle => regularTextStyle.copyWith(
         decoration: TextDecoration.underline,
-        color: _BannerWarning.linkColor,
-        fontSize: defaultFontSize,
+        color: colorScheme.onWarningContainerLink,
       );
 
-  TextStyle get errorMessageTextStyle => TextStyle(
-        color: _BannerError.foreground,
-        fontSize: defaultFontSize,
-      );
-
-  TextStyle get errorMessageLinkStyle => TextStyle(
+  TextStyle get errorMessageLinkStyle => regularTextStyle.copyWith(
         decoration: TextDecoration.underline,
-        color: _BannerError.linkColor,
-        fontSize: defaultFontSize,
+        color: colorScheme.onErrorContainerLink,
       );
 }
 

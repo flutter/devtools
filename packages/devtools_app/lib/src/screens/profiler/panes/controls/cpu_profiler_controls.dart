@@ -11,8 +11,8 @@ import '../../../../shared/globals.dart';
 import '../../../../shared/theme.dart';
 import '../../../../shared/ui/filter.dart';
 import '../../../../shared/utils.dart';
-import '../../cpu_profile_controller.dart';
 import '../../cpu_profile_model.dart';
+import '../../cpu_profiler_controller.dart';
 import '../../profiler_screen_controller.dart';
 
 final profilerScreenSearchFieldKey =
@@ -67,31 +67,6 @@ Example queries:
       dialogWidth: _filterDialogWidth,
       controller: controller,
       queryInstructions: filterQueryInstructions,
-    );
-  }
-}
-
-class CpuProfilerDisabled extends StatelessWidget {
-  const CpuProfilerDisabled(this.controller);
-
-  final CpuProfilerController controller;
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: <Widget>[
-          const Text('CPU profiler is disabled.'),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: ElevatedButton(
-              onPressed: controller.enableCpuProfiler,
-              child: const Text('Enable profiler'),
-            ),
-          ),
-        ],
-      ),
     );
   }
 }
@@ -221,7 +196,7 @@ class ModeDropdown extends StatelessWidget {
                   value: CpuProfilerViewType.code,
                 ),
               ],
-              onChanged: (type) => controller.updateView(type!),
+              onChanged: (type) => controller.updateViewForType(type!),
             ),
           ),
         );
