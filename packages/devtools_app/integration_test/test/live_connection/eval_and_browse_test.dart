@@ -16,6 +16,7 @@ import 'package:devtools_app/src/shared/console/widgets/console_pane.dart';
 import 'package:devtools_app/src/shared/primitives/simple_items.dart';
 import 'package:devtools_app/src/shared/ui/search.dart';
 import 'package:devtools_test/devtools_integration_test.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -132,8 +133,13 @@ class _EvalAndBrowseTester {
     // Open memory screen.
     await switchToScreen(tester, ScreenMetaData.memory);
 
-    // Close warning and chart to get screen.
-    await tapAndPump(find.byKey(DebugModeMemoryMessage.closeKey));
+    // Close warning and chart to get screen space.
+    await tapAndPump(
+      find.descendant(
+        of: find.byType(BannerWarning),
+        matching: find.byIcon(Icons.close),
+      ),
+    );
     await tapAndPump(find.text(PrimaryControls.memoryChartText));
 
     // Make console wider.
