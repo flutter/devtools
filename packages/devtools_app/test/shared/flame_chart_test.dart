@@ -262,31 +262,51 @@ void main() {
       // Event simulation is not supported for platform 'web'.
 
       // Zoom in.
-      await tester.sendKeyEvent(LogicalKeyboardKey.comma, platform: 'macos');
+      await tester.sendKeyEvent(
+        LogicalKeyboardKey.comma,
+        platform: 'macos',
+        physicalKey: PhysicalKeyboardKey.keyW,
+      );
       await tester.pumpAndSettle();
       expect(state.zoomController.value, equals(1.5));
       expect(state.horizontalControllerGroup.offset, equals(20.0));
 
       // Zoom in further.
-      await tester.sendKeyEvent(LogicalKeyboardKey.comma, platform: 'macos');
+      await tester.sendKeyEvent(
+        LogicalKeyboardKey.comma,
+        platform: 'macos',
+        physicalKey: PhysicalKeyboardKey.keyW,
+      );
       await tester.pumpAndSettle();
       expect(state.zoomController.value, equals(2.25));
       expect(state.horizontalControllerGroup.offset, equals(50.0));
 
       // Zoom out.
-      await tester.sendKeyEvent(LogicalKeyboardKey.keyO, platform: 'macos');
+      await tester.sendKeyEvent(
+        LogicalKeyboardKey.keyO,
+        platform: 'macos',
+        physicalKey: PhysicalKeyboardKey.keyS,
+      );
       await tester.pumpAndSettle();
       expect(state.zoomController.value, equals(1.5));
       expect(state.horizontalControllerGroup.offset, equals(20.0));
 
       // Zoom out further.
-      await tester.sendKeyEvent(LogicalKeyboardKey.keyO, platform: 'macos');
+      await tester.sendKeyEvent(
+        LogicalKeyboardKey.keyO,
+        platform: 'macos',
+        physicalKey: PhysicalKeyboardKey.keyS,
+      );
       await tester.pumpAndSettle();
       expect(state.zoomController.value, equals(1.0));
       expect(state.horizontalControllerGroup.offset, equals(0.0));
 
       // Zoom out and verify we cannot go beyond the minimum zoom level (1.0);
-      await tester.sendKeyEvent(LogicalKeyboardKey.keyO, platform: 'macos');
+      await tester.sendKeyEvent(
+        LogicalKeyboardKey.keyO,
+        platform: 'macos',
+        physicalKey: PhysicalKeyboardKey.keyS,
+      );
       await tester.pumpAndSettle();
       expect(state.zoomController.value, equals(1.0));
       expect(state.horizontalControllerGroup.offset, equals(0.0));
@@ -294,7 +314,11 @@ void main() {
       // Verify that the scroll position does not change when the mouse is
       // positioned in an unzoomable area (start or end inset).
       state.mouseHoverX = 30.0;
-      await tester.sendKeyEvent(LogicalKeyboardKey.comma, platform: 'macos');
+      await tester.sendKeyEvent(
+        LogicalKeyboardKey.comma,
+        platform: 'macos',
+        physicalKey: PhysicalKeyboardKey.keyW,
+      );
       await tester.pumpAndSettle();
       expect(state.zoomController.value, equals(1.5));
       expect(state.horizontalControllerGroup.offset, equals(0.0));
@@ -315,39 +339,67 @@ void main() {
       // Event simulation is not supported for platform 'web'.
 
       // Zoom in so we have room to pan around.
-      await tester.sendKeyEvent(LogicalKeyboardKey.comma, platform: 'macos');
+      await tester.sendKeyEvent(
+        LogicalKeyboardKey.comma,
+        platform: 'macos',
+        physicalKey: PhysicalKeyboardKey.keyW,
+      );
       await tester.pumpAndSettle();
-      await tester.sendKeyEvent(LogicalKeyboardKey.comma, platform: 'macos');
+      await tester.sendKeyEvent(
+        LogicalKeyboardKey.comma,
+        platform: 'macos',
+        physicalKey: PhysicalKeyboardKey.keyW,
+      );
       await tester.pumpAndSettle();
       expect(state.zoomController.value, equals(2.25));
       expect(state.horizontalControllerGroup.offset, equals(550.0));
 
       // Pan left. Pan unit should equal 1/4th of the original width (1000.0).
-      await tester.sendKeyEvent(LogicalKeyboardKey.keyA, platform: 'macos');
+      await tester.sendKeyEvent(
+        LogicalKeyboardKey.keyA,
+        platform: 'macos',
+        physicalKey: PhysicalKeyboardKey.keyA,
+      );
       await tester.pumpAndSettle();
       expect(state.zoomController.value, equals(2.25));
       expect(state.horizontalControllerGroup.offset, equals(300.0));
 
       // Pan right. Pan unit should equal 1/4th of the original width (1000.0).
-      await tester.sendKeyEvent(LogicalKeyboardKey.keyE, platform: 'macos');
+      await tester.sendKeyEvent(
+        LogicalKeyboardKey.keyE,
+        platform: 'macos',
+        physicalKey: PhysicalKeyboardKey.keyD,
+      );
       await tester.pumpAndSettle();
       expect(state.zoomController.value, equals(2.25));
       expect(state.horizontalControllerGroup.offset, equals(550.0));
 
       // Zoom in.
-      await tester.sendKeyEvent(LogicalKeyboardKey.comma, platform: 'macos');
+      await tester.sendKeyEvent(
+        LogicalKeyboardKey.comma,
+        platform: 'macos',
+        physicalKey: PhysicalKeyboardKey.keyW,
+      );
       await tester.pumpAndSettle();
       expect(state.zoomController.value, equals(3.375));
       expect(state.horizontalControllerGroup.offset, equals(1045.0));
 
       // Pan left. Pan unit should equal 1/4th of the original width (1000.0).
-      await tester.sendKeyEvent(LogicalKeyboardKey.keyA, platform: 'macos');
+      await tester.sendKeyEvent(
+        LogicalKeyboardKey.keyA,
+        platform: 'macos',
+        physicalKey: PhysicalKeyboardKey.keyA,
+      );
       await tester.pumpAndSettle();
       expect(state.zoomController.value, equals(3.375));
       expect(state.horizontalControllerGroup.offset, equals(795.0));
 
       // Pan right. Pan unit should equal 1/4th of the original width (1000.0).
-      await tester.sendKeyEvent(LogicalKeyboardKey.keyE, platform: 'macos');
+      await tester.sendKeyEvent(
+        LogicalKeyboardKey.keyE,
+        platform: 'macos',
+        physicalKey: PhysicalKeyboardKey.keyD,
+      );
       await tester.pumpAndSettle();
       expect(state.zoomController.value, equals(3.375));
       expect(state.horizontalControllerGroup.offset, equals(1045.0));
