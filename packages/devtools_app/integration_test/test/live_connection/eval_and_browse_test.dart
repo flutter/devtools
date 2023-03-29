@@ -192,6 +192,7 @@ class _EvalTester {
         if (items.isNotEmpty) return items.first;
         await action();
       } on StateError {
+        // tester.widgetList throws StateError if no widgets found.
         await action();
       }
     }
