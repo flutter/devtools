@@ -173,33 +173,30 @@ class _EvalTester {
     Duration? duration,
     Finder? next,
   }) async {
-    int tryNumber = 0;
-
-    Future<void> action() async {
-      logStatus('tapping #$tryNumber to find \n'
-          '[$finder]\n');
+    Future<void> action(int tryNumber) async {
+      logStatus('tapping #$tryNumber to find \n[$finder]\n');
       tryNumber++;
       await tester.tap(finder);
       await tester.pump(duration);
       await tester.pumpAndSettle();
     }
 
-    await action();
+    await action(0);
 
     if (next == null) return null;
 
-    // Tthese tries are needed because tap in console is flaky.
-    while (tryNumber < 10) {
+    // These tries are needed because tap in console is flaky.
+    for (var tryNumber = 1; tryNumber < 10; tryNumber++) {
       try {
         final items = tester.widgetList(next);
         if (items.isNotEmpty) return items.first;
-        await action();
+        await action(tryNumber);
       } on StateError {
         // tester.widgetList throws StateError if no widgets found.
-        await action();
+        await action(tryNumber);
       }
     }
 
-    expect(false, isTrue, reason: 'Could not find $next');
+    throw StateError('Could not find $next');
   }
 }
