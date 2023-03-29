@@ -10,7 +10,6 @@ import '../../../../shared/analytics/constants.dart' as gac;
 import '../../../../shared/charts/flame_chart.dart';
 import '../../../../shared/common_widgets.dart';
 import '../../../../shared/dialogs.dart';
-import '../../../../shared/feature_flags.dart';
 import '../../../../shared/globals.dart';
 import '../../../../shared/theme.dart';
 import '../../../../shared/ui/search.dart';
@@ -68,7 +67,7 @@ class TimelineEventsTabControls extends StatelessWidget {
         return Row(
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
-            if (useLegacy || !FeatureFlags.embeddedPerfetto) ...[
+            if (useLegacy) ...[
               ValueListenableBuilder<EventsControllerStatus>(
                 valueListenable: controller.status,
                 builder: (context, status, _) {
