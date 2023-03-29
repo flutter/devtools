@@ -311,7 +311,6 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
         value: _importController,
         builder: (context, _) {
           final showConsole = serviceManager.connectedAppInitialized &&
-              !serviceManager.connectedApp!.isProfileBuildNow! &&
               !offlineController.offlineMode.value &&
               _currentScreen.showConsole(widget.embed);
 

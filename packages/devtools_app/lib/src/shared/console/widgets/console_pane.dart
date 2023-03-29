@@ -52,15 +52,24 @@ class ConsolePane extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final Widget? footer;
+
+    // Eval is disabled for profile mode.
+    if (serviceManager.connectedApp!.isProfileBuildNow!) {
+      footer = null;
+    } else {
+      footer = SizedBox(
+        height: consoleLineHeight,
+        child: const ExpressionEvalField(),
+      );
+    }
+
     return Column(
       children: [
         Expanded(
           child: Console(
             lines: stdio,
-            footer: SizedBox(
-              height: consoleLineHeight,
-              child: const ExpressionEvalField(),
-            ),
+            footer: footer,
           ),
         ),
       ],
