@@ -568,129 +568,6 @@ class VisibilityButton extends StatelessWidget {
   }
 }
 
-class RecordingInfo extends StatelessWidget {
-  const RecordingInfo({
-    this.instructionsKey,
-    this.recordingStatusKey,
-    this.processingStatusKey,
-    required this.recording,
-    required this.recordedObject,
-    required this.processing,
-    this.progressValue,
-    this.isPause = false,
-  });
-
-  final Key? instructionsKey;
-
-  final Key? recordingStatusKey;
-
-  final Key? processingStatusKey;
-
-  final bool recording;
-
-  final String recordedObject;
-
-  final bool processing;
-
-  final double? progressValue;
-
-  final bool isPause;
-
-  @override
-  Widget build(BuildContext context) {
-    Widget child;
-    if (processing) {
-      child = ProcessingInfo(
-        key: processingStatusKey,
-        progressValue: progressValue,
-        processedObject: recordedObject,
-      );
-    } else if (recording) {
-      child = RecordingStatus(
-        key: recordingStatusKey,
-        recordedObject: recordedObject,
-      );
-    } else {
-      child = RecordingInstructions(
-        key: instructionsKey,
-        recordedObject: recordedObject,
-        isPause: isPause,
-      );
-    }
-    return Center(
-      child: child,
-    );
-  }
-}
-
-class RecordingStatus extends StatelessWidget {
-  const RecordingStatus({
-    Key? key,
-    required this.recordedObject,
-  }) : super(key: key);
-
-  final String recordedObject;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Text(
-          'Recording $recordedObject',
-          style: Theme.of(context).subtleTextStyle,
-        ),
-        const SizedBox(height: defaultSpacing),
-        const CircularProgressIndicator(),
-      ],
-    );
-  }
-}
-
-class RecordingInstructions extends StatelessWidget {
-  const RecordingInstructions({
-    Key? key,
-    required this.isPause,
-    required this.recordedObject,
-  }) : super(key: key);
-
-  final String recordedObject;
-
-  final bool isPause;
-
-  @override
-  Widget build(BuildContext context) {
-    final stopOrPauseRow = Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: isPause
-          ? const [
-              Text('Click the pause button '),
-              Icon(Icons.pause),
-              Text(' to pause the recording.'),
-            ]
-          : const [
-              Text('Click the stop button '),
-              Icon(Icons.stop),
-              Text(' to end the recording.'),
-            ],
-    );
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Text('Click the record button '),
-            const Icon(Icons.fiber_manual_record),
-            Text(' to start recording $recordedObject.'),
-          ],
-        ),
-        stopOrPauseRow,
-      ],
-    );
-  }
-}
-
 class ProcessingInfo extends StatelessWidget {
   const ProcessingInfo({
     Key? key,
@@ -877,13 +754,18 @@ class ToolbarAction extends StatelessWidget {
     Key? key,
     this.size,
     this.style,
-  }) : super(key: key);
+    this.gaScreen,
+    this.gaSelection,
+  })  : assert((gaScreen == null) == (gaSelection == null)),
+        super(key: key);
 
   final TextStyle? style;
   final IconData icon;
   final String? tooltip;
   final VoidCallback? onPressed;
   final double? size;
+  final String? gaScreen;
+  final String? gaSelection;
 
   @override
   Widget build(BuildContext context) {
@@ -893,7 +775,12 @@ class ToolbarAction extends StatelessWidget {
         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
         textStyle: style,
       ),
-      onPressed: onPressed,
+      onPressed: () {
+        if (gaScreen != null && gaSelection != null) {
+          ga.select(gaScreen!, gaSelection!);
+        }
+        onPressed?.call();
+      },
       child: Icon(
         icon,
         size: size ?? actionsIconSize,

@@ -5,16 +5,20 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:logging/logging.dart';
 
 import '../../../../../shared/analytics/analytics.dart' as ga;
 import '../../../../../shared/analytics/constants.dart' as gac;
 import '../../../../../shared/common_widgets.dart';
+import '../../../../../shared/dialogs.dart';
 import '../../../../../shared/primitives/auto_dispose.dart';
 import '../../../../../shared/primitives/utils.dart';
 import '../../../../../shared/table/table.dart';
 import '../../../../../shared/theme.dart';
 import '../controller/diff_pane_controller.dart';
 import '../controller/item_controller.dart';
+
+final _log = Logger('snapshot_list');
 
 class SnapshotList extends StatelessWidget {
   const SnapshotList({Key? key, required this.controller}) : super(key: key);
@@ -50,6 +54,21 @@ class _ListControlPane extends StatelessWidget {
 
   final DiffPaneController controller;
 
+  Future<void> _takeSnapshot(BuildContext context) async {
+    try {
+      await controller.takeSnapshot();
+    } catch (e, trace) {
+      _log.shout(e, e, trace);
+      await showDialog(
+        context: context,
+        builder: (context) => UnexpectedErrorDialog(
+          additionalInfo:
+              'Encountered an error while taking a heap snapshot:\n$e\n$trace',
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<bool>(
@@ -61,9 +80,9 @@ class _ListControlPane extends StatelessWidget {
             ToolbarAction(
               icon: iconToTakeSnapshot,
               tooltip: 'Take heap snapshot for the selected isolate',
-              onPressed: controller.takeSnapshotHandler(
-                gac.MemoryEvent.diffTakeSnapshotControlPane,
-              ),
+              onPressed: controller.isTakingSnapshot.value
+                  ? null
+                  : () async => _takeSnapshot(context),
             ),
             ToolbarAction(
               icon: Icons.block,

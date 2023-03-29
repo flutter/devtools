@@ -4,8 +4,6 @@
 
 import 'dart:math' as math;
 
-import 'package:flutter/foundation.dart';
-
 import '../../shared/primitives/utils.dart';
 import 'cpu_profile_model.dart';
 
@@ -14,12 +12,6 @@ import 'cpu_profile_model.dart';
 class CpuProfileTransformer {
   /// Number of stack frames we will process in each batch.
   static const _defaultBatchSize = 100;
-
-  /// Notifies with the current progress value of transforming CPU profile data.
-  ///
-  /// This value should sit between 0.0 and 1.0.
-  ValueListenable<double> get progressNotifier => _progressNotifier;
-  final _progressNotifier = ValueNotifier<double>(0.0);
 
   late int _stackFramesCount;
 
@@ -57,7 +49,6 @@ class CpuProfileTransformer {
     // Use batch processing to maintain a responsive UI.
     while (_stackFramesProcessed < _stackFramesCount) {
       _processBatch(batchSize, cpuProfileData, processId: processId);
-      _progressNotifier.value = _stackFramesProcessed / _stackFramesCount;
 
       // Await a small delay to give the UI thread a chance to update the
       // progress indicator. Use a longer delay than the default (0) so that the
@@ -159,11 +150,6 @@ class CpuProfileTransformer {
     _stackFramesProcessed = 0;
     _stackFrameKeys = null;
     _stackFrameValues = null;
-    _progressNotifier.value = 0.0;
-  }
-
-  void dispose() {
-    _progressNotifier.dispose();
   }
 }
 

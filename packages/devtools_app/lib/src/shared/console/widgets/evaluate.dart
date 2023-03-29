@@ -10,6 +10,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../../analytics/analytics.dart' as ga;
+import '../../analytics/constants.dart' as gac;
 import '../../feature_flags.dart';
 import '../../globals.dart';
 import '../../primitives/auto_dispose.dart';
@@ -315,6 +317,7 @@ class ExpressionEvalFieldState extends State<ExpressionEvalField>
     if (expressionText.isEmpty) return;
 
     if (FeatureFlags.evalAndBrowse && expressionText.trim() == '?') {
+      ga.select(gac.console, gac.ConsoleEvent.helpInline);
       unawaited(
         showDialog(
           context: context,
@@ -336,8 +339,10 @@ class ExpressionEvalFieldState extends State<ExpressionEvalField>
       // Response is either a ErrorRef, InstanceRef, or Sentinel.
       final Response response;
       if (evalService.isStoppedAtDartFrame) {
+        ga.select(gac.console, gac.ConsoleEvent.evalInStoppedApp);
         response = await evalService.evalAtCurrentFrame(expressionText);
       } else {
+        ga.select(gac.console, gac.ConsoleEvent.evalInRunningApp);
         if (_tryProcessAssignment(expressionText)) return;
         if (isolateRef == null) {
           _emitToConsole(
