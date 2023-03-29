@@ -135,7 +135,7 @@ class _EvalTester {
     await tapAndPump(find.byKey(DebugModeMemoryMessage.closeKey));
     await tapAndPump(find.text(PrimaryControls.memoryChartText));
 
-    // Increase cinsole.
+    // Make console wider.
     await tester.drag(
       find.byKey(ConsolePaneHeader.theKey),
       const Offset(0, -320),
