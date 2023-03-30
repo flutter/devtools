@@ -101,8 +101,6 @@ jobs:
           git push -u origin "$BRANCH_NAME"
 
 
-          # Change github credentials back to the actions bot.
-          GH_TOKEN="$ORIGINAL_GH_TOKEN"
 
           if [ "$UPDATE_TYPE" == "release" ]; then
             # Since this is a release PR then don't autosubmit it.
@@ -113,6 +111,10 @@ jobs:
 
           if [ "$IS_DRY_RUN" != "true" ] ; then
             PR_URL=$(gh pr create --title "$COMMIT_MESSAGE" --body "RELEASE_NOTE_EXCEPTION=Automated Version Bump")
+            
+            # Change github credentials back to the actions bot.
+            GH_TOKEN="$ORIGINAL_GH_TOKEN"
+
             gh pr edit $PR_URL $FLAGS
           fi
 
