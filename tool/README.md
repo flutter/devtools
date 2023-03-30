@@ -29,12 +29,13 @@ Make sure:
 - Select "Run Workflow"
 - Then use the following options:
   - Update Type: `release`
+  - Auto Submit PR: `false` **THIS SETTING IS IMPORTANT**
   - Dry Run: `false`
 - This will create a branch with a release version on it
 
 #### Verify the version changes for the release PR
 
-Verify release_helper.sh script:
+Verify the code on the release PR:
 - updated the pubspecs under packages/
 - updated all references to those packages
 - updated the version constant in `packages/devtools_app/lib/devtools.dart`
@@ -194,6 +195,7 @@ checkout the Flutter version on your local flutter repo (the Flutter SDK that
 - Select "Run Workflow"
 - Then use the following options:
   - Update Type: `minor+dev`
+  - Auto Submit PR: `true` **This can be autosubmit since no changes need to be made**
   - Dry Run: `false`
 - This will create a version bump PR that will autosubmit when the workflows pass
 - Ensure that the PR eventually submits itsef.
