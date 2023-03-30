@@ -25,6 +25,7 @@ import 'primitives/auto_dispose.dart';
 import 'primitives/flutter_widgets/linked_scroll_controller.dart';
 import 'primitives/utils.dart';
 import 'routing.dart';
+import 'side_panel.dart';
 import 'theme.dart';
 import 'ui/label.dart';
 import 'utils.dart';
@@ -2561,6 +2562,37 @@ class HelpButtonWithDialog extends StatelessWidget {
             ),
           ),
         );
+      },
+      gaScreen: gaScreen,
+      gaSelection: gaSelection,
+      outlined: outlined,
+    );
+  }
+}
+
+/// Help button, that opens a side panel on click.
+class HelpButtonWithSidePanel extends StatelessWidget {
+  const HelpButtonWithSidePanel({
+    required this.gaScreen,
+    required this.gaSelection,
+    required this.panelController,
+    this.outlined = true,
+  });
+
+  final String gaScreen;
+
+  final String gaSelection;
+
+  final SidePanelController panelController;
+
+  final bool outlined;
+
+  @override
+  Widget build(BuildContext context) {
+    return HelpButton(
+      onPressed: () {
+        ga.select(gaScreen, gaSelection);
+        panelController.toggleVisibility(true);
       },
       gaScreen: gaScreen,
       gaSelection: gaSelection,

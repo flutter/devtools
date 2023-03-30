@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import '../../../../../shared/analytics/analytics.dart' as ga;
 import '../../../../../shared/analytics/constants.dart' as gac;
 import '../../../../../shared/common_widgets.dart';
+import '../../../../../shared/side_panel.dart';
 import '../../../../../shared/theme.dart';
 import '../../../shared/primitives/simple_elements.dart';
 import '../controller/diff_pane_controller.dart';
@@ -43,6 +44,8 @@ class SnapshotControlPane extends StatelessWidget {
                     gaSelection: gac.MemoryEvent.diffSnapshotDownloadCsv,
                     onPressed: controller.downloadCurrentItemToCsv,
                   ),
+                  const SizedBox(width: defaultSpacing),
+                  _HelpLink(panelController: controller.sidePanelController),
                 ],
               ],
             ),
@@ -60,13 +63,6 @@ class SnapshotControlPane extends StatelessWidget {
                             gac.MemoryEvent.diffSnapshotDelete,
                           );
                         },
-                ),
-                ToolbarAction(
-                  icon: Icons.help_outline,
-                  tooltip: 'Show help panel about diffing memory snapshots',
-                  onPressed: () {
-                    controller.sidePanelController.toggleVisibility(true);
-                  },
                 ),
               ],
             ),
@@ -140,6 +136,26 @@ class _DiffDropdown extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _HelpLink extends StatelessWidget {
+  const _HelpLink({
+    Key? key,
+    required this.panelController,
+  }) : super(key: key);
+
+  static const _documentationTopic = gac.MemoryEvent.diffHelp;
+
+  final SidePanelController panelController;
+
+  @override
+  Widget build(BuildContext context) {
+    return HelpButtonWithSidePanel(
+      gaScreen: gac.memory,
+      gaSelection: gac.topicDocumentationButton(_documentationTopic),
+      panelController: panelController,
     );
   }
 }
