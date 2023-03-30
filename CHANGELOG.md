@@ -17,6 +17,7 @@
 * Add analytics to eval and browse [#5541](https://github.com/flutter/devtools/pull/5541)
 * Fix error and create error handling for snapshot taking [#5520](https://github.com/flutter/devtools/pull/5520)
 * Remove CPU profiler from legacy trace viewer [#5539](https://github.com/flutter/devtools/pull/5539)
+BLAH BLAH
 * Update help_dialog.dart [#5534](https://github.com/flutter/devtools/pull/5534)
 * Make _MemoryChartPaneState.didChangeDependencies null safer [#5521](https://github.com/flutter/devtools/pull/5521)
 * Improve performance of CPU profile filtering [#5535](https://github.com/flutter/devtools/pull/5535)
