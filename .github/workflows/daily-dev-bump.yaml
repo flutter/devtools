@@ -69,6 +69,11 @@ jobs:
             exit 1;
           fi
 
+          if [ -z "$UPDATE_TYPE" ]; then
+            # If $UPDATE_TYPE is not set, then assume it is dev
+            UPDATE_TYPE="dev"
+          fi
+
           # If there is a major, minor, or patch bump, do it.
 
           if [ "$UPDATE_TYPE" == "patch+dev" ]; then
@@ -82,9 +87,10 @@ jobs:
             dart tool/update_version.dart auto --type major
           elif [ "$UPDATE_TYPE" == "dev" ]; then
             # The dev bump will be handled after the if statement so do nothing here
-            echo "DEV DEV DEV"
+            echo "UPDATE_TYPE is dev"
           else
             echo "ERROR: UNEXPECTED UPDATE TYPE: $UPDATE_TYPE"
+            exit 1
           fi
 
           # Do the dev bump
@@ -98,7 +104,7 @@ jobs:
           UPDATE_TYPE: ${{ inputs.updateType }}
 
       - name: Create the PR
-        if: ${{ inputs.dryRun == false }}
+        if: ${{ inputs.dryRun != true  }}
         run: |
           BRANCH_NAME="auto-bump-$(date +%s)"
           # Stage the file, commit and push
