@@ -5,7 +5,7 @@
 name: devtools
 
 on:
-  pull_request:
+  # pull_request: #TODO: uncomment this
   push:
     branches:
       - master
