@@ -199,7 +199,7 @@ class SidePanel extends AnimatedWidget {
   }
 }
 
-abstract class SidePanelController {
+class SidePanelController {
   ValueListenable<String?> get markdown => _markdown;
 
   final _markdown = ValueNotifier<String?>(null);
@@ -210,6 +210,10 @@ abstract class SidePanelController {
 
   void toggleVisibility(bool visible) {
     _isVisible.value = visible;
+  }
+
+  set markdownText(String markdownText) {
+    _markdown.value = markdownText;
   }
 }
 
@@ -306,17 +310,5 @@ class ReleaseNotesController extends SidePanelController {
   String _releaseNotesUrl(String currentVersion) {
     return '$_flutterDocsSite/development/tools/devtools/release-notes/'
         'release-notes-$currentVersion-src.md';
-  }
-}
-
-class SidePanelControllerMarkdownString extends SidePanelController {
-  SidePanelControllerMarkdownString(
-    String markdownText,
-  ) {
-    _markdown.value = markdownText;
-  }
-
-  set markdownText(String markdownText) {
-    _markdown.value = markdownText;
   }
 }

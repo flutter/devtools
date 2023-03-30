@@ -19,7 +19,9 @@ import 'widgets/snapshot_list.dart';
 import 'widgets/snapshot_view.dart';
 
 class DiffPane extends StatelessWidget {
-  const DiffPane({Key? key, required this.diffController}) : super(key: key);
+  DiffPane({Key? key, required this.diffController}) : super(key: key) {
+    diffController.sidePanelController.markdownText = snapshotDocumentation;
+  }
 
   final DiffPaneController diffController;
 
