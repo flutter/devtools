@@ -70,7 +70,7 @@ Future<void> _testAssignment(_EvalAndBrowseTester tester) async {
 
 Future<void> _inboundReferencesAreListed(_EvalAndBrowseTester tester) async {
   await tester.tapAndPump(find.text('MyApp'));
-  await tester.tapAndPump(find.text(ContextMenuButton.text));
+  await tester.tapAndPump(find.byType(ContextMenuButton));
   await tester.tapAndPump(find.textContaining('one instance'));
   await tester.tapAndPump(find.text('Any'), duration: longPumpDuration);
 

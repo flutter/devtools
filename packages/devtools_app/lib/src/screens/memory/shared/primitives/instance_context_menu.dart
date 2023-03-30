@@ -26,10 +26,12 @@ abstract class ClassSampler {
   bool get isEvalEnabled;
 }
 
-/// A button with label '...' to show near count of instances,
-/// with drop down menu to explore the instances.
-class InstanceSetButton extends StatelessWidget {
-  const InstanceSetButton({
+/// A display for an instance set that includes a context menu button when
+/// [showMenu] is true.
+///
+/// The context menu provides options to explore the instances in the set.
+class InstanceDisplayWithContextMenu extends StatelessWidget {
+  const InstanceDisplayWithContextMenu({
     super.key,
     this.textStyle,
     required this.count,
@@ -54,6 +56,7 @@ class InstanceSetButton extends StatelessWidget {
     final shouldShowMenu = showMenu && count > 0;
 
     return Row(
+      mainAxisAlignment: MainAxisAlignment.end,
       children: [
         Text(
           nf.format(count),
