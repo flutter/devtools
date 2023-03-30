@@ -59,7 +59,7 @@ jobs:
       - name: Bump the Version
         id: version-bump
         run: |
-          set -x
+          set -ex
           pushd tool/
           dart pub get
           popd
@@ -99,7 +99,7 @@ jobs:
 
       - name: Create the PR
         run: |
-          set -x
+          set -ex
           BRANCH_NAME="auto-bump-$(date +%s)"
           # Stage the file, commit and push
           git checkout -b "$BRANCH_NAME"
@@ -109,7 +109,7 @@ jobs:
 
 
           # Add the autosubmit label if it was specified, or if this is a scheduled event.
-          if ["$AUTOSUBMIT" == "true" ] || [ "$IS_SCHEDULED" == "true" ]; then
+          if [ "$AUTOSUBMIT" == "true" ] || [ "$IS_SCHEDULED" == "true" ]; then
             if [ "$UPDATE_TYPE" == "release" ]; then
               echo "ERROR: Auto submitting a release PR is not allowed"
               exit 1
