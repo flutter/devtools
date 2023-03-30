@@ -5,7 +5,7 @@ on:
       updateType:
         description: "Update Type"
         required: true
-        default: "dev" #TODO THIS SHOULD BE dev
+        default: "dev"
         type: choice
         options:
           - dev
