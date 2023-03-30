@@ -1,6 +1,21 @@
 name: Bump Dev Version
 on:
   workflow_dispatch: # Allows for manual triggering if needed
+    inputs:
+      updateType:
+        description: "Update Type"
+        required: true
+        default: "dev"
+        type: choice
+        options:
+          - dev
+          - patch+dev
+          - minor+dev
+          - major+dev
+      dryRun:
+        description: "Dry Run"
+        required: false
+        type: boolean
   pull_request:
     types: [closed]
   schedule:
@@ -14,9 +29,9 @@ env:
   GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 jobs:
-  bump-dev-version:
+  bump-version:
     if: ${{ github.event_name == 'workflow_dispatch' || github.event_name == 'schedule' }}
-    name: Bump Dev Version
+    name: Bump Version
     runs-on: ubuntu-latest
     steps:
       - name: git clone devtools
@@ -34,7 +49,7 @@ jobs:
           git config user.name "DevTools Workflow Bot"
           git config user.email "dart-devtool-workflow-bot@google.com"
 
-      - name: Bump the Dev Version
+      - name: Bump the Version
         id: version-bump
         run: |
           set -x
@@ -53,14 +68,35 @@ jobs:
             exit 1;
           fi
 
-          # Get the commit message
-          COMMIT_MESSAGE=$(dart tool/update_version.dart auto --dry-run --type dev)
-          echo "COMMIT_MESSAGE=$COMMIT_MESSAGE" >> $GITHUB_OUTPUT
+          # If there is a major, minor, or patch bump, do it.
 
-          # Do the update
+          if [ "$UPDATE_TYPE" == "patch+dev" ]; then
+            FIRST_COMMIT_MESSAGE=$(dart tool/update_version.dart auto --dry-run --type patch)
+            dart tool/update_version.dart auto --type patch
+          elif [ "$UPDATE_TYPE" == "minor+dev" ]; then
+            FIRST_COMMIT_MESSAGE=$(dart tool/update_version.dart auto --dry-run --type minor)
+            dart tool/update_version.dart auto --type minor
+          elif [ "$UPDATE_TYPE" == "major+dev" ]; then
+            FIRST_COMMIT_MESSAGE=$(dart tool/update_version.dart auto --dry-run --type major)
+            dart tool/update_version.dart auto --type major
+          elif [ "$UPDATE_TYPE" == "dev" ]; then
+            # The dev bump will be handled after the if statement so do nothing here
+          else
+            echo "ERROR: UNEXPECTED UPDATE TYPE: $UPDATE_TYPE"
+          fi
+
+          # Do the dev bump
+
+          SECOND_COMMIT_MESSAGE=$(dart tool/update_version.dart auto --dry-run --type dev)
+
           dart tool/update_version.dart auto --type dev
 
+          echo "COMMIT_MESSAGE=${FIRST_COMMIT_MESSAGE}\n${SECOND_COMMIT_MESSAGE}" >> $GITHUB_OUTPUT
+        env:
+          UPDATE_TYPE: ${{ inputs.updateType }}
+
       - name: Create the PR
+        if: ${{ inputs.dryRun == False }}
         run: |
           BRANCH_NAME="auto-bump-$(date +%s)"
           # Stage the file, commit and push
