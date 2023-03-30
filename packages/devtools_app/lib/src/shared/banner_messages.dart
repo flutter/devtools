@@ -209,8 +209,8 @@ class _BannerError extends BannerMessage {
 }
 
 // TODO(kenz): add "Do not show this again" option to warnings.
-class _BannerWarning extends BannerMessage {
-  const _BannerWarning({
+class BannerWarning extends BannerMessage {
+  const BannerWarning({
     required super.key,
     required super.textSpans,
     required super.screenId,
@@ -224,7 +224,7 @@ class DebugModePerformanceMessage {
 
   BannerMessage build(BuildContext context) {
     final theme = Theme.of(context);
-    return _BannerWarning(
+    return BannerWarning(
       key: Key('DebugModePerformanceMessage - $screenId'),
       textSpans: [
         const TextSpan(
@@ -348,7 +348,7 @@ class HighCpuSamplingRateMessage {
 
   BannerMessage build(BuildContext context) {
     final theme = Theme.of(context);
-    return _BannerWarning(
+    return BannerWarning(
       key: key,
       textSpans: [
         const TextSpan(
@@ -380,7 +380,7 @@ class DebugModeMemoryMessage {
   final String screenId;
 
   BannerMessage build(BuildContext context) {
-    return _BannerWarning(
+    return BannerWarning(
       key: Key('DebugModeMemoryMessage - $screenId'),
       textSpans: [
         const TextSpan(
@@ -416,7 +416,7 @@ class UnsupportedFlutterVersionWarning {
   final SemanticVersion supportedFlutterVersion;
 
   BannerMessage build() {
-    return _BannerWarning(
+    return BannerWarning(
       key: Key('UnsupportedFlutterVersionWarning - $screenId'),
       textSpans: [
         TextSpan(

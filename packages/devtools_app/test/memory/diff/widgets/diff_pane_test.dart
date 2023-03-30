@@ -70,7 +70,7 @@ void main() {
 
       final closeSidePanelButton = find.descendant(
         of: find.byKey(SidePanelViewType.memoryDiffHelp.key),
-        matching: find.byType(IconButton),
+        matching: find.byIcon(Icons.close),
       );
       expect(closeSidePanelButton, findsOneWidget);
       await tester.tap(closeSidePanelButton);

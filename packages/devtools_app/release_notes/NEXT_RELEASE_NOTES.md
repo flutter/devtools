@@ -14,28 +14,35 @@ Dart & Flutter DevTools - A Suite of Performance Tools for Dart and Flutter
 * Added support for viewing data after an app disconnects for screens that
 support offline viewing (currently only the Performance and CPU proiler pages).
 [#5509](https://github.com/flutter/devtools/pull/5509)
+* Include settings button in the footer of the embedded view. - [#5528](https://github.com/flutter/devtools/pull/5528)
 
 ## Inspector updates
 TODO: Remove this section if there are not any general updates.
 
 ## Performance updates
+* Fix a performance regression in timeline event processing. - [#5460](https://github.com/flutter/devtools/pull/5460)
 * Persist a user's preference for whether the Flutter Frames chart should be shown by default. - [#5339](https://github.com/flutter/devtools/pull/5339)
 * Point users to [Impeller](https://github.com/flutter/flutter/wiki/Impeller) when shader compilation
 jank is detected on an iOS device. - [#5455](https://github.com/flutter/devtools/pull/5455)
-* Fix a performance regression in timeline event processing. - [#5460](https://github.com/flutter/devtools/pull/5460)
+* Remove the CPU profiler from the legacy trace viewer - [#5539](https://github.com/flutter/devtools/pull/5539)
 
 ## CPU profiler updates
 * Add a Method Table to the CPU profiler - [#5366](https://github.com/flutter/devtools/pull/5366)
-* Improve the performance of data processing in the CPU profiler - [#5468](https://github.com/flutter/devtools/pull/5468)
 
 ![method table](images/image1.png "method_table")
+
+* Improve the performance of data processing in the CPU profiler - [#5468](https://github.com/flutter/devtools/pull/5468), [#5533](https://github.com/flutter/devtools/pull/5533), [#5535](https://github.com/flutter/devtools/pull/5535)
+* Polish and performance improvements for the CPU profile flame chart - [#5529](https://github.com/flutter/devtools/pull/5529)
 
 * Add ability to inspect statistics for a CPU profile - [#5340](https://github.com/flutter/devtools/pull/5340)
 * Fix a bug where Native stack frames were missing their name - [#5344](https://github.com/flutter/devtools/pull/5344)
 * Fix an error in total and self time calculations for the bottom up tree - [#5348](https://github.com/flutter/devtools/pull/5348)
+* Add support for zooming and navigating the flame chart with ,AOE keys (helpful for Dvorak users) - [#5545](https://github.com/flutter/devtools/pull/5545)
 
 ## Memory updates
 * Fix filtering bug in the "Trace Instances" view - [#5406](https://github.com/flutter/devtools/pull/5406)
+* Enabled evaluation and browsing for instances in heap snapshot - [#5542](https://github.com/flutter/devtools/pull/5542)
+* Fix heap snapshot failure - [5520](https://github.com/flutter/devtools/pull/5520)
 * Add a side panel with help instructions in the Diff tab
 
 ## Debugger updates

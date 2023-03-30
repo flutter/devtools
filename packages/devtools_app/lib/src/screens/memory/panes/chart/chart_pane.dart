@@ -77,88 +77,57 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
               : _hoverEventsHeight)
           : 0);
 
+  static int get _timestamp => DateTime.now().millisecondsSinceEpoch;
+
+  void _addTapLocationListener(
+    ValueNotifier<TapLocation?> tapLocation,
+    List<ValueNotifier<TapLocation?>> allLocations,
+  ) {
+    addAutoDisposeListener(tapLocation, () {
+      final value = tapLocation.value;
+      if (value == null) return;
+
+      if (_hoverOverlayEntry != null) {
+        _hideHover();
+        return;
+      }
+
+      final details = value.tapDownDetails;
+      if (details == null) return;
+
+      final copied = TapLocation.copy(value);
+      for (var location in allLocations) {
+        if (location != tapLocation) location.value = copied;
+      }
+
+      final allValues = ChartsValues(
+        controller,
+        value.index,
+        value.timestamp ?? _timestamp,
+      );
+
+      _showHover(
+        context,
+        allValues,
+        details.globalPosition,
+      );
+    });
+  }
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (!initController()) return;
 
-    // TODO(polinach): generalize three addAutoDisposeListener below.
-    addAutoDisposeListener(widget.chartController.event.tapLocation, () {
-      if (widget.chartController.event.tapLocation.value != null) {
-        if (_hoverOverlayEntry != null) {
-          _hideHover();
-        }
-        final tapLocation = widget.chartController.event.tapLocation.value;
-        if (tapLocation?.tapDownDetails != null) {
-          final tapData = tapLocation!;
-          final index = tapData.index;
-          final timestamp = tapData.timestamp!;
+    final allLocations = [
+      widget.chartController.event.tapLocation,
+      widget.chartController.vm.tapLocation,
+      widget.chartController.android.tapLocation,
+    ];
 
-          final copied = TapLocation.copy(tapLocation);
-          widget.chartController.vm.tapLocation.value = copied;
-          widget.chartController.android.tapLocation.value = copied;
-
-          final allValues = ChartsValues(controller, index, timestamp);
-          _showHover(
-            context,
-            allValues,
-            tapData.tapDownDetails!.globalPosition,
-          );
-        }
-      }
-    });
-
-    addAutoDisposeListener(widget.chartController.vm.tapLocation, () {
-      if (widget.chartController.vm.tapLocation.value != null) {
-        if (_hoverOverlayEntry != null) {
-          _hideHover();
-        }
-        final tapLocation = widget.chartController.vm.tapLocation.value;
-        if (tapLocation?.tapDownDetails != null) {
-          final tapData = tapLocation!;
-          final index = tapData.index;
-          final timestamp = tapData.timestamp!;
-
-          final copied = TapLocation.copy(tapLocation);
-          widget.chartController.event.tapLocation.value = copied;
-          widget.chartController.android.tapLocation.value = copied;
-
-          final allValues = ChartsValues(controller, index, timestamp);
-
-          _showHover(
-            context,
-            allValues,
-            tapData.tapDownDetails!.globalPosition,
-          );
-        }
-      }
-    });
-
-    addAutoDisposeListener(widget.chartController.android.tapLocation, () {
-      if (widget.chartController.android.tapLocation.value != null) {
-        if (_hoverOverlayEntry != null) {
-          _hideHover();
-        }
-        final tapLocation = widget.chartController.android.tapLocation.value;
-        if (tapLocation?.tapDownDetails != null) {
-          final tapData = tapLocation!;
-          final index = tapData.index;
-          final timestamp = tapData.timestamp!;
-
-          final copied = TapLocation.copy(tapLocation);
-          widget.chartController.event.tapLocation.value = copied;
-          widget.chartController.vm.tapLocation.value = copied;
-
-          final allValues = ChartsValues(controller, index, timestamp);
-
-          _showHover(
-            context,
-            allValues,
-            tapData.tapDownDetails!.globalPosition,
-          );
-        }
-      }
-    });
+    for (var location in allLocations) {
+      _addTapLocationListener(location, allLocations);
+    }
 
     addAutoDisposeListener(controller.refreshCharts, () {
       setState(() {

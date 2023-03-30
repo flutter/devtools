@@ -16,6 +16,7 @@ import 'framework/landing_screen.dart';
 import 'framework/notifications_view.dart';
 import 'framework/report_feedback_button.dart';
 import 'framework/scaffold.dart';
+import 'framework/settings_dialog.dart';
 import 'screens/app_size/app_size_controller.dart';
 import 'screens/app_size/app_size_screen.dart';
 import 'screens/debugger/debugger_controller.dart';
@@ -39,14 +40,10 @@ import 'screens/vm_developer/vm_developer_tools_screen.dart';
 import 'service/service_extension_widgets.dart';
 import 'shared/analytics/analytics.dart' as ga;
 import 'shared/analytics/analytics_controller.dart';
-import 'shared/analytics/constants.dart' as gac;
 import 'shared/analytics/metrics.dart';
 import 'shared/common_widgets.dart';
-import 'shared/config_specific/server/server.dart';
 import 'shared/console/primitives/simple_items.dart';
-import 'shared/dialogs.dart';
 import 'shared/globals.dart';
-import 'shared/log_storage.dart';
 import 'shared/offline_screen.dart';
 import 'shared/primitives/auto_dispose.dart';
 import 'shared/primitives/utils.dart';
@@ -55,7 +52,6 @@ import 'shared/screen.dart';
 import 'shared/side_panel.dart';
 import 'shared/theme.dart';
 import 'shared/ui/hover.dart';
-import 'shared/utils.dart';
 
 // Assign to true to use a sample implementation of a conditional screen.
 // WARNING: Do not check in this file if debugEnableSampleScreen is true.
@@ -460,180 +456,6 @@ class _AlternateCheckedModeBanner extends StatelessWidget {
         builder: builder,
       ),
     );
-  }
-}
-
-class OpenSettingsAction extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return DevToolsTooltip(
-      message: 'Settings',
-      child: InkWell(
-        onTap: () {
-          unawaited(
-            showDialog(
-              context: context,
-              builder: (context) => SettingsDialog(),
-            ),
-          );
-        },
-        child: Container(
-          width: actionWidgetSize,
-          height: actionWidgetSize,
-          alignment: Alignment.center,
-          child: Icon(
-            Icons.settings_outlined,
-            size: actionsIconSize,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-// TODO(kenz): merge the checkbox functionality here with [NotifierCheckbox]
-class SettingsDialog extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    final analyticsController = Provider.of<AnalyticsController>(context);
-    return DevToolsDialog(
-      title: const DialogTitleText('Settings'),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          CheckboxSetting(
-            label: const Text('Use a dark theme'),
-            listenable: preferences.darkModeTheme,
-            toggle: preferences.toggleDarkModeTheme,
-            gaItem: gac.darkTheme,
-          ),
-          CheckboxSetting(
-            label: const Text('Use dense mode'),
-            listenable: preferences.denseModeEnabled,
-            toggle: preferences.toggleDenseMode,
-            gaItem: gac.denseMode,
-          ),
-          if (isExternalBuild && isDevToolsServerAvailable)
-            CheckboxSetting(
-              label: const Text('Enable analytics'),
-              listenable: analyticsController.analyticsEnabled,
-              toggle: (enable) =>
-                  unawaited(analyticsController.toggleAnalyticsEnabled(enable)),
-              gaItem: gac.analytics,
-            ),
-          CheckboxSetting(
-            label: const Text('Enable VM developer mode'),
-            listenable: preferences.vmDeveloperModeEnabled,
-            toggle: preferences.toggleVmDeveloperMode,
-            gaItem: gac.vmDeveloperMode,
-          ),
-          const PaddedDivider(),
-          const _VerboseLoggingSetting(),
-        ],
-      ),
-      actions: const [
-        DialogCloseButton(),
-      ],
-    );
-  }
-}
-
-class _VerboseLoggingSetting extends StatelessWidget {
-  const _VerboseLoggingSetting();
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Row(
-          children: [
-            CheckboxSetting(
-              label: const Text('Enable verbose logging'),
-              listenable: preferences.verboseLoggingEnabled,
-              toggle: (enable) => preferences.toggleVerboseLogging(enable),
-              gaItem: gac.verboseLogging,
-            ),
-            const SizedBox(width: defaultSpacing),
-            DevToolsButton(
-              label: 'Copy logs',
-              icon: Icons.copy,
-              gaScreen: gac.settingsDialog,
-              gaSelection: gac.copyLogs,
-              onPressed: () async => await copyToClipboard(
-                LogStorage.root.toString(),
-                'Successfully copied logs',
-              ),
-            ),
-            const SizedBox(width: denseSpacing),
-            ClearButton(
-              label: 'Clear logs',
-              gaScreen: gac.settingsDialog,
-              gaSelection: gac.clearLogs,
-              onPressed: LogStorage.root.clear,
-            ),
-          ],
-        ),
-        const SizedBox(height: denseSpacing),
-        const Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Spacer(),
-            Icon(Icons.warning),
-            SizedBox(width: defaultSpacing),
-            Text(
-              'Logs may contain sensitive information.\n'
-              'Always check their contents before sharing.',
-            )
-          ],
-        ),
-      ],
-    );
-  }
-}
-
-// TODO(polinach): consider reusing CheckboxSettings from shared/common_widgets.
-class CheckboxSetting extends StatelessWidget {
-  const CheckboxSetting({
-    Key? key,
-    required this.label,
-    required this.listenable,
-    required this.toggle,
-    required this.gaItem,
-  }) : super(key: key);
-
-  final Text label;
-
-  final ValueListenable<bool> listenable;
-
-  final void Function(bool) toggle;
-
-  final String gaItem;
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: () => toggleSetting(!listenable.value),
-      child: Row(
-        children: [
-          ValueListenableBuilder<bool>(
-            valueListenable: listenable,
-            builder: (context, value, _) {
-              return Checkbox(value: value, onChanged: toggleSetting);
-            },
-          ),
-          label,
-        ],
-      ),
-    );
-  }
-
-  void toggleSetting(bool? newValue) {
-    ga.select(
-      gac.settingsDialog,
-      '$gaItem-${newValue == true ? 'enabled' : 'disabled'}',
-    );
-    toggle(newValue == true);
   }
 }
 

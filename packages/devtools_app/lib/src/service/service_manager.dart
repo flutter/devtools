@@ -7,12 +7,12 @@ import 'dart:core';
 
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
+import 'package:logging/logging.dart';
 import 'package:vm_service/vm_service.dart' hide Error;
 
 import '../screens/logging/vm_service_logger.dart';
 import '../screens/performance/timeline_streams.dart';
 import '../shared/analytics/analytics.dart' as ga;
-import '../shared/config_specific/logger/logger.dart';
 import '../shared/connected_app.dart';
 import '../shared/console/console_service.dart';
 import '../shared/diagnostics/inspector_service.dart';
@@ -28,6 +28,8 @@ import 'service_extension_manager.dart';
 import 'service_registrations.dart' as registrations;
 import 'vm_flags.dart';
 import 'vm_service_wrapper.dart';
+
+final _log = Logger('service_manager');
 
 // Note: don't check this in enabled.
 /// Used to debug service protocol traffic. All requests to to the VM service
@@ -297,15 +299,12 @@ class ServiceConnectionManager {
     for (final id in streamIds) {
       try {
         unawaited(service.streamListen(id));
-      } catch (e) {
+      } catch (e, st) {
         if (id.endsWith('Logging')) {
           // Don't complain about '_Logging' or 'Logging' events (new VMs don't
           // have the private names, and older ones don't have the public ones).
         } else {
-          log(
-            "Service client stream not supported: '$id'\n  $e",
-            LogLevel.error,
-          );
+          _log.shout("Service client stream not supported: '$id'\n  $e", e, st);
         }
       }
     }
@@ -478,7 +477,7 @@ class ServiceConnectionManager {
     if (flutterView == null) {
       final message =
           'No Flutter Views to query: ${flutterViewListResponse.json}';
-      log(message, LogLevel.error);
+      _log.shout(message);
       throw Exception(message);
     }
 

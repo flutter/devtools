@@ -10,14 +10,16 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:http/http.dart' as http;
+import 'package:logging/logging.dart';
 
 import '../../devtools.dart' as devtools;
 import 'common_widgets.dart';
 import 'config_specific/launch_url/launch_url.dart';
-import 'config_specific/logger/logger.dart' as logger;
 import 'config_specific/server/server.dart' as server;
 import 'primitives/auto_dispose.dart';
 import 'theme.dart';
+
+final _log = Logger('release_notes');
 
 const debugTestReleaseNotes = false;
 
@@ -257,10 +259,9 @@ class ReleaseNotesController extends SidePanelController {
         // version of DevTools.
         _markdown.value = null;
         toggleReleaseNotesVisible(false);
-        logger.log(
+        _log.warning(
           'Warning: could not find release notes for DevTools version '
           '$parsedCurrentVersionStr. $e',
-          logger.LogLevel.warning,
         );
       }
     }

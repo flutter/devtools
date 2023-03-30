@@ -51,16 +51,6 @@ void main() {
       // Only run this test if asserts are enabled.
       assert(_runTest());
     });
-
-    test('dispose', () {
-      cpuProfileTransformer.dispose();
-      expect(
-        () {
-          cpuProfileTransformer.progressNotifier.addListener(() {});
-        },
-        throwsA(anything),
-      );
-    });
   });
 
   group('BottomUpTransformer', () {

@@ -2,12 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:pointer_interceptor/pointer_interceptor.dart';
 
+import '../shared/config_specific/launch_url/launch_url.dart';
 import 'common_widgets.dart';
+import 'globals.dart';
 import 'theme.dart';
 import 'ui/label.dart';
+import 'utils.dart';
 
 const dialogDefaultContext = 'dialog';
 
@@ -33,6 +38,51 @@ final dialogTextFieldDecoration = InputDecoration(
     borderRadius: BorderRadius.circular(defaultBorderRadius),
   ),
 );
+
+/// A dialog, that reports unexpected error and allows to copy details and create issue.
+class UnexpectedErrorDialog extends StatelessWidget {
+  const UnexpectedErrorDialog({
+    super.key,
+    required this.additionalInfo,
+  });
+
+  final String additionalInfo;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return DevToolsDialog(
+      title: const Text('Unexpected Error'),
+      content: Text(
+        additionalInfo,
+        style: theme.fixedFontStyle,
+      ),
+      actions: [
+        DialogTextButton(
+          child: const Text('Copy details'),
+          onPressed: () => unawaited(
+            copyToClipboard(
+              additionalInfo,
+              'Error details copied to clipboard',
+            ),
+          ),
+        ),
+        DialogTextButton(
+          child: const Text('Create issue'),
+          onPressed: () => unawaited(
+            launchUrl(
+              devToolsExtensionPoints
+                  .issueTrackerLink(additionalInfo: additionalInfo)
+                  .url,
+            ),
+          ),
+        ),
+        const DialogCloseButton(),
+      ],
+    );
+  }
+}
 
 /// A standardized dialog with help text and buttons `Reset to default`,
 /// `APPLY` and `CANCEL`.

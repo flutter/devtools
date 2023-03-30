@@ -113,9 +113,9 @@ abstract class FlameChartState<T extends FlameChart,
 
   final focusNode = FocusNode(debugLabel: 'flame-chart');
 
-  bool _altKeyPressed = false;
-
   double? mouseHoverX;
+
+  final _hoveredNodeNotifier = ValueNotifier<V?>(null);
 
   late final FixedExtentDelegate verticalExtentDelegate;
 
@@ -123,7 +123,7 @@ abstract class FlameChartState<T extends FlameChart,
 
   late final LinkedScrollControllerGroup horizontalControllerGroup;
 
-  late final ScrollController _flameChartScrollController;
+  late final ScrollController _verticalFlameChartScrollController;
 
   /// Animation controller for animating flame chart zoom changes.
   @visibleForTesting
@@ -221,7 +221,7 @@ abstract class FlameChartState<T extends FlameChart,
       });
     });
 
-    _flameChartScrollController = verticalControllerGroup.addAndGet();
+    _verticalFlameChartScrollController = verticalControllerGroup.addAndGet();
 
     zoomController = AnimationController(
       value: FlameChart.minZoomLevel,
@@ -274,37 +274,40 @@ abstract class FlameChartState<T extends FlameChart,
   @override
   void dispose() {
     zoomController.dispose();
+    _verticalFlameChartScrollController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    // TODO(kenz): handle tooltips hover here instead of wrapping each row in a
-    // MouseRegion widget.
     return MouseRegion(
       onHover: _handleMouseHover,
-      child: RawKeyboardListener(
-        autofocus: true,
-        focusNode: focusNode,
-        onKey: (event) => _handleKeyEvent(event),
-        // Scrollbar needs to wrap [LayoutBuilder] so that the scroll bar is
-        // rendered on top of the custom painters defined in [buildCustomPaints]
-        child: Scrollbar(
-          controller: _flameChartScrollController,
-          thumbVisibility: true,
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              final chartOverlays = buildChartOverlays(constraints, context);
-              final flameChart = _buildFlameChart(constraints);
-              return chartOverlays.isNotEmpty
-                  ? Stack(
-                      children: [
-                        flameChart,
-                        ...chartOverlays,
-                      ],
-                    )
-                  : flameChart;
-            },
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTapUp: _handleTapUp,
+        child: Focus(
+          autofocus: true,
+          focusNode: focusNode,
+          onKey: (node, event) => _handleKeyEvent(event),
+          // Scrollbar needs to wrap [LayoutBuilder] so that the scroll bar is
+          // rendered on top of the custom painters defined in [buildCustomPaints]
+          child: Scrollbar(
+            controller: _verticalFlameChartScrollController,
+            thumbVisibility: true,
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final chartOverlays = buildChartOverlays(constraints, context);
+                final flameChart = _buildFlameChart(constraints);
+                return chartOverlays.isNotEmpty
+                    ? Stack(
+                        children: [
+                          flameChart,
+                          ...chartOverlays,
+                        ],
+                      )
+                    : flameChart;
+              },
+            ),
           ),
         ),
       ),
@@ -314,9 +317,8 @@ abstract class FlameChartState<T extends FlameChart,
   Widget _buildFlameChart(BoxConstraints constraints) {
     return ExtentDelegateListView(
       physics: const ClampingScrollPhysics(),
-      controller: _flameChartScrollController,
+      controller: _verticalFlameChartScrollController,
       extentDelegate: verticalExtentDelegate,
-      customPointerSignalHandler: _handlePointerSignal,
       childrenDelegate: SliverChildBuilderDelegate(
         (context, index) {
           final nodes = rows[index].nodes;
@@ -347,12 +349,12 @@ abstract class FlameChartState<T extends FlameChart,
             nodes: nodes,
             width: math.max(constraints.maxWidth, widthWithZoom),
             startInset: widget.startInset,
+            hoveredNotifier: _hoveredNodeNotifier,
             selectionNotifier: widget.selectionNotifier as ValueListenable<V?>,
             searchMatchesNotifier:
                 widget.searchMatchesNotifier as ValueListenable<List<V>>?,
             activeSearchMatchNotifier:
                 widget.activeSearchMatchNotifier as ValueListenable<V?>?,
-            onTapUp: focusNode.requestFocus,
             backgroundColor: rowBackgroundColor,
             zoom: currentZoom,
           );
@@ -379,18 +381,89 @@ abstract class FlameChartState<T extends FlameChart,
 
   void _handleMouseHover(PointerHoverEvent event) {
     mouseHoverX = event.localPosition.dx;
+    final mouseHoverY = event.localPosition.dy;
+
+    final topPaddingHeight = rowOffsetForTopPadding * sectionSpacing;
+    if (mouseHoverY <= topPaddingHeight) {
+      _hoveredNodeNotifier.value = null;
+      return;
+    }
+
+    final nodes = _nodesForRowAtY(mouseHoverY);
+    if (nodes == null) {
+      _hoveredNodeNotifier.value = null;
+      return;
+    }
+
+    final hoverNodeData = _binarySearchForNode(
+      x: event.localPosition.dx + horizontalControllerGroup.offset,
+      nodesInRow: nodes,
+    )?.data;
+    _hoveredNodeNotifier.value = hoverNodeData;
   }
 
-  void _handleKeyEvent(RawKeyEvent event) {
-    _altKeyPressed = event.isAltPressed;
+  /// Returns the nodes for the row at the given [dy] mouse position.
+  ///
+  /// Returns null if there is not a row at the given position.
+  List<FlameChartNode<V>>? _nodesForRowAtY(double dy) {
+    final rowIndex = _rowIndexForY(dy);
+    if (rowIndex == -1) {
+      return null;
+    }
+    return rows[rowIndex].nodes;
+  }
 
+  /// Returns the flame chart row index for the given [dy] mouse position.
+  ///
+  /// Returns -1 if the row index is out of range for [rows].
+  int _rowIndexForY(double dy) {
+    final topPaddingHeight = rowOffsetForTopPadding * sectionSpacing;
+    final rowIndex = ((dy - topPaddingHeight) ~/ rowHeightWithPadding) +
+        rowOffsetForTopPadding;
+    if (rowIndex < 0 || rowIndex >= rows.length) {
+      return -1;
+    }
+    return rowIndex;
+  }
+
+  void _handleTapUp(TapUpDetails details) {
+    final referenceBox = context.findRenderObject() as RenderBox;
+    final tapPosition = referenceBox.globalToLocal(details.globalPosition);
+    final nodes = _nodesForRowAtY(tapPosition.dy);
+    if (nodes != null) {
+      final nodeToSelect = _binarySearchForNode(
+        x: tapPosition.dx + horizontalControllerGroup.offset,
+        nodesInRow: nodes,
+      );
+      nodeToSelect?.onSelected(nodeToSelect.data);
+    }
+    focusNode.requestFocus();
+  }
+
+  FlameChartNode<V>? _binarySearchForNode({
+    required double x,
+    required List<FlameChartNode<V>> nodesInRow,
+  }) {
+    return binarySearchForNodeHelper(
+      x: x,
+      nodesInRow: nodesInRow,
+      zoom: currentZoom,
+      startInset: widget.startInset,
+    );
+  }
+
+  KeyEventResult _handleKeyEvent(RawKeyEvent event) {
     // Only handle down events so logic is not duplicated on key up.
     if (event is RawKeyDownEvent) {
-      // Handle zooming / navigation from W-A-S-D keys.
-      final keyLabel = event.data.keyLabel;
       // TODO(kenz): zoom in/out faster if key is held. It actually zooms slower
       // if the key is held currently.
-      if (keyLabel == 'w') {
+
+      // Handle zooming / navigation from WASD keys. Use physical keys to match
+      // other keyboard mappings like Dvorak, for which these keys would
+      // translate to ,AOE keys. See
+      // https://api.flutter.dev/flutter/services/RawKeyEvent/physicalKey.html.
+      final eventKey = event.physicalKey;
+      if (eventKey == PhysicalKeyboardKey.keyW) {
         unawaited(
           zoomTo(
             math.min(
@@ -399,7 +472,8 @@ abstract class FlameChartState<T extends FlameChart,
             ),
           ),
         );
-      } else if (keyLabel == 's') {
+        return KeyEventResult.handled;
+      } else if (eventKey == PhysicalKeyboardKey.keyS) {
         unawaited(
           zoomTo(
             math.max(
@@ -408,57 +482,20 @@ abstract class FlameChartState<T extends FlameChart,
             ),
           ),
         );
-      } else if (keyLabel == 'a') {
+        return KeyEventResult.handled;
+      } else if (eventKey == PhysicalKeyboardKey.keyA) {
         // `unawaited` does not work for FutureOr
         // ignore: discarded_futures
         scrollToX(horizontalControllerGroup.offset - keyboardScrollUnit);
-      } else if (keyLabel == 'd') {
+        return KeyEventResult.handled;
+      } else if (eventKey == PhysicalKeyboardKey.keyD) {
         // `unawaited` does not work for FutureOr
         // ignore: discarded_futures
         scrollToX(horizontalControllerGroup.offset + keyboardScrollUnit);
+        return KeyEventResult.handled;
       }
     }
-  }
-
-  void _handlePointerSignal(PointerSignalEvent event) async {
-    if (event is PointerScrollEvent) {
-      final deltaX = event.scrollDelta.dx;
-      double deltaY = event.scrollDelta.dy;
-      if (deltaY.abs() >= deltaX.abs()) {
-        if (_altKeyPressed) {
-          verticalControllerGroup.jumpTo(
-            math.max(
-              math.min(
-                verticalControllerGroup.offset + deltaY,
-                verticalControllerGroup.position.maxScrollExtent,
-              ),
-              0.0,
-            ),
-          );
-        } else {
-          deltaY = deltaY.clamp(
-            -FlameChart.maxScrollWheelDelta,
-            FlameChart.maxScrollWheelDelta,
-          );
-          // TODO(kenz): if https://github.com/flutter/flutter/issues/52762 is,
-          // resolved, consider adjusting the multiplier based on the scroll device
-          // kind (mouse or track pad).
-          final multiplier = FlameChart.zoomMultiplier * currentZoom;
-          final newZoomLevel = (currentZoom + deltaY * multiplier).clamp(
-            FlameChart.minZoomLevel,
-            maxZoomLevel,
-          );
-          await zoomTo(newZoomLevel, jump: true);
-          if (newZoomLevel == FlameChart.minZoomLevel &&
-              horizontalControllerGroup.offset != 0.0) {
-            // We do not need to call this in a post frame callback because
-            // `FlameChart.minScrollOffset` (0.0) is guaranteed to be less than
-            // the scroll controllers max scroll extent.
-            await scrollToX(FlameChart.minScrollOffset);
-          }
-        }
-      }
-    }
+    return KeyEventResult.ignored;
   }
 
   void _handleZoomControllerValueUpdate() {
@@ -609,10 +646,10 @@ class ScrollingFlameChartRow<V extends FlameChartDataMixin<V>>
     required this.nodes,
     required this.width,
     required this.startInset,
+    required this.hoveredNotifier,
     required this.selectionNotifier,
     required this.searchMatchesNotifier,
     required this.activeSearchMatchNotifier,
-    required this.onTapUp,
     required this.backgroundColor,
     required this.zoom,
   });
@@ -625,13 +662,13 @@ class ScrollingFlameChartRow<V extends FlameChartDataMixin<V>>
 
   final double startInset;
 
+  final ValueListenable<V?> hoveredNotifier;
+
   final ValueListenable<V?> selectionNotifier;
 
   final ValueListenable<List<V>>? searchMatchesNotifier;
 
   final ValueListenable<V?>? activeSearchMatchNotifier;
-
-  final VoidCallback onTapUp;
 
   final Color backgroundColor;
 
@@ -687,6 +724,13 @@ class ScrollingFlameChartRowState<V extends FlameChartDataMixin<V>>
       }
     });
 
+    hovered = widget.hoveredNotifier.value;
+    addAutoDisposeListener(widget.hoveredNotifier, () {
+      setState(() {
+        hovered = widget.hoveredNotifier.value;
+      });
+    });
+
     if (widget.searchMatchesNotifier != null) {
       addAutoDisposeListener(widget.searchMatchesNotifier);
     }
@@ -740,88 +784,35 @@ class ScrollingFlameChartRowState<V extends FlameChartDataMixin<V>>
         backgroundColor: widget.backgroundColor,
       );
     }
-    // Having each row handle gestures and mouse events instead of each node
-    // handling its own improves performance.
-    return MouseRegion(
-      onHover: _handleMouseHover,
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTapUp: _handleTapUp,
-        child: Container(
-          height: rowHeightWithPadding,
-          width: widget.width,
-          color: widget.backgroundColor,
-          // TODO(kenz): investigate if `addAutomaticKeepAlives: false` and
-          // `addRepaintBoundaries: false` are needed here for perf improvement.
-          child: ExtentDelegateListView(
-            controller: scrollController,
-            scrollDirection: Axis.horizontal,
-            extentDelegate: extentDelegate,
-            childrenDelegate: SliverChildBuilderDelegate(
-              (context, index) {
-                final node = nodes[index];
-                return FlameChartNodeWidget(
-                  index: index,
-                  nodes: nodes,
-                  zoom: widget.zoom,
-                  startInset: widget.startInset,
-                  chartWidth: widget.width,
-                  selected: node.data == selected,
-                  hovered: node.data == hovered,
-                );
-              },
-              childCount: nodes.length,
-              addRepaintBoundaries: false,
-              addAutomaticKeepAlives: false,
-            ),
-          ),
+    return Container(
+      height: rowHeightWithPadding,
+      width: widget.width,
+      color: widget.backgroundColor,
+      // TODO(kenz): investigate if `addAutomaticKeepAlives: false` and
+      // `addRepaintBoundaries: false` are needed here for perf improvement.
+      child: ExtentDelegateListView(
+        controller: scrollController,
+        scrollDirection: Axis.horizontal,
+        extentDelegate: extentDelegate,
+        childrenDelegate: SliverChildBuilderDelegate(
+          (context, index) {
+            final node = nodes[index];
+            return FlameChartNodeWidget(
+              index: index,
+              nodes: nodes,
+              zoom: widget.zoom,
+              startInset: widget.startInset,
+              chartWidth: widget.width,
+              selected: node.data == selected,
+              hovered: node.data == hovered,
+            );
+          },
+          childCount: nodes.length,
+          addRepaintBoundaries: false,
+          addAutomaticKeepAlives: false,
         ),
       ),
     );
-  }
-
-  void _handleMouseHover(PointerHoverEvent event) {
-    final hoverNodeData =
-        binarySearchForNode(event.localPosition.dx + scrollController.offset)
-            ?.data;
-
-    if (hoverNodeData != hovered) {
-      setState(() {
-        hovered = hoverNodeData;
-      });
-    }
-  }
-
-  void _handleTapUp(TapUpDetails details) {
-    final referenceBox = context.findRenderObject() as RenderBox;
-    final tapPosition = referenceBox.globalToLocal(details.globalPosition);
-    final nodeToSelect =
-        binarySearchForNode(tapPosition.dx + scrollController.offset);
-    if (nodeToSelect != null) {
-      nodeToSelect.onSelected(nodeToSelect.data);
-    }
-    widget.onTapUp();
-  }
-
-  @visibleForTesting
-  FlameChartNode<V>? binarySearchForNode(double x) {
-    int min = 0;
-    int max = nodes.length;
-    while (min < max) {
-      final mid = min + ((max - min) >> 1);
-      final node = nodes[mid];
-      final zoomedNodeRect = node.zoomedRect(widget.zoom, widget.startInset);
-      if (x >= zoomedNodeRect.left && x <= zoomedNodeRect.right) {
-        return node;
-      }
-      if (x < zoomedNodeRect.left) {
-        max = mid;
-      }
-      if (x > zoomedNodeRect.right) {
-        min = mid + 1;
-      }
-    }
-    return null;
   }
 
   void _resetHovered() {
@@ -1500,11 +1491,8 @@ class FlameChartHelpButton extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          ...dialogSubHeader(theme, 'Navigation'),
+          ...dialogSubHeader(theme, 'Navigation & Zoom'),
           _buildNavigationInstructions(theme),
-          const SizedBox(height: denseSpacing),
-          ...dialogSubHeader(theme, 'Zoom'),
-          _buildZoomInstructions(theme),
           if (additionalInfo.isNotEmpty) const SizedBox(height: denseSpacing),
           ...additionalInfo,
         ],
@@ -1521,6 +1509,10 @@ class FlameChartHelpButton extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Text(
+                'WASD • ',
+                style: theme.fixedFontStyle,
+              ),
+              Text(
                 'click + drag • ',
                 style: theme.fixedFontStyle,
               ),
@@ -1528,78 +1520,22 @@ class FlameChartHelpButton extends StatelessWidget {
                 'click + fling • ',
                 style: theme.fixedFontStyle,
               ),
-              Text(
-                'alt/option + scroll • ',
-                style: theme.fixedFontStyle,
-              ),
-              Text(
-                'scroll left / right • ',
-                style: theme.fixedFontStyle,
-              ),
-              Text(
-                'a / d • ',
-                style: theme.fixedFontStyle,
-              ),
             ],
           ),
         ),
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            Text(
+              'Pan chart left / right and zoom in / out',
+              style: theme.subtleTextStyle,
+            ),
             Text(
               'Pan chart up / down / left / right',
               style: theme.subtleTextStyle,
             ),
             Text(
               'Fling chart up / down / left / right',
-              style: theme.subtleTextStyle,
-            ),
-            Text(
-              'Pan chart up / down',
-              style: theme.subtleTextStyle,
-            ),
-            Text(
-              'Pan chart left / right',
-              style: theme.subtleTextStyle,
-            ),
-            Text(
-              'Pan chart left / right',
-              style: theme.subtleTextStyle,
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget _buildZoomInstructions(ThemeData theme) {
-    return Row(
-      children: [
-        SizedBox(
-          width: firstColumnWidth,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(
-                'scroll up / down • ',
-                style: theme.fixedFontStyle,
-              ),
-              Text(
-                'w / s • ',
-                style: theme.fixedFontStyle,
-              ),
-            ],
-          ),
-        ),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'zoom in / out',
-              style: theme.subtleTextStyle,
-            ),
-            Text(
-              'zoom in / out',
               style: theme.subtleTextStyle,
             ),
           ],
@@ -1630,4 +1566,32 @@ class EmptyFlameChartRow extends StatelessWidget {
       color: backgroundColor,
     );
   }
+}
+
+// Helper method to enable easier testing of this method. Do not use directly
+// outside of this file.
+@visibleForTesting
+FlameChartNode<V>? binarySearchForNodeHelper<V extends FlameChartDataMixin<V>>({
+  required double x,
+  required List<FlameChartNode<V>> nodesInRow,
+  required double zoom,
+  required double startInset,
+}) {
+  int min = 0;
+  int max = nodesInRow.length;
+  while (min < max) {
+    final mid = min + ((max - min) >> 1);
+    final node = nodesInRow[mid];
+    final zoomedNodeRect = node.zoomedRect(zoom, startInset);
+    if (x >= zoomedNodeRect.left && x <= zoomedNodeRect.right) {
+      return node;
+    }
+    if (x < zoomedNodeRect.left) {
+      max = mid;
+    }
+    if (x > zoomedNodeRect.right) {
+      min = mid + 1;
+    }
+  }
+  return null;
 }
