@@ -17,7 +17,7 @@ on:
         required: false
         type: boolean
   pull_request:
-    types: [closed]
+    types: [closed, labeled, unlabeled]
   schedule:
     # * is a special character in YAML so you have to quote this string
     - cron: "0 8 * * *" # Run every day at midnight Pacific Time
@@ -30,7 +30,7 @@ env:
 
 jobs:
   bump-version:
-    if: ${{ github.event_name == 'workflow_dispatch' || github.event_name == 'schedule' }}
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event_name == 'schedule' || github.event.pull_request.labeled || github.event.pull_request.unlabeled }}
     name: Bump Version
     runs-on: ubuntu-latest
     steps:
