@@ -93,7 +93,6 @@ jobs:
           UPDATE_TYPE: ${{ inputs.updateType }}
 
       - name: Create the PR
-        if: ${{   }}
         run: |
           set -x
           BRANCH_NAME="auto-bump-$(date +%s)"
