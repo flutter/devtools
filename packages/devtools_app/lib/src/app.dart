@@ -354,10 +354,10 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
           ],
           child: NotificationsView(
             child: SidePanelViewer(
-              key: releaseNotesKey,
+              key: SidePanelViewType.releaseNotes.key,
               controller: releaseNotesController,
-              title: releaseNotesTitle,
-              textIfMarkdownDataEmpty: releaseNotesTextWhenEmpty,
+              title: SidePanelViewType.releaseNotes.title,
+              textIfMarkdownDataEmpty: 'Stay tuned for updates.',
               child: child,
             ),
           ),

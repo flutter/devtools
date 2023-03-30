@@ -21,11 +21,18 @@ import 'theme.dart';
 
 const debugTestReleaseNotes = false;
 
-const releaseNotesTitle = 'What\'s new in DevTools?';
-const releaseNotesTextWhenEmpty = 'Stay tuned for updates.';
+enum SidePanelViewType {
+  releaseNotes('What\'s new in DevTools?', _releaseNotesKey),
+  memoryDiffHelp('Diffing memory snapshots', _memoryDiffHelpKey);
 
-const releaseNotesKey = Key('release_notes');
-const diffSnapshotsHelpPanelKey = Key('diff_snapshots_help_panel');
+  const SidePanelViewType(this.title, this.key);
+
+  final String title;
+  final Key key;
+
+  static const _releaseNotesKey = Key('release_notes');
+  static const _memoryDiffHelpKey = Key('memory_diff_help_panel');
+}
 
 class SidePanelViewer extends StatefulWidget {
   const SidePanelViewer({

@@ -63,12 +63,13 @@ void main() {
       }
 
       // Hide the diff snapshots help panel
-      final diffSnapshotsHelpPanel =
-          tester.widget<SidePanelViewer>(find.byKey(diffSnapshotsHelpPanelKey));
+      final diffSnapshotsHelpPanel = tester.widget<SidePanelViewer>(
+        find.byKey(SidePanelViewType.memoryDiffHelp.key),
+      );
       expect(diffSnapshotsHelpPanel.controller.isVisible.value, isTrue);
 
       final closeSidePanelButton = find.descendant(
-        of: find.byKey(diffSnapshotsHelpPanelKey),
+        of: find.byKey(SidePanelViewType.memoryDiffHelp.key),
         matching: find.byType(IconButton),
       );
       expect(closeSidePanelButton, findsOneWidget);
