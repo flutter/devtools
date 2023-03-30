@@ -105,15 +105,9 @@ class _ListControlPane extends StatelessWidget {
 }
 
 class _SnapshotListTitle extends StatelessWidget {
-  const _SnapshotListTitle({
-    Key? key,
-    required this.item,
-    required this.selected,
-  }) : super(key: key);
+  const _SnapshotListTitle({Key? key, required this.item}) : super(key: key);
 
   final SnapshotItem item;
-
-  final bool selected;
 
   @override
   Widget build(BuildContext context) {
@@ -224,7 +218,6 @@ class _SnapshotListItemsState extends State<_SnapshotListItems>
               onTap: () => widget.controller.setSnapshotIndex(index),
               child: _SnapshotListTitle(
                 item: snapshots[index],
-                selected: selected,
               ),
             ),
           );

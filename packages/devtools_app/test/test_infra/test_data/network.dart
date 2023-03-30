@@ -504,7 +504,6 @@ final Map<String, dynamic> httpWsHandshakeJson = {
   'responseBody': [],
 };
 
-final httpGetPendingRequest = HttpProfileRequest.parse(httpGetPendingJson)!;
 final Map<String, dynamic> httpGetPendingJson = {
   'type': 'HttpProfileRequest',
   'id': '7',
