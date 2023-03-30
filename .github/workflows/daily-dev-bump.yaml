@@ -58,16 +58,7 @@ jobs:
           dart pub get
           popd
 
-          CURRENT_VERSION=$(dart tool/update_version.dart current-version)
-          if ! echo "$CURRENT_VERSION" |grep -Eq "\-dev\.[0-9]+" ; then
-            ERROR_DESCRIPTION="Doing \
-          a Dev bump on a release version ($CURRENT_VERSION) is not supported. \
-          Ensure that that current version has been properly bumped to a '-dev.*' \
-          pre-release version, in order to continue daily dev bumps."
-
-            echo "::error ,title=Cannot Bump A Release Version ($CURRENT_VERSION)::$ERROR_DESCRIPTION" 
-            exit 1;
-          fi
+          ORIGINAL_VERSION=$(dart tool/update_version.dart current-version)
 
           if [ -z "$UPDATE_TYPE" ]; then
             # If $UPDATE_TYPE is not set, then assume it is dev
@@ -77,13 +68,10 @@ jobs:
           # If there is a major, minor, or patch bump, do it.
 
           if [ "$UPDATE_TYPE" == "patch+dev" ]; then
-            FIRST_COMMIT_MESSAGE=$(dart tool/update_version.dart auto --dry-run --type patch)
             dart tool/update_version.dart auto --type patch
           elif [ "$UPDATE_TYPE" == "minor+dev" ]; then
-            FIRST_COMMIT_MESSAGE=$(dart tool/update_version.dart auto --dry-run --type minor)
             dart tool/update_version.dart auto --type minor
           elif [ "$UPDATE_TYPE" == "major+dev" ]; then
-            FIRST_COMMIT_MESSAGE=$(dart tool/update_version.dart auto --dry-run --type major)
             dart tool/update_version.dart auto --type major
           elif [ "$UPDATE_TYPE" == "dev" ]; then
             # The dev bump will be handled after the if statement so do nothing here
@@ -95,11 +83,11 @@ jobs:
 
           # Do the dev bump
 
-          SECOND_COMMIT_MESSAGE=$(dart tool/update_version.dart auto --dry-run --type dev)
+          NEW_VERSION=$(dart tool/update_version.dart current-version)
 
           dart tool/update_version.dart auto --type dev
 
-          echo "COMMIT_MESSAGE=${FIRST_COMMIT_MESSAGE}\n${SECOND_COMMIT_MESSAGE}" >> $GITHUB_OUTPUT
+          echo "COMMIT_MESSAGE=Updating from $ORIGINAL_VERSION to $NEW_VERSION" >> $GITHUB_OUTPUT
         env:
           UPDATE_TYPE: ${{ inputs.updateType }}
 
