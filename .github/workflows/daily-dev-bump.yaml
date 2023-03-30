@@ -108,7 +108,7 @@ jobs:
             # Since this is a release PR then don't autosubmit it.
             FLAGS=""
           else
-            FLAGS="--add-label 'autosubmit'"
+            FLAGS="--add-label=autosubmit"
           fi
 
           if [ "$IS_DRY_RUN" != "true" ] ; then
