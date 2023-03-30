@@ -16,9 +16,9 @@ on:
         description: "Dry Run"
         required: false
         type: boolean
-        default: true # TODO THIS SHOULD BE FALSE
+        default: false
   pull_request:
-    types: [closed, labeled, unlabeled] # TODO remove labeled and unlabled
+    types: [closed]
   schedule:
     # * is a special character in YAML so you have to quote this string
     - cron: "0 8 * * *" # Run every day at midnight Pacific Time
@@ -31,7 +31,7 @@ env:
 
 jobs:
   bump-version:
-    # if: ${{ github.event_name == 'workflow_dispatch' || github.event_name == 'schedule' || github.event.pull_request.labeled || github.event.pull_request.unlabeled }}
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event_name == 'schedule' }}
     name: Bump Version
     runs-on: ubuntu-latest
     steps:
@@ -92,7 +92,7 @@ jobs:
           UPDATE_TYPE: ${{ inputs.updateType }}
 
       - name: Create the PR
-        if: ${{ false  }} # TODO Set this to: inputs.dryRun != true
+        if: ${{ inputs.dryRun != true  }}
         run: |
           BRANCH_NAME="auto-bump-$(date +%s)"
           # Stage the file, commit and push
