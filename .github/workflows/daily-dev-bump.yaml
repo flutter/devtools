@@ -83,9 +83,9 @@ jobs:
 
           # Do the dev bump
 
-          NEW_VERSION=$(dart tool/update_version.dart current-version)
-
           dart tool/update_version.dart auto --type dev
+
+          NEW_VERSION=$(dart tool/update_version.dart current-version)
 
           echo "COMMIT_MESSAGE=Updating from $ORIGINAL_VERSION to $NEW_VERSION" >> $GITHUB_OUTPUT
         env:
