@@ -92,7 +92,7 @@ jobs:
           UPDATE_TYPE: ${{ inputs.updateType }}
 
       - name: Create the PR
-        if: ${{ inputs.dryRun != true  }}
+        if: ${{ false  }} # TODO Set this to: inputs.dryRun != true
         run: |
           BRANCH_NAME="auto-bump-$(date +%s)"
           # Stage the file, commit and push
