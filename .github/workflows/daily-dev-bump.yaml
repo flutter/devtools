@@ -19,7 +19,7 @@ on:
         type: boolean
         default: false
       dryRun:
-        description: "Dry Run"
+        description: "Dry Run(Don't create the PR)"
         required: false
         type: boolean
         default: false
@@ -119,7 +119,7 @@ jobs:
             PR_URL=$(gh pr create --title "$COMMIT_MESSAGE" --body "RELEASE_NOTE_EXCEPTION=Automated Version Bump")
             
             # Add the autosubmit label if it was specified, or if this is a scheduled event.
-            if [ "$AUTOSUBMIT" == "true" ] || [ "IS_SCHEDULED" == "true" ]; then
+            if [ "$AUTOSUBMIT" == "true" ] || [ "$IS_SCHEDULED" == "true" ]; then
               # Change github credentials back to the actions bot.
               GH_TOKEN="$ORIGINAL_GH_TOKEN"
 
