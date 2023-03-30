@@ -13,6 +13,11 @@ on:
           - minor+dev
           - major+dev
           - release
+      autosubmit:
+        description: "Auto Submit the PR"
+        required: false
+        type: boolean
+        default: false
       dryRun:
         description: "Dry Run"
         required: false
@@ -113,10 +118,13 @@ jobs:
           if [ "$IS_DRY_RUN" != "true" ] ; then
             PR_URL=$(gh pr create --title "$COMMIT_MESSAGE" --body "RELEASE_NOTE_EXCEPTION=Automated Version Bump")
             
-            # Change github credentials back to the actions bot.
-            GH_TOKEN="$ORIGINAL_GH_TOKEN"
+            # Add the autosubmit label if it was specified, or if this is a scheduled event.
+            if [ "$AUTOSUBMIT" == "true" ] || [ "IS_SCHEDULED" == "true" ]; then
+              # Change github credentials back to the actions bot.
+              GH_TOKEN="$ORIGINAL_GH_TOKEN"
 
-            gh pr edit $PR_URL $FLAGS
+              gh pr edit $PR_URL $FLAGS
+            fi
           fi
 
         env:
@@ -125,6 +133,8 @@ jobs:
           ORIGINAL_GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           UPDATE_TYPE: ${{ inputs.updateType }}
           IS_DRY_RUN: ${{ inputs.dryRun }}
+          AUTOSUBMIT: ${{ inputs.autosubmit }}
+          IS_SCHEDULED: ${{ github.event_name == 'schedule' }}
   clean-up-branches:
     # If a pr is closed on a workflow bot PR, then clean up workflow bot branches.
     if: ${{ github.event_name == 'pull_request' && github.event.action == 'closed'  && github.event.pull_request.user.login == 'DartDevtoolWorkflowBot'}}
