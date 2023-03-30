@@ -31,7 +31,7 @@ env:
 
 jobs:
   bump-version:
-    if: ${{ github.event_name == 'workflow_dispatch' || github.event_name == 'schedule' || github.event.pull_request.labeled || github.event.pull_request.unlabeled }}
+    # if: ${{ github.event_name == 'workflow_dispatch' || github.event_name == 'schedule' || github.event.pull_request.labeled || github.event.pull_request.unlabeled }}
     name: Bump Version
     runs-on: ubuntu-latest
     steps:
