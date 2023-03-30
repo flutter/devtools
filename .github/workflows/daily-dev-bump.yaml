@@ -82,6 +82,7 @@ jobs:
             dart tool/update_version.dart auto --type major
           elif [ "$UPDATE_TYPE" == "dev" ]; then
             # The dev bump will be handled after the if statement so do nothing here
+            echo "DEV DEV DEV"
           else
             echo "ERROR: UNEXPECTED UPDATE TYPE: $UPDATE_TYPE"
           fi
