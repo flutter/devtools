@@ -84,6 +84,7 @@ jobs:
             dart tool/update_version.dart auto --type dev
           elif [ "$UPDATE_TYPE" == "release" ]; then
             dart tool/update_version.dart auto --type release
+            dart tool/bin/repo_tool.dart generate-changelog
           elif [ "$UPDATE_TYPE" == "dev" ]; then
             dart tool/update_version.dart auto --type dev
           else
