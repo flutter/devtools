@@ -5,7 +5,7 @@ on:
       updateType:
         description: "Update Type"
         required: true
-        default: "dev"
+        default: "dev" #TODO THIS SHOULD BE dev
         type: choice
         options:
           - dev
@@ -16,8 +16,9 @@ on:
         description: "Dry Run"
         required: false
         type: boolean
+        default: true # TODO THIS SHOULD BE FALSE
   pull_request:
-    types: [closed, labeled, unlabeled]
+    types: [closed, labeled, unlabeled] # TODO remove labeled and unlabled
   schedule:
     # * is a special character in YAML so you have to quote this string
     - cron: "0 8 * * *" # Run every day at midnight Pacific Time
@@ -96,7 +97,7 @@ jobs:
           UPDATE_TYPE: ${{ inputs.updateType }}
 
       - name: Create the PR
-        if: ${{ inputs.dryRun == False }}
+        if: ${{ inputs.dryRun == false }}
         run: |
           BRANCH_NAME="auto-bump-$(date +%s)"
           # Stage the file, commit and push
