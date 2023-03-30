@@ -12,6 +12,7 @@ on:
           - patch+dev
           - minor+dev
           - major+dev
+          - release
       dryRun:
         description: "Dry Run"
         required: false
@@ -69,21 +70,21 @@ jobs:
 
           if [ "$UPDATE_TYPE" == "patch+dev" ]; then
             dart tool/update_version.dart auto --type patch
+            dart tool/update_version.dart auto --type dev
           elif [ "$UPDATE_TYPE" == "minor+dev" ]; then
             dart tool/update_version.dart auto --type minor
+            dart tool/update_version.dart auto --type dev
           elif [ "$UPDATE_TYPE" == "major+dev" ]; then
             dart tool/update_version.dart auto --type major
+            dart tool/update_version.dart auto --type dev
+          elif [ "$UPDATE_TYPE" == "release" ]; then
+            dart tool/update_version.dart auto --type release
           elif [ "$UPDATE_TYPE" == "dev" ]; then
-            # The dev bump will be handled after the if statement so do nothing here
-            echo "UPDATE_TYPE is dev"
+            dart tool/update_version.dart auto --type dev
           else
             echo "ERROR: UNEXPECTED UPDATE TYPE: $UPDATE_TYPE"
             exit 1
           fi
-
-          # Do the dev bump
-
-          dart tool/update_version.dart auto --type dev
 
           NEW_VERSION=$(dart tool/update_version.dart current-version)
 
@@ -92,8 +93,9 @@ jobs:
           UPDATE_TYPE: ${{ inputs.updateType }}
 
       - name: Create the PR
-        if: ${{ inputs.dryRun != true  }}
+        if: ${{   }}
         run: |
+          set -x
           BRANCH_NAME="auto-bump-$(date +%s)"
           # Stage the file, commit and push
           git checkout -b "$BRANCH_NAME"
@@ -104,12 +106,23 @@ jobs:
 
           # Change github credentials back to the actions bot.
           GH_TOKEN="$ORIGINAL_GH_TOKEN"
-          gh pr edit $PR_URL --add-label "autosubmit"
+          if [ "$UPDATE_TYPE" == "release" ]; then
+            # Since this is a release PR then don't autosubmit it.
+            FLAGS=""
+          else
+            FLAGS="--add-label 'autosubmit'"
+          fi
+
+          if [ "$IS_DRY_RUN" != "true" ] ; then
+            gh pr edit $PR_URL $FLAGS
+          fi
 
         env:
           COMMIT_MESSAGE: ${{ steps.version-bump.outputs.COMMIT_MESSAGE }}
           GH_TOKEN: ${{ secrets.DEVTOOLS_WORKFLOW_BOT_TOKEN }}
           ORIGINAL_GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          UPDATE_TYPE: ${{ inputs.updateType }}
+          IS_DRY_RUN: ${{ inputs.dryRun }}
   clean-up-branches:
     # If a pr is closed on a workflow bot PR, then clean up workflow bot branches.
     if: ${{ github.event_name == 'pull_request' && github.event.action == 'closed'  && github.event.pull_request.user.login == 'DartDevtoolWorkflowBot'}}

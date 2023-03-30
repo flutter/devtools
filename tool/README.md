@@ -24,20 +24,15 @@ Make sure:
 
 ### Prepare the release
 
-#### Update the DevTools version number
+#### Create a release PR
+- Navigate to the [Version Bump Action Page](https://github.com/flutter/devtools/actions/workflows/version-bump.yaml)
+- Select "Run Workflow"
+- Then use the following options:
+  - Update Type: `release`
+  - Dry Run: `false`
+- This will create a branch with a release version on it
 
-- Make sure your working branch is clean
-- Run the `tool/release_helper.sh` script with `minor` or `major`.
-   `./tool/release_helper.sh [minor|major]`
-- This creates 2 branches for you:
-    - Release Branch
-    - Next Branch
-- The following steps will guide you through how these branches will be prepared and merged.
-- **For your convenience, the `tool/release_helper.sh` script exports the following two variables to the terminal it is run in:**
-  - `$DEVTOOLS_RELEASE_BRANCH`
-  - `$DEVTOOLS_NEXT_BRANCH`
-
-#### Verify the version changes for `$DEVTOOLS_RELEASE_BRANCH`
+#### Verify the version changes for the release PR
 
 Verify release_helper.sh script:
 - updated the pubspecs under packages/
@@ -46,7 +41,7 @@ Verify release_helper.sh script:
 
 These packages always have their version numbers updated in lock, so we don't have to worry about versioning.
 
-#### Manually review the CHANGELOG.md in `$DEVTOOLS_RELEASE_BRANCH`
+#### Manually review the CHANGELOG.md for the release PR
 
 Review/update `CHANGELOG.md`:
 
@@ -62,9 +57,9 @@ Review/update `CHANGELOG.md`:
 3. Verify each item is a complete sentence, written as though it was an order, and there is no syntax errors.
 4. Create draft PR for the branch and add the item for it to the top.
 
-### Test the `$DEVTOOLS_RELEASE_BRANCH`
+### Test the release PR
 
-- Checkout the `$DEVTOOLS_RELEASE_BRANCH`,
+- Checkout the release PR,
 - Build the DevTools binary and run it from your local Dart SDK.
    - From the main devtools/ directory.
    ```shell
@@ -92,14 +87,14 @@ Review/update `CHANGELOG.md`:
       git clean -f -d;
       ```
 
-#### Push the `$DEVTOOLS_RELEASE_BRANCH`
+#### Submit the Release PR
 
 Receive an LGTM for the PR, squash and commit.
 
 
 ### Tag the release
 - Checkout the commit from which you want to release DevTools
-   - This is likely the commit for the PR you just landed
+   - This is likely the commit, on `master`, for the PR you just landed
    - You can run `git log -v` to see the commits.
 - Run the `tag_version.sh` script
    - this creates a tag on the `flutter/devtools` repo for this release.
@@ -194,16 +189,14 @@ checkout the Flutter version on your local flutter repo (the Flutter SDK that
    flutter pub publish
    ```
 
-### Push the DEVTOOLS_NEXT_BRANCH
-```shell
-git pull upstream master
-git checkout $DEVTOOLS_NEXT_BRANCH
-git push -u origin $DEVTOOLS_NEXT_BRANCH
-```
-
-From the git GUI tool or from github.com directly:
-1. Create a PR.
-2. Receive an LGTM, squash and commit.
+### Update to the next version
+- Navigate to the [Version Bump Action Page](https://github.com/flutter/devtools/actions/workflows/version-bump.yaml)
+- Select "Run Workflow"
+- Then use the following options:
+  - Update Type: `minor+dev`
+  - Dry Run: `false`
+- This will create a version bump PR that will autosubmit when the workflows pass
+- Ensure that the PR eventually submits itsef.
 
 ## Debug Logs
 
