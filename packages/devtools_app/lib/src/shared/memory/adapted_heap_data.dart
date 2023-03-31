@@ -69,6 +69,7 @@ class AdaptedHeapData {
   }
 
   // TODO(polina-c): mark as visibleForTesting after fix: https://github.com/dart-lang/sdk/issues/51914
+  /// Use this method only for testing.
   factory AdaptedHeapData.fromJson(Map<String, dynamic> json) {
     final createdJson = json[_JsonFields.created];
 
@@ -100,7 +101,10 @@ class AdaptedHeapData {
       objects.add(object);
     }
 
-    return AdaptedHeapData(objects, isolateId: isolateId);
+    final footprint =
+        MemoryFootprint(rss: rss, dart: dart, reachable: reachable);
+
+    return AdaptedHeapData(objects, footprint, isolateId: isolateId);
   }
 
   /// Default value for rootIndex is taken from the doc:
@@ -154,11 +158,6 @@ class AdaptedHeapData {
 
     return HeapPath(result.reversed.toList(growable: false));
   }
-
-  late final totalSize = () {
-    if (!allFieldsCalculated) throw StateError('Spanning tree should be built');
-    return objects[rootIndex].retainedSize!;
-  }();
 }
 
 /// Sequence of ids of objects in the heap.
