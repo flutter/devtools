@@ -4,6 +4,7 @@
 DEVTOOLS_REMOTE=$(git remote -v | grep "flutter/devtools.git" | grep "(fetch)"| tail -n1 | cut -w -f1)
 TYPE=$1
 
+cd ..
 
 if [ -z "$DEVTOOLS_REMOTE" ] ; then
     echo "Couldn't find a remote that points to flutter/devtools.git"
@@ -26,14 +27,12 @@ git checkout -b "$RELEASE_BRANCH"
 
 dart pub get
 
-ORIGINAL_VERSION=$(dart update_version.dart current-version)
+ORIGINAL_VERSION=$(dart tool/update_version.dart current-version)
 
-pushd ../packages/devtools_app
-dart update_version.dart auto --type release
-dart bin/repo_tool.dart generate-changelog
-popd
+dart tool/update_version.dart auto --type release
+dart tool/bin/repo_tool.dart generate-changelog
 
-NEW_VERSION=$(dart update_version.dart current-version)
+NEW_VERSION=$(dart tool/update_version.dart current-version)
 
 COMMIT_MESSAGE="Updating from $ORIGINAL_VERSION to $NEW_VERSION"
 
