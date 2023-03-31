@@ -48,15 +48,17 @@ COMMIT_MESSAGE="Releasing from $ORIGINAL_VERSION to $NEW_VERSION"
 git commit -a -m "$COMMIT_MESSAGE"
 
 git push -u $DEVTOOLS_REMOTE $RELEASE_BRANCH
+
 echo "Creating the PR"
 echo
+
 PR_URL=$(gh pr create --draft --title "$COMMIT_MESSAGE" --body "RELEASE_NOTE_EXCEPTION=Version Bump" $CREATION_FLAGS)
 
-echo "Release PR created successfully: $PR_URL"
-echo
+
 echo "Updating your flutter version to the most recent candidate."
 echo
 ./tool/update_flutter_sdk.sh --local
+
 echo
 echo "$0 DONE: You can now start testing devtools to make sure it is ready for release."
 echo "Your Draft release PR can be found at: $PR_URL"
