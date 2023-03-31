@@ -35,6 +35,8 @@ const _debugUseLocalPerfetto = false;
 /// [_viewIdIncrementer] is used to create.
 var _viewIdIncrementer = 0;
 
+/// Events that are passed between DevTools and the embedded Perfetto iFrame via
+/// [window.postMessage].
 enum EmbeddedPerfettoEvent {
   /// Id for an event Perfetto excpects to verify the trace viewer is ready.
   ping('PING'),
