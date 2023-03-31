@@ -49,8 +49,10 @@ class SnapshotControlPane extends StatelessWidget {
             ),
             Row(
               children: [
-                if (heapIsReady)
+                if (heapIsReady) ...[
                   _SnapshotSizeView(footprint: current.heap!.footprint),
+                  const SizedBox(width: defaultSpacing),
+                ],
                 _DeleteSnapshotButton(
                   controller: controller,
                   isProcessing: isProcessing,
@@ -75,18 +77,12 @@ class _DeleteSnapshotButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ToolbarAction(
+    return DevToolsButton(
       icon: Icons.clear,
       tooltip: 'Delete snapshot',
-      onPressed: isProcessing
-          ? null
-          : () {
-              controller.deleteCurrentSnapshot();
-              ga.select(
-                gac.memory,
-                gac.MemoryEvent.diffSnapshotDelete,
-              );
-            },
+      onPressed: isProcessing ? null : controller.deleteCurrentSnapshot,
+      gaScreen: gac.memory,
+      gaSelection: gac.MemoryEvent.diffSnapshotDelete,
     );
   }
 }
@@ -166,8 +162,8 @@ class _SnapshotSizeView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Text('RSS: ${prettyPrintBytes(footprint.rss, includeUnit: true)} '
-        'Dart: ${prettyPrintBytes(footprint.dart, includeUnit: true)} '
+    return Text('RSS: ${prettyPrintBytes(footprint.rss, includeUnit: true)} | '
+        'Dart: ${prettyPrintBytes(footprint.dart, includeUnit: true)} | '
         'Reachable: ${prettyPrintBytes(footprint.reachable, includeUnit: true)}');
   }
 }
