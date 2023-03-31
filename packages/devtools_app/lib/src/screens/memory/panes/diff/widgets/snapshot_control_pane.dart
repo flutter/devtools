@@ -166,8 +166,8 @@ class _SnapshotSizeView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Text('RSS: ${prettyPrintBytes(footprint.rss)} '
-        'Dart: ${prettyPrintBytes(footprint.dart)} '
-        'Reachable: ${prettyPrintBytes(footprint.reachable)}');
+    return Text('RSS: ${prettyPrintBytes(footprint.rss, includeUnit: true)} '
+        'Dart: ${prettyPrintBytes(footprint.dart, includeUnit: true)} '
+        'Reachable: ${prettyPrintBytes(footprint.reachable, includeUnit: true)}');
   }
 }
