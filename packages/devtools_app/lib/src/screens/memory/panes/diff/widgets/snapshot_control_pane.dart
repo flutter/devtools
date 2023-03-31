@@ -4,10 +4,10 @@
 
 import 'package:flutter/material.dart';
 
+import '../../../../../../devtools_app.dart';
 import '../../../../../shared/analytics/analytics.dart' as ga;
 import '../../../../../shared/analytics/constants.dart' as gac;
-import '../../../../../shared/common_widgets.dart';
-import '../../../../../shared/theme.dart';
+import '../../../../../shared/memory/simple_items.dart';
 import '../../../shared/primitives/simple_elements.dart';
 import '../controller/diff_pane_controller.dart';
 import '../controller/item_controller.dart';
@@ -24,13 +24,14 @@ class SnapshotControlPane extends StatelessWidget {
       valueListenable: controller.isTakingSnapshot,
       builder: (_, isProcessing, __) {
         final current = controller.core.selectedItem as SnapshotInstanceItem;
+        final heapIsReady = !isProcessing && current.heap != null;
 
         return Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Row(
               children: [
-                if (!isProcessing && current.heap != null) ...[
+                if (heapIsReady) ...[
                   _DiffDropdown(
                     current: current,
                     controller: controller,
@@ -46,22 +47,46 @@ class SnapshotControlPane extends StatelessWidget {
                 ],
               ],
             ),
-            ToolbarAction(
-              icon: Icons.clear,
-              tooltip: 'Delete snapshot',
-              onPressed: isProcessing
-                  ? null
-                  : () {
-                      controller.deleteCurrentSnapshot();
-                      ga.select(
-                        gac.memory,
-                        gac.MemoryEvent.diffSnapshotDelete,
-                      );
-                    },
+            Row(
+              children: [
+                if (heapIsReady)
+                  _SnapshotSizeView(footprint: current.heap!.footprint),
+                _DeleteSnapshotButton(
+                  controller: controller,
+                  isProcessing: isProcessing,
+                ),
+              ],
             ),
           ],
         );
       },
+    );
+  }
+}
+
+class _DeleteSnapshotButton extends StatelessWidget {
+  const _DeleteSnapshotButton({
+    required this.controller,
+    required this.isProcessing,
+  });
+
+  final DiffPaneController controller;
+  final bool isProcessing;
+
+  @override
+  Widget build(BuildContext context) {
+    return ToolbarAction(
+      icon: Icons.clear,
+      tooltip: 'Delete snapshot',
+      onPressed: isProcessing
+          ? null
+          : () {
+              controller.deleteCurrentSnapshot();
+              ga.select(
+                gac.memory,
+                gac.MemoryEvent.diffSnapshotDelete,
+              );
+            },
     );
   }
 }
@@ -130,5 +155,19 @@ class _DiffDropdown extends StatelessWidget {
         ],
       ),
     );
+  }
+}
+
+class _SnapshotSizeView extends StatelessWidget {
+  const _SnapshotSizeView({Key? key, required this.footprint})
+      : super(key: key);
+
+  final MemoryFootprint footprint;
+
+  @override
+  Widget build(BuildContext context) {
+    return Text('RSS: ${prettyPrintBytes(footprint.rss)} '
+        'Dart: ${prettyPrintBytes(footprint.dart)} '
+        'Reachable: ${prettyPrintBytes(footprint.reachable)}');
   }
 }
