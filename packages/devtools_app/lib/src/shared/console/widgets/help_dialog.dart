@@ -35,7 +35,7 @@ class ConsoleHelpDialog extends StatelessWidget {
 Use debug console to:
 
 1. Watch the standard output (stdout) of the application.
-2. Evaluate expressions for a paused or running application.
+2. Evaluate expressions for a paused or running application in debug mode.
 3. Analyze inbound and outbound references for objects, dropped from memory heap snapshots.
 
 Assign previously evaluated objects to variable using $0, $1 … $5.

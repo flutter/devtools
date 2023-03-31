@@ -8,13 +8,13 @@ import '../../../../../shared/analytics/constants.dart';
 import '../../../../../shared/memory/adapted_heap_data.dart';
 import '../../../../../shared/memory/class_name.dart';
 import '../../../shared/heap/heap.dart';
-import '../../../shared/primitives/instance_set_button.dart';
+import '../../../shared/primitives/instance_context_menu.dart';
 import '../controller/sampler.dart';
 
 /// Right aligned table cell, shat shows number of instances.
 ///
-/// If the row is selected and count of instances is positive, shows ellipsis button
-/// with context menu for the instance set.
+/// If the row is selected and count of instances is positive, the table cell
+/// includes a "more" icon button with a context menu for the instance set.
 class InstanceTableCell extends StatelessWidget {
   InstanceTableCell(
     ObjectSet objects,
@@ -41,17 +41,12 @@ class InstanceTableCell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.end,
-      children: [
-        InstanceSetButton(
-          count: _count,
-          gaContext: gaContext,
-          sampleObtainer: _sampleObtainer,
-          showMenu: _showMenu,
-          liveItemsEnabled: liveItemsEnabled,
-        ),
-      ],
+    return InstanceDisplayWithContextMenu(
+      count: _count,
+      gaContext: gaContext,
+      sampleObtainer: _sampleObtainer,
+      showMenu: _showMenu,
+      liveItemsEnabled: liveItemsEnabled,
     );
   }
 }

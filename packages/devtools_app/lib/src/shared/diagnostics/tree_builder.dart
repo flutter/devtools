@@ -9,7 +9,6 @@ import 'package:logging/logging.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../screens/debugger/debugger_model.dart';
-import '../feature_flags.dart';
 import '../globals.dart';
 import '../memory/adapted_heap_data.dart';
 import '../primitives/utils.dart';
@@ -409,8 +408,7 @@ Future<void> buildVariablesTree(
     variable.addChild(DartObjectNode.text('error: $ex\n$stack'));
   }
 
-  if (FeatureFlags.evalAndBrowse &&
-      ref.heapSelection != null &&
+  if (ref.heapSelection != null &&
       ref is! ObjectReferences &&
       !variable.isGroup) {
     addReferencesRoot(variable, ref);

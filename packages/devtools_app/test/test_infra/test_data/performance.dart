@@ -1422,26 +1422,6 @@ final testTimelineJson = {
   'timeExtentMicros': 193938770147 - 193938741076,
 };
 
-final gcEventStartTrace = testTraceEventWrapper({
-  'name': 'ConcurrentMark',
-  'cat': 'GC',
-  'tid': 38147,
-  'pid': 48043,
-  'ts': 794638620007,
-  'ph': 'B',
-  'args': {'isolateGroupId': 'isolateGroups/18139071461608741439'}
-});
-
-final gcEventEndTrace = testTraceEventWrapper({
-  'name': 'ConcurrentMark',
-  'cat': 'GC',
-  'tid': 25091,
-  'pid': 48043,
-  'ts': 794638633011,
-  'ph': 'E',
-  'args': {'isolateGroupId': 'isolateGroups/18139071461608741439'}
-});
-
 final namedThreadEventStartTrace = testTraceEventWrapper({
   'name': 'Shell::OnPlatformViewDispatchPointerDataPacket',
   'cat': 'Embedder',
