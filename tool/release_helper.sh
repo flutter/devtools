@@ -28,8 +28,10 @@ dart pub get
 
 ORIGINAL_VERSION=$(dart update_version.dart current-version)
 
+pushd ../packages/devtools_app
 dart update_version.dart auto --type release
 dart bin/repo_tool.dart generate-changelog
+popd
 
 NEW_VERSION=$(dart update_version.dart current-version)
 
