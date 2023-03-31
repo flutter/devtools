@@ -50,7 +50,7 @@ git commit -a -m "$COMMIT_MESSAGE"
 git push -u $DEVTOOLS_REMOTE $RELEASE_BRANCH
 echo "Creating the PR"
 echo
-PR_URL=$(gh pr create --title "$COMMIT_MESSAGE" --body "RELEASE_NOTE_EXCEPTION=Automated Version Bump" $CREATION_FLAGS)
+PR_URL=$(gh pr create --draft --title "$COMMIT_MESSAGE" --body "RELEASE_NOTE_EXCEPTION=Automated Version Bump" $CREATION_FLAGS)
 
 echo "Release PR created successfully: $PR_URL"
 echo
