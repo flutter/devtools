@@ -7,3 +7,22 @@ enum RefDirection {
   inbound,
   outbound,
 }
+
+class MemoryFootprint {
+  MemoryFootprint({
+    required this.rss,
+    required this.dart,
+    required this.reachable,
+  });
+
+  /// Total memory used by the Dart VM, including shared pages.
+  ///
+  /// See https://developer.android.com/topic/performance/memory-management.
+  final int rss;
+
+  /// Subset of [rss].
+  final int dart;
+
+  /// Subset of [dart].
+  final int reachable;
+}

@@ -71,6 +71,7 @@ class AdaptedHeapData {
     this.created = created ?? DateTime.now();
   }
 
+  // TODO(polina-c): mark as visibleForTesting after fix: https://github.com/dart-lang/sdk/issues/51914
   factory AdaptedHeapData.fromJson(Map<String, dynamic> json) {
     final createdJson = json[_JsonFields.created];
 
@@ -120,6 +121,8 @@ class AdaptedHeapData {
   late DateTime created;
 
   String snapshotName = '';
+
+  late MemoryFootprint footprint;
 
   /// Heap objects by identityHashCode.
   late final Map<IdentityHashCode, int> _objectsByCode = Map.fromIterable(
