@@ -32,7 +32,7 @@ Future<void> _setInboundRefsAndTotal(AdaptedHeapData heap) async {
       heap.objects[to].inRefs.add(from);
     }
   }
-  heap.setFootprint(totalDart);
+  heap.initFootprint(totalDart);
 }
 
 /// The algorithm takes O(number of references in the heap).

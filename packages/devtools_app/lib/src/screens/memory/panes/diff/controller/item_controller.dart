@@ -5,6 +5,7 @@
 import 'package:flutter/foundation.dart';
 
 import '../../../../../shared/memory/adapted_heap_data.dart';
+import '../../../../../shared/memory/simple_items.dart';
 import '../../../../../shared/primitives/auto_dispose.dart';
 import '../../../shared/heap/heap.dart';
 
@@ -64,5 +65,5 @@ class SnapshotInstanceItem extends SnapshotItem {
   @override
   bool get hasData => heap != null;
 
-  int? get totalSize => heap?.data.totalSize;
+  MemoryFootprint? get memoryFootprint => heap?.data.memoryFootprint;
 }

@@ -52,10 +52,12 @@ class NotGCedAnalyzerTask {
   static Future<NotGCedAnalyzerTask> fromSnapshot(
     HeapSnapshotGraph graph,
     List<LeakReport> reports,
-    String isolateId,
-  ) async {
+    String isolateId, {
+    required int rssSize,
+  }) async {
     return NotGCedAnalyzerTask(
-      heap: await AdaptedHeapData.fromHeapSnapshot(graph, isolateId: isolateId),
+      heap: await AdaptedHeapData.fromHeapSnapshot(graph,
+          isolateId: isolateId, rssSize: rssSize),
       reports: reports,
     );
   }

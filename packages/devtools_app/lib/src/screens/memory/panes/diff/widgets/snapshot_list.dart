@@ -125,10 +125,11 @@ class _SnapshotListTitle extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
               ),
             ),
-          if (theItem is SnapshotInstanceItem && theItem.totalSize != null) ...[
+          if (theItem is SnapshotInstanceItem &&
+              theItem.memoryFootprint != null) ...[
             Text(
               prettyPrintBytes(
-                theItem.totalSize,
+                theItem.memoryFootprint!.reachable,
                 includeUnit: true,
                 kbFractionDigits: 1,
               )!,

@@ -16,6 +16,7 @@ class _JsonFields {
   static const String rootIndex = 'rootIndex';
   static const String created = 'created';
   static const String isolateId = 'isolateId';
+  static const String rssSize = 'rssSize';
 }
 
 @immutable
@@ -60,11 +61,12 @@ class AdaptedHeapData {
   AdaptedHeapData(
     this.objects, {
     required this.isolateId,
-    required this._rssSize,
+    required int rssSize,
     this.rootIndex = _defaultRootIndex,
     DateTime? created,
   })  : assert(objects.isNotEmpty),
-        assert(objects.length > rootIndex) {
+        assert(objects.length > rootIndex),
+        _rssSize = rssSize {
     this.created = created ?? DateTime.now();
   }
 
@@ -79,7 +81,7 @@ class AdaptedHeapData {
             (i, e) => AdaptedHeapObject.fromJson(e as Map<String, Object?>, i),
           )
           .toList(),
-      MemoryFootprint(rss: 0, dart: 0, reachable: 0),
+      rssSize: json[_JsonFields.rssSize] ?? 0,
       created: createdJson == null ? null : DateTime.parse(createdJson),
       rootIndex: json[_JsonFields.rootIndex] ?? _defaultRootIndex,
       isolateId: json[_JsonFields.isolateId] ?? '',
@@ -91,7 +93,7 @@ class AdaptedHeapData {
   static Future<AdaptedHeapData> fromHeapSnapshot(
     HeapSnapshotGraph graph, {
     required String isolateId,
-    required int rss,
+    required int rssSize,
   }) async {
     final objects = <AdaptedHeapObject>[];
     for (final i in Iterable.generate(graph.objects.length)) {
@@ -101,10 +103,7 @@ class AdaptedHeapData {
       objects.add(object);
     }
 
-    final footprint =
-        MemoryFootprint(rss: rss, dart: dart, reachable: reachable);
-
-    return AdaptedHeapData(objects, footprint, isolateId: isolateId);
+    return AdaptedHeapData(objects, rssSize: rssSize, isolateId: isolateId);
   }
 
   /// Default value for rootIndex is taken from the doc:
@@ -159,18 +158,15 @@ class AdaptedHeapData {
     return HeapPath(result.reversed.toList(growable: false));
   }
 
-  late final memoryFootprint = () {
-    if (!allFieldsCalculated) throw StateError('Spanning tree should be built');
+  late final MemoryFootprint memoryFootprint;
 
-    return MemoryFootprint(
+  void initFootprint(int totalDart) {
+    memoryFootprint = MemoryFootprint(
       rss: _rssSize,
-      dart: objects[rootIndex].retainedSize!,
+      dart: totalDart,
       reachable: objects[rootIndex].retainedSize!,
     );
-    return objects[rootIndex].retainedSize!;
-  }();
-
-  void setFootprint(int totalDart) {}
+  }
 }
 
 /// Sequence of ids of objects in the heap.
