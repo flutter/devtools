@@ -2,6 +2,8 @@
 
 DEVTOOLS_REMOTE=$(git remote -v | grep "flutter/devtools.git" | grep "(fetch)"| tail -n1 | cut -w -f1)
 
+# Change to the script's directory
+cd "$(dirname "$0")"
 
 if [ -z "$DEVTOOLS_REMOTE" ] ; then
     echo "Couldn't find a remote that points to flutter/devtools.git"
