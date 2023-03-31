@@ -88,7 +88,7 @@ Future<SingleClassStats> _createClassStats(
     rootIndex: 0,
     isolateId: '',
   );
-  await buildSpanningTreeAndSetInRefs(heap);
+  await calculateHeap(heap);
 
   final result = SingleClassStats(heapClass: instances.first.heapClass);
   for (var index in indexes) {
