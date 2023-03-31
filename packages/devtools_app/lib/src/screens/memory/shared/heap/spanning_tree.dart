@@ -8,25 +8,31 @@ import '../../../../shared/primitives/utils.dart';
 
 final _uiReleaser = UiReleaser();
 
-/// Sets the field retainer and retainedSize for each object in the [heap], that
+/// Performs calculations on the [heap] to populate fields.
+///
+/// * Sets the field retainer and retainedSize for each object in the [heap], that
 /// has retaining path to the root.
-/// Also populates [AdaptedHeapObject.inRefs].
-Future<void> buildSpanningTreeAndSetInRefs(AdaptedHeapData heap) async {
+/// * Populates [AdaptedHeapObject.inRefs].
+///
+Future<void> calculateHeap(AdaptedHeapData heap) async {
   assert(!heap.allFieldsCalculated);
   await _setRetainers(heap);
-  await _setInboundRefs(heap);
+  await _setInboundRefsAndTotal(heap);
   heap.allFieldsCalculated = true;
   _verifyHeapIntegrity(heap);
 }
 
-Future<void> _setInboundRefs(AdaptedHeapData heap) async {
+Future<void> _setInboundRefsAndTotal(AdaptedHeapData heap) async {
+  int totalDart = 0;
   for (final from in Iterable.generate(heap.objects.length)) {
+    totalDart += heap.objects[from].shallowSize;
     if (_uiReleaser.step()) await _uiReleaser.releaseUi();
     for (final to in heap.objects[from].outRefs) {
       assert(from != to);
       heap.objects[to].inRefs.add(from);
     }
   }
+  heap.setFootprint(totalDart);
 }
 
 /// The algorithm takes O(number of references in the heap).

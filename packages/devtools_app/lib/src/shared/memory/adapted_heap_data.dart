@@ -158,6 +158,19 @@ class AdaptedHeapData {
 
     return HeapPath(result.reversed.toList(growable: false));
   }
+
+  late final memoryFootprint = () {
+    if (!allFieldsCalculated) throw StateError('Spanning tree should be built');
+
+    return MemoryFootprint(
+      rss: _rssSize,
+      dart: objects[rootIndex].retainedSize!,
+      reachable: objects[rootIndex].retainedSize!,
+    );
+    return objects[rootIndex].retainedSize!;
+  }();
+
+  void setFootprint(int totalDart) {}
 }
 
 /// Sequence of ids of objects in the heap.

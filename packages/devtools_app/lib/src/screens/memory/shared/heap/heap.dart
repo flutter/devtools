@@ -33,7 +33,7 @@ class AdaptedHeap {
 
   Future<SingleHeapClasses> _heapStatistics() async {
     final result = <HeapClassName, SingleClassStats>{};
-    if (!data.allFieldsCalculated) await buildSpanningTreeAndSetInRefs(data);
+    if (!data.allFieldsCalculated) await calculateHeap(data);
 
     for (var i in Iterable.generate(data.objects.length)) {
       if (_uiReleaser.step()) await _uiReleaser.releaseUi();

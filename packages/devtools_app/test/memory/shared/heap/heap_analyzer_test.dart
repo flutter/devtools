@@ -11,7 +11,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   for (var t in _sizeTests) {
     test('has expected root and unreachable sizes, ${t.name}.', () async {
-      await buildSpanningTreeAndSetInRefs(t.heap);
+      await calculateHeap(t.heap);
       expect(t.heap.root.retainedSize, equals(t.rootRetainedSize));
 
       var actualUnreachableSize = 0;
