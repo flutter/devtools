@@ -11,7 +11,6 @@ import 'package:logging/logging.dart';
 import '../../../../shared/analytics/analytics.dart' as ga;
 import '../../../../shared/analytics/constants.dart' as gac;
 import '../../../../shared/analytics/metrics.dart';
-import '../../../../shared/feature_flags.dart';
 import '../../../../shared/future_work_tracker.dart';
 import '../../../../shared/globals.dart';
 import '../../../../shared/http/http_service.dart' as http_service;
@@ -76,11 +75,7 @@ class TimelineEventsController extends PerformanceFeatureController
 
   /// Whether we should be using the legacy trace viewer or the new Perfetto
   /// trace viewer.
-  final useLegacyTraceViewer =
-      ValueNotifier<bool>(!FeatureFlags.embeddedPerfetto || !kIsWeb);
-
-  bool get _perfettoMode =>
-      FeatureFlags.embeddedPerfetto && !useLegacyTraceViewer.value;
+  final useLegacyTraceViewer = ValueNotifier<bool>(!kIsWeb);
 
   /// Whether the recorded timeline data is currently being processed.
   ValueListenable<EventsControllerStatus> get status => _status;
@@ -105,8 +100,9 @@ class TimelineEventsController extends PerformanceFeatureController
 
   static const _timelinePollingRateLimit = 1.0;
 
-  Duration get _timelinePollingInterval =>
-      _perfettoMode ? const Duration(seconds: 1) : const Duration(seconds: 2);
+  Duration get _timelinePollingInterval => useLegacyTraceViewer.value
+      ? const Duration(seconds: 2)
+      : const Duration(seconds: 1);
 
   RateLimiter? _timelinePollingRateLimiter;
 
@@ -123,9 +119,7 @@ class TimelineEventsController extends PerformanceFeatureController
 
   @override
   Future<void> init() async {
-    if (FeatureFlags.embeddedPerfetto) {
-      perfettoController.init();
-    }
+    perfettoController.init();
 
     if (!offlineController.offlineMode.value) {
       await _initForServiceConnection();
@@ -134,7 +128,7 @@ class TimelineEventsController extends PerformanceFeatureController
 
   @override
   void onBecomingActive() {
-    if (_perfettoMode) {
+    if (!useLegacyTraceViewer.value) {
       perfettoController.onBecomingActive();
     }
   }
@@ -283,46 +277,47 @@ class TimelineEventsController extends PerformanceFeatureController
   }
 
   Future<void> _processAllTraceEvents() async {
-    if (_perfettoMode) {
-      final traceEventCount = allTraceEvents.length;
-      debugTraceEventCallback(
-        () => _log.info(
-          'processing traceEvents at startIndex '
-          '$_nextTraceIndexToProcess',
-        ),
-      );
-      final processingTraceCount = traceEventCount - _nextTraceIndexToProcess;
-      Future<void> processTraceEventsHelper() async {
-        await perfettoController.processor.processData(
-          allTraceEvents,
-          startIndex: _nextTraceIndexToProcess,
-        );
-        debugTraceEventCallback(
-          () => _log.info(
-            'after processing traceEvents at startIndex $_nextTraceIndexToProcess, '
-            'and now _nextTraceIndexToProcess = $traceEventCount',
-          ),
-        );
-        _nextTraceIndexToProcess = traceEventCount;
-      }
-
-      // Process trace events [processTraceEventsHelper] and time the operation
-      // for analytics.
-      await ga.timeAsync(
-        gac.performance,
-        gac.perfettoModeTraceEventProcessingTime,
-        asyncOperation: processTraceEventsHelper,
-        screenMetricsProvider: () => PerformanceScreenMetrics(
-          traceEventCount: processingTraceCount,
-        ),
-      );
-      await perfettoController.loadTrace(allTraceEvents);
-    } else {
+    if (useLegacyTraceViewer.value) {
       await legacyController.processTraceEvents(
         allTraceEvents,
         threadNamesById: threadNamesById,
       );
+      return;
     }
+
+    final traceEventCount = allTraceEvents.length;
+    debugTraceEventCallback(
+      () => _log.info(
+        'processing traceEvents at startIndex '
+        '$_nextTraceIndexToProcess',
+      ),
+    );
+    final processingTraceCount = traceEventCount - _nextTraceIndexToProcess;
+    Future<void> processTraceEventsHelper() async {
+      await perfettoController.processor.processData(
+        allTraceEvents,
+        startIndex: _nextTraceIndexToProcess,
+      );
+      debugTraceEventCallback(
+        () => _log.info(
+          'after processing traceEvents at startIndex $_nextTraceIndexToProcess, '
+          'and now _nextTraceIndexToProcess = $traceEventCount',
+        ),
+      );
+      _nextTraceIndexToProcess = traceEventCount;
+    }
+
+    // Process trace events [processTraceEventsHelper] and time the operation
+    // for analytics.
+    await ga.timeAsync(
+      gac.performance,
+      gac.perfettoModeTraceEventProcessingTime,
+      asyncOperation: processTraceEventsHelper,
+      screenMetricsProvider: () => PerformanceScreenMetrics(
+        traceEventCount: processingTraceCount,
+      ),
+    );
+    await perfettoController.loadTrace(allTraceEvents);
   }
 
   Future<void> selectTimelineEvent(TimelineEvent? event) async {
@@ -338,7 +333,7 @@ class TimelineEventsController extends PerformanceFeatureController
   Future<void> handleSelectedFrame(FlutterFrame frame) async {
     if (useLegacyTraceViewer.value) {
       await _legacySelectFrame(frame);
-    } else if (FeatureFlags.embeddedPerfetto) {
+    } else {
       await _perfettoSelectFrame(frame);
     }
 
@@ -551,7 +546,7 @@ class TimelineEventsController extends PerformanceFeatureController
 
     await legacyController.setOfflineData(offlineData);
 
-    if (offlineData.selectedFrame != null && _perfettoMode) {
+    if (offlineData.selectedFrame != null && !useLegacyTraceViewer.value) {
       perfettoController
           .scrollToTimeRange(offlineData.selectedFrame!.timeFromFrameTiming);
     }
@@ -568,18 +563,14 @@ class TimelineEventsController extends PerformanceFeatureController
     _workTracker.clear();
     legacyController.clearData();
     _status.value = EventsControllerStatus.empty;
-    if (FeatureFlags.embeddedPerfetto) {
-      await perfettoController.clear();
-    }
+    await perfettoController.clear();
   }
 
   @override
   void dispose() {
     _pollingTimer?.cancel();
     _timelinePollingRateLimiter?.dispose();
-    if (FeatureFlags.embeddedPerfetto) {
-      perfettoController.dispose();
-    }
+    perfettoController.dispose();
     super.dispose();
   }
 }

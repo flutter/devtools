@@ -45,6 +45,9 @@ class SnapshotList extends StatelessWidget {
   }
 }
 
+@visibleForTesting
+const iconToTakeSnapshot = Icons.fiber_manual_record;
+
 class _ListControlPane extends StatelessWidget {
   const _ListControlPane({Key? key, required this.controller})
       : super(key: key);
@@ -75,7 +78,7 @@ class _ListControlPane extends StatelessWidget {
         return Row(
           children: [
             ToolbarAction(
-              icon: Icons.fiber_manual_record,
+              icon: iconToTakeSnapshot,
               tooltip: 'Take heap snapshot for the selected isolate',
               onPressed: controller.isTakingSnapshot.value
                   ? null
@@ -102,15 +105,9 @@ class _ListControlPane extends StatelessWidget {
 }
 
 class _SnapshotListTitle extends StatelessWidget {
-  const _SnapshotListTitle({
-    Key? key,
-    required this.item,
-    required this.selected,
-  }) : super(key: key);
+  const _SnapshotListTitle({Key? key, required this.item}) : super(key: key);
 
   final SnapshotItem item;
-
-  final bool selected;
 
   @override
   Widget build(BuildContext context) {
@@ -221,7 +218,6 @@ class _SnapshotListItemsState extends State<_SnapshotListItems>
               onTap: () => widget.controller.setSnapshotIndex(index),
               child: _SnapshotListTitle(
                 item: snapshots[index],
-                selected: selected,
               ),
             ),
           );

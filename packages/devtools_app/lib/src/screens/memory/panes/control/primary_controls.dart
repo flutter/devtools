@@ -14,6 +14,9 @@ class PrimaryControls extends StatelessWidget {
     Key? key,
   }) : super(key: key);
 
+  @visibleForTesting
+  static const memoryChartText = 'Memory chart';
+
   @override
   Widget build(BuildContext context) {
     return VisibilityButton(
@@ -21,7 +24,7 @@ class PrimaryControls extends StatelessWidget {
       gaScreen: gac.memory,
       onPressed: (show) => preferences.memory.showChart.value = show,
       minScreenWidthForTextBeforeScaling: memoryControlsMinVerboseWidth,
-      label: 'Memory chart',
+      label: memoryChartText,
       tooltip: 'Toggle visibility of the Memory usage chart',
     );
   }

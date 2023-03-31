@@ -2577,12 +2577,13 @@ class RadioButton<T> extends StatelessWidget {
 }
 
 class ContextMenuButton extends StatelessWidget {
-  const ContextMenuButton({
+  ContextMenuButton({
+    required this.menu,
     this.style,
     this.gaScreen,
     this.gaItem,
-    required this.menu,
-  });
+    double? size,
+  }) : size = size ?? tableIconSize;
 
   static const double width = 14;
 
@@ -2590,6 +2591,7 @@ class ContextMenuButton extends StatelessWidget {
   final String? gaScreen;
   final String? gaItem;
   final List<Widget> menu;
+  final double size;
 
   @override
   Widget build(BuildContext context) {
@@ -2599,8 +2601,10 @@ class ContextMenuButton extends StatelessWidget {
           (BuildContext context, MenuController controller, Widget? child) {
         return SizedBox(
           width: width,
-          child: TextButton(
-            child: Text('⋮', style: style, textAlign: TextAlign.center),
+          child: ToolbarAction(
+            icon: Icons.more_vert,
+            size: size,
+            style: style,
             onPressed: () {
               if (gaScreen != null && gaItem != null) {
                 ga.select(gaScreen!, gaItem!);

@@ -48,8 +48,7 @@ class EventDetails extends StatelessWidget {
       return noEventSelected;
     }
     final selected = selectedEvent!;
-    return '${selected.isUiEvent ? 'CPU Profile: ' : ''}'
-        '${selected.name} (${durationText(selected.time.duration)})';
+    return '${selected.name} (${durationText(selected.time.duration)})';
   }
 }
 
@@ -63,6 +62,8 @@ class EventSummary extends StatelessWidget {
         ],
         _eventArgs = Map.from(event.traceEvents.first.event.args!)
           ..addAll({for (var trace in event.traceEvents) ...trace.event.args!});
+
+  static const _detailsSpacing = 32.0;
 
   final TimelineEvent event;
 
@@ -82,47 +83,49 @@ class EventSummary extends StatelessWidget {
         // affects the hover boundary for the clickable expanding tiles.
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
-          child: EventMetaData(
-            title: 'Time',
-            inlineValue: durationText(event.time.duration),
-            child: SelectableText(
-              '[${event.time.start!.inMicroseconds} μs —  '
-              '${event.time.end!.inMicroseconds} μs]',
-              style: Theme.of(context).subtleFixedFontStyle,
-            ),
-          ),
-        ),
-        // Wrap with horizontal padding so that these items align with the
-        // expanding data items. Adding horizontal padding to the entire list
-        // affects the hover boundary for the clickable expanding tiles.
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
           child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Flexible(
-                fit: FlexFit.tight,
                 child: EventMetaData(
-                  title: 'Category',
-                  inlineValue: '${firstTraceEvent.category}',
+                  title: 'Time',
+                  inlineValue: durationText(event.time.duration),
+                  child: SelectableText(
+                    '[${durationText(event.time.start!, unit: DurationDisplayUnit.micros)} —  '
+                    '${durationText(event.time.end!, unit: DurationDisplayUnit.micros)}]',
+                    style: Theme.of(context).subtleFixedFontStyle,
+                  ),
                 ),
               ),
-              if (event.isAsyncEvent)
-                Flexible(
-                  fit: FlexFit.tight,
-                  child: _asyncIdTile(),
-                ),
+              const SizedBox(width: _detailsSpacing),
               Flexible(
-                fit: FlexFit.tight,
-                child: EventMetaData(
-                  title: 'Thread id',
-                  inlineValue: '${firstTraceEvent.threadId}',
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    EventMetaData(
+                      title: 'Thread id',
+                      inlineValue: '${firstTraceEvent.threadId}',
+                    ),
+                    EventMetaData(
+                      title: 'Process id',
+                      inlineValue: '${firstTraceEvent.processId}',
+                    ),
+                  ],
                 ),
               ),
+              const SizedBox(width: _detailsSpacing),
               Flexible(
-                fit: FlexFit.tight,
-                child: EventMetaData(
-                  title: 'Process id',
-                  inlineValue: '${firstTraceEvent.processId}',
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    EventMetaData(
+                      title: 'Category',
+                      inlineValue: '${firstTraceEvent.category}',
+                    ),
+                    if (event.isAsyncEvent) _asyncIdTile(),
+                  ],
                 ),
               ),
             ],
@@ -199,31 +202,28 @@ class EventMetaData extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: denseSpacing),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SelectableText.rich(
-            TextSpan(
-              text: '$title${inlineValue != null ? ':  ' : ''}',
-              style: theme.textTheme.titleSmall,
-              children: [
-                if (inlineValue != null)
-                  TextSpan(
-                    text: inlineValue,
-                    style: theme.subtleFixedFontStyle,
-                  ),
-              ],
-            ),
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SelectableText.rich(
+          TextSpan(
+            text: '$title${inlineValue != null ? ':  ' : ''}',
+            style: theme.textTheme.titleSmall,
+            children: [
+              if (inlineValue != null)
+                TextSpan(
+                  text: inlineValue,
+                  style: theme.subtleFixedFontStyle,
+                ),
+            ],
           ),
-          if (child != null) ...[
-            const SizedBox(height: densePadding),
-            child!,
-          ],
+        ),
+        if (child != null) ...[
+          const SizedBox(height: densePadding),
+          child!,
         ],
-      ),
+      ],
     );
   }
 }
