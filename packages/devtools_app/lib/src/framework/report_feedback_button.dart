@@ -15,7 +15,7 @@ import '../shared/theme.dart';
 
 class ReportFeedbackButton extends StatelessWidget {
   const ReportFeedbackButton();
-  
+
   @override
   Widget build(BuildContext context) {
     return DevToolsTooltip(

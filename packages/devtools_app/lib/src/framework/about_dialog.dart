@@ -135,7 +135,7 @@ class _DiscordLink extends StatelessWidget {
 
 class OpenAboutAction extends StatelessWidget {
   const OpenAboutAction();
-  
+
   @override
   Widget build(BuildContext context) {
     final releaseNotesController = Provider.of<ReleaseNotesController>(context);

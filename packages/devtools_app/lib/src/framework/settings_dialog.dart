@@ -19,7 +19,7 @@ import '../shared/utils.dart';
 
 class OpenSettingsAction extends StatelessWidget {
   const OpenSettingsAction();
-  
+
   @override
   Widget build(BuildContext context) {
     return DevToolsTooltip(
