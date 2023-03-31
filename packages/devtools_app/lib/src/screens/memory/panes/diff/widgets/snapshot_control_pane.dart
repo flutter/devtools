@@ -47,17 +47,23 @@ class SnapshotControlPane extends StatelessWidget {
                 ],
               ],
             ),
-            Row(
-              children: [
-                if (heapIsReady) ...[
-                  _SnapshotSizeView(footprint: current.heap!.footprint),
-                  const SizedBox(width: defaultSpacing),
+            Expanded(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  if (heapIsReady) ...[
+                    Expanded(
+                      child:
+                          _SnapshotSizeView(footprint: current.heap!.footprint),
+                    ),
+                    const SizedBox(width: defaultSpacing),
+                  ],
+                  _DeleteSnapshotButton(
+                    controller: controller,
+                    isProcessing: isProcessing,
+                  ),
                 ],
-                _DeleteSnapshotButton(
-                  controller: controller,
-                  isProcessing: isProcessing,
-                ),
-              ],
+              ),
             ),
           ],
         );
@@ -162,8 +168,12 @@ class _SnapshotSizeView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Text('RSS: ${prettyPrintBytes(footprint.rss, includeUnit: true)} | '
-        'Dart: ${prettyPrintBytes(footprint.dart, includeUnit: true)} | '
-        'Reachable: ${prettyPrintBytes(footprint.reachable, includeUnit: true)}');
+    return Text(
+      'RSS: ${prettyPrintBytes(footprint.rss, includeUnit: true)} | '
+      'Dart: ${prettyPrintBytes(footprint.dart, includeUnit: true)} | '
+      'Reachable: ${prettyPrintBytes(footprint.reachable, includeUnit: true)}',
+      overflow: TextOverflow.ellipsis,
+      textAlign: TextAlign.right,
+    );
   }
 }
