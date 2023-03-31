@@ -9,7 +9,7 @@ import 'package:vm_service/vm_service.dart';
 
 import '../../../service/vm_service_wrapper.dart';
 import '../../globals.dart';
-import '../../memory/adapted_heap_data.dart';
+import '../../memory/adapted_heap_object.dart';
 import '../../primitives/auto_dispose.dart';
 import '../../vm_utils.dart';
 import '../primitives/scope.dart';

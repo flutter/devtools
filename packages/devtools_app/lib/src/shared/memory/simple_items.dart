@@ -7,3 +7,6 @@ enum RefDirection {
   inbound,
   outbound,
 }
+
+/// Result of invocation of [identityHashCode].
+typedef IdentityHashCode = int;
