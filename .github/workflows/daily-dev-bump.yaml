@@ -131,7 +131,6 @@ jobs:
           GH_TOKEN: ${{ secrets.DEVTOOLS_WORKFLOW_BOT_TOKEN }}
           ORIGINAL_GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           UPDATE_TYPE: ${{ inputs.updateType }}
-          IS_DRY_RUN: ${{ inputs.dryRun }}
           AUTOSUBMIT: ${{ inputs.autosubmit }}
           IS_SCHEDULED: ${{ github.event_name == 'schedule' }}
           IS_DRAFT: ${{ inputs.draft == true }}
