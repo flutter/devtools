@@ -26,3 +26,6 @@ class MemoryFootprint {
   /// Subset of [dart].
   final int reachable;
 }
+
+/// Result of invocation of [identityHashCode].
+typedef IdentityHashCode = int;
