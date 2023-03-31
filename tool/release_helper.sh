@@ -2,9 +2,7 @@
 # echo '{ "draft": "true", "updateType": "release" }' | gh workflow run .github/workflows/daily-dev-bump.yaml --json --ref=more-bump
 
 DEVTOOLS_REMOTE=$(git remote -v | grep "flutter/devtools.git" | grep "(fetch)"| tail -n1 | cut -w -f1)
-TYPE=$1
 
-cd ..
 
 if [ -z "$DEVTOOLS_REMOTE" ] ; then
     echo "Couldn't find a remote that points to flutter/devtools.git"
@@ -26,6 +24,8 @@ RELEASE_BRANCH="clean_release_$(date +%s)"
 git checkout -b "$RELEASE_BRANCH"
 
 dart pub get
+
+cd ..
 
 ORIGINAL_VERSION=$(dart tool/update_version.dart current-version)
 
