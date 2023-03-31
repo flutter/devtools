@@ -41,5 +41,4 @@ git commit -a -m "$COMMIT_MESSAGE"
 
 git push -u $DEVTOOLS_REMOTE master
 
-
 PR_URL=$(gh pr create --title "$COMMIT_MESSAGE" --body "RELEASE_NOTE_EXCEPTION=Automated Version Bump" $CREATION_FLAGS)
