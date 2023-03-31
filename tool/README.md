@@ -24,16 +24,19 @@ Make sure:
 
 ### Prepare the release
 
-#### Create a release PR
-- Navigate to the [Version Bump Action Page](https://github.com/flutter/devtools/actions/workflows/version-bump.yaml)
-- Select "Run Workflow"
-- Then use the following options:
-  - Update Type: `release`
-  - Auto Submit PR: `false` **THIS SETTING IS IMPORTANT**
-  - Dry Run: `false`
-- This will create a branch with a release version on it
+#### Ensure you have Github CLI installed
+- If you need to install the Github CLI you can run:
+    `brew install gh`
+- More information can be found at: https://cli.github.com/manual/installation
 
-#### Verify the version changes for the release PR
+#### Create a release PR
+- Run: `./tool/release_helper.sh`
+- This will create a PR for you using the tip of master.
+- That PR will be checked out locally for you.
+- It will also update your local version of flutter to the Latest flutter candidate
+    - This is to facilitate testing in the next steps
+
+#### Verify the version changes for the Release PR
 
 Verify the code on the release PR:
 - updated the pubspecs under packages/
@@ -42,7 +45,7 @@ Verify the code on the release PR:
 
 These packages always have their version numbers updated in lock, so we don't have to worry about versioning.
 
-#### Manually review the CHANGELOG.md for the release PR
+#### Manually review the CHANGELOG.md for the Release PR
 
 Review/update `CHANGELOG.md`:
 
@@ -60,7 +63,6 @@ Review/update `CHANGELOG.md`:
 
 ### Test the release PR
 
-- Checkout the release PR,
 - Build the DevTools binary and run it from your local Dart SDK.
    - From the main devtools/ directory.
    ```shell
@@ -191,14 +193,13 @@ checkout the Flutter version on your local flutter repo (the Flutter SDK that
    ```
 
 ### Update to the next version
-- Navigate to the [Version Bump Action Page](https://github.com/flutter/devtools/actions/workflows/version-bump.yaml)
-- Select "Run Workflow"
-- Then use the following options:
-  - Update Type: `minor+dev`
-  - Auto Submit PR: `true` **This can be autosubmit since no changes need to be made**
-  - Dry Run: `false`
-- This will create a version bump PR that will autosubmit when the workflows pass
-- Ensure that the PR eventually submits itsef.
+-  `gh workflow run daily-dev-bump.yaml  -f updateType=minor+dev`
+   -  This will kick off a workflow that will automatically create a PR with a `minor` + `dev` version bump
+   -  That PR should then be auto submitted
+-  See https://github.com/flutter/devtools/actions/workflows/daily-dev-bump.yaml
+   -  To see the workflow run
+-  Go to https://github.com/flutter/devtools/pulls to see the pull request that ends up being created
+-  You should make sure that the release PR goes through without issue.
 
 ## Debug Logs
 
