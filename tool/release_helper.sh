@@ -34,7 +34,7 @@ dart tool/bin/repo_tool.dart generate-changelog
 
 NEW_VERSION=$(dart tool/update_version.dart current-version)
 
-COMMIT_MESSAGE="Updating from $ORIGINAL_VERSION to $NEW_VERSION"
+COMMIT_MESSAGE="Releasing from $ORIGINAL_VERSION to $NEW_VERSION"
 
 # Stage the file, commit and push
 git commit -a -m "$COMMIT_MESSAGE"
