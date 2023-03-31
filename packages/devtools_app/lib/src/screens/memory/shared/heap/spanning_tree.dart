@@ -13,7 +13,7 @@ final _uiReleaser = UiReleaser();
 /// * Sets the field retainer and retainedSize for each object in the [heap], that
 /// has retaining path to the root.
 /// * Populates [AdaptedHeapObject.inRefs].
-/// * Sets AdaptedHeapObject.totalDartSize.
+/// * Sets [AdaptedHeapObject.totalDartSize].
 /// * Sets [AdaptedHeapData.allFieldsCalculated] to true.
 Future<void> calculateHeap(AdaptedHeapData heap) async {
   assert(!heap.allFieldsCalculated);
