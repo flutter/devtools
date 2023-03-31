@@ -58,9 +58,9 @@ typedef HeapDataCallback = AdaptedHeapData Function();
 class AdaptedHeapData {
   @visibleForTesting
   AdaptedHeapData(
-    this.objects,
-    this.memoryFootprint, {
+    this.objects, {
     required this.isolateId,
+    required this._rssSize,
     this.rootIndex = _defaultRootIndex,
     DateTime? created,
   })  : assert(objects.isNotEmpty),
@@ -125,7 +125,7 @@ class AdaptedHeapData {
 
   String snapshotName = '';
 
-  MemoryFootprint memoryFootprint;
+  int _rssSize;
 
   /// Heap objects by identityHashCode.
   late final Map<IdentityHashCode, int> _objectsByCode = Map.fromIterable(
