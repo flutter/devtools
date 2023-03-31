@@ -110,6 +110,9 @@ class AdaptedHeapData {
 
   final String isolateId;
 
+  /// Total size of all objects in the heap.
+  ///
+  /// Should be set externally.
   late int totalDartSize;
 
   bool allFieldsCalculated = false;

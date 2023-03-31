@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io';
+
 import '../../../../shared/memory/adapted_heap_data.dart';
 import '../../../../shared/memory/adapted_heap_object.dart';
 import '../../../../shared/memory/class_name.dart';
@@ -22,19 +24,27 @@ class AdaptedHeap {
 
   final AdaptedHeapData data;
 
+  late final MemoryFootprint footprint;
+
   SingleHeapClasses get classes => _classes;
   late final SingleHeapClasses _classes;
 
   Future<void> _initialize() async {
+    if (!data.allFieldsCalculated) await calculateHeap(data);
+    footprint = MemoryFootprint(
+      rss: ProcessInfo.currentRss,
+      dart: data.totalDartSize,
+      reachable: data.totalReachableSize,
+    );
     _classes = await _heapStatistics();
   }
 
   final _uiReleaser = UiReleaser();
 
   Future<SingleHeapClasses> _heapStatistics() async {
-    final result = <HeapClassName, SingleClassStats>{};
-    if (!data.allFieldsCalculated) await calculateHeap(data);
+    assert(data.allFieldsCalculated);
 
+    final result = <HeapClassName, SingleClassStats>{};
     for (var i in Iterable.generate(data.objects.length)) {
       if (_uiReleaser.step()) await _uiReleaser.releaseUi();
       final object = data.objects[i];
