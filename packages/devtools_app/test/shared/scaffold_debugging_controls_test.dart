@@ -58,7 +58,7 @@ void main() {
 
       await tester.pumpWidget(
         wrapWithControllers(
-          const DevToolsScaffold(screens: [_screen1, _screen2]),
+          DevToolsScaffold(screens: const [_screen1, _screen2]),
           debugger: mockDebuggerController,
           analytics: AnalyticsController(enabled: false, firstRun: false),
         ),

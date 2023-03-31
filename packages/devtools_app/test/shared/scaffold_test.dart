@@ -42,8 +42,8 @@ void main() {
       await tester.pumpWidget(
         wrapScaffold(
           wrapWithNotifications(
-            const DevToolsScaffold(
-              screens: [_screen1, _screen2, _screen3, _screen4, _screen5],
+            DevToolsScaffold(
+              screens: const [_screen1, _screen2, _screen3, _screen4, _screen5],
             ),
           ),
         ),
@@ -61,8 +61,8 @@ void main() {
       await tester.pumpWidget(
         wrapScaffold(
           wrapWithNotifications(
-            const DevToolsScaffold(
-              screens: [_screen1, _screen2, _screen3, _screen4, _screen5],
+            DevToolsScaffold(
+              screens: const [_screen1, _screen2, _screen3, _screen4, _screen5],
             ),
           ),
         ),
@@ -79,7 +79,7 @@ void main() {
       await tester.pumpWidget(
         wrapScaffold(
           wrapWithNotifications(
-            const DevToolsScaffold(screens: [_screen1]),
+            DevToolsScaffold(screens: const [_screen1]),
           ),
         ),
       );
@@ -92,7 +92,7 @@ void main() {
     await tester.pumpWidget(
       wrapScaffold(
         wrapWithNotifications(
-          const DevToolsScaffold(screens: [_screen1, _screen2]),
+          DevToolsScaffold(screens: const [_screen1, _screen2]),
         ),
       ),
     );

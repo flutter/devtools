@@ -42,7 +42,7 @@ void main() {
       await tester.pumpWidget(
         wrapScaffold(
           wrapWithNotifications(
-            const DevToolsScaffold(screens: [_screen1, _screen2]),
+            DevToolsScaffold(screens: const [_screen1, _screen2]),
           ),
         ),
       );
