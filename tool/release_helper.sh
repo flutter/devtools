@@ -26,12 +26,12 @@ git checkout -b "$RELEASE_BRANCH"
 
 dart pub get
 
-ORIGINAL_VERSION=$(dart tool/update_version.dart current-version)
+ORIGINAL_VERSION=$(dart update_version.dart current-version)
 
 dart update_version.dart auto --type release
 dart bin/repo_tool.dart generate-changelog
 
-NEW_VERSION=$(dart tool/update_version.dart current-version)
+NEW_VERSION=$(dart update_version.dart current-version)
 
 COMMIT_MESSAGE="Updating from $ORIGINAL_VERSION to $NEW_VERSION"
 
