@@ -61,6 +61,6 @@ echo "Updating your flutter version to the most recent candidate."
 echo
 ./tool/update_flutter_sdk.sh --local
 
-echo
-echo "$0 DONE: You can now start testing devtools to make sure it is ready for release."
 echo "Your Draft release PR can be found at: $PR_URL"
+echo
+echo "$0 DONE: Build, run and test this release using: `dart ./tool/build_e2e.dart`"

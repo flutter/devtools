@@ -24,12 +24,10 @@ Make sure:
 
 ### Prepare the release
 
-#### Ensure you have Github CLI installed
-- If you need to install the Github CLI you can run:
-    `brew install gh`
-- More information can be found at: https://cli.github.com/manual/installation
-
 #### Create a release PR
+
+> If you need to install the [Github CLI](https://cli.github.com/manual/installation) you can run: `brew install gh`
+
 - Run: `./tool/release_helper.sh`
 - This will create a PR for you using the tip of master.
 - The branch for that PR will be checked out locally for you.
