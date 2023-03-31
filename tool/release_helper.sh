@@ -39,6 +39,6 @@ COMMIT_MESSAGE="Updating from $ORIGINAL_VERSION to $NEW_VERSION"
 # Stage the file, commit and push
 git commit -a -m "$COMMIT_MESSAGE"
 
-git push -u $DEVTOOLS_REMOTE
+git push -u $DEVTOOLS_REMOTE $RELEASE_BRANCH
 
 PR_URL=$(gh pr create --title "$COMMIT_MESSAGE" --body "RELEASE_NOTE_EXCEPTION=Automated Version Bump" $CREATION_FLAGS)
