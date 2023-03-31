@@ -432,9 +432,9 @@ class SettingsOutlinedButton extends DevToolsButton {
 
 class HelpButton extends StatelessWidget {
   const HelpButton({
-    required this.onPressed,
     required this.gaScreen,
     required this.gaSelection,
+    required this.onPressed,
     this.outlined = true,
   });
 

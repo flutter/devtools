@@ -16,13 +16,19 @@ found in the LICENSE file.
 
 .topbar .omnibox {
     height: 28px !important;
+    border-radius: 14px !important;
+    border: solid 1px !important;
 }
 
 .topbar .omnibox::before {
     font-size: 18px !important;
+    margin-top: 4px !important;
+    margin-left: 5px !important;
+    padding-top: 0px !important;
 }
 
 .topbar .omnibox input {
+    height: 26px !important;
     font-size: 16px !important;
 }
 
@@ -32,5 +38,5 @@ found in the LICENSE file.
 }
 
 .overview-timeline {
-    height: 60px !important;
+    height: 50px !important;
 }

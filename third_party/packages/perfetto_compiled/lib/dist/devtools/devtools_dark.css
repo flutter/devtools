@@ -10,7 +10,14 @@ found in the LICENSE file.
     /* Matches [darkColorScheme.surface] color from DevTools. */
     --devtools-dark-background-color: #1B1B1F;
     /* Matches [darkColorScheme.onSurface] color from DevTools. */
-    --devtools-dark-primary-color: #C7C6CA;
+    --devtools-dark-on-background-color: #E3E2E6;
+    /* Matches [darkColorScheme.primary] color from DevTools. */
+    --devtools-dark-primary-color: #ADC6FF;
+    /* Matches [darkColorScheme.onPrimary] color from DevTools. */
+    --devtools-dark-on-primary-color: #002E69;
+    /* Matches [Theme.focusColor] from DevTools. */
+    --devtools-dark-border-color: #37373A;
+
     --overview-timeline-non-visible-color: #6e6e6e80 !important;
     /* Perfetto CSS variable overrides. */
     /* DevTools-specific CSS variables. Prefix with 'devtools' so that
@@ -53,13 +60,14 @@ body {
 
 .topbar .omnibox {
   background-color: var(--devtools-dark-background-color) !important;
-  border-color: var(--devtools-dark-primary-color) !important;
+  color: var(--devtools-dark-on-background-color) !important;
+  border-color: var(--devtools-dark-on-background-color) !important;
   border-width: thin !important;
-  border: solid !important;
+  border: solid 1px !important;
 }
 
 .topbar .omnibox input {
-  color: var(--devtools-dark-primary-color) !important;
+  color: var(--devtools-dark-on-background-color) !important;
 }
 
 .material-icons {
@@ -68,11 +76,11 @@ body {
 
 .track-shell {
   background-color: var(--devtools-dark-background-color) !important;
-  border-right: 1px solid var(--devtools-dark-primary-color) !important;
+  border-right: 1px solid var(--devtools-dark-on-background-color) !important;
 }
 
 .track .track-shell h1 {
-  color: var(--devtools-dark-primary-color) !important;
+  color: var(--devtools-dark-on-background-color) !important;
 }
 
 .track .track-shell .track-button {
@@ -97,69 +105,58 @@ body {
 
 .details-panel {
   background-color: var(--devtools-dark-background-color) !important;
-  color: var(--devtools-dark-primary-color) !important;
+  color: var(--devtools-dark-on-background-color) !important;
 }
 
 .details-panel .details-panel-heading {
   background-color: var(--devtools-dark-background-color) !important;
-  color: var(--devtools-dark-primary-color) !important;
+  color: var(--devtools-dark-on-background-color) !important;
 }
 
 .details-panel table tr:hover td, .details-panel table tr:hover th {
-  background-color: var(--devtools-dark-primary-color) !important;
-  color: #262626 !important;
+  background-color: #6e6e6e !important;
 }
 
 .details-content .handle {
-  background-color: #262626 !important;
-  border-top: 1px solid #585858 !important;
+  background-color: var(--devtools-dark-background-color) !important;
+  border-top: 1px solid var(--devtools-dark-border-color) !important;
+  border-bottom: 1px solid var(--devtools-dark-border-color) !important;
+}
+
+.details-content .handle .tabs .tab {
+  background-color: var(--devtools-dark-background-color) !important;
+  color: var(--devtools-dark-on-background-color) !important;
+  border: none !important;
+  z-index: 0 !important;
+  box-shadow: none !important;
 }
 
 .details-content .handle .tabs .tab[active] {
-  background-color: #262626 !important;
-  border-left: solid 1px var(--devtools-dark-primary-color) !important;
-  border-right: solid 1px var(--devtools-dark-primary-color) !important;
-  border-top: solid 1px var(--devtools-dark-primary-color) !important;
-  color: var(--devtools-dark-primary-color) !important;
+  text-decoration: underline !important;
+  text-decoration-color: var(--devtools-dark-primary-color) !important;
+  text-decoration-thickness: 3px !important;
 }
 
 .details-content .handle .tabs .tab[active]:hover {
-  color: #13b9fd !important;
+  background-color: var(--devtools-dark-border-color) !important;
 }
 
 .notes-editor-panel {
-  color: var(--devtools-dark-primary-color) !important;
+  color: var(--devtools-dark-on-background-color) !important;
 }
 
 .notes-editor-panel button {
   background: transparent !important;
-  border-color: var(--devtools-dark-primary-color) !important;
+  border-color: var(--devtools-dark-on-background-color) !important;
   border-width: thin !important;
   border: solid !important;
 }
 .notes-editor-panel input {
   background-color: var(--devtools-dark-background-color) !important;
-  border-color: var(--devtools-dark-primary-color) !important;
-  color: var(--devtools-dark-primary-color) !important;
+  border-color: var(--devtools-dark-on-background-color) !important;
+  color: var(--devtools-dark-on-background-color) !important;
 }
 
 .sum .sum-data {
-  border-bottom: 1px solid var(--devtools-dark-primary-color) !important;
-}
-
-.cookie-consent {
-  background-color: var(--devtools-dark-primary-color) !important;
-  color: #262626 !important;
-}
-
-.cookie-consent .buttons button {
-  color: #262626 !important;
-}
-
-.cookie-consent button a {
-  color: #262626 !important;
-}
-
-.cookie-consent button:hover {
-  background-color: #ffffff !important;
+  border-bottom: 1px solid var(--devtools-dark-on-background-color) !important;
 }
