@@ -56,8 +56,10 @@ typedef HeapDataCallback = AdaptedHeapData Function();
 /// Contains information from [HeapSnapshotGraph],
 /// needed for memory screen.
 class AdaptedHeapData {
+  @visibleForTesting
   AdaptedHeapData(
-    this.objects, {
+    this.objects,
+    this.memoryFootprint, {
     required this.isolateId,
     this.rootIndex = _defaultRootIndex,
     DateTime? created,
@@ -76,6 +78,7 @@ class AdaptedHeapData {
             (i, e) => AdaptedHeapObject.fromJson(e as Map<String, Object?>, i),
           )
           .toList(),
+      MemoryFootprint(rss: 0, dart: 0, reachable: 0),
       created: createdJson == null ? null : DateTime.parse(createdJson),
       rootIndex: json[_JsonFields.rootIndex] ?? _defaultRootIndex,
       isolateId: json[_JsonFields.isolateId] ?? '',
@@ -87,6 +90,7 @@ class AdaptedHeapData {
   static Future<AdaptedHeapData> fromHeapSnapshot(
     HeapSnapshotGraph graph, {
     required String isolateId,
+    required int rss,
   }) async {
     final objects = <AdaptedHeapObject>[];
     for (final i in Iterable.generate(graph.objects.length)) {
@@ -117,7 +121,7 @@ class AdaptedHeapData {
 
   String snapshotName = '';
 
-  late MemoryFootprint footprint;
+  MemoryFootprint memoryFootprint;
 
   /// Heap objects by identityHashCode.
   late final Map<IdentityHashCode, int> _objectsByCode = Map.fromIterable(
