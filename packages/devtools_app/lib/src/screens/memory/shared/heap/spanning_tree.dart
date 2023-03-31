@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import '../../../../shared/memory/adapted_heap_data.dart';
+import '../../../../shared/memory/adapted_heap_object.dart';
 import '../../../../shared/primitives/utils.dart';
 
 final _uiReleaser = UiReleaser();
