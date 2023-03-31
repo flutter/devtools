@@ -32,7 +32,7 @@ Make sure:
 #### Create a release PR
 - Run: `./tool/release_helper.sh`
 - This will create a PR for you using the tip of master.
-- That PR will be checked out locally for you.
+- The branch for that PR will be checked out locally for you.
 - It will also update your local version of flutter to the Latest flutter candidate
     - This is to facilitate testing in the next steps
 
@@ -193,7 +193,7 @@ checkout the Flutter version on your local flutter repo (the Flutter SDK that
    ```
 
 ### Update to the next version
--  `gh workflow run daily-dev-bump.yaml  -f updateType=minor+dev`
+-  `gh workflow run daily-dev-bump.yaml -f updateType=minor+dev`
    -  This will kick off a workflow that will automatically create a PR with a `minor` + `dev` version bump
    -  That PR should then be auto submitted
 -  See https://github.com/flutter/devtools/actions/workflows/daily-dev-bump.yaml
