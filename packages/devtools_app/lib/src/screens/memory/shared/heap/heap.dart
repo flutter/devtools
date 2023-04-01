@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io';
-
 import '../../../../shared/memory/adapted_heap_data.dart';
 import '../../../../shared/memory/adapted_heap_object.dart';
 import '../../../../shared/memory/class_name.dart';
@@ -31,20 +29,12 @@ class AdaptedHeap {
 
   Future<void> _initialize() async {
     if (!data.allFieldsCalculated) await calculateHeap(data);
-    footprint = _footprint(data);
+    footprint = await _footprint(data);
     _classes = await _heapStatistics();
   }
 
-  static MemoryFootprint _footprint(AdaptedHeapData data) {
-    int? rss;
-    try {
-      // This operation is not supported on Web.
-      rss = ProcessInfo.currentRss;
-    } on UnsupportedError {
-      rss = null;
-    }
+  static Future<MemoryFootprint> _footprint(AdaptedHeapData data) async {
     return MemoryFootprint(
-      rss: rss,
       dart: data.totalDartSize,
       reachable: data.totalReachableSize,
     );

@@ -169,7 +169,6 @@ class _SnapshotSizeView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final items = <String, int>{
-      if (footprint.rss != null) 'RSS': footprint.rss!,
       'Dart': footprint.dart,
       'Reachable': footprint.reachable,
     };
