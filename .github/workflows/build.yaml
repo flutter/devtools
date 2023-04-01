@@ -41,7 +41,7 @@ jobs:
       - name: Run DCM on Root
         run: |
           set -x
-          dcm analyze --verbose --ci-key="$DCM_CI_KEY" --email="$DCM_EMAIL" .
+          dcm analyze --ci-key="$DCM_CI_KEY" --email="$DCM_EMAIL" .
 
   flutter-prep:
     name: ${{ matrix.os }} Flutter Prep
