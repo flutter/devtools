@@ -168,10 +168,17 @@ class _SnapshotSizeView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final items = <String, int>{
+      if (footprint.rss != null) 'RSS': footprint.rss!,
+      'Dart': footprint.dart,
+      'Reachable': footprint.reachable,
+    };
     return Text(
-      'RSS: ${prettyPrintBytes(footprint.rss, includeUnit: true)} | '
-      'Dart: ${prettyPrintBytes(footprint.dart, includeUnit: true)} | '
-      'Reachable: ${prettyPrintBytes(footprint.reachable, includeUnit: true)}',
+      items.entries
+          .map<String>(
+            (e) => '${e.key}: ${prettyPrintBytes(e.value, includeUnit: true)}',
+          )
+          .join(' | '),
       overflow: TextOverflow.ellipsis,
       textAlign: TextAlign.right,
     );

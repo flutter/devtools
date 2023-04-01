@@ -21,7 +21,7 @@ class MemoryFootprint {
   /// Total memory used by the Dart VM, including shared pages.
   ///
   /// See https://developer.android.com/topic/performance/memory-management.
-  final int rss;
+  final int? rss;
 
   /// Subset of [rss].
   final int dart;

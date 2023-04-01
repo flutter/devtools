@@ -31,12 +31,23 @@ class AdaptedHeap {
 
   Future<void> _initialize() async {
     if (!data.allFieldsCalculated) await calculateHeap(data);
-    footprint = MemoryFootprint(
-      rss: ProcessInfo.currentRss,
+    footprint = _footprint(data);
+    _classes = await _heapStatistics();
+  }
+
+  static MemoryFootprint _footprint(AdaptedHeapData data) {
+    int? rss;
+    try {
+      // This operation is not supported on Web.
+      rss = ProcessInfo.currentRss;
+    } on UnsupportedError {
+      rss = null;
+    }
+    return MemoryFootprint(
+      rss: rss,
       dart: data.totalDartSize,
       reachable: data.totalReachableSize,
     );
-    _classes = await _heapStatistics();
   }
 
   final _uiReleaser = UiReleaser();
