@@ -169,7 +169,7 @@ class _SnapshotSizeView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final items = <String, int>{
-      'Dart': footprint.dart,
+      'Dart Heap': footprint.dart,
       'Reachable': footprint.reachable,
     };
     return Text(
