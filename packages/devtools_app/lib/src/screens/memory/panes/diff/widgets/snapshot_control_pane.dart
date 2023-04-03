@@ -180,6 +180,7 @@ class _SnapshotSizeView extends StatelessWidget {
           .map<String>(
             (e) => '${e.key}: ${prettyPrintBytes(e.value, includeUnit: true)}',
           )
+          // TODO(polina-c): consider using vertical divider instead of text.
           .join(' | '),
       overflow: TextOverflow.ellipsis,
       textAlign: TextAlign.right,

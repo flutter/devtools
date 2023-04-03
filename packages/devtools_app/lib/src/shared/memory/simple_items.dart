@@ -17,7 +17,7 @@ class MemoryFootprint {
     required this.reachable,
   });
 
-  /// Reachable and unreachable dart size.
+  /// Reachable and unreachable total dart heap size.
   final int dart;
 
   /// Subset of [dart].
