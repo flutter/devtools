@@ -4,6 +4,7 @@
 
 import 'package:flutter/material.dart';
 
+import '../../../../shared/analytics/constants.dart' as gac;
 import '../../../../shared/common_widgets.dart';
 import '../../../../shared/primitives/utils.dart';
 import '../../../../shared/table/table.dart';
@@ -11,8 +12,8 @@ import '../../../../shared/table/table_data.dart';
 import '../../../../shared/theme.dart';
 import '../../../../shared/ui/tab.dart';
 import '../../../../shared/utils.dart';
-import '../../../profiler/cpu_profile_columns.dart';
 import '../../../profiler/cpu_profile_model.dart';
+import '../../../profiler/panes/cpu_profile_columns.dart';
 import 'tracing_pane_controller.dart';
 
 const double _countColumnWidth = 130;
@@ -212,6 +213,8 @@ class _TracingTreeHeader extends StatelessWidget {
         ),
         const SizedBox(width: denseSpacing),
         ExpandAllButton(
+          gaScreen: gac.memory,
+          gaSelection: gac.MemoryEvent.tracingTreeExpandAll,
           onPressed: () => updateTreeStateCallback(
             () {
               for (final root in _currentDataRoots) {
@@ -222,6 +225,8 @@ class _TracingTreeHeader extends StatelessWidget {
         ),
         const SizedBox(width: denseSpacing),
         CollapseAllButton(
+          gaScreen: gac.memory,
+          gaSelection: gac.MemoryEvent.tracingTreeCollapseAll,
           onPressed: () => updateTreeStateCallback(
             () {
               for (final root in _currentDataRoots) {

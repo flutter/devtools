@@ -4,7 +4,6 @@
 
 import 'dart:convert';
 
-import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../devtools.dart';
@@ -16,15 +15,6 @@ import '_export_stub.dart'
     if (dart.library.html) '_export_web.dart'
     if (dart.library.io) '_export_desktop.dart';
 
-const devToolsSnapshotKey = 'devToolsSnapshot';
-const activeScreenIdKey = 'activeScreenId';
-const devToolsVersionKey = 'devtoolsVersion';
-const connectedAppKey = 'connectedApp';
-const isFlutterAppKey = 'isFlutterApp';
-const isProfileBuildKey = 'isProfileBuild';
-const isDartWebAppKey = 'isDartWebApp';
-const isRunningOnDartVMKey = 'isRunningOnDartVM';
-const flutterVersionKey = 'flutterVersion';
 const nonDevToolsFileMessage = 'The imported file is not a Dart DevTools file.'
     ' At this time, DevTools only supports importing files that were originally'
     ' exported from DevTools.';
@@ -35,6 +25,13 @@ String attemptingToImportMessage(String devToolsScreen) {
 
 String successfulExportMessage(String exportedFile) {
   return 'Successfully exported $exportedFile to ~/Downloads directory';
+}
+
+enum DevToolsExportKeys {
+  devToolsSnapshot,
+  devToolsVersion,
+  connectedApp,
+  activeScreenId,
 }
 
 // TODO(kenz): we should support a file picker import for desktop.
@@ -65,8 +62,8 @@ class ImportController {
     }
     previousImportTime = now;
 
-    final isDevToolsSnapshot =
-        _json is Map<String, dynamic> && _json[devToolsSnapshotKey] == true;
+    final isDevToolsSnapshot = _json is Map<String, dynamic> &&
+        _json[DevToolsExportKeys.devToolsSnapshot.name] == true;
     if (!isDevToolsSnapshot) {
       notificationService.push(nonDevToolsFileMessage);
       return;
@@ -74,14 +71,15 @@ class ImportController {
 
     final devToolsSnapshot = _json;
     // TODO(kenz): support imports for more than one screen at a time.
-    final activeScreenId = devToolsSnapshot[activeScreenIdKey];
+    final activeScreenId =
+        devToolsSnapshot[DevToolsExportKeys.activeScreenId.name];
     final connectedApp =
-        (devToolsSnapshot[connectedAppKey] ?? <String, Object>{})
+        (devToolsSnapshot[DevToolsExportKeys.connectedApp.name] ??
+                <String, Object>{})
             .cast<String, Object>();
     offlineController
-      ..enterOfflineMode()
+      ..enterOfflineMode(offlineApp: OfflineConnectedApp.parse(connectedApp))
       ..offlineDataJson = devToolsSnapshot;
-    serviceManager.connectedApp = OfflineConnectedApp.parse(connectedApp);
     notificationService.push(attemptingToImportMessage(activeScreenId));
     _pushSnapshotScreenForImport(activeScreenId);
   }
@@ -148,60 +146,34 @@ abstract class ExportController {
     required String fileName,
   });
 
-  String encode(String activeScreenId, Map<String, dynamic> contents) {
-    final _contents = {
-      devToolsSnapshotKey: true,
-      activeScreenIdKey: activeScreenId,
-      devToolsVersionKey: version,
-      connectedAppKey: {
-        isFlutterAppKey: serviceManager.connectedApp!.isFlutterAppNow,
-        isProfileBuildKey: serviceManager.connectedApp!.isProfileBuildNow,
-        isDartWebAppKey: serviceManager.connectedApp!.isDartWebAppNow,
-        isRunningOnDartVMKey: serviceManager.connectedApp!.isRunningOnDartVM,
-      },
-      if (serviceManager.connectedApp!.flutterVersionNow != null)
-        flutterVersionKey:
-            serviceManager.connectedApp!.flutterVersionNow!.version,
+  Map<String, dynamic> generateDataForExport({
+    required Map<String, dynamic> offlineScreenData,
+    ConnectedApp? connectedApp,
+  }) {
+    final contents = {
+      DevToolsExportKeys.devToolsSnapshot.name: true,
+      DevToolsExportKeys.devToolsVersion.name: version,
+      DevToolsExportKeys.connectedApp.name:
+          connectedApp?.toJson() ?? serviceManager.connectedApp!.toJson(),
+      ...offlineScreenData,
     };
+    final activeScreenId = contents[DevToolsExportKeys.activeScreenId.name];
+
     // This is a workaround to guarantee that DevTools exports are compatible
     // with other trace viewers (catapult, perfetto, chrome://tracing), which
     // require a top level field named "traceEvents".
     if (activeScreenId == ScreenMetaData.performance.id) {
       final traceEvents = List<Map<String, dynamic>>.from(
-        contents[traceEventsFieldName],
+        contents[activeScreenId][traceEventsFieldName],
       );
-      _contents[traceEventsFieldName] = traceEvents;
-      contents.remove(traceEventsFieldName);
+      contents[traceEventsFieldName] = traceEvents;
+      contents[activeScreenId].remove(traceEventsFieldName);
     }
-    return jsonEncode(_contents..addAll({activeScreenId: contents}));
-  }
-}
-
-class OfflineModeController {
-  ValueListenable<bool> get offlineMode => _offlineMode;
-
-  final _offlineMode = ValueNotifier(false);
-
-  Map<String, dynamic> offlineDataJson = {};
-
-  /// Stores the [ConnectedApp] instance temporarily while switching between
-  /// offline and online modes.
-  ConnectedApp? _previousConnectedApp;
-
-  bool shouldLoadOfflineData(String screenId) {
-    return _offlineMode.value &&
-        offlineDataJson.isNotEmpty &&
-        offlineDataJson[screenId] != null;
+    return contents;
   }
 
-  void enterOfflineMode() {
-    _previousConnectedApp = serviceManager.connectedApp;
-    _offlineMode.value = true;
-  }
-
-  void exitOfflineMode() {
-    serviceManager.connectedApp = _previousConnectedApp;
-    _offlineMode.value = false;
-    offlineDataJson.clear();
+  String encode(Map<String, dynamic> offlineScreenData) {
+    final data = generateDataForExport(offlineScreenData: offlineScreenData);
+    return jsonEncode(data);
   }
 }

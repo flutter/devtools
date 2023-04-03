@@ -81,7 +81,7 @@ class LandingScreenSection extends StatelessWidget {
       children: [
         Text(
           title,
-          style: textTheme.headlineSmall,
+          style: textTheme.titleLarge,
         ),
         const PaddedDivider(),
         child,

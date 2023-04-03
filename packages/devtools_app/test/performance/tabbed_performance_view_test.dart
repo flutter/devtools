@@ -5,10 +5,9 @@
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/performance/panes/frame_analysis/frame_analysis.dart';
 import 'package:devtools_app/src/screens/performance/panes/raster_stats/raster_stats.dart';
-import 'package:devtools_app/src/screens/performance/panes/timeline_events/legacy/timeline_flame_chart.dart';
+import 'package:devtools_app/src/screens/performance/panes/timeline_events/timeline_events_view.dart';
 import 'package:devtools_app/src/screens/performance/tabbed_performance_view.dart';
 import 'package:devtools_app/src/shared/charts/flame_chart.dart';
-import 'package:devtools_app/src/shared/config_specific/import_export/import_export.dart';
 import 'package:devtools_app/src/shared/ui/tab.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
@@ -193,10 +192,14 @@ void main() {
         await tester.tap(find.text('Timeline Events'));
         await tester.pumpAndSettle();
 
+        expect(find.byType(TraceCategoriesButton), findsOneWidget);
         expect(find.byType(RefreshTimelineEventsButton), findsOneWidget);
         expect(find.byType(FlameChartHelpButton), findsOneWidget);
-        expect(find.byType(SearchField<TimelineEvent>), findsOneWidget);
-        expect(find.byType(TimelineEventsView), findsOneWidget);
+        expect(
+          find.byType(SearchField<LegacyTimelineEventsController>),
+          findsOneWidget,
+        );
+        expect(find.byType(TimelineEventsTabView), findsOneWidget);
       });
     });
 

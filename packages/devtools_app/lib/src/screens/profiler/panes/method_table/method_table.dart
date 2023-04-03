@@ -61,15 +61,17 @@ class _MethodTable extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return OutlineDecoration.onlyRight(
-      child: FlatTable<MethodTableGraphNode>(
+      child: SearchableFlatTable<MethodTableGraphNode>(
+        searchController: _methodTableController,
         keyFactory: (node) => ValueKey(node.id),
         data: _methods,
         dataKey: 'cpu-profile-methods',
         columns: columns,
         defaultSortColumn: totalTimeColumn,
         defaultSortDirection: SortDirection.descending,
+        sortOriginalData: true,
         selectionNotifier: _methodTableController.selectedNode,
-        sizeToFit: false,
+        sizeColumnsToFit: false,
       ),
     );
   }
@@ -200,7 +202,7 @@ class _CallersTable extends StatelessWidget {
       defaultSortColumn: _callerTimeColumn,
       defaultSortDirection: SortDirection.descending,
       selectionNotifier: _methodTableController.selectedNode,
-      sizeToFit: false,
+      sizeColumnsToFit: false,
     );
   }
 }
@@ -236,7 +238,7 @@ class _CalleesTable extends StatelessWidget {
       defaultSortColumn: _calleeTimeColumn,
       defaultSortDirection: SortDirection.descending,
       selectionNotifier: _methodTableController.selectedNode,
-      sizeToFit: false,
+      sizeColumnsToFit: false,
     );
   }
 }

@@ -53,6 +53,44 @@ enum ScrollKind {
   parent,
 }
 
+/// A [FlatTable] widget that is searchable.
+///
+/// The table requires a [searchController], which is responsible for feeding
+/// information about search matches and the active search match to the table.
+///
+/// This table will automatically refresh search matches on the
+/// [searchController] after sort operations that are triggered from the table.
+class SearchableFlatTable<T extends SearchableDataMixin> extends FlatTable {
+  SearchableFlatTable({
+    Key? key,
+    required SearchControllerMixin<T> searchController,
+    required super.keyFactory,
+    required super.data,
+    required super.dataKey,
+    required super.columns,
+    required super.defaultSortColumn,
+    required super.defaultSortDirection,
+    super.secondarySortColumn,
+    super.sortOriginalData = false,
+    super.pinBehavior = FlatTablePinBehavior.none,
+    super.columnGroups,
+    super.autoScrollContent = false,
+    super.onItemSelected,
+    super.preserveVerticalScrollPosition = false,
+    super.includeColumnGroupHeaders = true,
+    super.sizeColumnsToFit = true,
+    super.selectionNotifier,
+  }) : super(
+          searchMatchesNotifier: searchController.searchMatches,
+          activeSearchMatchNotifier: searchController.activeSearchMatch,
+          onDataSorted: () => WidgetsBinding.instance.addPostFrameCallback((_) {
+            // This needs to be in a post frame callback so that the search
+            // matches are not updated in the middle of a table build.
+            searchController.refreshSearchMatches();
+          }),
+        );
+}
+
 /// A table that displays in a collection of [data], based on a collection of
 /// [ColumnData].
 ///
@@ -70,13 +108,16 @@ class FlatTable<T> extends StatefulWidget {
     this.onItemSelected,
     required this.defaultSortColumn,
     required this.defaultSortDirection,
+    this.onDataSorted,
+    this.sortOriginalData = false,
     this.pinBehavior = FlatTablePinBehavior.none,
     this.secondarySortColumn,
     this.searchMatchesNotifier,
     this.activeSearchMatchNotifier,
     this.preserveVerticalScrollPosition = false,
     this.includeColumnGroupHeaders = true,
-    this.sizeToFit = true,
+    this.tallHeaders = false,
+    this.sizeColumnsToFit = true,
     ValueNotifier<T?>? selectionNotifier,
   })  : selectionNotifier = selectionNotifier ?? ValueNotifier<T?>(null),
         super(key: key);
@@ -97,13 +138,23 @@ class FlatTable<T> extends StatefulWidget {
 
   /// Whether the columns for this table should be sized so that the entire
   /// table fits in view (e.g. so that there is no horizontal scrolling).
-  final bool sizeToFit;
+  final bool sizeColumnsToFit;
+
+  // TODO(kenz): should we enable this behavior by default? Does it ever matter
+  // to preserve the order of the original data passed to a flat table?
+  /// Whether table sorting should sort the original data list instead of
+  /// creating a copy.
+  final bool sortOriginalData;
 
   /// Determines if the headers for column groups should be rendered.
   ///
   /// If set to false and `columnGroups` is non-null and non-empty, only
   /// the vertical dividing lines will be drawn for each column group boundary.
   final bool includeColumnGroupHeaders;
+
+  /// Whether the table headers should be slightly taller than the table rows to
+  /// support multiline text.
+  final bool tallHeaders;
 
   /// Data set to show as rows in this table.
   final List<T> data;
@@ -150,6 +201,9 @@ class FlatTable<T> extends StatefulWidget {
   /// The secondary sort column to be used in the sorting algorithm provided by
   /// [TableControllerBase.sortDataAndNotify].
   final ColumnData<T>? secondarySortColumn;
+
+  /// Callback that will be called after each table sort operation.
+  final VoidCallback? onDataSorted;
 
   /// Notifies with the list of data items that should be marked as search
   /// matches.
@@ -228,7 +282,9 @@ class FlatTableState<T> extends State<FlatTable<T>> with AutoDisposeMixin {
         columnGroups: widget.columnGroups,
         includeColumnGroupHeaders: widget.includeColumnGroupHeaders,
         pinBehavior: widget.pinBehavior,
-        sizeToFit: widget.sizeToFit,
+        sizeColumnsToFit: widget.sizeColumnsToFit,
+        sortOriginalData: widget.sortOriginalData,
+        onDataSorted: widget.onDataSorted,
       );
     }
 
@@ -269,8 +325,9 @@ class FlatTableState<T> extends State<FlatTable<T>> with AutoDisposeMixin {
           activeSearchMatchNotifier: widget.activeSearchMatchNotifier,
           rowItemExtent: defaultRowHeight,
           preserveVerticalScrollPosition: widget.preserveVerticalScrollPosition,
+          tallHeaders: widget.tallHeaders,
         );
-    if (widget.sizeToFit || tableController.columnWidths == null) {
+    if (widget.sizeColumnsToFit || tableController.columnWidths == null) {
       return LayoutBuilder(
         builder: (context, constraints) => _buildTable(
           tableController.computeColumnWidthsSizeToFit(
@@ -376,6 +433,7 @@ class TreeTable<T extends TreeNode<T>> extends StatefulWidget {
     this.autoExpandRoots = false,
     this.preserveVerticalScrollPosition = false,
     this.displayTreeGuidelines = false,
+    this.tallHeaders = false,
     ValueNotifier<Selection<T?>>? selectionNotifier,
   })  : selectionNotifier = selectionNotifier ??
             ValueNotifier<Selection<T?>>(Selection.empty()),
@@ -445,6 +503,10 @@ class TreeTable<T extends TreeNode<T>> extends StatefulWidget {
 
   /// Determines whether or not guidelines should be rendered in tree columns.
   final bool displayTreeGuidelines;
+
+  /// Whether the table headers should be slightly taller than the table rows to
+  /// support multiline text.
+  final bool tallHeaders;
 
   @override
   TreeTableState<T> createState() => TreeTableState<T>();
@@ -636,6 +698,7 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
       handleKeyEvent: _handleKeyEvent,
       selectionNotifier: widget.selectionNotifier,
       preserveVerticalScrollPosition: widget.preserveVerticalScrollPosition,
+      tallHeaders: widget.tallHeaders,
     );
   }
 
@@ -824,6 +887,7 @@ class _Table<T> extends StatefulWidget {
     this.preserveVerticalScrollPosition = false,
     this.activeSearchMatchNotifier,
     this.rowItemExtent,
+    this.tallHeaders = false,
   }) : super(key: key);
 
   final TableControllerBase<T> tableController;
@@ -836,6 +900,7 @@ class _Table<T> extends StatefulWidget {
   final ValueNotifier<Selection<T?>>? selectionNotifier;
   final ValueListenable<T?>? activeSearchMatchNotifier;
   final bool preserveVerticalScrollPosition;
+  final bool tallHeaders;
 
   @override
   _TableState<T> createState() => _TableState<T>();
@@ -1033,6 +1098,7 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
                   secondarySortColumn:
                       widget.tableController.secondarySortColumn,
                   onSortChanged: widget.tableController.sortDataAndNotify,
+                  tall: widget.tallHeaders,
                 ),
               TableRow<T>.tableColumnHeader(
                 key: const Key('Table header'),
@@ -1045,6 +1111,7 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
                 sortDirection: tableUiState.sortDirection,
                 secondarySortColumn: widget.tableController.secondarySortColumn,
                 onSortChanged: widget.tableController.sortDataAndNotify,
+                tall: widget.tallHeaders,
               ),
               if (pinnedData.isNotEmpty) ...[
                 SizedBox(
@@ -1164,6 +1231,7 @@ class TableRow<T> extends StatefulWidget {
         secondarySortColumn = null,
         onSortChanged = null,
         rowType = _TableRowType.data,
+        tall = false,
         super(key: key);
 
   /// Constructs a [TableRow] that presents the column titles instead
@@ -1179,6 +1247,7 @@ class TableRow<T> extends StatefulWidget {
     required this.onSortChanged,
     this.secondarySortColumn,
     this.onPressed,
+    this.tall = false,
   })  : node = null,
         isExpanded = false,
         isExpandable = false,
@@ -1206,6 +1275,7 @@ class TableRow<T> extends StatefulWidget {
     required this.onSortChanged,
     this.secondarySortColumn,
     this.onPressed,
+    this.tall = false,
   })  : node = null,
         isExpanded = false,
         isExpandable = false,
@@ -1237,6 +1307,8 @@ class TableRow<T> extends StatefulWidget {
   final bool isSelected;
 
   final _TableRowType rowType;
+
+  final bool tall;
 
   /// Which column, if any, should show expansion affordances
   /// and nested rows.
@@ -1362,7 +1434,8 @@ class _TableRowState<T> extends State<TableRow<T>>
     final box = SizedBox(
       height: widget.rowType == _TableRowType.data
           ? defaultRowHeight
-          : areaPaneHeaderHeight,
+          : areaPaneHeaderHeight +
+              (widget.tall ? scaleByFontFactor(densePadding) : 0.0),
       child: Material(
         color: _searchAwareBackgroundColor(),
         child: onPressed != null
@@ -1465,18 +1538,6 @@ class _TableRowState<T> extends State<TableRow<T>>
     }
   }
 
-  TextAlign _textAlignmentFor(ColumnData<T> column) {
-    switch (column.alignment) {
-      case ColumnAlignment.center:
-        return TextAlign.center;
-      case ColumnAlignment.right:
-        return TextAlign.right;
-      case ColumnAlignment.left:
-      default:
-        return TextAlign.left;
-    }
-  }
-
   /// Presents the content of this row.
   Widget tableRowFor(BuildContext context, {VoidCallback? onPressed}) {
     Widget columnFor(ColumnData<T> column, double columnWidth) {
@@ -1534,7 +1595,7 @@ class _TableRowState<T> extends State<TableRow<T>>
           ),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
-          textAlign: _textAlignmentFor(column),
+          textAlign: column.contentTextAlignment,
         );
 
         final tooltip = column.getTooltip(node);
@@ -1751,6 +1812,7 @@ class _ColumnHeader<T> extends StatelessWidget {
     final title = Text(
       column.title,
       overflow: TextOverflow.ellipsis,
+      textAlign: column.headerAlignment,
     );
 
     final headerContent = Row(

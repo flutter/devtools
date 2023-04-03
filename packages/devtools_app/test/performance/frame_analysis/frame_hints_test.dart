@@ -5,7 +5,6 @@
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/performance/panes/controls/enhance_tracing/enhance_tracing_model.dart';
 import 'package:devtools_app/src/screens/performance/panes/frame_analysis/frame_hints.dart';
-import 'package:devtools_app/src/shared/config_specific/import_export/import_export.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -316,6 +315,46 @@ void main() {
           'negatively affect your app\'s performance',
         ),
         findsOneWidget,
+      );
+      expect(
+        find.richTextContaining(
+          ' Note: pre-compiling shaders is a legacy solution with many '
+          'pitfalls. Try',
+        ),
+        findsOneWidget,
+      );
+    });
+
+    testWidgetsWithWindowSize(
+        'does not show impeller link on android', windowSize,
+        (WidgetTester tester) async {
+      _mockFrameAnalysis(
+        frameAnalysis: mockFrameAnalysis,
+        frame: testFrameWithShaderJank,
+      );
+      mockConnectedApp(
+        serviceManager.connectedApp!,
+        isFlutterApp: true,
+        isProfileBuild: true,
+        isWebApp: false,
+        os: 'android',
+      );
+      await pumpHints(tester, mockFrameAnalysis);
+
+      expect(find.byType(ShaderCompilationHint), findsOneWidget);
+      expect(
+        find.richTextContaining(
+          ' of shader compilation occurred during this frame. This may '
+          'negatively affect your app\'s performance',
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.richTextContaining(
+          ' Note: pre-compiling shaders is a legacy solution with many '
+          'pitfalls. Try',
+        ),
+        findsNothing,
       );
     });
   });

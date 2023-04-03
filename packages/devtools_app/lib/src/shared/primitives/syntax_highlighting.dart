@@ -4,6 +4,9 @@
 
 import 'dart:convert';
 import 'dart:io';
+import 'package:logging/logging.dart';
+
+final _log = Logger('syntax_highlighting');
 
 //Future<String> loadPolyfillScript() {
 //  return asset.loadString('assets/scripts/inspector_polyfill_script.dart');
@@ -15,7 +18,7 @@ void main() {
   final String source = File('assets/syntax/dart.json').readAsStringSync();
 
   final TextmateGrammar dartGrammar = TextmateGrammar(source);
-  print(dartGrammar);
+  _log.info(dartGrammar);
 }
 
 // todo: test basic parsing
@@ -50,7 +53,7 @@ class TextmateGrammar {
       _ruleMap[name]!._parse(repository[name]);
     }
 
-    print('rules: ${_ruleMap.keys.toList()}');
+    _log.info('rules: ${_ruleMap.keys.toList()}');
   }
 
   void _parseFileRules() {
@@ -58,7 +61,7 @@ class TextmateGrammar {
     for (Map info in patterns.cast<Map<Object?, Object?>>()) {
       _fileRules.add(Rule(info['name']).._parse(info));
     }
-    print('fileRules: $_fileRules');
+    _log.info('fileRules: $_fileRules');
   }
 
   @override

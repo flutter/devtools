@@ -3,8 +3,11 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
+import 'package:logging/logging.dart';
 
 import 'globals.dart';
+
+final _log = Logger('lib/src/shared/features_flags');
 
 @visibleForTesting
 bool get enableExperiments =>
@@ -45,36 +48,23 @@ abstract class FeatureFlags {
   /// Example usage of a flag for an experimental feature.
   static bool myExperimentalFeature = enableExperiments;
 
-  /// Flag to enable the embedded perfetto trace viewer.
-  ///
-  /// TODO(https://github.com/flutter/devtools/issues/4207): remove all uses of
-  /// this flag.
-  static bool embeddedPerfetto = true;
-
   /// Flag to enable widget rebuild stats ui.
   ///
   /// https://github.com/flutter/devtools/issues/4564.
   static bool widgetRebuildstats = enableExperiments;
-
-  /// Flag to enable live eval and snapshot browse.
-  ///
-  /// https://github.com/flutter/devtools/issues/4962.
-  static bool evalAndBrowse = enableExperiments;
 
   /// Stores a map of all the feature flags for debugging purposes.
   ///
   /// When adding a new flag, you are responsible for adding it to this map as
   /// well.
   static final _allFlags = <String, bool>{
-    'embeddedPerfetto': embeddedPerfetto,
     'widgetRebuildStats': widgetRebuildstats,
-    'evalAndBrowseSnapshot': evalAndBrowse,
   };
 
   /// A helper to print the status of all the feature flags.
   static void debugPrintFeatureFlags() {
     for (final entry in _allFlags.entries) {
-      print('${entry.key}: ${entry.value}');
+      _log.config('${entry.key}: ${entry.value}');
     }
   }
 }

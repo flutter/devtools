@@ -11,6 +11,7 @@ import 'package:provider/provider.dart';
 import '../screens/performance/performance_utils.dart';
 import 'analytics/constants.dart' as gac;
 import 'common_widgets.dart';
+import 'connected_app.dart';
 import 'globals.dart';
 import 'primitives/utils.dart';
 import 'screen.dart';
@@ -205,19 +206,15 @@ class _BannerError extends BannerMessage {
           screenId: screenId,
           messageType: BannerMessageType.error,
         );
-
-  static const linkColor = Color(0xFF54C1EF);
 }
 
 // TODO(kenz): add "Do not show this again" option to warnings.
-class _BannerWarning extends BannerMessage {
-  const _BannerWarning({
+class BannerWarning extends BannerMessage {
+  const BannerWarning({
     required super.key,
     required super.textSpans,
     required super.screenId,
   }) : super(messageType: BannerMessageType.warning);
-
-  static const linkColor = Color(0xFF54C1EF);
 }
 
 class DebugModePerformanceMessage {
@@ -227,7 +224,7 @@ class DebugModePerformanceMessage {
 
   BannerMessage build(BuildContext context) {
     final theme = Theme.of(context);
-    return _BannerWarning(
+    return BannerWarning(
       key: Key('DebugModePerformanceMessage - $screenId'),
       textSpans: [
         const TextSpan(
@@ -242,7 +239,7 @@ class DebugModePerformanceMessage {
         _runInProfileModeTextSpan(
           context,
           screenId: screenId,
-          style: theme.errorMessageLinkStyle,
+          style: theme.warningMessageLinkStyle,
         ),
         const TextSpan(
           text: '.',
@@ -292,14 +289,18 @@ class ShaderJankMessage {
 
   BannerMessage build(BuildContext context) {
     final theme = Theme.of(context);
+    final jankDurationText = durationText(
+      jankDuration,
+      unit: DurationDisplayUnit.milliseconds,
+    );
     return _BannerError(
       key: Key('ShaderJankMessage - $screenId'),
       textSpans: [
         TextSpan(
-          text: '''
-Shader compilation jank detected. $jankyFramesCount ${pluralize('frame', jankyFramesCount)} janked with a total of ${msText(jankDuration)} spent in shader compilation.
-
-To pre-compile shaders, see the instructions at ''',
+          text: 'Shader compilation jank detected. $jankyFramesCount '
+              '${pluralize('frame', jankyFramesCount)} janked with a total of '
+              '$jankDurationText spent in shader compilation. To pre-compile '
+              'shaders, see the instructions at ',
         ),
         LinkTextSpan(
           link: Link(
@@ -311,9 +312,26 @@ To pre-compile shaders, see the instructions at ''',
           context: context,
           style: theme.errorMessageLinkStyle,
         ),
-        const TextSpan(
-          text: '.',
-        ),
+        const TextSpan(text: '.'),
+        if (serviceManager.connectedApp!.isIosApp) ...[
+          const TextSpan(
+            text: '\n\nNote: this is a legacy solution with many pitfalls. '
+                'Try ',
+          ),
+          LinkTextSpan(
+            link: Link(
+              display: 'Impeller',
+              url: impellerWikiUrl,
+              gaScreenName: screenId,
+              gaSelectedItemDescription: gac.impellerWiki,
+            ),
+            context: context,
+            style: theme.errorMessageLinkStyle,
+          ),
+          const TextSpan(
+            text: ' instead!',
+          ),
+        ]
       ],
       screenId: screenId,
     );
@@ -330,7 +348,7 @@ class HighCpuSamplingRateMessage {
 
   BannerMessage build(BuildContext context) {
     final theme = Theme.of(context);
-    return _BannerWarning(
+    return BannerWarning(
       key: key,
       textSpans: [
         const TextSpan(
@@ -362,7 +380,7 @@ class DebugModeMemoryMessage {
   final String screenId;
 
   BannerMessage build(BuildContext context) {
-    return _BannerWarning(
+    return BannerWarning(
       key: Key('DebugModeMemoryMessage - $screenId'),
       textSpans: [
         const TextSpan(
@@ -398,7 +416,7 @@ class UnsupportedFlutterVersionWarning {
   final SemanticVersion supportedFlutterVersion;
 
   BannerMessage build() {
-    return _BannerWarning(
+    return BannerWarning(
       key: Key('UnsupportedFlutterVersionWarning - $screenId'),
       textSpans: [
         TextSpan(
@@ -462,14 +480,14 @@ void maybePushDebugModeMemoryMessage(
 }
 
 extension BannerMessageThemeExtension on ThemeData {
-  TextStyle get warningMessageLinkStyle => const TextStyle(
+  TextStyle get warningMessageLinkStyle => regularTextStyle.copyWith(
         decoration: TextDecoration.underline,
-        color: _BannerWarning.linkColor,
+        color: colorScheme.onWarningContainerLink,
       );
 
-  TextStyle get errorMessageLinkStyle => const TextStyle(
+  TextStyle get errorMessageLinkStyle => regularTextStyle.copyWith(
         decoration: TextDecoration.underline,
-        color: _BannerError.linkColor,
+        color: colorScheme.onErrorContainerLink,
       );
 }
 

@@ -1,0 +1,159 @@
+// Copyright 2023 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+import 'dart:async';
+
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import '../shared/analytics/analytics_controller.dart';
+import '../shared/analytics/constants.dart' as gac;
+import '../shared/common_widgets.dart';
+import '../shared/config_specific/server/server.dart';
+import '../shared/dialogs.dart';
+import '../shared/globals.dart';
+import '../shared/log_storage.dart';
+import '../shared/theme.dart';
+import '../shared/utils.dart';
+
+class OpenSettingsAction extends StatelessWidget {
+  const OpenSettingsAction();
+
+  @override
+  Widget build(BuildContext context) {
+    return DevToolsTooltip(
+      message: 'Settings',
+      child: InkWell(
+        onTap: () {
+          unawaited(
+            showDialog(
+              context: context,
+              builder: (context) => SettingsDialog(),
+            ),
+          );
+        },
+        child: Container(
+          width: actionWidgetSize,
+          height: actionWidgetSize,
+          alignment: Alignment.center,
+          child: Icon(
+            Icons.settings_outlined,
+            size: actionsIconSize,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class SettingsDialog extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final analyticsController = Provider.of<AnalyticsController>(context);
+    return DevToolsDialog(
+      title: const DialogTitleText('Settings'),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Flexible(
+            child: CheckboxSetting(
+              title: 'Use a dark theme',
+              notifier: preferences.darkModeTheme,
+              onChanged: preferences.toggleDarkModeTheme,
+              gaItem: gac.darkTheme,
+            ),
+          ),
+          Flexible(
+            child: CheckboxSetting(
+              title: 'Use dense mode',
+              notifier: preferences.denseModeEnabled,
+              onChanged: preferences.toggleDenseMode,
+              gaItem: gac.denseMode,
+            ),
+          ),
+          if (isExternalBuild && isDevToolsServerAvailable)
+            Flexible(
+              child: CheckboxSetting(
+                title: 'Enable analytics',
+                notifier: analyticsController.analyticsEnabled,
+                onChanged: (enable) => unawaited(
+                  analyticsController.toggleAnalyticsEnabled(enable),
+                ),
+                gaItem: gac.analytics,
+              ),
+            ),
+          Flexible(
+            child: CheckboxSetting(
+              title: 'Enable VM developer mode',
+              notifier: preferences.vmDeveloperModeEnabled,
+              onChanged: preferences.toggleVmDeveloperMode,
+              gaItem: gac.vmDeveloperMode,
+            ),
+          ),
+          const PaddedDivider(),
+          const _VerboseLoggingSetting(),
+        ],
+      ),
+      actions: const [
+        DialogCloseButton(),
+      ],
+    );
+  }
+}
+
+class _VerboseLoggingSetting extends StatelessWidget {
+  const _VerboseLoggingSetting();
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Row(
+          children: [
+            Flexible(
+              child: CheckboxSetting(
+                title: 'Enable verbose logging',
+                notifier: preferences.verboseLoggingEnabled,
+                onChanged: (enable) => preferences.toggleVerboseLogging(enable),
+                gaItem: gac.verboseLogging,
+              ),
+            ),
+            const SizedBox(width: defaultSpacing),
+            DevToolsButton(
+              label: 'Copy logs',
+              icon: Icons.copy,
+              gaScreen: gac.settingsDialog,
+              gaSelection: gac.copyLogs,
+              onPressed: () async => await copyToClipboard(
+                LogStorage.root.toString(),
+                'Successfully copied logs',
+              ),
+            ),
+            const SizedBox(width: denseSpacing),
+            ClearButton(
+              label: 'Clear logs',
+              gaScreen: gac.settingsDialog,
+              gaSelection: gac.clearLogs,
+              onPressed: LogStorage.root.clear,
+            ),
+          ],
+        ),
+        const SizedBox(height: denseSpacing),
+        const Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Spacer(),
+            Icon(Icons.warning),
+            SizedBox(width: defaultSpacing),
+            Text(
+              'Logs may contain sensitive information.\n'
+              'Always check their contents before sharing.',
+            )
+          ],
+        ),
+      ],
+    );
+  }
+}

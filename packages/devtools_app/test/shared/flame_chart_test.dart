@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app/devtools_app.dart';
-import 'package:devtools_app/src/screens/profiler/cpu_profile_controller.dart';
+import 'package:devtools_app/src/screens/profiler/cpu_profiler_controller.dart';
 import 'package:devtools_app/src/screens/profiler/panes/cpu_flame_chart.dart';
 import 'package:devtools_app/src/shared/charts/flame_chart.dart';
 import 'package:devtools_app/src/shared/primitives/flutter_widgets/linked_scroll_controller.dart';
@@ -245,6 +245,384 @@ void main() {
       expect(state.zoomController.value, equals(3.375));
       expect(state.horizontalControllerGroup.offset, equals(1045.0));
     });
+
+    testWidgets(',AOE keys zoom and update scroll position',
+        (WidgetTester tester) async {
+      await pumpFlameChart(tester);
+      expect(find.byWidget(flameChart), findsOneWidget);
+      final FlameChartState state = tester.state(find.byWidget(flameChart));
+
+      expect(state.zoomController.value, equals(1.0));
+      expect(state.horizontalControllerGroup.offset, equals(0.0));
+      state.mouseHoverX = 100.0;
+      state.focusNode.requestFocus();
+      await tester.pumpAndSettle();
+
+      // Use platform macos so that we have access to [event.data.keyLabel].
+      // Event simulation is not supported for platform 'web'.
+
+      // Zoom in.
+      await tester.sendKeyEvent(
+        LogicalKeyboardKey.comma,
+        platform: 'macos',
+        physicalKey: PhysicalKeyboardKey.keyW,
+      );
+      await tester.pumpAndSettle();
+      expect(state.zoomController.value, equals(1.5));
+      expect(state.horizontalControllerGroup.offset, equals(20.0));
+
+      // Zoom in further.
+      await tester.sendKeyEvent(
+        LogicalKeyboardKey.comma,
+        platform: 'macos',
+        physicalKey: PhysicalKeyboardKey.keyW,
+      );
+      await tester.pumpAndSettle();
+      expect(state.zoomController.value, equals(2.25));
+      expect(state.horizontalControllerGroup.offset, equals(50.0));
+
+      // Zoom out.
+      await tester.sendKeyEvent(
+        LogicalKeyboardKey.keyO,
+        platform: 'macos',
+        physicalKey: PhysicalKeyboardKey.keyS,
+      );
+      await tester.pumpAndSettle();
+      expect(state.zoomController.value, equals(1.5));
+      expect(state.horizontalControllerGroup.offset, equals(20.0));
+
+      // Zoom out further.
+      await tester.sendKeyEvent(
+        LogicalKeyboardKey.keyO,
+        platform: 'macos',
+        physicalKey: PhysicalKeyboardKey.keyS,
+      );
+      await tester.pumpAndSettle();
+      expect(state.zoomController.value, equals(1.0));
+      expect(state.horizontalControllerGroup.offset, equals(0.0));
+
+      // Zoom out and verify we cannot go beyond the minimum zoom level (1.0);
+      await tester.sendKeyEvent(
+        LogicalKeyboardKey.keyO,
+        platform: 'macos',
+        physicalKey: PhysicalKeyboardKey.keyS,
+      );
+      await tester.pumpAndSettle();
+      expect(state.zoomController.value, equals(1.0));
+      expect(state.horizontalControllerGroup.offset, equals(0.0));
+
+      // Verify that the scroll position does not change when the mouse is
+      // positioned in an unzoomable area (start or end inset).
+      state.mouseHoverX = 30.0;
+      await tester.sendKeyEvent(
+        LogicalKeyboardKey.comma,
+        platform: 'macos',
+        physicalKey: PhysicalKeyboardKey.keyW,
+      );
+      await tester.pumpAndSettle();
+      expect(state.zoomController.value, equals(1.5));
+      expect(state.horizontalControllerGroup.offset, equals(0.0));
+    });
+
+    testWidgets(',AOE keys pan chart', (WidgetTester tester) async {
+      await pumpFlameChart(tester);
+      expect(find.byWidget(flameChart), findsOneWidget);
+      final FlameChartState state = tester.state(find.byWidget(flameChart));
+
+      expect(state.zoomController.value, equals(1.0));
+      expect(state.horizontalControllerGroup.offset, equals(0.0));
+      state.mouseHoverX = 500.0;
+      state.focusNode.requestFocus();
+      await tester.pumpAndSettle();
+
+      // Use platform macos so that we have access to [event.data.keyLabel].
+      // Event simulation is not supported for platform 'web'.
+
+      // Zoom in so we have room to pan around.
+      await tester.sendKeyEvent(
+        LogicalKeyboardKey.comma,
+        platform: 'macos',
+        physicalKey: PhysicalKeyboardKey.keyW,
+      );
+      await tester.pumpAndSettle();
+      await tester.sendKeyEvent(
+        LogicalKeyboardKey.comma,
+        platform: 'macos',
+        physicalKey: PhysicalKeyboardKey.keyW,
+      );
+      await tester.pumpAndSettle();
+      expect(state.zoomController.value, equals(2.25));
+      expect(state.horizontalControllerGroup.offset, equals(550.0));
+
+      // Pan left. Pan unit should equal 1/4th of the original width (1000.0).
+      await tester.sendKeyEvent(
+        LogicalKeyboardKey.keyA,
+        platform: 'macos',
+        physicalKey: PhysicalKeyboardKey.keyA,
+      );
+      await tester.pumpAndSettle();
+      expect(state.zoomController.value, equals(2.25));
+      expect(state.horizontalControllerGroup.offset, equals(300.0));
+
+      // Pan right. Pan unit should equal 1/4th of the original width (1000.0).
+      await tester.sendKeyEvent(
+        LogicalKeyboardKey.keyE,
+        platform: 'macos',
+        physicalKey: PhysicalKeyboardKey.keyD,
+      );
+      await tester.pumpAndSettle();
+      expect(state.zoomController.value, equals(2.25));
+      expect(state.horizontalControllerGroup.offset, equals(550.0));
+
+      // Zoom in.
+      await tester.sendKeyEvent(
+        LogicalKeyboardKey.comma,
+        platform: 'macos',
+        physicalKey: PhysicalKeyboardKey.keyW,
+      );
+      await tester.pumpAndSettle();
+      expect(state.zoomController.value, equals(3.375));
+      expect(state.horizontalControllerGroup.offset, equals(1045.0));
+
+      // Pan left. Pan unit should equal 1/4th of the original width (1000.0).
+      await tester.sendKeyEvent(
+        LogicalKeyboardKey.keyA,
+        platform: 'macos',
+        physicalKey: PhysicalKeyboardKey.keyA,
+      );
+      await tester.pumpAndSettle();
+      expect(state.zoomController.value, equals(3.375));
+      expect(state.horizontalControllerGroup.offset, equals(795.0));
+
+      // Pan right. Pan unit should equal 1/4th of the original width (1000.0).
+      await tester.sendKeyEvent(
+        LogicalKeyboardKey.keyE,
+        platform: 'macos',
+        physicalKey: PhysicalKeyboardKey.keyD,
+      );
+      await tester.pumpAndSettle();
+      expect(state.zoomController.value, equals(3.375));
+      expect(state.horizontalControllerGroup.offset, equals(1045.0));
+    });
+
+    group('binary search for node', () {
+      testWidgets('returns correct node for default zoom level',
+          (WidgetTester tester) async {
+        const zoomLevel = 1.0;
+        expect(
+          binarySearchForNodeHelper(
+            x: -10.0,
+            nodesInRow: testNodes,
+            zoom: zoomLevel,
+            startInset: sideInset,
+          ),
+          isNull,
+        );
+        expect(
+          binarySearchForNodeHelper(
+            x: 49.0,
+            nodesInRow: testNodes,
+            zoom: zoomLevel,
+            startInset: sideInset,
+          ),
+          isNull,
+        );
+        expect(
+          binarySearchForNodeHelper(
+            x: 70.0,
+            nodesInRow: testNodes,
+            zoom: zoomLevel,
+            startInset: sideInset,
+          ),
+          testNode,
+        );
+        expect(
+          binarySearchForNodeHelper(
+            x: 120.0,
+            nodesInRow: testNodes,
+            zoom: zoomLevel,
+            startInset: sideInset,
+          ),
+          testNode2,
+        );
+        expect(
+          binarySearchForNodeHelper(
+            x: 230.0,
+            nodesInRow: testNodes,
+            zoom: zoomLevel,
+            startInset: sideInset,
+          ),
+          testNode3,
+        );
+        expect(
+          binarySearchForNodeHelper(
+            x: 360.0,
+            nodesInRow: testNodes,
+            zoom: zoomLevel,
+            startInset: sideInset,
+          ),
+          testNode4,
+        );
+        expect(
+          binarySearchForNodeHelper(
+            x: 1060.0,
+            nodesInRow: testNodes,
+            zoom: zoomLevel,
+            startInset: sideInset,
+          ),
+          isNull,
+        );
+      });
+
+      testWidgets('returns correct node in zoomed row',
+          (WidgetTester tester) async {
+        const zoomLevel = 2.0;
+        expect(
+          binarySearchForNodeHelper(
+            x: -10.0,
+            nodesInRow: testNodes,
+            zoom: zoomLevel,
+            startInset: sideInset,
+          ),
+          isNull,
+        );
+        expect(
+          binarySearchForNodeHelper(
+            x: 49.0,
+            nodesInRow: testNodes,
+            zoom: zoomLevel,
+            startInset: sideInset,
+          ),
+          isNull,
+        );
+        expect(
+          binarySearchForNodeHelper(
+            x: 70.0,
+            nodesInRow: testNodes,
+            zoom: zoomLevel,
+            startInset: sideInset,
+          ),
+          testNode,
+        );
+        expect(
+          binarySearchForNodeHelper(
+            x: 130.0,
+            nodesInRow: testNodes,
+            zoom: zoomLevel,
+            startInset: sideInset,
+          ),
+          testNode,
+        );
+        expect(
+          binarySearchForNodeHelper(
+            x: 130.1,
+            nodesInRow: testNodes,
+            zoom: zoomLevel,
+            startInset: sideInset,
+          ),
+          isNull,
+        );
+        expect(
+          binarySearchForNodeHelper(
+            x: 169.9,
+            nodesInRow: testNodes,
+            zoom: zoomLevel,
+            startInset: sideInset,
+          ),
+          isNull,
+        );
+        expect(
+          binarySearchForNodeHelper(
+            x: 170.0,
+            nodesInRow: testNodes,
+            zoom: zoomLevel,
+            startInset: sideInset,
+          ),
+          testNode2,
+        );
+        expect(
+          binarySearchForNodeHelper(
+            x: 270.0,
+            nodesInRow: testNodes,
+            zoom: zoomLevel,
+            startInset: sideInset,
+          ),
+          testNode2,
+        );
+        expect(
+          binarySearchForNodeHelper(
+            x: 270.1,
+            nodesInRow: testNodes,
+            zoom: zoomLevel,
+            startInset: sideInset,
+          ),
+          isNull,
+        );
+        expect(
+          binarySearchForNodeHelper(
+            x: 289.9,
+            nodesInRow: testNodes,
+            zoom: zoomLevel,
+            startInset: sideInset,
+          ),
+          isNull,
+        );
+        expect(
+          binarySearchForNodeHelper(
+            x: 290.0,
+            nodesInRow: testNodes,
+            zoom: zoomLevel,
+            startInset: sideInset,
+          ),
+          testNode3,
+        );
+        expect(
+          binarySearchForNodeHelper(
+            x: 409.9,
+            nodesInRow: testNodes,
+            zoom: zoomLevel,
+            startInset: sideInset,
+          ),
+          isNull,
+        );
+        expect(
+          binarySearchForNodeHelper(
+            x: 410.0,
+            nodesInRow: testNodes,
+            zoom: zoomLevel,
+            startInset: sideInset,
+          ),
+          testNode4,
+        );
+        expect(
+          binarySearchForNodeHelper(
+            x: 1010.0,
+            nodesInRow: testNodes,
+            zoom: zoomLevel,
+            startInset: sideInset,
+          ),
+          testNode4,
+        );
+        expect(
+          binarySearchForNodeHelper(
+            x: 1010.1,
+            nodesInRow: testNodes,
+            zoom: zoomLevel,
+            startInset: sideInset,
+          ),
+          isNull,
+        );
+        expect(
+          binarySearchForNodeHelper(
+            x: 10000,
+            nodesInRow: testNodes,
+            zoom: zoomLevel,
+            startInset: sideInset,
+          ),
+          isNull,
+        );
+      });
+    });
   });
 
   group('ScrollingFlameChartRow', () {
@@ -255,25 +633,12 @@ void main() {
       nodes: testNodes,
       width: 680.0, // 680.0 fits all test nodes and sideInsets of 70.0.
       startInset: sideInset,
+      hoveredNotifier: ValueNotifier<TimelineEvent?>(null),
       selectionNotifier: ValueNotifier<TimelineEvent?>(null),
       searchMatchesNotifier: null,
       activeSearchMatchNotifier: null,
-      onTapUp: () {},
       backgroundColor: Colors.transparent,
       zoom: FlameChart.minZoomLevel,
-    );
-    final zoomedTestRow = ScrollingFlameChartRow<TimelineEvent>(
-      linkedScrollControllerGroup: linkedScrollControllerGroup,
-      nodes: testNodes,
-      // 1080.0 fits all test nodes at zoom level 2.0 and sideInsets of 70.0.
-      width: 1080.0,
-      startInset: sideInset,
-      selectionNotifier: ValueNotifier<TimelineEvent?>(null),
-      searchMatchesNotifier: null,
-      activeSearchMatchNotifier: null,
-      onTapUp: () {},
-      backgroundColor: Colors.transparent,
-      zoom: 2.0,
     );
 
     Future<void> pumpScrollingFlameChartRow(
@@ -296,20 +661,9 @@ void main() {
       );
     }
 
-    Future<ScrollingFlameChartRowState> pumpRowAndGetState(
-      WidgetTester tester, {
-      ScrollingFlameChartRow? row,
-    }) async {
-      row ??= testRow;
-      await pumpScrollingFlameChartRow(tester, row);
-      expect(find.byWidget(currentRow), findsOneWidget);
-      return tester.state(find.byWidget(currentRow));
-    }
-
     testWidgets('builds with nodes in row', (WidgetTester tester) async {
       await pumpScrollingFlameChartRow(tester, testRow);
       expect(find.byWidget(currentRow), findsOneWidget);
-      expect(find.byType(MouseRegion), findsOneWidget);
 
       // 1 for row container and 4 for node containers.
       expect(tester.widgetList(find.byType(Container)).length, equals(5));
@@ -321,55 +675,21 @@ void main() {
         nodes: const [],
         width: 500.0, // 500.0 is arbitrary.
         startInset: sideInset,
+        hoveredNotifier: ValueNotifier<CpuStackFrame?>(null),
         selectionNotifier: ValueNotifier<CpuStackFrame?>(null),
         searchMatchesNotifier: null,
         activeSearchMatchNotifier: null,
         backgroundColor: Colors.transparent,
-        onTapUp: () {},
         zoom: FlameChart.minZoomLevel,
       );
 
       await pumpScrollingFlameChartRow(tester, emptyRow);
       expect(find.byWidget(currentRow), findsOneWidget);
-      expect(find.byType(MouseRegion), findsNothing);
 
       final emptyRowFinder = find.byType(EmptyFlameChartRow);
       final EmptyFlameChartRow emptyFlameChartRow =
           tester.widget(emptyRowFinder);
       expect(emptyFlameChartRow.height, equals(sectionSpacing));
-    });
-
-    testWidgets('binary search for node returns correct node',
-        (WidgetTester tester) async {
-      final rowState = await pumpRowAndGetState(tester);
-      expect(rowState.binarySearchForNode(-10.0), isNull);
-      expect(rowState.binarySearchForNode(49.0), isNull);
-      expect(rowState.binarySearchForNode(70.0), equals(testNode));
-      expect(rowState.binarySearchForNode(120.0), equals(testNode2));
-      expect(rowState.binarySearchForNode(230.0), equals(testNode3));
-      expect(rowState.binarySearchForNode(360.0), equals(testNode4));
-      expect(rowState.binarySearchForNode(1060.0), isNull);
-    });
-
-    testWidgets('binary search for node returns correct node in zoomed row',
-        (WidgetTester tester) async {
-      final rowState = await pumpRowAndGetState(tester, row: zoomedTestRow);
-      expect(rowState.binarySearchForNode(-10.0), isNull);
-      expect(rowState.binarySearchForNode(49.0), isNull);
-      expect(rowState.binarySearchForNode(70.0), equals(testNode));
-      expect(rowState.binarySearchForNode(130.0), equals(testNode));
-      expect(rowState.binarySearchForNode(130.1), isNull);
-      expect(rowState.binarySearchForNode(169.9), isNull);
-      expect(rowState.binarySearchForNode(170.0), equals(testNode2));
-      expect(rowState.binarySearchForNode(270.0), equals(testNode2));
-      expect(rowState.binarySearchForNode(270.1), isNull);
-      expect(rowState.binarySearchForNode(289.9), isNull);
-      expect(rowState.binarySearchForNode(290.0), equals(testNode3));
-      expect(rowState.binarySearchForNode(409.9), isNull);
-      expect(rowState.binarySearchForNode(410.0), equals(testNode4));
-      expect(rowState.binarySearchForNode(1010.0), equals(testNode4));
-      expect(rowState.binarySearchForNode(1010.1), isNull);
-      expect(rowState.binarySearchForNode(10000), isNull);
     });
   });
 
@@ -441,8 +761,7 @@ void main() {
         expect(nodeFinder, findsOneWidget);
         final Container nodeWidget = tester.widget(nodeFinder);
 
-        final BuildContext context = tester.element(find.byType(Builder));
-        expect(nodeWidget.color, equals(Theme.of(context).primaryColor));
+        expect(nodeWidget.color, equals(darkColorScheme.primary));
 
         expect(textFinder, findsOneWidget);
         final Text textWidget = tester.widget(textFinder);

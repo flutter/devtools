@@ -5,34 +5,27 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
+import 'package:logging/logging.dart';
 
 import '../../../../../shared/analytics/analytics.dart' as ga;
 import '../../../../../shared/analytics/constants.dart' as gac;
 import '../../../../../shared/analytics/metrics.dart';
-import '../../../../../shared/config_specific/logger/allowed_error.dart';
-import '../../../../../shared/config_specific/logger/logger.dart';
-import '../../../../../shared/globals.dart';
-import '../../../../../shared/primitives/auto_dispose.dart';
 import '../../../../../shared/primitives/trace_event.dart';
 import '../../../../../shared/primitives/trees.dart';
 import '../../../../../shared/primitives/utils.dart';
 import '../../../../../shared/ui/search.dart';
-import '../../../../profiler/cpu_profile_controller.dart';
-import '../../../../profiler/cpu_profile_model.dart';
-import '../../../../profiler/cpu_profile_service.dart';
-import '../../../../profiler/sampling_rate.dart';
 import '../../../performance_controller.dart';
 import '../../../performance_model.dart';
 import '../../../performance_utils.dart';
 import '../../../simple_trace_example.dart';
-import '../../flutter_frames/flutter_frame_model.dart';
 import 'legacy_event_processor.dart';
+
+final _log = Logger('legacy_events_controller');
 
 /// Debugging flag to load sample trace events from [simple_trace_example.dart].
 bool debugSimpleTrace = false;
 
-class LegacyTimelineEventsController extends DisposableController
-    with SearchControllerMixin<TimelineEvent> {
+class LegacyTimelineEventsController with SearchControllerMixin<TimelineEvent> {
   LegacyTimelineEventsController(this.performanceController) {
     processor = LegacyEventProcessor(performanceController);
   }
@@ -48,24 +41,12 @@ class LegacyTimelineEventsController extends DisposableController
       _selectedTimelineEventNotifier;
   final _selectedTimelineEventNotifier = ValueNotifier<TimelineEvent?>(null);
 
-  final cpuProfilerController =
-      CpuProfilerController(analyticsScreenId: gac.performance);
-
   /// The tracking index for the first unprocessed trace event collected.
   int _nextTraceIndexToProcess = 0;
 
   /// The tracking index for the first unprocessed [TimelineEvent] that needs to
   /// be processed and added to the timeline events flame chart.
   int _nextTimelineEventIndexToProcess = 0;
-
-  void init() {
-    unawaited(
-      allowedError(
-        serviceManager.service!.setProfilePeriod(mediumProfilePeriod),
-        logError: false,
-      ),
-    );
-  }
 
   Future<void> processTraceEvents(
     List<TraceEventWrapper> traceEvents, {
@@ -92,7 +73,7 @@ class LegacyTimelineEventsController extends DisposableController
     final traceEventCount = traceEvents.length;
 
     debugTraceEventCallback(
-      () => log(
+      () => _log.info(
         'processing traceEvents at startIndex '
         '$_nextTraceIndexToProcess',
       ),
@@ -106,7 +87,7 @@ class LegacyTimelineEventsController extends DisposableController
         startIndex: _nextTraceIndexToProcess,
       );
       debugTraceEventCallback(
-        () => log(
+        () => _log.info(
           'after processing traceEvents at startIndex $_nextTraceIndexToProcess, '
           'and now _nextTraceIndexToProcess = $traceEventCount',
         ),
@@ -114,7 +95,7 @@ class LegacyTimelineEventsController extends DisposableController
       _nextTraceIndexToProcess = traceEventCount;
 
       debugTraceEventCallback(
-        () => log(
+        () => _log.info(
           'initializing event groups at startIndex '
           '$_nextTimelineEventIndexToProcess',
         ),
@@ -124,7 +105,7 @@ class LegacyTimelineEventsController extends DisposableController
         startIndex: _nextTimelineEventIndexToProcess,
       );
       debugTraceEventCallback(
-        () => log(
+        () => _log.info(
           'after initializing event groups at startIndex '
           '$_nextTimelineEventIndexToProcess and now '
           '_nextTimelineEventIndexToProcess = ${_data.timelineEvents.length}',
@@ -149,81 +130,12 @@ class LegacyTimelineEventsController extends DisposableController
     }
   }
 
-  Future<void> selectTimelineEvent(
-    TimelineEvent? event, {
-    bool updateProfiler = true,
-  }) async {
+  Future<void> selectTimelineEvent(TimelineEvent? event) async {
     final _data = data!;
     if (event == null || _data.selectedEvent == event) return;
 
     _data.selectedEvent = event;
     _selectedTimelineEventNotifier.value = event;
-
-    if (event.isUiEvent && updateProfiler) {
-      final storedProfile = cpuProfilerController.cpuProfileStore.lookupProfile(
-        time: event.time,
-      );
-      if (storedProfile != null) {
-        await cpuProfilerController.processAndSetData(
-          storedProfile,
-          processId: 'Stored profile for ${event.time}',
-          storeAsUserTagNone: true,
-          shouldApplyFilters: true,
-          shouldRefreshSearchMatches: true,
-        );
-        _data.cpuProfileData = cpuProfilerController.dataNotifier.value;
-      } else if ((!offlineController.offlineMode.value ||
-              performanceController.offlinePerformanceData == null) &&
-          cpuProfilerController.profilerEnabled) {
-        // Fetch a profile if not in offline mode and if the profiler is enabled
-        cpuProfilerController.reset();
-        await cpuProfilerController.pullAndProcessProfile(
-          startMicros: event.time.start!.inMicroseconds,
-          extentMicros: event.time.duration.inMicroseconds,
-          processId: '${event.traceEvents.first.wrapperId}',
-        );
-        _data.cpuProfileData = cpuProfilerController.dataNotifier.value;
-      }
-    }
-  }
-
-  Future<void> updateCpuProfileForFrame(FlutterFrame frame) async {
-    final storedProfileForFrame =
-        cpuProfilerController.cpuProfileStore.lookupProfile(
-      time: frame.timeFromEventFlows,
-    );
-    if (storedProfileForFrame == null) {
-      cpuProfilerController.reset();
-      if (!offlineController.offlineMode.value &&
-          frame.timeFromEventFlows.isWellFormed) {
-        await cpuProfilerController.pullAndProcessProfile(
-          startMicros: frame.timeFromEventFlows.start!.inMicroseconds,
-          extentMicros: frame.timeFromEventFlows.duration.inMicroseconds,
-          processId: 'Flutter frame ${frame.id}',
-        );
-      }
-      if (performanceController
-              .flutterFramesController.currentFrameBeingSelected !=
-          frame) return;
-      data?.cpuProfileData = cpuProfilerController.dataNotifier.value;
-    } else {
-      if (!storedProfileForFrame.processed) {
-        await storedProfileForFrame.process(
-          transformer: cpuProfilerController.transformer,
-          processId: 'Flutter frame ${frame.id} - stored profile ',
-        );
-      }
-      if (performanceController
-              .flutterFramesController.currentFrameBeingSelected !=
-          frame) return;
-      data?.cpuProfileData = storedProfileForFrame.getActive(
-        cpuProfilerController.viewType.value,
-      );
-      cpuProfilerController.loadProcessedData(
-        storedProfileForFrame,
-        storeAsUserTagNone: true,
-      );
-    }
   }
 
   @override
@@ -232,11 +144,12 @@ class LegacyTimelineEventsController extends DisposableController
     bool searchPreviousMatches = false,
   }) {
     if (search.isEmpty) return <TimelineEvent>[];
+    final regexSearch = RegExp(search, caseSensitive: false);
     final matches = <TimelineEvent>[];
     if (searchPreviousMatches) {
       final List<TimelineEvent> previousMatches = searchMatches.value;
       for (final previousMatch in previousMatches) {
-        if (previousMatch.name!.caseInsensitiveContains(search)) {
+        if (previousMatch.matchesSearchToken(regexSearch)) {
           matches.add(previousMatch);
         }
       }
@@ -246,7 +159,7 @@ class LegacyTimelineEventsController extends DisposableController
         breadthFirstTraversal<TimelineEvent>(
           event,
           action: (TimelineEvent e) {
-            if (e.name!.caseInsensitiveContains(search)) {
+            if (e.matchesSearchToken(regexSearch)) {
               matches.add(e);
             }
           },
@@ -257,13 +170,6 @@ class LegacyTimelineEventsController extends DisposableController
   }
 
   Future<void> setOfflineData(PerformanceData offlineData) async {
-    if (offlineData.cpuProfileData != null) {
-      await cpuProfilerController.transformer.processData(
-        offlineData.cpuProfileData!,
-        processId: 'process offline data',
-      );
-    }
-
     if (offlineData.selectedEvent != null) {
       for (var timelineEvent in data!.timelineEvents) {
         final eventToSelect = timelineEvent.firstChildWithCondition((event) {
@@ -279,31 +185,12 @@ class LegacyTimelineEventsController extends DisposableController
         }
       }
     }
-
-    final offlineCpuProfileData = offlineData.cpuProfileData;
-    if (offlineCpuProfileData != null) {
-      cpuProfilerController.loadProcessedData(
-        CpuProfilePair(
-          functionProfile: offlineCpuProfileData,
-          // TODO(bkonyi): do we care about offline code profiles?
-          codeProfile: null,
-        ),
-        storeAsUserTagNone: true,
-      );
-    }
   }
 
   void clearData() {
-    cpuProfilerController.reset();
     processor.reset();
     _nextTraceIndexToProcess = 0;
     _nextTimelineEventIndexToProcess = 0;
     _selectedTimelineEventNotifier.value = null;
-  }
-
-  @override
-  void dispose() {
-    cpuProfilerController.dispose();
-    super.dispose();
   }
 }

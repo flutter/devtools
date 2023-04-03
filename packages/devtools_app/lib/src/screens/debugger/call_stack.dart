@@ -81,12 +81,13 @@ class _CallStackState extends State<CallStack>
           text: frameDescription,
           style: theme.regularTextStyle,
           children: [
-            TextSpan(
-              text: ' $locationDescription',
-              style: selected
-                  ? theme.selectedSubtleTextStyle
-                  : theme.subtleTextStyle,
-            ),
+            if (locationDescription != null)
+              TextSpan(
+                text: ' $locationDescription',
+                style: selected
+                    ? theme.selectedSubtleTextStyle
+                    : theme.subtleTextStyle,
+              ),
           ],
         ),
       );

@@ -8,10 +8,10 @@ import 'dart:math' as math;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:logging/logging.dart';
 import 'package:vm_service/vm_service.dart' hide Stack;
 
 import '../../shared/common_widgets.dart';
-import '../../shared/config_specific/logger/logger.dart';
 import '../../shared/console/widgets/expandable_variable.dart';
 import '../../shared/diagnostics/dart_object_node.dart';
 import '../../shared/diagnostics/primitives/source_location.dart';
@@ -37,6 +37,8 @@ import 'debugger_controller.dart';
 import 'debugger_model.dart';
 import 'file_search.dart';
 import 'key_sets.dart';
+
+final _log = Logger('codeview');
 
 final debuggerCodeViewFileOpenerKey =
     GlobalKey(debugLabel: 'DebuggerCodeViewFileOpenerKey');
@@ -64,7 +66,8 @@ class CodeView extends StatefulWidget {
   static const debuggerCodeViewVerticalScrollbarKey =
       Key('debuggerCodeViewVerticalScrollbarKey');
 
-  static double get rowHeight => scaleByFontFactor(20.0);
+  static double get rowHeight =>
+      isDense() ? scaleByFontFactor(16.0) : scaleByFontFactor(20.0);
 
   final CodeViewController codeViewController;
   final DebuggerController? debuggerController;
@@ -86,8 +89,7 @@ class CodeView extends StatefulWidget {
   _CodeViewState createState() => _CodeViewState();
 }
 
-class _CodeViewState extends State<CodeView>
-    with AutoDisposeMixin, SearchFieldMixin<CodeView> {
+class _CodeViewState extends State<CodeView> with AutoDisposeMixin {
   static const searchFieldRightPadding = 75.0;
 
   late final LinkedScrollControllerGroup verticalController;
@@ -105,9 +107,6 @@ class _CodeViewState extends State<CodeView>
   // Used to ensure we don't update the scroll position when expanding or
   // collapsing the file explorer.
   ScriptRef? _lastScriptRef;
-
-  @override
-  SearchControllerMixin get searchController => widget.codeViewController;
 
   @override
   void initState() {
@@ -207,7 +206,7 @@ class _CodeViewState extends State<CodeView>
     void updateScrollPositionImpl() {
       if (!verticalController.hasAttachedControllers) {
         // TODO(devoncarew): I'm uncertain why this occurs.
-        log('LinkedScrollControllerGroup has no attached controllers');
+        _log.info('LinkedScrollControllerGroup has no attached controllers');
         return;
       }
       final line =
@@ -484,7 +483,7 @@ class _CodeViewState extends State<CodeView>
   Widget buildFileSearchField() {
     return ElevatedCard(
       key: debuggerCodeViewFileOpenerKey,
-      width: extraWideSearchTextWidth,
+      width: extraWideSearchFieldWidth,
       height: defaultTextFieldHeight,
       padding: EdgeInsets.zero,
       child: FileSearchField(
@@ -495,13 +494,13 @@ class _CodeViewState extends State<CodeView>
 
   Widget buildSearchInFileField() {
     return ElevatedCard(
-      width: wideSearchTextWidth,
+      width: wideSearchFieldWidth,
       height: defaultTextFieldHeight + 2 * denseSpacing,
-      child: SearchField<SourceToken>(
-        controller: widget.codeViewController,
+      child: SearchField<CodeViewController>(
+        searchController: widget.codeViewController,
         searchFieldEnabled: parsedScript != null,
         shouldRequestFocus: true,
-        supportsNavigation: true,
+        searchFieldWidth: wideSearchFieldWidth,
         onClose: () =>
             widget.codeViewController.toggleSearchInFileVisibility(false),
       ),
@@ -1485,7 +1484,7 @@ final copyPackagePathOption = ScriptPopupMenuOption(
   label: 'Copy package path',
   icon: Icons.content_copy,
   onSelected: (_, controller) => Clipboard.setData(
-    ClipboardData(text: controller.scriptLocation.value?.scriptRef.uri),
+    ClipboardData(text: controller.scriptLocation.value?.scriptRef.uri ?? ''),
   ),
 );
 
@@ -1494,8 +1493,9 @@ final copyFilePathOption = ScriptPopupMenuOption(
   icon: Icons.content_copy,
   onSelected: (_, controller) {
     unawaited(() async {
+      final filePath = await fetchScriptLocationFullFilePath(controller);
       await Clipboard.setData(
-        ClipboardData(text: await fetchScriptLocationFullFilePath(controller)),
+        ClipboardData(text: filePath ?? ''),
       );
     }());
   },

@@ -14,7 +14,6 @@ import 'package:js/js.dart';
 import 'package:logging/logging.dart';
 
 import '../../../devtools.dart' as devtools show version;
-import '../config_specific/logger/logger.dart';
 import '../config_specific/server/server.dart' as server;
 import '../config_specific/url/url.dart';
 import '../globals.dart';
@@ -432,11 +431,10 @@ void timeEnd(
   final startTime = _timedOperationsInProgress.remove(operationKey);
   assert(startTime != null);
   if (startTime == null) {
-    log(
+    _log.warning(
       'Could not time operation "$timedOperation" because a) `timeEnd` was '
       'called before `timeStart` or b) the `screenName` and `timedOperation`'
       'parameters for the `timeStart` and `timeEnd` calls do not match.',
-      LogLevel.warning,
     );
     return;
   }
@@ -475,10 +473,9 @@ void timeSync(
     syncOperation();
   } catch (e, st) {
     // Do not send the timing analytic to GA if the operation failed.
-    log(
+    _log.warning(
       'Could not time sync operation "$timedOperation" '
       'because an exception was thrown:\n$e\n$st',
-      LogLevel.warning,
     );
     rethrow;
   }
@@ -506,10 +503,9 @@ Future<void> timeAsync(
     await asyncOperation();
   } catch (e, st) {
     // Do not send the timing analytic to GA if the operation failed.
-    log(
+    _log.warning(
       'Could not time async operation "$timedOperation" '
       'because an exception was thrown:\n$e\n$st',
-      LogLevel.warning,
     );
     rethrow;
   }
@@ -760,7 +756,7 @@ void waitForDimensionsComputed(String screenName) {
       if (_stillWaiting++ < 50) {
         waitForDimensionsComputed(screenName);
       } else {
-        log('Cancel waiting for dimensions.', LogLevel.warning);
+        _log.warning('Cancel waiting for dimensions.');
       }
     }
   });

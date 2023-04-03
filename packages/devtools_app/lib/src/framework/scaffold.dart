@@ -27,6 +27,9 @@ import '../shared/split.dart';
 import '../shared/theme.dart';
 import '../shared/title.dart';
 import '../shared/utils.dart';
+import 'about_dialog.dart';
+import 'report_feedback_button.dart';
+import 'settings_dialog.dart';
 import 'status_line.dart';
 
 /// Scaffolding for a screen and navigation in the DevTools App.
@@ -36,13 +39,14 @@ import 'status_line.dart';
 /// [DevToolsApp] defines the collections of [Screen]s to show in a scaffold
 /// for different routes.
 class DevToolsScaffold extends StatefulWidget {
-  const DevToolsScaffold({
+  DevToolsScaffold({
     Key? key,
     required this.screens,
     this.page,
-    this.actions,
+    List<Widget>? actions,
     this.embed = false,
-  }) : super(key: key);
+  })  : actions = actions ?? defaultActions(),
+        super(key: key);
 
   DevToolsScaffold.withChild({
     Key? key,
@@ -60,6 +64,12 @@ class DevToolsScaffold extends StatefulWidget {
 
   /// A [Key] that indicates the scaffold is showing in full-width mode.
   static const Key fullWidthKey = Key('Full-width Scaffold');
+
+  static List<Widget> defaultActions() => const [
+        OpenSettingsAction(),
+        ReportFeedbackButton(),
+        OpenAboutAction(),
+      ];
 
   /// The padding around the content in the DevTools UI.
   EdgeInsets get appPadding => EdgeInsets.fromLTRB(
@@ -311,7 +321,6 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
         value: _importController,
         builder: (context, _) {
           final showConsole = serviceManager.connectedAppInitialized &&
-              !serviceManager.connectedApp!.isProfileBuildNow! &&
               !offlineController.offlineMode.value &&
               _currentScreen.showConsole(widget.embed);
 

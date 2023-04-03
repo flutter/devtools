@@ -48,7 +48,7 @@ class ScriptLocation {
   String toString() => '${scriptRef.uri} $location';
 }
 
-class SourceToken with DataSearchStateMixin {
+class SourceToken with SearchableDataMixin {
   SourceToken({required this.position, required this.length});
 
   final SourcePosition position;
@@ -225,6 +225,11 @@ class StackFrameAndSourcePosition {
     }
     name = name.replaceAll(anonymousClosureName, closureName);
     name = name == none ? name : '$name';
+
+    if (frame.code?.kind == CodeKind.kNative) {
+      return '<native code: $name>';
+    }
+
     return name;
   }
 

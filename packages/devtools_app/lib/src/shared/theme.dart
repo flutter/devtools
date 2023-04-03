@@ -271,6 +271,8 @@ double get actionWidgetSize => scaleByFontFactor(48.0);
 
 double get statusLineHeight => scaleByFontFactor(24.0);
 
+double get inputDecorationElementHeight => scaleByFontFactor(20.0);
+
 const chartTextFontSize = 10.0;
 
 const devtoolsGreen = Color(0xFF5BC43B);
@@ -283,6 +285,11 @@ extension DevToolsColorScheme on ColorScheme {
   Color get warningContainer => tertiaryContainer;
 
   Color get onWarningContainer => onTertiaryContainer;
+
+  Color get onWarningContainerLink =>
+      isLight ? tertiary : const Color(0xFFDF9F32);
+
+  Color get onErrorContainerLink => isLight ? error : const Color(0xFFFF897D);
 
   Color get subtleTextColor => const Color(0xFF919094);
 
@@ -522,9 +529,9 @@ extension ThemeDataExtension on ThemeData {
   }
 }
 
-const extraWideSearchTextWidth = 600.0;
-const wideSearchTextWidth = 400.0;
-const defaultSearchTextWidth = 200.0;
+const extraWideSearchFieldWidth = 600.0;
+const wideSearchFieldWidth = 400.0;
+const defaultSearchFieldWidth = 200.0;
 double get defaultTextFieldHeight => scaleByFontFactor(32.0);
 double get defaultTextFieldNumberWidth => scaleByFontFactor(100.0);
 

@@ -64,5 +64,5 @@ class SnapshotInstanceItem extends SnapshotItem {
   @override
   bool get hasData => heap != null;
 
-  int? get totalSize => heap?.data.totalSize;
+  int? get totalSize => heap?.data.totalReachableSize;
 }

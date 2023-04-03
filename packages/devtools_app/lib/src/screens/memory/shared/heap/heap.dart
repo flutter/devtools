@@ -3,7 +3,9 @@
 // found in the LICENSE file.
 
 import '../../../../shared/memory/adapted_heap_data.dart';
+import '../../../../shared/memory/adapted_heap_object.dart';
 import '../../../../shared/memory/class_name.dart';
+import '../../../../shared/memory/simple_items.dart';
 import '../../../../shared/primitives/utils.dart';
 import 'class_filter.dart';
 import 'model.dart';
@@ -20,19 +22,30 @@ class AdaptedHeap {
 
   final AdaptedHeapData data;
 
+  late final MemoryFootprint footprint;
+
   SingleHeapClasses get classes => _classes;
   late final SingleHeapClasses _classes;
 
   Future<void> _initialize() async {
+    if (!data.allFieldsCalculated) await calculateHeap(data);
+    footprint = await _footprint(data);
     _classes = await _heapStatistics();
+  }
+
+  static Future<MemoryFootprint> _footprint(AdaptedHeapData data) async {
+    return MemoryFootprint(
+      dart: data.totalDartSize,
+      reachable: data.totalReachableSize,
+    );
   }
 
   final _uiReleaser = UiReleaser();
 
   Future<SingleHeapClasses> _heapStatistics() async {
-    final result = <HeapClassName, SingleClassStats>{};
-    if (!data.allFieldsCalculated) await buildSpanningTreeAndSetInRefs(data);
+    assert(data.allFieldsCalculated);
 
+    final result = <HeapClassName, SingleClassStats>{};
     for (var i in Iterable.generate(data.objects.length)) {
       if (_uiReleaser.step()) await _uiReleaser.releaseUi();
       final object = data.objects[i];

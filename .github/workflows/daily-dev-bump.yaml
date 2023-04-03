@@ -1,6 +1,22 @@
 name: Bump Dev Version
 on:
   workflow_dispatch: # Allows for manual triggering if needed
+    inputs:
+      updateType:
+        description: "Update Type"
+        required: true
+        default: "dev"
+        type: choice
+        options:
+          - dev
+          - patch+dev
+          - minor+dev
+          - major+dev
+      draft:
+        description: "PR as Draft"
+        required: false
+        type: boolean
+        default: false
   pull_request:
     types: [closed]
   schedule:
@@ -14,17 +30,17 @@ env:
   GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 jobs:
-  bump-dev-version:
+  bump-version:
     if: ${{ github.event_name == 'workflow_dispatch' || github.event_name == 'schedule' }}
-    name: Bump Dev Version
+    name: Bump Version
     runs-on: ubuntu-latest
     steps:
       - name: git clone devtools
-        uses: actions/checkout@24cb9080177205b6e8c946b17badbe402adc938f
+        uses: actions/checkout@8f4b7f84864484a7bf31766abe9204da3cbe65b3
         with:
           ref: master
 
-      - uses: dart-lang/setup-dart@a57a6c04cf7d4840e88432aad6281d1e125f0d46
+      - uses: dart-lang/setup-dart@d6a63dab3335f427404425de0fbfed4686d93c4f
 
       - name: setup git config
         run: |
@@ -34,50 +50,70 @@ jobs:
           git config user.name "DevTools Workflow Bot"
           git config user.email "dart-devtool-workflow-bot@google.com"
 
-      - name: Bump the Dev Version
+      - name: Bump the Version
         id: version-bump
         run: |
-          set -x
+          set -ex
           pushd tool/
           dart pub get
           popd
 
-          CURRENT_VERSION=$(dart tool/update_version.dart current-version)
-          if ! echo "$CURRENT_VERSION" |grep -Eq "\-dev\.[0-9]+" ; then
-            ERROR_DESCRIPTION="Doing \
-          a Dev bump on a release version ($CURRENT_VERSION) is not supported. \
-          Ensure that that current version has been properly bumped to a '-dev.*' \
-          pre-release version, in order to continue daily dev bumps."
+          ORIGINAL_VERSION=$(dart tool/update_version.dart current-version)
 
-            echo "::error ,title=Cannot Bump A Release Version ($CURRENT_VERSION)::$ERROR_DESCRIPTION" 
-            exit 1;
+          if [ -z "$UPDATE_TYPE" ]; then
+            # If $UPDATE_TYPE is not set, then assume it is dev
+            UPDATE_TYPE="dev"
           fi
 
-          # Get the commit message
-          COMMIT_MESSAGE=$(dart tool/update_version.dart auto --dry-run --type dev)
-          echo "COMMIT_MESSAGE=$COMMIT_MESSAGE" >> $GITHUB_OUTPUT
+          # If there is a major, minor, or patch bump, do it.
 
-          # Do the update
-          dart tool/update_version.dart auto --type dev
+          if [ "$UPDATE_TYPE" == "patch+dev" ]; then
+            dart tool/update_version.dart auto --type patch
+            dart tool/update_version.dart auto --type dev
+          elif [ "$UPDATE_TYPE" == "minor+dev" ]; then
+            dart tool/update_version.dart auto --type minor
+            dart tool/update_version.dart auto --type dev
+          elif [ "$UPDATE_TYPE" == "major+dev" ]; then
+            dart tool/update_version.dart auto --type major
+            dart tool/update_version.dart auto --type dev
+          elif [ "$UPDATE_TYPE" == "dev" ]; then
+            dart tool/update_version.dart auto --type dev
+          else
+            echo "ERROR: UNEXPECTED UPDATE TYPE: $UPDATE_TYPE"
+            exit 1
+          fi
+
+          NEW_VERSION=$(dart tool/update_version.dart current-version)
+
+          echo "COMMIT_MESSAGE=Updating from $ORIGINAL_VERSION to $NEW_VERSION" >> $GITHUB_OUTPUT
+        env:
+          UPDATE_TYPE: ${{ inputs.updateType }}
 
       - name: Create the PR
         run: |
+          set -ex
           BRANCH_NAME="auto-bump-$(date +%s)"
           # Stage the file, commit and push
           git checkout -b "$BRANCH_NAME"
           git commit -a -m "$COMMIT_MESSAGE"
           git push -u origin "$BRANCH_NAME"
 
-          PR_URL=$(gh pr create --title "$COMMIT_MESSAGE" --body "RELEASE_NOTE_EXCEPTION=Automated Version Bump")
+          if [ "$IS_DRAFT" == "true" ]; then
+            CREATION_FLAGS="--draft"
+          fi
+
+          PR_URL=$(gh pr create --title "$COMMIT_MESSAGE" --body "RELEASE_NOTE_EXCEPTION=Automated Version Bump" $CREATION_FLAGS) 
 
           # Change github credentials back to the actions bot.
           GH_TOKEN="$ORIGINAL_GH_TOKEN"
-          gh pr edit $PR_URL --add-label "autosubmit"
+
+          gh pr edit $PR_URL $FLAGS --add-label=autosubmit
 
         env:
           COMMIT_MESSAGE: ${{ steps.version-bump.outputs.COMMIT_MESSAGE }}
           GH_TOKEN: ${{ secrets.DEVTOOLS_WORKFLOW_BOT_TOKEN }}
           ORIGINAL_GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          IS_DRAFT: ${{ inputs.draft == true }}
   clean-up-branches:
     # If a pr is closed on a workflow bot PR, then clean up workflow bot branches.
     if: ${{ github.event_name == 'pull_request' && github.event.action == 'closed'  && github.event.pull_request.user.login == 'DartDevtoolWorkflowBot'}}

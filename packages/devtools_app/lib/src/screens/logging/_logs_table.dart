@@ -34,6 +34,7 @@ class LogsTable extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // TODO(kenz): use SearchableFlatTable instead.
     return FlatTable<LogData>(
       keyFactory: (LogData data) => ValueKey<LogData>(data),
       data: data,
