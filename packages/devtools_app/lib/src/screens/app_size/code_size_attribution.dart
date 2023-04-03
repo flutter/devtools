@@ -51,11 +51,11 @@ class _CallGraphWithDominatorsState extends State<CallGraphWithDominators> {
         AreaPaneHeader(
           title: Text(showCallGraph ? 'Call Graph' : 'Dominator Tree'),
           includeTopBorder: false,
-          includeBottomBorder: false,
-          includeLeftBorder: true,
+          roundedTopBorder: false,
           actions: [
             const Text('Show call graph'),
-            Switch(
+            DevToolsSwitch(
+              padding: const EdgeInsets.only(left: denseSpacing),
               value: showCallGraph,
               onChanged: _toggleShowCallGraph,
             ),
@@ -108,28 +108,38 @@ class _CallGraphViewState extends State<CallGraphView> {
 
   @override
   Widget build(BuildContext context) {
-    final mainNode = Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        const Padding(
-          padding: EdgeInsets.symmetric(horizontal: densePadding),
-          child: Icon(Icons.arrow_forward),
-        ),
-        DevToolsTooltip(
-          message: selectedNode.data.toString(),
-          child: Container(
-            padding: const EdgeInsets.all(densePadding),
-            child: Text(
-              selectedNode.display,
-              overflow: TextOverflow.ellipsis,
+    // Padding to prevent the node title and arrows from overlapping the column
+    // headers.
+    const columnHeaderPadding = 50.0;
+    final mainNode = Padding(
+      padding: const EdgeInsets.symmetric(horizontal: columnHeaderPadding),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: densePadding),
+            child: Icon(Icons.arrow_forward),
+          ),
+          Flexible(
+            child: DevToolsTooltip(
+              message: selectedNode.data.toString(),
+              child: Padding(
+                padding: const EdgeInsets.all(densePadding),
+                child: Text(
+                  selectedNode.display,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.center,
+                ),
+              ),
             ),
           ),
-        ),
-        const Padding(
-          padding: EdgeInsets.symmetric(horizontal: densePadding),
-          child: Icon(Icons.arrow_forward),
-        ),
-      ],
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: densePadding),
+            child: Icon(Icons.arrow_forward),
+          ),
+        ],
+      ),
     );
 
     return LayoutBuilder(
@@ -147,14 +157,7 @@ class _CallGraphViewState extends State<CallGraphView> {
                     onNodeSelected: _selectMainNode,
                   ),
                 ),
-                // TODO(kenz): this seems like an odd way to be using this
-                // Container. See if we can remove since we are already using
-                // [MainAxisAlignment.spaceBetween].
-                Container(
-                  height: constraints.maxHeight,
-                  width: densePadding,
-                  color: Theme.of(context).colorScheme.surface,
-                ),
+                const SizedBox(width: densePadding),
                 Flexible(
                   child: _CallGraphTable(
                     tableType: _CallGraphTableType.to,
@@ -165,7 +168,7 @@ class _CallGraphViewState extends State<CallGraphView> {
               ],
             ),
             Positioned(
-              top: 0,
+              top: densePadding,
               width: constraints.maxWidth,
               child: mainNode,
             ),
@@ -246,6 +249,9 @@ class ToColumn extends ColumnData<CallGraphNode> {
 
   @override
   ColumnAlignment get alignment => ColumnAlignment.right;
+
+  @override
+  TextAlign get headerAlignment => TextAlign.right;
 
   @override
   String? getValue(CallGraphNode dataObject) => dataObject.display;
