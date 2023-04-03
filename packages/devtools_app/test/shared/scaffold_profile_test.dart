@@ -57,6 +57,7 @@ void main() {
           DevToolsScaffold(screens: const [_screen1, _screen2]),
           debugger: mockDebuggerController,
           analytics: AnalyticsController(enabled: false, firstRun: false),
+          releaseNotes: ReleaseNotesController(),
         ),
       );
       expect(find.byKey(_k1), findsOneWidget);

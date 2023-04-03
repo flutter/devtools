@@ -32,7 +32,11 @@ void main() {
   setGlobal(NotificationService, NotificationService());
 
   Widget wrapScaffold(Widget child) {
-    return wrap(wrapWithAnalytics(child));
+    return wrapWithControllers(
+      child,
+      analytics: AnalyticsController(enabled: false, firstRun: false),
+      releaseNotes: ReleaseNotesController(),
+    );
   }
 
   testWidgets(
@@ -41,9 +45,7 @@ void main() {
       when(mockServiceManager.connectedAppInitialized).thenReturn(false);
       await tester.pumpWidget(
         wrapScaffold(
-          wrapWithNotifications(
-            DevToolsScaffold(screens: const [_screen1, _screen2]),
-          ),
+          DevToolsScaffold(screens: const [_screen1, _screen2]),
         ),
       );
       expect(find.byKey(_k1), findsOneWidget);
