@@ -86,6 +86,13 @@ class TimelineEventsTabControls extends StatelessWidget {
                 gaSelection: gac.timelineFlameChartHelp,
               ),
             ],
+            if (!controller.useLegacyTraceViewer.value)
+              Padding(
+                padding: const EdgeInsets.only(right: densePadding),
+                child: PerfettoHelpButton(
+                  perfettoController: controller.perfettoController,
+                ),
+              ),
             if (!offlineController.offlineMode.value) ...[
               // TODO(kenz): add a switch to enable the CPU profiler once the
               // tracing format supports it (when we switch to protozero).
