@@ -568,6 +568,7 @@ class VisibilityButton extends StatelessWidget {
   }
 }
 
+/// Default switch for DevTools that enforces size restriction.
 class DevToolsSwitch extends StatelessWidget {
   const DevToolsSwitch({
     super.key,
