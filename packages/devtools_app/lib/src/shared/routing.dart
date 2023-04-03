@@ -124,6 +124,9 @@ class DevToolsRouterDelegate extends RouterDelegate<DevToolsRouteConfiguration>
   @override
   final GlobalKey<NavigatorState> navigatorKey;
 
+  static String get currentPage => _currentPage;
+  static late String _currentPage;
+
   final Page Function(
     BuildContext,
     String?,
@@ -222,6 +225,7 @@ class DevToolsRouterDelegate extends RouterDelegate<DevToolsRouteConfiguration>
 
   /// Replaces the navigation stack with a new route.
   void _replaceStack(DevToolsRouteConfiguration configuration) {
+    _currentPage = configuration.page;
     routes
       ..clear()
       ..add(configuration);

@@ -205,6 +205,7 @@ class _AnalyticsTabbedViewState extends State<AnalyticsTabbedView>
     );
 
     return RoundedOutlinedBorder(
+      clip: true,
       child: Column(
         children: [
           tabBar,

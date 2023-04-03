@@ -17,8 +17,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
+import 'package:logging/logging.dart';
 
 import 'simple_items.dart';
+
+final _log = Logger('utils');
 
 bool isPrivate(String member) => member.startsWith('_');
 
@@ -896,14 +899,14 @@ class DebugTimingLogger {
 
     if (_timer != null) {
       _timer!.stop();
-      print('[$name}]   ${_timer!.elapsedMilliseconds}ms');
+      _log.fine('[$name}]   ${_timer!.elapsedMilliseconds}ms');
       _timer!.reset();
     }
 
     _timer ??= Stopwatch();
     _timer!.start();
 
-    print('[$name] $message');
+    _log.fine('[$name] $message');
   }
 }
 
@@ -1147,6 +1150,11 @@ extension StringExtension on String {
   Iterable<Match> caseInsensitiveAllMatches(String? query) {
     if (query == null) return const [];
     return toLowerCase().allMatches(query.toLowerCase());
+  }
+
+  String toSentenceCase() {
+    if (isEmpty) return this;
+    return '${this[0].toUpperCase()}${substring(1).toLowerCase()}';
   }
 }
 

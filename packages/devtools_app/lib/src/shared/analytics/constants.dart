@@ -22,6 +22,7 @@ final debugger = ScreenMetaData.debugger.id;
 final logging = ScreenMetaData.logging.id;
 final appSize = ScreenMetaData.appSize.id;
 final vmTools = ScreenMetaData.vmTools.id;
+const console = 'console';
 final simple = ScreenMetaData.simple.id;
 
 // GA events not associated with a any screen e.g., hotReload, hotRestart, etc
@@ -179,6 +180,13 @@ const documentationLink = 'documentationLink';
 String topicDocumentationButton(String topic) => '${topic}DocumentationButton';
 String topicDocumentationLink(String topic) => '${topic}DocumentationLink';
 
+/// Analytic event constants specific for console.
+class ConsoleEvent {
+  static const helpInline = 'consoleHelpInline';
+  static const String evalInStoppedApp = 'consoleEvalInStoppedApp';
+  static const String evalInRunningApp = 'consoleEvalInRunningApp';
+}
+
 /// Analytic time constants specific for memory screen.
 class MemoryTime {
   static const adaptSnapshot = 'adaptSnapshot';
@@ -186,6 +194,7 @@ class MemoryTime {
   static const updateValues = 'updateValues';
 }
 
+// ignore: avoid_classes_with_only_static_members
 /// Analytic event constants specific for memory screen.
 class MemoryEvent {
   static const gc = 'gc';
@@ -214,6 +223,8 @@ class MemoryEvent {
   static const tracingRefresh = 'tracingRefresh';
   static const tracingClassFilter = 'tracingClassFilter';
   static const tracingTraceCheck = 'tracingTraceCheck';
+  static const tracingTreeExpandAll = 'tracingTreeExpandAll';
+  static const tracingTreeCollapseAll = 'tracingTreeCollapseAll';
   static const tracingHelp = 'memoryTracingHelp';
 
   static const diffTakeSnapshotControlPane = 'diffTakeSnapshotControlPane';
@@ -239,6 +250,14 @@ class MemoryEvent {
   static const diffSnapshotFilterReset = 'diffSnapshotFilterReset';
 
   static const browseRefLimit = 'browseRefLimit';
+
+  static const dropOneLiveVariable = 'dropOneLiveVariable';
+  static const dropOneStaticVariable = 'dropOneStaticVariable';
+  static String dropAllLiveToConsole({
+    required bool includeSubclasses,
+    required bool includeImplementers,
+  }) =>
+      'dropAllVariables${includeSubclasses ? '_Subclasses' : ''}${includeImplementers ? '_Imlementers' : ''}';
 }
 
 /// Areas of memory screen, to prefix event names, when events are emitted

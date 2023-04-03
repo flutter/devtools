@@ -75,7 +75,7 @@ void main() {
         expect(find.text('Instances'), findsOneWidget);
         expect(find.text('Total Size'), findsOneWidget);
         expect(find.text('Dart Heap'), findsOneWidget);
-        expect(find.text('External'), findsOneWidget);
+        expect(find.text('External'), findsNothing);
         expect(find.text('Old Space'), findsNothing);
         expect(find.text('New Space'), findsNothing);
         expect(find.text('Usage'), findsNothing);
@@ -243,14 +243,12 @@ void main() {
         final instances = find.text('Instances');
         final size = find.text('Total Size');
         final dartHeap = find.text('Dart Heap');
-        final external_ = find.text('External');
 
         final columns = <Finder>[
           cls,
           instances,
           size,
           dartHeap,
-          external_,
         ];
 
         for (final columnFinder in columns) {
@@ -354,30 +352,6 @@ void main() {
           final internalSize = element.totalDartHeapSize;
           expect(internalSize >= lastValue, isTrue);
           lastValue = internalSize;
-        }
-
-        // Sort by external size, largest to smallest.
-        await tester.tap(external_);
-        await tester.pumpAndSettle();
-
-        data = state.tableController.tableData.value.data;
-
-        lastValue = data.first.totalExternalSize;
-        for (final element in data) {
-          final externalSize = element.totalExternalSize;
-          expect(externalSize <= lastValue, isTrue);
-          lastValue = externalSize;
-        }
-
-        // Sort by external size, smallest to largest.
-        await tester.tap(external_);
-        await tester.pumpAndSettle();
-
-        lastValue = data.first.totalExternalSize;
-        for (final element in data) {
-          final externalSize = element.totalExternalSize;
-          expect(externalSize >= lastValue, isTrue);
-          lastValue = externalSize;
         }
       },
     );

@@ -5,11 +5,10 @@
 import 'dart:async';
 import 'dart:math';
 
+import 'package:logging/logging.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../screens/debugger/debugger_model.dart';
-import '../config_specific/logger/logger.dart';
-import '../feature_flags.dart';
 import '../globals.dart';
 import '../memory/adapted_heap_data.dart';
 import '../primitives/utils.dart';
@@ -20,6 +19,8 @@ import 'helpers.dart';
 import 'inspector_service.dart';
 import 'references.dart';
 import 'variable_factory.dart';
+
+final _log = Logger('tree_builder');
 
 Future<void> _addExpandableChildren(
   DartObjectNode variable,
@@ -354,9 +355,8 @@ Future<void> _addInspectorItems(variable, IsolateRef? isolateRef) async {
             );
           } catch (e) {
             if (e is! SentinelException) {
-              log(
+              _log.warning(
                 'Caught $e accessing the value of an object',
-                LogLevel.warning,
               );
             }
           }
@@ -418,8 +418,7 @@ Future<void> buildVariablesTree(
     variable.addChild(DartObjectNode.text('error: $ex\n$stack'));
   }
 
-  if (FeatureFlags.evalAndBrowse &&
-      ref.heapSelection != null &&
+  if (ref.heapSelection != null &&
       ref is! ObjectReferences &&
       !variable.isGroup) {
     addReferencesRoot(variable, ref);

@@ -6,8 +6,8 @@ import 'dart:math';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:logging/logging.dart';
 
-import '../config_specific/logger/logger.dart' as logger;
 import '../primitives/auto_dispose.dart';
 import '../primitives/utils.dart';
 import '../theme.dart';
@@ -15,6 +15,8 @@ import 'chart_controller.dart';
 import 'chart_trace.dart';
 
 typedef DrawCodeCallback = void Function(Canvas canvas);
+
+final _log = Logger('chart');
 
 /// Perform some draw operations on a canvas after applying translate.
 ///
@@ -411,7 +413,7 @@ class ChartPainter extends CustomPainter {
 
     final elapsedTime = DateTime.now().difference(startTime).inMilliseconds;
     if (debugTrackPaintTime && elapsedTime > 500) {
-      logger.log(
+      _log.info(
         '${chartController.name} ${chartController.timestampsLength} '
         'CustomPainter paint elapsed time $elapsedTime',
       );
@@ -698,7 +700,7 @@ class ChartPainter extends CustomPainter {
       default:
         final message = 'Unknown symbol ${characteristics.symbol}';
         assert(false, message);
-        logger.log(message, logger.LogLevel.error);
+        _log.shout(message);
     }
   }
 
