@@ -78,9 +78,7 @@ void main() {
     (WidgetTester tester) async {
       await tester.pumpWidget(
         wrapScaffold(
-          wrapWithNotifications(
-            DevToolsScaffold(screens: const [_screen1]),
-          ),
+          DevToolsScaffold(screens: const [_screen1]),
         ),
       );
       expect(find.byKey(_k1), findsOneWidget);
