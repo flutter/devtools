@@ -110,6 +110,11 @@ class AdaptedHeapData {
 
   final String isolateId;
 
+  /// Total size of all objects in the heap.
+  ///
+  /// Should be set externally.
+  late int totalDartSize;
+
   bool allFieldsCalculated = false;
 
   late DateTime created;
@@ -148,7 +153,7 @@ class AdaptedHeapData {
     return HeapPath(result.reversed.toList(growable: false));
   }
 
-  late final totalSize = () {
+  late final totalReachableSize = () {
     if (!allFieldsCalculated) throw StateError('Spanning tree should be built');
     return objects[rootIndex].retainedSize!;
   }();

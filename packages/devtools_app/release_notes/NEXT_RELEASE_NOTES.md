@@ -44,6 +44,7 @@ jank is detected on an iOS device. - [#5455](https://github.com/flutter/devtools
 * Enabled evaluation and browsing for instances in heap snapshot - [#5542](https://github.com/flutter/devtools/pull/5542)
 * Fix heap snapshot failure - [5520](https://github.com/flutter/devtools/pull/5520)
 * Stop displaying external sizes in the allocation profile - [5555](https://github.com/flutter/devtools/pull/5555)
+* Expose totals for memory in heap snapshot - [5593](https://github.com/flutter/devtools/pull/5593)
 
 ## Debugger updates
 * Fix a bug where variable inspection for instances sometimes showed no children. - [#5356](https://github.com/flutter/devtools/pull/5356)
