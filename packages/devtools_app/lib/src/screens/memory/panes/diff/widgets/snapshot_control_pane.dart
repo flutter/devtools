@@ -4,10 +4,12 @@
 
 import 'package:flutter/material.dart';
 
-import '../../../../../../devtools_app.dart';
 import '../../../../../shared/analytics/analytics.dart' as ga;
 import '../../../../../shared/analytics/constants.dart' as gac;
+import '../../../../../shared/common_widgets.dart';
 import '../../../../../shared/memory/simple_items.dart';
+import '../../../../../shared/primitives/utils.dart';
+import '../../../../../shared/theme.dart';
 import '../../../shared/primitives/simple_elements.dart';
 import '../controller/diff_pane_controller.dart';
 import '../controller/item_controller.dart';
@@ -53,8 +55,9 @@ class SnapshotControlPane extends StatelessWidget {
                 children: [
                   if (heapIsReady) ...[
                     Expanded(
-                      child:
-                          _SnapshotSizeView(footprint: current.heap!.footprint),
+                      child: _SnapshotSizeView(
+                        footprint: current.heap!.footprint,
+                      ),
                     ),
                     const SizedBox(width: defaultSpacing),
                   ],
