@@ -44,4 +44,3 @@ dev_dependencies:
   build_runner: ^2.3.3
   integration_test:
     sdk: flutter
-  test_api: ^0.5.1
