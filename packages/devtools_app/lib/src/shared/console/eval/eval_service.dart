@@ -188,7 +188,7 @@ class EvalService extends DisposableController with AutoDisposeControllerMixin {
   bool isScopeSupported({bool emitWarningToConsole = false}) {
     // Web does not support scopes yet.
     final isWeb = serviceManager.connectedApp?.isDartWebAppNow ?? true;
-    if (isWeb) {
+    if (isWeb && emitWarningToConsole) {
       serviceManager.consoleService.appendStdio(
         'Scope variables are not supported for web applications.',
       );
