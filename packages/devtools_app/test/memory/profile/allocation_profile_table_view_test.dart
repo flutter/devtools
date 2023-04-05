@@ -25,7 +25,7 @@ void main() {
   });
 
   Future<void> pumpMemoryScreen(WidgetTester tester) async {
-    await tester.pumpWidget(scene.build());
+    await tester.pumpWidget(scene.build(MockBuildContext()));
     // Delay to ensure the memory profiler has collected data.
     await tester.pumpAndSettle(const Duration(seconds: 1));
     expect(find.byType(MemoryBody), findsOneWidget);

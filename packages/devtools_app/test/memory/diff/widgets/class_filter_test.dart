@@ -69,7 +69,7 @@ void main() {
       diffWith,
     );
 
-    await tester.pumpWidget(scene.build());
+    await tester.pumpWidget(scene.build(MockBuildContext()));
     await tester.pumpAndSettle();
     expect(
       scene.diffController.core.classFilter.value.filterType,

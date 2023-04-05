@@ -47,7 +47,7 @@ void main() {
 
     Future<void> pumpProfilerScreen(WidgetTester tester) async {
       await tester.runAsync(() async {
-        await tester.pumpWidget(scene.build());
+        await tester.pumpWidget(scene.build(MockBuildContext()));
         // Delay to ensure the memory profiler has collected data.
         await tester.pump(const Duration(seconds: 1));
         expect(find.byType(ProfilerScreenBody), findsOneWidget);
