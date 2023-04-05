@@ -28,7 +28,7 @@ class MemoryDefaultScene extends Scene {
   late FakeServiceManager fakeServiceManager;
 
   @override
-  Widget build() {
+  Widget build(BuildContext context) {
     return wrapWithControllers(
       const MemoryBody(),
       memory: controller,
