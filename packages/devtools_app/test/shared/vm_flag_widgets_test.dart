@@ -65,9 +65,18 @@ void main() {
         find.byKey(CpuSamplingRateDropdown.dropdownKey),
         findsOneWidget,
       );
-      expect(find.text(CpuSamplingRate.low.display), findsOneWidget);
-      expect(find.text(CpuSamplingRate.medium.display), findsOneWidget);
-      expect(find.text(CpuSamplingRate.high.display), findsOneWidget);
+      expect(
+        find.text(CpuSamplingRate.low.display, skipOffstage: false),
+        findsOneWidget,
+      );
+      expect(
+        find.text(CpuSamplingRate.medium.display, skipOffstage: false),
+        findsOneWidget,
+      );
+      expect(
+        find.text(CpuSamplingRate.high.display, skipOffstage: false),
+        findsOneWidget,
+      );
       final RoundedDropDownButton<String> dropdownButton =
           tester.widget(find.byKey(CpuSamplingRateDropdown.dropdownKey));
       expect(dropdownButton.value, equals(CpuSamplingRate.medium.value));
@@ -76,9 +85,18 @@ void main() {
     testWidgets('selection', (WidgetTester tester) async {
       await pumpDropdown(tester);
       expect(find.byWidget(dropdown), findsOneWidget);
-      expect(find.text(CpuSamplingRate.low.display), findsOneWidget);
-      expect(find.text(CpuSamplingRate.medium.display), findsOneWidget);
-      expect(find.text(CpuSamplingRate.high.display), findsOneWidget);
+      expect(
+        find.text(CpuSamplingRate.low.display, skipOffstage: false),
+        findsOneWidget,
+      );
+      expect(
+        find.text(CpuSamplingRate.medium.display, skipOffstage: false),
+        findsOneWidget,
+      );
+      expect(
+        find.text(CpuSamplingRate.high.display, skipOffstage: false),
+        findsOneWidget,
+      );
       RoundedDropDownButton<String> dropdownButton =
           tester.widget(find.byKey(CpuSamplingRateDropdown.dropdownKey));
       expect(dropdownButton.value, equals(CpuSamplingRate.medium.value));
