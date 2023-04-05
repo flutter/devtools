@@ -1,3 +1,6 @@
+## 2.23.1
+TODO: update changelog
+
 ## 2.23.0
 * Additional material 3 polish [#5602](https://github.com/flutter/devtools/pull/5602)
 * Expose totals for memory in heap snapshot [#5593](https://github.com/flutter/devtools/pull/5593)
