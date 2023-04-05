@@ -4,12 +4,13 @@
 
 import 'dart:async';
 
+import 'package:logging/logging.dart';
+
 import '../../devtools.dart' as devtools show version;
 import '../screens/debugger/breakpoint_manager.dart';
 import '../service/service.dart';
 import '../service/service_manager.dart';
 import '../service/vm_service_wrapper.dart';
-import '../shared/config_specific/logger/logger.dart';
 import '../shared/console/eval/eval_service.dart';
 import '../shared/framework_controller.dart';
 import '../shared/globals.dart';
@@ -21,6 +22,8 @@ import '../shared/scripts/script_manager.dart';
 import '../shared/survey.dart';
 
 typedef ErrorReporter = void Function(String title, Object error);
+
+final _log = Logger('framework_core');
 
 // TODO(jacobr): refactor this class to not use static members.
 // ignore: avoid_classes_with_only_static_members
@@ -39,7 +42,7 @@ class FrameworkCore {
 
   static void init() {
     // Print the version number at startup.
-    log('DevTools version ${devtools.version}.');
+    _log.info('DevTools version ${devtools.version}.');
   }
 
   /// Returns true if we're able to connect to a device and false otherwise.
@@ -70,7 +73,7 @@ class FrameworkCore {
         return true;
       } catch (e, st) {
         if (logException) {
-          log('$e\n$st', LogLevel.error);
+          _log.shout(e, e, st);
         }
         errorReporter('Unable to connect to VM service at $uri: $e', e);
         return false;

@@ -10,7 +10,6 @@ import '../../../../shared/analytics/constants.dart' as gac;
 import '../../../../shared/charts/flame_chart.dart';
 import '../../../../shared/common_widgets.dart';
 import '../../../../shared/dialogs.dart';
-import '../../../../shared/feature_flags.dart';
 import '../../../../shared/globals.dart';
 import '../../../../shared/theme.dart';
 import '../../../../shared/ui/search.dart';
@@ -68,7 +67,7 @@ class TimelineEventsTabControls extends StatelessWidget {
         return Row(
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
-            if (useLegacy || !FeatureFlags.embeddedPerfetto) ...[
+            if (useLegacy) ...[
               ValueListenableBuilder<EventsControllerStatus>(
                 valueListenable: controller.status,
                 builder: (context, status, _) {
@@ -87,7 +86,16 @@ class TimelineEventsTabControls extends StatelessWidget {
                 gaSelection: gac.timelineFlameChartHelp,
               ),
             ],
+            if (!controller.useLegacyTraceViewer.value)
+              Padding(
+                padding: const EdgeInsets.only(right: densePadding),
+                child: PerfettoHelpButton(
+                  perfettoController: controller.perfettoController,
+                ),
+              ),
             if (!offlineController.offlineMode.value) ...[
+              // TODO(kenz): add a switch to enable the CPU profiler once the
+              // tracing format supports it (when we switch to protozero).
               const SizedBox(width: denseSpacing),
               TraceCategoriesButton(controller: controller),
               const SizedBox(width: denseSpacing),
@@ -111,7 +119,7 @@ class TraceCategoriesButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DevToolsButton.iconOnly(
-      icon: Icons.checklist,
+      icon: Icons.checklist_outlined,
       outlined: false,
       tooltip: 'Trace categories',
       gaScreen: gac.performance,

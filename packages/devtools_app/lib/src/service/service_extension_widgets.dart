@@ -7,11 +7,11 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:logging/logging.dart';
 import 'package:pointer_interceptor/pointer_interceptor.dart';
 
 import '../shared/analytics/analytics.dart' as ga;
 import '../shared/common_widgets.dart';
-import '../shared/config_specific/logger/logger.dart';
 import '../shared/globals.dart';
 import '../shared/primitives/auto_dispose.dart';
 import '../shared/primitives/message_bus.dart';
@@ -23,6 +23,17 @@ import '../shared/utils.dart';
 import 'service_extension_manager.dart';
 import 'service_extensions.dart';
 import 'service_registrations.dart';
+
+final _log = Logger('service_extension_widgets');
+
+/// Data class tracking the state of a single service extension.
+class ExtensionState {
+  ExtensionState(this.description);
+
+  final ToggleableServiceExtensionDescription description;
+  bool isSelected = false;
+  bool isAvailable = false;
+}
 
 /// Group of buttons where each button toggles the state of a VMService
 /// extension.
@@ -43,15 +54,6 @@ class ServiceExtensionButtonGroup extends StatefulWidget {
   @override
   _ServiceExtensionButtonGroupState createState() =>
       _ServiceExtensionButtonGroupState();
-}
-
-/// Data class tracking the state of a single service extension.
-class ExtensionState {
-  ExtensionState(this.description);
-
-  final ToggleableServiceExtensionDescription description;
-  bool isSelected = false;
-  bool isAvailable = false;
 }
 
 class _ServiceExtensionButtonGroupState
@@ -388,18 +390,12 @@ class _ServiceExtensionToggleState extends State<_ServiceExtensionToggle>
         onTap: _onClick,
         child: Row(
           children: <Widget>[
-            SizedBox(
-              // TODO(kenz): this is not working.
-              height: defaultSwitchHeight,
-              child: Switch(
-                value: value,
-                onChanged: _onClick,
-              ),
+            DevToolsSwitch(
+              padding: const EdgeInsets.only(right: denseSpacing),
+              value: value,
+              onChanged: _onClick,
             ),
             Text(widget.service.title),
-            // The switch is padded on its sides by 16dp.
-            // This balances out the tappable area.
-            const Padding(padding: EdgeInsets.only(left: defaultSpacing)),
           ],
         ),
       ),
@@ -876,7 +872,7 @@ mixin _ServiceExtensionMixin<T extends _ServiceExtensionWidget> on State<T> {
         notificationService.push(widget.completedText!);
       }
     } catch (e, st) {
-      log('$e\n$st');
+      _log.info(e, e, st);
 
       if (mounted) {
         notificationService.push(widget.describeError(e));
@@ -910,13 +906,14 @@ class ServiceExtensionTooltip extends StatelessWidget {
       );
     }
 
-    final colorScheme = Theme.of(context).colorScheme;
-    final focusColor = Theme.of(context).focusColor;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final focusColor = theme.focusColor;
     return DevToolsTooltip(
       message: description.tooltip,
       preferBelow: true,
       decoration: BoxDecoration(
-        color: colorScheme.defaultBackgroundColor,
+        color: colorScheme.surface,
         border: Border.all(
           color: focusColor,
           width: hoverCardBorderWidth,
@@ -924,6 +921,7 @@ class ServiceExtensionTooltip extends StatelessWidget {
         borderRadius:
             const BorderRadius.all(Radius.circular(defaultBorderRadius)),
       ),
+      textStyle: theme.regularTextStyle.copyWith(color: colorScheme.onSurface),
       child: child,
     );
   }

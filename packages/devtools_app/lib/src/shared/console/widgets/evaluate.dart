@@ -10,7 +10,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../feature_flags.dart';
+import '../../analytics/analytics.dart' as ga;
+import '../../analytics/constants.dart' as gac;
 import '../../globals.dart';
 import '../../primitives/auto_dispose.dart';
 import '../../theme.dart';
@@ -20,6 +21,7 @@ import '../eval/auto_complete.dart';
 import '../eval/eval_service.dart';
 import '../primitives/assignment.dart';
 import '../primitives/eval_history.dart';
+import 'help_dialog.dart';
 
 typedef AutoCompleteResultsFunction = Future<List<String>> Function(
   EditingParts parts,
@@ -209,7 +211,7 @@ class ExpressionEvalFieldState extends State<ExpressionEvalField>
                 _historyNavDown();
                 return KeyEventResult.handled;
               } else if (event.isKeyPressed(LogicalKeyboardKey.enter)) {
-                _handleExpressionEval();
+                _handleExpressionEval(context);
                 return KeyEventResult.handled;
               }
 
@@ -226,7 +228,7 @@ class ExpressionEvalFieldState extends State<ExpressionEvalField>
                 border: OutlineInputBorder(),
                 focusedBorder: OutlineInputBorder(borderSide: BorderSide.none),
                 enabledBorder: OutlineInputBorder(borderSide: BorderSide.none),
-                labelText: 'Eval',
+                labelText: 'Eval. Enter "?" for help.',
               ),
               overlayXPositionBuilder:
                   (String inputValue, TextStyle? inputStyle) {
@@ -301,13 +303,24 @@ class ExpressionEvalFieldState extends State<ExpressionEvalField>
         .toList();
   }
 
-  void _handleExpressionEval() async {
+  void _handleExpressionEval(BuildContext context) async {
     final expressionText = searchTextFieldController.value.text.trim();
     _autoCompleteController
       ..updateSearchField(newValue: '', caretPosition: 0)
       ..clearSearchField(force: true);
 
     if (expressionText.isEmpty) return;
+
+    if (expressionText.trim() == '?') {
+      ga.select(gac.console, gac.ConsoleEvent.helpInline);
+      unawaited(
+        showDialog(
+          context: context,
+          builder: (context) => const ConsoleHelpDialog(),
+        ),
+      );
+      return;
+    }
 
     serviceManager.consoleService.appendStdio('> $expressionText\n');
     setState(() {
@@ -321,8 +334,10 @@ class ExpressionEvalFieldState extends State<ExpressionEvalField>
       // Response is either a ErrorRef, InstanceRef, or Sentinel.
       final Response response;
       if (evalService.isStoppedAtDartFrame) {
+        ga.select(gac.console, gac.ConsoleEvent.evalInStoppedApp);
         response = await evalService.evalAtCurrentFrame(expressionText);
       } else {
+        ga.select(gac.console, gac.ConsoleEvent.evalInRunningApp);
         if (_tryProcessAssignment(expressionText)) return;
         if (isolateRef == null) {
           _emitToConsole(
@@ -416,8 +431,6 @@ class ExpressionEvalFieldState extends State<ExpressionEvalField>
   ///
   /// Returns true if the text was parsed as assignment.
   bool _tryProcessAssignment(String expressionText) {
-    if (!FeatureFlags.evalAndBrowse) return false;
-
     final assignment = ConsoleVariableAssignment.tryParse(expressionText);
     if (assignment == null) return false;
     const kSuccess = true;

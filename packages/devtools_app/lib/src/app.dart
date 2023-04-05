@@ -9,13 +9,11 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'example/conditional_screen.dart';
-import 'framework/about_dialog.dart';
 import 'framework/framework_core.dart';
 import 'framework/initializer.dart';
 import 'framework/landing_screen.dart';
 import 'framework/notifications_view.dart';
 import 'framework/release_notes/release_notes.dart';
-import 'framework/report_feedback_button.dart';
 import 'framework/scaffold.dart';
 import 'screens/app_size/app_size_controller.dart';
 import 'screens/app_size/app_size_screen.dart';
@@ -40,14 +38,10 @@ import 'screens/vm_developer/vm_developer_tools_screen.dart';
 import 'service/service_extension_widgets.dart';
 import 'shared/analytics/analytics.dart' as ga;
 import 'shared/analytics/analytics_controller.dart';
-import 'shared/analytics/constants.dart' as gac;
 import 'shared/analytics/metrics.dart';
 import 'shared/common_widgets.dart';
-import 'shared/config_specific/server/server.dart';
 import 'shared/console/primitives/simple_items.dart';
-import 'shared/dialogs.dart';
 import 'shared/globals.dart';
-import 'shared/log_storage.dart';
 import 'shared/offline_screen.dart';
 import 'shared/primitives/auto_dispose.dart';
 import 'shared/primitives/utils.dart';
@@ -55,7 +49,6 @@ import 'shared/routing.dart';
 import 'shared/screen.dart';
 import 'shared/theme.dart';
 import 'shared/ui/hover.dart';
-import 'shared/utils.dart';
 
 // Assign to true to use a sample implementation of a conditional screen.
 // WARNING: Do not check in this file if debugEnableSampleScreen is true.
@@ -209,11 +202,6 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
       return DevToolsScaffold.withChild(
         key: const Key('landing'),
         ideTheme: ideTheme,
-        actions: [
-          OpenSettingsAction(),
-          ReportFeedbackButton(),
-          OpenAboutAction(),
-        ],
         child: LandingScreenBody(sampleData: widget.sampleData),
       );
     }
@@ -252,9 +240,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
                     HotReloadButton(),
                     HotRestartButton(),
                   ],
-                  OpenSettingsAction(),
-                  ReportFeedbackButton(),
-                  OpenAboutAction(),
+                  ...DevToolsScaffold.defaultActions(),
                 ],
               ),
             );
@@ -293,11 +279,6 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
         return DevToolsScaffold.withChild(
           key: const Key('appsize'),
           ideTheme: ideTheme,
-          actions: [
-            OpenSettingsAction(),
-            ReportFeedbackButton(),
-            OpenAboutAction(),
-          ],
           child: MultiProvider(
             providers: _providedControllers(),
             child: const AppSizeBody(),
@@ -454,145 +435,6 @@ class _AlternateCheckedModeBanner extends StatelessWidget {
       child: Builder(
         builder: builder,
       ),
-    );
-  }
-}
-
-class OpenSettingsAction extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return DevToolsTooltip(
-      message: 'Settings',
-      child: InkWell(
-        onTap: () {
-          unawaited(
-            showDialog(
-              context: context,
-              builder: (context) => SettingsDialog(),
-            ),
-          );
-        },
-        child: Container(
-          width: actionWidgetSize,
-          height: actionWidgetSize,
-          alignment: Alignment.center,
-          child: Icon(
-            Icons.settings_outlined,
-            size: actionsIconSize,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class SettingsDialog extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    final analyticsController = Provider.of<AnalyticsController>(context);
-    return DevToolsDialog(
-      title: const DialogTitleText('Settings'),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Flexible(
-            child: CheckboxSetting(
-              title: 'Use a dark theme',
-              notifier: preferences.darkModeTheme,
-              onChanged: preferences.toggleDarkModeTheme,
-              gaItem: gac.darkTheme,
-            ),
-          ),
-          Flexible(
-            child: CheckboxSetting(
-              title: 'Use dense mode',
-              notifier: preferences.denseModeEnabled,
-              onChanged: preferences.toggleDenseMode,
-              gaItem: gac.denseMode,
-            ),
-          ),
-          if (isExternalBuild && isDevToolsServerAvailable)
-            Flexible(
-              child: CheckboxSetting(
-                title: 'Enable analytics',
-                notifier: analyticsController.analyticsEnabled,
-                onChanged: (enable) => unawaited(
-                  analyticsController.toggleAnalyticsEnabled(enable),
-                ),
-                gaItem: gac.analytics,
-              ),
-            ),
-          Flexible(
-            child: CheckboxSetting(
-              title: 'Enable VM developer mode',
-              notifier: preferences.vmDeveloperModeEnabled,
-              onChanged: preferences.toggleVmDeveloperMode,
-              gaItem: gac.vmDeveloperMode,
-            ),
-          ),
-          const PaddedDivider(),
-          const _VerboseLoggingSetting(),
-        ],
-      ),
-      actions: const [
-        DialogCloseButton(),
-      ],
-    );
-  }
-}
-
-class _VerboseLoggingSetting extends StatelessWidget {
-  const _VerboseLoggingSetting();
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Row(
-          children: [
-            Flexible(
-              child: CheckboxSetting(
-                title: 'Enable verbose logging',
-                notifier: preferences.verboseLoggingEnabled,
-                onChanged: (enable) => preferences.toggleVerboseLogging(enable),
-                gaItem: gac.verboseLogging,
-              ),
-            ),
-            const SizedBox(width: defaultSpacing),
-            DevToolsButton(
-              label: 'Copy logs',
-              icon: Icons.copy,
-              gaScreen: gac.settingsDialog,
-              gaSelection: gac.copyLogs,
-              onPressed: () async => await copyToClipboard(
-                LogStorage.root.toString(),
-                'Successfully copied logs',
-              ),
-            ),
-            const SizedBox(width: denseSpacing),
-            ClearButton(
-              label: 'Clear logs',
-              gaScreen: gac.settingsDialog,
-              gaSelection: gac.clearLogs,
-              onPressed: LogStorage.root.clear,
-            ),
-          ],
-        ),
-        const SizedBox(height: denseSpacing),
-        const Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Spacer(),
-            Icon(Icons.warning),
-            SizedBox(width: defaultSpacing),
-            Text(
-              'Logs may contain sensitive information.\n'
-              'Always check their contents before sharing.',
-            )
-          ],
-        ),
-      ],
     );
   }
 }

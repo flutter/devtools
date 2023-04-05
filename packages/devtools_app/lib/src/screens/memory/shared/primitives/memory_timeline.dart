@@ -5,10 +5,12 @@
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
+import 'package:logging/logging.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../../../shared/config_specific/logger/logger.dart';
 import '../../../../shared/primitives/utils.dart';
+
+final _log = Logger('memory_timeline');
 
 enum ContinuesState {
   none,
@@ -280,7 +282,9 @@ class MemoryTimeline {
           data[endingIndex].timestamp.toInt(),
         ),
       );
-      log('Recompute Time range Offline data start: $startDT, end: $endDT');
+      _log.info(
+        'Recompute Time range Offline data start: $startDT, end: $endDT',
+      );
     }
   }
 

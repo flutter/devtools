@@ -40,8 +40,6 @@ extension FlameChartColorScheme on ColorScheme {
       isLight ? Colors.black54 : const Color.fromARGB(255, 200, 200, 200);
 }
 
-const defaultSelectionForegroundColor = Colors.white;
-
 const searchMatchColor = Colors.yellow;
 final searchMatchColorOpaque = Colors.yellow.withOpacity(0.5);
 const activeSearchMatchColor = Colors.orangeAccent;

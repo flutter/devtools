@@ -6,12 +6,14 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
+import 'package:logging/logging.dart';
 
-import '../../../../../shared/config_specific/logger/logger.dart';
 import '../../../../../shared/primitives/trace_event.dart';
 import '../../../../../shared/primitives/utils.dart';
 import '../../../performance_model.dart';
 import '../timeline_event_processor.dart';
+
+final _log = Logger('legacy_event_processor');
 
 /// Processor for composing a recorded list of trace events into a timeline of
 /// [AsyncTimelineEvent]s, [SyncTimelineEvent]s, and [FlutterFrame]s.
@@ -197,7 +199,7 @@ class LegacyEventProcessor extends BaseTraceEventProcessor {
           // an illegal id collision that we need to handle gracefully, so throw
           // this event away. Bug tracking collisions:
           // https://github.com/flutter/flutter/issues/47019.
-          log('Id collision on id ${eventWrapper.event.id}', LogLevel.warning);
+          _log.warning('Id collision on id ${eventWrapper.event.id}');
         } else {
           // We know it must be a child because we process events in timestamp
           // order.

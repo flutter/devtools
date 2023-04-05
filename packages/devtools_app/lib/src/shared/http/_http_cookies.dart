@@ -137,37 +137,6 @@ class Cookie {
     parseAttributes();
   }
 
-  String toString() {
-    StringBuffer sb = new StringBuffer();
-    sb
-      ..write(_name)
-      ..write("=")
-      ..write(_value);
-    if (expires != null) {
-      sb
-        ..write("; Expires=")
-        ..write(HttpDate.format(expires!));
-    }
-    if (maxAge != null) {
-      sb
-        ..write("; Max-Age=")
-        ..write(maxAge);
-    }
-    if (domain != null) {
-      sb
-        ..write("; Domain=")
-        ..write(domain);
-    }
-    if (path != null) {
-      sb
-        ..write("; Path=")
-        ..write(path);
-    }
-    if (secure) sb.write("; Secure");
-    if (httpOnly) sb.write("; HttpOnly");
-    return sb.toString();
-  }
-
   static String _validateName(String? newName) {
     const separators = const [
       "(",
