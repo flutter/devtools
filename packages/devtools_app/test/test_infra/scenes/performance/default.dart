@@ -19,7 +19,7 @@ class PerformanceDefaultScene extends Scene {
   late PerformanceController controller;
 
   @override
-  Widget build() {
+  Widget build(BuildContext _) {
     return wrapWithControllers(
       const PerformanceScreenBody(),
       performance: controller,

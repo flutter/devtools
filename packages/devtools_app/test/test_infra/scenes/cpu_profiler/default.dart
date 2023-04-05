@@ -21,7 +21,7 @@ class CpuProfilerDefaultScene extends Scene {
   late ProfilerScreen screen;
 
   @override
-  Widget build() {
+  Widget build(BuildContext _) {
     return wrapWithControllers(
       const ProfilerScreenBody(),
       profiler: controller,
