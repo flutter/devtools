@@ -1,3 +1,8 @@
+## 2.23.1
+* Fix g3 violations and dependency issues with test_api and stager [#5610](https://github.com/flutter/devtools/pull/5610)
+* Hide warning message "Scope variables are not supported for web applications" [#5612](https://github.com/flutter/devtools/pull/5612)
+* Prep Devtools for release to 2.23.1 [#5651](https://github.com/flutter/devtools/pull/5615)
+
 ## 2.23.0
 * Additional material 3 polish [#5602](https://github.com/flutter/devtools/pull/5602)
 * Expose totals for memory in heap snapshot [#5593](https://github.com/flutter/devtools/pull/5593)
