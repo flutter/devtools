@@ -197,7 +197,7 @@ class TimelineEventsController extends PerformanceFeatureController
         if (added) {
           // Only add this thread name event to [allTraceEvents] if we have not
           // already added it. Otherwise, it will be a duplicate and will
-          // consume unecessary space and processing time.
+          // consume unnecessary space and processing time.
           newThreadNameEvents.add(threadNameEvent);
           allTraceEvents.add(eventWrapper);
         }

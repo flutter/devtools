@@ -49,6 +49,6 @@ void main() {
     await tester.tap(find.byType(DropdownButton<DevToolsJsonFile>));
     await tester.pumpAndSettle();
 
-    expect(find.text('test-data'), findsNWidgets(2));
+    expect(find.text('test-data'), findsOneWidget);
   });
 }

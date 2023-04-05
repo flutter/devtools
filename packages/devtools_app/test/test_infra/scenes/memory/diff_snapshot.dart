@@ -22,7 +22,7 @@ class DiffSnapshotScene extends Scene {
   late FakeServiceManager fakeServiceManager;
 
   @override
-  Widget build() {
+  Widget build(BuildContext context) {
     return wrap(
       SnapshotInstanceItemPane(controller: diffController),
     );

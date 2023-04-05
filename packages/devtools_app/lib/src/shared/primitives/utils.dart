@@ -151,7 +151,7 @@ enum DurationDisplayUnit {
   }
 }
 
-/// Converts a [Duration] into a readble text representation in the specified
+/// Converts a [Duration] into a readable text representation in the specified
 /// [unit].
 ///
 /// [includeUnit] - whether to include the unit at the end of the returned value
