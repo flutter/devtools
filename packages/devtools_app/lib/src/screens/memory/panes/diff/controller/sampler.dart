@@ -12,7 +12,7 @@ import '../../../../../shared/memory/adapted_heap_data.dart';
 import '../../../../../shared/memory/class_name.dart';
 import '../../../../../shared/vm_utils.dart';
 import '../../../shared/heap/heap.dart';
-import '../../../shared/primitives/instance_set_button.dart';
+import '../../../shared/primitives/instance_context_menu.dart';
 
 class HeapClassSampler extends ClassSampler {
   HeapClassSampler(this.objects, this.heap, this.heapClass)

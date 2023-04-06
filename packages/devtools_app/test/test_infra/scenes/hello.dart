@@ -9,7 +9,7 @@ import 'package:stager/stager.dart';
 /// flutter run -t test/scenes/hello.stager_app.dart -d macos
 class HelloScene extends Scene {
   @override
-  Widget build() {
+  Widget build(BuildContext context) {
     return MaterialApp(
       home: Card(
         child: Text('Hello, I am $title.'),

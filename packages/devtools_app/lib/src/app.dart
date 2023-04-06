@@ -9,14 +9,11 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'example/conditional_screen.dart';
-import 'framework/about_dialog.dart';
 import 'framework/framework_core.dart';
 import 'framework/initializer.dart';
 import 'framework/landing_screen.dart';
 import 'framework/notifications_view.dart';
-import 'framework/report_feedback_button.dart';
 import 'framework/scaffold.dart';
-import 'framework/settings_dialog.dart';
 import 'screens/app_size/app_size_controller.dart';
 import 'screens/app_size/app_size_screen.dart';
 import 'screens/debugger/debugger_controller.dart';
@@ -205,11 +202,6 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
       return DevToolsScaffold.withChild(
         key: const Key('landing'),
         ideTheme: ideTheme,
-        actions: [
-          OpenSettingsAction(),
-          ReportFeedbackButton(),
-          OpenAboutAction(),
-        ],
         child: LandingScreenBody(sampleData: widget.sampleData),
       );
     }
@@ -248,9 +240,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
                     HotReloadButton(),
                     HotRestartButton(),
                   ],
-                  OpenSettingsAction(),
-                  ReportFeedbackButton(),
-                  OpenAboutAction(),
+                  ...DevToolsScaffold.defaultActions(),
                 ],
               ),
             );
@@ -289,11 +279,6 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
         return DevToolsScaffold.withChild(
           key: const Key('appsize'),
           ideTheme: ideTheme,
-          actions: [
-            OpenSettingsAction(),
-            ReportFeedbackButton(),
-            OpenAboutAction(),
-          ],
           child: MultiProvider(
             providers: _providedControllers(),
             child: const AppSizeBody(),
