@@ -44,27 +44,21 @@ class SnapshotControlPane extends StatelessWidget {
                     gaSelection: gac.MemoryEvent.diffSnapshotDownloadCsv,
                     onPressed: controller.downloadCurrentItemToCsv,
                   ),
-                  const SizedBox(width: defaultSpacing),
-                  _HelpLink(panelController: controller.sidePanelController),
                 ],
               ],
             ),
-            Row(
-              children: [
-                ToolbarAction(
-                  icon: Icons.clear,
-                  tooltip: 'Delete snapshot',
-                  onPressed: isProcessing
-                      ? null
-                      : () {
-                          controller.deleteCurrentSnapshot();
-                          ga.select(
-                            gac.memory,
-                            gac.MemoryEvent.diffSnapshotDelete,
-                          );
-                        },
-                ),
-              ],
+            ToolbarAction(
+              icon: Icons.clear,
+              tooltip: 'Delete snapshot',
+              onPressed: isProcessing
+                  ? null
+                  : () {
+                      controller.deleteCurrentSnapshot();
+                      ga.select(
+                        gac.memory,
+                        gac.MemoryEvent.diffSnapshotDelete,
+                      );
+                    },
             ),
           ],
         );

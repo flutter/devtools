@@ -28,8 +28,7 @@ enum SidePanelViewType {
     'What\'s new in DevTools?',
     'Stay tuned for updates.',
     _releaseNotesKey,
-  ),
-  memoryDiffHelp('Diffing memory snapshots', '', _memoryDiffHelpKey);
+  );
 
   const SidePanelViewType(this.title, this.emptyMarkdownFallback, this.key);
 
@@ -38,7 +37,6 @@ enum SidePanelViewType {
   final Key key;
 
   static const _releaseNotesKey = Key('release_notes');
-  static const _memoryDiffHelpKey = Key('memory_diff_help_panel');
 }
 
 class SidePanelViewer extends StatefulWidget {

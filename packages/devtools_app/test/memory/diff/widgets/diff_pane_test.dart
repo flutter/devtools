@@ -62,20 +62,6 @@ void main() {
         expect(find.text('selected-isolate-${i + 1}'), findsOneWidget);
       }
 
-      // Hide the diff snapshots help panel
-      final diffSnapshotsHelpPanel = tester.widget<SidePanelViewer>(
-        find.byKey(SidePanelViewType.memoryDiffHelp.key),
-      );
-      expect(diffSnapshotsHelpPanel.controller.isVisible.value, isTrue);
-
-      final closeSidePanelButton = find.descendant(
-        of: find.byKey(SidePanelViewType.memoryDiffHelp.key),
-        matching: find.byIcon(Icons.close),
-      );
-      expect(closeSidePanelButton, findsOneWidget);
-      await tester.tap(closeSidePanelButton);
-      await tester.pumpAndSettle();
-
       await expectLater(
         find.byType(DiffPane),
         matchesDevToolsGolden(

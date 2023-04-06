@@ -8,7 +8,6 @@ import 'package:flutter_markdown/flutter_markdown.dart';
 import '../../../../shared/analytics/constants.dart' as gac;
 import '../../../../shared/common_widgets.dart';
 import '../../../../shared/config_specific/launch_url/launch_url.dart';
-import '../../../../shared/side_panel.dart';
 import '../../../../shared/split.dart';
 import '../../../../shared/theme.dart';
 import '../../shared/primitives/simple_elements.dart';
@@ -19,9 +18,7 @@ import 'widgets/snapshot_list.dart';
 import 'widgets/snapshot_view.dart';
 
 class DiffPane extends StatelessWidget {
-  DiffPane({Key? key, required this.diffController}) : super(key: key) {
-    diffController.sidePanelController.markdownText = snapshotDocumentation;
-  }
+  const DiffPane({Key? key, required this.diffController}) : super(key: key);
 
   final DiffPaneController diffController;
 
@@ -55,41 +52,36 @@ class _SnapshotItemContent extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SidePanelViewer(
-      key: SidePanelViewType.memoryDiffHelp.key,
-      controller: controller.sidePanelController,
-      title: 'Diffing memory snapshots',
-      child: ValueListenableBuilder<SnapshotItem>(
-        valueListenable: controller.derived.selectedItem,
-        builder: (_, item, __) {
-          if (item is SnapshotDocItem) {
-            return Padding(
-              padding: const EdgeInsets.all(defaultSpacing),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: Markdown(
-                      data: snapshotDocumentation,
-                      onTapLink: (text, url, title) async =>
-                          await launchUrl(url!),
-                    ),
+    return ValueListenableBuilder<SnapshotItem>(
+      valueListenable: controller.derived.selectedItem,
+      builder: (_, item, __) {
+        if (item is SnapshotDocItem) {
+          return Padding(
+            padding: const EdgeInsets.all(defaultSpacing),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Markdown(
+                    data: _snapshotDocumentation,
+                    onTapLink: (text, url, title) async =>
+                        await launchUrl(url!),
                   ),
-                  const SizedBox(height: denseSpacing),
-                  MoreInfoLink(
-                    url: DocLinks.diff.value,
-                    gaScreenName: gac.memory,
-                    gaSelectedItemDescription:
-                        gac.topicDocumentationLink(_documentationTopic),
-                  ),
-                ],
-              ),
-            );
-          }
+                ),
+                const SizedBox(height: denseSpacing),
+                MoreInfoLink(
+                  url: DocLinks.diff.value,
+                  gaScreenName: gac.memory,
+                  gaSelectedItemDescription:
+                      gac.topicDocumentationLink(_documentationTopic),
+                ),
+              ],
+            ),
+          );
+        }
 
-          return SnapshotInstanceItemPane(controller: controller);
-        },
-      ),
+        return SnapshotInstanceItemPane(controller: controller);
+      },
     );
   }
 }
@@ -121,7 +113,7 @@ class SnapshotInstanceItemPane extends StatelessWidget {
 }
 
 /// `\v` adds vertical space
-const snapshotDocumentation = '''
+const _snapshotDocumentation = '''
 Find unexpected memory usage by comparing two heap snapshots:
 
 \v
