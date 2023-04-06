@@ -2457,37 +2457,6 @@ class HelpButtonWithDialog extends StatelessWidget {
   }
 }
 
-/// Help button, that opens a side panel on click.
-class HelpButtonWithSidePanel extends StatelessWidget {
-  const HelpButtonWithSidePanel({
-    required this.gaScreen,
-    required this.gaSelection,
-    required this.panelController,
-    this.outlined = true,
-  });
-
-  final String gaScreen;
-
-  final String gaSelection;
-
-  final SidePanelController panelController;
-
-  final bool outlined;
-
-  @override
-  Widget build(BuildContext context) {
-    return HelpButton(
-      onPressed: () {
-        ga.select(gaScreen, gaSelection);
-        panelController.toggleVisibility(true);
-      },
-      gaScreen: gaScreen,
-      gaSelection: gaSelection,
-      outlined: outlined,
-    );
-  }
-}
-
 /// Display a single bullet character in order to act as a stylized spacer
 /// component.
 class BulletSpacer extends StatelessWidget {
