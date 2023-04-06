@@ -25,7 +25,6 @@ import 'primitives/auto_dispose.dart';
 import 'primitives/flutter_widgets/linked_scroll_controller.dart';
 import 'primitives/utils.dart';
 import 'routing.dart';
-import 'side_panel.dart';
 import 'theme.dart';
 import 'ui/label.dart';
 import 'utils.dart';
