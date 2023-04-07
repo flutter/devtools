@@ -12,6 +12,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../../../test_infra/matchers/matchers.dart';
 import '../../../test_infra/scenes/memory/diff_snapshot.dart';
+import '../../../test_infra/scenes/scene_test_extensions.dart';
 
 class _FilterTest {
   _FilterTest({required this.isDiff});
@@ -69,7 +70,7 @@ void main() {
       diffWith,
     );
 
-    await tester.pumpWidget(scene.build());
+    await tester.pumpScene(scene);
     await tester.pumpAndSettle();
     expect(
       scene.diffController.core.classFilter.value.filterType,

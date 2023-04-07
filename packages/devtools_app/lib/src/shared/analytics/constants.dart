@@ -96,6 +96,7 @@ const perfettoModeTraceEventProcessingTime =
     'traceEventProcessingTime-perfettoMode';
 const perfettoLoadTrace = 'perfettoLoadTrace';
 const perfettoScrollToTimeRange = 'perfettoScrollToTimeRange';
+const perfettoShowHelp = 'perfettoShowHelp';
 const performanceSettings = 'performanceSettings';
 const traceCategories = 'traceCategories';
 

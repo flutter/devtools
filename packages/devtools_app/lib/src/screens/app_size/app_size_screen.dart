@@ -381,8 +381,10 @@ class _AnalysisViewState extends State<AnalysisView>
                         ),
                         if (analysisCallGraphRoot != null)
                           Flexible(
-                            child: CallGraphWithDominators(
-                              callGraphRoot: analysisCallGraphRoot,
+                            child: OutlineDecoration.onlyLeft(
+                              child: CallGraphWithDominators(
+                                callGraphRoot: analysisCallGraphRoot,
+                              ),
                             ),
                           ),
                       ],

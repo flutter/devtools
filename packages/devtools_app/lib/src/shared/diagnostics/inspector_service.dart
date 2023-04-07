@@ -1042,7 +1042,7 @@ abstract class ObjectGroupBase implements Disposable {
   }
 
   Future<List<RemoteDiagnosticsNode>> getListHelper(
-    InspectorInstanceRef instanceRef,
+    InspectorInstanceRef? instanceRef,
     String methodName,
     RemoteDiagnosticsNode? parent,
     bool isProperty,

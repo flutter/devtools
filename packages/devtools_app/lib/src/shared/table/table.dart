@@ -1538,18 +1538,6 @@ class _TableRowState<T> extends State<TableRow<T>>
     }
   }
 
-  TextAlign _textAlignmentFor(ColumnData<T> column) {
-    switch (column.alignment) {
-      case ColumnAlignment.center:
-        return TextAlign.center;
-      case ColumnAlignment.right:
-        return TextAlign.right;
-      case ColumnAlignment.left:
-      default:
-        return TextAlign.left;
-    }
-  }
-
   /// Presents the content of this row.
   Widget tableRowFor(BuildContext context, {VoidCallback? onPressed}) {
     Widget columnFor(ColumnData<T> column, double columnWidth) {
@@ -1607,7 +1595,7 @@ class _TableRowState<T> extends State<TableRow<T>>
           ),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
-          textAlign: _textAlignmentFor(column),
+          textAlign: column.contentTextAlignment,
         );
 
         final tooltip = column.getTooltip(node);
@@ -1824,6 +1812,7 @@ class _ColumnHeader<T> extends StatelessWidget {
     final title = Text(
       column.title,
       overflow: TextOverflow.ellipsis,
+      textAlign: column.headerAlignment,
     );
 
     final headerContent = Row(

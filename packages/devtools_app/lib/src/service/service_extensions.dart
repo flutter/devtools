@@ -295,7 +295,7 @@ final disableClipLayers = ToggleableServiceExtensionDescription<bool>._(
       '$_flutterExtensionPrefix${RenderingServiceExtensions.debugDisableClipLayers.name}',
   inverted: true,
   title: 'Render Clip layers',
-  iconData: Icons.cut,
+  iconData: Icons.cut_outlined,
   enabledValue: true,
   disabledValue: false,
   gaScreenName: gac.performance,

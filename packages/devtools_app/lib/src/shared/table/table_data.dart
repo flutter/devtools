@@ -29,6 +29,7 @@ abstract class ColumnData<T> {
     this.titleTooltip,
     required double this.fixedWidthPx,
     this.alignment = ColumnAlignment.left,
+    this.headerAlignment = TextAlign.left,
   }) : minWidthPx = null;
 
   ColumnData.wide(
@@ -36,6 +37,7 @@ abstract class ColumnData<T> {
     this.titleTooltip,
     this.minWidthPx,
     this.alignment = ColumnAlignment.left,
+    this.headerAlignment = TextAlign.left,
   }) : fixedWidthPx = null;
 
   final String title;
@@ -53,6 +55,8 @@ abstract class ColumnData<T> {
   double getNodeIndentPx(T dataObject) => 0.0;
 
   final ColumnAlignment alignment;
+
+  final TextAlign headerAlignment;
 
   bool get numeric => false;
 
@@ -170,6 +174,18 @@ extension ColumnDataExtension<T> on ColumnData<T> {
       case ColumnAlignment.left:
       default:
         return MainAxisAlignment.start;
+    }
+  }
+
+  TextAlign get contentTextAlignment {
+    switch (alignment) {
+      case ColumnAlignment.center:
+        return TextAlign.center;
+      case ColumnAlignment.right:
+        return TextAlign.right;
+      case ColumnAlignment.left:
+      default:
+        return TextAlign.left;
     }
   }
 }

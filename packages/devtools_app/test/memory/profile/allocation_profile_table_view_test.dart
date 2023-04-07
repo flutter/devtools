@@ -15,6 +15,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../test_infra/scenes/memory/default.dart';
+import '../../test_infra/scenes/scene_test_extensions.dart';
 
 void main() {
   late MemoryDefaultScene scene;
@@ -25,7 +26,7 @@ void main() {
   });
 
   Future<void> pumpMemoryScreen(WidgetTester tester) async {
-    await tester.pumpWidget(scene.build());
+    await tester.pumpScene(scene);
     // Delay to ensure the memory profiler has collected data.
     await tester.pumpAndSettle(const Duration(seconds: 1));
     expect(find.byType(MemoryBody), findsOneWidget);

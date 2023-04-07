@@ -37,7 +37,7 @@ Future<void> analyzeHeapAndSetRetainingPaths(
   AdaptedHeapData heap,
   List<LeakReport> notGCedLeaks,
 ) async {
-  if (!heap.allFieldsCalculated) await buildSpanningTreeAndSetInRefs(heap);
+  if (!heap.allFieldsCalculated) await calculateHeap(heap);
 
   for (var l in notGCedLeaks) {
     l.retainingPath = _pathByIdentityHashCode(heap, l.code)?.shortPath();
