@@ -23,9 +23,9 @@ final _log = Logger('app_error_handling');
 /// application.
 void setupErrorHandling(Future Function() appStartCallback) {
   // First, run all our code in a new zone.
-  return runZonedGuarded(
+  unawaited(runZonedGuarded<Future<void>>(
     // ignore: avoid-passing-async-when-sync-expected this ignore should be fixed.
-    () async {
+    () {
       WidgetsFlutterBinding.ensureInitialized();
 
       final FlutterExceptionHandler? oldHandler = FlutterError.onError;
@@ -54,7 +54,7 @@ void setupErrorHandling(Future Function() appStartCallback) {
       _reportError(error, stack, 'zoneGuarded');
       throw error;
     },
-  );
+  ));
 }
 
 void _reportError(Object error, StackTrace stack, String caller) {
