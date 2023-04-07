@@ -125,7 +125,7 @@ Future<void> _addInstanceSetItems(
   DartObjectNode variable,
   IsolateRef? isolateRef,
   InstanceSet instanceSet,
-) async {
+) {
   final instances = instanceSet.instances ?? [];
   variable.addAllChildren(
     createVariablesForInstanceSet(
@@ -182,7 +182,7 @@ Future<void> _addChildrenToInstanceVariable({
   required IsolateRef? isolateRef,
   required HeapObjectSelection? heapSelection,
   Set<String>? existingNames,
-}) async {
+}) {
   switch (value.kind) {
     case InstanceKind.kMap:
       variable.addAllChildren(

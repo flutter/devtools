@@ -10,7 +10,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('FutureWorkTracker', () {
-    test('tracker returns future', () async {
+    test('tracker returns future', () {
       final tracker = FutureWorkTracker();
       final completer = Completer<Object?>();
       expect(tracker.track(() => completer.future), equals(isA<Future>()));
@@ -20,7 +20,7 @@ void main() {
       async.elapse(const Duration(milliseconds: 50));
     }
 
-    test('tracks work', () async {
+    test('tracks work', () {
       _wrapAndRunAsync(
         (async) async {
           final tracker = FutureWorkTracker();
@@ -49,7 +49,7 @@ void main() {
       );
     });
 
-    test('tracks work after clear', () async {
+    test('tracks work after clear', () {
       _wrapAndRunAsync(
         (async) async {
           final tracker = FutureWorkTracker();
@@ -76,42 +76,45 @@ void main() {
       );
     });
 
-    test('tracks failed work', () async {
+    test('tracks failed work', () {
       _wrapAndRunAsync((async) async {
-        await runZonedGuarded(() async {
-          final tracker = FutureWorkTracker();
-          expect(tracker.active.value, isFalse);
+        await runZonedGuarded(
+          () async {
+            final tracker = FutureWorkTracker();
+            expect(tracker.active.value, isFalse);
 
-          final completer1 = Completer<Object?>();
-          unawaited(tracker.track(() => completer1.future));
-          _advanceClock(async);
-          expect(tracker.active.value, isTrue);
-
-          final completer2 = Completer<Object?>();
-          unawaited(tracker.track(() => completer2.future));
-          _advanceClock(async);
-          expect(tracker.active.value, isTrue);
-
-          completer1.completeError('bad');
-          try {
-            unawaited(completer1.future);
+            final completer1 = Completer<Object?>();
+            unawaited(tracker.track(() => completer1.future));
             _advanceClock(async);
-          } catch (error) {
-            expectSync(error, equals('bad'));
-          }
-          expect(tracker.active.value, isTrue);
+            expect(tracker.active.value, isTrue);
 
-          completer2.completeError('bad');
-          try {
-            unawaited(completer2.future);
+            final completer2 = Completer<Object?>();
+            unawaited(tracker.track(() => completer2.future));
             _advanceClock(async);
-          } catch (error) {
+            expect(tracker.active.value, isTrue);
+
+            completer1.completeError('bad');
+            try {
+              unawaited(completer1.future);
+              _advanceClock(async);
+            } catch (error) {
+              expectSync(error, equals('bad'));
+            }
+            expect(tracker.active.value, isTrue);
+
+            completer2.completeError('bad');
+            try {
+              unawaited(completer2.future);
+              _advanceClock(async);
+            } catch (error) {
+              expectSync(error, equals('bad'));
+            }
+            expect(tracker.active.value, isFalse);
+          },
+          (Object error, StackTrace stack) {
             expectSync(error, equals('bad'));
-          }
-          expect(tracker.active.value, isFalse);
-        }, (Object error, StackTrace stack) {
-          expectSync(error, equals('bad'));
-        });
+          },
+        );
       });
     });
   });

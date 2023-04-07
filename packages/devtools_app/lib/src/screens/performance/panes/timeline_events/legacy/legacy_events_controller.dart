@@ -169,7 +169,7 @@ class LegacyTimelineEventsController with SearchControllerMixin<TimelineEvent> {
     return matches;
   }
 
-  Future<void> setOfflineData(PerformanceData offlineData) async {
+  Future<void> setOfflineData(PerformanceData offlineData) {
     if (offlineData.selectedEvent != null) {
       for (var timelineEvent in data!.timelineEvents) {
         final eventToSelect = timelineEvent.firstChildWithCondition((event) {

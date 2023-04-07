@@ -30,92 +30,98 @@ void main() {
           initialRoute: (context) {
             onBuild(context);
             return const SizedBox();
-          }
+          },
         },
       );
     }
 
     testWidgets(
-        'Generates a route name with parameters with an empty route in the context',
-        (WidgetTester tester) async {
-      late String generatedRoute;
-      await tester.pumpWidget(
-        routeTestingApp((context) {
-          generatedRoute = routeNameWithQueryParams(
-            context,
-            '/home',
-            {'foo': 'bar', 'theme': 'dark'},
-          );
-        }),
-      );
-      expect(generatedRoute, '/home?foo=bar&theme=dark');
-    });
-
-    testWidgets('Respects dark theme of the current route from the context',
-        (WidgetTester tester) async {
-      late String generatedRoute;
-      await tester.pumpWidget(
-        routeTestingApp(
-          (context) {
-            generatedRoute =
-                routeNameWithQueryParams(context, '/home', {'foo': 'bar'});
-          },
-          initialRoute: '/?theme=dark',
-        ),
-      );
-      expect(generatedRoute, '/home?foo=bar&theme=dark');
-    });
-
-    testWidgets(
-        'Removes redundant light theme of the current route from the context',
-        (WidgetTester tester) async {
-      late String generatedRoute;
-      await tester.pumpWidget(
-        routeTestingApp(
-          (context) {
-            generatedRoute =
-                routeNameWithQueryParams(context, '/home', {'foo': 'bar'});
-          },
-          initialRoute: '/?theme=light',
-        ),
-      );
-      expect(generatedRoute, '/home?foo=bar');
-    });
-
-    testWidgets(
-        'Overrides dark theme of the current route when a replacement theme is given',
-        (WidgetTester tester) async {
-      late String generatedRoute;
-      await tester.pumpWidget(
-        routeTestingApp(
-          (context) {
+      'Generates a route name with parameters with an empty route in the context',
+      (WidgetTester tester) async {
+        late String generatedRoute;
+        await tester.pumpWidget(
+          routeTestingApp((context) {
             generatedRoute = routeNameWithQueryParams(
               context,
               '/home',
-              {'foo': 'bar', 'theme': 'light'},
+              {'foo': 'bar', 'theme': 'dark'},
             );
-          },
-          initialRoute: '/?snap=crackle&theme=dark',
-        ),
-      );
-      expect(generatedRoute, '/home?foo=bar&theme=light');
-    });
+          }),
+        );
+        expect(generatedRoute, '/home?foo=bar&theme=dark');
+      },
+    );
 
     testWidgets(
-        'Overrides other parameters of the current route from the context',
-        (WidgetTester tester) async {
-      late String generatedRoute;
-      await tester.pumpWidget(
-        routeTestingApp(
-          (context) {
-            generatedRoute =
-                routeNameWithQueryParams(context, '/home', {'foo': 'baz'});
-          },
-          initialRoute: '/?foo=bar&baz=quux',
-        ),
-      );
-      expect(generatedRoute, '/home?foo=baz');
-    });
+      'Respects dark theme of the current route from the context',
+      (WidgetTester tester) async {
+        late String generatedRoute;
+        await tester.pumpWidget(
+          routeTestingApp(
+            (context) {
+              generatedRoute =
+                  routeNameWithQueryParams(context, '/home', {'foo': 'bar'});
+            },
+            initialRoute: '/?theme=dark',
+          ),
+        );
+        expect(generatedRoute, '/home?foo=bar&theme=dark');
+      },
+    );
+
+    testWidgets(
+      'Removes redundant light theme of the current route from the context',
+      (WidgetTester tester) async {
+        late String generatedRoute;
+        await tester.pumpWidget(
+          routeTestingApp(
+            (context) {
+              generatedRoute =
+                  routeNameWithQueryParams(context, '/home', {'foo': 'bar'});
+            },
+            initialRoute: '/?theme=light',
+          ),
+        );
+        expect(generatedRoute, '/home?foo=bar');
+      },
+    );
+
+    testWidgets(
+      'Overrides dark theme of the current route when a replacement theme is given',
+      (WidgetTester tester) async {
+        late String generatedRoute;
+        await tester.pumpWidget(
+          routeTestingApp(
+            (context) {
+              generatedRoute = routeNameWithQueryParams(
+                context,
+                '/home',
+                {'foo': 'bar', 'theme': 'light'},
+              );
+            },
+            initialRoute: '/?snap=crackle&theme=dark',
+          ),
+        );
+        expect(generatedRoute, '/home?foo=bar&theme=light');
+      },
+    );
+
+    testWidgets(
+      'Overrides other parameters of the current route from the context',
+      (WidgetTester tester) async {
+        late String generatedRoute;
+        await tester.pumpWidget(
+          routeTestingApp(
+            (context) {
+              generatedRoute =
+                  routeNameWithQueryParams(context, '/home', {'foo': 'baz'});
+            },
+            initialRoute: '/?foo=bar&baz=quux',
+          ),
+        );
+        expect(generatedRoute, '/home?foo=baz');
+      },
+    );
 
     group('in an unnamed route', () {
       // TODO(jacobr): rewrite these tests in a way that makes sense given how

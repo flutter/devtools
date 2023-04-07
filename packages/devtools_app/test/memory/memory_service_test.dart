@@ -22,7 +22,7 @@ int previousTimestamp = 0;
 
 bool firstSample = true;
 
-void main() async {
+void main() {
   // TODO(https://github.com/flutter/devtools/issues/2053): rewrite.
   // ignore: dead_code
   if (false) {

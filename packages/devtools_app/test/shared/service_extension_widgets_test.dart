@@ -19,7 +19,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 
-Future<void> main() async {
+Future<void> main() {
   final mockServiceManager = MockServiceConnectionManager();
   when(mockServiceManager.serviceExtensionManager)
       .thenReturn(FakeServiceExtensionManager());
@@ -158,7 +158,7 @@ Future<void> main() async {
       serviceState.addListener(serviceStateListener);
     });
 
-    tearDown(() async {
+    tearDown(() {
       serviceState.removeListener(serviceStateListener);
     });
 

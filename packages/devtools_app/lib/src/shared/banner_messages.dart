@@ -185,7 +185,7 @@ class BannerMessage extends StatelessWidget {
                     context,
                     listen: false,
                   ).removeMessage(this, dismiss: true),
-                )
+                ),
               ],
             ),
           ],
@@ -331,7 +331,7 @@ class ShaderJankMessage {
           const TextSpan(
             text: ' instead!',
           ),
-        ]
+        ],
       ],
       screenId: screenId,
     );

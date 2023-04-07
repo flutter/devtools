@@ -48,200 +48,220 @@ void main() {
       initServiceManager();
     });
 
-    testWidgetsWithWindowSize('builds dialog for dart web app', windowSize,
-        (WidgetTester tester) async {
-      final app = fakeServiceManager.connectedApp!;
-      mockWebVm(fakeServiceManager.vm);
-      mockConnectedApp(
-        app,
-        isFlutterApp: false,
-        isProfileBuild: false,
-        isWebApp: true,
-      );
+    testWidgetsWithWindowSize(
+      'builds dialog for dart web app',
+      windowSize,
+      (WidgetTester tester) async {
+        final app = fakeServiceManager.connectedApp!;
+        mockWebVm(fakeServiceManager.vm);
+        mockConnectedApp(
+          app,
+          isFlutterApp: false,
+          isProfileBuild: false,
+          isWebApp: true,
+        );
 
-      deviceDialog = DeviceDialog(
-        connectedApp: app,
-      );
+        deviceDialog = DeviceDialog(
+          connectedApp: app,
+        );
 
-      await tester.pumpWidget(wrap(deviceDialog));
-      expect(find.text('Device Info'), findsOneWidget);
+        await tester.pumpWidget(wrap(deviceDialog));
+        expect(find.text('Device Info'), findsOneWidget);
 
-      expect(find.text('CPU / OS: '), findsOneWidget);
-      expect(find.text('Web macos'), findsOneWidget);
-      expect(find.text('Dart Version: '), findsOneWidget);
-      expect(find.text('1.9.1'), findsOneWidget);
-      expect(find.text('Flutter Version: '), findsNothing);
-      expect(find.text('Framework / Engine: '), findsNothing);
-      expect(find.text('Connected app type: '), findsOneWidget);
-      expect(find.text('Dart web'), findsOneWidget);
-      expect(find.text('VM Service Connection: '), findsOneWidget);
-      expect(find.text('ws://127.0.0.1:56137/ISsyt6ki0no=/ws'), findsOneWidget);
-      expect(find.byType(CopyToClipboardControl), findsOneWidget);
-    });
-
-    testWidgetsWithWindowSize('builds dialog for dart CLI app', windowSize,
-        (WidgetTester tester) async {
-      final app = fakeServiceManager.connectedApp!;
-      when(fakeServiceManager.vm.operatingSystem).thenReturn('macos');
-      mockConnectedApp(
-        app,
-        isFlutterApp: false,
-        isProfileBuild: false,
-        isWebApp: false,
-      );
-
-      deviceDialog = DeviceDialog(
-        connectedApp: app,
-      );
-
-      await tester.pumpWidget(wrap(deviceDialog));
-      expect(find.text('Device Info'), findsOneWidget);
-
-      expect(find.text('CPU / OS: '), findsOneWidget);
-      expect(find.text('x64 (64 bit) macos'), findsOneWidget);
-      expect(find.text('Dart Version: '), findsOneWidget);
-      expect(find.text('1.9.1'), findsOneWidget);
-      expect(find.text('Flutter Version: '), findsNothing);
-      expect(find.text('Framework / Engine: '), findsNothing);
-      expect(find.text('Connected app type: '), findsOneWidget);
-      expect(find.text('Dart CLI'), findsOneWidget);
-      expect(find.text('VM Service Connection: '), findsOneWidget);
-      expect(find.text('ws://127.0.0.1:56137/ISsyt6ki0no=/ws'), findsOneWidget);
-      expect(find.byType(CopyToClipboardControl), findsOneWidget);
-    });
+        expect(find.text('CPU / OS: '), findsOneWidget);
+        expect(find.text('Web macos'), findsOneWidget);
+        expect(find.text('Dart Version: '), findsOneWidget);
+        expect(find.text('1.9.1'), findsOneWidget);
+        expect(find.text('Flutter Version: '), findsNothing);
+        expect(find.text('Framework / Engine: '), findsNothing);
+        expect(find.text('Connected app type: '), findsOneWidget);
+        expect(find.text('Dart web'), findsOneWidget);
+        expect(find.text('VM Service Connection: '), findsOneWidget);
+        expect(
+            find.text('ws://127.0.0.1:56137/ISsyt6ki0no=/ws'), findsOneWidget);
+        expect(find.byType(CopyToClipboardControl), findsOneWidget);
+      },
+    );
 
     testWidgetsWithWindowSize(
-        'builds dialog for flutter native app (debug)', windowSize,
-        (WidgetTester tester) async {
-      final app = fakeServiceManager.connectedApp!;
-      mockConnectedApp(
-        app,
-        isFlutterApp: true,
-        isProfileBuild: false,
-        isWebApp: false,
-      );
+      'builds dialog for dart CLI app',
+      windowSize,
+      (WidgetTester tester) async {
+        final app = fakeServiceManager.connectedApp!;
+        when(fakeServiceManager.vm.operatingSystem).thenReturn('macos');
+        mockConnectedApp(
+          app,
+          isFlutterApp: false,
+          isProfileBuild: false,
+          isWebApp: false,
+        );
 
-      deviceDialog = DeviceDialog(
-        connectedApp: app,
-      );
+        deviceDialog = DeviceDialog(
+          connectedApp: app,
+        );
 
-      await tester.pumpWidget(wrap(deviceDialog));
-      expect(find.text('Device Info'), findsOneWidget);
+        await tester.pumpWidget(wrap(deviceDialog));
+        expect(find.text('Device Info'), findsOneWidget);
 
-      expect(find.text('CPU / OS: '), findsOneWidget);
-      expect(find.text('x64 (64 bit) android'), findsOneWidget);
-      expect(find.text('Dart Version: '), findsOneWidget);
-      expect(find.text('1.9.1'), findsOneWidget);
-      expect(find.text('Flutter Version: '), findsOneWidget);
-      expect(find.text('2.10.0 / unknown'), findsOneWidget);
-      expect(find.text('Framework / Engine: '), findsOneWidget);
-      expect(find.text('74432fa91c / ae2222f47e'), findsOneWidget);
-      expect(find.text('Connected app type: '), findsOneWidget);
-      expect(find.text('Flutter native (debug build)'), findsOneWidget);
-      expect(find.text('VM Service Connection: '), findsOneWidget);
-      expect(find.text('ws://127.0.0.1:56137/ISsyt6ki0no=/ws'), findsOneWidget);
-      expect(find.byType(CopyToClipboardControl), findsOneWidget);
-    });
-
-    testWidgetsWithWindowSize(
-        'builds dialog for flutter native app (profile)', windowSize,
-        (WidgetTester tester) async {
-      final app = fakeServiceManager.connectedApp!;
-      mockConnectedApp(
-        app,
-        isFlutterApp: true,
-        isProfileBuild: true,
-        isWebApp: false,
-      );
-
-      deviceDialog = DeviceDialog(
-        connectedApp: app,
-      );
-
-      await tester.pumpWidget(wrap(deviceDialog));
-      expect(find.text('Device Info'), findsOneWidget);
-
-      expect(find.text('CPU / OS: '), findsOneWidget);
-      expect(find.text('Dart Version: '), findsOneWidget);
-      expect(find.text('1.9.1'), findsOneWidget);
-      expect(find.text('Flutter Version: '), findsOneWidget);
-      expect(find.text('2.10.0 / unknown'), findsOneWidget);
-      expect(find.text('Framework / Engine: '), findsOneWidget);
-      expect(find.text('74432fa91c / ae2222f47e'), findsOneWidget);
-      expect(find.text('Connected app type: '), findsOneWidget);
-      expect(find.text('Flutter native (profile build)'), findsOneWidget);
-      expect(find.text('VM Service Connection: '), findsOneWidget);
-      expect(find.text('ws://127.0.0.1:56137/ISsyt6ki0no=/ws'), findsOneWidget);
-      expect(find.byType(CopyToClipboardControl), findsOneWidget);
-    });
+        expect(find.text('CPU / OS: '), findsOneWidget);
+        expect(find.text('x64 (64 bit) macos'), findsOneWidget);
+        expect(find.text('Dart Version: '), findsOneWidget);
+        expect(find.text('1.9.1'), findsOneWidget);
+        expect(find.text('Flutter Version: '), findsNothing);
+        expect(find.text('Framework / Engine: '), findsNothing);
+        expect(find.text('Connected app type: '), findsOneWidget);
+        expect(find.text('Dart CLI'), findsOneWidget);
+        expect(find.text('VM Service Connection: '), findsOneWidget);
+        expect(
+            find.text('ws://127.0.0.1:56137/ISsyt6ki0no=/ws'), findsOneWidget);
+        expect(find.byType(CopyToClipboardControl), findsOneWidget);
+      },
+    );
 
     testWidgetsWithWindowSize(
-        'builds dialog for flutter web app (debug)', windowSize,
-        (WidgetTester tester) async {
-      final app = fakeServiceManager.connectedApp!;
-      mockWebVm(fakeServiceManager.vm);
-      mockConnectedApp(
-        app,
-        isFlutterApp: true,
-        isProfileBuild: false,
-        isWebApp: true,
-      );
+      'builds dialog for flutter native app (debug)',
+      windowSize,
+      (WidgetTester tester) async {
+        final app = fakeServiceManager.connectedApp!;
+        mockConnectedApp(
+          app,
+          isFlutterApp: true,
+          isProfileBuild: false,
+          isWebApp: false,
+        );
 
-      deviceDialog = DeviceDialog(
-        connectedApp: app,
-      );
+        deviceDialog = DeviceDialog(
+          connectedApp: app,
+        );
 
-      await tester.pumpWidget(wrap(deviceDialog));
-      expect(find.text('Device Info'), findsOneWidget);
+        await tester.pumpWidget(wrap(deviceDialog));
+        expect(find.text('Device Info'), findsOneWidget);
 
-      expect(find.text('CPU / OS: '), findsOneWidget);
-      expect(find.text('Web macos'), findsOneWidget);
-      expect(find.text('Dart Version: '), findsOneWidget);
-      expect(find.text('1.9.1'), findsOneWidget);
-      expect(find.text('Flutter Version: '), findsOneWidget);
-      expect(find.text('2.10.0 / unknown'), findsOneWidget);
-      expect(find.text('Framework / Engine: '), findsOneWidget);
-      expect(find.text('74432fa91c / ae2222f47e'), findsOneWidget);
-      expect(find.text('Connected app type: '), findsOneWidget);
-      expect(find.text('Flutter web (debug build)'), findsOneWidget);
-      expect(find.text('VM Service Connection: '), findsOneWidget);
-      expect(find.text('ws://127.0.0.1:56137/ISsyt6ki0no=/ws'), findsOneWidget);
-      expect(find.byType(CopyToClipboardControl), findsOneWidget);
-    });
+        expect(find.text('CPU / OS: '), findsOneWidget);
+        expect(find.text('x64 (64 bit) android'), findsOneWidget);
+        expect(find.text('Dart Version: '), findsOneWidget);
+        expect(find.text('1.9.1'), findsOneWidget);
+        expect(find.text('Flutter Version: '), findsOneWidget);
+        expect(find.text('2.10.0 / unknown'), findsOneWidget);
+        expect(find.text('Framework / Engine: '), findsOneWidget);
+        expect(find.text('74432fa91c / ae2222f47e'), findsOneWidget);
+        expect(find.text('Connected app type: '), findsOneWidget);
+        expect(find.text('Flutter native (debug build)'), findsOneWidget);
+        expect(find.text('VM Service Connection: '), findsOneWidget);
+        expect(
+            find.text('ws://127.0.0.1:56137/ISsyt6ki0no=/ws'), findsOneWidget);
+        expect(find.byType(CopyToClipboardControl), findsOneWidget);
+      },
+    );
 
     testWidgetsWithWindowSize(
-        'builds dialog for flutter web app (profile)', windowSize,
-        (WidgetTester tester) async {
-      final app = fakeServiceManager.connectedApp!;
-      mockWebVm(fakeServiceManager.vm);
-      mockConnectedApp(
-        app,
-        isFlutterApp: true,
-        isProfileBuild: true,
-        isWebApp: true,
-      );
+      'builds dialog for flutter native app (profile)',
+      windowSize,
+      (WidgetTester tester) async {
+        final app = fakeServiceManager.connectedApp!;
+        mockConnectedApp(
+          app,
+          isFlutterApp: true,
+          isProfileBuild: true,
+          isWebApp: false,
+        );
 
-      deviceDialog = DeviceDialog(
-        connectedApp: app,
-      );
+        deviceDialog = DeviceDialog(
+          connectedApp: app,
+        );
 
-      await tester.pumpWidget(wrap(deviceDialog));
-      expect(find.text('Device Info'), findsOneWidget);
+        await tester.pumpWidget(wrap(deviceDialog));
+        expect(find.text('Device Info'), findsOneWidget);
 
-      expect(find.text('CPU / OS: '), findsOneWidget);
-      expect(find.text('Web macos'), findsOneWidget);
-      expect(find.text('Dart Version: '), findsOneWidget);
-      expect(find.text('1.9.1'), findsOneWidget);
-      expect(find.text('Flutter Version: '), findsOneWidget);
-      expect(find.text('2.10.0 / unknown'), findsOneWidget);
-      expect(find.text('Framework / Engine: '), findsOneWidget);
-      expect(find.text('74432fa91c / ae2222f47e'), findsOneWidget);
-      expect(find.text('Connected app type: '), findsOneWidget);
-      expect(find.text('Flutter web (profile build)'), findsOneWidget);
-      expect(find.text('VM Service Connection: '), findsOneWidget);
-      expect(find.text('ws://127.0.0.1:56137/ISsyt6ki0no=/ws'), findsOneWidget);
-      expect(find.byType(CopyToClipboardControl), findsOneWidget);
-    });
+        expect(find.text('CPU / OS: '), findsOneWidget);
+        expect(find.text('Dart Version: '), findsOneWidget);
+        expect(find.text('1.9.1'), findsOneWidget);
+        expect(find.text('Flutter Version: '), findsOneWidget);
+        expect(find.text('2.10.0 / unknown'), findsOneWidget);
+        expect(find.text('Framework / Engine: '), findsOneWidget);
+        expect(find.text('74432fa91c / ae2222f47e'), findsOneWidget);
+        expect(find.text('Connected app type: '), findsOneWidget);
+        expect(find.text('Flutter native (profile build)'), findsOneWidget);
+        expect(find.text('VM Service Connection: '), findsOneWidget);
+        expect(
+            find.text('ws://127.0.0.1:56137/ISsyt6ki0no=/ws'), findsOneWidget);
+        expect(find.byType(CopyToClipboardControl), findsOneWidget);
+      },
+    );
+
+    testWidgetsWithWindowSize(
+      'builds dialog for flutter web app (debug)',
+      windowSize,
+      (WidgetTester tester) async {
+        final app = fakeServiceManager.connectedApp!;
+        mockWebVm(fakeServiceManager.vm);
+        mockConnectedApp(
+          app,
+          isFlutterApp: true,
+          isProfileBuild: false,
+          isWebApp: true,
+        );
+
+        deviceDialog = DeviceDialog(
+          connectedApp: app,
+        );
+
+        await tester.pumpWidget(wrap(deviceDialog));
+        expect(find.text('Device Info'), findsOneWidget);
+
+        expect(find.text('CPU / OS: '), findsOneWidget);
+        expect(find.text('Web macos'), findsOneWidget);
+        expect(find.text('Dart Version: '), findsOneWidget);
+        expect(find.text('1.9.1'), findsOneWidget);
+        expect(find.text('Flutter Version: '), findsOneWidget);
+        expect(find.text('2.10.0 / unknown'), findsOneWidget);
+        expect(find.text('Framework / Engine: '), findsOneWidget);
+        expect(find.text('74432fa91c / ae2222f47e'), findsOneWidget);
+        expect(find.text('Connected app type: '), findsOneWidget);
+        expect(find.text('Flutter web (debug build)'), findsOneWidget);
+        expect(find.text('VM Service Connection: '), findsOneWidget);
+        expect(
+            find.text('ws://127.0.0.1:56137/ISsyt6ki0no=/ws'), findsOneWidget);
+        expect(find.byType(CopyToClipboardControl), findsOneWidget);
+      },
+    );
+
+    testWidgetsWithWindowSize(
+      'builds dialog for flutter web app (profile)',
+      windowSize,
+      (WidgetTester tester) async {
+        final app = fakeServiceManager.connectedApp!;
+        mockWebVm(fakeServiceManager.vm);
+        mockConnectedApp(
+          app,
+          isFlutterApp: true,
+          isProfileBuild: true,
+          isWebApp: true,
+        );
+
+        deviceDialog = DeviceDialog(
+          connectedApp: app,
+        );
+
+        await tester.pumpWidget(wrap(deviceDialog));
+        expect(find.text('Device Info'), findsOneWidget);
+
+        expect(find.text('CPU / OS: '), findsOneWidget);
+        expect(find.text('Web macos'), findsOneWidget);
+        expect(find.text('Dart Version: '), findsOneWidget);
+        expect(find.text('1.9.1'), findsOneWidget);
+        expect(find.text('Flutter Version: '), findsOneWidget);
+        expect(find.text('2.10.0 / unknown'), findsOneWidget);
+        expect(find.text('Framework / Engine: '), findsOneWidget);
+        expect(find.text('74432fa91c / ae2222f47e'), findsOneWidget);
+        expect(find.text('Connected app type: '), findsOneWidget);
+        expect(find.text('Flutter web (profile build)'), findsOneWidget);
+        expect(find.text('VM Service Connection: '), findsOneWidget);
+        expect(
+            find.text('ws://127.0.0.1:56137/ISsyt6ki0no=/ws'), findsOneWidget);
+        expect(find.byType(CopyToClipboardControl), findsOneWidget);
+      },
+    );
   });
 
   group('VMFlagsDialog', () {

@@ -184,7 +184,7 @@ Widget _helpBuilder(BuildContext context) {
                 CopyToClipboardControl(
                   dataProvider: () => t.alias,
                   size: tableIconSize,
-                )
+                ),
               ],
             ),
           ],

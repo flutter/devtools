@@ -29,7 +29,7 @@ void main() {
 
   group('CallGraphWithDominators', () {
     late CallGraphWithDominators callGraphWithDominators;
-    setUp(() async {
+    setUp(() {
       callGraphWithDominators = CallGraphWithDominators(
         callGraphRoot: callGraph.root,
       );

@@ -248,7 +248,7 @@ class _PerfettoViewController extends DisposableController
   Future<void> _pingPerfettoUntilReady() async {
     if (!_perfettoHandlerReady.isCompleted) {
       _pollForPerfettoHandlerReady =
-          Timer.periodic(const Duration(milliseconds: 200), (_) async {
+          Timer.periodic(const Duration(milliseconds: 200), (_) {
         // Once the Perfetto UI is ready, Perfetto will receive this 'PING'
         // message and return a 'PONG' message, handled in [_handleMessage].
         _postMessage(EmbeddedPerfettoEvent.ping.event);
@@ -266,7 +266,7 @@ class _PerfettoViewController extends DisposableController
     if (!isExternalBuild) return;
     if (!_devtoolsThemeHandlerReady.isCompleted) {
       _pollForThemeHandlerReady =
-          Timer.periodic(const Duration(milliseconds: 200), (_) async {
+          Timer.periodic(const Duration(milliseconds: 200), (_) {
         // Once [devtools_theme_handler.js] is ready, it will receive this
         // 'PING-DEVTOOLS-THEME' message and return a 'PONG-DEVTOOLS-THEME'
         // message, handled in [_handleMessage].

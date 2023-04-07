@@ -10,7 +10,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart';
 
-void main() async {
+void main() {
   late ResolvedUriManager resolvedUriManager;
   final service = createMockVmServiceWrapperWithDefaults();
 

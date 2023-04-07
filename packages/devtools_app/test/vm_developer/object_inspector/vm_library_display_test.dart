@@ -75,21 +75,24 @@ void main() {
       },
     );
 
-    testWidgetsWithWindowSize(' - with null dependencies', windowSize,
-        (WidgetTester tester) async {
-      testLibCopy.dependencies = null;
+    testWidgetsWithWindowSize(
+      ' - with null dependencies',
+      windowSize,
+      (WidgetTester tester) async {
+        testLibCopy.dependencies = null;
 
-      await tester.pumpWidget(
-        wrap(
-          VmLibraryDisplay(
-            library: mockLibraryObject,
-            controller: ObjectInspectorViewController(),
+        await tester.pumpWidget(
+          wrap(
+            VmLibraryDisplay(
+              library: mockLibraryObject,
+              controller: ObjectInspectorViewController(),
+            ),
           ),
-        ),
-      );
+        );
 
-      expect(find.byType(LibraryDependencies), findsNothing);
-    });
+        expect(find.byType(LibraryDependencies), findsNothing);
+      },
+    );
   });
 
   group('test LibraryDependencyExtension description method: ', () {
