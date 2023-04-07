@@ -63,7 +63,7 @@ class _ListControlPane extends StatelessWidget {
         context: context,
         builder: (context) => UnexpectedErrorDialog(
           additionalInfo:
-              'Encountered an error while taking a heap snapshot:\n$e\n$trace',
+              'Encountered an error while taking a heap snapshot:\n${e.runtimeType}\n$e\n$trace',
         ),
       );
     }

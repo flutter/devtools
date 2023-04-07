@@ -18,6 +18,8 @@ import '../shared/theme.dart';
 import '../shared/utils.dart';
 
 class OpenSettingsAction extends StatelessWidget {
+  const OpenSettingsAction();
+
   @override
   Widget build(BuildContext context) {
     return DevToolsTooltip(
@@ -121,7 +123,7 @@ class _VerboseLoggingSetting extends StatelessWidget {
             const SizedBox(width: defaultSpacing),
             DevToolsButton(
               label: 'Copy logs',
-              icon: Icons.copy,
+              icon: Icons.copy_outlined,
               gaScreen: gac.settingsDialog,
               gaSelection: gac.copyLogs,
               onPressed: () async => await copyToClipboard(

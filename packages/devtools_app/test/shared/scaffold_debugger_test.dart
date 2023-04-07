@@ -66,6 +66,7 @@ void main() {
           ),
           debugger: mockDebuggerController,
           analytics: AnalyticsController(enabled: false, firstRun: false),
+          releaseNotes: ReleaseNotesController(),
         ),
       );
       expect(find.byKey(debuggerScreenKey), findsOneWidget);

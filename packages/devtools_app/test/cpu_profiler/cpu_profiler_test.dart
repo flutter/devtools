@@ -548,10 +548,22 @@ void main() {
 
             expect(find.byType(UserTagDropdown), findsOneWidget);
             // There is a Text widget and a RichText widget.
-            expect(find.text('Filter by tag: userTagA'), findsWidgets);
-            expect(find.text('Filter by tag: userTagB'), findsWidgets);
-            expect(find.text('Filter by tag: userTagC'), findsWidgets);
-            expect(find.text('Group by: User Tag'), findsWidgets);
+            expect(
+              find.text('Filter by tag: userTagA', skipOffstage: false),
+              findsWidgets,
+            );
+            expect(
+              find.text('Filter by tag: userTagB', skipOffstage: false),
+              findsWidgets,
+            );
+            expect(
+              find.text('Filter by tag: userTagC', skipOffstage: false),
+              findsWidgets,
+            );
+            expect(
+              find.text('Group by: User Tag', skipOffstage: false),
+              findsWidgets,
+            );
 
             await tester.tap(find.text('Call Tree'));
             await tester.pumpAndSettle();
