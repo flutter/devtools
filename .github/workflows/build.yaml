@@ -16,32 +16,6 @@ permissions: read-all
 env:
   GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 jobs:
-  dcm:
-    name: Dart Code Metrics
-    runs-on: ubuntu-latest
-
-    env:
-      DCM_EMAIL: ${{ secrets.DCM_EMAIL }}
-      DCM_CI_KEY: ${{ secrets.DCM_CI_KEY }}
-    steps:
-      - name: Install DCM
-        run: |
-          set -x
-          sudo apt-get update
-          wget -qO- https://dcm.dev/pgp-key.public | sudo gpg --dearmor -o /usr/share/keyrings/dcm.gpg
-          echo 'deb [signed-by=/usr/share/keyrings/dcm.gpg arch=amd64] https://dcm.dev/debian stable main' | sudo tee /etc/apt/sources.list.d/dart_stable.list
-          sudo apt-get update
-          sudo apt-get install dcm
-          sudo chmod +x /usr/bin/dcm
-
-      - name: git clone devtools
-        uses: actions/checkout@8f4b7f84864484a7bf31766abe9204da3cbe65b3
-      - name: Use Dart
-        uses: dart-lang/setup-dart@9a04e6d73cca37bd455e0608d7e5092f881fd603
-      - name: Run DCM on Root
-        run: |
-          set -x
-          dcm analyze --ci-key="$DCM_CI_KEY" --email="$DCM_EMAIL" .
 
   flutter-prep:
     name: ${{ matrix.os }} Flutter Prep
