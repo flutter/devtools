@@ -349,6 +349,7 @@ bool _isConstructor(FuncRef funcRef, Class clazz) =>
 bool _isAccessible(
   String member,
   Class? clazz,
+  EvalService evalService,
 ) {
   final frame = _appState.currentFrame.value!;
   final currentScript = frame.location!.script;

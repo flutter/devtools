@@ -16,7 +16,7 @@ import '../test_infra/matchers/matchers.dart';
 // reduced to under 1 second without introducing flakes.
 const inspectorChangeSettleTime = Duration(seconds: 2);
 
-void main() {
+void main() async {
   // We need to use real async in this test so we need to use this binding.
   initializeLiveTestWidgetsFlutterBindingWithAssets();
   const windowSize = Size(2600.0, 1200.0);

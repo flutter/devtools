@@ -146,7 +146,7 @@ $display ($totalCount samples)
       totalCount: totalCount,
       selfCount: selfCount,
       profileMetaData: profileMetaData,
-      stackFrameIds: Set.of(stackFrameIds),
+      stackFrameIds: Set.from(stackFrameIds),
     );
   }
 }

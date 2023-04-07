@@ -32,7 +32,7 @@ void main() {
       );
     });
 
-    test('process response with missing leaf frame', () {
+    test('process response with missing leaf frame', () async {
       bool _runTest() {
         final cpuProfileDataWithMissingLeaf =
             CpuProfileData.parse(responseWithMissingLeafFrame);

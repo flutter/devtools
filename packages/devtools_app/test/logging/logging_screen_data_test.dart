@@ -12,7 +12,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 
-void main() {
+void main() async {
   late MockLoggingController mockLoggingController;
   const windowSize = Size(1000.0, 1000.0);
   final fakeServiceManager = FakeServiceManager();

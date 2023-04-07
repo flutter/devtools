@@ -25,7 +25,7 @@ void setupErrorHandling(Future Function() appStartCallback) {
   // First, run all our code in a new zone.
   return runZonedGuarded(
     // ignore: avoid-passing-async-when-sync-expected this ignore should be fixed.
-    () {
+    () async {
       WidgetsFlutterBinding.ensureInitialized();
 
       final FlutterExceptionHandler? oldHandler = FlutterError.onError;

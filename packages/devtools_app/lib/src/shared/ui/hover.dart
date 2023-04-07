@@ -372,7 +372,7 @@ class _HoverCardTooltipState extends State<HoverCardTooltip> {
     final generateHoverCardData = widget.generateHoverCardData;
     final asyncTimeout = widget.asyncTimeout;
 
-    _showTimer = Timer(HoverCardTooltip._hoverDelay, () {
+    _showTimer = Timer(HoverCardTooltip._hoverDelay, () async {
       if (asyncGenerateHoverCardData != null) {
         assert(generateHoverCardData == null);
         _showAsyncHoverCard(

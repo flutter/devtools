@@ -286,7 +286,7 @@ class ImportFileInstructions extends StatelessWidget {
           if (sampleData.isNotEmpty && !kReleaseMode) ...[
             const SizedBox(height: defaultSpacing),
             SampleDataDropDownButton(sampleData: sampleData),
-          ],
+          ]
         ],
       ),
     );

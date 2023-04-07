@@ -12,23 +12,22 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   test(
-    '$HeapDiffStore does not create new $DiffHeapClasses for the same couple',
-    () async {
-      final heap1 = await _createSimplestHeap();
-      final heap2 = await _createSimplestHeap();
+      '$HeapDiffStore does not create new $DiffHeapClasses for the same couple',
+      () async {
+    final heap1 = await _createSimplestHeap();
+    final heap2 = await _createSimplestHeap();
 
-      expect(heap1 == heap2, false);
+    expect(heap1 == heap2, false);
 
-      final store = HeapDiffStore();
+    final store = HeapDiffStore();
 
-      final couple1 = identityHashCode(store.compare(heap1, heap2));
-      final couple2 = identityHashCode(store.compare(heap1, heap2));
-      final couple3 = identityHashCode(store.compare(heap2, heap1));
+    final couple1 = identityHashCode(store.compare(heap1, heap2));
+    final couple2 = identityHashCode(store.compare(heap1, heap2));
+    final couple3 = identityHashCode(store.compare(heap2, heap1));
 
-      expect(couple1, couple2);
-      expect(couple1, couple3);
-    },
-  );
+    expect(couple1, couple2);
+    expect(couple1, couple3);
+  });
 
   test('$DiffClassStats calculates mix of cases as expected', () async {
     final className = HeapClassName(className: 'myClass', library: 'library');
@@ -119,7 +118,7 @@ Future<AdaptedHeap> _createSimplestHeap() async => await AdaptedHeap.create(
             outRefs: {},
             heapClass: HeapClassName(className: 'root', library: 'lib'),
             shallowSize: 1,
-          ),
+          )
         ],
         rootIndex: 0,
         isolateId: '',

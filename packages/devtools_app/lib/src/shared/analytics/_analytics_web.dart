@@ -749,7 +749,7 @@ Future<void> computeFlutterClientId() async {
 int _stillWaiting = 0;
 
 void waitForDimensionsComputed(String screenName) {
-  Timer(const Duration(milliseconds: 100), () {
+  Timer(const Duration(milliseconds: 100), () async {
     if (_analyticsComputed) {
       screen(screenName);
     } else {

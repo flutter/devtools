@@ -22,20 +22,19 @@ void main() {
       });
 
       test(
-        'parses the current page from the path even if query string is populated',
-        () {
-          final page = extractCurrentPageFromUrl(
-            'http://localhost:9000/memory?uri=x&page=inspector&theme=dark',
-          );
-          expect(page, 'memory');
-        },
-      );
+          'parses the current page from the path even if query string is populated',
+          () {
+        final page = extractCurrentPageFromUrl(
+          'http://localhost:9000/memory?uri=x&page=inspector&theme=dark',
+        );
+        expect(page, 'memory');
+      });
     });
 
     group('mapLegacyUrl', () {
       for (final prefix in [
         'http://localhost:123',
-        'http://localhost:123/authToken=/devtools',
+        'http://localhost:123/authToken=/devtools'
       ]) {
         group(' with $prefix prefix', () {
           test('does not map new-style URLs', () {

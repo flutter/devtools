@@ -49,7 +49,7 @@ class _VmInstanceDisplayState extends State<VmInstanceDisplay> {
     _populate();
   }
 
-  void _populate() {
+  void _populate() async {
     final isolateRef = serviceManager.isolateManager.selectedIsolate.value;
     _root = DartObjectNode.fromValue(
       name: 'value',
@@ -212,7 +212,7 @@ class DisplayProvider extends StatelessWidget {
           Text(
             variable.ref!.value.toString(),
             style: Theme.of(context).subtleFixedFontStyle,
-          ),
+          )
       ],
     );
   }

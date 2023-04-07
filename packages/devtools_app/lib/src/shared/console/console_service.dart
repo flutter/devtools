@@ -163,7 +163,7 @@ class ConsoleService extends Disposer {
     return item.variable;
   }
 
-  void appendMessage() {}
+  void appendMessage(String text) {}
 
   /// Append to the stdout / stderr buffer.
   void appendStdio(String text) {

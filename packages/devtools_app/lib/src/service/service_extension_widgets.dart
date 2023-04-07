@@ -949,7 +949,7 @@ class ServiceExtensionRichTooltip extends StatelessWidget {
     );
   }
 
-  HoverCardData _buildCardData() {
+  HoverCardData _buildCardData(BuildContext context) {
     return HoverCardData(
       position: HoverCardPosition.element,
       width: _tooltipWidth,

@@ -618,7 +618,7 @@ class FlutterFrameTooltip extends StatelessWidget {
     );
   }
 
-  HoverCardData _buildCardData() {
+  HoverCardData _buildCardData(BuildContext context) {
     final uiText = 'UI: ${durationText(
       frame.buildTime,
       unit: DurationDisplayUnit.milliseconds,

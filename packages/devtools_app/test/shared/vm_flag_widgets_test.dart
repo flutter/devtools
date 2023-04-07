@@ -180,28 +180,24 @@ void main() {
       expect(dropdownButton.value, equals(expectedFlagValue));
     }
 
-    testWidgets(
-      'updates value for safe flag change',
-      (WidgetTester tester) async {
-        testUpdatesForFlagChange(
-          tester,
-          newFlagValue: CpuSamplingRate.high.value,
-          expectedFlagValue: CpuSamplingRate.high.value,
-        );
-      },
-    );
+    testWidgets('updates value for safe flag change',
+        (WidgetTester tester) async {
+      testUpdatesForFlagChange(
+        tester,
+        newFlagValue: CpuSamplingRate.high.value,
+        expectedFlagValue: CpuSamplingRate.high.value,
+      );
+    });
 
-    testWidgets(
-      'updates value for unsafe flag change',
-      (WidgetTester tester) async {
-        // 999 is not a value in the dropdown list.
-        testUpdatesForFlagChange(
-          tester,
-          newFlagValue: '999',
-          expectedFlagValue: CpuSamplingRate.medium.value,
-        );
-      },
-    );
+    testWidgets('updates value for unsafe flag change',
+        (WidgetTester tester) async {
+      // 999 is not a value in the dropdown list.
+      testUpdatesForFlagChange(
+        tester,
+        newFlagValue: '999',
+        expectedFlagValue: CpuSamplingRate.medium.value,
+      );
+    });
   });
 }
 

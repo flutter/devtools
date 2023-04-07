@@ -14,45 +14,41 @@ void main() {
   });
 
   testWidgetsWithWindowSize(
-    'Landing screen displays without error',
-    const Size(2000.0, 2000.0),
-    (WidgetTester tester) async {
-      // Build our app and trigger a frame.
-      await tester.pumpWidget(wrap(const LandingScreenBody()));
-      expect(find.byType(ConnectDialog), findsOneWidget);
-      expect(find.byType(ImportFileInstructions), findsOneWidget);
-      expect(find.byType(SampleDataDropDownButton), findsNothing);
-      expect(find.byType(AppSizeToolingInstructions), findsOneWidget);
-    },
-  );
+      'Landing screen displays without error', const Size(2000.0, 2000.0),
+      (WidgetTester tester) async {
+    // Build our app and trigger a frame.
+    await tester.pumpWidget(wrap(const LandingScreenBody()));
+    expect(find.byType(ConnectDialog), findsOneWidget);
+    expect(find.byType(ImportFileInstructions), findsOneWidget);
+    expect(find.byType(SampleDataDropDownButton), findsNothing);
+    expect(find.byType(AppSizeToolingInstructions), findsOneWidget);
+  });
 
   testWidgetsWithWindowSize(
-    'Landing screen displays sample data picker',
-    const Size(2000.0, 2000.0),
-    (WidgetTester tester) async {
-      // Build our app and trigger a frame.
-      await tester.pumpWidget(
-        wrap(
-          LandingScreenBody(
-            sampleData: [
-              DevToolsJsonFile(
-                name: 'test-data',
-                lastModifiedTime: DateTime.now(),
-                data: <String, Object?>{},
-              ),
-            ],
-          ),
+      'Landing screen displays sample data picker', const Size(2000.0, 2000.0),
+      (WidgetTester tester) async {
+    // Build our app and trigger a frame.
+    await tester.pumpWidget(
+      wrap(
+        LandingScreenBody(
+          sampleData: [
+            DevToolsJsonFile(
+              name: 'test-data',
+              lastModifiedTime: DateTime.now(),
+              data: <String, Object?>{},
+            ),
+          ],
         ),
-      );
-      expect(find.byType(ConnectDialog), findsOneWidget);
-      expect(find.byType(ImportFileInstructions), findsOneWidget);
-      expect(find.byType(SampleDataDropDownButton), findsOneWidget);
-      expect(find.byType(AppSizeToolingInstructions), findsOneWidget);
+      ),
+    );
+    expect(find.byType(ConnectDialog), findsOneWidget);
+    expect(find.byType(ImportFileInstructions), findsOneWidget);
+    expect(find.byType(SampleDataDropDownButton), findsOneWidget);
+    expect(find.byType(AppSizeToolingInstructions), findsOneWidget);
 
-      await tester.tap(find.byType(DropdownButton<DevToolsJsonFile>));
-      await tester.pumpAndSettle();
+    await tester.tap(find.byType(DropdownButton<DevToolsJsonFile>));
+    await tester.pumpAndSettle();
 
-      expect(find.text('test-data'), findsOneWidget);
-    },
-  );
+    expect(find.text('test-data'), findsOneWidget);
+  });
 }

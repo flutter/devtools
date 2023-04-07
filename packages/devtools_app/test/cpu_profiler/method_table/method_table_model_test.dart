@@ -66,7 +66,7 @@ void main() {
       stackFrameIds: {'4'},
     );
 
-    test('shallowEquals ', () {
+    test('shallowEquals ', () async {
       expect(node1.shallowEquals(node2), isTrue);
       expect(node1.shallowEquals(node3), isFalse);
       expect(node1.shallowEquals(node4), isFalse);
@@ -84,7 +84,7 @@ void main() {
       expect(node4.shallowEquals(node3), isFalse);
     });
 
-    test('merge ', () {
+    test('merge ', () async {
       // Make a copy so that we do not modify the original nodes.
       final node1Copy = node1.copy();
 
@@ -106,7 +106,7 @@ void main() {
       expect(node1Copy.selfCount, 5);
     });
 
-    test('merge without total time', () {
+    test('merge without total time', () async {
       // Make a copy so that we do not modify the original nodes.
       final node1Copy = node1.copy();
 

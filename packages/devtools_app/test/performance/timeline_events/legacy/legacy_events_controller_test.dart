@@ -22,7 +22,7 @@ void main() {
   group('$LegacyTimelineEventsController', () {
     late TimelineEventsController eventsController;
 
-    setUp(() {
+    setUp(() async {
       when(fakeServiceManager.connectedApp!.isProfileBuild)
           .thenAnswer((realInvocation) => Future.value(false));
       final initializedCompleter = Completer<bool>();

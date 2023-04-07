@@ -69,7 +69,7 @@ void main() {
             library: 'library',
           ),
           shallowSize: 1,
-        ),
+        )
       ],
       rootIndex: 0,
       isolateId: '',

@@ -238,37 +238,35 @@ void main() {
             expect(callbackCounter, equals(0));
           });
 
-          test(
-            'runs callback immediately if starting in the ready state',
-            () async {
-              final disposer = Disposer();
-              final trigger = ValueNotifier<bool>(isReady);
-              int callbackCounter = 0;
+          test('runs callback immediately if starting in the ready state',
+              () async {
+            final disposer = Disposer();
+            final trigger = ValueNotifier<bool>(isReady);
+            int callbackCounter = 0;
 
-              expect(trigger.hasListeners, isFalse);
+            expect(trigger.hasListeners, isFalse);
 
-              disposer.callOnceWhenReady(
-                trigger: trigger,
-                readyWhen: (triggerValue) => triggerValue == isReady,
-                callback: () {
-                  callbackCounter++;
-                },
-              );
+            disposer.callOnceWhenReady(
+              trigger: trigger,
+              readyWhen: (triggerValue) => triggerValue == isReady,
+              callback: () {
+                callbackCounter++;
+              },
+            );
 
-              expect(trigger.hasListeners, isFalse);
-              expect(callbackCounter, equals(1));
-              expect(disposer.listenables.length, equals(0));
-              expect(disposer.listeners.length, equals(0));
+            expect(trigger.hasListeners, isFalse);
+            expect(callbackCounter, equals(1));
+            expect(disposer.listenables.length, equals(0));
+            expect(disposer.listeners.length, equals(0));
 
-              // Change the isReady value to make sure we don't trigger again.
-              trigger.value = !trigger.value;
+            // Change the isReady value to make sure we don't trigger again.
+            trigger.value = !trigger.value;
 
-              await delay();
+            await delay();
 
-              // Verify callback not fired again.
-              expect(callbackCounter, equals(1));
-            },
-          );
+            // Verify callback not fired again.
+            expect(callbackCounter, equals(1));
+          });
         });
       }
     });
@@ -299,7 +297,7 @@ void main() {
     expect(state.eventCount, 2);
   });
 
-  test('Test Listenable auto dispose', () {
+  test('Test Listenable auto dispose', () async {
     final controller = AutoDisposeContoller();
     final notifier = ValueNotifier<int>(42);
     final values = <int>[];

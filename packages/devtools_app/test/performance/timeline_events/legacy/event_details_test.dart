@@ -30,49 +30,37 @@ void main() {
       setGlobal(PreferencesController, PreferencesController());
     });
 
-    testWidgetsWithWindowSize(
-      'builds for UI event',
-      windowSize,
-      (WidgetTester tester) async {
-        await pumpEventDetails(goldenUiTimelineEvent, tester);
-        expect(find.byType(EventSummary), findsOneWidget);
-        expect(find.text(EventDetails.noEventSelected), findsNothing);
-        expect(find.text(EventDetails.instructions), findsNothing);
-      },
-    );
+    testWidgetsWithWindowSize('builds for UI event', windowSize,
+        (WidgetTester tester) async {
+      await pumpEventDetails(goldenUiTimelineEvent, tester);
+      expect(find.byType(EventSummary), findsOneWidget);
+      expect(find.text(EventDetails.noEventSelected), findsNothing);
+      expect(find.text(EventDetails.instructions), findsNothing);
+    });
 
-    testWidgetsWithWindowSize(
-      'builds for Raster event',
-      windowSize,
-      (WidgetTester tester) async {
-        await pumpEventDetails(goldenRasterTimelineEvent, tester);
-        expect(find.byType(EventSummary), findsOneWidget);
-        expect(find.text(EventDetails.noEventSelected), findsNothing);
-        expect(find.text(EventDetails.instructions), findsNothing);
-      },
-    );
+    testWidgetsWithWindowSize('builds for Raster event', windowSize,
+        (WidgetTester tester) async {
+      await pumpEventDetails(goldenRasterTimelineEvent, tester);
+      expect(find.byType(EventSummary), findsOneWidget);
+      expect(find.text(EventDetails.noEventSelected), findsNothing);
+      expect(find.text(EventDetails.instructions), findsNothing);
+    });
 
-    testWidgetsWithWindowSize(
-      'builds for ASYNC event',
-      windowSize,
-      (WidgetTester tester) async {
-        await pumpEventDetails(asyncEventWithInstantChildren, tester);
-        expect(find.byType(EventSummary), findsOneWidget);
-        expect(find.text(EventDetails.noEventSelected), findsNothing);
-        expect(find.text(EventDetails.instructions), findsNothing);
-      },
-    );
+    testWidgetsWithWindowSize('builds for ASYNC event', windowSize,
+        (WidgetTester tester) async {
+      await pumpEventDetails(asyncEventWithInstantChildren, tester);
+      expect(find.byType(EventSummary), findsOneWidget);
+      expect(find.text(EventDetails.noEventSelected), findsNothing);
+      expect(find.text(EventDetails.instructions), findsNothing);
+    });
 
-    testWidgetsWithWindowSize(
-      'builds for null event',
-      windowSize,
-      (WidgetTester tester) async {
-        await pumpEventDetails(null, tester);
-        expect(find.byType(EventSummary), findsNothing);
-        expect(find.text(EventDetails.noEventSelected), findsOneWidget);
-        expect(find.text(EventDetails.instructions), findsOneWidget);
-      },
-    );
+    testWidgetsWithWindowSize('builds for null event', windowSize,
+        (WidgetTester tester) async {
+      await pumpEventDetails(null, tester);
+      expect(find.byType(EventSummary), findsNothing);
+      expect(find.text(EventDetails.noEventSelected), findsOneWidget);
+      expect(find.text(EventDetails.instructions), findsOneWidget);
+    });
   });
 
   // TODO(kenz): add golden images for these tests.

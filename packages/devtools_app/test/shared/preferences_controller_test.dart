@@ -75,7 +75,7 @@ void main() {
     group('hoverEvalMode', () {
       late InspectorPreferencesController controller;
 
-      setUp(() {
+      setUp(() async {
         setGlobal(Storage, FlutterTestStorage());
         setGlobal(IdeTheme, IdeTheme());
         controller = InspectorPreferencesController();
@@ -181,7 +181,7 @@ void main() {
       await controller.init();
     });
 
-    test('has expected default values', () {
+    test('has expected default values', () async {
       expect(controller.displayTreeGuidelines.value, isFalse);
     });
 
@@ -232,7 +232,7 @@ void main() {
       await controller.init();
     });
 
-    test('has expected default values', () {
+    test('has expected default values', () async {
       expect(controller.showFlutterFramesChart.value, isTrue);
     });
 

@@ -287,23 +287,20 @@ void main() {
       expect(state._numbers.position.pixels, 100.0);
     });
 
-    testWidgets(
-      'tap on another scrollable during fling stops scrolling',
-      (tester) async {
-        await tester.pumpWidget(Test());
-        final state = tester.state<TestState>(find.byType(Test));
+    testWidgets('tap on another scrollable during fling stops scrolling',
+        (tester) async {
+      await tester.pumpWidget(Test());
+      final state = tester.state<TestState>(find.byType(Test));
 
-        await tester.fling(
-            find.text('Hello A'), const Offset(0.0, -50.0), 500.0);
-        await tester.tap(find.text('Hello 1'));
+      await tester.fling(find.text('Hello A'), const Offset(0.0, -50.0), 500.0);
+      await tester.tap(find.text('Hello 1'));
 
-        await tester.pumpAndSettle();
+      await tester.pumpAndSettle();
 
-        // Position would be about 100 if the scroll were not stopped by the tap.
-        expect(state._letters.position.pixels, 50.0);
-        expect(state._numbers.position.pixels, 50.0);
-      },
-    );
+      // Position would be about 100 if the scroll were not stopped by the tap.
+      expect(state._letters.position.pixels, 50.0);
+      expect(state._numbers.position.pixels, 50.0);
+    });
   });
 }
 

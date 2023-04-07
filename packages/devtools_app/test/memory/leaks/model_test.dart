@@ -20,7 +20,7 @@ void main() {
           context: const <String, Object?>{},
           code: 2,
           trackedClass: 'trackedClass',
-        ),
+        )
       ],
       heap: AdaptedHeapData(
         [

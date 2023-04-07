@@ -10,7 +10,7 @@ void main() {
   print('starting debugging app (exception)');
 
   void run() {
-    Timer(const Duration(milliseconds: 200), () {
+    Timer(const Duration(milliseconds: 200), () async {
       performAction();
 
       run();

@@ -1455,7 +1455,7 @@ class ScriptPopupMenuOption {
 
   final IconData? icon;
 
-  PopupMenuItem<ScriptPopupMenuOption> build() {
+  PopupMenuItem<ScriptPopupMenuOption> build(BuildContext context) {
     return PopupMenuItem<ScriptPopupMenuOption>(
       value: this,
       child: Row(

@@ -82,7 +82,7 @@ void main() {
             },
             '/details': (context) {
               return const SizedBox(key: detailsKey);
-            },
+            }
           },
         );
       }

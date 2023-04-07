@@ -92,298 +92,270 @@ void main() {
     }
 
     testWidgetsWithWindowSize(
-      'does not show hints when frame is not janky',
-      windowSize,
-      (WidgetTester tester) async {
-        when(mockFrameAnalysis.frame).thenReturn(testFrame0);
-        await pumpHints(tester, mockFrameAnalysis);
+        'does not show hints when frame is not janky', windowSize,
+        (WidgetTester tester) async {
+      when(mockFrameAnalysis.frame).thenReturn(testFrame0);
+      await pumpHints(tester, mockFrameAnalysis);
 
-        expect(
-          find.text('No suggestions for this frame - no jank detected.'),
-          findsOneWidget,
-        );
-      },
-    );
+      expect(
+        find.text('No suggestions for this frame - no jank detected.'),
+        findsOneWidget,
+      );
+    });
 
-    testWidgetsWithWindowSize(
-      'does show hints for janky frame',
-      windowSize,
-      (WidgetTester tester) async {
-        _mockFrameAnalysis(frameAnalysis: mockFrameAnalysis, frame: jankyFrame);
-        await pumpHints(tester, mockFrameAnalysis);
+    testWidgetsWithWindowSize('does show hints for janky frame', windowSize,
+        (WidgetTester tester) async {
+      _mockFrameAnalysis(frameAnalysis: mockFrameAnalysis, frame: jankyFrame);
+      await pumpHints(tester, mockFrameAnalysis);
 
-        expect(
-          find.text('No suggestions for this frame - no jank detected.'),
-          findsNothing,
-        );
-        expect(find.text('UI Jank Detected'), findsOneWidget);
-        expect(find.byType(EnhanceTracingHint), findsOneWidget);
-        expect(find.byType(IntrinsicOperationsHint), findsNothing);
-        expect(find.text('Raster Jank Detected'), findsOneWidget);
-        expect(find.byType(RasterStatsHint), findsOneWidget);
-        expect(find.byType(CanvasSaveLayerHint), findsNothing);
-        expect(find.byType(ShaderCompilationHint), findsNothing);
-      },
-    );
+      expect(
+        find.text('No suggestions for this frame - no jank detected.'),
+        findsNothing,
+      );
+      expect(find.text('UI Jank Detected'), findsOneWidget);
+      expect(find.byType(EnhanceTracingHint), findsOneWidget);
+      expect(find.byType(IntrinsicOperationsHint), findsNothing);
+      expect(find.text('Raster Jank Detected'), findsOneWidget);
+      expect(find.byType(RasterStatsHint), findsOneWidget);
+      expect(find.byType(CanvasSaveLayerHint), findsNothing);
+      expect(find.byType(ShaderCompilationHint), findsNothing);
+    });
 
     group('enhance tracing hints', () {
       testWidgetsWithWindowSize(
-        'shows hint when build tracing was enhanced',
-        windowSize,
-        (WidgetTester tester) async {
-          _mockFrameAnalysis(
-            frameAnalysis: mockFrameAnalysis,
-            frame: jankyFrame,
-            buildsTracked: true,
-          );
-          await pumpHints(tester, mockFrameAnalysis);
+          'shows hint when build tracing was enhanced', windowSize,
+          (WidgetTester tester) async {
+        _mockFrameAnalysis(
+          frameAnalysis: mockFrameAnalysis,
+          frame: jankyFrame,
+          buildsTracked: true,
+        );
+        await pumpHints(tester, mockFrameAnalysis);
 
-          expect(
-            find.richTextContaining(
-              'Build was the longest UI phase in this frame. Since "Track Widget '
-              'Builds" was enabled while this frame was drawn, you should be able'
-              ' to see timeline events for each widget built.',
-            ),
-            findsOneWidget,
-          );
-        },
-      );
+        expect(
+          find.richTextContaining(
+            'Build was the longest UI phase in this frame. Since "Track Widget '
+            'Builds" was enabled while this frame was drawn, you should be able'
+            ' to see timeline events for each widget built.',
+          ),
+          findsOneWidget,
+        );
+      });
 
       testWidgetsWithWindowSize(
-        'shows hint when build tracing was not enhanced',
-        windowSize,
-        (WidgetTester tester) async {
-          _mockFrameAnalysis(
-            frameAnalysis: mockFrameAnalysis,
-            frame: jankyFrame,
-          );
-          await pumpHints(tester, mockFrameAnalysis);
+          'shows hint when build tracing was not enhanced', windowSize,
+          (WidgetTester tester) async {
+        _mockFrameAnalysis(
+          frameAnalysis: mockFrameAnalysis,
+          frame: jankyFrame,
+        );
+        await pumpHints(tester, mockFrameAnalysis);
 
-          expect(
-            find.richTextContaining(
-              'Build was the longest UI phase in this frame. Consider enabling '
-              '"Track Widget Builds" from the ',
-            ),
-            findsOneWidget,
-          );
-          expect(find.byType(SmallEnhanceTracingButton), findsOneWidget);
-          expect(
-            find.richTextContaining(
-              ' options above and reproducing the behavior in your app.',
-            ),
-            findsOneWidget,
-          );
-        },
-      );
+        expect(
+          find.richTextContaining(
+            'Build was the longest UI phase in this frame. Consider enabling '
+            '"Track Widget Builds" from the ',
+          ),
+          findsOneWidget,
+        );
+        expect(find.byType(SmallEnhanceTracingButton), findsOneWidget);
+        expect(
+          find.richTextContaining(
+            ' options above and reproducing the behavior in your app.',
+          ),
+          findsOneWidget,
+        );
+      });
 
       testWidgetsWithWindowSize(
-        'shows hint when layout tracing was enhanced',
-        windowSize,
-        (WidgetTester tester) async {
-          _mockFrameAnalysis(
-            frameAnalysis: mockFrameAnalysis,
-            frame: jankyFrame,
-            longestUiPhase: mockLayoutPhase,
-            layoutsTracked: true,
-          );
-          await pumpHints(tester, mockFrameAnalysis);
+          'shows hint when layout tracing was enhanced', windowSize,
+          (WidgetTester tester) async {
+        _mockFrameAnalysis(
+          frameAnalysis: mockFrameAnalysis,
+          frame: jankyFrame,
+          longestUiPhase: mockLayoutPhase,
+          layoutsTracked: true,
+        );
+        await pumpHints(tester, mockFrameAnalysis);
 
-          expect(
-            find.richTextContaining(
-              'Layout was the longest UI phase in this frame. Since "Track '
-              'Layouts" was enabled while this frame was drawn, you should be '
-              'able to see timeline events for each render object laid out.',
-            ),
-            findsOneWidget,
-          );
-        },
-      );
+        expect(
+          find.richTextContaining(
+            'Layout was the longest UI phase in this frame. Since "Track '
+            'Layouts" was enabled while this frame was drawn, you should be '
+            'able to see timeline events for each render object laid out.',
+          ),
+          findsOneWidget,
+        );
+      });
 
       testWidgetsWithWindowSize(
-        'shows hint when layout tracing was not enhanced',
-        windowSize,
-        (WidgetTester tester) async {
-          _mockFrameAnalysis(
-            frameAnalysis: mockFrameAnalysis,
-            frame: jankyFrame,
-            longestUiPhase: mockLayoutPhase,
-          );
-          await pumpHints(tester, mockFrameAnalysis);
+          'shows hint when layout tracing was not enhanced', windowSize,
+          (WidgetTester tester) async {
+        _mockFrameAnalysis(
+          frameAnalysis: mockFrameAnalysis,
+          frame: jankyFrame,
+          longestUiPhase: mockLayoutPhase,
+        );
+        await pumpHints(tester, mockFrameAnalysis);
 
-          expect(
-            find.richTextContaining(
-              'Layout was the longest UI phase in this frame. Consider enabling '
-              '"Track Layouts" from the ',
-            ),
-            findsOneWidget,
-          );
-          expect(find.byType(SmallEnhanceTracingButton), findsOneWidget);
-          expect(
-            find.richTextContaining(
-              ' options above and reproducing the behavior in your app.',
-            ),
-            findsOneWidget,
-          );
-        },
-      );
+        expect(
+          find.richTextContaining(
+            'Layout was the longest UI phase in this frame. Consider enabling '
+            '"Track Layouts" from the ',
+          ),
+          findsOneWidget,
+        );
+        expect(find.byType(SmallEnhanceTracingButton), findsOneWidget);
+        expect(
+          find.richTextContaining(
+            ' options above and reproducing the behavior in your app.',
+          ),
+          findsOneWidget,
+        );
+      });
 
       testWidgetsWithWindowSize(
-        'shows hint when paint tracing was enhanced',
-        windowSize,
-        (WidgetTester tester) async {
-          _mockFrameAnalysis(
-            frameAnalysis: mockFrameAnalysis,
-            frame: jankyFrame,
-            longestUiPhase: mockPaintPhase,
-            paintsTracked: true,
-          );
-          await pumpHints(tester, mockFrameAnalysis);
+          'shows hint when paint tracing was enhanced', windowSize,
+          (WidgetTester tester) async {
+        _mockFrameAnalysis(
+          frameAnalysis: mockFrameAnalysis,
+          frame: jankyFrame,
+          longestUiPhase: mockPaintPhase,
+          paintsTracked: true,
+        );
+        await pumpHints(tester, mockFrameAnalysis);
 
-          expect(
-            find.richTextContaining(
-              'Paint was the longest UI phase in this frame. Since "Track '
-              'Paints" was enabled while this frame was drawn, you should be '
-              'able to see timeline events for each render object painted.',
-            ),
-            findsOneWidget,
-          );
-        },
-      );
+        expect(
+          find.richTextContaining(
+            'Paint was the longest UI phase in this frame. Since "Track '
+            'Paints" was enabled while this frame was drawn, you should be '
+            'able to see timeline events for each render object painted.',
+          ),
+          findsOneWidget,
+        );
+      });
 
       testWidgetsWithWindowSize(
-        'shows hint when paint tracing was not enhanced',
-        windowSize,
-        (WidgetTester tester) async {
-          _mockFrameAnalysis(
-            frameAnalysis: mockFrameAnalysis,
-            frame: jankyFrame,
-            longestUiPhase: mockPaintPhase,
-          );
-          await pumpHints(tester, mockFrameAnalysis);
+          'shows hint when paint tracing was not enhanced', windowSize,
+          (WidgetTester tester) async {
+        _mockFrameAnalysis(
+          frameAnalysis: mockFrameAnalysis,
+          frame: jankyFrame,
+          longestUiPhase: mockPaintPhase,
+        );
+        await pumpHints(tester, mockFrameAnalysis);
 
-          expect(
-            find.richTextContaining(
-              'Paint was the longest UI phase in this frame. Consider enabling '
-              '"Track Paints" from the ',
-            ),
-            findsOneWidget,
-          );
-          expect(find.byType(SmallEnhanceTracingButton), findsOneWidget);
-          expect(
-            find.richTextContaining(
-              ' options above and reproducing the behavior in your app.',
-            ),
-            findsOneWidget,
-          );
-        },
+        expect(
+          find.richTextContaining(
+            'Paint was the longest UI phase in this frame. Consider enabling '
+            '"Track Paints" from the ',
+          ),
+          findsOneWidget,
+        );
+        expect(find.byType(SmallEnhanceTracingButton), findsOneWidget);
+        expect(
+          find.richTextContaining(
+            ' options above and reproducing the behavior in your app.',
+          ),
+          findsOneWidget,
+        );
+      });
+    });
+
+    testWidgetsWithWindowSize('shows intrinsic operations hint', windowSize,
+        (WidgetTester tester) async {
+      _mockFrameAnalysis(
+        frameAnalysis: mockFrameAnalysis,
+        frame: jankyFrame,
+        intrinsicsCount: 5,
+      );
+      await pumpHints(tester, mockFrameAnalysis);
+
+      expect(find.byType(IntrinsicOperationsHint), findsOneWidget);
+      expect(
+        find.richTextContaining(
+          'Intrinsic passes were performed 5 times during this frame. This '
+          'may negatively affect your app\'s performance.',
+        ),
+        findsOneWidget,
+      );
+    });
+
+    testWidgetsWithWindowSize('shows canvas save layer hint', windowSize,
+        (WidgetTester tester) async {
+      _mockFrameAnalysis(
+        frameAnalysis: mockFrameAnalysis,
+        frame: jankyFrame,
+        saveLayerCount: 5,
+      );
+      await pumpHints(tester, mockFrameAnalysis);
+
+      expect(find.byType(CanvasSaveLayerHint), findsOneWidget);
+      expect(
+        find.richTextContaining(
+          'Canvas.saveLayer() was called 5 times during this frame. This '
+          'may negatively affect your app\'s performance.',
+        ),
+        findsOneWidget,
+      );
+    });
+
+    testWidgetsWithWindowSize('shows shader compilation hint', windowSize,
+        (WidgetTester tester) async {
+      _mockFrameAnalysis(
+        frameAnalysis: mockFrameAnalysis,
+        frame: testFrameWithShaderJank,
+      );
+      await pumpHints(tester, mockFrameAnalysis);
+
+      expect(find.byType(ShaderCompilationHint), findsOneWidget);
+      expect(
+        find.richTextContaining(
+          ' of shader compilation occurred during this frame. This may '
+          'negatively affect your app\'s performance',
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.richTextContaining(
+          ' Note: pre-compiling shaders is a legacy solution with many '
+          'pitfalls. Try',
+        ),
+        findsOneWidget,
       );
     });
 
     testWidgetsWithWindowSize(
-      'shows intrinsic operations hint',
-      windowSize,
-      (WidgetTester tester) async {
-        _mockFrameAnalysis(
-          frameAnalysis: mockFrameAnalysis,
-          frame: jankyFrame,
-          intrinsicsCount: 5,
-        );
-        await pumpHints(tester, mockFrameAnalysis);
+        'does not show impeller link on android', windowSize,
+        (WidgetTester tester) async {
+      _mockFrameAnalysis(
+        frameAnalysis: mockFrameAnalysis,
+        frame: testFrameWithShaderJank,
+      );
+      mockConnectedApp(
+        serviceManager.connectedApp!,
+        isFlutterApp: true,
+        isProfileBuild: true,
+        isWebApp: false,
+        os: 'android',
+      );
+      await pumpHints(tester, mockFrameAnalysis);
 
-        expect(find.byType(IntrinsicOperationsHint), findsOneWidget);
-        expect(
-          find.richTextContaining(
-            'Intrinsic passes were performed 5 times during this frame. This '
-            'may negatively affect your app\'s performance.',
-          ),
-          findsOneWidget,
-        );
-      },
-    );
-
-    testWidgetsWithWindowSize(
-      'shows canvas save layer hint',
-      windowSize,
-      (WidgetTester tester) async {
-        _mockFrameAnalysis(
-          frameAnalysis: mockFrameAnalysis,
-          frame: jankyFrame,
-          saveLayerCount: 5,
-        );
-        await pumpHints(tester, mockFrameAnalysis);
-
-        expect(find.byType(CanvasSaveLayerHint), findsOneWidget);
-        expect(
-          find.richTextContaining(
-            'Canvas.saveLayer() was called 5 times during this frame. This '
-            'may negatively affect your app\'s performance.',
-          ),
-          findsOneWidget,
-        );
-      },
-    );
-
-    testWidgetsWithWindowSize(
-      'shows shader compilation hint',
-      windowSize,
-      (WidgetTester tester) async {
-        _mockFrameAnalysis(
-          frameAnalysis: mockFrameAnalysis,
-          frame: testFrameWithShaderJank,
-        );
-        await pumpHints(tester, mockFrameAnalysis);
-
-        expect(find.byType(ShaderCompilationHint), findsOneWidget);
-        expect(
-          find.richTextContaining(
-            ' of shader compilation occurred during this frame. This may '
-            'negatively affect your app\'s performance',
-          ),
-          findsOneWidget,
-        );
-        expect(
-          find.richTextContaining(
-            ' Note: pre-compiling shaders is a legacy solution with many '
-            'pitfalls. Try',
-          ),
-          findsOneWidget,
-        );
-      },
-    );
-
-    testWidgetsWithWindowSize(
-      'does not show impeller link on android',
-      windowSize,
-      (WidgetTester tester) async {
-        _mockFrameAnalysis(
-          frameAnalysis: mockFrameAnalysis,
-          frame: testFrameWithShaderJank,
-        );
-        mockConnectedApp(
-          serviceManager.connectedApp!,
-          isFlutterApp: true,
-          isProfileBuild: true,
-          isWebApp: false,
-          os: 'android',
-        );
-        await pumpHints(tester, mockFrameAnalysis);
-
-        expect(find.byType(ShaderCompilationHint), findsOneWidget);
-        expect(
-          find.richTextContaining(
-            ' of shader compilation occurred during this frame. This may '
-            'negatively affect your app\'s performance',
-          ),
-          findsOneWidget,
-        );
-        expect(
-          find.richTextContaining(
-            ' Note: pre-compiling shaders is a legacy solution with many '
-            'pitfalls. Try',
-          ),
-          findsNothing,
-        );
-      },
-    );
+      expect(find.byType(ShaderCompilationHint), findsOneWidget);
+      expect(
+        find.richTextContaining(
+          ' of shader compilation occurred during this frame. This may '
+          'negatively affect your app\'s performance',
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.richTextContaining(
+          ' Note: pre-compiling shaders is a legacy solution with many '
+          'pitfalls. Try',
+        ),
+        findsNothing,
+      );
+    });
   });
 }

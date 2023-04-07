@@ -8,8 +8,8 @@ import 'package:devtools_app/src/shared/config_specific/import_export/import_exp
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-void main() {
-  test('Filename is sortable by time', () {
+void main() async {
+  test('Filename is sortable by time', () async {
     final dates = [
       DateTime(1901, 2, 3, 4, 5, 6, 7),
       DateTime(1902, 1, 3, 4, 5, 6, 7),
@@ -39,7 +39,7 @@ void main() {
     expect(sortedByTime, sortedByFileName);
   });
 
-  test('Filename hours are 0 to 23', () {
+  test('Filename hours are 0 to 23', () async {
     final filename = ExportController.generateFileName(
       time: DateTime(1901, 2, 3, 14, 5, 6, 7),
       type: ExportFileType.json,
@@ -112,6 +112,6 @@ final devToolsFileJson = DevToolsJsonFile(
   data: <String, Object?>{
     'devToolsSnapshot': true,
     'activeScreenId': 'example',
-    'example': {'title': 'example custom tools'},
+    'example': {'title': 'example custom tools'}
   },
 );

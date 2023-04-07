@@ -31,7 +31,7 @@ void main() {
       );
     });
 
-    test('init', () {
+    test('init', () async {
       expect(performanceData.traceEvents, isEmpty);
       expect(performanceData.frames, isEmpty);
       expect(performanceData.selectedFrame, isNull);
@@ -61,7 +61,7 @@ void main() {
         frames: [testFrame0, testFrame1],
         displayRefreshRate: 60,
         traceEvents: [
-          {'name': 'FakeTraceEvent'},
+          {'name': 'FakeTraceEvent'}
         ],
         selectedEvent: vsyncEvent,
         cpuProfileData: CpuProfileData.parse(goldenCpuProfileDataJson),
@@ -79,7 +79,7 @@ void main() {
               'elapsed': 20000,
               'build': 10000,
               'raster': 12000,
-              'vsyncOverhead': 10,
+              'vsyncOverhead': 10
             },
             {
               'number': 1,
@@ -87,12 +87,12 @@ void main() {
               'elapsed': 20000,
               'build': 16000,
               'raster': 16000,
-              'vsyncOverhead': 1000,
+              'vsyncOverhead': 1000
             },
           ],
           PerformanceData.displayRefreshRateKey: 60,
           PerformanceData.traceEventsKey: [
-            {'name': 'FakeTraceEvent'},
+            {'name': 'FakeTraceEvent'}
           ],
           PerformanceData.selectedEventKey: vsyncEvent.json,
           PerformanceData.cpuProfileKey: goldenCpuProfileDataJson,
@@ -102,7 +102,7 @@ void main() {
       );
     });
 
-    test('clear', () {
+    test('clear', () async {
       performanceData = PerformanceData(
         displayRefreshRate: 120,
         timelineEvents: [

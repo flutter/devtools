@@ -82,7 +82,7 @@ class _ListControlPane extends StatelessWidget {
               tooltip: 'Take heap snapshot for the selected isolate',
               onPressed: controller.isTakingSnapshot.value
                   ? null
-                  : () => _takeSnapshot(context),
+                  : () async => _takeSnapshot(context),
             ),
             ToolbarAction(
               icon: Icons.block,

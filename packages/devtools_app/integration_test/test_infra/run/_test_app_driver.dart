@@ -148,7 +148,7 @@ abstract class _TestApp with IOMixin {
     final Map<String, dynamic> request = <String, dynamic>{
       'id': requestId,
       'method': method,
-      'params': params,
+      'params': params
     };
     final String jsonEncoded = json.encode(<Map<String, dynamic>>[request]);
     _debugPrint(jsonEncoded);

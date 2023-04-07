@@ -150,7 +150,7 @@ class _VerboseLoggingSetting extends StatelessWidget {
             Text(
               'Logs may contain sensitive information.\n'
               'Always check their contents before sharing.',
-            ),
+            )
           ],
         ),
       ],

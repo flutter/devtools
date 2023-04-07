@@ -32,7 +32,7 @@ Future<void> runDevTools({
   bool shouldEnableExperiments = false,
   List<DevToolsJsonFile> sampleData = const [],
   List<DevToolsScreen>? screens,
-}) {
+}) async {
   setupErrorHandling(() async {
     screens ??= defaultScreens;
 

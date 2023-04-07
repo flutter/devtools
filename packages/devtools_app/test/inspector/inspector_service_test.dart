@@ -16,7 +16,7 @@ import '../test_infra/flutter_test_driver.dart' show FlutterRunConfiguration;
 import '../test_infra/flutter_test_environment.dart';
 import '../test_infra/matchers/matchers.dart';
 
-void main() {
+void main() async {
   initializeLiveTestWidgetsFlutterBindingWithAssets();
 
   final FlutterTestEnvironment env = FlutterTestEnvironment(

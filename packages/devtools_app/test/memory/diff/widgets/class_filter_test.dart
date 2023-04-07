@@ -89,65 +89,61 @@ void main() {
 
   for (final test in _tests) {
     testWidgetsWithWindowSize(
-      '$ClassFilterDialog filters classes, ${test.name}',
-      windowSize,
-      (WidgetTester tester) async {
-        final scene = await pumpScene(tester, test);
+        '$ClassFilterDialog filters classes, ${test.name}', windowSize,
+        (WidgetTester tester) async {
+      final scene = await pumpScene(tester, test);
 
-        await _switchFilter(
-          scene,
-          ClassFilterType.showAll,
-          ClassFilterType.except,
-          tester,
-          test,
-        );
+      await _switchFilter(
+        scene,
+        ClassFilterType.showAll,
+        ClassFilterType.except,
+        tester,
+        test,
+      );
 
-        await _switchFilter(
-          scene,
-          ClassFilterType.except,
-          ClassFilterType.only,
-          tester,
-          test,
-        );
+      await _switchFilter(
+        scene,
+        ClassFilterType.except,
+        ClassFilterType.only,
+        tester,
+        test,
+      );
 
-        await _switchFilter(
-          scene,
-          ClassFilterType.only,
-          ClassFilterType.showAll,
-          tester,
-          test,
-        );
-      },
-    );
+      await _switchFilter(
+        scene,
+        ClassFilterType.only,
+        ClassFilterType.showAll,
+        tester,
+        test,
+      );
+    });
   }
 
   for (final test in _tests) {
     testWidgetsWithWindowSize(
-      '$ClassFilterDialog customizes and resets to default, ${test.name}',
-      windowSize,
-      (WidgetTester tester) async {
-        final scene = await pumpScene(tester, test);
+        '$ClassFilterDialog customizes and resets to default, ${test.name}',
+        windowSize, (WidgetTester tester) async {
+      final scene = await pumpScene(tester, test);
 
-        // Customize filter.
-        scene.diffController.derived.applyFilter(_customFilter);
-        await _checkDataGolden(scene, null, tester, test);
+      // Customize filter.
+      scene.diffController.derived.applyFilter(_customFilter);
+      await _checkDataGolden(scene, null, tester, test);
 
-        // Open dialog.
-        await tester.tap(find.byType(ClassFilterButton));
-        await _checkFilterGolden(null, tester);
+      // Open dialog.
+      await tester.tap(find.byType(ClassFilterButton));
+      await _checkFilterGolden(null, tester);
 
-        // Reset to default.
-        await tester.tap(find.text('Reset to default'));
-        await tester.pumpAndSettle();
-        await tester.tap(find.text('APPLY'));
-        await tester.pumpAndSettle();
-        await tester.pumpAndSettle();
+      // Reset to default.
+      await tester.tap(find.text('Reset to default'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('APPLY'));
+      await tester.pumpAndSettle();
+      await tester.pumpAndSettle();
 
-        final actualFilter = scene.diffController.core.classFilter.value;
-        expect(actualFilter.filterType, equals(ClassFilterType.except));
-        expect(actualFilter.except, equals(ClassFilter.defaultExceptString));
-      },
-    );
+      final actualFilter = scene.diffController.core.classFilter.value;
+      expect(actualFilter.filterType, equals(ClassFilterType.except));
+      expect(actualFilter.except, equals(ClassFilter.defaultExceptString));
+    });
   }
 }
 
