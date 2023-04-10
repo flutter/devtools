@@ -49,6 +49,10 @@ enum EmbeddedPerfettoEvent {
   /// be opened.
   showHelp('SHOW-HELP'),
 
+  /// Id for an event that signals to Perfetto that the CSS constants need to be
+  /// re-initialized.
+  reloadCssConstants('RELOAD-CSS-CONSTANTS'),
+
   /// Id for a [postMessage] request that is sent before trying to change the
   /// DevTools theme (see [devtoolsThemeChange]).
   ///
