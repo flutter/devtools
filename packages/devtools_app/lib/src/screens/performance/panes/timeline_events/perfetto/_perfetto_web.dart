@@ -44,7 +44,7 @@ class _PerfettoState extends State<Perfetto> with AutoDisposeMixin {
     // If [_perfettoController.activeTraceEvents] has a null value, the trace
     // data has not yet been initialized.
     if (_perfettoController.activeTraceEvents.value != null) {
-      unawaited(_loadActiveTrace());
+      _loadActiveTrace();
     }
     addAutoDisposeListener(
       _perfettoController.activeTraceEvents,
@@ -58,10 +58,9 @@ class _PerfettoState extends State<Perfetto> with AutoDisposeMixin {
     );
   }
 
-  Future<void> _loadActiveTrace() async {
+  void _loadActiveTrace() {
     assert(_perfettoController.activeTraceEvents.value != null);
-    await _viewController
-        ._loadTrace(_perfettoController.activeTraceEvents.value!);
+    _viewController._loadTrace(_perfettoController.activeTraceEvents.value!);
   }
 
   void _scrollToActiveTimeRange() {
@@ -148,7 +147,7 @@ class _PerfettoViewController extends DisposableController
     );
   }
 
-  Future<void> _loadTrace(List<TraceEventWrapper> devToolsTraceEvents) async {
+  void _loadTrace(List<TraceEventWrapper> devToolsTraceEvents) {
     final encodedJson = jsonEncode({
       'traceEvents': devToolsTraceEvents
           .map((eventWrapper) => eventWrapper.event.json)
@@ -157,7 +156,7 @@ class _PerfettoViewController extends DisposableController
     final buffer = Uint8List.fromList(encodedJson.codeUnits);
 
     ga.select(gac.performance, gac.perfettoLoadTrace);
-    await _postMessage({
+    _postMessage({
       'perfetto': {
         'buffer': buffer,
         'title': 'DevTools timeline trace',
@@ -179,7 +178,7 @@ class _PerfettoViewController extends DisposableController
     }
     await _pingPerfettoUntilReady();
     ga.select(gac.performance, gac.perfettoScrollToTimeRange);
-    await _postMessage({
+    _postMessage({
       'perfetto': {
         // Pass the values to Perfetto in seconds.
         'timeStart': timeRange.start!.inMicroseconds / 1000000,
@@ -194,7 +193,7 @@ class _PerfettoViewController extends DisposableController
     // This message will be handled by [devtools_theme_handler.js], which is
     // included in the Perfetto build inside [packages/perfetto_compiled/dist].
     await _pingDevToolsThemeHandlerUntilReady();
-    await _postMessageWithId(
+    _postMessageWithId(
       EmbeddedPerfettoEvent.devtoolsThemeChange.event,
       perfettoIgnore: true,
       args: {
@@ -210,9 +209,9 @@ class _PerfettoViewController extends DisposableController
     // Send this message [maxReloadCalls] times to ensure that the CSS has been
     // updated by the time we ask Perfetto to reload the CSS constants.
     late final Timer pollingTimer;
-    pollingTimer = Timer.periodic(const Duration(milliseconds: 200), (_) async {
+    pollingTimer = Timer.periodic(const Duration(milliseconds: 200), (_) {
       if (reloadCount++ < maxReloadCalls) {
-        await _postMessage(EmbeddedPerfettoEvent.reloadCssConstants.event);
+        _postMessage(EmbeddedPerfettoEvent.reloadCssConstants.event);
       } else {
         pollingTimer.cancel();
       }
@@ -221,10 +220,10 @@ class _PerfettoViewController extends DisposableController
 
   Future<void> _showHelp() async {
     await _pingPerfettoUntilReady();
-    await _postMessage(EmbeddedPerfettoEvent.showHelp.event);
+    _postMessage(EmbeddedPerfettoEvent.showHelp.event);
   }
 
-  Future<void> _postMessage(Object message) async {
+  void _postMessage(Object message) async {
     await _perfettoIFrameReady.future;
     assert(
       perfettoController.perfettoIFrame.contentWindow != null,
@@ -237,16 +236,16 @@ class _PerfettoViewController extends DisposableController
     );
   }
 
-  Future<void> _postMessageWithId(
+  void _postMessageWithId(
     String id, {
     Map<String, Object> args = const {},
     bool perfettoIgnore = false,
-  }) async {
+  }) {
     final message = <String, Object>{
       'msgId': id,
       if (perfettoIgnore) 'perfettoIgnore': true,
     }..addAll(args);
-    await _postMessage(message);
+    _postMessage(message);
   }
 
   void _handleMessage(html.Event e) {
