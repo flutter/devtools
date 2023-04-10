@@ -29,7 +29,6 @@ Future<void> main() async {
   setUp(() async {
     final fakeServiceManager = FakeServiceManager();
     final scriptManager = MockScriptManager();
-    // ignore: discarded_futures
     when(scriptManager.getScript(any)).thenAnswer(
       (_) => Future<Script>.value(testScript),
     );
