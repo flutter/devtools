@@ -16,6 +16,8 @@ You can do this online, and it only takes a minute.
 
 2. Understand [coding agreements](packages/README.md).
 
+3. **If you work at Google:** and don't have [DCM](https://dcm.dev/) enabled, [enable and activate it](#enabling-and-activating-dcm).
+
 ## Workflow for making changes
 
 - Create a branch from your cloned repo: `git checkout -b myBranch`
@@ -24,6 +26,7 @@ You can do this online, and it only takes a minute.
 - Commit work to your branch: `git commit -m “description”`
 - Push to your branch: `git push origin myBranch`
 - Navigate to the Pull Requests tab in the main [DevTools repo](https://github.com/flutter/devtools). You should see a popup to create a pull request from the branch in your cloned repo to DevTools master. Create a pull request.
+- If you don't have DCM Teams activated, there are some additional checks that will be run only on the CI. If the pipeline named "Dart Code Metrics" fails after your pull request is submitted, open it and address all the issues. All issues will contain the line and the rule that triggered the issue to help you fix them.
 
 ### Keeping your fork in-sync
 
@@ -235,3 +238,12 @@ directory. As an expedient to make the third_party code work well with our build
 code in third_party should be given a stub pubspec.yaml file so that you can
 reference the resources from the packages directory from
 `packages/devtools_app/web/index.html`
+
+## Enabling and activating DCM
+
+1. Install the executable for your target platform. You can refer to [this guide](https://dcm.dev/docs/teams/getting-started/#installation).
+2. Get the license key and activate DCM. To do so, run `dcm activate --license-key=YOUR_KEY` from the console.
+3. Install the extension for your IDE. If you use VS Code, you can get it from [the marketplace](https://marketplace.visualstudio.com/items?itemName=dcmdev.dcm-vscode-extension). If you use IntelliJ IDEA or Android Studio, you can find the plugin [here](https://plugins.jetbrains.com/plugin/20856-dcm).
+4. Reload the IDE.
+
+**Note:** DCM issues can be distinguished from the Dart analyzer issues by their name: DCM rule names contain `-`. Some of the issues can be fixed via CLI, to do so, run `dcm fix` for any directory.
