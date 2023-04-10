@@ -27,4 +27,16 @@ of ad hoc updates, this output should be refreshed at least once per quarter.
 
 To update the Perfetto build output, run the `update_perfetto.sh` script located
 in `devtools/tools/`. Be sure that all DevTools-authored files under
-`assets/perfetto` are not deleted by mistake. 
+`assets/perfetto` are not deleted by mistake.
+
+## How to update this build for local changes in the Perfetto codebase?
+
+If you are making changes to a local Perfetto branch and you want to test those
+changes in the DevTools embedding, follow these steps:
+1. Make your changes in your local Perfetto branch.
+2. Run `ui/build` from your `perfetto` directory.
+3. Update the DevTools `perfetto_compiled` build to your local build:
+`update_perfetto.sh -b /Users/me/path/to/perfetto/out/ui/ui/dist`
+
+Then run DevTools and you should see your local changes to the Perfetto build reflected
+in the embedded perfetto timeline view.
