@@ -5,13 +5,12 @@ found in the LICENSE file.
 **/
 
 :root {
-    --details-content-height: 180px!important;
+    /* Perfetto CSS variable overrides. */
+    --details-content-height: 180px! important;
     --selection-fill-color: #13b9fd4d !important;
     --selection-stroke-color: #13b9fd !important;
-    --sidebar-width: 0px!important;
-    --topbar-height: 36px!important;
-    /* Perfetto CSS variable overrides. */
-    /* There must not be a space betweein the value and '!important'. This value is parsed by Perfetto. */
+    --sidebar-width: 0px! important;
+    --topbar-height: 36px! important;
 }
 
 body {
@@ -40,6 +39,11 @@ body {
 .topbar .omnibox .stepthrough {
     align-items: center !important;
     height: 28px !important;
+}
+
+.topbar .omnibox.command-mode {
+    margin-left: 4px !important;
+    margin-right: 4px !important;
 }
 
 .overview-timeline {

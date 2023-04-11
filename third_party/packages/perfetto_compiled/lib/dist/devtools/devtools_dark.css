@@ -31,6 +31,9 @@ found in the LICENSE file.
 
     /* Perfetto CSS variable overrides. */
     --overview-timeline-non-visible-color: #6e6e6e80 !important;
+    --track-border-color: var(--devtools-dark-border-color) !important;
+    --main-background-color: var(--devtools-dark-background-color) !important;
+    --main-foreground-color: var(--devtools-dark-on-background-color) !important;
 }
 
 /* Selectors that require both default 'background-color' and 'color' properties. */
@@ -100,10 +103,6 @@ h1,
 
 .track .track-shell .track-button {
   color: var(--devtools-dark-primary-color) !important;
-}
-
-.track::after {
-  border-top: 1px solid var(--devtools-dark-border-color) !important;
 }
 
 .track-group-panel[collapsed=true], .track-group-panel[collapsed=true] .shell {

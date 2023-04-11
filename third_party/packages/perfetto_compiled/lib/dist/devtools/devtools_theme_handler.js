@@ -4,6 +4,7 @@
 
 function toggleTheme(messageEvent) {
   const themePingId = 'DART-DEVTOOLS-THEME-PING';
+  const themePongId = 'DART-DEVTOOLS-THEME-PONG';
   const themeChangeId = 'DART-DEVTOOLS-THEME-CHANGE';
   const KNOWN_MESSAGE_IDS = [
     themePingId,
@@ -17,7 +18,7 @@ function toggleTheme(messageEvent) {
 
   if (msgId === themePingId) {
     const windowSource = messageEvent.source;
-    windowSource.postMessage('DART-DEVTOOLS-THEME-PONG', messageEvent.origin);
+    windowSource.postMessage(themePongId, messageEvent.origin);
     return;
   }
 
