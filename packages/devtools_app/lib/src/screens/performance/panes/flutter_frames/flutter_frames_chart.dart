@@ -607,7 +607,7 @@ class FlutterFrameTooltip extends StatelessWidget {
 
   static const double _moreInfoLinkWidth = 100.0;
 
-  static const _textMeasurementBuffer = 4.0;
+  static const _textMeasurementBuffer = 8.0;
 
   @override
   Widget build(BuildContext context) {

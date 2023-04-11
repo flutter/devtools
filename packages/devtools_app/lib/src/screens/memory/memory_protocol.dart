@@ -6,13 +6,15 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:devtools_shared/devtools_shared.dart';
+import 'package:logging/logging.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../shared/config_specific/logger/logger.dart' as logger;
 import '../../shared/globals.dart';
 import '../../shared/utils.dart';
 import 'memory_controller.dart';
 import 'shared/primitives/memory_timeline.dart';
+
+final _log = Logger('memory_protocol');
 
 class MemoryTracker {
   MemoryTracker(this.memoryController);
@@ -87,7 +89,7 @@ class MemoryTracker {
 
     if (!serviceManager.hasConnection ||
         memoryController.memoryTracker == null) {
-      logger.log('VM service connection and/or MemoryTracker lost.');
+      _log.info('VM service connection and/or MemoryTracker lost.');
       return;
     }
 
@@ -291,7 +293,7 @@ class MemoryTracker {
         }
         // Throw away event, missed attempt to attach to a HeapSample.
         final ignoreEvent = memoryTimeline.pullEventSample();
-        logger.log(
+        _log.info(
           'Event duration is lagging ignore event'
           'timestamp: ${MemoryTimeline.fineGrainTimestampFormat(time)} '
           'event: ${MemoryTimeline.fineGrainTimestampFormat(eventTime)}'

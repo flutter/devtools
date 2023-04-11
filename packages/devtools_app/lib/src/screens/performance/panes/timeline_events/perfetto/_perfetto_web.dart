@@ -94,40 +94,6 @@ class _PerfettoViewController extends DisposableController
 
   final PerfettoControllerImpl perfettoController;
 
-  static const _perfettoPing = 'PING';
-
-  static const _perfettoPong = 'PONG';
-
-  /// Id for a [postMessage] request that is sent before trying to change the
-  /// DevTools theme (see [_devtoolsThemeChange]).
-  ///
-  /// Once the DevTools theme handler in the bundled Perfetto web app has been
-  /// registered, a "pong" event [_devtoolsThemePong] will be returned, at which
-  /// point we can safely change the theme [_devtoolsThemeChange].
-  ///
-  /// This message must be sent with the argument 'perfettoIgnore' set to true
-  /// so that the message handler in the Perfetto codebase
-  /// [post_message_handler.ts] will not try to handle this message and warn
-  /// "Unknown postMessage() event received".
-  static const _devtoolsThemePing = 'DART-DEVTOOLS-THEME-PING';
-
-  /// Id for a [postMessage] response that should be received when the DevTools
-  /// theme handler has been registered.
-  ///
-  /// We will send a "ping" event [_devtoolsThemePing] to the DevTools theme
-  /// handler in the bundled Perfetto web app, and the handler will return this
-  /// "pong" event when it is ready. We must wait for this event to be returned
-  /// before we can send a theme change request [_devtoolsThemeChange].
-  static const _devtoolsThemePong = 'DART-DEVTOOLS-THEME-PONG';
-
-  /// Id for a [postMessage] request that is sent on DevTools theme changes.
-  ///
-  /// This message must be sent with the argument 'perfettoIgnore' set to true
-  /// so that the message handler in the Perfetto codebase
-  /// [post_message_handler.ts] will not try to handle this message and warn
-  /// "Unknown postMessage() event received".
-  static const _devtoolsThemeChange = 'DART-DEVTOOLS-THEME-CHANGE';
-
   /// Completes when the perfetto iFrame has received the first event on the
   /// 'onLoad' stream.
   late final Completer<void> _perfettoIFrameReady;
@@ -169,8 +135,16 @@ class _PerfettoViewController extends DisposableController
       unawaited(_loadStyle(preferences.darkModeTheme.value));
       addAutoDisposeListener(preferences.darkModeTheme, () async {
         await _loadStyle(preferences.darkModeTheme.value);
+        reloadCssForThemeChange();
       });
     }
+    autoDisposeStreamSubscription(
+      perfettoController.perfettoPostEventStream.stream.listen((event) async {
+        if (event == EmbeddedPerfettoEvent.showHelp.event) {
+          await _showHelp();
+        }
+      }),
+    );
   }
 
   void _loadTrace(List<TraceEventWrapper> devToolsTraceEvents) {
@@ -220,12 +194,33 @@ class _PerfettoViewController extends DisposableController
     // included in the Perfetto build inside [packages/perfetto_compiled/dist].
     await _pingDevToolsThemeHandlerUntilReady();
     _postMessageWithId(
-      _devtoolsThemeChange,
+      EmbeddedPerfettoEvent.devtoolsThemeChange.event,
       perfettoIgnore: true,
       args: {
         'theme': '${darkMode ? 'dark' : 'light'}',
       },
     );
+  }
+
+  void reloadCssForThemeChange() {
+    const maxReloadCalls = 3;
+    var reloadCount = 0;
+
+    // Send this message [maxReloadCalls] times to ensure that the CSS has been
+    // updated by the time we ask Perfetto to reload the CSS constants.
+    late final Timer pollingTimer;
+    pollingTimer = Timer.periodic(const Duration(milliseconds: 200), (_) {
+      if (reloadCount++ < maxReloadCalls) {
+        _postMessage(EmbeddedPerfettoEvent.reloadCssConstants.event);
+      } else {
+        pollingTimer.cancel();
+      }
+    });
+  }
+
+  Future<void> _showHelp() async {
+    await _pingPerfettoUntilReady();
+    _postMessage(EmbeddedPerfettoEvent.showHelp.event);
   }
 
   void _postMessage(Object message) async {
@@ -255,11 +250,12 @@ class _PerfettoViewController extends DisposableController
 
   void _handleMessage(html.Event e) {
     if (e is html.MessageEvent) {
-      if (e.data == _perfettoPong && !_perfettoHandlerReady.isCompleted) {
+      if (e.data == EmbeddedPerfettoEvent.pong.event &&
+          !_perfettoHandlerReady.isCompleted) {
         _perfettoHandlerReady.complete();
       }
 
-      if (e.data == _devtoolsThemePong &&
+      if (e.data == EmbeddedPerfettoEvent.devtoolsThemePong.event &&
           !_devtoolsThemeHandlerReady.isCompleted) {
         _devtoolsThemeHandlerReady.complete();
       }
@@ -269,10 +265,10 @@ class _PerfettoViewController extends DisposableController
   Future<void> _pingPerfettoUntilReady() async {
     if (!_perfettoHandlerReady.isCompleted) {
       _pollForPerfettoHandlerReady =
-          Timer.periodic(const Duration(milliseconds: 200), (_) async {
+          Timer.periodic(const Duration(milliseconds: 200), (_) {
         // Once the Perfetto UI is ready, Perfetto will receive this 'PING'
         // message and return a 'PONG' message, handled in [_handleMessage].
-        _postMessage(_perfettoPing);
+        _postMessage(EmbeddedPerfettoEvent.ping.event);
       });
 
       await _perfettoHandlerReady.future.timeout(
@@ -287,11 +283,14 @@ class _PerfettoViewController extends DisposableController
     if (!isExternalBuild) return;
     if (!_devtoolsThemeHandlerReady.isCompleted) {
       _pollForThemeHandlerReady =
-          Timer.periodic(const Duration(milliseconds: 200), (_) async {
+          Timer.periodic(const Duration(milliseconds: 200), (_) {
         // Once [devtools_theme_handler.js] is ready, it will receive this
         // 'PING-DEVTOOLS-THEME' message and return a 'PONG-DEVTOOLS-THEME'
         // message, handled in [_handleMessage].
-        _postMessageWithId(_devtoolsThemePing, perfettoIgnore: true);
+        _postMessageWithId(
+          EmbeddedPerfettoEvent.devtoolsThemePing.event,
+          perfettoIgnore: true,
+        );
       });
 
       await _devtoolsThemeHandlerReady.future.timeout(

@@ -4,6 +4,8 @@
 
 import 'package:flutter/material.dart';
 
+import '../../../../../shared/analytics/constants.dart' as gac;
+import '../../../../../shared/common_widgets.dart';
 import '_perfetto_desktop.dart' if (dart.library.html) '_perfetto_web.dart';
 import 'perfetto_controller.dart';
 
@@ -17,6 +19,22 @@ class EmbeddedPerfetto extends StatelessWidget {
   Widget build(BuildContext context) {
     return Perfetto(
       perfettoController: perfettoController,
+    );
+  }
+}
+
+class PerfettoHelpButton extends StatelessWidget {
+  const PerfettoHelpButton({super.key, required this.perfettoController});
+
+  final PerfettoController perfettoController;
+
+  @override
+  Widget build(BuildContext context) {
+    return HelpButton(
+      gaScreen: gac.performance,
+      gaSelection: gac.perfettoShowHelp,
+      outlined: false,
+      onPressed: perfettoController.showHelpMenu,
     );
   }
 }

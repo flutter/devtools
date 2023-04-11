@@ -3,24 +3,15 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:vm_service/vm_service.dart' hide TimelineEvent;
 
 import '../../../../../shared/common_widgets.dart';
-import '../../../../../shared/globals.dart';
 import '../../../../../shared/primitives/trace_event.dart';
 import '../../../../../shared/primitives/utils.dart';
 import '../../../../../shared/theme.dart';
-import '../../../../../shared/ui/vm_flag_widgets.dart';
-import '../../../../profiler/cpu_profile_model.dart';
-import '../../../../profiler/cpu_profiler.dart';
-import '../../../../profiler/cpu_profiler_controller.dart';
-import '../../../../profiler/panes/controls/profiler_controls.dart';
 import '../../../performance_model.dart';
-import '../../../performance_screen.dart';
-import 'legacy_events_controller.dart';
 
 class EventDetails extends StatelessWidget {
-  const EventDetails(this.selectedEvent, this.legacyController);
+  const EventDetails(this.selectedEvent);
 
   static const instructions =
       'Select an event from the Timeline to view details';
@@ -28,48 +19,27 @@ class EventDetails extends StatelessWidget {
 
   final TimelineEvent? selectedEvent;
 
-  final LegacyTimelineEventsController legacyController;
-
   @override
   Widget build(BuildContext context) {
-    // TODO(kenz): when in offlineMode and selectedEvent doesn't match the event
-    // from the offline data, show message notifying that CPU profile data is
-    // unavailable for snapshots and provide link to return to offline profile
-    // (see html_event_details.dart).
     final theme = Theme.of(context);
-    return DualValueListenableBuilder<bool, Flag>(
-      firstListenable: offlineController.offlineMode,
-      secondListenable:
-          legacyController.cpuProfilerController.profilerFlagNotifier!,
-      builder: (context, offline, profilerFlag, _) {
-        final profilerEnabled = profilerFlag.valueAsString == 'true';
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            AreaPaneHeader(
-              tall: true,
-              title: Text(_generateHeaderText()),
-              actions: [
-                if (selectedEvent != null &&
-                    selectedEvent!.isUiEvent &&
-                    !offline &&
-                    profilerEnabled)
-                  CpuSamplingRateDropdown(
-                    screenId: PerformanceScreen.id,
-                    profilePeriodFlagNotifier: legacyController
-                        .cpuProfilerController.profilePeriodFlag!,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        AreaPaneHeader(
+          title: Text(_generateHeaderText()),
+          roundedTopBorder: false,
+        ),
+        Expanded(
+          child: selectedEvent != null
+              ? EventSummary(selectedEvent!)
+              : Center(
+                  child: Text(
+                    instructions,
+                    style: theme.subtleTextStyle,
                   ),
-              ],
-              roundedTopBorder: false,
-            ),
-            Expanded(
-              child: selectedEvent != null
-                  ? _buildDetails(offline, profilerEnabled)
-                  : _buildInstructions(theme),
-            ),
-          ],
-        );
-      },
+                ),
+        ),
+      ],
     );
   }
 
@@ -78,61 +48,7 @@ class EventDetails extends StatelessWidget {
       return noEventSelected;
     }
     final selected = selectedEvent!;
-    return '${selected.isUiEvent ? 'CPU Profile: ' : ''}'
-        '${selected.name} (${durationText(selected.time.duration)})';
-  }
-
-  Widget _buildDetails(bool offlineMode, bool profilerEnabled) {
-    final selected = selectedEvent!;
-    if (selected.isUiEvent) {
-      // In [offlineController.offlineMode], we do not need to worry about
-      // whether the profiler is enabled.
-      if (offlineMode) {
-        return _buildCpuProfiler(legacyController.cpuProfilerController);
-      }
-      return profilerEnabled
-          ? _buildCpuProfiler(legacyController.cpuProfilerController)
-          : CpuProfilerDisabled(legacyController.cpuProfilerController);
-    }
-    return EventSummary(selected);
-  }
-
-  Widget _buildCpuProfiler(CpuProfilerController cpuProfilerController) {
-    return ValueListenableBuilder<CpuProfileData?>(
-      valueListenable: cpuProfilerController.dataNotifier,
-      builder: (context, cpuProfileData, child) {
-        if (cpuProfileData == null) {
-          return child!;
-        }
-        return CpuProfiler(
-          data: cpuProfileData,
-          controller: cpuProfilerController,
-          summaryView: EventSummary(selectedEvent!),
-        );
-      },
-      child: _buildProcessingInfo(cpuProfilerController),
-    );
-  }
-
-  Widget _buildProcessingInfo(CpuProfilerController cpuProfilerController) {
-    return ValueListenableBuilder<double>(
-      valueListenable: cpuProfilerController.transformer.progressNotifier,
-      builder: (context, progress, _) {
-        return ProcessingInfo(
-          progressValue: progress,
-          processedObject: 'CPU samples',
-        );
-      },
-    );
-  }
-
-  Widget _buildInstructions(ThemeData theme) {
-    return Center(
-      child: Text(
-        instructions,
-        style: theme.subtleTextStyle,
-      ),
-    );
+    return '${selected.name} (${durationText(selected.time.duration)})';
   }
 }
 
@@ -146,6 +62,8 @@ class EventSummary extends StatelessWidget {
         ],
         _eventArgs = Map.from(event.traceEvents.first.event.args!)
           ..addAll({for (var trace in event.traceEvents) ...trace.event.args!});
+
+  static const _detailsSpacing = 32.0;
 
   final TimelineEvent event;
 
@@ -165,47 +83,49 @@ class EventSummary extends StatelessWidget {
         // affects the hover boundary for the clickable expanding tiles.
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
-          child: EventMetaData(
-            title: 'Time',
-            inlineValue: durationText(event.time.duration),
-            child: SelectableText(
-              '[${event.time.start!.inMicroseconds} μs —  '
-              '${event.time.end!.inMicroseconds} μs]',
-              style: Theme.of(context).subtleFixedFontStyle,
-            ),
-          ),
-        ),
-        // Wrap with horizontal padding so that these items align with the
-        // expanding data items. Adding horizontal padding to the entire list
-        // affects the hover boundary for the clickable expanding tiles.
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
           child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Flexible(
-                fit: FlexFit.tight,
                 child: EventMetaData(
-                  title: 'Category',
-                  inlineValue: '${firstTraceEvent.category}',
+                  title: 'Time',
+                  inlineValue: durationText(event.time.duration),
+                  child: SelectableText(
+                    '[${durationText(event.time.start!, unit: DurationDisplayUnit.micros)} —  '
+                    '${durationText(event.time.end!, unit: DurationDisplayUnit.micros)}]',
+                    style: Theme.of(context).subtleFixedFontStyle,
+                  ),
                 ),
               ),
-              if (event.isAsyncEvent)
-                Flexible(
-                  fit: FlexFit.tight,
-                  child: _asyncIdTile(),
-                ),
+              const SizedBox(width: _detailsSpacing),
               Flexible(
-                fit: FlexFit.tight,
-                child: EventMetaData(
-                  title: 'Thread id',
-                  inlineValue: '${firstTraceEvent.threadId}',
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    EventMetaData(
+                      title: 'Thread id',
+                      inlineValue: '${firstTraceEvent.threadId}',
+                    ),
+                    EventMetaData(
+                      title: 'Process id',
+                      inlineValue: '${firstTraceEvent.processId}',
+                    ),
+                  ],
                 ),
               ),
+              const SizedBox(width: _detailsSpacing),
               Flexible(
-                fit: FlexFit.tight,
-                child: EventMetaData(
-                  title: 'Process id',
-                  inlineValue: '${firstTraceEvent.processId}',
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    EventMetaData(
+                      title: 'Category',
+                      inlineValue: '${firstTraceEvent.category}',
+                    ),
+                    if (event.isAsyncEvent) _asyncIdTile(),
+                  ],
                 ),
               ),
             ],
@@ -282,31 +202,28 @@ class EventMetaData extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: denseSpacing),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SelectableText.rich(
-            TextSpan(
-              text: '$title${inlineValue != null ? ':  ' : ''}',
-              style: theme.textTheme.titleSmall,
-              children: [
-                if (inlineValue != null)
-                  TextSpan(
-                    text: inlineValue,
-                    style: theme.subtleFixedFontStyle,
-                  ),
-              ],
-            ),
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SelectableText.rich(
+          TextSpan(
+            text: '$title${inlineValue != null ? ':  ' : ''}',
+            style: theme.textTheme.titleSmall,
+            children: [
+              if (inlineValue != null)
+                TextSpan(
+                  text: inlineValue,
+                  style: theme.subtleFixedFontStyle,
+                ),
+            ],
           ),
-          if (child != null) ...[
-            const SizedBox(height: densePadding),
-            child!,
-          ],
+        ),
+        if (child != null) ...[
+          const SizedBox(height: densePadding),
+          child!,
         ],
-      ),
+      ],
     );
   }
 }

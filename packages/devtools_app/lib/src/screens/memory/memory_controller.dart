@@ -8,13 +8,13 @@ import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
 import 'package:leak_tracker/devtools_integration.dart';
+import 'package:logging/logging.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../service/service_manager.dart';
 import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/config_specific/file/file.dart';
-import '../../shared/config_specific/logger/logger.dart';
 import '../../shared/globals.dart';
 import '../../shared/primitives/auto_dispose.dart';
 import '../../shared/utils.dart';
@@ -25,6 +25,8 @@ import 'panes/profile/profile_pane_controller.dart';
 import 'panes/tracing/tracing_pane_controller.dart';
 import 'shared/heap/model.dart';
 import 'shared/primitives/memory_timeline.dart';
+
+final _log = Logger('memory_controller');
 
 // TODO(terry): Consider supporting more than one file since app was launched.
 // Memory Log filename.
@@ -427,7 +429,7 @@ class _MemoryLog {
     if (!memoryJson.isMatchedVersion) {
       final e =
           'Error loading file $filename version ${memoryJson.payloadVersion}';
-      log(e, LogLevel.warning);
+      _log.warning(e);
       throw OfflineFileException(e);
     }
 

@@ -11,6 +11,7 @@ import 'package:flutter/foundation.dart';
 import 'package:stack_trace/stack_trace.dart' as stack_trace;
 import 'package:vm_service/vm_service.dart';
 
+import '../memory/adapted_heap_data.dart';
 import '../vm_utils.dart';
 import 'dart_object_node.dart';
 import 'diagnostics_node.dart';
@@ -477,6 +478,7 @@ List<DartObjectNode> createVariablesForSets(
 List<DartObjectNode> createVariablesForList(
   Instance instance,
   IsolateRef? isolateRef,
+  HeapObjectSelection? heapSelection,
 ) {
   final variables = <DartObjectNode>[];
   final elements = instance.elements ?? [];
@@ -490,6 +492,7 @@ List<DartObjectNode> createVariablesForList(
         value: elements[i],
         isolateRef: isolateRef,
         artificialName: true,
+        heapSelection: heapSelection,
       ),
     );
   }

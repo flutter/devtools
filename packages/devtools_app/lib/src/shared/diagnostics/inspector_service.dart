@@ -1046,7 +1046,7 @@ abstract class ObjectGroupBase extends ObjectGroupApi<RemoteDiagnosticsNode> {
   }
 
   Future<List<RemoteDiagnosticsNode>> getListHelper(
-    InspectorInstanceRef instanceRef,
+    InspectorInstanceRef? instanceRef,
     String methodName,
     RemoteDiagnosticsNode? parent,
     bool isProperty,
