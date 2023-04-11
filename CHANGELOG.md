@@ -1,3 +1,25 @@
+## 2.24.0
+* Rename perfetto_compiled to perfetto_ui_compiled to match g3 config [#5637](https://github.com/flutter/devtools/pull/5637)
+* Fix a couple small UI bugs [#5635](https://github.com/flutter/devtools/pull/5635)
+* Updating from 2.24.0-dev.0 to 2.24.0-dev.1 [#5632](https://github.com/flutter/devtools/pull/5632)
+* Polish perfetto CSS for theme switches [#5631](https://github.com/flutter/devtools/pull/5631)
+* Update perfetto_compiled to latest Perfetto [#5627](https://github.com/flutter/devtools/pull/5627)
+* Updating from 2.23.1-dev.3 to 2.24.0-dev.0 [#5630](https://github.com/flutter/devtools/pull/5630)
+* Fix breakages from latest flutter [#5628](https://github.com/flutter/devtools/pull/5628)
+* Updating from 2.23.1-dev.2 to 2.23.1-dev.3 [#5625](https://github.com/flutter/devtools/pull/5625)
+* Updating from 2.23.1-dev.1 to 2.23.1-dev.2 [#5624](https://github.com/flutter/devtools/pull/5624)
+* Fix some DCM lint warnings [#5623](https://github.com/flutter/devtools/pull/5623)
+* Bump github/codeql-action from 2.2.10 to 2.2.11 [#5622](https://github.com/flutter/devtools/pull/5622)
+* Updating from 2.23.1-dev.0 to 2.23.1-dev.1 [#5621](https://github.com/flutter/devtools/pull/5621)
+* Bump github/codeql-action from 2.2.8 to 2.2.10 [#5619](https://github.com/flutter/devtools/pull/5619)
+* Updating from 2.23.1 to 2.23.1-dev.0 [#5617](https://github.com/flutter/devtools/pull/5617)
+* Prep Devtools for release to `2.23.1` [#5615](https://github.com/flutter/devtools/pull/5615)
+* Hide warning message "Scope variables are not supported for web applications" [#5612](https://github.com/flutter/devtools/pull/5612)
+* Fix g3 violations and dependency issues with test_api and stager [#5610](https://github.com/flutter/devtools/pull/5610)
+
+## 2.24.0
+TODO: update changelog
+
 ## 2.23.1
 * Fix g3 violations and dependency issues with test_api and stager [#5610](https://github.com/flutter/devtools/pull/5610)
 * Hide warning message "Scope variables are not supported for web applications" [#5612](https://github.com/flutter/devtools/pull/5612)
