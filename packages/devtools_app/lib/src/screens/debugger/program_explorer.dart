@@ -444,6 +444,7 @@ class ProgramExplorer extends StatelessWidget {
               ? AreaPaneHeader(
                   title: Text(title),
                   includeTopBorder: false,
+                  roundedTopBorder: false,
                 )
               : BlankHeader();
           final fileExplorer = _FileExplorer(
@@ -475,7 +476,10 @@ class ProgramExplorer extends StatelessWidget {
                       minSizes: const [0.0, 0.0],
                       headers: <PreferredSizeWidget>[
                         fileExplorerHeader as PreferredSizeWidget,
-                        const AreaPaneHeader(title: Text('Outline')),
+                        const AreaPaneHeader(
+                          title: Text('Outline'),
+                          roundedTopBorder: false,
+                        ),
                       ],
                       children: [
                         fileExplorer,
