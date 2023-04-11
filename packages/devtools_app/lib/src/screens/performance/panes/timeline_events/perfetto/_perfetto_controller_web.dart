@@ -123,7 +123,7 @@ class PerfettoControllerImpl extends PerfettoController {
       path: html.window.location.pathname ?? '',
     );
     final baseUrl = isExternalBuild
-        ? '$assetsPath/assets/packages/perfetto_compiled/dist/index.html'
+        ? '$assetsPath/assets/packages/perfetto_ui_compiled/dist/index.html'
         : 'https://ui.perfetto.dev';
     return '$baseUrl$_embeddedModeQuery';
   }

@@ -1,0 +1,141 @@
+!! PLEASE REVIEW THIS LOG FOR SENSITIVE INFORMATION BEFORE SHARING !!
+
+Dart Code extension: 3.63.20230405
+Flutter extension: 3.63.20230303 (not activated)
+
+App: Visual Studio Code
+Version: 1.77.1
+Platform: mac
+
+HTTP_PROXY: undefined
+NO_PROXY: undefined
+
+Logging Categories:
+    General
+
+Mon Apr 10 2023 [13:45:19 GMT-0700 (Pacific Daylight Time)] Log file started
+[1:45:19 PM] [General] [Info] Searching for SDKs...
+[1:45:19 PM] [General] [Info] Environment PATH:
+[1:45:19 PM] [General] [Info]     /Users/kenzieschmoll/develop/flutter/bin
+[1:45:19 PM] [General] [Info]     /usr/local/bin
+[1:45:19 PM] [General] [Info]     /Library/Frameworks/Python.framework/Versions/3.11/bin
+[1:45:19 PM] [General] [Info]     /usr/local/git/git-google/bin
+[1:45:19 PM] [General] [Info]     /usr/local/git/current/bin
+[1:45:19 PM] [General] [Info]     /usr/local/bin
+[1:45:19 PM] [General] [Info]     /usr/bin
+[1:45:19 PM] [General] [Info]     /bin
+[1:45:19 PM] [General] [Info]     /usr/local/sbin
+[1:45:19 PM] [General] [Info]     /usr/sbin
+[1:45:19 PM] [General] [Info]     /sbin
+[1:45:19 PM] [General] [Info]     /Library/Apple/usr/bin
+[1:45:19 PM] [General] [Info]     /Users/kenzieschmoll/develop/
+[1:45:19 PM] [General] [Info]     /Users/kenzieschmoll/.pub-cache/bin
+[1:45:19 PM] [General] [Info]     /Users/kenzieschmoll/develop/depot_tools
+[1:45:19 PM] [General] [Info]     /usr/local/bin/dcm
+[1:45:19 PM] [General] [Info]     /Users/kenzieschmoll/develop/flutter/bin
+[1:45:19 PM] [General] [Info]     /Users/kenzieschmoll/develop/flutter/bin/cache/dart-sdk/bin
+[1:45:20 PM] [General] [Info] Took 529ms to search for projects (5 levels)
+[1:45:20 PM] [General] [Info] Took 0ms to filter out excluded projects (0 exclusion rules)
+[1:45:20 PM] [General] [Info] Searching for flutter
+[1:45:20 PM] [General] [Info]     Looking for flutter in:
+[1:45:20 PM] [General] [Info]         /Users/kenzieschmoll/flutter-sdk
+[1:45:20 PM] [General] [Info]         /Users/kenzieschmoll/flutter-sdk/bin
+[1:45:20 PM] [General] [Info]         /google/flutter
+[1:45:20 PM] [General] [Info]         /google/flutter/bin
+[1:45:20 PM] [General] [Info]         /Users/kenzieschmoll/develop/flutter/bin
+[1:45:20 PM] [General] [Info]         /usr/local/bin
+[1:45:20 PM] [General] [Info]         /Library/Frameworks/Python.framework/Versions/3.11/bin
+[1:45:20 PM] [General] [Info]         /usr/local/git/git-google/bin
+[1:45:20 PM] [General] [Info]         /usr/local/git/current/bin
+[1:45:20 PM] [General] [Info]         /usr/local/bin
+[1:45:20 PM] [General] [Info]         /usr/bin
+[1:45:20 PM] [General] [Info]         /bin
+[1:45:20 PM] [General] [Info]         /usr/local/sbin
+[1:45:20 PM] [General] [Info]         /usr/sbin
+[1:45:20 PM] [General] [Info]         /sbin
+[1:45:20 PM] [General] [Info]         /Library/Apple/usr/bin
+[1:45:20 PM] [General] [Info]         /Users/kenzieschmoll/develop/
+[1:45:20 PM] [General] [Info]         /Users/kenzieschmoll/develop/bin
+[1:45:20 PM] [General] [Info]         /Users/kenzieschmoll/.pub-cache/bin
+[1:45:20 PM] [General] [Info]         /Users/kenzieschmoll/develop/depot_tools
+[1:45:20 PM] [General] [Info]         /Users/kenzieschmoll/develop/depot_tools/bin
+[1:45:20 PM] [General] [Info]         /usr/local/bin/dcm
+[1:45:20 PM] [General] [Info]         /usr/local/bin/dcm/bin
+[1:45:20 PM] [General] [Info]         /Users/kenzieschmoll/develop/flutter/bin
+[1:45:20 PM] [General] [Info]         /Users/kenzieschmoll/develop/flutter/bin/cache/dart-sdk/bin
+[1:45:20 PM] [General] [Info]     Found at:
+[1:45:20 PM] [General] [Info]         /Users/kenzieschmoll/develop/flutter/bin
+[1:45:20 PM] [General] [Info]         /Users/kenzieschmoll/develop/
+[1:45:20 PM] [General] [Info]         /Users/kenzieschmoll/develop/flutter/bin
+[1:45:20 PM] [General] [Info]     Candidate paths to be post-filtered:
+[1:45:20 PM] [General] [Info]         /Users/kenzieschmoll/develop/flutter
+[1:45:20 PM] [General] [Info]         /Users/kenzieschmoll
+[1:45:20 PM] [General] [Info]         /Users/kenzieschmoll/develop/flutter
+[1:45:20 PM] [General] [Info]     Found at /Users/kenzieschmoll/develop/flutter
+[1:45:20 PM] [General] [Info]     Returning SDK path /Users/kenzieschmoll/develop/flutter for flutter
+[1:45:20 PM] [General] [Info] Searching for dart
+[1:45:20 PM] [General] [Info]     Looking for dart in:
+[1:45:20 PM] [General] [Info]         /Users/kenzieschmoll/develop/flutter/bin
+[1:45:20 PM] [General] [Info]         /usr/local/bin
+[1:45:20 PM] [General] [Info]         /Library/Frameworks/Python.framework/Versions/3.11/bin
+[1:45:20 PM] [General] [Info]         /usr/local/git/git-google/bin
+[1:45:20 PM] [General] [Info]         /usr/local/git/current/bin
+[1:45:20 PM] [General] [Info]         /usr/local/bin
+[1:45:20 PM] [General] [Info]         /usr/bin
+[1:45:20 PM] [General] [Info]         /bin
+[1:45:20 PM] [General] [Info]         /usr/local/sbin
+[1:45:20 PM] [General] [Info]         /usr/sbin
+[1:45:20 PM] [General] [Info]         /sbin
+[1:45:20 PM] [General] [Info]         /Library/Apple/usr/bin
+[1:45:20 PM] [General] [Info]         /Users/kenzieschmoll/develop/
+[1:45:20 PM] [General] [Info]         /Users/kenzieschmoll/develop/bin
+[1:45:20 PM] [General] [Info]         /Users/kenzieschmoll/.pub-cache/bin
+[1:45:20 PM] [General] [Info]         /Users/kenzieschmoll/develop/depot_tools
+[1:45:20 PM] [General] [Info]         /Users/kenzieschmoll/develop/depot_tools/bin
+[1:45:20 PM] [General] [Info]         /usr/local/bin/dcm
+[1:45:20 PM] [General] [Info]         /usr/local/bin/dcm/bin
+[1:45:20 PM] [General] [Info]         /Users/kenzieschmoll/develop/flutter/bin
+[1:45:20 PM] [General] [Info]         /Users/kenzieschmoll/develop/flutter/bin/cache/dart-sdk/bin
+[1:45:20 PM] [General] [Info]         /Users/kenzieschmoll/develop/flutter/bin/cache/dart-sdk
+[1:45:20 PM] [General] [Info]         /Users/kenzieschmoll/develop/flutter/bin/cache/dart-sdk/bin
+[1:45:20 PM] [General] [Info]     Found at:
+[1:45:20 PM] [General] [Info]         /Users/kenzieschmoll/develop/flutter/bin
+[1:45:20 PM] [General] [Info]         /Users/kenzieschmoll/develop/flutter/bin
+[1:45:20 PM] [General] [Info]         /Users/kenzieschmoll/develop/flutter/bin/cache/dart-sdk/bin
+[1:45:20 PM] [General] [Info]         /Users/kenzieschmoll/develop/flutter/bin/cache/dart-sdk/bin
+[1:45:20 PM] [General] [Info]     Candidate paths to be post-filtered:
+[1:45:20 PM] [General] [Info]         /Users/kenzieschmoll/develop/flutter
+[1:45:20 PM] [General] [Info]         /Users/kenzieschmoll/develop/flutter
+[1:45:20 PM] [General] [Info]         /Users/kenzieschmoll/develop/flutter/bin/cache/dart-sdk
+[1:45:20 PM] [General] [Info]         /Users/kenzieschmoll/develop/flutter/bin/cache/dart-sdk
+[1:45:20 PM] [General] [Info]     Found at /Users/kenzieschmoll/develop/flutter/bin/cache/dart-sdk
+[1:45:20 PM] [General] [Info]     Returning SDK path /Users/kenzieschmoll/develop/flutter/bin/cache/dart-sdk for dart
+[1:45:20 PM] [General] [Info] Experiment random number is 40 for experiment 'sdkDaps'. Experiment is enabled for <= 10
+[1:45:20 PM] [General] [Info] Experiment 'sdkDaps' does not apply and will not be activated
+[1:45:20 PM] [General] [Info] !! PLEASE REVIEW THIS LOG FOR SENSITIVE INFORMATION BEFORE SHARING !!
+
+Dart Code extension: 3.63.20230405
+Flutter extension: 3.63.20230303 (not activated)
+
+App: Visual Studio Code
+Version: 1.77.1
+Platform: mac
+
+Workspace type: Dart
+Analyzer type: LSP
+Multi-root?: false
+
+Dart SDK:
+    Loc: /Users/kenzieschmoll/develop/flutter/bin/cache/dart-sdk
+    Ver: 3.0.0-417.0.dev
+Flutter SDK:
+    Loc: /Users/kenzieschmoll/develop/flutter
+    Ver: 3.10.0-1.0.pre
+
+HTTP_PROXY: undefined
+NO_PROXY: undefined
+[1:45:20 PM] [General] [Info] Returning cached results for project search
+[1:45:20 PM] [General] [Info] Found 0 folders requiring "pub get" or "pub upgrade":
+[1:45:21 PM] [General] [Info] Loaded 20000 package names from vscode-userdata:/Users/kenzieschmoll/Library/Application%20Support/Code/User/globalStorage/dart-code.dart-code/package_cache.json
+[4:58:20 AM] [General] [Info] Caching Pub package names from https://pub.dev...
+[4:58:21 AM] [General] [Info] Saved 20000 in vscode-userdata:/Users/kenzieschmoll/Library/Application%20Support/Code/User/globalStorage/dart-code.dart-code/package_cache.json
