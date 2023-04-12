@@ -578,6 +578,7 @@ class InspectorService extends InspectorServiceBase {
   }
 }
 
+/// This class has additional descenders in Google3.
 abstract class ObjectGroupBase extends ObjectGroupApi<RemoteDiagnosticsNode> {
   ObjectGroupBase(
     String debugName,
