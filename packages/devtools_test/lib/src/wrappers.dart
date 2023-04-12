@@ -72,6 +72,7 @@ Widget wrapWithControllers(
   BannerMessagesController? bannerMessages,
   AppSizeController? appSize,
   AnalyticsController? analytics,
+  ReleaseNotesController? releaseNotes,
   VMDeveloperToolsController? vmDeveloperTools,
 }) {
   final _providers = [
@@ -91,6 +92,8 @@ Widget wrapWithControllers(
     if (appSize != null) Provider<AppSizeController>.value(value: appSize),
     if (analytics != null)
       Provider<AnalyticsController>.value(value: analytics),
+    if (releaseNotes != null)
+      Provider<ReleaseNotesController>.value(value: releaseNotes),
     if (vmDeveloperTools != null)
       Provider<VMDeveloperToolsController>.value(value: vmDeveloperTools),
   ];

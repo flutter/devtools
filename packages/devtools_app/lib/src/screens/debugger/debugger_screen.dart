@@ -164,6 +164,7 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
                       children: [
                         child!,
                         RoundedOutlinedBorder(
+                          clip: true,
                           child: ProgramExplorer(
                             controller:
                                 codeViewController.programExplorerController,

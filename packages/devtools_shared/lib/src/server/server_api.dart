@@ -36,7 +36,6 @@ class ServerApi {
       case apiGetFlutterGAEnabled:
         // Is Analytics collection enabled?
         return api.getCompleted(
-          request,
           json.encode(FlutterUsage.doesStoreExist ? _usage!.enabled : ''),
         );
       case apiGetFlutterGAClientId:
@@ -44,11 +43,9 @@ class ServerApi {
         // true.
         return (FlutterUsage.doesStoreExist)
             ? api.getCompleted(
-                request,
                 json.encode(_usage!.enabled ? _usage!.clientId : ''),
               )
             : api.getCompleted(
-                request,
                 json.encode(''),
               );
 
@@ -56,17 +53,15 @@ class ServerApi {
 
       case apiResetDevTools:
         _devToolsUsage.reset();
-        return api.getCompleted(request, json.encode(true));
+        return api.getCompleted(json.encode(true));
       case apiGetDevToolsFirstRun:
         // Has DevTools been run first time? To bring up analytics dialog.
         return api.getCompleted(
-          request,
           json.encode(_devToolsUsage.isFirstRun),
         );
       case apiGetDevToolsEnabled:
         // Is DevTools Analytics collection enabled?
         return api.getCompleted(
-          request,
           json.encode(_devToolsUsage.analyticsEnabled),
         );
       case apiSetDevToolsEnabled:
@@ -77,7 +72,6 @@ class ServerApi {
               json.decode(queryParams[devToolsEnabledPropertyName]!);
         }
         return api.setCompleted(
-          request,
           json.encode(_devToolsUsage.analyticsEnabled),
         );
 
@@ -100,7 +94,7 @@ class ServerApi {
           result = true;
         }
 
-        return api.getCompleted(request, json.encode(result));
+        return api.getCompleted(json.encode(result));
       case apiGetSurveyActionTaken:
         // Request setActiveSurvey has not been requested.
         if (_devToolsUsage.activeSurvey == null) {
@@ -111,7 +105,6 @@ class ServerApi {
         }
         // SurveyActionTaken has the survey been acted upon (taken or dismissed)
         return api.getCompleted(
-          request,
           json.encode(_devToolsUsage.surveyActionTaken),
         );
       // TODO(terry): remove the query param logic for this request.
@@ -133,7 +126,6 @@ class ServerApi {
               json.decode(queryParams[surveyActionTakenPropertyName]!);
         }
         return api.setCompleted(
-          request,
           json.encode(_devToolsUsage.surveyActionTaken),
         );
       case apiGetSurveyShownCount:
@@ -146,7 +138,6 @@ class ServerApi {
         }
         // SurveyShownCount how many times have we asked to take survey.
         return api.getCompleted(
-          request,
           json.encode(_devToolsUsage.surveyShownCount),
         );
       case apiIncrementSurveyShownCount:
@@ -160,12 +151,10 @@ class ServerApi {
         // Increment the SurveyShownCount, we've asked about the survey.
         _devToolsUsage.incrementSurveyShownCount();
         return api.getCompleted(
-          request,
           json.encode(_devToolsUsage.surveyShownCount),
         );
       case apiGetLastReleaseNotesVersion:
         return api.getCompleted(
-          request,
           json.encode(_devToolsUsage.lastReleaseNotesVersion),
         );
       case apiSetLastReleaseNotesVersion:
@@ -175,7 +164,6 @@ class ServerApi {
               queryParams[lastReleaseNotesVersionPropertyName]!;
         }
         return api.getCompleted(
-          request,
           json.encode(_devToolsUsage.lastReleaseNotesVersion),
         );
       case apiGetBaseAppSizeFile:
@@ -186,7 +174,7 @@ class ServerApi {
           if (fileJson == null) {
             return api.badRequest('No JSON file available at $filePath.');
           }
-          return api.getCompleted(request, fileJson);
+          return api.getCompleted(fileJson);
         }
         return api.badRequest(
           'Request for base app size file does not '
@@ -201,7 +189,7 @@ class ServerApi {
           if (fileJson == null) {
             return api.badRequest('No JSON file available at $filePath.');
           }
-          return api.getCompleted(request, fileJson);
+          return api.getCompleted(fileJson);
         }
         return api.badRequest(
           'Request for test app size file does not '
@@ -209,7 +197,7 @@ class ServerApi {
           '$testAppSizeFilePropertyName',
         );
       default:
-        return api.notImplemented(request);
+        return api.notImplemented();
     }
   }
 
@@ -228,15 +216,14 @@ class ServerApi {
   ///
   /// In the open-source version of DevTools, Google Analytics handles this
   /// without any need to involve the server.
-  FutureOr<shelf.Response> logScreenView(shelf.Request request) =>
-      notImplemented(request);
+  FutureOr<shelf.Response> logScreenView() => notImplemented();
 
   /// Return the value of the property.
-  FutureOr<shelf.Response> getCompleted(shelf.Request request, String value) =>
+  FutureOr<shelf.Response> getCompleted(String value) =>
       shelf.Response.ok('$value');
 
   /// Return the value of the property after the property value has been set.
-  FutureOr<shelf.Response> setCompleted(shelf.Request request, String value) =>
+  FutureOr<shelf.Response> setCompleted(String value) =>
       shelf.Response.ok('$value');
 
   /// A [shelf.Response] for API calls that encountered a request problem e.g.,
@@ -253,6 +240,6 @@ class ServerApi {
   ///
   /// This is a no-op 204 No Content response because returning 404 Not Found
   /// creates unnecessary noise in the console.
-  FutureOr<shelf.Response> notImplemented(shelf.Request request) =>
+  FutureOr<shelf.Response> notImplemented() =>
       shelf.Response(HttpStatus.noContent);
 }

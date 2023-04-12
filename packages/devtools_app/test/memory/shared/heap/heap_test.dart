@@ -17,7 +17,7 @@ class _ClassSizeTest {
     required this.expectedClassARetainedSize,
   }) : assert(_assertHeapIndexIsCode(heap));
 
-  Future<void> initialize() => buildSpanningTreeAndSetInRefs(heap);
+  Future<void> initialize() => calculateHeap(heap);
 
   final AdaptedHeapData heap;
   final String name;

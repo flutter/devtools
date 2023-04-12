@@ -31,21 +31,25 @@ void setupClipboardCopyListener({
 }) {
   // This intercepts the Clipboard.setData SystemChannel message,
   // and stores the contents that were (attempted) to be copied.
-  SystemChannels.platform.setMockMethodCallHandler((MethodCall call) {
-    switch (call.method) {
-      case 'Clipboard.setData':
-        clipboardContentsCallback(call.arguments['text']);
-        break;
-      case 'Clipboard.getData':
-        return Future.value(<String, Object?>{});
-      case 'Clipboard.hasStrings':
-        return Future.value(<String, Object?>{'value': true});
-      default:
-        break;
-    }
+  TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+      .setMockMethodCallHandler(
+    SystemChannels.platform,
+    (MethodCall call) {
+      switch (call.method) {
+        case 'Clipboard.setData':
+          clipboardContentsCallback(call.arguments['text']);
+          break;
+        case 'Clipboard.getData':
+          return Future.value(<String, Object?>{});
+        case 'Clipboard.hasStrings':
+          return Future.value(<String, Object?>{'value': true});
+        default:
+          break;
+      }
 
-    return Future.value(true);
-  });
+      return Future.value(true);
+    },
+  );
 }
 
 Future<String> loadPageHtmlContent(String url) async {

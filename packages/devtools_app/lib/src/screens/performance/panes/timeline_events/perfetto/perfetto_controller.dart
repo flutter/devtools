@@ -41,5 +41,7 @@ abstract class PerfettoController extends DisposableController {
 
   void scrollToTimeRange(TimeRange timeRange) {}
 
+  void showHelpMenu() {}
+
   Future<void> clear() async {}
 }

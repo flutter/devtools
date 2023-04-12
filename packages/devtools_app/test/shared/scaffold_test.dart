@@ -32,7 +32,11 @@ void main() {
   setGlobal(NotificationService, NotificationService());
 
   Widget wrapScaffold(Widget child) {
-    return wrap(wrapWithAnalytics(child));
+    return wrapWithControllers(
+      child,
+      analytics: AnalyticsController(enabled: false, firstRun: false),
+      releaseNotes: ReleaseNotesController(),
+    );
   }
 
   testWidgetsWithWindowSize(
@@ -41,10 +45,8 @@ void main() {
     (WidgetTester tester) async {
       await tester.pumpWidget(
         wrapScaffold(
-          wrapWithNotifications(
-            const DevToolsScaffold(
-              screens: [_screen1, _screen2, _screen3, _screen4, _screen5],
-            ),
+          DevToolsScaffold(
+            screens: const [_screen1, _screen2, _screen3, _screen4, _screen5],
           ),
         ),
       );
@@ -60,10 +62,8 @@ void main() {
     (WidgetTester tester) async {
       await tester.pumpWidget(
         wrapScaffold(
-          wrapWithNotifications(
-            const DevToolsScaffold(
-              screens: [_screen1, _screen2, _screen3, _screen4, _screen5],
-            ),
+          DevToolsScaffold(
+            screens: const [_screen1, _screen2, _screen3, _screen4, _screen5],
           ),
         ),
       );
@@ -78,9 +78,7 @@ void main() {
     (WidgetTester tester) async {
       await tester.pumpWidget(
         wrapScaffold(
-          wrapWithNotifications(
-            const DevToolsScaffold(screens: [_screen1]),
-          ),
+          DevToolsScaffold(screens: const [_screen1]),
         ),
       );
       expect(find.byKey(_k1), findsOneWidget);
@@ -91,9 +89,7 @@ void main() {
   testWidgets('displays only the selected tab', (WidgetTester tester) async {
     await tester.pumpWidget(
       wrapScaffold(
-        wrapWithNotifications(
-          const DevToolsScaffold(screens: [_screen1, _screen2]),
-        ),
+        DevToolsScaffold(screens: const [_screen1, _screen2]),
       ),
     );
     expect(find.byKey(_k1), findsOneWidget);
@@ -118,11 +114,9 @@ void main() {
     (WidgetTester tester) async {
       await tester.pumpWidget(
         wrapScaffold(
-          wrapWithNotifications(
-            DevToolsScaffold(
-              screens: const [_screen1, _screen2],
-              page: _screen2.screenId,
-            ),
+          DevToolsScaffold(
+            screens: const [_screen1, _screen2],
+            page: _screen2.screenId,
           ),
         ),
       );

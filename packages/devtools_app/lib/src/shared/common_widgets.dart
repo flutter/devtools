@@ -432,9 +432,9 @@ class SettingsOutlinedButton extends DevToolsButton {
 
 class HelpButton extends StatelessWidget {
   const HelpButton({
-    required this.onPressed,
     required this.gaScreen,
     required this.gaSelection,
+    required this.onPressed,
     this.outlined = true,
   });
 
@@ -564,6 +564,37 @@ class VisibilityButton extends StatelessWidget {
           onPressed: () => onPressed(!show),
         );
       },
+    );
+  }
+}
+
+/// Default switch for DevTools that enforces size restriction.
+class DevToolsSwitch extends StatelessWidget {
+  const DevToolsSwitch({
+    super.key,
+    required this.value,
+    required this.onChanged,
+    this.padding,
+  });
+
+  final bool value;
+
+  final void Function(bool)? onChanged;
+
+  final EdgeInsets? padding;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: defaultSwitchHeight,
+      padding: padding,
+      child: FittedBox(
+        fit: BoxFit.fill,
+        child: Switch(
+          value: value,
+          onChanged: onChanged,
+        ),
+      ),
     );
   }
 }

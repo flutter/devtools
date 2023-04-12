@@ -13,6 +13,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../test_infra/scenes/cpu_profiler/default.dart';
+import '../test_infra/scenes/scene_test_extensions.dart';
 import '../test_infra/utils/test_utils.dart';
 
 void main() {
@@ -48,7 +49,7 @@ void main() {
 
     Future<void> pumpProfilerScreen(WidgetTester tester) async {
       await tester.runAsync(() async {
-        await tester.pumpWidget(scene.build());
+        await tester.pumpScene(scene);
         // Delay to ensure the memory profiler has collected data.
         await tester.pump(const Duration(seconds: 1));
         expect(find.byType(ProfilerScreenBody), findsOneWidget);
