@@ -23,37 +23,39 @@ final _log = Logger('app_error_handling');
 /// application.
 void setupErrorHandling(Future Function() appStartCallback) {
   // First, run all our code in a new zone.
-  return runZonedGuarded(
-    // ignore: avoid-passing-async-when-sync-expected this ignore should be fixed.
-    () async {
-      WidgetsFlutterBinding.ensureInitialized();
+  unawaited(
+    runZonedGuarded<Future<void>>(
+      // ignore: avoid-passing-async-when-sync-expected this ignore should be fixed.
+      () {
+        WidgetsFlutterBinding.ensureInitialized();
 
-      final FlutterExceptionHandler? oldHandler = FlutterError.onError;
+        final FlutterExceptionHandler? oldHandler = FlutterError.onError;
 
-      FlutterError.onError = (FlutterErrorDetails details) {
-        // Flutter Framework errors are caught here.
-        _reportError(
-          details.exception,
-          details.stack ?? StackTrace.empty,
-          'FlutterError',
-        );
+        FlutterError.onError = (FlutterErrorDetails details) {
+          // Flutter Framework errors are caught here.
+          _reportError(
+            details.exception,
+            details.stack ?? StackTrace.empty,
+            'FlutterError',
+          );
 
-        if (oldHandler != null) {
-          oldHandler(details);
-        }
-      };
+          if (oldHandler != null) {
+            oldHandler(details);
+          }
+        };
 
-      PlatformDispatcher.instance.onError = (error, stack) {
-        // Unhandled errors on the root isolate are caught here.
-        _reportError(error, stack, 'PlatformDispatcher');
-        return false;
-      };
-      return appStartCallback();
-    },
-    (Object error, StackTrace stack) {
-      _reportError(error, stack, 'zoneGuarded');
-      throw error;
-    },
+        PlatformDispatcher.instance.onError = (error, stack) {
+          // Unhandled errors on the root isolate are caught here.
+          _reportError(error, stack, 'PlatformDispatcher');
+          return false;
+        };
+        return appStartCallback();
+      },
+      (Object error, StackTrace stack) {
+        _reportError(error, stack, 'zoneGuarded');
+        throw error;
+      },
+    ),
   );
 }
 

@@ -119,7 +119,7 @@ class TraceCategoriesButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DevToolsButton.iconOnly(
-      icon: Icons.checklist,
+      icon: Icons.checklist_outlined,
       outlined: false,
       tooltip: 'Trace categories',
       gaScreen: gac.performance,

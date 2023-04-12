@@ -13,7 +13,7 @@ TOOL_DIR=`dirname "${RELATIVE_PATH_TO_SCRIPT}"`
 # The devtools root directory is assumed to be the parent of this directory.
 DEVTOOLS_DIR="${TOOL_DIR}/.."
 
-pushd $DEVTOOLS_DIR/third_party/packages/perfetto_compiled/lib
+pushd $DEVTOOLS_DIR/third_party/packages/perfetto_ui_compiled/lib
 
 echo "UPDATE_PERFETTO: Moving DevTools-Perfetto integration files to a temp directory"
 mkdir _tmp

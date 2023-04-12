@@ -49,6 +49,10 @@ enum EmbeddedPerfettoEvent {
   /// be opened.
   showHelp('SHOW-HELP'),
 
+  /// Id for an event that signals to Perfetto that the CSS constants need to be
+  /// re-initialized.
+  reloadCssConstants('RELOAD-CSS-CONSTANTS'),
+
   /// Id for a [postMessage] request that is sent before trying to change the
   /// DevTools theme (see [devtoolsThemeChange]).
   ///
@@ -119,7 +123,7 @@ class PerfettoControllerImpl extends PerfettoController {
       path: html.window.location.pathname ?? '',
     );
     final baseUrl = isExternalBuild
-        ? '$assetsPath/assets/packages/perfetto_compiled/dist/index.html'
+        ? '$assetsPath/assets/packages/perfetto_ui_compiled/dist/index.html'
         : 'https://ui.perfetto.dev';
     return '$baseUrl$_embeddedModeQuery';
   }

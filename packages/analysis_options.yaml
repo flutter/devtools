@@ -152,7 +152,7 @@ dart_code_metrics:
     - test/**
   rules:
 #    - arguments-ordering Too strict
-    - avoid-banned-imports
+#    - avoid-banned-imports # TODO(polina-c): add configuration
     - avoid-cascade-after-if-null
     - avoid-collection-methods-with-unrelated-types
     - avoid-duplicate-exports
@@ -173,7 +173,7 @@ dart_code_metrics:
     - avoid-unnecessary-type-casts
     - avoid-unrelated-type-assertions
     - avoid-unused-parameters
-    - ban-name
+    # - ban-name # TODO(polina-c): add configuration
     # - binary-expression-operand-order Some nice catches but too many false positives to enable.
     - double-literal-format
     # - format-comment TODO(jacobr): enable this one after fixing violations.
