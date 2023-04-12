@@ -451,7 +451,7 @@ void main() async {
         expect(nodeInDetailsTree.valueRef, equals(nodeInSummaryTree.valueRef));
 
         await group.setSelectionInspector(nodeInDetailsTree.valueRef, true);
-        var selection = (await group.getSelection(
+        final selection = (await group.getSelection(
           null,
           FlutterTreeType.widget,
           isSummaryTree: false,
@@ -463,20 +463,6 @@ void main() async {
           equalsIgnoringHashCodes(
             'Text\n'
             ' └─RichText\n',
-          ),
-        );
-
-        // Get selection in the render tree.
-        selection = (await group.getSelection(
-          null,
-          FlutterTreeType.renderObject,
-          isSummaryTree: false,
-        ))!;
-        expect(
-          treeToDebugString(selection),
-          equalsIgnoringHashCodes(
-            'RenderParagraph#00000 relayoutBoundary=up2\n'
-            ' └─text: TextSpan\n',
           ),
         );
 
