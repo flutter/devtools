@@ -21,7 +21,7 @@ TODO: Remove this section if there are not any general updates.
 TODO: Remove this section if there are not any general updates.
 
 ## Debugger updates
-TODO: Remove this section if there are not any general updates.
+* Improve support for inspecting `UserTag` and `MirrorReferent` instances - [#5490](https://github.com/flutter/devtools/pull/5490)
 
 ## Network profiler updates
 TODO: Remove this section if there are not any general updates.

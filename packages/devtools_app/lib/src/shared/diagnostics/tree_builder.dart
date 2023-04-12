@@ -260,6 +260,16 @@ Future<void> _addChildrenToInstanceVariable({
         createVariablesForStackTrace(value, isolateRef),
       );
       break;
+    case InstanceKind.kMirrorReference:
+      variable.addAllChildren(
+        createVariablesForMirrorReference(value, isolateRef),
+      );
+      break;
+    case InstanceKind.kUserTag:
+      variable.addAllChildren(
+        createVariablesForUserTag(value, isolateRef),
+      );
+      break;
     default:
       break;
   }
