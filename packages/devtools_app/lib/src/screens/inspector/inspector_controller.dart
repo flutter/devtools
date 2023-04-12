@@ -921,15 +921,6 @@ class InspectorController extends DisposableController
     super.dispose();
   }
 
-  static String treeTypeDisplayName(FlutterTreeType treeType) {
-    switch (treeType) {
-      case FlutterTreeType.widget:
-        return 'Widget';
-      case FlutterTreeType.renderObject:
-        return 'Render Objects';
-    }
-  }
-
   void _onNodeAdded(
     InspectorTreeNode node,
     RemoteDiagnosticsNode diagnosticsNode,
