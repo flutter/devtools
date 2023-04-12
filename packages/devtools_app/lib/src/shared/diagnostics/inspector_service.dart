@@ -1134,6 +1134,10 @@ abstract class ObjectGroupBase extends ObjectGroupApi<RemoteDiagnosticsNode> {
       false,
     );
   }
+
+  @override
+  bool isLocalClass(RemoteDiagnosticsNode node) =>
+      inspectorService.isLocalClass(node);
 }
 
 /// Class managing a group of inspector objects that can be freed by
@@ -1422,10 +1426,6 @@ class ObjectGroup extends ObjectGroupBase {
     final directories = (invocationResult as List?)?.cast<Object>();
     return List.from(directories ?? []);
   }
-
-  @override
-  bool isLocalClass(RemoteDiagnosticsNode node) =>
-      inspectorService.isLocalClass(node);
 }
 
 abstract class InspectorServiceClient {
