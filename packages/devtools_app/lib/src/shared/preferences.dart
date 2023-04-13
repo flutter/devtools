@@ -21,8 +21,7 @@ import 'primitives/utils.dart';
 /// A controller for global application preferences.
 class PreferencesController extends DisposableController
     with AutoDisposeControllerMixin {
-  final darkModeTheme =
-      ValueNotifier<bool>(devToolsExtensionPoints.defaultIsDarkTheme);
+  final darkModeTheme = ValueNotifier<bool>(true);
 
   final vmDeveloperModeEnabled = ValueNotifier<bool>(false);
 
@@ -47,9 +46,7 @@ class PreferencesController extends DisposableController
   Future<void> init() async {
     // Get the current values and listen for and write back changes.
     String? value = await storage.getValue('ui.darkMode');
-    final useDarkMode = value == null
-        ? devToolsExtensionPoints.defaultIsDarkTheme
-        : value == 'true';
+    final useDarkMode = value == null || value == 'true';
     toggleDarkModeTheme(useDarkMode);
     addAutoDisposeListener(darkModeTheme, () {
       storage.setValue('ui.darkMode', '${darkModeTheme.value}');

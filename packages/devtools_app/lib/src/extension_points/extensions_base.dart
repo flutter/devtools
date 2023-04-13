@@ -17,7 +17,6 @@ abstract class DevToolsExtensionPoints {
 
   InspectorServiceBase? inspectorServiceProvider();
 
-  bool get defaultIsDarkTheme;
 
   String get perfettoIndexLocation;
 }
