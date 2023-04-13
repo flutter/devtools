@@ -50,6 +50,7 @@ class ExternalDevToolsExtensionPoints implements DevToolsExtensionPoints {
   @override
   bool get defaultIsDarkTheme => true;
 
+  @override
   String get perfettoIndexLocation =>
       'packages/perfetto_ui_compiled/dist/index.html';
 }
