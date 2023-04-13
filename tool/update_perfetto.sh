@@ -48,6 +48,9 @@ find ./ -name 'traceconv.wasm' -exec rm {} \;
 find ./ -name 'traceconv_bundle.js' -exec rm {} \;
 find ./ -name 'catapult_trace_viewer.*' -exec rm {} \;
 
+echo "UPDATE_PERFETTO: Deleting unnecessary PNG files"
+find ./ -name 'rec_*.png' -exec rm {} \;
+
 echo "UPDATE_PERFETTO: Moving DevTools-Perfetto integration files back from _tmp/"
 mkdir dist/devtools
 mv _tmp/* dist/devtools/

@@ -43,22 +43,6 @@ Verify the code on the release PR:
 
 These packages always have their version numbers updated in lock, so we don't have to worry about versioning.
 
-#### Manually review the CHANGELOG.md for the Release PR
-
-Review/update `CHANGELOG.md`:
-
-1. Verify all changes are here:
-
-    * Open [commits](https://github.com/flutter/devtools/commits/master)
-    * Search for last PR, commented for previous version in CHANGELOG
-    * Make sure all PRs since the found one are included.
-      You may want to re-run `dart tool/bin/repo_tool.dart generate-changelog  --since-tag=<tag like v1.5.2>` with passed parameter
-      for the tag.
-
-2. Verify the version for the CHANGELOG entry was correctly generated.
-3. Verify each item is a complete sentence, written as though it was an order, and there is no syntax errors.
-4. Create draft PR for the branch and add the item for it to the top.
-
 ### Test the release PR
 
 - Build the DevTools binary and run it from your local Dart SDK.
