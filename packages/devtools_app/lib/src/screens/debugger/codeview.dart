@@ -370,9 +370,9 @@ class _CodeViewState extends State<CodeView> with AutoDisposeMixin {
                     null,
                   ),
               builder: (context, frame, _) {
-                final pausedFrame = frame == null
-                    ? null
-                    : (frame.scriptRef == scriptRef ? frame : null);
+                final pausedFrame =
+                    frame?.scriptRef == scriptRef ? frame : null;
+
                 return Row(
                   children: [
                     ValueListenableBuilder<bool>(
