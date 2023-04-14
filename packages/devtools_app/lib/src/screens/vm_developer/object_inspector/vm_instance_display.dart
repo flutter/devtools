@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -58,15 +60,19 @@ class _VmInstanceDisplayState extends State<VmInstanceDisplay> {
       artificialName: true,
     );
 
-    _initialized = buildVariablesTree(_root)
-        .then(
-          (_) => _root.expand(),
-        )
-        .then(
-          (_) => Future.wait([
-            for (final child in _root.children) buildVariablesTree(child),
-          ]),
-        );
+    unawaited(
+      _initialized = buildVariablesTree(_root)
+          .then(
+            (_) => _root.expand(),
+          )
+          .then(
+            (_) => unawaited(
+              Future.wait([
+                for (final child in _root.children) buildVariablesTree(child),
+              ]),
+            ),
+          ),
+    );
   }
 
   @override

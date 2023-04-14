@@ -5,6 +5,8 @@
 // ignore_for_file: avoid_print
 
 @TestOn('vm')
+import 'dart:async';
+
 import 'package:devtools_app/src/shared/console/primitives/simple_items.dart';
 import 'package:devtools_app/src/shared/diagnostics/diagnostics_node.dart';
 import 'package:devtools_app/src/shared/diagnostics/inspector_service.dart';
@@ -43,7 +45,7 @@ void main() {
   try {
     group('inspector service tests', () {
       tearDown(env.tearDownEnvironment);
-      tearDownAll(() => env.tearDownEnvironment(force: true));
+      tearDownAll(() => unawaited(env.tearDownEnvironment(force: true)));
 
       test('track widget creation on', () async {
         await env.setupEnvironment();

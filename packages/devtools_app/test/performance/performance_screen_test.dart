@@ -281,7 +281,9 @@ void main() {
               findsOneWidget,
             );
             expect(
-                find.richTextContaining('Render Clip layers'), findsOneWidget);
+              find.richTextContaining('Render Clip layers'),
+              findsOneWidget,
+            );
             expect(
               find.richTextContaining('Render Opacity layers'),
               findsOneWidget,

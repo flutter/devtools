@@ -294,7 +294,8 @@ void main() {
         final state = tester.state<TestState>(find.byType(Test));
 
         await tester.fling(
-            find.text('Hello A'), const Offset(0.0, -50.0), 500.0);
+            find.text('Hello A'), const Offset(0.0, -50.0), 500.0,
+        );
         await tester.tap(find.text('Hello 1'));
 
         await tester.pumpAndSettle();

@@ -1342,7 +1342,9 @@ void main() {
 
           expect(state.widget.selectionNotifier.value.node, equals(data.root));
           expect(
-              state.widget.selectionNotifier.value.node!.isExpanded, isFalse);
+            state.widget.selectionNotifier.value.node!.isExpanded,
+            isFalse,
+          );
 
           // Expand root and navigate down twice
           await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);

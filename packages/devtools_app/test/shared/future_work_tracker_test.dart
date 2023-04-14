@@ -13,6 +13,7 @@ void main() {
     test('tracker returns future', () {
       final tracker = FutureWorkTracker();
       final completer = Completer<Object?>();
+      // ignore: discarded_futures, by design
       expect(tracker.track(() => completer.future), equals(isA<Future>()));
     });
 

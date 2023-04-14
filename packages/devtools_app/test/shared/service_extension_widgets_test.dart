@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:devtools_app/src/service/service_extension_manager.dart';
 import 'package:devtools_app/src/service/service_extension_widgets.dart';
 import 'package:devtools_app/src/service/service_extensions.dart';
@@ -27,7 +29,7 @@ void main() {
   when(mockServiceManager.appState).thenReturn(
     AppState(mockServiceManager.isolateManager.selectedIsolate),
   );
-  when(mockServiceManager.runDeviceBusyTask(any))
+  when(unawaited(mockServiceManager.runDeviceBusyTask(any)))
       .thenAnswer((_) => Future<void>.value());
   when(mockServiceManager.isMainIsolatePaused).thenReturn(false);
   setGlobal(ServiceConnectionManager, mockServiceManager);

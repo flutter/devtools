@@ -78,7 +78,9 @@ void main() {
         expect(find.text('Dart web'), findsOneWidget);
         expect(find.text('VM Service Connection: '), findsOneWidget);
         expect(
-            find.text('ws://127.0.0.1:56137/ISsyt6ki0no=/ws'), findsOneWidget);
+          find.text('ws://127.0.0.1:56137/ISsyt6ki0no=/ws'),
+          findsOneWidget,
+        );
         expect(find.byType(CopyToClipboardControl), findsOneWidget);
       },
     );
@@ -113,7 +115,9 @@ void main() {
         expect(find.text('Dart CLI'), findsOneWidget);
         expect(find.text('VM Service Connection: '), findsOneWidget);
         expect(
-            find.text('ws://127.0.0.1:56137/ISsyt6ki0no=/ws'), findsOneWidget);
+          find.text('ws://127.0.0.1:56137/ISsyt6ki0no=/ws'),
+          findsOneWidget,
+        );
         expect(find.byType(CopyToClipboardControl), findsOneWidget);
       },
     );
@@ -149,7 +153,9 @@ void main() {
         expect(find.text('Flutter native (debug build)'), findsOneWidget);
         expect(find.text('VM Service Connection: '), findsOneWidget);
         expect(
-            find.text('ws://127.0.0.1:56137/ISsyt6ki0no=/ws'), findsOneWidget);
+          find.text('ws://127.0.0.1:56137/ISsyt6ki0no=/ws'),
+          findsOneWidget,
+        );
         expect(find.byType(CopyToClipboardControl), findsOneWidget);
       },
     );
@@ -184,7 +190,9 @@ void main() {
         expect(find.text('Flutter native (profile build)'), findsOneWidget);
         expect(find.text('VM Service Connection: '), findsOneWidget);
         expect(
-            find.text('ws://127.0.0.1:56137/ISsyt6ki0no=/ws'), findsOneWidget);
+          find.text('ws://127.0.0.1:56137/ISsyt6ki0no=/ws'),
+          findsOneWidget,
+        );
         expect(find.byType(CopyToClipboardControl), findsOneWidget);
       },
     );
@@ -221,7 +229,9 @@ void main() {
         expect(find.text('Flutter web (debug build)'), findsOneWidget);
         expect(find.text('VM Service Connection: '), findsOneWidget);
         expect(
-            find.text('ws://127.0.0.1:56137/ISsyt6ki0no=/ws'), findsOneWidget);
+          find.text('ws://127.0.0.1:56137/ISsyt6ki0no=/ws'),
+          findsOneWidget,
+        );
         expect(find.byType(CopyToClipboardControl), findsOneWidget);
       },
     );
@@ -258,7 +268,9 @@ void main() {
         expect(find.text('Flutter web (profile build)'), findsOneWidget);
         expect(find.text('VM Service Connection: '), findsOneWidget);
         expect(
-            find.text('ws://127.0.0.1:56137/ISsyt6ki0no=/ws'), findsOneWidget);
+          find.text('ws://127.0.0.1:56137/ISsyt6ki0no=/ws'),
+          findsOneWidget,
+        );
         expect(find.byType(CopyToClipboardControl), findsOneWidget);
       },
     );

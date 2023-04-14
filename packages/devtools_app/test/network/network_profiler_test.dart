@@ -367,10 +367,14 @@ void main() {
         );
         expect(find.text('Connection established: '), findsOneWidget);
         expect(
-            find.text('[0.0 ms - 529.0 ms] → 529.0 ms total'), findsOneWidget);
+          find.text('[0.0 ms - 529.0 ms] → 529.0 ms total'),
+          findsOneWidget,
+        );
         expect(find.text('Request sent: '), findsOneWidget);
         expect(
-            find.text('[529.0 ms - 529.0 ms] → 0.0 ms total'), findsOneWidget);
+          find.text('[529.0 ms - 529.0 ms] → 0.0 ms total'),
+          findsOneWidget,
+        );
         expect(find.text('Waiting (TTFB): '), findsOneWidget);
         expect(
           find.text('[529.0 ms - 810.7 ms] → 281.7 ms total'),
@@ -378,7 +382,9 @@ void main() {
         );
         expect(find.text('Content Download: '), findsOneWidget);
         expect(
-            find.text('[810.7 ms - 811.7 ms] → 1.0 ms total'), findsOneWidget);
+          find.text('[810.7 ms - 811.7 ms] → 1.0 ms total'),
+          findsOneWidget,
+        );
       },
     );
 

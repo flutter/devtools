@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 @TestOn('vm')
+import 'dart:async';
+
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -74,10 +76,10 @@ void main() {
 
       bool timelineControllerHandlerCalled = false;
       when(
-        mockTimelineEventsController.handleSelectedFrame(any),
+        unawaited(mockTimelineEventsController.handleSelectedFrame(any)),
       ).thenAnswer((_) {
         timelineControllerHandlerCalled = true;
-        return Future.value();
+        return unawaited(Future.value());
       });
 
       expect(timelineControllerHandlerCalled, isFalse);

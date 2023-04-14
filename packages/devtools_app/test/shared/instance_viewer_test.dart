@@ -377,7 +377,8 @@ void main() {
         await expectLater(
           find.byType(MaterialApp),
           matchesDevToolsGolden(
-              '../test_infra/goldens/instance_viewer/null.png'),
+            '../test_infra/goldens/instance_viewer/null.png',
+          ),
         );
 
         await tester.pumpWidget(
@@ -385,7 +386,8 @@ void main() {
             overrides: [
               instanceProvider(const InstancePath.fromInstanceId('0'))
                   .overrideWithValue(
-                      AsyncValue.error(StateError('test error'))),
+                AsyncValue.error(StateError('test error')),
+              ),
             ],
             child: app,
           ),
@@ -437,7 +439,8 @@ void main() {
         await expectLater(
           find.byType(MaterialApp),
           matchesDevToolsGolden(
-              '../test_infra/goldens/instance_viewer/null.png'),
+            '../test_infra/goldens/instance_viewer/null.png',
+          ),
         );
 
         await tester.pumpWidget(
@@ -454,7 +457,8 @@ void main() {
         await expectLater(
           find.byType(MaterialApp),
           matchesDevToolsGolden(
-              '../test_infra/goldens/instance_viewer/num.png'),
+            '../test_infra/goldens/instance_viewer/num.png',
+          ),
         );
       },
     );

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/performance/panes/timeline_events/legacy/legacy_event_processor.dart';
 import 'package:devtools_test/devtools_test.dart';
@@ -51,7 +53,8 @@ void main() {
       when(mockPerformanceController.timelineEventsController)
           .thenReturn(timelineEventsController);
       when(mockPerformanceController.data).thenReturn(data);
-      when(mockPerformanceController.clearData()).thenAnswer((_) async {
+      when(unawaited(mockPerformanceController.clearData()))
+          .thenAnswer((_) async {
         data.clear();
         await timelineEventsController.clearData();
       });
