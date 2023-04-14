@@ -37,8 +37,8 @@ class HeapClassSampler extends ClassSampler {
         theClass.id!,
         preferences.memory.refLimit.value,
       );
-    } catch (error) {
-      _outputError(error);
+    } catch (error, trace) {
+      _outputError(error, trace);
       return null;
     }
   }
@@ -54,16 +54,14 @@ class HeapClassSampler extends ClassSampler {
         isolateId,
         theClass.id!,
       );
-    } catch (error) {
-      _outputError(error);
+    } catch (error, trace) {
+      _outputError(error, trace);
       return null;
     }
   }
 
-  void _outputError(
-    Object error,
-  ) {
-    serviceManager.consoleService.appendStdio('$error\ntrace');
+  void _outputError(Object error, StackTrace trace) {
+    serviceManager.consoleService.appendStdio('$error\n$trace');
   }
 
   @override
