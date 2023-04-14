@@ -44,7 +44,7 @@ void main() {
           List.of(performanceController.data!.traceEvents, growable: false);
 
       logStatus(
-          'toggling the Performance Overlay to trigger new Flutter frames',
+        'toggling the Performance Overlay to trigger new Flutter frames',
       );
       final performanceOverlayFinder = find.text('Performance Overlay');
       expect(performanceOverlayFinder, findsOneWidget);
