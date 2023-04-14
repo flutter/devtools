@@ -384,7 +384,7 @@ class Tile extends StatelessWidget {
   final String caption;
 
   @override
-  Widget build(_) => Container(
+  Widget build(BuildContext _) => Container(
         margin: const EdgeInsets.all(8.0),
         padding: const EdgeInsets.all(8.0),
         height: 250.0,

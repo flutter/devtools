@@ -90,7 +90,7 @@ class MethodTableGraphNode extends GraphNode with SearchableDataMixin {
     }
   }
 
-  bool shallowEquals(other) {
+  bool shallowEquals(Object? other) {
     return other is MethodTableGraphNode &&
         other.name == name &&
         other._sourceUri == _sourceUri;
