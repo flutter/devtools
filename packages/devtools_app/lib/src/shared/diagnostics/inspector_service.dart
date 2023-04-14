@@ -1042,7 +1042,7 @@ abstract class ObjectGroupBase implements Disposable {
   }
 
   Future<List<RemoteDiagnosticsNode>> getListHelper(
-    InspectorInstanceRef instanceRef,
+    InspectorInstanceRef? instanceRef,
     String methodName,
     RemoteDiagnosticsNode? parent,
     bool isProperty,
@@ -1151,8 +1151,6 @@ class ObjectGroup extends ObjectGroupBase {
     switch (type) {
       case FlutterTreeType.widget:
         return getRootWidget();
-      case FlutterTreeType.renderObject:
-        return getRootRenderObject();
     }
   }
 
@@ -1177,13 +1175,6 @@ class ObjectGroup extends ObjectGroupBase {
       invokeServiceMethodDaemon(
         WidgetInspectorServiceExtensions.getRootWidgetSummaryTree.name,
       ),
-    );
-  }
-
-  Future<RemoteDiagnosticsNode?> getRootRenderObject() {
-    assert(!disposed);
-    return invokeServiceMethodReturningNode(
-      WidgetInspectorServiceExtensions.getRootRenderObject.name,
     );
   }
 
@@ -1242,12 +1233,6 @@ class ObjectGroup extends ObjectGroupBase {
           isSummaryTree
               ? WidgetInspectorServiceExtensions.getSelectedSummaryWidget.name
               : WidgetInspectorServiceExtensions.getSelectedWidget.name,
-          previousSelectionRef,
-        );
-        break;
-      case FlutterTreeType.renderObject:
-        newSelection = await invokeServiceMethodReturningNodeInspectorRef(
-          WidgetInspectorServiceExtensions.getSelectedRenderObject.name,
           previousSelectionRef,
         );
         break;

@@ -91,7 +91,8 @@ void main() {
 
       tearDown(() {
         // Cleanup the SystemChannel
-        SystemChannels.platform.setMockMethodCallHandler(null);
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+            .setMockMethodCallHandler(SystemChannels.platform, null);
       });
 
       testWidgetsWithWindowSize(

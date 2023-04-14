@@ -6,6 +6,7 @@ import 'package:devtools_app/src/screens/memory/panes/diff/controller/heap_diff.
 import 'package:devtools_app/src/screens/memory/shared/heap/heap.dart';
 import 'package:devtools_app/src/screens/memory/shared/heap/spanning_tree.dart';
 import 'package:devtools_app/src/shared/memory/adapted_heap_data.dart';
+import 'package:devtools_app/src/shared/memory/adapted_heap_object.dart';
 import 'package:devtools_app/src/shared/memory/class_name.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -87,7 +88,7 @@ Future<SingleClassStats> _createClassStats(
     rootIndex: 0,
     isolateId: '',
   );
-  await buildSpanningTreeAndSetInRefs(heap);
+  await calculateHeap(heap);
 
   final result = SingleClassStats(heapClass: instances.first.heapClass);
   for (var index in indexes) {

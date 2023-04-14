@@ -432,9 +432,10 @@ class SettingsOutlinedButton extends DevToolsButton {
 
 class HelpButton extends StatelessWidget {
   const HelpButton({
-    required this.onPressed,
     required this.gaScreen,
     required this.gaSelection,
+    required this.onPressed,
+    this.outlined = true,
   });
 
   final VoidCallback onPressed;
@@ -442,6 +443,8 @@ class HelpButton extends StatelessWidget {
   final String gaScreen;
 
   final String gaSelection;
+
+  final bool outlined;
 
   @override
   Widget build(BuildContext context) {
@@ -451,35 +454,69 @@ class HelpButton extends StatelessWidget {
       tooltip: 'Help',
       gaScreen: gaScreen,
       gaSelection: gaSelection,
+      outlined: outlined,
     );
   }
 }
 
 class ExpandAllButton extends StatelessWidget {
-  const ExpandAllButton({Key? key, required this.onPressed}) : super(key: key);
+  const ExpandAllButton({
+    super.key,
+    required this.gaScreen,
+    required this.gaSelection,
+    required this.onPressed,
+    this.minScreenWidthForTextBeforeScaling,
+  });
 
   final VoidCallback onPressed;
 
+  final String gaScreen;
+
+  final String gaSelection;
+
+  final double? minScreenWidthForTextBeforeScaling;
+
   @override
   Widget build(BuildContext context) {
-    return OutlinedButton(
+    return DevToolsButton(
+      icon: Icons.unfold_more,
+      label: 'Expand All',
+      tooltip: 'Expand All',
       onPressed: onPressed,
-      child: const Text('Expand All'),
+      gaScreen: gaScreen,
+      gaSelection: gaSelection,
+      minScreenWidthForTextBeforeScaling: minScreenWidthForTextBeforeScaling,
     );
   }
 }
 
 class CollapseAllButton extends StatelessWidget {
-  const CollapseAllButton({Key? key, required this.onPressed})
-      : super(key: key);
+  const CollapseAllButton({
+    super.key,
+    required this.gaScreen,
+    required this.gaSelection,
+    required this.onPressed,
+    this.minScreenWidthForTextBeforeScaling,
+  });
 
   final VoidCallback onPressed;
 
+  final String gaScreen;
+
+  final String gaSelection;
+
+  final double? minScreenWidthForTextBeforeScaling;
+
   @override
   Widget build(BuildContext context) {
-    return OutlinedButton(
+    return DevToolsButton(
+      icon: Icons.unfold_less,
+      label: 'Collapse All',
+      tooltip: 'Collapse All',
       onPressed: onPressed,
-      child: const Text('Collapse All'),
+      gaScreen: gaScreen,
+      gaSelection: gaSelection,
+      minScreenWidthForTextBeforeScaling: minScreenWidthForTextBeforeScaling,
     );
   }
 }
@@ -531,125 +568,33 @@ class VisibilityButton extends StatelessWidget {
   }
 }
 
-class RecordingInfo extends StatelessWidget {
-  const RecordingInfo({
-    this.instructionsKey,
-    this.recordingStatusKey,
-    this.processingStatusKey,
-    required this.recording,
-    required this.recordedObject,
-    required this.processing,
-    this.progressValue,
-    this.isPause = false,
+/// Default switch for DevTools that enforces size restriction.
+class DevToolsSwitch extends StatelessWidget {
+  const DevToolsSwitch({
+    super.key,
+    required this.value,
+    required this.onChanged,
+    this.padding,
   });
 
-  final Key? instructionsKey;
+  final bool value;
 
-  final Key? recordingStatusKey;
+  final void Function(bool)? onChanged;
 
-  final Key? processingStatusKey;
-
-  final bool recording;
-
-  final String recordedObject;
-
-  final bool processing;
-
-  final double? progressValue;
-
-  final bool isPause;
+  final EdgeInsets? padding;
 
   @override
   Widget build(BuildContext context) {
-    Widget child;
-    if (processing) {
-      child = ProcessingInfo(
-        key: processingStatusKey,
-        progressValue: progressValue,
-        processedObject: recordedObject,
-      );
-    } else if (recording) {
-      child = RecordingStatus(
-        key: recordingStatusKey,
-        recordedObject: recordedObject,
-      );
-    } else {
-      child = RecordingInstructions(
-        key: instructionsKey,
-        recordedObject: recordedObject,
-        isPause: isPause,
-      );
-    }
-    return Center(
-      child: child,
-    );
-  }
-}
-
-class RecordingStatus extends StatelessWidget {
-  const RecordingStatus({
-    Key? key,
-    required this.recordedObject,
-  }) : super(key: key);
-
-  final String recordedObject;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Text(
-          'Recording $recordedObject',
-          style: Theme.of(context).subtleTextStyle,
+    return Container(
+      height: defaultSwitchHeight,
+      padding: padding,
+      child: FittedBox(
+        fit: BoxFit.fill,
+        child: Switch(
+          value: value,
+          onChanged: onChanged,
         ),
-        const SizedBox(height: defaultSpacing),
-        const CircularProgressIndicator(),
-      ],
-    );
-  }
-}
-
-class RecordingInstructions extends StatelessWidget {
-  const RecordingInstructions({
-    Key? key,
-    required this.isPause,
-    required this.recordedObject,
-  }) : super(key: key);
-
-  final String recordedObject;
-
-  final bool isPause;
-
-  @override
-  Widget build(BuildContext context) {
-    final stopOrPauseRow = Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: isPause
-          ? const [
-              Text('Click the pause button '),
-              Icon(Icons.pause),
-              Text(' to pause the recording.'),
-            ]
-          : const [
-              Text('Click the stop button '),
-              Icon(Icons.stop),
-              Text(' to end the recording.'),
-            ],
-    );
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Text('Click the record button '),
-            const Icon(Icons.fiber_manual_record),
-            Text(' to start recording $recordedObject.'),
-          ],
-        ),
-        stopOrPauseRow,
-      ],
+      ),
     );
   }
 }
@@ -840,13 +785,18 @@ class ToolbarAction extends StatelessWidget {
     Key? key,
     this.size,
     this.style,
-  }) : super(key: key);
+    this.gaScreen,
+    this.gaSelection,
+  })  : assert((gaScreen == null) == (gaSelection == null)),
+        super(key: key);
 
   final TextStyle? style;
   final IconData icon;
   final String? tooltip;
   final VoidCallback? onPressed;
   final double? size;
+  final String? gaScreen;
+  final String? gaSelection;
 
   @override
   Widget build(BuildContext context) {
@@ -856,7 +806,12 @@ class ToolbarAction extends StatelessWidget {
         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
         textStyle: style,
       ),
-      onPressed: onPressed,
+      onPressed: () {
+        if (gaScreen != null && gaSelection != null) {
+          ga.select(gaScreen!, gaSelection!);
+        }
+        onPressed?.call();
+      },
       child: Icon(
         icon,
         size: size ?? actionsIconSize,
@@ -2493,6 +2448,7 @@ class HelpButtonWithDialog extends StatelessWidget {
     required this.gaSelection,
     required this.dialogTitle,
     required this.child,
+    this.outlined = true,
   });
 
   final String gaScreen;
@@ -2502,6 +2458,8 @@ class HelpButtonWithDialog extends StatelessWidget {
   final String dialogTitle;
 
   final Widget child;
+
+  final bool outlined;
 
   @override
   Widget build(BuildContext context) {
@@ -2524,6 +2482,7 @@ class HelpButtonWithDialog extends StatelessWidget {
       },
       gaScreen: gaScreen,
       gaSelection: gaSelection,
+      outlined: outlined,
     );
   }
 }
@@ -2649,12 +2608,13 @@ class RadioButton<T> extends StatelessWidget {
 }
 
 class ContextMenuButton extends StatelessWidget {
-  const ContextMenuButton({
+  ContextMenuButton({
+    required this.menu,
     this.style,
     this.gaScreen,
     this.gaItem,
-    required this.menu,
-  });
+    double? size,
+  }) : size = size ?? tableIconSize;
 
   static const double width = 14;
 
@@ -2662,6 +2622,7 @@ class ContextMenuButton extends StatelessWidget {
   final String? gaScreen;
   final String? gaItem;
   final List<Widget> menu;
+  final double size;
 
   @override
   Widget build(BuildContext context) {
@@ -2671,8 +2632,10 @@ class ContextMenuButton extends StatelessWidget {
           (BuildContext context, MenuController controller, Widget? child) {
         return SizedBox(
           width: width,
-          child: TextButton(
-            child: Text('⋮', style: style, textAlign: TextAlign.center),
+          child: ToolbarAction(
+            icon: Icons.more_vert,
+            size: size,
+            style: style,
             onPressed: () {
               if (gaScreen != null && gaItem != null) {
                 ga.select(gaScreen!, gaItem!);

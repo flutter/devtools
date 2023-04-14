@@ -607,7 +607,7 @@ class FlutterFrameTooltip extends StatelessWidget {
 
   static const double _moreInfoLinkWidth = 100.0;
 
-  static const _textMeasurementBuffer = 4.0;
+  static const _textMeasurementBuffer = 8.0;
 
   @override
   Widget build(BuildContext context) {
@@ -619,10 +619,22 @@ class FlutterFrameTooltip extends StatelessWidget {
   }
 
   HoverCardData _buildCardData(BuildContext context) {
-    final uiText = 'UI: ${msText(frame.buildTime)}';
-    final rasterText = 'Raster: ${msText(frame.rasterTime)}';
+    final uiText = 'UI: ${durationText(
+      frame.buildTime,
+      unit: DurationDisplayUnit.milliseconds,
+      allowRoundingToZero: false,
+    )}';
+    final rasterText = 'Raster: ${durationText(
+      frame.rasterTime,
+      unit: DurationDisplayUnit.milliseconds,
+      allowRoundingToZero: false,
+    )}';
     final shaderText = hasShaderJank
-        ? 'Shader Compilation: ${msText(frame.shaderDuration)}  -'
+        ? 'Shader Compilation: ${durationText(
+            frame.shaderDuration,
+            unit: DurationDisplayUnit.milliseconds,
+            allowRoundingToZero: false,
+          )}  -'
         : '';
     return HoverCardData(
       position: HoverCardPosition.element,
@@ -806,8 +818,9 @@ class ChartAxisPainter extends CustomPainter {
     Rect chartArea, {
     required int timeMs,
   }) {
-    final labelText = msText(
+    final labelText = durationText(
       Duration(milliseconds: timeMs),
+      unit: DurationDisplayUnit.milliseconds,
       fractionDigits: 0,
     );
 

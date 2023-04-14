@@ -40,7 +40,13 @@ abstract class NetworkRequest with SearchableDataMixin {
 
   String get durationDisplay {
     final duration = this.duration;
-    return 'Duration: ${duration != null ? msText(duration) : 'Pending'}';
+    final text = duration != null
+        ? durationText(
+            duration,
+            unit: DurationDisplayUnit.milliseconds,
+          )
+        : 'Pending';
+    return 'Duration: $text';
   }
 
   int timelineMicrosecondsSinceEpoch(int micros) {

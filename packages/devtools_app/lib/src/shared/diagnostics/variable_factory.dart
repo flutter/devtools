@@ -11,6 +11,7 @@ import 'package:flutter/foundation.dart';
 import 'package:stack_trace/stack_trace.dart' as stack_trace;
 import 'package:vm_service/vm_service.dart';
 
+import '../memory/adapted_heap_data.dart';
 import '../vm_utils.dart';
 import 'dart_object_node.dart';
 import 'diagnostics_node.dart';
@@ -477,6 +478,7 @@ List<DartObjectNode> createVariablesForSets(
 List<DartObjectNode> createVariablesForList(
   Instance instance,
   IsolateRef? isolateRef,
+  HeapObjectSelection? heapSelection,
 ) {
   final variables = <DartObjectNode>[];
   final elements = instance.elements ?? [];
@@ -490,6 +492,7 @@ List<DartObjectNode> createVariablesForList(
         value: elements[i],
         isolateRef: isolateRef,
         artificialName: true,
+        heapSelection: heapSelection,
       ),
     );
   }
@@ -547,7 +550,6 @@ List<DartObjectNode> createVariablesForFields(
   Set<String>? existingNames,
 }) {
   final result = <DartObjectNode>[];
-
   for (var field in instance.fields!) {
     final name = field.decl?.name;
     if (name == null) {
@@ -569,4 +571,36 @@ List<DartObjectNode> createVariablesForFields(
     }
   }
   return result;
+}
+
+List<DartObjectNode> createVariablesForMirrorReference(
+  Instance mirrorReference,
+  IsolateRef? isolateRef,
+) {
+  final referent = mirrorReference.mirrorReferent! as ClassRef;
+  return [
+    DartObjectNode.fromValue(
+      name: 'class',
+      value: referent.name,
+      isolateRef: isolateRef,
+    ),
+    DartObjectNode.fromValue(
+      name: 'library',
+      value: referent.library!.uri,
+      isolateRef: isolateRef,
+    ),
+  ];
+}
+
+List<DartObjectNode> createVariablesForUserTag(
+  Instance userTag,
+  IsolateRef? isolateRef,
+) {
+  return [
+    DartObjectNode.fromValue(
+      name: 'label',
+      value: userTag.label,
+      isolateRef: isolateRef,
+    ),
+  ];
 }

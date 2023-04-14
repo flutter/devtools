@@ -2,14 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/framework/scaffold.dart';
-import 'package:devtools_app/src/service/service_manager.dart';
-import 'package:devtools_app/src/shared/config_specific/ide_theme/ide_theme.dart';
-import 'package:devtools_app/src/shared/config_specific/import_export/import_export.dart';
 import 'package:devtools_app/src/shared/framework_controller.dart';
-import 'package:devtools_app/src/shared/globals.dart';
-import 'package:devtools_app/src/shared/notifications.dart';
-import 'package:devtools_app/src/shared/screen.dart';
 import 'package:devtools_app/src/shared/survey.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
@@ -37,7 +32,11 @@ void main() {
   setGlobal(NotificationService, NotificationService());
 
   Widget wrapScaffold(Widget child) {
-    return wrap(wrapWithAnalytics(child));
+    return wrapWithControllers(
+      child,
+      analytics: AnalyticsController(enabled: false, firstRun: false),
+      releaseNotes: ReleaseNotesController(),
+    );
   }
 
   testWidgetsWithWindowSize(
@@ -46,10 +45,8 @@ void main() {
     (WidgetTester tester) async {
       await tester.pumpWidget(
         wrapScaffold(
-          wrapWithNotifications(
-            const DevToolsScaffold(
-              screens: [_screen1, _screen2, _screen3, _screen4, _screen5],
-            ),
+          DevToolsScaffold(
+            screens: const [_screen1, _screen2, _screen3, _screen4, _screen5],
           ),
         ),
       );
@@ -65,10 +62,8 @@ void main() {
     (WidgetTester tester) async {
       await tester.pumpWidget(
         wrapScaffold(
-          wrapWithNotifications(
-            const DevToolsScaffold(
-              screens: [_screen1, _screen2, _screen3, _screen4, _screen5],
-            ),
+          DevToolsScaffold(
+            screens: const [_screen1, _screen2, _screen3, _screen4, _screen5],
           ),
         ),
       );
@@ -83,9 +78,7 @@ void main() {
     (WidgetTester tester) async {
       await tester.pumpWidget(
         wrapScaffold(
-          wrapWithNotifications(
-            const DevToolsScaffold(screens: [_screen1]),
-          ),
+          DevToolsScaffold(screens: const [_screen1]),
         ),
       );
       expect(find.byKey(_k1), findsOneWidget);
@@ -96,9 +89,7 @@ void main() {
   testWidgets('displays only the selected tab', (WidgetTester tester) async {
     await tester.pumpWidget(
       wrapScaffold(
-        wrapWithNotifications(
-          const DevToolsScaffold(screens: [_screen1, _screen2]),
-        ),
+        DevToolsScaffold(screens: const [_screen1, _screen2]),
       ),
     );
     expect(find.byKey(_k1), findsOneWidget);
@@ -123,11 +114,9 @@ void main() {
     (WidgetTester tester) async {
       await tester.pumpWidget(
         wrapScaffold(
-          wrapWithNotifications(
-            DevToolsScaffold(
-              screens: const [_screen1, _screen2],
-              page: _screen2.screenId,
-            ),
+          DevToolsScaffold(
+            screens: const [_screen1, _screen2],
+            page: _screen2.screenId,
           ),
         ),
       );

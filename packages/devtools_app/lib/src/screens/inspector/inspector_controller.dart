@@ -19,10 +19,10 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:logging/logging.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../service/service_extensions.dart' as extensions;
-import '../../shared/config_specific/logger/logger.dart';
 import '../../shared/config_specific/url/url.dart';
 import '../../shared/console/eval/inspector_tree.dart';
 import '../../shared/console/primitives/simple_items.dart';
@@ -34,6 +34,8 @@ import '../../shared/primitives/auto_dispose.dart';
 import '../../shared/primitives/utils.dart';
 import 'inspector_screen.dart';
 import 'inspector_tree_controller.dart';
+
+final _log = Logger('inspector_controller');
 
 const inspectorRefQueryParam = 'inspectorRef';
 
@@ -469,8 +471,8 @@ class InspectorController extends DisposableController
       inspectorTree.root = rootNode;
 
       refreshSelection(newSelection, detailsSelection, setSubtreeRoot);
-    } catch (error) {
-      log(error.toString(), LogLevel.error);
+    } catch (error, st) {
+      _log.shout(error, error, st);
       treeGroups.cancelNext();
       return;
     }
@@ -680,9 +682,9 @@ class InspectorController extends DisposableController
       subtreeRoot = newSelection;
 
       applyNewSelection(newSelection, detailsSelection, true);
-    } catch (error) {
+    } catch (error, st) {
       if (selectionGroups.next == group) {
-        log(error.toString(), LogLevel.error);
+        _log.shout(error, error, st);
         selectionGroups.cancelNext();
       }
     }
@@ -917,15 +919,6 @@ class InspectorController extends DisposableController
     _selectionGroups = null;
     details?.dispose();
     super.dispose();
-  }
-
-  static String treeTypeDisplayName(FlutterTreeType treeType) {
-    switch (treeType) {
-      case FlutterTreeType.widget:
-        return 'Widget';
-      case FlutterTreeType.renderObject:
-        return 'Render Objects';
-    }
   }
 
   void _onNodeAdded(

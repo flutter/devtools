@@ -9,9 +9,9 @@ import 'package:async/async.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:logging/logging.dart';
 
 import '../common_widgets.dart';
-import '../config_specific/logger/logger.dart';
 import '../primitives/auto_dispose.dart';
 import '../primitives/trees.dart';
 import '../primitives/utils.dart';
@@ -25,6 +25,8 @@ import '../utils.dart';
 /// Top 10 matches to display in auto-complete overlay.
 const defaultTopMatchesLimit = 10;
 int topMatchesLimit = defaultTopMatchesLimit;
+
+final _log = Logger('packages/devtools_app/lib/src/shared/ui/search');
 
 mixin SearchControllerMixin<T extends SearchableDataMixin> {
   final _searchNotifier = ValueNotifier<String>('');
@@ -107,8 +109,8 @@ mixin SearchControllerMixin<T extends SearchableDataMixin> {
         // Abort any ongoing search operations and start a new one
         try {
           await _searchOperation?.cancel();
-        } catch (e) {
-          log(e, LogLevel.error);
+        } catch (e, st) {
+          _log.shout(e, e, st);
         }
         searchInProgress = true;
 

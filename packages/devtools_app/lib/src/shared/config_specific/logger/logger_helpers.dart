@@ -31,7 +31,7 @@ void initDevToolsLogging() {
       } else if (record.level == Level.SHOUT) {
         logLevel = LogLevel.error;
       }
-      log(record.message, logLevel);
+      printToConsole(record.message, logLevel);
     }
   });
 }

@@ -29,7 +29,6 @@ Future<void> main() async {
   setUp(() async {
     final fakeServiceManager = FakeServiceManager();
     final scriptManager = MockScriptManager();
-    // ignore: discarded_futures
     when(scriptManager.getScript(any)).thenAnswer(
       (_) => Future<Script>.value(testScript),
     );
@@ -160,7 +159,10 @@ Future<void> main() async {
           debugger: debuggerController,
         ),
       );
-      expect(find.text("Don't stop on exceptions"), findsOneWidget);
+      expect(
+        find.text("Don't stop on exceptions", skipOffstage: false),
+        findsOneWidget,
+      );
     },
   );
 
@@ -174,7 +176,10 @@ Future<void> main() async {
           debugger: debuggerController,
         ),
       );
-      expect(find.text('Ignore exceptions'), findsOneWidget);
+      expect(
+        find.text('Ignore exceptions', skipOffstage: false),
+        findsOneWidget,
+      );
     },
   );
 

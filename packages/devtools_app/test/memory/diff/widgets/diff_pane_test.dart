@@ -11,13 +11,14 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../../../test_infra/matchers/matchers.dart';
 import '../../../test_infra/scenes/memory/default.dart';
+import '../../../test_infra/scenes/scene_test_extensions.dart';
 
 void main() {
   group('Diff pane', () {
     late MemoryDefaultScene scene;
 
     Future<void> pumpScene(WidgetTester tester) async {
-      await tester.pumpWidget(scene.build());
+      await tester.pumpScene(scene);
       // Delay to ensure the memory profiler has collected data.
       await tester.pumpAndSettle(const Duration(seconds: 1));
       expect(find.byType(MemoryBody), findsOneWidget);

@@ -209,8 +209,8 @@ class _BannerError extends BannerMessage {
 }
 
 // TODO(kenz): add "Do not show this again" option to warnings.
-class _BannerWarning extends BannerMessage {
-  const _BannerWarning({
+class BannerWarning extends BannerMessage {
+  const BannerWarning({
     required super.key,
     required super.textSpans,
     required super.screenId,
@@ -224,7 +224,7 @@ class DebugModePerformanceMessage {
 
   BannerMessage build(BuildContext context) {
     final theme = Theme.of(context);
-    return _BannerWarning(
+    return BannerWarning(
       key: Key('DebugModePerformanceMessage - $screenId'),
       textSpans: [
         const TextSpan(
@@ -289,13 +289,17 @@ class ShaderJankMessage {
 
   BannerMessage build(BuildContext context) {
     final theme = Theme.of(context);
+    final jankDurationText = durationText(
+      jankDuration,
+      unit: DurationDisplayUnit.milliseconds,
+    );
     return _BannerError(
       key: Key('ShaderJankMessage - $screenId'),
       textSpans: [
         TextSpan(
           text: 'Shader compilation jank detected. $jankyFramesCount '
               '${pluralize('frame', jankyFramesCount)} janked with a total of '
-              '${msText(jankDuration)} spent in shader compilation. To pre-compile '
+              '$jankDurationText spent in shader compilation. To pre-compile '
               'shaders, see the instructions at ',
         ),
         LinkTextSpan(
@@ -344,7 +348,7 @@ class HighCpuSamplingRateMessage {
 
   BannerMessage build(BuildContext context) {
     final theme = Theme.of(context);
-    return _BannerWarning(
+    return BannerWarning(
       key: key,
       textSpans: [
         const TextSpan(
@@ -376,7 +380,7 @@ class DebugModeMemoryMessage {
   final String screenId;
 
   BannerMessage build(BuildContext context) {
-    return _BannerWarning(
+    return BannerWarning(
       key: Key('DebugModeMemoryMessage - $screenId'),
       textSpans: [
         const TextSpan(
@@ -412,7 +416,7 @@ class UnsupportedFlutterVersionWarning {
   final SemanticVersion supportedFlutterVersion;
 
   BannerMessage build() {
-    return _BannerWarning(
+    return BannerWarning(
       key: Key('UnsupportedFlutterVersionWarning - $screenId'),
       textSpans: [
         TextSpan(
