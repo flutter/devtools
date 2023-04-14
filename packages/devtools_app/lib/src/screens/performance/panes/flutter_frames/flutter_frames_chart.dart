@@ -28,7 +28,6 @@ import 'flutter_frame_model.dart';
 import 'flutter_frames_controller.dart';
 
 // Turn this flag on to see when flutter frames are linked with timeline events.
-// ignore: avoid-global-state
 bool debugFrames = false;
 
 class FlutterFramesChart extends StatelessWidget {
