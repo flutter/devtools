@@ -17,7 +17,7 @@ void main() {
 
       test(
         'addLog',
-        () async {
+        () {
           final logMessage =
               LogRecord(Level.INFO, 'This is a logMessage', 'testLoggerName');
 
@@ -31,7 +31,7 @@ void main() {
 
       test(
         'clear',
-        () async {
+        () {
           final logRecord =
               LogRecord(Level.INFO, 'This is a logMessage', 'test');
 
@@ -45,7 +45,7 @@ void main() {
 
       test(
         'log limit',
-        () async {
+        () {
           for (var i = 0; i < LogStorage.maxLogEntries; i++) {
             final logRecord =
                 LogRecord(Level.INFO, 'This is logMessage: $i', 'test');

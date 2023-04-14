@@ -917,7 +917,7 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
   /// part of a processed CPU profile.
   late final Set<String> ancestorIds = {
     if (parentId != null) parentId!,
-    ...parent?.ancestorIds ?? {}
+    ...parent?.ancestorIds ?? {},
   };
 
   @override

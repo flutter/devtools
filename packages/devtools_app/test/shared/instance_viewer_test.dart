@@ -131,99 +131,100 @@ void main() {
 
   group('InstanceViewer', () {
     testWidgets(
-        'showInternalProperties: false hides private properties from dependencies',
-        (tester) async {
-      const objPath = InstancePath.fromInstanceId('obj');
+      'showInternalProperties: false hides private properties from dependencies',
+      (tester) async {
+        const objPath = InstancePath.fromInstanceId('obj');
 
-      InstancePath pathForProperty(String name) {
-        return objPath.pathForChild(
-          PathToProperty.objectProperty(
-            name: name,
-            ownerUri: '',
-            ownerName: '',
-          ),
-        );
-      }
+        InstancePath pathForProperty(String name) {
+          return objPath.pathForChild(
+            PathToProperty.objectProperty(
+              name: name,
+              ownerUri: '',
+              ownerName: '',
+            ),
+          );
+        }
 
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            instanceProvider(objPath).overrideWithValue(
-              AsyncValue.data(
-                ObjectInstance(
-                  [
-                    ObjectField(
-                      name: 'first',
-                      isFinal: false,
-                      ownerName: '',
-                      ownerUri: '',
-                      eval: FakeEvalOnDartLibrary(),
-                      ref: Result.error(Error(), StackTrace.empty),
-                      isDefinedByDependency: true,
-                    ),
-                    ObjectField(
-                      name: '_second',
-                      isFinal: false,
-                      ownerName: '',
-                      ownerUri: '',
-                      eval: FakeEvalOnDartLibrary(),
-                      ref: Result.error(Error(), StackTrace.empty),
-                      isDefinedByDependency: true,
-                    ),
-                    ObjectField(
-                      name: 'third',
-                      isFinal: false,
-                      ownerName: '',
-                      ownerUri: '',
-                      eval: FakeEvalOnDartLibrary(),
-                      ref: Result.error(Error(), StackTrace.empty),
-                      isDefinedByDependency: false,
-                    ),
-                    ObjectField(
-                      name: '_forth',
-                      isFinal: false,
-                      ownerName: '',
-                      ownerUri: '',
-                      eval: FakeEvalOnDartLibrary(),
-                      ref: Result.error(Error(), StackTrace.empty),
-                      isDefinedByDependency: false,
-                    ),
-                  ],
-                  hash: 0,
-                  instanceRefId: 'object',
-                  setter: null,
-                  evalForInstance: FakeEvalOnDartLibrary(),
-                  type: 'MyClass',
+        await tester.pumpWidget(
+          ProviderScope(
+            overrides: [
+              instanceProvider(objPath).overrideWithValue(
+                AsyncValue.data(
+                  ObjectInstance(
+                    [
+                      ObjectField(
+                        name: 'first',
+                        isFinal: false,
+                        ownerName: '',
+                        ownerUri: '',
+                        eval: FakeEvalOnDartLibrary(),
+                        ref: Result.error(Error(), StackTrace.empty),
+                        isDefinedByDependency: true,
+                      ),
+                      ObjectField(
+                        name: '_second',
+                        isFinal: false,
+                        ownerName: '',
+                        ownerUri: '',
+                        eval: FakeEvalOnDartLibrary(),
+                        ref: Result.error(Error(), StackTrace.empty),
+                        isDefinedByDependency: true,
+                      ),
+                      ObjectField(
+                        name: 'third',
+                        isFinal: false,
+                        ownerName: '',
+                        ownerUri: '',
+                        eval: FakeEvalOnDartLibrary(),
+                        ref: Result.error(Error(), StackTrace.empty),
+                        isDefinedByDependency: false,
+                      ),
+                      ObjectField(
+                        name: '_forth',
+                        isFinal: false,
+                        ownerName: '',
+                        ownerUri: '',
+                        eval: FakeEvalOnDartLibrary(),
+                        ref: Result.error(Error(), StackTrace.empty),
+                        isDefinedByDependency: false,
+                      ),
+                    ],
+                    hash: 0,
+                    instanceRefId: 'object',
+                    setter: null,
+                    evalForInstance: FakeEvalOnDartLibrary(),
+                    type: 'MyClass',
+                  ),
+                ),
+              ),
+              instanceProvider(pathForProperty('first'))
+                  .overrideWithValue(int42Instance),
+              instanceProvider(pathForProperty('_second'))
+                  .overrideWithValue(int42Instance),
+              instanceProvider(pathForProperty('third'))
+                  .overrideWithValue(int42Instance),
+              instanceProvider(pathForProperty('_forth'))
+                  .overrideWithValue(int42Instance),
+            ],
+            child: const MaterialApp(
+              home: Scaffold(
+                body: InstanceViewer(
+                  showInternalProperties: false,
+                  rootPath: objPath,
                 ),
               ),
             ),
-            instanceProvider(pathForProperty('first'))
-                .overrideWithValue(int42Instance),
-            instanceProvider(pathForProperty('_second'))
-                .overrideWithValue(int42Instance),
-            instanceProvider(pathForProperty('third'))
-                .overrideWithValue(int42Instance),
-            instanceProvider(pathForProperty('_forth'))
-                .overrideWithValue(int42Instance),
-          ],
-          child: const MaterialApp(
-            home: Scaffold(
-              body: InstanceViewer(
-                showInternalProperties: false,
-                rootPath: objPath,
-              ),
-            ),
           ),
-        ),
-      );
+        );
 
-      await expectLater(
-        find.byType(MaterialApp),
-        matchesDevToolsGolden(
-          '../test_infra/goldens/instance_viewer/show_internal_properties.png',
-        ),
-      );
-    });
+        await expectLater(
+          find.byType(MaterialApp),
+          matchesDevToolsGolden(
+            '../test_infra/goldens/instance_viewer/show_internal_properties.png',
+          ),
+        );
+      },
+    );
 
     testWidgets('field editing flow', (tester) async {
       const objPath = InstancePath.fromInstanceId('obj');
@@ -265,6 +266,7 @@ void main() {
                 InstanceDetails.number(
                   '0',
                   instanceRefId: '0',
+                  // ignore: avoid-redundant-async, required by contruct
                   setter: (value) async {},
                 ),
               ),
@@ -305,149 +307,157 @@ void main() {
       );
     });
 
-    testWidgets('renders <loading> while an instance is fetched',
-        (tester) async {
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            instanceProvider(const InstancePath.fromInstanceId('0'))
-                .overrideWithValue(const AsyncValue.loading())
-          ],
-          child: const MaterialApp(
-            home: Scaffold(
-              body: InstanceViewer(
-                showInternalProperties: true,
-                rootPath: InstancePath.fromInstanceId('0'),
+    testWidgets(
+      'renders <loading> while an instance is fetched',
+      (tester) async {
+        await tester.pumpWidget(
+          ProviderScope(
+            overrides: [
+              instanceProvider(const InstancePath.fromInstanceId('0'))
+                  .overrideWithValue(const AsyncValue.loading()),
+            ],
+            child: const MaterialApp(
+              home: Scaffold(
+                body: InstanceViewer(
+                  showInternalProperties: true,
+                  rootPath: InstancePath.fromInstanceId('0'),
+                ),
               ),
             ),
           ),
-        ),
-      );
+        );
 
-      await tester.pumpAndSettle();
+        await tester.pumpAndSettle();
 
-      await expectLater(
-        find.byType(MaterialApp),
-        matchesDevToolsGolden(
-          '../test_infra/goldens/instance_viewer/loading.png',
-        ),
-      );
-    });
+        await expectLater(
+          find.byType(MaterialApp),
+          matchesDevToolsGolden(
+            '../test_infra/goldens/instance_viewer/loading.png',
+          ),
+        );
+      },
+    );
 
     // TODO(rrousselGit) find a way to test "data then loading then wait then loading then wait shows "loading" after a total of one second"
     // This is tricky because tester.pump(duration) completes the Timer even if the duration is < 1 second
 
     testWidgets(
-        'once valid data was fetched, going back to loading and emiting an error immediately updates the UI',
-        (tester) async {
-      const app = MaterialApp(
-        home: Scaffold(
-          body: InstanceViewer(
-            showInternalProperties: true,
-            rootPath: InstancePath.fromInstanceId('0'),
+      'once valid data was fetched, going back to loading and emiting an error immediately updates the UI',
+      (tester) async {
+        const app = MaterialApp(
+          home: Scaffold(
+            body: InstanceViewer(
+              showInternalProperties: true,
+              rootPath: InstancePath.fromInstanceId('0'),
+            ),
           ),
-        ),
-      );
+        );
 
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            instanceProvider(const InstancePath.fromInstanceId('0'))
-                .overrideWithValue(nullInstance),
-          ],
-          child: app,
-        ),
-      );
-      await tester.pumpAndSettle();
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            instanceProvider(const InstancePath.fromInstanceId('0'))
-                .overrideWithValue(const AsyncValue.loading()),
-          ],
-          child: app,
-        ),
-      );
-      await tester.pump();
+        await tester.pumpWidget(
+          ProviderScope(
+            overrides: [
+              instanceProvider(const InstancePath.fromInstanceId('0'))
+                  .overrideWithValue(nullInstance),
+            ],
+            child: app,
+          ),
+        );
+        await tester.pumpAndSettle();
+        await tester.pumpWidget(
+          ProviderScope(
+            overrides: [
+              instanceProvider(const InstancePath.fromInstanceId('0'))
+                  .overrideWithValue(const AsyncValue.loading()),
+            ],
+            child: app,
+          ),
+        );
+        await tester.pump();
 
-      await expectLater(
-        find.byType(MaterialApp),
-        matchesDevToolsGolden('../test_infra/goldens/instance_viewer/null.png'),
-      );
+        await expectLater(
+          find.byType(MaterialApp),
+          matchesDevToolsGolden(
+              '../test_infra/goldens/instance_viewer/null.png'),
+        );
 
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            instanceProvider(const InstancePath.fromInstanceId('0'))
-                .overrideWithValue(AsyncValue.error(StateError('test error'))),
-          ],
-          child: app,
-        ),
-      );
-      await tester.pumpAndSettle();
+        await tester.pumpWidget(
+          ProviderScope(
+            overrides: [
+              instanceProvider(const InstancePath.fromInstanceId('0'))
+                  .overrideWithValue(
+                      AsyncValue.error(StateError('test error'))),
+            ],
+            child: app,
+          ),
+        );
+        await tester.pumpAndSettle();
 
-      await expectLater(
-        find.byType(MaterialApp),
-        matchesDevToolsGolden(
-          '../test_infra/goldens/instance_viewer/error.png',
-        ),
-      );
-    });
+        await expectLater(
+          find.byType(MaterialApp),
+          matchesDevToolsGolden(
+            '../test_infra/goldens/instance_viewer/error.png',
+          ),
+        );
+      },
+    );
 
     testWidgets(
-        'once valid data was fetched, going back to loading and emiting a new value immediately updates the UI',
-        (tester) async {
-      const app = MaterialApp(
-        home: Scaffold(
-          body: InstanceViewer(
-            showInternalProperties: true,
-            rootPath: InstancePath.fromInstanceId('0'),
+      'once valid data was fetched, going back to loading and emiting a new value immediately updates the UI',
+      (tester) async {
+        const app = MaterialApp(
+          home: Scaffold(
+            body: InstanceViewer(
+              showInternalProperties: true,
+              rootPath: InstancePath.fromInstanceId('0'),
+            ),
           ),
-        ),
-      );
+        );
 
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            instanceProvider(const InstancePath.fromInstanceId('0'))
-                .overrideWithValue(nullInstance),
-          ],
-          child: app,
-        ),
-      );
-      await tester.pumpAndSettle();
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            instanceProvider(const InstancePath.fromInstanceId('0'))
-                .overrideWithValue(const AsyncValue.loading()),
-          ],
-          child: app,
-        ),
-      );
-      await tester.pump();
+        await tester.pumpWidget(
+          ProviderScope(
+            overrides: [
+              instanceProvider(const InstancePath.fromInstanceId('0'))
+                  .overrideWithValue(nullInstance),
+            ],
+            child: app,
+          ),
+        );
+        await tester.pumpAndSettle();
+        await tester.pumpWidget(
+          ProviderScope(
+            overrides: [
+              instanceProvider(const InstancePath.fromInstanceId('0'))
+                  .overrideWithValue(const AsyncValue.loading()),
+            ],
+            child: app,
+          ),
+        );
+        await tester.pump();
 
-      await expectLater(
-        find.byType(MaterialApp),
-        matchesDevToolsGolden('../test_infra/goldens/instance_viewer/null.png'),
-      );
+        await expectLater(
+          find.byType(MaterialApp),
+          matchesDevToolsGolden(
+              '../test_infra/goldens/instance_viewer/null.png'),
+        );
 
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            instanceProvider(const InstancePath.fromInstanceId('0'))
-                .overrideWithValue(int42Instance),
-          ],
-          child: app,
-        ),
-      );
-      await tester.pumpAndSettle();
+        await tester.pumpWidget(
+          ProviderScope(
+            overrides: [
+              instanceProvider(const InstancePath.fromInstanceId('0'))
+                  .overrideWithValue(int42Instance),
+            ],
+            child: app,
+          ),
+        );
+        await tester.pumpAndSettle();
 
-      await expectLater(
-        find.byType(MaterialApp),
-        matchesDevToolsGolden('../test_infra/goldens/instance_viewer/num.png'),
-      );
-    });
+        await expectLater(
+          find.byType(MaterialApp),
+          matchesDevToolsGolden(
+              '../test_infra/goldens/instance_viewer/num.png'),
+        );
+      },
+    );
 
     testWidgets('renders enums', (tester) async {
       final container = ProviderContainer(
@@ -1074,36 +1084,38 @@ void main() {
     });
 
     group('lists', () {
-      test('count for one line when not expanded regarless of the list length',
-          () {
-        final container = ProviderContainer(
-          overrides: [
-            neverExpandedOverride,
-            instanceProvider(const InstancePath.fromInstanceId('empty'))
-                .overrideWithValue(emptyListInstance),
-            instanceProvider(const InstancePath.fromInstanceId('list-2'))
-                .overrideWithValue(emptyListInstance)
-          ],
-        );
-        addTearDown(container.dispose);
+      test(
+        'count for one line when not expanded regarless of the list length',
+        () {
+          final container = ProviderContainer(
+            overrides: [
+              neverExpandedOverride,
+              instanceProvider(const InstancePath.fromInstanceId('empty'))
+                  .overrideWithValue(emptyListInstance),
+              instanceProvider(const InstancePath.fromInstanceId('list-2'))
+                  .overrideWithValue(emptyListInstance),
+            ],
+          );
+          addTearDown(container.dispose);
 
-        expect(
-          container.read(
-            estimatedChildCountProvider(
-              const InstancePath.fromInstanceId('empty'),
+          expect(
+            container.read(
+              estimatedChildCountProvider(
+                const InstancePath.fromInstanceId('empty'),
+              ),
             ),
-          ),
-          1,
-        );
-        expect(
-          container.read(
-            estimatedChildCountProvider(
-              const InstancePath.fromInstanceId('list-2'),
+            1,
+          );
+          expect(
+            container.read(
+              estimatedChildCountProvider(
+                const InstancePath.fromInstanceId('list-2'),
+              ),
             ),
-          ),
-          1,
-        );
-      });
+            1,
+          );
+        },
+      );
 
       test('when expanded, recursively traverse the list content', () {
         final container = ProviderContainer(
@@ -1192,36 +1204,38 @@ void main() {
     });
 
     group('maps', () {
-      test('count for one line when not expanded regarless of the map length',
-          () {
-        final container = ProviderContainer(
-          overrides: [
-            neverExpandedOverride,
-            instanceProvider(const InstancePath.fromInstanceId('empty'))
-                .overrideWithValue(emptyMapInstance),
-            instanceProvider(const InstancePath.fromInstanceId('map-2'))
-                .overrideWithValue(map2Instance)
-          ],
-        );
-        addTearDown(container.dispose);
+      test(
+        'count for one line when not expanded regarless of the map length',
+        () {
+          final container = ProviderContainer(
+            overrides: [
+              neverExpandedOverride,
+              instanceProvider(const InstancePath.fromInstanceId('empty'))
+                  .overrideWithValue(emptyMapInstance),
+              instanceProvider(const InstancePath.fromInstanceId('map-2'))
+                  .overrideWithValue(map2Instance),
+            ],
+          );
+          addTearDown(container.dispose);
 
-        expect(
-          container.read(
-            estimatedChildCountProvider(
-              const InstancePath.fromInstanceId('empty'),
+          expect(
+            container.read(
+              estimatedChildCountProvider(
+                const InstancePath.fromInstanceId('empty'),
+              ),
             ),
-          ),
-          1,
-        );
-        expect(
-          container.read(
-            estimatedChildCountProvider(
-              const InstancePath.fromInstanceId('map-2'),
+            1,
+          );
+          expect(
+            container.read(
+              estimatedChildCountProvider(
+                const InstancePath.fromInstanceId('map-2'),
+              ),
             ),
-          ),
-          1,
-        );
-      });
+            1,
+          );
+        },
+      );
 
       test('when expanded, recursively traverse the map content', () {
         final container = ProviderContainer(
@@ -1311,36 +1325,37 @@ void main() {
 
     group('objects', () {
       test(
-          'count for one line when not expanded regarless of the number of fields',
-          () {
-        final container = ProviderContainer(
-          overrides: [
-            neverExpandedOverride,
-            instanceProvider(const InstancePath.fromInstanceId('empty'))
-                .overrideWithValue(emptyObjectInstance),
-            instanceProvider(const InstancePath.fromInstanceId('object-2'))
-                .overrideWithValue(object2Instance)
-          ],
-        );
-        addTearDown(container.dispose);
+        'count for one line when not expanded regarless of the number of fields',
+        () {
+          final container = ProviderContainer(
+            overrides: [
+              neverExpandedOverride,
+              instanceProvider(const InstancePath.fromInstanceId('empty'))
+                  .overrideWithValue(emptyObjectInstance),
+              instanceProvider(const InstancePath.fromInstanceId('object-2'))
+                  .overrideWithValue(object2Instance),
+            ],
+          );
+          addTearDown(container.dispose);
 
-        expect(
-          container.read(
-            estimatedChildCountProvider(
-              const InstancePath.fromInstanceId('empty'),
+          expect(
+            container.read(
+              estimatedChildCountProvider(
+                const InstancePath.fromInstanceId('empty'),
+              ),
             ),
-          ),
-          1,
-        );
-        expect(
-          container.read(
-            estimatedChildCountProvider(
-              const InstancePath.fromInstanceId('object-2'),
+            1,
+          );
+          expect(
+            container.read(
+              estimatedChildCountProvider(
+                const InstancePath.fromInstanceId('object-2'),
+              ),
             ),
-          ),
-          1,
-        );
-      });
+            1,
+          );
+        },
+      );
 
       test('when expanded, recursively traverse the object content', () {
         final container = ProviderContainer(
@@ -1358,7 +1373,7 @@ void main() {
                     name: 'first',
                     ownerUri: '',
                     ownerName: '',
-                  )
+                  ),
                 ],
               ),
             ).overrideWithValue(stringInstance),
@@ -1370,7 +1385,7 @@ void main() {
                     name: 'second',
                     ownerUri: '',
                     ownerName: '',
-                  )
+                  ),
                 ],
               ),
             ).overrideWithValue(list2Instance),

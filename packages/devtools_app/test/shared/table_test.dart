@@ -91,28 +91,30 @@ void main() {
       expect(find.byKey(const Key('empty')), findsOneWidget);
     });
 
-    testWidgets('displays with simple content size to content',
-        (WidgetTester tester) async {
-      final table = FlatTable<TestData>(
-        columns: [flatNameColumn],
-        data: [TestData('empty', 0)],
-        dataKey: 'test-data',
-        keyFactory: (d) => Key(d.name),
-        defaultSortColumn: flatNameColumn,
-        defaultSortDirection: SortDirection.ascending,
-        sizeColumnsToFit: false,
-      );
-      await tester.pumpWidget(wrap(table));
-      expect(find.byWidget(table), findsOneWidget);
-      expect(find.text('FlatName'), findsOneWidget);
+    testWidgets(
+      'displays with simple content size to content',
+      (WidgetTester tester) async {
+        final table = FlatTable<TestData>(
+          columns: [flatNameColumn],
+          data: [TestData('empty', 0)],
+          dataKey: 'test-data',
+          keyFactory: (d) => Key(d.name),
+          defaultSortColumn: flatNameColumn,
+          defaultSortDirection: SortDirection.ascending,
+          sizeColumnsToFit: false,
+        );
+        await tester.pumpWidget(wrap(table));
+        expect(find.byWidget(table), findsOneWidget);
+        expect(find.text('FlatName'), findsOneWidget);
 
-      final FlatTableState state = tester.state(find.byWidget(table));
-      expect(state.tableController.columnWidths, isNotNull);
-      final columnWidths = state.tableController.columnWidths!;
-      expect(columnWidths.length, 1);
-      expect(columnWidths.first, 300);
-      expect(find.byKey(const Key('empty')), findsOneWidget);
-    });
+        final FlatTableState state = tester.state(find.byWidget(table));
+        expect(state.tableController.columnWidths, isNotNull);
+        final columnWidths = state.tableController.columnWidths!;
+        expect(columnWidths.length, 1);
+        expect(columnWidths.first, 300);
+        expect(find.byKey(const Key('empty')), findsOneWidget);
+      },
+    );
 
     testWidgetsWithWindowSize(
       'displays with full content',
@@ -524,67 +526,69 @@ void main() {
       // TODO(jacobr): add a golden image test.
     });
 
-    testWidgets('displays with wide column size to content',
-        (WidgetTester tester) async {
-      final table = FlatTable<TestData>(
-        columns: [
-          flatNameColumn,
-          _NumberColumn(),
-          _WideColumn(),
-        ],
-        data: flatData,
-        dataKey: 'test-data',
-        keyFactory: (data) => Key(data.name),
-        defaultSortColumn: flatNameColumn,
-        defaultSortDirection: SortDirection.ascending,
-        sizeColumnsToFit: false,
-      );
-      await tester.pumpWidget(
-        wrap(
-          SizedBox(
-            width: 800.0,
-            height: 200.0,
-            child: table,
+    testWidgets(
+      'displays with wide column size to content',
+      (WidgetTester tester) async {
+        final table = FlatTable<TestData>(
+          columns: [
+            flatNameColumn,
+            _NumberColumn(),
+            _WideColumn(),
+          ],
+          data: flatData,
+          dataKey: 'test-data',
+          keyFactory: (data) => Key(data.name),
+          defaultSortColumn: flatNameColumn,
+          defaultSortDirection: SortDirection.ascending,
+          sizeColumnsToFit: false,
+        );
+        await tester.pumpWidget(
+          wrap(
+            SizedBox(
+              width: 800.0,
+              height: 200.0,
+              child: table,
+            ),
           ),
-        ),
-      );
-      expect(find.byWidget(table), findsOneWidget);
-      {
-        final FlatTableState<TestData> state =
-            tester.state(find.byWidget(table));
-        expect(state.tableController.columnWidths, isNotNull);
-        final columnWidths = state.tableController.columnWidths!;
-        expect(columnWidths.length, equals(3));
-        expect(columnWidths[0], equals(300.0));
-        expect(columnWidths[1], equals(400.0));
-        expect(columnWidths[2], equals(369.0));
-      }
+        );
+        expect(find.byWidget(table), findsOneWidget);
+        {
+          final FlatTableState<TestData> state =
+              tester.state(find.byWidget(table));
+          expect(state.tableController.columnWidths, isNotNull);
+          final columnWidths = state.tableController.columnWidths!;
+          expect(columnWidths.length, equals(3));
+          expect(columnWidths[0], equals(300.0));
+          expect(columnWidths[1], equals(400.0));
+          expect(columnWidths[2], equals(369.0));
+        }
 
-      // TODO(jacobr): add a golden image test.
+        // TODO(jacobr): add a golden image test.
 
-      await tester.pumpWidget(
-        wrap(
-          SizedBox(
-            width: 200.0,
-            height: 200.0,
-            child: table,
+        await tester.pumpWidget(
+          wrap(
+            SizedBox(
+              width: 200.0,
+              height: 200.0,
+              child: table,
+            ),
           ),
-        ),
-      );
+        );
 
-      {
-        final FlatTableState<TestData> state =
-            tester.state(find.byWidget(table));
-        expect(state.tableController.columnWidths, isNotNull);
-        final columnWidths = state.tableController.columnWidths!;
-        expect(columnWidths.length, equals(3));
-        expect(columnWidths[0], equals(300.0)); // Fixed width column.
-        expect(columnWidths[1], equals(400.0)); // Fixed width column.
-        expect(columnWidths[2], equals(369.0)); // Variable width column.
-      }
+        {
+          final FlatTableState<TestData> state =
+              tester.state(find.byWidget(table));
+          expect(state.tableController.columnWidths, isNotNull);
+          final columnWidths = state.tableController.columnWidths!;
+          expect(columnWidths.length, equals(3));
+          expect(columnWidths[0], equals(300.0)); // Fixed width column.
+          expect(columnWidths[1], equals(400.0)); // Fixed width column.
+          expect(columnWidths[2], equals(369.0)); // Variable width column.
+        }
 
-      // TODO(jacobr): add a golden image test.
-    });
+        // TODO(jacobr): add a golden image test.
+      },
+    );
 
     testWidgets(
       'displays with multiple wide columns',
@@ -1151,34 +1155,36 @@ void main() {
       },
     );
 
-    testWidgets('properly collapses and expands the tree',
-        (WidgetTester tester) async {
-      final table = TreeTable<TestData>(
-        columns: [
-          _NumberColumn(),
-          treeColumn,
-        ],
-        dataRoots: [tree1],
-        dataKey: 'test-data',
-        treeColumn: treeColumn,
-        keyFactory: (d) => Key(d.name),
-        defaultSortColumn: treeColumn,
-        defaultSortDirection: SortDirection.ascending,
-      );
-      await tester.pumpWidget(wrap(table));
-      await tester.pumpAndSettle();
+    testWidgets(
+      'properly collapses and expands the tree',
+      (WidgetTester tester) async {
+        final table = TreeTable<TestData>(
+          columns: [
+            _NumberColumn(),
+            treeColumn,
+          ],
+          dataRoots: [tree1],
+          dataKey: 'test-data',
+          treeColumn: treeColumn,
+          keyFactory: (d) => Key(d.name),
+          defaultSortColumn: treeColumn,
+          defaultSortDirection: SortDirection.ascending,
+        );
+        await tester.pumpWidget(wrap(table));
+        await tester.pumpAndSettle();
 
-      expect(tree1.isExpanded, true);
-      await tester.tap(find.byKey(const Key('Foo')));
-      await tester.pumpAndSettle();
-      expect(tree1.isExpanded, false);
-      await tester.tap(find.byKey(const Key('Foo')));
-      await tester.pumpAndSettle();
-      expect(tree1.isExpanded, true);
-      await tester.tap(find.byKey(const Key('Bar')));
-      await tester.pumpAndSettle();
-      expect(tree1.children[0].isExpanded, false);
-    });
+        expect(tree1.isExpanded, true);
+        await tester.tap(find.byKey(const Key('Foo')));
+        await tester.pumpAndSettle();
+        expect(tree1.isExpanded, false);
+        await tester.tap(find.byKey(const Key('Foo')));
+        await tester.pumpAndSettle();
+        expect(tree1.isExpanded, true);
+        await tester.tap(find.byKey(const Key('Bar')));
+        await tester.pumpAndSettle();
+        expect(tree1.children[0].isExpanded, false);
+      },
+    );
 
     testWidgets('starts with sorted data', (WidgetTester tester) async {
       expect(tree1.children[0].name, equals('Bar'));
@@ -1290,151 +1296,158 @@ void main() {
         );
       });
 
-      testWidgets('selection changes with up/down arrow keys',
-          (WidgetTester tester) async {
-        data.expand();
-        await tester.pumpWidget(wrap(table));
-        await tester.pumpAndSettle();
-
-        final TreeTableState state = tester.state(find.byWidget(table));
-        state.focusNode!.requestFocus();
-        await tester.pumpAndSettle();
-
-        expect(state.widget.selectionNotifier.value.node, equals(null));
-
-        // the root is selected by default when there is no selection. Pressing
-        // arrowDown should take us to the first child, Bar
-        await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
-        await tester.pumpAndSettle();
-        expect(
-          state.widget.selectionNotifier.value.node,
-          equals(data.children[0]),
-        );
-
-        await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
-        await tester.pumpAndSettle();
-
-        expect(state.widget.selectionNotifier.value.node, equals(data.root));
-      });
-
-      testWidgets('selection changes with left/right arrow keys',
-          (WidgetTester tester) async {
-        await tester.pumpWidget(wrap(table));
-        await tester.pumpAndSettle();
-
-        final TreeTableState state = tester.state(find.byWidget(table));
-        state.focusNode!.requestFocus();
-        await tester.pumpAndSettle();
-
-        // left arrow on collapsed node with no parent should succeed but have
-        // no effect.
-        await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
-        await tester.pumpAndSettle();
-
-        expect(state.widget.selectionNotifier.value.node, equals(data.root));
-        expect(state.widget.selectionNotifier.value.node!.isExpanded, isFalse);
-
-        // Expand root and navigate down twice
-        await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
-        await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
-        await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
-        await tester.pumpAndSettle();
-
-        expect(
-          state.widget.selectionNotifier.value.node,
-          equals(data.root.children[1]),
-        );
-
-        // Back to parent
-        await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
-        await tester.pumpAndSettle();
-
-        expect(state.widget.selectionNotifier.value.node, equals(data.root));
-        expect(state.widget.selectionNotifier.value.node!.isExpanded, isTrue);
-      });
-    });
-
-    testWidgets('properly colors rows with alternating colors',
+      testWidgets(
+        'selection changes with up/down arrow keys',
         (WidgetTester tester) async {
-      final data = TestData('Foo', 0)
-        ..children.addAll([
-          TestData('Bar', 1)
-            ..children.addAll([
-              TestData('Baz', 2),
-              TestData('Qux', 3),
-              TestData('Snap', 4),
-            ]),
-          TestData('Crackle', 5),
-        ])
-        ..expandCascading();
-      final table = TreeTable<TestData>(
-        columns: [
-          _NumberColumn(),
-          treeColumn,
-        ],
-        dataRoots: [data],
-        dataKey: 'test-data',
-        treeColumn: treeColumn,
-        keyFactory: (d) => Key(d.name),
-        defaultSortColumn: treeColumn,
-        defaultSortDirection: SortDirection.ascending,
+          data.expand();
+          await tester.pumpWidget(wrap(table));
+          await tester.pumpAndSettle();
+
+          final TreeTableState state = tester.state(find.byWidget(table));
+          state.focusNode!.requestFocus();
+          await tester.pumpAndSettle();
+
+          expect(state.widget.selectionNotifier.value.node, equals(null));
+
+          // the root is selected by default when there is no selection. Pressing
+          // arrowDown should take us to the first child, Bar
+          await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+          await tester.pumpAndSettle();
+          expect(
+            state.widget.selectionNotifier.value.node,
+            equals(data.children[0]),
+          );
+
+          await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+          await tester.pumpAndSettle();
+
+          expect(state.widget.selectionNotifier.value.node, equals(data.root));
+        },
       );
 
-      final fooFinder = find.byKey(const Key('Foo'));
-      final barFinder = find.byKey(const Key('Bar'));
-      final bazFinder = find.byKey(const Key('Baz'));
-      final quxFinder = find.byKey(const Key('Qux'));
-      final snapFinder = find.byKey(const Key('Snap'));
-      final crackleFinder = find.byKey(const Key('Crackle'));
+      testWidgets(
+        'selection changes with left/right arrow keys',
+        (WidgetTester tester) async {
+          await tester.pumpWidget(wrap(table));
+          await tester.pumpAndSettle();
 
-      // Expected values returned through accessing Color.value property.
-      const color1Value = 4294111476;
-      const color2Value = 4294967295;
-      const rowSelectedColorValue = 4294967295;
+          final TreeTableState state = tester.state(find.byWidget(table));
+          state.focusNode!.requestFocus();
+          await tester.pumpAndSettle();
 
-      await tester.pumpWidget(wrap(table));
-      await tester.pumpAndSettle();
-      expect(tree1.isExpanded, true);
+          // left arrow on collapsed node with no parent should succeed but have
+          // no effect.
+          await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+          await tester.pumpAndSettle();
 
-      expect(fooFinder, findsOneWidget);
-      expect(barFinder, findsOneWidget);
-      expect(bazFinder, findsOneWidget);
-      expect(quxFinder, findsOneWidget);
-      expect(snapFinder, findsOneWidget);
-      expect(crackleFinder, findsOneWidget);
-      TableRow fooRow = tester.widget(fooFinder);
-      TableRow barRow = tester.widget(barFinder);
-      final TableRow bazRow = tester.widget(bazFinder);
-      final TableRow quxRow = tester.widget(quxFinder);
-      final TableRow snapRow = tester.widget(snapFinder);
-      TableRow crackleRow = tester.widget(crackleFinder);
+          expect(state.widget.selectionNotifier.value.node, equals(data.root));
+          expect(
+              state.widget.selectionNotifier.value.node!.isExpanded, isFalse);
 
-      expect(fooRow.backgroundColor!.value, equals(color1Value));
-      expect(barRow.backgroundColor!.value, equals(color2Value));
-      expect(bazRow.backgroundColor!.value, equals(color1Value));
-      expect(quxRow.backgroundColor!.value, equals(color2Value));
-      expect(snapRow.backgroundColor!.value, equals(color1Value));
-      expect(crackleRow.backgroundColor!.value, equals(color2Value));
+          // Expand root and navigate down twice
+          await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+          await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+          await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+          await tester.pumpAndSettle();
 
-      await tester.tap(barFinder);
-      await tester.pumpAndSettle();
-      expect(fooFinder, findsOneWidget);
-      expect(barFinder, findsOneWidget);
-      expect(bazFinder, findsNothing);
-      expect(quxFinder, findsNothing);
-      expect(snapFinder, findsNothing);
-      expect(crackleFinder, findsOneWidget);
-      fooRow = tester.widget(fooFinder);
-      barRow = tester.widget(barFinder);
-      crackleRow = tester.widget(crackleFinder);
+          expect(
+            state.widget.selectionNotifier.value.node,
+            equals(data.root.children[1]),
+          );
 
-      expect(fooRow.backgroundColor!.value, equals(color1Value));
-      // [barRow] has the rowSelected color after being tapped.
-      expect(barRow.backgroundColor!.value, equals(rowSelectedColorValue));
-      // [crackleRow] has a different background color after collapsing previous
-      // row (Bar).
-      expect(crackleRow.backgroundColor!.value, equals(color1Value));
+          // Back to parent
+          await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+          await tester.pumpAndSettle();
+
+          expect(state.widget.selectionNotifier.value.node, equals(data.root));
+          expect(state.widget.selectionNotifier.value.node!.isExpanded, isTrue);
+        },
+      );
     });
+
+    testWidgets(
+      'properly colors rows with alternating colors',
+      (WidgetTester tester) async {
+        final data = TestData('Foo', 0)
+          ..children.addAll([
+            TestData('Bar', 1)
+              ..children.addAll([
+                TestData('Baz', 2),
+                TestData('Qux', 3),
+                TestData('Snap', 4),
+              ]),
+            TestData('Crackle', 5),
+          ])
+          ..expandCascading();
+        final table = TreeTable<TestData>(
+          columns: [
+            _NumberColumn(),
+            treeColumn,
+          ],
+          dataRoots: [data],
+          dataKey: 'test-data',
+          treeColumn: treeColumn,
+          keyFactory: (d) => Key(d.name),
+          defaultSortColumn: treeColumn,
+          defaultSortDirection: SortDirection.ascending,
+        );
+
+        final fooFinder = find.byKey(const Key('Foo'));
+        final barFinder = find.byKey(const Key('Bar'));
+        final bazFinder = find.byKey(const Key('Baz'));
+        final quxFinder = find.byKey(const Key('Qux'));
+        final snapFinder = find.byKey(const Key('Snap'));
+        final crackleFinder = find.byKey(const Key('Crackle'));
+
+        // Expected values returned through accessing Color.value property.
+        const color1Value = 4294111476;
+        const color2Value = 4294967295;
+        const rowSelectedColorValue = 4294967295;
+
+        await tester.pumpWidget(wrap(table));
+        await tester.pumpAndSettle();
+        expect(tree1.isExpanded, true);
+
+        expect(fooFinder, findsOneWidget);
+        expect(barFinder, findsOneWidget);
+        expect(bazFinder, findsOneWidget);
+        expect(quxFinder, findsOneWidget);
+        expect(snapFinder, findsOneWidget);
+        expect(crackleFinder, findsOneWidget);
+        TableRow fooRow = tester.widget(fooFinder);
+        TableRow barRow = tester.widget(barFinder);
+        final TableRow bazRow = tester.widget(bazFinder);
+        final TableRow quxRow = tester.widget(quxFinder);
+        final TableRow snapRow = tester.widget(snapFinder);
+        TableRow crackleRow = tester.widget(crackleFinder);
+
+        expect(fooRow.backgroundColor!.value, equals(color1Value));
+        expect(barRow.backgroundColor!.value, equals(color2Value));
+        expect(bazRow.backgroundColor!.value, equals(color1Value));
+        expect(quxRow.backgroundColor!.value, equals(color2Value));
+        expect(snapRow.backgroundColor!.value, equals(color1Value));
+        expect(crackleRow.backgroundColor!.value, equals(color2Value));
+
+        await tester.tap(barFinder);
+        await tester.pumpAndSettle();
+        expect(fooFinder, findsOneWidget);
+        expect(barFinder, findsOneWidget);
+        expect(bazFinder, findsNothing);
+        expect(quxFinder, findsNothing);
+        expect(snapFinder, findsNothing);
+        expect(crackleFinder, findsOneWidget);
+        fooRow = tester.widget(fooFinder);
+        barRow = tester.widget(barFinder);
+        crackleRow = tester.widget(crackleFinder);
+
+        expect(fooRow.backgroundColor!.value, equals(color1Value));
+        // [barRow] has the rowSelected color after being tapped.
+        expect(barRow.backgroundColor!.value, equals(rowSelectedColorValue));
+        // [crackleRow] has a different background color after collapsing previous
+        // row (Bar).
+        expect(crackleRow.backgroundColor!.value, equals(color1Value));
+      },
+    );
 
     test('fails when TreeColumn is not in column list', () {
       expect(

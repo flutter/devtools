@@ -16,7 +16,7 @@ void main() {
     late RasterStatsController controller;
     late MockServiceConnectionManager mockServiceManager;
 
-    setUp(() async {
+    setUp(() {
       mockServiceManager = MockServiceConnectionManager();
       when(mockServiceManager.renderFrameWithRasterStats).thenAnswer(
         (_) => Future.value(Response.parse(rasterStatsFromServiceJson)),
@@ -43,18 +43,20 @@ void main() {
       expect(rasterStats.totalRasterTime, isNot(equals(Duration.zero)));
     });
 
-    test('calling collectRasterStats sets null data for bad service response',
-        () async {
-      var rasterStats = controller.rasterStats.value;
-      expect(rasterStats, isNull);
+    test(
+      'calling collectRasterStats sets null data for bad service response',
+      () async {
+        var rasterStats = controller.rasterStats.value;
+        expect(rasterStats, isNull);
 
-      when(mockServiceManager.renderFrameWithRasterStats)
-          .thenAnswer((_) => throw Exception('something went wrong'));
-      await controller.collectRasterStats();
+        when(mockServiceManager.renderFrameWithRasterStats)
+            .thenAnswer((_) => throw Exception('something went wrong'));
+        await controller.collectRasterStats();
 
-      rasterStats = controller.rasterStats.value;
-      expect(rasterStats, isNull);
-    });
+        rasterStats = controller.rasterStats.value;
+        expect(rasterStats, isNull);
+      },
+    );
 
     test('calling clear nulls out raster stats', () async {
       await controller.collectRasterStats();

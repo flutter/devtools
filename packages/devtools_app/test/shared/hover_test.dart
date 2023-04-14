@@ -29,10 +29,12 @@ void main() {
     expect(wordForHover(5000, _textSpan), '');
   });
 
-  test('wordForHover returns an empty string if there is no underlying word',
-      () {
-    expect(wordForHover(5000, _textSpan), '');
-  });
+  test(
+    'wordForHover returns an empty string if there is no underlying word',
+    () {
+      expect(wordForHover(5000, _textSpan), '');
+    },
+  );
 
   test('wordForHover merges words linked with `.`', () {
     expect(wordForHover(200, _textSpan), 'foo');

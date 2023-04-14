@@ -1397,10 +1397,10 @@ class ScriptPopupMenu extends StatelessWidget {
       onSelected: (option) => option.onSelected(context, _controller),
       itemBuilder: (_) => [
         for (final menuOption in defaultScriptPopupMenuOptions)
-          menuOption.build(context),
+          menuOption.build(),
         for (final extensionMenuOption in devToolsExtensionPoints
             .buildExtraDebuggerScriptPopupMenuOptions())
-          extensionMenuOption.build(context),
+          extensionMenuOption.build(),
       ],
       child: Icon(
         Icons.more_vert,
@@ -1455,7 +1455,7 @@ class ScriptPopupMenuOption {
 
   final IconData? icon;
 
-  PopupMenuItem<ScriptPopupMenuOption> build(BuildContext context) {
+  PopupMenuItem<ScriptPopupMenuOption> build() {
     return PopupMenuItem<ScriptPopupMenuOption>(
       value: this,
       child: Row(

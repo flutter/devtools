@@ -43,7 +43,7 @@ void main() {
     late TimelineEventsController timelineEventsController;
     late LegacyEventProcessor processor;
 
-    setUp(() async {
+    setUp(() {
       data = PerformanceData();
       mockPerformanceController = createMockPerformanceControllerWithDefaults();
       timelineEventsController =
@@ -130,7 +130,7 @@ void main() {
         'pid': 94955,
         'ts': 118039650802,
         'ph': 'B',
-        'args': {}
+        'args': {},
       });
       final animatorBeginFrameEvent = testTraceEventWrapper({
         'name': 'Animator::BeginFrame',
@@ -139,13 +139,13 @@ void main() {
         'pid': 94955,
         'ts': 118039650802,
         'ph': 'B',
-        'args': {}
+        'args': {},
       });
       traceEvents = [
         vsyncEvent,
         animatorBeginFrameEvent,
         vsyncEvent,
-        animatorBeginFrameEvent
+        animatorBeginFrameEvent,
       ];
       traceEvents
           .addAll(goldenUiTraceEvents.getRange(2, goldenUiTraceEvents.length));
@@ -241,12 +241,13 @@ void main() {
     });
 
     test(
-        'processes trace with children with different ids does not throw assert',
-        () async {
-      // This test should complete without throwing an assert from
-      // `AsyncTimelineEvent.endAsyncEvent`.
-      await processor.processData(asyncEventsWithChildrenWithDifferentIds);
-    });
+      'processes trace with children with different ids does not throw assert',
+      () async {
+        // This test should complete without throwing an assert from
+        // `AsyncTimelineEvent.endAsyncEvent`.
+        await processor.processData(asyncEventsWithChildrenWithDifferentIds);
+      },
+    );
 
     test('inferEventType', () {
       expect(

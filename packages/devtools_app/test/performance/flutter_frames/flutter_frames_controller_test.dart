@@ -11,7 +11,7 @@ import 'package:mockito/mockito.dart';
 import '../../test_infra/test_data/performance.dart';
 
 // TODO(kenz): add better test coverage for [FlutterFramesController].
-void main() async {
+void main() {
   late MockPerformanceController mockPerformanceController;
   late MockTimelineEventsController mockTimelineEventsController;
   late FlutterFramesController framesController;
@@ -27,7 +27,7 @@ void main() async {
       framesController = FlutterFramesController(mockPerformanceController);
     });
 
-    test('can toggle frame recording', () async {
+    test('can toggle frame recording', () {
       expect(framesController.recordingFrames.value, isTrue);
       framesController.toggleRecordingFrames(false);
       expect(framesController.recordingFrames.value, isFalse);
@@ -35,7 +35,7 @@ void main() async {
       expect(framesController.recordingFrames.value, isTrue);
     });
 
-    test('can add frames', () async {
+    test('can add frames', () {
       expect(framesController.flutterFrames.value, isEmpty);
       framesController.addFrame(testFrame1);
       expect(
@@ -62,7 +62,7 @@ void main() async {
       );
     });
 
-    test('can toggle frame selection', () async {
+    test('can toggle frame selection', () {
       final frame0 = testFrame0.shallowCopy()
         ..setEventFlow(goldenUiTimelineEvent)
         ..setEventFlow(goldenRasterTimelineEvent);

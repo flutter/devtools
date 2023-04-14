@@ -19,51 +19,54 @@ void main() {
     expect(testApp.vmServiceUri, isNotNull);
   });
 
-  testWidgets('refreshing the timeline does not duplicate recorded events',
-      (tester) async {
-    await pumpAndConnectDevTools(tester, testApp);
+  testWidgets(
+    'refreshing the timeline does not duplicate recorded events',
+    (tester) async {
+      await pumpAndConnectDevTools(tester, testApp);
 
-    logStatus(
-      'Open the Performance screen and switch to the Timeline Events tab',
-    );
-
-    await switchToScreen(tester, ScreenMetaData.performance);
-    await tester.pump(safePumpDuration);
-
-    await tester.tap(find.widgetWithText(InkWell, 'Timeline Events'));
-    await tester.pumpAndSettle(longPumpDuration);
-
-    // Find the [PerformanceController] to access its data.
-    final performanceScreenFinder = find.byType(PerformanceScreenBody);
-    expect(performanceScreenFinder, findsOneWidget);
-    final screenState =
-        tester.state<PerformanceScreenBodyState>(performanceScreenFinder);
-    final performanceController = screenState.controller;
-    final initialEventsRecorded =
-        List.of(performanceController.data!.traceEvents, growable: false);
-
-    logStatus('toggling the Performance Overlay to trigger new Flutter frames');
-    final performanceOverlayFinder = find.text('Performance Overlay');
-    expect(performanceOverlayFinder, findsOneWidget);
-    await tester.tap(performanceOverlayFinder);
-    await tester.pump(safePumpDuration);
-
-    logStatus('Refreshing the timeline to load new events');
-    await tester.tap(find.byType(RefreshTimelineEventsButton));
-    await tester.pump(longPumpDuration);
-
-    logStatus('Verifying that we have not recorded duplicate events');
-    final newEventsRecorded = performanceController.data!.traceEvents
-        .sublist(initialEventsRecorded.length);
-    for (final newEvent in newEventsRecorded) {
-      final eventDuplicated = initialEventsRecorded.containsWhere(
-        (event) => collectionEquals(event, newEvent),
+      logStatus(
+        'Open the Performance screen and switch to the Timeline Events tab',
       );
-      expect(
-        eventDuplicated,
-        isFalse,
-        reason: 'Duplicate event recorded: $newEvent',
-      );
-    }
-  });
+
+      await switchToScreen(tester, ScreenMetaData.performance);
+      await tester.pump(safePumpDuration);
+
+      await tester.tap(find.widgetWithText(InkWell, 'Timeline Events'));
+      await tester.pumpAndSettle(longPumpDuration);
+
+      // Find the [PerformanceController] to access its data.
+      final performanceScreenFinder = find.byType(PerformanceScreenBody);
+      expect(performanceScreenFinder, findsOneWidget);
+      final screenState =
+          tester.state<PerformanceScreenBodyState>(performanceScreenFinder);
+      final performanceController = screenState.controller;
+      final initialEventsRecorded =
+          List.of(performanceController.data!.traceEvents, growable: false);
+
+      logStatus(
+          'toggling the Performance Overlay to trigger new Flutter frames');
+      final performanceOverlayFinder = find.text('Performance Overlay');
+      expect(performanceOverlayFinder, findsOneWidget);
+      await tester.tap(performanceOverlayFinder);
+      await tester.pump(safePumpDuration);
+
+      logStatus('Refreshing the timeline to load new events');
+      await tester.tap(find.byType(RefreshTimelineEventsButton));
+      await tester.pump(longPumpDuration);
+
+      logStatus('Verifying that we have not recorded duplicate events');
+      final newEventsRecorded = performanceController.data!.traceEvents
+          .sublist(initialEventsRecorded.length);
+      for (final newEvent in newEventsRecorded) {
+        final eventDuplicated = initialEventsRecorded.containsWhere(
+          (event) => collectionEquals(event, newEvent),
+        );
+        expect(
+          eventDuplicated,
+          isFalse,
+          reason: 'Duplicate event recorded: $newEvent',
+        );
+      }
+    },
+  );
 }

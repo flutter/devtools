@@ -1633,39 +1633,41 @@ void main() {
         setGlobal(IdeTheme, IdeTheme());
       });
 
-      testWidgets('updates controller when provided controller changes',
-          (WidgetTester tester) async {
-        final controller1 = TestProvidedController('id_1');
-        final controller2 = TestProvidedController('id_2');
-        final controllerNotifier =
-            ValueNotifier<TestProvidedController>(controller1);
+      testWidgets(
+        'updates controller when provided controller changes',
+        (WidgetTester tester) async {
+          final controller1 = TestProvidedController('id_1');
+          final controller2 = TestProvidedController('id_2');
+          final controllerNotifier =
+              ValueNotifier<TestProvidedController>(controller1);
 
-        final provider = ValueListenableBuilder<TestProvidedController>(
-          valueListenable: controllerNotifier,
-          builder: (context, controller, _) {
-            return Provider<TestProvidedController>.value(
-              value: controller,
-              child: Builder(
-                builder: (context) {
-                  return wrap(
-                    const TestStatefulWidget(),
-                  );
-                },
-              ),
-            );
-          },
-        );
+          final provider = ValueListenableBuilder<TestProvidedController>(
+            valueListenable: controllerNotifier,
+            builder: (context, controller, _) {
+              return Provider<TestProvidedController>.value(
+                value: controller,
+                child: Builder(
+                  builder: (context) {
+                    return wrap(
+                      const TestStatefulWidget(),
+                    );
+                  },
+                ),
+              );
+            },
+          );
 
-        await tester.pumpWidget(provider);
-        expect(find.text('Value 1'), findsOneWidget);
-        expect(find.text('Controller id_1'), findsOneWidget);
+          await tester.pumpWidget(provider);
+          expect(find.text('Value 1'), findsOneWidget);
+          expect(find.text('Controller id_1'), findsOneWidget);
 
-        controllerNotifier.value = controller2;
-        await tester.pumpAndSettle();
+          controllerNotifier.value = controller2;
+          await tester.pumpAndSettle();
 
-        expect(find.text('Value 2'), findsOneWidget);
-        expect(find.text('Controller id_2'), findsOneWidget);
-      });
+          expect(find.text('Value 2'), findsOneWidget);
+          expect(find.text('Controller id_2'), findsOneWidget);
+        },
+      );
     });
 
     group('subtractMaps', () {
