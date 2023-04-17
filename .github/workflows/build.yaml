@@ -22,7 +22,8 @@ jobs:
       latest_flutter_candidate: ${{ steps.flutter-candidate.outputs.FLUTTER_CANDIDATE }}
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest]
+        # os: [ubuntu-latest, macos-latest]
+        os: [macos-latest]
     runs-on: ${{ matrix.os }}
     steps:
       - name: git clone devtools
@@ -69,26 +70,26 @@ jobs:
           ./flutter-sdk/bin/flutter doctor
           ./flutter-sdk/bin/cache/dart-sdk/bin/dart --disable-analytics
 
-  main:
-    name: main
-    needs: flutter-prep
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-    steps:
-      - name: git clone
-        uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab
-      - name: Load Cached Flutter SDK
-        uses: actions/cache@88522ab9f39a2ea568f7027eddc7d8d8bc9d59c8
-        with:
-          path: |
-            ./flutter-sdk
-          key: flutter-sdk-${{ runner.os }}-${{ needs.flutter-prep.outputs.latest_flutter_candidate }}
+  # main:
+  #   name: main
+  #   needs: flutter-prep
+  #   runs-on: ubuntu-latest
+  #   strategy:
+  #     fail-fast: false
+  #   steps:
+  #     - name: git clone
+  #       uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab
+  #     - name: Load Cached Flutter SDK
+  #       uses: actions/cache@88522ab9f39a2ea568f7027eddc7d8d8bc9d59c8
+  #       with:
+  #         path: |
+  #           ./flutter-sdk
+  #         key: flutter-sdk-${{ runner.os }}-${{ needs.flutter-prep.outputs.latest_flutter_candidate }}
 
-      - name: tool/bots.sh
-        env:
-          BOT: main
-        run: ./tool/bots.sh
+  #     - name: tool/bots.sh
+  #       env:
+  #         BOT: main
+  #       run: ./tool/bots.sh
 
   # test:
   #   name: ${{ matrix.bot }}
