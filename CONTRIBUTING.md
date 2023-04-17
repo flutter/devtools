@@ -26,7 +26,6 @@ You can do this online, and it only takes a minute.
 - Commit work to your branch: `git commit -m “description”`
 - Push to your branch: `git push origin myBranch`
 - Navigate to the Pull Requests tab in the main [DevTools repo](https://github.com/flutter/devtools). You should see a popup to create a pull request from the branch in your cloned repo to DevTools master. Create a pull request.
-- If you don't have DCM Teams activated, there are some additional checks that will be run only on the CI. If the pipeline named "Dart Code Metrics" fails after your pull request is submitted, open it and address all the issues. All issues will contain the line and the rule that triggered the issue to help you fix them.
 
 ### Keeping your fork in-sync
 
