@@ -30,10 +30,18 @@ jobs:
           sudo apt-get update
           sudo apt-get install dcm
           sudo chmod +x /usr/bin/dcm
-      - name: Checkout repository
-        uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b
       - name: Setup Dart SDK
         uses: dart-lang/setup-dart@6a218f2413a3e78e9087f638a238f6b40893203d
+      - name: Checkout repository
+        uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b
+      - name: Upgrade devtools_app dependencies
+        run: flutter pub upgrade
+        working-directory: packages/devtools_app
+      - name: Upgrade devtools_shared dependencies
+        run: flutter pub upgrade
+        working-directory: packages/devtools_shared
+      - name: Upgrade devtools_test dependencies
+        run: flutter pub upgrade
+        working-directory: packages/devtools_test
       - name: Run DCM on root
-        run: |
-          dcm analyze --ci-key="${{ secrets.DCM_CI_KEY }}" --email="${{ secrets.DCM_EMAIL }}" .
+        run: dcm analyze --ci-key="${{ secrets.DCM_CI_KEY }}" --email="${{ secrets.DCM_EMAIL }}" .
