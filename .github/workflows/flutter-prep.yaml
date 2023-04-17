@@ -8,7 +8,7 @@ on:
   workflow_call
 
 jobs:
-  flutter-prep:
+  reusable-flutter-prep:
     name: ${{ matrix.os }} Flutter Prep
     outputs:
       latest_flutter_candidate: ${{ steps.flutter-candidate.outputs.FLUTTER_CANDIDATE }}

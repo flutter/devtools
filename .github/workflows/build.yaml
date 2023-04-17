@@ -16,8 +16,8 @@ permissions: read-all
 env:
   GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 jobs:
-  call-flutter-prep:
-    uses: ./flutter-prep.yaml
+  flutter-prep:
+    uses: ./.github/workflows/flutter-prep.yaml
 
   main:
     name: main
