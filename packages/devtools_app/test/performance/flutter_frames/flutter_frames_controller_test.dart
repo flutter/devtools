@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 @TestOn('vm')
-import 'dart:async';
 
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_test/devtools_test.dart';
@@ -64,7 +63,7 @@ void main() {
       );
     });
 
-    test('can toggle frame selection', () {
+    test('can toggle frame selection', () async {
       final frame0 = testFrame0.shallowCopy()
         ..setEventFlow(goldenUiTimelineEvent)
         ..setEventFlow(goldenRasterTimelineEvent);
@@ -76,6 +75,7 @@ void main() {
 
       bool timelineControllerHandlerCalled = false;
       when(
+        // ignore: discarded_futures, by design
         mockTimelineEventsController.handleSelectedFrame(any),
       ).thenAnswer((_) {
         timelineControllerHandlerCalled = true;
