@@ -131,13 +131,12 @@ class _PerfettoViewController extends DisposableController
 
     html.window.addEventListener('message', _handleMessage);
 
-    if (isExternalBuild) {
-      unawaited(_loadStyle(preferences.darkModeTheme.value));
-      addAutoDisposeListener(preferences.darkModeTheme, () async {
-        await _loadStyle(preferences.darkModeTheme.value);
-        reloadCssForThemeChange();
-      });
-    }
+    unawaited(_loadStyle(preferences.darkModeTheme.value));
+    addAutoDisposeListener(preferences.darkModeTheme, () async {
+      await _loadStyle(preferences.darkModeTheme.value);
+      reloadCssForThemeChange();
+    });
+
     autoDisposeStreamSubscription(
       perfettoController.perfettoPostEventStream.stream.listen((event) async {
         if (event == EmbeddedPerfettoEvent.showHelp.event) {
@@ -280,7 +279,6 @@ class _PerfettoViewController extends DisposableController
   }
 
   Future<void> _pingDevToolsThemeHandlerUntilReady() async {
-    if (!isExternalBuild) return;
     if (!_devtoolsThemeHandlerReady.isCompleted) {
       _pollForThemeHandlerReady =
           Timer.periodic(const Duration(milliseconds: 200), (_) {

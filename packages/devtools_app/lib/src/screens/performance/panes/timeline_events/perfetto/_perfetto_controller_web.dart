@@ -118,13 +118,14 @@ class PerfettoControllerImpl extends PerfettoController {
     if (_debugUseLocalPerfetto) {
       return _debugPerfettoUrl;
     }
-    final assetsPath = assetUrlHelper(
+    final basePath = assetUrlHelper(
       origin: html.window.location.origin,
       path: html.window.location.pathname ?? '',
     );
-    final baseUrl = isExternalBuild
-        ? '$assetsPath/assets/packages/perfetto_ui_compiled/dist/index.html'
-        : 'https://ui.perfetto.dev';
+    // ignore: undefined_prefixed_name
+    final indexFilePath = ui.webOnlyAssetManager
+        .getAssetUrl(devToolsExtensionPoints.perfettoIndexLocation);
+    final baseUrl = '$basePath/$indexFilePath';
     return '$baseUrl$_embeddedModeQuery';
   }
 
