@@ -3,7 +3,7 @@
 # NOTE: DCM usage in DevTools is currently experimental! 
 
 # The DCM_CI_KEY and DCM_EMAIL secrets are set in the admin settings page
-# of the flutter/devtools repo. They can be found at: go/dart-devtools-dcm-key
+# of the flutter/devtools repo. They can be found at: go/dash-devexp-dcm-keys
 # These are associated with a trial license of DCM, and will need to be changed
 # if we decide to purchase an actual license. The trial license will expire on
 # April 11, 2024.
