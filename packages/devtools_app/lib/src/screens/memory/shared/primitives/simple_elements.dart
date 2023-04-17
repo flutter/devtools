@@ -15,10 +15,9 @@ const _memoryDocUrl =
 
 enum DocLinks {
   chart(_memoryDocUrl, 'expandable-chart'),
-  profile(_memoryDocUrl, 'profile-tab'),
-  diff(_memoryDocUrl, 'diff-tab'),
-  trace(_memoryDocUrl, 'trace-tab'),
-  ;
+  profile(_memoryDocUrl, 'profile-memory-tab'),
+  diff(_memoryDocUrl, 'diff-snapshots-tab'),
+  trace(_memoryDocUrl, 'trace-instances-tab');
 
   const DocLinks(this.url, this.hash);
 
