@@ -171,6 +171,13 @@ jobs:
           path: |
             ./flutter-sdk
           key: flutter-sdk-${{ runner.os }}-${{ needs.flutter-prep.outputs.latest_flutter_candidate }}
+      - name: Start Chromedriver
+        uses: actions/checkout@v2
+        uses: nanasess/setup-chromedriver@v2
+        # with:
+        #   # Optional: do not specify to match Chrome's version
+        #   chromedriver-version: '88.0.4324.96'
+        # run: chromedriver --port=4444
       - name: tool/bots.sh
         env:
           BOT: ${{ matrix.bot }}
