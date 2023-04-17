@@ -134,7 +134,7 @@ class StateUpdateDialog extends StatelessWidget {
             if (helpBuilder != null) ...[
               const SizedBox(height: defaultSpacing),
               helpBuilder!.call(context),
-            ]
+            ],
           ],
         ),
       ),

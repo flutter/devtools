@@ -36,6 +36,7 @@ Future<void> runFlutterIntegrationTest(
         testApp = TestFlutterApp(appPath: testFileArgs.appPath);
         await testApp.start();
       } catch (e) {
+        // ignore: avoid-throw-in-catch-block, by design
         throw Exception('Error starting test app: $e');
       }
       testAppUri = testApp.vmServiceUri.toString();
@@ -50,6 +51,7 @@ Future<void> runFlutterIntegrationTest(
   try {
     await chromedriver.start();
   } catch (e) {
+    // ignore: avoid-throw-in-catch-block, by design
     throw Exception('Error starting chromedriver: $e');
   }
 

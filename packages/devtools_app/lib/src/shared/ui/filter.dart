@@ -193,7 +193,7 @@ class _FilterDialogState<T> extends State<FilterDialog<T>>
             if (widget.queryInstructions != null) ...[
               DialogHelpText(helpText: widget.queryInstructions!),
               const SizedBox(height: defaultSpacing),
-            ]
+            ],
           ],
           for (final toggleFilter in widget.controller._toggleFilters) ...[
             ToggleFilterElement(filter: toggleFilter),

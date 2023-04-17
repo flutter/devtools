@@ -544,7 +544,7 @@ class TimelineEventsController extends PerformanceFeatureController
     _primeThreadIds(uiThreadId: uiThreadId, rasterThreadId: rasterThreadId);
     await processAllTraceEvents();
 
-    await legacyController.setOfflineData(offlineData);
+    legacyController.setOfflineData(offlineData);
 
     if (offlineData.selectedFrame != null && !useLegacyTraceViewer.value) {
       perfettoController

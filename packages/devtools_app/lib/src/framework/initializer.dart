@@ -191,7 +191,7 @@ class _InitializerState extends State<Initializer>
     final args = <String, String?>{
       'uri': null,
       'screen': offlineController
-          .offlineDataJson[DevToolsExportKeys.activeScreenId.name] as String
+          .offlineDataJson[DevToolsExportKeys.activeScreenId.name] as String,
     };
     final routerDelegate = DevToolsRouterDelegate.of(context);
     Router.neglect(

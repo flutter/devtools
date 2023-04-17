@@ -165,7 +165,9 @@ dart_code_metrics:
 #    - avoid-non-null-assertion
 #    - avoid-passing-async-when-sync-expected TODO(jacobr): consider re-enabliing.
     - avoid-redundant-async
-    - avoid-throw-in-catch-block
+    - avoid-throw-in-catch-block:
+        exclude:
+          - '*test.dart'
 
 #    - avoid-top-level-members-in-tests Doesn't seem to match our style.
     - avoid-unnecessary-type-assertions

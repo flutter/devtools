@@ -28,7 +28,6 @@ import 'flutter_frame_model.dart';
 import 'flutter_frames_controller.dart';
 
 // Turn this flag on to see when flutter frames are linked with timeline events.
-// ignore: avoid-global-state
 bool debugFrames = false;
 
 class FlutterFramesChart extends StatelessWidget {
@@ -613,12 +612,12 @@ class FlutterFrameTooltip extends StatelessWidget {
   Widget build(BuildContext context) {
     return HoverCardTooltip.sync(
       enabled: () => true,
-      generateHoverCardData: (_) => _buildCardData(context),
+      generateHoverCardData: (_) => _buildCardData(),
       child: child,
     );
   }
 
-  HoverCardData _buildCardData(BuildContext context) {
+  HoverCardData _buildCardData() {
     final uiText = 'UI: ${durationText(
       frame.buildTime,
       unit: DurationDisplayUnit.milliseconds,

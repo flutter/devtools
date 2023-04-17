@@ -12,39 +12,41 @@ import 'package:integration_test/integration_test.dart';
 void main() {
   final binding = IntegrationTestWidgetsFlutterBinding.ensureInitialized();
 
-  testWidgets('Perfetto trace viewer loads data and scrolls for Flutter frames',
-      (tester) async {
-    await pumpDevTools(tester);
-    await loadSampleData(tester, performanceFileName);
+  testWidgets(
+    'Perfetto trace viewer loads data and scrolls for Flutter frames',
+    (tester) async {
+      await pumpDevTools(tester);
+      await loadSampleData(tester, performanceFileName);
 
-    await tester.tap(find.widgetWithText(InkWell, 'Timeline Events'));
-    await tester.pumpAndSettle(longPumpDuration);
+      await tester.tap(find.widgetWithText(InkWell, 'Timeline Events'));
+      await tester.pumpAndSettle(longPumpDuration);
 
-    logStatus('verify HtmlElementView has loaded');
-    expect(find.byType(Perfetto), findsOneWidget);
-    expect(find.byType(HtmlElementView), findsOneWidget);
+      logStatus('verify HtmlElementView has loaded');
+      expect(find.byType(Perfetto), findsOneWidget);
+      expect(find.byType(HtmlElementView), findsOneWidget);
 
-    await verifyScreenshot(binding, 'perfetto_initial_load');
+      await verifyScreenshot(binding, 'perfetto_initial_load');
 
-    logStatus('select a Flutter Frame');
-    await tester.tap(find.byType(FlutterFramesChartItem).last);
-    await tester.pumpAndSettle(safePumpDuration);
+      logStatus('select a Flutter Frame');
+      await tester.tap(find.byType(FlutterFramesChartItem).last);
+      await tester.pumpAndSettle(safePumpDuration);
 
-    await verifyScreenshot(binding, 'perfetto_frame_selection');
+      await verifyScreenshot(binding, 'perfetto_frame_selection');
 
-    logStatus(
-      'switch to a different feature tab and back to Timeline Events',
-    );
-    await tester.tap(find.widgetWithText(InkWell, 'Frame Analysis'));
-    await tester.pump(safePumpDuration);
+      logStatus(
+        'switch to a different feature tab and back to Timeline Events',
+      );
+      await tester.tap(find.widgetWithText(InkWell, 'Frame Analysis'));
+      await tester.pump(safePumpDuration);
 
-    await tester.tap(find.widgetWithText(InkWell, 'Timeline Events'));
-    await tester.pump(safePumpDuration);
+      await tester.tap(find.widgetWithText(InkWell, 'Timeline Events'));
+      await tester.pump(safePumpDuration);
 
-    await verifyScreenshot(
-      binding,
-      'perfetto_frame_selection_2',
-      lastScreenshot: true,
-    );
-  });
+      await verifyScreenshot(
+        binding,
+        'perfetto_frame_selection_2',
+        lastScreenshot: true,
+      );
+    },
+  );
 }

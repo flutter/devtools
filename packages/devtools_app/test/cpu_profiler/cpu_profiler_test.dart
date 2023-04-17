@@ -835,41 +835,43 @@ void main() {
       expect(find.text('Sampling depth: 128'), findsOneWidget);
     });
 
-    testWidgets('displays correctly for invalid data',
-        (WidgetTester tester) async {
-      final metadata = CpuProfileMetaData(
-        sampleCount: 100,
-        samplePeriod: 0,
-        stackDepth: 128,
-        time: TimeRange()
-          ..start = const Duration()
-          ..end = const Duration(microseconds: 10000),
-      );
-      await tester.pumpWidget(wrap(CpuProfileStats(metadata: metadata)));
-      await tester.pumpAndSettle();
+    testWidgets(
+      'displays correctly for invalid data',
+      (WidgetTester tester) async {
+        final metadata = CpuProfileMetaData(
+          sampleCount: 100,
+          samplePeriod: 0,
+          stackDepth: 128,
+          time: TimeRange()
+            ..start = const Duration()
+            ..end = const Duration(microseconds: 10000),
+        );
+        await tester.pumpWidget(wrap(CpuProfileStats(metadata: metadata)));
+        await tester.pumpAndSettle();
 
-      expect(
-        find.byTooltip('The duration of time spanned by the CPU samples'),
-        findsOneWidget,
-      );
-      expect(
-        find.byTooltip('The number of samples included in the profile'),
-        findsOneWidget,
-      );
-      expect(
-        find.byTooltip(
-          'The frequency at which samples are collected by the profiler',
-        ),
-        findsOneWidget,
-      );
-      expect(
-        find.byTooltip('The maximum stack trace depth of a collected sample'),
-        findsOneWidget,
-      );
-      expect(find.text('Duration: 10.0 ms'), findsOneWidget);
-      expect(find.text('Sample count: 100'), findsOneWidget);
-      expect(find.text('Sampling rate: -- Hz'), findsOneWidget);
-      expect(find.text('Sampling depth: 128'), findsOneWidget);
-    });
+        expect(
+          find.byTooltip('The duration of time spanned by the CPU samples'),
+          findsOneWidget,
+        );
+        expect(
+          find.byTooltip('The number of samples included in the profile'),
+          findsOneWidget,
+        );
+        expect(
+          find.byTooltip(
+            'The frequency at which samples are collected by the profiler',
+          ),
+          findsOneWidget,
+        );
+        expect(
+          find.byTooltip('The maximum stack trace depth of a collected sample'),
+          findsOneWidget,
+        );
+        expect(find.text('Duration: 10.0 ms'), findsOneWidget);
+        expect(find.text('Sample count: 100'), findsOneWidget);
+        expect(find.text('Sampling rate: -- Hz'), findsOneWidget);
+        expect(find.text('Sampling depth: 128'), findsOneWidget);
+      },
+    );
   });
 }

@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 @TestOn('vm')
+
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -11,7 +12,7 @@ import 'package:mockito/mockito.dart';
 import '../../test_infra/test_data/performance.dart';
 
 // TODO(kenz): add better test coverage for [FlutterFramesController].
-void main() async {
+void main() {
   late MockPerformanceController mockPerformanceController;
   late MockTimelineEventsController mockTimelineEventsController;
   late FlutterFramesController framesController;
@@ -27,7 +28,7 @@ void main() async {
       framesController = FlutterFramesController(mockPerformanceController);
     });
 
-    test('can toggle frame recording', () async {
+    test('can toggle frame recording', () {
       expect(framesController.recordingFrames.value, isTrue);
       framesController.toggleRecordingFrames(false);
       expect(framesController.recordingFrames.value, isFalse);
@@ -35,7 +36,7 @@ void main() async {
       expect(framesController.recordingFrames.value, isTrue);
     });
 
-    test('can add frames', () async {
+    test('can add frames', () {
       expect(framesController.flutterFrames.value, isEmpty);
       framesController.addFrame(testFrame1);
       expect(
@@ -74,6 +75,7 @@ void main() async {
 
       bool timelineControllerHandlerCalled = false;
       when(
+        // ignore: discarded_futures, by design
         mockTimelineEventsController.handleSelectedFrame(any),
       ).thenAnswer((_) {
         timelineControllerHandlerCalled = true;

@@ -96,7 +96,7 @@ void main() {
   }
 
   group('AppSizeScreen', () {
-    setUp(() async {
+    setUp(() {
       screen = AppSizeScreen();
       appSizeController = AppSizeTestController();
       fakeServiceManager = FakeServiceManager();
@@ -206,7 +206,7 @@ void main() {
   });
 
   group('SnapshotView', () {
-    setUp(() async {
+    setUp(() {
       screen = AppSizeScreen();
       appSizeController = AppSizeTestController();
     });
@@ -286,7 +286,7 @@ void main() {
   });
 
   group('DiffView', () {
-    setUp(() async {
+    setUp(() {
       screen = AppSizeScreen();
       appSizeController = AppSizeTestController();
     });
@@ -433,7 +433,7 @@ void main() {
   });
 
   group('AppSizeController', () {
-    setUp(() async {
+    setUp(() {
       screen = AppSizeScreen();
       appSizeController = AppSizeTestController();
     });
