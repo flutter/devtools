@@ -56,6 +56,9 @@ const _memoryDocUrl =
 const _consoleDocUrl =
     'https://docs.flutter.dev/development/tools/devtools/console';
 
+/// Some links to documentation.
+///
+/// The enum is test covered to catch broken links.
 enum DocLinks {
   chart(_memoryDocUrl, 'expandable-chart'),
   profile(_memoryDocUrl, 'profile-memory-tab'),
