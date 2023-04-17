@@ -17,8 +17,8 @@ env:
   GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 jobs:
   call-flutter-prep:
-    uses: ./.github/workflows/flutter-prep.yaml
-    
+    uses: ./flutter-prep.yaml
+
   main:
     name: main
     needs: flutter-prep
