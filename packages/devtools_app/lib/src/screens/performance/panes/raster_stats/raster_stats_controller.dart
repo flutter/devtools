@@ -54,7 +54,7 @@ class RasterStatsController extends PerformanceFeatureController {
   }
 
   @override
-  Future<void> handleSelectedFrame(FlutterFrame frame) async {
+  void handleSelectedFrame(FlutterFrame frame) {
     // TODO(kenz): show raster stats for the selected frame, if available.
   }
 
