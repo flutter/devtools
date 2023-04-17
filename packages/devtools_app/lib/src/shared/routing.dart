@@ -50,6 +50,9 @@ class DevToolsRouteInformationParser
   Future<DevToolsRouteConfiguration> parseRouteInformation(
     RouteInformation routeInformation,
   ) {
+    // TODO(chunhtai): Use routeInformation.uri once supported.
+    // https://github.com/flutter/devtools/issues/5651.
+    // ignore: unnecessary_non_null_assertion
     var uri = Uri.parse(routeInformation.location!);
 
     if (_forceVmServiceUri != null) {
