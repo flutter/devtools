@@ -183,7 +183,7 @@ class FlutterFramesController extends PerformanceFeatureController {
   }
 
   @override
-  void handleSelectedFrame(FlutterFrame frame) {
+  Future<void> handleSelectedFrame(FlutterFrame frame) async {
     if (data == null) {
       return;
     }

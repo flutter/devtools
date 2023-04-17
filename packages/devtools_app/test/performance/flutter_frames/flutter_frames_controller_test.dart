@@ -76,10 +76,10 @@ void main() {
 
       bool timelineControllerHandlerCalled = false;
       when(
-        unawaited(mockTimelineEventsController.handleSelectedFrame(any)),
+        mockTimelineEventsController.handleSelectedFrame(any),
       ).thenAnswer((_) {
         timelineControllerHandlerCalled = true;
-        return unawaited(Future.value());
+        return Future.value();
       });
 
       expect(timelineControllerHandlerCalled, isFalse);

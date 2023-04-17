@@ -297,5 +297,5 @@ abstract class PerformanceFeatureController extends DisposableController {
 
   FutureOr<void> clearData();
 
-  void handleSelectedFrame(FlutterFrame frame);
+  Future<void> handleSelectedFrame(FlutterFrame frame);
 }
