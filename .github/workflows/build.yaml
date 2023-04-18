@@ -19,7 +19,7 @@ jobs:
   flutter-prep:
     uses: ./.github/workflows/flutter-prep.yaml
     with:
-      os-name: "macos"
+      os-name: macos
 
   main:
     name: main
