@@ -18,7 +18,7 @@ jobs:
       latest_flutter_candidate: ${{ steps.flutter-candidate.outputs.FLUTTER_CANDIDATE }}
     strategy:
       matrix:
-        os: ${{ (inputs.os-name == macos && fromJSON('[ "macos-latest"]')) || (inputs.os-name == ubuntu && fromJSON('[ "ubuntu-latest"]')) || fromJSON('["ubuntu-latest", "macos-latest"]') }}
+        os: ${{ (inputs.os-name == 'macos' && fromJSON('[ "macos-latest"]')) || (inputs.os-name == 'ubuntu' && fromJSON('[ "ubuntu-latest"]')) || fromJSON('["ubuntu-latest", "macos-latest"]') }}
     runs-on: ${{ matrix.os }}
     steps:
       - name: git clone devtools
