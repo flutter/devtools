@@ -18,8 +18,13 @@ on:
     types: [opened, synchronize, reopened]
 
 jobs:
+  jobs:
+    flutter-prep:
+      uses: ./.github/workflows/flutter-prep.yaml
+      with: ubuntu
   dcm:
     name: Dart Code Metrics
+    needs: flutter-prep
     runs-on: ubuntu-latest
     steps:
       - name: Install DCM
@@ -32,8 +37,6 @@ jobs:
           sudo chmod +x /usr/bin/dcm
       - name: Setup Dart SDK
         uses: dart-lang/setup-dart@6a218f2413a3e78e9087f638a238f6b40893203d
-      - name: Checkout repository
-        uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b
       - name: Upgrade devtools_app dependencies
         run: flutter pub upgrade
         working-directory: packages/devtools_app
