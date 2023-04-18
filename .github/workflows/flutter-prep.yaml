@@ -5,7 +5,11 @@
 name: Flutter SDK prep
 
 on:
-  workflow_call
+  workflow_call:
+    inputs:
+      os-name:
+        description: 'The OS to run against, either "macos" or "ubuntu". If none is provided, will run against both.'
+        type: string
 
 jobs:
   reusable-flutter-prep:
@@ -14,7 +18,7 @@ jobs:
       latest_flutter_candidate: ${{ steps.flutter-candidate.outputs.FLUTTER_CANDIDATE }}
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest]
+        os: ${{ (inputs.os-name == "macos" && fromJSON('[ "macos-latest"]')) || (inputs.os-name == "ubuntu" && fromJSON('[ "ubuntu-latest"]')) || fromJSON('["ubuntu-latest", "macos-latest"]') }}
     runs-on: ${{ matrix.os }}
     steps:
       - name: git clone devtools
