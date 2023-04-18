@@ -8,7 +8,7 @@ on:
   workflow_call:
     inputs:
       os-name:
-        description: 'The OS to run against, either "macos" or "ubuntu". If none is provided, will run against both.'
+        description: 'The OS to run against, either "macos" or "ubuntu". If neither is provided, will run against both.'
         type: string
 
 jobs:
