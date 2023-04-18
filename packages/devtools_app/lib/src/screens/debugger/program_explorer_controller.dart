@@ -348,7 +348,7 @@ class ProgramExplorerController extends DisposableController
       FieldRef(:final location?) ||
       FuncRef(:final location?) =>
         location.script,
-      Code(:final function) => function?.location?.script,
+      Code(:final function?) => function.location?.script,
       ScriptRef() => object,
       _ => null,
     };
