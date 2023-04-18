@@ -20,7 +20,8 @@ on:
 jobs:
   flutter-prep:
     uses: ./.github/workflows/flutter-prep.yaml
-    with: ubuntu
+    with:
+      os-name: ubuntu
   dcm:
     name: Dart Code Metrics
     needs: flutter-prep
