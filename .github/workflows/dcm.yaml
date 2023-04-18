@@ -18,10 +18,9 @@ on:
     types: [opened, synchronize, reopened]
 
 jobs:
-  jobs:
-    flutter-prep:
-      uses: ./.github/workflows/flutter-prep.yaml
-      with: ubuntu
+  flutter-prep:
+    uses: ./.github/workflows/flutter-prep.yaml
+    with: ubuntu
   dcm:
     name: Dart Code Metrics
     needs: flutter-prep
