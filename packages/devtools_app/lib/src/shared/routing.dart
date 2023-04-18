@@ -52,6 +52,8 @@ class DevToolsRouteInformationParser
   ) {
     // TODO(chunhtai): Use routeInformation.uri once supported.
     // https://github.com/flutter/devtools/issues/5651.
+    // The ignore unblocks the internal roll of
+    // https://github.com/flutter/flutter/pull/119968.
     // ignore: unnecessary_non_null_assertion
     var uri = Uri.parse(routeInformation.location!);
 
