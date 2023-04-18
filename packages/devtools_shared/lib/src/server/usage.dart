@@ -177,8 +177,10 @@ abstract class PersistentProperties {
 
   final String name;
 
+  // ignore: avoid-dynamic, dynamic by design.
   dynamic operator [](String key);
 
+  // ignore: avoid-dynamic, dynamic by design.
   void operator []=(String key, dynamic value);
 
   /// Re-read settings from the backing store.

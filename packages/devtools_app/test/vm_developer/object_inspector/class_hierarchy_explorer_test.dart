@@ -63,7 +63,7 @@ void main() {
         .buildHierarchy(classes);
   });
 
-  test('Correctly builds class hierarchy', () async {
+  test('Correctly builds class hierarchy', () {
     final controller = objectInspectorViewController.classHierarchyController;
 
     // The resulting class hierarchy should look like this:
@@ -95,32 +95,35 @@ void main() {
     expect(superNode.children.first.isExpandable, false);
   });
 
-  testWidgetsWithWindowSize('Correctly renders class hierarchy', windowSize,
-      (tester) async {
-    final controller = objectInspectorViewController.classHierarchyController;
-    await tester.pumpWidget(
-      wrapWithControllers(
-        ClassHierarchyExplorer(
-          controller: objectInspectorViewController,
+  testWidgetsWithWindowSize(
+    'Correctly renders class hierarchy',
+    windowSize,
+    (tester) async {
+      final controller = objectInspectorViewController.classHierarchyController;
+      await tester.pumpWidget(
+        wrapWithControllers(
+          ClassHierarchyExplorer(
+            controller: objectInspectorViewController,
+          ),
         ),
-      ),
-    );
+      );
 
-    expect(find.text('Object'), findsOneWidget);
+      expect(find.text('Object'), findsOneWidget);
 
-    controller.selectedIsolateClassHierarchy.value.first.expandCascading();
-    (controller.selectedIsolateClassHierarchy as ValueNotifier)
-        .notifyListeners();
-    await tester.pumpAndSettle();
+      controller.selectedIsolateClassHierarchy.value.first.expandCascading();
+      (controller.selectedIsolateClassHierarchy as ValueNotifier)
+          .notifyListeners();
+      await tester.pumpAndSettle();
 
-    expect(find.text('Object'), findsOneWidget);
-    expect(find.text('Super'), findsOneWidget);
-    expect(find.text('Sub'), findsOneWidget);
-    expect(find.text('NoSub'), findsOneWidget);
+      expect(find.text('Object'), findsOneWidget);
+      expect(find.text('Super'), findsOneWidget);
+      expect(find.text('Sub'), findsOneWidget);
+      expect(find.text('NoSub'), findsOneWidget);
 
-    expect(
-      find.byType(VmServiceObjectLink),
-      findsNWidgets(classes.length),
-    );
-  });
+      expect(
+        find.byType(VmServiceObjectLink),
+        findsNWidgets(classes.length),
+      );
+    },
+  );
 }

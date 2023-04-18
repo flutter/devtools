@@ -38,7 +38,7 @@ void main() {
         '_objectPool': {
           'id': 'pool-id',
           'length': 0,
-        }
+        },
       };
       final offset = pow(2, 20) as int;
       const addressCount = 1000;
@@ -48,7 +48,7 @@ void main() {
           'unknown',
           'noop',
           null,
-        ]
+        ],
       ]);
 
       final ticksTable = CpuProfilerTicksTable.parse(
@@ -99,49 +99,51 @@ void main() {
     }
 
     testWidgetsWithWindowSize(
-        'displays CodeTable instructions in order of increasing address',
-        windowSize, (WidgetTester tester) async {
-      await tester.pumpWidget(
-        wrap(
-          VmCodeDisplay(
-            code: mockCodeObject,
-            controller: ObjectInspectorViewController(),
+      'displays CodeTable instructions in order of increasing address',
+      windowSize,
+      (WidgetTester tester) async {
+        await tester.pumpWidget(
+          wrap(
+            VmCodeDisplay(
+              code: mockCodeObject,
+              controller: ObjectInspectorViewController(),
+            ),
           ),
-        ),
-      );
+        );
 
-      expect(find.byType(CodeTable), findsOneWidget);
-      final FlatTableState<Instruction> state =
-          tester.state(find.byType(FlatTable<Instruction>));
+        expect(find.byType(CodeTable), findsOneWidget);
+        final FlatTableState<Instruction> state =
+            tester.state(find.byType(FlatTable<Instruction>));
 
-      // Check that the profiler columns render ticks correctly.
-      final profilerColumns = state.tableController.columns.where(
-        (c) => c.title == 'Total %' || c.title == 'Self %',
-      );
-      expect(profilerColumns.length, 2);
-      for (final profilerColumn in profilerColumns) {
-        for (final instr in state.tableController.tableData.value.data) {
-          expect(profilerColumn.getDisplayValue(instr), '0.10% (1)');
+        // Check that the profiler columns render ticks correctly.
+        final profilerColumns = state.tableController.columns.where(
+          (c) => c.title == 'Total %' || c.title == 'Self %',
+        );
+        expect(profilerColumns.length, 2);
+        for (final profilerColumn in profilerColumns) {
+          for (final instr in state.tableController.tableData.value.data) {
+            expect(profilerColumn.getDisplayValue(instr), '0.10% (1)');
+          }
         }
-      }
 
-      // Ensure ordering is correct.
-      verifyAddressOrder(
-        state.tableController.tableData.value.data,
-        mockCodeObject.ticksTable,
-      );
-
-      final columns = state.widget.columns;
-
-      // Make sure the table can't be sorted differently.
-      for (final column in columns) {
-        await tester.tap(find.text(column.title));
-        await tester.pumpAndSettle();
+        // Ensure ordering is correct.
         verifyAddressOrder(
           state.tableController.tableData.value.data,
           mockCodeObject.ticksTable,
         );
-      }
-    });
+
+        final columns = state.widget.columns;
+
+        // Make sure the table can't be sorted differently.
+        for (final column in columns) {
+          await tester.tap(find.text(column.title));
+          await tester.pumpAndSettle();
+          verifyAddressOrder(
+            state.tableController.tableData.value.data,
+            mockCodeObject.ticksTable,
+          );
+        }
+      },
+    );
   });
 }

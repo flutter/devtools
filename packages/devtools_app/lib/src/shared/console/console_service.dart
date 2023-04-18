@@ -163,8 +163,6 @@ class ConsoleService extends Disposer {
     return item.variable;
   }
 
-  void appendMessage(String text) {}
-
   /// Append to the stdout / stderr buffer.
   void appendStdio(String text) {
     const int kMaxLogItemsLowerBound = 5000;

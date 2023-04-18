@@ -61,8 +61,8 @@ Future<void> pumpDevTools(WidgetTester tester) async {
   // integration_test/test_infra? When trying to import, we get an error:
   // Error when reading 'org-dartlang-app:/test_infra/shared.dart': File not found
   const shouldEnableExperiments = bool.fromEnvironment('enable_experiments');
-  await app.externalRunDevTools(
-    // ignore: avoid_redundant_argument_values
+  app.externalRunDevTools(
+    // ignore: avoid_redundant_argument_values, by design
     shouldEnableExperiments: shouldEnableExperiments,
     sampleData: _sampleData,
   );

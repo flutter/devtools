@@ -133,7 +133,7 @@ class ComplexObject {
     _token: 'non-constant key',
     'nested_map': <Object, Object>{
       'key': 'value',
-    }
+    },
   };
 
   var list = <Object?>[

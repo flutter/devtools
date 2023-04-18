@@ -83,7 +83,7 @@ class NetworkRequestInspector extends StatelessWidget {
               if (data.responseBody != null) HttpResponseView(data),
               if (data.hasCookies) HttpRequestCookiesView(data),
             ],
-          ]
+          ],
         ].map((e) => OutlineDecoration.onlyTop(child: e)).toList();
 
         return RoundedOutlinedBorder(
