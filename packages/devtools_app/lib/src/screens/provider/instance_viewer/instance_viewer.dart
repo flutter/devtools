@@ -15,6 +15,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../shared/diagnostics_text_styles.dart';
 import '../../../shared/eval_on_dart_library.dart';
 import '../../../shared/primitives/sliver_iterable_child_delegate.dart';
+import '../../../shared/primitives/utils.dart';
 import '../../../shared/theme.dart';
 import 'instance_details.dart';
 import 'instance_providers.dart';
@@ -243,9 +244,7 @@ class _InstanceViewerState extends ConsumerState<InstanceViewer> {
           hash: instance.hash,
           meta: instance.keys.isEmpty
               ? null
-              : instance.keys.length == 1
-                  ? '1 element'
-                  : '${instance.keys.length} elements',
+              : pluralize('element', instance.keys.length),
         ),
         list: (instance) => _ObjectHeader(
           startToken: '[',
@@ -253,9 +252,7 @@ class _InstanceViewerState extends ConsumerState<InstanceViewer> {
           hash: instance.hash,
           meta: instance.length == 0
               ? null
-              : instance.length == 1
-                  ? '1 element'
-                  : '${instance.length} elements',
+              : pluralize('element', instance.length),
         ),
         object: (instance) => _ObjectHeader(
           type: instance.type,
@@ -289,6 +286,8 @@ class _InstanceViewerState extends ConsumerState<InstanceViewer> {
         yield child != null
             ? Padding(
                 padding: const EdgeInsets.only(left: defaultSpacing),
+                // Expression is easily understood.
+                // ignore: avoid-nested-conditional-expressions
                 child: isFirstItem
                     ? Row(
                         children: [

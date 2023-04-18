@@ -127,11 +127,12 @@ class _ProfilerScreenBodyState extends State<ProfilerScreenBody>
           );
         }
         final status = recording || profilerBusy
+            // Requires refactor.
+            // ignore: avoid-nested-conditional-expressions
             ? (recording
                 ? const RecordingStatus()
                 : ProfilerBusyStatus(status: profilerBusyStatus))
             : null;
-
         return Column(
           children: [
             ProfilerScreenControls(

@@ -42,6 +42,8 @@ class _ObjectColumn extends ColumnData<ObjectStoreEntry>
   @override
   Widget build(
     BuildContext context,
+    // Requires refactor.
+    // ignore: avoid-dynamic
     data, {
     bool isRowSelected = false,
     VoidCallback? onPressed,

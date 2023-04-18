@@ -321,6 +321,8 @@ class CodeTable extends StatelessWidget {
 class CpuProfilerTicksTable {
   CpuProfilerTicksTable.parse({
     required this.sampleCount,
+    // Requires refactor.
+    // ignore: avoid-dynamic
     required List<dynamic> ticks,
   }) : assert(ticks.length % 3 == 0) {
     // Ticks are built up of groups of 3 elements:

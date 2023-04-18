@@ -122,6 +122,7 @@ class PerfettoControllerImpl extends PerfettoController {
       origin: html.window.location.origin,
       path: html.window.location.pathname ?? '',
     );
+    // Naming comes from GA
     // ignore: undefined_prefixed_name
     final indexFilePath = ui.webOnlyAssetManager
         .getAssetUrl(devToolsExtensionPoints.perfettoIndexLocation);
