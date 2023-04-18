@@ -26,7 +26,14 @@ jobs:
     name: Dart Code Metrics
     needs: flutter-prep
     runs-on: ubuntu-latest
-    steps:
+      - name: git clone
+        uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab
+      - name: Load Cached Flutter SDK
+        uses: actions/cache@88522ab9f39a2ea568f7027eddc7d8d8bc9d59c8
+        with:
+          path: |
+            ./flutter-sdk
+          key: flutter-sdk-${{ runner.os }}-${{ needs.flutter-prep.outputs.latest_flutter_candidate }}
       - name: tool/bots.sh
         env:
           BOT: main
