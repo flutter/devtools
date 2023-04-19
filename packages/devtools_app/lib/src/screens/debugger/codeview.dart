@@ -1174,7 +1174,6 @@ class _LineItemState extends State<LineItem>
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final darkTheme = theme.brightness == Brightness.dark;
 
     Widget child;
     final column = widget.pausedFrame?.column;
