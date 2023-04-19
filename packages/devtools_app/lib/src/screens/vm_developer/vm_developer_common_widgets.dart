@@ -246,31 +246,17 @@ String? _objectName(ObjRef? objectRef) {
     return null;
   }
 
-  String? objectRefName;
-
-  if (objectRef is ClassRef) {
-    objectRefName = objectRef.name;
-  } else if (objectRef is FuncRef) {
-    objectRefName = objectRef.name;
-  } else if (objectRef is FieldRef) {
-    objectRefName = objectRef.name;
-  } else if (objectRef is LibraryRef) {
-    objectRefName =
-        (objectRef.name?.isEmpty ?? false) ? objectRef.uri : objectRef.name;
-  } else if (objectRef is ScriptRef) {
-    objectRefName = fileNameFromUri(objectRef.uri);
-  } else if (objectRef is InstanceRef) {
-    objectRefName = objectRef.name ??
-        'Instance of ${objectRef.classRef?.name ?? '<Class>'}';
-  } else {
-    objectRefName = objectRef.vmType ?? objectRef.type;
-
-    if (objectRefName.startsWith('@')) {
-      objectRefName = objectRefName.substring(1, objectRefName.length);
-    }
-  }
-
-  return objectRefName;
+  return switch (objectRef) {
+    // TODO(https://github.com/dart-lang/sdk/issues/52099): merge these cases.
+    ClassRef(:final name) => name,
+    FuncRef(:final name) => name,
+    FieldRef(:final name) => name,
+    LibraryRef(:final name, :final uri) => nullOrEmpty(name) ? uri : name,
+    ScriptRef(:final uri) => fileNameFromUri(uri),
+    InstanceRef(:final name, :final classRef) =>
+      name ?? 'Instance of ${classRef?.name ?? '<Class>'}',
+    _ => (objectRef.vmType ?? objectRef.type)..replaceFirst('@', ''),
+  };
 }
 
 /// Returns the name of a function, qualified with the name of
@@ -298,15 +284,13 @@ String? qualifiedName(ObjRef? ref) {
 
 // Returns a description of the object containing its name and owner.
 String? _objectDescription(ObjRef? object) {
-  if (object == null) {
-    return null;
-  } else if (object is FieldRef) {
-    return '${object.declaredType?.name ?? 'Field'} ${object.name} of ${_objectName(object.owner) ?? '<Owner>'}';
-  } else if (object is FuncRef) {
-    return '${qualifiedName(object) ?? '<Function Name>'}';
-  } else {
-    return '${_objectName(object)}';
-  }
+  if (object == null) return null;
+  return switch (object) {
+    FieldRef(:final declaredType, :final name, :final owner) =>
+      '${declaredType?.name ?? 'Field'} $name of ${_objectName(owner) ?? '<Owner>'}',
+    FuncRef() => '${qualifiedName(object) ?? '<Function Name>'}',
+    _ => _objectName(object),
+  };
 }
 
 /// An ExpansionTile with an AreaPaneHeader as header and custom style
@@ -736,77 +720,55 @@ class VmServiceObjectLink extends StatelessWidget {
     Object? object, {
     bool preferUri = false,
   }) {
-    String? text;
-    if (object is LibraryRef) {
-      final lib = object;
-      if (lib.uri!.startsWith('dart') || preferUri) {
-        text = lib.uri!;
-      } else {
-        final name = lib.name;
-        text = name!.isEmpty ? lib.uri! : name;
-      }
-    } else if (object is FieldRef) {
-      final field = object;
-      text = field.name!;
-    } else if (object is FuncRef) {
-      final func = object;
-      text = func.name!;
-    } else if (object is ScriptRef) {
-      final script = object;
-      text = script.uri!;
-    } else if (object is ClassRef) {
-      final cls = object;
-      text = cls.name!;
-    } else if (object is CodeRef) {
-      final code = object;
-      text = code.name!;
-    } else if (object is InstanceRef) {
-      final instance = object;
-      if (instance.kind == InstanceKind.kList) {
-        text = 'List(length: ${instance.length})';
-      } else if (instance.kind == InstanceKind.kMap) {
-        text = 'Map(length: ${instance.length})';
-      } else if (instance.kind == InstanceKind.kRecord) {
-        text = 'Record';
-      } else if (instance.kind == InstanceKind.kType ||
-          instance.kind == InstanceKind.kTypeParameter) {
-        text = instance.name!;
-      } else if (instance.kind == InstanceKind.kStackTrace) {
-        final trace = stack_trace.Trace.parse(instance.valueAsString!);
+    if (object == null) return null;
+    return switch (object) {
+      LibraryRef(:final uri, :final name) =>
+        uri!.startsWith('dart') || preferUri
+            ? uri
+            : (name!.isEmpty ? uri : name),
+      // TODO(https://github.com/dart-lang/sdk/issues/52099): merge these cases.
+      FieldRef(:final name) => name,
+      FuncRef(:final name) => name,
+      ClassRef(:final name) => name,
+      CodeRef(:final name) => name,
+      TypeArgumentsRef(:final name) => name,
+      ScriptRef(:final uri) => uri,
+      ContextRef(:final length) => 'Context(length: $length)',
+      Sentinel(:final valueAsString) => 'Sentinel $valueAsString',
+      InstanceRef() => _textForInstanceRef(object),
+      ObjRef(:final isICData) when isICData =>
+        'ICData(${object.asICData.selector})',
+      ObjRef(:final isObjectPool) when isObjectPool =>
+        'Object Pool(length: ${object.asObjectPool.length})',
+      ObjRef(:final isWeakArray) when isWeakArray =>
+        'WeakArray(length: ${object.asWeakArray.length})',
+      ObjRef(:final isSubtypeTestCache) when isSubtypeTestCache =>
+        'SubtypeTestCache',
+      _ => null,
+    };
+  }
+
+  static String? _textForInstanceRef(InstanceRef instance) {
+    final valueAsString = instance.valueAsString;
+    switch (instance.kind) {
+      case InstanceKind.kList:
+        return 'List(length: ${instance.length})';
+      case InstanceKind.kMap:
+        return 'Map(length: ${instance.length})';
+      case InstanceKind.kRecord:
+        return 'Record';
+      case InstanceKind.kType:
+      case InstanceKind.kTypeParameter:
+        return instance.name;
+      case InstanceKind.kStackTrace:
+        final trace = stack_trace.Trace.parse(valueAsString!);
         final depth = trace.frames.length;
-        text = 'StackTrace ($depth ${pluralize('frame', depth)})';
-      } else {
-        if (instance.valueAsString != null) {
-          text = instance.valueAsString!;
-        } else {
-          final cls = instance.classRef!;
-          text = '${cls.name}';
-        }
-      }
-    } else if (object is ContextRef) {
-      final context = object;
-      text = 'Context(length: ${context.length})';
-    } else if (object is TypeArgumentsRef) {
-      final typeArgs = object;
-      text = typeArgs.name!;
-    } else if (object is Sentinel) {
-      final sentinel = object;
-      text = 'Sentinel ${sentinel.valueAsString!}';
-    } else if (object != null && object is ObjRef && object.isICData) {
-      final icData = object.asICData;
-      text = 'ICData(${icData.selector})';
-    } else if (object != null && object is ObjRef && object.isObjectPool) {
-      final objectPool = object.asObjectPool;
-      text = 'Object Pool(length: ${objectPool.length})';
-    } else if (object != null &&
-        object is ObjRef &&
-        object.isSubtypeTestCache) {
-      text = 'SubtypeTestCache';
-    } else if (object != null && object is ObjRef && object.isWeakArray) {
-      final weakArray = object.asWeakArray;
-      text = 'WeakArray(length: ${weakArray.length})';
+        return 'StackTrace ($depth ${pluralize('frame', depth)})';
+      default:
+        return valueAsString != null
+            ? valueAsString
+            : '${instance.classRef!.name}';
     }
-    return text;
   }
 
   TextSpan buildTextSpan(BuildContext context) {
