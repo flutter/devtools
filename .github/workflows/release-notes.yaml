@@ -10,8 +10,7 @@ env:
   CURRENT_RELEASE_FILE_PATH: packages/devtools_app/release_notes/NEXT_RELEASE_NOTES.md
 jobs:
   release-preparedness:
-    if: |
-      ${{ !contains(github.event.*.labels.*.name, 'release-notes-not-required') }}
+    if: ${{ !contains(github.event.*.labels.*.name, 'release-notes-not-required') }}
     runs-on: ubuntu-latest
     name: Verify PR Release Note Requirements
     steps:
