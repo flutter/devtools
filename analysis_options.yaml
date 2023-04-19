@@ -160,7 +160,7 @@ dart_code_metrics:
 #    - avoid-ignoring-return-values
 #    - avoid-late-keyword
     - avoid-missing-enum-constant-in-map
-#    - avoid-nested-conditional-expressions Worth renabling but currently too many violators.
+#    - avoid-nested-conditional-expressions Worth enabling but currently too many violators.
 #    - avoid-non-ascii-symbols  TODO(jacobr): probably worth enabling.
 #    - avoid-non-null-assertion
 #    - avoid-passing-async-when-sync-expected TODO(jacobr): consider re-enabliing.
