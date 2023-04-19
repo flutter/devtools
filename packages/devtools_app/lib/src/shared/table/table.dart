@@ -238,8 +238,6 @@ class FlatTableState<T> extends State<FlatTable<T>> with AutoDisposeMixin {
     addAutoDisposeListener(tableController.tableData);
 
     if (tableController.pinBehavior != FlatTablePinBehavior.none &&
-        // TODO(jacobr): this lint appears to be firing incorrectly.
-        // ignore: avoid-unnecessary-type-assertions
         this is! State<FlatTable<PinnableListEntry>>) {
       throw StateError('$T must implement PinnableListEntry');
     }
@@ -337,9 +335,6 @@ class FlatTableState<T> extends State<FlatTable<T>> with AutoDisposeMixin {
   }
 
   Widget _buildRow({
-    // Unused parameters doesn't understand that this parameter is required to
-    // match the signature for the rowBuilder Function.
-    // ignore: avoid-unused-parameters
     required BuildContext context,
     required LinkedScrollControllerGroup linkedScrollControllerGroup,
     required int index,
@@ -672,9 +667,6 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
     required LinkedScrollControllerGroup linkedScrollControllerGroup,
     required int index,
     required List<double> columnWidths,
-    // Unused parameters doesn't understand that this parameter is required to
-    // match the signature for the rowBuilder Function.
-    // ignore: avoid-unused-parameters
     required bool isPinned,
   }) {
     Widget rowForNode(T node) {
@@ -1469,6 +1461,7 @@ class _TableRowState<T> extends State<TableRow<T>>
               onSortChanged: widget.onSortChanged,
             );
 
+        // ignore: avoid-unrelated-type-assertions, false positive.
         if (column is ColumnHeaderRenderer) {
           content = (column as ColumnHeaderRenderer)
               .buildHeader(context, defaultHeaderRenderer);
@@ -1481,6 +1474,7 @@ class _TableRowState<T> extends State<TableRow<T>>
         // widget class.
         final padding = column.getNodeIndentPx(node);
         assert(padding >= 0);
+        // ignore: avoid-unrelated-type-assertions, false positive.
         if (column is ColumnRenderer) {
           content = (column as ColumnRenderer).build(
             context,

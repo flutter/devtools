@@ -190,14 +190,10 @@ class ServiceConnectionManager {
     VmServiceWrapper service, {
     required Future<void> onClosed,
   }) async {
-    // Getting and setting a variable should not count as repeated references.
-    // ignore: prefer-moving-to-variable
     if (service == this.service) {
       // Service already opened.
       return;
     }
-    // Getting and setting a variable should not count as repeated references.
-    // ignore: prefer-moving-to-variable
     this.service = service;
     if (_serviceAvailable.isCompleted) {
       _serviceAvailable = Completer();
@@ -228,8 +224,6 @@ class ServiceConnectionManager {
     _inspectorService?.dispose();
     _inspectorService = null;
 
-    // Value may have changes between repeated references.
-    // ignore: prefer-moving-to-variable
     if (service != this.service) {
       // A different service has been opened.
       return;
@@ -237,8 +231,6 @@ class ServiceConnectionManager {
 
     vm = await service.getVM();
 
-    // Value may have changes between repeated references.
-    // ignore: prefer-moving-to-variable
     if (service != this.service) {
       // A different service has been opened.
       return;
@@ -308,8 +300,6 @@ class ServiceConnectionManager {
         }
       }
     }
-    // Value may have changes between repeated references.
-    // ignore: prefer-moving-to-variable
     if (service != this.service) {
       // A different service has been opened.
       return;
@@ -319,8 +309,6 @@ class ServiceConnectionManager {
 
     final isolates = vm?.isolatesForDevToolsMode() ?? <IsolateRef>[];
     await isolateManager.init(isolates);
-    // Value may have changes between repeated references.
-    // ignore: prefer-moving-to-variable
     if (service != this.service) {
       // A different service has been opened.
       return;
@@ -329,8 +317,6 @@ class ServiceConnectionManager {
     // This needs to be called before calling
     // `ga.setupUserApplicationDimensions()`.
     await connectedApp!.initializeValues();
-    // Value may have changes between repeated references.
-    // ignore: prefer-moving-to-variable
     if (service != this.service) {
       // A different service has been opened.
       return;
@@ -340,8 +326,6 @@ class ServiceConnectionManager {
 
     // Set up analytics dimensions for the connected app.
     ga.setupUserApplicationDimensions();
-    // Value may have changes between repeated references.
-    // ignore: prefer-moving-to-variable
     if (service != this.service) {
       // A different service has been opened.
       return;

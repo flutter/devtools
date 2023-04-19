@@ -31,7 +31,7 @@ void main() {
     when(scriptManager.sortedScripts).thenReturn(
       ValueNotifier(<ScriptRef>[testScript]),
     );
-    // ignore: discarded_futures
+    // ignore: discarded_futures, test code.
     when(scriptManager.retrieveAndSortScripts(any)).thenAnswer(
       (_) => Future.value([testScript]),
     );

@@ -102,7 +102,7 @@ class _RebuildStatsViewState extends State<RebuildStatsView>
               children: [
                 ClearButton(
                   gaScreen: gac.performance,
-                  gaSelection: gac.clearRebuildStats,
+                  gaSelection: gac.PerformanceEvents.clearRebuildStats.name,
                   onPressed: widget.model.clearAllCounts,
                 ),
                 const SizedBox(width: denseSpacing),

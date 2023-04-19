@@ -64,13 +64,13 @@ class _RasterStatsControls extends StatelessWidget {
               icon: Icons.camera_outlined,
               label: 'Take Snapshot',
               gaScreen: gac.performance,
-              gaSelection: gac.collectRasterStats,
+              gaSelection: gac.PerformanceEvents.collectRasterStats.name,
               onPressed: rasterStatsController.collectRasterStats,
             ),
             const SizedBox(width: denseSpacing),
             ClearButton(
               gaScreen: gac.performance,
-              gaSelection: gac.clearRasterStats,
+              gaSelection: gac.PerformanceEvents.clearRasterStats.name,
               onPressed: rasterStatsController.clearData,
             ),
           ],
@@ -346,7 +346,7 @@ class _FullScreenButton extends StatelessWidget {
         icon: Icons.fullscreen,
         outlined: false,
         gaScreen: gac.performance,
-        gaSelection: gac.fullScreenLayerImage,
+        gaSelection: gac.PerformanceEvents.fullScreenLayerImage.name,
         onPressed: () {
           unawaited(
             showDialog(

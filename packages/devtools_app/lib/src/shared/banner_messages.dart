@@ -307,7 +307,8 @@ class ShaderJankMessage {
             display: preCompileShadersDocsUrl,
             url: preCompileShadersDocsUrl,
             gaScreenName: screenId,
-            gaSelectedItemDescription: gac.shaderCompilationDocs,
+            gaSelectedItemDescription:
+                gac.PerformanceDocs.shaderCompilationDocs.name,
           ),
           context: context,
           style: theme.errorMessageLinkStyle,
@@ -323,7 +324,8 @@ class ShaderJankMessage {
               display: 'Impeller',
               url: impellerWikiUrl,
               gaScreenName: screenId,
-              gaSelectedItemDescription: gac.impellerWiki,
+              gaSelectedItemDescription:
+                  gac.PerformanceDocs.impellerWikiLink.name,
             ),
             context: context,
             style: theme.errorMessageLinkStyle,
@@ -360,7 +362,8 @@ You are opting in to a high CPU sampling rate. This may affect the performance o
             display: 'documentation',
             url: _cpuSamplingRateDocsUrl,
             gaScreenName: screenId,
-            gaSelectedItemDescription: gac.cpuSamplingRateDocs,
+            gaSelectedItemDescription:
+                gac.CpuProfilerDocs.profileGranularityDocs.name,
           ),
           context: context,
           style: theme.warningMessageLinkStyle,
