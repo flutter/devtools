@@ -244,7 +244,7 @@ class _InstanceViewerState extends ConsumerState<InstanceViewer> {
           hash: instance.hash,
           meta: instance.keys.isEmpty
               ? null
-              : pluralize('element', instance.keys.length),
+              : '${instance.keys.length} ${pluralize('element', instance.keys.length)}',
         ),
         list: (instance) => _ObjectHeader(
           startToken: '[',
@@ -252,7 +252,7 @@ class _InstanceViewerState extends ConsumerState<InstanceViewer> {
           hash: instance.hash,
           meta: instance.length == 0
               ? null
-              : pluralize('element', instance.length),
+              : '${instance.length} ${pluralize('element', instance.length)}',
         ),
         object: (instance) => _ObjectHeader(
           type: instance.type,

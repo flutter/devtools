@@ -1229,7 +1229,7 @@ class _LineItemState extends State<LineItem>
     }
 
     final backgroundColor = widget.focused
-        ? _focusedColor(theme.canvasColor, isDarkTheme: darkTheme)
+        ? theme.colorScheme.selectedRowBackgroundColor
         : null;
 
     return Container(
@@ -1239,9 +1239,6 @@ class _LineItemState extends State<LineItem>
       child: child,
     );
   }
-
-  Color _focusedColor(Color color, {required bool isDarkTheme}) =>
-      isDarkTheme ? color.brighten() : color.darken();
 
   Widget _hoverableLine() => HoverCardTooltip.async(
         enabled: () => true,
