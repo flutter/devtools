@@ -1095,7 +1095,10 @@ class DevToolsFile<T> {
 final _lowercaseLookup = <String, String>{};
 
 extension NullableStringExtension on String? {
-  bool get isNullOrEmpty => this == null || this!.isEmpty;
+  bool get isNullOrEmpty {
+    final self = this;
+    return self == null || self.isEmpty;
+  }
 }
 
 // TODO(kenz): consider moving other String helpers into this extension.
