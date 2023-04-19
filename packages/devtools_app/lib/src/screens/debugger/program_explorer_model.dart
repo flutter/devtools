@@ -345,14 +345,14 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
     int? tokenPos = 0;
     final object = this.object;
 
-    SourceLocation? sourceLocation;
-    if (object is FieldRef) {
-      sourceLocation = object.location;
-    } else if (object is FuncRef) {
-      sourceLocation = object.location;
-    } else if (object is ClassRef) {
-      sourceLocation = object.location;
-    }
+    final SourceLocation? sourceLocation = switch (object) {
+      // TODO(https://github.com/dart-lang/sdk/issues/52099): merge these cases.
+      FieldRef(:final location) => location,
+      FuncRef(:final location) => location,
+      ClassRef(:final location) => location,
+      _ => null,
+    };
+
     if (sourceLocation != null) {
       tokenPos = sourceLocation.tokenPos;
       scriptRef = sourceLocation.script;

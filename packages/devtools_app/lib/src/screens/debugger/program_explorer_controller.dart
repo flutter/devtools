@@ -343,19 +343,16 @@ class ProgramExplorerController extends DisposableController
 
     // Otherwise, we need to find the target script to determine the library
     // the target node is listed under.
-    ScriptRef? targetScript;
-    if (object is ClassRef) {
-      targetScript = object.location?.script;
-    } else if (object is FieldRef) {
-      targetScript = object.location?.script;
-    } else if (object is FuncRef) {
-      targetScript = object.location?.script;
-    } else if (object is Code) {
-      final ownerFunction = object.function;
-      targetScript = ownerFunction?.location?.script;
-    } else if (object is ScriptRef) {
-      targetScript = object;
-    }
+    final ScriptRef? targetScript = switch (object) {
+      // TODO(https://github.com/dart-lang/sdk/issues/52099): merge these cases.
+      ClassRef(:final location?) => location.script,
+      FieldRef(:final location?) => location.script,
+      FuncRef(:final location?) => location.script,
+      Code(:final function?) => function.location?.script,
+      ScriptRef() => object,
+      _ => null,
+    };
+
     if (targetScript == null) {
       throw StateError('Could not find script');
     }

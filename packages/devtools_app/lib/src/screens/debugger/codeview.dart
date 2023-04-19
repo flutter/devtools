@@ -113,18 +113,9 @@ class _CodeViewState extends State<CodeView> with AutoDisposeMixin {
     super.initState();
 
     verticalController = LinkedScrollControllerGroup();
-    // TODO(jacobr): this lint does not understand that some methods have side
-    // effects.
-    // ignore: prefer-moving-to-variable
     gutterController = verticalController.addAndGet();
-    // TODO(jacobr): this lint does not understand that some methods have side
-    // effects.
-    // ignore: prefer-moving-to-variable
     textController = verticalController.addAndGet();
     if (widget.codeViewController.showProfileInformation.value) {
-      // TODO(jacobr): this lint does not understand that some methods have side
-      // effects.
-      // ignore: prefer-moving-to-variable
       profileController = verticalController.addAndGet();
     }
     horizontalController = ScrollController();
@@ -1133,9 +1124,6 @@ class _LineItemState extends State<LineItem>
     with ProvidedControllerMixin<DebuggerController, LineItem> {
   Future<HoverCardData?> _generateHoverCardData({
     required PointerEvent event,
-    // TODO(jacobr): this needs to be ignored as this method is passed as a
-    // callback.
-    // ignore: avoid-unused-parameters
     required bool Function() isHoverStale,
   }) async {
     if (!serviceManager.isMainIsolatePaused) return null;
@@ -1186,7 +1174,6 @@ class _LineItemState extends State<LineItem>
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final darkTheme = theme.brightness == Brightness.dark;
 
     Widget child;
     final column = widget.pausedFrame?.column;
@@ -1240,11 +1227,8 @@ class _LineItemState extends State<LineItem>
       child = _hoverableLine();
     }
 
-    final backgroundColor = widget.focused
-        ? (darkTheme
-            ? theme.canvasColor.brighten()
-            : theme.canvasColor.darken())
-        : null;
+    final backgroundColor =
+        widget.focused ? theme.colorScheme.selectedRowBackgroundColor : null;
 
     return Container(
       alignment: Alignment.centerLeft,

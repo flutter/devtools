@@ -60,6 +60,7 @@ class FlutterVersion extends SemanticVersion {
   String get engineVersionSummary => 'revision $engineRevision';
 
   @override
+  // ignore: avoid-dynamic, necessary here.
   bool operator ==(other) {
     if (other is! FlutterVersion) return false;
     return version == other.version &&

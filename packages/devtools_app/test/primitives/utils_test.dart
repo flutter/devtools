@@ -1533,6 +1533,19 @@ void main() {
       });
     });
 
+    group('NullableStringExtension', () {
+      test('isNullOrEmpty', () {
+        String? str;
+        expect(str.isNullOrEmpty, isTrue);
+        str = '';
+        expect(str.isNullOrEmpty, isTrue);
+        str = 'hello';
+        expect(str.isNullOrEmpty, isFalse);
+        str = null;
+        expect(str.isNullOrEmpty, isTrue);
+      });
+    });
+
     group('StringExtension', () {
       test('fuzzyMatch', () {
         const str = 'hello_world_file';

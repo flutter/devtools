@@ -63,7 +63,7 @@ void main() {
       );
     });
 
-    test('can toggle frame selection', () async {
+    test('can toggle frame selection', () {
       final frame0 = testFrame0.shallowCopy()
         ..setEventFlow(goldenUiTimelineEvent)
         ..setEventFlow(goldenRasterTimelineEvent);

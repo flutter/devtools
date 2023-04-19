@@ -122,7 +122,7 @@ class PerfettoControllerImpl extends PerfettoController {
       origin: html.window.location.origin,
       path: html.window.location.pathname ?? '',
     );
-    // ignore: undefined_prefixed_name
+    // ignore: undefined_prefixed_name, doesn't understand conditional imports.
     final indexFilePath = ui.webOnlyAssetManager
         .getAssetUrl(devToolsExtensionPoints.perfettoIndexLocation);
     final baseUrl = '$basePath/$indexFilePath';
