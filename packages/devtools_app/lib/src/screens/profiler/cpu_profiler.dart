@@ -206,7 +206,8 @@ class _CpuProfilerState extends State<CpuProfiler>
                 padding: const EdgeInsets.only(left: denseSpacing),
                 child: FlameChartHelpButton(
                   gaScreen: gac.cpuProfiler,
-                  gaSelection: gac.cpuProfileFlameChartHelp,
+                  gaSelection:
+                      gac.CpuProfilerEvents.cpuProfileFlameChartHelp.name,
                   additionalInfo: [
                     ...dialogSubHeader(Theme.of(context), 'Legend'),
                     Legend(

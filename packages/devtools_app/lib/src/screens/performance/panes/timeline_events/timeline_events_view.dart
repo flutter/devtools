@@ -83,7 +83,7 @@ class TimelineEventsTabControls extends StatelessWidget {
               const SizedBox(width: denseSpacing),
               FlameChartHelpButton(
                 gaScreen: gac.performance,
-                gaSelection: gac.timelineFlameChartHelp,
+                gaSelection: gac.PerformanceEvents.timelineFlameChartHelp.name,
               ),
             ],
             if (!controller.useLegacyTraceViewer.value)
@@ -123,7 +123,7 @@ class TraceCategoriesButton extends StatelessWidget {
       outlined: false,
       tooltip: 'Trace categories',
       gaScreen: gac.performance,
-      gaSelection: gac.traceCategories,
+      gaSelection: gac.PerformanceEvents.traceCategories.name,
       onPressed: () => _openTraceCategoriesDialog(context),
     );
   }
@@ -159,7 +159,7 @@ class RefreshTimelineEventsButton extends StatelessWidget {
               : controller.processAllTraceEvents,
           tooltip: 'Refresh timeline events',
           gaScreen: gac.performance,
-          gaSelection: gac.refreshTimelineEvents,
+          gaSelection: gac.PerformanceEvents.refreshTimelineEvents.name,
         );
       },
     );
