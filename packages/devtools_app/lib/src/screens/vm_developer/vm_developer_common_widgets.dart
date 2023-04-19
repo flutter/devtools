@@ -251,7 +251,7 @@ String? _objectName(ObjRef? objectRef) {
     ClassRef(:final name) => name,
     FuncRef(:final name) => name,
     FieldRef(:final name) => name,
-    LibraryRef(:final name, :final uri) => nullOrEmpty(name) ? uri : name,
+    LibraryRef(:final name, :final uri) => name.isNullOrEmpty ? uri : name,
     ScriptRef(:final uri) => fileNameFromUri(uri),
     InstanceRef(:final name, :final classRef) =>
       name ?? 'Instance of ${classRef?.name ?? '<Class>'}',
