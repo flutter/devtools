@@ -15,7 +15,7 @@ TODO: Remove this section if there are not any general updates.
 TODO: Remove this section if there are not any general updates.
 
 ## CPU profiler updates
-* Fix bug with CPU flame chart selection and tooltips - []()
+* Fix bug with CPU flame chart selection and tooltips - [#5676](https://github.com/flutter/devtools/pull/5676)
 
 ## Memory updates
 TODO: Remove this section if there are not any general updates.
