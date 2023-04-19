@@ -127,7 +127,6 @@ class _ProfilerScreenBodyState extends State<ProfilerScreenBody>
           );
         }
         final status = recording || profilerBusy
-            // ignore: avoid-nested-conditional-expressions, requires refactor.
             ? (recording
                 ? const RecordingStatus()
                 : ProfilerBusyStatus(status: profilerBusyStatus))
