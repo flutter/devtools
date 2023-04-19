@@ -9,3 +9,4 @@ updates:
       interval: "daily"
     labels:
       - "autosubmit"
+      - "dependabot"
