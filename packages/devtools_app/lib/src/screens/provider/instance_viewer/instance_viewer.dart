@@ -286,8 +286,6 @@ class _InstanceViewerState extends ConsumerState<InstanceViewer> {
         yield child != null
             ? Padding(
                 padding: const EdgeInsets.only(left: defaultSpacing),
-                // Expression is easily understood.
-                // ignore: avoid-nested-conditional-expressions
                 child: isFirstItem
                     ? Row(
                         children: [

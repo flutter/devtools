@@ -222,8 +222,6 @@ class RequestableSizeWidget extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     SelectableText(
-                      // Expression is easily understood.
-                      // ignore: avoid-nested-conditional-expressions
                       size.valueAsString == null
                           ? '--'
                           : prettyPrintBytes(
