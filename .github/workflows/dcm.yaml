@@ -14,8 +14,7 @@
 name: Dart Code Metrics
 
 on:
-  pull_request:
-    types: [opened, synchronize, reopened]
+  pull_request_target
 
 jobs:
   flutter-prep:
