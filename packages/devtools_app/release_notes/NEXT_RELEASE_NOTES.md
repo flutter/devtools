@@ -15,7 +15,7 @@ TODO: Remove this section if there are not any general updates.
 TODO: Remove this section if there are not any general updates.
 
 ## CPU profiler updates
-TODO: Remove this section if there are not any general updates.
+* Fix bug with CPU flame chart selection and tooltips - []()
 
 ## Memory updates
 TODO: Remove this section if there are not any general updates.
