@@ -1228,9 +1228,8 @@ class _LineItemState extends State<LineItem>
       child = _hoverableLine();
     }
 
-    final backgroundColor = widget.focused
-        ? theme.colorScheme.selectedRowBackgroundColor
-        : null;
+    final backgroundColor =
+        widget.focused ? theme.colorScheme.selectedRowBackgroundColor : null;
 
     return Container(
       alignment: Alignment.centerLeft,
