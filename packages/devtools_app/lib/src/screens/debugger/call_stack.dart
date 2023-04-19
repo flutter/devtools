@@ -110,8 +110,7 @@ class _CallStackState extends State<CallStack>
     return isAsyncBreak
         ? result
         : DevToolsTooltip(
-            // False positive.
-            // ignore: avoid-nested-conditional-expressions
+            // ignore: avoid-nested-conditional-expressions, false positive.
             message: locationDescription == null
                 ? frameDescription
                 : '$frameDescription $locationDescription',

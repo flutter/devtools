@@ -56,8 +56,7 @@ class AnotherClass {
   var someField = 3;
   static var someStaticField = 2;
   int get someProperty => 42;
-  // This lint gets in the way of testing.
-  // ignore: avoid-dynamic
+  // ignore: avoid-dynamic, gets in the way of testing.
   set someSomeProperty(v) {}
 }
 
