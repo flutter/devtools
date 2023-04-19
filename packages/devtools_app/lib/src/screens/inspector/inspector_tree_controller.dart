@@ -806,7 +806,7 @@ class _InspectorTreeState extends State<InspectorTree>
       callOnceWhenReady(
         trigger: mainIsolateState.isPaused,
         callback: _bindToController,
-        readyWhen: (triggerValue) => triggerValue == false,
+        readyWhen: (triggerValue) => !triggerValue,
       );
     }
   }

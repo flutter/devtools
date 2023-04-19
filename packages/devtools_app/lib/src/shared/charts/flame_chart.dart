@@ -1443,6 +1443,7 @@ class TimelineGridPainter extends FlameChartPainter {
   bool shouldRepaint(CustomPainter oldDelegate) => this != oldDelegate;
 
   @override
+  // ignore: avoid-dynamic, necessary here.
   bool operator ==(other) {
     if (other is! TimelineGridPainter) return false;
     return zoom == other.zoom &&

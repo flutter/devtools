@@ -667,6 +667,7 @@ class TimeRange {
   }
 
   @override
+  // ignore: avoid-dynamic, necessary here.
   bool operator ==(other) {
     if (other is! TimeRange) return false;
     return start == other.start && end == other.end;
@@ -831,6 +832,7 @@ class Range {
   String toString() => 'Range($begin, $end)';
 
   @override
+  // ignore: avoid-dynamic, necessary here.
   bool operator ==(other) {
     if (other is! Range) return false;
     return begin == other.begin && end == other.end;
@@ -860,6 +862,7 @@ class LineRange {
   String toString() => 'LineRange($begin, $end)';
 
   @override
+  // ignore: avoid-dynamic, necessary here.
   bool operator ==(other) {
     if (other is! LineRange) return false;
     return begin == other.begin && end == other.end;

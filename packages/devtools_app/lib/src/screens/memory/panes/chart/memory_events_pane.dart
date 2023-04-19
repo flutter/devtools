@@ -281,9 +281,6 @@ class MemoryEventsPaneState extends State<MemoryEventsPane>
     }
 
     final extensionEventsIndex = _chartController.createTrace(
-      // TODO(jacobr): prefer-moving-to-variable doesn't understand that enum
-      // entries don't need to be moved to variables.
-      // ignore: prefer-moving-to-variable
       trace.ChartType.symbol,
       trace.PaintCharacteristics(
         color: Colors.purpleAccent[100]!,
@@ -303,9 +300,6 @@ class MemoryEventsPaneState extends State<MemoryEventsPane>
     );
 
     final snapshotIndex = _chartController.createTrace(
-      // TODO(jacobr): prefer-moving-to-variable doesn't understand that enum
-      // entries don't need to be moved to variables.
-      // ignore: prefer-moving-to-variable
       trace.ChartType.symbol,
       trace.PaintCharacteristics(
         color: Colors.green,
