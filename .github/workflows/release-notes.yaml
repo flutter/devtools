@@ -16,7 +16,6 @@ jobs:
     runs-on: ubuntu-latest
     name: Verify PR Release Note Requirements
     steps:
-
       - name: Get Pull Request Number
         id: get-pull-request-number
         run: |
