@@ -418,7 +418,8 @@ abstract class FlameChartState<T extends FlameChart,
   /// Returns -1 if the row index is out of range for [rows].
   int _rowIndexForY(double dy) {
     final topPaddingHeight = rowOffsetForTopPadding * sectionSpacing;
-    final rowIndex = ((dy - topPaddingHeight) ~/ rowHeightWithPadding) +
+    final adjustedDy = verticalControllerGroup.offset + dy;
+    final rowIndex = ((adjustedDy - topPaddingHeight) ~/ rowHeightWithPadding) +
         rowOffsetForTopPadding;
     if (rowIndex < 0 || rowIndex >= rows.length) {
       return -1;
