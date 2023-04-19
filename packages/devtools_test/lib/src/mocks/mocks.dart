@@ -178,7 +178,7 @@ void mockFlutterVersion(
   when(connectedApp.connectedAppInitialized).thenReturn(true);
 }
 
-// ignore: prefer_single_quotes
+// ignore: prefer_single_quotes, false positive.
 final Grammar mockGrammar = Grammar.fromJson(
   jsonDecode(
     '''
