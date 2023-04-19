@@ -346,10 +346,10 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
     final object = this.object;
 
     final SourceLocation? sourceLocation = switch (object) {
-      FieldRef(:final location) ||
-      FuncRef(:final location) ||
-      ClassRef(:final location) =>
-        location,
+      // TODO(https://github.com/dart-lang/sdk/issues/52099): merge these cases.
+      FieldRef(:final location) => location,
+      FuncRef(:final location) => location,
+      ClassRef(:final location) => location,
       _ => null,
     };
 
