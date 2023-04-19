@@ -40,6 +40,6 @@ jobs:
         run: |
           if [ "$HAS_CHANGED_RELEASE_NOTES" != "true" ] ; then
             echo "Release Preparedness check failed"
-            echo "::error title='Release Notes were not modified'::Please add a release note entry to $CURRENT_RELEASE_FILE_PATH or add the `release-notes-not-required` label."
+            echo "::error title='Release Notes were not modified'::Please add a release note entry to $CURRENT_RELEASE_FILE_PATH or add the release-notes-not-required label."
             exit 1
           fi
