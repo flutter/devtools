@@ -206,7 +206,7 @@ class MemoryTime {
   static const updateValues = 'updateValues';
 }
 
-// ignore: avoid_classes_with_only_static_members
+// ignore: avoid_classes_with_only_static_members, requires refactor.
 /// Analytic event constants specific for memory screen.
 class MemoryEvent {
   static const gc = 'gc';
