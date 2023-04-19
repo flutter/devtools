@@ -237,7 +237,7 @@ class SmallEnhanceTracingButton extends StatelessWidget {
       label: EnhanceTracingButton.title,
       icon: EnhanceTracingButton.icon,
       gaScreen: gac.performance,
-      gaSelection: gac.smallEnhanceTracingButton,
+      gaSelection: gac.PerformanceEvents.enhanceTracingButtonSmall.name,
       onPressed: enhanceTracingController.showEnhancedTracingMenu,
     );
   }
@@ -262,7 +262,8 @@ class IntrinsicOperationsHint extends StatelessWidget {
       message: _ExpensiveOperationHint(
         docsUrl: _intrinsicOperationsDocs,
         gaScreenName: gac.performance,
-        gaSelectedItemDescription: gac.intrinsicOperationsDocs,
+        gaSelectedItemDescription:
+            gac.PerformanceDocs.intrinsicOperationsDocs.name,
         message: TextSpan(
           children: [
             TextSpan(
@@ -305,7 +306,7 @@ class CanvasSaveLayerHint extends StatelessWidget {
       message: _ExpensiveOperationHint(
         docsUrl: _saveLayerDocs,
         gaScreenName: gac.performance,
-        gaSelectedItemDescription: gac.canvasSaveLayerDocs,
+        gaSelectedItemDescription: gac.PerformanceDocs.canvasSaveLayerDocs.name,
         message: TextSpan(
           children: [
             TextSpan(
@@ -340,7 +341,8 @@ class ShaderCompilationHint extends StatelessWidget {
       message: _ExpensiveOperationHint(
         docsUrl: preCompileShadersDocsUrl,
         gaScreenName: gac.performance,
-        gaSelectedItemDescription: gac.shaderCompilationDocs,
+        gaSelectedItemDescription:
+            gac.PerformanceDocs.shaderCompilationDocs.name,
         message: TextSpan(
           children: [
             TextSpan(
@@ -369,7 +371,8 @@ class ShaderCompilationHint extends StatelessWidget {
                     display: 'Impeller',
                     url: impellerWikiUrl,
                     gaScreenName: gac.performance,
-                    gaSelectedItemDescription: gac.impellerWiki,
+                    gaSelectedItemDescription:
+                        gac.PerformanceDocs.impellerWikiLink.name,
                   ),
                   context: context,
                 ),

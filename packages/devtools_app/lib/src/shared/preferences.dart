@@ -431,8 +431,8 @@ class CpuProfilerPreferencesController extends DisposableController
     with AutoDisposeControllerMixin {
   final displayTreeGuidelines = ValueNotifier<bool>(false);
 
-  static final _displayTreeGuidelinesId =
-      '${gac.cpuProfiler}.${gac.cpuProfileDisplayTreeGuidelines}';
+  static final _displayTreeGuidelinesId = '${gac.cpuProfiler}.'
+      '${gac.CpuProfilerEvents.cpuProfileDisplayTreeGuidelines.name}';
 
   Future<void> init() async {
     addAutoDisposeListener(
@@ -444,7 +444,7 @@ class CpuProfilerPreferencesController extends DisposableController
         );
         ga.select(
           gac.cpuProfiler,
-          gac.cpuProfileDisplayTreeGuidelines,
+          gac.CpuProfilerEvents.cpuProfileDisplayTreeGuidelines.name,
           value: displayTreeGuidelines.value ? 1 : 0,
         );
       },
@@ -459,7 +459,7 @@ class PerformancePreferencesController extends DisposableController
   final showFlutterFramesChart = ValueNotifier<bool>(true);
 
   static final _showFlutterFramesChartId =
-      '${gac.performance}.${gac.framesChartVisibility}';
+      '${gac.performance}.${gac.PerformanceEvents.framesChartVisibility.name}';
 
   Future<void> init() async {
     addAutoDisposeListener(
@@ -471,7 +471,7 @@ class PerformancePreferencesController extends DisposableController
         );
         ga.select(
           gac.performance,
-          gac.framesChartVisibility,
+          gac.PerformanceEvents.framesChartVisibility.name,
           value: showFlutterFramesChart.value ? 1 : 0,
         );
       },

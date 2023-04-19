@@ -127,7 +127,7 @@ class _SecondaryControls extends StatelessWidget {
                 'the first Flutter frame was drawn (if available)',
             tooltipPadding: const EdgeInsets.all(denseSpacing),
             gaScreen: gac.cpuProfiler,
-            gaSelection: gac.profileAppStartUp,
+            gaSelection: gac.CpuProfilerEvents.profileAppStartUp.name,
             minScreenWidthForTextBeforeScaling:
                 _profilingControlsMinScreenWidthForText,
             onPressed: !profilerBusy
@@ -139,7 +139,7 @@ class _SecondaryControls extends StatelessWidget {
           label: 'Load all CPU samples',
           tooltip: 'Load all available CPU samples from the profiler',
           gaScreen: gac.cpuProfiler,
-          gaSelection: gac.loadAllCpuSamples,
+          gaSelection: gac.CpuProfilerEvents.loadAllCpuSamples.name,
           minScreenWidthForTextBeforeScaling:
               _profilingControlsMinScreenWidthForText,
           onPressed: !profilerBusy

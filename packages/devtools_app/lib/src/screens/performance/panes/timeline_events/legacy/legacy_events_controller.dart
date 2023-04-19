@@ -119,7 +119,7 @@ class LegacyTimelineEventsController with SearchControllerMixin<TimelineEvent> {
     try {
       await ga.timeAsync(
         gac.performance,
-        gac.traceEventProcessingTime,
+        gac.PerformanceEvents.traceEventProcessingTime.name,
         asyncOperation: processTraceEventsHelper,
         screenMetricsProvider: () => PerformanceScreenMetrics(
           traceEventCount: processingTraceCount,
