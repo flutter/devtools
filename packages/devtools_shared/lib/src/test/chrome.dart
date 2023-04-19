@@ -85,7 +85,7 @@ class Chrome {
       '--no-default-browser-check',
       '--no-first-run',
       '--user-data-dir=${getCreateChromeDataDir()}',
-      '--remote-debugging-port=$debugPort'
+      '--remote-debugging-port=$debugPort',
     ];
     if (useChromeHeadless && headlessModeIsSupported) {
       args.addAll(<String>[
@@ -264,7 +264,7 @@ class ChromeTab {
 
   Future<WipResponse> reload() => _wip!.page.reload();
 
-  Future<dynamic> navigate(String url) => _wip!.page.navigate(url);
+  Future<WipResponse> navigate(String url) => _wip!.page.navigate(url);
 
   WipConnection? get wipConnection => _wip;
 }

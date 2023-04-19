@@ -50,7 +50,7 @@ class AppFixture {
 
   IsolateRef? get mainIsolate => isolates.isEmpty ? null : isolates.first;
 
-  Future<dynamic> invoke(String expression) async {
+  Future<Response> invoke(String expression) async {
     final IsolateRef isolateRef = mainIsolate!;
     final String isolateId = isolateRef.id!;
     final Isolate isolate = await serviceConnection.getIsolate(isolateId);
