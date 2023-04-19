@@ -152,11 +152,6 @@ $ dart run integration_test/run_tests.dart --headless"
     # TODO(https://github.com/flutter/devtools/issues/1987): rewrite integration tests.
     dart run integration_test/run_tests.dart --headless
 
-else
-
-    echo "unknown bot configuration"
-    exit 1
-
 fi
 
 popd

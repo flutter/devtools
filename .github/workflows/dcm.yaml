@@ -18,10 +18,25 @@ on:
     types: [opened, synchronize, reopened]
 
 jobs:
+  flutter-prep:
+    uses: ./.github/workflows/flutter-prep.yaml
+    with:
+      os-name: ubuntu
   dcm:
     name: Dart Code Metrics
+    needs: flutter-prep
     runs-on: ubuntu-latest
     steps:
+      - name: Clone Flutter DevTools
+        uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab
+      - name: Load Cached Flutter SDK
+        uses: actions/cache@88522ab9f39a2ea568f7027eddc7d8d8bc9d59c8
+        with:
+          path: |
+            ./flutter-sdk
+          key: flutter-sdk-${{ runner.os }}-${{ needs.flutter-prep.outputs.latest_flutter_candidate }}
+      - name: Run tool/bots.sh
+        run: ./tool/bots.sh
       - name: Install DCM
         run: |
           sudo apt-get update
@@ -32,16 +47,6 @@ jobs:
           sudo chmod +x /usr/bin/dcm
       - name: Setup Dart SDK
         uses: dart-lang/setup-dart@6a218f2413a3e78e9087f638a238f6b40893203d
-      - name: Checkout repository
-        uses: actions/checkout@755da8c3cf115ac066823e79a1e1788f8940201b
-      - name: Upgrade devtools_app dependencies
-        run: flutter pub upgrade
-        working-directory: packages/devtools_app
-      - name: Upgrade devtools_shared dependencies
-        run: flutter pub upgrade
-        working-directory: packages/devtools_shared
-      - name: Upgrade devtools_test dependencies
-        run: flutter pub upgrade
-        working-directory: packages/devtools_test
       - name: Run DCM on root
-        run: dcm analyze --ci-key="${{ secrets.DCM_CI_KEY }}" --email="${{ secrets.DCM_EMAIL }}" .
+        run: |
+          dcm analyze --ci-key="${{ secrets.DCM_CI_KEY }}" --email="${{ secrets.DCM_EMAIL }}" packages/devtools_app packages/devtools_shared packages/devtools_test
