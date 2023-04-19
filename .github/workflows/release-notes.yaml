@@ -11,8 +11,7 @@ env:
 jobs:
   release-preparedness:
     if: |
-      ${{ !contains(github.event.*.labels.*.name, 'release-notes-not-required') 
-      && !contains(github.event.*.labels.*.name, 'dependabot') }}
+      ${{ !contains(github.event.*.labels.*.name, 'release-notes-not-required') }}
     runs-on: ubuntu-latest
     name: Verify PR Release Note Requirements
     steps:
