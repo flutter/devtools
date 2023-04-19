@@ -1094,7 +1094,12 @@ class DevToolsFile<T> {
 
 final _lowercaseLookup = <String, String>{};
 
-bool nullOrEmpty(String? str) => str == null || str.isEmpty;
+extension NullableStringExtension on String? {
+  bool get isNullOrEmpty {
+    final self = this;
+    return self == null || self.isEmpty;
+  }
+}
 
 // TODO(kenz): consider moving other String helpers into this extension.
 // TODO(kenz): replace other uses of toLowerCase() for string matching with
