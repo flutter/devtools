@@ -198,15 +198,15 @@ class TreeTableController<T extends TreeNode<T>>
           direction,
           secondarySortColumn: secondarySortColumn,
         );
-    void _sort(T dataObject) {
+    void sort(T dataObject) {
       dataObject.children
         ..sort(sortFunction)
-        ..forEach(_sort);
+        ..forEach(sort);
     }
 
     dataRoots
       ..sort(sortFunction)
-      ..forEach(_sort);
+      ..forEach(sort);
 
     setDataAndNotify(dataKey: dataKey);
 
@@ -249,13 +249,13 @@ abstract class TableControllerBase<T> extends DisposableController {
   /// The default sort column for tables using this [TableController].
   ///
   /// The currently active sort column will be stored as part of the
-  /// [_TableUiState] for the current data (stored in [_tableUiStateByData]).
+  /// [TableUiState] for the current data (stored in [_tableUiStateByData]).
   final ColumnData<T> defaultSortColumn;
 
   /// The default [SortDirection] for tables using this [TableController].
   ///
   /// The currently active [SortDirection] will be stored as part of the
-  /// [_TableUiState] for the current data (stored in [_tableUiStateByData]).
+  /// [TableUiState] for the current data (stored in [_tableUiStateByData]).
   final SortDirection defaultSortDirection;
 
   /// The column to be used by the table sorting algorithm to break a tie for
@@ -292,8 +292,8 @@ abstract class TableControllerBase<T> extends DisposableController {
   /// This value is reset each time [sortDataAndNotify] is called.
   late List<T> pinnedData;
 
-  /// Returns the [_TableUiState] for the current data [_tableData.value].
-  _TableUiState get tableUiState => _tableUiStateForKey(_currentDataKey);
+  /// Returns the [TableUiState] for the current data [_tableData.value].
+  TableUiState get tableUiState => _tableUiStateForKey(_currentDataKey);
 
   /// This method should be overridden by all subclasses.
   void setData(List<T> data, String key);
@@ -304,12 +304,12 @@ abstract class TableControllerBase<T> extends DisposableController {
     ColumnData<T>? secondarySortColumn,
   });
 
-  _TableUiState _tableUiStateForKey(String key) {
+  TableUiState _tableUiStateForKey(String key) {
     var state = TableUiStateStore.lookup(key);
     if (state == null) {
       TableUiStateStore.add(
         key,
-        _TableUiState(
+        TableUiState(
           sortColumnIndex: columns.indexOf(defaultSortColumn),
           sortDirection: defaultSortDirection,
           // Ignore this lint to make it clear what the default values are.
@@ -362,8 +362,8 @@ class TableData<T> {
   final String key;
 }
 
-class _TableUiState {
-  _TableUiState({
+class TableUiState {
+  TableUiState({
     required this.sortColumnIndex,
     required this.sortDirection,
     this.scrollOffset = 0.0,
@@ -383,16 +383,16 @@ class _TableUiState {
 // members here allow us to add asserts that guarantee unique keys for tables
 // across DevTools.
 // ignore: avoid_classes_with_only_static_members
-/// Stores the [_TableUiState] for each table, keyed on a unique [String].
+/// Stores the [TableUiState] for each table, keyed on a unique [String].
 ///
 /// This store will remain alive for the entire life of the DevTools instance.
-/// This allows us to cache the [_TableUiState] for tables without having to
+/// This allows us to cache the [TableUiState] for tables without having to
 /// keep table [State] classes or table controller classes alive.
 @visibleForTesting
 abstract class TableUiStateStore<T> {
-  static final _tableUiStateStore = <String, _TableUiState>{};
+  static final _tableUiStateStore = <String, TableUiState>{};
 
-  static void add(String key, _TableUiState value) {
+  static void add(String key, TableUiState value) {
     assert(
       !_tableUiStateStore.containsKey(key),
       '_TableUiState already exists for key: $key',
@@ -400,7 +400,7 @@ abstract class TableUiStateStore<T> {
     _tableUiStateStore[key] = value;
   }
 
-  static _TableUiState? lookup(String key) {
+  static TableUiState? lookup(String key) {
     return _tableUiStateStore[key];
   }
 

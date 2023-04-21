@@ -312,7 +312,7 @@ class FlatTableState<T> extends State<FlatTable<T>> with AutoDisposeMixin {
 
   @override
   Widget build(BuildContext context) {
-    Widget _buildTable(List<double> columnWidths) => _Table<T>(
+    Widget buildTable(List<double> columnWidths) => _Table<T>(
           tableController: tableController,
           columnWidths: columnWidths,
           autoScrollContent: widget.autoScrollContent,
@@ -324,14 +324,14 @@ class FlatTableState<T> extends State<FlatTable<T>> with AutoDisposeMixin {
         );
     if (widget.sizeColumnsToFit || tableController.columnWidths == null) {
       return LayoutBuilder(
-        builder: (context, constraints) => _buildTable(
+        builder: (context, constraints) => buildTable(
           tableController.computeColumnWidthsSizeToFit(
             constraints.maxWidth,
           ),
         ),
       );
     }
-    return _buildTable(tableController.columnWidths!);
+    return buildTable(tableController.columnWidths!);
   }
 
   Widget _buildRow({

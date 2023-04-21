@@ -127,12 +127,12 @@ class _SplitState extends State<Split> {
     double minFractionForIndex(int index) =>
         minSizeForIndex(index) / availableSize;
 
-    void _clampFraction(int index) {
+    void clampFraction(int index) {
       fractions[index] =
           fractions[index].clamp(minFractionForIndex(index), 1.0);
     }
 
-    double _sizeForIndex(int index) => availableSize * fractions[index];
+    double sizeForIndex(int index) => availableSize * fractions[index];
 
     double fractionDeltaRequired = 0.0;
     double fractionDeltaAvailable = 0.0;
@@ -173,7 +173,7 @@ class _SplitState extends State<Split> {
 
     // Determine what fraction to give each child, including enough space to
     // display the divider.
-    final sizes = List.generate(fractions.length, (i) => _sizeForIndex(i));
+    final sizes = List.generate(fractions.length, (i) => sizeForIndex(i));
 
     void updateSpacing(DragUpdateDetails dragDetails, int splitterIndex) {
       final dragDelta =
@@ -188,11 +188,11 @@ class _SplitState extends State<Split> {
           fractions[index] += delta;
           final minFraction = minFractionForIndex(index);
           if (fractions[index] >= minFraction) {
-            _clampFraction(index);
+            clampFraction(index);
             return startingDelta;
           }
           delta = fractions[index] - minFraction;
-          _clampFraction(index);
+          clampFraction(index);
           index--;
         }
         // At this point, we know that both [startingDelta] and [delta] are
@@ -209,11 +209,11 @@ class _SplitState extends State<Split> {
           fractions[index] += delta;
           final minFraction = minFractionForIndex(index);
           if (fractions[index] >= minFraction) {
-            _clampFraction(index);
+            clampFraction(index);
             return startingDelta;
           }
           delta = fractions[index] - minFraction;
-          _clampFraction(index);
+          clampFraction(index);
           index++;
         }
         // At this point, we know that both [startingDelta] and [delta] are
