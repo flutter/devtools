@@ -577,7 +577,19 @@ class _AppSizeView extends StatelessWidget {
                   initialFractionForTreeTable,
                 ],
                 children: [
-                  _buildTreemap(),
+                  LayoutBuilder(
+                    key: treemapKey,
+                    builder: (context, constraints) {
+                      Treemap.fromRoot(
+                        rootNode: treemapRoot,
+                        levelsVisible: 2,
+                        isOutermostLevel: true,
+                        width: constraints.maxWidth,
+                        height: constraints.maxHeight,
+                        onRootChangedCallback: onRootChangedCallback,
+                      );
+                    },
+                  ),
                   OutlineDecoration.onlyTop(
                     child: Row(
                       children: [
@@ -601,22 +613,6 @@ class _AppSizeView extends StatelessWidget {
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildTreemap() {
-    return LayoutBuilder(
-      key: treemapKey,
-      builder: (context, constraints) {
-        return Treemap.fromRoot(
-          rootNode: treemapRoot,
-          levelsVisible: 2,
-          isOutermostLevel: true,
-          width: constraints.maxWidth,
-          height: constraints.maxHeight,
-          onRootChangedCallback: onRootChangedCallback,
-        );
-      },
     );
   }
 }
