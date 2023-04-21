@@ -123,7 +123,8 @@ mixin FilterControllerMixin<T> on DisposableController
 /// This dialog interacts with a [FilterControllerMixin] to manage and preserve
 /// the filter state managed by the dialog.
 class FilterDialog<T> extends StatefulWidget {
-  FilterDialog({super.key, 
+  FilterDialog({
+    super.key,
     required this.controller,
     this.includeQueryFilter = true,
     this.queryInstructions,
@@ -151,7 +152,7 @@ class FilterDialog<T> extends StatefulWidget {
   final List<bool> toggleFilterValuesAtOpen;
 
   @override
-  _FilterDialogState<T> createState() => _FilterDialogState<T>();
+  State createState() => _FilterDialogState<T>();
 }
 
 class _FilterDialogState<T> extends State<FilterDialog<T>>

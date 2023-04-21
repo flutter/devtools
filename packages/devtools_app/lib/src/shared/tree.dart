@@ -13,7 +13,8 @@ import 'primitives/trees.dart';
 import 'theme.dart';
 
 class TreeView<T extends TreeNode<T>> extends StatefulWidget {
-  const TreeView({super.key, 
+  const TreeView({
+    super.key,
     required this.dataRootsListenable,
     required this.dataDisplayProvider,
     required this.onItemSelected,
@@ -61,7 +62,7 @@ class TreeView<T extends TreeNode<T>> extends StatefulWidget {
   final bool includeScrollbar;
 
   @override
-  _TreeViewState<T> createState() => _TreeViewState<T>();
+  State createState() => _TreeViewState<T>();
 }
 
 class _TreeViewState<T extends TreeNode<T>> extends State<TreeView<T>>
