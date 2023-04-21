@@ -32,7 +32,6 @@ dependencies:
   webkit_inspection_protocol: '>=0.5.0 <2.0.0'
 
 dependency_overrides:
-  dart_code_metrics: ^5.7.2
   # The '#OVERRIDE_FOR_DEVELOPMENT' lines are stripped out when we publish.
   # All overridden dependencies are published together so there is no harm
   # in treating them like they are part of a mono-repo while developing.
