@@ -1063,7 +1063,7 @@ class ToggleButton extends StatelessWidget {
               label: label,
             ),
           ),
-        )
+        ),
       ],
     );
   }

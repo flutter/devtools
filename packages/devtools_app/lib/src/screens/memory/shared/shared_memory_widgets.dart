@@ -43,7 +43,7 @@ class HeapClassView extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                     style: textStyle,
                   ),
-                )
+                ),
               ],
             ),
           ),

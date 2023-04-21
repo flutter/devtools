@@ -75,7 +75,7 @@ class _ObjectInspectorViewState extends State<_ObjectInspectorView>
             DevToolsTab.create(
               tabName: 'Class Hierarchy',
               gaPrefix: gac.classHierarchy,
-            )
+            ),
           ],
           tabViews: [
             ProgramExplorer(

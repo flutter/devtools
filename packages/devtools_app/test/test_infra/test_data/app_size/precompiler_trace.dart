@@ -72596,7 +72596,7 @@ final precompilerTrace = {
     10827,
     'C',
     10828,
-    'E'
+    'E',
   ],
   'entities': [
     'C',
@@ -115914,7 +115914,7 @@ final precompilerTrace = {
     'F',
     10809,
     692,
-    41
+    41,
   ],
   'strings': [
     'noSuchMethod',
@@ -122939,6 +122939,6 @@ final precompilerTrace = {
     'rotate',
     '_scale@16065589',
     'get:dragDetails',
-    'new Positioned.directional'
-  ]
+    'new Positioned.directional',
+  ],
 };

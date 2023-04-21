@@ -15,7 +15,6 @@
 // ignore_for_file: unnecessary_new
 // ignore_for_file: unused_catch_clause
 // ignore_for_file: unused_local_variable
-// ignore_for_file: prefer-moving-to-variable
 // ignore_for_file: avoid-throw-in-catch-block
 
 part of http;

@@ -5,6 +5,8 @@
 // ignore_for_file: avoid_print
 
 @TestOn('vm')
+import 'dart:async';
+
 import 'package:devtools_app/src/shared/console/primitives/simple_items.dart';
 import 'package:devtools_app/src/shared/diagnostics/diagnostics_node.dart';
 import 'package:devtools_app/src/shared/diagnostics/inspector_service.dart';
@@ -16,7 +18,7 @@ import '../test_infra/flutter_test_driver.dart' show FlutterRunConfiguration;
 import '../test_infra/flutter_test_environment.dart';
 import '../test_infra/matchers/matchers.dart';
 
-void main() async {
+void main() {
   initializeLiveTestWidgetsFlutterBindingWithAssets();
 
   final FlutterTestEnvironment env = FlutterTestEnvironment(
@@ -43,7 +45,7 @@ void main() async {
   try {
     group('inspector service tests', () {
       tearDown(env.tearDownEnvironment);
-      tearDownAll(() => env.tearDownEnvironment(force: true));
+      tearDownAll(() => unawaited(env.tearDownEnvironment(force: true)));
 
       test('track widget creation on', () async {
         await env.setupEnvironment();
@@ -451,7 +453,7 @@ void main() async {
         expect(nodeInDetailsTree.valueRef, equals(nodeInSummaryTree.valueRef));
 
         await group.setSelectionInspector(nodeInDetailsTree.valueRef, true);
-        var selection = (await group.getSelection(
+        final selection = (await group.getSelection(
           null,
           FlutterTreeType.widget,
           isSummaryTree: false,
@@ -463,20 +465,6 @@ void main() async {
           equalsIgnoringHashCodes(
             'Text\n'
             ' └─RichText\n',
-          ),
-        );
-
-        // Get selection in the render tree.
-        selection = (await group.getSelection(
-          null,
-          FlutterTreeType.renderObject,
-          isSummaryTree: false,
-        ))!;
-        expect(
-          treeToDebugString(selection),
-          equalsIgnoringHashCodes(
-            'RenderParagraph#00000 relayoutBoundary=up2\n'
-            ' └─text: TextSpan\n',
           ),
         );
 

@@ -143,12 +143,13 @@ abstract class _TestApp with IOMixin {
   }
 
   int _requestId = 1;
+  // ignore: avoid-dynamic, dynamic by design.
   Future<dynamic> _sendRequest(String method, dynamic params) async {
     final int requestId = _requestId++;
     final Map<String, dynamic> request = <String, dynamic>{
       'id': requestId,
       'method': method,
-      'params': params
+      'params': params,
     };
     final String jsonEncoded = json.encode(<Map<String, dynamic>>[request]);
     _debugPrint(jsonEncoded);

@@ -61,7 +61,7 @@ class HeapClassSampler extends ClassSampler {
   }
 
   void _outputError(Object error, StackTrace trace) {
-    serviceManager.consoleService.appendStdio('$error\ntrace');
+    serviceManager.consoleService.appendStdio('$error\n$trace');
   }
 
   @override
@@ -77,8 +77,9 @@ class HeapClassSampler extends ClassSampler {
 
     if (instanceRef == null) {
       serviceManager.consoleService.appendStdio(
-          'Unable to select instance that exist in snapshot and still alive in application.\n'
-          'You may want to increase "${preferences.memory.refLimitTitle}" in memory settings.');
+        'Unable to select instance that exist in snapshot and still alive in application.\n'
+        'You may want to increase "${preferences.memory.refLimitTitle}" in memory settings.',
+      );
       return;
     }
 

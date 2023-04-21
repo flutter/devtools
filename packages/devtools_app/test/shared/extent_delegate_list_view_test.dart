@@ -45,50 +45,18 @@ void main() {
       }
     });
 
-    testWidgets('builds successfully with customPointerSignalHandler',
-        (tester) async {
-      int pointerSignalEventCount = 0;
-      void _handlePointerSignal(PointerSignalEvent _) {
-        pointerSignalEventCount++;
-      }
+    testWidgets(
+      'builds successfully with customPointerSignalHandler',
+      (tester) async {
+        int pointerSignalEventCount = 0;
+        void _handlePointerSignal(PointerSignalEvent _) {
+          pointerSignalEventCount++;
+        }
 
-      await wrapAndPump(
-        tester,
-        ExtentDelegateListView(
-          controller: ScrollController(),
-          extentDelegate: FixedExtentDelegate(
-            computeLength: () => children.length,
-            computeExtent: (index) => children[index],
-          ),
-          childrenDelegate: SliverChildBuilderDelegate(
-            (context, index) => Text('${children[index]}'),
-            childCount: children.length,
-          ),
-          customPointerSignalHandler: _handlePointerSignal,
-        ),
-      );
-
-      final scrollEventLocation =
-          tester.getCenter(find.byType(ExtentDelegateListView));
-      final testPointer = TestPointer(1, PointerDeviceKind.mouse);
-      // Create a hover event so that |testPointer| has a location when
-      // generating the scroll.
-      testPointer.hover(scrollEventLocation);
-
-      await tester.sendEventToBinding(
-        testPointer.scroll(const Offset(0.0, 10.0)),
-      );
-      expect(pointerSignalEventCount, equals(1));
-    });
-
-    testWidgets('inherits PrimaryScrollController automatically',
-        (tester) async {
-      final ScrollController controller = ScrollController();
-      await wrapAndPump(
-        tester,
-        PrimaryScrollController(
-          controller: controller,
-          child: ExtentDelegateListView(
+        await wrapAndPump(
+          tester,
+          ExtentDelegateListView(
+            controller: ScrollController(),
             extentDelegate: FixedExtentDelegate(
               computeLength: () => children.length,
               computeExtent: (index) => children[index],
@@ -97,12 +65,48 @@ void main() {
               (context, index) => Text('${children[index]}'),
               childCount: children.length,
             ),
+            customPointerSignalHandler: _handlePointerSignal,
           ),
-        ),
-      );
+        );
 
-      expect(controller.hasClients, isTrue);
-    });
+        final scrollEventLocation =
+            tester.getCenter(find.byType(ExtentDelegateListView));
+        final testPointer = TestPointer(1, PointerDeviceKind.mouse);
+        // Create a hover event so that |testPointer| has a location when
+        // generating the scroll.
+        testPointer.hover(scrollEventLocation);
+
+        await tester.sendEventToBinding(
+          testPointer.scroll(const Offset(0.0, 10.0)),
+        );
+        expect(pointerSignalEventCount, equals(1));
+      },
+    );
+
+    testWidgets(
+      'inherits PrimaryScrollController automatically',
+      (tester) async {
+        final ScrollController controller = ScrollController();
+        await wrapAndPump(
+          tester,
+          PrimaryScrollController(
+            controller: controller,
+            child: ExtentDelegateListView(
+              extentDelegate: FixedExtentDelegate(
+                computeLength: () => children.length,
+                computeExtent: (index) => children[index],
+              ),
+              childrenDelegate: SliverChildBuilderDelegate(
+                (context, index) => Text('${children[index]}'),
+                childCount: children.length,
+              ),
+            ),
+          ),
+        );
+
+        expect(controller.hasClients, isTrue);
+      },
+    );
 
     testWidgets('inherits PrimaryScrollController explicitly', (tester) async {
       final ScrollController controller = ScrollController();
@@ -127,109 +131,116 @@ void main() {
       expect(controller.hasClients, isTrue);
     });
 
-    testWidgets('inherits PrimaryScrollController explicitly - horizontal',
-        (tester) async {
-      final ScrollController controller = ScrollController();
-      await wrapAndPump(
-        tester,
-        PrimaryScrollController(
-          controller: controller,
-          child: ExtentDelegateListView(
-            primary: true,
-            scrollDirection: Axis.horizontal,
-            extentDelegate: FixedExtentDelegate(
-              computeLength: () => children.length,
-              computeExtent: (index) => children[index],
-            ),
-            childrenDelegate: SliverChildBuilderDelegate(
-              (context, index) => Text('${children[index]}'),
-              childCount: children.length,
-            ),
-          ),
-        ),
-      );
-
-      expect(controller.hasClients, isTrue);
-    });
-
-    testWidgets('does not inherit PrimaryScrollController - horizontal',
-        (tester) async {
-      final ScrollController controller = ScrollController();
-      await wrapAndPump(
-        tester,
-        PrimaryScrollController(
-          controller: controller,
-          child: ExtentDelegateListView(
-            controller: ScrollController(),
-            scrollDirection: Axis.horizontal,
-            extentDelegate: FixedExtentDelegate(
-              computeLength: () => children.length,
-              computeExtent: (index) => children[index],
-            ),
-            childrenDelegate: SliverChildBuilderDelegate(
-              (context, index) => Text('${children[index]}'),
-              childCount: children.length,
+    testWidgets(
+      'inherits PrimaryScrollController explicitly - horizontal',
+      (tester) async {
+        final ScrollController controller = ScrollController();
+        await wrapAndPump(
+          tester,
+          PrimaryScrollController(
+            controller: controller,
+            child: ExtentDelegateListView(
+              primary: true,
+              scrollDirection: Axis.horizontal,
+              extentDelegate: FixedExtentDelegate(
+                computeLength: () => children.length,
+                computeExtent: (index) => children[index],
+              ),
+              childrenDelegate: SliverChildBuilderDelegate(
+                (context, index) => Text('${children[index]}'),
+                childCount: children.length,
+              ),
             ),
           ),
-        ),
-      );
+        );
 
-      expect(controller.hasClients, isFalse);
-    });
-
-    testWidgets('does not inherit PrimaryScrollController - explicitly set',
-        (tester) async {
-      final ScrollController controller = ScrollController();
-      await wrapAndPump(
-        tester,
-        PrimaryScrollController(
-          controller: controller,
-          child: ExtentDelegateListView(
-            primary: false,
-            controller: ScrollController(),
-            scrollDirection: Axis.horizontal,
-            extentDelegate: FixedExtentDelegate(
-              computeLength: () => children.length,
-              computeExtent: (index) => children[index],
-            ),
-            childrenDelegate: SliverChildBuilderDelegate(
-              (context, index) => Text('${children[index]}'),
-              childCount: children.length,
-            ),
-          ),
-        ),
-      );
-
-      expect(controller.hasClients, isFalse);
-    });
+        expect(controller.hasClients, isTrue);
+      },
+    );
 
     testWidgets(
-        'does not inherit PrimaryScrollController - other controller set',
-        (tester) async {
-      final ScrollController primaryController = ScrollController();
-      final ScrollController listController = ScrollController();
-      await wrapAndPump(
-        tester,
-        PrimaryScrollController(
-          controller: primaryController,
-          child: ExtentDelegateListView(
-            controller: listController,
-            scrollDirection: Axis.horizontal,
-            extentDelegate: FixedExtentDelegate(
-              computeLength: () => children.length,
-              computeExtent: (index) => children[index],
-            ),
-            childrenDelegate: SliverChildBuilderDelegate(
-              (context, index) => Text('${children[index]}'),
-              childCount: children.length,
+      'does not inherit PrimaryScrollController - horizontal',
+      (tester) async {
+        final ScrollController controller = ScrollController();
+        await wrapAndPump(
+          tester,
+          PrimaryScrollController(
+            controller: controller,
+            child: ExtentDelegateListView(
+              controller: ScrollController(),
+              scrollDirection: Axis.horizontal,
+              extentDelegate: FixedExtentDelegate(
+                computeLength: () => children.length,
+                computeExtent: (index) => children[index],
+              ),
+              childrenDelegate: SliverChildBuilderDelegate(
+                (context, index) => Text('${children[index]}'),
+                childCount: children.length,
+              ),
             ),
           ),
-        ),
-      );
+        );
 
-      expect(primaryController.hasClients, isFalse);
-      expect(listController.hasClients, isTrue);
-    });
+        expect(controller.hasClients, isFalse);
+      },
+    );
+
+    testWidgets(
+      'does not inherit PrimaryScrollController - explicitly set',
+      (tester) async {
+        final ScrollController controller = ScrollController();
+        await wrapAndPump(
+          tester,
+          PrimaryScrollController(
+            controller: controller,
+            child: ExtentDelegateListView(
+              primary: false,
+              controller: ScrollController(),
+              scrollDirection: Axis.horizontal,
+              extentDelegate: FixedExtentDelegate(
+                computeLength: () => children.length,
+                computeExtent: (index) => children[index],
+              ),
+              childrenDelegate: SliverChildBuilderDelegate(
+                (context, index) => Text('${children[index]}'),
+                childCount: children.length,
+              ),
+            ),
+          ),
+        );
+
+        expect(controller.hasClients, isFalse);
+      },
+    );
+
+    testWidgets(
+      'does not inherit PrimaryScrollController - other controller set',
+      (tester) async {
+        final ScrollController primaryController = ScrollController();
+        final ScrollController listController = ScrollController();
+        await wrapAndPump(
+          tester,
+          PrimaryScrollController(
+            controller: primaryController,
+            child: ExtentDelegateListView(
+              controller: listController,
+              scrollDirection: Axis.horizontal,
+              extentDelegate: FixedExtentDelegate(
+                computeLength: () => children.length,
+                computeExtent: (index) => children[index],
+              ),
+              childrenDelegate: SliverChildBuilderDelegate(
+                (context, index) => Text('${children[index]}'),
+                childCount: children.length,
+              ),
+            ),
+          ),
+        );
+
+        expect(primaryController.hasClients, isFalse);
+        expect(listController.hasClients, isTrue);
+      },
+    );
 
     testWidgets('asserts there is a scroll controller', (tester) async {
       final ScrollController controller = ScrollController();

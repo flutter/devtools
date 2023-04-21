@@ -36,7 +36,7 @@ void main() {
   group('$PerfettoEventProcessor', () {
     late PerfettoEventProcessor processor;
 
-    setUp(() async {
+    setUp(() {
       final data = PerformanceData();
       final mockPerformanceController =
           createMockPerformanceControllerWithDefaults();
@@ -147,7 +147,7 @@ final _frameIdentifierEvents = [
     'pid': 94955,
     'ts': 100,
     'ph': 'B',
-    'args': {'frame_number': '1'}
+    'args': {'frame_number': '1'},
   }),
   testTraceEventWrapper({
     'name': 'Animator::BeginFrame',
@@ -156,7 +156,7 @@ final _frameIdentifierEvents = [
     'pid': 94955,
     'ts': 200,
     'ph': 'E',
-    'args': {}
+    'args': {},
   }),
   testTraceEventWrapper({
     'name': 'Animator::BeginFrame',
@@ -165,7 +165,7 @@ final _frameIdentifierEvents = [
     'pid': 94955,
     'ts': 300,
     'ph': 'B',
-    'args': {'frame_number': '2'}
+    'args': {'frame_number': '2'},
   }),
   testTraceEventWrapper({
     'name': 'Animator::BeginFrame',
@@ -174,7 +174,7 @@ final _frameIdentifierEvents = [
     'pid': 94955,
     'ts': 400,
     'ph': 'E',
-    'args': {}
+    'args': {},
   }),
   testTraceEventWrapper({
     'name': 'Animator::BeginFrame',
@@ -183,7 +183,7 @@ final _frameIdentifierEvents = [
     'pid': 94955,
     'ts': 500,
     'ph': 'B',
-    'args': {'frame_number': '3'}
+    'args': {'frame_number': '3'},
   }),
   testTraceEventWrapper({
     'name': 'Animator::BeginFrame',
@@ -192,7 +192,7 @@ final _frameIdentifierEvents = [
     'pid': 94955,
     'ts': 600,
     'ph': 'E',
-    'args': {}
+    'args': {},
   }),
   testTraceEventWrapper({
     'name': 'GPURasterizer::Draw',
@@ -204,7 +204,7 @@ final _frameIdentifierEvents = [
     'args': {
       'isolateId': 'id_001',
       'frame_number': '1',
-    }
+    },
   }),
   testTraceEventWrapper({
     'name': 'GPURasterizer::Draw',
@@ -213,7 +213,7 @@ final _frameIdentifierEvents = [
     'pid': 94955,
     'ts': 250,
     'ph': 'E',
-    'args': {}
+    'args': {},
   }),
   testTraceEventWrapper({
     'name': 'GPURasterizer::Draw',
@@ -225,7 +225,7 @@ final _frameIdentifierEvents = [
     'args': {
       'isolateId': 'id_001',
       'frame_number': '2',
-    }
+    },
   }),
   testTraceEventWrapper({
     'name': 'GPURasterizer::Draw',
@@ -234,7 +234,7 @@ final _frameIdentifierEvents = [
     'pid': 94955,
     'ts': 450,
     'ph': 'E',
-    'args': {}
+    'args': {},
   }),
   testTraceEventWrapper({
     'name': 'GPURasterizer::Draw',
@@ -246,7 +246,7 @@ final _frameIdentifierEvents = [
     'args': {
       'isolateId': 'id_001',
       'frame_number': '3',
-    }
+    },
   }),
   testTraceEventWrapper({
     'name': 'GPURasterizer::Draw',
@@ -255,6 +255,6 @@ final _frameIdentifierEvents = [
     'pid': 94955,
     'ts': 650,
     'ph': 'E',
-    'args': {}
+    'args': {},
   }),
 ];

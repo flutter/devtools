@@ -322,14 +322,8 @@ class DebuggerController extends DisposableController
     final currentScriptRefs =
         await scriptManager.retrieveAndSortScripts(theIsolateRef);
     final removedScripts =
-        // There seems to be a bug in how this lint is working with type
-        // inference.
-        // ignore: avoid-collection-methods-with-unrelated-types
         Set.of(previousScriptRefs).difference(Set.of(currentScriptRefs));
     final addedScripts =
-        // There seems to be a bug in how this lint is working with type
-        // inference.
-        // ignore: avoid-collection-methods-with-unrelated-types
         Set.of(currentScriptRefs).difference(Set.of(previousScriptRefs));
 
     // TODO(devoncarew): Show a message in the logging view.

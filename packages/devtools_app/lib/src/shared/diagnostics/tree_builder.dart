@@ -121,11 +121,11 @@ void _setupGrouping(DartObjectNode variable) {
   }
 }
 
-Future<void> _addInstanceSetItems(
+void _addInstanceSetItems(
   DartObjectNode variable,
   IsolateRef? isolateRef,
   InstanceSet instanceSet,
-) async {
+) {
   final instances = instanceSet.instances ?? [];
   variable.addAllChildren(
     createVariablesForInstanceSet(
@@ -165,7 +165,7 @@ Future<void> _addInstanceRefItems(
   );
 
   if (result is Instance) {
-    await _addChildrenToInstanceVariable(
+    _addChildrenToInstanceVariable(
       variable: variable,
       value: result,
       isolateRef: isolateRef,
@@ -176,13 +176,13 @@ Future<void> _addInstanceRefItems(
 }
 
 /// Adds children to the variable.
-Future<void> _addChildrenToInstanceVariable({
+void _addChildrenToInstanceVariable({
   required DartObjectNode variable,
   required Instance value,
   required IsolateRef? isolateRef,
   required HeapObjectSelection? heapSelection,
   Set<String>? existingNames,
-}) async {
+}) {
   switch (value.kind) {
     case InstanceKind.kMap:
       variable.addAllChildren(
@@ -258,6 +258,16 @@ Future<void> _addChildrenToInstanceVariable({
     case InstanceKind.kStackTrace:
       variable.addAllChildren(
         createVariablesForStackTrace(value, isolateRef),
+      );
+      break;
+    case InstanceKind.kMirrorReference:
+      variable.addAllChildren(
+        createVariablesForMirrorReference(value, isolateRef),
+      );
+      break;
+    case InstanceKind.kUserTag:
+      variable.addAllChildren(
+        createVariablesForUserTag(value, isolateRef),
       );
       break;
     default:
@@ -398,7 +408,7 @@ Future<void> buildVariablesTree(
     } else if (instanceRef != null && serviceManager.service != null) {
       await _addInstanceRefItems(variable, instanceRef, isolateRef);
     } else if (value is InstanceSet) {
-      await _addInstanceSetItems(variable, isolateRef, value);
+      _addInstanceSetItems(variable, isolateRef, value);
     } else if (value != null) {
       await _addValueItems(variable, isolateRef, value);
     }

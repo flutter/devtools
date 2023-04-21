@@ -159,7 +159,7 @@ class StatusLine extends StatelessWidget {
               DevToolsTooltip(
                 message: 'Device Info',
                 child: InkWell(
-                  onTap: () async {
+                  onTap: () {
                     unawaited(
                       showDialog(
                         context: context,

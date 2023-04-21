@@ -27,7 +27,7 @@ void main() {
     late HttpProfile httpProfile;
     late List<NetworkRequest> requests;
 
-    setUpAll(() async {
+    setUpAll(() {
       httpProfile = loadHttpProfile();
       socketProfile = loadSocketProfile();
       fakeServiceManager = FakeServiceManager(

@@ -21,7 +21,7 @@ import '../test_infra/flutter_test_storage.dart';
 // https://www.jsonrpc.org/specification#error_object
 const jsonRpcInvalidParamsCode = -32602;
 
-void main() async {
+void main() {
   setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
   setGlobal(IdeTheme, IdeTheme());
   setGlobal(Storage, FlutterTestStorage());

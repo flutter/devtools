@@ -7,7 +7,7 @@ publish_to: none
 # When publishing new versions of this package be sure to publish a new version
 # of package:devtools as well. package:devtools contains a compiled snapshot of
 # this package.
-version: 2.24.0-dev.1
+version: 2.24.0-dev.4
 
 repository: https://github.com/flutter/devtools/tree/master/packages/devtools_test
 
@@ -18,8 +18,8 @@ environment:
 dependencies:
   async: ^2.0.0
   collection: ^1.15.0
-  devtools_shared: 2.24.0-dev.1
-  devtools_app: 2.24.0-dev.1
+  devtools_shared: 2.24.0-dev.4
+  devtools_app: 2.24.0-dev.4
   flutter:
     sdk: flutter
   flutter_test:
@@ -32,6 +32,7 @@ dependencies:
   webkit_inspection_protocol: '>=0.5.0 <2.0.0'
 
 dependency_overrides:
+  dart_code_metrics: ^5.7.2
   # The '#OVERRIDE_FOR_DEVELOPMENT' lines are stripped out when we publish.
   # All overridden dependencies are published together so there is no harm
   # in treating them like they are part of a mono-repo while developing.

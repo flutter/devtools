@@ -208,40 +208,18 @@ class TreeTableController<T extends TreeNode<T>>
       ..sort(sortFunction)
       ..forEach(_sort);
 
-    _setDataAndNotify(dataKey: dataKey);
+    setDataAndNotify(dataKey: dataKey);
 
     setTableUiState(sortColumn: column, sortDirection: direction);
   }
 
-  void _setDataAndNotify({
-    bool rebuildFlatList = true,
-    List<T> additionalChildrenForColumnWidthComputation = const [],
-    String? dataKey,
-  }) {
-    var dataFlatList = _tableData.value.data;
-    if (rebuildFlatList) {
-      dataFlatList = buildFlatList(dataRoots);
-    }
-    columnWidths = computeColumnWidths(
-      [
-        ...dataFlatList,
-        ...additionalChildrenForColumnWidthComputation,
-      ],
-    );
+  void setDataAndNotify({String? dataKey}) {
+    final dataFlatList = buildFlatList(dataRoots);
+    columnWidths = computeColumnWidths(dataFlatList);
 
     _tableData.value = TableData<T>(
       data: dataFlatList,
       key: dataKey ?? _tableData.value.key,
-    );
-  }
-
-  void updateDataForAnimatingChildren({
-    required List<T> animatingChildren,
-    bool rebuildFlatList = true,
-  }) {
-    _setDataAndNotify(
-      rebuildFlatList: rebuildFlatList,
-      additionalChildrenForColumnWidthComputation: animatingChildren,
     );
   }
 }

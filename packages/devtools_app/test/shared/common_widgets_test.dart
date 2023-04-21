@@ -21,34 +21,36 @@ void main() {
 
   group('Common widgets', () {
     testWidgetsWithWindowSize(
-        'processingInfo builds for progressValue', windowSize,
-        (WidgetTester tester) async {
-      await tester.pumpWidget(
-        wrap(
-          const ProcessingInfo(
-            progressValue: 0.0,
-            processedObject: 'fake object',
+      'processingInfo builds for progressValue',
+      windowSize,
+      (WidgetTester tester) async {
+        await tester.pumpWidget(
+          wrap(
+            const ProcessingInfo(
+              progressValue: 0.0,
+              processedObject: 'fake object',
+            ),
           ),
-        ),
-      );
+        );
 
-      final progressIndicatorFinder = find.byType(LinearProgressIndicator);
-      LinearProgressIndicator progressIndicator =
-          tester.widget(progressIndicatorFinder);
+        final progressIndicatorFinder = find.byType(LinearProgressIndicator);
+        LinearProgressIndicator progressIndicator =
+            tester.widget(progressIndicatorFinder);
 
-      expect(progressIndicator.value, equals(0.0));
+        expect(progressIndicator.value, equals(0.0));
 
-      await tester.pumpWidget(
-        wrap(
-          const ProcessingInfo(
-            progressValue: 0.5,
-            processedObject: 'fake object',
+        await tester.pumpWidget(
+          wrap(
+            const ProcessingInfo(
+              progressValue: 0.5,
+              processedObject: 'fake object',
+            ),
           ),
-        ),
-      );
-      progressIndicator = tester.widget(progressIndicatorFinder);
-      expect(progressIndicator.value, equals(0.5));
-    });
+        );
+        progressIndicator = tester.widget(progressIndicatorFinder);
+        expect(progressIndicator.value, equals(0.5));
+      },
+    );
   });
 
   group('NotifierCheckbox', () {
@@ -124,26 +126,28 @@ void main() {
   group('AreaPaneHeader', () {
     const titleText = 'The title';
 
-    testWidgets('actions do not take up space when not present',
-        (WidgetTester tester) async {
-      await tester.pumpWidget(
-        wrap(
-          const AreaPaneHeader(
-            title: Text(titleText),
+    testWidgets(
+      'actions do not take up space when not present',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(
+          wrap(
+            const AreaPaneHeader(
+              title: Text(titleText),
+            ),
           ),
-        ),
-      );
+        );
 
-      final Row row = tester.widget(find.byType(Row)) as Row;
-      expect(
-        row.children.length,
-        equals(1),
-      );
-      expect(
-        find.text(titleText),
-        findsOneWidget,
-      );
-    });
+        final Row row = tester.widget(find.byType(Row)) as Row;
+        expect(
+          row.children.length,
+          equals(1),
+        );
+        expect(
+          find.text(titleText),
+          findsOneWidget,
+        );
+      },
+    );
 
     testWidgets('shows actions', (WidgetTester tester) async {
       const actionText = 'The Action Text';
