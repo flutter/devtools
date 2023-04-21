@@ -104,7 +104,7 @@ class VMFlagsDialog extends StatefulWidget {
   const VMFlagsDialog({super.key});
 
   @override
-  _VMFlagsDialogState createState() => _VMFlagsDialogState();
+  State createState() => _VMFlagsDialogState();
 }
 
 class _VMFlagsDialogState extends State<VMFlagsDialog> with AutoDisposeMixin {
