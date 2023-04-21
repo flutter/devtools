@@ -240,8 +240,7 @@ class CustomPointerScrollable extends StatefulWidget {
   final void Function(PointerSignalEvent event)? customPointerSignalHandler;
 
   @override
-  State createState() =>
-      _CustomPointerScrollableState();
+  State createState() => _CustomPointerScrollableState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -260,7 +259,7 @@ class CustomPointerScrollable extends StatefulWidget {
   ///
   /// Calling this method will create a dependency on the closest [Scrollable]
   /// in the [context], if there is one.
-  static _CustomPointerScrollableState? of(BuildContext context) {
+  static _CustomPointerScrollableState? _of(BuildContext context) {
     final _ScrollableScope? widget =
         context.dependOnInheritedWidgetOfExactType<_ScrollableScope>();
     return widget?.scrollable;
@@ -302,7 +301,7 @@ class CustomPointerScrollable extends StatefulWidget {
     final List<Future<void>> futures = <Future<void>>[];
 
     _CustomPointerScrollableState? scrollable =
-        CustomPointerScrollable.of(context);
+        CustomPointerScrollable._of(context);
     while (scrollable != null) {
       futures.add(
         scrollable.position!.ensureVisible(
@@ -314,7 +313,7 @@ class CustomPointerScrollable extends StatefulWidget {
         ),
       );
       context = scrollable.context;
-      scrollable = CustomPointerScrollable.of(context);
+      scrollable = CustomPointerScrollable._of(context);
     }
 
     if (futures.isEmpty || duration == Duration.zero) {
