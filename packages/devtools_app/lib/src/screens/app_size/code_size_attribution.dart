@@ -19,8 +19,7 @@ class CallGraphWithDominators extends StatefulWidget {
   final CallGraphNode callGraphRoot;
 
   @override
-  _CallGraphWithDominatorsState createState() =>
-      _CallGraphWithDominatorsState();
+  State createState() => _CallGraphWithDominatorsState();
 }
 
 class _CallGraphWithDominatorsState extends State<CallGraphWithDominators> {
@@ -86,7 +85,7 @@ class CallGraphView extends StatefulWidget {
   final CallGraphNode node;
 
   @override
-  _CallGraphViewState createState() => _CallGraphViewState();
+  State createState() => _CallGraphViewState();
 }
 
 class _CallGraphViewState extends State<CallGraphView> {
@@ -258,7 +257,8 @@ class ToColumn extends ColumnData<CallGraphNode> {
 }
 
 class DominatorTree extends StatelessWidget {
-  DominatorTree({super.key, 
+  DominatorTree({
+    super.key,
     required this.dominatorTreeRoot,
     required this.selectedNode,
   });

@@ -381,7 +381,7 @@ class DebuggerStatus extends StatefulWidget {
   final DebuggerController controller;
 
   @override
-  _DebuggerStatusState createState() => _DebuggerStatusState();
+  State createState() => _DebuggerStatusState();
 }
 
 class _DebuggerStatusState extends State<DebuggerStatus> with AutoDisposeMixin {
@@ -477,8 +477,7 @@ class FloatingDebuggerControls extends StatefulWidget {
   const FloatingDebuggerControls({super.key});
 
   @override
-  _FloatingDebuggerControlsState createState() =>
-      _FloatingDebuggerControlsState();
+  State createState() => _FloatingDebuggerControlsState();
 }
 
 class _FloatingDebuggerControlsState extends State<FloatingDebuggerControls>
