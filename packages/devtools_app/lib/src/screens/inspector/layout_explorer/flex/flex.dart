@@ -33,11 +33,10 @@ class FlexLayoutExplorerWidget extends LayoutExplorerWidget {
   }
 
   @override
-  _FlexLayoutExplorerWidgetState createState() =>
-      _FlexLayoutExplorerWidgetState();
+  State createState() => FlexLayoutExplorerWidgetState();
 }
 
-class _FlexLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
+class FlexLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
     FlexLayoutExplorerWidget, FlexLayoutProperties> {
   final scrollController = ScrollController();
 
@@ -400,10 +399,10 @@ class VisualizeFlexChildren extends StatefulWidget {
   final LayoutProperties? highlighted;
   final ScrollController scrollController;
   final Axis direction;
-  final _FlexLayoutExplorerWidgetState state;
+  final FlexLayoutExplorerWidgetState state;
 
   @override
-  _VisualizeFlexChildrenState createState() => _VisualizeFlexChildrenState();
+  State createState() => _VisualizeFlexChildrenState();
 }
 
 class _VisualizeFlexChildrenState extends State<VisualizeFlexChildren> {
@@ -561,7 +560,7 @@ class FlexChildVisualizer extends StatelessWidget {
     required this.isSelected,
   }) : super(key: key);
 
-  final _FlexLayoutExplorerWidgetState state;
+  final FlexLayoutExplorerWidgetState state;
 
   final bool isSelected;
 
