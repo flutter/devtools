@@ -86,7 +86,7 @@ class LeaksPaneController {
 
   Future<void> requestLeaksAndSaveToYaml() async {
     try {
-      analysisStatus.status.value = AnalysisStatus.Ongoing;
+      analysisStatus.status.value = AnalysisStatus.ongoing;
       await _setMessageWithDelay('Requested details from the application.');
 
       final leakDetails =
@@ -119,7 +119,7 @@ class LeaksPaneController {
       _saveResultAndSetAnalysisStatus(yaml, task);
     } catch (error) {
       analysisStatus.message.value = 'Error: $error';
-      analysisStatus.status.value = AnalysisStatus.ShowingError;
+      analysisStatus.status.value = AnalysisStatus.showingError;
     }
   }
 
@@ -140,7 +140,7 @@ class LeaksPaneController {
     await _setMessageWithDelay(
       'Downloaded the leak analysis to $yamlFile$taskFileMessage.',
     );
-    analysisStatus.status.value = AnalysisStatus.ShowingResult;
+    analysisStatus.status.value = AnalysisStatus.showingResult;
   }
 
   /// Saves raw analysis task for troubleshooting and deeper analysis.

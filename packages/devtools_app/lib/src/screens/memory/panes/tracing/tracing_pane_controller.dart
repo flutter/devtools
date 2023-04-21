@@ -268,7 +268,7 @@ class TracingPaneController extends DisposableController
     _initialized = true;
     _initializing.value = true;
 
-    updateState() async {
+    Future<void> updateState() async {
       final isolate = serviceManager.isolateManager.selectedIsolate.value!;
       final isolateId = isolate.id!;
       var state = _stateForIsolate[isolateId];

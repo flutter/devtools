@@ -111,10 +111,12 @@ class PerformanceData {
   }) {
     for (int i = startIndex; i < timelineEvents.length; i++) {
       final event = timelineEvents[i];
-      eventGroups.putIfAbsent(
-        PerformanceUtils.computeEventGroupKey(event, threadNamesById),
-        () => TimelineEventGroup(),
-      ).addEventAtCalculatedRow(event);
+      eventGroups
+          .putIfAbsent(
+            PerformanceUtils.computeEventGroupKey(event, threadNamesById),
+            () => TimelineEventGroup(),
+          )
+          .addEventAtCalculatedRow(event);
     }
   }
 
@@ -606,7 +608,7 @@ abstract class TimelineEvent extends TreeNode<TimelineEvent>
   }
 
   void maybeRemoveDuplicate() {
-    void _maybeRemoveDuplicate({required TimelineEvent parent}) {
+    void innerMaybeRemoveDuplicate({required TimelineEvent parent}) {
       if (parent.children.length == 1 &&
           // [parent]'s DurationBegin trace is equal to that of its only child.
           collectionEquals(
@@ -624,11 +626,11 @@ abstract class TimelineEvent extends TreeNode<TimelineEvent>
 
     // Remove [this] event's child if it is a duplicate of [this].
     if (children.isNotEmpty) {
-      _maybeRemoveDuplicate(parent: this);
+      innerMaybeRemoveDuplicate(parent: this);
     }
     // Remove [this] event if it is a duplicate of [parent].
     if (parent != null) {
-      _maybeRemoveDuplicate(parent: parent!);
+      innerMaybeRemoveDuplicate(parent: parent!);
     }
   }
 
@@ -642,7 +644,7 @@ abstract class TimelineEvent extends TreeNode<TimelineEvent>
   @override
   void addChild(TimelineEvent child, {int? index}) {
     assert(index == null);
-    void _putChildInTree(TimelineEvent root) {
+    void putChildInTree(TimelineEvent root) {
       // [root] is a leaf. Add child here.
       if (root.children.isEmpty) {
         root._addChild(child);
@@ -680,7 +682,7 @@ abstract class TimelineEvent extends TreeNode<TimelineEvent>
       for (TimelineEvent otherChild in children.reversed) {
         if (otherChild.couldBeParentOf(child)) {
           // Recurse on [otherChild]'s subtree.
-          _putChildInTree(otherChild);
+          putChildInTree(otherChild);
           return;
         }
       }
@@ -690,7 +692,7 @@ abstract class TimelineEvent extends TreeNode<TimelineEvent>
       root._addChild(child);
     }
 
-    _putChildInTree(this);
+    putChildInTree(this);
   }
 
   void _addChild(TimelineEvent child) {

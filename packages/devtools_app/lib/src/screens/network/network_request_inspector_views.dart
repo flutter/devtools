@@ -373,7 +373,7 @@ class HttpRequestCookiesView extends StatelessWidget {
     bool requestCookies = false,
   }) {
     final theme = Theme.of(context);
-    DataColumn _buildColumn(
+    DataColumn buildColumn(
       String title, {
       bool numeric = false,
     }) {
@@ -422,15 +422,15 @@ class HttpRequestCookiesView extends StatelessWidget {
                 // NOTE: if this list of columns change, _buildRow will need
                 // to be updated to match.
                 columns: [
-                  _buildColumn('Name'),
-                  _buildColumn('Value'),
+                  buildColumn('Name'),
+                  buildColumn('Value'),
                   if (!requestCookies) ...[
-                    _buildColumn('Domain'),
-                    _buildColumn('Path'),
-                    _buildColumn('Expires / Max Age'),
-                    _buildColumn('Size', numeric: true),
-                    _buildColumn('HttpOnly'),
-                    _buildColumn('Secure'),
+                    buildColumn('Domain'),
+                    buildColumn('Path'),
+                    buildColumn('Expires / Max Age'),
+                    buildColumn('Size', numeric: true),
+                    buildColumn('HttpOnly'),
+                    buildColumn('Secure'),
                   ],
                 ],
                 rows: [
@@ -628,7 +628,7 @@ class NetworkRequestOverviewView extends StatelessWidget {
     ];
 
     var colorIndex = 0;
-    Color _nextColor() {
+    Color nextColor() {
       final color = colors[colorIndex % colors.length];
       colorIndex++;
       return color;
@@ -640,7 +640,7 @@ class NetworkRequestOverviewView extends StatelessWidget {
     for (final instant in data.instantEvents) {
       final duration = instant.timeRange!.duration;
       timingWidgets.add(
-        _buildTimingRow(_nextColor(), instant.name, duration),
+        _buildTimingRow(nextColor(), instant.name, duration),
       );
     }
     final duration = Duration(
@@ -649,7 +649,7 @@ class NetworkRequestOverviewView extends StatelessWidget {
           data.timelineMicrosecondsSinceEpoch(0),
     );
     timingWidgets.add(
-      _buildTimingRow(_nextColor(), 'Response', duration),
+      _buildTimingRow(nextColor(), 'Response', duration),
     );
     return Row(
       key: httpTimingGraphKey,

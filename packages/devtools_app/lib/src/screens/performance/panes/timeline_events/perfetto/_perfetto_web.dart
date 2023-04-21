@@ -4,6 +4,7 @@
 
 import 'dart:async';
 import 'dart:convert';
+// ignore: avoid_web_libraries_in_flutter, as designed
 import 'dart:html' as html;
 
 import 'package:flutter/foundation.dart';

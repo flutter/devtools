@@ -26,7 +26,7 @@ class TabbedPerformanceView extends StatefulWidget {
   const TabbedPerformanceView({super.key});
 
   @override
-  _TabbedPerformanceViewState createState() => _TabbedPerformanceViewState();
+  State createState() => _TabbedPerformanceViewState();
 }
 
 class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
