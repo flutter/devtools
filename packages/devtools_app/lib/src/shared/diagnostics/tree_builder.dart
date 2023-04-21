@@ -47,7 +47,7 @@ Future<void> _addDiagnosticsIfNeeded(
   if (diagnostic == null || !includeDiagnosticPropertiesInDebugger) return;
 
   final service = diagnostic.inspectorService;
-  Future<void> _addPropertiesHelper(
+  Future<void> addPropertiesHelper(
     List<RemoteDiagnosticsNode>? properties,
   ) async {
     if (properties == null || service == null || isolateRef == null) return;
@@ -63,11 +63,11 @@ Future<void> _addDiagnosticsIfNeeded(
   }
 
   if (diagnostic.inlineProperties.isNotEmpty) {
-    await _addPropertiesHelper(diagnostic.inlineProperties);
+    await addPropertiesHelper(diagnostic.inlineProperties);
   } else {
     assert(!service!.disposed);
     if (!service!.disposed) {
-      await _addPropertiesHelper(await diagnostic.getProperties(service));
+      await addPropertiesHelper(await diagnostic.getProperties(service));
     }
   }
 }
@@ -327,7 +327,7 @@ Future<void> _addInspectorItems(variable, IsolateRef? isolateRef) async {
   if (inspectorService != null) {
     final tasks = <Future>[];
     ObjectGroupBase? group;
-    Future<void> _maybeUpdateRef(DartObjectNode child) async {
+    Future<void> maybeUpdateRef(DartObjectNode child) async {
       final childRef = child.ref;
       if (childRef == null) return;
       if (childRef.diagnostic == null) {
@@ -365,7 +365,7 @@ Future<void> _addInspectorItems(variable, IsolateRef? isolateRef) async {
     }
 
     for (var child in variable.children) {
-      tasks.add(_maybeUpdateRef(child));
+      tasks.add(maybeUpdateRef(child));
     }
     if (tasks.isNotEmpty) {
       await Future.wait(tasks);
