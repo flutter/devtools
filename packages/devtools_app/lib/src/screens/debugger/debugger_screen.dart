@@ -89,7 +89,7 @@ class DebuggerScreen extends Screen {
 }
 
 class DebuggerScreenBody extends StatefulWidget {
-  const DebuggerScreenBody();
+  const DebuggerScreenBody({super.key});
 
   static final codeViewKey = GlobalKey(debugLabel: 'codeViewKey');
   static final scriptViewKey = GlobalKey(debugLabel: 'scriptViewKey');
@@ -459,7 +459,7 @@ class _DebuggerStatusState extends State<DebuggerStatus> with AutoDisposeMixin {
       return 'paused$reason';
     }
 
-    final fileName = ' at ' + scriptUri.split('/').last;
+    final fileName = ' at ${scriptUri.split('/').last}';
     final tokenPos = location?.tokenPos;
     final scriptRef = location?.script;
     if (tokenPos == null || scriptRef == null) {
@@ -474,6 +474,8 @@ class _DebuggerStatusState extends State<DebuggerStatus> with AutoDisposeMixin {
 }
 
 class FloatingDebuggerControls extends StatefulWidget {
+  const FloatingDebuggerControls({super.key});
+
   @override
   _FloatingDebuggerControlsState createState() =>
       _FloatingDebuggerControlsState();

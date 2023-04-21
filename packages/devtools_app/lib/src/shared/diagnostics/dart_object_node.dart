@@ -277,8 +277,9 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
     }
     final diagnostic = theRef?.diagnostic;
     if (diagnostic != null &&
-        ((diagnostic.inlineProperties.isNotEmpty) || diagnostic.hasChildren))
+        ((diagnostic.inlineProperties.isNotEmpty) || diagnostic.hasChildren)) {
       return true;
+    }
 
     // TODO(jacobr): do something smarter to avoid expandable variable flicker.
     if (instanceRef != null) {

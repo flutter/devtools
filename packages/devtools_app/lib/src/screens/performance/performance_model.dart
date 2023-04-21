@@ -114,7 +114,7 @@ class PerformanceData {
       eventGroups.putIfAbsent(
         PerformanceUtils.computeEventGroupKey(event, threadNamesById),
         () => TimelineEventGroup(),
-      )..addEventAtCalculatedRow(event);
+      ).addEventAtCalculatedRow(event);
     }
   }
 
@@ -649,12 +649,12 @@ abstract class TimelineEvent extends TreeNode<TimelineEvent>
         return;
       }
 
-      final _children = root.children.toList();
+      final children = root.children.toList();
 
       // If [child] is the parent of some or all of the members in [_children],
       // those members will need to be reordered in the tree.
       final childrenToReorder = <TimelineEvent>[];
-      for (TimelineEvent otherChild in _children) {
+      for (TimelineEvent otherChild in children) {
         if (child.couldBeParentOf(otherChild)) {
           childrenToReorder.add(otherChild);
         }
@@ -677,7 +677,7 @@ abstract class TimelineEvent extends TreeNode<TimelineEvent>
       // children in [_children] share a timestamp, they both could be the
       // parent of [child]. We reverse [_children] so that we will pick the last
       // received candidate as the new parent of [child].
-      for (TimelineEvent otherChild in _children.reversed) {
+      for (TimelineEvent otherChild in children.reversed) {
         if (otherChild.couldBeParentOf(child)) {
           // Recurse on [otherChild]'s subtree.
           _putChildInTree(otherChild);
@@ -989,10 +989,10 @@ class AsyncTimelineEvent extends TimelineEvent {
   @override
   void addChild(TimelineEvent child, {int? index}) {
     assert(index == null);
-    final _child = child as AsyncTimelineEvent;
+    final child0 = child as AsyncTimelineEvent;
     // Short circuit if we are using an explicit parentId.
-    if (_child.hasExplicitParent &&
-        _child.parentAsyncUID == traceEvents.first.event.asyncUID) {
+    if (child0.hasExplicitParent &&
+        child0.parentAsyncUID == traceEvents.first.event.asyncUID) {
       _addChild(child);
     } else {
       super.addChild(child);

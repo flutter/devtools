@@ -20,7 +20,7 @@ import 'theme.dart';
 import 'utils.dart';
 
 class DeviceDialog extends StatelessWidget {
-  const DeviceDialog({required this.connectedApp});
+  const DeviceDialog({super.key, required this.connectedApp});
 
   final ConnectedApp connectedApp;
 
@@ -91,7 +91,7 @@ class _ViewVMFlagsButton extends StatelessWidget {
         unawaited(
           showDialog(
             context: context,
-            builder: (context) => VMFlagsDialog(),
+            builder: (context) => const VMFlagsDialog(),
           ),
         );
       },
@@ -101,6 +101,8 @@ class _ViewVMFlagsButton extends StatelessWidget {
 }
 
 class VMFlagsDialog extends StatefulWidget {
+  const VMFlagsDialog({super.key});
+
   @override
   _VMFlagsDialogState createState() => _VMFlagsDialogState();
 }
@@ -153,7 +155,7 @@ class _VMFlagsDialogState extends State<VMFlagsDialog> with AutoDisposeMixin {
         children: [
           const DialogTitleText('VM Flags'),
           const Expanded(child: SizedBox(width: denseSpacing)),
-          Container(
+          SizedBox(
             width: defaultSearchFieldWidth,
             height: defaultTextFieldHeight,
             child: TextField(

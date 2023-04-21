@@ -268,7 +268,7 @@ class TracingPaneController extends DisposableController
     _initialized = true;
     _initializing.value = true;
 
-    final updateState = () async {
+    updateState() async {
       final isolate = serviceManager.isolateManager.selectedIsolate.value!;
       final isolateId = isolate.id!;
       var state = _stateForIsolate[isolateId];
@@ -283,7 +283,7 @@ class TracingPaneController extends DisposableController
       // Restore the previously applied filter for the isolate.
       textEditingController.text = state._currentFilter;
       _stateForIsolateListenable.value = state;
-    };
+    }
 
     addAutoDisposeListener(
       serviceManager.isolateManager.selectedIsolate,

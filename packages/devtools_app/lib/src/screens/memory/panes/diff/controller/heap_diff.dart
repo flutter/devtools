@@ -59,10 +59,12 @@ class _HeapCouple {
     if (heap2.data.created.isBefore(heap1.data.created)) return heap2;
     if (identityHashCode(heap1) < identityHashCode(heap2)) return heap1;
     if (identityHashCode(heap2) < identityHashCode(heap1)) return heap2;
-    if (identityHashCode(heap1.data) < identityHashCode(heap2.data))
+    if (identityHashCode(heap1.data) < identityHashCode(heap2.data)) {
       return heap1;
-    if (identityHashCode(heap2.data) < identityHashCode(heap1.data))
+    }
+    if (identityHashCode(heap2.data) < identityHashCode(heap1.data)) {
       return heap2;
+    }
     return heap1;
   }
 

@@ -120,9 +120,9 @@ void main() {
       final disposer = Disposer();
       final notifier = ValueNotifier<int>(42);
       final values = <int>[];
-      final listener = () {
+      listener() {
         values.add(notifier.value);
-      };
+      }
       disposer.addAutoDisposeListener(notifier, listener);
       expect(notifier.hasListeners, isTrue);
       notifier.value = 13;

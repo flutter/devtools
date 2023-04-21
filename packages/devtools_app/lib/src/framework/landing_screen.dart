@@ -31,7 +31,7 @@ import 'framework_core.dart';
 /// available as well as to provide access to other functionality that does not
 /// require a connected Dart application.
 class LandingScreenBody extends StatefulWidget {
-  const LandingScreenBody({this.sampleData = const []});
+  const LandingScreenBody({super.key, this.sampleData = const []});
 
   final List<DevToolsJsonFile> sampleData;
 

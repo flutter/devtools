@@ -13,7 +13,7 @@ import 'primitives/trees.dart';
 import 'theme.dart';
 
 class TreeView<T extends TreeNode<T>> extends StatefulWidget {
-  const TreeView({
+  const TreeView({super.key, 
     required this.dataRootsListenable,
     required this.dataDisplayProvider,
     required this.onItemSelected,

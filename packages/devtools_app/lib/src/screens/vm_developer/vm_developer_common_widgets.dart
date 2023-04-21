@@ -34,7 +34,7 @@ import 'vm_service_private_extensions.dart';
 /// `table` is a widget (typically a table) that is to be displayed after the
 /// rows specified for `rowKeyValues`.
 class VMInfoCard extends StatelessWidget implements PreferredSizeWidget {
-  const VMInfoCard({
+  const VMInfoCard({super.key, 
     required this.title,
     this.rowKeyValues,
     this.table,
@@ -101,7 +101,7 @@ MapEntry<String, WidgetBuilder> serviceObjectLinkBuilderMapEntry({
 }
 
 class VMInfoList extends StatelessWidget {
-  const VMInfoList({
+  const VMInfoList({super.key, 
     required this.title,
     this.rowKeyValues,
     this.table,
@@ -184,7 +184,7 @@ Widget _buildAlternatingRow(BuildContext context, int index, Widget row) {
 /// When the data is being requested (the value of [fetching] is true),
 /// a CircularProgressIndicator will be displayed.
 class RequestableSizeWidget extends StatelessWidget {
-  const RequestableSizeWidget({
+  const RequestableSizeWidget({super.key, 
     required this.fetching,
     required this.sizeProvider,
     required this.requestFunction,
@@ -288,7 +288,7 @@ String? _objectDescription(ObjRef? object) {
   return switch (object) {
     FieldRef(:final declaredType, :final name, :final owner) =>
       '${declaredType?.name ?? 'Field'} $name of ${_objectName(owner) ?? '<Owner>'}',
-    FuncRef() => '${qualifiedName(object) ?? '<Function Name>'}',
+    FuncRef() => qualifiedName(object) ?? '<Function Name>',
     _ => _objectName(object),
   };
 }
@@ -296,7 +296,7 @@ String? _objectDescription(ObjRef? object) {
 /// An ExpansionTile with an AreaPaneHeader as header and custom style
 /// for the VM tools tab.
 class VmExpansionTile extends StatelessWidget {
-  const VmExpansionTile({
+  const VmExpansionTile({super.key, 
     required this.title,
     required this.children,
     this.onExpanded,
@@ -339,6 +339,8 @@ class VmExpansionTile extends StatelessWidget {
 }
 
 class SizedCircularProgressIndicator extends StatelessWidget {
+  const SizedCircularProgressIndicator({super.key});
+
   @override
   Widget build(BuildContext context) {
     return SizedBox.fromSize(
@@ -351,7 +353,7 @@ class SizedCircularProgressIndicator extends StatelessWidget {
 }
 
 class ExpansionTileInstanceList extends StatelessWidget {
-  const ExpansionTileInstanceList({
+  const ExpansionTileInstanceList({super.key, 
     required this.controller,
     required this.title,
     required this.elements,
@@ -388,7 +390,7 @@ class ExpansionTileInstanceList extends StatelessWidget {
 
 /// An expandable list to display the retaining objects for a given RetainingPath.
 class RetainingPathWidget extends StatelessWidget {
-  const RetainingPathWidget({
+  const RetainingPathWidget({super.key, 
     required this.controller,
     required this.retainingPath,
     this.onExpanded,
@@ -414,7 +416,7 @@ class RetainingPathWidget extends StatelessWidget {
           onExpanded: onExpanded,
           children: [
             retainingPath == null
-                ? SizedCircularProgressIndicator()
+                ? const SizedCircularProgressIndicator()
                 : SizedBox.fromSize(
                     size: Size.fromHeight(
                       retainingObjects.length * defaultRowHeight + densePadding,
@@ -433,10 +435,10 @@ class RetainingPathWidget extends StatelessWidget {
     BuildContext context,
     RetainingPath retainingPath,
   ) {
-    final onTap = (ObjRef? obj) async {
+    Future<void> onTap(ObjRef? obj) async {
       if (obj == null) return;
       await controller.findAndSelectNodeForObject(obj);
-    };
+    }
     final theme = Theme.of(context);
     final emptyList = SelectableText(
       'No retaining objects',
@@ -596,7 +598,7 @@ String _parentListElementDescription(int listIndex, ObjRef? obj) {
 /// An expandable list to display the inbound references for a given
 /// instance of InboundReferences.
 class InboundReferencesWidget extends StatelessWidget {
-  const InboundReferencesWidget({
+  const InboundReferencesWidget({super.key, 
     required this.inboundReferences,
     this.onExpanded,
   });
@@ -618,7 +620,7 @@ class InboundReferencesWidget extends StatelessWidget {
           onExpanded: onExpanded,
           children: [
             inboundReferences == null
-                ? SizedCircularProgressIndicator()
+                ? const SizedCircularProgressIndicator()
                 : SizedBox.fromSize(
                     size: Size.fromHeight(
                       references.length * defaultRowHeight + densePadding,
@@ -703,7 +705,7 @@ class InboundReferencesWidget extends StatelessWidget {
 }
 
 class VmServiceObjectLink extends StatelessWidget {
-  const VmServiceObjectLink({
+  const VmServiceObjectLink({super.key, 
     required this.object,
     required this.onTap,
     this.preferUri = false,
@@ -766,9 +768,7 @@ class VmServiceObjectLink extends StatelessWidget {
         final depth = trace.frames.length;
         return 'StackTrace ($depth ${pluralize('frame', depth)})';
       default:
-        return valueAsString != null
-            ? valueAsString
-            : '${instance.classRef!.name}';
+        return valueAsString ?? '${instance.classRef!.name}';
     }
   }
 
@@ -820,7 +820,7 @@ class VmServiceObjectLink extends StatelessWidget {
 /// A widget for the object inspector historyViewport containing the main
 /// layout of information widgets related to VM object types.
 class VmObjectDisplayBasicLayout extends StatelessWidget {
-  const VmObjectDisplayBasicLayout({
+  const VmObjectDisplayBasicLayout({super.key, 
     required this.controller,
     required this.object,
     required this.generalDataRows,

@@ -59,7 +59,7 @@ enum ScrollKind {
 /// [searchController] after sort operations that are triggered from the table.
 class SearchableFlatTable<T extends SearchableDataMixin> extends FlatTable {
   SearchableFlatTable({
-    Key? key,
+    super.key,
     required SearchControllerMixin<T> searchController,
     required super.keyFactory,
     required super.data,

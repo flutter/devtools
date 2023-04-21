@@ -43,7 +43,7 @@ class ExtensionState {
 /// states for keeping state on the client and device consistent so you don't
 /// have to.
 class ServiceExtensionButtonGroup extends StatefulWidget {
-  const ServiceExtensionButtonGroup({
+  const ServiceExtensionButtonGroup({super.key, 
     this.minScreenWidthForTextBeforeScaling,
     required this.extensions,
   });
@@ -183,6 +183,8 @@ class _ServiceExtensionButtonGroupState
 
 /// Button that performs a hot reload on the [serviceManager].
 class HotReloadButton extends StatelessWidget {
+  const HotReloadButton({super.key});
+
   @override
   Widget build(BuildContext context) {
     // TODO(devoncarew): Show as disabled when reload service calls are in progress.
@@ -209,6 +211,8 @@ class HotReloadButton extends StatelessWidget {
 
 /// Button that performs a hot restart on the [serviceManager].
 class HotRestartButton extends StatelessWidget {
+  const HotRestartButton({super.key});
+
   @override
   Widget build(BuildContext context) {
     // TODO(devoncarew): Show as disabled when reload service calls are in progress.
@@ -329,6 +333,8 @@ class _RegisteredServiceExtensionButtonState
 
 /// Control that toggles the value of [structuredErrors].
 class StructuredErrorsToggle extends StatelessWidget {
+  const StructuredErrorsToggle({super.key});
+
   @override
   Widget build(BuildContext context) {
     return _ServiceExtensionToggle(

@@ -322,7 +322,7 @@ List<RebuildLocationStats> combineStats(
           entry.location,
           numStats: numStats,
         ),
-      )..buildCounts[i] = entry.buildCount;
+      ).buildCounts[i] = entry.buildCount;
     }
   }
   return output.values.toList(growable: false);

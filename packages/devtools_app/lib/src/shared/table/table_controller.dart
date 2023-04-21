@@ -191,7 +191,7 @@ class TreeTableController<T extends TreeNode<T>>
     String? dataKey,
   }) {
     pinnedData = <T>[];
-    final sortFunction = (T a, T b) => _compareData<T>(
+    int sortFunction(T a, T b) => _compareData<T>(
           a,
           b,
           column,

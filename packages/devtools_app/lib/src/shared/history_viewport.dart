@@ -24,7 +24,7 @@ import 'theme.dart';
 /// If [generateTitle] is provided, the title string will be set to the
 /// returned value. If not provided, the title will be empty.
 class HistoryViewport<T> extends StatefulWidget {
-  const HistoryViewport({
+  const HistoryViewport({super.key, 
     required this.history,
     required this.contentBuilder,
     this.controls,
@@ -104,7 +104,7 @@ class _HistoryViewportState<T> extends State<HistoryViewport<T>> {
                   icon: Icons.chevron_right,
                   onPressed: widget.history.hasNext
                       ? () {
-                          final current = widget.history.current.value!;
+                          final current = widget.history.current.value as T;
                           widget.history.moveForward();
                           if (widget.onChange != null) {
                             widget.onChange!(

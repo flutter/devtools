@@ -208,7 +208,7 @@ class _DartObjectColumn extends _CodeColumnData
 /// A widget for the object inspector historyViewport displaying information
 /// related to [Code] objects in the Dart VM.
 class VmCodeDisplay extends StatelessWidget {
-  const VmCodeDisplay({
+  const VmCodeDisplay({super.key, 
     required this.controller,
     required this.code,
   });

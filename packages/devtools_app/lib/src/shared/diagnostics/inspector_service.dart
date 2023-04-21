@@ -349,7 +349,7 @@ class InspectorService extends InspectorServiceBase {
         }
         final google3PackageName = packageParts.join('.');
         _rootPackages.add(google3PackageName);
-        _rootPackagePrefixes.add(google3PackageName + '.');
+        _rootPackagePrefixes.add('$google3PackageName.');
       } else {
         _rootPackages.add(path.last);
       }
@@ -616,14 +616,14 @@ abstract class ObjectGroupBase implements Disposable {
     return disposeComplete;
   }
 
-  Future<T?> nullIfDisposed<T>(Future<T> supplier()) async {
+  Future<T?> nullIfDisposed<T>(Future<T> Function() supplier) async {
     if (disposed) {
       return null;
     }
     return await supplier();
   }
 
-  T? nullValueIfDisposed<T>(T supplier()) {
+  T? nullValueIfDisposed<T>(T Function() supplier) {
     if (disposed) {
       return null;
     }
@@ -631,7 +631,7 @@ abstract class ObjectGroupBase implements Disposable {
     return supplier();
   }
 
-  void skipIfDisposed(void runnable()) {
+  void skipIfDisposed(void Function() runnable) {
     if (disposed) {
       return;
     }
@@ -1225,7 +1225,7 @@ class ObjectGroup extends ObjectGroupBase {
     if (disposed) return null;
     RemoteDiagnosticsNode? newSelection;
     final InspectorInstanceRef? previousSelectionRef =
-        previousSelection != null ? previousSelection.dartDiagnosticRef : null;
+        previousSelection?.dartDiagnosticRef;
 
     switch (treeType) {
       case FlutterTreeType.widget:

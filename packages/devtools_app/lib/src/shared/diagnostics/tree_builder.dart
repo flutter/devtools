@@ -385,8 +385,9 @@ Future<void> buildVariablesTree(
   bool expandAll = false,
 }) async {
   final ref = variable.ref;
-  if (!variable.isExpandable || variable.treeInitializeStarted || ref == null)
+  if (!variable.isExpandable || variable.treeInitializeStarted || ref == null) {
     return;
+  }
   variable.treeInitializeStarted = true;
 
   final isolateRef = ref.isolateRef;

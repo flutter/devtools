@@ -33,7 +33,7 @@ const _showRenderObjectPropertiesAsLinks = false;
 ///   inspector tree.
 class DiagnosticsNodeDescription extends StatelessWidget {
   const DiagnosticsNodeDescription(
-    this.diagnostic, {
+    this.diagnostic, {super.key, 
     this.isSelected = false,
     this.searchValue,
     this.errorText,

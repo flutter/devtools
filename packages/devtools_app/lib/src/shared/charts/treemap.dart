@@ -18,7 +18,7 @@ final _log = Logger('charts/treemap');
 
 class Treemap extends StatefulWidget {
   // TODO(peterdjlee): Consider auto-expanding rootNode named 'src'.
-  const Treemap.fromRoot({
+  const Treemap.fromRoot({super.key, 
     required this.rootNode,
     this.nodes,
     required this.levelsVisible,
@@ -28,7 +28,7 @@ class Treemap extends StatefulWidget {
     required this.onRootChangedCallback,
   }) : assert((rootNode == null) != (nodes == null));
 
-  const Treemap.fromNodes({
+  const Treemap.fromNodes({super.key, 
     this.rootNode,
     required this.nodes,
     required this.levelsVisible,
@@ -617,11 +617,9 @@ class TreemapNode extends TreeNode<TreemapNode> {
 
   TextSpan displayText({Color? color, bool oneLine = true}) {
     var displayName = name;
-    final textColor = color == null
-        ? showDiff
+    final textColor = color ?? (showDiff
             ? Colors.white
-            : Colors.black
-        : color;
+            : Colors.black);
 
     // Trim beginning of the name of [this] if it starts with its parent's name.
     // If the parent node and the child node's name are exactly the same,
@@ -704,9 +702,9 @@ class TreemapNode extends TreeNode<TreemapNode> {
   }
 
   void printTreeHelper(TreemapNode root, String tabs) {
-    _log.info(tabs + '$root');
+    _log.info('$tabs$root');
     for (final child in root.children) {
-      printTreeHelper(child, tabs + '\t');
+      printTreeHelper(child, '$tabs\t');
     }
   }
 
@@ -725,7 +723,7 @@ class TreemapNode extends TreeNode<TreemapNode> {
 }
 
 class PositionedCell extends Positioned {
-  PositionedCell({
+  PositionedCell({super.key, 
     required this.rect,
     required this.node,
     required child,

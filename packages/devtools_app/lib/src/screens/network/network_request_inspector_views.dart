@@ -42,7 +42,7 @@ ExpansionTile _buildTile(
 /// This widget displays general HTTP request / response information that is
 /// contained in the headers, in addition to the standard connection information.
 class HttpRequestHeadersView extends StatelessWidget {
-  const HttpRequestHeadersView(this.data);
+  const HttpRequestHeadersView(this.data, {super.key});
 
   @visibleForTesting
   static const generalKey = Key('General');
@@ -129,7 +129,7 @@ class _Row extends StatelessWidget {
 }
 
 class HttpRequestView extends StatelessWidget {
-  const HttpRequestView(this.data);
+  const HttpRequestView(this.data, {super.key});
 
   final DartIOHttpRequestData data;
 
@@ -175,7 +175,7 @@ class HttpRequestView extends StatelessWidget {
 /// If there is no content to copy, the button will not show. The copy contents
 /// will update as the request's data is updated.
 class HttpViewTrailingCopyButton extends StatelessWidget {
-  const HttpViewTrailingCopyButton(this.data, this.dataSelector);
+  const HttpViewTrailingCopyButton(this.data, this.dataSelector, {super.key});
   final DartIOHttpRequestData data;
   final String? Function(DartIOHttpRequestData) dataSelector;
 
@@ -202,7 +202,7 @@ class HttpViewTrailingCopyButton extends StatelessWidget {
 }
 
 class HttpResponseView extends StatelessWidget {
-  const HttpResponseView(this.data);
+  const HttpResponseView(this.data, {super.key});
 
   final DartIOHttpRequestData data;
 
@@ -246,7 +246,7 @@ class HttpResponseView extends StatelessWidget {
 }
 
 class ImageResponseView extends StatelessWidget {
-  const ImageResponseView(this.data);
+  const ImageResponseView(this.data, {super.key});
 
   final DartIOHttpRequestData data;
 
@@ -330,7 +330,7 @@ class ImageResponseView extends StatelessWidget {
 
 /// A [Widget] which displays [Cookie] information in a tab.
 class HttpRequestCookiesView extends StatelessWidget {
-  const HttpRequestCookiesView(this.data);
+  const HttpRequestCookiesView(this.data, {super.key});
 
   @visibleForTesting
   static const requestCookiesKey = Key('Request Cookies');
@@ -488,7 +488,7 @@ class HttpRequestCookiesView extends StatelessWidget {
 }
 
 class NetworkRequestOverviewView extends StatelessWidget {
-  const NetworkRequestOverviewView(this.data);
+  const NetworkRequestOverviewView(this.data, {super.key});
 
   static const _keyWidth = 110.0;
   static const _timingGraphHeight = 18.0;
@@ -621,16 +621,16 @@ class NetworkRequestOverviewView extends StatelessWidget {
       );
     }
 
-    const _colors = [
+    const colors = [
       searchMatchColor,
       mainRasterColor,
       mainAsyncColor,
     ];
 
-    var _colorIndex = 0;
+    var colorIndex = 0;
     Color _nextColor() {
-      final color = _colors[_colorIndex % _colors.length];
-      _colorIndex++;
+      final color = colors[colorIndex % colors.length];
+      colorIndex++;
       return color;
     }
 
@@ -698,7 +698,7 @@ class NetworkRequestOverviewView extends StatelessWidget {
       _buildRow(
         context: context,
         title: 'Socket id',
-        child: _valueText('${socket.id}'),
+        child: _valueText(socket.id),
       ),
       const SizedBox(height: defaultSpacing),
       _buildRow(
@@ -761,7 +761,7 @@ class NetworkRequestOverviewView extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Container(
+        SizedBox(
           width: _keyWidth,
           child: SelectableText(
             title.isEmpty ? '' : '$title: ',

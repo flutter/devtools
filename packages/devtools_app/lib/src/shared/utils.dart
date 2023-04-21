@@ -93,10 +93,10 @@ List<_ConnectionDescription> generateDeviceDescription(
 
   final flutterVersion = connectedApp.flutterVersionNow;
 
-  _ConnectionDescription? _vmServiceConnection;
+  _ConnectionDescription? vmServiceConnection;
   if (includeVmServiceConnection && serviceManager.service != null) {
     final description = serviceManager.service!.connectedUri.toString();
-    _vmServiceConnection = _ConnectionDescription(
+    vmServiceConnection = _ConnectionDescription(
       title: 'VM Service Connection',
       description: description,
       actions: [CopyToClipboardControl(dataProvider: () => description)],
@@ -121,7 +121,7 @@ List<_ConnectionDescription> generateDeviceDescription(
       title: 'Connected app type',
       description: connectedApp.display,
     ),
-    if (_vmServiceConnection != null) _vmServiceConnection,
+    if (vmServiceConnection != null) vmServiceConnection,
   ];
 }
 

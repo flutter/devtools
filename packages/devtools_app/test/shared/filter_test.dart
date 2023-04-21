@@ -232,7 +232,7 @@ class _TestController extends DisposableController
         ..addAll(data);
       return;
     }
-    final filterCallback = (_TestDataClass element) {
+    bool filterCallback(_TestDataClass element) {
       // First filter by the toggle filters.
       final toggleFilters = filter.toggleFilters;
       for (final toggleFilter in toggleFilters) {
@@ -268,7 +268,7 @@ class _TestController extends DisposableController
       }
 
       return true;
-    };
+    }
     filteredData
       ..clear()
       ..addAll(data.where(filterCallback));

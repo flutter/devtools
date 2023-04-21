@@ -294,7 +294,7 @@ class _SplitState extends State<Split> {
 }
 
 class DefaultSplitter extends StatelessWidget {
-  const DefaultSplitter({required this.isHorizontal});
+  const DefaultSplitter({super.key, required this.isHorizontal});
 
   static const double iconSize = 24.0;
   static const double splitterWidth = 12.0;

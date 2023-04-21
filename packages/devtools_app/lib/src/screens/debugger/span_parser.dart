@@ -416,7 +416,7 @@ class _MultilineMatcher extends _Matcher {
   void _scanEnd(Grammar grammar, LineScanner scanner, ScopeStack scopeStack) {
     final location = scanner.location;
     if (end != null && !scanner.scan(end!)) {
-      return null;
+      return;
     }
     _processCaptureHelper(grammar, scanner, scopeStack, endCaptures, location);
   }
@@ -633,7 +633,7 @@ class ScopeStack {
   /// Pops the last scope off the stack, producing a token if necessary up until
   /// [end].
   void pop(String? scope, ScopeStackLocation end) {
-    if (scope == null) return null;
+    if (scope == null) return;
     assert(stack.isNotEmpty);
 
     final scopes = stack.map((item) => item.scope).toSet();

@@ -153,7 +153,7 @@ class HoverCard {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   if (title != null) ...[
-                    Container(
+                    SizedBox(
                       width: width,
                       child: Text(
                         title,
@@ -285,7 +285,7 @@ class HoverCardTooltip extends StatefulWidget {
   /// a [HoverCard] with a spinner will show. If any [HoverCardData] returned
   /// from [asyncGenerateHoverCardData] the spinner [HoverCard] will be replaced
   /// with one containing the generated [HoverCardData].
-  const HoverCardTooltip.async({
+  const HoverCardTooltip.async({super.key, 
     required this.enabled,
     required this.asyncGenerateHoverCardData,
     required this.child,
@@ -297,7 +297,7 @@ class HoverCardTooltip extends StatefulWidget {
   ///
   /// The [HoverCardData] generated from [generateHoverCardData] will be
   /// displayed in a [HoverCard].
-  const HoverCardTooltip.sync({
+  const HoverCardTooltip.sync({super.key, 
     required this.enabled,
     required this.generateHoverCardData,
     required this.child,

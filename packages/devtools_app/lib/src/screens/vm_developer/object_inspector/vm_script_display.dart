@@ -11,7 +11,7 @@ import 'vm_object_model.dart';
 /// A widget for the object inspector historyViewport displaying information
 /// related to script objects in the Dart VM.
 class VmScriptDisplay extends StatelessWidget {
-  const VmScriptDisplay({
+  const VmScriptDisplay({super.key, 
     required this.controller,
     required this.script,
   });

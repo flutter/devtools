@@ -66,10 +66,8 @@ class LegacyTimelineEventsController with SearchControllerMixin<TimelineEvent> {
           .toList();
     }
 
-    if (data == null) {
-      performanceController.initData();
-    }
-    final _data = data!;
+    performanceController.initData();
+    final theData = data!;
     final traceEventCount = traceEvents.length;
 
     debugTraceEventCallback(
@@ -100,7 +98,7 @@ class LegacyTimelineEventsController with SearchControllerMixin<TimelineEvent> {
           '$_nextTimelineEventIndexToProcess',
         ),
       );
-      _data.initializeEventGroups(
+      theData.initializeEventGroups(
         threadNamesById,
         startIndex: _nextTimelineEventIndexToProcess,
       );
@@ -108,10 +106,10 @@ class LegacyTimelineEventsController with SearchControllerMixin<TimelineEvent> {
         () => _log.info(
           'after initializing event groups at startIndex '
           '$_nextTimelineEventIndexToProcess and now '
-          '_nextTimelineEventIndexToProcess = ${_data.timelineEvents.length}',
+          '_nextTimelineEventIndexToProcess = ${theData.timelineEvents.length}',
         ),
       );
-      _nextTimelineEventIndexToProcess = _data.timelineEvents.length;
+      _nextTimelineEventIndexToProcess = theData.timelineEvents.length;
     }
 
     // Process trace events [processTraceEventsHelper] and time the operation
@@ -131,10 +129,10 @@ class LegacyTimelineEventsController with SearchControllerMixin<TimelineEvent> {
   }
 
   Future<void> selectTimelineEvent(TimelineEvent? event) async {
-    final _data = data!;
-    if (event == null || _data.selectedEvent == event) return;
+    final theData = data!;
+    if (event == null || theData.selectedEvent == event) return;
 
-    _data.selectedEvent = event;
+    theData.selectedEvent = event;
     _selectedTimelineEventNotifier.value = event;
   }
 

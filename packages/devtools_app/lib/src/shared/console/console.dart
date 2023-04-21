@@ -21,11 +21,11 @@ import 'widgets/expandable_variable.dart';
 /// Renders a Console widget with output [lines] and an optional [title] and
 /// [footer].
 class Console extends StatelessWidget {
-  const Console({
+  const Console({super.key, 
     required this.lines,
     this.title,
     this.footer,
-  }) : super();
+  });
 
   final Widget? title;
   final Widget? footer;
@@ -41,10 +41,10 @@ class Console extends StatelessWidget {
 }
 
 class ConsoleFrame extends StatelessWidget {
-  const ConsoleFrame({
+  const ConsoleFrame({super.key, 
     required this.child,
     this.title,
-  }) : super();
+  });
 
   final Widget? title;
   final Widget child;
@@ -229,7 +229,7 @@ class _ConsoleOutputState extends State<_ConsoleOutput>
 /// This just preconfigures a ConsoleControl with the `delete` icon,
 /// and the `onPressed` function passed from the outside.
 class DeleteControl extends StatelessWidget {
-  const DeleteControl({
+  const DeleteControl({super.key, 
     this.onPressed,
     this.tooltip = 'Clear contents',
     this.buttonKey,

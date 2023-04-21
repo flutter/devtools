@@ -343,7 +343,7 @@ class TimelineEventsController extends PerformanceFeatureController
       frame.timelineEventData.uiEvent?.format(buf, '  ');
       buf.writeln('\nUI trace for frame ${frame.id}');
       frame.timelineEventData.uiEvent?.writeTraceToBuffer(buf);
-      buf.writeln('\Raster timeline event frame ${frame.id}:');
+      buf.writeln('Raster timeline event frame ${frame.id}:');
       frame.timelineEventData.rasterEvent?.format(buf, '  ');
       buf.writeln('\nRaster trace for frame ${frame.id}');
       frame.timelineEventData.rasterEvent?.writeTraceToBuffer(buf);

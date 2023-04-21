@@ -17,7 +17,7 @@ import 'utils.dart';
 /// It provides an interface that allows for removing, adding,
 /// and refreshing entries.
 class EditableList extends StatefulWidget {
-  EditableList({
+  EditableList({super.key, 
     required this.entries,
     required this.textFieldLabel,
     required this.gaScreen,
@@ -151,12 +151,12 @@ class EditableListActionBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return SizedBox(
       height: defaultTextFieldHeight,
       child: Row(
         children: [
           Expanded(
-            child: Container(
+            child: SizedBox(
               height: defaultTextFieldHeight,
               child: TextField(
                 focusNode: textFieldFocusNode,
@@ -181,7 +181,7 @@ class EditableListActionBar extends StatelessWidget {
             ), // TODO:(https://github.com/flutter/devtools/issues/4381)
           ),
           isRefreshing?.value ?? false
-              ? Container(
+              ? SizedBox(
                   width: defaultTextFieldHeight,
                   height: defaultTextFieldHeight,
                   child: const Padding(

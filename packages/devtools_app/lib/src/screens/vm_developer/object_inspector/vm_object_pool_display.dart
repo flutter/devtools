@@ -69,7 +69,7 @@ class _DartObjectColumn extends _ObjectPoolColumnData
 /// A widget for the object inspector historyViewport displaying information
 /// related to [ObjectPool] objects in the Dart VM.
 class VmObjectPoolDisplay extends StatelessWidget {
-  const VmObjectPoolDisplay({
+  const VmObjectPoolDisplay({super.key, 
     required this.controller,
     required this.objectPool,
   });

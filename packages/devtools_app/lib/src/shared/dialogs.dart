@@ -191,7 +191,7 @@ class DialogHelpText extends StatelessWidget {
 ///
 /// It normalizes dialog layout, spacing, and look and feel.
 class DevToolsDialog extends StatelessWidget {
-  const DevToolsDialog({
+  const DevToolsDialog({super.key, 
     Widget? title,
     required this.content,
     this.includeDivider = true,
@@ -257,7 +257,7 @@ class DialogCloseButton extends StatelessWidget {
 
 /// A TextButton used to close a containing dialog (Cancel).
 class DialogCancelButton extends StatelessWidget {
-  const DialogCancelButton({this.cancelAction}) : super();
+  const DialogCancelButton({super.key, this.cancelAction});
 
   final VoidCallback? cancelAction;
 
@@ -275,7 +275,7 @@ class DialogCancelButton extends StatelessWidget {
 
 /// A TextButton used to close a containing dialog (APPLY).
 class DialogApplyButton extends StatelessWidget {
-  const DialogApplyButton({required this.onPressed}) : super();
+  const DialogApplyButton({super.key, required this.onPressed});
 
   final Function onPressed;
 
@@ -292,7 +292,7 @@ class DialogApplyButton extends StatelessWidget {
 }
 
 class DialogTextButton extends StatelessWidget {
-  const DialogTextButton({this.onPressed, required this.child});
+  const DialogTextButton({super.key, this.onPressed, required this.child});
 
   final VoidCallback? onPressed;
 

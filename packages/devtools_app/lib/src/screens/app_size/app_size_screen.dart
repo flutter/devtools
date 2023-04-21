@@ -79,7 +79,7 @@ class AppSizeScreen extends Screen {
 }
 
 class AppSizeBody extends StatefulWidget {
-  const AppSizeBody();
+  const AppSizeBody({super.key});
 
   @override
   _AppSizeBodyState createState() => _AppSizeBodyState();
@@ -301,7 +301,7 @@ class _AppSizeBodyState extends State<AppSizeBody>
 }
 
 class AnalysisView extends StatefulWidget {
-  const AnalysisView();
+  const AnalysisView({super.key});
 
   // TODO(kenz): add links to documentation on how to generate these files, and
   // mention the import file button once it is hooked up to a file picker.
@@ -468,7 +468,7 @@ class _AnalysisViewState extends State<AnalysisView>
 }
 
 class DiffView extends StatefulWidget {
-  const DiffView();
+  const DiffView({super.key});
 
   // TODO(kenz): add links to documentation on how to generate these files, and
   // mention the import file button once it is hooked up to a file picker.

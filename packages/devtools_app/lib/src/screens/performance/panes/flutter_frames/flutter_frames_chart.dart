@@ -176,7 +176,7 @@ class _FlutterFramesChartState extends State<_FlutterFramesChart> {
 
 @visibleForTesting
 class FramesChart extends StatefulWidget {
-  const FramesChart({
+  const FramesChart({super.key, 
     required this.framesController,
     required this.frames,
     required this.displayRefreshRate,
@@ -339,7 +339,7 @@ class _FramesChartState extends State<FramesChart> with AutoDisposeMixin {
 
 @visibleForTesting
 class FramesChartControls extends StatelessWidget {
-  const FramesChartControls({
+  const FramesChartControls({super.key, 
     required this.framesController,
     required this.frames,
     required this.displayRefreshRate,
@@ -412,7 +412,7 @@ class FramesChartControls extends StatelessWidget {
 }
 
 class FlutterFramesChartItem extends StatelessWidget {
-  const FlutterFramesChartItem({
+  const FlutterFramesChartItem({super.key, 
     required this.index,
     required this.framesController,
     required this.frame,
@@ -686,7 +686,7 @@ class FlutterFrameTooltip extends StatelessWidget {
 }
 
 class AverageFPS extends StatelessWidget {
-  const AverageFPS({required this.frames, required this.displayRefreshRate});
+  const AverageFPS({super.key, required this.frames, required this.displayRefreshRate});
 
   final List<FlutterFrame> frames;
 
@@ -723,7 +723,7 @@ class AverageFPS extends StatelessWidget {
 }
 
 class ShaderJankWarningIcon extends StatelessWidget {
-  const ShaderJankWarningIcon();
+  const ShaderJankWarningIcon({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -828,8 +828,9 @@ class ChartAxisPainter extends CustomPainter {
 
     // Do not draw the y axis label if it will collide with the 0.0 label or if
     // it will go beyond the uper bound of the chart.
-    if (timeMs != 0 && (tickY > chartArea.height - 10.0 || tickY < 10.0))
+    if (timeMs != 0 && (tickY > chartArea.height - 10.0 || tickY < 10.0)) {
       return;
+    }
 
     canvas.drawLine(
       Offset(chartArea.left - yAxisTickWidth / 2, tickY),

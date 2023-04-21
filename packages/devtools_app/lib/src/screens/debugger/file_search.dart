@@ -21,7 +21,7 @@ const noResultsMsg = 'No files found.';
 final _fileNamesCache = <String, String>{};
 
 class FileSearchField extends StatefulWidget {
-  const FileSearchField({
+  const FileSearchField({super.key, 
     required this.codeViewController,
   });
 

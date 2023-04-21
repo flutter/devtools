@@ -496,11 +496,11 @@ Future<void> _serviceExtensionAvailable(String extensionName) async {
       serviceManager.serviceExtensionManager.hasServiceExtension(extensionName);
 
   final completer = Completer<void>();
-  final listener = () {
+  listener() {
     if (listenable.value && !completer.isCompleted) {
       completer.complete();
     }
-  };
+  }
   listener();
   listenable.addListener(listener);
   await completer.future;
@@ -536,11 +536,11 @@ Future<void> _verifyExtensionStateInServiceManager(
 
   // Wait for the service extension state to match the expected value.
   final Completer<ServiceExtensionState> stateCompleter = Completer();
-  final stateListener = () {
+  stateListener() {
     if (stateListenable.value.value == value) {
       stateCompleter.complete(stateListenable.value);
     }
-  };
+  }
 
   stateListenable.addListener(stateListener);
   stateListener();

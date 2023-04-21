@@ -193,7 +193,7 @@ void main() {
 
       expect(
         command.toString(),
-        "curl --location --request GET \'https://jsonplaceholder.typicode.com/albums/1\' \\\n--header 'content-length: 0'",
+        "curl --location --request GET 'https://jsonplaceholder.typicode.com/albums/1' \\\n--header 'content-length: 0'",
       );
     });
 
@@ -202,7 +202,7 @@ void main() {
 
       expect(
         command.toString(),
-        "curl --location --request POST \'https://jsonplaceholder.typicode.com/posts\' \\\n--data-raw '{\n \"title\": \"foo\", \"body\": \"bar\", \"userId\": 1\n}\n '",
+        "curl --location --request POST 'https://jsonplaceholder.typicode.com/posts' \\\n--data-raw '{\n \"title\": \"foo\", \"body\": \"bar\", \"userId\": 1\n}\n '",
       );
     });
   });

@@ -49,7 +49,7 @@ class FreeSpaceVisualizerWidget extends StatelessWidget {
         ),
       ],
     );
-    final heightWidget = Container(
+    final heightWidget = SizedBox(
       width: heightOnlyIndicatorSize,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -76,7 +76,7 @@ class FreeSpaceVisualizerWidget extends StatelessWidget {
     return Positioned(
       top: renderProperties.offset.dy,
       left: renderProperties.offset.dx,
-      child: Container(
+      child: SizedBox(
         width: renderProperties.width,
         height: renderProperties.height,
         child: DevToolsTooltip(
@@ -126,7 +126,7 @@ class PaddingVisualizerWidget extends StatelessWidget {
         ),
       ],
     );
-    final heightWidget = Container(
+    final heightWidget = SizedBox(
       width: heightOnlyIndicatorSize,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -153,7 +153,7 @@ class PaddingVisualizerWidget extends StatelessWidget {
     return Positioned(
       top: renderProperties.offset.dy,
       left: renderProperties.offset.dx,
-      child: Container(
+      child: SizedBox(
         width: safePositiveDouble(renderProperties.width),
         height: safePositiveDouble(renderProperties.height),
         child: horizontal ? widthWidget : heightWidget,

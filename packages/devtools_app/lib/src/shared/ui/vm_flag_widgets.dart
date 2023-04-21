@@ -21,7 +21,7 @@ import '../theme.dart';
 ///
 /// This flag controls the rate at which the vm samples the CPU call stack.
 class CpuSamplingRateDropdown extends StatelessWidget {
-  const CpuSamplingRateDropdown({
+  const CpuSamplingRateDropdown({super.key, 
     required this.screenId,
     required this.profilePeriodFlagNotifier,
   });

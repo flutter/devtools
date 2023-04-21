@@ -47,7 +47,7 @@ double get baseTimelineGridIntervalPx => scaleByFontFactor(150.0);
 // composition pattern instead of a class extension pattern.
 abstract class FlameChart<T, V> extends StatefulWidget {
   const FlameChart(
-    this.data, {
+    this.data, {super.key, 
     required this.time,
     required this.containerWidth,
     required this.containerHeight,
@@ -642,7 +642,7 @@ abstract class FlameChartState<T extends FlameChart,
 
 class ScrollingFlameChartRow<V extends FlameChartDataMixin<V>>
     extends StatefulWidget {
-  const ScrollingFlameChartRow({
+  const ScrollingFlameChartRow({super.key, 
     required this.linkedScrollControllerGroup,
     required this.nodes,
     required this.width,
@@ -1548,7 +1548,7 @@ class FlameChartHelpButton extends StatelessWidget {
 }
 
 class EmptyFlameChartRow extends StatelessWidget {
-  const EmptyFlameChartRow({
+  const EmptyFlameChartRow({super.key, 
     required this.height,
     required this.width,
     required this.backgroundColor,

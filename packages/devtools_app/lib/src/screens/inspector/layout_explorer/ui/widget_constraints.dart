@@ -14,7 +14,7 @@ import 'theme.dart';
 import 'utils.dart';
 
 class VisualizeWidthAndHeightWithConstraints extends StatelessWidget {
-  VisualizeWidthAndHeightWithConstraints({
+  VisualizeWidthAndHeightWithConstraints({super.key, 
     required this.properties,
     double? arrowHeadSize,
     required this.child,
@@ -43,7 +43,7 @@ class VisualizeWidthAndHeightWithConstraints extends StatelessWidget {
         TextSpan(
           children: [
             TextSpan(
-              text: '${propertiesLocal.describeHeight()}',
+              text: propertiesLocal.describeHeight(),
             ),
             if (propertiesLocal.constraints != null) ...[
               if (!showOverflowHeight) const TextSpan(text: '\n'),

@@ -16,7 +16,7 @@ import '../shared/theme.dart';
 import 'release_notes/release_notes.dart';
 
 class DevToolsAboutDialog extends StatelessWidget {
-  const DevToolsAboutDialog(this.releaseNotesController);
+  const DevToolsAboutDialog(this.releaseNotesController, {super.key});
 
   final ReleaseNotesController releaseNotesController;
 
@@ -134,7 +134,7 @@ class _DiscordLink extends StatelessWidget {
 }
 
 class OpenAboutAction extends StatelessWidget {
-  const OpenAboutAction();
+  const OpenAboutAction({super.key});
 
   @override
   Widget build(BuildContext context) {

@@ -16,7 +16,7 @@ import 'vm_object_model.dart';
 /// A widget for the object inspector historyViewport displaying information
 /// related to ICData objects in the Dart VM.
 class VmICDataDisplay extends StatefulWidget {
-  const VmICDataDisplay({
+  const VmICDataDisplay({super.key, 
     required this.controller,
     required this.icData,
   });
@@ -88,8 +88,9 @@ class _VmICDataDisplayState extends State<VmICDataDisplay> {
     return FutureBuilder<void>(
       future: _initialized,
       builder: (context, snapshot) {
-        if (snapshot.connectionState != ConnectionState.done)
+        if (snapshot.connectionState != ConnectionState.done) {
           return const CenteredCircularProgressIndicator();
+        }
         return VmObjectDisplayBasicLayout(
           controller: widget.controller,
           object: widget.icData,

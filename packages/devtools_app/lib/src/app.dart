@@ -62,7 +62,7 @@ const showVmDeveloperMode = false;
 class DevToolsApp extends StatefulWidget {
   const DevToolsApp(
     this.screens,
-    this.analyticsController, {
+    this.analyticsController, {super.key, 
     this.sampleData = const [],
   });
 
@@ -237,8 +237,8 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
                 actions: [
                   // TODO(https://github.com/flutter/devtools/issues/1941)
                   if (serviceManager.connectedApp!.isFlutterAppNow!) ...[
-                    HotReloadButton(),
-                    HotRestartButton(),
+                    const HotReloadButton(),
+                    const HotRestartButton(),
                   ],
                   ...DevToolsScaffold.defaultActions(),
                 ],

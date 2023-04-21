@@ -19,7 +19,7 @@ final profilerScreenSearchFieldKey =
     GlobalKey(debugLabel: 'ProfilerScreenSearchFieldKey');
 
 class DisplayTreeGuidelinesToggle extends StatelessWidget {
-  const DisplayTreeGuidelinesToggle();
+  const DisplayTreeGuidelinesToggle({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -74,7 +74,7 @@ Example queries:
 /// DropdownButton that controls the value of
 /// [ProfilerScreenController.userTagFilter].
 class UserTagDropdown extends StatelessWidget {
-  const UserTagDropdown(this.controller);
+  const UserTagDropdown(this.controller, {super.key});
 
   final CpuProfilerController controller;
 
@@ -162,7 +162,7 @@ class UserTagDropdown extends StatelessWidget {
 /// DropdownButton that controls the value of
 /// [ProfilerScreenController.viewType].
 class ModeDropdown extends StatelessWidget {
-  const ModeDropdown(this.controller);
+  const ModeDropdown(this.controller, {super.key});
 
   final CpuProfilerController controller;
 

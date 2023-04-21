@@ -48,7 +48,7 @@ class ProfilerScreen extends Screen {
 }
 
 class ProfilerScreenBody extends StatefulWidget {
-  const ProfilerScreenBody();
+  const ProfilerScreenBody({super.key});
 
   @override
   _ProfilerScreenBodyState createState() => _ProfilerScreenBodyState();
@@ -103,8 +103,9 @@ class _ProfilerScreenBodyState extends State<ProfilerScreenBody>
 
   @override
   Widget build(BuildContext context) {
-    if (offlineController.offlineMode.value)
+    if (offlineController.offlineMode.value) {
       return _buildProfilerScreenBody(controller);
+    }
     return ValueListenableBuilder<Flag>(
       valueListenable: controller.cpuProfilerController.profilerFlagNotifier!,
       builder: (context, profilerFlag, _) {

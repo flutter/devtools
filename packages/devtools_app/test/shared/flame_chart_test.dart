@@ -736,8 +736,8 @@ void main() {
       required bool selected,
       required bool hovered,
     }) async {
-      final _selected = selected;
-      final _hovered = hovered;
+      final selected0 = selected;
+      final hovered0 = hovered;
       await tester.pumpWidget(
         Directionality(
           textDirection: TextDirection.ltr,
@@ -746,10 +746,10 @@ void main() {
               OverlayEntry(
                 builder: (BuildContext context) {
                   return testNode.buildWidget(
-                    selected: _selected,
+                    selected: selected0,
                     searchMatch: false,
                     activeSearchMatch: false,
-                    hovered: _hovered,
+                    hovered: hovered0,
                     zoom: defaultZoom,
                     colorScheme: Theme.of(context).colorScheme,
                   );

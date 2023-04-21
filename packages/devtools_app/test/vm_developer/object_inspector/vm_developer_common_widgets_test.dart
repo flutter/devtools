@@ -141,7 +141,7 @@ void main() {
           RetainingPathWidget(
             controller: testObjectInspectorViewController,
             retainingPath: mockClassObject.retainingPath,
-            onExpanded: (bool) => null,
+            onExpanded: (bool) {},
           ),
         ),
       );
@@ -218,7 +218,7 @@ void main() {
         wrap(
           InboundReferencesWidget(
             inboundReferences: mockClassObject.inboundReferences,
-            onExpanded: (bool) => null,
+            onExpanded: (bool) {},
           ),
         ),
       );

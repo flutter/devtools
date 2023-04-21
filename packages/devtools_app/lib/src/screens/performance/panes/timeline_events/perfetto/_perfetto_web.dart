@@ -199,7 +199,7 @@ class _PerfettoViewController extends DisposableController
       EmbeddedPerfettoEvent.devtoolsThemeChange.event,
       perfettoIgnore: true,
       args: {
-        'theme': '${darkMode ? 'dark' : 'light'}',
+        'theme': darkMode ? 'dark' : 'light',
       },
     );
   }

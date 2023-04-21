@@ -59,7 +59,7 @@ class VMDeveloperToolsScreen extends Screen {
 }
 
 class VMDeveloperToolsScreenBody extends StatefulWidget {
-  const VMDeveloperToolsScreenBody();
+  const VMDeveloperToolsScreenBody({super.key});
 
   static List<VMDeveloperView> views = [
     const VMStatisticsView(),

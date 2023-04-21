@@ -20,7 +20,7 @@ import 'object_inspector_view_controller.dart';
 import 'vm_object_model.dart';
 
 class VmInstanceDisplay extends StatefulWidget {
-  const VmInstanceDisplay({
+  const VmInstanceDisplay({super.key, 
     required this.controller,
     required this.instance,
   });
@@ -98,8 +98,9 @@ class _VmInstanceDisplayState extends State<VmInstanceDisplay> {
                 child: FutureBuilder(
                   future: _initialized,
                   builder: (context, snapshot) {
-                    if (snapshot.connectionState != ConnectionState.done)
+                    if (snapshot.connectionState != ConnectionState.done) {
                       return const CenteredCircularProgressIndicator();
+                    }
                     return ExpandableVariable(
                       variable: _root,
                       dataDisplayProvider: (variable, onPressed) {

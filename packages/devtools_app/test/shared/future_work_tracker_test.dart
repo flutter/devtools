@@ -126,7 +126,7 @@ void _wrapAndRunAsync(Future<void> Function(FakeAsync) testCallback) {
     fakeAsync((async) async {
       // If the test expectations are not wrapped in a future, the test will
       // not fail even if one of the expectations fails.
-      final testFuture = () => testCallback(async);
+      Future<void> testFuture() => testCallback(async);
 
       unawaited(testFuture());
       async.flushMicrotasks();

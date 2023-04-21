@@ -23,7 +23,7 @@ import 'panes/timeline_events/timeline_events_view.dart';
 import 'performance_controller.dart';
 
 class TabbedPerformanceView extends StatefulWidget {
-  const TabbedPerformanceView();
+  const TabbedPerformanceView({super.key});
 
   @override
   _TabbedPerformanceViewState createState() => _TabbedPerformanceViewState();

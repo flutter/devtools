@@ -16,10 +16,12 @@ import 'tester.dart';
 // ignore_for_file: unnecessary_getters_setters
 
 void main() {
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatefulWidget {
+  const MyApp({super.key});
+
   @override
   _MyAppState createState() => _MyAppState();
 }
@@ -105,7 +107,7 @@ final _token = Object();
 
 class ComplexObject {
   Enum enumeration = Enum.a;
-  Null nill;
+  void nill;
   bool boolean = false;
   int integer = 0;
   double float = 0.42;

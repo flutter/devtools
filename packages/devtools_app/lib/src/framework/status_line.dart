@@ -25,7 +25,8 @@ import 'scaffold.dart';
 /// This displays information global to the application, as well as gives pages
 /// a mechanism to display page-specific information.
 class StatusLine extends StatelessWidget {
-  const StatusLine({required this.currentScreen, required this.isEmbedded});
+  const StatusLine(
+      {super.key, required this.currentScreen, required this.isEmbedded});
 
   final Screen currentScreen;
   final bool isEmbedded;
@@ -241,8 +242,9 @@ class IsolateSelector extends StatelessWidget {
 
 class IsolateOption extends StatelessWidget {
   const IsolateOption(
-    this.ref,
-  );
+    this.ref, {
+    super.key,
+  });
 
   final IsolateRef? ref;
 

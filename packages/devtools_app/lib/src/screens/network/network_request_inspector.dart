@@ -14,7 +14,7 @@ import 'network_request_inspector_views.dart';
 
 /// A [Widget] which displays information about a network request.
 class NetworkRequestInspector extends StatelessWidget {
-  const NetworkRequestInspector(this.controller);
+  const NetworkRequestInspector(this.controller, {super.key});
 
   static const _overviewTabTitle = 'Overview';
   static const _headersTabTitle = 'Headers';

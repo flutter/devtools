@@ -77,10 +77,10 @@ abstract class BaseTraceEventProcessor {
     int startIndex = 0,
   }) async {
     // Events need to be in increasing timestamp order.
-    final _traceEvents = traceEvents.sublist(startIndex)..sort();
+    final traceEvents0 = traceEvents.sublist(startIndex)..sort();
 
     // A subclass of [BaseTimelineEventProcessor] must implement this method.
-    await processTraceEvents(_traceEvents);
+    await processTraceEvents(traceEvents0);
 
     addPendingCompleteRootToTimeline(force: true);
 

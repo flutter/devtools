@@ -20,7 +20,7 @@ import 'more_debugging_options.dart';
 import 'performance_settings.dart';
 
 class PerformanceControls extends StatelessWidget {
-  const PerformanceControls({
+  const PerformanceControls({super.key, 
     required this.controller,
     required this.onClear,
   });

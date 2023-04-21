@@ -102,7 +102,7 @@ Future<bool> _isFlutterGAEnabled() async {
       // A return value of 'null' implies Flutter tool has never been run so
       // return false for Flutter GA enabled.
       final responseValue = json.decode(resp!.responseText!);
-      enabled = responseValue == null ? false : responseValue;
+      enabled = responseValue ?? false;
     } else {
       logWarning(resp, apiGetFlutterGAEnabled);
     }

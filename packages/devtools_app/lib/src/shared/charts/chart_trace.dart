@@ -383,7 +383,9 @@ class AxisScale {
         niceFraction = 5;
       } else if (fraction <= 7) {
         niceFraction = 7;
-      } else if (fraction <= 10) niceFraction = 10;
+      } else if (fraction <= 10) {
+        niceFraction = 10;
+      }
     }
 
     return niceFraction * pow(10, exponent);

@@ -308,7 +308,7 @@ class ExceptionMode {
 
 @visibleForTesting
 class DebuggerButton extends StatelessWidget {
-  const DebuggerButton({
+  const DebuggerButton({super.key, 
     required this.title,
     required this.icon,
     required this.onPressed,
