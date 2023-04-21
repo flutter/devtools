@@ -580,7 +580,7 @@ class _AppSizeView extends StatelessWidget {
                   LayoutBuilder(
                     key: treemapKey,
                     builder: (context, constraints) {
-                      Treemap.fromRoot(
+                      return Treemap.fromRoot(
                         rootNode: treemapRoot,
                         levelsVisible: 2,
                         isOutermostLevel: true,
