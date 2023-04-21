@@ -176,7 +176,8 @@ class _FlutterFramesChartState extends State<_FlutterFramesChart> {
 
 @visibleForTesting
 class FramesChart extends StatefulWidget {
-  const FramesChart({super.key, 
+  const FramesChart({
+    super.key,
     required this.framesController,
     required this.frames,
     required this.displayRefreshRate,
@@ -339,7 +340,8 @@ class _FramesChartState extends State<FramesChart> with AutoDisposeMixin {
 
 @visibleForTesting
 class FramesChartControls extends StatelessWidget {
-  const FramesChartControls({super.key, 
+  const FramesChartControls({
+    super.key,
     required this.framesController,
     required this.frames,
     required this.displayRefreshRate,
@@ -412,7 +414,8 @@ class FramesChartControls extends StatelessWidget {
 }
 
 class FlutterFramesChartItem extends StatelessWidget {
-  const FlutterFramesChartItem({super.key, 
+  const FlutterFramesChartItem({
+    super.key,
     required this.index,
     required this.framesController,
     required this.frame,
@@ -686,7 +689,8 @@ class FlutterFrameTooltip extends StatelessWidget {
 }
 
 class AverageFPS extends StatelessWidget {
-  const AverageFPS({super.key, required this.frames, required this.displayRefreshRate});
+  const AverageFPS(
+      {super.key, required this.frames, required this.displayRefreshRate});
 
   final List<FlutterFrame> frames;
 

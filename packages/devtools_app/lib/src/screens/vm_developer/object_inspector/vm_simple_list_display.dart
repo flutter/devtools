@@ -16,7 +16,8 @@ import 'vm_object_model.dart';
 /// A widget for the object inspector historyViewport displaying information
 /// related to list-like VM objects (e.g., subtype test cache, WeakArray, etc).
 class VmSimpleListDisplay<T extends VmListObject> extends StatefulWidget {
-  const VmSimpleListDisplay({super.key, 
+  const VmSimpleListDisplay({
+    super.key,
     required this.controller,
     required this.vmObject,
   });

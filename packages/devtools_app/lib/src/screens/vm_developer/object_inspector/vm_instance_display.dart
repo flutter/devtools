@@ -20,7 +20,8 @@ import 'object_inspector_view_controller.dart';
 import 'vm_object_model.dart';
 
 class VmInstanceDisplay extends StatefulWidget {
-  const VmInstanceDisplay({super.key, 
+  const VmInstanceDisplay({
+    super.key,
     required this.controller,
     required this.instance,
   });

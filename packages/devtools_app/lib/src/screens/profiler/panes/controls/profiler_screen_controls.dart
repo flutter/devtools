@@ -12,7 +12,8 @@ import '../../../../shared/ui/vm_flag_widgets.dart';
 import '../../profiler_screen_controller.dart';
 
 class ProfilerScreenControls extends StatelessWidget {
-  const ProfilerScreenControls({super.key, 
+  const ProfilerScreenControls({
+    super.key,
     required this.controller,
     required this.recording,
     required this.processing,

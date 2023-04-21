@@ -11,7 +11,8 @@ import '../../../shared/ui/utils.dart';
 import '../cpu_profile_model.dart';
 
 class CpuProfileFlameChart extends FlameChart<CpuProfileData, CpuStackFrame?> {
-  CpuProfileFlameChart({super.key,
+  CpuProfileFlameChart({
+    super.key,
     required CpuProfileData data,
     required double width,
     required double height,

@@ -191,7 +191,8 @@ class DialogHelpText extends StatelessWidget {
 ///
 /// It normalizes dialog layout, spacing, and look and feel.
 class DevToolsDialog extends StatelessWidget {
-  const DevToolsDialog({super.key, 
+  const DevToolsDialog({
+    super.key,
     Widget? title,
     required this.content,
     this.includeDivider = true,

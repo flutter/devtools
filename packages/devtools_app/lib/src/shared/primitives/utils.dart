@@ -91,11 +91,14 @@ String? prettyPrintBytes(
   final sizeInGB = sizeInMB / 1024.0;
 
   if (sizeInGB >= roundingPoint) {
-    return printGB(bytes, fractionDigits: gbFractionDigits, includeUnit: includeUnit);
+    return printGB(bytes,
+        fractionDigits: gbFractionDigits, includeUnit: includeUnit);
   } else if (sizeInMB >= roundingPoint) {
-    return printMB(bytes, fractionDigits: mbFractionDigits, includeUnit: includeUnit);
+    return printMB(bytes,
+        fractionDigits: mbFractionDigits, includeUnit: includeUnit);
   } else {
-    return printKB(bytes, fractionDigits: kbFractionDigits, includeUnit: includeUnit);
+    return printKB(bytes,
+        fractionDigits: kbFractionDigits, includeUnit: includeUnit);
   }
 }
 
@@ -1178,7 +1181,8 @@ extension ListExtension<T> on List<T> {
     ];
   }
 
-  Iterable<T> whereFromIndex(bool Function(T element) test, {int startIndex = 0}) {
+  Iterable<T> whereFromIndex(bool Function(T element) test,
+      {int startIndex = 0}) {
     final whereList = <T>[];
     for (int i = startIndex; i < length; i++) {
       final element = this[i];

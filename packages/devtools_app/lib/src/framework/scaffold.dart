@@ -492,7 +492,8 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
 }
 
 class KeyboardShortcuts extends StatefulWidget {
-  const KeyboardShortcuts({super.key, 
+  const KeyboardShortcuts({
+    super.key,
     required this.keyboardShortcuts,
     required this.child,
   });

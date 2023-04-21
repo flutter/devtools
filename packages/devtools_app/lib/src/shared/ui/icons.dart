@@ -19,7 +19,8 @@ import '../theme.dart';
 import '../utils.dart';
 
 class CustomIcon extends StatelessWidget {
-  const CustomIcon({super.key, 
+  const CustomIcon({
+    super.key,
     required this.kind,
     required this.text,
     this.isAbstract = false,
@@ -56,7 +57,8 @@ class CustomIcon extends StatelessWidget {
 
 /// An icon with one character
 class CircleIcon extends StatelessWidget {
-  const CircleIcon({super.key, 
+  const CircleIcon({
+    super.key,
     required this.text,
     required this.color,
     this.textColor = const Color(0xFF231F20),
@@ -293,7 +295,8 @@ class FlutterMaterialIcons {
 }
 
 class AssetImageIcon extends StatelessWidget {
-  const AssetImageIcon({super.key, 
+  const AssetImageIcon({
+    super.key,
     required this.asset,
     double? height,
     double? width,

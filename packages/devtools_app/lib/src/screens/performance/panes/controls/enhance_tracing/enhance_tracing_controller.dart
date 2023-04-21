@@ -25,8 +25,9 @@ class EnhanceTracingController extends DisposableController
 
   late EnhanceTracingState tracingState;
 
-  final _extensionStates =
-      { for (var ext in enhanceTracingExtensions) ext : false };
+  final _extensionStates = {
+    for (var ext in enhanceTracingExtensions) ext: false
+  };
 
   /// The id of the first 'Flutter.Frame' event that occurs after the DevTools
   /// performance page is opened.

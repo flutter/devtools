@@ -273,7 +273,8 @@ class AutoComplete extends StatefulWidget {
   /// [bottom] display drop-down below (true) the TextField or above (false)
   /// the TextField.
   const AutoComplete(
-    this.controller, {super.key, 
+    this.controller, {
+    super.key,
     required this.searchFieldKey,
     required this.onTap,
     bool bottom = true, // If false placed above.
@@ -450,7 +451,8 @@ class AutoCompleteState extends State<AutoComplete> with AutoDisposeMixin {
 }
 
 class AutoCompleteTile extends StatelessWidget {
-  const AutoCompleteTile({super.key, 
+  const AutoCompleteTile({
+    super.key,
     required this.textSpan,
     required this.index,
     required this.controller,
@@ -983,7 +985,8 @@ class _SearchFieldState extends State<SearchField>
 /// need to be accessed outside of the context of the search code.
 class StatelessSearchField<T extends SearchableDataMixin>
     extends StatelessWidget {
-  const StatelessSearchField({super.key, 
+  const StatelessSearchField({
+    super.key,
     required this.controller,
     required this.searchFieldEnabled,
     required this.shouldRequestFocus,
@@ -1088,7 +1091,8 @@ class StatelessSearchField<T extends SearchableDataMixin>
                     ],
                   )
                 : null,
-            suffix: suffix ?? ((supportsNavigation || onClose != null)
+            suffix: suffix ??
+                ((supportsNavigation || onClose != null)
                     ? _SearchFieldSuffix(
                         controller: controller,
                         supportsNavigation: supportsNavigation,
@@ -1111,7 +1115,8 @@ class StatelessSearchField<T extends SearchableDataMixin>
 /// The widget that builds [AutoCompleteSearchField] is responsible for mixing
 /// in [SearchFieldMixin], which manages the search field lifecycle.
 class AutoCompleteSearchField extends StatefulWidget {
-  const AutoCompleteSearchField({super.key, 
+  const AutoCompleteSearchField({
+    super.key,
     required this.controller,
     required this.searchFieldEnabled,
     required this.shouldRequestFocus,
@@ -1382,7 +1387,8 @@ class _SearchFieldSuffix extends StatelessWidget {
 }
 
 class SearchNavigationControls extends StatelessWidget {
-  const SearchNavigationControls(this.controller, {super.key, required this.onClose});
+  const SearchNavigationControls(this.controller,
+      {super.key, required this.onClose});
 
   final SearchControllerMixin controller;
 

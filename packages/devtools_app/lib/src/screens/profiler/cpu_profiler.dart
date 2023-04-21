@@ -31,7 +31,8 @@ import 'panes/method_table/method_table_controller.dart';
 // TODO(kenz): provide useful UI upon selecting a CPU stack frame.
 
 class CpuProfiler extends StatefulWidget {
-  CpuProfiler({super.key,
+  CpuProfiler({
+    super.key,
     required this.data,
     required this.controller,
     List<Key>? searchableTabKeys,

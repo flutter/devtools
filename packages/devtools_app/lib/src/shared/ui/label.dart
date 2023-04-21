@@ -10,7 +10,8 @@ import '../theme.dart';
 class ImageIconLabel extends StatelessWidget {
   const ImageIconLabel(
     this.icon,
-    this.text, {super.key, 
+    this.text, {
+    super.key,
     this.unscaledMinIncludeTextWidth,
   });
 
@@ -37,7 +38,8 @@ class ImageIconLabel extends StatelessWidget {
 }
 
 class MaterialIconLabel extends StatelessWidget {
-  const MaterialIconLabel({super.key, 
+  const MaterialIconLabel({
+    super.key,
     required this.label,
     required this.iconData,
     this.color,

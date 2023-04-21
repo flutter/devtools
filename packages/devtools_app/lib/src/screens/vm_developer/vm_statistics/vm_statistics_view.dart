@@ -273,7 +273,8 @@ class _IsolateHeapColumn extends _IsolateMemoryColumn {
 ///   - New / old space usage
 ///   - Dart heap usage
 class IsolatesPreviewWidget extends StatelessWidget {
-  const IsolatesPreviewWidget({super.key, 
+  const IsolatesPreviewWidget({
+    super.key,
     required this.controller,
     this.systemIsolates = false,
   });

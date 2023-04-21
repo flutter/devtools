@@ -17,7 +17,8 @@ const displayClassInstances = false;
 /// A widget for the object inspector historyViewport displaying information
 /// related to class objects in the Dart VM.
 class VmClassDisplay extends StatelessWidget {
-  const VmClassDisplay({super.key, 
+  const VmClassDisplay({
+    super.key,
     required this.controller,
     required this.clazz,
   });
@@ -83,7 +84,8 @@ class VmClassDisplay extends StatelessWidget {
 // all class instances. When done, remove the last row of the ClassInfoWidget.
 /// Displays information on the instances of the Class object.
 class ClassInstancesWidget extends StatelessWidget {
-  const ClassInstancesWidget({super.key, 
+  const ClassInstancesWidget({
+    super.key,
     required this.instances,
   });
 

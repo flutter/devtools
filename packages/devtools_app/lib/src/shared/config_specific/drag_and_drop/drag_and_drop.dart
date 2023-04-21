@@ -90,7 +90,8 @@ abstract class DragAndDropManager {
 }
 
 class DragAndDrop extends StatefulWidget {
-  const DragAndDrop({super.key, 
+  const DragAndDrop({
+    super.key,
     required this.child,
     this.handleDrop,
   });

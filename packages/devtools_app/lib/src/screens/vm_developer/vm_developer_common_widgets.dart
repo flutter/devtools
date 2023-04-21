@@ -34,7 +34,8 @@ import 'vm_service_private_extensions.dart';
 /// `table` is a widget (typically a table) that is to be displayed after the
 /// rows specified for `rowKeyValues`.
 class VMInfoCard extends StatelessWidget implements PreferredSizeWidget {
-  const VMInfoCard({super.key, 
+  const VMInfoCard({
+    super.key,
     required this.title,
     this.rowKeyValues,
     this.table,
@@ -101,7 +102,8 @@ MapEntry<String, WidgetBuilder> serviceObjectLinkBuilderMapEntry({
 }
 
 class VMInfoList extends StatelessWidget {
-  const VMInfoList({super.key, 
+  const VMInfoList({
+    super.key,
     required this.title,
     this.rowKeyValues,
     this.table,
@@ -184,7 +186,8 @@ Widget _buildAlternatingRow(BuildContext context, int index, Widget row) {
 /// When the data is being requested (the value of [fetching] is true),
 /// a CircularProgressIndicator will be displayed.
 class RequestableSizeWidget extends StatelessWidget {
-  const RequestableSizeWidget({super.key, 
+  const RequestableSizeWidget({
+    super.key,
     required this.fetching,
     required this.sizeProvider,
     required this.requestFunction,
@@ -296,7 +299,8 @@ String? _objectDescription(ObjRef? object) {
 /// An ExpansionTile with an AreaPaneHeader as header and custom style
 /// for the VM tools tab.
 class VmExpansionTile extends StatelessWidget {
-  const VmExpansionTile({super.key, 
+  const VmExpansionTile({
+    super.key,
     required this.title,
     required this.children,
     this.onExpanded,
@@ -353,7 +357,8 @@ class SizedCircularProgressIndicator extends StatelessWidget {
 }
 
 class ExpansionTileInstanceList extends StatelessWidget {
-  const ExpansionTileInstanceList({super.key, 
+  const ExpansionTileInstanceList({
+    super.key,
     required this.controller,
     required this.title,
     required this.elements,
@@ -390,7 +395,8 @@ class ExpansionTileInstanceList extends StatelessWidget {
 
 /// An expandable list to display the retaining objects for a given RetainingPath.
 class RetainingPathWidget extends StatelessWidget {
-  const RetainingPathWidget({super.key, 
+  const RetainingPathWidget({
+    super.key,
     required this.controller,
     required this.retainingPath,
     this.onExpanded,
@@ -439,6 +445,7 @@ class RetainingPathWidget extends StatelessWidget {
       if (obj == null) return;
       await controller.findAndSelectNodeForObject(obj);
     }
+
     final theme = Theme.of(context);
     final emptyList = SelectableText(
       'No retaining objects',
@@ -598,7 +605,8 @@ String _parentListElementDescription(int listIndex, ObjRef? obj) {
 /// An expandable list to display the inbound references for a given
 /// instance of InboundReferences.
 class InboundReferencesWidget extends StatelessWidget {
-  const InboundReferencesWidget({super.key, 
+  const InboundReferencesWidget({
+    super.key,
     required this.inboundReferences,
     this.onExpanded,
   });
@@ -705,7 +713,8 @@ class InboundReferencesWidget extends StatelessWidget {
 }
 
 class VmServiceObjectLink extends StatelessWidget {
-  const VmServiceObjectLink({super.key, 
+  const VmServiceObjectLink({
+    super.key,
     required this.object,
     required this.onTap,
     this.preferUri = false,
@@ -820,7 +829,8 @@ class VmServiceObjectLink extends StatelessWidget {
 /// A widget for the object inspector historyViewport containing the main
 /// layout of information widgets related to VM object types.
 class VmObjectDisplayBasicLayout extends StatelessWidget {
-  const VmObjectDisplayBasicLayout({super.key, 
+  const VmObjectDisplayBasicLayout({
+    super.key,
     required this.controller,
     required this.object,
     required this.generalDataRows,

@@ -62,7 +62,8 @@ const showVmDeveloperMode = false;
 class DevToolsApp extends StatefulWidget {
   const DevToolsApp(
     this.screens,
-    this.analyticsController, {super.key, 
+    this.analyticsController, {
+    super.key,
     this.sampleData = const [],
   });
 

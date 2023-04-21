@@ -2352,8 +2352,7 @@ class DualValueListenableBuilder<T, U> extends StatefulWidget {
   final Widget? child;
 
   @override
-  State createState() =>
-      _DualValueListenableBuilderState<T, U>();
+  State createState() => _DualValueListenableBuilderState<T, U>();
 }
 
 class _DualValueListenableBuilderState<T, U>

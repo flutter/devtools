@@ -17,7 +17,8 @@ import 'utils.dart';
 /// It provides an interface that allows for removing, adding,
 /// and refreshing entries.
 class EditableList extends StatefulWidget {
-  EditableList({super.key, 
+  EditableList({
+    super.key,
     required this.entries,
     required this.textFieldLabel,
     required this.gaScreen,

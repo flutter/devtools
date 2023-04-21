@@ -1181,7 +1181,8 @@ class _RowPainter extends CustomPainter {
 /// Changes to how the actual content of the node within the row should
 /// be implemented by changing [DiagnosticsNodeDescription] instead.
 class InspectorRowContent extends StatelessWidget {
-  const InspectorRowContent({super.key, 
+  const InspectorRowContent({
+    super.key,
     required this.row,
     required this.controller,
     required this.onToggle,

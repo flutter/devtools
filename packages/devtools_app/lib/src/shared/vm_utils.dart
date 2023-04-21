@@ -30,7 +30,10 @@ Future<InstanceRef?> findInstance(
   String? classId,
   int? hashCode,
 ) async {
-  if (classId == null || isolateId == null || hashCode == null || hashCode == 0) {
+  if (classId == null ||
+      isolateId == null ||
+      hashCode == null ||
+      hashCode == 0) {
     return null;
   }
 

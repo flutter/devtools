@@ -16,7 +16,8 @@ import 'vm_object_model.dart';
 /// A widget for the object inspector historyViewport displaying information
 /// related to function (Func type) objects in the Dart VM.
 class VmFuncDisplay extends StatelessWidget {
-  const VmFuncDisplay({super.key, 
+  const VmFuncDisplay({
+    super.key,
     required this.controller,
     required this.function,
   });
@@ -121,7 +122,8 @@ class VmFuncDisplay extends StatelessWidget {
 }
 
 class CallSiteDataArrayWidget extends StatelessWidget {
-  const CallSiteDataArrayWidget({super.key, 
+  const CallSiteDataArrayWidget({
+    super.key,
     required this.controller,
     required this.callSiteDataArray,
   });

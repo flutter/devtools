@@ -699,6 +699,7 @@ class CpuProfilerController extends DisposableController
 
       return true;
     }
+
     return CpuProfilePair.filterFrom(originalData, filterCallback);
   }
 }

@@ -13,7 +13,8 @@ import 'vm_object_model.dart';
 /// A widget for the object inspector historyViewport, displaying information
 /// related to field objects in the Dart VM.
 class VmFieldDisplay extends StatelessWidget {
-  const VmFieldDisplay({super.key, 
+  const VmFieldDisplay({
+    super.key,
     required this.controller,
     required this.field,
   });

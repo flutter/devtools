@@ -41,7 +41,8 @@ void drawTranslate(
 
 class Chart extends StatefulWidget {
   Chart(
-    this.controller, {super.key, 
+    this.controller, {
+    super.key,
     String title = '',
   }) {
     controller.title = title;

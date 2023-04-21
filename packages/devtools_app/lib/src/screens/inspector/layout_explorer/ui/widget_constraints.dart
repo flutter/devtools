@@ -14,7 +14,8 @@ import 'theme.dart';
 import 'utils.dart';
 
 class VisualizeWidthAndHeightWithConstraints extends StatelessWidget {
-  VisualizeWidthAndHeightWithConstraints({super.key, 
+  VisualizeWidthAndHeightWithConstraints({
+    super.key,
     required this.properties,
     double? arrowHeadSize,
     required this.child,
