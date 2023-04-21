@@ -86,7 +86,7 @@ class CodeView extends StatefulWidget {
   final void Function(ScriptRef scriptRef, int line)? onSelected;
 
   @override
-  _CodeViewState createState() => _CodeViewState();
+  State createState() => _CodeViewState();
 }
 
 class _CodeViewState extends State<CodeView> with AutoDisposeMixin {
@@ -438,6 +438,7 @@ class _CodeViewState extends State<CodeView> with AutoDisposeMixin {
         );
       }
     }
+
     if (widget.enableHistory) {
       return HistoryViewport(
         history: widget.codeViewController.scriptsHistory,
@@ -557,7 +558,8 @@ class CodeViewEmptyState extends StatelessWidget {
 }
 
 class ProfileInformationGutter extends StatelessWidget {
-  const ProfileInformationGutter({super.key, 
+  const ProfileInformationGutter({
+    super.key,
     required this.scrollController,
     required this.lineOffset,
     required this.lineCount,
@@ -705,7 +707,8 @@ class ProfileInformationGutterItem extends StatelessWidget {
 }
 
 class ProfilePercentageItem extends StatelessWidget {
-  const ProfilePercentageItem({super.key, 
+  const ProfilePercentageItem({
+    super.key,
     required this.percentage,
     required this.hoverText,
   });
@@ -743,7 +746,8 @@ class ProfilePercentageItem extends StatelessWidget {
 typedef IntCallback = void Function(int value);
 
 class Gutters extends StatelessWidget {
-  const Gutters({super.key, 
+  const Gutters({
+    super.key,
     required this.scriptRef,
     this.debuggerController,
     required this.codeViewController,
@@ -835,7 +839,8 @@ class Gutters extends StatelessWidget {
 }
 
 class Gutter extends StatelessWidget {
-  const Gutter({super.key, 
+  const Gutter({
+    super.key,
     required this.gutterWidth,
     required this.scrollController,
     required this.lineOffset,
@@ -1395,7 +1400,8 @@ class ScriptPopupMenu extends StatelessWidget {
 }
 
 class ScriptHistoryPopupMenu extends StatelessWidget {
-  const ScriptHistoryPopupMenu({super.key, 
+  const ScriptHistoryPopupMenu({
+    super.key,
     required this.itemBuilder,
     required this.onSelected,
     required this.enabled,
