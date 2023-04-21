@@ -104,11 +104,11 @@ Future<void> _addDiagnosticChildrenIfNeeded(
 
 void _setupGrouping(DartObjectNode variable) {
   final numChildrenInGrouping =
-      variable.childCount >= pow(DartObjectNode.MAX_CHILDREN_IN_GROUPING, 2)
+      variable.childCount >= pow(DartObjectNode.maxChildrenInGrouping, 2)
           ? (roundToNearestPow10(variable.childCount) /
-                  DartObjectNode.MAX_CHILDREN_IN_GROUPING)
+                  DartObjectNode.maxChildrenInGrouping)
               .floor()
-          : DartObjectNode.MAX_CHILDREN_IN_GROUPING;
+          : DartObjectNode.maxChildrenInGrouping;
 
   var start = variable.offset;
   final end = start + variable.childCount;
@@ -404,7 +404,7 @@ Future<void> buildVariablesTree(
   try {
     if (ref is ObjectReferences) {
       await addChildReferences(variable);
-    } else if (variable.childCount > DartObjectNode.MAX_CHILDREN_IN_GROUPING) {
+    } else if (variable.childCount > DartObjectNode.maxChildrenInGrouping) {
       _setupGrouping(variable);
     } else if (instanceRef != null && serviceManager.service != null) {
       await _addInstanceRefItems(variable, instanceRef, isolateRef);

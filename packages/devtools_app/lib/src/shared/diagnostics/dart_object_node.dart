@@ -190,7 +190,7 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
     );
   }
 
-  static const MAX_CHILDREN_IN_GROUPING = 100;
+  static const maxChildrenInGrouping = 100;
 
   final String? text;
   final String? name;
