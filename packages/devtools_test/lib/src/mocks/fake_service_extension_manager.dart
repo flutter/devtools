@@ -82,6 +82,7 @@ class FakeServiceExtensionManager extends Fake
     if (extension != null) {
       final Object? value = _getExtensionValueFromJson(name, valueFromJson);
 
+      // ignore: avoid-unnecessary-type-assertions, false positive
       final enabled = extension is ToggleableServiceExtensionDescription
           ? value == extension.enabledValue
           // For extensions that have more than two states
