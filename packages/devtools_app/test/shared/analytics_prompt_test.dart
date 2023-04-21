@@ -18,16 +18,6 @@ void main() {
 
   late bool didCallEnableAnalytics;
 
-  Widget _wrapWithAnalytics(
-    Widget child, {
-    AnalyticsController? controller,
-  }) {
-    if (controller != null) {
-      controller = controller;
-    }
-    return wrapWithAnalytics(child, controller: controller);
-  }
-
   group('AnalyticsPrompt', () {
     setUp(() {
       didCallEnableAnalytics = false;
@@ -53,7 +43,7 @@ void main() {
           (WidgetTester tester) async {
             expect(controller.analyticsEnabled.value, isTrue);
             expect(didCallEnableAnalytics, isFalse);
-            final prompt = _wrapWithAnalytics(
+            final prompt = wrapWithAnalytics(
               const AnalyticsPrompt(
                 child: Text('Child Text'),
               ),
@@ -95,7 +85,7 @@ void main() {
           (WidgetTester tester) async {
             expect(controller.analyticsEnabled.value, isTrue);
             expect(didCallEnableAnalytics, isFalse);
-            final prompt = _wrapWithAnalytics(
+            final prompt = wrapWithAnalytics(
               const AnalyticsPrompt(
                 child: Text('Child Text'),
               ),
@@ -124,7 +114,7 @@ void main() {
         'displays the child',
         windowSize,
         (WidgetTester tester) async {
-          final prompt = _wrapWithAnalytics(
+          final prompt = wrapWithAnalytics(
             const AnalyticsPrompt(
               child: Text('Child Text'),
             ),
@@ -155,7 +145,7 @@ void main() {
           (WidgetTester tester) async {
             expect(controller.analyticsEnabled.value, isTrue);
             expect(didCallEnableAnalytics, isTrue);
-            final prompt = _wrapWithAnalytics(
+            final prompt = wrapWithAnalytics(
               const AnalyticsPrompt(
                 child: Text('Child Text'),
               ),
@@ -185,7 +175,7 @@ void main() {
           (WidgetTester tester) async {
             expect(controller.analyticsEnabled.value, isTrue);
             expect(didCallEnableAnalytics, isTrue);
-            final prompt = _wrapWithAnalytics(
+            final prompt = wrapWithAnalytics(
               const AnalyticsPrompt(
                 child: Text('Child Text'),
               ),
@@ -217,7 +207,7 @@ void main() {
           (WidgetTester tester) async {
             expect(controller.analyticsEnabled.value, isTrue);
             expect(didCallEnableAnalytics, isTrue);
-            final prompt = _wrapWithAnalytics(
+            final prompt = wrapWithAnalytics(
               const AnalyticsPrompt(
                 child: Text('Child Text'),
               ),
@@ -249,7 +239,7 @@ void main() {
           (WidgetTester tester) async {
             expect(controller.analyticsEnabled.value, isTrue);
             expect(didCallEnableAnalytics, isTrue);
-            final prompt = _wrapWithAnalytics(
+            final prompt = wrapWithAnalytics(
               const AnalyticsPrompt(
                 child: Text('Child Text'),
               ),
@@ -293,7 +283,7 @@ void main() {
           (WidgetTester tester) async {
             expect(controller.analyticsEnabled.value, isFalse);
             expect(didCallEnableAnalytics, isFalse);
-            final prompt = _wrapWithAnalytics(
+            final prompt = wrapWithAnalytics(
               const AnalyticsPrompt(
                 child: Text('Child Text'),
               ),
@@ -322,7 +312,7 @@ void main() {
         'displays the child',
         windowSize,
         (WidgetTester tester) async {
-          final prompt = _wrapWithAnalytics(
+          final prompt = wrapWithAnalytics(
             const AnalyticsPrompt(
               child: Text('Child Text'),
             ),

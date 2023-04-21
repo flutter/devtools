@@ -113,7 +113,7 @@ void main() {
     const nonJsonOutput = 'Non-json details for log number 8';
     const jsonOutput = '{\n"Details": "of log event 9",\n"logEvent": "9"\n}\n';
 
-    String _ansiCodesOutput() {
+    String ansiCodesOutput() {
       final sb = StringBuffer();
       sb.write('Ansi color codes processed for ');
       final pen = AnsiPen()..rgb(r: 0.8, g: 0.3, b: 0.4, bg: true);
@@ -121,7 +121,7 @@ void main() {
       return sb.toString();
     }
 
-    LogData _generate(int i) {
+    LogData generate(int i) {
       String? details = 'log event $i';
       String kind = 'kind $i';
       String? computedDetails;
@@ -137,7 +137,7 @@ void main() {
           break;
         case 5:
           kind = 'stdout';
-          details = _ansiCodesOutput();
+          details = ansiCodesOutput();
           break;
         default:
           break;
@@ -152,7 +152,7 @@ void main() {
       return LogData(kind, details, i, detailsComputer: detailsComputer);
     }
 
-    final fakeLogData = List<LogData>.generate(totalLogs, _generate);
+    final fakeLogData = List<LogData>.generate(totalLogs, generate);
 
     Future<void> pumpLoggingScreen(WidgetTester tester) async {
       await tester.pumpWidget(
@@ -259,7 +259,7 @@ void main() {
       );
     }
 
-    String _ansiCodesOutput() {
+    String ansiCodesOutput() {
       final sb = StringBuffer();
       sb.write('Ansi color codes processed for ');
       final pen = AnsiPen()..rgb(r: 0.8, g: 0.3, b: 0.4, bg: true);
@@ -290,7 +290,7 @@ void main() {
       'Console area shows processed ansi text',
       windowSize,
       (WidgetTester tester) async {
-        serviceManager.consoleService.appendStdio(_ansiCodesOutput());
+        serviceManager.consoleService.appendStdio(ansiCodesOutput());
 
         await pumpConsole(tester, debuggerController);
 

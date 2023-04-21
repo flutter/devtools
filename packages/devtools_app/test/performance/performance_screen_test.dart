@@ -35,7 +35,7 @@ void main() {
     late PerformanceController controller;
     late FakeServiceManager fakeServiceManager;
 
-    Future<void> _setUpServiceManagerWithTimeline(
+    Future<void> setUpServiceManagerWithTimeline(
       Map<String, dynamic> timelineJson,
     ) async {
       fakeServiceManager = FakeServiceManager(
@@ -84,7 +84,7 @@ void main() {
 
     setUp(() async {
       preferences.performance.showFlutterFramesChart.value = true;
-      await _setUpServiceManagerWithTimeline(testTimelineJson);
+      await setUpServiceManagerWithTimeline(testTimelineJson);
       await shortDelay();
       controller = PerformanceController();
       await controller.initialized;

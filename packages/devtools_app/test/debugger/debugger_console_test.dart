@@ -52,7 +52,7 @@ void main() {
   group('ConsoleControls', () {
     final stdio = ['First line', _ansiCodesOutput(), 'Third line'];
 
-    void _appendStdioLines() {
+    void appendStdioLines() {
       for (var line in stdio) {
         serviceManager.consoleService.appendStdio('$line\n');
       }
@@ -81,7 +81,7 @@ void main() {
       final expected = stdio.join('\n');
 
       setUp(() {
-        _appendStdioLines();
+        appendStdioLines();
         setupClipboardCopyListener(
           clipboardContentsCallback: (contents) {
             clipboardContents = contents ?? '';

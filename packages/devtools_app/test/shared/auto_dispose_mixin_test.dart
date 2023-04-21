@@ -17,7 +17,7 @@ class AutoDisposedWidget extends StatefulWidget {
   final Stream stream;
 
   @override
-  _AutoDisposedWidgetState createState() => _AutoDisposedWidgetState();
+  State createState() => _AutoDisposedWidgetState();
 }
 
 class AutoDisposeContoller extends DisposableController
@@ -120,9 +120,10 @@ void main() {
       final disposer = Disposer();
       final notifier = ValueNotifier<int>(42);
       final values = <int>[];
-      listener() {
+      void listener() {
         values.add(notifier.value);
       }
+
       disposer.addAutoDisposeListener(notifier, listener);
       expect(notifier.hasListeners, isTrue);
       notifier.value = 13;
