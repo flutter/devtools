@@ -1,9 +1,8 @@
 *Replace this paragraph with a description of what this PR is changing or adding, and why. Consider including before/after screenshots.*
 
-*List which issues are fixed by this PR. You must list at least one issue.*
+*List which issues are fixed by this PR.*
 
-<!-- Uncomment and modify the following section if your PR does not require changes to the release notes -->
-<!-- RELEASE_NOTE_EXCEPTION=[REASON GOES HERE] -->
+*Please add a note to `packages/devtools_app/release_notes/NEXT_RELEASE_NOTES.md` if your change requires release notes. Otherwise, add the 'release-notes-not-required' label to the PR.*
 
 ## Pre-launch Checklist
 
