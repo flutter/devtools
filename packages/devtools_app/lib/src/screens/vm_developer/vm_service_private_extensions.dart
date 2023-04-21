@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// ignore_for_file: constant_identifier_names
+
 import 'package:vm_service/vm_service.dart';
 
 import '../../shared/globals.dart';

@@ -43,7 +43,8 @@ class ExtensionState {
 /// states for keeping state on the client and device consistent so you don't
 /// have to.
 class ServiceExtensionButtonGroup extends StatefulWidget {
-  const ServiceExtensionButtonGroup({super.key, 
+  const ServiceExtensionButtonGroup({
+    super.key,
     this.minScreenWidthForTextBeforeScaling,
     required this.extensions,
   });
@@ -52,8 +53,7 @@ class ServiceExtensionButtonGroup extends StatefulWidget {
   final List<ToggleableServiceExtensionDescription> extensions;
 
   @override
-  _ServiceExtensionButtonGroupState createState() =>
-      _ServiceExtensionButtonGroupState();
+  State createState() => _ServiceExtensionButtonGroupState();
 }
 
 class _ServiceExtensionButtonGroupState
@@ -262,7 +262,7 @@ Future<void> _wrapReloadCall(
 /// restart.
 ///
 /// This button will attempt to register to the given service description.
-class _RegisteredServiceExtensionButton extends _ServiceExtensionWidget {
+class _RegisteredServiceExtensionButton extends ServiceExtensionWidget {
   const _RegisteredServiceExtensionButton._({
     required this.serviceDescription,
     required this.action,
@@ -283,7 +283,7 @@ class _RegisteredServiceExtensionButton extends _ServiceExtensionWidget {
 
 class _RegisteredServiceExtensionButtonState
     extends State<_RegisteredServiceExtensionButton>
-    with _ServiceExtensionMixin, AutoDisposeMixin {
+    with ServiceExtensionMixin, AutoDisposeMixin {
   bool _hidden = true;
 
   @override
@@ -348,7 +348,7 @@ class StructuredErrorsToggle extends StatelessWidget {
 /// [Switch] that stays synced with the value of a service extension.
 ///
 /// Service extensions can be found in [service_extensions.dart].
-class _ServiceExtensionToggle extends _ServiceExtensionWidget {
+class _ServiceExtensionToggle extends ServiceExtensionWidget {
   const _ServiceExtensionToggle({
     Key? key,
     required this.service,
@@ -362,12 +362,12 @@ class _ServiceExtensionToggle extends _ServiceExtensionWidget {
   final ToggleableServiceExtensionDescription service;
 
   @override
-  _ServiceExtensionMixin<_ServiceExtensionWidget> createState() =>
+  ServiceExtensionMixin<ServiceExtensionWidget> createState() =>
       _ServiceExtensionToggleState();
 }
 
 class _ServiceExtensionToggleState extends State<_ServiceExtensionToggle>
-    with _ServiceExtensionMixin, AutoDisposeMixin {
+    with ServiceExtensionMixin, AutoDisposeMixin {
   bool value = false;
 
   @override
@@ -430,7 +430,7 @@ class _ServiceExtensionToggleState extends State<_ServiceExtensionToggle>
 /// [Checkbox] that stays synced with the value of a service extension.
 ///
 /// Service extensions can be found in [service_extensions.dart].
-class ServiceExtensionCheckbox extends _ServiceExtensionWidget {
+class ServiceExtensionCheckbox extends ServiceExtensionWidget {
   ServiceExtensionCheckbox({
     Key? key,
     required this.serviceExtension,
@@ -454,12 +454,12 @@ class ServiceExtensionCheckbox extends _ServiceExtensionWidget {
   final bool showDescription;
 
   @override
-  _ServiceExtensionMixin<_ServiceExtensionWidget> createState() =>
+  ServiceExtensionMixin<ServiceExtensionWidget> createState() =>
       _ServiceExtensionCheckboxState();
 }
 
 class _ServiceExtensionCheckboxState extends State<ServiceExtensionCheckbox>
-    with _ServiceExtensionMixin, AutoDisposeMixin {
+    with ServiceExtensionMixin, AutoDisposeMixin {
   /// Whether this checkbox value is set to true.
   ///
   /// This notifier listens to extension state changes from the service manager
@@ -829,8 +829,8 @@ class _ServiceExtensionCheckboxGroupOverlay extends StatelessWidget {
 }
 
 /// Widget that knows how to talk to a service extension and surface the relevant errors.
-abstract class _ServiceExtensionWidget extends StatefulWidget {
-  const _ServiceExtensionWidget({
+abstract class ServiceExtensionWidget extends StatefulWidget {
+  const ServiceExtensionWidget({
     Key? key,
     required this.completedText,
     required this.describeError,
@@ -847,12 +847,12 @@ abstract class _ServiceExtensionWidget extends StatefulWidget {
   final String Function(Object? error) describeError;
 
   @override
-  _ServiceExtensionMixin<_ServiceExtensionWidget> createState();
+  ServiceExtensionMixin<ServiceExtensionWidget> createState();
 }
 
 /// State mixin that manages calling an async service extension and reports
 /// errors.
-mixin _ServiceExtensionMixin<T extends _ServiceExtensionWidget> on State<T> {
+mixin ServiceExtensionMixin<T extends ServiceExtensionWidget> on State<T> {
   /// Whether an action is currently in progress.
   ///
   /// When [disabled], [invokeAndCatchErrors] will not accept new actions.
