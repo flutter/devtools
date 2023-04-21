@@ -50,7 +50,7 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
   static const _hoverYOffset = 0.0;
 
   static double get _hoverWidth => scaleByFontFactor(225.0);
-  static const _hover_card_border_width = 2.0;
+  static const _hoverCardBorderWidth = 2.0;
 
   // TODO(terry): Compute below heights dynamically.
   static double get _hoverHeightMinimum => scaleByFontFactor(42.0);
@@ -69,7 +69,7 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
   ) =>
       _hoverHeightMinimum +
       (eventsCount * hoverItemHeight) +
-      _hover_card_border_width +
+      _hoverCardBorderWidth +
       (tracesCount * hoverItemHeight) +
       (extensionEventsCount > 0
           ? (extensionEventsCount == 1
@@ -322,7 +322,7 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
             color: colorScheme.defaultBackgroundColor,
             border: Border.all(
               color: focusColor,
-              width: _hover_card_border_width,
+              width: _hoverCardBorderWidth,
             ),
             borderRadius: BorderRadius.circular(defaultBorderRadius),
           ),
@@ -338,12 +338,12 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
                   style: theme.legendTextStyle,
                   textAlign: TextAlign.center,
                 ),
-              ), ..._displayEventsInHover(chartsValues), ..._displayVmDataInHover(chartsValues), ..._displayAndroidDataInHover(chartsValues), ..._displayExtensionEventsInHover(chartsValues),
-            ]
-              
-              
-              
-              ,
+              ),
+              ..._displayEventsInHover(chartsValues),
+              ..._displayVmDataInHover(chartsValues),
+              ..._displayAndroidDataInHover(chartsValues),
+              ..._displayExtensionEventsInHover(chartsValues),
+            ],
           ),
         ),
       ),

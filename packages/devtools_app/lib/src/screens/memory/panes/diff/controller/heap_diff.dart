@@ -31,7 +31,7 @@ DiffHeapClasses _calculateDiffGaWrapper(_HeapCouple couple) {
   ga.timeSync(
     gac.memory,
     gac.MemoryTime.calculateDiff,
-    syncOperation: () => result = DiffHeapClasses(couple),
+    syncOperation: () => result = DiffHeapClasses._(couple),
     screenMetricsProvider: () => MemoryScreenMetrics(
       heapDiffObjectsBefore: couple.older.data.objects.length,
       heapDiffObjectsAfter: couple.younger.data.objects.length,
@@ -85,7 +85,7 @@ class _HeapCouple {
 /// List of classes with per-class comparison between two heaps.
 class DiffHeapClasses extends HeapClasses<DiffClassStats>
     with FilterableHeapClasses<DiffClassStats> {
-  DiffHeapClasses(_HeapCouple couple)
+  DiffHeapClasses._(_HeapCouple couple)
       : before = couple.older.data,
         after = couple.younger.data {
     classesByName = subtractMaps<HeapClassName, SingleClassStats,
