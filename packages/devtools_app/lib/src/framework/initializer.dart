@@ -53,7 +53,7 @@ class Initializer extends StatefulWidget {
   final bool allowConnectionScreenOnDisconnect;
 
   @override
-  _InitializerState createState() => _InitializerState();
+  State createState() => _InitializerState();
 }
 
 class _InitializerState extends State<Initializer>

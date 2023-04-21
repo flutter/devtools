@@ -23,7 +23,7 @@ class DebuggingControls extends StatefulWidget {
   static const minWidthBeforeScaling = 1750.0;
 
   @override
-  _DebuggingControlsState createState() => _DebuggingControlsState();
+  State createState() => _DebuggingControlsState();
 }
 
 class _DebuggingControlsState extends State<DebuggingControls>
@@ -308,7 +308,8 @@ class ExceptionMode {
 
 @visibleForTesting
 class DebuggerButton extends StatelessWidget {
-  const DebuggerButton({super.key, 
+  const DebuggerButton({
+    super.key,
     required this.title,
     required this.icon,
     required this.onPressed,

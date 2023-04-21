@@ -95,7 +95,7 @@ class ConnectDialog extends StatefulWidget {
   const ConnectDialog({Key? key}) : super(key: key);
 
   @override
-  _ConnectDialogState createState() => _ConnectDialogState();
+  State createState() => _ConnectDialogState();
 }
 
 class _ConnectDialogState extends State<ConnectDialog>
@@ -302,6 +302,7 @@ class ImportFileInstructions extends StatelessWidget {
     );
 
     if (importedFile != null) {
+      // ignore: use_build_context_synchronously, by design
       Provider.of<ImportController>(context, listen: false)
           .importData(importedFile);
     }

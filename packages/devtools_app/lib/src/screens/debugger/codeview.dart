@@ -343,7 +343,7 @@ class _CodeViewState extends State<CodeView> with AutoDisposeMixin {
       }
     }
 
-    Widget contentBuilder(context, ScriptRef? script) {
+    Widget contentBuilder(_, ScriptRef? script) {
       if (lines.isNotEmpty) {
         return DefaultTextStyle(
           style: theme.fixedFontStyle,
@@ -1016,7 +1016,7 @@ class Lines extends StatefulWidget {
   final ValueListenable<SourceToken?> activeSearchMatchNotifier;
 
   @override
-  _LinesState createState() => _LinesState();
+  State createState() => _LinesState();
 }
 
 class _LinesState extends State<Lines> with AutoDisposeMixin {
@@ -1122,7 +1122,7 @@ class LineItem extends StatefulWidget {
   final SourceToken? activeSearchMatch;
 
   @override
-  _LineItemState createState() => _LineItemState();
+  State createState() => _LineItemState();
 }
 
 class _LineItemState extends State<LineItem>

@@ -377,7 +377,7 @@ void main() {
 
         /// Helper method to call an extension on the test device and verify that
         /// the device reflects the new extension state.
-        Future<void> _enableExtensionOnTestDevice(
+        Future<void> enableExtensionOnTestDevice(
           extensions.ServiceExtensionDescription extensionDescription,
           Map<String, dynamic> args,
           String evalExpression,
@@ -423,7 +423,7 @@ void main() {
           isolate: serviceManager.isolateManager.mainIsolate,
         );
 
-        await _enableExtensionOnTestDevice(
+        await enableExtensionOnTestDevice(
           boolExtensionDescription,
           boolArgs,
           boolEvalExpression,
@@ -439,7 +439,7 @@ void main() {
           service,
           isolate: serviceManager.isolateManager.mainIsolate,
         );
-        await _enableExtensionOnTestDevice(
+        await enableExtensionOnTestDevice(
           stringExtensionDescription,
           stringArgs,
           stringEvalExpression,
@@ -461,7 +461,7 @@ void main() {
           service,
           isolate: serviceManager.isolateManager.mainIsolate,
         );
-        await _enableExtensionOnTestDevice(
+        await enableExtensionOnTestDevice(
           numericExtensionDescription,
           numericArgs,
           numericEvalExpression,
@@ -496,11 +496,12 @@ Future<void> _serviceExtensionAvailable(String extensionName) async {
       serviceManager.serviceExtensionManager.hasServiceExtension(extensionName);
 
   final completer = Completer<void>();
-  listener() {
+  void listener() {
     if (listenable.value && !completer.isCompleted) {
       completer.complete();
     }
   }
+
   listener();
   listenable.addListener(listener);
   await completer.future;
@@ -536,7 +537,7 @@ Future<void> _verifyExtensionStateInServiceManager(
 
   // Wait for the service extension state to match the expected value.
   final Completer<ServiceExtensionState> stateCompleter = Completer();
-  stateListener() {
+  void stateListener() {
     if (stateListenable.value.value == value) {
       stateCompleter.complete(stateListenable.value);
     }

@@ -82,7 +82,7 @@ class AppSizeBody extends StatefulWidget {
   const AppSizeBody({super.key});
 
   @override
-  _AppSizeBodyState createState() => _AppSizeBodyState();
+  State createState() => _AppSizeBodyState();
 }
 
 class _AppSizeBodyState extends State<AppSizeBody>
@@ -309,7 +309,7 @@ class AnalysisView extends StatefulWidget {
       ' size analysis file for debugging';
 
   @override
-  _AnalysisViewState createState() => _AnalysisViewState();
+  State createState() => _AnalysisViewState();
 }
 
 class _AnalysisViewState extends State<AnalysisView>
@@ -478,7 +478,7 @@ class DiffView extends StatefulWidget {
       'snapshot or size analysis file for debugging';
 
   @override
-  _DiffViewState createState() => _DiffViewState();
+  State createState() => _DiffViewState();
 }
 
 class _DiffViewState extends State<DiffView>
