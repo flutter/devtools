@@ -367,11 +367,12 @@ class FlexLayoutProperties extends LayoutProperties {
     final Map<String, Object?> renderObjectJson = node.renderObject!.json;
     final properties = renderObjectJson['properties'] as List<Object?>;
 
-    final data = {
-      // ignore: avoid-dynamic, as designed
-      for (dynamic property in properties)
-        property.elementAt('name'): property['description'],
-    };
+    // ignore: prefer_for_elements_to_map_fromiterable, requires refactoring
+    final data = Map<String, Object?>.fromIterable(
+      properties,
+      key: (property) => property['name'],
+      value: (property) => property['description'],
+    );
 
     return FlexLayoutProperties._fromNode(
       node,
