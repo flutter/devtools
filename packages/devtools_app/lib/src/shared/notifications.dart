@@ -86,8 +86,12 @@ class NotificationService {
 }
 
 class NotificationAction extends StatelessWidget {
-  const NotificationAction(this.label, this.onAction,
-      {super.key, this.isPrimary = false});
+  const NotificationAction(
+    this.label,
+    this.onAction, {
+    super.key,
+    this.isPrimary = false,
+  });
 
   final String label;
 

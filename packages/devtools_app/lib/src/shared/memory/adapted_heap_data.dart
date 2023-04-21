@@ -123,7 +123,7 @@ class AdaptedHeapData {
 
   /// Heap objects by identityHashCode.
   late final Map<IdentityHashCode, int> _objectsByCode = {
-    for (var i in Iterable.generate(objects.length)) objects[i].code: i
+    for (var i in Iterable.generate(objects.length)) objects[i].code: i,
   };
 
   Map<String, dynamic> toJson() => {

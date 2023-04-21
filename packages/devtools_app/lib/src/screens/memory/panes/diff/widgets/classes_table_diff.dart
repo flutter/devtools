@@ -304,7 +304,7 @@ class ClassesTableDiff extends StatelessWidget {
   }) : super(key: key) {
     _columns = {
       for (var sizeType in SizeType.values)
-        sizeType: ClassesTableDiffColumns(sizeType, diffData)
+        sizeType: ClassesTableDiffColumns(sizeType, diffData),
     };
   }
 

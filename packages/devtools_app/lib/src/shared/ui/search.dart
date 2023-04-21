@@ -1387,8 +1387,11 @@ class _SearchFieldSuffix extends StatelessWidget {
 }
 
 class SearchNavigationControls extends StatelessWidget {
-  const SearchNavigationControls(this.controller,
-      {super.key, required this.onClose});
+  const SearchNavigationControls(
+    this.controller, {
+    super.key,
+    required this.onClose,
+  });
 
   final SearchControllerMixin controller;
 

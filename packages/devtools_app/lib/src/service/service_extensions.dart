@@ -480,7 +480,7 @@ final List<ServiceExtensionDescription> _extensionDescriptions = [
 ];
 
 final Map<String, ServiceExtensionDescription> serviceExtensionsAllowlist = {
-  for (var extension in _extensionDescriptions) extension.extension: extension
+  for (var extension in _extensionDescriptions) extension.extension: extension,
 };
 
 /// Service extensions that are not safe to call unless a frame has already

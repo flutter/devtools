@@ -690,7 +690,7 @@ class FlutterFrameTooltip extends StatelessWidget {
 
 class AverageFPS extends StatelessWidget {
   const AverageFPS(
-      {super.key, required this.frames, required this.displayRefreshRate});
+      {super.key, required this.frames, required this.displayRefreshRate,});
 
   final List<FlutterFrame> frames;
 

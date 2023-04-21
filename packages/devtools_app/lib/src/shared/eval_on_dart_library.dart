@@ -553,7 +553,9 @@ class EvalOnDartLibrary extends DisposableController
   /// Stale requests will be generated if the user is quickly navigating through the
   /// UI to view specific details subtrees.
   Future<T?> addRequest<T>(
-      Disposable? isAlive, Future<T?> Function() request) async {
+    Disposable? isAlive,
+    Future<T?> Function() request,
+  ) async {
     if (isAlive != null && isAlive.disposed) return null;
 
     if (!oneRequestAtATime) {
