@@ -654,6 +654,7 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
       tableController: tableController,
       columnWidths: tableController.columnWidths!,
       rowBuilder: _buildRow,
+      rowItemExtent: defaultRowHeight,
       focusNode: _focusNode,
       handleKeyEvent: _handleKeyEvent,
       selectionNotifier: widget.selectionNotifier,
