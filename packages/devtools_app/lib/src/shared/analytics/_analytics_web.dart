@@ -8,6 +8,7 @@ library gtags;
 // ignore_for_file: non_constant_identifier_names
 
 import 'dart:async';
+// ignore: avoid_web_libraries_in_flutter, by design
 import 'dart:html';
 
 import 'package:js/js.dart';
