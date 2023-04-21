@@ -56,7 +56,11 @@ void main() {
         registerServiceExtension(mockServiceManager, hotReload);
         const button = HotReloadButton();
         await tester.pumpWidget(
-          wrap(wrapWithNotifications(const Scaffold(body: Center(child: button)))),
+          wrap(
+            wrapWithNotifications(
+              const Scaffold(body: Center(child: button)),
+            ),
+          ),
         );
         expect(find.byWidget(button), findsOneWidget);
         await tester.pumpAndSettle();
@@ -79,7 +83,8 @@ void main() {
           serviceAvailable: false,
         );
         const button = HotReloadButton();
-        await tester.pumpWidget(wrap(const Scaffold(body: Center(child: button))));
+        await tester
+            .pumpWidget(wrap(const Scaffold(body: Center(child: button))));
         expect(find.byWidget(button), findsOneWidget);
         await tester.pumpAndSettle();
         expect(reloads, 0);
@@ -110,7 +115,11 @@ void main() {
         registerServiceExtension(mockServiceManager, hotRestart);
         const button = HotRestartButton();
         await tester.pumpWidget(
-          wrap(wrapWithNotifications(const Scaffold(body: Center(child: button)))),
+          wrap(
+            wrapWithNotifications(
+              const Scaffold(body: Center(child: button)),
+            ),
+          ),
         );
         expect(find.byWidget(button), findsOneWidget);
         await tester.pumpAndSettle();
@@ -133,7 +142,8 @@ void main() {
           serviceAvailable: false,
         );
         const button = HotRestartButton();
-        await tester.pumpWidget(wrap(const Scaffold(body: Center(child: button))));
+        await tester
+            .pumpWidget(wrap(const Scaffold(body: Center(child: button))));
         expect(find.byWidget(button), findsOneWidget);
         await tester.pumpAndSettle();
         expect(restarts, 0);
@@ -147,7 +157,7 @@ void main() {
   group('Structured Errors toggle', () {
     late ValueListenable<ServiceExtensionState> serviceState;
     late ServiceExtensionState mostRecentState;
-    serviceStateListener() {
+    void serviceStateListener() {
       mostRecentState = serviceState.value;
     }
 
@@ -170,7 +180,8 @@ void main() {
           .fakeAddServiceExtension(structuredErrors.extension);
 
       const button = StructuredErrorsToggle();
-      await tester.pumpWidget(wrap(const Scaffold(body: Center(child: button))));
+      await tester
+          .pumpWidget(wrap(const Scaffold(body: Center(child: button))));
       expect(find.byWidget(button), findsOneWidget);
       await tester.tap(find.byWidget(button));
       await tester.pumpAndSettle();
@@ -190,7 +201,8 @@ void main() {
                 as FakeServiceExtensionManager)
             .fakeAddServiceExtension(structuredErrors.extension);
         const button = StructuredErrorsToggle();
-        await tester.pumpWidget(wrap(const Scaffold(body: Center(child: button))));
+        await tester
+            .pumpWidget(wrap(const Scaffold(body: Center(child: button))));
         expect(find.byWidget(button), findsOneWidget);
 
         await mockServiceManager.serviceExtensionManager
