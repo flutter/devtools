@@ -1533,7 +1533,7 @@ body.testing .sidebar-footer {
         flex-direction: row;
         align-items: center;
         padding: 10px 0px 10px 0px;
-        color: #ffffff; }
+        color: #fff; }
         .record-modal .record-modal-section .record-modal-description .record-modal-command .code-snippet {
           width: 100%; }
       .record-modal .record-modal-section .record-modal-description h3 {
@@ -1566,7 +1566,7 @@ body.testing .sidebar-footer {
     padding-top: 0.5rem;
     padding-bottom: 0.5rem;
     background-color: #0000ff;
-    color: #ffffff;
+    color: #fff;
     cursor: pointer;
     -webkit-appearance: button;
     text-transform: none;

@@ -308,7 +308,7 @@ class AllocationMemoryJson extends MemoryJson<ClassHeapStats> {
           ],
           // We'll just fudge the old space numbers.
           '_old': const <int>[0, 0, 0],
-        }
+        },
     ];
     return updatedPayload;
   }

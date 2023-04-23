@@ -119,7 +119,7 @@ class LegacyTimelineEventsController with SearchControllerMixin<TimelineEvent> {
     try {
       await ga.timeAsync(
         gac.performance,
-        gac.traceEventProcessingTime,
+        gac.PerformanceEvents.traceEventProcessingTime.name,
         asyncOperation: processTraceEventsHelper,
         screenMetricsProvider: () => PerformanceScreenMetrics(
           traceEventCount: processingTraceCount,
@@ -169,7 +169,7 @@ class LegacyTimelineEventsController with SearchControllerMixin<TimelineEvent> {
     return matches;
   }
 
-  Future<void> setOfflineData(PerformanceData offlineData) async {
+  void setOfflineData(PerformanceData offlineData) {
     if (offlineData.selectedEvent != null) {
       for (var timelineEvent in data!.timelineEvents) {
         final eventToSelect = timelineEvent.firstChildWithCondition((event) {

@@ -6,7 +6,7 @@ This is draft for future release notes, that are going to land on
 Dart & Flutter DevTools - A Suite of Performance Tools for Dart and Flutter
 
 ## General updates
-TODO: Remove this section if there are not any general updates.
+* Improve the overal performance of DevTools tables - [#5664](https://github.com/flutter/devtools/pull/5664), [#5696](https://github.com/flutter/devtools/pull/5696)
 
 ## Inspector updates
 TODO: Remove this section if there are not any general updates.
@@ -15,7 +15,7 @@ TODO: Remove this section if there are not any general updates.
 TODO: Remove this section if there are not any general updates.
 
 ## CPU profiler updates
-TODO: Remove this section if there are not any general updates.
+* Fix bug with CPU flame chart selection and tooltips - [#5676](https://github.com/flutter/devtools/pull/5676)
 
 ## Memory updates
 TODO: Remove this section if there are not any general updates.

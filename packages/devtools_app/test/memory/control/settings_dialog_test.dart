@@ -33,7 +33,7 @@ void main() {
     await scene.setUp();
   });
 
-  tearDown(() async {
+  tearDown(() {
     scene.tearDown();
   });
 

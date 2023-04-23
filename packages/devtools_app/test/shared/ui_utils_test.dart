@@ -167,118 +167,133 @@ void main() {
 
   group('ScreenSize', () {
     testWidgetsWithWindowSize(
-        'handles screens with xxs width and xl height', const Size(250, 1000),
-        (WidgetTester tester) async {
-      return expectScreenSize(
-        tester,
-        width: MediaSize.xxs,
-        height: MediaSize.xl,
-      );
-    });
+      'handles screens with xxs width and xl height',
+      const Size(250, 1000),
+      (WidgetTester tester) async {
+        return expectScreenSize(
+          tester,
+          width: MediaSize.xxs,
+          height: MediaSize.xl,
+        );
+      },
+    );
 
     testWidgetsWithWindowSize(
-        'handles screens with xs width and l height', const Size(500, 800),
-        (WidgetTester tester) async {
-      return expectScreenSize(
-        tester,
-        width: MediaSize.xs,
-        height: MediaSize.l,
-      );
-    });
+      'handles screens with xs width and l height',
+      const Size(500, 800),
+      (WidgetTester tester) async {
+        return expectScreenSize(
+          tester,
+          width: MediaSize.xs,
+          height: MediaSize.l,
+        );
+      },
+    );
 
     testWidgetsWithWindowSize(
-        'handles screens with s width and m height', const Size(800, 700),
-        (WidgetTester tester) async {
-      return expectScreenSize(
-        tester,
-        width: MediaSize.s,
-        height: MediaSize.m,
-      );
-    });
+      'handles screens with s width and m height',
+      const Size(800, 700),
+      (WidgetTester tester) async {
+        return expectScreenSize(
+          tester,
+          width: MediaSize.s,
+          height: MediaSize.m,
+        );
+      },
+    );
 
     testWidgetsWithWindowSize(
-        'handles screens with m width and s height', const Size(1100, 550),
-        (WidgetTester tester) async {
-      return expectScreenSize(
-        tester,
-        width: MediaSize.m,
-        height: MediaSize.s,
-      );
-    });
+      'handles screens with m width and s height',
+      const Size(1100, 550),
+      (WidgetTester tester) async {
+        return expectScreenSize(
+          tester,
+          width: MediaSize.m,
+          height: MediaSize.s,
+        );
+      },
+    );
 
     testWidgetsWithWindowSize(
-        'handles screens with l width and xs height', const Size(1400, 400),
-        (WidgetTester tester) async {
-      return expectScreenSize(
-        tester,
-        width: MediaSize.l,
-        height: MediaSize.xs,
-      );
-    });
+      'handles screens with l width and xs height',
+      const Size(1400, 400),
+      (WidgetTester tester) async {
+        return expectScreenSize(
+          tester,
+          width: MediaSize.l,
+          height: MediaSize.xs,
+        );
+      },
+    );
 
     testWidgetsWithWindowSize(
-        'handles screens with xl width and xxs height', const Size(1600, 250),
-        (WidgetTester tester) async {
-      return expectScreenSize(
-        tester,
-        width: MediaSize.xl,
-        height: MediaSize.xxs,
-      );
-    });
+      'handles screens with xl width and xxs height',
+      const Size(1600, 250),
+      (WidgetTester tester) async {
+        return expectScreenSize(
+          tester,
+          width: MediaSize.xl,
+          height: MediaSize.xxs,
+        );
+      },
+    );
   });
 
-  testWidgetsWithWindowSize('OffsetScrollbar goldens', const Size(300, 300),
-      (WidgetTester tester) async {
-    const root = Key('root');
-    final _scrollControllerX = ScrollController();
-    final _scrollControllerY = ScrollController();
-    await tester.pumpWidget(
-      wrap(
-        Scrollbar(
-          thumbVisibility: true,
-          key: root,
-          controller: _scrollControllerX,
-          child: SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
+  testWidgetsWithWindowSize(
+    'OffsetScrollbar goldens',
+    const Size(300, 300),
+    (WidgetTester tester) async {
+      const root = Key('root');
+      final _scrollControllerX = ScrollController();
+      final _scrollControllerY = ScrollController();
+      await tester.pumpWidget(
+        wrap(
+          Scrollbar(
+            thumbVisibility: true,
+            key: root,
             controller: _scrollControllerX,
-            child: OffsetScrollbar(
-              axis: Axis.vertical,
-              isAlwaysShown: true,
-              offsetControllerViewportDimension:
-                  300, // Matches the extent of the outer ScrollView.
-              controller: _scrollControllerY,
-              offsetController: _scrollControllerX,
-              child: SingleChildScrollView(
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              controller: _scrollControllerX,
+              child: OffsetScrollbar(
+                axis: Axis.vertical,
+                isAlwaysShown: true,
+                offsetControllerViewportDimension:
+                    300, // Matches the extent of the outer ScrollView.
                 controller: _scrollControllerY,
-                child:
-                    Container(width: 2000, height: 1000, color: Colors.green),
+                offsetController: _scrollControllerX,
+                child: SingleChildScrollView(
+                  controller: _scrollControllerY,
+                  child:
+                      Container(width: 2000, height: 1000, color: Colors.green),
+                ),
               ),
             ),
           ),
         ),
-      ),
-    );
-    await tester.pumpAndSettle();
+      );
+      await tester.pumpAndSettle();
 
-    // Screenshot should show both vertical and horizontal scrollbars.
-    await expectLater(
-      find.byKey(root),
-      matchesDevToolsGolden(
-        '../test_infra/goldens/offset_scrollbar_startup.png',
-      ),
-    );
+      // Screenshot should show both vertical and horizontal scrollbars.
+      await expectLater(
+        find.byKey(root),
+        matchesDevToolsGolden(
+          '../test_infra/goldens/offset_scrollbar_startup.png',
+        ),
+      );
 
-    _scrollControllerX.jumpTo(500);
-    await tester.pumpAndSettle();
-    // Screenshot should show horizontal scrollbar scrolled while vertical
-    // scrollbar is at its initial offset.
-    await expectLater(
-      find.byKey(root),
-      matchesDevToolsGolden(
-        '../test_infra/goldens/offset_scrollbar_scrolled.png',
-      ),
-    );
-  });
+      _scrollControllerX.jumpTo(500);
+      await tester.pumpAndSettle();
+      // Screenshot should show horizontal scrollbar scrolled while vertical
+      // scrollbar is at its initial offset.
+      await expectLater(
+        find.byKey(root),
+        matchesDevToolsGolden(
+          '../test_infra/goldens/offset_scrollbar_scrolled.png',
+        ),
+      );
+    },
+  );
 }
 
 void expectScreenSize(

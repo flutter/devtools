@@ -21,8 +21,7 @@ import 'primitives/utils.dart';
 /// A controller for global application preferences.
 class PreferencesController extends DisposableController
     with AutoDisposeControllerMixin {
-  final darkModeTheme =
-      ValueNotifier<bool>(devToolsExtensionPoints.defaultIsDarkTheme);
+  final darkModeTheme = ValueNotifier<bool>(true);
 
   final vmDeveloperModeEnabled = ValueNotifier<bool>(false);
 
@@ -47,9 +46,7 @@ class PreferencesController extends DisposableController
   Future<void> init() async {
     // Get the current values and listen for and write back changes.
     String? value = await storage.getValue('ui.darkMode');
-    final useDarkMode = value == null
-        ? devToolsExtensionPoints.defaultIsDarkTheme
-        : value == 'true';
+    final useDarkMode = value == null || value == 'true';
     toggleDarkModeTheme(useDarkMode);
     addAutoDisposeListener(darkModeTheme, () {
       storage.setValue('ui.darkMode', '${darkModeTheme.value}');
@@ -434,8 +431,8 @@ class CpuProfilerPreferencesController extends DisposableController
     with AutoDisposeControllerMixin {
   final displayTreeGuidelines = ValueNotifier<bool>(false);
 
-  static final _displayTreeGuidelinesId =
-      '${gac.cpuProfiler}.${gac.cpuProfileDisplayTreeGuidelines}';
+  static final _displayTreeGuidelinesId = '${gac.cpuProfiler}.'
+      '${gac.CpuProfilerEvents.cpuProfileDisplayTreeGuidelines.name}';
 
   Future<void> init() async {
     addAutoDisposeListener(
@@ -447,7 +444,7 @@ class CpuProfilerPreferencesController extends DisposableController
         );
         ga.select(
           gac.cpuProfiler,
-          gac.cpuProfileDisplayTreeGuidelines,
+          gac.CpuProfilerEvents.cpuProfileDisplayTreeGuidelines.name,
           value: displayTreeGuidelines.value ? 1 : 0,
         );
       },
@@ -462,7 +459,7 @@ class PerformancePreferencesController extends DisposableController
   final showFlutterFramesChart = ValueNotifier<bool>(true);
 
   static final _showFlutterFramesChartId =
-      '${gac.performance}.${gac.framesChartVisibility}';
+      '${gac.performance}.${gac.PerformanceEvents.framesChartVisibility.name}';
 
   Future<void> init() async {
     addAutoDisposeListener(
@@ -474,7 +471,7 @@ class PerformancePreferencesController extends DisposableController
         );
         ga.select(
           gac.performance,
-          gac.framesChartVisibility,
+          gac.PerformanceEvents.framesChartVisibility.name,
           value: showFlutterFramesChart.value ? 1 : 0,
         );
       },

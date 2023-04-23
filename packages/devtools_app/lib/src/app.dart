@@ -84,7 +84,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
   List<Screen> get _screens => widget.screens.map((s) => s.screen).toList();
 
   bool get isDarkThemeEnabled => _isDarkThemeEnabled;
-  bool _isDarkThemeEnabled = devToolsExtensionPoints.defaultIsDarkTheme;
+  bool _isDarkThemeEnabled = true;
 
   bool get vmDeveloperModeEnabled => _vmDeveloperModeEnabled;
   bool _vmDeveloperModeEnabled = false;

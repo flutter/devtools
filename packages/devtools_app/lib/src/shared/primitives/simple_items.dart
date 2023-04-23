@@ -50,3 +50,29 @@ const String traceEventsFieldName = 'traceEvents';
 const closureName = '<closure>';
 
 const anonymousClosureName = '<anonymous closure>';
+
+const _memoryDocUrl =
+    'https://docs.flutter.dev/development/tools/devtools/memory';
+const _consoleDocUrl =
+    'https://docs.flutter.dev/development/tools/devtools/console';
+
+/// Some links to documentation.
+///
+/// The enum is test covered to catch broken links.
+enum DocLinks {
+  chart(_memoryDocUrl, 'expandable-chart'),
+  profile(_memoryDocUrl, 'profile-memory-tab'),
+  diff(_memoryDocUrl, 'diff-snapshots-tab'),
+  trace(_memoryDocUrl, 'trace-instances-tab'),
+  console(_consoleDocUrl, null),
+  ;
+
+  const DocLinks(this.url, this.hash);
+
+  final String url;
+  final String? hash;
+  String get value {
+    if (hash == null) return url;
+    return '$url#$hash';
+  }
+}

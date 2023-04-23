@@ -153,7 +153,7 @@ class _SecondaryPerformanceControls extends StatelessWidget {
         const SizedBox(width: denseSpacing),
         SettingsOutlinedButton(
           gaScreen: gac.performance,
-          gaSelection: gac.performanceSettings,
+          gaSelection: gac.PerformanceEvents.performanceSettings.name,
           onPressed: () => _openSettingsDialog(context),
         ),
       ],

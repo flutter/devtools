@@ -71,7 +71,8 @@ class _BoxLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
   }
 
   @override
-  LayoutProperties computeLayoutProperties(node) => LayoutProperties(node);
+  LayoutProperties computeLayoutProperties(RemoteDiagnosticsNode node) =>
+      LayoutProperties(node);
 
   @override
   void updateHighlighted(LayoutProperties? newProperties) {

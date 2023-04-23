@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -49,7 +51,7 @@ class _VmInstanceDisplayState extends State<VmInstanceDisplay> {
     _populate();
   }
 
-  void _populate() async {
+  void _populate() {
     final isolateRef = serviceManager.isolateManager.selectedIsolate.value;
     _root = DartObjectNode.fromValue(
       name: 'value',
@@ -58,15 +60,19 @@ class _VmInstanceDisplayState extends State<VmInstanceDisplay> {
       artificialName: true,
     );
 
-    _initialized = buildVariablesTree(_root)
-        .then(
-          (_) => _root.expand(),
-        )
-        .then(
-          (_) => Future.wait([
-            for (final child in _root.children) buildVariablesTree(child),
-          ]),
-        );
+    unawaited(
+      _initialized = buildVariablesTree(_root)
+          .then(
+            (_) => _root.expand(),
+          )
+          .then(
+            (_) => unawaited(
+              Future.wait([
+                for (final child in _root.children) buildVariablesTree(child),
+              ]),
+            ),
+          ),
+    );
   }
 
   @override
@@ -212,7 +218,7 @@ class DisplayProvider extends StatelessWidget {
           Text(
             variable.ref!.value.toString(),
             style: Theme.of(context).subtleFixedFontStyle,
-          )
+          ),
       ],
     );
   }

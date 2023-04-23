@@ -418,7 +418,8 @@ abstract class FlameChartState<T extends FlameChart,
   /// Returns -1 if the row index is out of range for [rows].
   int _rowIndexForY(double dy) {
     final topPaddingHeight = rowOffsetForTopPadding * sectionSpacing;
-    final rowIndex = ((dy - topPaddingHeight) ~/ rowHeightWithPadding) +
+    final adjustedDy = verticalControllerGroup.offset + dy;
+    final rowIndex = ((adjustedDy - topPaddingHeight) ~/ rowHeightWithPadding) +
         rowOffsetForTopPadding;
     if (rowIndex < 0 || rowIndex >= rows.length) {
       return -1;
@@ -1442,6 +1443,7 @@ class TimelineGridPainter extends FlameChartPainter {
   bool shouldRepaint(CustomPainter oldDelegate) => this != oldDelegate;
 
   @override
+  // ignore: avoid-dynamic, necessary here.
   bool operator ==(other) {
     if (other is! TimelineGridPainter) return false;
     return zoom == other.zoom &&

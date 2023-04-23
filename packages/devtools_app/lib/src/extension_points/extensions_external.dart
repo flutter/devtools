@@ -48,7 +48,8 @@ class ExternalDevToolsExtensionPoints implements DevToolsExtensionPoints {
           : null;
 
   @override
-  bool get defaultIsDarkTheme => true;
+  String get perfettoIndexLocation =>
+      'packages/perfetto_ui_compiled/dist/index.html';
 }
 
 const _newDevToolsIssueUriDisplay = 'github.com/flutter/devtools/issues/new';

@@ -12,10 +12,10 @@ class FixedValueListenable<T> extends ValueListenable<T> {
   final T _value;
 
   @override
-  void addListener(listener) => null;
+  void addListener(void Function() listener) => null;
 
   @override
-  void removeListener(listener) => null;
+  void removeListener(void Function() listener) => null;
 
   @override
   T get value => _value;

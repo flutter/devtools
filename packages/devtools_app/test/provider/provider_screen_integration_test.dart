@@ -18,7 +18,7 @@ import '../test_infra/flutter_test_driver.dart';
 import '../test_infra/flutter_test_environment.dart';
 import '../test_infra/flutter_test_storage.dart';
 
-void main() async {
+void main() {
   final FlutterTestEnvironment env = FlutterTestEnvironment(
     const FlutterRunConfiguration(withDebugger: true),
     testAppDirectory: 'test/test_infra/fixtures/provider_app',
@@ -249,7 +249,7 @@ void main() async {
                   .then(
                     (value) => MapEntry(field.name, value),
                     onError: (Object err) => MapEntry(field.name, err),
-                  )
+                  ),
           ]);
 
           final mapPath = complexPath.pathForChild(
@@ -279,7 +279,7 @@ void main() async {
                     ).future,
                     (prev, next) {},
                   )
-                  .read()
+                  .read(),
           ]);
 
           final listPath = complexPath.pathForChild(
@@ -299,7 +299,7 @@ void main() async {
                     ).future,
                     (prev, next) {},
                   )
-                  .read()
+                  .read(),
           ]);
 
           // Counter.complex.list[4].value
@@ -626,7 +626,7 @@ void main() async {
                     (e) => e.isDefinedByDependency,
                     'isDefinedByDependency',
                     false,
-                  )
+                  ),
             ]).having((e) => e.setter, 'setter', isNotNull),
           );
 
@@ -677,9 +677,9 @@ void main() async {
                       (e) => e.isDefinedByDependency,
                       'isDefinedByDependency',
                       false,
-                    )
+                    ),
               ]),
-              isA<NullInstance>()
+              isA<NullInstance>(),
             ]),
           );
 
@@ -725,7 +725,7 @@ void main() async {
                 .having((e) => e.fields, 'fields', [
               isA<ObjectField>()
                   .having((e) => e.name, 'name', 'value')
-                  .having((e) => e.isFinal, 'isFinal', true)
+                  .having((e) => e.isFinal, 'isFinal', true),
             ]),
             isA<ObjectInstance>()
                 .having((e) => e.type, 'type', 'Object')
@@ -761,7 +761,7 @@ void main() async {
                   .having((e) => e.fields, 'fields', [
                 isA<ObjectField>()
                     .having((e) => e.name, 'name', 'value')
-                    .having((e) => e.isFinal, 'isFinal', true)
+                    .having((e) => e.isFinal, 'isFinal', true),
               ]),
               isA<StringInstance>()
                   .having(
@@ -838,7 +838,7 @@ void main() async {
         name: '_count',
         ownerUri: 'package:provider_app/main.dart',
         ownerName: 'Counter',
-      )
+      ),
     ],
   );
 
