@@ -66,7 +66,9 @@ class LegacyTimelineEventsController with SearchControllerMixin<TimelineEvent> {
           .toList();
     }
 
-    performanceController.initData();
+    if (data == null) {
+      performanceController.initData();
+    }
     final theData = data!;
     final traceEventCount = traceEvents.length;
 

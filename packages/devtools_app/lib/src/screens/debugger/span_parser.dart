@@ -43,7 +43,7 @@ class Grammar {
     return Grammar._(
       name: json['name'] as String,
       scopeName: json['scopeName'] as String,
-      topLevelMatcher: GrammaMatcher.parse(json),
+      topLevelMatcher: GrammarMatcher.parse(json),
       repository: Repository.build(json),
     );
   }
@@ -59,7 +59,7 @@ class Grammar {
 
   final String? scopeName;
 
-  final GrammaMatcher topLevelMatcher;
+  final GrammarMatcher topLevelMatcher;
 
   final Repository repository;
 
@@ -168,11 +168,11 @@ class Repository {
       return;
     }
     for (final subRepo in repositoryJson.keys) {
-      matchers[subRepo] = GrammaMatcher.parse(repositoryJson[subRepo]!);
+      matchers[subRepo] = GrammarMatcher.parse(repositoryJson[subRepo]!);
     }
   }
 
-  final matchers = <String?, GrammaMatcher>{};
+  final matchers = <String?, GrammarMatcher>{};
 
   Map<String, Object?> toJson() {
     return {
@@ -182,8 +182,8 @@ class Repository {
   }
 }
 
-abstract class GrammaMatcher {
-  factory GrammaMatcher.parse(Map<String, Object?> json) {
+abstract class GrammarMatcher {
+  factory GrammarMatcher.parse(Map<String, Object?> json) {
     if (_IncludeMatcher.isType(json)) {
       return _IncludeMatcher(json['include'] as String);
     } else if (_SimpleMatcher.isType(json)) {
@@ -196,7 +196,7 @@ abstract class GrammaMatcher {
     throw StateError('Unknown matcher type: $json');
   }
 
-  GrammaMatcher._(Map<String, Object?> json) : name = json['name'] as String?;
+  GrammarMatcher._(Map<String, Object?> json) : name = json['name'] as String?;
 
   final String? name;
 
@@ -237,7 +237,7 @@ abstract class GrammaMatcher {
             scanner.substring(0, captureEndLocation.position),
             position: captureStartLocation.position,
           );
-          GrammaMatcher.parse(capture)
+          GrammarMatcher.parse(capture)
               .scan(grammar, captureScanner, scopeStack);
         }
 
@@ -250,7 +250,7 @@ abstract class GrammaMatcher {
 }
 
 /// A simple matcher which matches a single line.
-class _SimpleMatcher extends GrammaMatcher {
+class _SimpleMatcher extends GrammarMatcher {
   _SimpleMatcher(Map<String, Object?> json)
       : match = RegExp(json['match'] as String, multiLine: true),
         captures = (json['captures'] as Map<String, Object?>?)
@@ -287,7 +287,7 @@ class _SimpleMatcher extends GrammaMatcher {
   }
 }
 
-class _MultilineMatcher extends GrammaMatcher {
+class _MultilineMatcher extends GrammarMatcher {
   _MultilineMatcher(Map<String, Object?> json)
       : begin = RegExp(json['begin'] as String, multiLine: true),
         beginCaptures = json['beginCaptures'] as Map<String, Object?>?,
@@ -302,9 +302,9 @@ class _MultilineMatcher extends GrammaMatcher {
             : RegExp(json['while'] as String, multiLine: true),
         patterns = (json['patterns'] as List<Object?>?)
             ?.cast<Map<String, Object?>>()
-            .map((e) => GrammaMatcher.parse(e))
+            .map((e) => GrammarMatcher.parse(e))
             .toList()
-            .cast<GrammaMatcher>(),
+            .cast<GrammarMatcher>(),
         super._(json);
 
   static bool isType(Map<String, Object?> json) {
@@ -353,7 +353,7 @@ class _MultilineMatcher extends GrammaMatcher {
   /// be null if this property is provided.
   final Map<String, Object?>? captures;
 
-  final List<GrammaMatcher>? patterns;
+  final List<GrammarMatcher>? patterns;
 
   void _scanBegin(Grammar grammar, LineScanner scanner, ScopeStack scopeStack) {
     final location = scanner.location;
@@ -382,7 +382,7 @@ class _MultilineMatcher extends GrammaMatcher {
         break;
       }
       bool foundMatch = false;
-      for (final pattern in patterns ?? <GrammaMatcher>[]) {
+      for (final pattern in patterns ?? <GrammarMatcher>[]) {
         if (pattern.scan(grammar, scanner, scopeStack)) {
           foundMatch = true;
           break;
@@ -401,7 +401,7 @@ class _MultilineMatcher extends GrammaMatcher {
   ) {
     while (!scanner.isDone && end != null && !scanner.matches(end!)) {
       bool foundMatch = false;
-      for (final pattern in patterns ?? <GrammaMatcher>[]) {
+      for (final pattern in patterns ?? <GrammarMatcher>[]) {
         if (pattern.scan(grammar, scanner, scopeStack)) {
           foundMatch = true;
           break;
@@ -516,20 +516,20 @@ class _MultilineMatcher extends GrammaMatcher {
   }
 }
 
-class _PatternMatcher extends GrammaMatcher {
+class _PatternMatcher extends GrammarMatcher {
   _PatternMatcher(Map<String, Object?> json)
       : patterns = (json['patterns'] as List<Object?>?)
             ?.cast<Map<String, Object?>>()
-            .map((e) => GrammaMatcher.parse(e))
+            .map((e) => GrammarMatcher.parse(e))
             .toList()
-            .cast<GrammaMatcher>(),
+            .cast<GrammarMatcher>(),
         super._(json);
 
   static bool isType(Map<String, Object?> json) {
     return json.containsKey('patterns');
   }
 
-  final List<GrammaMatcher>? patterns;
+  final List<GrammarMatcher>? patterns;
 
   @override
   bool scan(Grammar grammar, LineScanner scanner, ScopeStack scopeStack) {
@@ -552,10 +552,10 @@ class _PatternMatcher extends GrammaMatcher {
   }
 }
 
-/// A [GrammaMatcher] that corresponds to an `include` rule referenced in a
+/// A [GrammarMatcher] that corresponds to an `include` rule referenced in a
 /// `patterns` array. Allows for executing rules defined within a
 /// [Repository].
-class _IncludeMatcher extends GrammaMatcher {
+class _IncludeMatcher extends GrammarMatcher {
   _IncludeMatcher(String include)
       : include = include.substring(1),
         super._({});
