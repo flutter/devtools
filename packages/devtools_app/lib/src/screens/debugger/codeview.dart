@@ -86,7 +86,7 @@ class CodeView extends StatefulWidget {
   final void Function(ScriptRef scriptRef, int line)? onSelected;
 
   @override
-  State createState() => _CodeViewState();
+  State<CodeView> createState() => _CodeViewState();
 }
 
 class _CodeViewState extends State<CodeView> with AutoDisposeMixin {
@@ -1016,7 +1016,7 @@ class Lines extends StatefulWidget {
   final ValueListenable<SourceToken?> activeSearchMatchNotifier;
 
   @override
-  State createState() => _LinesState();
+  State<Lines> createState() => _LinesState();
 }
 
 class _LinesState extends State<Lines> with AutoDisposeMixin {
@@ -1122,7 +1122,7 @@ class LineItem extends StatefulWidget {
   final SourceToken? activeSearchMatch;
 
   @override
-  State createState() => _LineItemState();
+  State<LineItem> createState() => _LineItemState();
 }
 
 class _LineItemState extends State<LineItem>

@@ -52,7 +52,7 @@ class FileImportContainer extends StatefulWidget {
   final String? gaSelectionAction;
 
   @override
-  State createState() => _FileImportContainerState();
+  State<FileImportContainer> createState() => _FileImportContainerState();
 }
 
 class _FileImportContainerState extends State<FileImportContainer> {
@@ -291,7 +291,8 @@ class DualFileImportContainer extends StatefulWidget {
   ) onAction;
 
   @override
-  State createState() => _DualFileImportContainerState();
+  State<DualFileImportContainer> createState() =>
+      _DualFileImportContainerState();
 }
 
 class _DualFileImportContainerState extends State<DualFileImportContainer> {

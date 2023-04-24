@@ -122,7 +122,7 @@ class OffsetScrollbar extends StatefulWidget {
   final double offsetControllerViewportDimension;
 
   @override
-  State createState() => _OffsetScrollbarState();
+  State<OffsetScrollbar> createState() => _OffsetScrollbarState();
 }
 
 class _OffsetScrollbarState extends State<OffsetScrollbar> {

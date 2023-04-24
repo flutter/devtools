@@ -73,7 +73,7 @@ Example queries:
 ''';
 
   @override
-  State createState() => _LoggingScreenState();
+  State<LoggingScreenBody> createState() => _LoggingScreenState();
 }
 
 class _LoggingScreenState extends State<LoggingScreenBody>

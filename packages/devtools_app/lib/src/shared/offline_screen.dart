@@ -35,7 +35,7 @@ class OfflineScreenBody extends StatefulWidget {
   final List<Screen> possibleScreens;
 
   @override
-  State createState() => _OfflineScreenBodyState();
+  State<OfflineScreenBody> createState() => _OfflineScreenBodyState();
 }
 
 class _OfflineScreenBodyState extends State<OfflineScreenBody>

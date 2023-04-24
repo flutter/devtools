@@ -353,7 +353,7 @@ class IsolatePortsWidget extends StatefulWidget {
   final IsolateStatisticsViewController controller;
 
   @override
-  State createState() => _IsolatePortsWidgetState();
+  State<IsolatePortsWidget> createState() => _IsolatePortsWidgetState();
 }
 
 class _IsolatePortsWidgetState extends State<IsolatePortsWidget> {

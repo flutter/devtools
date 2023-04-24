@@ -68,7 +68,8 @@ class VMDeveloperToolsScreenBody extends StatefulWidget {
   ];
 
   @override
-  State createState() => _VMDeveloperToolsScreenState();
+  State<VMDeveloperToolsScreenBody> createState() =>
+      _VMDeveloperToolsScreenState();
 }
 
 class _VMDeveloperToolsScreenState extends State<VMDeveloperToolsScreenBody>

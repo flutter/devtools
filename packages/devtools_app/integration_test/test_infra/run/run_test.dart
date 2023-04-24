@@ -125,7 +125,7 @@ class TestRunner with IOMixin {
     bool updateGoldens = false,
     Map<String, Object> testAppArguments = const <String, Object>{},
   }) async {
-    Future<void> run({required int attemptNumber}) async {
+    Future<void> runTest({required int attemptNumber}) async {
       _debugLog('starting the flutter drive process');
       final process = await Process.start(
         'flutter',
@@ -213,7 +213,7 @@ class TestRunner with IOMixin {
             'Integration test timed out on try #$attemptNumber. Retrying '
             '$testTarget now.',
           );
-          await run(attemptNumber: ++attemptNumber);
+          await runTest(attemptNumber: ++attemptNumber);
         }
       }
 
@@ -222,7 +222,7 @@ class TestRunner with IOMixin {
       }
     }
 
-    await run(attemptNumber: 0);
+    await runTest(attemptNumber: 0);
   }
 }
 

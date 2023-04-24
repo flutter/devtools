@@ -330,7 +330,7 @@ class HoverCardTooltip extends StatefulWidget {
   final int? asyncTimeout;
 
   @override
-  State createState() => _HoverCardTooltipState();
+  State<HoverCardTooltip> createState() => _HoverCardTooltipState();
 }
 
 class _HoverCardTooltipState extends State<HoverCardTooltip> {

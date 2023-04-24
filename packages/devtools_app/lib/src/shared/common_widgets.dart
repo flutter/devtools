@@ -2276,7 +2276,7 @@ class BlinkingIcon extends StatefulWidget {
   final double size;
 
   @override
-  State createState() => _BlinkingIconState();
+  State<BlinkingIcon> createState() => _BlinkingIconState();
 }
 
 class _BlinkingIconState extends State<BlinkingIcon> {
@@ -2352,7 +2352,8 @@ class DualValueListenableBuilder<T, U> extends StatefulWidget {
   final Widget? child;
 
   @override
-  State createState() => _DualValueListenableBuilderState<T, U>();
+  State<DualValueListenableBuilder<T, U>> createState() =>
+      _DualValueListenableBuilderState<T, U>();
 }
 
 class _DualValueListenableBuilderState<T, U>

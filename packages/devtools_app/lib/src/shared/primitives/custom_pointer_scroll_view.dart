@@ -240,7 +240,8 @@ class CustomPointerScrollable extends StatefulWidget {
   final void Function(PointerSignalEvent event)? customPointerSignalHandler;
 
   @override
-  State createState() => _CustomPointerScrollableState();
+  State<CustomPointerScrollable> createState() =>
+      _CustomPointerScrollableState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {

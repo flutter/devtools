@@ -37,7 +37,8 @@ class BoxLayoutExplorerWidget extends LayoutExplorerWidget {
   }
 
   @override
-  State createState() => BoxLayoutExplorerWidgetState();
+  State<BoxLayoutExplorerWidget> createState() =>
+      BoxLayoutExplorerWidgetState();
 }
 
 class BoxLayoutExplorerWidgetState extends LayoutExplorerWidgetState<

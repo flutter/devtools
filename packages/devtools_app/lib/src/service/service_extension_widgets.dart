@@ -53,7 +53,8 @@ class ServiceExtensionButtonGroup extends StatefulWidget {
   final List<ToggleableServiceExtensionDescription> extensions;
 
   @override
-  State createState() => _ServiceExtensionButtonGroupState();
+  State<ServiceExtensionButtonGroup> createState() =>
+      _ServiceExtensionButtonGroupState();
 }
 
 class _ServiceExtensionButtonGroupState

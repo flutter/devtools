@@ -1232,7 +1232,8 @@ class NavigateInThreadInButton extends StatefulWidget {
   static const topPaddingForMediumGroups = 20.0;
 
   @override
-  State createState() => _NavigateInThreadInButtonState();
+  State<NavigateInThreadInButton> createState() =>
+      _NavigateInThreadInButtonState();
 }
 
 class _NavigateInThreadInButtonState extends State<NavigateInThreadInButton>

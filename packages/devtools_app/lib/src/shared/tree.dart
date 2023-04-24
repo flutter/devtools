@@ -62,7 +62,7 @@ class TreeView<T extends TreeNode<T>> extends StatefulWidget {
   final bool includeScrollbar;
 
   @override
-  State createState() => _TreeViewState<T>();
+  State<TreeView<T>> createState() => _TreeViewState<T>();
 }
 
 class _TreeViewState<T extends TreeNode<T>> extends State<TreeView<T>>

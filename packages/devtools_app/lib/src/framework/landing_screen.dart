@@ -95,7 +95,7 @@ class ConnectDialog extends StatefulWidget {
   const ConnectDialog({Key? key}) : super(key: key);
 
   @override
-  State createState() => _ConnectDialogState();
+  State<ConnectDialog> createState() => _ConnectDialogState();
 }
 
 class _ConnectDialogState extends State<ConnectDialog>

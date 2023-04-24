@@ -1302,7 +1302,7 @@ class TableRow<T> extends StatefulWidget {
   final bool displayTreeGuidelines;
 
   @override
-  State createState() => _TableRowState<T>();
+  State<TableRow<T>> createState() => _TableRowState<T>();
 }
 
 class _TableRowState<T> extends State<TableRow<T>>

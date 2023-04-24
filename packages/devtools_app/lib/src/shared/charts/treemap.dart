@@ -87,7 +87,7 @@ class Treemap extends StatefulWidget {
   static const minHeightToDisplayCellText = 50.0;
 
   @override
-  State createState() => _TreemapState();
+  State<Treemap> createState() => _TreemapState();
 }
 
 class _TreemapState extends State<Treemap> {

@@ -33,7 +33,8 @@ class FlexLayoutExplorerWidget extends LayoutExplorerWidget {
   }
 
   @override
-  State createState() => FlexLayoutExplorerWidgetState();
+  State<FlexLayoutExplorerWidget> createState() =>
+      FlexLayoutExplorerWidgetState();
 }
 
 class FlexLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
@@ -402,7 +403,7 @@ class VisualizeFlexChildren extends StatefulWidget {
   final FlexLayoutExplorerWidgetState state;
 
   @override
-  State createState() => _VisualizeFlexChildrenState();
+  State<VisualizeFlexChildren> createState() => _VisualizeFlexChildrenState();
 }
 
 class _VisualizeFlexChildrenState extends State<VisualizeFlexChildren> {

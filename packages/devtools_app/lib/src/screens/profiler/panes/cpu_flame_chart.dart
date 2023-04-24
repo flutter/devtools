@@ -34,7 +34,7 @@ class CpuProfileFlameChart extends FlameChart<CpuProfileData, CpuStackFrame?> {
         );
 
   @override
-  State createState() => _CpuProfileFlameChartState();
+  State<CpuProfileFlameChart> createState() => _CpuProfileFlameChartState();
 }
 
 class _CpuProfileFlameChartState

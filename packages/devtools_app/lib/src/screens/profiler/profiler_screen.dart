@@ -51,7 +51,7 @@ class ProfilerScreenBody extends StatefulWidget {
   const ProfilerScreenBody({super.key});
 
   @override
-  State createState() => _ProfilerScreenBodyState();
+  State<ProfilerScreenBody> createState() => _ProfilerScreenBodyState();
 }
 
 class _ProfilerScreenBodyState extends State<ProfilerScreenBody>

@@ -19,7 +19,8 @@ class CallGraphWithDominators extends StatefulWidget {
   final CallGraphNode callGraphRoot;
 
   @override
-  State createState() => _CallGraphWithDominatorsState();
+  State<CallGraphWithDominators> createState() =>
+      _CallGraphWithDominatorsState();
 }
 
 class _CallGraphWithDominatorsState extends State<CallGraphWithDominators> {
@@ -85,7 +86,7 @@ class CallGraphView extends StatefulWidget {
   final CallGraphNode node;
 
   @override
-  State createState() => _CallGraphViewState();
+  State<CallGraphView> createState() => _CallGraphViewState();
 }
 
 class _CallGraphViewState extends State<CallGraphView> {

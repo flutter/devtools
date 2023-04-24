@@ -71,7 +71,7 @@ class CpuProfiler extends StatefulWidget {
   ];
 
   @override
-  State createState() => _CpuProfilerState();
+  State<CpuProfiler> createState() => _CpuProfilerState();
 }
 
 // TODO(kenz): preserve tab controller index when updating CpuProfiler with new

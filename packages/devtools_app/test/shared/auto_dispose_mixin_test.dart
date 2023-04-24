@@ -11,17 +11,17 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../test_infra/fixtures/debugging_app_async.dart';
 
+class AutoDisposeContoller extends DisposableController
+    with AutoDisposeControllerMixin {}
+
 class AutoDisposedWidget extends StatefulWidget {
   const AutoDisposedWidget(this.stream, {Key? key}) : super(key: key);
 
   final Stream stream;
 
   @override
-  State createState() => _AutoDisposedWidgetState();
+  State<AutoDisposedWidget> createState() => _AutoDisposedWidgetState();
 }
-
-class AutoDisposeContoller extends DisposableController
-    with AutoDisposeControllerMixin {}
 
 class _AutoDisposedWidgetState extends State<AutoDisposedWidget>
     with AutoDisposeMixin {

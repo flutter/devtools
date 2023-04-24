@@ -23,7 +23,7 @@ class DebuggingControls extends StatefulWidget {
   static const minWidthBeforeScaling = 1750.0;
 
   @override
-  State createState() => _DebuggingControlsState();
+  State<DebuggingControls> createState() => _DebuggingControlsState();
 }
 
 class _DebuggingControlsState extends State<DebuggingControls>

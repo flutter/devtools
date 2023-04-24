@@ -20,7 +20,7 @@ class Breakpoints extends StatefulWidget {
   const Breakpoints({Key? key}) : super(key: key);
 
   @override
-  State createState() => _BreakpointsState();
+  State<Breakpoints> createState() => _BreakpointsState();
 }
 
 class _BreakpointsState extends State<Breakpoints>

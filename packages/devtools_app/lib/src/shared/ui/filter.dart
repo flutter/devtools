@@ -152,7 +152,7 @@ class FilterDialog<T> extends StatefulWidget {
   final List<bool> toggleFilterValuesAtOpen;
 
   @override
-  State createState() => _FilterDialogState<T>();
+  State<FilterDialog<T>> createState() => _FilterDialogState<T>();
 }
 
 class _FilterDialogState<T> extends State<FilterDialog<T>>
