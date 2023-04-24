@@ -31,8 +31,9 @@ class PreferencesController extends DisposableController
 
   final denseModeEnabled = ValueNotifier<bool>(false);
 
-  InspectorPreferencesController get inspector => _inspector;
-  final _inspector = InspectorPreferencesController();
+  InspectorPreferencesController? get inspector =>
+      serviceManager.inspectorService is InspectorService ? _inspector : null;
+  late final _inspector = InspectorPreferencesController();
 
   MemoryPreferencesController get memory => _memory;
   final _memory = MemoryPreferencesController();
@@ -66,7 +67,7 @@ class PreferencesController extends DisposableController
 
     await _initVerboseLogging();
 
-    await inspector.init();
+    await inspector?.init();
     await memory.init();
     await performance.init();
     await cpuProfiler.init();
@@ -96,7 +97,7 @@ class PreferencesController extends DisposableController
 
   @override
   void dispose() {
-    inspector.dispose();
+    inspector?.dispose();
     memory.dispose();
     performance.dispose();
     cpuProfiler.dispose();
@@ -134,6 +135,9 @@ class PreferencesController extends DisposableController
 
 class InspectorPreferencesController extends DisposableController
     with AutoDisposeControllerMixin {
+  InspectorPreferencesController()
+      : assert(serviceManager.inspectorService is InspectorService);
+
   ValueListenable<bool> get hoverEvalModeEnabled => _hoverEvalMode;
   ListValueNotifier<String> get customPubRootDirectories =>
       _customPubRootDirectories;
@@ -206,13 +210,13 @@ class InspectorPreferencesController extends DisposableController
           if (debuggerState?.isPaused.value == false) {
             // the isolate is already unpaused, we can try to load
             // the directories
-            unawaited(preferences.inspector.loadCustomPubRootDirectories());
+            unawaited(preferences.inspector!.loadCustomPubRootDirectories());
           } else {
             late Function() pausedListener;
 
             pausedListener = () {
               if (debuggerState?.isPaused.value == false) {
-                unawaited(preferences.inspector.loadCustomPubRootDirectories());
+                unawaited(preferences.inspector!.loadCustomPubRootDirectories());
 
                 debuggerState?.isPaused.removeListener(pausedListener);
               }

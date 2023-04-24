@@ -79,14 +79,16 @@ class InspectorController extends DisposableController
 
     await serviceManager.onServiceAvailable;
 
-    _treeGroups = InspectorObjectGroupManager(
-      serviceManager.inspectorService as InspectorService,
-      'tree',
-    );
-    _selectionGroups = InspectorObjectGroupManager(
-      serviceManager.inspectorService as InspectorService,
-      'selection',
-    );
+    if (inspectorService is InspectorService) {
+      _treeGroups = InspectorObjectGroupManager(
+        serviceManager.inspectorService as InspectorService,
+        'tree',
+      );
+      _selectionGroups = InspectorObjectGroupManager(
+        serviceManager.inspectorService as InspectorService,
+        'selection',
+      );
+    }
 
     addAutoDisposeListener(serviceManager.isolateManager.mainIsolate, () {
       final isolate = serviceManager.isolateManager.mainIsolate.value;
@@ -193,11 +195,12 @@ class InspectorController extends DisposableController
 
   late RateLimiter _refreshRateLimiter;
 
+  InspectorServiceBase get inspectorService =>
+      serviceManager.inspectorService as InspectorServiceBase;
+
   /// Groups used to manage and cancel requests to load data to display directly
   /// in the tree.
   InspectorObjectGroupManager? _treeGroups;
-
-  InspectorObjectGroupManager get treeGroups => _treeGroups!;
 
   /// Groups used to manage and cancel requests to determine what the current
   /// selection is.
@@ -206,8 +209,6 @@ class InspectorController extends DisposableController
   /// shared more with the details subtree.
   /// TODO(jacobr): is there a way we can unify the selection and tree groups?
   InspectorObjectGroupManager? _selectionGroups;
-
-  InspectorObjectGroupManager get selectionGroups => _selectionGroups!;
 
   /// Node being highlighted due to the current hover.
   InspectorTreeNode? get currentShowNode => inspectorTree.hover;
@@ -401,9 +402,6 @@ class InspectorController extends DisposableController
     unawaited(maybeLoadUI());
   }
 
-  InspectorService get inspectorService =>
-      serviceManager.inspectorService as InspectorService;
-
   Future<void> maybeLoadUI() async {
     if (parent != null) {
       // The parent controller will drive loading the UI.
@@ -427,10 +425,13 @@ class InspectorController extends DisposableController
         inspectorRef: inspectorRef,
       );
     } else {
-      final ready = await inspectorService.isWidgetTreeReady();
       if (_disposed) return;
-      flutterAppFrameReady = ready;
-      if (isActive && ready) {
+      if (inspectorService is InspectorService) {
+        final widgetTreeReady =
+            await (inspectorService as InspectorService).isWidgetTreeReady();
+        flutterAppFrameReady = widgetTreeReady;
+      }
+      if (isActive && flutterAppFrameReady) {
         await maybeLoadUI();
       }
     }
@@ -443,10 +444,11 @@ class InspectorController extends DisposableController
     int subtreeDepth = 2,
   }) async {
     assert(!_disposed);
-    if (_disposed) {
+    if (_disposed || _treeGroups == null) {
       return;
     }
 
+    final treeGroups = _treeGroups!;
     treeGroups.cancelNext();
     try {
       final group = treeGroups.next;
@@ -639,6 +641,7 @@ class InspectorController extends DisposableController
     }
     treeLoadStarted = true;
 
+    final selectionGroups = _selectionGroups!;
     selectionGroups.cancelNext();
 
     final group = selectionGroups.next;
