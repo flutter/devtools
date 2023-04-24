@@ -213,7 +213,7 @@ class DevToolsButton extends StatelessWidget {
         tooltip: tooltip,
         tooltipPadding: tooltipPadding,
         child: ElevatedButton(
-          onPressed: onPressed,
+          onPressed: onPressedHandler,
           child: iconLabel,
         ),
       );
@@ -234,11 +234,11 @@ class DevToolsButton extends StatelessWidget {
                   context,
                   minScreenWidthForTextBeforeScaling,
                 ),
-                onPressed: onPressed,
+                onPressed: onPressedHandler,
                 child: iconLabel,
               )
             : TextButton(
-                onPressed: onPressed,
+                onPressed: onPressedHandler,
                 style: denseAwareTextButtonStyle(
                   context,
                   minScreenWidthForTextBeforeScaling,
