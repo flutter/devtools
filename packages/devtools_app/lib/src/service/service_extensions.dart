@@ -479,7 +479,7 @@ final List<ServiceExtensionDescription> _extensionDescriptions = [
   disablePhysicalShapeLayers,
 ];
 
-final Map<String, ServiceExtensionDescription> serviceExtensionsAllowlist = {
+final serviceExtensionsAllowlist = <String, ServiceExtensionDescription>{
   for (var extension in _extensionDescriptions) extension.extension: extension,
 };
 

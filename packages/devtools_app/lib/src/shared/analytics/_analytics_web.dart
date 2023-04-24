@@ -616,44 +616,44 @@ String _flutterClientId = ''; // dimension8 Flutter tool clientId.
 
 String get userAppType => _userAppType;
 
-set userAppType(String userAppType) {
-  userAppType = userAppType;
+set userAppType(String __userAppType) {
+  _userAppType = __userAppType;
 }
 
 String get userBuildType => _userBuildType;
 
-set userBuildType(String userBuildType) {
-  userBuildType = userBuildType;
+set userBuildType(String __userBuildType) {
+  _userBuildType = __userBuildType;
 }
 
 String get userPlatformType => _userPlatformType;
 
-set userPlatformType(String userPlatformType) {
-  userPlatformType = userPlatformType;
+set userPlatformType(String __userPlatformType) {
+  _userPlatformType = __userPlatformType;
 }
 
 String get devtoolsPlatformType => _devtoolsPlatformType;
 
-set devtoolsPlatformType(String devtoolsPlatformType) {
-  devtoolsPlatformType = devtoolsPlatformType;
+set devtoolsPlatformType(String __devtoolsPlatformType) {
+  _devtoolsPlatformType = __devtoolsPlatformType;
 }
 
 String get devtoolsChrome => _devtoolsChrome;
 
-set devtoolsChrome(String devtoolsChrome) {
-  devtoolsChrome = devtoolsChrome;
+set devtoolsChrome(String __devtoolsChrome) {
+  _devtoolsChrome = __devtoolsChrome;
 }
 
 String get ideLaunched => _ideLaunched;
 
-set ideLaunched(String ideLaunched) {
-  ideLaunched = ideLaunched;
+set ideLaunched(String __ideLaunched) {
+  _ideLaunched = __ideLaunched;
 }
 
 String get flutterClientId => _flutterClientId;
 
-set flutterClientId(String flutterClientId) {
-  flutterClientId = flutterClientId;
+set flutterClientId(String __flutterClientId) {
+  _flutterClientId = __flutterClientId;
 }
 
 bool _computingDimensions = false;

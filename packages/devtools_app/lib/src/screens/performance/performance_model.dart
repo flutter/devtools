@@ -608,7 +608,7 @@ abstract class TimelineEvent extends TreeNode<TimelineEvent>
   }
 
   void maybeRemoveDuplicate() {
-    void innerMaybeRemoveDuplicate({required TimelineEvent parent}) {
+    void removeDuplicateHelper({required TimelineEvent parent}) {
       if (parent.children.length == 1 &&
           // [parent]'s DurationBegin trace is equal to that of its only child.
           collectionEquals(
@@ -626,11 +626,11 @@ abstract class TimelineEvent extends TreeNode<TimelineEvent>
 
     // Remove [this] event's child if it is a duplicate of [this].
     if (children.isNotEmpty) {
-      innerMaybeRemoveDuplicate(parent: this);
+      removeDuplicateHelper(parent: this);
     }
     // Remove [this] event if it is a duplicate of [parent].
     if (parent != null) {
-      innerMaybeRemoveDuplicate(parent: parent!);
+      removeDuplicateHelper(parent: parent!);
     }
   }
 
@@ -651,12 +651,12 @@ abstract class TimelineEvent extends TreeNode<TimelineEvent>
         return;
       }
 
-      final children = root.children.toList();
+      final eventChildren = root.children.toList();
 
       // If [child] is the parent of some or all of the members in [_children],
       // those members will need to be reordered in the tree.
       final childrenToReorder = <TimelineEvent>[];
-      for (TimelineEvent otherChild in children) {
+      for (TimelineEvent otherChild in eventChildren) {
         if (child.couldBeParentOf(otherChild)) {
           childrenToReorder.add(otherChild);
         }
@@ -679,7 +679,7 @@ abstract class TimelineEvent extends TreeNode<TimelineEvent>
       // children in [_children] share a timestamp, they both could be the
       // parent of [child]. We reverse [_children] so that we will pick the last
       // received candidate as the new parent of [child].
-      for (TimelineEvent otherChild in children.reversed) {
+      for (TimelineEvent otherChild in eventChildren.reversed) {
         if (otherChild.couldBeParentOf(child)) {
           // Recurse on [otherChild]'s subtree.
           putChildInTree(otherChild);
@@ -991,10 +991,10 @@ class AsyncTimelineEvent extends TimelineEvent {
   @override
   void addChild(TimelineEvent child, {int? index}) {
     assert(index == null);
-    final child0 = child as AsyncTimelineEvent;
+    child = child as AsyncTimelineEvent;
     // Short circuit if we are using an explicit parentId.
-    if (child0.hasExplicitParent &&
-        child0.parentAsyncUID == traceEvents.first.event.asyncUID) {
+    if (child.hasExplicitParent &&
+        child.parentAsyncUID == traceEvents.first.event.asyncUID) {
       _addChild(child);
     } else {
       super.addChild(child);
