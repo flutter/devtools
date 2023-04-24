@@ -122,7 +122,7 @@ class AdaptedHeapData {
   String snapshotName = '';
 
   /// Heap objects by identityHashCode.
-  late final Map<IdentityHashCode, int> _objectsByCode = {
+  late final _objectsByCode = <IdentityHashCode, int>{
     for (var i in Iterable.generate(objects.length)) objects[i].code: i,
   };
 
