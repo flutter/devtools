@@ -444,11 +444,11 @@ class InspectorController extends DisposableController
     int subtreeDepth = 2,
   }) async {
     assert(!_disposed);
-    if (_disposed || _treeGroups == null) {
+    final treeGroups = _treeGroups!;
+    if (_disposed || treeGroups == null) {
       return;
     }
 
-    final treeGroups = _treeGroups!;
     treeGroups.cancelNext();
     try {
       final group = treeGroups.next;
@@ -635,13 +635,13 @@ class InspectorController extends DisposableController
       // our selection rather than updating it our self.
       return;
     }
-    if (_selectionGroups == null) {
+    final selectionGroups = _selectionGroups;
+    if (selectionGroups == null) {
       // Already disposed. Ignore this requested to update selection.
       return;
     }
     treeLoadStarted = true;
 
-    final selectionGroups = _selectionGroups!;
     selectionGroups.cancelNext();
 
     final group = selectionGroups.next;
