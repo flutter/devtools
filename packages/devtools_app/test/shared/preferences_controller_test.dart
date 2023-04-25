@@ -86,15 +86,9 @@ void main() {
           controller.setHoverEvalMode(false);
         });
 
-        test('enables hover mode by default', () async {
+        test('enables hover eval mode by default', () async {
           await controller.init();
           expect(controller.hoverEvalModeEnabled.value, isTrue);
-        });
-
-        test('when embedded, disables hover mode by default', () async {
-          setGlobal(IdeTheme, IdeTheme(embed: true));
-          await controller.init();
-          expect(controller.hoverEvalModeEnabled.value, isFalse);
         });
       });
 

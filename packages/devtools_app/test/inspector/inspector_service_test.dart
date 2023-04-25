@@ -29,6 +29,7 @@ void main() {
 
   env.afterEverySetup = () async {
     assert(serviceManager.connectedAppInitialized);
+    setGlobal(IdeTheme, IdeTheme());
 
     inspectorService = InspectorService();
     if (env.runConfig.trackWidgetCreation) {
@@ -469,6 +470,15 @@ void main() {
         );
 
         await group.dispose();
+      });
+
+      test('enables hover eval mode by default', () async {
+        expect(inspectorService!.hoverEvalModeEnabledByDefault, isTrue);
+      });
+
+      test('disables hover eval mode by default when embedded', () async {
+        setGlobal(IdeTheme, IdeTheme(embed: true));
+        expect(inspectorService!.hoverEvalModeEnabledByDefault, isFalse);
       });
 
 // TODO(jacobr): uncomment this test once we have a more dependable golden
