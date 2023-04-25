@@ -74,17 +74,17 @@ abstract class FlutterTestDriver {
     FlutterRunConfiguration runConfig = const FlutterRunConfiguration(),
     File? pidFile,
   }) async {
-    final args0 = [
+    final testArgs = [
       ...args,
       if (runConfig.withDebugger) '--start-paused',
       if (pidFile != null) ...['--pid-file', pidFile.path],
     ];
 
-    _debugPrint('Spawning flutter $args0 in ${projectFolder.path}');
+    _debugPrint('Spawning flutter $testArgs in ${projectFolder.path}');
 
     proc = await Process.start(
       flutterExecutable,
-      args0,
+      testArgs,
       workingDirectory: projectFolder.path,
       environment: <String, String>{
         'FLUTTER_TEST': 'true',
