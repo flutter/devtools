@@ -474,10 +474,12 @@ void main() {
       });
 
       test('enables hover eval mode by default', () async {
+        await env.setupEnvironment();
         expect(inspectorService!.hoverEvalModeEnabledByDefault, isTrue);
       });
 
       test('disables hover eval mode by default when embedded', () async {
+        await env.setupEnvironment();
         setGlobal(IdeTheme, IdeTheme(embed: true));
         expect(inspectorService!.hoverEvalModeEnabledByDefault, isFalse);
       });
