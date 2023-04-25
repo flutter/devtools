@@ -77,14 +77,18 @@ void main() {
 
       setUp(() {
         setGlobal(Storage, FlutterTestStorage());
+        storage.values.clear();
         controller = InspectorPreferencesController();
       });
 
       test(
-        'hover eval mode disabled by default with no inspector service',
+        'default value equals inspector service default value',
         () async {
         await controller.init();
-        expect(controller.hoverEvalModeEnabled.value, isFalse);
+        expect(
+          controller.hoverEvalModeEnabled.value,
+          serviceManager.inspectorService.hoverEvalModeEnabledByDefault,
+        );
       });
 
       test('can be updated', () async {

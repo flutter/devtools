@@ -62,6 +62,9 @@ class FakeInspectorService extends Fake implements InspectorService {
   void removeClient(InspectorServiceClient client) {
     clients.remove(client);
   }
+
+  @override
+  bool get hoverEvalModeEnabledByDefault => true;
 }
 
 class TestInspectorController extends Fake implements InspectorController {

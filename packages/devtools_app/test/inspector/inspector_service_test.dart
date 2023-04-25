@@ -7,6 +7,7 @@
 @TestOn('vm')
 import 'dart:async';
 
+import 'package:devtools_app/src/shared/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/shared/console/primitives/simple_items.dart';
 import 'package:devtools_app/src/shared/diagnostics/diagnostics_node.dart';
 import 'package:devtools_app/src/shared/diagnostics/inspector_service.dart';
