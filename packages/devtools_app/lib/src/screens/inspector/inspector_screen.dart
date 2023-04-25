@@ -137,7 +137,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
         searchPreventClose = false;
       }
     });
-    addAutoDisposeListener(preferences.inspector!.customPubRootDirectories, () {
+    addAutoDisposeListener(preferences.inspector.customPubRootDirectories, () {
       if (serviceManager.hasConnection &&
           controller.firstInspectorTreeLoadCompleted) {
         _refreshInspector();
@@ -356,7 +356,7 @@ class FlutterInspectorSettingsDialog extends StatelessWidget {
               'General',
             ),
             CheckboxSetting(
-              notifier: preferences.inspector!.hoverEvalModeEnabled
+              notifier: preferences.inspector.hoverEvalModeEnabled
                   as ValueNotifier<bool?>,
               title: 'Enable hover inspection',
               description:
@@ -568,22 +568,21 @@ class PubRootDirectorySection extends StatelessWidget {
     return ValueListenableBuilder<IsolateRef?>(
       valueListenable: serviceManager.isolateManager.mainIsolate,
       builder: (_, __, ___) {
-        final inspectorPreferences = preferences.inspector!;
         return Container(
           height: 200.0,
           child: EditableList(
             gaScreen: gac.inspector,
             gaRefreshSelection: gac.refreshPubRoots,
-            entries:inspectorPreferences.customPubRootDirectories,
+            entries:preferences.inspector.customPubRootDirectories,
             textFieldLabel: 'Enter a new package directory',
             isRefreshing:
-                inspectorPreferences.isRefreshingCustomPubRootDirectories,
+                preferences.inspector.isRefreshingCustomPubRootDirectories,
             onEntryAdded: (p0) =>
-                unawaited(inspectorPreferences.addPubRootDirectories([p0])),
+                unawaited(preferences.inspector.addPubRootDirectories([p0])),
             onEntryRemoved: (p0) =>
-                unawaited(inspectorPreferences.removePubRootDirectories([p0])),
+                unawaited(preferences.inspector.removePubRootDirectories([p0])),
             onRefreshTriggered: () =>
-                unawaited(inspectorPreferences.loadCustomPubRootDirectories()),
+                unawaited(preferences.inspector.loadCustomPubRootDirectories()),
           ),
         );
       },
