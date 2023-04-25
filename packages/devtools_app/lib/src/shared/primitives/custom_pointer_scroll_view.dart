@@ -241,7 +241,7 @@ class CustomPointerScrollable extends StatefulWidget {
 
   @override
   State<CustomPointerScrollable> createState() =>
-      _CustomPointerScrollableState();
+      CustomPointerScrollableState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -260,7 +260,7 @@ class CustomPointerScrollable extends StatefulWidget {
   ///
   /// Calling this method will create a dependency on the closest [Scrollable]
   /// in the [context], if there is one.
-  static _CustomPointerScrollableState? _of(BuildContext context) {
+  static CustomPointerScrollableState? of(BuildContext context) {
     final _ScrollableScope? widget =
         context.dependOnInheritedWidgetOfExactType<_ScrollableScope>();
     return widget?.scrollable;
@@ -301,8 +301,8 @@ class CustomPointerScrollable extends StatefulWidget {
   }) {
     final List<Future<void>> futures = <Future<void>>[];
 
-    _CustomPointerScrollableState? scrollable =
-        CustomPointerScrollable._of(context);
+    CustomPointerScrollableState? scrollable =
+        CustomPointerScrollable.of(context);
     while (scrollable != null) {
       futures.add(
         scrollable.position!.ensureVisible(
@@ -314,7 +314,7 @@ class CustomPointerScrollable extends StatefulWidget {
         ),
       );
       context = scrollable.context;
-      scrollable = CustomPointerScrollable._of(context);
+      scrollable = CustomPointerScrollable.of(context);
     }
 
     if (futures.isEmpty || duration == Duration.zero) {
@@ -330,7 +330,7 @@ class CustomPointerScrollable extends StatefulWidget {
 /// This state object is a copy of [ScrollableState] and replaces the handler
 /// [ScrollableState._receivedPointerSignal] with
 /// [CustomPointerScrollable.customPointerSignalHandler] when non-null.
-class _CustomPointerScrollableState extends State<CustomPointerScrollable>
+class CustomPointerScrollableState extends State<CustomPointerScrollable>
     with TickerProviderStateMixin
     implements ScrollContext {
   /// The manager for this [Scrollable] widget's viewport position.
@@ -701,7 +701,7 @@ class _ScrollableScope extends InheritedWidget {
     required Widget child,
   }) : super(key: key, child: child);
 
-  final _CustomPointerScrollableState scrollable;
+  final CustomPointerScrollableState scrollable;
   final ScrollPosition position;
 
   @override
