@@ -7,6 +7,7 @@
 @TestOn('vm')
 import 'dart:async';
 
+import 'package:devtools_app/src/shared/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/shared/console/primitives/simple_items.dart';
 import 'package:devtools_app/src/shared/diagnostics/diagnostics_node.dart';
 import 'package:devtools_app/src/shared/diagnostics/inspector_service.dart';
@@ -29,6 +30,7 @@ void main() {
 
   env.afterEverySetup = () async {
     assert(serviceManager.connectedAppInitialized);
+    setGlobal(IdeTheme, IdeTheme());
 
     inspectorService = InspectorService();
     if (env.runConfig.trackWidgetCreation) {
@@ -469,6 +471,17 @@ void main() {
         );
 
         await group.dispose();
+      });
+
+      test('enables hover eval mode by default', () async {
+        await env.setupEnvironment();
+        expect(inspectorService!.hoverEvalModeEnabledByDefault, isTrue);
+      });
+
+      test('disables hover eval mode by default when embedded', () async {
+        await env.setupEnvironment();
+        setGlobal(IdeTheme, IdeTheme(embed: true));
+        expect(inspectorService!.hoverEvalModeEnabledByDefault, isFalse);
       });
 
 // TODO(jacobr): uncomment this test once we have a more dependable golden
