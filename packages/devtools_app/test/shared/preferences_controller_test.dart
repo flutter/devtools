@@ -80,7 +80,9 @@ void main() {
         controller = InspectorPreferencesController();
       });
 
-      test('hover eval mode disabled by default with no inspector service', () async {
+      test(
+        'hover eval mode disabled by default with no inspector service',
+        () async {
         await controller.init();
         expect(controller.hoverEvalModeEnabled.value, isFalse);
       });
