@@ -222,14 +222,14 @@ void main() {
       );
     });
 
-    for (final key in [
+    for (final selectionKey in [
       LogicalKeyboardKey.enter,
       LogicalKeyboardKey.tab,
       LogicalKeyboardKey.arrowRight,
     ]) {
-      group('selection with ${key.keyLabel} key', () {
+      group('selection with ${selectionKey.keyLabel} key', () {
         testWidgets(
-          'selecting "bar" autocompletes "b" to "bar"',
+          'selecting "ar" autocompletes "b" to "bar"',
           (tester) async {
             final objects = await _setupEvalFieldObjects(tester);
 
@@ -239,7 +239,27 @@ void main() {
             expect(objects.searchTextEditingController.text, 'b');
             expect(objects.searchTextEditingController.suggestionText, 'ar');
 
-            await tester.sendKeyEvent(key);
+            // Select the suggestion.
+            await tester.sendKeyEvent(selectionKey);
+            await tester.pumpAndSettle();
+
+            expect(objects.textFieldValue, equals('bar'));
+          },
+        );
+
+        testWidgets(
+          'selecting "r" autocompletes "ba" to "bar"',
+          (tester) async {
+            final objects = await _setupEvalFieldObjects(tester);
+
+            await tester.enterText(objects.textField, 'ba');
+            await tester.pumpAndSettle();
+
+            expect(objects.searchTextEditingController.text, 'ba');
+            expect(objects.searchTextEditingController.suggestionText, 'r');
+
+            // Select the suggestion.
+            await tester.sendKeyEvent(selectionKey);
             await tester.pumpAndSettle();
 
             expect(objects.textFieldValue, equals('bar'));
@@ -257,7 +277,26 @@ void main() {
             expect(objects.searchTextEditingController.text, 'someValue.');
             expect(objects.searchTextEditingController.suggestionText, 'foo');
 
-            await tester.sendKeyEvent(key);
+            // Select the suggestion.
+            await tester.sendKeyEvent(selectionKey);
+            await tester.pumpAndSettle();
+
+            expect(objects.textFieldValue, equals('someValue.foo'));
+          },
+        );
+
+        testWidgets(
+          'selecting "oo" autocompletes "someValue.f" to "someValue.foo"',
+          (tester) async {
+            final objects = await _setupEvalFieldObjects(tester);
+
+            await tester.enterText(objects.textField, 'someValue.f');
+            await tester.pumpAndSettle();
+
+            expect(objects.searchTextEditingController.text, 'someValue.f');
+            expect(objects.searchTextEditingController.suggestionText, 'oo');
+
+            await tester.sendKeyEvent(selectionKey);
             await tester.pumpAndSettle();
 
             expect(objects.textFieldValue, equals('someValue.foo'));
