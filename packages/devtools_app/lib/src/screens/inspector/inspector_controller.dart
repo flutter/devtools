@@ -444,7 +444,7 @@ class InspectorController extends DisposableController
     int subtreeDepth = 2,
   }) async {
     assert(!_disposed);
-    final treeGroups = _treeGroups!;
+    final treeGroups = _treeGroups;
     if (_disposed || treeGroups == null) {
       return;
     }
