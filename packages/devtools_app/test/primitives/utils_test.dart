@@ -1250,10 +1250,10 @@ void main() {
       });
 
       test('containsWhere', () {
-        final list0 = [1, 2, 1, 2, 3, 4];
-        expect(list0.containsWhere((element) => element == 1), isTrue);
-        expect(list0.containsWhere((element) => element == 5), isFalse);
-        expect(list0.containsWhere((element) => element + 2 == 3), isTrue);
+        final list = [1, 2, 1, 2, 3, 4];
+        expect(list.containsWhere((element) => element == 1), isTrue);
+        expect(list.containsWhere((element) => element == 5), isFalse);
+        expect(list.containsWhere((element) => element + 2 == 3), isTrue);
 
         final otherList = ['hi', 'hey', 'foo', 'bar'];
         expect(
