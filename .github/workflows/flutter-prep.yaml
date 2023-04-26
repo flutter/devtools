@@ -10,6 +10,11 @@ on:
       os-name:
         description: 'The OS to run against, either "macos" or "ubuntu". If neither is provided, will run against both.'
         type: string
+    outputs:
+      latest_flutter_candidate:
+        descrption: 'The latest Flutter candidate version.'
+        type: string
+
 
 jobs:
   reusable-flutter-prep:
