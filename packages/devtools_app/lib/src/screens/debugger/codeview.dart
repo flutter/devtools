@@ -1045,9 +1045,7 @@ class _LinesState extends State<Lines> with AutoDisposeMixin {
   @override
   Widget build(BuildContext context) {
     final pausedLine = widget.pausedFrame?.line;
-    print('======= BUILDING FOR PAUSED LINE: $pausedLine');
     SchedulerBinding.instance.addPostFrameCallback((_) {
-      print('Scrolling to $pausedLine');
       _maybeScrollToLine(pausedLine);
     });
 
@@ -1091,16 +1089,12 @@ class _LinesState extends State<Lines> with AutoDisposeMixin {
     final isOutOfViewBottom = lineNumber * CodeView.rowHeight >
         widget.scrollController.offset + widget.height - CodeView.rowHeight;
 
-    print('is out of view top: $isOutOfViewTop');
-    print('is out of view bottom: $isOutOfViewBottom');
-
     if (isOutOfViewTop || isOutOfViewBottom) {
       // Scroll this search token to the middle of the view.
       final targetOffset = math.max<double>(
         lineNumber * CodeView.rowHeight - widget.height / 2,
         0.0,
       );
-      print('scrolling.....');
       unawaited(
         widget.scrollController.animateTo(
           targetOffset,

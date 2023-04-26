@@ -112,7 +112,7 @@ void main() {
   );
 
   testWidgetsWithWindowSize(
-    'Selecting stackframe scrolls the frame location into view',
+    'selecting stackframe scrolls the frame location into view',
     windowSize,
     (WidgetTester tester) async {
       final stackFrameNotifier = ValueNotifier(_stackFrame1);

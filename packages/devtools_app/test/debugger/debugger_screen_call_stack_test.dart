@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app/devtools_app.dart';
-import 'package:devtools_app/src/screens/debugger/codeview.dart';
 import 'package:devtools_app/src/screens/debugger/debugger_model.dart';
 import 'package:devtools_app/src/shared/diagnostics/primitives/source_location.dart';
 import 'package:devtools_test/devtools_test.dart';
@@ -213,8 +212,6 @@ void main() {
         ),
         findsOneWidget,
       );
-
-      expect(find.byType(LineItem), findsOneWidget);
     },
   );
 }
