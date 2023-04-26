@@ -173,7 +173,8 @@ class _StateUpdateDialogTitle extends StatelessWidget {
 class DialogHelpText extends StatelessWidget {
   const DialogHelpText({super.key, required this.helpText});
 
-  static TextStyle? textStyle(context) => Theme.of(context).subtleTextStyle;
+  static TextStyle? textStyle(BuildContext context) =>
+      Theme.of(context).subtleTextStyle;
 
   final String helpText;
 

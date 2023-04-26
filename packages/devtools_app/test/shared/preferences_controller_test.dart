@@ -74,28 +74,19 @@ void main() {
   group('$InspectorPreferencesController', () {
     group('hoverEvalMode', () {
       late InspectorPreferencesController controller;
+      late FlutterTestStorage storage;
 
       setUp(() {
-        setGlobal(Storage, FlutterTestStorage());
-        setGlobal(IdeTheme, IdeTheme());
+        setGlobal(Storage, storage = FlutterTestStorage());
         controller = InspectorPreferencesController();
       });
 
-      group('init', () {
-        setUp(() {
-          controller.setHoverEvalMode(false);
-        });
-
-        test('enables hover mode by default', () async {
-          await controller.init();
-          expect(controller.hoverEvalModeEnabled.value, isTrue);
-        });
-
-        test('when embedded, disables hover mode by default', () async {
-          setGlobal(IdeTheme, IdeTheme(embed: true));
-          await controller.init();
-          expect(controller.hoverEvalModeEnabled.value, isFalse);
-        });
+      test('default value equals inspector service default value', () async {
+        await controller.init();
+        expect(
+          controller.hoverEvalModeEnabled.value,
+          serviceManager.inspectorService!.hoverEvalModeEnabledByDefault,
+        );
       });
 
       test('can be updated', () async {

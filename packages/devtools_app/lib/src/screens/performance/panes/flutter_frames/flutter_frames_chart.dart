@@ -577,7 +577,7 @@ class FlutterFramesChartItem extends StatelessWidget {
       // the frame's timeline events are available.
       ga.select(
         gac.performance,
-        gac.selectFlutterFrame,
+        gac.PerformanceEvents.selectFlutterFrame.name,
         screenMetricsProvider: () => PerformanceScreenMetrics(
           uiDuration: frame.buildTime,
           rasterDuration: frame.rasterTime,
@@ -657,8 +657,8 @@ class FlutterFrameTooltip extends StatelessWidget {
                   MoreInfoLink(
                     url: preCompileShadersDocsUrl,
                     gaScreenName: gac.performance,
-                    gaSelectedItemDescription:
-                        gac.shaderCompilationDocsTooltipLink,
+                    gaSelectedItemDescription: gac
+                        .PerformanceDocs.shaderCompilationDocsTooltipLink.name,
                   ),
                 ],
               ),

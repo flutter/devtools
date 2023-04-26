@@ -322,6 +322,7 @@ class DartIOHttpRequestData extends NetworkRequest {
   }
 
   @override
+  // ignore: avoid-dynamic, necessary here.
   bool operator ==(other) {
     return other is DartIOHttpRequestData && id == other.id && super == other;
   }

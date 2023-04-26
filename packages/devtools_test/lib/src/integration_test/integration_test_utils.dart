@@ -18,6 +18,7 @@ const longPumpDuration = Duration(seconds: 6);
 
 /// Required to have multiple test cases in this file.
 Future<void> resetHistory() async {
+  // ignore: avoid-dynamic, necessary here.
   await (ui.PlatformDispatcher.instance.views.single as dynamic).resetHistory();
 }
 
