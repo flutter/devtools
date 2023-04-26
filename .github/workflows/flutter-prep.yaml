@@ -12,7 +12,7 @@ on:
         type: string
     outputs:
       latest_flutter_candidate:
-        descrption: 'The latest Flutter candidate version.'
+        description: 'The latest Flutter candidate version.'
         type: string
 
 
