@@ -139,8 +139,8 @@ class InspectorPreferencesController extends DisposableController
       _customPubRootDirectories;
   ValueListenable<bool> get isRefreshingCustomPubRootDirectories =>
       _customPubRootDirectoriesAreBusy;
-  InspectorService? get _inspectorService =>
-      serviceManager.inspectorService as InspectorService?;
+  InspectorServiceBase? get _inspectorService =>
+      serviceManager.inspectorService;
 
   final _hoverEvalMode = ValueNotifier<bool>(false);
   final _customPubRootDirectories = ListValueNotifier<String>([]);
@@ -173,8 +173,8 @@ class InspectorPreferencesController extends DisposableController
     String? hoverEvalModeEnabledValue =
         await storage.getValue(_hoverEvalModeStorageId);
 
-    // When embedded, default hoverEvalMode to off
-    hoverEvalModeEnabledValue ??= (!ideTheme.embed).toString();
+    hoverEvalModeEnabledValue ??=
+        (_inspectorService?.hoverEvalModeEnabledByDefault ?? false).toString();
     setHoverEvalMode(hoverEvalModeEnabledValue == 'true');
 
     addAutoDisposeListener(_hoverEvalMode, () {
@@ -234,16 +234,19 @@ class InspectorPreferencesController extends DisposableController
   Future<void> _handleConnectionToNewService(VmServiceWrapper _) async {
     await _updateMainScriptRef();
 
-    _customPubRootDirectories.clear();
-    await loadCustomPubRootDirectories();
+    final localInspectorService = _inspectorService;
+    if (localInspectorService is InspectorService) {
+      _customPubRootDirectories.clear();
+      await loadCustomPubRootDirectories();
 
-    if (_customPubRootDirectories.value.isEmpty) {
-      // If there are no pub root directories set on the first connection
-      // then try inferring them.
-      await _customPubRootDirectoryBusyTracker(() async {
-        await _inspectorService?.inferPubRootDirectoryIfNeeded();
-        await loadCustomPubRootDirectories();
-      });
+      if (_customPubRootDirectories.value.isEmpty) {
+        // If there are no pub root directories set on the first connection
+        // then try inferring them.
+        await _customPubRootDirectoryBusyTracker(() async {
+          await localInspectorService.inferPubRootDirectoryIfNeeded();
+          await loadCustomPubRootDirectories();
+        });
+      }
     }
   }
 
@@ -268,10 +271,10 @@ class InspectorPreferencesController extends DisposableController
 
     if (!serviceManager.hasConnection) return;
     await _customPubRootDirectoryBusyTracker(() async {
-      final inspectorService = _inspectorService;
-      if (inspectorService == null) return;
+      final localInspectorService = _inspectorService;
+      if (localInspectorService is! InspectorService) return;
 
-      await inspectorService.addPubRootDirectories(pubRootDirectories);
+      await localInspectorService.addPubRootDirectories(pubRootDirectories);
       await _refreshPubRootDirectoriesFromService();
     });
   }
@@ -282,7 +285,7 @@ class InspectorPreferencesController extends DisposableController
     if (!serviceManager.hasConnection) return;
     await _customPubRootDirectoryBusyTracker(() async {
       final localInspectorService = _inspectorService;
-      if (localInspectorService == null) return;
+      if (localInspectorService is! InspectorService) return;
 
       await localInspectorService.removePubRootDirectories(pubRootDirectories);
       await _refreshPubRootDirectoriesFromService();
@@ -292,7 +295,7 @@ class InspectorPreferencesController extends DisposableController
   Future<void> _refreshPubRootDirectoriesFromService() async {
     await _customPubRootDirectoryBusyTracker(() async {
       final localInspectorService = _inspectorService;
-      if (localInspectorService == null) return;
+      if (localInspectorService is! InspectorService) return;
 
       final freshPubRootDirectories =
           await localInspectorService.getPubRootDirectories();

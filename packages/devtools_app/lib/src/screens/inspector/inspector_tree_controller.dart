@@ -33,7 +33,6 @@ import '../../shared/ui/utils.dart';
 import '../../shared/utils.dart';
 import 'inspector_breadcrumbs.dart';
 import 'inspector_controller.dart';
-import 'inspector_screen.dart';
 
 final _log = Logger('inspector_tree_controller');
 
@@ -745,6 +744,7 @@ class InspectorTree extends StatefulWidget {
     this.summaryTreeController,
     this.isSummaryTree = false,
     this.widgetErrors,
+    this.screenId,
   })  : assert(isSummaryTree == (summaryTreeController == null)),
         super(key: key);
 
@@ -759,6 +759,7 @@ class InspectorTree extends StatefulWidget {
 
   final bool isSummaryTree;
   final LinkedHashMap<String, InspectableWidgetError>? widgetErrors;
+  final String? screenId;
 
   @override
   State<InspectorTree> createState() => _InspectorTreeState();
@@ -1008,13 +1009,16 @@ class _InspectorTreeState extends State<InspectorTree>
     }
 
     if (!controller.firstInspectorTreeLoadCompleted && widget.isSummaryTree) {
-      ga.timeEnd(InspectorScreen.id, gac.pageReady);
-      unawaited(
-        serviceManager.sendDwdsEvent(
-          screen: InspectorScreen.id,
-          action: gac.pageReady,
-        ),
-      );
+      final screenId = widget.screenId;
+      if (screenId != null) {
+        ga.timeEnd(screenId, gac.pageReady);
+        unawaited(
+          serviceManager.sendDwdsEvent(
+            screen: screenId,
+            action: gac.pageReady,
+          ),
+        );
+      }
       controller.firstInspectorTreeLoadCompleted = true;
     }
     return LayoutBuilder(

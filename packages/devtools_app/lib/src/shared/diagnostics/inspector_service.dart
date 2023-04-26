@@ -108,6 +108,8 @@ abstract class InspectorServiceBase extends DisposableController
     super.dispose();
   }
 
+  bool get hoverEvalModeEnabledByDefault;
+
   Future<Object> forceRefresh() {
     final futures = <Future<void>>[];
     for (InspectorServiceClient client in clients) {
@@ -239,6 +241,10 @@ class InspectorService extends InspectorServiceBase {
     _cachedSelectionGroups = null;
     super.dispose();
   }
+
+  // When DevTools is embedded, default hover eval mode to off.
+  @override
+  bool get hoverEvalModeEnabledByDefault => !ideTheme.embed;
 
   void onExtensionVmServiceReceived(Event e) {
     if ('Flutter.Frame' == e.extensionKind) {

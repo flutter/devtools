@@ -159,6 +159,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
       key: detailsTreeKey,
       treeController: _detailsTreeController,
       summaryTreeController: _summaryTreeController,
+      screenId: InspectorScreen.id,
     );
 
     final splitAxis = Split.axisFor(context, 0.85);
@@ -244,6 +245,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
                           treeController: _summaryTreeController,
                           isSummaryTree: true,
                           widgetErrors: inspectableErrors,
+                          screenId: InspectorScreen.id,
                         ),
                         if (errors.isNotEmpty)
                           ValueListenableBuilder<int?>(
