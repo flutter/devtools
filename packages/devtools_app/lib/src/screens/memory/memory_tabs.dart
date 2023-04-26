@@ -36,16 +36,8 @@ class MemoryTabView extends StatelessWidget {
     return ValueListenableBuilder(
       valueListenable: controller.shouldShowLeaksTab,
       builder: (context, showLeaksTab, _) {
-        final tabRecords = _generateTabRecords();
-        final tabs = <DevToolsTab>[];
-        final tabViews = <Widget>[];
-        for (final record in tabRecords) {
-          tabs.add(record.tab);
-          tabViews.add(record.tabView);
-        }
         return AnalyticsTabbedView(
-          tabs: tabs,
-          tabViews: tabViews,
+          tabs: _generateTabRecords(),
           initialSelectedIndex: controller.selectedFeatureTabIndex,
           gaScreen: gac.memory,
           onTabChanged: (int index) {
@@ -56,9 +48,9 @@ class MemoryTabView extends StatelessWidget {
     );
   }
 
-  List<TabRecord> _generateTabRecords() {
+  List<({DevToolsTab tab, Widget tabView})> _generateTabRecords() {
     return [
-      TabRecord(
+      (
         tab: DevToolsTab.create(
           key: MemoryScreenKeys.dartHeapTableProfileTab,
           tabName: 'Profile Memory',
@@ -70,7 +62,7 @@ class MemoryTabView extends StatelessWidget {
           ),
         ),
       ),
-      TabRecord(
+      (
         tab: DevToolsTab.create(
           key: MemoryScreenKeys.diffTab,
           gaPrefix: _gaPrefix,
@@ -82,7 +74,7 @@ class MemoryTabView extends StatelessWidget {
           ),
         ),
       ),
-      TabRecord(
+      (
         tab: DevToolsTab.create(
           key: MemoryScreenKeys.dartHeapAllocationTracingTab,
           tabName: 'Trace Instances',
@@ -93,7 +85,7 @@ class MemoryTabView extends StatelessWidget {
         ),
       ),
       if (controller.shouldShowLeaksTab.value)
-        TabRecord(
+        (
           tab: DevToolsTab.create(
             key: MemoryScreenKeys.leaksTab,
             gaPrefix: _gaPrefix,
