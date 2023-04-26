@@ -13,7 +13,7 @@ on:
     outputs:
       latest_flutter_candidate:
         description: 'The latest Flutter candidate version.'
-        type: string
+        value: ${{ jobs.reusable-flutter-prep.outputs.latest_flutter_candidate }} 
 
 
 jobs:
