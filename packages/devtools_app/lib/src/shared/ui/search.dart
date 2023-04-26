@@ -869,6 +869,7 @@ mixin SearchFieldMixin<T extends StatefulWidget>
   @override
   void initState() {
     super.initState();
+    // ignore: avoid-unrelated-type-assertions, false positive.
     if (this is ProvidedControllerMixin) {
       // Controllers provided through package:provider will not be ready until
       // [didChangeDependencies] is called, so ensure [searchController] is
@@ -1469,6 +1470,7 @@ mixin SearchableDataMixin {
   /// [SearchControllerMixin.matchesForSearch] is overridden in such a way that
   /// [matchesSearchToken] is not used, then this method does not need to be
   /// implemented.
+  // ignore: avoid-unused-parameters, parameter is used in overrides
   bool matchesSearchToken(RegExp regExpSearch) => throw UnimplementedError(
         'Implement this method in order to use the default'
         ' [SearchControllerMixin.matchesForSearch] behavior.',

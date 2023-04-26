@@ -247,7 +247,7 @@ class CpuProfilerController extends DisposableController
       // operation for analytics.
       await ga.timeAsync(
         gac.cpuProfiler,
-        gac.cpuProfileProcessingTime,
+        gac.CpuProfilerEvents.cpuProfileProcessingTime.name,
         asyncOperation: pullAndProcessHelper,
         screenMetricsProvider: () => ProfilerScreenMetrics(
           cpuSampleCount: cpuProfiles.profileMetaData.sampleCount,
@@ -530,12 +530,13 @@ class CpuProfilerController extends DisposableController
       label: tag,
       createIfAbsent: () {
         final fullData = cpuProfileStore.lookupProfile(label: userTagNone)!;
+        final tagType = tag == groupByUserTag
+            ? CpuProfilerTagType.user
+            : CpuProfilerTagType.vm;
         final data = tag == groupByUserTag || tag == groupByVmTag
             ? CpuProfilePair.withTagRoots(
                 fullData,
-                tag == groupByUserTag
-                    ? CpuProfilerTagType.user
-                    : CpuProfilerTagType.vm,
+                tagType,
               )
             : CpuProfilePair.fromUserTag(fullData, tag);
         cpuProfileStore.storeProfile(data, label: tag);

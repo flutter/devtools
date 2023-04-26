@@ -108,6 +108,8 @@ abstract class InspectorServiceBase extends DisposableController
     super.dispose();
   }
 
+  bool get hoverEvalModeEnabledByDefault;
+
   Future<Object> forceRefresh() {
     final futures = <Future<void>>[];
     for (InspectorServiceClient client in clients) {
@@ -239,6 +241,10 @@ class InspectorService extends InspectorServiceBase {
     _cachedSelectionGroups = null;
     super.dispose();
   }
+
+  // When DevTools is embedded, default hover eval mode to off.
+  @override
+  bool get hoverEvalModeEnabledByDefault => !ideTheme.embed;
 
   void onExtensionVmServiceReceived(Event e) {
     if ('Flutter.Frame' == e.extensionKind) {
@@ -1151,8 +1157,6 @@ class ObjectGroup extends ObjectGroupBase {
     switch (type) {
       case FlutterTreeType.widget:
         return getRootWidget();
-      case FlutterTreeType.renderObject:
-        return getRootRenderObject();
     }
   }
 
@@ -1177,13 +1181,6 @@ class ObjectGroup extends ObjectGroupBase {
       invokeServiceMethodDaemon(
         WidgetInspectorServiceExtensions.getRootWidgetSummaryTree.name,
       ),
-    );
-  }
-
-  Future<RemoteDiagnosticsNode?> getRootRenderObject() {
-    assert(!disposed);
-    return invokeServiceMethodReturningNode(
-      WidgetInspectorServiceExtensions.getRootRenderObject.name,
     );
   }
 
@@ -1242,12 +1239,6 @@ class ObjectGroup extends ObjectGroupBase {
           isSummaryTree
               ? WidgetInspectorServiceExtensions.getSelectedSummaryWidget.name
               : WidgetInspectorServiceExtensions.getSelectedWidget.name,
-          previousSelectionRef,
-        );
-        break;
-      case FlutterTreeType.renderObject:
-        newSelection = await invokeServiceMethodReturningNodeInspectorRef(
-          WidgetInspectorServiceExtensions.getSelectedRenderObject.name,
           previousSelectionRef,
         );
         break;

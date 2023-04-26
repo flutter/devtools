@@ -649,7 +649,6 @@ class _CustomPointerScrollableState extends State<CustomPointerScrollable>
             child: IgnorePointer(
               key: _ignorePointerKey,
               ignoring: _shouldIgnorePointer,
-              ignoringSemantics: false,
               child: widget.viewportBuilder(context, position!),
             ),
           ),

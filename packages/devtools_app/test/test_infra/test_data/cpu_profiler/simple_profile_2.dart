@@ -100,7 +100,7 @@ final List<Map<String, dynamic>> _profileTraceEvents = [
       'userTag': 'Default',
       'vmTag': 'VM',
     },
-    'sf': '140357727781376-1'
+    'sf': '140357727781376-1',
   },
   {
     'ph': 'P',
@@ -113,7 +113,7 @@ final List<Map<String, dynamic>> _profileTraceEvents = [
       'userTag': 'Default',
       'vmTag': 'VM',
     },
-    'sf': '140357727781376-2'
+    'sf': '140357727781376-2',
   },
   {
     'ph': 'P',
@@ -126,7 +126,7 @@ final List<Map<String, dynamic>> _profileTraceEvents = [
       'userTag': 'Default',
       'vmTag': 'VM',
     },
-    'sf': '140357727781376-7'
+    'sf': '140357727781376-7',
   },
   {
     'ph': 'P',
@@ -139,7 +139,7 @@ final List<Map<String, dynamic>> _profileTraceEvents = [
       'userTag': 'Default',
       'vmTag': 'VM',
     },
-    'sf': '140357727781376-7'
+    'sf': '140357727781376-7',
   },
   {
     'ph': 'P',
@@ -152,7 +152,7 @@ final List<Map<String, dynamic>> _profileTraceEvents = [
       'userTag': 'Default',
       'vmTag': 'VM',
     },
-    'sf': '140357727781376-3'
+    'sf': '140357727781376-3',
   },
   {
     'ph': 'P',
@@ -165,7 +165,7 @@ final List<Map<String, dynamic>> _profileTraceEvents = [
       'userTag': 'Default',
       'vmTag': 'VM',
     },
-    'sf': '140357727781376-3'
+    'sf': '140357727781376-3',
   },
   {
     'ph': 'P',
@@ -178,7 +178,7 @@ final List<Map<String, dynamic>> _profileTraceEvents = [
       'userTag': 'Default',
       'vmTag': 'VM',
     },
-    'sf': '140357727781376-3'
+    'sf': '140357727781376-3',
   },
   {
     'ph': 'P',
@@ -191,7 +191,7 @@ final List<Map<String, dynamic>> _profileTraceEvents = [
       'userTag': 'Default',
       'vmTag': 'VM',
     },
-    'sf': '140357727781376-8'
+    'sf': '140357727781376-8',
   },
   {
     'ph': 'P',
@@ -204,7 +204,7 @@ final List<Map<String, dynamic>> _profileTraceEvents = [
       'userTag': 'Default',
       'vmTag': 'VM',
     },
-    'sf': '140357727781376-5'
+    'sf': '140357727781376-5',
   },
   {
     'ph': 'P',
@@ -217,7 +217,7 @@ final List<Map<String, dynamic>> _profileTraceEvents = [
       'userTag': 'Default',
       'vmTag': 'VM',
     },
-    'sf': '140357727781376-9'
+    'sf': '140357727781376-9',
   },
 ];
 

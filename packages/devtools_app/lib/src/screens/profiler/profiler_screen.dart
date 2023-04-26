@@ -131,7 +131,6 @@ class _ProfilerScreenBodyState extends State<ProfilerScreenBody>
                 ? const RecordingStatus()
                 : ProfilerBusyStatus(status: profilerBusyStatus))
             : null;
-
         return Column(
           children: [
             ProfilerScreenControls(

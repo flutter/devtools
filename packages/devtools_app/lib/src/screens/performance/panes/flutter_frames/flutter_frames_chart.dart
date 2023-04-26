@@ -28,7 +28,6 @@ import 'flutter_frame_model.dart';
 import 'flutter_frames_controller.dart';
 
 // Turn this flag on to see when flutter frames are linked with timeline events.
-// ignore: avoid-global-state
 bool debugFrames = false;
 
 class FlutterFramesChart extends StatelessWidget {
@@ -578,7 +577,7 @@ class FlutterFramesChartItem extends StatelessWidget {
       // the frame's timeline events are available.
       ga.select(
         gac.performance,
-        gac.selectFlutterFrame,
+        gac.PerformanceEvents.selectFlutterFrame.name,
         screenMetricsProvider: () => PerformanceScreenMetrics(
           uiDuration: frame.buildTime,
           rasterDuration: frame.rasterTime,
@@ -607,18 +606,18 @@ class FlutterFrameTooltip extends StatelessWidget {
 
   static const double _moreInfoLinkWidth = 100.0;
 
-  static const _textMeasurementBuffer = 4.0;
+  static const _textMeasurementBuffer = 8.0;
 
   @override
   Widget build(BuildContext context) {
     return HoverCardTooltip.sync(
       enabled: () => true,
-      generateHoverCardData: (_) => _buildCardData(context),
+      generateHoverCardData: (_) => _buildCardData(),
       child: child,
     );
   }
 
-  HoverCardData _buildCardData(BuildContext context) {
+  HoverCardData _buildCardData() {
     final uiText = 'UI: ${durationText(
       frame.buildTime,
       unit: DurationDisplayUnit.milliseconds,
@@ -658,8 +657,8 @@ class FlutterFrameTooltip extends StatelessWidget {
                   MoreInfoLink(
                     url: preCompileShadersDocsUrl,
                     gaScreenName: gac.performance,
-                    gaSelectedItemDescription:
-                        gac.shaderCompilationDocsTooltipLink,
+                    gaSelectedItemDescription: gac
+                        .PerformanceDocs.shaderCompilationDocsTooltipLink.name,
                   ),
                 ],
               ),

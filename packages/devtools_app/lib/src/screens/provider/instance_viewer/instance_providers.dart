@@ -76,7 +76,7 @@ Future<InstanceRef> _resolveInstanceRefForPath(
         scope: {'parent': parent.instanceRefId},
       );
     },
-    object: (parent) async {
+    object: (parent) {
       final propertyPath = path.pathToProperty.last as PropertyPath;
 
       // compare by both name and ref ID because an object may have multiple
@@ -400,7 +400,7 @@ Future<List<ObjectField>> _parseFields(
   Instance instance, {
   required Disposable isAlive,
   required String? appName,
-}) async {
+}) {
   final fields = instance.fields!.map((field) async {
     final fieldDeclaration = field.decl!;
     final owner =

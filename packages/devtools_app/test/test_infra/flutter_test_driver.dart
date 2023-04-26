@@ -190,7 +190,7 @@ abstract class FlutterTestDriver {
     int? id,
     Duration? timeout,
     bool ignoreAppStopEvent = false,
-  }) async {
+  }) {
     final Completer<Map<String, dynamic>> response =
         Completer<Map<String, dynamic>>();
     late StreamSubscription<String> sub;
@@ -396,7 +396,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
       <String, Object?>{
         'appId': _currentRunningAppId,
         'fullRestart': fullRestart,
-        'pause': pause
+        'pause': pause,
       },
     );
 
@@ -442,7 +442,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
     final request = <String, Object?>{
       'id': requestId,
       'method': method,
-      'params': params
+      'params': params,
     };
     final String jsonEncoded = json.encode(<Map<String, Object?>>[request]);
     _debugPrint(jsonEncoded);

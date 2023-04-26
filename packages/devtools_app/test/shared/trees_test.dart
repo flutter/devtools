@@ -346,8 +346,8 @@ void main() {
                     ..addAllChildren([
                       treeNodeI,
                       treeNodeJ,
-                    ])
-                ])
+                    ]),
+                ]),
             ],
           );
       });

@@ -95,7 +95,7 @@ class _FlexLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
   }
 
   @override
-  FlexLayoutProperties computeLayoutProperties(node) =>
+  FlexLayoutProperties computeLayoutProperties(RemoteDiagnosticsNode node) =>
       FlexLayoutProperties.fromDiagnostics(node);
 
   @override

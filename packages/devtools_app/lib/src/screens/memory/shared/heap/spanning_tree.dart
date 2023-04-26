@@ -110,7 +110,7 @@ void _verifyHeapIntegrity(AdaptedHeapData heap) {
     var totalInRefs = 0;
     var totalOutRefs = 0;
 
-    for (final i in Iterable.generate(heap.objects.length)) {
+    for (final int i in Iterable.generate(heap.objects.length)) {
       final object = heap.objects[i];
       assert(
         (object.retainedSize == null) == (object.retainer == null),

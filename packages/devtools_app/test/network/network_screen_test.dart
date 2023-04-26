@@ -13,7 +13,7 @@ void main() {
   late FakeServiceManager fakeServiceManager;
 
   group('NetworkScreen', () {
-    setUp(() async {
+    setUp(() {
       fakeServiceManager = FakeServiceManager();
       when(fakeServiceManager.connectedApp!.isDartWebAppNow).thenReturn(false);
       setGlobal(ServiceConnectionManager, fakeServiceManager);

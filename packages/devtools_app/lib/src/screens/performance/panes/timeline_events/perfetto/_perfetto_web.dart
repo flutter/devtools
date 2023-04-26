@@ -131,12 +131,12 @@ class _PerfettoViewController extends DisposableController
 
     html.window.addEventListener('message', _handleMessage);
 
-    if (isExternalBuild) {
-      unawaited(_loadStyle(preferences.darkModeTheme.value));
-      addAutoDisposeListener(preferences.darkModeTheme, () async {
-        await _loadStyle(preferences.darkModeTheme.value);
-      });
-    }
+    unawaited(_loadStyle(preferences.darkModeTheme.value));
+    addAutoDisposeListener(preferences.darkModeTheme, () async {
+      await _loadStyle(preferences.darkModeTheme.value);
+      reloadCssForThemeChange();
+    });
+
     autoDisposeStreamSubscription(
       perfettoController.perfettoPostEventStream.stream.listen((event) async {
         if (event == EmbeddedPerfettoEvent.showHelp.event) {
@@ -154,7 +154,7 @@ class _PerfettoViewController extends DisposableController
     });
     final buffer = Uint8List.fromList(encodedJson.codeUnits);
 
-    ga.select(gac.performance, gac.perfettoLoadTrace);
+    ga.select(gac.performance, gac.PerformanceEvents.perfettoLoadTrace.name);
     _postMessage({
       'perfetto': {
         'buffer': buffer,
@@ -176,7 +176,10 @@ class _PerfettoViewController extends DisposableController
       return;
     }
     await _pingPerfettoUntilReady();
-    ga.select(gac.performance, gac.perfettoScrollToTimeRange);
+    ga.select(
+      gac.performance,
+      gac.PerformanceEvents.perfettoScrollToTimeRange.name,
+    );
     _postMessage({
       'perfetto': {
         // Pass the values to Perfetto in seconds.
@@ -190,7 +193,7 @@ class _PerfettoViewController extends DisposableController
 
   Future<void> _loadStyle(bool darkMode) async {
     // This message will be handled by [devtools_theme_handler.js], which is
-    // included in the Perfetto build inside [packages/perfetto_compiled/dist].
+    // included in the Perfetto build inside [packages/perfetto_ui_compiled/dist].
     await _pingDevToolsThemeHandlerUntilReady();
     _postMessageWithId(
       EmbeddedPerfettoEvent.devtoolsThemeChange.event,
@@ -199,6 +202,22 @@ class _PerfettoViewController extends DisposableController
         'theme': '${darkMode ? 'dark' : 'light'}',
       },
     );
+  }
+
+  void reloadCssForThemeChange() {
+    const maxReloadCalls = 3;
+    var reloadCount = 0;
+
+    // Send this message [maxReloadCalls] times to ensure that the CSS has been
+    // updated by the time we ask Perfetto to reload the CSS constants.
+    late final Timer pollingTimer;
+    pollingTimer = Timer.periodic(const Duration(milliseconds: 200), (_) {
+      if (reloadCount++ < maxReloadCalls) {
+        _postMessage(EmbeddedPerfettoEvent.reloadCssConstants.event);
+      } else {
+        pollingTimer.cancel();
+      }
+    });
   }
 
   Future<void> _showHelp() async {
@@ -248,7 +267,7 @@ class _PerfettoViewController extends DisposableController
   Future<void> _pingPerfettoUntilReady() async {
     if (!_perfettoHandlerReady.isCompleted) {
       _pollForPerfettoHandlerReady =
-          Timer.periodic(const Duration(milliseconds: 200), (_) async {
+          Timer.periodic(const Duration(milliseconds: 200), (_) {
         // Once the Perfetto UI is ready, Perfetto will receive this 'PING'
         // message and return a 'PONG' message, handled in [_handleMessage].
         _postMessage(EmbeddedPerfettoEvent.ping.event);
@@ -263,10 +282,9 @@ class _PerfettoViewController extends DisposableController
   }
 
   Future<void> _pingDevToolsThemeHandlerUntilReady() async {
-    if (!isExternalBuild) return;
     if (!_devtoolsThemeHandlerReady.isCompleted) {
       _pollForThemeHandlerReady =
-          Timer.periodic(const Duration(milliseconds: 200), (_) async {
+          Timer.periodic(const Duration(milliseconds: 200), (_) {
         // Once [devtools_theme_handler.js] is ready, it will receive this
         // 'PING-DEVTOOLS-THEME' message and return a 'PONG-DEVTOOLS-THEME'
         // message, handled in [_handleMessage].

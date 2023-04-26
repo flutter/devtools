@@ -28,11 +28,11 @@ import 'src/shared/primitives/utils.dart';
 ///
 /// If the initialization is specific to running Devtools in google3 or
 /// externally, then it should be added to that respective main.dart file.
-Future<void> runDevTools({
+void runDevTools({
   bool shouldEnableExperiments = false,
   List<DevToolsJsonFile> sampleData = const [],
   List<DevToolsScreen>? screens,
-}) async {
+}) {
   setupErrorHandling(() async {
     screens ??= defaultScreens;
 

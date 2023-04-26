@@ -38,10 +38,6 @@ echo "Setting the release version"
 echo
 dart tool/update_version.dart auto --type release
 
-echo "Updating the changelog"
-echo
-dart tool/bin/repo_tool.dart generate-changelog
-
 NEW_VERSION=$(dart tool/update_version.dart current-version)
 
 COMMIT_MESSAGE="Releasing from $ORIGINAL_VERSION to $NEW_VERSION"
