@@ -64,6 +64,17 @@ void main() {
             widget is RichText && widget.text.toPlainText().contains(text),
       );
 
+  bool gutterItemForLineIsVisible(int lineNumber) {
+    final gutterItems = find.byType(GutterItem);
+    final firstGutterItem =
+        _getWidgetFromFinder(gutterItems.first) as GutterItem;
+    final lastGutterItem = _getWidgetFromFinder(gutterItems.last) as GutterItem;
+    final lineRange = Range(firstGutterItem.lineNumber, lastGutterItem.lineNumber);
+    print(lineRange);
+
+    return lineRange.contains(lineNumber);
+  }
+
   testWidgetsWithWindowSize(
     'debugger controls paused',
     windowSize,
@@ -122,26 +133,34 @@ void main() {
       // The first stack frame is visible:
       final firstStackFrame =
           findStackFrameWithText('firstCodeRef 17b557e5bc3:40');
-      expect(firstStackFrame, isNotNull);
-      // The first stack frame's line is visible:
-      final firstStackFrameLine =
-          find.widgetWithText(GutterItem, '$_firstLineNumber');
-      expect(firstStackFrameLine, isNotNull);
+      expect(firstStackFrame, findsOneWidget);
 
       // The second stack frame is visible:
       final secondStackFrame =
-          findStackFrameWithText('secondCodeRef 17b557e5bc3:40');
-      expect(secondStackFrame, isNotNull);
+          findStackFrameWithText('secondCodeRef 17b557e5bc3:120');
+      expect(secondStackFrame, findsOneWidget);
+
+      // The first stack frame's line is visible:
+      expect(gutterItemForLineIsVisible(_firstLineNumber), isTrue);
 
       // The second stack frame's line is not visible:
-      // final secondStackFrameLine =
-      //     find.widgetWithText(GutterItem, '$_secondLineNumber');
-      // expect(secondStackFrameLine, isNull);
+      expect(gutterItemForLineIsVisible(_secondLineNumber), isFalse);
 
-      final gutterItems = find.byType(GutterItem);
-      print(gutterItems);
-      expect(gutterItems, findsNWidgets(200));
+      when(codeViewController.scriptLocation)
+          .thenReturn(ValueNotifier(_secondScriptLocation));
 
+      await tester.tap(secondStackFrame);
+      await tester.pump();
+
+      // The second stack frame's line is not visible:
+      expect(gutterItemForLineIsVisible(_secondLineNumber), isTrue);
+
+      // print(gutterItems);
+
+      // final lineItems = find.byType(LineItem);
+      // // print(lineItems);
+      // expect(gutterItems, findsNWidgets(200));
+      // expect(lineItems, findsNWidgets(200));
 
       // Click on the second stack frame:
 
@@ -181,7 +200,7 @@ final _firstStackFrame = StackFrameAndSourcePosition(
   position: _firstSourcePosition,
 );
 
-const _secondLineNumber = 200;
+const _secondLineNumber = 120;
 
 const _secondSourcePosition =
     SourcePosition(line: _secondLineNumber, column: 1);
