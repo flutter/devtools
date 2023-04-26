@@ -15,7 +15,6 @@ on:
         description: 'The latest Flutter candidate version.'
         value: ${{ jobs.reusable-flutter-prep.outputs.latest_flutter_candidate }} 
 
-
 jobs:
   reusable-flutter-prep:
     name: ${{ matrix.os }} Flutter Prep
