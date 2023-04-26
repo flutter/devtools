@@ -618,7 +618,7 @@ final Script? mockScript = Script.parse(
 
 final mockScriptRef = ScriptRef(
   uri:
-      'libraries/@783137924/scripts/package%3Agallery%2Fmain.dart/17b557e5bc3"',
+      'libraries/@783137924/scripts/package%3Agallery%2Fmain.dart/17b557e5bc3',
   id: 'test-script-long-lines',
 );
 
