@@ -1045,9 +1045,12 @@ class _LinesState extends State<Lines> with AutoDisposeMixin {
   @override
   Widget build(BuildContext context) {
     final pausedLine = widget.pausedFrame?.line;
-    SchedulerBinding.instance.addPostFrameCallback((_) {
-      _maybeScrollToLine(pausedLine);
-    });
+    // Only scroll to the paused line if there is no active search in progress:
+    if (activeSearch == null) {
+      SchedulerBinding.instance.addPostFrameCallback((_) {
+        _maybeScrollToLine(pausedLine);
+      });
+    }
 
     return ListView.builder(
       controller: widget.scrollController,
