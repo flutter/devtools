@@ -13,6 +13,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../test_infra/utils/test_utils.dart';
+
 void main() {
   final screen = DebuggerScreen();
 
@@ -41,23 +43,24 @@ void main() {
   final scriptsHistory = ScriptsHistory();
   scriptsHistory.pushEntry(mockScript!);
   when(codeViewController.scriptsHistory).thenReturn(scriptsHistory);
-
   when(debuggerController.stackFramesWithLocation).thenReturn(
     ValueNotifier([
-      _firstStackFrame,
-      _secondStackFrame,
+      _stackFrame1,
+      _stackFrame2,
     ]),
   );
-  when(debuggerController.selectedStackFrame).thenReturn(ValueNotifier(null));
+  when(codeViewController.currentScriptRef)
+      .thenReturn(ValueNotifier(mockScriptRef));
+  when(codeViewController.currentParsedScript)
+      .thenReturn(ValueNotifier(mockParsedScript));
 
-  WidgetPredicate createDebuggerButtonPredicate(String title) {
-    return (Widget widget) {
-      if (widget is DebuggerButton && widget.title == title) {
-        return true;
-      }
-      return false;
-    };
-  }
+  Finder findDebuggerButtonWithTitle(String title) =>
+      find.byWidgetPredicate((Widget widget) {
+        if (widget is DebuggerButton && widget.title == title) {
+          return true;
+        }
+        return false;
+      });
 
   Finder findStackFrameWithText(String text) => find.byWidgetPredicate(
         (Widget widget) =>
@@ -66,11 +69,10 @@ void main() {
 
   bool gutterItemForLineIsVisible(int lineNumber) {
     final gutterItems = find.byType(GutterItem);
-    final firstGutterItem =
-        _getWidgetFromFinder(gutterItems.first) as GutterItem;
-    final lastGutterItem = _getWidgetFromFinder(gutterItems.last) as GutterItem;
-    final lineRange = Range(firstGutterItem.lineNumber, lastGutterItem.lineNumber);
-    print(lineRange);
+    final firstGutterItem = getWidgetFromFinder<GutterItem>(gutterItems.first);
+    final lastGutterItem = getWidgetFromFinder<GutterItem>(gutterItems.last);
+    final lineRange =
+        Range(firstGutterItem.lineNumber, lastGutterItem.lineNumber);
 
     return lineRange.contains(lineNumber);
   }
@@ -90,35 +92,32 @@ void main() {
       await tester.pump();
 
       expect(
-        find.byWidgetPredicate(createDebuggerButtonPredicate('Pause')),
+        findDebuggerButtonWithTitle('Pause'),
         findsOneWidget,
       );
-      final pause = _getWidgetFromFinder(
-        find.byWidgetPredicate(createDebuggerButtonPredicate('Pause')),
-      ) as DebuggerButton;
+      final pause = getWidgetFromFinder<DebuggerButton>(
+        findDebuggerButtonWithTitle('Pause'),
+      );
       expect(pause.onPressed, isNull);
 
       expect(
-        find.byWidgetPredicate(createDebuggerButtonPredicate('Resume')),
+        findDebuggerButtonWithTitle('Resume'),
         findsOneWidget,
       );
-      final resume = _getWidgetFromFinder(
-        find.byWidgetPredicate(createDebuggerButtonPredicate('Resume')),
-      ) as DebuggerButton;
+      final resume = getWidgetFromFinder<DebuggerButton>(
+        findDebuggerButtonWithTitle('Resume'),
+      );
       expect(resume.onPressed, isNotNull);
     },
   );
 
   testWidgetsWithWindowSize(
-    'figure out test name',
+    'Selecting stackframe scrolls the frame location into view',
     windowSize,
     (WidgetTester tester) async {
-      when(codeViewController.currentScriptRef)
-          .thenReturn(ValueNotifier(mockScriptRef));
-      when(codeViewController.scriptLocation)
-          .thenReturn(ValueNotifier(_firstScriptLocation));
-      when(codeViewController.currentParsedScript)
-          .thenReturn(ValueNotifier(mockParsedScript));
+      final stackFrameNotifier = ValueNotifier(_stackFrame1);
+      when(debuggerController.selectedStackFrame)
+          .thenReturn(stackFrameNotifier);
 
       await tester.pumpWidget(
         wrapWithControllers(
@@ -126,65 +125,40 @@ void main() {
           debugger: debuggerController,
         ),
       );
-      (serviceManager.isolateManager as FakeIsolateManager)
-          .setMainIsolatePausedState(true);
-      await tester.pump();
+      await tester.pumpAndSettle();
 
       // The first stack frame is visible:
       final firstStackFrame =
-          findStackFrameWithText('firstCodeRef 17b557e5bc3:40');
+          findStackFrameWithText('firstCodeRef 17b557e5bc3:1');
       expect(firstStackFrame, findsOneWidget);
 
       // The second stack frame is visible:
       final secondStackFrame =
-          findStackFrameWithText('secondCodeRef 17b557e5bc3:120');
+          findStackFrameWithText('secondCodeRef 17b557e5bc3:85');
       expect(secondStackFrame, findsOneWidget);
 
       // The first stack frame's line is visible:
-      expect(gutterItemForLineIsVisible(_firstLineNumber), isTrue);
+      expect(gutterItemForLineIsVisible(_stackFrame1Line), isTrue);
 
       // The second stack frame's line is not visible:
-      expect(gutterItemForLineIsVisible(_secondLineNumber), isFalse);
+      expect(gutterItemForLineIsVisible(_stackFrame2Line), isFalse);
 
-      when(codeViewController.scriptLocation)
-          .thenReturn(ValueNotifier(_secondScriptLocation));
-
-      await tester.tap(secondStackFrame);
-      await tester.pump();
-
-      // The second stack frame's line is not visible:
-      expect(gutterItemForLineIsVisible(_secondLineNumber), isTrue);
-
-      // print(gutterItems);
-
-      // final lineItems = find.byType(LineItem);
-      // // print(lineItems);
-      // expect(gutterItems, findsNWidgets(200));
-      // expect(lineItems, findsNWidgets(200));
-
-      // Click on the second stack frame:
+      // Update the selected stack frame:
+      stackFrameNotifier.value = _stackFrame2;
+      await tester.pumpAndSettle();
 
       // The second stack frame's line is now visible:
+      expect(gutterItemForLineIsVisible(_stackFrame2Line), isTrue);
 
       // The first stack frame's line is not visible:
+      expect(gutterItemForLineIsVisible(_stackFrame1Line), isFalse);
     },
   );
 }
 
-Widget _getWidgetFromFinder(Finder finder) {
-  return finder.first.evaluate().first.widget;
-}
+const _stackFrame1Line = 1;
 
-const _firstLineNumber = 40;
-
-const _firstSourcePosition = SourcePosition(line: _firstLineNumber, column: 1);
-
-final _firstScriptLocation = ScriptLocation(
-  mockScriptRef,
-  location: _firstSourcePosition,
-);
-
-final _firstStackFrame = StackFrameAndSourcePosition(
+final _stackFrame1 = StackFrameAndSourcePosition(
   Frame(
     index: 0,
     code: CodeRef(
@@ -197,20 +171,12 @@ final _firstStackFrame = StackFrameAndSourcePosition(
     ),
     kind: FrameKind.kRegular,
   ),
-  position: _firstSourcePosition,
+  position: const SourcePosition(line: _stackFrame1Line, column: 1),
 );
 
-const _secondLineNumber = 120;
+const _stackFrame2Line = 85;
 
-const _secondSourcePosition =
-    SourcePosition(line: _secondLineNumber, column: 1);
-
-final _secondScriptLocation = ScriptLocation(
-  mockScriptRef,
-  location: _secondSourcePosition,
-);
-
-final _secondStackFrame = StackFrameAndSourcePosition(
+final _stackFrame2 = StackFrameAndSourcePosition(
   Frame(
     index: 1,
     code: CodeRef(
@@ -223,5 +189,5 @@ final _secondStackFrame = StackFrameAndSourcePosition(
     ),
     kind: FrameKind.kRegular,
   ),
-  position: _secondSourcePosition,
+  position: const SourcePosition(line: _stackFrame2Line, column: 1),
 );
