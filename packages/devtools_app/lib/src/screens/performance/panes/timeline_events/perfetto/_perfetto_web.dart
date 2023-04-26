@@ -154,7 +154,7 @@ class _PerfettoViewController extends DisposableController
     });
     final buffer = Uint8List.fromList(encodedJson.codeUnits);
 
-    ga.select(gac.performance, gac.perfettoLoadTrace);
+    ga.select(gac.performance, gac.PerformanceEvents.perfettoLoadTrace.name);
     _postMessage({
       'perfetto': {
         'buffer': buffer,
@@ -176,7 +176,10 @@ class _PerfettoViewController extends DisposableController
       return;
     }
     await _pingPerfettoUntilReady();
-    ga.select(gac.performance, gac.perfettoScrollToTimeRange);
+    ga.select(
+      gac.performance,
+      gac.PerformanceEvents.perfettoScrollToTimeRange.name,
+    );
     _postMessage({
       'perfetto': {
         // Pass the values to Perfetto in seconds.

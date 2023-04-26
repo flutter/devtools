@@ -247,7 +247,7 @@ class CpuProfilerController extends DisposableController
       // operation for analytics.
       await ga.timeAsync(
         gac.cpuProfiler,
-        gac.cpuProfileProcessingTime,
+        gac.CpuProfilerEvents.cpuProfileProcessingTime.name,
         asyncOperation: pullAndProcessHelper,
         screenMetricsProvider: () => ProfilerScreenMetrics(
           cpuSampleCount: cpuProfiles.profileMetaData.sampleCount,

@@ -6,7 +6,7 @@ This is draft for future release notes, that are going to land on
 Dart & Flutter DevTools - A Suite of Performance Tools for Dart and Flutter
 
 ## General updates
-* Improve the overal performance of DevTools tables - [#5664](https://github.com/flutter/devtools/pull/5664)
+* Improve the overal performance of DevTools tables - [#5664](https://github.com/flutter/devtools/pull/5664), [#5696](https://github.com/flutter/devtools/pull/5696)
 
 ## Inspector updates
 TODO: Remove this section if there are not any general updates.
@@ -22,6 +22,7 @@ TODO: Remove this section if there are not any general updates.
 
 ## Debugger updates
 * Improve support for inspecting `UserTag` and `MirrorReferent` instances - [#5490](https://github.com/flutter/devtools/pull/5490)
+* Fixes expression evaluation bug where selecting an autocomplete result for a field would clear the current input - [#5717](https://github.com/flutter/devtools/pull/5717)
 
 ## Network profiler updates
 TODO: Remove this section if there are not any general updates.

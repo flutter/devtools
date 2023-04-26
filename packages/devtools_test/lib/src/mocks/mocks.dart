@@ -62,6 +62,9 @@ class FakeInspectorService extends Fake implements InspectorService {
   void removeClient(InspectorServiceClient client) {
     clients.remove(client);
   }
+
+  @override
+  bool get hoverEvalModeEnabledByDefault => true;
 }
 
 class TestInspectorController extends Fake implements InspectorController {
@@ -178,7 +181,7 @@ void mockFlutterVersion(
   when(connectedApp.connectedAppInitialized).thenReturn(true);
 }
 
-// ignore: prefer_single_quotes
+// ignore: prefer_single_quotes, false positive.
 final Grammar mockGrammar = Grammar.fromJson(
   jsonDecode(
     '''

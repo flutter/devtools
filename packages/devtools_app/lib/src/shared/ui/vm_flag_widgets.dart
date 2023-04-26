@@ -96,7 +96,7 @@ class CpuSamplingRateDropdown extends StatelessWidget {
   Future<void> _onSamplingFrequencyChanged(String? newValue) async {
     ga.select(
       screenId,
-      '${gac.cpuSamplingRatePrefix}'
+      '${gac.CpuProfilerEvents.profileGranularity.name}'
       '${CpuSamplingRateExtension.fromValue(newValue ?? '').displayShort}',
     );
     await serviceManager.service!.setProfilePeriod(

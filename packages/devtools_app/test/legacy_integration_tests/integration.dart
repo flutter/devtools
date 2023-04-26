@@ -78,22 +78,16 @@ class BrowserManager {
   Future<BrowserTabInstance> createNewTab() async {
     final String targetId = await this.tab.createNewTarget();
 
-    // This is a false positive for this lint.
-    // ignore: prefer-moving-to-variable
     await delay();
 
     final ChromeTab tab =
         (await chromeProcess.connectToTabId('localhost', targetId))!;
     await tab.connect(verbose: true);
 
-    // This is a false positive for this lint.
-    // ignore: prefer-moving-to-variable
     await delay();
 
     await tab.wipConnection!.target.activateTarget(targetId);
 
-    // This is a false positive for this lint.
-    // ignore: prefer-moving-to-variable
     await delay();
 
     return BrowserTabInstance(tab);

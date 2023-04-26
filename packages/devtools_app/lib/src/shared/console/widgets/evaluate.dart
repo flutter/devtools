@@ -76,7 +76,7 @@ class ExpressionEvalFieldState extends State<ExpressionEvalField>
     });
     addAutoDisposeListener(
       _autoCompleteController.selectTheSearchNotifier,
-      _handleSearch,
+      _handleSearchTermSelected,
     );
     addAutoDisposeListener(
       _autoCompleteController.searchNotifier,
@@ -134,16 +134,17 @@ class ExpressionEvalFieldState extends State<ExpressionEvalField>
     }
   }
 
-  void _handleSearch() async {
+  void _handleSearchTermSelected() {
+    _autoCompleteController.clearCurrentSuggestion();
+  }
+
+  Future<void> _handleSearch() async {
     final searchingValue = _autoCompleteController.search;
 
     _autoCompleteController.clearCurrentSuggestion();
 
     if (searchingValue.isNotEmpty) {
-      if (_autoCompleteController.selectTheSearch) {
-        _autoCompleteController.resetSearch();
-        return;
-      }
+      if (_autoCompleteController.selectTheSearch) return;
 
       // We avoid clearing the list of possible matches here even though the
       // current matches may be out of date as clearing results in flicker
