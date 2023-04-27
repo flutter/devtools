@@ -1207,7 +1207,7 @@ class _LineItemState extends State<LineItem>
               // to allow us to render this as a proper overlay as similar
               // functionality exists to render the selection handles properly.
               Opacity(
-                opacity: 0.5,
+                opacity: 0.0,
                 child: RichText(
                   text: truncateTextSpan(widget.lineContents, column - 1),
                 ),
