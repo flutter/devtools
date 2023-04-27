@@ -7,6 +7,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:logging/logging.dart';
 import 'package:vm_service/vm_service.dart' hide Stack;
@@ -401,7 +402,8 @@ class _CodeViewState extends State<CodeView> with AutoDisposeMixin {
                                   codeViewController: widget.codeViewController,
                                   scrollController: textController,
                                   lines: lines,
-                                  pausedFrame: pausedFrame,
+                                  selectedFrameNotifier: widget
+                                      .debuggerController?.selectedStackFrame,
                                   searchMatchesNotifier:
                                       widget.codeViewController.searchMatches,
                                   activeSearchMatchNotifier: widget
@@ -992,18 +994,18 @@ class Lines extends StatefulWidget {
     required this.codeViewController,
     required this.scrollController,
     required this.lines,
-    required this.pausedFrame,
     required this.searchMatchesNotifier,
     required this.activeSearchMatchNotifier,
+    required this.selectedFrameNotifier,
   }) : super(key: key);
 
   final double height;
   final CodeViewController codeViewController;
   final ScrollController scrollController;
   final List<TextSpan> lines;
-  final StackFrameAndSourcePosition? pausedFrame;
   final ValueListenable<List<SourceToken>> searchMatchesNotifier;
   final ValueListenable<SourceToken?> activeSearchMatchNotifier;
+  final ValueListenable<StackFrameAndSourcePosition?>? selectedFrameNotifier;
 
   @override
   State<Lines> createState() => _LinesState();
@@ -1031,35 +1033,23 @@ class _LinesState extends State<Lines> with AutoDisposeMixin {
       setState(() {
         activeSearch = widget.activeSearchMatchNotifier.value;
       });
-
       final activeSearchLine = activeSearch?.position.line;
-      if (activeSearchLine != null) {
-        final isOutOfViewTop = activeSearchLine * CodeView.rowHeight <
-            widget.scrollController.offset + CodeView.rowHeight;
-        final isOutOfViewBottom = activeSearchLine * CodeView.rowHeight >
-            widget.scrollController.offset + widget.height - CodeView.rowHeight;
+      _maybeScrollToLine(activeSearchLine);
+    });
 
-        if (isOutOfViewTop || isOutOfViewBottom) {
-          // Scroll this search token to the middle of the view.
-          final targetOffset = math.max<double>(
-            activeSearchLine * CodeView.rowHeight - widget.height / 2,
-            0.0,
-          );
-          unawaited(
-            widget.scrollController.animateTo(
-              targetOffset,
-              duration: defaultDuration,
-              curve: defaultCurve,
-            ),
-          );
-        }
-      }
+    addAutoDisposeListener(widget.selectedFrameNotifier, () {
+      final selectedFrame = widget.selectedFrameNotifier?.value;
+      SchedulerBinding.instance.addPostFrameCallback((_) {
+        _maybeScrollToLine(selectedFrame?.line);
+      });
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    final pausedLine = widget.pausedFrame?.line;
+    final pausedFrame = widget.selectedFrameNotifier?.value;
+    final pausedLine = pausedFrame?.line;
+
     return ListView.builder(
       controller: widget.scrollController,
       physics: const ClampingScrollPhysics(),
@@ -1074,9 +1064,9 @@ class _LinesState extends State<Lines> with AutoDisposeMixin {
             final isFocusedLine = focusLine == lineNum;
             return LineItem(
               lineContents: widget.lines[index],
-              pausedFrame: isPausedLine ? widget.pausedFrame : null,
+              pausedFrame: isPausedLine ? pausedFrame : null,
               focused: isPausedLine || isFocusedLine,
-              searchMatches: searchMatchesForLine(index),
+              searchMatches: _searchMatchesForLine(index),
               activeSearchMatch:
                   activeSearch?.position.line == index ? activeSearch : null,
             );
@@ -1086,10 +1076,34 @@ class _LinesState extends State<Lines> with AutoDisposeMixin {
     );
   }
 
-  List<SourceToken> searchMatchesForLine(int index) {
+  List<SourceToken> _searchMatchesForLine(int index) {
     return searchMatches
         .where((searchToken) => searchToken.position.line == index)
         .toList();
+  }
+
+  void _maybeScrollToLine(int? lineNumber) {
+    if (lineNumber == null) return;
+
+    final isOutOfViewTop = lineNumber * CodeView.rowHeight <
+        widget.scrollController.offset + CodeView.rowHeight;
+    final isOutOfViewBottom = lineNumber * CodeView.rowHeight >
+        widget.scrollController.offset + widget.height - CodeView.rowHeight;
+
+    if (isOutOfViewTop || isOutOfViewBottom) {
+      // Scroll this search token to the middle of the view.
+      final targetOffset = math.max<double>(
+        lineNumber * CodeView.rowHeight - widget.height / 2,
+        0.0,
+      );
+      unawaited(
+        widget.scrollController.animateTo(
+          targetOffset,
+          duration: defaultDuration,
+          curve: defaultCurve,
+        ),
+      );
+    }
   }
 }
 
@@ -1174,11 +1188,14 @@ class _LineItemState extends State<LineItem>
     final column = widget.pausedFrame?.column;
     if (column != null) {
       final breakpointColor = theme.colorScheme.breakpointColor;
-
+      final widthToCurrentColumn = calculateTextSpanWidth(
+        truncateTextSpan(widget.lineContents, column - 1),
+      );
       // The following constants are tweaked for using the
       // 'Icons.label_important' icon.
       const colIconSize = 13.0;
-      const colLeftOffset = -3.0;
+      // Subtract 3 to offset the icon at the start of the character:
+      final colLeftOffset = widthToCurrentColumn - 3.0;
       const colBottomOffset = 13.0;
       const colIconRotate = -90 * math.pi / 180;
 
@@ -1187,23 +1204,8 @@ class _LineItemState extends State<LineItem>
         children: [
           Row(
             children: [
-              // Create a hidden copy of the first column-1 characters of the
-              // line as a hack to correctly compute where to place
-              // the cursor. Approximating by using column-1 spaces instead
-              // of the correct characters and style s would be risky as it leads
-              // to small errors if the font is not fixed size or the font
-              // styles vary depending on the syntax highlighting.
-              // TODO(jacobr): there might be some api exposed on SelectedText
-              // to allow us to render this as a proper overlay as similar
-              // functionality exists to render the selection handles properly.
-              Opacity(
-                opacity: 0.5,
-                child: RichText(
-                  text: truncateTextSpan(widget.lineContents, column - 1),
-                ),
-              ),
               Transform.translate(
-                offset: const Offset(colLeftOffset, colBottomOffset),
+                offset: Offset(colLeftOffset, colBottomOffset),
                 child: Transform.rotate(
                   angle: colIconRotate,
                   child: Icon(
