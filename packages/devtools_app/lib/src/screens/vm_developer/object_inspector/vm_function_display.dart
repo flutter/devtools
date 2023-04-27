@@ -17,6 +17,7 @@ import 'vm_object_model.dart';
 /// related to function (Func type) objects in the Dart VM.
 class VmFuncDisplay extends StatelessWidget {
   const VmFuncDisplay({
+    super.key,
     required this.controller,
     required this.function,
   });
@@ -122,6 +123,7 @@ class VmFuncDisplay extends StatelessWidget {
 
 class CallSiteDataArrayWidget extends StatelessWidget {
   const CallSiteDataArrayWidget({
+    super.key,
     required this.controller,
     required this.callSiteDataArray,
   });

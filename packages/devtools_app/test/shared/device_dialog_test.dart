@@ -299,7 +299,7 @@ void main() {
     setUp(() {
       initServiceManager();
 
-      vmFlagsDialog = VMFlagsDialog();
+      vmFlagsDialog = const VMFlagsDialog();
     });
 
     testWidgets('builds dialog', (WidgetTester tester) async {

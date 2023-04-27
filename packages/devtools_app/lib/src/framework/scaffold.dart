@@ -309,7 +309,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
             _currentScreen.showFloatingDebuggerControls)
           Container(
             alignment: Alignment.topCenter,
-            child: FloatingDebuggerControls(),
+            child: const FloatingDebuggerControls(),
           ),
       ],
     );
@@ -493,6 +493,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
 
 class KeyboardShortcuts extends StatefulWidget {
   const KeyboardShortcuts({
+    super.key,
     required this.keyboardShortcuts,
     required this.child,
   });

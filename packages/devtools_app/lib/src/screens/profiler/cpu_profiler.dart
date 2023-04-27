@@ -32,6 +32,7 @@ import 'panes/method_table/method_table_controller.dart';
 
 class CpuProfiler extends StatefulWidget {
   CpuProfiler({
+    super.key,
     required this.data,
     required this.controller,
     List<Key>? searchableTabKeys,
@@ -70,7 +71,7 @@ class CpuProfiler extends StatefulWidget {
   ];
 
   @override
-  _CpuProfilerState createState() => _CpuProfilerState();
+  State<CpuProfiler> createState() => _CpuProfilerState();
 }
 
 // TODO(kenz): preserve tab controller index when updating CpuProfiler with new
@@ -367,7 +368,7 @@ class _CpuProfilerState extends State<CpuProfiler>
 // for filtered profiles (e.g. 'Sample count: 10/14), or to at least show the
 // original value in the tooltip for each of these stats.
 class CpuProfileStats extends StatelessWidget {
-  CpuProfileStats({required this.metadata});
+  CpuProfileStats({super.key, required this.metadata});
 
   final CpuProfileMetaData metadata;
 

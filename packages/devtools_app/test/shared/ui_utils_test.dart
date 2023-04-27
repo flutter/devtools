@@ -244,26 +244,26 @@ void main() {
     const Size(300, 300),
     (WidgetTester tester) async {
       const root = Key('root');
-      final _scrollControllerX = ScrollController();
-      final _scrollControllerY = ScrollController();
+      final scrollControllerX = ScrollController();
+      final scrollControllerY = ScrollController();
       await tester.pumpWidget(
         wrap(
           Scrollbar(
             thumbVisibility: true,
             key: root,
-            controller: _scrollControllerX,
+            controller: scrollControllerX,
             child: SingleChildScrollView(
               scrollDirection: Axis.horizontal,
-              controller: _scrollControllerX,
+              controller: scrollControllerX,
               child: OffsetScrollbar(
                 axis: Axis.vertical,
                 isAlwaysShown: true,
                 offsetControllerViewportDimension:
                     300, // Matches the extent of the outer ScrollView.
-                controller: _scrollControllerY,
-                offsetController: _scrollControllerX,
+                controller: scrollControllerY,
+                offsetController: scrollControllerX,
                 child: SingleChildScrollView(
-                  controller: _scrollControllerY,
+                  controller: scrollControllerY,
                   child:
                       Container(width: 2000, height: 1000, color: Colors.green),
                 ),
@@ -282,7 +282,7 @@ void main() {
         ),
       );
 
-      _scrollControllerX.jumpTo(500);
+      scrollControllerX.jumpTo(500);
       await tester.pumpAndSettle();
       // Screenshot should show horizontal scrollbar scrolled while vertical
       // scrollbar is at its initial offset.

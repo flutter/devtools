@@ -20,7 +20,7 @@ class Breakpoints extends StatefulWidget {
   const Breakpoints({Key? key}) : super(key: key);
 
   @override
-  _BreakpointsState createState() => _BreakpointsState();
+  State<Breakpoints> createState() => _BreakpointsState();
 }
 
 class _BreakpointsState extends State<Breakpoints>
@@ -116,12 +116,12 @@ class _BreakpointsState extends State<Breakpoints>
 }
 
 class BreakpointsCountBadge extends StatelessWidget {
-  const BreakpointsCountBadge({required this.breakpoints});
+  const BreakpointsCountBadge({super.key, required this.breakpoints});
 
   final List<BreakpointAndSourcePosition> breakpoints;
 
   @override
   Widget build(BuildContext context) {
-    return Badge('${nf.format(breakpoints.length)}');
+    return Badge(nf.format(breakpoints.length));
   }
 }

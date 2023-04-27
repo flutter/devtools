@@ -1207,11 +1207,11 @@ void main() {
         expect(parseCssHexColor('ffffff00'), equals(Colors.white.withAlpha(0)));
         expect(
           parseCssHexColor('#ff0000bb'),
-          equals(const Color(0xFF0000).withAlpha(0xbb)),
+          equals(const Color(0x00ff0000).withAlpha(0xbb)),
         );
         expect(
           parseCssHexColor('ff0000bb'),
-          equals(const Color(0xFF0000).withAlpha(0xbb)),
+          equals(const Color(0x00ff0000).withAlpha(0xbb)),
         );
       });
       test('parses 4 digit hex colors', () {
@@ -1225,11 +1225,11 @@ void main() {
         expect(parseCssHexColor('ffffff00'), equals(Colors.white.withAlpha(0)));
         expect(
           parseCssHexColor('#f00b'),
-          equals(const Color(0xFF0000).withAlpha(0xbb)),
+          equals(const Color(0x00ff0000).withAlpha(0xbb)),
         );
         expect(
           parseCssHexColor('f00b'),
-          equals(const Color(0xFF0000).withAlpha(0xbb)),
+          equals(const Color(0x00ff0000).withAlpha(0xbb)),
         );
       });
     });
@@ -1250,10 +1250,10 @@ void main() {
       });
 
       test('containsWhere', () {
-        final _list = [1, 2, 1, 2, 3, 4];
-        expect(_list.containsWhere((element) => element == 1), isTrue);
-        expect(_list.containsWhere((element) => element == 5), isFalse);
-        expect(_list.containsWhere((element) => element + 2 == 3), isTrue);
+        final list = [1, 2, 1, 2, 3, 4];
+        expect(list.containsWhere((element) => element == 1), isTrue);
+        expect(list.containsWhere((element) => element == 5), isFalse);
+        expect(list.containsWhere((element) => element + 2 == 3), isTrue);
 
         final otherList = ['hi', 'hey', 'foo', 'bar'];
         expect(

@@ -87,7 +87,7 @@ class CodeView extends StatefulWidget {
   final void Function(ScriptRef scriptRef, int line)? onSelected;
 
   @override
-  _CodeViewState createState() => _CodeViewState();
+  State<CodeView> createState() => _CodeViewState();
 }
 
 class _CodeViewState extends State<CodeView> with AutoDisposeMixin {
@@ -344,7 +344,7 @@ class _CodeViewState extends State<CodeView> with AutoDisposeMixin {
       }
     }
 
-    final contentBuilder = (context, ScriptRef? script) {
+    Widget contentBuilder(_, ScriptRef? script) {
       if (lines.isNotEmpty) {
         return DefaultTextStyle(
           style: theme.fixedFontStyle,
@@ -439,7 +439,8 @@ class _CodeViewState extends State<CodeView> with AutoDisposeMixin {
           ),
         );
       }
-    };
+    }
+
     if (widget.enableHistory) {
       return HistoryViewport(
         history: widget.codeViewController.scriptsHistory,
@@ -560,6 +561,7 @@ class CodeViewEmptyState extends StatelessWidget {
 
 class ProfileInformationGutter extends StatelessWidget {
   const ProfileInformationGutter({
+    super.key,
     required this.scrollController,
     required this.lineOffset,
     required this.lineCount,
@@ -585,7 +587,7 @@ class ProfileInformationGutter extends StatelessWidget {
     //  - Spacing for the vertical divider
     final gutterWidth = assumedMonospaceCharacterWidth * 16 + denseSpacing;
     return OutlineDecoration.onlyRight(
-      child: Container(
+      child: SizedBox(
         width: gutterWidth,
         child: Stack(
           children: [
@@ -633,7 +635,7 @@ class _ProfileInformationGutterHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return SizedBox(
       height: CodeView.rowHeight,
       child: Column(
         children: [
@@ -683,7 +685,7 @@ class ProfileInformationGutterItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return SizedBox(
       height: CodeView.rowHeight,
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -708,6 +710,7 @@ class ProfileInformationGutterItem extends StatelessWidget {
 
 class ProfilePercentageItem extends StatelessWidget {
   const ProfilePercentageItem({
+    super.key,
     required this.percentage,
     required this.hoverText,
   });
@@ -746,6 +749,7 @@ typedef IntCallback = void Function(int value);
 
 class Gutters extends StatelessWidget {
   const Gutters({
+    super.key,
     required this.scriptRef,
     this.debuggerController,
     required this.codeViewController,
@@ -838,6 +842,7 @@ class Gutters extends StatelessWidget {
 
 class Gutter extends StatelessWidget {
   const Gutter({
+    super.key,
     required this.gutterWidth,
     required this.scrollController,
     required this.lineOffset,
@@ -1013,7 +1018,7 @@ class Lines extends StatefulWidget {
   final ValueListenable<StackFrameAndSourcePosition?>? selectedFrameNotifier;
 
   @override
-  _LinesState createState() => _LinesState();
+  State<Lines> createState() => _LinesState();
 }
 
 class _LinesState extends State<Lines> with AutoDisposeMixin {
@@ -1131,7 +1136,7 @@ class LineItem extends StatefulWidget {
   final SourceToken? activeSearchMatch;
 
   @override
-  _LineItemState createState() => _LineItemState();
+  State<LineItem> createState() => _LineItemState();
 }
 
 class _LineItemState extends State<LineItem>
@@ -1385,7 +1390,7 @@ class _LineItemState extends State<LineItem>
 }
 
 class ScriptPopupMenu extends StatelessWidget {
-  const ScriptPopupMenu(this._controller);
+  const ScriptPopupMenu(this._controller, {super.key});
 
   final CodeViewController _controller;
 
@@ -1410,6 +1415,7 @@ class ScriptPopupMenu extends StatelessWidget {
 
 class ScriptHistoryPopupMenu extends StatelessWidget {
   const ScriptHistoryPopupMenu({
+    super.key,
     required this.itemBuilder,
     required this.onSelected,
     required this.enabled,
@@ -1551,7 +1557,7 @@ final openFileOption = ScriptPopupMenuOption(
 );
 
 class GoToLineDialog extends StatelessWidget {
-  const GoToLineDialog(this._codeViewController);
+  const GoToLineDialog(this._codeViewController, {super.key});
 
   final CodeViewController _codeViewController;
 

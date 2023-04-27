@@ -15,7 +15,7 @@ import 'analytics_controller.dart';
 /// Conditionally displays a prompt to request permission for collection of
 /// usage analytics.
 class AnalyticsPrompt extends StatefulWidget {
-  const AnalyticsPrompt({required this.child});
+  const AnalyticsPrompt({super.key, required this.child});
 
   final Widget child;
 

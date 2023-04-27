@@ -12,6 +12,7 @@ import '../cpu_profile_model.dart';
 
 class CpuProfileFlameChart extends FlameChart<CpuProfileData, CpuStackFrame?> {
   CpuProfileFlameChart({
+    super.key,
     required CpuProfileData data,
     required double width,
     required double height,
@@ -33,7 +34,7 @@ class CpuProfileFlameChart extends FlameChart<CpuProfileData, CpuStackFrame?> {
         );
 
   @override
-  _CpuProfileFlameChartState createState() => _CpuProfileFlameChartState();
+  State<CpuProfileFlameChart> createState() => _CpuProfileFlameChartState();
 }
 
 class _CpuProfileFlameChartState
@@ -59,7 +60,7 @@ class _CpuProfileFlameChartState
       final colorPair = _colorPairForStackFrame(stackFrame);
 
       final node = FlameChartNode<CpuStackFrame>(
-        key: Key('${stackFrame.id}'),
+        key: Key(stackFrame.id),
         text: stackFrame.name,
         rect: Rect.fromLTWH(left, flameChartNodeTop, width, chartRowHeight),
         colorPair: colorPair,

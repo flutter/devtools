@@ -50,10 +50,10 @@ void main() {
   }
 
   group('ConsoleControls', () {
-    final _stdio = ['First line', _ansiCodesOutput(), 'Third line'];
+    final stdio = ['First line', _ansiCodesOutput(), 'Third line'];
 
-    void _appendStdioLines() {
-      for (var line in _stdio) {
+    void appendStdioLines() {
+      for (var line in stdio) {
         serviceManager.consoleService.appendStdio('$line\n');
       }
     }
@@ -77,14 +77,14 @@ void main() {
     );
 
     group('Clipboard', () {
-      String _clipboardContents = '';
-      final _expected = _stdio.join('\n');
+      String clipboardContents = '';
+      final expected = stdio.join('\n');
 
       setUp(() {
-        _appendStdioLines();
+        appendStdioLines();
         setupClipboardCopyListener(
           clipboardContentsCallback: (contents) {
-            _clipboardContents = contents ?? '';
+            clipboardContents = contents ?? '';
           },
         );
       });
@@ -104,11 +104,11 @@ void main() {
           final copyButton = find.byKey(ConsolePane.copyToClipboardButtonKey);
           expect(copyButton, findsOneWidget);
 
-          expect(_clipboardContents, isEmpty);
+          expect(clipboardContents, isEmpty);
 
           await tester.tap(copyButton);
 
-          expect(_clipboardContents, equals(_expected));
+          expect(clipboardContents, equals(expected));
         },
       );
     });
