@@ -12,7 +12,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 
-void main() async {
+void main() {
   late MockLoggingController mockLoggingController;
   const windowSize = Size(1000.0, 1000.0);
   final fakeServiceManager = FakeServiceManager();
@@ -36,6 +36,8 @@ void main() async {
         .thenReturn(ValueNotifier<int>(0));
     setGlobal(ServiceConnectionManager, fakeServiceManager);
     setGlobal(NotificationService, NotificationService());
+    setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
+    setGlobal(PreferencesController, PreferencesController());
     setGlobal(IdeTheme, IdeTheme());
   });
 
@@ -97,7 +99,7 @@ void main() async {
       await pumpLoggingScreen(tester);
       verifyNever(mockLoggingController.clear());
 
-      final textFieldFinder = find.byKey(loggingSearchFieldKey);
+      final textFieldFinder = find.byType(TextField);
       expect(textFieldFinder, findsOneWidget);
       final TextField textField = tester.widget(textFieldFinder) as TextField;
       expect(textField.enabled, isTrue);
@@ -112,7 +114,7 @@ void main() async {
       await pumpLoggingScreen(tester);
 
       // Locates the copy to clipboard button's IconButton.
-      final copyButton = () => find
+      ToolbarAction copyButton() => find
           .byKey(LogDetails.copyToClipboardButtonKey)
           .evaluate()
           .first

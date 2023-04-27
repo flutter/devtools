@@ -1,33 +1,29 @@
 This is draft for future release notes, that are going to land on
 [the Flutter website](https://docs.flutter.dev/development/tools/devtools/release-notes).
 
-# DevTools 2.23.0 release notes
+# DevTools 2.24.0 release notes
 
 Dart & Flutter DevTools - A Suite of Performance Tools for Dart and Flutter
 
 ## General updates
-* Use the default Flutter service worker - [#5331](https://github.com/flutter/devtools/pull/5331)
+* Improve the overal performance of DevTools tables - [#5664](https://github.com/flutter/devtools/pull/5664), [#5696](https://github.com/flutter/devtools/pull/5696)
 
 ## Inspector updates
 TODO: Remove this section if there are not any general updates.
 
 ## Performance updates
-* Persist a user's preference for whether the Flutter Frames chart should be shown by default. - [#5339](https://github.com/flutter/devtools/pull/5339)
+TODO: Remove this section if there are not any general updates.
 
 ## CPU profiler updates
-* Add a Method Table to the CPU profiler - [#5366](https://github.com/flutter/devtools/pull/5366)
-
-![method table](images/image1.png "method_table")
-
-* Add ability to inspect statistics for a CPU profile - [#5340](https://github.com/flutter/devtools/pull/5340)
-* Fix a bug where Native stack frames were missing their name - [#5344](https://github.com/flutter/devtools/pull/5344)
-* Fix an error in total and self time calculations for the bottom up tree - [#5348](https://github.com/flutter/devtools/pull/5348)
+* Fix bug with CPU flame chart selection and tooltips - [#5676](https://github.com/flutter/devtools/pull/5676)
 
 ## Memory updates
 TODO: Remove this section if there are not any general updates.
 
 ## Debugger updates
-* Fix a bug where variable inspection for instances sometimes showed no children. - [#5356](https://github.com/flutter/devtools/pull/5356)
+* Improve support for inspecting `UserTag` and `MirrorReferent` instances - [#5490](https://github.com/flutter/devtools/pull/5490)
+* Fixes expression evaluation bug where selecting an autocomplete result for a field would clear the current input - [#5717](https://github.com/flutter/devtools/pull/5717)
+* Selecting a stack frame scrolls to the frame location in the source code - [#5722](https://github.com/flutter/devtools/pull/5722)
 
 ## Network profiler updates
 TODO: Remove this section if there are not any general updates.
@@ -38,6 +34,6 @@ TODO: Remove this section if there are not any general updates.
 ## App size tool updates
 TODO: Remove this section if there are not any general updates.
 
-## Changelog
-More details about changes and fixes are available in the DevTools
-[changelog](https://github.com/flutter/devtools/blob/master/CHANGELOG.md).
+## Full commit history
+More details about changes and fixes are available from the
+[DevTools git log.](https://github.com/flutter/devtools/commits/master).

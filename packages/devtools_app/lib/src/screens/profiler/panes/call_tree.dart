@@ -7,8 +7,8 @@ import 'package:flutter/material.dart';
 import '../../../shared/primitives/utils.dart';
 import '../../../shared/table/table.dart';
 import '../../../shared/table/table_data.dart';
-import '../cpu_profile_columns.dart';
 import '../cpu_profile_model.dart';
+import 'cpu_profile_columns.dart';
 
 /// A table of the CPU's top-down call tree.
 class CpuCallTreeTable extends StatelessWidget {

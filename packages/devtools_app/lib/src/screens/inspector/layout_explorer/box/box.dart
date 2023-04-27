@@ -37,11 +37,11 @@ class BoxLayoutExplorerWidget extends LayoutExplorerWidget {
   }
 
   @override
-  _BoxLayoutExplorerWidgetState createState() =>
-      _BoxLayoutExplorerWidgetState();
+  State<BoxLayoutExplorerWidget> createState() =>
+      BoxLayoutExplorerWidgetState();
 }
 
-class _BoxLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
+class BoxLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
     BoxLayoutExplorerWidget, LayoutProperties> {
   @override
   RemoteDiagnosticsNode? getRoot(RemoteDiagnosticsNode? node) {
@@ -71,7 +71,8 @@ class _BoxLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
   }
 
   @override
-  LayoutProperties computeLayoutProperties(node) => LayoutProperties(node);
+  LayoutProperties computeLayoutProperties(RemoteDiagnosticsNode node) =>
+      LayoutProperties(node);
 
   @override
   void updateHighlighted(LayoutProperties? newProperties) {
@@ -371,13 +372,11 @@ class BoxChildVisualizer extends StatelessWidget {
     required this.isSelected,
   }) : super(key: key);
 
-  final _BoxLayoutExplorerWidgetState state;
+  final BoxLayoutExplorerWidgetState state;
 
   final bool isSelected;
   final LayoutProperties layoutProperties;
   final RenderProperties renderProperties;
-
-  LayoutProperties? get root => state.properties;
 
   LayoutProperties? get properties => renderProperties.layoutProperties;
 

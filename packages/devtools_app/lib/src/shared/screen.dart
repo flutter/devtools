@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
@@ -175,7 +174,10 @@ abstract class Screen {
                 children: [
                   CustomPaint(
                     size: Size(defaultIconSize + denseSpacing + titleWidth, 0),
-                    painter: BadgePainter(number: count),
+                    painter: BadgePainter(
+                      number: count,
+                      colorScheme: Theme.of(context).colorScheme,
+                    ),
                   ),
                   tab,
                 ],
@@ -197,27 +199,6 @@ abstract class Screen {
   /// If this method returns `null`, then no page specific status is displayed.
   Widget? buildStatus(BuildContext context) {
     return null;
-  }
-}
-
-// TODO(https://github.com/flutter/devtools/issues/5101): delete this mixin and
-// use OfflineScreenControllerMixin for remaining uses.
-mixin OfflineScreenMixin<T extends StatefulWidget, U> on State<T> {
-  bool get loadingOfflineData => _loadingOfflineData;
-  bool _loadingOfflineData = false;
-
-  bool shouldLoadOfflineData();
-
-  FutureOr<void> processOfflineData(U offlineData);
-
-  Future<void> loadOfflineData(U offlineData) async {
-    setState(() {
-      _loadingOfflineData = true;
-    });
-    await processOfflineData(offlineData);
-    setState(() {
-      _loadingOfflineData = false;
-    });
   }
 }
 
@@ -265,21 +246,23 @@ bool shouldShowScreen(Screen screen) {
 }
 
 class BadgePainter extends CustomPainter {
-  BadgePainter({required this.number});
+  BadgePainter({required this.number, required this.colorScheme});
+
+  final ColorScheme colorScheme;
 
   final int number;
 
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
-      ..color = devtoolsError
+      ..color = colorScheme.errorContainer
       ..style = PaintingStyle.fill;
 
     final countPainter = TextPainter(
       text: TextSpan(
         text: '$number',
-        style: const TextStyle(
-          color: Colors.white,
+        style: TextStyle(
+          color: colorScheme.onErrorContainer,
           fontWeight: FontWeight.bold,
         ),
       ),

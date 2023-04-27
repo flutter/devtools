@@ -23,6 +23,8 @@ void main() {
     setGlobal(BreakpointManager, BreakpointManager());
     setGlobal(IdeTheme, IdeTheme());
     setGlobal(ServiceConnectionManager, FakeServiceManager());
+    setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
+    setGlobal(PreferencesController, PreferencesController());
 
     mockICDataObject = MockICDataObject();
 

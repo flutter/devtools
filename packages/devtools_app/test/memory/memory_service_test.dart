@@ -3,6 +3,8 @@
 // found in the LICENSE file.
 
 @TestOn('vm')
+import 'dart:async';
+
 import 'package:devtools_app/src/screens/memory/memory_controller.dart';
 import 'package:devtools_app/src/screens/memory/memory_protocol.dart';
 import 'package:devtools_app/src/screens/memory/shared/primitives/memory_timeline.dart';
@@ -22,7 +24,7 @@ int previousTimestamp = 0;
 
 bool firstSample = true;
 
-void main() async {
+void main() {
   // TODO(https://github.com/flutter/devtools/issues/2053): rewrite.
   // ignore: dead_code
   if (false) {
@@ -37,7 +39,7 @@ void main() async {
 
     group('MemoryController', () {
       tearDownAll(() {
-        env.tearDownEnvironment(force: true);
+        unawaited(env.tearDownEnvironment(force: true));
       });
 
       test('heap info', () async {

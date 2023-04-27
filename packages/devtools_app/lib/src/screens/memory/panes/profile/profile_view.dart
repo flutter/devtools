@@ -9,6 +9,7 @@ import '../../../../shared/analytics/analytics.dart' as ga;
 import '../../../../shared/analytics/constants.dart' as gac;
 import '../../../../shared/common_widgets.dart';
 import '../../../../shared/globals.dart';
+import '../../../../shared/primitives/simple_items.dart';
 import '../../../../shared/primitives/utils.dart';
 import '../../../../shared/table/table.dart';
 import '../../../../shared/table/table_controller.dart';
@@ -55,13 +56,10 @@ class _FieldClassNameColumn extends ColumnData<ProfileRecord>
   }) {
     if (data.isTotal) return null;
 
-    final theme = Theme.of(context);
     return HeapClassView(
       theClass: data.heapClass,
       showCopyButton: isRowSelected,
       copyGaItem: gac.MemoryEvent.diffClassSingleCopy,
-      textStyle:
-          isRowSelected ? theme.selectedTextStyle : theme.regularTextStyle,
       rootPackage: serviceManager.rootInfoNow().package,
     );
   }
@@ -327,7 +325,7 @@ class _GCLatencyColumn extends _GCHeapStatsColumn {
 
   @override
   String getDisplayValue(AdaptedProfile dataObject) {
-    return msText(
+    return durationText(
       Duration(
         milliseconds: getValue(dataObject)!.toInt(),
       ),
@@ -496,19 +494,19 @@ class _AllocationProfileTable extends StatelessWidget {
     ),
   ];
 
-  static final _initialSortColumn = _FieldSizeColumn(
+  static final _fieldSizeColumn = _FieldSizeColumn(
     heap: HeapGeneration.total,
   );
 
   static final _columns = [
     _FieldClassNameColumn(),
     _FieldInstanceCountColumn(heap: HeapGeneration.total),
-    _initialSortColumn,
+    _fieldSizeColumn,
     _FieldDartHeapSizeColumn(heap: HeapGeneration.total),
-    _FieldExternalSizeColumn(heap: HeapGeneration.total),
   ];
 
   static final _vmDeveloperModeColumns = [
+    _FieldExternalSizeColumn(heap: HeapGeneration.total),
     _FieldInstanceCountColumn(heap: HeapGeneration.newSpace),
     _FieldSizeColumn(heap: HeapGeneration.newSpace),
     _FieldDartHeapSizeColumn(heap: HeapGeneration.newSpace),
@@ -550,8 +548,7 @@ class _AllocationProfileTable extends StatelessWidget {
                       if (vmDeveloperModeEnabled)
                         ..._AllocationProfileTable._vmDeveloperModeColumns,
                     ],
-                    defaultSortColumn:
-                        _AllocationProfileTable._initialSortColumn,
+                    defaultSortColumn: _AllocationProfileTable._fieldSizeColumn,
                     defaultSortDirection: SortDirection.descending,
                     pinBehavior: FlatTablePinBehavior.pinOriginalToTop,
                     includeColumnGroupHeaders: false,
@@ -582,19 +579,16 @@ class _AllocationProfileTableControls extends StatelessWidget {
           allocationProfileController: allocationProfileController,
         ),
         const SizedBox(width: denseSpacing),
-        RefreshButton.icon(
-          onPressed: () async {
-            ga.select(
-              gac.memory,
-              gac.MemoryEvent.profileRefreshManual,
-            );
-            await allocationProfileController.refresh();
-          },
+        RefreshButton(
+          gaScreen: gac.memory,
+          gaSelection: gac.MemoryEvent.profileRefreshManual,
+          onPressed: allocationProfileController.refresh,
         ),
         const SizedBox(width: denseSpacing),
         _RefreshOnGCToggleButton(
           allocationProfileController: allocationProfileController,
         ),
+        const SizedBox(width: denseSpacing),
         const _ProfileHelpLink(),
       ],
     );
@@ -615,6 +609,8 @@ class _ExportAllocationProfileButton extends StatelessWidget {
       valueListenable: allocationProfileController.currentAllocationProfile,
       builder: (context, currentAllocationProfile, _) {
         return ToCsvButton(
+          gaScreen: gac.memory,
+          gaSelection: gac.MemoryEvent.profileDownloadCsv,
           minScreenWidthForTextBeforeScaling: memoryControlsMinVerboseWidth,
           tooltip: 'Download allocation profile data in CSV format',
           onPressed: currentAllocationProfile == null

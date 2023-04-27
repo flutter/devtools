@@ -20,7 +20,7 @@ class Breakpoints extends StatefulWidget {
   const Breakpoints({Key? key}) : super(key: key);
 
   @override
-  _BreakpointsState createState() => _BreakpointsState();
+  State<Breakpoints> createState() => _BreakpointsState();
 }
 
 class _BreakpointsState extends State<Breakpoints>
@@ -60,7 +60,7 @@ class _BreakpointsState extends State<Breakpoints>
     final isSelected = bp.id == selectedBreakpoint?.id;
 
     return Material(
-      color: isSelected ? theme.colorScheme.selectedRowColor : null,
+      color: isSelected ? theme.colorScheme.selectedRowBackgroundColor : null,
       child: InkWell(
         onTap: () => _onBreakpointSelected(bp),
         child: Padding(
@@ -74,10 +74,7 @@ class _BreakpointsState extends State<Breakpoints>
                 ),
                 child: createCircleWidget(
                   breakpointRadius,
-                  (isSelected
-                          ? theme.selectedTextStyle
-                          : theme.regularTextStyle)
-                      .color,
+                  theme.colorScheme.primary,
                 ),
               ),
               Flexible(
@@ -86,14 +83,12 @@ class _BreakpointsState extends State<Breakpoints>
                   overflow: TextOverflow.ellipsis,
                   text: TextSpan(
                     text: _descriptionFor(bp),
-                    style: isSelected
-                        ? theme.selectedTextStyle
-                        : theme.regularTextStyle,
+                    style: theme.regularTextStyle,
                     children: [
                       TextSpan(
                         text: ' (${bp.scriptUri})',
                         style: isSelected
-                            ? theme.selectedTextStyle
+                            ? theme.selectedSubtleTextStyle
                             : theme.subtleTextStyle,
                       ),
                     ],
@@ -121,12 +116,12 @@ class _BreakpointsState extends State<Breakpoints>
 }
 
 class BreakpointsCountBadge extends StatelessWidget {
-  const BreakpointsCountBadge({required this.breakpoints});
+  const BreakpointsCountBadge({super.key, required this.breakpoints});
 
   final List<BreakpointAndSourcePosition> breakpoints;
 
   @override
   Widget build(BuildContext context) {
-    return Badge('${nf.format(breakpoints.length)}');
+    return Badge(nf.format(breakpoints.length));
   }
 }

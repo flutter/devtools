@@ -89,7 +89,7 @@ class DebuggerScreen extends Screen {
 }
 
 class DebuggerScreenBody extends StatefulWidget {
-  const DebuggerScreenBody();
+  const DebuggerScreenBody({super.key});
 
   static final codeViewKey = GlobalKey(debugLabel: 'codeViewKey');
   static final scriptViewKey = GlobalKey(debugLabel: 'scriptViewKey');
@@ -142,11 +142,14 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
       axis: Axis.horizontal,
       initialFractions: const [0.25, 0.75],
       children: [
-        OutlineDecoration(child: debuggerPanes()),
+        RoundedOutlinedBorder(
+          clip: true,
+          child: debuggerPanes(),
+        ),
         Column(
           children: [
             const DebuggingControls(),
-            const SizedBox(height: denseRowSpacing),
+            const SizedBox(height: intermediateSpacing),
             Expanded(
               child: ValueListenableBuilder<bool>(
                 valueListenable: codeViewController.fileExplorerVisible,
@@ -160,7 +163,8 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
                       initialFractions: const [0.7, 0.3],
                       children: [
                         child!,
-                        OutlineDecoration(
+                        RoundedOutlinedBorder(
+                          clip: true,
                           child: ProgramExplorer(
                             controller:
                                 codeViewController.programExplorerController,
@@ -254,15 +258,20 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
                   buttonKey: DebuggerScreenBody.callStackCopyButtonKey,
                 ),
               ],
-              needsTopBorder: false,
+              roundedTopBorder: false,
+              includeTopBorder: false,
             ),
-            const AreaPaneHeader(title: Text(variablesTitle)),
+            const AreaPaneHeader(
+              title: Text(variablesTitle),
+              roundedTopBorder: false,
+            ),
             AreaPaneHeader(
               title: const Text(breakpointsTitle),
               actions: [
                 _breakpointsRightChild(),
               ],
               rightPadding: 0.0,
+              roundedTopBorder: false,
             ),
           ],
           children: const [
@@ -372,7 +381,7 @@ class DebuggerStatus extends StatefulWidget {
   final DebuggerController controller;
 
   @override
-  _DebuggerStatusState createState() => _DebuggerStatusState();
+  State<DebuggerStatus> createState() => _DebuggerStatusState();
 }
 
 class _DebuggerStatusState extends State<DebuggerStatus> with AutoDisposeMixin {
@@ -430,10 +439,19 @@ class _DebuggerStatusState extends State<DebuggerStatus> with AutoDisposeMixin {
       return 'running';
     }
 
-    final event = widget.controller.lastEvent!;
-    final frame = event.topFrame;
-    final reason =
-        event.kind == EventKind.kPauseException ? ' on exception' : '';
+    final event = widget.controller.lastEvent;
+    final String reason;
+    final Frame? frame;
+
+    if (event == null) {
+      reason = '';
+      frame = null;
+    } else {
+      frame = event.topFrame;
+      // TODO(polina-c): https://github.com/flutter/devtools/issues/5387
+      // Reason may be wrong.
+      reason = event.kind == EventKind.kPauseException ? ' on exception' : '';
+    }
 
     final location = frame?.location;
     final scriptUri = location?.script?.uri;
@@ -441,7 +459,7 @@ class _DebuggerStatusState extends State<DebuggerStatus> with AutoDisposeMixin {
       return 'paused$reason';
     }
 
-    final fileName = ' at ' + scriptUri.split('/').last;
+    final fileName = ' at ${scriptUri.split('/').last}';
     final tokenPos = location?.tokenPos;
     final scriptRef = location?.script;
     if (tokenPos == null || scriptRef == null) {
@@ -456,8 +474,10 @@ class _DebuggerStatusState extends State<DebuggerStatus> with AutoDisposeMixin {
 }
 
 class FloatingDebuggerControls extends StatefulWidget {
+  const FloatingDebuggerControls({super.key});
+
   @override
-  _FloatingDebuggerControlsState createState() =>
+  State<FloatingDebuggerControls> createState() =>
       _FloatingDebuggerControlsState();
 }
 
@@ -477,17 +497,20 @@ class _FloatingDebuggerControlsState extends State<FloatingDebuggerControls>
 
     controlHeight = _isPaused ? defaultButtonHeight : 0.0;
     addAutoDisposeListener(
-        serviceManager.isolateManager.mainIsolateState?.isPaused, () {
-      setState(() {
-        if (_isPaused) {
-          controlHeight = defaultButtonHeight;
-        }
-      });
-    });
+      serviceManager.isolateManager.mainIsolateState?.isPaused,
+      () {
+        setState(() {
+          if (_isPaused) {
+            controlHeight = defaultButtonHeight;
+          }
+        });
+      },
+    );
   }
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
     return AnimatedOpacity(
       opacity: _isPaused ? 1.0 : 0.0,
       duration: longDuration,
@@ -499,7 +522,7 @@ class _FloatingDebuggerControlsState extends State<FloatingDebuggerControls>
         }
       },
       child: Container(
-        color: devtoolsWarning,
+        color: colorScheme.warningContainer,
         height: controlHeight,
         child: OutlinedRowGroup(
           // Default focus color for the light theme - since the background
@@ -513,9 +536,9 @@ class _FloatingDebuggerControlsState extends State<FloatingDebuggerControls>
               padding: const EdgeInsets.symmetric(
                 horizontal: defaultSpacing,
               ),
-              child: const Text(
+              child: Text(
                 'Main isolate is paused in the debugger',
-                style: TextStyle(color: Colors.black),
+                style: TextStyle(color: colorScheme.onWarningContainer),
               ),
             ),
             DevToolsTooltip(

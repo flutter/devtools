@@ -7,11 +7,9 @@ import 'dart:math';
 
 import 'package:vm_service/vm_service.dart';
 
-import '../feature_flags.dart';
-import '../globals.dart';
+import '../../../devtools_app.dart';
 import '../memory/adapted_heap_data.dart';
 import '../memory/class_name.dart';
-import '../primitives/utils.dart';
 import 'dart_object_node.dart';
 import 'generic_instance_reference.dart';
 import 'helpers.dart';
@@ -54,7 +52,6 @@ HeapObjectSelection _refreshStaticSelection(
 Future<void> addChildReferences(
   DartObjectNode variable,
 ) async {
-  assert(FeatureFlags.evalAndBrowse);
   final ref = variable.ref!;
   if (ref is! ObjectReferences) {
     throw StateError('Wrong type: ${ref.runtimeType}');
@@ -87,9 +84,9 @@ Future<void> addChildReferences(
             ),
           ),
       ]);
-      break;
+      return;
     case RefNodeType.staticRefRoot:
-      if (ref.heapSelection.object == null) break;
+      if (ref.heapSelection.object == null) return;
       variable.addAllChildren([
         DartObjectNode.references(
           'inbound',
@@ -104,7 +101,7 @@ Future<void> addChildReferences(
         ),
       ]);
 
-      break;
+      return;
     case RefNodeType.staticInRefs:
       final children = ref.heapSelection
           .references(ref.refNodeType.direction!)
@@ -123,7 +120,7 @@ Future<void> addChildReferences(
           )
           .toList();
       variable.addAllChildren(children);
-      break;
+      return;
     case RefNodeType.staticOutRefs:
       final children = ref.heapSelection
           .references(ref.refNodeType.direction!)
@@ -144,7 +141,7 @@ Future<void> addChildReferences(
           )
           .toList();
       variable.addAllChildren(children);
-      break;
+      return;
     case RefNodeType.liveRefRoot:
       variable.addAllChildren([
         DartObjectNode.references(
@@ -157,12 +154,16 @@ Future<void> addChildReferences(
         ),
       ]);
 
-      break;
+      return;
     case RefNodeType.liveInRefs:
+      final value = ref.value;
+      if (value is! InstanceRef) {
+        return;
+      }
       final limit = preferences.memory.refLimit.value;
       final refs = (await serviceManager.service!.getInboundReferences(
             ref.isolateRef.id!,
-            ref.instanceRef!.id!,
+            value.id!,
             limit + 1,
           ))
               .references ??
@@ -185,14 +186,15 @@ Future<void> addChildReferences(
 
       variable.addAllChildren(children);
 
-      if (refs.length > limit)
+      if (refs.length > limit) {
         variable.addChild(
           DartObjectNode.text(
             '...\nTo get more items, increase "${preferences.memory.refLimitTitle}" in memory settings.',
           ),
         );
+      }
 
-      break;
+      return;
     case RefNodeType.liveOutRefs:
       final isolateRef = ref.isolateRef;
 
@@ -209,7 +211,7 @@ Future<void> addChildReferences(
           heapSelection: ref.heapSelection,
         );
       }
-      break;
+      return;
   }
 }
 
@@ -279,18 +281,28 @@ void _addLiveReferenceToNode(
   HeapObjectSelection heapSelection, {
   String namePrefix = '',
 }) {
-  if (instance is! InstanceRef && instance is! ContextRef) return;
+  if (instance is! ObjRef) {
+    throw StateError('Unexpected type: ${instance.runtimeType}.');
+  }
 
-  var name = '';
+  final String name;
   if (instance is InstanceRef) {
     final classRef = instance.classRef!;
     if (HeapClassName.fromClassRef(classRef).isNull) return;
     name = classRef.name ?? '';
+  } else if (namePrefix.isNotEmpty) {
+    name = '';
+  } else {
+    name = instance.runtimeType.toString();
   }
+
+  final text = '$namePrefix$name';
+
+  assert(text.isNotEmpty);
 
   variables.add(
     DartObjectNode.references(
-      '$namePrefix$name',
+      text,
       ObjectReferences(
         refNodeType: refNodeType,
         isolateRef: isolateRef,

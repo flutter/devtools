@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+// ignore: avoid_web_libraries_in_flutter, as designed
 import 'dart:html' as html;
 import 'dart:ui' as ui;
 
@@ -35,6 +36,59 @@ const _debugUseLocalPerfetto = false;
 /// [_viewIdIncrementer] is used to create.
 var _viewIdIncrementer = 0;
 
+/// Events that are passed between DevTools and the embedded Perfetto iFrame via
+/// [window.postMessage].
+enum EmbeddedPerfettoEvent {
+  /// Id for an event Perfetto excpects to verify the trace viewer is ready.
+  ping('PING'),
+
+  /// Id for an event that Perfetto will send back after receiving a [ping]
+  /// event.
+  pong('PONG'),
+
+  /// Id for an event that signals to Perfetto that the modal help dialog should
+  /// be opened.
+  showHelp('SHOW-HELP'),
+
+  /// Id for an event that signals to Perfetto that the CSS constants need to be
+  /// re-initialized.
+  reloadCssConstants('RELOAD-CSS-CONSTANTS'),
+
+  /// Id for a [postMessage] request that is sent before trying to change the
+  /// DevTools theme (see [devtoolsThemeChange]).
+  ///
+  /// Once the DevTools theme handler in the bundled Perfetto web app has been
+  /// registered, a "pong" event [devtoolsThemePong] will be returned, at which
+  /// point we can safely change the theme [devtoolsThemeChange].
+  ///
+  /// This message must be sent with the argument 'perfettoIgnore' set to true
+  /// so that the message handler in the Perfetto codebase
+  /// [post_message_handler.ts] will not try to handle this message and warn
+  /// "Unknown postMessage() event received".
+  devtoolsThemePing('DART-DEVTOOLS-THEME-PING'),
+
+  /// Id for a [postMessage] response that should be received when the DevTools
+  /// theme handler has been registered.
+  ///
+  /// We will send a "ping" event [devtoolsThemePing] to the DevTools theme
+  /// handler in the bundled Perfetto web app, and the handler will return this
+  /// "pong" event when it is ready. We must wait for this event to be returned
+  /// before we can send a theme change request [devtoolsThemeChange].
+  devtoolsThemePong('DART-DEVTOOLS-THEME-PONG'),
+
+  /// Id for a [postMessage] request that is sent on DevTools theme changes.
+  ///
+  /// This message must be sent with the argument 'perfettoIgnore' set to true
+  /// so that the message handler in the Perfetto codebase
+  /// [post_message_handler.ts] will not try to handle this message and warn
+  /// "Unknown postMessage() event received".
+  devtoolsThemeChange('DART-DEVTOOLS-THEME-CHANGE');
+
+  const EmbeddedPerfettoEvent(this.event);
+
+  final String event;
+}
+
 class PerfettoControllerImpl extends PerfettoController {
   PerfettoControllerImpl(
     super.performanceController,
@@ -65,13 +119,14 @@ class PerfettoControllerImpl extends PerfettoController {
     if (_debugUseLocalPerfetto) {
       return _debugPerfettoUrl;
     }
-    final assetsPath = assetUrlHelper(
+    final basePath = assetUrlHelper(
       origin: html.window.location.origin,
       path: html.window.location.pathname ?? '',
     );
-    final baseUrl = isExternalBuild
-        ? '$assetsPath/assets/packages/perfetto_compiled/dist/index.html'
-        : 'https://ui.perfetto.dev';
+    // ignore: undefined_prefixed_name, doesn't understand conditional imports.
+    final indexFilePath = ui.webOnlyAssetManager
+        .getAssetUrl(devToolsExtensionPoints.perfettoIndexLocation);
+    final baseUrl = '$basePath/$indexFilePath';
     return '$baseUrl$_embeddedModeQuery';
   }
 
@@ -99,6 +154,8 @@ class PerfettoControllerImpl extends PerfettoController {
   /// Time range we should scroll to, but have not yet since the trace viewer
   /// is not visible (i.e. [TimelineEventsController.isActiveFeature] is false).
   TimeRange? pendingScrollToTimeRange;
+
+  final perfettoPostEventStream = StreamController<String>.broadcast();
 
   bool _initialized = false;
 
@@ -129,6 +186,12 @@ class PerfettoControllerImpl extends PerfettoController {
       (int viewId) => _perfettoIFrame,
     );
     assert(registered, 'Failed to register view factory for $viewId.');
+  }
+
+  @override
+  void dispose() async {
+    await perfettoPostEventStream.close();
+    super.dispose();
   }
 
   @override
@@ -163,6 +226,11 @@ class PerfettoControllerImpl extends PerfettoController {
     }
     pendingScrollToTimeRange = null;
     _activeScrollToTimeRange.value = timeRange;
+  }
+
+  @override
+  void showHelpMenu() {
+    perfettoPostEventStream.add(EmbeddedPerfettoEvent.showHelp.event);
   }
 
   @override

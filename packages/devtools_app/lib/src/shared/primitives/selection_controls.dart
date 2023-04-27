@@ -37,7 +37,6 @@ class VariableSelectionControls extends MaterialTextSelectionControls {
       textLineHeight: textLineHeight,
       selectionMidpoint: selectionMidpoint,
       endpoints: endpoints,
-      delegate: delegate,
       clipboardStatus: clipboardStatus!,
       handleCut: canCut(delegate) ? () => handleCut(delegate) : null,
       handleCopy: canCopy(delegate) ? () => handleCopy(delegate) : null,
@@ -56,7 +55,6 @@ class _TextSelectionControlsToolbar extends StatefulWidget {
   const _TextSelectionControlsToolbar({
     Key? key,
     required this.clipboardStatus,
-    required this.delegate,
     required this.endpoints,
     required this.globalEditableRegion,
     required this.handleInspect,
@@ -70,7 +68,6 @@ class _TextSelectionControlsToolbar extends StatefulWidget {
   }) : super(key: key);
 
   final ValueListenable<ClipboardStatus> clipboardStatus;
-  final TextSelectionDelegate delegate;
   final List<TextSelectionPoint> endpoints;
   final Rect globalEditableRegion;
   final VoidCallback? handleInspect;

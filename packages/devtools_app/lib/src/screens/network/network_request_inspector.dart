@@ -14,7 +14,7 @@ import 'network_request_inspector_views.dart';
 
 /// A [Widget] which displays information about a network request.
 class NetworkRequestInspector extends StatelessWidget {
-  const NetworkRequestInspector(this.controller);
+  const NetworkRequestInspector(this.controller, {super.key});
 
   static const _overviewTabTitle = 'Overview';
   static const _headersTabTitle = 'Headers';
@@ -22,12 +22,12 @@ class NetworkRequestInspector extends StatelessWidget {
   static const _responseTabTitle = 'Response';
   static const _cookiesTabTitle = 'Cookies';
 
+  // TODO(kenz): remove these keys and use a text finder to lookup widgets in test.
+
   @visibleForTesting
   static const overviewTabKey = Key(_overviewTabTitle);
   @visibleForTesting
   static const headersTabKey = Key(_headersTabTitle);
-  @visibleForTesting
-  static const requestTabKey = Key(_requestTabTitle);
   @visibleForTesting
   static const responseTabKey = Key(_responseTabTitle);
   @visibleForTesting
@@ -57,21 +57,17 @@ class NetworkRequestInspector extends StatelessWidget {
             if (data.requestBody != null)
               _buildTab(
                 tabName: NetworkRequestInspector._requestTabTitle,
-                trailing: Align(
-                  alignment: Alignment.centerRight,
-                  child: CopyToClipboardControl(
-                    dataProvider: () => data.requestBody,
-                  ),
+                trailing: HttpViewTrailingCopyButton(
+                  data,
+                  (data) => data.requestBody,
                 ),
               ),
             if (data.responseBody != null)
               _buildTab(
                 tabName: NetworkRequestInspector._responseTabTitle,
-                trailing: Align(
-                  alignment: Alignment.centerRight,
-                  child: CopyToClipboardControl(
-                    dataProvider: () => data.responseBody,
-                  ),
+                trailing: HttpViewTrailingCopyButton(
+                  data,
+                  (data) => data.responseBody,
                 ),
               ),
             if (data.hasCookies)
@@ -87,29 +83,23 @@ class NetworkRequestInspector extends StatelessWidget {
               if (data.responseBody != null) HttpResponseView(data),
               if (data.hasCookies) HttpRequestCookiesView(data),
             ],
-          ]
+          ],
         ].map((e) => OutlineDecoration.onlyTop(child: e)).toList();
 
-        return Card(
-          margin: EdgeInsets.zero,
-          color: Theme.of(context).canvasColor,
-          child: RoundedOutlinedBorder(
-            child: (data == null)
-                ? Center(
-                    child: Text(
-                      'No request selected',
-                      key: NetworkRequestInspector.noRequestSelectedKey,
-                      style: Theme.of(context).textTheme.titleLarge,
-                    ),
-                  )
-                : AnalyticsTabbedView(
-                    tabs: tabs,
-                    tabViews: tabViews,
-                    gaScreen: gac.network,
-                    // TODO(kenz): Consider using the outlined style
-                    outlined: false,
+        return RoundedOutlinedBorder(
+          child: (data == null)
+              ? Center(
+                  child: Text(
+                    'No request selected',
+                    key: NetworkRequestInspector.noRequestSelectedKey,
+                    style: Theme.of(context).textTheme.titleLarge,
                   ),
-          ),
+                )
+              : AnalyticsTabbedView(
+                  tabs: tabs,
+                  tabViews: tabViews,
+                  gaScreen: gac.network,
+                ),
         );
       },
     );

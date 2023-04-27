@@ -182,32 +182,35 @@ void _mockFlutterAssets() {
 
   /// Navigation related actions (pop, push, replace) broadcasts these actions via
   /// platform messages.
-  SystemChannels.navigation
-      .setMockMethodCallHandler((MethodCall methodCall) async {});
+  TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+      .setMockMethodCallHandler(SystemChannels.navigation, null);
 
-  ServicesBinding.instance.defaultBinaryMessenger
-      .setMockMessageHandler('flutter/assets', (ByteData? message) async {
-    assert(message != null);
-    String key = utf8.decode(message!.buffer.asUint8List());
-    File asset = File(path.join(assetFolderPath!, key));
+  TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+      .setMockMessageHandler(
+    'flutter/assets',
+    (ByteData? message) async {
+      assert(message != null);
+      String key = utf8.decode(message!.buffer.asUint8List());
+      File asset = File(path.join(assetFolderPath!, key));
 
-    if (!asset.existsSync()) {
-      // For tests in package, it will load assets with its own package prefix.
-      // In this case, we do a best-effort look up.
-      if (!key.startsWith(prefix)) {
-        return null;
-      }
-
-      key = key.replaceFirst(prefix, '');
-      asset = File(path.join(assetFolderPath, key));
       if (!asset.existsSync()) {
-        return null;
-      }
-    }
+        // For tests in package, it will load assets with its own package prefix.
+        // In this case, we do a best-effort look up.
+        if (!key.startsWith(prefix)) {
+          return null;
+        }
 
-    final Uint8List encoded = Uint8List.fromList(asset.readAsBytesSync());
-    return Future<ByteData>.value(encoded.buffer.asByteData());
-  });
+        key = key.replaceFirst(prefix, '');
+        asset = File(path.join(assetFolderPath, key));
+        if (!asset.existsSync()) {
+          return null;
+        }
+      }
+
+      final Uint8List encoded = Uint8List.fromList(asset.readAsBytesSync());
+      return Future<ByteData>.value(encoded.buffer.asByteData());
+    },
+  );
 }
 
 /// Load fonts used by the devtool for golden-tests to use them
@@ -262,8 +265,8 @@ Future<void> loadFonts() async {
 Type typeOf<T>() => T;
 
 void verifyIsSearchMatch(
-  List<DataSearchStateMixin> data,
-  List<DataSearchStateMixin> matches,
+  List<SearchableDataMixin> data,
+  List<SearchableDataMixin> matches,
 ) {
   for (final request in data) {
     if (matches.contains(request)) {

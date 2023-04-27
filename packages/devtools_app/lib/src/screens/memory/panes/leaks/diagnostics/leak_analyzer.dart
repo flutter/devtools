@@ -37,19 +37,10 @@ Future<void> analyzeHeapAndSetRetainingPaths(
   AdaptedHeapData heap,
   List<LeakReport> notGCedLeaks,
 ) async {
-  if (!heap.allFieldsCalculated) await buildSpanningTreeAndSetInRefs(heap);
+  if (!heap.allFieldsCalculated) await calculateHeap(heap);
 
   for (var l in notGCedLeaks) {
     l.retainingPath = _pathByIdentityHashCode(heap, l.code)?.shortPath();
-  }
-}
-
-/// Sets [detailedPath] to each leak.
-void setDetailedPaths(AdaptedHeapData heap, List<LeakReport> notGCedLeaks) {
-  assert(heap.allFieldsCalculated);
-
-  for (var l in notGCedLeaks) {
-    l.detailedPath = _pathByIdentityHashCode(heap, l.code)?.detailedPath();
   }
 }
 
@@ -68,11 +59,7 @@ HeapPath? _pathByIdentityHashCode(AdaptedHeapData heap, int code) {
 Map<LeakReport, List<LeakReport>> findCulprits(
   Iterable<LeakReport> notGCed,
 ) {
-  final leaksByPath = Map<String, LeakReport>.fromIterable(
-    notGCed,
-    key: (r) => r.retainingPath,
-    value: (r) => r,
-  );
+  final leaksByPath = {for (var r in notGCed) r.retainingPath!: r};
 
   final result = <LeakReport, List<LeakReport>>{};
   String previousPath = '--- not a path ---';

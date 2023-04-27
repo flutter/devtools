@@ -12,6 +12,7 @@ import 'src/screens/provider/riverpod_error_logger_observer.dart';
 import 'src/shared/analytics/analytics_controller.dart';
 import 'src/shared/config_specific/framework_initialize/framework_initialize.dart';
 import 'src/shared/config_specific/ide_theme/ide_theme.dart';
+import 'src/shared/config_specific/logger/logger_helpers.dart';
 import 'src/shared/config_specific/url/url.dart';
 import 'src/shared/config_specific/url_strategy/url_strategy.dart';
 import 'src/shared/feature_flags.dart';
@@ -27,41 +28,43 @@ import 'src/shared/primitives/utils.dart';
 ///
 /// If the initialization is specific to running Devtools in google3 or
 /// externally, then it should be added to that respective main.dart file.
-Future<void> runDevTools({
+void runDevTools({
   bool shouldEnableExperiments = false,
   List<DevToolsJsonFile> sampleData = const [],
   List<DevToolsScreen>? screens,
-}) async {
-  screens ??= defaultScreens;
-
-  // Before switching to URL path strategy, check if this URL is in the legacy
-  // fragment format and redirect if necessary.
-  if (_handleLegacyUrl()) return;
-
-  usePathUrlStrategy();
-
-  // This may be set to true from our Flutter integration tests. Since we call
-  // [runDevTools] from Dart code, we cannot set the 'enable_experiments'
-  // environment variable before calling [runDevTools].
-  if (shouldEnableExperiments) {
-    setEnableExperiments();
-  }
-
-  // Initialize the framework before we do anything else, otherwise the
-  // StorageController won't be initialized and preferences won't be loaded.
-  await initializeFramework();
-
-  setGlobal(IdeTheme, getIdeTheme());
-
-  final preferences = PreferencesController();
-  // Wait for preferences to load before rendering the app to avoid a flash of
-  // content with the incorrect theme.
-  await preferences.init();
-
-  // Load the Dart syntax highlighting grammar.
-  await SyntaxHighlighter.initialize();
-
+}) {
   setupErrorHandling(() async {
+    screens ??= defaultScreens;
+
+    initDevToolsLogging();
+
+    // Before switching to URL path strategy, check if this URL is in the legacy
+    // fragment format and redirect if necessary.
+    if (_handleLegacyUrl()) return;
+
+    usePathUrlStrategy();
+
+    // This may be set to true from our Flutter integration tests. Since we call
+    // [runDevTools] from Dart code, we cannot set the 'enable_experiments'
+    // environment variable before calling [runDevTools].
+    if (shouldEnableExperiments) {
+      setEnableExperiments();
+    }
+
+    // Initialize the framework before we do anything else, otherwise the
+    // StorageController won't be initialized and preferences won't be loaded.
+    await initializeFramework();
+
+    setGlobal(IdeTheme, getIdeTheme());
+
+    final preferences = PreferencesController();
+    // Wait for preferences to load before rendering the app to avoid a flash of
+    // content with the incorrect theme.
+    await preferences.init();
+
+    // Load the Dart syntax highlighting grammar.
+    await SyntaxHighlighter.initialize();
+
     // Run the app.
     runApp(
       ProviderScope(

@@ -68,7 +68,7 @@ class ProviderScreenWrapper extends StatefulWidget {
   const ProviderScreenWrapper({Key? key}) : super(key: key);
 
   @override
-  _ProviderScreenWrapperState createState() => _ProviderScreenWrapperState();
+  State<ProviderScreenWrapper> createState() => _ProviderScreenWrapperState();
 }
 
 class _ProviderScreenWrapperState extends State<ProviderScreenWrapper> {
@@ -105,11 +105,13 @@ class ProviderScreenBody extends ConsumerWidget {
       axis: splitAxis,
       initialFractions: const [0.33, 0.67],
       children: [
-        const OutlineDecoration(
+        const RoundedOutlinedBorder(
+          clip: true,
           child: Column(
             children: [
               AreaPaneHeader(
-                needsTopBorder: false,
+                roundedTopBorder: false,
+                includeTopBorder: false,
                 title: Text('Providers'),
               ),
               Expanded(
@@ -118,11 +120,13 @@ class ProviderScreenBody extends ConsumerWidget {
             ],
           ),
         ),
-        OutlineDecoration(
+        RoundedOutlinedBorder(
+          clip: true,
           child: Column(
             children: [
               AreaPaneHeader(
-                needsTopBorder: false,
+                roundedTopBorder: false,
+                includeTopBorder: false,
                 title: Text(detailsTitleText),
                 actions: [
                   ToolbarAction(

@@ -7,8 +7,6 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../../../shared/analytics/analytics.dart' as ga;
-import '../../../../shared/analytics/constants.dart' as gac;
 import '../../../../shared/config_specific/import_export/import_export.dart';
 import '../../../../shared/globals.dart';
 import '../../../../shared/primitives/auto_dispose.dart';
@@ -25,8 +23,12 @@ class ProfilePaneController extends DisposableController
 
   /// Specifies if the allocation profile should be refreshed when a GC event
   /// is received.
+  ///
+  /// TODO(polina-c): set refresher on by default after resolving issue
+  /// with flickering
+  /// https://github.com/flutter/devtools/issues/5176
   ValueListenable<bool> get refreshOnGc => _refreshOnGc;
-  final _refreshOnGc = ValueNotifier<bool>(true);
+  final _refreshOnGc = ValueNotifier<bool>(false);
 
   bool _initialized = false;
 
@@ -76,10 +78,6 @@ class ProfilePaneController extends DisposableController
   ///
   /// The returned string is the name of the downloaded CSV file.
   void downloadMemoryTableCsv(AdaptedProfile profile) {
-    ga.select(
-      gac.memory,
-      gac.MemoryEvent.profileDownloadCsv,
-    );
     final csvBuffer = StringBuffer();
 
     // Write the headers first.

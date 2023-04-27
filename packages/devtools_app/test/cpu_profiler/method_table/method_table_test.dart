@@ -38,8 +38,9 @@ void main() {
     setGlobal(ScriptManager, mockScriptManager);
     final data = CpuProfileData.parse(simpleCpuProfile2);
     await CpuProfileTransformer().processData(data, processId: 'test');
-    methodTableController = MethodTableController()
-      ..createMethodTableGraph(data);
+    methodTableController = MethodTableController(
+      dataNotifier: FixedValueListenable<CpuProfileData>(data),
+    )..createMethodTableGraph(data);
   });
 
   const windowSize = Size(2000.0, 1000.0);
@@ -62,7 +63,10 @@ void main() {
       windowSize,
       (WidgetTester tester) async {
         await pumpMethodTable(tester);
-        expect(find.byType(FlatTable<MethodTableGraphNode>), findsOneWidget);
+        expect(
+          find.byType(SearchableFlatTable<MethodTableGraphNode>),
+          findsOneWidget,
+        );
         expect(find.text('Method'), findsOneWidget);
         expect(find.text('Total %'), findsOneWidget);
         expect(find.text('Self %'), findsOneWidget);
@@ -92,7 +96,11 @@ void main() {
 
         methodTableController.selectedNode.value = interestingNode;
         await pumpMethodTable(tester);
-        expect(find.byType(FlatTable<MethodTableGraphNode>), findsNWidgets(3));
+        expect(
+          find.byType(SearchableFlatTable<MethodTableGraphNode>),
+          findsOneWidget,
+        );
+        expect(find.byType(FlatTable<MethodTableGraphNode>), findsNWidgets(2));
         expect(find.text('Method'), findsNWidgets(3));
         expect(find.text('Total %'), findsOneWidget);
         expect(find.text('Self %'), findsOneWidget);

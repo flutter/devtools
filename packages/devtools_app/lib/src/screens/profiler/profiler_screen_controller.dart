@@ -7,32 +7,49 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../shared/analytics/constants.dart' as gac;
-import '../../shared/config_specific/import_export/import_export.dart';
 import '../../shared/config_specific/logger/allowed_error.dart';
 import '../../shared/globals.dart';
+import '../../shared/offline_mode.dart';
 import '../../shared/primitives/auto_dispose.dart';
 import '../../shared/primitives/utils.dart';
-import 'cpu_profile_controller.dart';
 import 'cpu_profile_model.dart';
 import 'cpu_profile_service.dart';
+import 'cpu_profiler_controller.dart';
 import 'profiler_screen.dart';
 import 'sampling_rate.dart';
 
 class ProfilerScreenController extends DisposableController
-    with AutoDisposeControllerMixin {
+    with
+        AutoDisposeControllerMixin,
+        OfflineScreenControllerMixin<CpuProfileData> {
   ProfilerScreenController() {
+    unawaited(_init());
+  }
+
+  final _initialized = Completer<void>();
+
+  Future<void> get initialized => _initialized.future;
+
+  Future<void> _init() async {
+    await _initHelper();
+    _initialized.complete();
+  }
+
+  Future<void> _initHelper() async {
+    initReviewHistoryOnDisconnectListener();
     if (!offlineController.offlineMode.value) {
-      unawaited(
-        allowedError(
-          serviceManager.service!.setProfilePeriod(mediumProfilePeriod),
-          logError: false,
-        ),
+      await allowedError(
+        serviceManager.service!.setProfilePeriod(mediumProfilePeriod),
+        logError: false,
       );
 
       _currentIsolate = serviceManager.isolateManager.selectedIsolate.value;
       addAutoDisposeListener(serviceManager.isolateManager.selectedIsolate, () {
-        switchToIsolate(serviceManager.isolateManager.selectedIsolate.value);
+        final selectedIsolate =
+            serviceManager.isolateManager.selectedIsolate.value;
+        if (selectedIsolate != null) {
+          switchToIsolate(selectedIsolate);
+        }
       });
 
       addAutoDisposeListener(preferences.vmDeveloperModeEnabled, () async {
@@ -54,15 +71,24 @@ class ProfilerScreenController extends DisposableController
         // Always reset to the function view when the VM developer mode state
         // changes. The selector is hidden when VM developer mode is disabled
         // and data for code profiles won't be requested.
-        cpuProfilerController.updateView(CpuProfilerViewType.function);
+        cpuProfilerController.updateViewForType(CpuProfilerViewType.function);
       });
+    } else {
+      final shouldLoadOfflineData =
+          offlineController.shouldLoadOfflineData(ProfilerScreen.id);
+      if (shouldLoadOfflineData) {
+        final profilerJson = Map<String, dynamic>.from(
+          offlineController.offlineDataJson[ProfilerScreen.id],
+        );
+        final offlineProfilerData = CpuProfileData.parse(profilerJson);
+        if (!offlineProfilerData.isEmpty) {
+          await loadOfflineData(offlineProfilerData);
+        }
+      }
     }
   }
 
-  final cpuProfilerController =
-      CpuProfilerController(analyticsScreenId: gac.cpuProfiler);
-
-  final _exportController = ExportController();
+  final cpuProfilerController = CpuProfilerController();
 
   CpuProfileData? get cpuProfileData =>
       cpuProfilerController.dataNotifier.value;
@@ -73,8 +99,6 @@ class ProfilerScreenController extends DisposableController
   ValueListenable<bool> get recordingNotifier => _recordingNotifier;
 
   final _recordingNotifier = ValueNotifier<bool>(false);
-
-  final int _profileStartMicros = 0;
 
   IsolateRef? _currentIsolate;
 
@@ -92,6 +116,8 @@ class ProfilerScreenController extends DisposableController
     cpuProfilerController.reset(data: previousData);
   }
 
+  int _profileRequestId = 0;
+
   Future<void> startRecording() async {
     await clear();
     _recordingNotifier.value = true;
@@ -100,21 +126,35 @@ class ProfilerScreenController extends DisposableController
   Future<void> stopRecording() async {
     _recordingNotifier.value = false;
     await cpuProfilerController.pullAndProcessProfile(
-      startMicros: _profileStartMicros,
+      // We start at 0 every time because [startRecording] clears the cpu
+      // samples on the VM.
+      startMicros: 0,
       // Using [maxJsInt] as [extentMicros] for the getCpuProfile requests will
       // give us all cpu samples we have available
       extentMicros: maxJsInt,
-      processId: 'Profile $_profileStartMicros',
+      processId: 'Profile ${++_profileRequestId}',
     );
   }
 
-  /// Exports the current profiler data to a .json file.
-  ///
-  /// This method returns the name of the file that was downloaded.
-  String exportData() {
-    final encodedData =
-        _exportController.encode(ProfilerScreen.id, cpuProfileData!.toJson);
-    return _exportController.downloadFile(encodedData);
+  @override
+  OfflineScreenData screenDataForExport() => OfflineScreenData(
+        screenId: ProfilerScreen.id,
+        data: cpuProfileData!.toJson,
+      );
+
+  @override
+  FutureOr<void> processOfflineData(CpuProfileData offlineData) async {
+    await cpuProfilerController.transformer.processData(
+      offlineData,
+      processId: 'offline data processing',
+    );
+    cpuProfilerController.loadProcessedData(
+      CpuProfilePair(
+        functionProfile: offlineData,
+        codeProfile: null,
+      ),
+      storeAsUserTagNone: true,
+    );
   }
 
   Future<void> clear() async {

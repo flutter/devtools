@@ -7,17 +7,12 @@ import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../primitives/utils.dart';
-import 'class_name.dart';
+import 'adapted_heap_object.dart';
 import 'simple_items.dart';
 
 /// Names for json fields.
 class _JsonFields {
   static const String objects = 'objects';
-  static const String code = 'code';
-  static const String references = 'references';
-  static const String klass = 'klass';
-  static const String library = 'library';
-  static const String shallowSize = 'shallowSize';
   static const String rootIndex = 'rootIndex';
   static const String created = 'created';
   static const String isolateId = 'isolateId';
@@ -33,22 +28,22 @@ class HeapObjectSelection {
   /// located in heap.
   final AdaptedHeapObject? object;
 
-  Iterable<int> _refs(RefDirection direction) {
+  Iterable<int>? _refs(RefDirection direction) {
     switch (direction) {
       case RefDirection.inbound:
-        return object?.inRefs ?? [];
+        return object?.inRefs;
       case RefDirection.outbound:
-        return object?.outRefs ?? [];
+        return object?.outRefs;
     }
   }
 
   List<HeapObjectSelection> references(RefDirection direction) =>
-      _refs(direction)
+      (_refs(direction) ?? [])
           .map((i) => HeapObjectSelection(heap, object: heap.objects[i]))
           .toList();
 
   int? countOfReferences(RefDirection? direction) =>
-      direction == null ? null : _refs(direction).length;
+      direction == null ? null : _refs(direction)?.length;
 
   HeapObjectSelection withoutObject() {
     if (object == null) return this;
@@ -115,6 +110,11 @@ class AdaptedHeapData {
 
   final String isolateId;
 
+  /// Total size of all objects in the heap.
+  ///
+  /// Should be set externally.
+  late int totalDartSize;
+
   bool allFieldsCalculated = false;
 
   late DateTime created;
@@ -122,11 +122,9 @@ class AdaptedHeapData {
   String snapshotName = '';
 
   /// Heap objects by identityHashCode.
-  late final Map<IdentityHashCode, int> _objectsByCode = Map.fromIterable(
-    Iterable.generate(objects.length),
-    key: (i) => objects[i].code,
-    value: (i) => i,
-  );
+  late final _objectsByCode = <IdentityHashCode, int>{
+    for (var i in Iterable.generate(objects.length)) objects[i].code: i,
+  };
 
   Map<String, dynamic> toJson() => {
         _JsonFields.objects: objects.map((e) => e.toJson()).toList(),
@@ -153,94 +151,19 @@ class AdaptedHeapData {
     return HeapPath(result.reversed.toList(growable: false));
   }
 
-  late final totalSize = () {
+  late final totalReachableSize = () {
     if (!allFieldsCalculated) throw StateError('Spanning tree should be built');
     return objects[rootIndex].retainedSize!;
   }();
 }
 
-/// Result of invocation of [identityHashCode].
-typedef IdentityHashCode = int;
-
-/// Contains information from [HeapSnapshotObject] needed for
-/// memory analysis on memory screen.
-class AdaptedHeapObject {
-  AdaptedHeapObject({
-    required this.code,
-    required this.outRefs,
-    required this.heapClass,
-    required this.shallowSize,
-  });
-
-  factory AdaptedHeapObject.fromHeapSnapshotObject(
-    HeapSnapshotObject object,
-    int index,
-  ) {
-    return AdaptedHeapObject(
-      code: object.identityHashCode,
-      outRefs: Set.of(object.references.where((i) => i != index)),
-      heapClass: HeapClassName.fromHeapSnapshotClass(object.klass),
-      shallowSize: object.shallowSize,
-    );
-  }
-
-  factory AdaptedHeapObject.fromJson(Map<String, Object?> json, int index) =>
-      AdaptedHeapObject(
-        code: json[_JsonFields.code] as int,
-        outRefs: (json[_JsonFields.references] as List<Object?>)
-            .cast<int>()
-            .where((i) => i != index)
-            .toSet(),
-        heapClass: HeapClassName(
-          className: json[_JsonFields.klass] as String,
-          library: json[_JsonFields.library],
-        ),
-        shallowSize: (json[_JsonFields.shallowSize] ?? 0) as int,
-      );
-
-  final Set<int> outRefs;
-  final Set<int> inRefs = {};
-  final HeapClassName heapClass;
-  final IdentityHashCode code;
-  final int shallowSize;
-
-  // No serialization is needed for the fields below, because the fields are
-  // calculated after the heap deserialization.
-
-  /// Special values: `null` - the object is not reachable,
-  /// `-1` - the object is root.
-  int? retainer;
-
-  /// Total shallow size of objects, where this object is retainer, recursively,
-  /// plus shallow size of this object.
-  ///
-  /// Null, if object is not reachable.
-  int? retainedSize;
-
-  Map<String, dynamic> toJson() => {
-        _JsonFields.code: code,
-        _JsonFields.references: outRefs.toList(),
-        _JsonFields.klass: heapClass.className,
-        _JsonFields.library: heapClass.library,
-        _JsonFields.shallowSize: shallowSize,
-      };
-
-  String get shortName => '${heapClass.className}-$code';
-
-  String get name => '${heapClass.library}/$shortName';
-}
-
 /// Sequence of ids of objects in the heap.
 class HeapPath {
   HeapPath(this.objects);
-
   final List<AdaptedHeapObject> objects;
-
   late final bool isRetainedBySameClass = () {
     if (objects.length < 2) return false;
-
     final theClass = objects.last.heapClass;
-
     return objects
         .take(objects.length - 1)
         .any((object) => object.heapClass == theClass);

@@ -8,6 +8,7 @@ import 'package:codicon/codicon.dart';
 import 'package:flutter/material.dart' hide Stack;
 import 'package:vm_service/vm_service.dart';
 
+import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/common_widgets.dart';
 import '../../shared/globals.dart';
 import '../../shared/primitives/auto_dispose.dart';
@@ -22,7 +23,7 @@ class DebuggingControls extends StatefulWidget {
   static const minWidthBeforeScaling = 1750.0;
 
   @override
-  _DebuggingControlsState createState() => _DebuggingControlsState();
+  State<DebuggingControls> createState() => _DebuggingControlsState();
 }
 
 class _DebuggingControlsState extends State<DebuggingControls>
@@ -138,15 +139,14 @@ class _DebuggingControlsState extends State<DebuggingControls>
     return ValueListenableBuilder<bool>(
       valueListenable: controller.codeViewController.fileExplorerVisible,
       builder: (context, visible, _) {
-        return RoundedOutlinedBorder(
-          child: Container(
-            color: visible ? Theme.of(context).highlightColor : null,
-            child: DebuggerButton(
-              title: 'File Explorer',
-              icon: Icons.folder,
-              onPressed: controller.codeViewController.toggleLibrariesVisible,
-            ),
-          ),
+        return DevToolsButton(
+          icon: Icons.folder_outlined,
+          label: 'File Explorer',
+          onPressed: controller.codeViewController.toggleLibrariesVisible,
+          gaScreen: gac.debugger,
+          gaSelection: visible ? gac.hideFileExplorer : gac.showFileExplorer,
+          minScreenWidthForTextBeforeScaling:
+              DebuggingControls.minWidthBeforeScaling,
         );
       },
     );
@@ -163,59 +163,72 @@ class CodeStatisticsControls extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return RoundedOutlinedBorder(
-      child: DualValueListenableBuilder<bool, bool>(
-        firstListenable: controller.codeViewController.showCodeCoverage,
-        secondListenable: controller.codeViewController.showProfileInformation,
-        builder: (context, showCodeCoverage, showProfileInformation, _) {
-          final isInSmallMode = MediaQuery.of(context).size.width <=
-              DebuggingControls.minWidthBeforeScaling;
-          return Row(
-            children: [
-              ToggleButton(
-                label: isInSmallMode ? null : 'Show Coverage',
-                message: 'Show code coverage',
-                icon: Codicons.checklist,
-                isSelected: showCodeCoverage,
-                outlined: false,
-                shape: const RoundedRectangleBorder(
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(4),
-                    bottomLeft: Radius.circular(4),
-                  ),
+    return DualValueListenableBuilder<bool, bool>(
+      firstListenable: controller.codeViewController.showCodeCoverage,
+      secondListenable: controller.codeViewController.showProfileInformation,
+      builder: (context, showCodeCoverage, showProfileInformation, _) {
+        return Row(
+          children: [
+            // TODO(kenz): clean up this button group when records are
+            // available.
+            DevToolsToggleButtonGroup(
+              selectedStates: [showCodeCoverage, showProfileInformation],
+              children: const [
+                _CodeStatsControl(
+                  tooltip: 'Show code coverage',
+                  icon: Codicons.checklist,
                 ),
-                onPressed: controller.codeViewController.toggleShowCodeCoverage,
-              ),
-              LeftBorder(
-                child: ToggleButton(
-                  label: isInSmallMode ? null : 'Show Profile',
-                  message: 'Show profiler hits',
+                _CodeStatsControl(
+                  tooltip: 'Show profiler hits',
                   icon: Codicons.flame,
-                  isSelected: showProfileInformation,
-                  outlined: false,
-                  shape: const ContinuousRectangleBorder(),
-                  onPressed: controller
-                      .codeViewController.toggleShowProfileInformation,
                 ),
-              ),
-              LeftBorder(
-                child: IconLabelButton(
-                  label: '',
-                  tooltip: 'Refresh statistics',
-                  outlined: false,
-                  onPressed: showCodeCoverage || showProfileInformation
-                      ? () => unawaited(
-                            controller.codeViewController
-                                .refreshCodeStatistics(),
-                          )
-                      : null,
-                  minScreenWidthForTextBeforeScaling: 20000,
-                  icon: Icons.refresh,
-                ),
-              ),
-            ],
-          );
-        },
+              ],
+              onPressed: (index) {
+                if (index == 0) {
+                  controller.codeViewController.toggleShowCodeCoverage();
+                } else if (index == 1) {
+                  controller.codeViewController.toggleShowProfileInformation();
+                }
+              },
+            ),
+            const SizedBox(width: denseSpacing),
+            RefreshButton(
+              iconOnly: true,
+              tooltip: 'Refresh statistics',
+              gaScreen: gac.debugger,
+              gaSelection: gac.refreshStatistics,
+              onPressed: showCodeCoverage || showProfileInformation
+                  ? () => unawaited(
+                        controller.codeViewController.refreshCodeStatistics(),
+                      )
+                  : null,
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class _CodeStatsControl extends StatelessWidget {
+  const _CodeStatsControl({
+    required this.icon,
+    required this.tooltip,
+  });
+
+  final IconData icon;
+  final String tooltip;
+
+  @override
+  Widget build(BuildContext context) {
+    return DevToolsTooltip(
+      message: tooltip,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
+        child: Icon(
+          icon,
+          size: defaultIconSize,
+        ),
       ),
     );
   }
@@ -296,6 +309,7 @@ class ExceptionMode {
 @visibleForTesting
 class DebuggerButton extends StatelessWidget {
   const DebuggerButton({
+    super.key,
     required this.title,
     required this.icon,
     required this.onPressed,

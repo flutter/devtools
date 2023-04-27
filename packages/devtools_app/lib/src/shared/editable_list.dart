@@ -18,8 +18,11 @@ import 'utils.dart';
 /// and refreshing entries.
 class EditableList extends StatefulWidget {
   EditableList({
+    super.key,
     required this.entries,
     required this.textFieldLabel,
+    required this.gaScreen,
+    required this.gaRefreshSelection,
     this.isRefreshing,
     this.onRefreshTriggered,
     Function(String)? onEntryAdded,
@@ -55,6 +58,10 @@ class EditableList extends StatefulWidget {
 
   /// Triggered when the refresh is triggered, using the interface.
   final Function()? onRefreshTriggered;
+
+  final String gaScreen;
+
+  final String gaRefreshSelection;
 
   @override
   State<StatefulWidget> createState() => _EditableListState();
@@ -93,6 +100,8 @@ class _EditableListState extends State<EditableList> {
               textFieldLabel: widget.textFieldLabel,
               onEntryAdded: widget.onEntryAdded,
               onRefresh: widget.onRefreshTriggered,
+              gaScreen: widget.gaScreen,
+              gaRefreshSelection: widget.gaRefreshSelection,
             ),
             const SizedBox(height: denseSpacing),
             Expanded(
@@ -118,6 +127,8 @@ class EditableListActionBar extends StatelessWidget {
     required this.textFieldLabel,
     required this.onEntryAdded,
     required this.onRefresh,
+    required this.gaScreen,
+    required this.gaRefreshSelection,
   }) : super(key: key);
 
   final FocusNode textFieldFocusNode;
@@ -126,6 +137,8 @@ class EditableListActionBar extends StatelessWidget {
   final String textFieldLabel;
   final Function(String) onEntryAdded;
   final Function()? onRefresh;
+  final String gaScreen;
+  final String gaRefreshSelection;
 
   void _addNewItem() {
     final value = textFieldController.value.text.trim();
@@ -139,12 +152,12 @@ class EditableListActionBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return SizedBox(
       height: defaultTextFieldHeight,
       child: Row(
         children: [
           Expanded(
-            child: Container(
+            child: SizedBox(
               height: defaultTextFieldHeight,
               child: TextField(
                 focusNode: textFieldFocusNode,
@@ -169,7 +182,7 @@ class EditableListActionBar extends StatelessWidget {
             ), // TODO:(https://github.com/flutter/devtools/issues/4381)
           ),
           isRefreshing?.value ?? false
-              ? Container(
+              ? SizedBox(
                   width: defaultTextFieldHeight,
                   height: defaultTextFieldHeight,
                   child: const Padding(
@@ -178,11 +191,9 @@ class EditableListActionBar extends StatelessWidget {
                   ),
                 )
               : RefreshButton(
-                  onPressed: () {
-                    if (onRefresh != null) {
-                      onRefresh!();
-                    }
-                  },
+                  gaScreen: gaScreen,
+                  gaSelection: gaRefreshSelection,
+                  onPressed: onRefresh,
                   minScreenWidthForTextBeforeScaling: double.maxFinite,
                 ),
         ],

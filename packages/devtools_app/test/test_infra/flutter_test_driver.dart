@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// ignore_for_file: avoid_print
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -58,7 +60,7 @@ abstract class FlutterTestDriver {
   String _debugPrint(String msg) {
     const int maxLength = 500;
     final String truncatedMsg =
-        msg.length > maxLength ? msg.substring(0, maxLength) + '...' : msg;
+        msg.length > maxLength ? '${msg.substring(0, maxLength)}...' : msg;
     _allMessages.add(truncatedMsg);
     if (_printDebugOutputToStdOut) {
       print('$_logPrefix$truncatedMsg');
@@ -72,17 +74,17 @@ abstract class FlutterTestDriver {
     FlutterRunConfiguration runConfig = const FlutterRunConfiguration(),
     File? pidFile,
   }) async {
-    final _args = [
+    final testArgs = [
       ...args,
       if (runConfig.withDebugger) '--start-paused',
       if (pidFile != null) ...['--pid-file', pidFile.path],
     ];
 
-    _debugPrint('Spawning flutter $_args in ${projectFolder.path}');
+    _debugPrint('Spawning flutter $testArgs in ${projectFolder.path}');
 
     proc = await Process.start(
       flutterExecutable,
-      _args,
+      testArgs,
       workingDirectory: projectFolder.path,
       environment: <String, String>{
         'FLUTTER_TEST': 'true',
@@ -188,7 +190,7 @@ abstract class FlutterTestDriver {
     int? id,
     Duration? timeout,
     bool ignoreAppStopEvent = false,
-  }) async {
+  }) {
     final Completer<Map<String, dynamic>> response =
         Completer<Map<String, dynamic>>();
     late StreamSubscription<String> sub;
@@ -302,27 +304,6 @@ class FlutterRunTestDriver extends FlutterTestDriver {
     );
   }
 
-  Future<void> attach(
-    int port, {
-    required String flutterExecutable,
-    FlutterRunConfiguration runConfig = const FlutterRunConfiguration(),
-    File? pidFile,
-  }) async {
-    await setupProcess(
-      <String>[
-        'attach',
-        '--machine',
-        '-d',
-        'flutter-tester',
-        '--debug-port',
-        '$port',
-      ],
-      flutterExecutable: flutterExecutable,
-      runConfig: runConfig,
-      pidFile: pidFile,
-    );
-  }
-
   @override
   Future<void> setupProcess(
     List<String> args, {
@@ -415,7 +396,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
       <String, Object?>{
         'appId': _currentRunningAppId,
         'fullRestart': fullRestart,
-        'pause': pause
+        'pause': pause,
       },
     );
 
@@ -425,32 +406,6 @@ class FlutterRunTestDriver extends FlutterTestDriver {
         'Hot ${fullRestart ? 'restart' : 'reload'} request failed',
       );
     }
-  }
-
-  Future<int> detach() async {
-    final vmServiceLocal = vmService;
-    if (vmServiceLocal != null) {
-      _debugPrint('Closing VM service');
-      await vmServiceLocal.dispose();
-    }
-    if (_currentRunningAppId != null) {
-      _debugPrint('Detaching from app');
-      await Future.any<void>(<Future<void>>[
-        proc.exitCode,
-        _sendRequest(
-          'app.detach',
-          <String, Object?>{'appId': _currentRunningAppId},
-        ),
-      ]).timeout(
-        quitTimeout,
-        onTimeout: () {
-          _debugPrint('app.detach did not return within $quitTimeout');
-        },
-      );
-      _currentRunningAppId = null;
-    }
-    _debugPrint('Waiting for process to end');
-    return proc.exitCode.timeout(quitTimeout, onTimeout: killGracefully);
   }
 
   Future<int> stop() async {
@@ -487,7 +442,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
     final request = <String, Object?>{
       'id': requestId,
       'method': method,
-      'params': params
+      'params': params,
     };
     final String jsonEncoded = json.encode(<Map<String, Object?>>[request]);
     _debugPrint(jsonEncoded);

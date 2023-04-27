@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// ignore_for_file: avoid_print
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -14,8 +16,6 @@ const bool _printDebugOutputToStdOut = false;
 class TestFlutterApp extends _TestApp {
   TestFlutterApp({String appPath = 'test/test_infra/fixtures/flutter_app'})
       : super(appPath);
-
-  Directory get workingDirectory => Directory(testAppPath);
 
   @override
   Future<void> startProcess() async {
@@ -143,12 +143,13 @@ abstract class _TestApp with IOMixin {
   }
 
   int _requestId = 1;
+  // ignore: avoid-dynamic, dynamic by design.
   Future<dynamic> _sendRequest(String method, dynamic params) async {
     final int requestId = _requestId++;
     final Map<String, dynamic> request = <String, dynamic>{
       'id': requestId,
       'method': method,
-      'params': params
+      'params': params,
     };
     final String jsonEncoded = json.encode(<Map<String, dynamic>>[request]);
     _debugPrint(jsonEncoded);
@@ -296,10 +297,10 @@ abstract class _TestApp with IOMixin {
   String _debugPrint(String msg) {
     const maxLength = 500;
     final truncatedMsg =
-        msg.length > maxLength ? msg.substring(0, maxLength) + '...' : msg;
+        msg.length > maxLength ? '${msg.substring(0, maxLength)}...' : msg;
     _allMessages.add(truncatedMsg);
     if (_printDebugOutputToStdOut) {
-      print('$truncatedMsg');
+      print(truncatedMsg);
     }
     return msg;
   }

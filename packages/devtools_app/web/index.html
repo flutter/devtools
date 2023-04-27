@@ -53,6 +53,9 @@
   <!-- This script adds the flutter initialization JS code -->
   <script src="flutter.js" defer></script> 
 
+  <!-- TODO(elliette): Remove once https://github.com/flutter/flutter/issues/122541 is fixed. -->
+  <link rel="stylesheet" href="styles.css">
+
 </head>
 
 <body>
@@ -104,6 +107,7 @@
       window.addEventListener('load', function(ev) {
         // Download main.dart.js
         _flutter.loader.loadEntrypoint({
+          entrypointUrl: 'main.dart.js',
           onEntrypointLoaded: function(engineInitializer) {
             engineInitializer.initializeEngine({
               renderer: 'canvaskit',

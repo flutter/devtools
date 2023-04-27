@@ -4,7 +4,6 @@
 
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/performance/panes/controls/performance_controls.dart';
-import 'package:devtools_app/src/shared/config_specific/import_export/import_export.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -45,7 +44,7 @@ void main() {
       offlineController.exitOfflineMode();
     });
 
-    Future<void> _pumpControls(WidgetTester tester) async {
+    Future<void> pumpControls(WidgetTester tester) async {
       await tester.pumpWidget(
         wrapWithControllers(
           PerformanceControls(
@@ -58,52 +57,63 @@ void main() {
       await tester.pumpAndSettle();
     }
 
-    testWidgetsWithWindowSize('builds for Flutter app', windowSize,
-        (WidgetTester tester) async {
-      await _pumpControls(tester);
-      expect(find.byType(ExitOfflineButton), findsNothing);
-      expect(find.byType(VisibilityButton), findsOneWidget);
-      expect(find.byIcon(Icons.block), findsOneWidget);
-      expect(find.text('Performance Overlay'), findsOneWidget);
-      expect(find.text('Enhance Tracing'), findsOneWidget);
-      expect(find.text('More debugging options'), findsOneWidget);
-      expect(find.byIcon(Icons.file_download), findsOneWidget);
-      expect(find.byIcon(Icons.settings), findsOneWidget);
-    });
+    testWidgetsWithWindowSize(
+      'builds for Flutter app',
+      windowSize,
+      (WidgetTester tester) async {
+        await pumpControls(tester);
+        expect(find.byType(ExitOfflineButton), findsNothing);
+        expect(find.byType(VisibilityButton), findsOneWidget);
+        expect(find.byIcon(Icons.block), findsOneWidget);
+        expect(find.text('Performance Overlay'), findsOneWidget);
+        expect(find.text('Enhance Tracing'), findsOneWidget);
+        expect(find.text('More debugging options'), findsOneWidget);
+        expect(find.byIcon(Icons.file_download), findsOneWidget);
+        expect(find.byIcon(Icons.settings_outlined), findsOneWidget);
+      },
+    );
 
-    testWidgetsWithWindowSize('builds for non flutter app', windowSize,
-        (WidgetTester tester) async {
-      mockConnectedApp(
-        mockServiceManager.connectedApp!,
-        isFlutterApp: false,
-        isProfileBuild: false,
-        isWebApp: false,
-      );
-      await _pumpControls(tester);
+    testWidgetsWithWindowSize(
+      'builds for non flutter app',
+      windowSize,
+      (WidgetTester tester) async {
+        mockConnectedApp(
+          mockServiceManager.connectedApp!,
+          isFlutterApp: false,
+          isProfileBuild: false,
+          isWebApp: false,
+        );
+        await pumpControls(tester);
 
-      expect(find.byType(ExitOfflineButton), findsNothing);
-      expect(find.byType(VisibilityButton), findsNothing);
-      expect(find.byIcon(Icons.block), findsOneWidget);
-      expect(find.text('Performance Overlay'), findsNothing);
-      expect(find.text('Enhance Tracing'), findsNothing);
-      expect(find.text('More debugging options'), findsNothing);
-      expect(find.byIcon(Icons.file_download), findsOneWidget);
-      expect(find.byIcon(Icons.settings), findsOneWidget);
-    });
+        expect(find.byType(ExitOfflineButton), findsNothing);
+        expect(find.byType(VisibilityButton), findsNothing);
+        expect(find.byIcon(Icons.block), findsOneWidget);
+        expect(find.text('Performance Overlay'), findsNothing);
+        expect(find.text('Enhance Tracing'), findsNothing);
+        expect(find.text('More debugging options'), findsNothing);
+        expect(find.byIcon(Icons.file_download), findsOneWidget);
+        expect(find.byIcon(Icons.settings_outlined), findsOneWidget);
+      },
+    );
 
-    testWidgetsWithWindowSize('builds for offline mode', windowSize,
-        (WidgetTester tester) async {
-      offlineController.enterOfflineMode();
-      await _pumpControls(tester);
-      expect(find.byType(ExitOfflineButton), findsOneWidget);
-      expect(find.byType(VisibilityButton), findsOneWidget);
-      expect(find.byIcon(Icons.block), findsNothing);
-      expect(find.text('Performance Overlay'), findsNothing);
-      expect(find.text('Enhance Tracing'), findsNothing);
-      expect(find.text('More debugging options'), findsNothing);
-      expect(find.byIcon(Icons.file_download), findsNothing);
-      expect(find.byIcon(Icons.settings), findsNothing);
-      offlineController.exitOfflineMode();
-    });
+    testWidgetsWithWindowSize(
+      'builds for offline mode',
+      windowSize,
+      (WidgetTester tester) async {
+        offlineController.enterOfflineMode(
+          offlineApp: serviceManager.connectedApp!,
+        );
+        await pumpControls(tester);
+        expect(find.byType(ExitOfflineButton), findsOneWidget);
+        expect(find.byType(VisibilityButton), findsOneWidget);
+        expect(find.byIcon(Icons.block), findsNothing);
+        expect(find.text('Performance Overlay'), findsNothing);
+        expect(find.text('Enhance Tracing'), findsNothing);
+        expect(find.text('More debugging options'), findsNothing);
+        expect(find.byIcon(Icons.file_download), findsNothing);
+        expect(find.byIcon(Icons.settings_outlined), findsNothing);
+        offlineController.exitOfflineMode();
+      },
+    );
   });
 }

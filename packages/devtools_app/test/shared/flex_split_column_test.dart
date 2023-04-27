@@ -51,7 +51,7 @@ void main() {
             0.2857142857142857,
             0.23809523809523808,
             0.23809523809523808,
-            0.23809523809523808
+            0.23809523809523808,
           ],
         ),
         isTrue,
@@ -78,7 +78,7 @@ void main() {
       // arbitrary column to check for [firstHeaderKey].
       final adjustedChildren =
           FlexSplitColumn.buildChildrenWithFirstHeader(children, headers)
-              .map((child) => Container(height: 100.0, child: child))
+              .map((child) => SizedBox(height: 100.0, child: child))
               .toList();
       await tester.pumpWidget(Column(children: adjustedChildren));
       expect(find.byKey(firstHeaderKey), findsOneWidget);

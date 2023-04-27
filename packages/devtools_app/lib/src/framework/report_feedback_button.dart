@@ -14,6 +14,8 @@ import '../shared/globals.dart';
 import '../shared/theme.dart';
 
 class ReportFeedbackButton extends StatelessWidget {
+  const ReportFeedbackButton({super.key});
+
   @override
   Widget build(BuildContext context) {
     return DevToolsTooltip(
@@ -35,7 +37,7 @@ class ReportFeedbackButton extends StatelessWidget {
           height: actionWidgetSize,
           alignment: Alignment.center,
           child: Icon(
-            Icons.bug_report,
+            Icons.bug_report_outlined,
             size: actionsIconSize,
           ),
         ),

@@ -21,11 +21,12 @@ import 'performance_settings.dart';
 
 class PerformanceControls extends StatelessWidget {
   const PerformanceControls({
+    super.key,
     required this.controller,
     required this.onClear,
   });
 
-  static const minScreenWidthForTextBeforeScaling = 920.0;
+  static const minScreenWidthForTextBeforeScaling = 1020.0;
 
   final PerformanceController controller;
 
@@ -34,6 +35,7 @@ class PerformanceControls extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return OfflineAwareControls(
+      gaScreen: gac.performance,
       controlsBuilder: (offline) {
         return Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -85,6 +87,7 @@ class _PrimaryControls extends StatelessWidget {
         if (serviceManager.connectedApp!.isFlutterAppNow!) ...[
           VisibilityButton(
             show: preferences.performance.showFlutterFramesChart,
+            gaScreen: gac.performance,
             onPressed:
                 controller.flutterFramesController.toggleShowFlutterFrames,
             label: 'Flutter frames',
@@ -93,9 +96,14 @@ class _PrimaryControls extends StatelessWidget {
           const SizedBox(width: denseSpacing),
         ],
         if (!offline)
-          OutlinedIconButton(
+          DevToolsButton(
             icon: Icons.block,
+            label: 'Clear all',
+            gaScreen: gac.performance,
+            gaSelection: gac.clear,
             tooltip: 'Clear all data on the Performance screen',
+            minScreenWidthForTextBeforeScaling:
+                PerformanceControls.minScreenWidthForTextBeforeScaling,
             onPressed: processing ? null : _clearPerformanceData,
           ),
       ],
@@ -135,14 +143,18 @@ class _SecondaryPerformanceControls extends StatelessWidget {
           const SizedBox(width: denseSpacing),
           const MoreDebuggingOptionsButton(),
         ],
-        const SizedBox(width: defaultSpacing),
-        OutlinedIconButton(
+        const SizedBox(width: denseSpacing),
+        DevToolsButton.iconOnly(
           icon: Icons.file_download,
+          gaScreen: gac.performance,
+          gaSelection: gac.export,
           tooltip: 'Export data',
           onPressed: _exportPerformanceData,
         ),
         const SizedBox(width: denseSpacing),
         SettingsOutlinedButton(
+          gaScreen: gac.performance,
+          gaSelection: gac.PerformanceEvents.performanceSettings.name,
           onPressed: () => _openSettingsDialog(context),
         ),
       ],

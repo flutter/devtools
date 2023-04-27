@@ -5,16 +5,20 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:logging/logging.dart';
 
 import '../../../../../shared/analytics/analytics.dart' as ga;
 import '../../../../../shared/analytics/constants.dart' as gac;
 import '../../../../../shared/common_widgets.dart';
+import '../../../../../shared/dialogs.dart';
 import '../../../../../shared/primitives/auto_dispose.dart';
 import '../../../../../shared/primitives/utils.dart';
 import '../../../../../shared/table/table.dart';
 import '../../../../../shared/theme.dart';
 import '../controller/diff_pane_controller.dart';
 import '../controller/item_controller.dart';
+
+final _log = Logger('snapshot_list');
 
 class SnapshotList extends StatelessWidget {
   const SnapshotList({Key? key, required this.controller}) : super(key: key);
@@ -41,11 +45,29 @@ class SnapshotList extends StatelessWidget {
   }
 }
 
+@visibleForTesting
+const iconToTakeSnapshot = Icons.fiber_manual_record;
+
 class _ListControlPane extends StatelessWidget {
   const _ListControlPane({Key? key, required this.controller})
       : super(key: key);
 
   final DiffPaneController controller;
+
+  Future<void> _takeSnapshot(BuildContext context) async {
+    try {
+      await controller.takeSnapshot();
+    } catch (e, trace) {
+      _log.shout(e, e, trace);
+      await showDialog(
+        context: context,
+        builder: (context) => UnexpectedErrorDialog(
+          additionalInfo:
+              'Encountered an error while taking a heap snapshot:\n${e.runtimeType}\n$e\n$trace',
+        ),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -56,11 +78,11 @@ class _ListControlPane extends StatelessWidget {
         return Row(
           children: [
             ToolbarAction(
-              icon: Icons.fiber_manual_record,
+              icon: iconToTakeSnapshot,
               tooltip: 'Take heap snapshot for the selected isolate',
-              onPressed: controller.takeSnapshotHandler(
-                gac.MemoryEvent.diffTakeSnapshotControlPane,
-              ),
+              onPressed: controller.isTakingSnapshot.value
+                  ? null
+                  : () => unawaited(_takeSnapshot(context)),
             ),
             ToolbarAction(
               icon: Icons.block,
@@ -83,22 +105,14 @@ class _ListControlPane extends StatelessWidget {
 }
 
 class _SnapshotListTitle extends StatelessWidget {
-  const _SnapshotListTitle({
-    Key? key,
-    required this.item,
-    required this.selected,
-  }) : super(key: key);
+  const _SnapshotListTitle({Key? key, required this.item}) : super(key: key);
 
   final SnapshotItem item;
-
-  final bool selected;
 
   @override
   Widget build(BuildContext context) {
     final theItem = item;
     final theme = Theme.of(context);
-    final textStyle =
-        selected ? theme.selectedTextStyle : theme.regularTextStyle;
     return ValueListenableBuilder<bool>(
       valueListenable: theItem.isProcessing,
       builder: (_, isProcessing, __) => Row(
@@ -109,7 +123,6 @@ class _SnapshotListTitle extends StatelessWidget {
               child: Text(
                 theItem.name,
                 overflow: TextOverflow.ellipsis,
-                style: textStyle,
               ),
             ),
           if (theItem is SnapshotInstanceItem && theItem.totalSize != null) ...[
@@ -119,7 +132,6 @@ class _SnapshotListTitle extends StatelessWidget {
                 includeUnit: true,
                 kbFractionDigits: 1,
               )!,
-              style: textStyle,
             ),
             const SizedBox(width: denseRowSpacing),
           ],
@@ -127,7 +139,7 @@ class _SnapshotListTitle extends StatelessWidget {
             Icon(
               Icons.help_outline,
               size: defaultIconSize,
-              color: textStyle.color,
+              color: theme.colorScheme.onSurface,
             ),
           if (isProcessing) ...[
             CenteredCircularProgressIndicator(size: smallProgressSize),
@@ -199,14 +211,13 @@ class _SnapshotListItemsState extends State<_SnapshotListItems>
           return Container(
             height: _headerHeight,
             color: selected
-                ? Theme.of(context).colorScheme.selectedRowColor
+                ? Theme.of(context).colorScheme.selectedRowBackgroundColor
                 : null,
             child: InkWell(
               canRequestFocus: false,
               onTap: () => widget.controller.setSnapshotIndex(index),
               child: _SnapshotListTitle(
                 item: snapshots[index],
-                selected: selected,
               ),
             ),
           );

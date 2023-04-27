@@ -8,7 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../../../test_infra/test_data/memory/heap/heap_data.dart';
 
-void main() async {
+void main() {
   for (var t in goldenHeapTests) {
     group(t.name, () {
       late AdaptedHeapData heap;
@@ -33,7 +33,7 @@ void main() async {
       });
 
       test('has path to the object of type ${t.appClassName}.', () async {
-        await buildSpanningTreeAndSetInRefs(heap);
+        await calculateHeap(heap);
         final appObject = heap.objects
             .where((o) => o.heapClass.className == t.appClassName)
             .first;

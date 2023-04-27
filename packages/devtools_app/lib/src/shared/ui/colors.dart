@@ -10,10 +10,6 @@ import 'utils.dart';
 /// This file holds color constants that are used throughout DevTools.
 // TODO(kenz): move colors from other pages to this file for consistency.
 
-/// Memory heat map blueish color incremental colors from Blue 100 to Blue 900.
-Color memoryHeatMapLightColor = const Color(0xFFBBDEFB); // Material BLUE 100
-Color memoryHeatMapDarkColor = const Color(0xFF0D47A1); // Material BLUE 900
-
 const mainUiColor = Color(0xFF88B1DE);
 const mainRasterColor = Color(0xFF2C5DAA);
 const mainUnknownColor = Color(0xFFCAB8E9);
@@ -43,9 +39,6 @@ extension FlameChartColorScheme on ColorScheme {
   Color get treeGuidelineColor =>
       isLight ? Colors.black54 : const Color.fromARGB(255, 200, 200, 200);
 }
-
-const defaultSelectionForegroundColor = Colors.white;
-Color get defaultSelectionColor => devtoolsBlue[400]!;
 
 const searchMatchColor = Colors.yellow;
 final searchMatchColorOpaque = Colors.yellow.withOpacity(0.5);

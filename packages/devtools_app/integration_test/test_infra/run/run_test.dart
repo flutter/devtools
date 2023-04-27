@@ -2,12 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// ignore_for_file: avoid_print
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
 import 'package:collection/collection.dart';
 
+import '_in_file_args.dart';
 import '_io_utils.dart';
 import '_test_app_driver.dart';
 
@@ -18,20 +21,22 @@ bool _debugTestScript = false;
 /// Do not use this method directly, but instead use the run_tests.dart
 /// which performs essential set up steps.
 Future<void> runFlutterIntegrationTest(
-  TestArgs testRunnerArgs, {
-  String testAppPath = 'test/test_infra/fixtures/flutter_app',
+  TestRunnerArgs testRunnerArgs,
+  TestFileArgs testFileArgs, {
+  required bool offline,
 }) async {
   TestFlutterApp? testApp;
   late String testAppUri;
 
-  if (!testRunnerArgs.offline) {
+  if (!offline) {
     if (testRunnerArgs.testAppUri == null) {
       // Create the test app and start it.
       // TODO(kenz): support running Dart CLI test apps from here too.
       try {
-        testApp = TestFlutterApp(appPath: testAppPath);
+        testApp = TestFlutterApp(appPath: testFileArgs.appPath);
         await testApp.start();
       } catch (e) {
+        // ignore: avoid-throw-in-catch-block, by design
         throw Exception('Error starting test app: $e');
       }
       testAppUri = testApp.vmServiceUri.toString();
@@ -46,6 +51,7 @@ Future<void> runFlutterIntegrationTest(
   try {
     await chromedriver.start();
   } catch (e) {
+    // ignore: avoid-throw-in-catch-block, by design
     throw Exception('Error starting chromedriver: $e');
   }
 
@@ -55,11 +61,11 @@ Future<void> runFlutterIntegrationTest(
   try {
     await testRunner.run(
       testRunnerArgs.testTarget,
-      enableExperiments: testRunnerArgs.enableExperiments,
+      enableExperiments: testFileArgs.experimentsOn,
       updateGoldens: testRunnerArgs.updateGoldens,
       headless: testRunnerArgs.headless,
       testAppArguments: {
-        if (!testRunnerArgs.offline) 'service_uri': testAppUri,
+        if (!offline) 'service_uri': testAppUri,
       },
     );
   } on Exception catch (e) {
@@ -119,7 +125,7 @@ class TestRunner with IOMixin {
     bool updateGoldens = false,
     Map<String, Object> testAppArguments = const <String, Object>{},
   }) async {
-    Future<void> _run({required int attemptNumber}) async {
+    Future<void> runTest({required int attemptNumber}) async {
       _debugLog('starting the flutter drive process');
       final process = await Process.start(
         'flutter',
@@ -207,7 +213,7 @@ class TestRunner with IOMixin {
             'Integration test timed out on try #$attemptNumber. Retrying '
             '$testTarget now.',
           );
-          await _run(attemptNumber: ++attemptNumber);
+          await runTest(attemptNumber: ++attemptNumber);
         }
       }
 
@@ -216,7 +222,7 @@ class TestRunner with IOMixin {
       }
     }
 
-    await _run(attemptNumber: 0);
+    await runTest(attemptNumber: 0);
   }
 }
 
@@ -262,8 +268,8 @@ void _debugLog(String log) {
 
 // TODO(https://github.com/flutter/devtools/issues/4970): use package:args to
 // parse these arguments.
-class TestArgs {
-  TestArgs(List<String> args) {
+class TestRunnerArgs {
+  TestRunnerArgs(List<String> args) {
     final argWithTestTarget =
         args.firstWhereOrNull((arg) => arg.startsWith(testTargetArg));
     final target = argWithTestTarget?.substring(testTargetArg.length);
@@ -277,16 +283,12 @@ class TestArgs {
         args.firstWhereOrNull((arg) => arg.startsWith(testAppArg));
     testAppUri = argWithTestAppUri?.substring(testAppArg.length);
 
-    offline = args.contains(offlineArg);
-    enableExperiments = args.contains(enableExperimentsArg);
     updateGoldens = args.contains(updateGoldensArg);
     headless = args.contains(headlessArg);
   }
 
   static const testTargetArg = '--target=';
   static const testAppArg = '--test-app-uri=';
-  static const offlineArg = '--offline';
-  static const enableExperimentsArg = '--enable-experiments';
   static const updateGoldensArg = '--update-goldens';
   static const headlessArg = '--headless';
 
@@ -294,24 +296,8 @@ class TestArgs {
 
   /// The Vm Service URI for the test app to connect devtools to.
   ///
-  /// This value will only be used when [offline] has not been set to true.
+  /// This value will only be used for tests with live connection.
   late final String? testAppUri;
-
-  /// Indicates that a test should not be run with a test app for connecting to
-  /// DevTools.
-  ///
-  /// When [offline] is true, the test will be responsible for loading offline
-  /// data to test DevTools against.
-  ///
-  /// `integration_test/run_tests.dart` will add this flag automatically for
-  /// test targets that lives under the integration_test/test/offline directory.
-  late final bool offline;
-
-  /// Whether DevTools experiments should be enabled for a test.
-  ///
-  /// `integration_test/run_tests.dart` will add this flag automatically for
-  /// test targets that lives under an `experimental/` directory.
-  late final bool enableExperiments;
 
   /// Whether golden images should be updated with the result of this test run.
   late final bool updateGoldens;

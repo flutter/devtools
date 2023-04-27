@@ -12,8 +12,6 @@ import '../../memory_controller.dart';
 import 'chart_pane_controller.dart';
 import 'primitives.dart';
 
-const verboseDropDownMinimumWidth = 950;
-
 class IntervalDropdown extends StatefulWidget {
   const IntervalDropdown({Key? key, required this.chartController})
       : super(key: key);
@@ -36,7 +34,7 @@ class _IntervalDropdownState extends State<IntervalDropdown>
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
 
-    final _displayTypes =
+    final displayTypes =
         ChartInterval.values.map<DropdownMenuItem<ChartInterval>>(
       (
         ChartInterval value,
@@ -67,7 +65,7 @@ class _IntervalDropdownState extends State<IntervalDropdown>
           widget.chartController.android.zoomDuration = duration;
         });
       },
-      items: _displayTypes,
+      items: displayTypes,
     );
   }
 }

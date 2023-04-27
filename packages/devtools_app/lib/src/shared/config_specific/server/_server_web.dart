@@ -5,12 +5,15 @@
 import 'dart:async';
 import 'dart:convert';
 // TODO(jacobr): this should use package:http instead of dart:html.
+// ignore: avoid_web_libraries_in_flutter, as designed
 import 'dart:html';
 
 import 'package:devtools_shared/devtools_shared.dart';
+import 'package:logging/logging.dart';
 
 import '../../primitives/utils.dart';
-import '../logger/logger.dart';
+
+final _log = Logger('_server_web');
 
 // Code to check if DevTools server is available, will only be true in release
 // mode, debug mode will be set to false.
@@ -100,7 +103,7 @@ Future<bool> _isFlutterGAEnabled() async {
       // A return value of 'null' implies Flutter tool has never been run so
       // return false for Flutter GA enabled.
       final responseValue = json.decode(resp!.responseText!);
-      enabled = responseValue == null ? false : responseValue;
+      enabled = responseValue ?? false;
     } else {
       logWarning(resp, apiGetFlutterGAEnabled);
     }
@@ -128,7 +131,7 @@ Future<String> flutterGAClientID() async {
           // Requested value of 'null' (Flutter tool never ran). Server request
           // apiGetFlutterGAClientId should not happen because the
           // isFlutterGAEnabled test should have been false.
-          log('$apiGetFlutterGAClientId is empty', LogLevel.warning);
+          _log.warning('$apiGetFlutterGAClientId is empty');
         }
       } else {
         logWarning(resp, apiGetFlutterGAClientId);
@@ -272,6 +275,7 @@ Future<void> setLastShownReleaseNotesVersion(String version) async {
   }
 }
 
+// currently unused
 /// Requests all .devtools properties to be reset to their default values in the
 /// file '~/.flutter-devtools/.devtools'.
 Future<void> resetDevToolsFile() async {
@@ -334,9 +338,8 @@ DevToolsJsonFile _devToolsJsonFileFromResponse(
 }
 
 void logWarning(HttpRequest? response, String apiType, [String? respText]) {
-  log(
+  _log.warning(
     'HttpRequest $apiType failed status = ${response?.status}'
     '${respText != null ? ', responseText = $respText' : ''}',
-    LogLevel.warning,
   );
 }

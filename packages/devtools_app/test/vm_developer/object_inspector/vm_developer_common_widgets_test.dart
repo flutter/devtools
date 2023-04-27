@@ -2,11 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/vm_developer/vm_developer_common_widgets.dart';
-import 'package:devtools_app/src/service/service_manager.dart';
-import 'package:devtools_app/src/shared/common_widgets.dart';
-import 'package:devtools_app/src/shared/config_specific/ide_theme/ide_theme.dart';
-import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -38,6 +35,8 @@ void main() {
     setUpMockScriptManager();
     setGlobal(ServiceConnectionManager, fakeServiceManager);
     setGlobal(IdeTheme, IdeTheme());
+    setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
+    setGlobal(PreferencesController, PreferencesController());
 
     mockClassObject = MockClassObject();
 
@@ -102,6 +101,7 @@ void main() {
   );
 
   testWidgets('test RequestableSizeWidget', (WidgetTester tester) async {
+    when(mockClassObject.reachableSize).thenReturn(requestedSize);
     await tester.pumpWidget(
       wrap(
         RequestableSizeWidget(
@@ -112,11 +112,8 @@ void main() {
       ),
     );
 
-    expect(find.byType(RequestDataButton), findsOneWidget);
-
-    when(mockClassObject.reachableSize).thenReturn(requestedSize);
-
-    await tester.tap(find.byType(RequestDataButton));
+    expect(find.byIcon(Icons.refresh), findsOneWidget);
+    await tester.tap(find.byIcon(Icons.refresh));
 
     await tester.pumpAndSettle();
 
@@ -136,101 +133,107 @@ void main() {
   });
 
   testWidgetsWithWindowSize(
-      'test RetainingPathWidget with null data', windowSize,
-      (WidgetTester tester) async {
-    await tester.pumpWidget(
-      wrap(
-        RetainingPathWidget(
-          controller: testObjectInspectorViewController,
-          retainingPath: mockClassObject.retainingPath,
-          onExpanded: (bool) => null,
+    'test RetainingPathWidget with null data',
+    windowSize,
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        wrap(
+          RetainingPathWidget(
+            controller: testObjectInspectorViewController,
+            retainingPath: mockClassObject.retainingPath,
+            onExpanded: (bool _) {},
+          ),
         ),
-      ),
-    );
+      );
 
-    expect(find.byType(AreaPaneHeader), findsOneWidget);
+      expect(find.byType(AreaPaneHeader), findsOneWidget);
 
-    expect(find.text('Retaining Path'), findsOneWidget);
+      expect(find.text('Retaining Path'), findsOneWidget);
 
-    await tester.tap(find.byType(AreaPaneHeader));
+      await tester.tap(find.byType(AreaPaneHeader));
 
-    await tester.pump();
+      await tester.pump();
 
-    expect(find.byType(CenteredCircularProgressIndicator), findsOneWidget);
-  });
+      expect(find.byType(CenteredCircularProgressIndicator), findsOneWidget);
+    },
+  );
 
   testWidgetsWithWindowSize(
-      'test RetainingPathWidget with fetched data', windowSize,
-      (WidgetTester tester) async {
-    retainingPathNotifier.value = null;
+    'test RetainingPathWidget with fetched data',
+    windowSize,
+    (WidgetTester tester) async {
+      retainingPathNotifier.value = null;
 
-    await tester.pumpWidget(
-      wrap(
-        RetainingPathWidget(
-          controller: testObjectInspectorViewController,
-          retainingPath: mockClassObject.retainingPath,
-          onExpanded: (bool) {
-            mockClassObject.requestRetainingPath();
-          },
+      await tester.pumpWidget(
+        wrap(
+          RetainingPathWidget(
+            controller: testObjectInspectorViewController,
+            retainingPath: mockClassObject.retainingPath,
+            onExpanded: (bool _) {
+              mockClassObject.requestRetainingPath();
+            },
+          ),
         ),
-      ),
-    );
+      );
 
-    await tester.tap(find.byType(AreaPaneHeader));
+      await tester.tap(find.byType(AreaPaneHeader));
 
-    await tester.pumpAndSettle();
-    expect(find.byType(SelectableText), findsNWidgets(7));
-    expect(find.text('FooClass'), findsOneWidget);
-    expect(
-      find.text('Retained by element [1] of fooSuperClass'),
-      findsOneWidget,
-    );
-    expect(
-      find.text('Retained by \$1 of Record'),
-      findsOneWidget,
-    );
-    expect(
-      find.text('Retained by fooParentField of Record'),
-      findsOneWidget,
-    );
-    expect(
-      find.text('Retained by element at [fooField] of fooSuperClass'),
-      findsOneWidget,
-    );
-    expect(
-      find.text('Retained by fooParentField of FooClass fooField of fooLib'),
-      findsOneWidget,
-    );
-    expect(
-      find.text('Retained by a GC root of type: class table'),
-      findsOneWidget,
-    );
-  });
+      await tester.pumpAndSettle();
+      expect(find.byType(SelectableText), findsNWidgets(7));
+      expect(find.text('FooClass'), findsOneWidget);
+      expect(
+        find.text('Retained by element [1] of fooSuperClass'),
+        findsOneWidget,
+      );
+      expect(
+        find.text('Retained by \$1 of Record'),
+        findsOneWidget,
+      );
+      expect(
+        find.text('Retained by fooParentField of Record'),
+        findsOneWidget,
+      );
+      expect(
+        find.text('Retained by element at [fooField] of fooSuperClass'),
+        findsOneWidget,
+      );
+      expect(
+        find.text('Retained by fooParentField of FooClass fooField of fooLib'),
+        findsOneWidget,
+      );
+      expect(
+        find.text('Retained by a GC root of type: class table'),
+        findsOneWidget,
+      );
+    },
+  );
 
   testWidgetsWithWindowSize(
-      'test InboundReferencesWidget with null data', windowSize,
-      (WidgetTester tester) async {
-    inboundRefsNotifier.value = null;
+    'test InboundReferencesWidget with null data',
+    windowSize,
+    (WidgetTester tester) async {
+      inboundRefsNotifier.value = null;
 
-    await tester.pumpWidget(
-      wrap(
-        InboundReferencesWidget(
-          inboundReferences: mockClassObject.inboundReferences,
-          onExpanded: (bool) => null,
+      await tester.pumpWidget(
+        wrap(
+          InboundReferencesWidget(
+            inboundReferences: mockClassObject.inboundReferences,
+            onExpanded: (bool _) {},
+          ),
         ),
-      ),
-    );
+      );
 
-    expect(find.byType(AreaPaneHeader), findsOneWidget);
+      expect(find.byType(AreaPaneHeader), findsOneWidget);
 
-    expect(find.text('Inbound References'), findsOneWidget);
+      expect(find.text('Inbound References'), findsOneWidget);
 
-    await tester.tap(find.byType(AreaPaneHeader));
+      await tester.tap(find.byType(AreaPaneHeader));
 
-    await tester.pump();
+      await tester.pump();
 
-    expect(find.byType(CenteredCircularProgressIndicator), findsOneWidget);
-  });
+      expect(find.byType(CenteredCircularProgressIndicator), findsOneWidget);
+    },
+  );
 
   testWidgetsWithWindowSize(
     'test InboundReferencesWidget with data',
@@ -240,7 +243,7 @@ void main() {
         wrap(
           InboundReferencesWidget(
             inboundReferences: mockClassObject.inboundReferences,
-            onExpanded: (bool) => mockClassObject.requestInboundsRefs(),
+            onExpanded: (bool _) => mockClassObject.requestInboundsRefs(),
           ),
         ),
       );

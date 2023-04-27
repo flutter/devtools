@@ -31,7 +31,7 @@ import 'framework_core.dart';
 /// available as well as to provide access to other functionality that does not
 /// require a connected Dart application.
 class LandingScreenBody extends StatefulWidget {
-  const LandingScreenBody({this.sampleData = const []});
+  const LandingScreenBody({super.key, this.sampleData = const []});
 
   final List<DevToolsJsonFile> sampleData;
 
@@ -81,7 +81,7 @@ class LandingScreenSection extends StatelessWidget {
       children: [
         Text(
           title,
-          style: textTheme.headlineSmall,
+          style: textTheme.titleLarge,
         ),
         const PaddedDivider(),
         child,
@@ -95,7 +95,7 @@ class ConnectDialog extends StatefulWidget {
   const ConnectDialog({Key? key}) : super(key: key);
 
   @override
-  _ConnectDialogState createState() => _ConnectDialogState();
+  State<ConnectDialog> createState() => _ConnectDialogState();
 }
 
 class _ConnectDialogState extends State<ConnectDialog>
@@ -286,7 +286,7 @@ class ImportFileInstructions extends StatelessWidget {
           if (sampleData.isNotEmpty && !kReleaseMode) ...[
             const SizedBox(height: defaultSpacing),
             SampleDataDropDownButton(sampleData: sampleData),
-          ]
+          ],
         ],
       ),
     );
@@ -302,6 +302,7 @@ class ImportFileInstructions extends StatelessWidget {
     );
 
     if (importedFile != null) {
+      // ignore: use_build_context_synchronously, by design
       Provider.of<ImportController>(context, listen: false)
           .importData(importedFile);
     }

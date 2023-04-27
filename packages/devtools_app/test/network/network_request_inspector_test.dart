@@ -4,13 +4,8 @@
 
 import 'dart:convert';
 
-import 'package:devtools_app/src/screens/network/network_controller.dart';
+import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/network/network_request_inspector.dart';
-import 'package:devtools_app/src/service/service_manager.dart';
-import 'package:devtools_app/src/shared/common_widgets.dart';
-import 'package:devtools_app/src/shared/config_specific/ide_theme/ide_theme.dart';
-import 'package:devtools_app/src/shared/globals.dart';
-import 'package:devtools_app/src/shared/notifications.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vm_service/vm_service.dart';
@@ -24,11 +19,13 @@ void main() {
     late FakeServiceManager fakeServiceManager;
     final HttpProfileRequest? httpRequest =
         HttpProfileRequest.parse(httpPostJson);
-    String _clipboardContents = '';
+    String clipboardContents = '';
 
     setUp(() {
       setGlobal(IdeTheme, IdeTheme());
-      _clipboardContents = '';
+      setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
+      setGlobal(PreferencesController, PreferencesController());
+      clipboardContents = '';
       fakeServiceManager = FakeServiceManager(
         service: FakeServiceManager.createFakeService(
           httpProfile: HttpProfile(
@@ -44,7 +41,7 @@ void main() {
       controller = NetworkController();
       setupClipboardCopyListener(
         clipboardContentsCallback: (contents) {
-          _clipboardContents = contents ?? '';
+          clipboardContents = contents ?? '';
         },
       );
     });
@@ -73,15 +70,15 @@ void main() {
       await tester.pumpAndSettle();
 
       // Tap the requestBody copy button.
-      expect(_clipboardContents, isEmpty);
+      expect(clipboardContents, isEmpty);
       await tester.tap(find.byType(CopyToClipboardControl));
       final expectedResponseBody =
           jsonDecode(utf8.decode(httpRequest!.requestBody!.toList()));
 
       // Check that the contents were copied to clipboard.
-      expect(_clipboardContents, isNotEmpty);
+      expect(clipboardContents, isNotEmpty);
       expect(
-        jsonDecode(_clipboardContents),
+        jsonDecode(clipboardContents),
         equals(expectedResponseBody),
       );
 
@@ -115,15 +112,15 @@ void main() {
       await tester.pumpAndSettle();
 
       // Tap the responseBody copy button.
-      expect(_clipboardContents, isEmpty);
+      expect(clipboardContents, isEmpty);
       await tester.tap(find.byType(CopyToClipboardControl));
       final expectedResponseBody =
           jsonDecode(utf8.decode(httpRequest!.responseBody!.toList()));
 
       // Check that the contents were copied to clipboard.
-      expect(_clipboardContents, isNotEmpty);
+      expect(clipboardContents, isNotEmpty);
       expect(
-        jsonDecode(_clipboardContents),
+        jsonDecode(clipboardContents),
         equals(expectedResponseBody),
       );
 

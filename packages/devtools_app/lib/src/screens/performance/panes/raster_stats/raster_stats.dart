@@ -7,7 +7,6 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
-import '../../../../shared/analytics/analytics.dart' as ga;
 import '../../../../shared/analytics/constants.dart' as gac;
 import '../../../../shared/common_widgets.dart';
 import '../../../../shared/dialogs.dart';
@@ -17,7 +16,6 @@ import '../../../../shared/split.dart';
 import '../../../../shared/table/table.dart';
 import '../../../../shared/table/table_data.dart';
 import '../../../../shared/theme.dart';
-import '../../../../shared/ui/colors.dart';
 import '../../../../shared/utils.dart';
 import 'raster_stats_controller.dart';
 import 'raster_stats_model.dart';
@@ -60,23 +58,19 @@ class _RasterStatsControls extends StatelessWidget {
         padding: const EdgeInsets.all(denseSpacing),
         child: Row(
           children: [
-            IconLabelButton(
+            DevToolsButton(
               tooltip: 'Take a snapshot of the rendering layers on the current'
                   ' screen',
-              icon: Icons.camera,
+              icon: Icons.camera_outlined,
               label: 'Take Snapshot',
-              onPressed: () {
-                ga.select(
-                  gac.performance,
-                  gac.collectRasterStats,
-                );
-                unawaited(
-                  rasterStatsController.collectRasterStats(),
-                );
-              },
+              gaScreen: gac.performance,
+              gaSelection: gac.PerformanceEvents.collectRasterStats.name,
+              onPressed: rasterStatsController.collectRasterStats,
             ),
             const SizedBox(width: denseSpacing),
             ClearButton(
+              gaScreen: gac.performance,
+              gaSelection: gac.PerformanceEvents.clearRasterStats.name,
               onPressed: rasterStatsController.clearData,
             ),
           ],
@@ -198,7 +192,7 @@ class _RenderingTimeColumn extends ColumnData<LayerSnapshot> {
 
   @override
   String getDisplayValue(LayerSnapshot dataObject) =>
-      msText(dataObject.duration);
+      durationText(dataObject.duration);
 
   @override
   bool get numeric => true;
@@ -252,6 +246,7 @@ class LayerImage extends StatelessWidget {
         size: _placeholderImageSize,
       );
     }
+    final theme = Theme.of(context);
     return Row(
       mainAxisSize: MainAxisSize.min,
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -262,7 +257,7 @@ class LayerImage extends StatelessWidget {
         ),
         Flexible(
           child: Container(
-            color: Theme.of(context).focusColor,
+            color: theme.focusColor,
             margin: const EdgeInsets.symmetric(horizontal: defaultSpacing),
             child: LayoutBuilder(
               builder: (context, constraints) {
@@ -283,7 +278,7 @@ class LayerImage extends StatelessWidget {
                         width: scaledSize.width,
                         decoration: BoxDecoration(
                           border: Border.all(
-                            color: defaultSelectionColor,
+                            color: theme.colorScheme.primary,
                           ),
                         ),
                       ),
@@ -342,13 +337,16 @@ class _FullScreenButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.only(bottom: denseSpacing),
+      padding: const EdgeInsets.only(
+        bottom: denseSpacing,
+        right: denseSpacing,
+      ),
       alignment: Alignment.bottomRight,
-      child: IconButton(
-        icon: Icon(
-          Icons.fullscreen,
-          size: defaultButtonHeight,
-        ),
+      child: DevToolsButton.iconOnly(
+        icon: Icons.fullscreen,
+        outlined: false,
+        gaScreen: gac.performance,
+        gaSelection: gac.PerformanceEvents.fullScreenLayerImage.name,
         onPressed: () {
           unawaited(
             showDialog(
@@ -386,7 +384,7 @@ class _LayerImageDialog extends StatelessWidget {
     return DevToolsDialog(
       includeDivider: false,
       scrollable: false,
-      content: Container(
+      content: SizedBox(
         width: mediaWidth - _padding,
         height: mediaHeight - _padding,
         child: LayerImage(

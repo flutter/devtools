@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 import '../../../../../shared/analytics/analytics.dart' as ga;
 import '../../../../../shared/analytics/constants.dart' as gac;
 import '../../../../../shared/common_widgets.dart';
-import '../../../../../shared/feature_flags.dart';
 import '../../../../../shared/globals.dart';
 import '../../../../../shared/primitives/utils.dart';
 import '../../../../../shared/table/table.dart';
@@ -60,13 +59,10 @@ class _ClassNameColumn extends ColumnData<DiffClassStats>
     bool isRowSelected = false,
     VoidCallback? onPressed,
   }) {
-    final theme = Theme.of(context);
     return HeapClassView(
       theClass: data.heapClass,
       showCopyButton: isRowSelected,
       copyGaItem: gac.MemoryEvent.diffClassDiffCopy,
-      textStyle:
-          isRowSelected ? theme.selectedTextStyle : theme.regularTextStyle,
       rootPackage: serviceManager.rootInfoNow().package,
     );
   }
@@ -91,7 +87,7 @@ class _InstanceColumn extends ColumnData<DiffClassStats>
   _InstanceColumn(this.dataPart, this.diffData)
       : super(
           columnTitle(dataPart),
-          fixedWidthPx: scaleByFontFactor(80.0),
+          fixedWidthPx: scaleByFontFactor(110.0),
           alignment: ColumnAlignment.right,
         );
 
@@ -147,7 +143,6 @@ class _InstanceColumn extends ColumnData<DiffClassStats>
     bool isRowSelected = false,
     VoidCallback? onPressed,
   }) {
-    if (!FeatureFlags.evalAndBrowse) return null;
     final objects = _instances(data);
 
     if (dataPart == _DataPart.delta) {
@@ -307,17 +302,16 @@ class ClassesTableDiff extends StatelessWidget {
     required this.classes,
     required this.diffData,
   }) : super(key: key) {
-    _columns = Map.fromIterable(
-      SizeType.values,
-      key: (sizeType) => sizeType,
-      value: (sizeType) => ClassesTableDiffColumns(sizeType, diffData),
-    );
+    _columns = {
+      for (var sizeType in SizeType.values)
+        sizeType: ClassesTableDiffColumns(sizeType, diffData),
+    };
   }
 
   final List<DiffClassStats> classes;
   final ClassesTableDiffData diffData;
 
-  List<ColumnGroup> _columnGroups(SizeType sizeType, BuildContext context) {
+  List<ColumnGroup> _columnGroups() {
     return [
       ColumnGroup.fromText(
         title: '',
@@ -350,7 +344,7 @@ class ClassesTableDiff extends StatelessWidget {
 
         return FlatTable<DiffClassStats>(
           columns: columns.columnList,
-          columnGroups: _columnGroups(sizeType, context),
+          columnGroups: _columnGroups(),
           data: classes,
           dataKey: dataKey,
           keyFactory: (e) => Key(e.heapClass.fullName),

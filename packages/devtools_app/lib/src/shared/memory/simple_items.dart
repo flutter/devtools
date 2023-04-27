@@ -7,3 +7,19 @@ enum RefDirection {
   inbound,
   outbound,
 }
+
+/// Result of invocation of [identityHashCode].
+typedef IdentityHashCode = int;
+
+class MemoryFootprint {
+  MemoryFootprint({
+    required this.dart,
+    required this.reachable,
+  });
+
+  /// Reachable and unreachable total dart heap size.
+  final int dart;
+
+  /// Subset of [dart].
+  final int reachable;
+}

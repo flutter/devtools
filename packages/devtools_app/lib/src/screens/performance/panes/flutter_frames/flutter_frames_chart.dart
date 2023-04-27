@@ -28,7 +28,6 @@ import 'flutter_frame_model.dart';
 import 'flutter_frames_controller.dart';
 
 // Turn this flag on to see when flutter frames are linked with timeline events.
-// ignore: avoid-global-state
 bool debugFrames = false;
 
 class FlutterFramesChart extends StatelessWidget {
@@ -178,6 +177,7 @@ class _FlutterFramesChartState extends State<_FlutterFramesChart> {
 @visibleForTesting
 class FramesChart extends StatefulWidget {
   const FramesChart({
+    super.key,
     required this.framesController,
     required this.frames,
     required this.displayRefreshRate,
@@ -341,6 +341,7 @@ class _FramesChartState extends State<FramesChart> with AutoDisposeMixin {
 @visibleForTesting
 class FramesChartControls extends StatelessWidget {
   const FramesChartControls({
+    super.key,
     required this.framesController,
     required this.frames,
     required this.displayRefreshRate,
@@ -375,6 +376,9 @@ class FramesChartControls extends StatelessWidget {
                 onResume: _resumeFrameRecording,
                 pauseTooltip: _pauseTooltip,
                 resumeTooltip: _resumeTooltip,
+                gaScreen: gac.performance,
+                gaSelectionPause: gac.pause,
+                gaSelectionResume: gac.resume,
               );
             },
           ),
@@ -411,6 +415,7 @@ class FramesChartControls extends StatelessWidget {
 
 class FlutterFramesChartItem extends StatelessWidget {
   const FlutterFramesChartItem({
+    super.key,
     required this.index,
     required this.framesController,
     required this.frame,
@@ -535,7 +540,7 @@ class FlutterFramesChartItem extends StatelessWidget {
             if (selected)
               Container(
                 key: selectedFrameIndicatorKey,
-                color: defaultSelectionColor,
+                color: colorScheme.primary,
                 height: selectedIndicatorHeight,
               ),
             if (hasShaderJank)
@@ -575,7 +580,7 @@ class FlutterFramesChartItem extends StatelessWidget {
       // the frame's timeline events are available.
       ga.select(
         gac.performance,
-        gac.selectFlutterFrame,
+        gac.PerformanceEvents.selectFlutterFrame.name,
         screenMetricsProvider: () => PerformanceScreenMetrics(
           uiDuration: frame.buildTime,
           rasterDuration: frame.rasterTime,
@@ -604,24 +609,34 @@ class FlutterFrameTooltip extends StatelessWidget {
 
   static const double _moreInfoLinkWidth = 100.0;
 
-  static const _textMeasurementBuffer = 4.0;
+  static const _textMeasurementBuffer = 8.0;
 
   @override
   Widget build(BuildContext context) {
     return HoverCardTooltip.sync(
       enabled: () => true,
-      generateHoverCardData: (_) => _buildCardData(context),
+      generateHoverCardData: (_) => _buildCardData(),
       child: child,
     );
   }
 
-  HoverCardData _buildCardData(BuildContext context) {
-    final textColor = Theme.of(context).colorScheme.toggleButtonsTitle;
-    final textStyle = TextStyle(color: textColor);
-    final uiText = 'UI: ${msText(frame.buildTime)}';
-    final rasterText = 'Raster: ${msText(frame.rasterTime)}';
+  HoverCardData _buildCardData() {
+    final uiText = 'UI: ${durationText(
+      frame.buildTime,
+      unit: DurationDisplayUnit.milliseconds,
+      allowRoundingToZero: false,
+    )}';
+    final rasterText = 'Raster: ${durationText(
+      frame.rasterTime,
+      unit: DurationDisplayUnit.milliseconds,
+      allowRoundingToZero: false,
+    )}';
     final shaderText = hasShaderJank
-        ? 'Shader Compilation: ${msText(frame.shaderDuration)}  -'
+        ? 'Shader Compilation: ${durationText(
+            frame.shaderDuration,
+            unit: DurationDisplayUnit.milliseconds,
+            allowRoundingToZero: false,
+          )}  -'
         : '';
     return HoverCardData(
       position: HoverCardPosition.element,
@@ -631,32 +646,22 @@ class FlutterFrameTooltip extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              uiText,
-              style: textStyle,
-            ),
+            Text(uiText),
             const SizedBox(height: densePadding),
-            Text(
-              rasterText,
-              style: textStyle,
-            ),
+            Text(rasterText),
             if (hasShaderJank)
               Row(
                 children: [
-                  Icon(
+                  const Icon(
                     Icons.subdirectory_arrow_right,
-                    color: textColor,
                     size: defaultIconSizeBeforeScaling,
                   ),
-                  Text(
-                    shaderText,
-                    style: textStyle,
-                  ),
+                  Text(shaderText),
                   MoreInfoLink(
                     url: preCompileShadersDocsUrl,
                     gaScreenName: gac.performance,
-                    gaSelectedItemDescription:
-                        gac.shaderCompilationDocsTooltipLink,
+                    gaSelectedItemDescription: gac
+                        .PerformanceDocs.shaderCompilationDocsTooltipLink.name,
                   ),
                 ],
               ),
@@ -684,7 +689,11 @@ class FlutterFrameTooltip extends StatelessWidget {
 }
 
 class AverageFPS extends StatelessWidget {
-  const AverageFPS({required this.frames, required this.displayRefreshRate});
+  const AverageFPS({
+    super.key,
+    required this.frames,
+    required this.displayRefreshRate,
+  });
 
   final List<FlutterFrame> frames;
 
@@ -721,7 +730,7 @@ class AverageFPS extends StatelessWidget {
 }
 
 class ShaderJankWarningIcon extends StatelessWidget {
-  const ShaderJankWarningIcon();
+  const ShaderJankWarningIcon({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -815,8 +824,9 @@ class ChartAxisPainter extends CustomPainter {
     Rect chartArea, {
     required int timeMs,
   }) {
-    final labelText = msText(
+    final labelText = durationText(
       Duration(milliseconds: timeMs),
+      unit: DurationDisplayUnit.milliseconds,
       fractionDigits: 0,
     );
 
@@ -825,8 +835,9 @@ class ChartAxisPainter extends CustomPainter {
 
     // Do not draw the y axis label if it will collide with the 0.0 label or if
     // it will go beyond the uper bound of the chart.
-    if (timeMs != 0 && (tickY > chartArea.height - 10.0 || tickY < 10.0))
+    if (timeMs != 0 && (tickY > chartArea.height - 10.0 || tickY < 10.0)) {
       return;
+    }
 
     canvas.drawLine(
       Offset(chartArea.left - yAxisTickWidth / 2, tickY),

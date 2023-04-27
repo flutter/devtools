@@ -9,7 +9,7 @@ import '../shared/diagnostics/inspector_service.dart';
 abstract class DevToolsExtensionPoints {
   List<ScriptPopupMenuOption> buildExtraDebuggerScriptPopupMenuOptions();
 
-  Link issueTrackerLink();
+  Link issueTrackerLink({String? additionalInfo});
 
   String? username();
 
@@ -17,5 +17,5 @@ abstract class DevToolsExtensionPoints {
 
   InspectorServiceBase? inspectorServiceProvider();
 
-  bool get defaultIsDarkTheme;
+  String get perfettoIndexLocation;
 }

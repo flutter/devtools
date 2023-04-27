@@ -7,9 +7,12 @@ import 'dart:async';
 import 'package:async/async.dart';
 import 'package:collection/collection.dart' show IterableExtension;
 import 'package:flutter/foundation.dart';
+import 'package:logging/logging.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../service/vm_service_wrapper.dart';
+import '../../shared/analytics/analytics.dart' as ga;
+import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/diagnostics/dart_object_node.dart';
 import '../../shared/diagnostics/primitives/source_location.dart';
 import '../../shared/diagnostics/tree_builder.dart';
@@ -22,7 +25,9 @@ import 'codeview_controller.dart';
 import 'debugger_model.dart';
 
 // Make sure this a checked in with `mute: true`.
-final _log = DebugTimingLogger('debugger', mute: true);
+final _debugTimingLog = DebugTimingLogger('debugger', mute: true);
+
+final _log = Logger('debugger_controller');
 
 /// Responsible for managing the debug state of the app.
 class DebuggerController extends DisposableController
@@ -209,13 +214,13 @@ class DebuggerController extends DisposableController
   Future<Success> pause() => _service.pause(_isolateRefId);
 
   Future<Success> resume() {
-    _log.log('resume()');
+    _debugTimingLog.log('resume()');
     _resuming.value = true;
     return _service.resume(_isolateRefId);
   }
 
   Future<Success> stepOver() {
-    _log.log('stepOver()');
+    _debugTimingLog.log('stepOver()');
     _resuming.value = true;
 
     // Handle async suspensions; issue StepOption.kOverAsyncSuspension.
@@ -227,7 +232,7 @@ class DebuggerController extends DisposableController
               ? StepOption.kOverAsyncSuspension
               : StepOption.kOver,
         )
-        .whenComplete(() => _log.log('stepOver() completed'));
+        .whenComplete(() => _debugTimingLog.log('stepOver() completed'));
   }
 
   Future<Success> stepIn() {
@@ -258,12 +263,12 @@ class DebuggerController extends DisposableController
     assert(_resuming.value);
 
     final id = event.isolate!.id!;
-    _log.log('resume() $id');
+    _debugTimingLog.log('resume() $id');
     return _service.resume(id);
   }
 
   void _handleDebugEvent(Event event) {
-    _log.log('event: ${event.kind}');
+    _debugTimingLog.log('event: ${event.kind}');
 
     // We're resuming and another isolate has started in a paused state,
     // resume any pauseState isolates.
@@ -317,14 +322,8 @@ class DebuggerController extends DisposableController
     final currentScriptRefs =
         await scriptManager.retrieveAndSortScripts(theIsolateRef);
     final removedScripts =
-        // There seems to be a bug in how this lint is working with type
-        // inference.
-        // ignore: avoid-collection-methods-with-unrelated-types
         Set.of(previousScriptRefs).difference(Set.of(currentScriptRefs));
     final addedScripts =
-        // There seems to be a bug in how this lint is working with type
-        // inference.
-        // ignore: avoid-collection-methods-with-unrelated-types
         Set.of(currentScriptRefs).difference(Set.of(previousScriptRefs));
 
     // TODO(devoncarew): Show a message in the logging view.
@@ -373,7 +372,7 @@ class DebuggerController extends DisposableController
     // listening for changes there instead of having separate logic.
     await _getStackOperation?.cancel();
 
-    _log.log('_pause(running: ${!paused})');
+    _debugTimingLog.log('_pause(running: ${!paused})');
 
     // Perform an early exit if we're not paused.
     if (!paused) {
@@ -388,9 +387,31 @@ class DebuggerController extends DisposableController
     // we fetch all variable objects twice (once in _getFullStack and once in
     // in_createStackFrameWithLocation).
     if (await serviceManager.connectedApp!.isDartWebApp) {
+      final topFrame = pauseEvent?.topFrame;
+      if (topFrame == null) {
+        _log.warning(
+          'Pause event has no frame. This likely indicates a DWDS bug.',
+        );
+        _populateFrameInfo(
+          [
+            await _createStackFrameWithLocation(
+              Frame(
+                code: CodeRef(
+                  name: 'No Dart frames found, likely paused in JS.',
+                  kind: CodeKind.kTag,
+                  id: DateTime.now().microsecondsSinceEpoch.toString(),
+                ),
+              ),
+            ),
+          ],
+          truncated: true,
+        );
+        ga.select(gac.debugger, gac.pausedWithNoFrames);
+        return;
+      }
       _populateFrameInfo(
         [
-          await _createStackFrameWithLocation(pauseEvent!.topFrame!),
+          await _createStackFrameWithLocation(topFrame),
         ],
         truncated: true,
       );
@@ -420,9 +441,10 @@ class DebuggerController extends DisposableController
   }
 
   Future<_StackInfo> _getStackInfo({int? limit}) async {
-    _log.log('getStack() with limit: $limit');
+    _debugTimingLog.log('getStack() with limit: $limit');
     final stack = await _service.getStack(_isolateRefId, limit: limit);
-    _log.log('getStack() completed (frames: ${stack.frames!.length})');
+    _debugTimingLog
+        .log('getStack() completed (frames: ${stack.frames!.length})');
 
     final frames = _framesForCallStack(
       stack.frames ?? [],
@@ -440,7 +462,7 @@ class DebuggerController extends DisposableController
     List<StackFrameAndSourcePosition> frames, {
     required final bool truncated,
   }) {
-    _log.log('populated frame info');
+    _debugTimingLog.log('populated frame info');
     _stackFramesWithLocation.value = frames;
     _hasTruncatedFrames.value = truncated;
     if (frames.isEmpty) {
@@ -482,14 +504,14 @@ class DebuggerController extends DisposableController
   Future<StackFrameAndSourcePosition> _createStackFrameWithLocation(
     Frame frame,
   ) async {
-    final location = frame.location;
-    if (location == null) {
+    final scriptInfo = frame.location?.script;
+    final tokenPos = frame.location?.tokenPos ?? -1;
+    if (scriptInfo == null || tokenPos < 0) {
       return StackFrameAndSourcePosition(frame);
     }
 
-    final script = await scriptManager.getScript(location.script!);
-    final position =
-        SourcePosition.calculatePosition(script, location.tokenPos!);
+    final script = await scriptManager.getScript(scriptInfo);
+    final position = SourcePosition.calculatePosition(script, tokenPos);
     return StackFrameAndSourcePosition(frame, position: position);
   }
 

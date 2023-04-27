@@ -103,7 +103,7 @@ class _RasterPhases extends StatelessWidget {
     final data = _generateBlockData(frameAnalysis);
     return _FrameBlockGroup(
       title: 'Raster ${pluralize('phase', data.length)}:',
-      data: _generateBlockData(frameAnalysis),
+      data: data,
       hasData: frameAnalysis.hasRasterData,
     );
   }
@@ -314,12 +314,13 @@ class _FramePhaseBlockData {
   final IconData icon;
 
   String get display {
-    final durationText = duration != Duration.zero
-        ? msText(
+    final text = duration != Duration.zero
+        ? durationText(
             duration,
+            unit: DurationDisplayUnit.milliseconds,
             allowRoundingToZero: false,
           )
         : '--';
-    return '$title - $durationText';
+    return '$title - $text';
   }
 }

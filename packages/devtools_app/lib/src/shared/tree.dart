@@ -14,6 +14,7 @@ import 'theme.dart';
 
 class TreeView<T extends TreeNode<T>> extends StatefulWidget {
   const TreeView({
+    super.key,
     required this.dataRootsListenable,
     required this.dataDisplayProvider,
     required this.onItemSelected,
@@ -61,7 +62,7 @@ class TreeView<T extends TreeNode<T>> extends StatefulWidget {
   final bool includeScrollbar;
 
   @override
-  _TreeViewState<T> createState() => _TreeViewState<T>();
+  State<TreeView<T>> createState() => _TreeViewState<T>();
 }
 
 class _TreeViewState<T extends TreeNode<T>> extends State<TreeView<T>>
@@ -174,7 +175,7 @@ class _TreeViewItemState<T extends TreeNode<T>> extends State<_TreeViewItem<T>>
     return Container(
       margin: EdgeInsets.only(left: nodeIndent(widget.data)),
       color: widget.data.isSelected
-          ? Theme.of(context).colorScheme.selectedRowColor
+          ? Theme.of(context).colorScheme.selectedRowBackgroundColor
           : null,
       child: Row(
         mainAxisSize: MainAxisSize.min,

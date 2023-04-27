@@ -3,14 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:ansicolor/ansicolor.dart';
-import 'package:devtools_app/src/screens/debugger/debugger_controller.dart';
-import 'package:devtools_app/src/service/service_manager.dart';
-import 'package:devtools_app/src/shared/config_specific/ide_theme/ide_theme.dart';
-import 'package:devtools_app/src/shared/console/eval/eval_service.dart';
+import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/shared/console/widgets/console_pane.dart';
-import 'package:devtools_app/src/shared/globals.dart';
-import 'package:devtools_app/src/shared/notifications.dart';
-import 'package:devtools_app/src/shared/scripts/script_manager.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -32,6 +26,8 @@ void main() {
   setGlobal(ScriptManager, MockScriptManager());
   setGlobal(NotificationService, NotificationService());
   setGlobal(EvalService, MockEvalService());
+  setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
+  setGlobal(PreferencesController, PreferencesController());
   fakeServiceManager.consoleService.ensureServiceInitialized();
   when(fakeServiceManager.errorBadgeManager.errorCountNotifier('debugger'))
       .thenReturn(ValueNotifier<int>(0));
@@ -54,10 +50,10 @@ void main() {
   }
 
   group('ConsoleControls', () {
-    final _stdio = ['First line', _ansiCodesOutput(), 'Third line'];
+    final stdio = ['First line', _ansiCodesOutput(), 'Third line'];
 
-    void _appendStdioLines() {
-      for (var line in _stdio) {
+    void appendStdioLines() {
+      for (var line in stdio) {
         serviceManager.consoleService.appendStdio('$line\n');
       }
     }
@@ -81,21 +77,22 @@ void main() {
     );
 
     group('Clipboard', () {
-      String _clipboardContents = '';
-      final _expected = _stdio.join('\n');
+      String clipboardContents = '';
+      final expected = stdio.join('\n');
 
       setUp(() {
-        _appendStdioLines();
+        appendStdioLines();
         setupClipboardCopyListener(
           clipboardContentsCallback: (contents) {
-            _clipboardContents = contents ?? '';
+            clipboardContents = contents ?? '';
           },
         );
       });
 
       tearDown(() {
         // Cleanup the SystemChannel
-        SystemChannels.platform.setMockMethodCallHandler(null);
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+            .setMockMethodCallHandler(SystemChannels.platform, null);
       });
 
       testWidgetsWithWindowSize(
@@ -107,11 +104,11 @@ void main() {
           final copyButton = find.byKey(ConsolePane.copyToClipboardButtonKey);
           expect(copyButton, findsOneWidget);
 
-          expect(_clipboardContents, isEmpty);
+          expect(clipboardContents, isEmpty);
 
           await tester.tap(copyButton);
 
-          expect(_clipboardContents, equals(_expected));
+          expect(clipboardContents, equals(expected));
         },
       );
     });

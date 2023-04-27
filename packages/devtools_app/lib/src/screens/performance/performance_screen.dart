@@ -43,7 +43,7 @@ class PerformanceScreen extends Screen {
 }
 
 class PerformanceScreenBody extends StatefulWidget {
-  const PerformanceScreenBody();
+  const PerformanceScreenBody({super.key});
 
   @override
   PerformanceScreenBodyState createState() => PerformanceScreenBodyState();
@@ -108,7 +108,7 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
               controller: controller,
               onClear: () => setState(() {}),
             ),
-            const SizedBox(height: denseRowSpacing),
+            const SizedBox(height: intermediateSpacing),
             if (isOfflineFlutterApp ||
                 (!offlineMode && serviceManager.connectedApp!.isFlutterAppNow!))
               FlutterFramesChart(

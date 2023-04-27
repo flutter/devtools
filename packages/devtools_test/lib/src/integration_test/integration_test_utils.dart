@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:convert';
+import 'dart:ui' as ui;
 
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/main.dart' as app;
@@ -14,6 +15,12 @@ import 'test_data/performance.dart';
 
 const safePumpDuration = Duration(seconds: 3);
 const longPumpDuration = Duration(seconds: 6);
+
+/// Required to have multiple test cases in this file.
+Future<void> resetHistory() async {
+  // ignore: avoid-dynamic, necessary here.
+  await (ui.PlatformDispatcher.instance.views.single as dynamic).resetHistory();
+}
 
 Future<void> pumpAndConnectDevTools(
   WidgetTester tester,
@@ -41,13 +48,22 @@ Future<void> pumpAndConnectDevTools(
   }
 }
 
+Future<void> switchToScreen(WidgetTester tester, ScreenMetaData screen) async {
+  final screenTitle = screen.title;
+  logStatus('switching to $screenTitle screen');
+  await tester.tap(find.widgetWithText(Tab, screenTitle));
+  // We use pump here instead of pumpAndSettle because pumpAndSettle will
+  // never complete if there is an animation (e.g. a progress indicator).
+  await tester.pump(safePumpDuration);
+}
+
 Future<void> pumpDevTools(WidgetTester tester) async {
   // TODO(kenz): how can we share code across integration_test/test and
   // integration_test/test_infra? When trying to import, we get an error:
   // Error when reading 'org-dartlang-app:/test_infra/shared.dart': File not found
   const shouldEnableExperiments = bool.fromEnvironment('enable_experiments');
-  await app.externalRunDevTools(
-    // ignore: avoid_redundant_argument_values
+  app.externalRunDevTools(
+    // ignore: avoid_redundant_argument_values, by design
     shouldEnableExperiments: shouldEnableExperiments,
     sampleData: _sampleData,
   );

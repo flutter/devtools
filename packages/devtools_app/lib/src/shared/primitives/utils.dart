@@ -17,8 +17,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:intl/intl.dart';
+import 'package:logging/logging.dart';
 
 import 'simple_items.dart';
+
+final _log = Logger('utils');
 
 bool isPrivate(String member) => member.startsWith('_');
 
@@ -88,23 +91,35 @@ String? prettyPrintBytes(
   final sizeInGB = sizeInMB / 1024.0;
 
   if (sizeInGB >= roundingPoint) {
-    return '${printGB(bytes, fractionDigits: gbFractionDigits, includeUnit: includeUnit)}';
+    return printGB(
+      bytes,
+      fractionDigits: gbFractionDigits,
+      includeUnit: includeUnit,
+    );
   } else if (sizeInMB >= roundingPoint) {
-    return '${printMB(bytes, fractionDigits: mbFractionDigits, includeUnit: includeUnit)}';
+    return printMB(
+      bytes,
+      fractionDigits: mbFractionDigits,
+      includeUnit: includeUnit,
+    );
   } else {
-    return '${printKB(bytes, fractionDigits: kbFractionDigits, includeUnit: includeUnit)}';
+    return printKB(
+      bytes,
+      fractionDigits: kbFractionDigits,
+      includeUnit: includeUnit,
+    );
   }
 }
 
 String printKB(num bytes, {int fractionDigits = 0, bool includeUnit = false}) {
-  final NumberFormat _kbPattern = NumberFormat.decimalPattern()
+  final NumberFormat kbPattern = NumberFormat.decimalPattern()
     ..maximumFractionDigits = fractionDigits;
 
   // We add ((1024/2)-1) to the value before formatting so that a non-zero byte
   // value doesn't round down to 0. If showing decimal points, let it round normally.
   // TODO(peterdjlee): Round up to the respective digit when fractionDigits > 0.
   final processedBytes = fractionDigits == 0 ? bytes + 511 : bytes;
-  var output = _kbPattern.format(processedBytes / 1024);
+  var output = kbPattern.format(processedBytes / 1024);
   if (includeUnit) {
     output += ' KB';
   }
@@ -128,22 +143,71 @@ String printGB(num bytes, {int fractionDigits = 1, bool includeUnit = false}) {
   return output;
 }
 
-/// Converts a [Duration] into a readable text representation in milliseconds.
+enum DurationDisplayUnit {
+  micros('μs'),
+  milliseconds('ms'),
+  seconds('s');
+
+  const DurationDisplayUnit(this.display);
+
+  final String display;
+
+  static DurationDisplayUnit unitFor(int micros) {
+    if (micros < 100) {
+      // Display values less than 0.1 millisecond as microseconds.
+      return DurationDisplayUnit.micros;
+    } else if (micros < 1000000) {
+      return DurationDisplayUnit.milliseconds;
+    }
+    return DurationDisplayUnit.seconds;
+  }
+}
+
+/// Converts a [Duration] into a readable text representation in the specified
+/// [unit].
 ///
-/// [includeUnit] - whether to include 'ms' at the end of the returned value
-/// [fractionDigits] - how many fraction digits should appear after the decimal
+/// [includeUnit] - whether to include the unit at the end of the returned value
+/// [fractionDigits] - how many fraction digits should appear after the decimal.
+/// This parameter value will be ignored when the unit is specified or inferred
+/// as [DurationDisplayUnit.micros], since there cannot be a fractional value of
+/// microseconds from the [Duration] class.
 /// [allowRoundingToZero] - when true, this method may return zero for a very
 /// small number (e.g. '0.0 ms'). When false, this method will return a minimum
 /// value with the less than operator for very small values (e.g. '< 0.1 ms').
 /// The value returned will always respect the specified [fractionDigits].
-String msText(
+String durationText(
   Duration dur, {
+  DurationDisplayUnit? unit,
   bool includeUnit = true,
   int fractionDigits = 1,
   bool allowRoundingToZero = true,
 }) {
-  var durationStr = (dur.inMicroseconds / 1000).toStringAsFixed(fractionDigits);
+  if (!allowRoundingToZero && unit == null) {
+    throw AssertionError('To disable rounding to zero, please specify a unit.');
+  }
 
+  final micros = dur.inMicroseconds;
+  unit ??= DurationDisplayUnit.unitFor(micros);
+  double durationAsDouble;
+  switch (unit) {
+    case DurationDisplayUnit.micros:
+      durationAsDouble = micros.toDouble();
+      break;
+    case DurationDisplayUnit.milliseconds:
+      durationAsDouble = micros / 1000;
+      break;
+    case DurationDisplayUnit.seconds:
+      durationAsDouble = micros / 1000000;
+      break;
+  }
+
+  // Hide any fraction digits when the unit is microseconds, since the
+  // duration displayed will always be a whole number in this case.
+  if (unit == DurationDisplayUnit.micros) {
+    fractionDigits = 0;
+  }
+
+  var durationStr = durationAsDouble.toStringAsFixed(fractionDigits);
   if (dur != Duration.zero && !allowRoundingToZero) {
     final zeroRegexp = RegExp(r'[0]+[.][0]+');
     if (zeroRegexp.hasMatch(durationStr)) {
@@ -155,15 +219,7 @@ String msText(
       durationStr = buf.toString();
     }
   }
-  return '$durationStr${includeUnit ? ' ms' : ''}';
-}
-
-/// Render the given [Duration] to text using either seconds or milliseconds as
-/// the units, depending on the value of the duration.
-String renderDuration(Duration duration) {
-  return duration.inMilliseconds < 1000
-      ? '${nf.format(duration.inMilliseconds)}ms'
-      : '${(duration.inMilliseconds / 1000).toStringAsFixed(1)}s';
+  return '$durationStr${includeUnit ? ' ${unit.display}' : ''}';
 }
 
 T? nullSafeMin<T extends num>(T? a, T? b) {
@@ -191,7 +247,7 @@ int roundToNearestPow10(int x) =>
 
 void executeWithDelay(
   Duration delay,
-  void callback(), {
+  void Function() callback, {
   bool executeNow = false,
 }) {
   if (executeNow || delay.inMilliseconds <= 0) {
@@ -249,7 +305,7 @@ String longestFittingSubstring(
   String originalText,
   num maxWidth,
   List<num> asciiMeasurements,
-  num slowMeasureFallback(int value),
+  num Function(int value) slowMeasureFallback,
 ) {
   if (originalText.isEmpty) return originalText;
 
@@ -623,6 +679,7 @@ class TimeRange {
   }
 
   @override
+  // ignore: avoid-dynamic, necessary here.
   bool operator ==(other) {
     if (other is! TimeRange) return false;
     return start == other.start && end == other.end;
@@ -714,7 +771,7 @@ class Reporter implements Listenable {
   }
 
   @override
-  String toString() => '${describeIdentity(this)}';
+  String toString() => describeIdentity(this);
 }
 
 /// A [Reporter] that notifies when its [value] changes.
@@ -787,6 +844,7 @@ class Range {
   String toString() => 'Range($begin, $end)';
 
   @override
+  // ignore: avoid-dynamic, necessary here.
   bool operator ==(other) {
     if (other is! Range) return false;
     return begin == other.begin && end == other.end;
@@ -816,6 +874,7 @@ class LineRange {
   String toString() => 'LineRange($begin, $end)';
 
   @override
+  // ignore: avoid-dynamic, necessary here.
   bool operator ==(other) {
     if (other is! LineRange) return false;
     return begin == other.begin && end == other.end;
@@ -855,14 +914,14 @@ class DebugTimingLogger {
 
     if (_timer != null) {
       _timer!.stop();
-      print('[$name}]   ${_timer!.elapsedMilliseconds}ms');
+      _log.fine('[$name}]   ${_timer!.elapsedMilliseconds}ms');
       _timer!.reset();
     }
 
     _timer ??= Stopwatch();
     _timer!.start();
 
-    print('[$name] $message');
+    _log.fine('[$name] $message');
   }
 }
 
@@ -1050,6 +1109,13 @@ class DevToolsFile<T> {
 
 final _lowercaseLookup = <String, String>{};
 
+extension NullableStringExtension on String? {
+  bool get isNullOrEmpty {
+    final self = this;
+    return self == null || self.isEmpty;
+  }
+}
+
 // TODO(kenz): consider moving other String helpers into this extension.
 // TODO(kenz): replace other uses of toLowerCase() for string matching with
 // this extension method.
@@ -1107,6 +1173,11 @@ extension StringExtension on String {
     if (query == null) return const [];
     return toLowerCase().allMatches(query.toLowerCase());
   }
+
+  String toSentenceCase() {
+    if (isEmpty) return this;
+    return '${this[0].toUpperCase()}${substring(1).toLowerCase()}';
+  }
 }
 
 extension ListExtension<T> on List<T> {
@@ -1119,7 +1190,10 @@ extension ListExtension<T> on List<T> {
     ];
   }
 
-  Iterable<T> whereFromIndex(bool test(T element), {int startIndex = 0}) {
+  Iterable<T> whereFromIndex(
+    bool Function(T element) test, {
+    int startIndex = 0,
+  }) {
     final whereList = <T>[];
     for (int i = startIndex; i < length; i++) {
       final element = this[i];
@@ -1130,7 +1204,7 @@ extension ListExtension<T> on List<T> {
     return whereList;
   }
 
-  bool containsWhere(bool test(T element)) {
+  bool containsWhere(bool Function(T element) test) {
     for (var e in this) {
       if (test(e)) {
         return true;
@@ -1141,7 +1215,7 @@ extension ListExtension<T> on List<T> {
 }
 
 extension SetExtension<T> on Set<T> {
-  bool containsWhere(bool test(T element)) {
+  bool containsWhere(bool Function(T element) test) {
     for (var e in this) {
       if (test(e)) {
         return true;
@@ -1428,12 +1502,12 @@ class ImmutableList<T> with ListMixin<T> implements List<T> {
   }
 
   @override
-  void removeWhere(bool test(T element)) {
+  void removeWhere(bool Function(T element) test) {
     throw Exception('Cannot modify the content of ImmutableList');
   }
 
   @override
-  void retainWhere(bool test(T element)) {
+  void retainWhere(bool Function(T element) test) {
     throw Exception('Cannot modify the content of ImmutableList');
   }
 

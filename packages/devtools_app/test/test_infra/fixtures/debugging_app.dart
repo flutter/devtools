@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// ignore_for_file: avoid_print
+
 import 'dart:async';
 
 void main() {
@@ -31,7 +33,7 @@ class Cat {
 
   void performAction() {
     String actionStr = 'catAction';
-    actionStr = actionStr + '!';
+    actionStr = '$actionStr!';
 
     actionCount++; // breakpoint
   }

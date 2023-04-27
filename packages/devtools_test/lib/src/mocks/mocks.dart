@@ -62,6 +62,9 @@ class FakeInspectorService extends Fake implements InspectorService {
   void removeClient(InspectorServiceClient client) {
     clients.remove(client);
   }
+
+  @override
+  bool get hoverEvalModeEnabledByDefault => true;
 }
 
 class TestInspectorController extends Fake implements InspectorController {
@@ -108,6 +111,7 @@ void mockConnectedApp(
   required bool isFlutterApp,
   required isProfileBuild,
   required isWebApp,
+  String os = 'ios',
 }) {
   assert(!(!isFlutterApp && isProfileBuild));
 
@@ -157,6 +161,9 @@ void mockConnectedApp(
   when(connectedApp.isDebugFlutterAppNow)
       .thenReturn(isFlutterApp && !isProfileBuild);
 
+  // Operating system.
+  when(connectedApp.operatingSystem).thenReturn(os);
+
   // Initialized.
   when(connectedApp.connectedAppInitialized).thenReturn(true);
   when(connectedApp.initialized).thenReturn(Completer()..complete(true));
@@ -174,7 +181,7 @@ void mockFlutterVersion(
   when(connectedApp.connectedAppInitialized).thenReturn(true);
 }
 
-// ignore: prefer_single_quotes
+// ignore: prefer_single_quotes, false positive.
 final Grammar mockGrammar = Grammar.fromJson(
   jsonDecode(
     '''
@@ -614,7 +621,7 @@ final Script? mockScript = Script.parse(
 
 final mockScriptRef = ScriptRef(
   uri:
-      'libraries/@783137924/scripts/package%3Agallery%2Fmain.dart/17b557e5bc3"',
+      'libraries/@783137924/scripts/package%3Agallery%2Fmain.dart/17b557e5bc3',
   id: 'test-script-long-lines',
 );
 

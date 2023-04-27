@@ -6,13 +6,12 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
-import '../../../../shared/analytics/analytics.dart' as ga;
 import '../../../../shared/analytics/constants.dart' as gac;
 import '../../../../shared/common_widgets.dart';
 import '../../../../shared/globals.dart';
+import '../../../../shared/primitives/simple_items.dart';
 import '../../../../shared/split.dart';
 import '../../../../shared/theme.dart';
-import '../../shared/primitives/simple_elements.dart';
 import 'class_table.dart';
 import 'tracing_pane_controller.dart';
 import 'tracing_tree.dart';
@@ -100,31 +99,18 @@ class _TracingControls extends StatelessWidget {
         children: [
           RefreshButton(
             tooltip: 'Request the set of updated allocation traces',
-            onPressed: isProfileMode
-                ? null
-                : () async {
-                    ga.select(
-                      gac.memory,
-                      gac.MemoryEvent.tracingRefresh,
-                    );
-                    await controller.refresh();
-                  },
+            gaScreen: gac.memory,
+            gaSelection: gac.MemoryEvent.tracingRefresh,
+            onPressed: isProfileMode ? null : controller.refresh,
           ),
-          const SizedBox(
-            width: denseSpacing,
-          ),
+          const SizedBox(width: denseSpacing),
           ClearButton(
             tooltip: 'Clear the set of previously collected traces',
-            onPressed: isProfileMode
-                ? null
-                : () async {
-                    ga.select(
-                      gac.memory,
-                      gac.MemoryEvent.tracingClear,
-                    );
-                    await controller.clear();
-                  },
+            gaScreen: gac.memory,
+            gaSelection: gac.MemoryEvent.tracingClear,
+            onPressed: isProfileMode ? null : controller.clear,
           ),
+          const SizedBox(width: denseSpacing),
           const _ProfileHelpLink(),
         ],
       ),

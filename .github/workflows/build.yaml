@@ -17,57 +17,7 @@ env:
   GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 jobs:
   flutter-prep:
-    name: ${{ matrix.os }} Flutter Prep
-    outputs:
-      latest_flutter_candidate: ${{ steps.flutter-candidate.outputs.FLUTTER_CANDIDATE }}
-    strategy:
-      matrix:
-        os: [ubuntu-latest, macos-latest]
-    runs-on: ${{ matrix.os }}
-    steps:
-      - name: git clone devtools
-        uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c
-
-      - name: Get Latest Flutter Candidate
-        id: flutter-candidate
-        run: |
-          LATEST_FLUTTER_CANDIDATE=$(./tool/latest_flutter_candidate.sh)
-          echo "FLUTTER_CANDIDATE=$LATEST_FLUTTER_CANDIDATE" >> $GITHUB_OUTPUT
-      
-      - name: Load Cached Flutter SDK
-        id: cache-flutter
-        uses: actions/cache@940f3d7cf195ba83374c77632d1e2cbb2f24ae68
-        with:
-          path: |
-            ./flutter-sdk
-          key: flutter-sdk-${{ runner.os }}-${{ steps.flutter-candidate.outputs.FLUTTER_CANDIDATE }}
-
-      - if: ${{ steps.cache-flutter.outputs.cache-hit != 'true' }}
-        name: Clone Flutter SDK if none cached
-        run: |
-          git clone https://github.com/flutter/flutter.git ./flutter-sdk
-          cd flutter-sdk
-          git checkout $LATEST_FLUTTER_CANDIDATE
-        env:
-          LATEST_FLUTTER_CANDIDATE: ${{ steps.flutter-candidate.outputs.FLUTTER_CANDIDATE }}
-
-      - name: Assert that the Latest Flutter Candidate is checked out
-        run: |
-            cd flutter-sdk
-            HEAD_SHA=$(git rev-parse HEAD)
-            LATEST_FLUTTER_CANDIDATE_SHA=$(git rev-parse "origin/$LATEST_FLUTTER_CANDIDATE")
-            if [ "$HEAD_SHA" != "$LATEST_FLUTTER_CANDIDATE_SHA" ]; then
-              echo "::error ,title=Error checking out Latest Flutter Candidate::{expected HEAD to be at $LATEST_FLUTTER_CANDIDATE_SHA but got $HEAD_SHA}"
-              exit 1
-            fi
-        env:
-          LATEST_FLUTTER_CANDIDATE: ${{ steps.flutter-candidate.outputs.FLUTTER_CANDIDATE }}
-
-      - name: Setup Flutter SDK
-        run: |
-          ./flutter-sdk/bin/flutter config --no-analytics
-          ./flutter-sdk/bin/flutter doctor
-          ./flutter-sdk/bin/cache/dart-sdk/bin/dart --disable-analytics
+    uses: ./.github/workflows/flutter-prep.yaml
 
   main:
     name: main
@@ -77,13 +27,13 @@ jobs:
       fail-fast: false
     steps:
       - name: git clone
-        uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c
+        uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab
       - name: Load Cached Flutter SDK
-        uses: actions/cache@940f3d7cf195ba83374c77632d1e2cbb2f24ae68
+        uses: actions/cache@88522ab9f39a2ea568f7027eddc7d8d8bc9d59c8
         with:
           path: |
             ./flutter-sdk
-          key: flutter-sdk-${{ runner.os }}-${{ needs.flutter-prep.outputs.latest_flutter_candidate }} 
+          key: flutter-sdk-${{ runner.os }}-${{ needs.flutter-prep.outputs.latest_flutter_candidate }}
 
       - name: tool/bots.sh
         env:
@@ -104,19 +54,19 @@ jobs:
           - test_dart2js
     steps:
       - name: git clone
-        uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c
+        uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab
       - name: Load Cached Flutter SDK
-        uses: actions/cache@940f3d7cf195ba83374c77632d1e2cbb2f24ae68
+        uses: actions/cache@88522ab9f39a2ea568f7027eddc7d8d8bc9d59c8
         with:
           path: |
             ./flutter-sdk
-          key: flutter-sdk-${{ runner.os }}-${{ needs.flutter-prep.outputs.latest_flutter_candidate }} 
+          key: flutter-sdk-${{ runner.os }}-${{ needs.flutter-prep.outputs.latest_flutter_candidate }}
       - name: tool/bots.sh
         env:
           BOT: ${{ matrix.bot }}
           PLATFORM: vm
         run: ./tool/bots.sh
-                
+
   macos-test:
     needs: flutter-prep
     name: macos goldens ${{ matrix.bot }}
@@ -128,27 +78,27 @@ jobs:
           - test_dart2js
         only_golden:
           - true
-        
+
     steps:
       - name: git clone
-        uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c
+        uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab
       - name: Load Cached Flutter SDK
-        uses: actions/cache@940f3d7cf195ba83374c77632d1e2cbb2f24ae68
+        uses: actions/cache@88522ab9f39a2ea568f7027eddc7d8d8bc9d59c8
         with:
           path: |
             ./flutter-sdk
-          key: flutter-sdk-${{ runner.os }}-${{ needs.flutter-prep.outputs.latest_flutter_candidate }} 
+          key: flutter-sdk-${{ runner.os }}-${{ needs.flutter-prep.outputs.latest_flutter_candidate }}
       - name: tool/bots.sh
         env:
           BOT: ${{ matrix.bot }}
           PLATFORM: vm
           ONLY_GOLDEN: ${{ matrix.only_golden }}
         run: ./tool/bots.sh
-  
+
       - name: Upload Golden Failure Artifacts
         uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce
         if: failure()
-        with: 
+        with:
           name: golden_image_failures.${{ matrix.bot }}
           path: packages/devtools_app/test/**/failures/*.png
 
@@ -164,13 +114,13 @@ jobs:
           - integration_dart2js
     steps:
       - name: git clone
-        uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c
+        uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab
       - name: Load Cached Flutter SDK
-        uses: actions/cache@940f3d7cf195ba83374c77632d1e2cbb2f24ae68
+        uses: actions/cache@88522ab9f39a2ea568f7027eddc7d8d8bc9d59c8
         with:
           path: |
             ./flutter-sdk
-          key: flutter-sdk-${{ runner.os }}-${{ needs.flutter-prep.outputs.latest_flutter_candidate }} 
+          key: flutter-sdk-${{ runner.os }}-${{ needs.flutter-prep.outputs.latest_flutter_candidate }}
       - name: tool/bots.sh
         env:
           BOT: ${{ matrix.bot }}
@@ -179,10 +129,9 @@ jobs:
       - name: Upload Golden Failure Artifacts
         uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce
         if: failure()
-        with: 
+        with:
           name: golden_image_failures.${{ matrix.bot }}
           path: packages/devtools_app/integration_test/**/failures/*.png
-
 # TODO(https://github.com/flutter/devtools/issues/1715): add a windows compatible version of tool/bots.sh
 # and run it from this job.
 #  windows-test:
@@ -195,7 +144,7 @@ jobs:
 #          - test_dart2js
 #    steps:
 #      - name: git clone
-#        uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c
+#        uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab
 #
 #      - name: tool/bots.sh
 #        env:
@@ -215,7 +164,7 @@ jobs:
 #          - integration_dart2js
 #    steps:
 #      - name: git clone
-#        uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c
+#        uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab
 #      - name: tool/bots.sh
 #        env:
 #          BOT: ${{ matrix.bot }}

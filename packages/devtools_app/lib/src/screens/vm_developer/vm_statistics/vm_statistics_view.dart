@@ -5,6 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../../../shared/analytics/constants.dart' as gac;
 import '../../../shared/common_widgets.dart';
 import '../../../shared/primitives/utils.dart';
 import '../../../shared/table/table.dart';
@@ -30,13 +31,19 @@ class VMStatisticsView extends VMDeveloperView {
 
 /// Displays general information about the state of the Dart VM.
 class VMStatisticsViewBody extends StatelessWidget {
+  VMStatisticsViewBody({super.key});
+
   final controller = VMStatisticsViewController();
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        RefreshButton(onPressed: controller.refresh),
+        RefreshButton(
+          gaScreen: gac.vmTools,
+          gaSelection: gac.refreshVmStatistics,
+          onPressed: controller.refresh,
+        ),
         const SizedBox(height: denseRowSpacing),
         Expanded(
           child: ValueListenableBuilder(
@@ -54,7 +61,7 @@ class VMStatisticsViewBody extends StatelessWidget {
 }
 
 class VMStatisticsWidget extends StatelessWidget {
-  const VMStatisticsWidget({required this.controller});
+  const VMStatisticsWidget({super.key, required this.controller});
 
   final VMStatisticsViewController controller;
 
@@ -110,7 +117,7 @@ class VMStatisticsWidget extends StatelessWidget {
 ///   - Profiler mode
 ///   - Current memory consumption
 class GeneralVMStatisticsWidget extends StatelessWidget {
-  const GeneralVMStatisticsWidget({required this.controller});
+  const GeneralVMStatisticsWidget({super.key, required this.controller});
 
   final VMStatisticsViewController controller;
 
@@ -154,7 +161,7 @@ class GeneralVMStatisticsWidget extends StatelessWidget {
 ///   - Current and maximum resident set size (RSS) utilization
 ///   - Zone allocator memory utilization
 class ProcessStatisticsWidget extends StatelessWidget {
-  const ProcessStatisticsWidget({required this.controller});
+  const ProcessStatisticsWidget({super.key, required this.controller});
 
   final VMStatisticsViewController controller;
 
@@ -267,6 +274,7 @@ class _IsolateHeapColumn extends _IsolateMemoryColumn {
 ///   - Dart heap usage
 class IsolatesPreviewWidget extends StatelessWidget {
   const IsolatesPreviewWidget({
+    super.key,
     required this.controller,
     this.systemIsolates = false,
   });

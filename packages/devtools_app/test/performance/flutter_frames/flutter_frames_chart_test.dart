@@ -5,7 +5,6 @@
 @TestOn('vm')
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/performance/panes/flutter_frames/flutter_frames_chart.dart';
-import 'package:devtools_app/src/shared/config_specific/import_export/import_export.dart';
 import 'package:devtools_app/src/shared/ui/colors.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
@@ -31,7 +30,7 @@ void main() {
   }
 
   group('FlutterFramesChart', () {
-    setUp(() async {
+    setUp(() {
       final fakeServiceManager = FakeServiceManager();
       mockConnectedApp(
         fakeServiceManager.connectedApp!,
@@ -65,20 +64,22 @@ void main() {
       expect(find.byType(FlutterFramesChartItem), findsNothing);
     });
 
-    testWidgets('builds nothing when visibility is false',
-        (WidgetTester tester) async {
-      framesController
-        ..addFrame(testFrame0)
-        ..addFrame(testFrame1)
-        ..toggleShowFlutterFrames(false);
+    testWidgets(
+      'builds nothing when visibility is false',
+      (WidgetTester tester) async {
+        framesController
+          ..addFrame(testFrame0)
+          ..addFrame(testFrame1)
+          ..toggleShowFlutterFrames(false);
 
-      await pumpChart(tester);
-      expect(find.byType(FramesChart), findsNothing);
-      expect(find.byType(FramesChartControls), findsNothing);
-      expect(find.byType(Legend), findsNothing);
-      expect(find.byType(AverageFPS), findsNothing);
-      expect(find.byType(FlutterFramesChartItem), findsNothing);
-    });
+        await pumpChart(tester);
+        expect(find.byType(FramesChart), findsNothing);
+        expect(find.byType(FramesChartControls), findsNothing);
+        expect(find.byType(Legend), findsNothing);
+        expect(find.byType(AverageFPS), findsNothing);
+        expect(find.byType(FlutterFramesChartItem), findsNothing);
+      },
+    );
 
     testWidgets('builds with frames', (WidgetTester tester) async {
       framesController
@@ -166,7 +167,7 @@ void main() {
           findsNWidgets(totalFramesInView),
         );
 
-        verifyScrollOffset(tester, 666.0);
+        verifyScrollOffset(tester, 648.0);
       });
     });
 
@@ -196,70 +197,78 @@ void main() {
       expect(raster.color, equals(mainRasterColor));
     });
 
-    testWidgets('builds with janky frame raster only',
-        (WidgetTester tester) async {
-      framesController.addFrame(jankyFrameRasterOnly);
+    testWidgets(
+      'builds with janky frame raster only',
+      (WidgetTester tester) async {
+        framesController.addFrame(jankyFrameRasterOnly);
 
-      await pumpChart(tester);
-      expect(find.byType(FlutterFramesChartItem), findsOneWidget);
-      final ui =
-          tester.widget(find.byKey(const Key('frame 4 - ui'))) as Container;
-      expect(ui.color, equals(mainUiColor));
-      final raster =
-          tester.widget(find.byKey(const Key('frame 4 - raster'))) as Container;
-      expect(raster.color, equals(rasterJankColor));
-    });
+        await pumpChart(tester);
+        expect(find.byType(FlutterFramesChartItem), findsOneWidget);
+        final ui =
+            tester.widget(find.byKey(const Key('frame 4 - ui'))) as Container;
+        expect(ui.color, equals(mainUiColor));
+        final raster = tester.widget(find.byKey(const Key('frame 4 - raster')))
+            as Container;
+        expect(raster.color, equals(rasterJankColor));
+      },
+    );
 
-    testWidgets('builds with janky frame with shader jank',
-        (WidgetTester tester) async {
-      framesController.addFrame(testFrameWithShaderJank);
+    testWidgets(
+      'builds with janky frame with shader jank',
+      (WidgetTester tester) async {
+        framesController.addFrame(testFrameWithShaderJank);
 
-      await pumpChart(tester);
-      expect(find.byType(FlutterFramesChartItem), findsOneWidget);
-      final ui =
-          tester.widget(find.byKey(const Key('frame 5 - ui'))) as Container;
-      expect(ui.color, equals(uiJankColor));
-      final raster =
-          tester.widget(find.byKey(const Key('frame 5 - raster'))) as Container;
-      expect(raster.color, equals(rasterJankColor));
-      final shaders = tester.widget(find.byKey(const Key('frame 5 - shaders')))
-          as Container;
-      expect(shaders.color, equals(shaderCompilationColor.background));
-      expect(find.byType(ShaderJankWarningIcon), findsOneWidget);
-    });
+        await pumpChart(tester);
+        expect(find.byType(FlutterFramesChartItem), findsOneWidget);
+        final ui =
+            tester.widget(find.byKey(const Key('frame 5 - ui'))) as Container;
+        expect(ui.color, equals(uiJankColor));
+        final raster = tester.widget(find.byKey(const Key('frame 5 - raster')))
+            as Container;
+        expect(raster.color, equals(rasterJankColor));
+        final shaders = tester
+            .widget(find.byKey(const Key('frame 5 - shaders'))) as Container;
+        expect(shaders.color, equals(shaderCompilationColor.background));
+        expect(find.byType(ShaderJankWarningIcon), findsOneWidget);
+      },
+    );
 
-    testWidgets('builds with janky frame with subtle shader jank',
-        (WidgetTester tester) async {
-      framesController.addFrame(testFrameWithSubtleShaderJank);
+    testWidgets(
+      'builds with janky frame with subtle shader jank',
+      (WidgetTester tester) async {
+        framesController.addFrame(testFrameWithSubtleShaderJank);
 
-      await pumpChart(tester);
-      expect(find.byType(FlutterFramesChartItem), findsOneWidget);
-      final ui =
-          tester.widget(find.byKey(const Key('frame 6 - ui'))) as Container;
-      expect(ui.color, equals(uiJankColor));
-      final raster =
-          tester.widget(find.byKey(const Key('frame 6 - raster'))) as Container;
-      expect(raster.color, equals(rasterJankColor));
-      final shaders = tester.widget(find.byKey(const Key('frame 6 - shaders')))
-          as Container;
-      expect(shaders.color, equals(shaderCompilationColor.background));
-      expect(find.byType(ShaderJankWarningIcon), findsNothing);
-    });
+        await pumpChart(tester);
+        expect(find.byType(FlutterFramesChartItem), findsOneWidget);
+        final ui =
+            tester.widget(find.byKey(const Key('frame 6 - ui'))) as Container;
+        expect(ui.color, equals(uiJankColor));
+        final raster = tester.widget(find.byKey(const Key('frame 6 - raster')))
+            as Container;
+        expect(raster.color, equals(rasterJankColor));
+        final shaders = tester
+            .widget(find.byKey(const Key('frame 6 - shaders'))) as Container;
+        expect(shaders.color, equals(shaderCompilationColor.background));
+        expect(find.byType(ShaderJankWarningIcon), findsNothing);
+      },
+    );
 
-    testWidgets('can pause and resume frame recording from controls',
-        (WidgetTester tester) async {
-      await pumpChart(tester);
-      expect(find.byIcon(Icons.pause), findsOneWidget);
-      expect(find.byIcon(Icons.play_arrow), findsOneWidget);
+    testWidgets(
+      'can pause and resume frame recording from controls',
+      (WidgetTester tester) async {
+        await pumpChart(tester);
+        expect(find.byIcon(Icons.pause), findsOneWidget);
+        expect(find.byIcon(Icons.play_arrow), findsOneWidget);
 
-      expect(framesController.recordingFrames.value, isTrue);
-      await tester.tap(find.byIcon(Icons.pause));
-      await tester.pumpAndSettle();
-      expect(framesController.recordingFrames.value, isFalse);
-      await tester.tap(find.byIcon(Icons.play_arrow));
-      await tester.pumpAndSettle();
-      expect(framesController.recordingFrames.value, isTrue);
-    });
+        expect(framesController.recordingFrames.value, isTrue);
+        await tester.tap(find.byIcon(Icons.pause));
+        await tester.pumpAndSettle();
+        expect(framesController.recordingFrames.value, isFalse);
+        await tester.tap(find.byIcon(Icons.play_arrow));
+        await tester.pumpAndSettle();
+        expect(framesController.recordingFrames.value, isTrue);
+      },
+    );
   });
 
   group('FlutterFramesChartItem', () {

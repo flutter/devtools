@@ -6,9 +6,10 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../service/service_extensions.dart' as extensions;
-import '../../../../shared/analytics/analytics.dart' as ga;
 import '../../../../shared/analytics/constants.dart' as gac;
 import '../../../../shared/common_widgets.dart';
+import '../../../../shared/connected_app.dart';
+import '../../../../shared/globals.dart';
 import '../../../../shared/primitives/utils.dart';
 import '../../../../shared/theme.dart';
 import '../../performance_controller.dart';
@@ -232,17 +233,12 @@ class SmallEnhanceTracingButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return IconLabelButton(
+    return DevToolsButton(
       label: EnhanceTracingButton.title,
       icon: EnhanceTracingButton.icon,
-      color: Theme.of(context).colorScheme.toggleButtonsTitle,
-      onPressed: () {
-        ga.select(
-          gac.performance,
-          gac.smallEnhanceTracingButton,
-        );
-        enhanceTracingController.showEnhancedTracingMenu();
-      },
+      gaScreen: gac.performance,
+      gaSelection: gac.PerformanceEvents.enhanceTracingButtonSmall.name,
+      onPressed: enhanceTracingController.showEnhancedTracingMenu,
     );
   }
 }
@@ -266,7 +262,8 @@ class IntrinsicOperationsHint extends StatelessWidget {
       message: _ExpensiveOperationHint(
         docsUrl: _intrinsicOperationsDocs,
         gaScreenName: gac.performance,
-        gaSelectedItemDescription: gac.shaderCompilationDocs,
+        gaSelectedItemDescription:
+            gac.PerformanceDocs.intrinsicOperationsDocs.name,
         message: TextSpan(
           children: [
             TextSpan(
@@ -309,7 +306,7 @@ class CanvasSaveLayerHint extends StatelessWidget {
       message: _ExpensiveOperationHint(
         docsUrl: _saveLayerDocs,
         gaScreenName: gac.performance,
-        gaSelectedItemDescription: gac.canvasSaveLayerDocs,
+        gaSelectedItemDescription: gac.PerformanceDocs.canvasSaveLayerDocs.name,
         message: TextSpan(
           children: [
             TextSpan(
@@ -344,11 +341,15 @@ class ShaderCompilationHint extends StatelessWidget {
       message: _ExpensiveOperationHint(
         docsUrl: preCompileShadersDocsUrl,
         gaScreenName: gac.performance,
-        gaSelectedItemDescription: gac.shaderCompilationDocs,
+        gaSelectedItemDescription:
+            gac.PerformanceDocs.shaderCompilationDocs.name,
         message: TextSpan(
           children: [
             TextSpan(
-              text: '${msText(shaderTime)}',
+              text: durationText(
+                shaderTime,
+                unit: DurationDisplayUnit.milliseconds,
+              ),
               style: theme.fixedFontStyle,
             ),
             TextSpan(
@@ -357,6 +358,30 @@ class ShaderCompilationHint extends StatelessWidget {
             ),
           ],
         ),
+        childrenSpans: serviceManager.connectedApp!.isIosApp
+            ? [
+                TextSpan(
+                  text:
+                      ' Note: pre-compiling shaders is a legacy solution with many '
+                      'pitfalls. Try ',
+                  style: theme.regularTextStyle,
+                ),
+                LinkTextSpan(
+                  link: Link(
+                    display: 'Impeller',
+                    url: impellerWikiUrl,
+                    gaScreenName: gac.performance,
+                    gaSelectedItemDescription:
+                        gac.PerformanceDocs.impellerWikiLink.name,
+                  ),
+                  context: context,
+                ),
+                TextSpan(
+                  text: ' instead!',
+                  style: theme.regularTextStyle,
+                ),
+              ]
+            : [],
       ),
     );
   }
@@ -400,12 +425,14 @@ class _ExpensiveOperationHint extends StatelessWidget {
     required this.docsUrl,
     required this.gaScreenName,
     required this.gaSelectedItemDescription,
+    this.childrenSpans = const <TextSpan>[],
   }) : super(key: key);
 
   final TextSpan message;
   final String docsUrl;
   final String gaScreenName;
   final String gaSelectedItemDescription;
+  final List<TextSpan> childrenSpans;
 
   @override
   Widget build(BuildContext context) {
@@ -432,6 +459,7 @@ class _ExpensiveOperationHint extends StatelessWidget {
             text: '.',
             style: theme.regularTextStyle,
           ),
+          ...childrenSpans,
         ],
       ),
     );

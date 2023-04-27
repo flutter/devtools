@@ -24,47 +24,27 @@ Make sure:
 
 ### Prepare the release
 
-#### Update the DevTools version number
+#### Create a release PR
 
-- Make sure your working branch is clean
-- Run the `tool/release_helper.sh` script with `minor` or `major`.
-   `./tool/release_helper.sh [minor|major]`
-- This creates 2 branches for you:
-    - Release Branch
-    - Next Branch
-- The following steps will guide you through how these branches will be prepared and merged.
-- **For your convenience, the `tool/release_helper.sh` script exports the following two variables to the terminal it is run in:**
-  - `$DEVTOOLS_RELEASE_BRANCH`
-  - `$DEVTOOLS_NEXT_BRANCH`
+> If you need to install the [Github CLI](https://cli.github.com/manual/installation) you can run: `brew install gh`
 
-#### Verify the version changes for `$DEVTOOLS_RELEASE_BRANCH`
+- Run: `./tool/release_helper.sh`
+- This will create a PR for you using the tip of master.
+- The branch for that PR will be checked out locally for you.
+- It will also update your local version of flutter to the Latest flutter candidate
+    - This is to facilitate testing in the next steps
 
-Verify release_helper.sh script:
+#### Verify the version changes for the Release PR
+
+Verify the code on the release PR:
 - updated the pubspecs under packages/
 - updated all references to those packages
 - updated the version constant in `packages/devtools_app/lib/devtools.dart`
 
 These packages always have their version numbers updated in lock, so we don't have to worry about versioning.
 
-#### Manually review the CHANGELOG.md in `$DEVTOOLS_RELEASE_BRANCH`
+### Test the release PR
 
-Review/update `CHANGELOG.md`:
-
-1. Verify all changes are here:
-
-    * Open [commits](https://github.com/flutter/devtools/commits/master)
-    * Search for last PR, commented for previous version in CHANGELOG
-    * Make sure all PRs since the found one are included.
-      You may want to re-run `dart tool/bin/repo_tool.dart generate-changelog  --since-tag=<tag like v1.5.2>` with passed parameter
-      for the tag.
-
-2. Verify the version for the CHANGELOG entry was correctly generated.
-3. Verify each item is a complete sentence, written as though it was an order, and there is no syntax errors.
-4. Create draft PR for the branch and add the item for it to the top.
-
-### Test the `$DEVTOOLS_RELEASE_BRANCH`
-
-- Checkout the `$DEVTOOLS_RELEASE_BRANCH`,
 - Build the DevTools binary and run it from your local Dart SDK.
    - From the main devtools/ directory.
    ```shell
@@ -92,23 +72,14 @@ Review/update `CHANGELOG.md`:
       git clean -f -d;
       ```
 
-#### Push the `$DEVTOOLS_RELEASE_BRANCH`
+#### Submit the Release PR
 
-> Ensure you are still on the `$DEVTOOLS_RELEASE_BRANCH`
-
-```shell
-git push -u origin $DEVTOOLS_RELEASE_BRANCH
-```
-
-From the git GUI tool or from github.com directly:
-1. Create a PR.
-2. Add the entry about the created PR to the CHANGELOG.md manually, and push to the PR.
-3. Receive an LGTM, squash and commit.
+Receive an LGTM for the PR, squash and commit.
 
 
 ### Tag the release
 - Checkout the commit from which you want to release DevTools
-   - This is likely the commit for the PR you just landed
+   - This is likely the commit, on `master`, for the PR you just landed
    - You can run `git log -v` to see the commits.
 - Run the `tag_version.sh` script
    - this creates a tag on the `flutter/devtools` repo for this release.
@@ -121,7 +92,7 @@ From the git GUI tool or from github.com directly:
 ### Verify and Submit the release notes
 
 See the release notes
-[README.md](https://github.com/flutter/devtools/blob/master/packages/devtools_app/release_notes/release_notes/README.md)
+[README.md](https://github.com/flutter/devtools/blob/master/packages/devtools_app/release_notes/README.md)
 for details on where to add DevTools release notes to Flutter website and how to test them.
 
 - Follow the release notes
@@ -203,13 +174,41 @@ checkout the Flutter version on your local flutter repo (the Flutter SDK that
    flutter pub publish
    ```
 
-### Push the DEVTOOLS_NEXT_BRANCH
-```shell
-git pull upstream master
-git checkout $DEVTOOLS_NEXT_BRANCH
-git push -u origin $DEVTOOLS_NEXT_BRANCH
-```
+### Update to the next version
+-  `gh workflow run daily-dev-bump.yaml -f updateType=minor+dev`
+   -  This will kick off a workflow that will automatically create a PR with a `minor` + `dev` version bump
+   -  That PR should then be auto submitted
+-  See https://github.com/flutter/devtools/actions/workflows/daily-dev-bump.yaml
+   -  To see the workflow run
+-  Go to https://github.com/flutter/devtools/pulls to see the pull request that ends up being created
+-  You should make sure that the release PR goes through without issue.
 
-From the git GUI tool or from github.com directly:
-1. Create a PR.
-2. Receive an LGTM, squash and commit.
+## Debug Logs
+
+Debug logs found in `Settings > Copy Logs` are saved such that they can be read by (lnav)[https://lnav.org/]
+
+### Configuring `lnav` for linux and MacOS
+> For Windows, you will need find a different program to parse and read these logs.
+
+- Follow the installation instructions found at https://lnav.org/downloads
+- After installation create a symbolic link to the `tool/devtools_lnav.json` file, inside the `lnav` formats:
+   ```sh
+      ln -s ${DEVTOOLS}/tool/devtools_lnav.json ~/.lnav/formats/installed/`
+   ```
+- Your `lnav` installation will now be able to format logs created by Dart DevTools.
+
+### Reading logs using `lnav`
+- Save your Dart DevTools [Debug Logs](#debug-logs) to a file.
+  ```sh
+  DEBUG_LOGS=/path/to/your/logs # Let DEBUG_LOGS represent the path to your log file.
+  ```
+- Open the logs
+  ```sh
+  lnav $DEBUG_LOGS
+  ```
+- You should now be navigating the nicely formatted Dart Devtools Logs inside `lnav`
+
+### `lnav` tips
+
+For a quick tutorial on how to navigate logs using `lnav`
+you can give [ their tutorial ](https://lnav.org/tutorials) a try.

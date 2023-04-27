@@ -68,10 +68,6 @@ const _eventsKey = 'events';
 class LocationMap {
   LocationMap();
 
-  factory LocationMap.fromJson(Map<String, dynamic> json) {
-    return LocationMap()..processLocationMap(json);
-  }
-
   final _locationMap = <int, Location>{};
 
   int _countUnknownLocations = 0;
@@ -320,13 +316,15 @@ List<RebuildLocationStats> combineStats(
   for (int i = 0; i < rebuildStats.length; i++) {
     final statsForIndex = rebuildStats[i];
     for (var entry in statsForIndex) {
-      output.putIfAbsent(
-        entry.location,
-        () => RebuildLocationStats(
-          entry.location,
-          numStats: numStats,
-        ),
-      )..buildCounts[i] = entry.buildCount;
+      output
+          .putIfAbsent(
+            entry.location,
+            () => RebuildLocationStats(
+              entry.location,
+              numStats: numStats,
+            ),
+          )
+          .buildCounts[i] = entry.buildCount;
     }
   }
   return output.values.toList(growable: false);

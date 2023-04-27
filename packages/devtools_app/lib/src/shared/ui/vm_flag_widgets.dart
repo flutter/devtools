@@ -22,6 +22,7 @@ import '../theme.dart';
 /// This flag controls the rate at which the vm samples the CPU call stack.
 class CpuSamplingRateDropdown extends StatelessWidget {
   const CpuSamplingRateDropdown({
+    super.key,
     required this.screenId,
     required this.profilePeriodFlagNotifier,
   });
@@ -96,7 +97,7 @@ class CpuSamplingRateDropdown extends StatelessWidget {
   Future<void> _onSamplingFrequencyChanged(String? newValue) async {
     ga.select(
       screenId,
-      '${gac.cpuSamplingRatePrefix}'
+      '${gac.CpuProfilerEvents.profileGranularity.name}'
       '${CpuSamplingRateExtension.fromValue(newValue ?? '').displayShort}',
     );
     await serviceManager.service!.setProfilePeriod(

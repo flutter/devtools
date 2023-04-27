@@ -6,15 +6,17 @@ import 'dart:async';
 import 'dart:core';
 
 import 'package:flutter/foundation.dart';
+import 'package:logging/logging.dart';
 import 'package:vm_service/vm_service.dart' hide Error;
 
-import '../shared/config_specific/logger/logger.dart';
 import '../shared/connected_app.dart';
 import '../shared/primitives/auto_dispose.dart';
 import 'isolate_manager.dart';
 import 'service_extensions.dart' as extensions;
 import 'service_extensions.dart';
 import 'vm_service_wrapper.dart';
+
+final _log = Logger('service_extension_manager');
 
 /// Manager that handles tracking the service extension for the main isolate.
 class ServiceExtensionManager extends Disposer {
@@ -94,11 +96,8 @@ class ServiceExtensionManager extends Disposer {
       for (final callback in callbacks) {
         try {
           await callback();
-        } catch (e) {
-          log(
-            'Error running isolate callback: $e',
-            LogLevel.error,
-          );
+        } catch (e, st) {
+          _log.shout('Error running isolate callback: $e', e, st);
         }
       }
     }
@@ -108,16 +107,15 @@ class ServiceExtensionManager extends Disposer {
     String name,
     String encodedValue,
   ) async {
-    final extension = extensions.serviceExtensionsAllowlist[name];
-    if (extension != null) {
+    final ext = extensions.serviceExtensionsAllowlist[name];
+    if (ext != null) {
       final extensionValue = _getExtensionValue(name, encodedValue);
-      final enabled =
-          extension is extensions.ToggleableServiceExtensionDescription
-              ? extensionValue == extension.enabledValue
-              // For extensions that have more than two states
-              // (enabled / disabled), we will always consider them to be
-              // enabled with the current value.
-              : true;
+      final enabled = ext is extensions.ToggleableServiceExtensionDescription
+          ? extensionValue == ext.enabledValue
+          // For extensions that have more than two states
+          // (enabled / disabled), we will always consider them to be
+          // enabled with the current value.
+          : true;
 
       await setServiceExtensionState(
         name,
@@ -202,10 +200,10 @@ class ServiceExtensionManager extends Disposer {
   }
 
   Future<void> _maybeCheckForFirstFlutterFrame() async {
-    final IsolateRef? _lastMainIsolate = _isolateManager.mainIsolate.value;
+    final IsolateRef? lastMainIsolate = _isolateManager.mainIsolate.value;
     if (_checkForFirstFrameStarted ||
         _firstFrameEventReceived ||
-        _lastMainIsolate == null) return;
+        lastMainIsolate == null) return;
     if (!isServiceExtensionAvailable(extensions.didSendFirstFrameEvent)) {
       return;
     }
@@ -213,9 +211,9 @@ class ServiceExtensionManager extends Disposer {
 
     final value = await _service!.callServiceExtension(
       extensions.didSendFirstFrameEvent,
-      isolateId: _lastMainIsolate.id,
+      isolateId: lastMainIsolate.id,
     );
-    if (_lastMainIsolate != _isolateManager.mainIsolate.value) {
+    if (lastMainIsolate != _isolateManager.mainIsolate.value) {
       // The active isolate has changed since we started querying the first
       // frame.
       return;
@@ -451,7 +449,9 @@ class ServiceExtensionManager extends Disposer {
     if (callExtension && _serviceExtensions.contains(name)) {
       await _callServiceExtension(name, value);
     } else if (callExtension) {
-      log('Attempted to call extension \'$name\', but no service with that name exists');
+      _log.info(
+        'Attempted to call extension \'$name\', but no service with that name exists',
+      );
     }
 
     final state = ServiceExtensionState(enabled: enabled, value: value);
@@ -549,8 +549,9 @@ class ServiceExtensionManager extends Disposer {
       _checkForFirstFrameStarted = false;
       final mainIsolate =
           await _isolateManager.isolateState(mainIsolateRef).isolate;
-      if (mainIsolate != null)
+      if (mainIsolate != null) {
         await _registerMainIsolate(mainIsolate, mainIsolateRef);
+      }
     }
   }
 }

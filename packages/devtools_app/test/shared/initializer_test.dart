@@ -3,10 +3,9 @@
 // found in the LICENSE file.
 
 @TestOn('vm')
+import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/framework/initializer.dart';
-import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/shared/framework_controller.dart';
-import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -16,12 +15,13 @@ void main() {
   group('Initializer', () {
     late MaterialApp app;
     const Key initializedKey = Key('initialized');
-    setUp(() async {
+    setUp(() {
       final serviceManager = FakeServiceManager();
       when(serviceManager.connectedApp!.isDartWebApp)
           .thenAnswer((_) => Future.value(false));
       setGlobal(ServiceConnectionManager, serviceManager);
       setGlobal(FrameworkController, FrameworkController());
+      setGlobal(OfflineModeController, OfflineModeController());
 
       app = MaterialApp(
         initialRoute: '/init',
@@ -34,62 +34,70 @@ void main() {
       );
     });
 
-    testWidgets('shows disconnected overlay if not connected',
-        (WidgetTester tester) async {
-      setGlobal(
-        ServiceConnectionManager,
-        FakeServiceManager(
-          hasConnection: false,
-        ),
-      );
+    testWidgets(
+      'shows disconnected overlay if not connected',
+      (WidgetTester tester) async {
+        setGlobal(
+          ServiceConnectionManager,
+          FakeServiceManager(
+            hasConnection: false,
+          ),
+        );
 
-      await tester.pumpFrames(app, const Duration(milliseconds: 100));
-      expect(find.text('Disconnected'), findsOneWidget);
-    });
+        await tester.pumpFrames(app, const Duration(milliseconds: 100));
+        expect(find.text('Disconnected'), findsOneWidget);
+      },
+    );
 
-    testWidgets('shows disconnected overlay upon disconnect',
-        (WidgetTester tester) async {
-      final serviceManager = FakeServiceManager();
-      setGlobal(ServiceConnectionManager, serviceManager);
+    testWidgets(
+      'shows disconnected overlay upon disconnect',
+      (WidgetTester tester) async {
+        final serviceManager = FakeServiceManager();
+        setGlobal(ServiceConnectionManager, serviceManager);
 
-      // Expect standard connected state.
-      await tester.pumpFrames(app, const Duration(milliseconds: 100));
-      expect(find.byKey(initializedKey), findsOneWidget);
-      expect(find.text('Disconnected'), findsNothing);
+        // Expect standard connected state.
+        await tester.pumpFrames(app, const Duration(milliseconds: 100));
+        expect(find.byKey(initializedKey), findsOneWidget);
+        expect(find.text('Disconnected'), findsNothing);
 
-      // Trigger a disconnect.
-      serviceManager.changeState(false);
+        // Trigger a disconnect.
+        serviceManager.changeState(false);
 
-      // Expect Disconnected overlay.
-      await tester.pumpFrames(app, const Duration(milliseconds: 100));
-      expect(find.text('Disconnected'), findsOneWidget);
-    });
+        // Expect Disconnected overlay.
+        await tester.pumpFrames(app, const Duration(milliseconds: 100));
+        expect(find.text('Disconnected'), findsOneWidget);
+      },
+    );
 
-    testWidgets('closes disconnected overlay upon reconnect',
-        (WidgetTester tester) async {
-      final serviceManager = FakeServiceManager();
-      setGlobal(ServiceConnectionManager, serviceManager);
+    testWidgets(
+      'closes disconnected overlay upon reconnect',
+      (WidgetTester tester) async {
+        final serviceManager = FakeServiceManager();
+        setGlobal(ServiceConnectionManager, serviceManager);
 
-      // Trigger a disconnect and ensure the overlay appears.
-      await tester.pumpFrames(app, const Duration(milliseconds: 100));
-      serviceManager.changeState(false);
-      await tester.pumpFrames(app, const Duration(milliseconds: 100));
-      expect(find.text('Disconnected'), findsOneWidget);
+        // Trigger a disconnect and ensure the overlay appears.
+        await tester.pumpFrames(app, const Duration(milliseconds: 100));
+        serviceManager.changeState(false);
+        await tester.pumpFrames(app, const Duration(milliseconds: 100));
+        expect(find.text('Disconnected'), findsOneWidget);
 
-      // Trigger a reconnect
-      serviceManager.changeState(true);
+        // Trigger a reconnect
+        serviceManager.changeState(true);
 
-      // Expect no overlay.
-      await tester.pumpFrames(app, const Duration(milliseconds: 100));
-      expect(find.text('Disconnected'), findsNothing);
-    });
+        // Expect no overlay.
+        await tester.pumpFrames(app, const Duration(milliseconds: 100));
+        expect(find.text('Disconnected'), findsNothing);
+      },
+    );
 
-    testWidgets('builds contents when initialized',
-        (WidgetTester tester) async {
-      await tester.pumpWidget(app);
-      await tester.pumpAndSettle();
-      expect(find.text('Disconnected'), findsNothing);
-      expect(find.byKey(initializedKey), findsOneWidget);
-    });
+    testWidgets(
+      'builds contents when initialized',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(app);
+        await tester.pumpAndSettle();
+        expect(find.text('Disconnected'), findsNothing);
+        expect(find.byKey(initializedKey), findsOneWidget);
+      },
+    );
   });
 }

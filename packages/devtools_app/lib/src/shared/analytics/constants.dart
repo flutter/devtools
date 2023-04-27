@@ -18,7 +18,12 @@ final performance = ScreenMetaData.performance.id;
 final cpuProfiler = ScreenMetaData.cpuProfiler.id;
 final memory = ScreenMetaData.memory.id;
 final network = ScreenMetaData.network.id;
+final debugger = ScreenMetaData.debugger.id;
 final logging = ScreenMetaData.logging.id;
+final appSize = ScreenMetaData.appSize.id;
+final vmTools = ScreenMetaData.vmTools.id;
+const console = 'console';
+final simple = ScreenMetaData.simple.id;
 
 // GA events not associated with a any screen e.g., hotReload, hotRestart, etc
 const devToolsMain = 'main';
@@ -53,51 +58,89 @@ const selectWidgetMode = 'selectWidgetMode';
 const enableOnDeviceInspector = 'enableOnDeviceInspector';
 const showOnDeviceInspector = 'showInspector';
 const treeNodeSelection = 'treeNodeSelection';
+const inspectorSettings = 'inspectorSettings';
+const refreshPubRoots = 'refreshPubRoots';
 
-// Performance UX actions:
-const refreshTimelineEvents = 'refreshTimelineEvents';
-const performanceOverlay = 'performanceOverlay';
-const performanceOverlayDocs = 'performanceOverlayDocs';
-const timelineFlameChartHelp = 'timelineFlameChartHelp';
-const framesChartVisibility = 'framesChartVisibility';
-const selectFlutterFrame = 'selectFlutterFrame';
-const traceEventProcessingTime = 'traceEventProcessingTime';
-const trackRebuilds = 'trackRebuilds';
-const trackWidgetBuildsDocs = 'trackWidgetBuildsDocs';
-const trackUserCreatedWidgetBuilds = 'trackUserCreatedWidgetBuilds';
-const trackPaints = 'trackPaints';
-const trackPaintsDocs = 'trackPaintsDocs';
-const trackLayouts = 'trackLayouts';
-const trackLayoutsDocs = 'trackLayoutsDocs';
-const smallEnhanceTracingButton = 'enhanceTracingButtonSmall';
-const disableClipLayersOption = 'disableClipLayers';
-const disableClipLayersOptionDocs = 'disableClipLayersDocs';
-const disableOpacityLayersOption = 'disableOpacityLayers';
-const disableOpacityLayersOptionDocs = 'disableOpacityLayersDocs';
-const disablePhysicalShapeLayersOption = 'disablePhysicalShapeLayers';
-const disablePhysicalShapeLayersOptionDocs = 'disablePhysicalShapeLayersDocs';
-const canvasSaveLayerDocs = 'canvasSaveLayerDocs';
-const intrinsicOperationsDocs = 'intrinsicOperationsDocs';
-const shaderCompilationDocs = 'shaderCompilationDocs';
-const shaderCompilationDocsTooltipLink = 'shaderCompilationDocsTooltipLink';
-const collectRasterStats = 'collectRasterStats';
-const perfettoModeTraceEventProcessingTime =
-    'traceEventProcessingTime-perfettoMode';
-const perfettoLoadTrace = 'perfettoLoadTrace';
-const perfettoScrollToTimeRange = 'perfettoScrollToTimeRange';
+enum PerformanceEvents {
+  refreshTimelineEvents,
+  performanceOverlay,
+  timelineFlameChartHelp,
+  framesChartVisibility,
+  selectFlutterFrame,
+  traceEventProcessingTime,
+  trackRebuilds,
+  trackUserCreatedWidgetBuilds,
+  trackPaints,
+  trackLayouts,
+  enhanceTracingButtonSmall,
+  disableClipLayers,
+  disableOpacityLayers,
+  disablePhysicalShapeLayers,
+  collectRasterStats,
+  clearRasterStats,
+  fullScreenLayerImage,
+  clearRebuildStats,
+  perfettoModeTraceEventProcessingTime('traceEventProcessingTime-perfettoMode'),
+  perfettoLoadTrace,
+  perfettoScrollToTimeRange,
+  perfettoShowHelp,
+  performanceSettings,
+  traceCategories;
 
-// CPU profiler UX actions:
-const cpuSamplingRatePrefix = 'profileGranularity';
-const cpuSamplingRateDocs = 'profileGranularityDocs';
-const loadAllCpuSamples = 'loadAllCpuSamples';
-const profileAppStartUp = 'profileAppStartUp';
-const cpuProfileFlameChartHelp = 'cpuProfileFlameChartHelp';
-const cpuProfileProcessingTime = 'cpuProfileProcessingTime';
-const cpuProfileDisplayTreeGuidelines = 'cpuProfileDisplayTreeGuidelines';
+  const PerformanceEvents([this.nameOverride]);
+
+  final String? nameOverride;
+}
+
+enum PerformanceDocs {
+  performanceOverlayDocs,
+  trackWidgetBuildsDocs,
+  trackPaintsDocs,
+  trackLayoutsDocs,
+  disableClipLayersDocs,
+  disableOpacityLayersDocs,
+  disablePhysicalShapeLayersDocs,
+  canvasSaveLayerDocs,
+  intrinsicOperationsDocs,
+  shaderCompilationDocs,
+  shaderCompilationDocsTooltipLink,
+  impellerWikiLink,
+}
+
+enum CpuProfilerEvents {
+  profileGranularity,
+  loadAllCpuSamples,
+  profileAppStartUp,
+  cpuProfileFlameChartHelp,
+  cpuProfileProcessingTime,
+  cpuProfileDisplayTreeGuidelines,
+}
+
+enum CpuProfilerDocs {
+  profileGranularityDocs,
+}
+
+// Debugger UX actions:
+const refreshStatistics = 'refreshStatistics';
+const showFileExplorer = 'showFileExplorer';
+const hideFileExplorer = 'hideFileExplorer';
+const pausedWithNoFrames = 'pausedWithNoFrames';
 
 // Logging UX actions:
 const structuredErrors = 'structuredErrors';
 const trackRebuildWidgets = 'trackRebuildWidgets';
+
+// App Size Tools UX actions:
+const importFileSingle = 'importFileSingle';
+const importFileDiffFirst = 'importFileDiffFirst';
+const importFileDiffSecond = 'importFileDiffSecond';
+const analyzeSingle = 'analyzeSingle';
+const analyzeDiff = 'analyzeDiff';
+
+// VM Tools UX Actions:
+const refreshIsolateStatistics = 'refreshIsolateStatistics';
+const refreshVmStatistics = 'refreshVmStatistics';
+const requestSize = 'requestSize';
 
 // Landing screen UX actions:
 const landingScreen = 'landing';
@@ -111,7 +154,10 @@ const darkTheme = 'darkTheme';
 const denseMode = 'denseMode';
 const analytics = 'analytics';
 const vmDeveloperMode = 'vmDeveloperMode';
+const verboseLogging = 'verboseLogging';
 const inspectorHoverEvalMode = 'inspectorHoverEvalMode';
+const clearLogs = 'clearLogs';
+const copyLogs = 'copyLogs';
 
 // Object explorer:
 const objectInspectorScreen = 'objectInspector';
@@ -135,6 +181,8 @@ const export = 'export';
 const expandAll = 'expandAll';
 const collapseAll = 'collapseAll';
 const profileModeDocs = 'profileModeDocs';
+const visibilityButton = 'visibilityButton';
+const exitOfflineMode = 'exitOfflineMode';
 // This should track the time from `initState` for a screen to the time when
 // the page data has loaded and is ready to interact with.
 const pageReady = 'pageReady';
@@ -144,6 +192,13 @@ const documentationLink = 'documentationLink';
 String topicDocumentationButton(String topic) => '${topic}DocumentationButton';
 String topicDocumentationLink(String topic) => '${topic}DocumentationLink';
 
+/// Analytic event constants specific for console.
+class ConsoleEvent {
+  static const helpInline = 'consoleHelpInline';
+  static const String evalInStoppedApp = 'consoleEvalInStoppedApp';
+  static const String evalInRunningApp = 'consoleEvalInRunningApp';
+}
+
 /// Analytic time constants specific for memory screen.
 class MemoryTime {
   static const adaptSnapshot = 'adaptSnapshot';
@@ -151,19 +206,25 @@ class MemoryTime {
   static const updateValues = 'updateValues';
 }
 
+// ignore: avoid_classes_with_only_static_members, requires refactor.
 /// Analytic event constants specific for memory screen.
 class MemoryEvent {
   static const gc = 'gc';
   static const settings = 'settings';
-  static const autoSnapshot = 'autoSnapshot';
 
-  static const chartLegend = 'memoryLegend';
+  static const showChartLegend = 'showMemoryLegend';
+  static const hideChartLegend = 'hideMemoryLegend';
   static const chartAndroid = 'androidChart';
 
+  static const pauseChart = 'pauseChart';
+  static const resumeChart = 'resumeChart';
+  static const clearChart = 'clearChart';
   static const showChart = 'showChart';
   static const hideChart = 'hideChart';
   static const chartInterval = 'chartInterval';
   static const chartHelp = 'memoryChartHelp';
+
+  static const leaksAnalyze = 'leaksAnalyze';
 
   static const profileDownloadCsv = 'profileDownloadCsv';
   static const profileRefreshManual = 'profileRefreshManual';
@@ -174,10 +235,11 @@ class MemoryEvent {
   static const tracingRefresh = 'tracingRefresh';
   static const tracingClassFilter = 'tracingClassFilter';
   static const tracingTraceCheck = 'tracingTraceCheck';
+  static const tracingTreeExpandAll = 'tracingTreeExpandAll';
+  static const tracingTreeCollapseAll = 'tracingTreeCollapseAll';
   static const tracingHelp = 'memoryTracingHelp';
 
   static const diffTakeSnapshotControlPane = 'diffTakeSnapshotControlPane';
-  static const diffTakeSnapshotAfterHelp = 'diffTakeSnapshotAfterHelp';
   static const diffClearSnapshots = 'diffClearSnapshots';
   static const diffHelp = 'memoryDiffHelp';
 
@@ -200,6 +262,14 @@ class MemoryEvent {
   static const diffSnapshotFilterReset = 'diffSnapshotFilterReset';
 
   static const browseRefLimit = 'browseRefLimit';
+
+  static const dropOneLiveVariable = 'dropOneLiveVariable';
+  static const dropOneStaticVariable = 'dropOneStaticVariable';
+  static String dropAllLiveToConsole({
+    required bool includeSubclasses,
+    required bool includeImplementers,
+  }) =>
+      'dropAllVariables${includeSubclasses ? '_Subclasses' : ''}${includeImplementers ? '_Imlementers' : ''}';
 }
 
 /// Areas of memory screen, to prefix event names, when events are emitted
@@ -208,8 +278,7 @@ enum MemoryAreas {
   snapshotSingle('single'),
   snapshotDiff('diff'),
   snapshotDiffDelta('diff-delta'),
-  snapshotDiffNew('diff-new'),
-  ;
+  snapshotDiffNew('diff-new');
 
   const MemoryAreas(this.name);
 

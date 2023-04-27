@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// ignore_for_file: avoid_print
+
 @TestOn('vm')
 
 import 'package:devtools_app/src/screens/network/network_controller.dart';
@@ -22,7 +24,7 @@ void main() {
     late SocketProfile socketProfile;
     late HttpProfile httpProfile;
 
-    setUp(() async {
+    setUp(() {
       socketProfile = loadSocketProfile();
       httpProfile = loadHttpProfile();
       fakeServiceManager = FakeServiceManager(

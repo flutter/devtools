@@ -14,6 +14,7 @@ import 'package:vm_service/vm_service.dart';
 import '../screens/debugger/debugger_controller.dart';
 import '../screens/inspector/layout_explorer/ui/theme.dart';
 import 'analytics/analytics.dart' as ga;
+import 'analytics/constants.dart' as gac;
 import 'config_specific/launch_url/launch_url.dart';
 import 'console/widgets/expandable_variable.dart';
 import 'diagnostics/dart_object_node.dart';
@@ -25,7 +26,6 @@ import 'primitives/flutter_widgets/linked_scroll_controller.dart';
 import 'primitives/utils.dart';
 import 'routing.dart';
 import 'theme.dart';
-import 'ui/icons.dart';
 import 'ui/label.dart';
 import 'utils.dart';
 
@@ -53,10 +53,10 @@ class PaddedDivider extends StatelessWidget {
     this.padding = const EdgeInsets.only(bottom: 10.0),
   }) : super(key: key);
 
-  const PaddedDivider.thin({Key? key})
+  const PaddedDivider.thin({super.key})
       : padding = const EdgeInsets.only(bottom: 4.0);
 
-  PaddedDivider.vertical({Key? key, double padding = densePadding})
+  PaddedDivider.vertical({super.key, double padding = densePadding})
       : padding = EdgeInsets.symmetric(vertical: padding);
 
   /// The padding to place around the divider.
@@ -101,52 +101,49 @@ TextStyle primaryColorLight(TextStyle style, BuildContext context) {
   );
 }
 
-class OutlinedIconButton extends IconLabelButton {
-  const OutlinedIconButton({
-    required IconData icon,
-    required VoidCallback? onPressed,
-    String? tooltip,
-    Key? key,
-  }) : super(
-          key: key,
-          icon: icon,
-          label: '',
-          tooltip: tooltip,
-          onPressed: onPressed,
-          // TODO(jacobr): consider a more conservative min-width. To minimize the
-          // impact on the existing UI and deal with the fact that some of the
-          // existing label names are fairly verbose, we set a width that will
-          // never be hit.
-          minScreenWidthForTextBeforeScaling: 20000,
-        );
-}
-
-/// A button with an icon and a label.
+/// A button with default DevTools styling and analytics handling.
 ///
 /// * `onPressed`: The callback to be called upon pressing the button.
 /// * `minScreenWidthForTextBeforeScaling`: The minimum width the button can be before the text is
 ///    omitted.
-class IconLabelButton extends StatelessWidget {
-  const IconLabelButton({
+class DevToolsButton extends StatelessWidget {
+  const DevToolsButton({
     Key? key,
-    this.icon,
-    this.imageIcon,
-    required this.label,
+    required this.icon,
     required this.onPressed,
+    required this.gaScreen,
+    required this.gaSelection,
+    this.label,
     this.color,
     this.minScreenWidthForTextBeforeScaling,
     this.elevatedButton = false,
     this.tooltip,
     this.tooltipPadding,
     this.outlined = true,
-  })  : assert((icon == null) != (imageIcon == null)),
-        super(key: key);
+  }) : super(key: key);
 
-  final IconData? icon;
+  factory DevToolsButton.iconOnly({
+    required IconData icon,
+    required String gaScreen,
+    required String gaSelection,
+    String? tooltip,
+    VoidCallback? onPressed,
+    bool outlined = true,
+  }) {
+    return DevToolsButton(
+      icon: icon,
+      outlined: outlined,
+      gaScreen: gaScreen,
+      gaSelection: gaSelection,
+      tooltip: tooltip,
+      onPressed: onPressed,
+    );
+  }
 
-  final ThemedImageIcon? imageIcon;
+  // TODO(kenz): allow icon to be nullable if this is a text only button.
+  final IconData icon;
 
-  final String label;
+  final String? label;
 
   final double? minScreenWidthForTextBeforeScaling;
 
@@ -163,21 +160,60 @@ class IconLabelButton extends StatelessWidget {
 
   final bool outlined;
 
+  final String gaScreen;
+
+  final String gaSelection;
+
   @override
   Widget build(BuildContext context) {
+    final onPressedHandler = onPressed != null
+        ? () {
+            ga.select(gaScreen, gaSelection);
+            onPressed!();
+          }
+        : null;
+
+    if (label == null) {
+      return SizedBox(
+        // This is required to force the button size.
+        height: defaultButtonHeight,
+        width: defaultButtonHeight,
+        child: maybeWrapWithTooltip(
+          tooltip: tooltip,
+          child: outlined
+              ? IconButton.outlined(
+                  onPressed: onPressedHandler,
+                  iconSize: actionsIconSize,
+                  icon: Icon(icon),
+                )
+              : IconButton(
+                  onPressed: onPressedHandler,
+                  iconSize: actionsIconSize,
+                  icon: Icon(
+                    icon,
+                  ),
+                ),
+        ),
+      );
+    }
+    final colorScheme = Theme.of(context).colorScheme;
+    var textColor = color;
+    if (textColor == null && elevatedButton) {
+      textColor =
+          onPressed == null ? colorScheme.onSurface : colorScheme.onPrimary;
+    }
     final iconLabel = MaterialIconLabel(
-      label: label,
+      label: label!,
       iconData: icon,
-      imageIcon: imageIcon,
       minScreenWidthForTextBeforeScaling: minScreenWidthForTextBeforeScaling,
-      color: color,
+      color: textColor,
     );
     if (elevatedButton) {
       return maybeWrapWithTooltip(
         tooltip: tooltip,
         tooltipPadding: tooltipPadding,
         child: ElevatedButton(
-          onPressed: onPressed,
+          onPressed: onPressedHandler,
           child: iconLabel,
         ),
       );
@@ -198,11 +234,11 @@ class IconLabelButton extends StatelessWidget {
                   context,
                   minScreenWidthForTextBeforeScaling,
                 ),
-                onPressed: onPressed,
+                onPressed: onPressedHandler,
                 child: iconLabel,
               )
             : TextButton(
-                onPressed: onPressed,
+                onPressed: onPressedHandler,
                 style: denseAwareTextButtonStyle(
                   context,
                   minScreenWidthForTextBeforeScaling,
@@ -214,74 +250,36 @@ class IconLabelButton extends StatelessWidget {
   }
 }
 
-class PauseButton extends StatelessWidget {
+class PauseButton extends DevToolsButton {
   const PauseButton({
     super.key,
-    this.iconOnly = false,
-    required this.tooltip,
-    required this.onPressed,
-    this.minScreenWidthForTextBeforeScaling,
-  });
-
-  final bool iconOnly;
-  final String? tooltip;
-  final VoidCallback? onPressed;
-  final double? minScreenWidthForTextBeforeScaling;
-
-  @override
-  Widget build(BuildContext context) {
-    if (iconOnly) {
-      return OutlinedIconButton(
-        icon: Icons.pause,
-        onPressed: onPressed,
-        tooltip: tooltip,
-      );
-    }
-
-    return IconLabelButton(
-      key: key,
-      icon: Icons.pause,
-      label: 'Pause',
-      tooltip: tooltip,
-      minScreenWidthForTextBeforeScaling: minScreenWidthForTextBeforeScaling,
-      onPressed: onPressed,
-    );
-  }
+    required super.tooltip,
+    required super.onPressed,
+    required super.gaScreen,
+    required super.gaSelection,
+    super.outlined = true,
+    super.minScreenWidthForTextBeforeScaling,
+    bool iconOnly = false,
+  }) : super(
+          label: iconOnly ? null : 'Pause',
+          icon: Icons.pause,
+        );
 }
 
-class ResumeButton extends StatelessWidget {
+class ResumeButton extends DevToolsButton {
   const ResumeButton({
     super.key,
-    this.iconOnly = false,
-    required this.tooltip,
-    required this.onPressed,
-    this.minScreenWidthForTextBeforeScaling,
-  });
-
-  final bool iconOnly;
-  final String? tooltip;
-  final VoidCallback? onPressed;
-  final double? minScreenWidthForTextBeforeScaling;
-
-  @override
-  Widget build(BuildContext context) {
-    if (iconOnly) {
-      return OutlinedIconButton(
-        icon: Icons.play_arrow,
-        onPressed: onPressed,
-        tooltip: tooltip,
-      );
-    }
-
-    return IconLabelButton(
-      key: key,
-      icon: Icons.pause,
-      label: 'Resume',
-      tooltip: tooltip,
-      minScreenWidthForTextBeforeScaling: minScreenWidthForTextBeforeScaling,
-      onPressed: onPressed,
-    );
-  }
+    required super.tooltip,
+    required super.onPressed,
+    required super.gaScreen,
+    required super.gaSelection,
+    super.outlined = true,
+    super.minScreenWidthForTextBeforeScaling,
+    bool iconOnly = false,
+  }) : super(
+          label: iconOnly ? null : 'Resume',
+          icon: Icons.play_arrow,
+        );
 }
 
 /// A button that groups pause and resume controls and automatically manages
@@ -294,6 +292,9 @@ class PauseResumeButtonGroup extends StatelessWidget {
     required this.onResume,
     this.pauseTooltip = 'Pause',
     this.resumeTooltip = 'Resume',
+    required this.gaScreen,
+    required this.gaSelectionPause,
+    required this.gaSelectionResume,
   });
 
   final bool paused;
@@ -306,6 +307,12 @@ class PauseResumeButtonGroup extends StatelessWidget {
 
   final String resumeTooltip;
 
+  final String gaScreen;
+
+  final String gaSelectionPause;
+
+  final String gaSelectionResume;
+
   @override
   Widget build(BuildContext context) {
     return Row(
@@ -314,88 +321,55 @@ class PauseResumeButtonGroup extends StatelessWidget {
           iconOnly: true,
           onPressed: paused ? null : onPause,
           tooltip: pauseTooltip,
+          gaScreen: gaScreen,
+          gaSelection: gaSelectionPause,
         ),
         const SizedBox(width: denseSpacing),
         ResumeButton(
           iconOnly: true,
           onPressed: paused ? onResume : null,
           tooltip: resumeTooltip,
+          gaScreen: gaScreen,
+          gaSelection: gaSelectionResume,
         ),
       ],
     );
   }
 }
 
-class ClearButton extends IconLabelButton {
+class ClearButton extends DevToolsButton {
   const ClearButton({
-    Key? key,
-    double? minScreenWidthForTextBeforeScaling,
-    String tooltip = 'Clear',
-    bool outlined = true,
-    required VoidCallback? onPressed,
-  }) : super(
-          key: key,
-          icon: Icons.block,
-          label: 'Clear',
-          tooltip: tooltip,
-          outlined: outlined,
-          minScreenWidthForTextBeforeScaling:
-              minScreenWidthForTextBeforeScaling,
-          onPressed: onPressed,
-        );
+    super.key,
+    super.color,
+    super.tooltip = 'Clear',
+    super.outlined = true,
+    super.minScreenWidthForTextBeforeScaling,
+    required super.gaScreen,
+    required super.gaSelection,
+    required super.onPressed,
+    bool iconOnly = false,
+    String label = 'Clear',
+  }) : super(icon: Icons.block, label: iconOnly ? null : label);
 }
 
-class RefreshButton extends IconLabelButton {
+class RefreshButton extends DevToolsButton {
   const RefreshButton({
-    Key? key,
+    super.key,
     String label = 'Refresh',
-    double? minScreenWidthForTextBeforeScaling,
-    String? tooltip,
-    required VoidCallback? onPressed,
-  })  : isIconButton = false,
-        super(
-          key: key,
-          icon: Icons.refresh,
-          label: label,
-          minScreenWidthForTextBeforeScaling:
-              minScreenWidthForTextBeforeScaling,
-          tooltip: tooltip,
-          onPressed: onPressed,
-        );
-
-  const RefreshButton.icon({
-    Key? key,
-    String? tooltip,
-    required VoidCallback? onPressed,
-    bool outlined = true,
-  })  : isIconButton = true,
-        super(
-          key: key,
-          icon: Icons.refresh,
-          label: '',
-          tooltip: tooltip,
-          onPressed: onPressed,
-          outlined: outlined,
-          minScreenWidthForTextBeforeScaling: 20000,
-        );
-
-  final bool isIconButton;
-
-  @override
-  Widget build(BuildContext context) {
-    if (!isIconButton || !outlined) {
-      return super.build(context);
-    }
-    return OutlinedIconButton(
-      onPressed: onPressed,
-      icon: icon!,
-    );
-  }
+    super.tooltip,
+    super.minScreenWidthForTextBeforeScaling,
+    super.outlined,
+    required super.gaScreen,
+    required super.gaSelection,
+    required super.onPressed,
+    bool iconOnly = false,
+  }) : super(icon: Icons.refresh, label: iconOnly ? null : label);
 }
 
 /// A Refresh ToolbarAction button.
 class ToolbarRefresh extends ToolbarAction {
   const ToolbarRefresh({
+    super.key,
     super.icon = Icons.refresh,
     required super.onPressed,
     super.tooltip = 'Refresh',
@@ -409,22 +383,20 @@ class ToolbarRefresh extends ToolbarAction {
 ///    omitted.
 /// * `labelOverride`: Optional alternative text to use for the button.
 /// * `onPressed`: The callback to be called upon pressing the button.
-class RecordButton extends IconLabelButton {
+class RecordButton extends DevToolsButton {
   const RecordButton({
-    Key? key,
+    super.key,
     required bool recording,
     required VoidCallback onPressed,
-    double? minScreenWidthForTextBeforeScaling,
+    required super.gaScreen,
+    required super.gaSelection,
+    super.minScreenWidthForTextBeforeScaling,
+    super.tooltip = 'Start recording',
     String? labelOverride,
-    String tooltip = 'Start recording',
   }) : super(
-          key: key,
           onPressed: recording ? null : onPressed,
           icon: Icons.fiber_manual_record,
           label: labelOverride ?? 'Record',
-          tooltip: tooltip,
-          minScreenWidthForTextBeforeScaling:
-              minScreenWidthForTextBeforeScaling,
         );
 }
 
@@ -434,40 +406,39 @@ class RecordButton extends IconLabelButton {
 /// * `minScreenWidthForTextBeforeScaling`: The minimum width the button can be before the text is
 ///    omitted.
 /// * `onPressed`: The callback to be called upon pressing the button.
-class StopRecordingButton extends IconLabelButton {
+class StopRecordingButton extends DevToolsButton {
   const StopRecordingButton({
-    Key? key,
+    super.key,
     required bool recording,
-    required VoidCallback onPressed,
-    double? minScreenWidthForTextBeforeScaling,
-    String tooltip = 'Stop recording',
+    required VoidCallback? onPressed,
+    required super.gaScreen,
+    required super.gaSelection,
+    super.minScreenWidthForTextBeforeScaling,
+    super.tooltip = 'Stop recording',
   }) : super(
-          key: key,
           onPressed: !recording ? null : onPressed,
           icon: Icons.stop,
           label: 'Stop',
-          tooltip: tooltip,
-          minScreenWidthForTextBeforeScaling:
-              minScreenWidthForTextBeforeScaling,
         );
 }
 
-class SettingsOutlinedButton extends OutlinedIconButton {
+class SettingsOutlinedButton extends DevToolsButton {
   const SettingsOutlinedButton({
-    required VoidCallback onPressed,
-    String? tooltip,
-  }) : super(
-          onPressed: onPressed,
-          icon: Icons.settings,
-          tooltip: tooltip,
-        );
+    super.key,
+    required super.onPressed,
+    required super.gaScreen,
+    required super.gaSelection,
+    super.tooltip,
+  }) : super(outlined: true, icon: Icons.settings_outlined);
 }
 
 class HelpButton extends StatelessWidget {
   const HelpButton({
-    required this.onPressed,
+    super.key,
     required this.gaScreen,
     required this.gaSelection,
+    required this.onPressed,
+    this.outlined = true,
   });
 
   final VoidCallback onPressed;
@@ -476,43 +447,79 @@ class HelpButton extends StatelessWidget {
 
   final String gaSelection;
 
+  final bool outlined;
+
   @override
   Widget build(BuildContext context) {
-    return DevToolsIconButton(
-      iconData: Icons.help_outline,
+    return DevToolsButton(
+      icon: Icons.help_outline,
       onPressed: onPressed,
       tooltip: 'Help',
       gaScreen: gaScreen,
       gaSelection: gaSelection,
+      outlined: outlined,
     );
   }
 }
 
 class ExpandAllButton extends StatelessWidget {
-  const ExpandAllButton({Key? key, required this.onPressed}) : super(key: key);
+  const ExpandAllButton({
+    super.key,
+    required this.gaScreen,
+    required this.gaSelection,
+    required this.onPressed,
+    this.minScreenWidthForTextBeforeScaling,
+  });
 
   final VoidCallback onPressed;
 
+  final String gaScreen;
+
+  final String gaSelection;
+
+  final double? minScreenWidthForTextBeforeScaling;
+
   @override
   Widget build(BuildContext context) {
-    return OutlinedButton(
+    return DevToolsButton(
+      icon: Icons.unfold_more,
+      label: 'Expand All',
+      tooltip: 'Expand All',
       onPressed: onPressed,
-      child: const Text('Expand All'),
+      gaScreen: gaScreen,
+      gaSelection: gaSelection,
+      minScreenWidthForTextBeforeScaling: minScreenWidthForTextBeforeScaling,
     );
   }
 }
 
 class CollapseAllButton extends StatelessWidget {
-  const CollapseAllButton({Key? key, required this.onPressed})
-      : super(key: key);
+  const CollapseAllButton({
+    super.key,
+    required this.gaScreen,
+    required this.gaSelection,
+    required this.onPressed,
+    this.minScreenWidthForTextBeforeScaling,
+  });
 
   final VoidCallback onPressed;
 
+  final String gaScreen;
+
+  final String gaSelection;
+
+  final double? minScreenWidthForTextBeforeScaling;
+
   @override
   Widget build(BuildContext context) {
-    return OutlinedButton(
+    return DevToolsButton(
+      icon: Icons.unfold_less,
+      label: 'Collapse All',
+      tooltip: 'Collapse All',
       onPressed: onPressed,
-      child: const Text('Collapse All'),
+      gaScreen: gaScreen,
+      gaSelection: gaSelection,
+      minScreenWidthForTextBeforeScaling: minScreenWidthForTextBeforeScaling,
     );
   }
 }
@@ -523,35 +530,41 @@ class CollapseAllButton extends StatelessWidget {
 /// shown or hidden state.
 class VisibilityButton extends StatelessWidget {
   const VisibilityButton({
+    super.key,
     required this.show,
     required this.onPressed,
     this.minScreenWidthForTextBeforeScaling,
     required this.label,
     required this.tooltip,
+    required this.gaScreen,
+    // We use a default value for visibility button because in some cases, the
+    // analytics for the visibility this button controls are tracked at the
+    // preferenes change.
+    this.gaSelection = gac.visibilityButton,
   });
 
   final ValueListenable<bool> show;
-
   final void Function(bool) onPressed;
-
   final double? minScreenWidthForTextBeforeScaling;
-
   final String label;
-
   final String tooltip;
+  final String gaScreen;
+  final String gaSelection;
 
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<bool>(
       valueListenable: show,
       builder: (_, show, __) {
-        return IconLabelButton(
+        return DevToolsButton(
           key: key,
           tooltip: tooltip,
           icon: show ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
           label: label,
           minScreenWidthForTextBeforeScaling:
               minScreenWidthForTextBeforeScaling,
+          gaScreen: gaScreen,
+          gaSelection: gaSelection,
           onPressed: () => onPressed(!show),
         );
       },
@@ -559,125 +572,33 @@ class VisibilityButton extends StatelessWidget {
   }
 }
 
-class RecordingInfo extends StatelessWidget {
-  const RecordingInfo({
-    this.instructionsKey,
-    this.recordingStatusKey,
-    this.processingStatusKey,
-    required this.recording,
-    required this.recordedObject,
-    required this.processing,
-    this.progressValue,
-    this.isPause = false,
+/// Default switch for DevTools that enforces size restriction.
+class DevToolsSwitch extends StatelessWidget {
+  const DevToolsSwitch({
+    super.key,
+    required this.value,
+    required this.onChanged,
+    this.padding,
   });
 
-  final Key? instructionsKey;
+  final bool value;
 
-  final Key? recordingStatusKey;
+  final void Function(bool)? onChanged;
 
-  final Key? processingStatusKey;
-
-  final bool recording;
-
-  final String recordedObject;
-
-  final bool processing;
-
-  final double? progressValue;
-
-  final bool isPause;
+  final EdgeInsets? padding;
 
   @override
   Widget build(BuildContext context) {
-    Widget child;
-    if (processing) {
-      child = ProcessingInfo(
-        key: processingStatusKey,
-        progressValue: progressValue,
-        processedObject: recordedObject,
-      );
-    } else if (recording) {
-      child = RecordingStatus(
-        key: recordingStatusKey,
-        recordedObject: recordedObject,
-      );
-    } else {
-      child = RecordingInstructions(
-        key: instructionsKey,
-        recordedObject: recordedObject,
-        isPause: isPause,
-      );
-    }
-    return Center(
-      child: child,
-    );
-  }
-}
-
-class RecordingStatus extends StatelessWidget {
-  const RecordingStatus({
-    Key? key,
-    required this.recordedObject,
-  }) : super(key: key);
-
-  final String recordedObject;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Text(
-          'Recording $recordedObject',
-          style: Theme.of(context).subtleTextStyle,
+    return Container(
+      height: defaultSwitchHeight,
+      padding: padding,
+      child: FittedBox(
+        fit: BoxFit.fill,
+        child: Switch(
+          value: value,
+          onChanged: onChanged,
         ),
-        const SizedBox(height: defaultSpacing),
-        const CircularProgressIndicator(),
-      ],
-    );
-  }
-}
-
-class RecordingInstructions extends StatelessWidget {
-  const RecordingInstructions({
-    Key? key,
-    required this.isPause,
-    required this.recordedObject,
-  }) : super(key: key);
-
-  final String recordedObject;
-
-  final bool isPause;
-
-  @override
-  Widget build(BuildContext context) {
-    final stopOrPauseRow = Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: isPause
-          ? const [
-              Text('Click the pause button '),
-              Icon(Icons.pause),
-              Text(' to pause the recording.'),
-            ]
-          : const [
-              Text('Click the stop button '),
-              Icon(Icons.stop),
-              Text(' to end the recording.'),
-            ],
-    );
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Text('Click the record button '),
-            const Icon(Icons.fiber_manual_record),
-            Text(' to start recording $recordedObject.'),
-          ],
-        ),
-        stopOrPauseRow,
-      ],
+      ),
     );
   }
 }
@@ -701,12 +622,11 @@ class ProcessingInfo extends StatelessWidget {
         children: [
           Text(
             'Processing $processedObject',
-            style: Theme.of(context).subtleTextStyle,
+            style: Theme.of(context).regularTextStyle,
           ),
           const SizedBox(height: defaultSpacing),
           SizedBox(
             width: 200.0,
-            height: defaultSpacing,
             child: LinearProgressIndicator(
               value: progressValue,
             ),
@@ -719,15 +639,19 @@ class ProcessingInfo extends StatelessWidget {
 
 /// Common button for exiting offline mode.
 class ExitOfflineButton extends StatelessWidget {
-  const ExitOfflineButton({super.key});
+  const ExitOfflineButton({required this.gaScreen, super.key});
+
+  final String gaScreen;
 
   @override
   Widget build(BuildContext context) {
     final routerDelegate = DevToolsRouterDelegate.of(context);
-    return IconLabelButton(
+    return DevToolsButton(
       key: const Key('exit offline button'),
       label: 'Exit offline mode',
       icon: Icons.clear,
+      gaScreen: gaScreen,
+      gaSelection: gac.exitOfflineMode,
       onPressed: () {
         offlineController.exitOfflineMode();
         // Use Router.neglect to replace the current history entry with
@@ -744,10 +668,12 @@ class ExitOfflineButton extends StatelessWidget {
 class OfflineAwareControls extends StatelessWidget {
   const OfflineAwareControls({
     required this.controlsBuilder,
+    required this.gaScreen,
     super.key,
   });
 
   final Widget Function(bool) controlsBuilder;
+  final String gaScreen;
 
   @override
   Widget build(BuildContext context) {
@@ -757,9 +683,9 @@ class OfflineAwareControls extends StatelessWidget {
         return Row(
           children: [
             if (offlineController.offlineMode.value)
-              const Padding(
-                padding: EdgeInsets.only(right: defaultSpacing),
-                child: ExitOfflineButton(),
+              Padding(
+                padding: const EdgeInsets.only(right: defaultSpacing),
+                child: ExitOfflineButton(gaScreen: gaScreen),
               ),
             Expanded(
               child: controlsBuilder(offline),
@@ -774,7 +700,7 @@ class OfflineAwareControls extends StatelessWidget {
 /// A small element containing some accessory information, often a numeric
 /// value.
 class Badge extends StatelessWidget {
-  const Badge(this.text);
+  const Badge(this.text, {super.key});
 
   final String text;
 
@@ -788,7 +714,7 @@ class Badge extends StatelessWidget {
 
     return Container(
       decoration: BoxDecoration(
-        color: theme.primaryColor,
+        color: theme.colorScheme.onSurface,
         borderRadius: BorderRadius.circular(badgeCornerRadius),
       ),
       padding: const EdgeInsets.symmetric(
@@ -798,7 +724,8 @@ class Badge extends StatelessWidget {
       child: Text(
         text,
         // Use a slightly smaller font for the badge.
-        style: (theme.primaryTextTheme.bodyMedium ?? const TextStyle())
+        style: theme.regularTextStyle
+            .copyWith(color: theme.colorScheme.surface)
             .apply(fontSizeDelta: -1),
       ),
     );
@@ -852,63 +779,6 @@ class DevToolsTooltip extends StatelessWidget {
   }
 }
 
-class DevToolsIconButton extends StatelessWidget {
-  const DevToolsIconButton({
-    Key? key,
-    this.iconData,
-    this.iconWidget,
-    required this.onPressed,
-    required this.tooltip,
-    required this.gaScreen,
-    required this.gaSelection,
-  })  : assert((iconData == null) != (iconWidget == null)),
-        super(key: key);
-
-  final IconData? iconData;
-
-  final Widget? iconWidget;
-
-  final VoidCallback? onPressed;
-
-  final String tooltip;
-
-  final String gaScreen;
-
-  final String gaSelection;
-
-  @override
-  Widget build(BuildContext context) {
-    final icon = iconData != null
-        ? Icon(
-            iconData,
-            size: defaultIconSize,
-          )
-        : iconWidget;
-
-    final _onPressed = onPressed != null
-        ? () {
-            ga.select(gaScreen, gaSelection);
-            onPressed!();
-          }
-        : null;
-    return SizedBox(
-      // This is required to force the button height.
-      height: defaultButtonHeight,
-      child: DevToolsTooltip(
-        message: tooltip,
-        child: TextButton(
-          onPressed: _onPressed,
-          child: SizedBox(
-            height: defaultButtonHeight,
-            width: defaultButtonHeight,
-            child: icon,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 /// A wrapper around a TextButton, an Icon, and an optional Tooltip; used for
 /// small toolbar actions.
 class ToolbarAction extends StatelessWidget {
@@ -919,13 +789,18 @@ class ToolbarAction extends StatelessWidget {
     Key? key,
     this.size,
     this.style,
-  }) : super(key: key);
+    this.gaScreen,
+    this.gaSelection,
+  })  : assert((gaScreen == null) == (gaSelection == null)),
+        super(key: key);
 
   final TextStyle? style;
   final IconData icon;
   final String? tooltip;
   final VoidCallback? onPressed;
   final double? size;
+  final String? gaScreen;
+  final String? gaSelection;
 
   @override
   Widget build(BuildContext context) {
@@ -935,11 +810,16 @@ class ToolbarAction extends StatelessWidget {
         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
         textStyle: style,
       ),
-      onPressed: onPressed,
+      onPressed: () {
+        if (gaScreen != null && gaSelection != null) {
+          ga.select(gaScreen!, gaSelection!);
+        }
+        onPressed?.call();
+      },
       child: Icon(
         icon,
         size: size ?? actionsIconSize,
-        color: style?.color,
+        color: style?.color ?? Theme.of(context).colorScheme.onSurface,
       ),
     );
 
@@ -957,6 +837,8 @@ class ToolbarAction extends StatelessWidget {
 /// Acts as an empty header widget with zero size that is compatible with
 /// interfaces that expect a [PreferredSizeWidget].
 class BlankHeader extends StatelessWidget implements PreferredSizeWidget {
+  const BlankHeader({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Container();
@@ -975,65 +857,88 @@ class AreaPaneHeader extends StatelessWidget implements PreferredSizeWidget {
     Key? key,
     required this.title,
     this.maxLines = 1,
-    this.needsTopBorder = true,
-    this.needsBottomBorder = true,
-    this.needsLeftBorder = false,
     this.actions = const [],
     this.leftPadding = defaultSpacing,
     this.rightPadding = densePadding,
     this.tall = false,
-    this.backgroundColor,
+    this.roundedTopBorder = true,
+    this.includeTopBorder = true,
+    this.includeBottomBorder = true,
+    this.includeLeftBorder = false,
+    this.includeRightBorder = false,
   }) : super(key: key);
 
   final Widget title;
   final int maxLines;
-  final bool needsTopBorder;
-  final bool needsBottomBorder;
-  final bool needsLeftBorder;
   final List<Widget> actions;
   final double leftPadding;
   final double rightPadding;
   final bool tall;
-  final Color? backgroundColor;
+
+  // TODO(kenz): add support for a non uniform border to allow for
+  // rounded corners when some border sides are missing. This is a
+  // challenge for Flutter since it is not supported out of the box:
+  // https://github.com/flutter/flutter/issues/12583.
+
+  /// Whether to use a full border with rounded top corners consistent with
+  /// material 3 styling.
+  ///
+  /// When true, the rounded border will take precedence over any value
+  /// specified by [includeTopBorder], [includeBottomBorder],
+  /// [includeLeftBorder], and [includeRightBorder].
+  final bool roundedTopBorder;
+
+  final bool includeTopBorder;
+  final bool includeBottomBorder;
+  final bool includeLeftBorder;
+  final bool includeRightBorder;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final borderSide = defaultBorderSide(theme);
+    final decoration = !roundedTopBorder
+        ? BoxDecoration(
+            border: Border(
+              top: includeTopBorder ? borderSide : BorderSide.none,
+              bottom: includeBottomBorder ? borderSide : BorderSide.none,
+              left: includeLeftBorder ? borderSide : BorderSide.none,
+              right: includeRightBorder ? borderSide : BorderSide.none,
+            ),
+            color: theme.colorScheme.surface,
+          )
+        : null;
+    Widget container = Container(
+      decoration: decoration,
+      padding: EdgeInsets.only(left: leftPadding, right: rightPadding),
+      alignment: Alignment.centerLeft,
+      child: Row(
+        children: [
+          Expanded(
+            child: DefaultTextStyle(
+              maxLines: maxLines,
+              overflow: TextOverflow.ellipsis,
+              style: theme.textTheme.titleSmall!,
+              child: title,
+            ),
+          ),
+          ...actions,
+        ],
+      ),
+    );
+    if (roundedTopBorder) {
+      container = RoundedOutlinedBorder.onlyTop(child: container);
+    }
     return SizedBox.fromSize(
       size: preferredSize,
-      child: Container(
-        decoration: BoxDecoration(
-          border: Border(
-            top: needsTopBorder ? borderSide : BorderSide.none,
-            bottom: needsBottomBorder ? borderSide : BorderSide.none,
-            left: needsLeftBorder ? borderSide : BorderSide.none,
-          ),
-          color: backgroundColor ?? theme.titleSolidBackgroundColor,
-        ),
-        padding: EdgeInsets.only(left: leftPadding, right: rightPadding),
-        alignment: Alignment.centerLeft,
-        child: Row(
-          children: [
-            Expanded(
-              child: DefaultTextStyle(
-                maxLines: maxLines,
-                overflow: TextOverflow.ellipsis,
-                style: theme.textTheme.titleSmall!,
-                child: title,
-              ),
-            ),
-            ...actions,
-          ],
-        ),
-      ),
+      child: container,
     );
   }
 
   @override
   Size get preferredSize {
     return Size.fromHeight(
-      tall ? areaPaneHeaderHeight + 2 * densePadding : areaPaneHeaderHeight,
+      tall ? areaPaneHeaderHeight + 2 * densePadding : defaultHeaderHeight,
     );
   }
 }
@@ -1064,10 +969,7 @@ class DevToolsToggleButtonGroup extends StatelessWidget {
       child: ToggleButtons(
         borderRadius:
             const BorderRadius.all(Radius.circular(defaultBorderRadius)),
-        color: theme.colorScheme.toggleButtonsTitle,
-        selectedColor: theme.colorScheme.toggleButtonsTitleSelected,
-        fillColor: theme.colorScheme.toggleButtonsFillSelected,
-        textStyle: theme.textTheme.bodyLarge,
+        textStyle: theme.textTheme.bodyMedium,
         constraints: BoxConstraints(
           minWidth: defaultButtonHeight,
           minHeight: defaultButtonHeight,
@@ -1085,20 +987,17 @@ class DevToolsToggleButtonGroup extends StatelessWidget {
 /// * `minScreenWidthForTextBeforeScaling`: The minimum width the button can be before the text is
 ///    omitted.
 /// * `onPressed`: The callback to be called upon pressing the button.
-class ExportButton extends IconLabelButton {
+class ExportButton extends DevToolsButton {
   const ExportButton({
-    Key? key,
-    required VoidCallback? onPressed,
-    required double minScreenWidthForTextBeforeScaling,
-    String tooltip = 'Export data',
+    required super.gaScreen,
+    super.key,
+    super.onPressed,
+    super.minScreenWidthForTextBeforeScaling,
+    super.tooltip = 'Export data',
   }) : super(
-          key: key,
-          onPressed: onPressed,
           icon: Icons.file_download,
           label: 'Export',
-          tooltip: tooltip,
-          minScreenWidthForTextBeforeScaling:
-              minScreenWidthForTextBeforeScaling,
+          gaSelection: gac.export,
         );
 }
 
@@ -1157,47 +1056,21 @@ class ToggleButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return DevToolsTooltip(
-      message: message,
-      // TODO(kenz): this SizedBox wrapper should be unnecessary once
-      // https://github.com/flutter/flutter/issues/79894 is fixed.
-      child: SizedBox(
-        height: defaultButtonHeight,
-        child: OutlinedButton(
-          key: key,
-          onPressed: onPressed,
-          style: TextButton.styleFrom(
-            side: outlined ? null : BorderSide.none,
-            backgroundColor: isSelected
-                ? theme.colorScheme.toggleButtonsFillSelected
-                : Colors.transparent,
-            shape: shape,
-          ),
-          child: Row(
-            children: [
-              Icon(
-                icon,
-                size: defaultIconSize,
-                color: isSelected
-                    ? theme.colorScheme.toggleButtonsTitleSelected
-                    : theme.colorScheme.toggleButtonsTitle,
-              ),
-              if (label != null) ...[
-                const SizedBox(width: denseSpacing),
-                Text(
-                  style: theme.textTheme.bodyLarge!.apply(
-                    color: isSelected
-                        ? theme.colorScheme.toggleButtonsTitleSelected
-                        : theme.colorScheme.toggleButtonsTitle,
-                  ),
-                  label!,
-                ),
-              ],
-            ],
+    return DevToolsToggleButtonGroup(
+      selectedStates: [isSelected],
+      onPressed: (_) => onPressed(),
+      children: [
+        DevToolsTooltip(
+          message: message,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: denseSpacing),
+            child: MaterialIconLabel(
+              iconData: icon,
+              label: label,
+            ),
           ),
         ),
-      ),
+      ],
     );
   }
 }
@@ -1337,6 +1210,7 @@ Widget closeSearchDropdownButton(VoidCallback? onPressed) {
 Widget inputDecorationSuffixButton(IconData icon, VoidCallback? onPressed) {
   return Container(
     padding: const EdgeInsets.symmetric(horizontal: densePadding),
+    height: inputDecorationElementHeight,
     width: defaultIconSize + denseSpacing,
     child: IconButton(
       padding: const EdgeInsets.all(0.0),
@@ -1349,7 +1223,7 @@ Widget inputDecorationSuffixButton(IconData icon, VoidCallback? onPressed) {
 }
 
 class OutlinedRowGroup extends StatelessWidget {
-  const OutlinedRowGroup({required this.children, this.borderColor});
+  const OutlinedRowGroup({super.key, required this.children, this.borderColor});
 
   final List<Widget> children;
 
@@ -1449,7 +1323,7 @@ class OutlineDecoration extends StatelessWidget {
 }
 
 class ThickDivider extends StatelessWidget {
-  const ThickDivider();
+  const ThickDivider({super.key});
 
   static const double thickDividerHeight = 5;
 
@@ -1463,14 +1337,81 @@ class ThickDivider extends StatelessWidget {
 }
 
 class RoundedOutlinedBorder extends StatelessWidget {
-  const RoundedOutlinedBorder({Key? key, this.child}) : super(key: key);
+  const RoundedOutlinedBorder({
+    super.key,
+    this.showTopLeft = true,
+    this.showTopRight = true,
+    this.showBottomLeft = true,
+    this.showBottomRight = true,
+    this.clip = false,
+    required this.child,
+  });
+
+  factory RoundedOutlinedBorder.onlyTop({
+    required Widget? child,
+    bool clip = false,
+  }) =>
+      RoundedOutlinedBorder(
+        showBottomLeft: false,
+        showBottomRight: false,
+        clip: clip,
+        child: child,
+      );
+
+  factory RoundedOutlinedBorder.onlyBottom({
+    required Widget? child,
+    bool clip = false,
+  }) =>
+      RoundedOutlinedBorder(
+        showTopLeft: false,
+        showTopRight: false,
+        clip: clip,
+        child: child,
+      );
+
+  final bool showTopLeft;
+  final bool showTopRight;
+  final bool showBottomLeft;
+  final bool showBottomRight;
+
+  /// Whether we should clip [child].
+  ///
+  /// This should be used sparingly and only where necessary for performance
+  /// reasons.
+  final bool clip;
 
   final Widget? child;
 
   @override
   Widget build(BuildContext context) {
+    final borderRadius = BorderRadius.only(
+      topLeft: showTopLeft
+          ? const Radius.circular(defaultBorderRadius)
+          : Radius.zero,
+      topRight: showTopRight
+          ? const Radius.circular(defaultBorderRadius)
+          : Radius.zero,
+      bottomLeft: showBottomLeft
+          ? const Radius.circular(defaultBorderRadius)
+          : Radius.zero,
+      bottomRight: showBottomRight
+          ? const Radius.circular(defaultBorderRadius)
+          : Radius.zero,
+    );
+
+    var child = this.child;
+    if (clip) {
+      child = ClipRRect(
+        borderRadius: borderRadius,
+        clipBehavior: Clip.hardEdge,
+        child: child,
+      );
+    }
     return Container(
-      decoration: roundedBorderDecoration(context),
+      decoration: BoxDecoration(
+        border: Border.all(color: Theme.of(context).focusColor),
+        borderRadius: borderRadius,
+      ),
       child: child,
     );
   }
@@ -1482,7 +1423,7 @@ BoxDecoration roundedBorderDecoration(BuildContext context) => BoxDecoration(
     );
 
 class LeftBorder extends StatelessWidget {
-  const LeftBorder({this.child});
+  const LeftBorder({super.key, this.child});
 
   final Widget? child;
 
@@ -1504,7 +1445,7 @@ class LeftBorder extends StatelessWidget {
 final goldenRatio = 1 + sqrt(5) / 2;
 
 class CenteredMessage extends StatelessWidget {
-  const CenteredMessage(this.message);
+  const CenteredMessage(this.message, {super.key});
 
   final String message;
 
@@ -1520,7 +1461,7 @@ class CenteredMessage extends StatelessWidget {
 }
 
 class CenteredCircularProgressIndicator extends StatelessWidget {
-  const CenteredCircularProgressIndicator({this.size});
+  const CenteredCircularProgressIndicator({super.key, this.size});
 
   final double? size;
 
@@ -1536,47 +1477,6 @@ class CenteredCircularProgressIndicator extends StatelessWidget {
       width: size,
       height: size,
       child: indicator,
-    );
-  }
-}
-
-class CircularIconButton extends StatelessWidget {
-  const CircularIconButton({
-    required this.icon,
-    required this.onPressed,
-    required this.backgroundColor,
-    required this.foregroundColor,
-  });
-
-  final IconData icon;
-  final VoidCallback onPressed;
-  final Color backgroundColor;
-  final Color foregroundColor;
-
-  @override
-  Widget build(BuildContext context) {
-    return RawMaterialButton(
-      fillColor: backgroundColor,
-      hoverColor: Theme.of(context).hoverColor,
-      elevation: 0.0,
-      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-      constraints: BoxConstraints.tightFor(
-        width: actionsIconSize,
-        height: actionsIconSize,
-      ),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20.0),
-        side: BorderSide(
-          width: 2.0,
-          color: foregroundColor,
-        ),
-      ),
-      onPressed: onPressed,
-      child: Icon(
-        icon,
-        size: defaultIconSize,
-        color: foregroundColor,
-      ),
     );
   }
 }
@@ -1678,12 +1578,13 @@ extension ColorExtension on Color {
 /// Gets an alternating color to use for indexed UI elements.
 Color alternatingColorForIndex(int index, ColorScheme colorScheme) {
   return index % 2 == 1
-      ? colorScheme.defaultBackgroundColor
-      : colorScheme.alternatingBackgroundColor;
+      ? colorScheme.alternatingBackgroundColor1
+      : colorScheme.alternatingBackgroundColor2;
 }
 
 class BreadcrumbNavigator extends StatelessWidget {
   const BreadcrumbNavigator.builder({
+    super.key,
     required this.itemCount,
     required this.builder,
   });
@@ -1708,6 +1609,7 @@ class BreadcrumbNavigator extends StatelessWidget {
 
 class Breadcrumb extends StatelessWidget {
   const Breadcrumb({
+    super.key,
     required this.text,
     required this.isRoot,
     required this.onPressed,
@@ -1820,6 +1722,7 @@ class _BreadcrumbPainter extends CustomPainter {
 // TODO(bkonyi): replace uses of this class with `JsonViewer`.
 class FormattedJson extends StatelessWidget {
   const FormattedJson({
+    super.key,
     this.json,
     this.formattedString,
     this.useSubtleStyle = false,
@@ -1846,6 +1749,7 @@ class FormattedJson extends StatelessWidget {
 
 class JsonViewer extends StatefulWidget {
   const JsonViewer({
+    super.key,
     required this.encodedJson,
   });
 
@@ -1935,8 +1839,9 @@ class _JsonViewerState extends State<JsonViewer>
         child: FutureBuilder(
           future: _initializeTree,
           builder: (context, snapshot) {
-            if (snapshot.connectionState != ConnectionState.done)
+            if (snapshot.connectionState != ConnectionState.done) {
               return Container();
+            }
             return ExpandableVariable(
               variable: variable,
             );
@@ -1984,7 +1889,7 @@ class MoreInfoLink extends StatelessWidget {
             Icon(
               Icons.launch,
               size: tooltipIconSize,
-              color: theme.colorScheme.toggleButtonsTitle,
+              color: theme.colorScheme.onSurface,
             ),
           ],
         ),
@@ -2034,6 +1939,8 @@ class Link {
   final String gaSelectedItemDescription;
 }
 
+/// Helper that will wrap [child] in a [DevToolsTooltip] widget if [tooltip] is
+/// non-null.
 Widget maybeWrapWithTooltip({
   required String? tooltip,
   EdgeInsetsGeometry? tooltipPadding,
@@ -2116,6 +2023,7 @@ typedef ClipboardDataProvider = String? Function();
 /// If it succeeds, it displays a notification with `successMessage`.
 class CopyToClipboardControl extends StatelessWidget {
   const CopyToClipboardControl({
+    super.key,
     this.dataProvider,
     this.successMessage = 'Copied to clipboard.',
     this.tooltip = 'Copy to clipboard',
@@ -2330,8 +2238,7 @@ class PubWarningText extends StatelessWidget {
       TextSpan(
         text: 'Warning: you should no longer be launching DevTools from'
             ' pub.\n\n',
-        style: theme.subtleTextStyle
-            .copyWith(color: theme.colorScheme.errorTextColor),
+        style: theme.subtleTextStyle.copyWith(color: theme.colorScheme.error),
         children: [
           TextSpan(
             text: 'DevTools version 2.8.0 will be the last version to '
@@ -2369,7 +2276,7 @@ class BlinkingIcon extends StatefulWidget {
   final double size;
 
   @override
-  _BlinkingIconState createState() => _BlinkingIconState();
+  State<BlinkingIcon> createState() => _BlinkingIconState();
 }
 
 class _BlinkingIconState extends State<BlinkingIcon> {
@@ -2445,7 +2352,7 @@ class DualValueListenableBuilder<T, U> extends StatefulWidget {
   final Widget? child;
 
   @override
-  _DualValueListenableBuilderState createState() =>
+  State<DualValueListenableBuilder<T, U>> createState() =>
       _DualValueListenableBuilderState<T, U>();
 }
 
@@ -2550,10 +2457,12 @@ class _KeepAliveWrapperState extends State<KeepAliveWrapper>
 /// Help button, that opens a dialog on click.
 class HelpButtonWithDialog extends StatelessWidget {
   const HelpButtonWithDialog({
+    super.key,
     required this.gaScreen,
     required this.gaSelection,
     required this.dialogTitle,
     required this.child,
+    this.outlined = true,
   });
 
   final String gaScreen;
@@ -2563,6 +2472,8 @@ class HelpButtonWithDialog extends StatelessWidget {
   final String dialogTitle;
 
   final Widget child;
+
+  final bool outlined;
 
   @override
   Widget build(BuildContext context) {
@@ -2585,6 +2496,7 @@ class HelpButtonWithDialog extends StatelessWidget {
       },
       gaScreen: gaScreen,
       gaSelection: gaSelection,
+      outlined: outlined,
     );
   }
 }
@@ -2592,7 +2504,7 @@ class HelpButtonWithDialog extends StatelessWidget {
 /// Display a single bullet character in order to act as a stylized spacer
 /// component.
 class BulletSpacer extends StatelessWidget {
-  const BulletSpacer({this.useAccentColor = false});
+  const BulletSpacer({super.key, this.useAccentColor = false});
 
   final bool useAccentColor;
 
@@ -2622,24 +2534,54 @@ class BulletSpacer extends StatelessWidget {
   }
 }
 
+class VerticalLineSpacer extends StatelessWidget {
+  const VerticalLineSpacer({required this.height, super.key});
+
+  // The total width of this spacer should be 8.0.
+  static double get totalWidth => _lineWidth + _paddingWidth * 2;
+  static const _lineWidth = 1.0;
+  static const _paddingWidth = 3.5;
+
+  final double height;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: _paddingWidth),
+      child: OutlineDecoration.onlyLeft(
+        child: SizedBox(
+          width: _lineWidth,
+          height: height,
+        ),
+      ),
+    );
+  }
+}
+
 class ToCsvButton extends StatelessWidget {
   const ToCsvButton({
     Key? key,
     this.onPressed,
     this.tooltip = 'Download data in CSV format',
     required this.minScreenWidthForTextBeforeScaling,
+    required this.gaScreen,
+    required this.gaSelection,
   }) : super(key: key);
 
   final VoidCallback? onPressed;
   final String? tooltip;
   final double minScreenWidthForTextBeforeScaling;
+  final String gaScreen;
+  final String gaSelection;
 
   @override
   Widget build(BuildContext context) {
-    return IconLabelButton(
+    return DevToolsButton(
       label: 'CSV',
       icon: Icons.file_download,
       tooltip: tooltip,
+      gaScreen: gaScreen,
+      gaSelection: gaSelection,
       onPressed: onPressed,
       minScreenWidthForTextBeforeScaling: minScreenWidthForTextBeforeScaling,
     );
@@ -2680,12 +2622,14 @@ class RadioButton<T> extends StatelessWidget {
 }
 
 class ContextMenuButton extends StatelessWidget {
-  const ContextMenuButton({
+  ContextMenuButton({
+    super.key,
+    required this.menu,
     this.style,
     this.gaScreen,
     this.gaItem,
-    required this.menu,
-  });
+    double? size,
+  }) : size = size ?? tableIconSize;
 
   static const double width = 14;
 
@@ -2693,6 +2637,7 @@ class ContextMenuButton extends StatelessWidget {
   final String? gaScreen;
   final String? gaItem;
   final List<Widget> menu;
+  final double size;
 
   @override
   Widget build(BuildContext context) {
@@ -2702,8 +2647,10 @@ class ContextMenuButton extends StatelessWidget {
           (BuildContext context, MenuController controller, Widget? child) {
         return SizedBox(
           width: width,
-          child: TextButton(
-            child: Text('⋮', style: style, textAlign: TextAlign.center),
+          child: ToolbarAction(
+            icon: Icons.more_vert,
+            size: size,
+            style: style,
             onPressed: () {
               if (gaScreen != null && gaItem != null) {
                 ga.select(gaScreen!, gaItem!);

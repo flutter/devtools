@@ -42,7 +42,7 @@ ExpansionTile _buildTile(
 /// This widget displays general HTTP request / response information that is
 /// contained in the headers, in addition to the standard connection information.
 class HttpRequestHeadersView extends StatelessWidget {
-  const HttpRequestHeadersView(this.data);
+  const HttpRequestHeadersView(this.data, {super.key});
 
   @visibleForTesting
   static const generalKey = Key('General');
@@ -129,7 +129,7 @@ class _Row extends StatelessWidget {
 }
 
 class HttpRequestView extends StatelessWidget {
-  const HttpRequestView(this.data);
+  const HttpRequestView(this.data, {super.key});
 
   final DartIOHttpRequestData data;
 
@@ -147,8 +147,13 @@ class HttpRequestView extends StatelessWidget {
             size: mediumProgressSize,
           );
         }
+
+        final isJson = requestContentType is List
+            ? requestContentType.any((element) => element.contains('json'))
+            : requestContentType.contains('json');
+
         Widget child;
-        child = (requestContentType.contains('json'))
+        child = isJson
             ? JsonViewer(encodedJson: data.requestBody!)
             : Text(
                 data.requestBody!,
@@ -165,8 +170,39 @@ class HttpRequestView extends StatelessWidget {
   }
 }
 
+/// A button for copying [DartIOHttpRequestData] contents.
+///
+/// If there is no content to copy, the button will not show. The copy contents
+/// will update as the request's data is updated.
+class HttpViewTrailingCopyButton extends StatelessWidget {
+  const HttpViewTrailingCopyButton(this.data, this.dataSelector, {super.key});
+  final DartIOHttpRequestData data;
+  final String? Function(DartIOHttpRequestData) dataSelector;
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder(
+      valueListenable: data.requestUpdatedNotifier,
+      builder: (context, __, ___) {
+        final dataToCopy = dataSelector(data);
+        final isLoading = data.isFetchingFullData;
+        if (dataToCopy == null || dataToCopy.isEmpty || isLoading) {
+          return Container();
+        }
+
+        return Align(
+          alignment: Alignment.centerRight,
+          child: CopyToClipboardControl(
+            dataProvider: () => dataToCopy,
+          ),
+        );
+      },
+    );
+  }
+}
+
 class HttpResponseView extends StatelessWidget {
-  const HttpResponseView(this.data);
+  const HttpResponseView(this.data, {super.key});
 
   final DartIOHttpRequestData data;
 
@@ -210,7 +246,7 @@ class HttpResponseView extends StatelessWidget {
 }
 
 class ImageResponseView extends StatelessWidget {
-  const ImageResponseView(this.data);
+  const ImageResponseView(this.data, {super.key});
 
   final DartIOHttpRequestData data;
 
@@ -294,7 +330,7 @@ class ImageResponseView extends StatelessWidget {
 
 /// A [Widget] which displays [Cookie] information in a tab.
 class HttpRequestCookiesView extends StatelessWidget {
-  const HttpRequestCookiesView(this.data);
+  const HttpRequestCookiesView(this.data, {super.key});
 
   @visibleForTesting
   static const requestCookiesKey = Key('Request Cookies');
@@ -337,7 +373,7 @@ class HttpRequestCookiesView extends StatelessWidget {
     bool requestCookies = false,
   }) {
     final theme = Theme.of(context);
-    DataColumn _buildColumn(
+    DataColumn buildColumn(
       String title, {
       bool numeric = false,
     }) {
@@ -386,15 +422,15 @@ class HttpRequestCookiesView extends StatelessWidget {
                 // NOTE: if this list of columns change, _buildRow will need
                 // to be updated to match.
                 columns: [
-                  _buildColumn('Name'),
-                  _buildColumn('Value'),
+                  buildColumn('Name'),
+                  buildColumn('Value'),
                   if (!requestCookies) ...[
-                    _buildColumn('Domain'),
-                    _buildColumn('Path'),
-                    _buildColumn('Expires / Max Age'),
-                    _buildColumn('Size', numeric: true),
-                    _buildColumn('HttpOnly'),
-                    _buildColumn('Secure'),
+                    buildColumn('Domain'),
+                    buildColumn('Path'),
+                    buildColumn('Expires / Max Age'),
+                    buildColumn('Size', numeric: true),
+                    buildColumn('HttpOnly'),
+                    buildColumn('Secure'),
                   ],
                 ],
                 rows: [
@@ -452,7 +488,7 @@ class HttpRequestCookiesView extends StatelessWidget {
 }
 
 class NetworkRequestOverviewView extends StatelessWidget {
-  const NetworkRequestOverviewView(this.data);
+  const NetworkRequestOverviewView(this.data, {super.key});
 
   static const _keyWidth = 110.0;
   static const _timingGraphHeight = 18.0;
@@ -523,8 +559,9 @@ class NetworkRequestOverviewView extends StatelessWidget {
       _buildRow(
         context: context,
         title: 'Timing',
-        child:
-            data is WebSocket ? _buildSocketTimeGraph() : _buildHttpTimeGraph(),
+        child: data is WebSocket
+            ? _buildSocketTimeGraph(context)
+            : _buildHttpTimeGraph(),
       ),
       const SizedBox(height: denseSpacing),
       _buildRow(
@@ -565,7 +602,7 @@ class NetworkRequestOverviewView extends StatelessWidget {
     return Flexible(
       flex: flex,
       child: DevToolsTooltip(
-        message: '$label - ${msText(duration)}',
+        message: '$label - ${durationText(duration)}',
         child: Container(
           height: _timingGraphHeight,
           color: color,
@@ -584,16 +621,16 @@ class NetworkRequestOverviewView extends StatelessWidget {
       );
     }
 
-    const _colors = [
+    const colors = [
       searchMatchColor,
       mainRasterColor,
       mainAsyncColor,
     ];
 
-    var _colorIndex = 0;
-    Color _nextColor() {
-      final color = _colors[_colorIndex % _colors.length];
-      _colorIndex++;
+    var colorIndex = 0;
+    Color nextColor() {
+      final color = colors[colorIndex % colors.length];
+      colorIndex++;
       return color;
     }
 
@@ -603,7 +640,7 @@ class NetworkRequestOverviewView extends StatelessWidget {
     for (final instant in data.instantEvents) {
       final duration = instant.timeRange!.duration;
       timingWidgets.add(
-        _buildTimingRow(_nextColor(), instant.name, duration),
+        _buildTimingRow(nextColor(), instant.name, duration),
       );
     }
     final duration = Duration(
@@ -612,7 +649,7 @@ class NetworkRequestOverviewView extends StatelessWidget {
           data.timelineMicrosecondsSinceEpoch(0),
     );
     timingWidgets.add(
-      _buildTimingRow(_nextColor(), 'Response', duration),
+      _buildTimingRow(nextColor(), 'Response', duration),
     );
     return Row(
       key: httpTimingGraphKey,
@@ -628,14 +665,24 @@ class NetworkRequestOverviewView extends StatelessWidget {
     for (final instant in data.instantEvents) {
       final instantEventStart = data.instantEvents.first.timeRange!.start!;
       final timeRange = instant.timeRange!;
+      final startDisplay = durationText(
+        timeRange.start! - instantEventStart,
+        unit: DurationDisplayUnit.milliseconds,
+      );
+      final endDisplay = durationText(
+        timeRange.end! - instantEventStart,
+        unit: DurationDisplayUnit.milliseconds,
+      );
+      final totalDisplay = durationText(
+        timeRange.duration,
+        unit: DurationDisplayUnit.milliseconds,
+      );
       result.addAll([
         _buildRow(
           context: context,
           title: instant.name,
           child: _valueText(
-            '[${msText(timeRange.start! - instantEventStart)} - '
-            '${msText(timeRange.end! - instantEventStart)}]'
-            ' → ${msText(timeRange.duration)} total',
+            '[$startDisplay - $endDisplay] → $totalDisplay total',
           ),
         ),
         if (instant != data.instantEvents.last)
@@ -651,7 +698,7 @@ class NetworkRequestOverviewView extends StatelessWidget {
       _buildRow(
         context: context,
         title: 'Socket id',
-        child: _valueText('${socket.id}'),
+        child: _valueText(socket.id),
       ),
       const SizedBox(height: defaultSpacing),
       _buildRow(
@@ -675,11 +722,11 @@ class NetworkRequestOverviewView extends StatelessWidget {
     ];
   }
 
-  Widget _buildSocketTimeGraph() {
+  Widget _buildSocketTimeGraph(BuildContext context) {
     return Container(
       key: socketTimingGraphKey,
       height: _timingGraphHeight,
-      color: mainUiColor,
+      color: Theme.of(context).colorScheme.primary,
     );
   }
 
@@ -714,7 +761,7 @@ class NetworkRequestOverviewView extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Container(
+        SizedBox(
           width: _keyWidth,
           child: SelectableText(
             title.isEmpty ? '' : '$title: ',

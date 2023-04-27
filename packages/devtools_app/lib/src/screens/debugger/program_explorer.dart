@@ -21,7 +21,6 @@ import 'program_explorer_model.dart';
 
 const containerIcon = Icons.folder;
 const libraryIcon = Icons.insert_drive_file;
-const listItemHeight = 40.0;
 
 double get _programExplorerRowHeight => scaleByFontFactor(22.0);
 double get _selectedNodeTopSpacing => _programExplorerRowHeight * 3;
@@ -64,11 +63,7 @@ class _ProgramExplorerRow extends StatelessWidget {
                 text!,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: theme.fixedFontStyle.copyWith(
-                  color: node.isSelected
-                      ? Colors.white
-                      : theme.fixedFontStyle.color,
-                ),
+                style: theme.fixedFontStyle,
               ),
             ),
           ],
@@ -83,8 +78,7 @@ class _ProgramExplorerRow extends StatelessWidget {
       final clazz = node.object as ClassRef;
       toolTip = '${clazz.name}';
       if (clazz.typeParameters != null) {
-        toolTip +=
-            '<' + clazz.typeParameters!.map((e) => e.name).join(', ') + '>';
+        toolTip += '<${clazz.typeParameters!.map((e) => e.name).join(', ')}>';
       }
     } else if (node.object is Func) {
       final func = node.object as Func;
@@ -211,6 +205,7 @@ class _ProgramExplorerRow extends StatelessWidget {
 
 class ProgramStructureIcon extends StatelessWidget {
   const ProgramStructureIcon({
+    super.key,
     required this.object,
   });
 
@@ -424,18 +419,16 @@ class _ProgramOutlineView extends StatelessWidget {
 /// filtering.
 class ProgramExplorer extends StatelessWidget {
   const ProgramExplorer({
-    Key? key,
+    super.key,
     required this.controller,
     this.title = 'File Explorer',
     this.onNodeSelected,
-    this.displayCodeNodes = false,
     this.displayHeader = true,
   });
 
   final ProgramExplorerController controller;
   final String title;
   final void Function(VMServiceObjectNode)? onNodeSelected;
-  final bool displayCodeNodes;
   final bool displayHeader;
 
   @override
@@ -450,9 +443,10 @@ class ProgramExplorer extends StatelessWidget {
           final fileExplorerHeader = displayHeader
               ? AreaPaneHeader(
                   title: Text(title),
-                  needsTopBorder: false,
+                  includeTopBorder: false,
+                  roundedTopBorder: false,
                 )
-              : BlankHeader();
+              : const BlankHeader();
           final fileExplorer = _FileExplorer(
             controller: controller,
             onItemExpanded: onItemExpanded,
@@ -482,7 +476,10 @@ class ProgramExplorer extends StatelessWidget {
                       minSizes: const [0.0, 0.0],
                       headers: <PreferredSizeWidget>[
                         fileExplorerHeader as PreferredSizeWidget,
-                        const AreaPaneHeader(title: Text('Outline')),
+                        const AreaPaneHeader(
+                          title: Text('Outline'),
+                          roundedTopBorder: false,
+                        ),
                       ],
                       children: [
                         fileExplorer,

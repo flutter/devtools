@@ -96,7 +96,7 @@ final Map<String, dynamic> cpuProfileDataWithUserTagsJson = {
         'userTag': 'userTagA',
         'vmTag': 'vmTagA',
       },
-      'sf': '140357727781376-3'
+      'sf': '140357727781376-3',
     },
     {
       'ph': 'P',
@@ -109,7 +109,7 @@ final Map<String, dynamic> cpuProfileDataWithUserTagsJson = {
         'userTag': 'userTagB',
         'vmTag': 'vmTagB',
       },
-      'sf': '140357727781376-4'
+      'sf': '140357727781376-4',
     },
     {
       'ph': 'P',
@@ -122,7 +122,7 @@ final Map<String, dynamic> cpuProfileDataWithUserTagsJson = {
         'userTag': 'userTagA',
         'vmTag': 'vmTagA',
       },
-      'sf': '140357727781376-5'
+      'sf': '140357727781376-5',
     },
     {
       'ph': 'P',
@@ -135,7 +135,7 @@ final Map<String, dynamic> cpuProfileDataWithUserTagsJson = {
         'userTag': 'userTagC',
         'vmTag': 'vmTagC',
       },
-      'sf': '140357727781376-5'
+      'sf': '140357727781376-5',
     },
     {
       'ph': 'P',
@@ -148,7 +148,7 @@ final Map<String, dynamic> cpuProfileDataWithUserTagsJson = {
         'userTag': 'userTagC',
         'vmTag': 'vmTagC',
       },
-      'sf': '140357727781376-6'
+      'sf': '140357727781376-6',
     },
   ],
 };
@@ -255,8 +255,8 @@ final Map<String, dynamic> goldenCpuSamplesJson = {
         'static': false,
         'const': false,
         'implicit': false,
-        'abstract': false
-      }
+        'abstract': false,
+      },
     },
     {
       'kind': 'Native',
@@ -271,8 +271,8 @@ final Map<String, dynamic> goldenCpuSamplesJson = {
         'static': false,
         'const': false,
         'implicit': false,
-        'abstract': false
-      }
+        'abstract': false,
+      },
     },
     {
       'kind': 'Native',
@@ -288,8 +288,8 @@ final Map<String, dynamic> goldenCpuSamplesJson = {
         'static': false,
         'const': false,
         'implicit': false,
-        'abstract': false
-      }
+        'abstract': false,
+      },
     },
     {
       'kind': 'Native',
@@ -305,8 +305,8 @@ final Map<String, dynamic> goldenCpuSamplesJson = {
         'static': false,
         'const': false,
         'implicit': false,
-        'abstract': false
-      }
+        'abstract': false,
+      },
     },
     {
       'kind': 'Native',
@@ -322,8 +322,8 @@ final Map<String, dynamic> goldenCpuSamplesJson = {
         'static': false,
         'const': false,
         'implicit': false,
-        'abstract': false
-      }
+        'abstract': false,
+      },
     },
     {
       'kind': 'Native',
@@ -344,9 +344,9 @@ final Map<String, dynamic> goldenCpuSamplesJson = {
           'type': 'SourceLocation',
           'script': null,
           'tokenPos': -1,
-          'line': 123321
-        }
-      }
+          'line': 123321,
+        },
+      },
     },
     {
       'kind': 'Native',
@@ -362,8 +362,8 @@ final Map<String, dynamic> goldenCpuSamplesJson = {
         'static': false,
         'const': false,
         'implicit': false,
-        'abstract': false
-      }
+        'abstract': false,
+      },
     },
     {
       'kind': 'Native',
@@ -378,8 +378,8 @@ final Map<String, dynamic> goldenCpuSamplesJson = {
         'static': false,
         'const': false,
         'implicit': false,
-        'abstract': false
-      }
+        'abstract': false,
+      },
     },
     {
       'kind': 'Native',
@@ -394,8 +394,8 @@ final Map<String, dynamic> goldenCpuSamplesJson = {
         'static': false,
         'const': false,
         'implicit': false,
-        'abstract': false
-      }
+        'abstract': false,
+      },
     },
     {
       'kind': 'Native',
@@ -411,8 +411,8 @@ final Map<String, dynamic> goldenCpuSamplesJson = {
         'static': false,
         'const': false,
         'implicit': false,
-        'abstract': false
-      }
+        'abstract': false,
+      },
     },
     {
       'kind': 'Native',
@@ -428,8 +428,8 @@ final Map<String, dynamic> goldenCpuSamplesJson = {
         'static': false,
         'const': false,
         'implicit': false,
-        'abstract': false
-      }
+        'abstract': false,
+      },
     },
     {
       'kind': 'Native',
@@ -445,8 +445,8 @@ final Map<String, dynamic> goldenCpuSamplesJson = {
         'static': false,
         'const': false,
         'implicit': false,
-        'abstract': false
-      }
+        'abstract': false,
+      },
     },
     {
       'kind': 'Native',
@@ -462,8 +462,8 @@ final Map<String, dynamic> goldenCpuSamplesJson = {
         'static': false,
         'const': false,
         'implicit': false,
-        'abstract': false
-      }
+        'abstract': false,
+      },
     },
     {
       'kind': 'Native',
@@ -479,8 +479,8 @@ final Map<String, dynamic> goldenCpuSamplesJson = {
         'static': false,
         'const': false,
         'implicit': false,
-        'abstract': false
-      }
+        'abstract': false,
+      },
     },
     {
       'kind': 'Native',
@@ -496,8 +496,8 @@ final Map<String, dynamic> goldenCpuSamplesJson = {
         'static': false,
         'const': false,
         'implicit': false,
-        'abstract': false
-      }
+        'abstract': false,
+      },
     },
     {
       'kind': 'Native',
@@ -513,8 +513,8 @@ final Map<String, dynamic> goldenCpuSamplesJson = {
         'static': false,
         'const': false,
         'implicit': false,
-        'abstract': false
-      }
+        'abstract': false,
+      },
     },
     {
       'kind': 'Native',
@@ -530,8 +530,8 @@ final Map<String, dynamic> goldenCpuSamplesJson = {
         'static': false,
         'const': false,
         'implicit': false,
-        'abstract': false
-      }
+        'abstract': false,
+      },
     },
     {
       'kind': 'Tag',
@@ -546,8 +546,8 @@ final Map<String, dynamic> goldenCpuSamplesJson = {
         'static': false,
         'const': false,
         'implicit': false,
-        'abstract': false
-      }
+        'abstract': false,
+      },
     },
     {
       'kind': 'Tag',
@@ -562,8 +562,8 @@ final Map<String, dynamic> goldenCpuSamplesJson = {
         'static': false,
         'const': false,
         'implicit': false,
-        'abstract': false
-      }
+        'abstract': false,
+      },
     },
   ],
   'samples': [
@@ -630,8 +630,8 @@ final Map<String, dynamic> goldenCpuSamplesJson = {
       'truncated': true,
       'userTag': 'Default',
       'vmTag': 'VM',
-    }
-  ]
+    },
+  ],
 };
 
 final Map<String, String> goldenResolvedUriMap = {
@@ -711,7 +711,7 @@ final Map<String, dynamic> goldenCpuProfileStackFrames =
           'resolvedUrl': '',
           'packageUri': '',
           'sourceLine': null,
-        }
+        },
       });
 
 final subProfileStackFrames = {
@@ -940,7 +940,7 @@ final filteredStackFrames = {
     'resolvedUrl': '',
     'packageUri': '',
     'sourceLine': null,
-  }
+  },
 };
 
 final filteredCpuSampleTraceEvents = [
@@ -955,7 +955,7 @@ final filteredCpuSampleTraceEvents = [
       'userTag': 'Foo',
       'vmTag': 'Dart',
     },
-    'sf': '140357727781376-5'
+    'sf': '140357727781376-5',
   },
   {
     'ph': 'P',
@@ -968,7 +968,7 @@ final filteredCpuSampleTraceEvents = [
       'userTag': 'Foo',
       'vmTag': 'Dart',
     },
-    'sf': '140357727781376-8'
+    'sf': '140357727781376-8',
   },
   {
     'ph': 'P',
@@ -981,7 +981,7 @@ final filteredCpuSampleTraceEvents = [
       'userTag': 'Foo',
       'vmTag': 'Dart',
     },
-    'sf': '140357727781376-11'
+    'sf': '140357727781376-11',
   },
   {
     'ph': 'P',
@@ -994,7 +994,7 @@ final filteredCpuSampleTraceEvents = [
       'userTag': 'Default',
       'vmTag': 'VM',
     },
-    'sf': '140357727781376-13'
+    'sf': '140357727781376-13',
   },
   {
     'ph': 'P',
@@ -1007,7 +1007,7 @@ final filteredCpuSampleTraceEvents = [
       'userTag': 'Default',
       'vmTag': 'VM',
     },
-    'sf': '140357727781376-13'
+    'sf': '140357727781376-13',
   },
   {
     'ph': 'P',
@@ -1020,7 +1020,7 @@ final filteredCpuSampleTraceEvents = [
       'userTag': 'Default',
       'vmTag': 'VM',
     },
-    'sf': '140357727781376-13'
+    'sf': '140357727781376-13',
   },
   {
     'ph': 'P',
@@ -1033,7 +1033,7 @@ final filteredCpuSampleTraceEvents = [
       'userTag': 'Default',
       'vmTag': 'VM',
     },
-    'sf': '140357727781376-15'
+    'sf': '140357727781376-15',
   },
   {
     'ph': 'P',
@@ -1046,8 +1046,8 @@ final filteredCpuSampleTraceEvents = [
       'userTag': 'Default',
       'vmTag': 'VM',
     },
-    'sf': '140357727781376-17'
-  }
+    'sf': '140357727781376-17',
+  },
 ];
 
 final List<Map<String, dynamic>> goldenCpuProfileTraceEvents =
@@ -1064,7 +1064,7 @@ final List<Map<String, dynamic>> goldenCpuProfileTraceEvents =
             'userTag': 'Default',
             'vmTag': 'VM',
           },
-          'sf': '140357727781376-14'
+          'sf': '140357727781376-14',
         },
         {
           'ph': 'P',
@@ -1077,7 +1077,7 @@ final List<Map<String, dynamic>> goldenCpuProfileTraceEvents =
             'userTag': 'Default',
             'vmTag': 'VM',
           },
-          'sf': '140357727781376-14'
+          'sf': '140357727781376-14',
         },
         {
           'ph': 'P',
@@ -1090,7 +1090,7 @@ final List<Map<String, dynamic>> goldenCpuProfileTraceEvents =
             'userTag': 'Default',
             'vmTag': 'VM',
           },
-          'sf': '140357727781376-14'
+          'sf': '140357727781376-14',
         },
         {
           'ph': 'P',
@@ -1103,7 +1103,7 @@ final List<Map<String, dynamic>> goldenCpuProfileTraceEvents =
             'userTag': 'Default',
             'vmTag': 'VM',
           },
-          'sf': '140357727781376-15'
+          'sf': '140357727781376-15',
         },
         {
           'ph': 'P',
@@ -1116,8 +1116,8 @@ final List<Map<String, dynamic>> goldenCpuProfileTraceEvents =
             'userTag': 'Default',
             'vmTag': 'VM',
           },
-          'sf': '140357727781376-17'
-        }
+          'sf': '140357727781376-17',
+        },
       ]);
 
 final subProfileTraceEvents = [
@@ -1132,7 +1132,7 @@ final subProfileTraceEvents = [
       'userTag': 'Foo',
       'vmTag': 'Dart',
     },
-    'sf': '140357727781376-5'
+    'sf': '140357727781376-5',
   },
   {
     'ph': 'P',
@@ -1145,7 +1145,7 @@ final subProfileTraceEvents = [
       'userTag': 'Foo',
       'vmTag': 'Dart',
     },
-    'sf': '140357727781376-8'
+    'sf': '140357727781376-8',
   },
   {
     'ph': 'P',
@@ -1158,7 +1158,7 @@ final subProfileTraceEvents = [
       'userTag': 'Foo',
       'vmTag': 'Dart',
     },
-    'sf': '140357727781376-11'
+    'sf': '140357727781376-11',
   },
 ];
 
@@ -1210,7 +1210,7 @@ final responseWithMissingLeafFrame = {
       'ts': 47377796685,
       'cat': 'Dart',
       'args': <String, Object?>{},
-      'sf': '140357727781376-0'
+      'sf': '140357727781376-0',
     },
     {
       'ph': 'P',
@@ -1220,7 +1220,7 @@ final responseWithMissingLeafFrame = {
       'ts': 47377797975,
       'cat': 'Dart',
       'args': <String, Object?>{},
-      'sf': '140357727781376-2'
+      'sf': '140357727781376-2',
     },
     {
       'ph': 'P',
@@ -1230,18 +1230,18 @@ final responseWithMissingLeafFrame = {
       'ts': 47377799063,
       'cat': 'Dart',
       'args': <String, Object?>{},
-      'sf': '140357727781376-4'
+      'sf': '140357727781376-4',
     },
-  ]
+  ],
 };
 
 final CpuProfileMetaData profileMetaData = CpuProfileMetaData(
   sampleCount: 10,
-  samplePeriod: 50,
+  samplePeriod: 1000,
   stackDepth: 128,
   time: TimeRange()
     ..start = const Duration()
-    ..end = const Duration(microseconds: 100),
+    ..end = const Duration(microseconds: 10000),
 );
 
 final CpuStackFrame tagFrameA = CpuStackFrame(

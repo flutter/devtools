@@ -76,7 +76,7 @@ Future<InstanceRef> _resolveInstanceRefForPath(
         scope: {'parent': parent.instanceRefId},
       );
     },
-    object: (parent) async {
+    object: (parent) {
       final propertyPath = path.pathToProperty.last as PropertyPath;
 
       // compare by both name and ref ID because an object may have multiple
@@ -195,11 +195,11 @@ Future<EnumInstance?> _tryParseEnum(
         ?.value;
   }
 
-  final _nameRef = findPropertyWithName('_name');
+  final nameRef = findPropertyWithName('_name');
   final indexRef = findPropertyWithName('index');
-  if (_nameRef == null || indexRef == null) return null;
+  if (nameRef == null || indexRef == null) return null;
 
-  final nameInstanceFuture = eval.safeGetInstance(_nameRef, isAlive);
+  final nameInstanceFuture = eval.safeGetInstance(nameRef, isAlive);
   final indexInstanceFuture = eval.safeGetInstance(indexRef, isAlive);
 
   final index = await indexInstanceFuture;
@@ -400,7 +400,7 @@ Future<List<ObjectField>> _parseFields(
   Instance instance, {
   required Disposable isAlive,
   required String? appName,
-}) async {
+}) {
   final fields = instance.fields!.map((field) async {
     final fieldDeclaration = field.decl!;
     final owner =

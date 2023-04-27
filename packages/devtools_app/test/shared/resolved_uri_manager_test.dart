@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:devtools_app/src/service/resolved_uri_manager.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/shared/globals.dart';
@@ -10,7 +12,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart';
 
-void main() async {
+void main() {
   late ResolvedUriManager resolvedUriManager;
   final service = createMockVmServiceWrapperWithDefaults();
 
@@ -25,8 +27,11 @@ void main() async {
 
   group('lifecycle', () {
     setUp(() {
-      when(serviceManager.service!.lookupPackageUris(isolateId, [uri1]))
-          .thenAnswer(
+      when(
+        unawaited(
+          serviceManager.service!.lookupPackageUris(isolateId, [uri1]),
+        ),
+      ).thenAnswer(
         (realInvocation) => Future.value(UriList(uris: [packageUri1])),
       );
     });

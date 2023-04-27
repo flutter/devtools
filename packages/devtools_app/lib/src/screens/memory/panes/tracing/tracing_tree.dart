@@ -3,8 +3,8 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:vm_service/vm_service.dart';
 
+import '../../../../shared/analytics/constants.dart' as gac;
 import '../../../../shared/common_widgets.dart';
 import '../../../../shared/primitives/utils.dart';
 import '../../../../shared/table/table.dart';
@@ -12,8 +12,8 @@ import '../../../../shared/table/table_data.dart';
 import '../../../../shared/theme.dart';
 import '../../../../shared/ui/tab.dart';
 import '../../../../shared/utils.dart';
-import '../../../profiler/cpu_profile_columns.dart';
 import '../../../profiler/cpu_profile_model.dart';
+import '../../../profiler/panes/cpu_profile_columns.dart';
 import 'tracing_pane_controller.dart';
 
 const double _countColumnWidth = 130;
@@ -21,7 +21,7 @@ const double _countColumnWidth = 130;
 /// Displays an allocation profile as a tree of stack frames, displaying
 /// inclusive and exclusive allocation counts.
 class AllocationTracingTree extends StatefulWidget {
-  const AllocationTracingTree({required this.controller});
+  const AllocationTracingTree({super.key, required this.controller});
 
   final TracingPaneController controller;
 
@@ -111,13 +111,11 @@ class _AllocationTracingTreeState extends State<AllocationTracingTree>
                     children: [
                       // Bottom-up tree view
                       TracingTable(
-                        cls: selection.cls,
                         dataRoots: state
                             .selectedTracedClassAllocationData!.bottomUpRoots,
                       ),
                       // Call tree view
                       TracingTable(
-                        cls: selection.cls,
                         dataRoots: state
                             .selectedTracedClassAllocationData!.callTreeRoots,
                       ),
@@ -204,18 +202,19 @@ class _TracingTreeHeader extends StatelessWidget {
         ),
       ),
       tall: true,
-      needsTopBorder: false,
+      includeTopBorder: false,
       actions: [
         const Spacer(),
         TabBar(
-          labelColor:
-              textTheme.bodyLarge?.color ?? colorScheme.defaultForeground,
+          labelColor: textTheme.bodyLarge?.color ?? colorScheme.primary,
           tabs: tabs,
           isScrollable: true,
           controller: tabController,
         ),
         const SizedBox(width: denseSpacing),
         ExpandAllButton(
+          gaScreen: gac.memory,
+          gaSelection: gac.MemoryEvent.tracingTreeExpandAll,
           onPressed: () => updateTreeStateCallback(
             () {
               for (final root in _currentDataRoots) {
@@ -226,6 +225,8 @@ class _TracingTreeHeader extends StatelessWidget {
         ),
         const SizedBox(width: denseSpacing),
         CollapseAllButton(
+          gaScreen: gac.memory,
+          gaSelection: gac.MemoryEvent.tracingTreeCollapseAll,
           onPressed: () => updateTreeStateCallback(
             () {
               for (final root in _currentDataRoots) {
@@ -317,7 +318,6 @@ class _ExclusiveCountColumn extends ColumnData<CpuStackFrame> {
 class TracingTable extends StatelessWidget {
   const TracingTable({
     Key? key,
-    required this.cls,
     required this.dataRoots,
   }) : super(key: key);
 
@@ -328,8 +328,6 @@ class TracingTable extends StatelessWidget {
     _ExclusiveCountColumn(),
     treeColumn,
   ]);
-
-  final ClassRef cls;
 
   final List<CpuStackFrame> dataRoots;
 

@@ -19,7 +19,7 @@ class PerformanceDefaultScene extends Scene {
   late PerformanceController controller;
 
   @override
-  Widget build() {
+  Widget build(BuildContext context) {
     return wrapWithControllers(
       const PerformanceScreenBody(),
       performance: controller,
@@ -45,6 +45,7 @@ class PerformanceDefaultScene extends Scene {
   @override
   String get title => '$PerformanceDefaultScene';
 
+  // TODO(kenz): call tearDown on the scenes that use this scene
   void tearDown() {
     FeatureFlags.widgetRebuildstats = false;
   }

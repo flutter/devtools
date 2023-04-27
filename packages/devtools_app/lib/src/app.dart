@@ -9,13 +9,11 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'example/conditional_screen.dart';
-import 'framework/about_dialog.dart';
 import 'framework/framework_core.dart';
 import 'framework/initializer.dart';
 import 'framework/landing_screen.dart';
 import 'framework/notifications_view.dart';
 import 'framework/release_notes/release_notes.dart';
-import 'framework/report_feedback_button.dart';
 import 'framework/scaffold.dart';
 import 'screens/app_size/app_size_controller.dart';
 import 'screens/app_size/app_size_screen.dart';
@@ -41,12 +39,9 @@ import 'screens/vm_developer/vm_developer_tools_screen.dart';
 import 'service/service_extension_widgets.dart';
 import 'shared/analytics/analytics.dart' as ga;
 import 'shared/analytics/analytics_controller.dart';
-import 'shared/analytics/constants.dart' as gac;
 import 'shared/analytics/metrics.dart';
 import 'shared/common_widgets.dart';
-import 'shared/config_specific/server/server.dart';
 import 'shared/console/primitives/simple_items.dart';
-import 'shared/dialogs.dart';
 import 'shared/globals.dart';
 import 'shared/offline_screen.dart';
 import 'shared/primitives/auto_dispose.dart';
@@ -69,6 +64,7 @@ class DevToolsApp extends StatefulWidget {
   const DevToolsApp(
     this.screens,
     this.analyticsController, {
+    super.key,
     this.sampleData = const [],
   });
 
@@ -90,7 +86,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
   List<Screen> get _screens => widget.screens.map((s) => s.screen).toList();
 
   bool get isDarkThemeEnabled => _isDarkThemeEnabled;
-  bool _isDarkThemeEnabled = devToolsExtensionPoints.defaultIsDarkTheme;
+  bool _isDarkThemeEnabled = true;
 
   bool get vmDeveloperModeEnabled => _vmDeveloperModeEnabled;
   bool _vmDeveloperModeEnabled = false;
@@ -208,11 +204,6 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
       return DevToolsScaffold.withChild(
         key: const Key('landing'),
         ideTheme: ideTheme,
-        actions: [
-          OpenSettingsAction(),
-          ReportFeedbackButton(),
-          OpenAboutAction(),
-        ],
         child: LandingScreenBody(sampleData: widget.sampleData),
       );
     }
@@ -243,18 +234,15 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
               providers: _providedControllers(),
               child: DevToolsScaffold(
                 embed: embed,
-                ideTheme: ideTheme,
                 page: page,
                 screens: screens,
                 actions: [
                   // TODO(https://github.com/flutter/devtools/issues/1941)
                   if (serviceManager.connectedApp!.isFlutterAppNow!) ...[
-                    HotReloadButton(),
-                    HotRestartButton(),
+                    const HotReloadButton(),
+                    const HotRestartButton(),
                   ],
-                  OpenSettingsAction(),
-                  ReportFeedbackButton(),
-                  OpenAboutAction(),
+                  ...DevToolsScaffold.defaultActions(),
                 ],
               ),
             );
@@ -293,11 +281,6 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
         return DevToolsScaffold.withChild(
           key: const Key('appsize'),
           ideTheme: ideTheme,
-          actions: [
-            OpenSettingsAction(),
-            ReportFeedbackButton(),
-            OpenAboutAction(),
-          ],
           child: MultiProvider(
             providers: _providedControllers(),
             child: const AppSizeBody(),
@@ -328,10 +311,16 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
   Widget build(BuildContext context) {
     return MaterialApp.router(
       debugShowCheckedModeBanner: false,
+      themeMode: isDarkThemeEnabled ? ThemeMode.dark : ThemeMode.light,
       theme: themeFor(
-        isDarkTheme: isDarkThemeEnabled,
+        isDarkTheme: false,
         ideTheme: ideTheme,
-        theme: Theme.of(context),
+        theme: ThemeData(useMaterial3: true, colorScheme: lightColorScheme),
+      ),
+      darkTheme: themeFor(
+        isDarkTheme: true,
+        ideTheme: ideTheme,
+        theme: ThemeData(useMaterial3: true, colorScheme: darkColorScheme),
       ),
       builder: (context, child) {
         return MultiProvider(
@@ -449,125 +438,6 @@ class _AlternateCheckedModeBanner extends StatelessWidget {
         builder: builder,
       ),
     );
-  }
-}
-
-class OpenSettingsAction extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return DevToolsTooltip(
-      message: 'Settings',
-      child: InkWell(
-        onTap: () {
-          unawaited(
-            showDialog(
-              context: context,
-              builder: (context) => SettingsDialog(),
-            ),
-          );
-        },
-        child: Container(
-          width: actionWidgetSize,
-          height: actionWidgetSize,
-          alignment: Alignment.center,
-          child: Icon(
-            Icons.settings,
-            size: actionsIconSize,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-// TODO(kenz): merge the checkbox functionality here with [NotifierCheckbox]
-class SettingsDialog extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    final analyticsController = Provider.of<AnalyticsController>(context);
-    return DevToolsDialog(
-      title: const DialogTitleText('Settings'),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          CheckboxSetting(
-            label: const Text('Use a dark theme'),
-            listenable: preferences.darkModeTheme,
-            toggle: preferences.toggleDarkModeTheme,
-            gaItem: gac.darkTheme,
-          ),
-          CheckboxSetting(
-            label: const Text('Use dense mode'),
-            listenable: preferences.denseModeEnabled,
-            toggle: preferences.toggleDenseMode,
-            gaItem: gac.denseMode,
-          ),
-          if (isExternalBuild && isDevToolsServerAvailable)
-            CheckboxSetting(
-              label: const Text('Enable analytics'),
-              listenable: analyticsController.analyticsEnabled,
-              toggle: (enable) =>
-                  unawaited(analyticsController.toggleAnalyticsEnabled(enable)),
-              gaItem: gac.analytics,
-            ),
-          CheckboxSetting(
-            label: const Text('Enable VM developer mode'),
-            listenable: preferences.vmDeveloperModeEnabled,
-            toggle: preferences.toggleVmDeveloperMode,
-            gaItem: gac.vmDeveloperMode,
-          ),
-        ],
-      ),
-      actions: const [
-        DialogCloseButton(),
-      ],
-    );
-  }
-}
-
-// TODO(polinach): consider reusing CheckboxSettings from shared/common_widgets.
-class CheckboxSetting extends StatelessWidget {
-  const CheckboxSetting({
-    Key? key,
-    required this.label,
-    required this.listenable,
-    required this.toggle,
-    required this.gaItem,
-  }) : super(key: key);
-
-  final Text label;
-
-  final ValueListenable<bool> listenable;
-
-  final void Function(bool) toggle;
-
-  final String gaItem;
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: () => toggleSetting(!listenable.value),
-      child: Row(
-        children: [
-          ValueListenableBuilder<bool>(
-            valueListenable: listenable,
-            builder: (context, value, _) {
-              return Checkbox(value: value, onChanged: toggleSetting);
-            },
-          ),
-          label,
-        ],
-      ),
-    );
-  }
-
-  void toggleSetting(bool? newValue) {
-    ga.select(
-      gac.settingsDialog,
-      '$gaItem-${newValue == true ? 'enabled' : 'disabled'}',
-    );
-    toggle(newValue == true);
   }
 }
 

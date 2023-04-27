@@ -5,6 +5,7 @@
 import 'package:collection/collection.dart' show IterableExtension;
 import 'package:flutter/material.dart';
 
+import 'analytics/constants.dart' as gac;
 import 'common_widgets.dart';
 import 'globals.dart';
 import 'primitives/auto_dispose.dart';
@@ -17,7 +18,7 @@ import 'theme.dart';
 /// This screen can be displayed both when DevTools is and is not connected to
 /// an app.
 class OfflineScreenBody extends StatefulWidget {
-  const OfflineScreenBody(this.args, this.possibleScreens);
+  const OfflineScreenBody(this.args, this.possibleScreens, {super.key});
 
   final OfflineDataArguments args;
 
@@ -34,7 +35,7 @@ class OfflineScreenBody extends StatefulWidget {
   final List<Screen> possibleScreens;
 
   @override
-  _OfflineScreenBodyState createState() => _OfflineScreenBodyState();
+  State<OfflineScreenBody> createState() => _OfflineScreenBodyState();
 }
 
 class _OfflineScreenBodyState extends State<OfflineScreenBody>
@@ -90,7 +91,7 @@ class _OfflineLoadError extends StatelessWidget {
           'Cannot load offline data for screen \'$screenId\'',
         ),
         const SizedBox(height: defaultSpacing),
-        const ExitOfflineButton(),
+        ExitOfflineButton(gaScreen: gac.simple),
       ],
     );
   }

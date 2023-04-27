@@ -7,10 +7,11 @@ import 'package:collection/collection.dart';
 import '../../../../shared/primitives/graph.dart';
 import '../../../../shared/primitives/utils.dart';
 import '../../../../shared/profiler_utils.dart';
+import '../../../../shared/ui/search.dart';
 import '../../cpu_profile_model.dart';
 
 /// Represents a graph node for a method in a CPU profile method table.
-class MethodTableGraphNode extends GraphNode {
+class MethodTableGraphNode extends GraphNode with SearchableDataMixin {
   MethodTableGraphNode({
     required this.name,
     required this.packageUri,
@@ -89,10 +90,16 @@ class MethodTableGraphNode extends GraphNode {
     }
   }
 
-  bool shallowEquals(other) {
+  bool shallowEquals(Object? other) {
     return other is MethodTableGraphNode &&
         other.name == name &&
         other._sourceUri == _sourceUri;
+  }
+
+  @override
+  bool matchesSearchToken(RegExp regExpSearch) {
+    return name.caseInsensitiveContains(regExpSearch) ||
+        packageUri.caseInsensitiveContains(regExpSearch);
   }
 
   @override
@@ -139,7 +146,7 @@ $display ($totalCount samples)
       totalCount: totalCount,
       selfCount: selfCount,
       profileMetaData: profileMetaData,
-      stackFrameIds: Set.from(stackFrameIds),
+      stackFrameIds: Set.of(stackFrameIds),
     );
   }
 }

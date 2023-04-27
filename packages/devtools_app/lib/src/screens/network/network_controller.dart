@@ -241,29 +241,7 @@ class NetworkController extends DisposableController
   }
 
   @override
-  List<NetworkRequest> matchesForSearch(
-    String search, {
-    bool searchPreviousMatches = false,
-  }) {
-    if (search.isEmpty) return [];
-    final matches = <NetworkRequest>[];
-    if (searchPreviousMatches) {
-      final previousMatches = searchMatches.value;
-      for (final previousMatch in previousMatches) {
-        if (previousMatch.uri.caseInsensitiveContains(search)) {
-          matches.add(previousMatch);
-        }
-      }
-    } else {
-      final currentRequests = filteredData.value;
-      for (final request in currentRequests) {
-        if (request.uri.caseInsensitiveContains(search)) {
-          matches.add(request);
-        }
-      }
-    }
-    return matches;
-  }
+  Iterable<NetworkRequest> get currentDataToSearchThrough => filteredData.value;
 
   @override
   void filterData(Filter<NetworkRequest> filter) {
@@ -334,13 +312,13 @@ class CurrentNetworkRequests {
   List<NetworkRequest> get requests => _requestsById.values.toList();
   final _requestsById = <String, NetworkRequest>{};
 
-  /// Triggered whenever the request's data changes on it's own.
+  /// Triggered whenever the request's data changes on its own.
   VoidCallback onRequestDataChange;
 
   NetworkRequest? getRequest(String id) => _requestsById[id];
 
   /// Update or add the [request] to the [requests] depending on whether or not
-  /// it's [request.id] already exists in the list.
+  /// its [request.id] already exists in the list.
   ///
   void updateOrAdd(
     HttpProfileRequest request,

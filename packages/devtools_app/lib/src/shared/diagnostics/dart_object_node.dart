@@ -143,23 +143,6 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
       ]);
   }
 
-  factory DartObjectNode.fromInstanceSet({
-    required String text,
-    required InstanceSet instanceSet,
-    required IsolateRef? isolateRef,
-  }) {
-    return DartObjectNode._(
-      text: text,
-      ref: GenericInstanceRef(
-        isolateRef: isolateRef,
-        value: instanceSet,
-      ),
-      artificialValue: true,
-      artificialName: true,
-      childCount: instanceSet.instances?.length,
-    );
-  }
-
   factory DartObjectNode.create(
     BoundVariable variable,
     IsolateRef? isolateRef,
@@ -202,13 +185,12 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
     return DartObjectNode._(
       text: text,
       ref: ref,
-      childCount:
-          ref.heapSelection.countOfReferences(ref.refNodeType.direction),
+      childCount: ref.childCount,
       isRerootable: isRerootable,
     );
   }
 
-  static const MAX_CHILDREN_IN_GROUPING = 100;
+  static const maxChildrenInGrouping = 100;
 
   final String? text;
   final String? name;
@@ -231,6 +213,8 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
   int get offset => _offset ?? 0;
 
   int? _offset;
+
+  bool get isGroup => _offset != null;
 
   /// If true, the variable can be saved to console as a root.
   final bool isRerootable;
@@ -293,8 +277,9 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
     }
     final diagnostic = theRef?.diagnostic;
     if (diagnostic != null &&
-        ((diagnostic.inlineProperties.isNotEmpty) || diagnostic.hasChildren))
+        ((diagnostic.inlineProperties.isNotEmpty) || diagnostic.hasChildren)) {
       return true;
+    }
 
     // TODO(jacobr): do something smarter to avoid expandable variable flicker.
     if (instanceRef != null) {

@@ -15,6 +15,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../../service/service_extensions.dart';
 import '../console/primitives/simple_items.dart';
 import '../eval_on_dart_library.dart';
 import '../globals.dart';
@@ -107,6 +108,8 @@ abstract class InspectorServiceBase extends DisposableController
     super.dispose();
   }
 
+  bool get hoverEvalModeEnabledByDefault;
+
   Future<Object> forceRefresh() {
     final futures = <Future<void>>[];
     for (InspectorServiceClient client in clients) {
@@ -180,7 +183,7 @@ class InspectorService extends InspectorServiceBase {
   InspectorService()
       : super(
           clientInspectorName: 'WidgetInspectorService',
-          serviceExtensionPrefix: 'ext.flutter.inspector',
+          serviceExtensionPrefix: inspectorExtensionPrefix,
           inspectorLibraryUri: inspectorLibraryUri,
         ) {
     // Note: We do not need to listen to event history here because the
@@ -238,6 +241,10 @@ class InspectorService extends InspectorServiceBase {
     _cachedSelectionGroups = null;
     super.dispose();
   }
+
+  // When DevTools is embedded, default hover eval mode to off.
+  @override
+  bool get hoverEvalModeEnabledByDefault => !ideTheme.embed;
 
   void onExtensionVmServiceReceived(Event e) {
     if ('Flutter.Frame' == e.extensionKind) {
@@ -348,7 +355,7 @@ class InspectorService extends InspectorServiceBase {
         }
         final google3PackageName = packageParts.join('.');
         _rootPackages.add(google3PackageName);
-        _rootPackagePrefixes.add(google3PackageName + '.');
+        _rootPackagePrefixes.add('$google3PackageName.');
       } else {
         _rootPackages.add(path.last);
       }
@@ -414,7 +421,7 @@ class InspectorService extends InspectorServiceBase {
   Future<void> _addPubRootDirectories(List<String> pubDirectories) {
     assert(useDaemonApi);
     return invokeServiceMethodDaemonNoGroupArgs(
-      'addPubRootDirectories',
+      WidgetInspectorServiceExtensions.addPubRootDirectories.name,
       pubDirectories,
     );
   }
@@ -422,7 +429,7 @@ class InspectorService extends InspectorServiceBase {
   Future<void> _removePubRootDirectories(List<String> pubDirectories) {
     assert(useDaemonApi);
     return invokeServiceMethodDaemonNoGroupArgs(
-      'removePubRootDirectories',
+      WidgetInspectorServiceExtensions.removePubRootDirectories.name,
       pubDirectories,
     );
   }
@@ -430,7 +437,7 @@ class InspectorService extends InspectorServiceBase {
   Future<List<String>?> getPubRootDirectories() async {
     assert(useDaemonApi);
     final response = await invokeServiceMethodDaemonNoGroupArgs(
-      'getPubRootDirectories',
+      WidgetInspectorServiceExtensions.getPubRootDirectories.name,
     );
 
     if (response is! List<Object?>) {
@@ -564,11 +571,15 @@ class InspectorService extends InspectorServiceBase {
   /// application is ready, the next Flutter.Frame event may never come as no
   /// new frames will be triggered to draw unless something changes in the UI.
   Future<bool> isWidgetTreeReady() {
-    return invokeBoolServiceMethodNoArgs('isWidgetTreeReady');
+    return invokeBoolServiceMethodNoArgs(
+      WidgetInspectorServiceExtensions.isWidgetTreeReady.name,
+    );
   }
 
   Future<bool> isWidgetCreationTracked() {
-    return invokeBoolServiceMethodNoArgs('isWidgetCreationTracked');
+    return invokeBoolServiceMethodNoArgs(
+      WidgetInspectorServiceExtensions.isWidgetCreationTracked.name,
+    );
   }
 }
 
@@ -602,20 +613,23 @@ abstract class ObjectGroupBase implements Disposable {
   Future<void> dispose() {
     // No need to dispose the group if the isolate is already gone.
     final disposeComplete = inspectorService.isolateRef != null
-        ? invokeVoidServiceMethod('disposeGroup', groupName)
+        ? invokeVoidServiceMethod(
+            WidgetInspectorServiceExtensions.disposeGroup.name,
+            groupName,
+          )
         : Future.value();
     disposed = true;
     return disposeComplete;
   }
 
-  Future<T?> nullIfDisposed<T>(Future<T> supplier()) async {
+  Future<T?> nullIfDisposed<T>(Future<T> Function() supplier) async {
     if (disposed) {
       return null;
     }
     return await supplier();
   }
 
-  T? nullValueIfDisposed<T>(T supplier()) {
+  T? nullValueIfDisposed<T>(T Function() supplier) {
     if (disposed) {
       return null;
     }
@@ -623,7 +637,7 @@ abstract class ObjectGroupBase implements Disposable {
     return supplier();
   }
 
-  void skipIfDisposed(void runnable()) {
+  void skipIfDisposed(void Function() runnable) {
     if (disposed) {
       return;
     }
@@ -1034,7 +1048,7 @@ abstract class ObjectGroupBase implements Disposable {
   }
 
   Future<List<RemoteDiagnosticsNode>> getListHelper(
-    InspectorInstanceRef instanceRef,
+    InspectorInstanceRef? instanceRef,
     String methodName,
     RemoteDiagnosticsNode? parent,
     bool isProperty,
@@ -1100,7 +1114,7 @@ abstract class ObjectGroupBase implements Disposable {
   ) {
     return getListHelper(
       instanceRef,
-      'getProperties',
+      WidgetInspectorServiceExtensions.getProperties.name,
       null,
       true,
     );
@@ -1113,7 +1127,9 @@ abstract class ObjectGroupBase implements Disposable {
   ) {
     return getListHelper(
       instanceRef,
-      summaryTree ? 'getChildrenSummaryTree' : 'getChildrenDetailsSubtree',
+      summaryTree
+          ? WidgetInspectorServiceExtensions.getChildrenSummaryTree.name
+          : WidgetInspectorServiceExtensions.getChildrenDetailsSubtree.name,
       parent,
       false,
     );
@@ -1141,8 +1157,6 @@ class ObjectGroup extends ObjectGroupBase {
     switch (type) {
       case FlutterTreeType.widget:
         return getRootWidget();
-      case FlutterTreeType.renderObject:
-        return getRootRenderObject();
     }
   }
 
@@ -1157,20 +1171,20 @@ class ObjectGroup extends ObjectGroupBase {
   }
 
   Future<RemoteDiagnosticsNode?> getRootWidgetFullTree() {
-    return invokeServiceMethodReturningNode('getRootWidget');
+    return invokeServiceMethodReturningNode(
+      WidgetInspectorServiceExtensions.getRootWidget.name,
+    );
   }
 
   Future<RemoteDiagnosticsNode?> getSummaryTreeWithoutIds() {
     return parseDiagnosticsNodeDaemon(
-      invokeServiceMethodDaemon('getRootWidgetSummaryTree'),
+      invokeServiceMethodDaemon(
+        WidgetInspectorServiceExtensions.getRootWidgetSummaryTree.name,
+      ),
     );
   }
 
-  Future<RemoteDiagnosticsNode?> getRootRenderObject() {
-    assert(!disposed);
-    return invokeServiceMethodReturningNode('getRootRenderObject');
-  }
-
+// TODO these ones could be not needed.
   /* TODO(jacobr): this probably isn't needed.
   Future<List<DiagnosticsPathNode>> getParentChain(DiagnosticsNode target) async {
     if (disposed) return null;
@@ -1217,18 +1231,14 @@ class ObjectGroup extends ObjectGroupBase {
     if (disposed) return null;
     RemoteDiagnosticsNode? newSelection;
     final InspectorInstanceRef? previousSelectionRef =
-        previousSelection != null ? previousSelection.dartDiagnosticRef : null;
+        previousSelection?.dartDiagnosticRef;
 
     switch (treeType) {
       case FlutterTreeType.widget:
         newSelection = await invokeServiceMethodReturningNodeInspectorRef(
-          isSummaryTree ? 'getSelectedSummaryWidget' : 'getSelectedWidget',
-          previousSelectionRef,
-        );
-        break;
-      case FlutterTreeType.renderObject:
-        newSelection = await invokeServiceMethodReturningNodeInspectorRef(
-          'getSelectedRenderObject',
+          isSummaryTree
+              ? WidgetInspectorServiceExtensions.getSelectedSummaryWidget.name
+              : WidgetInspectorServiceExtensions.getSelectedWidget.name,
           previousSelectionRef,
         );
         break;
@@ -1254,14 +1264,14 @@ class ObjectGroup extends ObjectGroupBase {
     return useDaemonApi
         ? handleSetSelectionDaemon(
             invokeServiceMethodDaemonInspectorRef(
-              'setSelectionById',
+              WidgetInspectorServiceExtensions.setSelectionById.name,
               selection,
             ),
             uiAlreadyUpdated,
           )
         : handleSetSelectionObservatory(
             invokeServiceMethodObservatoryInspectorRef(
-              'setSelectionById',
+              WidgetInspectorServiceExtensions.setSelectionById.name,
               selection,
             ),
             uiAlreadyUpdated,
@@ -1327,7 +1337,7 @@ class ObjectGroup extends ObjectGroupBase {
       'subtreeDepth': subtreeDepth.toString(),
     };
     final json = await invokeServiceMethodDaemonParams(
-      'getDetailsSubtree',
+      WidgetInspectorServiceExtensions.getDetailsSubtree.name,
       args,
     );
     return parseDiagnosticsNodeHelper(json as Map<String, Object?>?);

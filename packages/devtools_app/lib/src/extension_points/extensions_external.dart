@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
+
 import '../screens/debugger/codeview.dart';
 import '../shared/analytics/constants.dart' as gac;
 import '../shared/common_widgets.dart';
@@ -16,18 +18,13 @@ class ExternalDevToolsExtensionPoints implements DevToolsExtensionPoints {
       <ScriptPopupMenuOption>[];
 
   @override
-  Link issueTrackerLink() {
-    final issueBodyItems = issueLinkDetails();
-    final issueBody = issueBodyItems.join('\n');
-    const githubLinkDisplay = 'github.com/flutter/devtools/issues/new';
-    final githubUri = Uri.parse('https://$githubLinkDisplay').replace(
-      queryParameters: {
-        'body': issueBody,
-      },
-    );
+  Link issueTrackerLink({String? additionalInfo}) {
     return Link(
-      display: githubLinkDisplay,
-      url: githubUri.toString(),
+      display: _newDevToolsIssueUriDisplay,
+      url: newDevToolsGitHubIssueUriLengthSafe(
+        additionalInfo: additionalInfo,
+        environment: issueLinkDetails(),
+      ).toString(),
       gaScreenName: gac.devToolsMain,
       gaSelectedItemDescription: gac.feedbackLink,
     );
@@ -51,5 +48,55 @@ class ExternalDevToolsExtensionPoints implements DevToolsExtensionPoints {
           : null;
 
   @override
-  bool get defaultIsDarkTheme => true;
+  String get perfettoIndexLocation =>
+      'packages/perfetto_ui_compiled/dist/index.html';
+}
+
+const _newDevToolsIssueUriDisplay = 'github.com/flutter/devtools/issues/new';
+
+@visibleForTesting
+const maxGitHubUriLength = 8190;
+
+@visibleForTesting
+Uri newDevToolsGitHubIssueUriLengthSafe({
+  required List<String> environment,
+  String? additionalInfo,
+}) {
+  final fullUri = _newDevToolsGitHubIssueUri(
+    additionalInfo: additionalInfo,
+    environment: environment,
+  );
+
+  final lengthToCut = fullUri.toString().length - maxGitHubUriLength;
+  if (lengthToCut <= 0) return fullUri;
+
+  if (additionalInfo == null) {
+    return Uri.parse(fullUri.toString().substring(0, maxGitHubUriLength));
+  }
+
+  final truncatedInfo =
+      additionalInfo.substring(0, additionalInfo.length - lengthToCut);
+
+  final truncatedUri = _newDevToolsGitHubIssueUri(
+    additionalInfo: truncatedInfo,
+    environment: environment,
+  );
+  assert(truncatedUri.toString().length <= maxGitHubUriLength);
+  return truncatedUri;
+}
+
+Uri _newDevToolsGitHubIssueUri({
+  required List<String> environment,
+  String? additionalInfo,
+}) {
+  final issueBody = [
+    if (additionalInfo != null) additionalInfo,
+    ...environment,
+  ].join('\n');
+
+  return Uri.parse('https://$_newDevToolsIssueUriDisplay').replace(
+    queryParameters: {
+      'body': issueBody,
+    },
+  );
 }

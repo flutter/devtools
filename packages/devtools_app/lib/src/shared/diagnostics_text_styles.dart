@@ -14,11 +14,12 @@ class DiagnosticsTextStyles {
             colorScheme.isLight ? Colors.grey.shade500 : Colors.grey.shade600,
       );
 
-  static final TextStyle regular = TextStyle(
-    // The font size when not specified seems to be 14, but specify here since we
-    // are scaling based on this font size in [IdeTheme].
-    fontSize: defaultFontSize,
-  );
+  static TextStyle regular(ColorScheme colorScheme) => TextStyle(
+        // The font size when not specified seems to be 14, but specify here since we
+        // are scaling based on this font size in [IdeTheme].
+        fontSize: defaultFontSize,
+        color: colorScheme.onSurface,
+      );
 
   static TextStyle warning(ColorScheme colorScheme) => TextStyle(
         color: colorScheme.isLight
@@ -27,7 +28,7 @@ class DiagnosticsTextStyles {
       );
 
   static TextStyle error(ColorScheme colorScheme) => TextStyle(
-        color: colorScheme.isLight ? Colors.red.shade500 : Colors.red.shade400,
+        color: colorScheme.error,
       );
 
   static TextStyle link(ColorScheme colorScheme) => TextStyle(
@@ -39,15 +40,6 @@ class DiagnosticsTextStyles {
   static const regularBold = TextStyle(
     fontWeight: FontWeight.w700,
   );
-
-  static const regularItalic = TextStyle(fontStyle: FontStyle.italic);
-
-  static TextStyle unimportantItalic(ColorScheme colorScheme) =>
-      unimportant(colorScheme).merge(
-        const TextStyle(
-          fontStyle: FontStyle.italic,
-        ),
-      );
 
   static TextStyle textStyleForLevel(
     DiagnosticLevel level,
@@ -64,7 +56,7 @@ class DiagnosticsTextStyles {
       case DiagnosticLevel.info:
       case DiagnosticLevel.fine:
       default:
-        return regular;
+        return regular(colorScheme);
     }
   }
 }

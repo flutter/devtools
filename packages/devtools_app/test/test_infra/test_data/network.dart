@@ -69,7 +69,7 @@ final httpGetResponseBodyData = [
   109,
   34,
   10,
-  125
+  125,
 ];
 
 final testSocket1 = WebSocket(SocketStatistic.parse(testSocket1Json)!, 0);
@@ -133,7 +133,7 @@ final Map<String, dynamic> httpGetJson = {
       {'timestamp': 6326808941, 'event': 'Connection established'},
       {'timestamp': 6326808965, 'event': 'Request sent'},
       {'timestamp': 6327090622, 'event': 'Waiting (TTFB)'},
-      {'timestamp': 6327091650, 'event': 'Content Download'}
+      {'timestamp': 6327091650, 'event': 'Content Download'},
     ],
     'headers': {
       'content-length': ['0'],
@@ -456,7 +456,7 @@ final Map<String, dynamic> httpWsHandshakeJson = {
     'events': [
       {'timestamp': 8140247076, 'event': 'Connection established'},
       {'timestamp': 8140247156, 'event': 'Request sent'},
-      {'timestamp': 8140261573, 'event': 'Waiting (TTFB)'}
+      {'timestamp': 8140261573, 'event': 'Waiting (TTFB)'},
     ],
     'headers': {
       'content-length': ['0'],
@@ -504,12 +504,6 @@ final Map<String, dynamic> httpWsHandshakeJson = {
   'responseBody': [],
 };
 
-final httpGetPendingRequest = HttpProfileRequest.parse(httpGetPendingJson)!;
-final httpGetPending = DartIOHttpRequestData(
-  0,
-  httpGetPendingRequest,
-  requestFullDataFromVmService: false,
-);
 final Map<String, dynamic> httpGetPendingJson = {
   'type': 'HttpProfileRequest',
   'id': '7',
@@ -523,7 +517,7 @@ final Map<String, dynamic> httpGetPendingJson = {
       {'timestamp': 6326808941, 'event': 'Connection established'},
       {'timestamp': 6326808965, 'event': 'Request sent'},
       {'timestamp': 6327090622, 'event': 'Waiting (TTFB)'},
-      {'timestamp': 6327091650, 'event': 'Content Download'}
+      {'timestamp': 6327091650, 'event': 'Content Download'},
     ],
     'headers': {
       'content-length': ['0'],
