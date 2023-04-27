@@ -1184,11 +1184,13 @@ class _LineItemState extends State<LineItem>
     final column = widget.pausedFrame?.column;
     if (column != null) {
       final breakpointColor = theme.colorScheme.breakpointColor;
-
+      final widthToCurrentColumn = calculateTextSpanWidth(
+        truncateTextSpan(widget.lineContents, column - 1),
+      );
       // The following constants are tweaked for using the
       // 'Icons.label_important' icon.
       const colIconSize = 13.0;
-      const colLeftOffset = -3.0;
+      final colLeftOffset = -3.0 + widthToCurrentColumn;
       const colBottomOffset = 13.0;
       const colIconRotate = -90 * math.pi / 180;
 
@@ -1197,23 +1199,8 @@ class _LineItemState extends State<LineItem>
         children: [
           Row(
             children: [
-              // Create a hidden copy of the first column-1 characters of the
-              // line as a hack to correctly compute where to place
-              // the cursor. Approximating by using column-1 spaces instead
-              // of the correct characters and style s would be risky as it leads
-              // to small errors if the font is not fixed size or the font
-              // styles vary depending on the syntax highlighting.
-              // TODO(jacobr): there might be some api exposed on SelectedText
-              // to allow us to render this as a proper overlay as similar
-              // functionality exists to render the selection handles properly.
-              Opacity(
-                opacity: 0.0,
-                child: RichText(
-                  text: truncateTextSpan(widget.lineContents, column - 1),
-                ),
-              ),
               Transform.translate(
-                offset: const Offset(colLeftOffset, colBottomOffset),
+                offset: Offset(colLeftOffset, colBottomOffset),
                 child: Transform.rotate(
                   angle: colIconRotate,
                   child: Icon(
