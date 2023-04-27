@@ -261,34 +261,24 @@ class _CodeViewState extends State<CodeView> with AutoDisposeMixin {
       return const CenteredCircularProgressIndicator();
     }
 
-    return DualValueListenableBuilder<bool, bool>(
-      firstListenable: widget.enableFileExplorer
-          ? widget.codeViewController.showFileOpener
-          : const FixedValueListenable<bool>(false),
-      secondListenable: widget.enableSearch
-          ? widget.codeViewController.showSearchInFileField
-          : const FixedValueListenable<bool>(false),
-      builder: (context, showFileOpener, showSearch, _) {
-        return Stack(
-          children: [
-            scriptRef == null
-                ? CodeViewEmptyState(widget: widget)
-                : buildCodeArea(context),
-            if (showFileOpener)
-              Positioned(
-                left: noPadding,
-                right: noPadding,
-                child: buildFileSearchField(),
-              ),
-            if (showSearch && scriptRef != null)
-              Positioned(
-                top: denseSpacing,
-                right: searchFieldRightPadding,
-                child: buildSearchInFileField(),
-              ),
-          ],
-        );
-      },
+    return Stack(
+      children: [
+        scriptRef == null
+            ? CodeViewEmptyState(widget: widget)
+            : buildCodeArea(context),
+        PositionedPopup(
+          isVisibleListenable: widget.codeViewController.showFileOpener,
+          left: noPadding,
+          right: noPadding,
+          child: buildFileSearchField(),
+        ),
+        PositionedPopup(
+          isVisibleListenable: widget.codeViewController.showSearchInFileField,
+          top: denseSpacing,
+          right: searchFieldRightPadding,
+          child: buildSearchInFileField(),
+        ),
+      ],
     );
   }
 
@@ -1585,6 +1575,40 @@ class GoToLineDialog extends StatelessWidget {
       actions: const [
         DialogCancelButton(),
       ],
+    );
+  }
+}
+
+class PositionedPopup extends StatelessWidget {
+  const PositionedPopup({
+    super.key,
+    required this.isVisibleListenable,
+    required this.child,
+    this.top,
+    this.left,
+    this.right,
+  });
+
+  final ValueListenable<bool> isVisibleListenable;
+  final double? top;
+  final double? left;
+  final double? right;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder<bool>(
+      valueListenable: isVisibleListenable,
+      builder: (context, isVisible, _) {
+        return isVisible
+            ? Positioned(
+                top: top,
+                left: left,
+                right: right,
+                child: child,
+              )
+            : const SizedBox.shrink();
+      },
     );
   }
 }
