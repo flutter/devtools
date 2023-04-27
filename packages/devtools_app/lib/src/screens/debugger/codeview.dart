@@ -412,7 +412,8 @@ class _CodeViewState extends State<CodeView> with AutoDisposeMixin {
                                   codeViewController: widget.codeViewController,
                                   scrollController: textController,
                                   lines: lines,
-                                  pausedFrame: pausedFrame,
+                                  selectedFrameNotifier: widget
+                                      .debuggerController?.selectedStackFrame,
                                   searchMatchesNotifier:
                                       widget.codeViewController.searchMatches,
                                   activeSearchMatchNotifier: widget
@@ -998,18 +999,18 @@ class Lines extends StatefulWidget {
     required this.codeViewController,
     required this.scrollController,
     required this.lines,
-    required this.pausedFrame,
     required this.searchMatchesNotifier,
     required this.activeSearchMatchNotifier,
+    required this.selectedFrameNotifier,
   }) : super(key: key);
 
   final double height;
   final CodeViewController codeViewController;
   final ScrollController scrollController;
   final List<TextSpan> lines;
-  final StackFrameAndSourcePosition? pausedFrame;
   final ValueListenable<List<SourceToken>> searchMatchesNotifier;
   final ValueListenable<SourceToken?> activeSearchMatchNotifier;
+  final ValueListenable<StackFrameAndSourcePosition?>? selectedFrameNotifier;
 
   @override
   _LinesState createState() => _LinesState();
@@ -1040,17 +1041,19 @@ class _LinesState extends State<Lines> with AutoDisposeMixin {
       final activeSearchLine = activeSearch?.position.line;
       _maybeScrollToLine(activeSearchLine);
     });
+
+    addAutoDisposeListener(widget.activeSearchMatchNotifier, () {
+      final selectedFrame = widget.selectedFrameNotifier?.value;
+      SchedulerBinding.instance.addPostFrameCallback((_) {
+        _maybeScrollToLine(selectedFrame?.line);
+      });
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    final pausedLine = widget.pausedFrame?.line;
-    // Only scroll to the paused line if there is no active search in progress:
-    if (activeSearch == null) {
-      SchedulerBinding.instance.addPostFrameCallback((_) {
-        _maybeScrollToLine(pausedLine);
-      });
-    }
+    final pausedFrame = widget.selectedFrameNotifier?.value;
+    final pausedLine = pausedFrame?.line;
 
     return ListView.builder(
       controller: widget.scrollController,
@@ -1066,7 +1069,7 @@ class _LinesState extends State<Lines> with AutoDisposeMixin {
             final isFocusedLine = focusLine == lineNum;
             return LineItem(
               lineContents: widget.lines[index],
-              pausedFrame: isPausedLine ? widget.pausedFrame : null,
+              pausedFrame: isPausedLine ? pausedFrame : null,
               focused: isPausedLine || isFocusedLine,
               searchMatches: _searchMatchesForLine(index),
               activeSearchMatch:
