@@ -170,7 +170,7 @@ class InspectorPreferencesController extends DisposableController
   }
 
   Future<void> _initHoverEvalMode() async {
-    _updateHoverEvalMode();
+    await _updateHoverEvalMode();
 
     addAutoDisposeListener(_hoverEvalMode, () {
       storage.setValue(
