@@ -21,6 +21,8 @@ jobs:
     uses: ./.github/workflows/flutter-prep.yaml
     with:
       os-name: ubuntu
+      needs-checkout-merge: true
+
   dcm:
     name: Dart Code Metrics
     needs: flutter-prep
