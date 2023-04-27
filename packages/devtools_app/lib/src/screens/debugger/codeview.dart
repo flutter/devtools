@@ -7,6 +7,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:logging/logging.dart';
 import 'package:vm_service/vm_service.dart' hide Stack;
@@ -411,7 +412,8 @@ class _CodeViewState extends State<CodeView> with AutoDisposeMixin {
                                   codeViewController: widget.codeViewController,
                                   scrollController: textController,
                                   lines: lines,
-                                  pausedFrame: pausedFrame,
+                                  selectedFrameNotifier: widget
+                                      .debuggerController?.selectedStackFrame,
                                   searchMatchesNotifier:
                                       widget.codeViewController.searchMatches,
                                   activeSearchMatchNotifier: widget
@@ -1002,18 +1004,18 @@ class Lines extends StatefulWidget {
     required this.codeViewController,
     required this.scrollController,
     required this.lines,
-    required this.pausedFrame,
     required this.searchMatchesNotifier,
     required this.activeSearchMatchNotifier,
+    required this.selectedFrameNotifier,
   }) : super(key: key);
 
   final double height;
   final CodeViewController codeViewController;
   final ScrollController scrollController;
   final List<TextSpan> lines;
-  final StackFrameAndSourcePosition? pausedFrame;
   final ValueListenable<List<SourceToken>> searchMatchesNotifier;
   final ValueListenable<SourceToken?> activeSearchMatchNotifier;
+  final ValueListenable<StackFrameAndSourcePosition?>? selectedFrameNotifier;
 
   @override
   State<Lines> createState() => _LinesState();
@@ -1041,35 +1043,23 @@ class _LinesState extends State<Lines> with AutoDisposeMixin {
       setState(() {
         activeSearch = widget.activeSearchMatchNotifier.value;
       });
-
       final activeSearchLine = activeSearch?.position.line;
-      if (activeSearchLine != null) {
-        final isOutOfViewTop = activeSearchLine * CodeView.rowHeight <
-            widget.scrollController.offset + CodeView.rowHeight;
-        final isOutOfViewBottom = activeSearchLine * CodeView.rowHeight >
-            widget.scrollController.offset + widget.height - CodeView.rowHeight;
+      _maybeScrollToLine(activeSearchLine);
+    });
 
-        if (isOutOfViewTop || isOutOfViewBottom) {
-          // Scroll this search token to the middle of the view.
-          final targetOffset = math.max<double>(
-            activeSearchLine * CodeView.rowHeight - widget.height / 2,
-            0.0,
-          );
-          unawaited(
-            widget.scrollController.animateTo(
-              targetOffset,
-              duration: defaultDuration,
-              curve: defaultCurve,
-            ),
-          );
-        }
-      }
+    addAutoDisposeListener(widget.selectedFrameNotifier, () {
+      final selectedFrame = widget.selectedFrameNotifier?.value;
+      SchedulerBinding.instance.addPostFrameCallback((_) {
+        _maybeScrollToLine(selectedFrame?.line);
+      });
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    final pausedLine = widget.pausedFrame?.line;
+    final pausedFrame = widget.selectedFrameNotifier?.value;
+    final pausedLine = pausedFrame?.line;
+
     return ListView.builder(
       controller: widget.scrollController,
       physics: const ClampingScrollPhysics(),
@@ -1084,9 +1074,9 @@ class _LinesState extends State<Lines> with AutoDisposeMixin {
             final isFocusedLine = focusLine == lineNum;
             return LineItem(
               lineContents: widget.lines[index],
-              pausedFrame: isPausedLine ? widget.pausedFrame : null,
+              pausedFrame: isPausedLine ? pausedFrame : null,
               focused: isPausedLine || isFocusedLine,
-              searchMatches: searchMatchesForLine(index),
+              searchMatches: _searchMatchesForLine(index),
               activeSearchMatch:
                   activeSearch?.position.line == index ? activeSearch : null,
             );
@@ -1096,10 +1086,34 @@ class _LinesState extends State<Lines> with AutoDisposeMixin {
     );
   }
 
-  List<SourceToken> searchMatchesForLine(int index) {
+  List<SourceToken> _searchMatchesForLine(int index) {
     return searchMatches
         .where((searchToken) => searchToken.position.line == index)
         .toList();
+  }
+
+  void _maybeScrollToLine(int? lineNumber) {
+    if (lineNumber == null) return;
+
+    final isOutOfViewTop = lineNumber * CodeView.rowHeight <
+        widget.scrollController.offset + CodeView.rowHeight;
+    final isOutOfViewBottom = lineNumber * CodeView.rowHeight >
+        widget.scrollController.offset + widget.height - CodeView.rowHeight;
+
+    if (isOutOfViewTop || isOutOfViewBottom) {
+      // Scroll this search token to the middle of the view.
+      final targetOffset = math.max<double>(
+        lineNumber * CodeView.rowHeight - widget.height / 2,
+        0.0,
+      );
+      unawaited(
+        widget.scrollController.animateTo(
+          targetOffset,
+          duration: defaultDuration,
+          curve: defaultCurve,
+        ),
+      );
+    }
   }
 }
 
