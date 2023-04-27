@@ -1042,7 +1042,7 @@ class _LinesState extends State<Lines> with AutoDisposeMixin {
       _maybeScrollToLine(activeSearchLine);
     });
 
-    addAutoDisposeListener(widget.activeSearchMatchNotifier, () {
+    addAutoDisposeListener(widget.selectedFrameNotifier, () {
       final selectedFrame = widget.selectedFrameNotifier?.value;
       SchedulerBinding.instance.addPostFrameCallback((_) {
         _maybeScrollToLine(selectedFrame?.line);
