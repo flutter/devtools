@@ -25,9 +25,6 @@ jobs:
         os: ${{ (inputs.os-name == 'macos' && fromJSON('[ "macos-latest"]')) || (inputs.os-name == 'ubuntu' && fromJSON('[ "ubuntu-latest"]')) || fromJSON('["ubuntu-latest", "macos-latest"]') }}
     runs-on: ${{ matrix.os }}
     steps:
-      - name: git clone devtools
-        uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab
-
       - name: Get Latest Flutter Candidate
         id: flutter-candidate
         run: |
