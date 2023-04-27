@@ -110,7 +110,6 @@ class ServiceExtensionManager extends Disposer {
     final ext = extensions.serviceExtensionsAllowlist[name];
     if (ext != null) {
       final extensionValue = _getExtensionValue(name, encodedValue);
-      // ignore: avoid-unnecessary-type-assertions, false positive
       final enabled = ext is extensions.ToggleableServiceExtensionDescription
           ? extensionValue == ext.enabledValue
           // For extensions that have more than two states
