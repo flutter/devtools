@@ -54,13 +54,9 @@ void main() {
   when(codeViewController.currentParsedScript)
       .thenReturn(ValueNotifier(mockParsedScript));
 
-  Finder findDebuggerButtonWithTitle(String title) =>
-      find.byWidgetPredicate((Widget widget) {
-        if (widget is DebuggerButton && widget.title == title) {
-          return true;
-        }
-        return false;
-      });
+  Finder findDebuggerButtonWithTitle(String title) => find.byWidgetPredicate(
+        (Widget widget) => widget is DebuggerButton && widget.title == title,
+      );
 
   Finder findStackFrameWithText(String text) => find.byWidgetPredicate(
         (Widget widget) =>
