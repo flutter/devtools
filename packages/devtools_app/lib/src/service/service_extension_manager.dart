@@ -110,6 +110,7 @@ class ServiceExtensionManager extends Disposer {
     final ext = extensions.serviceExtensionsAllowlist[name];
     if (ext != null) {
       final extensionValue = _getExtensionValue(name, encodedValue);
+      // ignore: avoid-unnecessary-type-assertions, false positive
       final enabled = ext is extensions.ToggleableServiceExtensionDescription
           ? extensionValue == ext.enabledValue
           // For extensions that have more than two states
@@ -200,10 +201,10 @@ class ServiceExtensionManager extends Disposer {
   }
 
   Future<void> _maybeCheckForFirstFlutterFrame() async {
-    final IsolateRef? _lastMainIsolate = _isolateManager.mainIsolate.value;
+    final IsolateRef? lastMainIsolate = _isolateManager.mainIsolate.value;
     if (_checkForFirstFrameStarted ||
         _firstFrameEventReceived ||
-        _lastMainIsolate == null) return;
+        lastMainIsolate == null) return;
     if (!isServiceExtensionAvailable(extensions.didSendFirstFrameEvent)) {
       return;
     }
@@ -211,9 +212,9 @@ class ServiceExtensionManager extends Disposer {
 
     final value = await _service!.callServiceExtension(
       extensions.didSendFirstFrameEvent,
-      isolateId: _lastMainIsolate.id,
+      isolateId: lastMainIsolate.id,
     );
-    if (_lastMainIsolate != _isolateManager.mainIsolate.value) {
+    if (lastMainIsolate != _isolateManager.mainIsolate.value) {
       // The active isolate has changed since we started querying the first
       // frame.
       return;
@@ -549,8 +550,9 @@ class ServiceExtensionManager extends Disposer {
       _checkForFirstFrameStarted = false;
       final mainIsolate =
           await _isolateManager.isolateState(mainIsolateRef).isolate;
-      if (mainIsolate != null)
+      if (mainIsolate != null) {
         await _registerMainIsolate(mainIsolate, mainIsolateRef);
+      }
     }
   }
 }

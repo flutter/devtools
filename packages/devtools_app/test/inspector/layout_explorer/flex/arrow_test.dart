@@ -14,7 +14,7 @@ void main() {
     group('Unidirectional', () {
       Widget buildUnidirectionalArrowWrapper(ArrowType type) => Directionality(
             textDirection: TextDirection.ltr,
-            child: Container(
+            child: SizedBox(
               width: 100,
               height: 100,
               child: ArrowWrapper.unidirectional(
@@ -82,7 +82,7 @@ void main() {
     group('Bidirectional', () {
       Widget buildBidirectionalArrowWrapper(Axis direction) => Directionality(
             textDirection: TextDirection.ltr,
-            child: Container(
+            child: SizedBox(
               width: 100,
               height: 100,
               child: ArrowWrapper.bidirectional(

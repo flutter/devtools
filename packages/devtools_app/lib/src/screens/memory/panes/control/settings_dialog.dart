@@ -17,7 +17,7 @@ class MemorySettingDialogKeys {
 }
 
 class MemorySettingsDialog extends StatelessWidget {
-  const MemorySettingsDialog();
+  const MemorySettingsDialog({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -25,7 +25,7 @@ class MemorySettingsDialog extends StatelessWidget {
     return DevToolsDialog(
       title: const DialogTitleText('Memory Settings'),
       includeDivider: false,
-      content: Container(
+      content: SizedBox(
         width: defaultDialogWidth,
         child: Column(
           mainAxisSize: MainAxisSize.min,

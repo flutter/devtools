@@ -16,7 +16,7 @@ void main() {
   runApp(
     UncontrolledProviderScope(
       container: container,
-      child: MyApp(),
+      child: const MyApp(),
     ),
   );
 }
@@ -24,6 +24,8 @@ void main() {
 final counterProvider = StateNotifierProvider<Counter, int>((ref) => Counter());
 
 class MyApp extends ConsumerWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return MaterialApp(

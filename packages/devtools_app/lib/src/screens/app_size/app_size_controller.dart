@@ -135,7 +135,7 @@ class AppSizeController {
 
   int? nodeIndexCalculator(TreemapNode? newAnalysisRoot) {
     if (newAnalysisRoot == null) return null;
-    final searchCondition = (TreemapNode? n) => n == newAnalysisRoot;
+    bool searchCondition(TreemapNode? n) => n == newAnalysisRoot;
     if (!newAnalysisRoot.root.isExpanded) newAnalysisRoot.root.expand();
     final nodeIndex = newAnalysisRoot.root.childCountToMatchingNode(
       matchingNodeCondition: searchCondition,

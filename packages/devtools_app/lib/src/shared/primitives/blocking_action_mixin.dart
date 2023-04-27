@@ -28,7 +28,7 @@ mixin BlockingActionMixin<T extends StatefulWidget> on State<T> {
   ///
   /// The future returned by this method completes when either the future
   /// returned by the callback completes or the State object is disposed.
-  Future<void> blockWhileInProgress(Future callback()) async {
+  Future<void> blockWhileInProgress(Future Function() callback) async {
     setState(() {
       _actionInProgress = true;
     });

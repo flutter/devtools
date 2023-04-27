@@ -57,7 +57,7 @@ class InspectorScreen extends Screen {
 }
 
 class InspectorScreenBody extends StatefulWidget {
-  const InspectorScreenBody();
+  const InspectorScreenBody({super.key});
 
   @override
   InspectorScreenBodyState createState() => InspectorScreenBodyState();
@@ -301,7 +301,7 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
           unawaited(
             showDialog(
               context: context,
-              builder: (context) => FlutterInspectorSettingsDialog(),
+              builder: (context) => const FlutterInspectorSettingsDialog(),
             ),
           );
         },
@@ -338,13 +338,15 @@ class InspectorScreenBodyState extends State<InspectorScreenBody>
 }
 
 class FlutterInspectorSettingsDialog extends StatelessWidget {
+  const FlutterInspectorSettingsDialog({super.key});
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final dialogHeight = scaleByFontFactor(400.0);
     return DevToolsDialog(
       title: const DialogTitleText('Flutter Inspector Settings'),
-      content: Container(
+      content: SizedBox(
         width: defaultDialogWidth,
         height: dialogHeight,
         child: Column(
@@ -374,7 +376,7 @@ class FlutterInspectorSettingsDialog extends StatelessWidget {
               style: theme.subtleTextStyle,
             ),
             const SizedBox(height: denseSpacing),
-            Expanded(
+            const Expanded(
               child: PubRootDirectorySection(),
             ),
           ],
@@ -462,7 +464,7 @@ class InspectorSummaryTreeControls extends StatelessWidget {
 
   Widget _buildSearchControls() {
     return Expanded(
-      child: Container(
+      child: SizedBox(
         height: defaultTextFieldHeight,
         child: searchFieldBuilder(),
       ),
@@ -563,12 +565,14 @@ class _ErrorNavigatorButton extends StatelessWidget {
 }
 
 class PubRootDirectorySection extends StatelessWidget {
+  const PubRootDirectorySection({super.key});
+
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<IsolateRef?>(
       valueListenable: serviceManager.isolateManager.mainIsolate,
       builder: (_, __, ___) {
-        return Container(
+        return SizedBox(
           height: 200.0,
           child: EditableList(
             gaScreen: gac.inspector,

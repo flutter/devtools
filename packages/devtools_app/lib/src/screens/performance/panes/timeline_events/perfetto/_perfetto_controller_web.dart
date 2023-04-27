@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+// ignore: avoid_web_libraries_in_flutter, as designed
 import 'dart:html' as html;
 import 'dart:ui' as ui;
 

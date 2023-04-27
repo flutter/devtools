@@ -43,7 +43,7 @@ class Grammar {
     return Grammar._(
       name: json['name'] as String,
       scopeName: json['scopeName'] as String,
-      topLevelMatcher: _Matcher.parse(json),
+      topLevelMatcher: GrammarMatcher.parse(json),
       repository: Repository.build(json),
     );
   }
@@ -59,7 +59,7 @@ class Grammar {
 
   final String? scopeName;
 
-  final _Matcher topLevelMatcher;
+  final GrammarMatcher topLevelMatcher;
 
   final Repository repository;
 
@@ -168,11 +168,11 @@ class Repository {
       return;
     }
     for (final subRepo in repositoryJson.keys) {
-      matchers[subRepo] = _Matcher.parse(repositoryJson[subRepo]!);
+      matchers[subRepo] = GrammarMatcher.parse(repositoryJson[subRepo]!);
     }
   }
 
-  final matchers = <String?, _Matcher>{};
+  final matchers = <String?, GrammarMatcher>{};
 
   Map<String, Object?> toJson() {
     return {
@@ -182,8 +182,8 @@ class Repository {
   }
 }
 
-abstract class _Matcher {
-  factory _Matcher.parse(Map<String, Object?> json) {
+abstract class GrammarMatcher {
+  factory GrammarMatcher.parse(Map<String, Object?> json) {
     if (_IncludeMatcher.isType(json)) {
       return _IncludeMatcher(json['include'] as String);
     } else if (_SimpleMatcher.isType(json)) {
@@ -196,7 +196,7 @@ abstract class _Matcher {
     throw StateError('Unknown matcher type: $json');
   }
 
-  _Matcher._(Map<String, Object?> json) : name = json['name'] as String?;
+  GrammarMatcher._(Map<String, Object?> json) : name = json['name'] as String?;
 
   final String? name;
 
@@ -237,7 +237,8 @@ abstract class _Matcher {
             scanner.substring(0, captureEndLocation.position),
             position: captureStartLocation.position,
           );
-          _Matcher.parse(capture).scan(grammar, captureScanner, scopeStack);
+          GrammarMatcher.parse(capture)
+              .scan(grammar, captureScanner, scopeStack);
         }
 
         scopeStack.pop(captureName, captureEndLocation);
@@ -249,7 +250,7 @@ abstract class _Matcher {
 }
 
 /// A simple matcher which matches a single line.
-class _SimpleMatcher extends _Matcher {
+class _SimpleMatcher extends GrammarMatcher {
   _SimpleMatcher(Map<String, Object?> json)
       : match = RegExp(json['match'] as String, multiLine: true),
         captures = (json['captures'] as Map<String, Object?>?)
@@ -286,7 +287,7 @@ class _SimpleMatcher extends _Matcher {
   }
 }
 
-class _MultilineMatcher extends _Matcher {
+class _MultilineMatcher extends GrammarMatcher {
   _MultilineMatcher(Map<String, Object?> json)
       : begin = RegExp(json['begin'] as String, multiLine: true),
         beginCaptures = json['beginCaptures'] as Map<String, Object?>?,
@@ -301,9 +302,9 @@ class _MultilineMatcher extends _Matcher {
             : RegExp(json['while'] as String, multiLine: true),
         patterns = (json['patterns'] as List<Object?>?)
             ?.cast<Map<String, Object?>>()
-            .map((e) => _Matcher.parse(e))
+            .map((e) => GrammarMatcher.parse(e))
             .toList()
-            .cast<_Matcher>(),
+            .cast<GrammarMatcher>(),
         super._(json);
 
   static bool isType(Map<String, Object?> json) {
@@ -352,7 +353,7 @@ class _MultilineMatcher extends _Matcher {
   /// be null if this property is provided.
   final Map<String, Object?>? captures;
 
-  final List<_Matcher>? patterns;
+  final List<GrammarMatcher>? patterns;
 
   void _scanBegin(Grammar grammar, LineScanner scanner, ScopeStack scopeStack) {
     final location = scanner.location;
@@ -381,7 +382,7 @@ class _MultilineMatcher extends _Matcher {
         break;
       }
       bool foundMatch = false;
-      for (final pattern in patterns ?? <_Matcher>[]) {
+      for (final pattern in patterns ?? <GrammarMatcher>[]) {
         if (pattern.scan(grammar, scanner, scopeStack)) {
           foundMatch = true;
           break;
@@ -400,7 +401,7 @@ class _MultilineMatcher extends _Matcher {
   ) {
     while (!scanner.isDone && end != null && !scanner.matches(end!)) {
       bool foundMatch = false;
-      for (final pattern in patterns ?? <_Matcher>[]) {
+      for (final pattern in patterns ?? <GrammarMatcher>[]) {
         if (pattern.scan(grammar, scanner, scopeStack)) {
           foundMatch = true;
           break;
@@ -416,7 +417,7 @@ class _MultilineMatcher extends _Matcher {
   void _scanEnd(Grammar grammar, LineScanner scanner, ScopeStack scopeStack) {
     final location = scanner.location;
     if (end != null && !scanner.scan(end!)) {
-      return null;
+      return;
     }
     _processCaptureHelper(grammar, scanner, scopeStack, endCaptures, location);
   }
@@ -515,20 +516,20 @@ class _MultilineMatcher extends _Matcher {
   }
 }
 
-class _PatternMatcher extends _Matcher {
+class _PatternMatcher extends GrammarMatcher {
   _PatternMatcher(Map<String, Object?> json)
       : patterns = (json['patterns'] as List<Object?>?)
             ?.cast<Map<String, Object?>>()
-            .map((e) => _Matcher.parse(e))
+            .map((e) => GrammarMatcher.parse(e))
             .toList()
-            .cast<_Matcher>(),
+            .cast<GrammarMatcher>(),
         super._(json);
 
   static bool isType(Map<String, Object?> json) {
     return json.containsKey('patterns');
   }
 
-  final List<_Matcher>? patterns;
+  final List<GrammarMatcher>? patterns;
 
   @override
   bool scan(Grammar grammar, LineScanner scanner, ScopeStack scopeStack) {
@@ -551,10 +552,10 @@ class _PatternMatcher extends _Matcher {
   }
 }
 
-/// A [_Matcher] that corresponds to an `include` rule referenced in a
+/// A [GrammarMatcher] that corresponds to an `include` rule referenced in a
 /// `patterns` array. Allows for executing rules defined within a
 /// [Repository].
-class _IncludeMatcher extends _Matcher {
+class _IncludeMatcher extends GrammarMatcher {
   _IncludeMatcher(String include)
       : include = include.substring(1),
         super._({});
@@ -633,7 +634,7 @@ class ScopeStack {
   /// Pops the last scope off the stack, producing a token if necessary up until
   /// [end].
   void pop(String? scope, ScopeStackLocation end) {
-    if (scope == null) return null;
+    if (scope == null) return;
     assert(stack.isNotEmpty);
 
     final scopes = stack.map((item) => item.scope).toSet();

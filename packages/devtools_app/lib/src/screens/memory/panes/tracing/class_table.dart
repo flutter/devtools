@@ -116,7 +116,7 @@ class _InstancesColumn extends ColumnData<TracedClass> {
 }
 
 class AllocationTracingTable extends StatefulWidget {
-  const AllocationTracingTable({required this.controller});
+  const AllocationTracingTable({super.key, required this.controller});
 
   final TracingPaneController controller;
 

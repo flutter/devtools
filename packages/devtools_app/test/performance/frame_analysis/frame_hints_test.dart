@@ -68,7 +68,7 @@ void main() {
       expect(find.byType(FrameHints), findsOneWidget);
     }
 
-    void _mockFrameAnalysis({
+    void createMockFrameAnalysis({
       required MockFrameAnalysis frameAnalysis,
       required FlutterFrame frame,
       FramePhase? longestUiPhase,
@@ -109,7 +109,10 @@ void main() {
       'does show hints for janky frame',
       windowSize,
       (WidgetTester tester) async {
-        _mockFrameAnalysis(frameAnalysis: mockFrameAnalysis, frame: jankyFrame);
+        createMockFrameAnalysis(
+          frameAnalysis: mockFrameAnalysis,
+          frame: jankyFrame,
+        );
         await pumpHints(tester, mockFrameAnalysis);
 
         expect(
@@ -131,7 +134,7 @@ void main() {
         'shows hint when build tracing was enhanced',
         windowSize,
         (WidgetTester tester) async {
-          _mockFrameAnalysis(
+          createMockFrameAnalysis(
             frameAnalysis: mockFrameAnalysis,
             frame: jankyFrame,
             buildsTracked: true,
@@ -153,7 +156,7 @@ void main() {
         'shows hint when build tracing was not enhanced',
         windowSize,
         (WidgetTester tester) async {
-          _mockFrameAnalysis(
+          createMockFrameAnalysis(
             frameAnalysis: mockFrameAnalysis,
             frame: jankyFrame,
           );
@@ -180,7 +183,7 @@ void main() {
         'shows hint when layout tracing was enhanced',
         windowSize,
         (WidgetTester tester) async {
-          _mockFrameAnalysis(
+          createMockFrameAnalysis(
             frameAnalysis: mockFrameAnalysis,
             frame: jankyFrame,
             longestUiPhase: mockLayoutPhase,
@@ -203,7 +206,7 @@ void main() {
         'shows hint when layout tracing was not enhanced',
         windowSize,
         (WidgetTester tester) async {
-          _mockFrameAnalysis(
+          createMockFrameAnalysis(
             frameAnalysis: mockFrameAnalysis,
             frame: jankyFrame,
             longestUiPhase: mockLayoutPhase,
@@ -231,7 +234,7 @@ void main() {
         'shows hint when paint tracing was enhanced',
         windowSize,
         (WidgetTester tester) async {
-          _mockFrameAnalysis(
+          createMockFrameAnalysis(
             frameAnalysis: mockFrameAnalysis,
             frame: jankyFrame,
             longestUiPhase: mockPaintPhase,
@@ -254,7 +257,7 @@ void main() {
         'shows hint when paint tracing was not enhanced',
         windowSize,
         (WidgetTester tester) async {
-          _mockFrameAnalysis(
+          createMockFrameAnalysis(
             frameAnalysis: mockFrameAnalysis,
             frame: jankyFrame,
             longestUiPhase: mockPaintPhase,
@@ -283,7 +286,7 @@ void main() {
       'shows intrinsic operations hint',
       windowSize,
       (WidgetTester tester) async {
-        _mockFrameAnalysis(
+        createMockFrameAnalysis(
           frameAnalysis: mockFrameAnalysis,
           frame: jankyFrame,
           intrinsicsCount: 5,
@@ -305,7 +308,7 @@ void main() {
       'shows canvas save layer hint',
       windowSize,
       (WidgetTester tester) async {
-        _mockFrameAnalysis(
+        createMockFrameAnalysis(
           frameAnalysis: mockFrameAnalysis,
           frame: jankyFrame,
           saveLayerCount: 5,
@@ -327,7 +330,7 @@ void main() {
       'shows shader compilation hint',
       windowSize,
       (WidgetTester tester) async {
-        _mockFrameAnalysis(
+        createMockFrameAnalysis(
           frameAnalysis: mockFrameAnalysis,
           frame: testFrameWithShaderJank,
         );
@@ -355,7 +358,7 @@ void main() {
       'does not show impeller link on android',
       windowSize,
       (WidgetTester tester) async {
-        _mockFrameAnalysis(
+        createMockFrameAnalysis(
           frameAnalysis: mockFrameAnalysis,
           frame: testFrameWithShaderJank,
         );

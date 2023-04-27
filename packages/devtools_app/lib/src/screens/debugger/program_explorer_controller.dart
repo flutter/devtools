@@ -119,7 +119,7 @@ class ProgramExplorerController extends DisposableController
     ScriptRef? script,
     List<VMServiceObjectNode> nodes,
   ) async {
-    final searchCondition = (node) => node.script?.uri == script!.uri;
+    bool searchCondition(node) => node.script?.uri == script!.uri;
     for (final node in nodes) {
       final result = node.firstChildWithCondition(searchCondition);
       if (result != null) {
@@ -139,7 +139,7 @@ class ProgramExplorerController extends DisposableController
   }
 
   int _calculateNodeIndex({
-    bool matchingNodeCondition(VMServiceObjectNode node)?,
+    bool Function(VMServiceObjectNode node)? matchingNodeCondition,
     bool includeCollapsedNodes = true,
   }) {
     // Index tracks the position of the node in the flat-list representation of

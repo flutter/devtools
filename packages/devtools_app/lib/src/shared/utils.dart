@@ -79,7 +79,7 @@ extension VmExtension on VM {
   }
 }
 
-List<_ConnectionDescription> generateDeviceDescription(
+List<ConnectionDescription> generateDeviceDescription(
   VM vm,
   ConnectedApp connectedApp, {
   bool includeVmServiceConnection = true,
@@ -93,10 +93,10 @@ List<_ConnectionDescription> generateDeviceDescription(
 
   final flutterVersion = connectedApp.flutterVersionNow;
 
-  _ConnectionDescription? _vmServiceConnection;
+  ConnectionDescription? vmServiceConnection;
   if (includeVmServiceConnection && serviceManager.service != null) {
     final description = serviceManager.service!.connectedUri.toString();
-    _vmServiceConnection = _ConnectionDescription(
+    vmServiceConnection = ConnectionDescription(
       title: 'VM Service Connection',
       description: description,
       actions: [CopyToClipboardControl(dataProvider: () => description)],
@@ -104,24 +104,24 @@ List<_ConnectionDescription> generateDeviceDescription(
   }
 
   return [
-    _ConnectionDescription(title: 'CPU / OS', description: vm.deviceDisplay),
-    _ConnectionDescription(title: 'Dart Version', description: version),
+    ConnectionDescription(title: 'CPU / OS', description: vm.deviceDisplay),
+    ConnectionDescription(title: 'Dart Version', description: version),
     if (flutterVersion != null) ...{
-      _ConnectionDescription(
+      ConnectionDescription(
         title: 'Flutter Version',
         description: '${flutterVersion.version} / ${flutterVersion.channel}',
       ),
-      _ConnectionDescription(
+      ConnectionDescription(
         title: 'Framework / Engine',
         description: '${flutterVersion.frameworkRevision} / '
             '${flutterVersion.engineRevision}',
       ),
     },
-    _ConnectionDescription(
+    ConnectionDescription(
       title: 'Connected app type',
       description: connectedApp.display,
     ),
-    if (_vmServiceConnection != null) _vmServiceConnection,
+    if (vmServiceConnection != null) vmServiceConnection,
   ];
 }
 
@@ -150,7 +150,7 @@ List<String> issueLinkDetails() {
   return issueDescriptionItems;
 }
 
-typedef _ProvidedControllerCallback<T> = void Function(T);
+typedef ProvidedControllerCallback<T> = void Function(T);
 
 /// Mixin that provides a [controller] from package:provider for a State class.
 ///
@@ -163,13 +163,13 @@ mixin ProvidedControllerMixin<T, V extends StatefulWidget> on State<V> {
 
   T? _controller;
 
-  final _callWhenReady = <_ProvidedControllerCallback>[];
+  final _callWhenReady = <ProvidedControllerCallback>[];
 
   /// Calls the provided [callback] once [_controller] has been initialized.
   ///
   /// The [callback] will be called immediately if [_controller] has already
   /// been initialized.
-  void callWhenControllerReady(_ProvidedControllerCallback callback) {
+  void callWhenControllerReady(ProvidedControllerCallback callback) {
     if (_controller != null) {
       callback(_controller!);
     } else {
@@ -203,8 +203,8 @@ mixin ProvidedControllerMixin<T, V extends StatefulWidget> on State<V> {
   }
 }
 
-class _ConnectionDescription {
-  _ConnectionDescription({
+class ConnectionDescription {
+  ConnectionDescription({
     required this.title,
     required this.description,
     this.actions = const <Widget>[],

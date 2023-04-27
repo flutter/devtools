@@ -167,7 +167,7 @@ class RefreshTimelineEventsButton extends StatelessWidget {
 }
 
 class TraceCategoriesDialog extends StatelessWidget {
-  const TraceCategoriesDialog(this.timelineEventsController);
+  const TraceCategoriesDialog(this.timelineEventsController, {super.key});
 
   final TimelineEventsController timelineEventsController;
 
@@ -177,7 +177,7 @@ class TraceCategoriesDialog extends StatelessWidget {
     return DevToolsDialog(
       title: const DialogTitleText('Trace Categories'),
       includeDivider: false,
-      content: Container(
+      content: SizedBox(
         width: defaultDialogWidth,
         child: Column(
           mainAxisSize: MainAxisSize.min,

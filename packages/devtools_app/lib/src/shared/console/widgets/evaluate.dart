@@ -30,6 +30,7 @@ typedef AutoCompleteResultsFunction = Future<List<String>> Function(
 
 class ExpressionEvalField extends StatefulWidget {
   const ExpressionEvalField({
+    super.key,
     AutoCompleteResultsFunction? getAutoCompleteResults,
   }) : getAutoCompleteResults =
             getAutoCompleteResults ?? autoCompleteResultsFor;

@@ -70,22 +70,22 @@ class BorderLayout extends StatelessWidget {
         if (top != null)
           Align(
             alignment: Alignment.topCenter,
-            child: Container(height: topHeight, child: top),
+            child: SizedBox(height: topHeight, child: top),
           ),
         if (left != null)
           Align(
             alignment: Alignment.centerLeft,
-            child: Container(width: leftWidth, child: left),
+            child: SizedBox(width: leftWidth, child: left),
           ),
         if (right != null)
           Align(
             alignment: Alignment.centerRight,
-            child: Container(width: rightWidth, child: right),
+            child: SizedBox(width: rightWidth, child: right),
           ),
         if (bottom != null)
           Align(
             alignment: Alignment.bottomCenter,
-            child: Container(height: bottomHeight, child: bottom),
+            child: SizedBox(height: bottomHeight, child: bottom),
           ),
       ],
     );
@@ -264,8 +264,8 @@ class AnimatedLayoutProperties<T extends LayoutProperties>
   LayoutProperties? get parent => end.parent;
 
   @override
-  set parent(LayoutProperties? _parent) {
-    end.parent = _parent;
+  set parent(LayoutProperties? parent) {
+    end.parent = parent;
   }
 
   @override

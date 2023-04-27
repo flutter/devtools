@@ -80,10 +80,10 @@ class AppSizeScreen extends Screen {
 }
 
 class AppSizeBody extends StatefulWidget {
-  const AppSizeBody();
+  const AppSizeBody({super.key});
 
   @override
-  _AppSizeBodyState createState() => _AppSizeBodyState();
+  State<AppSizeBody> createState() => _AppSizeBodyState();
 }
 
 class _AppSizeBodyState extends State<AppSizeBody>
@@ -302,7 +302,7 @@ class _AppSizeBodyState extends State<AppSizeBody>
 }
 
 class AnalysisView extends StatefulWidget {
-  const AnalysisView();
+  const AnalysisView({super.key});
 
   // TODO(kenz): add links to documentation on how to generate these files, and
   // mention the import file button once it is hooked up to a file picker.
@@ -310,7 +310,7 @@ class AnalysisView extends StatefulWidget {
       ' size analysis file for debugging';
 
   @override
-  _AnalysisViewState createState() => _AnalysisViewState();
+  State<AnalysisView> createState() => _AnalysisViewState();
 }
 
 class _AnalysisViewState extends State<AnalysisView>
@@ -412,7 +412,7 @@ class _AnalysisViewState extends State<AnalysisView>
 }
 
 class DiffView extends StatefulWidget {
-  const DiffView();
+  const DiffView({super.key});
 
   // TODO(kenz): add links to documentation on how to generate these files, and
   // mention the import file button once it is hooked up to a file picker.
@@ -422,7 +422,7 @@ class DiffView extends StatefulWidget {
       'snapshot or size analysis file for debugging';
 
   @override
-  _DiffViewState createState() => _DiffViewState();
+  State<DiffView> createState() => _DiffViewState();
 }
 
 class _DiffViewState extends State<DiffView>
