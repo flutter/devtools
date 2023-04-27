@@ -1190,7 +1190,8 @@ class _LineItemState extends State<LineItem>
       // The following constants are tweaked for using the
       // 'Icons.label_important' icon.
       const colIconSize = 13.0;
-      final colLeftOffset = -3.0 + widthToCurrentColumn;
+      // Subtract 3 to offset the icon at the start of the character:
+      final colLeftOffset = widthToCurrentColumn - 3.0;
       const colBottomOffset = 13.0;
       const colIconRotate = -90 * math.pi / 180;
 
