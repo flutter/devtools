@@ -10,6 +10,9 @@ on:
       os-name:
         description: 'The OS to run against, either "macos" or "ubuntu". If neither is provided, will run against both.'
         type: string
+      needs-checkout-merge:
+        description: 'Whether the PR should be merged during the checkout step. Necessary for pull_request_target workflows.'
+        type: boolean
     outputs:
       latest_flutter_candidate:
         description: 'The latest Flutter candidate version.'
@@ -25,7 +28,21 @@ jobs:
         os: ${{ (inputs.os-name == 'macos' && fromJSON('[ "macos-latest"]')) || (inputs.os-name == 'ubuntu' && fromJSON('[ "ubuntu-latest"]')) || fromJSON('["ubuntu-latest", "macos-latest"]') }}
     runs-on: ${{ matrix.os }}
     steps:
-      - name: git clone devtools
+      # TODO(https://github.com/flutter/devtools/issues/5729) Consider caching DevTools so that we
+      # don't check it out again is subsequent workflows.
+
+      # Merge in the PR branch during checkout. This is necessary for pull_request_target workflows.
+      # See: https://github.com/actions/checkout/issues/518
+      - name: Checkout PR branch for DevTools
+        if: ${{ inputs.needs-checkout-merge == true }}
+        id: checkout-pr-branch
+        uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab
+        with:
+          ref: "refs/pull/${{ github.event.number }}/merge"
+  
+      # Otherwise use the default checkout action.
+      - name: Checkout DevTools (default)
+        if: steps.checkout-pr-branch.outcome == 'skipped'
         uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab
 
       - name: Get Latest Flutter Candidate

@@ -21,6 +21,8 @@ jobs:
     uses: ./.github/workflows/flutter-prep.yaml
     with:
       os-name: ubuntu
+      needs-checkout-merge: true
+
   dcm:
     name: Dart Code Metrics
     needs: flutter-prep
@@ -28,6 +30,8 @@ jobs:
     steps:
       - name: Clone Flutter DevTools
         uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab
+        with:
+          ref: "refs/pull/${{ github.event.number }}/merge"
       - name: Load Cached Flutter SDK
         uses: actions/cache@88522ab9f39a2ea568f7027eddc7d8d8bc9d59c8
         with:
