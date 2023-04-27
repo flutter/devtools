@@ -28,7 +28,6 @@ jobs:
         os: ${{ (inputs.os-name == 'macos' && fromJSON('[ "macos-latest"]')) || (inputs.os-name == 'ubuntu' && fromJSON('[ "ubuntu-latest"]')) || fromJSON('["ubuntu-latest", "macos-latest"]') }}
     runs-on: ${{ matrix.os }}
     steps:
-      steps:
       # TODO(https://github.com/flutter/devtools/issues/5729) Consider caching DevTools so that we
       # don't check it out again is subsequent workflows.
 
