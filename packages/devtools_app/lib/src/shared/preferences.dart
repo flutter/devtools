@@ -170,12 +170,7 @@ class InspectorPreferencesController extends DisposableController
   }
 
   Future<void> _initHoverEvalMode() async {
-    String? hoverEvalModeEnabledValue =
-        await storage.getValue(_hoverEvalModeStorageId);
-
-    hoverEvalModeEnabledValue ??=
-        (_inspectorService?.hoverEvalModeEnabledByDefault ?? false).toString();
-    setHoverEvalMode(hoverEvalModeEnabledValue == 'true');
+    _updateHoverEvalMode();
 
     addAutoDisposeListener(_hoverEvalMode, () {
       storage.setValue(
@@ -183,6 +178,15 @@ class InspectorPreferencesController extends DisposableController
         _hoverEvalMode.value.toString(),
       );
     });
+  }
+
+  Future<void> _updateHoverEvalMode() async {
+    String? hoverEvalModeEnabledValue =
+        await storage.getValue(_hoverEvalModeStorageId);
+
+    hoverEvalModeEnabledValue ??=
+        (_inspectorService?.hoverEvalModeEnabledByDefault ?? false).toString();
+    setHoverEvalMode(hoverEvalModeEnabledValue == 'true');
   }
 
   void _initCustomPubRootDirectories() {
@@ -233,6 +237,7 @@ class InspectorPreferencesController extends DisposableController
 
   Future<void> _handleConnectionToNewService(VmServiceWrapper _) async {
     await _updateMainScriptRef();
+    await _updateHoverEvalMode();
 
     final localInspectorService = _inspectorService;
     if (localInspectorService is InspectorService) {
