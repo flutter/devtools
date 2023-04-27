@@ -59,7 +59,7 @@ enum ScrollKind {
 /// [searchController] after sort operations that are triggered from the table.
 class SearchableFlatTable<T extends SearchableDataMixin> extends FlatTable {
   SearchableFlatTable({
-    Key? key,
+    super.key,
     required SearchControllerMixin<T> searchController,
     required super.keyFactory,
     required super.data,
@@ -312,7 +312,7 @@ class FlatTableState<T> extends State<FlatTable<T>> with AutoDisposeMixin {
 
   @override
   Widget build(BuildContext context) {
-    Widget _buildTable(List<double> columnWidths) => _Table<T>(
+    Widget buildTable(List<double> columnWidths) => _Table<T>(
           tableController: tableController,
           columnWidths: columnWidths,
           autoScrollContent: widget.autoScrollContent,
@@ -324,14 +324,14 @@ class FlatTableState<T> extends State<FlatTable<T>> with AutoDisposeMixin {
         );
     if (widget.sizeColumnsToFit || tableController.columnWidths == null) {
       return LayoutBuilder(
-        builder: (context, constraints) => _buildTable(
+        builder: (context, constraints) => buildTable(
           tableController.computeColumnWidthsSizeToFit(
             constraints.maxWidth,
           ),
         ),
       );
     }
-    return _buildTable(tableController.columnWidths!);
+    return buildTable(tableController.columnWidths!);
   }
 
   Widget _buildRow({
@@ -1179,7 +1179,7 @@ class TableRow<T> extends StatefulWidget {
         sortDirection = null,
         secondarySortColumn = null,
         onSortChanged = null,
-        rowType = _TableRowType.data,
+        _rowType = _TableRowType.data,
         tall = false,
         super(key: key);
 
@@ -1207,7 +1207,7 @@ class TableRow<T> extends StatefulWidget {
         searchMatchesNotifier = null,
         activeSearchMatchNotifier = null,
         displayTreeGuidelines = false,
-        rowType = _TableRowType.columnHeader,
+        _rowType = _TableRowType.columnHeader,
         super(key: key);
 
   /// Constructs a [TableRow] that presents column group titles instead of any
@@ -1234,7 +1234,7 @@ class TableRow<T> extends StatefulWidget {
         searchMatchesNotifier = null,
         activeSearchMatchNotifier = null,
         displayTreeGuidelines = false,
-        rowType = _TableRowType.columnGroupHeader,
+        _rowType = _TableRowType.columnGroupHeader,
         super(key: key);
 
   final LinkedScrollControllerGroup linkedScrollControllerGroup;
@@ -1251,7 +1251,7 @@ class TableRow<T> extends StatefulWidget {
 
   final bool isSelected;
 
-  final _TableRowType rowType;
+  final _TableRowType _rowType;
 
   final bool tall;
 
@@ -1302,7 +1302,7 @@ class TableRow<T> extends StatefulWidget {
   final bool displayTreeGuidelines;
 
   @override
-  _TableRowState<T> createState() => _TableRowState<T>();
+  State<TableRow<T>> createState() => _TableRowState<T>();
 }
 
 class _TableRowState<T> extends State<TableRow<T>>
@@ -1363,7 +1363,7 @@ class _TableRowState<T> extends State<TableRow<T>>
     );
 
     final box = SizedBox(
-      height: widget.rowType == _TableRowType.data
+      height: widget._rowType == _TableRowType.data
           ? defaultRowHeight
           : areaPaneHeaderHeight +
               (widget.tall ? scaleByFontFactor(densePadding) : 0.0),
@@ -1453,7 +1453,7 @@ class _TableRowState<T> extends State<TableRow<T>>
       Widget? content;
       final theme = Theme.of(context);
       final node = widget.node;
-      if (widget.rowType == _TableRowType.columnHeader) {
+      if (widget._rowType == _TableRowType.columnHeader) {
         Widget defaultHeaderRenderer() => _ColumnHeader(
               column: column,
               isSortColumn: column == widget.sortColumn,
@@ -1578,7 +1578,7 @@ class _TableRowState<T> extends State<TableRow<T>>
       return content;
     }
 
-    if (widget.rowType == _TableRowType.columnGroupHeader) {
+    if (widget._rowType == _TableRowType.columnGroupHeader) {
       final groups = widget.columnGroups!;
       return _ColumnGroupHeaderRow(
         groups: groups,
@@ -1650,7 +1650,7 @@ class _TableRowState<T> extends State<TableRow<T>>
         },
       ),
     );
-    if (widget.rowType == _TableRowType.columnHeader) {
+    if (widget._rowType == _TableRowType.columnHeader) {
       return OutlineDecoration.onlyBottom(child: rowContent);
     }
     return rowContent;

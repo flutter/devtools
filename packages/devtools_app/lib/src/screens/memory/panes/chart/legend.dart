@@ -14,10 +14,10 @@ import 'memory_charts.dart';
 import 'memory_events_pane.dart';
 import 'memory_vm_chart.dart';
 
-late final _legendWidth = scaleByFontFactor(200.0);
-late final _legendTextWidth = scaleByFontFactor(55.0);
-late final _legendHeight1Chart = scaleByFontFactor(200.0);
-late final _legendHeight2Charts = scaleByFontFactor(323.0);
+final _legendWidth = scaleByFontFactor(200.0);
+final _legendTextWidth = scaleByFontFactor(55.0);
+final _legendHeight1Chart = scaleByFontFactor(200.0);
+final _legendHeight2Charts = scaleByFontFactor(323.0);
 
 /// Padding for each title in the legend.
 const _legendTitlePadding = EdgeInsets.only(left: 5, bottom: 4);

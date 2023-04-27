@@ -89,7 +89,7 @@ class NetworkScreen extends Screen {
 }
 
 class NetworkScreenBody extends StatefulWidget {
-  const NetworkScreenBody();
+  const NetworkScreenBody({super.key});
 
   static const filterQueryInstructions = '''
 Type a filter query to show or hide specific requests.

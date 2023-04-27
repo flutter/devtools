@@ -70,6 +70,7 @@ class _DartObjectColumn extends _ObjectPoolColumnData
 /// related to [ObjectPool] objects in the Dart VM.
 class VmObjectPoolDisplay extends StatelessWidget {
   const VmObjectPoolDisplay({
+    super.key,
     required this.controller,
     required this.objectPool,
   });

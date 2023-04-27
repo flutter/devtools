@@ -14,6 +14,7 @@ import 'vm_object_model.dart';
 /// related to field objects in the Dart VM.
 class VmFieldDisplay extends StatelessWidget {
   const VmFieldDisplay({
+    super.key,
     required this.controller,
     required this.field,
   });

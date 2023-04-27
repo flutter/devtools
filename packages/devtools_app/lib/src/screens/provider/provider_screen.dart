@@ -68,7 +68,7 @@ class ProviderScreenWrapper extends StatefulWidget {
   const ProviderScreenWrapper({Key? key}) : super(key: key);
 
   @override
-  _ProviderScreenWrapperState createState() => _ProviderScreenWrapperState();
+  State<ProviderScreenWrapper> createState() => _ProviderScreenWrapperState();
 }
 
 class _ProviderScreenWrapperState extends State<ProviderScreenWrapper> {

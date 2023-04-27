@@ -23,7 +23,7 @@ void main() {
   late MockFlutterFramesController mockFlutterFramesController;
   late MockTimelineEventsController mockTimelineEventsController;
 
-  Future<void> _setUpServiceManagerWithTimeline(
+  Future<void> setUpServiceManagerWithTimeline(
     Map<String, dynamic> timelineJson,
   ) async {
     fakeServiceManager = FakeServiceManager(
@@ -50,7 +50,7 @@ void main() {
 
   group('TabbedPerformanceView', () {
     setUp(() async {
-      await _setUpServiceManagerWithTimeline(testTimelineJson);
+      await setUpServiceManagerWithTimeline(testTimelineJson);
       setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
       setGlobal(IdeTheme, IdeTheme());
       setGlobal(PreferencesController, PreferencesController());
@@ -111,7 +111,7 @@ void main() {
       windowSize,
       (WidgetTester tester) async {
         await tester.runAsync(() async {
-          await _setUpServiceManagerWithTimeline({});
+          await setUpServiceManagerWithTimeline({});
           await pumpView(tester);
 
           expect(find.byType(AnalyticsTabbedView), findsOneWidget);
@@ -129,7 +129,7 @@ void main() {
       windowSize,
       (WidgetTester tester) async {
         await tester.runAsync(() async {
-          await _setUpServiceManagerWithTimeline({});
+          await setUpServiceManagerWithTimeline({});
           final frame0 = testFrame0.shallowCopy()
             ..setEventFlow(animatorBeginFrameEvent)
             ..setEventFlow(goldenRasterTimelineEvent);
@@ -153,7 +153,7 @@ void main() {
       windowSize,
       (WidgetTester tester) async {
         await tester.runAsync(() async {
-          await _setUpServiceManagerWithTimeline({});
+          await setUpServiceManagerWithTimeline({});
           await pumpView(tester);
 
           expect(find.byType(AnalyticsTabbedView), findsOneWidget);
@@ -173,7 +173,7 @@ void main() {
       windowSize,
       (WidgetTester tester) async {
         await tester.runAsync(() async {
-          await _setUpServiceManagerWithTimeline({});
+          await setUpServiceManagerWithTimeline({});
           await pumpView(tester);
           await tester.pumpAndSettle();
           expect(find.byType(AnalyticsTabbedView), findsOneWidget);
@@ -194,7 +194,7 @@ void main() {
       windowSize,
       (WidgetTester tester) async {
         await tester.runAsync(() async {
-          await _setUpServiceManagerWithTimeline({});
+          await setUpServiceManagerWithTimeline({});
           await pumpView(tester);
 
           expect(find.byType(AnalyticsTabbedView), findsOneWidget);
@@ -220,7 +220,7 @@ void main() {
       windowSize,
       (WidgetTester tester) async {
         await tester.runAsync(() async {
-          await _setUpServiceManagerWithTimeline({});
+          await setUpServiceManagerWithTimeline({});
           final app = fakeServiceManager.connectedApp!;
           mockConnectedApp(
             app,

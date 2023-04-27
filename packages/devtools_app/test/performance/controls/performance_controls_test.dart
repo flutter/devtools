@@ -44,7 +44,7 @@ void main() {
       offlineController.exitOfflineMode();
     });
 
-    Future<void> _pumpControls(WidgetTester tester) async {
+    Future<void> pumpControls(WidgetTester tester) async {
       await tester.pumpWidget(
         wrapWithControllers(
           PerformanceControls(
@@ -61,7 +61,7 @@ void main() {
       'builds for Flutter app',
       windowSize,
       (WidgetTester tester) async {
-        await _pumpControls(tester);
+        await pumpControls(tester);
         expect(find.byType(ExitOfflineButton), findsNothing);
         expect(find.byType(VisibilityButton), findsOneWidget);
         expect(find.byIcon(Icons.block), findsOneWidget);
@@ -83,7 +83,7 @@ void main() {
           isProfileBuild: false,
           isWebApp: false,
         );
-        await _pumpControls(tester);
+        await pumpControls(tester);
 
         expect(find.byType(ExitOfflineButton), findsNothing);
         expect(find.byType(VisibilityButton), findsNothing);
@@ -103,7 +103,7 @@ void main() {
         offlineController.enterOfflineMode(
           offlineApp: serviceManager.connectedApp!,
         );
-        await _pumpControls(tester);
+        await pumpControls(tester);
         expect(find.byType(ExitOfflineButton), findsOneWidget);
         expect(find.byType(VisibilityButton), findsOneWidget);
         expect(find.byIcon(Icons.block), findsNothing);

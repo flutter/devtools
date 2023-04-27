@@ -384,7 +384,7 @@ class _LayerImageDialog extends StatelessWidget {
     return DevToolsDialog(
       includeDivider: false,
       scrollable: false,
-      content: Container(
+      content: SizedBox(
         width: mediaWidth - _padding,
         height: mediaHeight - _padding,
         child: LayerImage(

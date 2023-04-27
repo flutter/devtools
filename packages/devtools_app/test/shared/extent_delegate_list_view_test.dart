@@ -49,7 +49,7 @@ void main() {
       'builds successfully with customPointerSignalHandler',
       (tester) async {
         int pointerSignalEventCount = 0;
-        void _handlePointerSignal(PointerSignalEvent _) {
+        void handlePointerSignal(PointerSignalEvent _) {
           pointerSignalEventCount++;
         }
 
@@ -65,7 +65,7 @@ void main() {
               (context, index) => Text('${children[index]}'),
               childCount: children.length,
             ),
-            customPointerSignalHandler: _handlePointerSignal,
+            customPointerSignalHandler: handlePointerSignal,
           ),
         );
 

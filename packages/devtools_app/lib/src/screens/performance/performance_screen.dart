@@ -43,7 +43,7 @@ class PerformanceScreen extends Screen {
 }
 
 class PerformanceScreenBody extends StatefulWidget {
-  const PerformanceScreenBody();
+  const PerformanceScreenBody({super.key});
 
   @override
   PerformanceScreenBodyState createState() => PerformanceScreenBodyState();

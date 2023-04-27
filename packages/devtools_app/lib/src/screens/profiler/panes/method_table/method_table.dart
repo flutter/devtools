@@ -17,7 +17,7 @@ import 'method_table_model.dart';
 
 /// Widget that displays a method table for a CPU profile.
 class CpuMethodTable extends StatelessWidget {
-  const CpuMethodTable({required this.methodTableController});
+  const CpuMethodTable({super.key, required this.methodTableController});
 
   final MethodTableController methodTableController;
 

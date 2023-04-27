@@ -30,8 +30,9 @@ class CodeViewController extends DisposableController
   CodeViewController() {
     _scriptHistoryListener = () {
       final currentScriptValue = scriptsHistory.current.value;
-      if (currentScriptValue != null)
+      if (currentScriptValue != null) {
         _showScriptLocation(ScriptLocation(currentScriptValue));
+      }
     };
     scriptsHistory.current.addListener(_scriptHistoryListener);
   }

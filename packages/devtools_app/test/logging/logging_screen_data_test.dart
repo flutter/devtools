@@ -114,7 +114,7 @@ void main() {
       await pumpLoggingScreen(tester);
 
       // Locates the copy to clipboard button's IconButton.
-      final copyButton = () => find
+      ToolbarAction copyButton() => find
           .byKey(LogDetails.copyToClipboardButtonKey)
           .evaluate()
           .first

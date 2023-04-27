@@ -18,7 +18,7 @@ import '../shared/theme.dart';
 import '../shared/utils.dart';
 
 class OpenSettingsAction extends StatelessWidget {
-  const OpenSettingsAction();
+  const OpenSettingsAction({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -29,7 +29,7 @@ class OpenSettingsAction extends StatelessWidget {
           unawaited(
             showDialog(
               context: context,
-              builder: (context) => SettingsDialog(),
+              builder: (context) => const SettingsDialog(),
             ),
           );
         },
@@ -48,6 +48,8 @@ class OpenSettingsAction extends StatelessWidget {
 }
 
 class SettingsDialog extends StatelessWidget {
+  const SettingsDialog({super.key});
+
   @override
   Widget build(BuildContext context) {
     final analyticsController = Provider.of<AnalyticsController>(context);

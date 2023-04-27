@@ -52,10 +52,11 @@ Map<TestFileArgItems, dynamic> _parseFileContent(String fileContent) {
   final entries = matches.map<MapEntry<TestFileArgItems, dynamic>>(
     (RegExpMatch m) {
       final name = m.group(1) ?? '';
-      if (name.isEmpty)
+      if (name.isEmpty) {
         throw ArgumentError(
           'Name of test argument should be provided: [${m.group(0)}].',
         );
+      }
       final value = m.group(2) ?? '';
       return MapEntry(TestFileArgItems.values.byName(name), jsonDecode(value));
     },

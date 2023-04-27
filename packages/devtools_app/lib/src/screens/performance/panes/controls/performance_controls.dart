@@ -21,6 +21,7 @@ import 'performance_settings.dart';
 
 class PerformanceControls extends StatelessWidget {
   const PerformanceControls({
+    super.key,
     required this.controller,
     required this.onClear,
   });

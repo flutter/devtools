@@ -209,6 +209,7 @@ class _DartObjectColumn extends _CodeColumnData
 /// related to [Code] objects in the Dart VM.
 class VmCodeDisplay extends StatelessWidget {
   const VmCodeDisplay({
+    super.key,
     required this.controller,
     required this.code,
   });

@@ -39,7 +39,7 @@ void main() {
       ]) {
         group(' with $prefix prefix', () {
           test('does not map new-style URLs', () {
-            expect(mapLegacyUrl('$prefix'), isNull);
+            expect(mapLegacyUrl(prefix), isNull);
             expect(mapLegacyUrl('$prefix/'), isNull);
             expect(mapLegacyUrl('$prefix/foo?uri=ws://foo'), isNull);
             expect(mapLegacyUrl('$prefix?uri=ws://foo'), isNull);

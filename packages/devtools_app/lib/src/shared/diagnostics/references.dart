@@ -186,12 +186,13 @@ Future<void> addChildReferences(
 
       variable.addAllChildren(children);
 
-      if (refs.length > limit)
+      if (refs.length > limit) {
         variable.addChild(
           DartObjectNode.text(
             '...\nTo get more items, increase "${preferences.memory.refLimitTitle}" in memory settings.',
           ),
         );
+      }
 
       return;
     case RefNodeType.liveOutRefs:

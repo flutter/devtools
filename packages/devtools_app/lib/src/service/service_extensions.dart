@@ -479,12 +479,9 @@ final List<ServiceExtensionDescription> _extensionDescriptions = [
   disablePhysicalShapeLayers,
 ];
 
-final Map<String, ServiceExtensionDescription> serviceExtensionsAllowlist =
-    Map.fromIterable(
-  _extensionDescriptions,
-  key: (extension) => extension.extension,
-  value: (extension) => extension,
-);
+final serviceExtensionsAllowlist = <String, ServiceExtensionDescription>{
+  for (var extension in _extensionDescriptions) extension.extension: extension,
+};
 
 /// Service extensions that are not safe to call unless a frame has already
 /// been rendered.
