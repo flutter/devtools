@@ -336,7 +336,8 @@ class CodeViewController extends DisposableController
   }
 
   void toggleSearchInFileVisibility(bool visible) {
-    _showSearchInFileField.value = visible;
+    final fileExists = _currentScriptRef.value != null;
+    _showSearchInFileField.value = visible && fileExists;
     if (!visible) {
       resetSearch();
     }
