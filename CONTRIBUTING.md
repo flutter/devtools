@@ -16,8 +16,6 @@ You can do this online, and it only takes a minute.
 
 2. Understand [coding agreements](packages/README.md).
 
-3. **[Optional]** Follow instructions to [enable and activate DCM (Dart Code Metrics)](#enabling-and-activating-dcm).
-
 ## Workflow for making changes
 
 - Create a branch from your cloned repo: `git checkout -b myBranch`
@@ -54,6 +52,10 @@ From a separate terminal, start running a flutter app to connect to DevTools:
 - ensure the iOS Simulator is open (or a physical device is connected)
 - `flutter run`
 - copy the "Observatory debugger and profiler" uri printed in the command output, to connect to the app from DevTools later
+
+### **[Optional]** Enable DCM (Dart Code Metrics)
+
+Follow instructions to [enable and activate DCM (Dart Code Metrics)](#enabling-and-activating-dcm).
 
 ## Development
 
