@@ -25,6 +25,9 @@ TODO: Remove this section if there are not any general updates.
 * Fixes expression evaluation bug where selecting an autocomplete result for a field would clear the current input - [#5717](https://github.com/flutter/devtools/pull/5717)
 * Selecting a stack frame scrolls to the frame location in the source code - [#5722](https://github.com/flutter/devtools/pull/5722)
 * Performance improvements when searching in a file, or searching for a file - [#5733](https://github.com/flutter/devtools/pull/5733)
+* Disables syntax highlighting for files with more than 100,000 characters due to performance constraints - [#5743](https://github.com/flutter/devtools/pull/5743)
+* Fix bug where source code wasn't visible if syntax highlighting for a file was disabled - [#5743](https://github.com/flutter/devtools/pull/5743)
+
 
 ## Network profiler updates
 TODO: Remove this section if there are not any general updates.

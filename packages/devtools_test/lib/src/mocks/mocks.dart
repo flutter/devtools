@@ -4,6 +4,7 @@
 
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_shared/devtools_shared.dart';
@@ -197,6 +198,14 @@ final Grammar mockGrammar = Grammar.fromJson(
 ''',
   ),
 );
+
+final Script? mockLargeScript = _loadLargeScript();
+
+Script? _loadLargeScript() {
+  final largeScript =
+      File('../devtools_test/lib/src/mocks/mock_data/large_script.json');
+  return Script.parse(jsonDecode(largeScript.readAsStringSync()));
+}
 
 final Script? mockScript = Script.parse(
   jsonDecode(
@@ -620,8 +629,7 @@ final Script? mockScript = Script.parse(
 );
 
 final mockScriptRef = ScriptRef(
-  uri:
-      'libraries/@783137924/scripts/package%3Agallery%2Fmain.dart/17b557e5bc3',
+  uri: 'libraries/@783137924/scripts/package%3Agallery%2Fmain.dart/17b557e5bc3',
   id: 'test-script-long-lines',
 );
 
@@ -676,6 +684,17 @@ const profilerEntries = <int, ProfileReportEntry>{
 
 final mockParsedScript = ParsedScript(
   script: mockScript!,
+  highlighter: mockSyntaxHighlighter,
+  executableLines: executableLines,
+  sourceReport: ProcessedSourceReport(
+    coverageHitLines: coverageHitLines,
+    coverageMissedLines: coverageMissLines,
+    profilerEntries: profilerEntries,
+  ),
+);
+
+final mockLargeParsedScript = ParsedScript(
+  script: mockLargeScript!,
   highlighter: mockSyntaxHighlighter,
   executableLines: executableLines,
   sourceReport: ProcessedSourceReport(

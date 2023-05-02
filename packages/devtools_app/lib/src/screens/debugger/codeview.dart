@@ -289,11 +289,14 @@ class _CodeViewState extends State<CodeView> with AutoDisposeMixin {
     final lines = <TextSpan>[];
 
     // Ensure the syntax highlighter has been initialized.
-    // TODO(bkonyi): process source for highlighting on a separate thread.
     final script = parsedScript;
     final scriptSource = parsedScript?.script.source;
     if (script != null && scriptSource != null) {
-      if (scriptSource.length < 500000) {
+      // It takes ~1 second to syntax highlight 100,000 characters. Therefore,
+      // we only highlight scripts with less than 100,000 characters. If we want
+      // to support larger files, we should process the source for highlighting
+      // on a separate isolate.
+      if (scriptSource.length < 100000) {
         final highlighted = script.highlighter.highlight(
           context,
           lineRange: widget.lineRange,
@@ -1247,10 +1250,11 @@ class _LineItemState extends State<LineItem>
       );
 
   TextSpan searchAwareLineContents() {
-    final children = widget.lineContents.children;
-    if (children == null) return const TextSpan();
-
-    final activeSearchAwareContents = _activeSearchAwareLineContents(children);
+    // If syntax highlighting is disabled for the script, then
+    // `widget.lineContents` is simply a `TextSpan` with no children.
+    final lineContents = widget.lineContents.children ?? [widget.lineContents];
+    final activeSearchAwareContents =
+        _activeSearchAwareLineContents(lineContents);
     final allSearchAwareContents =
         _searchMatchAwareLineContents(activeSearchAwareContents!);
     return TextSpan(
