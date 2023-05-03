@@ -1,0 +1,53 @@
+{
+	"version": "0.2.0",
+	"configurations": [
+		{
+			"name": "Run Extension (Debug Version)",
+			"type": "extensionHost",
+			"request": "launch",
+			"cwd": "vs_code_extension",
+			"args": [
+				"--extensionDevelopmentPath=${workspaceFolder}/vs_code_extension"
+			],
+			"outFiles": [
+				"${workspaceFolder}/vs_code_extension/out/**/*.js"
+			],
+			"preLaunchTask": "${defaultBuildTask}",
+			"env": {
+				"FLUTTER_UI_URL_OVERRIDE": "http://localhost:8111/"
+			}
+		},
+		{
+			"name": "Run Flutter UI (background web server)",
+			"type": "dart",
+			"noDebug": true,
+			"request": "launch",
+			"cwd": "flutter_ui",
+			"deviceId": "web-server",
+			"suppressWebServerDeviceBrowserLaunch": true,
+			"toolArgs": [
+				"--web-port=8111",
+			]
+		},
+		{
+			"name": "Run Flutter UI (Chrome)",
+			"type": "dart",
+			"request": "launch",
+			"cwd": "flutter_ui",
+			"deviceId": "chrome",
+			"toolArgs": [
+				"--web-port=8111",
+			]
+		}
+	],
+	"compounds": [
+		{
+			"name": "Run Extension + Flutter UI",
+			"configurations": [
+				"Run Extension (Debug Version)",
+				"Run Flutter UI (background web server)"
+			],
+			"stopAll": true
+		}
+	]
+}

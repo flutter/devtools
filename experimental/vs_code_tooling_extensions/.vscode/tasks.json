@@ -1,0 +1,37 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "vs_code_extesion",
+			"type": "npm",
+			"script": "watch",
+			"path": "vs_code_extension",
+			"problemMatcher": "$tsc-watch",
+			"isBackground": true,
+			"presentation": {
+				"reveal": "never"
+			},
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			},
+			"dependsOn": [
+				"dart_code_api_npm"
+			]
+		},
+		{
+			"label": "dart_code_api_npm",
+			"type": "npm",
+			"script": "watch",
+			"path": "dart_code_api_npm",
+			"problemMatcher": "$tsc-watch",
+			"isBackground": true,
+			"presentation": {
+				"reveal": "never"
+			},
+			"group": {
+				"kind": "build"
+			}
+		}
+	]
+}

@@ -1,0 +1,19 @@
+name: flutter_ui
+description: The Flutter UI part of flutter-tooling-extension-sample.
+publish_to: 'none'
+version: 0.0.1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  dart_code_api:
+    path: ../dart_code_api
+
+dev_dependencies:
+  flutter_lints: ^2.0.0
+
+flutter:
+  uses-material-design: true
