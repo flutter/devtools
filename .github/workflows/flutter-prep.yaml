@@ -24,7 +24,7 @@ on:
 
 jobs:
   reusable-flutter-prep:
-    if: ${{ inputs.requires-label == '' || contains(github.event.*.labels.*.name, inputs.requires-label) }}
+    if: inputs.requires-label == '' || contains(github.event.pull_request.labels.*.name, inputs.requires-label) 
     name: ${{ matrix.os }} Flutter Prep
     outputs:
       latest_flutter_candidate: ${{ steps.flutter-candidate.outputs.FLUTTER_CANDIDATE }}
