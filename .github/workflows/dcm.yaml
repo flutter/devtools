@@ -20,10 +20,10 @@ on:
 
 jobs:
   flutter-prep:
-    if: ${{ contains(github.event.*.labels.*.name, 'run-dcm-workflow') }}
     uses: ./.github/workflows/flutter-prep.yaml
     with:
       os-name: ubuntu
+      requires-label: 'run-dcm-workflow'
       needs-checkout-merge: true
 
   dcm:

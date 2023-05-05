@@ -13,6 +13,10 @@ on:
       needs-checkout-merge:
         description: 'Whether the PR should be merged during the checkout step. Necessary for pull_request_target workflows.'
         type: boolean
+      requires-label:
+        description: 'Specifies the label required for the workflow to run. If not provided, the workflow will always run.'
+        type: string
+
     outputs:
       latest_flutter_candidate:
         description: 'The latest Flutter candidate version.'
@@ -20,6 +24,7 @@ on:
 
 jobs:
   reusable-flutter-prep:
+    if: ${{ inputs.requires-label == '' || contains(github.event.*.labels.*.name, inputs.requires-label) }}
     name: ${{ matrix.os }} Flutter Prep
     outputs:
       latest_flutter_candidate: ${{ steps.flutter-candidate.outputs.FLUTTER_CANDIDATE }}
