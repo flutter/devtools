@@ -14,7 +14,8 @@
 name: Dart Code Metrics
 
 on:
-  pull_request
+  pull_request_target
+    types: [synchronize, opened, reopened, labeled, unlabeled]
     branches:
       - master
 
