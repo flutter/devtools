@@ -44,6 +44,7 @@ If your improvement is user-facing, document it in
 4. Finally, run `sh tool/refresh.sh` to pull the latest version from repo, generate missing code and upgrade dependencies.
 
 ### Connect to application
+
 From a separate terminal, start running a flutter app to connect to DevTools:
 - `git clone https://github.com/flutter/gallery.git` (this is an existing application with many examples of Flutter widgets)
 - `cd gallery`
@@ -51,6 +52,23 @@ From a separate terminal, start running a flutter app to connect to DevTools:
 - ensure the iOS Simulator is open (or a physical device is connected)
 - `flutter run`
 - copy the "Observatory debugger and profiler" uri printed in the command output, to connect to the app from DevTools later
+
+### **[Optional]** Enable and activate DCM (Dart Code Metrics)
+
+**Note:** Enabling and activating DCM is optional. When you open a PR, the CI bots will show you any DCM warnings introduced by your change which should be fixed before submitting.
+
+**[Contributors who work at Google]** You can use the Google-purchased license key to activate DCM. See [go/dash-devexp-dcm-keys](http://goto.google.com/dash-devexp-dcm-keys).
+
+**[All other contributors]** Please follow instructions at <https://dcm.dev/pricing/>. You can either use the free tier of DCM, or purchase a team license. Note that the free tier doesn't support all the rules of the paid tier, so you will also need to consult the output of the Dart Code Metrics workflow on Github when you open your PR.
+
+To enable DCM:
+
+1. Install the executable for your target platform. You can refer to [this guide](https://dcm.dev/docs/teams/getting-started/#installation).
+2. [Get the license key](http://goto.google.com/dash-devexp-dcm-keys) and activate DCM. To do so, run `dcm activate --license-key=YOUR_KEY` from the console.
+3. Install the extension for your IDE. If you use VS Code, you can get it from [the marketplace](https://marketplace.visualstudio.com/items?itemName=dcmdev.dcm-vscode-extension). If you use IntelliJ IDEA or Android Studio, you can find the plugin [here](https://plugins.jetbrains.com/plugin/20856-dcm).
+4. Reload the IDE.
+
+**Note:** DCM issues can be distinguished from the Dart analyzer issues by their name: DCM rule names contain `-`. Some of the issues can be fixed via CLI, to do so, run `dcm fix` for any directory. To apply `dcm fix` on a file save in the IDE, refer to [this guide](https://dcm.dev/docs/teams/ide-integrations/vscode/#extension-capabilities).
 
 ## Development
 
@@ -235,3 +253,4 @@ directory. As an expedient to make the third_party code work well with our build
 code in third_party should be given a stub pubspec.yaml file so that you can
 reference the resources from the packages directory from
 `packages/devtools_app/web/index.html`
+
