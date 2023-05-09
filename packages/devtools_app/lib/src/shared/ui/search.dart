@@ -1477,7 +1477,6 @@ mixin SearchableDataMixin {
   /// [SearchControllerMixin.matchesForSearch] is overridden in such a way that
   /// [matchesSearchToken] is not used, then this method does not need to be
   /// implemented.
-  // ignore: avoid-unused-parameters, parameter is used in overrides
   bool matchesSearchToken(RegExp regExpSearch) => throw UnimplementedError(
         'Implement this method in order to use the default'
         ' [SearchControllerMixin.matchesForSearch] behavior.',
