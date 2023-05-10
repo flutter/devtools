@@ -18,6 +18,9 @@ on:
     branches:
       - master
   pull_request_target:
+    # synchronize, opened, and reopened are the default pull_request_target
+    # types. labeled and unlabeled are also required to re-run workflow when
+    # the run-dcm-workflow label is added or removed.
     types: [synchronize, opened, reopened, labeled, unlabeled]
     branches:
       - master

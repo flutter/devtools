@@ -16,5 +16,5 @@ jobs:
     steps:
       - name: Label reminder
         run: |
-          echo "Please add the 'run-dcm-workflow' label to run DCM checks."
+          echo "::error Please add the 'run-dcm-workflow' label to run DCM checks."
           exit 1
