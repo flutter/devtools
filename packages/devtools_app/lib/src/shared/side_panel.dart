@@ -13,9 +13,12 @@ import 'package:http/http.dart' as http;
 import 'package:logging/logging.dart';
 
 import '../../devtools.dart' as devtools;
-import '../../devtools_app.dart';
+import 'common_widgets.dart';
 import 'config_specific/launch_url/launch_url.dart';
 import 'config_specific/server/server.dart' as server;
+import 'primitives/auto_dispose.dart';
+import 'primitives/utils.dart';
+import 'theme.dart';
 
 final _log = Logger('release_notes');
 
@@ -143,7 +146,6 @@ class SidePanelViewerState extends State<SidePanelViewer>
 
   @override
   void dispose() {
-    cancelListeners();
     visibilityController.dispose();
     super.dispose();
   }
