@@ -24,7 +24,7 @@ void main() {
       );
     });
 
-    Future<CpuProfileData> _initSingleRootData({
+    Future<CpuProfileData> initSingleRootData({
       required Map<String, dynamic> dataJson,
       required String profileGolden,
     }) async {
@@ -36,14 +36,14 @@ void main() {
     }
 
     Future<CpuProfileData> initSimpleData1() async {
-      return await _initSingleRootData(
+      return await initSingleRootData(
         dataJson: simpleCpuProfile1,
         profileGolden: simpleProfile1Golden,
       );
     }
 
     Future<CpuProfileData> initSimpleData2() async {
-      return await _initSingleRootData(
+      return await initSingleRootData(
         dataJson: simpleCpuProfile2,
         profileGolden: simpleProfile2Golden,
       );

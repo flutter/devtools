@@ -274,6 +274,7 @@ class AutoComplete extends StatefulWidget {
   /// the TextField.
   const AutoComplete(
     this.controller, {
+    super.key,
     required this.searchFieldKey,
     required this.onTap,
     bool bottom = true, // If false placed above.
@@ -451,6 +452,7 @@ class AutoCompleteState extends State<AutoComplete> with AutoDisposeMixin {
 
 class AutoCompleteTile extends StatelessWidget {
   const AutoCompleteTile({
+    super.key,
     required this.textSpan,
     required this.index,
     required this.controller,
@@ -869,6 +871,7 @@ mixin SearchFieldMixin<T extends StatefulWidget>
   @override
   void initState() {
     super.initState();
+    // ignore: avoid-unrelated-type-assertions, false positive.
     if (this is ProvidedControllerMixin) {
       // Controllers provided through package:provider will not be ready until
       // [didChangeDependencies] is called, so ensure [searchController] is
@@ -983,6 +986,7 @@ class _SearchFieldState extends State<SearchField>
 class StatelessSearchField<T extends SearchableDataMixin>
     extends StatelessWidget {
   const StatelessSearchField({
+    super.key,
     required this.controller,
     required this.searchFieldEnabled,
     required this.shouldRequestFocus,
@@ -1087,15 +1091,14 @@ class StatelessSearchField<T extends SearchableDataMixin>
                     ],
                   )
                 : null,
-            suffix: suffix != null
-                ? suffix
-                : (supportsNavigation || onClose != null)
+            suffix: suffix ??
+                ((supportsNavigation || onClose != null)
                     ? _SearchFieldSuffix(
                         controller: controller,
                         supportsNavigation: supportsNavigation,
                         onClose: onClose,
                       )
-                    : null,
+                    : null),
           ),
     );
 
@@ -1113,6 +1116,7 @@ class StatelessSearchField<T extends SearchableDataMixin>
 /// in [SearchFieldMixin], which manages the search field lifecycle.
 class AutoCompleteSearchField extends StatefulWidget {
   const AutoCompleteSearchField({
+    super.key,
     required this.controller,
     required this.searchFieldEnabled,
     required this.shouldRequestFocus,
@@ -1383,7 +1387,11 @@ class _SearchFieldSuffix extends StatelessWidget {
 }
 
 class SearchNavigationControls extends StatelessWidget {
-  const SearchNavigationControls(this.controller, {required this.onClose});
+  const SearchNavigationControls(
+    this.controller, {
+    super.key,
+    required this.onClose,
+  });
 
   final SearchControllerMixin controller;
 
@@ -1508,9 +1516,9 @@ class AutoCompleteMatch {
   /// Transform the autocomplete match somehow (e.g. create a TextSpan where the
   /// matched segments are highlighted).
   T transformAutoCompleteMatch<T>({
-    required T transformMatchedSegment(String segment),
-    required T transformUnmatchedSegment(String segment),
-    required T combineSegments(List<T> segments),
+    required T Function(String segment) transformMatchedSegment,
+    required T Function(String segment) transformUnmatchedSegment,
+    required T Function(List<T> segments) combineSegments,
   }) {
     if (matchedSegments.isEmpty) {
       return transformUnmatchedSegment(text);

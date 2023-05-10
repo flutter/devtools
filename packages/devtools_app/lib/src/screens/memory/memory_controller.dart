@@ -78,7 +78,7 @@ class MemoryController extends DisposableController
     with AutoDisposeControllerMixin {
   MemoryController({DiffPaneController? diffPaneController}) {
     memoryTimeline = MemoryTimeline();
-    memoryLog = _MemoryLog(this);
+    memoryLog = MemoryLog(this);
 
     controllers = MemoryFeatureControllers(diffPaneController);
   }
@@ -101,7 +101,7 @@ class MemoryController extends DisposableController
 
   late MemoryTimeline memoryTimeline;
 
-  late _MemoryLog memoryLog;
+  late MemoryLog memoryLog;
 
   HeapSample? _selectedDartSample;
 
@@ -353,8 +353,8 @@ class MemoryController extends DisposableController
 }
 
 /// Supports saving and loading memory samples.
-class _MemoryLog {
-  _MemoryLog(this.controller);
+class MemoryLog {
+  MemoryLog(this.controller);
 
   /// Use in memory or local file system based on Flutter Web/Desktop.
   static final _fs = FileIO();

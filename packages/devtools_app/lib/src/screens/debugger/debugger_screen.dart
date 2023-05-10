@@ -89,7 +89,7 @@ class DebuggerScreen extends Screen {
 }
 
 class DebuggerScreenBody extends StatefulWidget {
-  const DebuggerScreenBody();
+  const DebuggerScreenBody({super.key});
 
   static final codeViewKey = GlobalKey(debugLabel: 'codeViewKey');
   static final scriptViewKey = GlobalKey(debugLabel: 'scriptViewKey');
@@ -164,6 +164,7 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
                       children: [
                         child!,
                         RoundedOutlinedBorder(
+                          clip: true,
                           child: ProgramExplorer(
                             controller:
                                 codeViewController.programExplorerController,
@@ -380,7 +381,7 @@ class DebuggerStatus extends StatefulWidget {
   final DebuggerController controller;
 
   @override
-  _DebuggerStatusState createState() => _DebuggerStatusState();
+  State<DebuggerStatus> createState() => _DebuggerStatusState();
 }
 
 class _DebuggerStatusState extends State<DebuggerStatus> with AutoDisposeMixin {
@@ -458,7 +459,7 @@ class _DebuggerStatusState extends State<DebuggerStatus> with AutoDisposeMixin {
       return 'paused$reason';
     }
 
-    final fileName = ' at ' + scriptUri.split('/').last;
+    final fileName = ' at ${scriptUri.split('/').last}';
     final tokenPos = location?.tokenPos;
     final scriptRef = location?.script;
     if (tokenPos == null || scriptRef == null) {
@@ -473,8 +474,10 @@ class _DebuggerStatusState extends State<DebuggerStatus> with AutoDisposeMixin {
 }
 
 class FloatingDebuggerControls extends StatefulWidget {
+  const FloatingDebuggerControls({super.key});
+
   @override
-  _FloatingDebuggerControlsState createState() =>
+  State<FloatingDebuggerControls> createState() =>
       _FloatingDebuggerControlsState();
 }
 
@@ -494,13 +497,15 @@ class _FloatingDebuggerControlsState extends State<FloatingDebuggerControls>
 
     controlHeight = _isPaused ? defaultButtonHeight : 0.0;
     addAutoDisposeListener(
-        serviceManager.isolateManager.mainIsolateState?.isPaused, () {
-      setState(() {
-        if (_isPaused) {
-          controlHeight = defaultButtonHeight;
-        }
-      });
-    });
+      serviceManager.isolateManager.mainIsolateState?.isPaused,
+      () {
+        setState(() {
+          if (_isPaused) {
+            controlHeight = defaultButtonHeight;
+          }
+        });
+      },
+    );
   }
 
   @override

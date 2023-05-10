@@ -19,13 +19,13 @@ void main() {
     late FakeServiceManager fakeServiceManager;
     final HttpProfileRequest? httpRequest =
         HttpProfileRequest.parse(httpPostJson);
-    String _clipboardContents = '';
+    String clipboardContents = '';
 
     setUp(() {
       setGlobal(IdeTheme, IdeTheme());
       setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
       setGlobal(PreferencesController, PreferencesController());
-      _clipboardContents = '';
+      clipboardContents = '';
       fakeServiceManager = FakeServiceManager(
         service: FakeServiceManager.createFakeService(
           httpProfile: HttpProfile(
@@ -41,7 +41,7 @@ void main() {
       controller = NetworkController();
       setupClipboardCopyListener(
         clipboardContentsCallback: (contents) {
-          _clipboardContents = contents ?? '';
+          clipboardContents = contents ?? '';
         },
       );
     });
@@ -70,15 +70,15 @@ void main() {
       await tester.pumpAndSettle();
 
       // Tap the requestBody copy button.
-      expect(_clipboardContents, isEmpty);
+      expect(clipboardContents, isEmpty);
       await tester.tap(find.byType(CopyToClipboardControl));
       final expectedResponseBody =
           jsonDecode(utf8.decode(httpRequest!.requestBody!.toList()));
 
       // Check that the contents were copied to clipboard.
-      expect(_clipboardContents, isNotEmpty);
+      expect(clipboardContents, isNotEmpty);
       expect(
-        jsonDecode(_clipboardContents),
+        jsonDecode(clipboardContents),
         equals(expectedResponseBody),
       );
 
@@ -112,15 +112,15 @@ void main() {
       await tester.pumpAndSettle();
 
       // Tap the responseBody copy button.
-      expect(_clipboardContents, isEmpty);
+      expect(clipboardContents, isEmpty);
       await tester.tap(find.byType(CopyToClipboardControl));
       final expectedResponseBody =
           jsonDecode(utf8.decode(httpRequest!.responseBody!.toList()));
 
       // Check that the contents were copied to clipboard.
-      expect(_clipboardContents, isNotEmpty);
+      expect(clipboardContents, isNotEmpty);
       expect(
-        jsonDecode(_clipboardContents),
+        jsonDecode(clipboardContents),
         equals(expectedResponseBody),
       );
 

@@ -134,28 +134,28 @@ class LegacyEventProcessor extends BaseTraceEventProcessor {
   }
 
   void _setTimeForData() {
-    final _data = performanceController.data!;
-    _data.timelineEvents.sort(
+    final data = performanceController.data!;
+    data.timelineEvents.sort(
       (a, b) =>
           a.time.start!.inMicroseconds.compareTo(b.time.start!.inMicroseconds),
     );
     // This logic is a little clearer written with if, else.
     // ignore: prefer-conditional-expression
-    if (_data.timelineEvents.isNotEmpty) {
-      _data.time = TimeRange()
+    if (data.timelineEvents.isNotEmpty) {
+      data.time = TimeRange()
         // We process trace events in timestamp order, so we can ensure the first
         // trace event has the earliest starting timestamp.
         ..start = Duration(
-          microseconds: _data.timelineEvents.first.time.start!.inMicroseconds,
+          microseconds: data.timelineEvents.first.time.start!.inMicroseconds,
         )
         // We cannot guarantee that the last trace event is the latest timestamp
         // in the timeline. DurationComplete events' timestamps refer to their
         // starting timestamp, but their end time is derived from the same trace
         // via the "dur" field. For this reason, we use the cached value stored in
         // [timelineController.fullTimeline].
-        ..end = Duration(microseconds: _data.endTimestampMicros);
+        ..end = Duration(microseconds: data.endTimestampMicros);
     } else {
-      _data.time = TimeRange()
+      data.time = TimeRange()
         ..start = Duration.zero
         ..end = Duration.zero;
     }

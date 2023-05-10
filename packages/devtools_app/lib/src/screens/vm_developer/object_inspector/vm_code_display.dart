@@ -209,6 +209,7 @@ class _DartObjectColumn extends _CodeColumnData
 /// related to [Code] objects in the Dart VM.
 class VmCodeDisplay extends StatelessWidget {
   const VmCodeDisplay({
+    super.key,
     required this.controller,
     required this.code,
   });
@@ -321,6 +322,7 @@ class CodeTable extends StatelessWidget {
 class CpuProfilerTicksTable {
   CpuProfilerTicksTable.parse({
     required this.sampleCount,
+    // ignore: avoid-dynamic, requires refactor.
     required List<dynamic> ticks,
   }) : assert(ticks.length % 3 == 0) {
     // Ticks are built up of groups of 3 elements:

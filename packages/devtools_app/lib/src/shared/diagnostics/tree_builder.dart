@@ -47,7 +47,7 @@ Future<void> _addDiagnosticsIfNeeded(
   if (diagnostic == null || !includeDiagnosticPropertiesInDebugger) return;
 
   final service = diagnostic.inspectorService;
-  Future<void> _addPropertiesHelper(
+  Future<void> addPropertiesHelper(
     List<RemoteDiagnosticsNode>? properties,
   ) async {
     if (properties == null || service == null || isolateRef == null) return;
@@ -63,11 +63,11 @@ Future<void> _addDiagnosticsIfNeeded(
   }
 
   if (diagnostic.inlineProperties.isNotEmpty) {
-    await _addPropertiesHelper(diagnostic.inlineProperties);
+    await addPropertiesHelper(diagnostic.inlineProperties);
   } else {
     assert(!service!.disposed);
     if (!service!.disposed) {
-      await _addPropertiesHelper(await diagnostic.getProperties(service));
+      await addPropertiesHelper(await diagnostic.getProperties(service));
     }
   }
 }
@@ -104,11 +104,11 @@ Future<void> _addDiagnosticChildrenIfNeeded(
 
 void _setupGrouping(DartObjectNode variable) {
   final numChildrenInGrouping =
-      variable.childCount >= pow(DartObjectNode.MAX_CHILDREN_IN_GROUPING, 2)
+      variable.childCount >= pow(DartObjectNode.maxChildrenInGrouping, 2)
           ? (roundToNearestPow10(variable.childCount) /
-                  DartObjectNode.MAX_CHILDREN_IN_GROUPING)
+                  DartObjectNode.maxChildrenInGrouping)
               .floor()
-          : DartObjectNode.MAX_CHILDREN_IN_GROUPING;
+          : DartObjectNode.maxChildrenInGrouping;
 
   var start = variable.offset;
   final end = start + variable.childCount;
@@ -121,11 +121,11 @@ void _setupGrouping(DartObjectNode variable) {
   }
 }
 
-Future<void> _addInstanceSetItems(
+void _addInstanceSetItems(
   DartObjectNode variable,
   IsolateRef? isolateRef,
   InstanceSet instanceSet,
-) async {
+) {
   final instances = instanceSet.instances ?? [];
   variable.addAllChildren(
     createVariablesForInstanceSet(
@@ -165,7 +165,7 @@ Future<void> _addInstanceRefItems(
   );
 
   if (result is Instance) {
-    await _addChildrenToInstanceVariable(
+    _addChildrenToInstanceVariable(
       variable: variable,
       value: result,
       isolateRef: isolateRef,
@@ -176,13 +176,13 @@ Future<void> _addInstanceRefItems(
 }
 
 /// Adds children to the variable.
-Future<void> _addChildrenToInstanceVariable({
+void _addChildrenToInstanceVariable({
   required DartObjectNode variable,
   required Instance value,
   required IsolateRef? isolateRef,
   required HeapObjectSelection? heapSelection,
   Set<String>? existingNames,
-}) async {
+}) {
   switch (value.kind) {
     case InstanceKind.kMap:
       variable.addAllChildren(
@@ -260,6 +260,16 @@ Future<void> _addChildrenToInstanceVariable({
         createVariablesForStackTrace(value, isolateRef),
       );
       break;
+    case InstanceKind.kMirrorReference:
+      variable.addAllChildren(
+        createVariablesForMirrorReference(value, isolateRef),
+      );
+      break;
+    case InstanceKind.kUserTag:
+      variable.addAllChildren(
+        createVariablesForUserTag(value, isolateRef),
+      );
+      break;
     default:
       break;
   }
@@ -317,7 +327,7 @@ Future<void> _addInspectorItems(variable, IsolateRef? isolateRef) async {
   if (inspectorService != null) {
     final tasks = <Future>[];
     ObjectGroupBase? group;
-    Future<void> _maybeUpdateRef(DartObjectNode child) async {
+    Future<void> maybeUpdateRef(DartObjectNode child) async {
       final childRef = child.ref;
       if (childRef == null) return;
       if (childRef.diagnostic == null) {
@@ -355,7 +365,7 @@ Future<void> _addInspectorItems(variable, IsolateRef? isolateRef) async {
     }
 
     for (var child in variable.children) {
-      tasks.add(_maybeUpdateRef(child));
+      tasks.add(maybeUpdateRef(child));
     }
     if (tasks.isNotEmpty) {
       await Future.wait(tasks);
@@ -375,8 +385,9 @@ Future<void> buildVariablesTree(
   bool expandAll = false,
 }) async {
   final ref = variable.ref;
-  if (!variable.isExpandable || variable.treeInitializeStarted || ref == null)
+  if (!variable.isExpandable || variable.treeInitializeStarted || ref == null) {
     return;
+  }
   variable.treeInitializeStarted = true;
 
   final isolateRef = ref.isolateRef;
@@ -393,12 +404,12 @@ Future<void> buildVariablesTree(
   try {
     if (ref is ObjectReferences) {
       await addChildReferences(variable);
-    } else if (variable.childCount > DartObjectNode.MAX_CHILDREN_IN_GROUPING) {
+    } else if (variable.childCount > DartObjectNode.maxChildrenInGrouping) {
       _setupGrouping(variable);
     } else if (instanceRef != null && serviceManager.service != null) {
       await _addInstanceRefItems(variable, instanceRef, isolateRef);
     } else if (value is InstanceSet) {
-      await _addInstanceSetItems(variable, isolateRef, value);
+      _addInstanceSetItems(variable, isolateRef, value);
     } else if (value != null) {
       await _addValueItems(variable, isolateRef, value);
     }

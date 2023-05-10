@@ -53,10 +53,10 @@ class PaddedDivider extends StatelessWidget {
     this.padding = const EdgeInsets.only(bottom: 10.0),
   }) : super(key: key);
 
-  const PaddedDivider.thin({Key? key})
+  const PaddedDivider.thin({super.key})
       : padding = const EdgeInsets.only(bottom: 4.0);
 
-  PaddedDivider.vertical({Key? key, double padding = densePadding})
+  PaddedDivider.vertical({super.key, double padding = densePadding})
       : padding = EdgeInsets.symmetric(vertical: padding);
 
   /// The padding to place around the divider.
@@ -166,7 +166,7 @@ class DevToolsButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final _onPressed = onPressed != null
+    final onPressedHandler = onPressed != null
         ? () {
             ga.select(gaScreen, gaSelection);
             onPressed!();
@@ -182,12 +182,12 @@ class DevToolsButton extends StatelessWidget {
           tooltip: tooltip,
           child: outlined
               ? IconButton.outlined(
-                  onPressed: _onPressed,
+                  onPressed: onPressedHandler,
                   iconSize: actionsIconSize,
                   icon: Icon(icon),
                 )
               : IconButton(
-                  onPressed: _onPressed,
+                  onPressed: onPressedHandler,
                   iconSize: actionsIconSize,
                   icon: Icon(
                     icon,
@@ -213,7 +213,7 @@ class DevToolsButton extends StatelessWidget {
         tooltip: tooltip,
         tooltipPadding: tooltipPadding,
         child: ElevatedButton(
-          onPressed: _onPressed,
+          onPressed: onPressedHandler,
           child: iconLabel,
         ),
       );
@@ -234,11 +234,11 @@ class DevToolsButton extends StatelessWidget {
                   context,
                   minScreenWidthForTextBeforeScaling,
                 ),
-                onPressed: _onPressed,
+                onPressed: onPressedHandler,
                 child: iconLabel,
               )
             : TextButton(
-                onPressed: _onPressed,
+                onPressed: onPressedHandler,
                 style: denseAwareTextButtonStyle(
                   context,
                   minScreenWidthForTextBeforeScaling,
@@ -369,6 +369,7 @@ class RefreshButton extends DevToolsButton {
 /// A Refresh ToolbarAction button.
 class ToolbarRefresh extends ToolbarAction {
   const ToolbarRefresh({
+    super.key,
     super.icon = Icons.refresh,
     required super.onPressed,
     super.tooltip = 'Refresh',
@@ -423,6 +424,7 @@ class StopRecordingButton extends DevToolsButton {
 
 class SettingsOutlinedButton extends DevToolsButton {
   const SettingsOutlinedButton({
+    super.key,
     required super.onPressed,
     required super.gaScreen,
     required super.gaSelection,
@@ -432,6 +434,7 @@ class SettingsOutlinedButton extends DevToolsButton {
 
 class HelpButton extends StatelessWidget {
   const HelpButton({
+    super.key,
     required this.gaScreen,
     required this.gaSelection,
     required this.onPressed,
@@ -527,6 +530,7 @@ class CollapseAllButton extends StatelessWidget {
 /// shown or hidden state.
 class VisibilityButton extends StatelessWidget {
   const VisibilityButton({
+    super.key,
     required this.show,
     required this.onPressed,
     this.minScreenWidthForTextBeforeScaling,
@@ -696,7 +700,7 @@ class OfflineAwareControls extends StatelessWidget {
 /// A small element containing some accessory information, often a numeric
 /// value.
 class Badge extends StatelessWidget {
-  const Badge(this.text);
+  const Badge(this.text, {super.key});
 
   final String text;
 
@@ -833,6 +837,8 @@ class ToolbarAction extends StatelessWidget {
 /// Acts as an empty header widget with zero size that is compatible with
 /// interfaces that expect a [PreferredSizeWidget].
 class BlankHeader extends StatelessWidget implements PreferredSizeWidget {
+  const BlankHeader({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Container();
@@ -1063,7 +1069,7 @@ class ToggleButton extends StatelessWidget {
               label: label,
             ),
           ),
-        )
+        ),
       ],
     );
   }
@@ -1217,7 +1223,7 @@ Widget inputDecorationSuffixButton(IconData icon, VoidCallback? onPressed) {
 }
 
 class OutlinedRowGroup extends StatelessWidget {
-  const OutlinedRowGroup({required this.children, this.borderColor});
+  const OutlinedRowGroup({super.key, required this.children, this.borderColor});
 
   final List<Widget> children;
 
@@ -1317,7 +1323,7 @@ class OutlineDecoration extends StatelessWidget {
 }
 
 class ThickDivider extends StatelessWidget {
-  const ThickDivider();
+  const ThickDivider({super.key});
 
   static const double thickDividerHeight = 5;
 
@@ -1332,6 +1338,7 @@ class ThickDivider extends StatelessWidget {
 
 class RoundedOutlinedBorder extends StatelessWidget {
   const RoundedOutlinedBorder({
+    super.key,
     this.showTopLeft = true,
     this.showTopRight = true,
     this.showBottomLeft = true,
@@ -1416,7 +1423,7 @@ BoxDecoration roundedBorderDecoration(BuildContext context) => BoxDecoration(
     );
 
 class LeftBorder extends StatelessWidget {
-  const LeftBorder({this.child});
+  const LeftBorder({super.key, this.child});
 
   final Widget? child;
 
@@ -1438,7 +1445,7 @@ class LeftBorder extends StatelessWidget {
 final goldenRatio = 1 + sqrt(5) / 2;
 
 class CenteredMessage extends StatelessWidget {
-  const CenteredMessage(this.message);
+  const CenteredMessage(this.message, {super.key});
 
   final String message;
 
@@ -1454,7 +1461,7 @@ class CenteredMessage extends StatelessWidget {
 }
 
 class CenteredCircularProgressIndicator extends StatelessWidget {
-  const CenteredCircularProgressIndicator({this.size});
+  const CenteredCircularProgressIndicator({super.key, this.size});
 
   final double? size;
 
@@ -1577,6 +1584,7 @@ Color alternatingColorForIndex(int index, ColorScheme colorScheme) {
 
 class BreadcrumbNavigator extends StatelessWidget {
   const BreadcrumbNavigator.builder({
+    super.key,
     required this.itemCount,
     required this.builder,
   });
@@ -1601,6 +1609,7 @@ class BreadcrumbNavigator extends StatelessWidget {
 
 class Breadcrumb extends StatelessWidget {
   const Breadcrumb({
+    super.key,
     required this.text,
     required this.isRoot,
     required this.onPressed,
@@ -1713,6 +1722,7 @@ class _BreadcrumbPainter extends CustomPainter {
 // TODO(bkonyi): replace uses of this class with `JsonViewer`.
 class FormattedJson extends StatelessWidget {
   const FormattedJson({
+    super.key,
     this.json,
     this.formattedString,
     this.useSubtleStyle = false,
@@ -1739,6 +1749,7 @@ class FormattedJson extends StatelessWidget {
 
 class JsonViewer extends StatefulWidget {
   const JsonViewer({
+    super.key,
     required this.encodedJson,
   });
 
@@ -1828,8 +1839,9 @@ class _JsonViewerState extends State<JsonViewer>
         child: FutureBuilder(
           future: _initializeTree,
           builder: (context, snapshot) {
-            if (snapshot.connectionState != ConnectionState.done)
+            if (snapshot.connectionState != ConnectionState.done) {
               return Container();
+            }
             return ExpandableVariable(
               variable: variable,
             );
@@ -2011,6 +2023,7 @@ typedef ClipboardDataProvider = String? Function();
 /// If it succeeds, it displays a notification with `successMessage`.
 class CopyToClipboardControl extends StatelessWidget {
   const CopyToClipboardControl({
+    super.key,
     this.dataProvider,
     this.successMessage = 'Copied to clipboard.',
     this.tooltip = 'Copy to clipboard',
@@ -2263,7 +2276,7 @@ class BlinkingIcon extends StatefulWidget {
   final double size;
 
   @override
-  _BlinkingIconState createState() => _BlinkingIconState();
+  State<BlinkingIcon> createState() => _BlinkingIconState();
 }
 
 class _BlinkingIconState extends State<BlinkingIcon> {
@@ -2339,7 +2352,7 @@ class DualValueListenableBuilder<T, U> extends StatefulWidget {
   final Widget? child;
 
   @override
-  _DualValueListenableBuilderState createState() =>
+  State<DualValueListenableBuilder<T, U>> createState() =>
       _DualValueListenableBuilderState<T, U>();
 }
 
@@ -2444,6 +2457,7 @@ class _KeepAliveWrapperState extends State<KeepAliveWrapper>
 /// Help button, that opens a dialog on click.
 class HelpButtonWithDialog extends StatelessWidget {
   const HelpButtonWithDialog({
+    super.key,
     required this.gaScreen,
     required this.gaSelection,
     required this.dialogTitle,
@@ -2490,7 +2504,7 @@ class HelpButtonWithDialog extends StatelessWidget {
 /// Display a single bullet character in order to act as a stylized spacer
 /// component.
 class BulletSpacer extends StatelessWidget {
-  const BulletSpacer({this.useAccentColor = false});
+  const BulletSpacer({super.key, this.useAccentColor = false});
 
   final bool useAccentColor;
 
@@ -2609,6 +2623,7 @@ class RadioButton<T> extends StatelessWidget {
 
 class ContextMenuButton extends StatelessWidget {
   ContextMenuButton({
+    super.key,
     required this.menu,
     this.style,
     this.gaScreen,

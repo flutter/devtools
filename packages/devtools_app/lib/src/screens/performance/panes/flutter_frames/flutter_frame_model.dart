@@ -218,11 +218,11 @@ class FrameTimelineEventData {
         // the event that 2) is true, do not set the frame end time here because
         // the end time for this frame will be set to the end time for
         // [uiEventFlow] once it finishes.
-        final _uiEvent = uiEvent;
-        if (_uiEvent != null) {
+        final theUiEvent = uiEvent;
+        if (theUiEvent != null) {
           time.end = Duration(
             microseconds: math.max(
-              _uiEvent.time.end!.inMicroseconds,
+              theUiEvent.time.end!.inMicroseconds,
               event.time.end?.inMicroseconds ?? 0,
             ),
           );

@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+// ignore: avoid_web_libraries_in_flutter, as designed
 import 'dart:html' as html;
 import 'dart:ui' as ui;
 
@@ -48,6 +49,10 @@ enum EmbeddedPerfettoEvent {
   /// Id for an event that signals to Perfetto that the modal help dialog should
   /// be opened.
   showHelp('SHOW-HELP'),
+
+  /// Id for an event that signals to Perfetto that the CSS constants need to be
+  /// re-initialized.
+  reloadCssConstants('RELOAD-CSS-CONSTANTS'),
 
   /// Id for a [postMessage] request that is sent before trying to change the
   /// DevTools theme (see [devtoolsThemeChange]).
@@ -114,13 +119,14 @@ class PerfettoControllerImpl extends PerfettoController {
     if (_debugUseLocalPerfetto) {
       return _debugPerfettoUrl;
     }
-    final assetsPath = assetUrlHelper(
+    final basePath = assetUrlHelper(
       origin: html.window.location.origin,
       path: html.window.location.pathname ?? '',
     );
-    final baseUrl = isExternalBuild
-        ? '$assetsPath/assets/packages/perfetto_compiled/dist/index.html'
-        : 'https://ui.perfetto.dev';
+    // ignore: undefined_prefixed_name, doesn't understand conditional imports.
+    final indexFilePath = ui.webOnlyAssetManager
+        .getAssetUrl(devToolsExtensionPoints.perfettoIndexLocation);
+    final baseUrl = '$basePath/$indexFilePath';
     return '$baseUrl$_embeddedModeQuery';
   }
 

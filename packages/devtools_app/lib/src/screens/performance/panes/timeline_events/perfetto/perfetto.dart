@@ -32,7 +32,7 @@ class PerfettoHelpButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return HelpButton(
       gaScreen: gac.performance,
-      gaSelection: gac.perfettoShowHelp,
+      gaSelection: gac.PerformanceEvents.perfettoShowHelp.name,
       outlined: false,
       onPressed: perfettoController.showHelpMenu,
     );

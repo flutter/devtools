@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:devtools_app/src/service/service_extension_manager.dart';
 import 'package:devtools_app/src/service/service_extension_widgets.dart';
 import 'package:devtools_app/src/service/service_extensions.dart';
@@ -19,7 +21,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 
-Future<void> main() async {
+void main() {
   final mockServiceManager = MockServiceConnectionManager();
   when(mockServiceManager.serviceExtensionManager)
       .thenReturn(FakeServiceExtensionManager());
@@ -27,7 +29,7 @@ Future<void> main() async {
   when(mockServiceManager.appState).thenReturn(
     AppState(mockServiceManager.isolateManager.selectedIsolate),
   );
-  when(mockServiceManager.runDeviceBusyTask(any))
+  when(unawaited(mockServiceManager.runDeviceBusyTask(any)))
       .thenAnswer((_) => Future<void>.value());
   when(mockServiceManager.isMainIsolatePaused).thenReturn(false);
   setGlobal(ServiceConnectionManager, mockServiceManager);
@@ -52,9 +54,13 @@ Future<void> main() async {
       'performs a hot reload when pressed',
       (WidgetTester tester) async {
         registerServiceExtension(mockServiceManager, hotReload);
-        final button = HotReloadButton();
+        const button = HotReloadButton();
         await tester.pumpWidget(
-          wrap(wrapWithNotifications(Scaffold(body: Center(child: button)))),
+          wrap(
+            wrapWithNotifications(
+              const Scaffold(body: Center(child: button)),
+            ),
+          ),
         );
         expect(find.byWidget(button), findsOneWidget);
         await tester.pumpAndSettle();
@@ -76,8 +82,9 @@ Future<void> main() async {
           hotReload,
           serviceAvailable: false,
         );
-        final button = HotReloadButton();
-        await tester.pumpWidget(wrap(Scaffold(body: Center(child: button))));
+        const button = HotReloadButton();
+        await tester
+            .pumpWidget(wrap(const Scaffold(body: Center(child: button))));
         expect(find.byWidget(button), findsOneWidget);
         await tester.pumpAndSettle();
         expect(reloads, 0);
@@ -106,9 +113,13 @@ Future<void> main() async {
       'performs a hot restart when pressed',
       (WidgetTester tester) async {
         registerServiceExtension(mockServiceManager, hotRestart);
-        final button = HotRestartButton();
+        const button = HotRestartButton();
         await tester.pumpWidget(
-          wrap(wrapWithNotifications(Scaffold(body: Center(child: button)))),
+          wrap(
+            wrapWithNotifications(
+              const Scaffold(body: Center(child: button)),
+            ),
+          ),
         );
         expect(find.byWidget(button), findsOneWidget);
         await tester.pumpAndSettle();
@@ -130,8 +141,9 @@ Future<void> main() async {
           hotRestart,
           serviceAvailable: false,
         );
-        final button = HotRestartButton();
-        await tester.pumpWidget(wrap(Scaffold(body: Center(child: button))));
+        const button = HotRestartButton();
+        await tester
+            .pumpWidget(wrap(const Scaffold(body: Center(child: button))));
         expect(find.byWidget(button), findsOneWidget);
         await tester.pumpAndSettle();
         expect(restarts, 0);
@@ -145,9 +157,9 @@ Future<void> main() async {
   group('Structured Errors toggle', () {
     late ValueListenable<ServiceExtensionState> serviceState;
     late ServiceExtensionState mostRecentState;
-    final serviceStateListener = () {
+    void serviceStateListener() {
       mostRecentState = serviceState.value;
-    };
+    }
 
     setUp(() {
       (mockServiceManager.serviceExtensionManager
@@ -158,7 +170,7 @@ Future<void> main() async {
       serviceState.addListener(serviceStateListener);
     });
 
-    tearDown(() async {
+    tearDown(() {
       serviceState.removeListener(serviceStateListener);
     });
 
@@ -167,8 +179,9 @@ Future<void> main() async {
               as FakeServiceExtensionManager)
           .fakeAddServiceExtension(structuredErrors.extension);
 
-      final button = StructuredErrorsToggle();
-      await tester.pumpWidget(wrap(Scaffold(body: Center(child: button))));
+      const button = StructuredErrorsToggle();
+      await tester
+          .pumpWidget(wrap(const Scaffold(body: Center(child: button))));
       expect(find.byWidget(button), findsOneWidget);
       await tester.tap(find.byWidget(button));
       await tester.pumpAndSettle();
@@ -187,8 +200,9 @@ Future<void> main() async {
         await (mockServiceManager.serviceExtensionManager
                 as FakeServiceExtensionManager)
             .fakeAddServiceExtension(structuredErrors.extension);
-        final button = StructuredErrorsToggle();
-        await tester.pumpWidget(wrap(Scaffold(body: Center(child: button))));
+        const button = StructuredErrorsToggle();
+        await tester
+            .pumpWidget(wrap(const Scaffold(body: Center(child: button))));
         expect(find.byWidget(button), findsOneWidget);
 
         await mockServiceManager.serviceExtensionManager

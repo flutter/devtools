@@ -3,7 +3,7 @@
 // in the LICENSE file.
 
 class HostPlatform {
-  static late final HostPlatform instance = HostPlatform();
+  static final HostPlatform instance = HostPlatform();
 
   bool get isMacOS => throw UnimplementedError();
 }

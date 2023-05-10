@@ -131,7 +131,7 @@ void main() {
         const SizedBox(
           width: 50.0,
         ),
-        Container(
+        const SizedBox(
           width: 75.0,
           height: 25.0,
         ),

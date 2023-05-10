@@ -108,6 +108,8 @@ abstract class InspectorServiceBase extends DisposableController
     super.dispose();
   }
 
+  bool get hoverEvalModeEnabledByDefault;
+
   Future<Object> forceRefresh() {
     final futures = <Future<void>>[];
     for (InspectorServiceClient client in clients) {
@@ -240,6 +242,10 @@ class InspectorService extends InspectorServiceBase {
     super.dispose();
   }
 
+  // When DevTools is embedded, default hover eval mode to off.
+  @override
+  bool get hoverEvalModeEnabledByDefault => !ideTheme.embed;
+
   void onExtensionVmServiceReceived(Event e) {
     if ('Flutter.Frame' == e.extensionKind) {
       for (InspectorServiceClient client in clients) {
@@ -349,7 +355,7 @@ class InspectorService extends InspectorServiceBase {
         }
         final google3PackageName = packageParts.join('.');
         _rootPackages.add(google3PackageName);
-        _rootPackagePrefixes.add(google3PackageName + '.');
+        _rootPackagePrefixes.add('$google3PackageName.');
       } else {
         _rootPackages.add(path.last);
       }
@@ -616,14 +622,14 @@ abstract class ObjectGroupBase implements Disposable {
     return disposeComplete;
   }
 
-  Future<T?> nullIfDisposed<T>(Future<T> supplier()) async {
+  Future<T?> nullIfDisposed<T>(Future<T> Function() supplier) async {
     if (disposed) {
       return null;
     }
     return await supplier();
   }
 
-  T? nullValueIfDisposed<T>(T supplier()) {
+  T? nullValueIfDisposed<T>(T Function() supplier) {
     if (disposed) {
       return null;
     }
@@ -631,7 +637,7 @@ abstract class ObjectGroupBase implements Disposable {
     return supplier();
   }
 
-  void skipIfDisposed(void runnable()) {
+  void skipIfDisposed(void Function() runnable) {
     if (disposed) {
       return;
     }
@@ -1151,8 +1157,6 @@ class ObjectGroup extends ObjectGroupBase {
     switch (type) {
       case FlutterTreeType.widget:
         return getRootWidget();
-      case FlutterTreeType.renderObject:
-        return getRootRenderObject();
     }
   }
 
@@ -1177,13 +1181,6 @@ class ObjectGroup extends ObjectGroupBase {
       invokeServiceMethodDaemon(
         WidgetInspectorServiceExtensions.getRootWidgetSummaryTree.name,
       ),
-    );
-  }
-
-  Future<RemoteDiagnosticsNode?> getRootRenderObject() {
-    assert(!disposed);
-    return invokeServiceMethodReturningNode(
-      WidgetInspectorServiceExtensions.getRootRenderObject.name,
     );
   }
 
@@ -1234,7 +1231,7 @@ class ObjectGroup extends ObjectGroupBase {
     if (disposed) return null;
     RemoteDiagnosticsNode? newSelection;
     final InspectorInstanceRef? previousSelectionRef =
-        previousSelection != null ? previousSelection.dartDiagnosticRef : null;
+        previousSelection?.dartDiagnosticRef;
 
     switch (treeType) {
       case FlutterTreeType.widget:
@@ -1242,12 +1239,6 @@ class ObjectGroup extends ObjectGroupBase {
           isSummaryTree
               ? WidgetInspectorServiceExtensions.getSelectedSummaryWidget.name
               : WidgetInspectorServiceExtensions.getSelectedWidget.name,
-          previousSelectionRef,
-        );
-        break;
-      case FlutterTreeType.renderObject:
-        newSelection = await invokeServiceMethodReturningNodeInspectorRef(
-          WidgetInspectorServiceExtensions.getSelectedRenderObject.name,
           previousSelectionRef,
         );
         break;

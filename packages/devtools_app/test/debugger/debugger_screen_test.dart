@@ -16,7 +16,7 @@ import 'package:vm_service/vm_service.dart';
 import '../test_infra/test_data/debugger/vm_service_object_tree.dart';
 import '../test_infra/utils/tree_utils.dart';
 
-Future<void> main() async {
+void main() {
   final screen = DebuggerScreen();
 
   const windowSize = Size(4000.0, 4000.0);
@@ -29,7 +29,6 @@ Future<void> main() async {
   setUp(() async {
     final fakeServiceManager = FakeServiceManager();
     final scriptManager = MockScriptManager();
-    // ignore: discarded_futures
     when(scriptManager.getScript(any)).thenAnswer(
       (_) => Future<Script>.value(testScript),
     );

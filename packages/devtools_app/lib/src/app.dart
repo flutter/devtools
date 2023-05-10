@@ -63,6 +63,7 @@ class DevToolsApp extends StatefulWidget {
   const DevToolsApp(
     this.screens,
     this.analyticsController, {
+    super.key,
     this.sampleData = const [],
   });
 
@@ -84,7 +85,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
   List<Screen> get _screens => widget.screens.map((s) => s.screen).toList();
 
   bool get isDarkThemeEnabled => _isDarkThemeEnabled;
-  bool _isDarkThemeEnabled = devToolsExtensionPoints.defaultIsDarkTheme;
+  bool _isDarkThemeEnabled = true;
 
   bool get vmDeveloperModeEnabled => _vmDeveloperModeEnabled;
   bool _vmDeveloperModeEnabled = false;
@@ -237,8 +238,8 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
                 actions: [
                   // TODO(https://github.com/flutter/devtools/issues/1941)
                   if (serviceManager.connectedApp!.isFlutterAppNow!) ...[
-                    HotReloadButton(),
-                    HotRestartButton(),
+                    const HotReloadButton(),
+                    const HotRestartButton(),
                   ],
                   ...DevToolsScaffold.defaultActions(),
                 ],

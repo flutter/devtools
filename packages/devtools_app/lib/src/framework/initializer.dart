@@ -53,7 +53,7 @@ class Initializer extends StatefulWidget {
   final bool allowConnectionScreenOnDisconnect;
 
   @override
-  _InitializerState createState() => _InitializerState();
+  State<Initializer> createState() => _InitializerState();
 }
 
 class _InitializerState extends State<Initializer>
@@ -191,7 +191,7 @@ class _InitializerState extends State<Initializer>
     final args = <String, String?>{
       'uri': null,
       'screen': offlineController
-          .offlineDataJson[DevToolsExportKeys.activeScreenId.name] as String
+          .offlineDataJson[DevToolsExportKeys.activeScreenId.name] as String,
     };
     final routerDelegate = DevToolsRouterDelegate.of(context);
     Router.neglect(

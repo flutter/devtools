@@ -28,7 +28,6 @@ import 'flutter_frame_model.dart';
 import 'flutter_frames_controller.dart';
 
 // Turn this flag on to see when flutter frames are linked with timeline events.
-// ignore: avoid-global-state
 bool debugFrames = false;
 
 class FlutterFramesChart extends StatelessWidget {
@@ -178,6 +177,7 @@ class _FlutterFramesChartState extends State<_FlutterFramesChart> {
 @visibleForTesting
 class FramesChart extends StatefulWidget {
   const FramesChart({
+    super.key,
     required this.framesController,
     required this.frames,
     required this.displayRefreshRate,
@@ -341,6 +341,7 @@ class _FramesChartState extends State<FramesChart> with AutoDisposeMixin {
 @visibleForTesting
 class FramesChartControls extends StatelessWidget {
   const FramesChartControls({
+    super.key,
     required this.framesController,
     required this.frames,
     required this.displayRefreshRate,
@@ -414,6 +415,7 @@ class FramesChartControls extends StatelessWidget {
 
 class FlutterFramesChartItem extends StatelessWidget {
   const FlutterFramesChartItem({
+    super.key,
     required this.index,
     required this.framesController,
     required this.frame,
@@ -578,7 +580,7 @@ class FlutterFramesChartItem extends StatelessWidget {
       // the frame's timeline events are available.
       ga.select(
         gac.performance,
-        gac.selectFlutterFrame,
+        gac.PerformanceEvents.selectFlutterFrame.name,
         screenMetricsProvider: () => PerformanceScreenMetrics(
           uiDuration: frame.buildTime,
           rasterDuration: frame.rasterTime,
@@ -607,18 +609,18 @@ class FlutterFrameTooltip extends StatelessWidget {
 
   static const double _moreInfoLinkWidth = 100.0;
 
-  static const _textMeasurementBuffer = 4.0;
+  static const _textMeasurementBuffer = 8.0;
 
   @override
   Widget build(BuildContext context) {
     return HoverCardTooltip.sync(
       enabled: () => true,
-      generateHoverCardData: (_) => _buildCardData(context),
+      generateHoverCardData: (_) => _buildCardData(),
       child: child,
     );
   }
 
-  HoverCardData _buildCardData(BuildContext context) {
+  HoverCardData _buildCardData() {
     final uiText = 'UI: ${durationText(
       frame.buildTime,
       unit: DurationDisplayUnit.milliseconds,
@@ -658,8 +660,8 @@ class FlutterFrameTooltip extends StatelessWidget {
                   MoreInfoLink(
                     url: preCompileShadersDocsUrl,
                     gaScreenName: gac.performance,
-                    gaSelectedItemDescription:
-                        gac.shaderCompilationDocsTooltipLink,
+                    gaSelectedItemDescription: gac
+                        .PerformanceDocs.shaderCompilationDocsTooltipLink.name,
                   ),
                 ],
               ),
@@ -687,7 +689,11 @@ class FlutterFrameTooltip extends StatelessWidget {
 }
 
 class AverageFPS extends StatelessWidget {
-  const AverageFPS({required this.frames, required this.displayRefreshRate});
+  const AverageFPS({
+    super.key,
+    required this.frames,
+    required this.displayRefreshRate,
+  });
 
   final List<FlutterFrame> frames;
 
@@ -724,7 +730,7 @@ class AverageFPS extends StatelessWidget {
 }
 
 class ShaderJankWarningIcon extends StatelessWidget {
-  const ShaderJankWarningIcon();
+  const ShaderJankWarningIcon({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -829,8 +835,9 @@ class ChartAxisPainter extends CustomPainter {
 
     // Do not draw the y axis label if it will collide with the 0.0 label or if
     // it will go beyond the uper bound of the chart.
-    if (timeMs != 0 && (tickY > chartArea.height - 10.0 || tickY < 10.0))
+    if (timeMs != 0 && (tickY > chartArea.height - 10.0 || tickY < 10.0)) {
       return;
+    }
 
     canvas.drawLine(
       Offset(chartArea.left - yAxisTickWidth / 2, tickY),

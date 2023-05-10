@@ -8,7 +8,7 @@ import '../../shared/theme.dart';
 import 'cpu_profiler_controller.dart';
 
 class CpuProfilerDisabled extends StatelessWidget {
-  const CpuProfilerDisabled(this.controller);
+  const CpuProfilerDisabled(this.controller, {super.key});
 
   final CpuProfilerController controller;
 
