@@ -220,7 +220,7 @@ class ReleaseNotesController {
   }
 
   /// Fetches and shows the most recent release notes for the current DevTools
-  /// version decreasing the patch version by 1 each time until we find release
+  /// version, decreasing the patch version by 1 each time until we find release
   /// notes or until we hit [versionFloor].
   Future<void> _fetchAndShowReleaseNotes({
     SemanticVersion? versionFloor,
