@@ -13,11 +13,9 @@ import 'package:http/http.dart' as http;
 import 'package:logging/logging.dart';
 
 import '../../devtools.dart' as devtools;
-import 'common_widgets.dart';
+import '../../devtools_app.dart';
 import 'config_specific/launch_url/launch_url.dart';
 import 'config_specific/server/server.dart' as server;
-import 'primitives/auto_dispose.dart';
-import 'theme.dart';
 
 final _log = Logger('release_notes');
 
@@ -72,15 +70,28 @@ class SidePanelViewerState extends State<SidePanelViewer>
   late bool isVisible;
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-
-    isVisible = widget.controller.isVisible.value;
-    markdownData = widget.controller.markdown.value;
+  void initState() {
+    super.initState();
 
     visibilityController = longAnimationController(this);
     visibilityAnimation =
         Tween<double>(begin: 1.0, end: 0).animate(visibilityController);
+
+    _initListeners();
+  }
+
+  @override
+  void didUpdateWidget(SidePanelViewer oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.controller.isVisible.value != isVisible ||
+        oldWidget.controller.markdown.value != markdownData) {
+      cancelListeners();
+      _initListeners();
+    }
+  }
+
+  void _initListeners() {
+    isVisible = widget.controller.isVisible.value;
 
     addAutoDisposeListener(widget.controller.isVisible, () {
       setState(() {
@@ -128,6 +139,13 @@ class SidePanelViewerState extends State<SidePanelViewer>
         },
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    cancelListeners();
+    visibilityController.dispose();
+    super.dispose();
   }
 }
 
@@ -183,7 +201,7 @@ class SidePanel extends AnimatedWidget {
                 ),
               ],
             ),
-            (markdownData == null || markdownData!.isEmpty)
+            markdownData.isNullOrEmpty
                 ? Text(textIfMarkdownDataEmpty ?? '')
                 : Expanded(
                     child: Markdown(
@@ -256,7 +274,7 @@ class ReleaseNotesController extends SidePanelController {
         // Fail gracefully if we cannot find release notes for the current
         // version of DevTools.
         _markdown.value = null;
-        toggleReleaseNotesVisible(false);
+        toggleVisibility(false);
         _log.warning(
           'Warning: could not find release notes for DevTools version '
           '$parsedCurrentVersionStr. $e',
@@ -287,7 +305,7 @@ class ReleaseNotesController extends SidePanelController {
         );
 
         _markdown.value = releaseNotesMarkdown;
-        toggleReleaseNotesVisible(true);
+        toggleVisibility(true);
         unawaited(
           server.setLastShownReleaseNotesVersion(currentVersionString),
         );
@@ -300,10 +318,6 @@ class ReleaseNotesController extends SidePanelController {
         version = version.downgrade(downgradePatch: true);
       }
     }
-  }
-
-  void toggleReleaseNotesVisible(bool visible) {
-    _isVisible.value = visible;
   }
 
   String _releaseNotesUrl(String currentVersion) {
