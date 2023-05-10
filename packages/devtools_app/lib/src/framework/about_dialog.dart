@@ -39,7 +39,7 @@ class DevToolsAboutDialog extends StatelessWidget {
                   style: theme.linkTextStyle,
                 ),
                 onTap: () =>
-                    releaseNotesController.toggleReleaseNotesVisible(true),
+                    unawaited(releaseNotesController.openLatestReleaseNotes()),
               ),
             ],
           ),
