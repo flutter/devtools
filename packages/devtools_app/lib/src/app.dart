@@ -336,6 +336,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
           ],
           child: NotificationsView(
             child: ReleaseNotesViewer(
+              controller: releaseNotesController,
               child: child,
             ),
           ),
