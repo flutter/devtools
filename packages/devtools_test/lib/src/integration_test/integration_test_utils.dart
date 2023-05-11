@@ -36,11 +36,11 @@ Future<void> pumpAndConnectDevTools(
   expect(find.text('No client connection'), findsNothing);
 
   // If the release notes viewer is open, close it.
-  final releaseNotesView = tester
-      .widget<SidePanelViewer>(find.byKey(SidePanelViewType.releaseNotes.key));
+  final releaseNotesView =
+      tester.widget<ReleaseNotesViewer>(find.byType(ReleaseNotesViewer));
   if (releaseNotesView.controller.isVisible.value) {
     final closeReleaseNotesButton = find.descendant(
-      of: find.byKey(SidePanelViewType.releaseNotes.key),
+      of: find.byType(ReleaseNotesViewer),
       matching: find.byType(IconButton),
     );
     expect(closeReleaseNotesButton, findsOneWidget);
