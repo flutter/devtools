@@ -344,6 +344,11 @@ class CustomPointerScrollableState extends State<CustomPointerScrollable>
   @override
   AxisDirection get axisDirection => widget.axisDirection;
 
+  @override
+  double get devicePixelRatio => _devicePixelRatio;
+  late double _devicePixelRatio;
+
+
   late ScrollBehavior _configuration;
   ScrollPhysics? _physics;
 
@@ -381,6 +386,7 @@ class CustomPointerScrollableState extends State<CustomPointerScrollable>
 
   @override
   void didChangeDependencies() {
+    _devicePixelRatio = MediaQuery.maybeDevicePixelRatioOf(context) ?? View.of(context).devicePixelRatio;
     _updatePosition();
     super.didChangeDependencies();
   }
