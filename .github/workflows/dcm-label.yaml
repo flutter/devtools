@@ -1,4 +1,4 @@
-# A CI workflow to remind the contributor to add the run-dcm-workflow label.
+# A CI workflow to remind the contributor to add the 'run-dcm-workflow' label.
 
 name: DCM Label Reminder
 
