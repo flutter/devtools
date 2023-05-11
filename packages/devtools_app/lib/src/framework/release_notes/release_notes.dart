@@ -96,7 +96,7 @@ class ReleaseNotesController extends SidePanelController {
             _flutterDocsSite,
           );
 
-          markdownText.value = releaseNotesMarkdown;
+          markdown.value = releaseNotesMarkdown;
           toggleVisibility(true);
           if (server.isDevToolsServerAvailable) {
             unawaited(
@@ -121,7 +121,7 @@ class ReleaseNotesController extends SidePanelController {
     } catch (e) {
       // Fail gracefully if we cannot find release notes for the current
       // version of DevTools.
-        markdownText.value = null;
+        markdown.value = null;
         toggleVisibility(false);
       _log.warning('Warning: $e');
     }
@@ -149,7 +149,7 @@ class ReleaseNotesController extends SidePanelController {
   }
 
   Future<void> openLatestReleaseNotes() async {
-    if (markdownText.value == null) {
+    if (markdown.value == null) {
       await _fetchAndShowReleaseNotes();
     }
     toggleVisibility(true);
