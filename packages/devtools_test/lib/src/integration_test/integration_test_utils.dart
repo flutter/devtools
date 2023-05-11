@@ -37,10 +37,10 @@ Future<void> pumpAndConnectDevTools(
 
   // If the release notes viewer is open, close it.
   final releaseNotesView =
-      tester.widget<ReleaseNotes>(find.byType(ReleaseNotes));
-  if (releaseNotesView.releaseNotesController.releaseNotesVisible.value) {
+      tester.widget<ReleaseNotesViewer>(find.byType(ReleaseNotesViewer));
+  if (releaseNotesView.controller.isVisible.value) {
     final closeReleaseNotesButton = find.descendant(
-      of: find.byType(ReleaseNotes),
+      of: find.byType(ReleaseNotesViewer),
       matching: find.byType(IconButton),
     );
     expect(closeReleaseNotesButton, findsOneWidget);

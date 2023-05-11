@@ -38,8 +38,7 @@ class DevToolsAboutDialog extends StatelessWidget {
                   'release notes',
                   style: theme.linkTextStyle,
                 ),
-                onTap: () =>
-                    releaseNotesController.toggleReleaseNotesVisible(true),
+                onTap: () => releaseNotesController.toggleVisibility(true),
               ),
             ],
           ),
