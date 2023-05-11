@@ -281,18 +281,19 @@ void main() {
             computeExtent: (index) => children[index],
           ),
           childrenDelegate: SliverChildBuilderDelegate(
-                (context, index) {
-                  if (index == 0) {
-                    capturedContext = context;
-                  }
-                  return Text('${children[index]}');
-                      },
+            (context, index) {
+              if (index == 0) {
+                capturedContext = context;
+              }
+              return Text('${children[index]}');
+            },
             childCount: children.length,
           ),
         ),
       );
 
-      expect(CustomPointerScrollable.of(capturedContext)!.devicePixelRatio, 3.0);
+      expect(
+          CustomPointerScrollable.of(capturedContext)!.devicePixelRatio, 3.0);
     });
   });
 }
