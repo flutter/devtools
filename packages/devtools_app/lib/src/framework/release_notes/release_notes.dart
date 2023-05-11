@@ -121,8 +121,8 @@ class ReleaseNotesController extends SidePanelController {
     } catch (e) {
       // Fail gracefully if we cannot find release notes for the current
       // version of DevTools.
-        markdown.value = null;
-        toggleVisibility(false);
+      markdown.value = null;
+      toggleVisibility(false);
       _log.warning('Warning: $e');
     }
   }
