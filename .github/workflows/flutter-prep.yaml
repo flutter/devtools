@@ -11,20 +11,15 @@ on:
         description: 'The OS to run against, either "macos" or "ubuntu". If neither is provided, will run against both.'
         type: string
       needs-checkout-merge:
-        description: 'Whether the PR should be merged during the checkout step. Necessary for pull_request_target workflows.'
+        description: "Whether the PR should be merged during the checkout step. Necessary for pull_request_target workflows."
         type: boolean
-      requires-label:
-        description: 'Specifies the label required for the workflow to run. If not provided, the workflow will always run.'
-        type: string
-
     outputs:
       latest_flutter_candidate:
-        description: 'The latest Flutter candidate version.'
-        value: ${{ jobs.reusable-flutter-prep.outputs.latest_flutter_candidate }} 
+        description: "The latest Flutter candidate version."
+        value: ${{ jobs.reusable-flutter-prep.outputs.latest_flutter_candidate }}
 
 jobs:
   reusable-flutter-prep:
-    if: inputs.requires-label == '' || contains(github.event.pull_request.labels.*.name, inputs.requires-label) 
     name: ${{ matrix.os }} Flutter Prep
     outputs:
       latest_flutter_candidate: ${{ steps.flutter-candidate.outputs.FLUTTER_CANDIDATE }}
@@ -44,7 +39,7 @@ jobs:
         uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab
         with:
           ref: "refs/pull/${{ github.event.number }}/merge"
-  
+
       # Otherwise use the default checkout action.
       - name: Checkout DevTools (default)
         if: steps.checkout-pr-branch.outcome == 'skipped'
@@ -54,6 +49,8 @@ jobs:
         id: flutter-candidate
         run: |
           LATEST_FLUTTER_CANDIDATE=$(./tool/latest_flutter_candidate.sh)
+          # Remove this line when the latest flutter candidate is not broken.
+          LATEST_FLUTTER_CANDIDATE=b9e3aef2390b9b755c3c3cf95f7a418f9d6ada6b
           echo "FLUTTER_CANDIDATE=$LATEST_FLUTTER_CANDIDATE" >> $GITHUB_OUTPUT
 
       - name: Load Cached Flutter SDK
