@@ -293,7 +293,9 @@ void main() {
       );
 
       expect(
-          CustomPointerScrollable.of(capturedContext)!.devicePixelRatio, 3.0);
+        CustomPointerScrollable.of(capturedContext)!.devicePixelRatio,
+        3.0,
+      );
     });
   });
 }
