@@ -684,10 +684,6 @@ class CustomPointerScrollableState extends State<CustomPointerScrollable>
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<ScrollPosition>('position', position));
   }
-
-  @override
-  // TODO: implement devicePixelRatio
-  double get devicePixelRatio => throw UnimplementedError();
 }
 
 // The following classes were copied from the Flutter framework with minor
