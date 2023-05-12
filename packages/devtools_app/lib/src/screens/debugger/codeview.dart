@@ -1411,6 +1411,7 @@ class ScriptHistoryPopupMenu extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // This is a comment.
     return PopupMenuButton<ScriptRef>(
       itemBuilder: itemBuilder,
       tooltip: 'Select recent script',
