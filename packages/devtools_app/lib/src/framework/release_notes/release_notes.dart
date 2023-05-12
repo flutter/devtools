@@ -59,7 +59,9 @@ class ReleaseNotesController extends SidePanelController {
         previousVersion = SemanticVersion.parse(lastReleaseNotesShownVersion);
       }
     }
-    await _fetchAndShowReleaseNotes(versionFloor: previousVersion);
+    await _fetchAndShowReleaseNotes(
+      versionFloor: debugTestReleaseNotes ? null : previousVersion,
+    );
   }
 
   /// Fetches and shows the most recent release notes for the current DevTools
