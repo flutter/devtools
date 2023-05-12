@@ -49,6 +49,7 @@ jobs:
         id: flutter-candidate
         run: |
           LATEST_FLUTTER_CANDIDATE=$(./tool/latest_flutter_candidate.sh)
+          # Remove this line when the latest flutter candidate is not broken.
           LATEST_FLUTTER_CANDIDATE=b9e3aef2390b9b755c3c3cf95f7a418f9d6ada6b
           echo "FLUTTER_CANDIDATE=$LATEST_FLUTTER_CANDIDATE" >> $GITHUB_OUTPUT
 
