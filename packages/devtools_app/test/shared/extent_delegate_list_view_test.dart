@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 @TestOn('vm')
+import 'package:devtools_app/src/shared/primitives/custom_pointer_scroll_view.dart';
 import 'package:devtools_app/src/shared/primitives/extent_delegate_list.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/widgets.dart';
@@ -267,6 +268,32 @@ void main() {
         error.message,
         'No ScrollController has been provided to the CustomPointerScrollView.',
       );
+    });
+
+    testWidgets('implements devicePixelRatio', (tester) async {
+      late final BuildContext capturedContext;
+      await wrapAndPump(
+        tester,
+        ExtentDelegateListView(
+          controller: ScrollController(),
+          extentDelegate: FixedExtentDelegate(
+            computeLength: () => children.length,
+            computeExtent: (index) => children[index],
+          ),
+          childrenDelegate: SliverChildBuilderDelegate(
+            (context, index) {
+              if (index == 0) {
+                capturedContext = context;
+              }
+              return Text('${children[index]}');
+            },
+            childCount: children.length,
+          ),
+        ),
+      );
+
+      expect(
+          CustomPointerScrollable.of(capturedContext)!.devicePixelRatio, 3.0);
     });
   });
 }
