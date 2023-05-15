@@ -266,7 +266,8 @@ void main() {
                 InstanceDetails.number(
                   '0',
                   instanceRefId: '0',
-                  setter: (value) async {},
+                  // ignore: avoid-redundant-async, false positive.
+                  setter: (_) async {},
                 ),
               ),
             ),
