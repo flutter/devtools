@@ -106,9 +106,6 @@ jobs:
 
           # Change github credentials back to the actions bot.
           GH_TOKEN="$ORIGINAL_GH_TOKEN"
-          sleep 60
-          gh pr edit $PR_URL $FLAGS --add-label "release-notes-not-required"
-          sleep 60
           gh pr edit $PR_URL $FLAGS --add-label "autosubmit"
 
         env:
