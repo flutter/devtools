@@ -104,10 +104,10 @@ jobs:
 
           PR_URL=$(gh pr create \
             --title "$COMMIT_MESSAGE" \
-            --body "Automated Version Bump" $CREATION_FLAGS) \
+            --body "Automated Version Bump" $CREATION_FLAGS \
             --label "autosubmit" \
             --label "release-notes-not-required" \
-            --label "run-dcm-workflow"
+            --label "run-dcm-workflow")
 
         env:
           COMMIT_MESSAGE: ${{ steps.version-bump.outputs.COMMIT_MESSAGE }}
