@@ -102,12 +102,7 @@ jobs:
             CREATION_FLAGS="--draft"
           fi
 
-          PR_URL=$(gh pr create --title "$COMMIT_MESSAGE" --body "Automated Version Bump" $CREATION_FLAGS) 
-
-          # Change github credentials back to the actions bot.
-          GH_TOKEN="$ORIGINAL_GH_TOKEN"
-
-          gh pr edit $PR_URL $FLAGS --add-label "autosubmit,release-notes-not-required"
+          PR_URL=$(gh pr create --title "$COMMIT_MESSAGE" --body "Automated Version Bump" $CREATION_FLAGS) --label "autosubmit,release-notes-not-required,run-dcm-workflow"
 
         env:
           COMMIT_MESSAGE: ${{ steps.version-bump.outputs.COMMIT_MESSAGE }}
