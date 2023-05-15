@@ -106,6 +106,7 @@ jobs:
 
           # Change github credentials back to the actions bot.
           GH_TOKEN="$ORIGINAL_GH_TOKEN"
+
           gh pr edit $PR_URL $FLAGS --add-label "autosubmit"
 
         env:
