@@ -50,11 +50,9 @@ class DeviceDialog extends StatelessWidget {
               child: Row(
                 children: [
                   Text('${entry.title}: ', style: boldText),
-                  Flexible(
-                    child: SelectableText(
-                      entry.description,
-                      style: theme.subtleTextStyle,
-                    ),
+                  SelectableText(
+                    entry.description,
+                    style: theme.subtleTextStyle,
                   ),
                   if (entry.actions.isNotEmpty) ...entry.actions,
                 ],
