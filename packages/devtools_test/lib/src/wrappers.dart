@@ -49,17 +49,6 @@ Widget wrap(Widget widget) {
   );
 }
 
-Widget wrapWithAnalytics(
-  Widget widget, {
-  AnalyticsController? controller,
-}) {
-  controller ??= AnalyticsController(enabled: false, firstRun: false);
-  return Provider<AnalyticsController>.value(
-    value: controller,
-    child: widget,
-  );
-}
-
 Widget wrapWithControllers(
   Widget widget, {
   InspectorController? inspector,

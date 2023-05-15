@@ -665,7 +665,7 @@ class CpuProfilerController extends DisposableController
     Filter<CpuStackFrame>? filter,
   }) {
     filter ??= activeFilter.value;
-    final filterCallback = (CpuStackFrame stackFrame) {
+    bool filterCallback(CpuStackFrame stackFrame) {
       for (final toggleFilter in filter!.toggleFilters) {
         if (toggleFilter.enabled.value &&
             !toggleFilter.includeCallback(stackFrame)) {
@@ -698,7 +698,8 @@ class CpuProfilerController extends DisposableController
       }
 
       return true;
-    };
+    }
+
     return CpuProfilePair.filterFrom(originalData, filterCallback);
   }
 }

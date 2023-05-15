@@ -80,7 +80,7 @@ class MessageColumn extends ColumnData<LogData>
           ),
         ],
       );
-    } else
+    } else {
       return RichText(
         text: TextSpan(
           children: processAnsiTerminalCodes(
@@ -93,5 +93,6 @@ class MessageColumn extends ColumnData<LogData>
         overflow: TextOverflow.ellipsis,
         maxLines: 1,
       );
+    }
   }
 }

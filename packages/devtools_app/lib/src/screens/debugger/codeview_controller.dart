@@ -30,8 +30,9 @@ class CodeViewController extends DisposableController
   CodeViewController() {
     _scriptHistoryListener = () {
       final currentScriptValue = scriptsHistory.current.value;
-      if (currentScriptValue != null)
+      if (currentScriptValue != null) {
         _showScriptLocation(ScriptLocation(currentScriptValue));
+      }
     };
     scriptsHistory.current.addListener(_scriptHistoryListener);
   }
@@ -335,7 +336,8 @@ class CodeViewController extends DisposableController
   }
 
   void toggleSearchInFileVisibility(bool visible) {
-    _showSearchInFileField.value = visible;
+    final fileExists = _currentScriptRef.value != null;
+    _showSearchInFileField.value = visible && fileExists;
     if (!visible) {
       resetSearch();
     }

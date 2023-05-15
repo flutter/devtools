@@ -14,7 +14,7 @@ import '../shared/globals.dart';
 import '../shared/theme.dart';
 
 class ReportFeedbackButton extends StatelessWidget {
-  const ReportFeedbackButton();
+  const ReportFeedbackButton({super.key});
 
   @override
   Widget build(BuildContext context) {

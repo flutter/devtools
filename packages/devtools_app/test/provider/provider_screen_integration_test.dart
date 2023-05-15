@@ -789,7 +789,7 @@ void main() {
           final container = ProviderContainer();
           addTearDown(container.dispose);
 
-          final _countSub = container.listen(
+          final countSub = container.listen(
             instanceProvider(
               const InstancePath.fromProviderId(
                 '0',
@@ -806,7 +806,7 @@ void main() {
           );
 
           await expectLater(
-            _countSub.read(),
+            countSub.read(),
             completion(
               isA<NumInstance>()
                   .having((e) => e.displayString, 'displayString', '0'),
@@ -819,7 +819,7 @@ void main() {
           );
 
           await expectLater(
-            _countSub.read(),
+            countSub.read(),
             completion(
               isA<NumInstance>()
                   .having((e) => e.displayString, 'displayString', '1'),

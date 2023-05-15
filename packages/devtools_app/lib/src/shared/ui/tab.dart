@@ -102,7 +102,7 @@ class AnalyticsTabbedView<T> extends StatefulWidget {
   final void Function(int)? onTabChanged;
 
   @override
-  _AnalyticsTabbedViewState createState() => _AnalyticsTabbedViewState();
+  State<AnalyticsTabbedView> createState() => _AnalyticsTabbedViewState();
 }
 
 class _AnalyticsTabbedViewState extends State<AnalyticsTabbedView>

@@ -13,6 +13,7 @@ import '../../profiler_screen_controller.dart';
 
 class ProfilerScreenControls extends StatelessWidget {
   const ProfilerScreenControls({
+    super.key,
     required this.controller,
     required this.recording,
     required this.processing,

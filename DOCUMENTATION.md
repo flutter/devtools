@@ -28,5 +28,5 @@ Create an [new issue](https://github.com/flutter/website/issues/new) on the flut
 - Add the `devtools-request` label.
 - Add relevant information to the issue description. This may include
 a Go Link to your demo video or doc, a screenshot, a short description,
-or any other relvant context that our tech writers may need to fulfill
+or any other relevant context that our tech writers may need to fulfill
 your request.

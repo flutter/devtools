@@ -297,10 +297,10 @@ abstract class _TestApp with IOMixin {
   String _debugPrint(String msg) {
     const maxLength = 500;
     final truncatedMsg =
-        msg.length > maxLength ? msg.substring(0, maxLength) + '...' : msg;
+        msg.length > maxLength ? '${msg.substring(0, maxLength)}...' : msg;
     _allMessages.add(truncatedMsg);
     if (_printDebugOutputToStdOut) {
-      print('$truncatedMsg');
+      print(truncatedMsg);
     }
     return msg;
   }

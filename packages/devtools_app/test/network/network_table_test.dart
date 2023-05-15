@@ -52,7 +52,7 @@ void main() {
       requests = networkRequests.requests;
     });
 
-    DartIOHttpRequestData _findRequestById(String id) {
+    DartIOHttpRequestData findRequestById(String id) {
       return requests
           .whereType<DartIOHttpRequestData>()
           .cast<DartIOHttpRequestData>()
@@ -75,33 +75,33 @@ void main() {
 
     test('StatusColumn for http request', () {
       final column = StatusColumn();
-      final getRequest = _findRequestById('1');
+      final getRequest = findRequestById('1');
       expect(column.getDisplayValue(getRequest), httpGet.status);
 
-      final pendingRequest = _findRequestById('7');
+      final pendingRequest = findRequestById('7');
       expect(column.getDisplayValue(pendingRequest), '--');
     });
 
     test('TypeColumn for http request', () {
       final column = TypeColumn();
-      final getRequest = _findRequestById('1');
+      final getRequest = findRequestById('1');
 
       expect(column.getDisplayValue(getRequest), 'json');
     });
 
     test('DurationColumn for http request', () {
       final column = DurationColumn();
-      final getRequest = _findRequestById('1');
+      final getRequest = findRequestById('1');
 
       expect(column.getDisplayValue(getRequest), '811 ms');
 
-      final pendingRequest = _findRequestById('7');
+      final pendingRequest = findRequestById('7');
       expect(column.getDisplayValue(pendingRequest), 'Pending');
     });
 
     test('TimestampColumn', () {
       final column = TimestampColumn();
-      final getRequest = _findRequestById('1');
+      final getRequest = findRequestById('1');
 
       // The hours field may be unreliable since it depends on the timezone the
       // test is running in.

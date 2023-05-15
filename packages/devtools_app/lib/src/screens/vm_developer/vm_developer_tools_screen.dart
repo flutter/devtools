@@ -59,7 +59,7 @@ class VMDeveloperToolsScreen extends Screen {
 }
 
 class VMDeveloperToolsScreenBody extends StatefulWidget {
-  const VMDeveloperToolsScreenBody();
+  const VMDeveloperToolsScreenBody({super.key});
 
   static List<VMDeveloperView> views = [
     const VMStatisticsView(),
@@ -68,7 +68,8 @@ class VMDeveloperToolsScreenBody extends StatefulWidget {
   ];
 
   @override
-  _VMDeveloperToolsScreenState createState() => _VMDeveloperToolsScreenState();
+  State<VMDeveloperToolsScreenBody> createState() =>
+      _VMDeveloperToolsScreenState();
 }
 
 class _VMDeveloperToolsScreenState extends State<VMDeveloperToolsScreenBody>

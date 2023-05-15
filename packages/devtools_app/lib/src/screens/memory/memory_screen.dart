@@ -50,7 +50,7 @@ class MemoryScreen extends Screen {
 }
 
 class MemoryBody extends StatefulWidget {
-  const MemoryBody();
+  const MemoryBody({super.key});
 
   @override
   MemoryBodyState createState() => MemoryBodyState();

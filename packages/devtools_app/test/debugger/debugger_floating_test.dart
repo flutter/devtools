@@ -36,7 +36,7 @@ void main() {
   Future<void> pumpControls(WidgetTester tester) async {
     await tester.pumpWidget(
       wrapWithControllers(
-        FloatingDebuggerControls(),
+        const FloatingDebuggerControls(),
         debugger: debuggerController,
       ),
     );

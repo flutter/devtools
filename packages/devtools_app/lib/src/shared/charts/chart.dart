@@ -42,6 +42,7 @@ void drawTranslate(
 class Chart extends StatefulWidget {
   Chart(
     this.controller, {
+    super.key,
     String title = '',
   }) {
     controller.title = title;
@@ -110,7 +111,7 @@ class ChartState extends State<Chart> with AutoDisposeMixin {
               timestampIndex,
             );
           },
-          child: Container(
+          child: SizedBox(
             width: constraints.widthConstraints().maxWidth,
             height: constraints.widthConstraints().maxHeight,
             child: CustomPaint(

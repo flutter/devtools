@@ -14,12 +14,12 @@ import '../../shared/table/table_data.dart';
 import '../../shared/theme.dart';
 
 class CallGraphWithDominators extends StatefulWidget {
-  const CallGraphWithDominators({required this.callGraphRoot});
+  const CallGraphWithDominators({super.key, required this.callGraphRoot});
 
   final CallGraphNode callGraphRoot;
 
   @override
-  _CallGraphWithDominatorsState createState() =>
+  State<CallGraphWithDominators> createState() =>
       _CallGraphWithDominatorsState();
 }
 
@@ -81,12 +81,12 @@ class _CallGraphWithDominatorsState extends State<CallGraphWithDominators> {
 }
 
 class CallGraphView extends StatefulWidget {
-  const CallGraphView({required this.node});
+  const CallGraphView({super.key, required this.node});
 
   final CallGraphNode node;
 
   @override
-  _CallGraphViewState createState() => _CallGraphViewState();
+  State<CallGraphView> createState() => _CallGraphViewState();
 }
 
 class _CallGraphViewState extends State<CallGraphView> {
@@ -259,6 +259,7 @@ class ToColumn extends ColumnData<CallGraphNode> {
 
 class DominatorTree extends StatelessWidget {
   DominatorTree({
+    super.key,
     required this.dominatorTreeRoot,
     required this.selectedNode,
   });

@@ -22,6 +22,7 @@ final _fileNamesCache = <String, String>{};
 
 class FileSearchField extends StatefulWidget {
   const FileSearchField({
+    super.key,
     required this.codeViewController,
   });
 

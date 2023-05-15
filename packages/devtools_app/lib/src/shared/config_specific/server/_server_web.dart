@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:convert';
 // TODO(jacobr): this should use package:http instead of dart:html.
+// ignore: avoid_web_libraries_in_flutter, as designed
 import 'dart:html';
 
 import 'package:devtools_shared/devtools_shared.dart';
@@ -102,7 +103,7 @@ Future<bool> _isFlutterGAEnabled() async {
       // A return value of 'null' implies Flutter tool has never been run so
       // return false for Flutter GA enabled.
       final responseValue = json.decode(resp!.responseText!);
-      enabled = responseValue == null ? false : responseValue;
+      enabled = responseValue ?? false;
     } else {
       logWarning(resp, apiGetFlutterGAEnabled);
     }
