@@ -102,7 +102,12 @@ jobs:
             CREATION_FLAGS="--draft"
           fi
 
-          PR_URL=$(gh pr create --title "$COMMIT_MESSAGE" --body "Automated Version Bump" $CREATION_FLAGS) --label "autosubmit,release-notes-not-required,run-dcm-workflow"
+          PR_URL=$(gh pr create \
+            --title "$COMMIT_MESSAGE" \
+            --body "Automated Version Bump" $CREATION_FLAGS) \
+            --label "autosubmit" \
+            --label "release-notes-not-required" \
+            --label "run-dcm-workflow"
 
         env:
           COMMIT_MESSAGE: ${{ steps.version-bump.outputs.COMMIT_MESSAGE }}
