@@ -55,7 +55,9 @@ class NotificationService {
         unawaited(
           launchUrl(
             devToolsExtensionPoints
-                .issueTrackerLink(additionalInfo: errorMessage)
+                .issueTrackerLink(
+                  issueTitle: 'Reporting error: $errorMessage',
+                )
                 .url,
           ),
         );
@@ -66,6 +68,8 @@ class NotificationService {
         errorMessage,
         isError: true,
         actions: [reportErrorAction],
+        // Double the duration so that the user has time to report the error:
+        duration: NotificationMessage.defaultDuration * 2,
       ),
       allowDuplicates: false,
     );
