@@ -68,7 +68,7 @@ void main() {
     when(codeViewController.fileExplorerVisible)
         .thenReturn(ValueNotifier(true));
     debuggerController = createMockDebuggerControllerWithDefaults(
-      mockCodeViewController: codeViewController,
+      codeViewController: codeViewController,
     );
   });
 

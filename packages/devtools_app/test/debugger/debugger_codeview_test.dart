@@ -33,7 +33,7 @@ void main() {
     );
     codeViewController = createMockCodeViewControllerWithDefaults();
     debuggerController = createMockDebuggerControllerWithDefaults(
-      mockCodeViewController: codeViewController,
+      codeViewController: codeViewController,
     );
     scriptsHistory = ScriptsHistory();
     mockConnectedApp(
