@@ -353,6 +353,7 @@ class NetworkRequestsTable extends StatelessWidget {
         onItemSelected: (item) {
           if (item is DartIOHttpRequestData) {
             unawaited(item.getFullRequestData());
+            networkController.resetDropDown();
           }
         },
       ),

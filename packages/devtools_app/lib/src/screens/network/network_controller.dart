@@ -19,6 +19,31 @@ import 'network_model.dart';
 import 'network_screen.dart';
 import 'network_service.dart';
 
+/// Different types of Network Response which can be used to visualise response
+/// on Response tab
+enum NetworkResponseType {
+  auto,
+  text,
+  json;
+
+  factory NetworkResponseType.fromString(String str) {
+    return switch (str) {
+      'Text' => NetworkResponseType.text,
+      'Json' => NetworkResponseType.json,
+      _ => NetworkResponseType.auto
+    };
+  }
+
+  @override
+  String toString() {
+    return switch (this) {
+      NetworkResponseType.json => 'Json',
+      NetworkResponseType.text => 'Text',
+      _ => 'Auto',
+    };
+  }
+}
+
 class NetworkController extends DisposableController
     with
         SearchControllerMixin<NetworkRequest>,
@@ -49,6 +74,22 @@ class NetworkController extends DisposableController
   ValueListenable<NetworkRequests> get requests => _requests;
 
   final _requests = ValueNotifier<NetworkRequests>(NetworkRequests());
+
+  /// Notifies that current response type has been changed
+  ValueListenable<NetworkResponseType> get currentResponseViewType =>
+      _currentResponseViewType;
+
+  final _currentResponseViewType =
+      ValueNotifier<NetworkResponseType>(NetworkResponseType.auto);
+
+  /// Change current response type
+  set setResponseViewType(String type) =>
+      _currentResponseViewType.value = NetworkResponseType.fromString(type);
+
+  /// Reset drop down to initial state when current network request is changed
+  void resetDropDown() {
+    _currentResponseViewType.value = NetworkResponseType.auto;
+  }
 
   final selectedRequest = ValueNotifier<NetworkRequest?>(null);
   late CurrentNetworkRequests _currentNetworkRequests;

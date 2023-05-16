@@ -65,9 +65,19 @@ class NetworkRequestInspector extends StatelessWidget {
             if (data.responseBody != null)
               _buildTab(
                 tabName: NetworkRequestInspector._responseTabTitle,
-                trailing: HttpViewTrailingCopyButton(
-                  data,
-                  (data) => data.responseBody,
+                trailing: Row(
+                  children: [
+                    HttpResponseTrailingDropDown(
+                      data,
+                      currentresponseType: controller.currentResponseViewType,
+                      onNewresponseTypeSelected: (value) =>
+                          controller.setResponseViewType = value,
+                    ),
+                    HttpViewTrailingCopyButton(
+                      data,
+                      (data) => data.responseBody,
+                    ),
+                  ],
                 ),
               ),
             if (data.hasCookies)
@@ -80,7 +90,11 @@ class NetworkRequestInspector extends StatelessWidget {
             if (data is DartIOHttpRequestData) ...[
               HttpRequestHeadersView(data),
               if (data.requestBody != null) HttpRequestView(data),
-              if (data.responseBody != null) HttpResponseView(data),
+              if (data.responseBody != null)
+                HttpResponseView(
+                  data,
+                  currentResponesNotifier: controller.currentResponseViewType,
+                ),
               if (data.hasCookies) HttpRequestCookiesView(data),
             ],
           ],

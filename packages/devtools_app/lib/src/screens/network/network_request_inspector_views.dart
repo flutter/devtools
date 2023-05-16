@@ -2,6 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// ignore_for_file: sort_constructors_first
+
+import 'dart:convert';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image/image.dart' as image;
 
@@ -12,6 +17,7 @@ import '../../shared/primitives/utils.dart';
 import '../../shared/table/table.dart';
 import '../../shared/theme.dart';
 import '../../shared/ui/colors.dart';
+import 'network_controller.dart';
 import 'network_model.dart';
 
 // Approximately double the indent of the expandable tile's title.
@@ -201,10 +207,122 @@ class HttpViewTrailingCopyButton extends StatelessWidget {
   }
 }
 
+/// A DropDownButton for selecting [NetworkResponseType].
+///
+/// If there is no content to visualise, the drop down will not show. Drop down
+/// values will update as the request's data is updated.
+class HttpResponseTrailingDropDown extends StatefulWidget {
+  const HttpResponseTrailingDropDown(
+    this.data, {
+    super.key,
+    required this.currentresponseType,
+    required this.onNewresponseTypeSelected,
+  });
+  final ValueListenable<NetworkResponseType> currentresponseType;
+  final DartIOHttpRequestData data;
+  final ValueChanged<String> onNewresponseTypeSelected;
+
+  @override
+  State<HttpResponseTrailingDropDown> createState() =>
+      _HttpResponseTrailingDropDownState();
+}
+
+class _HttpResponseTrailingDropDownState
+    extends State<HttpResponseTrailingDropDown> {
+  List<NetworkResponseType> availableResponseTypes = List.empty(growable: true);
+  bool visible = true;
+
+  @override
+  void initState() {
+    super.initState();
+    initialise();
+  }
+
+  @override
+  void didUpdateWidget(covariant HttpResponseTrailingDropDown oldWidget) {
+    initialise();
+    super.didUpdateWidget(oldWidget);
+  }
+
+  void initialise() {
+    availableResponseTypes.clear();
+    visible = true;
+    if ((widget.data.contentType != null &&
+            widget.data.contentType!.contains('image')) ||
+        widget.data.responseBody!.isEmpty) {
+      visible = false;
+    }
+    if (visible) {
+      availableResponseTypes.add(NetworkResponseType.auto);
+      if (isJsonDecodable()) {
+        availableResponseTypes.add(NetworkResponseType.json);
+      }
+      availableResponseTypes.add(NetworkResponseType.text);
+    }
+  }
+
+  bool isJsonDecodable() {
+    try {
+      json.decode(widget.data.responseBody!);
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder(
+      valueListenable: widget.data.requestUpdatedNotifier,
+      builder: (_, __, ___) {
+        initialise();
+        return Visibility(
+          visible: visible,
+          replacement: const SizedBox(),
+          child: ValueListenableBuilder<NetworkResponseType>(
+            valueListenable: widget.currentresponseType,
+            builder: (_, currentType, __) {
+              return SizedBox(
+                width: 80,
+                child: DropdownButtonFormField(
+                  decoration: const InputDecoration(
+                    contentPadding: EdgeInsets.all(5),
+                    border: OutlineInputBorder(borderSide: BorderSide.none),
+                  ),
+                  value: currentType.toString(),
+                  items: availableResponseTypes
+                      .map(
+                        (e) => DropdownMenuItem(
+                          value: e.toString(),
+                          child: Text(e.toString()),
+                        ),
+                      )
+                      .toList(),
+                  onChanged: (value) {
+                    if (value == null) {
+                      return;
+                    }
+                    widget.onNewresponseTypeSelected(value);
+                  },
+                ),
+              );
+            },
+          ),
+        );
+      },
+    );
+  }
+}
+
 class HttpResponseView extends StatelessWidget {
-  const HttpResponseView(this.data, {super.key});
+  const HttpResponseView(
+    this.data, {
+    super.key,
+    required this.currentResponesNotifier,
+  });
 
   final DartIOHttpRequestData data;
+  final ValueListenable<NetworkResponseType> currentResponesNotifier;
 
   @override
   Widget build(BuildContext context) {
@@ -226,20 +344,72 @@ class HttpResponseView extends StatelessWidget {
         }
         if (contentType != null && contentType.contains('image')) {
           child = ImageResponseView(data);
-        } else if (contentType != null &&
-            contentType.contains('json') &&
-            responseBody.isNotEmpty) {
-          child = JsonViewer(encodedJson: responseBody);
         } else {
-          child = Text(
-            responseBody,
-            style: theme.fixedFontStyle,
+          child = HttpTextResponseViewer(
+            contentType: contentType,
+            responseBody: responseBody,
+            currentResponesNotifier: currentResponesNotifier,
+            textStyle: theme.fixedFontStyle,
           );
         }
         return Padding(
           padding: const EdgeInsets.all(denseSpacing),
           child: SingleChildScrollView(child: child),
         );
+      },
+    );
+  }
+}
+
+class HttpTextResponseViewer extends StatefulWidget {
+  const HttpTextResponseViewer({
+    super.key,
+    required this.contentType,
+    required this.responseBody,
+    required this.currentResponesNotifier,
+    required this.textStyle,
+  });
+  final String? contentType;
+  final String responseBody;
+  final ValueListenable<NetworkResponseType> currentResponesNotifier;
+  final TextStyle textStyle;
+
+  @override
+  State<HttpTextResponseViewer> createState() => _HttpTextResponseViewerState();
+}
+
+class _HttpTextResponseViewerState extends State<HttpTextResponseViewer> {
+  late NetworkResponseType currentLocalResponseType;
+
+  void setCurrentLocalResponseType(NetworkResponseType type) {
+    if (type == NetworkResponseType.auto) {
+      if (widget.contentType != null &&
+          widget.contentType!.contains('json') &&
+          widget.responseBody.isNotEmpty) {
+        currentLocalResponseType = NetworkResponseType.json;
+      } else {
+        currentLocalResponseType = NetworkResponseType.text;
+      }
+      return;
+    }
+    currentLocalResponseType = type;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder(
+      valueListenable: widget.currentResponesNotifier,
+      builder: (_, currentResponseType, __) {
+        setCurrentLocalResponseType(currentResponseType);
+        return switch (currentLocalResponseType) {
+          NetworkResponseType.json =>
+            JsonViewer(encodedJson: widget.responseBody),
+          NetworkResponseType.text => Text(
+              widget.responseBody,
+              style: widget.textStyle,
+            ),
+          _ => const SizedBox()
+        };
       },
     );
   }
