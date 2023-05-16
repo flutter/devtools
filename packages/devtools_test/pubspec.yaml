@@ -12,7 +12,7 @@ version: 2.24.0-dev.13
 repository: https://github.com/flutter/devtools/tree/master/packages/devtools_test
 
 environment:
-  sdk: '>=3.0.0-417.0.dev <4.0.0'
+  sdk: '>=3.0.0'
   flutter: '>=3.0.0'
 
 dependencies:
