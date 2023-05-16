@@ -50,7 +50,7 @@ void main() {
   }
 
   setUpAll(() {
-    initializeGlobalsAndMockApp(); 
+    initializeGlobalsAndMockApp();
     codeViewController = CodeViewController();
     mockDebuggerController = createMockDebuggerControllerWithDefaults(
       codeViewController: codeViewController,
@@ -68,7 +68,7 @@ void main() {
       (WidgetTester tester) async {
         await pumpDebuggerScreen(tester, mockDebuggerController);
 
-        await codeViewController.showScriptLocation(
+        codeViewController.showScriptLocation(
           ScriptLocation(
             mockScriptRef,
             location: const SourcePosition(line: 1, column: 1),
@@ -94,7 +94,7 @@ void main() {
       (WidgetTester tester) async {
         await pumpDebuggerScreen(tester, mockDebuggerController);
 
-        await codeViewController.showScriptLocation(
+        codeViewController.showScriptLocation(
           ScriptLocation(
             mockScriptRef,
             location: const SourcePosition(line: 1, column: 1),
@@ -123,7 +123,7 @@ void main() {
       (WidgetTester tester) async {
         await pumpDebuggerScreen(tester, mockDebuggerController);
 
-        await codeViewController.showScriptLocation(
+        codeViewController.showScriptLocation(
           ScriptLocation(
             mockLargeScriptRef,
             location: const SourcePosition(line: 1, column: 1),
@@ -145,7 +145,7 @@ void main() {
       (WidgetTester tester) async {
         await pumpDebuggerScreen(tester, mockDebuggerController);
 
-        await codeViewController.showScriptLocation(
+        codeViewController.showScriptLocation(
           ScriptLocation(
             mockLargeScriptRef,
             location: const SourcePosition(line: 1, column: 1),
