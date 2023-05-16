@@ -629,8 +629,13 @@ final Script? mockScript = Script.parse(
 );
 
 final mockScriptRef = ScriptRef(
-  uri: 'libraries/@783137924/scripts/package%3Agallery%2Fmain.dart/17b557e5bc3',
+  uri: 'package:gallery/main.dart',
   id: 'test-script-long-lines',
+);
+
+final mockLargeScriptRef = ScriptRef(
+  uri: 'package:front_end/src/fasta/kernel/body_builder.dart',
+  id: 'test-large-script',
 );
 
 final mockSyntaxHighlighter = SyntaxHighlighter.withGrammar(
