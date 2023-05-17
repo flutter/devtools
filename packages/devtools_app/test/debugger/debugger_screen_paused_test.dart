@@ -125,12 +125,12 @@ void main() {
 
       // The first stack frame is visible:
       final firstStackFrame =
-          findStackFrameWithText('firstCodeRef 17b557e5bc3:1');
+          findStackFrameWithText('firstCodeRef main.dart:1');
       expect(firstStackFrame, findsOneWidget);
 
       // The second stack frame is visible:
       final secondStackFrame =
-          findStackFrameWithText('secondCodeRef 17b557e5bc3:85');
+          findStackFrameWithText('secondCodeRef main.dart:85');
       expect(secondStackFrame, findsOneWidget);
 
       // The first stack frame's line is visible:
@@ -187,3 +187,13 @@ final _stackFrame2 = StackFrameAndSourcePosition(
   ),
   position: const SourcePosition(line: _stackFrame2Line, column: 1),
 );
+
+void expectFirstNLinesContain(List<String> stringMatches) {
+  final lines = find.byType(LineItem);
+  expect(lines, findsAtLeastNWidgets(stringMatches.length));
+  for (int i = 0; i < stringMatches.length; i++) {
+    final stringMatch = stringMatches[i];
+    final line = getWidgetFromFinder<LineItem>(lines.at(i));
+    expect(line.lineContents.toPlainText(), contains(stringMatch));
+  }
+}
