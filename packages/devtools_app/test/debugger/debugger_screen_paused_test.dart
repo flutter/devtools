@@ -188,12 +188,3 @@ final _stackFrame2 = StackFrameAndSourcePosition(
   position: const SourcePosition(line: _stackFrame2Line, column: 1),
 );
 
-void expectFirstNLinesContain(List<String> stringMatches) {
-  final lines = find.byType(LineItem);
-  expect(lines, findsAtLeastNWidgets(stringMatches.length));
-  for (int i = 0; i < stringMatches.length; i++) {
-    final stringMatch = stringMatches[i];
-    final line = getWidgetFromFinder<LineItem>(lines.at(i));
-    expect(line.lineContents.toPlainText(), contains(stringMatch));
-  }
-}
