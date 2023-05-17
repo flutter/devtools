@@ -78,6 +78,14 @@ void main() {
     (WidgetTester tester) async {
       await pumpDebuggerScreen(tester, debuggerController);
 
+      codeViewController.showScriptLocation(
+        ScriptLocation(
+          mockScriptRef,
+          location: const SourcePosition(line: 50, column: 50),
+        ),
+      );
+      await tester.pumpAndSettle();
+
       expect(find.byType(Scrollbar), findsNWidgets(2));
       expect(
         find.byKey(const Key('debuggerCodeViewVerticalScrollbarKey')),
