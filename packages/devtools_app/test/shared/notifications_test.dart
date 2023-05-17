@@ -59,7 +59,7 @@ void main() {
     testWidgets('notifications can be dismissed', (WidgetTester tester) async {
       const notification = 'This is a notification!';
       await showNotification(
-        () => notificationService.push(notification, isDismissable: true),
+        () => notificationService.push(notification, isDismissible: true),
         tester: tester,
       );
 

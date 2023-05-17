@@ -17,7 +17,7 @@ class NotificationMessage {
     this.actions = const [],
     this.duration = defaultDuration,
     this.isError = false,
-    this.isDismissable = false,
+    this.isDismissible = false,
   });
 
   /// The default duration for notifications to show.
@@ -27,7 +27,7 @@ class NotificationMessage {
   final List<Widget> actions;
   final Duration duration;
   final bool isError;
-  final bool isDismissable;
+  final bool isDismissible;
 }
 
 /// Collects tasks to show or dismiss notifications in UI.
@@ -45,15 +45,15 @@ class NotificationService {
 
   /// Pushes a notification [message].
   ///
-  /// Includes a button to close the notification if [isDismissable] is true.
+  /// Includes a button to close the notification if [isDismissible] is true.
   bool push(
     String message, {
-    isDismissable = false,
+    isDismissible = false,
   }) =>
       pushNotification(
         NotificationMessage(
           message,
-          isDismissable: isDismissable,
+          isDismissible: isDismissible,
         ),
       );
 
@@ -61,10 +61,10 @@ class NotificationService {
   ///
   /// Includes an action to report the error by opening the link to our issue
   /// tracker if [isReportable] is true. Includes a button to close the error if
-  /// [isDismissable] is true.
+  /// [isDismissible] is true.
   bool pushError(
     String errorMessage, {
-    isDismissable = true,
+    isDismissible = true,
     isReportable = true,
   }) {
     final reportErrorAction = NotificationAction(
@@ -85,7 +85,7 @@ class NotificationService {
       NotificationMessage(
         errorMessage,
         isError: true,
-        isDismissable: isDismissable,
+        isDismissible: isDismissible,
         actions: [if (isReportable) reportErrorAction],
         // Double the duration so that the user has time to report the error:
         duration: isReportable
