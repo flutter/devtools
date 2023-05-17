@@ -187,4 +187,3 @@ final _stackFrame2 = StackFrameAndSourcePosition(
   ),
   position: const SourcePosition(line: _stackFrame2Line, column: 1),
 );
-

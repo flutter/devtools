@@ -214,8 +214,7 @@ final Script? mockScript = _loadScript('script.json');
 final Script? mockLargeScript = _loadScript('large_script.json');
 
 Script? _loadScript(String scriptName) {
-  final script =
-      File('../devtools_test/lib/src/mocks/mock_data/$scriptName');
+  final script = File('../devtools_test/lib/src/mocks/mock_data/$scriptName');
   return Script.parse(jsonDecode(script.readAsStringSync()));
 }
 
