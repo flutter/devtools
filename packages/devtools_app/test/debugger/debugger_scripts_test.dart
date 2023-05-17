@@ -10,6 +10,7 @@ import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
+import 'package:vm_service/vm_service.dart';
 
 import '../test_infra/utils/test_utils.dart';
 
@@ -49,8 +50,18 @@ void main() {
     );
   }
 
-  setUpAll(() {
+  void showScript(ScriptRef scriptRef) {
+    codeViewController.showScriptLocation(
+      ScriptLocation(
+        scriptRef,
+        location: const SourcePosition(line: 1, column: 1),
+      ),
+    );
+  }
+
+  setUpAll(() async {
     initializeGlobalsAndMockApp();
+    await SyntaxHighlighter.initialize();
     codeViewController = CodeViewController();
     mockDebuggerController = createMockDebuggerControllerWithDefaults(
       codeViewController: codeViewController,
@@ -67,14 +78,7 @@ void main() {
       smallWindowSize,
       (WidgetTester tester) async {
         await pumpDebuggerScreen(tester, mockDebuggerController);
-
-        codeViewController.showScriptLocation(
-          ScriptLocation(
-            mockScriptRef,
-            location: const SourcePosition(line: 1, column: 1),
-          ),
-        );
-
+        showScript(mockScriptRef);
         await tester.pumpAndSettle();
 
         expectFirstNLinesContain(
@@ -85,7 +89,18 @@ void main() {
           ],
         );
       },
-      skip: true,
+    );
+
+    testWidgetsWithWindowSize(
+      'lines of the script are highlighted',
+      smallWindowSize,
+      (WidgetTester tester) async {
+        await pumpDebuggerScreen(tester, mockDebuggerController);
+        showScript(mockScriptRef);
+        await tester.pumpAndSettle();
+
+        expect(firstNLinesAreHighlighted(10), isTrue);
+      },
     );
 
     testWidgetsWithWindowSize(
@@ -93,14 +108,7 @@ void main() {
       smallWindowSize,
       (WidgetTester tester) async {
         await pumpDebuggerScreen(tester, mockDebuggerController);
-
-        codeViewController.showScriptLocation(
-          ScriptLocation(
-            mockScriptRef,
-            location: const SourcePosition(line: 1, column: 1),
-          ),
-        );
-
+        showScript(mockScriptRef);
         await tester.pumpAndSettle();
 
         expect(
@@ -122,14 +130,7 @@ void main() {
       smallWindowSize,
       (WidgetTester tester) async {
         await pumpDebuggerScreen(tester, mockDebuggerController);
-
-        codeViewController.showScriptLocation(
-          ScriptLocation(
-            mockLargeScriptRef,
-            location: const SourcePosition(line: 1, column: 1),
-          ),
-        );
-
+        showScript(mockLargeScriptRef);
         await tester.pumpAndSettle();
 
         expect(
@@ -144,14 +145,7 @@ void main() {
       smallWindowSize,
       (WidgetTester tester) async {
         await pumpDebuggerScreen(tester, mockDebuggerController);
-
-        codeViewController.showScriptLocation(
-          ScriptLocation(
-            mockLargeScriptRef,
-            location: const SourcePosition(line: 1, column: 1),
-          ),
-        );
-
+        showScript(mockLargeScriptRef);
         await tester.pumpAndSettle();
 
         expectFirstNLinesContain(
@@ -163,11 +157,36 @@ void main() {
         );
       },
     );
+
+    testWidgetsWithWindowSize(
+      'lines of the script are not highlighted',
+      smallWindowSize,
+      (WidgetTester tester) async {
+        await pumpDebuggerScreen(tester, mockDebuggerController);
+        showScript(mockLargeScriptRef);
+        await tester.pumpAndSettle();
+
+        expect(firstNLinesAreHighlighted(10), isFalse);
+      },
+    );
   });
+}
+
+bool firstNLinesAreHighlighted(int n) {
+  bool containsNonHighlightedLine = false;
+  final lines = find.byType(LineItem);
+  for (int i = 0; i < n; i++) {
+    final line = getWidgetFromFinder<LineItem>(lines.at(i));
+    if (line.lineContents.children == null) {
+      containsNonHighlightedLine = true;
+    }
+  }
+  return !containsNonHighlightedLine;
 }
 
 void expectFirstNLinesContain(List<String> stringMatches) {
   final lines = find.byType(LineItem);
+  expect(lines, findsAtLeastNWidgets(stringMatches.length));
   for (int i = 0; i < stringMatches.length; i++) {
     final stringMatch = stringMatches[i];
     final line = getWidgetFromFinder<LineItem>(lines.at(i));
