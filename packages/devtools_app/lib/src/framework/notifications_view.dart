@@ -255,7 +255,7 @@ class _NotificationState extends State<_Notification>
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   if (widget.message.isDismissable)
-                    _DismissAction(widget: widget, context: context),
+                    _DismissAction(widget: widget),
                   _NotificationMessage(widget: widget, context: context),
                   const SizedBox(height: defaultSpacing),
                   _NotificationActions(widget: widget),
@@ -272,11 +272,9 @@ class _NotificationState extends State<_Notification>
 class _DismissAction extends StatelessWidget {
   const _DismissAction({
     required this.widget,
-    required this.context,
   });
 
   final _Notification widget;
-  final BuildContext context;
 
   @override
   Widget build(BuildContext context) {
