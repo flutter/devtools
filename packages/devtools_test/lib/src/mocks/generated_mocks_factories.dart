@@ -103,8 +103,8 @@ MockDebuggerController createMockDebuggerControllerWithDefaults({
   dynamic codeViewController,
 }) {
   assert(
-    codeViewController is MockCodeViewController ||
-        codeViewController is CodeViewController,
+    codeViewController is MockCodeViewController? ||
+        codeViewController is CodeViewController?,
   );
   final debuggerController = MockDebuggerController();
   when(debuggerController.resuming).thenReturn(ValueNotifier(false));
