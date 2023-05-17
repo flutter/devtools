@@ -234,7 +234,10 @@ class _ConnectDialogState extends State<ConnectDialog>
       '',
       explicitUri: uri,
       errorReporter: (message, error) {
-        notificationService.push('$message $error');
+        notificationService.pushError(
+          '$message $error',
+          isReportable: false,
+        );
       },
     );
     if (connected) {
