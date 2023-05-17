@@ -75,7 +75,6 @@ class SyntaxHighlighter {
           .join('\n');
     }
     final grammar = _grammar;
-    // TODO(elliette): Split on new lines if there is no grammar.
     if (grammar == null) {
       return TextSpan(text: _processedSource);
     }
