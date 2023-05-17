@@ -4,6 +4,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_web_plugins/url_strategy.dart';
 
 import 'src/app.dart';
 import 'src/framework/app_error_handling.dart';
@@ -14,7 +15,6 @@ import 'src/shared/config_specific/framework_initialize/framework_initialize.dar
 import 'src/shared/config_specific/ide_theme/ide_theme.dart';
 import 'src/shared/config_specific/logger/logger_helpers.dart';
 import 'src/shared/config_specific/url/url.dart';
-import 'src/shared/config_specific/url_strategy/url_strategy.dart';
 import 'src/shared/feature_flags.dart';
 import 'src/shared/globals.dart';
 import 'src/shared/preferences.dart';
