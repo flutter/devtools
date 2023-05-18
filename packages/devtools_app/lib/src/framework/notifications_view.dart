@@ -254,9 +254,24 @@ class _NotificationState extends State<_Notification>
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  if (widget.message.isDismissible)
-                    _DismissAction(widget: widget),
-                  _NotificationMessage(widget: widget, context: context),
+                  widget.message.isDismissible
+                      ? Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Flexible(
+                              child: _NotificationMessage(
+                                widget: widget,
+                                context: context,
+                              ),
+                            ),
+                            _DismissAction(widget: widget),
+                          ],
+                        )
+                      : _NotificationMessage(
+                          widget: widget,
+                          context: context,
+                        ),
                   const SizedBox(height: defaultSpacing),
                   _NotificationActions(widget: widget),
                 ],
