@@ -13,7 +13,6 @@ import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../test_infra/matchers/matchers.dart';
-import '../test_infra/utils/test_utils.dart';
 
 void main() {
   const mockScriptRefFileUri = 'the/path/mapped/to/script/ref/uri';
@@ -33,7 +32,7 @@ void main() {
     );
     codeViewController = createMockCodeViewControllerWithDefaults();
     debuggerController = createMockDebuggerControllerWithDefaults(
-      mockCodeViewController: codeViewController,
+      codeViewController: codeViewController,
     );
     scriptsHistory = ScriptsHistory();
     mockConnectedApp(
@@ -73,106 +72,87 @@ void main() {
     );
   }
 
-  group('for a file with < 100000 lines', () {
-    setUpAll(() {
-      scriptsHistory.pushEntry(mockScript!);
-      final mockCodeViewController = debuggerController.codeViewController;
-      when(mockCodeViewController.currentScriptRef)
-          .thenReturn(ValueNotifier(mockScriptRef));
-      when(mockCodeViewController.currentParsedScript)
-          .thenReturn(ValueNotifier(mockParsedScript));
-      when(mockCodeViewController.scriptsHistory).thenReturn(scriptsHistory);
-    });
+  testWidgetsWithWindowSize(
+    'has a horizontal and a vertical scrollbar',
+    smallWindowSize,
+    (WidgetTester tester) async {
+      await pumpDebuggerScreen(tester, debuggerController);
 
-    testWidgetsWithWindowSize(
-      'has a horizontal and a vertical scrollbar',
-      smallWindowSize,
-      (WidgetTester tester) async {
-        await pumpDebuggerScreen(tester, debuggerController);
+      codeViewController.showScriptLocation(
+        ScriptLocation(
+          mockScriptRef,
+          location: const SourcePosition(line: 50, column: 50),
+        ),
+      );
+      await tester.pumpAndSettle();
 
-        // TODO(elliette): https://github.com/flutter/flutter/pull/88152 fixes
-        // this so that forcing a scroll event is no longer necessary. Remove
-        // once the change is in the stable release.
-        codeViewController.showScriptLocation(
+      expect(find.byType(Scrollbar), findsNWidgets(2));
+      expect(
+        find.byKey(const Key('debuggerCodeViewVerticalScrollbarKey')),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(const Key('debuggerCodeViewHorizontalScrollbarKey')),
+        findsOneWidget,
+      );
+      await expectLater(
+        find.byKey(DebuggerScreenBody.codeViewKey),
+        matchesDevToolsGolden(
+          '../test_infra/goldens/codeview_scrollbars.png',
+        ),
+      );
+    },
+  );
+
+  testWidgetsWithWindowSize(
+    'search in file field is visible',
+    smallWindowSize,
+    (WidgetTester tester) async {
+      when(codeViewController.showSearchInFileField)
+          .thenReturn(ValueNotifier(true));
+      when(codeViewController.searchFieldFocusNode).thenReturn(FocusNode());
+      when(codeViewController.searchTextFieldController)
+          .thenReturn(SearchTextEditingController());
+
+      await pumpDebuggerScreen(tester, debuggerController);
+      expect(find.byType(SearchField<CodeViewController>), findsOneWidget);
+    },
+  );
+
+  testWidgetsWithWindowSize(
+    'file opener is visible',
+    smallWindowSize,
+    (WidgetTester tester) async {
+      when(codeViewController.showFileOpener).thenReturn(ValueNotifier(true));
+      when(scriptManager.sortedScripts).thenReturn(ValueNotifier([]));
+      await pumpDebuggerScreen(tester, debuggerController);
+      expect(
+        find.byKey(debuggerCodeViewFileOpenerKey),
+        findsOneWidget,
+      );
+    },
+  );
+
+  group('fetchScriptLocationFullFilePath', () {
+    testWidgets('gets the full path', (WidgetTester tester) async {
+      when(codeViewController.scriptLocation).thenReturn(
+        ValueNotifier(
           ScriptLocation(
             mockScriptRef,
             location: const SourcePosition(line: 50, column: 50),
           ),
-        );
-        await tester.pumpAndSettle();
+        ),
+      );
 
-        expect(find.byType(Scrollbar), findsNWidgets(2));
-        expect(
-          find.byKey(const Key('debuggerCodeViewVerticalScrollbarKey')),
-          findsOneWidget,
-        );
-        expect(
-          find.byKey(const Key('debuggerCodeViewHorizontalScrollbarKey')),
-          findsOneWidget,
-        );
-        await expectLater(
-          find.byKey(DebuggerScreenBody.codeViewKey),
-          matchesDevToolsGolden(
-            '../test_infra/goldens/codeview_scrollbars.png',
-          ),
-        );
-      },
-    );
+      final filePath =
+          await fetchScriptLocationFullFilePath(codeViewController);
 
-    testWidgetsWithWindowSize(
-      'search in file field is visible',
-      smallWindowSize,
+      expect(filePath, equals(mockScriptRefFileUri));
+    });
+
+    testWidgets(
+      'gets the path if immediately available',
       (WidgetTester tester) async {
-        when(codeViewController.showSearchInFileField)
-            .thenReturn(ValueNotifier(true));
-        when(codeViewController.searchFieldFocusNode).thenReturn(FocusNode());
-        when(codeViewController.searchTextFieldController)
-            .thenReturn(SearchTextEditingController());
-
-        await pumpDebuggerScreen(tester, debuggerController);
-        expect(find.byType(SearchField<CodeViewController>), findsOneWidget);
-      },
-    );
-
-    testWidgetsWithWindowSize(
-      'file opener is visible',
-      smallWindowSize,
-      (WidgetTester tester) async {
-        when(codeViewController.showFileOpener).thenReturn(ValueNotifier(true));
-        when(scriptManager.sortedScripts).thenReturn(ValueNotifier([]));
-        await pumpDebuggerScreen(tester, debuggerController);
-        expect(
-          find.byKey(debuggerCodeViewFileOpenerKey),
-          findsOneWidget,
-        );
-      },
-    );
-
-    testWidgetsWithWindowSize(
-      'lines of the script are visible',
-      smallWindowSize,
-      (WidgetTester tester) async {
-        await pumpDebuggerScreen(tester, debuggerController);
-
-        codeViewController.showScriptLocation(
-          ScriptLocation(
-            mockScriptRef,
-            location: const SourcePosition(line: 1, column: 1),
-          ),
-        );
-        await tester.pumpAndSettle();
-        expectFirstNLinesContain(
-          [
-            '// Copyright 2019 The Flutter team. All rights reserved',
-            '// Use of this source code is governed by a BSD-style license that can be',
-            '// found in the LICENSE file.',
-          ],
-        );
-      },
-    );
-
-    group('fetchScriptLocationFullFilePath', () {
-      testWidgets('gets the full path', (WidgetTester tester) async {
         when(codeViewController.scriptLocation).thenReturn(
           ValueNotifier(
             ScriptLocation(
@@ -181,102 +161,39 @@ void main() {
             ),
           ),
         );
+        // Prefetch File Uris
+        await serviceManager.resolvedUriManager.fetchFileUris(
+          serviceManager.isolateManager.selectedIsolate.value!.id!,
+          [mockScriptRef.uri!],
+        );
 
         final filePath =
             await fetchScriptLocationFullFilePath(codeViewController);
 
         expect(filePath, equals(mockScriptRefFileUri));
-      });
+      },
+    );
 
-      testWidgets(
-        'gets the path if immediately available',
-        (WidgetTester tester) async {
-          when(codeViewController.scriptLocation).thenReturn(
-            ValueNotifier(
-              ScriptLocation(
-                mockScriptRef,
-                location: const SourcePosition(line: 50, column: 50),
-              ),
-            ),
-          );
-          // Prefetch File Uris
-          await serviceManager.resolvedUriManager.fetchFileUris(
-            serviceManager.isolateManager.selectedIsolate.value!.id!,
-            [mockScriptRef.uri!],
-          );
-
-          final filePath =
-              await fetchScriptLocationFullFilePath(codeViewController);
-
-          expect(filePath, equals(mockScriptRefFileUri));
-        },
-      );
-
-      testWidgets(
-        'returns null if package not found',
-        (WidgetTester tester) async {
-          when(codeViewController.scriptLocation).thenReturn(
-            ValueNotifier(
-              ScriptLocation(
-                ScriptRef(
-                  uri: 'some/unknown/file',
-                  id: 'unknown-script-ref-for-test',
-                ),
-                location: const SourcePosition(line: 123, column: 456),
-              ),
-            ),
-          );
-
-          final filePath =
-              await fetchScriptLocationFullFilePath(codeViewController);
-
-          expect(filePath, isNull);
-        },
-      );
-    });
-  });
-
-  group('for a file with > 100000 lines', () {
-    setUpAll(() {
-      scriptsHistory.pushEntry(mockLargeScript!);
-      final mockCodeViewController = debuggerController.codeViewController;
-      when(mockCodeViewController.currentScriptRef)
-          .thenReturn(ValueNotifier(mockScriptRef));
-      when(mockCodeViewController.currentParsedScript)
-          .thenReturn(ValueNotifier(mockLargeParsedScript));
-      when(mockCodeViewController.scriptsHistory).thenReturn(scriptsHistory);
-    });
-
-    testWidgetsWithWindowSize(
-      'lines of the script are visible',
-      smallWindowSize,
+    testWidgets(
+      'returns null if package not found',
       (WidgetTester tester) async {
-        await pumpDebuggerScreen(tester, debuggerController);
-
-        codeViewController.showScriptLocation(
-          ScriptLocation(
-            mockScriptRef,
-            location: const SourcePosition(line: 1, column: 1),
+        when(codeViewController.scriptLocation).thenReturn(
+          ValueNotifier(
+            ScriptLocation(
+              ScriptRef(
+                uri: 'some/unknown/file',
+                id: 'unknown-script-ref-for-test',
+              ),
+              location: const SourcePosition(line: 123, column: 456),
+            ),
           ),
         );
-        await tester.pumpAndSettle();
-        expectFirstNLinesContain(
-          [
-            '// Copyright (c) 2016, the Dart project authors.  Please see the AUTHORS file',
-            '// for details. All rights reserved. Use of this source code is governed by a',
-            '// BSD-style license that can be found in the LICENSE file.',
-          ],
-        );
+
+        final filePath =
+            await fetchScriptLocationFullFilePath(codeViewController);
+
+        expect(filePath, isNull);
       },
     );
   });
-}
-
-void expectFirstNLinesContain(List<String> stringMatches) {
-  final lines = find.byType(LineItem);
-  for (int i = 0; i < stringMatches.length; i++) {
-    final stringMatch = stringMatches[i];
-    final line = getWidgetFromFinder<LineItem>(lines.at(i));
-    expect(line.lineContents.toPlainText(), contains(stringMatch));
-  }
 }

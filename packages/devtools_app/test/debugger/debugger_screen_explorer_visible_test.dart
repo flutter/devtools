@@ -36,7 +36,7 @@ void main() {
     programExplorerController: mockProgramExplorerController,
   );
   final debuggerController = createMockDebuggerControllerWithDefaults(
-    mockCodeViewController: mockCodeViewController,
+    codeViewController: mockCodeViewController,
   );
   final scripts = [
     ScriptRef(uri: 'package:test/script.dart', id: 'test-script'),
