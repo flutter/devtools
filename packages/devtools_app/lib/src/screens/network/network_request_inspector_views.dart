@@ -211,7 +211,7 @@ class HttpViewTrailingCopyButton extends StatelessWidget {
 ///
 /// If there is no content to visualise, the drop down will not show. Drop down
 /// values will update as the request's data is updated.
-class HttpResponseTrailingDropDown extends StatefulWidget {
+class HttpResponseTrailingDropDown extends StatelessWidget {
   const HttpResponseTrailingDropDown(
     this.data, {
     super.key,
@@ -223,48 +223,9 @@ class HttpResponseTrailingDropDown extends StatefulWidget {
   final DartIOHttpRequestData data;
   final ValueChanged<String> onChanged;
 
-  @override
-  State<HttpResponseTrailingDropDown> createState() =>
-      _HttpResponseTrailingDropDownState();
-}
-
-class _HttpResponseTrailingDropDownState
-    extends State<HttpResponseTrailingDropDown> {
-  List<NetworkResponseType> availableResponseTypes = List.empty(growable: true);
-  bool visible = true;
-
-  @override
-  void initState() {
-    super.initState();
-    initialise();
-  }
-
-  @override
-  void didUpdateWidget(covariant HttpResponseTrailingDropDown oldWidget) {
-    initialise();
-    super.didUpdateWidget(oldWidget);
-  }
-
-  void initialise() {
-    availableResponseTypes.clear();
-    visible = true;
-    if ((widget.data.contentType != null &&
-            widget.data.contentType!.contains('image')) ||
-        widget.data.responseBody!.isEmpty) {
-      visible = false;
-    }
-    if (visible) {
-      availableResponseTypes.add(NetworkResponseType.auto);
-      if (isJsonDecodable()) {
-        availableResponseTypes.add(NetworkResponseType.json);
-      }
-      availableResponseTypes.add(NetworkResponseType.text);
-    }
-  }
-
   bool isJsonDecodable() {
     try {
-      json.decode(widget.data.responseBody!);
+      json.decode(data.responseBody!);
       return true;
     } catch (_) {
       return false;
@@ -274,14 +235,23 @@ class _HttpResponseTrailingDropDownState
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder(
-      valueListenable: widget.data.requestUpdatedNotifier,
+      valueListenable: data.requestUpdatedNotifier,
       builder: (_, __, ___) {
-        initialise();
+        final bool visible = (data.contentType != null &&
+                !data.contentType!.contains('image')) &&
+            data.responseBody!.isNotEmpty;
+
+        final List<NetworkResponseType> availableResponseTypes = [
+          NetworkResponseType.auto,
+          if (isJsonDecodable()) NetworkResponseType.json,
+          NetworkResponseType.text,
+        ];
+
         return Visibility(
           visible: visible,
           replacement: const SizedBox(),
           child: ValueListenableBuilder<NetworkResponseType>(
-            valueListenable: widget.currentResponseViewType,
+            valueListenable: currentResponseViewType,
             builder: (_, currentType, __) {
               return SizedBox(
                 width: 80,
@@ -303,7 +273,7 @@ class _HttpResponseTrailingDropDownState
                     if (value == null) {
                       return;
                     }
-                    widget.onChanged(value);
+                    onChanged(value);
                   },
                 ),
               );
