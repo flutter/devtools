@@ -115,7 +115,7 @@ class NetworkRequestInspector extends StatelessWidget {
           .map(
             (t) => (
               tab: t.tab,
-              tabView: OutlineDecoration.onlyTop(child: t.tabView)
+              tabView: OutlineDecoration.onlyTop(child: t.tabView),
             ),
           )
           .toList();
