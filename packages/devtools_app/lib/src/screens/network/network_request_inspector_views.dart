@@ -207,7 +207,7 @@ class HttpViewTrailingCopyButton extends StatelessWidget {
   }
 }
 
-/// A DropDownButton for selecting [NetworkResponseType].
+/// A DropDownButton for selecting [NetworkResponseViewType].
 ///
 /// If there is no content to visualise, the drop down will not show. Drop down
 /// values will update as the request's data is updated.
@@ -219,9 +219,9 @@ class HttpResponseTrailingDropDown extends StatelessWidget {
     required this.onChanged,
   });
 
-  final ValueListenable<NetworkResponseType> currentResponseViewType;
+  final ValueListenable<NetworkResponseViewType> currentResponseViewType;
   final DartIOHttpRequestData data;
-  final ValueChanged<NetworkResponseType> onChanged;
+  final ValueChanged<NetworkResponseViewType> onChanged;
 
   bool isJsonDecodable() {
     try {
@@ -241,19 +241,19 @@ class HttpResponseTrailingDropDown extends StatelessWidget {
                 !data.contentType!.contains('image')) &&
             data.responseBody!.isNotEmpty;
 
-        final List<NetworkResponseType> availableResponseTypes = [
-          NetworkResponseType.auto,
-          if (isJsonDecodable()) NetworkResponseType.json,
-          NetworkResponseType.text,
+        final List<NetworkResponseViewType> availableResponseTypes = [
+          NetworkResponseViewType.auto,
+          if (isJsonDecodable()) NetworkResponseViewType.json,
+          NetworkResponseViewType.text,
         ];
 
         return Visibility(
           visible: visible,
           replacement: const SizedBox(),
-          child: ValueListenableBuilder<NetworkResponseType>(
+          child: ValueListenableBuilder<NetworkResponseViewType>(
             valueListenable: currentResponseViewType,
             builder: (_, currentType, __) {
-              return RoundedDropDownButton<NetworkResponseType>(
+              return RoundedDropDownButton<NetworkResponseViewType>(
                 value: currentType,
                 items: availableResponseTypes
                     .map(
@@ -286,7 +286,7 @@ class HttpResponseView extends StatelessWidget {
   });
 
   final DartIOHttpRequestData data;
-  final ValueListenable<NetworkResponseType> currentResponseViewType;
+  final ValueListenable<NetworkResponseViewType> currentResponseViewType;
 
   @override
   Widget build(BuildContext context) {
@@ -335,7 +335,7 @@ class HttpTextResponseViewer extends StatefulWidget {
   });
   final String? contentType;
   final String responseBody;
-  final ValueListenable<NetworkResponseType> currentResponesNotifier;
+  final ValueListenable<NetworkResponseViewType> currentResponesNotifier;
   final TextStyle textStyle;
 
   @override
@@ -343,16 +343,16 @@ class HttpTextResponseViewer extends StatefulWidget {
 }
 
 class _HttpTextResponseViewerState extends State<HttpTextResponseViewer> {
-  late NetworkResponseType currentLocalResponseType;
+  late NetworkResponseViewType currentLocalResponseType;
 
-  void setCurrentLocalResponseType(NetworkResponseType type) {
-    if (type == NetworkResponseType.auto) {
+  void setCurrentLocalResponseType(NetworkResponseViewType type) {
+    if (type == NetworkResponseViewType.auto) {
       if (widget.contentType != null &&
           widget.contentType!.contains('json') &&
           widget.responseBody.isNotEmpty) {
-        currentLocalResponseType = NetworkResponseType.json;
+        currentLocalResponseType = NetworkResponseViewType.json;
       } else {
-        currentLocalResponseType = NetworkResponseType.text;
+        currentLocalResponseType = NetworkResponseViewType.text;
       }
       return;
     }
@@ -366,9 +366,9 @@ class _HttpTextResponseViewerState extends State<HttpTextResponseViewer> {
       builder: (_, currentResponseType, __) {
         setCurrentLocalResponseType(currentResponseType);
         return switch (currentLocalResponseType) {
-          NetworkResponseType.json =>
+          NetworkResponseViewType.json =>
             JsonViewer(encodedJson: widget.responseBody),
-          NetworkResponseType.text => Text(
+          NetworkResponseViewType.text => Text(
               widget.responseBody,
               style: widget.textStyle,
             ),
