@@ -221,7 +221,7 @@ class HttpResponseTrailingDropDown extends StatelessWidget {
 
   final ValueListenable<NetworkResponseType> currentResponseViewType;
   final DartIOHttpRequestData data;
-  final ValueChanged<String> onChanged;
+  final ValueChanged<NetworkResponseType> onChanged;
 
   bool isJsonDecodable() {
     try {
@@ -253,29 +253,22 @@ class HttpResponseTrailingDropDown extends StatelessWidget {
           child: ValueListenableBuilder<NetworkResponseType>(
             valueListenable: currentResponseViewType,
             builder: (_, currentType, __) {
-              return SizedBox(
-                width: 80,
-                child: DropdownButtonFormField(
-                  decoration: const InputDecoration(
-                    contentPadding: EdgeInsets.all(5),
-                    border: OutlineInputBorder(borderSide: BorderSide.none),
-                  ),
-                  value: currentType.toString(),
-                  items: availableResponseTypes
-                      .map(
-                        (e) => DropdownMenuItem(
-                          value: e.toString(),
-                          child: Text(e.toString()),
-                        ),
-                      )
-                      .toList(),
-                  onChanged: (value) {
-                    if (value == null) {
-                      return;
-                    }
-                    onChanged(value);
-                  },
-                ),
+              return RoundedDropDownButton<NetworkResponseType>(
+                value: currentType,
+                items: availableResponseTypes
+                    .map(
+                      (e) => DropdownMenuItem(
+                        value: e,
+                        child: Text(e.toString()),
+                      ),
+                    )
+                    .toList(),
+                onChanged: (value) {
+                  if (value == null) {
+                    return;
+                  }
+                  onChanged(value);
+                },
               );
             },
           ),

@@ -83,8 +83,8 @@ class NetworkController extends DisposableController
       ValueNotifier<NetworkResponseType>(NetworkResponseType.auto);
 
   /// Change current response type
-  set setResponseViewType(String type) =>
-      _currentResponseViewType.value = NetworkResponseType.fromString(type);
+  set setResponseViewType(NetworkResponseType type) =>
+      _currentResponseViewType.value = type;
 
   /// Reset drop down to initial state when current network request is changed
   void resetDropDown() {
