@@ -323,7 +323,7 @@ class HttpResponseView extends StatelessWidget {
   }
 }
 
-class HttpTextResponseViewer extends StatefulWidget {
+class HttpTextResponseViewer extends StatelessWidget {
   const HttpTextResponseViewer({
     super.key,
     required this.contentType,
@@ -331,44 +331,40 @@ class HttpTextResponseViewer extends StatefulWidget {
     required this.currentResponesNotifier,
     required this.textStyle,
   });
+
   final String? contentType;
   final String responseBody;
   final ValueListenable<NetworkResponseViewType> currentResponesNotifier;
   final TextStyle textStyle;
 
   @override
-  State<HttpTextResponseViewer> createState() => _HttpTextResponseViewerState();
-}
-
-class _HttpTextResponseViewerState extends State<HttpTextResponseViewer> {
-  late NetworkResponseViewType currentLocalResponseType;
-
-  void setCurrentLocalResponseType(NetworkResponseViewType type) {
-    if (type == NetworkResponseViewType.auto) {
-      if (widget.contentType != null &&
-          widget.contentType!.contains('json') &&
-          widget.responseBody.isNotEmpty) {
-        currentLocalResponseType = NetworkResponseViewType.json;
-      } else {
-        currentLocalResponseType = NetworkResponseViewType.text;
-      }
-      return;
-    }
-    currentLocalResponseType = type;
-  }
-
-  @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder(
-      valueListenable: widget.currentResponesNotifier,
+      valueListenable: currentResponesNotifier,
       builder: (_, currentResponseType, __) {
+        late final NetworkResponseViewType currentLocalResponseType;
+
+        void setCurrentLocalResponseType(NetworkResponseViewType type) {
+          if (type == NetworkResponseViewType.auto) {
+            if (contentType != null &&
+                contentType!.contains('json') &&
+                responseBody.isNotEmpty) {
+              currentLocalResponseType = NetworkResponseViewType.json;
+            } else {
+              currentLocalResponseType = NetworkResponseViewType.text;
+            }
+            return;
+          }
+          currentLocalResponseType = type;
+        }
+
         setCurrentLocalResponseType(currentResponseType);
+
         return switch (currentLocalResponseType) {
-          NetworkResponseViewType.json =>
-            JsonViewer(encodedJson: widget.responseBody),
+          NetworkResponseViewType.json => JsonViewer(encodedJson: responseBody),
           NetworkResponseViewType.text => Text(
-              widget.responseBody,
-              style: widget.textStyle,
+              responseBody,
+              style: textStyle,
             ),
           _ => const SizedBox()
         };
