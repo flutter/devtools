@@ -50,8 +50,8 @@ void main() {
     );
   }
 
-  void showScript(ScriptRef scriptRef) {
-    codeViewController.showScriptLocation(
+  Future<void> showScript(ScriptRef scriptRef) async {
+    await codeViewController.showScriptLocation(
       ScriptLocation(
         scriptRef,
         location: const SourcePosition(line: 1, column: 1),
@@ -78,7 +78,7 @@ void main() {
       smallWindowSize,
       (WidgetTester tester) async {
         await pumpDebuggerScreen(tester, mockDebuggerController);
-        showScript(mockScriptRef);
+        await showScript(mockScriptRef);
         await tester.pumpAndSettle();
 
         expectFirstNLinesContain(
@@ -96,7 +96,7 @@ void main() {
       smallWindowSize,
       (WidgetTester tester) async {
         await pumpDebuggerScreen(tester, mockDebuggerController);
-        showScript(mockScriptRef);
+        await showScript(mockScriptRef);
         await tester.pumpAndSettle();
 
         expect(firstNLinesAreHighlighted(10), isTrue);
@@ -108,7 +108,7 @@ void main() {
       smallWindowSize,
       (WidgetTester tester) async {
         await pumpDebuggerScreen(tester, mockDebuggerController);
-        showScript(mockScriptRef);
+        await showScript(mockScriptRef);
         await tester.pumpAndSettle();
 
         expect(
@@ -130,7 +130,7 @@ void main() {
       smallWindowSize,
       (WidgetTester tester) async {
         await pumpDebuggerScreen(tester, mockDebuggerController);
-        showScript(mockLargeScriptRef);
+        await showScript(mockLargeScriptRef);
         await tester.pumpAndSettle();
 
         expect(
@@ -145,7 +145,7 @@ void main() {
       smallWindowSize,
       (WidgetTester tester) async {
         await pumpDebuggerScreen(tester, mockDebuggerController);
-        showScript(mockLargeScriptRef);
+        await showScript(mockLargeScriptRef);
         await tester.pumpAndSettle();
 
         expectFirstNLinesContain(
@@ -163,10 +163,47 @@ void main() {
       smallWindowSize,
       (WidgetTester tester) async {
         await pumpDebuggerScreen(tester, mockDebuggerController);
-        showScript(mockLargeScriptRef);
+        await showScript(mockLargeScriptRef);
         await tester.pumpAndSettle();
 
         expect(firstNLinesAreHighlighted(10), isFalse);
+      },
+    );
+  });
+
+  group('when a script cannot be found', () {
+    setUpAll(() {
+      when(scriptManager.getScriptCached(mockScriptRef)).thenReturn(mockScript);
+      when(scriptManager.getScriptCached(mockLargeScriptRef)).thenReturn(null);
+      // ignore: discarded_futures, mocking the future. 
+      when(scriptManager.getScript(mockLargeScriptRef)).thenAnswer(
+        (ref) => Future.value(
+          Script(id: 'empty-script'),
+        ),
+      );
+    });
+
+    testWidgetsWithWindowSize(
+      'script name does not update',
+      smallWindowSize,
+      (WidgetTester tester) async {
+        await pumpDebuggerScreen(tester, mockDebuggerController);
+        await showScript(mockScriptRef);
+        await tester.pumpAndSettle();
+
+        expect(
+          find.text('package:gallery/main.dart'),
+          findsOneWidget,
+        );
+
+        await pumpDebuggerScreen(tester, mockDebuggerController);
+        await showScript(mockLargeScriptRef);
+        await tester.pumpAndSettle();
+
+        expect(
+          find.text('package:gallery/main.dart'),
+          findsOneWidget,
+        );
       },
     );
   });
