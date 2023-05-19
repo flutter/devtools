@@ -39,10 +39,14 @@ jobs:
     needs: flutter-prep
     runs-on: ubuntu-latest
     steps:
-      - name: Clone Flutter DevTools
+      - name: Clone Flutter DevTools for PR
+        if: ${{ github.event_name != 'push' }}
         uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab
         with:
           ref: "refs/pull/${{ github.event.number }}/merge"
+      - name: Clone Flutter DevTools
+        if: ${{ github.event_name == 'push' }}
+        uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab
       - name: Load Cached Flutter SDK
         uses: actions/cache@88522ab9f39a2ea568f7027eddc7d8d8bc9d59c8
         with:
