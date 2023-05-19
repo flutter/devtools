@@ -2,10 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:collection';
 
 import 'package:flutter/material.dart';
 
+import 'config_specific/launch_url/launch_url.dart';
+import 'globals.dart';
 import 'primitives/utils.dart';
 
 class NotificationMessage {
@@ -13,6 +16,7 @@ class NotificationMessage {
     this.text, {
     this.actions = const [],
     this.duration = defaultDuration,
+    this.isError = false,
   });
 
   /// The default duration for notifications to show.
@@ -21,6 +25,7 @@ class NotificationMessage {
   final String text;
   final List<Widget> actions;
   final Duration duration;
+  final bool isError;
 }
 
 /// Collects tasks to show or dismiss notifications in UI.
@@ -38,6 +43,37 @@ class NotificationService {
 
   /// Pushes a notification [message].
   bool push(String message) => pushNotification(NotificationMessage(message));
+
+  /// Pushes an error notification with [errorMessage] as the text.
+  ///
+  /// Includes an action to report the error by opening the link to our issue
+  /// tracker.
+  bool pushError(String errorMessage) {
+    final reportErrorAction = NotificationAction(
+      'Report error',
+      () {
+        unawaited(
+          launchUrl(
+            devToolsExtensionPoints
+                .issueTrackerLink(
+                  issueTitle: 'Reporting error: $errorMessage',
+                )
+                .url,
+          ),
+        );
+      },
+    );
+    return pushNotification(
+      NotificationMessage(
+        errorMessage,
+        isError: true,
+        actions: [reportErrorAction],
+        // Double the duration so that the user has time to report the error:
+        duration: NotificationMessage.defaultDuration * 2,
+      ),
+      allowDuplicates: false,
+    );
+  }
 
   /// Pushes a notification [message].
   ///

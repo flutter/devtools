@@ -278,9 +278,13 @@ class _NotificationMessage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final textStyle = theme.textTheme.bodyMedium;
     return Text(
       widget.message.text,
-      style: Theme.of(context).textTheme.bodyMedium,
+      style: widget.message.isError
+          ? textStyle?.copyWith(color: theme.colorScheme.error)
+          : textStyle,
       overflow: TextOverflow.visible,
       maxLines: 10,
     );

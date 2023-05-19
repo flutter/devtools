@@ -194,9 +194,7 @@ class SidePanel extends AnimatedWidget {
 }
 
 class SidePanelController {
-  ValueListenable<String?> get markdown => _markdown;
-
-  final _markdown = ValueNotifier<String?>(null);
+  final markdown = ValueNotifier<String?>(null);
 
   ValueListenable<bool> get isVisible => _isVisible;
 
@@ -204,9 +202,5 @@ class SidePanelController {
 
   void toggleVisibility(bool visible) {
     _isVisible.value = visible;
-  }
-
-  set markdownText(String? markdownText) {
-    _markdown.value = markdownText;
   }
 }
