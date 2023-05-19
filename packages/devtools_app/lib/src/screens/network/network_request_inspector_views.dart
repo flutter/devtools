@@ -215,12 +215,13 @@ class HttpResponseTrailingDropDown extends StatefulWidget {
   const HttpResponseTrailingDropDown(
     this.data, {
     super.key,
-    required this.currentresponseType,
-    required this.onNewresponseTypeSelected,
+    required this.currentResponseViewType,
+    required this.onChanged,
   });
-  final ValueListenable<NetworkResponseType> currentresponseType;
+
+  final ValueListenable<NetworkResponseType> currentResponseViewType;
   final DartIOHttpRequestData data;
-  final ValueChanged<String> onNewresponseTypeSelected;
+  final ValueChanged<String> onChanged;
 
   @override
   State<HttpResponseTrailingDropDown> createState() =>
@@ -280,7 +281,7 @@ class _HttpResponseTrailingDropDownState
           visible: visible,
           replacement: const SizedBox(),
           child: ValueListenableBuilder<NetworkResponseType>(
-            valueListenable: widget.currentresponseType,
+            valueListenable: widget.currentResponseViewType,
             builder: (_, currentType, __) {
               return SizedBox(
                 width: 80,
@@ -302,7 +303,7 @@ class _HttpResponseTrailingDropDownState
                     if (value == null) {
                       return;
                     }
-                    widget.onNewresponseTypeSelected(value);
+                    widget.onChanged(value);
                   },
                 ),
               );
@@ -318,11 +319,11 @@ class HttpResponseView extends StatelessWidget {
   const HttpResponseView(
     this.data, {
     super.key,
-    required this.currentResponesNotifier,
+    required this.currentResponseViewType,
   });
 
   final DartIOHttpRequestData data;
-  final ValueListenable<NetworkResponseType> currentResponesNotifier;
+  final ValueListenable<NetworkResponseType> currentResponseViewType;
 
   @override
   Widget build(BuildContext context) {
@@ -348,7 +349,7 @@ class HttpResponseView extends StatelessWidget {
           child = HttpTextResponseViewer(
             contentType: contentType,
             responseBody: responseBody,
-            currentResponesNotifier: currentResponesNotifier,
+            currentResponesNotifier: currentResponseViewType,
             textStyle: theme.fixedFontStyle,
           );
         }

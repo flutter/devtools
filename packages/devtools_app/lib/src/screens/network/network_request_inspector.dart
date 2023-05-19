@@ -69,8 +69,8 @@ class NetworkRequestInspector extends StatelessWidget {
                   children: [
                     HttpResponseTrailingDropDown(
                       data,
-                      currentresponseType: controller.currentResponseViewType,
-                      onNewresponseTypeSelected: (value) =>
+                      currentResponseViewType: controller.currentResponseViewType,
+                      onChanged: (value) =>
                           controller.setResponseViewType = value,
                     ),
                     HttpViewTrailingCopyButton(
@@ -93,7 +93,7 @@ class NetworkRequestInspector extends StatelessWidget {
               if (data.responseBody != null)
                 HttpResponseView(
                   data,
-                  currentResponesNotifier: controller.currentResponseViewType,
+                  currentResponseViewType: controller.currentResponseViewType,
                 ),
               if (data.hasCookies) HttpRequestCookiesView(data),
             ],
