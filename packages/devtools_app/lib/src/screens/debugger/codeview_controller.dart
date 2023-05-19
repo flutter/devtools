@@ -9,6 +9,7 @@ import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../../framework/app_error_handling.dart';
 import '../../shared/diagnostics/primitives/source_location.dart';
 import '../../shared/globals.dart';
 import '../../shared/primitives/auto_dispose.dart';
@@ -234,7 +235,11 @@ class CodeViewController extends DisposableController
       final script = await _parseScript(scriptRef);
       if (script == null) {
         // Return early and indicate failure if parsing fails.
-        // TODO(elliette): Report error.
+        reportError(
+          'Failed to parse ${scriptRef.uri}.',
+          stack: StackTrace.current,
+          notifyUser: true,
+        );
         return false;
       }
       parsedScript.value = script;
@@ -297,11 +302,11 @@ class CodeViewController extends DisposableController
   /// for syntax highlighting.
   Future<ParsedScript?> _parseScript(ScriptRef scriptRef) async {
     final script = await getScriptForRef(scriptRef);
-    if (script == null) return null;
+    if (script == null || script.source == null) return null;
 
     // Create a new SyntaxHighlighter with the script's source in preparation
     // for building the code view.
-    final highlighter = SyntaxHighlighter(source: script.source ?? '');
+    final highlighter = SyntaxHighlighter(source: script.source);
 
     // Gather the data to display breakable lines.
     var executableLines = <int>{};
