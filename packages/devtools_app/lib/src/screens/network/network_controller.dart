@@ -26,14 +26,6 @@ enum NetworkResponseType {
   text,
   json;
 
-  factory NetworkResponseType.fromString(String str) {
-    return switch (str) {
-      'Text' => NetworkResponseType.text,
-      'Json' => NetworkResponseType.json,
-      _ => NetworkResponseType.auto
-    };
-  }
-
   @override
   String toString() {
     return switch (this) {
