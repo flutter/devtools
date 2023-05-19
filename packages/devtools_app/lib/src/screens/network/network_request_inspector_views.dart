@@ -342,23 +342,17 @@ class HttpTextResponseViewer extends StatelessWidget {
     return ValueListenableBuilder(
       valueListenable: currentResponseNotifier,
       builder: (_, currentResponseType, __) {
-        late final NetworkResponseViewType currentLocalResponseType;
+        NetworkResponseViewType currentLocalResponseType = currentResponseType;
 
-        void setCurrentLocalResponseType(NetworkResponseViewType type) {
-          if (type == NetworkResponseViewType.auto) {
-            if (contentType != null &&
-                contentType!.contains('json') &&
-                responseBody.isNotEmpty) {
-              currentLocalResponseType = NetworkResponseViewType.json;
-            } else {
-              currentLocalResponseType = NetworkResponseViewType.text;
-            }
-            return;
+        if (currentResponseType == NetworkResponseViewType.auto) {
+          if (contentType != null &&
+              contentType!.contains('json') &&
+              responseBody.isNotEmpty) {
+            currentLocalResponseType = NetworkResponseViewType.json;
+          } else {
+            currentLocalResponseType = NetworkResponseViewType.text;
           }
-          currentLocalResponseType = type;
         }
-
-        setCurrentLocalResponseType(currentResponseType);
 
         return switch (currentLocalResponseType) {
           NetworkResponseViewType.json => JsonViewer(encodedJson: responseBody),
