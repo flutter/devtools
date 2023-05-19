@@ -168,6 +168,7 @@ class _NotificationOverlay extends StatelessWidget {
           child: SingleChildScrollView(
             reverse: true,
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
               mainAxisSize: MainAxisSize.min,
               children: _notifications,
             ),
@@ -254,7 +255,28 @@ class _NotificationState extends State<_Notification>
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _NotificationMessage(widget: widget, context: context),
+                  widget.message.isDismissible
+                      ? Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Flexible(
+                              child: _NotificationMessage(
+                                widget: widget,
+                                context: context,
+                              ),
+                            ),
+                            _DismissAction(
+                              onPressed: () {
+                                widget.remove(widget);
+                              },
+                            ),
+                          ],
+                        )
+                      : _NotificationMessage(
+                          widget: widget,
+                          context: context,
+                        ),
                   const SizedBox(height: defaultSpacing),
                   _NotificationActions(widget: widget),
                 ],
@@ -262,6 +284,27 @@ class _NotificationState extends State<_Notification>
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _DismissAction extends StatelessWidget {
+  const _DismissAction({
+    required this.onPressed,
+  });
+
+  final void Function() onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return Align(
+      alignment: Alignment.topRight,
+      child: IconButton(
+        icon: const Icon(
+          Icons.close,
+        ),
+        onPressed: onPressed,
       ),
     );
   }
@@ -280,13 +323,21 @@ class _NotificationMessage extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final textStyle = theme.textTheme.bodyMedium;
-    return Text(
-      widget.message.text,
-      style: widget.message.isError
-          ? textStyle?.copyWith(color: theme.colorScheme.error)
-          : textStyle,
-      overflow: TextOverflow.visible,
-      maxLines: 10,
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+        denseSpacing,
+        denseSpacing,
+        denseSpacing,
+        0,
+      ),
+      child: Text(
+        widget.message.text,
+        style: widget.message.isError
+            ? textStyle?.copyWith(color: theme.colorScheme.error)
+            : textStyle,
+        overflow: TextOverflow.visible,
+        maxLines: 10,
+      ),
     );
   }
 }

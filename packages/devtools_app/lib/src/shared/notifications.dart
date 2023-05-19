@@ -17,6 +17,7 @@ class NotificationMessage {
     this.actions = const [],
     this.duration = defaultDuration,
     this.isError = false,
+    this.isDismissible = false,
   });
 
   /// The default duration for notifications to show.
@@ -26,6 +27,7 @@ class NotificationMessage {
   final List<Widget> actions;
   final Duration duration;
   final bool isError;
+  final bool isDismissible;
 }
 
 /// Collects tasks to show or dismiss notifications in UI.
@@ -42,13 +44,29 @@ class NotificationService {
   final activeMessages = <NotificationMessage>[];
 
   /// Pushes a notification [message].
-  bool push(String message) => pushNotification(NotificationMessage(message));
+  ///
+  /// Includes a button to close the notification if [isDismissible] is true.
+  bool push(
+    String message, {
+    isDismissible = false,
+  }) =>
+      pushNotification(
+        NotificationMessage(
+          message,
+          isDismissible: isDismissible,
+        ),
+      );
 
   /// Pushes an error notification with [errorMessage] as the text.
   ///
   /// Includes an action to report the error by opening the link to our issue
-  /// tracker.
-  bool pushError(String errorMessage) {
+  /// tracker if [isReportable] is true. Includes a button to close the error if
+  /// [isDismissible] is true.
+  bool pushError(
+    String errorMessage, {
+    isDismissible = true,
+    isReportable = true,
+  }) {
     final reportErrorAction = NotificationAction(
       'Report error',
       () {
@@ -67,9 +85,12 @@ class NotificationService {
       NotificationMessage(
         errorMessage,
         isError: true,
-        actions: [reportErrorAction],
+        isDismissible: isDismissible,
+        actions: [if (isReportable) reportErrorAction],
         // Double the duration so that the user has time to report the error:
-        duration: NotificationMessage.defaultDuration * 2,
+        duration: isReportable
+            ? NotificationMessage.defaultDuration * 2
+            : NotificationMessage.defaultDuration,
       ),
       allowDuplicates: false,
     );

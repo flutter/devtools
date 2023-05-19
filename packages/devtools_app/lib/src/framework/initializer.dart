@@ -135,7 +135,10 @@ class _InitializerState extends State<Initializer>
     }
 
     errorReporter ??= (String message, Object error) {
-      notificationService.push('$message, $error');
+      notificationService.pushError(
+        '$message, $error',
+        isReportable: false,
+      );
     };
 
     final uri = normalizeVmServiceUri(widget.url!);
