@@ -310,7 +310,7 @@ class HttpResponseView extends StatelessWidget {
           child = HttpTextResponseViewer(
             contentType: contentType,
             responseBody: responseBody,
-            currentResponesNotifier: currentResponseViewType,
+            currentResponseNotifier: currentResponseViewType,
             textStyle: theme.fixedFontStyle,
           );
         }
@@ -328,19 +328,19 @@ class HttpTextResponseViewer extends StatelessWidget {
     super.key,
     required this.contentType,
     required this.responseBody,
-    required this.currentResponesNotifier,
+    required this.currentResponseNotifier,
     required this.textStyle,
   });
 
   final String? contentType;
   final String responseBody;
-  final ValueListenable<NetworkResponseViewType> currentResponesNotifier;
+  final ValueListenable<NetworkResponseViewType> currentResponseNotifier;
   final TextStyle textStyle;
 
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder(
-      valueListenable: currentResponesNotifier,
+      valueListenable: currentResponseNotifier,
       builder: (_, currentResponseType, __) {
         late final NetworkResponseViewType currentLocalResponseType;
 
