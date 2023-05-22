@@ -11,7 +11,7 @@ on:
       - "**/*.dart"
 
 jobs:
-  changelog-reminder:
+  dcm-label-reminder:
     if: ${{ !contains(github.event.*.labels.*.name, 'run-dcm-workflow') }}
     name: Prevent submission
     runs-on: ubuntu-latest
