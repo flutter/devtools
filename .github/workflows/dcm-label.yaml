@@ -5,12 +5,14 @@ name: DCM Label Reminder
 on:
   pull_request:
     types: [synchronize, opened, reopened, labeled, unlabeled]
+    branches:
+      - master
     paths:
       - "**/*.dart"
 
 jobs:
-  changelog-reminder:
-    if: ${{ !contains(github.event.*.labels.*.name, 'run-dcm-workflow') && github.event.pull_request.user.login != 'DartDevtoolWorkflowBot' }}
+  dcm-label-reminder:
+    if: ${{ !contains(github.event.*.labels.*.name, 'run-dcm-workflow') }}
     name: Prevent submission
     runs-on: ubuntu-latest
     steps:

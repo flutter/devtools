@@ -14,9 +14,6 @@
 name: Dart Code Metrics
 
 on:
-  push:
-    branches:
-      - master
   pull_request_target:
     # synchronize, opened, and reopened are the default pull_request_target
     # types. labeled and unlabeled are also required to re-run workflow when
@@ -24,6 +21,8 @@ on:
     types: [synchronize, opened, reopened, labeled, unlabeled]
     branches:
       - master
+    paths:
+      - "**/*.dart"
 
 jobs:
   flutter-prep:
@@ -34,7 +33,7 @@ jobs:
       needs-checkout-merge: true
 
   dcm:
-    if: contains(github.event.pull_request.labels.*.name, 'run-dcm-workflow') || github.event.pull_request.user.login == 'DartDevtoolWorkflowBot'
+    if: contains(github.event.pull_request.labels.*.name, 'run-dcm-workflow') 
     name: Dart Code Metrics
     needs: flutter-prep
     runs-on: ubuntu-latest
