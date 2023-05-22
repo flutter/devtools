@@ -50,8 +50,8 @@ void main() {
     );
   }
 
-  void showScript(ScriptRef scriptRef) {
-    codeViewController.showScriptLocation(
+  Future<void> showScript(ScriptRef scriptRef) async {
+    await codeViewController.showScriptLocation(
       ScriptLocation(
         scriptRef,
         location: const SourcePosition(line: 1, column: 1),
@@ -78,7 +78,7 @@ void main() {
       smallWindowSize,
       (WidgetTester tester) async {
         await pumpDebuggerScreen(tester, mockDebuggerController);
-        showScript(mockScriptRef);
+        await showScript(mockScriptRef);
         await tester.pumpAndSettle();
 
         expectFirstNLinesContain(
@@ -96,7 +96,7 @@ void main() {
       smallWindowSize,
       (WidgetTester tester) async {
         await pumpDebuggerScreen(tester, mockDebuggerController);
-        showScript(mockScriptRef);
+        await showScript(mockScriptRef);
         await tester.pumpAndSettle();
 
         expect(firstNLinesAreHighlighted(10), isTrue);
@@ -108,7 +108,7 @@ void main() {
       smallWindowSize,
       (WidgetTester tester) async {
         await pumpDebuggerScreen(tester, mockDebuggerController);
-        showScript(mockScriptRef);
+        await showScript(mockScriptRef);
         await tester.pumpAndSettle();
 
         expect(
@@ -130,7 +130,7 @@ void main() {
       smallWindowSize,
       (WidgetTester tester) async {
         await pumpDebuggerScreen(tester, mockDebuggerController);
-        showScript(mockLargeScriptRef);
+        await showScript(mockLargeScriptRef);
         await tester.pumpAndSettle();
 
         expect(
@@ -145,7 +145,7 @@ void main() {
       smallWindowSize,
       (WidgetTester tester) async {
         await pumpDebuggerScreen(tester, mockDebuggerController);
-        showScript(mockLargeScriptRef);
+        await showScript(mockLargeScriptRef);
         await tester.pumpAndSettle();
 
         expectFirstNLinesContain(
@@ -163,10 +163,92 @@ void main() {
       smallWindowSize,
       (WidgetTester tester) async {
         await pumpDebuggerScreen(tester, mockDebuggerController);
-        showScript(mockLargeScriptRef);
+        await showScript(mockLargeScriptRef);
         await tester.pumpAndSettle();
 
         expect(firstNLinesAreHighlighted(10), isFalse);
+      },
+    );
+  });
+
+  group('for a script with no source', () {
+    setUpAll(() {
+      when(scriptManager.getScriptCached(mockScriptRef)).thenReturn(mockScript);
+      when(scriptManager.getScriptCached(mockEmptyScriptRef))
+          .thenReturn(mockEmptyScript);
+    });
+
+    testWidgetsWithWindowSize(
+      'script name does not update',
+      smallWindowSize,
+      (WidgetTester tester) async {
+        await pumpDebuggerScreen(tester, mockDebuggerController);
+        await showScript(mockScriptRef);
+        await tester.pumpAndSettle();
+
+        expect(
+          find.text('package:gallery/main.dart'),
+          findsOneWidget,
+        );
+
+        await pumpDebuggerScreen(tester, mockDebuggerController);
+        await showScript(mockEmptyScriptRef);
+        await tester.pumpAndSettle();
+
+        expect(
+          find.text('package:gallery/main.dart'),
+          findsOneWidget,
+        );
+      },
+    );
+
+    testWidgetsWithWindowSize(
+      'lines of the script do not update',
+      smallWindowSize,
+      (WidgetTester tester) async {
+        await pumpDebuggerScreen(tester, mockDebuggerController);
+        await showScript(mockScriptRef);
+        await tester.pumpAndSettle();
+
+        expectFirstNLinesContain(
+          [
+            '// Copyright 2019 The Flutter team. All rights reserved',
+            '// Use of this source code is governed by a BSD-style license that can be',
+            '// found in the LICENSE file.',
+          ],
+        );
+
+        await pumpDebuggerScreen(tester, mockDebuggerController);
+        await showScript(mockEmptyScriptRef);
+        await tester.pumpAndSettle();
+
+        expectFirstNLinesContain(
+          [
+            '// Copyright 2019 The Flutter team. All rights reserved',
+            '// Use of this source code is governed by a BSD-style license that can be',
+            '// found in the LICENSE file.',
+          ],
+        );
+      },
+    );
+
+    testWidgetsWithWindowSize(
+      'an error message is shown',
+      smallWindowSize,
+      (WidgetTester tester) async {
+        await pumpDebuggerScreen(tester, mockDebuggerController);
+        // Dismiss any previous notifications:
+        notificationService
+            .dismiss('Failed to parse package:gallery/src/unknown.dart.');
+        await tester.pumpAndSettle();
+
+        await showScript(mockEmptyScriptRef);
+        await tester.pumpAndSettle();
+
+        expect(
+          notificationService.activeMessages.first.text,
+          equals('Failed to parse package:gallery/src/unknown.dart.'),
+        );
       },
     );
   });

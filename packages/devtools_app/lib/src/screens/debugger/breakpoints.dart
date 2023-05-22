@@ -62,7 +62,7 @@ class _BreakpointsState extends State<Breakpoints>
     return Material(
       color: isSelected ? theme.colorScheme.selectedRowBackgroundColor : null,
       child: InkWell(
-        onTap: () => _onBreakpointSelected(bp),
+        onTap: () async => await _onBreakpointSelected(bp),
         child: Padding(
           padding: const EdgeInsets.all(borderPadding),
           child: Row(
@@ -102,8 +102,8 @@ class _BreakpointsState extends State<Breakpoints>
     );
   }
 
-  void _onBreakpointSelected(BreakpointAndSourcePosition bp) {
-    controller.selectBreakpoint(bp);
+  Future<void> _onBreakpointSelected(BreakpointAndSourcePosition bp) async {
+    await controller.selectBreakpoint(bp);
   }
 
   String _descriptionFor(BreakpointAndSourcePosition breakpoint) {

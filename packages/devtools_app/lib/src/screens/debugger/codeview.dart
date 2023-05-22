@@ -450,8 +450,8 @@ class _CodeViewState extends State<CodeView> with AutoDisposeMixin {
           ScriptPopupMenu(widget.codeViewController),
           ScriptHistoryPopupMenu(
             itemBuilder: _buildScriptMenuFromHistory,
-            onSelected: (scriptRef) {
-              widget.codeViewController
+            onSelected: (scriptRef) async {
+              await widget.codeViewController
                   .showScriptLocation(ScriptLocation(scriptRef));
             },
             enabled: widget.codeViewController.scriptsHistory.hasScripts,
@@ -1553,13 +1553,13 @@ class GoToLineDialog extends StatelessWidget {
         children: [
           TextField(
             autofocus: true,
-            onSubmitted: (value) {
+            onSubmitted: (value) async {
               final scriptRef =
                   _codeViewController.scriptLocation.value?.scriptRef;
               if (value.isNotEmpty && scriptRef != null) {
                 Navigator.of(context).pop(dialogDefaultContext);
                 final line = int.parse(value);
-                _codeViewController.showScriptLocation(
+                await _codeViewController.showScriptLocation(
                   ScriptLocation(
                     scriptRef,
                     location: SourcePosition(line: line, column: 0),
