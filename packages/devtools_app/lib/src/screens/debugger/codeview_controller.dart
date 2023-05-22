@@ -223,7 +223,9 @@ class CodeViewController extends DisposableController
   }
 
   /// Show the given script location (without updating the script navigation
-  /// history). Returns a boolean value representing success or failure.
+  /// history).
+  ///
+  /// Returns a boolean value representing success or failure.
   Future<bool> _showScriptLocation(
     ScriptLocation scriptLocation, {
     bool focusLine = false,
@@ -298,7 +300,7 @@ class CodeViewController extends DisposableController
     return const ProcessedSourceReport.empty();
   }
 
-  /// Parses the current script into executable lines and prepares the script
+  /// Parses the given script into executable lines and prepares the script
   /// for syntax highlighting.
   Future<ParsedScript?> _parseScript(ScriptRef scriptRef) async {
     final script = await getScriptForRef(scriptRef);

@@ -44,9 +44,7 @@ void main() {
   ) async {
     await tester.pumpWidget(
       wrapWithControllers(
-        const NotificationsView(
-          child: DebuggerScreenBody(),
-        ),
+        const DebuggerScreenBody(),
         debugger: controller,
       ),
     );
