@@ -309,6 +309,9 @@ class CodeViewController extends DisposableController
         executableLines = Set.from(
           positions.where((p) => p.line != null).map((p) => p.line),
         );
+        if (executableLines.isEmpty) {
+          unawaited(_maybeShowSourceMapsWarning());
+        }
       } catch (e, st) {
         // Ignore - not supported for all vm service implementations.
         _log.warning(e, e, st);
@@ -345,6 +348,14 @@ class CodeViewController extends DisposableController
 
   void toggleFileOpenerVisibility(bool visible) {
     _showFileOpener.value = visible;
+  }
+
+  Future<void> _maybeShowSourceMapsWarning() async {
+    final isWebApp = (await serviceManager.connectedApp?.isDartWebApp) ?? false;
+    final sourceMapsWarning = devToolsExtensionPoints.sourceMapsWarning();
+    if (isWebApp && sourceMapsWarning != null) {
+      notificationService.pushError(sourceMapsWarning, isReportable: false);
+    }
   }
 
   // TODO(kenz): search through previous matches when possible.

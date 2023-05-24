@@ -38,6 +38,12 @@ class ExternalDevToolsExtensionPoints implements DevToolsExtensionPoints {
   }
 
   @override
+  String? sourceMapsWarning() {
+    // This should always return a null value for 3p users.
+    return null;
+  }
+
+  @override
   String loadingAppSizeDataMessage() {
     return 'Loading app size data. Please wait...';
   }

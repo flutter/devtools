@@ -17,5 +17,7 @@ abstract class DevToolsExtensionPoints {
 
   InspectorServiceBase? inspectorServiceProvider();
 
+  String? sourceMapsWarning();
+
   String get perfettoIndexLocation;
 }
