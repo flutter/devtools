@@ -17,4 +17,6 @@ LATEST_FLUTTER_CANDIDATE=$(git ls-remote --tags --sort='-v:refname' https://flut
   | sed 's/^.*\(flutter.*\)$/\1/'\
   )
 
-echo $LATEST_FLUTTER_CANDIDATE
+# TODO(https://github.com/flutter/devtools/issues/5843) Un-pin once fixed.
+# echo $LATEST_FLUTTER_CANDIDATE
+echo 3.11.0-10.0.pre
