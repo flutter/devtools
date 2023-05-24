@@ -942,6 +942,7 @@ class GutterItem extends StatelessWidget {
           : theme.colorScheme.coverageMissColor;
     }
     return InkWell(
+      key: Key('Gutter Item $lineNumber'),
       onTap: onPressed,
       // Force usage of default mouse pointer when gutter interaction is
       // disabled.
