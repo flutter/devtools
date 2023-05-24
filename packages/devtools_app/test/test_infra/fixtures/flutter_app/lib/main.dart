@@ -16,6 +16,11 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
+    // ignore: unused_local_variable, for testing.
+    var count = 0;
+    PeriodicAction(() {
+      count++;
+    }).doEvery(const Duration(seconds: 1));
     return MaterialApp(
       title: 'Hello, World',
       theme: ThemeData(
