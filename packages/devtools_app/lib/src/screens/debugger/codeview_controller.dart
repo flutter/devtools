@@ -10,8 +10,10 @@ import 'package:logging/logging.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../framework/app_error_handling.dart';
+import '../../shared/config_specific/launch_url/launch_url.dart';
 import '../../shared/diagnostics/primitives/source_location.dart';
 import '../../shared/globals.dart';
+import '../../shared/notifications.dart';
 import '../../shared/primitives/auto_dispose.dart';
 import '../../shared/primitives/history_manager.dart';
 import '../../shared/routing.dart';
@@ -364,9 +366,26 @@ class CodeViewController extends DisposableController
 
   Future<void> _maybeShowSourceMapsWarning() async {
     final isWebApp = (await serviceManager.connectedApp?.isDartWebApp) ?? false;
-    final sourceMapsWarning = devToolsExtensionPoints.sourceMapsWarning();
-    if (isWebApp && sourceMapsWarning != null) {
-      notificationService.pushError(sourceMapsWarning, isReportable: false);
+    final enableSourceMapsLink = devToolsExtensionPoints.enableSourceMapsLink();
+    if (isWebApp && enableSourceMapsLink != null) {
+      final enableSourceMapsAction = NotificationAction(
+        'Enable sourcemaps',
+        () {
+          unawaited(
+            launchUrl(
+              enableSourceMapsLink.url,
+            ),
+          );
+        },
+      );
+      notificationService.pushNotification(
+        NotificationMessage(
+          'Cannot debug when sourcemaps are disabled.',
+          isError: true,
+          isDismissible: true,
+          actions: [enableSourceMapsAction],
+        ),
+      );
     }
   }
 

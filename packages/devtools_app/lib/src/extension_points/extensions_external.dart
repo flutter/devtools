@@ -38,7 +38,7 @@ class ExternalDevToolsExtensionPoints implements DevToolsExtensionPoints {
   }
 
   @override
-  String? sourceMapsWarning() {
+  Link? enableSourceMapsLink() {
     // This should always return a null value for 3p users.
     return null;
   }
