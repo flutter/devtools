@@ -325,7 +325,7 @@ class CodeViewController extends DisposableController
         positions.where((p) => p.line != null).map((p) => p.line),
       );
       if (executableLines.isEmpty) {
-        unawaited(_maybeShowSourceMapsWarning());
+        _maybeShowSourceMapsWarning();
       }
     } catch (e, st) {
       // Ignore - not supported for all vm service implementations.
@@ -364,8 +364,8 @@ class CodeViewController extends DisposableController
     _showFileOpener.value = visible;
   }
 
-  Future<void> _maybeShowSourceMapsWarning() async {
-    final isWebApp = (await serviceManager.connectedApp?.isDartWebApp) ?? false;
+  void _maybeShowSourceMapsWarning() {
+    final isWebApp = serviceManager.connectedApp?.isDartWebAppNow ?? false;
     final enableSourceMapsLink = devToolsExtensionPoints.enableSourceMapsLink();
     if (isWebApp && enableSourceMapsLink != null) {
       final enableSourceMapsAction = NotificationAction(
