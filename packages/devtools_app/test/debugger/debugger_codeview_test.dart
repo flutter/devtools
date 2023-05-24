@@ -78,7 +78,7 @@ void main() {
     (WidgetTester tester) async {
       await pumpDebuggerScreen(tester, debuggerController);
 
-      codeViewController.showScriptLocation(
+      await codeViewController.showScriptLocation(
         ScriptLocation(
           mockScriptRef,
           location: const SourcePosition(line: 50, column: 50),

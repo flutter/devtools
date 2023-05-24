@@ -27,6 +27,7 @@ TODO: Remove this section if there are not any general updates.
 * Performance improvements when searching in a file, or searching for a file - [#5733](https://github.com/flutter/devtools/pull/5733)
 * Disables syntax highlighting for files with more than 100,000 characters due to performance constraints - [#5743](https://github.com/flutter/devtools/pull/5743)
 * Fix bug where source code wasn't visible if syntax highlighting for a file was disabled - [#5743](https://github.com/flutter/devtools/pull/5743)
+* Prevent file names and source code from getting out of sync. - [#5827](https://github.com/flutter/devtools/pull/5827)
 
 
 ## Network profiler updates

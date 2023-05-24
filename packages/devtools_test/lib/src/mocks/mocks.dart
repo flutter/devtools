@@ -209,9 +209,19 @@ final mockLargeScriptRef = ScriptRef(
   id: 'test-large-script',
 );
 
+final mockEmptyScriptRef = ScriptRef(
+  uri: 'package:gallery/src/unknown.dart',
+  id: 'mock-script-no-source',
+);
+
 final Script? mockScript = _loadScript('script.json');
 
 final Script? mockLargeScript = _loadScript('large_script.json');
+
+final Script mockEmptyScript = Script(
+  uri: 'package:gallery/src/unknown.dart',
+  id: 'mock-script-no-source',
+);
 
 Script? _loadScript(String scriptName) {
   final script = File('../devtools_test/lib/src/mocks/mock_data/$scriptName');

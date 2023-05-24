@@ -29,6 +29,7 @@ void main() {
     setGlobal(IdeTheme, IdeTheme());
     setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
     setGlobal(PreferencesController, PreferencesController());
+    setGlobal(NotificationService, NotificationService());
 
     mockFieldObject = MockFieldObject();
 
