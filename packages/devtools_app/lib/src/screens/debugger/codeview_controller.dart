@@ -10,8 +10,10 @@ import 'package:logging/logging.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../framework/app_error_handling.dart';
+import '../../shared/config_specific/launch_url/launch_url.dart';
 import '../../shared/diagnostics/primitives/source_location.dart';
 import '../../shared/globals.dart';
+import '../../shared/notifications.dart';
 import '../../shared/primitives/auto_dispose.dart';
 import '../../shared/primitives/history_manager.dart';
 import '../../shared/routing.dart';
@@ -322,6 +324,9 @@ class CodeViewController extends DisposableController
       executableLines = Set.from(
         positions.where((p) => p.line != null).map((p) => p.line),
       );
+      if (executableLines.isEmpty) {
+        _maybeShowSourceMapsWarning();
+      }
     } catch (e, st) {
       // Ignore - not supported for all vm service implementations.
       _log.warning(e, e, st);
@@ -357,6 +362,31 @@ class CodeViewController extends DisposableController
 
   void toggleFileOpenerVisibility(bool visible) {
     _showFileOpener.value = visible;
+  }
+
+  void _maybeShowSourceMapsWarning() {
+    final isWebApp = serviceManager.connectedApp?.isDartWebAppNow ?? false;
+    final enableSourceMapsLink = devToolsExtensionPoints.enableSourceMapsLink();
+    if (isWebApp && enableSourceMapsLink != null) {
+      final enableSourceMapsAction = NotificationAction(
+        'Enable sourcemaps',
+        () {
+          unawaited(
+            launchUrl(
+              enableSourceMapsLink.url,
+            ),
+          );
+        },
+      );
+      notificationService.pushNotification(
+        NotificationMessage(
+          'Cannot debug when sourcemaps are disabled.',
+          isError: true,
+          isDismissible: true,
+          actions: [enableSourceMapsAction],
+        ),
+      );
+    }
   }
 
   // TODO(kenz): search through previous matches when possible.
