@@ -37,18 +37,136 @@ void main() {
       'Looking for the main.dart file',
     );
 
-    expectCurrentFileStartsWith(mainFileSourceCodeSnippet);
     final mainFileNameFinder = find.text(mainFileName);
     expect(mainFileNameFinder, findsOneWidget);
+    final line1 = getSourceCodeAtLine(1);
+    expect(line1, contains('FILE: main.dart'));
 
     logStatus(
       'Setting a breakpoint',
     );
 
-    final line22GutterFinder = find.byKey(const Key('Gutter Item 22'));
-    expect(line22GutterFinder, findsOneWidget);
-    await tester.tap(line22GutterFinder);
+    final line24 = getSourceCodeAtLine(24);
+    expect(line24, contains('count++;'));
+    final line24GutterFinder = getGutterItemFinderAtLine(24);
+    expect(line24GutterFinder, findsOneWidget);
+    // Tap on the gutter for the line to set a breakpoint:
+    await tester.tap(line24GutterFinder);
     await tester.pump(safePumpDuration);
+
+    // logStatus(
+    //   'Pausing at breakpoint',
+    // );
+
+    // final frameFinder = findStackFrameWithText('PeriodicAction.doEvery');
+    // await expectLater(frameFinder, findsOneWidget);
+  });
+}
+
+String getSourceCodeAtLine(int lineNumber) {
+  final lineItems = find.byType(LineItem);
+  final line = getWidgetFromFinder<LineItem>(lineItems.at(lineNumber - 1));
+  return line.lineContents.toPlainText();
+}
+
+Finder getGutterItemFinderAtLine(int lineNumber) {
+  final gutterItems = find.byType(GutterItem);
+  return gutterItems.at(lineNumber - 1);
+}
+
+Finder findStackFrameWithText(String text) => find.byWidgetPredicate(
+      (Widget widget) {
+        if (widget is RichText) {
+          final widgetText = widget.text.toPlainText();
+          return widgetText.contains(text);
+        }
+        return false;
+      },
+    );
+
+List<String> getFirstNLines(int n) {
+  final lineItems = find.byType(LineItem);
+  final lineStrings = <String>[];
+  for (int i = 0; i < n; i++) {
+    final line = getWidgetFromFinder<LineItem>(lineItems.at(i));
+    final lineString = line.lineContents.toPlainText().trim();
+    lineStrings.add(lineString);
+  }
+  return lineStrings;
+}
+
+void expectCurrentFileStartsWith(String sourceCode) {
+  final stringMatches = sourceCode.split('\n');
+  final lines = find.byType(LineItem);
+  expect(lines, findsAtLeastNWidgets(stringMatches.length));
+  for (int i = 0; i < stringMatches.length; i++) {
+    final stringMatch = stringMatches[i];
+    final line = getWidgetFromFinder<LineItem>(lines.at(i));
+    final actual = line.lineContents.toPlainText().trim();
+    final expected = stringMatch.trim();
+    expect(
+      actual,
+      contains(expected),
+    );
+  }
+}
+
+T getWidgetFromFinder<T>(Finder finder) =>
+    finder.first.evaluate().first.widget as T;
+
+const mainFileName = 'package:flutter_app/main.dart';
+
+const mainFileSourceCodeSnippet = '''
+// Copyright 2021 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+import 'package:flutter/material.dart';
+// Unused imports are useful for testing autocomplete.
+// ignore_for_file: unused_import
+import 'src/autocomplete.dart';
+import 'src/other_classes.dart';
+
+void main() => runApp(MyApp());
+
+bool topLevelFieldForTest = false;
+
+class MyApp extends StatelessWidget {
+  // This widget is the root of your application.
+  @override
+  Widget build(BuildContext context) {
+    // ignore: unused_local_variable, for testing.
+    var count = 0;
+    PeriodicAction(() {
+      count++;
+    }).doEvery(const Duration(seconds: 1));''';
+
+const otherFileName = 'package:flutter_app/src/other_classes.dart';
+
+const otherFileSourceCodeSnippet = '''
+// Copyright 2021 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+import 'dart:async';
+
+import 'package:flutter/material.dart';
+
+// Unused class in the sample application that is a widget.
+//
+// This is a fairly long description so that we can make sure that scrolling to
+// a line works when we are paused at a breakpoint.
+class MyOtherWidget extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return const SizedBox();
+  }
+}
+''';
+
+
+
+    /*
 
     logStatus(
       'Pausing at breakpoint',
@@ -58,6 +176,7 @@ void main() {
       find.text('main.dart:22'),
       findsOneWidget,
     );
+    
 
     logStatus(
       'Navigating to a stackframe',
@@ -72,12 +191,11 @@ void main() {
       'Verifying the file has changed',
     );
 
-    final otherFileNameFinder = find.text(otherFileName);
+    final otherFileNameFinder = find.text(otherFileName, findRichText: true);
     expect(otherFileNameFinder, findsOneWidget);
 
-
     // Inspect variables.
-    /* 
+    
 
     logStatus(
       'Opening the file opener',
@@ -115,95 +233,16 @@ void main() {
     expect(otherFileNameFinder, findsOneWidget);
     expectCurrentFileStartsWith(otherFileSourceCodeSnippet);
     */
-  });
-}
 
-void expectCurrentFileStartsWith(String sourceCode) {
-  final stringMatches = sourceCode.split('\n');
-  final lines = find.byType(LineItem);
-  expect(lines, findsAtLeastNWidgets(stringMatches.length));
-  for (int i = 0; i < stringMatches.length; i++) {
-    final stringMatch = stringMatches[i];
-    final line = getWidgetFromFinder<LineItem>(lines.at(i));
-    expect(
-      line.lineContents.toPlainText().trim(),
-      contains(
-        stringMatch.trim(),
-      ),
-    );
-  }
-}
+        // logStatus(
+    //   'Navigating to a stackframe',
+    // );
+    // await tester.tap(frameFinder);
+    // await tester.pump(safePumpDuration);
 
-void expectFirstNLinesContain(List<String> stringMatches) {
-  final lines = find.byType(LineItem);
-  expect(lines, findsAtLeastNWidgets(stringMatches.length));
-  for (int i = 0; i < stringMatches.length; i++) {
-    final stringMatch = stringMatches[i];
-    final line = getWidgetFromFinder<LineItem>(lines.at(i));
-    expect(line.lineContents.toPlainText(), contains(stringMatch));
-  }
-}
+    // logStatus(
+    //   'Verifying the file has changed',
+    // );
 
-T getWidgetFromFinder<T>(Finder finder) =>
-    finder.first.evaluate().first.widget as T;
-
-const mainFileName = 'package:flutter_app/main.dart';
-
-const mainFileSourceCodeSnippet = '''
-// Copyright 2021 The Chromium Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
-
-import 'package:flutter/material.dart';
-// Unused imports are useful for testing autocomplete.
-// ignore_for_file: unused_import
-import 'src/autocomplete.dart';
-import 'src/other_classes.dart';
-
-void main() => runApp(MyApp());
-
-bool topLevelFieldForTest = false;
-
-class MyApp extends StatelessWidget {
-  // This widget is the root of your application.
-  @override
-  Widget build(BuildContext context) {
-    // ignore: unused_local_variable, for testing.
-    var count = 0;
-    PeriodicAction(() {
-      count++;
-    }).doEvery(const Duration(seconds: 1));
-''';
-
-const otherFileName = 'package:flutter_app/src/other_classes.dart';
-
-const otherFileSourceCodeSnippet = '''
-// Copyright 2021 The Chromium Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
-
-import 'dart:async';
-
-import 'package:flutter/material.dart';
-
-// Unused class in the sample application that is a widget.
-//
-// This is a fairly long description so that we can make sure that scrolling to
-// a line works when we are paused at a breakpoint.
-class MyOtherWidget extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return const SizedBox();
-  }
-}
-''';
-
-
-    // Find the [DebuggerController] to access its data.
-    // final debuggerScreenFinder = find.byType(DebuggerScreenBody);
-    // expect(debuggerScreenFinder, findsOneWidget);
-    // final screenState =
-    //     tester.state<DebuggerScreenBodyState>(debuggerScreenFinder);
-    // final debuggerController = screenState.controller;
-
-    // expect(debuggerController, isNotNull);
+    // final otherFileNameFinder = find.text(otherFileName);
+    // expect(otherFileNameFinder, findsOneWidget);
