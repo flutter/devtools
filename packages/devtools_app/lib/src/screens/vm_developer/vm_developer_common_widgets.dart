@@ -250,10 +250,10 @@ String? _objectName(ObjRef? objectRef) {
   }
 
   return switch (objectRef) {
-    // TODO(https://github.com/dart-lang/sdk/issues/52099): merge these cases.
-    ClassRef(:final name) => name,
-    FuncRef(:final name) => name,
-    FieldRef(:final name) => name,
+    ClassRef(:final name) ||
+    FuncRef(:final name) ||
+    FieldRef(:final name) =>
+      name,
     LibraryRef(:final name, :final uri) => name.isNullOrEmpty ? uri : name,
     ScriptRef(:final uri) => fileNameFromUri(uri),
     InstanceRef(:final name, :final classRef) =>
@@ -733,16 +733,16 @@ class VmServiceObjectLink extends StatelessWidget {
   }) {
     if (object == null) return null;
     return switch (object) {
+      FieldRef(:final name) ||
+      FuncRef(:final name) ||
+      ClassRef(:final name) ||
+      CodeRef(:final name) ||
+      TypeArgumentsRef(:final name) =>
+        name,
       LibraryRef(:final uri, :final name) =>
         uri!.startsWith('dart') || preferUri
             ? uri
             : (name!.isEmpty ? uri : name),
-      // TODO(https://github.com/dart-lang/sdk/issues/52099): merge these cases.
-      FieldRef(:final name) => name,
-      FuncRef(:final name) => name,
-      ClassRef(:final name) => name,
-      CodeRef(:final name) => name,
-      TypeArgumentsRef(:final name) => name,
       ScriptRef(:final uri) => uri,
       ContextRef(:final length) => 'Context(length: $length)',
       Sentinel(:final valueAsString) => 'Sentinel $valueAsString',

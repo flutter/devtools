@@ -93,7 +93,6 @@ class _VMDeveloperToolsScreenState extends State<VMDeveloperToolsScreenBody>
             if (VMDeveloperToolsScreenBody.views.length > 1)
               NavigationRail(
                 selectedIndex: selectedIndex,
-                elevation: 10.0,
                 labelType: NavigationRailLabelType.all,
                 onDestinationSelected: controller.selectIndex,
                 destinations: [
