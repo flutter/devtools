@@ -6,7 +6,6 @@ import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/debugger/codeview.dart';
 import 'package:devtools_test/devtools_integration_test.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 
@@ -25,16 +24,11 @@ void main() {
 
   testWidgets('Debugger panel', (tester) async {
     await pumpAndConnectDevTools(tester, testApp);
-
-    logStatus(
-      'Switching to the debugger panel',
-    );
-
     await switchToScreen(tester, ScreenMetaData.debugger);
     await tester.pump(safePumpDuration);
 
     logStatus(
-      'Looking for the main.dart file',
+      'looking for the main.dart file',
     );
 
     // Look for the main.dart file name:
@@ -46,50 +40,38 @@ void main() {
     expect(getSourceCodeAtLine(line1LineFinder), contains('FILE: main.dart'));
 
     logStatus(
-      'Opening the "more" menu',
+      'opening the "more" menu',
     );
 
     final moreMenuFinder = find.byType(PopupMenuButton<ScriptPopupMenuOption>);
     expect(moreMenuFinder, findsOneWidget);
-
     await tester.tap(moreMenuFinder);
-    await tester.pump(longPumpDuration);
+    await tester.pumpAndSettle(safePumpDuration);
 
     logStatus(
-      'Selecting the go-to-line menu option',
+      'selecting the go-to-line menu option',
     );
 
-    await tester.pumpAndSettle(longPumpDuration);
     final goToLineOptionFinder = find.textContaining('Go to line number');
-
     expect(goToLineOptionFinder, findsOneWidget);
     await tester.tap(goToLineOptionFinder);
-    await tester.pump(safePumpDuration);
+    await tester.pumpAndSettle(safePumpDuration);
 
     logStatus(
-      'Looking for the go-to-line dialog',
+      'entering line number in the go-to-line dialog',
     );
 
-    // Look for the line number text input:
-    await tester.pumpAndSettle(safePumpDuration);
     final goToLineInputFinder = find.widgetWithText(TextField, 'Line Number');
     expect(goToLineInputFinder, findsOneWidget);
-
-    logStatus(
-      'Jumping to line 24',
-    );
-
-    // Enter "24" into the line number text input:
     await tester.enterText(goToLineInputFinder, '24');
     await tester.testTextInput.receiveAction(TextInputAction.done);
-    await tester.pump(safePumpDuration);
+    await tester.pumpAndSettle(safePumpDuration);
 
     logStatus(
-      'Looking for line 24',
+      'looking for line 24',
     );
 
     // Look for the line 24 gutter item:
-    await tester.pumpAndSettle(safePumpDuration);
     final line24GutterFinder = find.byKey(const Key('Gutter Item 24'));
     expect(line24GutterFinder, findsOneWidget);
 
@@ -99,20 +81,53 @@ void main() {
     expect(getSourceCodeAtLine(line24LineFinder), contains('count++;'));
 
     logStatus(
-      'Setting a breakpoint',
+      'setting a breakpoint',
     );
 
     // Tap on the gutter for the line to set a breakpoint:
     await tester.tap(line24GutterFinder);
+    await tester.pumpAndSettle(safePumpDuration);
+
+    logStatus(
+      'pausing at breakpoint',
+    );
+
+    final frameFinder = findStackFrameWithText('PeriodicAction.doEvery');
+    expect(frameFinder, findsOneWidget);
+    expect(isLineFocused(line24LineFinder), isTrue);
+
+    logStatus(
+      'inspecting variables',
+    );
+
+    final countVariableFinder = find.textContaining('count:');
+    expect(countVariableFinder, findsOneWidget);
+
+    logStatus(
+      'switching stackframes',
+    );
+
+    // Tap on the stackframe:
+    await tester.tap(frameFinder);
     await tester.pump(safePumpDuration);
 
     logStatus(
-      'Pausing at breakpoint',
+      'looking for the other_classes.dart file',
     );
 
-    await tester.pumpAndSettle(safePumpDuration);
-    final frameFinder = findStackFrameWithText('PeriodicAction.doEvery');
-    expect(frameFinder, findsOneWidget);
+    expect(
+      find.text('package:flutter_app/src/other_classes.dart'),
+      findsOneWidget,
+    );
+
+    logStatus(
+      'looking for the focused line',
+    );
+
+    final line40LineFinder = find.byKey(const Key('Line Item 40'));
+    expect(line40LineFinder, findsOneWidget);
+    expect(getSourceCodeAtLine(line40LineFinder), contains('_action();'));
+    expect(isLineFocused(line40LineFinder), isTrue);
   });
 }
 
@@ -122,6 +137,11 @@ T getWidgetFromFinder<T>(Finder finder) =>
 String getSourceCodeAtLine(Finder lineItemFinder) {
   final lineWidget = getWidgetFromFinder<LineItem>(lineItemFinder);
   return lineWidget.lineContents.toPlainText();
+}
+
+bool isLineFocused(Finder lineItemFinder) {
+  final lineWidget = getWidgetFromFinder<LineItem>(lineItemFinder);
+  return lineWidget.focused;
 }
 
 Finder findStackFrameWithText(String text) => find.byWidgetPredicate(
