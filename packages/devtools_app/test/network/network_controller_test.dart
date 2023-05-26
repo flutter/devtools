@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// ignore_for_file: avoid_print
-
 @TestOn('vm')
 
 import 'package:devtools_app/src/screens/network/network_controller.dart';
@@ -24,7 +22,7 @@ void main() {
     late SocketProfile socketProfile;
     late HttpProfile httpProfile;
 
-    setUp(() async {
+    setUp(() {
       socketProfile = loadSocketProfile();
       httpProfile = loadHttpProfile();
       fakeServiceManager = FakeServiceManager(
@@ -170,10 +168,6 @@ void main() {
       // Refresh network data and ensure requests are populated.
       await controller.networkService.refreshNetworkData();
       final profile = requestsNotifier.value;
-
-      for (final r in profile.requests) {
-        print('${r.uri}, ${r.method}, ${r.status}, ${r.type}');
-      }
 
       expect(profile.requests, hasLength(numRequests));
       expect(controller.filteredData.value, hasLength(numRequests));

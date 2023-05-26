@@ -11,15 +11,17 @@ import '../../theme.dart';
 import '../console.dart';
 import '../console_service.dart';
 import 'evaluate.dart';
+import 'help_dialog.dart';
 
 // TODO(devoncarew): Show some small UI indicator when we receive stdout/stderr.
 
 class ConsolePaneHeader extends AreaPaneHeader {
-  ConsolePaneHeader({Color? backgroundColor})
+  ConsolePaneHeader({super.key, Color? backgroundColor})
       : super(
           title: const Text('Console'),
           roundedTopBorder: true,
           actions: [
+            const ConsoleHelpLink(),
             CopyToClipboardControl(
               dataProvider: () =>
                   serviceManager.consoleService.stdio.value.join('\n'),
@@ -49,15 +51,24 @@ class ConsolePane extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final Widget? footer;
+
+    // Eval is disabled for profile mode.
+    if (serviceManager.connectedApp!.isProfileBuildNow!) {
+      footer = null;
+    } else {
+      footer = SizedBox(
+        height: consoleLineHeight,
+        child: const ExpressionEvalField(),
+      );
+    }
+
     return Column(
       children: [
         Expanded(
           child: Console(
             lines: stdio,
-            footer: SizedBox(
-              height: consoleLineHeight,
-              child: const ExpressionEvalField(),
-            ),
+            footer: footer,
           ),
         ),
       ],

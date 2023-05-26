@@ -23,7 +23,7 @@ import 'cpu_profile_model.dart';
 import 'cpu_profiler_controller.dart';
 import 'panes/bottom_up.dart';
 import 'panes/call_tree.dart';
-import 'panes/controls/profiler_controls.dart';
+import 'panes/controls/cpu_profiler_controls.dart';
 import 'panes/cpu_flame_chart.dart';
 import 'panes/method_table/method_table.dart';
 import 'panes/method_table/method_table_controller.dart';
@@ -32,15 +32,13 @@ import 'panes/method_table/method_table_controller.dart';
 
 class CpuProfiler extends StatefulWidget {
   CpuProfiler({
+    super.key,
     required this.data,
     required this.controller,
-    this.standaloneProfiler = true,
-    this.summaryView,
     List<Key>? searchableTabKeys,
   })  : callTreeRoots = data.callTreeRoots,
         bottomUpRoots = data.bottomUpRoots,
         tabs = [
-          if (summaryView != null) _buildTab(ProfilerTab.summary),
           _buildTab(ProfilerTab.bottomUp),
           _buildTab(ProfilerTab.callTree),
           _buildTab(ProfilerTab.methodTable),
@@ -63,10 +61,6 @@ class CpuProfiler extends StatefulWidget {
 
   final List<CpuStackFrame> bottomUpRoots;
 
-  final bool standaloneProfiler;
-
-  final Widget? summaryView;
-
   final List<DevToolsTab> tabs;
 
   static const Key dataProcessingKey = Key('CpuProfiler - data is processing');
@@ -77,7 +71,7 @@ class CpuProfiler extends StatefulWidget {
   ];
 
   @override
-  _CpuProfilerState createState() => _CpuProfilerState();
+  State<CpuProfiler> createState() => _CpuProfilerState();
 }
 
 // TODO(kenz): preserve tab controller index when updating CpuProfiler with new
@@ -169,32 +163,31 @@ class _CpuProfilerState extends State<CpuProfiler>
             tabs: widget.tabs,
           ),
           actions: [
-            if (currentTab.key != ProfilerTab.summary.key) ...[
-              FilterButton(
-                onPressed: _showFilterDialog,
-                isFilterActive: widget.controller.isFilterActive,
-              ),
+            FilterButton(
+              onPressed: _showFilterDialog,
+              isFilterActive: widget.controller.isFilterActive,
+            ),
+            const SizedBox(width: denseSpacing),
+            if (currentTab.key != ProfilerTab.cpuFlameChart.key &&
+                currentTab.key != ProfilerTab.methodTable.key) ...[
+              const DisplayTreeGuidelinesToggle(),
               const SizedBox(width: denseSpacing),
-              if (currentTab.key != ProfilerTab.cpuFlameChart.key &&
-                  currentTab.key != ProfilerTab.methodTable.key) ...[
-                const DisplayTreeGuidelinesToggle(),
-                const SizedBox(width: denseSpacing),
-              ],
-              UserTagDropdown(widget.controller),
-              const SizedBox(width: denseSpacing),
-              ValueListenableBuilder<bool>(
-                valueListenable: preferences.vmDeveloperModeEnabled,
-                builder: (context, vmDeveloperModeEnabled, _) {
-                  if (!vmDeveloperModeEnabled) {
-                    return const SizedBox();
-                  }
-                  return Padding(
-                    padding: const EdgeInsets.only(right: denseSpacing),
-                    child: ModeDropdown(widget.controller),
-                  );
-                },
-              ),
             ],
+            UserTagDropdown(widget.controller),
+            const SizedBox(width: denseSpacing),
+            ValueListenableBuilder<bool>(
+              valueListenable: preferences.vmDeveloperModeEnabled,
+              builder: (context, vmDeveloperModeEnabled, _) {
+                if (!vmDeveloperModeEnabled) {
+                  return const SizedBox();
+                }
+                return Padding(
+                  padding: const EdgeInsets.only(right: denseSpacing),
+                  child: ModeDropdown(widget.controller),
+                );
+              },
+            ),
+
             // TODO(kenz): support search for call tree and bottom up tabs as
             // well. This will require implementing search for tree tables.
             if (CpuProfiler.searchableTabKeys.contains(currentTab.key)) ...[
@@ -213,10 +206,9 @@ class _CpuProfilerState extends State<CpuProfiler>
               Padding(
                 padding: const EdgeInsets.only(left: denseSpacing),
                 child: FlameChartHelpButton(
-                  gaScreen: widget.standaloneProfiler
-                      ? gac.cpuProfiler
-                      : gac.performance,
-                  gaSelection: gac.cpuProfileFlameChartHelp,
+                  gaScreen: gac.cpuProfiler,
+                  gaSelection:
+                      gac.CpuProfilerEvents.cpuProfileFlameChartHelp.name,
                   additionalInfo: [
                     ...dialogSubHeader(Theme.of(context), 'Legend'),
                     Legend(
@@ -292,8 +284,7 @@ class _CpuProfilerState extends State<CpuProfiler>
             );
           },
         ),
-        if (currentTab.key != ProfilerTab.summary.key)
-          CpuProfileStats(metadata: data.profileMetaData),
+        CpuProfileStats(metadata: data.profileMetaData),
       ],
     );
   }
@@ -352,10 +343,7 @@ class _CpuProfilerState extends State<CpuProfiler>
         },
       ),
     );
-    final summaryView = widget.summaryView;
-    // TODO(kenz): make this order configurable.
     return [
-      if (summaryView != null) summaryView,
       bottomUp,
       callTree,
       methodTable,
@@ -380,7 +368,7 @@ class _CpuProfilerState extends State<CpuProfiler>
 // for filtered profiles (e.g. 'Sample count: 10/14), or to at least show the
 // original value in the tooltip for each of these stats.
 class CpuProfileStats extends StatelessWidget {
-  CpuProfileStats({required this.metadata});
+  CpuProfileStats({super.key, required this.metadata});
 
   final CpuProfileMetaData metadata;
 

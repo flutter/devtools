@@ -127,17 +127,18 @@ class MemoryVMChartState extends State<MemoryVMChart>
     _chartController.setupData();
 
     addAutoDisposeListener(_memoryTimeline.sampleAddedNotifier, () {
-      if (_memoryTimeline.sampleAddedNotifier.value != null)
+      if (_memoryTimeline.sampleAddedNotifier.value != null) {
         setState(() {
           _processHeapSample(_memoryTimeline.sampleAddedNotifier.value!);
         });
+      }
     });
   }
 
   @override
   Widget build(BuildContext context) {
     if (_chartController.timestamps.isNotEmpty) {
-      return Container(
+      return SizedBox(
         height: defaultChartHeight,
         child: Chart(_chartController),
       );

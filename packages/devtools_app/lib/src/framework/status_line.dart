@@ -18,16 +18,18 @@ import '../shared/screen.dart';
 import '../shared/theme.dart';
 import '../shared/ui/utils.dart';
 import '../shared/utils.dart';
-import 'about_dialog.dart';
-import 'report_feedback_button.dart';
-import 'settings_dialog.dart';
+import 'scaffold.dart';
 
 /// The status line widget displayed at the bottom of DevTools.
 ///
 /// This displays information global to the application, as well as gives pages
 /// a mechanism to display page-specific information.
 class StatusLine extends StatelessWidget {
-  const StatusLine({required this.currentScreen, required this.isEmbedded});
+  const StatusLine({
+    super.key,
+    required this.currentScreen,
+    required this.isEmbedded,
+  });
 
   final Screen currentScreen;
   final bool isEmbedded;
@@ -84,11 +86,7 @@ class StatusLine extends StatelessWidget {
         const BulletSpacer(),
         Row(
           crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            OpenSettingsAction(),
-            ReportFeedbackButton(),
-            OpenAboutAction(),
-          ],
+          children: DevToolsScaffold.defaultActions(),
         ),
       ],
     ];
@@ -165,7 +163,7 @@ class StatusLine extends StatelessWidget {
               DevToolsTooltip(
                 message: 'Device Info',
                 child: InkWell(
-                  onTap: () async {
+                  onTap: () {
                     unawaited(
                       showDialog(
                         context: context,
@@ -247,8 +245,9 @@ class IsolateSelector extends StatelessWidget {
 
 class IsolateOption extends StatelessWidget {
   const IsolateOption(
-    this.ref,
-  );
+    this.ref, {
+    super.key,
+  });
 
   final IsolateRef? ref;
 

@@ -62,7 +62,7 @@ abstract class NetworkRequest with SearchableDataMixin {
   String toString() => '$method $uri';
 
   @override
-  bool operator ==(other) {
+  bool operator ==(Object? other) {
     return other is NetworkRequest &&
         runtimeType == other.runtimeType &&
         startTimestamp == other.startTimestamp &&
@@ -175,7 +175,7 @@ class WebSocket extends NetworkRequest {
   bool get inProgress => false;
 
   @override
-  bool operator ==(other) => other is WebSocket && id == other.id;
+  bool operator ==(Object? other) => other is WebSocket && id == other.id;
 
   @override
   int get hashCode => id.hashCode;

@@ -2,8 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// TODO(jacobr): add render, semantics, and layer trees.
 enum FlutterTreeType {
-  widget, // ('Widget'),
-  renderObject // ('Render');
-// TODO(jacobr): add semantics, and layer trees.
+  widget('Widget');
+
+  const FlutterTreeType(this.title);
+
+  final String title;
 }

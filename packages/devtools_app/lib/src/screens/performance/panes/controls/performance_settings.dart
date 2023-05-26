@@ -12,7 +12,7 @@ import '../../performance_controller.dart';
 import '../flutter_frames/flutter_frames_controller.dart';
 
 class PerformanceSettingsDialog extends StatelessWidget {
-  const PerformanceSettingsDialog(this.controller);
+  const PerformanceSettingsDialog(this.controller, {super.key});
 
   final PerformanceController controller;
 
@@ -21,7 +21,7 @@ class PerformanceSettingsDialog extends StatelessWidget {
     return DevToolsDialog(
       title: const DialogTitleText('Performance Settings'),
       includeDivider: false,
-      content: Container(
+      content: SizedBox(
         width: defaultDialogWidth,
         child: Column(
           mainAxisSize: MainAxisSize.min,

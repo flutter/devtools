@@ -37,7 +37,6 @@ void main(List<String> args) async {
 Future<void> performTheVersionUpdate({
   required String currentVersion,
   required String newVersion,
-  bool modifyChangeLog = true,
 }) async {
   print('Updating pubspecs from $currentVersion to version $newVersion...');
 
@@ -50,11 +49,6 @@ Future<void> performTheVersionUpdate({
     File('packages/devtools_app/lib/devtools.dart'),
     newVersion,
   );
-
-  if (modifyChangeLog) {
-    print('Updating CHANGELOG to version $newVersion...');
-    writeVersionToChangelog(File('CHANGELOG.md'), newVersion);
-  }
 
   final process = await Process.start('./tool/pub_upgrade.sh', []);
   process.stdout.asBroadcastStream().listen((event) {
@@ -189,20 +183,6 @@ void writeVersionToVersionFile(File versionFile, String version) {
     revisedLines.add(line);
   }
   versionFile.writeAsStringSync(revisedLines.joinWithNewLine());
-}
-
-void writeVersionToChangelog(File changelog, String version) {
-  final lines = changelog.readAsLinesSync();
-  final versionString = '## $version';
-  if (lines.first.endsWith(versionString)) {
-    print('Changelog already has an entry for version $version');
-    return;
-  }
-  changelog.writeAsString([
-    versionString,
-    isDevVersion(version) ? '* Dev version\n' : 'TODO: update changelog\n',
-    ...lines,
-  ].joinWithNewLine());
 }
 
 String incrementDevVersion(String currentVersion) {
@@ -371,7 +351,6 @@ class AutoUpdateCommand extends Command {
     final type = argResults!['type'].toString();
     final isDryRun = argResults!['dry-run'];
     final currentVersion = versionFromPubspecFile();
-    bool modifyChangeLog = false;
     String? newVersion;
     if (currentVersion == null) {
       throw 'Could not automatically determine current version.';
@@ -379,7 +358,6 @@ class AutoUpdateCommand extends Command {
     switch (type) {
       case 'release':
         newVersion = stripPreReleases(currentVersion);
-        modifyChangeLog = true;
         break;
       case 'dev':
         newVersion = incrementDevVersion(currentVersion);
@@ -399,7 +377,6 @@ class AutoUpdateCommand extends Command {
     performTheVersionUpdate(
       currentVersion: currentVersion,
       newVersion: newVersion,
-      modifyChangeLog: modifyChangeLog,
     );
     if (['minor', 'major'].contains(type)) {
       // Only cycle the release notes when doing a minor or major version bump

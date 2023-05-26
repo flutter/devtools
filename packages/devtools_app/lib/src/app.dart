@@ -9,15 +9,12 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'example/conditional_screen.dart';
-import 'framework/about_dialog.dart';
 import 'framework/framework_core.dart';
 import 'framework/initializer.dart';
 import 'framework/landing_screen.dart';
 import 'framework/notifications_view.dart';
 import 'framework/release_notes/release_notes.dart';
-import 'framework/report_feedback_button.dart';
 import 'framework/scaffold.dart';
-import 'framework/settings_dialog.dart';
 import 'screens/app_size/app_size_controller.dart';
 import 'screens/app_size/app_size_screen.dart';
 import 'screens/debugger/debugger_controller.dart';
@@ -66,6 +63,7 @@ class DevToolsApp extends StatefulWidget {
   const DevToolsApp(
     this.screens,
     this.analyticsController, {
+    super.key,
     this.sampleData = const [],
   });
 
@@ -87,7 +85,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
   List<Screen> get _screens => widget.screens.map((s) => s.screen).toList();
 
   bool get isDarkThemeEnabled => _isDarkThemeEnabled;
-  bool _isDarkThemeEnabled = devToolsExtensionPoints.defaultIsDarkTheme;
+  bool _isDarkThemeEnabled = true;
 
   bool get vmDeveloperModeEnabled => _vmDeveloperModeEnabled;
   bool _vmDeveloperModeEnabled = false;
@@ -205,11 +203,6 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
       return DevToolsScaffold.withChild(
         key: const Key('landing'),
         ideTheme: ideTheme,
-        actions: [
-          OpenSettingsAction(),
-          ReportFeedbackButton(),
-          OpenAboutAction(),
-        ],
         child: LandingScreenBody(sampleData: widget.sampleData),
       );
     }
@@ -245,12 +238,10 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
                 actions: [
                   // TODO(https://github.com/flutter/devtools/issues/1941)
                   if (serviceManager.connectedApp!.isFlutterAppNow!) ...[
-                    HotReloadButton(),
-                    HotRestartButton(),
+                    const HotReloadButton(),
+                    const HotRestartButton(),
                   ],
-                  OpenSettingsAction(),
-                  ReportFeedbackButton(),
-                  OpenAboutAction(),
+                  ...DevToolsScaffold.defaultActions(),
                 ],
               ),
             );
@@ -289,11 +280,6 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
         return DevToolsScaffold.withChild(
           key: const Key('appsize'),
           ideTheme: ideTheme,
-          actions: [
-            OpenSettingsAction(),
-            ReportFeedbackButton(),
-            OpenAboutAction(),
-          ],
           child: MultiProvider(
             providers: _providedControllers(),
             child: const AppSizeBody(),
@@ -350,6 +336,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
           ],
           child: NotificationsView(
             child: ReleaseNotesViewer(
+              controller: releaseNotesController,
               child: child,
             ),
           ),

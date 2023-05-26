@@ -5,7 +5,7 @@
 import 'package:file/file.dart';
 import 'package:file/local.dart';
 import 'package:logging/logging.dart';
-import 'package:path/path.dart' as _path;
+import 'package:path/path.dart' as path;
 
 import 'file.dart';
 
@@ -84,7 +84,7 @@ class FileSystemDesktop implements FileIO {
 
       final allFiles = directory.listSync(followLinks: false);
       for (FileSystemEntity entry in allFiles) {
-        final basename = _path.basename(entry.path);
+        final basename = path.basename(entry.path);
         if (_fs.isFileSync(entry.path) && basename.startsWith(prefix)) {
           logs.add(basename);
         }

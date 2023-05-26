@@ -5,12 +5,14 @@
 import 'package:collection/collection.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../../../../../shared/analytics/analytics.dart' as ga;
+import '../../../../../shared/analytics/constants.dart' as gac;
 import '../../../../../shared/globals.dart';
 import '../../../../../shared/memory/adapted_heap_data.dart';
 import '../../../../../shared/memory/class_name.dart';
 import '../../../../../shared/vm_utils.dart';
 import '../../../shared/heap/heap.dart';
-import '../../../shared/primitives/instance_set_button.dart';
+import '../../../shared/primitives/instance_context_menu.dart';
 
 class HeapClassSampler extends ClassSampler {
   HeapClassSampler(this.objects, this.heap, this.heapClass)
@@ -59,11 +61,12 @@ class HeapClassSampler extends ClassSampler {
   }
 
   void _outputError(Object error, StackTrace trace) {
-    serviceManager.consoleService.appendStdio('$error\ntrace');
+    serviceManager.consoleService.appendStdio('$error\n$trace');
   }
 
   @override
   Future<void> oneLiveStaticToConsole() async {
+    ga.select(gac.memory, gac.MemoryEvent.dropOneLiveVariable);
     final instances = (await _liveInstances())?.instances;
 
     final instanceRef = instances?.firstWhereOrNull(
@@ -74,8 +77,9 @@ class HeapClassSampler extends ClassSampler {
 
     if (instanceRef == null) {
       serviceManager.consoleService.appendStdio(
-          'Unable to select instance that exist in snapshot and still alive in application.\n'
-          'You may want to increase "${preferences.memory.refLimitTitle}" in memory settings.');
+        'Unable to select instance that exist in snapshot and still alive in application.\n'
+        'You may want to increase "${preferences.memory.refLimitTitle}" in memory settings.',
+      );
       return;
     }
 
@@ -101,6 +105,14 @@ class HeapClassSampler extends ClassSampler {
     required bool includeSubclasses,
     required bool includeImplementers,
   }) async {
+    ga.select(
+      gac.memory,
+      gac.MemoryEvent.dropAllLiveToConsole(
+        includeImplementers: includeImplementers,
+        includeSubclasses: includeSubclasses,
+      ),
+    );
+
     final list = await _liveInstancesAsList();
 
     if (list == null) {
@@ -120,6 +132,8 @@ class HeapClassSampler extends ClassSampler {
 
   @override
   Future<void> oneStaticToConsole() async {
+    ga.select(gac.memory, gac.MemoryEvent.dropOneStaticVariable);
+
     final heapObject = objects.objectsByCodes.values.first;
     final heapSelection = HeapObjectSelection(heap, object: heapObject);
 

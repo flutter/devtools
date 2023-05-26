@@ -59,7 +59,7 @@ Future<String> _retrieveFullStringValue(
             stringRef,
             onUnavailable: (truncatedValue) => fallback,
           )
-          .then((value) => value != null ? value : fallback) ??
+          .then((value) => value ?? fallback) ??
       Future.value(fallback);
 }
 
@@ -424,7 +424,7 @@ class LoggingController extends DisposableController
     final InstanceRef messageRef = InstanceRef.parse(logRecord['message'])!;
     String? summary = _valueAsString(messageRef);
     if (messageRef.valueAsStringIsTruncated == true) {
-      summary = summary! + '...';
+      summary = '${summary!}...';
     }
     final InstanceRef? error = InstanceRef.parse(logRecord['error']);
     final InstanceRef? stackTrace = InstanceRef.parse(logRecord['stackTrace']);

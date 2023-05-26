@@ -65,9 +65,18 @@ void main() {
         find.byKey(CpuSamplingRateDropdown.dropdownKey),
         findsOneWidget,
       );
-      expect(find.text(CpuSamplingRate.low.display), findsOneWidget);
-      expect(find.text(CpuSamplingRate.medium.display), findsOneWidget);
-      expect(find.text(CpuSamplingRate.high.display), findsOneWidget);
+      expect(
+        find.text(CpuSamplingRate.low.display, skipOffstage: false),
+        findsOneWidget,
+      );
+      expect(
+        find.text(CpuSamplingRate.medium.display, skipOffstage: false),
+        findsOneWidget,
+      );
+      expect(
+        find.text(CpuSamplingRate.high.display, skipOffstage: false),
+        findsOneWidget,
+      );
       final RoundedDropDownButton<String> dropdownButton =
           tester.widget(find.byKey(CpuSamplingRateDropdown.dropdownKey));
       expect(dropdownButton.value, equals(CpuSamplingRate.medium.value));
@@ -76,9 +85,18 @@ void main() {
     testWidgets('selection', (WidgetTester tester) async {
       await pumpDropdown(tester);
       expect(find.byWidget(dropdown), findsOneWidget);
-      expect(find.text(CpuSamplingRate.low.display), findsOneWidget);
-      expect(find.text(CpuSamplingRate.medium.display), findsOneWidget);
-      expect(find.text(CpuSamplingRate.high.display), findsOneWidget);
+      expect(
+        find.text(CpuSamplingRate.low.display, skipOffstage: false),
+        findsOneWidget,
+      );
+      expect(
+        find.text(CpuSamplingRate.medium.display, skipOffstage: false),
+        findsOneWidget,
+      );
+      expect(
+        find.text(CpuSamplingRate.high.display, skipOffstage: false),
+        findsOneWidget,
+      );
       RoundedDropDownButton<String> dropdownButton =
           tester.widget(find.byKey(CpuSamplingRateDropdown.dropdownKey));
       expect(dropdownButton.value, equals(CpuSamplingRate.medium.value));
@@ -162,24 +180,28 @@ void main() {
       expect(dropdownButton.value, equals(expectedFlagValue));
     }
 
-    testWidgets('updates value for safe flag change',
-        (WidgetTester tester) async {
-      testUpdatesForFlagChange(
-        tester,
-        newFlagValue: CpuSamplingRate.high.value,
-        expectedFlagValue: CpuSamplingRate.high.value,
-      );
-    });
+    testWidgets(
+      'updates value for safe flag change',
+      (WidgetTester tester) async {
+        testUpdatesForFlagChange(
+          tester,
+          newFlagValue: CpuSamplingRate.high.value,
+          expectedFlagValue: CpuSamplingRate.high.value,
+        );
+      },
+    );
 
-    testWidgets('updates value for unsafe flag change',
-        (WidgetTester tester) async {
-      // 999 is not a value in the dropdown list.
-      testUpdatesForFlagChange(
-        tester,
-        newFlagValue: '999',
-        expectedFlagValue: CpuSamplingRate.medium.value,
-      );
-    });
+    testWidgets(
+      'updates value for unsafe flag change',
+      (WidgetTester tester) async {
+        // 999 is not a value in the dropdown list.
+        testUpdatesForFlagChange(
+          tester,
+          newFlagValue: '999',
+          expectedFlagValue: CpuSamplingRate.medium.value,
+        );
+      },
+    );
   });
 }
 

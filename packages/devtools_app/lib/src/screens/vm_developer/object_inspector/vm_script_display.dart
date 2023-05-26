@@ -12,6 +12,7 @@ import 'vm_object_model.dart';
 /// related to script objects in the Dart VM.
 class VmScriptDisplay extends StatelessWidget {
   const VmScriptDisplay({
+    super.key,
     required this.controller,
     required this.script,
   });

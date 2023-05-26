@@ -18,6 +18,8 @@ import '../shared/theme.dart';
 import '../shared/utils.dart';
 
 class OpenSettingsAction extends StatelessWidget {
+  const OpenSettingsAction({super.key});
+
   @override
   Widget build(BuildContext context) {
     return DevToolsTooltip(
@@ -27,7 +29,7 @@ class OpenSettingsAction extends StatelessWidget {
           unawaited(
             showDialog(
               context: context,
-              builder: (context) => SettingsDialog(),
+              builder: (context) => const SettingsDialog(),
             ),
           );
         },
@@ -46,6 +48,8 @@ class OpenSettingsAction extends StatelessWidget {
 }
 
 class SettingsDialog extends StatelessWidget {
+  const SettingsDialog({super.key});
+
   @override
   Widget build(BuildContext context) {
     final analyticsController = Provider.of<AnalyticsController>(context);
@@ -121,7 +125,7 @@ class _VerboseLoggingSetting extends StatelessWidget {
             const SizedBox(width: defaultSpacing),
             DevToolsButton(
               label: 'Copy logs',
-              icon: Icons.copy,
+              icon: Icons.copy_outlined,
               gaScreen: gac.settingsDialog,
               gaSelection: gac.copyLogs,
               onPressed: () async => await copyToClipboard(
@@ -148,7 +152,7 @@ class _VerboseLoggingSetting extends StatelessWidget {
             Text(
               'Logs may contain sensitive information.\n'
               'Always check their contents before sharing.',
-            )
+            ),
           ],
         ),
       ],

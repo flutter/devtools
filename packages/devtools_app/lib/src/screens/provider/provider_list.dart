@@ -53,7 +53,7 @@ class ProviderList extends ConsumerStatefulWidget {
   const ProviderList({Key? key}) : super(key: key);
 
   @override
-  _ProviderListState createState() => _ProviderListState();
+  ConsumerState<ConsumerStatefulWidget> createState() => _ProviderListState();
 }
 
 class _ProviderListState extends ConsumerState<ProviderList> {

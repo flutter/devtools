@@ -44,19 +44,8 @@ Widget wrap(Widget widget) {
       _testNavigatorKey,
     ),
     routeInformationParser:
-        // ignore: invalid_use_of_visible_for_testing_member
+        // ignore: invalid_use_of_visible_for_testing_member, false positive.
         DevToolsRouteInformationParser.test('http://test/uri'),
-  );
-}
-
-Widget wrapWithAnalytics(
-  Widget widget, {
-  AnalyticsController? controller,
-}) {
-  controller ??= AnalyticsController(enabled: false, firstRun: false);
-  return Provider<AnalyticsController>.value(
-    value: controller,
-    child: widget,
   );
 }
 
@@ -72,6 +61,7 @@ Widget wrapWithControllers(
   BannerMessagesController? bannerMessages,
   AppSizeController? appSize,
   AnalyticsController? analytics,
+  ReleaseNotesController? releaseNotes,
   VMDeveloperToolsController? vmDeveloperTools,
 }) {
   final _providers = [
@@ -91,6 +81,8 @@ Widget wrapWithControllers(
     if (appSize != null) Provider<AppSizeController>.value(value: appSize),
     if (analytics != null)
       Provider<AnalyticsController>.value(value: analytics),
+    if (releaseNotes != null)
+      Provider<ReleaseNotesController>.value(value: releaseNotes),
     if (vmDeveloperTools != null)
       Provider<VMDeveloperToolsController>.value(value: vmDeveloperTools),
   ];

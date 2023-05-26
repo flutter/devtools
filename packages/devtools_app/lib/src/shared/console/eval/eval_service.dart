@@ -9,7 +9,7 @@ import 'package:vm_service/vm_service.dart';
 
 import '../../../service/vm_service_wrapper.dart';
 import '../../globals.dart';
-import '../../memory/adapted_heap_data.dart';
+import '../../memory/adapted_heap_object.dart';
 import '../../primitives/auto_dispose.dart';
 import '../../vm_utils.dart';
 import '../primitives/scope.dart';
@@ -188,7 +188,7 @@ class EvalService extends DisposableController with AutoDisposeControllerMixin {
   bool isScopeSupported({bool emitWarningToConsole = false}) {
     // Web does not support scopes yet.
     final isWeb = serviceManager.connectedApp?.isDartWebAppNow ?? true;
-    if (isWeb) {
+    if (isWeb && emitWarningToConsole) {
       serviceManager.consoleService.appendStdio(
         'Scope variables are not supported for web applications.',
       );

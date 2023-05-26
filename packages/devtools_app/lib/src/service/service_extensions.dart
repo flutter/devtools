@@ -171,11 +171,11 @@ final performanceOverlay = ToggleableServiceExtensionDescription<bool>._(
   enabledValue: true,
   disabledValue: false,
   gaScreenName: gac.performance,
-  gaItem: gac.performanceOverlay,
+  gaItem: gac.PerformanceEvents.performanceOverlay.name,
   tooltip: 'Overlay a performance chart on your app.',
   documentationUrl:
       'https://flutter.dev/docs/perf/rendering/ui-performance#the-performance-overlay',
-  gaDocsItem: gac.performanceOverlayDocs,
+  gaDocsItem: gac.PerformanceDocs.performanceOverlayDocs.name,
 );
 
 final profileWidgetBuilds = ToggleableServiceExtensionDescription<bool>._(
@@ -186,12 +186,12 @@ final profileWidgetBuilds = ToggleableServiceExtensionDescription<bool>._(
   enabledValue: true,
   disabledValue: false,
   gaScreenName: gac.performance,
-  gaItem: gac.trackRebuilds,
+  gaItem: gac.PerformanceEvents.trackRebuilds.name,
   description: 'Adds an event to the timeline for every Widget built.',
   tooltip: '',
   documentationUrl:
       'https://docs.flutter.dev/development/tools/devtools/performance#track-widget-builds',
-  gaDocsItem: gac.trackWidgetBuildsDocs,
+  gaDocsItem: gac.PerformanceDocs.trackWidgetBuildsDocs.name,
 );
 
 final profileUserWidgetBuilds = ToggleableServiceExtensionDescription<bool>._(
@@ -202,7 +202,7 @@ final profileUserWidgetBuilds = ToggleableServiceExtensionDescription<bool>._(
   enabledValue: true,
   disabledValue: false,
   gaScreenName: gac.performance,
-  gaItem: gac.trackUserCreatedWidgetBuilds,
+  gaItem: gac.PerformanceEvents.trackUserCreatedWidgetBuilds.name,
   description:
       'Adds an event to the timeline for every Widget created in user code.',
   tooltip: '',
@@ -216,12 +216,12 @@ final profileRenderObjectPaints = ToggleableServiceExtensionDescription<bool>._(
   enabledValue: true,
   disabledValue: false,
   gaScreenName: gac.performance,
-  gaItem: gac.trackPaints,
+  gaItem: gac.PerformanceEvents.trackPaints.name,
   description: 'Adds an event to the timeline for every RenderObject painted.',
   tooltip: '',
   documentationUrl:
       'https://docs.flutter.dev/development/tools/devtools/performance#track-paints',
-  gaDocsItem: gac.trackPaintsDocs,
+  gaDocsItem: gac.PerformanceDocs.trackPaintsDocs.name,
 );
 
 final profileRenderObjectLayouts =
@@ -233,12 +233,12 @@ final profileRenderObjectLayouts =
   enabledValue: true,
   disabledValue: false,
   gaScreenName: gac.performance,
-  gaItem: gac.trackLayouts,
+  gaItem: gac.PerformanceEvents.trackLayouts.name,
   description: 'Adds an event to the timeline for every RenderObject layout.',
   tooltip: '',
   documentationUrl:
       'https://docs.flutter.dev/development/tools/devtools/performance#track-layouts',
-  gaDocsItem: gac.trackLayoutsDocs,
+  gaDocsItem: gac.PerformanceDocs.trackLayoutsDocs.name,
 );
 
 final repaintRainbow = ToggleableServiceExtensionDescription<bool>._(
@@ -295,18 +295,18 @@ final disableClipLayers = ToggleableServiceExtensionDescription<bool>._(
       '$_flutterExtensionPrefix${RenderingServiceExtensions.debugDisableClipLayers.name}',
   inverted: true,
   title: 'Render Clip layers',
-  iconData: Icons.cut,
+  iconData: Icons.cut_outlined,
   enabledValue: true,
   disabledValue: false,
   gaScreenName: gac.performance,
-  gaItem: gac.disableClipLayersOption,
+  gaItem: gac.PerformanceEvents.disableClipLayers.name,
   description: 'Render all clipping effects during paint.',
   tooltip: '''Disable this option to check whether excessive use of clipping is
 affecting performance. If performance improves with this option
 disabled, try to reduce the use of clipping effects in your app.''',
   documentationUrl:
       'https://docs.flutter.dev/development/tools/devtools/performance#more-debugging-options',
-  gaDocsItem: gac.disableClipLayersOptionDocs,
+  gaDocsItem: gac.PerformanceDocs.disableClipLayersDocs.name,
 );
 
 final disableOpacityLayers = ToggleableServiceExtensionDescription<bool>._(
@@ -318,14 +318,14 @@ final disableOpacityLayers = ToggleableServiceExtensionDescription<bool>._(
   enabledValue: true,
   disabledValue: false,
   gaScreenName: gac.performance,
-  gaItem: gac.disableOpacityLayersOption,
+  gaItem: gac.PerformanceEvents.disableOpacityLayers.name,
   description: 'Render all opacity effects during paint.',
   tooltip: '''Disable this option to check whether excessive use of opacity
 effects is affecting performance. If performance improves with this
 option disabled, try to reduce the use of opacity effects in your app.''',
   documentationUrl:
       'https://docs.flutter.dev/development/tools/devtools/performance#more-debugging-options',
-  gaDocsItem: gac.disableOpacityLayersOptionDocs,
+  gaDocsItem: gac.PerformanceDocs.disableOpacityLayersDocs.name,
 );
 
 final disablePhysicalShapeLayers =
@@ -338,7 +338,7 @@ final disablePhysicalShapeLayers =
   enabledValue: true,
   disabledValue: false,
   gaScreenName: gac.performance,
-  gaItem: gac.disablePhysicalShapeLayersOption,
+  gaItem: gac.PerformanceEvents.disablePhysicalShapeLayers.name,
   description: 'Render all physical modeling effects during paint.',
   tooltip: '''Disable this option to check whether excessive use of physical
 modeling effects is affecting performance (shadows, elevations, etc.).
@@ -346,7 +346,7 @@ If performance improves with this option disabled, try to reduce the
 use of physical modeling effects in your app.''',
   documentationUrl:
       'https://docs.flutter.dev/development/tools/devtools/performance#more-debugging-options',
-  gaDocsItem: gac.disablePhysicalShapeLayersOptionDocs,
+  gaDocsItem: gac.PerformanceDocs.disablePhysicalShapeLayersDocs.name,
 );
 
 final httpEnableTimelineLogging = ToggleableServiceExtensionDescription<bool>._(
@@ -479,12 +479,9 @@ final List<ServiceExtensionDescription> _extensionDescriptions = [
   disablePhysicalShapeLayers,
 ];
 
-final Map<String, ServiceExtensionDescription> serviceExtensionsAllowlist =
-    Map.fromIterable(
-  _extensionDescriptions,
-  key: (extension) => extension.extension,
-  value: (extension) => extension,
-);
+final serviceExtensionsAllowlist = <String, ServiceExtensionDescription>{
+  for (var extension in _extensionDescriptions) extension.extension: extension,
+};
 
 /// Service extensions that are not safe to call unless a frame has already
 /// been rendered.

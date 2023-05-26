@@ -48,7 +48,7 @@ class ImportController {
 
   // TODO(kenz): improve error handling here or in snapshot_screen.dart.
   void importData(DevToolsJsonFile jsonFile) {
-    final _json = jsonFile.data;
+    final json = jsonFile.data;
 
     // Do not allow two different imports within 500 ms of each other. This is a
     // workaround for the fact that we get two drop events for the same file.
@@ -62,14 +62,14 @@ class ImportController {
     }
     previousImportTime = now;
 
-    final isDevToolsSnapshot = _json is Map<String, dynamic> &&
-        _json[DevToolsExportKeys.devToolsSnapshot.name] == true;
+    final isDevToolsSnapshot = json is Map<String, dynamic> &&
+        json[DevToolsExportKeys.devToolsSnapshot.name] == true;
     if (!isDevToolsSnapshot) {
       notificationService.push(nonDevToolsFileMessage);
       return;
     }
 
-    final devToolsSnapshot = _json;
+    final devToolsSnapshot = json;
     // TODO(kenz): support imports for more than one screen at a time.
     final activeScreenId =
         devToolsSnapshot[DevToolsExportKeys.activeScreenId.name];

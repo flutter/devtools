@@ -68,10 +68,10 @@ class FrameAnalysis {
       );
 
       if (layoutEvent != null) {
-        final _buildChildren = layoutEvent.shallowNodesWithCondition(
+        final buildChildren = layoutEvent.shallowNodesWithCondition(
           (event) => event.name == FramePhaseType.build.eventName,
         );
-        final buildDuration = _buildChildren.fold<Duration>(
+        final buildDuration = buildChildren.fold<Duration>(
           Duration.zero,
           (previous, TimelineEvent event) {
             return previous + event.time.duration;
@@ -167,31 +167,31 @@ class FrameAnalysis {
   void _countExpensiveOperations() {
     assert(_saveLayerCount == null);
     assert(_intrinsicOperationsCount == null);
-    int _saveLayer = 0;
+    int saveLayer = 0;
     for (final paintEvent in paintPhase.events) {
       breadthFirstTraversal<TimelineEvent>(
         paintEvent,
         action: (event) {
           if (event.name!.caseInsensitiveContains(saveLayerEventName)) {
-            _saveLayer++;
+            saveLayer++;
           }
         },
       );
     }
-    _saveLayerCount = _saveLayer;
+    _saveLayerCount = saveLayer;
 
-    int _intrinsics = 0;
+    int intrinsics = 0;
     for (final layoutEvent in layoutPhase.events) {
       breadthFirstTraversal<TimelineEvent>(
         layoutEvent,
         action: (event) {
           if (event.name!.caseInsensitiveContains(intrinsicsEventSuffix)) {
-            _intrinsics++;
+            intrinsics++;
           }
         },
       );
     }
-    _intrinsicOperationsCount = _intrinsics;
+    _intrinsicOperationsCount = intrinsics;
   }
 
   int? buildFlex;

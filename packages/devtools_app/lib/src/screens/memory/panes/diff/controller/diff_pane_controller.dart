@@ -46,20 +46,12 @@ class DiffPaneController extends DisposableController {
   // is taken, and is used to assign a unique id to each [SnapshotListItem].
   int _snapshotId = 0;
 
-  VoidCallback? takeSnapshotHandler(String gaEvent) {
-    if (_isTakingSnapshot.value) return null;
-    return () {
-      ga.select(
-        gac.memory,
-        gaEvent,
-      );
-      unawaited(takeSnapshot());
-    };
-  }
-
   Future<void> takeSnapshot() async {
     _isTakingSnapshot.value = true;
-    final snapshots = core._snapshots;
+    ga.select(
+      gac.memory,
+      gac.MemoryEvent.diffTakeSnapshotControlPane,
+    );
 
     final item = SnapshotInstanceItem(
       id: _snapshotId++,
@@ -67,15 +59,21 @@ class DiffPaneController extends DisposableController {
       isolateName: selectedIsolateName ?? '<isolate-not-detected>',
     );
 
+    final snapshots = core._snapshots;
     snapshots.add(item);
 
-    final heapData = await snapshotTaker.take();
-    await item.initializeHeapData(heapData);
-
-    final newElementIndex = snapshots.value.length - 1;
-    core._selectedSnapshotIndex.value = newElementIndex;
-    _isTakingSnapshot.value = false;
-    derived._updateValues();
+    try {
+      final heapData = await snapshotTaker.take();
+      await item.initializeHeapData(heapData);
+    } catch (e) {
+      snapshots.remove(item);
+      rethrow;
+    } finally {
+      final newElementIndex = snapshots.value.length - 1;
+      core._selectedSnapshotIndex.value = newElementIndex;
+      _isTakingSnapshot.value = false;
+      derived._updateValues();
+    }
   }
 
   void clearSnapshots() {
@@ -275,8 +273,9 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
 
       assert(singleHidden || diffHidden);
 
-      if (singleHidden)
+      if (singleHidden) {
         assert(classesTableSingle.selection.value == null, details);
+      }
       if (diffHidden) assert(classesTableDiff.selection.value == null, details);
 
       assert((singleClassesToShow.value == null) == singleHidden, details);
@@ -346,7 +345,7 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
     // Set class to show.
     final classes = _snapshotClassesAfterDiffing();
     heapClasses.value = classes;
-    _setSelections();
+    _selectClassAndPath();
     _updateClasses(
       classes: classes,
       className: _core.className,
@@ -395,8 +394,9 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
   }
 
   /// Set initial selection of class and path, for discoverability of detailed view.
-  void _setSelections() {
+  void _selectClassAndPath() {
     if (_core.className != null) return;
+    assert(_core.path == null);
 
     final classes = heapClasses.value;
     if (classes == null) return;
@@ -420,17 +420,23 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
         _core.classFilter.value,
         _core.rootPackage,
       );
+
+      if (classStatsList.isEmpty) return;
       theClass = classStatsList.reduce(singleWithMaxRetainedSize);
     } else if (classes is DiffHeapClasses) {
       final classStatsList = classes.filtered(
         _core.classFilter.value,
         _core.rootPackage,
       );
+
+      if (classStatsList.isEmpty) return;
       theClass = classStatsList.reduce(diffWithMaxRetainedSize);
     } else {
       throw StateError('Unexpected type ${classes.runtimeType}');
     }
     _core.className = theClass.heapClass;
+
+    assert(theClass.statsByPathEntries.isNotEmpty);
 
     // Get path with max retained size.
     final path = theClass.statsByPathEntries.reduce((v, e) {

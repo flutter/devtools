@@ -240,8 +240,8 @@ class CustomPointerScrollable extends StatefulWidget {
   final void Function(PointerSignalEvent event)? customPointerSignalHandler;
 
   @override
-  _CustomPointerScrollableState createState() =>
-      _CustomPointerScrollableState();
+  State<CustomPointerScrollable> createState() =>
+      CustomPointerScrollableState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -260,7 +260,7 @@ class CustomPointerScrollable extends StatefulWidget {
   ///
   /// Calling this method will create a dependency on the closest [Scrollable]
   /// in the [context], if there is one.
-  static _CustomPointerScrollableState? of(BuildContext context) {
+  static CustomPointerScrollableState? of(BuildContext context) {
     final _ScrollableScope? widget =
         context.dependOnInheritedWidgetOfExactType<_ScrollableScope>();
     return widget?.scrollable;
@@ -301,7 +301,7 @@ class CustomPointerScrollable extends StatefulWidget {
   }) {
     final List<Future<void>> futures = <Future<void>>[];
 
-    _CustomPointerScrollableState? scrollable =
+    CustomPointerScrollableState? scrollable =
         CustomPointerScrollable.of(context);
     while (scrollable != null) {
       futures.add(
@@ -330,7 +330,7 @@ class CustomPointerScrollable extends StatefulWidget {
 /// This state object is a copy of [ScrollableState] and replaces the handler
 /// [ScrollableState._receivedPointerSignal] with
 /// [CustomPointerScrollable.customPointerSignalHandler] when non-null.
-class _CustomPointerScrollableState extends State<CustomPointerScrollable>
+class CustomPointerScrollableState extends State<CustomPointerScrollable>
     with TickerProviderStateMixin
     implements ScrollContext {
   /// The manager for this [Scrollable] widget's viewport position.
@@ -343,6 +343,10 @@ class _CustomPointerScrollableState extends State<CustomPointerScrollable>
 
   @override
   AxisDirection get axisDirection => widget.axisDirection;
+
+  @override
+  double get devicePixelRatio => _devicePixelRatio;
+  late double _devicePixelRatio;
 
   late ScrollBehavior _configuration;
   ScrollPhysics? _physics;
@@ -381,6 +385,8 @@ class _CustomPointerScrollableState extends State<CustomPointerScrollable>
 
   @override
   void didChangeDependencies() {
+    _devicePixelRatio = MediaQuery.maybeDevicePixelRatioOf(context) ??
+        View.of(context).devicePixelRatio;
     _updatePosition();
     super.didChangeDependencies();
   }
@@ -649,7 +655,6 @@ class _CustomPointerScrollableState extends State<CustomPointerScrollable>
             child: IgnorePointer(
               key: _ignorePointerKey,
               ignoring: _shouldIgnorePointer,
-              ignoringSemantics: false,
               child: widget.viewportBuilder(context, position!),
             ),
           ),
@@ -702,7 +707,7 @@ class _ScrollableScope extends InheritedWidget {
     required Widget child,
   }) : super(key: key, child: child);
 
-  final _CustomPointerScrollableState scrollable;
+  final CustomPointerScrollableState scrollable;
   final ScrollPosition position;
 
   @override

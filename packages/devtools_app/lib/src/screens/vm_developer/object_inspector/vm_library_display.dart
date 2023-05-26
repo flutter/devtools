@@ -14,6 +14,7 @@ import 'vm_object_model.dart';
 /// related to library objects in the Dart VM.
 class VmLibraryDisplay extends StatelessWidget {
   const VmLibraryDisplay({
+    super.key,
     required this.controller,
     required this.library,
   });
@@ -68,6 +69,7 @@ class VmLibraryDisplay extends StatelessWidget {
 /// An expandable tile displaying a list of library dependencies
 class LibraryDependencies extends StatelessWidget {
   const LibraryDependencies({
+    super.key,
     required this.dependencies,
   });
 

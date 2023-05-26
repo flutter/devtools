@@ -78,8 +78,7 @@ class _ProgramExplorerRow extends StatelessWidget {
       final clazz = node.object as ClassRef;
       toolTip = '${clazz.name}';
       if (clazz.typeParameters != null) {
-        toolTip +=
-            '<' + clazz.typeParameters!.map((e) => e.name).join(', ') + '>';
+        toolTip += '<${clazz.typeParameters!.map((e) => e.name).join(', ')}>';
       }
     } else if (node.object is Func) {
       final func = node.object as Func;
@@ -206,6 +205,7 @@ class _ProgramExplorerRow extends StatelessWidget {
 
 class ProgramStructureIcon extends StatelessWidget {
   const ProgramStructureIcon({
+    super.key,
     required this.object,
   });
 
@@ -419,7 +419,7 @@ class _ProgramOutlineView extends StatelessWidget {
 /// filtering.
 class ProgramExplorer extends StatelessWidget {
   const ProgramExplorer({
-    Key? key,
+    super.key,
     required this.controller,
     this.title = 'File Explorer',
     this.onNodeSelected,
@@ -444,8 +444,9 @@ class ProgramExplorer extends StatelessWidget {
               ? AreaPaneHeader(
                   title: Text(title),
                   includeTopBorder: false,
+                  roundedTopBorder: false,
                 )
-              : BlankHeader();
+              : const BlankHeader();
           final fileExplorer = _FileExplorer(
             controller: controller,
             onItemExpanded: onItemExpanded,
@@ -475,7 +476,10 @@ class ProgramExplorer extends StatelessWidget {
                       minSizes: const [0.0, 0.0],
                       headers: <PreferredSizeWidget>[
                         fileExplorerHeader as PreferredSizeWidget,
-                        const AreaPaneHeader(title: Text('Outline')),
+                        const AreaPaneHeader(
+                          title: Text('Outline'),
+                          roundedTopBorder: false,
+                        ),
                       ],
                       children: [
                         fileExplorer,

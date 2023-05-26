@@ -2,10 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:collection';
 
 import 'package:flutter/material.dart';
 
+import 'config_specific/launch_url/launch_url.dart';
+import 'globals.dart';
 import 'primitives/utils.dart';
 
 class NotificationMessage {
@@ -13,6 +16,8 @@ class NotificationMessage {
     this.text, {
     this.actions = const [],
     this.duration = defaultDuration,
+    this.isError = false,
+    this.isDismissible = false,
   });
 
   /// The default duration for notifications to show.
@@ -21,6 +26,8 @@ class NotificationMessage {
   final String text;
   final List<Widget> actions;
   final Duration duration;
+  final bool isError;
+  final bool isDismissible;
 }
 
 /// Collects tasks to show or dismiss notifications in UI.
@@ -37,7 +44,57 @@ class NotificationService {
   final activeMessages = <NotificationMessage>[];
 
   /// Pushes a notification [message].
-  bool push(String message) => pushNotification(NotificationMessage(message));
+  ///
+  /// Includes a button to close the notification if [isDismissible] is true.
+  bool push(
+    String message, {
+    isDismissible = false,
+  }) =>
+      pushNotification(
+        NotificationMessage(
+          message,
+          isDismissible: isDismissible,
+        ),
+      );
+
+  /// Pushes an error notification with [errorMessage] as the text.
+  ///
+  /// Includes an action to report the error by opening the link to our issue
+  /// tracker if [isReportable] is true. Includes a button to close the error if
+  /// [isDismissible] is true.
+  bool pushError(
+    String errorMessage, {
+    isDismissible = true,
+    isReportable = true,
+  }) {
+    final reportErrorAction = NotificationAction(
+      'Report error',
+      () {
+        unawaited(
+          launchUrl(
+            devToolsExtensionPoints
+                .issueTrackerLink(
+                  issueTitle: 'Reporting error: $errorMessage',
+                )
+                .url,
+          ),
+        );
+      },
+    );
+    return pushNotification(
+      NotificationMessage(
+        errorMessage,
+        isError: true,
+        isDismissible: isDismissible,
+        actions: [if (isReportable) reportErrorAction],
+        // Double the duration so that the user has time to report the error:
+        duration: isReportable
+            ? NotificationMessage.defaultDuration * 2
+            : NotificationMessage.defaultDuration,
+      ),
+      allowDuplicates: false,
+    );
+  }
 
   /// Pushes a notification [message].
   ///
@@ -86,7 +143,12 @@ class NotificationService {
 }
 
 class NotificationAction extends StatelessWidget {
-  const NotificationAction(this.label, this.onAction, {this.isPrimary = false});
+  const NotificationAction(
+    this.label,
+    this.onAction, {
+    super.key,
+    this.isPrimary = false,
+  });
 
   final String label;
 

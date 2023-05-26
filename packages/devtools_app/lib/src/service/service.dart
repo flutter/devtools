@@ -12,7 +12,7 @@ import 'vm_service_wrapper.dart';
 
 Future<VmServiceWrapper> _connectWithSse(
   Uri uri,
-  void onError(error),
+  void Function(Object?) onError,
   Completer<void> finishedCompleter,
 ) {
   final serviceCompleter = Completer<VmServiceWrapper>();
@@ -43,7 +43,7 @@ Future<VmServiceWrapper> _connectWithSse(
 
 Future<VmServiceWrapper> _connectWithWebSocket(
   Uri uri,
-  void onError(error),
+  void Function(Object?) onError,
   Completer<void> finishedCompleter,
 ) async {
   // Map the URI (which may be Observatory web app) to a WebSocket URI for

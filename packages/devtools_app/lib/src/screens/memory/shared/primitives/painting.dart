@@ -42,7 +42,7 @@ class DashedLine extends CustomPainter {
     this._dashWidth = defaultDashWidth,
     this._dashSpace = defaultDashSpace,
   ]) {
-    _color = color == null ? (Colors.grey.shade500) : color;
+    _color = color ?? (Colors.grey.shade500);
   }
 
   static const defaultDashHeight = 1.0;

@@ -9,7 +9,7 @@ import 'package:devtools_app/src/screens/profiler/cpu_profiler.dart';
 import 'package:devtools_app/src/screens/profiler/cpu_profiler_controller.dart';
 import 'package:devtools_app/src/screens/profiler/panes/bottom_up.dart';
 import 'package:devtools_app/src/screens/profiler/panes/call_tree.dart';
-import 'package:devtools_app/src/screens/profiler/panes/controls/profiler_controls.dart';
+import 'package:devtools_app/src/screens/profiler/panes/controls/cpu_profiler_controls.dart';
 import 'package:devtools_app/src/screens/profiler/panes/cpu_flame_chart.dart';
 import 'package:devtools_app/src/screens/profiler/panes/method_table/method_table.dart';
 import 'package:devtools_app/src/screens/profiler/panes/method_table/method_table_controller.dart';
@@ -102,48 +102,6 @@ void main() {
         expect(find.byKey(ProfilerTab.callTree.key), findsOneWidget);
         expect(find.byKey(ProfilerTab.methodTable.key), findsOneWidget);
         expect(find.byKey(ProfilerTab.cpuFlameChart.key), findsOneWidget);
-        expect(find.byKey(ProfilerTab.summary.key), findsNothing);
-      },
-    );
-
-    testWidgetsWithWindowSize(
-      'builds for empty cpuProfileData with summary view',
-      windowSize,
-      (WidgetTester tester) async {
-        cpuProfileData = CpuProfileData.parse(emptyCpuProfileDataJson);
-        const summaryViewKey = Key('test summary view');
-        cpuProfiler = CpuProfiler(
-          data: cpuProfileData,
-          controller: controller,
-          summaryView: const SizedBox(key: summaryViewKey),
-        );
-        await tester.pumpWidget(wrap(cpuProfiler));
-        expect(find.byType(TabBar), findsOneWidget);
-        expect(find.byKey(CpuProfiler.dataProcessingKey), findsNothing);
-        expect(find.byType(CpuBottomUpTable), findsNothing);
-        expect(find.byType(CpuCallTreeTable), findsNothing);
-        expect(find.byType(CpuMethodTable), findsNothing);
-        expect(find.byType(CpuProfileFlameChart), findsNothing);
-        expect(find.byType(CpuProfileStats), findsNothing);
-        expect(find.byType(DisplayTreeGuidelinesToggle), findsNothing);
-        expect(find.byType(UserTagDropdown), findsNothing);
-        expect(find.byType(ExpandAllButton), findsNothing);
-        expect(find.byType(CollapseAllButton), findsNothing);
-        expect(find.byType(FlameChartHelpButton), findsNothing);
-        expect(
-          find.byType(SearchField<MethodTableController>),
-          findsNothing,
-        );
-        expect(
-          find.byType(SearchField<CpuProfilerController>),
-          findsNothing,
-        );
-        expect(find.byKey(ProfilerTab.bottomUp.key), findsOneWidget);
-        expect(find.byKey(ProfilerTab.callTree.key), findsOneWidget);
-        expect(find.byKey(ProfilerTab.methodTable.key), findsOneWidget);
-        expect(find.byKey(ProfilerTab.cpuFlameChart.key), findsOneWidget);
-        expect(find.byKey(ProfilerTab.summary.key), findsOneWidget);
-        expect(find.byKey(summaryViewKey), findsOneWidget);
       },
     );
 
@@ -177,43 +135,6 @@ void main() {
         expect(find.byKey(ProfilerTab.callTree.key), findsOneWidget);
         expect(find.byKey(ProfilerTab.methodTable.key), findsOneWidget);
         expect(find.byKey(ProfilerTab.cpuFlameChart.key), findsOneWidget);
-        expect(find.byKey(ProfilerTab.summary.key), findsNothing);
-      },
-    );
-
-    testWidgetsWithWindowSize(
-      'builds for valid cpuProfileData with summaryView',
-      windowSize,
-      (WidgetTester tester) async {
-        const summaryViewKey = Key('test summary view');
-        cpuProfiler = CpuProfiler(
-          data: cpuProfileData,
-          controller: controller,
-          summaryView: const SizedBox(key: summaryViewKey),
-        );
-        await tester.pumpWidget(wrap(cpuProfiler));
-        expect(find.byType(TabBar), findsOneWidget);
-        expect(find.byKey(CpuProfiler.dataProcessingKey), findsNothing);
-        expect(find.byKey(summaryViewKey), findsOneWidget);
-        expect(find.byType(CpuProfileStats), findsNothing);
-        expect(find.byType(DisplayTreeGuidelinesToggle), findsNothing);
-        expect(find.byType(UserTagDropdown), findsNothing);
-        expect(find.byType(ExpandAllButton), findsNothing);
-        expect(find.byType(CollapseAllButton), findsNothing);
-        expect(find.byType(FlameChartHelpButton), findsNothing);
-        expect(
-          find.byType(SearchField<MethodTableController>),
-          findsNothing,
-        );
-        expect(
-          find.byType(SearchField<CpuProfilerController>),
-          findsNothing,
-        );
-        expect(find.byKey(ProfilerTab.bottomUp.key), findsOneWidget);
-        expect(find.byKey(ProfilerTab.callTree.key), findsOneWidget);
-        expect(find.byKey(ProfilerTab.methodTable.key), findsOneWidget);
-        expect(find.byKey(ProfilerTab.cpuFlameChart.key), findsOneWidget);
-        expect(find.byKey(ProfilerTab.summary.key), findsOneWidget);
       },
     );
 
@@ -627,10 +548,22 @@ void main() {
 
             expect(find.byType(UserTagDropdown), findsOneWidget);
             // There is a Text widget and a RichText widget.
-            expect(find.text('Filter by tag: userTagA'), findsWidgets);
-            expect(find.text('Filter by tag: userTagB'), findsWidgets);
-            expect(find.text('Filter by tag: userTagC'), findsWidgets);
-            expect(find.text('Group by: User Tag'), findsWidgets);
+            expect(
+              find.text('Filter by tag: userTagA', skipOffstage: false),
+              findsWidgets,
+            );
+            expect(
+              find.text('Filter by tag: userTagB', skipOffstage: false),
+              findsWidgets,
+            );
+            expect(
+              find.text('Filter by tag: userTagC', skipOffstage: false),
+              findsWidgets,
+            );
+            expect(
+              find.text('Group by: User Tag', skipOffstage: false),
+              findsWidgets,
+            );
 
             await tester.tap(find.text('Call Tree'));
             await tester.pumpAndSettle();
@@ -902,41 +835,43 @@ void main() {
       expect(find.text('Sampling depth: 128'), findsOneWidget);
     });
 
-    testWidgets('displays correctly for invalid data',
-        (WidgetTester tester) async {
-      final metadata = CpuProfileMetaData(
-        sampleCount: 100,
-        samplePeriod: 0,
-        stackDepth: 128,
-        time: TimeRange()
-          ..start = const Duration()
-          ..end = const Duration(microseconds: 10000),
-      );
-      await tester.pumpWidget(wrap(CpuProfileStats(metadata: metadata)));
-      await tester.pumpAndSettle();
+    testWidgets(
+      'displays correctly for invalid data',
+      (WidgetTester tester) async {
+        final metadata = CpuProfileMetaData(
+          sampleCount: 100,
+          samplePeriod: 0,
+          stackDepth: 128,
+          time: TimeRange()
+            ..start = const Duration()
+            ..end = const Duration(microseconds: 10000),
+        );
+        await tester.pumpWidget(wrap(CpuProfileStats(metadata: metadata)));
+        await tester.pumpAndSettle();
 
-      expect(
-        find.byTooltip('The duration of time spanned by the CPU samples'),
-        findsOneWidget,
-      );
-      expect(
-        find.byTooltip('The number of samples included in the profile'),
-        findsOneWidget,
-      );
-      expect(
-        find.byTooltip(
-          'The frequency at which samples are collected by the profiler',
-        ),
-        findsOneWidget,
-      );
-      expect(
-        find.byTooltip('The maximum stack trace depth of a collected sample'),
-        findsOneWidget,
-      );
-      expect(find.text('Duration: 10.0 ms'), findsOneWidget);
-      expect(find.text('Sample count: 100'), findsOneWidget);
-      expect(find.text('Sampling rate: -- Hz'), findsOneWidget);
-      expect(find.text('Sampling depth: 128'), findsOneWidget);
-    });
+        expect(
+          find.byTooltip('The duration of time spanned by the CPU samples'),
+          findsOneWidget,
+        );
+        expect(
+          find.byTooltip('The number of samples included in the profile'),
+          findsOneWidget,
+        );
+        expect(
+          find.byTooltip(
+            'The frequency at which samples are collected by the profiler',
+          ),
+          findsOneWidget,
+        );
+        expect(
+          find.byTooltip('The maximum stack trace depth of a collected sample'),
+          findsOneWidget,
+        );
+        expect(find.text('Duration: 10.0 ms'), findsOneWidget);
+        expect(find.text('Sample count: 100'), findsOneWidget);
+        expect(find.text('Sampling rate: -- Hz'), findsOneWidget);
+        expect(find.text('Sampling depth: 128'), findsOneWidget);
+      },
+    );
   });
 }

@@ -48,10 +48,10 @@ void main() {
       ///////////////////////////////////////////////////////////////////////////
 
       // Used for test.
-      final _rawExternal = <Data>[];
-      final _rawUsed = <Data>[];
-      final _rawCapacity = <Data>[];
-      final _rawRSS = <Data>[];
+      final rawExternal = <Data>[];
+      final rawUsed = <Data>[];
+      final rawCapacity = <Data>[];
+      final rawRSS = <Data>[];
 
       late int externalTraceIndex;
       late int usedTraceIndex;
@@ -148,7 +148,7 @@ void main() {
                 return Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Container(
+                    SizedBox(
                       height: chartHeight,
                       child: Padding(
                         padding: const EdgeInsets.all(0.0),
@@ -178,18 +178,18 @@ void main() {
 
           controller.addTimestamp(datum.timestamp);
 
-          _rawExternal.add(Data(datum.timestamp, external));
+          rawExternal.add(Data(datum.timestamp, external));
 
-          addDataToTrace(controller, externalTraceIndex, _rawExternal.last);
+          addDataToTrace(controller, externalTraceIndex, rawExternal.last);
 
-          _rawUsed.add(Data(datum.timestamp, external + used));
-          addDataToTrace(controller, usedTraceIndex, _rawUsed.last);
+          rawUsed.add(Data(datum.timestamp, external + used));
+          addDataToTrace(controller, usedTraceIndex, rawUsed.last);
 
-          _rawCapacity.add(Data(datum.timestamp, capacity));
-          addDataToTrace(controller, capacityTraceIndex, _rawCapacity.last);
+          rawCapacity.add(Data(datum.timestamp, capacity));
+          addDataToTrace(controller, capacityTraceIndex, rawCapacity.last);
 
-          _rawRSS.add(Data(datum.timestamp, rss));
-          addDataToTrace(controller, rssTraceIndex, _rawRSS.last);
+          rawRSS.add(Data(datum.timestamp, rss));
+          addDataToTrace(controller, rssTraceIndex, rawRSS.last);
         }
       }
 
@@ -298,19 +298,19 @@ void main() {
 
           final externalTrace = controller.trace(externalTraceIndex);
           expect(externalTrace.dataYMax, equals(357446512.0));
-          expect(externalTrace.data.length, equals(_rawExternal.length));
+          expect(externalTrace.data.length, equals(rawExternal.length));
 
           final usedTrace = controller.trace(usedTraceIndex);
           expect(usedTrace.dataYMax, equals(409913568.0));
-          expect(usedTrace.data.length, equals(_rawUsed.length));
+          expect(usedTrace.data.length, equals(rawUsed.length));
 
           final capacityTrace = controller.trace(capacityTraceIndex);
           expect(capacityTrace.dataYMax, equals(422794096.0));
-          expect(capacityTrace.data.length, equals(_rawCapacity.length));
+          expect(capacityTrace.data.length, equals(rawCapacity.length));
 
           final rssTrace = controller.trace(rssTraceIndex);
           expect(rssTrace.dataYMax, equals(717799424.0));
-          expect(rssTrace.data.length, equals(_rawRSS.length));
+          expect(rssTrace.data.length, equals(rawRSS.length));
 
           expect(controller.timestampsLength, equals(104));
 
@@ -437,9 +437,9 @@ void main() {
       // Fixed Y-axis chart.                                                                     //
       ///////////////////////////////////////////////////////////////////////////
 
-      final _rawGcEvents = <Data>[];
-      final _rawSnapshotEvents = <Data>[];
-      final _rawAutoSnapshotEvents = <Data>[];
+      final rawGcEvents = <Data>[];
+      final rawSnapshotEvents = <Data>[];
+      final rawAutoSnapshotEvents = <Data>[];
 
       late int snapshotTraceIndex;
       late int autoSnapshotTraceIndex;
@@ -551,25 +551,25 @@ void main() {
           final event = datum.memoryEventInfo;
           if (datum.isGC) {
             // VM GC
-            _rawGcEvents.add(Data(datum.timestamp, visibleVmEvent));
-            addDataToTrace(controller, gcTraceIndex, _rawGcEvents.last);
+            rawGcEvents.add(Data(datum.timestamp, visibleVmEvent));
+            addDataToTrace(controller, gcTraceIndex, rawGcEvents.last);
           } else if (event.isEventGC) {
             // Manual GC
             final rawData = Data(datum.timestamp, visibleVmEvent);
             addDataToTrace(controller, manualGCTraceIndex, rawData);
           } else if (event.isEventSnapshot) {
-            _rawSnapshotEvents.add(Data(datum.timestamp, visibleEvent));
+            rawSnapshotEvents.add(Data(datum.timestamp, visibleEvent));
             addDataToTrace(
               controller,
               snapshotTraceIndex,
-              _rawSnapshotEvents.last,
+              rawSnapshotEvents.last,
             );
           } else if (event.isEventSnapshotAuto) {
-            _rawAutoSnapshotEvents.add(Data(datum.timestamp, visibleEvent));
+            rawAutoSnapshotEvents.add(Data(datum.timestamp, visibleEvent));
             addDataToTrace(
               controller,
               autoSnapshotTraceIndex,
-              _rawAutoSnapshotEvents.last,
+              rawAutoSnapshotEvents.last,
             );
           } else if (event.isEventAllocationAccumulator) {
             final monitorType = event.allocationAccumulator;

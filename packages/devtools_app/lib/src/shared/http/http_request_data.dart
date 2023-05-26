@@ -131,11 +131,11 @@ class DartIOHttpRequestData extends NetworkRequest {
 
   @override
   String? get contentType {
-    final _headers = responseHeaders;
-    if (_headers == null || _headers[_contentTypeKey] == null) {
+    final headers = responseHeaders;
+    if (headers == null || headers[_contentTypeKey] == null) {
       return null;
     }
-    return _headers[_contentTypeKey].toString();
+    return headers[_contentTypeKey].toString();
   }
 
   @override
@@ -322,6 +322,7 @@ class DartIOHttpRequestData extends NetworkRequest {
   }
 
   @override
+  // ignore: avoid-dynamic, necessary here.
   bool operator ==(other) {
     return other is DartIOHttpRequestData && id == other.id && super == other;
   }

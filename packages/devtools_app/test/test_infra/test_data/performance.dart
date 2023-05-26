@@ -206,7 +206,7 @@ final goldenUiTimelineEvent = vsyncEvent
                     compositingEvent..parent = frameEvent,
                     semanticsEvent..parent = frameEvent,
                     finalizeTreeEvent..parent = frameEvent,
-                  ])
+                  ]),
               ]),
           ]),
       ]),
@@ -268,7 +268,7 @@ final httpTrace = testTraceEventWrapper({
   'ph': 'b',
   'args': {
     'filterKey': 'HTTP/client',
-  }
+  },
 });
 
 final vsyncTrace = testTraceEventWrapper({
@@ -278,7 +278,7 @@ final vsyncTrace = testTraceEventWrapper({
   'pid': 94955,
   'ts': 193938741076,
   'ph': 'B',
-  'args': {}
+  'args': {},
 });
 final animatorBeginFrameTrace = testTraceEventWrapper({
   'name': 'Animator::BeginFrame',
@@ -287,7 +287,7 @@ final animatorBeginFrameTrace = testTraceEventWrapper({
   'pid': 94955,
   'ts': 193938741077,
   'ph': 'B',
-  'args': {'frame_number': '1'}
+  'args': {'frame_number': '1'},
 });
 final frameworkWorkloadTrace = testTraceEventWrapper({
   'name': 'Framework Workload',
@@ -296,7 +296,7 @@ final frameworkWorkloadTrace = testTraceEventWrapper({
   'pid': 94955,
   'ts': 193938741081,
   'ph': 'B',
-  'args': {'mode': 'basic', 'frame': 'odd'}
+  'args': {'mode': 'basic', 'frame': 'odd'},
 });
 final engineBeginFrameTrace = testTraceEventWrapper({
   'name': 'Engine::BeginFrame',
@@ -305,7 +305,7 @@ final engineBeginFrameTrace = testTraceEventWrapper({
   'pid': 94955,
   'ts': 193938741083,
   'ph': 'B',
-  'args': {}
+  'args': {},
 });
 final animateTrace = testTraceEventWrapper({
   'name': 'Animate',
@@ -315,7 +315,7 @@ final animateTrace = testTraceEventWrapper({
   'ts': 193938741112,
   'ph': 'X',
   'dur': 33,
-  'args': {'mode': 'basic', 'isolateNumber': '993728060'}
+  'args': {'mode': 'basic', 'isolateNumber': '993728060'},
 });
 final buildTrace = testTraceEventWrapper({
   'name': 'Build',
@@ -325,7 +325,7 @@ final buildTrace = testTraceEventWrapper({
   'ts': 193938741258,
   'ph': 'X',
   'dur': 33,
-  'args': {'mode': 'basic', 'isolateNumber': '993728060'}
+  'args': {'mode': 'basic', 'isolateNumber': '993728060'},
 });
 final buildTrace2 = testTraceEventWrapper({
   'name': 'Build',
@@ -335,7 +335,7 @@ final buildTrace2 = testTraceEventWrapper({
   'ts': 193938741300,
   'ph': 'X',
   'dur': 50,
-  'args': {'mode': 'basic', 'isolateNumber': '993728060'}
+  'args': {'mode': 'basic', 'isolateNumber': '993728060'},
 });
 final layoutTrace = testTraceEventWrapper({
   'name': 'Layout',
@@ -345,7 +345,7 @@ final layoutTrace = testTraceEventWrapper({
   'ts': 193938741150,
   'ph': 'X',
   'dur': 211,
-  'args': {'mode': 'basic', 'isolateNumber': '993728060'}
+  'args': {'mode': 'basic', 'isolateNumber': '993728060'},
 });
 final compositingBitsTrace = testTraceEventWrapper({
   'name': 'Compositing bits',
@@ -355,7 +355,7 @@ final compositingBitsTrace = testTraceEventWrapper({
   'ts': 193938741362,
   'ph': 'X',
   'dur': 2,
-  'args': {'isolateNumber': '993728060'}
+  'args': {'isolateNumber': '993728060'},
 });
 final paintTrace = testTraceEventWrapper({
   'name': 'Paint',
@@ -365,7 +365,7 @@ final paintTrace = testTraceEventWrapper({
   'ts': 193938741365,
   'ph': 'X',
   'dur': 74,
-  'args': {'mode': 'basic', 'isolateNumber': '993728060'}
+  'args': {'mode': 'basic', 'isolateNumber': '993728060'},
 });
 final compositingTrace = testTraceEventWrapper({
   'name': 'Compositing',
@@ -375,7 +375,7 @@ final compositingTrace = testTraceEventWrapper({
   'ts': 193938741440,
   'ph': 'X',
   'dur': 294,
-  'args': {'mode': 'basic', 'isolateNumber': '993728060'}
+  'args': {'mode': 'basic', 'isolateNumber': '993728060'},
 });
 final semanticsTrace = testTraceEventWrapper({
   'name': 'Semantics',
@@ -385,7 +385,7 @@ final semanticsTrace = testTraceEventWrapper({
   'ts': 193938741736,
   'ph': 'X',
   'dur': 748,
-  'args': {'isolateNumber': '993728060'}
+  'args': {'isolateNumber': '993728060'},
 });
 final finalizeTreeTrace = testTraceEventWrapper({
   'name': 'Finalize tree',
@@ -395,7 +395,7 @@ final finalizeTreeTrace = testTraceEventWrapper({
   'ts': 193938742493,
   'ph': 'X',
   'dur': 89,
-  'args': {'mode': 'basic', 'isolateNumber': '993728060'}
+  'args': {'mode': 'basic', 'isolateNumber': '993728060'},
 });
 
 final frameTrace = testTraceEventWrapper({
@@ -406,7 +406,7 @@ final frameTrace = testTraceEventWrapper({
   'ts': 193938741108,
   'ph': 'X',
   'dur': 1500,
-  'args': {'mode': 'basic', 'isolateNumber': '993728060'}
+  'args': {'mode': 'basic', 'isolateNumber': '993728060'},
 });
 final endVsyncTrace = testTraceEventWrapper({
   'name': 'VSYNC',
@@ -415,7 +415,7 @@ final endVsyncTrace = testTraceEventWrapper({
   'pid': 94955,
   'ts': 193938742696,
   'ph': 'E',
-  'args': {}
+  'args': {},
 });
 final endAnimatorBeginFrameTrace = testTraceEventWrapper({
   'name': 'Animator::BeginFrame',
@@ -424,7 +424,7 @@ final endAnimatorBeginFrameTrace = testTraceEventWrapper({
   'pid': 94955,
   'ts': 193938742695,
   'ph': 'E',
-  'args': {}
+  'args': {},
 });
 final endFrameworkWorkloadTrace = testTraceEventWrapper({
   'name': 'Framework Workload',
@@ -433,7 +433,7 @@ final endFrameworkWorkloadTrace = testTraceEventWrapper({
   'pid': 94955,
   'ts': 193938742686,
   'ph': 'E',
-  'args': {}
+  'args': {},
 });
 final endEngineBeginFrameTrace = testTraceEventWrapper({
   'name': 'Engine::BeginFrame',
@@ -442,7 +442,7 @@ final endEngineBeginFrameTrace = testTraceEventWrapper({
   'pid': 94955,
   'ts': 193938742685,
   'ph': 'E',
-  'args': {}
+  'args': {},
 });
 
 final beginIntrinsics1Trace = testTraceEventWrapper({
@@ -577,7 +577,7 @@ final gpuRasterizerDrawTrace = testTraceEventWrapper({
   'args': {
     'isolateId': 'id_001',
     'frame_number': '1',
-  }
+  },
 });
 final pipelineConsumeTrace = testTraceEventWrapper({
   'name': 'PipelineConsume',
@@ -586,7 +586,7 @@ final pipelineConsumeTrace = testTraceEventWrapper({
   'pid': 94955,
   'ts': 193938741744,
   'ph': 'B',
-  'args': {}
+  'args': {},
 });
 final endPipelineConsumeTrace = testTraceEventWrapper({
   'name': 'PipelineConsume',
@@ -595,7 +595,7 @@ final endPipelineConsumeTrace = testTraceEventWrapper({
   'pid': 94955,
   'ts': 193938770144,
   'ph': 'E',
-  'args': {}
+  'args': {},
 });
 final endGpuRasterizerDrawTrace = testTraceEventWrapper({
   'name': 'GPURasterizer::Draw',
@@ -604,7 +604,7 @@ final endGpuRasterizerDrawTrace = testTraceEventWrapper({
   'pid': 94955,
   'ts': 193938770147,
   'ph': 'E',
-  'args': {}
+  'args': {},
 });
 final rasterizerDoDrawTrace = testTraceEventWrapper({
   'name': 'Rasterizer::DoDraw',
@@ -616,7 +616,7 @@ final rasterizerDoDrawTrace = testTraceEventWrapper({
   'args': {
     'isolateId': 'id_001',
     'frame_number': '1',
-  }
+  },
 });
 final endRasterizerDoDrawTrace = testTraceEventWrapper({
   'name': 'Rasterizer::DoDraw',
@@ -625,7 +625,7 @@ final endRasterizerDoDrawTrace = testTraceEventWrapper({
   'pid': 94955,
   'ts': 193938770147,
   'ph': 'E',
-  'args': {}
+  'args': {},
 });
 
 final rasterTimelineEventWithShaderJank =
@@ -641,7 +641,7 @@ final gpuRasterizerDrawWithShaderJankTrace = testTraceEventWrapper({
   'ph': 'B',
   'args': {
     'devtoolsTag': 'shaders',
-  }
+  },
 });
 final endGpuRasterizerDrawWithShaderJankTrace = testTraceEventWrapper({
   'name': 'GPURasterizer::Draw',
@@ -650,7 +650,7 @@ final endGpuRasterizerDrawWithShaderJankTrace = testTraceEventWrapper({
   'pid': 94955,
   'ts': 193938790000,
   'ph': 'E',
-  'args': {}
+  'args': {},
 });
 
 final rasterTimelineEventWithSubtleShaderJank =
@@ -676,7 +676,7 @@ final gpuRasterizerDrawWithSubtleShaderJankTrace = testTraceEventWrapper({
   'ph': 'B',
   'args': {
     'devtoolsTag': 'shaders',
-  }
+  },
 });
 final endGpuRasterizerDrawWithSubtleShaderJankTrace = testTraceEventWrapper({
   'name': 'GPURasterizer::Draw',
@@ -685,7 +685,7 @@ final endGpuRasterizerDrawWithSubtleShaderJankTrace = testTraceEventWrapper({
   'pid': 94955,
   'ts': 173938744000,
   'ph': 'E',
-  'args': {}
+  'args': {},
 });
 final shaderJankChildTrace = testTraceEventWrapper({
   'name': 'GPURasterizer::Draw',
@@ -694,7 +694,7 @@ final shaderJankChildTrace = testTraceEventWrapper({
   'pid': 94955,
   'ts': 173938741000,
   'ph': 'B',
-  'args': {}
+  'args': {},
 });
 final endShaderJankChildTrace = testTraceEventWrapper({
   'name': 'GPURasterizer::Draw',
@@ -703,7 +703,7 @@ final endShaderJankChildTrace = testTraceEventWrapper({
   'pid': 94955,
   'ts': 173938743000,
   'ph': 'E',
-  'args': {}
+  'args': {},
 });
 final shaderJankGrandchildTrace = testTraceEventWrapper({
   'name': 'GPURasterizer::Draw',
@@ -714,7 +714,7 @@ final shaderJankGrandchildTrace = testTraceEventWrapper({
   'ph': 'B',
   'args': {
     'devtoolsTag': 'shaders',
-  }
+  },
 });
 final endShaderJankGrandchildTrace = testTraceEventWrapper({
   'name': 'GPURasterizer::Draw',
@@ -723,7 +723,7 @@ final endShaderJankGrandchildTrace = testTraceEventWrapper({
   'pid': 94955,
   'ts': 173938742500,
   'ph': 'E',
-  'args': {}
+  'args': {},
 });
 
 // Mark: AsyncTimelineData
@@ -845,7 +845,7 @@ final instantAsync3 = AsyncTimelineEvent(
 final goldenAsyncTimelineEvent = asyncEventA
   ..addAllChildren([
     asyncEventB..addAllChildren([asyncEventB1, asyncEventB2]),
-    asyncEventC..addAllChildren([asyncEventC1, asyncEventC2])
+    asyncEventC..addAllChildren([asyncEventC1, asyncEventC2]),
   ]);
 
 const goldenAsyncString = '  A [193937056864 μs - 193938740982 μs]\n'
@@ -1022,7 +1022,7 @@ final asyncStartC1Trace = testTraceEventWrapper({
   'ts': 193937220903,
   'ph': 'b',
   'id': '11',
-  'args': {'parentId': '3', 'isolateId': 'isolates/2139247553966975'}
+  'args': {'parentId': '3', 'isolateId': 'isolates/2139247553966975'},
 });
 final asyncEndC1Trace = testTraceEventWrapper({
   'name': 'C1',
@@ -1032,7 +1032,7 @@ final asyncEndC1Trace = testTraceEventWrapper({
   'ts': 193937326225,
   'ph': 'e',
   'id': '11',
-  'args': {'isolateId': 'isolates/2139247553966975'}
+  'args': {'isolateId': 'isolates/2139247553966975'},
 });
 final asyncStartC2Trace = testTraceEventWrapper({
   'name': 'C2',
@@ -1042,7 +1042,7 @@ final asyncStartC2Trace = testTraceEventWrapper({
   'ts': 193937378812,
   'ph': 'b',
   'id': '12',
-  'args': {'parentId': '3', 'isolateId': 'isolates/2139247553966975'}
+  'args': {'parentId': '3', 'isolateId': 'isolates/2139247553966975'},
 });
 final asyncEndC2Trace = testTraceEventWrapper({
   'name': 'C2',
@@ -1052,7 +1052,7 @@ final asyncEndC2Trace = testTraceEventWrapper({
   'ts': 193937432875,
   'ph': 'e',
   'id': '12',
-  'args': {'isolateId': 'isolates/2139247553966975'}
+  'args': {'isolateId': 'isolates/2139247553966975'},
 });
 final asyncStartDTrace = testTraceEventWrapper({
   'name': 'D',
@@ -1285,7 +1285,7 @@ final transformLayerStart1 = testTraceEventWrapper({
   'ts': 193938741750,
   'tts': 733287,
   'ph': 'B',
-  'args': {}
+  'args': {},
 });
 final transformLayerStart2 = testTraceEventWrapper({
   'name': 'TransformLayer::Preroll',
@@ -1295,7 +1295,7 @@ final transformLayerStart2 = testTraceEventWrapper({
   'ts': 193938741850,
   'tts': 733289,
   'ph': 'B',
-  'args': {}
+  'args': {},
 });
 final transformLayerEnd2 = testTraceEventWrapper({
   'name': 'TransformLayer::Preroll',
@@ -1305,7 +1305,7 @@ final transformLayerEnd2 = testTraceEventWrapper({
   'ts': 193938770000,
   'tts': 733656,
   'ph': 'E',
-  'args': {}
+  'args': {},
 });
 final transformLayerEnd1 = testTraceEventWrapper({
   'name': 'TransformLayer::Preroll',
@@ -1315,7 +1315,7 @@ final transformLayerEnd1 = testTraceEventWrapper({
   'ts': 193938770000,
   'tts': 733656,
   'ph': 'E',
-  'args': {}
+  'args': {},
 });
 final durationEventsWithDuplicateTraces = <TraceEventWrapper>[
   gpuRasterizerDrawTrace,
@@ -1335,7 +1335,7 @@ final asyncEventsWithChildrenWithDifferentIds = [
     'ts': 5294235082,
     'ph': 'b',
     'id': '1',
-    'args': {'isolateId': 'isolates/677008524697083'}
+    'args': {'isolateId': 'isolates/677008524697083'},
   }),
   testTraceEventWrapper({
     'name': 'PipelineProduce',
@@ -1345,7 +1345,7 @@ final asyncEventsWithChildrenWithDifferentIds = [
     'ts': 5294235082,
     'ph': 'b',
     'id': '1',
-    'args': {'isolateId': 'isolates/677008524697083'}
+    'args': {'isolateId': 'isolates/677008524697083'},
   }),
   testTraceEventWrapper({
     'name': 'PipelineProduce',
@@ -1355,7 +1355,7 @@ final asyncEventsWithChildrenWithDifferentIds = [
     'ts': 5294236800,
     'ph': 'e',
     'id': '1',
-    'args': {'isolateId': 'isolates/677008524697083'}
+    'args': {'isolateId': 'isolates/677008524697083'},
   }),
   // Child of PipelineItem with id '1'
   testTraceEventWrapper({
@@ -1366,7 +1366,7 @@ final asyncEventsWithChildrenWithDifferentIds = [
     'ts': 5294246630,
     'ph': 'b',
     'id': '1',
-    'args': {'isolateId': 'isolates/677008524697083'}
+    'args': {'isolateId': 'isolates/677008524697083'},
   }),
   // Child of PipelineItem with id '2' (parent manually specified)
   testTraceEventWrapper({
@@ -1377,7 +1377,7 @@ final asyncEventsWithChildrenWithDifferentIds = [
     'ts': 5294251242,
     'ph': 'b',
     'id': '2',
-    'args': {'parentId': '1'}
+    'args': {'parentId': '1'},
   }),
   testTraceEventWrapper({
     'name': 'listener',
@@ -1387,7 +1387,7 @@ final asyncEventsWithChildrenWithDifferentIds = [
     'ts': 5294272684,
     'ph': 'e',
     'id': '2',
-    'args': {'isolateId': 'isolates/677008524697083'}
+    'args': {'isolateId': 'isolates/677008524697083'},
   }),
   testTraceEventWrapper({
     'name': 'ImageCache.putIfAbsent',
@@ -1397,7 +1397,7 @@ final asyncEventsWithChildrenWithDifferentIds = [
     'ts': 5294272706,
     'ph': 'e',
     'id': '1',
-    'args': {'isolateId': 'isolates/677008524697083'}
+    'args': {'isolateId': 'isolates/677008524697083'},
   }),
 ];
 
@@ -1421,26 +1421,6 @@ final testTimelineJson = {
   'timeOriginMicros': 193938741076,
   'timeExtentMicros': 193938770147 - 193938741076,
 };
-
-final gcEventStartTrace = testTraceEventWrapper({
-  'name': 'ConcurrentMark',
-  'cat': 'GC',
-  'tid': 38147,
-  'pid': 48043,
-  'ts': 794638620007,
-  'ph': 'B',
-  'args': {'isolateGroupId': 'isolateGroups/18139071461608741439'}
-});
-
-final gcEventEndTrace = testTraceEventWrapper({
-  'name': 'ConcurrentMark',
-  'cat': 'GC',
-  'tid': 25091,
-  'pid': 48043,
-  'ts': 794638633011,
-  'ph': 'E',
-  'args': {'isolateGroupId': 'isolateGroups/18139071461608741439'}
-});
 
 final namedThreadEventStartTrace = testTraceEventWrapper({
   'name': 'Shell::OnPlatformViewDispatchPointerDataPacket',

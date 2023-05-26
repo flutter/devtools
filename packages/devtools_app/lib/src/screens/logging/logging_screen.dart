@@ -57,7 +57,7 @@ class LoggingScreen extends Screen {
 }
 
 class LoggingScreenBody extends StatefulWidget {
-  const LoggingScreenBody();
+  const LoggingScreenBody({super.key});
 
   static const filterQueryInstructions = '''
 Type a filter query to show or hide specific logs.
@@ -73,7 +73,7 @@ Example queries:
 ''';
 
   @override
-  _LoggingScreenState createState() => _LoggingScreenState();
+  State<LoggingScreenBody> createState() => _LoggingScreenState();
 }
 
 class _LoggingScreenState extends State<LoggingScreenBody>
@@ -127,7 +127,7 @@ class _LoggingScreenState extends State<LoggingScreenBody>
           gaSelection: gac.clear,
         ),
         const Spacer(),
-        StructuredErrorsToggle(),
+        const StructuredErrorsToggle(),
         const SizedBox(width: denseSpacing),
         // TODO(kenz): fix focus issue when state is refreshed
         SearchField<LoggingController>(

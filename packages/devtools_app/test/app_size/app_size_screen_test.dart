@@ -96,7 +96,7 @@ void main() {
   }
 
   group('AppSizeScreen', () {
-    setUp(() async {
+    setUp(() {
       screen = AppSizeScreen();
       appSizeController = AppSizeTestController();
       fakeServiceManager = FakeServiceManager();
@@ -206,7 +206,7 @@ void main() {
   });
 
   group('SnapshotView', () {
-    setUp(() async {
+    setUp(() {
       screen = AppSizeScreen();
       appSizeController = AppSizeTestController();
     });
@@ -286,7 +286,7 @@ void main() {
   });
 
   group('DiffView', () {
-    setUp(() async {
+    setUp(() {
       screen = AppSizeScreen();
       appSizeController = AppSizeTestController();
     });
@@ -433,7 +433,7 @@ void main() {
   });
 
   group('AppSizeController', () {
-    setUp(() async {
+    setUp(() {
       screen = AppSizeScreen();
       appSizeController = AppSizeTestController();
     });
@@ -741,8 +741,8 @@ Finder _findDropdownButton<T>() {
 }
 
 Finder _findMenuItemWithText<T>(String text) {
-  return find.ancestor(
-    of: find.widgetWithText(DropdownMenuItem<T>, text),
-    matching: _findDropdownButton<T>(),
+  return find.descendant(
+    of: find.byType(DropdownMenuItem<T>),
+    matching: find.text(text).first,
   );
 }

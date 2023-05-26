@@ -29,7 +29,7 @@ void main() {
       expect(controller.recordingNotifier.value, isFalse);
     });
 
-    test('disposes', () async {
+    test('disposes', () {
       controller.dispose();
       expect(
         () {

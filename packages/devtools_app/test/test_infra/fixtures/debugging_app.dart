@@ -33,7 +33,7 @@ class Cat {
 
   void performAction() {
     String actionStr = 'catAction';
-    actionStr = actionStr + '!';
+    actionStr = '$actionStr!';
 
     actionCount++; // breakpoint
   }

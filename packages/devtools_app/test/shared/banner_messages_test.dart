@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app/src/framework/scaffold.dart';
-import 'package:devtools_app/src/screens/profiler/profiler_screen.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/shared/banner_messages.dart';
 import 'package:devtools_app/src/shared/config_specific/ide_theme/ide_theme.dart';
@@ -163,10 +162,8 @@ BannerMessagesController bannerMessagesController(BuildContext context) {
 
 final testMessage1ScreenId = SimpleScreen.id;
 final testMessage2ScreenId = SimpleScreen.id;
-final testMessage3ScreenId = ProfilerScreen.id;
 const k1 = Key('test message 1');
 const k2 = Key('test message 2');
-const k3 = Key('test message 3');
 final testMessage1 = BannerMessage(
   key: k1,
   textSpans: const [TextSpan(text: 'Test Message 1')],

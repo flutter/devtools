@@ -185,7 +185,7 @@ class BannerMessage extends StatelessWidget {
                     context,
                     listen: false,
                   ).removeMessage(this, dismiss: true),
-                )
+                ),
               ],
             ),
           ],
@@ -209,8 +209,8 @@ class _BannerError extends BannerMessage {
 }
 
 // TODO(kenz): add "Do not show this again" option to warnings.
-class _BannerWarning extends BannerMessage {
-  const _BannerWarning({
+class BannerWarning extends BannerMessage {
+  const BannerWarning({
     required super.key,
     required super.textSpans,
     required super.screenId,
@@ -224,7 +224,7 @@ class DebugModePerformanceMessage {
 
   BannerMessage build(BuildContext context) {
     final theme = Theme.of(context);
-    return _BannerWarning(
+    return BannerWarning(
       key: Key('DebugModePerformanceMessage - $screenId'),
       textSpans: [
         const TextSpan(
@@ -307,7 +307,8 @@ class ShaderJankMessage {
             display: preCompileShadersDocsUrl,
             url: preCompileShadersDocsUrl,
             gaScreenName: screenId,
-            gaSelectedItemDescription: gac.shaderCompilationDocs,
+            gaSelectedItemDescription:
+                gac.PerformanceDocs.shaderCompilationDocs.name,
           ),
           context: context,
           style: theme.errorMessageLinkStyle,
@@ -323,7 +324,8 @@ class ShaderJankMessage {
               display: 'Impeller',
               url: impellerWikiUrl,
               gaScreenName: screenId,
-              gaSelectedItemDescription: gac.impellerWiki,
+              gaSelectedItemDescription:
+                  gac.PerformanceDocs.impellerWikiLink.name,
             ),
             context: context,
             style: theme.errorMessageLinkStyle,
@@ -331,7 +333,7 @@ class ShaderJankMessage {
           const TextSpan(
             text: ' instead!',
           ),
-        ]
+        ],
       ],
       screenId: screenId,
     );
@@ -348,7 +350,7 @@ class HighCpuSamplingRateMessage {
 
   BannerMessage build(BuildContext context) {
     final theme = Theme.of(context);
-    return _BannerWarning(
+    return BannerWarning(
       key: key,
       textSpans: [
         const TextSpan(
@@ -360,7 +362,8 @@ You are opting in to a high CPU sampling rate. This may affect the performance o
             display: 'documentation',
             url: _cpuSamplingRateDocsUrl,
             gaScreenName: screenId,
-            gaSelectedItemDescription: gac.cpuSamplingRateDocs,
+            gaSelectedItemDescription:
+                gac.CpuProfilerDocs.profileGranularityDocs.name,
           ),
           context: context,
           style: theme.warningMessageLinkStyle,
@@ -380,7 +383,7 @@ class DebugModeMemoryMessage {
   final String screenId;
 
   BannerMessage build(BuildContext context) {
-    return _BannerWarning(
+    return BannerWarning(
       key: Key('DebugModeMemoryMessage - $screenId'),
       textSpans: [
         const TextSpan(
@@ -416,7 +419,7 @@ class UnsupportedFlutterVersionWarning {
   final SemanticVersion supportedFlutterVersion;
 
   BannerMessage build() {
-    return _BannerWarning(
+    return BannerWarning(
       key: Key('UnsupportedFlutterVersionWarning - $screenId'),
       textSpans: [
         TextSpan(

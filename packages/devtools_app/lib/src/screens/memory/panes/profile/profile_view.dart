@@ -9,6 +9,7 @@ import '../../../../shared/analytics/analytics.dart' as ga;
 import '../../../../shared/analytics/constants.dart' as gac;
 import '../../../../shared/common_widgets.dart';
 import '../../../../shared/globals.dart';
+import '../../../../shared/primitives/simple_items.dart';
 import '../../../../shared/primitives/utils.dart';
 import '../../../../shared/table/table.dart';
 import '../../../../shared/table/table_controller.dart';
@@ -493,19 +494,19 @@ class _AllocationProfileTable extends StatelessWidget {
     ),
   ];
 
-  static final _initialSortColumn = _FieldSizeColumn(
+  static final _fieldSizeColumn = _FieldSizeColumn(
     heap: HeapGeneration.total,
   );
 
   static final _columns = [
     _FieldClassNameColumn(),
     _FieldInstanceCountColumn(heap: HeapGeneration.total),
-    _initialSortColumn,
+    _fieldSizeColumn,
     _FieldDartHeapSizeColumn(heap: HeapGeneration.total),
-    _FieldExternalSizeColumn(heap: HeapGeneration.total),
   ];
 
   static final _vmDeveloperModeColumns = [
+    _FieldExternalSizeColumn(heap: HeapGeneration.total),
     _FieldInstanceCountColumn(heap: HeapGeneration.newSpace),
     _FieldSizeColumn(heap: HeapGeneration.newSpace),
     _FieldDartHeapSizeColumn(heap: HeapGeneration.newSpace),
@@ -547,8 +548,7 @@ class _AllocationProfileTable extends StatelessWidget {
                       if (vmDeveloperModeEnabled)
                         ..._AllocationProfileTable._vmDeveloperModeColumns,
                     ],
-                    defaultSortColumn:
-                        _AllocationProfileTable._initialSortColumn,
+                    defaultSortColumn: _AllocationProfileTable._fieldSizeColumn,
                     defaultSortDirection: SortDirection.descending,
                     pinBehavior: FlatTablePinBehavior.pinOriginalToTop,
                     includeColumnGroupHeaders: false,
