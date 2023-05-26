@@ -6,6 +6,8 @@ import 'dart:collection';
 import 'dart:convert';
 import 'package:logging/logging.dart';
 
+import '../../devtools_app.dart';
+
 /// Class for storing a limited number string messages.
 class LogStorage {
   static const int maxLogEntries = 4000;
@@ -45,8 +47,7 @@ class LogStorage {
             if (e.stackTrace != null) 'stackTrace': e.stackTrace.toString(),
           }),
         )
-        .map((line) => line + '\n') // Each entry needs to be on it's own line
-        .join();
+        .joinWithTrailing('\n');
   }
 
   /// Static instance for storing the app's logs.
