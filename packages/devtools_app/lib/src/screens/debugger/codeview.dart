@@ -884,6 +884,7 @@ class Gutter extends StatelessWidget {
             coverageHit = sourceReport.coverageHitLines.contains(lineNum);
           }
           return GutterItem(
+            key: Key('Gutter Item $lineNum'),
             lineNumber: lineNum,
             onPressed: () => onPressed(lineNum),
             isBreakpoint: bpLineSet.contains(lineNum),
@@ -942,7 +943,6 @@ class GutterItem extends StatelessWidget {
           : theme.colorScheme.coverageMissColor;
     }
     return InkWell(
-      key: Key('Gutter Item $lineNumber'),
       onTap: onPressed,
       // Force usage of default mouse pointer when gutter interaction is
       // disabled.
@@ -1067,6 +1067,7 @@ class _LinesState extends State<Lines> with AutoDisposeMixin {
           builder: (context, focusLine, _) {
             final isFocusedLine = focusLine == lineNum;
             return LineItem(
+              key: Key('Line Item $lineNum'),
               lineContents: widget.lines[index],
               pausedFrame: isPausedLine ? pausedFrame : null,
               focused: isPausedLine || isFocusedLine,
