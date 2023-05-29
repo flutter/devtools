@@ -33,7 +33,7 @@ jobs:
       needs-checkout-merge: true
 
   dcm:
-    if: contains(github.event.pull_request.labels.*.name, 'run-dcm-workflow') 
+    if: contains(github.event.pull_request.labels.*.name, 'run-dcm-workflow') || github.event.pull_request.user.login == 'DartDevtoolWorkflowBot'
     name: Dart Code Metrics
     needs: flutter-prep
     runs-on: ubuntu-latest
