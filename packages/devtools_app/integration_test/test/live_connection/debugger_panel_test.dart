@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app/devtools_app.dart';
+import 'package:devtools_app/src/framework/about_dialog.dart';
 import 'package:devtools_app/src/screens/debugger/call_stack.dart';
 import 'package:devtools_app/src/screens/debugger/codeview.dart';
 import 'package:devtools_test/devtools_integration_test.dart';
@@ -28,6 +29,25 @@ void main() {
     await pumpAndConnectDevTools(tester, testApp);
     await switchToScreen(tester, ScreenMetaData.debugger);
     await tester.pump(safePumpDuration);
+
+    // NOTE: The following will be removed. Trying to debug why this fails on CI
+    // but passes locally:
+
+    logStatus('checking DevTools version');
+
+    final aboutButtonFinder = find.descendant(
+      of: find.byType(OpenAboutAction),
+      matching: find.byType(InkWell),
+    );
+
+    await tester.tap(aboutButtonFinder);
+    await tester.pumpAndSettle(safePumpDuration);
+
+    final devToolsVersionText =
+        find.selectableTextContaining('DevTools version');
+    final selectableText =
+        getWidgetFromFinder<SelectableText>(devToolsVersionText);
+    expect(selectableText.data, equals('DevTools version 2.24.0-dev.18'));
 
     logStatus('looking for the main.dart file');
 
