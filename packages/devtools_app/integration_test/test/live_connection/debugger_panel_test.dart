@@ -30,25 +30,6 @@ void main() {
     await switchToScreen(tester, ScreenMetaData.debugger);
     await tester.pump(safePumpDuration);
 
-    // NOTE: The following will be removed. Trying to debug why this fails on CI
-    // but passes locally:
-
-    logStatus('checking DevTools version');
-
-    final aboutButtonFinder = find.descendant(
-      of: find.byType(OpenAboutAction),
-      matching: find.byType(InkWell),
-    );
-
-    await tester.tap(aboutButtonFinder);
-    await tester.pumpAndSettle(safePumpDuration);
-
-    final devToolsVersionText =
-        find.selectableTextContaining('DevTools version');
-    final selectableText =
-        getWidgetFromFinder<SelectableText>(devToolsVersionText);
-    expect(selectableText.data, equals('DevTools version 2.24.0-dev.18'));
-
     logStatus('looking for the main.dart file');
 
     // Look for the main.dart file name:
