@@ -20,6 +20,7 @@ void main() {
     setGlobal(ServiceConnectionManager, FakeServiceManager());
     setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
     setGlobal(PreferencesController, PreferencesController());
+    setGlobal(NotificationService, NotificationService());
   });
   group('test build library display', () {
     late Library testLibCopy;

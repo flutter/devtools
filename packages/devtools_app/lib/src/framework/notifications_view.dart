@@ -197,7 +197,7 @@ class _NotificationState extends State<_Notification>
     with SingleTickerProviderStateMixin {
   late AnimationController controller;
   late CurvedAnimation curve;
-  late Timer _dismissTimer;
+  Timer? _dismissTimer;
 
   @override
   void initState() {
@@ -210,25 +210,28 @@ class _NotificationState extends State<_Notification>
       parent: controller,
       curve: Curves.easeInOutCirc,
     );
+
     // Set up a timer that reverses the entrance animation, and tells the widget
     // to remove itself when the exit animation is completed.
     // We can do this because the NotificationsState is directly controlling
     // the life cycle of each _Notification widget presented in the overlay.
-    _dismissTimer = Timer(widget.message.duration, () {
-      controller.addStatusListener((status) {
-        if (status == AnimationStatus.dismissed) {
-          widget.remove(widget);
-        }
+    if (!widget.message.isDismissible) {
+      _dismissTimer = Timer(widget.message.duration, () {
+        controller.addStatusListener((status) {
+          if (status == AnimationStatus.dismissed) {
+            widget.remove(widget);
+          }
+        });
+        controller.reverse();
       });
-      controller.reverse();
-    });
+    }
     controller.forward();
   }
 
   @override
   void dispose() {
     controller.dispose();
-    _dismissTimer.cancel();
+    _dismissTimer?.cancel();
     super.dispose();
   }
 
