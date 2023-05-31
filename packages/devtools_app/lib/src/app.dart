@@ -8,6 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import 'embedded_ui/embedded_screen.dart';
 import 'example/conditional_screen.dart';
 import 'framework/framework_core.dart';
 import 'framework/initializer.dart';
@@ -184,7 +185,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
     return MaterialPage(
       child: DevToolsScaffold.withChild(
         key: const Key('not-found'),
-        ideTheme: ideTheme,
+        embed: isEmbedded(args),
         child: CenteredMessage("'$page' not found."),
       ),
     );
@@ -197,12 +198,13 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
     DevToolsNavigationState? __,
   ) {
     final vmServiceUri = params['uri'];
+    final embed = isEmbedded(params);
 
     // Always return the landing screen if there's no VM service URI.
     if (vmServiceUri?.isEmpty ?? true) {
       return DevToolsScaffold.withChild(
         key: const Key('landing'),
-        ideTheme: ideTheme,
+        embed: embed,
         child: LandingScreenBody(sampleData: widget.sampleData),
       );
     }
@@ -213,7 +215,6 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
     if (page?.isEmpty ?? true) {
       page = params['page'];
     }
-    final embed = params['embed'] == 'true';
     final hide = {...?params['hide']?.split(',')};
     return Initializer(
       url: vmServiceUri,
@@ -247,7 +248,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
             );
           },
           child: DevToolsScaffold.withChild(
-            ideTheme: ideTheme,
+            embed: embed,
             child: CenteredMessage(
               page != null
                   ? 'The "$page" screen is not available for this application.'
@@ -267,27 +268,40 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
         screen.screen.screenId: _buildTabbedPage,
       snapshotPageId: (_, __, args, ___) {
         final snapshotArgs = OfflineDataArguments.fromArgs(args);
+        final embed = isEmbedded(args);
         return DevToolsScaffold.withChild(
           key: UniqueKey(),
-          ideTheme: ideTheme,
+          embed: embed,
           child: MultiProvider(
             providers: _providedControllers(offline: true),
             child: OfflineScreenBody(snapshotArgs, _screens),
           ),
         );
       },
-      appSizePageId: (_, __, ___, ____) {
+      appSizePageId: (_, __, args, ____) {
+        final embed = isEmbedded(args);
         return DevToolsScaffold.withChild(
           key: const Key('appsize'),
-          ideTheme: ideTheme,
+          embed: embed,
           child: MultiProvider(
             providers: _providedControllers(),
             child: const AppSizeBody(),
           ),
         );
       },
+      embeddedScreenId: (_, __, args, ___) {
+        final id = args['id'];
+        final embed = isEmbedded(args);
+        return DevToolsScaffold.withChild(
+          key: UniqueKey(),
+          embed: embed,
+          child: EmbeddedScreen(id: id),
+        );
+      },
     };
   }
+
+  bool isEmbedded(Map<String, String?> args) => args['embed'] == 'true';
 
   Map<String, UrlParametersBuilder>? _routes;
 

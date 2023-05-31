@@ -20,6 +20,7 @@ const appSizePageId = 'appsize';
 
 const homePageId = '';
 const snapshotPageId = 'snapshot';
+const embeddedScreenId = 'embedded';
 
 /// Represents a Page/route for a DevTools screen.
 class DevToolsRouteConfiguration {

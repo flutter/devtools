@@ -51,12 +51,13 @@ class DevToolsScaffold extends StatefulWidget {
   DevToolsScaffold.withChild({
     Key? key,
     required Widget child,
-    required IdeTheme ideTheme,
+    bool embed = false,
     List<Widget>? actions,
   }) : this(
           key: key,
           screens: [SimpleScreen(child)],
           actions: actions,
+          embed: embed,
         );
 
   /// A [Key] that indicates the scaffold is showing in narrow-width mode.
