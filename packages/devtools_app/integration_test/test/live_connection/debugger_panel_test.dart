@@ -3,8 +3,10 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app/devtools_app.dart';
+import 'package:devtools_app/src/screens/debugger/call_stack.dart';
 import 'package:devtools_app/src/screens/debugger/codeview.dart';
 import 'package:devtools_test/devtools_integration_test.dart';
+import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
@@ -35,9 +37,22 @@ void main() {
     expect(find.text('package:flutter_app/main.dart'), findsOneWidget);
 
     // Look for the main.dart source code:
-    final line1LineFinder = find.byKey(const Key('Line Item 1'));
-    expect(line1LineFinder, findsOneWidget);
-    expect(getSourceCodeAtLine(line1LineFinder), contains('FILE: main.dart'));
+    final firstLineFinder = findLineItemWithText('FILE: main.dart');
+    expect(firstLineFinder, findsOneWidget);
+
+    // Look for the first gutter item:
+    final firstGutterFinder = findGutterItemWithText('1');
+    expect(firstGutterFinder, findsOneWidget);
+
+    // Verify that the gutter item and line item are aligned:
+    expect(
+      areHorizontallyAligned(
+        firstGutterFinder,
+        firstLineFinder,
+        tester: tester,
+      ),
+      isTrue,
+    );
 
     logStatus(
       'opening the "more" menu',
@@ -72,20 +87,29 @@ void main() {
     );
 
     // Look for the line 24 gutter item:
-    final line24GutterFinder = find.byKey(const Key('Gutter Item 24'));
-    expect(line24GutterFinder, findsOneWidget);
+    final gutter24Finder = findGutterItemWithText('24');
+    expect(gutter24Finder, findsOneWidget);
 
     // Look for the line 24 line item:
-    final line24LineFinder = find.byKey(const Key('Line Item 24'));
-    expect(line24LineFinder, findsOneWidget);
-    expect(getSourceCodeAtLine(line24LineFinder), contains('count++;'));
+    final line24Finder = findLineItemWithText('count++;');
+    expect(line24Finder, findsOneWidget);
+
+    // Verify that the gutter item and line item are aligned:
+    expect(
+      areHorizontallyAligned(
+        gutter24Finder,
+        line24Finder,
+        tester: tester,
+      ),
+      isTrue,
+    );
 
     logStatus(
       'setting a breakpoint',
     );
 
     // Tap on the gutter for the line to set a breakpoint:
-    await tester.tap(line24GutterFinder);
+    await tester.tap(gutter24Finder);
     await tester.pumpAndSettle(safePumpDuration);
 
     logStatus(
@@ -94,7 +118,7 @@ void main() {
 
     final frameFinder = findStackFrameWithText('PeriodicAction.doEvery');
     expect(frameFinder, findsOneWidget);
-    expect(isLineFocused(line24LineFinder), isTrue);
+    expect(isLineFocused(line24Finder), isTrue);
 
     logStatus(
       'inspecting variables',
@@ -124,32 +148,59 @@ void main() {
       'looking for the focused line',
     );
 
-    final line40LineFinder = find.byKey(const Key('Line Item 40'));
-    expect(line40LineFinder, findsOneWidget);
-    expect(getSourceCodeAtLine(line40LineFinder), contains('_action();'));
-    expect(isLineFocused(line40LineFinder), isTrue);
+    // Look for the line 40 gutter item:
+    final gutter40Finder = findGutterItemWithText('40');
+    expect(gutter40Finder, findsOneWidget);
+
+    // Look for the line 40 line item:
+    final line40Finder = findLineItemWithText('_action();');
+    expect(line40Finder, findsOneWidget);
+
+    // Verify that the gutter item and line item are aligned:
+    expect(
+      areHorizontallyAligned(
+        gutter40Finder,
+        line40Finder,
+        tester: tester,
+      ),
+      isTrue,
+    );
+
+    // Verify that line 40 is focused:
+    expect(isLineFocused(line40Finder), isTrue);
   });
+}
+
+bool areHorizontallyAligned(
+  Finder widgetAFinder,
+  Finder widgetBFinder, {
+  required WidgetTester tester,
+}) {
+  final widgetACenter = tester.getCenter(widgetAFinder);
+  final widgetBCenter = tester.getCenter(widgetBFinder);
+
+  return widgetACenter.dy == widgetBCenter.dy;
 }
 
 T getWidgetFromFinder<T>(Finder finder) =>
     finder.first.evaluate().first.widget as T;
 
-String getSourceCodeAtLine(Finder lineItemFinder) {
-  final lineWidget = getWidgetFromFinder<LineItem>(lineItemFinder);
-  return lineWidget.lineContents.toPlainText();
-}
+Finder findLineItemWithText(String text) => find.ancestor(
+      of: find.selectableTextContaining(text),
+      matching: find.byType(LineItem),
+    );
+
+Finder findGutterItemWithText(String text) => find.ancestor(
+      of: find.text(text),
+      matching: find.byType(GutterItem),
+    );
 
 bool isLineFocused(Finder lineItemFinder) {
   final lineWidget = getWidgetFromFinder<LineItem>(lineItemFinder);
   return lineWidget.focused;
 }
 
-Finder findStackFrameWithText(String text) => find.byWidgetPredicate(
-      (Widget widget) {
-        if (widget is RichText) {
-          final widgetText = widget.text.toPlainText();
-          return widgetText.contains(text);
-        }
-        return false;
-      },
+Finder findStackFrameWithText(String text) => find.descendant(
+      of: find.byType(CallStack),
+      matching: find.richTextContaining(text),
     );
