@@ -266,7 +266,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
     final args = {'screen': screenId};
     final routerDelegate = DevToolsRouterDelegate.of(context);
     if (!offlineController.offlineMode.value) {
-      routerDelegate.navigate(snapshotPageId, args);
+      routerDelegate.navigate(snapshotScreenId, args);
     } else {
       // If we are already in offline mode, we need to replace the existing page
       // so clicking Back does not go through all of the old snapshots.
@@ -275,7 +275,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
       // history entry.
       Router.neglect(
         context,
-        () => routerDelegate.navigate(snapshotPageId, args),
+        () => routerDelegate.navigate(snapshotScreenId, args),
       );
     }
   }

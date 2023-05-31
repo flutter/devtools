@@ -8,7 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import 'embedded_ui/embedded_screen.dart';
+import 'standalone_ui/standalone_screen.dart';
 import 'example/conditional_screen.dart';
 import 'framework/framework_core.dart';
 import 'framework/initializer.dart';
@@ -263,10 +263,10 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
   /// The pages that the app exposes.
   Map<String, UrlParametersBuilder> get pages {
     return _routes ??= {
-      homePageId: _buildTabbedPage,
+      homeScreenId: _buildTabbedPage,
       for (final screen in widget.screens)
         screen.screen.screenId: _buildTabbedPage,
-      snapshotPageId: (_, __, args, ___) {
+      snapshotScreenId: (_, __, args, ___) {
         final snapshotArgs = OfflineDataArguments.fromArgs(args);
         final embed = isEmbedded(args);
         return DevToolsScaffold.withChild(
@@ -289,13 +289,13 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
           ),
         );
       },
-      embeddedScreenId: (_, __, args, ___) {
+      standaloneScreenId: (_, __, args, ___) {
         final id = args['id'];
         final embed = isEmbedded(args);
         return DevToolsScaffold.withChild(
           key: UniqueKey(),
           embed: embed,
-          child: EmbeddedScreen(id: id),
+          child: StandaloneScreen(id: id),
         );
       },
     };
