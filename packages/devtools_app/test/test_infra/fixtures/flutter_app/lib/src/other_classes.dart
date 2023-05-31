@@ -25,7 +25,7 @@ class NotAWidget {}
 
 // Used class in the sample application that is not a widget.
 //
-// This is a class that can be used to periodically call a function at a set 
+// This is a class that can be used to periodically call a function at a set
 // interval.
 //
 // This is a fairly long description so that we can make sure that scrolling to
