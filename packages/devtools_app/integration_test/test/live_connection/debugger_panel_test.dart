@@ -29,9 +29,7 @@ void main() {
     await switchToScreen(tester, ScreenMetaData.debugger);
     await tester.pump(safePumpDuration);
 
-    logStatus(
-      'looking for the main.dart file',
-    );
+    logStatus('looking for the main.dart file');
 
     // Look for the main.dart file name:
     expect(find.text('package:flutter_app/main.dart'), findsOneWidget);
@@ -54,27 +52,21 @@ void main() {
       isTrue,
     );
 
-    logStatus(
-      'opening the "more" menu',
-    );
+    logStatus('opening the "more" menu');
 
     final moreMenuFinder = find.byType(PopupMenuButton<ScriptPopupMenuOption>);
     expect(moreMenuFinder, findsOneWidget);
     await tester.tap(moreMenuFinder);
     await tester.pumpAndSettle(safePumpDuration);
 
-    logStatus(
-      'selecting the go-to-line menu option',
-    );
+    logStatus('selecting the go-to-line menu option');
 
     final goToLineOptionFinder = find.textContaining('Go to line number');
     expect(goToLineOptionFinder, findsOneWidget);
     await tester.tap(goToLineOptionFinder);
     await tester.pumpAndSettle(safePumpDuration);
 
-    logStatus(
-      'entering line number in the go-to-line dialog',
-    );
+    logStatus('entering line number in the go-to-line dialog');
 
     final goToLineInputFinder = find.widgetWithText(TextField, 'Line Number');
     expect(goToLineInputFinder, findsOneWidget);
@@ -82,9 +74,7 @@ void main() {
     await tester.testTextInput.receiveAction(TextInputAction.done);
     await tester.pumpAndSettle(safePumpDuration);
 
-    logStatus(
-      'looking for line 24',
-    );
+    logStatus('looking for line 24');
 
     // Look for the line 24 gutter item:
     final gutter24Finder = findGutterItemWithText('24');
@@ -104,49 +94,37 @@ void main() {
       isTrue,
     );
 
-    logStatus(
-      'setting a breakpoint',
-    );
+    logStatus('setting a breakpoint');
 
     // Tap on the gutter for the line to set a breakpoint:
     await tester.tap(gutter24Finder);
     await tester.pumpAndSettle(safePumpDuration);
 
-    logStatus(
-      'pausing at breakpoint',
-    );
+    logStatus('pausing at breakpoint');
 
     final frameFinder = findStackFrameWithText('PeriodicAction.doEvery');
     expect(frameFinder, findsOneWidget);
     expect(isLineFocused(line24Finder), isTrue);
 
-    logStatus(
-      'inspecting variables',
-    );
+    logStatus('inspecting variables');
 
     final countVariableFinder = find.textContaining('count:');
     expect(countVariableFinder, findsOneWidget);
 
-    logStatus(
-      'switching stackframes',
-    );
+    logStatus('switching stackframes');
 
     // Tap on the stackframe:
     await tester.tap(frameFinder);
     await tester.pump(safePumpDuration);
 
-    logStatus(
-      'looking for the other_classes.dart file',
-    );
+    logStatus('looking for the other_classes.dart file');
 
     expect(
       find.text('package:flutter_app/src/other_classes.dart'),
       findsOneWidget,
     );
 
-    logStatus(
-      'looking for the focused line',
-    );
+    logStatus('looking for the focused line');
 
     // Look for the line 40 gutter item:
     final gutter40Finder = findGutterItemWithText('40');
