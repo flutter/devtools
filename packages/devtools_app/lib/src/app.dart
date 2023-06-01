@@ -8,7 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import 'standalone_ui/standalone_screen.dart';
+import 'shared/feature_flags.dart';
 import 'example/conditional_screen.dart';
 import 'framework/framework_core.dart';
 import 'framework/initializer.dart';
@@ -50,6 +50,7 @@ import 'shared/routing.dart';
 import 'shared/screen.dart';
 import 'shared/theme.dart';
 import 'shared/ui/hover.dart';
+import 'standalone_ui/standalone_screen.dart';
 
 // Assign to true to use a sample implementation of a conditional screen.
 // WARNING: Do not check in this file if debugEnableSampleScreen is true.
@@ -289,7 +290,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
           ),
         );
       },
-      ..._standaloneScreens,
+      if (FeatureFlags.vsCodeSidebarTooling) ..._standaloneScreens,
     };
   }
 

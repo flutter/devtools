@@ -13,7 +13,6 @@ import '../shared/analytics/prompt.dart';
 import '../shared/banner_messages.dart';
 import '../shared/common_widgets.dart';
 import '../shared/config_specific/drag_and_drop/drag_and_drop.dart';
-import '../shared/config_specific/ide_theme/ide_theme.dart';
 import '../shared/config_specific/import_export/import_export.dart';
 import '../shared/console/widgets/console_pane.dart';
 import '../shared/framework_controller.dart';
