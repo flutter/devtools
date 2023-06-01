@@ -20,6 +20,8 @@ class CallStack extends StatefulWidget {
 
 class _CallStackState extends State<CallStack>
     with ProvidedControllerMixin<DebuggerController, CallStack> {
+  StackFrameAndSourcePosition? selectedFrame;
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -28,17 +30,18 @@ class _CallStackState extends State<CallStack>
 
   @override
   Widget build(BuildContext context) {
-    return DualValueListenableBuilder<List<StackFrameAndSourcePosition>,
-        StackFrameAndSourcePosition?>(
-      firstListenable: controller.stackFramesWithLocation,
-      secondListenable: controller.selectedStackFrame,
-      builder: (context, stackFrames, selectedFrame, _) {
+    return ValueListenableBuilder<List<StackFrameAndSourcePosition>>(
+      valueListenable: controller.stackFramesWithLocation,
+      builder: (context, stackFrames, _) {
         return ListView.builder(
           itemCount: stackFrames.length,
           itemExtent: defaultListItemHeight,
           itemBuilder: (_, index) {
             final frame = stackFrames[index];
-            return _buildStackFrame(frame, frame == selectedFrame);
+            return _buildStackFrame(
+              frame,
+              frame == selectedFrame,
+            );
           },
         );
       },
@@ -119,6 +122,9 @@ class _CallStackState extends State<CallStack>
   }
 
   Future<void> _onStackFrameSelected(StackFrameAndSourcePosition frame) async {
+    setState(() {
+      selectedFrame = frame;
+    });
     await controller.selectStackFrame(frame);
   }
 }
