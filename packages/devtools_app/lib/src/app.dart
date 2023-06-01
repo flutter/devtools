@@ -8,7 +8,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import 'shared/feature_flags.dart';
 import 'example/conditional_screen.dart';
 import 'framework/framework_core.dart';
 import 'framework/initializer.dart';
@@ -42,6 +41,7 @@ import 'shared/analytics/analytics_controller.dart';
 import 'shared/analytics/metrics.dart';
 import 'shared/common_widgets.dart';
 import 'shared/console/primitives/simple_items.dart';
+import 'shared/feature_flags.dart';
 import 'shared/globals.dart';
 import 'shared/offline_screen.dart';
 import 'shared/primitives/auto_dispose.dart';
