@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter/material.dart' hide Stack;
 import 'package:vm_service/vm_service.dart';
 
@@ -20,7 +22,7 @@ class CallStack extends StatefulWidget {
 
 class _CallStackState extends State<CallStack>
     with ProvidedControllerMixin<DebuggerController, CallStack> {
-  StackFrameAndSourcePosition? selectedFrame;
+  StackFrameAndSourcePosition? _clickedOnFrame;
 
   @override
   void didChangeDependencies() {
@@ -30,15 +32,20 @@ class _CallStackState extends State<CallStack>
 
   @override
   Widget build(BuildContext context) {
-    return ValueListenableBuilder<List<StackFrameAndSourcePosition>>(
-      valueListenable: controller.stackFramesWithLocation,
-      builder: (context, stackFrames, _) {
+    return DualValueListenableBuilder<List<StackFrameAndSourcePosition>,
+        StackFrameAndSourcePosition?>(
+      firstListenable: controller.stackFramesWithLocation,
+      secondListenable: controller.selectedStackFrame,
+      builder: (context, stackFrames, selectedFrame, _) {
         return ListView.builder(
           itemCount: stackFrames.length,
           itemExtent: defaultListItemHeight,
           itemBuilder: (_, index) {
             final frame = stackFrames[index];
-            return _buildStackFrame(frame, frame == selectedFrame);
+            return _buildStackFrame(
+              frame,
+              frame == selectedFrame || frame == _clickedOnFrame,
+            );
           },
         );
       },
@@ -120,7 +127,12 @@ class _CallStackState extends State<CallStack>
 
   Future<void> _onStackFrameSelected(StackFrameAndSourcePosition frame) async {
     setState(() {
-      selectedFrame = frame;
+      _clickedOnFrame = frame;
+      // After 1 second, remove the indicator that the frame was clicked to
+      // avoid stale state.
+      Timer(const Duration(seconds: 1), () {
+        _clickedOnFrame = null;
+      });
     });
     await controller.selectStackFrame(frame);
   }
