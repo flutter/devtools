@@ -38,10 +38,7 @@ class _CallStackState extends State<CallStack>
           itemExtent: defaultListItemHeight,
           itemBuilder: (_, index) {
             final frame = stackFrames[index];
-            return _buildStackFrame(
-              frame,
-              frame == selectedFrame,
-            );
+            return _buildStackFrame(frame, frame == selectedFrame);
           },
         );
       },
