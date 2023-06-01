@@ -54,7 +54,7 @@ abstract class FeatureFlags {
   static bool widgetRebuildstats = enableExperiments;
 
   /// Flag to enable VS code sidebar tooling GUIs powered by DevTools.
-  /// 
+  ///
   /// https://github.com/flutter/devtools/issues/5868.
   static bool vsCodeSidebarTooling = enableExperiments;
 
