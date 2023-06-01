@@ -6,32 +6,12 @@ import 'package:flutter/material.dart';
 
 import 'vs_code/flutter_panel.dart';
 
-/// A "screen" that is intended for standalone use only, likely for embedding
+/// "Screens" that are intended for standalone use only, likely for embedding
 /// directly in an IDE.
 ///
 /// A standalone screen is one that will only be available at a specific route,
 /// meaning that this screen will not be part of DevTools' normal navigation.
 /// The only way to access a standalone screen is directly from the url.
-class StandaloneScreen extends StatefulWidget {
-  const StandaloneScreen({super.key, required this.id});
-
-  final String? id;
-
-  @override
-  State<StandaloneScreen> createState() => _StandaloneScreenState();
-}
-
-class _StandaloneScreenState extends State<StandaloneScreen> {
-  @override
-  Widget build(BuildContext context) {
-    final type = StandaloneScreenType.parse(widget.id);
-    if (type == null) {
-      return Text('Unknown view id: "${widget.id}"');
-    }
-    return type.screen;
-  }
-}
-
 enum StandaloneScreenType {
   vsCodeFlutterPanel;
 

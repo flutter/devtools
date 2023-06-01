@@ -278,7 +278,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
           ),
         );
       },
-      appSizePageId: (_, __, args, ____) {
+      appSizeScreenId: (_, __, args, ____) {
         final embed = isEmbedded(args);
         return DevToolsScaffold.withChild(
           key: const Key('appsize'),
@@ -289,15 +289,21 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
           ),
         );
       },
-      standaloneScreenId: (_, __, args, ___) {
-        final id = args['id'];
-        final embed = isEmbedded(args);
-        return DevToolsScaffold.withChild(
-          key: UniqueKey(),
-          embed: embed,
-          child: StandaloneScreen(id: id),
-        );
-      },
+      ..._standaloneScreens,
+    };
+  }
+
+  Map<String, UrlParametersBuilder> get _standaloneScreens {
+    return {
+      for (final type in StandaloneScreenType.values)
+        type.name: (_, __, args, ___) {
+          final embed = isEmbedded(args);
+          return DevToolsScaffold.withChild(
+            key: UniqueKey(),
+            embed: embed,
+            child: type.screen,
+          );
+        },
     };
   }
 

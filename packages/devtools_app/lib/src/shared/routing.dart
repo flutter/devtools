@@ -16,7 +16,7 @@ import 'primitives/utils.dart';
 ///
 /// This must be different to the AppSizeScreen ID which is also used in routing when
 /// cnnected to a VM to ensure they have unique URLs.
-const appSizePageId = 'appsize';
+const appSizeScreenId = 'appsize';
 
 const homeScreenId = '';
 const snapshotScreenId = 'snapshot';
