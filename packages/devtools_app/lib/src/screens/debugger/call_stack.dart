@@ -44,7 +44,9 @@ class _CallStackState extends State<CallStack>
             final frame = stackFrames[index];
             return _buildStackFrame(
               frame,
-              frame == selectedFrame || frame == _clickedOnFrame,
+              _clickedOnFrame != null
+                  ? frame == _clickedOnFrame
+                  : frame == selectedFrame,
             );
           },
         );
