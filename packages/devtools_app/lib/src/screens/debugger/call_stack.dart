@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter/material.dart' hide Stack;
 import 'package:vm_service/vm_service.dart';
 
@@ -20,6 +22,8 @@ class CallStack extends StatefulWidget {
 
 class _CallStackState extends State<CallStack>
     with ProvidedControllerMixin<DebuggerController, CallStack> {
+  StackFrameAndSourcePosition? _clickedOnFrame;
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -38,7 +42,12 @@ class _CallStackState extends State<CallStack>
           itemExtent: defaultListItemHeight,
           itemBuilder: (_, index) {
             final frame = stackFrames[index];
-            return _buildStackFrame(frame, frame == selectedFrame);
+            return _buildStackFrame(
+              frame,
+              _clickedOnFrame != null
+                  ? frame == _clickedOnFrame
+                  : frame == selectedFrame,
+            );
           },
         );
       },
@@ -119,6 +128,14 @@ class _CallStackState extends State<CallStack>
   }
 
   Future<void> _onStackFrameSelected(StackFrameAndSourcePosition frame) async {
+    setState(() {
+      _clickedOnFrame = frame;
+      // After 1 second, remove the indicator that the frame was clicked to
+      // avoid stale state.
+      Timer(const Duration(seconds: 1), () {
+        _clickedOnFrame = null;
+      });
+    });
     await controller.selectStackFrame(frame);
   }
 }
