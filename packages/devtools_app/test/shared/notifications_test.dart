@@ -56,35 +56,58 @@ void main() {
       expect(find.text(notification), findsNWidgets(2));
     });
 
-    testWidgets('notifications can be dismissed', (WidgetTester tester) async {
-      const notification = 'This is a notification!';
-      await showNotification(
-        () => notificationService.push(notification, isDismissible: true),
-        tester: tester,
-      );
+    testWidgets(
+      'dismissible notifications can be dismissed',
+      (WidgetTester tester) async {
+        const notification = 'This is a notification!';
+        await showNotification(
+          () => notificationService.push(notification, isDismissible: true),
+          tester: tester,
+        );
 
-      final closeButton = find.byType(IconButton);
-      expect(closeButton, findsOneWidget);
-      await tester.tap(closeButton);
+        final closeButton = find.byType(IconButton);
+        expect(closeButton, findsOneWidget);
+        await tester.tap(closeButton);
 
-      // Verify the notification has been dismissed:
-      await tester.pumpAndSettle();
-      expect(find.text(notification), findsNothing);
-    });
+        // Verify the notification has been dismissed:
+        await tester.pumpAndSettle();
+        expect(find.text(notification), findsNothing);
+      },
+    );
 
-    testWidgets('notifications expire', (WidgetTester tester) async {
-      const notification = 'This is a notification!';
-      await showNotification(
-        () => notificationService.push(notification),
-        tester: tester,
-      );
+    testWidgets(
+      'non-dismissible notifications expire',
+      (WidgetTester tester) async {
+        const notification = 'This is a notification!';
+        await showNotification(
+          () => notificationService.push(notification),
+          tester: tester,
+        );
 
-      expect(find.text(notification), findsOneWidget);
+        expect(find.text(notification), findsOneWidget);
 
-      // Wait for the notification to disappear.
-      await tester.pumpAndSettle(NotificationMessage.defaultDuration);
-      expect(find.text(notification), findsNothing);
-    });
+        // Wait for the notification to disappear.
+        await tester.pumpAndSettle(NotificationMessage.defaultDuration);
+        expect(find.text(notification), findsNothing);
+      },
+    );
+
+    testWidgets(
+      'dismissible notifications do not expire',
+      (WidgetTester tester) async {
+        const notification = 'This is a notification!';
+        await showNotification(
+          () => notificationService.push(notification, isDismissible: true),
+          tester: tester,
+        );
+
+        // Wait for the default dismiss duration.
+        await tester.pumpAndSettle(NotificationMessage.defaultDuration);
+
+        // Verify the notification is still there.
+        expect(find.text(notification), findsOneWidget);
+      },
+    );
 
     testWidgets('persist across routes', (WidgetTester tester) async {
       const notification = 'Navigating to /details';

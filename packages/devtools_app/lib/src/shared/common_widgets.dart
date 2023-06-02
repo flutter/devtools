@@ -241,7 +241,8 @@ class DevToolsButton extends StatelessWidget {
                 onPressed: onPressedHandler,
                 style: denseAwareTextButtonStyle(
                   context,
-                  minScreenWidthForTextBeforeScaling,
+                  minScreenWidthForTextBeforeScaling:
+                      minScreenWidthForTextBeforeScaling,
                 ),
                 child: iconLabel,
               ),
@@ -789,6 +790,7 @@ class ToolbarAction extends StatelessWidget {
     Key? key,
     this.size,
     this.style,
+    this.color,
     this.gaScreen,
     this.gaSelection,
   })  : assert((gaScreen == null) == (gaSelection == null)),
@@ -796,6 +798,7 @@ class ToolbarAction extends StatelessWidget {
 
   final TextStyle? style;
   final IconData icon;
+  final Color? color;
   final String? tooltip;
   final VoidCallback? onPressed;
   final double? size;
@@ -819,7 +822,7 @@ class ToolbarAction extends StatelessWidget {
       child: Icon(
         icon,
         size: size ?? actionsIconSize,
-        color: style?.color ?? Theme.of(context).colorScheme.onSurface,
+        color: color ?? Theme.of(context).colorScheme.onSurface,
       ),
     );
 
@@ -2031,10 +2034,8 @@ class CopyToClipboardControl extends StatelessWidget {
     this.size,
     this.gaScreen,
     this.gaItem,
-    this.style,
   });
 
-  final TextStyle? style;
   final ClipboardDataProvider? dataProvider;
   final String? successMessage;
   final String tooltip;
@@ -2062,7 +2063,6 @@ class CopyToClipboardControl extends StatelessWidget {
       onPressed: onPressed,
       key: buttonKey,
       size: size,
-      style: style,
     );
   }
 }
@@ -2624,33 +2624,37 @@ class RadioButton<T> extends StatelessWidget {
 class ContextMenuButton extends StatelessWidget {
   ContextMenuButton({
     super.key,
-    required this.menu,
-    this.style,
+    required this.menuChildren,
+    this.color,
     this.gaScreen,
     this.gaItem,
-    double? size,
-  }) : size = size ?? tableIconSize;
+    this.buttonWidth = defaultWidth,
+    this.icon = Icons.more_vert,
+    double? iconSize,
+  }) : iconSize = iconSize ?? tableIconSize;
 
-  static const double width = 14;
-
-  final TextStyle? style;
+  final Color? color;
   final String? gaScreen;
   final String? gaItem;
-  final List<Widget> menu;
-  final double size;
+  final List<Widget> menuChildren;
+  final IconData icon;
+  final double iconSize;
+  final double buttonWidth;
+
+  static const double defaultWidth = 14.0;
 
   @override
   Widget build(BuildContext context) {
     return MenuAnchor(
-      menuChildren: menu,
+      menuChildren: menuChildren,
       builder:
           (BuildContext context, MenuController controller, Widget? child) {
         return SizedBox(
-          width: width,
+          width: buttonWidth,
           child: ToolbarAction(
-            icon: Icons.more_vert,
-            size: size,
-            style: style,
+            icon: icon,
+            size: iconSize,
+            color: color,
             onPressed: () {
               if (gaScreen != null && gaItem != null) {
                 ga.select(gaScreen!, gaItem!);
