@@ -531,12 +531,7 @@ class DebuggerController extends DisposableController
   }
 
   Future<void> selectStackFrame(StackFrameAndSourcePosition? frame) async {
-    _selectedStackFrame.value = frame;
-
-    serviceManager.appState.setVariables(
-      frame != null ? _createVariablesForFrame(frame.frame) : [],
-    );
-
+    // Load the new script location:
     final scriptRef = frame?.scriptRef;
     final position = frame?.position;
     if (scriptRef != null && position != null) {
@@ -544,6 +539,12 @@ class DebuggerController extends DisposableController
         ScriptLocation(scriptRef, location: position),
       );
     }
+    // Update the variables for the stack frame:
+    serviceManager.appState.setVariables(
+      frame != null ? _createVariablesForFrame(frame.frame) : [],
+    );
+    // Notify that the stack frame has been succesfully selected:
+    _selectedStackFrame.value = frame;
   }
 
   List<DartObjectNode> _createVariablesForFrame(Frame frame) {
