@@ -209,7 +209,7 @@ class PerformanceController extends DisposableController
   Future<void> _applyToFeatureControllersAsync(
     FutureOr<void> Function(PerformanceFeatureController) callback,
   ) async {
-    Future<void> _helper(
+    Future<void> helper(
       FutureOr<void> Function(PerformanceFeatureController) futureOr,
       PerformanceFeatureController controller,
     ) async {
@@ -218,7 +218,7 @@ class PerformanceController extends DisposableController
 
     final futures = <Future<void>>[];
     for (final controller in _featureControllers) {
-      futures.add(_helper(callback, controller));
+      futures.add(helper(callback, controller));
     }
     await Future.wait(futures);
   }

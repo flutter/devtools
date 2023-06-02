@@ -59,7 +59,7 @@ class VMDeveloperToolsScreen extends Screen {
 }
 
 class VMDeveloperToolsScreenBody extends StatefulWidget {
-  const VMDeveloperToolsScreenBody();
+  const VMDeveloperToolsScreenBody({super.key});
 
   static List<VMDeveloperView> views = [
     const VMStatisticsView(),
@@ -68,7 +68,8 @@ class VMDeveloperToolsScreenBody extends StatefulWidget {
   ];
 
   @override
-  _VMDeveloperToolsScreenState createState() => _VMDeveloperToolsScreenState();
+  State<VMDeveloperToolsScreenBody> createState() =>
+      _VMDeveloperToolsScreenState();
 }
 
 class _VMDeveloperToolsScreenState extends State<VMDeveloperToolsScreenBody>
@@ -92,7 +93,6 @@ class _VMDeveloperToolsScreenState extends State<VMDeveloperToolsScreenBody>
             if (VMDeveloperToolsScreenBody.views.length > 1)
               NavigationRail(
                 selectedIndex: selectedIndex,
-                elevation: 10.0,
                 labelType: NavigationRailLabelType.all,
                 onDestinationSelected: controller.selectIndex,
                 destinations: [

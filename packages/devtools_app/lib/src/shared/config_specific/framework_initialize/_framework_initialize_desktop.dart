@@ -68,6 +68,6 @@ class FlutterDesktopStorage implements Storage {
     final String envKey =
         Platform.operatingSystem == 'windows' ? 'APPDATA' : 'HOME';
     final String? value = Platform.environment[envKey];
-    return value == null ? '.' : value;
+    return value ?? '.';
   }
 }

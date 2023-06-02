@@ -20,7 +20,7 @@ void main() {
   FakeServiceManager fakeServiceManager;
   late PerformanceController controller;
 
-  void _setUpServiceManagerWithTimeline(
+  void setUpServiceManagerWithTimeline(
     Map<String, dynamic> timelineJson,
   ) {
     fakeServiceManager = FakeServiceManager(
@@ -45,7 +45,7 @@ void main() {
 
   group('$TimelineEventsView', () {
     setUp(() {
-      _setUpServiceManagerWithTimeline(testTimelineJson);
+      setUpServiceManagerWithTimeline(testTimelineJson);
     });
 
     Future<void> pumpPerformanceScreenBody(
@@ -80,7 +80,7 @@ void main() {
       windowSize,
       (WidgetTester tester) async {
         await tester.runAsync(() async {
-          _setUpServiceManagerWithTimeline({});
+          setUpServiceManagerWithTimeline({});
           await pumpPerformanceScreenBody(tester);
           expect(find.byType(RefreshTimelineEventsButton), findsOneWidget);
           expect(
@@ -97,7 +97,7 @@ void main() {
       windowSize,
       (WidgetTester tester) async {
         await tester.runAsync(() async {
-          _setUpServiceManagerWithTimeline({});
+          setUpServiceManagerWithTimeline({});
           await pumpPerformanceScreenBody(tester);
 
           final helpButtonFinder = find.byType(FlameChartHelpButton);
@@ -137,7 +137,7 @@ void main() {
       windowSize,
       (WidgetTester tester) async {
         await tester.runAsync(() async {
-          _setUpServiceManagerWithTimeline({});
+          setUpServiceManagerWithTimeline({});
           await pumpPerformanceScreenBody(tester);
           expect(
             find.byKey(TimelineEventsView.emptyTimelineKey),

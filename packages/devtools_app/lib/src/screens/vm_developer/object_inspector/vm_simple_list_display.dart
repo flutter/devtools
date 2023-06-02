@@ -17,6 +17,7 @@ import 'vm_object_model.dart';
 /// related to list-like VM objects (e.g., subtype test cache, WeakArray, etc).
 class VmSimpleListDisplay<T extends VmListObject> extends StatefulWidget {
   const VmSimpleListDisplay({
+    super.key,
     required this.controller,
     required this.vmObject,
   });
@@ -80,8 +81,9 @@ class _VmSimpleListDisplayState extends State<VmSimpleListDisplay> {
     return FutureBuilder<void>(
       future: _initialized,
       builder: (context, snapshot) {
-        if (snapshot.connectionState != ConnectionState.done)
+        if (snapshot.connectionState != ConnectionState.done) {
           return const CenteredCircularProgressIndicator();
+        }
         return VmObjectDisplayBasicLayout(
           controller: widget.controller,
           object: widget.vmObject,

@@ -17,7 +17,7 @@ class LogDetails extends StatefulWidget {
   final LogData? log;
 
   @override
-  _LogDetailsState createState() => _LogDetailsState();
+  State<LogDetails> createState() => _LogDetailsState();
 
   static const copyToClipboardButtonKey =
       Key('log_details_copy_to_clipboard_button');
@@ -106,9 +106,9 @@ class _LogDetailsHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    String? Function()? _dataProvider;
+    String? Function()? dataProvider;
     if (log?.details != null && log!.details!.isNotEmpty) {
-      _dataProvider = log!.prettyPrinted;
+      dataProvider = log!.prettyPrinted;
     }
     return AreaPaneHeader(
       title: const Text('Details'),
@@ -116,7 +116,7 @@ class _LogDetailsHeader extends StatelessWidget {
       roundedTopBorder: false,
       actions: [
         CopyToClipboardControl(
-          dataProvider: _dataProvider,
+          dataProvider: dataProvider,
           buttonKey: LogDetails.copyToClipboardButtonKey,
         ),
       ],

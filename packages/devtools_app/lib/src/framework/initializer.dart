@@ -53,7 +53,7 @@ class Initializer extends StatefulWidget {
   final bool allowConnectionScreenOnDisconnect;
 
   @override
-  _InitializerState createState() => _InitializerState();
+  State<Initializer> createState() => _InitializerState();
 }
 
 class _InitializerState extends State<Initializer>
@@ -135,7 +135,10 @@ class _InitializerState extends State<Initializer>
     }
 
     errorReporter ??= (String message, Object error) {
-      notificationService.push('$message, $error');
+      notificationService.pushError(
+        '$message, $error',
+        isReportable: false,
+      );
     };
 
     final uri = normalizeVmServiceUri(widget.url!);

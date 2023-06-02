@@ -75,20 +75,17 @@ class AnalyticsTabbedView<T> extends StatefulWidget {
   AnalyticsTabbedView({
     Key? key,
     required this.tabs,
-    required this.tabViews,
     required this.gaScreen,
     this.sendAnalytics = true,
     this.onTabChanged,
     this.initialSelectedIndex,
   })  : trailingWidgets = List.generate(
           tabs.length,
-          (index) => tabs[index].trailing ?? const SizedBox(),
+          (index) => tabs[index].tab.trailing ?? const SizedBox(),
         ),
         super(key: key);
 
-  final List<DevToolsTab> tabs;
-
-  final List<Widget> tabViews;
+  final List<({DevToolsTab tab, Widget tabView})> tabs;
 
   final String gaScreen;
 
@@ -105,7 +102,7 @@ class AnalyticsTabbedView<T> extends StatefulWidget {
   final void Function(int)? onTabChanged;
 
   @override
-  _AnalyticsTabbedViewState createState() => _AnalyticsTabbedViewState();
+  State<AnalyticsTabbedView> createState() => _AnalyticsTabbedViewState();
 }
 
 class _AnalyticsTabbedViewState extends State<AnalyticsTabbedView>
@@ -138,7 +135,7 @@ class _AnalyticsTabbedViewState extends State<AnalyticsTabbedView>
     if (widget.sendAnalytics) {
       ga.select(
         widget.gaScreen,
-        widget.tabs[_currentTabControllerIndex].gaId,
+        widget.tabs[_currentTabControllerIndex].tab.gaId,
         nonInteraction: true,
       );
     }
@@ -154,7 +151,7 @@ class _AnalyticsTabbedViewState extends State<AnalyticsTabbedView>
       if (widget.sendAnalytics) {
         ga.select(
           widget.gaScreen,
-          widget.tabs[_currentTabControllerIndex].gaId,
+          widget.tabs[_currentTabControllerIndex].tab.gaId,
         );
       }
     }
@@ -194,7 +191,7 @@ class _AnalyticsTabbedViewState extends State<AnalyticsTabbedView>
               child: TabBar(
                 labelColor: Theme.of(context).textTheme.bodyLarge?.color,
                 controller: _tabController,
-                tabs: widget.tabs,
+                tabs: widget.tabs.map((t) => t.tab).toList(),
                 isScrollable: true,
               ),
             ),
@@ -213,21 +210,11 @@ class _AnalyticsTabbedViewState extends State<AnalyticsTabbedView>
             child: TabBarView(
               physics: defaultTabBarViewPhysics,
               controller: _tabController,
-              children: widget.tabViews,
+              children: widget.tabs.map((t) => t.tabView).toList(),
             ),
           ),
         ],
       ),
     );
   }
-}
-
-class TabRecord {
-  TabRecord({
-    required this.tab,
-    required this.tabView,
-  });
-
-  final DevToolsTab tab;
-  final Widget tabView;
 }

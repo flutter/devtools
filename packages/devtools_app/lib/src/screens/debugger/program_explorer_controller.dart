@@ -119,7 +119,7 @@ class ProgramExplorerController extends DisposableController
     ScriptRef? script,
     List<VMServiceObjectNode> nodes,
   ) async {
-    final searchCondition = (node) => node.script?.uri == script!.uri;
+    bool searchCondition(node) => node.script?.uri == script!.uri;
     for (final node in nodes) {
       final result = node.firstChildWithCondition(searchCondition);
       if (result != null) {
@@ -139,7 +139,7 @@ class ProgramExplorerController extends DisposableController
   }
 
   int _calculateNodeIndex({
-    bool matchingNodeCondition(VMServiceObjectNode node)?,
+    bool Function(VMServiceObjectNode node)? matchingNodeCondition,
     bool includeCollapsedNodes = true,
   }) {
     // Index tracks the position of the node in the flat-list representation of
@@ -344,10 +344,10 @@ class ProgramExplorerController extends DisposableController
     // Otherwise, we need to find the target script to determine the library
     // the target node is listed under.
     final ScriptRef? targetScript = switch (object) {
-      // TODO(https://github.com/dart-lang/sdk/issues/52099): merge these cases.
-      ClassRef(:final location?) => location.script,
-      FieldRef(:final location?) => location.script,
-      FuncRef(:final location?) => location.script,
+      ClassRef(:final location?) ||
+      FieldRef(:final location?) ||
+      FuncRef(:final location?) =>
+        location.script,
       Code(:final function?) => function.location?.script,
       ScriptRef() => object,
       _ => null,

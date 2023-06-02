@@ -25,7 +25,7 @@ void main() {
   final allocationJson =
       AllocationMemoryJson.decode(argJsonString: testAllocationData);
 
-  void _setUpServiceManagerForMemory() {
+  void setUpServiceManagerForMemory() {
     fakeServiceManager = FakeServiceManager(
       service: FakeServiceManager.createFakeService(
         memoryData: memoryJson,
@@ -79,7 +79,7 @@ void main() {
       setGlobal(NotificationService, NotificationService());
       screen = MemoryScreen();
       controller = MemoryController();
-      _setUpServiceManagerForMemory();
+      setUpServiceManagerForMemory();
     });
 
     testWidgets('builds its tab', (WidgetTester tester) async {

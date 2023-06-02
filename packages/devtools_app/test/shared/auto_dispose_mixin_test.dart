@@ -11,17 +11,17 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../test_infra/fixtures/debugging_app_async.dart';
 
+class AutoDisposeContoller extends DisposableController
+    with AutoDisposeControllerMixin {}
+
 class AutoDisposedWidget extends StatefulWidget {
   const AutoDisposedWidget(this.stream, {Key? key}) : super(key: key);
 
   final Stream stream;
 
   @override
-  _AutoDisposedWidgetState createState() => _AutoDisposedWidgetState();
+  State<AutoDisposedWidget> createState() => _AutoDisposedWidgetState();
 }
-
-class AutoDisposeContoller extends DisposableController
-    with AutoDisposeControllerMixin {}
 
 class _AutoDisposedWidgetState extends State<AutoDisposedWidget>
     with AutoDisposeMixin {
@@ -120,9 +120,10 @@ void main() {
       final disposer = Disposer();
       final notifier = ValueNotifier<int>(42);
       final values = <int>[];
-      final listener = () {
+      void listener() {
         values.add(notifier.value);
-      };
+      }
+
       disposer.addAutoDisposeListener(notifier, listener);
       expect(notifier.hasListeners, isTrue);
       notifier.value = 13;

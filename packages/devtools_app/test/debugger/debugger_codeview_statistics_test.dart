@@ -24,7 +24,7 @@ void main() {
     fakeServiceManager = FakeServiceManager();
     codeViewController = createMockCodeViewControllerWithDefaults();
     debuggerController = createMockDebuggerControllerWithDefaults(
-      mockCodeViewController: codeViewController,
+      codeViewController: codeViewController,
     );
     scriptsHistory = ScriptsHistory();
 

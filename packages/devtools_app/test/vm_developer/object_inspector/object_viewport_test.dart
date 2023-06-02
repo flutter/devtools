@@ -35,6 +35,7 @@ void main() {
     setGlobal(BreakpointManager, BreakpointManager());
     setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
     setGlobal(PreferencesController, PreferencesController());
+    setGlobal(NotificationService, NotificationService());
 
     testObjectInspectorViewController = TestObjectInspectorViewController();
   });

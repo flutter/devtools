@@ -195,11 +195,11 @@ Future<EnumInstance?> _tryParseEnum(
         ?.value;
   }
 
-  final _nameRef = findPropertyWithName('_name');
+  final nameRef = findPropertyWithName('_name');
   final indexRef = findPropertyWithName('index');
-  if (_nameRef == null || indexRef == null) return null;
+  if (nameRef == null || indexRef == null) return null;
 
-  final nameInstanceFuture = eval.safeGetInstance(_nameRef, isAlive);
+  final nameInstanceFuture = eval.safeGetInstance(nameRef, isAlive);
   final indexInstanceFuture = eval.safeGetInstance(indexRef, isAlive);
 
   final index = await indexInstanceFuture;

@@ -104,7 +104,7 @@ class InstanceViewer extends ConsumerStatefulWidget {
   final bool showInternalProperties;
 
   @override
-  _InstanceViewerState createState() => _InstanceViewerState();
+  ConsumerState<ConsumerStatefulWidget> createState() => _InstanceViewerState();
 }
 
 class _InstanceViewerState extends ConsumerState<InstanceViewer> {

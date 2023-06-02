@@ -34,7 +34,7 @@ class _IntervalDropdownState extends State<IntervalDropdown>
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
 
-    final _displayTypes =
+    final displayTypes =
         ChartInterval.values.map<DropdownMenuItem<ChartInterval>>(
       (
         ChartInterval value,
@@ -65,7 +65,7 @@ class _IntervalDropdownState extends State<IntervalDropdown>
           widget.chartController.android.zoomDuration = duration;
         });
       },
-      items: _displayTypes,
+      items: displayTypes,
     );
   }
 }

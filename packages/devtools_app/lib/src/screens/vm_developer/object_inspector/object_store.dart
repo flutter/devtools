@@ -56,6 +56,7 @@ class _ObjectColumn extends ColumnData<ObjectStoreEntry>
 
 class ObjectStoreViewer extends StatelessWidget {
   ObjectStoreViewer({
+    super.key,
     required this.onLinkTapped,
     required this.controller,
   });

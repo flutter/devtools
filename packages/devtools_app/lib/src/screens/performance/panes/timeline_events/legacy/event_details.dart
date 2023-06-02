@@ -11,7 +11,7 @@ import '../../../../../shared/theme.dart';
 import '../../../performance_model.dart';
 
 class EventDetails extends StatelessWidget {
-  const EventDetails(this.selectedEvent);
+  const EventDetails(this.selectedEvent, {super.key});
 
   static const instructions =
       'Select an event from the Timeline to view details';
@@ -53,7 +53,7 @@ class EventDetails extends StatelessWidget {
 }
 
 class EventSummary extends StatelessWidget {
-  EventSummary(this.event)
+  EventSummary(this.event, {super.key})
       : _connectedEvents = [
           if (event.isAsyncEvent)
             ...event.children

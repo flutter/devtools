@@ -35,6 +35,7 @@ import 'vm_service_private_extensions.dart';
 /// rows specified for `rowKeyValues`.
 class VMInfoCard extends StatelessWidget implements PreferredSizeWidget {
   const VMInfoCard({
+    super.key,
     required this.title,
     this.rowKeyValues,
     this.table,
@@ -102,6 +103,7 @@ MapEntry<String, WidgetBuilder> serviceObjectLinkBuilderMapEntry({
 
 class VMInfoList extends StatelessWidget {
   const VMInfoList({
+    super.key,
     required this.title,
     this.rowKeyValues,
     this.table,
@@ -185,6 +187,7 @@ Widget _buildAlternatingRow(BuildContext context, int index, Widget row) {
 /// a CircularProgressIndicator will be displayed.
 class RequestableSizeWidget extends StatelessWidget {
   const RequestableSizeWidget({
+    super.key,
     required this.fetching,
     required this.sizeProvider,
     required this.requestFunction,
@@ -247,10 +250,10 @@ String? _objectName(ObjRef? objectRef) {
   }
 
   return switch (objectRef) {
-    // TODO(https://github.com/dart-lang/sdk/issues/52099): merge these cases.
-    ClassRef(:final name) => name,
-    FuncRef(:final name) => name,
-    FieldRef(:final name) => name,
+    ClassRef(:final name) ||
+    FuncRef(:final name) ||
+    FieldRef(:final name) =>
+      name,
     LibraryRef(:final name, :final uri) => name.isNullOrEmpty ? uri : name,
     ScriptRef(:final uri) => fileNameFromUri(uri),
     InstanceRef(:final name, :final classRef) =>
@@ -288,7 +291,7 @@ String? _objectDescription(ObjRef? object) {
   return switch (object) {
     FieldRef(:final declaredType, :final name, :final owner) =>
       '${declaredType?.name ?? 'Field'} $name of ${_objectName(owner) ?? '<Owner>'}',
-    FuncRef() => '${qualifiedName(object) ?? '<Function Name>'}',
+    FuncRef() => qualifiedName(object) ?? '<Function Name>',
     _ => _objectName(object),
   };
 }
@@ -297,6 +300,7 @@ String? _objectDescription(ObjRef? object) {
 /// for the VM tools tab.
 class VmExpansionTile extends StatelessWidget {
   const VmExpansionTile({
+    super.key,
     required this.title,
     required this.children,
     this.onExpanded,
@@ -339,6 +343,8 @@ class VmExpansionTile extends StatelessWidget {
 }
 
 class SizedCircularProgressIndicator extends StatelessWidget {
+  const SizedCircularProgressIndicator({super.key});
+
   @override
   Widget build(BuildContext context) {
     return SizedBox.fromSize(
@@ -352,6 +358,7 @@ class SizedCircularProgressIndicator extends StatelessWidget {
 
 class ExpansionTileInstanceList extends StatelessWidget {
   const ExpansionTileInstanceList({
+    super.key,
     required this.controller,
     required this.title,
     required this.elements,
@@ -389,6 +396,7 @@ class ExpansionTileInstanceList extends StatelessWidget {
 /// An expandable list to display the retaining objects for a given RetainingPath.
 class RetainingPathWidget extends StatelessWidget {
   const RetainingPathWidget({
+    super.key,
     required this.controller,
     required this.retainingPath,
     this.onExpanded,
@@ -414,7 +422,7 @@ class RetainingPathWidget extends StatelessWidget {
           onExpanded: onExpanded,
           children: [
             retainingPath == null
-                ? SizedCircularProgressIndicator()
+                ? const SizedCircularProgressIndicator()
                 : SizedBox.fromSize(
                     size: Size.fromHeight(
                       retainingObjects.length * defaultRowHeight + densePadding,
@@ -433,10 +441,11 @@ class RetainingPathWidget extends StatelessWidget {
     BuildContext context,
     RetainingPath retainingPath,
   ) {
-    final onTap = (ObjRef? obj) async {
+    Future<void> onTap(ObjRef? obj) async {
       if (obj == null) return;
       await controller.findAndSelectNodeForObject(obj);
-    };
+    }
+
     final theme = Theme.of(context);
     final emptyList = SelectableText(
       'No retaining objects',
@@ -597,6 +606,7 @@ String _parentListElementDescription(int listIndex, ObjRef? obj) {
 /// instance of InboundReferences.
 class InboundReferencesWidget extends StatelessWidget {
   const InboundReferencesWidget({
+    super.key,
     required this.inboundReferences,
     this.onExpanded,
   });
@@ -618,7 +628,7 @@ class InboundReferencesWidget extends StatelessWidget {
           onExpanded: onExpanded,
           children: [
             inboundReferences == null
-                ? SizedCircularProgressIndicator()
+                ? const SizedCircularProgressIndicator()
                 : SizedBox.fromSize(
                     size: Size.fromHeight(
                       references.length * defaultRowHeight + densePadding,
@@ -704,6 +714,7 @@ class InboundReferencesWidget extends StatelessWidget {
 
 class VmServiceObjectLink extends StatelessWidget {
   const VmServiceObjectLink({
+    super.key,
     required this.object,
     required this.onTap,
     this.preferUri = false,
@@ -718,21 +729,20 @@ class VmServiceObjectLink extends StatelessWidget {
   @visibleForTesting
   static String? defaultTextBuilder(
     Object? object, {
-    // ignore: avoid-unused-parameters, false positive.
     bool preferUri = false,
   }) {
     if (object == null) return null;
     return switch (object) {
+      FieldRef(:final name) ||
+      FuncRef(:final name) ||
+      ClassRef(:final name) ||
+      CodeRef(:final name) ||
+      TypeArgumentsRef(:final name) =>
+        name,
       LibraryRef(:final uri, :final name) =>
         uri!.startsWith('dart') || preferUri
             ? uri
             : (name!.isEmpty ? uri : name),
-      // TODO(https://github.com/dart-lang/sdk/issues/52099): merge these cases.
-      FieldRef(:final name) => name,
-      FuncRef(:final name) => name,
-      ClassRef(:final name) => name,
-      CodeRef(:final name) => name,
-      TypeArgumentsRef(:final name) => name,
       ScriptRef(:final uri) => uri,
       ContextRef(:final length) => 'Context(length: $length)',
       Sentinel(:final valueAsString) => 'Sentinel $valueAsString',
@@ -766,9 +776,7 @@ class VmServiceObjectLink extends StatelessWidget {
         final depth = trace.frames.length;
         return 'StackTrace ($depth ${pluralize('frame', depth)})';
       default:
-        return valueAsString != null
-            ? valueAsString
-            : '${instance.classRef!.name}';
+        return valueAsString ?? '${instance.classRef!.name}';
     }
   }
 
@@ -821,6 +829,7 @@ class VmServiceObjectLink extends StatelessWidget {
 /// layout of information widgets related to VM object types.
 class VmObjectDisplayBasicLayout extends StatelessWidget {
   const VmObjectDisplayBasicLayout({
+    super.key,
     required this.controller,
     required this.object,
     required this.generalDataRows,
@@ -1012,17 +1021,17 @@ class _ObjectInspectorCodeViewState extends State<ObjectInspectorCodeView> {
   void didChangeDependencies() async {
     super.didChangeDependencies();
     if (widget.script != widget.codeViewController.currentScriptRef.value) {
-      widget.codeViewController.resetScriptLocation(
+      await widget.codeViewController.resetScriptLocation(
         ScriptLocation(widget.script),
       );
     }
   }
 
   @override
-  void didUpdateWidget(ObjectInspectorCodeView oldWidget) {
+  Future<void> didUpdateWidget(ObjectInspectorCodeView oldWidget) async {
     super.didUpdateWidget(oldWidget);
     if (widget.script != widget.codeViewController.currentScriptRef.value) {
-      widget.codeViewController.resetScriptLocation(
+      await widget.codeViewController.resetScriptLocation(
         ScriptLocation(widget.script),
       );
     }

@@ -1,5 +1,5 @@
 ## Generating Release notes
-- Release notes for DevTools are hosted on the flutter website (see [archive](https://docs.flutter.dev/development/tools/devtools/release-notes)).
+- Release notes for DevTools are hosted on the flutter website (see [archive](https://docs.flutter.dev/tools/devtools/release-notes)).
 - To add release notes for the latest release, create a PR with the appropriate changes for your release.
     - The [NEXT_RELEASE_NOTES.md](NEXT_RELEASE_NOTES.md) file contains the running release notes for the current version.
     - see example [PR](https://github.com/flutter/website/pull/6791) for an idea of how to add those to the Flutter website.
@@ -7,7 +7,7 @@
 - Test these changes locally before creating the PR.
     - See [README.md](https://github.com/flutter/website/blob/main/README.md)
 for getting setup to run the Flutter website locally.
-    - Release notes can be found at [http://localhost:4002/development/tools/devtools/release-notes/](http://localhost:4002/development/tools/devtools/release-notes/)
+    - Release notes can be found at [http://localhost:4002/development/tools/devtools/release-notes/](http://localhost:4002/tools/devtools/release-notes/)
 
 - Once you are satisfied with the release notes
     - stage the Flutter website on Firebase
@@ -47,7 +47,7 @@ for getting setup to run the Flutter website locally.
     ```
 
 ### Testing the release notes in DevTools
-- In `release_notes.dart` flip the `debugTestReleaseNotes` flag to true.
+- In `release_notes.dart` flip the `debugTestReleaseNotes` and `debugUseStagedFlutterWebsite` flags to true.
 
 - from the main `devtools/` directory, run the following:
     ```shell
@@ -64,4 +64,3 @@ Serving DevTools at http://127.0.0.1:57336.
 
 - Visit the DevTools link
 - verify the release notes viewer displays the new release notes as expected.
-

@@ -27,6 +27,7 @@ void main() {
     setGlobal(ServiceConnectionManager, FakeServiceManager());
     setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
     setGlobal(PreferencesController, PreferencesController());
+    setGlobal(NotificationService, NotificationService());
     mockClassObject = MockClassObject();
 
     final json = testClass.toJson();

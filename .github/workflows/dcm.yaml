@@ -1,6 +1,6 @@
 # A CI workflow to run the Dart Code Metrics analyzer (https://dcm.dev).
 
-# NOTE: DCM usage in DevTools is currently experimental! 
+# NOTE: DCM usage in DevTools is currently experimental!
 
 # The DCM_CI_KEY and DCM_EMAIL secrets are set in the admin settings page
 # of the flutter/devtools repo. They can be found at: go/dash-devexp-dcm-keys
@@ -14,20 +14,34 @@
 name: Dart Code Metrics
 
 on:
-  pull_request_target
+  pull_request_target:
+    # synchronize, opened, and reopened are the default pull_request_target
+    # types. labeled and unlabeled are also required to re-run workflow when
+    # the run-dcm-workflow label is added or removed.
+    types: [synchronize, opened, reopened, labeled, unlabeled]
+    branches:
+      - master
+    paths:
+      - "**/*.dart"
 
 jobs:
   flutter-prep:
     uses: ./.github/workflows/flutter-prep.yaml
     with:
       os-name: ubuntu
+      requires-label: "run-dcm-workflow"
+      needs-checkout-merge: true
+
   dcm:
+    if: contains(github.event.pull_request.labels.*.name, 'run-dcm-workflow') 
     name: Dart Code Metrics
     needs: flutter-prep
     runs-on: ubuntu-latest
     steps:
       - name: Clone Flutter DevTools
         uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab
+        with:
+          ref: "refs/pull/${{ github.event.number }}/merge"
       - name: Load Cached Flutter SDK
         uses: actions/cache@88522ab9f39a2ea568f7027eddc7d8d8bc9d59c8
         with:
@@ -45,7 +59,7 @@ jobs:
           sudo apt-get install dcm
           sudo chmod +x /usr/bin/dcm
       - name: Setup Dart SDK
-        uses: dart-lang/setup-dart@6a218f2413a3e78e9087f638a238f6b40893203d
+        uses: dart-lang/setup-dart@d6a63dab3335f427404425de0fbfed4686d93c4f
       - name: Run DCM on root
         run: |
           dcm analyze --ci-key="${{ secrets.DCM_CI_KEY }}" --email="${{ secrets.DCM_EMAIL }}" packages/devtools_app packages/devtools_shared packages/devtools_test

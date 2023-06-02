@@ -123,12 +123,13 @@ class _RebuildStatsViewState extends State<RebuildStatsView>
               extensions.trackRebuildWidgets.extension,
             ),
             builder: (context, state, _) {
-              if (metrics.isEmpty && !state.enabled)
+              if (metrics.isEmpty && !state.enabled) {
                 return const Center(
                   child: Text(
                     'Track widget build counts must be enabled to see data.',
                   ),
                 );
+              }
               if (metrics.isEmpty) {
                 return const Center(
                   child: Text(

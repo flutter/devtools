@@ -8,7 +8,7 @@ import '../../integration_test/test_infra/run/_in_file_args.dart';
 
 const _testAppPath = 'test/test_infra/fixtures/memory_app';
 
-late final _defaultArgs = TestFileArgs.parse({});
+final _defaultArgs = TestFileArgs.parse({});
 
 final tests = [
   _InFileTestArgsTest(

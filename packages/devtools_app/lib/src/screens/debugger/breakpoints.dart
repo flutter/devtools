@@ -20,7 +20,7 @@ class Breakpoints extends StatefulWidget {
   const Breakpoints({Key? key}) : super(key: key);
 
   @override
-  _BreakpointsState createState() => _BreakpointsState();
+  State<Breakpoints> createState() => _BreakpointsState();
 }
 
 class _BreakpointsState extends State<Breakpoints>
@@ -62,7 +62,7 @@ class _BreakpointsState extends State<Breakpoints>
     return Material(
       color: isSelected ? theme.colorScheme.selectedRowBackgroundColor : null,
       child: InkWell(
-        onTap: () => _onBreakpointSelected(bp),
+        onTap: () async => await _onBreakpointSelected(bp),
         child: Padding(
           padding: const EdgeInsets.all(borderPadding),
           child: Row(
@@ -102,8 +102,8 @@ class _BreakpointsState extends State<Breakpoints>
     );
   }
 
-  void _onBreakpointSelected(BreakpointAndSourcePosition bp) {
-    controller.selectBreakpoint(bp);
+  Future<void> _onBreakpointSelected(BreakpointAndSourcePosition bp) async {
+    await controller.selectBreakpoint(bp);
   }
 
   String _descriptionFor(BreakpointAndSourcePosition breakpoint) {
@@ -116,12 +116,12 @@ class _BreakpointsState extends State<Breakpoints>
 }
 
 class BreakpointsCountBadge extends StatelessWidget {
-  const BreakpointsCountBadge({required this.breakpoints});
+  const BreakpointsCountBadge({super.key, required this.breakpoints});
 
   final List<BreakpointAndSourcePosition> breakpoints;
 
   @override
   Widget build(BuildContext context) {
-    return Badge('${nf.format(breakpoints.length)}');
+    return Badge(nf.format(breakpoints.length));
   }
 }

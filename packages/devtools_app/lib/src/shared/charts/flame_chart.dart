@@ -48,6 +48,7 @@ double get baseTimelineGridIntervalPx => scaleByFontFactor(150.0);
 abstract class FlameChart<T, V> extends StatefulWidget {
   const FlameChart(
     this.data, {
+    super.key,
     required this.time,
     required this.containerWidth,
     required this.containerHeight,
@@ -643,6 +644,7 @@ abstract class FlameChartState<T extends FlameChart,
 class ScrollingFlameChartRow<V extends FlameChartDataMixin<V>>
     extends StatefulWidget {
   const ScrollingFlameChartRow({
+    super.key,
     required this.linkedScrollControllerGroup,
     required this.nodes,
     required this.width,
@@ -684,7 +686,7 @@ class ScrollingFlameChartRowState<V extends FlameChartDataMixin<V>>
     extends State<ScrollingFlameChartRow<V>> with AutoDisposeMixin {
   late final ScrollController scrollController;
 
-  late final _ScrollingFlameChartRowExtentDelegate extentDelegate;
+  late final _ScrollingFlameChartRowExtentDelegate _extentDelegate;
 
   /// Convenience getter for widget.nodes.
   List<FlameChartNode<V>> get nodes => widget.nodes;
@@ -699,7 +701,7 @@ class ScrollingFlameChartRowState<V extends FlameChartDataMixin<V>>
   void initState() {
     super.initState();
     scrollController = widget.linkedScrollControllerGroup.addAndGet();
-    extentDelegate = _ScrollingFlameChartRowExtentDelegate(
+    _extentDelegate = _ScrollingFlameChartRowExtentDelegate(
       nodeIntervals: nodes.toPaddedZoomedIntervals(
         zoom: widget.zoom,
         chartStartInset: widget.startInset,
@@ -751,7 +753,7 @@ class ScrollingFlameChartRowState<V extends FlameChartDataMixin<V>>
         oldWidget.zoom != widget.zoom ||
         oldWidget.width != widget.width ||
         oldWidget.startInset != widget.startInset) {
-      extentDelegate.recomputeWith(
+      _extentDelegate.recomputeWith(
         nodeIntervals: nodes.toPaddedZoomedIntervals(
           zoom: widget.zoom,
           chartStartInset: widget.startInset,
@@ -794,7 +796,7 @@ class ScrollingFlameChartRowState<V extends FlameChartDataMixin<V>>
       child: ExtentDelegateListView(
         controller: scrollController,
         scrollDirection: Axis.horizontal,
-        extentDelegate: extentDelegate,
+        extentDelegate: _extentDelegate,
         childrenDelegate: SliverChildBuilderDelegate(
           (context, index) {
             final node = nodes[index];
@@ -1549,6 +1551,7 @@ class FlameChartHelpButton extends StatelessWidget {
 
 class EmptyFlameChartRow extends StatelessWidget {
   const EmptyFlameChartRow({
+    super.key,
     required this.height,
     required this.width,
     required this.backgroundColor,

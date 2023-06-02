@@ -138,7 +138,9 @@ class HttpDate {
     int year = toInt(yearStr!);
     if (year >= 70 && year <= 99) {
       year += 1900;
-    } else if (year >= 0 && year <= 69) year += 2000;
+    } else if (year >= 0 && year <= 69) {
+      year += 2000;
+    }
     if (year < 1601) error();
 
     int dayOfMonth = toInt(dayOfMonthStr!);
