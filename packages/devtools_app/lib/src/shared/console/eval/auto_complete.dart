@@ -259,7 +259,7 @@ Future<void> _addAllInstanceMembersToAutocompleteList(
       .map((field) => field.decl?.name);
   result.addAll(
     removeNullValues(fieldNames).where(
-      (member) => _isAccessible(member, clazz, controller),
+      (member) => _isAccessible(member, clazz),
     ),
   );
 }
@@ -309,7 +309,7 @@ Future<Set<String>> _autoCompleteMembersFor(
         ),
       );
     }
-    result.removeWhere((member) => !_isAccessible(member, clazz, controller));
+    result.removeWhere((member) => !_isAccessible(member, clazz));
   }
   return result;
 }
@@ -349,7 +349,6 @@ bool _isConstructor(FuncRef funcRef, Class clazz) =>
 bool _isAccessible(
   String member,
   Class? clazz,
-  EvalService evalService,
 ) {
   final frame = _appState.currentFrame.value!;
   final currentScript = frame.location!.script;

@@ -220,10 +220,10 @@ void main() {
 
       // Match with RegExp.
       expect(
-        controller.matchesForSearch('rendering/.*\.dart').length,
+        controller.matchesForSearch('rendering/.*.dart').length,
         equals(7),
       );
-      expect(controller.matchesForSearch('RENDER.*\.paint').length, equals(6));
+      expect(controller.matchesForSearch('RENDER.*.paint').length, equals(6));
     });
 
     test('matchesForSearch sets isSearchMatch property', () async {

@@ -190,7 +190,7 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
     );
   }
 
-  static const MAX_CHILDREN_IN_GROUPING = 100;
+  static const maxChildrenInGrouping = 100;
 
   final String? text;
   final String? name;
@@ -277,8 +277,9 @@ class DartObjectNode extends TreeNode<DartObjectNode> {
     }
     final diagnostic = theRef?.diagnostic;
     if (diagnostic != null &&
-        ((diagnostic.inlineProperties.isNotEmpty) || diagnostic.hasChildren))
+        ((diagnostic.inlineProperties.isNotEmpty) || diagnostic.hasChildren)) {
       return true;
+    }
 
     // TODO(jacobr): do something smarter to avoid expandable variable flicker.
     if (instanceRef != null) {

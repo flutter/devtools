@@ -24,6 +24,8 @@ void main() async {
   final FlutterTestEnvironment env = FlutterTestEnvironment(
     const FlutterRunConfiguration(withDebugger: true),
   );
+  await env.setupEnvironment();
+  await storage.setValue('ui.denseMode', 'true');
 
   env.afterEverySetup = () async {
     final service = serviceManager.inspectorService;

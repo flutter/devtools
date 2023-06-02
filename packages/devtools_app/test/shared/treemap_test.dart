@@ -83,20 +83,19 @@ void main() {
     final nodeWithDuplicatePackageNameChild1 = TreemapNode(name: 'package:a');
     final nodeWithDuplicatePackageNameChild2 = TreemapNode(name: '<Type>');
     final nodeWithDuplicatePackageName = TreemapNode(name: 'package:a');
-    TreemapNode(name: 'libapp.so (Dart AOT)')
-      ..addChild(
-        nodeWithDuplicatePackageName
-          ..addAllChildren([
-            nodeWithDuplicatePackageNameChild1
-              ..addChild(nodeWithDuplicatePackageNameGrandchild),
-            nodeWithDuplicatePackageNameChild2,
-          ]),
-      );
+    TreemapNode(name: 'libapp.so (Dart AOT)').addChild(
+      nodeWithDuplicatePackageName
+        ..addAllChildren([
+          nodeWithDuplicatePackageNameChild1
+            ..addChild(nodeWithDuplicatePackageNameGrandchild),
+          nodeWithDuplicatePackageNameChild2,
+        ]),
+    );
 
     final dartLibraryChild = TreemapNode(name: 'dart lib child');
     final dartLibraryNode = TreemapNode(name: 'dart:core');
     TreemapNode(name: 'libapp.so (Dart AOT)')
-      ..addChild(dartLibraryNode..addChild(dartLibraryChild));
+        .addChild(dartLibraryNode..addChild(dartLibraryChild));
 
     test('packagePath returns correct values', () {
       expect(testRoot.packagePath(), equals([]));

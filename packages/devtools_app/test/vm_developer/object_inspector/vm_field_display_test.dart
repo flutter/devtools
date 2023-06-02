@@ -29,6 +29,7 @@ void main() {
     setGlobal(IdeTheme, IdeTheme());
     setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
     setGlobal(PreferencesController, PreferencesController());
+    setGlobal(NotificationService, NotificationService());
 
     mockFieldObject = MockFieldObject();
 
@@ -50,35 +51,38 @@ void main() {
   });
 
   group('field data display tests', () {
-    testWidgetsWithWindowSize('basic layout', windowSize,
-        (WidgetTester tester) async {
-      await tester.pumpWidget(
-        wrap(
-          VmFieldDisplay(
-            field: mockFieldObject,
-            controller: ObjectInspectorViewController(),
+    testWidgetsWithWindowSize(
+      'basic layout',
+      windowSize,
+      (WidgetTester tester) async {
+        await tester.pumpWidget(
+          wrap(
+            VmFieldDisplay(
+              field: mockFieldObject,
+              controller: ObjectInspectorViewController(),
+            ),
           ),
-        ),
-      );
+        );
 
-      expect(find.byType(VmObjectDisplayBasicLayout), findsOneWidget);
-      expect(find.byType(VMInfoCard), findsOneWidget);
-      expect(find.text('General Information'), findsOneWidget);
-      expect(find.text('Field'), findsOneWidget);
-      expect(find.text('256 B'), findsOneWidget);
-      expect(find.text('Owner:'), findsOneWidget);
-      expect(find.text('fooLib'), findsOneWidget);
-      expect(find.text('fooScript.dart:10:4'), findsOneWidget);
-      expect(find.text('Observed types not found'), findsOneWidget);
-      expect(find.text('Static Value:'), findsOneWidget);
-      expect(find.text('100'), findsOneWidget);
+        expect(find.byType(VmObjectDisplayBasicLayout), findsOneWidget);
+        expect(find.byType(VMInfoCard), findsOneWidget);
+        expect(find.text('General Information'), findsOneWidget);
+        expect(find.text('Field'), findsOneWidget);
+        expect(find.text('256 B'), findsOneWidget);
+        expect(find.text('Owner:'), findsOneWidget);
+        expect(find.text('fooLib'), findsOneWidget);
+        expect(find.text('fooScript.dart:10:4'), findsOneWidget);
+        expect(find.text('Observed types not found'), findsOneWidget);
+        expect(find.text('Static Value:'), findsOneWidget);
+        expect(find.text('100'), findsOneWidget);
 
-      expect(find.byType(RequestableSizeWidget), findsNWidgets(2));
+        expect(find.byType(RequestableSizeWidget), findsNWidgets(2));
 
-      expect(find.byType(RetainingPathWidget), findsOneWidget);
+        expect(find.byType(RetainingPathWidget), findsOneWidget);
 
-      expect(find.byType(InboundReferencesWidget), findsOneWidget);
-    });
+        expect(find.byType(InboundReferencesWidget), findsOneWidget);
+      },
+    );
 
     testWidgetsWithWindowSize(
       'observed type single - nullable',
@@ -101,22 +105,24 @@ void main() {
     );
 
     testWidgetsWithWindowSize(
-        'observed type dynamic - non-nullable', windowSize,
-        (WidgetTester tester) async {
-      when(mockFieldObject.guardClass).thenReturn(null);
-      when(mockFieldObject.guardNullable).thenReturn(false);
-      when(mockFieldObject.guardClassKind).thenReturn(GuardClassKind.dynamic);
+      'observed type dynamic - non-nullable',
+      windowSize,
+      (WidgetTester tester) async {
+        when(mockFieldObject.guardClass).thenReturn(null);
+        when(mockFieldObject.guardNullable).thenReturn(false);
+        when(mockFieldObject.guardClassKind).thenReturn(GuardClassKind.dynamic);
 
-      await tester.pumpWidget(
-        wrap(
-          VmFieldDisplay(
-            field: mockFieldObject,
-            controller: ObjectInspectorViewController(),
+        await tester.pumpWidget(
+          wrap(
+            VmFieldDisplay(
+              field: mockFieldObject,
+              controller: ObjectInspectorViewController(),
+            ),
           ),
-        ),
-      );
-      expect(find.text('various - null not observed'), findsOneWidget);
-    });
+        );
+        expect(find.text('various - null not observed'), findsOneWidget);
+      },
+    );
 
     testWidgetsWithWindowSize(
       'observed type unknown - null unknown',
@@ -141,20 +147,23 @@ void main() {
       },
     );
 
-    testWidgetsWithWindowSize('static value is not InstanceRef', windowSize,
-        (WidgetTester tester) async {
-      testFieldCopy.staticValue = testClass;
+    testWidgetsWithWindowSize(
+      'static value is not InstanceRef',
+      windowSize,
+      (WidgetTester tester) async {
+        testFieldCopy.staticValue = testClass;
 
-      await tester.pumpWidget(
-        wrap(
-          VmFieldDisplay(
-            field: mockFieldObject,
-            controller: ObjectInspectorViewController(),
+        await tester.pumpWidget(
+          wrap(
+            VmFieldDisplay(
+              field: mockFieldObject,
+              controller: ObjectInspectorViewController(),
+            ),
           ),
-        ),
-      );
+        );
 
-      expect(find.text('Static Value:'), findsNothing);
-    });
+        expect(find.text('Static Value:'), findsNothing);
+      },
+    );
   });
 }

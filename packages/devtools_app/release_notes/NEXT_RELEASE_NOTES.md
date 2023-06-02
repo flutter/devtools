@@ -1,7 +1,7 @@
 This is draft for future release notes, that are going to land on
 [the Flutter website](https://docs.flutter.dev/development/tools/devtools/release-notes).
 
-# DevTools 2.24.0 release notes
+# DevTools 2.25.0 release notes
 
 Dart & Flutter DevTools - A Suite of Performance Tools for Dart and Flutter
 
@@ -32,6 +32,6 @@ TODO: Remove this section if there are not any general updates.
 ## App size tool updates
 TODO: Remove this section if there are not any general updates.
 
-## Changelog
-More details about changes and fixes are available in the DevTools
-[changelog](https://github.com/flutter/devtools/blob/master/CHANGELOG.md).
+## Full commit history
+More details about changes and fixes are available from the
+[DevTools git log.](https://github.com/flutter/devtools/commits/master).

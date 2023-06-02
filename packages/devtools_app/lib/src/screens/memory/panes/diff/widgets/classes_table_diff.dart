@@ -302,11 +302,10 @@ class ClassesTableDiff extends StatelessWidget {
     required this.classes,
     required this.diffData,
   }) : super(key: key) {
-    _columns = Map.fromIterable(
-      SizeType.values,
-      key: (sizeType) => sizeType,
-      value: (sizeType) => ClassesTableDiffColumns(sizeType, diffData),
-    );
+    _columns = {
+      for (var sizeType in SizeType.values)
+        sizeType: ClassesTableDiffColumns(sizeType, diffData),
+    };
   }
 
   final List<DiffClassStats> classes;

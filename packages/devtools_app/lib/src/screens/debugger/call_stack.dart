@@ -15,7 +15,7 @@ class CallStack extends StatefulWidget {
   const CallStack({Key? key}) : super(key: key);
 
   @override
-  _CallStackState createState() => _CallStackState();
+  State<CallStack> createState() => _CallStackState();
 }
 
 class _CallStackState extends State<CallStack>
@@ -98,7 +98,7 @@ class _CallStackState extends State<CallStack>
     final result = Material(
       color: selected ? theme.colorScheme.selectedRowBackgroundColor : null,
       child: InkWell(
-        onTap: () => _onStackFrameSelected(frame),
+        onTap: () async => await _onStackFrameSelected(frame),
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: densePadding),
           alignment: Alignment.centerLeft,
@@ -118,7 +118,7 @@ class _CallStackState extends State<CallStack>
           );
   }
 
-  void _onStackFrameSelected(StackFrameAndSourcePosition frame) {
-    controller.selectStackFrame(frame);
+  Future<void> _onStackFrameSelected(StackFrameAndSourcePosition frame) async {
+    await controller.selectStackFrame(frame);
   }
 }

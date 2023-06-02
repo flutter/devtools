@@ -273,8 +273,9 @@ class DerivedData extends DisposableController with AutoDisposeControllerMixin {
 
       assert(singleHidden || diffHidden);
 
-      if (singleHidden)
+      if (singleHidden) {
         assert(classesTableSingle.selection.value == null, details);
+      }
       if (diffHidden) assert(classesTableDiff.selection.value == null, details);
 
       assert((singleClassesToShow.value == null) == singleHidden, details);

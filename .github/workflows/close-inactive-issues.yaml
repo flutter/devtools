@@ -1,26 +1,29 @@
 name: Close inactive issues
+# Both `issue_comment` and `scheduled` event types are required for this Action
+# to work properly.
 on:
+  issue_comment:
+    types: [created]
   schedule:
-    - cron: "30 18 * * *" # 10:30am PT
+    # Schedule for five minutes after the midnight, every day
+    - cron: "5 0 * * *"
   workflow_dispatch: # Allows for manual triggering if needed
+permissions:
+  issues: write
 jobs:
-  close-issues:
+  noResponse:
     runs-on: ubuntu-latest
-    permissions:
-      issues: write
-      pull-requests: write
     steps:
-      # See https://github.com/actions/stale for
-      # details on the parameters for this action
-      - uses: actions/stale@v8
+      - uses: lee-dohm/no-response@9bb0a4b5e6a45046f00353d5de7d90fb8bd773bb
         with:
-          debug-only: true # TODO: Delete this line when we are ready to implement this for our process.
-          stale-issue-label: "waiting for customer response"
-          only-issue-labels: "waiting for customer response"
-          labels-to-remove-when-unstale: "waiting for customer response"
-          days-before-issue-stale: -1
-          days-before-issue-close: 14
-          close-issue-message: "Without additional information we're unfortunately not sure how to resolve this issue. We're going to close this issue for now, but please don't hesitate to comment on the issue if you have any more information for us; we're happy to reopen. Thanks for your contribution!"
-          days-before-pr-stale: -1
-          days-before-pr-close: -1
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ github.token }}
+          # Comment to post when closing an Issue for lack of response. Set to `false` to disable
+          closeComment: >
+            Without additional information we're not able to resolve this issue,
+            so it will be closed at this time. You're still free to add more info
+            and respond to any questions above, though. We'll reopen the case
+            if you do. Thanks for your contribution!
+          # Number of days of inactivity before an issue is closed for lack of response.
+          daysUntilClose: 14
+          # Label requiring a response.
+          responseRequiredLabel: "waiting for customer response"

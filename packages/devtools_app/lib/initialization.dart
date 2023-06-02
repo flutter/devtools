@@ -4,6 +4,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_web_plugins/url_strategy.dart';
 
 import 'src/app.dart';
 import 'src/framework/app_error_handling.dart';
@@ -14,7 +15,6 @@ import 'src/shared/config_specific/framework_initialize/framework_initialize.dar
 import 'src/shared/config_specific/ide_theme/ide_theme.dart';
 import 'src/shared/config_specific/logger/logger_helpers.dart';
 import 'src/shared/config_specific/url/url.dart';
-import 'src/shared/config_specific/url_strategy/url_strategy.dart';
 import 'src/shared/feature_flags.dart';
 import 'src/shared/globals.dart';
 import 'src/shared/preferences.dart';
@@ -28,11 +28,11 @@ import 'src/shared/primitives/utils.dart';
 ///
 /// If the initialization is specific to running Devtools in google3 or
 /// externally, then it should be added to that respective main.dart file.
-Future<void> runDevTools({
+void runDevTools({
   bool shouldEnableExperiments = false,
   List<DevToolsJsonFile> sampleData = const [],
   List<DevToolsScreen>? screens,
-}) async {
+}) {
   setupErrorHandling(() async {
     screens ??= defaultScreens;
 

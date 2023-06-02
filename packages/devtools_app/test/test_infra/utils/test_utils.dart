@@ -73,3 +73,6 @@ void setCharacterWidthForTables() {
   // in the tree table. The flutter_tester device uses a redacted font.
   setAssumedMonospaceCharacterWidth(16.0);
 }
+
+T getWidgetFromFinder<T>(Finder finder) =>
+    finder.first.evaluate().first.widget as T;

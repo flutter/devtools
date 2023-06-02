@@ -177,8 +177,10 @@ abstract class PersistentProperties {
 
   final String name;
 
+  // ignore: avoid-dynamic, dynamic by design.
   dynamic operator [](String key);
 
+  // ignore: avoid-dynamic, dynamic by design.
   void operator []=(String key, dynamic value);
 
   /// Re-read settings from the backing store.
@@ -216,9 +218,11 @@ class IOPersistentProperties extends PersistentProperties {
   late Map _map;
 
   @override
+  // ignore: avoid-dynamic, necessary here.
   dynamic operator [](String key) => _map[key];
 
   @override
+  // ignore: avoid-dynamic, necessary here.
   void operator []=(String key, dynamic value) {
     if (value == null && !_map.containsKey(key)) return;
     if (_map[key] == value) return;

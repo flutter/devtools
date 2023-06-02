@@ -50,8 +50,7 @@ class DevToolsRouteInformationParser
   Future<DevToolsRouteConfiguration> parseRouteInformation(
     RouteInformation routeInformation,
   ) {
-    var uri = Uri.parse(routeInformation.location!);
-
+    var uri = routeInformation.uri;
     if (_forceVmServiceUri != null) {
       final newQueryParams = Map<String, dynamic>.from(uri.queryParameters);
       newQueryParams['uri'] = _forceVmServiceUri;
@@ -88,10 +87,7 @@ class DevToolsRouteInformationParser
     final params = {...configuration.args};
     params.removeWhere((key, value) => value == null);
     return RouteInformation(
-      location: Uri(
-        path: path,
-        queryParameters: params,
-      ).toString(),
+      uri: Uri(path: path, queryParameters: params),
       state: configuration.state,
     );
   }
@@ -276,10 +272,7 @@ class DevToolsRouterDelegate extends RouterDelegate<DevToolsRouteConfiguration>
     final params = Map.of(currentConfig.args);
     params.removeWhere((key, value) => value == null);
     await SystemNavigator.routeInformationUpdated(
-      location: Uri(
-        path: path,
-        queryParameters: params,
-      ).toString(),
+      uri: Uri(path: path, queryParameters: params),
       state: state,
       replace: true,
     );

@@ -311,7 +311,7 @@ class TimelineEventsController extends PerformanceFeatureController
     // for analytics.
     await ga.timeAsync(
       gac.performance,
-      gac.perfettoModeTraceEventProcessingTime,
+      gac.PerformanceEvents.perfettoModeTraceEventProcessingTime.nameOverride!,
       asyncOperation: processTraceEventsHelper,
       screenMetricsProvider: () => PerformanceScreenMetrics(
         traceEventCount: processingTraceCount,
@@ -343,7 +343,7 @@ class TimelineEventsController extends PerformanceFeatureController
       frame.timelineEventData.uiEvent?.format(buf, '  ');
       buf.writeln('\nUI trace for frame ${frame.id}');
       frame.timelineEventData.uiEvent?.writeTraceToBuffer(buf);
-      buf.writeln('\Raster timeline event frame ${frame.id}:');
+      buf.writeln('\nRaster timeline event frame ${frame.id}:');
       frame.timelineEventData.rasterEvent?.format(buf, '  ');
       buf.writeln('\nRaster trace for frame ${frame.id}');
       frame.timelineEventData.rasterEvent?.writeTraceToBuffer(buf);
@@ -544,7 +544,7 @@ class TimelineEventsController extends PerformanceFeatureController
     _primeThreadIds(uiThreadId: uiThreadId, rasterThreadId: rasterThreadId);
     await processAllTraceEvents();
 
-    await legacyController.setOfflineData(offlineData);
+    legacyController.setOfflineData(offlineData);
 
     if (offlineData.selectedFrame != null && !useLegacyTraceViewer.value) {
       perfettoController

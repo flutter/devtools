@@ -34,6 +34,7 @@ const _showRenderObjectPropertiesAsLinks = false;
 class DiagnosticsNodeDescription extends StatelessWidget {
   const DiagnosticsNodeDescription(
     this.diagnostic, {
+    super.key,
     this.isSelected = false,
     this.searchValue,
     this.errorText,

@@ -36,7 +36,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: git clone devtools
-        uses: actions/checkout@8f4b7f84864484a7bf31766abe9204da3cbe65b3
+        uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab
         with:
           ref: master
 
@@ -102,12 +102,12 @@ jobs:
             CREATION_FLAGS="--draft"
           fi
 
-          PR_URL=$(gh pr create --title "$COMMIT_MESSAGE" --body "RELEASE_NOTE_EXCEPTION=Automated Version Bump" $CREATION_FLAGS) 
+          PR_URL=$(gh pr create --title "$COMMIT_MESSAGE" --body "Automated Version Bump" $CREATION_FLAGS) 
 
           # Change github credentials back to the actions bot.
           GH_TOKEN="$ORIGINAL_GH_TOKEN"
 
-          gh pr edit $PR_URL $FLAGS --add-label=autosubmit
+          gh pr edit $PR_URL $FLAGS --add-label "run-dcm-workflow,autosubmit"
 
         env:
           COMMIT_MESSAGE: ${{ steps.version-bump.outputs.COMMIT_MESSAGE }}

@@ -20,6 +20,7 @@ class InstanceTableCell extends StatelessWidget {
     ObjectSet objects,
     HeapDataCallback heap,
     HeapClassName heapClass, {
+    super.key,
     required this.isSelected,
     required this.gaContext,
     this.liveItemsEnabled = true,

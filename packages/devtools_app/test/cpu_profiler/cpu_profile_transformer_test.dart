@@ -32,8 +32,8 @@ void main() {
       );
     });
 
-    test('process response with missing leaf frame', () async {
-      bool _runTest() {
+    test('process response with missing leaf frame', () {
+      bool runTest() {
         final cpuProfileDataWithMissingLeaf =
             CpuProfileData.parse(responseWithMissingLeafFrame);
         expect(
@@ -49,7 +49,7 @@ void main() {
       }
 
       // Only run this test if asserts are enabled.
-      assert(_runTest());
+      assert(runTest());
     });
   });
 

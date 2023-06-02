@@ -33,7 +33,6 @@ import '../../shared/ui/utils.dart';
 import '../../shared/utils.dart';
 import 'inspector_breadcrumbs.dart';
 import 'inspector_controller.dart';
-import 'inspector_screen.dart';
 
 final _log = Logger('inspector_tree_controller');
 
@@ -669,8 +668,8 @@ class InspectorTreeController extends DisposableController
       if (matches.isNotEmpty) return matches;
     }
 
-    int _debugStatsSearchOps = 0;
-    final _debugStatsWidgets = _searchableCachedRows.length;
+    int debugStatsSearchOps = 0;
+    final debugStatsWidgets = _searchableCachedRows.length;
 
     final inspectorService = serviceManager.inspectorService;
     if (search.isEmpty ||
@@ -687,7 +686,7 @@ class InspectorTreeController extends DisposableController
 
     assert(
       () {
-        debugPrint('Search started: ' + _searchTarget.toString());
+        debugPrint('Search started: $_searchTarget');
         return true;
       }(),
     );
@@ -698,7 +697,7 @@ class InspectorTreeController extends DisposableController
 
       // Widget search begin
       if (_searchTarget == SearchTargetType.widget) {
-        _debugStatsSearchOps++;
+        debugStatsSearchOps++;
         if (diagnostic.searchValue.caseInsensitiveContains(search)) {
           matches.add(row);
           continue;
@@ -710,11 +709,7 @@ class InspectorTreeController extends DisposableController
     assert(
       () {
         debugPrint(
-          'Search completed with ' +
-              _debugStatsWidgets.toString() +
-              ' widgets, ' +
-              _debugStatsSearchOps.toString() +
-              ' ops',
+          'Search completed with $debugStatsWidgets widgets, $debugStatsSearchOps ops',
         );
         return true;
       }(),
@@ -749,6 +744,7 @@ class InspectorTree extends StatefulWidget {
     this.summaryTreeController,
     this.isSummaryTree = false,
     this.widgetErrors,
+    this.screenId,
   })  : assert(isSummaryTree == (summaryTreeController == null)),
         super(key: key);
 
@@ -763,6 +759,7 @@ class InspectorTree extends StatefulWidget {
 
   final bool isSummaryTree;
   final LinkedHashMap<String, InspectableWidgetError>? widgetErrors;
+  final String? screenId;
 
   @override
   State<InspectorTree> createState() => _InspectorTreeState();
@@ -806,7 +803,7 @@ class _InspectorTreeState extends State<InspectorTree>
       callOnceWhenReady(
         trigger: mainIsolateState.isPaused,
         callback: _bindToController,
-        readyWhen: (triggerValue) => triggerValue == false,
+        readyWhen: (triggerValue) => !triggerValue,
       );
     }
   }
@@ -1012,13 +1009,16 @@ class _InspectorTreeState extends State<InspectorTree>
     }
 
     if (!controller.firstInspectorTreeLoadCompleted && widget.isSummaryTree) {
-      ga.timeEnd(InspectorScreen.id, gac.pageReady);
-      unawaited(
-        serviceManager.sendDwdsEvent(
-          screen: InspectorScreen.id,
-          action: gac.pageReady,
-        ),
-      );
+      final screenId = widget.screenId;
+      if (screenId != null) {
+        ga.timeEnd(screenId, gac.pageReady);
+        unawaited(
+          serviceManager.sendDwdsEvent(
+            screen: screenId,
+            action: gac.pageReady,
+          ),
+        );
+      }
       controller.firstInspectorTreeLoadCompleted = true;
     }
     return LayoutBuilder(
@@ -1186,6 +1186,7 @@ class _RowPainter extends CustomPainter {
 /// be implemented by changing [DiagnosticsNodeDescription] instead.
 class InspectorRowContent extends StatelessWidget {
   const InspectorRowContent({
+    super.key,
     required this.row,
     required this.controller,
     required this.onToggle,
@@ -1261,7 +1262,7 @@ class InspectorRowContent extends StatelessWidget {
                         // we wouldn't need this.
                         controller.requestFocus();
                       },
-                      child: Container(
+                      child: SizedBox(
                         height: rowHeight,
                         child: DiagnosticsNodeDescription(
                           node.diagnostic,

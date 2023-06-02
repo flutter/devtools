@@ -29,20 +29,21 @@ class InspectorDetails extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tabs = [
-      _buildTab(tabName: 'Layout Explorer'),
-      _buildTab(
-        tabName: 'Widget Details Tree',
-        trailing: InspectorExpandCollapseButtons(controller: controller),
+      (
+        tab: _buildTab(tabName: 'Layout Explorer'),
+        tabView: LayoutExplorerTab(controller: controller),
       ),
-    ];
-    final tabViews = <Widget>[
-      LayoutExplorerTab(controller: controller),
-      detailsTree,
+      (
+        tab: _buildTab(
+          tabName: 'Widget Details Tree',
+          trailing: InspectorExpandCollapseButtons(controller: controller),
+        ),
+        tabView: detailsTree,
+      ),
     ];
 
     return AnalyticsTabbedView(
       tabs: tabs,
-      tabViews: tabViews,
       gaScreen: gac.inspector,
     );
   }

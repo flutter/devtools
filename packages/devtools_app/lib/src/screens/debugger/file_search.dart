@@ -22,6 +22,7 @@ final _fileNamesCache = <String, String>{};
 
 class FileSearchField extends StatefulWidget {
   const FileSearchField({
+    super.key,
     required this.codeViewController,
   });
 
@@ -130,13 +131,14 @@ class FileSearchFieldState extends State<FileSearchField>
     _scriptsCache.putIfAbsent(uri, () => scriptRef);
   }
 
-  void _onSelection(String scriptUri) {
+  Future<void> _onSelection(String scriptUri) async {
     if (scriptUri == noResultsMsg) {
       _onClose();
       return;
     }
     final scriptRef = _scriptsCache[scriptUri]!;
-    widget.codeViewController.showScriptLocation(ScriptLocation(scriptRef));
+    await widget.codeViewController
+        .showScriptLocation(ScriptLocation(scriptRef));
     _onClose();
   }
 

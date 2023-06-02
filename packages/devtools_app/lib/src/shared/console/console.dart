@@ -22,10 +22,11 @@ import 'widgets/expandable_variable.dart';
 /// [footer].
 class Console extends StatelessWidget {
   const Console({
+    super.key,
     required this.lines,
     this.title,
     this.footer,
-  }) : super();
+  });
 
   final Widget? title;
   final Widget? footer;
@@ -42,9 +43,10 @@ class Console extends StatelessWidget {
 
 class ConsoleFrame extends StatelessWidget {
   const ConsoleFrame({
+    super.key,
     required this.child,
     this.title,
-  }) : super();
+  });
 
   final Widget? title;
   final Widget child;
@@ -230,6 +232,7 @@ class _ConsoleOutputState extends State<_ConsoleOutput>
 /// and the `onPressed` function passed from the outside.
 class DeleteControl extends StatelessWidget {
   const DeleteControl({
+    super.key,
     this.onPressed,
     this.tooltip = 'Clear contents',
     this.buttonKey,

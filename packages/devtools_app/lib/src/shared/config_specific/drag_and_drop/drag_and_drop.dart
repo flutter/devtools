@@ -19,7 +19,7 @@ abstract class DragAndDropManager {
 
   static DragAndDropManager get instance => _instance;
 
-  static late final DragAndDropManager _instance = DragAndDropManager();
+  static final DragAndDropManager _instance = DragAndDropManager();
 
   final _dragAndDropStates = <DragAndDropState>{};
 
@@ -91,6 +91,7 @@ abstract class DragAndDropManager {
 
 class DragAndDrop extends StatefulWidget {
   const DragAndDrop({
+    super.key,
     required this.child,
     this.handleDrop,
   });

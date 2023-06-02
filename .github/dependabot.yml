@@ -9,3 +9,4 @@ updates:
       interval: "daily"
     labels:
       - "autosubmit"
+      - "release-notes-not-required"

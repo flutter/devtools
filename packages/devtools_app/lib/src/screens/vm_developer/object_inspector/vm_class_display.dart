@@ -18,6 +18,7 @@ const displayClassInstances = false;
 /// related to class objects in the Dart VM.
 class VmClassDisplay extends StatelessWidget {
   const VmClassDisplay({
+    super.key,
     required this.controller,
     required this.clazz,
   });
@@ -84,6 +85,7 @@ class VmClassDisplay extends StatelessWidget {
 /// Displays information on the instances of the Class object.
 class ClassInstancesWidget extends StatelessWidget {
   const ClassInstancesWidget({
+    super.key,
     required this.instances,
   });
 

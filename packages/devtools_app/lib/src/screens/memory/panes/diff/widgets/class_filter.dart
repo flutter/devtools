@@ -22,7 +22,7 @@ String _adaptRootPackageForFilter(String? rootPackage) {
 }
 
 class ClassFilterButton extends StatelessWidget {
-  ClassFilterButton(this.data)
+  ClassFilterButton(this.data, {super.key})
       : _rootPackage = _adaptRootPackageForFilter(data.rootPackage);
 
   final ClassFilterData data;
@@ -184,7 +184,7 @@ Widget _helpBuilder(BuildContext context) {
                 CopyToClipboardControl(
                   dataProvider: () => t.alias,
                   size: tableIconSize,
-                )
+                ),
               ],
             ),
           ],

@@ -7,24 +7,25 @@ publish_to: none
 # When publishing new versions of this package be sure to publish a new version
 # of package:devtools as well. package:devtools contains a compiled snapshot of
 # this package.
-version: 2.24.0-dev.1
+version: 2.25.0-dev.0
 
 repository: https://github.com/flutter/devtools/tree/master/packages/devtools_test
 
 environment:
-  sdk: '>=3.0.0-417.0.dev <4.0.0'
+  sdk: '>=3.0.0 <4.0.0'
   flutter: '>=3.0.0'
 
 dependencies:
   async: ^2.0.0
   collection: ^1.15.0
-  devtools_shared: 2.24.0-dev.1
-  devtools_app: 2.24.0-dev.1
+  devtools_shared: 2.25.0-dev.0
+  devtools_app: 2.25.0-dev.0
   flutter:
     sdk: flutter
   flutter_test:
     sdk: flutter
-  mockito: ^5.0.9
+  # TODO(https://github.com/flutter/devtools/issues/5843) Un-pin once fixed.
+  mockito: 5.4.0
   path: ^1.8.0
   provider: ^6.0.2
   vm_service: ">=10.1.0 <12.0.0"

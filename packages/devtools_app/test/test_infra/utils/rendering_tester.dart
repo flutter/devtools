@@ -116,7 +116,7 @@ class TestRenderingFlutterBinding extends BindingBase
   }
 }
 
-late TestRenderingFlutterBinding _renderer = TestRenderingFlutterBinding();
+TestRenderingFlutterBinding _renderer = TestRenderingFlutterBinding();
 
 /// Place the box in the render tree, at the given size and with the given
 /// alignment on the screen.

@@ -4,6 +4,7 @@
 
 import 'dart:async';
 import 'dart:convert';
+// ignore: avoid_web_libraries_in_flutter, as designed
 import 'dart:html' as html;
 
 import 'package:flutter/foundation.dart';
@@ -131,13 +132,12 @@ class _PerfettoViewController extends DisposableController
 
     html.window.addEventListener('message', _handleMessage);
 
-    if (isExternalBuild) {
-      unawaited(_loadStyle(preferences.darkModeTheme.value));
-      addAutoDisposeListener(preferences.darkModeTheme, () async {
-        await _loadStyle(preferences.darkModeTheme.value);
-        reloadCssForThemeChange();
-      });
-    }
+    unawaited(_loadStyle(preferences.darkModeTheme.value));
+    addAutoDisposeListener(preferences.darkModeTheme, () async {
+      await _loadStyle(preferences.darkModeTheme.value);
+      reloadCssForThemeChange();
+    });
+
     autoDisposeStreamSubscription(
       perfettoController.perfettoPostEventStream.stream.listen((event) async {
         if (event == EmbeddedPerfettoEvent.showHelp.event) {
@@ -155,7 +155,7 @@ class _PerfettoViewController extends DisposableController
     });
     final buffer = Uint8List.fromList(encodedJson.codeUnits);
 
-    ga.select(gac.performance, gac.perfettoLoadTrace);
+    ga.select(gac.performance, gac.PerformanceEvents.perfettoLoadTrace.name);
     _postMessage({
       'perfetto': {
         'buffer': buffer,
@@ -177,7 +177,10 @@ class _PerfettoViewController extends DisposableController
       return;
     }
     await _pingPerfettoUntilReady();
-    ga.select(gac.performance, gac.perfettoScrollToTimeRange);
+    ga.select(
+      gac.performance,
+      gac.PerformanceEvents.perfettoScrollToTimeRange.name,
+    );
     _postMessage({
       'perfetto': {
         // Pass the values to Perfetto in seconds.
@@ -191,13 +194,13 @@ class _PerfettoViewController extends DisposableController
 
   Future<void> _loadStyle(bool darkMode) async {
     // This message will be handled by [devtools_theme_handler.js], which is
-    // included in the Perfetto build inside [packages/perfetto_compiled/dist].
+    // included in the Perfetto build inside [packages/perfetto_ui_compiled/dist].
     await _pingDevToolsThemeHandlerUntilReady();
     _postMessageWithId(
       EmbeddedPerfettoEvent.devtoolsThemeChange.event,
       perfettoIgnore: true,
       args: {
-        'theme': '${darkMode ? 'dark' : 'light'}',
+        'theme': darkMode ? 'dark' : 'light',
       },
     );
   }
@@ -280,7 +283,6 @@ class _PerfettoViewController extends DisposableController
   }
 
   Future<void> _pingDevToolsThemeHandlerUntilReady() async {
-    if (!isExternalBuild) return;
     if (!_devtoolsThemeHandlerReady.isCompleted) {
       _pollForThemeHandlerReady =
           Timer.periodic(const Duration(milliseconds: 200), (_) {
