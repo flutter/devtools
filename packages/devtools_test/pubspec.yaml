@@ -24,8 +24,7 @@ dependencies:
     sdk: flutter
   flutter_test:
     sdk: flutter
-  # TODO(https://github.com/flutter/devtools/issues/5843) Un-pin once fixed.
-  mockito: 5.4.1
+  mockito: ^5.4.1
   path: ^1.8.0
   provider: ^6.0.2
   vm_service: ">=10.1.0 <12.0.0"
