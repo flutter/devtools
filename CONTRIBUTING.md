@@ -146,6 +146,19 @@ This instructs VS Code to run the `tool/build_e2e.dart` script instead of runnin
 
 Next, restart VS Code (or run the **Developer: Reload Window** command from the command palette (`F1`)) and DevTools will be run from your local code. After making any code changes to DevTools or the server, you will need to re-run the **Developer: Reload Window** command to rebuild and restart the server.
 
+### Running with Flutter Desktop
+
+You can also run DevTools using the Flutter desktop embedder on linux or macos. Some DevTools features only work on the web, like the embedded Perfetto trace viewer or DevTools analytics, but the limitations on the desktop app are few.
+
+The advantage of developing with the desktop embedder is that you can use hot reload to speed up your development cycle.
+
+To run DevTools with the desktop embedder, you can run with either of the following from `devtools/packages/devtools_app`:
+
+- `flutter run -d macos`
+- `flutter run -d linux`
+
+If this  fails, you may need to run `flutter create .` from `devtools/packages/devtools_app` to generate the updated files for your platform.
+
 ## Developing with VS Code
 
 ### DevTools Web
