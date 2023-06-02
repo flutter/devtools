@@ -430,10 +430,12 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
         ],
       );
 
-      final leftPadding = hideTitle ? 0.0 : calculateTitleWidth(
-        title,
-        textTheme: Theme.of(context).textTheme,
-      );
+      final leftPadding = hideTitle
+          ? 0.0
+          : calculateTitleWidth(
+              title,
+              textTheme: Theme.of(context).textTheme,
+            );
       final rightPadding = math.max(
         0.0,
         // Use [widget.actions] here instead of [actions] because we may
