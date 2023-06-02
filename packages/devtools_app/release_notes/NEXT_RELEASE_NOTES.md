@@ -6,7 +6,7 @@ This is draft for future release notes, that are going to land on
 Dart & Flutter DevTools - A Suite of Performance Tools for Dart and Flutter
 
 ## General updates
-TODO: Remove this section if there are not any general updates.
+* Improve DevTools tab bar navigation when the list of tabs is long - [#5875](https://github.com/flutter/devtools/pull/5875)
 
 ## Inspector updates
 TODO: Remove this section if there are not any general updates.
