@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app/devtools_app.dart';
-import 'package:devtools_app/src/framework/about_dialog.dart';
 import 'package:devtools_app/src/screens/debugger/call_stack.dart';
 import 'package:devtools_app/src/screens/debugger/codeview.dart';
 import 'package:devtools_test/devtools_integration_test.dart';
@@ -116,7 +115,7 @@ void main() {
 
     // Tap on the stackframe:
     await tester.tap(frameFinder);
-    await tester.pump(safePumpDuration);
+    await tester.pumpAndSettle(safePumpDuration);
 
     logStatus('looking for the other_classes.dart file');
 
