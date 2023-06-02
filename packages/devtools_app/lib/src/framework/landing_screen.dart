@@ -348,7 +348,7 @@ class AppSizeToolingInstructions extends StatelessWidget {
       gac.landingScreen,
       gac.openAppSizeTool,
     );
-    DevToolsRouterDelegate.of(context).navigate(appSizePageId);
+    DevToolsRouterDelegate.of(context).navigate(appSizeScreenId);
   }
 }
 

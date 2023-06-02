@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:math' as math;
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -13,14 +11,12 @@ import '../shared/analytics/prompt.dart';
 import '../shared/banner_messages.dart';
 import '../shared/common_widgets.dart';
 import '../shared/config_specific/drag_and_drop/drag_and_drop.dart';
-import '../shared/config_specific/ide_theme/ide_theme.dart';
 import '../shared/config_specific/import_export/import_export.dart';
 import '../shared/console/widgets/console_pane.dart';
 import '../shared/framework_controller.dart';
 import '../shared/globals.dart';
 import '../shared/primitives/auto_dispose.dart';
 import '../shared/primitives/simple_items.dart';
-import '../shared/primitives/utils.dart';
 import '../shared/routing.dart';
 import '../shared/screen.dart';
 import '../shared/split.dart';
@@ -52,12 +48,13 @@ class DevToolsScaffold extends StatefulWidget {
   DevToolsScaffold.withChild({
     Key? key,
     required Widget child,
-    required IdeTheme ideTheme,
+    bool embed = false,
     List<Widget>? actions,
   }) : this(
           key: key,
           screens: [SimpleScreen(child)],
           actions: actions,
+          embed: embed,
         );
 
   static List<Widget> defaultActions() => const [
@@ -121,10 +118,9 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
     super.initState();
 
     _initTitle();
-    addAutoDisposeListener(offlineController.offlineMode);
-
     _setupTabController();
 
+    addAutoDisposeListener(offlineController.offlineMode);
     autoDisposeStreamSubscription(
       frameworkController.onShowPageId.listen(_showPageById),
     );
@@ -257,7 +253,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
     final args = {'screen': screenId};
     final routerDelegate = DevToolsRouterDelegate.of(context);
     if (!offlineController.offlineMode.value) {
-      routerDelegate.navigate(snapshotPageId, args);
+      routerDelegate.navigate(snapshotScreenId, args);
     } else {
       // If we are already in offline mode, we need to replace the existing page
       // so clicking Back does not go through all of the old snapshots.
@@ -266,7 +262,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
       // history entry.
       Router.neglect(
         context,
-        () => routerDelegate.navigate(snapshotPageId, args),
+        () => routerDelegate.navigate(snapshotScreenId, args),
       );
     }
   }
@@ -332,9 +328,20 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
                 child: Scaffold(
                   appBar: widget.embed
                       ? null
-                      :
-                      // ignore: avoid-returning-widgets as that would make code more verbose for no clear benefit in this case.
-                      _buildAppBar(scaffoldTitle),
+                      : PreferredSize(
+                          preferredSize: Size.fromHeight(defaultToolbarHeight),
+                          // Place the AppBar inside of a Hero widget to keep it the same across
+                          // route transitions.
+                          child: Hero(
+                            tag: _appBarTag,
+                            child: DevToolsAppBar(
+                              tabController: _tabController,
+                              title: scaffoldTitle,
+                              screens: widget.screens,
+                              actions: widget.actions,
+                            ),
+                          ),
+                        ),
                   body: OutlineDecoration.onlyTop(
                     child: Padding(
                       padding: widget.appPadding,
@@ -373,150 +380,6 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
         },
       ),
     );
-  }
-
-  // TODO(kenz): move this helper and related app bar widgets to their own file.
-  /// Builds an [AppBar] with the [TabBar] placed on the side or the bottom,
-  /// depending on the screen width.
-  PreferredSizeWidget _buildAppBar(String title) {
-    Widget? flexibleSpace;
-    TabBar tabBar;
-
-    List<Screen> visibleScreens = widget.screens;
-    bool tabsOverflow({bool includeOverflowButtonWidth = false}) {
-      return _scaffoldHeaderWidth(
-                title: title,
-                screens: visibleScreens,
-                actions: widget.actions,
-              ) +
-              (includeOverflowButtonWidth ? TabOverflowButton.width : 0) >=
-          MediaQuery.of(context).size.width;
-    }
-
-    var hideTitle = false;
-    var overflow = tabsOverflow();
-    while (overflow) {
-      visibleScreens = List.of(visibleScreens)..safeRemoveLast();
-      overflow = tabsOverflow(includeOverflowButtonWidth: true);
-      if (overflow && visibleScreens.isEmpty) {
-        hideTitle = true;
-        break;
-      }
-    }
-    final overflowScreens = widget.screens.sublist(visibleScreens.length);
-
-    // Add a leading [VerticalLineSpacer] to the actions to separate them from
-    // the tabs.
-    final actions = List<Widget>.from(widget.actions ?? [])
-      ..insert(0, VerticalLineSpacer(height: defaultToolbarHeight));
-
-    final bool hasMultipleTabs = widget.screens.length > 1;
-
-    if (hasMultipleTabs) {
-      tabBar = TabBar(
-        controller: _tabController,
-        isScrollable: true,
-        labelPadding: EdgeInsets.zero,
-        tabs: [
-          for (var screen in visibleScreens)
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: tabBarSpacing),
-              child: screen.buildTab(context),
-            ),
-          // We need to include a widget in the tab bar for the overflow screens
-          // because the [_tabController] expects a length equal to the total
-          // number of screens, hidden or not.
-          for (var _ in overflowScreens) const SizedBox.shrink(),
-        ],
-      );
-
-      final leftPadding = hideTitle
-          ? 0.0
-          : calculateTitleWidth(
-              title,
-              textTheme: Theme.of(context).textTheme,
-            );
-      final rightPadding = math.max(
-        0.0,
-        // Use [widget.actions] here instead of [actions] because we may
-        // have added a spacer element to [actions] above, which should be
-        // excluded from the width calculation.
-        actionWidgetSize * ((widget.actions ?? []).length) +
-            (actions.safeFirst is VerticalLineSpacer
-                ? VerticalLineSpacer.totalWidth
-                : 0.0),
-      );
-
-      flexibleSpace = Align(
-        alignment: Alignment.centerLeft,
-        child: Padding(
-          padding: EdgeInsets.only(
-            top: densePadding,
-            left: leftPadding,
-            right: rightPadding,
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              tabBar,
-              if (overflowScreens.isNotEmpty)
-                Expanded(
-                  child: Align(
-                    alignment: Alignment.centerLeft,
-                    child: TabOverflowButton(
-                      screens: overflowScreens,
-                      selectedIndex:
-                          _tabController!.index - visibleScreens.length,
-                      onItemSelected: (index) {
-                        final selectedTabIndex = visibleScreens.length + index;
-                        _tabController!.index = selectedTabIndex;
-                      },
-                    ),
-                  ),
-                ),
-            ],
-          ),
-        ),
-      );
-    }
-
-    final appBar = AppBar(
-      // Turn off the appbar's back button.
-      automaticallyImplyLeading: false,
-      title: hideTitle ? const SizedBox.shrink() : DevToolsTitle(title: title),
-      centerTitle: false,
-      toolbarHeight: defaultToolbarHeight,
-      actions: actions,
-      flexibleSpace: flexibleSpace,
-    );
-
-    if (!hasMultipleTabs) return appBar;
-
-    return PreferredSize(
-      preferredSize: Size.fromHeight(defaultToolbarHeight),
-      // Place the AppBar inside of a Hero widget to keep it the same across
-      // route transitions.
-      child: Hero(
-        tag: _appBarTag,
-        child: appBar,
-      ),
-    );
-  }
-
-  /// Returns the width of the scaffold title, tabs and default icons.
-  double _scaffoldHeaderWidth({
-    required String title,
-    required List<Screen> screens,
-    required List<Widget>? actions,
-  }) {
-    final textTheme = Theme.of(context).textTheme;
-    final titleWidth = calculateTitleWidth(title, textTheme: textTheme);
-    final tabsWidth = screens.fold(
-      0.0,
-      (prev, screen) => prev + screen.approximateTabWidth(textTheme),
-    );
-    final actionsWidth = (actions?.length ?? 0) * actionWidgetSize;
-    return titleWidth + tabsWidth + actionsWidth;
   }
 }
 

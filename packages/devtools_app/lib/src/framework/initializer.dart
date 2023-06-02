@@ -199,7 +199,7 @@ class _InitializerState extends State<Initializer>
     final routerDelegate = DevToolsRouterDelegate.of(context);
     Router.neglect(
       context,
-      () => routerDelegate.navigate(snapshotPageId, args),
+      () => routerDelegate.navigate(snapshotScreenId, args),
     );
   }
 
