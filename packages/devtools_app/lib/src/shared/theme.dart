@@ -231,6 +231,7 @@ const defaultIconSizeBeforeScaling = 16.0;
 const defaultActionsIconSizeBeforeScaling = 20.0;
 
 const defaultSpacing = 16.0;
+const tabBarSpacing = 14.0;
 const intermediateSpacing = 12.0;
 const denseSpacing = 8.0;
 const denseModeDenseSpacing = 2.0;
@@ -627,9 +628,9 @@ ButtonStyle denseAwareOutlinedButtonStyle(
 }
 
 ButtonStyle denseAwareTextButtonStyle(
-  BuildContext context,
+  BuildContext context, {
   double? minScreenWidthForTextBeforeScaling,
-) {
+}) {
   final buttonStyle =
       Theme.of(context).textButtonTheme.style ?? const ButtonStyle();
   return _generateButtonStyle(
