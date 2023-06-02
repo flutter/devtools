@@ -36,7 +36,7 @@ class TabOverflowButton extends StatelessWidget {
       buttonWidth: buttonMinWidth,
       menuChildren: _buildChildren(context),
     );
-    return overflowTabSelected ? _SelectedTabWrapper(child: button) : button;
+    return overflowTabSelected ? SelectedTabWrapper(child: button) : button;
   }
 
   List<Widget> _buildChildren(BuildContext context) {
@@ -50,7 +50,7 @@ class TabOverflowButton extends StatelessWidget {
           theme.textTheme,
           includeTabBarSpacing: false,
         );
-        tab = _SelectedTabWrapper(
+        tab = SelectedTabWrapper(
           width: tabWidth,
           child: Container(
             width: tabWidth,
@@ -79,8 +79,9 @@ class TabOverflowButton extends StatelessWidget {
   }
 }
 
-class _SelectedTabWrapper extends StatelessWidget {
-  _SelectedTabWrapper({required this.child, double? width})
+@visibleForTesting
+class SelectedTabWrapper extends StatelessWidget {
+  SelectedTabWrapper({super.key, required this.child, double? width})
       : width = width ?? buttonMinWidth;
 
   final Widget child;

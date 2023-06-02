@@ -393,10 +393,15 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
           MediaQuery.of(context).size.width;
     }
 
+    var hideTitle = false;
     var overflow = tabsOverflow();
     while (overflow) {
-      visibleScreens = List.of(visibleScreens)..removeLast();
+      visibleScreens = List.of(visibleScreens)..safeRemoveLast();
       overflow = tabsOverflow(includeOverflowButtonWidth: true);
+      if (overflow && visibleScreens.isEmpty) {
+        hideTitle = true;
+        break;
+      }
     }
     final overflowScreens = widget.screens.sublist(visibleScreens.length);
 
@@ -425,7 +430,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
         ],
       );
 
-      final leftPadding = calculateTitleWidth(
+      final leftPadding = hideTitle ? 0.0 : calculateTitleWidth(
         title,
         textTheme: Theme.of(context).textTheme,
       );
@@ -449,16 +454,23 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
             right: rightPadding,
           ),
           child: Row(
+            mainAxisSize: MainAxisSize.min,
             children: [
               tabBar,
               if (overflowScreens.isNotEmpty)
-                TabOverflowButton(
-                  screens: overflowScreens,
-                  selectedIndex: _tabController!.index - visibleScreens.length,
-                  onItemSelected: (index) {
-                    final selectedTabIndex = visibleScreens.length + index;
-                    _tabController!.index = selectedTabIndex;
-                  },
+                Expanded(
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: TabOverflowButton(
+                      screens: overflowScreens,
+                      selectedIndex:
+                          _tabController!.index - visibleScreens.length,
+                      onItemSelected: (index) {
+                        final selectedTabIndex = visibleScreens.length + index;
+                        _tabController!.index = selectedTabIndex;
+                      },
+                    ),
+                  ),
                 ),
             ],
           ),
@@ -469,7 +481,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
     final appBar = AppBar(
       // Turn off the appbar's back button.
       automaticallyImplyLeading: false,
-      title: DevToolsTitle(title: title),
+      title: hideTitle ? const SizedBox.shrink() : DevToolsTitle(title: title),
       centerTitle: false,
       toolbarHeight: defaultToolbarHeight,
       actions: actions,
