@@ -48,7 +48,7 @@ Future<void> _addDiagnosticsIfNeeded(
   if (diagnostic == null || !includeDiagnosticPropertiesInDebugger) return;
 
   final service = diagnostic.objectGroupApi;
-  Future<void> _addPropertiesHelper(
+  Future<void> addPropertiesHelper(
     List<RemoteDiagnosticsNode>? properties,
   ) async {
     if (properties == null || service == null || isolateRef == null) return;
