@@ -16,10 +16,10 @@ import 'primitives/utils.dart';
 ///
 /// This must be different to the AppSizeScreen ID which is also used in routing when
 /// cnnected to a VM to ensure they have unique URLs.
-const appSizePageId = 'appsize';
+const appSizeScreenId = 'appsize';
 
-const homePageId = '';
-const snapshotPageId = 'snapshot';
+const homeScreenId = '';
+const snapshotScreenId = 'snapshot';
 
 /// Represents a Page/route for a DevTools screen.
 class DevToolsRouteConfiguration {
@@ -196,7 +196,7 @@ class DevToolsRouterDelegate extends RouterDelegate<DevToolsRouteConfiguration>
     // Ensure we disconnect from any previously connected applications if we do
     // not have a vm service uri as a query parameter, unless we are loading an
     // offline file.
-    if (page != snapshotPageId && newArgs['uri'] == null) {
+    if (page != snapshotScreenId && newArgs['uri'] == null) {
       serviceManager.manuallyDisconnect();
     }
 
@@ -211,7 +211,7 @@ class DevToolsRouterDelegate extends RouterDelegate<DevToolsRouteConfiguration>
     required bool clearScreenParam,
   }) {
     navigate(
-      homePageId,
+      homeScreenId,
       {
         if (clearUriParam) 'uri': null,
         if (clearScreenParam) 'screen': null,

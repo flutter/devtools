@@ -2,11 +2,163 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
 import '../shared/common_widgets.dart';
+import '../shared/primitives/utils.dart';
 import '../shared/screen.dart';
 import '../shared/theme.dart';
+
+class DevToolsAppBar extends StatelessWidget {
+  const DevToolsAppBar({
+    super.key,
+    required this.tabController,
+    required this.title,
+    required this.screens,
+    required this.actions,
+  });
+
+  final TabController? tabController;
+
+  final String title;
+
+  final List<Screen> screens;
+
+  final List<Widget>? actions;
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    Widget? flexibleSpace;
+    TabBar tabBar;
+
+    List<Screen> visibleScreens = screens;
+    bool tabsOverflow({bool includeOverflowButtonWidth = false}) {
+      return _scaffoldHeaderWidth(
+                title: title,
+                screens: visibleScreens,
+                actions: actions,
+                textTheme: textTheme,
+              ) +
+              (includeOverflowButtonWidth ? TabOverflowButton.width : 0) >=
+          MediaQuery.of(context).size.width;
+    }
+
+    var hideTitle = false;
+    var overflow = tabsOverflow();
+    while (overflow) {
+      visibleScreens = List.of(visibleScreens)..safeRemoveLast();
+      overflow = tabsOverflow(includeOverflowButtonWidth: true);
+      if (overflow && visibleScreens.isEmpty) {
+        hideTitle = true;
+        break;
+      }
+    }
+    final overflowScreens = screens.sublist(visibleScreens.length);
+
+    // Add a leading [VerticalLineSpacer] to the actions to separate them from
+    // the tabs.
+    final actionsWithSpacer = List<Widget>.from(actions ?? [])
+      ..insert(0, VerticalLineSpacer(height: defaultToolbarHeight));
+
+    final bool hasMultipleTabs = screens.length > 1;
+    if (hasMultipleTabs) {
+      tabBar = TabBar(
+        controller: tabController,
+        isScrollable: true,
+        labelPadding: EdgeInsets.zero,
+        tabs: [
+          for (var screen in visibleScreens)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: tabBarSpacing),
+              child: screen.buildTab(context),
+            ),
+          // We need to include a widget in the tab bar for the overflow screens
+          // because the [_tabController] expects a length equal to the total
+          // number of screens, hidden or not.
+          for (var _ in overflowScreens) const SizedBox.shrink(),
+        ],
+      );
+
+      final leftPadding = hideTitle
+          ? 0.0
+          : calculateTitleWidth(
+              title,
+              textTheme: Theme.of(context).textTheme,
+            );
+      final rightPadding = math.max(
+        0.0,
+        // Use [actions] here instead of [actionsWithSpacer] because we may
+        // have added a spacer element to [actionsWithSpacer] above, which
+        // should be excluded from the width calculation.
+        actionWidgetSize * ((actions ?? []).length) +
+            (actionsWithSpacer.safeFirst is VerticalLineSpacer
+                ? VerticalLineSpacer.totalWidth
+                : 0.0),
+      );
+
+      flexibleSpace = Align(
+        alignment: Alignment.centerLeft,
+        child: Padding(
+          padding: EdgeInsets.only(
+            top: densePadding,
+            left: leftPadding,
+            right: rightPadding,
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              tabBar,
+              if (overflowScreens.isNotEmpty)
+                Expanded(
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: TabOverflowButton(
+                      screens: overflowScreens,
+                      selectedIndex:
+                          tabController!.index - visibleScreens.length,
+                      onItemSelected: (index) {
+                        final selectedTabIndex = visibleScreens.length + index;
+                        tabController!.index = selectedTabIndex;
+                      },
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return AppBar(
+      // Turn off the appbar's back button.
+      automaticallyImplyLeading: false,
+      title: hideTitle ? const SizedBox.shrink() : DevToolsTitle(title: title),
+      centerTitle: false,
+      toolbarHeight: defaultToolbarHeight,
+      actions: actionsWithSpacer,
+      flexibleSpace: flexibleSpace,
+    );
+  }
+
+  /// Returns the width of the scaffold title, tabs and default icons.
+  double _scaffoldHeaderWidth({
+    required String title,
+    required List<Screen> screens,
+    required List<Widget>? actions,
+    required TextTheme textTheme,
+  }) {
+    final titleWidth = calculateTitleWidth(title, textTheme: textTheme);
+    final tabsWidth = screens.fold(
+      0.0,
+      (prev, screen) => prev + screen.approximateTabWidth(textTheme),
+    );
+    final actionsWidth = (actions?.length ?? 0) * actionWidgetSize;
+    return titleWidth + tabsWidth + actionsWidth;
+  }
+}
 
 class TabOverflowButton extends StatelessWidget {
   const TabOverflowButton({
