@@ -41,6 +41,7 @@ import 'shared/analytics/analytics_controller.dart';
 import 'shared/analytics/metrics.dart';
 import 'shared/common_widgets.dart';
 import 'shared/console/primitives/simple_items.dart';
+import 'shared/feature_flags.dart';
 import 'shared/globals.dart';
 import 'shared/offline_screen.dart';
 import 'shared/primitives/auto_dispose.dart';
@@ -49,6 +50,7 @@ import 'shared/routing.dart';
 import 'shared/screen.dart';
 import 'shared/theme.dart';
 import 'shared/ui/hover.dart';
+import 'standalone_ui/standalone_screen.dart';
 
 // Assign to true to use a sample implementation of a conditional screen.
 // WARNING: Do not check in this file if debugEnableSampleScreen is true.
@@ -288,6 +290,14 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
           ),
         );
       },
+      if (FeatureFlags.vsCodeSidebarTooling) ..._standaloneScreens,
+    };
+  }
+
+  Map<String, UrlParametersBuilder> get _standaloneScreens {
+    return {
+      for (final type in StandaloneScreenType.values)
+        type.name: (_, __, args, ___) => type.screen,
     };
   }
 
