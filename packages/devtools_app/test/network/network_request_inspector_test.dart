@@ -6,6 +6,7 @@ import 'dart:convert';
 
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/network/network_request_inspector.dart';
+import 'package:devtools_app/src/screens/network/network_request_inspector_views.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vm_service/vm_service.dart';
@@ -123,6 +124,198 @@ void main() {
         jsonDecode(clipboardContents),
         equals(expectedResponseBody),
       );
+
+      controller.stopRecording();
+
+      // pumpAndSettle so residual http timers can clear.
+      await tester.pumpAndSettle(const Duration(seconds: 1));
+    });
+
+    group('HttpResponseTrailingDropDown', () {
+      testWidgets(
+          'drop down value should update when response view type changes',
+          (tester) async {
+        NetworkResponseViewType? getCurrentDropDownValue() {
+          final RoundedDropDownButton<NetworkResponseViewType> dropDownWidget =
+              find
+                  .byType(RoundedDropDownButton<NetworkResponseViewType>)
+                  .evaluate()
+                  .first
+                  .widget as RoundedDropDownButton<NetworkResponseViewType>;
+          return dropDownWidget.value;
+        }
+
+        final currentResponseViewType = controller.currentResponseViewType;
+        final requestsNotifier = controller.requests;
+        await controller.startRecording();
+
+        // Load the network request.
+        await controller.networkService.refreshNetworkData();
+        expect(requestsNotifier.value.requests.length, equals(1));
+
+        // Select the request in the network request list.
+        final data = requestsNotifier.value.requests.first;
+
+        // Matches Drop Down value with currentResponseViewType
+        void checkDropDownValue() {
+          final currentDropDownValue = getCurrentDropDownValue();
+          expect(currentDropDownValue, equals(currentResponseViewType.value));
+        }
+
+        await tester.pumpWidget(
+          wrapWithControllers(
+            HttpResponseTrailingDropDown(
+              data as DartIOHttpRequestData,
+              currentResponseViewType: currentResponseViewType,
+              onChanged: (value) {
+                controller.setResponseViewType = value;
+              },
+            ),
+            debugger: createMockDebuggerControllerWithDefaults(),
+          ),
+        );
+
+        controller.setResponseViewType = NetworkResponseViewType.json;
+        await tester.pumpAndSettle();
+        checkDropDownValue();
+
+        controller.setResponseViewType = NetworkResponseViewType.text;
+        await tester.pumpAndSettle();
+        checkDropDownValue();
+
+        controller.setResponseViewType = NetworkResponseViewType.auto;
+        await tester.pumpAndSettle();
+        checkDropDownValue();
+
+        controller.stopRecording();
+
+        // pumpAndSettle so residual http timers can clear.
+        await tester.pumpAndSettle(const Duration(seconds: 1));
+      });
+
+      testWidgets(
+          'onChanged handler should trigger when changing drop down value manually',
+          (tester) async {
+        final currentResponseViewType = controller.currentResponseViewType;
+        final requestsNotifier = controller.requests;
+        await controller.startRecording();
+
+        // Load the network request.
+        await controller.networkService.refreshNetworkData();
+        expect(requestsNotifier.value.requests.length, equals(1));
+
+        // Select the request in the network request list.
+        final data = requestsNotifier.value.requests.first;
+
+        await tester.pumpWidget(
+          wrapWithControllers(
+            HttpResponseTrailingDropDown(
+              data as DartIOHttpRequestData,
+              currentResponseViewType: currentResponseViewType,
+              onChanged: (value) {
+                controller.setResponseViewType = value;
+              },
+            ),
+            debugger: createMockDebuggerControllerWithDefaults(),
+          ),
+        );
+
+        final dropDownFinder = find.byType(
+          RoundedDropDownButton<NetworkResponseViewType>,
+        );
+
+        await tester.tap(dropDownFinder);
+        await tester.pumpAndSettle();
+
+        // Select Json from drop down
+        await tester.tap(
+          find.text(
+            NetworkResponseViewType.json.toString(),
+          ),
+        );
+        await tester.pumpAndSettle();
+        expect(
+          currentResponseViewType.value,
+          equals(NetworkResponseViewType.json),
+        );
+
+        await tester.tap(dropDownFinder);
+        await tester.pumpAndSettle();
+
+        // Select Text from drop down
+        await tester.tap(
+          find.text(
+            NetworkResponseViewType.text.toString(),
+          ),
+        );
+        await tester.pumpAndSettle();
+        expect(
+          currentResponseViewType.value,
+          equals(NetworkResponseViewType.text),
+        );
+
+        await tester.tap(dropDownFinder);
+        await tester.pumpAndSettle();
+
+        // Select Auto from drop down
+        await tester.tap(
+          find.text(
+            NetworkResponseViewType.auto.toString(),
+          ),
+        );
+        await tester.pumpAndSettle();
+        expect(
+          currentResponseViewType.value,
+          equals(NetworkResponseViewType.auto),
+        );
+
+        controller.stopRecording();
+
+        // pumpAndSettle so residual http timers can clear.
+        await tester.pumpAndSettle(const Duration(seconds: 1));
+      });
+    });
+
+    testWidgets(
+        'should update response view display when drop down value changes',
+        (tester) async {
+      final requestsNotifier = controller.requests;
+      await controller.startRecording();
+
+      await tester.pumpWidget(
+        wrapWithControllers(
+          NetworkRequestInspector(controller),
+          debugger: createMockDebuggerControllerWithDefaults(),
+        ),
+      );
+
+      // Load the network request.
+      await controller.networkService.refreshNetworkData();
+      expect(requestsNotifier.value.requests.length, equals(1));
+
+      // Select the request in the network request list.
+      final networkRequest = requestsNotifier.value.requests.first;
+      controller.selectedRequest.value = networkRequest;
+
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Response'));
+      await tester.pumpAndSettle();
+
+      controller.setResponseViewType = NetworkResponseViewType.json;
+
+      await tester.pumpAndSettle();
+
+      // Check that Json viewer is visible
+      Finder jsonViewer = find.byType(JsonViewer);
+      expect(jsonViewer, findsOneWidget);
+
+      controller.setResponseViewType = NetworkResponseViewType.text;
+
+      await tester.pumpAndSettle();
+
+      // Check that Json viewer is not visible
+      jsonViewer = find.byType(JsonViewer);
+      expect(jsonViewer, findsNothing);
 
       controller.stopRecording();
 
