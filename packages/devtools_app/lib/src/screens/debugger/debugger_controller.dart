@@ -163,9 +163,9 @@ class DebuggerController extends DisposableController
   bool get isSystemIsolate => _isolate.value?.isSystemIsolate ?? false;
 
   String get _isolateRefId {
-    final id = _isolate.value?.id;
-    if (id == null) return '';
-    return id;
+    final isolateId = _isolate.value?.id;
+    if (isolateId == null) return '';
+    return isolateId;
   }
 
   void _switchToIsolate(IsolateRef? ref) async {
