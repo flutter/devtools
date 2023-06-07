@@ -44,7 +44,7 @@ jobs:
         id: checkout-pr-branch
         uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab
         with:
-          ref: "refs/pull/${{ github.event.number }}/merge"
+          ref: "${{ github.event.pull_request.sha }}"
 
       # Otherwise use the default checkout action.
       - name: Checkout DevTools (default)
