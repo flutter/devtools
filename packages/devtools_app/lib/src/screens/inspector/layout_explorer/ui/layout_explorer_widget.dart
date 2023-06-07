@@ -107,7 +107,7 @@ abstract class LayoutExplorerWidgetState<W extends LayoutExplorerWidget,
     final node = await nextObjectGroup.getLayoutExplorerNode(
       getRoot(selectedNode),
     );
-    if (node == null) return null;
+    if (node == null || node.renderObject == null) return null;
 
     if (!nextObjectGroup.disposed) {
       assert(manager.next == nextObjectGroup);
