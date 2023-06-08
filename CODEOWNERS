@@ -26,3 +26,10 @@ vm_developer/       @bkonyi
 
 # Tooling files
 /tool/              @CoderDake
+
+# DartDevtoolWorkflowBot added here to prevent other CODEOWNERS
+# from being added to auto generated dev bumps
+packages/devtools_app/lib/devtools.dart @DartDevtoolWorkflowBot
+packages/devtools_app/pubspec.yaml @DartDevtoolWorkflowBot
+packages/devtools_shared/pubspec.yaml @DartDevtoolWorkflowBot
+packages/devtools_test/pubspec.yaml @DartDevtoolWorkflowBot
