@@ -29,11 +29,14 @@ jobs:
     uses: ./.github/workflows/flutter-prep.yaml
     with:
       os-name: ubuntu
-      requires-label: ${{ github.event.pull_request.user.login == 'DartDevtoolWorkflowBot' && "" || "run-dcm-workflow" }}
+      requires-label: "run-dcm-workflow"
       needs-checkout-merge: true
 
   dcm:
     if: contains(github.event.pull_request.labels.*.name, 'run-dcm-workflow')
+    paths:
+      - "**/*.dart"
+      - "!packages/devtools_app/lib/devtools.dart"
     name: Dart Code Metrics
     needs: flutter-prep
     runs-on: ubuntu-latest

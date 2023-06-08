@@ -12,7 +12,10 @@ on:
 
 jobs:
   dcm-label-reminder:
-    if: ${{ !contains(github.event.*.labels.*.name, 'run-dcm-workflow') }} && github.event.pull_request.user.login != 'DartDevtoolWorkflowBot'
+    if: ${{ !contains(github.event.*.labels.*.name, 'run-dcm-workflow') }}
+    paths:
+      - "**/*.dart"
+      - "!packages/devtools_app/lib/devtools.dart"
     name: Prevent submission
     runs-on: ubuntu-latest
     steps:
