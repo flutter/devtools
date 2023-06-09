@@ -120,7 +120,7 @@ class DragAndDropState extends State<DragAndDrop> {
   final _dragging = ValueNotifier<bool>(false);
 
   bool _isActive = false;
-  int? _viewId;
+
   @override
   void initState() {
     super.initState();
@@ -135,7 +135,7 @@ class DragAndDropState extends State<DragAndDrop> {
 
   @override
   Widget build(BuildContext context) {
-    setViewId(context);
+    _setViewId(context);
 
     return MetaData(
       metaData: DragAndDropMetaData(state: this),
@@ -154,9 +154,8 @@ class DragAndDropState extends State<DragAndDrop> {
     );
   }
 
-  void setViewId(BuildContext context) {
-    _viewId = View.of(context).viewId as int;
-    DragAndDropManager.instance.setViewId(_viewId!);
+  void _setViewId(BuildContext context) {
+    DragAndDropManager.instance.setViewId(View.of(context).viewId as int);
   }
 
   void dragOver() {
