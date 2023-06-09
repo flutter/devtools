@@ -729,6 +729,7 @@ class VmServiceObjectLink extends StatelessWidget {
   @visibleForTesting
   static String? defaultTextBuilder(
     Object? object, {
+    // ignore: avoid-unused-parameters, false positive
     bool preferUri = false,
   }) {
     if (object == null) return null;

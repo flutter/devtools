@@ -385,6 +385,7 @@ void main() {
           String? newValue,
           String? oldValue,
         }) async {
+          // ignore: avoid-unnecessary-type-assertions, false positive
           if (extensionDescription
               is extensions.ToggleableServiceExtensionDescription) {
             newValue ??= extensionDescription.enabledValue.toString();
