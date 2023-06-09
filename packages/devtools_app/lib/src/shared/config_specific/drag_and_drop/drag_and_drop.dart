@@ -11,18 +11,22 @@ import '_drag_and_drop_stub.dart'
     if (dart.library.io) '_drag_and_drop_desktop.dart';
 
 abstract class DragAndDropManager {
-  factory DragAndDropManager() => createDragAndDropManager();
+  factory DragAndDropManager(int viewId) => createDragAndDropManager(viewId);
 
-  DragAndDropManager.impl() {
+  DragAndDropManager.impl(int viewId) : _viewId = viewId {
     init();
   }
 
-  static DragAndDropManager get instance => _instance;
+  static DragAndDropManager getInstance(int viewId) {
+    _instances.putIfAbsent(viewId, () => DragAndDropManager(viewId));
+    return _instances[viewId]!;
+  }
 
-  static final DragAndDropManager _instance = DragAndDropManager();
+  static final Map<int, DragAndDropManager> _instances = {};
+  int get viewId => _viewId;
 
   final _dragAndDropStates = <DragAndDropState>{};
-  int? _viewId;
+  final int _viewId;
 
   DragAndDropState? activeState;
 
@@ -39,10 +43,6 @@ abstract class DragAndDropManager {
 
   void registerDragAndDrop(DragAndDropState state) {
     _dragAndDropStates.add(state);
-  }
-
-  void setViewId(int viewId) {
-    _viewId = viewId;
   }
 
   void unregisterDragAndDrop(DragAndDropState state) {
@@ -118,25 +118,42 @@ class DragAndDrop extends StatefulWidget {
 
 class DragAndDropState extends State<DragAndDrop> {
   final _dragging = ValueNotifier<bool>(false);
+  DragAndDropManager? _dragAndDropManager;
 
   bool _isActive = false;
+
+  void _refreshDragAndDropManager(int viewId) {
+    if (_dragAndDropManager != null) {
+      final oldViewId = _dragAndDropManager!.viewId;
+
+      // Already registered to the right drag and drop manager, so do nothing.
+      if (oldViewId == viewId) return;
+
+      _dragAndDropManager?.unregisterDragAndDrop(this);
+      _dragAndDropManager = null;
+    }
+
+    _dragAndDropManager = DragAndDropManager.getInstance(viewId);
+    _dragAndDropManager!.registerDragAndDrop(this);
+  }
 
   @override
   void initState() {
     super.initState();
-    DragAndDropManager.instance.registerDragAndDrop(this);
   }
 
   @override
   void dispose() {
-    DragAndDropManager.instance.unregisterDragAndDrop(this);
+    _dragAndDropManager?.unregisterDragAndDrop(this);
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    _setViewId(context);
-
+    // Each time the widget is rebuilt it may be in a a new view. So the
+    // dragAndDropManager is refreshed to ensure that we are registered in the
+    // right context.
+    _refreshDragAndDropManager(View.of(context).viewId as int);
     return MetaData(
       metaData: DragAndDropMetaData(state: this),
       child: widget.handleDrop != null
@@ -152,10 +169,6 @@ class DragAndDropState extends State<DragAndDrop> {
             )
           : widget.child,
     );
-  }
-
-  void _setViewId(BuildContext context) {
-    DragAndDropManager.instance.setViewId(View.of(context).viewId as int);
   }
 
   void dragOver() {
