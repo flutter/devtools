@@ -76,3 +76,5 @@ void setCharacterWidthForTables() {
 
 T getWidgetFromFinder<T>(Finder finder) =>
     finder.first.evaluate().first.widget as T;
+
+const skipForFlutterTestRegistry = 'skipForFlutterTestRegistry';
