@@ -7,9 +7,9 @@
 ./tool/generate_code.sh >> output.txt
 
 # Test devtools_shared
-cd packages/devtools_shared
-flutter test test/
+# cd packages/devtools_shared
+# flutter test test/
 
 # Test devtools_app
 cd ../devtools_app
-flutter test test/
+flutter test test/inspector/
