@@ -62,7 +62,9 @@ abstract class DragAndDropManager {
   /// newly active [DragAndDrop] widgets accordingly.
   void hitTestAndUpdateActiveId(double x, double y) {
     final hitTestResult = HitTestResult();
-    RendererBinding.instance.hitTest(hitTestResult, Offset(x, y));
+    final viewId =
+        RendererBinding.instance.renderView.flutterView.viewId as int;
+    RendererBinding.instance.hitTestInView(hitTestResult, Offset(x, y), viewId);
 
     // Starting at bottom of [hitTestResult.path], look for the first
     // [DragAndDrop] widget. This widget will be marked by a [RenderMetaData]
