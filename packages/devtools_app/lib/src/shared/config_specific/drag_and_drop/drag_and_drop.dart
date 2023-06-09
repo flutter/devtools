@@ -22,7 +22,7 @@ abstract class DragAndDropManager {
   static final DragAndDropManager _instance = DragAndDropManager();
 
   final _dragAndDropStates = <DragAndDropState>{};
-  int? viewId;
+  int? _viewId;
 
   DragAndDropState? activeState;
 
@@ -42,7 +42,7 @@ abstract class DragAndDropManager {
   }
 
   void setViewId(int viewId) {
-    viewId = viewId;
+    _viewId = viewId;
   }
 
   void unregisterDragAndDrop(DragAndDropState state) {
@@ -50,10 +50,7 @@ abstract class DragAndDropManager {
   }
 
   void dragOver(double x, double y) {
-    if (viewId == null) {
-      throw 'viewId was not initialized';
-    }
-    hitTestAndUpdateActiveId(x, y, viewId!);
+    hitTestAndUpdateActiveId(x, y);
     activeState?.dragOver();
   }
 
@@ -68,9 +65,13 @@ abstract class DragAndDropManager {
   /// Performs a hit test to find the active [DragAndDrop] widget at the (x, y)
   /// coordinates, and updates the active state for the previously active and
   /// newly active [DragAndDrop] widgets accordingly.
-  void hitTestAndUpdateActiveId(double x, double y, int viewId) {
+  void hitTestAndUpdateActiveId(double x, double y) {
+    if (_viewId == null) {
+      throw 'viewId was not initialized';
+    }
     final hitTestResult = HitTestResult();
-    RendererBinding.instance.hitTestInView(hitTestResult, Offset(x, y), viewId);
+    RendererBinding.instance
+        .hitTestInView(hitTestResult, Offset(x, y), _viewId!);
 
     // Starting at bottom of [hitTestResult.path], look for the first
     // [DragAndDrop] widget. This widget will be marked by a [RenderMetaData]
