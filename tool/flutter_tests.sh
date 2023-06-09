@@ -12,6 +12,5 @@
 # popd
 
 # Test devtools_app
-pushd packages/devtools_app
+cd packages/devtools_app
 flutter test test/inspector/
-popd
