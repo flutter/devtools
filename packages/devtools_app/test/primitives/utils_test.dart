@@ -865,6 +865,15 @@ void main() {
         expect(list.safeGet(1), equals(2));
         expect(list.safeGet(-1), isNull);
       });
+
+      test('safeRemoveLast', () {
+        final list = <int>[];
+        expect(list.safeRemoveLast(), isNull);
+        list.addAll([1, 2]);
+        expect(list.safeRemoveLast(), 2);
+        expect(list.safeRemoveLast(), 1);
+        expect(list.safeRemoveLast(), isNull);
+      });
     });
   });
 

@@ -33,7 +33,6 @@ abstract class ClassSampler {
 class InstanceDisplayWithContextMenu extends StatelessWidget {
   const InstanceDisplayWithContextMenu({
     super.key,
-    this.textStyle,
     required this.count,
     required this.sampleObtainer,
     required this.showMenu,
@@ -45,7 +44,6 @@ class InstanceDisplayWithContextMenu extends StatelessWidget {
   final int count;
   final ClassSampler? sampleObtainer;
   final bool showMenu;
-  final TextStyle? textStyle;
   final MemoryAreas gaContext;
 
   /// If true, menu items that show live objects, will be enabled.
@@ -54,23 +52,23 @@ class InstanceDisplayWithContextMenu extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final shouldShowMenu = showMenu && count > 0;
+    const menuButtonWidth = ContextMenuButton.defaultWidth;
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
-        Text(
-          nf.format(count),
-          style: textStyle,
-        ),
+        Text(nf.format(count)),
         if (shouldShowMenu)
           ContextMenuButton(
-            style: textStyle,
-            menu: _menu(
+            // ignore: avoid_redundant_argument_values, ensures consistency with [SizedBox] below.
+            buttonWidth: menuButtonWidth,
+            menuChildren: _menu(
               sampleObtainer!,
               liveItemsEnabled: liveItemsEnabled,
             ),
-          ),
-        if (!shouldShowMenu) const SizedBox(width: ContextMenuButton.width),
+          )
+        else
+          const SizedBox(width: menuButtonWidth),
       ],
     );
   }
