@@ -22,6 +22,7 @@ abstract class DragAndDropManager {
   static final DragAndDropManager _instance = DragAndDropManager();
 
   final _dragAndDropStates = <DragAndDropState>{};
+  int? viewId;
 
   DragAndDropState? activeState;
 
@@ -40,12 +41,19 @@ abstract class DragAndDropManager {
     _dragAndDropStates.add(state);
   }
 
+  void setViewId(int viewId) {
+    viewId = viewId;
+  }
+
   void unregisterDragAndDrop(DragAndDropState state) {
     _dragAndDropStates.remove(state);
   }
 
   void dragOver(double x, double y) {
-    hitTestAndUpdateActiveId(x, y);
+    if (viewId == null) {
+      throw 'viewId was not initialized';
+    }
+    hitTestAndUpdateActiveId(x, y, viewId!);
     activeState?.dragOver();
   }
 
@@ -60,10 +68,8 @@ abstract class DragAndDropManager {
   /// Performs a hit test to find the active [DragAndDrop] widget at the (x, y)
   /// coordinates, and updates the active state for the previously active and
   /// newly active [DragAndDrop] widgets accordingly.
-  void hitTestAndUpdateActiveId(double x, double y) {
+  void hitTestAndUpdateActiveId(double x, double y, int viewId) {
     final hitTestResult = HitTestResult();
-    final viewId =
-        RendererBinding.instance.renderView.flutterView.viewId as int;
     RendererBinding.instance.hitTestInView(hitTestResult, Offset(x, y), viewId);
 
     // Starting at bottom of [hitTestResult.path], look for the first
@@ -113,7 +119,7 @@ class DragAndDropState extends State<DragAndDrop> {
   final _dragging = ValueNotifier<bool>(false);
 
   bool _isActive = false;
-
+  int? _viewId;
   @override
   void initState() {
     super.initState();
@@ -128,6 +134,8 @@ class DragAndDropState extends State<DragAndDrop> {
 
   @override
   Widget build(BuildContext context) {
+    setViewId(context);
+
     return MetaData(
       metaData: DragAndDropMetaData(state: this),
       child: widget.handleDrop != null
@@ -143,6 +151,12 @@ class DragAndDropState extends State<DragAndDrop> {
             )
           : widget.child,
     );
+  }
+
+  void setViewId(BuildContext context) {
+    if (_viewId != null) return;
+    _viewId = View.of(context).viewId as int;
+    DragAndDropManager.instance.setViewId(_viewId!);
   }
 
   void dragOver() {
