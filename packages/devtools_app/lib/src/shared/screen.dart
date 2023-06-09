@@ -122,15 +122,18 @@ abstract class Screen {
 
   int get badgeCount => 0;
 
-  double approximateWidth(TextTheme textTheme) {
+  double approximateTabWidth(
+    TextTheme textTheme, {
+    bool includeTabBarSpacing = true,
+  }) {
     final painter = TextPainter(
-      text: TextSpan(
-        text: title,
-        style: textTheme.bodyLarge,
-      ),
+      text: TextSpan(text: title),
       textDirection: TextDirection.ltr,
     )..layout();
-    return painter.width + denseSpacing + defaultIconSize + defaultSpacing * 2;
+    return painter.width +
+        denseSpacing +
+        defaultIconSize +
+        (includeTabBarSpacing ? tabBarSpacing * 2 : 0.0);
   }
 
   /// Builds the tab to show for this screen in the [DevToolsScaffold]'s main
