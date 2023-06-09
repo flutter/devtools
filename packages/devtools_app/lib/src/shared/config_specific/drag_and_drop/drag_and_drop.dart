@@ -154,7 +154,6 @@ class DragAndDropState extends State<DragAndDrop> {
   }
 
   void setViewId(BuildContext context) {
-    if (_viewId != null) return;
     _viewId = View.of(context).viewId as int;
     DragAndDropManager.instance.setViewId(_viewId!);
   }
