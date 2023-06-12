@@ -7,10 +7,14 @@
 ./tool/generate_code.sh >> output.txt
 
 # Test devtools_shared
-# pushd packages/devtools_shared
+# flutter pub get
+# cd packages/devtools_shared
 # flutter test test/
-# popd
 
 # Test devtools_app
 cd packages/devtools_app
+flutter pub get
 flutter test test/inspector/
+
+# Run the integration test that builds every DevTools screen. 
+# dart run integration_test/run_tests.dart --target=integration_test/test/live_connection/app_test.dart
