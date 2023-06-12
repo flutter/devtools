@@ -42,14 +42,14 @@ jobs:
       - name: Checkout PR branch for DevTools
         if: ${{ inputs.needs-checkout-merge == true }}
         id: checkout-pr-branch
-        uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab
+        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9
         with:
           ref: "${{ github.event.pull_request.sha }}"
 
       # Otherwise use the default checkout action.
       - name: Checkout DevTools (default)
         if: steps.checkout-pr-branch.outcome == 'skipped'
-        uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab
+        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9
 
       - name: Get Latest Flutter Candidate
         id: flutter-candidate

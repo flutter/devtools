@@ -27,7 +27,7 @@ jobs:
       fail-fast: false
     steps:
       - name: git clone
-        uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab
+        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9
       - name: Load Cached Flutter SDK
         uses: actions/cache@88522ab9f39a2ea568f7027eddc7d8d8bc9d59c8
         with:
@@ -54,7 +54,7 @@ jobs:
           - test_dart2js
     steps:
       - name: git clone
-        uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab
+        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9
       - name: Load Cached Flutter SDK
         uses: actions/cache@88522ab9f39a2ea568f7027eddc7d8d8bc9d59c8
         with:
@@ -81,7 +81,7 @@ jobs:
 
     steps:
       - name: git clone
-        uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab
+        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9
       - name: Load Cached Flutter SDK
         uses: actions/cache@88522ab9f39a2ea568f7027eddc7d8d8bc9d59c8
         with:
@@ -114,7 +114,7 @@ jobs:
           - integration_dart2js
     steps:
       - name: git clone
-        uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab
+        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9
       - name: Load Cached Flutter SDK
         uses: actions/cache@88522ab9f39a2ea568f7027eddc7d8d8bc9d59c8
         with:
@@ -144,7 +144,7 @@ jobs:
 #          - test_dart2js
 #    steps:
 #      - name: git clone
-#        uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab
+#        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9
 #
 #      - name: tool/bots.sh
 #        env:
@@ -164,7 +164,7 @@ jobs:
 #          - integration_dart2js
 #    steps:
 #      - name: git clone
-#        uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab
+#        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9
 #      - name: tool/bots.sh
 #        env:
 #          BOT: ${{ matrix.bot }}
