@@ -18,15 +18,14 @@ abstract class DragAndDropManager {
   }
 
   static DragAndDropManager getInstance(int viewId) {
-    _instances.putIfAbsent(viewId, () => DragAndDropManager(viewId));
-    return _instances[viewId]!;
+    return _instances.putIfAbsent(viewId, () => DragAndDropManager(viewId));
   }
 
-  static final Map<int, DragAndDropManager> _instances = {};
+  static final _instances = <int, DragAndDropManager>{};
   int get viewId => _viewId;
+  final int _viewId;
 
   final _dragAndDropStates = <DragAndDropState>{};
-  final int _viewId;
 
   DragAndDropState? activeState;
 
@@ -66,12 +65,9 @@ abstract class DragAndDropManager {
   /// coordinates, and updates the active state for the previously active and
   /// newly active [DragAndDrop] widgets accordingly.
   void hitTestAndUpdateActiveId(double x, double y) {
-    if (_viewId == null) {
-      throw 'viewId was not initialized';
-    }
     final hitTestResult = HitTestResult();
     RendererBinding.instance
-        .hitTestInView(hitTestResult, Offset(x, y), _viewId!);
+        .hitTestInView(hitTestResult, Offset(x, y), _viewId);
 
     // Starting at bottom of [hitTestResult.path], look for the first
     // [DragAndDrop] widget. This widget will be marked by a [RenderMetaData]
@@ -153,7 +149,7 @@ class DragAndDropState extends State<DragAndDrop> {
     // Each time the widget is rebuilt it may be in a a new view. So the
     // dragAndDropManager is refreshed to ensure that we are registered in the
     // right context.
-    _refreshDragAndDropManager(View.of(context).viewId as int);
+    _refreshDragAndDropManager(View.of(context).viewId);
     return MetaData(
       metaData: DragAndDropMetaData(state: this),
       child: widget.handleDrop != null
