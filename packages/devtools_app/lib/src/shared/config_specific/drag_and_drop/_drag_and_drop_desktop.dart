@@ -7,12 +7,12 @@ import 'drag_and_drop.dart';
 // TODO(kenz): implement once Desktop support is available. See
 // https://github.com/flutter/flutter/issues/30719.
 
-DragAndDropManagerDesktop createDragAndDropManager() {
-  return DragAndDropManagerDesktop();
+DragAndDropManagerDesktop createDragAndDropManager(int viewId) {
+  return DragAndDropManagerDesktop(viewId);
 }
 
 class DragAndDropManagerDesktop extends DragAndDropManager {
-  DragAndDropManagerDesktop() : super.impl();
+  DragAndDropManagerDesktop(int viewId) : super.impl(viewId);
 
   @override
   void init() {}
