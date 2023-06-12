@@ -27,6 +27,7 @@ void main() {
   );
 
   setUpAll(() async {
+    await env.setupEnvironment();
     await storage.setValue('ui.denseMode', 'true');
 
     env.afterEverySetup = () async {
