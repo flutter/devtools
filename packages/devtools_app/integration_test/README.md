@@ -71,6 +71,14 @@ loading offline data allows for screenshot testing without flakiness.
 
 # In-file test arguments
 
-Some test arguments located in the test file as specifically formatted comments.
-See list of such arguments and example of
-usage in [tests](../test/integration_test/in_file_args_test.dart).
+Some test arguments are set in the test file directly as specifically formatted comments.
+
+For example:
+```dart
+// Do not delete these arguments. They are parsed by test runner.
+// test-argument:appPath="test/test_infra/fixtures/memory_app"
+// test-argument:experimentsOn=true
+```
+
+For a list of such arguments, see [_in_file_args.dart](test_infra/run/_in_file_args.dart). For an example of
+usage, see [eval_and_browse_test.dart](test/live_connection/eval_and_browse_test.dart).
