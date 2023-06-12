@@ -14,7 +14,7 @@ import '_in_file_args.dart';
 import '_io_utils.dart';
 import '_test_app_driver.dart';
 
-bool _debugTestScript = true;
+bool _debugTestScript = false;
 
 /// Runs one test.
 ///
@@ -154,9 +154,7 @@ class TestRunner with IOMixin {
       listenToProcessOutput(
         process,
         onStdout: (line) {
-          print('stdout - $line');
           if (line.startsWith(_TestResult.testResultPrefix)) {
-            print('this is the test result line');
             final testResultJson = line.substring(line.indexOf('{'));
             final testResultMap =
                 jsonDecode(testResultJson) as Map<String, Object?>;
@@ -166,29 +164,22 @@ class TestRunner with IOMixin {
                 ..writeln('$result')
                 ..writeln();
             }
-            print('result: $result');
-            print('result.result = ${result.result}');
-            print('exception buffer is empty? ${exceptionBuffer.isEmpty}');
           }
 
           if (line.contains(_beginExceptionMarker)) {
-            print('found beginning of exception marker');
             stdOutWriteInProgress = true;
           }
           if (stdOutWriteInProgress) {
-            print('line: $line');
             exceptionBuffer.writeln(line);
             // Marks the end of the exception caught by flutter.
             if (line.contains(_endExceptionMarker) &&
                 !line.contains(_beginExceptionMarker)) {
-              print('found end of exception marker');
               stdOutWriteInProgress = false;
               exceptionBuffer.writeln();
             }
           }
         },
         onStderr: (line) {
-          print('stderr - $line');
           if (line.contains(_errorMarker) ||
               line.contains(_unhandledExceptionMarker)) {
             stdErrWriteInProgress = true;
@@ -226,7 +217,6 @@ class TestRunner with IOMixin {
         }
       }
 
-      print('exception buffer is not empty? ${exceptionBuffer.isNotEmpty}');
       if (exceptionBuffer.isNotEmpty) {
         throw Exception(exceptionBuffer.toString());
       }

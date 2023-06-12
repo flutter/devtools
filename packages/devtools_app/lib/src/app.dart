@@ -523,22 +523,6 @@ List<DevToolsScreen> get defaultScreens {
         createController: (_) => ExampleController(),
         supportsOffline: true,
       ),
-    DevToolsScreen<AppSizeController>(
-      AppSizeScreen(),
-      createController: (_) => AppSizeController(),
-    ),
-    DevToolsScreen<AppSizeController>(
-      AppSizeScreen(),
-      createController: (_) => AppSizeController(),
-    ),
-    DevToolsScreen<AppSizeController>(
-      AppSizeScreen(),
-      createController: (_) => AppSizeController(),
-    ),
-    DevToolsScreen<AppSizeController>(
-      AppSizeScreen(),
-      createController: (_) => AppSizeController(),
-    ),
   ];
 }
 
