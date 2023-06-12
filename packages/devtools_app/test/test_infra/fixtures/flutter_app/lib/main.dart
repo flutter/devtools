@@ -1,3 +1,5 @@
+// FILE: main.dart (Note: Do not remove comment, for testing.)
+
 // Copyright 2021 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
@@ -16,6 +18,11 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
+    // ignore: unused_local_variable, for testing.
+    var count = 0;
+    PeriodicAction(() {
+      count++;
+    }).doEvery(const Duration(seconds: 1));
     return MaterialApp(
       title: 'Hello, World',
       theme: ThemeData(

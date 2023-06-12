@@ -18,7 +18,7 @@ on:
     # synchronize, opened, and reopened are the default pull_request_target
     # types. labeled and unlabeled are also required to re-run workflow when
     # the run-dcm-workflow label is added or removed.
-    types: [synchronize, opened, reopened, labeled, unlabeled]
+    types: [opened, reopened, labeled, unlabeled]
     branches:
       - master
     paths:
@@ -42,7 +42,7 @@ jobs:
       - name: Clone Flutter DevTools
         uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab
         with:
-          ref: "refs/pull/${{ github.event.number }}/merge"
+          ref: "${{ github.event.pull_request.sha }}"
       - name: Load Cached Flutter SDK
         uses: actions/cache@88522ab9f39a2ea568f7027eddc7d8d8bc9d59c8
         with:
