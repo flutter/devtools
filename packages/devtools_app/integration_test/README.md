@@ -22,6 +22,14 @@ If you get the error "'chromedriver' cannot be opened because it is from an unid
 xattr -d com.apple.quarantine ~/path/to/chromedriver
 ```
 
+### Updating ChromeDriver
+
+If you update your Chrome version, you may need to update your `chromedriver` executable as well. To do this,
+delete your existing `chromedriver` executable (you can find this by running `which chromedriver`). Then,
+download the proper `chromedriver` version from [here](https://chromedriver.chromium.org/downloads), unzip the
+folder and then copy the `chromedriver` executable to the same location that you just deleted the previous
+executable from.
+
 ## Running a test
 
 * To run all integration tets: `dart run integration_test/run_tests.dart`
@@ -39,10 +47,6 @@ updating the golden images to the results produced by the test run.
 The following flags are available, but should not be used manually. To run a test with offline data
 or with experiments enabled, place the test in the proper directory, and the `run_tests.dart` script
 will propagate the proper flag values automatically (see [instructions below](#where-to-add-an-integration-test))
-
-* `--offline`: indicates that we do not need to start a test app to run this test. This will take precedence
-if both --offline and --test-app-uri are present.
-* `--enable_experiments`: enables experiments for DevTools within the integration test environment
 
 # Where to add an integration test
 
