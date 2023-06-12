@@ -107,7 +107,7 @@ jobs:
           # Change github credentials back to the actions bot.
           GH_TOKEN="$ORIGINAL_GH_TOKEN"
 
-          gh pr edit $PR_URL $FLAGS --add-label "run-dcm-workflow,autosubmit"
+          gh pr edit $PR_URL $FLAGS --add-label "autosubmit"
 
         env:
           COMMIT_MESSAGE: ${{ steps.version-bump.outputs.COMMIT_MESSAGE }}
