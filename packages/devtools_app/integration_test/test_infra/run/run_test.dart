@@ -112,8 +112,8 @@ class ChromeDriver with IOMixin {
 }
 
 class TestRunner with IOMixin {
-  static const _beginExceptionMarker = '| EXCEPTION CAUGHT';
-  static const _endExceptionMarker = '===========================';
+  static const _beginExceptionMarker = 'EXCEPTION CAUGHT';
+  static const _endExceptionMarker = '═════════════════════════';
   static const _errorMarker = ': Error: ';
   static const _unhandledExceptionMarker = 'Unhandled exception:';
   static const _maxRetriesOnTimeout = 1;

@@ -37,11 +37,24 @@ void main() {
     }
     final tabs = tester.widgetList<Tab>(
       find.descendant(
-        of: find.byType(AppBar),
+        of: find.byType(DevToolsAppBar),
         matching: find.byType(Tab),
       ),
     );
-    expect(tabs.length, equals(availableScreenIds.length));
+
+    var numTabs = tabs.length;
+    if (numTabs < availableScreenIds.length) {
+      final tabOverflowMenuFinder = find.descendant(
+        of: find.byType(TabOverflowButton),
+        matching: find.byType(MenuAnchor),
+      );
+      expect(tabOverflowMenuFinder, findsOneWidget);
+      final menuChildren =
+          tester.widget<MenuAnchor>(tabOverflowMenuFinder).menuChildren;
+      numTabs += menuChildren.length;
+    }
+
+    expect(numTabs, availableScreenIds.length);
 
     final screens = (ScreenMetaData.values.toList()
       ..removeWhere((data) => !availableScreenIds.contains(data.id)));

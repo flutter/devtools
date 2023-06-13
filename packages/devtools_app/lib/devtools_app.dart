@@ -5,6 +5,7 @@
 export 'src/app.dart';
 export 'src/extension_points/extensions_base.dart';
 export 'src/extension_points/extensions_external.dart';
+export 'src/framework/app_bar.dart';
 export 'src/framework/landing_screen.dart';
 export 'src/framework/notifications_view.dart';
 export 'src/framework/release_notes/release_notes.dart';

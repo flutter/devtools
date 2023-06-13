@@ -13,10 +13,11 @@ import 'package:integration_test/integration_test.dart';
 
 import 'test_data/performance.dart';
 
+const shortPumpDuration = Duration(seconds: 1);
 const safePumpDuration = Duration(seconds: 3);
 const longPumpDuration = Duration(seconds: 6);
 
-/// Required to have multiple test cases in this file.
+/// Required to have multiple test cases in a file.
 Future<void> resetHistory() async {
   // ignore: avoid-dynamic, necessary here.
   await (ui.PlatformDispatcher.instance.views.single as dynamic).resetHistory();
@@ -51,7 +52,19 @@ Future<void> pumpAndConnectDevTools(
 Future<void> switchToScreen(WidgetTester tester, ScreenMetaData screen) async {
   final screenTitle = screen.title;
   logStatus('switching to $screenTitle screen');
-  await tester.tap(find.widgetWithText(Tab, screenTitle));
+
+  final tabFinder = find.widgetWithText(Tab, screenTitle);
+
+  // If we cannot find the tab, try opening the tab overflow menu, if present.
+  if (tabFinder.evaluate().isEmpty) {
+    final tabOverflowButtonFinder = find.byType(TabOverflowButton);
+    if (tabOverflowButtonFinder.evaluate().isNotEmpty) {
+      await tester.tap(tabOverflowButtonFinder);
+      await tester.pump(shortPumpDuration);
+    }
+  }
+
+  await tester.tap(tabFinder);
   // We use pump here instead of pumpAndSettle because pumpAndSettle will
   // never complete if there is an animation (e.g. a progress indicator).
   await tester.pump(safePumpDuration);

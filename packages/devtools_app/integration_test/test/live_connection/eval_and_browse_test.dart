@@ -10,6 +10,7 @@
 
 import 'package:devtools_app/src/screens/memory/panes/control/primary_controls.dart';
 import 'package:devtools_app/src/screens/memory/panes/diff/widgets/snapshot_list.dart';
+import 'package:devtools_app/src/screens/memory/shared/primitives/instance_context_menu.dart';
 import 'package:devtools_app/src/shared/banner_messages.dart';
 import 'package:devtools_app/src/shared/common_widgets.dart';
 import 'package:devtools_app/src/shared/console/widgets/console_pane.dart';
@@ -70,7 +71,13 @@ Future<void> _testAssignment(_EvalAndBrowseTester tester) async {
 
 Future<void> _inboundReferencesAreListed(_EvalAndBrowseTester tester) async {
   await tester.tapAndPump(find.text('MyApp'));
-  await tester.tapAndPump(find.byType(ContextMenuButton));
+  await tester.tapAndPump(
+    find.descendant(
+      of: find.byType(InstanceDisplayWithContextMenu),
+      matching: find.byType(ContextMenuButton),
+    ),
+  );
+
   await tester.tapAndPump(find.textContaining('one instance'));
   await tester.tapAndPump(find.text('Any'), duration: longPumpDuration);
 
