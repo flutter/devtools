@@ -76,7 +76,7 @@ void main(List<String> testRunnerArgs) async {
 }
 
 bool _isUnsupportedForDevice(String testPath, {required String testAppDevice}) {
-  if (testAppDevice == 'flutter-tester') return true;
+  if (testAppDevice == 'flutter-tester') return false;
   final unsupportedTestsForDevice =
       _unsupportedTestsForDevice[testAppDevice] ?? [];
   return unsupportedTestsForDevice
