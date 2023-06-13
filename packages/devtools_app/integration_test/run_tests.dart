@@ -26,13 +26,13 @@ const _testDirectory = 'integration_test/test';
 const _testSuffix = '_test.dart';
 const _offlineIndicator = 'integration_test/test/offline';
 
-// A mapping of test app device to the supported tests for that device.
-final _deviceToTestPaths = <String, List<String>>{
+// A mapping of test app device to the unsupported tests for that device.
+final _unsupportedTestsForDevice = <String, List<String>>{
   'chrome': [
-    'debugger_panel_test.dart',
-    'app_test.dart',
-    // TODO(https://github.com/flutter/devtools/issues/5874): Enable once supported on web.
-    // 'eval_and_browse_test.dart',
+    'performance_screen_event_recording_test.dart',
+    'perfetto_test.dart',
+    // TODO(https://github.com/flutter/devtools/issues/5874): Remove once supported on web.
+    'eval_and_browse_test.dart',
   ],
 };
 
@@ -56,7 +56,7 @@ void main(List<String> testRunnerArgs) async {
     final testFiles = testDirectory.listSync(recursive: true).where(
           (testFile) =>
               testFile.path.endsWith(_testSuffix) &&
-              _isTestForDevice(
+              !_isUnsupportedForDevice(
                 testFile.path,
                 testAppDevice: testAppDevice,
               ),
@@ -75,11 +75,12 @@ void main(List<String> testRunnerArgs) async {
   }
 }
 
-bool _isTestForDevice(String testPath, {required String testAppDevice}) {
+bool _isUnsupportedForDevice(String testPath, {required String testAppDevice}) {
   if (testAppDevice == 'flutter-tester') return true;
-  final testPathsForDevice = _deviceToTestPaths[testAppDevice] ?? [];
-  return testPathsForDevice
-      .any((supportedTestPath) => testPath.endsWith(supportedTestPath));
+  final unsupportedTestsForDevice =
+      _unsupportedTestsForDevice[testAppDevice] ?? [];
+  return unsupportedTestsForDevice
+      .any((unsupportedTestPath) => testPath.endsWith(unsupportedTestPath));
 }
 
 Future<void> _runTest(
