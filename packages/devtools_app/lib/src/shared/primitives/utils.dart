@@ -91,23 +91,35 @@ String? prettyPrintBytes(
   final sizeInGB = sizeInMB / 1024.0;
 
   if (sizeInGB >= roundingPoint) {
-    return '${printGB(bytes, fractionDigits: gbFractionDigits, includeUnit: includeUnit)}';
+    return printGB(
+      bytes,
+      fractionDigits: gbFractionDigits,
+      includeUnit: includeUnit,
+    );
   } else if (sizeInMB >= roundingPoint) {
-    return '${printMB(bytes, fractionDigits: mbFractionDigits, includeUnit: includeUnit)}';
+    return printMB(
+      bytes,
+      fractionDigits: mbFractionDigits,
+      includeUnit: includeUnit,
+    );
   } else {
-    return '${printKB(bytes, fractionDigits: kbFractionDigits, includeUnit: includeUnit)}';
+    return printKB(
+      bytes,
+      fractionDigits: kbFractionDigits,
+      includeUnit: includeUnit,
+    );
   }
 }
 
 String printKB(num bytes, {int fractionDigits = 0, bool includeUnit = false}) {
-  final NumberFormat _kbPattern = NumberFormat.decimalPattern()
+  final NumberFormat kbPattern = NumberFormat.decimalPattern()
     ..maximumFractionDigits = fractionDigits;
 
   // We add ((1024/2)-1) to the value before formatting so that a non-zero byte
   // value doesn't round down to 0. If showing decimal points, let it round normally.
   // TODO(peterdjlee): Round up to the respective digit when fractionDigits > 0.
   final processedBytes = fractionDigits == 0 ? bytes + 511 : bytes;
-  var output = _kbPattern.format(processedBytes / 1024);
+  var output = kbPattern.format(processedBytes / 1024);
   if (includeUnit) {
     output += ' KB';
   }
@@ -195,7 +207,7 @@ String durationText(
     fractionDigits = 0;
   }
 
-  var durationStr = '${durationAsDouble.toStringAsFixed(fractionDigits)}';
+  var durationStr = durationAsDouble.toStringAsFixed(fractionDigits);
   if (dur != Duration.zero && !allowRoundingToZero) {
     final zeroRegexp = RegExp(r'[0]+[.][0]+');
     if (zeroRegexp.hasMatch(durationStr)) {
@@ -235,7 +247,7 @@ int roundToNearestPow10(int x) =>
 
 void executeWithDelay(
   Duration delay,
-  void callback(), {
+  void Function() callback, {
   bool executeNow = false,
 }) {
   if (executeNow || delay.inMilliseconds <= 0) {
@@ -293,7 +305,7 @@ String longestFittingSubstring(
   String originalText,
   num maxWidth,
   List<num> asciiMeasurements,
-  num slowMeasureFallback(int value),
+  num Function(int value) slowMeasureFallback,
 ) {
   if (originalText.isEmpty) return originalText;
 
@@ -667,6 +679,7 @@ class TimeRange {
   }
 
   @override
+  // ignore: avoid-dynamic, necessary here.
   bool operator ==(other) {
     if (other is! TimeRange) return false;
     return start == other.start && end == other.end;
@@ -758,7 +771,7 @@ class Reporter implements Listenable {
   }
 
   @override
-  String toString() => '${describeIdentity(this)}';
+  String toString() => describeIdentity(this);
 }
 
 /// A [Reporter] that notifies when its [value] changes.
@@ -805,6 +818,8 @@ class ImmediateValueNotifier<T> extends ValueNotifier<T> {
 
 extension SafeAccessList<T> on List<T> {
   T? safeGet(int index) => index < 0 || index >= length ? null : this[index];
+
+  T? safeRemoveLast() => isNotEmpty ? removeLast() : null;
 }
 
 extension SafeAccess<T> on Iterable<T> {
@@ -831,6 +846,7 @@ class Range {
   String toString() => 'Range($begin, $end)';
 
   @override
+  // ignore: avoid-dynamic, necessary here.
   bool operator ==(other) {
     if (other is! Range) return false;
     return begin == other.begin && end == other.end;
@@ -860,6 +876,7 @@ class LineRange {
   String toString() => 'LineRange($begin, $end)';
 
   @override
+  // ignore: avoid-dynamic, necessary here.
   bool operator ==(other) {
     if (other is! LineRange) return false;
     return begin == other.begin && end == other.end;
@@ -1094,6 +1111,13 @@ class DevToolsFile<T> {
 
 final _lowercaseLookup = <String, String>{};
 
+extension NullableStringExtension on String? {
+  bool get isNullOrEmpty {
+    final self = this;
+    return self == null || self.isEmpty;
+  }
+}
+
 // TODO(kenz): consider moving other String helpers into this extension.
 // TODO(kenz): replace other uses of toLowerCase() for string matching with
 // this extension method.
@@ -1168,7 +1192,10 @@ extension ListExtension<T> on List<T> {
     ];
   }
 
-  Iterable<T> whereFromIndex(bool test(T element), {int startIndex = 0}) {
+  Iterable<T> whereFromIndex(
+    bool Function(T element) test, {
+    int startIndex = 0,
+  }) {
     final whereList = <T>[];
     for (int i = startIndex; i < length; i++) {
       final element = this[i];
@@ -1179,7 +1206,7 @@ extension ListExtension<T> on List<T> {
     return whereList;
   }
 
-  bool containsWhere(bool test(T element)) {
+  bool containsWhere(bool Function(T element) test) {
     for (var e in this) {
       if (test(e)) {
         return true;
@@ -1190,7 +1217,7 @@ extension ListExtension<T> on List<T> {
 }
 
 extension SetExtension<T> on Set<T> {
-  bool containsWhere(bool test(T element)) {
+  bool containsWhere(bool Function(T element) test) {
     for (var e in this) {
       if (test(e)) {
         return true;
@@ -1477,12 +1504,12 @@ class ImmutableList<T> with ListMixin<T> implements List<T> {
   }
 
   @override
-  void removeWhere(bool test(T element)) {
+  void removeWhere(bool Function(T element) test) {
     throw Exception('Cannot modify the content of ImmutableList');
   }
 
   @override
-  void retainWhere(bool test(T element)) {
+  void retainWhere(bool Function(T element) test) {
     throw Exception('Cannot modify the content of ImmutableList');
   }
 

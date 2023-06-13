@@ -64,31 +64,35 @@ class _ObjectInspectorViewState extends State<_ObjectInspectorView>
         AnalyticsTabbedView(
           gaScreen: gac.objectInspectorScreen,
           tabs: [
-            DevToolsTab.create(
-              tabName: 'Program Explorer',
-              gaPrefix: gac.programExplorer,
+            (
+              tab: DevToolsTab.create(
+                tabName: 'Program Explorer',
+                gaPrefix: gac.programExplorer,
+              ),
+              tabView: ProgramExplorer(
+                controller: controller.programExplorerController,
+                onNodeSelected: _onNodeSelected,
+                displayHeader: false,
+              ),
             ),
-            DevToolsTab.create(
-              tabName: 'Object Store',
-              gaPrefix: gac.objectStore,
+            (
+              tab: DevToolsTab.create(
+                tabName: 'Object Store',
+                gaPrefix: gac.objectStore,
+              ),
+              tabView: ObjectStoreViewer(
+                controller: controller.objectStoreController,
+                onLinkTapped: controller.findAndSelectNodeForObject,
+              ),
             ),
-            DevToolsTab.create(
-              tabName: 'Class Hierarchy',
-              gaPrefix: gac.classHierarchy,
-            )
-          ],
-          tabViews: [
-            ProgramExplorer(
-              controller: controller.programExplorerController,
-              onNodeSelected: _onNodeSelected,
-              displayHeader: false,
-            ),
-            ObjectStoreViewer(
-              controller: controller.objectStoreController,
-              onLinkTapped: controller.findAndSelectNodeForObject,
-            ),
-            ClassHierarchyExplorer(
-              controller: controller,
+            (
+              tab: DevToolsTab.create(
+                tabName: 'Class Hierarchy',
+                gaPrefix: gac.classHierarchy,
+              ),
+              tabView: ClassHierarchyExplorer(
+                controller: controller,
+              ),
             ),
           ],
         ),

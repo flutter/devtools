@@ -44,7 +44,7 @@ Example: ''',
                 TextSpan(
                   text: r'var x = $0',
                   style: theme.fixedFontStyle,
-                )
+                ),
               ],
             ),
           ),

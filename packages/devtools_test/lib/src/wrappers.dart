@@ -44,19 +44,8 @@ Widget wrap(Widget widget) {
       _testNavigatorKey,
     ),
     routeInformationParser:
-        // ignore: invalid_use_of_visible_for_testing_member
+        // ignore: invalid_use_of_visible_for_testing_member, false positive.
         DevToolsRouteInformationParser.test('http://test/uri'),
-  );
-}
-
-Widget wrapWithAnalytics(
-  Widget widget, {
-  AnalyticsController? controller,
-}) {
-  controller ??= AnalyticsController(enabled: false, firstRun: false);
-  return Provider<AnalyticsController>.value(
-    value: controller,
-    child: widget,
   );
 }
 

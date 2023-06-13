@@ -32,7 +32,7 @@ class VmServiceWrapper implements VmService {
 
   VmServiceWrapper.fromNewVmService(
     Stream<dynamic> /*String|List<int>*/ inStream,
-    void writeMessage(String message),
+    void Function(String message) writeMessage,
     this._connectedUri, {
     Log? log,
     DisposeHandler? disposeHandler,
@@ -942,7 +942,7 @@ class VmServiceWrapper implements VmService {
   Future<String?> retrieveFullStringValue(
     String isolateId,
     InstanceRef stringRef, {
-    String onUnavailable(String? truncatedValue)?,
+    String Function(String? truncatedValue)? onUnavailable,
   }) async {
     if (stringRef.valueAsStringIsTruncated != true) {
       return stringRef.valueAsString;

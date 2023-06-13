@@ -366,11 +366,14 @@ class FlexLayoutProperties extends LayoutProperties {
   static FlexLayoutProperties _buildNode(RemoteDiagnosticsNode node) {
     final Map<String, Object?> renderObjectJson = node.renderObject!.json;
     final properties = renderObjectJson['properties'] as List<Object?>;
+
+    // ignore: prefer_for_elements_to_map_fromiterable, requires refactoring
     final data = Map<String, Object?>.fromIterable(
       properties,
       key: (property) => property['name'],
       value: (property) => property['description'],
     );
+
     return FlexLayoutProperties._fromNode(
       node,
       direction: _directionUtils.enumEntry(data['direction'] as String?) ??

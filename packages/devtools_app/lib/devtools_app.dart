@@ -5,6 +5,7 @@
 export 'src/app.dart';
 export 'src/extension_points/extensions_base.dart';
 export 'src/extension_points/extensions_external.dart';
+export 'src/framework/app_bar.dart';
 export 'src/framework/landing_screen.dart';
 export 'src/framework/notifications_view.dart';
 export 'src/framework/release_notes/release_notes.dart';
@@ -90,6 +91,7 @@ export 'src/shared/primitives/utils.dart';
 export 'src/shared/routing.dart';
 export 'src/shared/screen.dart';
 export 'src/shared/scripts/script_manager.dart';
+export 'src/shared/side_panel.dart';
 export 'src/shared/split.dart';
 export 'src/shared/theme.dart';
 export 'src/shared/ui/filter.dart';

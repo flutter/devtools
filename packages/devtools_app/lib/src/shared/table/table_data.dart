@@ -272,5 +272,5 @@ abstract class TimeAndPercentageColumn<T> extends ColumnData<T> {
       '${durationText(timeProvider!(dataObject), fractionDigits: 2)} (${_percentDisplay(dataObject)})';
 
   String _percentDisplay(T dataObject) =>
-      '${percent(percentAsDoubleProvider(dataObject))}';
+      percent(percentAsDoubleProvider(dataObject));
 }

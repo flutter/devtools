@@ -23,7 +23,7 @@ import 'object_inspector_view_controller.dart';
 ///       - B
 ///     - C
 class ClassHierarchyExplorer extends StatelessWidget {
-  const ClassHierarchyExplorer({required this.controller});
+  const ClassHierarchyExplorer({super.key, required this.controller});
 
   final ObjectInspectorViewController controller;
 

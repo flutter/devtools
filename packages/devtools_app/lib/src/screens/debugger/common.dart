@@ -21,9 +21,7 @@ Widget debuggerSectionTitle(ThemeData theme, {String? text, Widget? child}) {
         padding: const EdgeInsets.only(left: defaultSpacing),
         alignment: Alignment.centerLeft,
         height: areaPaneHeaderHeight,
-        child: child != null
-            ? child
-            : Text(text!, style: theme.textTheme.titleSmall),
+        child: child ?? Text(text!, style: theme.textTheme.titleSmall),
       ),
     ),
   );

@@ -7,6 +7,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:logging/logging.dart';
 import 'package:vm_service/vm_service.dart' hide Stack;
@@ -86,7 +87,7 @@ class CodeView extends StatefulWidget {
   final void Function(ScriptRef scriptRef, int line)? onSelected;
 
   @override
-  _CodeViewState createState() => _CodeViewState();
+  State<CodeView> createState() => _CodeViewState();
 }
 
 class _CodeViewState extends State<CodeView> with AutoDisposeMixin {
@@ -113,18 +114,9 @@ class _CodeViewState extends State<CodeView> with AutoDisposeMixin {
     super.initState();
 
     verticalController = LinkedScrollControllerGroup();
-    // TODO(jacobr): this lint does not understand that some methods have side
-    // effects.
-    // ignore: prefer-moving-to-variable
     gutterController = verticalController.addAndGet();
-    // TODO(jacobr): this lint does not understand that some methods have side
-    // effects.
-    // ignore: prefer-moving-to-variable
     textController = verticalController.addAndGet();
     if (widget.codeViewController.showProfileInformation.value) {
-      // TODO(jacobr): this lint does not understand that some methods have side
-      // effects.
-      // ignore: prefer-moving-to-variable
       profileController = verticalController.addAndGet();
     }
     horizontalController = ScrollController();
@@ -270,34 +262,24 @@ class _CodeViewState extends State<CodeView> with AutoDisposeMixin {
       return const CenteredCircularProgressIndicator();
     }
 
-    return DualValueListenableBuilder<bool, bool>(
-      firstListenable: widget.enableFileExplorer
-          ? widget.codeViewController.showFileOpener
-          : const FixedValueListenable<bool>(false),
-      secondListenable: widget.enableSearch
-          ? widget.codeViewController.showSearchInFileField
-          : const FixedValueListenable<bool>(false),
-      builder: (context, showFileOpener, showSearch, _) {
-        return Stack(
-          children: [
-            scriptRef == null
-                ? CodeViewEmptyState(widget: widget)
-                : buildCodeArea(context),
-            if (showFileOpener)
-              Positioned(
-                left: noPadding,
-                right: noPadding,
-                child: buildFileSearchField(),
-              ),
-            if (showSearch && scriptRef != null)
-              Positioned(
-                top: denseSpacing,
-                right: searchFieldRightPadding,
-                child: buildSearchInFileField(),
-              ),
-          ],
-        );
-      },
+    return Stack(
+      children: [
+        scriptRef == null
+            ? CodeViewEmptyState(widget: widget)
+            : buildCodeArea(context),
+        PositionedPopup(
+          isVisibleListenable: widget.codeViewController.showFileOpener,
+          left: noPadding,
+          right: noPadding,
+          child: buildFileSearchField(),
+        ),
+        PositionedPopup(
+          isVisibleListenable: widget.codeViewController.showSearchInFileField,
+          top: denseSpacing,
+          right: searchFieldRightPadding,
+          child: buildSearchInFileField(),
+        ),
+      ],
     );
   }
 
@@ -307,11 +289,14 @@ class _CodeViewState extends State<CodeView> with AutoDisposeMixin {
     final lines = <TextSpan>[];
 
     // Ensure the syntax highlighter has been initialized.
-    // TODO(bkonyi): process source for highlighting on a separate thread.
     final script = parsedScript;
     final scriptSource = parsedScript?.script.source;
     if (script != null && scriptSource != null) {
-      if (scriptSource.length < 500000) {
+      // It takes ~1 second to syntax highlight 100,000 characters. Therefore,
+      // we only highlight scripts with less than 100,000 characters. If we want
+      // to support larger files, we should process the source for highlighting
+      // on a separate isolate.
+      if (scriptSource.length < 100000) {
         final highlighted = script.highlighter.highlight(
           context,
           lineRange: widget.lineRange,
@@ -352,7 +337,7 @@ class _CodeViewState extends State<CodeView> with AutoDisposeMixin {
       }
     }
 
-    final contentBuilder = (context, ScriptRef? script) {
+    Widget contentBuilder(_, ScriptRef? script) {
       if (lines.isNotEmpty) {
         return DefaultTextStyle(
           style: theme.fixedFontStyle,
@@ -370,9 +355,9 @@ class _CodeViewState extends State<CodeView> with AutoDisposeMixin {
                     null,
                   ),
               builder: (context, frame, _) {
-                final pausedFrame = frame == null
-                    ? null
-                    : (frame.scriptRef == scriptRef ? frame : null);
+                final pausedFrame =
+                    frame?.scriptRef == scriptRef ? frame : null;
+
                 return Row(
                   children: [
                     ValueListenableBuilder<bool>(
@@ -420,7 +405,8 @@ class _CodeViewState extends State<CodeView> with AutoDisposeMixin {
                                   codeViewController: widget.codeViewController,
                                   scrollController: textController,
                                   lines: lines,
-                                  pausedFrame: pausedFrame,
+                                  selectedFrameNotifier: widget
+                                      .debuggerController?.selectedStackFrame,
                                   searchMatchesNotifier:
                                       widget.codeViewController.searchMatches,
                                   activeSearchMatchNotifier: widget
@@ -446,7 +432,8 @@ class _CodeViewState extends State<CodeView> with AutoDisposeMixin {
           ),
         );
       }
-    };
+    }
+
     if (widget.enableHistory) {
       return HistoryViewport(
         history: widget.codeViewController.scriptsHistory,
@@ -463,8 +450,8 @@ class _CodeViewState extends State<CodeView> with AutoDisposeMixin {
           ScriptPopupMenu(widget.codeViewController),
           ScriptHistoryPopupMenu(
             itemBuilder: _buildScriptMenuFromHistory,
-            onSelected: (scriptRef) {
-              widget.codeViewController
+            onSelected: (scriptRef) async {
+              await widget.codeViewController
                   .showScriptLocation(ScriptLocation(scriptRef));
             },
             enabled: widget.codeViewController.scriptsHistory.hasScripts,
@@ -567,6 +554,7 @@ class CodeViewEmptyState extends StatelessWidget {
 
 class ProfileInformationGutter extends StatelessWidget {
   const ProfileInformationGutter({
+    super.key,
     required this.scrollController,
     required this.lineOffset,
     required this.lineCount,
@@ -592,7 +580,7 @@ class ProfileInformationGutter extends StatelessWidget {
     //  - Spacing for the vertical divider
     final gutterWidth = assumedMonospaceCharacterWidth * 16 + denseSpacing;
     return OutlineDecoration.onlyRight(
-      child: Container(
+      child: SizedBox(
         width: gutterWidth,
         child: Stack(
           children: [
@@ -640,7 +628,7 @@ class _ProfileInformationGutterHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return SizedBox(
       height: CodeView.rowHeight,
       child: Column(
         children: [
@@ -690,7 +678,7 @@ class ProfileInformationGutterItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return SizedBox(
       height: CodeView.rowHeight,
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -715,6 +703,7 @@ class ProfileInformationGutterItem extends StatelessWidget {
 
 class ProfilePercentageItem extends StatelessWidget {
   const ProfilePercentageItem({
+    super.key,
     required this.percentage,
     required this.hoverText,
   });
@@ -753,6 +742,7 @@ typedef IntCallback = void Function(int value);
 
 class Gutters extends StatelessWidget {
   const Gutters({
+    super.key,
     required this.scriptRef,
     this.debuggerController,
     required this.codeViewController,
@@ -845,6 +835,7 @@ class Gutters extends StatelessWidget {
 
 class Gutter extends StatelessWidget {
   const Gutter({
+    super.key,
     required this.gutterWidth,
     required this.scrollController,
     required this.lineOffset,
@@ -1006,21 +997,21 @@ class Lines extends StatefulWidget {
     required this.codeViewController,
     required this.scrollController,
     required this.lines,
-    required this.pausedFrame,
     required this.searchMatchesNotifier,
     required this.activeSearchMatchNotifier,
+    required this.selectedFrameNotifier,
   }) : super(key: key);
 
   final double height;
   final CodeViewController codeViewController;
   final ScrollController scrollController;
   final List<TextSpan> lines;
-  final StackFrameAndSourcePosition? pausedFrame;
   final ValueListenable<List<SourceToken>> searchMatchesNotifier;
   final ValueListenable<SourceToken?> activeSearchMatchNotifier;
+  final ValueListenable<StackFrameAndSourcePosition?>? selectedFrameNotifier;
 
   @override
-  _LinesState createState() => _LinesState();
+  State<Lines> createState() => _LinesState();
 }
 
 class _LinesState extends State<Lines> with AutoDisposeMixin {
@@ -1045,35 +1036,23 @@ class _LinesState extends State<Lines> with AutoDisposeMixin {
       setState(() {
         activeSearch = widget.activeSearchMatchNotifier.value;
       });
-
       final activeSearchLine = activeSearch?.position.line;
-      if (activeSearchLine != null) {
-        final isOutOfViewTop = activeSearchLine * CodeView.rowHeight <
-            widget.scrollController.offset + CodeView.rowHeight;
-        final isOutOfViewBottom = activeSearchLine * CodeView.rowHeight >
-            widget.scrollController.offset + widget.height - CodeView.rowHeight;
+      _maybeScrollToLine(activeSearchLine);
+    });
 
-        if (isOutOfViewTop || isOutOfViewBottom) {
-          // Scroll this search token to the middle of the view.
-          final targetOffset = math.max<double>(
-            activeSearchLine * CodeView.rowHeight - widget.height / 2,
-            0.0,
-          );
-          unawaited(
-            widget.scrollController.animateTo(
-              targetOffset,
-              duration: defaultDuration,
-              curve: defaultCurve,
-            ),
-          );
-        }
-      }
+    addAutoDisposeListener(widget.selectedFrameNotifier, () {
+      final selectedFrame = widget.selectedFrameNotifier?.value;
+      SchedulerBinding.instance.addPostFrameCallback((_) {
+        _maybeScrollToLine(selectedFrame?.line);
+      });
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    final pausedLine = widget.pausedFrame?.line;
+    final pausedFrame = widget.selectedFrameNotifier?.value;
+    final pausedLine = pausedFrame?.line;
+
     return ListView.builder(
       controller: widget.scrollController,
       physics: const ClampingScrollPhysics(),
@@ -1088,9 +1067,9 @@ class _LinesState extends State<Lines> with AutoDisposeMixin {
             final isFocusedLine = focusLine == lineNum;
             return LineItem(
               lineContents: widget.lines[index],
-              pausedFrame: isPausedLine ? widget.pausedFrame : null,
+              pausedFrame: isPausedLine ? pausedFrame : null,
               focused: isPausedLine || isFocusedLine,
-              searchMatches: searchMatchesForLine(index),
+              searchMatches: _searchMatchesForLine(index),
               activeSearchMatch:
                   activeSearch?.position.line == index ? activeSearch : null,
             );
@@ -1100,10 +1079,34 @@ class _LinesState extends State<Lines> with AutoDisposeMixin {
     );
   }
 
-  List<SourceToken> searchMatchesForLine(int index) {
+  List<SourceToken> _searchMatchesForLine(int index) {
     return searchMatches
         .where((searchToken) => searchToken.position.line == index)
         .toList();
+  }
+
+  void _maybeScrollToLine(int? lineNumber) {
+    if (lineNumber == null) return;
+
+    final isOutOfViewTop = lineNumber * CodeView.rowHeight <
+        widget.scrollController.offset + CodeView.rowHeight;
+    final isOutOfViewBottom = lineNumber * CodeView.rowHeight >
+        widget.scrollController.offset + widget.height - CodeView.rowHeight;
+
+    if (isOutOfViewTop || isOutOfViewBottom) {
+      // Scroll this search token to the middle of the view.
+      final targetOffset = math.max<double>(
+        lineNumber * CodeView.rowHeight - widget.height / 2,
+        0.0,
+      );
+      unawaited(
+        widget.scrollController.animateTo(
+          targetOffset,
+          duration: defaultDuration,
+          curve: defaultCurve,
+        ),
+      );
+    }
   }
 }
 
@@ -1126,16 +1129,13 @@ class LineItem extends StatefulWidget {
   final SourceToken? activeSearchMatch;
 
   @override
-  _LineItemState createState() => _LineItemState();
+  State<LineItem> createState() => _LineItemState();
 }
 
 class _LineItemState extends State<LineItem>
     with ProvidedControllerMixin<DebuggerController, LineItem> {
   Future<HoverCardData?> _generateHoverCardData({
     required PointerEvent event,
-    // TODO(jacobr): this needs to be ignored as this method is passed as a
-    // callback.
-    // ignore: avoid-unused-parameters
     required bool Function() isHoverStale,
   }) async {
     if (!serviceManager.isMainIsolatePaused) return null;
@@ -1186,17 +1186,19 @@ class _LineItemState extends State<LineItem>
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final darkTheme = theme.brightness == Brightness.dark;
 
     Widget child;
     final column = widget.pausedFrame?.column;
     if (column != null) {
       final breakpointColor = theme.colorScheme.breakpointColor;
-
+      final widthToCurrentColumn = calculateTextSpanWidth(
+        truncateTextSpan(widget.lineContents, column - 1),
+      );
       // The following constants are tweaked for using the
       // 'Icons.label_important' icon.
       const colIconSize = 13.0;
-      const colLeftOffset = -3.0;
+      // Subtract 3 to offset the icon at the start of the character:
+      final colLeftOffset = widthToCurrentColumn - 3.0;
       const colBottomOffset = 13.0;
       const colIconRotate = -90 * math.pi / 180;
 
@@ -1205,23 +1207,8 @@ class _LineItemState extends State<LineItem>
         children: [
           Row(
             children: [
-              // Create a hidden copy of the first column-1 characters of the
-              // line as a hack to correctly compute where to place
-              // the cursor. Approximating by using column-1 spaces instead
-              // of the correct characters and style s would be risky as it leads
-              // to small errors if the font is not fixed size or the font
-              // styles vary depending on the syntax highlighting.
-              // TODO(jacobr): there might be some api exposed on SelectedText
-              // to allow us to render this as a proper overlay as similar
-              // functionality exists to render the selection handles properly.
-              Opacity(
-                opacity: 0.5,
-                child: RichText(
-                  text: truncateTextSpan(widget.lineContents, column - 1),
-                ),
-              ),
               Transform.translate(
-                offset: const Offset(colLeftOffset, colBottomOffset),
+                offset: Offset(colLeftOffset, colBottomOffset),
                 child: Transform.rotate(
                   angle: colIconRotate,
                   child: Icon(
@@ -1240,11 +1227,8 @@ class _LineItemState extends State<LineItem>
       child = _hoverableLine();
     }
 
-    final backgroundColor = widget.focused
-        ? (darkTheme
-            ? theme.canvasColor.brighten()
-            : theme.canvasColor.darken())
-        : null;
+    final backgroundColor =
+        widget.focused ? theme.colorScheme.selectedRowBackgroundColor : null;
 
     return Container(
       alignment: Alignment.centerLeft,
@@ -1266,10 +1250,11 @@ class _LineItemState extends State<LineItem>
       );
 
   TextSpan searchAwareLineContents() {
-    final children = widget.lineContents.children;
-    if (children == null) return const TextSpan();
-
-    final activeSearchAwareContents = _activeSearchAwareLineContents(children);
+    // If syntax highlighting is disabled for the script, then
+    // `widget.lineContents` is simply a `TextSpan` with no children.
+    final lineContents = widget.lineContents.children ?? [widget.lineContents];
+    final activeSearchAwareContents =
+        _activeSearchAwareLineContents(lineContents);
     final allSearchAwareContents =
         _searchMatchAwareLineContents(activeSearchAwareContents!);
     return TextSpan(
@@ -1387,7 +1372,7 @@ class _LineItemState extends State<LineItem>
 }
 
 class ScriptPopupMenu extends StatelessWidget {
-  const ScriptPopupMenu(this._controller);
+  const ScriptPopupMenu(this._controller, {super.key});
 
   final CodeViewController _controller;
 
@@ -1397,10 +1382,10 @@ class ScriptPopupMenu extends StatelessWidget {
       onSelected: (option) => option.onSelected(context, _controller),
       itemBuilder: (_) => [
         for (final menuOption in defaultScriptPopupMenuOptions)
-          menuOption.build(context),
+          menuOption.build(),
         for (final extensionMenuOption in devToolsExtensionPoints
             .buildExtraDebuggerScriptPopupMenuOptions())
-          extensionMenuOption.build(context),
+          extensionMenuOption.build(),
       ],
       child: Icon(
         Icons.more_vert,
@@ -1412,6 +1397,7 @@ class ScriptPopupMenu extends StatelessWidget {
 
 class ScriptHistoryPopupMenu extends StatelessWidget {
   const ScriptHistoryPopupMenu({
+    super.key,
     required this.itemBuilder,
     required this.onSelected,
     required this.enabled,
@@ -1455,7 +1441,7 @@ class ScriptPopupMenuOption {
 
   final IconData? icon;
 
-  PopupMenuItem<ScriptPopupMenuOption> build(BuildContext context) {
+  PopupMenuItem<ScriptPopupMenuOption> build() {
     return PopupMenuItem<ScriptPopupMenuOption>(
       value: this,
       child: Row(
@@ -1553,7 +1539,7 @@ final openFileOption = ScriptPopupMenuOption(
 );
 
 class GoToLineDialog extends StatelessWidget {
-  const GoToLineDialog(this._codeViewController);
+  const GoToLineDialog(this._codeViewController, {super.key});
 
   final CodeViewController _codeViewController;
 
@@ -1567,13 +1553,13 @@ class GoToLineDialog extends StatelessWidget {
         children: [
           TextField(
             autofocus: true,
-            onSubmitted: (value) {
+            onSubmitted: (value) async {
               final scriptRef =
                   _codeViewController.scriptLocation.value?.scriptRef;
               if (value.isNotEmpty && scriptRef != null) {
                 Navigator.of(context).pop(dialogDefaultContext);
                 final line = int.parse(value);
-                _codeViewController.showScriptLocation(
+                await _codeViewController.showScriptLocation(
                   ScriptLocation(
                     scriptRef,
                     location: SourcePosition(line: line, column: 0),
@@ -1595,6 +1581,40 @@ class GoToLineDialog extends StatelessWidget {
       actions: const [
         DialogCancelButton(),
       ],
+    );
+  }
+}
+
+class PositionedPopup extends StatelessWidget {
+  const PositionedPopup({
+    super.key,
+    required this.isVisibleListenable,
+    required this.child,
+    this.top,
+    this.left,
+    this.right,
+  });
+
+  final ValueListenable<bool> isVisibleListenable;
+  final double? top;
+  final double? left;
+  final double? right;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder<bool>(
+      valueListenable: isVisibleListenable,
+      builder: (context, isVisible, _) {
+        return isVisible
+            ? Positioned(
+                top: top,
+                left: left,
+                right: right,
+                child: child,
+              )
+            : const SizedBox.shrink();
+      },
     );
   }
 }

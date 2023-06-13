@@ -15,19 +15,19 @@ import 'src/shared/primitives/utils.dart';
 /// WARNING: This is the external entrypoint for running DevTools.
 /// Any initialization that needs to occur, for both google3 and externally,
 /// should be added to [runDevTools].
-void main() async {
+void main() {
   BindingBase.debugZoneErrorsAreFatal = true;
-  await externalRunDevTools();
+  externalRunDevTools();
 }
 
-Future<void> externalRunDevTools({
+void externalRunDevTools({
   bool shouldEnableExperiments = false,
   List<DevToolsJsonFile> sampleData = const [],
-}) async {
+}) {
   // Set the extension points global.
   setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
 
-  await runDevTools(
+  runDevTools(
     shouldEnableExperiments: shouldEnableExperiments,
     sampleData: sampleData,
   );

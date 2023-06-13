@@ -32,6 +32,6 @@ TODO: Remove this section if there are not any general updates.
 ## App size tool updates
 TODO: Remove this section if there are not any general updates.
 
-## Changelog
-More details about changes and fixes are available in the DevTools
-[changelog](https://github.com/flutter/devtools/blob/master/CHANGELOG.md).
+## Full commit history
+More details about changes and fixes are available from the
+[DevTools git log.](https://github.com/flutter/devtools/commits/master).

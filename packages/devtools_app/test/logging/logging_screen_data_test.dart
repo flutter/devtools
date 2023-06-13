@@ -12,7 +12,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 
-void main() async {
+void main() {
   late MockLoggingController mockLoggingController;
   const windowSize = Size(1000.0, 1000.0);
   final fakeServiceManager = FakeServiceManager();
@@ -114,7 +114,7 @@ void main() async {
       await pumpLoggingScreen(tester);
 
       // Locates the copy to clipboard button's IconButton.
-      final copyButton = () => find
+      ToolbarAction copyButton() => find
           .byKey(LogDetails.copyToClipboardButtonKey)
           .evaluate()
           .first

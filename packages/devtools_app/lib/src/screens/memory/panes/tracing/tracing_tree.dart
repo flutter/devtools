@@ -21,7 +21,7 @@ const double _countColumnWidth = 130;
 /// Displays an allocation profile as a tree of stack frames, displaying
 /// inclusive and exclusive allocation counts.
 class AllocationTracingTree extends StatefulWidget {
-  const AllocationTracingTree({required this.controller});
+  const AllocationTracingTree({super.key, required this.controller});
 
   final TracingPaneController controller;
 

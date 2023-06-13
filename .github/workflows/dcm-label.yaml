@@ -1,0 +1,23 @@
+# A CI workflow to remind the contributor to add the 'run-dcm-workflow' label.
+
+name: DCM Label Reminder
+
+on:
+  pull_request:
+    types: [synchronize, opened, reopened, labeled, unlabeled]
+    branches:
+      - master
+    paths:
+      - "**/*.dart"
+      - "!packages/devtools_app/lib/devtools.dart"
+
+jobs:
+  dcm-label-reminder:
+    if: ${{ !contains(github.event.*.labels.*.name, 'run-dcm-workflow') }}
+    name: Prevent submission
+    runs-on: ubuntu-latest
+    steps:
+      - name: Label reminder
+        run: |
+          echo "::error Please add the 'run-dcm-workflow' label to run DCM checks."
+          exit 1

@@ -67,7 +67,7 @@ void main() {
       await tester.pumpAndSettle();
     }
 
-    setUpAll(() async {
+    setUpAll(() {
       final rawProfile = File(
         'test/test_infra/test_data/memory/allocation_tracing/allocation_trace.json',
       ).readAsStringSync();
@@ -99,7 +99,7 @@ void main() {
       setGlobal(ScriptManager, mockScriptManager);
     });
 
-    tearDown(() async {
+    tearDown(() {
       scene.tearDown();
     });
 

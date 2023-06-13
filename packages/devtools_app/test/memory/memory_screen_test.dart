@@ -25,7 +25,7 @@ void main() {
   final allocationJson =
       AllocationMemoryJson.decode(argJsonString: testAllocationData);
 
-  void _setUpServiceManagerForMemory() {
+  void setUpServiceManagerForMemory() {
     fakeServiceManager = FakeServiceManager(
       service: FakeServiceManager.createFakeService(
         memoryData: memoryJson,
@@ -63,7 +63,7 @@ void main() {
   const windowSize = Size(2225.0, 1000.0);
 
   group('MemoryScreen', () {
-    setUp(() async {
+    setUp(() {
       setGlobal(OfflineModeController, OfflineModeController());
       fakeServiceManager = FakeServiceManager();
       when(fakeServiceManager.connectedApp!.isDartWebAppNow).thenReturn(false);
@@ -79,7 +79,7 @@ void main() {
       setGlobal(NotificationService, NotificationService());
       screen = MemoryScreen();
       controller = MemoryController();
-      _setUpServiceManagerForMemory();
+      setUpServiceManagerForMemory();
     });
 
     testWidgets('builds its tab', (WidgetTester tester) async {
@@ -87,23 +87,26 @@ void main() {
       expect(find.text('Memory'), findsOneWidget);
     });
 
-    testWidgetsWithWindowSize('builds proper content for state', windowSize,
-        (WidgetTester tester) async {
-      await pumpMemoryScreen(tester);
+    testWidgetsWithWindowSize(
+      'builds proper content for state',
+      windowSize,
+      (WidgetTester tester) async {
+        await pumpMemoryScreen(tester);
 
-      // Should be collecting live feed.
-      expect(controller.offline, isFalse);
+        // Should be collecting live feed.
+        expect(controller.offline, isFalse);
 
-      // Verify Memory, Memory Source, and Memory Sources content.
-      expect(find.byTooltip(ChartPaneTooltips.pauseTooltip), findsOneWidget);
-      expect(find.byTooltip(ChartPaneTooltips.resumeTooltip), findsOneWidget);
+        // Verify Memory, Memory Source, and Memory Sources content.
+        expect(find.byTooltip(ChartPaneTooltips.pauseTooltip), findsOneWidget);
+        expect(find.byTooltip(ChartPaneTooltips.resumeTooltip), findsOneWidget);
 
-      expect(find.text('GC'), findsOneWidget);
+        expect(find.text('GC'), findsOneWidget);
 
-      expect(find.byType(MemoryVMChart), findsOneWidget);
+        expect(find.byType(MemoryVMChart), findsOneWidget);
 
-      expect(controller.memoryTimeline.liveData.isEmpty, isTrue);
-      expect(controller.memoryTimeline.offlineData.isEmpty, isTrue);
-    });
+        expect(controller.memoryTimeline.liveData.isEmpty, isTrue);
+        expect(controller.memoryTimeline.offlineData.isEmpty, isTrue);
+      },
+    );
   });
 }

@@ -50,7 +50,7 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
   static const _hoverYOffset = 0.0;
 
   static double get _hoverWidth => scaleByFontFactor(225.0);
-  static const _hover_card_border_width = 2.0;
+  static const _hoverCardBorderWidth = 2.0;
 
   // TODO(terry): Compute below heights dynamically.
   static double get _hoverHeightMinimum => scaleByFontFactor(42.0);
@@ -69,7 +69,7 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
   ) =>
       _hoverHeightMinimum +
       (eventsCount * hoverItemHeight) +
-      _hover_card_border_width +
+      _hoverCardBorderWidth +
       (tracesCount * hoverItemHeight) +
       (extensionEventsCount > 0
           ? (extensionEventsCount == 1
@@ -322,7 +322,7 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
             color: colorScheme.defaultBackgroundColor,
             border: Border.all(
               color: focusColor,
-              width: _hover_card_border_width,
+              width: _hoverCardBorderWidth,
             ),
             borderRadius: BorderRadius.circular(defaultBorderRadius),
           ),
@@ -339,11 +339,11 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
                   textAlign: TextAlign.center,
                 ),
               ),
-            ]
-              ..addAll(_displayEventsInHover(chartsValues))
-              ..addAll(_displayVmDataInHover(chartsValues))
-              ..addAll(_displayAndroidDataInHover(chartsValues))
-              ..addAll(_displayExtensionEventsInHover(chartsValues)),
+              ..._displayEventsInHover(chartsValues),
+              ..._displayVmDataInHover(chartsValues),
+              ..._displayAndroidDataInHover(chartsValues),
+              ..._displayExtensionEventsInHover(chartsValues),
+            ],
           ),
         ),
       ),
@@ -483,7 +483,7 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
     for (var entry in eventsDisplayed.entries) {
       if (entry.key.endsWith(eventsDisplayName)) {
         widgets.add(
-          Container(
+          SizedBox(
             height: _hoverEventsHeight,
             child: ListView(
               shrinkWrap: true,
@@ -613,7 +613,7 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
       // Flutter event emit the event name and value.
       final data = (event[eventData] as Map).cast<String, Object>();
       final key = data.keys.first;
-      output.writeln('${_longValueToShort(key)}');
+      output.writeln(_longValueToShort(key));
       final values = data[key] as Map<dynamic, dynamic>;
       final displaySize = values[displaySizeInBytesData];
       final decodeSize = values[decodedSizeInBytesData];
@@ -630,7 +630,7 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
       final data = custom[customEventData];
       for (var key in data.keys) {
         output.write('$key=');
-        output.writeln('${_longValueToShort(data[key])}');
+        output.writeln(_longValueToShort(data[key]));
       }
     } else {
       output.writeln('Unknown Event ${event[eventName]}');

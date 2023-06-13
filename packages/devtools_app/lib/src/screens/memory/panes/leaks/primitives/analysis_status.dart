@@ -8,14 +8,14 @@ import '../../../../../shared/common_widgets.dart';
 import '../../../../../shared/theme.dart';
 
 enum AnalysisStatus {
-  NotStarted,
-  Ongoing,
+  notStarted,
+  ongoing,
 
   /// The process is complete and we want user to see the result.
-  ShowingResult,
+  showingResult,
 
   /// The process is complete and we want user to acknowledge the error.
-  ShowingError,
+  showingError,
 }
 
 const Duration _showingResultDelay = Duration(seconds: 5);
@@ -27,17 +27,17 @@ class AnalysisStatusController {
   }
 
   ValueNotifier<AnalysisStatus> status =
-      ValueNotifier<AnalysisStatus>(AnalysisStatus.NotStarted);
+      ValueNotifier<AnalysisStatus>(AnalysisStatus.notStarted);
 
   ValueNotifier<String> message = ValueNotifier('');
 
   void reset() {
-    status.value = AnalysisStatus.NotStarted;
+    status.value = AnalysisStatus.notStarted;
     message.value = '';
   }
 
   void _statusChanged() async {
-    if (status.value == AnalysisStatus.ShowingResult) {
+    if (status.value == AnalysisStatus.showingResult) {
       await Future.delayed(_showingResultDelay);
       reset();
     }
@@ -71,7 +71,7 @@ class AnalysisStatusView extends StatelessWidget {
       firstListenable: controller.status,
       secondListenable: controller.message,
       builder: (_, status, message, __) {
-        if (status == AnalysisStatus.NotStarted) {
+        if (status == AnalysisStatus.notStarted) {
           return analysisStarter;
         }
 
@@ -82,7 +82,7 @@ class AnalysisStatusView extends StatelessWidget {
               padding: const EdgeInsets.all(denseSpacing),
               child: Text(message),
             ),
-            if (status == AnalysisStatus.ShowingError)
+            if (status == AnalysisStatus.showingError)
               Row(
                 children: [
                   CopyToClipboardControl(dataProvider: () => message),

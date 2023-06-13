@@ -865,6 +865,15 @@ void main() {
         expect(list.safeGet(1), equals(2));
         expect(list.safeGet(-1), isNull);
       });
+
+      test('safeRemoveLast', () {
+        final list = <int>[];
+        expect(list.safeRemoveLast(), isNull);
+        list.addAll([1, 2]);
+        expect(list.safeRemoveLast(), 2);
+        expect(list.safeRemoveLast(), 1);
+        expect(list.safeRemoveLast(), isNull);
+      });
     });
   });
 
@@ -1207,11 +1216,11 @@ void main() {
         expect(parseCssHexColor('ffffff00'), equals(Colors.white.withAlpha(0)));
         expect(
           parseCssHexColor('#ff0000bb'),
-          equals(const Color(0xFF0000).withAlpha(0xbb)),
+          equals(const Color(0x00ff0000).withAlpha(0xbb)),
         );
         expect(
           parseCssHexColor('ff0000bb'),
-          equals(const Color(0xFF0000).withAlpha(0xbb)),
+          equals(const Color(0x00ff0000).withAlpha(0xbb)),
         );
       });
       test('parses 4 digit hex colors', () {
@@ -1225,11 +1234,11 @@ void main() {
         expect(parseCssHexColor('ffffff00'), equals(Colors.white.withAlpha(0)));
         expect(
           parseCssHexColor('#f00b'),
-          equals(const Color(0xFF0000).withAlpha(0xbb)),
+          equals(const Color(0x00ff0000).withAlpha(0xbb)),
         );
         expect(
           parseCssHexColor('f00b'),
-          equals(const Color(0xFF0000).withAlpha(0xbb)),
+          equals(const Color(0x00ff0000).withAlpha(0xbb)),
         );
       });
     });
@@ -1250,10 +1259,10 @@ void main() {
       });
 
       test('containsWhere', () {
-        final _list = [1, 2, 1, 2, 3, 4];
-        expect(_list.containsWhere((element) => element == 1), isTrue);
-        expect(_list.containsWhere((element) => element == 5), isFalse);
-        expect(_list.containsWhere((element) => element + 2 == 3), isTrue);
+        final list = [1, 2, 1, 2, 3, 4];
+        expect(list.containsWhere((element) => element == 1), isTrue);
+        expect(list.containsWhere((element) => element == 5), isFalse);
+        expect(list.containsWhere((element) => element + 2 == 3), isTrue);
 
         final otherList = ['hi', 'hey', 'foo', 'bar'];
         expect(
@@ -1533,6 +1542,19 @@ void main() {
       });
     });
 
+    group('NullableStringExtension', () {
+      test('isNullOrEmpty', () {
+        String? str;
+        expect(str.isNullOrEmpty, isTrue);
+        str = '';
+        expect(str.isNullOrEmpty, isTrue);
+        str = 'hello';
+        expect(str.isNullOrEmpty, isFalse);
+        str = null;
+        expect(str.isNullOrEmpty, isTrue);
+      });
+    });
+
     group('StringExtension', () {
       test('fuzzyMatch', () {
         const str = 'hello_world_file';
@@ -1633,39 +1655,41 @@ void main() {
         setGlobal(IdeTheme, IdeTheme());
       });
 
-      testWidgets('updates controller when provided controller changes',
-          (WidgetTester tester) async {
-        final controller1 = TestProvidedController('id_1');
-        final controller2 = TestProvidedController('id_2');
-        final controllerNotifier =
-            ValueNotifier<TestProvidedController>(controller1);
+      testWidgets(
+        'updates controller when provided controller changes',
+        (WidgetTester tester) async {
+          final controller1 = TestProvidedController('id_1');
+          final controller2 = TestProvidedController('id_2');
+          final controllerNotifier =
+              ValueNotifier<TestProvidedController>(controller1);
 
-        final provider = ValueListenableBuilder<TestProvidedController>(
-          valueListenable: controllerNotifier,
-          builder: (context, controller, _) {
-            return Provider<TestProvidedController>.value(
-              value: controller,
-              child: Builder(
-                builder: (context) {
-                  return wrap(
-                    const TestStatefulWidget(),
-                  );
-                },
-              ),
-            );
-          },
-        );
+          final provider = ValueListenableBuilder<TestProvidedController>(
+            valueListenable: controllerNotifier,
+            builder: (context, controller, _) {
+              return Provider<TestProvidedController>.value(
+                value: controller,
+                child: Builder(
+                  builder: (context) {
+                    return wrap(
+                      const TestStatefulWidget(),
+                    );
+                  },
+                ),
+              );
+            },
+          );
 
-        await tester.pumpWidget(provider);
-        expect(find.text('Value 1'), findsOneWidget);
-        expect(find.text('Controller id_1'), findsOneWidget);
+          await tester.pumpWidget(provider);
+          expect(find.text('Value 1'), findsOneWidget);
+          expect(find.text('Controller id_1'), findsOneWidget);
 
-        controllerNotifier.value = controller2;
-        await tester.pumpAndSettle();
+          controllerNotifier.value = controller2;
+          await tester.pumpAndSettle();
 
-        expect(find.text('Value 2'), findsOneWidget);
-        expect(find.text('Controller id_2'), findsOneWidget);
-      });
+          expect(find.text('Value 2'), findsOneWidget);
+          expect(find.text('Controller id_2'), findsOneWidget);
+        },
+      );
     });
 
     group('subtractMaps', () {

@@ -304,7 +304,7 @@ class SyntaxHighlighter {
       'variable.parameter.dart',
     ];
 
-    Map<String, TextStyle> _scopeTextStyleMapper(
+    Map<String, TextStyle> scopeTextStyleMapper(
       List<String> scopes,
       TextStyle style,
     ) {
@@ -314,14 +314,14 @@ class SyntaxHighlighter {
     }
 
     return <String, TextStyle>{
-      ..._scopeTextStyleMapper(modifierScopes, modifierStyle),
-      ..._scopeTextStyleMapper(commentScopes, commentStyle),
-      ..._scopeTextStyleMapper(declarationScopes, declarationStyle),
-      ..._scopeTextStyleMapper(numericConstantScopes, numericConstantStyle),
-      ..._scopeTextStyleMapper(functionScopes, functionStyle),
-      ..._scopeTextStyleMapper(controlFlowScopes, controlFlowStyle),
-      ..._scopeTextStyleMapper(stringScopes, stringStyle),
-      ..._scopeTextStyleMapper(variableScopes, variableStyle),
+      ...scopeTextStyleMapper(modifierScopes, modifierStyle),
+      ...scopeTextStyleMapper(commentScopes, commentStyle),
+      ...scopeTextStyleMapper(declarationScopes, declarationStyle),
+      ...scopeTextStyleMapper(numericConstantScopes, numericConstantStyle),
+      ...scopeTextStyleMapper(functionScopes, functionStyle),
+      ...scopeTextStyleMapper(controlFlowScopes, controlFlowStyle),
+      ...scopeTextStyleMapper(stringScopes, stringStyle),
+      ...scopeTextStyleMapper(variableScopes, variableStyle),
     };
   }
 }

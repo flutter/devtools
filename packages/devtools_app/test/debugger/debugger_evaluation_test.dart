@@ -29,6 +29,7 @@ void main() {
     setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
     setGlobal(BreakpointManager, BreakpointManager());
     setGlobal(EvalService, EvalService());
+    setGlobal(NotificationService, NotificationService());
     isAlive = Disposable();
     await env.setupEnvironment();
     debuggerController = DebuggerController();

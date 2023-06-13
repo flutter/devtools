@@ -21,6 +21,7 @@ import 'performance_settings.dart';
 
 class PerformanceControls extends StatelessWidget {
   const PerformanceControls({
+    super.key,
     required this.controller,
     required this.onClear,
   });
@@ -153,7 +154,7 @@ class _SecondaryPerformanceControls extends StatelessWidget {
         const SizedBox(width: denseSpacing),
         SettingsOutlinedButton(
           gaScreen: gac.performance,
-          gaSelection: gac.performanceSettings,
+          gaSelection: gac.PerformanceEvents.performanceSettings.name,
           onPressed: () => _openSettingsDialog(context),
         ),
       ],

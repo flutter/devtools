@@ -2,11 +2,15 @@ name: Release Notes
 
 on:
   pull_request:
-    types: [assigned, opened, synchronize, reopened, edited]
+    types: [synchronize, opened, reopened, labeled, unlabeled]
+    paths:
+      - "**/*.dart"
+
 env:
   CURRENT_RELEASE_FILE_PATH: packages/devtools_app/release_notes/NEXT_RELEASE_NOTES.md
 jobs:
   release-preparedness:
+    if: ${{ !contains(github.event.*.labels.*.name, 'release-notes-not-required') && github.event.pull_request.user.login != 'DartDevtoolWorkflowBot' }}
     runs-on: ubuntu-latest
     name: Verify PR Release Note Requirements
     steps:
@@ -28,46 +32,12 @@ jobs:
           HAS_CHANGED_RELEASE_NOTES=$(echo $FILES_RESPONSE | jq '.[].filename' | jq -s '. | any(. == env.CURRENT_RELEASE_FILE_PATH)')
           echo "HAS_CHANGED_RELEASE_NOTES=$HAS_CHANGED_RELEASE_NOTES" >> $GITHUB_OUTPUT
 
-      - name: Get PR Info
-        id: check-release-note-exceptions
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PULL_NUMBER: ${{steps.get-pull-request-number.outputs.PULL_REQUEST_NUMBER}}
-        run: |
-          PULLS_RESPONSE=$(gh api /repos/$GITHUB_REPOSITORY/pulls/$PULL_NUMBER)
-          DESCRIPTION_BODY=$(echo $PULLS_RESPONSE | jq '.body')
-          AUTHOR_ID=$(echo $PULLS_RESPONSE | jq -r '.user.login')
-
-          sudo apt-get install pandoc
-
-          BODY_WITHOUT_COMMENTS=$(printf "$DESCRIPTION_BODY" | pandoc --strip-comments -f markdown -t plain)
-          echo $DESCRIPTION_BODY
-          echo $BODY_WITHOUT_COMMENTS
-          echo $AUTHOR_ID
-
-          if $(echo $BODY_WITHOUT_COMMENTS | grep -Eq "RELEASE_NOTE_EXCEPTION="); then
-            HAS_RELEASE_NOTE_EXCEPTION_STRING=true
-          else
-            HAS_RELEASE_NOTE_EXCEPTION_STRING=false
-          fi
-
-          if [[ "$AUTHOR_ID" == "dependabot[bot]" ]] ; then
-            IS_DEPENDABOT_PR=true
-          else
-            IS_DEPENDABOT_PR=false
-          fi
-
-          echo "HAS_RELEASE_NOTE_EXCEPTION_STRING=$HAS_RELEASE_NOTE_EXCEPTION_STRING" >> $GITHUB_OUTPUT
-          echo "IS_DEPENDABOT_PR=$IS_DEPENDABOT_PR" >> $GITHUB_OUTPUT
-
       - name: Check Release Preparedness requirements
         env:
           HAS_CHANGED_RELEASE_NOTES: ${{steps.get-modified-files.outputs.HAS_CHANGED_RELEASE_NOTES}}
-          HAS_RELEASE_NOTE_EXCEPTION_STRING: ${{steps.check-release-note-exceptions.outputs.HAS_RELEASE_NOTE_EXCEPTION_STRING}}
-          IS_DEPENDABOT_PR: ${{steps.check-release-note-exceptions.outputs.IS_DEPENDABOT_PR}}
         run: |
-          if [ "$HAS_CHANGED_RELEASE_NOTES" != "true" ] && [ "$HAS_RELEASE_NOTE_EXCEPTION_STRING" != "true" ] && [ "$IS_DEPENDABOT_PR" != "true" ] ; then
+          if [ "$HAS_CHANGED_RELEASE_NOTES" != "true" ] ; then
             echo "Release Preparedness check failed"
-            echo "::error title='Release Notes were not modified'::Please add a release note entry to $CURRENT_RELEASE_FILE_PATH or an exception reason to your description using: \`RELEASE_NOTE_EXCEPTION=[reason goes here]\`"
+            echo "::error title='Release Notes were not modified'::Please add a release note entry to $CURRENT_RELEASE_FILE_PATH or add the 'release-notes-not-required' label."
             exit 1
           fi

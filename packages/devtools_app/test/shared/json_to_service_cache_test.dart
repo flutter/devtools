@@ -20,7 +20,7 @@ void main() {
           true,
           null,
         ],
-        'aNullValue': null
+        'aNullValue': null,
       };
 
       final cache = JsonToServiceCache();

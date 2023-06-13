@@ -50,6 +50,7 @@ mixin AutoDisposeMixin<T extends StatefulWidget> on State<T>
   }
 
   @override
+  // ignore: avoid_shadowing_type_parameters, false positive
   void callOnceWhenReady<T>({
     required VoidCallback callback,
     required ValueListenable<T> trigger,

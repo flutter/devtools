@@ -52,7 +52,7 @@ class FileImportContainer extends StatefulWidget {
   final String? gaSelectionAction;
 
   @override
-  _FileImportContainerState createState() => _FileImportContainerState();
+  State<FileImportContainer> createState() => _FileImportContainerState();
 }
 
 class _FileImportContainerState extends State<FileImportContainer> {
@@ -232,6 +232,7 @@ Future<DevToolsJsonFile?> importFileFromPicker({
 
 class FileImportButton extends StatelessWidget {
   const FileImportButton({
+    super.key,
     required this.onPressed,
     required this.gaScreen,
     required this.gaSelection,
@@ -258,6 +259,7 @@ class FileImportButton extends StatelessWidget {
 
 class DualFileImportContainer extends StatefulWidget {
   const DualFileImportContainer({
+    super.key,
     required this.firstFileTitle,
     required this.secondFileTitle,
     required this.firstInstructions,
@@ -268,7 +270,6 @@ class DualFileImportContainer extends StatefulWidget {
     required this.gaSelectionImportFirst,
     required this.gaSelectionImportSecond,
     required this.gaSelectionAction,
-    Key? key,
   });
 
   final String firstFileTitle;
@@ -290,7 +291,7 @@ class DualFileImportContainer extends StatefulWidget {
   ) onAction;
 
   @override
-  _DualFileImportContainerState createState() =>
+  State<DualFileImportContainer> createState() =>
       _DualFileImportContainerState();
 }
 

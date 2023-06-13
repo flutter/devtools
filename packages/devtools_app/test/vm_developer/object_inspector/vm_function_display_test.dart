@@ -27,6 +27,7 @@ void main() {
     setGlobal(ServiceConnectionManager, FakeServiceManager());
     setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
     setGlobal(PreferencesController, PreferencesController());
+    setGlobal(NotificationService, NotificationService());
 
     mockFuncObject = MockFuncObject();
 
@@ -105,20 +106,23 @@ void main() {
       },
     );
 
-    testWidgetsWithWindowSize('unrecognized function kind', windowSize,
-        (WidgetTester tester) async {
-      when(mockFuncObject.kind).thenReturn(null);
+    testWidgetsWithWindowSize(
+      'unrecognized function kind',
+      windowSize,
+      (WidgetTester tester) async {
+        when(mockFuncObject.kind).thenReturn(null);
 
-      await tester.pumpWidget(
-        wrap(
-          VmFuncDisplay(
-            function: mockFuncObject,
-            controller: ObjectInspectorViewController(),
+        await tester.pumpWidget(
+          wrap(
+            VmFuncDisplay(
+              function: mockFuncObject,
+              controller: ObjectInspectorViewController(),
+            ),
           ),
-        ),
-      );
+        );
 
-      expect(find.text('Unrecognized function kind: null'), findsOneWidget);
-    });
+        expect(find.text('Unrecognized function kind: null'), findsOneWidget);
+      },
+    );
   });
 }

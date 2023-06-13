@@ -35,7 +35,7 @@ class ScriptLocation {
   final SourcePosition? location;
 
   @override
-  bool operator ==(other) {
+  bool operator ==(Object? other) {
     return other is ScriptLocation &&
         other.scriptRef == scriptRef &&
         other.location == location;
@@ -107,7 +107,7 @@ abstract class BreakpointAndSourcePosition
   @override
   int get hashCode => breakpoint.hashCode;
   @override
-  bool operator ==(other) {
+  bool operator ==(Object? other) {
     return other is BreakpointAndSourcePosition &&
         other.breakpoint == breakpoint;
   }
@@ -224,7 +224,6 @@ class StackFrameAndSourcePosition {
       name = name.substring(unoptimized.length);
     }
     name = name.replaceAll(anonymousClosureName, closureName);
-    name = name == none ? name : '$name';
 
     if (frame.code?.kind == CodeKind.kNative) {
       return '<native code: $name>';

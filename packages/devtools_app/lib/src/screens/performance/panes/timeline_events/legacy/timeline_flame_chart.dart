@@ -31,7 +31,7 @@ import 'event_details.dart';
 
 class TimelineEventsView extends StatelessWidget {
   const TimelineEventsView({
-    Key? key,
+    super.key,
     required this.controller,
     required this.processing,
     required this.processingProgress,
@@ -117,6 +117,7 @@ class TimelineEventsView extends StatelessWidget {
 class TimelineFlameChart extends FlameChart<PerformanceData, TimelineEvent> {
   TimelineFlameChart(
     PerformanceData data, {
+    super.key,
     required double width,
     required double height,
     required ValueListenable<TimelineEvent?> selectionNotifier,
@@ -194,18 +195,9 @@ class TimelineFlameChartState
   @override
   void initState() {
     super.initState();
-    // addAndGet has crucial side effects so moving to a variable is not
-    // feasible.
-    // ignore: prefer-moving-to-variable
     _groupLabelScrollController = verticalControllerGroup.addAndGet();
     _previousInGroupButtonsScrollController =
-        // addAndGet has crucial side effects so moving to a variable is not
-        // feasible.
-        // ignore: prefer-moving-to-variable
         verticalControllerGroup.addAndGet();
-    // addAndGet has crucial side effects so moving to a variable is not
-    // feasible.
-    // ignore: prefer-moving-to-variable
     _nextInGroupButtonsScrollController = verticalControllerGroup.addAndGet();
   }
 
@@ -376,16 +368,16 @@ class TimelineFlameChartState
   Future<void> _centerSelectedFrame() async {
     // TODO(kenz): consider using jumpTo for some of these animations to
     // improve performance.
-    final _selected = _selectedFrame;
-    if (_selected != null) {
+    final selected = _selectedFrame;
+    if (selected != null) {
       // Zoom and scroll to the frame's UI event.
-      final time = _selected.timeToCenterFrame();
-      final event = _selected.eventToCenterFrame();
+      final time = selected.timeToCenterFrame();
+      final event = selected.eventToCenterFrame();
       if (time == null || event == null) {
         final firstWellFormedFrameMicros =
             controller.flutterFramesController.firstWellFormedFrameMicros;
         if (firstWellFormedFrameMicros != null &&
-            _selected.timeFromFrameTiming.start!.inMicroseconds <
+            selected.timeFromFrameTiming.start!.inMicroseconds <
                 firstWellFormedFrameMicros) {
           notificationService.push(
             'No timeline events available for the selected frame. Timeline '
@@ -1207,6 +1199,7 @@ class SelectedFrameBracketPainter extends FlameChartPainter {
 
 class NavigateInThreadInButton extends StatefulWidget {
   const NavigateInThreadInButton({
+    super.key,
     required this.group,
     required this.isNext,
     required this.topSpacer,
@@ -1239,7 +1232,7 @@ class NavigateInThreadInButton extends StatefulWidget {
   static const topPaddingForMediumGroups = 20.0;
 
   @override
-  _NavigateInThreadInButtonState createState() =>
+  State<NavigateInThreadInButton> createState() =>
       _NavigateInThreadInButtonState();
 }
 
@@ -1289,6 +1282,7 @@ class _NavigateInThreadInButtonState extends State<NavigateInThreadInButton>
 
 class ThreadNavigatorButton extends StatelessWidget {
   const ThreadNavigatorButton({
+    super.key,
     required this.useSmallButton,
     required this.backgroundColor,
     required this.tooltip,
