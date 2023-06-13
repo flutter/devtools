@@ -23,10 +23,14 @@ mixin IOMixin {
 
   void listenToProcessOutput(
     Process process, {
-    void Function(String) printCallback = _defaultPrintCallback,
     void Function(String)? onStdout,
     void Function(String)? onStderr,
+    void Function(String)? printCallback,
+    String printTag = '',
   }) {
+    printCallback =
+        printCallback ?? (line) => _defaultPrintCallback(line, tag: printTag);
+
     streamSubscriptions.addAll([
       transformToLines(process.stdout).listen((String line) {
         onStdout?.call(line);
@@ -52,7 +56,7 @@ mixin IOMixin {
     streamSubscriptions.clear();
   }
 
-  static void _defaultPrintCallback(String line) {
-    print(line);
+  static void _defaultPrintCallback(String line, {String tag = ''}) {
+    print(tag.isNotEmpty ? '$tag - $line' : line);
   }
 }
