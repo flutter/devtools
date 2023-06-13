@@ -14,8 +14,10 @@ import '_io_utils.dart';
 const bool _printDebugOutputToStdOut = false;
 
 class TestFlutterApp extends _TestApp {
-  TestFlutterApp({String appPath = 'test/test_infra/fixtures/flutter_app'})
-      : super(appPath);
+  TestFlutterApp({
+    String appPath = 'test/test_infra/fixtures/flutter_app',
+    String appDevice = 'flutter-tester',
+  }) : super(appPath, appDevice);
 
   @override
   Future<void> startProcess() async {
@@ -25,7 +27,7 @@ class TestFlutterApp extends _TestApp {
         'run',
         '--machine',
         '-d',
-        'flutter-tester',
+        testAppDevice,
       ],
       workingDirectory: testAppPath,
     );
@@ -36,7 +38,7 @@ class TestFlutterApp extends _TestApp {
 class TestDartCliApp {}
 
 abstract class _TestApp with IOMixin {
-  _TestApp(this.testAppPath);
+  _TestApp(this.testAppPath, this.testAppDevice);
 
   static const _appStartTimeout = Duration(seconds: 120);
 
@@ -50,6 +52,9 @@ abstract class _TestApp with IOMixin {
   /// This will either be a file path or a directory path depending on the type
   /// of app.
   final String testAppPath;
+
+  /// The device the test app should run on, e.g. flutter-tester, chrome.
+  final String testAppDevice;
 
   late Process? runProcess;
 

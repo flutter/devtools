@@ -26,23 +26,41 @@ const _testDirectory = 'integration_test/test';
 const _testSuffix = '_test.dart';
 const _offlineIndicator = 'integration_test/test/offline';
 
+// A mapping of test app device to the supported tests for that device.
+final _deviceToTestPaths = <String, List<String>>{
+  'chrome': [
+    'debugger_panel_test.dart',
+    'app_test.dart',
+    // TODO(https://github.com/flutter/devtools/issues/5874): Enable once supported on web.
+    // 'eval_and_browse_test.dart',
+  ],
+};
+
 void main(List<String> testRunnerArgs) async {
   final testTargetProvided = testRunnerArgs
       .where((arg) => arg.startsWith(TestRunnerArgs.testTargetArg))
       .isNotEmpty;
 
   if (testTargetProvided) {
-    final testFilePath = TestRunnerArgs(testRunnerArgs).testTarget;
+    final testFilePath = TestRunnerArgs(testRunnerArgs).testTarget!;
 
     // TODO(kenz): add support for specifying a directory as the target instead
     // of a single file.
     await _runTest(testRunnerArgs, testFilePath);
   } else {
-    // Run all tests since a target test was not provided.
+    final testAppDevice = TestRunnerArgs(testRunnerArgs).testAppDevice;
+
+    // Run all tests for the given test app device since a target test was not
+    // provided.
     final testDirectory = Directory(_testDirectory);
-    final testFiles = testDirectory
-        .listSync(recursive: true)
-        .where((testFile) => testFile.path.endsWith(_testSuffix));
+    final testFiles = testDirectory.listSync(recursive: true).where(
+          (testFile) =>
+              testFile.path.endsWith(_testSuffix) &&
+              _isTestForDevice(
+                testFile.path,
+                testAppDevice: testAppDevice,
+              ),
+        );
 
     for (final testFile in testFiles) {
       final testTarget = testFile.path;
@@ -55,6 +73,13 @@ void main(List<String> testRunnerArgs) async {
       );
     }
   }
+}
+
+bool _isTestForDevice(String testPath, {required String testAppDevice}) {
+  if (testAppDevice == 'flutter-tester') return true;
+  final testPathsForDevice = _deviceToTestPaths[testAppDevice] ?? [];
+  return testPathsForDevice
+      .any((supportedTestPath) => testPath.endsWith(supportedTestPath));
 }
 
 Future<void> _runTest(

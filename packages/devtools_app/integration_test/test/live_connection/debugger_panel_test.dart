@@ -11,8 +11,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 
-// To run:
+// To run the test while connected to a flutter-tester device:
 // dart run integration_test/run_tests.dart --target=integration_test/test/live_connection/debugger_panel_test.dart
+
+// To run the test while connected to a chrome device:
+// dart run integration_test/run_tests.dart --target=integration_test/test/live_connection/debugger_panel_test.dart --test-app-device=chrome
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
@@ -102,19 +105,22 @@ void main() {
 
     logStatus('pausing at breakpoint');
 
-    final frameFinder = findStackFrameWithText('PeriodicAction.doEvery');
-    expect(frameFinder, findsOneWidget);
+    final topFrameFinder = findStackFrameWithText('incrementCounter');
+    expect(topFrameFinder, findsOneWidget);
     expect(isLineFocused(line24Finder), isTrue);
-
-    logStatus('inspecting variables');
 
     final countVariableFinder = find.textContaining('count:');
     expect(countVariableFinder, findsOneWidget);
 
+    logStatus('inspecting variables');
+
+    final callingFrameFinder = findStackFrameWithText('<closure>');
+    expect(callingFrameFinder, findsOneWidget);
+
     logStatus('switching stackframes');
 
     // Tap on the stackframe:
-    await tester.tap(frameFinder);
+    await tester.tap(callingFrameFinder);
     await tester.pumpAndSettle(safePumpDuration);
 
     logStatus('looking for the other_classes.dart file');

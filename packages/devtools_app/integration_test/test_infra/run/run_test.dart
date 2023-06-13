@@ -33,7 +33,10 @@ Future<void> runFlutterIntegrationTest(
       // Create the test app and start it.
       // TODO(kenz): support running Dart CLI test apps from here too.
       try {
-        testApp = TestFlutterApp(appPath: testFileArgs.appPath);
+        testApp = TestFlutterApp(
+          appPath: testFileArgs.appPath,
+          appDevice: testRunnerArgs.testAppDevice,
+        );
         await testApp.start();
       } catch (e) {
         // ignore: avoid-throw-in-catch-block, by design
@@ -60,7 +63,7 @@ Future<void> runFlutterIntegrationTest(
   Exception? exception;
   try {
     await testRunner.run(
-      testRunnerArgs.testTarget,
+      testRunnerArgs.testTarget!,
       enableExperiments: testFileArgs.experimentsOn,
       updateGoldens: testRunnerArgs.updateGoldens,
       headless: testRunnerArgs.headless,
@@ -273,31 +276,36 @@ class TestRunnerArgs {
     final argWithTestTarget =
         args.firstWhereOrNull((arg) => arg.startsWith(testTargetArg));
     final target = argWithTestTarget?.substring(testTargetArg.length);
-    assert(
-      target != null,
-      'Please specify a test target (e.g. ${testTargetArg}path/to/test.dart',
-    );
-    testTarget = target!;
+    testTarget = target;
 
     final argWithTestAppUri =
-        args.firstWhereOrNull((arg) => arg.startsWith(testAppArg));
-    testAppUri = argWithTestAppUri?.substring(testAppArg.length);
+        args.firstWhereOrNull((arg) => arg.startsWith(testAppUriArg));
+    testAppUri = argWithTestAppUri?.substring(testAppUriArg.length);
+
+    final argWithTestAppDevice =
+        args.firstWhereOrNull((arg) => arg.startsWith(testAppDeviceArg));
+    testAppDevice = argWithTestAppDevice?.substring(testAppDeviceArg.length) ??
+        'flutter-tester';
 
     updateGoldens = args.contains(updateGoldensArg);
     headless = args.contains(headlessArg);
   }
 
   static const testTargetArg = '--target=';
-  static const testAppArg = '--test-app-uri=';
+  static const testAppUriArg = '--test-app-uri=';
+  static const testAppDeviceArg = '--test-app-device=';
   static const updateGoldensArg = '--update-goldens';
   static const headlessArg = '--headless';
 
-  late final String testTarget;
+  late final String? testTarget;
 
   /// The Vm Service URI for the test app to connect devtools to.
   ///
   /// This value will only be used for tests with live connection.
   late final String? testAppUri;
+
+  /// The type of device for the test app to run on.
+  late final String testAppDevice;
 
   /// Whether golden images should be updated with the result of this test run.
   late final bool updateGoldens;
