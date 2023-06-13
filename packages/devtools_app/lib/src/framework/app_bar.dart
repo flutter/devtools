@@ -182,7 +182,7 @@ class TabOverflowButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final selectedColor = Theme.of(context).colorScheme.primary;
     final button = ContextMenuButton(
-      icon: Icons.keyboard_double_arrow_right,
+      icon: Icons.keyboard_double_arrow_right_sharp,
       iconSize: actionsIconSize,
       color: overflowTabSelected ? selectedColor : null,
       buttonWidth: buttonMinWidth,
