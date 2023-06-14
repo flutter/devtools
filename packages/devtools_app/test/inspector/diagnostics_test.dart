@@ -58,7 +58,7 @@ void main() {
         'hasChildren': false,
         'children': [],
       };
-      final inspectorService = MockObjectGroupBase();
+      final inspectorService = MockInspectorObjectGroupBase();
       final diagnostic = RemoteDiagnosticsNode(
         nodeJson,
         inspectorService,
