@@ -8,6 +8,7 @@ import 'package:vm_service/utils.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 import '../shared/config_specific/sse/sse_shim.dart';
+import '../shared/globals.dart';
 import 'vm_service_wrapper.dart';
 
 Future<VmServiceWrapper> _connectWithSse(
@@ -27,6 +28,7 @@ Future<VmServiceWrapper> _connectWithSse(
     stream,
     client.sink!.add,
     uri,
+    trackFutures: integrationTestMode,
   );
 
   unawaited(
@@ -57,6 +59,7 @@ Future<VmServiceWrapper> _connectWithWebSocket(
       ws.sink.add(message);
     },
     uri,
+    trackFutures: integrationTestMode,
   );
 
   if (ws.closeCode != null) {

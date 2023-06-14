@@ -76,6 +76,7 @@ Future<void> pumpDevTools(WidgetTester tester) async {
   // Error when reading 'org-dartlang-app:/test_infra/shared.dart': File not found
   const shouldEnableExperiments = bool.fromEnvironment('enable_experiments');
   app.externalRunDevTools(
+    integrationTestMode: true,
     // ignore: avoid_redundant_argument_values, by design
     shouldEnableExperiments: shouldEnableExperiments,
     sampleData: _sampleData,

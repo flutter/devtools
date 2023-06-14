@@ -103,7 +103,7 @@ class ChromeDriver with IOMixin {
         '--port=4444',
       ],
     );
-    listenToProcessOutput(_process);
+    listenToProcessOutput(_process, printTag: 'ChromeDriver');
   }
 
   void kill() {
@@ -153,6 +153,7 @@ class TestRunner with IOMixin {
 
       listenToProcessOutput(
         process,
+        printTag: 'FlutterDriveProcess',
         onStdout: (line) {
           if (line.startsWith(_TestResult.testResultPrefix)) {
             final testResultJson = line.substring(line.indexOf('{'));
