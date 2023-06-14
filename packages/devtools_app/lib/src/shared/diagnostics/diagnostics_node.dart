@@ -172,11 +172,12 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   @override
   bool operator ==(Object other) {
     if (other is! RemoteDiagnosticsNode) return false;
-    return dartDiagnosticRef == other.dartDiagnosticRef;
+
+    return json == other.json; // do it smarter!!!
   }
 
   @override
-  int get hashCode => dartDiagnosticRef.hashCode;
+  int get hashCode => throw UnimplementedError(); // like ==
 
   /// Separator text to show between property names and values.
   String get separator => showSeparator ? ':' : '';
@@ -602,11 +603,6 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   Future<List<RemoteDiagnosticsNode>>? _childrenFuture;
   List<RemoteDiagnosticsNode>? _children;
 
-  /// Reference the actual Dart DiagnosticsNode object this object is referencing.
-  InspectorInstanceRef get dartDiagnosticRef {
-    return InspectorInstanceRef(json['objectId'] as String?);
-  }
-
   /// Properties to show inline in the widget tree.
   List<RemoteDiagnosticsNode> get inlineProperties {
     if (cachedProperties == null) {
@@ -650,7 +646,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
     }
     for (var entry in entries) {
       final String key = entry.key;
-      if (key == 'objectId' || key == 'valueId') {
+      if (key == 'valueId') {
         continue;
       }
       if (entry.value == node.json[key]) {
