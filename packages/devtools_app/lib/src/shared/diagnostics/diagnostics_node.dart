@@ -576,7 +576,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
 
   Future<List<RemoteDiagnosticsNode>> _getChildrenHelper() {
     return inspectorService!.getChildren(
-      dartDiagnosticRef,
+      valueRef,
       isSummaryTree,
       this,
     );
