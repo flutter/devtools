@@ -306,7 +306,7 @@ abstract class _TestApp with IOMixin {
         msg.length > maxLength ? '${msg.substring(0, maxLength)}...' : msg;
     _allMessages.add(truncatedMsg);
     if (_printDebugOutputToStdOut) {
-      print(truncatedMsg);
+      print('_TestApp - $truncatedMsg');
     }
     return msg;
   }

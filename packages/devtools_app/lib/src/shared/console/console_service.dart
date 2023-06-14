@@ -135,7 +135,7 @@ class ConsoleService extends Disposer {
   final _stdio = ListValueNotifier<ConsoleLine>([]);
   bool _stdioTrailingNewline = false;
 
-  ObjectGroupBase get objectGroup {
+  InspectorObjectGroupBase get objectGroup {
     final inspectorService = serviceManager.inspectorService!;
     if (_objectGroup?.inspectorService == inspectorService) {
       return _objectGroup!;
@@ -145,7 +145,7 @@ class ConsoleService extends Disposer {
     return _objectGroup!;
   }
 
-  ObjectGroupBase? _objectGroup;
+  InspectorObjectGroupBase? _objectGroup;
 
   /// Clears the contents of stdio.
   void clearStdio() {
