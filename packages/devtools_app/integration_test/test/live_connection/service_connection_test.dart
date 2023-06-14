@@ -2,10 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:devtools_app/devtools_app.dart';
+import 'package:devtools_app/src/service/service_extensions.dart' as extensions;
+import 'package:devtools_app/src/shared/eval_on_dart_library.dart';
 import 'package:devtools_test/devtools_integration_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
+import 'package:vm_service/vm_service.dart';
 
 // To run:
 // dart run integration_test/run_tests.dart --target=integration_test/test/live_connection/service_connection_test.dart
@@ -84,4 +89,146 @@ void main() {
       await whenValueNonNull(serviceManager.isolateManager.selectedIsolate);
     }
   });
+
+  testWidgets('can call service extensions', (tester) async {
+    await pumpAndConnectDevTools(tester, testApp);
+    await tester.pump(longDuration);
+
+    // Ensure all futures are completed before running checks.
+    await serviceManager.service!.allFuturesCompleted;
+
+    logStatus('verify toggling a boolean service extension');
+    final extensionName = extensions.debugPaint.extension;
+    const evalExpression = 'debugPaintSizeEnabled';
+    final library = EvalOnDartLibrary(
+      'package:flutter/src/rendering/debug.dart',
+      serviceManager.service!,
+    );
+
+    await _serviceExtensionAvailable(extensionName);
+
+    logStatus('verify initial state on device is false');
+
+    // This chunk of code is behaving weirdly
+    logStatus('before eval $evalExpression');
+    final result = await library.eval(evalExpression, isAlive: null);
+    logStatus('after eval $evalExpression');
+    if (result is InstanceRef) {
+      logStatus(
+        'result.valueAsString: ${result.valueAsString}, expectedResult: false',
+      );
+      if (result.valueAsString == 'false') {
+        logStatus('this expectation is true');
+      }
+      // This expectation is failing after the test finishes, even though it
+      // does not fail during the test execution.
+      logStatus(
+          'before calling "expect(result.valueAsString, equals(\'false\'))"');
+      expect(result.valueAsString, equals('false'));
+      logStatus(
+          'after calling "expect(result.valueAsString, equals(\'false\'))"');
+    }
+    // end chunk
+
+    // await _verifyExtensionStateOnTestDevice(
+    //   evalExpression: evalExpression,
+    //   expectedResult: 'false',
+    //   library: library,
+    // );
+
+    logStatus('verify initial state in service manager is false');
+    await _verifyInitialExtensionStateInServiceManager(extensionName);
+
+    // The test only fails when the following block is present, but oddly it
+    // fails above at line 127 `expect(result.valueAsString, equals('false'));`
+    // however it fails at line 127 after the test has already completed and the
+    // prints show we have already successfully made it past line 127.
+    logStatus('enable the service extension via ServiceExtensionManager');
+    await serviceManager.serviceExtensionManager.setServiceExtensionState(
+      extensionName,
+      enabled: true,
+      value: true,
+    );
+
+    logStatus('at the end of the test');
+  });
+
+}
+
+/// Returns a future that completes when the service extension is available.
+Future<void> _serviceExtensionAvailable(String extensionName) async {
+  final listenable =
+      serviceManager.serviceExtensionManager.hasServiceExtension(extensionName);
+
+  final completer = Completer<void>();
+  void listener() {
+    if (listenable.value && !completer.isCompleted) {
+      completer.complete();
+    }
+  }
+
+  listener();
+  listenable.addListener(listener);
+  await completer.future;
+  listenable.removeListener(listener);
+}
+
+Future<void> _verifyExtensionStateOnTestDevice({
+  required String evalExpression,
+  required String? expectedResult,
+  required EvalOnDartLibrary library,
+}) async {
+  logStatus('before eval $evalExpression');
+  final result = await library.eval(evalExpression, isAlive: null);
+  logStatus('after eval $evalExpression');
+  if (result is InstanceRef) {
+    logStatus(
+      'result.valueAsString: ${result.valueAsString}, expectedResult: $expectedResult',
+    );
+    expect(result.valueAsString, equals(expectedResult));
+    logStatus(
+        'after result expectation - result ${result.valueAsString == expectedResult}');
+  }
+}
+
+Future<void> _verifyInitialExtensionStateInServiceManager(
+  String extensionName,
+) async {
+  // For all service extensions, the initial state in ServiceExtensionManager
+  // should be disabled with value null.
+  await _verifyExtensionStateInServiceManager(
+    extensionName,
+    enabled: false,
+    value: null,
+  );
+}
+
+Future<void> _verifyExtensionStateInServiceManager(
+  String extensionName, {
+  required bool enabled,
+  required Object? value,
+}) async {
+  logStatus(
+      '_verifyExtensionStateInServiceManager, $extensionName - enabled: $enabled, value: $value');
+  final stateListenable = serviceManager.serviceExtensionManager
+      .getServiceExtensionState(extensionName);
+
+  // Wait for the service extension state to match the expected value.
+  final Completer<ServiceExtensionState> stateCompleter = Completer();
+  void stateListener() {
+    print('in stateListener - ${stateListenable.value.value}');
+    if (stateListenable.value.value == value) {
+      stateCompleter.complete(stateListenable.value);
+    }
+  }
+
+  stateListenable.addListener(stateListener);
+  stateListener();
+
+  logStatus('before await future in verify in servicemanager fx');
+  final ServiceExtensionState state = await stateCompleter.future;
+  logStatus('after await future in verify in servicemanager fx');
+  stateListenable.removeListener(stateListener);
+  expect(state.enabled, equals(enabled));
+  expect(state.value, equals(value));
 }

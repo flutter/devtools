@@ -14,7 +14,7 @@ import '_in_file_args.dart';
 import '_io_utils.dart';
 import '_test_app_driver.dart';
 
-bool _debugTestScript = false;
+bool _debugTestScript = true;
 
 /// Runs one test.
 ///
@@ -219,6 +219,7 @@ class TestRunner with IOMixin {
       }
 
       if (exceptionBuffer.isNotEmpty) {
+        print('throwing exception because buffer has content');
         throw Exception(exceptionBuffer.toString());
       }
     }
