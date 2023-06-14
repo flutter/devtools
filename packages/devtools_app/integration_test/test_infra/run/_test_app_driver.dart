@@ -9,6 +9,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import '_io_utils.dart';
+import 'run_test.dart';
 
 // Set this to true for debugging to get JSON written to stdout.
 const bool _printDebugOutputToStdOut = false;
@@ -16,7 +17,7 @@ const bool _printDebugOutputToStdOut = false;
 class TestFlutterApp extends _TestApp {
   TestFlutterApp({
     String appPath = 'test/test_infra/fixtures/flutter_app',
-    String appDevice = 'flutter-tester',
+    TestAppDevice appDevice = TestAppDevice.flutterTester,
   }) : super(appPath, appDevice);
 
   @override
@@ -27,7 +28,7 @@ class TestFlutterApp extends _TestApp {
         'run',
         '--machine',
         '-d',
-        testAppDevice,
+        testAppDevice.argName,
       ],
       workingDirectory: testAppPath,
     );
@@ -54,7 +55,7 @@ abstract class _TestApp with IOMixin {
   final String testAppPath;
 
   /// The device the test app should run on, e.g. flutter-tester, chrome.
-  final String testAppDevice;
+  final TestAppDevice testAppDevice;
 
   late Process? runProcess;
 

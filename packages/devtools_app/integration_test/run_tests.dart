@@ -26,16 +26,6 @@ const _testDirectory = 'integration_test/test';
 const _testSuffix = '_test.dart';
 const _offlineIndicator = 'integration_test/test/offline';
 
-// A mapping of test app device to the unsupported tests for that device.
-final _unsupportedTestsForDevice = <String, List<String>>{
-  'chrome': [
-    'performance_screen_event_recording_test.dart',
-    'perfetto_test.dart',
-    // TODO(https://github.com/flutter/devtools/issues/5874): Remove once supported on web.
-    'eval_and_browse_test.dart',
-  ],
-};
-
 void main(List<String> testRunnerArgs) async {
   final testTargetProvided = testRunnerArgs
       .where((arg) => arg.startsWith(TestRunnerArgs.testTargetArg))
@@ -48,7 +38,8 @@ void main(List<String> testRunnerArgs) async {
     // of a single file.
     await _runTest(testRunnerArgs, testFilePath);
   } else {
-    final testAppDevice = TestRunnerArgs(testRunnerArgs).testAppDevice;
+    final testAppDevice =
+        TestAppDevice.fromArgName(TestRunnerArgs(testRunnerArgs).testAppDevice);
 
     // Run all tests for the given test app device since a target test was not
     // provided.
@@ -56,10 +47,7 @@ void main(List<String> testRunnerArgs) async {
     final testFiles = testDirectory.listSync(recursive: true).where(
           (testFile) =>
               testFile.path.endsWith(_testSuffix) &&
-              !_isUnsupportedForDevice(
-                testFile.path,
-                testAppDevice: testAppDevice,
-              ),
+              testAppDevice!.supportsTest(testFile.path),
         );
 
     for (final testFile in testFiles) {
@@ -73,14 +61,6 @@ void main(List<String> testRunnerArgs) async {
       );
     }
   }
-}
-
-bool _isUnsupportedForDevice(String testPath, {required String testAppDevice}) {
-  if (testAppDevice == 'flutter-tester') return false;
-  final unsupportedTestsForDevice =
-      _unsupportedTestsForDevice[testAppDevice] ?? [];
-  return unsupportedTestsForDevice
-      .any((unsupportedTestPath) => testPath.endsWith(unsupportedTestPath));
 }
 
 Future<void> _runTest(

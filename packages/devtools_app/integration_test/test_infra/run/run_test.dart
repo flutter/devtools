@@ -35,7 +35,8 @@ Future<void> runFlutterIntegrationTest(
       try {
         testApp = TestFlutterApp(
           appPath: testFileArgs.appPath,
-          appDevice: testRunnerArgs.testAppDevice,
+          appDevice: TestAppDevice.fromArgName(testRunnerArgs.testAppDevice) ??
+              TestAppDevice.flutterTester,
         );
         await testApp.start();
       } catch (e) {
@@ -313,4 +314,45 @@ class TestRunnerArgs {
   /// Whether this integration test should be run on the 'web-server' device
   /// instead of 'chrome'.
   late final bool headless;
+}
+
+enum TestAppDevice {
+  flutterTester,
+  chrome;
+
+  /// A mapping of test app device to the unsupported tests for that device.
+  static final _unsupportedTestsForDevice = <TestAppDevice, List<String>>{
+    TestAppDevice.flutterTester: [],
+    TestAppDevice.chrome: [
+      'performance_screen_event_recording_test.dart',
+      'perfetto_test.dart',
+      // TODO(https://github.com/flutter/devtools/issues/5874): Remove once supported on web.
+      'eval_and_browse_test.dart',
+    ],
+  };
+
+  static final _argNameToDeviceMap =
+      TestAppDevice.values.fold(<String, TestAppDevice>{}, (map, device) {
+    map[device.argName] = device;
+    return map;
+  });
+
+  static TestAppDevice? fromArgName(String argName) {
+    return _argNameToDeviceMap[argName];
+  }
+
+  String get argName {
+    switch (this) {
+      case flutterTester:
+        return 'flutter-tester';
+      case chrome:
+        return 'chrome';
+    }
+  }
+
+  bool supportsTest(String testPath) {
+    final unsupportedTests = _unsupportedTestsForDevice[this] ?? [];
+    return unsupportedTests
+        .none((unsupportedTestPath) => testPath.endsWith(unsupportedTestPath));
+  }
 }
