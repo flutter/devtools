@@ -2,15 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:devtools_app/devtools_app.dart';
-import 'package:devtools_app/src/service/service_extensions.dart' as extensions;
-import 'package:devtools_app/src/shared/eval_on_dart_library.dart';
 import 'package:devtools_test/devtools_integration_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
-import 'package:vm_service/vm_service.dart';
 
 // To run:
 // dart run integration_test/run_tests.dart --target=integration_test/test/live_connection/service_connection_test.dart
