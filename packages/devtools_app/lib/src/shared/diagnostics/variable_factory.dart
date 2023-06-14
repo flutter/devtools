@@ -302,7 +302,7 @@ List<DartObjectNode> createVariablesForRegExp(
 
 Future<DartObjectNode> _buildVariable(
   RemoteDiagnosticsNode diagnostic,
-  ObjectGroupApi<RemoteDiagnosticsNode> objectGroup,
+  InspectorObjectGroupApi<RemoteDiagnosticsNode> objectGroup,
   IsolateRef? isolateRef,
 ) async {
   final instanceRef =
@@ -316,7 +316,7 @@ Future<DartObjectNode> _buildVariable(
 }
 
 Future<List<DartObjectNode>> createVariablesForDiagnostics(
-  ObjectGroupApi<RemoteDiagnosticsNode> objectGroupApi,
+  InspectorObjectGroupApi<RemoteDiagnosticsNode> objectGroupApi,
   List<RemoteDiagnosticsNode> diagnostics,
   IsolateRef isolateRef,
 ) async {

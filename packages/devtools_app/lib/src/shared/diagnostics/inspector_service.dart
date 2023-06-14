@@ -81,8 +81,8 @@ abstract class InspectorServiceBase extends DisposableController
   /// directories of the app's package.
   bool isLocalClass(RemoteDiagnosticsNode node);
 
-  /// Returns a new [ObjectGroupBase] with the given group name.
-  ObjectGroupBase createObjectGroup(String debugName);
+  /// Returns a new [InspectorObjectGroupBase] with the given group name.
+  InspectorObjectGroupBase createObjectGroup(String debugName);
 
   bool get isDisposed => _isDisposed;
   bool _isDisposed = false;
@@ -585,8 +585,9 @@ class InspectorService extends InspectorServiceBase {
 }
 
 /// This class has additional descenders in Google3.
-abstract class ObjectGroupBase extends ObjectGroupApi<RemoteDiagnosticsNode> {
-  ObjectGroupBase(
+abstract class InspectorObjectGroupBase
+    extends InspectorObjectGroupApi<RemoteDiagnosticsNode> {
+  InspectorObjectGroupBase(
     String debugName,
   ) : groupName = '${debugName}_${InspectorServiceBase.nextGroupId}' {
     InspectorServiceBase.nextGroupId++;
@@ -1042,8 +1043,6 @@ abstract class ObjectGroupBase extends ObjectGroupApi<RemoteDiagnosticsNode> {
         throw UnimplementedError(
           'getSourcePosition not implemented. $location',
         );
-        // return inspectorLibrary.getSourcePosition(
-        // debugProcess, location.script, location.tokenPos, this);
       }
     }
     final ClassRef? superClass = clazz.superClass;
@@ -1153,7 +1152,7 @@ abstract class ObjectGroupBase extends ObjectGroupApi<RemoteDiagnosticsNode> {
 /// After dispose is called, all pending requests made with the ObjectGroup
 /// will be skipped. This means that clients should not have to write any
 /// special logic to handle orphaned requests.
-class ObjectGroup extends ObjectGroupBase {
+class ObjectGroup extends InspectorObjectGroupBase {
   ObjectGroup(
     String debugName,
     this.inspectorService,

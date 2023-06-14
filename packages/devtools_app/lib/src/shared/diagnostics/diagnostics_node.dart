@@ -94,7 +94,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
 
   /// Service used to retrieve more detailed information about the value of
   /// the property and its children and properties.
-  final ObjectGroupApi<RemoteDiagnosticsNode>? objectGroupApi;
+  final InspectorObjectGroupApi<RemoteDiagnosticsNode>? objectGroupApi;
 
   /// JSON describing the diagnostic node.
   final Map<String, Object?> json;
@@ -624,7 +624,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   }
 
   Future<List<RemoteDiagnosticsNode>> getProperties(
-    ObjectGroupApi<RemoteDiagnosticsNode> objectGroup,
+    InspectorObjectGroupApi<RemoteDiagnosticsNode> objectGroup,
   ) async {
     return await objectGroup.getProperties(dartDiagnosticRef);
   }

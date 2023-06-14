@@ -82,7 +82,7 @@ Future<void> _addDiagnosticChildrenIfNeeded(
   if (diagnostic == null || !includeDiagnosticChildren) return;
 
   // Always add children last after properties to avoid confusion.
-  final ObjectGroupApi<RemoteDiagnosticsNode>? service =
+  final InspectorObjectGroupApi<RemoteDiagnosticsNode>? service =
       diagnostic.objectGroupApi;
   final diagnosticChildren = await diagnostic.children;
   if (diagnosticChildren != null && diagnosticChildren.isNotEmpty) {
@@ -328,7 +328,7 @@ Future<void> _addInspectorItems(variable, IsolateRef? isolateRef) async {
   final inspectorService = serviceManager.inspectorService;
   if (inspectorService != null) {
     final tasks = <Future>[];
-    ObjectGroupBase? group;
+    InspectorObjectGroupBase? group;
     Future<void> maybeUpdateRef(DartObjectNode child) async {
       final childRef = child.ref;
       if (childRef == null) return;
