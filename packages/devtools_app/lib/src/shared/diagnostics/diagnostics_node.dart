@@ -576,7 +576,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
 
   Future<List<RemoteDiagnosticsNode>> _getChildrenHelper() {
     return inspectorService!.getChildren(
-      dartDiagnosticRef,
+      valueRef,
       isSummaryTree,
       this,
     );
@@ -622,7 +622,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   Future<List<RemoteDiagnosticsNode>> getProperties(
     ObjectGroupBase objectGroup,
   ) async {
-    return await objectGroup.getProperties(dartDiagnosticRef);
+    return await objectGroup.getProperties(valueRef);
   }
 
   Widget? get icon {
