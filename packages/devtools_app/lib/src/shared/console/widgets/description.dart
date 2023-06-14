@@ -186,7 +186,7 @@ class DiagnosticsNodeDescription extends StatelessWidget {
     return HoverCardTooltip.async(
       enabled: () =>
           preferences.inspector.hoverEvalModeEnabled.value &&
-          diagnosticLocal.inspectorService != null,
+          diagnosticLocal.objectGroupApi != null,
       asyncGenerateHoverCardData: ({
         required event,
         required isHoverStale,

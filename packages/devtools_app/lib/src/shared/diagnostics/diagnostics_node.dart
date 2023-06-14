@@ -12,7 +12,7 @@ import 'package:vm_service/vm_service.dart';
 import '../primitives/enum_utils.dart';
 import '../primitives/utils.dart';
 import '../ui/icons.dart';
-import 'inspector_service.dart';
+import 'object_group_api.dart';
 import 'primitives/instance_ref.dart';
 import 'primitives/source_location.dart';
 
@@ -41,7 +41,7 @@ final treeStyleUtils =
 class RemoteDiagnosticsNode extends DiagnosticableTree {
   RemoteDiagnosticsNode(
     this.json,
-    this.inspectorService,
+    this.objectGroupApi,
     this.isProperty,
     this.parent,
   );
@@ -94,7 +94,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
 
   /// Service used to retrieve more detailed information about the value of
   /// the property and its children and properties.
-  final ObjectGroupBase? inspectorService;
+  final InspectorObjectGroupApi<RemoteDiagnosticsNode>? objectGroupApi;
 
   /// JSON describing the diagnostic node.
   final Map<String, Object?> json;
@@ -118,7 +118,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
     if (data == null) return null;
     _renderObject = RemoteDiagnosticsNode(
       data as Map<String, Object?>? ?? {},
-      inspectorService,
+      objectGroupApi,
       false,
       null,
     );
@@ -132,7 +132,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
     if (data == null) return null;
     _parentRenderElement = RemoteDiagnosticsNode(
       data as Map<String, Object?>? ?? {},
-      inspectorService,
+      objectGroupApi,
       false,
       null,
     );
@@ -156,9 +156,9 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
       );
 
   bool get isLocalClass {
-    final objectGroup = inspectorService;
-    if (objectGroup is ObjectGroupBase) {
-      return _isLocalClass ??= objectGroup.inspectorService.isLocalClass(this);
+    final objectGroup = objectGroupApi;
+    if (objectGroup != null) {
+      return _isLocalClass ??= objectGroup.isLocalClass(this);
     } else {
       // TODO(jacobr): if objectGroup is a Future<ObjectGroup> we cannot compute
       // whether classes are local as for convenience we need this method to
@@ -487,7 +487,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
       }
       if (isEnumProperty()) {
         // Populate all the enum property values.
-        return inspectorService?.getEnumPropertyValues(valueRef);
+        return objectGroupApi?.getEnumPropertyValues(valueRef);
       }
 
       List<String> propertyNames;
@@ -504,7 +504,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
           return _valueProperties = Future.value();
       }
       _valueProperties =
-          inspectorService?.getDartObjectProperties(valueRef, propertyNames);
+          objectGroupApi?.getDartObjectProperties(valueRef, propertyNames);
     }
     return _valueProperties;
   }
@@ -574,7 +574,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   }
 
   Future<List<RemoteDiagnosticsNode>> _getChildrenHelper() {
-    return inspectorService!.getChildren(
+    return objectGroupApi!.getChildren(
       dartDiagnosticRef,
       isSummaryTree,
       this,
@@ -591,7 +591,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
       final nodes = <RemoteDiagnosticsNode>[];
       for (var element in jsonArray!.cast<Map<String, Object?>>()) {
         final child =
-            RemoteDiagnosticsNode(element, inspectorService, false, parent);
+            RemoteDiagnosticsNode(element, objectGroupApi, false, parent);
         child.parent = this;
         nodes.add(child);
       }
@@ -615,7 +615,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
         final jsonArray = json['properties'] as List<Object?>;
         for (var element in jsonArray.cast<Map<String, Object?>>()) {
           cachedProperties!.add(
-            RemoteDiagnosticsNode(element, inspectorService, true, parent),
+            RemoteDiagnosticsNode(element, objectGroupApi, true, parent),
           );
         }
       }
@@ -624,7 +624,7 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   }
 
   Future<List<RemoteDiagnosticsNode>> getProperties(
-    ObjectGroupBase objectGroup,
+    InspectorObjectGroupApi<RemoteDiagnosticsNode> objectGroup,
   ) async {
     return await objectGroup.getProperties(dartDiagnosticRef);
   }
@@ -696,8 +696,8 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   }
 
   Future<void> setSelectionInspector(bool uiAlreadyUpdated) async {
-    final objectGroup = inspectorService;
-    if (objectGroup is ObjectGroup) {
+    final objectGroup = objectGroupApi;
+    if (objectGroup != null && objectGroup.canSetSelectionInspector) {
       await objectGroup.setSelectionInspector(valueRef, uiAlreadyUpdated);
     }
   }
