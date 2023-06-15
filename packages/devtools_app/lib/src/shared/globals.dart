@@ -59,3 +59,10 @@ EvalService get evalService => globals[EvalService] as EvalService;
 void setGlobal(Type clazz, Object instance) {
   globals[clazz] = instance;
 }
+
+/// Whether DevTools is being run in integration test mode.
+bool get integrationTestMode => _integrationTestMode;
+bool _integrationTestMode = false;
+void setIntegrationTestMode() {
+  _integrationTestMode = true;
+}

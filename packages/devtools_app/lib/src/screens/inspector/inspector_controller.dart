@@ -787,7 +787,7 @@ class InspectorController extends DisposableController
   Future<void> _addNodeToConsole(InspectorTreeNode node) async {
     final valueRef = node.diagnostic!.valueRef;
     final isolateRef = inspectorService.isolateRef;
-    final instanceRef = await node.diagnostic!.inspectorService
+    final instanceRef = await node.diagnostic!.objectGroupApi
         ?.toObservatoryInstanceRef(valueRef);
     if (_disposed) return;
 
