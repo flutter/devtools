@@ -297,7 +297,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
   Map<String, UrlParametersBuilder> get _standaloneScreens {
     return {
       for (final type in StandaloneScreenType.values)
-        type.name: (_, __, args, ___) => type.screen,
+        type.name: (_, __, args, ___) => type.build(embedded: isEmbedded(args)),
     };
   }
 

@@ -24,9 +24,9 @@ enum StandaloneScreenType {
     return null;
   }
 
-  Widget get screen {
+  Widget Function({required bool embedded, Key? key}) get build {
     return switch (this) {
-      StandaloneScreenType.vsCodeFlutterPanel => const VsCodeFlutterPanel(),
+      StandaloneScreenType.vsCodeFlutterPanel => VsCodeFlutterPanel.new,
     };
   }
 }
