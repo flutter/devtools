@@ -64,7 +64,7 @@ Future<void> runFlutterIntegrationTest(
   Exception? exception;
   try {
     await testRunner.run(
-      testRunnerArgs.testTarget!,
+      testRunnerArgs.testTarget,
       enableExperiments: testFileArgs.experimentsOn,
       updateGoldens: testRunnerArgs.updateGoldens,
       headless: testRunnerArgs.headless,
@@ -278,7 +278,11 @@ class TestRunnerArgs {
     final argWithTestTarget =
         args.firstWhereOrNull((arg) => arg.startsWith(testTargetArg));
     final target = argWithTestTarget?.substring(testTargetArg.length);
-    testTarget = target;
+    assert(
+      target != null,
+      'Please specify a test target (e.g. ${testTargetArg}path/to/test.dart',
+    );
+    testTarget = target!;
 
     final argWithTestAppUri =
         args.firstWhereOrNull((arg) => arg.startsWith(testAppUriArg));
@@ -299,7 +303,7 @@ class TestRunnerArgs {
   static const updateGoldensArg = '--update-goldens';
   static const headlessArg = '--headless';
 
-  late final String? testTarget;
+  late final String testTarget;
 
   /// The Vm Service URI for the test app to connect devtools to.
   ///
@@ -318,8 +322,12 @@ class TestRunnerArgs {
 }
 
 enum TestAppDevice {
-  flutterTester,
-  chrome;
+  flutterTester('flutter-tester'),
+  chrome('chrome');
+
+  const TestAppDevice(this.argName);
+
+  final String argName;
 
   /// A mapping of test app device to the unsupported tests for that device.
   static final _unsupportedTestsForDevice = <TestAppDevice, List<String>>{
@@ -341,15 +349,6 @@ enum TestAppDevice {
 
   static TestAppDevice? fromArgName(String argName) {
     return _argNameToDeviceMap[argName];
-  }
-
-  String get argName {
-    switch (this) {
-      case flutterTester:
-        return 'flutter-tester';
-      case chrome:
-        return 'chrome';
-    }
   }
 
   bool supportsTest(String testPath) {

@@ -32,23 +32,17 @@ void main(List<String> testRunnerArgs) async {
       .isNotEmpty;
 
   if (testTargetProvided) {
-    final testFilePath = TestRunnerArgs(testRunnerArgs).testTarget!;
+    final testFilePath = TestRunnerArgs(testRunnerArgs).testTarget;
 
     // TODO(kenz): add support for specifying a directory as the target instead
     // of a single file.
     await _runTest(testRunnerArgs, testFilePath);
   } else {
-    final testAppDevice =
-        TestAppDevice.fromArgName(TestRunnerArgs(testRunnerArgs).testAppDevice);
-
-    // Run all tests for the given test app device since a target test was not
-    // provided.
+    // Run all tests since a target test was not provided.
     final testDirectory = Directory(_testDirectory);
-    final testFiles = testDirectory.listSync(recursive: true).where(
-          (testFile) =>
-              testFile.path.endsWith(_testSuffix) &&
-              testAppDevice!.supportsTest(testFile.path),
-        );
+    final testFiles = testDirectory
+        .listSync(recursive: true)
+        .where((testFile) => testFile.path.endsWith(_testSuffix));
 
     for (final testFile in testFiles) {
       final testTarget = testFile.path;
@@ -67,6 +61,13 @@ Future<void> _runTest(
   List<String> testRunnerArgs,
   String testFilePath,
 ) async {
+  final parsedArgs = TestRunnerArgs(testRunnerArgs);
+  final testAppDevice = TestAppDevice.fromArgName(parsedArgs.testAppDevice)!;
+  if (!testAppDevice.supportsTest(testFilePath)) {
+    // Skip test, since it is not supported for device.
+    return;
+  }
+
   await runFlutterIntegrationTest(
     TestRunnerArgs(testRunnerArgs),
     TestFileArgs(testFilePath),
