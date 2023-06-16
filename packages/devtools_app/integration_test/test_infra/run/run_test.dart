@@ -213,7 +213,7 @@ class TestRunner with IOMixin {
 
       // Ignore exception handling and retries if the tests passed. This is to
       // avoid bugs with the test runner where the test can fail after the test
-      // has passed. TODO link bug.
+      // has passed. See https://github.com/flutter/flutter/issues/129041.
       if (!testsPassed) {
         if (testTimedOut) {
           if (attemptNumber >= _maxRetriesOnTimeout) {
