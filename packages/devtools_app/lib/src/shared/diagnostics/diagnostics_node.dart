@@ -15,6 +15,7 @@ import '../ui/icons.dart';
 import 'object_group_api.dart';
 import 'primitives/instance_ref.dart';
 import 'primitives/source_location.dart';
+import 'package:collection/collection.dart';
 
 final diagnosticLevelUtils = EnumUtils<DiagnosticLevel>(DiagnosticLevel.values);
 
@@ -172,12 +173,24 @@ class RemoteDiagnosticsNode extends DiagnosticableTree {
   @override
   bool operator ==(Object other) {
     if (other is! RemoteDiagnosticsNode) return false;
-
-    return json == other.json; // do it smarter!!!
+    return jsonEquality(json, other.json);
   }
 
   @override
-  int get hashCode => throw UnimplementedError(); // like ==
+  int get hashCode => jsonHashCode(json);
+
+  @visibleForTesting
+  static int jsonHashCode(Map<String, dynamic> json) {
+    return const DeepCollectionEquality().hash(json);
+  }
+
+  @visibleForTesting
+  static bool jsonEquality(
+    Map<String, dynamic> json1,
+    Map<String, dynamic> json2,
+  ) {
+    return const DeepCollectionEquality().equals(json1, json2);
+  }
 
   /// Separator text to show between property names and values.
   String get separator => showSeparator ? ':' : '';
