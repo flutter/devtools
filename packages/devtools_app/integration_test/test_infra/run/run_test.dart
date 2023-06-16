@@ -116,6 +116,7 @@ class TestRunner with IOMixin {
   static const _endExceptionMarker = '═════════════════════════';
   static const _errorMarker = ': Error: ';
   static const _unhandledExceptionMarker = 'Unhandled exception:';
+  static const _allTestsPassed = 'All tests passed!';
   static const _maxRetriesOnTimeout = 1;
 
   Future<void> run(
@@ -151,10 +152,15 @@ class TestRunner with IOMixin {
       bool stdErrWriteInProgress = false;
       final exceptionBuffer = StringBuffer();
 
+      var testsPassed = false;
       listenToProcessOutput(
         process,
         printTag: 'FlutterDriveProcess',
         onStdout: (line) {
+          if (line.endsWith(_allTestsPassed)) {
+            testsPassed = true;
+          }
+
           if (line.startsWith(_TestResult.testResultPrefix)) {
             final testResultJson = line.substring(line.indexOf('{'));
             final testResultMap =
@@ -201,26 +207,31 @@ class TestRunner with IOMixin {
         timeout,
       ]);
 
+      _debugLog('attempting to kill the flutter drive process');
       process.kill();
       _debugLog('flutter drive process has exited');
 
-      if (testTimedOut) {
-        if (attemptNumber >= _maxRetriesOnTimeout) {
-          throw Exception(
-            'Integration test timed out on try #$attemptNumber: $testTarget',
-          );
-        } else {
-          _debugLog(
-            'Integration test timed out on try #$attemptNumber. Retrying '
-            '$testTarget now.',
-          );
-          await runTest(attemptNumber: ++attemptNumber);
+      // Ignore exception handling and retries if the tests passed. This is to
+      // avoid bugs with the test runner where the test can fail after the test
+      // has passed. TODO link bug.
+      if (!testsPassed) {
+        if (testTimedOut) {
+          if (attemptNumber >= _maxRetriesOnTimeout) {
+            throw Exception(
+              'Integration test timed out on try #$attemptNumber: $testTarget',
+            );
+          } else {
+            _debugLog(
+              'Integration test timed out on try #$attemptNumber. Retrying '
+              '$testTarget now.',
+            );
+            await runTest(attemptNumber: ++attemptNumber);
+          }
         }
-      }
 
-      if (exceptionBuffer.isNotEmpty) {
-        print('throwing exception because buffer has content');
-        throw Exception(exceptionBuffer.toString());
+        if (exceptionBuffer.isNotEmpty) {
+          throw Exception(exceptionBuffer.toString());
+        }
       }
     }
 

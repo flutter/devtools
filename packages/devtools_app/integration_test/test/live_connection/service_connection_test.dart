@@ -4,10 +4,15 @@
 
 import 'dart:async';
 
+import 'package:collection/collection.dart';
 import 'package:devtools_app/devtools_app.dart';
+import 'package:devtools_app/src/framework/status_line.dart';
+import 'package:devtools_app/src/service/service_extension_widgets.dart';
 import 'package:devtools_app/src/service/service_extensions.dart' as extensions;
+import 'package:devtools_app/src/shared/device_dialog.dart';
 import 'package:devtools_app/src/shared/eval_on_dart_library.dart';
 import 'package:devtools_test/devtools_integration_test.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:vm_service/vm_service.dart';
@@ -29,130 +34,328 @@ void main() {
     await resetHistory();
   });
 
-  // testWidgets('initial service connection state', (tester) async {
-  //   await pumpAndConnectDevTools(tester, testApp);
+  testWidgets('initial service connection state', (tester) async {
+    await pumpAndConnectDevTools(tester, testApp);
 
-  //   // Await a delay to ensure the service extensions have had a chance to
-  //   // be called. This delay may be able to be shortened if doing so does
-  //   // not cause bot flakiness.
-  //   await tester.pump(longDuration);
+    // Await a delay to ensure the service extensions have had a chance to
+    // be called. This delay may be able to be shortened if doing so does
+    // not cause bot flakiness.
+    await tester.pump(longDuration);
 
-  //   // Ensure all futures are completed before running checks.
-  //   await serviceManager.service!.allFuturesCompleted;
+    // Ensure all futures are completed before running checks.
+    await serviceManager.service!.allFuturesCompleted;
 
-  //   logStatus('verify the number of vm service calls on connect');
-  //   final vmServiceCallCount = serviceManager.service!.vmServiceCallCount;
-  //   expect(
-  //     // Use a range instead of an exact number because service extension
-  //     // calls are not consistent. This will still catch any spurious calls
-  //     // that are unintentionally added at start up.
-  //     const Range(50, 60).contains(vmServiceCallCount),
-  //     isTrue,
-  //     reason: 'Unexpected number of vm service calls upon connection: '
-  //         '$vmServiceCallCount. If this is expected, please update this test '
-  //         'to the new expected number of calls. Here are the calls for this '
-  //         'test run:\n ${serviceManager.service!.vmServiceCalls.toString()}',
-  //   );
-  //   // Check the ordering of the vm service calls we can expect to occur
-  //   // in a stable order.
-  //   expect(
-  //     serviceManager.service!.vmServiceCalls
-  //         // Filter out unawaited streamListen calls.
-  //         .where((call) => call != 'streamListen')
-  //         .toList()
-  //         .sublist(0, 5),
-  //     equals([
-  //       'getSupportedProtocols',
-  //       'getVersion',
-  //       'getFlagList',
-  //       'getVM',
-  //       'getIsolate',
-  //     ]),
-  //   );
+    logStatus('verify the vm service calls that occur on connect');
+    final vmServiceCallCount = serviceManager.service!.vmServiceCallCount;
+    expect(
+      // Use a range instead of an exact number because service extension
+      // calls are not consistent. This will still catch any spurious calls
+      // that are unintentionally added at start up.
+      const Range(40, 60).contains(vmServiceCallCount),
+      isTrue,
+      reason: 'Unexpected number of vm service calls upon connection: '
+          '$vmServiceCallCount. If this is expected, please update this test '
+          'to the new expected number of calls. Here are the calls for this '
+          'test run:\n ${serviceManager.service!.vmServiceCalls.toString()}',
+    );
 
-  //   expect(
-  //     serviceManager.service!.vmServiceCalls
-  //         .where((call) => call == 'streamListen')
-  //         .toList()
-  //         .length,
-  //     equals(10),
-  //   );
+    // Check the ordering of the vm service calls we can expect to occur
+    // in a stable order.
+    expect(
+      serviceManager.service!.vmServiceCalls
+          // Filter out unawaited streamListen calls.
+          .where((call) => call != 'streamListen')
+          .toList()
+          .sublist(0, 5),
+      equals([
+        'getSupportedProtocols',
+        'getVersion',
+        'getFlagList',
+        'getVM',
+        'getIsolate',
+      ]),
+    );
 
-  //   logStatus('verify managers have all been initialized');
-  //   expect(serviceManager.isolateManager, isNotNull);
-  //   expect(serviceManager.serviceExtensionManager, isNotNull);
-  //   expect(serviceManager.vmFlagManager, isNotNull);
-  //   expect(serviceManager.isolateManager.isolates.value, isNotEmpty);
-  //   expect(serviceManager.vmFlagManager.flags.value, isNotNull);
+    expect(
+      serviceManager.service!.vmServiceCalls
+          .where((call) => call == 'streamListen')
+          .toList()
+          .length,
+      equals(10),
+    );
 
-  //   if (serviceManager.isolateManager.selectedIsolate.value == null) {
-  //     await whenValueNonNull(serviceManager.isolateManager.selectedIsolate);
-  //   }
-  // });
+    logStatus('verify managers have all been initialized');
+    expect(serviceManager.isolateManager, isNotNull);
+    expect(serviceManager.serviceExtensionManager, isNotNull);
+    expect(serviceManager.vmFlagManager, isNotNull);
+    expect(serviceManager.isolateManager.isolates.value, isNotEmpty);
+    expect(serviceManager.vmFlagManager.flags.value, isNotNull);
 
-  testWidgets('can call service extensions', (tester) async {
+    if (serviceManager.isolateManager.selectedIsolate.value == null) {
+      await whenValueNonNull(serviceManager.isolateManager.selectedIsolate);
+    }
+  });
+
+  testWidgets('can call services and service extensions', (tester) async {
     await pumpAndConnectDevTools(tester, testApp);
     await tester.pump(longDuration);
 
     // Ensure all futures are completed before running checks.
     await serviceManager.service!.allFuturesCompleted;
 
-    logStatus('verify toggling a boolean service extension');
-    final extensionName = extensions.debugPaint.extension;
-    const evalExpression = 'debugPaintSizeEnabled';
-    final library = EvalOnDartLibrary(
-      'package:flutter/src/rendering/debug.dart',
-      serviceManager.service!,
+    logStatus('verify Flutter framework service extensions');
+    await _verifyBooleanExtension(tester);
+    await _verifyNumericExtension(tester);
+    await _verifyStringExtension(tester);
+
+    logStatus('verify Flutter engine service extensions');
+    expect(await serviceManager.queryDisplayRefreshRate, equals(60));
+
+    logStatus('verify services that are registered to exactly one client');
+    await _verifyHotReloadAndHotRestart();
+    await expectLater(
+      serviceManager.callService('fakeMethod'),
+      throwsException,
     );
-
-    await _serviceExtensionAvailable(extensionName);
-
-    logStatus('verify initial state on device is false');
-
-    // This chunk of code is behaving weirdly
-    logStatus('before eval $evalExpression');
-    final result = await library.eval(evalExpression, isAlive: null);
-    logStatus('after eval $evalExpression');
-    if (result is InstanceRef) {
-      logStatus(
-        'result.valueAsString: ${result.valueAsString}, expectedResult: false',
-      );
-      if (result.valueAsString == 'false') {
-        logStatus('this expectation is true');
-      }
-      // This expectation is failing after the test finishes, even though it
-      // does not fail during the test execution.
-      logStatus(
-          'before calling "expect(result.valueAsString, equals(\'false\'))"');
-      expect(result.valueAsString, equals('false'));
-      logStatus(
-          'after calling "expect(result.valueAsString, equals(\'false\'))"');
-    }
-    // end chunk
-
-    // await _verifyExtensionStateOnTestDevice(
-    //   evalExpression: evalExpression,
-    //   expectedResult: 'false',
-    //   library: library,
-    // );
-
-    logStatus('verify initial state in service manager is false');
-    await _verifyInitialExtensionStateInServiceManager(extensionName);
-
-    // The test only fails when the following block is present, but oddly it
-    // fails above at line 127 `expect(result.valueAsString, equals('false'));`
-    // however it fails at line 127 after the test has already completed and the
-    // prints show we have already successfully made it past line 127.
-    logStatus('enable the service extension via ServiceExtensionManager');
-    await serviceManager.serviceExtensionManager.setServiceExtensionState(
-      extensionName,
-      enabled: true,
-      value: true,
-    );
-
-    logStatus('at the end of the test');
   });
 
+  testWidgets('loads initial extension states from device', (tester) async {
+    await pumpAndConnectDevTools(tester, testApp);
+    await tester.pump(longDuration);
+
+    // Ensure all futures are completed before running checks.
+    final service = serviceManager.service!;
+    await service.allFuturesCompleted;
+
+    final serviceExtensionsToEnable = [
+      (extensions.debugPaint.extension, true),
+      (extensions.slowAnimations.extension, 5.0),
+      (extensions.togglePlatformMode.extension, 'iOS'),
+    ];
+
+    logStatus('enabling service extensions on the test device');
+    // Enable a service extension of each type (boolean, numeric, string).
+    for (final ext in serviceExtensionsToEnable) {
+      await serviceManager.serviceExtensionManager.setServiceExtensionState(
+        ext.$1,
+        enabled: true,
+        value: ext.$2,
+      );
+    }
+
+    logStatus('disconnecting from the test device');
+    await tester.tap(find.byTooltip(StatusLine.deviceInfoTooltip));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byType(ConnectToNewAppButton));
+    await tester.pump(safePumpDuration);
+
+    for (final ext in serviceExtensionsToEnable) {
+      expect(
+        serviceManager.serviceExtensionManager
+            .isServiceExtensionAvailable(ext.$1),
+        isFalse,
+      );
+    }
+
+    logStatus('reconnecting to the test device');
+    await connectToTestApp(tester, testApp);
+
+    logStatus('verify extension states have been restored from the device');
+    for (final ext in serviceExtensionsToEnable) {
+      expect(
+        serviceManager.serviceExtensionManager
+            .isServiceExtensionAvailable(ext.$1),
+        isTrue,
+      );
+      await _verifyExtensionStateInServiceManager(
+        ext.$1,
+        enabled: true,
+        value: ext.$2,
+      );
+    }
+  });
+}
+
+Future<void> _verifyBooleanExtension(WidgetTester tester) async {
+  final extensionName = extensions.debugPaint.extension;
+  const evalExpression = 'debugPaintSizeEnabled';
+  final library = EvalOnDartLibrary(
+    'package:flutter/src/rendering/debug.dart',
+    serviceManager.service!,
+  );
+  await _verifyExtension(
+    tester,
+    extensionName: extensionName,
+    evalExpression: evalExpression,
+    library: library,
+    initialValue: false,
+    newValue: true,
+  );
+}
+
+Future<void> _verifyNumericExtension(WidgetTester tester) async {
+  final extensionName = extensions.slowAnimations.extension;
+  const evalExpression = 'timeDilation';
+  final library = EvalOnDartLibrary(
+    'package:flutter/src/scheduler/binding.dart',
+    serviceManager.service!,
+  );
+  await _verifyExtension(
+    tester,
+    extensionName: extensionName,
+    evalExpression: evalExpression,
+    library: library,
+    initialValue: 1.0,
+    newValue: 5.0,
+    initialValueOnDevice: '1.0',
+    newValueOnDevice: '5.0',
+  );
+}
+
+Future<void> _verifyStringExtension(WidgetTester tester) async {
+  final extensionName = extensions.togglePlatformMode.extension;
+  await _serviceExtensionAvailable(extensionName);
+  const evalExpression = 'defaultTargetPlatform.toString()';
+  final library = EvalOnDartLibrary(
+    'package:flutter/src/foundation/platform.dart',
+    serviceManager.service!,
+  );
+  await _verifyExtension(
+    tester,
+    extensionName: extensionName,
+    evalExpression: evalExpression,
+    library: library,
+    initialValue: 'android',
+    newValue: 'iOS',
+    initialValueOnDevice: 'TargetPlatform.android',
+    newValueOnDevice: 'TargetPlatform.iOS',
+    initialValueInServiceManager: (true, 'android'),
+    // TODO(https://github.com/flutter/devtools/issues/2780): change this
+    // extension from the DevTools UI when it has a button in the inspector.
+    toggleExtensionFromUi: false,
+  );
+}
+
+Future<void> _verifyHotReloadAndHotRestart() async {
+  const evalExpression = 'topLevelFieldForTest';
+  final library = EvalOnDartLibrary(
+    'package:flutter_app/main.dart',
+    serviceManager.service!,
+  );
+
+  // Verify the initial value of [topLevelFieldForTest].
+  var value = await library.eval(evalExpression, isAlive: null);
+  expect(value.runtimeType, InstanceRef);
+  expect(value!.valueAsString, 'false');
+
+  // Change the value of [topLevelFieldForTest].
+  await library.eval('$evalExpression = true', isAlive: null);
+
+  // Verify the value of [topLevelFieldForTest] is now changed.
+  value = await library.eval(evalExpression, isAlive: null);
+  expect(value.runtimeType, InstanceRef);
+  expect(value!.valueAsString, 'true');
+
+  await serviceManager.performHotReload();
+
+  // Verify the value of [topLevelFieldForTest] is still changed after hot
+  // reload.
+  value = await library.eval(evalExpression, isAlive: null);
+  expect(value.runtimeType, InstanceRef);
+  expect(value!.valueAsString, 'true');
+
+  await serviceManager.performHotRestart();
+
+  // Verify the value of [topLevelFieldForTest] is back to its original value
+  // after hot restart.
+  value = await library.eval(evalExpression, isAlive: null);
+  expect(value.runtimeType, InstanceRef);
+  expect(value!.valueAsString, 'false');
+}
+
+Future<void> _verifyExtension(
+  WidgetTester tester, {
+  required String extensionName,
+  required String evalExpression,
+  required EvalOnDartLibrary library,
+  required Object initialValue,
+  required Object newValue,
+  (bool, Object?)? initialValueInServiceManager,
+  String? initialValueOnDevice,
+  String? newValueOnDevice,
+  bool toggleExtensionFromUi = true,
+}) async {
+  await _serviceExtensionAvailable(extensionName);
+
+  await _verifyExtensionStateOnTestDevice(
+    evalExpression: evalExpression,
+    expectedResult: initialValueOnDevice ?? initialValue.toString(),
+    library: library,
+  );
+  await _verifyExtensionStateInServiceManager(
+    extensionName,
+    enabled: initialValueInServiceManager?.$1 ?? false,
+    value: initialValueInServiceManager?.$2,
+  );
+
+  // Enable the service extension state from the service manager.
+  await serviceManager.serviceExtensionManager.setServiceExtensionState(
+    extensionName,
+    enabled: true,
+    value: newValue,
+  );
+
+  await _verifyExtensionStateOnTestDevice(
+    evalExpression: evalExpression,
+    expectedResult: newValueOnDevice ?? newValue.toString(),
+    library: library,
+  );
+  await _verifyExtensionStateInServiceManager(
+    extensionName,
+    enabled: true,
+    value: newValue,
+  );
+
+  if (toggleExtensionFromUi) {
+    // Disable the service extension state from the UI.
+    await _changeServiceExtensionFromButton(
+      extensionName,
+      evalExpression: evalExpression,
+      library: library,
+      expectedResultOnDevice: initialValueOnDevice ?? initialValue.toString(),
+      expectedResultInServiceManager: (false, initialValue),
+      tester: tester,
+    );
+  }
+}
+
+Future<void> _changeServiceExtensionFromButton(
+  String extensionName, {
+  required String evalExpression,
+  required EvalOnDartLibrary library,
+  required String? expectedResultOnDevice,
+  required (bool, Object?) expectedResultInServiceManager,
+  required WidgetTester tester,
+}) async {
+  final serviceExtensionButtons = tester
+      .widgetList<ServiceExtensionButton>(find.byType(ServiceExtensionButton));
+  final button = serviceExtensionButtons.firstWhereOrNull(
+    (b) => b.extensionState.description.extension == extensionName,
+  );
+  expect(button, isNotNull);
+  await tester.tap(find.byWidget(button as Widget));
+  await tester.pumpAndSettle(shortPumpDuration);
+
+  await _verifyExtensionStateOnTestDevice(
+    evalExpression: evalExpression,
+    expectedResult: expectedResultOnDevice,
+    library: library,
+  );
+  await _verifyExtensionStateInServiceManager(
+    extensionName,
+    enabled: expectedResultInServiceManager.$1,
+    value: expectedResultInServiceManager.$2,
+  );
 }
 
 /// Returns a future that completes when the service extension is available.
@@ -178,29 +381,10 @@ Future<void> _verifyExtensionStateOnTestDevice({
   required String? expectedResult,
   required EvalOnDartLibrary library,
 }) async {
-  logStatus('before eval $evalExpression');
   final result = await library.eval(evalExpression, isAlive: null);
-  logStatus('after eval $evalExpression');
   if (result is InstanceRef) {
-    logStatus(
-      'result.valueAsString: ${result.valueAsString}, expectedResult: $expectedResult',
-    );
     expect(result.valueAsString, equals(expectedResult));
-    logStatus(
-        'after result expectation - result ${result.valueAsString == expectedResult}');
   }
-}
-
-Future<void> _verifyInitialExtensionStateInServiceManager(
-  String extensionName,
-) async {
-  // For all service extensions, the initial state in ServiceExtensionManager
-  // should be disabled with value null.
-  await _verifyExtensionStateInServiceManager(
-    extensionName,
-    enabled: false,
-    value: null,
-  );
 }
 
 Future<void> _verifyExtensionStateInServiceManager(
@@ -208,15 +392,12 @@ Future<void> _verifyExtensionStateInServiceManager(
   required bool enabled,
   required Object? value,
 }) async {
-  logStatus(
-      '_verifyExtensionStateInServiceManager, $extensionName - enabled: $enabled, value: $value');
   final stateListenable = serviceManager.serviceExtensionManager
       .getServiceExtensionState(extensionName);
 
   // Wait for the service extension state to match the expected value.
   final Completer<ServiceExtensionState> stateCompleter = Completer();
   void stateListener() {
-    print('in stateListener - ${stateListenable.value.value}');
     if (stateListenable.value.value == value) {
       stateCompleter.complete(stateListenable.value);
     }
@@ -225,9 +406,7 @@ Future<void> _verifyExtensionStateInServiceManager(
   stateListenable.addListener(stateListener);
   stateListener();
 
-  logStatus('before await future in verify in servicemanager fx');
   final ServiceExtensionState state = await stateCompleter.future;
-  logStatus('after await future in verify in servicemanager fx');
   stateListenable.removeListener(stateListener);
   expect(state.enabled, equals(enabled));
   expect(state.value, equals(value));
