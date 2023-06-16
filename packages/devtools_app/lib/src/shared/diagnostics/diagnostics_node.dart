@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -15,7 +16,6 @@ import '../ui/icons.dart';
 import 'object_group_api.dart';
 import 'primitives/instance_ref.dart';
 import 'primitives/source_location.dart';
-import 'package:collection/collection.dart';
 
 final diagnosticLevelUtils = EnumUtils<DiagnosticLevel>(DiagnosticLevel.values);
 
