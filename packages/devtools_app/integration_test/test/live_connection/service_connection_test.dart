@@ -94,6 +94,8 @@ void main() {
     if (serviceManager.isolateManager.selectedIsolate.value == null) {
       await whenValueNonNull(serviceManager.isolateManager.selectedIsolate);
     }
+
+    await disconnectFromTestApp(tester);
   });
 
   testWidgets('can call services and service extensions', (tester) async {
@@ -117,6 +119,8 @@ void main() {
       serviceManager.callService('fakeMethod'),
       throwsException,
     );
+
+    await disconnectFromTestApp(tester);
   });
 
   testWidgets('loads initial extension states from device', (tester) async {
@@ -144,10 +148,7 @@ void main() {
     }
 
     logStatus('disconnecting from the test device');
-    await tester.tap(find.byTooltip(StatusLine.deviceInfoTooltip));
-    await tester.pumpAndSettle();
-    await tester.tap(find.byType(ConnectToNewAppButton));
-    await tester.pump(safePumpDuration);
+    await disconnectFromTestApp(tester);
 
     for (final ext in serviceExtensionsToEnable) {
       expect(
@@ -173,6 +174,8 @@ void main() {
         value: ext.$2,
       );
     }
+
+    await disconnectFromTestApp(tester);
   });
 }
 
