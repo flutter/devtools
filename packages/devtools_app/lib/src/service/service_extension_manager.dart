@@ -447,7 +447,6 @@ class ServiceExtensionManager extends Disposer {
     bool callExtension = true,
   }) async {
     if (callExtension && _serviceExtensions.contains(name)) {
-      print('calling the service extension $name');
       await _callServiceExtension(name, value);
     } else if (callExtension) {
       _log.info(
