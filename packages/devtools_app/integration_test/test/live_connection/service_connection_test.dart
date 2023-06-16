@@ -6,10 +6,8 @@ import 'dart:async';
 
 import 'package:collection/collection.dart';
 import 'package:devtools_app/devtools_app.dart';
-import 'package:devtools_app/src/framework/status_line.dart';
 import 'package:devtools_app/src/service/service_extension_widgets.dart';
 import 'package:devtools_app/src/service/service_extensions.dart' as extensions;
-import 'package:devtools_app/src/shared/device_dialog.dart';
 import 'package:devtools_app/src/shared/eval_on_dart_library.dart';
 import 'package:devtools_test/devtools_integration_test.dart';
 import 'package:flutter/widgets.dart';
