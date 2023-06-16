@@ -32,11 +32,11 @@ void main(List<String> testRunnerArgs) async {
       .isNotEmpty;
 
   if (testTargetProvided) {
-    final testFilePath = TestRunnerArgs(testRunnerArgs).testTarget;
+    final args = TestRunnerArgs(testRunnerArgs);
 
     // TODO(kenz): add support for specifying a directory as the target instead
     // of a single file.
-    await _runTest(testRunnerArgs, testFilePath);
+    await _runTest(args);
   } else {
     // Run all tests since a target test was not provided.
     final testDirectory = Directory(_testDirectory);
@@ -46,31 +46,27 @@ void main(List<String> testRunnerArgs) async {
 
     for (final testFile in testFiles) {
       final testTarget = testFile.path;
-      await _runTest(
-        [
-          ...testRunnerArgs,
-          '${TestRunnerArgs.testTargetArg}$testTarget',
-        ],
-        testTarget,
-      );
+      final args = TestRunnerArgs([
+        ...testRunnerArgs,
+        '${TestRunnerArgs.testTargetArg}$testTarget',
+      ]);
+      await _runTest(args);
     }
   }
 }
 
 Future<void> _runTest(
-  List<String> testRunnerArgs,
-  String testFilePath,
+  TestRunnerArgs testRunnerArgs,
 ) async {
-  final parsedArgs = TestRunnerArgs(testRunnerArgs);
-  final testAppDevice = TestAppDevice.fromArgName(parsedArgs.testAppDevice)!;
-  if (!testAppDevice.supportsTest(testFilePath)) {
+  final testTarget = testRunnerArgs.testTarget;
+  if (!testRunnerArgs.testAppDevice.supportsTest(testTarget)) {
     // Skip test, since it is not supported for device.
     return;
   }
 
   await runFlutterIntegrationTest(
-    TestRunnerArgs(testRunnerArgs),
-    TestFileArgs(testFilePath),
-    offline: testFilePath.startsWith(_offlineIndicator),
+    testRunnerArgs,
+    TestFileArgs(testRunnerArgs.testTarget),
+    offline: testTarget.startsWith(_offlineIndicator),
   );
 }

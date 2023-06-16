@@ -35,8 +35,7 @@ Future<void> runFlutterIntegrationTest(
       try {
         testApp = TestFlutterApp(
           appPath: testFileArgs.appPath,
-          appDevice: TestAppDevice.fromArgName(testRunnerArgs.testAppDevice) ??
-              TestAppDevice.flutterTester,
+          appDevice: testRunnerArgs.testAppDevice,
         );
         await testApp.start();
       } catch (e) {
@@ -290,8 +289,10 @@ class TestRunnerArgs {
 
     final argWithTestAppDevice =
         args.firstWhereOrNull((arg) => arg.startsWith(testAppDeviceArg));
-    testAppDevice = argWithTestAppDevice?.substring(testAppDeviceArg.length) ??
-        'flutter-tester';
+    testAppDevice = TestAppDevice.fromArgName(
+      argWithTestAppDevice?.substring(testAppDeviceArg.length) ??
+          'flutter-tester',
+    )!;
 
     updateGoldens = args.contains(updateGoldensArg);
     headless = args.contains(headlessArg);
@@ -311,7 +312,7 @@ class TestRunnerArgs {
   late final String? testAppUri;
 
   /// The type of device for the test app to run on.
-  late final String testAppDevice;
+  late final TestAppDevice testAppDevice;
 
   /// Whether golden images should be updated with the result of this test run.
   late final bool updateGoldens;
