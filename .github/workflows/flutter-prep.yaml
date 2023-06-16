@@ -44,7 +44,7 @@ jobs:
         id: checkout-pr-branch
         uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9
         with:
-          ref: "${{ github.event.pull_request.sha }}"
+          ref: "${{ github.event.pull_request.head.sha }}"
 
       # Otherwise use the default checkout action.
       - name: Checkout DevTools (default)
