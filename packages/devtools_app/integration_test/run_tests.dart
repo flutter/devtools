@@ -66,7 +66,7 @@ Future<void> _runTest(
 
   await runFlutterIntegrationTest(
     testRunnerArgs,
-    TestFileArgs(testRunnerArgs.testTarget),
+    TestFileArgs(testTarget),
     offline: testTarget.startsWith(_offlineIndicator),
   );
 }
