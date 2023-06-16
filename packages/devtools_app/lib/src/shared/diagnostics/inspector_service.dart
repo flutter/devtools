@@ -1252,7 +1252,7 @@ class ObjectGroup extends InspectorObjectGroupBase {
           isSummaryTree
               ? WidgetInspectorServiceExtensions.getSelectedSummaryWidget.name
               : WidgetInspectorServiceExtensions.getSelectedWidget.name,
-          previousSelectionRef,
+          null,
         );
         break;
     }
