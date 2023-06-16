@@ -14,7 +14,7 @@ import '_in_file_args.dart';
 import '_io_utils.dart';
 import '_test_app_driver.dart';
 
-bool _debugTestScript = true;
+bool _debugTestScript = false;
 
 /// Runs one test.
 ///
