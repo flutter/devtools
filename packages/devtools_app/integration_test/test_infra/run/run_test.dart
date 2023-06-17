@@ -291,7 +291,7 @@ class TestRunnerArgs {
         args.firstWhereOrNull((arg) => arg.startsWith(testAppDeviceArg));
     testAppDevice = TestAppDevice.fromArgName(
       argWithTestAppDevice?.substring(testAppDeviceArg.length) ??
-          'flutter-tester',
+          TestAppDevice.flutterTester.argName,
     )!;
 
     updateGoldens = args.contains(updateGoldensArg);
