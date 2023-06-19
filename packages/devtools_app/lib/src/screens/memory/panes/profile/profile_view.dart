@@ -18,7 +18,7 @@ import '../../../../shared/theme.dart';
 import '../../../../shared/utils.dart';
 import '../../../vm_developer/vm_service_private_extensions.dart';
 import '../../shared/primitives/simple_elements.dart';
-import '../../shared/shared_memory_widgets.dart';
+import '../../shared/widgets/shared_memory_widgets.dart';
 import 'model.dart';
 import 'profile_pane_controller.dart';
 

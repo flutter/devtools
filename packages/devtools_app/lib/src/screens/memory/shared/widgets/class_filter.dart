@@ -6,15 +6,14 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
-import '../../../../../shared/analytics/analytics.dart' as ga;
-import '../../../../../shared/analytics/constants.dart' as gac;
-import '../../../../../shared/common_widgets.dart';
-import '../../../../../shared/dialogs.dart';
-import '../../../../../shared/memory/class_name.dart';
-import '../../../../../shared/theme.dart';
-import '../../../../../shared/utils.dart';
-import '../../../shared/heap/class_filter.dart';
-import '../controller/class_data.dart';
+import '../../../../shared/analytics/analytics.dart' as ga;
+import '../../../../shared/analytics/constants.dart' as gac;
+import '../../../../shared/common_widgets.dart';
+import '../../../../shared/dialogs.dart';
+import '../../../../shared/memory/class_name.dart';
+import '../../../../shared/theme.dart';
+import '../../../../shared/utils.dart';
+import '../heap/class_filter.dart';
 
 String _adaptRootPackageForFilter(String? rootPackage) {
   if (rootPackage == null || rootPackage.isEmpty) return '';
