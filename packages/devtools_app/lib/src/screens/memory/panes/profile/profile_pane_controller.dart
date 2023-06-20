@@ -32,7 +32,8 @@ class ProfilePaneController extends DisposableController
   final _refreshOnGc = ValueNotifier<bool>(false);
 
   /// Current class filter.
-  late final ClassFilterData classFilterData;
+  ValueListenable<ClassFilter> get classFilter => _classFilter;
+  final _classFilter = ValueNotifier(ClassFilter.empty());
 
   bool _initialized = false;
 
@@ -40,12 +41,6 @@ class ProfilePaneController extends DisposableController
     if (_initialized) {
       return;
     }
-
-    final classFilter = ValueNotifier(ClassFilter.empty());
-    classFilterData = ClassFilterData(
-      filter: classFilter,
-      onChanged: (ClassFilter newFilter) => classFilter.value = newFilter,
-    );
 
     autoDisposeStreamSubscription(
       serviceManager.service!.onGCEvent.listen((event) {
@@ -59,6 +54,11 @@ class ProfilePaneController extends DisposableController
     });
     unawaited(refresh());
     _initialized = true;
+  }
+
+  void setFilter(ClassFilter filter) {
+    if (filter.equals(_classFilter.value)) return;
+    _classFilter.value = filter;
   }
 
   @visibleForTesting
