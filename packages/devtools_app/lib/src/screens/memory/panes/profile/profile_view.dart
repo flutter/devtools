@@ -17,6 +17,7 @@ import '../../../../shared/table/table_data.dart';
 import '../../../../shared/theme.dart';
 import '../../../../shared/utils.dart';
 import '../../../vm_developer/vm_service_private_extensions.dart';
+import '../../shared/heap/class_filter.dart';
 import '../../shared/primitives/simple_elements.dart';
 import '../../shared/widgets/class_filter.dart';
 import '../../shared/widgets/shared_memory_widgets.dart';
@@ -34,7 +35,7 @@ class _FieldClassNameColumn extends ColumnData<ProfileRecord>
     implements
         ColumnRenderer<ProfileRecord>,
         ColumnHeaderRenderer<ProfileRecord> {
-  _FieldClassNameColumn()
+  _FieldClassNameColumn(this.classFilterData)
       : super(
           'Class',
           fixedWidthPx: scaleByFontFactor(200),
@@ -49,6 +50,8 @@ class _FieldClassNameColumn extends ColumnData<ProfileRecord>
 
   @override
   bool get supportsSorting => true;
+
+  final ClassFilterData classFilterData;
 
   @override
   Widget? build(
@@ -76,8 +79,7 @@ class _FieldClassNameColumn extends ColumnData<ProfileRecord>
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Expanded(child: defaultHeaderRenderer()),
-        Icon(Icons.ac_unit),
-        //ClassFilterButton(data.filterData),
+        ClassFilterButton(classFilterData),
       ],
     );
   }
@@ -487,7 +489,7 @@ class AllocationProfileTableViewState
 }
 
 class _AllocationProfileTable extends StatelessWidget {
-  const _AllocationProfileTable({
+  _AllocationProfileTable({
     Key? key,
     required this.controller,
   }) : super(key: key);
@@ -516,14 +518,14 @@ class _AllocationProfileTable extends StatelessWidget {
     heap: HeapGeneration.total,
   );
 
-  static final _columns = [
-    _FieldClassNameColumn(),
+  late final List<ColumnData<ProfileRecord>> _columns = [
+    _FieldClassNameColumn(controller.classFilterData),
     _FieldInstanceCountColumn(heap: HeapGeneration.total),
     _fieldSizeColumn,
     _FieldDartHeapSizeColumn(heap: HeapGeneration.total),
   ];
 
-  static final _vmDeveloperModeColumns = [
+  late final _vmDeveloperModeColumns = [
     _FieldExternalSizeColumn(heap: HeapGeneration.total),
     _FieldInstanceCountColumn(heap: HeapGeneration.newSpace),
     _FieldSizeColumn(heap: HeapGeneration.newSpace),
@@ -562,9 +564,8 @@ class _AllocationProfileTable extends StatelessWidget {
                         ? _AllocationProfileTable._vmModeColumnGroups
                         : null,
                     columns: [
-                      ..._AllocationProfileTable._columns,
-                      if (vmDeveloperModeEnabled)
-                        ..._AllocationProfileTable._vmDeveloperModeColumns,
+                      ..._columns,
+                      if (vmDeveloperModeEnabled) ..._vmDeveloperModeColumns,
                     ],
                     defaultSortColumn: _AllocationProfileTable._fieldSizeColumn,
                     defaultSortDirection: SortDirection.descending,

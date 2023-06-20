@@ -10,6 +10,7 @@ import 'package:vm_service/vm_service.dart';
 import '../../../../shared/config_specific/import_export/import_export.dart';
 import '../../../../shared/globals.dart';
 import '../../../../shared/primitives/auto_dispose.dart';
+import '../../shared/heap/class_filter.dart';
 import 'model.dart';
 
 class ProfilePaneController extends DisposableController
@@ -30,12 +31,22 @@ class ProfilePaneController extends DisposableController
   ValueListenable<bool> get refreshOnGc => _refreshOnGc;
   final _refreshOnGc = ValueNotifier<bool>(false);
 
+  /// Current class filter.
+  late final ClassFilterData classFilterData;
+
   bool _initialized = false;
 
   void initialize() {
     if (_initialized) {
       return;
     }
+
+    final classFilter = ValueNotifier(ClassFilter.empty());
+    classFilterData = ClassFilterData(
+      filter: classFilter,
+      onChanged: (ClassFilter newFilter) => classFilter.value = newFilter,
+    );
+
     autoDisposeStreamSubscription(
       serviceManager.service!.onGCEvent.listen((event) {
         if (refreshOnGc.value) {
