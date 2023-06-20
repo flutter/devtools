@@ -18,6 +18,7 @@ import '../../../../shared/theme.dart';
 import '../../../../shared/utils.dart';
 import '../../../vm_developer/vm_service_private_extensions.dart';
 import '../../shared/primitives/simple_elements.dart';
+import '../../shared/widgets/class_filter.dart';
 import '../../shared/widgets/shared_memory_widgets.dart';
 import 'model.dart';
 import 'profile_pane_controller.dart';
@@ -30,7 +31,9 @@ import 'profile_pane_controller.dart';
 const _defaultNumberFieldWidth = 90.0;
 
 class _FieldClassNameColumn extends ColumnData<ProfileRecord>
-    implements ColumnRenderer<ProfileRecord> {
+    implements
+        ColumnRenderer<ProfileRecord>,
+        ColumnHeaderRenderer<ProfileRecord> {
   _FieldClassNameColumn()
       : super(
           'Class',
@@ -61,6 +64,21 @@ class _FieldClassNameColumn extends ColumnData<ProfileRecord>
       showCopyButton: isRowSelected,
       copyGaItem: gac.MemoryEvent.diffClassSingleCopy,
       rootPackage: serviceManager.rootInfoNow().package,
+    );
+  }
+
+  @override
+  Widget? buildHeader(
+    BuildContext context,
+    Widget Function() defaultHeaderRenderer,
+  ) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Expanded(child: defaultHeaderRenderer()),
+        Icon(Icons.ac_unit),
+        //ClassFilterButton(data.filterData),
+      ],
     );
   }
 }
