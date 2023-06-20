@@ -7,10 +7,13 @@ import 'package:vm_service/vm_service.dart';
 import '../../../../shared/memory/class_name.dart';
 import '../../../../shared/table/table_data.dart';
 import '../../../vm_developer/vm_service_private_extensions.dart';
+import '../../shared/heap/class_filter.dart';
 
 class AdaptedProfile {
-  AdaptedProfile.fromAllocationProfile(AllocationProfile profile)
-      : newSpaceGCStats = profile.newSpaceGCStats,
+  AdaptedProfile.fromAllocationProfile(
+    AllocationProfile profile,
+    ClassFilter filter,
+  )   : newSpaceGCStats = profile.newSpaceGCStats,
         oldSpaceGCStats = profile.oldSpaceGCStats,
         totalGCStats = profile.totalGCStats {
     final elements = (profile.members ?? []).where((element) {
@@ -25,8 +28,20 @@ class AdaptedProfile {
     ];
   }
 
+  AdaptedProfile.withNewFilter(
+    AdaptedProfile profile,
+    ClassFilter filter,
+  )   : newSpaceGCStats = profile.newSpaceGCStats,
+        oldSpaceGCStats = profile.oldSpaceGCStats,
+        totalGCStats = profile.totalGCStats {
+    records = [];
+  }
+
   /// A record per class plus one total record.
   late final List<ProfileRecord> records;
+
+  /// A record per class.
+  late final List<ProfileRecord> items;
 
   final GCStats newSpaceGCStats;
   final GCStats oldSpaceGCStats;

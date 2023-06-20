@@ -59,6 +59,12 @@ class ProfilePaneController extends DisposableController
   void setFilter(ClassFilter filter) {
     if (filter.equals(_classFilter.value)) return;
     _classFilter.value = filter;
+    final currentProfile = _currentAllocationProfile.value;
+    if (currentProfile == null) return;
+    _currentAllocationProfile.value = AdaptedProfile.withNewFilter(
+      currentProfile,
+      classFilter.value,
+    );
   }
 
   @visibleForTesting
@@ -81,8 +87,10 @@ class ProfilePaneController extends DisposableController
     if (isolate == null) return;
 
     final allocationProfile = await service.getAllocationProfile(isolate.id!);
-    _currentAllocationProfile.value =
-        AdaptedProfile.fromAllocationProfile(allocationProfile);
+    _currentAllocationProfile.value = AdaptedProfile.fromAllocationProfile(
+      allocationProfile,
+      classFilter.value,
+    );
   }
 
   /// Converts the current [AllocationProfile] to CSV format and downloads it.
