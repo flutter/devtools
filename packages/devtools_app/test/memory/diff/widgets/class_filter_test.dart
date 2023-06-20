@@ -4,8 +4,8 @@
 
 import 'package:devtools_app/src/screens/memory/panes/diff/controller/item_controller.dart';
 import 'package:devtools_app/src/screens/memory/panes/diff/diff_pane.dart';
-import 'package:devtools_app/src/screens/memory/panes/diff/widgets/class_filter.dart';
 import 'package:devtools_app/src/screens/memory/shared/heap/class_filter.dart';
+import 'package:devtools_app/src/screens/memory/shared/widgets/class_filter.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
