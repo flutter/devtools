@@ -12,36 +12,82 @@ import '../../shared/heap/class_filter.dart';
 class AdaptedProfile {
   AdaptedProfile.fromAllocationProfile(
     AllocationProfile profile,
-    ClassFilter filter,
+    this.filter,
+    String? rootPackage,
   )   : newSpaceGCStats = profile.newSpaceGCStats,
         oldSpaceGCStats = profile.oldSpaceGCStats,
         totalGCStats = profile.totalGCStats {
-    final elements = (profile.members ?? []).where((element) {
-      return element.bytesCurrent != 0 ||
-          element.newSpace.externalSize != 0 ||
-          element.oldSpace.externalSize != 0;
-    }).map((e) => ProfileRecord.fromClassHeapStats(e));
+    _items = (profile.members ?? [])
+        .where((element) {
+          return element.bytesCurrent != 0 ||
+              element.newSpace.externalSize != 0 ||
+              element.oldSpace.externalSize != 0;
+        })
+        .map((e) => ProfileRecord.fromClassHeapStats(e))
+        .toList();
+
+    _itemsFiltered = _items
+        .where((element) => filter.apply(element.heapClass, rootPackage))
+        .toList();
+
+    _total = ProfileRecord.total(profile);
 
     records = [
-      ProfileRecord.total(profile),
-      ...elements,
+      _total,
+      ..._itemsFiltered,
     ];
   }
 
   AdaptedProfile.withNewFilter(
     AdaptedProfile profile,
-    ClassFilter filter,
+    this.filter,
+    String? rootPackage,
   )   : newSpaceGCStats = profile.newSpaceGCStats,
         oldSpaceGCStats = profile.oldSpaceGCStats,
         totalGCStats = profile.totalGCStats {
-    records = [];
+    _items = profile._items;
+    _total = profile._total;
+
+    // Use previous data if filter is identical.
+    final task = filter.task(previous: profile.filter);
+    if (task == FilteringTask.doNothing) {
+      _itemsFiltered = profile._itemsFiltered;
+      records = profile.records;
+      return;
+    }
+
+    final Iterable<ProfileRecord> dataToFilter;
+    if (task == FilteringTask.refilter) {
+      dataToFilter = profile._items;
+    } else if (task == FilteringTask.reuse) {
+      dataToFilter = profile._itemsFiltered;
+    } else {
+      throw StateError('Unexpected task: $task.');
+    }
+
+    _itemsFiltered = dataToFilter
+        .where((e) => filter.apply(e.heapClass, rootPackage))
+        .toList();
+
+    records = [
+      _total,
+      ..._itemsFiltered,
+    ];
   }
 
-  /// A record per class plus one total record.
+  /// A record per class plus one total record, with applied filter.
   late final List<ProfileRecord> records;
 
+  late final ProfileRecord _total;
+
   /// A record per class.
-  late final List<ProfileRecord> items;
+  late final List<ProfileRecord> _items;
+
+  /// A record per class.
+  late final List<ProfileRecord> _itemsFiltered;
+
+  /// Applied filter.
+  final ClassFilter filter;
 
   final GCStats newSpaceGCStats;
   final GCStats oldSpaceGCStats;

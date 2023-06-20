@@ -35,6 +35,8 @@ class ProfilePaneController extends DisposableController
   ValueListenable<ClassFilter> get classFilter => _classFilter;
   final _classFilter = ValueNotifier(ClassFilter.empty());
 
+  late final _rootPackage = serviceManager.rootInfoNow().package;
+
   bool _initialized = false;
 
   void initialize() {
@@ -64,6 +66,7 @@ class ProfilePaneController extends DisposableController
     _currentAllocationProfile.value = AdaptedProfile.withNewFilter(
       currentProfile,
       classFilter.value,
+      _rootPackage,
     );
   }
 
@@ -90,6 +93,7 @@ class ProfilePaneController extends DisposableController
     _currentAllocationProfile.value = AdaptedProfile.fromAllocationProfile(
       allocationProfile,
       classFilter.value,
+      _rootPackage,
     );
   }
 
