@@ -20,9 +20,11 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     // ignore: unused_local_variable, for testing.
     var count = 0;
-    PeriodicAction(() {
+    void incrementCounter() {
       count++;
-    }).doEvery(const Duration(seconds: 1));
+    }
+
+    PeriodicAction(incrementCounter).doEvery(const Duration(seconds: 1));
     return MaterialApp(
       title: 'Hello, World',
       theme: ThemeData(

@@ -33,7 +33,10 @@ Future<void> runFlutterIntegrationTest(
       // Create the test app and start it.
       // TODO(kenz): support running Dart CLI test apps from here too.
       try {
-        testApp = TestFlutterApp(appPath: testFileArgs.appPath);
+        testApp = TestFlutterApp(
+          appPath: testFileArgs.appPath,
+          appDevice: testRunnerArgs.testAppDevice,
+        );
         await testApp.start();
       } catch (e) {
         // ignore: avoid-throw-in-catch-block, by design
@@ -281,15 +284,23 @@ class TestRunnerArgs {
     testTarget = target!;
 
     final argWithTestAppUri =
-        args.firstWhereOrNull((arg) => arg.startsWith(testAppArg));
-    testAppUri = argWithTestAppUri?.substring(testAppArg.length);
+        args.firstWhereOrNull((arg) => arg.startsWith(testAppUriArg));
+    testAppUri = argWithTestAppUri?.substring(testAppUriArg.length);
+
+    final argWithTestAppDevice =
+        args.firstWhereOrNull((arg) => arg.startsWith(testAppDeviceArg));
+    testAppDevice = TestAppDevice.fromArgName(
+      argWithTestAppDevice?.substring(testAppDeviceArg.length) ??
+          TestAppDevice.flutterTester.argName,
+    )!;
 
     updateGoldens = args.contains(updateGoldensArg);
     headless = args.contains(headlessArg);
   }
 
   static const testTargetArg = '--target=';
-  static const testAppArg = '--test-app-uri=';
+  static const testAppUriArg = '--test-app-uri=';
+  static const testAppDeviceArg = '--test-app-device=';
   static const updateGoldensArg = '--update-goldens';
   static const headlessArg = '--headless';
 
@@ -300,10 +311,50 @@ class TestRunnerArgs {
   /// This value will only be used for tests with live connection.
   late final String? testAppUri;
 
+  /// The type of device for the test app to run on.
+  late final TestAppDevice testAppDevice;
+
   /// Whether golden images should be updated with the result of this test run.
   late final bool updateGoldens;
 
   /// Whether this integration test should be run on the 'web-server' device
   /// instead of 'chrome'.
   late final bool headless;
+}
+
+enum TestAppDevice {
+  flutterTester('flutter-tester'),
+  chrome('chrome');
+
+  const TestAppDevice(this.argName);
+
+  final String argName;
+
+  /// A mapping of test app device to the unsupported tests for that device.
+  static final _unsupportedTestsForDevice = <TestAppDevice, List<String>>{
+    TestAppDevice.flutterTester: [],
+    TestAppDevice.chrome: [
+      // TODO(https://github.com/flutter/devtools/issues/5874): Remove once supported on web.
+      'eval_and_browse_test.dart',
+      'perfetto_test.dart',
+      'performance_screen_event_recording_test.dart',
+      'service_connection_test.dart',
+    ],
+  };
+
+  static final _argNameToDeviceMap =
+      TestAppDevice.values.fold(<String, TestAppDevice>{}, (map, device) {
+    map[device.argName] = device;
+    return map;
+  });
+
+  static TestAppDevice? fromArgName(String argName) {
+    return _argNameToDeviceMap[argName];
+  }
+
+  bool supportsTest(String testPath) {
+    final unsupportedTests = _unsupportedTestsForDevice[this] ?? [];
+    return unsupportedTests
+        .none((unsupportedTestPath) => testPath.endsWith(unsupportedTestPath));
+  }
 }
