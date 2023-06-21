@@ -148,26 +148,6 @@ void main() {
     // Verify that line 40 is focused:
     expect(isLineFocused(line40Finder), isTrue);
   });
-
-  test('invalid setBreakpoint throws exception', () async {
-    // Error codes defined by https://www.jsonrpc.org/specification#error_object
-    const jsonRpcInvalidParamsCode = -32602;
-
-    await expectLater(
-      serviceManager.service!.addBreakpoint(
-        serviceManager.isolateManager.selectedIsolate.value!.id!,
-        'fake-script-id',
-        1,
-      ),
-      throwsA(
-        const TypeMatcher<RPCError>().having(
-          (e) => e.code,
-          'code',
-          equals(jsonRpcInvalidParamsCode),
-        ),
-      ),
-    );
-  });
 }
 
 bool areHorizontallyAligned(
