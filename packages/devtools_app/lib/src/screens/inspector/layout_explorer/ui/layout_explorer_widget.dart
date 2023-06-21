@@ -122,7 +122,7 @@ abstract class LayoutExplorerWidgetState<W extends LayoutExplorerWidget,
 
   void updateHighlighted(L? newProperties);
 
-  String? id(RemoteDiagnosticsNode? node) => node?.dartDiagnosticRef.id;
+  String? id(RemoteDiagnosticsNode? node) => node?.valueRef.id;
 
   void _registerInspectorControllerService() {
     inspectorController.selectedNode.addListener(_onSelectionChangedCallback);
