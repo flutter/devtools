@@ -154,6 +154,15 @@ class ClassFilter {
     return filterType == ClassFilterType.except;
   }
 
+  /// Filters items in [original] by class with [newFilter].
+  ///
+  /// Utilizes previous filtering results, that are
+  /// [oldFiltered] with [oldFilter], if possible.
+  ///
+  /// Uses [extractClass] to get class from an item in the list.
+  ///
+  /// Uses [rootPackage] to pass to filter for root pacjage
+  /// alias replacement.
   static List<T> filter<T>({
     required ClassFilter? oldFilter,
     required List<T>? oldFiltered,

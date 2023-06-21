@@ -70,8 +70,11 @@ class MemoryDefaultScene extends Scene {
     when(fakeServiceManager.vm.operatingSystem).thenReturn('ios');
     setGlobal(ServiceConnectionManager, fakeServiceManager);
 
-    final showAllFilter =
-        ClassFilter(filterType: ClassFilterType.showAll, except: '', only: '');
+    final showAllFilter = ClassFilter(
+      filterType: ClassFilterType.showAll,
+      except: '',
+      only: '',
+    );
 
     final diffController = DiffPaneController(_TestSnapshotTaker())
       ..derived.applyFilter(showAllFilter);

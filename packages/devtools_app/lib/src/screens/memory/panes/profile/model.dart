@@ -66,12 +66,13 @@ class AdaptedProfile {
   /// A record per class plus one total record, with applied filter.
   late final List<ProfileRecord> records;
 
+  /// Record for totals.
   late final ProfileRecord _total;
 
   /// A record per class.
   late final List<ProfileRecord> _items;
 
-  /// A record per class.
+  /// A record per class, filtered.
   late final List<ProfileRecord> _itemsFiltered;
 
   /// Applied filter.
