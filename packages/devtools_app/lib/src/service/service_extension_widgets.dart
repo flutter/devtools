@@ -123,31 +123,12 @@ class _ServiceExtensionButtonGroupState
         onPressed: available ? _onPressed : null,
         children: <Widget>[
           for (var extensionState in _extensionStates)
-            _buildExtension(extensionState),
+            ServiceExtensionButton(
+              extensionState: extensionState,
+              minScreenWidthForTextBeforeScaling:
+                  widget.minScreenWidthForTextBeforeScaling,
+            ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildExtension(ExtensionState extensionState) {
-    final description = extensionState.description;
-
-    return ServiceExtensionTooltip(
-      description: description,
-      child: Container(
-        height: defaultButtonHeight,
-        padding: EdgeInsets.symmetric(
-          horizontal:
-              includeText(context, widget.minScreenWidthForTextBeforeScaling)
-                  ? defaultSpacing
-                  : 0.0,
-        ),
-        child: ImageIconLabel(
-          ServiceExtensionIcon(extensionState: extensionState),
-          description.title,
-          unscaledMinIncludeTextWidth:
-              widget.minScreenWidthForTextBeforeScaling,
-        ),
       ),
     );
   }
@@ -179,6 +160,40 @@ class _ServiceExtensionButtonGroupState
       // not available. That could happen as entire groups have to
       // be enabled or disabled at a time.
     }
+  }
+}
+
+class ServiceExtensionButton extends StatelessWidget {
+  const ServiceExtensionButton({
+    super.key,
+    required this.extensionState,
+    required this.minScreenWidthForTextBeforeScaling,
+  });
+
+  final ExtensionState extensionState;
+
+  final double? minScreenWidthForTextBeforeScaling;
+
+  @override
+  Widget build(BuildContext context) {
+    final description = extensionState.description;
+
+    return ServiceExtensionTooltip(
+      description: description,
+      child: Container(
+        height: defaultButtonHeight,
+        padding: EdgeInsets.symmetric(
+          horizontal: includeText(context, minScreenWidthForTextBeforeScaling)
+              ? defaultSpacing
+              : 0.0,
+        ),
+        child: ImageIconLabel(
+          ServiceExtensionIcon(extensionState: extensionState),
+          description.title,
+          unscaledMinIncludeTextWidth: minScreenWidthForTextBeforeScaling,
+        ),
+      ),
+    );
   }
 }
 

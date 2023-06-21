@@ -102,6 +102,13 @@ Future<void> connectToTestApp(WidgetTester tester, TestApp testApp) async {
   await tester.pumpAndSettle(safePumpDuration);
 }
 
+Future<void> disconnectFromTestApp(WidgetTester tester) async {
+  await tester.tap(find.byTooltip(StatusLine.deviceInfoTooltip));
+  await tester.pumpAndSettle();
+  await tester.tap(find.byType(ConnectToNewAppButton));
+  await tester.pump(safePumpDuration);
+}
+
 void logStatus(String log) {
   print('TEST STATUS: $log');
 }
