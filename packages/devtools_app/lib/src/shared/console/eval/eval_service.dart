@@ -133,7 +133,7 @@ class EvalService extends DisposableController with AutoDisposeControllerMixin {
       return Future.error(
         RPCError.withDetails(
           'evaluateInFrame',
-          RPCError.kInvalidParams,
+          RPCErrorKind.kInvalidParams.code,
           'Isolate not paused',
         ),
       );
@@ -145,7 +145,7 @@ class EvalService extends DisposableController with AutoDisposeControllerMixin {
       return Future.error(
         RPCError.withDetails(
           'evaluateInFrame',
-          RPCError.kInvalidParams,
+          RPCErrorKind.kInvalidParams.code,
           'No frames available',
         ),
       );
@@ -157,7 +157,7 @@ class EvalService extends DisposableController with AutoDisposeControllerMixin {
       return Future.error(
         RPCError.withDetails(
           'evaluateInFrame',
-          RPCError.kServerError,
+          RPCErrorKind.kInvalidParams.code,
           'isolateRefId is null',
         ),
       );
