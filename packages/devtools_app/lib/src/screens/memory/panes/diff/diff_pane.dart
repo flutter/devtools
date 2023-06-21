@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 
@@ -69,8 +71,8 @@ class _SnapshotItemContent extends StatelessWidget {
                         height: 450,
                         child: Markdown(
                           data: _snapshotDocumentation,
-                          onTapLink: (text, url, title) async =>
-                              await launchUrl(url!),
+                          onTapLink: (text, url, title) =>
+                              unawaited(launchUrl(url!)),
                         ),
                       ),
                       const ClassTypeLegend(),
