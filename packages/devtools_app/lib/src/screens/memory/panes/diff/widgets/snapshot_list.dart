@@ -59,6 +59,7 @@ class _ListControlPane extends StatelessWidget {
       await controller.takeSnapshot();
     } catch (e, trace) {
       _log.shout(e, e, trace);
+      if (!context.mounted) return;
       await showDialog(
         context: context,
         builder: (context) => UnexpectedErrorDialog(

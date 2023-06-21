@@ -34,6 +34,8 @@ class StatusLine extends StatelessWidget {
   final Screen currentScreen;
   final bool isEmbedded;
 
+  static const deviceInfoTooltip = 'Device Info';
+
   /// The padding around the footer in the DevTools UI.
   EdgeInsets get padding => const EdgeInsets.fromLTRB(
         defaultSpacing,
@@ -161,7 +163,7 @@ class StatusLine extends StatelessWidget {
               ),
               const SizedBox(width: denseSpacing),
               DevToolsTooltip(
-                message: 'Device Info',
+                message: deviceInfoTooltip,
                 child: InkWell(
                   onTap: () {
                     unawaited(

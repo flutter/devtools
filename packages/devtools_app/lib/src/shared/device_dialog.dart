@@ -61,14 +61,19 @@ class DeviceDialog extends StatelessWidget {
         ],
       ),
       actions: [
-        _connectToNewAppButton(context),
+        const ConnectToNewAppButton(),
         if (connectedApp.isRunningOnDartVM!) _ViewVMFlagsButton(),
         const DialogCloseButton(),
       ],
     );
   }
+}
 
-  Widget _connectToNewAppButton(BuildContext context) {
+class ConnectToNewAppButton extends StatelessWidget {
+  const ConnectToNewAppButton({super.key});
+
+  @override
+  Widget build(BuildContext context) {
     return ElevatedButton(
       onPressed: () {
         DevToolsRouterDelegate.of(context).navigateHome(

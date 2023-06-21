@@ -24,9 +24,19 @@ class PerformanceScreenMetrics extends ScreenAnalyticsMetrics {
     this.traceEventCount,
   });
 
+  /// The duration in microseconds for the UI time of a selected [FlutterFrame].
   final Duration? uiDuration;
+
+  /// The duration in microseconds for the Raster time of a selected
+  /// [FlutterFrame].
   final Duration? rasterDuration;
+
+  /// The duration in microseconds for the shader compilation time of a selected
+  /// [FlutterFrame].
   final Duration? shaderCompilationDuration;
+
+  /// The number of trace events that were processed (used to provide scale for
+  /// timing measurements).
   final int? traceEventCount;
 }
 
