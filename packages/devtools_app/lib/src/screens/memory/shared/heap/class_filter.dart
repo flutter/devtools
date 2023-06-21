@@ -161,7 +161,7 @@ class ClassFilter {
   ///
   /// Uses [extractClass] to get class from an item in the list.
   ///
-  /// Uses [rootPackage] to pass to filter for root pacjage
+  /// Uses [rootPackage] to pass to filter for root package.
   /// alias replacement.
   static List<T> filter<T>({
     required ClassFilter? oldFilter,
