@@ -73,7 +73,7 @@ class _SnapshotItemContent extends StatelessWidget {
                               await launchUrl(url!),
                         ),
                       ),
-                      const ClassTypeAgenda(),
+                      const ClassTypeLegend(),
                     ],
                   ),
                 ),

@@ -672,7 +672,7 @@ class _ProfileHelpLink extends StatelessWidget {
               'allocated objects in the Dart heap of the selected\n'
               'isolate.'),
           const SizedBox(height: denseSpacing),
-          const ClassTypeAgenda(),
+          const ClassTypeLegend(),
           MoreInfoLink(
             url: DocLinks.profile.value,
             gaScreenName: '',

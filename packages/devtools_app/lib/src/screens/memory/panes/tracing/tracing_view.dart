@@ -145,7 +145,7 @@ class _ProfileHelpLink extends StatelessWidget {
             'were allocated.',
           ),
           const SizedBox(height: denseSpacing),
-          const ClassTypeAgenda(),
+          const ClassTypeLegend(),
           MoreInfoLink(
             url: DocLinks.trace.value,
             gaScreenName: gac.memory,
