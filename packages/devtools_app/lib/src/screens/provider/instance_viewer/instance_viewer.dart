@@ -515,6 +515,7 @@ class _EditableFieldState extends State<_EditableField> {
           final setter = widget.setter;
           if (setter != null) await setter(value);
         } catch (err) {
+          if (!context.mounted) return;
           showErrorSnackBar(context, err);
         }
       },
