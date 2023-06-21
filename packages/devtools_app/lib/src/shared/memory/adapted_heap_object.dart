@@ -47,7 +47,7 @@ class AdaptedHeapObject {
             .toSet(),
         heapClass: HeapClassName(
           className: json[_JsonFields.klass] as String,
-          library: json[_JsonFields.library],
+          library: json[_JsonFields.library] as String?,
         ),
         shallowSize: (json[_JsonFields.shallowSize] ?? 0) as int,
       );

@@ -48,26 +48,14 @@ class AdaptedProfile {
     _items = profile._items;
     _total = profile._total;
 
-    // Use previous data if filter is identical.
-    final task = filter.task(previous: profile.filter);
-    if (task == FilteringTask.doNothing) {
-      _itemsFiltered = profile._itemsFiltered;
-      records = profile.records;
-      return;
-    }
-
-    final Iterable<ProfileRecord> dataToFilter;
-    if (task == FilteringTask.refilter) {
-      dataToFilter = profile._items;
-    } else if (task == FilteringTask.reuse) {
-      dataToFilter = profile._itemsFiltered;
-    } else {
-      throw StateError('Unexpected task: $task.');
-    }
-
-    _itemsFiltered = dataToFilter
-        .where((e) => filter.apply(e.heapClass, rootPackage))
-        .toList();
+    _itemsFiltered = ClassFilter.filter(
+      oldFilter: profile.filter,
+      oldFiltered: profile._itemsFiltered,
+      newFilter: filter,
+      original: profile._items,
+      extractClass: (s) => s.heapClass,
+      rootPackage: rootPackage,
+    );
 
     records = [
       _total,

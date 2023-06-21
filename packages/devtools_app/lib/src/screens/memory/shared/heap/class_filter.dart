@@ -105,6 +105,7 @@ class ClassFilter {
   late final Set<String> filters = _filtersAsSet();
 
   /// Task to be applied when filter changed.
+  @visibleForTesting
   FilteringTask task({required ClassFilter? previous}) {
     if (previous == null) return FilteringTask.refilter;
 
@@ -151,6 +152,41 @@ class ClassFilter {
     }
 
     return filterType == ClassFilterType.except;
+  }
+
+  static List<T> filter<T>({
+    required ClassFilter? oldFilter,
+    required List<T>? oldFiltered,
+    required ClassFilter newFilter,
+    required List<T> original,
+    required HeapClassName Function(T) extractClass,
+    required String? rootPackage,
+  }) {
+    if ((oldFilter == null) != (oldFiltered == null)) {
+      throw StateError('Nullness should match.');
+    }
+
+    // Return previous data if filter did not change.
+    if (oldFilter == newFilter) return oldFiltered!;
+
+    // Return previous data if filter is identical.
+    final task = newFilter.task(previous: oldFilter);
+    if (task == FilteringTask.doNothing) return original;
+
+    final Iterable<T> dataToFilter;
+    if (task == FilteringTask.refilter) {
+      dataToFilter = original;
+    } else if (task == FilteringTask.reuse) {
+      dataToFilter = oldFiltered!;
+    } else {
+      throw StateError('Unexpected task: $task.');
+    }
+
+    final result = dataToFilter
+        .where((e) => newFilter.apply(extractClass(e), rootPackage))
+        .toList();
+
+    return result;
   }
 
   bool _isMatch(HeapClassName className, String filter, String? rootPackage) {
