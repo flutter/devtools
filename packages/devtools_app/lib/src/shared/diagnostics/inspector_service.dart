@@ -494,7 +494,7 @@ class InspectorService extends InspectorServiceBase {
     List<RemoteDiagnosticsNode?> children = await root.children ?? [];
 
     if (children.isEmpty) {
-      children = await group.getChildren(root.dartDiagnosticRef, false, null);
+      children = await group.getChildren(root.valueRef, false, null);
     }
 
     if (children.isEmpty) {
@@ -1244,7 +1244,7 @@ class ObjectGroup extends InspectorObjectGroupBase {
     if (disposed) return null;
     RemoteDiagnosticsNode? newSelection;
     final InspectorInstanceRef? previousSelectionRef =
-        previousSelection?.dartDiagnosticRef;
+        previousSelection?.valueRef;
 
     switch (treeType) {
       case FlutterTreeType.widget:
@@ -1252,14 +1252,13 @@ class ObjectGroup extends InspectorObjectGroupBase {
           isSummaryTree
               ? WidgetInspectorServiceExtensions.getSelectedSummaryWidget.name
               : WidgetInspectorServiceExtensions.getSelectedWidget.name,
-          previousSelectionRef,
+          null,
         );
         break;
     }
     if (disposed) return null;
 
-    return newSelection != null &&
-            newSelection.dartDiagnosticRef == previousSelectionRef
+    return newSelection != null && newSelection.valueRef == previousSelectionRef
         ? previousSelection
         : newSelection;
   }
@@ -1347,7 +1346,7 @@ class ObjectGroup extends InspectorObjectGroupBase {
     if (node == null) return null;
     final args = {
       'objectGroup': groupName,
-      'arg': node.dartDiagnosticRef.id,
+      'arg': node.valueRef.id,
       'subtreeDepth': subtreeDepth.toString(),
     };
     final json = await invokeServiceMethodDaemonParams(
@@ -1402,7 +1401,7 @@ class ObjectGroup extends InspectorObjectGroupBase {
         WidgetInspectorServiceExtensions.getLayoutExplorerNode.name,
         {
           'groupName': groupName,
-          'id': node.dartDiagnosticRef.id,
+          'id': node.valueRef.id,
           'subtreeDepth': '$subtreeDepth',
         },
       ),
