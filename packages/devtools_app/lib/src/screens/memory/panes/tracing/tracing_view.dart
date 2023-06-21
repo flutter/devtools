@@ -12,6 +12,7 @@ import '../../../../shared/globals.dart';
 import '../../../../shared/primitives/simple_items.dart';
 import '../../../../shared/split.dart';
 import '../../../../shared/theme.dart';
+import '../../shared/widgets/shared_memory_widgets.dart';
 import 'class_table.dart';
 import 'tracing_pane_controller.dart';
 import 'tracing_tree.dart';
@@ -143,6 +144,8 @@ class _ProfileHelpLink extends StatelessWidget {
             'list, displaying a condensed view of locations where objects\n'
             'were allocated.',
           ),
+          const SizedBox(height: denseSpacing),
+          const ClassTypeAgenda(),
           MoreInfoLink(
             url: DocLinks.trace.value,
             gaScreenName: gac.memory,

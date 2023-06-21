@@ -11,6 +11,7 @@ import '../../../../shared/config_specific/launch_url/launch_url.dart';
 import '../../../../shared/primitives/simple_items.dart';
 import '../../../../shared/split.dart';
 import '../../../../shared/theme.dart';
+import '../../shared/widgets/shared_memory_widgets.dart';
 import 'controller/diff_pane_controller.dart';
 import 'controller/item_controller.dart';
 import 'widgets/snapshot_control_pane.dart';
@@ -62,13 +63,20 @@ class _SnapshotItemContent extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Expanded(
-                  child: Markdown(
-                    data: _snapshotDocumentation,
-                    onTapLink: (text, url, title) async =>
-                        await launchUrl(url!),
+                  child: ListView(
+                    children: [
+                      SizedBox(
+                        height: 450,
+                        child: Markdown(
+                          data: _snapshotDocumentation,
+                          onTapLink: (text, url, title) async =>
+                              await launchUrl(url!),
+                        ),
+                      ),
+                      const ClassTypeAgenda(),
+                    ],
                   ),
                 ),
-                const SizedBox(height: denseSpacing),
                 MoreInfoLink(
                   url: DocLinks.diff.value,
                   gaScreenName: gac.memory,

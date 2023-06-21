@@ -671,6 +671,8 @@ class _ProfileHelpLink extends StatelessWidget {
           const Text('The allocation profile tab displays information about\n'
               'allocated objects in the Dart heap of the selected\n'
               'isolate.'),
+          const SizedBox(height: denseSpacing),
+          const ClassTypeAgenda(),
           MoreInfoLink(
             url: DocLinks.profile.value,
             gaScreenName: '',

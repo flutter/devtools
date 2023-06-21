@@ -57,3 +57,25 @@ class HeapClassView extends StatelessWidget {
     );
   }
 }
+
+class ClassTypeAgenda extends StatelessWidget {
+  const ClassTypeAgenda({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text('Class types agenda:'),
+        ...ClassType.values.map(
+          (t) => Row(
+            children: [
+              t.icon,
+              Text(' ${t.aliasDescription}'),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
