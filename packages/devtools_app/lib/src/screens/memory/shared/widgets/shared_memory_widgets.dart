@@ -66,7 +66,7 @@ class ClassTypeLegend extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Class types legend:'),
+        const Text('Class type legend:'),
         ...ClassType.values.map(
           (t) => Row(
             children: [
