@@ -11,8 +11,15 @@ class MemoryScreenMetrics extends ScreenAnalyticsMetrics {
     this.heapDiffObjectsAfter,
   });
 
+  /// The number of objects in the 'before' heap for a diff calculation (used to
+  /// provide scale for timing measurements).
   final int? heapDiffObjectsBefore;
+
+  /// The number of objects in the 'after' heap for a diff calculation (used to
+  /// provide scale for timing measurements).
   final int? heapDiffObjectsAfter;
+
+  /// The number of objects in a heap snapshot that was captured.
   final int? heapObjectsTotal;
 }
 
@@ -46,7 +53,12 @@ class ProfilerScreenMetrics extends ScreenAnalyticsMetrics {
     required this.cpuStackDepth,
   });
 
+  /// The number of CPU samples that were processed for a profile (used along
+  /// with [cpuStackDepth] to provide scale for timing measurements).
   final int cpuSampleCount;
+
+  /// The stack depth for a profile (used along with [cpuSampleCount] to provide
+  /// scale for timing measurements).
   final int cpuStackDepth;
 }
 
