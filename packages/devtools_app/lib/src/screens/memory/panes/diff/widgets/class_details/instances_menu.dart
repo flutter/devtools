@@ -7,9 +7,10 @@ import 'package:flutter/material.dart';
 import '../../controller/sampler.dart';
 
 List<Widget> buildHeapInstancesMenu({
-  required HeapClassSampler sampler,
+  required HeapClassSampler? sampler,
   required bool liveItemsEnabled,
 }) {
+  if (sampler == null) return [];
   return [
     _StoreAsOneVariableMenu(sampler, liveItemsEnabled: liveItemsEnabled),
     _StoreAllAsVariableMenu(sampler, liveItemsEnabled: liveItemsEnabled),

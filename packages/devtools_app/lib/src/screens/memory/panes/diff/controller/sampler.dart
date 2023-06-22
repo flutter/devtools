@@ -12,9 +12,8 @@ import '../../../../../shared/memory/adapted_heap_data.dart';
 import '../../../../../shared/memory/class_name.dart';
 import '../../../../../shared/vm_utils.dart';
 import '../../../shared/heap/heap.dart';
-import '../../../shared/primitives/instance_context_menu.dart';
 
-class HeapClassSampler extends ClassSampler {
+class HeapClassSampler {
   HeapClassSampler(this.objects, this.heap, this.heapClass)
       : assert(objects.objectsByCodes.isNotEmpty);
 
@@ -64,7 +63,6 @@ class HeapClassSampler extends ClassSampler {
     serviceManager.consoleService.appendStdio('$error\n$trace');
   }
 
-  @override
   Future<void> oneLiveStaticToConsole() async {
     ga.select(gac.memory, gac.MemoryEvent.dropOneLiveVariable);
     final instances = (await _liveInstances())?.instances;
@@ -95,12 +93,10 @@ class HeapClassSampler extends ClassSampler {
     );
   }
 
-  @override
   bool get isEvalEnabled =>
       heapClass.classType(serviceManager.rootInfoNow().package) !=
       ClassType.runtime;
 
-  @override
   Future<void> allLiveToConsole({
     required bool includeSubclasses,
     required bool includeImplementers,
@@ -130,8 +126,7 @@ class HeapClassSampler extends ClassSampler {
     );
   }
 
-  @override
-  Future<void> oneStaticToConsole() async {
+  void oneStaticToConsole() {
     ga.select(gac.memory, gac.MemoryEvent.dropOneStaticVariable);
 
     final heapObject = objects.objectsByCodes.values.first;
