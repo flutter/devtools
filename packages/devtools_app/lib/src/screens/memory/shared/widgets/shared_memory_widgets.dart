@@ -57,3 +57,26 @@ class HeapClassView extends StatelessWidget {
     );
   }
 }
+
+/// Explains coloring for class types on the memory screen.
+class ClassTypeLegend extends StatelessWidget {
+  const ClassTypeLegend({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text('Class type legend:'),
+        ...ClassType.values.map(
+          (t) => Row(
+            children: [
+              t.icon,
+              Text(' ${t.aliasDescription}'),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}

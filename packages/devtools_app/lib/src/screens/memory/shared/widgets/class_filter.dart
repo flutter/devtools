@@ -171,20 +171,16 @@ Widget _helpBuilder(BuildContext context) {
     children: [
       Text(_helpText, style: textStyle),
       ...ClassType.values.map(
-        (t) => Column(
+        (t) => Row(
           children: [
-            Row(
-              children: [
-                t.icon,
-                Text(
-                  ' ${t.alias} - for ${t.aliasDescription}',
-                  style: textStyle,
-                ),
-                CopyToClipboardControl(
-                  dataProvider: () => t.alias,
-                  size: tableIconSize,
-                ),
-              ],
+            t.icon,
+            Text(
+              ' ${t.alias} - for ${t.aliasDescription}',
+              style: textStyle,
+            ),
+            CopyToClipboardControl(
+              dataProvider: () => t.alias,
+              size: tableIconSize,
             ),
           ],
         ),

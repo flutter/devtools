@@ -18,7 +18,7 @@ TODO: Remove this section if there are not any general updates.
 TODO: Remove this section if there are not any general updates.
 
 ## Memory updates
-TODO: Remove this section if there are not any general updates.
+* Add legend for class types - [#5937](https://github.com/flutter/devtools/pull/5937)
 
 ## Debugger updates
 TODO: Remove this section if there are not any general updates.
