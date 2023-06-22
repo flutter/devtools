@@ -10,6 +10,7 @@ import '../../../../../shared/memory/class_name.dart';
 import '../../../shared/heap/heap.dart';
 import '../../../shared/primitives/instance_context_menu.dart';
 import '../controller/sampler.dart';
+import 'class_details/instances_menu.dart';
 
 /// Right aligned table cell, shat shows number of instances.
 ///
@@ -21,11 +22,10 @@ class InstanceTableCell extends StatelessWidget {
     HeapDataCallback heap,
     HeapClassName heapClass, {
     super.key,
-    required this.isSelected,
+    required bool isSelected,
     required this.gaContext,
     this.liveItemsEnabled = true,
-  })  : _showMenu = _shouldShowMenu(isSelected, objects),
-        _sampleObtainer = _shouldShowMenu(isSelected, objects)
+  })  : _sampleObtainer = _shouldShowMenu(isSelected, objects)
             ? HeapClassSampler(objects, heap(), heapClass)
             : null,
         _count = objects.instanceCount;
@@ -34,20 +34,20 @@ class InstanceTableCell extends StatelessWidget {
       isSelected && objects.instanceCount > 0;
 
   final HeapClassSampler? _sampleObtainer;
-  final bool _showMenu;
-  final bool isSelected;
+
   final MemoryAreas gaContext;
   final int _count;
   final bool liveItemsEnabled;
 
   @override
   Widget build(BuildContext context) {
-    return InstanceDisplayWithContextMenu(
+    return InstanceViewWithContextMenu(
       count: _count,
       gaContext: gaContext,
-      sampleObtainer: _sampleObtainer,
-      showMenu: _showMenu,
-      liveItemsEnabled: liveItemsEnabled,
+      menuBuilder: () => buildHeapInstancesMenu(
+        sampler: _sampleObtainer,
+        liveItemsEnabled: liveItemsEnabled,
+      ),
     );
   }
 }

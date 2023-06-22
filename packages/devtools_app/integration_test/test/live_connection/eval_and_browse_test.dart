@@ -73,7 +73,7 @@ Future<void> _inboundReferencesAreListed(_EvalAndBrowseTester tester) async {
   await tester.tapAndPump(find.text('MyApp'));
   await tester.tapAndPump(
     find.descendant(
-      of: find.byType(InstanceDisplayWithContextMenu),
+      of: find.byType(InstanceViewWithContextMenu),
       matching: find.byType(ContextMenuButton),
     ),
   );
