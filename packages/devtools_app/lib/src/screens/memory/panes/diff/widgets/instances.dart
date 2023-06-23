@@ -16,8 +16,8 @@ import 'class_details/instances_menu.dart';
 ///
 /// If the row is selected and count of instances is positive, the table cell
 /// includes a "more" icon button with a context menu for the instance set.
-class InstanceTableCell extends StatelessWidget {
-  InstanceTableCell(
+class HeapInstanceTableCell extends StatelessWidget {
+  HeapInstanceTableCell(
     ObjectSet objects,
     HeapDataCallback heap,
     HeapClassName heapClass, {

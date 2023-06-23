@@ -13,8 +13,8 @@ import '../../shared/primitives/instance_context_menu.dart';
 ///
 /// If the row is selected and count of instances is positive, the table cell
 /// includes a "more" icon button with a context menu for the instance set.
-class InstanceTableCell extends StatelessWidget {
-  const InstanceTableCell(
+class ProfileInstanceTableCell extends StatelessWidget {
+  const ProfileInstanceTableCell(
     this.heapClass,
     this.gaContext, {
     super.key,
