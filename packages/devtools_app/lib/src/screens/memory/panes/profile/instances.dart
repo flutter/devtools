@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import '../../../../shared/analytics/constants.dart';
 import '../../../../shared/memory/class_name.dart';
 
+import '../../shared/heap/sampler.dart';
 import '../../shared/primitives/instance_context_menu.dart';
 
 /// Right aligned table cell, shat shows number of instances.
@@ -14,7 +15,7 @@ import '../../shared/primitives/instance_context_menu.dart';
 /// If the row is selected and count of instances is positive, the table cell
 /// includes a "more" icon button with a context menu for the instance set.
 class ProfileInstanceTableCell extends StatelessWidget {
-  const ProfileInstanceTableCell(
+  ProfileInstanceTableCell(
     this.heapClass,
     this.gaContext, {
     super.key,
@@ -24,28 +25,31 @@ class ProfileInstanceTableCell extends StatelessWidget {
 
   final MemoryAreas gaContext;
   final int count;
-  final HeapClassName heapClass;
   final bool _shouldShowMenu;
+  final HeapClassName heapClass;
+  late final ClassSampler _sampler = ClassSampler(heapClass);
 
   @override
   Widget build(BuildContext context) {
     return InstanceViewWithContextMenu(
       count: count,
       gaContext: gaContext,
-      menuBuilder: _shouldShowMenu ? buildHeapInstancesMenu : null,
+      menuBuilder: _shouldShowMenu ? _buildHeapInstancesMenu : null,
     );
+  }
+
+  List<Widget> _buildHeapInstancesMenu() {
+    return [
+      _StoreAsOneVariableMenu(_sampler),
+      _StoreAllAsVariableMenu(_sampler),
+    ];
   }
 }
 
-List<Widget> buildHeapInstancesMenu() {
-  return [
-    _StoreAsOneVariableMenu(),
-    _StoreAllAsVariableMenu(),
-  ];
-}
-
 class _StoreAllAsVariableMenu extends StatelessWidget {
-  const _StoreAllAsVariableMenu();
+  const _StoreAllAsVariableMenu(this.sampler);
+
+  final ClassSampler sampler;
 
   @override
   Widget build(BuildContext context) {
@@ -57,7 +61,10 @@ class _StoreAllAsVariableMenu extends StatelessWidget {
       required bool implementers,
     }) =>
         MenuItemButton(
-          onPressed: () {},
+          onPressed: () async => await sampler.allLiveToConsole(
+            includeImplementers: implementers,
+            includeSubclasses: subclasses,
+          ),
           child: Text(title),
         );
 
@@ -78,7 +85,9 @@ class _StoreAllAsVariableMenu extends StatelessWidget {
 }
 
 class _StoreAsOneVariableMenu extends StatelessWidget {
-  const _StoreAsOneVariableMenu();
+  const _StoreAsOneVariableMenu(this.sampler);
+
+  final ClassSampler sampler;
 
   @override
   Widget build(BuildContext context) {

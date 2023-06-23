@@ -20,8 +20,8 @@ class _HeapSelection {
   final AdaptedHeapData heap;
 }
 
-class ProfileClassSampler {
-  ProfileClassSampler(
+class ClassSampler {
+  ClassSampler(
     this.heapClass, {
     ObjectSet? objects,
     AdaptedHeapData? heap,
@@ -112,7 +112,7 @@ class ProfileClassSampler {
   }
 }
 
-class HeapClassSampler extends ProfileClassSampler {
+class HeapClassSampler extends ClassSampler {
   HeapClassSampler(
     HeapClassName heapClass,
     ObjectSet objects,
