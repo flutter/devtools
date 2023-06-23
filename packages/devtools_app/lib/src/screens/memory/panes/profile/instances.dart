@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 
 import '../../../../shared/analytics/constants.dart';
 import '../../../../shared/memory/class_name.dart';
-import 'package:flutter/material.dart';
 
 import '../../shared/primitives/instance_context_menu.dart';
 
