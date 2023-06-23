@@ -8,8 +8,8 @@ import '../../../../../shared/analytics/constants.dart';
 import '../../../../../shared/memory/adapted_heap_data.dart';
 import '../../../../../shared/memory/class_name.dart';
 import '../../../shared/heap/heap.dart';
+import '../../../shared/heap/sampler.dart';
 import '../../../shared/primitives/instance_context_menu.dart';
-import '../controller/sampler.dart';
 import 'class_details/instances_menu.dart';
 
 /// Right aligned table cell, shat shows number of instances.
@@ -26,7 +26,7 @@ class HeapInstanceTableCell extends StatelessWidget {
     required this.gaContext,
     this.liveItemsEnabled = true,
   })  : _sampleObtainer = _shouldShowMenu(isSelected, objects)
-            ? HeapClassSampler(objects, heap(), heapClass)
+            ? HeapClassSampler(heapClass, objects, heap())
             : null,
         _count = objects.instanceCount;
 

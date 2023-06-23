@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 
-import '../../controller/sampler.dart';
+import '../../../../shared/heap/sampler.dart';
 
 List<Widget> buildHeapInstancesMenu({
   required HeapClassSampler? sampler,

@@ -5,21 +5,32 @@
 import 'package:collection/collection.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../../../../shared/analytics/analytics.dart' as ga;
-import '../../../../../shared/analytics/constants.dart' as gac;
-import '../../../../../shared/globals.dart';
-import '../../../../../shared/memory/adapted_heap_data.dart';
-import '../../../../../shared/memory/class_name.dart';
-import '../../../../../shared/vm_utils.dart';
-import '../../../shared/heap/heap.dart';
+import '../../../../shared/analytics/analytics.dart' as ga;
+import '../../../../shared/analytics/constants.dart' as gac;
+import '../../../../shared/globals.dart';
+import '../../../../shared/memory/adapted_heap_data.dart';
+import '../../../../shared/memory/class_name.dart';
+import '../../../../shared/vm_utils.dart';
+import 'heap.dart';
 
-class HeapClassSampler {
-  HeapClassSampler(this.objects, this.heap, this.heapClass)
-      : assert(objects.objectsByCodes.isNotEmpty);
+class _HeapSelection {
+  _HeapSelection(this.objects, this.heap);
 
-  final HeapClassName heapClass;
   final ObjectSet objects;
   final AdaptedHeapData heap;
+}
+
+class ProfileClassSampler {
+  ProfileClassSampler(
+    this.heapClass, {
+    ObjectSet? objects,
+    AdaptedHeapData? heap,
+  })  : assert(objects?.objectsByCodes.isNotEmpty ?? true),
+        assert((objects == null) == (heap == null)),
+        _selection = objects == null ? null : _HeapSelection(objects, heap!);
+
+  final HeapClassName heapClass;
+  final _HeapSelection? _selection;
 
   IsolateRef get _mainIsolateRef =>
       serviceManager.isolateManager.mainIsolate.value!;
@@ -63,36 +74,6 @@ class HeapClassSampler {
     serviceManager.consoleService.appendStdio('$error\n$trace');
   }
 
-  Future<void> oneLiveStaticToConsole() async {
-    ga.select(gac.memory, gac.MemoryEvent.dropOneLiveVariable);
-    final instances = (await _liveInstances())?.instances;
-
-    final instanceRef = instances?.firstWhereOrNull(
-      (objRef) =>
-          objRef is InstanceRef &&
-          objects.objectsByCodes.containsKey(objRef.identityHashCode),
-    ) as InstanceRef?;
-
-    if (instanceRef == null) {
-      serviceManager.consoleService.appendStdio(
-        'Unable to select instance that exist in snapshot and still alive in application.\n'
-        'You may want to increase "${preferences.memory.refLimitTitle}" in memory settings.',
-      );
-      return;
-    }
-
-    final heapObject = objects.objectsByCodes[instanceRef.identityHashCode!]!;
-
-    final heapSelection = HeapObjectSelection(heap, object: heapObject);
-
-    // drop to console
-    serviceManager.consoleService.appendBrowsableInstance(
-      instanceRef: instanceRef,
-      isolateRef: _mainIsolateRef,
-      heapSelection: heapSelection,
-    );
-  }
-
   bool get isEvalEnabled =>
       heapClass.classType(serviceManager.rootInfoNow().package) !=
       ClassType.runtime;
@@ -118,19 +99,67 @@ class HeapClassSampler {
       return;
     }
 
+    final selection = _selection;
+
     // drop to console
     serviceManager.consoleService.appendBrowsableInstance(
       instanceRef: list,
       isolateRef: _mainIsolateRef,
-      heapSelection: HeapObjectSelection(heap, object: null),
+      heapSelection: selection == null
+          ? null
+          : HeapObjectSelection(selection.heap, object: null),
+    );
+  }
+}
+
+class HeapClassSampler extends ProfileClassSampler {
+  HeapClassSampler(
+    HeapClassName heapClass,
+    ObjectSet objects,
+    AdaptedHeapData heap,
+  ) : super(heapClass, heap: heap, objects: objects);
+
+  Future<void> oneLiveStaticToConsole() async {
+    final selection = _selection!;
+
+    ga.select(gac.memory, gac.MemoryEvent.dropOneLiveVariable);
+    final instances = (await _liveInstances())?.instances;
+
+    final instanceRef = instances?.firstWhereOrNull(
+      (objRef) =>
+          objRef is InstanceRef &&
+          selection.objects.objectsByCodes.containsKey(objRef.identityHashCode),
+    ) as InstanceRef?;
+
+    if (instanceRef == null) {
+      serviceManager.consoleService.appendStdio(
+        'Unable to select instance that exist in snapshot and still alive in application.\n'
+        'You may want to increase "${preferences.memory.refLimitTitle}" in memory settings.',
+      );
+      return;
+    }
+
+    final heapObject =
+        selection.objects.objectsByCodes[instanceRef.identityHashCode!]!;
+
+    final heapSelection =
+        HeapObjectSelection(selection.heap, object: heapObject);
+
+    // drop to console
+    serviceManager.consoleService.appendBrowsableInstance(
+      instanceRef: instanceRef,
+      isolateRef: _mainIsolateRef,
+      heapSelection: heapSelection,
     );
   }
 
   void oneStaticToConsole() {
+    final selection = _selection!;
     ga.select(gac.memory, gac.MemoryEvent.dropOneStaticVariable);
 
-    final heapObject = objects.objectsByCodes.values.first;
-    final heapSelection = HeapObjectSelection(heap, object: heapObject);
+    final heapObject = selection.objects.objectsByCodes.values.first;
+    final heapSelection =
+        HeapObjectSelection(selection.heap, object: heapObject);
 
     // drop to console
     serviceManager.consoleService.appendBrowsableInstance(
