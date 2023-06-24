@@ -575,27 +575,21 @@ class _AllocationProfileTable extends StatelessWidget {
         return ValueListenableBuilder<bool>(
           valueListenable: preferences.vmDeveloperModeEnabled,
           builder: (context, vmDeveloperModeEnabled, _) {
-            return LayoutBuilder(
-              builder: (context, constraints) {
-                return OutlineDecoration.onlyTop(
-                  child: FlatTable<ProfileRecord>(
-                    keyFactory: (element) => Key(element.heapClass.fullName),
-                    data: profile.records,
-                    dataKey: 'allocation-profile',
-                    columnGroups: vmDeveloperModeEnabled
-                        ? _AllocationProfileTable._vmModeColumnGroups
-                        : null,
-                    columns: [
-                      ..._columns,
-                      if (vmDeveloperModeEnabled) ..._vmDeveloperModeColumns,
-                    ],
-                    defaultSortColumn: _AllocationProfileTable._fieldSizeColumn,
-                    defaultSortDirection: SortDirection.descending,
-                    pinBehavior: FlatTablePinBehavior.pinOriginalToTop,
-                    includeColumnGroupHeaders: false,
-                  ),
-                );
-              },
+            return FlatTable<ProfileRecord>(
+              keyFactory: (element) => Key(element.heapClass.fullName),
+              data: profile.records,
+              dataKey: 'allocation-profile',
+              columnGroups: vmDeveloperModeEnabled
+                  ? _AllocationProfileTable._vmModeColumnGroups
+                  : null,
+              columns: [
+                ..._columns,
+                if (vmDeveloperModeEnabled) ..._vmDeveloperModeColumns,
+              ],
+              defaultSortColumn: _AllocationProfileTable._fieldSizeColumn,
+              defaultSortDirection: SortDirection.descending,
+              pinBehavior: FlatTablePinBehavior.pinOriginalToTop,
+              includeColumnGroupHeaders: false,
             );
           },
         );
