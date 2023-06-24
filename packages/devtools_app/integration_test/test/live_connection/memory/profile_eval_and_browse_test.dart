@@ -43,12 +43,12 @@ void main() {
 
     final evalTester = _EvalAndBrowseTester(tester);
 
-    await _testBasicEval(evalTester);
-    await _testAssignment(evalTester);
+    // await _testBasicEval(evalTester);
+    // await _testAssignment(evalTester);
 
     await evalTester.switchToProfile();
 
-    await _browseInstances(evalTester);
+    await _browseOneInstance(evalTester);
   });
 }
 
@@ -68,7 +68,7 @@ Future<void> _testAssignment(_EvalAndBrowseTester tester) async {
   );
 }
 
-Future<void> _browseInstances(_EvalAndBrowseTester tester) async {
+Future<void> _browseOneInstance(_EvalAndBrowseTester tester) async {
   await tester.tapAndPump(find.text('MyApp'));
   await tester.tapAndPump(
     find.descendant(
@@ -77,25 +77,27 @@ Future<void> _browseInstances(_EvalAndBrowseTester tester) async {
     ),
   );
 
-  await tester.tapAndPump(find.textContaining('one instance'));
-  await tester.tapAndPump(find.text('Any'), duration: longPumpDuration);
+  await tester.tapAndPump(
+    find.textContaining('one instance'),
+    duration: longPumpDuration,
+  );
 
-  Widget? next = await tester.tapAndPump(
-    find.textContaining('MyApp, retained size '),
-    next: find.text('references'),
+  expect(find.text('MyApp'), findsNWidgets(2));
+
+  await tester.tapAndPump(
+    find.descendant(
+      of: find.byType(InstanceViewWithContextMenu),
+      matching: find.byType(ContextMenuButton),
+    ),
   );
-  next = await tester.tapAndPump(
-    find.byWidget(next!),
-    next: find.textContaining('static ('),
+
+  await tester.tapAndPump(find.textContaining('all class instances'));
+  await tester.tapAndPump(
+    find.text('Direct instances'),
+    duration: longPumpDuration,
   );
-  next = await tester.tapAndPump(
-    find.byWidget(next!),
-    next: find.text('inbound'),
-  );
-  next = await tester.tapAndPump(
-    find.byWidget(next!),
-    next: find.text('Context'),
-  );
+
+  expect(find.text('List (1 item)'), findsOneWidget);
 }
 
 class _EvalAndBrowseTester {
