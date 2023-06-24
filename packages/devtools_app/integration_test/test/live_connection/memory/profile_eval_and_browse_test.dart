@@ -8,13 +8,8 @@
 
 // ignore_for_file: avoid_print
 
-import 'package:devtools_app/src/screens/memory/panes/control/primary_controls.dart';
-import 'package:devtools_app/src/screens/memory/panes/diff/widgets/snapshot_list.dart';
 import 'package:devtools_app/src/screens/memory/shared/primitives/instance_context_menu.dart';
-import 'package:devtools_app/src/shared/banner_messages.dart';
 import 'package:devtools_app/src/shared/common_widgets.dart';
-import 'package:devtools_app/src/shared/console/widgets/console_pane.dart';
-import 'package:devtools_app/src/shared/primitives/simple_items.dart';
 import 'package:devtools_app/src/shared/ui/search.dart';
 import 'package:devtools_test/devtools_integration_test.dart';
 import 'package:flutter/material.dart';
@@ -23,7 +18,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 
 // To run:
-// dart run integration_test/run_tests.dart --target=integration_test/test/live_connection/eval_and_browse_test.dart
+// dart run integration_test/run_tests.dart --target=integration_test/test/live_connection/memory/profile_eval_and_browse_test.dart
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
@@ -39,7 +34,7 @@ void main() {
     await resetHistory();
   });
 
-  testWidgets('memory eval and browse', (tester) async {
+  testWidgets('memory profile eval and browse', (tester) async {
     await pumpAndConnectDevTools(tester, testApp);
 
     final evalTester = _EvalAndBrowseTester(tester);
@@ -47,9 +42,7 @@ void main() {
     await _testBasicEval(evalTester);
     await _testAssignment(evalTester);
 
-    await evalTester.switchToSnapshotsAndTakeOne();
-
-    await _inboundReferencesAreListed(evalTester);
+    await _browseInstances(evalTester);
   });
 }
 
@@ -69,7 +62,7 @@ Future<void> _testAssignment(_EvalAndBrowseTester tester) async {
   );
 }
 
-Future<void> _inboundReferencesAreListed(_EvalAndBrowseTester tester) async {
+Future<void> _browseInstances(_EvalAndBrowseTester tester) async {
   await tester.tapAndPump(find.text('MyApp'));
   await tester.tapAndPump(
     find.descendant(
@@ -111,17 +104,7 @@ class _EvalAndBrowseTester {
     await tester.pump(safePumpDuration);
     await _pressEnter();
 
-    try {
-      expect(expectedResponse, findsOneWidget);
-    } catch (e) {
-      const goldenName = 'debug_golden.png';
-      // In case of unexpected response take golden for troubleshooting.
-      logStatus('Unexpected response. Taking $goldenName.\n$e');
-      await expectLater(
-        find.byType(ConsolePane),
-        matchesGoldenFile(goldenName),
-      );
-    }
+    expect(expectedResponse, findsOneWidget);
   }
 
   Future<void> _pressEnter() async {
@@ -133,48 +116,6 @@ class _EvalAndBrowseTester {
     await simulateKeyDownEvent(LogicalKeyboardKey.enter);
     await simulateKeyUpEvent(LogicalKeyboardKey.enter);
     await tester.pump(longPumpDuration);
-  }
-
-  Future<void> switchToSnapshotsAndTakeOne() async {
-    // Open memory screen.
-    await switchToScreen(tester, ScreenMetaData.memory);
-
-    // Close warning and chart to get screen space.
-    await tapAndPump(
-      find.descendant(
-        of: find.byType(BannerWarning),
-        matching: find.byIcon(Icons.close),
-      ),
-    );
-    await tapAndPump(find.text(PrimaryControls.memoryChartText));
-
-    // Make console wider.
-    // The distance is big enough to see more items in console,
-    // but not too big to make classes in snapshot hidden.
-    const dragDistance = -320.0;
-    await tester.drag(
-      find.byType(ConsolePaneHeader),
-      const Offset(0, dragDistance),
-    );
-    await tester.pumpAndSettle();
-
-    // Switch to diff tab.
-    await tapAndPump(find.text('Diff Snapshots'));
-
-    logStatus('Started taking snapshot.');
-    // Take snapshot.
-    const snapshotDuration = Duration(seconds: 20);
-    await tapAndPump(
-      find.byIcon(iconToTakeSnapshot),
-      duration: snapshotDuration,
-    );
-    logStatus('Finished taking snapshot.');
-
-    // Sort by class.
-    await tapAndPump(find.text('Class'));
-
-    // Select class.
-    await tapAndPump(find.text('MyApp'));
   }
 
   /// Taps and settles.
