@@ -110,6 +110,17 @@ class ClassSampler {
           : HeapObjectSelection(selection.heap, object: null),
     );
   }
+
+  void oneLiveToConsole() {
+    ga.select(gac.memory, gac.MemoryEvent.dropOneLiveVariable);
+
+    // drop to console
+    serviceManager.consoleService.appendBrowsableInstance(
+      instanceRef: null,
+      isolateRef: _mainIsolateRef,
+      heapSelection: null,
+    );
+  }
 }
 
 class HeapClassSampler extends ClassSampler {

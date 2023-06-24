@@ -53,7 +53,7 @@ class _StoreAllAsVariableMenu extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const menuText = 'Store all class instances currently alive in application';
+    const menuText = 'Store all class instances';
 
     MenuItemButton item(
       title, {
@@ -91,24 +91,11 @@ class _StoreAsOneVariableMenu extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const menuText = 'Store one instance from the set as a console variable';
-
-    return SubmenuButton(
-      menuChildren: <Widget>[
-        MenuItemButton(
-          onPressed: () {},
-          child: const Text(
-            'Any',
-          ),
-        ),
-        MenuItemButton(
-          onPressed: () {},
-          child: const Text(
-            'Any, not garbage collected',
-          ),
-        ),
-      ],
-      child: const Text(menuText),
+    return MenuItemButton(
+      onPressed: sampler.oneLiveToConsole,
+      child: const Text(
+        'Store one instance as a console variable',
+      ),
     );
   }
 }
