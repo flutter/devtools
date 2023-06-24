@@ -8,8 +8,12 @@
 
 // ignore_for_file: avoid_print
 
+import 'package:devtools_app/src/screens/memory/panes/control/primary_controls.dart';
 import 'package:devtools_app/src/screens/memory/shared/primitives/instance_context_menu.dart';
+import 'package:devtools_app/src/shared/banner_messages.dart';
 import 'package:devtools_app/src/shared/common_widgets.dart';
+import 'package:devtools_app/src/shared/console/widgets/console_pane.dart';
+import 'package:devtools_app/src/shared/primitives/simple_items.dart';
 import 'package:devtools_app/src/shared/ui/search.dart';
 import 'package:devtools_test/devtools_integration_test.dart';
 import 'package:flutter/material.dart';
@@ -41,6 +45,8 @@ void main() {
 
     await _testBasicEval(evalTester);
     await _testAssignment(evalTester);
+
+    await evalTester.switchToProfile();
 
     await _browseInstances(evalTester);
   });
@@ -152,5 +158,29 @@ class _EvalAndBrowseTester {
     }
 
     throw StateError('Could not find $next');
+  }
+
+  Future<void> switchToProfile() async {
+    // Open memory screen.
+    await switchToScreen(tester, ScreenMetaData.memory);
+
+    // Close warning and chart to get screen space.
+    await tapAndPump(
+      find.descendant(
+        of: find.byType(BannerWarning),
+        matching: find.byIcon(Icons.close),
+      ),
+    );
+    await tapAndPump(find.text(PrimaryControls.memoryChartText));
+
+    // Make console wider.
+    // The distance is big enough to see more items in console,
+    // but not too big to make classes in snapshot hidden.
+    const dragDistance = -320.0;
+    await tester.drag(
+      find.byType(ConsolePaneHeader),
+      const Offset(0, dragDistance),
+    );
+    await tester.pumpAndSettle();
   }
 }
