@@ -13,8 +13,8 @@ import '../../../../shared/memory/class_name.dart';
 import '../../../../shared/vm_utils.dart';
 import 'heap.dart';
 
-class _HeapSelection {
-  _HeapSelection(this.objects, this.heap);
+class _HeapObjects {
+  _HeapObjects(this.objects, this.heap);
 
   final ObjectSet objects;
   final AdaptedHeapData heap;
@@ -27,13 +27,35 @@ class ClassSampler {
     AdaptedHeapData? heap,
   })  : assert(objects?.objectsByCodes.isNotEmpty ?? true),
         assert((objects == null) == (heap == null)),
-        _selection = objects == null ? null : _HeapSelection(objects, heap!);
+        _objects = objects == null ? null : _HeapObjects(objects, heap!);
 
   final HeapClassName heapClass;
-  final _HeapSelection? _selection;
+  final _HeapObjects? _objects;
 
   IsolateRef get _mainIsolateRef =>
       serviceManager.isolateManager.mainIsolate.value!;
+
+  Future<InstanceRef?> _liveInstance() async {
+    try {
+      final isolateId = _mainIsolateRef.id!;
+
+      final theClass = await findClass(isolateId, heapClass);
+      if (theClass == null) return null;
+
+      final object = (await serviceManager.service!.getInstances(
+        isolateId,
+        theClass.id!,
+        1,
+      ))
+          .instances?[0];
+
+      if (object is InstanceRef) return object;
+      return null;
+    } catch (error, trace) {
+      _outputError(error, trace);
+      return null;
+    }
+  }
 
   Future<InstanceSet?> _liveInstances() async {
     try {
@@ -99,7 +121,7 @@ class ClassSampler {
       return;
     }
 
-    final selection = _selection;
+    final selection = _objects;
 
     // drop to console
     serviceManager.consoleService.appendBrowsableInstance(
@@ -111,12 +133,12 @@ class ClassSampler {
     );
   }
 
-  void oneLiveToConsole() {
+  Future<void> oneLiveToConsole() async {
     ga.select(gac.memory, gac.MemoryEvent.dropOneLiveVariable);
 
     // drop to console
     serviceManager.consoleService.appendBrowsableInstance(
-      instanceRef: null,
+      instanceRef: await _liveInstance(),
       isolateRef: _mainIsolateRef,
       heapSelection: null,
     );
@@ -131,7 +153,7 @@ class HeapClassSampler extends ClassSampler {
   ) : super(heapClass, heap: heap, objects: objects);
 
   Future<void> oneLiveStaticToConsole() async {
-    final selection = _selection!;
+    final selection = _objects!;
 
     ga.select(gac.memory, gac.MemoryEvent.dropOneLiveVariable);
     final instances = (await _liveInstances())?.instances;
@@ -165,7 +187,7 @@ class HeapClassSampler extends ClassSampler {
   }
 
   void oneStaticToConsole() {
-    final selection = _selection!;
+    final selection = _objects!;
     ga.select(gac.memory, gac.MemoryEvent.dropOneStaticVariable);
 
     final heapObject = selection.objects.objectsByCodes.values.first;
