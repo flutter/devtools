@@ -590,6 +590,7 @@ class _AllocationProfileTable extends StatelessWidget {
               defaultSortDirection: SortDirection.descending,
               pinBehavior: FlatTablePinBehavior.pinOriginalToTop,
               includeColumnGroupHeaders: false,
+              selectionNotifier: controller.selection,
             );
           },
         );
