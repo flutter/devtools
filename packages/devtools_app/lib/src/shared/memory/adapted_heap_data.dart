@@ -81,7 +81,8 @@ class AdaptedHeapData {
   static final _uiReleaser = UiReleaser();
 
   static Future<AdaptedHeapData> fromHeapSnapshot(
-      HeapSnapshotGraph graph,) async {
+    HeapSnapshotGraph graph,
+  ) async {
     final objects = <AdaptedHeapObject>[];
     for (final i in Iterable.generate(graph.objects.length)) {
       if (_uiReleaser.step()) await _uiReleaser.releaseUi();
