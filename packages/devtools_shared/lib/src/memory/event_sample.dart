@@ -31,13 +31,19 @@ class AllocationAccumulator {
   static AllocationAccumulator empty() =>
       AllocationAccumulator(false, false, false);
 
+  bool get isEmpty => !isStart && !isContinuesVisible && !isReset;
+
   final bool _start;
 
   final bool _continues;
+  bool continuesVisible = false;
 
   final bool _reset;
 
   bool get isStart => _start;
+
+  bool get isContinues => _continues;
+  bool get isContinuesVisible => isContinues && continuesVisible;
 
   bool get isReset => _reset;
 
