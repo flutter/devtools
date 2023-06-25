@@ -180,6 +180,7 @@ class InspectorTreeController extends DisposableController
       );
     });
   }
+
   InspectorTreeNode? get selection => _selection;
   InspectorTreeNode? _selection;
 

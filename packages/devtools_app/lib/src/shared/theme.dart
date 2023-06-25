@@ -359,7 +359,6 @@ extension DevToolsColorScheme on ColorScheme {
 
   Color get autoCompleteTextColor => isLight ? Colors.black : Colors.white;
 
-
   Color get expandedTopContentColor =>
       isLight ? Colors.grey[50]! : Colors.grey[850]!;
 
