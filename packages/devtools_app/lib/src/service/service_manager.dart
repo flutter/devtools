@@ -549,9 +549,6 @@ class VmServiceCapabilities {
   VmServiceCapabilities(this.version);
 
   final Version version;
-
-  bool get supportsGetScripts =>
-      version.major! > 3 || (version.major == 3 && version.minor! >= 12);
 }
 
 class ConnectedState {

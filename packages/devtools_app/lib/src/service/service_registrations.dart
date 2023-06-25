@@ -15,7 +15,7 @@ class RegisteredServiceDescription extends RegisteredService {
     this.icon,
     this.gaScreenName,
     this.gaItem,
-  }) : super(service: service, title: title);
+  }) : super(service: service);
 
   final Widget? icon;
   final String? gaScreenName;
@@ -56,7 +56,6 @@ final hotRestart = RegisteredServiceDescription._(
 /// the Flutter engine, and the Dart sdk.
 const flutterVersion = RegisteredService(
   service: 'flutterVersion',
-  title: 'Flutter Version',
 );
 
 RegisteredService get flutterMemoryInfo => flutterMemory;

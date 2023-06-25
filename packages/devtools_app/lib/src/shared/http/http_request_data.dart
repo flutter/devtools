@@ -53,8 +53,6 @@ class DartIOHttpRequestData extends NetworkRequest {
 
   HttpProfileRequestRef _request;
 
-  bool isOutStanding = false;
-
   final ValueNotifier<int> _updateCount = ValueNotifier<int>(0);
 
   /// A notifier that changes when the request data, or it's response body

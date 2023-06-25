@@ -1014,7 +1014,7 @@ class VmServiceWrapper implements VmService {
     vmServiceCallCount++;
     vmServiceCalls.add(name);
 
-    final trackedFuture = TrackedFuture(name, localFuture as Future<Object>);
+    final trackedFuture = TrackedFuture<Object>(name);
     if (_allFuturesCompleter.isCompleted) {
       _allFuturesCompleter = Completer<bool>();
     }
@@ -1101,8 +1101,7 @@ class VmServiceWrapper implements VmService {
 }
 
 class TrackedFuture<T> {
-  TrackedFuture(this.name, this.future);
+  TrackedFuture(this.name);
 
   final String name;
-  final Future<T> future;
 }

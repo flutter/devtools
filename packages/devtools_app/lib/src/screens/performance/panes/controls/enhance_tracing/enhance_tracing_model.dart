@@ -18,8 +18,6 @@ class EnhanceTracingState {
   final bool layouts;
   final bool paints;
 
-  bool get enhanced => builds || layouts || paints;
-
   bool enhancedFor(FramePhaseType type) {
     switch (type) {
       case FramePhaseType.build:

@@ -152,7 +152,6 @@ class _MethodGraphState extends State<_MethodGraph> with AutoDisposeMixin {
                 methodName: selectedNode.name,
                 packageUri: selectedNode.packageUri,
                 sourceLine: selectedNode.sourceLine,
-                isSelected: false,
                 displayInRow: false,
               ),
             ),
@@ -263,14 +262,12 @@ class _MethodColumn extends ColumnData<MethodTableGraphNode>
   Widget? build(
     BuildContext context,
     MethodTableGraphNode data, {
-    bool isRowSelected = false,
     VoidCallback? onPressed,
   }) {
     return MethodAndSourceDisplay(
       methodName: data.name,
       packageUri: data.packageUri,
       sourceLine: data.sourceLine,
-      isSelected: isRowSelected,
     );
   }
 }

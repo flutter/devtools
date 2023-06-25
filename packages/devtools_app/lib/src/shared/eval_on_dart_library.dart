@@ -96,7 +96,6 @@ class EvalOnDartLibrary extends DisposableController
   int _currentRequestId = 0;
 
   late Completer<LibraryRef> _libraryRef;
-  Future<LibraryRef> get libraryRef => _libraryRef.future;
 
   Completer? allPendingRequestsDone;
 
@@ -125,7 +124,7 @@ class EvalOnDartLibrary extends DisposableController
         }
       }
       assert(!_libraryRef.isCompleted);
-      _libraryRef.completeError(LibraryNotFound(libraryName));
+      _libraryRef.completeError(LibraryNotFound());
     } catch (e, stack) {
       _handleError(e, stack);
     }
@@ -284,10 +283,6 @@ class EvalOnDartLibrary extends DisposableController
     }
 
     return value;
-  }
-
-  Future<Library?> getLibrary(LibraryRef instance, Disposable isAlive) {
-    return getObjHelper(instance, isAlive);
   }
 
   Future<Class?> getClass(ClassRef instance, Disposable isAlive) {
@@ -499,20 +494,17 @@ class EvalOnDartLibrary extends DisposableController
         if (result is ErrorRef) {
           throw EvalErrorException(
             expression: expression,
-            scope: scope,
             errorRef: result,
           );
         }
         if (result is Sentinel) {
           throw EvalSentinelException(
             expression: expression,
-            scope: scope,
             sentinel: result,
           );
         }
         throw UnknownEvalException(
           expression: expression,
-          scope: scope,
           exception: result,
         );
       }
@@ -625,18 +617,10 @@ class EvalOnDartLibrary extends DisposableController
       return value;
     });
   }
-
-  Future<String?> retrieveFullValueAsString(InstanceRef stringRef) {
-    return service.retrieveFullStringValue(_isolateRef!.id!, stringRef);
-  }
 }
 
 class LibraryNotFound implements Exception {
-  LibraryNotFound(this.name);
-
-  final String name;
-
-  String get message => 'Library matchining $name not found';
+  LibraryNotFound();
 }
 
 class FutureFailedException implements Exception {
@@ -657,13 +641,11 @@ class CancelledException implements Exception {}
 class UnknownEvalException implements Exception {
   UnknownEvalException({
     required this.expression,
-    required this.scope,
     required this.exception,
   });
 
   final String expression;
   final Object? exception;
-  final Map<String, String?>? scope;
 
   @override
   String toString() {
@@ -685,12 +667,10 @@ class SentinelException implements Exception {
 class EvalSentinelException extends SentinelException {
   EvalSentinelException({
     required this.expression,
-    required this.scope,
     required Sentinel sentinel,
   }) : super(sentinel);
 
   final String expression;
-  final Map<String, String?>? scope;
 
   @override
   String toString() {
@@ -701,13 +681,11 @@ class EvalSentinelException extends SentinelException {
 class EvalErrorException implements Exception {
   EvalErrorException({
     required this.expression,
-    required this.scope,
     required this.errorRef,
   });
 
   final ErrorRef errorRef;
   final String expression;
-  final Map<String, String?>? scope;
 
   @override
   String toString() {

@@ -22,7 +22,6 @@ import 'diagnostics/tree_builder.dart';
 import 'dialogs.dart';
 import 'globals.dart';
 import 'primitives/auto_dispose.dart';
-import 'primitives/flutter_widgets/linked_scroll_controller.dart';
 import 'primitives/utils.dart';
 import 'routing.dart';
 import 'theme.dart';
@@ -32,10 +31,6 @@ import 'utils.dart';
 const tooltipWait = Duration(milliseconds: 500);
 const tooltipWaitLong = Duration(milliseconds: 1000);
 
-/// The width of the package:flutter_test debugger device.
-const debuggerDeviceWidth = 800.0;
-
-const defaultDialogRadius = 20.0;
 double get areaPaneHeaderHeight => scaleByFontFactor(36.0);
 
 double get assumedMonospaceCharacterWidth =>
@@ -53,9 +48,6 @@ class PaddedDivider extends StatelessWidget {
     this.padding = const EdgeInsets.only(bottom: 10.0),
   }) : super(key: key);
 
-  const PaddedDivider.thin({super.key})
-      : padding = const EdgeInsets.only(bottom: 4.0);
-
   PaddedDivider.vertical({super.key, double padding = densePadding})
       : padding = EdgeInsets.symmetric(vertical: padding);
 
@@ -69,36 +61,6 @@ class PaddedDivider extends StatelessWidget {
       child: const Divider(thickness: 1.0),
     );
   }
-}
-
-/// Creates a semibold version of [style].
-TextStyle semibold(TextStyle style) =>
-    style.copyWith(fontWeight: FontWeight.w600);
-
-/// Creates a version of [style] that uses the primary color of [context].
-///
-/// When the app is in dark mode, it instead uses the accent color.
-TextStyle primaryColor(TextStyle style, BuildContext context) {
-  final theme = Theme.of(context);
-  return style.copyWith(
-    color: (theme.brightness == Brightness.light)
-        ? theme.primaryColor
-        : theme.colorScheme.secondary,
-    fontWeight: FontWeight.w400,
-  );
-}
-
-/// Creates a version of [style] that uses the lighter primary color of
-/// [context].
-///
-/// In dark mode, the light primary color still has enough contrast to be
-/// visible, so we continue to use it.
-TextStyle primaryColorLight(TextStyle style, BuildContext context) {
-  final theme = Theme.of(context);
-  return style.copyWith(
-    color: theme.primaryColorLight,
-    fontWeight: FontWeight.w300,
-  );
 }
 
 /// A button with default DevTools styling and analytics handling.
@@ -1004,33 +966,6 @@ class ExportButton extends DevToolsButton {
         );
 }
 
-/// Button to open related information / documentation.
-///
-/// [tooltip] specifies the hover text for the button.
-/// [link] is the link that should be opened when the button is clicked.
-class InformationButton extends StatelessWidget {
-  const InformationButton({
-    Key? key,
-    required this.tooltip,
-    required this.link,
-  }) : super(key: key);
-
-  final String tooltip;
-
-  final String link;
-
-  @override
-  Widget build(BuildContext context) {
-    return Tooltip(
-      message: tooltip,
-      child: IconButton(
-        icon: const Icon(Icons.help_outline),
-        onPressed: () async => await launchUrl(link),
-      ),
-    );
-  }
-}
-
 class ToggleButton extends StatelessWidget {
   const ToggleButton({
     Key? key,
@@ -1038,9 +973,7 @@ class ToggleButton extends StatelessWidget {
     required this.isSelected,
     required this.message,
     required this.icon,
-    this.outlined = true,
     this.label,
-    this.shape,
   }) : super(key: key);
 
   final String message;
@@ -1052,10 +985,6 @@ class ToggleButton extends StatelessWidget {
   final IconData icon;
 
   final String? label;
-
-  final OutlinedBorder? shape;
-
-  final bool outlined;
 
   @override
   Widget build(BuildContext context) {
@@ -1099,7 +1028,6 @@ class FilterButton extends StatelessWidget {
       isSelected: isFilterActive,
       message: message,
       icon: Icons.filter_list,
-      outlined: outlined,
     );
   }
 }
@@ -1507,39 +1435,6 @@ extension ScrollControllerAutoScroll on ScrollController {
 
     // Scroll again if we've received new content in the interim.
     if (hasClients) {
-      final pos = position;
-      if (pos.pixels != pos.maxScrollExtent) {
-        jumpTo(pos.maxScrollExtent);
-      }
-    }
-  }
-}
-
-/// An extension on [LinkedScrollControllerGroup] to facilitate having the
-/// scrolling widgets auto scroll to the bottom on new content.
-///
-/// This extension serves the same function as the [ScrollControllerAutoScroll]
-/// extension above, but we need to implement these methods again as an
-/// extension on [LinkedScrollControllerGroup] because individual
-/// [ScrollController]s are intentionally inaccessible from
-/// [LinkedScrollControllerGroup].
-extension LinkedScrollControllerGroupExtension on LinkedScrollControllerGroup {
-  bool get atScrollBottom {
-    final pos = position;
-    return pos.pixels == pos.maxScrollExtent;
-  }
-
-  /// Scroll the content to the bottom using the app's default animation
-  /// duration and curve..
-  void autoScrollToBottom() async {
-    await animateTo(
-      position.maxScrollExtent,
-      duration: rapidDuration,
-      curve: defaultCurve,
-    );
-
-    // Scroll again if we've received new content in the interim.
-    if (hasAttachedControllers) {
       final pos = position;
       if (pos.pixels != pos.maxScrollExtent) {
         jumpTo(pos.maxScrollExtent);
@@ -2222,42 +2117,6 @@ class CheckboxSetting extends StatelessWidget {
       );
     }
     return content;
-  }
-}
-
-class PubWarningText extends StatelessWidget {
-  const PubWarningText({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isFlutterApp = serviceManager.connectedApp!.isFlutterAppNow == true;
-    final sdkName = isFlutterApp ? 'Flutter' : 'Dart';
-    final minSdkVersion = isFlutterApp ? '2.8.0' : '2.15.0';
-    return SelectableText.rich(
-      TextSpan(
-        text: 'Warning: you should no longer be launching DevTools from'
-            ' pub.\n\n',
-        style: theme.subtleTextStyle.copyWith(color: theme.colorScheme.error),
-        children: [
-          TextSpan(
-            text: 'DevTools version 2.8.0 will be the last version to '
-                'be shipped on pub. As of $sdkName\nversion >= '
-                '$minSdkVersion, DevTools should be launched by running '
-                'the ',
-            style: theme.subtleTextStyle,
-          ),
-          TextSpan(
-            text: '`dart devtools`',
-            style: theme.subtleFixedFontStyle,
-          ),
-          TextSpan(
-            text: '\ncommand.',
-            style: theme.subtleTextStyle,
-          ),
-        ],
-      ),
-    );
   }
 }
 

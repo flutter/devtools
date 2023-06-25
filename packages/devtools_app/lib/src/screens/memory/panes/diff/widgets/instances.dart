@@ -43,7 +43,6 @@ class InstanceTableCell extends StatelessWidget {
   Widget build(BuildContext context) {
     return InstanceViewWithContextMenu(
       count: _count,
-      gaContext: gaContext,
       menuBuilder: () => buildHeapInstancesMenu(
         sampler: _sampleObtainer,
         liveItemsEnabled: liveItemsEnabled,

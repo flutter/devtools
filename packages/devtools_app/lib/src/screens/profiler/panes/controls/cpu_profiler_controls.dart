@@ -10,13 +10,9 @@ import '../../../../shared/common_widgets.dart';
 import '../../../../shared/globals.dart';
 import '../../../../shared/theme.dart';
 import '../../../../shared/ui/filter.dart';
-import '../../../../shared/utils.dart';
 import '../../cpu_profile_model.dart';
 import '../../cpu_profiler_controller.dart';
 import '../../profiler_screen_controller.dart';
-
-final profilerScreenSearchFieldKey =
-    GlobalKey(debugLabel: 'ProfilerScreenSearchFieldKey');
 
 class DisplayTreeGuidelinesToggle extends StatelessWidget {
   const DisplayTreeGuidelinesToggle({super.key});
@@ -57,14 +53,11 @@ Example queries:
     '.toString -uri:flutter'
 ''';
 
-  double get _filterDialogWidth => scaleByFontFactor(400.0);
-
   final CpuProfilerController controller;
 
   @override
   Widget build(BuildContext context) {
     return FilterDialog<CpuStackFrame>(
-      dialogWidth: _filterDialogWidth,
       controller: controller,
       queryInstructions: filterQueryInstructions,
     );

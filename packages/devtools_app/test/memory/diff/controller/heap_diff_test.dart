@@ -87,7 +87,6 @@ Future<SingleClassStats> _createClassStats(
   final heap = AdaptedHeapData(
     objects,
     rootIndex: 0,
-    isolateId: '',
   );
   await calculateHeap(heap);
 
@@ -122,6 +121,5 @@ Future<AdaptedHeap> _createSimplestHeap() async => await AdaptedHeap.create(
           ),
         ],
         rootIndex: 0,
-        isolateId: '',
       ),
     );

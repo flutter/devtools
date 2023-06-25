@@ -4,9 +4,5 @@
 
 // TODO(jacobr): add render, semantics, and layer trees.
 enum FlutterTreeType {
-  widget('Widget');
-
-  const FlutterTreeType(this.title);
-
-  final String title;
+  widget,
 }

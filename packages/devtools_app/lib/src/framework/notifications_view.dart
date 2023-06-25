@@ -266,7 +266,6 @@ class _NotificationState extends State<_Notification>
                             Flexible(
                               child: _NotificationMessage(
                                 widget: widget,
-                                context: context,
                               ),
                             ),
                             _DismissAction(
@@ -278,7 +277,6 @@ class _NotificationState extends State<_Notification>
                         )
                       : _NotificationMessage(
                           widget: widget,
-                          context: context,
                         ),
                   const SizedBox(height: defaultSpacing),
                   _NotificationActions(widget: widget),
@@ -316,11 +314,9 @@ class _DismissAction extends StatelessWidget {
 class _NotificationMessage extends StatelessWidget {
   const _NotificationMessage({
     required this.widget,
-    required this.context,
   });
 
   final _Notification widget;
-  final BuildContext context;
 
   @override
   Widget build(BuildContext context) {

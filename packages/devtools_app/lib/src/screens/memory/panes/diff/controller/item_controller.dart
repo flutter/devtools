@@ -33,12 +33,9 @@ class SnapshotInstanceItem extends SnapshotItem {
   SnapshotInstanceItem({
     required this.displayNumber,
     required this.isolateName,
-    required this.id,
   }) {
     _isProcessing.value = true;
   }
-
-  final int id;
 
   final String isolateName;
 

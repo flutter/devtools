@@ -47,7 +47,6 @@ void main() {
         httpProfile.requests,
         0,
         currentRequests: currentRequests,
-        invalidRequests: [],
       );
       requests = networkRequests.requests;
     });

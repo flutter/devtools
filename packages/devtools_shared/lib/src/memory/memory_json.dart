@@ -61,8 +61,6 @@ abstract class MemoryJson<T> implements DecodeEncode<T> {
 
   late final int _payloadVersion;
 
-  int get payloadVersion => _payloadVersion;
-
   /// Imported JSON data loaded and converted, if necessary, to the latest version.
   bool get isMatchedVersion => _payloadVersion == version;
 
@@ -82,14 +80,9 @@ abstract class MemoryJson<T> implements DecodeEncode<T> {
   static const String devToolsScreenValueMemory = 'memory';
   static const String jsonVersionField = 'version';
   static const String jsonDataField = 'data';
-
-  /// Trailer portion:
-  static String get trailer => '\n]\n}}';
 }
 
 class SamplesMemoryJson extends MemoryJson<HeapSample> {
-  SamplesMemoryJson();
-
   /// Given a JSON string representing an array of HeapSample, decode to a
   /// List of HeapSample.
   SamplesMemoryJson.decode({
@@ -174,27 +167,6 @@ class SamplesMemoryJson extends MemoryJson<HeapSample> {
       throw UnimplementedError(
         '${HeapSample.version} is the only valid HeapSample version',
       );
-
-  /// Given a list of HeapSample, encode as a Json string.
-  static String encodeList(List<HeapSample> data) {
-    final samplesJson = SamplesMemoryJson();
-    final result = StringBuffer();
-
-    // Iterate over all HeapSamples collected.
-    data.map((f) {
-      final encodedValue = result.isNotEmpty
-          ? samplesJson.encodeAnother(f)
-          : samplesJson.encode(f);
-      result.write(encodedValue);
-    }).toList();
-
-    return '$header$result${MemoryJson.trailer}';
-  }
-
-  static String get header => '{"$_jsonMemoryPayloadField": {'
-      '"${MemoryJson.jsonVersionField}": ${HeapSample.version}, '
-      '"${MemoryJson.jsonDevToolsScreenField}": "${MemoryJson.devToolsScreenValueMemory}", '
-      '"${MemoryJson.jsonDataField}": [\n';
 }
 
 /// Structure of the memory JSON file:
@@ -246,8 +218,6 @@ class SamplesMemoryJson extends MemoryJson<HeapSample> {
 ///   }
 /// }
 class AllocationMemoryJson extends MemoryJson<ClassHeapStats> {
-  AllocationMemoryJson();
-
   /// Given a JSON string representing an array of HeapSample, decode to a
   /// List of HeapSample.
   AllocationMemoryJson.decode({
@@ -317,27 +287,4 @@ class AllocationMemoryJson extends MemoryJson<ClassHeapStats> {
   int get version => allocationFormatVersion;
 
   static const int allocationFormatVersion = 2;
-
-  /// Given a list of HeapSample, encode as a Json string.
-  static String encodeList(List<ClassHeapStats> data) {
-    final allocationJson = AllocationMemoryJson();
-
-    final result = StringBuffer();
-
-    // Iterate over all ClassHeapDetailStats collected.
-    data.map((f) {
-      final encodedValue = result.isNotEmpty
-          ? allocationJson.encodeAnother(f)
-          : allocationJson.encode(f);
-      result.write(encodedValue);
-    }).toList();
-
-    return '$header$result${MemoryJson.trailer}';
-  }
-
-  /// Allocations Header portion:
-  static String get header => '{"$_jsonAllocationPayloadField": {'
-      '"${MemoryJson.jsonVersionField}": $allocationFormatVersion, '
-      '"${MemoryJson.jsonDevToolsScreenField}": "${MemoryJson.devToolsScreenValueMemory}", '
-      '"${MemoryJson.jsonDataField}": [\n';
 }

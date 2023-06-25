@@ -60,10 +60,7 @@ class InspectorController extends DisposableController
     _refreshRateLimiter = RateLimiter(refreshFramesPerSecond, refresh);
 
     inspectorTree.config = InspectorTreeConfig(
-      summaryTree: isSummaryTree,
-      treeType: treeType,
       onNodeAdded: _onNodeAdded,
-      onHover: highlightShowNode,
       onSelectionChange: selectionChanged,
       onExpand: _onExpand,
       onClientActiveChange: _onClientChange,
@@ -492,10 +489,6 @@ class InspectorController extends DisposableController
   ) {
     this.subtreeRoot = subtreeRoot;
     details?.setSubtreeRoot(subtreeRoot, subtreeSelection);
-  }
-
-  InspectorInstanceRef? getSubtreeRootValue() {
-    return subtreeRoot?.valueRef;
   }
 
   void setSubtreeRoot(

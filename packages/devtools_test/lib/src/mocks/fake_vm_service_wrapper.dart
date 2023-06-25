@@ -25,9 +25,7 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
     CpuSamples? allocationSamples,
     this._resolvedUriMap,
     this._classList,
-  )   : _startingSockets = _socketProfile?.sockets ?? [],
-        _startingRequests = _httpProfile?.requests ?? [],
-        cpuSamples = cpuSamples ?? _defaultProfile,
+  )   : cpuSamples = cpuSamples ?? _defaultProfile,
         allocationSamples = allocationSamples ?? _defaultProfile {
     _reverseResolvedUriMap = <String, String>{};
     if (_resolvedUriMap != null) {
@@ -61,15 +59,10 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
   /// Specifies the return value of `socketProfilingEnabled`.
   bool socketProfilingEnabledResult = true;
 
-  /// Specifies the dart:io service extension version.
-  SemanticVersion dartIoVersion = SemanticVersion(major: 1, minor: 3);
-
   final VmFlagManager _vmFlagManager;
   final Timeline? _timelineData;
-  SocketProfile? _socketProfile;
-  final List<SocketStatistic> _startingSockets;
-  HttpProfile? _httpProfile;
-  final List<HttpProfileRequest> _startingRequests;
+  final SocketProfile? _socketProfile;
+  final HttpProfile? _httpProfile;
   final SamplesMemoryJson? _memoryData;
   final AllocationMemoryJson? _allocationData;
   final Map<String, String>? _resolvedUriMap;
@@ -389,10 +382,6 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
     return Future.value(_socketProfile ?? SocketProfile(sockets: []));
   }
 
-  void restoreFakeSockets() {
-    _socketProfile = SocketProfile(sockets: _startingSockets);
-  }
-
   @override
   Future<bool> isHttpProfilingAvailable(String isolateId) => Future.value(true);
 
@@ -418,10 +407,6 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
   Future<Success> clearHttpProfile(String isolateId) {
     _httpProfile?.requests.clear();
     return Future.value(Success());
-  }
-
-  void restoreFakeHttpProfileRequests() {
-    _httpProfile = HttpProfile(requests: _startingRequests, timestamp: 0);
   }
 
   @override

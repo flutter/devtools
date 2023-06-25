@@ -7,7 +7,6 @@
 
 import 'dart:async';
 import 'dart:collection';
-import 'dart:convert';
 import 'dart:math';
 
 import 'package:ansi_up/ansi_up.dart';
@@ -49,8 +48,6 @@ bool collectionEquals(e1, e2, {bool ordered = true}) {
 
 // 2^52 is the max int for dart2js.
 final int maxJsInt = pow(2, 52) as int;
-
-String escape(String? text) => text == null ? '' : htmlEscape.convert(text);
 
 final NumberFormat nf = NumberFormat.decimalPattern();
 
@@ -363,31 +360,6 @@ String getSimpleStackFrameName(String? name) {
   return newName.split('&').last;
 }
 
-/// Return a Stream that fires events whenever any of the three given parameter
-/// streams fire.
-Stream combineStreams(Stream a, Stream b, Stream c) {
-  late StreamController controller;
-
-  StreamSubscription? asub;
-  StreamSubscription? bsub;
-  StreamSubscription? csub;
-
-  controller = StreamController(
-    onListen: () {
-      asub = a.listen(controller.add);
-      bsub = b.listen(controller.add);
-      csub = c.listen(controller.add);
-    },
-    onCancel: () {
-      unawaited(asub?.cancel());
-      unawaited(bsub?.cancel());
-      unawaited(csub?.cancel());
-    },
-  );
-
-  return controller.stream;
-}
-
 /// Parses a 3 or 6 digit CSS Hex Color into a dart:ui Color.
 Color parseCssHexColor(String input) {
   // Remove any leading # (and the escaped version to be lenient)
@@ -422,62 +394,6 @@ String toCssHexColor(Color color) {
   return '#${hex(color.red)}${hex(color.green)}${hex(color.blue)}${hex(color.alpha)}';
 }
 
-class Property<T> {
-  Property(this._value);
-
-  final StreamController<T> _changeController = StreamController<T>.broadcast();
-  T _value;
-
-  T get value => _value;
-
-  set value(T newValue) {
-    if (newValue != _value) {
-      _value = newValue;
-      _changeController.add(newValue);
-    }
-  }
-
-  Stream<T> get onValueChange => _changeController.stream;
-}
-
-/// Batch up calls to the given closure. Repeated calls to [invoke] will
-/// overwrite the closure to be called. We'll delay at least [minDelay] before
-/// calling the closure, but will not delay more than [maxDelay].
-class DelayedTimer {
-  DelayedTimer(this.minDelay, this.maxDelay);
-
-  final Duration minDelay;
-  final Duration maxDelay;
-
-  VoidCallback? _closure;
-
-  Timer? _minTimer;
-  Timer? _maxTimer;
-
-  void invoke(VoidCallback closure) {
-    _closure = closure;
-
-    if (_minTimer == null) {
-      _minTimer = Timer(minDelay, _fire);
-      _maxTimer = Timer(maxDelay, _fire);
-    } else {
-      _minTimer!.cancel();
-      _minTimer = Timer(minDelay, _fire);
-    }
-  }
-
-  void _fire() {
-    _minTimer?.cancel();
-    _minTimer = null;
-
-    _maxTimer?.cancel();
-    _maxTimer = null;
-
-    _closure!();
-    _closure = null;
-  }
-}
-
 /// These utilities are ported from the Flutter IntelliJ plugin.
 ///
 /// With Dart's terser JSON support, these methods don't provide much value so
@@ -494,24 +410,6 @@ class JsonUtils {
   static int getIntMember(Map<String, Object?> json, String memberName) {
     return json[memberName] as int? ?? -1;
   }
-
-  static List<String> getValues(Map<String, Object> json, String member) {
-    final values = json[member] as List<Object?>?;
-    if (values == null || values.isEmpty) {
-      return const [];
-    }
-
-    return values.cast();
-  }
-
-  static bool hasJsonData(String? data) {
-    return data != null && data.isNotEmpty && data != 'null';
-  }
-}
-
-/// Add pretty print for a JSON payload.
-extension JsonMap on Map<String, Object?> {
-  String prettyPrint() => const JsonEncoder.withIndent('  ').convert(this);
 }
 
 typedef RateLimiterCallback = Future<void> Function();
@@ -898,10 +796,6 @@ extension SortDirectionExtension on SortDirection {
 /// valid.
 const defaultEpsilon = 1 / 1000;
 
-bool equalsWithinEpsilon(double a, double b) {
-  return (a - b).abs() < defaultEpsilon;
-}
-
 /// A dev time class to help trace DevTools application events.
 class DebugTimingLogger {
   DebugTimingLogger(this.name, {this.mute = false});
@@ -1190,20 +1084,6 @@ extension ListExtension<T> on List<T> {
         if (i != length - 1) separator,
       ],
     ];
-  }
-
-  Iterable<T> whereFromIndex(
-    bool Function(T element) test, {
-    int startIndex = 0,
-  }) {
-    final whereList = <T>[];
-    for (int i = startIndex; i < length; i++) {
-      final element = this[i];
-      if (test(element)) {
-        whereList.add(element);
-      }
-    }
-    return whereList;
   }
 
   bool containsWhere(bool Function(T element) test) {

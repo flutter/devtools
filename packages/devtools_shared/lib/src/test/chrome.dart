@@ -107,18 +107,6 @@ class ChromeProcess {
 
   final Process process;
   final int debugPort;
-  bool _processAlive = true;
-
-  Future<ChromeTab?> connectToTab(
-    String url, {
-    Duration timeout = const Duration(seconds: 20),
-  }) async {
-    return await _connectToTab(
-      connection: ChromeConnection(Uri.parse(url).host, debugPort),
-      tabFound: (tab) => tab.url == url,
-      timeout: timeout,
-    );
-  }
 
   Future<ChromeTab?> connectToTabId(
     String host,
@@ -154,23 +142,13 @@ class ChromeProcess {
       retryFor: timeout,
     );
 
-    unawaited(
-      process.exitCode.then((_) {
-        _processAlive = false;
-      }),
-    );
-
     return wipTab == null ? null : ChromeTab(wipTab);
   }
-
-  bool get isAlive => _processAlive;
 
   /// Returns `true` if the signal is successfully delivered to the process.
   /// Otherwise the signal could not be sent, usually meaning that the process
   /// is already dead.
   bool kill() => process.kill();
-
-  Future<int> get onExit => process.exitCode;
 }
 
 class ChromeTab {
@@ -249,9 +227,6 @@ class ChromeTab {
     return _wip!.target.createTarget('about:blank');
   }
 
-  bool get isConnected => _wip != null;
-
-  Stream<void> get onDisconnect => _disconnectStream.stream;
   final _disconnectStream = StreamController<void>.broadcast();
 
   Stream<LogEntry> get onLogEntryAdded => _entryAddedController.stream;
@@ -261,8 +236,6 @@ class ChromeTab {
 
   Stream<ExceptionThrownEvent> get onExceptionThrown =>
       _exceptionThrownController.stream;
-
-  Future<WipResponse> reload() => _wip!.page.reload();
 
   Future<WipResponse> navigate(String url) => _wip!.page.navigate(url);
 

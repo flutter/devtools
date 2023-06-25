@@ -57,7 +57,6 @@ class ServiceExtensionDescription<T> {
   ServiceExtensionDescription({
     this.iconAsset,
     this.iconData,
-    List<String>? displayValues,
     required this.extension,
     required this.title,
     required this.values,
@@ -68,9 +67,7 @@ class ServiceExtensionDescription<T> {
     this.documentationUrl,
     this.gaDocsItem,
     this.shouldCallOnAllIsolates = false,
-  })  : displayValues =
-            displayValues ?? values.map((v) => v.toString()).toList(),
-        assert((iconAsset == null) != (iconData == null)),
+  })  : assert((iconAsset == null) != (iconData == null)),
         assert((documentationUrl == null) == (gaDocsItem == null));
 
   final String extension;
@@ -82,8 +79,6 @@ class ServiceExtensionDescription<T> {
   final IconData? iconData;
 
   final List<T> values;
-
-  final List<String> displayValues;
 
   /// Analytics screen (screen name where item lives).
   final String? gaScreenName;
@@ -278,13 +273,6 @@ final togglePlatformMode = ServiceExtensionDescription<String>(
   title: 'Override target platform',
   iconAsset: 'icons/phone@2x.png',
   values: ['iOS', 'android', 'fuchsia', 'macOS', 'linux'],
-  displayValues: [
-    'Platform: iOS',
-    'Platform: Android',
-    'Platform: Fuchsia',
-    'Platform: MacOS',
-    'Platform: Linux',
-  ],
   gaScreenName: gac.inspector,
   gaItem: gac.togglePlatform,
   tooltip: 'Override Target Platform',

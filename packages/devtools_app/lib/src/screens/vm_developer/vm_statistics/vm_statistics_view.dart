@@ -19,7 +19,6 @@ import 'vm_statistics_view_controller.dart';
 class VMStatisticsView extends VMDeveloperView {
   const VMStatisticsView()
       : super(
-          id,
           title: 'VM',
           icon: Icons.devices,
         );

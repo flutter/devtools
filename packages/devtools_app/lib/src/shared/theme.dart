@@ -234,7 +234,6 @@ const defaultSpacing = 16.0;
 const tabBarSpacing = 14.0;
 const intermediateSpacing = 12.0;
 const denseSpacing = 8.0;
-const denseModeDenseSpacing = 2.0;
 const denseRowSpacing = 6.0;
 
 const defaultBorderRadius = 16.0;
@@ -253,9 +252,6 @@ double get defaultListItemHeight => scaleByFontFactor(28.0);
 // The chart height does need to increase somewhat to leave room for the legend
 // and tick marks but does not need to scale linearly with the font factor.
 double get defaultChartHeight => scaleByFontFactor(120.0);
-
-/// Width of all settings dialogs.
-double get dialogSettingsWidth => scaleByFontFactor(700.0);
 
 const defaultScrollBarOffset = 10.0;
 
@@ -296,21 +292,12 @@ extension DevToolsColorScheme on ColorScheme {
 
   Color get overlayShadowColor => const Color.fromRGBO(0, 0, 0, 0.5);
 
-  Color get overlayBackgroundColor =>
-      isLight ? Colors.white : const Color(0xFF424242);
-
   Color get grey => const Color.fromARGB(255, 128, 128, 128);
 
   Color get breakpointColor => primary;
 
-  /// Background colors for charts.
-  Color get chartBackground => isLight ? Colors.white : const Color(0xFF2D2E31);
-
   Color get devtoolsLink =>
       isLight ? const Color(0xFF1976D2) : Colors.lightBlueAccent;
-
-  Color get devtoolsSelectedLink =>
-      isLight ? Colors.white : Colors.lightBlueAccent;
 
   // TODO(jacobr): replace this with Theme.of(context).scaffoldBackgroundColor, but we use
   // this in places where we do not have access to the context.
@@ -372,7 +359,6 @@ extension DevToolsColorScheme on ColorScheme {
 
   Color get autoCompleteTextColor => isLight ? Colors.black : Colors.white;
 
-  Color get expandedColor => isLight ? Colors.grey[200]! : Colors.grey[800]!;
 
   Color get expandedTopContentColor =>
       isLight ? Colors.grey[50]! : Colors.grey[850]!;
@@ -454,10 +440,6 @@ extension ThemeDataExtension on ThemeData {
         ),
       );
 
-  TextStyle get selectedLinkTextStyle => _fixBlurryText(
-        linkTextStyle.copyWith(color: colorScheme.devtoolsSelectedLink),
-      );
-
   TextStyle get subtleChartTextStyle => _fixBlurryText(
         TextStyle(
           color: colorScheme.chartSubtleColor,
@@ -488,38 +470,12 @@ extension ThemeDataExtension on ThemeData {
         ),
       );
 
-  // Last allocation timestamp displayed.
-  TextStyle get italicTextStyle => _fixBlurryText(
-        TextStyle(
-          fontWeight: FontWeight.normal,
-          fontSize: scaleByFontFactor(14.0),
-          fontStyle: FontStyle.italic,
-          decoration: TextDecoration.none,
-        ),
-      );
-
   // Items in a chart's legend.
   TextStyle get legendTextStyle => _fixBlurryText(
         TextStyle(
           fontWeight: FontWeight.normal,
           fontSize: chartFontSizeSmall,
           decoration: TextDecoration.none,
-        ),
-      );
-
-  /// TextStyle for callstack.
-  TextStyle get stackTraceCall => _fixBlurryText(
-        TextStyle(
-          fontWeight: FontWeight.normal,
-          fontSize: scaleByFontFactor(12.0),
-        ),
-      );
-
-  /// TextStyle for source file displayed in callstack.
-  TextStyle get stackTraceSource => _fixBlurryText(
-        TextStyle(
-          fontWeight: FontWeight.w100,
-          fontSize: scaleByFontFactor(12.0),
         ),
       );
 
@@ -602,8 +558,6 @@ CurvedAnimation defaultCurvedAnimation(AnimationController parent) =>
     CurvedAnimation(curve: defaultCurve, parent: parent);
 
 double get chartFontSizeSmall => scaleByFontFactor(10.0);
-
-const lightSelection = Color(0xFFD4D7DA);
 
 bool includeText(
   BuildContext context,

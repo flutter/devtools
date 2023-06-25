@@ -24,7 +24,6 @@ import 'object_viewport.dart';
 class ObjectInspectorView extends VMDeveloperView {
   ObjectInspectorView()
       : super(
-          id,
           title: 'Objects',
           icon: Icons.data_object_outlined,
         );

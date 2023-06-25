@@ -15,15 +15,6 @@ import 'vs_code/flutter_panel.dart';
 enum StandaloneScreenType {
   vsCodeFlutterPanel;
 
-  static StandaloneScreenType? parse(String? id) {
-    if (id == null) return null;
-
-    for (final type in StandaloneScreenType.values) {
-      if (type.name == id) return type;
-    }
-    return null;
-  }
-
   Widget get screen {
     return switch (this) {
       StandaloneScreenType.vsCodeFlutterPanel => const VsCodeFlutterPanel(),

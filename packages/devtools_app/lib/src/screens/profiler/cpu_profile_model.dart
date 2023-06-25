@@ -356,14 +356,6 @@ class CpuProfileData {
   }
 
   /// Generate a cpu profile from [originalData] where each sample contains the
-  /// vmTag [tag].
-  ///
-  /// [originalData] does not need to be [processed] to run this operation.
-  factory CpuProfileData.fromVMTag(CpuProfileData originalData, String tag) {
-    return CpuProfileData._fromTag(originalData, tag, CpuProfilerTagType.vm);
-  }
-
-  /// Generate a cpu profile from [originalData] where each sample contains the
   /// userTag [tag].
   ///
   /// [originalData] does not need to be [processed] to run this operation.

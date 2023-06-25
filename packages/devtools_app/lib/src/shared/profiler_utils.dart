@@ -252,7 +252,6 @@ class MethodAndSourceDisplay extends StatelessWidget {
     required this.methodName,
     required this.packageUri,
     required this.sourceLine,
-    required this.isSelected,
     this.displayInRow = true,
     super.key,
   });
@@ -264,8 +263,6 @@ class MethodAndSourceDisplay extends StatelessWidget {
   final String packageUri;
 
   final int? sourceLine;
-
-  final bool isSelected;
 
   final bool displayInRow;
 

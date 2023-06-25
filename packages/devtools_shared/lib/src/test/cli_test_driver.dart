@@ -15,15 +15,11 @@ import 'test_utils.dart';
 class AppFixture {
   AppFixture._(
     this.process,
-    this.lines,
     this.serviceUri,
     this.serviceConnection,
     this.isolates,
     this.onTeardown,
   ) {
-    // "starting app"
-    _onAppStarted = lines.first;
-
     unawaited(serviceConnection.streamListen(EventStreams.kIsolate));
     _isolateEventStreamSubscription =
         serviceConnection.onIsolateEvent.listen((Event event) {
@@ -38,15 +34,11 @@ class AppFixture {
   }
 
   final Process process;
-  final Stream<String> lines;
   final Uri serviceUri;
   final VmService serviceConnection;
   final List<IsolateRef?> isolates;
   late final StreamSubscription<Event> _isolateEventStreamSubscription;
   final Future<void> Function()? onTeardown;
-  late Future<void> _onAppStarted;
-
-  Future<void> get onAppStarted => _onAppStarted;
 
   IsolateRef? get mainIsolate => isolates.isEmpty ? null : isolates.first;
 
@@ -77,14 +69,12 @@ class CliAppFixture extends AppFixture {
   CliAppFixture._(
     this.appScriptPath,
     Process process,
-    Stream<String> lines,
     Uri serviceUri,
     VmService serviceConnection,
     List<IsolateRef> isolates,
     Future<void> Function()? onTeardown,
   ) : super._(
           process,
-          lines,
           serviceUri,
           serviceConnection,
           isolates,
@@ -150,7 +140,6 @@ class CliAppFixture extends AppFixture {
     return CliAppFixture._(
       appScriptPath,
       process,
-      lineController.stream,
       uri,
       serviceConnection,
       vm.isolates!,

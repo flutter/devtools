@@ -109,22 +109,18 @@ class SnapshotTaker {
   Future<AdaptedHeapData?> take() async {
     final snapshot = await snapshotMemoryInSelectedIsolate();
     if (snapshot == null) return null;
-    final result =
-        await _adaptSnapshotGaWrapper(snapshot, isolateId: selectedIsolateId!);
+    final result = await _adaptSnapshotGaWrapper(snapshot);
     return result;
   }
 }
 
-Future<AdaptedHeapData> _adaptSnapshotGaWrapper(
-  HeapSnapshotGraph graph, {
-  required String isolateId,
-}) async {
+Future<AdaptedHeapData> _adaptSnapshotGaWrapper(HeapSnapshotGraph graph) async {
   late final AdaptedHeapData result;
   await ga.timeAsync(
     gac.memory,
     gac.MemoryTime.adaptSnapshot,
-    asyncOperation: () async => result =
-        await AdaptedHeapData.fromHeapSnapshot(graph, isolateId: isolateId),
+    asyncOperation: () async =>
+        result = await AdaptedHeapData.fromHeapSnapshot(graph),
     screenMetricsProvider: () => MemoryScreenMetrics(
       heapObjectsTotal: graph.objects.length,
     ),

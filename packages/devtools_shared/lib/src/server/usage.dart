@@ -23,8 +23,6 @@ class FlutterUsage {
     return LocalFileSystem.flutterStoreExists();
   }
 
-  bool get isFirstRun => _analytics.firstRun;
-
   bool get enabled => _analytics.enabled;
 
   set enabled(bool value) => _analytics.enabled = value;
@@ -173,9 +171,7 @@ class DevToolsUsage {
 }
 
 abstract class PersistentProperties {
-  PersistentProperties(this.name);
-
-  final String name;
+  PersistentProperties();
 
   // ignore: avoid-dynamic, dynamic by design.
   dynamic operator [](String key);
@@ -195,18 +191,10 @@ class IOPersistentProperties extends PersistentProperties {
   IOPersistentProperties(
     String name, {
     String? documentDirPath,
-  }) : super(name) {
+  }) {
     final String fileName = name.replaceAll(' ', '_');
     documentDirPath ??= LocalFileSystem.devToolsDir();
     _file = File(path.join(documentDirPath, fileName));
-    if (!_file.existsSync()) {
-      _file.createSync(recursive: true);
-    }
-    syncSettings();
-  }
-
-  IOPersistentProperties.fromFile(File file) : super(path.basename(file.path)) {
-    _file = file;
     if (!_file.existsSync()) {
       _file.createSync(recursive: true);
     }

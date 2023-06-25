@@ -3,5 +3,4 @@
 // found in the LICENSE file.
 
 export 'src/server/file_system.dart';
-export 'src/server/server_api.dart';
 export 'src/server/usage.dart';

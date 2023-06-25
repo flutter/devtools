@@ -56,8 +56,6 @@ class CodeView extends StatefulWidget {
     this.lineRange,
     this.initialPosition,
     this.onSelected,
-    this.enableFileExplorer = true,
-    this.enableSearch = true,
     this.enableHistory = true,
   }) : super(key: key);
 
@@ -80,8 +78,6 @@ class CodeView extends StatefulWidget {
   // the script's source in its entirety, with lines outside of the range being
   // rendered as if they have been greyed out.
   final LineRange? lineRange;
-  final bool enableFileExplorer;
-  final bool enableSearch;
   final bool enableHistory;
 
   final void Function(ScriptRef scriptRef, int line)? onSelected;

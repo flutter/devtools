@@ -48,17 +48,6 @@ class FlutterVersion extends SemanticVersion {
 
   final SemanticVersion? dartSdkVersion;
 
-  String get flutterVersionSummary => [
-        if (version != 'unknown') version,
-        'channel $channel',
-        repositoryUrl ?? 'unknown source',
-      ].join(' • ');
-
-  String get frameworkVersionSummary =>
-      'revision $frameworkRevision • $frameworkCommitDate';
-
-  String get engineVersionSummary => 'revision $engineRevision';
-
   @override
   // ignore: avoid-dynamic, necessary here.
   bool operator ==(other) {

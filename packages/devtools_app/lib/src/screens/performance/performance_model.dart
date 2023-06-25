@@ -49,13 +49,9 @@ class PerformanceData {
 
   static const selectedEventKey = 'selectedEvent';
 
-  static const timelineModeKey = 'timelineMode';
-
   static const uiKey = 'UI';
 
   static const rasterKey = 'Raster';
-
-  static const gcKey = 'GC';
 
   static const unknownKey = 'Unknown';
 
@@ -124,10 +120,6 @@ class PerformanceData {
     assert(event.isWellFormedDeep);
     timelineEvents.add(event);
     _endTimestampMicros = math.max(_endTimestampMicros, event.maxEndMicros);
-  }
-
-  bool hasCpuProfileData() {
-    return cpuProfileData != null && cpuProfileData!.stackFrames.isNotEmpty;
   }
 
   void clear() {
@@ -475,10 +467,6 @@ abstract class TimelineEvent extends TreeNode<TimelineEvent>
   }
 
   static const firstTraceKey = 'firstTrace';
-  static const eventNameKey = 'name';
-  static const eventTypeKey = 'type';
-  static const eventStartTimeKey = 'startMicros';
-  static const eventDurationKey = 'durationMicros';
 
   /// Trace events associated with this [TimelineEvent].
   ///
@@ -706,10 +694,6 @@ abstract class TimelineEvent extends TreeNode<TimelineEvent>
     for (TimelineEvent child in children) {
       child.format(buf, '  $indent');
     }
-  }
-
-  void formatFromRoot(StringBuffer buf, String indent) {
-    root.format(buf, indent);
   }
 
   void writeTraceToBuffer(StringBuffer buf) {

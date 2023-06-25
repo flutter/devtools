@@ -92,7 +92,6 @@ class DebuggerScreenBody extends StatefulWidget {
   const DebuggerScreenBody({super.key});
 
   static final codeViewKey = GlobalKey(debugLabel: 'codeViewKey');
-  static final scriptViewKey = GlobalKey(debugLabel: 'scriptViewKey');
   static const callStackCopyButtonKey =
       Key('debugger_call_stack_copy_to_clipboard_button');
 

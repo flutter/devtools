@@ -24,7 +24,6 @@ import 'isolate_statistics_view_controller.dart';
 class IsolateStatisticsView extends VMDeveloperView {
   const IsolateStatisticsView()
       : super(
-          id,
           title: 'Isolates',
           icon: Icons.bar_chart,
         );

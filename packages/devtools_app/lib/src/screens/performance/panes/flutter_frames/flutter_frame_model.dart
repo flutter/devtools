@@ -128,13 +128,6 @@ class FlutterFrame {
     event.frameId = id;
   }
 
-  TimelineEvent? findTimelineEvent(TimelineEvent event) {
-    final frameTimelineEvent = timelineEventData.eventByType(event.type);
-    return frameTimelineEvent?.firstChildWithCondition(
-      (e) => e.name == event.name && e.time == event.time,
-    );
-  }
-
   bool isJanky(double displayRefreshRate) {
     return isUiJanky(displayRefreshRate) || isRasterJanky(displayRefreshRate);
   }

@@ -64,14 +64,12 @@ class MethodAndSourceColumn extends TreeColumnData<CpuStackFrame>
   Widget? build(
     BuildContext context,
     CpuStackFrame data, {
-    bool isRowSelected = false,
     VoidCallback? onPressed,
   }) {
     return MethodAndSourceDisplay(
       methodName: data.name,
       packageUri: data.packageUri,
       sourceLine: data.sourceLine,
-      isSelected: isRowSelected,
     );
   }
 }
