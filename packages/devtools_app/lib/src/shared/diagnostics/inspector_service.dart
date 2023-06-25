@@ -12,7 +12,6 @@ import 'dart:convert';
 import 'dart:developer';
 
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../service/service_extensions.dart';

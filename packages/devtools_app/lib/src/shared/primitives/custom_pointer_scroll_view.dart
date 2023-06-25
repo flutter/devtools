@@ -321,6 +321,7 @@ class CustomPointerScrollableState extends State<CustomPointerScrollable>
   @override
   AxisDirection get axisDirection => widget.axisDirection;
 
+  @override
   double get devicePixelRatio => _devicePixelRatio;
   late double _devicePixelRatio;
 
