@@ -159,7 +159,7 @@ class _InstanceColumn extends ColumnData<DiffClassStats>
       );
     }
 
-    return InstanceTableCell(
+    return HeapInstanceTableCell(
       objects,
       heapCallback,
       data.heapClass,

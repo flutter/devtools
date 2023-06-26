@@ -79,6 +79,8 @@ class ProfilePaneController extends DisposableController
     _refreshOnGc.value = !_refreshOnGc.value;
   }
 
+  final selection = ValueNotifier<ProfileRecord?>(null);
+
   /// Clear the current allocation profile and request an updated version from
   /// the VM service.
   Future<void> refresh() async {
@@ -95,6 +97,18 @@ class ProfilePaneController extends DisposableController
       classFilter.value,
       _rootPackage,
     );
+    _initializeSelection();
+  }
+
+  void _initializeSelection() {
+    final records = _currentAllocationProfile.value?.records;
+    if (records == null) return;
+    records.sort((a, b) => b.totalSize.compareTo(a.totalSize));
+    var recordToSelect = records.elementAtOrNull(0);
+    if (recordToSelect?.isTotal ?? false) {
+      recordToSelect = records.elementAtOrNull(1);
+    }
+    selection.value = recordToSelect;
   }
 
   /// Converts the current [AllocationProfile] to CSV format and downloads it.

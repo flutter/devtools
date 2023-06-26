@@ -47,6 +47,11 @@ void main() {
     await _testBasicEval(evalTester);
     await _testAssignment(evalTester);
 
+    await evalTester.switchToMemoryAndIncreaseEval();
+
+    await _profileOneInstance(evalTester);
+    await _profileAllInstances(evalTester);
+
     await evalTester.switchToSnapshotsAndTakeOne();
 
     await _inboundReferencesAreListed(evalTester);
@@ -69,14 +74,28 @@ Future<void> _testAssignment(_EvalAndBrowseTester tester) async {
   );
 }
 
-Future<void> _inboundReferencesAreListed(_EvalAndBrowseTester tester) async {
-  await tester.tapAndPump(find.text('MyApp'));
+Future<void> _profileOneInstance(_EvalAndBrowseTester tester) async {
+  await tester.openContextMenuForClass('MyHomePage');
   await tester.tapAndPump(
-    find.descendant(
-      of: find.byType(InstanceViewWithContextMenu),
-      matching: find.byType(ContextMenuButton),
-    ),
+    find.textContaining('one instance'),
+    duration: longPumpDuration,
   );
+  expect(find.text('MyHomePage'), findsNWidgets(2));
+}
+
+Future<void> _profileAllInstances(_EvalAndBrowseTester tester) async {
+  await tester.openContextMenuForClass('_MyHomePageState');
+  await tester.tapAndPump(find.textContaining('all class instances'));
+  await tester.tapAndPump(
+    find.text('Direct instances'),
+    duration: longPumpDuration,
+  );
+
+  expect(find.text('List (1 item)'), findsOneWidget);
+}
+
+Future<void> _inboundReferencesAreListed(_EvalAndBrowseTester tester) async {
+  await tester.openContextMenuForClass('MyApp');
 
   await tester.tapAndPump(find.textContaining('one instance'));
   await tester.tapAndPump(find.text('Any'), duration: longPumpDuration);
@@ -135,7 +154,7 @@ class _EvalAndBrowseTester {
     await tester.pump(longPumpDuration);
   }
 
-  Future<void> switchToSnapshotsAndTakeOne() async {
+  Future<void> switchToMemoryAndIncreaseEval() async {
     // Open memory screen.
     await switchToScreen(tester, ScreenMetaData.memory);
 
@@ -157,7 +176,9 @@ class _EvalAndBrowseTester {
       const Offset(0, dragDistance),
     );
     await tester.pumpAndSettle();
+  }
 
+  Future<void> switchToSnapshotsAndTakeOne() async {
     // Switch to diff tab.
     await tapAndPump(find.text('Diff Snapshots'));
 
@@ -211,5 +232,15 @@ class _EvalAndBrowseTester {
     }
 
     throw StateError('Could not find $next');
+  }
+
+  Future<void> openContextMenuForClass(String className) async {
+    await tapAndPump(find.text(className));
+    await tapAndPump(
+      find.descendant(
+        of: find.byType(InstanceViewWithContextMenu),
+        matching: find.byType(ContextMenuButton),
+      ),
+    );
   }
 }
