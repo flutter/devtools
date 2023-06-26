@@ -19,6 +19,7 @@ TODO: Remove this section if there are not any general updates.
 
 ## Memory updates
 * Add legend for class types - [#5937](https://github.com/flutter/devtools/pull/5937)
+* Enable sampling for Memory > Profile - [#5947](https://github.com/flutter/devtools/pull/5947)
 
 ## Debugger updates
 TODO: Remove this section if there are not any general updates.

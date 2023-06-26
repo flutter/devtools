@@ -98,7 +98,7 @@ class _InstanceColumn extends ColumnData<SingleClassStats>
     bool isRowSelected = false,
     VoidCallback? onPressed,
   }) {
-    return InstanceTableCell(
+    return HeapInstanceTableCell(
       data.objects,
       classData.heap,
       data.heapClass,
