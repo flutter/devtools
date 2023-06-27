@@ -33,6 +33,7 @@ import 'screens/performance/performance_screen.dart';
 import 'screens/profiler/profiler_screen.dart';
 import 'screens/profiler/profiler_screen_controller.dart';
 import 'screens/provider/provider_screen.dart';
+import 'screens/snapshot_analysis/snapshot_analysis_screen.dart';
 import 'screens/vm_developer/vm_developer_tools_controller.dart';
 import 'screens/vm_developer/vm_developer_tools_screen.dart';
 import 'service/service_extension_widgets.dart';
@@ -287,6 +288,17 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
           child: MultiProvider(
             providers: _providedControllers(),
             child: const AppSizeBody(),
+          ),
+        );
+      },
+      snapshotAnalysisScreenId: (_, __, args, ____) {
+        final embed = isEmbedded(args);
+        return DevToolsScaffold.withChild(
+          key: const Key('snapshotAnalysis'),
+          embed: embed,
+          child: MultiProvider(
+            providers: _providedControllers(),
+            child: const SnapshotAnalysisBody(),
           ),
         );
       },

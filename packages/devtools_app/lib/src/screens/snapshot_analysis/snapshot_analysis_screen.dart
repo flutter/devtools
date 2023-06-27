@@ -12,6 +12,15 @@ class SnapshotAnalysisScreen extends Screen {
 
   @override
   Widget build(BuildContext context) {
-    return const Placeholder();
+    return const SnapshotAnalysisBody();
+  }
+}
+
+class SnapshotAnalysisBody extends StatelessWidget {
+  const SnapshotAnalysisBody({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const Text('Memory snapshot analysis will be here.');
   }
 }

@@ -20,6 +20,7 @@ const appSizeScreenId = 'appsize';
 
 const homeScreenId = '';
 const snapshotScreenId = 'snapshot';
+const snapshotAnalysisScreenId = 'snapshotAnalysis';
 
 /// Represents a Page/route for a DevTools screen.
 class DevToolsRouteConfiguration {

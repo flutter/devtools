@@ -147,6 +147,7 @@ const landingScreen = 'landing';
 const connectToApp = 'connectToApp';
 const importFile = 'importFile';
 const openAppSizeTool = 'openAppSizeTool';
+const openSnapshotAnalysisTool = 'openSnapshotAnalysisTool';
 
 // Settings actions:
 const settingsDialog = 'settings';

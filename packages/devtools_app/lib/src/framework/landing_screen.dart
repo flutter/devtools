@@ -14,6 +14,7 @@ import '../shared/analytics/analytics.dart' as ga;
 import '../shared/analytics/constants.dart' as gac;
 import '../shared/common_widgets.dart';
 import '../shared/config_specific/import_export/import_export.dart';
+import '../shared/feature_flags.dart';
 import '../shared/file_import.dart';
 import '../shared/globals.dart';
 import '../shared/primitives/blocking_action_mixin.dart';
@@ -56,6 +57,10 @@ class _LandingScreenBodyState extends State<LandingScreenBody> {
           ImportFileInstructions(sampleData: widget.sampleData),
           const SizedBox(height: defaultSpacing),
           const AppSizeToolingInstructions(),
+          if (FeatureFlags.snapshotAnalysis) ...[
+            const SizedBox(height: defaultSpacing),
+            const SnapshotAnalysisInstructions(),
+          ],
         ],
       ),
     );
@@ -254,6 +259,7 @@ class _ConnectDialogState extends State<ConnectDialog>
   }
 }
 
+@visibleForTesting
 class ImportFileInstructions extends StatelessWidget {
   const ImportFileInstructions({Key? key, this.sampleData = const []})
       : super(key: key);
@@ -312,6 +318,7 @@ class ImportFileInstructions extends StatelessWidget {
   }
 }
 
+@visibleForTesting
 class AppSizeToolingInstructions extends StatelessWidget {
   const AppSizeToolingInstructions({Key? key}) : super(key: key);
 
@@ -352,6 +359,7 @@ class AppSizeToolingInstructions extends StatelessWidget {
   }
 }
 
+@visibleForTesting
 class SnapshotAnalysisInstructions extends StatelessWidget {
   const SnapshotAnalysisInstructions({Key? key}) : super(key: key);
 
@@ -369,8 +377,7 @@ class SnapshotAnalysisInstructions extends StatelessWidget {
           ),
           const SizedBox(height: denseRowSpacing),
           Text(
-            'Load Dart AOT snapshots or app size analysis files to '
-            'track down size issues in your app.',
+            'Analyse memory heap snapshots, previously saved with DevTools or Dart leak_tracker.',
             style: textTheme.bodySmall,
           ),
           const SizedBox(height: defaultSpacing),
@@ -386,9 +393,9 @@ class SnapshotAnalysisInstructions extends StatelessWidget {
   void _onOpen(BuildContext context) {
     ga.select(
       gac.landingScreen,
-      gac.openAppSizeTool,
+      gac.openSnapshotAnalysisTool,
     );
-    DevToolsRouterDelegate.of(context).navigate(appSizeScreenId);
+    DevToolsRouterDelegate.of(context).navigate(snapshotAnalysisScreenId);
   }
 }
 
