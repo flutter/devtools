@@ -6,15 +6,10 @@ import 'dart:async';
 
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/foundation.dart';
-import 'package:intl/intl.dart';
 import 'package:leak_tracker/devtools_integration.dart';
-import 'package:logging/logging.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../service/service_manager.dart';
-import '../../shared/analytics/analytics.dart' as ga;
-import '../../shared/analytics/constants.dart' as gac;
-import '../../shared/config_specific/file/file.dart';
 import '../../shared/globals.dart';
 import '../../shared/primitives/auto_dispose.dart';
 import '../../shared/utils.dart';
@@ -69,7 +64,6 @@ class MemoryController extends DisposableController
     ProfilePaneController? profilePaneController,
   }) {
     memoryTimeline = MemoryTimeline();
-    memoryLog = MemoryLog(this);
 
     controllers = MemoryFeatureControllers(
       diffPaneController,
@@ -88,14 +82,10 @@ class MemoryController extends DisposableController
   /// instead of the widget state.
   int selectedFeatureTabIndex = 0;
 
-  static const logFilenamePrefix = 'memory_log_';
-
   final _shouldShowLeaksTab = ValueNotifier<bool>(false);
   ValueListenable<bool> get shouldShowLeaksTab => _shouldShowLeaksTab;
 
   late MemoryTimeline memoryTimeline;
-
-  late MemoryLog memoryLog;
 
   HeapSample? _selectedDartSample;
 
@@ -344,14 +334,4 @@ class MemoryController extends DisposableController
     _memoryTracker?.dispose();
     controllers.dispose();
   }
-}
-
-/// Supports saving and loading memory samples.
-class MemoryLog {
-  MemoryLog(this.controller);
-
-  /// Use in memory or local file system based on Flutter Web/Desktop.
-  static final _fs = FileIO();
-
-  MemoryController controller;
 }
