@@ -5,23 +5,23 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-import '../../shared/analytics/analytics.dart' as ga;
-import '../../shared/banner_messages.dart';
-import '../../shared/primitives/auto_dispose.dart';
-import '../../shared/primitives/listenable.dart';
-import '../../shared/primitives/simple_items.dart';
-import '../../shared/screen.dart';
-import '../../shared/theme.dart';
-import '../../shared/ui/icons.dart';
-import '../../shared/utils.dart';
+import '../../../shared/analytics/analytics.dart' as ga;
+import '../../../shared/banner_messages.dart';
+import '../../../shared/primitives/auto_dispose.dart';
+import '../../../shared/primitives/listenable.dart';
+import '../../../shared/primitives/simple_items.dart';
+import '../../../shared/screen.dart';
+import '../../../shared/theme.dart';
+import '../../../shared/ui/icons.dart';
+import '../../../shared/utils.dart';
 import 'memory_controller.dart';
 import 'memory_tabs.dart';
-import 'panes/chart/chart_pane.dart';
-import 'panes/chart/chart_pane_controller.dart';
-import 'panes/chart/memory_android_chart.dart';
-import 'panes/chart/memory_events_pane.dart';
-import 'panes/chart/memory_vm_chart.dart';
-import 'panes/control/control_pane.dart';
+import '../panes/chart/chart_pane.dart';
+import '../panes/chart/chart_pane_controller.dart';
+import '../panes/chart/memory_android_chart.dart';
+import '../panes/chart/memory_events_pane.dart';
+import '../panes/chart/memory_vm_chart.dart';
+import '../panes/control/control_pane.dart';
 
 class MemoryScreen extends Screen {
   MemoryScreen()
