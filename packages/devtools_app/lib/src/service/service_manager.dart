@@ -71,9 +71,10 @@ class ServiceConnectionManager {
 
   final _registeredServiceNotifiers = <String, ImmediateValueNotifier<bool>>{};
 
-  Map<String, List<String>> get registeredMethodsForService =>
+  /// Mapping of service name to service method.
+  Map<String, String> get registeredMethodsForService =>
       _registeredMethodsForService;
-  final Map<String, List<String>> _registeredMethodsForService = {};
+  final Map<String, String> _registeredMethodsForService = {};
 
   final vmFlagManager = VmFlagManager();
 
@@ -167,12 +168,12 @@ class ServiceConnectionManager {
     String? isolateId,
     Map<String, dynamic>? args,
   }) async {
-    final registered = _registeredMethodsForService[name] ?? const [];
-    if (registered.isEmpty) {
-      throw Exception('There are no registered methods for service "$name"');
+    final registeredMethod = _registeredMethodsForService[name];
+    if (registeredMethod == null) {
+      throw Exception('There is no registered method for service "$name"');
     }
     return service!.callMethod(
-      registered.first,
+      registeredMethod,
       isolateId: isolateId,
       args: args,
     );
@@ -252,9 +253,7 @@ class ServiceConnectionManager {
     void handleServiceEvent(Event e) {
       if (e.kind == EventKind.kServiceRegistered) {
         final serviceName = e.service!;
-        _registeredMethodsForService
-            .putIfAbsent(serviceName, () => [])
-            .add(e.method!);
+        _registeredMethodsForService[serviceName] = e.method!;
         final serviceNotifier = _registeredServiceNotifiers.putIfAbsent(
           serviceName,
           () => ImmediateValueNotifier(true),
@@ -374,6 +373,8 @@ class ServiceConnectionManager {
 
     _connectedState.value = connectionState;
     _connectionClosedController.add(null);
+
+    _registeredMethodsForService.clear();
 
     _inspectorService?.onIsolateStopped();
     _inspectorService?.dispose();
