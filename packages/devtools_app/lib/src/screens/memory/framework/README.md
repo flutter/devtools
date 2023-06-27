@@ -1,1 +1,1 @@
-This folder contains the code not used by memory panes.
+This folder contains code not used by memory panes.
