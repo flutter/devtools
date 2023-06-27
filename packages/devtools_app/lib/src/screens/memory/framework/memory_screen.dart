@@ -6,14 +6,11 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../../shared/analytics/analytics.dart' as ga;
-import '../../../shared/primitives/auto_dispose.dart';
 import '../../../shared/primitives/listenable.dart';
 import '../../../shared/primitives/simple_items.dart';
 import '../../../shared/screen.dart';
 import '../../../shared/ui/icons.dart';
-import '../../../shared/utils.dart';
 import 'connected/connected_screen_body.dart';
-import 'connected/memory_controller.dart';
 
 class MemoryScreen extends Screen {
   MemoryScreen()
@@ -49,11 +46,7 @@ class MemoryBody extends StatefulWidget {
   MemoryBodyState createState() => MemoryBodyState();
 }
 
-class MemoryBodyState extends State<MemoryBody>
-    with
-        AutoDisposeMixin,
-        SingleTickerProviderStateMixin,
-        ProvidedControllerMixin<MemoryController, MemoryBody> {
+class MemoryBodyState extends State<MemoryBody> {
   @override
   void initState() {
     super.initState();
@@ -62,6 +55,7 @@ class MemoryBodyState extends State<MemoryBody>
 
   @override
   Widget build(BuildContext context) {
+    // TODO(polina-c): load static body if not connected.
     return const ConnectedMemoryBody();
   }
 }
