@@ -377,7 +377,9 @@ class SnapshotAnalysisInstructions extends StatelessWidget {
           ),
           const SizedBox(height: denseRowSpacing),
           Text(
-            'Analyse memory heap snapshots, previously saved with DevTools or Dart leak_tracker.',
+            // TODO(polina-c): make package:leak_tracker a link.
+            // https://github.com/flutter/devtools/issues/5606
+            'Analyze heap snapshots that were previously saved from DevTools or package:leak_tracker.',
             style: textTheme.bodySmall,
           ),
           const SizedBox(height: defaultSpacing),
