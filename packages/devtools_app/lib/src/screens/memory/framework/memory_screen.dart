@@ -6,22 +6,14 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../../shared/analytics/analytics.dart' as ga;
-import '../../../shared/banner_messages.dart';
 import '../../../shared/primitives/auto_dispose.dart';
 import '../../../shared/primitives/listenable.dart';
 import '../../../shared/primitives/simple_items.dart';
 import '../../../shared/screen.dart';
-import '../../../shared/theme.dart';
 import '../../../shared/ui/icons.dart';
 import '../../../shared/utils.dart';
+import 'connected/connected_screen_body.dart';
 import 'connected/memory_controller.dart';
-import 'connected/memory_tabs.dart';
-import '../panes/chart/chart_pane.dart';
-import '../panes/chart/chart_pane_controller.dart';
-import '../panes/chart/memory_android_chart.dart';
-import '../panes/chart/memory_events_pane.dart';
-import '../panes/chart/memory_vm_chart.dart';
-import '../panes/control/control_pane.dart';
 
 class MemoryScreen extends Screen {
   MemoryScreen()
@@ -44,7 +36,8 @@ class MemoryScreen extends Screen {
   @override
   Widget build(BuildContext context) => const MemoryBody();
 
-  // TODO(polina-c): when embedded and console features should be in native console in VSCode
+  // TODO(polina-c): when embedded and VSCode console features are implemented,
+  // should be in native console in VSCode
   @override
   bool showConsole(bool embed) => true;
 }
@@ -61,51 +54,14 @@ class MemoryBodyState extends State<MemoryBody>
         AutoDisposeMixin,
         SingleTickerProviderStateMixin,
         ProvidedControllerMixin<MemoryController, MemoryBody> {
-  MemoryController get memoryController => controller;
-
-  late MemoryChartPaneController _chartController;
-
-  final _focusNode = FocusNode(debugLabel: 'memory');
-
   @override
   void initState() {
     super.initState();
     ga.screen(MemoryScreen.id);
-    autoDisposeFocusNode(_focusNode);
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    maybePushDebugModeMemoryMessage(context, MemoryScreen.id);
-    if (!initController()) return;
-
-    final vmChartController = VMChartController(controller);
-    _chartController = MemoryChartPaneController(
-      event: EventChartController(controller),
-      vm: vmChartController,
-      android: AndroidChartController(
-        controller,
-        sharedLabels: vmChartController.labelTimestamps,
-      ),
-    );
   }
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      key: MemoryChartPane.hoverKey,
-      children: [
-        MemoryControlPane(controller: controller),
-        const SizedBox(height: intermediateSpacing),
-        MemoryChartPane(
-          chartController: _chartController,
-          keyFocusNode: _focusNode,
-        ),
-        Expanded(
-          child: MemoryTabView(memoryController),
-        ),
-      ],
-    );
+    return const ConnectedMemoryBody();
   }
 }
