@@ -30,6 +30,7 @@ enum ScreenMetaData {
   performance('performance', 'Performance'),
   cpuProfiler('cpu-profiler', 'CPU Profiler'),
   memory('memory', 'Memory'),
+  snapshotAnalysis('snapshotAnalysis', 'Snapshot Analysis'),
   debugger('debugger', 'Debugger'),
   network('network', 'Network'),
   logging('logging', 'Logging'),

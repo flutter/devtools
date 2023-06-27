@@ -352,6 +352,46 @@ class AppSizeToolingInstructions extends StatelessWidget {
   }
 }
 
+class SnapshotAnalysisInstructions extends StatelessWidget {
+  const SnapshotAnalysisInstructions({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    return LandingScreenSection(
+      title: 'Snapshot Analysis',
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Analyze and diff the saved memory snapshots',
+            style: textTheme.titleMedium,
+          ),
+          const SizedBox(height: denseRowSpacing),
+          Text(
+            'Load Dart AOT snapshots or app size analysis files to '
+            'track down size issues in your app.',
+            style: textTheme.bodySmall,
+          ),
+          const SizedBox(height: defaultSpacing),
+          ElevatedButton(
+            child: const Text('Open snapshot analysis tool'),
+            onPressed: () => _onOpen(context),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _onOpen(BuildContext context) {
+    ga.select(
+      gac.landingScreen,
+      gac.openAppSizeTool,
+    );
+    DevToolsRouterDelegate.of(context).navigate(appSizeScreenId);
+  }
+}
+
 class SampleDataDropDownButton extends StatefulWidget {
   const SampleDataDropDownButton({
     super.key,
