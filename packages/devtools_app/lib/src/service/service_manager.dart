@@ -374,6 +374,8 @@ class ServiceConnectionManager {
     _connectedState.value = connectionState;
     _connectionClosedController.add(null);
 
+    _registeredMethodsForService.clear();
+
     _inspectorService?.onIsolateStopped();
     _inspectorService?.dispose();
     _inspectorService = null;
