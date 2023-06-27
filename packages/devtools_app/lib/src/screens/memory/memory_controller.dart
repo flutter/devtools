@@ -26,11 +26,6 @@ import 'panes/tracing/tracing_pane_controller.dart';
 import 'shared/heap/model.dart';
 import 'shared/primitives/memory_timeline.dart';
 
-// TODO(terry): Consider supporting more than one file since app was launched.
-// Memory Log filename.
-final String _memoryLogFilename =
-    '${MemoryController.logFilenamePrefix}${DateFormat("yyyyMMdd_HH_mm").format(DateTime.now())}';
-
 class MemoryFeatureControllers {
   /// [diffPaneController] is passed for testability.
   MemoryFeatureControllers(
@@ -359,47 +354,4 @@ class MemoryLog {
   static final _fs = FileIO();
 
   MemoryController controller;
-
-  /// Persist the live memory data to a JSON file in the /tmp directory.
-  List<String> exportMemory() {
-    ga.select(gac.memory, gac.export);
-
-    final liveData = controller.memoryTimeline.liveData;
-
-    bool pseudoData = false;
-    if (liveData.isEmpty) {
-      // Used to create empty memory log for test.
-      pseudoData = true;
-      liveData.add(
-        HeapSample(
-          DateTime.now().millisecondsSinceEpoch,
-          0,
-          0,
-          0,
-          0,
-          false,
-          AdbMemoryInfo.empty(),
-          EventSample.empty(),
-          RasterCache.empty(),
-        ),
-      );
-    }
-
-    final jsonPayload = SamplesMemoryJson.encodeList(liveData);
-    if (kDebugMode) {
-      // TODO(terry): Remove this check add a unit test instead.
-      // Reload the file just created and validate that the saved data matches
-      // the live data.
-      final memoryJson = SamplesMemoryJson.decode(argJsonString: jsonPayload);
-      assert(memoryJson.isMatchedVersion);
-      assert(memoryJson.isMemoryPayload);
-      assert(memoryJson.data.length == liveData.length);
-    }
-
-    _fs.writeStringToFile(_memoryLogFilename, jsonPayload, isMemory: true);
-
-    if (pseudoData) liveData.clear();
-
-    return [_fs.exportDirectoryName(isMemory: true), _memoryLogFilename];
-  }
 }
