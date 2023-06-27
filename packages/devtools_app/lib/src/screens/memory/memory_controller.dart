@@ -26,21 +26,10 @@ import 'panes/tracing/tracing_pane_controller.dart';
 import 'shared/heap/model.dart';
 import 'shared/primitives/memory_timeline.dart';
 
-final _log = Logger('memory_controller');
-
 // TODO(terry): Consider supporting more than one file since app was launched.
 // Memory Log filename.
 final String _memoryLogFilename =
     '${MemoryController.logFilenamePrefix}${DateFormat("yyyyMMdd_HH_mm").format(DateTime.now())}';
-
-class OfflineFileException implements Exception {
-  OfflineFileException(this.message) : super();
-
-  final String message;
-
-  @override
-  String toString() => message;
-}
 
 class MemoryFeatureControllers {
   /// [diffPaneController] is passed for testability.
@@ -413,44 +402,4 @@ class MemoryLog {
 
     return [_fs.exportDirectoryName(isMemory: true), _memoryLogFilename];
   }
-
-  /// Return a list of offline memory logs filenames in the /tmp directory
-  /// that are available to open.
-  List<String> offlineFiles() {
-    final memoryLogs = _fs.list(
-      prefix: MemoryController.logFilenamePrefix,
-      isMemory: true,
-    );
-
-    // Sort by newest file top-most (DateTime is in the filename).
-
-    memoryLogs.sort((a, b) => b.compareTo(a));
-
-    return memoryLogs;
-  }
-
-  /// Load the memory profile data from a saved memory log file.
-  @visibleForTesting
-  Future<void> loadOffline(String filename) async {
-    final jsonPayload = _fs.readStringFromFile(filename, isMemory: true)!;
-
-    final memoryJson = SamplesMemoryJson.decode(argJsonString: jsonPayload);
-
-    if (!memoryJson.isMatchedVersion) {
-      final e =
-          'Error loading file $filename version ${memoryJson.payloadVersion}';
-      _log.warning(e);
-      throw OfflineFileException(e);
-    }
-
-    assert(memoryJson.isMemoryPayload);
-
-    controller.offline = true;
-    controller.memoryTimeline.offlineData.clear();
-    controller.memoryTimeline.offlineData.addAll(memoryJson.data);
-  }
-
-  @visibleForTesting
-  bool removeOfflineFile(String filename) =>
-      _fs.deleteFile(filename, isMemory: true);
 }
