@@ -86,6 +86,13 @@ class _ListControlPane extends StatelessWidget {
                   : () => unawaited(_takeSnapshot(context)),
             ),
             ToolbarAction(
+              icon: Icons.file_open,
+              tooltip: 'Open previously saved snapshot.',
+              onPressed: controller.isTakingSnapshot.value
+                  ? null
+                  : () => unawaited(_takeSnapshot(context)),
+            ),
+            ToolbarAction(
               icon: Icons.block,
               tooltip: 'Clear all snapshots',
               onPressed: clearAllEnabled
