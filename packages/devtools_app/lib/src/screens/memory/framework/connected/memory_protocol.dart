@@ -9,10 +9,10 @@ import 'package:devtools_shared/devtools_shared.dart';
 import 'package:logging/logging.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../../shared/globals.dart';
-import '../../../shared/utils.dart';
+import '../../../../shared/globals.dart';
+import '../../../../shared/utils.dart';
 import 'memory_controller.dart';
-import '../shared/primitives/memory_timeline.dart';
+import '../../shared/primitives/memory_timeline.dart';
 
 final _log = Logger('memory_protocol');
 

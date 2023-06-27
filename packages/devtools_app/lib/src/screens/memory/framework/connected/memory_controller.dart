@@ -9,17 +9,17 @@ import 'package:flutter/foundation.dart';
 import 'package:leak_tracker/devtools_integration.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../../service/service_manager.dart';
-import '../../../shared/globals.dart';
-import '../../../shared/primitives/auto_dispose.dart';
-import '../../../shared/utils.dart';
+import '../../../../service/service_manager.dart';
+import '../../../../shared/globals.dart';
+import '../../../../shared/primitives/auto_dispose.dart';
+import '../../../../shared/utils.dart';
 import 'memory_protocol.dart';
-import '../panes/chart/primitives.dart';
-import '../panes/diff/controller/diff_pane_controller.dart';
-import '../panes/profile/profile_pane_controller.dart';
-import '../panes/tracing/tracing_pane_controller.dart';
-import '../shared/heap/model.dart';
-import '../shared/primitives/memory_timeline.dart';
+import '../../panes/chart/primitives.dart';
+import '../../panes/diff/controller/diff_pane_controller.dart';
+import '../../panes/profile/profile_pane_controller.dart';
+import '../../panes/tracing/tracing_pane_controller.dart';
+import '../../shared/heap/model.dart';
+import '../../shared/primitives/memory_timeline.dart';
 
 class MemoryFeatureControllers {
   /// [diffPaneController] is passed for testability.
