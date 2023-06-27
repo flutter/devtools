@@ -4,7 +4,7 @@
 
 import 'package:flutter/material.dart';
 
-import '../../memory_controller.dart';
+import '../../framework/memory_controller.dart';
 import 'primary_controls.dart';
 import 'secondary_controls.dart';
 

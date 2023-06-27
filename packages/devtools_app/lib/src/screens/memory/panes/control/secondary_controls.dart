@@ -9,7 +9,7 @@ import 'package:flutter/material.dart';
 import '../../../../shared/analytics/constants.dart' as gac;
 import '../../../../shared/common_widgets.dart';
 import '../../../../shared/theme.dart';
-import '../../memory_controller.dart';
+import '../../framework/memory_controller.dart';
 import '../../shared/primitives/simple_elements.dart';
 import 'settings_dialog.dart';
 

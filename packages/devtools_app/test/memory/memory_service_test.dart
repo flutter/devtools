@@ -5,8 +5,8 @@
 @TestOn('vm')
 import 'dart:async';
 
-import 'package:devtools_app/src/screens/memory/memory_controller.dart';
-import 'package:devtools_app/src/screens/memory/memory_protocol.dart';
+import 'package:devtools_app/src/screens/memory/framework/memory_controller.dart';
+import 'package:devtools_app/src/screens/memory/framework/memory_protocol.dart';
 import 'package:devtools_app/src/screens/memory/shared/primitives/memory_timeline.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_shared/devtools_shared.dart';

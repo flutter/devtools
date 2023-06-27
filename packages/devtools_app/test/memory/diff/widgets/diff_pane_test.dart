@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app/src/screens/memory/memory_screen.dart';
-import 'package:devtools_app/src/screens/memory/memory_tabs.dart';
+import 'package:devtools_app/src/screens/memory/framework/memory_tabs.dart';
 import 'package:devtools_app/src/screens/memory/panes/diff/diff_pane.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
