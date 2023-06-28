@@ -11,6 +11,8 @@ import 'package:flutter/material.dart';
 // This is a fairly long description so that we can make sure that scrolling to
 // a line works when we are paused at a breakpoint.
 class MyOtherWidget extends StatelessWidget {
+  const MyOtherWidget({super.key});
+
   @override
   Widget build(BuildContext context) {
     return const SizedBox();

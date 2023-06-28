@@ -17,7 +17,7 @@ class OverflowingApp extends StatefulWidget {
   final String? initialRoute;
 
   @override
-  _OverflowingAppState createState() => _OverflowingAppState();
+  State<OverflowingApp> createState() => _OverflowingAppState();
 }
 
 class _OverflowingAppState extends State<OverflowingApp> {
