@@ -29,7 +29,7 @@ class NotificationsView extends StatelessWidget {
     return Overlay(
       initialEntries: [
         OverlayEntry(
-          builder: (context) => _Notifications(child: child),
+          builder: (context) => Expanded(child: _Notifications(child: child)),
           maintainState: true,
           opaque: true,
         ),
@@ -164,13 +164,19 @@ class _NotificationOverlay extends StatelessWidget {
           bottom: statusLineHeight + defaultSpacing,
         ),
         child: SizedBox(
-          width: _notificationWidth,
-          child: SingleChildScrollView(
-            reverse: true,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              mainAxisSize: MainAxisSize.min,
-              children: _notifications,
+          width: _notificationWidth, // width of columen set here
+          child: Container(
+            color: Colors.red,
+            child: SingleChildScrollView(
+              reverse: true,
+              child: Column(
+                // TODO: potentially make column not clickable.
+                // it appears that the area around the column cannot be clicked through to the other overlays
+                crossAxisAlignment: CrossAxisAlignment.end,
+                mainAxisSize: MainAxisSize.min,
+
+                children: _notifications,
+              ),
             ),
           ),
         ),
@@ -203,7 +209,7 @@ class _NotificationState extends State<_Notification>
   void initState() {
     super.initState();
     controller = AnimationController(
-      duration: const Duration(milliseconds: 400),
+      duration: const Duration(milliseconds: 20000),
       vsync: this,
     );
     curve = CurvedAnimation(
@@ -246,43 +252,46 @@ class _NotificationState extends State<_Notification>
           child: child,
         );
       },
-      child: Padding(
-        padding: const EdgeInsets.all(denseSpacing),
-        child: Card(
-          color: theme.snackBarTheme.backgroundColor,
-          child: DefaultTextStyle(
-            style: theme.snackBarTheme.contentTextStyle ??
-                theme.primaryTextTheme.titleMedium!,
-            child: Padding(
-              padding: const EdgeInsets.all(denseSpacing),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  widget.message.isDismissible
-                      ? Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Flexible(
-                              child: _NotificationMessage(
-                                widget: widget,
-                                context: context,
+      child: Container(
+        color: Colors.blue,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(0, 0, 0, denseSpacing),
+          child: Card(
+            color: theme.snackBarTheme.backgroundColor,
+            child: DefaultTextStyle(
+              style: theme.snackBarTheme.contentTextStyle ??
+                  theme.primaryTextTheme.titleMedium!,
+              child: Padding(
+                padding: const EdgeInsets.all(denseSpacing),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    widget.message.isDismissible
+                        ? Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Flexible(
+                                child: _NotificationMessage(
+                                  widget: widget,
+                                  context: context,
+                                ),
                               ),
-                            ),
-                            _DismissAction(
-                              onPressed: () {
-                                widget.remove(widget);
-                              },
-                            ),
-                          ],
-                        )
-                      : _NotificationMessage(
-                          widget: widget,
-                          context: context,
-                        ),
-                  const SizedBox(height: defaultSpacing),
-                  _NotificationActions(widget: widget),
-                ],
+                              _DismissAction(
+                                onPressed: () {
+                                  widget.remove(widget);
+                                },
+                              ),
+                            ],
+                          )
+                        : _NotificationMessage(
+                            widget: widget,
+                            context: context,
+                          ),
+                    const SizedBox(height: defaultSpacing),
+                    _NotificationActions(widget: widget),
+                  ],
+                ),
               ),
             ),
           ),
