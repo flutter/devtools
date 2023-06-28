@@ -11,7 +11,9 @@ import 'package:flutter/foundation.dart';
 import '../../../../../shared/analytics/analytics.dart' as ga;
 import '../../../../../shared/analytics/constants.dart' as gac;
 import '../../../../../shared/config_specific/import_export/import_export.dart';
+import '../../../../../shared/file_import.dart';
 import '../../../../../shared/globals.dart';
+import '../../../../../shared/memory/adapted_heap_data.dart';
 import '../../../../../shared/memory/class_name.dart';
 import '../../../../../shared/primitives/auto_dispose.dart';
 import '../../../../../shared/primitives/utils.dart';
@@ -47,11 +49,16 @@ class DiffPaneController extends DisposableController {
   int _snapshotId = 0;
 
   Future<void> takeSnapshot() async {
-    _isTakingSnapshot.value = true;
     ga.select(
       gac.memory,
       gac.MemoryEvent.diffTakeSnapshotControlPane,
     );
+
+    await _addSnapshot(snapshotTaker.take);
+  }
+
+  Future<void> _addSnapshot(Future<AdaptedHeapData?> Function() getter) async {
+    _isTakingSnapshot.value = true;
 
     final item = SnapshotInstanceItem(
       id: _snapshotId++,
@@ -63,7 +70,7 @@ class DiffPaneController extends DisposableController {
     snapshots.add(item);
 
     try {
-      final heapData = await snapshotTaker.take();
+      final heapData = await getter();
       await item.initializeHeapData(heapData);
     } catch (e) {
       snapshots.remove(item);
@@ -84,6 +91,20 @@ class DiffPaneController extends DisposableController {
     snapshots.removeRange(1, snapshots.value.length);
     core._selectedSnapshotIndex.value = 0;
     derived._updateValues();
+  }
+
+  Future<void> openSnapshot() async {
+    ga.select(
+      gac.landingScreen,
+      gac.importFile,
+    );
+    final DevToolsJsonFile? importedFile = await importFileFromPicker(
+      acceptedTypes: ['json'],
+    );
+
+    if (importedFile != null) {
+      /// ???
+    }
   }
 
   int _nextDisplayNumber() {
