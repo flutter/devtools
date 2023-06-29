@@ -9,6 +9,7 @@ Dart & Flutter DevTools - A Suite of Performance Tools for Dart and Flutter
 
 - Improve DevTools tab bar navigation when the list of tabs is long - [#5875](https://github.com/flutter/devtools/pull/5875)
 - Clear registered service methods between app connections - [#5960](https://github.com/flutter/devtools/pull/5960)
+- Fix overlay notifications so they cover the area that their background blocks - [#5975](https://github.com/flutter/devtools/pull/5975)
 
 ## Inspector updates
 
