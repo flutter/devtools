@@ -14,8 +14,7 @@ import 'package:collection/collection.dart';
 import '_in_file_args.dart';
 import '_io_utils.dart';
 import '_test_app_driver.dart';
-
-bool _debugTestScript = false;
+import '_utils.dart';
 
 /// Runs one test.
 ///
@@ -48,16 +47,6 @@ Future<void> runFlutterIntegrationTest(
     }
   }
 
-  // TODO(kenz): do we need to start chromedriver in headless mode?
-  // Start chrome driver before running the flutter integration test.
-  final chromedriver = ChromeDriver();
-  try {
-    await chromedriver.start();
-  } catch (e) {
-    // ignore: avoid-throw-in-catch-block, by design
-    throw Exception('Error starting chromedriver: $e');
-  }
-
   // Run the flutter integration test.
   final testRunner = TestRunner();
   Exception? exception;
@@ -75,42 +64,16 @@ Future<void> runFlutterIntegrationTest(
     exception = e;
   } finally {
     if (testApp != null) {
-      _debugLog('killing the test app');
+      debugLog('killing the test app');
       await testApp.stop();
     }
 
-    _debugLog('cancelling stream subscriptions');
+    debugLog('cancelling stream subscriptions');
     await testRunner.cancelAllStreamSubscriptions();
-    await chromedriver.cancelAllStreamSubscriptions();
-
-    _debugLog('killing the chromedriver process');
-    chromedriver.kill();
   }
 
   if (exception != null) {
     throw exception;
-  }
-}
-
-class ChromeDriver with IOMixin {
-  late final Process _process;
-
-  // TODO(kenz): add error messaging if the chromedriver executable is not
-  // found. We can also consider using web installers directly in this script:
-  // https://github.com/flutter/flutter/wiki/Running-Flutter-Driver-tests-with-Web#web-installers-repo.
-  Future<void> start() async {
-    _debugLog('starting the chromedriver process');
-    _process = await Process.start(
-      'chromedriver',
-      [
-        '--port=4444',
-      ],
-    );
-    listenToProcessOutput(_process, printTag: 'ChromeDriver');
-  }
-
-  void kill() {
-    _process.kill();
   }
 }
 
@@ -130,7 +93,7 @@ class TestRunner with IOMixin {
     Map<String, Object> testAppArguments = const <String, Object>{},
   }) async {
     Future<void> runTest({required int attemptNumber}) async {
-      _debugLog('starting the flutter drive process');
+      debugLog('starting the flutter drive process');
       final process = await Process.start(
         'flutter',
         [
@@ -210,9 +173,9 @@ class TestRunner with IOMixin {
         timeout,
       ]);
 
-      _debugLog('attempting to kill the flutter drive process');
+      debugLog('attempting to kill the flutter drive process');
       process.kill();
-      _debugLog('flutter drive process has exited');
+      debugLog('flutter drive process has exited');
 
       // Ignore exception handling and retries if the tests passed. This is to
       // avoid bugs with the test runner where the test can fail after the test
@@ -224,7 +187,7 @@ class TestRunner with IOMixin {
               'Integration test timed out on try #$attemptNumber: $testTarget',
             );
           } else {
-            _debugLog(
+            debugLog(
               'Integration test timed out on try #$attemptNumber. Retrying '
               '$testTarget now.',
             );
@@ -273,12 +236,6 @@ class _TestResult {
       return 'Test passed';
     }
     return 'Test \'$methodName\' failed: $details.';
-  }
-}
-
-void _debugLog(String log) {
-  if (_debugTestScript) {
-    print(log);
   }
 }
 
