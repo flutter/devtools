@@ -9,7 +9,7 @@ The steps were tested for Mac. They may require adjustments for other platforms.
 ## Prerequisites
 
 1. [Configure](https://docs.flutter.dev/get-started/install) Dart or Flutter.
-
+testset
 ## Setup and start
 
 1. In your terminal `cd` to a folder where you want to clone devtools, and that does not have subfolder `devtools` yet.
