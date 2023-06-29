@@ -8,6 +8,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:args/args.dart';
 import 'package:collection/collection.dart';
 
 import '_in_file_args.dart';
@@ -31,7 +32,6 @@ Future<void> runFlutterIntegrationTest(
   if (!offline) {
     if (testRunnerArgs.testAppUri == null) {
       // Create the test app and start it.
-      // TODO(kenz): support running Dart CLI test apps from here too.
       try {
         testApp = TestFlutterApp(
           appPath: testFileArgs.appPath,
@@ -63,7 +63,7 @@ Future<void> runFlutterIntegrationTest(
   Exception? exception;
   try {
     await testRunner.run(
-      testRunnerArgs.testTarget,
+      testRunnerArgs.testTarget!,
       enableExperiments: testFileArgs.experimentsOn,
       updateGoldens: testRunnerArgs.updateGoldens,
       headless: testRunnerArgs.headless,
@@ -282,61 +282,101 @@ void _debugLog(String log) {
   }
 }
 
-// TODO(https://github.com/flutter/devtools/issues/4970): use package:args to
-// parse these arguments.
 class TestRunnerArgs {
-  TestRunnerArgs(List<String> args) {
-    final argWithTestTarget =
-        args.firstWhereOrNull((arg) => arg.startsWith(testTargetArg));
-    final target = argWithTestTarget?.substring(testTargetArg.length);
-    assert(
-      target != null,
-      'Please specify a test target (e.g. ${testTargetArg}path/to/test.dart',
-    );
-    testTarget = target!;
+  TestRunnerArgs(List<String> args, {bool verifyValidTarget = true}) {
+    final argParser = _buildArgParser();
+    _argResults = argParser.parse(args);
 
-    final argWithTestAppUri =
-        args.firstWhereOrNull((arg) => arg.startsWith(testAppUriArg));
-    testAppUri = argWithTestAppUri?.substring(testAppUriArg.length);
+    if (verifyValidTarget) {
+      final target = _argResults[testTargetArg];
+      assert(
+        target != null,
+        'Please specify a test target (e.g. '
+        '--$testTargetArg=path/to/test.dart',
+      );
+    }
 
-    final argWithTestAppDevice =
-        args.firstWhereOrNull((arg) => arg.startsWith(testAppDeviceArg));
     testAppDevice = TestAppDevice.fromArgName(
-      argWithTestAppDevice?.substring(testAppDeviceArg.length) ??
-          TestAppDevice.flutterTester.argName,
+      _argResults[_testAppDeviceArg] ?? TestAppDevice.flutterTester.argName,
     )!;
-
-    updateGoldens = args.contains(updateGoldensArg);
-    headless = args.contains(headlessArg);
   }
 
-  static const testTargetArg = '--target=';
-  static const testAppUriArg = '--test-app-uri=';
-  static const testAppDeviceArg = '--test-app-device=';
-  static const updateGoldensArg = '--update-goldens';
-  static const headlessArg = '--headless';
+  late final ArgResults _argResults;
 
-  late final String testTarget;
-
-  /// The Vm Service URI for the test app to connect devtools to.
-  ///
-  /// This value will only be used for tests with live connection.
-  late final String? testAppUri;
+  /// The path to the test target.
+  String? get testTarget => _argResults[testTargetArg];
 
   /// The type of device for the test app to run on.
   late final TestAppDevice testAppDevice;
 
+  /// The Vm Service URI for the test app to connect devtools to.
+  ///
+  /// This value will only be used for tests with live connection.
+  String? get testAppUri => _argResults[_testAppUriArg];
+
   /// Whether golden images should be updated with the result of this test run.
-  late final bool updateGoldens;
+  bool get updateGoldens => _argResults[_updateGoldensArg];
 
   /// Whether this integration test should be run on the 'web-server' device
   /// instead of 'chrome'.
-  late final bool headless;
+  bool get headless => _argResults[_headlessArg];
+
+  static const _helpArg = 'help';
+  static const testTargetArg = 'target';
+  static const _testAppUriArg = 'test-app-uri';
+  static const _testAppDeviceArg = 'test-app-device';
+  static const _updateGoldensArg = 'update-goldens';
+  static const _headlessArg = 'headless';
+
+  /// Builds an arg parser for DevTools integration tests.
+  static ArgParser _buildArgParser() {
+    final argParser = ArgParser()
+      ..addFlag(
+        _helpArg,
+        abbr: 'h',
+        help: 'Prints help output.',
+      )
+      ..addOption(
+        testTargetArg,
+        abbr: 't',
+        help:
+            'The integration test target (e.g. path/to/test.dart). If left empty,'
+            ' all integration tests will be run.',
+      )
+      ..addOption(
+        _testAppUriArg,
+        help: 'The vm service connection to use for the app that DevTools will '
+            'connect to during the integration test. If left empty, a sample app '
+            'will be spun up as part of the integration test process.',
+      )
+      ..addOption(
+        _testAppDeviceArg,
+        help:
+            'The device to use for the test app that DevTools will connect to.',
+      )
+      ..addFlag(
+        _updateGoldensArg,
+        negatable: false,
+        help: 'Updates the golden images with the results of this test run.',
+      )
+      ..addFlag(
+        _headlessArg,
+        negatable: false,
+        help:
+            'Runs the integration test on the \'web-server\' device instead of '
+            'the \'chrome\' device. For headless test runs, you will not be '
+            'able to see the integration test run visually in a Chrome browser.',
+      );
+    return argParser;
+  }
 }
 
 enum TestAppDevice {
   flutterTester('flutter-tester'),
   chrome('chrome');
+
+  // TODO(https://github.com/flutter/devtools/issues/5953): support a Dart CLI
+  // test device.
 
   const TestAppDevice(this.argName);
 
