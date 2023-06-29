@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// ATTENTION: If any lines are added to or  deleted from this file then the
+// debugger panel integration test will need to be updated with new line numbers
+// (the test verifies that breakpoints are hit at specific lines).
+
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -11,6 +15,8 @@ import 'package:flutter/material.dart';
 // This is a fairly long description so that we can make sure that scrolling to
 // a line works when we are paused at a breakpoint.
 class MyOtherWidget extends StatelessWidget {
+  const MyOtherWidget({super.key});
+
   @override
   Widget build(BuildContext context) {
     return const SizedBox();

@@ -94,6 +94,7 @@ MockCodeViewController createMockCodeViewControllerWithDefaults({
   );
   when(codeViewController.showCodeCoverage).thenReturn(ValueNotifier(false));
   when(codeViewController.focusLine).thenReturn(ValueNotifier(-1));
+  when(codeViewController.navigationInProgress).thenReturn(false);
 
   return codeViewController;
 }

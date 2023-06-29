@@ -69,6 +69,7 @@ void main() {
     when(mockCodeViewController.refreshCodeStatistics()).thenAnswer(
       (_) async => refreshCodeCoverageInvoked = true,
     );
+    when(codeViewController.navigationInProgress).thenReturn(false);
   });
 
   Future<void> pumpDebuggerScreen(
