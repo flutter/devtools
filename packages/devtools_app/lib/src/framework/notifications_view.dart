@@ -168,6 +168,7 @@ class _NotificationOverlay extends StatelessWidget {
           child: SingleChildScrollView(
             reverse: true,
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
               mainAxisSize: MainAxisSize.min,
               children: _notifications,
             ),
@@ -196,7 +197,7 @@ class _NotificationState extends State<_Notification>
     with SingleTickerProviderStateMixin {
   late AnimationController controller;
   late CurvedAnimation curve;
-  late Timer _dismissTimer;
+  Timer? _dismissTimer;
 
   @override
   void initState() {
@@ -209,25 +210,28 @@ class _NotificationState extends State<_Notification>
       parent: controller,
       curve: Curves.easeInOutCirc,
     );
+
     // Set up a timer that reverses the entrance animation, and tells the widget
     // to remove itself when the exit animation is completed.
     // We can do this because the NotificationsState is directly controlling
     // the life cycle of each _Notification widget presented in the overlay.
-    _dismissTimer = Timer(widget.message.duration, () {
-      controller.addStatusListener((status) {
-        if (status == AnimationStatus.dismissed) {
-          widget.remove(widget);
-        }
+    if (!widget.message.isDismissible) {
+      _dismissTimer = Timer(widget.message.duration, () {
+        controller.addStatusListener((status) {
+          if (status == AnimationStatus.dismissed) {
+            widget.remove(widget);
+          }
+        });
+        controller.reverse();
       });
-      controller.reverse();
-    });
+    }
     controller.forward();
   }
 
   @override
   void dispose() {
     controller.dispose();
-    _dismissTimer.cancel();
+    _dismissTimer?.cancel();
     super.dispose();
   }
 
@@ -254,7 +258,28 @@ class _NotificationState extends State<_Notification>
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _NotificationMessage(widget: widget, context: context),
+                  widget.message.isDismissible
+                      ? Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Flexible(
+                              child: _NotificationMessage(
+                                widget: widget,
+                                context: context,
+                              ),
+                            ),
+                            _DismissAction(
+                              onPressed: () {
+                                widget.remove(widget);
+                              },
+                            ),
+                          ],
+                        )
+                      : _NotificationMessage(
+                          widget: widget,
+                          context: context,
+                        ),
                   const SizedBox(height: defaultSpacing),
                   _NotificationActions(widget: widget),
                 ],
@@ -262,6 +287,27 @@ class _NotificationState extends State<_Notification>
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _DismissAction extends StatelessWidget {
+  const _DismissAction({
+    required this.onPressed,
+  });
+
+  final void Function() onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return Align(
+      alignment: Alignment.topRight,
+      child: IconButton(
+        icon: const Icon(
+          Icons.close,
+        ),
+        onPressed: onPressed,
       ),
     );
   }
@@ -278,11 +324,23 @@ class _NotificationMessage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Text(
-      widget.message.text,
-      style: Theme.of(context).textTheme.bodyMedium,
-      overflow: TextOverflow.visible,
-      maxLines: 10,
+    final theme = Theme.of(context);
+    final textStyle = theme.textTheme.bodyMedium;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+        denseSpacing,
+        denseSpacing,
+        denseSpacing,
+        0,
+      ),
+      child: Text(
+        widget.message.text,
+        style: widget.message.isError
+            ? textStyle?.copyWith(color: theme.colorScheme.error)
+            : textStyle,
+        overflow: TextOverflow.visible,
+        maxLines: 10,
+      ),
     );
   }
 }

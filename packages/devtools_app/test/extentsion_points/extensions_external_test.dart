@@ -17,4 +17,17 @@ void main() {
     expect(uri.toString().contains(tail), false);
     expect(uri.toString().length, maxGitHubUriLength);
   });
+
+  test(
+    'newDevToolsGitHubIssueUriLengthSafe includes title and additional info',
+    () {
+      final uri = newDevToolsGitHubIssueUriLengthSafe(
+        issueTitle: 'Issue title',
+        additionalInfo: 'Some additional info',
+        environment: [],
+      );
+      expect(uri.toString(), contains('title=Issue+title'));
+      expect(uri.toString(), contains('body=Some+additional+info'));
+    },
+  );
 }

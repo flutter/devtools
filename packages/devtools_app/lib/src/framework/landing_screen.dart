@@ -234,7 +234,10 @@ class _ConnectDialogState extends State<ConnectDialog>
       '',
       explicitUri: uri,
       errorReporter: (message, error) {
-        notificationService.push('$message $error');
+        notificationService.pushError(
+          '$message $error',
+          isReportable: false,
+        );
       },
     );
     if (connected) {
@@ -345,7 +348,7 @@ class AppSizeToolingInstructions extends StatelessWidget {
       gac.landingScreen,
       gac.openAppSizeTool,
     );
-    DevToolsRouterDelegate.of(context).navigate(appSizePageId);
+    DevToolsRouterDelegate.of(context).navigate(appSizeScreenId);
   }
 }
 

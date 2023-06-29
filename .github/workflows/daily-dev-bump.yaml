@@ -36,7 +36,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: git clone devtools
-        uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab
+        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9
         with:
           ref: master
 
@@ -107,7 +107,7 @@ jobs:
           # Change github credentials back to the actions bot.
           GH_TOKEN="$ORIGINAL_GH_TOKEN"
 
-          gh pr edit $PR_URL $FLAGS --add-label "autosubmit,release-notes-not-required"
+          gh pr edit $PR_URL $FLAGS --add-label "autosubmit"
 
         env:
           COMMIT_MESSAGE: ${{ steps.version-bump.outputs.COMMIT_MESSAGE }}

@@ -275,6 +275,7 @@ class MemoryEvent {
 /// Areas of memory screen, to prefix event names, when events are emitted
 /// by a widget used in different contexts.
 enum MemoryAreas {
+  profile('profile'),
   snapshotSingle('single'),
   snapshotDiff('diff'),
   snapshotDiffDelta('diff-delta'),

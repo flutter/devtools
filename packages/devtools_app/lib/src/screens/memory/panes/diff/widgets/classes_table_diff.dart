@@ -15,10 +15,10 @@ import '../../../../../shared/theme.dart';
 import '../../../../../shared/utils.dart';
 import '../../../shared/heap/heap.dart';
 import '../../../shared/primitives/simple_elements.dart';
-import '../../../shared/shared_memory_widgets.dart';
+import '../../../shared/widgets/class_filter.dart';
+import '../../../shared/widgets/shared_memory_widgets.dart';
 import '../controller/class_data.dart';
 import '../controller/heap_diff.dart';
-import 'class_filter.dart';
 import 'instances.dart';
 
 enum _DataPart {
@@ -159,7 +159,7 @@ class _InstanceColumn extends ColumnData<DiffClassStats>
       );
     }
 
-    return InstanceTableCell(
+    return HeapInstanceTableCell(
       objects,
       heapCallback,
       data.heapClass,

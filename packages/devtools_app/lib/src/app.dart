@@ -42,6 +42,7 @@ import 'shared/analytics/analytics_controller.dart';
 import 'shared/analytics/metrics.dart';
 import 'shared/common_widgets.dart';
 import 'shared/console/primitives/simple_items.dart';
+import 'shared/feature_flags.dart';
 import 'shared/globals.dart';
 import 'shared/offline_screen.dart';
 import 'shared/primitives/auto_dispose.dart';
@@ -50,6 +51,7 @@ import 'shared/routing.dart';
 import 'shared/screen.dart';
 import 'shared/theme.dart';
 import 'shared/ui/hover.dart';
+import 'standalone_ui/standalone_screen.dart';
 
 // Assign to true to use a sample implementation of a conditional screen.
 // WARNING: Do not check in this file if debugEnableSampleScreen is true.
@@ -185,7 +187,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
     return MaterialPage(
       child: DevToolsScaffold.withChild(
         key: const Key('not-found'),
-        ideTheme: ideTheme,
+        embed: isEmbedded(args),
         child: CenteredMessage("'$page' not found."),
       ),
     );
@@ -198,12 +200,13 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
     DevToolsNavigationState? __,
   ) {
     final vmServiceUri = params['uri'];
+    final embed = isEmbedded(params);
 
     // Always return the landing screen if there's no VM service URI.
     if (vmServiceUri?.isEmpty ?? true) {
       return DevToolsScaffold.withChild(
         key: const Key('landing'),
-        ideTheme: ideTheme,
+        embed: embed,
         child: LandingScreenBody(sampleData: widget.sampleData),
       );
     }
@@ -214,7 +217,6 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
     if (page?.isEmpty ?? true) {
       page = params['page'];
     }
-    final embed = params['embed'] == 'true';
     final hide = {...?params['hide']?.split(',')};
     return Initializer(
       url: vmServiceUri,
@@ -248,7 +250,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
             );
           },
           child: DevToolsScaffold.withChild(
-            ideTheme: ideTheme,
+            embed: embed,
             child: CenteredMessage(
               page != null
                   ? 'The "$page" screen is not available for this application.'
@@ -263,32 +265,44 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
   /// The pages that the app exposes.
   Map<String, UrlParametersBuilder> get pages {
     return _routes ??= {
-      homePageId: _buildTabbedPage,
+      homeScreenId: _buildTabbedPage,
       for (final screen in widget.screens)
         screen.screen.screenId: _buildTabbedPage,
-      snapshotPageId: (_, __, args, ___) {
+      snapshotScreenId: (_, __, args, ___) {
         final snapshotArgs = OfflineDataArguments.fromArgs(args);
+        final embed = isEmbedded(args);
         return DevToolsScaffold.withChild(
           key: UniqueKey(),
-          ideTheme: ideTheme,
+          embed: embed,
           child: MultiProvider(
             providers: _providedControllers(offline: true),
             child: OfflineScreenBody(snapshotArgs, _screens),
           ),
         );
       },
-      appSizePageId: (_, __, ___, ____) {
+      appSizeScreenId: (_, __, args, ____) {
+        final embed = isEmbedded(args);
         return DevToolsScaffold.withChild(
           key: const Key('appsize'),
-          ideTheme: ideTheme,
+          embed: embed,
           child: MultiProvider(
             providers: _providedControllers(),
             child: const AppSizeBody(),
           ),
         );
       },
+      if (FeatureFlags.vsCodeSidebarTooling) ..._standaloneScreens,
     };
   }
+
+  Map<String, UrlParametersBuilder> get _standaloneScreens {
+    return {
+      for (final type in StandaloneScreenType.values)
+        type.name: (_, __, args, ___) => type.screen,
+    };
+  }
+
+  bool isEmbedded(Map<String, String?> args) => args['embed'] == 'true';
 
   Map<String, UrlParametersBuilder>? _routes;
 
@@ -337,6 +351,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
           ],
           child: NotificationsView(
             child: ReleaseNotesViewer(
+              controller: releaseNotesController,
               child: child,
             ),
           ),

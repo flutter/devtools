@@ -32,7 +32,7 @@ void main() {
     );
     codeViewController = createMockCodeViewControllerWithDefaults();
     debuggerController = createMockDebuggerControllerWithDefaults(
-      mockCodeViewController: codeViewController,
+      codeViewController: codeViewController,
     );
     scriptsHistory = ScriptsHistory();
     mockConnectedApp(
@@ -78,10 +78,7 @@ void main() {
     (WidgetTester tester) async {
       await pumpDebuggerScreen(tester, debuggerController);
 
-      // TODO(elliette): https://github.com/flutter/flutter/pull/88152 fixes
-      // this so that forcing a scroll event is no longer necessary. Remove
-      // once the change is in the stable release.
-      codeViewController.showScriptLocation(
+      await codeViewController.showScriptLocation(
         ScriptLocation(
           mockScriptRef,
           location: const SourcePosition(line: 50, column: 50),
@@ -100,7 +97,9 @@ void main() {
       );
       await expectLater(
         find.byKey(DebuggerScreenBody.codeViewKey),
-        matchesDevToolsGolden('../test_infra/goldens/codeview_scrollbars.png'),
+        matchesDevToolsGolden(
+          '../test_infra/goldens/codeview_scrollbars.png',
+        ),
       );
     },
   );

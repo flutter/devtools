@@ -8,6 +8,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:args/args.dart';
 import 'package:collection/collection.dart';
 
 import '_in_file_args.dart';
@@ -31,9 +32,11 @@ Future<void> runFlutterIntegrationTest(
   if (!offline) {
     if (testRunnerArgs.testAppUri == null) {
       // Create the test app and start it.
-      // TODO(kenz): support running Dart CLI test apps from here too.
       try {
-        testApp = TestFlutterApp(appPath: testFileArgs.appPath);
+        testApp = TestFlutterApp(
+          appPath: testFileArgs.appPath,
+          appDevice: testRunnerArgs.testAppDevice,
+        );
         await testApp.start();
       } catch (e) {
         // ignore: avoid-throw-in-catch-block, by design
@@ -60,7 +63,7 @@ Future<void> runFlutterIntegrationTest(
   Exception? exception;
   try {
     await testRunner.run(
-      testRunnerArgs.testTarget,
+      testRunnerArgs.testTarget!,
       enableExperiments: testFileArgs.experimentsOn,
       updateGoldens: testRunnerArgs.updateGoldens,
       headless: testRunnerArgs.headless,
@@ -103,7 +106,7 @@ class ChromeDriver with IOMixin {
         '--port=4444',
       ],
     );
-    listenToProcessOutput(_process);
+    listenToProcessOutput(_process, printTag: 'ChromeDriver');
   }
 
   void kill() {
@@ -112,10 +115,11 @@ class ChromeDriver with IOMixin {
 }
 
 class TestRunner with IOMixin {
-  static const _beginExceptionMarker = '| EXCEPTION CAUGHT';
-  static const _endExceptionMarker = '===========================';
+  static const _beginExceptionMarker = 'EXCEPTION CAUGHT';
+  static const _endExceptionMarker = '═════════════════════════';
   static const _errorMarker = ': Error: ';
   static const _unhandledExceptionMarker = 'Unhandled exception:';
+  static const _allTestsPassed = 'All tests passed!';
   static const _maxRetriesOnTimeout = 1;
 
   Future<void> run(
@@ -151,9 +155,15 @@ class TestRunner with IOMixin {
       bool stdErrWriteInProgress = false;
       final exceptionBuffer = StringBuffer();
 
+      var testsPassed = false;
       listenToProcessOutput(
         process,
+        printTag: 'FlutterDriveProcess',
         onStdout: (line) {
+          if (line.endsWith(_allTestsPassed)) {
+            testsPassed = true;
+          }
+
           if (line.startsWith(_TestResult.testResultPrefix)) {
             final testResultJson = line.substring(line.indexOf('{'));
             final testResultMap =
@@ -200,25 +210,31 @@ class TestRunner with IOMixin {
         timeout,
       ]);
 
+      _debugLog('attempting to kill the flutter drive process');
       process.kill();
       _debugLog('flutter drive process has exited');
 
-      if (testTimedOut) {
-        if (attemptNumber >= _maxRetriesOnTimeout) {
-          throw Exception(
-            'Integration test timed out on try #$attemptNumber: $testTarget',
-          );
-        } else {
-          _debugLog(
-            'Integration test timed out on try #$attemptNumber. Retrying '
-            '$testTarget now.',
-          );
-          await runTest(attemptNumber: ++attemptNumber);
+      // Ignore exception handling and retries if the tests passed. This is to
+      // avoid bugs with the test runner where the test can fail after the test
+      // has passed. See https://github.com/flutter/flutter/issues/129041.
+      if (!testsPassed) {
+        if (testTimedOut) {
+          if (attemptNumber >= _maxRetriesOnTimeout) {
+            throw Exception(
+              'Integration test timed out on try #$attemptNumber: $testTarget',
+            );
+          } else {
+            _debugLog(
+              'Integration test timed out on try #$attemptNumber. Retrying '
+              '$testTarget now.',
+            );
+            await runTest(attemptNumber: ++attemptNumber);
+          }
         }
-      }
 
-      if (exceptionBuffer.isNotEmpty) {
-        throw Exception(exceptionBuffer.toString());
+        if (exceptionBuffer.isNotEmpty) {
+          throw Exception(exceptionBuffer.toString());
+        }
       }
     }
 
@@ -266,43 +282,131 @@ void _debugLog(String log) {
   }
 }
 
-// TODO(https://github.com/flutter/devtools/issues/4970): use package:args to
-// parse these arguments.
 class TestRunnerArgs {
-  TestRunnerArgs(List<String> args) {
-    final argWithTestTarget =
-        args.firstWhereOrNull((arg) => arg.startsWith(testTargetArg));
-    final target = argWithTestTarget?.substring(testTargetArg.length);
-    assert(
-      target != null,
-      'Please specify a test target (e.g. ${testTargetArg}path/to/test.dart',
-    );
-    testTarget = target!;
+  TestRunnerArgs(List<String> args, {bool verifyValidTarget = true}) {
+    final argParser = _buildArgParser();
+    _argResults = argParser.parse(args);
 
-    final argWithTestAppUri =
-        args.firstWhereOrNull((arg) => arg.startsWith(testAppArg));
-    testAppUri = argWithTestAppUri?.substring(testAppArg.length);
+    if (verifyValidTarget) {
+      final target = _argResults[testTargetArg];
+      assert(
+        target != null,
+        'Please specify a test target (e.g. '
+        '--$testTargetArg=path/to/test.dart',
+      );
+    }
 
-    updateGoldens = args.contains(updateGoldensArg);
-    headless = args.contains(headlessArg);
+    testAppDevice = TestAppDevice.fromArgName(
+      _argResults[_testAppDeviceArg] ?? TestAppDevice.flutterTester.argName,
+    )!;
   }
 
-  static const testTargetArg = '--target=';
-  static const testAppArg = '--test-app-uri=';
-  static const updateGoldensArg = '--update-goldens';
-  static const headlessArg = '--headless';
+  late final ArgResults _argResults;
 
-  late final String testTarget;
+  /// The path to the test target.
+  String? get testTarget => _argResults[testTargetArg];
+
+  /// The type of device for the test app to run on.
+  late final TestAppDevice testAppDevice;
 
   /// The Vm Service URI for the test app to connect devtools to.
   ///
   /// This value will only be used for tests with live connection.
-  late final String? testAppUri;
+  String? get testAppUri => _argResults[_testAppUriArg];
 
   /// Whether golden images should be updated with the result of this test run.
-  late final bool updateGoldens;
+  bool get updateGoldens => _argResults[_updateGoldensArg];
 
   /// Whether this integration test should be run on the 'web-server' device
   /// instead of 'chrome'.
-  late final bool headless;
+  bool get headless => _argResults[_headlessArg];
+
+  static const _helpArg = 'help';
+  static const testTargetArg = 'target';
+  static const _testAppUriArg = 'test-app-uri';
+  static const _testAppDeviceArg = 'test-app-device';
+  static const _updateGoldensArg = 'update-goldens';
+  static const _headlessArg = 'headless';
+
+  /// Builds an arg parser for DevTools integration tests.
+  static ArgParser _buildArgParser() {
+    final argParser = ArgParser()
+      ..addFlag(
+        _helpArg,
+        abbr: 'h',
+        help: 'Prints help output.',
+      )
+      ..addOption(
+        testTargetArg,
+        abbr: 't',
+        help:
+            'The integration test target (e.g. path/to/test.dart). If left empty,'
+            ' all integration tests will be run.',
+      )
+      ..addOption(
+        _testAppUriArg,
+        help: 'The vm service connection to use for the app that DevTools will '
+            'connect to during the integration test. If left empty, a sample app '
+            'will be spun up as part of the integration test process.',
+      )
+      ..addOption(
+        _testAppDeviceArg,
+        help:
+            'The device to use for the test app that DevTools will connect to.',
+      )
+      ..addFlag(
+        _updateGoldensArg,
+        negatable: false,
+        help: 'Updates the golden images with the results of this test run.',
+      )
+      ..addFlag(
+        _headlessArg,
+        negatable: false,
+        help:
+            'Runs the integration test on the \'web-server\' device instead of '
+            'the \'chrome\' device. For headless test runs, you will not be '
+            'able to see the integration test run visually in a Chrome browser.',
+      );
+    return argParser;
+  }
+}
+
+enum TestAppDevice {
+  flutterTester('flutter-tester'),
+  chrome('chrome');
+
+  // TODO(https://github.com/flutter/devtools/issues/5953): support a Dart CLI
+  // test device.
+
+  const TestAppDevice(this.argName);
+
+  final String argName;
+
+  /// A mapping of test app device to the unsupported tests for that device.
+  static final _unsupportedTestsForDevice = <TestAppDevice, List<String>>{
+    TestAppDevice.flutterTester: [],
+    TestAppDevice.chrome: [
+      // TODO(https://github.com/flutter/devtools/issues/5874): Remove once supported on web.
+      'eval_and_browse_test.dart',
+      'perfetto_test.dart',
+      'performance_screen_event_recording_test.dart',
+      'service_connection_test.dart',
+    ],
+  };
+
+  static final _argNameToDeviceMap =
+      TestAppDevice.values.fold(<String, TestAppDevice>{}, (map, device) {
+    map[device.argName] = device;
+    return map;
+  });
+
+  static TestAppDevice? fromArgName(String argName) {
+    return _argNameToDeviceMap[argName];
+  }
+
+  bool supportsTest(String testPath) {
+    final unsupportedTests = _unsupportedTestsForDevice[this] ?? [];
+    return unsupportedTests
+        .none((unsupportedTestPath) => testPath.endsWith(unsupportedTestPath));
+  }
 }

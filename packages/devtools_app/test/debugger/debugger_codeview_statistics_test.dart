@@ -24,7 +24,7 @@ void main() {
     fakeServiceManager = FakeServiceManager();
     codeViewController = createMockCodeViewControllerWithDefaults();
     debuggerController = createMockDebuggerControllerWithDefaults(
-      mockCodeViewController: codeViewController,
+      codeViewController: codeViewController,
     );
     scriptsHistory = ScriptsHistory();
 
@@ -69,6 +69,7 @@ void main() {
     when(mockCodeViewController.refreshCodeStatistics()).thenAnswer(
       (_) async => refreshCodeCoverageInvoked = true,
     );
+    when(codeViewController.navigationInProgress).thenReturn(false);
   });
 
   Future<void> pumpDebuggerScreen(

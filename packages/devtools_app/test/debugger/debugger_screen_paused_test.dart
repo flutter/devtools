@@ -53,6 +53,7 @@ void main() {
       .thenReturn(ValueNotifier(mockScriptRef));
   when(codeViewController.currentParsedScript)
       .thenReturn(ValueNotifier(mockParsedScript));
+  when(codeViewController.navigationInProgress).thenReturn(false);
 
   Finder findDebuggerButtonWithTitle(String title) => find.byWidgetPredicate(
         (Widget widget) => widget is DebuggerButton && widget.title == title,
@@ -125,12 +126,12 @@ void main() {
 
       // The first stack frame is visible:
       final firstStackFrame =
-          findStackFrameWithText('firstCodeRef 17b557e5bc3:1');
+          findStackFrameWithText('firstCodeRef main.dart:1');
       expect(firstStackFrame, findsOneWidget);
 
       // The second stack frame is visible:
       final secondStackFrame =
-          findStackFrameWithText('secondCodeRef 17b557e5bc3:85');
+          findStackFrameWithText('secondCodeRef main.dart:85');
       expect(secondStackFrame, findsOneWidget);
 
       // The first stack frame's line is visible:

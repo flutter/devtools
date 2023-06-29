@@ -11,15 +11,21 @@ on:
         description: 'The OS to run against, either "macos" or "ubuntu". If neither is provided, will run against both.'
         type: string
       needs-checkout-merge:
-        description: 'Whether the PR should be merged during the checkout step. Necessary for pull_request_target workflows.'
+        description: "Whether the PR should be merged during the checkout step. Necessary for pull_request_target workflows."
         type: boolean
+      requires-label:
+        description: "Specifies the label required for the workflow to run. If not provided, the workflow will always run."
+        type: string
+
     outputs:
       latest_flutter_candidate:
-        description: 'The latest Flutter candidate version.'
-        value: ${{ jobs.reusable-flutter-prep.outputs.latest_flutter_candidate }} 
+        description: "The latest Flutter candidate version."
+        value: ${{ jobs.reusable-flutter-prep.outputs.latest_flutter_candidate }}
 
 jobs:
   reusable-flutter-prep:
+    # Note: Do not delete the following check. This is needed for the DCM workflow.
+    if: inputs.requires-label == '' || contains(github.event.pull_request.labels.*.name, inputs.requires-label)
     name: ${{ matrix.os }} Flutter Prep
     outputs:
       latest_flutter_candidate: ${{ steps.flutter-candidate.outputs.FLUTTER_CANDIDATE }}
@@ -31,19 +37,19 @@ jobs:
       # TODO(https://github.com/flutter/devtools/issues/5729) Consider caching DevTools so that we
       # don't check it out again is subsequent workflows.
 
-      # Merge in the PR branch during checkout. This is necessary for pull_request_target workflows.
-      # See: https://github.com/actions/checkout/issues/518
+      # Merge in the PR branch during checkout using the PR's sha. This is necessary for pull_request_target
+      # workflows. See: https://github.com/actions/checkout/issues/518
       - name: Checkout PR branch for DevTools
         if: ${{ inputs.needs-checkout-merge == true }}
         id: checkout-pr-branch
-        uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab
+        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9
         with:
-          ref: "refs/pull/${{ github.event.number }}/merge"
-  
+          ref: "${{ github.event.pull_request.head.sha }}"
+
       # Otherwise use the default checkout action.
       - name: Checkout DevTools (default)
         if: steps.checkout-pr-branch.outcome == 'skipped'
-        uses: actions/checkout@8e5e7e5ab8b370d6c329ec480221332ada57f0ab
+        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9
 
       - name: Get Latest Flutter Candidate
         id: flutter-candidate

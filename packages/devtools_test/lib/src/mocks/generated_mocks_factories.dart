@@ -94,13 +94,19 @@ MockCodeViewController createMockCodeViewControllerWithDefaults({
   );
   when(codeViewController.showCodeCoverage).thenReturn(ValueNotifier(false));
   when(codeViewController.focusLine).thenReturn(ValueNotifier(-1));
+  when(codeViewController.navigationInProgress).thenReturn(false);
 
   return codeViewController;
 }
 
 MockDebuggerController createMockDebuggerControllerWithDefaults({
-  MockCodeViewController? mockCodeViewController,
+  // ignore: avoid-dynamic, can be either a real or mock controller.
+  dynamic codeViewController,
 }) {
+  assert(
+    codeViewController is MockCodeViewController? ||
+        codeViewController is CodeViewController?,
+  );
   final debuggerController = MockDebuggerController();
   when(debuggerController.resuming).thenReturn(ValueNotifier(false));
   when(debuggerController.isSystemIsolate).thenReturn(false);
@@ -113,9 +119,9 @@ MockDebuggerController createMockDebuggerControllerWithDefaults({
   when(debuggerController.exceptionPauseMode)
       .thenReturn(ValueNotifier('Unhandled'));
 
-  mockCodeViewController ??= createMockCodeViewControllerWithDefaults();
+  codeViewController ??= createMockCodeViewControllerWithDefaults();
   when(debuggerController.codeViewController).thenReturn(
-    mockCodeViewController,
+    codeViewController,
   );
 
   return debuggerController;

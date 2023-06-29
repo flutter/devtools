@@ -44,12 +44,16 @@ class OfflineFileException implements Exception {
 
 class MemoryFeatureControllers {
   /// [diffPaneController] is passed for testability.
-  MemoryFeatureControllers(DiffPaneController? diffPaneController) {
+  MemoryFeatureControllers(
+    DiffPaneController? diffPaneController,
+    ProfilePaneController? profilePaneController,
+  ) {
     diff = diffPaneController ?? DiffPaneController(SnapshotTaker());
+    profile = profilePaneController ?? ProfilePaneController();
   }
 
   late DiffPaneController diff;
-  ProfilePaneController profile = ProfilePaneController();
+  late ProfilePaneController profile;
   TracingPaneController tracing = TracingPaneController();
 
   void reset() {
@@ -76,11 +80,17 @@ class MemoryFeatureControllers {
 /// of the complicated logic in this class to run on the VM.
 class MemoryController extends DisposableController
     with AutoDisposeControllerMixin {
-  MemoryController({DiffPaneController? diffPaneController}) {
+  MemoryController({
+    DiffPaneController? diffPaneController,
+    ProfilePaneController? profilePaneController,
+  }) {
     memoryTimeline = MemoryTimeline();
     memoryLog = MemoryLog(this);
 
-    controllers = MemoryFeatureControllers(diffPaneController);
+    controllers = MemoryFeatureControllers(
+      diffPaneController,
+      profilePaneController,
+    );
   }
 
   /// Sub-controllers of memory controller.

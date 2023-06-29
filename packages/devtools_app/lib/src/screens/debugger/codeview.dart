@@ -168,7 +168,7 @@ class _CodeViewState extends State<CodeView> with AutoDisposeMixin {
     }
 
     if (oldWidget.scriptRef != widget.scriptRef) {
-      verticalController.resetScroll();
+      _updateScrollPosition();
     }
   }
 
@@ -232,8 +232,9 @@ class _CodeViewState extends State<CodeView> with AutoDisposeMixin {
       final lineCount = parsedScript?.lineCount;
       if (lineCount != null && lineCount * CodeView.rowHeight > extent) {
         final lineIndex = line - 1;
-        final scrollPosition = lineIndex * CodeView.rowHeight -
+        var scrollPosition = lineIndex * CodeView.rowHeight -
             ((extent - CodeView.rowHeight) / 2);
+        scrollPosition = scrollPosition.clamp(0.0, position.extentTotal);
         if (animate) {
           unawaited(
             verticalController.animateTo(
@@ -262,34 +263,24 @@ class _CodeViewState extends State<CodeView> with AutoDisposeMixin {
       return const CenteredCircularProgressIndicator();
     }
 
-    return DualValueListenableBuilder<bool, bool>(
-      firstListenable: widget.enableFileExplorer
-          ? widget.codeViewController.showFileOpener
-          : const FixedValueListenable<bool>(false),
-      secondListenable: widget.enableSearch
-          ? widget.codeViewController.showSearchInFileField
-          : const FixedValueListenable<bool>(false),
-      builder: (context, showFileOpener, showSearch, _) {
-        return Stack(
-          children: [
-            scriptRef == null
-                ? CodeViewEmptyState(widget: widget)
-                : buildCodeArea(context),
-            if (showFileOpener)
-              Positioned(
-                left: noPadding,
-                right: noPadding,
-                child: buildFileSearchField(),
-              ),
-            if (showSearch && scriptRef != null)
-              Positioned(
-                top: denseSpacing,
-                right: searchFieldRightPadding,
-                child: buildSearchInFileField(),
-              ),
-          ],
-        );
-      },
+    return Stack(
+      children: [
+        scriptRef == null
+            ? CodeViewEmptyState(widget: widget)
+            : buildCodeArea(context),
+        PositionedPopup(
+          isVisibleListenable: widget.codeViewController.showFileOpener,
+          left: noPadding,
+          right: noPadding,
+          child: buildFileSearchField(),
+        ),
+        PositionedPopup(
+          isVisibleListenable: widget.codeViewController.showSearchInFileField,
+          top: denseSpacing,
+          right: searchFieldRightPadding,
+          child: buildSearchInFileField(),
+        ),
+      ],
     );
   }
 
@@ -299,11 +290,14 @@ class _CodeViewState extends State<CodeView> with AutoDisposeMixin {
     final lines = <TextSpan>[];
 
     // Ensure the syntax highlighter has been initialized.
-    // TODO(bkonyi): process source for highlighting on a separate thread.
     final script = parsedScript;
     final scriptSource = parsedScript?.script.source;
     if (script != null && scriptSource != null) {
-      if (scriptSource.length < 500000) {
+      // It takes ~1 second to syntax highlight 100,000 characters. Therefore,
+      // we only highlight scripts with less than 100,000 characters. If we want
+      // to support larger files, we should process the source for highlighting
+      // on a separate isolate.
+      if (scriptSource.length < 100000) {
         final highlighted = script.highlighter.highlight(
           context,
           lineRange: widget.lineRange,
@@ -457,8 +451,8 @@ class _CodeViewState extends State<CodeView> with AutoDisposeMixin {
           ScriptPopupMenu(widget.codeViewController),
           ScriptHistoryPopupMenu(
             itemBuilder: _buildScriptMenuFromHistory,
-            onSelected: (scriptRef) {
-              widget.codeViewController
+            onSelected: (scriptRef) async {
+              await widget.codeViewController
                   .showScriptLocation(ScriptLocation(scriptRef));
             },
             enabled: widget.codeViewController.scriptsHistory.hasScripts,
@@ -1257,10 +1251,11 @@ class _LineItemState extends State<LineItem>
       );
 
   TextSpan searchAwareLineContents() {
-    final children = widget.lineContents.children;
-    if (children == null) return const TextSpan();
-
-    final activeSearchAwareContents = _activeSearchAwareLineContents(children);
+    // If syntax highlighting is disabled for the script, then
+    // `widget.lineContents` is simply a `TextSpan` with no children.
+    final lineContents = widget.lineContents.children ?? [widget.lineContents];
+    final activeSearchAwareContents =
+        _activeSearchAwareLineContents(lineContents);
     final allSearchAwareContents =
         _searchMatchAwareLineContents(activeSearchAwareContents!);
     return TextSpan(
@@ -1559,13 +1554,13 @@ class GoToLineDialog extends StatelessWidget {
         children: [
           TextField(
             autofocus: true,
-            onSubmitted: (value) {
+            onSubmitted: (value) async {
               final scriptRef =
                   _codeViewController.scriptLocation.value?.scriptRef;
               if (value.isNotEmpty && scriptRef != null) {
                 Navigator.of(context).pop(dialogDefaultContext);
                 final line = int.parse(value);
-                _codeViewController.showScriptLocation(
+                await _codeViewController.showScriptLocation(
                   ScriptLocation(
                     scriptRef,
                     location: SourcePosition(line: line, column: 0),
@@ -1587,6 +1582,40 @@ class GoToLineDialog extends StatelessWidget {
       actions: const [
         DialogCancelButton(),
       ],
+    );
+  }
+}
+
+class PositionedPopup extends StatelessWidget {
+  const PositionedPopup({
+    super.key,
+    required this.isVisibleListenable,
+    required this.child,
+    this.top,
+    this.left,
+    this.right,
+  });
+
+  final ValueListenable<bool> isVisibleListenable;
+  final double? top;
+  final double? left;
+  final double? right;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder<bool>(
+      valueListenable: isVisibleListenable,
+      builder: (context, isVisible, _) {
+        return isVisible
+            ? Positioned(
+                top: top,
+                left: left,
+                right: right,
+                child: child,
+              )
+            : const SizedBox.shrink();
+      },
     );
   }
 }

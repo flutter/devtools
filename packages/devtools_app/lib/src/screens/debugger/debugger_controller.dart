@@ -181,7 +181,7 @@ class DebuggerController extends DisposableController
 
     if (ref == null) {
       await _getStackOperation?.cancel();
-      _populateFrameInfo([], truncated: false);
+      await _populateFrameInfo([], truncated: false);
       return;
     }
 
@@ -376,7 +376,7 @@ class DebuggerController extends DisposableController
 
     // Perform an early exit if we're not paused.
     if (!paused) {
-      _populateFrameInfo([], truncated: false);
+      await _populateFrameInfo([], truncated: false);
       return;
     }
 
@@ -392,7 +392,7 @@ class DebuggerController extends DisposableController
         _log.warning(
           'Pause event has no frame. This likely indicates a DWDS bug.',
         );
-        _populateFrameInfo(
+        await _populateFrameInfo(
           [
             await _createStackFrameWithLocation(
               Frame(
@@ -409,7 +409,7 @@ class DebuggerController extends DisposableController
         ga.select(gac.debugger, gac.pausedWithNoFrames);
         return;
       }
-      _populateFrameInfo(
+      await _populateFrameInfo(
         [
           await _createStackFrameWithLocation(topFrame),
         ],
@@ -429,7 +429,7 @@ class DebuggerController extends DisposableController
       ),
     );
     final stackInfo = await _getStackOperation!.value;
-    _populateFrameInfo(
+    await _populateFrameInfo(
       stackInfo.frames,
       truncated: stackInfo.truncated,
     );
@@ -458,17 +458,17 @@ class DebuggerController extends DisposableController
     );
   }
 
-  void _populateFrameInfo(
+  Future<void> _populateFrameInfo(
     List<StackFrameAndSourcePosition> frames, {
     required final bool truncated,
-  }) {
+  }) async {
     _debugTimingLog.log('populated frame info');
     _stackFramesWithLocation.value = frames;
     _hasTruncatedFrames.value = truncated;
     if (frames.isEmpty) {
-      selectStackFrame(null);
+      await selectStackFrame(null);
     } else {
-      selectStackFrame(frames.first);
+      await selectStackFrame(frames.first);
     }
   }
 
@@ -476,7 +476,7 @@ class DebuggerController extends DisposableController
     await _getStackOperation?.cancel();
     _getStackOperation = CancelableOperation.fromFuture(_getStackInfo());
     final stackInfo = await _getStackOperation!.value;
-    _populateFrameInfo(stackInfo.frames, truncated: stackInfo.truncated);
+    await _populateFrameInfo(stackInfo.frames, truncated: stackInfo.truncated);
   }
 
   void _clearCaches() {
@@ -515,35 +515,36 @@ class DebuggerController extends DisposableController
     return StackFrameAndSourcePosition(frame, position: position);
   }
 
-  void selectBreakpoint(BreakpointAndSourcePosition bp) {
+  Future<void> selectBreakpoint(BreakpointAndSourcePosition bp) async {
     _selectedBreakpoint.value = bp;
 
     final scriptRef = bp.scriptRef;
     if (scriptRef == null) return;
 
     if (bp.sourcePosition == null) {
-      codeViewController.showScriptLocation(ScriptLocation(scriptRef));
+      await codeViewController.showScriptLocation(ScriptLocation(scriptRef));
     } else {
-      codeViewController.showScriptLocation(
+      await codeViewController.showScriptLocation(
         ScriptLocation(scriptRef, location: bp.sourcePosition),
       );
     }
   }
 
-  void selectStackFrame(StackFrameAndSourcePosition? frame) {
-    _selectedStackFrame.value = frame;
-
-    serviceManager.appState.setVariables(
-      frame != null ? _createVariablesForFrame(frame.frame) : [],
-    );
-
+  Future<void> selectStackFrame(StackFrameAndSourcePosition? frame) async {
+    // Load the new script location:
     final scriptRef = frame?.scriptRef;
     final position = frame?.position;
     if (scriptRef != null && position != null) {
-      codeViewController.showScriptLocation(
+      await codeViewController.showScriptLocation(
         ScriptLocation(scriptRef, location: position),
       );
     }
+    // Update the variables for the stack frame:
+    serviceManager.appState.setVariables(
+      frame != null ? _createVariablesForFrame(frame.frame) : [],
+    );
+    // Notify that the stack frame has been succesfully selected:
+    _selectedStackFrame.value = frame;
   }
 
   List<DartObjectNode> _createVariablesForFrame(Frame frame) {

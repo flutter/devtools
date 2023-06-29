@@ -152,6 +152,8 @@ $ dart run integration_test/run_tests.dart --headless"
     # TODO(https://github.com/flutter/devtools/issues/1987): rewrite integration tests.
     dart run integration_test/run_tests.dart --headless
 
+    # Run the supported integration tests connected to a web device.
+    dart run integration_test/run_tests.dart --test-app-device=chrome --headless
 fi
 
 popd

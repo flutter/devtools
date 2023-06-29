@@ -18,11 +18,12 @@ class ExternalDevToolsExtensionPoints implements DevToolsExtensionPoints {
       <ScriptPopupMenuOption>[];
 
   @override
-  Link issueTrackerLink({String? additionalInfo}) {
+  Link issueTrackerLink({String? additionalInfo, String? issueTitle}) {
     return Link(
       display: _newDevToolsIssueUriDisplay,
       url: newDevToolsGitHubIssueUriLengthSafe(
         additionalInfo: additionalInfo,
+        issueTitle: issueTitle,
         environment: issueLinkDetails(),
       ).toString(),
       gaScreenName: gac.devToolsMain,
@@ -32,6 +33,12 @@ class ExternalDevToolsExtensionPoints implements DevToolsExtensionPoints {
 
   @override
   String? username() {
+    // This should always return a null value for 3p users.
+    return null;
+  }
+
+  @override
+  Link? enableSourceMapsLink() {
     // This should always return a null value for 3p users.
     return null;
   }
@@ -61,9 +68,11 @@ const maxGitHubUriLength = 8190;
 Uri newDevToolsGitHubIssueUriLengthSafe({
   required List<String> environment,
   String? additionalInfo,
+  String? issueTitle,
 }) {
   final fullUri = _newDevToolsGitHubIssueUri(
     additionalInfo: additionalInfo,
+    issueTitle: issueTitle,
     environment: environment,
   );
 
@@ -74,11 +83,13 @@ Uri newDevToolsGitHubIssueUriLengthSafe({
     return Uri.parse(fullUri.toString().substring(0, maxGitHubUriLength));
   }
 
+  // Truncate the additional info if the URL is too long:
   final truncatedInfo =
       additionalInfo.substring(0, additionalInfo.length - lengthToCut);
 
   final truncatedUri = _newDevToolsGitHubIssueUri(
     additionalInfo: truncatedInfo,
+    issueTitle: issueTitle,
     environment: environment,
   );
   assert(truncatedUri.toString().length <= maxGitHubUriLength);
@@ -88,6 +99,7 @@ Uri newDevToolsGitHubIssueUriLengthSafe({
 Uri _newDevToolsGitHubIssueUri({
   required List<String> environment,
   String? additionalInfo,
+  String? issueTitle,
 }) {
   final issueBody = [
     if (additionalInfo != null) additionalInfo,
@@ -96,6 +108,7 @@ Uri _newDevToolsGitHubIssueUri({
 
   return Uri.parse('https://$_newDevToolsIssueUriDisplay').replace(
     queryParameters: {
+      'title': issueTitle,
       'body': issueBody,
     },
   );

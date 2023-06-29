@@ -23,6 +23,7 @@ import '../primitives/auto_dispose.dart';
 import '../primitives/utils.dart';
 import 'diagnostics_node.dart';
 import 'generic_instance_reference.dart';
+import 'object_group_api.dart';
 import 'primitives/instance_ref.dart';
 import 'primitives/source_location.dart';
 
@@ -80,8 +81,8 @@ abstract class InspectorServiceBase extends DisposableController
   /// directories of the app's package.
   bool isLocalClass(RemoteDiagnosticsNode node);
 
-  /// Returns a new [ObjectGroupBase] with the given group name.
-  ObjectGroupBase createObjectGroup(String debugName);
+  /// Returns a new [InspectorObjectGroupBase] with the given group name.
+  InspectorObjectGroupBase createObjectGroup(String debugName);
 
   bool get isDisposed => _isDisposed;
   bool _isDisposed = false;
@@ -493,7 +494,7 @@ class InspectorService extends InspectorServiceBase {
     List<RemoteDiagnosticsNode?> children = await root.children ?? [];
 
     if (children.isEmpty) {
-      children = await group.getChildren(root.dartDiagnosticRef, false, null);
+      children = await group.getChildren(root.valueRef, false, null);
     }
 
     if (children.isEmpty) {
@@ -583,8 +584,10 @@ class InspectorService extends InspectorServiceBase {
   }
 }
 
-abstract class ObjectGroupBase implements Disposable {
-  ObjectGroupBase(
+/// This class has additional descenders in Google3.
+abstract class InspectorObjectGroupBase
+    extends InspectorObjectGroupApi<RemoteDiagnosticsNode> {
+  InspectorObjectGroupBase(
     String debugName,
   ) : groupName = '${debugName}_${InspectorServiceBase.nextGroupId}' {
     InspectorServiceBase.nextGroupId++;
@@ -908,6 +911,7 @@ abstract class ObjectGroupBase implements Disposable {
     return jsonDecode(json);
   }
 
+  @override
   Future<InstanceRef?> toObservatoryInstanceRef(
     InspectorInstanceRef inspectorInstanceRef,
   ) async {
@@ -950,6 +954,7 @@ abstract class ObjectGroupBase implements Disposable {
   /// fields.
   ///
   /// The future will immediately complete to null if the inspectorInstanceRef is null.
+  @override
   Future<Map<String, InstanceRef>?> getDartObjectProperties(
     InspectorInstanceRef inspectorInstanceRef,
     final List<String> propertyNames,
@@ -979,6 +984,7 @@ abstract class ObjectGroupBase implements Disposable {
     return properties;
   }
 
+  @override
   Future<Map<String, InstanceRef>?> getEnumPropertyValues(
     InspectorInstanceRef ref,
   ) async {
@@ -1037,8 +1043,6 @@ abstract class ObjectGroupBase implements Disposable {
         throw UnimplementedError(
           'getSourcePosition not implemented. $location',
         );
-//        return inspectorLibrary.getSourcePosition(
-//            debugProcess, location.script, location.tokenPos, this);
       }
     }
     final ClassRef? superClass = clazz.superClass;
@@ -1109,6 +1113,7 @@ abstract class ObjectGroupBase implements Disposable {
     }
   }
 
+  @override
   Future<List<RemoteDiagnosticsNode>> getProperties(
     InspectorInstanceRef instanceRef,
   ) {
@@ -1120,6 +1125,7 @@ abstract class ObjectGroupBase implements Disposable {
     );
   }
 
+  @override
   Future<List<RemoteDiagnosticsNode>> getChildren(
     InspectorInstanceRef instanceRef,
     bool summaryTree,
@@ -1134,6 +1140,10 @@ abstract class ObjectGroupBase implements Disposable {
       false,
     );
   }
+
+  @override
+  bool isLocalClass(RemoteDiagnosticsNode node) =>
+      inspectorService.isLocalClass(node);
 }
 
 /// Class managing a group of inspector objects that can be freed by
@@ -1142,7 +1152,7 @@ abstract class ObjectGroupBase implements Disposable {
 /// After dispose is called, all pending requests made with the ObjectGroup
 /// will be skipped. This means that clients should not have to write any
 /// special logic to handle orphaned requests.
-class ObjectGroup extends ObjectGroupBase {
+class ObjectGroup extends InspectorObjectGroupBase {
   ObjectGroup(
     String debugName,
     this.inspectorService,
@@ -1150,6 +1160,9 @@ class ObjectGroup extends ObjectGroupBase {
 
   @override
   final InspectorService inspectorService;
+
+  @override
+  bool canSetSelectionInspector = true;
 
   Future<RemoteDiagnosticsNode?> getRoot(FlutterTreeType type) {
     // There is no excuse to call this method on a disposed group.
@@ -1231,7 +1244,7 @@ class ObjectGroup extends ObjectGroupBase {
     if (disposed) return null;
     RemoteDiagnosticsNode? newSelection;
     final InspectorInstanceRef? previousSelectionRef =
-        previousSelection?.dartDiagnosticRef;
+        previousSelection?.valueRef;
 
     switch (treeType) {
       case FlutterTreeType.widget:
@@ -1239,18 +1252,18 @@ class ObjectGroup extends ObjectGroupBase {
           isSummaryTree
               ? WidgetInspectorServiceExtensions.getSelectedSummaryWidget.name
               : WidgetInspectorServiceExtensions.getSelectedWidget.name,
-          previousSelectionRef,
+          null,
         );
         break;
     }
     if (disposed) return null;
 
-    return newSelection != null &&
-            newSelection.dartDiagnosticRef == previousSelectionRef
+    return newSelection != null && newSelection.valueRef == previousSelectionRef
         ? previousSelection
         : newSelection;
   }
 
+  @override
   Future<bool> setSelectionInspector(
     InspectorInstanceRef selection,
     bool uiAlreadyUpdated,
@@ -1333,7 +1346,7 @@ class ObjectGroup extends ObjectGroupBase {
     if (node == null) return null;
     final args = {
       'objectGroup': groupName,
-      'arg': node.dartDiagnosticRef.id,
+      'arg': node.valueRef.id,
       'subtreeDepth': subtreeDepth.toString(),
     };
     final json = await invokeServiceMethodDaemonParams(
@@ -1388,7 +1401,7 @@ class ObjectGroup extends ObjectGroupBase {
         WidgetInspectorServiceExtensions.getLayoutExplorerNode.name,
         {
           'groupName': groupName,
-          'id': node.dartDiagnosticRef.id,
+          'id': node.valueRef.id,
           'subtreeDepth': '$subtreeDepth',
         },
       ),

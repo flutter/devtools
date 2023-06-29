@@ -21,6 +21,7 @@ void main() {
 }
 
 void externalRunDevTools({
+  bool integrationTestMode = false,
   bool shouldEnableExperiments = false,
   List<DevToolsJsonFile> sampleData = const [],
 }) {
@@ -28,6 +29,7 @@ void externalRunDevTools({
   setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
 
   runDevTools(
+    integrationTestMode: integrationTestMode,
     shouldEnableExperiments: shouldEnableExperiments,
     sampleData: sampleData,
   );

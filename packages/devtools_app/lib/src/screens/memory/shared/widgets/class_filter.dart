@@ -6,15 +6,14 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
-import '../../../../../shared/analytics/analytics.dart' as ga;
-import '../../../../../shared/analytics/constants.dart' as gac;
-import '../../../../../shared/common_widgets.dart';
-import '../../../../../shared/dialogs.dart';
-import '../../../../../shared/memory/class_name.dart';
-import '../../../../../shared/theme.dart';
-import '../../../../../shared/utils.dart';
-import '../../../shared/heap/class_filter.dart';
-import '../controller/class_data.dart';
+import '../../../../shared/analytics/analytics.dart' as ga;
+import '../../../../shared/analytics/constants.dart' as gac;
+import '../../../../shared/common_widgets.dart';
+import '../../../../shared/dialogs.dart';
+import '../../../../shared/memory/class_name.dart';
+import '../../../../shared/theme.dart';
+import '../../../../shared/utils.dart';
+import '../heap/class_filter.dart';
 
 String _adaptRootPackageForFilter(String? rootPackage) {
   if (rootPackage == null || rootPackage.isEmpty) return '';
@@ -172,20 +171,16 @@ Widget _helpBuilder(BuildContext context) {
     children: [
       Text(_helpText, style: textStyle),
       ...ClassType.values.map(
-        (t) => Column(
+        (t) => Row(
           children: [
-            Row(
-              children: [
-                t.icon,
-                Text(
-                  ' ${t.alias} - for ${t.aliasDescription}',
-                  style: textStyle,
-                ),
-                CopyToClipboardControl(
-                  dataProvider: () => t.alias,
-                  size: tableIconSize,
-                ),
-              ],
+            t.icon,
+            Text(
+              ' ${t.alias} - for ${t.aliasDescription}',
+              style: textStyle,
+            ),
+            CopyToClipboardControl(
+              dataProvider: () => t.alias,
+              size: tableIconSize,
             ),
           ],
         ),

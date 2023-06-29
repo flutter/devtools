@@ -6,11 +6,14 @@ import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:logging/logging.dart';
 
 import 'globals.dart';
 import 'primitives/listenable.dart';
 import 'theme.dart';
 import 'version.dart';
+
+final _log = Logger('screen.dart');
 
 /// Defines a page shown in the DevTools [TabBar].
 @immutable
@@ -122,15 +125,18 @@ abstract class Screen {
 
   int get badgeCount => 0;
 
-  double approximateWidth(TextTheme textTheme) {
+  double approximateTabWidth(
+    TextTheme textTheme, {
+    bool includeTabBarSpacing = true,
+  }) {
     final painter = TextPainter(
-      text: TextSpan(
-        text: title,
-        style: textTheme.bodyLarge,
-      ),
+      text: TextSpan(text: title),
       textDirection: TextDirection.ltr,
     )..layout();
-    return painter.width + denseSpacing + defaultIconSize + defaultSpacing * 2;
+    return painter.width +
+        denseSpacing +
+        defaultIconSize +
+        (includeTabBarSpacing ? tabBarSpacing * 2 : 0.0);
   }
 
   /// Builds the tab to show for this screen in the [DevToolsScaffold]'s main
@@ -204,33 +210,45 @@ abstract class Screen {
 
 /// Check whether a screen should be shown in the UI.
 bool shouldShowScreen(Screen screen) {
+  _log.finest('shouldShowScreen: ${screen.screenId}');
   if (offlineController.offlineMode.value) {
+    _log.finest('for offline mode: returning ${screen.worksOffline}');
     return screen.worksOffline;
   }
   // No sense in ever showing screens in non-offline mode unless the service
   // is available. This also avoids odd edge cases where we could show screens
   // while the ServiceManager is still initializing.
-  if (!serviceManager.isServiceAvailable ||
-      !serviceManager.connectedApp!.connectedAppInitialized) return false;
+  final serviceReady = serviceManager.isServiceAvailable &&
+      serviceManager.connectedApp!.connectedAppInitialized;
+  if (!serviceReady) {
+    _log.finest('service not ready: returning false');
+    return false;
+  }
 
   if (screen.requiresLibrary != null) {
     if (serviceManager.isolateManager.mainIsolate.value == null ||
         !serviceManager.libraryUriAvailableNow(screen.requiresLibrary)) {
+      _log.finest(
+        'screen requires library ${screen.requiresLibrary}: returning false',
+      );
       return false;
     }
   }
   if (screen.requiresDartVm) {
     if (serviceManager.connectedApp!.isRunningOnDartVM != true) {
+      _log.finest('screen requires Dart VM: returning false');
       return false;
     }
   }
   if (screen.requiresDebugBuild) {
     if (serviceManager.connectedApp!.isProfileBuildNow == true) {
+      _log.finest('screen requires debug build: returning false');
       return false;
     }
   }
   if (screen.requiresVmDeveloperMode) {
     if (!preferences.vmDeveloperModeEnabled.value) {
+      _log.finest('screen requires vm developer mode: returning false');
       return false;
     }
   }
@@ -239,9 +257,11 @@ bool shouldShowScreen(Screen screen) {
         !screen.shouldShowForFlutterVersion!(
           serviceManager.connectedApp!.flutterVersionNow,
         )) {
+      _log.finest('screen has flutter version restraints: returning false');
       return false;
     }
   }
+  _log.finest('${screen.screenId} screen supported: returning true');
   return true;
 }
 
