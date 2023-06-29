@@ -24,7 +24,7 @@ TODO: Remove this section if there are not any general updates.
 TODO: Remove this section if there are not any general updates.
 
 ## Network profiler updates
-TODO: Remove this section if there are not any general updates.
+* Added a selector to customize the display type of text and json responses (thanks to @hhacker1999!) - [#5816](https://github.com/flutter/devtools/pull/5816)
 
 ## Logging updates
 TODO: Remove this section if there are not any general updates.
