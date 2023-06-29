@@ -73,25 +73,25 @@ void main() {
 
     final goToLineInputFinder = find.widgetWithText(TextField, 'Line Number');
     expect(goToLineInputFinder, findsOneWidget);
-    await tester.enterText(goToLineInputFinder, '24');
+    await tester.enterText(goToLineInputFinder, '30');
     await tester.testTextInput.receiveAction(TextInputAction.done);
     await tester.pumpAndSettle(safePumpDuration);
 
-    logStatus('looking for line 24');
+    logStatus('looking for line 30');
 
-    // Look for the line 24 gutter item:
-    final gutter24Finder = findGutterItemWithText('24');
-    expect(gutter24Finder, findsOneWidget);
+    // Look for the line 30 gutter item:
+    final gutter30Finder = findGutterItemWithText('30');
+    expect(gutter30Finder, findsOneWidget);
 
-    // Look for the line 24 line item:
-    final line24Finder = findLineItemWithText('count++;');
-    expect(line24Finder, findsOneWidget);
+    // Look for the line 30 line item:
+    final line30Finder = findLineItemWithText('count++;');
+    expect(line30Finder, findsOneWidget);
 
     // Verify that the gutter item and line item are aligned:
     expect(
       areHorizontallyAligned(
-        gutter24Finder,
-        line24Finder,
+        gutter30Finder,
+        line30Finder,
         tester: tester,
       ),
       isTrue,
@@ -100,14 +100,14 @@ void main() {
     logStatus('setting a breakpoint');
 
     // Tap on the gutter for the line to set a breakpoint:
-    await tester.tap(gutter24Finder);
+    await tester.tap(gutter30Finder);
     await tester.pumpAndSettle(safePumpDuration);
 
     logStatus('pausing at breakpoint');
 
     final topFrameFinder = findStackFrameWithText('incrementCounter');
     expect(topFrameFinder, findsOneWidget);
-    expect(isLineFocused(line24Finder), isTrue);
+    expect(isLineFocused(line30Finder), isTrue);
 
     final countVariableFinder = find.textContaining('count:');
     expect(countVariableFinder, findsOneWidget);
@@ -132,26 +132,26 @@ void main() {
 
     logStatus('looking for the focused line');
 
-    // Look for the line 40 gutter item:
-    final gutter40Finder = findGutterItemWithText('40');
-    expect(gutter40Finder, findsOneWidget);
+    // Look for the line 46 gutter item:
+    final gutter46Finder = findGutterItemWithText('46');
+    expect(gutter46Finder, findsOneWidget);
 
-    // Look for the line 40 line item:
-    final line40Finder = findLineItemWithText('_action();');
-    expect(line40Finder, findsOneWidget);
+    // Look for the line 46 line item:
+    final line46Finder = findLineItemWithText('_action();');
+    expect(line46Finder, findsOneWidget);
 
     // Verify that the gutter item and line item are aligned:
     expect(
       areHorizontallyAligned(
-        gutter40Finder,
-        line40Finder,
+        gutter46Finder,
+        line46Finder,
         tester: tester,
       ),
       isTrue,
     );
 
-    // Verify that line 40 is focused:
-    expect(isLineFocused(line40Finder), isTrue);
+    // Verify that line 46 is focused:
+    expect(isLineFocused(line46Finder), isTrue);
   });
 }
 

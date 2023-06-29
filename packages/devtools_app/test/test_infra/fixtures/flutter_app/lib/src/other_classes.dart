@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// ATTENTION: If any lines are added to or  deleted from this file then the
+// debugger panel integration test will need to be updated with new line numbers
+// (the test verifies that breakpoints are hit at specific lines).
+
 import 'dart:async';
 
 import 'package:flutter/material.dart';
