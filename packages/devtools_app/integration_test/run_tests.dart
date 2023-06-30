@@ -19,6 +19,12 @@ const _testSuffix = '_test.dart';
 const _offlineIndicator = 'integration_test/test/offline';
 
 void main(List<String> args) async {
+  final testRunnerArgs = TestRunnerArgs(args, verifyValidTarget: false);
+  if (testRunnerArgs.help) {
+    testRunnerArgs.printHelp();
+    return;
+  }
+
   Exception? exception;
   final chromedriver = ChromeDriver();
 
@@ -26,7 +32,6 @@ void main(List<String> args) async {
     // Start chrome driver before running the flutter integration test.
     await chromedriver.start();
 
-    final testRunnerArgs = TestRunnerArgs(args, verifyValidTarget: false);
     if (testRunnerArgs.testTarget != null) {
       // TODO(kenz): add support for specifying a directory as the target instead
       // of a single file.
@@ -69,7 +74,7 @@ Future<void> _runTest(
 
   await runFlutterIntegrationTest(
     testRunnerArgs,
-    TestFileArgs(testTarget),
+    TestFileArgs(testTarget, testAppDevice: testRunnerArgs.testAppDevice),
     offline: testTarget.startsWith(_offlineIndicator),
   );
 }
