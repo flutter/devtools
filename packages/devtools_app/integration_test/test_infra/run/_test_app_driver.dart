@@ -350,14 +350,18 @@ class TestDartCliApp extends IntegrationTestApp {
 
   @override
   Future<void> startProcess() async {
+    const separator = '/';
+    final parts = testAppPath.split(separator);
+    final scriptName = parts.removeLast();
+    final workingDir = parts.join(separator);
     runProcess = await Process.start(
       'dart',
       [
         '--observe',
         'run',
-        testAppPath.split('/').last,
+        scriptName,
       ],
-      workingDirectory: testAppPath,
+      workingDirectory: workingDir,
     );
   }
 
