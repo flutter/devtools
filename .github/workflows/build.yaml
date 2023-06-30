@@ -111,7 +111,7 @@ jobs:
       matrix:
         bot:
           # Consider running integration tests in ddc mode, too.
-          - integration_dart2js
+          - dart2js
         device:
           - flutter
           - flutter-web

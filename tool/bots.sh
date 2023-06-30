@@ -138,7 +138,7 @@ elif [[ "$BOT" == "test_ddc" || "$BOT" == "test_dart2js" ]]; then
 # elif [ "$BOT" = "integration_ddc" ]; then
 
 # TODO(https://github.com/flutter/devtools/issues/1987): rewrite legacy integration tests.
-elif [ "$BOT" = "integration_dart2js" ]; then
+elif [ "$BOT" = "dart2js" ]; then
 
     flutter pub get
 
