@@ -5,8 +5,8 @@ This is draft for future release notes, that are going to land on
 
 Dart & Flutter DevTools - A Suite of Performance Tools for Dart and Flutter
 
-## General updates
-TODO: Remove this section if there are not any general updates.
+## General updates 
+- Fix overlay notifications so they cover the area that their background blocks - [#5975](https://github.com/flutter/devtools/pull/5975)
 
 ## Inspector updates
 TODO: Remove this section if there are not any general updates.
