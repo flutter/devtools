@@ -197,6 +197,77 @@ class TestFlutterApp extends IntegrationTestApp {
   }
 }
 
+class TestDartCliApp extends IntegrationTestApp {
+  TestDartCliApp({
+    String appPath = 'test/test_infra/fixtures/empty_app.dart',
+  }) : super(appPath, TestAppDevice.cli);
+
+  static const vmServicePrefix = 'The Dart VM service is listening on ';
+
+  @override
+  Future<void> startProcess() async {
+    const separator = '/';
+    final parts = testAppPath.split(separator);
+    final scriptName = parts.removeLast();
+    final workingDir = parts.join(separator);
+    runProcess = await Process.start(
+      'dart',
+      [
+        '--observe=0',
+        'run',
+        scriptName,
+      ],
+      workingDirectory: workingDir,
+    );
+  }
+
+  @override
+  Future<void> waitForAppStart() async {
+    final vmServiceUri = await waitFor(
+      message: vmServicePrefix,
+      timeout: IntegrationTestApp._appStartTimeout,
+    );
+    final parsedVmServiceUri = Uri.parse(vmServiceUri);
+
+    // Map to WS URI.
+    _vmServiceWsUri =
+        convertToWebSocketUrl(serviceProtocolUrl: parsedVmServiceUri);
+  }
+
+  Future<String> waitFor({required String message, Duration? timeout}) {
+    final response = Completer<String>();
+    late StreamSubscription<String> sub;
+    sub = stdoutController.stream.listen(
+      (String line) => _handleStdout(
+        line,
+        subscription: sub,
+        response: response,
+        message: message,
+      ),
+    );
+
+    return _timeoutWithMessages<String>(
+      () => response.future,
+      timeout: timeout,
+      message: 'Did not receive expected message: $message.',
+    ).whenComplete(() => sub.cancel());
+  }
+
+  void _handleStdout(
+    String line, {
+    required StreamSubscription<String> subscription,
+    required Completer<String> response,
+    required String message,
+  }) async {
+    if (message == vmServicePrefix && line.startsWith(vmServicePrefix)) {
+      final vmServiceUri = line
+          .substring(line.indexOf(vmServicePrefix) + vmServicePrefix.length);
+      await subscription.cancel();
+      response.complete(vmServiceUri);
+    }
+  }
+}
+
 abstract class IntegrationTestApp with IOMixin {
   IntegrationTestApp(this.testAppPath, this.testAppDevice);
 
@@ -339,77 +410,6 @@ enum FlutterDaemonConstants {
   final String? _nameOverride;
 
   String get key => _nameOverride ?? name;
-}
-
-class TestDartCliApp extends IntegrationTestApp {
-  TestDartCliApp({
-    String appPath = 'test/test_infra/fixtures/empty_app.dart',
-  }) : super(appPath, TestAppDevice.cli);
-
-  static const vmServicePrefix = 'The Dart VM service is listening on ';
-
-  @override
-  Future<void> startProcess() async {
-    const separator = '/';
-    final parts = testAppPath.split(separator);
-    final scriptName = parts.removeLast();
-    final workingDir = parts.join(separator);
-    runProcess = await Process.start(
-      'dart',
-      [
-        '--observe',
-        'run',
-        scriptName,
-      ],
-      workingDirectory: workingDir,
-    );
-  }
-
-  @override
-  Future<void> waitForAppStart() async {
-    final vmServiceUri = await waitFor(
-      message: vmServicePrefix,
-      timeout: IntegrationTestApp._appStartTimeout,
-    );
-    final parsedVmServiceUri = Uri.parse(vmServiceUri);
-
-    // Map to WS URI.
-    _vmServiceWsUri =
-        convertToWebSocketUrl(serviceProtocolUrl: parsedVmServiceUri);
-  }
-
-  Future<String> waitFor({required String message, Duration? timeout}) {
-    final response = Completer<String>();
-    late StreamSubscription<String> sub;
-    sub = stdoutController.stream.listen(
-      (String line) => _handleStdout(
-        line,
-        subscription: sub,
-        response: response,
-        message: message,
-      ),
-    );
-
-    return _timeoutWithMessages<String>(
-      () => response.future,
-      timeout: timeout,
-      message: 'Did not receive expected message: $message.',
-    ).whenComplete(() => sub.cancel());
-  }
-
-  void _handleStdout(
-    String line, {
-    required StreamSubscription<String> subscription,
-    required Completer<String> response,
-    required String message,
-  }) async {
-    if (message == vmServicePrefix && line.startsWith(vmServicePrefix)) {
-      final vmServiceUri = line
-          .substring(line.indexOf(vmServicePrefix) + vmServicePrefix.length);
-      await subscription.cancel();
-      response.complete(vmServiceUri);
-    }
-  }
 }
 
 enum TestAppDevice {
