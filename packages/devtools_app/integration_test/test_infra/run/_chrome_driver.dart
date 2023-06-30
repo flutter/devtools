@@ -32,6 +32,6 @@ class ChromeDriver with IOMixin {
   Future<void> stop() async {
     await cancelAllStreamSubscriptions();
     debugLog('killing the chromedriver process');
-    _process.kill();
+    await killGracefully(_process);
   }
 }

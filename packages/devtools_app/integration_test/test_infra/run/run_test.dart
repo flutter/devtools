@@ -25,17 +25,21 @@ Future<void> runFlutterIntegrationTest(
   TestFileArgs testFileArgs, {
   required bool offline,
 }) async {
-  TestFlutterApp? testApp;
+  IntegrationTestApp? testApp;
   late String testAppUri;
 
   if (!offline) {
     if (testRunnerArgs.testAppUri == null) {
       // Create the test app and start it.
       try {
-        testApp = TestFlutterApp(
-          appPath: testFileArgs.appPath,
-          appDevice: testRunnerArgs.testAppDevice,
-        );
+        if (testRunnerArgs.testAppDevice == TestAppDevice.cli) {
+          testApp = TestDartCliApp(appPath: testFileArgs.appPath);
+        } else {
+          testApp = TestFlutterApp(
+            appPath: testFileArgs.appPath,
+            appDevice: testRunnerArgs.testAppDevice,
+          );
+        }
         await testApp.start();
       } catch (e) {
         // ignore: avoid-throw-in-catch-block, by design
@@ -278,6 +282,14 @@ class TestRunnerArgs {
   /// instead of 'chrome'.
   bool get headless => _argResults[_headlessArg];
 
+  /// Whether the help flag `-h` was passed to the integration test command.
+  bool get help => _argResults[_helpArg];
+
+  void printHelp() {
+    print('Run integration tests (one or many) for Dart DevTools.');
+    print(_buildArgParser().usage);
+  }
+
   static const _helpArg = 'help';
   static const testTargetArg = 'target';
   static const _testAppUriArg = 'test-app-uri';
@@ -325,45 +337,5 @@ class TestRunnerArgs {
             'able to see the integration test run visually in a Chrome browser.',
       );
     return argParser;
-  }
-}
-
-enum TestAppDevice {
-  flutterTester('flutter-tester'),
-  chrome('chrome');
-
-  // TODO(https://github.com/flutter/devtools/issues/5953): support a Dart CLI
-  // test device.
-
-  const TestAppDevice(this.argName);
-
-  final String argName;
-
-  /// A mapping of test app device to the unsupported tests for that device.
-  static final _unsupportedTestsForDevice = <TestAppDevice, List<String>>{
-    TestAppDevice.flutterTester: [],
-    TestAppDevice.chrome: [
-      // TODO(https://github.com/flutter/devtools/issues/5874): Remove once supported on web.
-      'eval_and_browse_test.dart',
-      'perfetto_test.dart',
-      'performance_screen_event_recording_test.dart',
-      'service_connection_test.dart',
-    ],
-  };
-
-  static final _argNameToDeviceMap =
-      TestAppDevice.values.fold(<String, TestAppDevice>{}, (map, device) {
-    map[device.argName] = device;
-    return map;
-  });
-
-  static TestAppDevice? fromArgName(String argName) {
-    return _argNameToDeviceMap[argName];
-  }
-
-  bool supportsTest(String testPath) {
-    final unsupportedTests = _unsupportedTestsForDevice[this] ?? [];
-    return unsupportedTests
-        .none((unsupportedTestPath) => testPath.endsWith(unsupportedTestPath));
   }
 }
