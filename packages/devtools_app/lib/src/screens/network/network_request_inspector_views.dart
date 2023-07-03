@@ -360,7 +360,7 @@ class HttpTextResponseViewer extends StatelessWidget {
               responseBody,
               style: textStyle,
             ),
-          _ => const SizedBox()
+          _ => const SizedBox(),
         };
       },
     );
