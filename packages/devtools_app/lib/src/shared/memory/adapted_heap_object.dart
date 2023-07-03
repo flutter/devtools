@@ -16,6 +16,29 @@ class _JsonFields {
   static const String shallowSize = 'shallowSize';
 }
 
+class HeapRef {
+  HeapRef({required this.index, required this.location});
+
+  /// Index of the object in [AdaptedHeapData.objects].
+  final int index;
+
+  /// Name of field in class or index in array.
+  final String? location;
+
+  @override
+  bool operator ==(Object other) {
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
+    return other is HeapRef &&
+        other.index == index &&
+        other.location == location;
+  }
+
+  @override
+  int get hashCode => Object.hash(index, location);
+}
+
 /// Contains information from [HeapSnapshotObject] needed for
 /// memory analysis on memory screen.
 class AdaptedHeapObject {
