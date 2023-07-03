@@ -8,6 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../devtools_app.dart';
 import 'example/conditional_screen.dart';
 import 'framework/framework_core.dart';
 import 'framework/initializer.dart';
