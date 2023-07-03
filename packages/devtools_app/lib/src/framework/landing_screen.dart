@@ -59,7 +59,7 @@ class _LandingScreenBodyState extends State<LandingScreenBody> {
           const AppSizeToolingInstructions(),
           if (FeatureFlags.memoryAnalysis) ...[
             const SizedBox(height: defaultSpacing),
-            const AppSizeToolingInstructions(),
+            const MemoryAnalysisInstructions(),
           ],
         ],
       ),
