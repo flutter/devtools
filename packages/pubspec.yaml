@@ -4,7 +4,6 @@ publish_to: none
 
 environment:
   sdk: '>=3.0.0 <4.0.0'
-  flutter: '>=3.0.0'
 
 dev_dependencies:
   flutter_lints: ^2.0.0
