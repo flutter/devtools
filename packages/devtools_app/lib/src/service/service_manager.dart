@@ -251,6 +251,7 @@ class ServiceConnectionManager {
     unawaited(onClosed.then((_) => vmServiceClosed()));
 
     void handleServiceEvent(Event e) {
+      _log.fine('ServiceEvent: [${e.kind}] - ${e.service}');
       if (e.kind == EventKind.kServiceRegistered) {
         final serviceName = e.service!;
         _registeredMethodsForService[serviceName] = e.method!;
