@@ -292,6 +292,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
           ),
         );
       },
+  if (FeatureFlags.memoryAnalysis)
       memoryAnalysisScreenId: (_, __, args, ____) {
         final embed = isEmbedded(args);
         return DevToolsScaffold.withChild(
