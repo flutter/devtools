@@ -2,11 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io';
-import 'dart:typed_data';
-
 import 'package:devtools_app/src/shared/memory/adapted_heap_data.dart';
-import 'package:vm_service/vm_service.dart';
 
 const _dataDir = 'test/test_infra/test_data/memory/heap/';
 
@@ -27,13 +23,7 @@ class GoldenHeapTest {
   ///
   /// Format is format used by [NativeRuntime.writeHeapSnapshotToFile]
   static Future<AdaptedHeapData> _loadFromFile(String fileName) async {
-    final file = File(fileName);
-    final bytes = await file.readAsBytes();
-    final data = ByteData.view(bytes.buffer);
-
-    final graph = HeapSnapshotGraph.fromChunks([data]);
-
-    return AdaptedHeapData.fromHeapSnapshot(graph, isolateId: 'test');
+    return AdaptedHeapData.fromFile(fileName, isolateId: 'test');
   }
 
   static HeapLoader _loaderFromFile(String fileName) =>
