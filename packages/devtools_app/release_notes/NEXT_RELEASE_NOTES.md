@@ -9,7 +9,7 @@ Dart & Flutter DevTools - A Suite of Performance Tools for Dart and Flutter
 - Fix overlay notifications so they cover the area that their background blocks - [#5975](https://github.com/flutter/devtools/pull/5975)
 
 ## Inspector updates
-- Fix bug related to upcoming Flutter Multi View functionality - [#5986](https://github.com/flutter/devtools/pull/5986)
+TODO: Remove this section if there are not any general updates.
 
 ## Performance updates
 TODO: Remove this section if there are not any general updates.
