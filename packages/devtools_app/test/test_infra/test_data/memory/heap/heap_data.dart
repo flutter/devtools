@@ -7,8 +7,6 @@ import 'dart:io';
 
 import 'package:devtools_app/src/shared/memory/adapted_heap_data.dart';
 
-import '../leaks/leaks_data.dart';
-
 const _dataDir = 'test/test_infra/test_data/memory/heap/';
 
 typedef HeapLoader = Future<AdaptedHeapData> Function();
@@ -47,13 +45,4 @@ List<GoldenHeapTest> goldenHeapTests = <GoldenHeapTest>[
     name: 'counter_snapshot4',
     appClassName: 'MyApp',
   ),
-  ..._heapsFromLeakTests(),
 ];
-
-Iterable<GoldenHeapTest> _heapsFromLeakTests() => goldenLeakTests.map(
-      (t) => GoldenHeapTest(
-        heapLoader: () async => (await t.task()).heap,
-        name: t.name,
-        appClassName: t.appClassName,
-      ),
-    );
