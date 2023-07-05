@@ -6,6 +6,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:devtools_app/src/shared/memory/adapted_heap_data.dart';
+import 'package:vm_service/vm_service.dart';
 
 const _dataDir = 'test/test_infra/test_data/memory/heap/';
 
@@ -22,10 +23,19 @@ class GoldenHeapTest {
   final String appClassName;
   late HeapLoader loadHeap;
 
-  static HeapLoader _loaderFromFile(String fileName) => () async {
-        final json = jsonDecode(await File(fileName).readAsString());
-        return AdaptedHeapData.fromJson(json);
-      };
+  /// Loads the heap data from a file.
+  ///
+  /// Format is format used by [NativeRuntime.writeHeapSnapshotToFile]
+  static Future<AdaptedHeapData> _loadFromFile(String fileName) async {
+    final json = jsonDecode(await File(fileName).readAsString());
+
+    final graph = HeapSnapshotGraph.fromJson(json);
+
+    return AdaptedHeapData.fromJson(json);
+  }
+
+  static HeapLoader _loaderFromFile(String fileName) =>
+      () => _loadFromFile(fileName);
 }
 
 List<GoldenHeapTest> goldenHeapTests = <GoldenHeapTest>[
