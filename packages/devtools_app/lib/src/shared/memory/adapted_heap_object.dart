@@ -14,16 +14,28 @@ class _JsonFields {
   static const String klass = 'klass';
   static const String library = 'library';
   static const String shallowSize = 'shallowSize';
+  static const String index = 'index';
+  static const String location = 'location';
 }
 
 class HeapRef {
   HeapRef({required this.index, required this.location});
+
+  factory HeapRef.fromJson(Map<String, Object?> json, int index) => HeapRef(
+        index: json[_JsonFields.index] as int,
+        location: json[_JsonFields.index] as String?,
+      );
 
   /// Index of the object in [AdaptedHeapData.objects].
   final int index;
 
   /// Name of field in class or index in array.
   final String? location;
+
+  Map<String, dynamic> toJson() => {
+        _JsonFields.index: index,
+        _JsonFields.location: location,
+      };
 
   @override
   bool operator ==(Object other) {
@@ -52,10 +64,15 @@ class AdaptedHeapObject {
   factory AdaptedHeapObject.fromHeapSnapshotObject(
     HeapSnapshotObject object,
     int index,
+    HeapSnapshotClass classInfo,
   ) {
     return AdaptedHeapObject(
       code: object.identityHashCode,
-      outRefs: Set.of(object.references.where((i) => i != index)),
+      outRefs: Set.of(
+        object.references
+            .where((i) => i != index)
+            .map((i) => HeapRef(index: i, location: classInfo.fields[i].name)),
+      ),
       heapClass: HeapClassName.fromHeapSnapshotClass(object.klass),
       shallowSize: object.shallowSize,
     );
@@ -65,7 +82,7 @@ class AdaptedHeapObject {
       AdaptedHeapObject(
         code: json[_JsonFields.code] as int,
         outRefs: (json[_JsonFields.references] as List<Object?>)
-            .cast<int>()
+            .cast<Map<String, Object?>>()
             .where((i) => i != index)
             .toSet(),
         heapClass: HeapClassName(
@@ -75,7 +92,7 @@ class AdaptedHeapObject {
         shallowSize: (json[_JsonFields.shallowSize] ?? 0) as int,
       );
 
-  final Set<int> outRefs;
+  final Set<HeapRef> outRefs;
   final Set<int> inRefs = {};
   final HeapClassName heapClass;
   final IdentityHashCode code;

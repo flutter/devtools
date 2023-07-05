@@ -90,8 +90,11 @@ class AdaptedHeapData {
     final objects = <AdaptedHeapObject>[];
     for (final i in Iterable.generate(graph.objects.length)) {
       if (_uiReleaser.step()) await _uiReleaser.releaseUi();
-      final object =
-          AdaptedHeapObject.fromHeapSnapshotObject(graph.objects[i], i);
+      final object = AdaptedHeapObject.fromHeapSnapshotObject(
+        graph.objects[i],
+        i,
+        graph.classes[graph.objects[i].classId],
+      );
       objects.add(object);
     }
 
