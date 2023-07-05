@@ -246,44 +246,42 @@ class _NotificationState extends State<_Notification>
           child: child,
         );
       },
-      child: Padding(
-        padding: const EdgeInsets.all(denseSpacing),
-        child: Card(
-          color: theme.snackBarTheme.backgroundColor,
-          child: DefaultTextStyle(
-            style: theme.snackBarTheme.contentTextStyle ??
-                theme.primaryTextTheme.titleMedium!,
-            child: Padding(
-              padding: const EdgeInsets.all(denseSpacing),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  widget.message.isDismissible
-                      ? Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Flexible(
-                              child: _NotificationMessage(
-                                widget: widget,
-                                context: context,
-                              ),
+      child: Card(
+        color: theme.snackBarTheme.backgroundColor,
+        margin: const EdgeInsets.fromLTRB(0, 0, 0, densePadding),
+        child: DefaultTextStyle(
+          style: theme.snackBarTheme.contentTextStyle ??
+              theme.primaryTextTheme.titleMedium!,
+          child: Padding(
+            padding: const EdgeInsets.all(denseSpacing),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                widget.message.isDismissible
+                    ? Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Flexible(
+                            child: _NotificationMessage(
+                              widget: widget,
+                              context: context,
                             ),
-                            _DismissAction(
-                              onPressed: () {
-                                widget.remove(widget);
-                              },
-                            ),
-                          ],
-                        )
-                      : _NotificationMessage(
-                          widget: widget,
-                          context: context,
-                        ),
-                  const SizedBox(height: defaultSpacing),
-                  _NotificationActions(widget: widget),
-                ],
-              ),
+                          ),
+                          _DismissAction(
+                            onPressed: () {
+                              widget.remove(widget);
+                            },
+                          ),
+                        ],
+                      )
+                    : _NotificationMessage(
+                        widget: widget,
+                        context: context,
+                      ),
+                const SizedBox(height: defaultSpacing),
+                _NotificationActions(widget: widget),
+              ],
             ),
           ),
         ),

@@ -173,6 +173,8 @@ void main() {
                 .tap(find.byKey(NetworkRequestInspector.responseTabKey));
             await tester.pumpAndSettle();
 
+            expect(find.byType(HttpResponseTrailingDropDown), findsOneWidget);
+            expect(find.byType(HttpViewTrailingCopyButton), findsOneWidget);
             expect(find.byType(NetworkRequestOverviewView), findsNothing);
             expect(find.byType(HttpRequestHeadersView), findsNothing);
             expect(find.byType(HttpResponseView), findsOneWidget);

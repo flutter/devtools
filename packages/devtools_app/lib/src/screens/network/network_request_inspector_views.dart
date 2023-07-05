@@ -2,6 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image/image.dart' as image;
 
@@ -12,6 +15,7 @@ import '../../shared/primitives/utils.dart';
 import '../../shared/table/table.dart';
 import '../../shared/theme.dart';
 import '../../shared/ui/colors.dart';
+import 'network_controller.dart';
 import 'network_model.dart';
 
 // Approximately double the indent of the expandable tile's title.
@@ -201,10 +205,86 @@ class HttpViewTrailingCopyButton extends StatelessWidget {
   }
 }
 
+/// A DropDownButton for selecting [NetworkResponseViewType].
+///
+/// If there is no content to visualise, the drop down will not show. Drop down
+/// values will update as the request's data is updated.
+class HttpResponseTrailingDropDown extends StatelessWidget {
+  const HttpResponseTrailingDropDown(
+    this.data, {
+    super.key,
+    required this.currentResponseViewType,
+    required this.onChanged,
+  });
+
+  final ValueListenable<NetworkResponseViewType> currentResponseViewType;
+  final DartIOHttpRequestData data;
+  final ValueChanged<NetworkResponseViewType> onChanged;
+
+  bool isJsonDecodable() {
+    try {
+      json.decode(data.responseBody!);
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder(
+      valueListenable: data.requestUpdatedNotifier,
+      builder: (_, __, ___) {
+        final bool visible = (data.contentType != null &&
+                !data.contentType!.contains('image')) &&
+            data.responseBody!.isNotEmpty;
+
+        final List<NetworkResponseViewType> availableResponseTypes = [
+          NetworkResponseViewType.auto,
+          if (isJsonDecodable()) NetworkResponseViewType.json,
+          NetworkResponseViewType.text,
+        ];
+
+        return Visibility(
+          visible: visible,
+          replacement: const SizedBox(),
+          child: ValueListenableBuilder<NetworkResponseViewType>(
+            valueListenable: currentResponseViewType,
+            builder: (_, currentType, __) {
+              return RoundedDropDownButton<NetworkResponseViewType>(
+                value: currentType,
+                items: availableResponseTypes
+                    .map(
+                      (e) => DropdownMenuItem(
+                        value: e,
+                        child: Text(e.toString()),
+                      ),
+                    )
+                    .toList(),
+                onChanged: (value) {
+                  if (value == null) {
+                    return;
+                  }
+                  onChanged(value);
+                },
+              );
+            },
+          ),
+        );
+      },
+    );
+  }
+}
+
 class HttpResponseView extends StatelessWidget {
-  const HttpResponseView(this.data, {super.key});
+  const HttpResponseView(
+    this.data, {
+    super.key,
+    required this.currentResponseViewType,
+  });
 
   final DartIOHttpRequestData data;
+  final ValueListenable<NetworkResponseViewType> currentResponseViewType;
 
   @override
   Widget build(BuildContext context) {
@@ -226,20 +306,62 @@ class HttpResponseView extends StatelessWidget {
         }
         if (contentType != null && contentType.contains('image')) {
           child = ImageResponseView(data);
-        } else if (contentType != null &&
-            contentType.contains('json') &&
-            responseBody.isNotEmpty) {
-          child = JsonViewer(encodedJson: responseBody);
         } else {
-          child = Text(
-            responseBody,
-            style: theme.fixedFontStyle,
+          child = HttpTextResponseViewer(
+            contentType: contentType,
+            responseBody: responseBody,
+            currentResponseNotifier: currentResponseViewType,
+            textStyle: theme.fixedFontStyle,
           );
         }
         return Padding(
           padding: const EdgeInsets.all(denseSpacing),
           child: SingleChildScrollView(child: child),
         );
+      },
+    );
+  }
+}
+
+class HttpTextResponseViewer extends StatelessWidget {
+  const HttpTextResponseViewer({
+    super.key,
+    required this.contentType,
+    required this.responseBody,
+    required this.currentResponseNotifier,
+    required this.textStyle,
+  });
+
+  final String? contentType;
+  final String responseBody;
+  final ValueListenable<NetworkResponseViewType> currentResponseNotifier;
+  final TextStyle textStyle;
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder(
+      valueListenable: currentResponseNotifier,
+      builder: (_, currentResponseType, __) {
+        NetworkResponseViewType currentLocalResponseType = currentResponseType;
+
+        if (currentResponseType == NetworkResponseViewType.auto) {
+          if (contentType != null &&
+              contentType!.contains('json') &&
+              responseBody.isNotEmpty) {
+            currentLocalResponseType = NetworkResponseViewType.json;
+          } else {
+            currentLocalResponseType = NetworkResponseViewType.text;
+          }
+        }
+
+        return switch (currentLocalResponseType) {
+          NetworkResponseViewType.json => JsonViewer(encodedJson: responseBody),
+          NetworkResponseViewType.text => Text(
+              responseBody,
+              style: textStyle,
+            ),
+          _ => const SizedBox(),
+        };
       },
     );
   }

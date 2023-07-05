@@ -63,6 +63,7 @@ class CodeViewController extends DisposableController
     final processedState =
         CodeViewSourceLocationNavigationState._fromState(state);
     final object = processedState.object;
+    _navigationInProgress = true;
     await showScriptLocation(processedState.location, focusLine: true);
     if (programExplorerController.initialized.value) {
       if (object != null) {
@@ -78,7 +79,13 @@ class CodeViewController extends DisposableController
         programExplorerController.clearOutlineSelection();
       }
     }
+    _navigationInProgress = false;
   }
+
+  /// Whether there is a [CodeViewSourceLocationNavigationState] currently being
+  /// processed and handled.
+  bool get navigationInProgress => _navigationInProgress;
+  bool _navigationInProgress = false;
 
   ValueListenable<ScriptLocation?> get scriptLocation => _scriptLocation;
   final _scriptLocation = ValueNotifier<ScriptLocation?>(null);

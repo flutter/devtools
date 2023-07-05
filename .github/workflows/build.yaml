@@ -103,7 +103,7 @@ jobs:
           path: packages/devtools_app/test/**/failures/*.png
 
   integration-test:
-    name: integration-test ${{ matrix.bot }}
+    name: integration-test ${{ matrix.bot }} - ${{ matrix.device }}
     needs: flutter-prep
     runs-on: macos-latest
     strategy:
@@ -111,7 +111,11 @@ jobs:
       matrix:
         bot:
           # Consider running integration tests in ddc mode, too.
-          - integration_dart2js
+          - dart2js
+        device:
+          - flutter
+          - flutter-web
+          - dart-cli
     steps:
       - name: git clone
         uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9
@@ -124,6 +128,7 @@ jobs:
       - name: tool/bots.sh
         env:
           BOT: ${{ matrix.bot }}
+          DEVICE: ${{ matrix.device }}
         run: ./tool/bots.sh
 
       - name: Upload Golden Failure Artifacts
