@@ -11,6 +11,7 @@ import '../../../../../shared/analytics/analytics.dart' as ga;
 import '../../../../../shared/analytics/constants.dart' as gac;
 import '../../../../../shared/common_widgets.dart';
 import '../../../../../shared/dialogs.dart';
+import '../../../../../shared/file_import.dart';
 import '../../../../../shared/primitives/auto_dispose.dart';
 import '../../../../../shared/primitives/utils.dart';
 import '../../../../../shared/table/table.dart';
@@ -87,10 +88,10 @@ class _ListControlPane extends StatelessWidget {
             ),
             ToolbarAction(
               icon: Icons.file_open,
-              tooltip: 'Open previously saved snapshot.',
+              tooltip: 'Open stored snapshots.',
               onPressed: controller.isTakingSnapshot.value
                   ? null
-                  : () => unawaited(_takeSnapshot(context)),
+                  : () => unawaited(_openSnapshots(context)),
             ),
             ToolbarAction(
               icon: Icons.block,
@@ -109,6 +110,13 @@ class _ListControlPane extends StatelessWidget {
         );
       },
     );
+  }
+
+  Future<void> _openSnapshots(BuildContext context) async {
+    ga.select(gac.memory, gac.MemoryEvent.diffOpenSnapshots);
+
+    final files = await importFilesFromPicker(acceptedTypes: ['json']);
+    print('files: $files');
   }
 }
 

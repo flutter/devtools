@@ -218,7 +218,21 @@ Future<DevToolsJsonFile?> importFileFromPicker({
   final acceptedTypeGroups = [XTypeGroup(extensions: acceptedTypes)];
   final file = await openFile(acceptedTypeGroups: acceptedTypeGroups);
   if (file == null) return null;
+  return await _toDevToolsFile(file);
+}
 
+Future<List<DevToolsJsonFile>> importFilesFromPicker({
+  required List<String> acceptedTypes,
+}) async {
+  final acceptedTypeGroups = [XTypeGroup(extensions: acceptedTypes)];
+  final files = await openFiles(acceptedTypeGroups: acceptedTypeGroups);
+
+  final futures = files.map((file) => _toDevToolsFile(file));
+
+  return await Future.wait(futures);
+}
+
+Future<DevToolsJsonFile> _toDevToolsFile(XFile file) async {
   final data = jsonDecode(await file.readAsString());
   final lastModifiedTime = await file.lastModified();
   // TODO(kenz): this will need to be modified if we need to support other file

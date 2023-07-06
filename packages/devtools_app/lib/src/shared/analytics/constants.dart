@@ -240,6 +240,7 @@ class MemoryEvent {
   static const tracingHelp = 'memoryTracingHelp';
 
   static const diffTakeSnapshotControlPane = 'diffTakeSnapshotControlPane';
+  static const diffOpenSnapshots = 'diffOpenSnapshots';
   static const diffClearSnapshots = 'diffClearSnapshots';
   static const diffHelp = 'memoryDiffHelp';
 
