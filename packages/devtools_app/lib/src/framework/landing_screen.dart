@@ -14,6 +14,7 @@ import '../shared/analytics/analytics.dart' as ga;
 import '../shared/analytics/constants.dart' as gac;
 import '../shared/common_widgets.dart';
 import '../shared/config_specific/import_export/import_export.dart';
+import '../shared/feature_flags.dart';
 import '../shared/file_import.dart';
 import '../shared/globals.dart';
 import '../shared/primitives/blocking_action_mixin.dart';
@@ -56,6 +57,10 @@ class _LandingScreenBodyState extends State<LandingScreenBody> {
           ImportFileInstructions(sampleData: widget.sampleData),
           const SizedBox(height: defaultSpacing),
           const AppSizeToolingInstructions(),
+          if (FeatureFlags.memoryAnalysis) ...[
+            const SizedBox(height: defaultSpacing),
+            const MemoryAnalysisInstructions(),
+          ],
         ],
       ),
     );
@@ -349,6 +354,48 @@ class AppSizeToolingInstructions extends StatelessWidget {
       gac.openAppSizeTool,
     );
     DevToolsRouterDelegate.of(context).navigate(appSizeScreenId);
+  }
+}
+
+@visibleForTesting
+class MemoryAnalysisInstructions extends StatelessWidget {
+  const MemoryAnalysisInstructions({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    return LandingScreenSection(
+      title: 'Memory Analysis',
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Analyze and diff the saved memory snapshots',
+            style: textTheme.titleMedium,
+          ),
+          const SizedBox(height: denseRowSpacing),
+          Text(
+            // TODO(polina-c): make package:leak_tracker a link.
+            // https://github.com/flutter/devtools/issues/5606
+            'Analyze heap snapshots that were previously saved from DevTools or package:leak_tracker.',
+            style: textTheme.bodySmall,
+          ),
+          const SizedBox(height: defaultSpacing),
+          ElevatedButton(
+            child: const Text('Open memory analysis tool'),
+            onPressed: () => _onOpen(context),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _onOpen(BuildContext context) {
+    ga.select(
+      gac.landingScreen,
+      gac.openMemoryAnalysisTool,
+    );
+    DevToolsRouterDelegate.of(context).navigate(memoryAnalysisScreenId);
   }
 }
 
