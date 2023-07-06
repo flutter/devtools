@@ -183,7 +183,8 @@ class _TraceCategoriesDialogState extends State<TraceCategoriesDialog>
   void initState() {
     super.initState();
     // Mirror the value of [http_service.httpLoggingState] in the [_httpLogging]
-    // so that we can use [_httpLogging] for the [CheckboxSetting] widget below.
+    // notifier so that we can use [_httpLogging] for the [CheckboxSetting]
+    // widget below.
     _httpLogging = ValueNotifier<bool>(http_service.httpLoggingEnabled);
     addAutoDisposeListener(http_service.httpLoggingState, () {
       _httpLogging.value = http_service.httpLoggingState.value.enabled;
