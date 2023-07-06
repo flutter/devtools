@@ -82,7 +82,7 @@ class AdaptedHeapData {
   }) async {
     final file = File(fileName);
     final bytes = await file.readAsBytes();
-    final data = ByteData.view(bytes.buffer);
+    final data = bytes.buffer.asByteData();
     final graph = HeapSnapshotGraph.fromChunks([data]);
     return AdaptedHeapData.fromHeapSnapshot(graph, isolateId: isolateId);
   }

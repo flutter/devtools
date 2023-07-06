@@ -10,41 +10,35 @@ typedef HeapLoader = Future<AdaptedHeapData> Function();
 
 class GoldenHeapTest {
   GoldenHeapTest({
-    HeapLoader? heapLoader,
-    required this.name,
+    required this.fileName,
     required this.appClassName,
-  }) : loadHeap = heapLoader ?? _loaderFromFile('$_dataDir$name.json');
+  });
 
-  final String name;
+  final String fileName;
   final String appClassName;
-  late HeapLoader loadHeap;
 
   /// Loads the heap data from a file.
   ///
-  /// Format is format used by [NativeRuntime.writeHeapSnapshotToFile]
-  static Future<AdaptedHeapData> _loadFromFile(String fileName) async {
-    return AdaptedHeapData.fromFile(fileName, isolateId: 'test');
-  }
-
-  static HeapLoader _loaderFromFile(String fileName) =>
-      () => _loadFromFile(fileName);
+  /// Format is format used by [NativeRuntime.writeHeapSnapshotToFile].
+  Future<AdaptedHeapData> loadHeap() =>
+      AdaptedHeapData.fromFile('$_dataDir$fileName', isolateId: 'test');
 }
 
 List<GoldenHeapTest> goldenHeapTests = <GoldenHeapTest>[
   GoldenHeapTest(
-    name: 'counter_snapshot1',
+    fileName: 'counter_snapshot1',
     appClassName: 'MyApp',
   ),
   GoldenHeapTest(
-    name: 'counter_snapshot2',
+    fileName: 'counter_snapshot2',
     appClassName: 'MyApp',
   ),
   GoldenHeapTest(
-    name: 'counter_snapshot3',
+    fileName: 'counter_snapshot3',
     appClassName: 'MyApp',
   ),
   GoldenHeapTest(
-    name: 'counter_snapshot4',
+    fileName: 'counter_snapshot4',
     appClassName: 'MyApp',
   ),
 ];
