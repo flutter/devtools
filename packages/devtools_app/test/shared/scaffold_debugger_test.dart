@@ -34,6 +34,7 @@ void main() {
   setGlobal(OfflineModeController, OfflineModeController());
   setGlobal(IdeTheme, IdeTheme());
   setGlobal(NotificationService, NotificationService());
+  setGlobal(BannerMessagesController, BannerMessagesController());
 
   testWidgets(
     'does not display floating debugger controls when debugger screen is showing',
