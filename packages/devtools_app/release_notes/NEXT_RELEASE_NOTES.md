@@ -6,7 +6,7 @@ This is draft for future release notes, that are going to land on
 Dart & Flutter DevTools - A Suite of Performance Tools for Dart and Flutter
 
 ## General updates 
-- Fix overlay notifications so they cover the area that their background blocks - [#5975](https://github.com/flutter/devtools/pull/5975)
+* Fix overlay notifications so they cover the area that their background blocks - [#5975](https://github.com/flutter/devtools/pull/5975)
 
 ## Inspector updates
 TODO: Remove this section if there are not any general updates.
@@ -18,7 +18,7 @@ TODO: Remove this section if there are not any general updates.
 TODO: Remove this section if there are not any general updates.
 
 ## Memory updates
-- Add support for renaming heap snapshots in the Diff tool. Either right-click or double-click to rename an item in the snapshot list. - [#5997](https://github.com/flutter/devtools/pull/5997)
+* Add support for renaming heap snapshots in the Diff tool. Either right-click or double-click to rename an item in the snapshot list. - [#5997](https://github.com/flutter/devtools/pull/5997)
 
 ## Debugger updates
 TODO: Remove this section if there are not any general updates.

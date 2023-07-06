@@ -285,7 +285,7 @@ class _SnapshotListItemsState extends State<_SnapshotListItems>
   double? _openContextMenuPosition;
 
   /// Whether [BrowserContextMenu.enabled] was initially set to true.
-  /// 
+  ///
   /// We will manage the state of [BrowserContextMenu.enabled] while this widget
   /// is alive, and will return it to its original state upon disposal.
   bool _browserContextMenuWasEnabled = false;
