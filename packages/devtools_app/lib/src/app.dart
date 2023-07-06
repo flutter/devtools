@@ -292,18 +292,18 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
           ),
         );
       },
-  if (FeatureFlags.memoryAnalysis)
-      memoryAnalysisScreenId: (_, __, args, ____) {
-        final embed = isEmbedded(args);
-        return DevToolsScaffold.withChild(
-          key: const Key('memoryanalysis'),
-          embed: embed,
-          child: MultiProvider(
-            providers: _providedControllers(),
-            child: const StaticMemoryBody(),
-          ),
-        );
-      },
+      if (FeatureFlags.memoryAnalysis)
+        memoryAnalysisScreenId: (_, __, args, ____) {
+          final embed = isEmbedded(args);
+          return DevToolsScaffold.withChild(
+            key: const Key('memoryanalysis'),
+            embed: embed,
+            child: MultiProvider(
+              providers: _providedControllers(),
+              child: const StaticMemoryBody(),
+            ),
+          );
+        },
       if (FeatureFlags.vsCodeSidebarTooling) ..._standaloneScreens,
     };
   }
