@@ -135,7 +135,6 @@ class TimelineEventsController extends PerformanceFeatureController
 
   Future<void> _initForServiceConnection() async {
     await serviceManager.timelineStreamManager.setDefaultTimelineStreams();
-    await toggleHttpRequestLogging(true);
 
     autoDisposeStreamSubscription(
       serviceManager.onConnectionClosed.listen((_) {
