@@ -13,7 +13,6 @@ import '../../../../shared/analytics/constants.dart' as gac;
 import '../../../../shared/analytics/metrics.dart';
 import '../../../../shared/future_work_tracker.dart';
 import '../../../../shared/globals.dart';
-import '../../../../shared/http/http_service.dart' as http_service;
 import '../../../../shared/primitives/auto_dispose.dart';
 import '../../../../shared/primitives/trace_event.dart';
 import '../../../../shared/primitives/utils.dart';
@@ -83,16 +82,6 @@ class TimelineEventsController extends PerformanceFeatureController
       ValueNotifier<EventsControllerStatus>(EventsControllerStatus.empty);
 
   final _workTracker = FutureWorkTracker();
-
-  // TODO(jacobr): this isn't accurate. Another page of DevTools
-  // or a different instance of DevTools could change this value. We need to
-  // sync the value with the server like we do for other vm service extensions
-  // that we track with the vm service extension manager.
-  // See https://github.com/dart-lang/sdk/issues/41823.
-  /// Whether http timeline logging is enabled.
-  ValueListenable<bool> get httpTimelineLoggingEnabled =>
-      _httpTimelineLoggingEnabled;
-  final _httpTimelineLoggingEnabled = ValueNotifier<bool>(false);
 
   Timer? _pollingTimer;
 
@@ -481,11 +470,6 @@ class TimelineEventsController extends PerformanceFeatureController
     if (event != null) {
       frame.setEventFlow(event, type: type);
     }
-  }
-
-  Future<void> toggleHttpRequestLogging(bool state) async {
-    await http_service.toggleHttpRequestLogging(state);
-    _httpTimelineLoggingEnabled.value = state;
   }
 
   Future<void> toggleUseLegacyTraceViewer(bool? value) async {

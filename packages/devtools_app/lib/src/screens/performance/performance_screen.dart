@@ -64,7 +64,6 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
   void didChangeDependencies() {
     super.didChangeDependencies();
     maybePushUnsupportedFlutterVersionWarning(
-      context,
       PerformanceScreen.id,
       supportedFlutterVersion: SemanticVersion(
         major: 2,
