@@ -76,6 +76,7 @@ class AdaptedHeapData {
     return AdaptedHeapData(objects, isolateId: isolateId);
   }
 
+  @visibleForTesting
   static Future<AdaptedHeapData> fromFile(
     String fileName, {
     String isolateId = '',
