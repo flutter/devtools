@@ -4,7 +4,9 @@
 
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:logging/logging.dart';
 
 import '../../../../../shared/analytics/analytics.dart' as ga;
@@ -106,9 +108,21 @@ class _ListControlPane extends StatelessWidget {
 }
 
 class _SnapshotListTitle extends StatelessWidget {
-  const _SnapshotListTitle({Key? key, required this.item}) : super(key: key);
+  const _SnapshotListTitle({
+    Key? key,
+    required this.item,
+    required this.index,
+    required this.editIndexNotifier,
+    required this.onNameEdited,
+  }) : super(key: key);
 
   final SnapshotItem item;
+
+  final int index;
+
+  final ValueNotifier<int?> editIndexNotifier;
+
+  final VoidCallback onNameEdited;
 
   @override
   Widget build(BuildContext context) {
@@ -121,12 +135,19 @@ class _SnapshotListTitle extends StatelessWidget {
           const SizedBox(width: denseRowSpacing),
           if (theItem is SnapshotInstanceItem)
             Expanded(
-              child: Text(
-                theItem.name,
-                overflow: TextOverflow.ellipsis,
+              child: ValueListenableBuilder(
+                valueListenable: editIndexNotifier,
+                builder: (context, editIndex, _) {
+                  return _EditableSnapshotName(
+                    item: theItem,
+                    editMode: index == editIndex,
+                    onEditingComplete: onNameEdited,
+                  );
+                },
               ),
             ),
           if (theItem is SnapshotInstanceItem && theItem.totalSize != null) ...[
+            const SizedBox(width: densePadding),
             Text(
               prettyPrintBytes(
                 theItem.totalSize,
@@ -152,6 +173,94 @@ class _SnapshotListTitle extends StatelessWidget {
   }
 }
 
+class _EditableSnapshotName extends StatefulWidget {
+  const _EditableSnapshotName({
+    required this.item,
+    required this.editMode,
+    required this.onEditingComplete,
+  });
+
+  final SnapshotInstanceItem item;
+
+  final bool editMode;
+
+  final VoidCallback onEditingComplete;
+
+  @override
+  State<_EditableSnapshotName> createState() => _EditableSnapshotNameState();
+}
+
+class _EditableSnapshotNameState extends State<_EditableSnapshotName>
+    with AutoDisposeMixin {
+  late final TextEditingController textEditingController;
+
+  final textFieldFocusNode = FocusNode();
+
+  @override
+  void initState() {
+    super.initState();
+    textEditingController = TextEditingController();
+    textEditingController.text = widget.item.name;
+
+    _updateFocus();
+    addAutoDisposeListener(textFieldFocusNode, () {
+      if (!textFieldFocusNode.hasPrimaryFocus) {
+        textFieldFocusNode.unfocus();
+        widget.onEditingComplete();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    cancelListeners();
+    textEditingController.dispose();
+    textFieldFocusNode.dispose();
+    super.dispose();
+  }
+
+  @override
+  void didUpdateWidget(_EditableSnapshotName oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    textEditingController.text = widget.item.name;
+    _updateFocus();
+  }
+
+  void _updateFocus() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (widget.editMode) {
+        textFieldFocusNode.requestFocus();
+      } else {
+        textFieldFocusNode.unfocus();
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return TextField(
+      controller: textEditingController,
+      focusNode: textFieldFocusNode,
+      autofocus: true,
+      showCursor: widget.editMode,
+      enabled: widget.editMode,
+      style: Theme.of(context).textTheme.bodyMedium,
+      decoration: const InputDecoration(
+        isDense: true,
+        border: InputBorder.none,
+      ),
+      onChanged: (value) => widget.item.nameOverride = value,
+      onSubmitted: _updateName,
+    );
+  }
+
+  void _updateName(String value) {
+    widget.item.nameOverride = value;
+    widget.onEditingComplete();
+    textFieldFocusNode.unfocus();
+  }
+}
+
 class _SnapshotListItems extends StatefulWidget {
   const _SnapshotListItems({required this.controller});
 
@@ -164,13 +273,36 @@ class _SnapshotListItems extends StatefulWidget {
 class _SnapshotListItemsState extends State<_SnapshotListItems>
     with AutoDisposeMixin {
   final _headerHeight = 1.2 * defaultRowHeight;
-  late final ScrollController _scrollController;
+
+  final _scrollController = ScrollController();
+
+  final _contextMenuController = MenuController();
+
+  /// The index in the list for the snapshot name actively being edited.
+  final _editIndex = ValueNotifier<int?>(null);
+
+  /// The 'y' position for the open context menu.
+  double? _openContextMenuPosition;
+
+  /// Whether [BrowserContextMenu.enabled] was initially set to true.
+  /// 
+  /// We will manage the state of [BrowserContextMenu.enabled] while this widget
+  /// is alive, and will return it to its original state upon disposal.
+  bool _browserContextMenuWasEnabled = false;
 
   @override
   void initState() {
     super.initState();
-    _scrollController = ScrollController();
     _init();
+    _disableBrowserContextMenu();
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    _editIndex.dispose();
+    _reenableBrowserContextMenu();
+    super.dispose();
   }
 
   @override
@@ -203,33 +335,101 @@ class _SnapshotListItemsState extends State<_SnapshotListItems>
     return DualValueListenableBuilder<List<SnapshotItem>, int>(
       firstListenable: core.snapshots,
       secondListenable: core.selectedSnapshotIndex,
-      builder: (_, snapshots, selectedIndex, __) => ListView.builder(
-        controller: _scrollController,
-        shrinkWrap: true,
-        itemCount: snapshots.length,
-        itemBuilder: (context, index) {
-          final selected = selectedIndex == index;
-          return Container(
-            height: _headerHeight,
-            color: selected
-                ? Theme.of(context).colorScheme.selectedRowBackgroundColor
-                : null,
-            child: InkWell(
-              canRequestFocus: false,
-              onTap: () => widget.controller.setSnapshotIndex(index),
-              child: _SnapshotListTitle(
-                item: snapshots[index],
+      builder: (_, snapshots, selectedIndex, __) {
+        return GestureDetector(
+          onSecondaryTapUp: _showContextMenu,
+          onDoubleTapDown: _enterEditMode,
+          child: MenuAnchor(
+            controller: _contextMenuController,
+            anchorTapClosesMenu: true,
+            onClose: () => _openContextMenuPosition = null,
+            menuChildren: <Widget>[
+              MenuItemButton(
+                onPressed: _setEditIndex,
+                child: const Text('Rename'),
               ),
+            ],
+            child: ListView.builder(
+              controller: _scrollController,
+              itemCount: snapshots.length,
+              itemExtent: defaultRowHeight,
+              itemBuilder: (context, index) {
+                final selected = selectedIndex == index;
+                return Container(
+                  height: _headerHeight,
+                  color: selected
+                      ? Theme.of(context).colorScheme.selectedRowBackgroundColor
+                      : null,
+                  child: InkWell(
+                    canRequestFocus: false,
+                    onTap: () {
+                      widget.controller.setSnapshotIndex(index);
+                      _resetEditMode();
+                    },
+                    child: _SnapshotListTitle(
+                      item: snapshots[index],
+                      index: index,
+                      editIndexNotifier: _editIndex,
+                      onNameEdited: _resetEditMode,
+                    ),
+                  ),
+                );
+              },
             ),
-          );
-        },
-      ),
+          ),
+        );
+      },
     );
   }
 
-  @override
-  void dispose() {
-    _scrollController.dispose();
-    super.dispose();
+  void _enterEditMode(TapDownDetails details) {
+    _editIndex.value = _indexForPosition(details.localPosition.dy);
+  }
+
+  void _resetEditMode() {
+    _editIndex.value = null;
+  }
+
+  void _setEditIndex() {
+    if (_openContextMenuPosition == null) return;
+    _editIndex.value = _indexForPosition(_openContextMenuPosition!);
+  }
+
+  int _indexForPosition(double dy) {
+    return (_scrollController.offset + dy) ~/ defaultRowHeight;
+  }
+
+  void _showContextMenu(TapUpDetails details) {
+    final tapY = details.localPosition.dy;
+    final index = _indexForPosition(tapY);
+    // Only show the context menu for heap snapshots in the list (e.g. not the
+    // first 'info' item and not for a position that is out of range).
+    if (index > 0 && index < widget.controller.core.snapshots.value.length) {
+      _openContextMenuPosition = details.localPosition.dy;
+      _contextMenuController.open(position: details.localPosition);
+    } else {
+      _openContextMenuPosition = null;
+    }
+  }
+
+  void _disableBrowserContextMenu() {
+    if (!kIsWeb) {
+      // Does nothing on non-web platforms.
+      return;
+    }
+    _browserContextMenuWasEnabled = BrowserContextMenu.enabled;
+    if (_browserContextMenuWasEnabled) {
+      unawaited(BrowserContextMenu.disableContextMenu());
+    }
+  }
+
+  void _reenableBrowserContextMenu() {
+    if (!kIsWeb) {
+      // Does nothing on non-web platforms.
+      return;
+    }
+    if (_browserContextMenuWasEnabled && !BrowserContextMenu.enabled) {
+      unawaited(BrowserContextMenu.enableContextMenu());
+    }
   }
 }
