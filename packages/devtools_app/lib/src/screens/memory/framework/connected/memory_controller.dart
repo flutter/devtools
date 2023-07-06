@@ -6,41 +6,20 @@ import 'dart:async';
 
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/foundation.dart';
-import 'package:intl/intl.dart';
 import 'package:leak_tracker/devtools_integration.dart';
-import 'package:logging/logging.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../service/service_manager.dart';
-import '../../shared/analytics/analytics.dart' as ga;
-import '../../shared/analytics/constants.dart' as gac;
-import '../../shared/config_specific/file/file.dart';
-import '../../shared/globals.dart';
-import '../../shared/primitives/auto_dispose.dart';
-import '../../shared/utils.dart';
+import '../../../../service/service_manager.dart';
+import '../../../../shared/globals.dart';
+import '../../../../shared/primitives/auto_dispose.dart';
+import '../../../../shared/utils.dart';
+import '../../panes/chart/primitives.dart';
+import '../../panes/diff/controller/diff_pane_controller.dart';
+import '../../panes/profile/profile_pane_controller.dart';
+import '../../panes/tracing/tracing_pane_controller.dart';
+import '../../shared/heap/model.dart';
+import '../../shared/primitives/memory_timeline.dart';
 import 'memory_protocol.dart';
-import 'panes/chart/primitives.dart';
-import 'panes/diff/controller/diff_pane_controller.dart';
-import 'panes/profile/profile_pane_controller.dart';
-import 'panes/tracing/tracing_pane_controller.dart';
-import 'shared/heap/model.dart';
-import 'shared/primitives/memory_timeline.dart';
-
-final _log = Logger('memory_controller');
-
-// TODO(terry): Consider supporting more than one file since app was launched.
-// Memory Log filename.
-final String _memoryLogFilename =
-    '${MemoryController.logFilenamePrefix}${DateFormat("yyyyMMdd_HH_mm").format(DateTime.now())}';
-
-class OfflineFileException implements Exception {
-  OfflineFileException(this.message) : super();
-
-  final String message;
-
-  @override
-  String toString() => message;
-}
 
 class MemoryFeatureControllers {
   /// [diffPaneController] is passed for testability.
@@ -85,7 +64,6 @@ class MemoryController extends DisposableController
     ProfilePaneController? profilePaneController,
   }) {
     memoryTimeline = MemoryTimeline();
-    memoryLog = MemoryLog(this);
 
     controllers = MemoryFeatureControllers(
       diffPaneController,
@@ -104,14 +82,10 @@ class MemoryController extends DisposableController
   /// instead of the widget state.
   int selectedFeatureTabIndex = 0;
 
-  static const logFilenamePrefix = 'memory_log_';
-
   final _shouldShowLeaksTab = ValueNotifier<bool>(false);
   ValueListenable<bool> get shouldShowLeaksTab => _shouldShowLeaksTab;
 
   late MemoryTimeline memoryTimeline;
-
-  late MemoryLog memoryLog;
 
   HeapSample? _selectedDartSample;
 
@@ -360,97 +334,4 @@ class MemoryController extends DisposableController
     _memoryTracker?.dispose();
     controllers.dispose();
   }
-}
-
-/// Supports saving and loading memory samples.
-class MemoryLog {
-  MemoryLog(this.controller);
-
-  /// Use in memory or local file system based on Flutter Web/Desktop.
-  static final _fs = FileIO();
-
-  MemoryController controller;
-
-  /// Persist the live memory data to a JSON file in the /tmp directory.
-  List<String> exportMemory() {
-    ga.select(gac.memory, gac.export);
-
-    final liveData = controller.memoryTimeline.liveData;
-
-    bool pseudoData = false;
-    if (liveData.isEmpty) {
-      // Used to create empty memory log for test.
-      pseudoData = true;
-      liveData.add(
-        HeapSample(
-          DateTime.now().millisecondsSinceEpoch,
-          0,
-          0,
-          0,
-          0,
-          false,
-          AdbMemoryInfo.empty(),
-          EventSample.empty(),
-          RasterCache.empty(),
-        ),
-      );
-    }
-
-    final jsonPayload = SamplesMemoryJson.encodeList(liveData);
-    if (kDebugMode) {
-      // TODO(terry): Remove this check add a unit test instead.
-      // Reload the file just created and validate that the saved data matches
-      // the live data.
-      final memoryJson = SamplesMemoryJson.decode(argJsonString: jsonPayload);
-      assert(memoryJson.isMatchedVersion);
-      assert(memoryJson.isMemoryPayload);
-      assert(memoryJson.data.length == liveData.length);
-    }
-
-    _fs.writeStringToFile(_memoryLogFilename, jsonPayload, isMemory: true);
-
-    if (pseudoData) liveData.clear();
-
-    return [_fs.exportDirectoryName(isMemory: true), _memoryLogFilename];
-  }
-
-  /// Return a list of offline memory logs filenames in the /tmp directory
-  /// that are available to open.
-  List<String> offlineFiles() {
-    final memoryLogs = _fs.list(
-      prefix: MemoryController.logFilenamePrefix,
-      isMemory: true,
-    );
-
-    // Sort by newest file top-most (DateTime is in the filename).
-
-    memoryLogs.sort((a, b) => b.compareTo(a));
-
-    return memoryLogs;
-  }
-
-  /// Load the memory profile data from a saved memory log file.
-  @visibleForTesting
-  Future<void> loadOffline(String filename) async {
-    final jsonPayload = _fs.readStringFromFile(filename, isMemory: true)!;
-
-    final memoryJson = SamplesMemoryJson.decode(argJsonString: jsonPayload);
-
-    if (!memoryJson.isMatchedVersion) {
-      final e =
-          'Error loading file $filename version ${memoryJson.payloadVersion}';
-      _log.warning(e);
-      throw OfflineFileException(e);
-    }
-
-    assert(memoryJson.isMemoryPayload);
-
-    controller.offline = true;
-    controller.memoryTimeline.offlineData.clear();
-    controller.memoryTimeline.offlineData.addAll(memoryJson.data);
-  }
-
-  @visibleForTesting
-  bool removeOfflineFile(String filename) =>
-      _fs.deleteFile(filename, isMemory: true);
 }
