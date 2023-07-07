@@ -18,7 +18,7 @@ TODO: Remove this section if there are not any general updates.
 TODO: Remove this section if there are not any general updates.
 
 ## Memory updates
-* Add support for renaming heap snapshots in the Diff tool - [#5997](https://github.com/flutter/devtools/pull/5997)
+* Added a context menu to rename or delete a heap snapshot from the list - [#5997](https://github.com/flutter/devtools/pull/5997)
 
 ## Debugger updates
 TODO: Remove this section if there are not any general updates.
