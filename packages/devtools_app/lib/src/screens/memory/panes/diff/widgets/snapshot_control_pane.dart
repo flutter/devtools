@@ -27,13 +27,12 @@ class SnapshotControlPane extends StatelessWidget {
       builder: (_, isProcessing, __) {
         final current = controller.core.selectedItem as SnapshotInstanceItem;
         final heapIsReady = !isProcessing && current.heap != null;
-
-        return Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Row(
-              children: [
-                if (heapIsReady) ...[
+        if (heapIsReady) {
+          return Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
                   _DiffDropdown(
                     current: current,
                     controller: controller,
@@ -47,15 +46,16 @@ class SnapshotControlPane extends StatelessWidget {
                     onPressed: controller.downloadCurrentItemToCsv,
                   ),
                 ],
-              ],
-            ),
-            Expanded(
-              child: _SnapshotSizeView(
-                footprint: current.heap!.footprint,
               ),
-            ),
-          ],
-        );
+              Expanded(
+                child: _SnapshotSizeView(
+                  footprint: current.heap!.footprint,
+                ),
+              ),
+            ],
+          );
+        }
+        return const SizedBox.shrink();
       },
     );
   }
