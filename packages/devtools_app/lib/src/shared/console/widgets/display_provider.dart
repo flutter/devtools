@@ -75,39 +75,35 @@ class DisplayProvider extends StatelessWidget {
     }
 
     final hasName = variable.name?.isNotEmpty ?? false;
-    return DevToolsTooltip(
-      message: variable.displayValue.toString(),
-      waitDuration: tooltipWaitLong,
-      child: SelectableText.rich(
-        TextSpan(
-          text: hasName ? variable.name : null,
-          style: variable.artificialName
-              ? theme.subtleFixedFontStyle
-              : theme.fixedFontStyle.apply(
-                  color: theme.colorScheme.controlFlowSyntaxColor,
-                ),
-          children: [
-            if (hasName)
-              TextSpan(
-                text: ': ',
-                style: theme.fixedFontStyle,
+    return SelectableText.rich(
+      TextSpan(
+        text: hasName ? variable.name : null,
+        style: variable.artificialName
+            ? theme.subtleFixedFontStyle
+            : theme.fixedFontStyle.apply(
+                color: theme.colorScheme.controlFlowSyntaxColor,
               ),
+        children: [
+          if (hasName)
             TextSpan(
-              text: variable.displayValue.toString(),
-              style: variable.artificialValue
-                  ? theme.subtleFixedFontStyle
-                  : _variableDisplayStyle(theme, variable),
+              text: ': ',
+              style: theme.fixedFontStyle,
             ),
-          ],
-        ),
-        selectionControls: _selectionControls(
-          variable: variable,
-          onInspect: serviceManager.inspectorService == null
-              ? null
-              : (delegate) => _handleInspect(delegate, context),
-        ),
-        onTap: onTap,
+          TextSpan(
+            text: variable.displayValue.toString(),
+            style: variable.artificialValue
+                ? theme.subtleFixedFontStyle
+                : _variableDisplayStyle(theme, variable),
+          ),
+        ],
       ),
+      selectionControls: _selectionControls(
+        variable: variable,
+        onInspect: serviceManager.inspectorService == null
+            ? null
+            : (delegate) => _handleInspect(delegate, context),
+      ),
+      onTap: onTap,
     );
   }
 
