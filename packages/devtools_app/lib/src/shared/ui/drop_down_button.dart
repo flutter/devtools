@@ -21,7 +21,7 @@ class AnalyticsDropDownButton<T> extends StatelessWidget {
     required this.items,
     required this.onChanged,
     this.sendAnalytics = true,
-    this.isDense = true,
+    this.isDense = false,
   });
 
   /// The GA ID for the screen this widget is displayed on.
@@ -58,7 +58,7 @@ class AnalyticsDropDownButton<T> extends StatelessWidget {
       child: DevToolsTooltip(
         message: message,
         child: RoundedDropDownButton<T>(
-          isDense: true,
+          isDense: isDense,
           style: Theme.of(context).textTheme.bodyMedium,
           value: value,
           items: items?.map((e) => e.item).toList(),

@@ -66,6 +66,7 @@ class CpuSamplingRateDropdown extends StatelessWidget {
         return AnalyticsDropDownButton(
           key: CpuSamplingRateDropdown.dropdownKey,
           gaScreen: screenId,
+          isDense: true,
           gaDropDownId: gac.CpuProfilerEvents.profileGranularity.name,
           message:
               'The frequency at which the CPU profiler will sample the call stack',
