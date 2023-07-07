@@ -10,7 +10,6 @@ import 'package:vm_service/vm_service.dart';
 
 import '../../screens/profiler/cpu_profile_service.dart';
 import '../../screens/profiler/sampling_rate.dart';
-import '../analytics/analytics.dart' as ga;
 import '../analytics/constants.dart' as gac;
 import '../banner_messages.dart';
 import '../globals.dart';
