@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 
 import '../analytics/analytics.dart' as ga;
@@ -70,8 +71,10 @@ class AnalyticsDropDownButton<T> extends StatelessWidget {
   void _onChanged(T? newValue) {
     if (sendAnalytics && items != null) {
       final gaId =
-          items?.firstWhere((element) => element.item == newValue).gaId;
-      ga.select(gaScreen, '$gaDropDownId $gaId');
+          items?.firstWhereOrNull((element) => element.item == newValue)?.gaId;
+      if (gaId != null) {
+        ga.select(gaScreen, '$gaDropDownId $gaId');
+      }
     }
     onChanged?.call(newValue);
   }
