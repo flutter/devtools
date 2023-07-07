@@ -2633,6 +2633,9 @@ class ContextMenuButton extends StatelessWidget {
     double? iconSize,
   }) : iconSize = iconSize ?? tableIconSize;
 
+  static const double defaultWidth = 14.0;
+  static const double densePadding = 2.0;
+
   final Color? color;
   final String? gaScreen;
   final String? gaItem;
@@ -2640,8 +2643,6 @@ class ContextMenuButton extends StatelessWidget {
   final IconData icon;
   final double iconSize;
   final double buttonWidth;
-
-  static const double defaultWidth = 14.0;
 
   @override
   Widget build(BuildContext context) {
