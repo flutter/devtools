@@ -5,6 +5,7 @@
 import 'package:collection/collection.dart';
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/service/vm_flags.dart' as vm_flags;
+import 'package:devtools_app/src/shared/ui/drop_down_button.dart';
 import 'package:devtools_app/src/shared/ui/vm_flag_widgets.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
@@ -77,7 +78,7 @@ void main() {
         find.text(CpuSamplingRate.high.display, skipOffstage: false),
         findsOneWidget,
       );
-      final RoundedDropDownButton<String> dropdownButton =
+      final AnalyticsDropDownButton<String> dropdownButton =
           tester.widget(find.byKey(CpuSamplingRateDropdown.dropdownKey));
       expect(dropdownButton.value, equals(CpuSamplingRate.medium.value));
     });
@@ -97,7 +98,7 @@ void main() {
         find.text(CpuSamplingRate.high.display, skipOffstage: false),
         findsOneWidget,
       );
-      RoundedDropDownButton<String> dropdownButton =
+      AnalyticsDropDownButton<String> dropdownButton =
           tester.widget(find.byKey(CpuSamplingRateDropdown.dropdownKey));
       expect(dropdownButton.value, equals(CpuSamplingRate.medium.value));
 
@@ -167,7 +168,7 @@ void main() {
       expect(find.byWidget(dropdown), findsOneWidget);
       final dropdownButtonFinder =
           find.byKey(CpuSamplingRateDropdown.dropdownKey);
-      RoundedDropDownButton<String> dropdownButton =
+      AnalyticsDropDownButton<String> dropdownButton =
           tester.widget(dropdownButtonFinder);
       expect(dropdownButton.value, equals(CpuSamplingRate.medium.value));
 
