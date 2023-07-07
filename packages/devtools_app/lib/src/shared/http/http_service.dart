@@ -2,6 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
+import 'package:flutter/foundation.dart';
+
+import '../../service/service_extension_manager.dart';
+import '../../service/service_extensions.dart' as extensions;
 import '../globals.dart';
 import '../primitives/utils.dart';
 
@@ -24,3 +30,10 @@ Future<void> toggleHttpRequestLogging(bool state) async {
     }
   });
 }
+
+bool get httpLoggingEnabled => httpLoggingState.value.enabled;
+
+ValueListenable<ServiceExtensionState> get httpLoggingState =>
+    serviceManager.serviceExtensionManager.getServiceExtensionState(
+      extensions.httpEnableTimelineLogging.extension,
+    );

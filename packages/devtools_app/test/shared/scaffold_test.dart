@@ -30,6 +30,7 @@ void main() {
   setGlobal(OfflineModeController, OfflineModeController());
   setGlobal(IdeTheme, IdeTheme());
   setGlobal(NotificationService, NotificationService());
+  setGlobal(BannerMessagesController, BannerMessagesController());
 
   Widget wrapScaffold(Widget child) {
     return wrapWithControllers(

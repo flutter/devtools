@@ -5,6 +5,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../shared/banner_messages.dart';
+import '../../../../shared/http/http_service.dart' as http_service;
 import '../../../../shared/primitives/auto_dispose.dart';
 import '../../../../shared/primitives/simple_items.dart';
 import '../../../../shared/theme.dart';
@@ -46,7 +47,13 @@ class _ConnectedMemoryBodyState extends State<ConnectedMemoryBody>
   void didChangeDependencies() {
     super.didChangeDependencies();
     maybePushDebugModeMemoryMessage(context, ScreenMetaData.memory.id);
+    maybePushHttpLoggingMessage(context, ScreenMetaData.memory.id);
+
     if (!initController()) return;
+
+    addAutoDisposeListener(http_service.httpLoggingState, () {
+      maybePushHttpLoggingMessage(context, ScreenMetaData.memory.id);
+    });
 
     final vmChartController = VMChartController(controller);
     _chartController = MemoryChartPaneController(

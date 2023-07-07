@@ -19,6 +19,7 @@ TODO: Remove this section if there are not any general updates.
 
 ## Memory updates
 * Added a context menu to rename or delete a heap snapshot from the list - [#5997](https://github.com/flutter/devtools/pull/5997)
+* Warn users when HTTP logging may be affecting their app's memory consumption - [#5998](https://github.com/flutter/devtools/pull/5998)
 
 ## Debugger updates
 TODO: Remove this section if there are not any general updates.
