@@ -50,48 +50,13 @@ class SnapshotControlPane extends StatelessWidget {
               ],
             ),
             Expanded(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  if (heapIsReady) ...[
-                    Expanded(
-                      child: _SnapshotSizeView(
-                        footprint: current.heap!.footprint,
-                      ),
-                    ),
-                    const SizedBox(width: defaultSpacing),
-                  ],
-                  _DeleteSnapshotButton(
-                    controller: controller,
-                    isProcessing: isProcessing,
-                  ),
-                ],
+              child: _SnapshotSizeView(
+                footprint: current.heap!.footprint,
               ),
             ),
           ],
         );
       },
-    );
-  }
-}
-
-class _DeleteSnapshotButton extends StatelessWidget {
-  const _DeleteSnapshotButton({
-    required this.controller,
-    required this.isProcessing,
-  });
-
-  final DiffPaneController controller;
-  final bool isProcessing;
-
-  @override
-  Widget build(BuildContext context) {
-    return DevToolsButton(
-      icon: Icons.clear,
-      tooltip: 'Delete snapshot',
-      onPressed: isProcessing ? null : controller.deleteCurrentSnapshot,
-      gaScreen: gac.memory,
-      gaSelection: gac.MemoryEvent.diffSnapshotDelete,
     );
   }
 }

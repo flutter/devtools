@@ -6,7 +6,6 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:logging/logging.dart';
 
 import '../../../../../shared/analytics/analytics.dart' as ga;
@@ -112,62 +111,98 @@ class _SnapshotListTitle extends StatelessWidget {
     Key? key,
     required this.item,
     required this.index,
-    required this.editIndexNotifier,
-    required this.onNameEdited,
+    required this.selected,
+    required this.editIndex,
+    required this.onEdit,
+    required this.onEditingComplete,
+    required this.onDelete,
   }) : super(key: key);
 
   final SnapshotItem item;
 
   final int index;
 
-  final ValueNotifier<int?> editIndexNotifier;
+  final bool selected;
 
-  final VoidCallback onNameEdited;
+  final ValueListenable<int?> editIndex;
+
+  final VoidCallback onEdit;
+
+  final VoidCallback onEditingComplete;
+
+  final VoidCallback onDelete;
 
   @override
   Widget build(BuildContext context) {
     final theItem = item;
     final theme = Theme.of(context);
+
+    late final Widget leading;
+    final trailing = <Widget>[];
+    if (theItem is SnapshotDocItem) {
+      leading = Icon(
+        Icons.help_outline,
+        size: defaultIconSize,
+        color: theme.colorScheme.onSurface,
+      );
+    } else if (theItem is SnapshotInstanceItem) {
+      leading = Expanded(
+        child: ValueListenableBuilder(
+          valueListenable: editIndex,
+          builder: (context, editIndex, _) {
+            return _EditableSnapshotName(
+              item: theItem,
+              editMode: index == editIndex,
+              onEditingComplete: onEditingComplete,
+            );
+          },
+        ),
+      );
+
+      const menuButtonWidth =
+          ContextMenuButton.defaultWidth + ContextMenuButton.densePadding;
+      trailing.addAll([
+        if (theItem.totalSize != null)
+          Text(
+            prettyPrintBytes(
+              theItem.totalSize,
+              includeUnit: true,
+              kbFractionDigits: 1,
+            )!,
+          ),
+        Padding(
+          padding: const EdgeInsets.only(left: ContextMenuButton.densePadding),
+          child: selected
+              ? ContextMenuButton(
+                  menuChildren: <Widget>[
+                    MenuItemButton(
+                      onPressed: onEdit,
+                      child: const Text('Rename'),
+                    ),
+                    MenuItemButton(
+                      onPressed: onDelete,
+                      child: const Text('Delete'),
+                    ),
+                  ],
+                )
+              : const SizedBox(width: menuButtonWidth),
+        ),
+      ]);
+    }
+
     return ValueListenableBuilder<bool>(
       valueListenable: theItem.isProcessing,
-      builder: (_, isProcessing, __) => Row(
-        children: [
-          const SizedBox(width: denseRowSpacing),
-          if (theItem is SnapshotInstanceItem)
-            Expanded(
-              child: ValueListenableBuilder(
-                valueListenable: editIndexNotifier,
-                builder: (context, editIndex, _) {
-                  return _EditableSnapshotName(
-                    item: theItem,
-                    editMode: index == editIndex,
-                    onEditingComplete: onNameEdited,
-                  );
-                },
-              ),
-            ),
-          if (theItem is SnapshotInstanceItem && theItem.totalSize != null) ...[
-            const SizedBox(width: densePadding),
-            Text(
-              prettyPrintBytes(
-                theItem.totalSize,
-                includeUnit: true,
-                kbFractionDigits: 1,
-              )!,
-            ),
-            const SizedBox(width: denseRowSpacing),
+      builder: (_, isProcessing, __) => Padding(
+        padding: const EdgeInsets.symmetric(horizontal: denseRowSpacing),
+        child: Row(
+          children: [
+            leading,
+            if (isProcessing)
+              CenteredCircularProgressIndicator(size: smallProgressSize)
+            else
+              ...trailing,
           ],
-          if (theItem is SnapshotDocItem)
-            Icon(
-              Icons.help_outline,
-              size: defaultIconSize,
-              color: theme.colorScheme.onSurface,
-            ),
-          if (isProcessing) ...[
-            CenteredCircularProgressIndicator(size: smallProgressSize),
-            const SizedBox(width: denseRowSpacing),
-          ],
-        ],
+        ),
       ),
     );
   }
@@ -276,32 +311,20 @@ class _SnapshotListItemsState extends State<_SnapshotListItems>
 
   final _scrollController = ScrollController();
 
-  final _contextMenuController = MenuController();
-
   /// The index in the list for the snapshot name actively being edited.
+  ValueListenable<int?> get editIndex => _editIndex;
   final _editIndex = ValueNotifier<int?>(null);
-
-  /// The 'y' position for the open context menu.
-  double? _openContextMenuPosition;
-
-  /// Whether [BrowserContextMenu.enabled] was initially set to true.
-  ///
-  /// We will manage the state of [BrowserContextMenu.enabled] while this widget
-  /// is alive, and will return it to its original state upon disposal.
-  bool _browserContextMenuWasEnabled = false;
 
   @override
   void initState() {
     super.initState();
     _init();
-    _disableBrowserContextMenu();
   }
 
   @override
   void dispose() {
     _scrollController.dispose();
     _editIndex.dispose();
-    _reenableBrowserContextMenu();
     super.dispose();
   }
 
@@ -336,100 +359,43 @@ class _SnapshotListItemsState extends State<_SnapshotListItems>
       firstListenable: core.snapshots,
       secondListenable: core.selectedSnapshotIndex,
       builder: (_, snapshots, selectedIndex, __) {
-        return GestureDetector(
-          onSecondaryTapUp: _showContextMenu,
-          onDoubleTapDown: _enterEditMode,
-          child: MenuAnchor(
-            controller: _contextMenuController,
-            anchorTapClosesMenu: true,
-            onClose: () => _openContextMenuPosition = null,
-            menuChildren: <Widget>[
-              MenuItemButton(
-                onPressed: _setEditIndex,
-                child: const Text('Rename'),
+        return ListView.builder(
+          controller: _scrollController,
+          itemCount: snapshots.length,
+          itemExtent: defaultRowHeight,
+          itemBuilder: (context, index) {
+            final selected = selectedIndex == index;
+            return Container(
+              height: _headerHeight,
+              color: selected
+                  ? Theme.of(context).colorScheme.selectedRowBackgroundColor
+                  : null,
+              child: InkWell(
+                canRequestFocus: false,
+                onTap: () {
+                  widget.controller.setSnapshotIndex(index);
+                  _editIndex.value = null;
+                },
+                child: _SnapshotListTitle(
+                  item: snapshots[index],
+                  index: index,
+                  selected: selected,
+                  editIndex: editIndex,
+                  onEdit: () => _editIndex.value = index,
+                  onEditingComplete: () => _editIndex.value = null,
+                  onDelete: () {
+                    if (_editIndex.value == index) {
+                      _editIndex.value = null;
+                    }
+                    final item = widget.controller.core.snapshots.value[index];
+                    widget.controller.deleteSnapshot(item);
+                  },
+                ),
               ),
-            ],
-            child: ListView.builder(
-              controller: _scrollController,
-              itemCount: snapshots.length,
-              itemExtent: defaultRowHeight,
-              itemBuilder: (context, index) {
-                final selected = selectedIndex == index;
-                return Container(
-                  height: _headerHeight,
-                  color: selected
-                      ? Theme.of(context).colorScheme.selectedRowBackgroundColor
-                      : null,
-                  child: InkWell(
-                    canRequestFocus: false,
-                    onTap: () {
-                      widget.controller.setSnapshotIndex(index);
-                      _resetEditMode();
-                    },
-                    child: _SnapshotListTitle(
-                      item: snapshots[index],
-                      index: index,
-                      editIndexNotifier: _editIndex,
-                      onNameEdited: _resetEditMode,
-                    ),
-                  ),
-                );
-              },
-            ),
-          ),
+            );
+          },
         );
       },
     );
-  }
-
-  void _enterEditMode(TapDownDetails details) {
-    _editIndex.value = _indexForPosition(details.localPosition.dy);
-  }
-
-  void _resetEditMode() {
-    _editIndex.value = null;
-  }
-
-  void _setEditIndex() {
-    if (_openContextMenuPosition == null) return;
-    _editIndex.value = _indexForPosition(_openContextMenuPosition!);
-  }
-
-  int _indexForPosition(double dy) {
-    return (_scrollController.offset + dy) ~/ defaultRowHeight;
-  }
-
-  void _showContextMenu(TapUpDetails details) {
-    final tapY = details.localPosition.dy;
-    final index = _indexForPosition(tapY);
-    // Only show the context menu for heap snapshots in the list (e.g. not the
-    // first 'info' item and not for a position that is out of range).
-    if (index > 0 && index < widget.controller.core.snapshots.value.length) {
-      _openContextMenuPosition = details.localPosition.dy;
-      _contextMenuController.open(position: details.localPosition);
-    } else {
-      _openContextMenuPosition = null;
-    }
-  }
-
-  void _disableBrowserContextMenu() {
-    if (!kIsWeb) {
-      // Does nothing on non-web platforms.
-      return;
-    }
-    _browserContextMenuWasEnabled = BrowserContextMenu.enabled;
-    if (_browserContextMenuWasEnabled) {
-      unawaited(BrowserContextMenu.disableContextMenu());
-    }
-  }
-
-  void _reenableBrowserContextMenu() {
-    if (!kIsWeb) {
-      // Does nothing on non-web platforms.
-      return;
-    }
-    if (_browserContextMenuWasEnabled && !BrowserContextMenu.enabled) {
-      unawaited(BrowserContextMenu.enableContextMenu());
-    }
   }
 }
