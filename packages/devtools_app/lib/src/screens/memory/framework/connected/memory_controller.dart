@@ -152,9 +152,6 @@ class MemoryController extends DisposableController
 
   Stream<MemoryTracker?> get onMemory => _memoryTrackerController.stream;
 
-  Stream<void> get onDisconnect => _disconnectController.stream;
-  final _disconnectController = StreamController<void>.broadcast();
-
   MemoryTracker? _memoryTracker;
 
   MemoryTracker? get memoryTracker => _memoryTracker;
@@ -262,7 +259,6 @@ class MemoryController extends DisposableController
     _memoryTrackerController.add(_memoryTracker);
 
     controllers.reset();
-    _disconnectController.add(null);
     hasStopped = true;
   }
 
@@ -329,7 +325,6 @@ class MemoryController extends DisposableController
   void dispose() {
     super.dispose();
     _displayIntervalNotifier.dispose();
-    unawaited(_disconnectController.close());
     unawaited(_memoryTrackerController.close());
     _memoryTracker?.dispose();
     controllers.dispose();

@@ -27,13 +27,12 @@ class SnapshotControlPane extends StatelessWidget {
       builder: (_, isProcessing, __) {
         final current = controller.core.selectedItem as SnapshotInstanceItem;
         final heapIsReady = !isProcessing && current.heap != null;
-
-        return Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Row(
-              children: [
-                if (heapIsReady) ...[
+        if (heapIsReady) {
+          return Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
                   _DiffDropdown(
                     current: current,
                     controller: controller,
@@ -47,51 +46,17 @@ class SnapshotControlPane extends StatelessWidget {
                     onPressed: controller.downloadCurrentItemToCsv,
                   ),
                 ],
-              ],
-            ),
-            Expanded(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  if (heapIsReady) ...[
-                    Expanded(
-                      child: _SnapshotSizeView(
-                        footprint: current.heap!.footprint,
-                      ),
-                    ),
-                    const SizedBox(width: defaultSpacing),
-                  ],
-                  _DeleteSnapshotButton(
-                    controller: controller,
-                    isProcessing: isProcessing,
-                  ),
-                ],
               ),
-            ),
-          ],
-        );
+              Expanded(
+                child: _SnapshotSizeView(
+                  footprint: current.heap!.footprint,
+                ),
+              ),
+            ],
+          );
+        }
+        return const SizedBox.shrink();
       },
-    );
-  }
-}
-
-class _DeleteSnapshotButton extends StatelessWidget {
-  const _DeleteSnapshotButton({
-    required this.controller,
-    required this.isProcessing,
-  });
-
-  final DiffPaneController controller;
-  final bool isProcessing;
-
-  @override
-  Widget build(BuildContext context) {
-    return DevToolsButton(
-      icon: Icons.clear,
-      tooltip: 'Delete snapshot',
-      onPressed: isProcessing ? null : controller.deleteCurrentSnapshot,
-      gaScreen: gac.memory,
-      gaSelection: gac.MemoryEvent.diffSnapshotDelete,
     );
   }
 }
