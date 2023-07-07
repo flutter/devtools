@@ -213,7 +213,7 @@ class _ConnectDialogState extends State<ConnectDialog>
   Future<void> _connectHelper() async {
     ga.select(
       gac.landingScreen,
-      gac.connectToApp,
+      gac.HomeScreenEvents.connectToApp.name,
     );
     if (connectDialogController.text.isEmpty) {
       notificationService.push('Please enter a VM Service URL.');

@@ -27,13 +27,14 @@ final simple = ScreenMetaData.simple.id;
 
 // GA events not associated with a any screen e.g., hotReload, hotRestart, etc
 const devToolsMain = 'main';
-const hotReload = 'hotReload';
-const hotRestart = 'hotRestart';
 const appDisconnected = 'appDisconnected';
 
 // DevTools UI action selected (clicked).
 
 // Main bar UX actions:
+const hotReload = 'hotReload';
+const hotRestart = 'hotRestart';
+const importFile = 'importFile';
 const feedbackLink = 'feedback';
 const feedbackButton = 'feedbackButton';
 const contributingLink = 'contributing';
@@ -60,6 +61,12 @@ const showOnDeviceInspector = 'showInspector';
 const treeNodeSelection = 'treeNodeSelection';
 const inspectorSettings = 'inspectorSettings';
 const refreshPubRoots = 'refreshPubRoots';
+
+enum HomeScreenEvents {
+  connectToApp,
+  connectToNewApp,
+  viewVmFlags,
+}
 
 enum PerformanceEvents {
   refreshTimelineEvents,
@@ -144,8 +151,6 @@ const requestSize = 'requestSize';
 
 // Landing screen UX actions:
 const landingScreen = 'landing';
-const connectToApp = 'connectToApp';
-const importFile = 'importFile';
 const openAppSizeTool = 'openAppSizeTool';
 const openMemoryAnalysisTool = 'openMemoryAnalysisTool';
 
