@@ -69,13 +69,9 @@ class AnalyticsDropDownButton<T> extends StatelessWidget {
   }
 
   void _onChanged(T? newValue) {
-    if (sendAnalytics) {
-      final gaId = items
-              ?.firstWhereOrNull(
-                (element) => element.item == newValue,
-              )
-              ?.gaId ??
-          '<empty>';
+    if (sendAnalytics && items != null) {
+      final gaId =
+          items?.firstWhere((element) => element.item == newValue).gaId;
       ga.select(gaScreen, '$gaDropDownId $gaId');
     }
     onChanged?.call(newValue);
