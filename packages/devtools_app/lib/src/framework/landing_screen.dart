@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:devtools_shared/devtools_shared.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -52,6 +53,10 @@ class _LandingScreenBodyState extends State<LandingScreenBody> {
         children: [
           const ConnectDialog(),
           const SizedBox(height: defaultSpacing),
+          if (widget.sampleData.isNotEmpty && !kReleaseMode) ...[
+            SampleDataDropDownButton(sampleData: widget.sampleData),
+            const SizedBox(height: defaultSpacing),
+          ],
           const AppSizeToolingInstructions(),
           if (FeatureFlags.memoryAnalysis) ...[
             const SizedBox(height: defaultSpacing),
