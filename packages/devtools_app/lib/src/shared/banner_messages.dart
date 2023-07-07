@@ -391,7 +391,7 @@ class HttpLoggingEnabledMessage {
       textSpans: [
         const TextSpan(
           text: '''
-Http traffic is being logged for debugging purposes. This may result in increased memory usage for your app. If this is not intentional, consider ''',
+HTTP traffic is being logged for debugging purposes. This may result in increased memory usage for your app. If this is not intentional, consider ''',
         ),
         TextSpan(
           text: 'disabling http logging',
