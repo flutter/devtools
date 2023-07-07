@@ -1,4 +1,17 @@
-## Generating Release notes
+## Updating NEXT_RELEASE_NOTES.md
+When you add a user-facing change to DevTools, please add a release note entry to document this improvement.
+
+If you want to add an image to the release note entry, add the image to the `release_notes/images` folder,
+and then reference it in the markdown. For example:
+
+```
+![my feature](images/my_feature.png "my feature")
+```
+
+When adding these release notes to the Flutter website, you'll have to copy the image over and edit the path
+to match the structure of the Flutter website.
+
+## Generating Release notes for the Flutter website
 - Release notes for DevTools are hosted on the flutter website (see [archive](https://docs.flutter.dev/tools/devtools/release-notes)).
 - To add release notes for the latest release, create a PR with the appropriate changes for your release.
     - The [NEXT_RELEASE_NOTES.md](NEXT_RELEASE_NOTES.md) file contains the running release notes for the current version.
