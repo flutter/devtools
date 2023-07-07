@@ -18,7 +18,7 @@ TODO: Remove this section if there are not any general updates.
 TODO: Remove this section if there are not any general updates.
 
 ## Memory updates
-TODO: Remove this section if there are not any general updates.
+* Warn users when HTTP logging may be affecting their app's memory consumption - [#5998](https://github.com/flutter/devtools/pull/5998)
 
 ## Debugger updates
 TODO: Remove this section if there are not any general updates.

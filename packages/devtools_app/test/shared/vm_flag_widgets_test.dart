@@ -16,7 +16,6 @@ void main() {
   group('Profile Granularity Dropdown', () {
     late FakeServiceManager fakeServiceManager;
     late CpuSamplingRateDropdown dropdown;
-    late BuildContext buildContext;
 
     setUp(() async {
       fakeServiceManager = FakeServiceManager();
@@ -24,6 +23,7 @@ void main() {
       setGlobal(ServiceConnectionManager, fakeServiceManager);
       setGlobal(IdeTheme, IdeTheme());
       setGlobal(NotificationService, NotificationService());
+      setGlobal(BannerMessagesController, BannerMessagesController());
       await fakeServiceManager.flagsInitialized.future;
       dropdown = CpuSamplingRateDropdown(
         screenId: ProfilerScreen.id,
@@ -33,29 +33,7 @@ void main() {
     });
 
     Future<void> pumpDropdown(WidgetTester tester) async {
-      await tester.pumpWidget(
-        MaterialApp(
-          theme: themeFor(
-            isDarkTheme: false,
-            ideTheme: IdeTheme(),
-            theme: ThemeData(
-              useMaterial3: true,
-              colorScheme: lightColorScheme,
-            ),
-          ),
-          home: Material(
-            child: wrapWithControllers(
-              Builder(
-                builder: (context) {
-                  buildContext = context;
-                  return dropdown;
-                },
-              ),
-              bannerMessages: BannerMessagesController(),
-            ),
-          ),
-        ),
-      );
+      await tester.pumpWidget(wrap(dropdown));
     }
 
     testWidgets('displays with default content', (WidgetTester tester) async {
@@ -126,10 +104,7 @@ void main() {
       );
       // Verify we are showing the high profile granularity warning.
       expect(
-        bannerMessagesController(buildContext)
-            .messagesForScreen(ProfilerScreen.id)
-            .value
-            .length,
+        bannerMessages.messagesForScreen(ProfilerScreen.id).value.length,
         equals(1),
       );
 
@@ -151,9 +126,7 @@ void main() {
       );
       // Verify we are not showing the high profile granularity warning.
       expect(
-        bannerMessagesController(buildContext)
-            .messagesForScreen(ProfilerScreen.id)
-            .value,
+        bannerMessages.messagesForScreen(ProfilerScreen.id).value,
         isEmpty,
       );
     });

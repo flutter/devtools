@@ -5,7 +5,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../screens/profiler/cpu_profile_service.dart';
@@ -52,14 +51,12 @@ class CpuSamplingRateDropdown extends StatelessWidget {
           unawaited(_onSamplingFrequencyChanged(safeValue));
         }
 
-        final bannerMessageController =
-            Provider.of<BannerMessagesController>(context);
         if (safeValue == highProfilePeriod) {
-          bannerMessageController.addMessage(
+          bannerMessages.addMessage(
             HighCpuSamplingRateMessage(screenId).build(context),
           );
         } else {
-          bannerMessageController.removeMessageByKey(
+          bannerMessages.removeMessageByKey(
             HighCpuSamplingRateMessage(screenId).key,
             screenId,
           );

@@ -20,9 +20,11 @@ void main() {
     bool offlineMode = false,
   }) async {
     await tester.pumpWidget(
-      wrapWithControllers(
-        FlutterFramesChart(framesController, offlineMode: offlineMode),
-        bannerMessages: BannerMessagesController(),
+      wrap(
+        FlutterFramesChart(
+          framesController,
+          offlineMode: offlineMode,
+        ),
       ),
     );
     await tester.pumpAndSettle();
@@ -42,6 +44,7 @@ void main() {
       setGlobal(OfflineModeController, OfflineModeController());
       setGlobal(IdeTheme, IdeTheme());
       setGlobal(NotificationService, NotificationService());
+      setGlobal(BannerMessagesController, BannerMessagesController());
       setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
       setGlobal(PreferencesController, PreferencesController());
 
