@@ -5,7 +5,6 @@
 import 'dart:async';
 
 import 'package:devtools_shared/devtools_shared.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';

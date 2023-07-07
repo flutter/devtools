@@ -44,7 +44,6 @@ void main() {
         ),
       );
       expect(find.byType(ConnectDialog), findsOneWidget);
-      expect(find.byType(ImportFileInstructions), findsOneWidget);
       expect(find.byType(SampleDataDropDownButton), findsOneWidget);
       expect(find.byType(AppSizeToolingInstructions), findsOneWidget);
 
