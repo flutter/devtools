@@ -106,8 +106,9 @@ class _ListControlPane extends StatelessWidget {
   }
 }
 
-class _SnapshotListTitle extends StatelessWidget {
-  const _SnapshotListTitle({
+@visibleForTesting
+class SnapshotListTitle extends StatelessWidget {
+  const SnapshotListTitle({
     Key? key,
     required this.item,
     required this.index,
@@ -376,7 +377,7 @@ class _SnapshotListItemsState extends State<_SnapshotListItems>
                   widget.controller.setSnapshotIndex(index);
                   _editIndex.value = null;
                 },
-                child: _SnapshotListTitle(
+                child: SnapshotListTitle(
                   item: snapshots[index],
                   index: index,
                   selected: selected,
