@@ -143,7 +143,7 @@ void main() {
 
   testWidgetsWithWindowSize(
     'hides $DevToolsTitle when screen is very narrow',
-    const Size(200.0, 1200.0),
+    const Size(220.0, 1200.0),
     (WidgetTester tester) async {
       await tester.pumpWidget(
         wrapScaffold(

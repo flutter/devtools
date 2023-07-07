@@ -60,6 +60,7 @@ class DevToolsScaffold extends StatefulWidget {
   static List<Widget> defaultActions() => const [
         OpenSettingsAction(),
         ReportFeedbackButton(),
+        ImportToolbarAction(),
         OpenAboutAction(),
       ];
 

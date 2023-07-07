@@ -7,6 +7,7 @@ Dart & Flutter DevTools - A Suite of Performance Tools for Dart and Flutter
 
 ## General updates 
 * Fix overlay notifications so they cover the area that their background blocks - [#5975](https://github.com/flutter/devtools/pull/5975)
+* Added an action to the main toolbar for loading offline data into DevTools - [#6003](https://github.com/flutter/devtools/pull/6003)
 
 ## Inspector updates
 TODO: Remove this section if there are not any general updates.
