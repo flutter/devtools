@@ -20,7 +20,6 @@ void main() {
       // Build our app and trigger a frame.
       await tester.pumpWidget(wrap(const LandingScreenBody()));
       expect(find.byType(ConnectDialog), findsOneWidget);
-      expect(find.byType(ImportFileInstructions), findsOneWidget);
       expect(find.byType(SampleDataDropDownButton), findsNothing);
       expect(find.byType(AppSizeToolingInstructions), findsOneWidget);
     },

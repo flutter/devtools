@@ -15,7 +15,6 @@ import '../shared/analytics/constants.dart' as gac;
 import '../shared/common_widgets.dart';
 import '../shared/config_specific/import_export/import_export.dart';
 import '../shared/feature_flags.dart';
-import '../shared/file_import.dart';
 import '../shared/globals.dart';
 import '../shared/primitives/blocking_action_mixin.dart';
 import '../shared/primitives/utils.dart';
@@ -53,8 +52,6 @@ class _LandingScreenBodyState extends State<LandingScreenBody> {
       child: ListView(
         children: [
           const ConnectDialog(),
-          const SizedBox(height: defaultSpacing),
-          ImportFileInstructions(sampleData: widget.sampleData),
           const SizedBox(height: defaultSpacing),
           const AppSizeToolingInstructions(),
           if (FeatureFlags.memoryAnalysis) ...[
@@ -255,64 +252,6 @@ class _ConnectDialogState extends State<ConnectDialog>
         'Failed to connect to the VM Service at "${connectDialogController.text}".\n'
         'The link was not valid.',
       );
-    }
-  }
-}
-
-class ImportFileInstructions extends StatelessWidget {
-  const ImportFileInstructions({Key? key, this.sampleData = const []})
-      : super(key: key);
-
-  final List<DevToolsJsonFile> sampleData;
-
-  @override
-  Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
-    return LandingScreenSection(
-      title: 'Load DevTools Data',
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Import a data file to use DevTools without an app connection.',
-            style: textTheme.titleMedium,
-          ),
-          const SizedBox(height: denseRowSpacing),
-          Text(
-            'At this time, DevTools only supports importing files that were originally'
-            ' exported from DevTools.',
-            style: textTheme.bodySmall,
-          ),
-          const SizedBox(height: defaultSpacing),
-          ElevatedButton(
-            onPressed: () => unawaited(_importFile(context)),
-            child: const MaterialIconLabel(
-              label: 'Import File',
-              iconData: Icons.file_upload,
-            ),
-          ),
-          if (sampleData.isNotEmpty && !kReleaseMode) ...[
-            const SizedBox(height: defaultSpacing),
-            SampleDataDropDownButton(sampleData: sampleData),
-          ],
-        ],
-      ),
-    );
-  }
-
-  Future<void> _importFile(BuildContext context) async {
-    ga.select(
-      gac.landingScreen,
-      gac.importFile,
-    );
-    final DevToolsJsonFile? importedFile = await importFileFromPicker(
-      acceptedTypes: ['json'],
-    );
-
-    if (importedFile != null) {
-      // ignore: use_build_context_synchronously, by design
-      Provider.of<ImportController>(context, listen: false)
-          .importData(importedFile);
     }
   }
 }
