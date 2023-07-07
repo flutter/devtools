@@ -125,12 +125,16 @@ class SnapshotListTitle extends StatelessWidget {
 
   final bool selected;
 
+  /// The index in the list for the [SnapshotListTitle] actively being edited.
   final ValueListenable<int?> editIndex;
 
+  /// Called when the 'Rename' context menu item is selected.
   final VoidCallback onEdit;
 
+  /// Called when the snapshot name editing is complete.
   final VoidCallback onEditingComplete;
 
+  /// Called when the 'Delete' context menu item is selected.
   final VoidCallback onDelete;
 
   @override
