@@ -13,9 +13,7 @@ import '../../screens/profiler/sampling_rate.dart';
 import '../analytics/analytics.dart' as ga;
 import '../analytics/constants.dart' as gac;
 import '../banner_messages.dart';
-import '../common_widgets.dart';
 import '../globals.dart';
-import '../theme.dart';
 import 'drop_down_button.dart';
 
 /// DropdownButton that controls the value of the 'profile_period' vm flag.
