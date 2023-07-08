@@ -2057,12 +2057,15 @@ class CopyToClipboardControl extends StatelessWidget {
             );
           };
 
-    return ToolbarAction(
-      icon: Icons.content_copy,
-      tooltip: tooltip,
-      onPressed: onPressed,
-      key: buttonKey,
-      size: size,
+    return SizedBox(
+      height: size,
+      child: ToolbarAction(
+        icon: Icons.content_copy,
+        tooltip: tooltip,
+        onPressed: onPressed,
+        key: buttonKey,
+        size: size,
+      ),
     );
   }
 }

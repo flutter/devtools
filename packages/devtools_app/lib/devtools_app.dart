@@ -69,6 +69,7 @@ export 'src/shared/charts/treemap.dart';
 export 'src/shared/common_widgets.dart';
 export 'src/shared/config_specific/ide_theme/ide_theme.dart';
 export 'src/shared/connected_app.dart';
+export 'src/shared/connection_info.dart';
 export 'src/shared/console/console_service.dart';
 export 'src/shared/console/eval/eval_service.dart';
 export 'src/shared/console/eval/inspector_tree.dart';
