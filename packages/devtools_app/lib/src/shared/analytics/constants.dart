@@ -167,6 +167,7 @@ const copyLogs = 'copyLogs';
 
 // Object explorer:
 const objectInspectorScreen = 'objectInspector';
+const objectInspectorDropDown = 'dropdown';
 const programExplorer = 'programExplorer';
 const objectStore = 'objectStore';
 const classHierarchy = 'classHierarchy';

@@ -22,6 +22,8 @@ class AnalyticsDropDownButton<T> extends StatelessWidget {
     required this.onChanged,
     this.sendAnalytics = true,
     this.isDense = false,
+    this.isExpanded = false,
+    this.roundedCornerOptions,
   });
 
   /// The GA ID for the screen this widget is displayed on.
@@ -50,6 +52,8 @@ class AnalyticsDropDownButton<T> extends StatelessWidget {
   final void Function(T?)? onChanged;
 
   final bool isDense;
+  final bool isExpanded;
+  final RoundedCornerOptions? roundedCornerOptions;
 
   @override
   Widget build(BuildContext context) {
@@ -59,10 +63,12 @@ class AnalyticsDropDownButton<T> extends StatelessWidget {
         message: message,
         child: RoundedDropDownButton<T>(
           isDense: isDense,
+          isExpanded: isExpanded,
           style: Theme.of(context).textTheme.bodyMedium,
           value: value,
           items: items?.map((e) => e.item).toList(),
           onChanged: _onChanged,
+          roundedCornerOptions: roundedCornerOptions,
         ),
       ),
     );
