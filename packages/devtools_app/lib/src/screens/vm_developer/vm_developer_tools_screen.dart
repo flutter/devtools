@@ -6,7 +6,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../shared/primitives/auto_dispose.dart';
-import '../../shared/primitives/simple_items.dart';
 import '../../shared/screen.dart';
 import '../../shared/theme.dart';
 import '../../shared/utils.dart';
@@ -44,7 +43,7 @@ class VMDeveloperToolsScreen extends Screen {
       : super.conditional(
           id: id,
           title: ScreenMetaData.vmTools.title,
-          icon: Icons.settings_applications,
+          icon: ScreenMetaData.vmTools.icon ,
           requiresVmDeveloperMode: true,
         );
 

@@ -5,9 +5,15 @@ This is draft for future release notes, that are going to land on
 
 Dart & Flutter DevTools - A Suite of Performance Tools for Dart and Flutter
 
-## General updates 
-* Fix overlay notifications so they cover the area that their background blocks - [#5975](https://github.com/flutter/devtools/pull/5975)
+## General updates
+* Added a new "Home" screen in DevTools that either shows the "Connect" dialog or
+a summary of your connected app, depending on the connection status in DevTools. Keep an
+eye on this screen for cool new features in the future. This change also enables support
+for static tooling (tools that don't require a connected app) in DevTools - [#6010](https://github.com/flutter/devtools/pull/6010)
+![home screen](images/home_screen.png "DevTools home screen")
 * Added an action to the main toolbar for loading offline data into DevTools - [#6003](https://github.com/flutter/devtools/pull/6003)
+![load data action](images/load_data.png "Load data action")
+* Fixed overlay notifications so that they cover the area that their background blocks - [#5975](https://github.com/flutter/devtools/pull/5975)
 
 ## Inspector updates
 TODO: Remove this section if there are not any general updates.

@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import '../../../../shared/banner_messages.dart';
 import '../../../../shared/http/http_service.dart' as http_service;
 import '../../../../shared/primitives/auto_dispose.dart';
-import '../../../../shared/primitives/simple_items.dart';
+import '../../../../shared/screen.dart';
 import '../../../../shared/theme.dart';
 import '../../../../shared/utils.dart';
 import '../../panes/chart/chart_pane.dart';

@@ -21,11 +21,9 @@ import '../../shared/error_badge_manager.dart';
 import '../../shared/globals.dart';
 import '../../shared/primitives/auto_dispose.dart';
 import '../../shared/primitives/blocking_action_mixin.dart';
-import '../../shared/primitives/simple_items.dart';
 import '../../shared/screen.dart';
 import '../../shared/split.dart';
 import '../../shared/theme.dart';
-import '../../shared/ui/icons.dart';
 import '../../shared/ui/search.dart';
 import '../../shared/utils.dart';
 import 'inspector_controller.dart';
@@ -39,7 +37,7 @@ class InspectorScreen extends Screen {
           requiresLibrary: flutterLibraryUri,
           requiresDebugBuild: true,
           title: ScreenMetaData.inspector.title,
-          icon: Octicons.deviceMobile,
+          icon:  ScreenMetaData.inspector.icon,
         );
 
   static final id = ScreenMetaData.inspector.id;

@@ -18,12 +18,10 @@ import '../../shared/config_specific/url/url.dart';
 import '../../shared/file_import.dart';
 import '../../shared/globals.dart';
 import '../../shared/primitives/auto_dispose.dart';
-import '../../shared/primitives/simple_items.dart';
 import '../../shared/primitives/utils.dart';
 import '../../shared/screen.dart';
 import '../../shared/split.dart';
 import '../../shared/theme.dart';
-import '../../shared/ui/icons.dart';
 import '../../shared/ui/tab.dart';
 import '../../shared/utils.dart';
 import 'app_size_controller.dart';
@@ -37,9 +35,10 @@ class AppSizeScreen extends Screen {
   AppSizeScreen()
       : super.conditional(
           id: id,
+          requiresConnection: false,
           requiresDartVm: true,
           title: ScreenMetaData.appSize.title,
-          icon: Octicons.fileZip,
+          icon: ScreenMetaData.appSize.icon,
         );
 
   static const analysisTabKey = Key('Analysis Tab');

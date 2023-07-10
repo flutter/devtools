@@ -18,6 +18,7 @@ import '../../file_import.dart';
 import '../../globals.dart';
 import '../../primitives/simple_items.dart';
 import '../../primitives/utils.dart';
+import '../../screen.dart';
 import '../../theme.dart';
 import '_export_stub.dart'
     if (dart.library.html) '_export_web.dart'
