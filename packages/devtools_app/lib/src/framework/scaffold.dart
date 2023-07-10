@@ -60,6 +60,7 @@ class DevToolsScaffold extends StatefulWidget {
   static List<Widget> defaultActions() => const [
         OpenSettingsAction(),
         ReportFeedbackButton(),
+        ImportToolbarAction(),
         OpenAboutAction(),
       ];
 
@@ -303,82 +304,79 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
     );
     final theme = Theme.of(context);
 
-    return Provider<BannerMessagesController>(
-      create: (_) => BannerMessagesController(),
-      child: Provider<ImportController>.value(
-        value: _importController,
-        builder: (context, _) {
-          final showConsole = serviceManager.connectedAppInitialized &&
-              !offlineController.offlineMode.value &&
-              _currentScreen.showConsole(widget.embed);
+    return Provider<ImportController>.value(
+      value: _importController,
+      builder: (context, _) {
+        final showConsole = serviceManager.connectedAppInitialized &&
+            !offlineController.offlineMode.value &&
+            _currentScreen.showConsole(widget.embed);
 
-          return DragAndDrop(
-            handleDrop: _importController.importData,
-            child: Title(
-              title: scaffoldTitle,
-              // Color is a required parameter but the color only appears to
-              // matter on Android and we do not care about Android.
-              // Using theme.primaryColor matches the default behavior of the
-              // title used by [WidgetsApp].
-              color: theme.primaryColor.withAlpha(255),
-              child: KeyboardShortcuts(
-                keyboardShortcuts: _currentScreen.buildKeyboardShortcuts(
-                  context,
-                ),
-                child: Scaffold(
-                  appBar: widget.embed
-                      ? null
-                      : PreferredSize(
-                          preferredSize: Size.fromHeight(defaultToolbarHeight),
-                          // Place the AppBar inside of a Hero widget to keep it the same across
-                          // route transitions.
-                          child: Hero(
-                            tag: _appBarTag,
-                            child: DevToolsAppBar(
-                              tabController: _tabController,
-                              title: scaffoldTitle,
-                              screens: widget.screens,
-                              actions: widget.actions,
-                            ),
+        return DragAndDrop(
+          handleDrop: _importController.importData,
+          child: Title(
+            title: scaffoldTitle,
+            // Color is a required parameter but the color only appears to
+            // matter on Android and we do not care about Android.
+            // Using theme.primaryColor matches the default behavior of the
+            // title used by [WidgetsApp].
+            color: theme.primaryColor.withAlpha(255),
+            child: KeyboardShortcuts(
+              keyboardShortcuts: _currentScreen.buildKeyboardShortcuts(
+                context,
+              ),
+              child: Scaffold(
+                appBar: widget.embed
+                    ? null
+                    : PreferredSize(
+                        preferredSize: Size.fromHeight(defaultToolbarHeight),
+                        // Place the AppBar inside of a Hero widget to keep it the same across
+                        // route transitions.
+                        child: Hero(
+                          tag: _appBarTag,
+                          child: DevToolsAppBar(
+                            tabController: _tabController,
+                            title: scaffoldTitle,
+                            screens: widget.screens,
+                            actions: widget.actions,
                           ),
                         ),
-                  body: OutlineDecoration.onlyTop(
-                    child: Padding(
-                      padding: widget.appPadding,
-                      child: showConsole
-                          ? Split(
-                              axis: Axis.vertical,
-                              splitters: [
-                                ConsolePaneHeader(
-                                  backgroundColor: theme.colorScheme.surface,
+                      ),
+                body: OutlineDecoration.onlyTop(
+                  child: Padding(
+                    padding: widget.appPadding,
+                    child: showConsole
+                        ? Split(
+                            axis: Axis.vertical,
+                            splitters: [
+                              ConsolePaneHeader(
+                                backgroundColor: theme.colorScheme.surface,
+                              ),
+                            ],
+                            initialFractions: const [0.8, 0.2],
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.only(
+                                  bottom: intermediateSpacing,
                                 ),
-                              ],
-                              initialFractions: const [0.8, 0.2],
-                              children: [
-                                Padding(
-                                  padding: const EdgeInsets.only(
-                                    bottom: intermediateSpacing,
-                                  ),
-                                  child: content,
-                                ),
-                                RoundedOutlinedBorder.onlyBottom(
-                                  child: const ConsolePane(),
-                                ),
-                              ],
-                            )
-                          : content,
-                    ),
+                                child: content,
+                              ),
+                              RoundedOutlinedBorder.onlyBottom(
+                                child: const ConsolePane(),
+                              ),
+                            ],
+                          )
+                        : content,
                   ),
-                  bottomNavigationBar: StatusLine(
-                    currentScreen: _currentScreen,
-                    isEmbedded: widget.embed,
-                  ),
+                ),
+                bottomNavigationBar: StatusLine(
+                  currentScreen: _currentScreen,
+                  isEmbedded: widget.embed,
                 ),
               ),
             ),
-          );
-        },
-      ),
+          ),
+        );
+      },
     );
   }
 }

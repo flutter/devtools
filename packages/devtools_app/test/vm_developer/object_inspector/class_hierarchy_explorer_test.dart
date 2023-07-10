@@ -101,7 +101,7 @@ void main() {
     (tester) async {
       final controller = objectInspectorViewController.classHierarchyController;
       await tester.pumpWidget(
-        wrapWithControllers(
+        wrap(
           ClassHierarchyExplorer(
             controller: objectInspectorViewController,
           ),

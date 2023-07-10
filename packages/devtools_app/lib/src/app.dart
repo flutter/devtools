@@ -24,8 +24,9 @@ import 'screens/inspector/inspector_screen.dart';
 import 'screens/inspector/inspector_tree_controller.dart';
 import 'screens/logging/logging_controller.dart';
 import 'screens/logging/logging_screen.dart';
-import 'screens/memory/memory_controller.dart';
-import 'screens/memory/memory_screen.dart';
+import 'screens/memory/framework/connected/memory_controller.dart';
+import 'screens/memory/framework/memory_screen.dart';
+import 'screens/memory/framework/static/static_screen_body.dart';
 import 'screens/network/network_controller.dart';
 import 'screens/network/network_screen.dart';
 import 'screens/performance/performance_controller.dart';
@@ -290,6 +291,18 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
           ),
         );
       },
+      if (FeatureFlags.memoryAnalysis)
+        memoryAnalysisScreenId: (_, __, args, ____) {
+          final embed = isEmbedded(args);
+          return DevToolsScaffold.withChild(
+            key: const Key('memoryanalysis'),
+            embed: embed,
+            child: MultiProvider(
+              providers: _providedControllers(),
+              child: const StaticMemoryBody(),
+            ),
+          );
+        },
       if (FeatureFlags.vsCodeSidebarTooling) ..._standaloneScreens,
     };
   }

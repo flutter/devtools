@@ -14,7 +14,7 @@ import '../shared/analytics/analytics.dart' as ga;
 import '../shared/analytics/constants.dart' as gac;
 import '../shared/common_widgets.dart';
 import '../shared/config_specific/import_export/import_export.dart';
-import '../shared/file_import.dart';
+import '../shared/feature_flags.dart';
 import '../shared/globals.dart';
 import '../shared/primitives/blocking_action_mixin.dart';
 import '../shared/primitives/utils.dart';
@@ -53,9 +53,15 @@ class _LandingScreenBodyState extends State<LandingScreenBody> {
         children: [
           const ConnectDialog(),
           const SizedBox(height: defaultSpacing),
-          ImportFileInstructions(sampleData: widget.sampleData),
-          const SizedBox(height: defaultSpacing),
+          if (widget.sampleData.isNotEmpty && !kReleaseMode) ...[
+            SampleDataDropDownButton(sampleData: widget.sampleData),
+            const SizedBox(height: defaultSpacing),
+          ],
           const AppSizeToolingInstructions(),
+          if (FeatureFlags.memoryAnalysis) ...[
+            const SizedBox(height: defaultSpacing),
+            const MemoryAnalysisInstructions(),
+          ],
         ],
       ),
     );
@@ -207,7 +213,7 @@ class _ConnectDialogState extends State<ConnectDialog>
   Future<void> _connectHelper() async {
     ga.select(
       gac.landingScreen,
-      gac.connectToApp,
+      gac.HomeScreenEvents.connectToApp.name,
     );
     if (connectDialogController.text.isEmpty) {
       notificationService.push('Please enter a VM Service URL.');
@@ -254,64 +260,6 @@ class _ConnectDialogState extends State<ConnectDialog>
   }
 }
 
-class ImportFileInstructions extends StatelessWidget {
-  const ImportFileInstructions({Key? key, this.sampleData = const []})
-      : super(key: key);
-
-  final List<DevToolsJsonFile> sampleData;
-
-  @override
-  Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
-    return LandingScreenSection(
-      title: 'Load DevTools Data',
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Import a data file to use DevTools without an app connection.',
-            style: textTheme.titleMedium,
-          ),
-          const SizedBox(height: denseRowSpacing),
-          Text(
-            'At this time, DevTools only supports importing files that were originally'
-            ' exported from DevTools.',
-            style: textTheme.bodySmall,
-          ),
-          const SizedBox(height: defaultSpacing),
-          ElevatedButton(
-            onPressed: () => unawaited(_importFile(context)),
-            child: const MaterialIconLabel(
-              label: 'Import File',
-              iconData: Icons.file_upload,
-            ),
-          ),
-          if (sampleData.isNotEmpty && !kReleaseMode) ...[
-            const SizedBox(height: defaultSpacing),
-            SampleDataDropDownButton(sampleData: sampleData),
-          ],
-        ],
-      ),
-    );
-  }
-
-  Future<void> _importFile(BuildContext context) async {
-    ga.select(
-      gac.landingScreen,
-      gac.importFile,
-    );
-    final DevToolsJsonFile? importedFile = await importFileFromPicker(
-      acceptedTypes: ['json'],
-    );
-
-    if (importedFile != null) {
-      // ignore: use_build_context_synchronously, by design
-      Provider.of<ImportController>(context, listen: false)
-          .importData(importedFile);
-    }
-  }
-}
-
 class AppSizeToolingInstructions extends StatelessWidget {
   const AppSizeToolingInstructions({Key? key}) : super(key: key);
 
@@ -349,6 +297,48 @@ class AppSizeToolingInstructions extends StatelessWidget {
       gac.openAppSizeTool,
     );
     DevToolsRouterDelegate.of(context).navigate(appSizeScreenId);
+  }
+}
+
+@visibleForTesting
+class MemoryAnalysisInstructions extends StatelessWidget {
+  const MemoryAnalysisInstructions({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    return LandingScreenSection(
+      title: 'Memory Analysis',
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Analyze and diff the saved memory snapshots',
+            style: textTheme.titleMedium,
+          ),
+          const SizedBox(height: denseRowSpacing),
+          Text(
+            // TODO(polina-c): make package:leak_tracker a link.
+            // https://github.com/flutter/devtools/issues/5606
+            'Analyze heap snapshots that were previously saved from DevTools or package:leak_tracker.',
+            style: textTheme.bodySmall,
+          ),
+          const SizedBox(height: defaultSpacing),
+          ElevatedButton(
+            child: const Text('Open memory analysis tool'),
+            onPressed: () => _onOpen(context),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _onOpen(BuildContext context) {
+    ga.select(
+      gac.landingScreen,
+      gac.openMemoryAnalysisTool,
+    );
+    DevToolsRouterDelegate.of(context).navigate(memoryAnalysisScreenId);
   }
 }
 

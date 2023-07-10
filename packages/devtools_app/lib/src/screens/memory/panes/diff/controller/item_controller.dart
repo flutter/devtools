@@ -57,7 +57,9 @@ class SnapshotInstanceItem extends SnapshotItem {
   @override
   final int displayNumber;
 
-  String get name => '$isolateName-$displayNumber';
+  String get name => nameOverride ?? '$isolateName-$displayNumber';
+
+  String? nameOverride;
 
   final diffWith = ValueNotifier<SnapshotInstanceItem?>(null);
 

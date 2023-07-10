@@ -6,7 +6,8 @@ This is draft for future release notes, that are going to land on
 Dart & Flutter DevTools - A Suite of Performance Tools for Dart and Flutter
 
 ## General updates 
-- Fix overlay notifications so they cover the area that their background blocks - [#5975](https://github.com/flutter/devtools/pull/5975)
+* Fix overlay notifications so they cover the area that their background blocks - [#5975](https://github.com/flutter/devtools/pull/5975)
+* Added an action to the main toolbar for loading offline data into DevTools - [#6003](https://github.com/flutter/devtools/pull/6003)
 
 ## Inspector updates
 TODO: Remove this section if there are not any general updates.
@@ -18,7 +19,8 @@ TODO: Remove this section if there are not any general updates.
 TODO: Remove this section if there are not any general updates.
 
 ## Memory updates
-TODO: Remove this section if there are not any general updates.
+* Added a context menu to rename or delete a heap snapshot from the list - [#5997](https://github.com/flutter/devtools/pull/5997)
+* Warn users when HTTP logging may be affecting their app's memory consumption - [#5998](https://github.com/flutter/devtools/pull/5998)
 
 ## Debugger updates
 TODO: Remove this section if there are not any general updates.

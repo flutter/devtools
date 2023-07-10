@@ -7,12 +7,12 @@ import 'dart:async';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:provider/provider.dart' as provider show Provider;
 
 import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/banner_messages.dart';
 import '../../shared/common_widgets.dart';
 import '../../shared/dialogs.dart';
+import '../../shared/globals.dart';
 import '../../shared/primitives/simple_items.dart';
 import '../../shared/screen.dart';
 import '../../shared/split.dart';
@@ -98,7 +98,7 @@ class ProviderScreenBody extends ConsumerWidget {
         : '[No provider selected]';
 
     ref.listen<bool>(_hasErrorProvider, (_, hasError) {
-      if (hasError) showProviderErrorBanner(context);
+      if (hasError) showProviderErrorBanner();
     });
 
     return Split(
@@ -157,11 +157,8 @@ class ProviderScreenBody extends ConsumerWidget {
   }
 }
 
-void showProviderErrorBanner(BuildContext context) {
-  provider.Provider.of<BannerMessagesController>(
-    context,
-    listen: false,
-  ).addMessage(
+void showProviderErrorBanner() {
+  bannerMessages.addMessage(
     ProviderUnknownErrorBanner(screenId: ProviderScreen.id).build(),
   );
 }
