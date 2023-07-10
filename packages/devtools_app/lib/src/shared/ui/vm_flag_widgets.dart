@@ -9,7 +9,6 @@ import 'package:vm_service/vm_service.dart';
 
 import '../../screens/profiler/cpu_profile_service.dart';
 import '../../screens/profiler/sampling_rate.dart';
-import '../analytics/analytics.dart' as ga;
 import '../analytics/constants.dart' as gac;
 import '../banner_messages.dart';
 import '../common_widgets.dart';
@@ -21,6 +20,7 @@ import '../table/table.dart';
 import '../table/table_data.dart';
 import '../theme.dart';
 import '../utils.dart';
+import 'drop_down_button.dart';
 
 /// DropdownButton that controls the value of the 'profile_period' vm flag.
 ///
@@ -67,42 +67,38 @@ class CpuSamplingRateDropdown extends StatelessWidget {
             screenId,
           );
         }
-        return SizedBox(
-          height: defaultButtonHeight,
-          child: DevToolsTooltip(
-            message:
-                'The frequency at which the CPU profiler will sample the call stack',
-            child: RoundedDropDownButton<String>(
-              key: CpuSamplingRateDropdown.dropdownKey,
-              isDense: true,
-              style: Theme.of(context).textTheme.bodyMedium,
-              value: safeValue,
-              items: [
-                _buildMenuItem(CpuSamplingRate.low),
-                _buildMenuItem(CpuSamplingRate.medium),
-                _buildMenuItem(CpuSamplingRate.high),
-              ],
-              onChanged: _onSamplingFrequencyChanged,
-            ),
-          ),
+        return AnalyticsDropDownButton(
+          key: CpuSamplingRateDropdown.dropdownKey,
+          gaScreen: screenId,
+          isDense: true,
+          gaDropDownId: gac.CpuProfilerEvents.profileGranularity.name,
+          message:
+              'The frequency at which the CPU profiler will sample the call stack',
+          value: safeValue,
+          items: [
+            _buildMenuItem(CpuSamplingRate.low),
+            _buildMenuItem(CpuSamplingRate.medium),
+            _buildMenuItem(CpuSamplingRate.high),
+          ],
+          onChanged: _onSamplingFrequencyChanged,
         );
       },
     );
   }
 
-  DropdownMenuItem<String> _buildMenuItem(CpuSamplingRate samplingRate) {
-    return DropdownMenuItem<String>(
-      value: samplingRate.value,
-      child: Text(samplingRate.display),
+  ({DropdownMenuItem<String> item, String gaId}) _buildMenuItem(
+    CpuSamplingRate samplingRate,
+  ) {
+    return (
+      item: DropdownMenuItem<String>(
+        value: samplingRate.value,
+        child: Text(samplingRate.display),
+      ),
+      gaId: samplingRate.displayShort
     );
   }
 
   Future<void> _onSamplingFrequencyChanged(String? newValue) async {
-    ga.select(
-      screenId,
-      '${gac.CpuProfilerEvents.profileGranularity.name}'
-      '${CpuSamplingRateExtension.fromValue(newValue ?? '').displayShort}',
-    );
     await serviceManager.service!.setProfilePeriod(
       newValue ?? mediumProfilePeriod,
     );
