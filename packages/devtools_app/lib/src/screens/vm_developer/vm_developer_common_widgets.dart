@@ -37,11 +37,13 @@ class VMInfoCard extends StatelessWidget implements PreferredSizeWidget {
   const VMInfoCard({
     super.key,
     required this.title,
+    this.roundedTopBorder = true,
     this.rowKeyValues,
     this.table,
   });
 
   final String title;
+  final bool roundedTopBorder;
   final List<MapEntry<String, WidgetBuilder>>? rowKeyValues;
   final Widget? table;
 
@@ -51,6 +53,7 @@ class VMInfoCard extends StatelessWidget implements PreferredSizeWidget {
       size: preferredSize,
       child: VMInfoList(
         title: title,
+        roundedTopBorder: roundedTopBorder,
         rowKeyValues: rowKeyValues,
         table: table,
       ),
@@ -105,11 +108,13 @@ class VMInfoList extends StatelessWidget {
   const VMInfoList({
     super.key,
     required this.title,
+    this.roundedTopBorder = true,
     this.rowKeyValues,
     this.table,
   });
 
   final String title;
+  final bool roundedTopBorder;
   final List<MapEntry<String, WidgetBuilder>>? rowKeyValues;
   final Widget? table;
 
@@ -125,6 +130,7 @@ class VMInfoList extends StatelessWidget {
         AreaPaneHeader(
           title: Text(title),
           includeTopBorder: false,
+          roundedTopBorder: roundedTopBorder,
         ),
         if (rowKeyValues != null)
           Expanded(
@@ -861,6 +867,7 @@ class VmObjectDisplayBasicLayout extends StatelessWidget {
                   child: VMInfoCard(
                     title: generalInfoTitle,
                     rowKeyValues: generalDataRows,
+                    roundedTopBorder: false,
                   ),
                 ),
               ),
@@ -1086,6 +1093,7 @@ class _ObjectInspectorCodeViewState extends State<ObjectInspectorCodeView> {
             Column(
               children: [
                 const AreaPaneHeader(
+                  roundedTopBorder: false,
                   title: Text('Code Preview'),
                 ),
                 Expanded(
