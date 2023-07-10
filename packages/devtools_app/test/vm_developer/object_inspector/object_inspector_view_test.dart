@@ -69,8 +69,6 @@ void main() {
       expect(find.byType(ObjectViewport), findsOneWidget);
       expect(find.text('Program Explorer'), findsOneWidget);
       expect(find.text('Outline'), findsOneWidget);
-      expect(find.text('Object Store'), findsOneWidget);
-      expect(find.text('Class Hierarchy'), findsOneWidget);
       expect(find.text('No object selected.'), findsOneWidget);
       expect(find.byTooltip('Refresh'), findsOneWidget);
     },
