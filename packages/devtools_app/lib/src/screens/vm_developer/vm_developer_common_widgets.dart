@@ -312,11 +312,6 @@ class VmExpansionTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final titleRow = AreaPaneHeader(
-      title: Text(title),
-      includeTopBorder: false,
-      includeBottomBorder: false,
-    );
     final theme = Theme.of(context);
     return Card(
       child: ListTileTheme(
@@ -328,10 +323,13 @@ class VmExpansionTile extends StatelessWidget {
           // expanded ExpansionTile.
           data: theme.copyWith(dividerColor: Colors.transparent),
           child: ExpansionTile(
-            title: titleRow,
+            title: DefaultTextStyle(
+              style: theme.textTheme.titleSmall!,
+              child: Text(title),
+            ),
             onExpansionChanged: onExpanded,
             tilePadding: const EdgeInsets.only(
-              left: densePadding,
+              left: defaultSpacing,
               right: defaultSpacing,
             ),
             children: children,
@@ -849,7 +847,7 @@ class VmObjectDisplayBasicLayout extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
+    return ListView(
       children: [
         IntrinsicHeight(
           child: Row(
@@ -878,22 +876,16 @@ class VmObjectDisplayBasicLayout extends StatelessWidget {
             ],
           ),
         ),
-        Flexible(
-          child: ListView(
-            children: [
-              RetainingPathWidget(
-                controller: controller,
-                retainingPath: object.retainingPath,
-                onExpanded: _onExpandRetainingPath,
-              ),
-              InboundReferencesWidget(
-                inboundReferences: object.inboundReferences,
-                onExpanded: _onExpandInboundRefs,
-              ),
-              ...?expandableWidgets,
-            ],
-          ),
+        RetainingPathWidget(
+          controller: controller,
+          retainingPath: object.retainingPath,
+          onExpanded: _onExpandRetainingPath,
         ),
+        InboundReferencesWidget(
+          inboundReferences: object.inboundReferences,
+          onExpanded: _onExpandInboundRefs,
+        ),
+        ...?expandableWidgets,
       ],
     );
   }
