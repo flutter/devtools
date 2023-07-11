@@ -113,8 +113,6 @@ class _CodeViewState extends State<CodeView> with AutoDisposeMixin {
   void initState() {
     super.initState();
 
-    unawaited(BrowserContextMenu.disableContextMenu());
-
     verticalController = LinkedScrollControllerGroup();
     gutterController = verticalController.addAndGet();
     textController = verticalController.addAndGet();

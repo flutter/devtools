@@ -30,7 +30,7 @@ class DisplayProvider extends StatelessWidget {
     if (variable.text != null) {
       return InteractivityWrapper(
         onTap: onTap,
-        buttonItems: _getButtonItems(context),
+        menuButtons: _getMenuButtons(context),
         child: Text.rich(
           TextSpan(
             children: processAnsiTerminalCodes(
@@ -53,7 +53,7 @@ class DisplayProvider extends StatelessWidget {
     final hasName = variable.name?.isNotEmpty ?? false;
     return InteractivityWrapper(
       onTap: onTap,
-      buttonItems: _getButtonItems(context),
+      menuButtons: _getMenuButtons(context),
       child: Text.rich(
         TextSpan(
           text: hasName ? variable.name : null,
@@ -80,13 +80,12 @@ class DisplayProvider extends StatelessWidget {
     );
   }
 
-  List<ContextMenuButtonItem> _getButtonItems(
+  List<ContextMenuButtonItem> _getMenuButtons(
     BuildContext context,
   ) {
-    final buttonItems = <ContextMenuButtonItem>[];
-
+    final menuButtons = <ContextMenuButtonItem>[];
     if (variable.isRerootable) {
-      buttonItems.add(
+      menuButtons.add(
         ContextMenuButtonItem(
           onPressed: () {
             ContextMenuController.removeAny();
@@ -101,9 +100,8 @@ class DisplayProvider extends StatelessWidget {
         ),
       );
     }
-
     if (serviceManager.inspectorService != null && variable.isRoot) {
-      buttonItems.add(
+      menuButtons.add(
         ContextMenuButtonItem(
           onPressed: () {
             ContextMenuController.removeAny();
@@ -113,8 +111,7 @@ class DisplayProvider extends StatelessWidget {
         ),
       );
     }
-
-    return buttonItems;
+    return menuButtons;
   }
 
   void _handleInspect(
@@ -189,12 +186,14 @@ class InteractivityWrapper extends StatefulWidget {
   const InteractivityWrapper({
     super.key,
     required this.child,
-    required this.buttonItems,
+    this.menuButtons,
     this.onTap,
   });
 
   /// Button items shown in a context menu on secondary click.
-  final List<ContextMenuButtonItem> buttonItems;
+  ///
+  /// If none are provided, then no action will happen on secondary click.
+  final List<ContextMenuButtonItem>? menuButtons;
 
   /// Optional callback when tapped.
   final void Function()? onTap;
@@ -218,13 +217,11 @@ class _InteractivityWrapperState extends State<InteractivityWrapper> {
   }
 
   void _onSecondaryTapUp(TapUpDetails details) {
-    if (!_contextMenuController.isShown) {
-      _showMenu(details.globalPosition);
-    }
+    _maybeShowMenu(details.globalPosition);
   }
 
-  void _showMenu(Offset offset) {
-    if (widget.buttonItems.isEmpty) {
+  void _maybeShowMenu(Offset offset) {
+    if (_contextMenuController.isShown) {
       return;
     }
     _contextMenuController.show(
@@ -232,7 +229,7 @@ class _InteractivityWrapperState extends State<InteractivityWrapper> {
       contextMenuBuilder: (context) {
         return AdaptiveTextSelectionToolbar.buttonItems(
           anchors: TextSelectionToolbarAnchors(primaryAnchor: offset),
-          buttonItems: widget.buttonItems,
+          buttonItems: widget.menuButtons,
         );
       },
     );
@@ -246,10 +243,14 @@ class _InteractivityWrapperState extends State<InteractivityWrapper> {
 
   @override
   Widget build(BuildContext context) {
+    final contextMenuOnSecondaryTapEnabled =
+        widget.menuButtons != null && widget.menuButtons!.isNotEmpty;
+
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: _onTap,
-      onSecondaryTapUp: _onSecondaryTapUp,
+      onSecondaryTapUp:
+          contextMenuOnSecondaryTapEnabled ? _onSecondaryTapUp : null,
       child: widget.child,
     );
   }

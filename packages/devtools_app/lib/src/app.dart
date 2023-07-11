@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import 'example/conditional_screen.dart';
@@ -104,6 +105,12 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
   @override
   void initState() {
     super.initState();
+
+    // Disable the browser's native context menu on secondary-click, and instead
+    // use the menu provided by Flutter:
+    if (kIsWeb) {
+      unawaited(BrowserContextMenu.disableContextMenu());
+    }
 
     unawaited(ga.setupDimensions());
 

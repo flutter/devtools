@@ -396,13 +396,13 @@ class _ProgramOutlineView extends StatelessWidget {
           dataRootsListenable: controller.outlineNodes,
           onItemSelected: onItemSelected,
           onItemExpanded: onItemExpanded,
-          dataDisplayProvider: (node, onPressed) {
+          dataDisplayProvider: (node, onTap) {
             return _ProgramExplorerRow(
               node: node,
               onTap: () async {
                 await node.populateLocation();
                 controller.selectOutlineNode(node);
-                onPressed();
+                onTap();
               },
             );
           },
