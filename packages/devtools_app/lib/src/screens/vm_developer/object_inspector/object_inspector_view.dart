@@ -66,6 +66,11 @@ class _ObjectInspectorViewState extends State<_ObjectInspectorView>
         ObjectViewport(
           controller: controller,
         ),
+        SelectionArea(
+          child: ObjectViewport(
+            controller: controller,
+          ),
+        ),
       ],
     );
   }
