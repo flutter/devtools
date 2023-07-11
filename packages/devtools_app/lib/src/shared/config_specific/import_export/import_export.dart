@@ -187,7 +187,9 @@ abstract class ExportController {
 }
 
 class ImportToolbarAction extends StatelessWidget {
-  const ImportToolbarAction({super.key});
+  const ImportToolbarAction({super.key, this.color});
+
+  final Color? color;
 
   @override
   Widget build(BuildContext context) {
@@ -202,6 +204,7 @@ class ImportToolbarAction extends StatelessWidget {
           child: Icon(
             Icons.upload_rounded,
             size: actionsIconSize,
+            color: color,
           ),
         ),
       ),

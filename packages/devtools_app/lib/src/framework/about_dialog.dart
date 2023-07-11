@@ -134,7 +134,9 @@ class _DiscordLink extends StatelessWidget {
 }
 
 class OpenAboutAction extends StatelessWidget {
-  const OpenAboutAction({super.key});
+  const OpenAboutAction({super.key, this.color});
+
+  final Color? color;
 
   @override
   Widget build(BuildContext context) {
@@ -157,6 +159,7 @@ class OpenAboutAction extends StatelessWidget {
           child: Icon(
             Icons.help_outline,
             size: actionsIconSize,
+            color: color,
           ),
         ),
       ),

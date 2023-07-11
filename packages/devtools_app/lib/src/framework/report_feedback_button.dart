@@ -14,7 +14,9 @@ import '../shared/globals.dart';
 import '../shared/theme.dart';
 
 class ReportFeedbackButton extends StatelessWidget {
-  const ReportFeedbackButton({super.key});
+  const ReportFeedbackButton({super.key, this.color});
+
+  final Color? color;
 
   @override
   Widget build(BuildContext context) {
@@ -39,6 +41,7 @@ class ReportFeedbackButton extends StatelessWidget {
           child: Icon(
             Icons.bug_report_outlined,
             size: actionsIconSize,
+            color: color,
           ),
         ),
       ),

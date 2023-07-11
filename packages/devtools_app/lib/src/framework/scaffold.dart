@@ -42,7 +42,7 @@ class DevToolsScaffold extends StatefulWidget {
     this.page,
     List<Widget>? actions,
     this.embed = false,
-  })  : actions = actions ?? defaultActions(),
+  })  : actions = actions ?? defaultActions(isEmbedded: embed),
         super(key: key);
 
   DevToolsScaffold.withChild({
@@ -57,11 +57,15 @@ class DevToolsScaffold extends StatefulWidget {
           embed: embed,
         );
 
-  static List<Widget> defaultActions() => const [
-        OpenSettingsAction(),
-        ReportFeedbackButton(),
-        ImportToolbarAction(),
-        OpenAboutAction(),
+  static List<Widget> defaultActions({
+    required bool isEmbedded,
+    Color? color,
+  }) =>
+      [
+        OpenSettingsAction(color: color),
+        ReportFeedbackButton(color: color),
+        if (!isEmbedded) ImportToolbarAction(color: color),
+        OpenAboutAction(color: color),
       ];
 
   /// The padding around the content in the DevTools UI.
@@ -371,6 +375,8 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
                 bottomNavigationBar: StatusLine(
                   currentScreen: _currentScreen,
                   isEmbedded: widget.embed,
+                  isConnected: serviceManager.hasConnection &&
+                      serviceManager.connectedAppInitialized,
                 ),
               ),
             ),
