@@ -12,7 +12,7 @@ import '../../../../shared/charts/chart_trace.dart' show ChartSymbol, ChartType;
 import '../../../../shared/primitives/auto_dispose.dart';
 import '../../../../shared/theme.dart';
 import '../../../../shared/utils.dart';
-import '../../memory_controller.dart';
+import '../../framework/connected/memory_controller.dart';
 import '../../shared/primitives/memory_timeline.dart';
 
 class AndroidChartController extends ChartController {

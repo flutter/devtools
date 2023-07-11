@@ -63,6 +63,7 @@ void main() {
       expect(
         visibleScreenTypes,
         equals([
+          HomeScreen,
           // InspectorScreen,
           // LegacyPerformanceScreen,
           PerformanceScreen,
@@ -83,6 +84,7 @@ void main() {
       expect(
         visibleScreenTypes,
         equals([
+          HomeScreen,
           // InspectorScreen,
           // LegacyPerformanceScreen,
           // PerformanceScreen,
@@ -105,6 +107,7 @@ void main() {
         expect(
           visibleScreenTypes,
           equals([
+            HomeScreen,
             InspectorScreen,
             // LegacyPerformanceScreen,
             PerformanceScreen,
@@ -128,6 +131,7 @@ void main() {
         expect(
           visibleScreenTypes,
           equals([
+            HomeScreen,
             // InspectorScreen,
             // LegacyPerformanceScreen,
             PerformanceScreen,
@@ -151,6 +155,7 @@ void main() {
         expect(
           visibleScreenTypes,
           equals([
+            HomeScreen,
             InspectorScreen,
             // LegacyPerformanceScreen,
             // PerformanceScreen,
@@ -185,6 +190,7 @@ void main() {
         expect(
           visibleScreenTypes,
           equals([
+            HomeScreen,
             InspectorScreen,
             PerformanceScreen,
             ProfilerScreen,
@@ -208,6 +214,7 @@ void main() {
       expect(
         visibleScreenTypes,
         equals([
+          // HomeScreen,
           // InspectorScreen,
           PerformanceScreen, // Works offline, so appears regardless of web flag
           ProfilerScreen, // Works offline, so appears regardless of web flag
@@ -230,6 +237,7 @@ void main() {
         expect(
           visibleScreenTypes,
           equals([
+            HomeScreen,
             // InspectorScreen,
             // LegacyPerformanceScreen,
             PerformanceScreen,
@@ -248,7 +256,7 @@ void main() {
   });
 }
 
-List<Type> get visibleScreenTypes => defaultScreens
+List<Type> get visibleScreenTypes => defaultScreens()
     .map((s) => s.screen)
     .where(shouldShowScreen)
     .map((s) => s.runtimeType)

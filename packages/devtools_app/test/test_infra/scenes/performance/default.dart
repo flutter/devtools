@@ -33,6 +33,7 @@ class PerformanceDefaultScene extends Scene {
     setGlobal(OfflineModeController, OfflineModeController());
     setGlobal(IdeTheme, IdeTheme());
     setGlobal(NotificationService, NotificationService());
+    setGlobal(BannerMessagesController, BannerMessagesController());
     setGlobal(PreferencesController, PreferencesController());
     setGlobal(ServiceConnectionManager, ServiceConnectionManager());
     await _loadOfflineSnapshot(

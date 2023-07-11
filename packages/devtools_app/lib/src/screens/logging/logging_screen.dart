@@ -12,12 +12,10 @@ import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/common_widgets.dart';
 import '../../shared/primitives/auto_dispose.dart';
-import '../../shared/primitives/simple_items.dart';
 import '../../shared/screen.dart';
 import '../../shared/split.dart';
 import '../../shared/theme.dart';
 import '../../shared/ui/filter.dart';
-import '../../shared/ui/icons.dart';
 import '../../shared/ui/search.dart';
 import '../../shared/utils.dart';
 import '_log_details.dart';
@@ -30,7 +28,7 @@ class LoggingScreen extends Screen {
       : super(
           id,
           title: ScreenMetaData.logging.title,
-          icon: Octicons.clippy,
+          icon: ScreenMetaData.logging.icon,
         );
 
   static final id = ScreenMetaData.logging.id;

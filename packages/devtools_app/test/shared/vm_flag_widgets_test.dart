@@ -4,11 +4,15 @@
 
 import 'package:collection/collection.dart';
 import 'package:devtools_app/devtools_app.dart';
+import 'package:devtools_app/src/service/service_registrations.dart'
+    as registrations;
 import 'package:devtools_app/src/service/vm_flags.dart' as vm_flags;
+import 'package:devtools_app/src/shared/ui/drop_down_button.dart';
 import 'package:devtools_app/src/shared/ui/vm_flag_widgets.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mockito/mockito.dart';
 import 'package:provider/provider.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -16,7 +20,6 @@ void main() {
   group('Profile Granularity Dropdown', () {
     late FakeServiceManager fakeServiceManager;
     late CpuSamplingRateDropdown dropdown;
-    late BuildContext buildContext;
 
     setUp(() async {
       fakeServiceManager = FakeServiceManager();
@@ -24,6 +27,7 @@ void main() {
       setGlobal(ServiceConnectionManager, fakeServiceManager);
       setGlobal(IdeTheme, IdeTheme());
       setGlobal(NotificationService, NotificationService());
+      setGlobal(BannerMessagesController, BannerMessagesController());
       await fakeServiceManager.flagsInitialized.future;
       dropdown = CpuSamplingRateDropdown(
         screenId: ProfilerScreen.id,
@@ -33,29 +37,7 @@ void main() {
     });
 
     Future<void> pumpDropdown(WidgetTester tester) async {
-      await tester.pumpWidget(
-        MaterialApp(
-          theme: themeFor(
-            isDarkTheme: false,
-            ideTheme: IdeTheme(),
-            theme: ThemeData(
-              useMaterial3: true,
-              colorScheme: lightColorScheme,
-            ),
-          ),
-          home: Material(
-            child: wrapWithControllers(
-              Builder(
-                builder: (context) {
-                  buildContext = context;
-                  return dropdown;
-                },
-              ),
-              bannerMessages: BannerMessagesController(),
-            ),
-          ),
-        ),
-      );
+      await tester.pumpWidget(wrap(dropdown));
     }
 
     testWidgets('displays with default content', (WidgetTester tester) async {
@@ -77,7 +59,7 @@ void main() {
         find.text(CpuSamplingRate.high.display, skipOffstage: false),
         findsOneWidget,
       );
-      final RoundedDropDownButton<String> dropdownButton =
+      final AnalyticsDropDownButton<String> dropdownButton =
           tester.widget(find.byKey(CpuSamplingRateDropdown.dropdownKey));
       expect(dropdownButton.value, equals(CpuSamplingRate.medium.value));
     });
@@ -97,7 +79,7 @@ void main() {
         find.text(CpuSamplingRate.high.display, skipOffstage: false),
         findsOneWidget,
       );
-      RoundedDropDownButton<String> dropdownButton =
+      AnalyticsDropDownButton<String> dropdownButton =
           tester.widget(find.byKey(CpuSamplingRateDropdown.dropdownKey));
       expect(dropdownButton.value, equals(CpuSamplingRate.medium.value));
 
@@ -126,10 +108,7 @@ void main() {
       );
       // Verify we are showing the high profile granularity warning.
       expect(
-        bannerMessagesController(buildContext)
-            .messagesForScreen(ProfilerScreen.id)
-            .value
-            .length,
+        bannerMessages.messagesForScreen(ProfilerScreen.id).value.length,
         equals(1),
       );
 
@@ -151,9 +130,7 @@ void main() {
       );
       // Verify we are not showing the high profile granularity warning.
       expect(
-        bannerMessagesController(buildContext)
-            .messagesForScreen(ProfilerScreen.id)
-            .value,
+        bannerMessages.messagesForScreen(ProfilerScreen.id).value,
         isEmpty,
       );
     });
@@ -167,7 +144,7 @@ void main() {
       expect(find.byWidget(dropdown), findsOneWidget);
       final dropdownButtonFinder =
           find.byKey(CpuSamplingRateDropdown.dropdownKey);
-      RoundedDropDownButton<String> dropdownButton =
+      AnalyticsDropDownButton<String> dropdownButton =
           tester.widget(dropdownButtonFinder);
       expect(dropdownButton.value, equals(CpuSamplingRate.medium.value));
 
@@ -202,6 +179,48 @@ void main() {
         );
       },
     );
+  });
+
+  group('VMFlagsDialog', () {
+    late FakeServiceManager fakeServiceManager;
+
+    void initServiceManager({
+      bool flutterVersionServiceAvailable = true,
+    }) {
+      final availableServices = [
+        if (flutterVersionServiceAvailable)
+          registrations.flutterVersion.service,
+      ];
+      fakeServiceManager = FakeServiceManager(
+        availableServices: availableServices,
+      );
+      when(fakeServiceManager.vm.version).thenReturn('1.9.1');
+      final app = fakeServiceManager.connectedApp!;
+      when(app.isDartWebAppNow).thenReturn(false);
+      when(app.isRunningOnDartVM).thenReturn(true);
+      setGlobal(ServiceConnectionManager, fakeServiceManager);
+    }
+
+    setUp(() {
+      initServiceManager();
+    });
+
+    testWidgets('builds dialog', (WidgetTester tester) async {
+      mockConnectedApp(
+        fakeServiceManager.connectedApp!,
+        isFlutterApp: true,
+        isProfileBuild: false,
+        isWebApp: false,
+      );
+
+      await tester.pumpWidget(wrap(const VMFlagsDialog()));
+      expect(find.richText('VM Flags'), findsOneWidget);
+      expect(find.richText('flag 1 name'), findsOneWidget);
+      final RichText commentText = tester.firstWidget<RichText>(
+        findSubstring('flag 1 comment'),
+      );
+      expect(commentText, isNotNull);
+    });
   });
 }
 
