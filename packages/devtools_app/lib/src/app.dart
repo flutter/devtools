@@ -10,8 +10,8 @@ import 'package:provider/provider.dart';
 
 import 'example/conditional_screen.dart';
 import 'framework/framework_core.dart';
+import 'framework/home_screen.dart';
 import 'framework/initializer.dart';
-import 'framework/landing_screen.dart';
 import 'framework/notifications_view.dart';
 import 'framework/release_notes/release_notes.dart';
 import 'framework/scaffold.dart';
@@ -201,15 +201,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
   ) {
     final vmServiceUri = params['uri'];
     final embed = isEmbedded(params);
-
-    // Always return the landing screen if there's no VM service URI.
-    if (vmServiceUri?.isEmpty ?? true) {
-      return DevToolsScaffold.withChild(
-        key: const Key('landing'),
-        embed: embed,
-        child: LandingScreenBody(sampleData: widget.sampleData),
-      );
-    }
+    final hide = {...?params['hide']?.split(',')};
 
     // TODO(dantup): We should be able simplify this a little, removing params['page']
     // and only supporting /inspector (etc.) instead of also &page=inspector if
@@ -217,49 +209,49 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
     if (page?.isEmpty ?? true) {
       page = params['page'];
     }
-    final hide = {...?params['hide']?.split(',')};
-    return Initializer(
-      url: vmServiceUri,
-      allowConnectionScreenOnDisconnect: !embed,
-      builder: (_) {
-        // Force regeneration of visible screens when VM developer mode is
-        // enabled.
-        return ValueListenableBuilder<bool>(
-          valueListenable: preferences.vmDeveloperModeEnabled,
-          builder: (_, __, child) {
-            final screens = _visibleScreens()
-                .where((p) => embed && page != null ? p.screenId == page : true)
-                .where((p) => !hide.contains(p.screenId))
-                .toList();
-            if (screens.isEmpty) return child ?? const SizedBox.shrink();
-            return MultiProvider(
-              providers: _providedControllers(),
-              child: DevToolsScaffold(
-                embed: embed,
-                page: page,
-                screens: screens,
-                actions: [
+
+    final screens = _visibleScreens()
+        .where((p) => embed && page != null ? p.screenId == page : true)
+        .where((p) => !hide.contains(p.screenId))
+        .toList();
+
+    final connectedToVmService =
+        vmServiceUri != null && vmServiceUri.isNotEmpty;
+
+    Widget scaffoldBuilder() {
+      // Force regeneration of visible screens when VM developer mode is
+      // enabled.
+      return ValueListenableBuilder<bool>(
+        valueListenable: preferences.vmDeveloperModeEnabled,
+        builder: (_, __, child) {
+          return MultiProvider(
+            providers: _providedControllers(),
+            child: DevToolsScaffold(
+              embed: embed,
+              page: page,
+              screens: screens,
+              actions: [
+                if (connectedToVmService)
                   // TODO(https://github.com/flutter/devtools/issues/1941)
                   if (serviceManager.connectedApp!.isFlutterAppNow!) ...[
                     const HotReloadButton(),
                     const HotRestartButton(),
                   ],
-                  ...DevToolsScaffold.defaultActions(),
-                ],
-              ),
-            );
-          },
-          child: DevToolsScaffold.withChild(
-            embed: embed,
-            child: CenteredMessage(
-              page != null
-                  ? 'The "$page" screen is not available for this application.'
-                  : 'No tabs available for this application.',
+                ...DevToolsScaffold.defaultActions(),
+              ],
             ),
-          ),
-        );
-      },
-    );
+          );
+        },
+      );
+    }
+
+    return connectedToVmService
+        ? Initializer(
+            url: vmServiceUri,
+            allowConnectionScreenOnDisconnect: !embed,
+            builder: (_) => scaffoldBuilder(),
+          )
+        : scaffoldBuilder();
   }
 
   /// The pages that the app exposes.
@@ -475,8 +467,14 @@ class _AlternateCheckedModeBanner extends StatelessWidget {
 ///
 /// Conditional screens can be added to this list, and they will automatically
 /// be shown or hidden based on the [Screen.conditionalLibrary] provided.
-List<DevToolsScreen> get defaultScreens {
+List<DevToolsScreen> defaultScreens({
+  List<DevToolsJsonFile> sampleData = const [],
+}) {
   return devtoolsScreens ??= <DevToolsScreen>[
+    DevToolsScreen<void>(
+      HomeScreen(sampleData: sampleData),
+      createController: (_) {},
+    ),
     DevToolsScreen<InspectorController>(
       InspectorScreen(),
       createController: (_) => InspectorController(

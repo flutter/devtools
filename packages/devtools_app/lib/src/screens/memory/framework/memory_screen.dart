@@ -7,9 +7,7 @@ import 'package:flutter/material.dart';
 
 import '../../../shared/analytics/analytics.dart' as ga;
 import '../../../shared/primitives/listenable.dart';
-import '../../../shared/primitives/simple_items.dart';
 import '../../../shared/screen.dart';
-import '../../../shared/ui/icons.dart';
 import 'connected/connected_screen_body.dart';
 
 class MemoryScreen extends Screen {
@@ -18,7 +16,7 @@ class MemoryScreen extends Screen {
           id: id,
           requiresDartVm: true,
           title: ScreenMetaData.memory.title,
-          icon: Octicons.package,
+          icon: ScreenMetaData.memory.icon,
         );
 
   static final id = ScreenMetaData.memory.id;

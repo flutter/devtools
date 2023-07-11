@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '../primitives/simple_items.dart';
+import '../screen.dart';
 
 // Type of events (event_category):
 const screenViewEvent = 'screen'; // Active screen (tab selected).
@@ -13,6 +13,7 @@ const timingEvent = 'timing'; // Timed operation.
 // These screen ids must match the `screenId` for each respective subclass of
 // [Screen]. This is to ensure that the analytics for documentation links match
 // the screen id for other analytics on the same screen.
+final home = ScreenMetaData.home.id;
 final inspector = ScreenMetaData.inspector.id;
 final performance = ScreenMetaData.performance.id;
 final cpuProfiler = ScreenMetaData.cpuProfiler.id;
@@ -148,11 +149,6 @@ const analyzeDiff = 'analyzeDiff';
 const refreshIsolateStatistics = 'refreshIsolateStatistics';
 const refreshVmStatistics = 'refreshVmStatistics';
 const requestSize = 'requestSize';
-
-// Landing screen UX actions:
-const landingScreen = 'landing';
-const openAppSizeTool = 'openAppSizeTool';
-const openMemoryAnalysisTool = 'openMemoryAnalysisTool';
 
 // Settings actions:
 const settingsDialog = 'settings';

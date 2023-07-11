@@ -8,14 +8,11 @@
 
 // ignore_for_file: avoid_print
 
+import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/memory/panes/control/primary_controls.dart';
 import 'package:devtools_app/src/screens/memory/panes/diff/widgets/snapshot_list.dart';
 import 'package:devtools_app/src/screens/memory/shared/primitives/instance_context_menu.dart';
-import 'package:devtools_app/src/shared/banner_messages.dart';
-import 'package:devtools_app/src/shared/common_widgets.dart';
 import 'package:devtools_app/src/shared/console/widgets/console_pane.dart';
-import 'package:devtools_app/src/shared/primitives/simple_items.dart';
-import 'package:devtools_app/src/shared/ui/search.dart';
 import 'package:devtools_test/devtools_integration_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -43,11 +40,10 @@ void main() {
     await pumpAndConnectDevTools(tester, testApp);
 
     final evalTester = _EvalAndBrowseTester(tester);
+    await evalTester.prepareMemoryUI();
 
     await _testBasicEval(evalTester);
     await _testAssignment(evalTester);
-
-    await evalTester.switchToMemoryAndIncreaseEval();
 
     await _profileOneInstance(evalTester);
     await _profileAllInstances(evalTester);
@@ -154,7 +150,9 @@ class _EvalAndBrowseTester {
     await tester.pump(longPumpDuration);
   }
 
-  Future<void> switchToMemoryAndIncreaseEval() async {
+  /// Prepares the UI of the memory screen so that the eval-related elements are
+  /// visible on the screen for testing.
+  Future<void> prepareMemoryUI() async {
     // Open memory screen.
     await switchToScreen(tester, ScreenMetaData.memory);
 
@@ -208,7 +206,7 @@ class _EvalAndBrowseTester {
     Finder? next,
   }) async {
     Future<void> action(int tryNumber) async {
-      logStatus('tapping #$tryNumber to find \n[$finder]\n');
+      logStatus('attempt #$tryNumber, tapping \n[$finder]\n');
       tryNumber++;
       await tester.tap(finder);
       await tester.pump(duration);

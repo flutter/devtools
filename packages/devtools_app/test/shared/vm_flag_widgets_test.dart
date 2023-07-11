@@ -4,12 +4,15 @@
 
 import 'package:collection/collection.dart';
 import 'package:devtools_app/devtools_app.dart';
+import 'package:devtools_app/src/service/service_registrations.dart'
+    as registrations;
 import 'package:devtools_app/src/service/vm_flags.dart' as vm_flags;
 import 'package:devtools_app/src/shared/ui/drop_down_button.dart';
 import 'package:devtools_app/src/shared/ui/vm_flag_widgets.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mockito/mockito.dart';
 import 'package:provider/provider.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -176,6 +179,48 @@ void main() {
         );
       },
     );
+  });
+
+  group('VMFlagsDialog', () {
+    late FakeServiceManager fakeServiceManager;
+
+    void initServiceManager({
+      bool flutterVersionServiceAvailable = true,
+    }) {
+      final availableServices = [
+        if (flutterVersionServiceAvailable)
+          registrations.flutterVersion.service,
+      ];
+      fakeServiceManager = FakeServiceManager(
+        availableServices: availableServices,
+      );
+      when(fakeServiceManager.vm.version).thenReturn('1.9.1');
+      final app = fakeServiceManager.connectedApp!;
+      when(app.isDartWebAppNow).thenReturn(false);
+      when(app.isRunningOnDartVM).thenReturn(true);
+      setGlobal(ServiceConnectionManager, fakeServiceManager);
+    }
+
+    setUp(() {
+      initServiceManager();
+    });
+
+    testWidgets('builds dialog', (WidgetTester tester) async {
+      mockConnectedApp(
+        fakeServiceManager.connectedApp!,
+        isFlutterApp: true,
+        isProfileBuild: false,
+        isWebApp: false,
+      );
+
+      await tester.pumpWidget(wrap(const VMFlagsDialog()));
+      expect(find.richText('VM Flags'), findsOneWidget);
+      expect(find.richText('flag 1 name'), findsOneWidget);
+      final RichText commentText = tester.firstWidget<RichText>(
+        findSubstring('flag 1 comment'),
+      );
+      expect(commentText, isNotNull);
+    });
   });
 }
 

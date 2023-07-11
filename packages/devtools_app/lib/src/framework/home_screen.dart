@@ -14,50 +14,75 @@ import '../shared/analytics/analytics.dart' as ga;
 import '../shared/analytics/constants.dart' as gac;
 import '../shared/common_widgets.dart';
 import '../shared/config_specific/import_export/import_export.dart';
+import '../shared/connection_info.dart';
 import '../shared/feature_flags.dart';
 import '../shared/globals.dart';
+import '../shared/primitives/auto_dispose.dart';
 import '../shared/primitives/blocking_action_mixin.dart';
 import '../shared/primitives/utils.dart';
 import '../shared/routing.dart';
+import '../shared/screen.dart';
 import '../shared/theme.dart';
+import '../shared/title.dart';
 import '../shared/ui/label.dart';
+import '../shared/ui/vm_flag_widgets.dart';
 import '../shared/utils.dart';
 import 'framework_core.dart';
 
-/// The landing screen when starting Dart DevTools without being connected to an
-/// app.
-///
-/// We need to use this screen to get a guarantee that the app has a Dart VM
-/// available as well as to provide access to other functionality that does not
-/// require a connected Dart application.
-class LandingScreenBody extends StatefulWidget {
-  const LandingScreenBody({super.key, this.sampleData = const []});
+class HomeScreen extends Screen {
+  HomeScreen({this.sampleData = const []})
+      : super.conditional(
+          id: id,
+          requiresConnection: false,
+          icon: ScreenMetaData.home.icon,
+          titleGenerator: () => devToolsTitle.value,
+        );
+
+  static final id = ScreenMetaData.home.id;
 
   final List<DevToolsJsonFile> sampleData;
 
   @override
-  State<LandingScreenBody> createState() => _LandingScreenBodyState();
+  Widget build(BuildContext context) {
+    return HomeScreenBody(sampleData: sampleData);
+  }
 }
 
-class _LandingScreenBodyState extends State<LandingScreenBody> {
+class HomeScreenBody extends StatefulWidget {
+  const HomeScreenBody({super.key, this.sampleData = const []});
+
+  final List<DevToolsJsonFile> sampleData;
+
+  @override
+  State<HomeScreenBody> createState() => _HomeScreenBodyState();
+}
+
+class _HomeScreenBodyState extends State<HomeScreenBody> with AutoDisposeMixin {
   @override
   void initState() {
     super.initState();
-    ga.screen(gac.landingScreen);
+    ga.screen(gac.home);
+
+    autoDisposeStreamSubscription(
+      serviceManager.onConnectionAvailable.listen((_) => setState(() {})),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
+    final connected =
+        serviceManager.hasConnection && serviceManager.connectedAppInitialized;
     return Scrollbar(
       child: ListView(
         children: [
-          const ConnectDialog(),
-          const SizedBox(height: defaultSpacing),
-          if (widget.sampleData.isNotEmpty && !kReleaseMode) ...[
+          ConnectionSection(connected: connected),
+          if (widget.sampleData.isNotEmpty && !kReleaseMode && !connected) ...[
             SampleDataDropDownButton(sampleData: widget.sampleData),
             const SizedBox(height: defaultSpacing),
           ],
-          const AppSizeToolingInstructions(),
+          // TODO(polina-c): make the MemoryScreen a static screen and remove
+          // this section from the Home page. See this PR for more details:
+          // https://github.com/flutter/devtools/pull/6010.
           if (FeatureFlags.memoryAnalysis) ...[
             const SizedBox(height: defaultSpacing),
             const MemoryAnalysisInstructions(),
@@ -68,16 +93,52 @@ class _LandingScreenBodyState extends State<LandingScreenBody> {
   }
 }
 
+class ConnectionSection extends StatelessWidget {
+  const ConnectionSection({super.key, required this.connected});
+
+  static const _primaryMinScreenWidthForTextBeforeScaling = 480.0;
+  static const _secondaryMinScreenWidthForTextBeforeScaling = 600.0;
+
+  final bool connected;
+
+  @override
+  Widget build(BuildContext context) {
+    if (connected) {
+      return LandingScreenSection(
+        title: 'Connected app',
+        actions: [
+          ViewVmFlagsButton(
+            gaScreen: gac.home,
+            minScreenWidthForTextBeforeScaling:
+                _secondaryMinScreenWidthForTextBeforeScaling,
+          ),
+          const SizedBox(width: defaultSpacing),
+          ConnectToNewAppButton(
+            gaScreen: gac.home,
+            minScreenWidthForTextBeforeScaling:
+                _primaryMinScreenWidthForTextBeforeScaling,
+          ),
+        ],
+        child: const ConnectedAppSummary(narrowView: false),
+      );
+    }
+    return const ConnectDialog();
+  }
+}
+
 class LandingScreenSection extends StatelessWidget {
   const LandingScreenSection({
     Key? key,
     required this.title,
     required this.child,
+    this.actions = const [],
   }) : super(key: key);
 
   final String title;
 
   final Widget child;
+
+  final List<Widget> actions;
 
   @override
   Widget build(BuildContext context) {
@@ -85,9 +146,16 @@ class LandingScreenSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          title,
-          style: textTheme.titleLarge,
+        Row(
+          children: [
+            Expanded(
+              child: Text(
+                title,
+                style: textTheme.titleLarge,
+              ),
+            ),
+            ...actions,
+          ],
         ),
         const PaddedDivider(),
         child,
@@ -212,7 +280,7 @@ class _ConnectDialogState extends State<ConnectDialog>
 
   Future<void> _connectHelper() async {
     ga.select(
-      gac.landingScreen,
+      gac.home,
       gac.HomeScreenEvents.connectToApp.name,
     );
     if (connectDialogController.text.isEmpty) {
@@ -260,46 +328,6 @@ class _ConnectDialogState extends State<ConnectDialog>
   }
 }
 
-class AppSizeToolingInstructions extends StatelessWidget {
-  const AppSizeToolingInstructions({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
-    return LandingScreenSection(
-      title: 'App Size Tooling',
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'Analyze and view diffs for your app\'s size',
-            style: textTheme.titleMedium,
-          ),
-          const SizedBox(height: denseRowSpacing),
-          Text(
-            'Load Dart AOT snapshots or app size analysis files to '
-            'track down size issues in your app.',
-            style: textTheme.bodySmall,
-          ),
-          const SizedBox(height: defaultSpacing),
-          ElevatedButton(
-            child: const Text('Open app size tool'),
-            onPressed: () => _onOpenAppSizeToolSelected(context),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _onOpenAppSizeToolSelected(BuildContext context) {
-    ga.select(
-      gac.landingScreen,
-      gac.openAppSizeTool,
-    );
-    DevToolsRouterDelegate.of(context).navigate(appSizeScreenId);
-  }
-}
-
 @visibleForTesting
 class MemoryAnalysisInstructions extends StatelessWidget {
   const MemoryAnalysisInstructions({Key? key}) : super(key: key);
@@ -334,10 +362,6 @@ class MemoryAnalysisInstructions extends StatelessWidget {
   }
 
   void _onOpen(BuildContext context) {
-    ga.select(
-      gac.landingScreen,
-      gac.openMemoryAnalysisTool,
-    );
     DevToolsRouterDelegate.of(context).navigate(memoryAnalysisScreenId);
   }
 }

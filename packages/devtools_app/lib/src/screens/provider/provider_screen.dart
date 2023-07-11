@@ -13,7 +13,6 @@ import '../../shared/banner_messages.dart';
 import '../../shared/common_widgets.dart';
 import '../../shared/dialogs.dart';
 import '../../shared/globals.dart';
-import '../../shared/primitives/simple_items.dart';
 import '../../shared/screen.dart';
 import '../../shared/split.dart';
 import 'instance_viewer/instance_details.dart';
@@ -52,8 +51,8 @@ class ProviderScreen extends Screen {
           id: id,
           requiresLibrary: 'package:provider/',
           title: ScreenMetaData.provider.title,
+          icon: ScreenMetaData.provider.icon,
           requiresDebugBuild: true,
-          icon: Icons.attach_file,
         );
 
   static final id = ScreenMetaData.provider.id;

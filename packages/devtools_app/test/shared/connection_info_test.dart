@@ -1,11 +1,10 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2023 The Chromium Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/service/service_registrations.dart'
     as registrations;
-import 'package:devtools_app/src/shared/ui/vm_flag_widgets.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -16,7 +15,7 @@ void main() {
 
   const windowSize = Size(2000.0, 1000.0);
 
-  group('DeviceDialog', () {
+  group('Connection info', () {
     void initServiceManager({
       bool flutterVersionServiceAvailable = true,
     }) {
@@ -42,14 +41,12 @@ void main() {
       setGlobal(IdeTheme, IdeTheme());
     }
 
-    DeviceDialog deviceDialog;
-
     setUp(() {
       initServiceManager();
     });
 
     testWidgetsWithWindowSize(
-      'builds dialog for dart web app',
+      'builds summary for dart web app',
       windowSize,
       (WidgetTester tester) async {
         final app = fakeServiceManager.connectedApp!;
@@ -61,13 +58,7 @@ void main() {
           isWebApp: true,
         );
 
-        deviceDialog = DeviceDialog(
-          connectedApp: app,
-        );
-
-        await tester.pumpWidget(wrap(deviceDialog));
-        expect(find.text('Device Info'), findsOneWidget);
-
+        await tester.pumpWidget(wrap(const ConnectedAppSummary()));
         expect(find.text('CPU / OS: '), findsOneWidget);
         expect(find.text('Web macos'), findsOneWidget);
         expect(find.text('Dart Version: '), findsOneWidget);
@@ -98,13 +89,7 @@ void main() {
           isWebApp: false,
         );
 
-        deviceDialog = DeviceDialog(
-          connectedApp: app,
-        );
-
-        await tester.pumpWidget(wrap(deviceDialog));
-        expect(find.text('Device Info'), findsOneWidget);
-
+        await tester.pumpWidget(wrap(const ConnectedAppSummary()));
         expect(find.text('CPU / OS: '), findsOneWidget);
         expect(find.text('x64 (64 bit) macos'), findsOneWidget);
         expect(find.text('Dart Version: '), findsOneWidget);
@@ -134,13 +119,7 @@ void main() {
           isWebApp: false,
         );
 
-        deviceDialog = DeviceDialog(
-          connectedApp: app,
-        );
-
-        await tester.pumpWidget(wrap(deviceDialog));
-        expect(find.text('Device Info'), findsOneWidget);
-
+        await tester.pumpWidget(wrap(const ConnectedAppSummary()));
         expect(find.text('CPU / OS: '), findsOneWidget);
         expect(find.text('x64 (64 bit) android'), findsOneWidget);
         expect(find.text('Dart Version: '), findsOneWidget);
@@ -172,13 +151,7 @@ void main() {
           isWebApp: false,
         );
 
-        deviceDialog = DeviceDialog(
-          connectedApp: app,
-        );
-
-        await tester.pumpWidget(wrap(deviceDialog));
-        expect(find.text('Device Info'), findsOneWidget);
-
+        await tester.pumpWidget(wrap(const ConnectedAppSummary()));
         expect(find.text('CPU / OS: '), findsOneWidget);
         expect(find.text('Dart Version: '), findsOneWidget);
         expect(find.text('1.9.1'), findsOneWidget);
@@ -210,13 +183,7 @@ void main() {
           isWebApp: true,
         );
 
-        deviceDialog = DeviceDialog(
-          connectedApp: app,
-        );
-
-        await tester.pumpWidget(wrap(deviceDialog));
-        expect(find.text('Device Info'), findsOneWidget);
-
+        await tester.pumpWidget(wrap(const ConnectedAppSummary()));
         expect(find.text('CPU / OS: '), findsOneWidget);
         expect(find.text('Web macos'), findsOneWidget);
         expect(find.text('Dart Version: '), findsOneWidget);
@@ -249,13 +216,7 @@ void main() {
           isWebApp: true,
         );
 
-        deviceDialog = DeviceDialog(
-          connectedApp: app,
-        );
-
-        await tester.pumpWidget(wrap(deviceDialog));
-        expect(find.text('Device Info'), findsOneWidget);
-
+        await tester.pumpWidget(wrap(const ConnectedAppSummary()));
         expect(find.text('CPU / OS: '), findsOneWidget);
         expect(find.text('Web macos'), findsOneWidget);
         expect(find.text('Dart Version: '), findsOneWidget);
@@ -274,49 +235,5 @@ void main() {
         expect(find.byType(CopyToClipboardControl), findsOneWidget);
       },
     );
-  });
-
-  group('VMFlagsDialog', () {
-    void initServiceManager({
-      bool flutterVersionServiceAvailable = true,
-    }) {
-      final availableServices = [
-        if (flutterVersionServiceAvailable)
-          registrations.flutterVersion.service,
-      ];
-      fakeServiceManager = FakeServiceManager(
-        availableServices: availableServices,
-      );
-      when(fakeServiceManager.vm.version).thenReturn('1.9.1');
-      final app = fakeServiceManager.connectedApp!;
-      when(app.isDartWebAppNow).thenReturn(false);
-      when(app.isRunningOnDartVM).thenReturn(true);
-      setGlobal(ServiceConnectionManager, fakeServiceManager);
-    }
-
-    late VMFlagsDialog vmFlagsDialog;
-
-    setUp(() {
-      initServiceManager();
-
-      vmFlagsDialog = const VMFlagsDialog();
-    });
-
-    testWidgets('builds dialog', (WidgetTester tester) async {
-      mockConnectedApp(
-        fakeServiceManager.connectedApp!,
-        isFlutterApp: true,
-        isProfileBuild: false,
-        isWebApp: false,
-      );
-
-      await tester.pumpWidget(wrap(vmFlagsDialog));
-      expect(find.richText('VM Flags'), findsOneWidget);
-      expect(find.richText('flag 1 name'), findsOneWidget);
-      final RichText commentText = tester.firstWidget<RichText>(
-        findSubstring('flag 1 comment'),
-      );
-      expect(commentText, isNotNull);
-    });
   });
 }

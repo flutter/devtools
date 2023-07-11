@@ -5,14 +5,14 @@
 import 'package:flutter/material.dart' hide Stack;
 import 'package:vm_service/vm_service.dart';
 
-import '../../../shared/common_widgets.dart';
-import '../../../shared/globals.dart';
-import '../../../shared/primitives/selection_controls.dart';
-import '../../../shared/primitives/utils.dart';
-import '../../../shared/routing.dart';
-import '../../../shared/theme.dart';
+import '../../common_widgets.dart';
 import '../../diagnostics/dart_object_node.dart';
-import '../../primitives/simple_items.dart';
+import '../../globals.dart';
+import '../../primitives/selection_controls.dart';
+import '../../primitives/utils.dart';
+import '../../routing.dart';
+import '../../screen.dart';
+import '../../theme.dart';
 import 'description.dart';
 
 VariableSelectionControls _selectionControls({

@@ -100,6 +100,11 @@ void main() {
     await pumpAndConnectDevTools(tester, testApp);
     await tester.pump(longDuration);
 
+    // TODO(kenz): re-work this integration test so that we do not have to be
+    // on the inspector screen for this to pass.
+    await switchToScreen(tester, ScreenMetaData.inspector);
+    await tester.pump(longDuration);
+
     // Ensure all futures are completed before running checks.
     await serviceManager.service!.allFuturesCompleted;
 
