@@ -10,10 +10,8 @@ import '../../shared/banner_messages.dart';
 import '../../shared/common_widgets.dart';
 import '../../shared/globals.dart';
 import '../../shared/primitives/auto_dispose.dart';
-import '../../shared/primitives/simple_items.dart';
 import '../../shared/screen.dart';
 import '../../shared/theme.dart';
-import '../../shared/ui/icons.dart';
 import '../../shared/utils.dart';
 import 'panes/controls/performance_controls.dart';
 import 'panes/flutter_frames/flutter_frames_chart.dart';
@@ -30,7 +28,7 @@ class PerformanceScreen extends Screen {
           requiresDartVm: true,
           worksOffline: true,
           title: ScreenMetaData.performance.title,
-          icon: Octicons.pulse,
+          icon: ScreenMetaData.performance.icon,
         );
 
   static final id = ScreenMetaData.performance.id;
@@ -64,7 +62,6 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
   void didChangeDependencies() {
     super.didChangeDependencies();
     maybePushUnsupportedFlutterVersionWarning(
-      context,
       PerformanceScreen.id,
       supportedFlutterVersion: SemanticVersion(
         major: 2,

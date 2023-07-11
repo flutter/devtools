@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -12,7 +10,6 @@ import '../service/isolate_manager.dart';
 import '../service/service_manager.dart';
 import '../shared/analytics/constants.dart' as gac;
 import '../shared/common_widgets.dart';
-import '../shared/device_dialog.dart';
 import '../shared/globals.dart';
 import '../shared/screen.dart';
 import '../shared/theme.dart';
@@ -163,34 +160,11 @@ class StatusLine extends StatelessWidget {
               ),
               const SizedBox(width: denseSpacing),
               DevToolsTooltip(
-                message: deviceInfoTooltip,
-                child: InkWell(
-                  onTap: () {
-                    unawaited(
-                      showDialog(
-                        context: context,
-                        builder: (context) => DeviceDialog(
-                          connectedApp: app,
-                        ),
-                      ),
-                    );
-                  },
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.info_outline,
-                        size: actionsIconSize,
-                      ),
-                      if (screenWidth > MediaSize.xxs) ...[
-                        const SizedBox(width: denseSpacing),
-                        Text(
-                          description,
-                          style: textTheme.bodyMedium,
-                          overflow: TextOverflow.clip,
-                        ),
-                      ],
-                    ],
-                  ),
+                message: 'Connected device',
+                child: Text(
+                  description,
+                  style: textTheme.bodyMedium,
+                  overflow: TextOverflow.clip,
                 ),
               ),
             ],

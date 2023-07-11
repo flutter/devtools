@@ -37,11 +37,13 @@ class VMInfoCard extends StatelessWidget implements PreferredSizeWidget {
   const VMInfoCard({
     super.key,
     required this.title,
+    this.roundedTopBorder = true,
     this.rowKeyValues,
     this.table,
   });
 
   final String title;
+  final bool roundedTopBorder;
   final List<MapEntry<String, WidgetBuilder>>? rowKeyValues;
   final Widget? table;
 
@@ -51,6 +53,7 @@ class VMInfoCard extends StatelessWidget implements PreferredSizeWidget {
       size: preferredSize,
       child: VMInfoList(
         title: title,
+        roundedTopBorder: roundedTopBorder,
         rowKeyValues: rowKeyValues,
         table: table,
       ),
@@ -105,11 +108,13 @@ class VMInfoList extends StatelessWidget {
   const VMInfoList({
     super.key,
     required this.title,
+    this.roundedTopBorder = true,
     this.rowKeyValues,
     this.table,
   });
 
   final String title;
+  final bool roundedTopBorder;
   final List<MapEntry<String, WidgetBuilder>>? rowKeyValues;
   final Widget? table;
 
@@ -125,6 +130,7 @@ class VMInfoList extends StatelessWidget {
         AreaPaneHeader(
           title: Text(title),
           includeTopBorder: false,
+          roundedTopBorder: roundedTopBorder,
         ),
         if (rowKeyValues != null)
           Expanded(
@@ -312,11 +318,6 @@ class VmExpansionTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final titleRow = AreaPaneHeader(
-      title: Text(title),
-      includeTopBorder: false,
-      includeBottomBorder: false,
-    );
     final theme = Theme.of(context);
     return Card(
       child: ListTileTheme(
@@ -328,10 +329,13 @@ class VmExpansionTile extends StatelessWidget {
           // expanded ExpansionTile.
           data: theme.copyWith(dividerColor: Colors.transparent),
           child: ExpansionTile(
-            title: titleRow,
+            title: DefaultTextStyle(
+              style: theme.textTheme.titleSmall!,
+              child: Text(title),
+            ),
             onExpansionChanged: onExpanded,
             tilePadding: const EdgeInsets.only(
-              left: densePadding,
+              left: defaultSpacing,
               right: defaultSpacing,
             ),
             children: children,
@@ -849,7 +853,7 @@ class VmObjectDisplayBasicLayout extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
+    return ListView(
       children: [
         IntrinsicHeight(
           child: Row(
@@ -863,6 +867,7 @@ class VmObjectDisplayBasicLayout extends StatelessWidget {
                   child: VMInfoCard(
                     title: generalInfoTitle,
                     rowKeyValues: generalDataRows,
+                    roundedTopBorder: false,
                   ),
                 ),
               ),
@@ -878,22 +883,16 @@ class VmObjectDisplayBasicLayout extends StatelessWidget {
             ],
           ),
         ),
-        Flexible(
-          child: ListView(
-            children: [
-              RetainingPathWidget(
-                controller: controller,
-                retainingPath: object.retainingPath,
-                onExpanded: _onExpandRetainingPath,
-              ),
-              InboundReferencesWidget(
-                inboundReferences: object.inboundReferences,
-                onExpanded: _onExpandInboundRefs,
-              ),
-              ...?expandableWidgets,
-            ],
-          ),
+        RetainingPathWidget(
+          controller: controller,
+          retainingPath: object.retainingPath,
+          onExpanded: _onExpandRetainingPath,
         ),
+        InboundReferencesWidget(
+          inboundReferences: object.inboundReferences,
+          onExpanded: _onExpandInboundRefs,
+        ),
+        ...?expandableWidgets,
       ],
     );
   }
@@ -1094,6 +1093,7 @@ class _ObjectInspectorCodeViewState extends State<ObjectInspectorCodeView> {
             Column(
               children: [
                 const AreaPaneHeader(
+                  roundedTopBorder: false,
                   title: Text('Code Preview'),
                 ),
                 Expanded(
