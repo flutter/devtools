@@ -30,11 +30,13 @@ Future<void> pumpAndConnectDevTools(
   await pumpDevTools(tester);
   expect(find.byType(LandingScreenBody), findsOneWidget);
   expect(find.text('No client connection'), findsOneWidget);
+  _verifyFooterColor(tester, null);
 
   logStatus('verify that we can connect to an app');
   await connectToTestApp(tester, testApp);
   expect(find.byType(LandingScreenBody), findsNothing);
   expect(find.text('No client connection'), findsNothing);
+  _verifyFooterColor(tester, darkColorScheme.primary);
 
   // If the release notes viewer is open, close it.
   final releaseNotesView =
@@ -47,6 +49,21 @@ Future<void> pumpAndConnectDevTools(
     expect(closeReleaseNotesButton, findsOneWidget);
     await tester.tap(closeReleaseNotesButton);
   }
+}
+
+void _verifyFooterColor(WidgetTester tester, Color? expectedColor) {
+  final Container statusLineContainer = tester.widget(
+    find
+        .descendant(
+          of: find.byType(StatusLine),
+          matching: find.byType(Container),
+        )
+        .first,
+  );
+  expect(
+    (statusLineContainer.decoration! as BoxDecoration).color,
+    expectedColor,
+  );
 }
 
 Future<void> switchToScreen(WidgetTester tester, ScreenMetaData screen) async {

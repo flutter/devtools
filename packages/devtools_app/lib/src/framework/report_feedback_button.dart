@@ -13,6 +13,8 @@ import '../shared/config_specific/launch_url/launch_url.dart';
 import '../shared/globals.dart';
 import '../shared/theme.dart';
 
+/// Button that, when clicked, will open the DevTools issue tracker in the
+/// browser.
 class ReportFeedbackButton extends StatelessWidget {
   const ReportFeedbackButton({super.key, this.color});
 

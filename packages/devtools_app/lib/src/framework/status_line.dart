@@ -36,6 +36,8 @@ class StatusLine extends StatelessWidget {
   final bool isEmbedded;
   final bool isConnected;
 
+  static const deviceInfoTooltip = 'Device Info';
+
   /// The padding around the footer in the DevTools UI.
   EdgeInsets get padding => const EdgeInsets.fromLTRB(
         defaultSpacing,
