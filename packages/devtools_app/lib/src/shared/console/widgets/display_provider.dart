@@ -85,9 +85,8 @@ class DisplayProvider extends StatelessWidget {
   List<ContextMenuButtonItem> _getMenuButtons(
     BuildContext context,
   ) {
-    final menuButtons = <ContextMenuButtonItem>[];
-    if (variable.isRerootable) {
-      menuButtons.add(
+    return [
+      if (variable.isRerootable)
         ContextMenuButtonItem(
           onPressed: () {
             ContextMenuController.removeAny();
@@ -100,10 +99,7 @@ class DisplayProvider extends StatelessWidget {
           },
           label: 'Reroot',
         ),
-      );
-    }
-    if (serviceManager.inspectorService != null && variable.isRoot) {
-      menuButtons.add(
+      if (serviceManager.inspectorService != null && variable.isRoot)
         ContextMenuButtonItem(
           onPressed: () {
             ContextMenuController.removeAny();
@@ -111,9 +107,7 @@ class DisplayProvider extends StatelessWidget {
           },
           label: 'Inspect',
         ),
-      );
-    }
-    return menuButtons;
+    ];
   }
 
   void _handleInspect(

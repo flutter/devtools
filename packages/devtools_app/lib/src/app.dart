@@ -111,9 +111,9 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
     // https://github.com/flutter/flutter/issues/129692 is fixed, disable the
     // browser's native context menu on secondary-click, and instead use the
     // menu provided by Flutter:
-    if (kIsWeb) {
-      unawaited(BrowserContextMenu.enableContextMenu());
-    }
+    // if (kIsWeb) {
+    //   unawaited(BrowserContextMenu.disableContextMenu());
+    // }
 
     unawaited(ga.setupDimensions());
 
