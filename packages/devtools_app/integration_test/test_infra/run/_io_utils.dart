@@ -8,6 +8,8 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import '_utils.dart';
+
 Stream<String> transformToLines(Stream<List<int>> byteStream) {
   return byteStream
       .transform<String>(utf8.decoder)
@@ -15,6 +17,8 @@ Stream<String> transformToLines(Stream<List<int>> byteStream) {
 }
 
 mixin IOMixin {
+  static const killTimeout = Duration(seconds: 10);
+
   final stdoutController = StreamController<String>.broadcast();
 
   final stderrController = StreamController<String>.broadcast();
@@ -58,5 +62,23 @@ mixin IOMixin {
 
   static void _defaultPrintCallback(String line, {String tag = ''}) {
     print(tag.isNotEmpty ? '$tag - $line' : line);
+  }
+
+  Future<int> killGracefully(Process process) async {
+    final processId = process.pid;
+    debugLog('Sending SIGTERM to $processId..');
+    await cancelAllStreamSubscriptions();
+    Process.killPid(processId);
+    return process.exitCode
+        .timeout(killTimeout, onTimeout: () => killForcefully(process));
+  }
+
+  Future<int> killForcefully(Process process) {
+    final processId = process.pid;
+    // Use sigint here instead of sigkill. See
+    // https://github.com/flutter/flutter/issues/117415.
+    debugLog('Sending SIGINT to $processId..');
+    Process.killPid(processId, ProcessSignal.sigint);
+    return process.exitCode;
   }
 }

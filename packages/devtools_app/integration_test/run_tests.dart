@@ -4,61 +4,69 @@
 
 import 'dart:io';
 
+import 'test_infra/run/_chrome_driver.dart';
 import 'test_infra/run/_in_file_args.dart';
 import 'test_infra/run/run_test.dart';
 
 // To run integration tests, run the following from `devtools_app/`:
 // `dart run integration_test/run_tests.dart`
 //
-// Arguments that may be passed to this command:
-// --target=<path/to/test.dart> - this will run a single test at the path
-//    provided.
-// --test-app-uri=<some vm service uri> - this will connect DevTools to the app
-//    you specify instead of spinning up a test app inside
-//    [runFlutterIntegrationTest].
-// --update-goldens - this will update the current golden images with the
-//   results from this test run
-// --headless - this will run the integration test on the 'web-server' device
-//    instead of the 'chrome' device, meaning you will not be able to see the
-//    integration test run in Chrome when running locally.
+// To see a list of arguments that you can pass to this test script, please run
+// the above command with the '-h' flag.
 
 const _testDirectory = 'integration_test/test';
 const _testSuffix = '_test.dart';
 const _offlineIndicator = 'integration_test/test/offline';
 
-void main(List<String> testRunnerArgs) async {
-  final testTargetProvided = testRunnerArgs
-      .where((arg) => arg.startsWith(TestRunnerArgs.testTargetArg))
-      .isNotEmpty;
+void main(List<String> args) async {
+  final testRunnerArgs = TestRunnerArgs(args, verifyValidTarget: false);
+  if (testRunnerArgs.help) {
+    testRunnerArgs.printHelp();
+    return;
+  }
 
-  if (testTargetProvided) {
-    final args = TestRunnerArgs(testRunnerArgs);
+  Exception? exception;
+  final chromedriver = ChromeDriver();
 
-    // TODO(kenz): add support for specifying a directory as the target instead
-    // of a single file.
-    await _runTest(args);
-  } else {
-    // Run all tests since a target test was not provided.
-    final testDirectory = Directory(_testDirectory);
-    final testFiles = testDirectory
-        .listSync(recursive: true)
-        .where((testFile) => testFile.path.endsWith(_testSuffix));
+  try {
+    // Start chrome driver before running the flutter integration test.
+    await chromedriver.start();
 
-    for (final testFile in testFiles) {
-      final testTarget = testFile.path;
-      final args = TestRunnerArgs([
-        ...testRunnerArgs,
-        '${TestRunnerArgs.testTargetArg}$testTarget',
-      ]);
-      await _runTest(args);
+    if (testRunnerArgs.testTarget != null) {
+      // TODO(kenz): add support for specifying a directory as the target instead
+      // of a single file.
+      await _runTest(testRunnerArgs);
+    } else {
+      // Run all tests since a target test was not provided.
+      final testDirectory = Directory(_testDirectory);
+      final testFiles = testDirectory
+          .listSync(recursive: true)
+          .where((testFile) => testFile.path.endsWith(_testSuffix));
+
+      for (final testFile in testFiles) {
+        final testTarget = testFile.path;
+        final newArgsWithTarget = TestRunnerArgs([
+          ...args,
+          '--${TestRunnerArgs.testTargetArg}=$testTarget',
+        ]);
+        await _runTest(newArgsWithTarget);
+      }
     }
+  } on Exception catch (e) {
+    exception = e;
+  } finally {
+    await chromedriver.stop();
+  }
+
+  if (exception != null) {
+    throw exception;
   }
 }
 
 Future<void> _runTest(
   TestRunnerArgs testRunnerArgs,
 ) async {
-  final testTarget = testRunnerArgs.testTarget;
+  final testTarget = testRunnerArgs.testTarget!;
   if (!testRunnerArgs.testAppDevice.supportsTest(testTarget)) {
     // Skip test, since it is not supported for device.
     return;
@@ -66,7 +74,7 @@ Future<void> _runTest(
 
   await runFlutterIntegrationTest(
     testRunnerArgs,
-    TestFileArgs(testTarget),
+    TestFileArgs(testTarget, testAppDevice: testRunnerArgs.testAppDevice),
     offline: testTarget.startsWith(_offlineIndicator),
   );
 }

@@ -33,6 +33,7 @@ void main() {
   setGlobal(OfflineModeController, OfflineModeController());
   setGlobal(IdeTheme, IdeTheme());
   setGlobal(NotificationService, NotificationService());
+  setGlobal(BannerMessagesController, BannerMessagesController());
 
   testWidgets(
     'displays floating debugger controls',

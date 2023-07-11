@@ -164,7 +164,7 @@ class _CodeViewState extends State<CodeView> with AutoDisposeMixin {
     }
 
     if (oldWidget.scriptRef != widget.scriptRef) {
-      verticalController.resetScroll();
+      _updateScrollPosition();
     }
   }
 
@@ -228,8 +228,9 @@ class _CodeViewState extends State<CodeView> with AutoDisposeMixin {
       final lineCount = parsedScript?.lineCount;
       if (lineCount != null && lineCount * CodeView.rowHeight > extent) {
         final lineIndex = line - 1;
-        final scrollPosition = lineIndex * CodeView.rowHeight -
+        var scrollPosition = lineIndex * CodeView.rowHeight -
             ((extent - CodeView.rowHeight) / 2);
+        scrollPosition = scrollPosition.clamp(0.0, position.extentTotal);
         if (animate) {
           unawaited(
             verticalController.animateTo(

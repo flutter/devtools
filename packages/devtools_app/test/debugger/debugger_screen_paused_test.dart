@@ -53,6 +53,7 @@ void main() {
       .thenReturn(ValueNotifier(mockScriptRef));
   when(codeViewController.currentParsedScript)
       .thenReturn(ValueNotifier(mockParsedScript));
+  when(codeViewController.navigationInProgress).thenReturn(false);
 
   Finder findDebuggerButtonWithTitle(String title) => find.byWidgetPredicate(
         (Widget widget) => widget is DebuggerButton && widget.title == title,

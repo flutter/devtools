@@ -2,20 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:collection/collection.dart';
+import 'dart:io';
+
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../primitives/utils.dart';
 import 'adapted_heap_object.dart';
 import 'simple_items.dart';
-
-/// Names for json fields.
-class _JsonFields {
-  static const String objects = 'objects';
-  static const String rootIndex = 'rootIndex';
-  static const String created = 'created';
-}
 
 @immutable
 class HeapObjectSelection {
@@ -64,20 +58,6 @@ class AdaptedHeapData {
     this.created = created ?? DateTime.now();
   }
 
-  factory AdaptedHeapData.fromJson(Map<String, dynamic> json) {
-    final createdJson = json[_JsonFields.created];
-
-    return AdaptedHeapData(
-      (json[_JsonFields.objects] as List<Object?>)
-          .mapIndexed(
-            (i, e) => AdaptedHeapObject.fromJson(e as Map<String, Object?>, i),
-          )
-          .toList(),
-      created: createdJson == null ? null : DateTime.parse(createdJson),
-      rootIndex: json[_JsonFields.rootIndex] ?? _defaultRootIndex,
-    );
-  }
-
   static final _uiReleaser = UiReleaser();
 
   static Future<AdaptedHeapData> fromHeapSnapshot(
@@ -92,6 +72,17 @@ class AdaptedHeapData {
     }
 
     return AdaptedHeapData(objects);
+  }
+
+  @visibleForTesting
+  static Future<AdaptedHeapData> fromFile(
+    String fileName,
+  ) async {
+    final file = File(fileName);
+    final bytes = await file.readAsBytes();
+    final data = bytes.buffer.asByteData();
+    final graph = HeapSnapshotGraph.fromChunks([data]);
+    return AdaptedHeapData.fromHeapSnapshot(graph);
   }
 
   /// Default value for rootIndex is taken from the doc:
@@ -119,12 +110,6 @@ class AdaptedHeapData {
   late final _objectsByCode = <IdentityHashCode, int>{
     for (var i in Iterable.generate(objects.length)) objects[i].code: i,
   };
-
-  Map<String, dynamic> toJson() => {
-        _JsonFields.objects: objects.map((e) => e.toJson()).toList(),
-        _JsonFields.rootIndex: rootIndex,
-        _JsonFields.created: created.toIso8601String(),
-      };
 
   int? objectIndexByIdentityHashCode(IdentityHashCode code) =>
       _objectsByCode[code];

@@ -21,6 +21,7 @@ import '../../shared/heap/class_filter.dart';
 import '../../shared/primitives/simple_elements.dart';
 import '../../shared/widgets/class_filter.dart';
 import '../../shared/widgets/shared_memory_widgets.dart';
+import 'instances.dart';
 import 'model.dart';
 import 'profile_pane_controller.dart';
 
@@ -105,7 +106,8 @@ enum HeapGeneration {
   }
 }
 
-class _FieldInstanceCountColumn extends ColumnData<ProfileRecord> {
+class _FieldInstanceCountColumn extends ColumnData<ProfileRecord>
+    implements ColumnRenderer<ProfileRecord> {
   _FieldInstanceCountColumn({required this.heap})
       : super(
           'Instances',
@@ -130,6 +132,21 @@ class _FieldInstanceCountColumn extends ColumnData<ProfileRecord> {
 
   @override
   bool get numeric => true;
+
+  @override
+  Widget? build(
+    BuildContext context,
+    ProfileRecord data, {
+    bool isRowSelected = false,
+    VoidCallback? onPressed,
+  }) {
+    return ProfileInstanceTableCell(
+      data.heapClass,
+      gac.MemoryAreas.profile,
+      isSelected: isRowSelected,
+      count: data.totalInstances ?? 0,
+    );
+  }
 }
 
 class _FieldExternalSizeColumn extends _FieldSizeColumn {
@@ -558,27 +575,22 @@ class _AllocationProfileTable extends StatelessWidget {
         return ValueListenableBuilder<bool>(
           valueListenable: preferences.vmDeveloperModeEnabled,
           builder: (context, vmDeveloperModeEnabled, _) {
-            return LayoutBuilder(
-              builder: (context, constraints) {
-                return OutlineDecoration.onlyTop(
-                  child: FlatTable<ProfileRecord>(
-                    keyFactory: (element) => Key(element.heapClass.fullName),
-                    data: profile.records,
-                    dataKey: 'allocation-profile',
-                    columnGroups: vmDeveloperModeEnabled
-                        ? _AllocationProfileTable._vmModeColumnGroups
-                        : null,
-                    columns: [
-                      ..._columns,
-                      if (vmDeveloperModeEnabled) ..._vmDeveloperModeColumns,
-                    ],
-                    defaultSortColumn: _AllocationProfileTable._fieldSizeColumn,
-                    defaultSortDirection: SortDirection.descending,
-                    pinBehavior: FlatTablePinBehavior.pinOriginalToTop,
-                    includeColumnGroupHeaders: false,
-                  ),
-                );
-              },
+            return FlatTable<ProfileRecord>(
+              keyFactory: (element) => Key(element.heapClass.fullName),
+              data: profile.records,
+              dataKey: 'allocation-profile',
+              columnGroups: vmDeveloperModeEnabled
+                  ? _AllocationProfileTable._vmModeColumnGroups
+                  : null,
+              columns: [
+                ..._columns,
+                if (vmDeveloperModeEnabled) ..._vmDeveloperModeColumns,
+              ],
+              defaultSortColumn: _AllocationProfileTable._fieldSizeColumn,
+              defaultSortDirection: SortDirection.descending,
+              pinBehavior: FlatTablePinBehavior.pinOriginalToTop,
+              includeColumnGroupHeaders: false,
+              selectionNotifier: controller.selection,
             );
           },
         );

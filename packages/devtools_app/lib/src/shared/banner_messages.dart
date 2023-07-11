@@ -5,14 +5,15 @@
 import 'package:collection/collection.dart' show IterableExtension;
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 import '../screens/performance/performance_utils.dart';
 import 'analytics/constants.dart' as gac;
 import 'common_widgets.dart';
 import 'connected_app.dart';
 import 'globals.dart';
+import 'http/http_service.dart' as http_service;
 import 'primitives/utils.dart';
 import 'screen.dart';
 import 'theme.dart';
@@ -95,8 +96,7 @@ class BannerMessages extends StatelessWidget {
   // TODO(kenz): use an AnimatedList for message changes.
   @override
   Widget build(BuildContext context) {
-    final controller = Provider.of<BannerMessagesController>(context);
-    final messagesForScreen = controller.messagesForScreen(screen.screenId);
+    final messagesForScreen = bannerMessages.messagesForScreen(screen.screenId);
     return Column(
       children: [
         ValueListenableBuilder<List<BannerMessage>>(
@@ -181,10 +181,8 @@ class BannerMessage extends StatelessWidget {
                         ? colorScheme.onErrorContainer
                         : colorScheme.onWarningContainer,
                   ),
-                  onPressed: () => Provider.of<BannerMessagesController>(
-                    context,
-                    listen: false,
-                  ).removeMessage(this, dismiss: true),
+                  onPressed: () =>
+                      bannerMessages.removeMessage(this, dismiss: true),
                 ),
               ],
             ),
@@ -377,6 +375,47 @@ You are opting in to a high CPU sampling rate. This may affect the performance o
   }
 }
 
+class HttpLoggingEnabledMessage {
+  HttpLoggingEnabledMessage(this.screenId)
+      : key = Key('HttpLoggingEnabledMessage - $screenId');
+
+  final Key key;
+
+  final String screenId;
+
+  BannerMessage build(BuildContext context) {
+    final theme = Theme.of(context);
+    late final BannerWarning message;
+    message = BannerWarning(
+      key: key,
+      textSpans: [
+        const TextSpan(
+          text: '''
+HTTP traffic is being logged for debugging purposes. This may result in increased memory usage for your app. If this is not intentional, consider ''',
+        ),
+        TextSpan(
+          text: 'disabling http logging',
+          style: theme.warningMessageLinkStyle,
+          recognizer: TapGestureRecognizer()
+            ..onTap = () async {
+              await http_service.toggleHttpRequestLogging(false).then((_) {
+                if (!http_service.httpLoggingEnabled) {
+                  notificationService.push('Http logging disabled.');
+                  bannerMessages.removeMessage(message);
+                }
+              });
+            },
+        ),
+        const TextSpan(
+          text: ' before profiling the memory of your application.',
+        ),
+      ],
+      screenId: screenId,
+    );
+    return message;
+  }
+}
+
 class DebugModeMemoryMessage {
   const DebugModeMemoryMessage(this.screenId);
 
@@ -437,7 +476,6 @@ class UnsupportedFlutterVersionWarning {
 }
 
 void maybePushUnsupportedFlutterVersionWarning(
-  BuildContext context,
   String screenId, {
   required SemanticVersion supportedFlutterVersion,
 }) {
@@ -449,7 +487,7 @@ void maybePushUnsupportedFlutterVersionWarning(
   }
   final currentVersion = serviceManager.connectedApp!.flutterVersionNow!;
   if (currentVersion < supportedFlutterVersion) {
-    Provider.of<BannerMessagesController>(context).addMessage(
+    bannerMessages.addMessage(
       UnsupportedFlutterVersionWarning(
         screenId: screenId,
         currentFlutterVersion: currentVersion,
@@ -465,7 +503,7 @@ void maybePushDebugModePerformanceMessage(
 ) {
   if (offlineController.offlineMode.value) return;
   if (serviceManager.connectedApp?.isDebugFlutterAppNow ?? false) {
-    Provider.of<BannerMessagesController>(context).addMessage(
+    bannerMessages.addMessage(
       DebugModePerformanceMessage(screenId).build(context),
     );
   }
@@ -477,8 +515,18 @@ void maybePushDebugModeMemoryMessage(
 ) {
   if (offlineController.offlineMode.value) return;
   if (serviceManager.connectedApp?.isDebugFlutterAppNow ?? false) {
-    Provider.of<BannerMessagesController>(context)
-        .addMessage(DebugModeMemoryMessage(screenId).build(context));
+    bannerMessages.addMessage(DebugModeMemoryMessage(screenId).build(context));
+  }
+}
+
+void maybePushHttpLoggingMessage(
+  BuildContext context,
+  String screenId,
+) {
+  if (http_service.httpLoggingEnabled) {
+    bannerMessages.addMessage(
+      HttpLoggingEnabledMessage(screenId).build(context),
+    );
   }
 }
 

@@ -18,6 +18,8 @@ import 'primitives/utils.dart';
 /// cnnected to a VM to ensure they have unique URLs.
 const appSizeScreenId = 'appsize';
 
+const memoryAnalysisScreenId = 'memoryanalysis';
+
 const homeScreenId = '';
 const snapshotScreenId = 'snapshot';
 

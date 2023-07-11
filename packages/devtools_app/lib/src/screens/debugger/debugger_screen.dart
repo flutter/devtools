@@ -116,7 +116,8 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
     ga.timeStart(DebuggerScreen.id, gac.pageReady);
     _shownFirstScript = false;
     SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
-      if (!_shownFirstScript) return;
+      if (!_shownFirstScript ||
+          controller.codeViewController.navigationInProgress) return;
       final routerDelegate = DevToolsRouterDelegate.of(context);
       routerDelegate.updateStateIfChanged(
         CodeViewSourceLocationNavigationState(

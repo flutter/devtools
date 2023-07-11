@@ -88,7 +88,10 @@ class DiffPaneController extends DisposableController {
   }
 
   void deleteCurrentSnapshot() {
-    final item = core.selectedItem;
+    deleteSnapshot(core.selectedItem);
+  }
+
+  void deleteSnapshot(SnapshotItem item) {
     assert(item is SnapshotInstanceItem);
     item.dispose();
     final index = core.selectedSnapshotIndex.value;

@@ -1032,15 +1032,31 @@ class FilterButton extends StatelessWidget {
   }
 }
 
+class RoundedCornerOptions {
+  const RoundedCornerOptions({
+    this.showTopLeft = true,
+    this.showTopRight = true,
+    this.showBottomLeft = true,
+    this.showBottomRight = true,
+  });
+
+  final bool showTopLeft;
+  final bool showTopRight;
+  final bool showBottomLeft;
+  final bool showBottomRight;
+}
+
 class RoundedDropDownButton<T> extends StatelessWidget {
   const RoundedDropDownButton({
     Key? key,
     this.value,
     this.onChanged,
     this.isDense = false,
+    this.isExpanded = false,
     this.style,
     this.selectedItemBuilder,
     this.items,
+    this.roundedCornerOptions,
   }) : super(key: key);
 
   final T? value;
@@ -1049,29 +1065,52 @@ class RoundedDropDownButton<T> extends StatelessWidget {
 
   final bool isDense;
 
+  final bool isExpanded;
+
   final TextStyle? style;
 
   final DropdownButtonBuilder? selectedItemBuilder;
 
   final List<DropdownMenuItem<T>>? items;
 
+  final RoundedCornerOptions? roundedCornerOptions;
+
   @override
   Widget build(BuildContext context) {
     final bgColor = Theme.of(context).colorScheme.backgroundColorSelected;
 
+    Radius selectRadius(bool show) {
+      return show ? const Radius.circular(defaultBorderRadius) : Radius.zero;
+    }
+
+    final showTopLeft = roundedCornerOptions?.showTopLeft ?? true;
+    final showTopRight = roundedCornerOptions?.showTopRight ?? true;
+    final showBottomLeft = roundedCornerOptions?.showBottomLeft ?? true;
+    final showBottomRight = roundedCornerOptions?.showBottomRight ?? true;
     return RoundedOutlinedBorder(
+      showTopLeft: showTopLeft,
+      showTopRight: showTopRight,
+      showBottomLeft: showBottomLeft,
+      showBottomRight: showBottomRight,
       child: Center(
-        child: Container(
-          padding: const EdgeInsets.only(
-            left: defaultSpacing,
-            right: borderPadding,
-          ),
+        child: SizedBox(
           height: defaultButtonHeight - 2.0, // subtract 2.0 for width of border
           child: DropdownButtonHideUnderline(
             child: DropdownButton<T>(
+              padding: const EdgeInsets.only(
+                left: defaultSpacing,
+                right: borderPadding,
+              ),
               value: value,
               onChanged: onChanged,
               isDense: isDense,
+              isExpanded: isExpanded,
+              borderRadius: BorderRadius.only(
+                topLeft: selectRadius(showTopLeft),
+                topRight: selectRadius(showTopRight),
+                bottomLeft: selectRadius(showBottomLeft),
+                bottomRight: selectRadius(showBottomRight),
+              ),
               style: style,
               selectedItemBuilder: selectedItemBuilder,
               items: items,
@@ -1952,12 +1991,15 @@ class CopyToClipboardControl extends StatelessWidget {
             );
           };
 
-    return ToolbarAction(
-      icon: Icons.content_copy,
-      tooltip: tooltip,
-      onPressed: onPressed,
-      key: buttonKey,
-      size: size,
+    return SizedBox(
+      height: size,
+      child: ToolbarAction(
+        icon: Icons.content_copy,
+        tooltip: tooltip,
+        onPressed: onPressed,
+        key: buttonKey,
+        size: size,
+      ),
     );
   }
 }
@@ -2492,6 +2534,9 @@ class ContextMenuButton extends StatelessWidget {
     double? iconSize,
   }) : iconSize = iconSize ?? tableIconSize;
 
+  static const double defaultWidth = 14.0;
+  static const double densePadding = 2.0;
+
   final Color? color;
   final String? gaScreen;
   final String? gaItem;
@@ -2499,8 +2544,6 @@ class ContextMenuButton extends StatelessWidget {
   final IconData icon;
   final double iconSize;
   final double buttonWidth;
-
-  static const double defaultWidth = 14.0;
 
   @override
   Widget build(BuildContext context) {
