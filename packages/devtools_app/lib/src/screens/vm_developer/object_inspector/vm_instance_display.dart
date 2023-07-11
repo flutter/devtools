@@ -168,6 +168,7 @@ class DisplayProvider extends StatelessWidget {
     final theme = Theme.of(context);
     if (variable.text != null) {
       return SelectableText.rich(
+        // TODO switch ^
         TextSpan(
           children: processAnsiTerminalCodes(
             variable.text,

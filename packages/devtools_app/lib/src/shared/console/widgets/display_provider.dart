@@ -5,34 +5,13 @@
 import 'package:flutter/material.dart' hide Stack;
 import 'package:vm_service/vm_service.dart';
 
-import '../../../shared/common_widgets.dart';
 import '../../../shared/globals.dart';
-import '../../../shared/primitives/selection_controls.dart';
 import '../../../shared/primitives/utils.dart';
 import '../../../shared/routing.dart';
 import '../../../shared/theme.dart';
 import '../../diagnostics/dart_object_node.dart';
 import '../../primitives/simple_items.dart';
 import 'description.dart';
-
-VariableSelectionControls _selectionControls({
-  required DartObjectNode variable,
-  required Function(TextSelectionDelegate delegate)? onInspect,
-}) {
-  final ref = variable.ref;
-  return VariableSelectionControls(
-    onReroot: variable.isRerootable
-        ? (delegate) {
-            serviceManager.consoleService.appendBrowsableInstance(
-              instanceRef: variable.value as InstanceRef?,
-              isolateRef: ref?.isolateRef,
-              heapSelection: ref?.heapSelection,
-            );
-          }
-        : null,
-    onInspect: onInspect,
-  );
-}
 
 class DisplayProvider extends StatelessWidget {
   const DisplayProvider({
@@ -48,21 +27,18 @@ class DisplayProvider extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    // TODO(devoncarew): Here, we want to wait until the tooltip wants to show,
-    // then call toString() on variable and render the result in a tooltip. We
-    // should also include the type of the value in the tooltip if the variable
-    // is not null.
     if (variable.text != null) {
-      return SelectableText.rich(
-        TextSpan(
-          children: processAnsiTerminalCodes(
-            variable.text,
-            theme.subtleFixedFontStyle,
+      return InteractivityWrapper(
+        onTap: onTap,
+        buttonItems: _getButtonItems(context),
+        child: Text.rich(
+          TextSpan(
+            children: processAnsiTerminalCodes(
+              variable.text,
+              theme.subtleFixedFontStyle,
+            ),
           ),
         ),
-        onTap: onTap,
-        selectionControls:
-            _selectionControls(variable: variable, onInspect: null),
       );
     }
     final diagnostic = variable.ref?.diagnostic;
@@ -75,10 +51,10 @@ class DisplayProvider extends StatelessWidget {
     }
 
     final hasName = variable.name?.isNotEmpty ?? false;
-    return DevToolsTooltip(
-      message: variable.displayValue.toString(),
-      waitDuration: tooltipWaitLong,
-      child: SelectableText.rich(
+    return InteractivityWrapper(
+      onTap: onTap,
+      buttonItems: _getButtonItems(context),
+      child: Text.rich(
         TextSpan(
           text: hasName ? variable.name : null,
           style: variable.artificialName
@@ -100,22 +76,50 @@ class DisplayProvider extends StatelessWidget {
             ),
           ],
         ),
-        selectionControls: _selectionControls(
-          variable: variable,
-          onInspect: serviceManager.inspectorService == null
-              ? null
-              : (delegate) => _handleInspect(delegate, context),
-        ),
-        onTap: onTap,
       ),
     );
   }
 
+  List<ContextMenuButtonItem> _getButtonItems(
+    BuildContext context,
+  ) {
+    final buttonItems = <ContextMenuButtonItem>[];
+
+    if (variable.isRerootable) {
+      buttonItems.add(
+        ContextMenuButtonItem(
+          onPressed: () {
+            ContextMenuController.removeAny();
+            final ref = variable.ref;
+            serviceManager.consoleService.appendBrowsableInstance(
+              instanceRef: variable.value as InstanceRef?,
+              isolateRef: ref?.isolateRef,
+              heapSelection: ref?.heapSelection,
+            );
+          },
+          label: 'Reroot',
+        ),
+      );
+    }
+
+    if (serviceManager.inspectorService != null && variable.isRoot) {
+      buttonItems.add(
+        ContextMenuButtonItem(
+          onPressed: () {
+            ContextMenuController.removeAny();
+            _handleInspect(context);
+          },
+          label: 'Inspect',
+        ),
+      );
+    }
+
+    return buttonItems;
+  }
+
   void _handleInspect(
-    TextSelectionDelegate delegate,
     BuildContext context,
   ) async {
-    delegate.hideToolbar();
     final router = DevToolsRouterDelegate.of(context);
     final inspectorService = serviceManager.inspectorService;
     if (await variable.inspectWidget()) {
@@ -175,5 +179,78 @@ class DisplayProvider extends StatelessWidget {
       default:
         return style;
     }
+  }
+}
+
+/// A wrapper that allows the user to interact with the variable.
+///
+/// Responds to primary and secondary click events.
+class InteractivityWrapper extends StatefulWidget {
+  const InteractivityWrapper({
+    super.key,
+    required this.child,
+    required this.buttonItems,
+    this.onTap,
+  });
+
+  /// Button items shown in a context menu on secondary click.
+  final List<ContextMenuButtonItem> buttonItems;
+
+  /// Optional callback when tapped.
+  final void Function()? onTap;
+
+  /// The child widget that will be listened to for gestures.
+  final Widget child;
+
+  @override
+  State<InteractivityWrapper> createState() => _InteractivityWrapperState();
+}
+
+class _InteractivityWrapperState extends State<InteractivityWrapper> {
+  final ContextMenuController _contextMenuController = ContextMenuController();
+
+  void _onTap() {
+    ContextMenuController.removeAny();
+    final onTap = widget.onTap;
+    if (onTap != null) {
+      onTap();
+    }
+  }
+
+  void _onSecondaryTapUp(TapUpDetails details) {
+    if (!_contextMenuController.isShown) {
+      _showMenu(details.globalPosition);
+    }
+  }
+
+  void _showMenu(Offset offset) {
+    if (widget.buttonItems.isEmpty) {
+      return;
+    }
+    _contextMenuController.show(
+      context: context,
+      contextMenuBuilder: (context) {
+        return AdaptiveTextSelectionToolbar.buttonItems(
+          anchors: TextSelectionToolbarAnchors(primaryAnchor: offset),
+          buttonItems: widget.buttonItems,
+        );
+      },
+    );
+  }
+
+  @override
+  void dispose() {
+    _contextMenuController.remove();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: _onTap,
+      onSecondaryTapUp: _onSecondaryTapUp,
+      child: widget.child,
+    );
   }
 }
