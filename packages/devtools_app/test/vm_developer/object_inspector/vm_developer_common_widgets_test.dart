@@ -146,11 +146,11 @@ void main() {
         ),
       );
 
-      expect(find.byType(AreaPaneHeader), findsOneWidget);
+      expect(find.byType(RetainingPathWidget), findsOneWidget);
 
       expect(find.text('Retaining Path'), findsOneWidget);
 
-      await tester.tap(find.byType(AreaPaneHeader));
+      await tester.tap(find.text('Retaining Path'));
 
       await tester.pump();
 
@@ -176,7 +176,7 @@ void main() {
         ),
       );
 
-      await tester.tap(find.byType(AreaPaneHeader));
+      await tester.tap(find.text('Retaining Path'));
 
       await tester.pumpAndSettle();
       expect(find.byType(SelectableText), findsNWidgets(7));
@@ -223,11 +223,9 @@ void main() {
         ),
       );
 
-      expect(find.byType(AreaPaneHeader), findsOneWidget);
-
       expect(find.text('Inbound References'), findsOneWidget);
 
-      await tester.tap(find.byType(AreaPaneHeader));
+      await tester.tap(find.text('Inbound References'));
 
       await tester.pump();
 
@@ -248,7 +246,7 @@ void main() {
         ),
       );
 
-      await tester.tap(find.byType(AreaPaneHeader));
+      await tester.tap(find.text('Inbound References'));
 
       await tester.pumpAndSettle();
       expect(find.byType(SelectableText), findsNWidgets(5));

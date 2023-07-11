@@ -197,10 +197,9 @@ void main() {
           .pumpWidget(wrap(LibraryDependencies(dependencies: dependencies)));
 
       expect(find.byType(VmExpansionTile), findsOneWidget);
-      expect(find.byType(AreaPaneHeader), findsOneWidget);
       expect(find.text('Dependencies (3)'), findsOneWidget);
 
-      await tester.tap(find.byType(AreaPaneHeader));
+      await tester.tap(find.text('Dependencies (3)'));
 
       await tester.pumpAndSettle();
 
