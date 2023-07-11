@@ -43,7 +43,7 @@ class VMDeveloperToolsScreen extends Screen {
       : super.conditional(
           id: id,
           title: ScreenMetaData.vmTools.title,
-          icon: ScreenMetaData.vmTools.icon ,
+          icon: ScreenMetaData.vmTools.icon,
           requiresVmDeveloperMode: true,
         );
 

@@ -37,7 +37,7 @@ class InspectorScreen extends Screen {
           requiresLibrary: flutterLibraryUri,
           requiresDebugBuild: true,
           title: ScreenMetaData.inspector.title,
-          icon:  ScreenMetaData.inspector.icon,
+          icon: ScreenMetaData.inspector.icon,
         );
 
   static final id = ScreenMetaData.inspector.id;

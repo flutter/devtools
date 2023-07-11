@@ -150,8 +150,8 @@ class _EvalAndBrowseTester {
     await tester.pump(longPumpDuration);
   }
 
-/// Prepares the UI of the memory screen so that the eval-related elements are
-/// visible on the screen for testing.
+  /// Prepares the UI of the memory screen so that the eval-related elements are
+  /// visible on the screen for testing.
   Future<void> prepareMemoryUI() async {
     // Open memory screen.
     await switchToScreen(tester, ScreenMetaData.memory);
