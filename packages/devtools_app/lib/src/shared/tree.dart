@@ -82,22 +82,24 @@ class _TreeViewState<T extends TreeNode<T>> extends State<TreeView<T>>
   @override
   Widget build(BuildContext context) {
     if (dataFlatList.isEmpty) return _emptyTreeViewBuilder();
-    final content = ListView.builder(
-      itemCount: dataFlatList.length,
-      itemExtent: widget.itemExtent,
-      shrinkWrap: widget.shrinkWrap,
-      physics: widget.shrinkWrap ? const ClampingScrollPhysics() : null,
-      controller: widget.scrollController,
-      itemBuilder: (context, index) {
-        final T item = dataFlatList[index];
-        return _TreeViewItem<T>(
-          item,
-          buildDisplay: (onPressed) =>
-              widget.dataDisplayProvider(item, onPressed),
-          onItemSelected: _onItemSelected,
-          onItemExpanded: _onItemExpanded,
-        );
-      },
+    final content = SelectionArea(
+      child: ListView.builder(
+        itemCount: dataFlatList.length,
+        itemExtent: widget.itemExtent,
+        shrinkWrap: widget.shrinkWrap,
+        physics: widget.shrinkWrap ? const ClampingScrollPhysics() : null,
+        controller: widget.scrollController,
+        itemBuilder: (context, index) {
+          final T item = dataFlatList[index];
+          return _TreeViewItem<T>(
+            item,
+            buildDisplay: (onPressed) =>
+                widget.dataDisplayProvider(item, onPressed),
+            onItemSelected: _onItemSelected,
+            onItemExpanded: _onItemExpanded,
+          );
+        },
+      ),
     );
     if (widget.includeScrollbar) {
       return Scrollbar(
