@@ -64,6 +64,7 @@ class MethodAndSourceColumn extends TreeColumnData<CpuStackFrame>
   Widget? build(
     BuildContext context,
     CpuStackFrame data, {
+    bool isRowSelected = false,
     VoidCallback? onPressed,
   }) {
     return MethodAndSourceDisplay(

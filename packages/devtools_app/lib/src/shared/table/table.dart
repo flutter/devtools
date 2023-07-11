@@ -1132,6 +1132,7 @@ abstract class ColumnRenderer<T> {
   Widget? build(
     BuildContext context,
     T data, {
+    bool isRowSelected = false,
     VoidCallback? onPressed,
   });
 }
@@ -1479,6 +1480,7 @@ class _TableRowState<T> extends State<TableRow<T>>
           content = (column as ColumnRenderer).build(
             context,
             node,
+            isRowSelected: widget.isSelected,
             onPressed: onPressed,
           );
         }

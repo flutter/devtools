@@ -33,7 +33,6 @@ class ProfileInstanceTableCell extends StatelessWidget {
   Widget build(BuildContext context) {
     return InstanceViewWithContextMenu(
       count: count,
-      gaContext: gaContext,
       menuBuilder: _shouldShowMenu ? _buildHeapInstancesMenu : null,
     );
   }

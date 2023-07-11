@@ -21,7 +21,7 @@ class GoldenHeapTest {
   ///
   /// Format is format used by [NativeRuntime.writeHeapSnapshotToFile].
   Future<AdaptedHeapData> loadHeap() =>
-      AdaptedHeapData.fromFile('$_dataDir$fileName', isolateId: 'test');
+      AdaptedHeapData.fromFile('$_dataDir$fileName');
 }
 
 List<GoldenHeapTest> goldenHeapTests = <GoldenHeapTest>[

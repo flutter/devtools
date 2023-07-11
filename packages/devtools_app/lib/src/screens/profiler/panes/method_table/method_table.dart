@@ -262,6 +262,7 @@ class _MethodColumn extends ColumnData<MethodTableGraphNode>
   Widget? build(
     BuildContext context,
     MethodTableGraphNode data, {
+    bool isRowSelected = false,
     VoidCallback? onPressed,
   }) {
     return MethodAndSourceDisplay(
