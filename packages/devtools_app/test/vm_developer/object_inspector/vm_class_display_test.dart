@@ -56,10 +56,13 @@ void main() {
       expect(find.byType(VMInfoCard), findsOneWidget);
       expect(find.text('General Information'), findsOneWidget);
       expect(find.text('1 KB'), findsOneWidget);
-      expect(find.text('fooLib'), findsOneWidget);
-      expect(find.text('fooScript.dart:10:4'), findsOneWidget);
-      expect(find.text('fooSuperClass'), findsOneWidget);
-      expect(find.text('fooSuperType'), findsOneWidget);
+      expect(find.text('fooLib', findRichText: true), findsOneWidget);
+      expect(
+        find.text('fooScript.dart:10:4', findRichText: true),
+        findsOneWidget,
+      );
+      expect(find.text('fooSuperClass', findRichText: true), findsOneWidget);
+      expect(find.text('fooSuperType', findRichText: true), findsOneWidget);
       expect(find.text('Currently allocated instances:'), findsOneWidget);
       expect(find.text('3'), findsOneWidget);
 
