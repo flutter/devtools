@@ -65,7 +65,7 @@ abstract class FeatureFlags {
 
   /// Flag to enable the deep link validation tooling in DevTools, both for the
   /// DevTools screen and the standalone tool for IDE embedding.
-  /// 
+  ///
   /// https://github.com/flutter/devtools/issues/6013
   static bool deepLinkValidation = enableExperiments;
 
