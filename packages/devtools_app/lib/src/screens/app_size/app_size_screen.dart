@@ -44,10 +44,6 @@ class AppSizeScreen extends Screen {
   static const analysisTabKey = Key('Analysis Tab');
   static const diffTabKey = Key('Diff Tab');
 
-  /// The ID (used in routing) for the tabbed app-size page.
-  ///
-  /// This must be different to the top-level appSizePageId which is also used
-  /// in routing when to ensure they have unique URLs.
   static final id = ScreenMetaData.appSize.id;
 
   @visibleForTesting
