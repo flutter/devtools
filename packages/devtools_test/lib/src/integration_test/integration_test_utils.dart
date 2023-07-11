@@ -28,13 +28,15 @@ Future<void> pumpAndConnectDevTools(
   TestApp testApp,
 ) async {
   await pumpDevTools(tester);
-  expect(find.byType(LandingScreenBody), findsOneWidget);
+  expect(find.byType(ConnectDialog), findsOneWidget);
+  expect(find.byType(ConnectedAppSummary), findsNothing);
   expect(find.text('No client connection'), findsOneWidget);
   _verifyFooterColor(tester, null);
 
   logStatus('verify that we can connect to an app');
   await connectToTestApp(tester, testApp);
-  expect(find.byType(LandingScreenBody), findsNothing);
+  expect(find.byType(ConnectDialog), findsNothing);
+  expect(find.byType(ConnectedAppSummary), findsOneWidget);
   expect(find.text('No client connection'), findsNothing);
   _verifyFooterColor(tester, darkColorScheme.primary);
 
@@ -67,10 +69,8 @@ void _verifyFooterColor(WidgetTester tester, Color? expectedColor) {
 }
 
 Future<void> switchToScreen(WidgetTester tester, ScreenMetaData screen) async {
-  final screenTitle = screen.title;
-  logStatus('switching to $screenTitle screen');
-
-  final tabFinder = find.widgetWithText(Tab, screenTitle);
+  logStatus('switching to ${screen.name} screen (icon ${screen.icon})');
+  final tabFinder = find.widgetWithIcon(Tab, screen.icon!);
 
   // If we cannot find the tab, try opening the tab overflow menu, if present.
   if (tabFinder.evaluate().isEmpty) {
@@ -120,7 +120,12 @@ Future<void> connectToTestApp(WidgetTester tester, TestApp testApp) async {
 }
 
 Future<void> disconnectFromTestApp(WidgetTester tester) async {
-  await tester.tap(find.byTooltip(StatusLine.deviceInfoTooltip));
+  await tester.tap(
+    find.descendant(
+      of: find.byType(DevToolsAppBar),
+      matching: find.byIcon(Icons.home_rounded),
+    ),
+  );
   await tester.pumpAndSettle();
   await tester.tap(find.byType(ConnectToNewAppButton));
   await tester.pump(safePumpDuration);
