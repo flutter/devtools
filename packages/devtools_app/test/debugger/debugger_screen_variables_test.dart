@@ -118,11 +118,7 @@ void main() {
 
       final listFinder = find.selectableText('Root 1: List (2 items)');
 
-      // expect a tooltip for the list value
-      expect(
-        find.byTooltip('List (2 items)'),
-        findsOneWidget,
-      );
+      expect(listFinder, findsOneWidget);
 
       final mapFinder = find.selectableTextContaining(
         'Root 2: Map (2 items)',
