@@ -19,6 +19,8 @@ import 'screens/app_size/app_size_controller.dart';
 import 'screens/app_size/app_size_screen.dart';
 import 'screens/debugger/debugger_controller.dart';
 import 'screens/debugger/debugger_screen.dart';
+import 'screens/deep_link_validation/deep_links_controller.dart';
+import 'screens/deep_link_validation/deep_links_screen.dart';
 import 'screens/inspector/inspector_controller.dart';
 import 'screens/inspector/inspector_screen.dart';
 import 'screens/inspector/inspector_tree_controller.dart';
@@ -523,6 +525,11 @@ List<DevToolsScreen> defaultScreens({
       AppSizeScreen(),
       createController: (_) => AppSizeController(),
     ),
+    if (FeatureFlags.deepLinkValidation)
+      DevToolsScreen<DeepLinksController>(
+        DeepLinksScreen(),
+        createController: (_) => DeepLinksController(),
+      ),
     DevToolsScreen<VMDeveloperToolsController>(
       VMDeveloperToolsScreen(),
       createController: (_) => VMDeveloperToolsController(),

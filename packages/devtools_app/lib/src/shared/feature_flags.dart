@@ -63,6 +63,12 @@ abstract class FeatureFlags {
   /// https://github.com/flutter/devtools/issues/5606
   static bool memoryAnalysis = enableExperiments;
 
+  /// Flag to enable the deep link validation tooling in DevTools, both for the
+  /// DevTools screen and the standalone tool for IDE embedding.
+  ///
+  /// https://github.com/flutter/devtools/issues/6013
+  static bool deepLinkValidation = enableExperiments;
+
   /// Stores a map of all the feature flags for debugging purposes.
   ///
   /// When adding a new flag, you are responsible for adding it to this map as
