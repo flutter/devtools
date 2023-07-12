@@ -212,11 +212,6 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
       page = params['page'];
     }
 
-    final screens = _visibleScreens()
-        .where((p) => embed && page != null ? p.screenId == page : true)
-        .where((p) => !hide.contains(p.screenId))
-        .toList();
-
     final connectedToVmService =
         vmServiceUri != null && vmServiceUri.isNotEmpty;
 
@@ -226,6 +221,10 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
       return ValueListenableBuilder<bool>(
         valueListenable: preferences.vmDeveloperModeEnabled,
         builder: (_, __, child) {
+          final screens = _visibleScreens()
+              .where((p) => embed && page != null ? p.screenId == page : true)
+              .where((p) => !hide.contains(p.screenId))
+              .toList();
           return MultiProvider(
             providers: _providedControllers(),
             child: DevToolsScaffold(
@@ -271,17 +270,6 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
           child: MultiProvider(
             providers: _providedControllers(offline: true),
             child: OfflineScreenBody(snapshotArgs, _screens),
-          ),
-        );
-      },
-      appSizeScreenId: (_, __, args, ____) {
-        final embed = isEmbedded(args);
-        return DevToolsScaffold.withChild(
-          key: const Key('appsize'),
-          embed: embed,
-          child: MultiProvider(
-            providers: _providedControllers(),
-            child: const AppSizeBody(),
           ),
         );
       },
