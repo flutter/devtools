@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/shared/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/shared/console/widgets/expandable_variable.dart';
 import 'package:devtools_app/src/shared/diagnostics/dart_object_node.dart';
@@ -11,6 +12,13 @@ import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+
+  setUp(() {
+    final service = createMockVmServiceWrapperWithDefaults();
+    final manager = FakeServiceManager(service: service);
+    setGlobal(ServiceConnectionManager, manager);
+  });
+
   group('debugger variables', () {
     late DartObjectNode objectNode;
 
