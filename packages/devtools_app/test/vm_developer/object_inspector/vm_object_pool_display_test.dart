@@ -115,6 +115,7 @@ void main() {
             find.text(
               VmServiceObjectLink.defaultTextBuilder(entry.value) ??
                   entry.value.toString(),
+              findRichText: true,
             ),
             findsOneWidget,
           );

@@ -63,8 +63,10 @@ class _ObjectInspectorViewState extends State<_ObjectInspectorView>
       initialFractions: const [0.2, 0.8],
       children: [
         const ObjectInspectorSelector(),
-        ObjectViewport(
-          controller: controller,
+        SelectionArea(
+          child: ObjectViewport(
+            controller: controller,
+          ),
         ),
       ],
     );

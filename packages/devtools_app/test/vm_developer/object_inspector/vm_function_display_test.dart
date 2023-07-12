@@ -77,8 +77,11 @@ void main() {
         expect(find.text('Function'), findsOneWidget);
         expect(find.text('256 B'), findsOneWidget);
         expect(find.text('Owner:'), findsOneWidget);
-        expect(find.text('fooLib'), findsOneWidget);
-        expect(find.text('fooScript.dart:10:4'), findsOneWidget);
+        expect(find.text('fooLib', findRichText: true), findsOneWidget);
+        expect(
+          find.text('fooScript.dart:10:4', findRichText: true),
+          findsOneWidget,
+        );
 
         expect(find.text('Function Details'), findsOneWidget);
         expect(find.text('Kind:'), findsOneWidget);
