@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app/devtools_app.dart';
-import 'package:devtools_app/src/shared/config_specific/import_export/import_export.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
@@ -30,7 +29,7 @@ void main() {
       expect(controller.recordingNotifier.value, isFalse);
     });
 
-    test('disposes', () async {
+    test('disposes', () {
       controller.dispose();
       expect(
         () {

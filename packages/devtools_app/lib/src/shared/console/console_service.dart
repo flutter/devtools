@@ -7,7 +7,6 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../screens/memory/shared/heap/model.dart';
 import '../../service/vm_service_wrapper.dart';
 import '../diagnostics/dart_object_node.dart';
 import '../diagnostics/diagnostics_node.dart';
@@ -42,15 +41,6 @@ class ConsoleLine {
         forceScrollIntoView: forceScrollIntoView,
       );
 
-  factory ConsoleLine.dartObjectGraph(
-    HeapObjectGraph graph, {
-    bool forceScrollIntoView = false,
-  }) =>
-      GraphConsoleLine(
-        graph,
-        forceScrollIntoView: forceScrollIntoView,
-      );
-
   ConsoleLine._(this.forceScrollIntoView);
 
   // Whether this console line should be scrolled into view when it is added.
@@ -81,25 +71,34 @@ class VariableConsoleLine extends ConsoleLine {
   }
 }
 
-class GraphConsoleLine extends ConsoleLine {
-  GraphConsoleLine(this.graph, {bool forceScrollIntoView = false})
-      : super._(forceScrollIntoView);
-  final HeapObjectGraph graph;
-}
-
 /// Source of truth for the state of the Console including both events from the
 /// VM and events emitted from other UI.
 class ConsoleService extends Disposer {
-  // TODO(polina-c): add needed parameters
-  void appendInstanceGraph(
-    HeapObjectGraph graph, {
-    bool forceScrollIntoView = false,
-  }) {
-    _stdio.add(
-      ConsoleLine.dartObjectGraph(
-        graph,
-        forceScrollIntoView: forceScrollIntoView,
-      ),
+  void appendBrowsableInstance({
+    required InstanceRef? instanceRef,
+    required IsolateRef? isolateRef,
+    required HeapObjectSelection? heapSelection,
+  }) async {
+    if (instanceRef == null) {
+      final object = heapSelection?.object;
+      if (object == null || isolateRef == null) {
+        serviceManager.consoleService.appendStdio(
+          'Not enough information to browse the instance.',
+        );
+        return;
+      }
+
+      instanceRef = await evalService.findObject(object, isolateRef);
+    }
+
+    // If instanceRef is null at this point, user will see static references.
+
+    appendInstanceRef(
+      value: instanceRef,
+      diagnostic: null,
+      isolateRef: isolateRef,
+      forceScrollIntoView: true,
+      heapSelection: heapSelection,
     );
   }
 
@@ -136,7 +135,7 @@ class ConsoleService extends Disposer {
   final _stdio = ListValueNotifier<ConsoleLine>([]);
   bool _stdioTrailingNewline = false;
 
-  ObjectGroupBase get objectGroup {
+  InspectorObjectGroupBase get objectGroup {
     final inspectorService = serviceManager.inspectorService!;
     if (_objectGroup?.inspectorService == inspectorService) {
       return _objectGroup!;
@@ -146,13 +145,22 @@ class ConsoleService extends Disposer {
     return _objectGroup!;
   }
 
-  ObjectGroupBase? _objectGroup;
+  InspectorObjectGroupBase? _objectGroup;
 
   /// Clears the contents of stdio.
   void clearStdio() {
     if (_stdio.value.isNotEmpty) {
       _stdio.clear();
     }
+  }
+
+  DartObjectNode? itemAt(int invertedIndex) {
+    assert(invertedIndex >= 0);
+    final list = _stdio.value;
+    if (invertedIndex > list.length - 1) return null;
+    final item = list[list.length - 1 - invertedIndex];
+    if (item is! VariableConsoleLine) return null;
+    return item.variable;
   }
 
   /// Append to the stdout / stderr buffer.

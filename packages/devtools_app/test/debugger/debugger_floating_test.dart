@@ -29,12 +29,14 @@ void main() {
 
   setUp(() {
     fakeServiceManager.isMainIsolatePaused = true;
+    (fakeServiceManager.isolateManager as FakeIsolateManager)
+        .setMainIsolatePausedState(true);
   });
 
   Future<void> pumpControls(WidgetTester tester) async {
     await tester.pumpWidget(
       wrapWithControllers(
-        FloatingDebuggerControls(),
+        const FloatingDebuggerControls(),
         debugger: debuggerController,
       ),
     );
@@ -88,9 +90,9 @@ void main() {
   });
 
   testWidgets('are hidden when app is not paused', (WidgetTester tester) async {
-    final state =
-        fakeServiceManager.isolateManager.mainIsolateState! as MockIsolateState;
-    state.isPaused.value = false;
+    fakeServiceManager.isMainIsolatePaused = false;
+    (fakeServiceManager.isolateManager as FakeIsolateManager)
+        .setMainIsolatePausedState(false);
     await pumpControls(tester);
     final animatedOpacityFinder = find.byType(AnimatedOpacity);
     expect(animatedOpacityFinder, findsOneWidget);

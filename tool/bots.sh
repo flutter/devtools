@@ -137,7 +137,8 @@ elif [[ "$BOT" == "test_ddc" || "$BOT" == "test_dart2js" ]]; then
 # for a DDC build of DevTools
 # elif [ "$BOT" = "integration_ddc" ]; then
 
-elif [ "$BOT" = "integration_dart2js" ]; then
+# TODO(https://github.com/flutter/devtools/issues/1987): rewrite legacy integration tests.
+elif [ "$BOT" = "dart2js" ]; then
 
     flutter pub get
 
@@ -149,14 +150,19 @@ https://github.com/flutter/flutter/issues/118470). Run the test locally to see i
 images under a 'failures/' directory are created as a result of the test run:\n\
 $ dart run integration_test/run_tests.dart --headless"
 
-    # TODO(https://github.com/flutter/devtools/issues/1987): rewrite integration tests.
-    dart run integration_test/run_tests.dart --headless
+    if [ "$DEVICE" = "flutter" ]; then
 
-else
+        dart run integration_test/run_tests.dart --headless
 
-    echo "unknown bot configuration"
-    exit 1
+    elif [ "$DEVICE" = "flutter-web" ]; then
 
+        dart run integration_test/run_tests.dart --test-app-device=chrome --headless
+
+    elif [ "$DEVICE" = "dart-cli" ]; then
+
+        dart run integration_test/run_tests.dart --test-app-device=cli --headless
+
+    fi
 fi
 
 popd

@@ -128,23 +128,6 @@ class LayoutProperties {
     }
   }
 
-  factory LayoutProperties.lerp(
-    LayoutProperties begin,
-    LayoutProperties end,
-    double t,
-  ) {
-    return LayoutProperties.values(
-      node: end.node,
-      children: end.children,
-      constraints: BoxConstraints.lerp(begin.constraints, end.constraints, t),
-      description: end.description,
-      flexFactor: begin.flexFactor! * (t + 1) - end.flexFactor! * t,
-      isFlex: begin.isFlex && end.isFlex,
-      size: Size.lerp(begin.size, end.size, t)!,
-      flexFit: end.flexFit,
-    );
-  }
-
   LayoutProperties? parent;
   final RemoteDiagnosticsNode node;
   final List<LayoutProperties> children;
@@ -383,11 +366,14 @@ class FlexLayoutProperties extends LayoutProperties {
   static FlexLayoutProperties _buildNode(RemoteDiagnosticsNode node) {
     final Map<String, Object?> renderObjectJson = node.renderObject!.json;
     final properties = renderObjectJson['properties'] as List<Object?>;
+
+    // ignore: prefer_for_elements_to_map_fromiterable, requires refactoring
     final data = Map<String, Object?>.fromIterable(
       properties,
       key: (property) => property['name'],
       value: (property) => property['description'],
     );
+
     return FlexLayoutProperties._fromNode(
       node,
       direction: _directionUtils.enumEntry(data['direction'] as String?) ??

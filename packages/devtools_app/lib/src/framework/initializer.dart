@@ -6,16 +6,21 @@ import 'dart:async';
 
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/material.dart';
+import 'package:logging/logging.dart';
 
 import '../shared/analytics/analytics.dart' as ga;
 import '../shared/analytics/constants.dart' as gac;
 import '../shared/common_widgets.dart';
+import '../shared/config_specific/import_export/import_export.dart';
+import '../shared/framework_controller.dart';
 import '../shared/globals.dart';
 import '../shared/primitives/auto_dispose.dart';
 import '../shared/primitives/utils.dart';
 import '../shared/routing.dart';
 import '../shared/theme.dart';
 import 'framework_core.dart';
+
+final _log = Logger('initializer');
 
 /// Widget that requires business logic to be loaded before building its
 /// [builder].
@@ -48,7 +53,7 @@ class Initializer extends StatefulWidget {
   final bool allowConnectionScreenOnDisconnect;
 
   @override
-  _InitializerState createState() => _InitializerState();
+  State<Initializer> createState() => _InitializerState();
 }
 
 class _InitializerState extends State<Initializer>
@@ -77,7 +82,16 @@ class _InitializerState extends State<Initializer>
           !connectionState.userInitiatedConnectionState) {
         // Try to reconnect (otherwise, will fall back to showing the
         // disconnected overlay).
-        unawaited(_attemptUrlConnection());
+        unawaited(
+          _attemptUrlConnection(
+            logException: false,
+            errorReporter: (_, __) {
+              _log.warning(
+                'Attempted to reconnect to the application, but failed.',
+              );
+            },
+          ),
+        );
       }
     });
 
@@ -104,25 +118,35 @@ class _InitializerState extends State<Initializer>
   /// Connects to the VM with the given URI. This request usually comes from the
   /// IDE via the server API to reuse the DevTools window after being disconnected
   /// (for example if the user stops a debug session then launches a new one).
-  void _connectVm(event) {
+  void _connectVm(ConnectVmEvent event) {
     DevToolsRouterDelegate.of(context).updateArgsIfChanged({
       'uri': event.serviceProtocolUri.toString(),
       if (event.notify) 'notify': 'true',
     });
   }
 
-  Future<void> _attemptUrlConnection() async {
+  Future<void> _attemptUrlConnection({
+    ErrorReporter? errorReporter,
+    bool logException = true,
+  }) async {
     if (widget.url == null) {
       _handleNoConnection();
       return;
     }
 
+    errorReporter ??= (String message, Object error) {
+      notificationService.pushError(
+        '$message, $error',
+        isReportable: false,
+      );
+    };
+
     final uri = normalizeVmServiceUri(widget.url!);
     final connected = await FrameworkCore.initVmService(
       '',
       explicitUri: uri,
-      errorReporter: (message, error) =>
-          notificationService.push('$message, $error'),
+      errorReporter: errorReporter,
+      logException: logException,
     );
 
     if (!connected) {
@@ -154,8 +178,29 @@ class _InitializerState extends State<Initializer>
   }
 
   void hideDisconnectedOverlay() {
-    currentDisconnectedOverlay?.remove();
-    currentDisconnectedOverlay = null;
+    setState(() {
+      currentDisconnectedOverlay?.remove();
+      currentDisconnectedOverlay = null;
+    });
+  }
+
+  void _reviewHistory() {
+    assert(offlineController.offlineDataJson.isNotEmpty);
+
+    offlineController.enterOfflineMode(
+      offlineApp: offlineController.previousConnectedApp!,
+    );
+    hideDisconnectedOverlay();
+    final args = <String, String?>{
+      'uri': null,
+      'screen': offlineController
+          .offlineDataJson[DevToolsExportKeys.activeScreenId.name] as String,
+    };
+    final routerDelegate = DevToolsRouterDelegate.of(context);
+    Router.neglect(
+      context,
+      () => routerDelegate.navigate(snapshotScreenId, args),
+    );
   }
 
   OverlayEntry _createDisconnectedOverlay() {
@@ -186,11 +231,12 @@ class _InitializerState extends State<Initializer>
                   style: theme.textTheme.bodyMedium,
                 ),
               const Spacer(),
-              ElevatedButton(
-                onPressed: hideDisconnectedOverlay,
-                child: const Text('Review History'),
-              ),
-              const SizedBox(height: defaultSpacing),
+              if (offlineController.offlineDataJson.isNotEmpty)
+                ElevatedButton(
+                  onPressed: _reviewHistory,
+                  child: const Text('Review recent data (offline)'),
+                ),
+              const Spacer(),
             ],
           ),
         ),
@@ -201,7 +247,7 @@ class _InitializerState extends State<Initializer>
 
   @override
   Widget build(BuildContext context) {
-    return _checkLoaded()
+    return _checkLoaded() || offlineController.offlineMode.value
         ? widget.builder(context)
         : Scaffold(
             body: currentDisconnectedOverlay != null

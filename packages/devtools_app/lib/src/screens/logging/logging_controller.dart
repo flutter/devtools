@@ -9,11 +9,11 @@ import 'dart:math' as math;
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
+import 'package:logging/logging.dart';
 import 'package:path/path.dart' as path;
 import 'package:vm_service/vm_service.dart';
 
 import '../../service/vm_service_wrapper.dart';
-import '../../shared/config_specific/logger/logger.dart' as logger;
 import '../../shared/console/eval/inspector_tree.dart';
 import '../../shared/diagnostics/diagnostics_node.dart';
 import '../../shared/diagnostics/inspector_service.dart';
@@ -25,6 +25,8 @@ import '../../shared/ui/filter.dart';
 import '../../shared/ui/search.dart';
 import '../inspector/inspector_tree_controller.dart';
 import 'logging_screen.dart';
+
+final _log = Logger('logging_controller');
 
 // For performance reasons, we drop old logs in batches, so the log will grow
 // to kMaxLogItemsUpperBound then truncate to kMaxLogItemsLowerBound.
@@ -57,7 +59,7 @@ Future<String> _retrieveFullStringValue(
             stringRef,
             onUnavailable: (truncatedValue) => fallback,
           )
-          .then((value) => value != null ? value : fallback) ??
+          .then((value) => value ?? fallback) ??
       Future.value(fallback);
 }
 
@@ -171,13 +173,15 @@ class LoggingController extends DisposableController
       serviceManager.onConnectionClosed.listen(_handleConnectionStop),
     );
     _handleBusEvents();
+    subscribeToFilterChanges();
   }
 
   static const kindFilterId = 'logging-kind-filter';
 
-  final filterArgs = {
-    kindFilterId: QueryFilterArgument(keys: ['kind', 'k']),
-  };
+  @override
+  Map<String, QueryFilterArgument> createQueryFilterArgs() => {
+        kindFilterId: QueryFilterArgument(keys: ['kind', 'k']),
+      };
 
   final StreamController<String> _logStatusController =
       StreamController.broadcast();
@@ -357,7 +361,7 @@ class LoggingController extends DisposableController
       // style error.
       node.style = DiagnosticsTreeStyle.error;
       if (_verboseDebugging) {
-        logger.log('node toStringDeep:######\n${node.toStringDeep()}\n###');
+        _log.info('node toStringDeep:######\n${node.toStringDeep()}\n###');
       }
 
       final RemoteDiagnosticsNode summary = _findFirstSummary(node) ?? node;
@@ -420,7 +424,7 @@ class LoggingController extends DisposableController
     final InstanceRef messageRef = InstanceRef.parse(logRecord['message'])!;
     String? summary = _valueAsString(messageRef);
     if (messageRef.valueAsStringIsTruncated == true) {
-      summary = summary! + '...';
+      summary = '${summary!}...';
     }
     final InstanceRef? error = InstanceRef.parse(logRecord['error']);
     final InstanceRef? stackTrace = InstanceRef.parse(logRecord['stackTrace']);
@@ -623,76 +627,46 @@ class LoggingController extends DisposableController
   }
 
   @override
-  List<LogData> matchesForSearch(
-    String search, {
-    bool searchPreviousMatches = false,
-  }) {
-    if (search.isEmpty) return [];
-    final matches = <LogData>[];
-    if (searchPreviousMatches) {
-      final previousMatches = searchMatches.value;
-      for (final previousMatch in previousMatches) {
-        if (previousMatch.summary!.caseInsensitiveContains(search)) {
-          matches.add(previousMatch);
-        }
-      }
-    } else {
-      final List<LogData> currentLogs = filteredData.value;
-      for (final log in currentLogs) {
-        if ((log.summary != null &&
-                log.summary!.caseInsensitiveContains(search)) ||
-            (log.details != null &&
-                log.details!.caseInsensitiveContains(search))) {
-          matches.add(log);
-        }
-      }
-    }
-    return matches;
-  }
+  Iterable<LogData> get currentDataToSearchThrough => filteredData.value;
 
   @override
-  void filterData(Filter<LogData>? filter) {
-    if (filter?.queryFilter == null) {
+  void filterData(Filter<LogData> filter) {
+    super.filterData(filter);
+    final queryFilter = filter.queryFilter;
+    if (queryFilter.isEmpty) {
       filteredData
         ..clear()
         ..addAll(data);
-    } else {
-      filteredData
-        ..clear()
-        ..addAll(
-          data.where((log) {
-            final kindArg = filter!.queryFilter!.filterArguments[kindFilterId];
-            if (kindArg != null &&
-                !kindArg.matchesValue(log.kind.toLowerCase())) {
-              return false;
-            }
-
-            if (filter.queryFilter!.substrings.isNotEmpty) {
-              for (final substring in filter.queryFilter!.substrings) {
-                final caseInsensitiveSubstring = substring.toLowerCase();
-                final matchesKind =
-                    log.kind.toLowerCase().contains(caseInsensitiveSubstring);
-                if (matchesKind) return true;
-
-                final matchesSummary = log.summary != null &&
-                    log.summary!
-                        .toLowerCase()
-                        .contains(caseInsensitiveSubstring);
-                if (matchesSummary) return true;
-
-                final matchesDetails = log.details != null &&
-                    log.summary!
-                        .toLowerCase()
-                        .contains(caseInsensitiveSubstring);
-                if (matchesDetails) return true;
-              }
-              return false;
-            }
-            return true;
-          }).toList(),
-        );
+      return;
     }
-    activeFilter.value = filter;
+    filteredData
+      ..clear()
+      ..addAll(
+        data.where((log) {
+          final kindArg = filter.queryFilter.filterArguments[kindFilterId];
+          if (kindArg != null &&
+              !kindArg.matchesValue(log.kind.toLowerCase())) {
+            return false;
+          }
+
+          if (filter.queryFilter.substrings.isNotEmpty) {
+            for (final substring in filter.queryFilter.substrings) {
+              final matchesKind = log.kind.caseInsensitiveContains(substring);
+              if (matchesKind) return true;
+
+              final matchesSummary = log.summary != null &&
+                  log.summary!.caseInsensitiveContains(substring);
+              if (matchesSummary) return true;
+
+              final matchesDetails = log.details != null &&
+                  log.summary!.caseInsensitiveContains(substring);
+              if (matchesDetails) return true;
+            }
+            return false;
+          }
+          return true;
+        }).toList(),
+      );
   }
 }
 
@@ -793,7 +767,7 @@ String? _valueAsString(InstanceRef? ref) {
 /// case, this log entry will have a non-null `detailsComputer` field. After the
 /// data is calculated, the log entry will be modified to contain the calculated
 /// `details` data.
-class LogData with DataSearchStateMixin {
+class LogData with SearchableDataMixin {
   LogData(
     this.kind,
     this._details,
@@ -852,6 +826,12 @@ class LogData with DataSearchStateMixin {
     }
 
     return false;
+  }
+
+  @override
+  bool matchesSearchToken(RegExp regExpSearch) {
+    return (summary?.caseInsensitiveContains(regExpSearch) == true) ||
+        (details?.caseInsensitiveContains(regExpSearch) == true);
   }
 
   @override

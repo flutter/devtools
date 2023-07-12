@@ -9,14 +9,14 @@ import '../test_infra/test_data/performance.dart';
 
 void main() {
   group('PerformanceUtils', () {
-    test('computeEventGroupKey for event with a set groupKey', () async {
+    test('computeEventGroupKey for event with a set groupKey', () {
       expect(
         PerformanceUtils.computeEventGroupKey(httpEvent, threadNamesById),
         equals('HTTP/client'),
       );
     });
 
-    test('computeEventGroupKey for UI event', () async {
+    test('computeEventGroupKey for UI event', () {
       expect(
         PerformanceUtils.computeEventGroupKey(
           goldenUiTimelineEvent,
@@ -26,7 +26,7 @@ void main() {
       );
     });
 
-    test('computeEventGroupKey for Raster event', () async {
+    test('computeEventGroupKey for Raster event', () {
       expect(
         PerformanceUtils.computeEventGroupKey(
           goldenRasterTimelineEvent,
@@ -36,7 +36,7 @@ void main() {
       );
     });
 
-    test('computeEventGroupKey for Async event', () async {
+    test('computeEventGroupKey for Async event', () {
       expect(
         PerformanceUtils.computeEventGroupKey(
           goldenAsyncTimelineEvent,
@@ -61,7 +61,7 @@ void main() {
       );
     });
 
-    test('computeEventGroupKey for unknown event', () async {
+    test('computeEventGroupKey for unknown event', () {
       expect(
         PerformanceUtils.computeEventGroupKey(unknownEvent, threadNamesById),
         equals('Unknown'),

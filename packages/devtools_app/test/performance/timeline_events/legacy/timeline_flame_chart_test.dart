@@ -5,9 +5,8 @@
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/performance/panes/timeline_events/legacy/event_details.dart';
 import 'package:devtools_app/src/screens/performance/panes/timeline_events/legacy/timeline_flame_chart.dart';
-import 'package:devtools_app/src/screens/performance/tabbed_performance_view.dart';
+import 'package:devtools_app/src/screens/performance/panes/timeline_events/timeline_events_view.dart';
 import 'package:devtools_app/src/shared/charts/flame_chart.dart';
-import 'package:devtools_app/src/shared/config_specific/import_export/import_export.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -21,7 +20,7 @@ void main() {
   FakeServiceManager fakeServiceManager;
   late PerformanceController controller;
 
-  void _setUpServiceManagerWithTimeline(
+  void setUpServiceManagerWithTimeline(
     Map<String, dynamic> timelineJson,
   ) {
     fakeServiceManager = FakeServiceManager(
@@ -46,7 +45,7 @@ void main() {
 
   group('$TimelineEventsView', () {
     setUp(() {
-      _setUpServiceManagerWithTimeline(testTimelineJson);
+      setUpServiceManagerWithTimeline(testTimelineJson);
     });
 
     Future<void> pumpPerformanceScreenBody(
@@ -76,66 +75,81 @@ void main() {
 
     const windowSize = Size(2225.0, 1000.0);
 
-    testWidgetsWithWindowSize('builds header with search field', windowSize,
-        (WidgetTester tester) async {
-      await tester.runAsync(() async {
-        _setUpServiceManagerWithTimeline({});
-        await pumpPerformanceScreenBody(tester);
-        expect(find.byType(RefreshTimelineEventsButton), findsOneWidget);
-        expect(find.byKey(timelineSearchFieldKey), findsOneWidget);
-        expect(find.byType(FlameChartHelpButton), findsOneWidget);
-      });
-    });
+    testWidgetsWithWindowSize(
+      'builds header with search field',
+      windowSize,
+      (WidgetTester tester) async {
+        await tester.runAsync(() async {
+          setUpServiceManagerWithTimeline({});
+          await pumpPerformanceScreenBody(tester);
+          expect(find.byType(RefreshTimelineEventsButton), findsOneWidget);
+          expect(
+            find.byType(SearchField<LegacyTimelineEventsController>),
+            findsOneWidget,
+          );
+          expect(find.byType(FlameChartHelpButton), findsOneWidget);
+        });
+      },
+    );
 
-    testWidgetsWithWindowSize('can show help dialog', windowSize,
-        (WidgetTester tester) async {
-      await tester.runAsync(() async {
-        _setUpServiceManagerWithTimeline({});
-        await pumpPerformanceScreenBody(tester);
+    testWidgetsWithWindowSize(
+      'can show help dialog',
+      windowSize,
+      (WidgetTester tester) async {
+        await tester.runAsync(() async {
+          setUpServiceManagerWithTimeline({});
+          await pumpPerformanceScreenBody(tester);
 
-        final helpButtonFinder = find.byType(FlameChartHelpButton);
-        expect(helpButtonFinder, findsOneWidget);
-        await tester.tap(helpButtonFinder);
-        await tester.pumpAndSettle();
-        expect(find.text('Flame Chart Help'), findsOneWidget);
-      });
-    });
+          final helpButtonFinder = find.byType(FlameChartHelpButton);
+          expect(helpButtonFinder, findsOneWidget);
+          await tester.tap(helpButtonFinder);
+          await tester.pumpAndSettle();
+          expect(find.text('Flame Chart Help'), findsOneWidget);
+        });
+      },
+    );
 
-    testWidgetsWithWindowSize('builds flame chart with data', windowSize,
-        (WidgetTester tester) async {
-      await tester.runAsync(() async {
-        await pumpPerformanceScreenBody(tester);
-        expect(
-          find.byKey(TimelineEventsView.emptyTimelineKey),
-          findsNothing,
-        );
+    testWidgetsWithWindowSize(
+      'builds flame chart with data',
+      windowSize,
+      (WidgetTester tester) async {
+        await tester.runAsync(() async {
+          await pumpPerformanceScreenBody(tester);
+          expect(
+            find.byKey(TimelineEventsView.emptyTimelineKey),
+            findsNothing,
+          );
 
-        expect(find.byType(TimelineFlameChart), findsOneWidget);
-        expect(find.byType(EventDetails), findsOneWidget);
+          expect(find.byType(TimelineFlameChart), findsOneWidget);
+          expect(find.byType(EventDetails), findsOneWidget);
 
-        // Verify the state of the splitter.
-        final splitFinder = find.byType(Split);
-        expect(splitFinder, findsOneWidget);
-        final Split splitter = tester.widget(splitFinder);
-        expect(splitter.initialFractions[0], equals(0.7));
-      });
-    });
+          // Verify the state of the splitter.
+          final splitFinder = find.byType(Split);
+          expect(splitFinder, findsOneWidget);
+          final Split splitter = tester.widget(splitFinder);
+          expect(splitter.initialFractions[0], equals(0.7));
+        });
+      },
+    );
 
-    testWidgetsWithWindowSize('builds flame chart with no data', windowSize,
-        (WidgetTester tester) async {
-      await tester.runAsync(() async {
-        _setUpServiceManagerWithTimeline({});
-        await pumpPerformanceScreenBody(tester);
-        expect(
-          find.byKey(TimelineEventsView.emptyTimelineKey),
-          findsOneWidget,
-        );
+    testWidgetsWithWindowSize(
+      'builds flame chart with no data',
+      windowSize,
+      (WidgetTester tester) async {
+        await tester.runAsync(() async {
+          setUpServiceManagerWithTimeline({});
+          await pumpPerformanceScreenBody(tester);
+          expect(
+            find.byKey(TimelineEventsView.emptyTimelineKey),
+            findsOneWidget,
+          );
 
-        expect(find.byType(TimelineFlameChart), findsNothing);
-        expect(find.byType(EventDetails), findsNothing);
-        expect(find.byType(Split), findsNothing);
-      });
-    });
+          expect(find.byType(TimelineFlameChart), findsNothing);
+          expect(find.byType(EventDetails), findsNothing);
+          expect(find.byType(Split), findsNothing);
+        });
+      },
+    );
 
     testWidgetsWithWindowSize(
       'builds flame chart with selected frame',

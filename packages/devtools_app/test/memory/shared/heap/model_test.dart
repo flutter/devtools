@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app/src/shared/memory/adapted_heap_data.dart';
+import 'package:devtools_app/src/shared/memory/adapted_heap_object.dart';
 import 'package:devtools_app/src/shared/memory/class_name.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -57,26 +58,6 @@ final _heapPathTests = <_HeapPathTest>[
 ];
 
 void main() {
-  test('$AdaptedHeapData serializes.', () {
-    final json = AdaptedHeapData(
-      [
-        AdaptedHeapObject(
-          code: 1,
-          outRefs: {3, 4, 5},
-          heapClass: HeapClassName(
-            className: 'class',
-            library: 'library',
-          ),
-          shallowSize: 1,
-        )
-      ],
-      rootIndex: 0,
-      created: DateTime(2000),
-    ).toJson();
-
-    expect(json, AdaptedHeapData.fromJson(json).toJson());
-  });
-
   test('$HeapPath.isRetainedBySameClass returns expected result for.', () {
     for (final t in _heapPathTests) {
       expect(

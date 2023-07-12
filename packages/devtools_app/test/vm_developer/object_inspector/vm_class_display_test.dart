@@ -2,13 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app/src/screens/debugger/breakpoint_manager.dart';
-import 'package:devtools_app/src/screens/vm_developer/object_inspector/object_inspector_view_controller.dart';
+import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/vm_developer/object_inspector/vm_class_display.dart';
 import 'package:devtools_app/src/screens/vm_developer/vm_developer_common_widgets.dart';
-import 'package:devtools_app/src/service/service_manager.dart';
-import 'package:devtools_app/src/shared/config_specific/ide_theme/ide_theme.dart';
-import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -29,6 +25,9 @@ void main() {
     setGlobal(BreakpointManager, BreakpointManager());
     setGlobal(IdeTheme, IdeTheme());
     setGlobal(ServiceConnectionManager, FakeServiceManager());
+    setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
+    setGlobal(PreferencesController, PreferencesController());
+    setGlobal(NotificationService, NotificationService());
     mockClassObject = MockClassObject();
 
     final json = testClass.toJson();
@@ -40,34 +39,40 @@ void main() {
     when(mockClassObject.obj).thenReturn(testClassCopy);
   });
 
-  testWidgetsWithWindowSize('builds class display', windowSize,
-      (WidgetTester tester) async {
-    await tester.pumpWidget(
-      wrap(
-        VmClassDisplay(
-          clazz: mockClassObject,
-          controller: ObjectInspectorViewController(),
+  testWidgetsWithWindowSize(
+    'builds class display',
+    windowSize,
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        wrap(
+          VmClassDisplay(
+            clazz: mockClassObject,
+            controller: ObjectInspectorViewController(),
+          ),
         ),
-      ),
-    );
+      );
 
-    expect(find.byType(VmObjectDisplayBasicLayout), findsOneWidget);
-    expect(find.byType(VMInfoCard), findsOneWidget);
-    expect(find.text('General Information'), findsOneWidget);
-    expect(find.text('1 KB'), findsOneWidget);
-    expect(find.text('fooLib'), findsOneWidget);
-    expect(find.text('fooScript.dart:10:4'), findsOneWidget);
-    expect(find.text('fooSuperClass'), findsOneWidget);
-    expect(find.text('fooSuperType'), findsOneWidget);
-    expect(find.text('Currently allocated instances:'), findsOneWidget);
-    expect(find.text('3'), findsOneWidget);
+      expect(find.byType(VmObjectDisplayBasicLayout), findsOneWidget);
+      expect(find.byType(VMInfoCard), findsOneWidget);
+      expect(find.text('General Information'), findsOneWidget);
+      expect(find.text('1 KB'), findsOneWidget);
+      expect(find.text('fooLib', findRichText: true), findsOneWidget);
+      expect(
+        find.text('fooScript.dart:10:4', findRichText: true),
+        findsOneWidget,
+      );
+      expect(find.text('fooSuperClass', findRichText: true), findsOneWidget);
+      expect(find.text('fooSuperType', findRichText: true), findsOneWidget);
+      expect(find.text('Currently allocated instances:'), findsOneWidget);
+      expect(find.text('3'), findsOneWidget);
 
-    expect(find.byType(RequestableSizeWidget), findsNWidgets(2));
+      expect(find.byType(RequestableSizeWidget), findsNWidgets(2));
 
-    expect(find.byType(RetainingPathWidget), findsOneWidget);
+      expect(find.byType(RetainingPathWidget), findsOneWidget);
 
-    expect(find.byType(InboundReferencesWidget), findsOneWidget);
+      expect(find.byType(InboundReferencesWidget), findsOneWidget);
 
-    // TODO(mtaylee): test ClassInstancesWidget when implemented
-  });
+      // TODO(mtaylee): test ClassInstancesWidget when implemented
+    },
+  );
 }

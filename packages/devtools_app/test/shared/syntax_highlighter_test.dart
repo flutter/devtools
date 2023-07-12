@@ -177,6 +177,10 @@ void main() {
             theme: themeFor(
               isDarkTheme: useDarkTheme,
               ideTheme: getIdeTheme(),
+              theme: ThemeData(
+                useMaterial3: true,
+                colorScheme: useDarkTheme ? darkColorScheme : lightColorScheme,
+              ),
             ),
             routerDelegate: DevToolsRouterDelegate(
               (a, b, c, d) => const CupertinoPage(child: SizedBox.shrink()),

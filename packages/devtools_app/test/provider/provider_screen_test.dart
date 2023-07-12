@@ -3,16 +3,11 @@
 // found in the LICENSE file.
 
 @TestOn('vm')
+import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/provider/instance_viewer/instance_details.dart';
 import 'package:devtools_app/src/screens/provider/instance_viewer/instance_providers.dart';
 import 'package:devtools_app/src/screens/provider/provider_list.dart';
 import 'package:devtools_app/src/screens/provider/provider_nodes.dart';
-import 'package:devtools_app/src/screens/provider/provider_screen.dart';
-import 'package:devtools_app/src/service/service_manager.dart';
-import 'package:devtools_app/src/shared/banner_messages.dart';
-import 'package:devtools_app/src/shared/config_specific/ide_theme/ide_theme.dart';
-import 'package:devtools_app/src/shared/globals.dart';
-import 'package:devtools_app/src/shared/notifications.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -25,26 +20,27 @@ void main() {
   const windowSize = Size(2225.0, 1000.0);
 
   late Widget providerScreen;
-  late BannerMessagesController bannerMessagesController;
 
   setUpAll(() async => await loadFonts());
 
   setUp(() {
     setGlobal(IdeTheme, getIdeTheme());
+    setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
+    setGlobal(PreferencesController, PreferencesController());
     setGlobal(ServiceConnectionManager, FakeServiceManager());
     setGlobal(NotificationService, NotificationService());
+    setGlobal(BannerMessagesController, BannerMessagesController());
   });
 
   setUp(() {
-    bannerMessagesController = BannerMessagesController();
-
     providerScreen = Container(
       color: Colors.grey,
       child: Directionality(
         textDirection: TextDirection.ltr,
-        child: wrapWithControllers(
-          BannerMessages(screen: ProviderScreen()),
-          bannerMessages: bannerMessagesController,
+        child: wrap(
+          BannerMessages(
+            screen: ProviderScreen(),
+          ),
         ),
       ),
     );
@@ -52,40 +48,42 @@ void main() {
 
   group('ProviderScreen', () {
     testWidgetsWithWindowSize(
-        'shows ProviderUnknownErrorBanner if the devtool failed to fetch the list of providers',
-        windowSize, (tester) async {
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            sortedProviderNodesProvider.overrideWithValue(
-              const AsyncValue.loading(),
-            ),
-          ],
-          child: providerScreen,
-        ),
-      );
+      'shows ProviderUnknownErrorBanner if the devtool failed to fetch the list of providers',
+      windowSize,
+      (tester) async {
+        await tester.pumpWidget(
+          ProviderScope(
+            overrides: [
+              sortedProviderNodesProvider.overrideWithValue(
+                const AsyncValue.loading(),
+              ),
+            ],
+            child: providerScreen,
+          ),
+        );
 
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            sortedProviderNodesProvider.overrideWithValue(
-              AsyncValue.error(StateError('')),
-            ),
-          ],
-          child: providerScreen,
-        ),
-      );
+        await tester.pumpWidget(
+          ProviderScope(
+            overrides: [
+              sortedProviderNodesProvider.overrideWithValue(
+                AsyncValue.error(StateError('')),
+              ),
+            ],
+            child: providerScreen,
+          ),
+        );
 
-      // wait for the Banner to appear as it is mounted asynchronously
-      await tester.pump();
+        // wait for the Banner to appear as it is mounted asynchronously
+        await tester.pump();
 
-      await expectLater(
-        find.byType(ProviderScreenBody),
-        matchesDevToolsGolden(
-          '../test_infra/goldens/provider_screen/list_error_banner.png',
-        ),
-      );
-    });
+        await expectLater(
+          find.byType(ProviderScreenBody),
+          matchesDevToolsGolden(
+            '../test_infra/goldens/provider_screen/list_error_banner.png',
+          ),
+        );
+      },
+    );
   });
 
   group('selectedProviderIdProvider', () {
@@ -156,36 +154,37 @@ void main() {
     });
 
     test(
-        'When the currently selected provider is removed, selects the next first provider',
-        () async {
-      final container = ProviderContainer(
-        overrides: [
+      'When the currently selected provider is removed, selects the next first provider',
+      () {
+        final container = ProviderContainer(
+          overrides: [
+            sortedProviderNodesProvider.overrideWithValue(
+              const AsyncValue.data([
+                ProviderNode(id: '0', type: 'Provider<A>'),
+              ]),
+            ),
+          ],
+        );
+        addTearDown(container.dispose);
+
+        final sub = container.listen<String?>(
+          selectedProviderIdProvider,
+          (prev, next) {},
+        );
+
+        expect(sub.read(), '0');
+
+        container.updateOverrides([
           sortedProviderNodesProvider.overrideWithValue(
             const AsyncValue.data([
-              ProviderNode(id: '0', type: 'Provider<A>'),
+              ProviderNode(id: '1', type: 'Provider<B>'),
             ]),
           ),
-        ],
-      );
-      addTearDown(container.dispose);
+        ]);
 
-      final sub = container.listen<String?>(
-        selectedProviderIdProvider,
-        (prev, next) {},
-      );
-
-      expect(sub.read(), '0');
-
-      container.updateOverrides([
-        sortedProviderNodesProvider.overrideWithValue(
-          const AsyncValue.data([
-            ProviderNode(id: '1', type: 'Provider<B>'),
-          ]),
-        ),
-      ]);
-
-      expect(sub.read(), '1');
-    });
+        expect(sub.read(), '1');
+      },
+    );
 
     test('Once a provider is selected, further updates are no-op', () async {
       final container = ProviderContainer(
@@ -224,51 +223,52 @@ void main() {
     });
 
     test(
-        'when the list of providers becomes empty, the current provider is unselected '
-        ', then, the first provider will be selected when the list becomes non-empty again.',
-        () async {
-      final container = ProviderContainer(
-        overrides: [
+      'when the list of providers becomes empty, the current provider is unselected '
+      ', then, the first provider will be selected when the list becomes non-empty again.',
+      () async {
+        final container = ProviderContainer(
+          overrides: [
+            sortedProviderNodesProvider.overrideWithValue(
+              const AsyncValue.data([
+                ProviderNode(id: '0', type: 'Provider<A>'),
+              ]),
+            ),
+          ],
+        );
+        addTearDown(container.dispose);
+
+        final sub = container.listen<String?>(
+          selectedProviderIdProvider,
+          (prev, next) {},
+        );
+
+        await container.pump();
+
+        expect(sub.read(), '0');
+
+        container.updateOverrides([
+          sortedProviderNodesProvider.overrideWithValue(
+            const AsyncValue.data([]),
+          ),
+        ]);
+
+        await container.pump();
+
+        expect(sub.read(), isNull);
+
+        container.updateOverrides([
           sortedProviderNodesProvider.overrideWithValue(
             const AsyncValue.data([
-              ProviderNode(id: '0', type: 'Provider<A>'),
+              ProviderNode(id: '1', type: 'Provider<B>'),
             ]),
           ),
-        ],
-      );
-      addTearDown(container.dispose);
+        ]);
 
-      final sub = container.listen<String?>(
-        selectedProviderIdProvider,
-        (prev, next) {},
-      );
+        await container.pump();
 
-      await container.pump();
-
-      expect(sub.read(), '0');
-
-      container.updateOverrides([
-        sortedProviderNodesProvider.overrideWithValue(
-          const AsyncValue.data([]),
-        ),
-      ]);
-
-      await container.pump();
-
-      expect(sub.read(), isNull);
-
-      container.updateOverrides([
-        sortedProviderNodesProvider.overrideWithValue(
-          const AsyncValue.data([
-            ProviderNode(id: '1', type: 'Provider<B>'),
-          ]),
-        ),
-      ]);
-
-      await container.pump();
-
-      expect(sub.read(), '1');
-    });
+        expect(sub.read(), '1');
+      },
+    );
   });
 
   group('ProviderList', () {
@@ -283,126 +283,130 @@ void main() {
               setter: null,
             ),
           ),
-        )
+        ),
       ];
     }
 
     testWidgetsWithWindowSize(
-        'selects the first provider the first time a provider is received',
-        windowSize, (tester) async {
-      final container = ProviderContainer(
-        overrides: [
-          sortedProviderNodesProvider
-              .overrideWithValue(const AsyncValue.loading()),
+      'selects the first provider the first time a provider is received',
+      windowSize,
+      (tester) async {
+        final container = ProviderContainer(
+          overrides: [
+            sortedProviderNodesProvider
+                .overrideWithValue(const AsyncValue.loading()),
+            ...getOverrides(),
+          ],
+        );
+
+        await tester.pumpWidget(
+          UncontrolledProviderScope(
+            container: container,
+            child: providerScreen,
+          ),
+        );
+
+        expect(container.read(selectedProviderIdProvider), isNull);
+        expect(find.byType(ProviderNodeItem), findsNothing);
+
+        await expectLater(
+          find.byType(ProviderScreenBody),
+          matchesDevToolsGolden(
+            '../test_infra/goldens/provider_screen/no_selected_provider.png',
+          ),
+        );
+
+        container.updateOverrides([
+          sortedProviderNodesProvider.overrideWithValue(
+            const AsyncValue.data([
+              ProviderNode(id: '0', type: 'Provider<A>'),
+              ProviderNode(id: '1', type: 'Provider<B>'),
+            ]),
+          ),
           ...getOverrides(),
-        ],
-      );
+        ]);
 
-      await tester.pumpWidget(
-        UncontrolledProviderScope(
-          container: container,
-          child: providerScreen,
-        ),
-      );
+        await tester.pump();
 
-      expect(container.read(selectedProviderIdProvider), isNull);
-      expect(find.byType(ProviderNodeItem), findsNothing);
+        expect(container.read(selectedProviderIdProvider), '0');
+        expect(find.byType(ProviderNodeItem), findsNWidgets(2));
+        expect(
+          find.descendant(
+            of: find.byKey(const Key('provider-0')),
+            matching: find.text('Provider<A>()'),
+          ),
+          findsOneWidget,
+        );
+        expect(
+          find.descendant(
+            of: find.byKey(const Key('provider-1')),
+            matching: find.text('Provider<B>()'),
+          ),
+          findsOneWidget,
+        );
 
-      await expectLater(
-        find.byType(ProviderScreenBody),
-        matchesDevToolsGolden(
-          '../test_infra/goldens/provider_screen/no_selected_provider.png',
-        ),
-      );
-
-      container.updateOverrides([
-        sortedProviderNodesProvider.overrideWithValue(
-          const AsyncValue.data([
-            ProviderNode(id: '0', type: 'Provider<A>'),
-            ProviderNode(id: '1', type: 'Provider<B>'),
-          ]),
-        ),
-        ...getOverrides(),
-      ]);
-
-      await tester.pump();
-
-      expect(container.read(selectedProviderIdProvider), '0');
-      expect(find.byType(ProviderNodeItem), findsNWidgets(2));
-      expect(
-        find.descendant(
-          of: find.byKey(const Key('provider-0')),
-          matching: find.text('Provider<A>()'),
-        ),
-        findsOneWidget,
-      );
-      expect(
-        find.descendant(
-          of: find.byKey(const Key('provider-1')),
-          matching: find.text('Provider<B>()'),
-        ),
-        findsOneWidget,
-      );
-
-      await expectLater(
-        find.byType(ProviderScreenBody),
-        matchesDevToolsGolden(
-          '../test_infra/goldens/provider_screen/selected_provider.png',
-        ),
-      );
-    });
+        await expectLater(
+          find.byType(ProviderScreenBody),
+          matchesDevToolsGolden(
+            '../test_infra/goldens/provider_screen/selected_provider.png',
+          ),
+        );
+      },
+    );
 
     testWidgetsWithWindowSize(
-        'shows ProviderUnknownErrorBanner if the devtool failed to fetch the selected provider',
-        windowSize, (tester) async {
-      final overrides = [
-        sortedProviderNodesProvider.overrideWithValue(
-          const AsyncValue.data([
-            ProviderNode(id: '0', type: 'Provider<A>'),
-            ProviderNode(id: '1', type: 'Provider<B>'),
-          ]),
-        ),
-        ...getOverrides(),
-      ];
+      'shows ProviderUnknownErrorBanner if the devtool failed to fetch the selected provider',
+      windowSize,
+      (tester) async {
+        final overrides = [
+          sortedProviderNodesProvider.overrideWithValue(
+            const AsyncValue.data([
+              ProviderNode(id: '0', type: 'Provider<A>'),
+              ProviderNode(id: '1', type: 'Provider<B>'),
+            ]),
+          ),
+          ...getOverrides(),
+        ];
 
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            ...overrides,
-            instanceProvider(const InstancePath.fromProviderId('0'))
-                .overrideWithValue(const AsyncValue.loading()),
-          ],
-          child: providerScreen,
-        ),
-      );
+        await tester.pumpWidget(
+          ProviderScope(
+            overrides: [
+              ...overrides,
+              instanceProvider(const InstancePath.fromProviderId('0'))
+                  .overrideWithValue(const AsyncValue.loading()),
+            ],
+            child: providerScreen,
+          ),
+        );
 
-      await tester.pumpWidget(
-        ProviderScope(
-          overrides: [
-            ...overrides,
-            instanceProvider(const InstancePath.fromProviderId('0'))
-                .overrideWithValue(AsyncValue.error(Error())),
-          ],
-          child: providerScreen,
-        ),
-      );
+        await tester.pumpWidget(
+          ProviderScope(
+            overrides: [
+              ...overrides,
+              instanceProvider(const InstancePath.fromProviderId('0'))
+                  .overrideWithValue(AsyncValue.error(Error())),
+            ],
+            child: providerScreen,
+          ),
+        );
 
-      // await for the modal to be mounted as it is rendered asynchronously
-      await tester.pump();
+        // await for the modal to be mounted as it is rendered asynchronously
+        await tester.pump();
 
-      expect(
-        find.byKey(
-          Key('ProviderUnknownErrorBanner - ${ProviderScreen.id}'),
-        ),
-        findsOneWidget,
-      );
+        expect(
+          find.byKey(
+            Key('ProviderUnknownErrorBanner - ${ProviderScreen.id}'),
+          ),
+          findsOneWidget,
+        );
 
-      await expectLater(
-        find.byType(ProviderScreenBody),
-        matchesDevToolsGolden(
-          '../test_infra/goldens/provider_screen/selected_provider_error_banner.png',
-        ),
-      );
-    });
+        await expectLater(
+          find.byType(ProviderScreenBody),
+          matchesDevToolsGolden(
+            '../test_infra/goldens/provider_screen/selected_provider_error_banner.png',
+          ),
+        );
+      },
+    );
   });
 }

@@ -3,14 +3,14 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app/devtools_app.dart';
-import 'package:devtools_app/src/screens/profiler/cpu_profile_controller.dart';
-import 'package:devtools_app/src/shared/config_specific/import_export/import_export.dart';
+import 'package:devtools_app/src/screens/profiler/cpu_profiler_controller.dart';
+import 'package:devtools_shared/devtools_test_utils.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../test_infra/test_data/cpu_profile.dart';
+import '../test_infra/test_data/cpu_profiler/cpu_profile.dart';
 
 void main() {
   final ServiceConnectionManager fakeServiceManager = FakeServiceManager(
@@ -24,6 +24,17 @@ void main() {
 
   group('CpuProfileController', () {
     late CpuProfilerController controller;
+
+    Future<void> disableAllFiltering() async {
+      for (final filter in controller.activeFilter.value.toggleFilters) {
+        filter.enabled.value = false;
+      }
+      controller.setActiveFilter();
+      // [CpuProfilerController.filterData], which is triggered by the call to
+      // [setActiveFilter] via a listener callback, calls an unawaited future.
+      // We await a short delay here to ensure that that future completes.
+      await shortDelay();
+    }
 
     setUp(() {
       setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
@@ -55,7 +66,7 @@ void main() {
         controller.dataNotifier.value,
         equals(CpuProfilerController.baseStateCpuProfileData),
       );
-      expect(controller.processingNotifier.value, false);
+      expect(controller.profilerBusyStatus.value, CpuProfilerBusyStatus.none);
 
       // [startMicros] and [extentMicros] are arbitrary for testing.
       await controller.pullAndProcessProfile(
@@ -67,7 +78,7 @@ void main() {
         controller.dataNotifier.value,
         isNot(equals(CpuProfilerController.baseStateCpuProfileData)),
       );
-      expect(controller.processingNotifier.value, false);
+      expect(controller.profilerBusyStatus.value, CpuProfilerBusyStatus.none);
 
       await controller.clear();
       expect(
@@ -86,11 +97,12 @@ void main() {
       final originalData = controller.cpuProfileStore.lookupProfile(
         label: CpuProfilerController.userTagNone,
       )!;
-      final filteredData = controller.dataNotifier.value!;
       expect(
         originalData.functionProfile.stackFrames.values.length,
         equals(17),
       );
+
+      final filteredData = controller.dataNotifier.value!;
       expect(filteredData.stackFrames.values.length, equals(12));
 
       // The native frame filter is applied by default.
@@ -104,37 +116,58 @@ void main() {
       expect(filteredNativeFrames, isEmpty);
     });
 
-    test('generateToggleFilterSuffix', () {
-      for (final toggleFilter in controller.toggleFilters) {
-        toggleFilter.enabled.value = false;
+    test('filters data by query filter', () async {
+      // [startMicros] and [extentMicros] are arbitrary for testing.
+      await controller.pullAndProcessProfile(
+        startMicros: 0,
+        extentMicros: 100,
+        processId: 'test',
+      );
+      final originalData = controller.cpuProfileStore.lookupProfile(
+        label: CpuProfilerController.userTagNone,
+      )!;
+      expect(
+        originalData.functionProfile.stackFrames.values.length,
+        equals(17),
+      );
+
+      // At this point, data is filtered by the default toggle filter values.
+      var filteredData = controller.dataNotifier.value!;
+      expect(filteredData.stackFrames.values.length, equals(12));
+
+      // [CpuProfilerController.filterData], which is triggered by the call to
+      // [setActiveFilter] via a listener callback, calls an unawaited future.
+      // We await a short delay here and below to ensure that that future
+      // completes.
+      controller.setActiveFilter(query: 'uri:dart:vm');
+      await shortDelay();
+      filteredData = controller.dataNotifier.value!;
+      expect(filteredData.stackFrames.values.length, equals(3));
+
+      controller.setActiveFilter(query: 'render uri:dart:vm');
+      await shortDelay();
+      filteredData = controller.dataNotifier.value!;
+      expect(filteredData.stackFrames.values.length, equals(2));
+
+      controller.setActiveFilter(query: 'abcdefg some bogus value');
+      await shortDelay();
+      filteredData = controller.dataNotifier.value!;
+      expect(filteredData.stackFrames.values.length, equals(0));
+
+      // 'thread' events are excluded because Native frames are hidden by
+      // default.
+      controller.setActiveFilter(query: 'paint thread');
+      await shortDelay();
+      filteredData = controller.dataNotifier.value!;
+      expect(filteredData.stackFrames.values.length, equals(7));
+
+      for (final filter in controller.activeFilter.value.toggleFilters) {
+        filter.enabled.value = false;
       }
-      expect(controller.generateToggleFilterSuffix(), equals(''));
-
-      controller.toggleFilters[0].enabled.value = true;
-      expect(
-        controller.generateToggleFilterSuffix(),
-        equals('Hide Native code'),
-      );
-
-      controller.toggleFilters[1].enabled.value = true;
-      expect(
-        controller.generateToggleFilterSuffix(),
-        equals('Hide Native code,Hide core Dart libraries'),
-      );
-
-      controller.toggleFilters[2].enabled.value = true;
-      expect(
-        controller.generateToggleFilterSuffix(),
-        equals(
-          'Hide Native code,Hide core Dart libraries,Hide core Flutter libraries',
-        ),
-      );
-
-      controller.toggleFilters[1].enabled.value = false;
-      expect(
-        controller.generateToggleFilterSuffix(),
-        equals('Hide Native code,Hide core Flutter libraries'),
-      );
+      controller.setActiveFilter(query: 'paint thread');
+      await shortDelay();
+      filteredData = controller.dataNotifier.value!;
+      expect(filteredData.stackFrames.values.length, equals(9));
     });
 
     test('selectCpuStackFrame', () async {
@@ -160,10 +193,7 @@ void main() {
     });
 
     test('matchesForSearch', () async {
-      // Disable all filtering by default for this sake of this test.
-      for (final filter in controller.toggleFilters) {
-        filter.enabled.value = false;
-      }
+      await disableAllFiltering();
 
       // [startMicros] and [extentMicros] are arbitrary for testing.
       await controller.pullAndProcessProfile(
@@ -190,17 +220,14 @@ void main() {
 
       // Match with RegExp.
       expect(
-        controller.matchesForSearch('rendering/.*\.dart').length,
+        controller.matchesForSearch('rendering/.*.dart').length,
         equals(7),
       );
-      expect(controller.matchesForSearch('RENDER.*\.paint').length, equals(6));
+      expect(controller.matchesForSearch('RENDER.*.paint').length, equals(6));
     });
 
     test('matchesForSearch sets isSearchMatch property', () async {
-      // Disable all filtering by default for this sake of this test.
-      for (final filter in controller.toggleFilters) {
-        filter.enabled.value = false;
-      }
+      await disableAllFiltering();
 
       // [startMicros] and [extentMicros] are arbitrary for testing.
       await controller.pullAndProcessProfile(
@@ -229,10 +256,7 @@ void main() {
     });
 
     test('processDataForTag', () async {
-      // Disable toggle filters for the purpose of this test.
-      for (final toggleFilter in controller.toggleFilters) {
-        toggleFilter.enabled.value = false;
-      }
+      await disableAllFiltering();
 
       final cpuProfileDataWithTags =
           CpuProfileData.parse(cpuProfileDataWithUserTagsJson);
@@ -313,52 +337,21 @@ void main() {
       await controller.loadDataWithTag(CpuProfilerController.groupByUserTag);
       expect(
         controller.dataNotifier.value!.cpuProfileRoot.profileAsString(),
-        equals(
-          '''
-  all - children: 3 - excl: 0 - incl: 5
-    userTagA - children: 1 - excl: 0 - incl: 2
-      Frame1 - children: 2 - excl: 0 - incl: 2
-        Frame2 - children: 1 - excl: 0 - incl: 1
-          Frame3 - children: 0 - excl: 1 - incl: 1
-        Frame5 - children: 0 - excl: 1 - incl: 1
-    userTagB - children: 1 - excl: 0 - incl: 1
-      Frame1 - children: 1 - excl: 0 - incl: 1
-        Frame2 - children: 1 - excl: 0 - incl: 1
-          Frame4 - children: 0 - excl: 1 - incl: 1
-    userTagC - children: 1 - excl: 0 - incl: 2
-      Frame1 - children: 1 - excl: 0 - incl: 2
-        Frame5 - children: 1 - excl: 1 - incl: 2
-          Frame6 - children: 0 - excl: 1 - incl: 1
-''',
-        ),
+        profileGroupedByUserTagsGolden,
       );
 
       await controller.loadDataWithTag(CpuProfilerController.groupByVmTag);
       expect(
         controller.dataNotifier.value!.cpuProfileRoot.profileAsString(),
-        equals(
-          '''
-  all - children: 3 - excl: 0 - incl: 5
-    vmTagA - children: 1 - excl: 0 - incl: 2
-      Frame1 - children: 2 - excl: 0 - incl: 2
-        Frame2 - children: 1 - excl: 0 - incl: 1
-          Frame3 - children: 0 - excl: 1 - incl: 1
-        Frame5 - children: 0 - excl: 1 - incl: 1
-    vmTagB - children: 1 - excl: 0 - incl: 1
-      Frame1 - children: 1 - excl: 0 - incl: 1
-        Frame2 - children: 1 - excl: 0 - incl: 1
-          Frame4 - children: 0 - excl: 1 - incl: 1
-    vmTagC - children: 1 - excl: 0 - incl: 2
-      Frame1 - children: 1 - excl: 0 - incl: 2
-        Frame5 - children: 1 - excl: 1 - incl: 2
-          Frame6 - children: 0 - excl: 1 - incl: 1
-''',
-        ),
+        profileGroupedByVmTagsGolden,
       );
     });
 
     test('processDataForTag applies toggle filters by default', () async {
-      expect(controller.toggleFilters[0].enabled.value, isTrue);
+      expect(
+        controller.activeFilter.value.toggleFilters[0].enabled.value,
+        isTrue,
+      );
       final cpuProfileDataWithTags =
           CpuProfileData.parse(cpuProfileDataWithUserTagsJson);
       await controller.transformer.processData(
@@ -473,7 +466,7 @@ void main() {
         equals(CpuProfilerController.baseStateCpuProfileData),
       );
       expect(controller.selectedCpuStackFrameNotifier.value, isNull);
-      expect(controller.processingNotifier.value, isFalse);
+      expect(controller.profilerBusyStatus.value, CpuProfilerBusyStatus.none);
     });
 
     test('disposes', () {
@@ -492,7 +485,7 @@ void main() {
       );
       expect(
         () {
-          controller.processingNotifier.addListener(() {});
+          controller.profilerBusyStatus.addListener(() {});
         },
         throwsA(anything),
       );

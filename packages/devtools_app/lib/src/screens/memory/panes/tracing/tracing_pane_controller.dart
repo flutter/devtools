@@ -127,19 +127,20 @@ class TracingIsolateState {
     await Future.wait(profileRequests);
   }
 
-  void updateClassFilter(String value, {bool force = false}) {
-    if (value.isEmpty && _currentFilter.isEmpty && !force) return;
-    final updatedFilteredClassList = (value.contains(_currentFilter) && !force
-            ? _filteredClassList.value
-            : unfilteredClassList)
-        .where(
-          (e) => e.cls.name!.contains(value),
-        )
-        .map((e) => tracedClasses[e.cls.id!]!)
-        .toList();
+  void updateClassFilter(String newFilter, {bool force = false}) {
+    if (newFilter.isEmpty && _currentFilter.isEmpty && !force) return;
+    final updatedFilteredClassList =
+        (newFilter.caseInsensitiveContains(_currentFilter) && !force
+                ? _filteredClassList.value
+                : unfilteredClassList)
+            .where(
+              (e) => e.cls.name!.caseInsensitiveContains(newFilter),
+            )
+            .map((e) => tracedClasses[e.cls.id!]!)
+            .toList();
 
     _filteredClassList.replaceAll(updatedFilteredClassList);
-    _currentFilter = value;
+    _currentFilter = newFilter;
   }
 
   /// Clears the allocation profiles for the currently traced classes.
@@ -267,7 +268,7 @@ class TracingPaneController extends DisposableController
     _initialized = true;
     _initializing.value = true;
 
-    final updateState = () async {
+    Future<void> updateState() async {
       final isolate = serviceManager.isolateManager.selectedIsolate.value!;
       final isolateId = isolate.id!;
       var state = _stateForIsolate[isolateId];
@@ -282,7 +283,7 @@ class TracingPaneController extends DisposableController
       // Restore the previously applied filter for the isolate.
       textEditingController.text = state._currentFilter;
       _stateForIsolateListenable.value = state;
-    };
+    }
 
     addAutoDisposeListener(
       serviceManager.isolateManager.selectedIsolate,

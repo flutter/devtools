@@ -7,13 +7,12 @@ import 'dart:async';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:provider/provider.dart' as provider show Provider;
 
 import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/banner_messages.dart';
 import '../../shared/common_widgets.dart';
 import '../../shared/dialogs.dart';
-import '../../shared/primitives/simple_items.dart';
+import '../../shared/globals.dart';
 import '../../shared/screen.dart';
 import '../../shared/split.dart';
 import 'instance_viewer/instance_details.dart';
@@ -52,8 +51,8 @@ class ProviderScreen extends Screen {
           id: id,
           requiresLibrary: 'package:provider/',
           title: ScreenMetaData.provider.title,
+          icon: ScreenMetaData.provider.icon,
           requiresDebugBuild: true,
-          icon: Icons.attach_file,
         );
 
   static final id = ScreenMetaData.provider.id;
@@ -68,7 +67,7 @@ class ProviderScreenWrapper extends StatefulWidget {
   const ProviderScreenWrapper({Key? key}) : super(key: key);
 
   @override
-  _ProviderScreenWrapperState createState() => _ProviderScreenWrapperState();
+  State<ProviderScreenWrapper> createState() => _ProviderScreenWrapperState();
 }
 
 class _ProviderScreenWrapperState extends State<ProviderScreenWrapper> {
@@ -98,18 +97,20 @@ class ProviderScreenBody extends ConsumerWidget {
         : '[No provider selected]';
 
     ref.listen<bool>(_hasErrorProvider, (_, hasError) {
-      if (hasError) showProviderErrorBanner(context);
+      if (hasError) showProviderErrorBanner();
     });
 
     return Split(
       axis: splitAxis,
       initialFractions: const [0.33, 0.67],
       children: [
-        OutlineDecoration(
+        const RoundedOutlinedBorder(
+          clip: true,
           child: Column(
-            children: const [
+            children: [
               AreaPaneHeader(
-                needsTopBorder: false,
+                roundedTopBorder: false,
+                includeTopBorder: false,
                 title: Text('Providers'),
               ),
               Expanded(
@@ -118,11 +119,13 @@ class ProviderScreenBody extends ConsumerWidget {
             ],
           ),
         ),
-        OutlineDecoration(
+        RoundedOutlinedBorder(
+          clip: true,
           child: Column(
             children: [
               AreaPaneHeader(
-                needsTopBorder: false,
+                roundedTopBorder: false,
+                includeTopBorder: false,
                 title: Text(detailsTitleText),
                 actions: [
                   ToolbarAction(
@@ -153,11 +156,8 @@ class ProviderScreenBody extends ConsumerWidget {
   }
 }
 
-void showProviderErrorBanner(BuildContext context) {
-  provider.Provider.of<BannerMessagesController>(
-    context,
-    listen: false,
-  ).addMessage(
+void showProviderErrorBanner() {
+  bannerMessages.addMessage(
     ProviderUnknownErrorBanner(screenId: ProviderScreen.id).build(),
   );
 }

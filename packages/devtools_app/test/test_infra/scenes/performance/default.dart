@@ -17,10 +17,9 @@ import 'package:stager/stager.dart';
 /// flutter run -t test/test_infra/scenes/performance/default.stager_app.dart -d macos
 class PerformanceDefaultScene extends Scene {
   late PerformanceController controller;
-  final screen = PerformanceScreen();
 
   @override
-  Widget build() {
+  Widget build(BuildContext context) {
     return wrapWithControllers(
       const PerformanceScreenBody(),
       performance: controller,
@@ -34,6 +33,7 @@ class PerformanceDefaultScene extends Scene {
     setGlobal(OfflineModeController, OfflineModeController());
     setGlobal(IdeTheme, IdeTheme());
     setGlobal(NotificationService, NotificationService());
+    setGlobal(BannerMessagesController, BannerMessagesController());
     setGlobal(PreferencesController, PreferencesController());
     setGlobal(ServiceConnectionManager, ServiceConnectionManager());
     await _loadOfflineSnapshot(
@@ -46,6 +46,7 @@ class PerformanceDefaultScene extends Scene {
   @override
   String get title => '$PerformanceDefaultScene';
 
+  // TODO(kenz): call tearDown on the scenes that use this scene
   void tearDown() {
     FeatureFlags.widgetRebuildstats = false;
   }

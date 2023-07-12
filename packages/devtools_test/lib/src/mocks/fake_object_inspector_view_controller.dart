@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app/devtools_app.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -13,6 +12,5 @@ class FakeObjectInspectorViewController extends Fake
   final classHierarchyController = ClassHierarchyExplorerController();
 
   @override
-  Future<void> findAndSelectNodeForObject(
-      BuildContext context, ObjRef obj) async {}
+  Future<void> findAndSelectNodeForObject(ObjRef obj) async {}
 }

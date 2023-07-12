@@ -22,6 +22,7 @@ final _fileNamesCache = <String, String>{};
 
 class FileSearchField extends StatefulWidget {
   const FileSearchField({
+    super.key,
     required this.codeViewController,
   });
 
@@ -33,20 +34,22 @@ class FileSearchField extends StatefulWidget {
 
 class FileSearchFieldState extends State<FileSearchField>
     with AutoDisposeMixin, SearchFieldMixin {
-  late AutoCompleteController autoCompleteController;
+  static final fileSearchFieldKey = GlobalKey(debugLabel: 'fileSearchFieldKey');
+
+  final autoCompleteController = AutoCompleteController(fileSearchFieldKey);
 
   final _scriptsCache = <String, ScriptRef>{};
-
-  final fileSearchFieldKey = GlobalKey(debugLabel: 'fileSearchFieldKey');
 
   late String _query;
   late FileSearchResults _searchResults;
 
   @override
+  SearchControllerMixin get searchController => autoCompleteController;
+
+  @override
   void initState() {
     super.initState();
 
-    autoCompleteController = AutoCompleteController();
     autoCompleteController.setCurrentHoveredIndexValue(0);
 
     addAutoDisposeListener(
@@ -70,12 +73,11 @@ class FileSearchFieldState extends State<FileSearchField>
 
   @override
   Widget build(BuildContext context) {
-    return buildAutoCompleteSearchField(
+    return AutoCompleteSearchField(
       controller: autoCompleteController,
-      searchFieldKey: fileSearchFieldKey,
       searchFieldEnabled: true,
       shouldRequestFocus: true,
-      keyEventsToPropagate: {LogicalKeyboardKey.escape},
+      keyEventsToIgnore: {LogicalKeyboardKey.escape},
       onSelection: _onSelection,
       onClose: _onClose,
       label: 'Open file',
@@ -129,13 +131,14 @@ class FileSearchFieldState extends State<FileSearchField>
     _scriptsCache.putIfAbsent(uri, () => scriptRef);
   }
 
-  void _onSelection(String scriptUri) {
+  Future<void> _onSelection(String scriptUri) async {
     if (scriptUri == noResultsMsg) {
       _onClose();
       return;
     }
     final scriptRef = _scriptsCache[scriptUri]!;
-    widget.codeViewController.showScriptLocation(ScriptLocation(scriptRef));
+    await widget.codeViewController
+        .showScriptLocation(ScriptLocation(scriptRef));
     _onClose();
   }
 

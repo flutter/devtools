@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -19,6 +21,7 @@ import 'vm_object_model.dart';
 
 class VmInstanceDisplay extends StatefulWidget {
   const VmInstanceDisplay({
+    super.key,
     required this.controller,
     required this.instance,
   });
@@ -49,7 +52,7 @@ class _VmInstanceDisplayState extends State<VmInstanceDisplay> {
     _populate();
   }
 
-  void _populate() async {
+  void _populate() {
     final isolateRef = serviceManager.isolateManager.selectedIsolate.value;
     _root = DartObjectNode.fromValue(
       name: 'value',
@@ -58,15 +61,19 @@ class _VmInstanceDisplayState extends State<VmInstanceDisplay> {
       artificialName: true,
     );
 
-    _initialized = buildVariablesTree(_root)
-        .then(
-          (_) => _root.expand(),
-        )
-        .then(
-          (_) => Future.wait([
-            for (final child in _root.children) buildVariablesTree(child),
-          ]),
-        );
+    unawaited(
+      _initialized = buildVariablesTree(_root)
+          .then(
+            (_) => _root.expand(),
+          )
+          .then(
+            (_) => unawaited(
+              Future.wait([
+                for (final child in _root.children) buildVariablesTree(child),
+              ]),
+            ),
+          ),
+    );
   }
 
   @override
@@ -86,14 +93,15 @@ class _VmInstanceDisplayState extends State<VmInstanceDisplay> {
             children: [
               const AreaPaneHeader(
                 title: Text('Properties'),
-                needsTopBorder: false,
+                includeTopBorder: false,
               ),
               Flexible(
                 child: FutureBuilder(
                   future: _initialized,
                   builder: (context, snapshot) {
-                    if (snapshot.connectionState != ConnectionState.done)
+                    if (snapshot.connectionState != ConnectionState.done) {
                       return const CenteredCircularProgressIndicator();
+                    }
                     return ExpandableVariable(
                       variable: _root,
                       dataDisplayProvider: (variable, onPressed) {
@@ -130,7 +138,7 @@ class _InstanceViewer extends StatelessWidget {
       controller: controller,
       object: instance,
       generalDataRows: [
-        serviceObjectLinkBuilderMapEntry<ClassRef>(
+        serviceObjectLinkBuilderMapEntry(
           controller: controller,
           key: 'Object Class',
           object: instance.obj.classRef!,
@@ -196,9 +204,9 @@ class DisplayProvider extends StatelessWidget {
           ),
           onTap: onTap,
         ),
-        if (variable.ref!.value is! Sentinel)
+        if (variable.ref!.value is! Sentinel && variable.ref!.value is ObjRef?)
           VmServiceObjectLink(
-            object: variable.ref!.value,
+            object: variable.ref!.value as ObjRef?,
             textBuilder: (object) {
               if (object is InstanceRef &&
                   object.kind == InstanceKind.kString) {
@@ -206,12 +214,13 @@ class DisplayProvider extends StatelessWidget {
               }
               return null;
             },
-            onTap: (object) async {
-              if (object is ObjRef) {
-                await controller.findAndSelectNodeForObject(context, object);
-              }
-            },
+            onTap: controller.findAndSelectNodeForObject,
           )
+        else
+          Text(
+            variable.ref!.value.toString(),
+            style: Theme.of(context).subtleFixedFontStyle,
+          ),
       ],
     );
   }

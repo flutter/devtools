@@ -2,17 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/framework/scaffold.dart';
-import 'package:devtools_app/src/screens/debugger/debugger_screen.dart';
-import 'package:devtools_app/src/service/service_manager.dart';
-import 'package:devtools_app/src/shared/analytics/analytics_controller.dart';
-import 'package:devtools_app/src/shared/config_specific/ide_theme/ide_theme.dart';
-import 'package:devtools_app/src/shared/config_specific/import_export/import_export.dart';
-import 'package:devtools_app/src/shared/connected_app.dart';
 import 'package:devtools_app/src/shared/framework_controller.dart';
-import 'package:devtools_app/src/shared/globals.dart';
-import 'package:devtools_app/src/shared/notifications.dart';
-import 'package:devtools_app/src/shared/screen.dart';
 import 'package:devtools_app/src/shared/survey.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
@@ -22,7 +14,6 @@ import 'package:mockito/mockito.dart';
 void main() {
   final mockServiceManager = MockServiceConnectionManager();
   when(mockServiceManager.service).thenReturn(null);
-  when(mockServiceManager.connectedAppInitialized).thenReturn(false);
   when(mockServiceManager.connectedState).thenReturn(
     ValueNotifier<ConnectedState>(const ConnectedState(false)),
   );
@@ -42,15 +33,20 @@ void main() {
   setGlobal(OfflineModeController, OfflineModeController());
   setGlobal(IdeTheme, IdeTheme());
   setGlobal(NotificationService, NotificationService());
+  setGlobal(BannerMessagesController, BannerMessagesController());
 
   testWidgets(
     'displays floating debugger controls',
     (WidgetTester tester) async {
-      final mockConnectedApp = MockConnectedAppLegacy();
-      when(mockConnectedApp.isFlutterAppNow).thenReturn(true);
-      when(mockConnectedApp.isProfileBuildNow).thenReturn(false);
+      final connectedApp = MockConnectedApp();
+      mockConnectedApp(
+        connectedApp,
+        isFlutterApp: true,
+        isProfileBuild: false,
+        isWebApp: false,
+      );
       when(mockServiceManager.connectedAppInitialized).thenReturn(true);
-      when(mockServiceManager.connectedApp).thenReturn(mockConnectedApp);
+      when(mockServiceManager.connectedApp).thenReturn(connectedApp);
       when(mockServiceManager.isolateManager).thenReturn(FakeIsolateManager());
       when(mockServiceManager.appState).thenReturn(
         AppState(mockServiceManager.isolateManager.selectedIsolate),
@@ -58,17 +54,15 @@ void main() {
       final mockDebuggerController = MockDebuggerController();
       final state =
           serviceManager.isolateManager.mainIsolateState! as MockIsolateState;
-      state.isPaused.value = true;
+      when(state.isPaused).thenReturn(ValueNotifier(true));
       when(mockServiceManager.isMainIsolatePaused).thenReturn(false);
 
       await tester.pumpWidget(
         wrapWithControllers(
-          DevToolsScaffold(
-            screens: const [_screen1, _screen2],
-            ideTheme: IdeTheme(),
-          ),
+          DevToolsScaffold(screens: const [_screen1, _screen2]),
           debugger: mockDebuggerController,
           analytics: AnalyticsController(enabled: false, firstRun: false),
+          releaseNotes: ReleaseNotesController(),
         ),
       );
       expect(find.byKey(_k1), findsOneWidget);

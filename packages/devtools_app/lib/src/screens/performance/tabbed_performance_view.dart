@@ -8,13 +8,10 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 
 import '../../shared/analytics/constants.dart' as gac;
-import '../../shared/charts/flame_chart.dart';
 import '../../shared/common_widgets.dart';
 import '../../shared/feature_flags.dart';
 import '../../shared/globals.dart';
 import '../../shared/primitives/auto_dispose.dart';
-import '../../shared/theme.dart';
-import '../../shared/ui/search.dart';
 import '../../shared/ui/tab.dart';
 import '../../shared/utils.dart';
 import 'panes/flutter_frames/flutter_frame_model.dart';
@@ -22,31 +19,23 @@ import 'panes/flutter_frames/flutter_frames_controller.dart';
 import 'panes/frame_analysis/frame_analysis.dart';
 import 'panes/raster_stats/raster_stats.dart';
 import 'panes/rebuild_stats/rebuild_stats.dart';
-import 'panes/timeline_events/legacy/timeline_flame_chart.dart';
-import 'panes/timeline_events/perfetto/perfetto.dart';
-import 'panes/timeline_events/timeline_events_controller.dart';
+import 'panes/timeline_events/timeline_events_view.dart';
 import 'performance_controller.dart';
-import 'performance_screen.dart';
-
-final timelineSearchFieldKey = GlobalKey(debugLabel: 'TimelineSearchFieldKey');
 
 class TabbedPerformanceView extends StatefulWidget {
-  const TabbedPerformanceView();
+  const TabbedPerformanceView({super.key});
 
   @override
-  _TabbedPerformanceViewState createState() => _TabbedPerformanceViewState();
+  State<TabbedPerformanceView> createState() => _TabbedPerformanceViewState();
 }
 
 class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
     with
         AutoDisposeMixin,
-        SearchFieldMixin<TabbedPerformanceView>,
         ProvidedControllerMixin<PerformanceController, TabbedPerformanceView> {
   static const _gaPrefix = 'performanceTab';
 
   late FlutterFramesController _flutterFramesController;
-
-  late TimelineEventsController _timelineEventsController;
 
   FlutterFrame? _selectedFlutterFrame;
 
@@ -55,7 +44,6 @@ class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
     super.didChangeDependencies();
     if (!initController()) return;
 
-    _timelineEventsController = controller.timelineEventsController;
     _flutterFramesController = controller.flutterFramesController;
 
     cancelListeners();
@@ -87,21 +75,17 @@ class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
           hasOfflineData &&
           offlineData.rebuildCountModel.isNotEmpty;
     }
-    final tabRecords = <_PerformanceTabRecord>[
-      if (showFrameAnalysis) _frameAnalysisRecord(),
-      if (showRasterStats) _rasterStatsRecord(),
-      if (showRebuildStats) _rebuildStatsRecord(),
-      _timelineEventsRecord(),
-    ];
 
-    final tabs = <DevToolsTab>[];
-    final tabViews = <Widget>[];
-    final featureControllers = <PerformanceFeatureController?>[];
-    for (final record in tabRecords) {
-      tabs.add(record.tab);
-      tabViews.add(record.tabView);
-      featureControllers.add(record.featureController);
-    }
+    final tabsAndControllers = _generateTabs(
+      showFrameAnalysis: showFrameAnalysis,
+      showRasterStats: showRasterStats,
+      showRebuildStats: showRebuildStats,
+    );
+    final tabs = tabsAndControllers
+        .map((t) => (tab: t.tab, tabView: t.tabView))
+        .toList();
+    final featureControllers =
+        tabsAndControllers.map((t) => t.featureController).toList();
 
     // If there is not an active feature, activate the first.
     if (featureControllers.firstWhereOrNull(
@@ -113,7 +97,6 @@ class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
 
     return AnalyticsTabbedView(
       tabs: tabs,
-      tabViews: tabViews,
       initialSelectedIndex: controller.selectedFeatureTabIndex,
       gaScreen: gac.performance,
       onTabChanged: (int index) {
@@ -130,134 +113,73 @@ class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
     unawaited(controller.setActiveFeature(featureController));
   }
 
-  _PerformanceTabRecord _frameAnalysisRecord() {
-    assert(serviceManager.connectedApp!.isFlutterAppNow!);
-    Widget frameAnalysisView;
-    final selectedFrame = _selectedFlutterFrame;
-    frameAnalysisView = selectedFrame != null
-        ? FlutterFrameAnalysisView(
-            frameAnalysis: selectedFrame.frameAnalysis,
-            enhanceTracingController: controller.enhanceTracingController,
-            rebuildCountModel: controller.data!.rebuildCountModel,
-          )
-        : const Center(
-            child: Text('Select a frame above to view analysis data.'),
-          );
-    return _PerformanceTabRecord(
-      tab: _buildTab(tabName: 'Frame Analysis'),
-      tabView: KeepAliveWrapper(
-        child: frameAnalysisView,
-      ),
-      featureController: null,
-    );
-  }
-
-  _PerformanceTabRecord _rebuildStatsRecord() {
-    final rebuildStatsView = RebuildStatsView(
-      model: controller.data!.rebuildCountModel,
-      selectedFrame: controller.flutterFramesController.selectedFrame,
-    );
-
-    return _PerformanceTabRecord(
-      tab: _buildTab(tabName: 'Rebuild Stats'),
-      tabView: KeepAliveWrapper(
-        child: rebuildStatsView,
-      ),
-      featureController: null,
-    );
-  }
-
-  _PerformanceTabRecord _rasterStatsRecord() {
-    assert(serviceManager.connectedApp!.isFlutterAppNow!);
-    return _PerformanceTabRecord(
-      tab: _buildTab(tabName: 'Raster Stats'),
-      tabView: KeepAliveWrapper(
-        child: Center(
-          child: RasterStatsView(
-            rasterStatsController: controller.rasterStatsController,
+  List<
+      ({
+        DevToolsTab tab,
+        Widget tabView,
+        PerformanceFeatureController? featureController,
+      })> _generateTabs({
+    required bool showFrameAnalysis,
+    required bool showRasterStats,
+    required bool showRebuildStats,
+  }) {
+    if (showFrameAnalysis || showRasterStats || showRebuildStats) {
+      assert(serviceManager.connectedApp!.isFlutterAppNow!);
+    }
+    return [
+      if (showFrameAnalysis)
+        (
+          tab: _buildTab(tabName: 'Frame Analysis'),
+          tabView: KeepAliveWrapper(
+            child: _selectedFlutterFrame != null
+                ? FlutterFrameAnalysisView(
+                    frameAnalysis: _selectedFlutterFrame!.frameAnalysis,
+                    enhanceTracingController:
+                        controller.enhanceTracingController,
+                    rebuildCountModel: controller.data!.rebuildCountModel,
+                  )
+                : const Center(
+                    child: Text('Select a frame above to view analysis data.'),
+                  ),
+          ),
+          featureController: null,
+        ),
+      if (showRasterStats)
+        (
+          tab: _buildTab(tabName: 'Raster Stats'),
+          tabView: KeepAliveWrapper(
+            child: Center(
+              child: RasterStatsView(
+                rasterStatsController: controller.rasterStatsController,
+              ),
+            ),
+          ),
+          featureController: controller.rasterStatsController,
+        ),
+      if (showRebuildStats)
+        (
+          tab: _buildTab(tabName: 'Rebuild Stats'),
+          tabView: KeepAliveWrapper(
+            child: RebuildStatsView(
+              model: controller.data!.rebuildCountModel,
+              selectedFrame: controller.flutterFramesController.selectedFrame,
+            ),
+          ),
+          featureController: null,
+        ),
+      (
+        tab: _buildTab(
+          tabName: 'Timeline Events',
+          trailing: TimelineEventsTabControls(
+            controller: controller.timelineEventsController,
           ),
         ),
-      ),
-      featureController: controller.rasterStatsController,
-    );
-  }
-
-  _PerformanceTabRecord _timelineEventsRecord() {
-    return _PerformanceTabRecord(
-      tab: _buildTab(
-        tabName: 'Timeline Events',
-        trailing: ValueListenableBuilder<bool>(
-          valueListenable: _timelineEventsController.useLegacyTraceViewer,
-          builder: (context, useLegacy, _) {
-            return Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                if (useLegacy || !FeatureFlags.embeddedPerfetto) ...[
-                  ValueListenableBuilder<EventsControllerStatus>(
-                    valueListenable: _timelineEventsController.status,
-                    builder: (context, status, _) {
-                      final searchFieldEnabled =
-                          status == EventsControllerStatus.ready;
-                      return _buildSearchField(searchFieldEnabled);
-                    },
-                  ),
-                  FlameChartHelpButton(
-                    gaScreen: PerformanceScreen.id,
-                    gaSelection: gac.timelineFlameChartHelp,
-                  ),
-                ],
-                if (!offlineController.offlineMode.value)
-                  RefreshTimelineEventsButton(
-                    controller: _timelineEventsController,
-                  ),
-              ],
-            );
-          },
+        tabView: TimelineEventsTabView(
+          controller: controller.timelineEventsController,
         ),
+        featureController: controller.timelineEventsController,
       ),
-      tabView: ValueListenableBuilder<bool>(
-        valueListenable: _timelineEventsController.useLegacyTraceViewer,
-        builder: (context, useLegacy, _) {
-          return (useLegacy || !FeatureFlags.embeddedPerfetto)
-              ? KeepAliveWrapper(
-                  child: DualValueListenableBuilder<EventsControllerStatus,
-                      double>(
-                    firstListenable: _timelineEventsController.status,
-                    secondListenable: _timelineEventsController
-                        .legacyController.processor.progressNotifier,
-                    builder: (context, status, processingProgress, _) {
-                      return TimelineEventsView(
-                        controller: _timelineEventsController,
-                        processing: status == EventsControllerStatus.processing,
-                        processingProgress: processingProgress,
-                      );
-                    },
-                  ),
-                )
-              : KeepAliveWrapper(
-                  child: EmbeddedPerfetto(
-                    perfettoController:
-                        _timelineEventsController.perfettoController,
-                  ),
-                );
-        },
-      ),
-      featureController: controller.timelineEventsController,
-    );
-  }
-
-  Widget _buildSearchField(bool searchFieldEnabled) {
-    return Container(
-      width: defaultSearchTextWidth,
-      height: defaultTextFieldHeight,
-      child: buildSearchField(
-        controller: _timelineEventsController.legacyController,
-        searchFieldKey: timelineSearchFieldKey,
-        searchFieldEnabled: searchFieldEnabled,
-        shouldRequestFocus: false,
-        supportsNavigation: true,
-      ),
-    );
+    ];
   }
 
   DevToolsTab _buildTab({required String tabName, Widget? trailing}) {
@@ -267,42 +189,4 @@ class _TabbedPerformanceViewState extends State<TabbedPerformanceView>
       trailing: trailing,
     );
   }
-}
-
-@visibleForTesting
-class RefreshTimelineEventsButton extends StatelessWidget {
-  const RefreshTimelineEventsButton({
-    Key? key,
-    required this.controller,
-  }) : super(key: key);
-
-  final TimelineEventsController controller;
-
-  @override
-  Widget build(BuildContext context) {
-    return ValueListenableBuilder<EventsControllerStatus>(
-      valueListenable: controller.status,
-      builder: (context, status, _) {
-        return DevToolsIconButton(
-          iconData: Icons.refresh,
-          onPressed: status == EventsControllerStatus.processing
-              ? null
-              : controller.processAllTraceEvents,
-          tooltip: 'Refresh timeline events',
-          gaScreen: gac.performance,
-          gaSelection: gac.refreshTimelineEvents,
-        );
-      },
-    );
-  }
-}
-
-class _PerformanceTabRecord extends TabRecord {
-  _PerformanceTabRecord({
-    required super.tab,
-    required super.tabView,
-    required this.featureController,
-  });
-
-  final PerformanceFeatureController? featureController;
 }

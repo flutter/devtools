@@ -72,7 +72,7 @@ enum ClassType {
 }
 
 class HeapClassName {
-  HeapClassName({required this.className, required library})
+  HeapClassName({required this.className, required String? library})
       : library = _normalizeLibrary(library);
 
   HeapClassName.fromClassRef(ClassRef? classRef)
@@ -107,6 +107,8 @@ class HeapClassName {
   late final isSentinel = className == 'Sentinel' && library.isEmpty;
 
   late final isRoot = className == 'Root' && library.isEmpty;
+
+  late final bool isNull = className == 'Null' && library == 'dart:core';
 
   /// Whether a class can hold a reference to an object
   /// without preventing garbage collection.
@@ -198,8 +200,8 @@ class HeapClassName {
   @override
   late final hashCode = fullName.hashCode;
 
-  static String _normalizeLibrary(String library) =>
-      library.trim().replaceFirst(
+  static String _normalizeLibrary(String? library) =>
+      (library ?? '').trim().replaceFirst(
             RegExp('^${PackagePrefixes.dartInSnapshot}'),
             PackagePrefixes.dart,
           );

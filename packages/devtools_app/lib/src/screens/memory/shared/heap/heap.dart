@@ -2,9 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '../../../../../devtools_app.dart';
 import '../../../../shared/memory/adapted_heap_data.dart';
+import '../../../../shared/memory/adapted_heap_object.dart';
 import '../../../../shared/memory/class_name.dart';
+import '../../../../shared/memory/simple_items.dart';
+import '../../../../shared/primitives/utils.dart';
 import 'class_filter.dart';
 import 'model.dart';
 import 'spanning_tree.dart';
@@ -20,19 +22,30 @@ class AdaptedHeap {
 
   final AdaptedHeapData data;
 
+  late final MemoryFootprint footprint;
+
   SingleHeapClasses get classes => _classes;
   late final SingleHeapClasses _classes;
 
   Future<void> _initialize() async {
+    if (!data.allFieldsCalculated) await calculateHeap(data);
+    footprint = await _footprint(data);
     _classes = await _heapStatistics();
+  }
+
+  static Future<MemoryFootprint> _footprint(AdaptedHeapData data) async {
+    return MemoryFootprint(
+      dart: data.totalDartSize,
+      reachable: data.totalReachableSize,
+    );
   }
 
   final _uiReleaser = UiReleaser();
 
   Future<SingleHeapClasses> _heapStatistics() async {
-    final result = <HeapClassName, SingleClassStats>{};
-    if (!data.allFieldsCalculated) await buildSpanningTreeAndSetInRefs(data);
+    assert(data.allFieldsCalculated);
 
+    final result = <HeapClassName, SingleClassStats>{};
     for (var i in Iterable.generate(data.objects.length)) {
       if (_uiReleaser.step()) await _uiReleaser.releaseUi();
       final object = data.objects[i];
@@ -62,33 +75,17 @@ mixin FilterableHeapClasses<T extends ClassStats> on HeapClasses<T> {
   List<T>? _filtered;
 
   List<T> filtered(ClassFilter newFilter, String? rootPackage) {
-    final oldFilter = _appliedFilter;
-    final oldFiltered = _filtered;
+    _filtered = ClassFilter.filter(
+      oldFilter: _appliedFilter,
+      oldFiltered: _filtered,
+      newFilter: newFilter,
+      original: classStatsList,
+      extractClass: (s) => s.heapClass,
+      rootPackage: rootPackage,
+    );
     _appliedFilter = newFilter;
-    if ((oldFilter == null) != (oldFiltered == null)) {
-      throw StateError('Nullness should match.');
-    }
 
-    // Return previous data if filter did not change.
-    if (oldFilter == newFilter) return oldFiltered!;
-
-    // Return previous data if filter is identical.
-    final task = newFilter.task(previous: oldFilter);
-    if (task == FilteringTask.doNothing) return oldFiltered!;
-
-    final Iterable<T> dataToFilter;
-    if (task == FilteringTask.refilter) {
-      dataToFilter = classStatsList;
-    } else if (task == FilteringTask.reuse) {
-      dataToFilter = oldFiltered!;
-    } else {
-      throw StateError('Unexpected task: $task.');
-    }
-
-    final result = dataToFilter
-        .where((e) => newFilter.apply(e.heapClass, rootPackage))
-        .toList();
-    return _filtered = result;
+    return _filtered!;
   }
 }
 
@@ -138,8 +135,6 @@ class SingleClassStats extends ClassStats {
 
   final ObjectSet objects;
 
-  late final entries = statsByPath.entries.toList(growable: false);
-
   void countInstance(AdaptedHeapData data, int objectIndex) {
     assert(!isSealed);
     final object = data.objects[objectIndex];
@@ -158,8 +153,6 @@ class SingleClassStats extends ClassStats {
     );
     objectsForPath.countInstance(object, excludeFromRetained: false);
   }
-
-  bool get isZero => objects.isZero;
 }
 
 /// Statistical size-information about objects.
@@ -215,7 +208,12 @@ class ObjectSet extends ObjectSetStats {
   static ObjectSet empty = ObjectSet()..seal();
 
   final objectsByCodes = <IdentityHashCode, AdaptedHeapObject>{};
-  final notCountedInRetained = <IdentityHashCode>{};
+
+  /// Subset of objects that are excluded from the retained size
+  /// calculation for this set.
+  ///
+  /// See [countInstance].
+  final objectsExcludedFromRetainedSize = <IdentityHashCode>{};
 
   @override
   bool get isZero => objectsByCodes.isEmpty;
@@ -228,7 +226,7 @@ class ObjectSet extends ObjectSetStats {
     if (objectsByCodes.containsKey(object.code)) return;
     super.countInstance(object, excludeFromRetained: excludeFromRetained);
     objectsByCodes[object.code] = object;
-    if (excludeFromRetained) notCountedInRetained.add(object.code);
+    if (excludeFromRetained) objectsExcludedFromRetainedSize.add(object.code);
   }
 
   @override

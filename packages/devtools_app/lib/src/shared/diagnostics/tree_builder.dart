@@ -5,18 +5,23 @@
 import 'dart:async';
 import 'dart:math';
 
+import 'package:logging/logging.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../screens/debugger/debugger_model.dart';
-import '../config_specific/logger/logger.dart';
-import '../feature_flags.dart';
 import '../globals.dart';
+import '../memory/adapted_heap_data.dart';
 import '../primitives/utils.dart';
 import 'dart_object_node.dart';
 import 'diagnostics_node.dart';
 import 'generic_instance_reference.dart';
+import 'helpers.dart';
 import 'inspector_service.dart';
+import 'object_group_api.dart';
+import 'references.dart';
 import 'variable_factory.dart';
+
+final _log = Logger('tree_builder');
 
 Future<void> _addExpandableChildren(
   DartObjectNode variable,
@@ -42,8 +47,8 @@ Future<void> _addDiagnosticsIfNeeded(
 ) async {
   if (diagnostic == null || !includeDiagnosticPropertiesInDebugger) return;
 
-  final service = diagnostic.inspectorService;
-  Future<void> _addPropertiesHelper(
+  final service = diagnostic.objectGroupApi;
+  Future<void> addPropertiesHelper(
     List<RemoteDiagnosticsNode>? properties,
   ) async {
     if (properties == null || service == null || isolateRef == null) return;
@@ -59,11 +64,11 @@ Future<void> _addDiagnosticsIfNeeded(
   }
 
   if (diagnostic.inlineProperties.isNotEmpty) {
-    await _addPropertiesHelper(diagnostic.inlineProperties);
+    await addPropertiesHelper(diagnostic.inlineProperties);
   } else {
     assert(!service!.disposed);
     if (!service!.disposed) {
-      await _addPropertiesHelper(await diagnostic.getProperties(service));
+      await addPropertiesHelper(await diagnostic.getProperties(service));
     }
   }
 }
@@ -77,7 +82,8 @@ Future<void> _addDiagnosticChildrenIfNeeded(
   if (diagnostic == null || !includeDiagnosticChildren) return;
 
   // Always add children last after properties to avoid confusion.
-  final ObjectGroupBase? service = diagnostic.inspectorService;
+  final InspectorObjectGroupApi<RemoteDiagnosticsNode>? service =
+      diagnostic.objectGroupApi;
   final diagnosticChildren = await diagnostic.children;
   if (diagnosticChildren != null && diagnosticChildren.isNotEmpty) {
     final childrenNode = DartObjectNode.text(
@@ -100,11 +106,11 @@ Future<void> _addDiagnosticChildrenIfNeeded(
 
 void _setupGrouping(DartObjectNode variable) {
   final numChildrenInGrouping =
-      variable.childCount >= pow(DartObjectNode.MAX_CHILDREN_IN_GROUPING, 2)
+      variable.childCount >= pow(DartObjectNode.maxChildrenInGrouping, 2)
           ? (roundToNearestPow10(variable.childCount) /
-                  DartObjectNode.MAX_CHILDREN_IN_GROUPING)
+                  DartObjectNode.maxChildrenInGrouping)
               .floor()
-          : DartObjectNode.MAX_CHILDREN_IN_GROUPING;
+          : DartObjectNode.maxChildrenInGrouping;
 
   var start = variable.offset;
   final end = start + variable.childCount;
@@ -117,115 +123,20 @@ void _setupGrouping(DartObjectNode variable) {
   }
 }
 
-Future<void> addChildReferences(
+void _addInstanceSetItems(
   DartObjectNode variable,
-) async {
-  assert(FeatureFlags.evalAndBrowse);
-  final ref = variable.ref!;
-  if (ref is! ObjectReferences) {
-    throw StateError('Wrong type: ${ref.runtimeType}');
-  }
-
-  final refNodeType = ref.refNodeType;
-
-  switch (refNodeType) {
-    case RefNodeType.refRoot:
-      variable.addAllChildren([
-        DartObjectNode.references(
-          'live',
-          ObjectReferences.withType(ref, RefNodeType.liveRefRoot),
-        ),
-        DartObjectNode.references(
-          'static',
-          ObjectReferences.withType(ref, RefNodeType.staticRefRoot),
-        ),
-      ]);
-      break;
-    case RefNodeType.staticRefRoot:
-      variable.addAllChildren([
-        DartObjectNode.references(
-          'inbound',
-          ObjectReferences.withType(ref, RefNodeType.staticInRefs),
-        ),
-        DartObjectNode.references(
-          'outbound',
-          ObjectReferences.withType(ref, RefNodeType.staticOutRefs),
-        ),
-      ]);
-
-      break;
-    case RefNodeType.staticInRefs:
-      final children = ref.heapSelection!
-          .references(ref.refNodeType.direction!)
-          .map(
-            (s) => DartObjectNode.references(
-              s.object.heapClass.className,
-              ObjectReferences(
-                refNodeType: RefNodeType.staticInRefs,
-                heapSelection: s,
-              ),
-            ),
-          )
-          .toList();
-      variable.addAllChildren(children);
-      break;
-    case RefNodeType.staticOutRefs:
-      final children = ref.heapSelection!
-          .references(ref.refNodeType.direction!)
-          .map(
-            (s) => DartObjectNode.references(
-              '${s.object.heapClass.className}, ${prettyPrintRetainedSize(
-                s.object.retainedSize,
-              )}',
-              ObjectReferences(
-                refNodeType: RefNodeType.staticOutRefs,
-                heapSelection: s,
-              ),
-            ),
-          )
-          .toList();
-      variable.addAllChildren(children);
-      break;
-    case RefNodeType.liveRefRoot:
-      variable.addAllChildren([
-        DartObjectNode.references(
-          'inbound',
-          ObjectReferences.withType(ref, RefNodeType.liveInRefs),
-        ),
-        DartObjectNode.references(
-          'outbound',
-          ObjectReferences.withType(ref, RefNodeType.liveOutRefs),
-        ),
-      ]);
-
-      break;
-    case RefNodeType.liveInRefs:
-      variable.addChild(
-        DartObjectNode.references(
-          // Temporary placeholder
-          '<live inbound refs>',
-          ObjectReferences.withType(ref, RefNodeType.liveInRefs),
-        ),
-      );
-      break;
-    case RefNodeType.liveOutRefs:
-      final isolateRef = variable.ref!.isolateRef;
-      final instance = await _getObject(
-        isolateRef: isolateRef,
-        value: ref.instanceRef!,
-        variable: variable,
-      );
-
-      if (instance is Instance) {
-        await _addChildrenToInstanceVariable(
-          variable: variable,
-          value: instance,
-          asReferences: true,
-          isolateRef: isolateRef,
-        );
-      }
-      break;
-  }
+  IsolateRef? isolateRef,
+  InstanceSet instanceSet,
+) {
+  final instances = instanceSet.instances ?? [];
+  variable.addAllChildren(
+    createVariablesForInstanceSet(
+      variable.offset,
+      variable.childCount,
+      instances,
+      isolateRef,
+    ),
+  );
 }
 
 Future<void> _addInstanceRefItems(
@@ -249,64 +160,43 @@ Future<void> _addInstanceRefItems(
     }
   }
 
-  final result = await _getObject(
+  final result = await getObject(
     variable: variable,
     isolateRef: variable.ref!.isolateRef,
     value: instanceRef,
   );
+
   if (result is Instance) {
-    if (FeatureFlags.evalAndBrowse && ref?.heapSelection != null) {
-      final ref = variable.ref!;
-      variable.addChild(
-        DartObjectNode.references(
-          'references',
-          ObjectReferences(
-            refNodeType: RefNodeType.refRoot,
-            value: ref.value,
-            isolateRef: ref.isolateRef,
-            heapSelection: ref.heapSelection,
-          ),
-        ),
-        index: 0,
-      );
-    }
-    await _addChildrenToInstanceVariable(
+    _addChildrenToInstanceVariable(
       variable: variable,
       value: result,
       isolateRef: isolateRef,
       existingNames: existingNames,
-      asReferences: false,
+      heapSelection: ref?.heapSelection?.withoutObject(),
     );
   }
 }
 
 /// Adds children to the variable.
-///
-/// If [asReferences] is true, shows them as references, otherwize as field values.
-Future<void> _addChildrenToInstanceVariable({
+void _addChildrenToInstanceVariable({
   required DartObjectNode variable,
   required Instance value,
-  required bool asReferences,
   required IsolateRef? isolateRef,
+  required HeapObjectSelection? heapSelection,
   Set<String>? existingNames,
-}) async {
+}) {
   switch (value.kind) {
     case InstanceKind.kMap:
       variable.addAllChildren(
-        createVariablesForAssociations(
+        createVariablesForMap(
           value,
           isolateRef,
-          asReferences: asReferences,
         ),
       );
       break;
     case InstanceKind.kList:
       variable.addAllChildren(
-        createVariablesForElements(
-          value,
-          isolateRef,
-          asReferences: asReferences,
-        ),
+        createVariablesForList(value, isolateRef, heapSelection),
       );
       break;
     case InstanceKind.kRecord:
@@ -372,32 +262,33 @@ Future<void> _addChildrenToInstanceVariable({
         createVariablesForStackTrace(value, isolateRef),
       );
       break;
+    case InstanceKind.kMirrorReference:
+      variable.addAllChildren(
+        createVariablesForMirrorReference(value, isolateRef),
+      );
+      break;
+    case InstanceKind.kUserTag:
+      variable.addAllChildren(
+        createVariablesForUserTag(value, isolateRef),
+      );
+      break;
     default:
       break;
   }
+
+  if (variable.isSet) {
+    variable.addAllChildren(createVariablesForSets(value, isolateRef));
+  }
+
   if (value.fields != null && value.kind != InstanceKind.kRecord) {
     variable.addAllChildren(
       createVariablesForFields(
         value,
         isolateRef,
         existingNames: existingNames,
-        asReferences: asReferences,
       ),
     );
   }
-}
-
-Future<Object?> _getObject({
-  required IsolateRef? isolateRef,
-  required ObjRef value,
-  DartObjectNode? variable,
-}) async {
-  return await serviceManager.service!.getObject(
-    isolateRef!.id!,
-    value.id!,
-    offset: variable?.offset,
-    count: variable?.childCount,
-  );
 }
 
 Future<void> _addValueItems(
@@ -406,7 +297,7 @@ Future<void> _addValueItems(
   Object? value,
 ) async {
   if (value is ObjRef) {
-    value = await _getObject(isolateRef: isolateRef!, value: value);
+    value = await getObject(isolateRef: isolateRef!, value: value);
     switch (value.runtimeType) {
       case Func:
         final function = value as Func;
@@ -437,8 +328,8 @@ Future<void> _addInspectorItems(variable, IsolateRef? isolateRef) async {
   final inspectorService = serviceManager.inspectorService;
   if (inspectorService != null) {
     final tasks = <Future>[];
-    ObjectGroupBase? group;
-    Future<void> _maybeUpdateRef(DartObjectNode child) async {
+    InspectorObjectGroupBase? group;
+    Future<void> maybeUpdateRef(DartObjectNode child) async {
       final childRef = child.ref;
       if (childRef == null) return;
       if (childRef.diagnostic == null) {
@@ -466,9 +357,8 @@ Future<void> _addInspectorItems(variable, IsolateRef? isolateRef) async {
             );
           } catch (e) {
             if (e is! SentinelException) {
-              log(
+              _log.warning(
                 'Caught $e accessing the value of an object',
-                LogLevel.warning,
               );
             }
           }
@@ -477,7 +367,7 @@ Future<void> _addInspectorItems(variable, IsolateRef? isolateRef) async {
     }
 
     for (var child in variable.children) {
-      tasks.add(_maybeUpdateRef(child));
+      tasks.add(maybeUpdateRef(child));
     }
     if (tasks.isNotEmpty) {
       await Future.wait(tasks);
@@ -497,13 +387,15 @@ Future<void> buildVariablesTree(
   bool expandAll = false,
 }) async {
   final ref = variable.ref;
-  if (!variable.isExpandable || variable.treeInitializeStarted || ref == null)
+  if (!variable.isExpandable || variable.treeInitializeStarted || ref == null) {
     return;
+  }
   variable.treeInitializeStarted = true;
 
   final isolateRef = ref.isolateRef;
   final instanceRef = ref.instanceRef;
   final diagnostic = ref.diagnostic;
+  final value = variable.value;
 
   await _addDiagnosticsIfNeeded(
     diagnostic,
@@ -512,18 +404,27 @@ Future<void> buildVariablesTree(
   );
 
   try {
-    if (variable.childCount > DartObjectNode.MAX_CHILDREN_IN_GROUPING) {
-      _setupGrouping(variable);
-    } else if (ref is ObjectReferences) {
+    if (ref is ObjectReferences) {
       await addChildReferences(variable);
+    } else if (variable.childCount > DartObjectNode.maxChildrenInGrouping) {
+      _setupGrouping(variable);
     } else if (instanceRef != null && serviceManager.service != null) {
       await _addInstanceRefItems(variable, instanceRef, isolateRef);
-    } else if (variable.value != null) {
-      final value = variable.value;
+    } else if (value is InstanceSet) {
+      _addInstanceSetItems(variable, isolateRef, value);
+    } else if (value != null) {
       await _addValueItems(variable, isolateRef, value);
     }
   } on SentinelException {
     // Fail gracefully if calling `getObject` throws a SentinelException.
+  } catch (ex, stack) {
+    variable.addChild(DartObjectNode.text('error: $ex\n$stack'));
+  }
+
+  if (ref.heapSelection != null &&
+      ref is! ObjectReferences &&
+      !variable.isGroup) {
+    addReferencesRoot(variable, ref);
   }
 
   await _addDiagnosticChildrenIfNeeded(

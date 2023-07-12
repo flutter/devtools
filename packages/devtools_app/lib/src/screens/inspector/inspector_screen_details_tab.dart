@@ -29,20 +29,21 @@ class InspectorDetails extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tabs = [
-      _buildTab(tabName: 'Layout Explorer'),
-      _buildTab(
-        tabName: 'Widget Details Tree',
-        trailing: InspectorExpandCollapseButtons(controller: controller),
+      (
+        tab: _buildTab(tabName: 'Layout Explorer'),
+        tabView: LayoutExplorerTab(controller: controller),
       ),
-    ];
-    final tabViews = <Widget>[
-      LayoutExplorerTab(controller: controller),
-      detailsTree,
+      (
+        tab: _buildTab(
+          tabName: 'Widget Details Tree',
+          trailing: InspectorExpandCollapseButtons(controller: controller),
+        ),
+        tabView: detailsTree,
+      ),
     ];
 
     return AnalyticsTabbedView(
       tabs: tabs,
-      tabViews: tabViews,
       gaScreen: gac.inspector,
     );
   }
@@ -87,23 +88,27 @@ class _InspectorExpandCollapseButtonsState
         mainAxisSize: MainAxisSize.min,
         children: [
           SizedBox(
-            child: IconLabelButton(
+            child: DevToolsButton(
               icon: Icons.unfold_more,
               onPressed: enableButtons ? _onExpandClick : null,
               label: 'Expand all',
               minScreenWidthForTextBeforeScaling:
                   InspectorScreenBodyState.minScreenWidthForTextBeforeScaling,
+              gaScreen: gac.inspector,
+              gaSelection: gac.expandAll,
               outlined: false,
             ),
           ),
           const SizedBox(width: denseSpacing),
           SizedBox(
-            child: IconLabelButton(
+            child: DevToolsButton(
               icon: Icons.unfold_less,
               onPressed: enableButtons ? _onCollapseClick : null,
               label: 'Collapse to selected',
               minScreenWidthForTextBeforeScaling:
                   InspectorScreenBodyState.minScreenWidthForTextBeforeScaling,
+              gaScreen: gac.inspector,
+              gaSelection: gac.collapseAll,
               outlined: false,
             ),
           ),

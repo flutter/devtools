@@ -73,44 +73,166 @@ void main() {
       expect(printMB(1000 * mb, fractionDigits: 2), '1000.00');
     });
 
-    test('msText', () {
-      expect(msText(const Duration(microseconds: 3111)), equals('3.1 ms'));
-      expect(
-        msText(const Duration(microseconds: 3199), includeUnit: false),
-        equals('3.2'),
-      );
-      expect(
-        msText(const Duration(microseconds: 3159), fractionDigits: 2),
-        equals('3.16 ms'),
-      );
-      expect(
-        msText(const Duration(microseconds: 3111), fractionDigits: 3),
-        equals('3.111 ms'),
-      );
-      expect(
-        msText(const Duration(milliseconds: 3)),
-        equals('3.0 ms'),
-      );
-      expect(
-        msText(const Duration(microseconds: 1)),
-        equals('0.0 ms'),
-      );
-      expect(
-        msText(Duration.zero, allowRoundingToZero: false),
-        equals('0.0 ms'),
-      );
-      expect(
-        msText(const Duration(microseconds: 1), allowRoundingToZero: false),
-        equals('< 0.1 ms'),
-      );
-      expect(
-        msText(
-          const Duration(microseconds: 1),
-          fractionDigits: 2,
-          allowRoundingToZero: false,
-        ),
-        equals('< 0.01 ms'),
-      );
+    group('durationText', () {
+      test('infers unit based on duration', () {
+        expect(
+          durationText(Duration.zero),
+          equals('0 μs'),
+        );
+        expect(
+          durationText(const Duration(microseconds: 100)),
+          equals('0.1 ms'),
+        );
+        expect(
+          durationText(const Duration(microseconds: 99)),
+          equals('99 μs'),
+        );
+        expect(
+          durationText(const Duration(microseconds: 1000)),
+          equals('1.0 ms'),
+        );
+        expect(
+          durationText(const Duration(microseconds: 999900)),
+          equals('999.9 ms'),
+        );
+        expect(
+          durationText(const Duration(microseconds: 1000000)),
+          equals('1.0 s'),
+        );
+        expect(
+          durationText(const Duration(microseconds: 9000000)),
+          equals('9.0 s'),
+        );
+      });
+
+      test('displays proper number of fraction digits', () {
+        expect(
+          durationText(const Duration(microseconds: 99)),
+          equals('99 μs'),
+        );
+        expect(
+          durationText(
+            const Duration(microseconds: 99),
+            // Should ignore this since this will be displayed in microseconds.
+            fractionDigits: 3,
+          ),
+          equals('99 μs'),
+        );
+        expect(
+          durationText(const Duration(microseconds: 3111)),
+          equals('3.1 ms'),
+        );
+        expect(
+          durationText(const Duration(microseconds: 3159), fractionDigits: 2),
+          equals('3.16 ms'),
+        );
+        expect(
+          durationText(const Duration(microseconds: 3111), fractionDigits: 3),
+          equals('3.111 ms'),
+        );
+      });
+
+      test('does not include unit when specified', () {
+        expect(
+          durationText(
+            const Duration(microseconds: 1000),
+            includeUnit: false,
+          ),
+          equals('1.0'),
+        );
+        expect(
+          durationText(
+            const Duration(milliseconds: 10000),
+            includeUnit: false,
+            unit: DurationDisplayUnit.seconds,
+          ),
+          equals('10.0'),
+        );
+      });
+
+      test('does not allow rounding to zero when specified', () {
+        // Setting [allowRoundingToZero] to false without specifying a unit
+        // throws an assertion error.
+        expect(
+          () {
+            durationText(Duration.zero, allowRoundingToZero: false);
+          },
+          throwsAssertionError,
+        );
+
+        // Displays zero for true zero values.
+        expect(
+          durationText(
+            Duration.zero,
+            allowRoundingToZero: false,
+            unit: DurationDisplayUnit.micros,
+          ),
+          equals('0 μs'),
+        );
+        expect(
+          durationText(
+            Duration.zero,
+            allowRoundingToZero: false,
+            unit: DurationDisplayUnit.milliseconds,
+          ),
+          equals('0.0 ms'),
+        );
+        expect(
+          durationText(
+            Duration.zero,
+            allowRoundingToZero: false,
+            unit: DurationDisplayUnit.seconds,
+          ),
+          equals('0.0 s'),
+        );
+
+        // Displays less than text for close-to-zero values.
+        expect(
+          durationText(
+            const Duration(microseconds: 1),
+            allowRoundingToZero: false,
+            unit: DurationDisplayUnit.milliseconds,
+          ),
+          equals('< 0.1 ms'),
+        );
+        expect(
+          durationText(
+            const Duration(microseconds: 1),
+            allowRoundingToZero: false,
+            unit: DurationDisplayUnit.seconds,
+          ),
+          equals('< 0.1 s'),
+        );
+
+        // Only displays less than text values that would round to zero.
+        expect(
+          durationText(
+            const Duration(microseconds: 49),
+            allowRoundingToZero: false,
+            unit: DurationDisplayUnit.milliseconds,
+          ),
+          equals('< 0.1 ms'),
+        );
+        expect(
+          durationText(
+            const Duration(microseconds: 50),
+            allowRoundingToZero: false,
+            unit: DurationDisplayUnit.milliseconds,
+          ),
+          equals('0.1 ms'),
+        );
+
+        // Displays properly with fraction digits.
+        expect(
+          durationText(
+            const Duration(microseconds: 1),
+            fractionDigits: 3,
+            allowRoundingToZero: false,
+            unit: DurationDisplayUnit.milliseconds,
+          ),
+          equals('< 0.001 ms'),
+        );
+      });
     });
 
     test('nullSafeMin', () {
@@ -743,6 +865,15 @@ void main() {
         expect(list.safeGet(1), equals(2));
         expect(list.safeGet(-1), isNull);
       });
+
+      test('safeRemoveLast', () {
+        final list = <int>[];
+        expect(list.safeRemoveLast(), isNull);
+        list.addAll([1, 2]);
+        expect(list.safeRemoveLast(), 2);
+        expect(list.safeRemoveLast(), 1);
+        expect(list.safeRemoveLast(), isNull);
+      });
     });
   });
 
@@ -1085,11 +1216,11 @@ void main() {
         expect(parseCssHexColor('ffffff00'), equals(Colors.white.withAlpha(0)));
         expect(
           parseCssHexColor('#ff0000bb'),
-          equals(const Color(0xFF0000).withAlpha(0xbb)),
+          equals(const Color(0x00ff0000).withAlpha(0xbb)),
         );
         expect(
           parseCssHexColor('ff0000bb'),
-          equals(const Color(0xFF0000).withAlpha(0xbb)),
+          equals(const Color(0x00ff0000).withAlpha(0xbb)),
         );
       });
       test('parses 4 digit hex colors', () {
@@ -1103,11 +1234,11 @@ void main() {
         expect(parseCssHexColor('ffffff00'), equals(Colors.white.withAlpha(0)));
         expect(
           parseCssHexColor('#f00b'),
-          equals(const Color(0xFF0000).withAlpha(0xbb)),
+          equals(const Color(0x00ff0000).withAlpha(0xbb)),
         );
         expect(
           parseCssHexColor('f00b'),
-          equals(const Color(0xFF0000).withAlpha(0xbb)),
+          equals(const Color(0x00ff0000).withAlpha(0xbb)),
         );
       });
     });
@@ -1128,10 +1259,10 @@ void main() {
       });
 
       test('containsWhere', () {
-        final _list = [1, 2, 1, 2, 3, 4];
-        expect(_list.containsWhere((element) => element == 1), isTrue);
-        expect(_list.containsWhere((element) => element == 5), isFalse);
-        expect(_list.containsWhere((element) => element + 2 == 3), isTrue);
+        final list = [1, 2, 1, 2, 3, 4];
+        expect(list.containsWhere((element) => element == 1), isTrue);
+        expect(list.containsWhere((element) => element == 5), isFalse);
+        expect(list.containsWhere((element) => element + 2 == 3), isTrue);
 
         final otherList = ['hi', 'hey', 'foo', 'bar'];
         expect(
@@ -1411,6 +1542,19 @@ void main() {
       });
     });
 
+    group('NullableStringExtension', () {
+      test('isNullOrEmpty', () {
+        String? str;
+        expect(str.isNullOrEmpty, isTrue);
+        str = '';
+        expect(str.isNullOrEmpty, isTrue);
+        str = 'hello';
+        expect(str.isNullOrEmpty, isFalse);
+        str = null;
+        expect(str.isNullOrEmpty, isTrue);
+      });
+    });
+
     group('StringExtension', () {
       test('fuzzyMatch', () {
         const str = 'hello_world_file';
@@ -1511,39 +1655,41 @@ void main() {
         setGlobal(IdeTheme, IdeTheme());
       });
 
-      testWidgets('updates controller when provided controller changes',
-          (WidgetTester tester) async {
-        final controller1 = TestProvidedController('id_1');
-        final controller2 = TestProvidedController('id_2');
-        final controllerNotifier =
-            ValueNotifier<TestProvidedController>(controller1);
+      testWidgets(
+        'updates controller when provided controller changes',
+        (WidgetTester tester) async {
+          final controller1 = TestProvidedController('id_1');
+          final controller2 = TestProvidedController('id_2');
+          final controllerNotifier =
+              ValueNotifier<TestProvidedController>(controller1);
 
-        final provider = ValueListenableBuilder<TestProvidedController>(
-          valueListenable: controllerNotifier,
-          builder: (context, controller, _) {
-            return Provider<TestProvidedController>.value(
-              value: controller,
-              child: Builder(
-                builder: (context) {
-                  return wrap(
-                    const TestStatefulWidget(),
-                  );
-                },
-              ),
-            );
-          },
-        );
+          final provider = ValueListenableBuilder<TestProvidedController>(
+            valueListenable: controllerNotifier,
+            builder: (context, controller, _) {
+              return Provider<TestProvidedController>.value(
+                value: controller,
+                child: Builder(
+                  builder: (context) {
+                    return wrap(
+                      const TestStatefulWidget(),
+                    );
+                  },
+                ),
+              );
+            },
+          );
 
-        await tester.pumpWidget(provider);
-        expect(find.text('Value 1'), findsOneWidget);
-        expect(find.text('Controller id_1'), findsOneWidget);
+          await tester.pumpWidget(provider);
+          expect(find.text('Value 1'), findsOneWidget);
+          expect(find.text('Controller id_1'), findsOneWidget);
 
-        controllerNotifier.value = controller2;
-        await tester.pumpAndSettle();
+          controllerNotifier.value = controller2;
+          await tester.pumpAndSettle();
 
-        expect(find.text('Value 2'), findsOneWidget);
-        expect(find.text('Controller id_2'), findsOneWidget);
-      });
+          expect(find.text('Value 2'), findsOneWidget);
+          expect(find.text('Controller id_2'), findsOneWidget);
+        },
+      );
     });
 
     group('subtractMaps', () {

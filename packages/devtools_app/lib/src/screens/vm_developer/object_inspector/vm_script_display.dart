@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:vm_service/vm_service.dart';
 
 import '../vm_developer_common_widgets.dart';
 import 'object_inspector_view_controller.dart';
@@ -13,6 +12,7 @@ import 'vm_object_model.dart';
 /// related to script objects in the Dart VM.
 class VmScriptDisplay extends StatelessWidget {
   const VmScriptDisplay({
+    super.key,
     required this.controller,
     required this.script,
   });
@@ -45,7 +45,7 @@ class VmScriptDisplay extends StatelessWidget {
         controller,
         field,
       ),
-      serviceObjectLinkBuilderMapEntry<ScriptRef>(
+      serviceObjectLinkBuilderMapEntry(
         controller: controller,
         key: 'URI',
         object: script.obj,

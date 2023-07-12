@@ -8,18 +8,20 @@
 
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:logging/logging.dart';
 import 'package:provider/provider.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../devtools.dart' as devtools;
 import 'common_widgets.dart';
-import 'config_specific/logger/logger.dart' as logger;
 import 'connected_app.dart';
 import 'globals.dart';
+import 'theme.dart';
+
+final _log = Logger('lib/src/shared/utils');
 
 /// Attempts to copy a String of `data` to the clipboard.
 ///
@@ -41,7 +43,7 @@ Future<void> copyToClipboard(
 void debugLogger(String message) {
   assert(
     () {
-      logger.log('$message');
+      _log.info(message);
       return true;
     }(),
   );
@@ -92,18 +94,28 @@ List<ConnectionDescription> generateDeviceDescription(
 
   final flutterVersion = connectedApp.flutterVersionNow;
 
-  ConnectionDescription? _vmServiceConnection;
+  ConnectionDescription? vmServiceConnection;
   if (includeVmServiceConnection && serviceManager.service != null) {
     final description = serviceManager.service!.connectedUri.toString();
-    _vmServiceConnection = ConnectionDescription(
+    vmServiceConnection = ConnectionDescription(
       title: 'VM Service Connection',
       description: description,
-      actions: [CopyToClipboardControl(dataProvider: () => description)],
+      actions: [
+        CopyToClipboardControl(
+          dataProvider: () => description,
+          size: defaultIconSize,
+        ),
+      ],
     );
   }
 
   return [
     ConnectionDescription(title: 'CPU / OS', description: vm.deviceDisplay),
+    ConnectionDescription(
+      title: 'Connected app type',
+      description: connectedApp.display,
+    ),
+    if (vmServiceConnection != null) vmServiceConnection,
     ConnectionDescription(title: 'Dart Version', description: version),
     if (flutterVersion != null) ...{
       ConnectionDescription(
@@ -116,14 +128,10 @@ List<ConnectionDescription> generateDeviceDescription(
             '${flutterVersion.engineRevision}',
       ),
     },
-    ConnectionDescription(
-      title: 'Connected app type',
-      description: connectedApp.display,
-    ),
-    if (_vmServiceConnection != null) _vmServiceConnection,
   ];
 }
 
+/// This method should be public, because it is used by g3 specific code.
 List<String> issueLinkDetails() {
   final issueDescriptionItems = [
     '<-- Please describe your problem here. Be sure to include repro steps. -->',
@@ -148,6 +156,8 @@ List<String> issueLinkDetails() {
   return issueDescriptionItems;
 }
 
+typedef ProvidedControllerCallback<T> = void Function(T);
+
 /// Mixin that provides a [controller] from package:provider for a State class.
 ///
 /// [initController] must be called from [State.didChangeDependencies]. If
@@ -158,6 +168,20 @@ mixin ProvidedControllerMixin<T, V extends StatefulWidget> on State<V> {
   T get controller => _controller!;
 
   T? _controller;
+
+  final _callWhenReady = <ProvidedControllerCallback>[];
+
+  /// Calls the provided [callback] once [_controller] has been initialized.
+  ///
+  /// The [callback] will be called immediately if [_controller] has already
+  /// been initialized.
+  void callWhenControllerReady(ProvidedControllerCallback callback) {
+    if (_controller != null) {
+      callback(_controller!);
+    } else {
+      _callWhenReady.add(callback);
+    }
+  }
 
   /// Initializes [_controller] from package:provider.
   ///
@@ -173,21 +197,15 @@ mixin ProvidedControllerMixin<T, V extends StatefulWidget> on State<V> {
   bool initController() {
     final newController = Provider.of<T>(context);
     if (newController == _controller) return false;
+    final firstInitialization = _controller == null;
     _controller = newController;
+    if (firstInitialization) {
+      for (final callback in _callWhenReady) {
+        callback(_controller!);
+      }
+      _callWhenReady.clear();
+    }
     return true;
-  }
-}
-
-mixin OfflineScreenControllerMixin<T> {
-  ValueListenable<bool> get loadingOfflineData => _loadingOfflineData;
-  final _loadingOfflineData = ValueNotifier<bool>(false);
-
-  FutureOr<void> processOfflineData(T offlineData);
-
-  Future<void> loadOfflineData(T offlineData) async {
-    _loadingOfflineData.value = true;
-    await processOfflineData(offlineData);
-    _loadingOfflineData.value = false;
   }
 }
 

@@ -11,15 +11,15 @@ import 'dart:async';
 import 'package:collection/collection.dart' show IterableExtension;
 import 'package:dds_service_extensions/dds_service_extensions.dart';
 import 'package:flutter/foundation.dart';
-// TODO(CoderDake): remove after migration to vm_service:11.0.0
-// ignore: implementation_imports
-import 'package:vm_service/src/vm_service.dart';
+import 'package:logging/logging.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../screens/vm_developer/vm_service_private_extensions.dart';
 import '../shared/globals.dart';
 import '../shared/primitives/utils.dart';
 import 'json_to_service_cache.dart';
+
+final _log = Logger('vm_service_wrapper');
 
 class VmServiceWrapper implements VmService {
   VmServiceWrapper(
@@ -32,7 +32,7 @@ class VmServiceWrapper implements VmService {
 
   VmServiceWrapper.fromNewVmService(
     Stream<dynamic> /*String|List<int>*/ inStream,
-    void writeMessage(String message),
+    void Function(String message) writeMessage,
     this._connectedUri, {
     Log? log,
     DisposeHandler? disposeHandler,
@@ -85,6 +85,9 @@ class VmServiceWrapper implements VmService {
   // A local cache of "fake" service objects. Used to convert JSON objects to
   // VM service response formats to be used with APIs that require them.
   final fakeServiceCache = JsonToServiceCache();
+
+  /// A counter for unique ids to add to each of a future's messages.
+  static int _logIdCounter = 0;
 
   /// Executes `callback` for each isolate, and waiting for all callbacks to
   /// finish before completing.
@@ -287,6 +290,24 @@ class VmServiceWrapper implements VmService {
         isolateId,
         objectId,
         limit,
+        includeSubclasses: includeSubclasses,
+        includeImplementers: includeImplementers,
+      ),
+    );
+  }
+
+  @override
+  Future<InstanceRef> getInstancesAsList(
+    String isolateId,
+    String objectId, {
+    bool? includeSubclasses,
+    bool? includeImplementers,
+  }) async {
+    return trackFuture(
+      'getInstancesAsList',
+      _vmService.getInstancesAsList(
+        isolateId,
+        objectId,
         includeSubclasses: includeSubclasses,
         includeImplementers: includeImplementers,
       ),
@@ -856,29 +877,10 @@ class VmServiceWrapper implements VmService {
     String id,
   ) async {
     assert(await isHttpProfilingAvailable(isolateId));
-    final dartIOVersion = await getDartIOVersion(isolateId);
-    final majorVersion = dartIOVersion.major;
-    // TODO(CoderDake): switch back to _vmService.getHttpProfileRequest call
-    // when upgrading to vm_service:11.0.0
-    if (majorVersion == null || majorVersion < 2) {
-      return trackFuture(
-        'ext.dart.io.getHttpProfileRequest',
-        extensionCallHelper(
-            _vmService, 'ext.dart.io.getHttpProfileRequest', <String, dynamic>{
-          'id': int.parse(id),
-          'isolateId': isolateId,
-        }),
-      ).then((r) => r as HttpProfileRequest);
-    } else {
-      return trackFuture(
-        'ext.dart.io.getHttpProfileRequest',
-        extensionCallHelper(
-            _vmService, 'ext.dart.io.getHttpProfileRequest', <String, dynamic>{
-          'id': id,
-          'isolateId': isolateId,
-        }),
-      ).then((r) => r as HttpProfileRequest);
-    }
+    return trackFuture(
+      'getHttpProfileRequest',
+      _vmService.getHttpProfileRequest(isolateId, id),
+    );
   }
 
   /// The `clearHttpProfile` RPC is used to clear previously recorded HTTP
@@ -940,7 +942,7 @@ class VmServiceWrapper implements VmService {
   Future<String?> retrieveFullStringValue(
     String isolateId,
     InstanceRef stringRef, {
-    String onUnavailable(String? truncatedValue)?,
+    String Function(String? truncatedValue)? onUnavailable,
   }) async {
     if (stringRef.valueAsStringIsTruncated != true) {
       return stringRef.valueAsString;
@@ -975,15 +977,44 @@ class VmServiceWrapper implements VmService {
     vmServiceCallCount = 0;
   }
 
+  /// If logging is enabled, wraps a future with logs at its start and finish.
+  ///
+  /// All logs from this run will have matching unique ids, so that they can
+  /// be associated together in the logs.
+  Future<T> _maybeLogWrappedFuture<T>(
+    String name,
+    Future<T> future,
+  ) async {
+    // If the logger is not accepting FINE logs, then we won't be logging any
+    // messages. So just return the [future] as-is.
+    if (!_log.isLoggable(Level.FINE)) return future;
+
+    final logId = ++_logIdCounter;
+    try {
+      _log.fine('[$logId]-trackFuture($name,...): Started');
+      final result = await future;
+      _log.fine('[$logId]-trackFuture($name,...): Succeeded');
+      return result;
+    } catch (error) {
+      _log.severe(
+        '[$logId]-trackFuture($name,...): Failed',
+        error,
+      );
+      rethrow;
+    }
+  }
+
   @visibleForTesting
   Future<T> trackFuture<T>(String name, Future<T> future) {
+    final localFuture = _maybeLogWrappedFuture<T>(name, future);
+
     if (!trackFutures) {
-      return future;
+      return localFuture;
     }
     vmServiceCallCount++;
     vmServiceCalls.add(name);
 
-    final trackedFuture = TrackedFuture(name, future as Future<Object>);
+    final trackedFuture = TrackedFuture(name, localFuture as Future<Object>);
     if (_allFuturesCompleter.isCompleted) {
       _allFuturesCompleter = Completer<bool>();
     }
@@ -996,11 +1027,11 @@ class VmServiceWrapper implements VmService {
       }
     }
 
-    future.then(
+    localFuture.then(
       (value) => futureComplete(),
       onError: (error) => futureComplete(),
     );
-    return future;
+    return localFuture;
   }
 
   /// Adds support for private VM RPCs that can only be used when VM developer

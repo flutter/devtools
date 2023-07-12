@@ -5,7 +5,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:vm_service/vm_service.dart';
 
 import '../../../shared/common_widgets.dart';
 import '../../../shared/tree.dart';
@@ -26,7 +25,7 @@ import 'object_inspector_view_controller.dart';
 ///       - B
 ///     - C
 class ClassHierarchyExplorer extends StatelessWidget {
-  const ClassHierarchyExplorer({required this.controller});
+  const ClassHierarchyExplorer({super.key, required this.controller});
 
   final ObjectInspectorViewController controller;
 
@@ -35,10 +34,10 @@ class ClassHierarchyExplorer extends StatelessWidget {
     return TreeView<ClassHierarchyNode>(
       dataRootsListenable:
           controller.classHierarchyController.selectedIsolateClassHierarchy,
-      dataDisplayProvider: (node, onPressed) => VmServiceObjectLink<Class>(
+      dataDisplayProvider: (node, onPressed) => VmServiceObjectLink(
         object: node.cls,
         onTap: (cls) => unawaited(
-          controller.findAndSelectNodeForObject(context, cls),
+          controller.findAndSelectNodeForObject(cls),
         ),
       ),
       onItemSelected: (_) => null,

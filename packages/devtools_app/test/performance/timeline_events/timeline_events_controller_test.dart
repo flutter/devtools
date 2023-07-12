@@ -5,7 +5,6 @@
 import 'dart:async';
 
 import 'package:devtools_app/devtools_app.dart';
-import 'package:devtools_app/src/shared/config_specific/import_export/import_export.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
@@ -25,7 +24,7 @@ void main() {
   group('$TimelineEventsController', () {
     late TimelineEventsController eventsController;
 
-    setUp(() async {
+    setUp(() {
       when(fakeServiceManager.connectedApp!.isProfileBuild)
           .thenAnswer((realInvocation) => Future.value(false));
       final initializedCompleter = Completer<bool>();
@@ -58,7 +57,9 @@ void main() {
         isNull,
       );
 
-      offlineController.enterOfflineMode();
+      offlineController.enterOfflineMode(
+        offlineApp: serviceManager.connectedApp!,
+      );
       final traceEvents = [...goldenUiTraceEvents, ...goldenRasterTraceEvents]
           .map((e) => e.json)
           .toList()

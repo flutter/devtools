@@ -3,21 +3,10 @@
 // found in the LICENSE file.
 
 import 'package:collection/collection.dart';
-import 'package:devtools_app/src/screens/debugger/breakpoint_manager.dart';
-import 'package:devtools_app/src/screens/debugger/codeview_controller.dart';
+import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/debugger/controls.dart';
-import 'package:devtools_app/src/screens/debugger/debugger_controller.dart';
 import 'package:devtools_app/src/screens/debugger/debugger_model.dart';
-import 'package:devtools_app/src/screens/debugger/debugger_screen.dart';
-import 'package:devtools_app/src/screens/debugger/program_explorer_model.dart';
-import 'package:devtools_app/src/service/service_manager.dart';
-import 'package:devtools_app/src/shared/config_specific/ide_theme/ide_theme.dart';
-import 'package:devtools_app/src/shared/console/eval/eval_service.dart';
 import 'package:devtools_app/src/shared/console/widgets/console_pane.dart';
-import 'package:devtools_app/src/shared/globals.dart';
-import 'package:devtools_app/src/shared/notifications.dart';
-import 'package:devtools_app/src/shared/routing.dart';
-import 'package:devtools_app/src/shared/scripts/script_manager.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -27,11 +16,11 @@ import 'package:vm_service/vm_service.dart';
 import '../test_infra/test_data/debugger/vm_service_object_tree.dart';
 import '../test_infra/utils/tree_utils.dart';
 
-Future<void> main() async {
+void main() {
   final screen = DebuggerScreen();
 
   const windowSize = Size(4000.0, 4000.0);
-  const smallWindowSize = Size(1100.0, 1100.0);
+  const smallWindowSize = Size(1200.0, 1100.0);
 
   late MockDebuggerController debuggerController;
   late TestProgramExplorerController programExplorerController;
@@ -40,7 +29,6 @@ Future<void> main() async {
   setUp(() async {
     final fakeServiceManager = FakeServiceManager();
     final scriptManager = MockScriptManager();
-    // ignore: discarded_futures
     when(scriptManager.getScript(any)).thenAnswer(
       (_) => Future<Script>.value(testScript),
     );
@@ -56,6 +44,8 @@ Future<void> main() async {
     setGlobal(NotificationService, NotificationService());
     setGlobal(BreakpointManager, BreakpointManager());
     setGlobal(EvalService, MockEvalService());
+    setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
+    setGlobal(PreferencesController, PreferencesController());
     fakeServiceManager.consoleService.ensureServiceInitialized();
     when(fakeServiceManager.errorBadgeManager.errorCountNotifier('debugger'))
         .thenReturn(ValueNotifier<int>(0));
@@ -68,7 +58,7 @@ Future<void> main() async {
         controller.rootObjectNodesInternal.add(libraryNode);
       },
     );
-    programExplorerController.initialize();
+    await programExplorerController.initialize();
     await programExplorerController.selectNode(libraryNode);
 
     final codeViewController = createMockCodeViewControllerWithDefaults(
@@ -78,7 +68,7 @@ Future<void> main() async {
     when(codeViewController.fileExplorerVisible)
         .thenReturn(ValueNotifier(true));
     debuggerController = createMockDebuggerControllerWithDefaults(
-      mockCodeViewController: codeViewController,
+      codeViewController: codeViewController,
     );
   });
 
@@ -169,7 +159,10 @@ Future<void> main() async {
           debugger: debuggerController,
         ),
       );
-      expect(find.text("Don't stop on exceptions"), findsOneWidget);
+      expect(
+        find.text("Don't stop on exceptions", skipOffstage: false),
+        findsOneWidget,
+      );
     },
   );
 
@@ -183,7 +176,10 @@ Future<void> main() async {
           debugger: debuggerController,
         ),
       );
-      expect(find.text('Ignore exceptions'), findsOneWidget);
+      expect(
+        find.text('Ignore exceptions', skipOffstage: false),
+        findsOneWidget,
+      );
     },
   );
 

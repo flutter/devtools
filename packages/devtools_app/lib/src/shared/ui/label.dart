@@ -5,13 +5,13 @@
 import 'package:flutter/material.dart';
 
 import '../theme.dart';
-import 'icons.dart';
 
 /// Label including an image icon and optional text.
 class ImageIconLabel extends StatelessWidget {
   const ImageIconLabel(
     this.icon,
     this.text, {
+    super.key,
     this.unscaledMinIncludeTextWidth,
   });
 
@@ -39,20 +39,16 @@ class ImageIconLabel extends StatelessWidget {
 
 class MaterialIconLabel extends StatelessWidget {
   const MaterialIconLabel({
+    super.key,
     required this.label,
-    this.iconData,
-    this.imageIcon,
+    required this.iconData,
     this.color,
     this.minScreenWidthForTextBeforeScaling,
-  }) : assert(
-          (iconData == null) != (imageIcon == null),
-          'Exactly one of iconData and imageIcon should be present.',
-        );
+  });
 
-  final IconData? iconData;
-  final ThemedImageIcon? imageIcon;
+  final IconData iconData;
   final Color? color;
-  final String label;
+  final String? label;
   final double? minScreenWidthForTextBeforeScaling;
 
   @override
@@ -62,19 +58,18 @@ class MaterialIconLabel extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        iconData != null
-            ? Icon(
-                iconData,
-                size: defaultIconSize,
-                color: color,
-              )
-            : imageIcon!,
+        Icon(
+          iconData,
+          size: defaultIconSize,
+          color: color,
+        ),
         // TODO(jacobr): animate showing and hiding the text.
-        if (includeText(context, minScreenWidthForTextBeforeScaling))
+        if (label != null &&
+            includeText(context, minScreenWidthForTextBeforeScaling))
           Padding(
             padding: const EdgeInsets.only(left: denseSpacing),
             child: Text(
-              label,
+              label!,
               style: TextStyle(color: color),
             ),
           ),

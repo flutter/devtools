@@ -113,7 +113,7 @@ void main() {
     const nonJsonOutput = 'Non-json details for log number 8';
     const jsonOutput = '{\n"Details": "of log event 9",\n"logEvent": "9"\n}\n';
 
-    String _ansiCodesOutput() {
+    String ansiCodesOutput() {
       final sb = StringBuffer();
       sb.write('Ansi color codes processed for ');
       final pen = AnsiPen()..rgb(r: 0.8, g: 0.3, b: 0.4, bg: true);
@@ -121,7 +121,7 @@ void main() {
       return sb.toString();
     }
 
-    LogData _generate(int i) {
+    LogData generate(int i) {
       String? details = 'log event $i';
       String kind = 'kind $i';
       String? computedDetails;
@@ -137,7 +137,7 @@ void main() {
           break;
         case 5:
           kind = 'stdout';
-          details = _ansiCodesOutput();
+          details = ansiCodesOutput();
           break;
         default:
           break;
@@ -152,7 +152,7 @@ void main() {
       return LogData(kind, details, i, detailsComputer: detailsComputer);
     }
 
-    final fakeLogData = List<LogData>.generate(totalLogs, _generate);
+    final fakeLogData = List<LogData>.generate(totalLogs, generate);
 
     Future<void> pumpLoggingScreen(WidgetTester tester) async {
       await tester.pumpWidget(
@@ -163,7 +163,7 @@ void main() {
       );
     }
 
-    setUp(() async {
+    setUp(() {
       mockLoggingController = MockLoggingController();
       when(mockLoggingController.data).thenReturn([]);
       when(mockLoggingController.search).thenReturn('');
@@ -190,52 +190,55 @@ void main() {
           .thenReturn(ListValueNotifier<LogData>(fakeLogData));
     });
 
-    testWidgetsWithWindowSize('can process Ansi codes', windowSize,
-        (WidgetTester tester) async {
-      await pumpLoggingScreen(tester);
-      await tester.pumpAndSettle();
-      await tester.tap(find.byKey(ValueKey(fakeLogData[5])));
-      await tester.pumpAndSettle();
+    testWidgetsWithWindowSize(
+      'can process Ansi codes',
+      windowSize,
+      (WidgetTester tester) async {
+        await pumpLoggingScreen(tester);
+        await tester.pumpAndSettle();
+        await tester.tap(find.byKey(ValueKey(fakeLogData[5])));
+        await tester.pumpAndSettle();
 
-      // Entry in tree.
-      expect(
-        find.richText('Ansi color codes processed for log 5'),
-        findsOneWidget,
-        reason: 'Processed text without ansi codes should exist in logs and '
-            'details sections.',
-      );
-
-      // Entry in details panel.
-      final finder =
-          find.selectableText('Ansi color codes processed for log 5');
-
-      expect(
-        find.richText('Ansi color codes processed for log 5'),
-        findsOneWidget,
-        reason: 'Processed text without ansi codes should exist in logs and '
-            'details sections.',
-      );
-
-      finder.evaluate().forEach((element) {
-        final richText = element.widget as RichText;
-        final textSpan = richText.text as TextSpan;
-        final secondSpan = textSpan.children![1] as TextSpan;
+        // Entry in tree.
         expect(
-          secondSpan.text,
-          'log 5',
-          reason: 'Text with ansi code should be in separate span',
+          find.richText('Ansi color codes processed for log 5'),
+          findsOneWidget,
+          reason: 'Processed text without ansi codes should exist in logs and '
+              'details sections.',
         );
+
+        // Entry in details panel.
+        final finder =
+            find.selectableText('Ansi color codes processed for log 5');
+
         expect(
-          secondSpan.style!.backgroundColor,
-          const Color.fromRGBO(215, 95, 135, 1),
+          find.richText('Ansi color codes processed for log 5'),
+          findsOneWidget,
+          reason: 'Processed text without ansi codes should exist in logs and '
+              'details sections.',
         );
-      });
-    });
+
+        finder.evaluate().forEach((element) {
+          final richText = element.widget as RichText;
+          final textSpan = richText.text as TextSpan;
+          final secondSpan = textSpan.children![1] as TextSpan;
+          expect(
+            secondSpan.text,
+            'log 5',
+            reason: 'Text with ansi code should be in separate span',
+          );
+          expect(
+            secondSpan.style!.backgroundColor,
+            const Color.fromRGBO(215, 95, 135, 1),
+          );
+        });
+      },
+    );
   });
 
   group('Debugger Screen', () {
     late FakeServiceManager fakeServiceManager;
-    late MockDebuggerControllerLegacy debuggerController;
+    late MockDebuggerController debuggerController;
 
     const windowSize = Size(4000.0, 4000.0);
 
@@ -256,7 +259,7 @@ void main() {
       );
     }
 
-    String _ansiCodesOutput() {
+    String ansiCodesOutput() {
       final sb = StringBuffer();
       sb.write('Ansi color codes processed for ');
       final pen = AnsiPen()..rgb(r: 0.8, g: 0.3, b: 0.4, bg: true);
@@ -280,33 +283,35 @@ void main() {
       // when(fakeServiceManager.errorBadgeManager.errorCountNotifier(any))
       //     .thenReturn(ValueNotifier<int>(0));
 
-      debuggerController = MockDebuggerControllerLegacy.withDefaults();
+      debuggerController = createMockDebuggerControllerWithDefaults();
     });
 
     testWidgetsWithWindowSize(
-        'Console area shows processed ansi text', windowSize,
-        (WidgetTester tester) async {
-      serviceManager.consoleService.appendStdio(_ansiCodesOutput());
+      'Console area shows processed ansi text',
+      windowSize,
+      (WidgetTester tester) async {
+        serviceManager.consoleService.appendStdio(ansiCodesOutput());
 
-      await pumpConsole(tester, debuggerController);
+        await pumpConsole(tester, debuggerController);
 
-      final finder =
-          find.selectableText('Ansi color codes processed for console');
-      expect(finder, findsOneWidget);
-      finder.evaluate().forEach((element) {
-        final selectableText = element.widget as SelectableText;
-        final textSpan = selectableText.textSpan!;
-        final secondSpan = textSpan.children![1] as TextSpan;
-        expect(
-          secondSpan.text,
-          'console',
-          reason: 'Text with ansi code should be in separate span',
-        );
-        expect(
-          secondSpan.style!.backgroundColor,
-          const Color.fromRGBO(215, 95, 135, 1),
-        );
-      });
-    });
+        final finder =
+            find.selectableText('Ansi color codes processed for console');
+        expect(finder, findsOneWidget);
+        finder.evaluate().forEach((element) {
+          final selectableText = element.widget as SelectableText;
+          final textSpan = selectableText.textSpan!;
+          final secondSpan = textSpan.children![1] as TextSpan;
+          expect(
+            secondSpan.text,
+            'console',
+            reason: 'Text with ansi code should be in separate span',
+          );
+          expect(
+            secondSpan.style!.backgroundColor,
+            const Color.fromRGBO(215, 95, 135, 1),
+          );
+        });
+      },
+    );
   });
 }

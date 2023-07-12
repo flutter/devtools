@@ -3,16 +3,13 @@
 // found in the LICENSE file.
 
 import 'package:collection/collection.dart';
-import 'package:devtools_app/src/service/service_manager.dart';
+import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/shared/config_specific/import_export/import_export.dart';
-import 'package:devtools_app/src/shared/globals.dart';
-import 'package:devtools_app/src/shared/notifications.dart';
-import 'package:devtools_app/src/shared/primitives/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-void main() async {
-  test('Filename is sortable by time', () async {
+void main() {
+  test('Filename is sortable by time', () {
     final dates = [
       DateTime(1901, 2, 3, 4, 5, 6, 7),
       DateTime(1902, 1, 3, 4, 5, 6, 7),
@@ -42,7 +39,7 @@ void main() async {
     expect(sortedByTime, sortedByFileName);
   });
 
-  test('Filename hours are 0 to 23', () async {
+  test('Filename hours are 0 to 23', () {
     final filename = ExportController.generateFileName(
       time: DateTime(1901, 2, 3, 14, 5, 6, 7),
       type: ExportFileType.json,
@@ -115,6 +112,6 @@ final devToolsFileJson = DevToolsJsonFile(
   data: <String, Object?>{
     'devToolsSnapshot': true,
     'activeScreenId': 'example',
-    'example': {'title': 'example custom tools'}
+    'example': {'title': 'example custom tools'},
   },
 );

@@ -107,20 +107,24 @@ class ClassOnlyHeapPath {
 /// This class is needed to make the snapshot taking operation mockable.
 class SnapshotTaker {
   Future<AdaptedHeapData?> take() async {
-    final snapshot = await snapshotMemory();
+    final snapshot = await snapshotMemoryInSelectedIsolate();
     if (snapshot == null) return null;
-    final result = await _adaptSnapshotGaWrapper(snapshot);
+    final result =
+        await _adaptSnapshotGaWrapper(snapshot, isolateId: selectedIsolateId!);
     return result;
   }
 }
 
-Future<AdaptedHeapData> _adaptSnapshotGaWrapper(HeapSnapshotGraph graph) async {
+Future<AdaptedHeapData> _adaptSnapshotGaWrapper(
+  HeapSnapshotGraph graph, {
+  required String isolateId,
+}) async {
   late final AdaptedHeapData result;
   await ga.timeAsync(
     gac.memory,
     gac.MemoryTime.adaptSnapshot,
-    asyncOperation: () async =>
-        result = await AdaptedHeapData.fromHeapSnapshot(graph),
+    asyncOperation: () async => result =
+        await AdaptedHeapData.fromHeapSnapshot(graph, isolateId: isolateId),
     screenMetricsProvider: () => MemoryScreenMetrics(
       heapObjectsTotal: graph.objects.length,
     ),
@@ -140,16 +144,4 @@ mixin Sealable {
   /// See doc for the mixin [Sealable].
   bool get isSealed => _isSealed;
   bool _isSealed = false;
-}
-
-/// Successors and predecessors for a heap instance, to
-/// browse in console.
-class HeapObjectGraph {
-  //TODO(polina-c): add needed fields
-
-  HeapObjectGraph(this.heap, this.identityHashCode, this.className);
-
-  final int identityHashCode;
-  final HeapClassName className;
-  final AdaptedHeapData heap;
 }

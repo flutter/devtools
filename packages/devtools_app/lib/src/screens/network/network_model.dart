@@ -8,7 +8,7 @@ import '../../shared/http/http_request_data.dart';
 import '../../shared/primitives/utils.dart';
 import '../../shared/ui/search.dart';
 
-abstract class NetworkRequest with DataSearchStateMixin {
+abstract class NetworkRequest with SearchableDataMixin {
   NetworkRequest(this._timelineMicrosBase);
 
   final int _timelineMicrosBase;
@@ -40,7 +40,13 @@ abstract class NetworkRequest with DataSearchStateMixin {
 
   String get durationDisplay {
     final duration = this.duration;
-    return 'Duration: ${duration != null ? msText(duration) : 'Pending'}';
+    final text = duration != null
+        ? durationText(
+            duration,
+            unit: DurationDisplayUnit.milliseconds,
+          )
+        : 'Pending';
+    return 'Duration: $text';
   }
 
   int timelineMicrosecondsSinceEpoch(int micros) {
@@ -48,10 +54,15 @@ abstract class NetworkRequest with DataSearchStateMixin {
   }
 
   @override
+  bool matchesSearchToken(RegExp regExpSearch) {
+    return uri.caseInsensitiveContains(regExpSearch);
+  }
+
+  @override
   String toString() => '$method $uri';
 
   @override
-  bool operator ==(other) {
+  bool operator ==(Object? other) {
     return other is NetworkRequest &&
         runtimeType == other.runtimeType &&
         startTimestamp == other.startTimestamp &&
@@ -84,7 +95,7 @@ class WebSocket extends NetworkRequest {
 
   final SocketStatistic _socket;
   @override
-  String get id => _socket.id.toString();
+  String get id => _socket.id;
 
   @override
   Duration? get duration {
@@ -164,7 +175,7 @@ class WebSocket extends NetworkRequest {
   bool get inProgress => false;
 
   @override
-  bool operator ==(other) => other is WebSocket && id == other.id;
+  bool operator ==(Object? other) => other is WebSocket && id == other.id;
 
   @override
   int get hashCode => id.hashCode;
@@ -175,7 +186,6 @@ class NetworkRequests {
   NetworkRequests({
     this.requests = const [],
     this.invalidHttpRequests = const [],
-    this.outstandingHttpRequests = const {},
   });
 
   /// A list of network requests.
@@ -189,12 +199,7 @@ class NetworkRequests {
   /// information to display normally in the UI.
   List<DartIOHttpRequestData> invalidHttpRequests;
 
-  /// A mapping of timeline IDs to instances of HttpRequestData which are
-  /// currently in-progress.
-  Map<String, DartIOHttpRequestData> outstandingHttpRequests;
-
   void clear() {
     requests.clear();
-    outstandingHttpRequests.clear();
   }
 }

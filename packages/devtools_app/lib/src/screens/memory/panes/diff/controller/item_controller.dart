@@ -47,19 +47,24 @@ class SnapshotInstanceItem extends SnapshotItem {
   /// This method is expected to be called once when heap is actually received.
   Future<void> initializeHeapData(AdaptedHeapData? data) async {
     assert(heap == null);
-    if (data != null) heap = await AdaptedHeap.create(data);
+    if (data != null) {
+      data.snapshotName = name;
+      heap = await AdaptedHeap.create(data);
+    }
     _isProcessing.value = false;
   }
 
   @override
   final int displayNumber;
 
-  String get name => '$isolateName-$displayNumber';
+  String get name => nameOverride ?? '$isolateName-$displayNumber';
+
+  String? nameOverride;
 
   final diffWith = ValueNotifier<SnapshotInstanceItem?>(null);
 
   @override
   bool get hasData => heap != null;
 
-  int? get totalSize => heap?.data.totalSize;
+  int? get totalSize => heap?.data.totalReachableSize;
 }

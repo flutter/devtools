@@ -17,7 +17,7 @@ class LogDetails extends StatefulWidget {
   final LogData? log;
 
   @override
-  _LogDetailsState createState() => _LogDetailsState();
+  State<LogDetails> createState() => _LogDetailsState();
 
   static const copyToClipboardButtonKey =
       Key('log_details_copy_to_clipboard_button');
@@ -69,11 +69,6 @@ class _LogDetailsState extends State<LogDetails>
   }
 
   Widget _buildSimpleLog(BuildContext context, LogData? log) {
-    String? Function()? _dataProvider;
-    if (log?.details != null && log!.details!.isNotEmpty) {
-      _dataProvider = log.prettyPrinted;
-    }
-
     final details = log?.details;
     if (details != _lastDetails) {
       if (scrollController.hasClients) {
@@ -83,18 +78,11 @@ class _LogDetailsState extends State<LogDetails>
       _lastDetails = details;
     }
 
-    return OutlineDecoration(
+    final theme = Theme.of(context);
+    return RoundedOutlinedBorder(
+      clip: true,
       child: ConsoleFrame(
-        title: AreaPaneHeader(
-          title: const Text('Details'),
-          needsTopBorder: false,
-          actions: [
-            CopyToClipboardControl(
-              dataProvider: _dataProvider,
-              buttonKey: LogDetails.copyToClipboardButtonKey,
-            ),
-          ],
-        ),
+        title: _LogDetailsHeader(log: log),
         child: Padding(
           padding: const EdgeInsets.all(denseSpacing),
           child: SingleChildScrollView(
@@ -102,11 +90,36 @@ class _LogDetailsState extends State<LogDetails>
             child: SelectableText(
               log?.prettyPrinted() ?? '',
               textAlign: TextAlign.left,
-              style: Theme.of(context).fixedFontStyle,
+              style: theme.fixedFontStyle,
             ),
           ),
         ),
       ),
+    );
+  }
+}
+
+class _LogDetailsHeader extends StatelessWidget {
+  const _LogDetailsHeader({required this.log});
+
+  final LogData? log;
+
+  @override
+  Widget build(BuildContext context) {
+    String? Function()? dataProvider;
+    if (log?.details != null && log!.details!.isNotEmpty) {
+      dataProvider = log!.prettyPrinted;
+    }
+    return AreaPaneHeader(
+      title: const Text('Details'),
+      includeTopBorder: false,
+      roundedTopBorder: false,
+      actions: [
+        CopyToClipboardControl(
+          dataProvider: dataProvider,
+          buttonKey: LogDetails.copyToClipboardButtonKey,
+        ),
+      ],
     );
   }
 }

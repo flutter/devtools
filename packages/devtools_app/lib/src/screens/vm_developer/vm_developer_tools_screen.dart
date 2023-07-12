@@ -6,7 +6,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../shared/primitives/auto_dispose.dart';
-import '../../shared/primitives/simple_items.dart';
 import '../../shared/screen.dart';
 import '../../shared/theme.dart';
 import '../../shared/utils.dart';
@@ -44,7 +43,7 @@ class VMDeveloperToolsScreen extends Screen {
       : super.conditional(
           id: id,
           title: ScreenMetaData.vmTools.title,
-          icon: Icons.settings_applications,
+          icon: ScreenMetaData.vmTools.icon,
           requiresVmDeveloperMode: true,
         );
 
@@ -59,7 +58,7 @@ class VMDeveloperToolsScreen extends Screen {
 }
 
 class VMDeveloperToolsScreenBody extends StatefulWidget {
-  const VMDeveloperToolsScreenBody();
+  const VMDeveloperToolsScreenBody({super.key});
 
   static List<VMDeveloperView> views = [
     const VMStatisticsView(),
@@ -68,7 +67,8 @@ class VMDeveloperToolsScreenBody extends StatefulWidget {
   ];
 
   @override
-  _VMDeveloperToolsScreenState createState() => _VMDeveloperToolsScreenState();
+  State<VMDeveloperToolsScreenBody> createState() =>
+      _VMDeveloperToolsScreenState();
 }
 
 class _VMDeveloperToolsScreenState extends State<VMDeveloperToolsScreenBody>
@@ -92,7 +92,6 @@ class _VMDeveloperToolsScreenState extends State<VMDeveloperToolsScreenBody>
             if (VMDeveloperToolsScreenBody.views.length > 1)
               NavigationRail(
                 selectedIndex: selectedIndex,
-                elevation: 10.0,
                 labelType: NavigationRailLabelType.all,
                 onDestinationSelected: controller.selectIndex,
                 destinations: [

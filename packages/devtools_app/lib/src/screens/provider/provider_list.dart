@@ -5,7 +5,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../shared/console/eval/inspector_tree.dart';
 import '../../shared/theme.dart';
 import 'provider_nodes.dart';
 
@@ -54,7 +53,7 @@ class ProviderList extends ConsumerStatefulWidget {
   const ProviderList({Key? key}) : super(key: key);
 
   @override
-  _ProviderListState createState() => _ProviderListState();
+  ConsumerState<ConsumerStatefulWidget> createState() => _ProviderListState();
 }
 
 class _ProviderListState extends ConsumerState<ProviderList> {

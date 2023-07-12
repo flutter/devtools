@@ -3,13 +3,15 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
+import 'package:logging/logging.dart';
 
-import '../../../../shared/config_specific/logger/logger.dart' as logger;
 import '../../../../shared/globals.dart';
 import '../../performance_controller.dart';
 import '../../performance_model.dart';
 import '../flutter_frames/flutter_frame_model.dart';
 import 'raster_stats_model.dart';
+
+final _log = Logger('raster_stats_controller');
 
 class RasterStatsController extends PerformanceFeatureController {
   RasterStatsController(super.performanceController);
@@ -38,7 +40,7 @@ class RasterStatsController extends PerformanceFeatureController {
       final rasterStats = RasterStats.parse(json);
       setData(rasterStats);
     } catch (e, st) {
-      logger.log('Error collecting raster stats: $e\n\n$st');
+      _log.shout('Error collecting raster stats: $e', e, st);
       clearData();
     } finally {
       _loadingSnapshot.value = false;

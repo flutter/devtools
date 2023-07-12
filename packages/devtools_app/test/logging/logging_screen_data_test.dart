@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 @TestOn('vm')
-
 import 'package:ansicolor/ansicolor.dart';
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/logging/_log_details.dart';
@@ -13,8 +12,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 
-void main() async {
-  final MockLoggingController mockLoggingController = MockLoggingController();
+void main() {
+  late MockLoggingController mockLoggingController;
   const windowSize = Size(1000.0, 1000.0);
   final fakeServiceManager = FakeServiceManager();
 
@@ -27,18 +26,19 @@ void main() async {
     );
   }
 
-  when(fakeServiceManager.connectedApp!.isFlutterWebAppNow).thenReturn(false);
-  when(fakeServiceManager.connectedApp!.isProfileBuildNow).thenReturn(false);
-  when(fakeServiceManager.errorBadgeManager.errorCountNotifier('logging'))
-      .thenReturn(ValueNotifier<int>(0));
-  setGlobal(ServiceConnectionManager, fakeServiceManager);
-  setGlobal(NotificationService, NotificationService());
-  setGlobal(IdeTheme, IdeTheme());
-
   setUp(() {
-    mockLoggingController.data = fakeLogData;
-    mockLoggingController.filteredData.clear();
-    mockLoggingController.filteredData.addAll(fakeLogData);
+    mockLoggingController =
+        createMockLoggingControllerWithDefaults(data: fakeLogData);
+
+    when(fakeServiceManager.connectedApp!.isFlutterWebAppNow).thenReturn(false);
+    when(fakeServiceManager.connectedApp!.isProfileBuildNow).thenReturn(false);
+    when(fakeServiceManager.errorBadgeManager.errorCountNotifier('logging'))
+        .thenReturn(ValueNotifier<int>(0));
+    setGlobal(ServiceConnectionManager, fakeServiceManager);
+    setGlobal(NotificationService, NotificationService());
+    setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
+    setGlobal(PreferencesController, PreferencesController());
+    setGlobal(IdeTheme, IdeTheme());
   });
 
   testWidgetsWithWindowSize(
@@ -99,7 +99,7 @@ void main() async {
       await pumpLoggingScreen(tester);
       verifyNever(mockLoggingController.clear());
 
-      final textFieldFinder = find.byKey(loggingSearchFieldKey);
+      final textFieldFinder = find.byType(TextField);
       expect(textFieldFinder, findsOneWidget);
       final TextField textField = tester.widget(textFieldFinder) as TextField;
       expect(textField.enabled, isTrue);
@@ -114,7 +114,7 @@ void main() async {
       await pumpLoggingScreen(tester);
 
       // Locates the copy to clipboard button's IconButton.
-      final copyButton = () => find
+      ToolbarAction copyButton() => find
           .byKey(LogDetails.copyToClipboardButtonKey)
           .evaluate()
           .first

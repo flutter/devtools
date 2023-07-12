@@ -5,14 +5,16 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
+import 'package:logging/logging.dart';
 
-import '../../../../shared/config_specific/logger/logger.dart';
 import '../../../../shared/primitives/trace_event.dart';
 import '../../../../shared/primitives/utils.dart';
 import '../../performance_controller.dart';
 import '../../performance_model.dart';
 import '../../performance_utils.dart';
 import 'timeline_events_controller.dart';
+
+final _log = Logger('timeline_event_processor');
 
 // For documentation on the Chrome "Trace Event Format", see this document:
 // https://docs.google.com/document/d/1CvAClvFfyA5R-PhYUmn5OOQtYMH4h6I0nSsKchNAySU/preview
@@ -75,10 +77,10 @@ abstract class BaseTraceEventProcessor {
     int startIndex = 0,
   }) async {
     // Events need to be in increasing timestamp order.
-    final _traceEvents = traceEvents.sublist(startIndex)..sort();
+    final traceEventsToProcess = traceEvents.sublist(startIndex)..sort();
 
     // A subclass of [BaseTimelineEventProcessor] must implement this method.
-    await processTraceEvents(_traceEvents);
+    await processTraceEvents(traceEventsToProcess);
 
     addPendingCompleteRootToTimeline(force: true);
 
@@ -144,7 +146,7 @@ abstract class BaseTraceEventProcessor {
         // VSYNC - DurationEnd
         //
         debugTraceEventCallback(
-          () => log(
+          () => _log.info(
             'Duplicate duration end event - skipping processing.\n'
             'Current event: $eventJson\n'
             'Previous event: ${_previousDurationEndEvents[eventThreadId]?.json}',
@@ -171,7 +173,7 @@ abstract class BaseTraceEventProcessor {
           // VSYNC - DurationEnd [event]
           //
           debugTraceEventCallback(
-            () => log(
+            () => _log.info(
               'Duplicate duration begin event - removing duplicate:'
               ' ${current?.beginTraceEventJson}',
             ),
@@ -225,7 +227,7 @@ abstract class BaseTraceEventProcessor {
           );
 
           debugTraceEventCallback(() {
-            log(
+            _log.info(
               'Missing DurationEnd event - adding fake end event $fakeEndEvent',
             );
           });
@@ -253,9 +255,9 @@ abstract class BaseTraceEventProcessor {
         //  Animator::BeginFrame - DurationEnd
         // VSYNC - DurationEnd
         debugTraceEventCallback(() {
-          log('Cannot recover unbalanced event tree.');
-          log('Event: $eventJson');
-          log('Current: $current');
+          _log.info('Cannot recover unbalanced event tree.');
+          _log.info('Event: $eventJson');
+          _log.info('Current: $current');
         });
         currentDurationEventNodes[eventThreadId] = null;
         return;

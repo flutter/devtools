@@ -14,12 +14,6 @@ import 'package:vm_service/vm_service.dart';
 const isolateId = '433';
 const objectId = '123';
 
-final libraryRef = LibraryRef(
-  name: 'some library',
-  uri: 'package:foo/foo.dart',
-  id: 'lib-id-1',
-);
-
 void main() {
   late ServiceConnectionManager manager;
 
@@ -82,8 +76,6 @@ void main() {
         manager.service!.getObject(
           isolateId,
           objectId,
-          offset: 0,
-          count: 3,
         ),
       ).thenAnswer((_) async {
         return instance;
@@ -92,8 +84,8 @@ void main() {
       await buildVariablesTree(recordVar);
 
       expect(recordVar.children, [
-        matchesVariable(name: '\$0', value: '12.34'),
-        matchesVariable(name: '\$1', value: 'true'),
+        matchesVariable(name: '\$1', value: '12.34'),
+        matchesVariable(name: '\$2', value: 'true'),
         matchesVariable(name: 'myNamedField', value: "'hello world'"),
       ]);
     },

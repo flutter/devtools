@@ -13,9 +13,11 @@ import 'package:flutter/material.dart' hide Stack;
 class VariableSelectionControls extends MaterialTextSelectionControls {
   VariableSelectionControls({
     required this.onInspect,
+    required this.onReroot,
   });
 
   final void Function(TextSelectionDelegate delegate)? onInspect;
+  final void Function(TextSelectionDelegate delegate)? onReroot;
 
   /// Builder for material-style copy/paste text selection toolbar with added
   /// Dart DevTools specific functionality.
@@ -35,7 +37,6 @@ class VariableSelectionControls extends MaterialTextSelectionControls {
       textLineHeight: textLineHeight,
       selectionMidpoint: selectionMidpoint,
       endpoints: endpoints,
-      delegate: delegate,
       clipboardStatus: clipboardStatus!,
       handleCut: canCut(delegate) ? () => handleCut(delegate) : null,
       handleCopy: canCopy(delegate) ? () => handleCopy(delegate) : null,
@@ -44,6 +45,7 @@ class VariableSelectionControls extends MaterialTextSelectionControls {
       handleSelectAll:
           canSelectAll(delegate) ? () => handleSelectAll(delegate) : null,
       handleInspect: onInspect != null ? () => onInspect!(delegate) : null,
+      handleReroot: onReroot != null ? () => onReroot!(delegate) : null,
     );
   }
 }
@@ -53,10 +55,10 @@ class _TextSelectionControlsToolbar extends StatefulWidget {
   const _TextSelectionControlsToolbar({
     Key? key,
     required this.clipboardStatus,
-    required this.delegate,
     required this.endpoints,
     required this.globalEditableRegion,
     required this.handleInspect,
+    required this.handleReroot,
     required this.handleCut,
     required this.handleCopy,
     required this.handlePaste,
@@ -66,10 +68,10 @@ class _TextSelectionControlsToolbar extends StatefulWidget {
   }) : super(key: key);
 
   final ValueListenable<ClipboardStatus> clipboardStatus;
-  final TextSelectionDelegate delegate;
   final List<TextSelectionPoint> endpoints;
   final Rect globalEditableRegion;
   final VoidCallback? handleInspect;
+  final VoidCallback? handleReroot;
   final VoidCallback? handleCut;
   final VoidCallback? handleCopy;
   final VoidCallback? handlePaste;
@@ -156,6 +158,11 @@ class _TextSelectionControlsToolbarState
         _TextSelectionToolbarItemData(
           label: 'Inspect',
           onPressed: widget.handleInspect,
+        ),
+      if (widget.handleReroot != null)
+        _TextSelectionToolbarItemData(
+          label: 'Reroot',
+          onPressed: widget.handleReroot,
         ),
       if (widget.handleCut != null)
         _TextSelectionToolbarItemData(

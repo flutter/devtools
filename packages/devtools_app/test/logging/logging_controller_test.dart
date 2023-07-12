@@ -9,7 +9,6 @@ import 'package:devtools_app/src/screens/logging/logging_controller.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_app/src/shared/primitives/message_bus.dart';
-import 'package:devtools_app/src/shared/ui/filter.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -40,7 +39,7 @@ void main() {
       );
     }
 
-    setUp(() async {
+    setUp(() {
       setGlobal(
         ServiceConnectionManager,
         FakeServiceManager(),
@@ -52,7 +51,7 @@ void main() {
     test('initial state', () {
       expect(controller.data, isEmpty);
       expect(controller.filteredData.value, isEmpty);
-      expect(controller.activeFilter.value, isNull);
+      expect(controller.activeFilter.value.isEmpty, isTrue);
     });
 
     test('receives data', () {
@@ -128,71 +127,39 @@ void main() {
       expect(controller.data, hasLength(5));
       expect(controller.filteredData.value, hasLength(5));
 
-      controller.filterData(
-        Filter(queryFilter: QueryFilter.parse('abc', controller.filterArgs)),
-      );
+      controller.setActiveFilter(query: 'abc');
       expect(controller.data, hasLength(5));
       expect(controller.filteredData.value, hasLength(2));
 
-      controller.filterData(
-        Filter(queryFilter: QueryFilter.parse('def', controller.filterArgs)),
-      );
+      controller.setActiveFilter(query: 'def');
       expect(controller.data, hasLength(5));
       expect(controller.filteredData.value, hasLength(1));
 
-      controller.filterData(
-        Filter(
-          queryFilter:
-              QueryFilter.parse('k:stdout abc def', controller.filterArgs),
-        ),
-      );
+      controller.setActiveFilter(query: 'k:stdout abc def');
       expect(controller.data, hasLength(5));
       expect(controller.filteredData.value, hasLength(3));
 
-      controller.filterData(
-        Filter(
-          queryFilter: QueryFilter.parse('kind:gc', controller.filterArgs),
-        ),
-      );
+      controller.setActiveFilter(query: 'kind:gc');
       expect(controller.data, hasLength(5));
       expect(controller.filteredData.value, hasLength(2));
 
-      controller.filterData(
-        Filter(
-          queryFilter: QueryFilter.parse('k:stdout abc', controller.filterArgs),
-        ),
-      );
+      controller.setActiveFilter(query: 'k:stdout abc');
       expect(controller.data, hasLength(5));
       expect(controller.filteredData.value, hasLength(2));
 
-      controller.filterData(
-        Filter(
-          queryFilter: QueryFilter.parse('-k:gc', controller.filterArgs),
-        ),
-      );
+      controller.setActiveFilter(query: '-k:gc');
       expect(controller.data, hasLength(5));
       expect(controller.filteredData.value, hasLength(3));
 
-      controller.filterData(
-        Filter(
-          queryFilter: QueryFilter.parse('-k:gc,stdout', controller.filterArgs),
-        ),
-      );
+      controller.setActiveFilter(query: '-k:gc,stdout');
       expect(controller.data, hasLength(5));
       expect(controller.filteredData.value, hasLength(0));
 
-      controller.filterData(
-        Filter(
-          queryFilter: QueryFilter.parse(
-            'k:gc,stdout,stdin,flutter.frame',
-            controller.filterArgs,
-          ),
-        ),
-      );
+      controller.setActiveFilter(query: 'k:gc,stdout,stdin,flutter.frame');
       expect(controller.data, hasLength(5));
       expect(controller.filteredData.value, hasLength(5));
 
-      controller.filterData(null);
+      controller.setActiveFilter();
       expect(controller.data, hasLength(5));
       expect(controller.filteredData.value, hasLength(5));
     });

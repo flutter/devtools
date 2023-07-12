@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:stack_trace/stack_trace.dart' as stack_trace;
 import 'package:vm_service/vm_service.dart';
 
+import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/common_widgets.dart';
 import '../../shared/globals.dart';
 import '../../shared/primitives/utils.dart';
@@ -34,12 +35,15 @@ import 'vm_service_private_extensions.dart';
 /// rows specified for `rowKeyValues`.
 class VMInfoCard extends StatelessWidget implements PreferredSizeWidget {
   const VMInfoCard({
+    super.key,
     required this.title,
+    this.roundedTopBorder = true,
     this.rowKeyValues,
     this.table,
   });
 
   final String title;
+  final bool roundedTopBorder;
   final List<MapEntry<String, WidgetBuilder>>? rowKeyValues;
   final Widget? table;
 
@@ -49,6 +53,7 @@ class VMInfoCard extends StatelessWidget implements PreferredSizeWidget {
       size: preferredSize,
       child: VMInfoList(
         title: title,
+        roundedTopBorder: roundedTopBorder,
         rowKeyValues: rowKeyValues,
         table: table,
       ),
@@ -74,42 +79,42 @@ MapEntry<String, WidgetBuilder> selectableTextBuilderMapEntry(
 ) {
   return MapEntry(
     key,
-    (context) => SelectableText(
+    (context) => Text(
       value ?? '--',
       style: Theme.of(context).fixedFontStyle,
     ),
   );
 }
 
-MapEntry<String, WidgetBuilder>
-    serviceObjectLinkBuilderMapEntry<T extends ObjRef>({
+MapEntry<String, WidgetBuilder> serviceObjectLinkBuilderMapEntry({
   required ObjectInspectorViewController controller,
   required String key,
-  required T object,
+  required Response? object,
   bool preferUri = false,
-  String Function(T)? textBuilder,
+  String Function(Response?)? textBuilder,
 }) {
   return MapEntry(
     key,
-    (context) => VmServiceObjectLink<T>(
+    (context) => VmServiceObjectLink(
       object: object,
       textBuilder: textBuilder,
       preferUri: preferUri,
-      onTap: (object) async {
-        await controller.findAndSelectNodeForObject(context, object);
-      },
+      onTap: controller.findAndSelectNodeForObject,
     ),
   );
 }
 
 class VMInfoList extends StatelessWidget {
   const VMInfoList({
+    super.key,
     required this.title,
+    this.roundedTopBorder = true,
     this.rowKeyValues,
     this.table,
   });
 
   final String title;
+  final bool roundedTopBorder;
   final List<MapEntry<String, WidgetBuilder>>? rowKeyValues;
   final Widget? table;
 
@@ -124,7 +129,8 @@ class VMInfoList extends StatelessWidget {
       children: [
         AreaPaneHeader(
           title: Text(title),
-          needsTopBorder: false,
+          includeTopBorder: false,
+          roundedTopBorder: roundedTopBorder,
         ),
         if (rowKeyValues != null)
           Expanded(
@@ -140,7 +146,7 @@ class VMInfoList extends StatelessWidget {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          SelectableText(
+                          Text(
                             '${row.key.toString()}:',
                             style: theme.fixedFontStyle,
                           ),
@@ -179,16 +185,6 @@ Widget _buildAlternatingRow(BuildContext context, int index, Widget row) {
   );
 }
 
-/// An IconLabelButton with label 'Request' and a 'call made' icon.
-class RequestDataButton extends IconLabelButton {
-  const RequestDataButton({
-    required super.onPressed,
-    super.icon = Icons.call_made,
-    super.label = 'Request',
-    super.outlined = false,
-  });
-}
-
 /// Displays a RequestDataButton if the data provided by [sizeProvider] is null,
 /// otherwise displays the size data and a ToolbarRefresh button next
 /// to it, to request that data again if required.
@@ -197,6 +193,7 @@ class RequestDataButton extends IconLabelButton {
 /// a CircularProgressIndicator will be displayed.
 class RequestableSizeWidget extends StatelessWidget {
   const RequestableSizeWidget({
+    super.key,
     required this.fetching,
     required this.sizeProvider,
     required this.requestFunction,
@@ -222,11 +219,18 @@ class RequestableSizeWidget extends StatelessWidget {
         } else {
           final size = sizeProvider();
           return size == null
-              ? RequestDataButton(onPressed: requestFunction)
+              ? DevToolsButton(
+                  icon: Icons.call_made,
+                  label: 'Request',
+                  outlined: false,
+                  gaScreen: gac.vmTools,
+                  gaSelection: gac.requestSize,
+                  onPressed: requestFunction,
+                )
               : Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    SelectableText(
+                    Text(
                       size.valueAsString == null
                           ? '--'
                           : prettyPrintBytes(
@@ -251,31 +255,17 @@ String? _objectName(ObjRef? objectRef) {
     return null;
   }
 
-  String? objectRefName;
-
-  if (objectRef is ClassRef) {
-    objectRefName = objectRef.name;
-  } else if (objectRef is FuncRef) {
-    objectRefName = objectRef.name;
-  } else if (objectRef is FieldRef) {
-    objectRefName = objectRef.name;
-  } else if (objectRef is LibraryRef) {
-    objectRefName =
-        (objectRef.name?.isEmpty ?? false) ? objectRef.uri : objectRef.name;
-  } else if (objectRef is ScriptRef) {
-    objectRefName = fileNameFromUri(objectRef.uri);
-  } else if (objectRef is InstanceRef) {
-    objectRefName = objectRef.name ??
-        'Instance of ${objectRef.classRef?.name ?? '<Class>'}';
-  } else {
-    objectRefName = objectRef.vmType ?? objectRef.type;
-
-    if (objectRefName.startsWith('@')) {
-      objectRefName = objectRefName.substring(1, objectRefName.length);
-    }
-  }
-
-  return objectRefName;
+  return switch (objectRef) {
+    ClassRef(:final name) ||
+    FuncRef(:final name) ||
+    FieldRef(:final name) =>
+      name,
+    LibraryRef(:final name, :final uri) => name.isNullOrEmpty ? uri : name,
+    ScriptRef(:final uri) => fileNameFromUri(uri),
+    InstanceRef(:final name, :final classRef) =>
+      name ?? 'Instance of ${classRef?.name ?? '<Class>'}',
+    _ => (objectRef.vmType ?? objectRef.type)..replaceFirst('@', ''),
+  };
 }
 
 /// Returns the name of a function, qualified with the name of
@@ -303,21 +293,20 @@ String? qualifiedName(ObjRef? ref) {
 
 // Returns a description of the object containing its name and owner.
 String? _objectDescription(ObjRef? object) {
-  if (object == null) {
-    return null;
-  } else if (object is FieldRef) {
-    return '${object.declaredType?.name ?? 'Field'} ${object.name} of ${_objectName(object.owner) ?? '<Owner>'}';
-  } else if (object is FuncRef) {
-    return '${qualifiedName(object) ?? '<Function Name>'}';
-  } else {
-    return '${_objectName(object)}';
-  }
+  if (object == null) return null;
+  return switch (object) {
+    FieldRef(:final declaredType, :final name, :final owner) =>
+      '${declaredType?.name ?? 'Field'} $name of ${_objectName(owner) ?? '<Owner>'}',
+    FuncRef() => qualifiedName(object) ?? '<Function Name>',
+    _ => _objectName(object),
+  };
 }
 
 /// An ExpansionTile with an AreaPaneHeader as header and custom style
 /// for the VM tools tab.
 class VmExpansionTile extends StatelessWidget {
   const VmExpansionTile({
+    super.key,
     required this.title,
     required this.children,
     this.onExpanded,
@@ -329,17 +318,8 @@ class VmExpansionTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final titleRow = AreaPaneHeader(
-      title: Text(title),
-      needsTopBorder: false,
-      needsBottomBorder: false,
-      // We'll set the color in the Card so the InkWell shows a consistent
-      // color when the user hovers over the ExpansionTile.
-      backgroundColor: Colors.transparent,
-    );
     final theme = Theme.of(context);
     return Card(
-      color: theme.titleSolidBackgroundColor,
       child: ListTileTheme(
         data: ListTileTheme.of(context).copyWith(
           dense: true,
@@ -349,10 +329,13 @@ class VmExpansionTile extends StatelessWidget {
           // expanded ExpansionTile.
           data: theme.copyWith(dividerColor: Colors.transparent),
           child: ExpansionTile(
-            title: titleRow,
+            title: DefaultTextStyle(
+              style: theme.textTheme.titleSmall!,
+              child: Text(title),
+            ),
             onExpansionChanged: onExpanded,
             tilePadding: const EdgeInsets.only(
-              left: densePadding,
+              left: defaultSpacing,
               right: defaultSpacing,
             ),
             children: children,
@@ -364,6 +347,8 @@ class VmExpansionTile extends StatelessWidget {
 }
 
 class SizedCircularProgressIndicator extends StatelessWidget {
+  const SizedCircularProgressIndicator({super.key});
+
   @override
   Widget build(BuildContext context) {
     return SizedBox.fromSize(
@@ -375,9 +360,47 @@ class SizedCircularProgressIndicator extends StatelessWidget {
   }
 }
 
+class ExpansionTileInstanceList extends StatelessWidget {
+  const ExpansionTileInstanceList({
+    super.key,
+    required this.controller,
+    required this.title,
+    required this.elements,
+  });
+
+  final ObjectInspectorViewController controller;
+  final String title;
+  final List<Response?> elements;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final children = <Row>[
+      for (int i = 0; i < elements.length; ++i)
+        Row(
+          children: [
+            Text(
+              '[$i]: ',
+              style: theme.subtleFixedFontStyle,
+            ),
+            VmServiceObjectLink(
+              object: elements[i],
+              onTap: controller.findAndSelectNodeForObject,
+            ),
+          ],
+        ),
+    ];
+    return VmExpansionTile(
+      title: '$title (${elements.length})',
+      children: prettyRows(context, children),
+    );
+  }
+}
+
 /// An expandable list to display the retaining objects for a given RetainingPath.
 class RetainingPathWidget extends StatelessWidget {
   const RetainingPathWidget({
+    super.key,
     required this.controller,
     required this.retainingPath,
     this.onExpanded,
@@ -403,7 +426,7 @@ class RetainingPathWidget extends StatelessWidget {
           onExpanded: onExpanded,
           children: [
             retainingPath == null
-                ? SizedCircularProgressIndicator()
+                ? const SizedCircularProgressIndicator()
                 : SizedBox.fromSize(
                     size: Size.fromHeight(
                       retainingObjects.length * defaultRowHeight + densePadding,
@@ -422,12 +445,14 @@ class RetainingPathWidget extends StatelessWidget {
     BuildContext context,
     RetainingPath retainingPath,
   ) {
-    final onTap = (ObjRef? obj) async {
+    Future<void> onTap(ObjRef? obj) async {
       if (obj == null) return;
-      await controller.findAndSelectNodeForObject(context, obj);
-    };
+      await controller.findAndSelectNodeForObject(obj);
+    }
+
+    ;
     final theme = Theme.of(context);
-    final emptyList = SelectableText(
+    final emptyList = Text(
       'No retaining objects',
       style: theme.fixedFontStyle,
     );
@@ -463,7 +488,7 @@ class RetainingPathWidget extends StatelessWidget {
           ),
       Row(
         children: [
-          SelectableText(
+          Text(
             'Retained by a GC root of type: ${retainingPath.gcRootType ?? '<unknown>'}',
             style: theme.fixedFontStyle,
           ),
@@ -488,8 +513,8 @@ class _RetainingObjectDescription extends StatelessWidget {
   Widget build(BuildContext context) {
     final parentListIndex = object.parentListIndex;
     if (parentListIndex != null) {
-      return SelectableText.rich(
-        TextSpan(
+      return RichText(
+        text: TextSpan(
           children: [
             TextSpan(text: 'Retained by element [$parentListIndex] of '),
             VmServiceObjectLink(
@@ -502,8 +527,8 @@ class _RetainingObjectDescription extends StatelessWidget {
     }
 
     if (object.parentMapKey != null) {
-      return SelectableText.rich(
-        TextSpan(
+      return RichText(
+        text: TextSpan(
           children: [
             const TextSpan(text: 'Retained by element at ['),
             VmServiceObjectLink(object: object.parentMapKey, onTap: onTap)
@@ -563,8 +588,8 @@ class _RetainingObjectDescription extends StatelessWidget {
         ).buildTextSpan(context),
       );
     }
-    return SelectableText.rich(
-      TextSpan(children: entries),
+    return RichText(
+      text: TextSpan(children: entries),
     );
   }
 }
@@ -586,6 +611,7 @@ String _parentListElementDescription(int listIndex, ObjRef? obj) {
 /// instance of InboundReferences.
 class InboundReferencesWidget extends StatelessWidget {
   const InboundReferencesWidget({
+    super.key,
     required this.inboundReferences,
     this.onExpanded,
   });
@@ -607,7 +633,7 @@ class InboundReferencesWidget extends StatelessWidget {
           onExpanded: onExpanded,
           children: [
             inboundReferences == null
-                ? SizedCircularProgressIndicator()
+                ? const SizedCircularProgressIndicator()
                 : SizedBox.fromSize(
                     size: Size.fromHeight(
                       references.length * defaultRowHeight + densePadding,
@@ -637,7 +663,7 @@ class InboundReferencesWidget extends StatelessWidget {
         Row(
           children: [
             Flexible(
-              child: SelectableText(
+              child: Text(
                 _inboundRefDescription(inboundRef, parentWordOffset),
                 style: Theme.of(context).fixedFontStyle,
               ),
@@ -691,92 +717,89 @@ class InboundReferencesWidget extends StatelessWidget {
   }
 }
 
-class VmServiceObjectLink<T> extends StatelessWidget {
+class VmServiceObjectLink extends StatelessWidget {
   const VmServiceObjectLink({
+    super.key,
     required this.object,
     required this.onTap,
-    this.isSelected = false,
     this.preferUri = false,
     this.textBuilder,
   });
 
-  final T object;
+  final Response? object;
   final bool preferUri;
-  final String? Function(T)? textBuilder;
-  final FutureOr<void> Function(T) onTap;
-  final bool isSelected;
+  final String? Function(Response?)? textBuilder;
+  final FutureOr<void> Function(ObjRef) onTap;
+
+  @visibleForTesting
+  static String? defaultTextBuilder(
+    Object? object, {
+    bool preferUri = false,
+  }) {
+    if (object == null) return null;
+    return switch (object) {
+      FieldRef(:final name) ||
+      FuncRef(:final name) ||
+      ClassRef(:final name) ||
+      CodeRef(:final name) ||
+      TypeArgumentsRef(:final name) =>
+        name,
+      LibraryRef(:final uri, :final name) =>
+        uri!.startsWith('dart') || preferUri
+            ? uri
+            : (name!.isEmpty ? uri : name),
+      ScriptRef(:final uri) => uri,
+      ContextRef(:final length) => 'Context(length: $length)',
+      Sentinel(:final valueAsString) => 'Sentinel $valueAsString',
+      InstanceRef() => _textForInstanceRef(object),
+      ObjRef(:final isICData) when isICData =>
+        'ICData(${object.asICData.selector})',
+      ObjRef(:final isObjectPool) when isObjectPool =>
+        'Object Pool(length: ${object.asObjectPool.length})',
+      ObjRef(:final isWeakArray) when isWeakArray =>
+        'WeakArray(length: ${object.asWeakArray.length})',
+      ObjRef(:final isSubtypeTestCache) when isSubtypeTestCache =>
+        'SubtypeTestCache',
+      _ => null,
+    };
+  }
+
+  static String? _textForInstanceRef(InstanceRef instance) {
+    final valueAsString = instance.valueAsString;
+    switch (instance.kind) {
+      case InstanceKind.kList:
+        return 'List(length: ${instance.length})';
+      case InstanceKind.kMap:
+        return 'Map(length: ${instance.length})';
+      case InstanceKind.kRecord:
+        return 'Record';
+      case InstanceKind.kType:
+      case InstanceKind.kTypeParameter:
+        return instance.name;
+      case InstanceKind.kStackTrace:
+        final trace = stack_trace.Trace.parse(valueAsString!);
+        final depth = trace.frames.length;
+        return 'StackTrace ($depth ${pluralize('frame', depth)})';
+      default:
+        return valueAsString ?? '${instance.classRef!.name}';
+    }
+  }
 
   TextSpan buildTextSpan(BuildContext context) {
     final theme = Theme.of(context);
 
-    String? text = textBuilder?.call(object);
-    bool isServiceObject = true;
-    if (text == null) {
-      if (object is LibraryRef) {
-        final lib = object as LibraryRef;
-        if (lib.uri!.startsWith('dart') || preferUri) {
-          text = lib.uri!;
-        } else {
-          final name = lib.name;
-          text = name!.isEmpty ? lib.uri! : name;
-        }
-      } else if (object is FieldRef) {
-        final field = object as FieldRef;
-        text = field.name!;
-      } else if (object is FuncRef) {
-        final func = object as FuncRef;
-        text = func.name!;
-      } else if (object is ScriptRef) {
-        final script = object as ScriptRef;
-        text = script.uri!;
-      } else if (object is ClassRef) {
-        final cls = object as ClassRef;
-        text = cls.name!;
-      } else if (object is CodeRef) {
-        final code = object as CodeRef;
-        text = code.name!;
-      } else if (object is InstanceRef) {
-        final instance = object as InstanceRef;
-        if (instance.kind == InstanceKind.kList) {
-          text = 'List(length: ${instance.length})';
-        } else if (instance.kind == InstanceKind.kMap) {
-          text = 'Map(length: ${instance.length})';
-        } else if (instance.kind == InstanceKind.kRecord) {
-          text = 'Record';
-        } else if (instance.kind == InstanceKind.kType) {
-          text = instance.name!;
-        } else if (instance.kind == InstanceKind.kStackTrace) {
-          final trace = stack_trace.Trace.parse(instance.valueAsString!);
-          final depth = trace.frames.length;
-          text = 'StackTrace ($depth ${pluralize('frame', depth)})';
-        } else {
-          if (instance.valueAsString != null) {
-            text = instance.valueAsString!;
-          } else {
-            final cls = instance.classRef!;
-            text = '${cls.name}';
-          }
-        }
-      } else if (object is ContextRef) {
-        final context = object as ContextRef;
-        text = 'Context(length: ${context.length})';
-      } else if (object is TypeArgumentsRef) {
-        final typeArgs = object as TypeArgumentsRef;
-        text = typeArgs.name!;
-      } else if (object is Sentinel) {
-        final sentinel = object as Sentinel;
-        text = sentinel.valueAsString!;
-      } else {
-        isServiceObject = false;
-        text = object.toString();
-      }
-    }
+    String? text = textBuilder?.call(object) ??
+        defaultTextBuilder(object, preferUri: preferUri);
+
+    // Sentinels aren't objects that can be inspected.
+    final isServiceObject = object is! Sentinel && text != null;
+    text ??= object.toString();
 
     final TextStyle style;
     if (isServiceObject) {
-      style = isSelected ? theme.selectedLinkTextStyle : theme.linkTextStyle;
+      style = theme.fixedFontLinkStyle;
     } else {
-      style = isSelected ? theme.selectedFixedFontStyle : theme.fixedFontStyle;
+      style = theme.fixedFontStyle;
     }
     return TextSpan(
       text: text,
@@ -784,7 +807,10 @@ class VmServiceObjectLink<T> extends StatelessWidget {
       recognizer: isServiceObject
           ? (TapGestureRecognizer()
             ..onTap = () async {
-              await onTap(object);
+              final obj = object;
+              if (obj is ObjRef) {
+                await onTap(obj);
+              }
             })
           : null,
     );
@@ -793,13 +819,15 @@ class VmServiceObjectLink<T> extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return SelectableText.rich(
-      style: theme.linkTextStyle.apply(
-        fontFamily: theme.fixedFontStyle.fontFamily,
-        overflow: TextOverflow.ellipsis,
-      ),
+    return RichText(
       maxLines: 1,
-      buildTextSpan(context),
+      text: TextSpan(
+        style: theme.linkTextStyle.apply(
+          fontFamily: theme.fixedFontStyle.fontFamily,
+          overflow: TextOverflow.ellipsis,
+        ),
+        children: [buildTextSpan(context)],
+      ),
     );
   }
 }
@@ -808,6 +836,7 @@ class VmServiceObjectLink<T> extends StatelessWidget {
 /// layout of information widgets related to VM object types.
 class VmObjectDisplayBasicLayout extends StatelessWidget {
   const VmObjectDisplayBasicLayout({
+    super.key,
     required this.controller,
     required this.object,
     required this.generalDataRows,
@@ -827,7 +856,7 @@ class VmObjectDisplayBasicLayout extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
+    return ListView(
       children: [
         IntrinsicHeight(
           child: Row(
@@ -841,6 +870,7 @@ class VmObjectDisplayBasicLayout extends StatelessWidget {
                   child: VMInfoCard(
                     title: generalInfoTitle,
                     rowKeyValues: generalDataRows,
+                    roundedTopBorder: false,
                   ),
                 ),
               ),
@@ -856,22 +886,16 @@ class VmObjectDisplayBasicLayout extends StatelessWidget {
             ],
           ),
         ),
-        Flexible(
-          child: ListView(
-            children: [
-              RetainingPathWidget(
-                controller: controller,
-                retainingPath: object.retainingPath,
-                onExpanded: _onExpandRetainingPath,
-              ),
-              InboundReferencesWidget(
-                inboundReferences: object.inboundReferences,
-                onExpanded: _onExpandInboundRefs,
-              ),
-              ...?expandableWidgets,
-            ],
-          ),
+        RetainingPathWidget(
+          controller: controller,
+          retainingPath: object.retainingPath,
+          onExpanded: _onExpandRetainingPath,
         ),
+        InboundReferencesWidget(
+          inboundReferences: object.inboundReferences,
+          onExpanded: _onExpandInboundRefs,
+        ),
+        ...?expandableWidgets,
       ],
     );
   }
@@ -933,25 +957,25 @@ List<MapEntry<String, WidgetBuilder>> vmObjectGeneralDataRows(
     reachableSizeRowBuilder(object),
     retainedSizeRowBuilder(object),
     if (object is ClassObject)
-      serviceObjectLinkBuilderMapEntry<LibraryRef>(
+      serviceObjectLinkBuilderMapEntry(
         controller: controller,
         key: 'Library',
         object: object.obj.library!,
       ),
     if (object is ScriptObject)
-      serviceObjectLinkBuilderMapEntry<LibraryRef>(
+      serviceObjectLinkBuilderMapEntry(
         controller: controller,
         key: 'Library',
         object: object.obj.library!,
       ),
     if (object is FieldObject)
-      serviceObjectLinkBuilderMapEntry<ObjRef>(
+      serviceObjectLinkBuilderMapEntry(
         controller: controller,
         key: 'Owner',
         object: object.obj.owner!,
       ),
     if (object is FuncObject)
-      serviceObjectLinkBuilderMapEntry<ObjRef>(
+      serviceObjectLinkBuilderMapEntry(
         controller: controller,
         key: 'Owner',
         object: object.obj.owner!,
@@ -959,11 +983,12 @@ List<MapEntry<String, WidgetBuilder>> vmObjectGeneralDataRows(
     if (object is! ScriptObject &&
         object is! LibraryObject &&
         object.script != null)
-      serviceObjectLinkBuilderMapEntry<ScriptRef>(
+      serviceObjectLinkBuilderMapEntry(
         controller: controller,
         key: 'Script',
         object: object.script!,
-        textBuilder: (script) {
+        textBuilder: (s) {
+          final script = s as ScriptRef;
           return '${fileNameFromUri(script.uri) ?? ''}:${object.pos?.toString() ?? ''}';
         },
       ),
@@ -998,17 +1023,17 @@ class _ObjectInspectorCodeViewState extends State<ObjectInspectorCodeView> {
   void didChangeDependencies() async {
     super.didChangeDependencies();
     if (widget.script != widget.codeViewController.currentScriptRef.value) {
-      widget.codeViewController.resetScriptLocation(
+      await widget.codeViewController.resetScriptLocation(
         ScriptLocation(widget.script),
       );
     }
   }
 
   @override
-  void didUpdateWidget(ObjectInspectorCodeView oldWidget) {
+  Future<void> didUpdateWidget(ObjectInspectorCodeView oldWidget) async {
     super.didUpdateWidget(oldWidget);
     if (widget.script != widget.codeViewController.currentScriptRef.value) {
-      widget.codeViewController.resetScriptLocation(
+      await widget.codeViewController.resetScriptLocation(
         ScriptLocation(widget.script),
       );
     }
@@ -1071,6 +1096,7 @@ class _ObjectInspectorCodeViewState extends State<ObjectInspectorCodeView> {
             Column(
               children: [
                 const AreaPaneHeader(
+                  roundedTopBorder: false,
                   title: Text('Code Preview'),
                 ),
                 Expanded(

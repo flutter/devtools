@@ -8,10 +8,11 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../../shared/analytics/constants.dart' as gac;
+import '../../../shared/common_widgets.dart';
 import '../../../shared/globals.dart';
 import '../../../shared/primitives/auto_dispose.dart';
 import '../../../shared/split.dart';
-import '../../../shared/ui/tab.dart';
+import '../../../shared/ui/drop_down_button.dart';
 import '../../debugger/program_explorer.dart';
 import '../../debugger/program_explorer_model.dart';
 import '../vm_developer_tools_controller.dart';
@@ -49,22 +50,22 @@ class _ObjectInspectorViewState extends State<_ObjectInspectorView>
   late ObjectInspectorViewController controller;
 
   @override
-  void initState() {
-    super.initState();
-
-    addAutoDisposeListener(
-      scriptManager.sortedScripts,
-      () => controller.initializeForCurrentIsolate(context),
-    );
-  }
-
-  @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     final vmDeveloperToolsController =
         Provider.of<VMDeveloperToolsController>(context);
-    controller = vmDeveloperToolsController.objectInspectorViewController
-      ..init(context);
+    controller = vmDeveloperToolsController.objectInspectorViewController;
+    unawaited(controller.init());
+
+    addAutoDisposeListener(
+      controller.routingEventReporter,
+      () => controller.handleRoutingEvent(context),
+    );
+
+    addAutoDisposeListener(
+      scriptManager.sortedScripts,
+      controller.initializeForCurrentIsolate,
+    );
   }
 
   @override
@@ -73,44 +74,120 @@ class _ObjectInspectorViewState extends State<_ObjectInspectorView>
       axis: Axis.horizontal,
       initialFractions: const [0.2, 0.8],
       children: [
-        AnalyticsTabbedView(
-          gaScreen: gac.objectInspectorScreen,
-          tabs: [
-            DevToolsTab.create(
-              tabName: 'Program Explorer',
-              gaPrefix: gac.programExplorer,
-            ),
-            DevToolsTab.create(
-              tabName: 'Object Store',
-              gaPrefix: gac.objectStore,
-            ),
-            DevToolsTab.create(
-              tabName: 'Class Hierarchy',
-              gaPrefix: gac.classHierarchy,
-            )
-          ],
-          tabViews: [
-            ProgramExplorer(
-              controller: controller.programExplorerController,
-              onNodeSelected: _onNodeSelected,
-              displayHeader: false,
-            ),
-            ObjectStoreViewer(
-              controller: controller.objectStoreController,
-              onLinkTapped: (objRef) => unawaited(
-                controller.findAndSelectNodeForObject(context, objRef),
-              ),
-            ),
-            ClassHierarchyExplorer(
-              controller: controller,
-            ),
-          ],
-        ),
-        ObjectViewport(
-          controller: controller,
+        const ObjectInspectorSelector(),
+        SelectionArea(
+          child: ObjectViewport(
+            controller: controller,
+          ),
         ),
       ],
     );
+  }
+}
+
+class ObjectInspectorSelector extends StatefulWidget {
+  const ObjectInspectorSelector({
+    super.key,
+  });
+
+  static const kProgramExplorer = 'Program Explorer';
+  static const kObjectStore = 'Object Store';
+  static const kClassHierarchy = 'Class Hierarchy';
+
+  @override
+  State<ObjectInspectorSelector> createState() =>
+      _ObjectInspectorSelectorState();
+}
+
+class _ObjectInspectorSelectorState extends State<ObjectInspectorSelector> {
+  String value = ObjectInspectorSelector.kProgramExplorer;
+  late ObjectInspectorViewController controller;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final vmDeveloperToolsController =
+        Provider.of<VMDeveloperToolsController>(context);
+    controller = vmDeveloperToolsController.objectInspectorViewController;
+    unawaited(controller.init());
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        AnalyticsDropDownButton<String>(
+          gaScreen: gac.objectInspectorScreen,
+          gaDropDownId: gac.objectInspectorDropDown,
+          message: '',
+          isExpanded: true,
+          value: value,
+          roundedCornerOptions: const RoundedCornerOptions(
+            showBottomLeft: false,
+            showBottomRight: false,
+          ),
+          items: [
+            _buildMenuItem(
+              ObjectInspectorSelector.kProgramExplorer,
+              gac.programExplorer,
+            ),
+            _buildMenuItem(
+              ObjectInspectorSelector.kObjectStore,
+              gac.objectStore,
+            ),
+            _buildMenuItem(
+              ObjectInspectorSelector.kClassHierarchy,
+              gac.classHierarchy,
+            ),
+          ],
+          onChanged: (newValue) => setState(() {
+            value = newValue!;
+          }),
+        ),
+        Expanded(
+          child: RoundedOutlinedBorder(
+            showTopLeft: false,
+            showTopRight: false,
+            child: _selectedWidget(),
+          ),
+        ),
+      ],
+    );
+  }
+
+  ({DropdownMenuItem<String> item, String gaId}) _buildMenuItem(
+    String text,
+    String gaId,
+  ) {
+    return (
+      item: DropdownMenuItem<String>(
+        value: text,
+        child: Text(text),
+      ),
+      gaId: gaId,
+    );
+  }
+
+  Widget _selectedWidget() {
+    switch (value) {
+      case ObjectInspectorSelector.kProgramExplorer:
+        return ProgramExplorer(
+          controller: controller.programExplorerController,
+          onNodeSelected: _onNodeSelected,
+          displayHeader: false,
+        );
+      case ObjectInspectorSelector.kObjectStore:
+        return ObjectStoreViewer(
+          controller: controller.objectStoreController,
+          onLinkTapped: controller.findAndSelectNodeForObject,
+        );
+      case ObjectInspectorSelector.kClassHierarchy:
+        return ClassHierarchyExplorer(
+          controller: controller,
+        );
+      default:
+        throw StateError('Unexpected value: $value');
+    }
   }
 
   void _onNodeSelected(VMServiceObjectNode node) {
@@ -120,7 +197,6 @@ class _ObjectInspectorViewState extends State<_ObjectInspectorView>
         objRef != controller.objectHistory.current.value?.ref) {
       unawaited(
         controller.pushObject(
-          context,
           objRef,
           scriptRef: location?.scriptRef,
         ),

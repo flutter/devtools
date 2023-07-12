@@ -12,7 +12,7 @@ import '../../../../shared/charts/chart_trace.dart' show ChartType;
 import '../../../../shared/primitives/auto_dispose.dart';
 import '../../../../shared/theme.dart';
 import '../../../../shared/utils.dart';
-import '../../memory_controller.dart';
+import '../../framework/connected/memory_controller.dart';
 import '../../shared/primitives/memory_timeline.dart';
 
 // TODO(terry): Consider custom painter?
@@ -281,9 +281,6 @@ class MemoryEventsPaneState extends State<MemoryEventsPane>
     }
 
     final extensionEventsIndex = _chartController.createTrace(
-      // TODO(jacobr): prefer-moving-to-variable doesn't understand that enum
-      // entries don't need to be moved to variables.
-      // ignore: prefer-moving-to-variable
       trace.ChartType.symbol,
       trace.PaintCharacteristics(
         color: Colors.purpleAccent[100]!,
@@ -303,9 +300,6 @@ class MemoryEventsPaneState extends State<MemoryEventsPane>
     );
 
     final snapshotIndex = _chartController.createTrace(
-      // TODO(jacobr): prefer-moving-to-variable doesn't understand that enum
-      // entries don't need to be moved to variables.
-      // ignore: prefer-moving-to-variable
       trace.ChartType.symbol,
       trace.PaintCharacteristics(
         color: Colors.green,

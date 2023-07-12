@@ -14,6 +14,7 @@ import 'vm_object_model.dart';
 /// related to field objects in the Dart VM.
 class VmFieldDisplay extends StatelessWidget {
   const VmFieldDisplay({
+    super.key,
     required this.controller,
     required this.field,
   });
@@ -51,7 +52,7 @@ class VmFieldDisplay extends StatelessWidget {
         _fieldObservedTypes(field),
       ),
       if (staticValue is InstanceRef)
-        serviceObjectLinkBuilderMapEntry<InstanceRef>(
+        serviceObjectLinkBuilderMapEntry(
           controller: controller,
           key: 'Static Value',
           object: staticValue,
@@ -83,10 +84,12 @@ class VmFieldDisplay extends StatelessWidget {
         type = 'Observed types not found';
     }
 
-    final nullable = field.guardNullable == null
-        ? ''
-        : ' - null ${field.guardNullable! ? '' : 'not '}observed';
+    final nullable =
+        field.guardNullable == null ? '' : _nullMessage(field.guardNullable!);
 
     return '$type$nullable';
   }
+
+  String _nullMessage(bool isNullable) =>
+      ' - null ${isNullable ? '' : 'not '}observed';
 }

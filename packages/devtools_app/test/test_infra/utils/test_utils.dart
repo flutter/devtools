@@ -6,8 +6,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:devtools_app/src/screens/performance/performance_model.dart';
-import 'package:devtools_app/src/shared/primitives/trace_event.dart';
+import 'package:devtools_app/devtools_app.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -32,21 +31,25 @@ void setupClipboardCopyListener({
 }) {
   // This intercepts the Clipboard.setData SystemChannel message,
   // and stores the contents that were (attempted) to be copied.
-  SystemChannels.platform.setMockMethodCallHandler((MethodCall call) {
-    switch (call.method) {
-      case 'Clipboard.setData':
-        clipboardContentsCallback(call.arguments['text']);
-        break;
-      case 'Clipboard.getData':
-        return Future.value(<String, Object?>{});
-      case 'Clipboard.hasStrings':
-        return Future.value(<String, Object?>{'value': true});
-      default:
-        break;
-    }
+  TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+      .setMockMethodCallHandler(
+    SystemChannels.platform,
+    (MethodCall call) {
+      switch (call.method) {
+        case 'Clipboard.setData':
+          clipboardContentsCallback(call.arguments['text']);
+          break;
+        case 'Clipboard.getData':
+          return Future.value(<String, Object?>{});
+        case 'Clipboard.hasStrings':
+          return Future.value(<String, Object?>{'value': true});
+        default:
+          break;
+      }
 
-    return Future.value(true);
-  });
+      return Future.value(true);
+    },
+  );
 }
 
 Future<String> loadPageHtmlContent(String url) async {
@@ -64,3 +67,12 @@ Future<String> loadPageHtmlContent(String url) async {
   await completer.future;
   return content.toString();
 }
+
+void setCharacterWidthForTables() {
+  // Modify the character width that will be used to calculate column sizes
+  // in the tree table. The flutter_tester device uses a redacted font.
+  setAssumedMonospaceCharacterWidth(16.0);
+}
+
+T getWidgetFromFinder<T>(Finder finder) =>
+    finder.first.evaluate().first.widget as T;

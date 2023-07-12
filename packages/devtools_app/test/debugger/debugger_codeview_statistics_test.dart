@@ -2,17 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app/src/screens/debugger/breakpoint_manager.dart';
+import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/debugger/codeview.dart';
-import 'package:devtools_app/src/screens/debugger/codeview_controller.dart';
-import 'package:devtools_app/src/screens/debugger/debugger_controller.dart';
-import 'package:devtools_app/src/screens/debugger/debugger_screen.dart';
-import 'package:devtools_app/src/service/service_manager.dart';
-import 'package:devtools_app/src/shared/common_widgets.dart';
-import 'package:devtools_app/src/shared/config_specific/ide_theme/ide_theme.dart';
-import 'package:devtools_app/src/shared/globals.dart';
-import 'package:devtools_app/src/shared/notifications.dart';
-import 'package:devtools_app/src/shared/scripts/script_manager.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -33,7 +24,7 @@ void main() {
     fakeServiceManager = FakeServiceManager();
     codeViewController = createMockCodeViewControllerWithDefaults();
     debuggerController = createMockDebuggerControllerWithDefaults(
-      mockCodeViewController: codeViewController,
+      codeViewController: codeViewController,
     );
     scriptsHistory = ScriptsHistory();
 
@@ -50,6 +41,8 @@ void main() {
     setGlobal(IdeTheme, IdeTheme());
     setGlobal(ScriptManager, MockScriptManager());
     setGlobal(NotificationService, NotificationService());
+    setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
+    setGlobal(PreferencesController, PreferencesController());
     scriptsHistory.pushEntry(mockScript!);
     final mockCodeViewController = debuggerController.codeViewController;
 
@@ -76,6 +69,7 @@ void main() {
     when(mockCodeViewController.refreshCodeStatistics()).thenAnswer(
       (_) async => refreshCodeCoverageInvoked = true,
     );
+    when(codeViewController.navigationInProgress).thenReturn(false);
   });
 
   Future<void> pumpDebuggerScreen(
@@ -125,9 +119,9 @@ void main() {
     (WidgetTester tester) async {
       await pumpDebuggerScreen(tester, debuggerController);
 
-      final findCoverageToggle = find.text('Show Coverage');
-      final findProfileToggle = find.text('Show Profile');
-      final findRefresh = find.byType(IconLabelButton);
+      final findCoverageToggle = find.byTooltip('Show code coverage');
+      final findProfileToggle = find.byTooltip('Show profiler hits');
+      final findRefresh = find.byType(RefreshButton);
       expect(findCoverageToggle, findsOneWidget);
       expect(findProfileToggle, findsOneWidget);
       expect(findRefresh, findsOneWidget);
@@ -136,7 +130,7 @@ void main() {
       gutterItemCoverageTester(tester, false);
       gutterItemProfileInfoTester(tester, false);
       expect(
-        tester.widget<IconLabelButton>(findRefresh).onPressed,
+        tester.widget<DevToolsButton>(findRefresh).onPressed,
         isNull,
       );
 
@@ -147,7 +141,7 @@ void main() {
       gutterItemCoverageTester(tester, true);
       gutterItemProfileInfoTester(tester, false);
       expect(
-        tester.widget<IconLabelButton>(findRefresh).onPressed,
+        tester.widget<DevToolsButton>(findRefresh).onPressed,
         isNotNull,
       );
 
@@ -158,7 +152,7 @@ void main() {
       gutterItemCoverageTester(tester, true);
       gutterItemProfileInfoTester(tester, true);
       expect(
-        tester.widget<IconLabelButton>(findRefresh).onPressed,
+        tester.widget<DevToolsButton>(findRefresh).onPressed,
         isNotNull,
       );
 
@@ -173,7 +167,7 @@ void main() {
       gutterItemCoverageTester(tester, false);
       gutterItemProfileInfoTester(tester, true);
       expect(
-        tester.widget<IconLabelButton>(findRefresh).onPressed,
+        tester.widget<DevToolsButton>(findRefresh).onPressed,
         isNotNull,
       );
 
@@ -183,7 +177,7 @@ void main() {
       gutterItemCoverageTester(tester, false);
       gutterItemProfileInfoTester(tester, false);
       expect(
-        tester.widget<IconLabelButton>(findRefresh).onPressed,
+        tester.widget<DevToolsButton>(findRefresh).onPressed,
         isNull,
       );
     },

@@ -5,15 +5,33 @@
 import 'package:flutter/material.dart' hide Stack;
 import 'package:vm_service/vm_service.dart';
 
-import '../../../shared/common_widgets.dart';
-import '../../../shared/globals.dart';
-import '../../../shared/primitives/selection_controls.dart';
-import '../../../shared/primitives/utils.dart';
-import '../../../shared/routing.dart';
-import '../../../shared/theme.dart';
 import '../../diagnostics/dart_object_node.dart';
-import '../../primitives/simple_items.dart';
+import '../../globals.dart';
+import '../../primitives/selection_controls.dart';
+import '../../primitives/utils.dart';
+import '../../routing.dart';
+import '../../screen.dart';
+import '../../theme.dart';
 import 'description.dart';
+
+VariableSelectionControls _selectionControls({
+  required DartObjectNode variable,
+  required Function(TextSelectionDelegate delegate)? onInspect,
+}) {
+  final ref = variable.ref;
+  return VariableSelectionControls(
+    onReroot: variable.isRerootable
+        ? (delegate) {
+            serviceManager.consoleService.appendBrowsableInstance(
+              instanceRef: variable.value as InstanceRef?,
+              isolateRef: ref?.isolateRef,
+              heapSelection: ref?.heapSelection,
+            );
+          }
+        : null,
+    onInspect: onInspect,
+  );
+}
 
 class DisplayProvider extends StatelessWidget {
   const DisplayProvider({
@@ -42,6 +60,8 @@ class DisplayProvider extends StatelessWidget {
           ),
         ),
         onTap: onTap,
+        selectionControls:
+            _selectionControls(variable: variable, onInspect: null),
       );
     }
     final diagnostic = variable.ref?.diagnostic;
@@ -54,38 +74,35 @@ class DisplayProvider extends StatelessWidget {
     }
 
     final hasName = variable.name?.isNotEmpty ?? false;
-    return DevToolsTooltip(
-      message: variable.displayValue.toString(),
-      waitDuration: tooltipWaitLong,
-      child: SelectableText.rich(
-        TextSpan(
-          text: hasName ? variable.name : null,
-          style: variable.artificialName
-              ? theme.subtleFixedFontStyle
-              : theme.fixedFontStyle.apply(
-                  color: theme.colorScheme.controlFlowSyntaxColor,
-                ),
-          children: [
-            if (hasName)
-              TextSpan(
-                text: ': ',
-                style: theme.fixedFontStyle,
+    return SelectableText.rich(
+      TextSpan(
+        text: hasName ? variable.name : null,
+        style: variable.artificialName
+            ? theme.subtleFixedFontStyle
+            : theme.fixedFontStyle.apply(
+                color: theme.colorScheme.controlFlowSyntaxColor,
               ),
+        children: [
+          if (hasName)
             TextSpan(
-              text: variable.displayValue.toString(),
-              style: variable.artificialValue
-                  ? theme.subtleFixedFontStyle
-                  : _variableDisplayStyle(theme, variable),
+              text: ': ',
+              style: theme.fixedFontStyle,
             ),
-          ],
-        ),
-        selectionControls: VariableSelectionControls(
-          onInspect: serviceManager.inspectorService == null
-              ? null
-              : (delegate) => _handleInspect(delegate, context),
-        ),
-        onTap: onTap,
+          TextSpan(
+            text: variable.displayValue.toString(),
+            style: variable.artificialValue
+                ? theme.subtleFixedFontStyle
+                : _variableDisplayStyle(theme, variable),
+          ),
+        ],
       ),
+      selectionControls: _selectionControls(
+        variable: variable,
+        onInspect: serviceManager.inspectorService == null
+            ? null
+            : (delegate) => _handleInspect(delegate, context),
+      ),
+      onTap: onTap,
     );
   }
 

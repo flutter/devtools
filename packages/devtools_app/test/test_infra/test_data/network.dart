@@ -69,12 +69,12 @@ final httpGetResponseBodyData = [
   109,
   34,
   10,
-  125
+  125,
 ];
 
 final testSocket1 = WebSocket(SocketStatistic.parse(testSocket1Json)!, 0);
 final Map<String, dynamic> testSocket1Json = {
-  'id': 0,
+  'id': '10000',
   'startTime': 1000000,
   'endTime': 2000000,
   'lastReadTime': 1800000,
@@ -88,7 +88,7 @@ final Map<String, dynamic> testSocket1Json = {
 
 final testSocket2 = WebSocket(SocketStatistic.parse(testSocket2Json)!, 0);
 final Map<String, dynamic> testSocket2Json = {
-  'id': 1,
+  'id': '11111',
   'startTime': 3000000,
   // This socket has no end time.
   'lastReadTime': 3500000,
@@ -102,7 +102,7 @@ final Map<String, dynamic> testSocket2Json = {
 
 final testSocket3 = WebSocket(SocketStatistic.parse(testSocket3Json)!, 0);
 final Map<String, dynamic> testSocket3Json = {
-  'id': 0,
+  'id': '10000',
   'startTime': 1000000,
   'endTime': 2000000,
   'lastReadTime': 1800000,
@@ -122,7 +122,7 @@ final httpGet = DartIOHttpRequestData(
 );
 final Map<String, dynamic> httpGetJson = {
   'type': 'HttpProfileRequest',
-  'id': 1,
+  'id': '1',
   'isolateId': 'isolates/2013291945734727',
   'method': 'GET',
   'uri': 'https://jsonplaceholder.typicode.com/albums/1',
@@ -133,7 +133,7 @@ final Map<String, dynamic> httpGetJson = {
       {'timestamp': 6326808941, 'event': 'Connection established'},
       {'timestamp': 6326808965, 'event': 'Request sent'},
       {'timestamp': 6327090622, 'event': 'Waiting (TTFB)'},
-      {'timestamp': 6327091650, 'event': 'Content Download'}
+      {'timestamp': 6327091650, 'event': 'Content Download'},
     ],
     'headers': {
       'content-length': ['0'],
@@ -188,7 +188,7 @@ final httpPost = DartIOHttpRequestData(
 );
 final Map<String, dynamic> httpPostJson = {
   'type': 'HttpProfileRequest',
-  'id': 2,
+  'id': '2',
   'isolateId': 'isolates/979700762893215',
   'method': 'POST',
   'uri': 'https://jsonplaceholder.typicode.com/posts',
@@ -265,7 +265,7 @@ final httpPut = DartIOHttpRequestData(
 );
 final Map<String, dynamic> httpPutJson = {
   'type': 'HttpProfileRequest',
-  'id': 3,
+  'id': '3',
   'isolateId': 'isolates/4447876918484683',
   'method': 'PUT',
   'uri': 'https://jsonplaceholder.typicode.com/posts/1',
@@ -344,7 +344,7 @@ final httpPatch = DartIOHttpRequestData(
 );
 final Map<String, dynamic> httpPatchJson = {
   'type': 'HttpProfileRequest',
-  'id': 4,
+  'id': '4',
   'isolateId': 'isolates/4447876918484683',
   'method': 'PATCH',
   'uri': 'https://jsonplaceholder.typicode.com/posts/1',
@@ -426,7 +426,7 @@ final httpGetWithError = DartIOHttpRequestData(
 );
 final Map<String, dynamic> httpGetWithErrorJson = {
   'type': '@HttpProfileRequest',
-  'id': 5,
+  'id': '5',
   'isolateId': 'isolates/1939772779732043',
   'method': 'GET',
   'uri': 'https://www.examplez.com/1',
@@ -446,7 +446,7 @@ final httpWsHandshake = DartIOHttpRequestData(
 );
 final Map<String, dynamic> httpWsHandshakeJson = {
   'type': 'HttpProfileRequest',
-  'id': 6,
+  'id': '6',
   'isolateId': 'isolates/1350291957483171',
   'method': 'GET',
   'uri': 'http://localhost:8080',
@@ -456,7 +456,7 @@ final Map<String, dynamic> httpWsHandshakeJson = {
     'events': [
       {'timestamp': 8140247076, 'event': 'Connection established'},
       {'timestamp': 8140247156, 'event': 'Request sent'},
-      {'timestamp': 8140261573, 'event': 'Waiting (TTFB)'}
+      {'timestamp': 8140261573, 'event': 'Waiting (TTFB)'},
     ],
     'headers': {
       'content-length': ['0'],
@@ -504,15 +504,9 @@ final Map<String, dynamic> httpWsHandshakeJson = {
   'responseBody': [],
 };
 
-final httpGetPendingRequest = HttpProfileRequest.parse(httpGetPendingJson)!;
-final httpGetPending = DartIOHttpRequestData(
-  0,
-  httpGetPendingRequest,
-  requestFullDataFromVmService: false,
-);
 final Map<String, dynamic> httpGetPendingJson = {
   'type': 'HttpProfileRequest',
-  'id': 7,
+  'id': '7',
   'isolateId': 'isolates/2013291945734727',
   'method': 'GET',
   'uri': 'https://jsonplaceholder.typicode.com/albums/10',
@@ -523,7 +517,7 @@ final Map<String, dynamic> httpGetPendingJson = {
       {'timestamp': 6326808941, 'event': 'Connection established'},
       {'timestamp': 6326808965, 'event': 'Request sent'},
       {'timestamp': 6327090622, 'event': 'Waiting (TTFB)'},
-      {'timestamp': 6327091650, 'event': 'Content Download'}
+      {'timestamp': 6327091650, 'event': 'Content Download'},
     ],
     'headers': {
       'content-length': ['0'],

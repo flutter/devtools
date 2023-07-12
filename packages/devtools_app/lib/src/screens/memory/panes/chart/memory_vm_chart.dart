@@ -12,7 +12,7 @@ import '../../../../shared/charts/chart_trace.dart' show ChartType, ChartSymbol;
 import '../../../../shared/primitives/auto_dispose.dart';
 import '../../../../shared/theme.dart';
 import '../../../../shared/utils.dart';
-import '../../memory_controller.dart';
+import '../../framework/connected/memory_controller.dart';
 import '../../shared/primitives/memory_timeline.dart';
 
 class VMChartController extends ChartController {
@@ -127,17 +127,18 @@ class MemoryVMChartState extends State<MemoryVMChart>
     _chartController.setupData();
 
     addAutoDisposeListener(_memoryTimeline.sampleAddedNotifier, () {
-      if (_memoryTimeline.sampleAddedNotifier.value != null)
+      if (_memoryTimeline.sampleAddedNotifier.value != null) {
         setState(() {
           _processHeapSample(_memoryTimeline.sampleAddedNotifier.value!);
         });
+      }
     });
   }
 
   @override
   Widget build(BuildContext context) {
     if (_chartController.timestamps.isNotEmpty) {
-      return Container(
+      return SizedBox(
         height: defaultChartHeight,
         child: Chart(_chartController),
       );

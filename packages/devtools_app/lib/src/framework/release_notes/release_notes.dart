@@ -3,205 +3,60 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:math';
 
 import 'package:devtools_shared/devtools_shared.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:http/http.dart' as http;
-import 'package:provider/provider.dart';
+import 'package:logging/logging.dart';
 
 import '../../../devtools.dart' as devtools;
-import '../../shared/common_widgets.dart';
-import '../../shared/config_specific/launch_url/launch_url.dart';
-import '../../shared/config_specific/logger/logger.dart' as logger;
 import '../../shared/config_specific/server/server.dart' as server;
-import '../../shared/primitives/auto_dispose.dart';
-import '../../shared/theme.dart';
+import '../../shared/side_panel.dart';
 
-const debugTestReleaseNotes = false;
+final _log = Logger('release_notes');
 
-class ReleaseNotesViewer extends StatefulWidget {
+// This is not const because it is manipulated for testing as well as for
+// local development.
+bool debugTestReleaseNotes = false;
+
+// To load markdown from a staged flutter website, set this string to the url
+// from the flutter/website PR, which has a GitHub action that automatically
+// stages commits to firebase. Example:
+// https://flutter-docs-prod--pr8928-dt-notes-links-b0b33er1.web.app/tools/devtools/release-notes/release-notes-2.24.0-src.md.
+String? _debugReleaseNotesUrl;
+
+const _flutterDocsSite = 'https://docs.flutter.dev';
+
+const releaseNotesKey = Key('release_notes');
+
+class ReleaseNotesViewer extends SidePanelViewer {
   const ReleaseNotesViewer({
-    Key? key,
-    required this.child,
-  }) : super(key: key);
-
-  final Widget? child;
-
-  @override
-  _ReleaseNotesViewerState createState() => _ReleaseNotesViewerState();
+    required super.controller,
+    Widget? child,
+  }) : super(
+          key: releaseNotesKey,
+          title: 'What\'s new in DevTools?',
+          textIfMarkdownDataEmpty: 'Stay tuned for updates.',
+          child: child,
+        );
 }
 
-class _ReleaseNotesViewerState extends State<ReleaseNotesViewer>
-    with AutoDisposeMixin, SingleTickerProviderStateMixin {
-  static const maxViewerWidth = 600.0;
-
-  /// Animation controller for animating the opening and closing of the viewer.
-  late AnimationController visibilityController;
-
-  /// A curved animation that matches [visibilityController].
-  late Animation<double> visibilityAnimation;
-
-  String? markdownData;
-
-  late bool isVisible;
-
-  late ReleaseNotesController releaseNotesController;
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    releaseNotesController = Provider.of<ReleaseNotesController>(context);
-
-    isVisible = releaseNotesController.releaseNotesVisible.value;
-    markdownData = releaseNotesController.releaseNotesMarkdown.value;
-
-    visibilityController = longAnimationController(this);
-    visibilityAnimation =
-        Tween<double>(begin: 1.0, end: 0).animate(visibilityController);
-
-    addAutoDisposeListener(releaseNotesController.releaseNotesVisible, () {
-      setState(() {
-        isVisible = releaseNotesController.releaseNotesVisible.value;
-        if (isVisible) {
-          visibilityController.forward();
-        } else {
-          visibilityController.reverse();
-        }
-      });
-    });
-
-    markdownData = releaseNotesController.releaseNotesMarkdown.value;
-    addAutoDisposeListener(releaseNotesController.releaseNotesMarkdown, () {
-      setState(() {
-        markdownData = releaseNotesController.releaseNotesMarkdown.value;
-      });
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final child = widget.child;
-    return Material(
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          final widthForSmallScreen = constraints.maxWidth - 2 * densePadding;
-          final width = min(
-            _ReleaseNotesViewerState.maxViewerWidth,
-            widthForSmallScreen,
-          );
-          return Stack(
-            children: [
-              if (child != null) child,
-              ReleaseNotes(
-                releaseNotesController: releaseNotesController,
-                visibilityAnimation: visibilityAnimation,
-                markdownData: markdownData,
-                width: width,
-              ),
-            ],
-          );
-        },
-      ),
-    );
-  }
-}
-
-class ReleaseNotes extends AnimatedWidget {
-  const ReleaseNotes({
-    Key? key,
-    required this.releaseNotesController,
-    required Animation<double> visibilityAnimation,
-    required this.markdownData,
-    required this.width,
-  }) : super(key: key, listenable: visibilityAnimation);
-
-  final ReleaseNotesController releaseNotesController;
-
-  final String? markdownData;
-
-  final double width;
-
-  @override
-  Widget build(BuildContext context) {
-    final animation = listenable as Animation<double>;
-    final theme = Theme.of(context);
-    final displacement = width * animation.value;
-    final right = densePadding - displacement;
-    return Positioned(
-      top: densePadding,
-      bottom: densePadding,
-      right: right,
-      width: width,
-      child: Card(
-        elevation: defaultElevation,
-        color: theme.scaffoldBackgroundColor,
-        clipBehavior: Clip.hardEdge,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(defaultBorderRadius),
-          side: BorderSide(
-            color: theme.focusColor,
-          ),
-        ),
-        child: Column(
-          children: [
-            AreaPaneHeader(
-              title: const Text(
-                'What\'s new in DevTools?',
-              ),
-              needsTopBorder: false,
-              actions: [
-                IconButton(
-                  padding: const EdgeInsets.all(0.0),
-                  onPressed: () =>
-                      releaseNotesController.toggleReleaseNotesVisible(false),
-                  icon: const Icon(Icons.close),
-                ),
-              ],
-            ),
-            markdownData == null
-                ? const Text('Stay tuned for updates.')
-                : Expanded(
-                    child: Markdown(
-                      data: markdownData!,
-                      onTapLink: (_, href, __) => unawaited(launchUrl(href!)),
-                    ),
-                  ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class ReleaseNotesController {
+class ReleaseNotesController extends SidePanelController {
   ReleaseNotesController() {
     _init();
   }
 
   static const _unsupportedPathSyntax = '{{site.url}}';
 
-  String get _flutterDocsSite => debugTestReleaseNotes
-      ? 'https://flutter-website-dt-staging.web.app'
-      : 'https://docs.flutter.dev';
-
-  ValueListenable<String?> get releaseNotesMarkdown => _releaseNotesMarkdown;
-
-  final _releaseNotesMarkdown = ValueNotifier<String?>(null);
-
-  ValueListenable<bool> get releaseNotesVisible => _releaseNotesVisible;
-
-  final _releaseNotesVisible = ValueNotifier<bool>(false);
-
   void _init() {
-    if (debugTestReleaseNotes || server.isDevToolsServerAvailable) {
-      _maybeFetchReleaseNotes();
+    if (debugTestReleaseNotes ||
+        _debugReleaseNotesUrl != null ||
+        server.isDevToolsServerAvailable) {
+      _maybeShowReleaseNotes();
     }
   }
 
-  void _maybeFetchReleaseNotes() async {
+  void _maybeShowReleaseNotes() async {
     SemanticVersion previousVersion = SemanticVersion();
     if (server.isDevToolsServerAvailable) {
       final lastReleaseNotesShownVersion =
@@ -210,68 +65,105 @@ class ReleaseNotesController {
         previousVersion = SemanticVersion.parse(lastReleaseNotesShownVersion);
       }
     }
+    await _fetchAndShowReleaseNotes(
+      versionFloor: debugTestReleaseNotes ? null : previousVersion,
+    );
+  }
+
+  /// Fetches and shows the most recent release notes for the current DevTools
+  /// version, decreasing the patch version by 1 each time until we find release
+  /// notes or until we hit [versionFloor].
+  Future<void> _fetchAndShowReleaseNotes({
+    SemanticVersion? versionFloor,
+  }) async {
+    versionFloor ??= SemanticVersion();
+
     // Parse the current version instead of using [devtools.version] directly to
     // strip off any build metadata (any characters following a '+' character).
     // Release notes will be hosted on the Flutter website with a version number
     // that does not contain any build metadata.
-    final parsedCurrentVersion = SemanticVersion.parse(devtools.version);
-    final parsedCurrentVersionStr = parsedCurrentVersion.toString();
-    if (parsedCurrentVersion > previousVersion) {
-      try {
-        await _fetchReleaseNotes(parsedCurrentVersion);
-      } catch (e) {
-        // Fail gracefully if we cannot find release notes for the current
-        // version of DevTools.
-        _releaseNotesMarkdown.value = null;
-        toggleReleaseNotesVisible(false);
-        logger.log(
-          'Warning: could not find release notes for DevTools version '
-          '$parsedCurrentVersionStr. $e',
-          logger.LogLevel.warning,
-        );
-      }
-    }
-  }
+    final parsedVersion = SemanticVersion.parse(devtools.version);
+    var notesVersion = latestVersionToCheckForReleaseNotes(parsedVersion);
+    try {
+      // Try all patch versions for this major.minor combination until we find
+      // release notes (e.g. 2.11.4 -> 2.11.3 -> 2.11.2 -> ...).
+      final attemptedVersions = <String>[];
+      var attempts = notesVersion.patch;
+      while (attempts >= 0 && notesVersion > versionFloor) {
+        final versionString = notesVersion.toString();
+        try {
+          String releaseNotesMarkdown = await http.read(
+            Uri.parse(_debugReleaseNotesUrl ?? _releaseNotesUrl(versionString)),
+          );
+          // This is a workaround so that the images in release notes will appear.
+          // The {{site.url}} syntax is best practices for the flutter website
+          // repo, where these release notes are hosted, so we are performing this
+          // workaround on our end to ensure the images render properly.
+          releaseNotesMarkdown = releaseNotesMarkdown.replaceAll(
+            _unsupportedPathSyntax,
+            _flutterDocsSite,
+          );
 
-  Future<void> _fetchReleaseNotes(SemanticVersion version) async {
-    final currentVersionString = version.toString();
-
-    // Try all patch versions for this major.minor combination until we find
-    // release notes (e.g. 2.11.4 -> 2.11.3 -> 2.11.2 -> ...).
-    var attempts = version.patch;
-    while (attempts >= 0) {
-      final versionString = version.toString();
-      try {
-        String releaseNotesMarkdown = await http.read(
-          Uri.parse(_releaseNotesUrl(versionString)),
-        );
-        // This is a workaround so that the images in release notes will appear.
-        // The {{site.url}} syntax is best practices for the flutter website
-        // repo, where these release notes are hosted, so we are performing this
-        // workaround on our end to ensure the images render properly.
-        releaseNotesMarkdown = releaseNotesMarkdown.replaceAll(
-          _unsupportedPathSyntax,
-          _flutterDocsSite,
-        );
-
-        _releaseNotesMarkdown.value = releaseNotesMarkdown;
-        toggleReleaseNotesVisible(true);
-        unawaited(
-          server.setLastShownReleaseNotesVersion(currentVersionString),
-        );
-        return;
-      } catch (_) {
-        attempts--;
-        if (attempts < 0) {
-          rethrow;
+          markdown.value = releaseNotesMarkdown;
+          toggleVisibility(true);
+          if (_debugReleaseNotesUrl == null &&
+              server.isDevToolsServerAvailable) {
+            // Only set the last release notes version if we are using a real
+            // url and not [_debugReleaseNotesUrl].
+            unawaited(
+              server.setLastShownReleaseNotesVersion(versionString),
+            );
+          }
+          return;
+        } catch (e) {
+          attempts--;
+          attemptedVersions.add(versionString);
+          if (attempts < 0) {
+            // ignore: avoid-throw-in-catch-block, false positive
+            throw Exception(
+              'Could not find release notes for DevTools versions '
+              '${attemptedVersions.join(', ')}.'
+              '\n$e',
+            );
+          }
+          notesVersion = notesVersion.downgrade(downgradePatch: true);
         }
-        version = version.downgrade(downgradePatch: true);
       }
+    } catch (e) {
+      // Fail gracefully if we cannot find release notes for the current
+      // version of DevTools.
+      markdown.value = null;
+      toggleVisibility(false);
+      _log.warning('Warning: $e');
     }
   }
 
-  void toggleReleaseNotesVisible(bool visible) {
-    _releaseNotesVisible.value = visible;
+  @visibleForTesting
+  SemanticVersion latestVersionToCheckForReleaseNotes(
+    SemanticVersion currentVersion,
+  ) {
+    // If the current version is a pre-release, downgrade the minor to find the
+    // previous DevTools release, and start looking for release notes from this
+    // value. Release notes will never be published for pre-release versions.
+    if (currentVersion.isPreRelease) {
+      // It is very unlikely the patch value of the DevTools version will ever
+      // be above this number. This is a safe number to start looking for
+      // release notes at.
+      const safeStartPatch = 10;
+      currentVersion = SemanticVersion(
+        major: currentVersion.major,
+        minor: currentVersion.minor - 1,
+        patch: safeStartPatch,
+      );
+    }
+    return currentVersion;
+  }
+
+  Future<void> openLatestReleaseNotes() async {
+    if (markdown.value == null) {
+      await _fetchAndShowReleaseNotes();
+    }
+    toggleVisibility(true);
   }
 
   String _releaseNotesUrl(String currentVersion) {

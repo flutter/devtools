@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -52,6 +53,12 @@ class ScriptManager extends DisposableController
     });
     _sortedScripts.value = scriptRefs;
     return scriptRefs;
+  }
+
+  ScriptRef? scriptRefForUri(String? uri) {
+    return _sortedScripts.value.firstWhereOrNull(
+      (element) => element.uri != null && element.uri == uri,
+    );
   }
 
   /// Return a cached [Script] for the given [ScriptRef], returning null

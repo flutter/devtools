@@ -3,37 +3,20 @@
 // found in the LICENSE file.
 
 @TestOn('vm')
-
-import 'package:ansicolor/ansicolor.dart';
+import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/logging/_log_details.dart';
 import 'package:devtools_app/src/screens/logging/_logs_table.dart';
 import 'package:devtools_app/src/screens/logging/_message_column.dart';
-import 'package:devtools_app/src/screens/logging/logging_controller.dart';
-import 'package:devtools_app/src/screens/logging/logging_screen.dart';
 import 'package:devtools_app/src/service/service_extension_widgets.dart';
-import 'package:devtools_app/src/service/service_extensions.dart';
-import 'package:devtools_app/src/service/service_manager.dart';
-import 'package:devtools_app/src/shared/config_specific/ide_theme/ide_theme.dart';
-import 'package:devtools_app/src/shared/globals.dart';
-import 'package:devtools_app/src/shared/notifications.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 
-void main() async {
+void main() {
   late LoggingScreen screen;
   late MockLoggingController mockLoggingController;
   const windowSize = Size(1000.0, 1000.0);
-
-  mockLoggingController = MockLoggingController();
-
-  final FakeServiceManager fakeServiceManager = FakeServiceManager();
-  when(fakeServiceManager.connectedApp!.isFlutterWebAppNow).thenReturn(false);
-  when(fakeServiceManager.connectedApp!.isProfileBuildNow).thenReturn(false);
-  when(fakeServiceManager.errorBadgeManager.errorCountNotifier('logging'))
-      .thenReturn(ValueNotifier<int>(0));
-  setGlobal(NotificationService, NotificationService());
 
   group('Logging Screen', () {
     Future<void> pumpLoggingScreen(WidgetTester tester) async {
@@ -46,6 +29,18 @@ void main() async {
     }
 
     setUp(() {
+      mockLoggingController = createMockLoggingControllerWithDefaults();
+
+      final FakeServiceManager fakeServiceManager = FakeServiceManager();
+      when(fakeServiceManager.connectedApp!.isFlutterWebAppNow)
+          .thenReturn(false);
+      when(fakeServiceManager.connectedApp!.isProfileBuildNow)
+          .thenReturn(false);
+      when(fakeServiceManager.errorBadgeManager.errorCountNotifier('logging'))
+          .thenReturn(ValueNotifier<int>(0));
+      setGlobal(NotificationService, NotificationService());
+      setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
+      setGlobal(PreferencesController, PreferencesController());
       setGlobal(ServiceConnectionManager, fakeServiceManager);
       setGlobal(IdeTheme, IdeTheme());
 
@@ -65,8 +60,9 @@ void main() async {
         expect(find.byType(LoggingScreenBody), findsOneWidget);
         expect(find.byType(LogsTable), findsOneWidget);
         expect(find.byType(LogDetails), findsOneWidget);
-        expect(find.text('Clear'), findsOneWidget);
+        expect(find.byType(ClearButton), findsOneWidget);
         expect(find.byType(TextField), findsOneWidget);
+        expect(find.byType(FilterButton), findsOneWidget);
         expect(find.byType(StructuredErrorsToggle), findsOneWidget);
       },
     );
@@ -77,7 +73,7 @@ void main() async {
       (WidgetTester tester) async {
         await pumpLoggingScreen(tester);
         verifyNever(mockLoggingController.clear());
-        await tester.tap(find.text('Clear'));
+        await tester.tap(find.byType(ClearButton));
         verify(mockLoggingController.clear()).called(1);
       },
     );
@@ -89,7 +85,7 @@ void main() async {
         await pumpLoggingScreen(tester);
         verifyNever(mockLoggingController.clear());
 
-        final textFieldFinder = find.byKey(loggingSearchFieldKey);
+        final textFieldFinder = find.byType(TextField);
         expect(textFieldFinder, findsOneWidget);
         final TextField textField = tester.widget(textFieldFinder) as TextField;
         expect(textField.enabled, isFalse);
@@ -170,48 +166,4 @@ void main() async {
       });
     });
   });
-}
-
-const totalLogs = 10;
-
-final fakeLogData = List<LogData>.generate(totalLogs, _generate);
-
-LogData _generate(int i) {
-  String? details = 'log event $i';
-  String kind = 'kind $i';
-  String? computedDetails;
-  switch (i) {
-    case 9:
-      computedDetails = jsonOutput;
-      break;
-    case 8:
-      computedDetails = nonJsonOutput;
-      break;
-    case 7:
-      details = null;
-      break;
-    case 5:
-      kind = 'stdout';
-      details = _ansiCodesOutput();
-      break;
-    default:
-      break;
-  }
-
-  final detailsComputer = computedDetails == null
-      ? null
-      : () =>
-          Future.delayed(const Duration(seconds: 1), () => computedDetails!);
-  return LogData(kind, details, i, detailsComputer: detailsComputer);
-}
-
-const nonJsonOutput = 'Non-json details for log number 8';
-const jsonOutput = '{\n"Details": "of log event 9",\n"logEvent": "9"\n}\n';
-
-String _ansiCodesOutput() {
-  final sb = StringBuffer();
-  sb.write('Ansi color codes processed for ');
-  final pen = AnsiPen()..rgb(r: 0.8, g: 0.3, b: 0.4, bg: true);
-  sb.write(pen('log 5'));
-  return sb.toString();
 }

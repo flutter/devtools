@@ -6,25 +6,23 @@ import 'package:flutter/material.dart';
 
 import '../../../../../shared/analytics/analytics.dart' as ga;
 import '../../../../../shared/analytics/constants.dart' as gac;
-import '../../../../../shared/feature_flags.dart';
 import '../../../../../shared/globals.dart';
-import '../../../../../shared/memory/adapted_heap_data.dart';
 import '../../../../../shared/primitives/utils.dart';
 import '../../../../../shared/table/table.dart';
 import '../../../../../shared/table/table_data.dart';
-import '../../../../../shared/theme.dart';
 import '../../../../../shared/utils.dart';
 import '../../../shared/heap/heap.dart';
-import '../../../shared/primitives/instance_set_view.dart';
 import '../../../shared/primitives/simple_elements.dart';
-import '../../../shared/shared_memory_widgets.dart';
-import '../controller/sampler.dart';
+import '../../../shared/widgets/class_filter.dart';
+import '../../../shared/widgets/shared_memory_widgets.dart';
+import '../controller/class_data.dart';
+import 'instances.dart';
 
 class _ClassNameColumn extends ColumnData<SingleClassStats>
     implements
         ColumnRenderer<SingleClassStats>,
         ColumnHeaderRenderer<SingleClassStats> {
-  _ClassNameColumn(this.classFilterButton)
+  _ClassNameColumn(this.data)
       : super(
           'Class',
           titleTooltip: 'Class name',
@@ -32,11 +30,11 @@ class _ClassNameColumn extends ColumnData<SingleClassStats>
           alignment: ColumnAlignment.left,
         );
 
-  final Widget classFilterButton;
+  final ClassesTableSingleData data;
 
   @override
-  String? getValue(SingleClassStats classStats) =>
-      classStats.heapClass.className;
+  String? getValue(SingleClassStats dataObject) =>
+      dataObject.heapClass.className;
 
   @override
   bool get supportsSorting => true;
@@ -52,13 +50,10 @@ class _ClassNameColumn extends ColumnData<SingleClassStats>
     bool isRowSelected = false,
     VoidCallback? onPressed,
   }) {
-    final theme = Theme.of(context);
     return HeapClassView(
       theClass: data.heapClass,
       showCopyButton: isRowSelected,
       copyGaItem: gac.MemoryEvent.diffClassSingleCopy,
-      textStyle:
-          isRowSelected ? theme.selectedTextStyle : theme.regularTextStyle,
       rootPackage: serviceManager.rootInfoNow().package,
     );
   }
@@ -72,7 +67,7 @@ class _ClassNameColumn extends ColumnData<SingleClassStats>
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Expanded(child: defaultHeaderRenderer()),
-        classFilterButton,
+        ClassFilterButton(data.filterData),
       ],
     );
   }
@@ -80,18 +75,18 @@ class _ClassNameColumn extends ColumnData<SingleClassStats>
 
 class _InstanceColumn extends ColumnData<SingleClassStats>
     implements ColumnRenderer<SingleClassStats> {
-  _InstanceColumn(this.heap)
+  _InstanceColumn(this.classData)
       : super(
           'Instances',
           titleTooltip: nonGcableInstancesColumnTooltip,
-          fixedWidthPx: scaleByFontFactor(180.0),
+          fixedWidthPx: scaleByFontFactor(110.0),
           alignment: ColumnAlignment.right,
         );
 
-  final AdaptedHeapData heap;
+  final ClassesTableSingleData classData;
 
   @override
-  int getValue(SingleClassStats classStats) => classStats.objects.instanceCount;
+  int getValue(SingleClassStats dataObject) => dataObject.objects.instanceCount;
 
   @override
   bool get numeric => true;
@@ -103,23 +98,12 @@ class _InstanceColumn extends ColumnData<SingleClassStats>
     bool isRowSelected = false,
     VoidCallback? onPressed,
   }) {
-    if (!FeatureFlags.evalAndBrowse) return null;
-
-    final theme = Theme.of(context);
-    final showMenu = isRowSelected;
-
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.end,
-      children: [
-        InstanceSetButton(
-          textStyle:
-              isRowSelected ? theme.selectedTextStyle : theme.regularTextStyle,
-          count: getValue(data),
-          gaContext: gac.MemoryAreas.snapshotSingle,
-          sampleObtainer: showMenu ? HeapClassSampler(data, heap) : null,
-          showMenu: showMenu,
-        ),
-      ],
+    return HeapInstanceTableCell(
+      data.objects,
+      classData.heap,
+      data.heapClass,
+      isSelected: isRowSelected,
+      gaContext: gac.MemoryAreas.snapshotSingle,
     );
   }
 }
@@ -127,9 +111,9 @@ class _InstanceColumn extends ColumnData<SingleClassStats>
 class _ShallowSizeColumn extends ColumnData<SingleClassStats> {
   _ShallowSizeColumn()
       : super(
-          'Shallow\nDart Size',
-          titleTooltip: shallowSizeColumnTooltip,
-          fixedWidthPx: scaleByFontFactor(85.0),
+          'Shallow Dart Size',
+          titleTooltip: SizeType.shallow.description,
+          fixedWidthPx: scaleByFontFactor(140.0),
           alignment: ColumnAlignment.right,
         );
 
@@ -148,95 +132,80 @@ class _ShallowSizeColumn extends ColumnData<SingleClassStats> {
 }
 
 class _RetainedSizeColumn extends ColumnData<SingleClassStats> {
-  _RetainedSizeColumn(this.totalSize)
+  _RetainedSizeColumn(this.classData)
       : super(
           'Retained Dart Size',
-          titleTooltip: retainedSizeColumnTooltip,
+          titleTooltip: SizeType.retained.description,
           fixedWidthPx: scaleByFontFactor(140.0),
           alignment: ColumnAlignment.right,
         );
 
-  final int totalSize;
+  final ClassesTableSingleData classData;
 
   @override
-  int getValue(SingleClassStats classStats) => classStats.objects.retainedSize;
+  int getValue(SingleClassStats dataObject) => dataObject.objects.retainedSize;
 
   @override
   bool get numeric => true;
 
   @override
-  String getDisplayValue(SingleClassStats classStats) {
-    final value = getValue(classStats);
+  String getDisplayValue(SingleClassStats dataObject) {
+    final value = getValue(dataObject);
 
     final bytes = prettyPrintRetainedSize(value)!;
 
-    final percents = '${(value * 100 / totalSize).round()}%';
+    final percents =
+        percent(value / classData.totalHeapSize(), fractionDigits: 0);
 
     return '$bytes ($percents)';
   }
 }
 
 class _ClassesTableSingleColumns {
-  _ClassesTableSingleColumns(this.totalSize, this.classFilterButton, this.heap);
+  _ClassesTableSingleColumns(this.classData);
 
-  /// Is needed to calculate percentage.
-  final int totalSize;
+  late final retainedSizeColumn = _RetainedSizeColumn(classData);
 
-  final Widget classFilterButton;
-
-  late final retainedSizeColumn = _RetainedSizeColumn(totalSize);
-
-  final AdaptedHeapData heap;
+  final ClassesTableSingleData classData;
 
   late final columnList = <ColumnData<SingleClassStats>>[
-    _ClassNameColumn(classFilterButton),
-    _InstanceColumn(heap),
+    _ClassNameColumn(classData),
+    _InstanceColumn(classData),
     _ShallowSizeColumn(),
     retainedSizeColumn,
   ];
 }
 
 class ClassesTableSingle extends StatelessWidget {
-  const ClassesTableSingle({
+  ClassesTableSingle({
     super.key,
     required this.classes,
-    required this.selection,
-    required this.totalSize,
-    required this.classFilterButton,
-    required this.heap,
-  });
-
-  final int totalSize;
-
-  final Widget classFilterButton;
+    required this.classesData,
+  }) : _columns = _ClassesTableSingleColumns(classesData);
 
   final List<SingleClassStats> classes;
 
-  final ValueNotifier<SingleClassStats?> selection;
+  final ClassesTableSingleData classesData;
 
-  final AdaptedHeapData heap;
+  final _ClassesTableSingleColumns _columns;
 
   @override
   Widget build(BuildContext context) {
     // We want to preserve the sorting and sort directions for ClassesTableDiff
     // no matter what the data passed to it is.
     const dataKey = 'ClassesTableSingle';
-    final columns = _ClassesTableSingleColumns(
-      totalSize,
-      classFilterButton,
-      heap,
-    );
+
     return FlatTable<SingleClassStats>(
-      columns: columns.columnList,
+      columns: _columns.columnList,
       data: classes,
       dataKey: dataKey,
       keyFactory: (e) => Key(e.heapClass.fullName),
-      selectionNotifier: selection,
+      selectionNotifier: classesData.selection,
       onItemSelected: (_) => ga.select(
         gac.memory,
         gac.MemoryEvent.diffClassSingleSelect,
       ),
-      defaultSortColumn: columns.retainedSizeColumn,
+      defaultSortColumn: _columns.retainedSizeColumn,
       defaultSortDirection: SortDirection.descending,
     );
   }

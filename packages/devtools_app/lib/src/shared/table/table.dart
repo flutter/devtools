@@ -27,10 +27,7 @@ import 'table_data.dart';
 // TODO(devoncarew): We need to render the selected row with a different
 // background color.
 
-/// The maximum height to allow for rows in the table.
-///
-/// When rows in the table expand or collapse, they will animate between a
-/// height of 0 and a height of [defaultRowHeight].
+/// The height for rows in the table.
 double get defaultRowHeight => scaleByFontFactor(32.0);
 
 typedef IndexedScrollableWidgetBuilder = Widget Function({
@@ -53,6 +50,44 @@ enum ScrollKind {
   parent,
 }
 
+/// A [FlatTable] widget that is searchable.
+///
+/// The table requires a [searchController], which is responsible for feeding
+/// information about search matches and the active search match to the table.
+///
+/// This table will automatically refresh search matches on the
+/// [searchController] after sort operations that are triggered from the table.
+class SearchableFlatTable<T extends SearchableDataMixin> extends FlatTable {
+  SearchableFlatTable({
+    super.key,
+    required SearchControllerMixin<T> searchController,
+    required super.keyFactory,
+    required super.data,
+    required super.dataKey,
+    required super.columns,
+    required super.defaultSortColumn,
+    required super.defaultSortDirection,
+    super.secondarySortColumn,
+    super.sortOriginalData = false,
+    super.pinBehavior = FlatTablePinBehavior.none,
+    super.columnGroups,
+    super.autoScrollContent = false,
+    super.onItemSelected,
+    super.preserveVerticalScrollPosition = false,
+    super.includeColumnGroupHeaders = true,
+    super.sizeColumnsToFit = true,
+    super.selectionNotifier,
+  }) : super(
+          searchMatchesNotifier: searchController.searchMatches,
+          activeSearchMatchNotifier: searchController.activeSearchMatch,
+          onDataSorted: () => WidgetsBinding.instance.addPostFrameCallback((_) {
+            // This needs to be in a post frame callback so that the search
+            // matches are not updated in the middle of a table build.
+            searchController.refreshSearchMatches();
+          }),
+        );
+}
+
 /// A table that displays in a collection of [data], based on a collection of
 /// [ColumnData].
 ///
@@ -70,25 +105,53 @@ class FlatTable<T> extends StatefulWidget {
     this.onItemSelected,
     required this.defaultSortColumn,
     required this.defaultSortDirection,
+    this.onDataSorted,
+    this.sortOriginalData = false,
     this.pinBehavior = FlatTablePinBehavior.none,
     this.secondarySortColumn,
     this.searchMatchesNotifier,
     this.activeSearchMatchNotifier,
     this.preserveVerticalScrollPosition = false,
     this.includeColumnGroupHeaders = true,
+    this.tallHeaders = false,
+    this.sizeColumnsToFit = true,
     ValueNotifier<T?>? selectionNotifier,
   })  : selectionNotifier = selectionNotifier ?? ValueNotifier<T?>(null),
         super(key: key);
 
+  /// List of columns to display.
+  ///
+  /// These [ColumnData] elements should be defined as static
+  /// OR if they cannot be defined as static,
+  /// they should not manage stateful data.
+  ///
+  /// [FlatTableState.didUpdateWidget] checks if the columns have
+  /// changed before re-initializing the table controller,
+  /// and the columns are compared by title only.
+  /// See also [FlatTableState. _tableConfigurationChanged].
   final List<ColumnData<T>> columns;
 
   final List<ColumnGroup>? columnGroups;
+
+  /// Whether the columns for this table should be sized so that the entire
+  /// table fits in view (e.g. so that there is no horizontal scrolling).
+  final bool sizeColumnsToFit;
+
+  // TODO(kenz): should we enable this behavior by default? Does it ever matter
+  // to preserve the order of the original data passed to a flat table?
+  /// Whether table sorting should sort the original data list instead of
+  /// creating a copy.
+  final bool sortOriginalData;
 
   /// Determines if the headers for column groups should be rendered.
   ///
   /// If set to false and `columnGroups` is non-null and non-empty, only
   /// the vertical dividing lines will be drawn for each column group boundary.
   final bool includeColumnGroupHeaders;
+
+  /// Whether the table headers should be slightly taller than the table rows to
+  /// support multiline text.
+  final bool tallHeaders;
 
   /// Data set to show as rows in this table.
   final List<T> data;
@@ -136,6 +199,9 @@ class FlatTable<T> extends StatefulWidget {
   /// [TableControllerBase.sortDataAndNotify].
   final ColumnData<T>? secondarySortColumn;
 
+  /// Callback that will be called after each table sort operation.
+  final VoidCallback? onDataSorted;
+
   /// Notifies with the list of data items that should be marked as search
   /// matches.
   final ValueListenable<List<T>>? searchMatchesNotifier;
@@ -172,8 +238,6 @@ class FlatTableState<T> extends State<FlatTable<T>> with AutoDisposeMixin {
     addAutoDisposeListener(tableController.tableData);
 
     if (tableController.pinBehavior != FlatTablePinBehavior.none &&
-        // TODO(jacobr): this lint appears to be firing incorrectly.
-        // ignore: avoid-unnecessary-type-assertions
         this is! State<FlatTable<PinnableListEntry>>) {
       throw StateError('$T must implement PinnableListEntry');
     }
@@ -187,6 +251,12 @@ class FlatTableState<T> extends State<FlatTable<T>> with AutoDisposeMixin {
     } else if (!collectionEquals(oldWidget.data, widget.data)) {
       _setUpTableController(reset: false);
     }
+  }
+
+  @override
+  void dispose() {
+    _tableController = null;
+    super.dispose();
   }
 
   /// Sets up the [tableController] for the property values in [widget].
@@ -207,6 +277,9 @@ class FlatTableState<T> extends State<FlatTable<T>> with AutoDisposeMixin {
         columnGroups: widget.columnGroups,
         includeColumnGroupHeaders: widget.includeColumnGroupHeaders,
         pinBehavior: widget.pinBehavior,
+        sizeColumnsToFit: widget.sizeColumnsToFit,
+        sortOriginalData: widget.sortOriginalData,
+        onDataSorted: widget.onDataSorted,
       );
     }
 
@@ -239,11 +312,7 @@ class FlatTableState<T> extends State<FlatTable<T>> with AutoDisposeMixin {
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final columnWidths =
-            tableController.computeColumnWidths(constraints.maxWidth);
-        return _Table<T>(
+    Widget buildTable(List<double> columnWidths) => _Table<T>(
           tableController: tableController,
           columnWidths: columnWidths,
           autoScrollContent: widget.autoScrollContent,
@@ -251,15 +320,21 @@ class FlatTableState<T> extends State<FlatTable<T>> with AutoDisposeMixin {
           activeSearchMatchNotifier: widget.activeSearchMatchNotifier,
           rowItemExtent: defaultRowHeight,
           preserveVerticalScrollPosition: widget.preserveVerticalScrollPosition,
+          tallHeaders: widget.tallHeaders,
         );
-      },
-    );
+    if (widget.sizeColumnsToFit || tableController.columnWidths == null) {
+      return LayoutBuilder(
+        builder: (context, constraints) => buildTable(
+          tableController.computeColumnWidthsSizeToFit(
+            constraints.maxWidth,
+          ),
+        ),
+      );
+    }
+    return buildTable(tableController.columnWidths!);
   }
 
   Widget _buildRow({
-    // Unused parameters doesn't understand that this parameter is required to
-    // match the signature for the rowBuilder Function.
-    // ignore: avoid-unused-parameters
     required BuildContext context,
     required LinkedScrollControllerGroup linkedScrollControllerGroup,
     required int index,
@@ -350,6 +425,7 @@ class TreeTable<T extends TreeNode<T>> extends StatefulWidget {
     this.autoExpandRoots = false,
     this.preserveVerticalScrollPosition = false,
     this.displayTreeGuidelines = false,
+    this.tallHeaders = false,
     ValueNotifier<Selection<T?>>? selectionNotifier,
   })  : selectionNotifier = selectionNotifier ??
             ValueNotifier<Selection<T?>>(Selection.empty()),
@@ -420,18 +496,16 @@ class TreeTable<T extends TreeNode<T>> extends StatefulWidget {
   /// Determines whether or not guidelines should be rendered in tree columns.
   final bool displayTreeGuidelines;
 
+  /// Whether the table headers should be slightly taller than the table rows to
+  /// support multiline text.
+  final bool tallHeaders;
+
   @override
   TreeTableState<T> createState() => TreeTableState<T>();
 }
 
 class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
     with TickerProviderStateMixin, AutoDisposeMixin {
-  /// The number of items to show when animating out the tree table.
-  static const itemsToShowWhenAnimating = 50;
-  List<T> animatingChildren = [];
-  Set<T> animatingChildrenSet = {};
-  T? animatingNode;
-
   FocusNode? get focusNode => _focusNode;
   late FocusNode _focusNode;
 
@@ -472,6 +546,12 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
     if (oldWidget.selectionNotifier != widget.selectionNotifier) {
       _initSelectionListener();
     }
+  }
+
+  @override
+  void dispose() {
+    _tableController = null;
+    super.dispose();
   }
 
   /// Sets up the [tableController] for the property values in [widget].
@@ -541,18 +621,6 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
     }
   }
 
-  void _onItemsAnimated() {
-    setState(() {
-      animatingChildren = [];
-      animatingChildrenSet = {};
-      // Remove the animating children from the column width computations.
-      tableController.updateDataForAnimatingChildren(
-        animatingChildren: [],
-        rebuildFlatList: false,
-      );
-    });
-  }
-
   void _onItemPressed(T node, int nodeIndex) {
     // Rebuilds the table whenever the tree structure has been updated.
     widget.selectionNotifier.value = Selection(
@@ -570,40 +638,28 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
     }
 
     setState(() {
-      animatingNode = node;
-      List<T> nodeChildren;
       if (node.isExpanded) {
-        // Compute the children of the expanded node before collapsing.
-        nodeChildren = buildFlatList([node]);
         node.collapse();
       } else {
         node.expand();
-        // Compute the children of the collapsed node after expanding it.
-        nodeChildren = buildFlatList([node]);
       }
-      // The first item will be node itself. We will take the next few items
-      // to generate a convincing expansion animation without creating
-      // potentially thousands of widgets.
-      animatingChildren =
-          nodeChildren.skip(1).take(itemsToShowWhenAnimating).toList();
-      animatingChildrenSet = Set.of(animatingChildren);
     });
-    // _updateItems();
-    tableController.updateDataForAnimatingChildren(
-      animatingChildren: animatingChildren,
-    );
+
+    tableController.setDataAndNotify();
   }
 
   @override
   Widget build(BuildContext context) {
     return _Table<T>(
       tableController: tableController,
-      columnWidths: tableController.columnWidths,
+      columnWidths: tableController.columnWidths!,
       rowBuilder: _buildRow,
+      rowItemExtent: defaultRowHeight,
       focusNode: _focusNode,
       handleKeyEvent: _handleKeyEvent,
       selectionNotifier: widget.selectionNotifier,
       preserveVerticalScrollPosition: widget.preserveVerticalScrollPosition,
+      tallHeaders: widget.tallHeaders,
     );
   }
 
@@ -612,9 +668,6 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
     required LinkedScrollControllerGroup linkedScrollControllerGroup,
     required int index,
     required List<double> columnWidths,
-    // Unused parameters doesn't understand that this parameter is required to
-    // match the signature for the rowBuilder Function.
-    // ignore: avoid-unused-parameters
     required bool isPinned,
   }) {
     Widget rowForNode(T node) {
@@ -637,17 +690,10 @@ class TreeTableState<T extends TreeNode<T>> extends State<TreeTable<T>>
         isExpandable: node.isExpandable,
         isShown: node.shouldShow(),
         displayTreeGuidelines: widget.displayTreeGuidelines,
-        expansionChildren:
-            node != animatingNode || animatingChildrenSet.contains(node)
-                ? null
-                : [for (var child in animatingChildren) rowForNode(child)],
-        onExpansionCompleted: _onItemsAnimated,
       );
     }
 
-    final node = _data[index];
-    if (animatingChildrenSet.contains(node)) return const SizedBox();
-    return rowForNode(node);
+    return rowForNode(_data[index]);
   }
 
   KeyEventResult _handleKeyEvent(
@@ -792,6 +838,7 @@ class _Table<T> extends StatefulWidget {
     this.preserveVerticalScrollPosition = false,
     this.activeSearchMatchNotifier,
     this.rowItemExtent,
+    this.tallHeaders = false,
   }) : super(key: key);
 
   final TableControllerBase<T> tableController;
@@ -804,6 +851,7 @@ class _Table<T> extends StatefulWidget {
   final ValueNotifier<Selection<T?>>? selectionNotifier;
   final ValueListenable<T?>? activeSearchMatchNotifier;
   final bool preserveVerticalScrollPosition;
+  final bool tallHeaders;
 
   @override
   _TableState<T> createState() => _TableState<T>();
@@ -1001,6 +1049,7 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
                   secondarySortColumn:
                       widget.tableController.secondarySortColumn,
                   onSortChanged: widget.tableController.sortDataAndNotify,
+                  tall: widget.tallHeaders,
                 ),
               TableRow<T>.tableColumnHeader(
                 key: const Key('Table header'),
@@ -1013,6 +1062,7 @@ class _TableState<T> extends State<_Table<T>> with AutoDisposeMixin {
                 sortDirection: tableUiState.sortDirection,
                 secondarySortColumn: widget.tableController.secondarySortColumn,
                 onSortChanged: widget.tableController.sortDataAndNotify,
+                tall: widget.tallHeaders,
               ),
               if (pinnedData.isNotEmpty) ...[
                 SizedBox(
@@ -1118,8 +1168,6 @@ class TableRow<T> extends StatefulWidget {
     this.columnGroups,
     this.backgroundColor,
     this.expandableColumn,
-    this.expansionChildren,
-    this.onExpansionCompleted,
     this.isExpanded = false,
     this.isExpandable = false,
     this.isSelected = false,
@@ -1131,7 +1179,8 @@ class TableRow<T> extends StatefulWidget {
         sortDirection = null,
         secondarySortColumn = null,
         onSortChanged = null,
-        rowType = _TableRowType.data,
+        _rowType = _TableRowType.data,
+        tall = false,
         super(key: key);
 
   /// Constructs a [TableRow] that presents the column titles instead
@@ -1147,6 +1196,7 @@ class TableRow<T> extends StatefulWidget {
     required this.onSortChanged,
     this.secondarySortColumn,
     this.onPressed,
+    this.tall = false,
   })  : node = null,
         isExpanded = false,
         isExpandable = false,
@@ -1154,12 +1204,10 @@ class TableRow<T> extends StatefulWidget {
         expandableColumn = null,
         isShown = true,
         backgroundColor = null,
-        expansionChildren = null,
-        onExpansionCompleted = null,
         searchMatchesNotifier = null,
         activeSearchMatchNotifier = null,
         displayTreeGuidelines = false,
-        rowType = _TableRowType.columnHeader,
+        _rowType = _TableRowType.columnHeader,
         super(key: key);
 
   /// Constructs a [TableRow] that presents column group titles instead of any
@@ -1174,6 +1222,7 @@ class TableRow<T> extends StatefulWidget {
     required this.onSortChanged,
     this.secondarySortColumn,
     this.onPressed,
+    this.tall = false,
   })  : node = null,
         isExpanded = false,
         isExpandable = false,
@@ -1182,12 +1231,10 @@ class TableRow<T> extends StatefulWidget {
         columns = const [],
         isShown = true,
         backgroundColor = null,
-        expansionChildren = null,
-        onExpansionCompleted = null,
         searchMatchesNotifier = null,
         activeSearchMatchNotifier = null,
         displayTreeGuidelines = false,
-        rowType = _TableRowType.columnGroupHeader,
+        _rowType = _TableRowType.columnGroupHeader,
         super(key: key);
 
   final LinkedScrollControllerGroup linkedScrollControllerGroup;
@@ -1204,7 +1251,9 @@ class TableRow<T> extends StatefulWidget {
 
   final bool isSelected;
 
-  final _TableRowType rowType;
+  final _TableRowType _rowType;
+
+  final bool tall;
 
   /// Which column, if any, should show expansion affordances
   /// and nested rows.
@@ -1226,12 +1275,8 @@ class TableRow<T> extends StatefulWidget {
 
   /// Whether or not this row is shown.
   ///
-  /// When the value is toggled, this row will animate in or out.
+  /// When the value is toggled, this row will appear or disappear.
   final bool isShown;
-
-  /// The children to show when the expand animation of this widget is running.
-  final List<Widget>? expansionChildren;
-  final VoidCallback? onExpansionCompleted;
 
   /// The background color of the row.
   ///
@@ -1257,7 +1302,7 @@ class TableRow<T> extends StatefulWidget {
   final bool displayTreeGuidelines;
 
   @override
-  _TableRowState<T> createState() => _TableRowState<T>();
+  State<TableRow<T>> createState() => _TableRowState<T>();
 }
 
 class _TableRowState<T> extends State<TableRow<T>>
@@ -1279,16 +1324,6 @@ class _TableRowState<T> extends State<TableRow<T>>
     super.initState();
     contentKey = ValueKey(this);
     scrollController = widget.linkedScrollControllerGroup.addAndGet();
-
-    expandController.addStatusListener((status) {
-      setState(() {});
-      if ([AnimationStatus.completed, AnimationStatus.dismissed]
-              .contains(status) &&
-          widget.onExpansionCompleted != null) {
-        widget.onExpansionCompleted!();
-      }
-    });
-
     _initSearchListeners();
   }
 
@@ -1328,9 +1363,10 @@ class _TableRowState<T> extends State<TableRow<T>>
     );
 
     final box = SizedBox(
-      height: widget.rowType == _TableRowType.data
+      height: widget._rowType == _TableRowType.data
           ? defaultRowHeight
-          : areaPaneHeaderHeight,
+          : areaPaneHeaderHeight +
+              (widget.tall ? scaleByFontFactor(densePadding) : 0.0),
       child: Material(
         color: _searchAwareBackgroundColor(),
         child: onPressed != null
@@ -1343,29 +1379,7 @@ class _TableRowState<T> extends State<TableRow<T>>
             : row,
       ),
     );
-    if (widget.expansionChildren == null) return box;
-
-    return AnimatedBuilder(
-      animation: expandCurve,
-      builder: (context, child) {
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            box,
-            for (var c in widget.expansionChildren!)
-              SizedBox(
-                height: defaultRowHeight * expandCurve.value,
-                child: OverflowBox(
-                  minHeight: 0.0,
-                  maxHeight: defaultRowHeight,
-                  alignment: Alignment.topCenter,
-                  child: c,
-                ),
-              ),
-          ],
-        );
-      },
-    );
+    return box;
   }
 
   void _initSearchListeners() {
@@ -1405,10 +1419,10 @@ class _TableRowState<T> extends State<TableRow<T>>
   }
 
   Color _searchAwareBackgroundColor() {
-    final backgroundColor =
-        widget.backgroundColor ?? Theme.of(context).titleSolidBackgroundColor;
+    final colorScheme = Theme.of(context).colorScheme;
+    final backgroundColor = widget.backgroundColor ?? colorScheme.surface;
     if (widget.isSelected) {
-      return Theme.of(context).colorScheme.selectedRowColor;
+      return colorScheme.selectedRowBackgroundColor;
     }
     final searchAwareBackgroundColor = isSearchMatch
         ? Color.alphaBlend(
@@ -1433,25 +1447,13 @@ class _TableRowState<T> extends State<TableRow<T>>
     }
   }
 
-  TextAlign _textAlignmentFor(ColumnData<T> column) {
-    switch (column.alignment) {
-      case ColumnAlignment.center:
-        return TextAlign.center;
-      case ColumnAlignment.right:
-        return TextAlign.right;
-      case ColumnAlignment.left:
-      default:
-        return TextAlign.left;
-    }
-  }
-
   /// Presents the content of this row.
   Widget tableRowFor(BuildContext context, {VoidCallback? onPressed}) {
     Widget columnFor(ColumnData<T> column, double columnWidth) {
       Widget? content;
       final theme = Theme.of(context);
       final node = widget.node;
-      if (widget.rowType == _TableRowType.columnHeader) {
+      if (widget._rowType == _TableRowType.columnHeader) {
         Widget defaultHeaderRenderer() => _ColumnHeader(
               column: column,
               isSortColumn: column == widget.sortColumn,
@@ -1460,6 +1462,7 @@ class _TableRowState<T> extends State<TableRow<T>>
               onSortChanged: widget.onSortChanged,
             );
 
+        // ignore: avoid-unrelated-type-assertions, false positive.
         if (column is ColumnHeaderRenderer) {
           content = (column as ColumnHeaderRenderer)
               .buildHeader(context, defaultHeaderRenderer);
@@ -1472,6 +1475,7 @@ class _TableRowState<T> extends State<TableRow<T>>
         // widget class.
         final padding = column.getNodeIndentPx(node);
         assert(padding >= 0);
+        // ignore: avoid-unrelated-type-assertions, false positive.
         if (column is ColumnRenderer) {
           content = (column as ColumnRenderer).build(
             context,
@@ -1494,17 +1498,23 @@ class _TableRowState<T> extends State<TableRow<T>>
                   ),
                 ),
             ],
-            style: contentTextStyle(column),
+            style: column.contentTextStyle(
+              context,
+              node,
+              isSelected: widget.isSelected,
+            ),
           ),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
-          textAlign: _textAlignmentFor(column),
+          textAlign: column.contentTextAlignment,
         );
 
         final tooltip = column.getTooltip(node);
-        if (tooltip.isNotEmpty) {
+        final richTooltip = column.getRichTooltip(node, context);
+        if (tooltip.isNotEmpty || richTooltip != null) {
           content = DevToolsTooltip(
-            message: tooltip,
+            message: richTooltip == null ? tooltip : null,
+            richMessage: richTooltip,
             waitDuration: tooltipWaitLong,
             child: content,
           );
@@ -1512,15 +1522,18 @@ class _TableRowState<T> extends State<TableRow<T>>
 
         if (column == widget.expandableColumn) {
           final expandIndicator = widget.isExpandable
-              ? RotationTransition(
-                  turns: expandArrowAnimation,
-                  child: Icon(
-                    Icons.expand_more,
-                    color: widget.isSelected
-                        ? defaultSelectionForegroundColor
-                        : null,
-                    size: defaultIconSize,
-                  ),
+              ? ValueListenableBuilder(
+                  valueListenable: expandController,
+                  builder: (context, _, __) {
+                    return RotationTransition(
+                      turns: expandArrowAnimation,
+                      child: Icon(
+                        Icons.expand_more,
+                        color: theme.colorScheme.onSurface,
+                        size: defaultIconSize,
+                      ),
+                    );
+                  },
                 )
               : SizedBox(width: defaultIconSize, height: defaultIconSize);
           content = Row(
@@ -1565,7 +1578,7 @@ class _TableRowState<T> extends State<TableRow<T>>
       return content;
     }
 
-    if (widget.rowType == _TableRowType.columnGroupHeader) {
+    if (widget._rowType == _TableRowType.columnGroupHeader) {
       final groups = widget.columnGroups!;
       return _ColumnGroupHeaderRow(
         groups: groups,
@@ -1611,7 +1624,7 @@ class _TableRowState<T> extends State<TableRow<T>>
       }
     }
 
-    return Padding(
+    final rowContent = Padding(
       padding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
@@ -1637,14 +1650,10 @@ class _TableRowState<T> extends State<TableRow<T>>
         },
       ),
     );
-  }
-
-  TextStyle contentTextStyle(ColumnData<T> column) {
-    final textColor = widget.isSelected
-        ? defaultSelectionForegroundColor
-        : column.getTextColor(widget.node!);
-    final fontStyle = Theme.of(context).fixedFontStyle;
-    return textColor == null ? fontStyle : fontStyle.copyWith(color: textColor);
+    if (widget._rowType == _TableRowType.columnHeader) {
+      return OutlineDecoration.onlyBottom(child: rowContent);
+    }
+    return rowContent;
   }
 
   @override
@@ -1719,6 +1728,7 @@ class _ColumnHeader<T> extends StatelessWidget {
     final title = Text(
       column.title,
       overflow: TextOverflow.ellipsis,
+      textAlign: column.headerAlignment,
     );
 
     final headerContent = Row(
@@ -1825,7 +1835,7 @@ class _ColumnGroupHeaderRow extends StatelessWidget {
           return Container(
             alignment: Alignment.center,
             width: groupWidth,
-            child: Text(group.title),
+            child: group.title,
           );
         },
       ),

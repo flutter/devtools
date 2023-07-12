@@ -12,10 +12,12 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart';
 
-void main() {
-  late final ObjectInspectorView objectInspector;
+import '../vm_developer_test_utils.dart';
 
-  late final FakeServiceManager fakeServiceManager;
+void main() {
+  late ObjectInspectorView objectInspector;
+
+  late FakeServiceManager fakeServiceManager;
 
   late MockScriptManager scriptManager;
 
@@ -26,7 +28,13 @@ void main() {
     fakeServiceManager = FakeServiceManager();
     scriptManager = MockScriptManager();
 
-    when(scriptManager.sortedScripts).thenReturn(ValueNotifier(<ScriptRef>[]));
+    when(scriptManager.sortedScripts).thenReturn(
+      ValueNotifier(<ScriptRef>[testScript]),
+    );
+    // ignore: discarded_futures, test code.
+    when(scriptManager.retrieveAndSortScripts(any)).thenAnswer(
+      (_) => Future.value([testScript]),
+    );
     when(fakeServiceManager.connectedApp!.isProfileBuildNow).thenReturn(false);
     when(fakeServiceManager.connectedApp!.isDartWebAppNow).thenReturn(false);
 
@@ -40,28 +48,29 @@ void main() {
     VmServiceWrapper.enablePrivateRpcs = true;
   });
 
-  testWidgetsWithWindowSize('builds screen', windowSize,
-      (WidgetTester tester) async {
-    await tester.pumpWidget(
-      wrapWithControllers(
-        Builder(
-          builder: objectInspector.build,
-        ),
-        vmDeveloperTools: VMDeveloperToolsController(
-          objectInspectorViewController: ObjectInspectorViewController(
-            classHierarchyController: TestClassHierarchyExplorerController(),
+  testWidgetsWithWindowSize(
+    'builds screen',
+    windowSize,
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        wrapWithControllers(
+          Builder(
+            builder: objectInspector.build,
+          ),
+          vmDeveloperTools: VMDeveloperToolsController(
+            objectInspectorViewController: ObjectInspectorViewController(
+              classHierarchyController: TestClassHierarchyExplorerController(),
+            ),
           ),
         ),
-      ),
-    );
-    expect(find.byType(Split), findsNWidgets(2));
-    expect(find.byType(ProgramExplorer), findsOneWidget);
-    expect(find.byType(ObjectViewport), findsOneWidget);
-    expect(find.text('Program Explorer'), findsOneWidget);
-    expect(find.text('Outline'), findsOneWidget);
-    expect(find.text('Object Store'), findsOneWidget);
-    expect(find.text('Class Hierarchy'), findsOneWidget);
-    expect(find.text('No object selected.'), findsOneWidget);
-    expect(find.byTooltip('Refresh'), findsOneWidget);
-  });
+      );
+      expect(find.byType(Split), findsNWidgets(2));
+      expect(find.byType(ProgramExplorer), findsOneWidget);
+      expect(find.byType(ObjectViewport), findsOneWidget);
+      expect(find.text('Program Explorer'), findsOneWidget);
+      expect(find.text('Outline'), findsOneWidget);
+      expect(find.text('No object selected.'), findsOneWidget);
+      expect(find.byTooltip('Refresh'), findsOneWidget);
+    },
+  );
 }

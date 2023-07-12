@@ -16,7 +16,6 @@ final _pubspecs = [
   'packages/devtools_test/pubspec.yaml',
   'packages/devtools_shared/pubspec.yaml',
 ].map((path) => File(path)).toList();
-  
 const _releaseNoteDirPath = './packages/devtools_app/release_notes';
 
 void main(List<String> args) async {
@@ -38,7 +37,6 @@ void main(List<String> args) async {
 Future<void> performTheVersionUpdate({
   required String currentVersion,
   required String newVersion,
-  bool modifyChangeLog = true,
 }) async {
   print('Updating pubspecs from $currentVersion to version $newVersion...');
 
@@ -51,15 +49,6 @@ Future<void> performTheVersionUpdate({
     File('packages/devtools_app/lib/devtools.dart'),
     newVersion,
   );
-
-  if (modifyChangeLog) {
-    print('Updating CHANGELOG to version $newVersion...');
-    writeVersionToChangelog(File('CHANGELOG.md'), newVersion);
-  }
-
-  print('Updating index.html to version $newVersion...');
-  writeVersionToIndexHtml(
-      File('packages/devtools_app/web/index.html'), currentVersion, newVersion);
 
   final process = await Process.start('./tool/pub_upgrade.sh', []);
   process.stdout.asBroadcastStream().listen((event) {
@@ -194,46 +183,6 @@ void writeVersionToVersionFile(File versionFile, String version) {
     revisedLines.add(line);
   }
   versionFile.writeAsStringSync(revisedLines.joinWithNewLine());
-}
-
-void writeVersionToChangelog(File changelog, String version) {
-  final lines = changelog.readAsLinesSync();
-  final versionString = '## $version';
-  if (lines.first.endsWith(versionString)) {
-    print('Changelog already has an entry for version $version');
-    return;
-  }
-  changelog.writeAsString([
-    versionString,
-    isDevVersion(version) ? '* Dev version\n' : 'TODO: update changelog\n',
-    ...lines,
-  ].joinWithNewLine());
-}
-
-void writeVersionToIndexHtml(
-  File indexHtml,
-  String oldVersion,
-  String newVersion,
-) {
-  var updatedVersion = false;
-  final lines = indexHtml.readAsLinesSync();
-  final revisedLines = <String>[];
-  for (final line in lines) {
-    if (line.contains(oldVersion)) {
-      final versionStart = line.indexOf(oldVersion);
-      final lineSegmentBefore = line.substring(0, versionStart);
-      final lineSegmentAfter = line.substring(versionStart + oldVersion.length);
-      final newLine = '$lineSegmentBefore$newVersion$lineSegmentAfter';
-      revisedLines.add(newLine);
-      updatedVersion = true;
-    } else {
-      revisedLines.add(line);
-    }
-  }
-  if (!updatedVersion) {
-    throw Exception('Unable to update version in index.html');
-  }
-  indexHtml.writeAsStringSync(revisedLines.joinWithNewLine());
 }
 
 String incrementDevVersion(String currentVersion) {
@@ -402,7 +351,6 @@ class AutoUpdateCommand extends Command {
     final type = argResults!['type'].toString();
     final isDryRun = argResults!['dry-run'];
     final currentVersion = versionFromPubspecFile();
-    bool modifyChangeLog = false;
     String? newVersion;
     if (currentVersion == null) {
       throw 'Could not automatically determine current version.';
@@ -410,7 +358,6 @@ class AutoUpdateCommand extends Command {
     switch (type) {
       case 'release':
         newVersion = stripPreReleases(currentVersion);
-        modifyChangeLog = true;
         break;
       case 'dev':
         newVersion = incrementDevVersion(currentVersion);
@@ -421,7 +368,7 @@ class AutoUpdateCommand extends Command {
           throw 'Failed to determine the newVersion.';
         }
     }
-    print('Updating from $currentVersion to $newVersion');
+    print('Bump version from $currentVersion to $newVersion');
 
     if (isDryRun) {
       return;
@@ -430,7 +377,6 @@ class AutoUpdateCommand extends Command {
     performTheVersionUpdate(
       currentVersion: currentVersion,
       newVersion: newVersion,
-      modifyChangeLog: modifyChangeLog,
     );
     if (['minor', 'major'].contains(type)) {
       // Only cycle the release notes when doing a minor or major version bump

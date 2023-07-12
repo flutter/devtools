@@ -4,13 +4,14 @@
 
 import 'package:devtools_app/src/screens/memory/shared/heap/spanning_tree.dart';
 import 'package:devtools_app/src/shared/memory/adapted_heap_data.dart';
+import 'package:devtools_app/src/shared/memory/adapted_heap_object.dart';
 import 'package:devtools_app/src/shared/memory/class_name.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   for (var t in _sizeTests) {
     test('has expected root and unreachable sizes, ${t.name}.', () async {
-      await buildSpanningTreeAndSetInRefs(t.heap);
+      await calculateHeap(t.heap);
       expect(t.heap.root.retainedSize, equals(t.rootRetainedSize));
 
       var actualUnreachableSize = 0;
@@ -30,37 +31,34 @@ final _sizeTests = [
 
   _SizeTest(
     name: 'One object heap',
-    heap: AdaptedHeapData(
+    heap: _heapData(
       [
         _createOneByteObject(0, []),
       ],
-      rootIndex: 0,
     ),
     rootRetainedSize: 1,
     unreachableSize: 0,
   ),
   _SizeTest(
     name: 'Two objects heap',
-    heap: AdaptedHeapData(
+    heap: _heapData(
       [
         _createOneByteObject(0, [1]),
         _createOneByteObject(1, []),
       ],
-      rootIndex: 0,
     ),
     rootRetainedSize: 2,
     unreachableSize: 0,
   ),
   _SizeTest(
     name: 'Four objects heap',
-    heap: AdaptedHeapData(
+    heap: _heapData(
       [
         _createOneByteObject(0, [1, 2, 3]),
         _createOneByteObject(1, []),
         _createOneByteObject(2, []),
         _createOneByteObject(3, []),
       ],
-      rootIndex: 0,
     ),
     rootRetainedSize: 4,
     unreachableSize: 0,
@@ -70,19 +68,18 @@ final _sizeTests = [
 
   _SizeTest(
     name: 'One unreachable object heap',
-    heap: AdaptedHeapData(
+    heap: _heapData(
       [
         _createOneByteObject(0, []),
         _createOneByteObject(1, []),
       ],
-      rootIndex: 0,
     ),
     rootRetainedSize: 1,
     unreachableSize: 1,
   ),
   _SizeTest(
     name: 'Many unreachable objects heap',
-    heap: AdaptedHeapData(
+    heap: _heapData(
       [
         // Reachable:
         _createOneByteObject(0, [1, 2, 3]),
@@ -96,7 +93,6 @@ final _sizeTests = [
         _createOneByteObject(6, []),
         _createOneByteObject(7, []),
       ],
-      rootIndex: 0,
     ),
     rootRetainedSize: 4,
     unreachableSize: 4,
@@ -110,14 +106,13 @@ final _sizeTests = [
     //  1w 2
     //  |
     //  3
-    heap: AdaptedHeapData(
+    heap: _heapData(
       [
         _createOneByteObject(0, [1, 2]),
         _createOneByteWeakObject(1, [3]),
         _createOneByteObject(2, []),
         _createOneByteObject(3, []),
       ],
-      rootIndex: 0,
     ),
     rootRetainedSize: 3,
     unreachableSize: 1,
@@ -129,7 +124,7 @@ final _sizeTests = [
     //  1w 2w
     //  |   \
     //  3   4
-    heap: AdaptedHeapData(
+    heap: _heapData(
       [
         _createOneByteObject(0, [1, 2]),
         _createOneByteWeakObject(1, [3]),
@@ -137,7 +132,6 @@ final _sizeTests = [
         _createOneByteObject(3, []),
         _createOneByteObject(4, []),
       ],
-      rootIndex: 0,
     ),
     rootRetainedSize: 3,
     unreachableSize: 2,
@@ -148,14 +142,13 @@ final _sizeTests = [
     name: 'Diamond',
     //  |\
     //  \|
-    heap: AdaptedHeapData(
+    heap: _heapData(
       [
         _createOneByteObject(0, [1, 2]),
         _createOneByteObject(1, [3]),
         _createOneByteObject(2, [3]),
         _createOneByteObject(3, []),
       ],
-      rootIndex: 0,
     ),
     rootRetainedSize: 4,
     unreachableSize: 0,
@@ -165,7 +158,7 @@ final _sizeTests = [
     //  \
     //  |\
     //  \|
-    heap: AdaptedHeapData(
+    heap: _heapData(
       [
         _createOneByteObject(0, [1]),
         _createOneByteObject(1, [2, 3]),
@@ -173,7 +166,6 @@ final _sizeTests = [
         _createOneByteObject(3, [4]),
         _createOneByteObject(4, []),
       ],
-      rootIndex: 0,
     ),
     rootRetainedSize: 5,
     unreachableSize: 0,
@@ -183,7 +175,7 @@ final _sizeTests = [
     //  \
     //  |\
     //  \|
-    heap: AdaptedHeapData(
+    heap: _heapData(
       [
         _createOneByteObject(0, [1]),
         _createOneByteObject(1, [2, 3]),
@@ -191,7 +183,6 @@ final _sizeTests = [
         _createOneByteObject(3, [4]),
         _createOneByteObject(4, []),
       ],
-      rootIndex: 0,
     ),
     rootRetainedSize: 5,
     unreachableSize: 0,
@@ -201,7 +192,7 @@ final _sizeTests = [
     //  \
     //  |\
     //  \|
-    heap: AdaptedHeapData(
+    heap: _heapData(
       [
         _createOneByteObject(0, [1]),
         _createOneByteObject(1, [2, 3]),
@@ -209,7 +200,6 @@ final _sizeTests = [
         _createOneByteWeakObject(3, [4]),
         _createOneByteObject(4, []),
       ],
-      rootIndex: 0,
     ),
     rootRetainedSize: 4,
     unreachableSize: 1,
@@ -263,6 +253,10 @@ AdaptedHeapObject _createOneByteWeakObject(
   );
   assert(result.heapClass.isWeakEntry, isTrue);
   return result;
+}
+
+AdaptedHeapData _heapData(List<AdaptedHeapObject> objects) {
+  return AdaptedHeapData(objects, isolateId: '', rootIndex: 0);
 }
 
 /// For convenience of testing each heap object has code equal to the

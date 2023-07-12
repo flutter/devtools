@@ -14,7 +14,7 @@ import 'network_request_inspector_views.dart';
 
 /// A [Widget] which displays information about a network request.
 class NetworkRequestInspector extends StatelessWidget {
-  const NetworkRequestInspector(this.controller);
+  const NetworkRequestInspector(this.controller, {super.key});
 
   static const _overviewTabTitle = 'Overview';
   static const _headersTabTitle = 'Headers';
@@ -22,12 +22,12 @@ class NetworkRequestInspector extends StatelessWidget {
   static const _responseTabTitle = 'Response';
   static const _cookiesTabTitle = 'Cookies';
 
+  // TODO(kenz): remove these keys and use a text finder to lookup widgets in test.
+
   @visibleForTesting
   static const overviewTabKey = Key(_overviewTabTitle);
   @visibleForTesting
   static const headersTabKey = Key(_headersTabTitle);
-  @visibleForTesting
-  static const requestTabKey = Key(_requestTabTitle);
   @visibleForTesting
   static const responseTabKey = Key(_responseTabTitle);
   @visibleForTesting
@@ -50,64 +50,87 @@ class NetworkRequestInspector extends StatelessWidget {
     return ValueListenableBuilder<NetworkRequest?>(
       valueListenable: controller.selectedRequest,
       builder: (context, data, _) {
-        final tabs = <DevToolsTab>[
-          _buildTab(tabName: NetworkRequestInspector._overviewTabTitle),
-          if (data is DartIOHttpRequestData) ...[
-            _buildTab(tabName: NetworkRequestInspector._headersTabTitle),
-            if (data.requestBody != null)
-              _buildTab(
-                tabName: NetworkRequestInspector._requestTabTitle,
-                trailing: Align(
-                  alignment: Alignment.centerRight,
-                  child: CopyToClipboardControl(
-                    dataProvider: () => data.requestBody,
+        return RoundedOutlinedBorder(
+          child: (data == null)
+              ? Center(
+                  child: Text(
+                    'No request selected',
+                    key: NetworkRequestInspector.noRequestSelectedKey,
+                    style: Theme.of(context).textTheme.titleLarge,
                   ),
+                )
+              : AnalyticsTabbedView(
+                  tabs: _generateTabs(data),
+                  gaScreen: gac.network,
                 ),
-              ),
-            if (data.responseBody != null)
-              _buildTab(
-                tabName: NetworkRequestInspector._responseTabTitle,
-                trailing: Align(
-                  alignment: Alignment.centerRight,
-                  child: CopyToClipboardControl(
-                    dataProvider: () => data.responseBody,
-                  ),
-                ),
-              ),
-            if (data.hasCookies)
-              _buildTab(tabName: NetworkRequestInspector._cookiesTabTitle),
-          ],
-        ];
-        return Card(
-          margin: EdgeInsets.zero,
-          color: Theme.of(context).canvasColor,
-          child: RoundedOutlinedBorder(
-            child: (data == null)
-                ? Center(
-                    child: Text(
-                      'No request selected',
-                      key: NetworkRequestInspector.noRequestSelectedKey,
-                      style: Theme.of(context).textTheme.titleLarge,
-                    ),
-                  )
-                : AnalyticsTabbedView(
-                    tabs: tabs,
-                    tabViews: [
-                      NetworkRequestOverviewView(data),
-                      if (data is DartIOHttpRequestData) ...[
-                        HttpRequestHeadersView(data),
-                        if (data.requestBody != null) HttpRequestView(data),
-                        if (data.responseBody != null) HttpResponseView(data),
-                        if (data.hasCookies) HttpRequestCookiesView(data),
-                      ],
-                    ],
-                    gaScreen: gac.network,
-                    // TODO(kenz): Consider using the outlined style
-                    outlined: false,
-                  ),
-          ),
         );
       },
     );
   }
+
+  List<({DevToolsTab tab, Widget tabView})> _generateTabs(
+    NetworkRequest data,
+  ) =>
+      [
+        (
+          tab: _buildTab(tabName: NetworkRequestInspector._overviewTabTitle),
+          tabView: NetworkRequestOverviewView(data),
+        ),
+        if (data is DartIOHttpRequestData) ...[
+          (
+            tab: _buildTab(tabName: NetworkRequestInspector._headersTabTitle),
+            tabView: HttpRequestHeadersView(data),
+          ),
+          if (data.requestBody != null)
+            (
+              tab: _buildTab(
+                tabName: NetworkRequestInspector._requestTabTitle,
+                trailing: HttpViewTrailingCopyButton(
+                  data,
+                  (data) => data.requestBody,
+                ),
+              ),
+              tabView: HttpRequestView(data),
+            ),
+          if (data.responseBody != null)
+            (
+              tab: _buildTab(
+                tabName: NetworkRequestInspector._responseTabTitle,
+                trailing: Row(
+                  children: [
+                    HttpResponseTrailingDropDown(
+                      data,
+                      currentResponseViewType:
+                          controller.currentResponseViewType,
+                      onChanged: (value) =>
+                          controller.setResponseViewType = value,
+                    ),
+                    HttpViewTrailingCopyButton(
+                      data,
+                      (data) => data.responseBody,
+                    ),
+                  ],
+                ),
+              ),
+              tabView: HttpResponseView(
+                data,
+                currentResponseViewType: controller.currentResponseViewType,
+              ),
+            ),
+          if (data.hasCookies)
+            (
+              tab: _buildTab(
+                tabName: NetworkRequestInspector._cookiesTabTitle,
+              ),
+              tabView: HttpRequestCookiesView(data),
+            ),
+        ],
+      ]
+          .map(
+            (t) => (
+              tab: t.tab,
+              tabView: OutlineDecoration.onlyTop(child: t.tabView),
+            ),
+          )
+          .toList();
 }

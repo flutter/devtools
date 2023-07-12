@@ -51,7 +51,7 @@ void main() {
             0.2857142857142857,
             0.23809523809523808,
             0.23809523809523808,
-            0.23809523809523808
+            0.23809523809523808,
           ],
         ),
         isTrue,
@@ -71,14 +71,14 @@ void main() {
     });
 
     testWidgets('buildChildrenWithFirstHeader', (WidgetTester tester) async {
-      await tester.pumpWidget(Column(children: children));
+      await tester.pumpWidget(const Column(children: children));
       expect(find.byKey(firstHeaderKey), findsNothing);
 
       // Wrap each child in a container so we can build the elements in a
       // arbitrary column to check for [firstHeaderKey].
       final adjustedChildren =
           FlexSplitColumn.buildChildrenWithFirstHeader(children, headers)
-              .map((child) => Container(height: 100.0, child: child))
+              .map((child) => SizedBox(height: 100.0, child: child))
               .toList();
       await tester.pumpWidget(Column(children: adjustedChildren));
       expect(find.byKey(firstHeaderKey), findsOneWidget);

@@ -12,9 +12,11 @@ import 'package:vm_service/vm_service.dart';
 
 import '../../../shared/globals.dart';
 import '../../../shared/primitives/auto_dispose.dart';
+import '../../../shared/primitives/utils.dart';
 import '../../../shared/routing.dart';
 import '../../debugger/codeview_controller.dart';
 import '../../debugger/program_explorer_controller.dart';
+import '../vm_service_private_extensions.dart';
 import 'class_hierarchy_explorer_controller.dart';
 import 'object_store_controller.dart';
 import 'object_viewport.dart';
@@ -48,14 +50,17 @@ class ObjectInspectorViewController extends DisposableController
   ValueListenable<bool> get refreshing => _refreshing;
   final _refreshing = ValueNotifier<bool>(false);
 
+  Reporter get routingEventReporter => _routingEventReporter;
+  final _routingEventReporter = Reporter(); 
+  void Function()? _routingEventCallback;
+
   bool _initialized = false;
 
-  void init(BuildContext context) {
+  Future<void> init() async {
     if (!_initialized) {
-      programExplorerController
-        ..initialize()
-        ..initListeners();
-      initializeForCurrentIsolate(context);
+      await programExplorerController.initialize();
+      programExplorerController.initListeners();
+      initializeForCurrentIsolate();
       _initialized = true;
     }
   }
@@ -148,13 +153,11 @@ class ObjectInspectorViewController extends DisposableController
   }
 
   Future<void> pushObject(
-    BuildContext context,
     ObjRef objRef, {
     ScriptRef? scriptRef,
   }) async {
     _refreshing.value = true;
-
-    Router.navigate(context, () async {
+    _routingEventCallback = () async {
       final object = await createVmObject(objRef, scriptRef: scriptRef);
       if (object != null) {
         objectHistory.pushEntry(object);
@@ -165,8 +168,13 @@ class ObjectInspectorViewController extends DisposableController
           ),
         );
       }
-    });
+    };
+    _routingEventReporter.notify();
+  }
 
+  void handleRoutingEvent(BuildContext context) {
+    Router.navigate(context, _routingEventCallback!);
+    _routingEventCallback = null;
     _refreshing.value = false;
   }
 
@@ -208,6 +216,22 @@ class ObjectInspectorViewController extends DisposableController
       object = CodeObject(
         ref: objRef,
       );
+    } else if (objRef.isObjectPool) {
+      object = ObjectPoolObject(
+        ref: objRef,
+      );
+    } else if (objRef.isICData) {
+      object = ICDataObject(
+        ref: objRef,
+      );
+    } else if (objRef.isSubtypeTestCache) {
+      object = SubtypeTestCacheObject(
+        ref: objRef,
+      );
+    } else if (objRef.isWeakArray) {
+      object = WeakArrayObject(
+        ref: objRef,
+      );
     }
 
     await object?.initialize();
@@ -217,7 +241,7 @@ class ObjectInspectorViewController extends DisposableController
 
   /// Re-initializes the object inspector's state when building it for the
   /// first time or when the selected isolate is updated.
-  void initializeForCurrentIsolate(BuildContext context) async {
+  void initializeForCurrentIsolate() async {
     objectHistory.clear();
     await objectStoreController.refresh();
     await classHierarchyController.refresh();
@@ -241,16 +265,15 @@ class ObjectInspectorViewController extends DisposableController
       if (parts.isEmpty) {
         for (final lib in libraries) {
           if (lib.uri == mainScriptRef.uri) {
-            return await pushObject(context, lib, scriptRef: mainScriptRef);
+            return await pushObject(lib, scriptRef: mainScriptRef);
           }
         }
       }
-      await pushObject(context, mainScriptRef, scriptRef: mainScriptRef);
+      await pushObject(mainScriptRef, scriptRef: mainScriptRef);
     }
   }
 
   Future<void> findAndSelectNodeForObject(
-    BuildContext context,
     ObjRef obj,
   ) async {
     codeViewController.clearState();
@@ -263,7 +286,7 @@ class ObjectInspectorViewController extends DisposableController
       // the object store.
       programExplorerController.clearSelection();
     }
-    await pushObject(context, obj, scriptRef: script);
+    await pushObject(obj, scriptRef: script);
   }
 }
 

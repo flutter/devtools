@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter/material.dart' hide Stack;
 import 'package:vm_service/vm_service.dart';
 
@@ -15,11 +17,13 @@ class CallStack extends StatefulWidget {
   const CallStack({Key? key}) : super(key: key);
 
   @override
-  _CallStackState createState() => _CallStackState();
+  State<CallStack> createState() => _CallStackState();
 }
 
 class _CallStackState extends State<CallStack>
     with ProvidedControllerMixin<DebuggerController, CallStack> {
+  StackFrameAndSourcePosition? _clickedOnFrame;
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -38,7 +42,12 @@ class _CallStackState extends State<CallStack>
           itemExtent: defaultListItemHeight,
           itemBuilder: (_, index) {
             final frame = stackFrames[index];
-            return _buildStackFrame(frame, frame == selectedFrame);
+            return _buildStackFrame(
+              frame,
+              _clickedOnFrame != null
+                  ? frame == _clickedOnFrame
+                  : frame == selectedFrame,
+            );
           },
         );
       },
@@ -56,10 +65,6 @@ class _CallStackState extends State<CallStack>
     final frameKind = frame.frame.kind;
 
     final asyncMarker = frameKind == FrameKind.kAsyncSuspensionMarker;
-    final asyncFrame = frameKind == FrameKind.kAsyncActivation ||
-        frameKind == FrameKind.kAsyncSuspensionMarker;
-    final noLineInfo = frame.line == null;
-
     final frameDescription = frame.description;
     final locationDescription = frame.location;
 
@@ -71,7 +76,7 @@ class _CallStackState extends State<CallStack>
             padding: const EdgeInsets.symmetric(horizontal: densePadding),
             child: Text(
               frameDescription,
-              style: selected ? theme.selectedTextStyle : theme.subtleTextStyle,
+              style: theme.regularTextStyle,
             ),
           ),
           const Expanded(child: Divider()),
@@ -83,16 +88,15 @@ class _CallStackState extends State<CallStack>
         overflow: TextOverflow.ellipsis,
         text: TextSpan(
           text: frameDescription,
-          style: selected
-              ? theme.selectedTextStyle
-              : (asyncFrame || noLineInfo
-                  ? theme.subtleTextStyle
-                  : theme.regularTextStyle),
+          style: theme.regularTextStyle,
           children: [
-            TextSpan(
-              text: ' $locationDescription',
-              style: selected ? theme.selectedTextStyle : theme.subtleTextStyle,
-            ),
+            if (locationDescription != null)
+              TextSpan(
+                text: ' $locationDescription',
+                style: selected
+                    ? theme.selectedSubtleTextStyle
+                    : theme.subtleTextStyle,
+              ),
           ],
         ),
       );
@@ -101,9 +105,9 @@ class _CallStackState extends State<CallStack>
     final isAsyncBreak = frame.frame.kind == FrameKind.kAsyncSuspensionMarker;
 
     final result = Material(
-      color: selected ? theme.colorScheme.selectedRowColor : null,
+      color: selected ? theme.colorScheme.selectedRowBackgroundColor : null,
       child: InkWell(
-        onTap: () => _onStackFrameSelected(frame),
+        onTap: () async => await _onStackFrameSelected(frame),
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: densePadding),
           alignment: Alignment.centerLeft,
@@ -123,7 +127,15 @@ class _CallStackState extends State<CallStack>
           );
   }
 
-  void _onStackFrameSelected(StackFrameAndSourcePosition frame) {
-    controller.selectStackFrame(frame);
+  Future<void> _onStackFrameSelected(StackFrameAndSourcePosition frame) async {
+    setState(() {
+      _clickedOnFrame = frame;
+      // After 1 second, remove the indicator that the frame was clicked to
+      // avoid stale state.
+      Timer(const Duration(seconds: 1), () {
+        _clickedOnFrame = null;
+      });
+    });
+    await controller.selectStackFrame(frame);
   }
 }

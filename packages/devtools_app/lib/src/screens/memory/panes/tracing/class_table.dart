@@ -14,7 +14,7 @@ import '../../../../shared/table/table_controller.dart';
 import '../../../../shared/table/table_data.dart';
 import '../../../../shared/theme.dart';
 import '../../../../shared/utils.dart';
-import '../../shared/shared_memory_widgets.dart';
+import '../../shared/widgets/shared_memory_widgets.dart';
 import 'tracing_pane_controller.dart';
 
 /// The default width for columns containing *mostly* numeric data (e.g.,
@@ -88,13 +88,10 @@ class _ClassNameColumn extends ColumnData<TracedClass>
     bool isRowSelected = false,
     VoidCallback? onPressed,
   }) {
-    final theme = Theme.of(context);
     return HeapClassView(
       theClass: data.name,
       showCopyButton: isRowSelected,
       copyGaItem: gac.MemoryEvent.diffClassSingleCopy,
-      textStyle:
-          isRowSelected ? theme.selectedTextStyle : theme.regularTextStyle,
       rootPackage: serviceManager.rootInfoNow().package,
     );
   }
@@ -119,7 +116,7 @@ class _InstancesColumn extends ColumnData<TracedClass> {
 }
 
 class AllocationTracingTable extends StatefulWidget {
-  const AllocationTracingTable({required this.controller});
+  const AllocationTracingTable({super.key, required this.controller});
 
   final TracingPaneController controller;
 

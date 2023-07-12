@@ -6,10 +6,13 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
+import 'package:logging/logging.dart';
 import 'package:stack_trace/stack_trace.dart' as stack_trace;
 
 import '../shared/analytics/analytics.dart' as ga;
-import '../shared/config_specific/logger/logger.dart';
+import '../shared/globals.dart';
+
+final _log = Logger('app_error_handling');
 
 /// Set up error handling for the app.
 ///
@@ -21,33 +24,58 @@ import '../shared/config_specific/logger/logger.dart';
 /// application.
 void setupErrorHandling(Future Function() appStartCallback) {
   // First, run all our code in a new zone.
-  return runZonedGuarded(
-    // ignore: avoid-passing-async-when-sync-expected this ignore should be fixed.
-    () async {
-      WidgetsFlutterBinding.ensureInitialized();
+  unawaited(
+    runZonedGuarded<Future<void>>(
+      // ignore: avoid-passing-async-when-sync-expected this ignore should be fixed.
+      () {
+        WidgetsFlutterBinding.ensureInitialized();
 
-      final FlutterExceptionHandler? oldHandler = FlutterError.onError;
+        final FlutterExceptionHandler? oldHandler = FlutterError.onError;
 
-      FlutterError.onError = (FlutterErrorDetails details) {
-        _reportError(details.exception, details.stack ?? StackTrace.empty);
+        FlutterError.onError = (FlutterErrorDetails details) {
+          // Flutter Framework errors are caught here.
+          reportError(
+            details.exception,
+            stack: details.stack,
+            errorType: 'FlutterError',
+          );
 
-        if (oldHandler != null) {
-          oldHandler(details);
-        }
-      };
+          if (oldHandler != null) {
+            oldHandler(details);
+          }
+        };
 
-      return appStartCallback();
-    },
-    (Object error, StackTrace stack) {
-      _reportError(error, stack);
-    },
+        PlatformDispatcher.instance.onError = (error, stack) {
+          // Unhandled errors on the root isolate are caught here.
+          reportError(error, stack: stack, errorType: 'PlatformDispatcher');
+          return false;
+        };
+        return appStartCallback();
+      },
+      (Object error, StackTrace stack) {
+        reportError(error, stack: stack, errorType: 'zoneGuarded');
+        throw error;
+      },
+    ),
   );
 }
 
-void _reportError(Object error, StackTrace stack) {
+void reportError(
+  Object error, {
+  String errorType = 'DevToolsError',
+  bool notifyUser = false,
+  StackTrace? stack,
+}) {
+  stack = stack ?? StackTrace.empty;
+
   final terseStackTrace = stack_trace.Trace.from(stack).terse.toString();
 
-  log('$error', LogLevel.error);
+  _log.severe('[$errorType]: ${error.toString()}', error, stack);
 
   ga.reportError('$error\n$terseStackTrace');
+
+  // Show error message in a notification pop-up:
+  if (notifyUser) {
+    notificationService.pushError(error.toString());
+  }
 }

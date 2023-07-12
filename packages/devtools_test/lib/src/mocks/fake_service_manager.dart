@@ -12,6 +12,7 @@ import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../utils.dart';
+import 'fake_isolate_manager.dart';
 import 'fake_service_extension_manager.dart';
 import 'fake_vm_service_wrapper.dart';
 import 'generated.mocks.dart';
@@ -35,6 +36,8 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
     }
     when(connectedApp!.isFlutterAppNow).thenReturn(false);
     when(connectedApp!.isDebugFlutterAppNow).thenReturn(false);
+
+    when(vm.operatingSystem).thenReturn('macos');
 
     unawaited(vmServiceOpened(this.service!, onClosed: Future.value()));
   }
@@ -93,7 +96,7 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
 
   set isMainIsolatePaused(bool value) {
     final state = isolateManager.mainIsolateState! as MockIsolateState;
-    state.isPaused.value = value;
+    when(state.isPaused).thenReturn(ValueNotifier(value));
   }
 
   @override

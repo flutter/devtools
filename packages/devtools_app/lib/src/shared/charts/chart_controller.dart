@@ -75,20 +75,6 @@ class ChartController extends DisposableController
   /// Number of ticks visible (on the X-axis);
   late int visibleXAxisTicks;
 
-  // TODO(terry): For now three labels.  Need better mechanism, some number of labels
-  //              based on x-axis zoom factor and default unit to display for labels e.g.,
-  //              live take the duration (visible) and divide by some nice unit e.g., 10/20
-  //              seconds, 5 minute show 1 minute units, 15 minutes show 5 minute units, width
-  //              of the window, etc.
-  final List<int?> _xAxisLabeledTimestamps = [null, null, null];
-
-  int getLabelsCount() => _xAxisLabeledTimestamps.length;
-
-  int getLabeledIndexByTimestamp(int timestamp) =>
-      _xAxisLabeledTimestamps.indexOf(timestamp);
-
-  int? getLabelTimestampByIndex(int index) => _xAxisLabeledTimestamps[index];
-
   /// If true the X axis line is rendered, if false then both the X axis line
   /// is not rendered and the labels and ticks are also not rendered.
   final bool displayXAxis;
@@ -141,7 +127,7 @@ class ChartController extends DisposableController
 
   ValueNotifier<TraceNotifier> get traceChanged => _traceNotifier;
 
-  final _traceNotifier = ValueNotifier<TraceNotifier>(TraceNotifier(-1, -1));
+  final _traceNotifier = ValueNotifier<TraceNotifier>(TraceNotifier());
 
   double _yMaxValue = 0.0;
 
@@ -447,8 +433,6 @@ class ChartController extends DisposableController
     assert(index < traces.length);
     return traces[index];
   }
-
-  int traceIndex(Trace trace) => traces.indexOf(trace);
 
   int createTrace(
     ChartType chartType,

@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app/src/screens/memory/memory_screen.dart';
-import 'package:devtools_app/src/screens/memory/memory_tabs.dart';
+import 'package:devtools_app/src/screens/memory/framework/connected/memory_tabs.dart';
+import 'package:devtools_app/src/screens/memory/framework/memory_screen.dart';
 import 'package:devtools_app/src/screens/memory/panes/profile/model.dart';
 import 'package:devtools_app/src/screens/memory/panes/profile/profile_pane_controller.dart';
 import 'package:devtools_app/src/screens/vm_developer/vm_service_private_extensions.dart';
@@ -15,6 +15,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../../test_infra/scenes/memory/default.dart';
+import '../../test_infra/scenes/scene_test_extensions.dart';
 
 void main() {
   late MemoryDefaultScene scene;
@@ -25,7 +26,7 @@ void main() {
   });
 
   Future<void> pumpMemoryScreen(WidgetTester tester) async {
-    await tester.pumpWidget(scene.build());
+    await tester.pumpScene(scene);
     // Delay to ensure the memory profiler has collected data.
     await tester.pumpAndSettle(const Duration(seconds: 1));
     expect(find.byType(MemoryBody), findsOneWidget);
@@ -75,7 +76,7 @@ void main() {
         expect(find.text('Instances'), findsOneWidget);
         expect(find.text('Total Size'), findsOneWidget);
         expect(find.text('Dart Heap'), findsOneWidget);
-        expect(find.text('External'), findsOneWidget);
+        expect(find.text('External'), findsNothing);
         expect(find.text('Old Space'), findsNothing);
         expect(find.text('New Space'), findsNothing);
         expect(find.text('Usage'), findsNothing);
@@ -132,7 +133,7 @@ void main() {
           // Average collection time
           expect(
             find.text(
-              msText(
+              durationText(
                 Duration(milliseconds: stats.averageCollectionTime.toInt()),
                 fractionDigits: 2,
               ),
@@ -243,14 +244,12 @@ void main() {
         final instances = find.text('Instances');
         final size = find.text('Total Size');
         final dartHeap = find.text('Dart Heap');
-        final external_ = find.text('External');
 
         final columns = <Finder>[
           cls,
           instances,
           size,
           dartHeap,
-          external_,
         ];
 
         for (final columnFinder in columns) {
@@ -354,30 +353,6 @@ void main() {
           final internalSize = element.totalDartHeapSize;
           expect(internalSize >= lastValue, isTrue);
           lastValue = internalSize;
-        }
-
-        // Sort by external size, largest to smallest.
-        await tester.tap(external_);
-        await tester.pumpAndSettle();
-
-        data = state.tableController.tableData.value.data;
-
-        lastValue = data.first.totalExternalSize;
-        for (final element in data) {
-          final externalSize = element.totalExternalSize;
-          expect(externalSize <= lastValue, isTrue);
-          lastValue = externalSize;
-        }
-
-        // Sort by external size, smallest to largest.
-        await tester.tap(external_);
-        await tester.pumpAndSettle();
-
-        lastValue = data.first.totalExternalSize;
-        for (final element in data) {
-          final externalSize = element.totalExternalSize;
-          expect(externalSize >= lastValue, isTrue);
-          lastValue = externalSize;
         }
       },
     );

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -12,24 +10,28 @@ import '../service/isolate_manager.dart';
 import '../service/service_manager.dart';
 import '../shared/analytics/constants.dart' as gac;
 import '../shared/common_widgets.dart';
-import '../shared/device_dialog.dart';
 import '../shared/globals.dart';
 import '../shared/screen.dart';
 import '../shared/theme.dart';
 import '../shared/ui/utils.dart';
 import '../shared/utils.dart';
-import 'about_dialog.dart';
-import 'report_feedback_button.dart';
+import 'scaffold.dart';
 
 /// The status line widget displayed at the bottom of DevTools.
 ///
 /// This displays information global to the application, as well as gives pages
 /// a mechanism to display page-specific information.
 class StatusLine extends StatelessWidget {
-  const StatusLine({required this.currentScreen, required this.isEmbedded});
+  const StatusLine({
+    super.key,
+    required this.currentScreen,
+    required this.isEmbedded,
+  });
 
   final Screen currentScreen;
   final bool isEmbedded;
+
+  static const deviceInfoTooltip = 'Device Info';
 
   /// The padding around the footer in the DevTools UI.
   EdgeInsets get padding => const EdgeInsets.fromLTRB(
@@ -83,10 +85,7 @@ class StatusLine extends StatelessWidget {
         const BulletSpacer(),
         Row(
           crossAxisAlignment: CrossAxisAlignment.end,
-          children: [
-            ReportFeedbackButton(),
-            OpenAboutAction(),
-          ],
+          children: DevToolsScaffold.defaultActions(),
         ),
       ],
     ];
@@ -161,34 +160,11 @@ class StatusLine extends StatelessWidget {
               ),
               const SizedBox(width: denseSpacing),
               DevToolsTooltip(
-                message: 'Device Info',
-                child: InkWell(
-                  onTap: () async {
-                    unawaited(
-                      showDialog(
-                        context: context,
-                        builder: (context) => DeviceDialog(
-                          connectedApp: app,
-                        ),
-                      ),
-                    );
-                  },
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.info_outline,
-                        size: actionsIconSize,
-                      ),
-                      if (screenWidth > MediaSize.xxs) ...[
-                        const SizedBox(width: denseSpacing),
-                        Text(
-                          description,
-                          style: textTheme.bodyMedium,
-                          overflow: TextOverflow.clip,
-                        ),
-                      ],
-                    ],
-                  ),
+                message: 'Connected device',
+                child: Text(
+                  description,
+                  style: textTheme.bodyMedium,
+                  overflow: TextOverflow.clip,
                 ),
               ),
             ],
@@ -245,8 +221,9 @@ class IsolateSelector extends StatelessWidget {
 
 class IsolateOption extends StatelessWidget {
   const IsolateOption(
-    this.ref,
-  );
+    this.ref, {
+    super.key,
+  });
 
   final IsolateRef? ref;
 

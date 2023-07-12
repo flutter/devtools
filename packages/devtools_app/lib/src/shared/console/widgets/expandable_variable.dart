@@ -28,8 +28,9 @@ class ExpandableVariable extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final variable = this.variable;
-    if (variable == null)
+    if (variable == null) {
       return const SizedBox(key: emptyExpandableVariableKey);
+    }
     // TODO(kenz): preserve expanded state of tree on switching frames and
     // on stepping.
     return TreeView<DartObjectNode>(

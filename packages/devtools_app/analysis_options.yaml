@@ -1,4 +1,4 @@
-include: ../../analysis_options.yaml
+include: ../analysis_options.yaml
 
 analyzer:
   exclude:
@@ -10,6 +10,10 @@ analyzer:
     # these files if you want to ensure code is not invalid except where
     # expected.
     - test/test_infra/test_data/syntax_highlighting/**
+
+linter:
+  rules:
+    - avoid_print
 
 dart_code_metrics:
   metrics-exclude:

@@ -71,8 +71,11 @@ class ResolvedUriManager {
   String? lookupPackageUri(String isolateId, String fileUri) =>
       _packagePathMappings?.lookupFullPathToPackageMapping(isolateId, fileUri);
 
-  String? lookupFileUri(String isolateId, packageUri) => _packagePathMappings
-      ?.lookupPackageToFullPathMapping(isolateId, packageUri);
+  String? lookupFileUri(String isolateId, String packageUri) =>
+      _packagePathMappings?.lookupPackageToFullPathMapping(
+        isolateId,
+        packageUri,
+      );
 }
 
 /// Helper class for storing 1:1 mappings for full file paths to package paths.

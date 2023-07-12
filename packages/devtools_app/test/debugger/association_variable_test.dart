@@ -65,7 +65,7 @@ void main() {
         ),
         isolateRef,
       );
-      when(manager.service!.getObject(isolateId, objectId, offset: 0, count: 2))
+      when(manager.service!.getObject(isolateId, objectId))
           .thenAnswer((_) async {
         return instance;
       });
@@ -113,7 +113,7 @@ void main() {
         ),
         isolateRef,
       );
-      when(manager.service!.getObject(isolateId, objectId, offset: 0, count: 2))
+      when(manager.service!.getObject(isolateId, objectId))
           .thenAnswer((_) async {
         return instance;
       });
@@ -161,7 +161,7 @@ void main() {
         ),
         isolateRef,
       );
-      when(manager.service!.getObject(isolateId, objectId, offset: 0, count: 2))
+      when(manager.service!.getObject(isolateId, objectId))
           .thenAnswer((_) async {
         return instance;
       });
@@ -173,7 +173,7 @@ void main() {
       ]);
       expect(variable.children.first.children, [
         matchesVariable(name: '[key]', value: 'Foo'),
-        matchesVariable(name: '[value]', value: '12.34'),
+        matchesVariable(name: '[val]', value: '12.34'),
       ]);
     },
   );
