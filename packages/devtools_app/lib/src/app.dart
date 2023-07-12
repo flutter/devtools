@@ -92,9 +92,6 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
   bool get isDarkThemeEnabled => _isDarkThemeEnabled;
   bool _isDarkThemeEnabled = true;
 
-  bool get vmDeveloperModeEnabled => _vmDeveloperModeEnabled;
-  bool _vmDeveloperModeEnabled = false;
-
   bool get denseModeEnabled => _denseModeEnabled;
   bool _denseModeEnabled = false;
 
@@ -120,13 +117,6 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
     addAutoDisposeListener(preferences.darkModeTheme, () {
       setState(() {
         _isDarkThemeEnabled = preferences.darkModeTheme.value;
-      });
-    });
-
-    _vmDeveloperModeEnabled = preferences.vmDeveloperModeEnabled.value;
-    addAutoDisposeListener(preferences.vmDeveloperModeEnabled, () {
-      setState(() {
-        _vmDeveloperModeEnabled = preferences.vmDeveloperModeEnabled.value;
       });
     });
 
