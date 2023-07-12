@@ -782,6 +782,52 @@ void main() {
         },
         timeout: const Timeout.factor(12),
       );
+
+      test(
+        'listens to updates from the application side',
+        () async {
+          final container = ProviderContainer();
+          addTearDown(container.dispose);
+
+          final countSub = container.listen(
+            instanceProvider(
+              const InstancePath.fromProviderId(
+                '0',
+                pathToProperty: [
+                  PathToProperty.objectProperty(
+                    name: '_count',
+                    ownerUri: 'package:provider_app/main.dart',
+                    ownerName: 'Counter',
+                  ),
+                ],
+              ),
+            ).future,
+            (prev, next) {},
+          );
+
+          await expectLater(
+            countSub.read(),
+            completion(
+              isA<NumInstance>()
+                  .having((e) => e.displayString, 'displayString', '0'),
+            ),
+          );
+
+          await evalOnDartLibrary.asyncEval(
+            'await tester.tap(find.byKey(Key("increment"))).then((_) => tester.pump())',
+            isAlive: isAlive,
+          );
+
+          await expectLater(
+            countSub.read(),
+            completion(
+              isA<NumInstance>()
+                  .having((e) => e.displayString, 'displayString', '1'),
+            ),
+          );
+        },
+        timeout: const Timeout.factor(12),
+      );
     });
   });
 
