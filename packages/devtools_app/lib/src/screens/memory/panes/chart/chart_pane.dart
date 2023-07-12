@@ -327,8 +327,7 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
             borderRadius: BorderRadius.circular(defaultBorderRadius),
           ),
           width: _hoverWidth,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          child: ListView(
             children: [
               Container(
                 width: _hoverWidth,
@@ -476,37 +475,12 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
   }
 
   List<Widget> _displayExtensionEventsInHover(ChartsValues chartsValues) {
-    final widgets = <Widget>[];
-
-    final eventsDisplayed = chartsValues.extensionEventsToDisplay;
-
-    for (var entry in eventsDisplayed.entries) {
-      if (entry.key.endsWith(eventsDisplayName)) {
-        widgets.add(
-          SizedBox(
-            height: _hoverEventsHeight,
-            child: ListView(
-              shrinkWrap: true,
-              primary: false,
-              children: [
-                _listItem(
-                  allEvents: chartsValues.extensionEvents,
-                  title: entry.key,
-                ),
-              ],
-            ),
-          ),
-        );
-      } else {
-        widgets.add(_hoverRow(name: entry.key, image: entry.value));
-
-        /// Pull out the event name, and custom values.
-        final output =
-            _displayEvent(null, chartsValues.extensionEvents.first).trim();
-        widgets.add(_hoverRow(name: output));
-      }
-    }
-    return widgets;
+    return [
+      if (chartsValues.hasExtensionEvents)
+        ..._extensionEvents(
+          allEvents: chartsValues.extensionEvents,
+        ),
+    ];
   }
 
   List<Widget> _displayEventsInHover(ChartsValues chartsValues) {
@@ -523,87 +497,70 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
     return results;
   }
 
-  Widget _listItem({
+  List<Widget> _extensionEvents({
     required List<Map<String, Object>> allEvents,
-    required String title,
   }) {
+    final theme = Theme.of(context);
+
     final widgets = <Widget>[];
     var index = 1;
     for (var event in allEvents) {
-      final output = _displayEvent(index, event);
-      widgets.add(_cardWidget(output));
+      late String? name;
+      if (event[eventName] == devToolsEvent && event.containsKey(customEvent)) {
+        final custom = event[customEvent] as Map<dynamic, dynamic>;
+        name = custom[customEventName];
+      } else {
+        name = event[eventName] as String?;
+      }
+
+      final output = _decodeEventValues(event);
+      widgets.add(
+        Padding(
+          padding: const EdgeInsets.only(left: intermediateSpacing),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                '$index. $name',
+                overflow: TextOverflow.ellipsis,
+                style: theme.legendTextStyle,
+              ),
+              Padding(
+                padding: const EdgeInsets.only(left: densePadding),
+                child: Text(
+                  output,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.legendTextStyle,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
       index++;
     }
 
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-    final collapsedColor = colorScheme.defaultBackgroundColor;
-
-    return Material(
-      color: Colors.transparent,
-      child: Theme(
-        // TODO(kenz): why are we using a Material and a Theme widget here?
-        data: ThemeData(),
-        child: ExpansionTile(
-          tilePadding: EdgeInsets.zero,
-          childrenPadding: EdgeInsets.zero,
-          leading: Container(
-            padding: const EdgeInsets.only(left: 5, top: 4),
-            child: Image(
-              image: allEvents.length > 1
-                  ? const AssetImage(eventsLegend)
-                  : const AssetImage(eventLegend),
-            ),
+    final eventsLength = allEvents.length;
+    final title = Row(
+      children: [
+        Container(
+          padding: const EdgeInsets.only(left: 6.0),
+          child: Image(
+            image: AssetImage(eventLegendAsset(eventsLength)),
           ),
-          backgroundColor: collapsedColor,
-          collapsedBackgroundColor: collapsedColor,
-          title: Text(title, style: theme.legendTextStyle),
-          children: widgets,
         ),
-      ),
+        const SizedBox(width: denseSpacing),
+        Text(
+          '$eventsLength ${pluralize('Event', eventsLength)}',
+          style: theme.legendTextStyle,
+        ),
+      ],
     );
-  }
-
-  Widget _cardWidget(String value) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-    final expandedGradient = colorScheme.verticalGradient;
-
-    return Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      width: _hoverWidth,
-      decoration: BoxDecoration(
-        gradient: expandedGradient,
-      ),
-      child: Row(
-        children: [
-          const SizedBox(width: 10),
-          Text(
-            value,
-            overflow: TextOverflow.ellipsis,
-            style: theme.legendTextStyle,
-          ),
-        ],
-      ),
-    );
-  }
-
-  String _displayEvent(int? index, Map<String, Object> event) {
-    final output = StringBuffer();
-
-    String? name;
-
-    if (event[eventName] == devToolsEvent && event.containsKey(customEvent)) {
-      final custom = event[customEvent] as Map<dynamic, dynamic>;
-      name = custom[customEventName];
-    } else {
-      name = event[eventName] as String?;
-    }
-
-    output.writeln(index == null ? name : '$index. $name');
-    output.write(_decodeEventValues(event));
-
-    return output.toString();
+    return [
+      title,
+      ...widgets,
+    ];
   }
 
   String _decodeEventValues(Map<String, Object> event) {

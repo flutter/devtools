@@ -10,6 +10,7 @@ import '../../../../shared/charts/chart_controller.dart';
 import '../../../../shared/charts/chart_trace.dart' as trace;
 import '../../../../shared/charts/chart_trace.dart' show ChartType;
 import '../../../../shared/primitives/auto_dispose.dart';
+import '../../../../shared/primitives/utils.dart';
 import '../../../../shared/theme.dart';
 import '../../../../shared/utils.dart';
 import '../../framework/connected/memory_controller.dart';
@@ -24,8 +25,8 @@ const resetDarkLegend = '${_base}reset_glyph_dark.png';
 const resetLightLegend = '${_base}reset_glyph_light.png';
 const gcManualLegend = '${_base}gc_manual_glyph.png';
 const gcVMLegend = '${_base}gc_vm_glyph.png';
-const eventLegend = '${_base}event_glyph.png';
-const eventsLegend = '${_base}events_glyph.png';
+String eventLegendAsset(int eventCount) =>
+    '$_base${pluralize('event', eventCount)}_glyph.png';
 
 /// Events trace name displayed
 const manualSnapshotLegendName = 'Snapshot';
