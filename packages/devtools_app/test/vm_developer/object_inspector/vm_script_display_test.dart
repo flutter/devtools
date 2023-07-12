@@ -59,9 +59,9 @@ void main() {
       expect(find.text('General Information'), findsOneWidget);
       expect(find.text('1 KB'), findsOneWidget);
       expect(find.text('Library:'), findsOneWidget);
-      expect(find.text('fooLib'), findsOneWidget);
+      expect(find.text('fooLib', findRichText: true), findsOneWidget);
       expect(find.text('URI:'), findsOneWidget);
-      expect(find.text('fooScript.dart'), findsOneWidget);
+      expect(find.text('fooScript.dart', findRichText: true), findsOneWidget);
       expect(find.text('Load time:'), findsOneWidget);
       expect(find.text('2022-08-10 06:30:00.000'), findsOneWidget);
 

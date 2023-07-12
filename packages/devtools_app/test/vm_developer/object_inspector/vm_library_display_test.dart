@@ -62,7 +62,7 @@ void main() {
         expect(find.text('General Information'), findsOneWidget);
         expect(find.text('1 KB'), findsOneWidget);
         expect(find.text('URI:'), findsOneWidget);
-        expect(find.text('fooLib.dart'), findsOneWidget);
+        expect(find.text('fooLib.dart', findRichText: true), findsOneWidget);
         expect(find.text('VM Name:'), findsOneWidget);
         expect(find.text('fooDartLibrary'), findsOneWidget);
 

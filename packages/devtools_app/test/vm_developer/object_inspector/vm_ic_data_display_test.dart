@@ -74,7 +74,7 @@ void main() {
 
         expect(find.text('64 B'), findsOneWidget);
         expect(find.text('Owner:'), findsOneWidget);
-        expect(find.text('func'), findsOneWidget);
+        expect(find.text('func', findRichText: true), findsOneWidget);
 
         expect(find.byType(RequestableSizeWidget), findsNWidgets(2));
         expect(find.byType(RetainingPathWidget), findsOneWidget);
