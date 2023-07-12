@@ -831,11 +831,11 @@ void main() {
             );
           },
           timeout: const Timeout.factor(12),
+          //TODO(rrousselGit): https://github.com/flutter/devtools/issues/6021
+          skip: true,
         );
       });
     },
-    skip:
-        true, //TODO(rrousselGit): https://github.com/flutter/devtools/issues/6021
   );
 
   const countPath = InstancePath.fromProviderId(
