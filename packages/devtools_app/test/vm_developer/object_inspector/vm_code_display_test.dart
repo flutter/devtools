@@ -207,7 +207,8 @@ void main() {
             of: find.byType(InliningTable),
             matching: find.text(column.title),
           ),
-        );        await tester.pumpAndSettle();
+        );
+        await tester.pumpAndSettle();
         verifyAddressOrder(
           state.tableController.tableData.value.data,
           mockCodeObject.ticksTable,
