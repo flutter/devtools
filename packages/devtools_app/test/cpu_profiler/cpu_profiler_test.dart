@@ -50,6 +50,7 @@ void main() {
     setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
     setGlobal(OfflineModeController, OfflineModeController());
     setGlobal(NotificationService, NotificationService());
+    setGlobal(BannerMessagesController, BannerMessagesController());
     setGlobal(PreferencesController, PreferencesController());
     setGlobal(IdeTheme, IdeTheme());
     final mockScriptManager = MockScriptManager();

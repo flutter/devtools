@@ -105,7 +105,7 @@ void main() {
       expect(find.text('Console'), findsOneWidget);
 
       // test for stdio output.
-      expect(find.selectableText('test stdio'), findsOneWidget);
+      expect(find.text('test stdio'), findsOneWidget);
     },
   );
 

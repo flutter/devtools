@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '../primitives/simple_items.dart';
+import '../screen.dart';
 
 // Type of events (event_category):
 const screenViewEvent = 'screen'; // Active screen (tab selected).
@@ -13,6 +13,7 @@ const timingEvent = 'timing'; // Timed operation.
 // These screen ids must match the `screenId` for each respective subclass of
 // [Screen]. This is to ensure that the analytics for documentation links match
 // the screen id for other analytics on the same screen.
+final home = ScreenMetaData.home.id;
 final inspector = ScreenMetaData.inspector.id;
 final performance = ScreenMetaData.performance.id;
 final cpuProfiler = ScreenMetaData.cpuProfiler.id;
@@ -27,13 +28,14 @@ final simple = ScreenMetaData.simple.id;
 
 // GA events not associated with a any screen e.g., hotReload, hotRestart, etc
 const devToolsMain = 'main';
-const hotReload = 'hotReload';
-const hotRestart = 'hotRestart';
 const appDisconnected = 'appDisconnected';
 
 // DevTools UI action selected (clicked).
 
 // Main bar UX actions:
+const hotReload = 'hotReload';
+const hotRestart = 'hotRestart';
+const importFile = 'importFile';
 const feedbackLink = 'feedback';
 const feedbackButton = 'feedbackButton';
 const contributingLink = 'contributing';
@@ -60,6 +62,12 @@ const showOnDeviceInspector = 'showInspector';
 const treeNodeSelection = 'treeNodeSelection';
 const inspectorSettings = 'inspectorSettings';
 const refreshPubRoots = 'refreshPubRoots';
+
+enum HomeScreenEvents {
+  connectToApp,
+  connectToNewApp,
+  viewVmFlags,
+}
 
 enum PerformanceEvents {
   refreshTimelineEvents,
@@ -142,12 +150,6 @@ const refreshIsolateStatistics = 'refreshIsolateStatistics';
 const refreshVmStatistics = 'refreshVmStatistics';
 const requestSize = 'requestSize';
 
-// Landing screen UX actions:
-const landingScreen = 'landing';
-const connectToApp = 'connectToApp';
-const importFile = 'importFile';
-const openAppSizeTool = 'openAppSizeTool';
-
 // Settings actions:
 const settingsDialog = 'settings';
 const darkTheme = 'darkTheme';
@@ -161,6 +163,7 @@ const copyLogs = 'copyLogs';
 
 // Object explorer:
 const objectInspectorScreen = 'objectInspector';
+const objectInspectorDropDown = 'dropdown';
 const programExplorer = 'programExplorer';
 const objectStore = 'objectStore';
 const classHierarchy = 'classHierarchy';

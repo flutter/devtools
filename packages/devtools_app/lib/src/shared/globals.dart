@@ -5,6 +5,7 @@
 import '../extension_points/extensions_base.dart';
 import '../screens/debugger/breakpoint_manager.dart';
 import '../service/service_manager.dart';
+import '../shared/banner_messages.dart';
 import '../shared/notifications.dart';
 import 'config_specific/ide_theme/ide_theme.dart';
 import 'console/eval/eval_service.dart';
@@ -50,6 +51,9 @@ IdeTheme get ideTheme => globals[IdeTheme] as IdeTheme;
 
 NotificationService get notificationService =>
     globals[NotificationService] as NotificationService;
+
+BannerMessagesController get bannerMessages =>
+    globals[BannerMessagesController] as BannerMessagesController;
 
 BreakpointManager get breakpointManager =>
     globals[BreakpointManager] as BreakpointManager;

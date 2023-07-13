@@ -118,7 +118,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(requestedSize.valueAsString, '1024');
-    expect(find.byType(SelectableText), findsOneWidget);
+    expect(find.byType(Text), findsOneWidget);
     expect(find.text('1 KB'), findsOneWidget);
     expect(find.byType(ToolbarRefresh), findsOneWidget);
 
@@ -127,7 +127,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(requestedSize.valueAsString, '1536');
-    expect(find.byType(SelectableText), findsOneWidget);
+    expect(find.byType(Text), findsOneWidget);
     expect(find.text('1.5 KB'), findsOneWidget);
     expect(find.byType(ToolbarRefresh), findsOneWidget);
   });
@@ -146,11 +146,11 @@ void main() {
         ),
       );
 
-      expect(find.byType(AreaPaneHeader), findsOneWidget);
+      expect(find.byType(RetainingPathWidget), findsOneWidget);
 
       expect(find.text('Retaining Path'), findsOneWidget);
 
-      await tester.tap(find.byType(AreaPaneHeader));
+      await tester.tap(find.text('Retaining Path'));
 
       await tester.pump();
 
@@ -176,33 +176,44 @@ void main() {
         ),
       );
 
-      await tester.tap(find.byType(AreaPaneHeader));
+      await tester.tap(find.text('Retaining Path'));
 
       await tester.pumpAndSettle();
-      expect(find.byType(SelectableText), findsNWidgets(7));
-      expect(find.text('FooClass'), findsOneWidget);
+      expect(find.text('FooClass', findRichText: true), findsOneWidget);
       expect(
-        find.text('Retained by element [1] of fooSuperClass'),
+        find.text(
+          'Retained by element [1] of fooSuperClass',
+          findRichText: true,
+        ),
         findsOneWidget,
       );
       expect(
-        find.text('Retained by \$1 of Record'),
+        find.text('Retained by \$1 of Record', findRichText: true),
         findsOneWidget,
       );
       expect(
-        find.text('Retained by fooParentField of Record'),
+        find.text('Retained by fooParentField of Record', findRichText: true),
         findsOneWidget,
       );
       expect(
-        find.text('Retained by element at [fooField] of fooSuperClass'),
+        find.text(
+          'Retained by element at [fooField] of fooSuperClass',
+          findRichText: true,
+        ),
         findsOneWidget,
       );
       expect(
-        find.text('Retained by fooParentField of FooClass fooField of fooLib'),
+        find.text(
+          'Retained by fooParentField of FooClass fooField of fooLib',
+          findRichText: true,
+        ),
         findsOneWidget,
       );
       expect(
-        find.text('Retained by a GC root of type: class table'),
+        find.text(
+          'Retained by a GC root of type: class table',
+          findRichText: true,
+        ),
         findsOneWidget,
       );
     },
@@ -223,11 +234,9 @@ void main() {
         ),
       );
 
-      expect(find.byType(AreaPaneHeader), findsOneWidget);
-
       expect(find.text('Inbound References'), findsOneWidget);
 
-      await tester.tap(find.byType(AreaPaneHeader));
+      await tester.tap(find.text('Inbound References'));
 
       await tester.pump();
 
@@ -248,10 +257,9 @@ void main() {
         ),
       );
 
-      await tester.tap(find.byType(AreaPaneHeader));
+      await tester.tap(find.text('Inbound References'));
 
       await tester.pumpAndSettle();
-      expect(find.byType(SelectableText), findsNWidgets(5));
       expect(
         find.text('Referenced by fooFunction'),
         findsOneWidget,

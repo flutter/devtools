@@ -35,6 +35,7 @@ class CpuProfilerDefaultScene extends Scene {
     setGlobal(IdeTheme, IdeTheme());
     setGlobal(NotificationService, NotificationService());
     setGlobal(PreferencesController, PreferencesController());
+    setGlobal(BannerMessagesController, BannerMessagesController());
 
     fakeServiceManager = FakeServiceManager(
       service: FakeServiceManager.createFakeService(

@@ -6,7 +6,6 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 import '../../../../framework/scaffold.dart';
 import '../../../../shared/analytics/analytics.dart' as ga;
@@ -115,7 +114,7 @@ class _FlutterFramesChartState extends State<_FlutterFramesChart> {
         Duration.zero,
         (prev, frame) => prev + frame.shaderDuration,
       );
-      Provider.of<BannerMessagesController>(context).addMessage(
+      bannerMessages.addMessage(
         ShaderJankMessage(
           offlineController.offlineMode.value
               ? SimpleScreen.id
