@@ -4,6 +4,7 @@
 
 // ignore_for_file: constant_identifier_names
 
+import 'package:flutter/widgets.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../shared/globals.dart';
@@ -600,7 +601,7 @@ extension CodePrivateViewExtension on Code {
 
   ObjectPoolRef get objectPool => ObjectPoolRef.parse(json![_objectPoolKey]);
 
-  bool get hasInliningData => json!.containsKey(InliningData._inlinedFunctions);
+  bool get hasInliningData => json!.containsKey(InliningData.kInlinedFunctions);
   InliningData get inliningData => InliningData.parse(json!);
 }
 
@@ -613,9 +614,9 @@ class InliningData {
   const InliningData._({required this.entries});
 
   factory InliningData.parse(Map<String, dynamic> json) {
-    final startAddress = int.parse(json[_startAddressKey], radix: 16);
-    final intervals = json[_inlinedIntervals] as List;
-    final functions = (json[_inlinedFunctions] as List)
+    final startAddress = int.parse(json[kStartAddressKey], radix: 16);
+    final intervals = json[kInlinedIntervals] as List;
+    final functions = (json[kInlinedFunctions] as List)
         .cast<Map<String, dynamic>>()
         .map<FuncRef>((e) => FuncRef.parse(e)!)
         .toList();
@@ -646,9 +647,12 @@ class InliningData {
     return InliningData._(entries: entries);
   }
 
-  static const _inlinedIntervals = '_inlinedIntervals';
-  static const _inlinedFunctions = '_inlinedFunctions';
-  static const _startAddressKey = '_startAddress';
+  @visibleForTesting
+  static const kInlinedIntervals = '_inlinedIntervals';
+  @visibleForTesting
+  static const kInlinedFunctions = '_inlinedFunctions';
+  @visibleForTesting
+  static const kStartAddressKey = '_startAddress';
 
   final List<InliningEntry> entries;
 }

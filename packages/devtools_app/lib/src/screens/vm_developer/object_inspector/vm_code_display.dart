@@ -150,7 +150,7 @@ class _ProfileRangeTicksColumn extends _CodeColumnData<InliningEntry> {
     final value = getValue(dataObject);
     if (value == null) return '';
 
-    final percentage = percent2(value / ticks!.sampleCount);
+    final percentage = percent(value / ticks!.sampleCount);
     return '$percentage ($value)';
   }
 }
