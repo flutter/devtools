@@ -65,8 +65,12 @@ class _FunctionsColumn extends _CodeColumnData<InliningEntry>
   final ObjectInspectorViewController controller;
 
   @override
-  Widget? build(BuildContext context, InliningEntry data,
-      {bool isRowSelected = false, VoidCallback? onPressed}) {
+  Widget? build(
+    BuildContext context,
+    InliningEntry data, {
+    bool isRowSelected = false,
+    VoidCallback? onPressed,
+  }) {
     return Row(
       children: [
         for (final function in data.functions) ...[
@@ -400,7 +404,9 @@ class InliningTable extends StatelessWidget {
       keyFactory: (entry) => Key(entry.addressRange.toString()),
       columnGroups: [
         ColumnGroup.fromText(
-            title: 'Inlined Functions', range: const Range(0, 2)),
+          title: 'Inlined Functions',
+          range: const Range(0, 2),
+        ),
         if (ticks != null)
           ColumnGroup.fromText(
             title: 'Profiler Ticks',
