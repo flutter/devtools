@@ -6,7 +6,22 @@ import 'package:vm_service/vm_service.dart';
 
 import '../memory/adapted_heap_data.dart';
 import '../memory/simple_items.dart';
+import '../vm_utils.dart';
 import 'diagnostics_node.dart';
+
+/// True, if [ref] contains static or live information about references and thus
+/// makes the node expandable.
+bool isRootForReferences(GenericInstanceRef? ref) {
+  if (ref == null) return false;
+  if (ref is! ObjectReferences) {
+    return ref.heapSelection != null;
+  }
+
+  if (ref.instanceRef?.length == 0 ||
+      isPrimitiveInstanceKind(ref.instanceRef?.kind)) return false;
+
+  return ref.refNodeType.isRoot;
+}
 
 /// A generic [InstanceRef] using either format used by the [InspectorService]
 /// or Dart VM.
@@ -48,7 +63,9 @@ class ObjectReferences extends GenericInstanceRef {
     required IsolateRef super.isolateRef,
     required super.value,
     required HeapObjectSelection super.heapSelection,
-  });
+  }) {
+    if (refNodeType.isLive) assert(value != null);
+  }
 
   ObjectReferences.copyWith(
     ObjectReferences ref, {
@@ -68,6 +85,16 @@ class ObjectReferences extends GenericInstanceRef {
 
   @override
   IsolateRef get isolateRef => super.isolateRef!;
+
+  int? get childCount {
+    final result = heapSelection.countOfReferences(refNodeType.direction);
+    if (result != null) return result;
+
+    final instance = value;
+    if (instance is! InstanceRef) return null;
+
+    return instance.length;
+  }
 }
 
 enum RefNodeType {
@@ -96,4 +123,9 @@ enum RefNodeType {
   const RefNodeType([this.direction]);
 
   final RefDirection? direction;
+
+  bool get isRoot => const {refRoot, staticRefRoot, liveRefRoot}.contains(this);
+
+  bool get isLive =>
+      const {liveOutRefs, liveInRefs, liveRefRoot}.contains(this);
 }

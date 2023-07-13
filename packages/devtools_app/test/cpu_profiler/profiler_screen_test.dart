@@ -4,6 +4,8 @@
 
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/profiler/cpu_profiler.dart';
+import 'package:devtools_app/src/screens/profiler/panes/controls/cpu_profiler_controls.dart';
+import 'package:devtools_app/src/screens/profiler/profiler_status.dart';
 import 'package:devtools_app/src/service/vm_flags.dart' as vm_flags;
 import 'package:devtools_app/src/shared/ui/vm_flag_widgets.dart';
 import 'package:devtools_test/devtools_test.dart';
@@ -11,6 +13,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../test_infra/scenes/cpu_profiler/default.dart';
+import '../test_infra/scenes/scene_test_extensions.dart';
 import '../test_infra/utils/test_utils.dart';
 
 void main() {
@@ -35,20 +38,22 @@ void main() {
       }
       expect(find.byType(CpuSamplingRateDropdown), findsOneWidget);
       expect(
-        find.byKey(ProfilerScreen.recordingInstructionsKey),
+        find.byType(ProfileRecordingInstructions),
         findsOneWidget,
       );
-      expect(find.byKey(ProfilerScreen.recordingStatusKey), findsNothing);
+      expect(find.byType(RecordingStatus), findsNothing);
       expect(find.byType(CircularProgressIndicator), findsNothing);
       expect(find.byType(CpuProfiler), findsNothing);
       expect(find.byType(ModeDropdown), findsNothing);
     }
 
     Future<void> pumpProfilerScreen(WidgetTester tester) async {
-      await tester.pumpWidget(scene.build());
-      // Delay to ensure the memory profiler has collected data.
-      await tester.pumpAndSettle(const Duration(seconds: 1));
-      expect(find.byType(ProfilerScreenBody), findsOneWidget);
+      await tester.runAsync(() async {
+        await tester.pumpScene(scene);
+        // Delay to ensure the memory profiler has collected data.
+        await tester.pump(const Duration(seconds: 1));
+        expect(find.byType(ProfilerScreenBody), findsOneWidget);
+      });
     }
 
     testWidgets('builds its tab', (WidgetTester tester) async {
@@ -96,10 +101,10 @@ void main() {
         await tester.tap(find.byType(RecordButton));
         await tester.pump(const Duration(seconds: 1));
         expect(
-          find.byKey(ProfilerScreen.recordingInstructionsKey),
+          find.byType(ProfileRecordingInstructions),
           findsNothing,
         );
-        expect(find.byKey(ProfilerScreen.recordingStatusKey), findsOneWidget);
+        expect(find.byType(RecordingStatus), findsOneWidget);
         expect(find.byType(CircularProgressIndicator), findsOneWidget);
         expect(find.byType(CpuProfiler), findsNothing);
 
@@ -121,15 +126,17 @@ void main() {
       'builds for disabled profiler',
       windowSize,
       (WidgetTester tester) async {
-        await scene.fakeServiceManager.service!.setFlag(
-          vm_flags.profiler,
-          'false',
-        );
+        await tester.runAsync(() async {
+          await scene.fakeServiceManager.service!.setFlag(
+            vm_flags.profiler,
+            'false',
+          );
+        });
         await pumpProfilerScreen(tester);
 
         expect(find.byType(CpuProfilerDisabled), findsOneWidget);
         expect(
-          find.byKey(ProfilerScreen.recordingInstructionsKey),
+          find.byType(ProfileRecordingInstructions),
           findsNothing,
         );
         expect(find.byType(RecordButton), findsNothing);
@@ -137,9 +144,12 @@ void main() {
         expect(find.byType(ClearButton), findsNothing);
         expect(find.byType(CpuSamplingRateDropdown), findsNothing);
 
-        await tester.tap(find.text('Enable profiler'));
+        await tester.runAsync(() async {
+          await tester.tap(find.text('Enable profiler'));
+          // Delay to ensure the memory profiler has collected data.
+          await tester.pump(const Duration(seconds: 1));
+        });
         await tester.pumpAndSettle();
-
         verifyBaseState();
       },
     );

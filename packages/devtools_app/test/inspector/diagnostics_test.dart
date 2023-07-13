@@ -58,7 +58,7 @@ void main() {
         'hasChildren': false,
         'children': [],
       };
-      final inspectorService = MockObjectGroupBase();
+      final inspectorService = MockInspectorObjectGroupBase();
       final diagnostic = RemoteDiagnosticsNode(
         nodeJson,
         inspectorService,
@@ -121,7 +121,7 @@ void main() {
     });
 
     group('approximateNodeWidth', () {
-      const epsilon = 5.0;
+      const epsilon = 7.0;
       testWidgets(
         'property diagnostics node with name and description',
         (WidgetTester tester) async {

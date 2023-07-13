@@ -8,11 +8,12 @@ import 'package:vm_service/utils.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 import '../shared/config_specific/sse/sse_shim.dart';
+import '../shared/globals.dart';
 import 'vm_service_wrapper.dart';
 
 Future<VmServiceWrapper> _connectWithSse(
   Uri uri,
-  void onError(error),
+  void Function(Object?) onError,
   Completer<void> finishedCompleter,
 ) {
   final serviceCompleter = Completer<VmServiceWrapper>();
@@ -27,6 +28,7 @@ Future<VmServiceWrapper> _connectWithSse(
     stream,
     client.sink!.add,
     uri,
+    trackFutures: integrationTestMode,
   );
 
   unawaited(
@@ -43,7 +45,7 @@ Future<VmServiceWrapper> _connectWithSse(
 
 Future<VmServiceWrapper> _connectWithWebSocket(
   Uri uri,
-  void onError(error),
+  void Function(Object?) onError,
   Completer<void> finishedCompleter,
 ) async {
   // Map the URI (which may be Observatory web app) to a WebSocket URI for
@@ -57,6 +59,7 @@ Future<VmServiceWrapper> _connectWithWebSocket(
       ws.sink.add(message);
     },
     uri,
+    trackFutures: integrationTestMode,
   );
 
   if (ws.closeCode != null) {
@@ -113,17 +116,4 @@ Future<VmServiceWrapper> connect(Uri uri, Completer<void> finishedCompleter) {
     }
   });
   return connectedCompleter.future;
-}
-
-/// Wraps a broadcast stream as a single-subscription stream to workaround
-/// events being dropped for DOM/WebSocket broadcast streams when paused
-/// (such as in an asyncMap).
-/// https://github.com/dart-lang/sdk/issues/34656
-Stream<T> convertBroadcastToSingleSubscriber<T>(Stream<T> stream) {
-  final StreamController<T> controller = StreamController<T>();
-  late StreamSubscription<T> subscription;
-  controller.onListen =
-      () => subscription = stream.listen((T e) => controller.add(e));
-  controller.onCancel = () => unawaited(subscription.cancel());
-  return controller.stream;
 }

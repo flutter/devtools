@@ -20,6 +20,7 @@ import '../utils.dart';
 
 class CustomIcon extends StatelessWidget {
   const CustomIcon({
+    super.key,
     required this.kind,
     required this.text,
     this.isAbstract = false,
@@ -33,7 +34,7 @@ class CustomIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return SizedBox(
       width: baseIcon.width,
       height: baseIcon.height,
       child: Stack(
@@ -57,6 +58,7 @@ class CustomIcon extends StatelessWidget {
 /// An icon with one character
 class CircleIcon extends StatelessWidget {
   const CircleIcon({
+    super.key,
     required this.text,
     required this.color,
     this.textColor = const Color(0xFF231F20),
@@ -194,7 +196,7 @@ class IconKind {
 }
 
 class ColorIcon extends StatelessWidget {
-  const ColorIcon(this.color);
+  const ColorIcon(this.color, {super.key});
 
   final Color color;
 
@@ -243,7 +245,7 @@ class _ColorIconPainter extends CustomPainter {
           size.width - iconMargin,
           size.height - iconMargin,
         ),
-        Paint()..color = colorScheme.defaultBackground,
+        Paint()..color = colorScheme.background,
       )
       ..drawRect(
         Rect.fromLTRB(
@@ -271,7 +273,7 @@ class _ColorIconPainter extends CustomPainter {
         iconRect,
         Paint()
           ..style = PaintingStyle.stroke
-          ..color = colorScheme.defaultForeground,
+          ..color = colorScheme.onPrimary,
       );
   }
 
@@ -288,12 +290,13 @@ class FlutterMaterialIcons {
   FlutterMaterialIcons._();
 
   static Icon getIconForCodePoint(int charCode, ColorScheme colorScheme) {
-    return Icon(IconData(charCode), color: colorScheme.defaultForeground);
+    return Icon(IconData(charCode), color: colorScheme.onPrimary);
   }
 }
 
 class AssetImageIcon extends StatelessWidget {
   const AssetImageIcon({
+    super.key,
     required this.asset,
     double? height,
     double? width,
@@ -314,27 +317,6 @@ class AssetImageIcon extends StatelessWidget {
       height: height,
       width: width,
       fit: BoxFit.fill,
-    );
-  }
-}
-
-class ThemedImageIcon extends StatelessWidget {
-  const ThemedImageIcon({
-    required this.lightModeAsset,
-    required this.darkModeAsset,
-  });
-
-  final String lightModeAsset;
-  final String darkModeAsset;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Image(
-      image: AssetImage(theme.isDarkTheme ? darkModeAsset : lightModeAsset),
-      height: defaultIconSize,
-      width: defaultIconSize,
     );
   }
 }

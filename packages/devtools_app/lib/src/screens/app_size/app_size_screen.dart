@@ -6,8 +6,10 @@ import 'dart:async';
 
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/material.dart';
+import 'package:vm_snapshot_analysis/precompiler_trace.dart';
 
 import '../../shared/analytics/analytics.dart' as ga;
+import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/charts/treemap.dart';
 import '../../shared/common_widgets.dart';
 import '../../shared/config_specific/drag_and_drop/drag_and_drop.dart';
@@ -16,12 +18,10 @@ import '../../shared/config_specific/url/url.dart';
 import '../../shared/file_import.dart';
 import '../../shared/globals.dart';
 import '../../shared/primitives/auto_dispose.dart';
-import '../../shared/primitives/simple_items.dart';
 import '../../shared/primitives/utils.dart';
 import '../../shared/screen.dart';
 import '../../shared/split.dart';
 import '../../shared/theme.dart';
-import '../../shared/ui/icons.dart';
 import '../../shared/ui/tab.dart';
 import '../../shared/utils.dart';
 import 'app_size_controller.dart';
@@ -35,18 +35,15 @@ class AppSizeScreen extends Screen {
   AppSizeScreen()
       : super.conditional(
           id: id,
+          requiresConnection: false,
           requiresDartVm: true,
           title: ScreenMetaData.appSize.title,
-          icon: Octicons.fileZip,
+          icon: ScreenMetaData.appSize.icon,
         );
 
   static const analysisTabKey = Key('Analysis Tab');
   static const diffTabKey = Key('Diff Tab');
 
-  /// The ID (used in routing) for the tabbed app-size page.
-  ///
-  /// This must be different to the top-level appSizePageId which is also used
-  /// in routing when to ensure they have unique URLs.
   static final id = ScreenMetaData.appSize.id;
 
   @visibleForTesting
@@ -78,10 +75,10 @@ class AppSizeScreen extends Screen {
 }
 
 class AppSizeBody extends StatefulWidget {
-  const AppSizeBody();
+  const AppSizeBody({super.key});
 
   @override
-  _AppSizeBodyState createState() => _AppSizeBodyState();
+  State<AppSizeBody> createState() => _AppSizeBodyState();
 }
 
 class _AppSizeBodyState extends State<AppSizeBody>
@@ -109,7 +106,7 @@ class _AppSizeBodyState extends State<AppSizeBody>
   @override
   void initState() {
     super.initState();
-    ga.screen(AppSizeScreen.id);
+    ga.screen(gac.appSize);
     _tabController = TabController(length: tabs.length, vsync: this);
     addAutoDisposeListener(_tabController);
   }
@@ -292,13 +289,15 @@ class _AppSizeBodyState extends State<AppSizeBody>
 
   Widget _buildClearButton(Key activeTabKey) {
     return ClearButton(
+      gaScreen: gac.appSize,
+      gaSelection: gac.clear,
       onPressed: () => controller.clear(activeTabKey),
     );
   }
 }
 
 class AnalysisView extends StatefulWidget {
-  const AnalysisView();
+  const AnalysisView({super.key});
 
   // TODO(kenz): add links to documentation on how to generate these files, and
   // mention the import file button once it is hooked up to a file picker.
@@ -306,7 +305,7 @@ class AnalysisView extends StatefulWidget {
       ' size analysis file for debugging';
 
   @override
-  _AnalysisViewState createState() => _AnalysisViewState();
+  State<AnalysisView> createState() => _AnalysisViewState();
 }
 
 class _AnalysisViewState extends State<AnalysisView>
@@ -333,57 +332,25 @@ class _AnalysisViewState extends State<AnalysisView>
 
   @override
   Widget build(BuildContext context) {
+    final analysisRootLocal = analysisRoot;
     return Column(
       children: [
         Expanded(
-          child: analysisRoot != null
-              ? _buildTreemapAndTableSplitView()
-              : _buildImportFileView(),
+          child: analysisRootLocal == null
+              ? _buildImportFileView()
+              : _AppSizeView(
+                  title: _generateSingleFileHeaderText(),
+                  treemapKey: AppSizeScreen.analysisViewTreemapKey,
+                  treemapRoot: analysisRootLocal,
+                  onRootChangedCallback: controller.changeAnalysisRoot,
+                  analysisTable: AppSizeAnalysisTable(
+                    rootNode: analysisRootLocal.root,
+                    controller: controller,
+                  ),
+                  callGraphRoot: controller.analysisCallGraphRoot.value,
+                ),
         ),
       ],
-    );
-  }
-
-  Widget _buildTreemapAndTableSplitView() {
-    final analysisCallGraphRoot = controller.analysisCallGraphRoot.value;
-    return OutlineDecoration(
-      child: Column(
-        children: [
-          AreaPaneHeader(
-            title: Text(_generateSingleFileHeaderText()),
-            maxLines: 2,
-            needsTopBorder: false,
-          ),
-          Expanded(
-            child: Split(
-              axis: Axis.vertical,
-              initialFractions: const [
-                initialFractionForTreemap,
-                initialFractionForTreeTable,
-              ],
-              children: [
-                _buildTreemap(),
-                Row(
-                  children: [
-                    Flexible(
-                      child: AppSizeAnalysisTable(
-                        rootNode: analysisRoot!.root,
-                        controller: controller,
-                      ),
-                    ),
-                    if (analysisCallGraphRoot != null)
-                      Flexible(
-                        child: CallGraphWithDominators(
-                          callGraphRoot: analysisCallGraphRoot,
-                        ),
-                      ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
     );
   }
 
@@ -394,22 +361,6 @@ class _AnalysisViewState extends State<AnalysisView>
         : 'Dart AOT snapshot: ';
     output += analysisFile.displayText;
     return output;
-  }
-
-  Widget _buildTreemap() {
-    return LayoutBuilder(
-      key: AppSizeScreen.analysisViewTreemapKey,
-      builder: (context, constraints) {
-        return Treemap.fromRoot(
-          rootNode: analysisRoot,
-          levelsVisible: 2,
-          isOutermostLevel: true,
-          width: constraints.maxWidth,
-          height: constraints.maxHeight,
-          onRootChangedCallback: controller.changeAnalysisRoot,
-        );
-      },
-    );
   }
 
   Widget _buildImportFileView() {
@@ -434,6 +385,9 @@ class _AnalysisViewState extends State<AnalysisView>
                   title: 'Size analysis',
                   instructions: AnalysisView.importInstructions,
                   actionText: 'Analyze Size',
+                  gaScreen: gac.appSize,
+                  gaSelectionImport: gac.importFileSingle,
+                  gaSelectionAction: gac.analyzeSingle,
                   onAction: (jsonFile) {
                     controller.loadTreeFromJsonFile(
                       jsonFile: jsonFile,
@@ -453,7 +407,7 @@ class _AnalysisViewState extends State<AnalysisView>
 }
 
 class DiffView extends StatefulWidget {
-  const DiffView();
+  const DiffView({super.key});
 
   // TODO(kenz): add links to documentation on how to generate these files, and
   // mention the import file button once it is hooked up to a file picker.
@@ -463,7 +417,7 @@ class DiffView extends StatefulWidget {
       'snapshot or size analysis file for debugging';
 
   @override
-  _DiffViewState createState() => _DiffViewState();
+  State<DiffView> createState() => _DiffViewState();
 }
 
 class _DiffViewState extends State<DiffView>
@@ -492,54 +446,22 @@ class _DiffViewState extends State<DiffView>
 
   @override
   Widget build(BuildContext context) {
+    final diffRootLocal = diffRoot;
     return Column(
       children: [
         Expanded(
-          child: diffRoot != null
-              ? _buildTreemapAndTableSplitView()
-              : _buildImportDiffView(),
+          child: diffRootLocal == null
+              ? _buildImportDiffView()
+              : _AppSizeView(
+                  title: _generateDualFileHeaderText(),
+                  treemapKey: AppSizeScreen.diffViewTreemapKey,
+                  treemapRoot: diffRootLocal,
+                  onRootChangedCallback: controller.changeDiffRoot,
+                  analysisTable: AppSizeDiffTable(rootNode: diffRootLocal),
+                  callGraphRoot: controller.diffCallGraphRoot.value,
+                ),
         ),
       ],
-    );
-  }
-
-  Widget _buildTreemapAndTableSplitView() {
-    final diffCallGraphRoot = controller.diffCallGraphRoot.value;
-    return OutlineDecoration(
-      child: Column(
-        children: [
-          AreaPaneHeader(
-            title: Text(_generateDualFileHeaderText()),
-            maxLines: 2,
-            needsTopBorder: false,
-          ),
-          Expanded(
-            child: Split(
-              axis: Axis.vertical,
-              initialFractions: const [
-                initialFractionForTreemap,
-                initialFractionForTreeTable,
-              ],
-              children: [
-                _buildTreemap(),
-                Row(
-                  children: [
-                    Flexible(
-                      child: AppSizeDiffTable(rootNode: diffRoot!),
-                    ),
-                    if (diffCallGraphRoot != null)
-                      Flexible(
-                        child: CallGraphWithDominators(
-                          callGraphRoot: diffCallGraphRoot,
-                        ),
-                      ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
     );
   }
 
@@ -574,6 +496,10 @@ class _DiffViewState extends State<DiffView>
                   firstInstructions: DiffView.importOldInstructions,
                   secondInstructions: DiffView.importNewInstructions,
                   actionText: 'Analyze Diff',
+                  gaScreen: gac.appSize,
+                  gaSelectionImportFirst: gac.importFileDiffFirst,
+                  gaSelectionImportSecond: gac.importFileDiffSecond,
+                  gaSelectionAction: gac.analyzeDiff,
                   onAction: (oldFile, newFile, onError) =>
                       controller.loadDiffTreeFromJsonFiles(
                     oldFile: oldFile,
@@ -600,20 +526,88 @@ class _DiffViewState extends State<DiffView>
       ),
     );
   }
+}
 
-  Widget _buildTreemap() {
-    return LayoutBuilder(
-      key: AppSizeScreen.diffViewTreemapKey,
-      builder: (context, constraints) {
-        return Treemap.fromRoot(
-          rootNode: diffRoot,
-          levelsVisible: 2,
-          isOutermostLevel: true,
-          width: constraints.maxWidth,
-          height: constraints.maxHeight,
-          onRootChangedCallback: controller.changeDiffRoot,
-        );
-      },
+class _AppSizeView extends StatelessWidget {
+  const _AppSizeView({
+    required this.title,
+    required this.treemapKey,
+    required this.treemapRoot,
+    required this.onRootChangedCallback,
+    required this.analysisTable,
+    required this.callGraphRoot,
+  });
+
+  final String title;
+
+  final Key treemapKey;
+
+  final TreemapNode treemapRoot;
+
+  final Function(TreemapNode?) onRootChangedCallback;
+
+  final Widget analysisTable;
+
+  final CallGraphNode? callGraphRoot;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: intermediateSpacing),
+      child: RoundedOutlinedBorder(
+        clip: true,
+        child: Column(
+          children: [
+            AreaPaneHeader(
+              title: Text(title),
+              maxLines: 2,
+              roundedTopBorder: false,
+              includeTopBorder: false,
+            ),
+            Expanded(
+              child: Split(
+                axis: Axis.vertical,
+                initialFractions: const [
+                  initialFractionForTreemap,
+                  initialFractionForTreeTable,
+                ],
+                children: [
+                  LayoutBuilder(
+                    key: treemapKey,
+                    builder: (context, constraints) {
+                      return Treemap.fromRoot(
+                        rootNode: treemapRoot,
+                        levelsVisible: 2,
+                        isOutermostLevel: true,
+                        width: constraints.maxWidth,
+                        height: constraints.maxHeight,
+                        onRootChangedCallback: onRootChangedCallback,
+                      );
+                    },
+                  ),
+                  OutlineDecoration.onlyTop(
+                    child: Row(
+                      children: [
+                        Flexible(
+                          child: analysisTable,
+                        ),
+                        if (callGraphRoot != null)
+                          Flexible(
+                            child: OutlineDecoration.onlyLeft(
+                              child: CallGraphWithDominators(
+                                callGraphRoot: callGraphRoot!,
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

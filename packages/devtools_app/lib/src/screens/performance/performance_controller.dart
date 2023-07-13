@@ -6,12 +6,11 @@ import 'dart:async';
 
 import 'package:vm_service/vm_service.dart';
 
-import '../../shared/config_specific/import_export/import_export.dart';
 import '../../shared/diagnostics/inspector_service.dart';
 import '../../shared/feature_flags.dart';
 import '../../shared/globals.dart';
+import '../../shared/offline_mode.dart';
 import '../../shared/primitives/auto_dispose.dart';
-import '../../shared/utils.dart';
 import 'panes/controls/enhance_tracing/enhance_tracing_controller.dart';
 import 'panes/flutter_frames/flutter_frame_model.dart';
 import 'panes/flutter_frames/flutter_frames_controller.dart';
@@ -72,8 +71,6 @@ class PerformanceController extends DisposableController
 
   final enhanceTracingController = EnhanceTracingController();
 
-  final _exportController = ExportController();
-
   /// Active timeline data.
   ///
   /// This is the true source of data for the UI. In the case of an offline
@@ -105,6 +102,8 @@ class PerformanceController extends DisposableController
 
   Future<void> _initHelper() async {
     initData();
+    initReviewHistoryOnDisconnectListener();
+
     await _applyToFeatureControllersAsync((c) => c.init());
     if (!offlineController.offlineMode.value) {
       await serviceManager.onServiceAvailable;
@@ -210,7 +209,7 @@ class PerformanceController extends DisposableController
   Future<void> _applyToFeatureControllersAsync(
     FutureOr<void> Function(PerformanceFeatureController) callback,
   ) async {
-    Future<void> _helper(
+    Future<void> helper(
       FutureOr<void> Function(PerformanceFeatureController) futureOr,
       PerformanceFeatureController controller,
     ) async {
@@ -219,7 +218,7 @@ class PerformanceController extends DisposableController
 
     final futures = <Future<void>>[];
     for (final controller in _featureControllers) {
-      futures.add(_helper(callback, controller));
+      futures.add(helper(callback, controller));
     }
     await Future.wait(futures);
   }
@@ -232,24 +231,6 @@ class PerformanceController extends DisposableController
         featureController != null && c == featureController,
       ),
     );
-  }
-
-  @override
-  FutureOr<void> processOfflineData(OfflinePerformanceData offlineData) async {
-    await clearData();
-    offlinePerformanceData = offlineData.shallowClone();
-    data = offlineData.shallowClone();
-
-    await _applyToFeatureControllersAsync(
-      (c) => c.setOfflineData(offlinePerformanceData!),
-    );
-  }
-
-  /// Exports the current performance screen data to a .json file.
-  void exportData() {
-    final encodedData =
-        _exportController.encode(PerformanceScreen.id, data!.toJson());
-    _exportController.downloadFile(encodedData);
   }
 
   /// Clears the timeline data currently stored by the controller as well the
@@ -269,6 +250,21 @@ class PerformanceController extends DisposableController
     _applyToFeatureControllers((c) => c.dispose());
     enhanceTracingController.dispose();
     super.dispose();
+  }
+
+  @override
+  OfflineScreenData screenDataForExport() =>
+      OfflineScreenData(screenId: PerformanceScreen.id, data: data!.toJson());
+
+  @override
+  FutureOr<void> processOfflineData(OfflinePerformanceData offlineData) async {
+    await clearData();
+    offlinePerformanceData = offlineData.shallowClone();
+    data = offlineData.shallowClone();
+
+    await _applyToFeatureControllersAsync(
+      (c) => c.setOfflineData(offlinePerformanceData!),
+    );
   }
 }
 

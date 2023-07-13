@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be found
 // in the LICENSE file.
 
+// ignore: avoid_web_libraries_in_flutter, as designed
 import 'dart:html';
 
 class HostPlatform {
@@ -9,7 +10,7 @@ class HostPlatform {
     _isMacOS = window.navigator.userAgent.contains('Macintosh');
   }
 
-  static late final HostPlatform instance = HostPlatform._();
+  static final HostPlatform instance = HostPlatform._();
 
   late final bool _isMacOS;
 

@@ -109,7 +109,7 @@ class _SplitState extends State<Split> {
     final availableSize = axisSize - _totalSplitterSize();
 
     // Size calculation helpers.
-    double _minSizeForIndex(int index) {
+    double minSizeForIndex(int index) {
       if (widget.minSizes == null) return 0.0;
 
       double totalMinSize = 0;
@@ -124,21 +124,21 @@ class _SplitState extends State<Split> {
           : widget.minSizes![index];
     }
 
-    double _minFractionForIndex(int index) =>
-        _minSizeForIndex(index) / availableSize;
+    double minFractionForIndex(int index) =>
+        minSizeForIndex(index) / availableSize;
 
-    void _clampFraction(int index) {
+    void clampFraction(int index) {
       fractions[index] =
-          fractions[index].clamp(_minFractionForIndex(index), 1.0);
+          fractions[index].clamp(minFractionForIndex(index), 1.0);
     }
 
-    double _sizeForIndex(int index) => availableSize * fractions[index];
+    double sizeForIndex(int index) => availableSize * fractions[index];
 
     double fractionDeltaRequired = 0.0;
     double fractionDeltaAvailable = 0.0;
 
     double deltaFromMinimumSize(int index) =>
-        fractions[index] - _minFractionForIndex(index);
+        fractions[index] - minFractionForIndex(index);
 
     for (int i = 0; i < fractions.length; ++i) {
       final delta = deltaFromMinimumSize(i);
@@ -161,7 +161,7 @@ class _SplitState extends State<Split> {
         final delta = deltaFromMinimumSize(i);
         if (delta < 0) {
           // This is equivalent to adding delta but avoids rounding error.
-          fractions[i] = _minFractionForIndex(i);
+          fractions[i] = minFractionForIndex(i);
         } else {
           // Reduce all fractions that are above their minimum size by an amount
           // proportional to their ability to reduce their size without
@@ -173,7 +173,7 @@ class _SplitState extends State<Split> {
 
     // Determine what fraction to give each child, including enough space to
     // display the divider.
-    final sizes = List.generate(fractions.length, (i) => _sizeForIndex(i));
+    final sizes = List.generate(fractions.length, (i) => sizeForIndex(i));
 
     void updateSpacing(DragUpdateDetails dragDetails, int splitterIndex) {
       final dragDelta =
@@ -186,13 +186,13 @@ class _SplitState extends State<Split> {
         var index = splitterIndex;
         while (index >= 0) {
           fractions[index] += delta;
-          final minFractionForIndex = _minFractionForIndex(index);
-          if (fractions[index] >= minFractionForIndex) {
-            _clampFraction(index);
+          final minFraction = minFractionForIndex(index);
+          if (fractions[index] >= minFraction) {
+            clampFraction(index);
             return startingDelta;
           }
-          delta = fractions[index] - minFractionForIndex;
-          _clampFraction(index);
+          delta = fractions[index] - minFraction;
+          clampFraction(index);
           index--;
         }
         // At this point, we know that both [startingDelta] and [delta] are
@@ -207,13 +207,13 @@ class _SplitState extends State<Split> {
         var index = splitterIndex + 1;
         while (index < fractions.length) {
           fractions[index] += delta;
-          final minFractionForIndex = _minFractionForIndex(index);
-          if (fractions[index] >= minFractionForIndex) {
-            _clampFraction(index);
+          final minFraction = minFractionForIndex(index);
+          if (fractions[index] >= minFraction) {
+            clampFraction(index);
             return startingDelta;
           }
-          delta = fractions[index] - minFractionForIndex;
-          _clampFraction(index);
+          delta = fractions[index] - minFraction;
+          clampFraction(index);
           index++;
         }
         // At this point, we know that both [startingDelta] and [delta] are
@@ -294,7 +294,7 @@ class _SplitState extends State<Split> {
 }
 
 class DefaultSplitter extends StatelessWidget {
-  const DefaultSplitter({required this.isHorizontal});
+  const DefaultSplitter({super.key, required this.isHorizontal});
 
   static const double iconSize = 24.0;
   static const double splitterWidth = 12.0;

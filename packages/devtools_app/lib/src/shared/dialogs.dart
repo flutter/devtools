@@ -2,12 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:pointer_interceptor/pointer_interceptor.dart';
 
+import '../shared/config_specific/launch_url/launch_url.dart';
 import 'common_widgets.dart';
+import 'globals.dart';
 import 'theme.dart';
 import 'ui/label.dart';
+import 'utils.dart';
 
 const dialogDefaultContext = 'dialog';
 
@@ -33,6 +38,51 @@ final dialogTextFieldDecoration = InputDecoration(
     borderRadius: BorderRadius.circular(defaultBorderRadius),
   ),
 );
+
+/// A dialog, that reports unexpected error and allows to copy details and create issue.
+class UnexpectedErrorDialog extends StatelessWidget {
+  const UnexpectedErrorDialog({
+    super.key,
+    required this.additionalInfo,
+  });
+
+  final String additionalInfo;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return DevToolsDialog(
+      title: const Text('Unexpected Error'),
+      content: Text(
+        additionalInfo,
+        style: theme.fixedFontStyle,
+      ),
+      actions: [
+        DialogTextButton(
+          child: const Text('Copy details'),
+          onPressed: () => unawaited(
+            copyToClipboard(
+              additionalInfo,
+              'Error details copied to clipboard',
+            ),
+          ),
+        ),
+        DialogTextButton(
+          child: const Text('Create issue'),
+          onPressed: () => unawaited(
+            launchUrl(
+              devToolsExtensionPoints
+                  .issueTrackerLink(additionalInfo: additionalInfo)
+                  .url,
+            ),
+          ),
+        ),
+        const DialogCloseButton(),
+      ],
+    );
+  }
+}
 
 /// A standardized dialog with help text and buttons `Reset to default`,
 /// `APPLY` and `CANCEL`.
@@ -84,7 +134,7 @@ class StateUpdateDialog extends StatelessWidget {
             if (helpBuilder != null) ...[
               const SizedBox(height: defaultSpacing),
               helpBuilder!.call(context),
-            ]
+            ],
           ],
         ),
       ),
@@ -123,7 +173,8 @@ class _StateUpdateDialogTitle extends StatelessWidget {
 class DialogHelpText extends StatelessWidget {
   const DialogHelpText({super.key, required this.helpText});
 
-  static TextStyle? textStyle(context) => Theme.of(context).subtleTextStyle;
+  static TextStyle? textStyle(BuildContext context) =>
+      Theme.of(context).subtleTextStyle;
 
   final String helpText;
 
@@ -141,11 +192,13 @@ class DialogHelpText extends StatelessWidget {
 /// It normalizes dialog layout, spacing, and look and feel.
 class DevToolsDialog extends StatelessWidget {
   const DevToolsDialog({
+    super.key,
     Widget? title,
     required this.content,
     this.includeDivider = true,
     this.scrollable = true,
     this.actions,
+    this.actionsAlignment,
   }) : titleContent = title ?? const SizedBox();
 
   static const contentPadding = 24.0;
@@ -155,6 +208,7 @@ class DevToolsDialog extends StatelessWidget {
   final bool includeDivider;
   final bool scrollable;
   final List<Widget>? actions;
+  final MainAxisAlignment? actionsAlignment;
 
   @override
   Widget build(BuildContext context) {
@@ -179,6 +233,7 @@ class DevToolsDialog extends StatelessWidget {
         ),
         content: content,
         actions: actions,
+        actionsAlignment: actionsAlignment,
         buttonPadding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
       ),
     );
@@ -206,7 +261,7 @@ class DialogCloseButton extends StatelessWidget {
 
 /// A TextButton used to close a containing dialog (Cancel).
 class DialogCancelButton extends StatelessWidget {
-  const DialogCancelButton({this.cancelAction}) : super();
+  const DialogCancelButton({super.key, this.cancelAction});
 
   final VoidCallback? cancelAction;
 
@@ -224,7 +279,7 @@ class DialogCancelButton extends StatelessWidget {
 
 /// A TextButton used to close a containing dialog (APPLY).
 class DialogApplyButton extends StatelessWidget {
-  const DialogApplyButton({required this.onPressed}) : super();
+  const DialogApplyButton({super.key, required this.onPressed});
 
   final Function onPressed;
 
@@ -241,7 +296,7 @@ class DialogApplyButton extends StatelessWidget {
 }
 
 class DialogTextButton extends StatelessWidget {
-  const DialogTextButton({this.onPressed, required this.child});
+  const DialogTextButton({super.key, this.onPressed, required this.child});
 
   final VoidCallback? onPressed;
 
@@ -249,12 +304,9 @@ class DialogTextButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: defaultButtonHeight,
-      child: TextButton(
-        onPressed: onPressed,
-        child: child,
-      ),
+    return TextButton(
+      onPressed: onPressed,
+      child: child,
     );
   }
 }

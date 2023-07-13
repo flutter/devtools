@@ -17,7 +17,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   group(LinkedScrollControllerGroup, () {
     testWidgets('letters drive numbers - fling', (tester) async {
-      await tester.pumpWidget(Test());
+      await tester.pumpWidget(const Test());
       expect(find.text('Hello A'), findsOneWidget);
       expect(find.text('Hello 1'), findsOneWidget);
       expect(find.text('Hello E'), findsNothing);
@@ -45,7 +45,7 @@ void main() {
     });
 
     testWidgets('letters drive numbers - drag', (tester) async {
-      await tester.pumpWidget(Test());
+      await tester.pumpWidget(const Test());
       expect(find.text('Hello A'), findsOneWidget);
       expect(find.text('Hello 1'), findsOneWidget);
       expect(find.text('Hello B'), findsOneWidget);
@@ -83,7 +83,7 @@ void main() {
     });
 
     testWidgets('numbers drive letters - fling', (tester) async {
-      await tester.pumpWidget(Test());
+      await tester.pumpWidget(const Test());
       expect(find.text('Hello A'), findsOneWidget);
       expect(find.text('Hello 1'), findsOneWidget);
       expect(find.text('Hello E'), findsNothing);
@@ -111,7 +111,7 @@ void main() {
     });
 
     testWidgets('numbers drive letters - drag', (tester) async {
-      await tester.pumpWidget(Test());
+      await tester.pumpWidget(const Test());
       expect(find.text('Hello A'), findsOneWidget);
       expect(find.text('Hello 1'), findsOneWidget);
       expect(find.text('Hello B'), findsOneWidget);
@@ -149,7 +149,7 @@ void main() {
     });
 
     testWidgets('offset throws for empty group', (tester) async {
-      await tester.pumpWidget(TestEmptyGroup());
+      await tester.pumpWidget(const TestEmptyGroup());
 
       final state =
           tester.state<TestEmptyGroupState>(find.byType(TestEmptyGroup));
@@ -162,7 +162,7 @@ void main() {
     });
 
     testWidgets('offset returns current position', (tester) async {
-      await tester.pumpWidget(Test());
+      await tester.pumpWidget(const Test());
 
       final state = tester.state<TestState>(find.byType(Test));
       expect(state._controllers.offset, equals(0.0));
@@ -179,7 +179,7 @@ void main() {
     });
 
     testWidgets('onOffsetChanged fires on scroll', (tester) async {
-      await tester.pumpWidget(Test());
+      await tester.pumpWidget(const Test());
       final state = tester.state<TestState>(find.byType(Test));
 
       var onOffsetChangedCount = 0;
@@ -220,7 +220,7 @@ void main() {
     });
 
     testWidgets('jumpTo jumps group to offset', (tester) async {
-      await tester.pumpWidget(Test());
+      await tester.pumpWidget(const Test());
 
       final state = tester.state<TestState>(find.byType(Test));
       expect(state._controllers.offset, equals(0.0));
@@ -235,7 +235,7 @@ void main() {
     });
 
     testWidgets('animateTo animates group to offset', (tester) async {
-      await tester.pumpWidget(Test());
+      await tester.pumpWidget(const Test());
 
       final state = tester.state<TestState>(find.byType(Test));
       expect(state._controllers.offset, equals(0.0));
@@ -260,7 +260,7 @@ void main() {
     });
 
     testWidgets('resetScroll moves scroll back to 0', (tester) async {
-      await tester.pumpWidget(Test());
+      await tester.pumpWidget(const Test());
 
       await tester.drag(find.text('Hello 2'), const Offset(0.0, -300.0));
       await tester.pumpAndSettle();
@@ -273,7 +273,7 @@ void main() {
     });
 
     testWidgets('jumpTo is synced', (tester) async {
-      await tester.pumpWidget(Test());
+      await tester.pumpWidget(const Test());
       final state = tester.state<TestState>(find.byType(Test));
 
       expect(state._letters.position.pixels, 0.0);
@@ -287,24 +287,32 @@ void main() {
       expect(state._numbers.position.pixels, 100.0);
     });
 
-    testWidgets('tap on another scrollable during fling stops scrolling',
-        (tester) async {
-      await tester.pumpWidget(Test());
-      final state = tester.state<TestState>(find.byType(Test));
+    testWidgets(
+      'tap on another scrollable during fling stops scrolling',
+      (tester) async {
+        await tester.pumpWidget(const Test());
+        final state = tester.state<TestState>(find.byType(Test));
 
-      await tester.fling(find.text('Hello A'), const Offset(0.0, -50.0), 500.0);
-      await tester.tap(find.text('Hello 1'));
+        await tester.fling(
+          find.text('Hello A'),
+          const Offset(0.0, -50.0),
+          500.0,
+        );
+        await tester.tap(find.text('Hello 1'));
 
-      await tester.pumpAndSettle();
+        await tester.pumpAndSettle();
 
-      // Position would be about 100 if the scroll were not stopped by the tap.
-      expect(state._letters.position.pixels, 50.0);
-      expect(state._numbers.position.pixels, 50.0);
-    });
+        // Position would be about 100 if the scroll were not stopped by the tap.
+        expect(state._letters.position.pixels, 50.0);
+        expect(state._numbers.position.pixels, 50.0);
+      },
+    );
   });
 }
 
 class TestEmptyGroup extends StatefulWidget {
+  const TestEmptyGroup({super.key});
+
   @override
   TestEmptyGroupState createState() => TestEmptyGroupState();
 }
@@ -325,6 +333,8 @@ class TestEmptyGroupState extends State<TestEmptyGroup> {
 }
 
 class Test extends StatefulWidget {
+  const Test({super.key});
+
   @override
   TestState createState() => TestState();
 }
@@ -379,12 +389,12 @@ class TestState extends State<Test> {
 }
 
 class Tile extends StatelessWidget {
-  const Tile(this.caption);
+  const Tile(this.caption, {super.key});
 
   final String caption;
 
   @override
-  Widget build(_) => Container(
+  Widget build(BuildContext _) => Container(
         margin: const EdgeInsets.all(8.0),
         padding: const EdgeInsets.all(8.0),
         height: 250.0,

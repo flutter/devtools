@@ -6,10 +6,13 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
+import 'package:logging/logging.dart';
 
 import '../service/vm_service_wrapper.dart';
 import 'analytics/analytics.dart' as ga;
 import 'analytics/constants.dart' as gac;
+import 'config_specific/logger/logger_helpers.dart';
+import 'constants.dart';
 import 'diagnostics/inspector_service.dart';
 import 'globals.dart';
 import 'primitives/auto_dispose.dart';
@@ -18,15 +21,15 @@ import 'primitives/utils.dart';
 /// A controller for global application preferences.
 class PreferencesController extends DisposableController
     with AutoDisposeControllerMixin {
-  ValueListenable<bool> get darkModeTheme => _darkModeTheme;
-  final _darkModeTheme =
-      ValueNotifier<bool>(devToolsExtensionPoints.defaultIsDarkTheme);
+  final darkModeTheme = ValueNotifier<bool>(true);
 
-  ValueListenable<bool> get vmDeveloperModeEnabled => _vmDeveloperMode;
-  final _vmDeveloperMode = ValueNotifier<bool>(false);
+  final vmDeveloperModeEnabled = ValueNotifier<bool>(false);
 
-  ValueListenable<bool> get denseModeEnabled => _denseMode;
-  final _denseMode = ValueNotifier<bool>(false);
+  final verboseLoggingEnabled =
+      ValueNotifier<bool>(Logger.root.level == verboseLoggingLevel);
+  static const _verboseLoggingStorageId = 'verboseLogging';
+
+  final denseModeEnabled = ValueNotifier<bool>(false);
 
   InspectorPreferencesController get inspector => _inspector;
   final _inspector = InspectorPreferencesController();
@@ -34,60 +37,98 @@ class PreferencesController extends DisposableController
   MemoryPreferencesController get memory => _memory;
   final _memory = MemoryPreferencesController();
 
+  PerformancePreferencesController get performance => _performance;
+  final _performance = PerformancePreferencesController();
+
   CpuProfilerPreferencesController get cpuProfiler => _cpuProfiler;
   final _cpuProfiler = CpuProfilerPreferencesController();
 
   Future<void> init() async {
     // Get the current values and listen for and write back changes.
     String? value = await storage.getValue('ui.darkMode');
-    final useDarkMode = value == null
-        ? devToolsExtensionPoints.defaultIsDarkTheme
-        : value == 'true';
+    final useDarkMode = value == null || value == 'true';
     toggleDarkModeTheme(useDarkMode);
-    addAutoDisposeListener(_darkModeTheme, () {
-      storage.setValue('ui.darkMode', '${_darkModeTheme.value}');
+    addAutoDisposeListener(darkModeTheme, () {
+      storage.setValue('ui.darkMode', '${darkModeTheme.value}');
     });
 
     value = await storage.getValue('ui.vmDeveloperMode');
     toggleVmDeveloperMode(value == 'true');
-    addAutoDisposeListener(_vmDeveloperMode, () {
-      storage.setValue('ui.vmDeveloperMode', '${_vmDeveloperMode.value}');
+    addAutoDisposeListener(vmDeveloperModeEnabled, () {
+      storage.setValue('ui.vmDeveloperMode', '${vmDeveloperModeEnabled.value}');
     });
 
     value = await storage.getValue('ui.denseMode');
     toggleDenseMode(value == 'true');
-    addAutoDisposeListener(_denseMode, () {
-      storage.setValue('ui.denseMode', '${_denseMode.value}');
+    addAutoDisposeListener(denseModeEnabled, () {
+      storage.setValue('ui.denseMode', '${denseModeEnabled.value}');
     });
+
+    await _initVerboseLogging();
 
     await inspector.init();
     await memory.init();
+    await performance.init();
     await cpuProfiler.init();
 
     setGlobal(PreferencesController, this);
+  }
+
+  Future<void> _initVerboseLogging() async {
+    final verboseLoggingEnabledValue =
+        await storage.getValue(_verboseLoggingStorageId);
+
+    toggleVerboseLogging(verboseLoggingEnabledValue == 'true');
+
+    addAutoDisposeListener(verboseLoggingEnabled, () {
+      storage.setValue(
+        'verboseLogging',
+        verboseLoggingEnabled.value.toString(),
+      );
+
+      if (verboseLoggingEnabled.value) {
+        setDevToolsLoggingLevel(verboseLoggingLevel);
+      } else {
+        setDevToolsLoggingLevel(basicLoggingLevel);
+      }
+    });
   }
 
   @override
   void dispose() {
     inspector.dispose();
     memory.dispose();
+    performance.dispose();
+    cpuProfiler.dispose();
     super.dispose();
   }
 
   /// Change the value for the dark mode setting.
-  void toggleDarkModeTheme(bool useDarkMode) {
-    _darkModeTheme.value = useDarkMode;
+  void toggleDarkModeTheme(bool? useDarkMode) {
+    if (useDarkMode != null) {
+      darkModeTheme.value = useDarkMode;
+    }
   }
 
   /// Change the value for the VM developer mode setting.
-  void toggleVmDeveloperMode(bool enableVmDeveloperMode) {
-    _vmDeveloperMode.value = enableVmDeveloperMode;
-    VmServiceWrapper.enablePrivateRpcs = enableVmDeveloperMode;
+  void toggleVmDeveloperMode(bool? enableVmDeveloperMode) {
+    if (enableVmDeveloperMode != null) {
+      vmDeveloperModeEnabled.value = enableVmDeveloperMode;
+      VmServiceWrapper.enablePrivateRpcs = enableVmDeveloperMode;
+    }
+  }
+
+  void toggleVerboseLogging(bool? enableVerboseLogging) {
+    if (enableVerboseLogging != null) {
+      verboseLoggingEnabled.value = enableVerboseLogging;
+    }
   }
 
   /// Change the value for the dense mode setting.
-  void toggleDenseMode(bool enableDenseMode) {
-    _denseMode.value = enableDenseMode;
+  void toggleDenseMode(bool? enableDenseMode) {
+    if (enableDenseMode != null) {
+      denseModeEnabled.value = enableDenseMode;
+    }
   }
 }
 
@@ -98,8 +139,8 @@ class InspectorPreferencesController extends DisposableController
       _customPubRootDirectories;
   ValueListenable<bool> get isRefreshingCustomPubRootDirectories =>
       _customPubRootDirectoriesAreBusy;
-  InspectorService? get _inspectorService =>
-      serviceManager.inspectorService as InspectorService?;
+  InspectorServiceBase? get _inspectorService =>
+      serviceManager.inspectorService;
 
   final _hoverEvalMode = ValueNotifier<bool>(false);
   final _customPubRootDirectories = ListValueNotifier<String>([]);
@@ -129,12 +170,7 @@ class InspectorPreferencesController extends DisposableController
   }
 
   Future<void> _initHoverEvalMode() async {
-    String? hoverEvalModeEnabledValue =
-        await storage.getValue(_hoverEvalModeStorageId);
-
-    // When embedded, default hoverEvalMode to off
-    hoverEvalModeEnabledValue ??= (!ideTheme.embed).toString();
-    setHoverEvalMode(hoverEvalModeEnabledValue == 'true');
+    await _updateHoverEvalMode();
 
     addAutoDisposeListener(_hoverEvalMode, () {
       storage.setValue(
@@ -142,6 +178,15 @@ class InspectorPreferencesController extends DisposableController
         _hoverEvalMode.value.toString(),
       );
     });
+  }
+
+  Future<void> _updateHoverEvalMode() async {
+    String? hoverEvalModeEnabledValue =
+        await storage.getValue(_hoverEvalModeStorageId);
+
+    hoverEvalModeEnabledValue ??=
+        (_inspectorService?.hoverEvalModeEnabledByDefault ?? false).toString();
+    setHoverEvalMode(hoverEvalModeEnabledValue == 'true');
   }
 
   void _initCustomPubRootDirectories() {
@@ -192,17 +237,21 @@ class InspectorPreferencesController extends DisposableController
 
   Future<void> _handleConnectionToNewService(VmServiceWrapper _) async {
     await _updateMainScriptRef();
+    await _updateHoverEvalMode();
 
-    _customPubRootDirectories.clear();
-    await loadCustomPubRootDirectories();
+    final localInspectorService = _inspectorService;
+    if (localInspectorService is InspectorService) {
+      _customPubRootDirectories.clear();
+      await loadCustomPubRootDirectories();
 
-    if (_customPubRootDirectories.value.isEmpty) {
-      // If there are no pub root directories set on the first connection
-      // then try inferring them.
-      await _customPubRootDirectoryBusyTracker(() async {
-        await _inspectorService?.inferPubRootDirectoryIfNeeded();
-        await loadCustomPubRootDirectories();
-      });
+      if (_customPubRootDirectories.value.isEmpty) {
+        // If there are no pub root directories set on the first connection
+        // then try inferring them.
+        await _customPubRootDirectoryBusyTracker(() async {
+          await localInspectorService.inferPubRootDirectoryIfNeeded();
+          await loadCustomPubRootDirectories();
+        });
+      }
     }
   }
 
@@ -227,10 +276,10 @@ class InspectorPreferencesController extends DisposableController
 
     if (!serviceManager.hasConnection) return;
     await _customPubRootDirectoryBusyTracker(() async {
-      final inspectorService = _inspectorService;
-      if (inspectorService == null) return;
+      final localInspectorService = _inspectorService;
+      if (localInspectorService is! InspectorService) return;
 
-      await inspectorService.addPubRootDirectories(pubRootDirectories);
+      await localInspectorService.addPubRootDirectories(pubRootDirectories);
       await _refreshPubRootDirectoriesFromService();
     });
   }
@@ -241,7 +290,7 @@ class InspectorPreferencesController extends DisposableController
     if (!serviceManager.hasConnection) return;
     await _customPubRootDirectoryBusyTracker(() async {
       final localInspectorService = _inspectorService;
-      if (localInspectorService == null) return;
+      if (localInspectorService is! InspectorService) return;
 
       await localInspectorService.removePubRootDirectories(pubRootDirectories);
       await _refreshPubRootDirectoriesFromService();
@@ -251,7 +300,7 @@ class InspectorPreferencesController extends DisposableController
   Future<void> _refreshPubRootDirectoriesFromService() async {
     await _customPubRootDirectoryBusyTracker(() async {
       final localInspectorService = _inspectorService;
-      if (localInspectorService == null) return;
+      if (localInspectorService is! InspectorService) return;
 
       final freshPubRootDirectories =
           await localInspectorService.getPubRootDirectories();
@@ -390,8 +439,8 @@ class CpuProfilerPreferencesController extends DisposableController
     with AutoDisposeControllerMixin {
   final displayTreeGuidelines = ValueNotifier<bool>(false);
 
-  static final _displayTreeGuidelinesId =
-      '${gac.cpuProfiler}.${gac.cpuProfileDisplayTreeGuidelines}';
+  static final _displayTreeGuidelinesId = '${gac.cpuProfiler}.'
+      '${gac.CpuProfilerEvents.cpuProfileDisplayTreeGuidelines.name}';
 
   Future<void> init() async {
     addAutoDisposeListener(
@@ -403,12 +452,39 @@ class CpuProfilerPreferencesController extends DisposableController
         );
         ga.select(
           gac.cpuProfiler,
-          gac.cpuProfileDisplayTreeGuidelines,
+          gac.CpuProfilerEvents.cpuProfileDisplayTreeGuidelines.name,
           value: displayTreeGuidelines.value ? 1 : 0,
         );
       },
     );
     displayTreeGuidelines.value =
         await storage.getValue(_displayTreeGuidelinesId) == 'true';
+  }
+}
+
+class PerformancePreferencesController extends DisposableController
+    with AutoDisposeControllerMixin {
+  final showFlutterFramesChart = ValueNotifier<bool>(true);
+
+  static final _showFlutterFramesChartId =
+      '${gac.performance}.${gac.PerformanceEvents.framesChartVisibility.name}';
+
+  Future<void> init() async {
+    addAutoDisposeListener(
+      showFlutterFramesChart,
+      () {
+        storage.setValue(
+          _showFlutterFramesChartId,
+          showFlutterFramesChart.value.toString(),
+        );
+        ga.select(
+          gac.performance,
+          gac.PerformanceEvents.framesChartVisibility.name,
+          value: showFlutterFramesChart.value ? 1 : 0,
+        );
+      },
+    );
+    showFlutterFramesChart.value =
+        await storage.getValue(_showFlutterFramesChartId) != 'false';
   }
 }

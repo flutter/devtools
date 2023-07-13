@@ -2,10 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/app_size/code_size_attribution.dart';
-import 'package:devtools_app/src/service/service_manager.dart';
-import 'package:devtools_app/src/shared/config_specific/ide_theme/ide_theme.dart';
-import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_app/src/shared/table/table.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
@@ -20,6 +18,8 @@ void main() {
 
   setUp(() {
     setGlobal(ServiceConnectionManager, FakeServiceManager());
+    setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
+    setGlobal(PreferencesController, PreferencesController());
     setGlobal(IdeTheme, IdeTheme());
     callGraph = generateCallGraphWithDominators(
       precompilerTrace,
@@ -29,7 +29,7 @@ void main() {
 
   group('CallGraphWithDominators', () {
     late CallGraphWithDominators callGraphWithDominators;
-    setUp(() async {
+    setUp(() {
       callGraphWithDominators = CallGraphWithDominators(
         callGraphRoot: callGraph.root,
       );
@@ -82,22 +82,21 @@ void main() {
     testWidgets('builds content for root', (WidgetTester tester) async {
       await tester.pumpWidget(wrap(callGraphView));
 
-      expect(find.byKey(CallGraphView.fromTableKey), findsOneWidget);
-      expect(find.byKey(CallGraphView.toTableKey), findsOneWidget);
+      expect(find.byType(FlatTable<CallGraphNode>), findsNWidgets(2));
       expect(find.text('From'), findsOneWidget);
       expect(find.text('To'), findsOneWidget);
 
       final fromTable = find
-          .byKey(CallGraphView.fromTableKey)
+          .byType(FlatTable<CallGraphNode>)
           .evaluate()
           .first
           .widget as FlatTable;
       expect(fromTable.data, isEmpty);
 
       final toTable = find
-          .byKey(CallGraphView.toTableKey)
+          .byType(FlatTable<CallGraphNode>)
           .evaluate()
-          .first
+          .last
           .widget as FlatTable;
       expect(toTable.data.length, equals(17));
     });
@@ -105,19 +104,18 @@ void main() {
     testWidgets('re-roots on selection', (WidgetTester tester) async {
       await tester.pumpWidget(wrap(callGraphView));
 
-      expect(find.byKey(CallGraphView.fromTableKey), findsOneWidget);
-      expect(find.byKey(CallGraphView.toTableKey), findsOneWidget);
+      expect(find.byType(FlatTable<CallGraphNode>), findsNWidgets(2));
       expect(find.text('From'), findsOneWidget);
       expect(find.text('To'), findsOneWidget);
 
       var fromTable = find
-          .byKey(CallGraphView.fromTableKey)
+          .byType(FlatTable<CallGraphNode>)
           .evaluate()
           .first
           .widget as FlatTable;
       expect(fromTable.data, isEmpty);
 
-      var toTable = find.byKey(CallGraphView.toTableKey).evaluate().first.widget
+      var toTable = find.byType(FlatTable<CallGraphNode>).evaluate().last.widget
           as FlatTable;
       expect(toTable.data.length, equals(17));
 
@@ -125,11 +123,11 @@ void main() {
       await tester.tap(find.richText('dart:math'));
       await tester.pumpAndSettle();
 
-      fromTable = find.byKey(CallGraphView.fromTableKey).evaluate().first.widget
+      fromTable = find.byType(FlatTable<CallGraphNode>).evaluate().first.widget
           as FlatTable;
       expect(fromTable.data.length, equals(3));
 
-      toTable = find.byKey(CallGraphView.toTableKey).evaluate().first.widget
+      toTable = find.byType(FlatTable<CallGraphNode>).evaluate().last.widget
           as FlatTable;
       expect(toTable.data.length, equals(1));
     });

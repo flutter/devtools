@@ -22,6 +22,8 @@ void main() {
     setUp(() {
       setUpMockScriptManager();
       setGlobal(IdeTheme, IdeTheme());
+      setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
+      setGlobal(PreferencesController, PreferencesController());
 
       mockObjectPool = MockObjectPoolObject();
 
@@ -73,48 +75,52 @@ void main() {
       when(mockObjectPool.reachableSize).thenReturn(null);
     });
 
-    testWidgetsWithWindowSize('displays object pool entries', windowSize,
-        (WidgetTester tester) async {
-      await tester.pumpWidget(
-        wrap(
-          VmObjectPoolDisplay(
-            objectPool: mockObjectPool,
-            controller: ObjectInspectorViewController(),
+    testWidgetsWithWindowSize(
+      'displays object pool entries',
+      windowSize,
+      (WidgetTester tester) async {
+        await tester.pumpWidget(
+          wrap(
+            VmObjectPoolDisplay(
+              objectPool: mockObjectPool,
+              controller: ObjectInspectorViewController(),
+            ),
           ),
-        ),
-      );
-
-      expect(find.byType(VmObjectDisplayBasicLayout), findsOneWidget);
-      expect(find.byType(VMInfoCard), findsOneWidget);
-      expect(find.text('General Information'), findsOneWidget);
-      expect(find.text('ObjectPool'), findsOneWidget);
-      expect(find.text('Shallow Size:'), findsOneWidget);
-      expect(find.text('0 B'), findsOneWidget);
-      expect(find.text('Reachable Size:'), findsOneWidget);
-      expect(find.text('Retained Size:'), findsOneWidget);
-
-      expect(find.byType(RetainingPathWidget), findsOneWidget);
-      expect(find.byType(InboundReferencesWidget), findsOneWidget);
-
-      expect(find.byType(ObjectPoolTable), findsOneWidget);
-
-      for (final entry in mockObjectPool.obj.entries) {
-        // Includes the offset within the pool.
-        expect(
-          find.text(
-            '[PP + 0x${entry.offset.toRadixString(16).toUpperCase()}]',
-            findRichText: true,
-          ),
-          findsOneWidget,
         );
-        expect(
-          find.text(
-            VmServiceObjectLink.defaultTextBuilder(entry.value) ??
-                entry.value.toString(),
-          ),
-          findsOneWidget,
-        );
-      }
-    });
+
+        expect(find.byType(VmObjectDisplayBasicLayout), findsOneWidget);
+        expect(find.byType(VMInfoCard), findsOneWidget);
+        expect(find.text('General Information'), findsOneWidget);
+        expect(find.text('ObjectPool'), findsOneWidget);
+        expect(find.text('Shallow Size:'), findsOneWidget);
+        expect(find.text('0 B'), findsOneWidget);
+        expect(find.text('Reachable Size:'), findsOneWidget);
+        expect(find.text('Retained Size:'), findsOneWidget);
+
+        expect(find.byType(RetainingPathWidget), findsOneWidget);
+        expect(find.byType(InboundReferencesWidget), findsOneWidget);
+
+        expect(find.byType(ObjectPoolTable), findsOneWidget);
+
+        for (final entry in mockObjectPool.obj.entries) {
+          // Includes the offset within the pool.
+          expect(
+            find.text(
+              '[PP + 0x${entry.offset.toRadixString(16).toUpperCase()}]',
+              findRichText: true,
+            ),
+            findsOneWidget,
+          );
+          expect(
+            find.text(
+              VmServiceObjectLink.defaultTextBuilder(entry.value) ??
+                  entry.value.toString(),
+              findRichText: true,
+            ),
+            findsOneWidget,
+          );
+        }
+      },
+    );
   });
 }

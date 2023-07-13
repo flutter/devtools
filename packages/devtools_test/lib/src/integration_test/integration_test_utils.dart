@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:convert';
+import 'dart:ui' as ui;
 
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/main.dart' as app;
@@ -12,16 +13,88 @@ import 'package:integration_test/integration_test.dart';
 
 import 'test_data/performance.dart';
 
+const shortPumpDuration = Duration(seconds: 1);
 const safePumpDuration = Duration(seconds: 3);
 const longPumpDuration = Duration(seconds: 6);
+
+/// Required to have multiple test cases in a file.
+Future<void> resetHistory() async {
+  // ignore: avoid-dynamic, necessary here.
+  await (ui.PlatformDispatcher.instance.views.single as dynamic).resetHistory();
+}
+
+Future<void> pumpAndConnectDevTools(
+  WidgetTester tester,
+  TestApp testApp,
+) async {
+  await pumpDevTools(tester);
+  expect(find.byType(ConnectDialog), findsOneWidget);
+  expect(find.byType(ConnectedAppSummary), findsNothing);
+  expect(find.text('No client connection'), findsOneWidget);
+  _verifyFooterColor(tester, null);
+
+  logStatus('verify that we can connect to an app');
+  await connectToTestApp(tester, testApp);
+  expect(find.byType(ConnectDialog), findsNothing);
+  expect(find.byType(ConnectedAppSummary), findsOneWidget);
+  expect(find.text('No client connection'), findsNothing);
+  _verifyFooterColor(tester, darkColorScheme.primary);
+
+  // If the release notes viewer is open, close it.
+  final releaseNotesView =
+      tester.widget<ReleaseNotesViewer>(find.byType(ReleaseNotesViewer));
+  if (releaseNotesView.controller.isVisible.value) {
+    final closeReleaseNotesButton = find.descendant(
+      of: find.byType(ReleaseNotesViewer),
+      matching: find.byType(IconButton),
+    );
+    expect(closeReleaseNotesButton, findsOneWidget);
+    await tester.tap(closeReleaseNotesButton);
+  }
+}
+
+void _verifyFooterColor(WidgetTester tester, Color? expectedColor) {
+  final Container statusLineContainer = tester.widget(
+    find
+        .descendant(
+          of: find.byType(StatusLine),
+          matching: find.byType(Container),
+        )
+        .first,
+  );
+  expect(
+    (statusLineContainer.decoration! as BoxDecoration).color,
+    expectedColor,
+  );
+}
+
+Future<void> switchToScreen(WidgetTester tester, ScreenMetaData screen) async {
+  logStatus('switching to ${screen.name} screen (icon ${screen.icon})');
+  final tabFinder = find.widgetWithIcon(Tab, screen.icon!);
+
+  // If we cannot find the tab, try opening the tab overflow menu, if present.
+  if (tabFinder.evaluate().isEmpty) {
+    final tabOverflowButtonFinder = find.byType(TabOverflowButton);
+    if (tabOverflowButtonFinder.evaluate().isNotEmpty) {
+      await tester.tap(tabOverflowButtonFinder);
+      await tester.pump(shortPumpDuration);
+    }
+  }
+
+  await tester.tap(tabFinder);
+  // We use pump here instead of pumpAndSettle because pumpAndSettle will
+  // never complete if there is an animation (e.g. a progress indicator).
+  await tester.pump(safePumpDuration);
+}
 
 Future<void> pumpDevTools(WidgetTester tester) async {
   // TODO(kenz): how can we share code across integration_test/test and
   // integration_test/test_infra? When trying to import, we get an error:
   // Error when reading 'org-dartlang-app:/test_infra/shared.dart': File not found
   const shouldEnableExperiments = bool.fromEnvironment('enable_experiments');
-  await app.runDevTools(
-    // ignore: avoid_redundant_argument_values
+  app.externalRunDevTools(
+    integrationTestMode: true,
+    // ignore: avoid_redundant_argument_values, by design
     shouldEnableExperiments: shouldEnableExperiments,
     sampleData: _sampleData,
   );
@@ -44,6 +117,18 @@ Future<void> connectToTestApp(WidgetTester tester, TestApp testApp) async {
     ),
   );
   await tester.pumpAndSettle(safePumpDuration);
+}
+
+Future<void> disconnectFromTestApp(WidgetTester tester) async {
+  await tester.tap(
+    find.descendant(
+      of: find.byType(DevToolsAppBar),
+      matching: find.byIcon(Icons.home_rounded),
+    ),
+  );
+  await tester.pumpAndSettle();
+  await tester.tap(find.byType(ConnectToNewAppButton));
+  await tester.pump(safePumpDuration);
 }
 
 void logStatus(String log) {

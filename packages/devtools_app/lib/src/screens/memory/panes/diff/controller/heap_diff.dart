@@ -9,6 +9,7 @@ import '../../../../../shared/analytics/constants.dart' as gac;
 import '../../../../../shared/analytics/metrics.dart';
 import '../../../../../shared/memory/adapted_heap_data.dart';
 import '../../../../../shared/memory/class_name.dart';
+import '../../../../../shared/memory/simple_items.dart';
 import '../../../../../shared/primitives/utils.dart';
 import '../../../shared/heap/heap.dart';
 import '../../../shared/heap/model.dart';
@@ -30,7 +31,7 @@ DiffHeapClasses _calculateDiffGaWrapper(_HeapCouple couple) {
   ga.timeSync(
     gac.memory,
     gac.MemoryTime.calculateDiff,
-    syncOperation: () => result = DiffHeapClasses(couple),
+    syncOperation: () => result = DiffHeapClasses._(couple),
     screenMetricsProvider: () => MemoryScreenMetrics(
       heapDiffObjectsBefore: couple.older.data.objects.length,
       heapDiffObjectsAfter: couple.younger.data.objects.length,
@@ -58,10 +59,12 @@ class _HeapCouple {
     if (heap2.data.created.isBefore(heap1.data.created)) return heap2;
     if (identityHashCode(heap1) < identityHashCode(heap2)) return heap1;
     if (identityHashCode(heap2) < identityHashCode(heap1)) return heap2;
-    if (identityHashCode(heap1.data) < identityHashCode(heap2.data))
+    if (identityHashCode(heap1.data) < identityHashCode(heap2.data)) {
       return heap1;
-    if (identityHashCode(heap2.data) < identityHashCode(heap1.data))
+    }
+    if (identityHashCode(heap2.data) < identityHashCode(heap1.data)) {
       return heap2;
+    }
     return heap1;
   }
 
@@ -82,9 +85,9 @@ class _HeapCouple {
 /// List of classes with per-class comparison between two heaps.
 class DiffHeapClasses extends HeapClasses<DiffClassStats>
     with FilterableHeapClasses<DiffClassStats> {
-  DiffHeapClasses(_HeapCouple couple)
-      : before = couple.younger.data,
-        after = couple.older.data {
+  DiffHeapClasses._(_HeapCouple couple)
+      : before = couple.older.data,
+        after = couple.younger.data {
     classesByName = subtractMaps<HeapClassName, SingleClassStats,
         SingleClassStats, DiffClassStats>(
       from: couple.younger.classes.classesByName,
@@ -133,7 +136,10 @@ class DiffClassStats extends ClassStats {
 
     final result = DiffClassStats._(
       heapClass: heapClass,
-      total: ObjectSetDiff(before: before?.objects, after: after?.objects),
+      total: ObjectSetDiff(
+        setBefore: before?.objects,
+        setAfter: after?.objects,
+      ),
       statsByPath: subtractMaps<ClassOnlyHeapPath, ObjectSetStats,
           ObjectSetStats, ObjectSetStats>(
         from: after?.statsByPath,
@@ -152,44 +158,42 @@ class DiffClassStats extends ClassStats {
 
 /// Comparison between two sets of objects.
 class ObjectSetDiff {
-  ObjectSetDiff({ObjectSet? before, ObjectSet? after}) {
-    before ??= ObjectSet.empty;
-    after ??= ObjectSet.empty;
+  ObjectSetDiff({ObjectSet? setBefore, ObjectSet? setAfter}) {
+    setBefore ??= ObjectSet.empty;
+    setAfter ??= ObjectSet.empty;
 
-    final codesBefore = before.objectsByCodes.keys.toSet();
-    final codesAfter = after.objectsByCodes.keys.toSet();
+    final allCodes = _unionCodes(setBefore, setAfter);
 
-    final allCodes = codesBefore.union(codesAfter);
     for (var code in allCodes) {
-      final inBefore = codesBefore.contains(code);
-      final inAfter = codesAfter.contains(code);
+      final before = setBefore.objectsByCodes[code];
+      final after = setAfter.objectsByCodes[code];
 
-      final object = before.objectsByCodes[code] ?? after.objectsByCodes[code]!;
-
-      if (inAfter && inBefore) {
-        // We assume that state 'after' is what is most interesting for user
+      if (before != null && after != null) {
+        // When an object exists both before and after
+        // the state 'after' is more interesting for user
         // about the retained size.
         final excludeFromRetained =
-            after.objectsExcludedFromRetainedSize.contains(object.code);
+            setAfter.objectsExcludedFromRetainedSize.contains(after.code);
         persisted.countInstance(
-          object,
+          after,
           excludeFromRetained: excludeFromRetained,
         );
         continue;
       }
 
-      if (inBefore) {
+      if (before != null) {
         final excludeFromRetained =
-            before.objectsExcludedFromRetainedSize.contains(object.code);
-        deleted.countInstance(object, excludeFromRetained: excludeFromRetained);
-        delta.uncountInstance(object, excludeFromRetained: excludeFromRetained);
+            setBefore.objectsExcludedFromRetainedSize.contains(before.code);
+        deleted.countInstance(before, excludeFromRetained: excludeFromRetained);
+        delta.uncountInstance(before, excludeFromRetained: excludeFromRetained);
         continue;
       }
-      if (inAfter) {
+
+      if (after != null) {
         final excludeFromRetained =
-            after.objectsExcludedFromRetainedSize.contains(object.code);
-        created.countInstance(object, excludeFromRetained: excludeFromRetained);
-        delta.countInstance(object, excludeFromRetained: excludeFromRetained);
+            setAfter.objectsExcludedFromRetainedSize.contains(after.code);
+        created.countInstance(after, excludeFromRetained: excludeFromRetained);
+        delta.countInstance(after, excludeFromRetained: excludeFromRetained);
         continue;
       }
 
@@ -202,6 +206,13 @@ class ObjectSetDiff {
     assert(
       delta.instanceCount == created.instanceCount - deleted.instanceCount,
     );
+  }
+
+  static Set<IdentityHashCode> _unionCodes(ObjectSet set1, ObjectSet set2) {
+    final codesBefore = set1.objectsByCodes.keys.toSet();
+    final codesAfter = set2.objectsByCodes.keys.toSet();
+
+    return codesBefore.union(codesAfter);
   }
 
   final created = ObjectSet();

@@ -72,7 +72,7 @@ enum ClassType {
 }
 
 class HeapClassName {
-  HeapClassName({required this.className, required library})
+  HeapClassName({required this.className, required String? library})
       : library = _normalizeLibrary(library);
 
   HeapClassName.fromClassRef(ClassRef? classRef)
@@ -200,8 +200,8 @@ class HeapClassName {
   @override
   late final hashCode = fullName.hashCode;
 
-  static String _normalizeLibrary(String library) =>
-      library.trim().replaceFirst(
+  static String _normalizeLibrary(String? library) =>
+      (library ?? '').trim().replaceFirst(
             RegExp('^${PackagePrefixes.dartInSnapshot}'),
             PackagePrefixes.dart,
           );

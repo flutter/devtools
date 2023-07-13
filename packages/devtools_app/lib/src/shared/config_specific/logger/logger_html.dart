@@ -2,11 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// ignore: avoid_web_libraries_in_flutter, as designed
 import 'dart:html';
 
 import 'logger.dart';
 
-void log(Object message, [LogLevel level = LogLevel.debug]) {
+void printToConsole(Object message, [LogLevel level = LogLevel.debug]) {
   switch (level) {
     case LogLevel.debug:
       window.console.log(message);

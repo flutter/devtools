@@ -25,24 +25,34 @@ class PackagePrefixes {
   static const dartUi = 'dart:ui';
 }
 
-enum ScreenMetaData {
-  inspector('inspector', 'Flutter Inspector'),
-  performance('performance', 'Performance'),
-  cpuProfiler('cpu-profiler', 'CPU Profiler'),
-  memory('memory', 'Memory'),
-  debugger('debugger', 'Debugger'),
-  network('network', 'Network'),
-  logging('logging', 'Logging'),
-  provider('provider', 'Provider'),
-  appSize('app-size', 'App Size'),
-  vmTools('vm-tools', 'VM Tools'),
-  simple('simple', '');
-
-  const ScreenMetaData(this.id, this.title);
-
-  final String id;
-
-  final String title;
-}
-
 const String traceEventsFieldName = 'traceEvents';
+
+const closureName = '<closure>';
+
+const anonymousClosureName = '<anonymous closure>';
+
+const _memoryDocUrl =
+    'https://docs.flutter.dev/development/tools/devtools/memory';
+const _consoleDocUrl =
+    'https://docs.flutter.dev/development/tools/devtools/console';
+
+/// Some links to documentation.
+///
+/// The enum is test covered to catch broken links.
+enum DocLinks {
+  chart(_memoryDocUrl, 'expandable-chart'),
+  profile(_memoryDocUrl, 'profile-memory-tab'),
+  diff(_memoryDocUrl, 'diff-snapshots-tab'),
+  trace(_memoryDocUrl, 'trace-instances-tab'),
+  console(_consoleDocUrl, null),
+  ;
+
+  const DocLinks(this.url, this.hash);
+
+  final String url;
+  final String? hash;
+  String get value {
+    if (hash == null) return url;
+    return '$url#$hash';
+  }
+}

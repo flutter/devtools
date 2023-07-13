@@ -2,15 +2,18 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 
 import '../../../../shared/analytics/constants.dart' as gac;
 import '../../../../shared/common_widgets.dart';
 import '../../../../shared/config_specific/launch_url/launch_url.dart';
+import '../../../../shared/primitives/simple_items.dart';
 import '../../../../shared/split.dart';
 import '../../../../shared/theme.dart';
-import '../../shared/primitives/simple_elements.dart';
+import '../../shared/widgets/shared_memory_widgets.dart';
 import 'controller/diff_pane_controller.dart';
 import 'controller/item_controller.dart';
 import 'widgets/snapshot_control_pane.dart';
@@ -62,13 +65,20 @@ class _SnapshotItemContent extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Expanded(
-                  child: Markdown(
-                    data: _snapshotDocumentation,
-                    onTapLink: (text, url, title) async =>
-                        await launchUrl(url!),
+                  child: ListView(
+                    children: [
+                      SizedBox(
+                        height: 450,
+                        child: Markdown(
+                          data: _snapshotDocumentation,
+                          onTapLink: (text, url, title) =>
+                              unawaited(launchUrl(url!)),
+                        ),
+                      ),
+                      const ClassTypeLegend(),
+                    ],
                   ),
                 ),
-                const SizedBox(height: denseSpacing),
                 MoreInfoLink(
                   url: DocLinks.diff.value,
                   gaScreenName: gac.memory,
@@ -114,6 +124,10 @@ class SnapshotInstanceItemPane extends StatelessWidget {
 
 /// `\v` adds vertical space
 const _snapshotDocumentation = '''
+Find unexpected memory usage by comparing two heap snapshots:
+
+\v
+
 1. Understand [Dart memory concepts](https://docs.flutter.dev/development/tools/devtools/memory#basic-memory-concepts).
 
 \v

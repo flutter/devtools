@@ -23,14 +23,24 @@
             "program": "devtools_app/lib/main.dart",
             "args": [
                 "--dart-define=enable_experiments=true"
-            ]
+            ],
         },
         {
-            "name": "devtools - profile",
+            "name": "devtools + profile",
             "request": "launch",
             "type": "dart",
             "program": "devtools_app/lib/main.dart",
             "flutterMode": "profile",
+        },
+        {
+            "name": "devtools + profile + experiments",
+            "request": "launch",
+            "type": "dart",
+            "program": "devtools_app/lib/main.dart",
+            "flutterMode": "profile",
+            "args": [
+                "--dart-define=enable_experiments=true"
+            ],
         },
         {
             "name": "memory/default",
@@ -49,6 +59,12 @@
             "request": "launch",
             "type": "dart",
             "program": "devtools_app/test/test_infra/scenes/performance/default.stager_app.dart",
+        },
+        {
+            "name": "profiler/default",
+            "request": "launch",
+            "type": "dart",
+            "program": "devtools_app/test/test_infra/scenes/cpu_profiler/default.stager_app.dart",
         },
         {
             "name": "fixtures/flutter_app",

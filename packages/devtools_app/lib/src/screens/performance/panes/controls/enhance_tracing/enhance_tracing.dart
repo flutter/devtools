@@ -13,7 +13,7 @@ import '../../../../../shared/common_widgets.dart';
 import '../../../../../shared/globals.dart';
 import '../../../../../shared/primitives/auto_dispose.dart';
 import '../../../../../shared/theme.dart';
-import '../../../performance_screen.dart';
+import '../performance_controls.dart';
 import 'enhance_tracing_controller.dart';
 
 class EnhanceTracingButton extends StatelessWidget {
@@ -37,7 +37,7 @@ class EnhanceTracingButton extends StatelessWidget {
       icon: icon,
       tooltip: 'Add more detail to the Timeline trace',
       minScreenWidthForTextBeforeScaling:
-          SecondaryPerformanceControls.minScreenWidthForTextBeforeScaling,
+          PerformanceControls.minScreenWidthForTextBeforeScaling,
       extensions: enhanceTracingExtensions,
       forceShowOverlayController:
           enhanceTracingController.showMenuStreamController,
@@ -54,8 +54,7 @@ class EnhanceTracingButton extends StatelessWidget {
           children: [
             TextSpan(
               text: 'frame times may be negatively affected',
-              style:
-                  textStyle.copyWith(color: theme.colorScheme.errorTextColor),
+              style: textStyle.copyWith(color: theme.colorScheme.error),
             ),
             TextSpan(
               text: '.\n\n',

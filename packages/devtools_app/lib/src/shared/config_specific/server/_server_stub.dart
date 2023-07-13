@@ -13,6 +13,7 @@ const unsupportedMessage =
 
 bool get isDevToolsServerAvailable => false;
 
+// This is used in g3.
 Future<Object?> request(String url) async {
   throw Exception(unsupportedMessage);
 }
@@ -61,6 +62,7 @@ Future<String> setLastShownReleaseNotesVersion(String version) async {
   throw Exception(unsupportedMessage);
 }
 
+// currently unused
 Future<void> resetDevToolsFile() async {
   throw Exception(unsupportedMessage);
 }

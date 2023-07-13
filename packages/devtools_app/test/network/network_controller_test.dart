@@ -22,7 +22,7 @@ void main() {
     late SocketProfile socketProfile;
     late HttpProfile httpProfile;
 
-    setUp(() async {
+    setUp(() {
       socketProfile = loadSocketProfile();
       httpProfile = loadHttpProfile();
       fakeServiceManager = FakeServiceManager(
@@ -168,10 +168,6 @@ void main() {
       // Refresh network data and ensure requests are populated.
       await controller.networkService.refreshNetworkData();
       final profile = requestsNotifier.value;
-
-      for (final r in profile.requests) {
-        print('${r.uri}, ${r.method}, ${r.status}, ${r.type}');
-      }
 
       expect(profile.requests, hasLength(numRequests));
       expect(controller.filteredData.value, hasLength(numRequests));

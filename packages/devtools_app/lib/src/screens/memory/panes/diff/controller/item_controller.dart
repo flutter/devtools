@@ -57,12 +57,14 @@ class SnapshotInstanceItem extends SnapshotItem {
   @override
   final int displayNumber;
 
-  String get name => '$isolateName-$displayNumber';
+  String get name => nameOverride ?? '$isolateName-$displayNumber';
+
+  String? nameOverride;
 
   final diffWith = ValueNotifier<SnapshotInstanceItem?>(null);
 
   @override
   bool get hasData => heap != null;
 
-  int? get totalSize => heap?.data.totalSize;
+  int? get totalSize => heap?.data.totalReachableSize;
 }

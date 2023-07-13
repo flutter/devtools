@@ -16,7 +16,7 @@ import '../shared/theme.dart';
 import 'release_notes/release_notes.dart';
 
 class DevToolsAboutDialog extends StatelessWidget {
-  const DevToolsAboutDialog(this.releaseNotesController);
+  const DevToolsAboutDialog(this.releaseNotesController, {super.key});
 
   final ReleaseNotesController releaseNotesController;
 
@@ -39,7 +39,7 @@ class DevToolsAboutDialog extends StatelessWidget {
                   style: theme.linkTextStyle,
                 ),
                 onTap: () =>
-                    releaseNotesController.toggleReleaseNotesVisible(true),
+                    unawaited(releaseNotesController.openLatestReleaseNotes()),
               ),
             ],
           ),
@@ -134,6 +134,10 @@ class _DiscordLink extends StatelessWidget {
 }
 
 class OpenAboutAction extends StatelessWidget {
+  const OpenAboutAction({super.key, this.color});
+
+  final Color? color;
+
   @override
   Widget build(BuildContext context) {
     final releaseNotesController = Provider.of<ReleaseNotesController>(context);
@@ -155,6 +159,7 @@ class OpenAboutAction extends StatelessWidget {
           child: Icon(
             Icons.help_outline,
             size: actionsIconSize,
+            color: color,
           ),
         ),
       ),

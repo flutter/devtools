@@ -9,7 +9,7 @@ import 'package:devtools_app/src/screens/performance/panes/raster_stats/raster_s
 import 'package:devtools_app/src/screens/performance/panes/rebuild_stats/rebuild_stats_model.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import '../test_infra/test_data/cpu_profile.dart';
+import '../test_infra/test_data/cpu_profiler/cpu_profile.dart';
 import '../test_infra/test_data/performance.dart';
 import '../test_infra/test_data/performance_raster_stats.dart';
 
@@ -31,7 +31,7 @@ void main() {
       );
     });
 
-    test('init', () async {
+    test('init', () {
       expect(performanceData.traceEvents, isEmpty);
       expect(performanceData.frames, isEmpty);
       expect(performanceData.selectedFrame, isNull);
@@ -61,7 +61,7 @@ void main() {
         frames: [testFrame0, testFrame1],
         displayRefreshRate: 60,
         traceEvents: [
-          {'name': 'FakeTraceEvent'}
+          {'name': 'FakeTraceEvent'},
         ],
         selectedEvent: vsyncEvent,
         cpuProfileData: CpuProfileData.parse(goldenCpuProfileDataJson),
@@ -79,7 +79,7 @@ void main() {
               'elapsed': 20000,
               'build': 10000,
               'raster': 12000,
-              'vsyncOverhead': 10
+              'vsyncOverhead': 10,
             },
             {
               'number': 1,
@@ -87,12 +87,12 @@ void main() {
               'elapsed': 20000,
               'build': 16000,
               'raster': 16000,
-              'vsyncOverhead': 1000
+              'vsyncOverhead': 1000,
             },
           ],
           PerformanceData.displayRefreshRateKey: 60,
           PerformanceData.traceEventsKey: [
-            {'name': 'FakeTraceEvent'}
+            {'name': 'FakeTraceEvent'},
           ],
           PerformanceData.selectedEventKey: vsyncEvent.json,
           PerformanceData.cpuProfileKey: goldenCpuProfileDataJson,
@@ -102,7 +102,7 @@ void main() {
       );
     });
 
-    test('clear', () async {
+    test('clear', () {
       performanceData = PerformanceData(
         displayRefreshRate: 120,
         timelineEvents: [

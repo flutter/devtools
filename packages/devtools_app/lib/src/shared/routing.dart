@@ -16,10 +16,12 @@ import 'primitives/utils.dart';
 ///
 /// This must be different to the AppSizeScreen ID which is also used in routing when
 /// cnnected to a VM to ensure they have unique URLs.
-const appSizePageId = 'appsize';
+const appSizeScreenId = 'appsize';
 
-const homePageId = '';
-const snapshotPageId = 'snapshot';
+const memoryAnalysisScreenId = 'memoryanalysis';
+
+const homeScreenId = '';
+const snapshotScreenId = 'snapshot';
 
 /// Represents a Page/route for a DevTools screen.
 class DevToolsRouteConfiguration {
@@ -50,8 +52,7 @@ class DevToolsRouteInformationParser
   Future<DevToolsRouteConfiguration> parseRouteInformation(
     RouteInformation routeInformation,
   ) {
-    var uri = Uri.parse(routeInformation.location!);
-
+    var uri = routeInformation.uri;
     if (_forceVmServiceUri != null) {
       final newQueryParams = Map<String, dynamic>.from(uri.queryParameters);
       newQueryParams['uri'] = _forceVmServiceUri;
@@ -72,11 +73,7 @@ class DevToolsRouteInformationParser
     final configuration = DevToolsRouteConfiguration(
       path,
       uri.queryParameters,
-      routeInformation.state == null
-          ? null
-          : DevToolsNavigationState._(
-              (routeInformation.state as Map).cast<String, String?>(),
-            ),
+      _navigationStateFromRouteInformation(routeInformation),
     );
     return SynchronousFuture<DevToolsRouteConfiguration>(configuration);
   }
@@ -92,12 +89,23 @@ class DevToolsRouteInformationParser
     final params = {...configuration.args};
     params.removeWhere((key, value) => value == null);
     return RouteInformation(
-      location: Uri(
-        path: path,
-        queryParameters: params,
-      ).toString(),
+      uri: Uri(path: path, queryParameters: params),
       state: configuration.state,
     );
+  }
+
+  DevToolsNavigationState? _navigationStateFromRouteInformation(
+    RouteInformation routeInformation,
+  ) {
+    final routeState = routeInformation.state;
+    if (routeState == null) return null;
+    try {
+      return DevToolsNavigationState._(
+        (routeState as Map).cast<String, String?>(),
+      );
+    } catch (_) {
+      return null;
+    }
   }
 }
 
@@ -113,6 +121,9 @@ class DevToolsRouterDelegate extends RouterDelegate<DevToolsRouteConfiguration>
 
   @override
   final GlobalKey<NavigatorState> navigatorKey;
+
+  static String get currentPage => _currentPage;
+  static late String _currentPage;
 
   final Page Function(
     BuildContext,
@@ -187,7 +198,7 @@ class DevToolsRouterDelegate extends RouterDelegate<DevToolsRouteConfiguration>
     // Ensure we disconnect from any previously connected applications if we do
     // not have a vm service uri as a query parameter, unless we are loading an
     // offline file.
-    if (page != snapshotPageId && newArgs['uri'] == null) {
+    if (page != snapshotScreenId && newArgs['uri'] == null) {
       serviceManager.manuallyDisconnect();
     }
 
@@ -202,7 +213,7 @@ class DevToolsRouterDelegate extends RouterDelegate<DevToolsRouteConfiguration>
     required bool clearScreenParam,
   }) {
     navigate(
-      homePageId,
+      homeScreenId,
       {
         if (clearUriParam) 'uri': null,
         if (clearScreenParam) 'screen': null,
@@ -212,6 +223,7 @@ class DevToolsRouterDelegate extends RouterDelegate<DevToolsRouteConfiguration>
 
   /// Replaces the navigation stack with a new route.
   void _replaceStack(DevToolsRouteConfiguration configuration) {
+    _currentPage = configuration.page;
     routes
       ..clear()
       ..add(configuration);
@@ -262,10 +274,7 @@ class DevToolsRouterDelegate extends RouterDelegate<DevToolsRouteConfiguration>
     final params = Map.of(currentConfig.args);
     params.removeWhere((key, value) => value == null);
     await SystemNavigator.routeInformationUpdated(
-      location: Uri(
-        path: path,
-        queryParameters: params,
-      ).toString(),
+      uri: Uri(path: path, queryParameters: params),
       state: state,
       replace: true,
     );

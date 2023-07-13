@@ -141,7 +141,7 @@ class HoverCard {
             child: Container(
               padding: const EdgeInsets.all(denseSpacing),
               decoration: BoxDecoration(
-                color: colorScheme.defaultBackgroundColor,
+                color: colorScheme.surface,
                 border: Border.all(
                   color: focusColor,
                   width: hoverCardBorderWidth,
@@ -153,7 +153,7 @@ class HoverCard {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   if (title != null) ...[
-                    Container(
+                    SizedBox(
                       width: width,
                       child: Text(
                         title,
@@ -162,7 +162,7 @@ class HoverCard {
                         textAlign: TextAlign.center,
                       ),
                     ),
-                    Divider(color: theme.hoverTextStyle.color),
+                    Divider(color: theme.focusColor),
                   ],
                   SingleChildScrollView(
                     child: Container(
@@ -286,6 +286,7 @@ class HoverCardTooltip extends StatefulWidget {
   /// from [asyncGenerateHoverCardData] the spinner [HoverCard] will be replaced
   /// with one containing the generated [HoverCardData].
   const HoverCardTooltip.async({
+    super.key,
     required this.enabled,
     required this.asyncGenerateHoverCardData,
     required this.child,
@@ -298,6 +299,7 @@ class HoverCardTooltip extends StatefulWidget {
   /// The [HoverCardData] generated from [generateHoverCardData] will be
   /// displayed in a [HoverCard].
   const HoverCardTooltip.sync({
+    super.key,
     required this.enabled,
     required this.generateHoverCardData,
     required this.child,
@@ -328,7 +330,7 @@ class HoverCardTooltip extends StatefulWidget {
   final int? asyncTimeout;
 
   @override
-  _HoverCardTooltipState createState() => _HoverCardTooltipState();
+  State<HoverCardTooltip> createState() => _HoverCardTooltipState();
 }
 
 class _HoverCardTooltipState extends State<HoverCardTooltip> {
@@ -372,7 +374,7 @@ class _HoverCardTooltipState extends State<HoverCardTooltip> {
     final generateHoverCardData = widget.generateHoverCardData;
     final asyncTimeout = widget.asyncTimeout;
 
-    _showTimer = Timer(HoverCardTooltip._hoverDelay, () async {
+    _showTimer = Timer(HoverCardTooltip._hoverDelay, () {
       if (asyncGenerateHoverCardData != null) {
         assert(generateHoverCardData == null);
         _showAsyncHoverCard(
@@ -418,6 +420,7 @@ class _HoverCardTooltipState extends State<HoverCardTooltip> {
         // If we get no data back, then don't show a hover card.
         if (data == null) return;
         // Otherwise, show a hover card immediately.
+        // ignore: use_build_context_synchronously, requires investigation
         return _setHoverCardFromData(
           data,
           context: context,
@@ -427,6 +430,7 @@ class _HoverCardTooltipState extends State<HoverCardTooltip> {
     }
     // The data on the card is fetched asynchronously, so show a spinner
     // while we wait for it.
+    // ignore: use_build_context_synchronously, requires investigation
     spinnerHoverCard = HoverCard.fromHoverEvent(
       context: context,
       contents: const CenteredCircularProgressIndicator(),
@@ -453,6 +457,7 @@ class _HoverCardTooltipState extends State<HoverCardTooltip> {
       return;
     }
 
+    // ignore: use_build_context_synchronously, requires investigation
     return _setHoverCardFromData(
       hoverCardData,
       context: context,

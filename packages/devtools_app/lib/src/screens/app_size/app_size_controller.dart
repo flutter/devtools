@@ -103,7 +103,8 @@ class AppSizeController {
   /// The node set as the analysis tab root.
   ///
   /// Used to build the treemap and the tree table for the analysis tab.
-  final analysisRoot = ValueNotifier<Selection<TreemapNode>>(Selection.empty());
+  final analysisRoot =
+      ValueNotifier<Selection<TreemapNode?>>(Selection.empty());
 
   ValueListenable<bool> get isDeferredApp => _isDeferredApp;
   final _isDeferredApp = ValueNotifier<bool>(false);
@@ -134,7 +135,7 @@ class AppSizeController {
 
   int? nodeIndexCalculator(TreemapNode? newAnalysisRoot) {
     if (newAnalysisRoot == null) return null;
-    final searchCondition = (TreemapNode? n) => n == newAnalysisRoot;
+    bool searchCondition(TreemapNode? n) => n == newAnalysisRoot;
     if (!newAnalysisRoot.root.isExpanded) newAnalysisRoot.root.expand();
     final nodeIndex = newAnalysisRoot.root.childCountToMatchingNode(
       matchingNodeCondition: searchCondition,

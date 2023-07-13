@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// ignore_for_file: constant_identifier_names
+
 import 'package:vm_service/vm_service.dart';
 
 import '../../shared/globals.dart';
@@ -960,15 +962,15 @@ extension CpuSamplesPrivateView on CpuSamples {
   }
 
   List<ProfileCode> get codes {
-    var _codes = _expando[this];
-    if (_codes == null) {
-      _codes = json![_kCodesKey]
+    var codesFromExpando = _expando[this];
+    if (codesFromExpando == null) {
+      codesFromExpando = json![_kCodesKey]
           .cast<Map<String, dynamic>>()
           .map<ProfileCode>((e) => ProfileCode.parse(e)!)
           .toList();
-      _expando[this] = _codes;
+      _expando[this] = codesFromExpando;
     }
-    return _codes!;
+    return codesFromExpando!;
   }
 }
 

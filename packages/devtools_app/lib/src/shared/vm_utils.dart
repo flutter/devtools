@@ -8,7 +8,7 @@ import 'package:vm_service/vm_service.dart';
 import 'globals.dart';
 import 'memory/class_name.dart';
 
-bool isPrimativeInstanceKind(String? kind) {
+bool isPrimitiveInstanceKind(String? kind) {
   return kind == InstanceKind.kBool ||
       kind == InstanceKind.kDouble ||
       kind == InstanceKind.kInt ||
@@ -30,8 +30,12 @@ Future<InstanceRef?> findInstance(
   String? classId,
   int? hashCode,
 ) async {
-  if (classId == null || isolateId == null || hashCode == null || hashCode == 0)
+  if (classId == null ||
+      isolateId == null ||
+      hashCode == null ||
+      hashCode == 0) {
     return null;
+  }
 
   final result = (await serviceManager.service!.getInstances(
     isolateId,

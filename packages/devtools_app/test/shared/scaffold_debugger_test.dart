@@ -4,7 +4,6 @@
 
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/framework/scaffold.dart';
-import 'package:devtools_app/src/shared/config_specific/import_export/import_export.dart';
 import 'package:devtools_app/src/shared/framework_controller.dart';
 import 'package:devtools_app/src/shared/survey.dart';
 import 'package:devtools_test/devtools_test.dart';
@@ -18,6 +17,7 @@ void main() {
   when(mockServiceManager.connectedState).thenReturn(
     ValueNotifier<ConnectedState>(const ConnectedState(false)),
   );
+  when(mockServiceManager.hasConnection).thenReturn(false);
   when(mockServiceManager.isolateManager).thenReturn(FakeIsolateManager());
   when(mockServiceManager.appState).thenReturn(
     AppState(mockServiceManager.isolateManager.selectedIsolate),
@@ -35,6 +35,7 @@ void main() {
   setGlobal(OfflineModeController, OfflineModeController());
   setGlobal(IdeTheme, IdeTheme());
   setGlobal(NotificationService, NotificationService());
+  setGlobal(BannerMessagesController, BannerMessagesController());
 
   testWidgets(
     'does not display floating debugger controls when debugger screen is showing',
@@ -64,10 +65,10 @@ void main() {
               ),
               _screen2,
             ],
-            ideTheme: IdeTheme(),
           ),
           debugger: mockDebuggerController,
           analytics: AnalyticsController(enabled: false, firstRun: false),
+          releaseNotes: ReleaseNotesController(),
         ),
       );
       expect(find.byKey(debuggerScreenKey), findsOneWidget);

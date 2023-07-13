@@ -42,6 +42,7 @@ class _ObjectColumn extends ColumnData<ObjectStoreEntry>
   @override
   Widget build(
     BuildContext context,
+    // ignore: avoid-dynamic, requires refactor.
     data, {
     bool isRowSelected = false,
     VoidCallback? onPressed,
@@ -49,18 +50,18 @@ class _ObjectColumn extends ColumnData<ObjectStoreEntry>
     return VmServiceObjectLink(
       object: data.value,
       onTap: onTap,
-      isSelected: isRowSelected,
     );
   }
 }
 
 class ObjectStoreViewer extends StatelessWidget {
   ObjectStoreViewer({
+    super.key,
     required this.onLinkTapped,
     required this.controller,
   });
 
-  final _entryColumn = _EntryColumn();
+  static final _entryColumn = _EntryColumn();
   late final _objectColumn = _ObjectColumn(onTap: onLinkTapped);
   late final _columns = <ColumnData<ObjectStoreEntry>>[
     _entryColumn,

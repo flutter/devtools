@@ -9,7 +9,7 @@ import 'package:vm_service/vm_service.dart';
 
 import '../../../service/vm_service_wrapper.dart';
 import '../../globals.dart';
-import '../../memory/adapted_heap_data.dart';
+import '../../memory/adapted_heap_object.dart';
 import '../../primitives/auto_dispose.dart';
 import '../../vm_utils.dart';
 import '../primitives/scope.dart';
@@ -76,11 +76,13 @@ class EvalService extends DisposableController with AutoDisposeControllerMixin {
 
     final isolateId = isolateRef.id!;
 
+    final scope = await _scopeIfSupported(isolateId);
+
     Future<Response> eval() async => await serviceManager.service!.evaluate(
           isolateId,
           (await isolate.isolate)!.rootLib!.id!,
           expressionText,
-          scope: scope.value(isolateId: isolateId),
+          scope: scope,
         );
 
     return await _evalWithVariablesRefresh(eval, isolateId);
@@ -110,8 +112,14 @@ class EvalService extends DisposableController with AutoDisposeControllerMixin {
     final variables = scope.removedVariables.join(', ');
     serviceManager.consoleService.appendStdio(
       'Garbage collected instances were removed from the scope: $variables. '
-      'Stop application to make variables persistent.\n',
+      'Pause application (use DevTools > Debugger) to make the variables persistent.\n',
     );
+  }
+
+  bool get isStoppedAtDartFrame {
+    return serviceManager.isMainIsolatePaused &&
+        serviceManager.appState.currentFrame.value?.code?.kind ==
+            CodeKind.kDart;
   }
 
   /// Evaluate the given expression in the context of the currently selected
@@ -125,7 +133,7 @@ class EvalService extends DisposableController with AutoDisposeControllerMixin {
       return Future.error(
         RPCError.withDetails(
           'evaluateInFrame',
-          RPCError.kInvalidParams,
+          RPCErrorKind.kInvalidParams.code,
           'Isolate not paused',
         ),
       );
@@ -137,7 +145,7 @@ class EvalService extends DisposableController with AutoDisposeControllerMixin {
       return Future.error(
         RPCError.withDetails(
           'evaluateInFrame',
-          RPCError.kInvalidParams,
+          RPCErrorKind.kInvalidParams.code,
           'No frames available',
         ),
       );
@@ -149,21 +157,45 @@ class EvalService extends DisposableController with AutoDisposeControllerMixin {
       return Future.error(
         RPCError.withDetails(
           'evaluateInFrame',
-          RPCError.kServerError,
+          RPCErrorKind.kInvalidParams.code,
           'isolateRefId is null',
         ),
       );
     }
+
+    final scope = await _scopeIfSupported(isolateRefId);
 
     Future<Response> evalFunction() => _service.evaluateInFrame(
           isolateRefId,
           frame.index!,
           expression,
           disableBreakpoints: true,
-          scope: scope.value(isolateId: isolateRefId),
+          scope: scope,
         );
 
     return await _evalWithVariablesRefresh(evalFunction, isolateRefId);
+  }
+
+  Future<Map<String, String>?> _scopeIfSupported(String isolateRefId) async {
+    if (!isScopeSupported()) return null;
+
+    return scope.value(isolateId: isolateRefId);
+  }
+
+  /// If scope is supported, returns true.
+  ///
+  /// If [emitWarningToConsole] and scope is not supported, emits warning message to console.
+  bool isScopeSupported({bool emitWarningToConsole = false}) {
+    // Web does not support scopes yet.
+    final isWeb = serviceManager.connectedApp?.isDartWebAppNow ?? true;
+    if (isWeb && emitWarningToConsole) {
+      serviceManager.consoleService.appendStdio(
+        'Scope variables are not supported for web applications.',
+      );
+
+      return false;
+    }
+    return true;
   }
 
   Future<InstanceRef?> findObject(

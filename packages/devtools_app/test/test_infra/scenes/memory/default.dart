@@ -4,10 +4,11 @@
 
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/memory/panes/diff/controller/diff_pane_controller.dart';
+import 'package:devtools_app/src/screens/memory/panes/profile/profile_pane_controller.dart';
 import 'package:devtools_app/src/screens/memory/shared/heap/class_filter.dart';
 import 'package:devtools_app/src/screens/memory/shared/heap/model.dart';
-import 'package:devtools_app/src/shared/config_specific/import_export/import_export.dart';
 import 'package:devtools_app/src/shared/memory/adapted_heap_data.dart';
+import 'package:devtools_app/src/shared/memory/adapted_heap_object.dart';
 import 'package:devtools_app/src/shared/memory/class_name.dart';
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:devtools_test/devtools_test.dart';
@@ -28,7 +29,7 @@ class MemoryDefaultScene extends Scene {
   late FakeServiceManager fakeServiceManager;
 
   @override
-  Widget build() {
+  Widget build(BuildContext context) {
     return wrapWithControllers(
       const MemoryBody(),
       memory: controller,
@@ -41,6 +42,7 @@ class MemoryDefaultScene extends Scene {
     setGlobal(OfflineModeController, OfflineModeController());
     setGlobal(IdeTheme, IdeTheme());
     setGlobal(NotificationService, NotificationService());
+    setGlobal(BannerMessagesController, BannerMessagesController());
     setGlobal(
       PreferencesController,
       PreferencesController()..memory.showChart.value = false,
@@ -69,12 +71,20 @@ class MemoryDefaultScene extends Scene {
     when(fakeServiceManager.vm.operatingSystem).thenReturn('ios');
     setGlobal(ServiceConnectionManager, fakeServiceManager);
 
-    final diffController = DiffPaneController(_TestSnapshotTaker());
-    diffController.applyFilter(
-      ClassFilter(filterType: ClassFilterType.showAll, except: '', only: ''),
+    final showAllFilter = ClassFilter(
+      filterType: ClassFilterType.showAll,
+      except: '',
+      only: '',
     );
+
+    final diffController = DiffPaneController(_TestSnapshotTaker())
+      ..derived.applyFilter(showAllFilter);
+
+    final profileController = ProfilePaneController()..setFilter(showAllFilter);
+
     controller = MemoryController(
       diffPaneController: diffController,
+      profilePaneController: profileController,
     )
       ..offline = true
       ..memoryTimeline.offlineData.clear()

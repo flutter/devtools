@@ -8,8 +8,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 
-import 'mocks/generated.mocks.dart';
-
 /// The RouterDelegate must use the same NavigatorKey when building in order
 /// for widget state to be preserved.
 final _testNavigatorKey = GlobalKey<NavigatorState>();
@@ -21,7 +19,14 @@ final _testNavigatorKey = GlobalKey<NavigatorState>();
 /// [Directionality] to support [RenderFlex] widgets like [Row] and [Column].
 Widget wrap(Widget widget) {
   return MaterialApp.router(
-    theme: themeFor(isDarkTheme: false, ideTheme: IdeTheme()),
+    theme: themeFor(
+      isDarkTheme: false,
+      ideTheme: IdeTheme(),
+      theme: ThemeData(
+        useMaterial3: true,
+        colorScheme: lightColorScheme,
+      ),
+    ),
     routerDelegate: DevToolsRouterDelegate(
       (context, page, args, state) => MaterialPage(
         child: Material(
@@ -37,19 +42,8 @@ Widget wrap(Widget widget) {
       _testNavigatorKey,
     ),
     routeInformationParser:
-        // ignore: invalid_use_of_visible_for_testing_member
+        // ignore: invalid_use_of_visible_for_testing_member, false positive.
         DevToolsRouteInformationParser.test('http://test/uri'),
-  );
-}
-
-Widget wrapWithAnalytics(
-  Widget widget, {
-  AnalyticsController? controller,
-}) {
-  controller ??= AnalyticsController(enabled: false, firstRun: false);
-  return Provider<AnalyticsController>.value(
-    value: controller,
-    child: widget,
   );
 }
 
@@ -62,15 +56,12 @@ Widget wrapWithControllers(
   ProfilerScreenController? profiler,
   DebuggerController? debugger,
   NetworkController? network,
-  BannerMessagesController? bannerMessages,
   AppSizeController? appSize,
   AnalyticsController? analytics,
+  ReleaseNotesController? releaseNotes,
   VMDeveloperToolsController? vmDeveloperTools,
 }) {
   final _providers = [
-    Provider<BannerMessagesController>.value(
-      value: bannerMessages ?? MockBannerMessagesController(),
-    ),
     if (inspector != null)
       Provider<InspectorController>.value(value: inspector),
     if (logging != null) Provider<LoggingController>.value(value: logging),
@@ -84,6 +75,8 @@ Widget wrapWithControllers(
     if (appSize != null) Provider<AppSizeController>.value(value: appSize),
     if (analytics != null)
       Provider<AnalyticsController>.value(value: analytics),
+    if (releaseNotes != null)
+      Provider<ReleaseNotesController>.value(value: releaseNotes),
     if (vmDeveloperTools != null)
       Provider<VMDeveloperToolsController>.value(value: vmDeveloperTools),
   ];
@@ -155,21 +148,21 @@ void testWidgetsWithWindowSize(
   testWidgets(
     name,
     (WidgetTester tester) async {
-      await _setWindowSize(windowSize);
+      await _setWindowSize(tester, windowSize);
       await test(tester);
-      await _resetWindowSize();
+      await _resetWindowSize(tester);
     },
     skip: skip,
   );
 }
 
-Future<void> _setWindowSize(Size windowSize) async {
+Future<void> _setWindowSize(WidgetTester tester, Size windowSize) async {
   final binding = TestWidgetsFlutterBinding.ensureInitialized();
   await binding.setSurfaceSize(windowSize);
-  binding.window.physicalSizeTestValue = windowSize;
-  binding.window.devicePixelRatioTestValue = 1.0;
+  tester.view.physicalSize = windowSize;
+  tester.view.devicePixelRatio = 1.0;
 }
 
-Future<void> _resetWindowSize() async {
-  await _setWindowSize(const Size(800.0, 600.0));
+Future<void> _resetWindowSize(WidgetTester tester) async {
+  await _setWindowSize(tester, const Size(800.0, 600.0));
 }

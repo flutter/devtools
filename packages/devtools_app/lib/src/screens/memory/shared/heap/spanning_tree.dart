@@ -3,14 +3,19 @@
 // found in the LICENSE file.
 
 import '../../../../shared/memory/adapted_heap_data.dart';
+import '../../../../shared/memory/adapted_heap_object.dart';
 import '../../../../shared/primitives/utils.dart';
 
 final _uiReleaser = UiReleaser();
 
-/// Sets the field retainer and retainedSize for each object in the [heap], that
+/// Performs calculations on the [heap] to populate fields.
+///
+/// * Sets the field retainer and retainedSize for each object in the [heap], that
 /// has retaining path to the root.
-/// Also populates [AdaptedHeapObject.inRefs].
-Future<void> buildSpanningTreeAndSetInRefs(AdaptedHeapData heap) async {
+/// * Populates [AdaptedHeapObject.inRefs].
+/// * Sets [AdaptedHeapObject.totalDartSize].
+/// * Sets [AdaptedHeapData.allFieldsCalculated] to true.
+Future<void> calculateHeap(AdaptedHeapData heap) async {
   assert(!heap.allFieldsCalculated);
   await _setRetainers(heap);
   await _setInboundRefs(heap);
@@ -19,13 +24,16 @@ Future<void> buildSpanningTreeAndSetInRefs(AdaptedHeapData heap) async {
 }
 
 Future<void> _setInboundRefs(AdaptedHeapData heap) async {
+  int totalDartSize = 0;
   for (final from in Iterable.generate(heap.objects.length)) {
+    totalDartSize += heap.objects[from].shallowSize;
     if (_uiReleaser.step()) await _uiReleaser.releaseUi();
     for (final to in heap.objects[from].outRefs) {
       assert(from != to);
       heap.objects[to].inRefs.add(from);
     }
   }
+  heap.totalDartSize = totalDartSize;
 }
 
 /// The algorithm takes O(number of references in the heap).
@@ -102,7 +110,7 @@ void _verifyHeapIntegrity(AdaptedHeapData heap) {
     var totalInRefs = 0;
     var totalOutRefs = 0;
 
-    for (final i in Iterable.generate(heap.objects.length)) {
+    for (final int i in Iterable.generate(heap.objects.length)) {
       final object = heap.objects[i];
       assert(
         (object.retainedSize == null) == (object.retainer == null),

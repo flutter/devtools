@@ -19,10 +19,10 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:logging/logging.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../service/service_extensions.dart' as extensions;
-import '../../shared/config_specific/logger/logger.dart';
 import '../../shared/config_specific/url/url.dart';
 import '../../shared/console/eval/inspector_tree.dart';
 import '../../shared/console/primitives/simple_items.dart';
@@ -34,6 +34,8 @@ import '../../shared/primitives/auto_dispose.dart';
 import '../../shared/primitives/utils.dart';
 import 'inspector_screen.dart';
 import 'inspector_tree_controller.dart';
+
+final _log = Logger('inspector_controller');
 
 const inspectorRefQueryParam = 'inspectorRef';
 
@@ -77,14 +79,16 @@ class InspectorController extends DisposableController
 
     await serviceManager.onServiceAvailable;
 
-    _treeGroups = InspectorObjectGroupManager(
-      serviceManager.inspectorService as InspectorService,
-      'tree',
-    );
-    _selectionGroups = InspectorObjectGroupManager(
-      serviceManager.inspectorService as InspectorService,
-      'selection',
-    );
+    if (inspectorService is InspectorService) {
+      _treeGroups = InspectorObjectGroupManager(
+        serviceManager.inspectorService as InspectorService,
+        'tree',
+      );
+      _selectionGroups = InspectorObjectGroupManager(
+        serviceManager.inspectorService as InspectorService,
+        'selection',
+      );
+    }
 
     addAutoDisposeListener(serviceManager.isolateManager.mainIsolate, () {
       final isolate = serviceManager.isolateManager.mainIsolate.value;
@@ -191,11 +195,12 @@ class InspectorController extends DisposableController
 
   late RateLimiter _refreshRateLimiter;
 
+  InspectorServiceBase get inspectorService =>
+      serviceManager.inspectorService as InspectorServiceBase;
+
   /// Groups used to manage and cancel requests to load data to display directly
   /// in the tree.
   InspectorObjectGroupManager? _treeGroups;
-
-  InspectorObjectGroupManager get treeGroups => _treeGroups!;
 
   /// Groups used to manage and cancel requests to determine what the current
   /// selection is.
@@ -204,8 +209,6 @@ class InspectorController extends DisposableController
   /// shared more with the details subtree.
   /// TODO(jacobr): is there a way we can unify the selection and tree groups?
   InspectorObjectGroupManager? _selectionGroups;
-
-  InspectorObjectGroupManager get selectionGroups => _selectionGroups!;
 
   /// Node being highlighted due to the current hover.
   InspectorTreeNode? get currentShowNode => inspectorTree.hover;
@@ -399,9 +402,6 @@ class InspectorController extends DisposableController
     unawaited(maybeLoadUI());
   }
 
-  InspectorService get inspectorService =>
-      serviceManager.inspectorService as InspectorService;
-
   Future<void> maybeLoadUI() async {
     if (parent != null) {
       // The parent controller will drive loading the UI.
@@ -425,10 +425,13 @@ class InspectorController extends DisposableController
         inspectorRef: inspectorRef,
       );
     } else {
-      final ready = await inspectorService.isWidgetTreeReady();
       if (_disposed) return;
-      flutterAppFrameReady = ready;
-      if (isActive && ready) {
+      if (inspectorService is InspectorService) {
+        final widgetTreeReady =
+            await (inspectorService as InspectorService).isWidgetTreeReady();
+        flutterAppFrameReady = widgetTreeReady;
+      }
+      if (isActive && flutterAppFrameReady) {
         await maybeLoadUI();
       }
     }
@@ -441,7 +444,8 @@ class InspectorController extends DisposableController
     int subtreeDepth = 2,
   }) async {
     assert(!_disposed);
-    if (_disposed) {
+    final treeGroups = _treeGroups;
+    if (_disposed || treeGroups == null) {
       return;
     }
 
@@ -469,8 +473,8 @@ class InspectorController extends DisposableController
       inspectorTree.root = rootNode;
 
       refreshSelection(newSelection, detailsSelection, setSubtreeRoot);
-    } catch (error) {
-      log(error.toString(), LogLevel.error);
+    } catch (error, st) {
+      _log.shout(error, error, st);
       treeGroups.cancelNext();
       return;
     }
@@ -599,16 +603,6 @@ class InspectorController extends DisposableController
     _refreshRateLimiter.scheduleRequest();
   }
 
-  bool identicalDiagnosticsNodes(
-    RemoteDiagnosticsNode a,
-    RemoteDiagnosticsNode b,
-  ) {
-    if (a == b) {
-      return true;
-    }
-    return a.dartDiagnosticRef == b.dartDiagnosticRef;
-  }
-
   @override
   void onInspectorSelectionChanged() {
     if (!visibleToUser) {
@@ -631,7 +625,8 @@ class InspectorController extends DisposableController
       // our selection rather than updating it our self.
       return;
     }
-    if (_selectionGroups == null) {
+    final selectionGroups = _selectionGroups;
+    if (selectionGroups == null) {
       // Already disposed. Ignore this requested to update selection.
       return;
     }
@@ -680,9 +675,9 @@ class InspectorController extends DisposableController
       subtreeRoot = newSelection;
 
       applyNewSelection(newSelection, detailsSelection, true);
-    } catch (error) {
+    } catch (error, st) {
       if (selectionGroups.next == group) {
-        log(error.toString(), LogLevel.error);
+        _log.shout(error, error, st);
         selectionGroups.cancelNext();
       }
     }
@@ -792,7 +787,7 @@ class InspectorController extends DisposableController
   Future<void> _addNodeToConsole(InspectorTreeNode node) async {
     final valueRef = node.diagnostic!.valueRef;
     final isolateRef = inspectorService.isolateRef;
-    final instanceRef = await node.diagnostic!.inspectorService
+    final instanceRef = await node.diagnostic!.objectGroupApi
         ?.toObservatoryInstanceRef(valueRef);
     if (_disposed) return;
 
@@ -917,15 +912,6 @@ class InspectorController extends DisposableController
     _selectionGroups = null;
     details?.dispose();
     super.dispose();
-  }
-
-  static String treeTypeDisplayName(FlutterTreeType treeType) {
-    switch (treeType) {
-      case FlutterTreeType.widget:
-        return 'Widget';
-      case FlutterTreeType.renderObject:
-        return 'Render Objects';
-    }
   }
 
   void _onNodeAdded(

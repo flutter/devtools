@@ -2,16 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be found
 // in the LICENSE file.
 
+import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/memory/panes/diff/controller/diff_pane_controller.dart';
 import 'package:devtools_app/src/screens/memory/panes/diff/diff_pane.dart';
 import 'package:devtools_app/src/screens/memory/shared/heap/class_filter.dart';
 import 'package:devtools_app/src/screens/memory/shared/heap/model.dart';
-import 'package:devtools_app/src/service/service_manager.dart';
-import 'package:devtools_app/src/shared/config_specific/ide_theme/ide_theme.dart';
-import 'package:devtools_app/src/shared/config_specific/import_export/import_export.dart';
-import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_app/src/shared/memory/adapted_heap_data.dart';
-import 'package:devtools_app/src/shared/notifications.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -26,7 +22,7 @@ class DiffSnapshotScene extends Scene {
   late FakeServiceManager fakeServiceManager;
 
   @override
-  Widget build() {
+  Widget build(BuildContext context) {
     return wrap(
       SnapshotInstanceItemPane(controller: diffController),
     );
@@ -49,9 +45,7 @@ class DiffSnapshotScene extends Scene {
     setGlobal(ServiceConnectionManager, fakeServiceManager);
 
     diffController = DiffPaneController(_TestSnapshotTaker());
-    diffController.applyFilter(
-      ClassFilter(filterType: ClassFilterType.showAll, except: '', only: ''),
-    );
+    setClassFilterToShowAll();
 
     await diffController.takeSnapshot();
     await diffController.takeSnapshot();
@@ -60,12 +54,17 @@ class DiffSnapshotScene extends Scene {
   @override
   String get title => '$DiffSnapshotScene';
 
+  void setClassFilterToShowAll() {
+    diffController.derived.applyFilter(
+      ClassFilter(filterType: ClassFilterType.showAll, except: '', only: ''),
+    );
+  }
+
   void tearDown() {}
 }
 
 /// Provides test snapshots.
 class _TestSnapshotTaker implements SnapshotTaker {
-  bool firstTime = true;
   int _nextIndex = 0;
 
   @override

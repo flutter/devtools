@@ -7,6 +7,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 class MissingMaterialError extends StatelessWidget {
+  const MissingMaterialError({super.key});
+
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
@@ -24,7 +26,7 @@ class ExampleWidget extends StatefulWidget {
   const ExampleWidget({Key? key}) : super(key: key);
 
   @override
-  _ExampleWidgetState createState() => _ExampleWidgetState();
+  State<ExampleWidget> createState() => _ExampleWidgetState();
 }
 
 /// State for [ExampleWidget] widgets.

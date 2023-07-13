@@ -74,28 +74,19 @@ void main() {
   group('$InspectorPreferencesController', () {
     group('hoverEvalMode', () {
       late InspectorPreferencesController controller;
+      late FlutterTestStorage storage;
 
-      setUp(() async {
-        setGlobal(Storage, FlutterTestStorage());
-        setGlobal(IdeTheme, IdeTheme());
+      setUp(() {
+        setGlobal(Storage, storage = FlutterTestStorage());
         controller = InspectorPreferencesController();
       });
 
-      group('init', () {
-        setUp(() {
-          controller.setHoverEvalMode(false);
-        });
-
-        test('enables hover mode by default', () async {
-          await controller.init();
-          expect(controller.hoverEvalModeEnabled.value, isTrue);
-        });
-
-        test('when embedded, disables hover mode by default', () async {
-          setGlobal(IdeTheme, IdeTheme(embed: true));
-          await controller.init();
-          expect(controller.hoverEvalModeEnabled.value, isFalse);
-        });
+      test('default value equals inspector service default value', () async {
+        await controller.init();
+        expect(
+          controller.hoverEvalModeEnabled.value,
+          serviceManager.inspectorService!.hoverEvalModeEnabledByDefault,
+        );
       });
 
       test('can be updated', () async {
@@ -181,7 +172,7 @@ void main() {
       await controller.init();
     });
 
-    test('has expected default values', () async {
+    test('has expected default values', () {
       expect(controller.displayTreeGuidelines.value, isFalse);
     });
 
@@ -218,6 +209,57 @@ void main() {
       expect(
         controller.displayTreeGuidelines.value,
         displayTreeGuidelines,
+      );
+    });
+  });
+
+  group('$PerformancePreferencesController', () {
+    late PerformancePreferencesController controller;
+    late FlutterTestStorage storage;
+
+    setUp(() async {
+      setGlobal(Storage, storage = FlutterTestStorage());
+      controller = PerformancePreferencesController();
+      await controller.init();
+    });
+
+    test('has expected default values', () {
+      expect(controller.showFlutterFramesChart.value, isTrue);
+    });
+
+    test('stores values and reads them on init', () async {
+      storage.values.clear();
+
+      // Remember original values.
+      final showFramesChart = controller.showFlutterFramesChart.value;
+
+      // Flip the values in controller.
+      controller.showFlutterFramesChart.value = !showFramesChart;
+
+      // Check the values are stored.
+      expect(storage.values, hasLength(1));
+
+      // Reload the values from storage.
+      await controller.init();
+
+      // Check they did not change back to default.
+      expect(
+        controller.showFlutterFramesChart.value,
+        !showFramesChart,
+      );
+
+      // Flip the values in storage.
+      for (var key in storage.values.keys) {
+        storage.values[key] = (!(storage.values[key] == 'true')).toString();
+      }
+
+      // Reload the values from storage.
+      await controller.init();
+
+      // Check they flipped values are loaded.
+      expect(
+        controller.showFlutterFramesChart.value,
+        showFramesChart,
       );
     });
   });

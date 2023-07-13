@@ -9,7 +9,7 @@ void main() {
   group('FilterControllerMixin', () {
     late _TestController controller;
 
-    void _verifyBaseFilterState() {
+    void verifyBaseFilterState() {
       final activeFilter = controller.activeFilter.value;
       for (final toggleFilter in activeFilter.toggleFilters) {
         expect(
@@ -24,7 +24,7 @@ void main() {
       controller = _TestController(_sampleData);
       expect(controller.data.length, equals(7));
       expect(controller.filteredData.value, isEmpty);
-      _verifyBaseFilterState();
+      verifyBaseFilterState();
     });
 
     test('setActiveFilter applies default filters', () {
@@ -175,7 +175,7 @@ void main() {
     test('resetFilter', () {
       // Verify default state.
       controller.resetFilter();
-      _verifyBaseFilterState();
+      verifyBaseFilterState();
 
       controller.toggleFilters[0].enabled.value = true;
       controller.toggleFilters[1].enabled.value = true;
@@ -186,7 +186,7 @@ void main() {
       expect(controller.activeFilter.value.queryFilter.isEmpty, isFalse);
 
       controller.resetFilter();
-      _verifyBaseFilterState();
+      verifyBaseFilterState();
     });
   });
 }
@@ -202,9 +202,6 @@ class _TestController extends DisposableController
   // Convenience getters for testing.
   List<ToggleFilter<_TestDataClass>> get toggleFilters =>
       activeFilter.value.toggleFilters;
-
-  Map<String, QueryFilterArgument> get queryFilterArgs =>
-      activeFilter.value.queryFilter.filterArguments;
 
   @override
   List<ToggleFilter<_TestDataClass>> createToggleFilters() => [
@@ -235,7 +232,7 @@ class _TestController extends DisposableController
         ..addAll(data);
       return;
     }
-    final filterCallback = (_TestDataClass element) {
+    bool filterCallback(_TestDataClass element) {
       // First filter by the toggle filters.
       final toggleFilters = filter.toggleFilters;
       for (final toggleFilter in toggleFilters) {
@@ -271,7 +268,8 @@ class _TestController extends DisposableController
       }
 
       return true;
-    };
+    }
+
     filteredData
       ..clear()
       ..addAll(data.where(filterCallback));

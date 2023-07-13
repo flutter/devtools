@@ -1,12 +1,9 @@
-#!/bin/bash -ex
+#!/bin/bash -e
 
 DEVTOOLS_REMOTE=$(git remote -v | grep "flutter/devtools.git" | grep "(fetch)"| tail -n1 | cut -w -f1)
-TYPE=$1
 
-if [ -z "$TYPE" ] ; then
-    echo "$0 expects a type as a first parameter"
-    exit 1
-fi
+# Change to the script's directory
+cd "$(dirname "$0")"
 
 if [ -z "$DEVTOOLS_REMOTE" ] ; then
     echo "Couldn't find a remote that points to flutter/devtools.git"
@@ -19,38 +16,47 @@ if [[ ! -z  "$STATUS" ]] ; then
     exit 1
 fi
 
+echo "Getting a fresh copy of master"
+echo
 MASTER="tmp_master_$(date +%s)"
 git fetch $DEVTOOLS_REMOTE master
 git checkout -b $MASTER $DEVTOOLS_REMOTE/master
 
 
 RELEASE_BRANCH="clean_release_$(date +%s)"
-NEXT_BRANCH="next_version_$(date +%s)"
+git checkout -b "$RELEASE_BRANCH"
 
-git checkout -b $RELEASE_BRANCH;
-COMMIT_MESSAGE=$(dart tool/update_version.dart auto -d -t release)
-dart tool/update_version.dart auto -t release
-dart tool/bin/repo_tool.dart generate-changelog
-git commit -am "$COMMIT_MESSAGE"
-
-git checkout -b $NEXT_BRANCH;
-TYPE_BUMP_COMMIT_MESSAGE=$(dart tool/update_version.dart auto -d -t $TYPE)
-dart tool/update_version.dart auto -t $TYPE
-git commit -am "$TYPE_BUMP_COMMIT_MESSAGE"
-
-DEV_BUMP_COMMIT_MESSAGE=$(dart tool/update_version.dart auto -d -t dev)
-dart tool/update_version.dart auto -t dev # set the first dev version
-git commit -am "$DEV_BUMP_COMMIT_MESSAGE"
-
-
-git checkout $RELEASE_BRANCH
-
-echo "------------------------"
-echo "RELEASE HELPER FINISHED"
-echo "The branches created are as follows:"
+echo "Ensuring ./tool packages are ready"
 echo
-echo "DEVTOOLS_RELEASE_BRANCH=\"$RELEASE_BRANCH\";"
-echo "DEVTOOLS_NEXT_BRANCH=\"$NEXT_BRANCH\";"
+dart pub get
 
-export DEVTOOLS_RELEASE_BRANCH="$RELEASE_BRANCH"
-export DEVTOOLS_NEXT_BRANCH="$NEXT_BRANCH"
+cd ..
+
+ORIGINAL_VERSION=$(dart tool/update_version.dart current-version)
+
+echo "Setting the release version"
+echo
+dart tool/update_version.dart auto --type release
+
+NEW_VERSION=$(dart tool/update_version.dart current-version)
+
+COMMIT_MESSAGE="Releasing from $ORIGINAL_VERSION to $NEW_VERSION"
+
+# Stage the file, commit and push
+git commit -a -m "$COMMIT_MESSAGE"
+
+git push -u $DEVTOOLS_REMOTE $RELEASE_BRANCH
+
+echo "Creating the PR"
+echo
+
+PR_URL=$(gh pr create --draft --title "$COMMIT_MESSAGE" --body "RELEASE_NOTE_EXCEPTION=Version Bump" $CREATION_FLAGS)
+
+
+echo "Updating your flutter version to the most recent candidate."
+echo
+./tool/update_flutter_sdk.sh --local
+
+echo "Your Draft release PR can be found at: $PR_URL"
+echo
+echo "$0 DONE: Build, run and test this release using: `dart ./tool/build_e2e.dart`"

@@ -51,8 +51,7 @@ void main() {
       isolateRef,
     );
 
-    when(manager.service!.getObject(isolateId, objectId, offset: 0, count: 4))
-        .thenAnswer((_) async {
+    when(manager.service!.getObject(isolateId, objectId)).thenAnswer((_) async {
       return instance;
     });
 
@@ -81,8 +80,7 @@ void main() {
       ),
       isolateRef,
     );
-    when(manager.service!.getObject(isolateId, objectId, offset: 0, count: 4))
-        .thenAnswer((_) async {
+    when(manager.service!.getObject(isolateId, objectId)).thenAnswer((_) async {
       return instance;
     });
 
@@ -111,8 +109,7 @@ void main() {
       ),
       isolateRef,
     );
-    when(manager.service!.getObject(isolateId, objectId, offset: 0, count: 4))
-        .thenAnswer((_) async {
+    when(manager.service!.getObject(isolateId, objectId)).thenAnswer((_) async {
       return instance;
     });
 
@@ -141,8 +138,7 @@ void main() {
       ),
       isolateRef,
     );
-    when(manager.service!.getObject(isolateId, objectId, offset: 0, count: 4))
-        .thenAnswer((_) async {
+    when(manager.service!.getObject(isolateId, objectId)).thenAnswer((_) async {
       return instance;
     });
 
@@ -174,7 +170,7 @@ void main() {
         ),
         isolateRef,
       );
-      when(manager.service!.getObject(isolateId, objectId, offset: 0, count: 4))
+      when(manager.service!.getObject(isolateId, objectId))
           .thenAnswer((_) async {
         return instance;
       });
@@ -206,8 +202,7 @@ void main() {
       ),
       isolateRef,
     );
-    when(manager.service!.getObject(isolateId, objectId, offset: 0, count: 4))
-        .thenAnswer((_) async {
+    when(manager.service!.getObject(isolateId, objectId)).thenAnswer((_) async {
       return instance;
     });
 
@@ -236,8 +231,7 @@ void main() {
       ),
       isolateRef,
     );
-    when(manager.service!.getObject(isolateId, objectId, offset: 0, count: 4))
-        .thenAnswer((_) async {
+    when(manager.service!.getObject(isolateId, objectId)).thenAnswer((_) async {
       return instance;
     });
 
@@ -266,8 +260,7 @@ void main() {
       ),
       isolateRef,
     );
-    when(manager.service!.getObject(isolateId, objectId, offset: 0, count: 4))
-        .thenAnswer((_) async {
+    when(manager.service!.getObject(isolateId, objectId)).thenAnswer((_) async {
       return instance;
     });
 
@@ -299,7 +292,7 @@ void main() {
         ),
         isolateRef,
       );
-      when(manager.service!.getObject(isolateId, objectId, offset: 0, count: 4))
+      when(manager.service!.getObject(isolateId, objectId))
           .thenAnswer((_) async {
         return instance;
       });
@@ -332,8 +325,7 @@ void main() {
       ),
       isolateRef,
     );
-    when(manager.service!.getObject(isolateId, objectId, offset: 0, count: 4))
-        .thenAnswer((_) async {
+    when(manager.service!.getObject(isolateId, objectId)).thenAnswer((_) async {
       return instance;
     });
 
@@ -362,8 +354,7 @@ void main() {
       ),
       isolateRef,
     );
-    when(manager.service!.getObject(isolateId, objectId, offset: 0, count: 4))
-        .thenAnswer((_) async {
+    when(manager.service!.getObject(isolateId, objectId)).thenAnswer((_) async {
       return instance;
     });
 
@@ -393,8 +384,7 @@ void main() {
       ),
       isolateRef,
     );
-    when(manager.service!.getObject(isolateId, objectId, offset: 0, count: 4))
-        .thenAnswer((_) async {
+    when(manager.service!.getObject(isolateId, objectId)).thenAnswer((_) async {
       return instance;
     });
     await buildVariablesTree(variable);
@@ -430,8 +420,7 @@ void main() {
       ),
       isolateRef,
     );
-    when(manager.service!.getObject(isolateId, objectId, offset: 0, count: 4))
-        .thenAnswer((_) async {
+    when(manager.service!.getObject(isolateId, objectId)).thenAnswer((_) async {
       return instance;
     });
 
@@ -465,8 +454,7 @@ void main() {
       ),
       isolateRef,
     );
-    when(manager.service!.getObject(isolateId, objectId, offset: 0, count: 4))
-        .thenAnswer((_) async {
+    when(manager.service!.getObject(isolateId, objectId)).thenAnswer((_) async {
       return instance;
     });
 

@@ -121,6 +121,7 @@ class SemanticVersion with CompareMixin {
       compareTo(supportedVersion) >= 0;
 
   @override
+  // ignore: avoid-dynamic, necessary here.
   int compareTo(other) {
     if (major == other.major &&
         minor == other.minor &&

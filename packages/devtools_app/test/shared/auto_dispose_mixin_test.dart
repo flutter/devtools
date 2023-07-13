@@ -11,17 +11,17 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../test_infra/fixtures/debugging_app_async.dart';
 
+class AutoDisposeContoller extends DisposableController
+    with AutoDisposeControllerMixin {}
+
 class AutoDisposedWidget extends StatefulWidget {
   const AutoDisposedWidget(this.stream, {Key? key}) : super(key: key);
 
   final Stream stream;
 
   @override
-  _AutoDisposedWidgetState createState() => _AutoDisposedWidgetState();
+  State<AutoDisposedWidget> createState() => _AutoDisposedWidgetState();
 }
-
-class AutoDisposeContoller extends DisposableController
-    with AutoDisposeControllerMixin {}
 
 class _AutoDisposedWidgetState extends State<AutoDisposedWidget>
     with AutoDisposeMixin {
@@ -120,9 +120,10 @@ void main() {
       final disposer = Disposer();
       final notifier = ValueNotifier<int>(42);
       final values = <int>[];
-      final listener = () {
+      void listener() {
         values.add(notifier.value);
-      };
+      }
+
       disposer.addAutoDisposeListener(notifier, listener);
       expect(notifier.hasListeners, isTrue);
       notifier.value = 13;
@@ -238,35 +239,37 @@ void main() {
             expect(callbackCounter, equals(0));
           });
 
-          test('runs callback immediately if starting in the ready state',
-              () async {
-            final disposer = Disposer();
-            final trigger = ValueNotifier<bool>(isReady);
-            int callbackCounter = 0;
+          test(
+            'runs callback immediately if starting in the ready state',
+            () async {
+              final disposer = Disposer();
+              final trigger = ValueNotifier<bool>(isReady);
+              int callbackCounter = 0;
 
-            expect(trigger.hasListeners, isFalse);
+              expect(trigger.hasListeners, isFalse);
 
-            disposer.callOnceWhenReady(
-              trigger: trigger,
-              readyWhen: (triggerValue) => triggerValue == isReady,
-              callback: () {
-                callbackCounter++;
-              },
-            );
+              disposer.callOnceWhenReady(
+                trigger: trigger,
+                readyWhen: (triggerValue) => triggerValue == isReady,
+                callback: () {
+                  callbackCounter++;
+                },
+              );
 
-            expect(trigger.hasListeners, isFalse);
-            expect(callbackCounter, equals(1));
-            expect(disposer.listenables.length, equals(0));
-            expect(disposer.listeners.length, equals(0));
+              expect(trigger.hasListeners, isFalse);
+              expect(callbackCounter, equals(1));
+              expect(disposer.listenables.length, equals(0));
+              expect(disposer.listeners.length, equals(0));
 
-            // Change the isReady value to make sure we don't trigger again.
-            trigger.value = !trigger.value;
+              // Change the isReady value to make sure we don't trigger again.
+              trigger.value = !trigger.value;
 
-            await delay();
+              await delay();
 
-            // Verify callback not fired again.
-            expect(callbackCounter, equals(1));
-          });
+              // Verify callback not fired again.
+              expect(callbackCounter, equals(1));
+            },
+          );
         });
       }
     });
@@ -297,7 +300,7 @@ void main() {
     expect(state.eventCount, 2);
   });
 
-  test('Test Listenable auto dispose', () async {
+  test('Test Listenable auto dispose', () {
     final controller = AutoDisposeContoller();
     final notifier = ValueNotifier<int>(42);
     final values = <int>[];

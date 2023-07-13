@@ -7,12 +7,12 @@ import 'dart:core';
 
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
+import 'package:logging/logging.dart';
 import 'package:vm_service/vm_service.dart' hide Error;
 
 import '../screens/logging/vm_service_logger.dart';
 import '../screens/performance/timeline_streams.dart';
 import '../shared/analytics/analytics.dart' as ga;
-import '../shared/config_specific/logger/logger.dart';
 import '../shared/connected_app.dart';
 import '../shared/console/console_service.dart';
 import '../shared/diagnostics/inspector_service.dart';
@@ -28,6 +28,8 @@ import 'service_extension_manager.dart';
 import 'service_registrations.dart' as registrations;
 import 'vm_flags.dart';
 import 'vm_service_wrapper.dart';
+
+final _log = Logger('service_manager');
 
 // Note: don't check this in enabled.
 /// Used to debug service protocol traffic. All requests to to the VM service
@@ -69,9 +71,10 @@ class ServiceConnectionManager {
 
   final _registeredServiceNotifiers = <String, ImmediateValueNotifier<bool>>{};
 
-  Map<String, List<String>> get registeredMethodsForService =>
+  /// Mapping of service name to service method.
+  Map<String, String> get registeredMethodsForService =>
       _registeredMethodsForService;
-  final Map<String, List<String>> _registeredMethodsForService = {};
+  final Map<String, String> _registeredMethodsForService = {};
 
   final vmFlagManager = VmFlagManager();
 
@@ -165,12 +168,12 @@ class ServiceConnectionManager {
     String? isolateId,
     Map<String, dynamic>? args,
   }) async {
-    final registered = _registeredMethodsForService[name] ?? const [];
-    if (registered.isEmpty) {
-      throw Exception('There are no registered methods for service "$name"');
+    final registeredMethod = _registeredMethodsForService[name];
+    if (registeredMethod == null) {
+      throw Exception('There is no registered method for service "$name"');
     }
     return service!.callMethod(
-      registered.first,
+      registeredMethod,
       isolateId: isolateId,
       args: args,
     );
@@ -188,14 +191,10 @@ class ServiceConnectionManager {
     VmServiceWrapper service, {
     required Future<void> onClosed,
   }) async {
-    // Getting and setting a variable should not count as repeated references.
-    // ignore: prefer-moving-to-variable
     if (service == this.service) {
       // Service already opened.
       return;
     }
-    // Getting and setting a variable should not count as repeated references.
-    // ignore: prefer-moving-to-variable
     this.service = service;
     if (_serviceAvailable.isCompleted) {
       _serviceAvailable = Completer();
@@ -214,7 +213,7 @@ class ServiceConnectionManager {
     serviceExtensionManager.vmServiceOpened(service, connectedApp!);
     resolvedUriManager.vmServiceOpened();
     await vmFlagManager.vmServiceOpened(service);
-    await timelineStreamManager.vmServiceOpened(service, connectedApp!);
+    timelineStreamManager.vmServiceOpened(service, connectedApp!);
     // This needs to be called last in the above group of `vmServiceOpened`
     // calls.
     errorBadgeManager.vmServiceOpened(service);
@@ -226,8 +225,6 @@ class ServiceConnectionManager {
     _inspectorService?.dispose();
     _inspectorService = null;
 
-    // Value may have changes between repeated references.
-    // ignore: prefer-moving-to-variable
     if (service != this.service) {
       // A different service has been opened.
       return;
@@ -235,8 +232,6 @@ class ServiceConnectionManager {
 
     vm = await service.getVM();
 
-    // Value may have changes between repeated references.
-    // ignore: prefer-moving-to-variable
     if (service != this.service) {
       // A different service has been opened.
       return;
@@ -256,11 +251,10 @@ class ServiceConnectionManager {
     unawaited(onClosed.then((_) => vmServiceClosed()));
 
     void handleServiceEvent(Event e) {
+      _log.fine('ServiceEvent: [${e.kind}] - ${e.service}');
       if (e.kind == EventKind.kServiceRegistered) {
         final serviceName = e.service!;
-        _registeredMethodsForService
-            .putIfAbsent(serviceName, () => [])
-            .add(e.method!);
+        _registeredMethodsForService[serviceName] = e.method!;
         final serviceNotifier = _registeredServiceNotifiers.putIfAbsent(
           serviceName,
           () => ImmediateValueNotifier(true),
@@ -297,20 +291,15 @@ class ServiceConnectionManager {
     for (final id in streamIds) {
       try {
         unawaited(service.streamListen(id));
-      } catch (e) {
+      } catch (e, st) {
         if (id.endsWith('Logging')) {
           // Don't complain about '_Logging' or 'Logging' events (new VMs don't
           // have the private names, and older ones don't have the public ones).
         } else {
-          log(
-            "Service client stream not supported: '$id'\n  $e",
-            LogLevel.error,
-          );
+          _log.shout("Service client stream not supported: '$id'\n  $e", e, st);
         }
       }
     }
-    // Value may have changes between repeated references.
-    // ignore: prefer-moving-to-variable
     if (service != this.service) {
       // A different service has been opened.
       return;
@@ -320,8 +309,6 @@ class ServiceConnectionManager {
 
     final isolates = vm?.isolatesForDevToolsMode() ?? <IsolateRef>[];
     await isolateManager.init(isolates);
-    // Value may have changes between repeated references.
-    // ignore: prefer-moving-to-variable
     if (service != this.service) {
       // A different service has been opened.
       return;
@@ -330,8 +317,6 @@ class ServiceConnectionManager {
     // This needs to be called before calling
     // `ga.setupUserApplicationDimensions()`.
     await connectedApp!.initializeValues();
-    // Value may have changes between repeated references.
-    // ignore: prefer-moving-to-variable
     if (service != this.service) {
       // A different service has been opened.
       return;
@@ -341,8 +326,6 @@ class ServiceConnectionManager {
 
     // Set up analytics dimensions for the connected app.
     ga.setupUserApplicationDimensions();
-    // Value may have changes between repeated references.
-    // ignore: prefer-moving-to-variable
     if (service != this.service) {
       // A different service has been opened.
       return;
@@ -361,6 +344,14 @@ class ServiceConnectionManager {
   void vmServiceClosed({
     ConnectedState connectionState = const ConnectedState(false),
   }) {
+    // Set [offlineController.previousConnectedApp] in case we need it for
+    // viewing data after disconnect. This must be done before resetting the
+    // rest of the service manager state.
+    final previousConnectedApp = connectedApp != null
+        ? OfflineConnectedApp.parse(connectedApp!.toJson())
+        : null;
+    offlineController.previousConnectedApp = previousConnectedApp;
+
     _serviceAvailable = Completer();
 
     service = null;
@@ -383,6 +374,8 @@ class ServiceConnectionManager {
 
     _connectedState.value = connectionState;
     _connectionClosedController.add(null);
+
+    _registeredMethodsForService.clear();
 
     _inspectorService?.onIsolateStopped();
     _inspectorService?.dispose();
@@ -470,7 +463,7 @@ class ServiceConnectionManager {
     if (flutterView == null) {
       final message =
           'No Flutter Views to query: ${flutterViewListResponse.json}';
-      log(message, LogLevel.error);
+      _log.shout(message);
       throw Exception(message);
     }
 

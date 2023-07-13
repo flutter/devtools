@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 import 'package:devtools_app/devtools_app.dart';
-import 'package:devtools_app/src/shared/config_specific/import_export/import_export.dart';
 import 'package:devtools_test/devtools_test.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 
@@ -17,6 +17,8 @@ void main() {
     setUp(() {
       setGlobal(IdeTheme, IdeTheme());
       setGlobal(OfflineModeController, OfflineModeController());
+      setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
+      setGlobal(PreferencesController, PreferencesController());
       mockServiceManager = MockServiceConnectionManager();
       final connectedApp = MockConnectedApp();
       mockConnectedApp(
@@ -26,8 +28,12 @@ void main() {
         isWebApp: false,
       );
       when(mockServiceManager.connectedApp).thenReturn(connectedApp);
+      when(mockServiceManager.connectedState)
+          .thenReturn(ValueNotifier(const ConnectedState(true)));
       setGlobal(ServiceConnectionManager, mockServiceManager);
-      offlineController.enterOfflineMode();
+      offlineController.enterOfflineMode(
+        offlineApp: serviceManager.connectedApp!,
+      );
       controller = PerformanceController();
     });
 

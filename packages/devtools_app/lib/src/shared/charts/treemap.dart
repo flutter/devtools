@@ -4,6 +4,7 @@
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:logging/logging.dart';
 
 import '../common_widgets.dart';
 import '../primitives/trees.dart';
@@ -13,9 +14,12 @@ import '../ui/colors.dart';
 
 enum PivotType { pivotByMiddle, pivotBySize }
 
+final _log = Logger('charts/treemap');
+
 class Treemap extends StatefulWidget {
   // TODO(peterdjlee): Consider auto-expanding rootNode named 'src'.
   const Treemap.fromRoot({
+    super.key,
     required this.rootNode,
     this.nodes,
     required this.levelsVisible,
@@ -26,6 +30,7 @@ class Treemap extends StatefulWidget {
   }) : assert((rootNode == null) != (nodes == null));
 
   const Treemap.fromNodes({
+    super.key,
     this.rootNode,
     required this.nodes,
     required this.levelsVisible,
@@ -82,7 +87,7 @@ class Treemap extends StatefulWidget {
   static const minHeightToDisplayCellText = 50.0;
 
   @override
-  _TreemapState createState() => _TreemapState();
+  State<Treemap> createState() => _TreemapState();
 }
 
 class _TreemapState extends State<Treemap> {
@@ -614,11 +619,7 @@ class TreemapNode extends TreeNode<TreemapNode> {
 
   TextSpan displayText({Color? color, bool oneLine = true}) {
     var displayName = name;
-    final textColor = color == null
-        ? showDiff
-            ? Colors.white
-            : Colors.black
-        : color;
+    final textColor = color ?? (showDiff ? Colors.white : Colors.black);
 
     // Trim beginning of the name of [this] if it starts with its parent's name.
     // If the parent node and the child node's name are exactly the same,
@@ -701,9 +702,9 @@ class TreemapNode extends TreeNode<TreemapNode> {
   }
 
   void printTreeHelper(TreemapNode root, String tabs) {
-    print(tabs + '$root');
+    _log.info('$tabs$root');
     for (final child in root.children) {
-      printTreeHelper(child, tabs + '\t');
+      printTreeHelper(child, '$tabs\t');
     }
   }
 
@@ -723,6 +724,7 @@ class TreemapNode extends TreeNode<TreemapNode> {
 
 class PositionedCell extends Positioned {
   PositionedCell({
+    super.key,
     required this.rect,
     required this.node,
     required child,

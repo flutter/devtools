@@ -8,12 +8,13 @@ library gtags;
 // ignore_for_file: non_constant_identifier_names
 
 import 'dart:async';
+// ignore: avoid_web_libraries_in_flutter, by design
 import 'dart:html';
 
 import 'package:js/js.dart';
+import 'package:logging/logging.dart';
 
 import '../../../devtools.dart' as devtools show version;
-import '../config_specific/logger/logger.dart';
 import '../config_specific/server/server.dart' as server;
 import '../config_specific/url/url.dart';
 import '../globals.dart';
@@ -31,18 +32,6 @@ const String appTypeDartCLI = 'dart_cli';
 // Dimensions2 BuildType values:
 const String buildTypeDebug = 'debug';
 const String buildTypeProfile = 'profile';
-// Dimensions3 PlatformType values:
-//    android
-//    linux
-//    ios
-//    macos
-//    windows
-//    fuchsia
-//    unknown     VM Service before version 3.24
-// Dimension4 devToolsPlatformType values:
-const String devToolsPlatformTypeMac = 'MacIntel';
-const String devToolsPlatformTypeLinux = 'Linux';
-const String devToolsPlatformTypeWindows = 'Windows';
 // Start with Android_n.n.n
 const String devToolsPlatformTypeAndroid = 'Android_';
 // Dimension5 devToolsChrome starts with
@@ -54,6 +43,8 @@ const String devToolsChromeOS = 'CrOS'; // Chrome OS
 // Dimension7 ideLaunched
 const String ideLaunchedQuery = 'ide'; // '&ide=' query parameter
 const String ideLaunchedCLI = 'CLI'; // Command Line Interface
+
+final _log = Logger('_analytics_web');
 
 @JS('initializeGA')
 external void initializeGA();
@@ -104,6 +95,10 @@ class GtagEventDevTools extends GtagEvent {
     int? heap_diff_objects_before, // metric7
     int? heap_diff_objects_after, // metric8
     int? heap_objects_total, // metric9
+    // Inspector screen metrics. See [InspectorScreenMetrics].
+    int? root_set_count, // metric10
+    int? row_count, // metric11
+    int? inspector_tree_controller_id, // metric12
   });
 
   @override
@@ -165,6 +160,12 @@ class GtagEventDevTools extends GtagEvent {
   external int? get heap_diff_objects_after;
 
   external int? get heap_objects_total;
+
+  external int? get root_set_count;
+
+  external int? get row_count;
+
+  external int? get inspector_tree_controller_id;
 }
 
 // This cannot be a factory constructor in the [GtagEventDevTools] class due to
@@ -225,6 +226,15 @@ GtagEventDevTools _gtagEvent({
     heap_objects_total: screenMetrics is MemoryScreenMetrics
         ? screenMetrics.heapObjectsTotal
         : null,
+    // [InspectorScreenMetrics]
+    root_set_count: screenMetrics is InspectorScreenMetrics
+        ? screenMetrics.rootSetCount
+        : null,
+    row_count:
+        screenMetrics is InspectorScreenMetrics ? screenMetrics.rowCount : null,
+    inspector_tree_controller_id: screenMetrics is InspectorScreenMetrics
+        ? screenMetrics.inspectorTreeControllerId
+        : null,
   );
 }
 
@@ -280,6 +290,15 @@ GtagExceptionDevTools _gtagException(
     heap_objects_total: screenMetrics is MemoryScreenMetrics
         ? screenMetrics.heapObjectsTotal
         : null,
+    // [InspectorScreenMetrics]
+    root_set_count: screenMetrics is InspectorScreenMetrics
+        ? screenMetrics.rootSetCount
+        : null,
+    row_count:
+        screenMetrics is InspectorScreenMetrics ? screenMetrics.rowCount : null,
+    inspector_tree_controller_id: screenMetrics is InspectorScreenMetrics
+        ? screenMetrics.inspectorTreeControllerId
+        : null,
   );
 }
 
@@ -318,6 +337,10 @@ class GtagExceptionDevTools extends GtagException {
     int? heap_diff_objects_before, // metric7
     int? heap_diff_objects_after, // metric8
     int? heap_objects_total, // metric9
+    // Inspector screen metrics. See [InspectorScreenMetrics].
+    int? root_set_count, // metric10
+    int? row_count, // metric11
+    int? inspector_tree_controller_id, // metric12
   });
 
   @override
@@ -366,6 +389,12 @@ class GtagExceptionDevTools extends GtagException {
   external int? get heap_diff_objects_after;
 
   external int? get heap_objects_total;
+
+  external int? get root_set_count;
+
+  external int? get row_count;
+
+  external int? get inspector_tree_controller_id;
 }
 
 /// Request DevTools property value 'enabled' (GA enabled) stored in the file
@@ -384,6 +413,7 @@ void screen(
   String screenName, [
   int value = 0,
 ]) {
+  _log.fine('Event: Screen(screenName:$screenName, value:$value)');
   GTag.event(
     screenName,
     gaEventProvider: () => _gtagEvent(
@@ -428,11 +458,10 @@ void timeEnd(
   final startTime = _timedOperationsInProgress.remove(operationKey);
   assert(startTime != null);
   if (startTime == null) {
-    log(
+    _log.warning(
       'Could not time operation "$timedOperation" because a) `timeEnd` was '
       'called before `timeStart` or b) the `screenName` and `timedOperation`'
       'parameters for the `timeStart` and `timeEnd` calls do not match.',
-      LogLevel.warning,
     );
     return;
   }
@@ -471,10 +500,9 @@ void timeSync(
     syncOperation();
   } catch (e, st) {
     // Do not send the timing analytic to GA if the operation failed.
-    log(
+    _log.warning(
       'Could not time sync operation "$timedOperation" '
       'because an exception was thrown:\n$e\n$st',
-      LogLevel.warning,
     );
     rethrow;
   }
@@ -502,10 +530,9 @@ Future<void> timeAsync(
     await asyncOperation();
   } catch (e, st) {
     // Do not send the timing analytic to GA if the operation failed.
-    log(
+    _log.warning(
       'Could not time async operation "$timedOperation" '
       'because an exception was thrown:\n$e\n$st',
-      LogLevel.warning,
     );
     rethrow;
   }
@@ -527,6 +554,12 @@ void _timing(
   required int durationMicros,
   ScreenAnalyticsMetrics? screenMetrics,
 }) {
+  _log.fine(
+    'Event: _timing('
+    'screenName:$screenName, '
+    'timedOperation:$timedOperation, '
+    'durationMicros:$durationMicros)',
+  );
   GTag.event(
     screenName,
     gaEventProvider: () => _gtagEvent(
@@ -546,6 +579,13 @@ void select(
   bool nonInteraction = false,
   ScreenAnalyticsMetrics Function()? screenMetricsProvider,
 }) {
+  _log.fine(
+    'Event: select('
+    'screenName:$screenName, '
+    'selectedItem:$selectedItem, '
+    'value:$value, '
+    'nonInteraction:$nonInteraction)',
+  );
   GTag.event(
     screenName,
     gaEventProvider: () => _gtagEvent(
@@ -602,44 +642,44 @@ String _flutterClientId = ''; // dimension8 Flutter tool clientId.
 
 String get userAppType => _userAppType;
 
-set userAppType(String __userAppType) {
-  _userAppType = __userAppType;
+set userAppType(String newUserAppType) {
+  _userAppType = newUserAppType;
 }
 
 String get userBuildType => _userBuildType;
 
-set userBuildType(String __userBuildType) {
-  _userBuildType = __userBuildType;
+set userBuildType(String newUserBuildType) {
+  _userBuildType = newUserBuildType;
 }
 
 String get userPlatformType => _userPlatformType;
 
-set userPlatformType(String __userPlatformType) {
-  _userPlatformType = __userPlatformType;
+set userPlatformType(String newUserPlatformType) {
+  _userPlatformType = newUserPlatformType;
 }
 
 String get devtoolsPlatformType => _devtoolsPlatformType;
 
-set devtoolsPlatformType(String __devtoolsPlatformType) {
-  _devtoolsPlatformType = __devtoolsPlatformType;
+set devtoolsPlatformType(String newDevtoolsPlatformType) {
+  _devtoolsPlatformType = newDevtoolsPlatformType;
 }
 
 String get devtoolsChrome => _devtoolsChrome;
 
-set devtoolsChrome(String __devtoolsChrome) {
-  _devtoolsChrome = __devtoolsChrome;
+set devtoolsChrome(String newDevtoolsChrome) {
+  _devtoolsChrome = newDevtoolsChrome;
 }
 
 String get ideLaunched => _ideLaunched;
 
-set ideLaunched(String __ideLaunched) {
-  _ideLaunched = __ideLaunched;
+set ideLaunched(String newIdeLaunched) {
+  _ideLaunched = newIdeLaunched;
 }
 
 String get flutterClientId => _flutterClientId;
 
-set flutterClientId(String __flutterClientId) {
-  _flutterClientId = __flutterClientId;
+set flutterClientId(String newFlutterClientId) {
+  _flutterClientId = newFlutterClientId;
 }
 
 bool _computingDimensions = false;
@@ -736,28 +776,17 @@ Future<void> computeFlutterClientId() async {
 int _stillWaiting = 0;
 
 void waitForDimensionsComputed(String screenName) {
-  Timer(const Duration(milliseconds: 100), () async {
+  Timer(const Duration(milliseconds: 100), () {
     if (_analyticsComputed) {
       screen(screenName);
     } else {
       if (_stillWaiting++ < 50) {
         waitForDimensionsComputed(screenName);
       } else {
-        log('Cancel waiting for dimensions.', LogLevel.warning);
+        _log.warning('Cancel waiting for dimensions.');
       }
     }
   });
-}
-
-// Loading screen from a hash code, can't collect GA (if enabled) until we have
-// all the dimension data.
-void setupAndGaScreen(String screenName) {
-  if (!_analyticsComputed) {
-    _stillWaiting++;
-    waitForDimensionsComputed(screenName);
-  } else {
-    screen(screenName);
-  }
 }
 
 Future<void> setupDimensions() async {

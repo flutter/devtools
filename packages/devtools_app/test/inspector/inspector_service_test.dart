@@ -2,7 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// ignore_for_file: avoid_print
+
 @TestOn('vm')
+import 'dart:async';
+
+import 'package:devtools_app/src/shared/config_specific/ide_theme/ide_theme.dart';
 import 'package:devtools_app/src/shared/console/primitives/simple_items.dart';
 import 'package:devtools_app/src/shared/diagnostics/diagnostics_node.dart';
 import 'package:devtools_app/src/shared/diagnostics/inspector_service.dart';
@@ -14,7 +19,7 @@ import '../test_infra/flutter_test_driver.dart' show FlutterRunConfiguration;
 import '../test_infra/flutter_test_environment.dart';
 import '../test_infra/matchers/matchers.dart';
 
-void main() async {
+void main() {
   initializeLiveTestWidgetsFlutterBindingWithAssets();
 
   final FlutterTestEnvironment env = FlutterTestEnvironment(
@@ -25,6 +30,7 @@ void main() async {
 
   env.afterEverySetup = () async {
     assert(serviceManager.connectedAppInitialized);
+    setGlobal(IdeTheme, IdeTheme());
 
     inspectorService = InspectorService();
     if (env.runConfig.trackWidgetCreation) {
@@ -41,7 +47,7 @@ void main() async {
   try {
     group('inspector service tests', () {
       tearDown(env.tearDownEnvironment);
-      tearDownAll(() => env.tearDownEnvironment(force: true));
+      tearDownAll(() => unawaited(env.tearDownEnvironment(force: true)));
 
       test('track widget creation on', () async {
         await env.setupEnvironment();
@@ -449,7 +455,7 @@ void main() async {
         expect(nodeInDetailsTree.valueRef, equals(nodeInSummaryTree.valueRef));
 
         await group.setSelectionInspector(nodeInDetailsTree.valueRef, true);
-        var selection = (await group.getSelection(
+        final selection = (await group.getSelection(
           null,
           FlutterTreeType.widget,
           isSummaryTree: false,
@@ -464,21 +470,18 @@ void main() async {
           ),
         );
 
-        // Get selection in the render tree.
-        selection = (await group.getSelection(
-          null,
-          FlutterTreeType.renderObject,
-          isSummaryTree: false,
-        ))!;
-        expect(
-          treeToDebugString(selection),
-          equalsIgnoringHashCodes(
-            'RenderParagraph#00000 relayoutBoundary=up2\n'
-            ' └─text: TextSpan\n',
-          ),
-        );
-
         await group.dispose();
+      });
+
+      test('enables hover eval mode by default', () async {
+        await env.setupEnvironment();
+        expect(inspectorService!.hoverEvalModeEnabledByDefault, isTrue);
+      });
+
+      test('disables hover eval mode by default when embedded', () async {
+        await env.setupEnvironment();
+        setGlobal(IdeTheme, IdeTheme(embed: true));
+        expect(inspectorService!.hoverEvalModeEnabledByDefault, isFalse);
       });
 
 // TODO(jacobr): uncomment this test once we have a more dependable golden

@@ -124,10 +124,10 @@ class TimelineStreamManager extends Disposer {
     }
   }
 
-  Future<void> vmServiceOpened(
+  void vmServiceOpened(
     VmServiceWrapper service,
     ConnectedApp connectedApp,
-  ) async {
+  ) {
     cancelStreamSubscriptions();
     _service = service;
 

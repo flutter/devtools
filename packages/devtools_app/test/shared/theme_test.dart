@@ -17,67 +17,86 @@ void main() {
     ThemeData theme;
 
     test('can be used without override', () {
-      theme = themeFor(isDarkTheme: true, ideTheme: IdeTheme());
+      theme = themeFor(
+        isDarkTheme: true,
+        ideTheme: IdeTheme(),
+        theme: ThemeData(
+          useMaterial3: true,
+          colorScheme: darkColorScheme,
+        ),
+      );
       expect(theme.brightness, equals(Brightness.dark));
       expect(
         theme.scaffoldBackgroundColor,
-        equals(ThemeData.dark().scaffoldBackgroundColor),
+        equals(darkColorScheme.surface),
       );
 
-      theme = themeFor(isDarkTheme: false, ideTheme: IdeTheme());
+      theme = themeFor(
+        isDarkTheme: false,
+        ideTheme: IdeTheme(),
+        theme: ThemeData(
+          useMaterial3: true,
+          colorScheme: lightColorScheme,
+        ),
+      );
       expect(theme.brightness, equals(Brightness.light));
       expect(
         theme.scaffoldBackgroundColor,
-        equals(ThemeData.light().scaffoldBackgroundColor),
+        equals(lightColorScheme.surface),
       );
     });
 
     test('can be inferred from override background color', () {
       theme = themeFor(
-        isDarkTheme: false, // Will be overridden by black BG
+        isDarkTheme: false, // Will be overridden by white BG
+        ideTheme: IdeTheme(backgroundColor: Colors.white70),
+        theme: ThemeData(
+          useMaterial3: true,
+          colorScheme: lightColorScheme,
+        ),
+      );
+      expect(theme.brightness, equals(Brightness.light));
+      expect(theme.scaffoldBackgroundColor, equals(Colors.white70));
+
+      theme = themeFor(
+        isDarkTheme: true, // Will be overridden by black BG
         ideTheme: IdeTheme(backgroundColor: Colors.black),
+        theme: ThemeData(
+          useMaterial3: true,
+          colorScheme: darkColorScheme,
+        ),
       );
       expect(theme.brightness, equals(Brightness.dark));
       expect(theme.scaffoldBackgroundColor, equals(Colors.black));
-
-      theme = themeFor(
-        isDarkTheme: true, // Will be overridden by white BG
-        ideTheme: IdeTheme(backgroundColor: Colors.white),
-      );
-      expect(theme.brightness, equals(Brightness.light));
-      expect(theme.scaffoldBackgroundColor, equals(Colors.white));
     });
 
     test('will not be inferred for colors that are not dark/light enough', () {
       theme = themeFor(
         isDarkTheme: false, // Will not be overridden - not dark enough
         ideTheme: IdeTheme(backgroundColor: Colors.orange),
+        theme: ThemeData(
+          useMaterial3: true,
+          colorScheme: lightColorScheme,
+        ),
       );
       expect(theme.brightness, equals(Brightness.light));
       expect(
         theme.scaffoldBackgroundColor,
-        equals(ThemeData.light().scaffoldBackgroundColor),
+        equals(lightColorScheme.surface),
       );
 
       theme = themeFor(
         isDarkTheme: true, // Will not be overridden - not light enough
         ideTheme: IdeTheme(backgroundColor: Colors.orange),
+        theme: ThemeData(
+          useMaterial3: true,
+          colorScheme: darkColorScheme,
+        ),
       );
       expect(theme.brightness, equals(Brightness.dark));
       expect(
         theme.scaffoldBackgroundColor,
-        equals(ThemeData.dark().scaffoldBackgroundColor),
-      );
-    });
-
-    test('custom background will not be used if not dark/light enough', () {
-      theme = themeFor(
-        isDarkTheme: false,
-        ideTheme: IdeTheme(backgroundColor: Colors.orange),
-      );
-      expect(
-        theme.scaffoldBackgroundColor,
-        equals(ThemeData.light().scaffoldBackgroundColor),
+        equals(darkColorScheme.surface),
       );
     });
   });

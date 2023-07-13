@@ -9,21 +9,18 @@ import 'package:provider/provider.dart';
 
 import '../../service/service_extension_widgets.dart';
 import '../../shared/analytics/analytics.dart' as ga;
+import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/common_widgets.dart';
 import '../../shared/primitives/auto_dispose.dart';
-import '../../shared/primitives/simple_items.dart';
 import '../../shared/screen.dart';
 import '../../shared/split.dart';
 import '../../shared/theme.dart';
 import '../../shared/ui/filter.dart';
-import '../../shared/ui/icons.dart';
 import '../../shared/ui/search.dart';
 import '../../shared/utils.dart';
 import '_log_details.dart';
 import '_logs_table.dart';
 import 'logging_controller.dart';
-
-final loggingSearchFieldKey = GlobalKey(debugLabel: 'LoggingSearchFieldKey');
 
 /// Presents logs from the connected app.
 class LoggingScreen extends Screen {
@@ -31,7 +28,7 @@ class LoggingScreen extends Screen {
       : super(
           id,
           title: ScreenMetaData.logging.title,
-          icon: Octicons.clippy,
+          icon: ScreenMetaData.logging.icon,
         );
 
   static final id = ScreenMetaData.logging.id;
@@ -58,7 +55,7 @@ class LoggingScreen extends Screen {
 }
 
 class LoggingScreenBody extends StatefulWidget {
-  const LoggingScreenBody();
+  const LoggingScreenBody({super.key});
 
   static const filterQueryInstructions = '''
 Type a filter query to show or hide specific logs.
@@ -74,20 +71,19 @@ Example queries:
 ''';
 
   @override
-  _LoggingScreenState createState() => _LoggingScreenState();
+  State<LoggingScreenBody> createState() => _LoggingScreenState();
 }
 
 class _LoggingScreenState extends State<LoggingScreenBody>
     with
         AutoDisposeMixin,
-        ProvidedControllerMixin<LoggingController, LoggingScreenBody>,
-        SearchFieldMixin<LoggingScreenBody> {
+        ProvidedControllerMixin<LoggingController, LoggingScreenBody> {
   late List<LogData> filteredLogs;
 
   @override
   void initState() {
     super.initState();
-    ga.screen(LoggingScreen.id);
+    ga.screen(gac.logging);
   }
 
   @override
@@ -110,7 +106,7 @@ class _LoggingScreenState extends State<LoggingScreenBody>
     return Column(
       children: [
         _buildLoggingControls(),
-        const SizedBox(height: denseRowSpacing),
+        const SizedBox(height: intermediateSpacing),
         Expanded(
           child: _buildLoggingBody(),
         ),
@@ -118,41 +114,45 @@ class _LoggingScreenState extends State<LoggingScreenBody>
     );
   }
 
+  // TODO(kenz): replace with helper widget
   Widget _buildLoggingControls() {
     final hasData = controller.filteredData.value.isNotEmpty;
     return Row(
       children: [
-        ClearButton(onPressed: controller.clear),
+        ClearButton(
+          onPressed: controller.clear,
+          gaScreen: gac.logging,
+          gaSelection: gac.clear,
+        ),
         const Spacer(),
-        StructuredErrorsToggle(),
+        const StructuredErrorsToggle(),
         const SizedBox(width: denseSpacing),
         // TODO(kenz): fix focus issue when state is refreshed
-        Container(
-          width: wideSearchTextWidth,
-          height: defaultTextFieldHeight,
-          child: buildSearchField(
-            controller: controller,
-            searchFieldKey: loggingSearchFieldKey,
-            searchFieldEnabled: hasData,
-            shouldRequestFocus: false,
-            supportsNavigation: true,
-          ),
+        SearchField<LoggingController>(
+          searchFieldWidth: wideSearchFieldWidth,
+          searchController: controller,
+          searchFieldEnabled: hasData,
         ),
         const SizedBox(width: denseSpacing),
         FilterButton(
           onPressed: _showFilterDialog,
-          isFilterActive: filteredLogs.length != controller.data.length,
+          isFilterActive: controller.isFilterActive,
         ),
       ],
     );
   }
 
+  // TODO(kenz): replace with helper widget.
   Widget _buildLoggingBody() {
     return Split(
       axis: Axis.vertical,
       initialFractions: const [0.72, 0.28],
+      // TODO(kenz): refactor so that the LogDetails header can be the splitter.
+      // This would be more consistent with other screens that use the console
+      // header as the splitter.
       children: [
-        OutlineDecoration(
+        RoundedOutlinedBorder(
+          clip: true,
           child: LogsTable(
             data: filteredLogs,
             selectionNotifier: controller.selectedLog,

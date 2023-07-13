@@ -132,30 +132,10 @@ class ConsoleService extends Disposer {
     );
   }
 
-  void appendInstanceSet({
-    required String type,
-    required InstanceSet instanceSet,
-    required IsolateRef? isolateRef,
-  }) async {
-    _stdioTrailingNewline = false;
-    final variable = DartObjectNode.fromInstanceSet(
-      text:
-          '$type (${instanceSet.instances?.length ?? 0} out of ${instanceSet.totalCount} instances)',
-      instanceSet: instanceSet,
-      isolateRef: isolateRef,
-    );
-
-    await buildVariablesTree(variable);
-
-    _stdio.add(
-      ConsoleLine.dartObjectNode(variable),
-    );
-  }
-
   final _stdio = ListValueNotifier<ConsoleLine>([]);
   bool _stdioTrailingNewline = false;
 
-  ObjectGroupBase get objectGroup {
+  InspectorObjectGroupBase get objectGroup {
     final inspectorService = serviceManager.inspectorService!;
     if (_objectGroup?.inspectorService == inspectorService) {
       return _objectGroup!;
@@ -165,7 +145,7 @@ class ConsoleService extends Disposer {
     return _objectGroup!;
   }
 
-  ObjectGroupBase? _objectGroup;
+  InspectorObjectGroupBase? _objectGroup;
 
   /// Clears the contents of stdio.
   void clearStdio() {
@@ -182,8 +162,6 @@ class ConsoleService extends Disposer {
     if (item is! VariableConsoleLine) return null;
     return item.variable;
   }
-
-  void appendMessage(String text) {}
 
   /// Append to the stdout / stderr buffer.
   void appendStdio(String text) {

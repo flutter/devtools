@@ -2,12 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// TODO(polinach): consider reusing CheckboxSettings from shared/common_widgets
-// and then this hide can be removed.
-export 'src/app.dart' hide CheckboxSetting;
+export 'src/app.dart';
 export 'src/extension_points/extensions_base.dart';
 export 'src/extension_points/extensions_external.dart';
+export 'src/framework/app_bar.dart';
+export 'src/framework/home_screen.dart';
 export 'src/framework/notifications_view.dart';
+export 'src/framework/release_notes/release_notes.dart';
+export 'src/framework/status_line.dart';
 export 'src/screens/app_size/app_size_controller.dart';
 export 'src/screens/app_size/app_size_screen.dart';
 export 'src/screens/debugger/breakpoint_manager.dart';
@@ -23,8 +25,8 @@ export 'src/screens/inspector/inspector_screen.dart';
 export 'src/screens/inspector/inspector_tree_controller.dart';
 export 'src/screens/logging/logging_controller.dart';
 export 'src/screens/logging/logging_screen.dart';
-export 'src/screens/memory/memory_controller.dart';
-export 'src/screens/memory/memory_screen.dart';
+export 'src/screens/memory/framework/connected/memory_controller.dart';
+export 'src/screens/memory/framework/memory_screen.dart';
 export 'src/screens/network/network_controller.dart';
 export 'src/screens/network/network_model.dart';
 export 'src/screens/network/network_screen.dart';
@@ -67,6 +69,7 @@ export 'src/shared/charts/treemap.dart';
 export 'src/shared/common_widgets.dart';
 export 'src/shared/config_specific/ide_theme/ide_theme.dart';
 export 'src/shared/connected_app.dart';
+export 'src/shared/connection_info.dart';
 export 'src/shared/console/console_service.dart';
 export 'src/shared/console/eval/eval_service.dart';
 export 'src/shared/console/eval/inspector_tree.dart';
@@ -78,9 +81,11 @@ export 'src/shared/error_badge_manager.dart';
 export 'src/shared/globals.dart';
 export 'src/shared/http/http_request_data.dart';
 export 'src/shared/notifications.dart';
+export 'src/shared/offline_mode.dart';
 export 'src/shared/preferences.dart';
 export 'src/shared/primitives/auto_dispose.dart';
 export 'src/shared/primitives/listenable.dart';
+export 'src/shared/primitives/simple_items.dart';
 export 'src/shared/primitives/storage.dart';
 export 'src/shared/primitives/trace_event.dart';
 export 'src/shared/primitives/trees.dart';
@@ -88,6 +93,7 @@ export 'src/shared/primitives/utils.dart';
 export 'src/shared/routing.dart';
 export 'src/shared/screen.dart';
 export 'src/shared/scripts/script_manager.dart';
+export 'src/shared/side_panel.dart';
 export 'src/shared/split.dart';
 export 'src/shared/theme.dart';
 export 'src/shared/ui/filter.dart';

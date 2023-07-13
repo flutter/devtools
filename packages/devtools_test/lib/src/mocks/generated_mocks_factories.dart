@@ -5,7 +5,7 @@
 import 'dart:async';
 
 import 'package:devtools_app/devtools_app.dart';
-import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart' hide TimelineEvent;
 
@@ -43,6 +43,9 @@ MockPerformanceController createMockPerformanceControllerWithDefaults() {
       .thenReturn(ValueNotifier<bool>(true));
   when(timelineEventsController.legacyController)
       .thenReturn(legacyTimelineEventsController);
+  when(timelineEventsController.status).thenReturn(
+    ValueNotifier<EventsControllerStatus>(EventsControllerStatus.empty),
+  );
   when(legacyTimelineEventsController.searchMatches)
       .thenReturn(const FixedValueListenable<List<TimelineEvent>>([]));
   when(legacyTimelineEventsController.searchInProgressNotifier)
@@ -91,13 +94,19 @@ MockCodeViewController createMockCodeViewControllerWithDefaults({
   );
   when(codeViewController.showCodeCoverage).thenReturn(ValueNotifier(false));
   when(codeViewController.focusLine).thenReturn(ValueNotifier(-1));
+  when(codeViewController.navigationInProgress).thenReturn(false);
 
   return codeViewController;
 }
 
 MockDebuggerController createMockDebuggerControllerWithDefaults({
-  MockCodeViewController? mockCodeViewController,
+  // ignore: avoid-dynamic, can be either a real or mock controller.
+  dynamic codeViewController,
 }) {
+  assert(
+    codeViewController is MockCodeViewController? ||
+        codeViewController is CodeViewController?,
+  );
   final debuggerController = MockDebuggerController();
   when(debuggerController.resuming).thenReturn(ValueNotifier(false));
   when(debuggerController.isSystemIsolate).thenReturn(false);
@@ -110,9 +119,9 @@ MockDebuggerController createMockDebuggerControllerWithDefaults({
   when(debuggerController.exceptionPauseMode)
       .thenReturn(ValueNotifier('Unhandled'));
 
-  mockCodeViewController ??= createMockCodeViewControllerWithDefaults();
+  codeViewController ??= createMockCodeViewControllerWithDefaults();
   when(debuggerController.codeViewController).thenReturn(
-    mockCodeViewController,
+    codeViewController,
   );
 
   return debuggerController;
@@ -157,8 +166,12 @@ MockLoggingController createMockLoggingControllerWithDefaults({
   when(mockLoggingController.data).thenReturn(data);
   when(mockLoggingController.filteredData)
       .thenReturn(ListValueNotifier<LogData>(data));
+  when(mockLoggingController.isFilterActive).thenReturn(false);
   when(mockLoggingController.selectedLog)
       .thenReturn(ValueNotifier<LogData?>(null));
+  when(mockLoggingController.searchFieldFocusNode).thenReturn(FocusNode());
+  when(mockLoggingController.searchTextFieldController)
+      .thenReturn(SearchTextEditingController());
   when(mockLoggingController.searchMatches)
       .thenReturn(const FixedValueListenable(<LogData>[]));
   when(mockLoggingController.activeSearchMatch)

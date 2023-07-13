@@ -7,9 +7,7 @@ import 'package:flutter/material.dart';
 import '../../../../../shared/analytics/analytics.dart' as ga;
 import '../../../../../shared/analytics/constants.dart' as gac;
 import '../../../../../shared/common_widgets.dart';
-import '../../../../../shared/feature_flags.dart';
 import '../../../../../shared/globals.dart';
-import '../../../../../shared/memory/adapted_heap_data.dart';
 import '../../../../../shared/primitives/utils.dart';
 import '../../../../../shared/table/table.dart';
 import '../../../../../shared/table/table_data.dart';
@@ -17,7 +15,9 @@ import '../../../../../shared/theme.dart';
 import '../../../../../shared/utils.dart';
 import '../../../shared/heap/heap.dart';
 import '../../../shared/primitives/simple_elements.dart';
-import '../../../shared/shared_memory_widgets.dart';
+import '../../../shared/widgets/class_filter.dart';
+import '../../../shared/widgets/shared_memory_widgets.dart';
+import '../controller/class_data.dart';
 import '../controller/heap_diff.dart';
 import 'instances.dart';
 
@@ -32,7 +32,7 @@ class _ClassNameColumn extends ColumnData<DiffClassStats>
     implements
         ColumnRenderer<DiffClassStats>,
         ColumnHeaderRenderer<DiffClassStats> {
-  _ClassNameColumn(this.classFilterButton)
+  _ClassNameColumn(this.diffData)
       : super(
           'Class',
           titleTooltip: 'Class name',
@@ -40,17 +40,17 @@ class _ClassNameColumn extends ColumnData<DiffClassStats>
           alignment: ColumnAlignment.left,
         );
 
-  final Widget classFilterButton;
+  final ClassesTableDiffData diffData;
 
   @override
-  String? getValue(DiffClassStats classStats) => classStats.heapClass.className;
+  String? getValue(DiffClassStats dataObject) => dataObject.heapClass.className;
 
   @override
   bool get supportsSorting => true;
 
   @override
   // We are removing the tooltip, because it is provided by [HeapClassView].
-  String getTooltip(DiffClassStats classStats) => '';
+  String getTooltip(DiffClassStats dataObject) => '';
 
   @override
   Widget build(
@@ -59,13 +59,10 @@ class _ClassNameColumn extends ColumnData<DiffClassStats>
     bool isRowSelected = false,
     VoidCallback? onPressed,
   }) {
-    final theme = Theme.of(context);
     return HeapClassView(
       theClass: data.heapClass,
       showCopyButton: isRowSelected,
       copyGaItem: gac.MemoryEvent.diffClassDiffCopy,
-      textStyle:
-          isRowSelected ? theme.selectedTextStyle : theme.regularTextStyle,
       rootPackage: serviceManager.rootInfoNow().package,
     );
   }
@@ -79,7 +76,7 @@ class _ClassNameColumn extends ColumnData<DiffClassStats>
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Expanded(child: defaultHeaderRenderer()),
-        classFilterButton,
+        ClassFilterButton(diffData.filterData),
       ],
     );
   }
@@ -87,16 +84,16 @@ class _ClassNameColumn extends ColumnData<DiffClassStats>
 
 class _InstanceColumn extends ColumnData<DiffClassStats>
     implements ColumnRenderer<DiffClassStats> {
-  _InstanceColumn(this.dataPart, this.heap)
+  _InstanceColumn(this.dataPart, this.diffData)
       : super(
           columnTitle(dataPart),
-          fixedWidthPx: scaleByFontFactor(80.0),
+          fixedWidthPx: scaleByFontFactor(110.0),
           alignment: ColumnAlignment.right,
         );
 
   final _DataPart dataPart;
 
-  final AdaptedHeapData? heap;
+  final ClassesTableDiffData diffData;
 
   static String columnTitle(_DataPart dataPart) {
     switch (dataPart) {
@@ -112,8 +109,8 @@ class _InstanceColumn extends ColumnData<DiffClassStats>
   }
 
   @override
-  int getValue(DiffClassStats classStats) =>
-      _instances(classStats).instanceCount;
+  int getValue(DiffClassStats dataObject) =>
+      _instances(dataObject).instanceCount;
 
   ObjectSetStats _instances(DiffClassStats classStats) {
     switch (dataPart) {
@@ -129,9 +126,9 @@ class _InstanceColumn extends ColumnData<DiffClassStats>
   }
 
   @override
-  String getDisplayValue(DiffClassStats classStats) {
+  String getDisplayValue(DiffClassStats dataObject) {
     // Add leading sign for delta values.
-    final value = getValue(classStats);
+    final value = getValue(dataObject);
     if (dataPart != _DataPart.delta || value <= 0) return value.toString();
     return '+$value';
   }
@@ -146,28 +143,29 @@ class _InstanceColumn extends ColumnData<DiffClassStats>
     bool isRowSelected = false,
     VoidCallback? onPressed,
   }) {
-    if (!FeatureFlags.evalAndBrowse) return null;
     final objects = _instances(data);
-    final theHeap = heap;
 
     if (dataPart == _DataPart.delta) {
-      assert(theHeap == null);
       assert(objects is! ObjectSet);
       return null;
     }
 
-    if (objects is! ObjectSet || theHeap == null) {
+    final heapCallback =
+        dataPart == _DataPart.deleted ? diffData.before : diffData.after;
+
+    if (objects is! ObjectSet) {
       throw StateError(
-        'All columns except ${_DataPart.delta} should have objects and heap data available.',
+        'All columns except ${_DataPart.delta} should have objects available.',
       );
     }
 
-    return InstanceTableCell(
+    return HeapInstanceTableCell(
       objects,
-      theHeap,
+      heapCallback,
       data.heapClass,
       isSelected: isRowSelected,
       gaContext: gac.MemoryAreas.snapshotDiff,
+      liveItemsEnabled: dataPart != _DataPart.deleted,
     );
   }
 }
@@ -237,44 +235,36 @@ class _SizeColumn extends ColumnData<DiffClassStats> {
   bool get numeric => true;
 }
 
-class _ClassesTableDiffColumns {
-  _ClassesTableDiffColumns(
-    this.classFilterButton,
-    this.sizeTypeToShow, {
-    required this.before,
-    required this.after,
-  });
+class ClassesTableDiffColumns {
+  ClassesTableDiffColumns(this.sizeType, this.diffData);
 
-  final Widget classFilterButton;
+  final SizeType sizeType;
+  final ClassesTableDiffData diffData;
 
-  late final sizeDeltaColumn = _SizeColumn(_DataPart.delta, sizeTypeToShow);
-
-  final AdaptedHeapData before;
-  final AdaptedHeapData after;
-
-  final SizeType sizeTypeToShow;
+  late final sizeDeltaColumn = _SizeColumn(_DataPart.delta, sizeType);
 
   late final List<ColumnData<DiffClassStats>> columnList =
       <ColumnData<DiffClassStats>>[
-    _ClassNameColumn(classFilterButton),
-    _InstanceColumn(_DataPart.created, after),
-    _InstanceColumn(_DataPart.deleted, before),
-    _InstanceColumn(_DataPart.delta, null),
-    _InstanceColumn(_DataPart.persisted, after),
-    _SizeColumn(_DataPart.created, sizeTypeToShow),
-    _SizeColumn(_DataPart.deleted, sizeTypeToShow),
+    _ClassNameColumn(diffData),
+    _InstanceColumn(_DataPart.created, diffData),
+    _InstanceColumn(_DataPart.deleted, diffData),
+    _InstanceColumn(_DataPart.delta, diffData),
+    _InstanceColumn(_DataPart.persisted, diffData),
+    _SizeColumn(_DataPart.created, sizeType),
+    _SizeColumn(_DataPart.deleted, sizeType),
     sizeDeltaColumn,
-    _SizeColumn(_DataPart.persisted, sizeTypeToShow),
+    _SizeColumn(_DataPart.persisted, sizeType),
   ];
 }
 
-class _SizeTitle extends StatelessWidget {
-  const _SizeTitle({required this.sizeTypeToShowForDiff});
-  final ValueNotifier<SizeType> sizeTypeToShowForDiff;
+class _SizeGroupTitle extends StatelessWidget {
+  const _SizeGroupTitle(this.diffData);
+
+  final ClassesTableDiffData diffData;
 
   @override
   Widget build(BuildContext context) {
-    final sizeType = sizeTypeToShowForDiff.value;
+    final sizeType = diffData.selectedSizeType.value;
 
     return maybeWrapWithTooltip(
       child: Padding(
@@ -286,7 +276,7 @@ class _SizeTitle extends StatelessWidget {
               isDense: true,
               value: sizeType,
               onChanged: (SizeType? value) =>
-                  sizeTypeToShowForDiff.value = value!,
+                  diffData.selectedSizeType.value = value!,
               items: SizeType.values
                   .map(
                     (sizeType) => DropdownMenuItem<SizeType>(
@@ -307,23 +297,21 @@ class _SizeTitle extends StatelessWidget {
 }
 
 class ClassesTableDiff extends StatelessWidget {
-  const ClassesTableDiff({
+  ClassesTableDiff({
     Key? key,
     required this.classes,
-    required this.selection,
-    required this.classFilterButton,
-    required this.before,
-    required this.after,
-    required this.sizeTypeToShowForDiff,
-  }) : super(key: key);
+    required this.diffData,
+  }) : super(key: key) {
+    _columns = {
+      for (var sizeType in SizeType.values)
+        sizeType: ClassesTableDiffColumns(sizeType, diffData),
+    };
+  }
 
   final List<DiffClassStats> classes;
-  final ValueNotifier<DiffClassStats?> selection;
-  final AdaptedHeapData before;
-  final AdaptedHeapData after;
-  final ValueNotifier<SizeType> sizeTypeToShowForDiff;
+  final ClassesTableDiffData diffData;
 
-  List<ColumnGroup> _columnGroups(SizeType sizeType, BuildContext context) {
+  List<ColumnGroup> _columnGroups() {
     return [
       ColumnGroup.fromText(
         title: '',
@@ -335,36 +323,32 @@ class ClassesTableDiff extends StatelessWidget {
         tooltip: nonGcableInstancesColumnTooltip,
       ),
       ColumnGroup(
-        title: _SizeTitle(sizeTypeToShowForDiff: sizeTypeToShowForDiff),
+        title: _SizeGroupTitle(diffData),
         range: const Range(5, 9),
       ),
     ];
   }
 
-  final Widget classFilterButton;
+  late final Map<SizeType, ClassesTableDiffColumns> _columns;
 
   @override
   Widget build(BuildContext context) {
     return ValueListenableBuilder<SizeType>(
-      valueListenable: sizeTypeToShowForDiff,
+      valueListenable: diffData.selectedSizeType,
       builder: (context, sizeType, _) {
         // We want to preserve the sorting and sort directions for ClassesTableDiff
         // no matter what the data passed to it is.
         const dataKey = 'ClassesTableDiff';
-        final columns = _ClassesTableDiffColumns(
-          classFilterButton,
-          sizeType,
-          before: before,
-          after: after,
-        );
+
+        final columns = _columns[sizeType]!;
 
         return FlatTable<DiffClassStats>(
           columns: columns.columnList,
-          columnGroups: _columnGroups(sizeType, context),
+          columnGroups: _columnGroups(),
           data: classes,
           dataKey: dataKey,
           keyFactory: (e) => Key(e.heapClass.fullName),
-          selectionNotifier: selection,
+          selectionNotifier: diffData.selection,
           onItemSelected: (_) => ga.select(
             gac.memory,
             gac.MemoryEvent.diffClassDiffSelect,

@@ -180,10 +180,10 @@ class Trace {
       controller.yMaxValue = datum.y;
     }
 
-    final traceIndex = controller.traceIndex(this);
-
     // New data has arrived notify listeners this data needs to be plotted.
-    controller.traceChanged.value = TraceNotifier(traceIndex, data.length - 1);
+    // TODO(polina-c): should we use stream instead notifier?
+    // https://github.com/flutter/devtools/pull/5301#discussion_r1126792303
+    controller.traceChanged.value = TraceNotifier();
   }
 
   /// Draw square centered on [x,y] point (*).
@@ -267,14 +267,7 @@ class Trace {
 }
 
 class TraceNotifier {
-  TraceNotifier(this.traceIndex, this.dataIndex);
-
-  /// Index of the trace that just changed, see ChartController field traces.
-  final int traceIndex;
-
-  /// Index of the datum that that changed for the Trace's data field (see
-  /// Trace's data field).
-  final int dataIndex;
+  TraceNotifier();
 }
 
 enum ChartType {
@@ -390,7 +383,9 @@ class AxisScale {
         niceFraction = 5;
       } else if (fraction <= 7) {
         niceFraction = 7;
-      } else if (fraction <= 10) niceFraction = 10;
+      } else if (fraction <= 10) {
+        niceFraction = 10;
+      }
     }
 
     return niceFraction * pow(10, exponent);

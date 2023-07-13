@@ -1,0 +1,19 @@
+{
+    "$schema": "https://lnav.org/schemas/format-v1.schema.json",
+    "dart_devtools_log": {
+        "title": "Dart DevTools Log Format",
+        "description": "Log format used for https://github.com/flutter/devtools logging.",
+        "url": "https://github.com/flutter/devtools",
+        "file-type": "json",
+        "level-field": "level",
+        "level": {
+            "stats": "FINER",
+            "notice": "FINE",
+            "info": "INFO",
+            "warning": "WARNING",
+            "critical": "SEVERE",
+            "fatal": "SHOUT"
+        },
+        "ordered-by-time": true
+    }
+}

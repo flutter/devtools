@@ -19,6 +19,23 @@ import 'network_model.dart';
 import 'network_screen.dart';
 import 'network_service.dart';
 
+/// Different types of Network Response which can be used to visualise response
+/// on Response tab
+enum NetworkResponseViewType {
+  auto,
+  text,
+  json;
+
+  @override
+  String toString() {
+    return switch (this) {
+      NetworkResponseViewType.json => 'Json',
+      NetworkResponseViewType.text => 'Text',
+      _ => 'Auto',
+    };
+  }
+}
+
 class NetworkController extends DisposableController
     with
         SearchControllerMixin<NetworkRequest>,
@@ -49,6 +66,22 @@ class NetworkController extends DisposableController
   ValueListenable<NetworkRequests> get requests => _requests;
 
   final _requests = ValueNotifier<NetworkRequests>(NetworkRequests());
+
+  /// Notifies that current response type has been changed
+  ValueListenable<NetworkResponseViewType> get currentResponseViewType =>
+      _currentResponseViewType;
+
+  final _currentResponseViewType =
+      ValueNotifier<NetworkResponseViewType>(NetworkResponseViewType.auto);
+
+  /// Change current response type
+  set setResponseViewType(NetworkResponseViewType type) =>
+      _currentResponseViewType.value = type;
+
+  /// Reset drop down to initial state when current network request is changed
+  void resetDropDown() {
+    _currentResponseViewType.value = NetworkResponseViewType.auto;
+  }
 
   final selectedRequest = ValueNotifier<NetworkRequest?>(null);
   late CurrentNetworkRequests _currentNetworkRequests;
@@ -241,29 +274,7 @@ class NetworkController extends DisposableController
   }
 
   @override
-  List<NetworkRequest> matchesForSearch(
-    String search, {
-    bool searchPreviousMatches = false,
-  }) {
-    if (search.isEmpty) return [];
-    final matches = <NetworkRequest>[];
-    if (searchPreviousMatches) {
-      final previousMatches = searchMatches.value;
-      for (final previousMatch in previousMatches) {
-        if (previousMatch.uri.caseInsensitiveContains(search)) {
-          matches.add(previousMatch);
-        }
-      }
-    } else {
-      final currentRequests = filteredData.value;
-      for (final request in currentRequests) {
-        if (request.uri.caseInsensitiveContains(search)) {
-          matches.add(request);
-        }
-      }
-    }
-    return matches;
-  }
+  Iterable<NetworkRequest> get currentDataToSearchThrough => filteredData.value;
 
   @override
   void filterData(Filter<NetworkRequest> filter) {
@@ -334,13 +345,13 @@ class CurrentNetworkRequests {
   List<NetworkRequest> get requests => _requestsById.values.toList();
   final _requestsById = <String, NetworkRequest>{};
 
-  /// Triggered whenever the request's data changes on it's own.
+  /// Triggered whenever the request's data changes on its own.
   VoidCallback onRequestDataChange;
 
   NetworkRequest? getRequest(String id) => _requestsById[id];
 
   /// Update or add the [request] to the [requests] depending on whether or not
-  /// it's [request.id] already exists in the list.
+  /// its [request.id] already exists in the list.
   ///
   void updateOrAdd(
     HttpProfileRequest request,

@@ -2,14 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:collection';
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
+import 'package:logging/logging.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
 
 import '../../shared/charts/flame_chart.dart';
-import '../../shared/config_specific/logger/logger.dart';
 import '../../shared/globals.dart';
 import '../../shared/primitives/simple_items.dart';
 import '../../shared/primitives/trace_event.dart';
@@ -18,8 +17,10 @@ import '../../shared/primitives/utils.dart';
 import '../../shared/profiler_utils.dart';
 import '../../shared/ui/search.dart';
 import '../vm_developer/vm_service_private_extensions.dart';
-import 'cpu_profile_controller.dart';
 import 'cpu_profile_transformer.dart';
+import 'cpu_profiler_controller.dart';
+
+final _log = Logger('lib/src/screens/profiler/cpu_profile_model');
 
 /// A convenience wrapper for managing CPU profiles with both function and code
 /// profile views.
@@ -190,9 +191,10 @@ class CpuProfileData {
       final resolvedUrl = (stackFrameJson[resolvedUrlKey] as String?) ?? '';
       final packageUri =
           (stackFrameJson[resolvedPackageUriKey] as String?) ?? resolvedUrl;
+      final name = getSimpleStackFrameName(stackFrameJson[nameKey] as String?);
       final stackFrame = CpuStackFrame(
         id: entry.key,
-        name: getSimpleStackFrameName(stackFrameJson[nameKey] as String?),
+        name: name,
         verboseName: stackFrameJson[nameKey] as String?,
         category: stackFrameJson[categoryKey] as String?,
         // If the user is on a version of Flutter where resolvedUrl is not
@@ -237,11 +239,7 @@ class CpuProfileData {
         )
         .toList();
 
-    // Use a SplayTreeMap so that map iteration will be in sorted key order.
-    // This keeps the visualization of the profile as consistent as possible
-    // when applying filters.
-    final SplayTreeMap<String, CpuStackFrame> subStackFrames =
-        SplayTreeMap(stackFrameIdCompare);
+    final subStackFrames = <String, CpuStackFrame>{};
     for (final sample in subSamples) {
       final leafFrame = superProfile.stackFrames[sample.leafId]!;
       subStackFrames[sample.leafId] = leafFrame;
@@ -289,12 +287,7 @@ class CpuProfileData {
 
     final metaData = originalData.profileMetaData.copyWith();
 
-    // Use a SplayTreeMap so that map iteration will be in sorted key order.
-    // This keeps the visualization of the profile as consistent as possible
-    // when applying filters.
-    final SplayTreeMap<String, CpuStackFrame> stackFrames =
-        SplayTreeMap(stackFrameIdCompare);
-
+    final stackFrames = <String, CpuStackFrame>{};
     final samples = <CpuSampleEvent>[];
 
     int nextId = 1;
@@ -413,11 +406,7 @@ class CpuProfileData {
         ),
     );
 
-    // Use a SplayTreeMap so that map iteration will be in sorted key order.
-    // This keeps the visualization of the profile as consistent as possible
-    // when applying filters.
-    final SplayTreeMap<String, CpuStackFrame> stackFramesWithTag =
-        SplayTreeMap(stackFrameIdCompare);
+    final stackFramesWithTag = <String, CpuStackFrame>{};
 
     for (final sample in samplesWithTag) {
       String? currentId = sample.leafId;
@@ -469,7 +458,11 @@ class CpuProfileData {
             traceJson: sampleJson,
           ),
         );
-      } else if (stackFrame.parentId != CpuProfileData.rootId) {
+      }
+      // TODO(kenz): investigate why [stackFrame.parentId] is sometimes
+      // missing.
+      else if (stackFrame.parentId != CpuProfileData.rootId &&
+          originalData.stackFrames.containsKey(stackFrame.parentId)) {
         final parent = originalData.stackFrames[stackFrame.parentId]!;
         includeSampleOrWalkUp(sample, sampleJson, parent);
       }
@@ -481,18 +474,18 @@ class CpuProfileData {
       includeSampleOrWalkUp(sample, sampleJson, leafStackFrame);
     }
 
-    // Use a SplayTreeMap so that map iteration will be in sorted key order.
-    // This keeps the visualization of the profile as consistent as possible
-    // when applying filters.
-    final SplayTreeMap<String, CpuStackFrame> filteredStackFrames =
-        SplayTreeMap(stackFrameIdCompare);
+    final filteredStackFrames = <String, CpuStackFrame>{};
 
     String? filteredParentStackFrameId(CpuStackFrame? candidateParentFrame) {
       if (candidateParentFrame == null) return null;
 
       if (includeFilter(candidateParentFrame)) {
         return candidateParentFrame.id;
-      } else if (candidateParentFrame.parentId != CpuProfileData.rootId) {
+      }
+      // TODO(kenz): investigate why [stackFrame.parentId] is sometimes
+      // missing.
+      else if (candidateParentFrame.parentId != CpuProfileData.rootId &&
+          originalData.stackFrames.containsKey(candidateParentFrame.parentId)) {
         final parent = originalData.stackFrames[candidateParentFrame.parentId]!;
         return filteredParentStackFrameId(parent);
       }
@@ -842,7 +835,7 @@ class CpuSampleEvent extends TraceEvent {
 class CpuStackFrame extends TreeNode<CpuStackFrame>
     with
         ProfilableDataMixin<CpuStackFrame>,
-        DataSearchStateMixin,
+        SearchableDataMixin,
         TreeDataSearchStateMixin<CpuStackFrame>,
         FlameChartDataMixin {
   factory CpuStackFrame({
@@ -911,11 +904,21 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
   final String packageUri;
 
   String get packageUriWithSourceLine =>
-      '$packageUri${sourceLine != null ? ':$sourceLine' : ''}';
+      uriWithSourceLine(packageUri, sourceLine);
 
   final int? sourceLine;
 
   final String? parentId;
+
+  /// The set of ids for all ancesctors of this [CpuStackFrame].
+  ///
+  /// This is late and final, so it will only be created once for performance
+  /// reasons. This method should only be called when the [CpuStackFrame] is
+  /// part of a processed CPU profile.
+  late final Set<String> ancestorIds = {
+    if (parentId != null) parentId!,
+    ...parent?.ancestorIds ?? {},
+  };
 
   @override
   CpuProfileMetaData get profileMetaData => _profileMetaData;
@@ -967,7 +970,7 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
     final nameWithPrefix = [prefix, name].join(' ');
     return [
       nameWithPrefix,
-      msText(totalTime),
+      durationText(totalTime),
       if (packageUriWithSourceLine.isNotEmpty) packageUriWithSourceLine,
     ].join(' - ');
   }
@@ -995,7 +998,6 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
     int? sourceLine,
     CpuProfileMetaData? profileMetaData,
     bool copySampleCounts = true,
-    bool resetInclusiveSampleCount = true,
   }) {
     final copy = CpuStackFrame._(
       id: id ?? this.id,
@@ -1012,8 +1014,7 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
     if (copySampleCounts) {
       copy
         ..exclusiveSampleCount = exclusiveSampleCount
-        ..inclusiveSampleCount =
-            resetInclusiveSampleCount ? null : inclusiveSampleCount;
+        ..inclusiveSampleCount = inclusiveSampleCount;
     }
     return copy;
   }
@@ -1023,7 +1024,7 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
   /// The returned copy stack frame will have a null parent.
   @override
   CpuStackFrame deepCopy() {
-    final copy = shallowCopy(resetInclusiveSampleCount: false);
+    final copy = shallowCopy();
     for (CpuStackFrame child in children) {
       copy.addChild(child.deepCopy());
     }
@@ -1039,6 +1040,12 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
       rawUrl == other.rawUrl &&
       category == other.category &&
       sourceLine == other.sourceLine;
+
+  @override
+  bool matchesSearchToken(RegExp regExpSearch) {
+    return name.caseInsensitiveContains(regExpSearch) ||
+        packageUri.caseInsensitiveContains(regExpSearch);
+  }
 
   Map<String, Object?> get toJson => {
         id: {
@@ -1057,47 +1064,11 @@ class CpuStackFrame extends TreeNode<CpuStackFrame>
     buf.write('$name ');
     // TODO(kenz): use a number of fractionDigits that better matches the
     // resolution of the stack frame.
-    buf.write('- ${msText(totalTime, fractionDigits: 2)} ');
+    buf.write('- ${durationText(totalTime, fractionDigits: 2)} ');
     buf.write('($inclusiveSampleCount ');
     buf.write(inclusiveSampleCount == 1 ? 'sample' : 'samples');
-    buf.write(', ${percent2(totalTimeRatio)})');
+    buf.write(', ${percent(totalTimeRatio)})');
     return buf.toString();
-  }
-}
-
-@visibleForTesting
-int stackFrameIdCompare(String a, String b) {
-  if (a == b) {
-    return 0;
-  }
-  // Order the root first.
-  if (a == CpuProfileData.rootId) {
-    return -1;
-  }
-  if (b == CpuProfileData.rootId) {
-    return 1;
-  }
-
-  // Stack frame ids are structured as 140225212960768-24 (iOS) or -784070656-24
-  // (Android). We need to compare the number after the last dash to maintain
-  // the correct order.
-  const dash = '-';
-  final aDashIndex = a.lastIndexOf(dash);
-  final bDashIndex = b.lastIndexOf(dash);
-  try {
-    final int aId = int.parse(a.substring(aDashIndex + 1));
-    final int bId = int.parse(b.substring(bDashIndex + 1));
-    return aId.compareTo(bId);
-  } catch (e, stackTrace) {
-    String error = 'invalid stack frame ';
-    if (aDashIndex == -1 && bDashIndex != -1) {
-      error += 'id [$a]';
-    } else if (aDashIndex != -1 && bDashIndex == -1) {
-      error += 'id [$b]';
-    } else {
-      error += 'ids [$a, $b]';
-    }
-    Error.throwWithStackTrace(error, stackTrace);
   }
 }
 
@@ -1192,8 +1163,8 @@ class CpuProfileStore {
   }
 
   void debugPrintKeys() {
-    log('_profilesByLabel: ${_profilesByLabel.keys}');
-    log('_profilesByTime: ${_profilesByTime.keys}');
+    _log.info('_profilesByLabel: ${_profilesByLabel.keys}');
+    _log.info('_profilesByTime: ${_profilesByTime.keys}');
   }
 }
 
@@ -1232,14 +1203,13 @@ class _CpuProfileTimelineTree {
   final bool isCodeTree;
   int frameId = kNoFrameId;
 
-  vm_service.FuncRef? get _function {
+  Object? get _function {
     if (isCodeTree) {
       return _code.function!;
     }
     final function = samples.functions![index].function;
-    if (function is vm_service.FuncRef) {
-      // TODO(jacobr): is this really anything else? The VMService API isn't
-      // clear.
+    if (function is vm_service.FuncRef ||
+        function is vm_service.NativeFunction) {
       return function;
     }
     return null;
@@ -1247,7 +1217,16 @@ class _CpuProfileTimelineTree {
 
   vm_service.CodeRef get _code => samples.codes[index].code!;
 
-  String? get name => isCodeTree ? _code.name : _function?.name;
+  String? get name {
+    if (isCodeTree) return _code.name;
+    switch (_function.runtimeType) {
+      case vm_service.FuncRef:
+        return (_function as vm_service.FuncRef?)?.name;
+      case vm_service.NativeFunction:
+        return (_function as vm_service.NativeFunction?)?.name;
+    }
+    return null;
+  }
 
   String? get className {
     if (isCodeTree) return null;
@@ -1261,22 +1240,23 @@ class _CpuProfileTimelineTree {
     return null;
   }
 
-  String? get resolvedUrl => isCodeTree
+  String? get resolvedUrl => isCodeTree && _function is vm_service.FuncRef?
       ?
       // TODO(bkonyi): not sure if this is a resolved URL or not, but it's not
       // critical since this is only displayed when VM developer mode is
       // enabled.
-      _function?.location?.script!.uri
+      (_function as vm_service.FuncRef?)?.location?.script?.uri
       : samples.functions![index].resolvedUrl;
 
   int? get sourceLine {
     final function = _function;
     try {
-      return function?.location?.line;
+      if (function is vm_service.FuncRef?) {
+        return function?.location?.line;
+      }
+      return null;
     } catch (_) {
-      // Fail gracefully if `function` has no getter `location` (for example, if
-      // the function is an instance of [NativeFunction]) or generally if
-      // `function.location.line` throws an exception.
+      // Fail gracefully if `function.location.line` throws an exception.
       return null;
     }
   }
@@ -1325,6 +1305,32 @@ extension CpuSamplesExtension on vm_service.CpuSamples {
       final className = current.className;
       if (className != null) {
         return '$className.${current.name}';
+      }
+      if (current.name == anonymousClosureName &&
+          current._function is vm_service.FuncRef) {
+        final nameParts = <String?>[current.name];
+
+        final function = current._function as vm_service.FuncRef;
+        var owner = function.owner;
+        switch (owner.runtimeType) {
+          case vm_service.FuncRef:
+            owner = owner as vm_service.FuncRef;
+            final functionName = owner.name;
+
+            String? className;
+            if (owner.owner is vm_service.ClassRef) {
+              className = (owner.owner as vm_service.ClassRef).name;
+            }
+
+            nameParts.insertAll(0, [className, functionName]);
+            break;
+          case vm_service.ClassRef:
+            final className = (owner as vm_service.ClassRef).name;
+            nameParts.insert(0, className);
+        }
+
+        nameParts.removeWhere((element) => element == null);
+        return nameParts.join('.');
       }
       return current.name;
     }

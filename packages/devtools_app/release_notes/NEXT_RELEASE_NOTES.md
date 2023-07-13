@@ -1,12 +1,19 @@
 This is draft for future release notes, that are going to land on
 [the Flutter website](https://docs.flutter.dev/development/tools/devtools/release-notes).
 
-# DevTools 2.22.0 release notes
+# DevTools 2.26.0 release notes
 
 Dart & Flutter DevTools - A Suite of Performance Tools for Dart and Flutter
 
 ## General updates
-* Prevent crashes if there is no main isolate - [#5232](https://github.com/flutter/devtools/pull/5232)
+* Added a new "Home" screen in DevTools that either shows the "Connect" dialog or
+a summary of your connected app, depending on the connection status in DevTools. Keep an
+eye on this screen for cool new features in the future. This change also enables support
+for static tooling (tools that don't require a connected app) in DevTools - [#6010](https://github.com/flutter/devtools/pull/6010)
+![home screen](images/home_screen.png "DevTools home screen")
+* Added an action to the main toolbar for loading offline data into DevTools - [#6003](https://github.com/flutter/devtools/pull/6003)
+![load data action](images/load_data.png "Load data action")
+* Fixed overlay notifications so that they cover the area that their background blocks - [#5975](https://github.com/flutter/devtools/pull/5975)
 
 ## Inspector updates
 TODO: Remove this section if there are not any general updates.
@@ -15,22 +22,17 @@ TODO: Remove this section if there are not any general updates.
 TODO: Remove this section if there are not any general updates.
 
 ## CPU profiler updates
-
-* Display stack frame uri inline with method name to ensure the URI is always visible
-in deeply nested trees - [#5181](https://github.com/flutter/devtools/pull/5181)
-* Add the ability to filter by method name or source URI - [#5204](https://github.com/flutter/devtools/pull/5204)
+TODO: Remove this section if there are not any general updates.
 
 ## Memory updates
-* Change filter default to show only project and 3rd party dependencies [#5201](https://github.com/flutter/devtools/pull/5201).
-* Support expression evaluation in console for running application [#5248](https://github.com/flutter/devtools/pull/5248).
-* Add column `Persisted` for memory diffing [#5290](https://github.com/flutter/devtools/pull/5290).
+* Added a context menu to rename or delete a heap snapshot from the list - [#5997](https://github.com/flutter/devtools/pull/5997)
+* Warn users when HTTP logging may be affecting their app's memory consumption - [#5998](https://github.com/flutter/devtools/pull/5998)
 
 ## Debugger updates
-* Add support for browser navigation history when navigating using the `File Explorer` [#4906](https://github.com/flutter/devtools/pull/4906).
-* Designate positional fields for `Record` types with the getter syntax beginning at `$1` [#5272](https://github.com/flutter/devtools/pull/5272)
+* Improvements to text selection and copy behavior in the codeview, console, and variables window. - [#6020](https://github.com/flutter/devtools/pull/6020)
 
 ## Network profiler updates
-* Improve reliability and performance of the Network tab - [#5056](https://github.com/flutter/devtools/pull/5056)
+* Added a selector to customize the display type of text and json responses (thanks to @hhacker1999!) - [#5816](https://github.com/flutter/devtools/pull/5816)
 
 ## Logging updates
 TODO: Remove this section if there are not any general updates.
@@ -38,6 +40,6 @@ TODO: Remove this section if there are not any general updates.
 ## App size tool updates
 TODO: Remove this section if there are not any general updates.
 
-## Changelog
-More details about changes and fixes are available in the DevTools
-[changelog](https://github.com/flutter/devtools/blob/master/CHANGELOG.md).
+## Full commit history
+More details about changes and fixes are available from the
+[DevTools git log.](https://github.com/flutter/devtools/commits/master).

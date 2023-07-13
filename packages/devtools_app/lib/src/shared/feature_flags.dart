@@ -3,8 +3,11 @@
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
+import 'package:logging/logging.dart';
 
 import 'globals.dart';
+
+final _log = Logger('lib/src/shared/features_flags');
 
 @visibleForTesting
 bool get enableExperiments =>
@@ -45,43 +48,40 @@ abstract class FeatureFlags {
   /// Example usage of a flag for an experimental feature.
   static bool myExperimentalFeature = enableExperiments;
 
-  /// Flag to enable the embedded perfetto trace viewer.
-  ///
-  /// TODO(https://github.com/flutter/devtools/issues/4207): remove all uses of
-  /// this flag.
-  static bool embeddedPerfetto = true;
-
-  /// Flag to enable the CPU profiler method table.
-  ///
-  /// This feature is under development.
-  /// TODO(https://github.com/flutter/devtools/issues/841): remove this flag and
-  /// enable by default when complete.
-  static bool methodTable = enableExperiments;
-
   /// Flag to enable widget rebuild stats ui.
   ///
   /// https://github.com/flutter/devtools/issues/4564.
   static bool widgetRebuildstats = enableExperiments;
 
-  /// Flag to enable live eval and snapshot browse.
+  /// Flag to enable VS code sidebar tooling GUIs powered by DevTools.
   ///
-  /// https://github.com/flutter/devtools/issues/4962.
-  static bool evalAndBrowse = enableExperiments;
+  /// https://github.com/flutter/devtools/issues/5868.
+  static bool vsCodeSidebarTooling = enableExperiments;
+
+  /// Flag to enable analysis of snapshots in disconnected mode.
+  ///
+  /// https://github.com/flutter/devtools/issues/5606
+  static bool memoryAnalysis = enableExperiments;
+
+  /// Flag to enable the deep link validation tooling in DevTools, both for the
+  /// DevTools screen and the standalone tool for IDE embedding.
+  ///
+  /// https://github.com/flutter/devtools/issues/6013
+  static bool deepLinkValidation = enableExperiments;
 
   /// Stores a map of all the feature flags for debugging purposes.
   ///
   /// When adding a new flag, you are responsible for adding it to this map as
   /// well.
   static final _allFlags = <String, bool>{
-    'embeddedPerfetto': embeddedPerfetto,
     'widgetRebuildStats': widgetRebuildstats,
-    'evalAndBrowseSnapshot': evalAndBrowse,
+    'memoryAnalysis': memoryAnalysis,
   };
 
   /// A helper to print the status of all the feature flags.
   static void debugPrintFeatureFlags() {
     for (final entry in _allFlags.entries) {
-      print('${entry.key}: ${entry.value}');
+      _log.config('${entry.key}: ${entry.value}');
     }
   }
 }

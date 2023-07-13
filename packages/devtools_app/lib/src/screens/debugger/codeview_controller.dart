@@ -6,11 +6,14 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
+import 'package:logging/logging.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../shared/config_specific/logger/logger.dart';
+import '../../framework/app_error_handling.dart';
+import '../../shared/config_specific/launch_url/launch_url.dart';
 import '../../shared/diagnostics/primitives/source_location.dart';
 import '../../shared/globals.dart';
+import '../../shared/notifications.dart';
 import '../../shared/primitives/auto_dispose.dart';
 import '../../shared/primitives/history_manager.dart';
 import '../../shared/routing.dart';
@@ -20,16 +23,19 @@ import 'debugger_model.dart';
 import 'program_explorer_controller.dart';
 import 'syntax_highlighter.dart';
 
+final _log = Logger('codeview_controller');
+
 class CodeViewController extends DisposableController
     with
         AutoDisposeControllerMixin,
         SearchControllerMixin<SourceToken>,
         RouteStateHandlerMixin {
   CodeViewController() {
-    _scriptHistoryListener = () {
+    _scriptHistoryListener = () async {
       final currentScriptValue = scriptsHistory.current.value;
-      if (currentScriptValue != null)
-        _showScriptLocation(ScriptLocation(currentScriptValue));
+      if (currentScriptValue != null) {
+        await _showScriptLocation(ScriptLocation(currentScriptValue));
+      }
     };
     scriptsHistory.current.addListener(_scriptHistoryListener);
   }
@@ -45,19 +51,20 @@ class CodeViewController extends DisposableController
   /// This method is only invoked if [subscribeToRouterEvents] has been called on
   /// this instance with a valid [DevToolsRouterDelegate].
   @override
-  void onRouteStateUpdate(DevToolsNavigationState state) {
+  Future<void> onRouteStateUpdate(DevToolsNavigationState state) async {
     switch (state.kind) {
       case CodeViewSourceLocationNavigationState.type:
-        _handleNavigationEvent(state);
+        await _handleNavigationEvent(state);
         break;
     }
   }
 
-  void _handleNavigationEvent(DevToolsNavigationState state) {
+  Future<void> _handleNavigationEvent(DevToolsNavigationState state) async {
     final processedState =
         CodeViewSourceLocationNavigationState._fromState(state);
     final object = processedState.object;
-    showScriptLocation(processedState.location, focusLine: true);
+    _navigationInProgress = true;
+    await showScriptLocation(processedState.location, focusLine: true);
     if (programExplorerController.initialized.value) {
       if (object != null) {
         final node = programExplorerController.findOutlineNode(object);
@@ -72,7 +79,13 @@ class CodeViewController extends DisposableController
         programExplorerController.clearOutlineSelection();
       }
     }
+    _navigationInProgress = false;
   }
+
+  /// Whether there is a [CodeViewSourceLocationNavigationState] currently being
+  /// processed and handled.
+  bool get navigationInProgress => _navigationInProgress;
+  bool _navigationInProgress = false;
 
   ValueListenable<ScriptLocation?> get scriptLocation => _scriptLocation;
   final _scriptLocation = ValueNotifier<ScriptLocation?>(null);
@@ -169,23 +182,26 @@ class CodeViewController extends DisposableController
   }
 
   /// Jump to the given ScriptRef and optional SourcePosition.
-  void showScriptLocation(
+  Future<void> showScriptLocation(
     ScriptLocation scriptLocation, {
     bool focusLine = false,
-  }) {
+  }) async {
     // TODO(elliette): This is here so that when a program is selected in the
     // program explorer, the file opener will close (if it was open). Instead,
     // give the program explorer focus so that the focus changes so the file
     // opener will close automatically when its focus is lost.
     toggleFileOpenerVisibility(false);
 
-    _showScriptLocation(scriptLocation, focusLine: focusLine);
+    final succeeded =
+        await _showScriptLocation(scriptLocation, focusLine: focusLine);
 
-    // Update the scripts history (and make sure we don't react to the
-    // subsequent event).
-    scriptsHistory.current.removeListener(_scriptHistoryListener);
-    scriptsHistory.pushEntry(scriptLocation.scriptRef);
-    scriptsHistory.current.addListener(_scriptHistoryListener);
+    if (succeeded) {
+      // Update the scripts history (and make sure we don't react to the
+      // subsequent event).
+      scriptsHistory.current.removeListener(_scriptHistoryListener);
+      scriptsHistory.pushEntry(scriptLocation.scriptRef);
+      scriptsHistory.current.addListener(_scriptHistoryListener);
+    }
   }
 
   Future<void> refreshCodeStatistics() async {
@@ -208,26 +224,39 @@ class CodeViewController extends DisposableController
   }
 
   /// Resets the current script information before invoking [showScriptLocation].
-  void resetScriptLocation(ScriptLocation scriptLocation) {
+  Future<void> resetScriptLocation(ScriptLocation scriptLocation) async {
     _scriptLocation.value = null;
     _currentScriptRef.value = null;
     parsedScript.value = null;
-    showScriptLocation(scriptLocation);
+    await showScriptLocation(scriptLocation);
   }
 
   /// Show the given script location (without updating the script navigation
   /// history).
-  void _showScriptLocation(
+  ///
+  /// Returns a boolean value representing success or failure.
+  Future<bool> _showScriptLocation(
     ScriptLocation scriptLocation, {
     bool focusLine = false,
-  }) {
-    _currentScriptRef.value = scriptLocation.scriptRef;
-    if (_currentScriptRef.value == null) {
-      log('Trying to show a location with a null script ref', LogLevel.error);
+  }) async {
+    final scriptRef = scriptLocation.scriptRef;
+
+    if (scriptRef.id != parsedScript.value?.script.id) {
+      // Try to parse the script if it isn't the currently parsed script:
+      final script = await _parseScript(scriptRef);
+      if (script == null) {
+        // Return early and indicate failure if parsing fails.
+        reportError(
+          'Failed to parse ${scriptRef.uri}.',
+          stack: StackTrace.current,
+          notifyUser: true,
+        );
+        return false;
+      }
+      parsedScript.value = script;
     }
 
-    unawaited(_parseCurrentScript());
-
+    _currentScriptRef.value = scriptRef;
     if (focusLine) {
       _focusLine.value = scriptLocation.location?.line ?? -1;
     }
@@ -235,6 +264,7 @@ class CodeViewController extends DisposableController
     // set to null to ensure that happens.
     _scriptLocation.value = null;
     _scriptLocation.value = scriptLocation;
+    return true;
   }
 
   Future<ProcessedSourceReport> _getSourceReport(
@@ -272,57 +302,56 @@ class CodeViewController extends DisposableController
           (last, e) => last..addAll(e.entries),
         ),
       );
-    } catch (e) {
+    } catch (e, st) {
       // Ignore - not supported for all vm service implementations.
-      log('$e');
+      _log.warning(e, e, st);
     }
     return const ProcessedSourceReport.empty();
   }
 
-  /// Parses the current script into executable lines and prepares the script
+  /// Parses the given script into executable lines and prepares the script
   /// for syntax highlighting.
-  Future<void> _parseCurrentScript() async {
-    // Return early if the current script has not changed.
-    if (parsedScript.value?.script.id == _currentScriptRef.value?.id) return;
+  Future<ParsedScript?> _parseScript(ScriptRef scriptRef) async {
+    final isolateRef = serviceManager.isolateManager.selectedIsolate.value;
+    if (isolateRef == null) return null;
 
-    final scriptRef = _currentScriptRef.value;
-    if (scriptRef == null) return;
     final script = await getScriptForRef(scriptRef);
+    if (script == null || script.source == null) return null;
 
     // Create a new SyntaxHighlighter with the script's source in preparation
     // for building the code view.
-    final highlighter = SyntaxHighlighter(source: script?.source ?? '');
+    final highlighter = SyntaxHighlighter(source: script.source);
 
     // Gather the data to display breakable lines.
     var executableLines = <int>{};
 
-    if (script != null) {
-      final isolateRef = serviceManager.isolateManager.selectedIsolate.value!;
-      try {
-        final positions = await breakpointManager.getBreakablePositions(
-          isolateRef,
-          script,
-        );
-        executableLines = Set.from(
-          positions.where((p) => p.line != null).map((p) => p.line),
-        );
-      } catch (e) {
-        // Ignore - not supported for all vm service implementations.
-        log('$e');
-      }
-
-      final processedReport = await _getSourceReport(
+    try {
+      final positions = await breakpointManager.getBreakablePositions(
         isolateRef,
         script,
       );
-
-      parsedScript.value = ParsedScript(
-        script: script,
-        highlighter: highlighter,
-        executableLines: executableLines,
-        sourceReport: processedReport,
+      executableLines = Set.from(
+        positions.where((p) => p.line != null).map((p) => p.line),
       );
+      if (executableLines.isEmpty) {
+        _maybeShowSourceMapsWarning();
+      }
+    } catch (e, st) {
+      // Ignore - not supported for all vm service implementations.
+      _log.warning(e, e, st);
     }
+
+    final processedReport = await _getSourceReport(
+      isolateRef,
+      script,
+    );
+
+    return ParsedScript(
+      script: script,
+      highlighter: highlighter,
+      executableLines: executableLines,
+      sourceReport: processedReport,
+    );
   }
 
   /// Make the 'Libraries' view on the right-hand side of the screen visible or
@@ -333,7 +362,8 @@ class CodeViewController extends DisposableController
   }
 
   void toggleSearchInFileVisibility(bool visible) {
-    _showSearchInFileField.value = visible;
+    final fileExists = _currentScriptRef.value != null;
+    _showSearchInFileField.value = visible && fileExists;
     if (!visible) {
       resetSearch();
     }
@@ -341,6 +371,31 @@ class CodeViewController extends DisposableController
 
   void toggleFileOpenerVisibility(bool visible) {
     _showFileOpener.value = visible;
+  }
+
+  void _maybeShowSourceMapsWarning() {
+    final isWebApp = serviceManager.connectedApp?.isDartWebAppNow ?? false;
+    final enableSourceMapsLink = devToolsExtensionPoints.enableSourceMapsLink();
+    if (isWebApp && enableSourceMapsLink != null) {
+      final enableSourceMapsAction = NotificationAction(
+        'Enable sourcemaps',
+        () {
+          unawaited(
+            launchUrl(
+              enableSourceMapsLink.url,
+            ),
+          );
+        },
+      );
+      notificationService.pushNotification(
+        NotificationMessage(
+          'Cannot debug when sourcemaps are disabled.',
+          isError: true,
+          isDismissible: true,
+          actions: [enableSourceMapsAction],
+        ),
+      );
+    }
   }
 
   // TODO(kenz): search through previous matches when possible.
