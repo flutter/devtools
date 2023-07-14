@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '../extension_points/extensions_base.dart';
+import '../extensions/static/extension_points_base.dart';
 import '../screens/debugger/breakpoint_manager.dart';
 import '../service/service_manager.dart';
 import '../shared/banner_messages.dart';

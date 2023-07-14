@@ -3,8 +3,8 @@
 // found in the LICENSE file.
 
 export 'src/app.dart';
-export 'src/extension_points/extensions_base.dart';
-export 'src/extension_points/extensions_external.dart';
+export 'src/extensions/static/extension_points_base.dart';
+export 'src/extensions/static/extension_points_external.dart';
 export 'src/framework/app_bar.dart';
 export 'src/framework/home_screen.dart';
 export 'src/framework/notifications_view.dart';

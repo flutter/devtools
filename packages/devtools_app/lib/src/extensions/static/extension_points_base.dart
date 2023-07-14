@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '../screens/debugger/codeview.dart';
-import '../shared/common_widgets.dart';
-import '../shared/diagnostics/inspector_service.dart';
+import '../../screens/debugger/codeview.dart';
+import '../../shared/common_widgets.dart';
+import '../../shared/diagnostics/inspector_service.dart';
 
 abstract class DevToolsExtensionPoints {
   List<ScriptPopupMenuOption> buildExtraDebuggerScriptPopupMenuOptions();

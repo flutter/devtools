@@ -4,13 +4,13 @@
 
 import 'package:flutter/foundation.dart';
 
-import '../screens/debugger/codeview.dart';
-import '../shared/analytics/constants.dart' as gac;
-import '../shared/common_widgets.dart';
-import '../shared/diagnostics/inspector_service.dart';
-import '../shared/globals.dart';
-import '../shared/utils.dart';
-import 'extensions_base.dart';
+import '../../screens/debugger/codeview.dart';
+import '../../shared/analytics/constants.dart' as gac;
+import '../../shared/common_widgets.dart';
+import '../../shared/diagnostics/inspector_service.dart';
+import '../../shared/globals.dart';
+import '../../shared/utils.dart';
+import 'extension_points_base.dart';
 
 class ExternalDevToolsExtensionPoints implements DevToolsExtensionPoints {
   @override

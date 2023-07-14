@@ -5,8 +5,8 @@
 import 'package:flutter/foundation.dart';
 
 import 'initialization.dart';
-import 'src/extension_points/extensions_base.dart';
-import 'src/extension_points/extensions_external.dart';
+import 'src/extensions/static/extension_points_base.dart';
+import 'src/extensions/static/extension_points_external.dart';
 import 'src/shared/globals.dart';
 import 'src/shared/primitives/utils.dart';
 
