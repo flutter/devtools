@@ -58,7 +58,7 @@ jobs:
           git push -u origin "$BRANCH_NAME"
 
 
-          PR_URL=$(gh pr create --title "$COMMIT_MESSAGE" --body "Automated Version Bump") 
+          PR_URL=$(gh pr create --title "$COMMIT_MESSAGE" --body "Automated Flutter candidate version bump.") 
 
           # Change github credentials back to the actions bot.
           GH_TOKEN="$ORIGINAL_GH_TOKEN"
