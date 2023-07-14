@@ -34,14 +34,18 @@ you can give [ their tutorial ](https://lnav.org/tutorials) a try.
 
 ## Flutter versions that work with this instance of DevTools
 
-The most recent version to be tested with this version of DevTools is: [flutter-candidate.txt](../flutter-candidate.txt)
+Latest Flutter candidate for this DevTools version: [flutter-candidate.txt](../flutter-candidate.txt)
 
-If your version of DevTools does not contain the [flutter-candidate.txt](../flutter-candidate.txt) then you can try guessing using the following legend.
+If [flutter-candidate.txt](../flutter-candidate.txt) does not exist:
+- Find the most recent commit date for your DevTools version:
 
-The following is a list of known flutter candidates, and the date they were tagged.
+  ` git show -s --format=%ci`
+
+- Use the following table to find the closest Flutter candidate date before your date.
+  - Try using that version of flutter.
 <details>
 
-<summary><H3> Flutter Candidate Creation Dates </H3></summary>
+<summary><H3> Flutter Candidate List </H3></summary>
 
 | DATE | TAG | HASH |
 | ----| --- | ---- |
