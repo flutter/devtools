@@ -44,7 +44,7 @@ jobs:
       - name: Create the PR
         run: |
           set -ex
-          if ! [[ `git status --porcelain --untracked-files=no` ]]; then
+          if ! [[ `git status --porcelain #--untracked-files=no` ]]; then
             # No changes made, so we can just exit.
             echo "No change to the flutter-candidate.txt file"
             exit
