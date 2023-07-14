@@ -179,45 +179,47 @@ class _ConsoleOutputState extends State<_ConsoleOutput>
       key: _scrollBarKey,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: denseSpacing),
-        child: ListView.separated(
-          padding: const EdgeInsets.all(denseSpacing),
-          itemCount: _currentLines.length + (widget.footer != null ? 1 : 0),
-          controller: _scroll,
-          // Scroll physics to try to keep content within view and avoid bouncing.
-          physics: const ClampingScrollPhysics(
-            parent: RangeMaintainingScrollPhysics(),
-          ),
-          separatorBuilder: (_, __) {
-            return const Divider();
-          },
-          itemBuilder: (context, index) {
-            if (index == _currentLines.length && widget.footer != null) {
-              return widget.footer!;
-            }
-            final line = _currentLines[index];
-            if (line is TextConsoleLine) {
-              return SelectableText.rich(
-                TextSpan(
-                  // TODO(jacobr): consider caching the processed ansi terminal
-                  // codes.
-                  children: processAnsiTerminalCodes(
-                    line.text,
-                    theme.fixedFontStyle,
+        child: SelectionArea(
+          child: ListView.separated(
+            padding: const EdgeInsets.all(denseSpacing),
+            itemCount: _currentLines.length + (widget.footer != null ? 1 : 0),
+            controller: _scroll,
+            // Scroll physics to try to keep content within view and avoid bouncing.
+            physics: const ClampingScrollPhysics(
+              parent: RangeMaintainingScrollPhysics(),
+            ),
+            separatorBuilder: (_, __) {
+              return const Divider();
+            },
+            itemBuilder: (context, index) {
+              if (index == _currentLines.length && widget.footer != null) {
+                return widget.footer!;
+              }
+              final line = _currentLines[index];
+              if (line is TextConsoleLine) {
+                return Text.rich(
+                  TextSpan(
+                    // TODO(jacobr): consider caching the processed ansi terminal
+                    // codes.
+                    children: processAnsiTerminalCodes(
+                      line.text,
+                      theme.fixedFontStyle,
+                    ),
                   ),
-                ),
-              );
-            } else if (line is VariableConsoleLine) {
-              return ExpandableVariable(
-                variable: line.variable,
-              );
-            } else {
-              assert(
-                false,
-                'ConsoleLine of unsupported type ${line.runtimeType} encountered',
-              );
-              return const SizedBox();
-            }
-          },
+                );
+              } else if (line is VariableConsoleLine) {
+                return ExpandableVariable(
+                  variable: line.variable,
+                );
+              } else {
+                assert(
+                  false,
+                  'ConsoleLine of unsupported type ${line.runtimeType} encountered',
+                );
+                return const SizedBox();
+              }
+            },
+          ),
         ),
       ),
     );

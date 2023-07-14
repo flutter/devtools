@@ -29,7 +29,7 @@ TODO: Remove this section if there are not any general updates.
 * Warn users when HTTP logging may be affecting their app's memory consumption - [#5998](https://github.com/flutter/devtools/pull/5998)
 
 ## Debugger updates
-TODO: Remove this section if there are not any general updates.
+* Improvements to text selection and copy behavior in the codeview, console, and variables window. - [#6020](https://github.com/flutter/devtools/pull/6020)
 
 ## Network profiler updates
 * Added a selector to customize the display type of text and json responses (thanks to @hhacker1999!) - [#5816](https://github.com/flutter/devtools/pull/5816)
