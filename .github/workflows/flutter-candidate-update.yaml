@@ -53,7 +53,8 @@ jobs:
           BRANCH_NAME="auto-candidate-$(date +%s)"
           # Stage the file, commit and push
           git checkout -b "$BRANCH_NAME"
-          git commit -a -m "$COMMIT_MESSAGE"
+          git add .
+          git commit -m "$COMMIT_MESSAGE"
           git push -u origin "$BRANCH_NAME"
 
 
