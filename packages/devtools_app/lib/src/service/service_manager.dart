@@ -134,6 +134,8 @@ class ServiceConnectionManager {
   final ValueNotifier<ConnectedState> _connectedState =
       ValueNotifier(const ConnectedState(false));
 
+  // TODO(kenz): try to replace all uses of this stream with a listener to the
+  // [connectedState] ValueListenable.
   Stream<VmServiceWrapper> get onConnectionAvailable =>
       _connectionAvailableController.stream;
 
@@ -305,8 +307,6 @@ class ServiceConnectionManager {
       return;
     }
 
-    _connectedState.value = const ConnectedState(true);
-
     final isolates = vm?.isolatesForDevToolsMode() ?? <IsolateRef>[];
     await isolateManager.init(isolates);
     if (service != this.service) {
@@ -332,6 +332,7 @@ class ServiceConnectionManager {
     }
 
     _connectionAvailableController.add(service);
+    _connectedState.value = const ConnectedState(true);
   }
 
   void manuallyDisconnect() {
@@ -566,4 +567,18 @@ class ConnectedState {
 
   /// Whether this [ConnectedState] was manually initiated by the user.
   final bool userInitiatedConnectionState;
+
+  @override
+  bool operator ==(Object? other) {
+    return other is ConnectedState &&
+        other.connected == connected &&
+        other.userInitiatedConnectionState == userInitiatedConnectionState;
+  }
+
+  @override
+  int get hashCode => Object.hash(connected, userInitiatedConnectionState);
+
+  @override
+  String toString() =>
+      'ConnectedState(connected: $connected, userInitiated: $userInitiatedConnectionState)';
 }
