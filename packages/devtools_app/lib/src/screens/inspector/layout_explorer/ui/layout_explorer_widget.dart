@@ -78,11 +78,7 @@ abstract class LayoutExplorerWidgetState<W extends LayoutExplorerWidget,
     if (shouldFetch) {
       _dirty = false;
       final newSelection = await fetchLayoutProperties();
-      if (newSelection != null) {
-        _setProperties(newSelection);
-      } else {
-        _setProperties(null);
-      }
+      _setProperties(newSelection);
     } else {
       updateHighlighted(_properties);
     }
