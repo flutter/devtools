@@ -4,8 +4,6 @@ on:
   schedule:
     # * is a special character in YAML so you have to quote this string
     - cron: "0 8 * * *" # Run every day at midnight Pacific Time
-  pull_request:
-    types: [labeled, unlabeled] # TODO: Remove these before submitting PR
 
 permissions:
   contents: write
@@ -44,7 +42,7 @@ jobs:
       - name: Create the PR
         run: |
           set -ex
-          if ! [[ `git status --porcelain #--untracked-files=no` ]]; then
+          if ! [[ `git status --porcelain --untracked-files=no` ]]; then
             # No changes made, so we can just exit.
             echo "No change to the flutter-candidate.txt file"
             exit
