@@ -14,7 +14,7 @@ env:
 
 jobs:
   update-candidate:
-    name: Bump Version
+    name: Update Flutter Candidate Version
     runs-on: ubuntu-latest
     steps:
       - name: git clone devtools

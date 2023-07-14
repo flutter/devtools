@@ -32,7 +32,7 @@ Debug logs found in `Settings > Copy Logs` are saved such that they can be read 
 For a quick tutorial on how to navigate logs using `lnav`
 you can give [ their tutorial ](https://lnav.org/tutorials) a try.
 
-## Flutter versions that work with this instance of DevTools
+## Finding the Flutter version that a DevTools commit is compatible with
 
 Latest Flutter candidate for this DevTools version: [flutter-candidate.txt](../flutter-candidate.txt)
 
