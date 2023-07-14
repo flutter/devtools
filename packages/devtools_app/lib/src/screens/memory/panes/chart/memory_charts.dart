@@ -270,22 +270,6 @@ class ChartsValues {
     return eventsDisplayed;
   }
 
-  Map<String, String> get extensionEventsToDisplay {
-    final eventsDisplayed = <String, String>{};
-
-    if (hasExtensionEvents) {
-      final eventLength = extensionEventsLength;
-      if (eventLength > 0) {
-        final displayKey = '$eventLength'
-            '${eventLength == 1 ? eventDisplayName : eventsDisplayName}';
-        eventsDisplayed[displayKey] =
-            eventLength == 1 ? eventLegend : eventsLegend;
-      }
-    }
-
-    return eventsDisplayed;
-  }
-
   Map<String, Map<String, Object?>> displayVmDataToDisplay(List<Trace> traces) {
     final vmDataDisplayed = <String, Map<String, Object?>>{};
 

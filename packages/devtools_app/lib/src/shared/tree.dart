@@ -11,6 +11,9 @@ import 'collapsible_mixin.dart';
 import 'primitives/auto_dispose.dart';
 import 'primitives/trees.dart';
 import 'theme.dart';
+import 'utils.dart';
+
+double get defaultTreeViewRowHeight => scaleByFontFactor(20.0);
 
 class TreeView<T extends TreeNode<T>> extends StatefulWidget {
   const TreeView({
@@ -19,8 +22,6 @@ class TreeView<T extends TreeNode<T>> extends StatefulWidget {
     required this.dataDisplayProvider,
     required this.onItemSelected,
     this.onItemExpanded,
-    this.shrinkWrap = false,
-    this.itemExtent,
     this.onTraverse,
     this.emptyTreeViewBuilder,
     this.scrollController,
@@ -28,14 +29,6 @@ class TreeView<T extends TreeNode<T>> extends StatefulWidget {
   });
 
   final ValueListenable<List<T>> dataRootsListenable;
-
-  /// Use [shrinkWrap] iff you need to place a TreeView inside a ListView or
-  /// other container with unconstrained height.
-  ///
-  /// Enabling shrinkWrap impacts performance.
-  ///
-  /// Defaults to false.
-  final bool shrinkWrap;
 
   final Widget Function(T, VoidCallback) dataDisplayProvider;
 
@@ -47,8 +40,6 @@ class TreeView<T extends TreeNode<T>> extends StatefulWidget {
   /// If provided, this method will be called when the expand button is tapped.
   /// Otherwise, [onItemSelected] will be invoked, if provided.
   final FutureOr<void> Function(T)? onItemExpanded;
-
-  final double? itemExtent;
 
   /// Called on traversal of child node during [buildFlatList].
   final void Function(T)? onTraverse;
@@ -82,23 +73,25 @@ class _TreeViewState<T extends TreeNode<T>> extends State<TreeView<T>>
   @override
   Widget build(BuildContext context) {
     if (dataFlatList.isEmpty) return _emptyTreeViewBuilder();
-    final content = SelectionArea(
-      child: ListView.builder(
-        itemCount: dataFlatList.length,
-        itemExtent: widget.itemExtent,
-        shrinkWrap: widget.shrinkWrap,
-        physics: widget.shrinkWrap ? const ClampingScrollPhysics() : null,
-        controller: widget.scrollController,
-        itemBuilder: (context, index) {
-          final T item = dataFlatList[index];
-          return _TreeViewItem<T>(
-            item,
-            buildDisplay: (onPressed) =>
-                widget.dataDisplayProvider(item, onPressed),
-            onItemSelected: _onItemSelected,
-            onItemExpanded: _onItemExpanded,
-          );
-        },
+    final content = SizedBox(
+      height: dataFlatList.length * defaultTreeViewRowHeight,
+      child: SelectionArea(
+        child: ListView.builder(
+          itemCount: dataFlatList.length,
+          itemExtent: defaultTreeViewRowHeight,
+          physics: const ClampingScrollPhysics(),
+          controller: widget.scrollController,
+          itemBuilder: (context, index) {
+            final T item = dataFlatList[index];
+            return _TreeViewItem<T>(
+              item,
+              buildDisplay: (onPressed) =>
+                  widget.dataDisplayProvider(item, onPressed),
+              onItemSelected: _onItemSelected,
+              onItemExpanded: _onItemExpanded,
+            );
+          },
+        ),
       ),
     );
     if (widget.includeScrollbar) {
