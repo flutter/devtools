@@ -70,7 +70,7 @@ abstract class FeatureFlags {
   static bool deepLinkValidation = enableExperiments;
 
   /// Flag to enable DevTools extensions.
-  /// 
+  ///
   /// https://github.com/flutter/devtools/issues/1632
   static bool devToolsExtensions = enableExperiments;
 
