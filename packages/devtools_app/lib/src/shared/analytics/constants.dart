@@ -41,6 +41,10 @@ const feedbackButton = 'feedbackButton';
 const contributingLink = 'contributing';
 const discordLink = 'discord';
 
+// Extension screens UX actions.
+const extensionScreenId = 'devtoolsExtension';
+String extensionFeedback(String name) => 'extensionFeedback-$name';
+
 // Inspector UX actions:
 const refresh = 'refresh';
 const refreshEmptyTree = 'refreshEmptyTree';
