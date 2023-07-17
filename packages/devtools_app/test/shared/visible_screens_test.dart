@@ -16,7 +16,10 @@ void main() {
 
     setUp(() async {
       fakeServiceManager = FakeServiceManager(availableLibraries: []);
-      setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
+      setGlobal(
+        DevToolsEnvironmentParameters,
+        ExternalDevToolsEnvironmentParameters(),
+      );
       setGlobal(ServiceConnectionManager, fakeServiceManager);
       setGlobal(BreakpointManager, BreakpointManager());
       setGlobal(FrameworkController, FrameworkController());

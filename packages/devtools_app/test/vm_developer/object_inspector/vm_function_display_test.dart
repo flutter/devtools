@@ -25,7 +25,10 @@ void main() {
     setGlobal(BreakpointManager, BreakpointManager());
     setGlobal(IdeTheme, IdeTheme());
     setGlobal(ServiceConnectionManager, FakeServiceManager());
-    setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
+    setGlobal(
+      DevToolsEnvironmentParameters,
+      ExternalDevToolsEnvironmentParameters(),
+    );
     setGlobal(PreferencesController, PreferencesController());
     setGlobal(NotificationService, NotificationService());
 

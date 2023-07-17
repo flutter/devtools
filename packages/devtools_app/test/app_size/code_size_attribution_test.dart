@@ -18,7 +18,10 @@ void main() {
 
   setUp(() {
     setGlobal(ServiceConnectionManager, FakeServiceManager());
-    setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
+    setGlobal(
+      DevToolsEnvironmentParameters,
+      ExternalDevToolsEnvironmentParameters(),
+    );
     setGlobal(PreferencesController, PreferencesController());
     setGlobal(IdeTheme, IdeTheme());
     callGraph = generateCallGraphWithDominators(
