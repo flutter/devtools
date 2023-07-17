@@ -119,13 +119,11 @@ class DiffPaneController extends DisposableController {
       gac.memory,
       gac.importFile,
     );
-    final DevToolsJsonFile? importedFile = await importFileFromPicker(
+    final files = await importFilesFromPicker(
       acceptedTypes: ['json'],
     );
 
-    if (importedFile != null) {
-      /// ???
-    }
+    print(files.length);
   }
 
   void setDiffing(
