@@ -28,7 +28,10 @@ void main() {
   late Disposable isAlive;
 
   setUp(() async {
-    setGlobal(DevToolsEnvironmentParameters, ExternalDevToolsEnvironmentParameters());
+    setGlobal(
+      DevToolsEnvironmentParameters,
+      ExternalDevToolsEnvironmentParameters(),
+    );
     setGlobal(IdeTheme, getIdeTheme());
     setGlobal(BreakpointManager, BreakpointManager());
     setGlobal(Storage, FlutterTestStorage());

@@ -41,7 +41,10 @@ void main() {
     setGlobal(IdeTheme, IdeTheme());
     setGlobal(ScriptManager, MockScriptManager());
     setGlobal(NotificationService, NotificationService());
-    setGlobal(DevToolsEnvironmentParameters, ExternalDevToolsEnvironmentParameters());
+    setGlobal(
+      DevToolsEnvironmentParameters,
+      ExternalDevToolsEnvironmentParameters(),
+    );
     setGlobal(PreferencesController, PreferencesController());
     scriptsHistory.pushEntry(mockScript!);
     final mockCodeViewController = debuggerController.codeViewController;

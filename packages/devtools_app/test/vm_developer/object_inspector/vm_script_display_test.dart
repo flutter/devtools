@@ -24,7 +24,10 @@ void main() {
     setGlobal(IdeTheme, IdeTheme());
     setGlobal(BreakpointManager, BreakpointManager());
     setGlobal(ServiceConnectionManager, FakeServiceManager());
-    setGlobal(DevToolsEnvironmentParameters, ExternalDevToolsEnvironmentParameters());
+    setGlobal(
+      DevToolsEnvironmentParameters,
+      ExternalDevToolsEnvironmentParameters(),
+    );
     setGlobal(PreferencesController, PreferencesController());
     setGlobal(NotificationService, NotificationService());
     setUpMockScriptManager();

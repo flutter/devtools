@@ -24,7 +24,10 @@ import '../test_infra/test_data/app_size/unsupported_file.dart';
 void main() {
   setUp(() {
     setGlobal(ServiceConnectionManager, FakeServiceManager());
-    setGlobal(DevToolsEnvironmentParameters, ExternalDevToolsEnvironmentParameters());
+    setGlobal(
+      DevToolsEnvironmentParameters,
+      ExternalDevToolsEnvironmentParameters(),
+    );
     setGlobal(PreferencesController, PreferencesController());
     setGlobal(IdeTheme, IdeTheme());
     setGlobal(NotificationService, NotificationService());

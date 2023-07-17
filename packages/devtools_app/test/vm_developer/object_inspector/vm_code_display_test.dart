@@ -24,7 +24,10 @@ void main() {
     setUp(() {
       setUpMockScriptManager();
       setGlobal(IdeTheme, IdeTheme());
-      setGlobal(DevToolsEnvironmentParameters, ExternalDevToolsEnvironmentParameters());
+      setGlobal(
+        DevToolsEnvironmentParameters,
+        ExternalDevToolsEnvironmentParameters(),
+      );
       setGlobal(PreferencesController, PreferencesController());
 
       mockCodeObject = MockCodeObject();

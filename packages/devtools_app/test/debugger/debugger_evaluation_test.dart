@@ -26,7 +26,10 @@ void main() {
   late EvalOnDartLibrary eval;
 
   setUp(() async {
-    setGlobal(DevToolsEnvironmentParameters, ExternalDevToolsEnvironmentParameters());
+    setGlobal(
+      DevToolsEnvironmentParameters,
+      ExternalDevToolsEnvironmentParameters(),
+    );
     setGlobal(BreakpointManager, BreakpointManager());
     setGlobal(EvalService, EvalService());
     setGlobal(NotificationService, NotificationService());

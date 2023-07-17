@@ -27,7 +27,10 @@ void main() {
   setGlobal(ScriptManager, scriptManager);
   setGlobal(NotificationService, NotificationService());
   setGlobal(BreakpointManager, mockBreakpointManager);
-  setGlobal(DevToolsEnvironmentParameters, ExternalDevToolsEnvironmentParameters());
+  setGlobal(
+    DevToolsEnvironmentParameters,
+    ExternalDevToolsEnvironmentParameters(),
+  );
   setGlobal(PreferencesController, PreferencesController());
   fakeServiceManager.consoleService.ensureServiceInitialized();
   when(fakeServiceManager.errorBadgeManager.errorCountNotifier('debugger'))

@@ -15,7 +15,10 @@ void main() {
     late PreferencesController controller;
 
     setUp(() {
-      setGlobal(DevToolsEnvironmentParameters, ExternalDevToolsEnvironmentParameters());
+      setGlobal(
+        DevToolsEnvironmentParameters,
+        ExternalDevToolsEnvironmentParameters(),
+      );
       controller = PreferencesController();
     });
 

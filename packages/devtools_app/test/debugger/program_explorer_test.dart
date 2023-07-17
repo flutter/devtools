@@ -32,7 +32,10 @@ void main() {
           createMockProgramExplorerControllerWithDefaults();
       setGlobal(IdeTheme, IdeTheme());
       setGlobal(ServiceConnectionManager, fakeServiceManager);
-      setGlobal(DevToolsEnvironmentParameters, ExternalDevToolsEnvironmentParameters());
+      setGlobal(
+        DevToolsEnvironmentParameters,
+        ExternalDevToolsEnvironmentParameters(),
+      );
       setGlobal(PreferencesController, PreferencesController());
     });
 

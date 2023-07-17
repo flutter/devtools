@@ -45,7 +45,10 @@ void main() async {
     }
   };
 
-  setGlobal(DevToolsEnvironmentParameters, ExternalDevToolsEnvironmentParameters());
+  setGlobal(
+    DevToolsEnvironmentParameters,
+    ExternalDevToolsEnvironmentParameters(),
+  );
   setGlobal(BreakpointManager, BreakpointManager());
   setGlobal(IdeTheme, IdeTheme());
   setGlobal(NotificationService, NotificationService());

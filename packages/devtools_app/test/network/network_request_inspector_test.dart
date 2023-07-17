@@ -25,7 +25,10 @@ void main() {
 
     setUp(() {
       setGlobal(IdeTheme, IdeTheme());
-      setGlobal(DevToolsEnvironmentParameters, ExternalDevToolsEnvironmentParameters());
+      setGlobal(
+        DevToolsEnvironmentParameters,
+        ExternalDevToolsEnvironmentParameters(),
+      );
       setGlobal(PreferencesController, PreferencesController());
       clipboardContents = '';
       fakeServiceManager = FakeServiceManager(

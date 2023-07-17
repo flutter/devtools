@@ -26,7 +26,10 @@ void externalRunDevTools({
   List<DevToolsJsonFile> sampleData = const [],
 }) {
   // Set the extension points global.
-  setGlobal(DevToolsEnvironmentParameters, ExternalDevToolsEnvironmentParameters());
+  setGlobal(
+    DevToolsEnvironmentParameters,
+    ExternalDevToolsEnvironmentParameters(),
+  );
 
   runDevTools(
     integrationTestMode: integrationTestMode,
