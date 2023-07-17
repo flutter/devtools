@@ -39,7 +39,7 @@ void main() {
       when(fakeServiceManager.errorBadgeManager.errorCountNotifier('logging'))
           .thenReturn(ValueNotifier<int>(0));
       setGlobal(NotificationService, NotificationService());
-      setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
+      setGlobal(DevToolsEnvironmentParameters, ExternalDevToolsEnvironmentParameters());
       setGlobal(PreferencesController, PreferencesController());
       setGlobal(ServiceConnectionManager, fakeServiceManager);
       setGlobal(IdeTheme, IdeTheme());

@@ -23,7 +23,7 @@ void main() {
 
     setUp(() async {
       fakeServiceManager = FakeServiceManager();
-      setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
+      setGlobal(DevToolsEnvironmentParameters, ExternalDevToolsEnvironmentParameters());
       setGlobal(ServiceConnectionManager, fakeServiceManager);
       setGlobal(IdeTheme, IdeTheme());
       setGlobal(NotificationService, NotificationService());

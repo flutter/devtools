@@ -37,7 +37,7 @@ void main() {
     }
 
     setUp(() {
-      setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
+      setGlobal(DevToolsEnvironmentParameters, ExternalDevToolsEnvironmentParameters());
       setGlobal(ServiceConnectionManager, fakeServiceManager);
       setGlobal(OfflineModeController, OfflineModeController());
       setGlobal(PreferencesController, PreferencesController());

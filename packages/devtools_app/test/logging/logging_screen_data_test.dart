@@ -36,7 +36,7 @@ void main() {
         .thenReturn(ValueNotifier<int>(0));
     setGlobal(ServiceConnectionManager, fakeServiceManager);
     setGlobal(NotificationService, NotificationService());
-    setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
+    setGlobal(DevToolsEnvironmentParameters, ExternalDevToolsEnvironmentParameters());
     setGlobal(PreferencesController, PreferencesController());
     setGlobal(IdeTheme, IdeTheme());
   });

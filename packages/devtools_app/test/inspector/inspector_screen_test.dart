@@ -48,7 +48,7 @@ void main() {
     when(fakeServiceManager.errorBadgeManager.errorCountNotifier('inspector'))
         .thenReturn(ValueNotifier<int>(0));
 
-    setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
+    setGlobal(DevToolsEnvironmentParameters, ExternalDevToolsEnvironmentParameters());
     setGlobal(ServiceConnectionManager, fakeServiceManager);
     setGlobal(IdeTheme, IdeTheme());
     setGlobal(PreferencesController, PreferencesController());

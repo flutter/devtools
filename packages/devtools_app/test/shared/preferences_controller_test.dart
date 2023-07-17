@@ -15,7 +15,7 @@ void main() {
     late PreferencesController controller;
 
     setUp(() {
-      setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
+      setGlobal(DevToolsEnvironmentParameters, ExternalDevToolsEnvironmentParameters());
       controller = PreferencesController();
     });
 

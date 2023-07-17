@@ -14,7 +14,7 @@ void main() {
     when(fakeServiceManager.connectedApp!.isFlutterAppNow).thenReturn(false);
 
     setUp(() {
-      setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
+      setGlobal(DevToolsEnvironmentParameters, ExternalDevToolsEnvironmentParameters());
       setGlobal(ServiceConnectionManager, fakeServiceManager);
       setGlobal(OfflineModeController, OfflineModeController());
       setGlobal(PreferencesController, PreferencesController());

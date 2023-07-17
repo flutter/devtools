@@ -35,7 +35,7 @@ void main() {
       isWebApp: false,
     );
 
-    setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
+    setGlobal(DevToolsEnvironmentParameters, ExternalDevToolsEnvironmentParameters());
     setGlobal(ServiceConnectionManager, fakeServiceManager);
     setGlobal(OfflineModeController, OfflineModeController());
     setGlobal(IdeTheme, IdeTheme());

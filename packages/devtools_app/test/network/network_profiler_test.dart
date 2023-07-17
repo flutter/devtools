@@ -48,7 +48,7 @@ void main() {
     socketProfile = loadSocketProfile();
     httpProfile = loadHttpProfile();
     setGlobal(IdeTheme, IdeTheme());
-    setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
+    setGlobal(DevToolsEnvironmentParameters, ExternalDevToolsEnvironmentParameters());
     setGlobal(PreferencesController, PreferencesController());
     setGlobal(NotificationService, NotificationService());
     setGlobal(BreakpointManager, BreakpointManager());

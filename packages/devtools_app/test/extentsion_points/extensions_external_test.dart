@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app/src/extensions/static/extension_points_external.dart';
+import 'package:devtools_app/src/shared/environment_parameters/environment_parameters_external.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {

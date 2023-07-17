@@ -124,7 +124,7 @@ void main() {
   setUpAll(() async => await loadFonts());
 
   setUp(() {
-    setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
+    setGlobal(DevToolsEnvironmentParameters, ExternalDevToolsEnvironmentParameters());
     setGlobal(IdeTheme, getIdeTheme());
     setGlobal(ServiceConnectionManager, FakeServiceManager());
   });

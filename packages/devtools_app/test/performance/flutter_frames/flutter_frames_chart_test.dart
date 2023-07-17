@@ -45,7 +45,7 @@ void main() {
       setGlobal(IdeTheme, IdeTheme());
       setGlobal(NotificationService, NotificationService());
       setGlobal(BannerMessagesController, BannerMessagesController());
-      setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
+      setGlobal(DevToolsEnvironmentParameters, ExternalDevToolsEnvironmentParameters());
       setGlobal(PreferencesController, PreferencesController());
 
       framesController = FlutterFramesController(

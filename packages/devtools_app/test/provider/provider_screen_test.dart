@@ -25,7 +25,7 @@ void main() {
 
   setUp(() {
     setGlobal(IdeTheme, getIdeTheme());
-    setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
+    setGlobal(DevToolsEnvironmentParameters, ExternalDevToolsEnvironmentParameters());
     setGlobal(PreferencesController, PreferencesController());
     setGlobal(ServiceConnectionManager, FakeServiceManager());
     setGlobal(NotificationService, NotificationService());
