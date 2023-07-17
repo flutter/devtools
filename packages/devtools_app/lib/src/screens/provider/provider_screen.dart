@@ -13,8 +13,10 @@ import '../../shared/banner_messages.dart';
 import '../../shared/common_widgets.dart';
 import '../../shared/dialogs.dart';
 import '../../shared/globals.dart';
+import '../../shared/primitives/auto_dispose.dart';
 import '../../shared/screen.dart';
 import '../../shared/split.dart';
+import 'instance_viewer/eval.dart';
 import 'instance_viewer/instance_details.dart';
 import 'instance_viewer/instance_providers.dart';
 import 'instance_viewer/instance_viewer.dart';
@@ -70,11 +72,19 @@ class ProviderScreenWrapper extends StatefulWidget {
   State<ProviderScreenWrapper> createState() => _ProviderScreenWrapperState();
 }
 
-class _ProviderScreenWrapperState extends State<ProviderScreenWrapper> {
+class _ProviderScreenWrapperState extends State<ProviderScreenWrapper>
+    with AutoDisposeMixin {
   @override
   void initState() {
     super.initState();
     ga.screen(ProviderScreen.id);
+
+    cancelListeners();
+    addAutoDisposeListener(serviceManager.connectedState, () {
+      if (serviceManager.connectedState.value.connected) {
+        setServiceConnectionForProviderScreen(serviceManager.service!);
+      }
+    });
   }
 
   @override

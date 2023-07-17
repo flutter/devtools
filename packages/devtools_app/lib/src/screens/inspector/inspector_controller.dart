@@ -114,16 +114,17 @@ class InspectorController extends DisposableController
       });
     }
 
-    autoDisposeStreamSubscription(
-      serviceManager.onConnectionAvailable
-          .listen((_) => _handleConnectionStart()),
-    );
+    addAutoDisposeListener(serviceManager.connectedState, () {
+      if (serviceManager.connectedState.value.connected) {
+        _handleConnectionStart();
+      } else {
+        _handleConnectionStop();
+      }
+    });
+
     if (serviceManager.connectedAppInitialized) {
       _handleConnectionStart();
     }
-    autoDisposeStreamSubscription(
-      serviceManager.onConnectionClosed.listen((_) => _handleConnectionStop()),
-    );
 
     serviceManager.consoleService.ensureServiceInitialized();
   }
