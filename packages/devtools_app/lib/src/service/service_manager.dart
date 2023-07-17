@@ -17,6 +17,7 @@ import '../shared/connected_app.dart';
 import '../shared/console/console_service.dart';
 import '../shared/diagnostics/inspector_service.dart';
 import '../shared/error_badge_manager.dart';
+import '../shared/feature_flags.dart';
 import '../shared/globals.dart';
 import '../shared/primitives/utils.dart';
 import '../shared/title.dart';
@@ -329,6 +330,10 @@ class ServiceConnectionManager {
     if (service != this.service) {
       // A different service has been opened.
       return;
+    }
+
+    if (FeatureFlags.devToolsExtensions) {
+      extensionService.initialize();
     }
 
     _connectionAvailableController.add(service);

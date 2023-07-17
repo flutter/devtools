@@ -9,6 +9,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'example/conditional_screen.dart';
+import 'extensions/extension_model.dart';
+import 'extensions/ui/extension_screen.dart';
 import 'framework/framework_core.dart';
 import 'framework/home_screen.dart';
 import 'framework/initializer.dart';
@@ -66,13 +68,13 @@ const showVmDeveloperMode = false;
 @immutable
 class DevToolsApp extends StatefulWidget {
   const DevToolsApp(
-    this.screens,
+    this.originalScreens,
     this.analyticsController, {
     super.key,
     this.sampleData = const [],
   });
 
-  final List<DevToolsScreen> screens;
+  final List<DevToolsScreen> originalScreens;
   final AnalyticsController analyticsController;
   final List<DevToolsJsonFile> sampleData;
 
@@ -87,7 +89,18 @@ class DevToolsApp extends StatefulWidget {
 // TODO(https://github.com/flutter/devtools/issues/1146): Introduce tests that
 // navigate the full app.
 class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
-  List<Screen> get _screens => widget.screens.map((s) => s.screen).toList();
+  List<Screen> get _screens => [
+        ..._originalScreens,
+        if (FeatureFlags.devToolsExtensions) ..._extensionScreens,
+      ];
+
+  List<Screen> get _originalScreens =>
+      widget.originalScreens.map((s) => s.screen).toList();
+
+  Iterable<Screen> get _extensionScreens =>
+      extensionService.availableExtensions.value.map(
+        (e) => DevToolsScreen<void>(ExtensionScreen(e)).screen,
+      );
 
   bool get isDarkThemeEnabled => _isDarkThemeEnabled;
   bool _isDarkThemeEnabled = true;
@@ -114,6 +127,14 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
     // }
 
     unawaited(ga.setupDimensions());
+
+    if (FeatureFlags.devToolsExtensions) {
+      addAutoDisposeListener(extensionService.availableExtensions, () {
+        setState(() {
+          _clearCachedRoutes();
+        });
+      });
+    }
 
     addAutoDisposeListener(serviceManager.isolateManager.mainIsolate, () {
       setState(() {
@@ -215,10 +236,11 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
 
     Widget scaffoldBuilder() {
       // Force regeneration of visible screens when VM developer mode is
-      // enabled.
-      return ValueListenableBuilder<bool>(
-        valueListenable: preferences.vmDeveloperModeEnabled,
-        builder: (_, __, child) {
+      // enabled and when the list of available extensions change.
+      return DualValueListenableBuilder<bool, List<DevToolsExtensionConfig>>(
+        firstListenable: preferences.vmDeveloperModeEnabled,
+        secondListenable: extensionService.availableExtensions,
+        builder: (_, __, ___, child) {
           final screens = _visibleScreens()
               .where((p) => embed && page != null ? p.screenId == page : true)
               .where((p) => !hide.contains(p.screenId))
@@ -257,8 +279,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
   Map<String, UrlParametersBuilder> get pages {
     return _routes ??= {
       homeScreenId: _buildTabbedPage,
-      for (final screen in widget.screens)
-        screen.screen.screenId: _buildTabbedPage,
+      for (final screen in _screens) screen.screenId: _buildTabbedPage,
       snapshotScreenId: (_, __, args, ___) {
         final snapshotArgs = OfflineDataArguments.fromArgs(args);
         final embed = isEmbedded(args);
@@ -305,7 +326,9 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
   List<Screen> _visibleScreens() => _screens.where(shouldShowScreen).toList();
 
   List<Provider> _providedControllers({bool offline = false}) {
-    return widget.screens
+    // We use [widget.originalScreens] here instead of [_screens] because
+    // extension screens do not provide a controller through this mechanism.
+    return widget.originalScreens
         .where(
           (s) => s.providesController && (offline ? s.supportsOffline : true),
         )
@@ -360,10 +383,10 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
 }
 
 /// DevTools screen wrapper that is responsible for creating and providing the
-/// screen's controller, as well as enabling offline support.
+/// screen's controller, if one exists, as well as enabling offline support.
 ///
 /// [C] corresponds to the type of the screen's controller, which is created by
-/// [createController] and provided by [controllerProvider].
+/// [createController] or provided by [controllerProvider].
 class DevToolsScreen<C> {
   const DevToolsScreen(
     this.screen, {
@@ -459,10 +482,7 @@ List<DevToolsScreen> defaultScreens({
   List<DevToolsJsonFile> sampleData = const [],
 }) {
   return devtoolsScreens ??= <DevToolsScreen>[
-    DevToolsScreen<void>(
-      HomeScreen(sampleData: sampleData),
-      createController: (_) {},
-    ),
+    DevToolsScreen<void>(HomeScreen(sampleData: sampleData)),
     DevToolsScreen<InspectorController>(
       InspectorScreen(),
       createController: (_) => InspectorController(
@@ -503,10 +523,7 @@ List<DevToolsScreen> defaultScreens({
       LoggingScreen(),
       createController: (_) => LoggingController(),
     ),
-    DevToolsScreen<void>(
-      ProviderScreen(),
-      createController: (_) {},
-    ),
+    DevToolsScreen<void>(ProviderScreen()),
     DevToolsScreen<AppSizeController>(
       AppSizeScreen(),
       createController: (_) => AppSizeController(),
