@@ -35,7 +35,7 @@ void runDevTools({
   List<DevToolsScreen>? screens,
 }) {
   setupErrorHandling(() async {
-    screens ??= defaultScreens;
+    screens ??= defaultScreens(sampleData: sampleData);
 
     initDevToolsLogging();
 

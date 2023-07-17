@@ -10,8 +10,8 @@ import 'package:provider/provider.dart';
 
 import 'example/conditional_screen.dart';
 import 'framework/framework_core.dart';
+import 'framework/home_screen.dart';
 import 'framework/initializer.dart';
-import 'framework/landing_screen.dart';
 import 'framework/notifications_view.dart';
 import 'framework/release_notes/release_notes.dart';
 import 'framework/scaffold.dart';
@@ -19,13 +19,16 @@ import 'screens/app_size/app_size_controller.dart';
 import 'screens/app_size/app_size_screen.dart';
 import 'screens/debugger/debugger_controller.dart';
 import 'screens/debugger/debugger_screen.dart';
+import 'screens/deep_link_validation/deep_links_controller.dart';
+import 'screens/deep_link_validation/deep_links_screen.dart';
 import 'screens/inspector/inspector_controller.dart';
 import 'screens/inspector/inspector_screen.dart';
 import 'screens/inspector/inspector_tree_controller.dart';
 import 'screens/logging/logging_controller.dart';
 import 'screens/logging/logging_screen.dart';
-import 'screens/memory/memory_controller.dart';
-import 'screens/memory/memory_screen.dart';
+import 'screens/memory/framework/connected/memory_controller.dart';
+import 'screens/memory/framework/memory_screen.dart';
+import 'screens/memory/framework/static/static_screen_body.dart';
 import 'screens/network/network_controller.dart';
 import 'screens/network/network_screen.dart';
 import 'screens/performance/performance_controller.dart';
@@ -89,9 +92,6 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
   bool get isDarkThemeEnabled => _isDarkThemeEnabled;
   bool _isDarkThemeEnabled = true;
 
-  bool get vmDeveloperModeEnabled => _vmDeveloperModeEnabled;
-  bool _vmDeveloperModeEnabled = false;
-
   bool get denseModeEnabled => _denseModeEnabled;
   bool _denseModeEnabled = false;
 
@@ -105,6 +105,14 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
   void initState() {
     super.initState();
 
+    // TODO(https://github.com/flutter/devtools/issues/6018): Once
+    // https://github.com/flutter/flutter/issues/129692 is fixed, disable the
+    // browser's native context menu on secondary-click, and instead use the
+    // menu provided by Flutter:
+    // if (kIsWeb) {
+    //   unawaited(BrowserContextMenu.disableContextMenu());
+    // }
+
     unawaited(ga.setupDimensions());
 
     addAutoDisposeListener(serviceManager.isolateManager.mainIsolate, () {
@@ -117,13 +125,6 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
     addAutoDisposeListener(preferences.darkModeTheme, () {
       setState(() {
         _isDarkThemeEnabled = preferences.darkModeTheme.value;
-      });
-    });
-
-    _vmDeveloperModeEnabled = preferences.vmDeveloperModeEnabled.value;
-    addAutoDisposeListener(preferences.vmDeveloperModeEnabled, () {
-      setState(() {
-        _vmDeveloperModeEnabled = preferences.vmDeveloperModeEnabled.value;
       });
     });
 
@@ -200,15 +201,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
   ) {
     final vmServiceUri = params['uri'];
     final embed = isEmbedded(params);
-
-    // Always return the landing screen if there's no VM service URI.
-    if (vmServiceUri?.isEmpty ?? true) {
-      return DevToolsScaffold.withChild(
-        key: const Key('landing'),
-        embed: embed,
-        child: LandingScreenBody(sampleData: widget.sampleData),
-      );
-    }
+    final hide = {...?params['hide']?.split(',')};
 
     // TODO(dantup): We should be able simplify this a little, removing params['page']
     // and only supporting /inspector (etc.) instead of also &page=inspector if
@@ -216,49 +209,48 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
     if (page?.isEmpty ?? true) {
       page = params['page'];
     }
-    final hide = {...?params['hide']?.split(',')};
-    return Initializer(
-      url: vmServiceUri,
-      allowConnectionScreenOnDisconnect: !embed,
-      builder: (_) {
-        // Force regeneration of visible screens when VM developer mode is
-        // enabled.
-        return ValueListenableBuilder<bool>(
-          valueListenable: preferences.vmDeveloperModeEnabled,
-          builder: (_, __, child) {
-            final screens = _visibleScreens()
-                .where((p) => embed && page != null ? p.screenId == page : true)
-                .where((p) => !hide.contains(p.screenId))
-                .toList();
-            if (screens.isEmpty) return child ?? const SizedBox.shrink();
-            return MultiProvider(
-              providers: _providedControllers(),
-              child: DevToolsScaffold(
-                embed: embed,
-                page: page,
-                screens: screens,
-                actions: [
+
+    final connectedToVmService =
+        vmServiceUri != null && vmServiceUri.isNotEmpty;
+
+    Widget scaffoldBuilder() {
+      // Force regeneration of visible screens when VM developer mode is
+      // enabled.
+      return ValueListenableBuilder<bool>(
+        valueListenable: preferences.vmDeveloperModeEnabled,
+        builder: (_, __, child) {
+          final screens = _visibleScreens()
+              .where((p) => embed && page != null ? p.screenId == page : true)
+              .where((p) => !hide.contains(p.screenId))
+              .toList();
+          return MultiProvider(
+            providers: _providedControllers(),
+            child: DevToolsScaffold(
+              embed: embed,
+              page: page,
+              screens: screens,
+              actions: [
+                if (connectedToVmService)
                   // TODO(https://github.com/flutter/devtools/issues/1941)
                   if (serviceManager.connectedApp!.isFlutterAppNow!) ...[
                     const HotReloadButton(),
                     const HotRestartButton(),
                   ],
-                  ...DevToolsScaffold.defaultActions(),
-                ],
-              ),
-            );
-          },
-          child: DevToolsScaffold.withChild(
-            embed: embed,
-            child: CenteredMessage(
-              page != null
-                  ? 'The "$page" screen is not available for this application.'
-                  : 'No tabs available for this application.',
+                ...DevToolsScaffold.defaultActions(isEmbedded: embed),
+              ],
             ),
-          ),
-        );
-      },
-    );
+          );
+        },
+      );
+    }
+
+    return connectedToVmService
+        ? Initializer(
+            url: vmServiceUri,
+            allowConnectionScreenOnDisconnect: !embed,
+            builder: (_) => scaffoldBuilder(),
+          )
+        : scaffoldBuilder();
   }
 
   /// The pages that the app exposes.
@@ -279,17 +271,18 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
           ),
         );
       },
-      appSizeScreenId: (_, __, args, ____) {
-        final embed = isEmbedded(args);
-        return DevToolsScaffold.withChild(
-          key: const Key('appsize'),
-          embed: embed,
-          child: MultiProvider(
-            providers: _providedControllers(),
-            child: const AppSizeBody(),
-          ),
-        );
-      },
+      if (FeatureFlags.memoryAnalysis)
+        memoryAnalysisScreenId: (_, __, args, ____) {
+          final embed = isEmbedded(args);
+          return DevToolsScaffold.withChild(
+            key: const Key('memoryanalysis'),
+            embed: embed,
+            child: MultiProvider(
+              providers: _providedControllers(),
+              child: const StaticMemoryBody(),
+            ),
+          );
+        },
       if (FeatureFlags.vsCodeSidebarTooling) ..._standaloneScreens,
     };
   }
@@ -462,8 +455,14 @@ class _AlternateCheckedModeBanner extends StatelessWidget {
 ///
 /// Conditional screens can be added to this list, and they will automatically
 /// be shown or hidden based on the [Screen.conditionalLibrary] provided.
-List<DevToolsScreen> get defaultScreens {
+List<DevToolsScreen> defaultScreens({
+  List<DevToolsJsonFile> sampleData = const [],
+}) {
   return devtoolsScreens ??= <DevToolsScreen>[
+    DevToolsScreen<void>(
+      HomeScreen(sampleData: sampleData),
+      createController: (_) {},
+    ),
     DevToolsScreen<InspectorController>(
       InspectorScreen(),
       createController: (_) => InspectorController(
@@ -512,6 +511,11 @@ List<DevToolsScreen> get defaultScreens {
       AppSizeScreen(),
       createController: (_) => AppSizeController(),
     ),
+    if (FeatureFlags.deepLinkValidation)
+      DevToolsScreen<DeepLinksController>(
+        DeepLinksScreen(),
+        createController: (_) => DeepLinksController(),
+      ),
     DevToolsScreen<VMDeveloperToolsController>(
       VMDeveloperToolsScreen(),
       createController: (_) => VMDeveloperToolsController(),

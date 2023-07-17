@@ -47,9 +47,13 @@ void main() {
       processId: 'test',
     );
 
-    setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
+    setGlobal(
+      DevToolsEnvironmentParameters,
+      ExternalDevToolsEnvironmentParameters(),
+    );
     setGlobal(OfflineModeController, OfflineModeController());
     setGlobal(NotificationService, NotificationService());
+    setGlobal(BannerMessagesController, BannerMessagesController());
     setGlobal(PreferencesController, PreferencesController());
     setGlobal(IdeTheme, IdeTheme());
     final mockScriptManager = MockScriptManager();

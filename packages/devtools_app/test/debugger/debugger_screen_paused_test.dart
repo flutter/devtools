@@ -33,7 +33,10 @@ void main() {
   setGlobal(ScriptManager, scriptManager);
   setGlobal(NotificationService, NotificationService());
   setGlobal(BreakpointManager, BreakpointManager());
-  setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
+  setGlobal(
+    DevToolsEnvironmentParameters,
+    ExternalDevToolsEnvironmentParameters(),
+  );
   setGlobal(PreferencesController, PreferencesController());
   fakeServiceManager.consoleService.ensureServiceInitialized();
   when(fakeServiceManager.errorBadgeManager.errorCountNotifier('debugger'))
@@ -53,6 +56,7 @@ void main() {
       .thenReturn(ValueNotifier(mockScriptRef));
   when(codeViewController.currentParsedScript)
       .thenReturn(ValueNotifier(mockParsedScript));
+  when(codeViewController.navigationInProgress).thenReturn(false);
 
   Finder findDebuggerButtonWithTitle(String title) => find.byWidgetPredicate(
         (Widget widget) => widget is DebuggerButton && widget.title == title,

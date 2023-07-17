@@ -41,7 +41,10 @@ void main() {
     setGlobal(IdeTheme, IdeTheme());
     setGlobal(ScriptManager, MockScriptManager());
     setGlobal(NotificationService, NotificationService());
-    setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
+    setGlobal(
+      DevToolsEnvironmentParameters,
+      ExternalDevToolsEnvironmentParameters(),
+    );
     setGlobal(PreferencesController, PreferencesController());
     scriptsHistory.pushEntry(mockScript!);
     final mockCodeViewController = debuggerController.codeViewController;
@@ -69,6 +72,7 @@ void main() {
     when(mockCodeViewController.refreshCodeStatistics()).thenAnswer(
       (_) async => refreshCodeCoverageInvoked = true,
     );
+    when(codeViewController.navigationInProgress).thenReturn(false);
   });
 
   Future<void> pumpDebuggerScreen(

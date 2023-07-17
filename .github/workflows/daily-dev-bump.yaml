@@ -45,8 +45,6 @@ jobs:
       - name: setup git config
         run: |
 
-          # TODO(https://github.com/flutter/devtools/issues/4949):  Change the author to
-          # a flutter owned account
           git config user.name "DevTools Workflow Bot"
           git config user.email "dart-devtool-workflow-bot@google.com"
 

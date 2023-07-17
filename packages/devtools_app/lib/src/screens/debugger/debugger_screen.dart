@@ -19,12 +19,10 @@ import '../../shared/flex_split_column.dart';
 import '../../shared/globals.dart';
 import '../../shared/primitives/auto_dispose.dart';
 import '../../shared/primitives/listenable.dart';
-import '../../shared/primitives/simple_items.dart';
 import '../../shared/routing.dart';
 import '../../shared/screen.dart';
 import '../../shared/split.dart';
 import '../../shared/theme.dart';
-import '../../shared/ui/icons.dart';
 import '../../shared/utils.dart';
 import 'breakpoints.dart';
 import 'call_stack.dart';
@@ -44,7 +42,7 @@ class DebuggerScreen extends Screen {
           id: id,
           requiresDebugBuild: true,
           title: ScreenMetaData.debugger.title,
-          icon: Octicons.bug,
+          icon: ScreenMetaData.debugger.icon,
           showFloatingDebuggerControls: false,
         );
 
@@ -117,7 +115,8 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
     ga.timeStart(DebuggerScreen.id, gac.pageReady);
     _shownFirstScript = false;
     SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
-      if (!_shownFirstScript) return;
+      if (!_shownFirstScript ||
+          controller.codeViewController.navigationInProgress) return;
       final routerDelegate = DevToolsRouterDelegate.of(context);
       routerDelegate.updateStateIfChanged(
         CodeViewSourceLocationNavigationState(

@@ -30,11 +30,15 @@ class CpuProfilerDefaultScene extends Scene {
 
   @override
   Future<void> setUp() async {
-    setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
+    setGlobal(
+      DevToolsEnvironmentParameters,
+      ExternalDevToolsEnvironmentParameters(),
+    );
     setGlobal(OfflineModeController, OfflineModeController());
     setGlobal(IdeTheme, IdeTheme());
     setGlobal(NotificationService, NotificationService());
     setGlobal(PreferencesController, PreferencesController());
+    setGlobal(BannerMessagesController, BannerMessagesController());
 
     fakeServiceManager = FakeServiceManager(
       service: FakeServiceManager.createFakeService(

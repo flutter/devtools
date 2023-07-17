@@ -44,7 +44,10 @@ void main() {
     setGlobal(NotificationService, NotificationService());
     setGlobal(BreakpointManager, BreakpointManager());
     setGlobal(EvalService, MockEvalService());
-    setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
+    setGlobal(
+      DevToolsEnvironmentParameters,
+      ExternalDevToolsEnvironmentParameters(),
+    );
     setGlobal(PreferencesController, PreferencesController());
     fakeServiceManager.consoleService.ensureServiceInitialized();
     when(fakeServiceManager.errorBadgeManager.errorCountNotifier('debugger'))
@@ -105,7 +108,7 @@ void main() {
       expect(find.text('Console'), findsOneWidget);
 
       // test for stdio output.
-      expect(find.selectableText('test stdio'), findsOneWidget);
+      expect(find.text('test stdio'), findsOneWidget);
     },
   );
 

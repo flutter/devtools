@@ -36,7 +36,6 @@ class ExpandableVariable extends StatelessWidget {
     return TreeView<DartObjectNode>(
       dataRootsListenable:
           FixedValueListenable<List<DartObjectNode>>([variable]),
-      shrinkWrap: true,
       dataDisplayProvider: dataDisplayProvider ??
           (variable, onPressed) => DisplayProvider(
                 variable: variable,

@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -12,7 +10,6 @@ import '../service/isolate_manager.dart';
 import '../service/service_manager.dart';
 import '../shared/analytics/constants.dart' as gac;
 import '../shared/common_widgets.dart';
-import '../shared/device_dialog.dart';
 import '../shared/globals.dart';
 import '../shared/screen.dart';
 import '../shared/theme.dart';
@@ -29,29 +26,33 @@ class StatusLine extends StatelessWidget {
     super.key,
     required this.currentScreen,
     required this.isEmbedded,
+    required this.isConnected,
   });
 
   final Screen currentScreen;
   final bool isEmbedded;
+  final bool isConnected;
 
   static const deviceInfoTooltip = 'Device Info';
 
   /// The padding around the footer in the DevTools UI.
   EdgeInsets get padding => const EdgeInsets.fromLTRB(
         defaultSpacing,
+        densePadding,
         defaultSpacing,
-        defaultSpacing,
-        denseSpacing,
+        densePadding,
       );
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final height = statusLineHeight + padding.top + padding.bottom;
     return ValueListenableBuilder<bool>(
       valueListenable: currentScreen.showIsolateSelector,
       builder: (context, showIsolateSelector, _) {
         return Container(
           decoration: BoxDecoration(
+            color: isConnected ? theme.colorScheme.primary : null,
             border: Border(
               top: Divider.createBorderSide(context, width: 1.0),
             ),
@@ -69,26 +70,31 @@ class StatusLine extends StatelessWidget {
   }
 
   List<Widget> _getStatusItems(BuildContext context, bool showIsolateSelector) {
+    final theme = Theme.of(context);
+    final color = isConnected ? theme.colorScheme.onPrimary : null;
     final screenWidth = ScreenSize(context).width;
     final Widget? pageStatus = currentScreen.buildStatus(context);
     final widerThanXxs = screenWidth > MediaSize.xxs;
     return [
       buildHelpUrlStatus(context, currentScreen, screenWidth),
-      const BulletSpacer(),
+      BulletSpacer(color: color),
       if (widerThanXxs && showIsolateSelector) ...[
         const IsolateSelector(),
-        const BulletSpacer(),
+        BulletSpacer(color: color),
       ],
       if (screenWidth > MediaSize.xs && pageStatus != null) ...[
         pageStatus,
-        const BulletSpacer(),
+        BulletSpacer(color: color),
       ],
       buildConnectionStatus(context, screenWidth),
       if (widerThanXxs && isEmbedded) ...[
-        const BulletSpacer(),
+        BulletSpacer(color: color),
         Row(
           crossAxisAlignment: CrossAxisAlignment.end,
-          children: DevToolsScaffold.defaultActions(),
+          children: DevToolsScaffold.defaultActions(
+            color: color,
+            isEmbedded: isEmbedded,
+          ),
         ),
       ],
     ];
@@ -99,6 +105,8 @@ class StatusLine extends StatelessWidget {
     Screen currentScreen,
     MediaSize screenWidth,
   ) {
+    final theme = Theme.of(context);
+    final style = theme.linkTextStyle;
     final String? docPageId = currentScreen.docPageId;
     if (docPageId != null) {
       return RichText(
@@ -111,6 +119,9 @@ class StatusLine extends StatelessWidget {
             gaScreenName: currentScreen.screenId,
             gaSelectedItemDescription: gac.documentationLink,
           ),
+          style: isConnected
+              ? style.copyWith(color: theme.colorScheme.onPrimary)
+              : style,
           context: context,
         ),
       );
@@ -120,13 +131,18 @@ class StatusLine extends StatelessWidget {
         child: Text(
           '${screenWidth <= MediaSize.xs ? '' : 'DevTools '}${devtools.version}',
           overflow: TextOverflow.ellipsis,
+          style: isConnected
+              ? theme.regularTextStyle
+                  .copyWith(color: theme.colorScheme.onPrimary)
+              : theme.regularTextStyle,
         ),
       );
     }
   }
 
   Widget buildConnectionStatus(BuildContext context, MediaSize screenWidth) {
-    final textTheme = Theme.of(context).textTheme;
+    final theme = Theme.of(context);
+    final textTheme = theme.textTheme;
     const noConnectionMsg = 'No client connection';
     return ValueListenableBuilder<ConnectedState>(
       valueListenable: serviceManager.connectedState,
@@ -142,7 +158,9 @@ class StatusLine extends StatelessWidget {
             description = vm.deviceDisplay;
           }
 
-          final color = textTheme.bodyMedium!.color;
+          final color = isConnected
+              ? theme.colorScheme.onPrimary
+              : textTheme.bodyMedium!.color;
 
           return Row(
             mainAxisAlignment: MainAxisAlignment.end,
@@ -163,34 +181,14 @@ class StatusLine extends StatelessWidget {
               ),
               const SizedBox(width: denseSpacing),
               DevToolsTooltip(
-                message: deviceInfoTooltip,
-                child: InkWell(
-                  onTap: () {
-                    unawaited(
-                      showDialog(
-                        context: context,
-                        builder: (context) => DeviceDialog(
-                          connectedApp: app,
-                        ),
-                      ),
-                    );
-                  },
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.info_outline,
-                        size: actionsIconSize,
-                      ),
-                      if (screenWidth > MediaSize.xxs) ...[
-                        const SizedBox(width: denseSpacing),
-                        Text(
-                          description,
-                          style: textTheme.bodyMedium,
-                          overflow: TextOverflow.clip,
-                        ),
-                      ],
-                    ],
-                  ),
+                message: 'Connected device',
+                child: Text(
+                  description,
+                  style: isConnected
+                      ? textTheme.bodyMedium!
+                          .copyWith(color: theme.colorScheme.onPrimary)
+                      : textTheme.bodyMedium,
+                  overflow: TextOverflow.clip,
                 ),
               ),
             ],
@@ -255,16 +253,21 @@ class IsolateOption extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
+    final theme = Theme.of(context);
+    final textTheme = theme.textTheme;
     return Row(
       children: [
-        ref?.isSystemIsolate ?? false
-            ? const Icon(Icons.settings_applications)
-            : const Icon(Icons.call_split),
+        Icon(
+          ref?.isSystemIsolate ?? false
+              ? Icons.settings_applications
+              : Icons.call_split,
+          color: theme.colorScheme.onPrimary,
+        ),
         const SizedBox(width: denseSpacing),
         Text(
           ref == null ? 'isolate' : _isolateName(ref!),
-          style: textTheme.bodyMedium,
+          style: textTheme.bodyMedium!
+              .copyWith(color: theme.colorScheme.onPrimary),
         ),
       ],
     );

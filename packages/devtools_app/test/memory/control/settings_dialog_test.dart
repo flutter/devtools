@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app/src/screens/memory/memory_screen.dart';
+import 'package:devtools_app/src/screens/memory/framework/memory_screen.dart';
 import 'package:devtools_app/src/screens/memory/panes/control/settings_dialog.dart';
 import 'package:devtools_app/src/shared/common_widgets.dart';
 import 'package:devtools_app/src/shared/dialogs.dart';

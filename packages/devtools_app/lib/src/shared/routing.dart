@@ -12,11 +12,7 @@ import 'globals.dart';
 import 'primitives/auto_dispose.dart';
 import 'primitives/utils.dart';
 
-/// The page ID (used in routing) for the standalone app-size page.
-///
-/// This must be different to the AppSizeScreen ID which is also used in routing when
-/// cnnected to a VM to ensure they have unique URLs.
-const appSizeScreenId = 'appsize';
+const memoryAnalysisScreenId = 'memoryanalysis';
 
 const homeScreenId = '';
 const snapshotScreenId = 'snapshot';
