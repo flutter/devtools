@@ -16,7 +16,6 @@ import '../../../service/vm_service_wrapper.dart';
 import '../../../shared/eval_on_dart_library.dart';
 import '../../../shared/globals.dart';
 
-
 Stream<VmServiceWrapper> get _serviceConnectionStream =>
     _serviceConnectionStreamController.stream;
 final _serviceConnectionStreamController =
