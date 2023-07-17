@@ -80,8 +80,7 @@ class _InitializerState extends State<Initializer>
       final connectionState = serviceManager.connectedState.value;
       if (connectionState.connected) {
         setState(() {});
-      } else if (!connectionState.connected &&
-          !connectionState.userInitiatedConnectionState) {
+      } else if (!connectionState.userInitiatedConnectionState) {
         // Try to reconnect (otherwise, will fall back to showing the
         // disconnected overlay).
         unawaited(
