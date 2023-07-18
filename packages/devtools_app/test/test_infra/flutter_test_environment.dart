@@ -128,6 +128,7 @@ class FlutterTestEnvironment {
         setGlobal(Storage, FlutterDesktopStorage());
         setGlobal(ServiceConnectionManager, ServiceConnectionManager());
         setGlobal(OfflineModeController, OfflineModeController());
+        setGlobal(NotificationService, NotificationService());
 
         final preferencesController = PreferencesController();
         _preferencesController = preferencesController;
