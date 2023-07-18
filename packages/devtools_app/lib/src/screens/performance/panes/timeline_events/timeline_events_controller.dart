@@ -125,12 +125,12 @@ class TimelineEventsController extends PerformanceFeatureController
   Future<void> _initForServiceConnection() async {
     await serviceManager.timelineStreamManager.setDefaultTimelineStreams();
 
-    autoDisposeStreamSubscription(
-      serviceManager.onConnectionClosed.listen((_) {
+    addAutoDisposeListener(serviceManager.connectedState, () {
+      if (!serviceManager.connectedState.value.connected) {
         _pollingTimer?.cancel();
         _timelinePollingRateLimiter?.dispose();
-      }),
-    );
+      }
+    });
 
     // Load available timeline events.
     await _pullTraceEventsFromVmTimeline(isInitialPull: true);

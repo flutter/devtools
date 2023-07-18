@@ -49,11 +49,9 @@ class ServiceConnectionManager {
     _serviceExtensionManager = ServiceExtensionManager(isolateManager);
   }
 
-  final StreamController<VmServiceWrapper> _connectionAvailableController =
-      StreamController<VmServiceWrapper>.broadcast();
-
   Completer<VmService> _serviceAvailable = Completer();
 
+  // TODO(kenz): try to replace uses of this with a listener on [connectedState]
   Future<VmService> get onServiceAvailable => _serviceAvailable.future;
 
   bool get isServiceAvailable => _serviceAvailable.isCompleted;
@@ -134,14 +132,6 @@ class ServiceConnectionManager {
 
   final ValueNotifier<ConnectedState> _connectedState =
       ValueNotifier(const ConnectedState(false));
-
-  // TODO(kenz): try to replace all uses of this stream with a listener to the
-  // [connectedState] ValueListenable.
-  Stream<VmServiceWrapper> get onConnectionAvailable =>
-      _connectionAvailableController.stream;
-
-  Stream<void> get onConnectionClosed => _connectionClosedController.stream;
-  final _connectionClosedController = StreamController<void>.broadcast();
 
   final ValueNotifier<bool> _deviceBusy = ValueNotifier<bool>(false);
 
@@ -335,8 +325,7 @@ class ServiceConnectionManager {
     if (FeatureFlags.devToolsExtensions) {
       extensionService.initialize();
     }
-
-    _connectionAvailableController.add(service);
+    
     _connectedState.value = const ConnectedState(true);
   }
 
@@ -379,7 +368,6 @@ class ServiceConnectionManager {
     setDeviceBusy(false);
 
     _connectedState.value = connectionState;
-    _connectionClosedController.add(null);
 
     _registeredMethodsForService.clear();
 

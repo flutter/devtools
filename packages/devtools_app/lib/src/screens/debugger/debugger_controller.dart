@@ -38,9 +38,11 @@ class DebuggerController extends DisposableController
     DevToolsRouterDelegate? routerDelegate,
     bool initialSwitchToIsolate = true,
   }) : _initialSwitchToIsolate = initialSwitchToIsolate {
-    autoDisposeStreamSubscription(
-      serviceManager.onConnectionAvailable.listen(_handleConnectionAvailable),
-    );
+    addAutoDisposeListener(serviceManager.connectedState, () {
+      if (serviceManager.connectedState.value.connected) {
+        _handleConnectionAvailable(serviceManager.service!);
+      }
+    });
     if (routerDelegate != null) {
       codeViewController.subscribeToRouterEvents(routerDelegate);
     }

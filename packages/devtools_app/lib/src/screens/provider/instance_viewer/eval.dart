@@ -6,6 +6,8 @@
 
 library eval;
 
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:vm_service/vm_service.dart';
@@ -14,13 +16,21 @@ import '../../../service/vm_service_wrapper.dart';
 import '../../../shared/eval_on_dart_library.dart';
 import '../../../shared/globals.dart';
 
+Stream<VmServiceWrapper> get _serviceConnectionStream =>
+    _serviceConnectionStreamController.stream;
+final _serviceConnectionStreamController =
+    StreamController<VmServiceWrapper>.broadcast();
+void setServiceConnectionForProviderScreen(VmServiceWrapper service) {
+  _serviceConnectionStreamController.add(service);
+}
+
 /// Exposes the current VmServiceWrapper.
 /// By listening to this provider instead of directly accessing `serviceManager.service`,
 /// this ensures that providers reload properly when the devtool is connected
 /// to a different application.
 final serviceProvider = StreamProvider<VmServiceWrapper>((ref) async* {
   yield serviceManager.service!;
-  yield* serviceManager.onConnectionAvailable;
+  yield* _serviceConnectionStream;
 });
 
 /// An [EvalOnDartLibrary] that has access to no specific library in particular

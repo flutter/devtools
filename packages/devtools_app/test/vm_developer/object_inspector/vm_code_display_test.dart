@@ -220,19 +220,21 @@ void main() {
     }
 
     testWidgetsWithWindowSize(
-        'displays CodeTable and InliningTable instructions in order of increasing address',
-        windowSize, (WidgetTester tester) async {
-      await tester.pumpWidget(
-        wrap(
-          VmCodeDisplay(
-            code: mockCodeObject,
-            controller: ObjectInspectorViewController(),
+      'displays CodeTable and InliningTable instructions in order of increasing address',
+      windowSize,
+      (WidgetTester tester) async {
+        await tester.pumpWidget(
+          wrap(
+            VmCodeDisplay(
+              code: mockCodeObject,
+              controller: ObjectInspectorViewController(),
+            ),
           ),
-        ),
-      );
+        );
 
-      await verifyCodeTable(tester);
-      await verifyInliningTable(tester);
-    });
+        await verifyCodeTable(tester);
+        await verifyInliningTable(tester);
+      },
+    );
   });
 }
