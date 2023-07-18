@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import '../extensions/extension_service.dart';
 import '../screens/debugger/breakpoint_manager.dart';
 import '../service/service_manager.dart';
 import '../shared/banner_messages.dart';
@@ -59,6 +60,9 @@ BreakpointManager get breakpointManager =>
     globals[BreakpointManager] as BreakpointManager;
 
 EvalService get evalService => globals[EvalService] as EvalService;
+
+ExtensionService get extensionService =>
+    globals[ExtensionService] as ExtensionService;
 
 void setGlobal(Type clazz, Object instance) {
   globals[clazz] = instance;

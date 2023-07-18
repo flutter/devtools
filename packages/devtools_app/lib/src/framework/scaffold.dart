@@ -142,8 +142,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
             widget.screens.indexOf(oldWidget.screens[_tabController!.index]);
       }
       // Create a new tab controller to reflect the changed tabs.
-      _setupTabController();
-      _tabController!.index = newIndex;
+      _setupTabController(startingIndex: newIndex);
     } else if (widget.screens[_tabController!.index].screenId != widget.page) {
       // If the page changed (eg. the route was modified by pressing back in the
       // browser), animate to the new one.
@@ -170,9 +169,13 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
     super.dispose();
   }
 
-  void _setupTabController() {
+  void _setupTabController({int startingIndex = 0}) {
     _tabController?.dispose();
-    _tabController = TabController(length: widget.screens.length, vsync: this);
+    _tabController = TabController(
+      initialIndex: startingIndex,
+      length: widget.screens.length,
+      vsync: this,
+    );
 
     if (widget.page != null) {
       final initialIndex =
