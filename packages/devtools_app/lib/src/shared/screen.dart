@@ -195,7 +195,7 @@ abstract class Screen {
         // Add a small buffer to account for variances between the text painter
         // approximation and the actual measurement.
         measurementBuffer;
-  } 
+  }
 
   /// Builds the tab to show for this screen in the [DevToolsScaffold]'s main
   /// navbar.
