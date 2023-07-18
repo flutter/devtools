@@ -45,6 +45,7 @@ import 'shared/analytics/analytics.dart' as ga;
 import 'shared/analytics/analytics_controller.dart';
 import 'shared/analytics/metrics.dart';
 import 'shared/console/primitives/simple_items.dart';
+import 'shared/common_widgets.dart';
 import 'shared/feature_flags.dart';
 import 'shared/globals.dart';
 import 'shared/offline_screen.dart';
