@@ -325,7 +325,7 @@ class ServiceConnectionManager {
     if (FeatureFlags.devToolsExtensions) {
       extensionService.initialize();
     }
-    
+
     _connectedState.value = const ConnectedState(true);
   }
 
