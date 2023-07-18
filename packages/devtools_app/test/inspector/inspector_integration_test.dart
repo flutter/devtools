@@ -16,7 +16,7 @@ import '../test_infra/matchers/matchers.dart';
 // reduced to under 1 second without introducing flakes.
 const inspectorChangeSettleTime = Duration(seconds: 2);
 
-void main() async {
+void main() {
   // We need to use real async in this test so we need to use this binding.
   initializeLiveTestWidgetsFlutterBindingWithAssets();
   const windowSize = Size(2600.0, 1200.0);
@@ -24,8 +24,6 @@ void main() async {
   final FlutterTestEnvironment env = FlutterTestEnvironment(
     const FlutterRunConfiguration(withDebugger: true),
   );
-  await env.setupEnvironment();
-  await storage.setValue('ui.denseMode', 'true');
 
   env.afterEverySetup = () async {
     final service = serviceManager.inspectorService;
@@ -45,19 +43,17 @@ void main() async {
     }
   };
 
-  setGlobal(
-    DevToolsEnvironmentParameters,
-    ExternalDevToolsEnvironmentParameters(),
-  );
-  setGlobal(BreakpointManager, BreakpointManager());
-  setGlobal(IdeTheme, IdeTheme());
-  setGlobal(NotificationService, NotificationService());
+  setUp(() async {
+    await env.setupEnvironment();
+    await storage.setValue('ui.denseMode', 'true');
+    preferences.toggleDenseMode(true);
+  });
+
+  tearDownAll(() async {
+    await env.tearDownEnvironment(force: true);
+  });
 
   group('screenshot tests', () {
-    tearDownAll(() async {
-      await env.tearDownEnvironment(force: true);
-    });
-
     testWidgetsWithWindowSize(
       'navigation',
       windowSize,
@@ -408,10 +404,6 @@ void main() async {
   });
 
   group('widget errors', () {
-    tearDownAll(() async {
-      await env.tearDownEnvironment(force: true);
-    });
-
     testWidgetsWithWindowSize(
       'show navigator and error labels',
       windowSize,
