@@ -63,9 +63,7 @@ class _HomeScreenBodyState extends State<HomeScreenBody> with AutoDisposeMixin {
     super.initState();
     ga.screen(gac.home);
 
-    autoDisposeStreamSubscription(
-      serviceManager.onConnectionAvailable.listen((_) => setState(() {})),
-    );
+    addAutoDisposeListener(serviceManager.connectedState);
   }
 
   @override

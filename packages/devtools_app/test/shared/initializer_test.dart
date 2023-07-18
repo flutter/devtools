@@ -33,7 +33,7 @@ void main() {
           ),
         ),
       );
-      await tester.pumpAndSettle();
+      await tester.pump();
     }
 
     testWidgets(
