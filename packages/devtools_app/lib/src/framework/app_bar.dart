@@ -82,9 +82,7 @@ class DevToolsAppBar extends StatelessWidget {
         // have added a spacer element to [actionsWithSpacer] above, which
         // should be excluded from the width calculation.
         actionWidgetSize * ((actions ?? []).length) +
-            (actionsWithSpacer.safeFirst is VerticalLineSpacer
-                ? VerticalLineSpacer.totalWidth
-                : 0.0),
+            VerticalLineSpacer.totalWidth,
       );
 
       flexibleSpace = Align(
@@ -140,7 +138,7 @@ class DevToolsAppBar extends StatelessWidget {
       (prev, screen) => prev + screen.approximateTabWidth(textTheme),
     );
     final actionsWidth = (actions?.length ?? 0) * actionWidgetSize;
-    return tabsWidth + actionsWidth;
+    return tabsWidth + VerticalLineSpacer.totalWidth + actionsWidth;
   }
 }
 
