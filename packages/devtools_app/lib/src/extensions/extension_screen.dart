@@ -101,7 +101,6 @@ class ExtensionView extends StatelessWidget {
   }
 }
 
-
 // TODO(kenz): add button to deactivate extension once activate / deactivate
 // logic is hooked up.
 class EmbeddedExtensionHeader extends StatelessWidget {
@@ -136,8 +135,7 @@ class EmbeddedExtensionHeader extends StatelessWidget {
               display: 'Report an issue',
               url: extension.issueTrackerLink,
               gaScreenName: gac.extensionScreenId,
-              gaSelectedItemDescription:
-                  gac.extensionFeedback(extensionName),
+              gaSelectedItemDescription: gac.extensionFeedback(extensionName),
             ),
             context: context,
           ),

@@ -187,7 +187,7 @@ abstract class Screen {
       text: TextSpan(text: title),
       textDirection: TextDirection.ltr,
     )..layout();
-    const measurementBuffer = 1.5;
+    const measurementBuffer = 2.0;
     return painter.width +
         denseSpacing +
         defaultIconSize +
