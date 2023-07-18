@@ -187,11 +187,15 @@ abstract class Screen {
       text: TextSpan(text: title),
       textDirection: TextDirection.ltr,
     )..layout();
+    const measurementBuffer = 1.5;
     return painter.width +
         denseSpacing +
         defaultIconSize +
-        (includeTabBarSpacing ? tabBarSpacing * 2 : 0.0);
-  }
+        (includeTabBarSpacing ? tabBarSpacing * 2 : 0.0) +
+        // Add a small buffer to account for variances between the text painter
+        // approximation and the actual measurement.
+        measurementBuffer;
+  } 
 
   /// Builds the tab to show for this screen in the [DevToolsScaffold]'s main
   /// navbar.

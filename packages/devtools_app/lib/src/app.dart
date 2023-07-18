@@ -188,7 +188,20 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
       child: DevToolsScaffold.withChild(
         key: const Key('not-found'),
         embed: isEmbedded(args),
-        child: CenteredMessage("'$page' not found."),
+        child: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text("'$page' not found."),
+              const SizedBox(height: defaultSpacing),
+              ElevatedButton(
+                onPressed: () =>
+                    routerDelegate.navigateHome(clearScreenParam: true),
+                child: const Text('Go to Home screen'),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
