@@ -47,7 +47,7 @@ class _ExtensionScreenBody extends StatefulWidget {
 }
 
 class __ExtensionScreenBodyState extends State<_ExtensionScreenBody> {
-  late final EmbeddedExtensionController extensionController;
+  EmbeddedExtensionController? extensionController;
 
   @override
   void initState() {
@@ -58,7 +58,7 @@ class __ExtensionScreenBodyState extends State<_ExtensionScreenBody> {
 
   @override
   void dispose() {
-    extensionController.dispose();
+    extensionController?.dispose();
     super.dispose();
   }
 
@@ -66,7 +66,7 @@ class __ExtensionScreenBodyState extends State<_ExtensionScreenBody> {
   void didUpdateWidget(_ExtensionScreenBody oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.extensionConfig != widget.extensionConfig) {
-      extensionController.dispose();
+      extensionController?.dispose();
       extensionController =
           createEmbeddedExtensionController(widget.extensionConfig)..init();
     }
@@ -75,7 +75,7 @@ class __ExtensionScreenBodyState extends State<_ExtensionScreenBody> {
   @override
   Widget build(BuildContext context) {
     return ExtensionView(
-      controller: extensionController,
+      controller: extensionController!,
       extension: widget.extensionConfig,
     );
   }
