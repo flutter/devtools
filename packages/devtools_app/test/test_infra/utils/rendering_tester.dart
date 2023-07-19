@@ -80,15 +80,17 @@ class TestRenderingFlutterBinding extends BindingBase
       _errors.add(details);
     };
     try {
-      pipelineOwner.flushLayout();
+      RendererBinding.instance.rootPipelineOwner.flushLayout();
       if (phase == EnginePhase.layout) return;
-      pipelineOwner.flushCompositingBits();
+      RendererBinding.instance.rootPipelineOwner.flushCompositingBits();
       if (phase == EnginePhase.compositingBits) return;
-      pipelineOwner.flushPaint();
+      RendererBinding.instance.rootPipelineOwner.flushPaint();
       if (phase == EnginePhase.paint) return;
-      renderView.compositeFrame();
+      for (final view in RendererBinding.instance.renderViews) {
+        view.compositeFrame();
+      }
       if (phase == EnginePhase.composite) return;
-      pipelineOwner.flushSemantics();
+      RendererBinding.instance.rootPipelineOwner.flushSemantics();
       if (phase == EnginePhase.flushSemantics) return;
       assert(
         phase == EnginePhase.flushSemantics ||
@@ -144,7 +146,9 @@ void layout(
     box.parent == null,
   ); // We stick the box in another, so you can't reuse it easily, sorry.
 
-  _renderer.renderView.child = null;
+  for (final view in RendererBinding.instance.renderViews) {
+    view.child = null;
+  }
   if (constraints != null) {
     box = RenderPositionedBox(
       alignment: alignment,
@@ -154,7 +158,9 @@ void layout(
       ),
     );
   }
-  _renderer.renderView.child = box;
+  for (final view in RendererBinding.instance.renderViews) {
+    view.child = box;
+  }
 
   pumpFrame(phase: phase, onErrors: onErrors);
 }
@@ -166,7 +172,9 @@ void pumpFrame({
   EnginePhase phase = EnginePhase.layout,
   VoidCallback? onErrors,
 }) {
-  assert(_renderer.renderView.child != null); // call layout() first!
+  for (final view in RendererBinding.instance.renderViews) {
+    assert(view.child != null); // call layout() first!
+  }
 
   if (onErrors != null) {
     _renderer.onErrors = onErrors;
