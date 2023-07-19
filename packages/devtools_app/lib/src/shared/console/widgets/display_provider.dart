@@ -194,8 +194,9 @@ class DapDisplayProvider extends StatelessWidget {
     final name = variable.name;
     final value = variable.value;
 
-    // TODO(): Wrap in interactivity wrapper to provide inspect
-    // and re-root functionality.
+    // TODO(https://github.com/flutter/devtools/issues/6056): Wrap in
+    // interactivity wrapper to provide inspect and re-root functionality. Add
+    // tooltip on hover to provide type information.
     return Text.rich(
       TextSpan(
         text: name,
@@ -207,6 +208,8 @@ class DapDisplayProvider extends StatelessWidget {
             text: ': ',
             style: theme.fixedFontStyle,
           ),
+          // TODO(https://github.com/flutter/devtools/issues/6056): Change text
+          // style based on variable type.
           TextSpan(
             text: value,
             style: theme.subtleFixedFontStyle,

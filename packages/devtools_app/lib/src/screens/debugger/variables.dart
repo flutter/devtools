@@ -11,6 +11,7 @@ import 'dart:async';
 import 'package:flutter/material.dart' hide Stack;
 
 import '../../shared/console/widgets/display_provider.dart';
+import '../../shared/diagnostics/dap_object_node.dart';
 import '../../shared/diagnostics/dart_object_node.dart';
 import '../../shared/diagnostics/tree_builder.dart';
 import '../../shared/feature_flags.dart';
@@ -25,15 +26,32 @@ class Variables extends StatelessWidget {
     // TODO(kenz): preserve expanded state of tree on switching frames and
     // on stepping.
     if (FeatureFlags.dapDebugging) {
+      return TreeView<DapObjectNode>(
+        dataRootsListenable: serviceManager.appState.dapVariables,
+        dataDisplayProvider: (variable, onPressed) {
+          return DapDisplayProvider(node: variable, onTap: onPressed);
+        },
+        onItemSelected: onDapItemPressed,
+      );
     } else {
-    return TreeView<DartObjectNode>(
-      dataRootsListenable: serviceManager.appState.variables,
-      dataDisplayProvider: (variable, onPressed) => DisplayProvider(
-        variable: variable,
-        onTap: onPressed,
-      ),
-      onItemSelected: onItemPressed,
-    );
+      return TreeView<DartObjectNode>(
+        dataRootsListenable: serviceManager.appState.variables,
+        dataDisplayProvider: (variable, onPressed) => DisplayProvider(
+          variable: variable,
+          onTap: onPressed,
+        ),
+        onItemSelected: onItemPressed,
+      );
+    }
+  }
+
+  Future<void> onDapItemPressed(
+    DapObjectNode node,
+  ) async {
+    if (node.isExpanded) {
+      for (final child in node.children) {
+        await child.fetchChildren();
+      }
     }
   }
 
