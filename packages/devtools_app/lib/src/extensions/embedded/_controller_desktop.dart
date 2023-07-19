@@ -5,5 +5,5 @@
 import 'controller.dart';
 
 class EmbeddedExtensionControllerImpl extends EmbeddedExtensionController {
-    EmbeddedExtensionControllerImpl(super.extensionConfig);
+  EmbeddedExtensionControllerImpl(super.extensionConfig);
 }

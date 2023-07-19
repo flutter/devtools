@@ -85,8 +85,19 @@ class _ExtensionIFrameController extends DisposableController
     autoDisposeStreamSubscription(
       embeddedExtensionController.extensionPostEventStream.stream
           .listen((event) async {
-        await _pingExtensionUntilReady();
-        _postMessage(event);
+        final ready = await _pingExtensionUntilReady();
+        if (ready) {
+          _postMessage(event);
+        } else {
+          // TODO(kenz): we may want to give the user a way to retry the failed
+          // request or show a more permanent error UI where we guide them to
+          // file an issue against the extension package.
+          notificationService.pushError(
+            'Something went wrong.'
+            ' ${embeddedExtensionController.extensionConfig.name} extension is '
+            'not ready.',
+          );
+        }
       }),
     );
   }
@@ -124,7 +135,13 @@ class _ExtensionIFrameController extends DisposableController
     }
   }
 
-  Future<void> _pingExtensionUntilReady() async {
+  /// Sends [DevToolsExtensionEventType.ping] events to the extension until we
+  /// receive the expected [DevToolsExtensionEventType.pong] response, or until
+  /// [_pollUntilReadyTimeout] has passed.
+  ///
+  /// Returns whether the extension eventually became ready.
+  Future<bool> _pingExtensionUntilReady() async {
+    var ready = true;
     if (!_extensionHandlerReady.isCompleted) {
       _pollForExtensionHandlerReady =
           Timer.periodic(const Duration(milliseconds: 200), (_) {
@@ -136,10 +153,14 @@ class _ExtensionIFrameController extends DisposableController
 
       await _extensionHandlerReady.future.timeout(
         _pollUntilReadyTimeout,
-        onTimeout: () => _pollForExtensionHandlerReady?.cancel(),
+        onTimeout: () {
+          ready = false;
+          _pollForExtensionHandlerReady?.cancel();
+        },
       );
       _pollForExtensionHandlerReady?.cancel();
     }
+    return ready;
   }
 
   @override
