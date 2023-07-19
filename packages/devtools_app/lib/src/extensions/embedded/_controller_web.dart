@@ -29,8 +29,7 @@ class EmbeddedExtensionControllerImpl extends EmbeddedExtensionController {
   ///
   /// See [_viewIdIncrementer] for an explanation of why we use an incrementer
   /// in the id.
-  late final viewId =
-      'ext-${extensionConfig.name}-${_viewIdIncrementer++}';
+  late final viewId = 'ext-${extensionConfig.name}-${_viewIdIncrementer++}';
 
   String get extensionUrl {
     // TODO(kenz): load the extension url being served by devtools server.
