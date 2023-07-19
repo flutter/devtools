@@ -5,6 +5,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:pointer_interceptor/pointer_interceptor.dart';
 
 import '../shared/common_widgets.dart';
 import '../shared/primitives/utils.dart';
@@ -194,17 +195,19 @@ class TabOverflowButton extends StatelessWidget {
         );
       }
       children.add(
-        SizedBox(
-          // Match the height of the main tab bar.
-          height: defaultToolbarHeight,
-          child: MenuItemButton(
-            style: const ButtonStyle().copyWith(
-              textStyle: MaterialStateProperty.resolveWith<TextStyle>((_) {
-                return theme.textTheme.titleSmall!;
-              }),
+        PointerInterceptor(
+          child: SizedBox(
+            // Match the height of the main tab bar.
+            height: defaultToolbarHeight,
+            child: MenuItemButton(
+              style: const ButtonStyle().copyWith(
+                textStyle: MaterialStateProperty.resolveWith<TextStyle>((_) {
+                  return theme.textTheme.titleSmall!;
+                }),
+              ),
+              onPressed: () => onItemSelected(i),
+              child: tab,
             ),
-            onPressed: () => onItemSelected(i),
-            child: tab,
           ),
         ),
       );

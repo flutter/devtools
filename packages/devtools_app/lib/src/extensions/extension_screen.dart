@@ -5,6 +5,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
+import '../screens/performance/panes/controls/enhance_tracing/enhance_tracing.dart';
 import '../shared/analytics/constants.dart' as gac;
 import '../shared/common_widgets.dart';
 import '../shared/primitives/listenable.dart';
@@ -52,13 +53,26 @@ class __ExtensionScreenBodyState extends State<_ExtensionScreenBody> {
   @override
   void initState() {
     super.initState();
-    extensionController = createEmbeddedExtensionController();
+    print('ext screen ${widget.extensionConfig.name} initstate');
+    extensionController =
+        createEmbeddedExtensionController(widget.extensionConfig)..init();
   }
 
   @override
   void dispose() {
+    print('ext screen ${widget.extensionConfig.name} dispose');
     extensionController.dispose();
     super.dispose();
+  }
+
+  @override
+  void didUpdateWidget(_ExtensionScreenBody oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.extensionConfig != widget.extensionConfig) {
+      extensionController.dispose();
+      extensionController =
+          createEmbeddedExtensionController(widget.extensionConfig)..init();
+    }
   }
 
   @override

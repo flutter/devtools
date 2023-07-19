@@ -2,19 +2,150 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+// ignore: avoid_web_libraries_in_flutter, as designed
+import 'dart:html' as html;
+
+import 'package:devtools_extensions/devtools_extensions.dart';
 import 'package:flutter/material.dart';
 
+import '../../shared/globals.dart';
+import '../../shared/primitives/auto_dispose.dart';
+import '_controller_web.dart';
 import 'controller.dart';
 
-class EmbeddedExtension extends StatelessWidget {
+class EmbeddedExtension extends StatefulWidget {
   const EmbeddedExtension({super.key, required this.controller});
 
   final EmbeddedExtensionController controller;
 
   @override
+  State<EmbeddedExtension> createState() => _EmbeddedExtensionState();
+}
+
+class _EmbeddedExtensionState extends State<EmbeddedExtension> {
+  late final EmbeddedExtensionControllerImpl _embeddedExtensionController;
+  late final _ExtensionIFrameController iFrameController;
+
+  @override
+  void initState() {
+    super.initState();
+    _embeddedExtensionController =
+        widget.controller as EmbeddedExtensionControllerImpl;
+    iFrameController = _ExtensionIFrameController(_embeddedExtensionController)
+      ..init();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return const Center(
-      child: Text('TODO implement embedded extension web view'),
+    return Container(
+      color: Theme.of(context).scaffoldBackgroundColor,
+      child: HtmlElementView(
+        viewType: _embeddedExtensionController.viewId,
+      ),
     );
+  }
+}
+
+class _ExtensionIFrameController extends DisposableController
+    with AutoDisposeControllerMixin {
+  _ExtensionIFrameController(this.embeddedExtensionController);
+
+  final EmbeddedExtensionControllerImpl embeddedExtensionController;
+
+  /// Completes when the extension iFrame has received the first event on the
+  /// 'onLoad' stream.
+  late final Completer<void> _iFrameReady;
+
+  /// Completes when the extension's postMessage handler is ready.
+  ///
+  /// We know this handler is ready when we receive a
+  /// [DevToolsExtensionEventType.pong] event from the
+  /// extension, which it will send in response to a
+  /// [DevToolsExtensionEventType.ping] event sent from DevTools.
+  late final Completer<void> _extensionHandlerReady;
+
+  /// Timer that will poll until [_extensionHandlerReady] is complete or until
+  /// [_pollUntilReadyTimeout] has passed.
+  Timer? _pollForExtensionHandlerReady;
+
+  static const _pollUntilReadyTimeout = Duration(seconds: 10);
+
+  void init() {
+    _iFrameReady = Completer<void>();
+
+    unawaited(
+      embeddedExtensionController.extensionIFrame.onLoad.first.then((_) {
+        _iFrameReady.complete();
+      }),
+    );
+
+    html.window.addEventListener('message', _handleMessage);
+
+    autoDisposeStreamSubscription(
+      embeddedExtensionController.extensionPostEventStream.stream
+          .listen((event) async {
+        await _pingExtensionUntilReady();
+        _postMessage(event);
+      }),
+    );
+  }
+
+  void _postMessage(DevToolsExtensionEvent event) async {
+    await _iFrameReady.future;
+    final message = event.toJson();
+    assert(
+      embeddedExtensionController.extensionIFrame.contentWindow != null,
+      'Something went wrong. The iFrame\'s contentWindow is null after the'
+      ' _iFrameReady future completed.',
+    );
+    embeddedExtensionController.extensionIFrame.contentWindow!.postMessage(
+      message,
+      embeddedExtensionController.extensionUrl,
+    );
+  }
+
+  void _handleMessage(html.Event e) {
+    if (e is html.MessageEvent) {
+      final extensionEvent = DevToolsExtensionEvent.tryParse(e.data);
+      if (extensionEvent != null) {
+        switch (extensionEvent.type) {
+          case DevToolsExtensionEventType.pong:
+            if (!_extensionHandlerReady.isCompleted) {
+              _extensionHandlerReady.complete();
+            }
+            break;
+          default:
+            notificationService.push(
+              'Unknown event received from extension: ${e.data}',
+            );
+        }
+      }
+    }
+  }
+
+  Future<void> _pingExtensionUntilReady() async {
+    if (!_extensionHandlerReady.isCompleted) {
+      _pollForExtensionHandlerReady =
+          Timer.periodic(const Duration(milliseconds: 200), (_) {
+        // Once the extension UI is ready, the extension will receive this
+        // [DevToolsExtensionEventType.ping] message and return a
+        // [DevToolsExtensionEventType.pong] message, handled in [_handleMessage].
+        _postMessage(DevToolsExtensionEvent.ping);
+      });
+
+      await _extensionHandlerReady.future.timeout(
+        _pollUntilReadyTimeout,
+        onTimeout: () => _pollForExtensionHandlerReady?.cancel(),
+      );
+      _pollForExtensionHandlerReady?.cancel();
+    }
+  }
+
+  @override
+  void dispose() {
+    html.window.removeEventListener('message', _handleMessage);
+    _pollForExtensionHandlerReady?.cancel();
+    super.dispose();
   }
 }
