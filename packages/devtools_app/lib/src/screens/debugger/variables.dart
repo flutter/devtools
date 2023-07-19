@@ -13,6 +13,7 @@ import 'package:flutter/material.dart' hide Stack;
 import '../../shared/console/widgets/display_provider.dart';
 import '../../shared/diagnostics/dart_object_node.dart';
 import '../../shared/diagnostics/tree_builder.dart';
+import '../../shared/feature_flags.dart';
 import '../../shared/globals.dart';
 import '../../shared/tree.dart';
 
@@ -23,6 +24,8 @@ class Variables extends StatelessWidget {
   Widget build(BuildContext context) {
     // TODO(kenz): preserve expanded state of tree on switching frames and
     // on stepping.
+    if (FeatureFlags.dapDebugging) {
+    } else {
     return TreeView<DartObjectNode>(
       dataRootsListenable: serviceManager.appState.variables,
       dataDisplayProvider: (variable, onPressed) => DisplayProvider(
@@ -31,6 +34,7 @@ class Variables extends StatelessWidget {
       ),
       onItemSelected: onItemPressed,
     );
+    }
   }
 
   Future<void> onItemPressed(

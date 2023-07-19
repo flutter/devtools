@@ -7,6 +7,7 @@ import 'package:flutter/material.dart' hide Stack;
 import 'package:flutter/services.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../../diagnostics/dap_object_node.dart';
 import '../../diagnostics/dart_object_node.dart';
 import '../../globals.dart';
 import '../../primitives/utils.dart';
@@ -172,6 +173,47 @@ class DisplayProvider extends StatelessWidget {
       default:
         return style;
     }
+  }
+}
+
+class DapDisplayProvider extends StatelessWidget {
+  const DapDisplayProvider({
+    super.key,
+    required this.node,
+    required this.onTap,
+  });
+
+  final DapObjectNode node;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    final variable = node.variable;
+    final name = variable.name;
+    final value = variable.value;
+
+    // TODO(): Wrap in interactivity wrapper to provide inspect
+    // and re-root functionality.
+    return Text.rich(
+      TextSpan(
+        text: name,
+        style: theme.fixedFontStyle.apply(
+          color: theme.colorScheme.controlFlowSyntaxColor,
+        ),
+        children: [
+          TextSpan(
+            text: ': ',
+            style: theme.fixedFontStyle,
+          ),
+          TextSpan(
+            text: value,
+            style: theme.subtleFixedFontStyle,
+          ),
+        ],
+      ),
+    );
   }
 }
 
