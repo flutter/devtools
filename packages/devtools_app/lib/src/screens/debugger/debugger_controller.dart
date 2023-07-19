@@ -581,6 +581,9 @@ class DebuggerController extends DisposableController
   }
 
   Future<List<DapObjectNode>> _createDapVariablesForFrame(Frame frame) async {
+    // TODO(https://github.com/flutter/devtools/issues/6056): Use DAP for all
+    // frames instead of translating between the current VM service frame and
+    // the corresponding DAP frame.
     final dapFrame = await _fetchDapFrame(frame);
     final frameId = dapFrame?.id;
     if (frameId == null) return [];
@@ -608,13 +611,13 @@ class DebuggerController extends DisposableController
 
     final stackTraceResponse = await _service.dapStackTraceRequest(
       dap.StackTraceArguments(
-        // The DAP thread ID is equivalent to the VM isolate number, see LINK:
+        // The DAP thread ID is equivalent to the VM isolate number. See:
+        // https://github.com/dart-lang/sdk/commit/95e6f1e1107ac3f494ca3dc97ffd12cf261313a9
         threadId: int.parse(isolateNumber),
         startFrame: frameIndex,
         levels: 1, // The number of frames to return.
       ),
     );
-
     return stackTraceResponse?.stackFrames.first;
   }
 
