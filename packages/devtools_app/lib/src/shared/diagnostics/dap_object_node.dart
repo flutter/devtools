@@ -15,8 +15,12 @@ class DapObjectNode extends TreeNode<DapObjectNode> {
   final VmServiceWrapper _service;
 
   Future<void> fetchChildren() async {
+    // If we have already fetched children for this variable,
+    // then do nothing instead of re-fetching.
+    if (this.children.isNotEmpty) return;
+
     // If `variablesReference` is > 0, then the variable is
-    // structured, meaning it has children:
+    // structured, meaning it has children.
     final hasChildren = variable.variablesReference > 0;
     if (!hasChildren) return;
 

@@ -1151,7 +1151,6 @@ class VmServiceWrapper implements VmService {
   }
 
   Future<DapResponse?> _sendDapRequest(dap.Request request) async {
-    // TODO(https://github.com/flutter/devtools/issues/6056): Remove flag.
     if (!FeatureFlags.dapDebugging) return null;
 
     // Warn the user if there is no DDS connection.
