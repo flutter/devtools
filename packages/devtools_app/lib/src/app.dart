@@ -10,7 +10,7 @@ import 'package:provider/provider.dart';
 
 import 'example/conditional_screen.dart';
 import 'extensions/extension_model.dart';
-import 'extensions/ui/extension_screen.dart';
+import 'extensions/extension_screen.dart';
 import 'framework/framework_core.dart';
 import 'framework/home_screen.dart';
 import 'framework/initializer.dart';
