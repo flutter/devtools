@@ -121,6 +121,8 @@ class _ExtensionIFrameController extends DisposableController
       final extensionEvent = DevToolsExtensionEvent.tryParse(e.data);
       if (extensionEvent != null) {
         switch (extensionEvent.type) {
+          case DevToolsExtensionEventType.ping:
+          // Ignore. DevTools should not receive/handle ping events.
           case DevToolsExtensionEventType.pong:
             if (!_extensionHandlerReady.isCompleted) {
               _extensionHandlerReady.complete();
