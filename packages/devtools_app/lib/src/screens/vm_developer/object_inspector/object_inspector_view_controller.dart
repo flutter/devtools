@@ -51,7 +51,7 @@ class ObjectInspectorViewController extends DisposableController
   final _refreshing = ValueNotifier<bool>(false);
 
   Reporter get routingEventReporter => _routingEventReporter;
-  final _routingEventReporter = Reporter(); 
+  final _routingEventReporter = Reporter();
   void Function()? _routingEventCallback;
 
   bool _initialized = false;
