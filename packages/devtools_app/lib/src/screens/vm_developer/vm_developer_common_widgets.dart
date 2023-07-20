@@ -450,7 +450,6 @@ class RetainingPathWidget extends StatelessWidget {
       await controller.findAndSelectNodeForObject(obj);
     }
 
-    ;
     final theme = Theme.of(context);
     final emptyList = Text(
       'No retaining objects',

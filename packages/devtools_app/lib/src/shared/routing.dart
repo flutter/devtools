@@ -244,7 +244,8 @@ class DevToolsRouterDelegate extends RouterDelegate<DevToolsRouteConfiguration>
   void _replaceStack(DevToolsRouteConfiguration configuration) {
     if (_routes.isNotEmpty) {
       _routes = ListQueue.of(
-          _routes.toList().sublist(0, _currentConfigurationIndex + 1));
+        _routes.toList().sublist(0, _currentConfigurationIndex + 1),
+      );
       _routes.add(configuration);
       _currentConfigurationIndex = _routes.length - 1;
     } else {
