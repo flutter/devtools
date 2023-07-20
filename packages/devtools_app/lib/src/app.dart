@@ -267,7 +267,8 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
               actions: [
                 if (connectedToVmService)
                   // TODO(https://github.com/flutter/devtools/issues/1941)
-                  if (serviceManager.connectedApp!.isFlutterAppNow!) ...[
+                  if (serviceManager.connectedApp?.isFlutterAppNow ??
+                      false) ...[
                     const HotReloadButton(),
                     const HotRestartButton(),
                   ],

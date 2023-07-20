@@ -5,5 +5,5 @@
 import 'controller.dart';
 
 class EmbeddedExtensionControllerImpl extends EmbeddedExtensionController {
-  // TODO(kenz): implement desktop stubs that match the web implementation.
+  EmbeddedExtensionControllerImpl(super.extensionConfig);
 }
