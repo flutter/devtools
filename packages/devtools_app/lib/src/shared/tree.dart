@@ -20,7 +20,7 @@ class TreeView<T extends TreeNode<T>> extends StatefulWidget {
     super.key,
     required this.dataRootsListenable,
     required this.dataDisplayProvider,
-    required this.onItemSelected,
+    this.onItemSelected,
     this.onItemExpanded,
     this.onTraverse,
     this.emptyTreeViewBuilder,
@@ -35,7 +35,7 @@ class TreeView<T extends TreeNode<T>> extends StatefulWidget {
   /// Invoked when a tree node is selected. If [onItemExpanded] is not
   /// provided, this method will also be called when the expand button is
   /// tapped.
-  final FutureOr<void> Function(T) onItemSelected;
+  final FutureOr<void> Function(T)? onItemSelected;
 
   /// If provided, this method will be called when the expand button is tapped.
   /// Otherwise, [onItemSelected] will be invoked, if provided.
@@ -117,7 +117,9 @@ class _TreeViewState<T extends TreeNode<T>> extends State<TreeView<T>>
     if (widget.onItemExpanded == null && item.isExpandable) {
       item.toggleExpansion();
     }
-    await widget.onItemSelected(item);
+    if (widget.onItemSelected != null) {
+      await widget.onItemSelected!(item);
+    }
 
     _updateItems();
   }
@@ -128,8 +130,8 @@ class _TreeViewState<T extends TreeNode<T>> extends State<TreeView<T>>
     }
     if (widget.onItemExpanded != null) {
       await widget.onItemExpanded!(item);
-    } else {
-      await widget.onItemSelected(item);
+    } else if (widget.onItemSelected != null) {
+      await widget.onItemSelected!(item);
     }
     _updateItems();
   }

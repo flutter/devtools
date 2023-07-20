@@ -31,7 +31,7 @@ class Variables extends StatelessWidget {
         dataDisplayProvider: (variable, onPressed) {
           return DapDisplayProvider(node: variable, onTap: onPressed);
         },
-        onItemSelected: onDapItemPressed,
+        onItemExpanded: onDapItemExpanded,
       );
     } else {
       return TreeView<DartObjectNode>(
@@ -45,7 +45,7 @@ class Variables extends StatelessWidget {
     }
   }
 
-  Future<void> onDapItemPressed(
+  Future<void> onDapItemExpanded(
     DapObjectNode node,
   ) async {
     if (node.isExpanded) {
