@@ -7,7 +7,7 @@ import 'dart:async';
 import 'dart:html' as html;
 import 'dart:ui' as ui;
 
-import 'package:devtools_extensions/devtools_extensions.dart';
+import 'package:devtools_extensions/api.dart';
 
 import 'controller.dart';
 
