@@ -6,7 +6,7 @@ import 'api.dart';
 
 /// Data model for a devtools extension event that will be sent and received
 /// over 'postMessage' between DevTools and an embedded extension iFrame.
-/// 
+///
 /// See [DevToolsExtensionEventType] for different types of events that are
 /// supported over this communication channel.
 class DevToolsExtensionEvent {
