@@ -44,9 +44,11 @@ class ExtensionManager {
             // events.
             break;
           case DevToolsExtensionEventType.unknown:
-            _log.info('Unrecognized event received by extension: ${e.data}');
-            break;
           default:
+            _log.warning(
+              'Unrecognized event received by extension: '
+              '(${extensionEvent.type} - ${e.data}',
+            );
         }
         _registeredEventHandlers[extensionEvent.type]?.call(extensionEvent);
       }

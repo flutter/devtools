@@ -15,7 +15,7 @@ part 'extension_manager.dart';
 /// A manager that allows extensions to interact with DevTools or the DevTools
 /// extensions framework.
 ///
-/// A couple use case examples include posting messages to DevTools or
+/// A couple of use case examples include posting messages to DevTools or
 /// registering an event handler from the extension.
 ExtensionManager get extensionManager => _extensionManager;
 late final ExtensionManager _extensionManager;
