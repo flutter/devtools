@@ -256,6 +256,8 @@ final Map<String, dynamic> goldenCpuSamplesJson = {
         'const': false,
         'implicit': false,
         'abstract': false,
+        'isGetter': false,
+        'isSetter': false,
       },
     },
     {
@@ -272,6 +274,8 @@ final Map<String, dynamic> goldenCpuSamplesJson = {
         'const': false,
         'implicit': false,
         'abstract': false,
+        'isGetter': false,
+        'isSetter': false,
       },
     },
     {
@@ -289,6 +293,8 @@ final Map<String, dynamic> goldenCpuSamplesJson = {
         'const': false,
         'implicit': false,
         'abstract': false,
+        'isGetter': false,
+        'isSetter': false,
       },
     },
     {
@@ -306,6 +312,8 @@ final Map<String, dynamic> goldenCpuSamplesJson = {
         'const': false,
         'implicit': false,
         'abstract': false,
+        'isGetter': false,
+        'isSetter': false,
       },
     },
     {
@@ -323,6 +331,8 @@ final Map<String, dynamic> goldenCpuSamplesJson = {
         'const': false,
         'implicit': false,
         'abstract': false,
+        'isGetter': false,
+        'isSetter': false,
       },
     },
     {
@@ -340,6 +350,8 @@ final Map<String, dynamic> goldenCpuSamplesJson = {
         'const': false,
         'implicit': false,
         'abstract': false,
+        'isGetter': false,
+        'isSetter': false,
         'location': {
           'type': 'SourceLocation',
           'script': null,
@@ -363,6 +375,8 @@ final Map<String, dynamic> goldenCpuSamplesJson = {
         'const': false,
         'implicit': false,
         'abstract': false,
+        'isGetter': false,
+        'isSetter': false,
       },
     },
     {
@@ -379,6 +393,8 @@ final Map<String, dynamic> goldenCpuSamplesJson = {
         'const': false,
         'implicit': false,
         'abstract': false,
+        'isGetter': false,
+        'isSetter': false,
       },
     },
     {
@@ -395,6 +411,8 @@ final Map<String, dynamic> goldenCpuSamplesJson = {
         'const': false,
         'implicit': false,
         'abstract': false,
+        'isGetter': false,
+        'isSetter': false,
       },
     },
     {
@@ -412,6 +430,8 @@ final Map<String, dynamic> goldenCpuSamplesJson = {
         'const': false,
         'implicit': false,
         'abstract': false,
+        'isGetter': false,
+        'isSetter': false,
       },
     },
     {
@@ -429,6 +449,8 @@ final Map<String, dynamic> goldenCpuSamplesJson = {
         'const': false,
         'implicit': false,
         'abstract': false,
+        'isGetter': false,
+        'isSetter': false,
       },
     },
     {
@@ -446,6 +468,8 @@ final Map<String, dynamic> goldenCpuSamplesJson = {
         'const': false,
         'implicit': false,
         'abstract': false,
+        'isGetter': false,
+        'isSetter': false,
       },
     },
     {
@@ -463,6 +487,8 @@ final Map<String, dynamic> goldenCpuSamplesJson = {
         'const': false,
         'implicit': false,
         'abstract': false,
+        'isGetter': false,
+        'isSetter': false,
       },
     },
     {
@@ -480,6 +506,8 @@ final Map<String, dynamic> goldenCpuSamplesJson = {
         'const': false,
         'implicit': false,
         'abstract': false,
+        'isGetter': false,
+        'isSetter': false,
       },
     },
     {
@@ -497,6 +525,8 @@ final Map<String, dynamic> goldenCpuSamplesJson = {
         'const': false,
         'implicit': false,
         'abstract': false,
+        'isGetter': false,
+        'isSetter': false,
       },
     },
     {
@@ -514,6 +544,8 @@ final Map<String, dynamic> goldenCpuSamplesJson = {
         'const': false,
         'implicit': false,
         'abstract': false,
+        'isGetter': false,
+        'isSetter': false,
       },
     },
     {
@@ -531,6 +563,8 @@ final Map<String, dynamic> goldenCpuSamplesJson = {
         'const': false,
         'implicit': false,
         'abstract': false,
+        'isGetter': false,
+        'isSetter': false,
       },
     },
     {
@@ -547,6 +581,8 @@ final Map<String, dynamic> goldenCpuSamplesJson = {
         'const': false,
         'implicit': false,
         'abstract': false,
+        'isGetter': false,
+        'isSetter': false,
       },
     },
     {
@@ -563,6 +599,8 @@ final Map<String, dynamic> goldenCpuSamplesJson = {
         'const': false,
         'implicit': false,
         'abstract': false,
+        'isGetter': false,
+        'isSetter': false,
       },
     },
   ],
