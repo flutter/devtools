@@ -20,6 +20,8 @@ part 'extension_manager.dart';
 ExtensionManager get extensionManager => _extensionManager;
 late final ExtensionManager _extensionManager;
 
+/// A wrapper widget that initializes the [extensionManager] and establishes a
+/// connection with DevTools for this extension to interact over.
 class DevToolsExtension extends StatefulWidget {
   const DevToolsExtension({
     super.key,
