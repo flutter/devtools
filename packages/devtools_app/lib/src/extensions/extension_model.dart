@@ -58,7 +58,7 @@ extension ExtensionConfigExtension on DevToolsExtensionConfig {
 }
 
 // TODO(kenz): remove these once the DevTools extensions feature has shipped.
-final List<DevToolsExtensionConfig> debugPlugins = [
+final List<DevToolsExtensionConfig> debugExtensions = [
   DevToolsExtensionConfig.parse({
     DevToolsExtensionConfig.nameKey: 'foo',
     DevToolsExtensionConfig.issueTrackerKey: 'www.google.com',

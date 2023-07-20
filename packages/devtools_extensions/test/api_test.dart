@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_extensions/devtools_extensions.dart';
+import 'package:devtools_extensions/api.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -55,7 +55,7 @@ void main() {
         data: {'foo': 'bar'},
       );
       expect(event.toJson(), {
-        'type': 'ping',
+        'type': 'pong',
         'data': {'foo': 'bar'},
       });
 

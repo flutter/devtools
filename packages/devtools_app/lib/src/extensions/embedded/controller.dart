@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_extensions/devtools_extensions.dart';
+import 'package:devtools_extensions/api.dart';
 
 import '../../shared/primitives/auto_dispose.dart';
 import '../extension_model.dart';

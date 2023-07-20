@@ -16,7 +16,7 @@ class EmbeddedExtension extends StatelessWidget {
     // TODO(kenz): if web view support for desktop is ever added, use that here.
     return const Center(
       child: Text(
-        'Cannot display the DevTools plugin.'
+        'Cannot display the DevTools extension.'
         ' IFrames are not supported on desktop platforms.',
       ),
     );

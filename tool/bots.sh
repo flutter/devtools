@@ -86,11 +86,16 @@ if [ "$BOT" = "main" ]; then
     # Analyze the code
     repo_tool analyze
 
-    # Test the devtools_shared package tests on the main bot.
     popd
+
+    # Test the devtools_shared and devtools_extensions package tests on the main bot.
     pushd packages/devtools_shared
     echo `pwd`
+    flutter test test/
+    popd
 
+    pushd packages/devtools_extensions
+    echo `pwd`
     flutter test test/
     popd
 

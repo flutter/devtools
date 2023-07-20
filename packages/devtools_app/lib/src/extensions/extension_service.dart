@@ -16,15 +16,15 @@ class ExtensionService extends DisposableController
 
   void initialize() {
     addAutoDisposeListener(serviceManager.connectedState, () {
-      _refreshAvailablePlugins();
+      _refreshAvailableExtensions();
     });
   }
 
-  // TODO(kenz): actually look up the available plugins from the server, based
-  // on the root path(s) from the available isolate(s).
+  // TODO(kenz): actually look up the available extensions from devtools server,
+  // based on the root path(s) from the available isolate(s).
   int _count = 0;
-  void _refreshAvailablePlugins() {
+  void _refreshAvailableExtensions() {
     _availableExtensions.value =
-        debugPlugins.sublist(0, _count++ % (debugPlugins.length + 1));
+        debugExtensions.sublist(0, _count++ % (debugExtensions.length + 1));
   }
 }

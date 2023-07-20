@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-library template;
+library api;
 
-export 'src/template/devtools_extension.dart';
+export 'src/api/api.dart';
+export 'src/api/model.dart';
