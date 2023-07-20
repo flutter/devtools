@@ -40,7 +40,8 @@ class ExtensionManager {
             );
             break;
           case DevToolsExtensionEventType.pong:
-            // Ignore. DevTools Plugins should not receive/handle these events.
+            // Ignore. DevTools extensions should not receive or handle pong
+            // events.
             break;
           case DevToolsExtensionEventType.unknown:
             _log.info('Unrecognized event received by extension: ${e.data}');
