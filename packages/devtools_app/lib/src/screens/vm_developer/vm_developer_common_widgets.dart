@@ -1019,21 +1019,25 @@ class ObjectInspectorCodeView extends StatefulWidget {
 
 class _ObjectInspectorCodeViewState extends State<ObjectInspectorCodeView> {
   @override
-  void didChangeDependencies() async {
+  void didChangeDependencies() {
     super.didChangeDependencies();
     if (widget.script != widget.codeViewController.currentScriptRef.value) {
-      await widget.codeViewController.resetScriptLocation(
-        ScriptLocation(widget.script),
+      unawaited(
+        widget.codeViewController.resetScriptLocation(
+          ScriptLocation(widget.script),
+        ),
       );
     }
   }
 
   @override
-  Future<void> didUpdateWidget(ObjectInspectorCodeView oldWidget) async {
+  void didUpdateWidget(ObjectInspectorCodeView oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.script != widget.codeViewController.currentScriptRef.value) {
-      await widget.codeViewController.resetScriptLocation(
-        ScriptLocation(widget.script),
+      unawaited(
+        widget.codeViewController.resetScriptLocation(
+          ScriptLocation(widget.script),
+        ),
       );
     }
   }
