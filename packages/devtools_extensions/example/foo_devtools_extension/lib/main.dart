@@ -1,7 +1,6 @@
 import 'package:devtools_extensions/api.dart';
-import 'package:flutter/material.dart';
-
 import 'package:devtools_extensions/devtools_extensions.dart';
+import 'package:flutter/material.dart';
 
 void main() {
   runApp(const FooPackageDevToolsExtension());
@@ -12,9 +11,9 @@ class FooPackageDevToolsExtension extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       title: 'Foo DevTools Extension',
-      home: const DevToolsExtension(
+      home: DevToolsExtension(
         child: FooExtensionHomePage(),
       ),
     );
