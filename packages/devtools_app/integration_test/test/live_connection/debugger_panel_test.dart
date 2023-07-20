@@ -170,7 +170,7 @@ T getWidgetFromFinder<T>(Finder finder) =>
     finder.first.evaluate().first.widget as T;
 
 Finder findLineItemWithText(String text) => find.ancestor(
-      of: find.selectableTextContaining(text),
+      of: find.textContaining(text),
       matching: find.byType(LineItem),
     );
 

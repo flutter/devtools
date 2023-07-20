@@ -31,6 +31,7 @@ enum ScreenMetaData {
   logging('logging', title: 'Logging', icon: Octicons.clippy),
   provider('provider', title: 'Provider', icon: Icons.attach_file),
   appSize('app-size', title: 'App Size', icon: Octicons.fileZip),
+  deepLinks('deep-links', title: 'Deep Links', icon: Icons.link_rounded),
   vmTools('vm-tools', title: 'VM Tools', icon: Icons.settings_applications),
   simple('simple');
 
@@ -55,6 +56,7 @@ abstract class Screen {
     this.requiresLibrary,
     this.requiresConnection = true,
     this.requiresDartVm = false,
+    this.requiresFlutter = false,
     this.requiresDebugBuild = false,
     this.requiresVmDeveloperMode = false,
     this.worksOffline = false,
@@ -67,6 +69,7 @@ abstract class Screen {
     String? requiresLibrary,
     bool requiresConnection = true,
     bool requiresDartVm = false,
+    bool requiresFlutter = false,
     bool requiresDebugBuild = false,
     bool requiresVmDeveloperMode = false,
     bool worksOffline = false,
@@ -81,6 +84,7 @@ abstract class Screen {
           requiresLibrary: requiresLibrary,
           requiresConnection: requiresConnection,
           requiresDartVm: requiresDartVm,
+          requiresFlutter: requiresFlutter,
           requiresDebugBuild: requiresDebugBuild,
           requiresVmDeveloperMode: requiresVmDeveloperMode,
           worksOffline: worksOffline,
@@ -141,6 +145,9 @@ abstract class Screen {
   /// Whether this screen should only be included when the app is running on the Dart VM.
   final bool requiresDartVm;
 
+  /// Whether this screen should only be included when the app is a Flutter app.
+  final bool requiresFlutter;
+
   /// Whether this screen should only be included when the app is debuggable.
   final bool requiresDebugBuild;
 
@@ -180,10 +187,14 @@ abstract class Screen {
       text: TextSpan(text: title),
       textDirection: TextDirection.ltr,
     )..layout();
+    const measurementBuffer = 2.0;
     return painter.width +
         denseSpacing +
         defaultIconSize +
-        (includeTabBarSpacing ? tabBarSpacing * 2 : 0.0);
+        (includeTabBarSpacing ? tabBarSpacing * 2 : 0.0) +
+        // Add a small buffer to account for variances between the text painter
+        // approximation and the actual measurement.
+        measurementBuffer;
   }
 
   /// Builds the tab to show for this screen in the [DevToolsScaffold]'s main
@@ -294,6 +305,11 @@ bool shouldShowScreen(Screen screen) {
       _log.finest('screen requires Dart VM: returning false');
       return false;
     }
+  }
+  if (screen.requiresFlutter &&
+      serviceManager.connectedApp!.isFlutterAppNow == false) {
+    _log.finest('screen requires Flutter: returning false');
+    return false;
   }
   if (screen.requiresDebugBuild) {
     if (serviceManager.connectedApp!.isProfileBuildNow == true) {

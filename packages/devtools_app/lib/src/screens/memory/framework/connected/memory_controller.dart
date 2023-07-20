@@ -9,7 +9,6 @@ import 'package:flutter/foundation.dart';
 import 'package:leak_tracker/devtools_integration.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../../../service/service_manager.dart';
 import '../../../../shared/globals.dart';
 import '../../../../shared/primitives/auto_dispose.dart';
 import '../../../../shared/utils.dart';
@@ -170,7 +169,7 @@ class MemoryController extends DisposableController
         .value;
   }
 
-  void _handleConnectionStart(ServiceConnectionManager serviceManager) {
+  void _handleConnectionStart() {
     _refreshShouldShowLeaksTab();
 
     if (_memoryTracker == null) {
@@ -254,7 +253,7 @@ class MemoryController extends DisposableController
     isAndroidChartVisibleNotifier.value = isConnectedToAndroidAndAndroidEnabled;
   }
 
-  void _handleConnectionStop(Object? _) {
+  void _handleConnectionStop() {
     _memoryTracker?.stop();
     _memoryTrackerController.add(_memoryTracker);
 
@@ -268,16 +267,17 @@ class MemoryController extends DisposableController
       _handleIsolateChanged,
     );
 
-    autoDisposeStreamSubscription(
-      serviceManager.onConnectionAvailable
-          .listen((_) => _handleConnectionStart(serviceManager)),
-    );
+    addAutoDisposeListener(serviceManager.connectedState, () {
+      if (serviceManager.connectedState.value.connected) {
+        _handleConnectionStart();
+      } else {
+        _handleConnectionStop();
+      }
+    });
+
     if (serviceManager.connectedAppInitialized) {
-      _handleConnectionStart(serviceManager);
+      _handleConnectionStart();
     }
-    autoDisposeStreamSubscription(
-      serviceManager.onConnectionClosed.listen(_handleConnectionStop),
-    );
   }
 
   void stopTimeLine() {

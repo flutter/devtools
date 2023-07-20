@@ -13,7 +13,6 @@ import '../../service/service_extensions.dart' as extensions;
 import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/common_widgets.dart';
-import '../../shared/connected_app.dart';
 import '../../shared/console/eval/inspector_tree.dart';
 import '../../shared/dialogs.dart';
 import '../../shared/editable_list.dart';
@@ -34,7 +33,7 @@ class InspectorScreen extends Screen {
   InspectorScreen()
       : super.conditional(
           id: id,
-          requiresLibrary: flutterLibraryUri,
+          requiresFlutter: true,
           requiresDebugBuild: true,
           title: ScreenMetaData.inspector.title,
           icon: ScreenMetaData.inspector.icon,

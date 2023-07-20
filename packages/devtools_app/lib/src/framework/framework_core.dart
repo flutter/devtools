@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:logging/logging.dart';
 
 import '../../devtools.dart' as devtools show version;
+import '../extensions/extension_service.dart';
 import '../screens/debugger/breakpoint_manager.dart';
 import '../service/service.dart';
 import '../service/service_manager.dart';
@@ -40,6 +41,7 @@ class FrameworkCore {
     setGlobal(BannerMessagesController, BannerMessagesController());
     setGlobal(BreakpointManager, BreakpointManager());
     setGlobal(EvalService, EvalService());
+    setGlobal(ExtensionService, ExtensionService());
   }
 
   static void init() {

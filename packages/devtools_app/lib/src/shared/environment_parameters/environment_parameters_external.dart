@@ -4,15 +4,16 @@
 
 import 'package:flutter/foundation.dart';
 
-import '../screens/debugger/codeview.dart';
-import '../shared/analytics/constants.dart' as gac;
-import '../shared/common_widgets.dart';
-import '../shared/diagnostics/inspector_service.dart';
-import '../shared/globals.dart';
-import '../shared/utils.dart';
-import 'extensions_base.dart';
+import '../../screens/debugger/codeview.dart';
+import '../analytics/constants.dart' as gac;
+import '../common_widgets.dart';
+import '../diagnostics/inspector_service.dart';
+import '../globals.dart';
+import '../utils.dart';
+import 'environment_parameters_base.dart';
 
-class ExternalDevToolsExtensionPoints implements DevToolsExtensionPoints {
+class ExternalDevToolsEnvironmentParameters
+    implements DevToolsEnvironmentParameters {
   @override
   List<ScriptPopupMenuOption> buildExtraDebuggerScriptPopupMenuOptions() =>
       <ScriptPopupMenuOption>[];

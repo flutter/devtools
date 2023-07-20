@@ -78,9 +78,7 @@ abstract class LayoutExplorerWidgetState<W extends LayoutExplorerWidget,
     if (shouldFetch) {
       _dirty = false;
       final newSelection = await fetchLayoutProperties();
-      if (newSelection != null) {
-        _setProperties(newSelection);
-      }
+      _setProperties(newSelection);
     } else {
       updateHighlighted(_properties);
     }
@@ -219,7 +217,7 @@ abstract class LayoutExplorerWidgetState<W extends LayoutExplorerWidget,
     });
   }
 
-  void _setProperties(L newProperties) {
+  void _setProperties(L? newProperties) {
     if (!mounted) return;
     updateHighlighted(newProperties);
     if (_properties == newProperties) {
