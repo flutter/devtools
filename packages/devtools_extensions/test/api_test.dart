@@ -55,7 +55,7 @@ void main() {
         data: {'foo': 'bar'},
       );
       expect(event.toJson(), {
-        'type': 'ping',
+        'type': 'pong',
         'data': {'foo': 'bar'},
       });
 
