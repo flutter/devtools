@@ -77,7 +77,7 @@ abstract class FeatureFlags {
   /// Flag to enable debugging via DAP.
   ///
   /// https://github.com/flutter/devtools/issues/6056
-  static bool dapDebugging = true;
+  static bool dapDebugging = enableExperiments;
 
   /// Stores a map of all the feature flags for debugging purposes.
   ///
