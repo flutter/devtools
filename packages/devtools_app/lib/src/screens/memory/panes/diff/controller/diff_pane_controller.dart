@@ -119,9 +119,7 @@ class DiffPaneController extends DisposableController {
       gac.memory,
       gac.importFile,
     );
-    final files = await importFilesFromPicker(
-      acceptedTypes: ['json'],
-    );
+    final files = await importRawFilesFromPicker();
 
     print(files.length);
   }

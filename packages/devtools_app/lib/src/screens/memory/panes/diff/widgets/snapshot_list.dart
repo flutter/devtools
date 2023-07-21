@@ -92,7 +92,7 @@ class _ListControlPane extends StatelessWidget {
               tooltip: 'Open stored snapshots.',
               onPressed: controller.isTakingSnapshot.value
                   ? null
-                  : () => unawaited(_openSnapshots(context)),
+                  : () => unawaited(controller.openSnapshots()),
             ),
             ToolbarAction(
               icon: Icons.block,
@@ -111,13 +111,6 @@ class _ListControlPane extends StatelessWidget {
         );
       },
     );
-  }
-
-  Future<void> _openSnapshots(BuildContext context) async {
-    ga.select(gac.memory, gac.MemoryEvent.diffOpenSnapshots);
-
-    final files = await importFilesFromPicker(acceptedTypes: ['json']);
-    print('files: $files');
   }
 }
 
