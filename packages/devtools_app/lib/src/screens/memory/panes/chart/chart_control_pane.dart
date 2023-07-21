@@ -27,11 +27,8 @@ class ChartControlPane extends StatefulWidget {
 
 @visibleForTesting
 class ChartPaneTooltips {
-  static const String pauseTooltip =
-      'Pause the chart and auto-collection of snapshots\n'
-      'in case of aggressive memory consumption\n'
-      '(if enabled in settings)';
-  static const String resumeTooltip = 'Resume recording memory statistics';
+  static const String pauseTooltip = 'Pause the chart';
+  static const String resumeTooltip = 'Resume the chart';
 }
 
 class _ChartControlPaneState extends State<ChartControlPane>
