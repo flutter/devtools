@@ -17,7 +17,7 @@ void main() {
   late MockScriptManager scriptManager;
   late MockVmServiceWrapper vmService;
 
-  const windowSize = Size(2000, 1000);
+  const windowSize = Size(2500, 1500);
 
   setUp(() {
     FeatureFlags.dapDebugging = true;
