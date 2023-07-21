@@ -10,7 +10,7 @@ import 'package:provider/provider.dart';
 
 import 'example/conditional_screen.dart';
 import 'extensions/extension_model.dart';
-import 'extensions/ui/extension_screen.dart';
+import 'extensions/extension_screen.dart';
 import 'framework/framework_core.dart';
 import 'framework/home_screen.dart';
 import 'framework/initializer.dart';
@@ -267,7 +267,8 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
               actions: [
                 if (connectedToVmService)
                   // TODO(https://github.com/flutter/devtools/issues/1941)
-                  if (serviceManager.connectedApp!.isFlutterAppNow!) ...[
+                  if (serviceManager.connectedApp?.isFlutterAppNow ??
+                      false) ...[
                     const HotReloadButton(),
                     const HotRestartButton(),
                   ],
