@@ -3,10 +3,8 @@
 // found in the LICENSE file.
 
 export 'src/app.dart';
-export 'src/extension_points/extensions_base.dart';
-export 'src/extension_points/extensions_external.dart';
 export 'src/framework/app_bar.dart';
-export 'src/framework/landing_screen.dart';
+export 'src/framework/home_screen.dart';
 export 'src/framework/notifications_view.dart';
 export 'src/framework/release_notes/release_notes.dart';
 export 'src/framework/status_line.dart';
@@ -75,9 +73,10 @@ export 'src/shared/console/eval/eval_service.dart';
 export 'src/shared/console/eval/inspector_tree.dart';
 export 'src/shared/console/primitives/simple_items.dart';
 export 'src/shared/console/widgets/description.dart';
-export 'src/shared/device_dialog.dart';
 export 'src/shared/diagnostics/diagnostics_node.dart';
 export 'src/shared/diagnostics/inspector_service.dart';
+export 'src/shared/environment_parameters/environment_parameters_base.dart';
+export 'src/shared/environment_parameters/environment_parameters_external.dart';
 export 'src/shared/error_badge_manager.dart';
 export 'src/shared/globals.dart';
 export 'src/shared/http/http_request_data.dart';

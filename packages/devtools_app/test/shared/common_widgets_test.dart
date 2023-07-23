@@ -13,7 +13,10 @@ void main() {
   const windowSize = Size(1000.0, 1000.0);
 
   setUp(() {
-    setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
+    setGlobal(
+      DevToolsEnvironmentParameters,
+      ExternalDevToolsEnvironmentParameters(),
+    );
     setGlobal(PreferencesController, PreferencesController());
     setGlobal(ServiceConnectionManager, FakeServiceManager());
     setGlobal(IdeTheme, IdeTheme());

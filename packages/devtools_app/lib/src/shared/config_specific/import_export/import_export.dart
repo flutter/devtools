@@ -18,6 +18,7 @@ import '../../file_import.dart';
 import '../../globals.dart';
 import '../../primitives/simple_items.dart';
 import '../../primitives/utils.dart';
+import '../../screen.dart';
 import '../../theme.dart';
 import '_export_stub.dart'
     if (dart.library.html) '_export_web.dart'
@@ -187,7 +188,9 @@ abstract class ExportController {
 }
 
 class ImportToolbarAction extends StatelessWidget {
-  const ImportToolbarAction({super.key});
+  const ImportToolbarAction({super.key, this.color});
+
+  final Color? color;
 
   @override
   Widget build(BuildContext context) {
@@ -202,6 +205,7 @@ class ImportToolbarAction extends StatelessWidget {
           child: Icon(
             Icons.upload_rounded,
             size: actionsIconSize,
+            color: color,
           ),
         ),
       ),

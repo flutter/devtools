@@ -25,7 +25,10 @@ void main() {
     }
 
     setUp(() {
-      setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
+      setGlobal(
+        DevToolsEnvironmentParameters,
+        ExternalDevToolsEnvironmentParameters(),
+      );
       setGlobal(IdeTheme, IdeTheme());
       setGlobal(PreferencesController, PreferencesController());
     });

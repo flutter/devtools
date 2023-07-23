@@ -2405,9 +2405,9 @@ class HelpButtonWithDialog extends StatelessWidget {
 /// Display a single bullet character in order to act as a stylized spacer
 /// component.
 class BulletSpacer extends StatelessWidget {
-  const BulletSpacer({super.key, this.useAccentColor = false});
+  const BulletSpacer({super.key, this.color});
 
-  final bool useAccentColor;
+  final Color? color;
 
   static double get width => actionWidgetSize / 2;
 
@@ -2415,12 +2415,7 @@ class BulletSpacer extends StatelessWidget {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
 
-    late TextStyle? textStyle;
-    textStyle = useAccentColor
-        ? theme.appBarTheme.toolbarTextStyle ??
-            theme.primaryTextTheme.bodyMedium
-        : theme.textTheme.bodyMedium;
-
+    final textStyle = theme.textTheme.bodyMedium;
     final mutedColor = textStyle?.color?.withAlpha(0x90);
 
     return Container(
@@ -2429,7 +2424,7 @@ class BulletSpacer extends StatelessWidget {
       alignment: Alignment.center,
       child: Text(
         '•',
-        style: textStyle?.copyWith(color: mutedColor),
+        style: textStyle?.copyWith(color: color ?? mutedColor),
       ),
     );
   }

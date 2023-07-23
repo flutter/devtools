@@ -190,13 +190,13 @@ class InspectorPreferencesController extends DisposableController
   }
 
   void _initCustomPubRootDirectories() {
-    autoDisposeStreamSubscription(
-      serviceManager.onConnectionAvailable
-          .listen(_handleConnectionToNewService),
-    );
-    autoDisposeStreamSubscription(
-      serviceManager.onConnectionClosed.listen(_handleConnectionClosed),
-    );
+    addAutoDisposeListener(serviceManager.connectedState, () async {
+      if (serviceManager.connectedState.value.connected) {
+        await _handleConnectionToNewService();
+      } else {
+        _handleConnectionClosed();
+      }
+    });
     addAutoDisposeListener(_busyCounter, () {
       _customPubRootDirectoriesAreBusy.value = _busyCounter.value != 0;
     });
@@ -230,12 +230,12 @@ class InspectorPreferencesController extends DisposableController
     );
   }
 
-  void _handleConnectionClosed(Object? _) {
+  void _handleConnectionClosed() {
     _mainScriptDir = null;
     _customPubRootDirectories.clear();
   }
 
-  Future<void> _handleConnectionToNewService(VmServiceWrapper _) async {
+  Future<void> _handleConnectionToNewService() async {
     await _updateMainScriptRef();
     await _updateHoverEvalMode();
 

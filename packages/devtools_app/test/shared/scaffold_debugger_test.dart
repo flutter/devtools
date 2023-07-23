@@ -17,6 +17,7 @@ void main() {
   when(mockServiceManager.connectedState).thenReturn(
     ValueNotifier<ConnectedState>(const ConnectedState(false)),
   );
+  when(mockServiceManager.hasConnection).thenReturn(false);
   when(mockServiceManager.isolateManager).thenReturn(FakeIsolateManager());
   when(mockServiceManager.appState).thenReturn(
     AppState(mockServiceManager.isolateManager.selectedIsolate),

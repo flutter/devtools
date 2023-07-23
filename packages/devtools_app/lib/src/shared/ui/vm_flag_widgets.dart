@@ -94,7 +94,7 @@ class CpuSamplingRateDropdown extends StatelessWidget {
         value: samplingRate.value,
         child: Text(samplingRate.display),
       ),
-      gaId: samplingRate.displayShort
+      gaId: samplingRate.displayShort,
     );
   }
 

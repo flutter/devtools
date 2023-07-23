@@ -68,15 +68,14 @@ class LoggingController extends DisposableController
         FilterControllerMixin<LogData>,
         AutoDisposeControllerMixin {
   LoggingController() {
-    autoDisposeStreamSubscription(
-      serviceManager.onConnectionAvailable.listen(_handleConnectionStart),
-    );
+    addAutoDisposeListener(serviceManager.connectedState, () {
+      if (serviceManager.connectedState.value.connected) {
+        _handleConnectionStart(serviceManager.service!);
+      }
+    });
     if (serviceManager.connectedAppInitialized) {
       _handleConnectionStart(serviceManager.service!);
     }
-    autoDisposeStreamSubscription(
-      serviceManager.onConnectionClosed.listen(_handleConnectionStop),
-    );
     _handleBusEvents();
     subscribeToFilterChanges();
   }
@@ -404,8 +403,6 @@ class LoggingController extends DisposableController
       ),
     );
   }
-
-  void _handleConnectionStop(Object? _) {}
 
   void log(LogData log) {
     List<LogData> currentLogs = List.of(data);

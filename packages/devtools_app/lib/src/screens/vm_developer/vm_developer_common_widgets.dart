@@ -37,11 +37,13 @@ class VMInfoCard extends StatelessWidget implements PreferredSizeWidget {
   const VMInfoCard({
     super.key,
     required this.title,
+    this.roundedTopBorder = true,
     this.rowKeyValues,
     this.table,
   });
 
   final String title;
+  final bool roundedTopBorder;
   final List<MapEntry<String, WidgetBuilder>>? rowKeyValues;
   final Widget? table;
 
@@ -51,6 +53,7 @@ class VMInfoCard extends StatelessWidget implements PreferredSizeWidget {
       size: preferredSize,
       child: VMInfoList(
         title: title,
+        roundedTopBorder: roundedTopBorder,
         rowKeyValues: rowKeyValues,
         table: table,
       ),
@@ -76,7 +79,7 @@ MapEntry<String, WidgetBuilder> selectableTextBuilderMapEntry(
 ) {
   return MapEntry(
     key,
-    (context) => SelectableText(
+    (context) => Text(
       value ?? '--',
       style: Theme.of(context).fixedFontStyle,
     ),
@@ -105,11 +108,13 @@ class VMInfoList extends StatelessWidget {
   const VMInfoList({
     super.key,
     required this.title,
+    this.roundedTopBorder = true,
     this.rowKeyValues,
     this.table,
   });
 
   final String title;
+  final bool roundedTopBorder;
   final List<MapEntry<String, WidgetBuilder>>? rowKeyValues;
   final Widget? table;
 
@@ -125,6 +130,7 @@ class VMInfoList extends StatelessWidget {
         AreaPaneHeader(
           title: Text(title),
           includeTopBorder: false,
+          roundedTopBorder: roundedTopBorder,
         ),
         if (rowKeyValues != null)
           Expanded(
@@ -140,7 +146,7 @@ class VMInfoList extends StatelessWidget {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          SelectableText(
+                          Text(
                             '${row.key.toString()}:',
                             style: theme.fixedFontStyle,
                           ),
@@ -224,7 +230,7 @@ class RequestableSizeWidget extends StatelessWidget {
               : Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    SelectableText(
+                    Text(
                       size.valueAsString == null
                           ? '--'
                           : prettyPrintBytes(
@@ -312,11 +318,6 @@ class VmExpansionTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final titleRow = AreaPaneHeader(
-      title: Text(title),
-      includeTopBorder: false,
-      includeBottomBorder: false,
-    );
     final theme = Theme.of(context);
     return Card(
       child: ListTileTheme(
@@ -328,10 +329,13 @@ class VmExpansionTile extends StatelessWidget {
           // expanded ExpansionTile.
           data: theme.copyWith(dividerColor: Colors.transparent),
           child: ExpansionTile(
-            title: titleRow,
+            title: DefaultTextStyle(
+              style: theme.textTheme.titleSmall!,
+              child: Text(title),
+            ),
             onExpansionChanged: onExpanded,
             tilePadding: const EdgeInsets.only(
-              left: densePadding,
+              left: defaultSpacing,
               right: defaultSpacing,
             ),
             children: children,
@@ -447,7 +451,7 @@ class RetainingPathWidget extends StatelessWidget {
     }
 
     final theme = Theme.of(context);
-    final emptyList = SelectableText(
+    final emptyList = Text(
       'No retaining objects',
       style: theme.fixedFontStyle,
     );
@@ -483,7 +487,7 @@ class RetainingPathWidget extends StatelessWidget {
           ),
       Row(
         children: [
-          SelectableText(
+          Text(
             'Retained by a GC root of type: ${retainingPath.gcRootType ?? '<unknown>'}',
             style: theme.fixedFontStyle,
           ),
@@ -508,8 +512,8 @@ class _RetainingObjectDescription extends StatelessWidget {
   Widget build(BuildContext context) {
     final parentListIndex = object.parentListIndex;
     if (parentListIndex != null) {
-      return SelectableText.rich(
-        TextSpan(
+      return RichText(
+        text: TextSpan(
           children: [
             TextSpan(text: 'Retained by element [$parentListIndex] of '),
             VmServiceObjectLink(
@@ -522,8 +526,8 @@ class _RetainingObjectDescription extends StatelessWidget {
     }
 
     if (object.parentMapKey != null) {
-      return SelectableText.rich(
-        TextSpan(
+      return RichText(
+        text: TextSpan(
           children: [
             const TextSpan(text: 'Retained by element at ['),
             VmServiceObjectLink(object: object.parentMapKey, onTap: onTap)
@@ -583,8 +587,8 @@ class _RetainingObjectDescription extends StatelessWidget {
         ).buildTextSpan(context),
       );
     }
-    return SelectableText.rich(
-      TextSpan(children: entries),
+    return RichText(
+      text: TextSpan(children: entries),
     );
   }
 }
@@ -658,7 +662,7 @@ class InboundReferencesWidget extends StatelessWidget {
         Row(
           children: [
             Flexible(
-              child: SelectableText(
+              child: Text(
                 _inboundRefDescription(inboundRef, parentWordOffset),
                 style: Theme.of(context).fixedFontStyle,
               ),
@@ -814,13 +818,15 @@ class VmServiceObjectLink extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return SelectableText.rich(
-      style: theme.linkTextStyle.apply(
-        fontFamily: theme.fixedFontStyle.fontFamily,
-        overflow: TextOverflow.ellipsis,
-      ),
+    return RichText(
       maxLines: 1,
-      buildTextSpan(context),
+      text: TextSpan(
+        style: theme.linkTextStyle.apply(
+          fontFamily: theme.fixedFontStyle.fontFamily,
+          overflow: TextOverflow.ellipsis,
+        ),
+        children: [buildTextSpan(context)],
+      ),
     );
   }
 }
@@ -849,7 +855,7 @@ class VmObjectDisplayBasicLayout extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
+    return ListView(
       children: [
         IntrinsicHeight(
           child: Row(
@@ -863,6 +869,7 @@ class VmObjectDisplayBasicLayout extends StatelessWidget {
                   child: VMInfoCard(
                     title: generalInfoTitle,
                     rowKeyValues: generalDataRows,
+                    roundedTopBorder: false,
                   ),
                 ),
               ),
@@ -878,22 +885,16 @@ class VmObjectDisplayBasicLayout extends StatelessWidget {
             ],
           ),
         ),
-        Flexible(
-          child: ListView(
-            children: [
-              RetainingPathWidget(
-                controller: controller,
-                retainingPath: object.retainingPath,
-                onExpanded: _onExpandRetainingPath,
-              ),
-              InboundReferencesWidget(
-                inboundReferences: object.inboundReferences,
-                onExpanded: _onExpandInboundRefs,
-              ),
-              ...?expandableWidgets,
-            ],
-          ),
+        RetainingPathWidget(
+          controller: controller,
+          retainingPath: object.retainingPath,
+          onExpanded: _onExpandRetainingPath,
         ),
+        InboundReferencesWidget(
+          inboundReferences: object.inboundReferences,
+          onExpanded: _onExpandInboundRefs,
+        ),
+        ...?expandableWidgets,
       ],
     );
   }
@@ -1094,6 +1095,7 @@ class _ObjectInspectorCodeViewState extends State<ObjectInspectorCodeView> {
             Column(
               children: [
                 const AreaPaneHeader(
+                  roundedTopBorder: false,
                   title: Text('Code Preview'),
                 ),
                 Expanded(

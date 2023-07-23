@@ -606,7 +606,7 @@ class ChartPainter extends CustomPainter {
     final tp = TextPainter(
       text: span,
       textAlign: TextAlign.right,
-      textScaleFactor: scale,
+      textScaler: TextScaler.linear(scale),
       textDirection: TextDirection.ltr,
     );
     tp.layout();

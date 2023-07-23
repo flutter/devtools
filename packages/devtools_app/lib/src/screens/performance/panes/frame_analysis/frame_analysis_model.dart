@@ -35,10 +35,7 @@ class FrameAnalysis {
     }
     final buildEvents = uiEvent
         .nodesWithCondition(
-          (event) =>
-              event.name
-                  ?.caseInsensitiveEquals(FramePhaseType.build.eventName) ??
-              false,
+          (event) => FramePhaseType.build.isMatchForEventName(event.name),
         )
         .cast<SyncTimelineEvent>();
     return FramePhase.build(events: buildEvents);
@@ -61,15 +58,12 @@ class FrameAnalysis {
     final uiEvent = frame.timelineEventData.uiEvent;
     if (uiEvent != null) {
       final layoutEvent = uiEvent.firstChildWithCondition(
-        (event) =>
-            event.name
-                ?.caseInsensitiveEquals(FramePhaseType.layout.eventName) ??
-            false,
+        (event) => FramePhaseType.layout.isMatchForEventName(event.name),
       );
 
       if (layoutEvent != null) {
         final buildChildren = layoutEvent.shallowNodesWithCondition(
-          (event) => event.name == FramePhaseType.build.eventName,
+          (event) => FramePhaseType.build.isMatchForEventName(event.name),
         );
         final buildDuration = buildChildren.fold<Duration>(
           Duration.zero,
@@ -98,9 +92,7 @@ class FrameAnalysis {
       return FramePhase.paint(events: <SyncTimelineEvent>[]);
     }
     final paintEvent = uiEvent.firstChildWithCondition(
-      (event) =>
-          event.name?.caseInsensitiveEquals(FramePhaseType.paint.eventName) ??
-          false,
+      (event) => FramePhaseType.paint.isMatchForEventName(event.name),
     );
     return FramePhase.paint(
       events: <SyncTimelineEvent>[
@@ -244,22 +236,41 @@ enum FramePhaseType {
 
   static const _buildEventName = 'Build';
 
-  static const _layoutEventName = 'Layout';
+  static const _layoutEventName = 'Layout (root)';
 
-  static const _paintEventName = 'Paint';
+  static const _layoutEventNameLegacy = 'Layout';
+
+  static const _paintEventName = 'Paint (root)';
+
+  static const _paintEventNameLegacy = 'Paint';
 
   static const _rasterEventName = 'Raster';
 
-  String get eventName {
+  String get display {
     switch (this) {
       case build:
         return _buildEventName;
       case layout:
-        return _layoutEventName;
+        return _layoutEventNameLegacy;
       case paint:
-        return _paintEventName;
+        return _paintEventNameLegacy;
       case raster:
         return _rasterEventName;
+    }
+  }
+
+  bool isMatchForEventName(String? eventName) {
+    switch (this) {
+      case build:
+        return _buildEventName.caseInsensitiveEquals(eventName);
+      case layout:
+        return _layoutEventName.caseInsensitiveEquals(eventName) ||
+            _layoutEventNameLegacy.caseInsensitiveEquals(eventName);
+      case paint:
+        return _paintEventName.caseInsensitiveEquals(eventName) ||
+            _paintEventNameLegacy.caseInsensitiveEquals(eventName);
+      case raster:
+        throw StateError('Raster events should not be matched by event name');
     }
   }
 }
@@ -269,7 +280,7 @@ class FramePhase {
     required this.type,
     required this.events,
     Duration? duration,
-  })  : title = type.eventName,
+  })  : title = type.display,
         duration = duration ??
             events.fold<Duration>(Duration.zero, (previous, event) {
               return previous + event.time.duration;

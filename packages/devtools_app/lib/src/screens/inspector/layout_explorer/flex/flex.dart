@@ -281,7 +281,7 @@ class FlexLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
               padding: const EdgeInsets.all(4.0),
               child: Text(
                 'Total Flex Factor: ${propertiesLocal.totalFlex.toInt()}',
-                textScaleFactor: largeTextScaleFactor,
+                textScaler: const TextScaler.linear(largeTextScaleFactor),
                 style: const TextStyle(
                   color: emphasizedTextColor,
                   fontWeight: FontWeight.bold,
@@ -321,7 +321,7 @@ class FlexLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
                       propertiesLocal.verticalDirectionDescription,
                       overflow: TextOverflow.ellipsis,
                       textAlign: TextAlign.center,
-                      textScaleFactor: largeTextScaleFactor,
+                      textScaler: const TextScaler.linear(largeTextScaleFactor),
                       style: TextStyle(
                         color: verticalTextColor(colorScheme),
                       ),
@@ -356,7 +356,7 @@ class FlexLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
                     propertiesLocal.horizontalDirectionDescription,
                     overflow: TextOverflow.ellipsis,
                     textAlign: TextAlign.center,
-                    textScaleFactor: largeTextScaleFactor,
+                    textScaler: const TextScaler.linear(largeTextScaleFactor),
                     style: TextStyle(color: horizontalTextColor(colorScheme)),
                   ),
                 ),
@@ -689,7 +689,7 @@ class FlexChildVisualizer extends StatelessWidget {
               maxLines: 2,
               softWrap: true,
               overflow: TextOverflow.ellipsis,
-              textScaleFactor: smallTextScaleFactor,
+              textScaler: const TextScaler.linear(smallTextScaleFactor),
               textAlign: TextAlign.center,
             ),
           _buildFlexFitChangerDropdown(),

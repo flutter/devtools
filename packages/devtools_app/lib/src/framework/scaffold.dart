@@ -16,7 +16,6 @@ import '../shared/console/widgets/console_pane.dart';
 import '../shared/framework_controller.dart';
 import '../shared/globals.dart';
 import '../shared/primitives/auto_dispose.dart';
-import '../shared/primitives/simple_items.dart';
 import '../shared/routing.dart';
 import '../shared/screen.dart';
 import '../shared/split.dart';
@@ -42,7 +41,7 @@ class DevToolsScaffold extends StatefulWidget {
     this.page,
     List<Widget>? actions,
     this.embed = false,
-  })  : actions = actions ?? defaultActions(),
+  })  : actions = actions ?? defaultActions(isEmbedded: embed),
         super(key: key);
 
   DevToolsScaffold.withChild({
@@ -57,11 +56,15 @@ class DevToolsScaffold extends StatefulWidget {
           embed: embed,
         );
 
-  static List<Widget> defaultActions() => const [
-        OpenSettingsAction(),
-        ReportFeedbackButton(),
-        ImportToolbarAction(),
-        OpenAboutAction(),
+  static List<Widget> defaultActions({
+    required bool isEmbedded,
+    Color? color,
+  }) =>
+      [
+        OpenSettingsAction(color: color),
+        ReportFeedbackButton(color: color),
+        if (!isEmbedded) ImportToolbarAction(color: color),
+        OpenAboutAction(color: color),
       ];
 
   /// The padding around the content in the DevTools UI.
@@ -112,13 +115,12 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
 
   late ImportController _importController;
 
-  late String scaffoldTitle;
-
   @override
   void initState() {
     super.initState();
 
-    _initTitle();
+    addAutoDisposeListener(devToolsTitle);
+
     _setupTabController();
 
     addAutoDisposeListener(offlineController.offlineMode);
@@ -140,8 +142,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
             widget.screens.indexOf(oldWidget.screens[_tabController!.index]);
       }
       // Create a new tab controller to reflect the changed tabs.
-      _setupTabController();
-      _tabController!.index = newIndex;
+      _setupTabController(startingIndex: newIndex);
     } else if (widget.screens[_tabController!.index].screenId != widget.page) {
       // If the page changed (eg. the route was modified by pressing back in the
       // browser), animate to the new one.
@@ -168,18 +169,13 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
     super.dispose();
   }
 
-  void _initTitle() {
-    scaffoldTitle = devToolsTitle.value;
-    addAutoDisposeListener(devToolsTitle, () {
-      setState(() {
-        scaffoldTitle = devToolsTitle.value;
-      });
-    });
-  }
-
-  void _setupTabController() {
+  void _setupTabController({int startingIndex = 0}) {
     _tabController?.dispose();
-    _tabController = TabController(length: widget.screens.length, vsync: this);
+    _tabController = TabController(
+      initialIndex: startingIndex,
+      length: widget.screens.length,
+      vsync: this,
+    );
 
     if (widget.page != null) {
       final initialIndex =
@@ -313,65 +309,58 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
 
         return DragAndDrop(
           handleDrop: _importController.importData,
-          child: Title(
-            title: scaffoldTitle,
-            // Color is a required parameter but the color only appears to
-            // matter on Android and we do not care about Android.
-            // Using theme.primaryColor matches the default behavior of the
-            // title used by [WidgetsApp].
-            color: theme.primaryColor.withAlpha(255),
-            child: KeyboardShortcuts(
-              keyboardShortcuts: _currentScreen.buildKeyboardShortcuts(
-                context,
-              ),
-              child: Scaffold(
-                appBar: widget.embed
-                    ? null
-                    : PreferredSize(
-                        preferredSize: Size.fromHeight(defaultToolbarHeight),
-                        // Place the AppBar inside of a Hero widget to keep it the same across
-                        // route transitions.
-                        child: Hero(
-                          tag: _appBarTag,
-                          child: DevToolsAppBar(
-                            tabController: _tabController,
-                            title: scaffoldTitle,
-                            screens: widget.screens,
-                            actions: widget.actions,
-                          ),
+          child: KeyboardShortcuts(
+            keyboardShortcuts: _currentScreen.buildKeyboardShortcuts(
+              context,
+            ),
+            child: Scaffold(
+              appBar: widget.embed
+                  ? null
+                  : PreferredSize(
+                      preferredSize: Size.fromHeight(defaultToolbarHeight),
+                      // Place the AppBar inside of a Hero widget to keep it the same across
+                      // route transitions.
+                      child: Hero(
+                        tag: _appBarTag,
+                        child: DevToolsAppBar(
+                          tabController: _tabController,
+                          screens: widget.screens,
+                          actions: widget.actions,
                         ),
                       ),
-                body: OutlineDecoration.onlyTop(
-                  child: Padding(
-                    padding: widget.appPadding,
-                    child: showConsole
-                        ? Split(
-                            axis: Axis.vertical,
-                            splitters: [
-                              ConsolePaneHeader(
-                                backgroundColor: theme.colorScheme.surface,
+                    ),
+              body: OutlineDecoration.onlyTop(
+                child: Padding(
+                  padding: widget.appPadding,
+                  child: showConsole
+                      ? Split(
+                          axis: Axis.vertical,
+                          splitters: [
+                            ConsolePaneHeader(
+                              backgroundColor: theme.colorScheme.surface,
+                            ),
+                          ],
+                          initialFractions: const [0.8, 0.2],
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.only(
+                                bottom: intermediateSpacing,
                               ),
-                            ],
-                            initialFractions: const [0.8, 0.2],
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.only(
-                                  bottom: intermediateSpacing,
-                                ),
-                                child: content,
-                              ),
-                              RoundedOutlinedBorder.onlyBottom(
-                                child: const ConsolePane(),
-                              ),
-                            ],
-                          )
-                        : content,
-                  ),
+                              child: content,
+                            ),
+                            RoundedOutlinedBorder.onlyBottom(
+                              child: const ConsolePane(),
+                            ),
+                          ],
+                        )
+                      : content,
                 ),
-                bottomNavigationBar: StatusLine(
-                  currentScreen: _currentScreen,
-                  isEmbedded: widget.embed,
-                ),
+              ),
+              bottomNavigationBar: StatusLine(
+                currentScreen: _currentScreen,
+                isEmbedded: widget.embed,
+                isConnected: serviceManager.hasConnection &&
+                    serviceManager.connectedAppInitialized,
               ),
             ),
           ),

@@ -39,7 +39,10 @@ void main() {
         .thenReturn(false);
     when(fakeServiceManager.connectedApp!.isDartWebApp)
         .thenAnswer((_) => Future.value(false));
-    setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
+    setGlobal(
+      DevToolsEnvironmentParameters,
+      ExternalDevToolsEnvironmentParameters(),
+    );
     setGlobal(ServiceConnectionManager, fakeServiceManager);
     setGlobal(PreferencesController, PreferencesController());
     setGlobal(OfflineModeController, OfflineModeController());

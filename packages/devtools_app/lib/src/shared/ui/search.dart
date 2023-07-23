@@ -406,7 +406,7 @@ class AutoCompleteState extends State<AutoComplete> with AutoDisposeMixin {
       width: isMaxWidth
           ? box.size.width
           : AutoCompleteSearchControllerMixin.minPopupWidth,
-      height: bottom ? null : count * tileEntryHeight,
+      height: count * tileEntryHeight,
       child: CompositedTransformFollower(
         link: controller.autoCompleteLayerLink,
         showWhenUnlinked: false,
@@ -417,7 +417,6 @@ class AutoCompleteState extends State<AutoComplete> with AutoDisposeMixin {
           child: TextFieldTapRegion(
             child: ListView(
               padding: EdgeInsets.zero,
-              shrinkWrap: true,
               itemExtent: tileEntryHeight,
               children: autoCompleteTiles,
             ),
