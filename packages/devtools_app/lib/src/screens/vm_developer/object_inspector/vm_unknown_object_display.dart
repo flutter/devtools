@@ -9,6 +9,7 @@ import '../vm_developer_common_widgets.dart';
 import 'object_inspector_view_controller.dart';
 import 'vm_object_model.dart';
 
+/// Displays basic properties about an VM service object of an unknown type.
 class VmUnknownObjectDisplay extends StatelessWidget {
   const VmUnknownObjectDisplay({
     super.key,
@@ -22,38 +23,20 @@ class VmUnknownObjectDisplay extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return OutlineDecoration.onlyBottom(
-      child: _UnknownObjectViewer(
+      child: VmObjectDisplayBasicLayout(
         controller: controller,
         object: object,
+        generalDataRows: [
+          serviceObjectLinkBuilderMapEntry(
+            controller: controller,
+            key: 'Object Class',
+            object: object.obj.classRef!,
+          ),
+          shallowSizeRowBuilder(object),
+          reachableSizeRowBuilder(object),
+          retainedSizeRowBuilder(object),
+        ],
       ),
-    );
-  }
-}
-
-class _UnknownObjectViewer extends StatelessWidget {
-  const _UnknownObjectViewer({
-    required this.controller,
-    required this.object,
-  });
-
-  final ObjectInspectorViewController controller;
-  final UnknownObject object;
-
-  @override
-  Widget build(BuildContext context) {
-    return VmObjectDisplayBasicLayout(
-      controller: controller,
-      object: object,
-      generalDataRows: [
-        serviceObjectLinkBuilderMapEntry(
-          controller: controller,
-          key: 'Object Class',
-          object: object.obj.classRef!,
-        ),
-        shallowSizeRowBuilder(object),
-        reachableSizeRowBuilder(object),
-        retainedSizeRowBuilder(object),
-      ],
     );
   }
 }

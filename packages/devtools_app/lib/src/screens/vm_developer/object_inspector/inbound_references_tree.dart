@@ -26,7 +26,6 @@ class InboundReferencesTreeNode extends TreeNode<InboundReferencesTreeNode> {
   @override
   bool get isExpandable => ref.source != null;
 
-  // TODO(bkonyi):
   late final String description = _inboundRefDescription(ref, null);
 
   /// Wrapper to get the name of an ObjRef depending on its type.
