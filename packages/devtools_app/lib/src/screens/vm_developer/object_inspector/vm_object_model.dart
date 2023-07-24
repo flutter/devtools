@@ -11,6 +11,7 @@ import '../../../shared/diagnostics/primitives/source_location.dart';
 import '../../../shared/globals.dart';
 import '../../../shared/primitives/utils.dart';
 import '../vm_service_private_extensions.dart';
+import 'inbound_references_tree.dart';
 import 'vm_code_display.dart';
 
 /// Wrapper class for storing Dart VM objects with their relevant VM
@@ -56,9 +57,10 @@ abstract class VmObject {
   ValueListenable<RetainingPath?> get retainingPath => _retainingPath;
   final _retainingPath = ValueNotifier<RetainingPath?>(null);
 
-  ValueListenable<InboundReferences?> get inboundReferences =>
-      _inboundReferences;
-  final _inboundReferences = ValueNotifier<InboundReferences?>(null);
+  ValueListenable<List<InboundReferencesTreeNode>> get inboundReferencesTree =>
+      _inboundReferencesTree;
+  final _inboundReferencesTree =
+      ListValueNotifier<InboundReferencesTreeNode>([]);
 
   @mustCallSuper
   Future<void> initialize() async {
@@ -100,9 +102,32 @@ abstract class VmObject {
         await _service.getRetainingPath(_isolate!.id!, ref.id!, 100);
   }
 
+  /// Retrieves the root set of inbound references to the current object.
   Future<void> requestInboundsRefs() async {
-    _inboundReferences.value =
-        await _service.getInboundReferences(_isolate!.id!, ref.id!, 100);
+    final inboundRefs = await _service.getInboundReferences(
+      _isolate!.id!,
+      ref.id!,
+      100,
+    );
+    _inboundReferencesTree.addAll(
+      InboundReferencesTreeNode.buildTreeRoots(inboundRefs),
+    );
+  }
+
+  /// Expands an [InboundReferencesTreeNode] by retrieving the inbound
+  /// references for the `source` that references the current node.
+  Future<void> expandInboundRef(InboundReferencesTreeNode node) async {
+    final isolate = serviceManager.isolateManager.selectedIsolate.value!;
+    final service = serviceManager.service!;
+    final inboundRefs = await service.getInboundReferences(
+      isolate.id!,
+      node.ref.source!.id!,
+      100,
+    );
+    node.addAllChildren(
+      InboundReferencesTreeNode.buildTreeRoots(inboundRefs),
+    );
+    _inboundReferencesTree.notifyListeners();
   }
 }
 
@@ -389,4 +414,19 @@ class WeakArrayObject extends VmListObject {
 
   @override
   List<Response?>? get elementsAsList => obj.asWeakArray.elements;
+}
+
+/// Catch-all for VM internal types that don't have a particularly interesting
+/// set of properties but are reachable through the service protocol.
+class UnknownObject extends VmObject {
+  UnknownObject({required super.ref, super.scriptRef});
+
+  @override
+  SourceLocation? get _sourceLocation => null;
+
+  @override
+  String? get name => obj.classRef!.name;
+
+  @override
+  Obj get obj => _obj;
 }
