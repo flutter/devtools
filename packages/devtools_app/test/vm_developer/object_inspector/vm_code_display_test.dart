@@ -5,6 +5,7 @@
 import 'dart:math';
 
 import 'package:devtools_app/devtools_app.dart';
+import 'package:devtools_app/src/screens/vm_developer/object_inspector/inbound_references_tree.dart';
 import 'package:devtools_app/src/screens/vm_developer/object_inspector/vm_code_display.dart';
 import 'package:devtools_app/src/shared/table/table.dart';
 import 'package:devtools_test/devtools_test.dart';
@@ -87,8 +88,8 @@ void main() {
       when(mockCodeObject.retainingPath).thenReturn(
         const FixedValueListenable<RetainingPath?>(null),
       );
-      when(mockCodeObject.inboundReferences).thenReturn(
-        const FixedValueListenable<InboundReferences?>(null),
+      when(mockCodeObject.inboundReferencesTree).thenReturn(
+        const FixedValueListenable<List<InboundReferencesTreeNode>>([]),
       );
       when(mockCodeObject.fetchingReachableSize).thenReturn(
         const FixedValueListenable<bool>(false),

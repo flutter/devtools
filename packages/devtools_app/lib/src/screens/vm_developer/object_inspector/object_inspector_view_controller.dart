@@ -133,7 +133,7 @@ class ObjectInspectorViewController extends DisposableController
     ObjRef objRef, {
     ScriptRef? scriptRef,
   }) async {
-    VmObject? object;
+    VmObject object;
     if (objRef is ClassRef) {
       object = ClassObject(
         ref: objRef,
@@ -183,9 +183,13 @@ class ObjectInspectorViewController extends DisposableController
       object = WeakArrayObject(
         ref: objRef,
       );
+    } else {
+      object = UnknownObject(
+        ref: objRef,
+      );
     }
 
-    await object?.initialize();
+    await object.initialize();
 
     return object;
   }
