@@ -127,6 +127,7 @@ class GeneralVMStatisticsWidget extends StatelessWidget {
     return OutlineDecoration(
       child: VMInfoCard(
         title: 'VM',
+        roundedTopBorder: false,
         rowKeyValues: [
           selectableTextBuilderMapEntry('Name', vm?.name),
           selectableTextBuilderMapEntry('Version', vm?.version),
@@ -172,6 +173,7 @@ class ProcessStatisticsWidget extends StatelessWidget {
       showTop: false,
       child: VMInfoCard(
         title: 'Process',
+        roundedTopBorder: false,
         rowKeyValues: [
           selectableTextBuilderMapEntry('PID', vm?.pid?.toString()),
           selectableTextBuilderMapEntry(
@@ -306,6 +308,7 @@ class IsolatesPreviewWidget extends StatelessWidget {
       showTop: !systemIsolates,
       child: VMInfoCard(
         title: '$title (${isolates.length})',
+        roundedTopBorder: false,
         table: Flexible(
           child: FlatTable<Isolate>(
             keyFactory: (Isolate i) => ValueKey<String>(i.id!),
