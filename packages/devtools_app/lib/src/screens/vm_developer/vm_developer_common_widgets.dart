@@ -592,7 +592,10 @@ class InboundReferencesTree extends StatelessWidget {
             builder: (context, references, _) {
               return TreeView<InboundReferencesTreeNode>(
                 dataRootsListenable: object.inboundReferencesTree,
-                dataDisplayProvider: (node, _) => _displayProvider(theme, node),
+                dataDisplayProvider: (node, _) => InboundReferenceWidget(
+                  controller: controller,
+                  node: node,
+                ),
                 emptyTreeViewBuilder: () {
                   return Padding(
                     padding: EdgeInsets.all(defaultRowHeight / 2),
@@ -610,11 +613,22 @@ class InboundReferencesTree extends StatelessWidget {
       ],
     );
   }
+}
 
-  Widget _displayProvider(
-    ThemeData theme,
-    InboundReferencesTreeNode node,
-  ) {
+/// An entry in a [InboundReferencesTree].
+class InboundReferenceWidget extends StatelessWidget {
+  const InboundReferenceWidget({
+    super.key,
+    required this.controller,
+    required this.node,
+  });
+
+  final ObjectInspectorViewController controller;
+  final InboundReferencesTreeNode node;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final rowContent = <Widget>[
       const Text('Referenced by '),
     ];

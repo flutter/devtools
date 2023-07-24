@@ -28,7 +28,7 @@ class InboundReferencesTreeNode extends TreeNode<InboundReferencesTreeNode> {
 
   late final String description = _inboundRefDescription(ref, null);
 
-  /// Wrapper to get the name of an ObjRef depending on its type.
+  /// Wrapper to get the name of an [ObjRef] depending on its type.
   String? _objectName(ObjRef? objectRef) {
     if (objectRef == null) {
       return null;
@@ -56,7 +56,7 @@ class InboundReferencesTreeNode extends TreeNode<InboundReferencesTreeNode> {
   }
 
   String _parentListElementDescription(int listIndex, ObjRef? obj) {
-    final parentListName = _instanceClassName(obj) ?? '<parentListName>';
+    final parentListName = _instanceClassName(obj) ?? '<parentList>';
     return 'element [$listIndex] of $parentListName';
   }
 
