@@ -57,10 +57,7 @@ class ConsolePane extends StatelessWidget {
     if (serviceManager.connectedApp!.isProfileBuildNow!) {
       footer = null;
     } else {
-      footer = SizedBox(
-        height: consoleLineHeight,
-        child: const ExpressionEvalField(),
-      );
+      footer = const ExpressionEvalField();
     }
 
     return Column(
