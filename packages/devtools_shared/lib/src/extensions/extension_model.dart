@@ -58,10 +58,35 @@ class DevToolsExtensionConfig {
   static const versionKey = 'version';
   static const materialIconCodePointKey = 'materialIconCodePoint';
 
+  /// The package name that this extension is for.
   final String name;
+
+  /// The path that this extension's assets live at.
+  ///
+  /// This location will be in the user's pub cache.
   final String path;
+
+  // TODO(kenz): we might want to add validation to these issue tracker
+  // links to ensure they don't point to the DevTools repo or flutter repo.
+  // If an invalid issue tracker link is provided, we can default to
+  // 'pub.dev/packages/$name'.
+  /// The link to the issue tracker for this DevTools extension.
+  ///
+  /// This should not point to the flutter/devtools or flutter/flutter issue
+  /// trackers, but rather to the issue tracker for the package that provides
+  /// the extension, or to the repo where the extension is developed.
   final String issueTrackerLink;
+
+  /// The version for the DevTools extension.
+  /// 
+  /// This may match the version of the parent package or use a different
+  /// versioning system as decided by the extension author.
   final String version;
+
+  /// The code point for the material icon that will parsed by Flutter's
+  /// [IconData] class for displaying in DevTools.
+  /// 
+  /// This code point should be part of the 'MaterialIcons' font family.
   final int materialIconCodePoint;
 
   Map<String, Object?> toJson() => {

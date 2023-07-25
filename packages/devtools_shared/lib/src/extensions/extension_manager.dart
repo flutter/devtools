@@ -106,7 +106,7 @@ class ExtensionsManager {
   void _resetServedPluginsDir() {
     final buildDirectory = Directory(buildDir);
     if (!buildDirectory.existsSync()) {
-      throw Exception('The build directory does not exist.');
+      throw const FileSystemException('The build directory does not exist.');
     }
 
     // Destroy and recreate the 'devtools_extensions' directory where extension
