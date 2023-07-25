@@ -4,12 +4,12 @@
 
 import 'dart:async';
 
+import 'package:devtools_shared/devtools_extensions.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'example/conditional_screen.dart';
-import 'extensions/extension_model.dart';
 import 'extensions/extension_screen.dart';
 import 'framework/framework_core.dart';
 import 'framework/home_screen.dart';

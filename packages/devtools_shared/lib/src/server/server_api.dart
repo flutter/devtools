@@ -9,6 +9,7 @@ import 'dart:io';
 import 'package:shelf/shelf.dart' as shelf;
 
 import '../devtools_api.dart';
+import '../extensions/extension_manager.dart';
 import 'file_system.dart';
 import 'usage.dart';
 
@@ -27,7 +28,8 @@ class ServerApi {
   ///
   /// To override an API call, pass in a subclass of [ServerApi].
   static FutureOr<shelf.Response> handle(
-    shelf.Request request, [
+    shelf.Request request,
+    ExtensionsManager extensionsManager, [
     ServerApi? api,
   ]) {
     api ??= ServerApi();
@@ -153,6 +155,9 @@ class ServerApi {
         return api.getCompleted(
           json.encode(_devToolsUsage.surveyShownCount),
         );
+
+      // ----- Release notes api. -----
+
       case apiGetLastReleaseNotesVersion:
         return api.getCompleted(
           json.encode(_devToolsUsage.lastReleaseNotesVersion),
@@ -166,6 +171,9 @@ class ServerApi {
         return api.getCompleted(
           json.encode(_devToolsUsage.lastReleaseNotesVersion),
         );
+
+      // ----- App size api. -----
+
       case apiGetBaseAppSizeFile:
         final queryParams = request.requestedUri.queryParameters;
         if (queryParams.containsKey(baseAppSizeFilePropertyName)) {
@@ -196,6 +204,26 @@ class ServerApi {
           'contain a query parameter with the expected key: '
           '$testAppSizeFilePropertyName',
         );
+
+      // ----- Extensions api. -----
+
+      case apiServeAvailableExtensions:
+        final queryParams = request.requestedUri.queryParameters;
+        final rootPath = queryParams[extensionRootPathPropertyName];
+        if (rootPath == null) {
+          return api.badRequest(
+            '$extensionRootPathPropertyName query parameter required',
+          );
+        }
+
+        extensionsManager.serveAvailableExtensions(rootPath);
+        final extensions = extensionsManager.devtoolsExtensions
+            .map((p) => p.toJson())
+            .toList();
+        final result = jsonEncode({extensionsResultPropertyName: extensions});
+
+        return api.getCompleted(result);
+
       default:
         return api.notImplemented();
     }

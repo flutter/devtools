@@ -64,3 +64,12 @@ const String apiGetTestAppSizeFile = '${apiPrefix}getTestAppSizeFile';
 const String baseAppSizeFilePropertyName = 'appSizeBase';
 
 const String testAppSizeFilePropertyName = 'appSizeTest';
+
+/// Serves any available extensions and returns a list of their configurations
+/// to DevTools.
+const String apiServeAvailableExtensions =
+    '${apiPrefix}serveAvailableExtensions';
+
+const extensionRootPathPropertyName = 'rootPath';
+
+const extensionsResultPropertyName = 'extensions';
