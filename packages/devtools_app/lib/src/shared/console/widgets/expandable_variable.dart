@@ -36,7 +36,7 @@ class ExpandableVariable extends StatelessWidget {
     }
     // TODO(kenz): preserve expanded state of tree on switching frames and
     // on stepping.
-    final tree = TreeView<DartObjectNode>(
+    return TreeView<DartObjectNode>(
       dataRootsListenable:
           FixedValueListenable<List<DartObjectNode>>([variable]),
       dataDisplayProvider: dataDisplayProvider ??
@@ -47,12 +47,6 @@ class ExpandableVariable extends StatelessWidget {
       onItemSelected: onItemPressed,
       isSelectable: isSelectable,
     );
-
-    if (isSelectable) {
-      return SelectionArea(child: tree);
-    }
-
-    return tree;
   }
 
   Future<void> onItemPressed(
