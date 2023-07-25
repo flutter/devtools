@@ -21,15 +21,39 @@ const extensionLocation = 'extension/devtools';
 /// `<parent_package_root>/extension/devtools/`.
 const extensionBuildDefault = 'build';
 
+/// Responsible for storing the available DevTools extensions and managing the
+/// content that DevTools server will serve at `build/devtools_extensions`.
+///
+/// When [serveAvailableExtensions] is called, the available extensions will be
+/// looked up using package:extension_discovery, and the available extension's
+/// assets will be copied to the `build/devtools_extensions` directory that
+/// DevTools server is serving.
 class ExtensionsManager {
   ExtensionsManager({required this.buildDir});
 
+  /// The build directory of DevTools that is being served by the DevTools
+  /// server.
   final String buildDir;
 
-  String get servedExtensionsPath => path.join(buildDir, extensionRequestPath);
+  /// The directory path where DevTools extensions are being served by the
+  /// DevTools server.
+  String get _servedExtensionsPath => path.join(buildDir, extensionRequestPath);
 
+  /// The list of available DevTools extensions that are being served by the
+  /// DevTools server.
+  ///
+  /// This list will be cleared and re-populated each time
+  /// [serveAvailableExtensions] is called.
   final devtoolsExtensions = <DevToolsExtensionConfig>[];
 
+  /// Serves any available DevTools extensions for the given [rootPath], where
+  /// [rootPath] is the root for a Dart or Flutter project containing the
+  /// `.dart_tool/` directory.
+  /// 
+  /// This method first looks up the available extensions using
+  /// package:extension_discovery, and the available extension's
+  /// assets will be copied to the `build/devtools_extensions` directory that
+  /// DevTools server is serving.
   void serveAvailableExtensions(String? rootPath) {
     devtoolsExtensions.clear();
 
@@ -54,14 +78,8 @@ class ExtensionsManager {
         final relativeExtensionLocation =
             configAsMap['buildLocation'] as String? ?? 'build';
 
-        // TODO(kenz): this is hacky. Unclear if this will work for windows.
-        var rootWithoutFile = extension.rootUri.toString();
-        if (rootWithoutFile.startsWith('file:///Users')) {
-          rootWithoutFile = rootWithoutFile.replaceFirst('file:///', '/');
-        }
-
         final location = path.join(
-          rootWithoutFile,
+          extension.rootUri.toFilePath(),
           extensionLocation,
           relativeExtensionLocation,
         );
@@ -93,7 +111,7 @@ class ExtensionsManager {
 
     // Destroy and recreate the 'devtools_extensions' directory where extension
     // assets are served.
-    final servedExtensionsDir = Directory(servedExtensionsPath);
+    final servedExtensionsDir = Directory(_servedExtensionsPath);
     if (servedExtensionsDir.existsSync()) {
       servedExtensionsDir.deleteSync(recursive: true);
     }
@@ -104,14 +122,16 @@ class ExtensionsManager {
     String extensionPackageName,
     String extensionPath,
   ) {
-    final newExtensionPath =
-        path.join(servedExtensionsPath, extensionPackageName);
+    final newExtensionPath = path.join(
+      _servedExtensionsPath,
+      extensionPackageName,
+    );
     copyPathSync(extensionPath, newExtensionPath);
   }
 }
 
 /// TODO(kenz): remove this class. This is copied from
-/// package:extension_discovery, which is drafed here: 
+/// package:extension_discovery, which is drafed here:
 /// https://github.com/dart-lang/tools/pull/129. Remove this temporary copy once
 /// package:extension_discovery is published.
 class _Extension {
