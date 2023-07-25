@@ -64,7 +64,7 @@ class ExtensionsManager {
       //   'devtools',
       //   packageConfig: '$rootPath/.dart_tool/package_config.json',
       // );
-      final extensions = <Extension>[];
+      final extensions = <_Extension>[];
       for (final extension in extensions) {
         final config = extension.config;
         if (config is! Map) {
