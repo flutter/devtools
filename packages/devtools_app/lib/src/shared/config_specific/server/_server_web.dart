@@ -8,6 +8,7 @@ import 'dart:convert';
 // ignore: avoid_web_libraries_in_flutter, as designed
 import 'dart:html';
 
+import 'package:collection/collection.dart';
 import 'package:devtools_shared/devtools_extensions.dart';
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:logging/logging.dart';
@@ -351,6 +352,7 @@ Future<List<DevToolsExtensionConfig>> refreshAvailableExtensions(
       final parsedResult = json.decode(resp!.responseText!);
       final extensionsAsJson =
           (parsedResult[extensionsResultPropertyName]! as List<Object?>)
+              .whereNotNull()
               .cast<Map<String, Object?>>();
       return extensionsAsJson
           .map((p) => DevToolsExtensionConfig.parse(p))

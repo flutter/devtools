@@ -216,13 +216,13 @@ class ServerApi {
           );
         }
 
-        extensionsManager.serveAvailableExtensions(rootPath);
-        final extensions = extensionsManager.devtoolsExtensions
-            .map((p) => p.toJson())
-            .toList();
-        final result = jsonEncode({extensionsResultPropertyName: extensions});
-
-        return api.getCompleted(result);
+        return extensionsManager.serveAvailableExtensions(rootPath).then((_) {
+          final extensions = extensionsManager.devtoolsExtensions
+              .map((p) => p.toJson())
+              .toList();
+          final result = jsonEncode({extensionsResultPropertyName: extensions});
+          return api!.getCompleted(result);
+        });
 
       default:
         return api.notImplemented();

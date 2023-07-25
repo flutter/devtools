@@ -49,12 +49,12 @@ class ExtensionsManager {
   /// Serves any available DevTools extensions for the given [rootPath], where
   /// [rootPath] is the root for a Dart or Flutter project containing the
   /// `.dart_tool/` directory.
-  /// 
+  ///
   /// This method first looks up the available extensions using
   /// package:extension_discovery, and the available extension's
   /// assets will be copied to the `build/devtools_extensions` directory that
   /// DevTools server is serving.
-  void serveAvailableExtensions(String? rootPath) {
+  Future<void> serveAvailableExtensions(String? rootPath) async {
     devtoolsExtensions.clear();
 
     if (rootPath != null) {
@@ -98,9 +98,10 @@ class ExtensionsManager {
     }
 
     _resetServedPluginsDir();
-    for (final extension in devtoolsExtensions) {
-      _moveToServedExtensionsDir(extension.name, extension.path);
-    }
+    await Future.wait([
+      for (final extension in devtoolsExtensions)
+        _moveToServedExtensionsDir(extension.name, extension.path),
+    ]);
   }
 
   void _resetServedPluginsDir() {
@@ -118,15 +119,15 @@ class ExtensionsManager {
     servedExtensionsDir.createSync();
   }
 
-  void _moveToServedExtensionsDir(
+  Future<void> _moveToServedExtensionsDir(
     String extensionPackageName,
     String extensionPath,
-  ) {
+  ) async {
     final newExtensionPath = path.join(
       _servedExtensionsPath,
       extensionPackageName,
     );
-    copyPathSync(extensionPath, newExtensionPath);
+    await copyPath(extensionPath, newExtensionPath);
   }
 }
 
