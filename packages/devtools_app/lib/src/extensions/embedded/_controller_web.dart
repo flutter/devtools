@@ -8,6 +8,7 @@ import 'dart:html' as html;
 import 'dart:ui' as ui;
 
 import 'package:devtools_extensions/api.dart';
+import 'package:path/path.dart' as path;
 
 import 'controller.dart';
 
@@ -32,8 +33,12 @@ class EmbeddedExtensionControllerImpl extends EmbeddedExtensionController {
   late final viewId = 'ext-${extensionConfig.name}-${_viewIdIncrementer++}';
 
   String get extensionUrl {
-    // TODO(kenz): load the extension url being served by devtools server.
-    return 'https://flutter.dev/';
+    return path.join(
+      html.window.location.origin,
+      'devtools_extensions',
+      extensionConfig.name,
+      'index.html',
+    );
   }
 
   html.IFrameElement get extensionIFrame => _extensionIFrame;

@@ -323,7 +323,7 @@ class ServiceConnectionManager {
     }
 
     if (FeatureFlags.devToolsExtensions) {
-      extensionService.initialize();
+      await extensionService.initialize();
     }
 
     _connectedState.value = const ConnectedState(true);
@@ -538,6 +538,23 @@ class ServiceConnectionManager {
     assert(_serviceAvailable.isCompleted);
     await whenValueNonNull(isolateManager.mainIsolate);
     return libraryUriAvailableNow(uri);
+  }
+
+  Future<String?> rootLibraryForSelectedIsolate() async {
+    if (!connectedState.value.connected) return null;
+
+    final selectedIsolateRef = isolateManager.mainIsolate.value?.id;
+    if (selectedIsolateRef == null) return null;
+
+    final selectedIsolate = await service!.getIsolate(selectedIsolateRef);
+    final rootLib = selectedIsolate.rootLib?.uri;
+    if (rootLib == null) return null;
+
+    await resolvedUriManager.fetchFileUris(selectedIsolateRef, [rootLib]);
+    return resolvedUriManager.lookupFileUri(
+      selectedIsolateRef,
+      rootLib,
+    );
   }
 }
 
