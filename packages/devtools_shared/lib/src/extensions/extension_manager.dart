@@ -110,59 +110,20 @@ class ExtensionsManager {
   }
 }
 
-/// Mark copied from package:extension_discovery. Remove once it is published.
-
-/// Information about an extension for target package.
-class Extension {
-  Extension._({
+/// TODO(kenz): remove this class. This is copied from
+/// package:extension_discovery, which is drafed here: 
+/// https://github.com/dart-lang/tools/pull/129. Remove this temporary copy once
+/// package:extension_discovery is published.
+class _Extension {
+  _Extension._({
     required this.package,
     required this.rootUri,
     required this.packageUri,
     required this.config,
   });
 
-  /// Name of the package providing an extension.
   final String package;
-
-  /// Absolute path to the package root.
-  ///
-  /// This folder usually contains a `lib/` folder and a `pubspec.yaml`
-  /// (assuming dependencies are fetched using the pub package manager).
-  ///
-  /// **Examples:** If `foo` is installed in pub-cache this would be:
-  ///  * `/home/my_user/.pub-cache/hosted/pub.dev/foo-1.0.0/`
-  ///
-  /// See `rootUri` in the [specification for `package_config.json`][1],
-  /// for details.
-  ///
-  /// [1]: https://github.com/dart-lang/language/blob/main/accepted/2.8/language-versioning/package-config-file-v2.md
   final Uri rootUri;
-
-  /// Path to the library import path relative to [rootUri].
-  ///
-  /// In Dart code the `package:<package>/<path>` will be resolved as
-  /// `<rootUri>/<packageUri>/<path>`.
-  ///
-  /// If dependencies are installed using `dart pub`, then this is
-  /// **always** `lib/`.
-  ///
-  /// See `packageUri` in the [specification for `package_config.json`][1],
-  /// for details.
-  ///
-  /// [1]: https://github.com/dart-lang/language/blob/main/accepted/2.8/language-versioning/package-config-file-v2.md
   final Uri packageUri;
-
-  /// Contents of `extension/<targetPackage>/config.json` parsed as JSON.
-  ///
-  /// If parsing JSON from this file failed, then no [Extension] entry
-  /// will exist.
-  ///
-  /// This field is always a structure consisting of the following types:
-  ///  * `null`,
-  ///  * [bool] (`true` or `false`),
-  ///  * [String],
-  ///  * [num] ([int] or [double]),
-  ///  * [List<Object?>], and,
-  ///  * [Map<String, Object?>].
   final Object? config;
 }
