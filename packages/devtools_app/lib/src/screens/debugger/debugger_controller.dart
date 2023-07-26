@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:async/async.dart';
 import 'package:collection/collection.dart' show IterableExtension;
+import 'package:dap/dap.dart' as dap;
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:vm_service/vm_service.dart';
@@ -13,9 +14,11 @@ import 'package:vm_service/vm_service.dart';
 import '../../service/vm_service_wrapper.dart';
 import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/analytics/constants.dart' as gac;
+import '../../shared/diagnostics/dap_object_node.dart';
 import '../../shared/diagnostics/dart_object_node.dart';
 import '../../shared/diagnostics/primitives/source_location.dart';
 import '../../shared/diagnostics/tree_builder.dart';
+import '../../shared/feature_flags.dart';
 import '../../shared/globals.dart';
 import '../../shared/primitives/auto_dispose.dart';
 import '../../shared/primitives/message_bus.dart';
@@ -542,9 +545,15 @@ class DebuggerController extends DisposableController
       );
     }
     // Update the variables for the stack frame:
-    serviceManager.appState.setVariables(
-      frame != null ? _createVariablesForFrame(frame.frame) : [],
-    );
+    if (FeatureFlags.dapDebugging) {
+      serviceManager.appState.setDapVariables(
+        frame != null ? await _createDapVariablesForFrame(frame.frame) : [],
+      );
+    } else {
+      serviceManager.appState.setVariables(
+        frame != null ? _createVariablesForFrame(frame.frame) : [],
+      );
+    }
     // Notify that the stack frame has been succesfully selected:
     _selectedStackFrame.value = frame;
   }
@@ -569,6 +578,65 @@ class DebuggerController extends DisposableController
       ..forEach((v) => unawaited(buildVariablesTree(v)))
       ..sort((a, b) => sortFieldsByName(a.name!, b.name!));
     return variables;
+  }
+
+  Future<List<DapObjectNode>> _createDapVariablesForFrame(Frame frame) async {
+    // TODO(https://github.com/flutter/devtools/issues/6056): Use DAP for all
+    // frames instead of translating between the current VM service frame and
+    // the corresponding DAP frame.
+    final dapFrame = await _fetchDapFrame(frame);
+    final frameId = dapFrame?.id;
+    if (frameId == null) return [];
+
+    final dapObjectNodes = <DapObjectNode>[];
+
+    final scopes = await _fetchDapScopes(frameId);
+    for (final scope in scopes) {
+      final variables = await _fetchDapVariables(scope.variablesReference);
+      for (final variable in variables) {
+        final node = DapObjectNode(variable: variable, service: _service);
+        await node.fetchChildren();
+        dapObjectNodes.add(node);
+      }
+    }
+
+    return dapObjectNodes;
+  }
+
+  Future<dap.StackFrame?> _fetchDapFrame(Frame vmFrame) async {
+    final isolateNumber =
+        serviceManager.isolateManager.selectedIsolate.value?.number;
+    final frameIndex = vmFrame.index;
+    if (isolateNumber == null || frameIndex == null) return null;
+
+    final stackTraceResponse = await _service.dapStackTraceRequest(
+      dap.StackTraceArguments(
+        // The DAP thread ID is equivalent to the VM isolate number. See:
+        // https://github.com/dart-lang/sdk/commit/95e6f1e1107ac3f494ca3dc97ffd12cf261313a9
+        threadId: int.parse(isolateNumber),
+        startFrame: frameIndex,
+        levels: 1, // The number of frames to return.
+      ),
+    );
+    return stackTraceResponse?.stackFrames.first;
+  }
+
+  Future<List<dap.Scope>> _fetchDapScopes(int frameId) async {
+    final scopesResponse = await _service.dapScopesRequest(
+      dap.ScopesArguments(
+        frameId: frameId,
+      ),
+    );
+    return scopesResponse?.scopes ?? [];
+  }
+
+  Future<List<dap.Variable>> _fetchDapVariables(int variablesReference) async {
+    final variablesResponse = await _service.dapVariablesRequest(
+      dap.VariablesArguments(
+        variablesReference: variablesReference,
+      ),
+    );
+    return variablesResponse?.variables ?? [];
   }
 
   List<Frame> _framesForCallStack(

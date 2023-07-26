@@ -5,6 +5,7 @@
 import 'package:devtools_shared/devtools_extensions.dart';
 import 'package:flutter/foundation.dart';
 
+import '../shared/config_specific/server/server.dart' as server;
 import '../shared/globals.dart';
 import '../shared/primitives/auto_dispose.dart';
 
@@ -14,42 +15,40 @@ class ExtensionService extends DisposableController
       _availableExtensions;
   final _availableExtensions = ValueNotifier<List<DevToolsExtensionConfig>>([]);
 
-  void initialize() {
-    addAutoDisposeListener(serviceManager.connectedState, () {
-      _refreshAvailableExtensions();
-    });
+  Future<void> initialize() async {
+    await maybeRefreshExtensions();
+    addAutoDisposeListener(
+      serviceManager.connectedState,
+      maybeRefreshExtensions,
+    );
+
+    // TODO(kenz): we should also refresh the available extensions on some event
+    // from the analysis server that is watching the
+    // .dart_tool/package_config.json file for changes.
   }
 
-  // TODO(kenz): actually look up the available extensions from devtools server,
-  // based on the root path(s) from the available isolate(s).
-  int _count = 0;
-  void _refreshAvailableExtensions() {
-    _availableExtensions.value =
-        debugExtensions.sublist(0, _count++ % (debugExtensions.length + 1));
+  Future<void> maybeRefreshExtensions() async {
+    final appRootPath = await _connectedAppRootPath();
+    if (appRootPath != null) {
+      _availableExtensions.value =
+          await server.refreshAvailableExtensions(appRootPath);
+    }
   }
 }
 
-// TODO(kenz): remove these once the DevTools extensions feature has shipped.
-final List<DevToolsExtensionConfig> debugExtensions = [
-  DevToolsExtensionConfig.parse({
-    DevToolsExtensionConfig.nameKey: 'foo',
-    DevToolsExtensionConfig.issueTrackerKey: 'www.google.com',
-    DevToolsExtensionConfig.versionKey: '1.0.0',
-    DevToolsExtensionConfig.pathKey: '/path/to/foo',
-  }),
-  DevToolsExtensionConfig.parse({
-    DevToolsExtensionConfig.nameKey: 'bar',
-    DevToolsExtensionConfig.issueTrackerKey: 'www.google.com',
-    DevToolsExtensionConfig.versionKey: '2.0.0',
-    DevToolsExtensionConfig.materialIconCodePointKey: 0xe638,
-    DevToolsExtensionConfig.pathKey: '/path/to/bar',
-  }),
-  DevToolsExtensionConfig.parse({
-    DevToolsExtensionConfig.nameKey: 'provider',
-    DevToolsExtensionConfig.issueTrackerKey:
-        'https://github.com/rrousselGit/provider/issues',
-    DevToolsExtensionConfig.versionKey: '3.0.0',
-    DevToolsExtensionConfig.materialIconCodePointKey: 0xe50a,
-    DevToolsExtensionConfig.pathKey: '/path/to/provider',
-  }),
-];
+Future<String?> _connectedAppRootPath() async {
+  var fileUri = await serviceManager.rootLibraryForSelectedIsolate();
+  if (fileUri == null) return null;
+
+  // TODO(kenz): for robustness, consider sending the root library uri to the
+  // server and having the server look for the package folder that contains the
+  // `.dart_tool` directory.
+
+  // Assume that the parent folder of `lib` is the package root.
+  final libDirectoryRegExp = RegExp(r'\/lib\/[^\/.]*.dart');
+  final libDirectoryIndex = fileUri.indexOf(libDirectoryRegExp);
+  if (libDirectoryIndex != -1) {
+    fileUri = fileUri.substring(0, libDirectoryIndex);
+  }
+  return fileUri;
+}
