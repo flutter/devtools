@@ -25,31 +25,43 @@ class DevToolsExtensionConfig {
       codePoint = codePointFromJson as int? ?? defaultCodePoint;
     }
 
-    final name = json[nameKey] as String?;
-    final path = json[pathKey] as String?;
-    final issueTrackerLink = json[issueTrackerKey] as String?;
-    final version = json[versionKey] as String?;
-
-    final nullFields = [
-      if (name == null) nameKey,
-      if (path == null) pathKey,
-      if (issueTrackerLink == null) issueTrackerKey,
-      if (version == null) versionKey,
-    ];
-    if (nullFields.isNotEmpty) {
-      throw StateError(
-        'missing required fields ${nullFields.toString()} in the extension '
-        'config.json',
+    if (json
+        case {
+          nameKey: final String name,
+          pathKey: final String path,
+          issueTrackerKey: final String issueTracker,
+          versionKey: final String version,
+        }) {
+      return DevToolsExtensionConfig._(
+        name: name,
+        path: path,
+        issueTrackerLink: issueTracker,
+        version: version,
+        materialIconCodePoint: codePoint,
       );
+    } else {
+      const requiredKeys = {nameKey, pathKey, issueTrackerKey, versionKey};
+      final diff = requiredKeys.difference(json.keys.toSet());
+      if (diff.isEmpty) {
+        // All the required keys are present, but the value types did not match.
+        final sb = StringBuffer();
+        for (final entry in json.entries) {
+          sb.writeln(
+            '   ${entry.key}: ${entry.value} (${entry.value.runtimeType})',
+          );
+        }
+        throw StateError(
+          'Unexpected value types in the extension config.json. Expected all '
+          'values to be of type String, but one or more had a different type:\n'
+          '${sb.toString()}',
+        );
+      } else {
+        throw StateError(
+          'Missing required fields ${diff.toString()} in the extension '
+          'config.json.',
+        );
+      }
     }
-
-    return DevToolsExtensionConfig._(
-      name: name!,
-      path: path!,
-      issueTrackerLink: issueTrackerLink!,
-      version: version!,
-      materialIconCodePoint: codePoint,
-    );
   }
 
   static const nameKey = 'name';
@@ -78,14 +90,14 @@ class DevToolsExtensionConfig {
   final String issueTrackerLink;
 
   /// The version for the DevTools extension.
-  /// 
+  ///
   /// This may match the version of the parent package or use a different
   /// versioning system as decided by the extension author.
   final String version;
 
   /// The code point for the material icon that will parsed by Flutter's
   /// [IconData] class for displaying in DevTools.
-  /// 
+  ///
   /// This code point should be part of the 'MaterialIcons' font family.
   final int materialIconCodePoint;
 
