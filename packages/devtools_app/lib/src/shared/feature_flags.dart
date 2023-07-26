@@ -74,6 +74,11 @@ abstract class FeatureFlags {
   /// https://github.com/flutter/devtools/issues/1632
   static bool devToolsExtensions = enableExperiments;
 
+  /// Flag to enable debugging via DAP.
+  ///
+  /// https://github.com/flutter/devtools/issues/6056
+  static bool dapDebugging = enableExperiments;
+
   // TODO(elliottbrooks): remove this flag once you add instructions to the
   // web performance page body.
   /// Flag to enable the Performance page for web.
@@ -88,6 +93,7 @@ abstract class FeatureFlags {
   static final _allFlags = <String, bool>{
     'widgetRebuildStats': widgetRebuildstats,
     'memoryAnalysis': memoryAnalysis,
+    'dapDebugging': dapDebugging,
   };
 
   /// A helper to print the status of all the feature flags.
