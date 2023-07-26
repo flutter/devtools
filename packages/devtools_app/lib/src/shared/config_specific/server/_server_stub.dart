@@ -6,6 +6,8 @@
 // ignore_for_file: avoid-unused-parameters
 import 'dart:async';
 
+import 'package:devtools_shared/devtools_extensions.dart';
+
 import '../../primitives/utils.dart';
 
 const unsupportedMessage =
@@ -73,6 +75,12 @@ Future<DevToolsJsonFile?> requestBaseAppSizeFile(String path) async {
 
 Future<DevToolsJsonFile?> requestTestAppSizeFile(String path) async {
   throw Exception(unsupportedMessage);
+}
+
+Future<List<DevToolsExtensionConfig>> refreshAvailableExtensions(
+  String? rootPath,
+) async {
+  return [];
 }
 
 void logWarning() {

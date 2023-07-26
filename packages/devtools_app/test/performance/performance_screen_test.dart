@@ -11,6 +11,7 @@ import 'package:devtools_app/src/screens/performance/panes/flutter_frames/flutte
 import 'package:devtools_app/src/screens/performance/panes/timeline_events/legacy/event_details.dart';
 import 'package:devtools_app/src/screens/performance/panes/timeline_events/legacy/timeline_flame_chart.dart';
 import 'package:devtools_app/src/screens/performance/tabbed_performance_view.dart';
+import 'package:devtools_app/src/shared/feature_flags.dart';
 import 'package:devtools_shared/devtools_test_utils.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
@@ -70,7 +71,9 @@ void main() {
     }) async {
       await tester.pumpWidget(
         wrapWithControllers(
-          const PerformanceScreenBody(),
+          Builder(
+            builder: PerformanceScreen().build,
+          ),
           performance: controller,
         ),
       );
@@ -111,6 +114,8 @@ void main() {
         await tester.runAsync(() async {
           await pumpPerformanceScreen(tester, runAsync: true);
           await tester.pumpAndSettle();
+          expect(find.byType(PerformanceScreenBody), findsOneWidget);
+          expect(find.byType(WebPerformanceScreenBody), findsNothing);
           expect(find.byType(PerformanceControls), findsOneWidget);
           expect(find.byType(FlutterFramesChart), findsOneWidget);
           expect(find.byType(TabbedPerformanceView), findsOneWidget);
@@ -119,6 +124,32 @@ void main() {
             findsOneWidget,
           );
         });
+      },
+    );
+
+    testWidgetsWithWindowSize(
+      'builds initial content for web app',
+      windowSize,
+      (WidgetTester tester) async {
+        setEnableExperiments();
+        mockConnectedApp(
+          fakeServiceManager.connectedApp!,
+          isFlutterApp: false,
+          isProfileBuild: false,
+          isWebApp: true,
+        );
+        await tester.pumpWidget(
+          wrap(
+            Builder(builder: PerformanceScreen().build),
+          ),
+        );
+        await tester.pumpAndSettle();
+        expect(find.byType(PerformanceScreenBody), findsNothing);
+        expect(find.byType(WebPerformanceScreenBody), findsOneWidget);
+        expect(
+          find.text('TODO: add instructions for using Chrome DevTools'),
+          findsOneWidget,
+        );
       },
     );
 

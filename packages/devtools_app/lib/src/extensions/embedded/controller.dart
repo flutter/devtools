@@ -3,9 +3,9 @@
 // found in the LICENSE file.
 
 import 'package:devtools_extensions/api.dart';
+import 'package:devtools_shared/devtools_extensions.dart';
 
 import '../../shared/primitives/auto_dispose.dart';
-import '../extension_model.dart';
 import '_controller_desktop.dart' if (dart.library.html) '_controller_web.dart';
 
 EmbeddedExtensionControllerImpl createEmbeddedExtensionController(
