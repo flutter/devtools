@@ -93,6 +93,9 @@ class VmServiceWrapper implements VmService {
   /// A counter for unique ids to add to each of a future's messages.
   static int _logIdCounter = 0;
 
+  /// A sequence number incremented and attached to each DAP request.
+  static int _dapSeq = 0;
+
   /// Executes `callback` for each isolate, and waiting for all callbacks to
   /// finish before completing.
   Future<void> forEachIsolate(
@@ -1099,58 +1102,40 @@ class VmServiceWrapper implements VmService {
   Future<dap.VariablesResponseBody?> dapVariablesRequest(
     dap.VariablesArguments args,
   ) async {
-    final response = await _sendDapRequest(
-      dap.Request(
-        command: 'variables',
-        seq: 0,
-        arguments: args,
-      ),
-    );
-    final responseBody = response?.dapResponse.body;
-    if (responseBody == null) return null;
+    final response = await _sendDapRequest('variables', args: args);
+    if (response == null) return null;
 
     return dap.VariablesResponseBody.fromJson(
-      responseBody as Map<String, Object?>,
+      response as Map<String, Object?>,
     );
   }
 
   Future<dap.ScopesResponseBody?> dapScopesRequest(
     dap.ScopesArguments args,
   ) async {
-    final response = await _sendDapRequest(
-      dap.Request(
-        command: 'scopes',
-        seq: 0,
-        arguments: args,
-      ),
-    );
-    final responseBody = response?.dapResponse.body;
-    if (responseBody == null) return null;
+    final response = await _sendDapRequest('scopes', args: args);
+    if (response == null) return null;
 
     return dap.ScopesResponseBody.fromJson(
-      responseBody as Map<String, Object?>,
+      response as Map<String, Object?>,
     );
   }
 
   Future<dap.StackTraceResponseBody?> dapStackTraceRequest(
     dap.StackTraceArguments args,
   ) async {
-    final response = await _sendDapRequest(
-      dap.Request(
-        command: 'stackTrace',
-        seq: 0,
-        arguments: args,
-      ),
-    );
-    final responseBody = response?.dapResponse.body;
-    if (responseBody == null) return null;
+    final response = await _sendDapRequest('stackTrace', args: args);
+    if (response == null) return null;
 
     return dap.StackTraceResponseBody.fromJson(
-      responseBody as Map<String, Object?>,
+      response as Map<String, Object?>,
     );
   }
 
-  Future<DapResponse?> _sendDapRequest(dap.Request request) async {
+  Future<Object?> _sendDapRequest(
+    String command, {
+    required Object? args,
+  }) async {
     if (!FeatureFlags.dapDebugging) return null;
 
     // Warn the user if there is no DDS connection.
@@ -1159,12 +1144,28 @@ class VmServiceWrapper implements VmService {
       return null;
     }
 
-    return trackFuture(
-      'dap.${request.command}',
+    final response = await trackFuture(
+      'dap.$command',
       _vmService.sendDapRequest(
-        jsonEncode(request),
+        jsonEncode(
+          dap.Request(
+            command: command,
+            seq: _dapSeq++,
+            arguments: args,
+          ),
+        ),
       ),
     );
+
+    // Log any errors from DAP if the request failed:
+    if (!response.dapResponse.success) {
+      _log.warning(
+        'Error for dap.$command: ${response.dapResponse.message ?? 'Unknown.'}',
+      );
+      return null;
+    }
+
+    return response.dapResponse.body;
   }
 
   /// Prevent DevTools from blocking Dart SDK rolls if changes in

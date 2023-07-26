@@ -117,9 +117,7 @@ class _TreeViewState<T extends TreeNode<T>> extends State<TreeView<T>>
     if (widget.onItemExpanded == null && item.isExpandable) {
       item.toggleExpansion();
     }
-    if (widget.onItemSelected != null) {
-      await widget.onItemSelected!(item);
-    }
+    await widget.onItemExpanded?.call(item);
 
     _updateItems();
   }
