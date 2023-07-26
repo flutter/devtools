@@ -78,7 +78,7 @@ abstract class FeatureFlags {
   ///
   /// https://github.com/flutter/devtools/issues/6056
   static bool dapDebugging = enableExperiments;
-  
+
   // TODO(elliottbrooks): remove this flag once you add instructions to the
   // web performance page body.
   /// Flag to enable the Performance page for web.
