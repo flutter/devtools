@@ -16,7 +16,7 @@ import '../../screen.dart';
 import '../../theme.dart';
 import 'description.dart';
 
-/// The display provider for variables fetching via the VM service protocol.
+/// The display provider for variables fetched via the VM service protocol.
 class DisplayProvider extends StatelessWidget {
   const DisplayProvider({
     super.key,
@@ -177,7 +177,7 @@ class DisplayProvider extends StatelessWidget {
   }
 }
 
-/// The display provider for variables fetching via the Debug Adapter Protocol.
+/// The display provider for variables fetched via the Debug Adapter Protocol.
 class DapDisplayProvider extends StatelessWidget {
   const DapDisplayProvider({
     super.key,
