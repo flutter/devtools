@@ -25,31 +25,27 @@ class DevToolsExtensionConfig {
       codePoint = codePointFromJson as int? ?? defaultCodePoint;
     }
 
-    final name = json[nameKey] as String?;
-    final path = json[pathKey] as String?;
-    final issueTrackerLink = json[issueTrackerKey] as String?;
-    final version = json[versionKey] as String?;
-
-    final nullFields = [
-      if (name == null) nameKey,
-      if (path == null) pathKey,
-      if (issueTrackerLink == null) issueTrackerKey,
-      if (version == null) versionKey,
-    ];
-    if (nullFields.isNotEmpty) {
+    if (json
+        case {
+          nameKey: final String name,
+          pathKey: final String path,
+          issueTrackerKey: final String issueTracker,
+          versionKey: final String version,
+        }) {
+      return DevToolsExtensionConfig._(
+        name: name,
+        path: path,
+        issueTrackerLink: issueTracker,
+        version: version,
+        materialIconCodePoint: codePoint,
+      );
+    } else {
+      final requiredKeys = {nameKey, pathKey, issueTrackerKey, versionKey};
       throw StateError(
-        'missing required fields ${nullFields.toString()} in the extension '
-        'config.json',
+        'Missing required fields ${requiredKeys.difference(json.keys.toSet())} '
+        'in the extension config.json.',
       );
     }
-
-    return DevToolsExtensionConfig._(
-      name: name!,
-      path: path!,
-      issueTrackerLink: issueTrackerLink!,
-      version: version!,
-      materialIconCodePoint: codePoint,
-    );
   }
 
   static const nameKey = 'name';
@@ -78,14 +74,14 @@ class DevToolsExtensionConfig {
   final String issueTrackerLink;
 
   /// The version for the DevTools extension.
-  /// 
+  ///
   /// This may match the version of the parent package or use a different
   /// versioning system as decided by the extension author.
   final String version;
 
   /// The code point for the material icon that will parsed by Flutter's
   /// [IconData] class for displaying in DevTools.
-  /// 
+  ///
   /// This code point should be part of the 'MaterialIcons' font family.
   final int materialIconCodePoint;
 
