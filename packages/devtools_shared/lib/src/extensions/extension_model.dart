@@ -40,11 +40,27 @@ class DevToolsExtensionConfig {
         materialIconCodePoint: codePoint,
       );
     } else {
-      final requiredKeys = {nameKey, pathKey, issueTrackerKey, versionKey};
-      throw StateError(
-        'Missing required fields ${requiredKeys.difference(json.keys.toSet())} '
-        'in the extension config.json.',
-      );
+      const requiredKeys = {nameKey, pathKey, issueTrackerKey, versionKey};
+      final diff = requiredKeys.difference(json.keys.toSet());
+      if (diff.isEmpty) {
+        // All the required keys are present, but the value types did not match.
+        final sb = StringBuffer();
+        for (final entry in json.entries) {
+          sb.writeln(
+            '   ${entry.key}: ${entry.value} (${entry.value.runtimeType})',
+          );
+        }
+        throw StateError(
+          'Unexpected value types in the extension config.json. Expected all '
+          'values to be of type String, but one or more had a different type:\n'
+          '${sb.toString()}',
+        );
+      } else {
+        throw StateError(
+          'Missing required fields ${diff.toString()} in the extension '
+          'config.json.',
+        );
+      }
     }
   }
 

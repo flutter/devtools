@@ -55,6 +55,16 @@ void main() {
     });
 
     test('parse throws when missing a required field', () {
+      Matcher throwsMissingRequiredFieldsError() {
+        return throwsA(
+          isA<StateError>().having(
+            (e) => e.message,
+            'missing required fields StateError',
+            startsWith('Missing required fields'),
+          ),
+        );
+      }
+
       // Missing 'name'.
       expect(
         () {
@@ -64,7 +74,7 @@ void main() {
             'version': '1.0.0',
           });
         },
-        throwsA(isA<StateError>()),
+        throwsMissingRequiredFieldsError(),
       );
 
       // Missing 'path'.
@@ -76,7 +86,7 @@ void main() {
             'version': '1.0.0',
           });
         },
-        throwsA(isA<StateError>()),
+        throwsMissingRequiredFieldsError(),
       );
 
       // Missing 'issueTracker'.
@@ -88,7 +98,7 @@ void main() {
             'version': '1.0.0',
           });
         },
-        throwsA(isA<StateError>()),
+        throwsMissingRequiredFieldsError(),
       );
 
       // Missing 'version'.
@@ -100,7 +110,31 @@ void main() {
             'issueTracker': 'www.google.com',
           });
         },
-        throwsA(isA<StateError>()),
+        throwsMissingRequiredFieldsError(),
+      );
+    });
+
+    test('parse throws when value has unexpected type', () {
+      Matcher throwsUnexpectedValueTypesError() {
+        return throwsA(
+          isA<StateError>().having(
+            (e) => e.message,
+            'unexpected value types StateError',
+            startsWith('Unexpected value types'),
+          ),
+        );
+      }
+
+      expect(
+        () {
+          DevToolsExtensionConfig.parse({
+            'name': 23,
+            'path': 'path/to/foo/extension',
+            'issueTracker': 'www.google.com',
+            'version': '1.0.0',
+          });
+        },
+        throwsUnexpectedValueTypesError(),
       );
     });
   });
