@@ -42,8 +42,7 @@ class PerformanceScreen extends Screen {
 
   @override
   Widget build(BuildContext context) {
-    if (FeatureFlags.performancePageForWeb &&
-        (serviceManager.connectedApp?.isDartWebAppNow ?? false)) {
+    if (serviceManager.connectedApp?.isDartWebAppNow ?? false) {
       return const WebPerformanceScreenBody();
     }
     return const PerformanceScreenBody();
@@ -135,6 +134,60 @@ class WebPerformanceScreenBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Markdown(data: 'This is some markdown');
+    final isFlutterWebApp =
+        serviceManager.connectedApp?.isFlutterWebAppNow ?? false;
+    return Markdown(
+      data: isFlutterWebApp ? flutterWebInstructionsMd : dartWebInstructionsMd,
+      onTapLink: (_, url, __) {
+        if (url != null) {
+          unawaited(
+            launchUrl(
+              Uri.parse(url),
+            ),
+          );
+        }
+      },
+    );
   }
 }
+
+const timelineLink =
+    'https://api.flutter.dev/flutter/dart-developer/Timeline-class.html';
+const timelineTaskLink =
+    'https://api.flutter.dev/flutter/dart-developer/TimelineTask-class.html';
+const debugBuildsLink =
+    'https://api.flutter.dev/flutter/widgets/debugProfileBuildsEnabled.html';
+const profileModeLink = 'https://docs.flutter.dev/testing/build-modes#profile';
+const performancePanelLink =
+    'https://developer.chrome.com/docs/devtools/performance';
+
+const flutterWebInstructionsMd = '''
+# How to use Chrome DevTools for performance profiling
+
+The timeline events emitted by the Flutter framework as it works to build
+frames, draw scenes, and track other activity such as HTTP request timings and
+garbage collection are exposed in the Chrome DevTools performance panel.
+
+You can also emit your own timeline events using the `dart:developer` 
+[Timeline]($timelineLink) and [TimelineTask]($timelineTaskLink) APIs for further
+performance analysis.
+
+## Instructions:
+
+1. *[Optional]* Set [debugProfileBuildsEnabled]($debugBuildsLink) to true to 
+track your app's widget builds.
+2. Run your Flutter web app in [profile mode]($profileModeLink).
+3. Open up the [Chrome DevTools' Performance panel]($performancePanelLink) for
+your application, and start recording to capture timeline events.
+''';
+
+const dartWebInstructionsMd = '''
+# How to use Chrome DevTools for performance profiling
+
+Any events emitted using the `dart:developer` [Timeline]($timelineLink) and 
+[TimelineTask]($timelineTaskLink) APIs are exposed in the Chrome DevTools 
+performance panel.
+
+Open up the [Chrome DevTools' Performance panel]($performancePanelLink) for
+your application, and start recording to capture timeline events.
+''';
