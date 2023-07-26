@@ -135,8 +135,6 @@ class WebPerformanceScreenBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Center(
-      child: Text('TODO: add instructions for using Chrome DevTools'),
-    );
+    return const Markdown(data: 'This is some markdown');
   }
 }
