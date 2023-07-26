@@ -26,6 +26,7 @@ class TreeView<T extends TreeNode<T>> extends StatefulWidget {
     this.emptyTreeViewBuilder,
     this.scrollController,
     this.includeScrollbar = false,
+    this.isSelectable = true,
   });
 
   final ValueListenable<List<T>> dataRootsListenable;
@@ -52,6 +53,8 @@ class TreeView<T extends TreeNode<T>> extends StatefulWidget {
 
   final bool includeScrollbar;
 
+  final bool isSelectable;
+
   @override
   State<TreeView<T>> createState() => _TreeViewState<T>();
 }
@@ -75,8 +78,8 @@ class _TreeViewState<T extends TreeNode<T>> extends State<TreeView<T>>
     if (dataFlatList.isEmpty) return _emptyTreeViewBuilder();
     final content = SizedBox(
       height: dataFlatList.length * defaultTreeViewRowHeight,
-      child: SelectionArea(
-        child: ListView.builder(
+      child: _maybeWrapInSelectionArea(
+        ListView.builder(
           itemCount: dataFlatList.length,
           itemExtent: defaultTreeViewRowHeight,
           physics: const ClampingScrollPhysics(),
@@ -109,6 +112,13 @@ class _TreeViewState<T extends TreeNode<T>> extends State<TreeView<T>>
       return widget.emptyTreeViewBuilder!();
     }
     return const SizedBox();
+  }
+
+  Widget _maybeWrapInSelectionArea(Widget tree) {
+    if (widget.isSelectable) {
+      return SelectionArea(child: tree);
+    }
+    return tree;
   }
 
   // TODO(kenz): animate expansions and collapses.

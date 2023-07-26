@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_shared/devtools_extensions.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -13,7 +14,6 @@ import '../shared/screen.dart';
 import '../shared/theme.dart';
 import 'embedded/controller.dart';
 import 'embedded/view.dart';
-import 'extension_model.dart';
 
 class ExtensionScreen extends Screen {
   ExtensionScreen(this.extensionConfig)
@@ -154,4 +154,11 @@ class EmbeddedExtensionHeader extends StatelessWidget {
       ],
     );
   }
+}
+
+extension ExtensionConfigExtension on DevToolsExtensionConfig {
+  IconData get icon => IconData(
+        materialIconCodePoint,
+        fontFamily: 'MaterialIcons',
+      );
 }

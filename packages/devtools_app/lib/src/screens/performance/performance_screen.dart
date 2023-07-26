@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/banner_messages.dart';
 import '../../shared/common_widgets.dart';
+import '../../shared/feature_flags.dart';
 import '../../shared/globals.dart';
 import '../../shared/primitives/auto_dispose.dart';
 import '../../shared/screen.dart';
@@ -25,7 +26,6 @@ class PerformanceScreen extends Screen {
   PerformanceScreen()
       : super.conditional(
           id: id,
-          requiresDartVm: true,
           worksOffline: true,
           title: ScreenMetaData.performance.title,
           icon: ScreenMetaData.performance.icon,
@@ -37,7 +37,13 @@ class PerformanceScreen extends Screen {
   String get docPageId => id;
 
   @override
-  Widget build(BuildContext context) => const PerformanceScreenBody();
+  Widget build(BuildContext context) {
+    if (FeatureFlags.performancePageForWeb &&
+        (serviceManager.connectedApp?.isDartWebAppNow ?? false)) {
+      return const WebPerformanceScreenBody();
+    }
+    return const PerformanceScreenBody();
+  }
 }
 
 class PerformanceScreenBody extends StatefulWidget {
@@ -116,6 +122,17 @@ class PerformanceScreenBodyState extends State<PerformanceScreenBody>
           ],
         );
       },
+    );
+  }
+}
+
+class WebPerformanceScreenBody extends StatelessWidget {
+  const WebPerformanceScreenBody({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const Center(
+      child: Text('TODO: add instructions for using Chrome DevTools'),
     );
   }
 }

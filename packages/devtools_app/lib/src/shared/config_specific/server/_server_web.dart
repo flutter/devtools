@@ -8,6 +8,8 @@ import 'dart:convert';
 // ignore: avoid_web_libraries_in_flutter, as designed
 import 'dart:html';
 
+import 'package:collection/collection.dart';
+import 'package:devtools_shared/devtools_extensions.dart';
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:logging/logging.dart';
 
@@ -335,6 +337,32 @@ DevToolsJsonFile _devToolsJsonFileFromResponse(
     lastModifiedTime: lastModifiedTime,
     data: data,
   );
+}
+
+Future<List<DevToolsExtensionConfig>> refreshAvailableExtensions(
+  String? rootPath,
+) async {
+  if (isDevToolsServerAvailable) {
+    final uri = Uri(
+      path: apiServeAvailableExtensions,
+      queryParameters: {extensionRootPathPropertyName: rootPath},
+    );
+    final resp = await request(uri.toString());
+    if (resp?.status == HttpStatus.ok) {
+      final parsedResult = json.decode(resp!.responseText!);
+      final extensionsAsJson =
+          (parsedResult[extensionsResultPropertyName]! as List<Object?>)
+              .whereNotNull()
+              .cast<Map<String, Object?>>();
+      return extensionsAsJson
+          .map((p) => DevToolsExtensionConfig.parse(p))
+          .toList();
+    } else {
+      logWarning(resp, apiServeAvailableExtensions);
+      return [];
+    }
+  }
+  return [];
 }
 
 void logWarning(HttpRequest? response, String apiType, [String? respText]) {

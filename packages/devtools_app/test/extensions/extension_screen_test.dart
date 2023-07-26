@@ -4,8 +4,8 @@
 
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/extensions/embedded/view.dart';
-import 'package:devtools_app/src/extensions/extension_model.dart';
 import 'package:devtools_app/src/extensions/extension_screen.dart';
+import 'package:devtools_shared/src/extensions/extension_model.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';

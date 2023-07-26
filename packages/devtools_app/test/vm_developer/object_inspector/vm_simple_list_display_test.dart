@@ -73,7 +73,7 @@ void main() {
 
         expect(find.byType(RequestableSizeWidget), findsNWidgets(2));
         expect(find.byType(RetainingPathWidget), findsOneWidget);
-        expect(find.byType(InboundReferencesWidget), findsOneWidget);
+        expect(find.byType(InboundReferencesTree), findsOneWidget);
         expect(find.byType(ExpansionTileInstanceList), findsOneWidget);
       },
     );
