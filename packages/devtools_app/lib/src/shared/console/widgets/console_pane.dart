@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 
 import '../../common_widgets.dart';
 import '../../globals.dart';
-import '../../theme.dart';
 import '../console.dart';
 import '../console_service.dart';
 import 'evaluate.dart';
