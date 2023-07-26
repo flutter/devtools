@@ -210,6 +210,7 @@ class _ConsoleOutputState extends State<_ConsoleOutput>
               } else if (line is VariableConsoleLine) {
                 return ExpandableVariable(
                   variable: line.variable,
+                  isSelectable: false,
                 );
               } else {
                 assert(
