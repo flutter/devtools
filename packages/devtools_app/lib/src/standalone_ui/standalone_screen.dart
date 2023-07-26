@@ -4,7 +4,9 @@
 
 import 'package:flutter/material.dart';
 
+import 'api/impl/dart_tooling_api.dart';
 import 'vs_code/flutter_panel.dart';
+import 'vs_code/mock_environment/flutter_panel_mock_editor.dart';
 
 /// "Screens" that are intended for standalone use only, likely for embedding
 /// directly in an IDE.
@@ -13,7 +15,8 @@ import 'vs_code/flutter_panel.dart';
 /// meaning that this screen will not be part of DevTools' normal navigation.
 /// The only way to access a standalone screen is directly from the url.
 enum StandaloneScreenType {
-  vsCodeFlutterPanel;
+  vsCodeFlutterPanel,
+  vsCodeFlutterPanelMockEditor;
 
   static StandaloneScreenType? parse(String? id) {
     if (id == null) return null;
@@ -26,7 +29,10 @@ enum StandaloneScreenType {
 
   Widget get screen {
     return switch (this) {
-      StandaloneScreenType.vsCodeFlutterPanel => const VsCodeFlutterPanel(),
+      StandaloneScreenType.vsCodeFlutterPanel =>
+        VsCodeFlutterPanel(DartToolingApiImpl.postMessage()),
+      StandaloneScreenType.vsCodeFlutterPanelMockEditor =>
+        const VsCodeFlutterPanelMockEditor(),
     };
   }
 }
