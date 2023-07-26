@@ -543,16 +543,18 @@ class ServiceConnectionManager {
   Future<String?> rootLibraryForSelectedIsolate() async {
     if (!connectedState.value.connected) return null;
 
-    final selectedIsolateRef = isolateManager.mainIsolate.value?.id;
+    final selectedIsolateRef = isolateManager.mainIsolate.value;
     if (selectedIsolateRef == null) return null;
 
-    final selectedIsolate = await service!.getIsolate(selectedIsolateRef);
-    final rootLib = selectedIsolate.rootLib?.uri;
+    final isolateState = isolateManager.isolateState(selectedIsolateRef);
+    await isolateState.waitForIsolateLoad();
+    final rootLib = isolateState.rootInfo!.library;
     if (rootLib == null) return null;
 
-    await resolvedUriManager.fetchFileUris(selectedIsolateRef, [rootLib]);
+    final selectedIsolateRefId = selectedIsolateRef.id!;
+    await resolvedUriManager.fetchFileUris(selectedIsolateRefId, [rootLib]);
     return resolvedUriManager.lookupFileUri(
-      selectedIsolateRef,
+      selectedIsolateRefId,
       rootLib,
     );
   }

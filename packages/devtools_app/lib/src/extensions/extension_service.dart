@@ -17,9 +17,10 @@ class ExtensionService extends DisposableController
 
   Future<void> initialize() async {
     await maybeRefreshExtensions();
-    addAutoDisposeListener(serviceManager.connectedState, () async {
-      await maybeRefreshExtensions();
-    });
+    addAutoDisposeListener(
+      serviceManager.connectedState,
+      maybeRefreshExtensions,
+    );
 
     // TODO(kenz): we should also refresh the available extensions on some event
     // from the analysis server that is watching the
@@ -29,13 +30,9 @@ class ExtensionService extends DisposableController
   Future<void> maybeRefreshExtensions() async {
     final appRootPath = await _connectedAppRootPath();
     if (appRootPath != null) {
-      await _refreshAvailableExtensions(appRootPath);
+      _availableExtensions.value =
+          await server.refreshAvailableExtensions(appRootPath);
     }
-  }
-
-  Future<void> _refreshAvailableExtensions(String? rootPath) async {
-    final extensions = await server.refreshAvailableExtensions(rootPath);
-    _availableExtensions.value = extensions;
   }
 }
 
@@ -43,8 +40,15 @@ Future<String?> _connectedAppRootPath() async {
   var fileUri = await serviceManager.rootLibraryForSelectedIsolate();
   if (fileUri == null) return null;
 
-  if (fileUri.endsWith('/lib/main.dart')) {
-    fileUri = fileUri.replaceFirst('/lib/main.dart', '');
+  // TODO(kenz): for robustness, consider sending the root library uri to the
+  // server and having the server look for the package folder that contains the
+  // `.dart_tool` directory.
+
+  // Assume that the parent folder of `lib` is the package root.
+  final libDirectoryRegExp = RegExp(r'\/lib\/[^\/.]*.dart');
+  final libDirectoryIndex = fileUri.indexOf(libDirectoryRegExp);
+  if (libDirectoryIndex != -1) {
+    fileUri = fileUri.substring(0, libDirectoryIndex);
   }
   return fileUri;
 }
