@@ -339,26 +339,30 @@ DevToolsJsonFile _devToolsJsonFileFromResponse(
   );
 }
 
+/// Makes a request to the server to refresh the list of available extensions,
+/// serve their assets on the server, and return the list of available
+/// extensions here.
 Future<List<DevToolsExtensionConfig>> refreshAvailableExtensions(
-  String? rootPath,
+  String rootPath,
 ) async {
   if (isDevToolsServerAvailable) {
     final uri = Uri(
-      path: apiServeAvailableExtensions,
-      queryParameters: {extensionRootPathPropertyName: rootPath},
+      path: ExtensionsApi.apiServeAvailableExtensions,
+      queryParameters: {ExtensionsApi.extensionRootPathPropertyName: rootPath},
     );
     final resp = await request(uri.toString());
     if (resp?.status == HttpStatus.ok) {
       final parsedResult = json.decode(resp!.responseText!);
       final extensionsAsJson =
-          (parsedResult[extensionsResultPropertyName]! as List<Object?>)
+          (parsedResult[ExtensionsApi.extensionsResultPropertyName]!
+                  as List<Object?>)
               .whereNotNull()
               .cast<Map<String, Object?>>();
       return extensionsAsJson
           .map((p) => DevToolsExtensionConfig.parse(p))
           .toList();
     } else {
-      logWarning(resp, apiServeAvailableExtensions);
+      logWarning(resp, ExtensionsApi.apiServeAvailableExtensions);
       return [];
     }
   }

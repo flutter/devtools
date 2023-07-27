@@ -9,6 +9,7 @@ import 'dart:io';
 import 'package:shelf/shelf.dart' as shelf;
 
 import '../devtools_api.dart';
+import '../extensions/extension_activation.dart';
 import '../extensions/extension_manager.dart';
 import 'file_system.dart';
 import 'usage.dart';
@@ -207,12 +208,14 @@ class ServerApi {
 
       // ----- Extensions api. -----
 
-      case apiServeAvailableExtensions:
+      case ExtensionsApi.apiServeAvailableExtensions:
         final queryParams = request.requestedUri.queryParameters;
-        final rootPath = queryParams[extensionRootPathPropertyName];
+        final rootPath =
+            queryParams[ExtensionsApi.extensionRootPathPropertyName];
         if (rootPath == null) {
           return api.badRequest(
-            '$extensionRootPathPropertyName query parameter required',
+            '${ExtensionsApi.extensionRootPathPropertyName} query parameter '
+            'required',
           );
         }
 
@@ -220,9 +223,46 @@ class ServerApi {
           final extensions = extensionsManager.devtoolsExtensions
               .map((p) => p.toJson())
               .toList();
-          final result = jsonEncode({extensionsResultPropertyName: extensions});
+          final result = jsonEncode({
+            ExtensionsApi.extensionsResultPropertyName: extensions,
+          });
           return api!.getCompleted(result);
         });
+
+      case ExtensionsApi.apiExtensionActivationState:
+        final queryParams = request.requestedUri.queryParameters;
+        final rootPath =
+            queryParams[ExtensionsApi.extensionRootPathPropertyName];
+        if (rootPath == null) {
+          return api.badRequest(
+            '${ExtensionsApi.extensionRootPathPropertyName} query parameter '
+            'required',
+          );
+        }
+        final rootUri = Uri.parse(rootPath);
+
+        final extensionName =
+            queryParams[ExtensionsApi.extensionNamePropertyName];
+        if (extensionName == null) {
+          return api.badRequest(
+            '${ExtensionsApi.extensionNamePropertyName} query parameter required',
+          );
+        }
+
+        final activate = queryParams[ExtensionsApi.activationStatePropertyName];
+        if (activate != null) {
+          final newState = _devToolsOptions.setExtensionActivationState(
+            rootUri: rootUri,
+            extensionName: extensionName,
+            activate: bool.parse(activate),
+          );
+          return api.getCompleted(json.encode(newState.name));
+        }
+        final activationState = _devToolsOptions.lookupExtensionActivationState(
+          rootUri: rootUri,
+          extensionName: extensionName,
+        );
+        return api.getCompleted(json.encode(activationState.name));
 
       default:
         return api.notImplemented();
@@ -236,9 +276,13 @@ class ServerApi {
       FlutterUsage.doesStoreExist ? FlutterUsage() : null;
 
   // Accessing DevTools usage file e.g., ~/.flutter-devtools/.devtools
-  static final DevToolsUsage _devToolsUsage = DevToolsUsage();
+  static final _devToolsUsage = DevToolsUsage();
 
   static DevToolsUsage get devToolsPreferences => _devToolsUsage;
+
+  /// Provides read and write access to DevTools options files
+  /// (e.g. path/to/app/root/devtools_options.yaml).
+  static final _devToolsOptions = DevToolsOptions();
 
   /// Logs a page view in the DevTools server.
   ///
