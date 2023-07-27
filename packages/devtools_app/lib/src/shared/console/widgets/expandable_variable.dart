@@ -44,17 +44,15 @@ class ExpandableVariable extends StatelessWidget {
                 variable: variable,
                 onTap: onPressed,
               ),
-      onItemSelected: onItemPressed,
+      onItemExpanded: onItemExpanded,
       isSelectable: isSelectable,
     );
   }
 
-  Future<void> onItemPressed(
+  Future<void> onItemExpanded(
     DartObjectNode v,
   ) async {
-    // On expansion, lazily build the variables tree for performance reasons.
-    if (v.isExpanded) {
-      await Future.wait(v.children.map(buildVariablesTree));
-    }
+    // Lazily build the variables tree for performance reasons.
+    await Future.wait(v.children.map(buildVariablesTree));
   }
 }
