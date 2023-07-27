@@ -39,9 +39,16 @@ void main() {
         .thenReturn(false);
     when(fakeServiceManager.connectedApp!.isDartWebApp)
         .thenAnswer((_) => Future.value(false));
-    setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
+    setGlobal(
+      DevToolsEnvironmentParameters,
+      ExternalDevToolsEnvironmentParameters(),
+    );
     setGlobal(ServiceConnectionManager, fakeServiceManager);
     setGlobal(PreferencesController, PreferencesController());
+    setGlobal(OfflineModeController, OfflineModeController());
+    setGlobal(IdeTheme, IdeTheme());
+    setGlobal(NotificationService, NotificationService());
+    setGlobal(BannerMessagesController, BannerMessagesController());
   }
 
   Future<void> pumpMemoryScreen(
@@ -64,19 +71,6 @@ void main() {
 
   group('MemoryScreen', () {
     setUp(() {
-      setGlobal(OfflineModeController, OfflineModeController());
-      fakeServiceManager = FakeServiceManager();
-      when(fakeServiceManager.connectedApp!.isDartWebAppNow).thenReturn(false);
-      when(fakeServiceManager.connectedApp!.isDebugFlutterAppNow)
-          .thenReturn(false);
-      when(fakeServiceManager.vm.operatingSystem).thenReturn('android');
-      when(fakeServiceManager.connectedApp!.isDartWebApp)
-          .thenAnswer((_) => Future.value(false));
-      when(fakeServiceManager.errorBadgeManager.errorCountNotifier('memory'))
-          .thenReturn(ValueNotifier<int>(0));
-      setGlobal(ServiceConnectionManager, fakeServiceManager);
-      setGlobal(IdeTheme, IdeTheme());
-      setGlobal(NotificationService, NotificationService());
       screen = MemoryScreen();
       controller = MemoryController();
       setUpServiceManagerForMemory();

@@ -27,7 +27,10 @@ void main() {
     setGlobal(ServiceConnectionManager, FakeServiceManager());
     setGlobal(BreakpointManager, BreakpointManager());
     setGlobal(IdeTheme, IdeTheme());
-    setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
+    setGlobal(
+      DevToolsEnvironmentParameters,
+      ExternalDevToolsEnvironmentParameters(),
+    );
     setGlobal(PreferencesController, PreferencesController());
     setGlobal(NotificationService, NotificationService());
 
@@ -70,17 +73,20 @@ void main() {
         expect(find.text('Field'), findsOneWidget);
         expect(find.text('256 B'), findsOneWidget);
         expect(find.text('Owner:'), findsOneWidget);
-        expect(find.text('fooLib'), findsOneWidget);
-        expect(find.text('fooScript.dart:10:4'), findsOneWidget);
+        expect(find.text('fooLib', findRichText: true), findsOneWidget);
+        expect(
+          find.text('fooScript.dart:10:4', findRichText: true),
+          findsOneWidget,
+        );
         expect(find.text('Observed types not found'), findsOneWidget);
         expect(find.text('Static Value:'), findsOneWidget);
-        expect(find.text('100'), findsOneWidget);
+        expect(find.text('100', findRichText: true), findsOneWidget);
 
         expect(find.byType(RequestableSizeWidget), findsNWidgets(2));
 
         expect(find.byType(RetainingPathWidget), findsOneWidget);
 
-        expect(find.byType(InboundReferencesWidget), findsOneWidget);
+        expect(find.byType(InboundReferencesTree), findsOneWidget);
       },
     );
 

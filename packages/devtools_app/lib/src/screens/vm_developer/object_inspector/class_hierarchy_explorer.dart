@@ -36,7 +36,6 @@ class ClassHierarchyExplorer extends StatelessWidget {
         object: node.cls,
         onTap: controller.findAndSelectNodeForObject,
       ),
-      onItemSelected: (_) => null,
       emptyTreeViewBuilder: () => const CenteredCircularProgressIndicator(),
     );
   }

@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app/devtools_app.dart';
+import 'package:devtools_app/src/screens/vm_developer/object_inspector/inbound_references_tree.dart';
 import 'package:devtools_app/src/screens/vm_developer/object_inspector/vm_object_pool_display.dart';
 import 'package:devtools_app/src/screens/vm_developer/vm_developer_common_widgets.dart';
 import 'package:devtools_test/devtools_test.dart';
@@ -22,7 +23,10 @@ void main() {
     setUp(() {
       setUpMockScriptManager();
       setGlobal(IdeTheme, IdeTheme());
-      setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
+      setGlobal(
+        DevToolsEnvironmentParameters,
+        ExternalDevToolsEnvironmentParameters(),
+      );
       setGlobal(PreferencesController, PreferencesController());
 
       mockObjectPool = MockObjectPoolObject();
@@ -62,8 +66,8 @@ void main() {
       when(mockObjectPool.retainingPath).thenReturn(
         const FixedValueListenable<RetainingPath?>(null),
       );
-      when(mockObjectPool.inboundReferences).thenReturn(
-        const FixedValueListenable<InboundReferences?>(null),
+      when(mockObjectPool.inboundReferencesTree).thenReturn(
+        const FixedValueListenable<List<InboundReferencesTreeNode>>([]),
       );
       when(mockObjectPool.fetchingReachableSize).thenReturn(
         const FixedValueListenable<bool>(false),
@@ -98,7 +102,7 @@ void main() {
         expect(find.text('Retained Size:'), findsOneWidget);
 
         expect(find.byType(RetainingPathWidget), findsOneWidget);
-        expect(find.byType(InboundReferencesWidget), findsOneWidget);
+        expect(find.byType(InboundReferencesTree), findsOneWidget);
 
         expect(find.byType(ObjectPoolTable), findsOneWidget);
 
@@ -115,6 +119,7 @@ void main() {
             find.text(
               VmServiceObjectLink.defaultTextBuilder(entry.value) ??
                   entry.value.toString(),
+              findRichText: true,
             ),
             findsOneWidget,
           );

@@ -1054,29 +1054,31 @@ class _LinesState extends State<Lines> with AutoDisposeMixin {
     final pausedFrame = widget.selectedFrameNotifier?.value;
     final pausedLine = pausedFrame?.line;
 
-    return ListView.builder(
-      controller: widget.scrollController,
-      physics: const ClampingScrollPhysics(),
-      itemExtent: CodeView.rowHeight,
-      itemCount: widget.lines.length,
-      itemBuilder: (context, index) {
-        final lineNum = index + 1;
-        final isPausedLine = pausedLine == lineNum;
-        return ValueListenableBuilder<int>(
-          valueListenable: widget.codeViewController.focusLine,
-          builder: (context, focusLine, _) {
-            final isFocusedLine = focusLine == lineNum;
-            return LineItem(
-              lineContents: widget.lines[index],
-              pausedFrame: isPausedLine ? pausedFrame : null,
-              focused: isPausedLine || isFocusedLine,
-              searchMatches: _searchMatchesForLine(index),
-              activeSearchMatch:
-                  activeSearch?.position.line == index ? activeSearch : null,
-            );
-          },
-        );
-      },
+    return SelectionArea(
+      child: ListView.builder(
+        controller: widget.scrollController,
+        physics: const ClampingScrollPhysics(),
+        itemExtent: CodeView.rowHeight,
+        itemCount: widget.lines.length,
+        itemBuilder: (context, index) {
+          final lineNum = index + 1;
+          final isPausedLine = pausedLine == lineNum;
+          return ValueListenableBuilder<int>(
+            valueListenable: widget.codeViewController.focusLine,
+            builder: (context, focusLine, _) {
+              final isFocusedLine = focusLine == lineNum;
+              return LineItem(
+                lineContents: widget.lines[index],
+                pausedFrame: isPausedLine ? pausedFrame : null,
+                focused: isPausedLine || isFocusedLine,
+                searchMatches: _searchMatchesForLine(index),
+                activeSearchMatch:
+                    activeSearch?.position.line == index ? activeSearch : null,
+              );
+            },
+          );
+        },
+      ),
     );
   }
 
@@ -1243,9 +1245,8 @@ class _LineItemState extends State<LineItem>
         enabled: () => true,
         asyncTimeout: 100,
         asyncGenerateHoverCardData: _generateHoverCardData,
-        child: SelectableText.rich(
+        child: Text.rich(
           searchAwareLineContents(),
-          scrollPhysics: const NeverScrollableScrollPhysics(),
           maxLines: 1,
         ),
       );

@@ -120,16 +120,23 @@ class FlutterTestEnvironment {
 
         _service = _flutter!.vmService!;
 
-        setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
+        setGlobal(
+          DevToolsEnvironmentParameters,
+          ExternalDevToolsEnvironmentParameters(),
+        );
         setGlobal(IdeTheme, IdeTheme());
         setGlobal(Storage, FlutterDesktopStorage());
         setGlobal(ServiceConnectionManager, ServiceConnectionManager());
         setGlobal(OfflineModeController, OfflineModeController());
+        setGlobal(NotificationService, NotificationService());
 
         final preferencesController = PreferencesController();
         _preferencesController = preferencesController;
         setGlobal(PreferencesController, preferencesController);
-        setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
+        setGlobal(
+          DevToolsEnvironmentParameters,
+          ExternalDevToolsEnvironmentParameters(),
+        );
         setGlobal(MessageBus, MessageBus());
         setGlobal(ScriptManager, ScriptManager());
         setGlobal(BreakpointManager, BreakpointManager());

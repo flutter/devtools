@@ -17,6 +17,7 @@ import '../shared/connected_app.dart';
 import '../shared/console/console_service.dart';
 import '../shared/diagnostics/inspector_service.dart';
 import '../shared/error_badge_manager.dart';
+import '../shared/feature_flags.dart';
 import '../shared/globals.dart';
 import '../shared/primitives/utils.dart';
 import '../shared/title.dart';
@@ -48,11 +49,9 @@ class ServiceConnectionManager {
     _serviceExtensionManager = ServiceExtensionManager(isolateManager);
   }
 
-  final StreamController<VmServiceWrapper> _connectionAvailableController =
-      StreamController<VmServiceWrapper>.broadcast();
-
   Completer<VmService> _serviceAvailable = Completer();
 
+  // TODO(kenz): try to replace uses of this with a listener on [connectedState]
   Future<VmService> get onServiceAvailable => _serviceAvailable.future;
 
   bool get isServiceAvailable => _serviceAvailable.isCompleted;
@@ -133,12 +132,6 @@ class ServiceConnectionManager {
 
   final ValueNotifier<ConnectedState> _connectedState =
       ValueNotifier(const ConnectedState(false));
-
-  Stream<VmServiceWrapper> get onConnectionAvailable =>
-      _connectionAvailableController.stream;
-
-  Stream<void> get onConnectionClosed => _connectionClosedController.stream;
-  final _connectionClosedController = StreamController<void>.broadcast();
 
   final ValueNotifier<bool> _deviceBusy = ValueNotifier<bool>(false);
 
@@ -305,8 +298,6 @@ class ServiceConnectionManager {
       return;
     }
 
-    _connectedState.value = const ConnectedState(true);
-
     final isolates = vm?.isolatesForDevToolsMode() ?? <IsolateRef>[];
     await isolateManager.init(isolates);
     if (service != this.service) {
@@ -331,7 +322,11 @@ class ServiceConnectionManager {
       return;
     }
 
-    _connectionAvailableController.add(service);
+    if (FeatureFlags.devToolsExtensions) {
+      await extensionService.initialize();
+    }
+
+    _connectedState.value = const ConnectedState(true);
   }
 
   void manuallyDisconnect() {
@@ -373,7 +368,6 @@ class ServiceConnectionManager {
     setDeviceBusy(false);
 
     _connectedState.value = connectionState;
-    _connectionClosedController.add(null);
 
     _registeredMethodsForService.clear();
 
@@ -545,6 +539,25 @@ class ServiceConnectionManager {
     await whenValueNonNull(isolateManager.mainIsolate);
     return libraryUriAvailableNow(uri);
   }
+
+  Future<String?> rootLibraryForSelectedIsolate() async {
+    if (!connectedState.value.connected) return null;
+
+    final selectedIsolateRef = isolateManager.mainIsolate.value;
+    if (selectedIsolateRef == null) return null;
+
+    final isolateState = isolateManager.isolateState(selectedIsolateRef);
+    await isolateState.waitForIsolateLoad();
+    final rootLib = isolateState.rootInfo!.library;
+    if (rootLib == null) return null;
+
+    final selectedIsolateRefId = selectedIsolateRef.id!;
+    await resolvedUriManager.fetchFileUris(selectedIsolateRefId, [rootLib]);
+    return resolvedUriManager.lookupFileUri(
+      selectedIsolateRefId,
+      rootLib,
+    );
+  }
 }
 
 class VmServiceCapabilities {
@@ -566,4 +579,18 @@ class ConnectedState {
 
   /// Whether this [ConnectedState] was manually initiated by the user.
   final bool userInitiatedConnectionState;
+
+  @override
+  bool operator ==(Object? other) {
+    return other is ConnectedState &&
+        other.connected == connected &&
+        other.userInitiatedConnectionState == userInitiatedConnectionState;
+  }
+
+  @override
+  int get hashCode => Object.hash(connected, userInitiatedConnectionState);
+
+  @override
+  String toString() =>
+      'ConnectedState(connected: $connected, userInitiated: $userInitiatedConnectionState)';
 }

@@ -48,7 +48,10 @@ void main() {
     socketProfile = loadSocketProfile();
     httpProfile = loadHttpProfile();
     setGlobal(IdeTheme, IdeTheme());
-    setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
+    setGlobal(
+      DevToolsEnvironmentParameters,
+      ExternalDevToolsEnvironmentParameters(),
+    );
     setGlobal(PreferencesController, PreferencesController());
     setGlobal(NotificationService, NotificationService());
     setGlobal(BreakpointManager, BreakpointManager());
@@ -173,6 +176,8 @@ void main() {
                 .tap(find.byKey(NetworkRequestInspector.responseTabKey));
             await tester.pumpAndSettle();
 
+            expect(find.byType(HttpResponseTrailingDropDown), findsOneWidget);
+            expect(find.byType(HttpViewTrailingCopyButton), findsOneWidget);
             expect(find.byType(NetworkRequestOverviewView), findsNothing);
             expect(find.byType(HttpRequestHeadersView), findsNothing);
             expect(find.byType(HttpResponseView), findsOneWidget);

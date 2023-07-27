@@ -1104,15 +1104,31 @@ class FilterButton extends StatelessWidget {
   }
 }
 
+class RoundedCornerOptions {
+  const RoundedCornerOptions({
+    this.showTopLeft = true,
+    this.showTopRight = true,
+    this.showBottomLeft = true,
+    this.showBottomRight = true,
+  });
+
+  final bool showTopLeft;
+  final bool showTopRight;
+  final bool showBottomLeft;
+  final bool showBottomRight;
+}
+
 class RoundedDropDownButton<T> extends StatelessWidget {
   const RoundedDropDownButton({
     Key? key,
     this.value,
     this.onChanged,
     this.isDense = false,
+    this.isExpanded = false,
     this.style,
     this.selectedItemBuilder,
     this.items,
+    this.roundedCornerOptions,
   }) : super(key: key);
 
   final T? value;
@@ -1121,29 +1137,52 @@ class RoundedDropDownButton<T> extends StatelessWidget {
 
   final bool isDense;
 
+  final bool isExpanded;
+
   final TextStyle? style;
 
   final DropdownButtonBuilder? selectedItemBuilder;
 
   final List<DropdownMenuItem<T>>? items;
 
+  final RoundedCornerOptions? roundedCornerOptions;
+
   @override
   Widget build(BuildContext context) {
     final bgColor = Theme.of(context).colorScheme.backgroundColorSelected;
 
+    Radius selectRadius(bool show) {
+      return show ? const Radius.circular(defaultBorderRadius) : Radius.zero;
+    }
+
+    final showTopLeft = roundedCornerOptions?.showTopLeft ?? true;
+    final showTopRight = roundedCornerOptions?.showTopRight ?? true;
+    final showBottomLeft = roundedCornerOptions?.showBottomLeft ?? true;
+    final showBottomRight = roundedCornerOptions?.showBottomRight ?? true;
     return RoundedOutlinedBorder(
+      showTopLeft: showTopLeft,
+      showTopRight: showTopRight,
+      showBottomLeft: showBottomLeft,
+      showBottomRight: showBottomRight,
       child: Center(
-        child: Container(
-          padding: const EdgeInsets.only(
-            left: defaultSpacing,
-            right: borderPadding,
-          ),
+        child: SizedBox(
           height: defaultButtonHeight - 2.0, // subtract 2.0 for width of border
           child: DropdownButtonHideUnderline(
             child: DropdownButton<T>(
+              padding: const EdgeInsets.only(
+                left: defaultSpacing,
+                right: borderPadding,
+              ),
               value: value,
               onChanged: onChanged,
               isDense: isDense,
+              isExpanded: isExpanded,
+              borderRadius: BorderRadius.only(
+                topLeft: selectRadius(showTopLeft),
+                topRight: selectRadius(showTopRight),
+                bottomLeft: selectRadius(showBottomLeft),
+                bottomRight: selectRadius(showBottomRight),
+              ),
               style: style,
               selectedItemBuilder: selectedItemBuilder,
               items: items,
@@ -2057,12 +2096,15 @@ class CopyToClipboardControl extends StatelessWidget {
             );
           };
 
-    return ToolbarAction(
-      icon: Icons.content_copy,
-      tooltip: tooltip,
-      onPressed: onPressed,
-      key: buttonKey,
-      size: size,
+    return SizedBox(
+      height: size,
+      child: ToolbarAction(
+        icon: Icons.content_copy,
+        tooltip: tooltip,
+        onPressed: onPressed,
+        key: buttonKey,
+        size: size,
+      ),
     );
   }
 }
@@ -2504,9 +2546,9 @@ class HelpButtonWithDialog extends StatelessWidget {
 /// Display a single bullet character in order to act as a stylized spacer
 /// component.
 class BulletSpacer extends StatelessWidget {
-  const BulletSpacer({super.key, this.useAccentColor = false});
+  const BulletSpacer({super.key, this.color});
 
-  final bool useAccentColor;
+  final Color? color;
 
   static double get width => actionWidgetSize / 2;
 
@@ -2514,12 +2556,7 @@ class BulletSpacer extends StatelessWidget {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
 
-    late TextStyle? textStyle;
-    textStyle = useAccentColor
-        ? theme.appBarTheme.toolbarTextStyle ??
-            theme.primaryTextTheme.bodyMedium
-        : theme.textTheme.bodyMedium;
-
+    final textStyle = theme.textTheme.bodyMedium;
     final mutedColor = textStyle?.color?.withAlpha(0x90);
 
     return Container(
@@ -2528,7 +2565,7 @@ class BulletSpacer extends StatelessWidget {
       alignment: Alignment.center,
       child: Text(
         '•',
-        style: textStyle?.copyWith(color: mutedColor),
+        style: textStyle?.copyWith(color: color ?? mutedColor),
       ),
     );
   }
@@ -2633,6 +2670,9 @@ class ContextMenuButton extends StatelessWidget {
     double? iconSize,
   }) : iconSize = iconSize ?? tableIconSize;
 
+  static const double defaultWidth = 14.0;
+  static const double densePadding = 2.0;
+
   final Color? color;
   final String? gaScreen;
   final String? gaItem;
@@ -2640,8 +2680,6 @@ class ContextMenuButton extends StatelessWidget {
   final IconData icon;
   final double iconSize;
   final double buttonWidth;
-
-  static const double defaultWidth = 14.0;
 
   @override
   Widget build(BuildContext context) {

@@ -17,6 +17,7 @@ void main() {
   when(mockServiceManager.connectedState).thenReturn(
     ValueNotifier<ConnectedState>(const ConnectedState(false)),
   );
+  when(mockServiceManager.hasConnection).thenReturn(false);
   when(mockServiceManager.isolateManager).thenReturn(FakeIsolateManager());
   when(mockServiceManager.appState).thenReturn(
     AppState(mockServiceManager.isolateManager.selectedIsolate),
@@ -34,6 +35,7 @@ void main() {
   setGlobal(OfflineModeController, OfflineModeController());
   setGlobal(IdeTheme, IdeTheme());
   setGlobal(NotificationService, NotificationService());
+  setGlobal(BannerMessagesController, BannerMessagesController());
 
   testWidgets(
     'does not display floating debugger controls when debugger screen is showing',

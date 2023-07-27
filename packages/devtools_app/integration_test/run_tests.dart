@@ -4,6 +4,7 @@
 
 import 'dart:io';
 
+import 'test_infra/run/_chrome_driver.dart';
 import 'test_infra/run/_in_file_args.dart';
 import 'test_infra/run/run_test.dart';
 
@@ -19,25 +20,46 @@ const _offlineIndicator = 'integration_test/test/offline';
 
 void main(List<String> args) async {
   final testRunnerArgs = TestRunnerArgs(args, verifyValidTarget: false);
-  if (testRunnerArgs.testTarget != null) {
-    // TODO(kenz): add support for specifying a directory as the target instead
-    // of a single file.
-    await _runTest(testRunnerArgs);
-  } else {
-    // Run all tests since a target test was not provided.
-    final testDirectory = Directory(_testDirectory);
-    final testFiles = testDirectory
-        .listSync(recursive: true)
-        .where((testFile) => testFile.path.endsWith(_testSuffix));
+  if (testRunnerArgs.help) {
+    testRunnerArgs.printHelp();
+    return;
+  }
 
-    for (final testFile in testFiles) {
-      final testTarget = testFile.path;
-      final newArgsWithTarget = TestRunnerArgs([
-        ...args,
-        '--${TestRunnerArgs.testTargetArg}=$testTarget',
-      ]);
-      await _runTest(newArgsWithTarget);
+  Exception? exception;
+  final chromedriver = ChromeDriver();
+
+  try {
+    // Start chrome driver before running the flutter integration test.
+    await chromedriver.start();
+
+    if (testRunnerArgs.testTarget != null) {
+      // TODO(kenz): add support for specifying a directory as the target instead
+      // of a single file.
+      await _runTest(testRunnerArgs);
+    } else {
+      // Run all tests since a target test was not provided.
+      final testDirectory = Directory(_testDirectory);
+      final testFiles = testDirectory
+          .listSync(recursive: true)
+          .where((testFile) => testFile.path.endsWith(_testSuffix));
+
+      for (final testFile in testFiles) {
+        final testTarget = testFile.path;
+        final newArgsWithTarget = TestRunnerArgs([
+          ...args,
+          '--${TestRunnerArgs.testTargetArg}=$testTarget',
+        ]);
+        await _runTest(newArgsWithTarget);
+      }
     }
+  } on Exception catch (e) {
+    exception = e;
+  } finally {
+    await chromedriver.stop();
+  }
+
+  if (exception != null) {
+    throw exception;
   }
 }
 
@@ -52,7 +74,7 @@ Future<void> _runTest(
 
   await runFlutterIntegrationTest(
     testRunnerArgs,
-    TestFileArgs(testTarget),
+    TestFileArgs(testTarget, testAppDevice: testRunnerArgs.testAppDevice),
     offline: testTarget.startsWith(_offlineIndicator),
   );
 }

@@ -7,10 +7,12 @@ import 'dart:async';
 import 'package:logging/logging.dart';
 
 import '../../devtools.dart' as devtools show version;
+import '../extensions/extension_service.dart';
 import '../screens/debugger/breakpoint_manager.dart';
 import '../service/service.dart';
 import '../service/service_manager.dart';
 import '../service/vm_service_wrapper.dart';
+import '../shared/banner_messages.dart';
 import '../shared/console/eval/eval_service.dart';
 import '../shared/framework_controller.dart';
 import '../shared/globals.dart';
@@ -36,8 +38,10 @@ class FrameworkCore {
     setGlobal(OfflineModeController, OfflineModeController());
     setGlobal(ScriptManager, ScriptManager());
     setGlobal(NotificationService, NotificationService());
+    setGlobal(BannerMessagesController, BannerMessagesController());
     setGlobal(BreakpointManager, BreakpointManager());
     setGlobal(EvalService, EvalService());
+    setGlobal(ExtensionService, ExtensionService());
   }
 
   static void init() {

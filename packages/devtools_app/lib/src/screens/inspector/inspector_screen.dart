@@ -13,7 +13,6 @@ import '../../service/service_extensions.dart' as extensions;
 import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/common_widgets.dart';
-import '../../shared/connected_app.dart';
 import '../../shared/console/eval/inspector_tree.dart';
 import '../../shared/dialogs.dart';
 import '../../shared/editable_list.dart';
@@ -21,11 +20,9 @@ import '../../shared/error_badge_manager.dart';
 import '../../shared/globals.dart';
 import '../../shared/primitives/auto_dispose.dart';
 import '../../shared/primitives/blocking_action_mixin.dart';
-import '../../shared/primitives/simple_items.dart';
 import '../../shared/screen.dart';
 import '../../shared/split.dart';
 import '../../shared/theme.dart';
-import '../../shared/ui/icons.dart';
 import '../../shared/ui/search.dart';
 import '../../shared/utils.dart';
 import 'inspector_controller.dart';
@@ -36,10 +33,10 @@ class InspectorScreen extends Screen {
   InspectorScreen()
       : super.conditional(
           id: id,
-          requiresLibrary: flutterLibraryUri,
+          requiresFlutter: true,
           requiresDebugBuild: true,
           title: ScreenMetaData.inspector.title,
-          icon: Octicons.deviceMobile,
+          icon: ScreenMetaData.inspector.icon,
         );
 
   static final id = ScreenMetaData.inspector.id;

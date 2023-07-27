@@ -18,6 +18,7 @@ void main() {
   when(mockServiceManager.connectedState).thenReturn(
     ValueNotifier<ConnectedState>(const ConnectedState(false)),
   );
+  when(mockServiceManager.hasConnection).thenReturn(false);
 
   final mockErrorBadgeManager = MockErrorBadgeManager();
   when(mockServiceManager.errorBadgeManager).thenReturn(mockErrorBadgeManager);
@@ -30,6 +31,7 @@ void main() {
   setGlobal(OfflineModeController, OfflineModeController());
   setGlobal(IdeTheme, IdeTheme());
   setGlobal(NotificationService, NotificationService());
+  setGlobal(BannerMessagesController, BannerMessagesController());
 
   Widget wrapScaffold(Widget child) {
     return wrapWithControllers(
@@ -59,7 +61,6 @@ void main() {
       expect(find.byKey(_t5), findsOneWidget);
 
       expect(find.byType(TabOverflowButton), findsNothing);
-      expect(find.byType(DevToolsTitle), findsOneWidget);
     },
   );
 
@@ -83,7 +84,6 @@ void main() {
       expect(find.byKey(_t5), findsNothing);
 
       expect(find.byType(TabOverflowButton), findsOneWidget);
-      expect(find.byType(DevToolsTitle), findsOneWidget);
     },
   );
 
@@ -106,7 +106,6 @@ void main() {
       expect(find.byKey(_t4), findsNothing);
       expect(find.byKey(_t5), findsNothing);
       expect(find.byType(TabOverflowButton), findsOneWidget);
-      expect(find.byType(DevToolsTitle), findsOneWidget);
 
       await tester.tap(find.byType(TabOverflowButton));
       await tester.pumpAndSettle();
@@ -137,29 +136,6 @@ void main() {
 
       expect(find.byKey(_k1), findsNothing);
       expect(find.byKey(_k5), findsOneWidget);
-    },
-  );
-
-  testWidgetsWithWindowSize(
-    'hides $DevToolsTitle when screen is very narrow',
-    const Size(200.0, 1200.0),
-    (WidgetTester tester) async {
-      await tester.pumpWidget(
-        wrapScaffold(
-          DevToolsScaffold(
-            screens: const [_screen1, _screen2, _screen3, _screen4, _screen5],
-          ),
-        ),
-      );
-      expect(find.byKey(_k1), findsOneWidget);
-
-      expect(find.byKey(_t1), findsNothing);
-      expect(find.byKey(_t2), findsNothing);
-      expect(find.byKey(_t3), findsNothing);
-      expect(find.byKey(_t4), findsNothing);
-      expect(find.byKey(_t5), findsNothing);
-      expect(find.byType(TabOverflowButton), findsOneWidget);
-      expect(find.byType(DevToolsTitle), findsNothing);
     },
   );
 

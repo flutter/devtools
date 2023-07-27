@@ -14,8 +14,7 @@ import 'package:collection/collection.dart';
 import '_in_file_args.dart';
 import '_io_utils.dart';
 import '_test_app_driver.dart';
-
-bool _debugTestScript = false;
+import '_utils.dart';
 
 /// Runs one test.
 ///
@@ -26,17 +25,21 @@ Future<void> runFlutterIntegrationTest(
   TestFileArgs testFileArgs, {
   required bool offline,
 }) async {
-  TestFlutterApp? testApp;
+  IntegrationTestApp? testApp;
   late String testAppUri;
 
   if (!offline) {
     if (testRunnerArgs.testAppUri == null) {
       // Create the test app and start it.
       try {
-        testApp = TestFlutterApp(
-          appPath: testFileArgs.appPath,
-          appDevice: testRunnerArgs.testAppDevice,
-        );
+        if (testRunnerArgs.testAppDevice == TestAppDevice.cli) {
+          testApp = TestDartCliApp(appPath: testFileArgs.appPath);
+        } else {
+          testApp = TestFlutterApp(
+            appPath: testFileArgs.appPath,
+            appDevice: testRunnerArgs.testAppDevice,
+          );
+        }
         await testApp.start();
       } catch (e) {
         // ignore: avoid-throw-in-catch-block, by design
@@ -46,16 +49,6 @@ Future<void> runFlutterIntegrationTest(
     } else {
       testAppUri = testRunnerArgs.testAppUri!;
     }
-  }
-
-  // TODO(kenz): do we need to start chromedriver in headless mode?
-  // Start chrome driver before running the flutter integration test.
-  final chromedriver = ChromeDriver();
-  try {
-    await chromedriver.start();
-  } catch (e) {
-    // ignore: avoid-throw-in-catch-block, by design
-    throw Exception('Error starting chromedriver: $e');
   }
 
   // Run the flutter integration test.
@@ -75,42 +68,16 @@ Future<void> runFlutterIntegrationTest(
     exception = e;
   } finally {
     if (testApp != null) {
-      _debugLog('killing the test app');
+      debugLog('killing the test app');
       await testApp.stop();
     }
 
-    _debugLog('cancelling stream subscriptions');
+    debugLog('cancelling stream subscriptions');
     await testRunner.cancelAllStreamSubscriptions();
-    await chromedriver.cancelAllStreamSubscriptions();
-
-    _debugLog('killing the chromedriver process');
-    chromedriver.kill();
   }
 
   if (exception != null) {
     throw exception;
-  }
-}
-
-class ChromeDriver with IOMixin {
-  late final Process _process;
-
-  // TODO(kenz): add error messaging if the chromedriver executable is not
-  // found. We can also consider using web installers directly in this script:
-  // https://github.com/flutter/flutter/wiki/Running-Flutter-Driver-tests-with-Web#web-installers-repo.
-  Future<void> start() async {
-    _debugLog('starting the chromedriver process');
-    _process = await Process.start(
-      'chromedriver',
-      [
-        '--port=4444',
-      ],
-    );
-    listenToProcessOutput(_process, printTag: 'ChromeDriver');
-  }
-
-  void kill() {
-    _process.kill();
   }
 }
 
@@ -130,7 +97,7 @@ class TestRunner with IOMixin {
     Map<String, Object> testAppArguments = const <String, Object>{},
   }) async {
     Future<void> runTest({required int attemptNumber}) async {
-      _debugLog('starting the flutter drive process');
+      debugLog('starting the flutter drive process');
       final process = await Process.start(
         'flutter',
         [
@@ -210,9 +177,9 @@ class TestRunner with IOMixin {
         timeout,
       ]);
 
-      _debugLog('attempting to kill the flutter drive process');
+      debugLog('attempting to kill the flutter drive process');
       process.kill();
-      _debugLog('flutter drive process has exited');
+      debugLog('flutter drive process has exited');
 
       // Ignore exception handling and retries if the tests passed. This is to
       // avoid bugs with the test runner where the test can fail after the test
@@ -224,7 +191,7 @@ class TestRunner with IOMixin {
               'Integration test timed out on try #$attemptNumber: $testTarget',
             );
           } else {
-            _debugLog(
+            debugLog(
               'Integration test timed out on try #$attemptNumber. Retrying '
               '$testTarget now.',
             );
@@ -276,12 +243,6 @@ class _TestResult {
   }
 }
 
-void _debugLog(String log) {
-  if (_debugTestScript) {
-    print(log);
-  }
-}
-
 class TestRunnerArgs {
   TestRunnerArgs(List<String> args, {bool verifyValidTarget = true}) {
     final argParser = _buildArgParser();
@@ -320,6 +281,14 @@ class TestRunnerArgs {
   /// Whether this integration test should be run on the 'web-server' device
   /// instead of 'chrome'.
   bool get headless => _argResults[_headlessArg];
+
+  /// Whether the help flag `-h` was passed to the integration test command.
+  bool get help => _argResults[_helpArg];
+
+  void printHelp() {
+    print('Run integration tests (one or many) for Dart DevTools.');
+    print(_buildArgParser().usage);
+  }
 
   static const _helpArg = 'help';
   static const testTargetArg = 'target';
@@ -368,45 +337,5 @@ class TestRunnerArgs {
             'able to see the integration test run visually in a Chrome browser.',
       );
     return argParser;
-  }
-}
-
-enum TestAppDevice {
-  flutterTester('flutter-tester'),
-  chrome('chrome');
-
-  // TODO(https://github.com/flutter/devtools/issues/5953): support a Dart CLI
-  // test device.
-
-  const TestAppDevice(this.argName);
-
-  final String argName;
-
-  /// A mapping of test app device to the unsupported tests for that device.
-  static final _unsupportedTestsForDevice = <TestAppDevice, List<String>>{
-    TestAppDevice.flutterTester: [],
-    TestAppDevice.chrome: [
-      // TODO(https://github.com/flutter/devtools/issues/5874): Remove once supported on web.
-      'eval_and_browse_test.dart',
-      'perfetto_test.dart',
-      'performance_screen_event_recording_test.dart',
-      'service_connection_test.dart',
-    ],
-  };
-
-  static final _argNameToDeviceMap =
-      TestAppDevice.values.fold(<String, TestAppDevice>{}, (map, device) {
-    map[device.argName] = device;
-    return map;
-  });
-
-  static TestAppDevice? fromArgName(String argName) {
-    return _argNameToDeviceMap[argName];
-  }
-
-  bool supportsTest(String testPath) {
-    final unsupportedTests = _unsupportedTestsForDevice[this] ?? [];
-    return unsupportedTests
-        .none((unsupportedTestPath) => testPath.endsWith(unsupportedTestPath));
   }
 }

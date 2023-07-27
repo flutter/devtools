@@ -86,6 +86,7 @@ class _DebuggingControlsState extends State<DebuggingControls>
             title: 'Pause',
             icon: Codicons.debugPause,
             autofocus: true,
+            roundedLeftBorder: true,
             // Disable when paused or selected isolate is a system isolate.
             onPressed: (isPaused || isSystemIsolate)
                 ? null
@@ -95,6 +96,7 @@ class _DebuggingControlsState extends State<DebuggingControls>
             child: DebuggerButton(
               title: 'Resume',
               icon: Codicons.debugContinue,
+              roundedRightBorder: true,
               // Enable while paused + not resuming and selected isolate is not
               // a system isolate.
               onPressed: ((isPaused && !resuming) && !isSystemIsolate)
@@ -114,6 +116,7 @@ class _DebuggingControlsState extends State<DebuggingControls>
           DebuggerButton(
             title: 'Step Over',
             icon: Codicons.debugStepOver,
+            roundedLeftBorder: true,
             onPressed: canStep ? () => unawaited(controller.stepOver()) : null,
           ),
           LeftBorder(
@@ -127,6 +130,7 @@ class _DebuggingControlsState extends State<DebuggingControls>
             child: DebuggerButton(
               title: 'Step Out',
               icon: Codicons.debugStepOut,
+              roundedRightBorder: true,
               onPressed: canStep ? () => unawaited(controller.stepOut()) : null,
             ),
           ),
@@ -314,12 +318,16 @@ class DebuggerButton extends StatelessWidget {
     required this.icon,
     required this.onPressed,
     this.autofocus = false,
+    this.roundedLeftBorder = false,
+    this.roundedRightBorder = false,
   });
 
   final String title;
   final IconData icon;
   final VoidCallback? onPressed;
   final bool autofocus;
+  final bool roundedLeftBorder;
+  final bool roundedRightBorder;
 
   @override
   Widget build(BuildContext context) {
@@ -329,7 +337,16 @@ class DebuggerButton extends StatelessWidget {
         autofocus: autofocus,
         style: OutlinedButton.styleFrom(
           side: BorderSide.none,
-          shape: const ContinuousRectangleBorder(),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.horizontal(
+              left: roundedLeftBorder
+                  ? const Radius.circular(defaultBorderRadius)
+                  : Radius.zero,
+              right: roundedRightBorder
+                  ? const Radius.circular(defaultBorderRadius)
+                  : Radius.zero,
+            ),
+          ),
         ),
         onPressed: onPressed,
         child: MaterialIconLabel(

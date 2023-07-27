@@ -18,7 +18,9 @@ import '../shared/theme.dart';
 import '../shared/utils.dart';
 
 class OpenSettingsAction extends StatelessWidget {
-  const OpenSettingsAction({super.key});
+  const OpenSettingsAction({super.key, this.color});
+
+  final Color? color;
 
   @override
   Widget build(BuildContext context) {
@@ -40,6 +42,7 @@ class OpenSettingsAction extends StatelessWidget {
           child: Icon(
             Icons.settings_outlined,
             size: actionsIconSize,
+            color: color,
           ),
         ),
       ),

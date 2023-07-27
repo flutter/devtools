@@ -39,7 +39,7 @@ var _viewIdIncrementer = 0;
 /// Events that are passed between DevTools and the embedded Perfetto iFrame via
 /// [window.postMessage].
 enum EmbeddedPerfettoEvent {
-  /// Id for an event Perfetto excpects to verify the trace viewer is ready.
+  /// Id for an event Perfetto expects to verify the trace viewer is ready.
   ping('PING'),
 
   /// Id for an event that Perfetto will send back after receiving a [ping]

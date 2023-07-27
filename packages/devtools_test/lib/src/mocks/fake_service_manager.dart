@@ -118,12 +118,6 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
   final ConsoleService consoleService = ConsoleService();
 
   @override
-  Stream<VmServiceWrapper> get onConnectionClosed => const Stream.empty();
-
-  @override
-  Stream<VmServiceWrapper> get onConnectionAvailable => Stream.value(service!);
-
-  @override
   Future<double> get queryDisplayRefreshRate => Future.value(60.0);
 
   @override
