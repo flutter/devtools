@@ -15,6 +15,7 @@ import 'package:devtools_app/src/shared/feature_flags.dart';
 import 'package:devtools_shared/devtools_test_utils.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart' as vm_service;
@@ -128,7 +129,7 @@ void main() {
     );
 
     testWidgetsWithWindowSize(
-      'builds initial content for web app',
+      'builds initial content for Dart web app',
       windowSize,
       (WidgetTester tester) async {
         setEnableExperiments();
@@ -147,7 +148,53 @@ void main() {
         expect(find.byType(PerformanceScreenBody), findsNothing);
         expect(find.byType(WebPerformanceScreenBody), findsOneWidget);
         expect(
-          find.text('TODO: add instructions for using Chrome DevTools'),
+          markdownFinder(
+            'How to use Chrome DevTools for performance profiling',
+          ),
+          findsOneWidget,
+        );
+
+        // Make sure NO Flutter-specific information is included:
+        expect(
+          markdownFinder(
+            'The timeline events emitted by the Flutter framework',
+          ),
+          findsNothing,
+        );
+      },
+    );
+
+    testWidgetsWithWindowSize(
+      'builds initial content for Flutter web app',
+      windowSize,
+      (WidgetTester tester) async {
+        setEnableExperiments();
+        mockConnectedApp(
+          fakeServiceManager.connectedApp!,
+          isFlutterApp: true,
+          isProfileBuild: false,
+          isWebApp: true,
+        );
+        await tester.pumpWidget(
+          wrap(
+            Builder(builder: PerformanceScreen().build),
+          ),
+        );
+        await tester.pumpAndSettle();
+        expect(find.byType(PerformanceScreenBody), findsNothing);
+        expect(find.byType(WebPerformanceScreenBody), findsOneWidget);
+        expect(
+          markdownFinder(
+            'How to use Chrome DevTools for performance profiling',
+          ),
+          findsOneWidget,
+        );
+
+        // Make sure Flutter-specific information is included:
+        expect(
+          markdownFinder(
+            'The timeline events emitted by the Flutter framework',
+          ),
           findsOneWidget,
         );
       },
@@ -365,3 +412,7 @@ void main() {
     });
   });
 }
+
+Finder markdownFinder(String textMatch) => find.byWidgetPredicate(
+      (widget) => widget is Markdown && widget.data.contains(textMatch),
+    );
