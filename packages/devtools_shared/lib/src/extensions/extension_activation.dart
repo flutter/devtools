@@ -121,7 +121,6 @@ $_extensionsKey:
 
     final optionsFile = File(path.join(rootDir.path, optionsFileName));
     if (!optionsFile.existsSync()) {
-      print('creating options file: ${optionsFile.path}');
       optionsFile
         ..createSync()
         ..writeAsStringSync(_defaultOptions);
