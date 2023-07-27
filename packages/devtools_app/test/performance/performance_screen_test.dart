@@ -157,7 +157,7 @@ void main() {
         // Make sure NO Flutter-specific information is included:
         expect(
           markdownFinder(
-            'The timeline events emitted by the Flutter framework',
+            'The Flutter framework emits timeline events',
           ),
           findsNothing,
         );
@@ -193,7 +193,7 @@ void main() {
         // Make sure Flutter-specific information is included:
         expect(
           markdownFinder(
-            'The timeline events emitted by the Flutter framework',
+            'The Flutter framework emits timeline events',
           ),
           findsOneWidget,
         );
