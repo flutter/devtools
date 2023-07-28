@@ -293,11 +293,11 @@ class ServerApi {
 }
 
 abstract class _ExtensionsApiHandler {
-  static FutureOr<shelf.Response> handleServeAvailableExtensions(
+  static Future<shelf.Response> handleServeAvailableExtensions(
     ServerApi api,
     Map<String, String> queryParams,
     ExtensionsManager extensionsManager,
-  ) {
+  ) async {
     final missingRequiredParams = ServerApi._checkRequiredParameters(
       [ExtensionsApi.extensionRootPathPropertyName],
       queryParams: queryParams,
@@ -307,14 +307,13 @@ abstract class _ExtensionsApiHandler {
 
     final rootPath = queryParams[ExtensionsApi.extensionRootPathPropertyName];
 
-    return extensionsManager.serveAvailableExtensions(rootPath).then((_) {
-      final extensions =
-          extensionsManager.devtoolsExtensions.map((p) => p.toJson()).toList();
-      final result = jsonEncode({
-        ExtensionsApi.extensionsResultPropertyName: extensions,
-      });
-      return ServerApi._encodeResponse(result, api: api);
+    await extensionsManager.serveAvailableExtensions(rootPath);
+    final extensions =
+        extensionsManager.devtoolsExtensions.map((p) => p.toJson()).toList();
+    final result = jsonEncode({
+      ExtensionsApi.extensionsResultPropertyName: extensions,
     });
+    return ServerApi._encodeResponse(result, api: api);
   }
 
   static shelf.Response handleExtensionActivationState(
