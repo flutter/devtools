@@ -109,10 +109,10 @@ TextStyle primaryColorLight(TextStyle style, BuildContext context) {
 class DevToolsButton extends StatelessWidget {
   const DevToolsButton({
     Key? key,
-    required this.icon,
     required this.onPressed,
     required this.gaScreen,
     required this.gaSelection,
+    this.icon,
     this.label,
     this.color,
     this.minScreenWidthForTextBeforeScaling,
@@ -120,7 +120,11 @@ class DevToolsButton extends StatelessWidget {
     this.tooltip,
     this.tooltipPadding,
     this.outlined = true,
-  }) : super(key: key);
+  })  : assert(
+          label != null || icon != null,
+          'Either icon or label must be specified.',
+        ),
+        super(key: key);
 
   factory DevToolsButton.iconOnly({
     required IconData icon,
@@ -140,8 +144,7 @@ class DevToolsButton extends StatelessWidget {
     );
   }
 
-  // TODO(kenz): allow icon to be nullable if this is a text only button.
-  final IconData icon;
+  final IconData? icon;
 
   final String? label;
 
@@ -832,6 +835,44 @@ class ToolbarAction extends StatelessWidget {
             message: tooltip,
             child: button,
           );
+  }
+}
+
+class ScaffoldAction extends StatelessWidget {
+  const ScaffoldAction({
+    super.key,
+    required this.icon,
+    required this.tooltip,
+    required this.onPressed,
+    this.color,
+  });
+
+  final IconData icon;
+
+  final String tooltip;
+
+  final Function(BuildContext) onPressed;
+
+  final Color? color;
+
+  @override
+  Widget build(BuildContext context) {
+    return DevToolsTooltip(
+      message: tooltip,
+      child: InkWell(
+        onTap: () => onPressed(context),
+        child: Container(
+          width: actionWidgetSize,
+          height: actionWidgetSize,
+          alignment: Alignment.center,
+          child: Icon(
+            icon,
+            size: actionsIconSize,
+            color: color,
+          ),
+        ),
+      ),
+    );
   }
 }
 

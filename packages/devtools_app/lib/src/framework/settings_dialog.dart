@@ -17,37 +17,21 @@ import '../shared/log_storage.dart';
 import '../shared/theme.dart';
 import '../shared/utils.dart';
 
-class OpenSettingsAction extends StatelessWidget {
-  const OpenSettingsAction({super.key, this.color});
-
-  final Color? color;
-
-  @override
-  Widget build(BuildContext context) {
-    return DevToolsTooltip(
-      message: 'Settings',
-      child: InkWell(
-        onTap: () {
-          unawaited(
-            showDialog(
-              context: context,
-              builder: (context) => const SettingsDialog(),
-            ),
-          );
-        },
-        child: Container(
-          width: actionWidgetSize,
-          height: actionWidgetSize,
-          alignment: Alignment.center,
-          child: Icon(
-            Icons.settings_outlined,
-            size: actionsIconSize,
-            color: color,
-          ),
-        ),
-      ),
-    );
-  }
+class OpenSettingsAction extends ScaffoldAction {
+  OpenSettingsAction({super.key, Color? color})
+      : super(
+          icon: Icons.settings_outlined,
+          tooltip: 'Settings',
+          color: color,
+          onPressed: (context) {
+            unawaited(
+              showDialog(
+                context: context,
+                builder: (context) => const SettingsDialog(),
+              ),
+            );
+          },
+        );
 }
 
 class SettingsDialog extends StatelessWidget {
