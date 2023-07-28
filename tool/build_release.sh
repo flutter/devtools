@@ -41,6 +41,14 @@ if [[ $1 = "--update-perfetto" ]]; then
   $TOOL_DIR/update_perfetto.sh
 fi
 
+pushd $DEVTOOLS_DIR/packages/devtools_shared
+flutter pub get
+popd
+
+pushd $DEVTOOLS_DIR/packages/devtools_extensions
+flutter pub get
+popd
+
 pushd $DEVTOOLS_DIR/packages/devtools_app
 
 flutter clean
