@@ -36,8 +36,8 @@ class Variables extends StatelessWidget {
     } else {
       return TreeView<DartObjectNode>(
         dataRootsListenable: serviceManager.appState.variables,
-        dataDisplayProvider: (variable, onPressed) => DisplayProvider(
-          variable: variable,
+        dataDisplayProvider: (variable, onPressed) => VmDisplayProvider(
+          node: variable,
           onTap: onPressed,
         ),
         onItemSelected: onItemPressed,

@@ -16,36 +16,52 @@ import '../../screen.dart';
 import '../../theme.dart';
 import 'description.dart';
 
-/// The display provider for variables fetched via the VM service protocol.
-class DisplayProvider extends StatelessWidget {
-  const DisplayProvider({
+/// Defines how to display and interact with a variable node.
+abstract class NodeDisplayProvider<T> extends StatelessWidget {
+  const NodeDisplayProvider({
     super.key,
-    required this.variable,
+    required this.node,
     required this.onTap,
   });
 
-  final DartObjectNode variable;
+  final T node;
+
+  final VoidCallback onTap;
+}
+
+/// The display provider for variables fetched via the VM service protocol.
+class VmDisplayProvider extends StatelessWidget implements NodeDisplayProvider {
+  const VmDisplayProvider({
+    super.key,
+    required this.node,
+    required this.onTap,
+  });
+
+  @override
+  final DartObjectNode node;
+
+  @override
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    if (variable.text != null) {
+    if (node.text != null) {
       return InteractivityWrapper(
         onTap: onTap,
         menuButtons: _getMenuButtons(context),
         child: Text.rich(
           TextSpan(
             children: processAnsiTerminalCodes(
-              variable.text,
+              node.text,
               theme.subtleFixedFontStyle,
             ),
           ),
         ),
       );
     }
-    final diagnostic = variable.ref?.diagnostic;
+    final diagnostic = node.ref?.diagnostic;
     if (diagnostic != null) {
       return DiagnosticsNodeDescription(
         diagnostic,
@@ -54,14 +70,14 @@ class DisplayProvider extends StatelessWidget {
       );
     }
 
-    final hasName = variable.name?.isNotEmpty ?? false;
+    final hasName = node.name?.isNotEmpty ?? false;
     return InteractivityWrapper(
       onTap: onTap,
       menuButtons: _getMenuButtons(context),
       child: Text.rich(
         TextSpan(
-          text: hasName ? variable.name : null,
-          style: variable.artificialName
+          text: hasName ? node.name : null,
+          style: node.artificialName
               ? theme.subtleFixedFontStyle
               : theme.fixedFontStyle.apply(
                   color: theme.colorScheme.controlFlowSyntaxColor,
@@ -73,10 +89,10 @@ class DisplayProvider extends StatelessWidget {
                 style: theme.fixedFontStyle,
               ),
             TextSpan(
-              text: variable.displayValue.toString(),
-              style: variable.artificialValue
+              text: node.displayValue.toString(),
+              style: node.artificialValue
                   ? theme.subtleFixedFontStyle
-                  : _variableDisplayStyle(theme, variable),
+                  : _variableDisplayStyle(theme, node),
             ),
           ],
         ),
@@ -88,20 +104,20 @@ class DisplayProvider extends StatelessWidget {
     BuildContext context,
   ) {
     return [
-      if (variable.isRerootable)
+      if (node.isRerootable)
         ContextMenuButtonItem(
           onPressed: () {
             ContextMenuController.removeAny();
-            final ref = variable.ref;
+            final ref = node.ref;
             serviceManager.consoleService.appendBrowsableInstance(
-              instanceRef: variable.value as InstanceRef?,
+              instanceRef: node.value as InstanceRef?,
               isolateRef: ref?.isolateRef,
               heapSelection: ref?.heapSelection,
             );
           },
           label: 'Reroot',
         ),
-      if (serviceManager.inspectorService != null && variable.isRoot)
+      if (serviceManager.inspectorService != null && node.isRoot)
         ContextMenuButtonItem(
           onPressed: () {
             ContextMenuController.removeAny();
@@ -117,11 +133,11 @@ class DisplayProvider extends StatelessWidget {
   ) async {
     final router = DevToolsRouterDelegate.of(context);
     final inspectorService = serviceManager.inspectorService;
-    if (await variable.inspectWidget()) {
+    if (await node.inspectWidget()) {
       router.navigateIfNotCurrent(ScreenMetaData.inspector.id);
     } else {
       if (inspectorService!.isDisposed) return;
-      final isInspectable = await variable.isInspectable;
+      final isInspectable = await node.isInspectable;
       if (inspectorService.isDisposed) return;
       if (isInspectable) {
         notificationService.push(
@@ -178,14 +194,18 @@ class DisplayProvider extends StatelessWidget {
 }
 
 /// The display provider for variables fetched via the Debug Adapter Protocol.
-class DapDisplayProvider extends StatelessWidget {
+class DapDisplayProvider extends StatelessWidget
+    implements NodeDisplayProvider {
   const DapDisplayProvider({
     super.key,
     required this.node,
     required this.onTap,
   });
 
+  @override
   final DapObjectNode node;
+
+  @override
   final VoidCallback onTap;
 
   @override
