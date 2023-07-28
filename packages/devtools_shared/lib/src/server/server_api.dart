@@ -226,14 +226,14 @@ class ServerApi {
     }
   }
 
-  static FutureOr<shelf.Response> _encodeResponse(
+  static shelf.Response _encodeResponse(
     Object? object, {
     required ServerApi api,
   }) {
     return api.getCompleted(json.encode(object));
   }
 
-  static FutureOr<shelf.Response?> _checkRequiredParameters(
+  static shelf.Response? _checkRequiredParameters(
     List<String> expectedParams, {
     required Map<String, String> queryParams,
     required ServerApi api,
@@ -267,21 +267,19 @@ class ServerApi {
   ///
   /// In the open-source version of DevTools, Google Analytics handles this
   /// without any need to involve the server.
-  FutureOr<shelf.Response> logScreenView() => notImplemented();
+  shelf.Response logScreenView() => notImplemented();
 
   /// Return the value of the property.
-  FutureOr<shelf.Response> getCompleted(String value) =>
-      shelf.Response.ok('$value');
+  shelf.Response getCompleted(String value) => shelf.Response.ok('$value');
 
   /// Return the value of the property after the property value has been set.
-  FutureOr<shelf.Response> setCompleted(String value) =>
-      shelf.Response.ok('$value');
+  shelf.Response setCompleted(String value) => shelf.Response.ok('$value');
 
   /// A [shelf.Response] for API calls that encountered a request problem e.g.,
   /// setActiveSurvey not called.
   ///
   /// This is a 400 Bad Request response.
-  FutureOr<shelf.Response> badRequest([String? logError]) {
+  shelf.Response badRequest([String? logError]) {
     if (logError != null) print(logError);
     return shelf.Response(HttpStatus.badRequest);
   }
@@ -291,8 +289,7 @@ class ServerApi {
   ///
   /// This is a no-op 204 No Content response because returning 404 Not Found
   /// creates unnecessary noise in the console.
-  FutureOr<shelf.Response> notImplemented() =>
-      shelf.Response(HttpStatus.noContent);
+  shelf.Response notImplemented() => shelf.Response(HttpStatus.noContent);
 }
 
 abstract class _ExtensionsApiHandler {
@@ -300,8 +297,8 @@ abstract class _ExtensionsApiHandler {
     ServerApi api,
     Map<String, String> queryParams,
     ExtensionsManager extensionsManager,
-  ) async {
-    final missingRequiredParams = await ServerApi._checkRequiredParameters(
+  ) {
+    final missingRequiredParams = ServerApi._checkRequiredParameters(
       [ExtensionsApi.extensionRootPathPropertyName],
       queryParams: queryParams,
       api: api,
@@ -320,11 +317,11 @@ abstract class _ExtensionsApiHandler {
     });
   }
 
-  static FutureOr<shelf.Response> handleExtensionActivationState(
+  static shelf.Response handleExtensionActivationState(
     ServerApi api,
     Map<String, String> queryParams,
-  ) async {
-    final missingRequiredParams = await ServerApi._checkRequiredParameters(
+  ) {
+    final missingRequiredParams = ServerApi._checkRequiredParameters(
       [
         ExtensionsApi.extensionRootPathPropertyName,
         ExtensionsApi.extensionsResultPropertyName,
