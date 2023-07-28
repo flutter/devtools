@@ -7,6 +7,7 @@ import 'package:flutter/material.dart' hide Stack;
 import 'package:flutter/services.dart';
 import 'package:vm_service/vm_service.dart';
 
+import '../../diagnostics/dap_object_node.dart';
 import '../../diagnostics/dart_object_node.dart';
 import '../../globals.dart';
 import '../../primitives/utils.dart';
@@ -15,6 +16,7 @@ import '../../screen.dart';
 import '../../theme.dart';
 import 'description.dart';
 
+/// The display provider for variables fetched via the VM service protocol.
 class DisplayProvider extends StatelessWidget {
   const DisplayProvider({
     super.key,
@@ -172,6 +174,51 @@ class DisplayProvider extends StatelessWidget {
       default:
         return style;
     }
+  }
+}
+
+/// The display provider for variables fetched via the Debug Adapter Protocol.
+class DapDisplayProvider extends StatelessWidget {
+  const DapDisplayProvider({
+    super.key,
+    required this.node,
+    required this.onTap,
+  });
+
+  final DapObjectNode node;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    final variable = node.variable;
+    final name = variable.name;
+    final value = variable.value;
+
+    // TODO(https://github.com/flutter/devtools/issues/6056): Wrap in
+    // interactivity wrapper to provide inspect and re-root functionality. Add
+    // tooltip on hover to provide type information.
+    return Text.rich(
+      TextSpan(
+        text: name,
+        style: theme.fixedFontStyle.apply(
+          color: theme.colorScheme.controlFlowSyntaxColor,
+        ),
+        children: [
+          TextSpan(
+            text: ': ',
+            style: theme.fixedFontStyle,
+          ),
+          // TODO(https://github.com/flutter/devtools/issues/6056): Change text
+          // style based on variable type.
+          TextSpan(
+            text: value,
+            style: theme.subtleFixedFontStyle,
+          ),
+        ],
+      ),
+    );
   }
 }
 

@@ -7,14 +7,18 @@
 library vm_service_wrapper;
 
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:collection/collection.dart' show IterableExtension;
+import 'package:dap/dap.dart' as dap;
+import 'package:dds_service_extensions/dap.dart';
 import 'package:dds_service_extensions/dds_service_extensions.dart';
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../screens/vm_developer/vm_service_private_extensions.dart';
+import '../shared/feature_flags.dart';
 import '../shared/globals.dart';
 import '../shared/primitives/utils.dart';
 import 'json_to_service_cache.dart';
@@ -88,6 +92,9 @@ class VmServiceWrapper implements VmService {
 
   /// A counter for unique ids to add to each of a future's messages.
   static int _logIdCounter = 0;
+
+  /// A sequence number incremented and attached to each DAP request.
+  static int _dapSeq = 0;
 
   /// Executes `callback` for each isolate, and waiting for all callbacks to
   /// finish before completing.
@@ -1091,6 +1098,75 @@ class VmServiceWrapper implements VmService {
         isolateId: isolateId,
         parser: ObjectStore.parse,
       );
+
+  Future<dap.VariablesResponseBody?> dapVariablesRequest(
+    dap.VariablesArguments args,
+  ) async {
+    final response = await _sendDapRequest('variables', args: args);
+    if (response == null) return null;
+
+    return dap.VariablesResponseBody.fromJson(
+      response as Map<String, Object?>,
+    );
+  }
+
+  Future<dap.ScopesResponseBody?> dapScopesRequest(
+    dap.ScopesArguments args,
+  ) async {
+    final response = await _sendDapRequest('scopes', args: args);
+    if (response == null) return null;
+
+    return dap.ScopesResponseBody.fromJson(
+      response as Map<String, Object?>,
+    );
+  }
+
+  Future<dap.StackTraceResponseBody?> dapStackTraceRequest(
+    dap.StackTraceArguments args,
+  ) async {
+    final response = await _sendDapRequest('stackTrace', args: args);
+    if (response == null) return null;
+
+    return dap.StackTraceResponseBody.fromJson(
+      response as Map<String, Object?>,
+    );
+  }
+
+  Future<Object?> _sendDapRequest(
+    String command, {
+    required Object? args,
+  }) async {
+    if (!FeatureFlags.dapDebugging) return null;
+
+    // Warn the user if there is no DDS connection.
+    if (!_ddsSupported) {
+      _log.warning('A DDS connection is required to debug via DAP.');
+      return null;
+    }
+
+    final response = await trackFuture(
+      'dap.$command',
+      _vmService.sendDapRequest(
+        jsonEncode(
+          dap.Request(
+            command: command,
+            seq: _dapSeq++,
+            arguments: args,
+          ),
+        ),
+      ),
+    );
+
+    // Log any errors from DAP if the request failed:
+    if (!response.dapResponse.success) {
+      _log.warning(
+        'Error for dap.$command: ${response.dapResponse.message ?? 'Unknown.'}',
+      );
+      return null;
+    }
+
+    return response.dapResponse.body;
+  }
 
   /// Prevent DevTools from blocking Dart SDK rolls if changes in
   /// package:vm_service are unimplemented in DevTools.
