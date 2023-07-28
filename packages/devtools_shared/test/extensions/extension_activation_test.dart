@@ -12,13 +12,12 @@ void main() {
   group('$DevToolsOptions', () {
     late DevToolsOptions options;
     late Directory tmpDir;
-
-    const tmpPath = '_tmp';
-    final tmpUri = Uri.parse(tmpPath);
+    late Uri tmpUri;
 
     setUp(() {
       options = DevToolsOptions();
-      tmpDir = Directory(tmpPath)..createSync();
+      tmpDir = Directory.current.createTempSync();
+      tmpUri = Uri.parse(tmpDir.path);
     });
 
     tearDown(() {
@@ -29,7 +28,8 @@ void main() {
     File _optionsFileFromTmp() {
       final tmpFiles = tmpDir.listSync();
       expect(tmpFiles, isNotEmpty);
-      final optionsFile = File('$tmpPath/${DevToolsOptions.optionsFileName}');
+      final optionsFile =
+          File('${tmpDir.path}/${DevToolsOptions.optionsFileName}');
       expect(optionsFile.existsSync(), isTrue);
       return optionsFile;
     }
@@ -86,21 +86,21 @@ extensions:
 
       expect(
         options.lookupExtensionActivationState(
-        rootUri: tmpUri,
+          rootUri: tmpUri,
           extensionName: 'foo',
         ),
         ExtensionActivationState.enabled,
       );
       expect(
         options.lookupExtensionActivationState(
-        rootUri: tmpUri,
+          rootUri: tmpUri,
           extensionName: 'bar',
         ),
         ExtensionActivationState.disabled,
       );
       expect(
         options.lookupExtensionActivationState(
-        rootUri: tmpUri,
+          rootUri: tmpUri,
           extensionName: 'baz',
         ),
         ExtensionActivationState.none,
