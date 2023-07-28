@@ -838,7 +838,8 @@ class ToolbarAction extends StatelessWidget {
   }
 }
 
-class ScaffoldAction extends StatelessWidget {
+/// Icon action button used in the main DevTools toolbar or footer.
+abstract class ScaffoldAction extends StatelessWidget {
   const ScaffoldAction({
     super.key,
     required this.icon,
