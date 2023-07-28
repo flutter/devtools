@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// ignore_for_file: avoid_classes_with_only_static_members
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -34,6 +36,10 @@ class ServerApi {
     ServerApi? api,
   ]) {
     api ??= ServerApi();
+    final queryParams = request.requestedUri.queryParameters;
+    // TODO(kenz): break this switch statement up so that it uses helper methods
+    // for each case. Also use [_checkRequiredParameters] and [_encodeResponse]
+    // helpers.
     switch (request.url.path) {
       // ----- Flutter Tool GA store. -----
       case apiGetFlutterGAEnabled:
@@ -69,7 +75,6 @@ class ServerApi {
         );
       case apiSetDevToolsEnabled:
         // Enable or disable DevTools analytics collection.
-        final queryParams = request.requestedUri.queryParameters;
         if (queryParams.containsKey(devToolsEnabledPropertyName)) {
           _devToolsUsage.analyticsEnabled =
               json.decode(queryParams[devToolsEnabledPropertyName]!);
@@ -87,7 +92,6 @@ class ServerApi {
         // Set the active survey used to store subsequent apiGetSurveyActionTaken,
         // apiSetSurveyActionTaken, apiGetSurveyShownCount, and
         // apiIncrementSurveyShownCount calls.
-        final queryParams = request.requestedUri.queryParameters;
         if (queryParams.keys.length == 1 &&
             queryParams.containsKey(activeSurveyName)) {
           final String theSurveyName = queryParams[activeSurveyName]!;
@@ -123,7 +127,6 @@ class ServerApi {
         }
         // Set the SurveyActionTaken.
         // Has the survey been taken or dismissed..
-        final queryParams = request.requestedUri.queryParameters;
         if (queryParams.containsKey(surveyActionTakenPropertyName)) {
           _devToolsUsage.surveyActionTaken =
               json.decode(queryParams[surveyActionTakenPropertyName]!);
@@ -164,7 +167,6 @@ class ServerApi {
           json.encode(_devToolsUsage.lastReleaseNotesVersion),
         );
       case apiSetLastReleaseNotesVersion:
-        final queryParams = request.requestedUri.queryParameters;
         if (queryParams.containsKey(lastReleaseNotesVersionPropertyName)) {
           _devToolsUsage.lastReleaseNotesVersion =
               queryParams[lastReleaseNotesVersionPropertyName]!;
@@ -176,7 +178,6 @@ class ServerApi {
       // ----- App size api. -----
 
       case apiGetBaseAppSizeFile:
-        final queryParams = request.requestedUri.queryParameters;
         if (queryParams.containsKey(baseAppSizeFilePropertyName)) {
           final filePath = queryParams[baseAppSizeFilePropertyName]!;
           final fileJson = LocalFileSystem.devToolsFileAsJson(filePath);
@@ -191,7 +192,6 @@ class ServerApi {
           '$baseAppSizeFilePropertyName',
         );
       case apiGetTestAppSizeFile:
-        final queryParams = request.requestedUri.queryParameters;
         if (queryParams.containsKey(testAppSizeFilePropertyName)) {
           final filePath = queryParams[testAppSizeFilePropertyName]!;
           final fileJson = LocalFileSystem.devToolsFileAsJson(filePath);
@@ -209,64 +209,43 @@ class ServerApi {
       // ----- Extensions api. -----
 
       case ExtensionsApi.apiServeAvailableExtensions:
-        final queryParams = request.requestedUri.queryParameters;
-        final rootPath =
-            queryParams[ExtensionsApi.extensionRootPathPropertyName];
-        if (rootPath == null) {
-          return api.badRequest(
-            '${ExtensionsApi.extensionRootPathPropertyName} query parameter '
-            'required',
-          );
-        }
-
-        return extensionsManager.serveAvailableExtensions(rootPath).then((_) {
-          final extensions = extensionsManager.devtoolsExtensions
-              .map((p) => p.toJson())
-              .toList();
-          final result = jsonEncode({
-            ExtensionsApi.extensionsResultPropertyName: extensions,
-          });
-          return api!.getCompleted(result);
-        });
+        return _ExtensionsApiHandler.handleServeAvailableExtensions(
+          api,
+          queryParams,
+          extensionsManager,
+        );
 
       case ExtensionsApi.apiExtensionActivationState:
-        final queryParams = request.requestedUri.queryParameters;
-        final rootPath =
-            queryParams[ExtensionsApi.extensionRootPathPropertyName];
-        if (rootPath == null) {
-          return api.badRequest(
-            '${ExtensionsApi.extensionRootPathPropertyName} query parameter '
-            'required',
-          );
-        }
-        final rootUri = Uri.parse(rootPath);
-
-        final extensionName =
-            queryParams[ExtensionsApi.extensionNamePropertyName];
-        if (extensionName == null) {
-          return api.badRequest(
-            '${ExtensionsApi.extensionNamePropertyName} query parameter required',
-          );
-        }
-
-        final activate = queryParams[ExtensionsApi.activationStatePropertyName];
-        if (activate != null) {
-          final newState = _devToolsOptions.setExtensionActivationState(
-            rootUri: rootUri,
-            extensionName: extensionName,
-            activate: bool.parse(activate),
-          );
-          return api.getCompleted(json.encode(newState.name));
-        }
-        final activationState = _devToolsOptions.lookupExtensionActivationState(
-          rootUri: rootUri,
-          extensionName: extensionName,
+        return _ExtensionsApiHandler.handleExtensionActivationState(
+          api,
+          queryParams,
         );
-        return api.getCompleted(json.encode(activationState.name));
 
       default:
         return api.notImplemented();
     }
+  }
+
+  static FutureOr<shelf.Response> _encodeResponse(
+    Object? object, {
+    required ServerApi api,
+  }) {
+    return api.getCompleted(json.encode(object));
+  }
+
+  static FutureOr<shelf.Response?> _checkRequiredParameters(
+    List<String> expectedParams, {
+    required Map<String, String> queryParams,
+    required ServerApi api,
+  }) {
+    final missing = expectedParams.where(
+      (param) => !queryParams.containsKey(param),
+    );
+    return missing.isNotEmpty
+        ? api.badRequest(
+            'Missing required query parameters: ${missing.toList()}',
+          )
+        : null;
   }
 
   // Accessing Flutter usage file e.g., ~/.flutter.
@@ -314,4 +293,65 @@ class ServerApi {
   /// creates unnecessary noise in the console.
   FutureOr<shelf.Response> notImplemented() =>
       shelf.Response(HttpStatus.noContent);
+}
+
+abstract class _ExtensionsApiHandler {
+  static FutureOr<shelf.Response> handleServeAvailableExtensions(
+    ServerApi api,
+    Map<String, String> queryParams,
+    ExtensionsManager extensionsManager,
+  ) async {
+    final missingRequiredParams = await ServerApi._checkRequiredParameters(
+      [ExtensionsApi.extensionRootPathPropertyName],
+      queryParams: queryParams,
+      api: api,
+    );
+    if (missingRequiredParams != null) return missingRequiredParams;
+
+    final rootPath = queryParams[ExtensionsApi.extensionRootPathPropertyName];
+
+    return extensionsManager.serveAvailableExtensions(rootPath).then((_) {
+      final extensions =
+          extensionsManager.devtoolsExtensions.map((p) => p.toJson()).toList();
+      final result = jsonEncode({
+        ExtensionsApi.extensionsResultPropertyName: extensions,
+      });
+      return ServerApi._encodeResponse(result, api: api);
+    });
+  }
+
+  static FutureOr<shelf.Response> handleExtensionActivationState(
+    ServerApi api,
+    Map<String, String> queryParams,
+  ) async {
+    final missingRequiredParams = await ServerApi._checkRequiredParameters(
+      [
+        ExtensionsApi.extensionRootPathPropertyName,
+        ExtensionsApi.extensionsResultPropertyName,
+      ],
+      queryParams: queryParams,
+      api: api,
+    );
+    if (missingRequiredParams != null) return missingRequiredParams;
+
+    final rootPath = queryParams[ExtensionsApi.extensionRootPathPropertyName]!;
+    final rootUri = Uri.parse(rootPath);
+    final extensionName = queryParams[ExtensionsApi.extensionNamePropertyName]!;
+
+    final activate = queryParams[ExtensionsApi.activationStatePropertyName];
+    if (activate != null) {
+      final newState = ServerApi._devToolsOptions.setExtensionActivationState(
+        rootUri: rootUri,
+        extensionName: extensionName,
+        activate: bool.parse(activate),
+      );
+      return ServerApi._encodeResponse(newState.name, api: api);
+    }
+    final activationState =
+        ServerApi._devToolsOptions.lookupExtensionActivationState(
+      rootUri: rootUri,
+      extensionName: extensionName,
+    );
+    return ServerApi._encodeResponse(activationState.name, api: api);
+  }
 }

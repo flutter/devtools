@@ -125,7 +125,7 @@ enum ExtensionActivationState {
   /// Something went wrong with reading or writing the activation state.
   ///
   /// We should ignore extensions with this activation state.
-  err;
+  error;
 
   static ExtensionActivationState from(String? value) {
     return ExtensionActivationState.values

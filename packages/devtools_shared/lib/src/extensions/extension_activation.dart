@@ -31,7 +31,7 @@ $_extensionsKey:
     required String extensionName,
   }) {
     final options = _optionsAsMap(rootUri: rootUri);
-    if (options == null) return ExtensionActivationState.err;
+    if (options == null) return ExtensionActivationState.error;
 
     final extensions =
         (options[_extensionsKey] as List?)?.cast<Map<String, Object?>>();
@@ -58,7 +58,7 @@ $_extensionsKey:
     required bool activate,
   }) {
     final options = _optionsAsMap(rootUri: rootUri);
-    if (options == null) return ExtensionActivationState.err;
+    if (options == null) return ExtensionActivationState.error;
 
     var extensions =
         (options[_extensionsKey] as List?)?.cast<Map<String, Object?>>();
@@ -70,9 +70,11 @@ $_extensionsKey:
     // Write the new activation state to the map.
     final extension = extensions.firstWhereOrNull(
       (e) => e.keys.first == extensionName,
-    )?[extensionName] = activate;
+    );
     if (extension == null) {
       extensions.add({extensionName: activate});
+    } else {
+      extension[extensionName] = activate;
     }
 
     _writeToOptionsFile(rootUri: rootUri, options: options);
