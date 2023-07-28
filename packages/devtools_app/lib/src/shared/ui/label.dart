@@ -44,9 +44,12 @@ class MaterialIconLabel extends StatelessWidget {
     required this.iconData,
     this.color,
     this.minScreenWidthForTextBeforeScaling,
-  });
+  }) : assert(
+          label != null || iconData != null,
+          'Either iconData or label must be specified.',
+        );
 
-  final IconData iconData;
+  final IconData? iconData;
   final Color? color;
   final String? label;
   final double? minScreenWidthForTextBeforeScaling;
@@ -58,16 +61,19 @@ class MaterialIconLabel extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(
-          iconData,
-          size: defaultIconSize,
-          color: color,
-        ),
+        if (iconData != null)
+          Icon(
+            iconData,
+            size: defaultIconSize,
+            color: color,
+          ),
         // TODO(jacobr): animate showing and hiding the text.
         if (label != null &&
             includeText(context, minScreenWidthForTextBeforeScaling))
           Padding(
-            padding: const EdgeInsets.only(left: denseSpacing),
+            padding: EdgeInsets.only(
+              left: iconData != null ? denseSpacing : 0.0,
+            ),
             child: Text(
               label!,
               style: TextStyle(color: color),
