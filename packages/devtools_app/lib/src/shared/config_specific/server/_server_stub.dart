@@ -78,7 +78,7 @@ Future<DevToolsJsonFile?> requestTestAppSizeFile(String path) async {
 }
 
 Future<List<DevToolsExtensionConfig>> refreshAvailableExtensions(
-  String? rootPath,
+  String rootPath,
 ) async {
   return [];
 }

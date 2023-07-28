@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:collection/collection.dart';
+
 /// Describes an extension that can be dynamically loaded into a custom screen
 /// in DevTools.
 class DevToolsExtensionConfig {
@@ -108,4 +110,26 @@ class DevToolsExtensionConfig {
         versionKey: version,
         materialIconCodePointKey: materialIconCodePoint,
       };
+}
+
+enum ExtensionActivationState {
+  /// The extension has been enabled manually by the user.
+  enabled,
+
+  /// The extension has been disabled manually by the user.
+  disabled,
+
+  /// The extension has been neither enabled nor disabled by the user.
+  none,
+
+  /// Something went wrong with reading or writing the activation state.
+  ///
+  /// We should ignore extensions with this activation state.
+  error;
+
+  static ExtensionActivationState from(String? value) {
+    return ExtensionActivationState.values
+            .firstWhereOrNull((e) => e.name == value) ??
+        ExtensionActivationState.none;
+  }
 }
