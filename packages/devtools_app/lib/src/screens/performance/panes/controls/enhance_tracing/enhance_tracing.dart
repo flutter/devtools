@@ -230,10 +230,14 @@ class _TrackWidgetBuildsSettingState extends State<TrackWidgetBuildsSetting>
             );
           },
         ),
-        DualValueListenableBuilder<bool, TrackWidgetBuildsScope?>(
-          firstListenable: _tracked,
-          secondListenable: _selectedScope,
-          builder: (context, tracked, selectedScope, _) {
+        MultiValueListenableBuilder(
+          listenables: [
+            _tracked,
+            _selectedScope,
+          ],
+          builder: (context, values, _) {
+            final tracked = values.first as bool;
+            final selectedScope = values.second as TrackWidgetBuildsScope?;
             return Padding(
               padding: const EdgeInsets.only(left: _scopeSelectorPadding),
               child: TrackWidgetBuildsScopeSelector(

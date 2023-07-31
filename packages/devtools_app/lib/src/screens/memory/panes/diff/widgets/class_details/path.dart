@@ -123,18 +123,24 @@ class _PathView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return DualValueListenableBuilder<bool, bool>(
-      firstListenable: controller.hideStandard,
-      secondListenable: controller.invert,
-      builder: (_, hideStandard, invert, __) => SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: SingleChildScrollView(
-          child: Text(
-            path.toLongString(inverted: invert, hideStandard: hideStandard),
-            overflow: TextOverflow.visible,
+    return MultiValueListenableBuilder(
+      listenables: [
+        controller.hideStandard,
+        controller.invert,
+      ],
+      builder: (_, values, __) {
+        final hideStandard = values.first as bool;
+        final invert = values.second as bool;
+        return SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: SingleChildScrollView(
+            child: Text(
+              path.toLongString(inverted: invert, hideStandard: hideStandard),
+              overflow: TextOverflow.visible,
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }

@@ -250,10 +250,12 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
     Widget scaffoldBuilder() {
       // Force regeneration of visible screens when VM developer mode is
       // enabled and when the list of available extensions change.
-      return DualValueListenableBuilder<bool, List<DevToolsExtensionConfig>>(
-        firstListenable: preferences.vmDeveloperModeEnabled,
-        secondListenable: extensionService.availableExtensions,
-        builder: (_, __, ___, child) {
+      return MultiValueListenableBuilder(
+        listenables: [
+          preferences.vmDeveloperModeEnabled,
+          extensionService.availableExtensions,
+        ],
+        builder: (_, __, child) {
           final screens = _visibleScreens()
               .where((p) => embed && page != null ? p.screenId == page : true)
               .where((p) => !hide.contains(p.screenId))

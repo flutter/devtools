@@ -85,10 +85,12 @@ class _EditableListState extends State<EditableList> {
 
   @override
   Widget build(BuildContext context) {
-    return DualValueListenableBuilder(
-      firstListenable: widget.entries,
-      secondListenable: widget.isRefreshing ?? ValueNotifier<bool>(false),
-      builder: (_, __, ___, ____) {
+    return MultiValueListenableBuilder(
+      listenables: [
+        widget.entries,
+        widget.isRefreshing ?? ValueNotifier<bool>(false),
+      ],
+      builder: (_, __, ____) {
         return Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,

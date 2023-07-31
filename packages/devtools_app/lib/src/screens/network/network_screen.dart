@@ -50,10 +50,14 @@ class NetworkScreen extends Screen {
     final networkController = Provider.of<NetworkController>(context);
     final color = Theme.of(context).textTheme.bodyMedium!.color!;
 
-    return DualValueListenableBuilder<NetworkRequests, List<NetworkRequest>>(
-      firstListenable: networkController.requests,
-      secondListenable: networkController.filteredData,
-      builder: (context, networkRequests, filteredRequests, child) {
+    return MultiValueListenableBuilder(
+      listenables: [
+        networkController.requests,
+        networkController.filteredData,
+      ],
+      builder: (context, values, child) {
+        final networkRequests = values.first as NetworkRequests;
+        final filteredRequests = values.second as List<NetworkRequest>;
         final filteredCount = filteredRequests.length;
         final totalCount = networkRequests.requests.length;
         return Row(

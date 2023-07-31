@@ -32,12 +32,14 @@ class TimelineEventsTabView extends StatelessWidget {
       builder: (context, useLegacy, _) {
         return useLegacy
             ? KeepAliveWrapper(
-                child:
-                    DualValueListenableBuilder<EventsControllerStatus, double>(
-                  firstListenable: controller.status,
-                  secondListenable:
-                      controller.legacyController.processor.progressNotifier,
-                  builder: (context, status, processingProgress, _) {
+                child: MultiValueListenableBuilder(
+                  listenables: [
+                    controller.status,
+                    controller.legacyController.processor.progressNotifier,
+                  ],
+                  builder: (context, values, _) {
+                    final status = values.first as EventsControllerStatus;
+                    final processingProgress = values.second as double;
                     return TimelineEventsView(
                       controller: controller,
                       processing: status == EventsControllerStatus.processing,

@@ -1214,6 +1214,10 @@ extension ListExtension<T> on List<T> {
     }
     return false;
   }
+
+  T get second => this[1];
+
+  T get third => this[2];
 }
 
 extension SetExtension<T> on Set<T> {

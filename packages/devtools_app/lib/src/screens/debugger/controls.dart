@@ -167,10 +167,14 @@ class CodeStatisticsControls extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return DualValueListenableBuilder<bool, bool>(
-      firstListenable: controller.codeViewController.showCodeCoverage,
-      secondListenable: controller.codeViewController.showProfileInformation,
-      builder: (context, showCodeCoverage, showProfileInformation, _) {
+    return MultiValueListenableBuilder(
+      listenables: [
+        controller.codeViewController.showCodeCoverage,
+        controller.codeViewController.showProfileInformation,
+      ],
+      builder: (context, values, _) {
+        final showCodeCoverage = values.first as bool;
+        final showProfileInformation = values.second as bool;
         return Row(
           children: [
             // TODO(kenz): clean up this button group when records are

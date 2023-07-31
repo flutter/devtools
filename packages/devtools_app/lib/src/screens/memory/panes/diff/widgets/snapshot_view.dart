@@ -20,11 +20,14 @@ class SnapshotView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return DualValueListenableBuilder<List<SingleClassStats>?,
-        List<DiffClassStats>?>(
-      firstListenable: controller.derived.singleClassesToShow,
-      secondListenable: controller.derived.diffClassesToShow,
-      builder: (_, singleClasses, diffClasses, __) {
+    return MultiValueListenableBuilder(
+      listenables: [
+        controller.derived.singleClassesToShow,
+        controller.derived.diffClassesToShow,
+      ],
+      builder: (_, values, __) {
+        final singleClasses = values.first as List<SingleClassStats>?;
+        final diffClasses = values.second as List<DiffClassStats>?;
         if (controller.derived.updatingValues) {
           return const Center(child: Text('Calculating...'));
         }

@@ -67,10 +67,14 @@ class AnalysisStatusView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return DualValueListenableBuilder<AnalysisStatus, String>(
-      firstListenable: controller.status,
-      secondListenable: controller.message,
-      builder: (_, status, message, __) {
+    return MultiValueListenableBuilder(
+      listenables: [
+        controller.status,
+        controller.message,
+      ],
+      builder: (_, values, __) {
+        final status = values.first as AnalysisStatus;
+        final message = values.second as String;
         if (status == AnalysisStatus.notStarted) {
           return analysisStarter;
         }

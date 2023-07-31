@@ -87,10 +87,14 @@ class _LayerVisualizer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return DualValueListenableBuilder<RasterStats?, bool>(
-      firstListenable: rasterStatsController.rasterStats,
-      secondListenable: rasterStatsController.loadingSnapshot,
-      builder: (context, rasterStats, loading, _) {
+    return MultiValueListenableBuilder(
+      listenables: [
+        rasterStatsController.rasterStats,
+        rasterStatsController.loadingSnapshot,
+      ],
+      builder: (context, values, _) {
+        final rasterStats = values.first as RasterStats?;
+        final loading = values.second as bool;
         if (loading) {
           return const CenteredCircularProgressIndicator();
         }
