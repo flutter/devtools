@@ -339,12 +339,8 @@ class DebuggerButton extends StatelessWidget {
           side: BorderSide.none,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.horizontal(
-              left: roundedLeftBorder
-                  ? const Radius.circular(defaultBorderRadius)
-                  : Radius.zero,
-              right: roundedRightBorder
-                  ? const Radius.circular(defaultBorderRadius)
-                  : Radius.zero,
+              left: roundedLeftBorder ? defaultRadius : Radius.zero,
+              right: roundedRightBorder ? defaultRadius : Radius.zero,
             ),
           ),
         ),

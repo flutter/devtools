@@ -102,7 +102,7 @@ class MemoryChartLegend extends StatelessWidget {
       decoration: BoxDecoration(
         color: colorScheme.defaultBackgroundColor,
         border: Border.all(color: theme.focusColor),
-        borderRadius: BorderRadius.circular(defaultBorderRadius),
+        borderRadius: defaultBorderRadius,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

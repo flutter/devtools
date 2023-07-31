@@ -90,9 +90,6 @@ class _InspectorBreadcrumb extends StatelessWidget {
     required this.onTap,
   }) : super(key: key);
 
-  static const BorderRadius _borderRadius =
-      BorderRadius.all(Radius.circular(defaultBorderRadius));
-
   static const _iconScale = 0.75;
 
   final _InspectorBreadcrumbData data;
@@ -120,14 +117,14 @@ class _InspectorBreadcrumb extends StatelessWidget {
 
     return InkWell(
       onTap: data.isClickable ? onTap : null,
-      borderRadius: _borderRadius,
+      borderRadius: defaultBorderRadius,
       child: Container(
         padding: const EdgeInsets.symmetric(
           horizontal: densePadding,
           vertical: borderPadding,
         ),
         decoration: BoxDecoration(
-          borderRadius: _borderRadius,
+          borderRadius: defaultBorderRadius,
           color: data.isSelected
               ? Theme.of(context).colorScheme.selectedRowBackgroundColor
               : Colors.transparent,

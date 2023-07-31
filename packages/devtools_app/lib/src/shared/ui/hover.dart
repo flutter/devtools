@@ -146,7 +146,7 @@ class HoverCard {
                   color: focusColor,
                   width: hoverCardBorderWidth,
                 ),
-                borderRadius: BorderRadius.circular(defaultBorderRadius),
+                borderRadius: defaultBorderRadius,
               ),
               width: width,
               child: Column(
