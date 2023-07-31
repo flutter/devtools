@@ -13,6 +13,7 @@ import 'package:vm_service/vm_service.dart';
 
 import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/analytics/constants.dart' as gac;
+import '../../shared/banner_messages.dart';
 import '../../shared/common_widgets.dart';
 import '../../shared/diagnostics/primitives/source_location.dart';
 import '../../shared/flex_split_column.dart';
@@ -125,6 +126,8 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
         ),
       );
     });
+    // TODO(elliette): Remove once Chrome issue is resolved.
+    _maybeShowBreakpointsWarningBanner();
   }
 
   @override
@@ -214,6 +217,26 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
         ),
       ],
     );
+  }
+
+  void _maybeShowBreakpointsWarningBanner() {
+    final isWebApp = serviceManager.connectedApp?.isDartWebAppNow ?? false;
+    final chrome115BreakpointBug =
+        devToolsExtensionPoints.chrome115BreakpointBug();
+    if (isWebApp && chrome115BreakpointBug != null) {
+      bannerMessages.addMessage(
+        BannerWarning(
+          key: const Key('Chrome115BreakpointsWarning'),
+          textSpans: [
+            TextSpan(
+              text:
+                  'Setting a breakpoint in Chrome version 115 will crash your app. See $chrome115BreakpointBug',
+            ),
+          ],
+          screenId: DebuggerScreen.id,
+        ),
+      );
+    }
   }
 
   void _onNodeSelected(VMServiceObjectNode? node) {
