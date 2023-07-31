@@ -50,7 +50,7 @@ git push -u $DEVTOOLS_REMOTE $RELEASE_BRANCH
 echo "Creating the PR"
 echo
 
-PR_URL=$(gh pr create --draft --title "$COMMIT_MESSAGE" --body "RELEASE_NOTE_EXCEPTION=Version Bump" $CREATION_FLAGS)
+PR_URL=$(gh pr create --draft --title "$COMMIT_MESSAGE" $CREATION_FLAGS)
 
 
 echo "Updating your flutter version to the most recent candidate."
