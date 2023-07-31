@@ -5,6 +5,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../../shared/common_widgets.dart';
+import '../../../../../shared/primitives/utils.dart';
 import '../../../../../shared/theme.dart';
 
 enum AnalysisStatus {

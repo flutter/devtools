@@ -12,6 +12,7 @@ import '../../../../../service/service_extensions.dart' as extensions;
 import '../../../../../shared/common_widgets.dart';
 import '../../../../../shared/globals.dart';
 import '../../../../../shared/primitives/auto_dispose.dart';
+import '../../../../../shared/primitives/utils.dart';
 import '../../../../../shared/theme.dart';
 import '../performance_controls.dart';
 import 'enhance_tracing_controller.dart';

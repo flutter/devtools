@@ -13,6 +13,7 @@ import '../../../../shared/dialogs.dart';
 import '../../../../shared/globals.dart';
 import '../../../../shared/http/http_service.dart' as http_service;
 import '../../../../shared/primitives/auto_dispose.dart';
+import '../../../../shared/primitives/utils.dart';
 import '../../../../shared/theme.dart';
 import '../../../../shared/ui/search.dart';
 import 'legacy/legacy_events_controller.dart';

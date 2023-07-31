@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import '../../../../../../shared/analytics/analytics.dart' as ga;
 import '../../../../../../shared/analytics/constants.dart' as gac;
 import '../../../../../../shared/common_widgets.dart';
+import '../../../../../../shared/primitives/utils.dart';
 import '../../../../../../shared/theme.dart';
 import '../../../../shared/heap/model.dart';
 import '../../controller/class_data.dart';
