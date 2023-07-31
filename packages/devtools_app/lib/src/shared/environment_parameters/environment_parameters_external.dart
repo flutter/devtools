@@ -58,6 +58,13 @@ class ExternalDevToolsEnvironmentParameters
   @override
   String get perfettoIndexLocation =>
       'packages/perfetto_ui_compiled/dist/index.html';
+
+  @override
+  String? chrome115BreakpointBug() {
+    // This should always return a null value for 3p users.
+    return null;
+  }
+
 }
 
 const _newDevToolsIssueUriDisplay = 'github.com/flutter/devtools/issues/new';
