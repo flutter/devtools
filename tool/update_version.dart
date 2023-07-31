@@ -11,6 +11,8 @@ import 'package:args/command_runner.dart';
 // TODO(kenz): If changes are made to this script, first consider refactoring to
 // use https://github.com/dart-lang/pubspec_parse.
 
+// package/devtools_extensions has its own versioning strategy. Do not include
+// it in the list here.
 final _pubspecs = [
   'packages/devtools_app/pubspec.yaml',
   'packages/devtools_test/pubspec.yaml',
