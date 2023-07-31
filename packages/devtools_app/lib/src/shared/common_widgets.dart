@@ -1012,8 +1012,7 @@ class DevToolsToggleButtonGroup extends StatelessWidget {
     return SizedBox(
       height: defaultButtonHeight,
       child: ToggleButtons(
-        borderRadius:
-            const BorderRadius.all(Radius.circular(defaultBorderRadius)),
+        borderRadius: defaultBorderRadius,
         textStyle: theme.textTheme.bodyMedium,
         constraints: BoxConstraints(
           minWidth: defaultButtonHeight,
@@ -1194,7 +1193,7 @@ class RoundedDropDownButton<T> extends StatelessWidget {
     final bgColor = Theme.of(context).colorScheme.backgroundColorSelected;
 
     Radius selectRadius(bool show) {
-      return show ? const Radius.circular(defaultBorderRadius) : Radius.zero;
+      return show ? defaultRadius : Radius.zero;
     }
 
     final showTopLeft = roundedCornerOptions?.showTopLeft ?? true;
@@ -1469,18 +1468,10 @@ class RoundedOutlinedBorder extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final borderRadius = BorderRadius.only(
-      topLeft: showTopLeft
-          ? const Radius.circular(defaultBorderRadius)
-          : Radius.zero,
-      topRight: showTopRight
-          ? const Radius.circular(defaultBorderRadius)
-          : Radius.zero,
-      bottomLeft: showBottomLeft
-          ? const Radius.circular(defaultBorderRadius)
-          : Radius.zero,
-      bottomRight: showBottomRight
-          ? const Radius.circular(defaultBorderRadius)
-          : Radius.zero,
+      topLeft: showTopLeft ? defaultRadius : Radius.zero,
+      topRight: showTopRight ? defaultRadius : Radius.zero,
+      bottomLeft: showBottomLeft ? defaultRadius : Radius.zero,
+      bottomRight: showBottomRight ? defaultRadius : Radius.zero,
     );
 
     var child = this.child;
@@ -1503,7 +1494,7 @@ class RoundedOutlinedBorder extends StatelessWidget {
 
 BoxDecoration roundedBorderDecoration(BuildContext context) => BoxDecoration(
       border: Border.all(color: Theme.of(context).focusColor),
-      borderRadius: BorderRadius.circular(defaultBorderRadius),
+      borderRadius: defaultBorderRadius,
     );
 
 class LeftBorder extends StatelessWidget {
@@ -1958,7 +1949,7 @@ class MoreInfoLink extends StatelessWidget {
     final theme = Theme.of(context);
     return InkWell(
       onTap: _onLinkTap,
-      borderRadius: BorderRadius.circular(defaultBorderRadius),
+      borderRadius: defaultBorderRadius,
       child: Padding(
         padding: padding ?? const EdgeInsets.all(denseSpacing),
         child: Row(
@@ -2497,7 +2488,7 @@ class ElevatedCard extends StatelessWidget {
       elevation: defaultElevation,
       color: Theme.of(context).scaffoldBackgroundColor,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(defaultBorderRadius),
+        borderRadius: defaultBorderRadius,
       ),
       child: Container(
         width: width,

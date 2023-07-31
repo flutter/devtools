@@ -48,7 +48,7 @@ class _AnalyticsPromptState extends State<AnalyticsPrompt>
       },
       child: Card(
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(defaultBorderRadius),
+          borderRadius: defaultBorderRadius,
           side: BorderSide(
             color: theme.focusColor,
           ),

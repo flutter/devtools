@@ -324,7 +324,7 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
               color: focusColor,
               width: _hoverCardBorderWidth,
             ),
-            borderRadius: BorderRadius.circular(defaultBorderRadius),
+            borderRadius: defaultBorderRadius,
           ),
           width: _hoverWidth,
           child: ListView(
