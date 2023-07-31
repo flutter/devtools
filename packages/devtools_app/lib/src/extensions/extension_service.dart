@@ -11,15 +11,40 @@ import '../shared/primitives/auto_dispose.dart';
 
 class ExtensionService extends DisposableController
     with AutoDisposeControllerMixin {
+  /// All the DevTools extensions that are available for the connected
+  /// application, regardless of whether they have been enabled or disabled
+  /// by the user.
   ValueListenable<List<DevToolsExtensionConfig>> get availableExtensions =>
       _availableExtensions;
   final _availableExtensions = ValueNotifier<List<DevToolsExtensionConfig>>([]);
 
+  /// DevTools extensions that are visible in their own DevTools screen (i.e.
+  /// extensions that have not been manually disabled by the user).
+  ValueListenable<List<DevToolsExtensionConfig>> get visibleExtensions =>
+      _availableExtensions;
+  final _visibleExtensions = ValueNotifier<List<DevToolsExtensionConfig>>([]);
+
+  /// Returns the [ValueListenable] that stores the [ExtensionEnabledState] for
+  /// the DevTools Extension with [extensionName].
+  ValueListenable<ExtensionEnabledState> enabledStateListenable(
+    String extensionName,
+  ) {
+    return _extensionEnabledStates.putIfAbsent(
+      extensionName.toLowerCase(),
+      () => ValueNotifier<ExtensionEnabledState>(
+        ExtensionEnabledState.none,
+      ),
+    );
+  }
+
+  final _extensionEnabledStates =
+      <String, ValueNotifier<ExtensionEnabledState>>{};
+
   Future<void> initialize() async {
-    await maybeRefreshExtensions();
+    await _maybeRefreshExtensions();
     addAutoDisposeListener(
       serviceManager.connectedState,
-      maybeRefreshExtensions,
+      _maybeRefreshExtensions,
     );
 
     // TODO(kenz): we should also refresh the available extensions on some event
@@ -27,11 +52,50 @@ class ExtensionService extends DisposableController
     // .dart_tool/package_config.json file for changes.
   }
 
-  Future<void> maybeRefreshExtensions() async {
+  Future<void> _maybeRefreshExtensions() async {
     final appRootPath = await _connectedAppRootPath();
     if (appRootPath != null) {
       _availableExtensions.value =
           await server.refreshAvailableExtensions(appRootPath);
+      await _refreshExtensionEnabledStates();
+    }
+  }
+
+  Future<void> _refreshExtensionEnabledStates() async {
+    final appRootPath = await _connectedAppRootPath();
+    if (appRootPath != null) {
+      final visible = <DevToolsExtensionConfig>[];
+      for (final extension in _availableExtensions.value) {
+        final stateFromOptionsFile = await server.extensionEnabledState(
+          rootPath: appRootPath,
+          extensionName: extension.name,
+        );
+        final stateNotifier = _extensionEnabledStates.putIfAbsent(
+          extension.name,
+          () => ValueNotifier<ExtensionEnabledState>(stateFromOptionsFile),
+        );
+        stateNotifier.value = stateFromOptionsFile;
+        if (stateFromOptionsFile != ExtensionEnabledState.disabled) {
+          visible.add(extension);
+        }
+      }
+      _visibleExtensions.value = visible;
+    }
+  }
+
+  /// Sets the enabled state for [extension].
+  Future<void> setExtensionEnabledState(
+    DevToolsExtensionConfig extension, {
+    required bool enable,
+  }) async {
+    final appRootPath = await _connectedAppRootPath();
+    if (appRootPath != null) {
+      await server.extensionEnabledState(
+        rootPath: appRootPath,
+        extensionName: extension.name,
+        enable: enable,
+      );
+      await _refreshExtensionEnabledStates();
     }
   }
 }

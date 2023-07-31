@@ -43,7 +43,10 @@ const discordLink = 'discord';
 
 // Extension screens UX actions.
 const extensionScreenId = 'devtoolsExtension';
+const extensionSettingsId = 'devtoolsExtensionSettings';
 String extensionFeedback(String name) => 'extensionFeedback-$name';
+String extensionEnable(String name) => 'extensionEnable-$name';
+String extensionDisable(String name) => 'extensionDisable-$name';
 
 // Inspector UX actions:
 const refresh = 'refresh';

@@ -97,6 +97,9 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
   List<Screen> get _originalScreens =>
       widget.originalScreens.map((s) => s.screen).toList();
 
+  /// TODO(kenz): use [extensionService.visibleExtensions] instead of
+  /// [extensionService.availableExtensions] and verify tabs are added / removed
+  /// propertly based on the enabled state of extensions.
   Iterable<Screen> get _extensionScreens =>
       extensionService.availableExtensions.value.map(
         (e) => DevToolsScreen<void>(ExtensionScreen(e)).screen,

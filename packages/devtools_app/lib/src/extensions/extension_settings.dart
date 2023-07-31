@@ -1,0 +1,204 @@
+// Copyright 2023 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+import 'dart:async';
+
+import 'package:devtools_shared/devtools_extensions.dart';
+import 'package:flutter/material.dart';
+
+import '../shared/analytics/analytics.dart' as ga;
+import '../shared/analytics/constants.dart' as gac;
+import '../shared/common_widgets.dart';
+import '../shared/dialogs.dart';
+import '../shared/globals.dart';
+import '../shared/theme.dart';
+import '../shared/utils.dart';
+
+/// A [ScaffoldAction] that, when clicked, will open a dialog menu for
+/// managing DevTools extension states.
+class ExtensionSettingsAction extends ScaffoldAction {
+  ExtensionSettingsAction({super.key, Color? color})
+      : super(
+          icon: Icons.extension_rounded,
+          tooltip: 'DevTools Extensions',
+          color: color,
+          onPressed: (context) {
+            unawaited(
+              showDialog(
+                context: context,
+                builder: (context) => const ExtensionSettingsDialog(),
+              ),
+            );
+          },
+        );
+}
+
+class ExtensionSettingsDialog extends StatelessWidget {
+  const ExtensionSettingsDialog({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final availableExtensions = extensionService.availableExtensions.value;
+    final dialogHeight = scaleByFontFactor(300.0);
+    return DevToolsDialog(
+      title: const DialogTitleText('DevTools Extensions'),
+      content: SizedBox(
+        width: defaultDialogWidth,
+        height: dialogHeight,
+        child: Column(
+          children: [
+            const Text(
+              'Extensions are provided by the pub packages used in your '
+              'application. When activated, the tools provided by these '
+              'extensions will be available in a separate DevTools tab.',
+            ),
+            const SizedBox(height: defaultSpacing),
+            Expanded(
+              child: availableExtensions.isEmpty
+                  ? Center(
+                      child: Text(
+                        'No extensions available.',
+                        style: theme.textTheme.bodyLarge!.copyWith(
+                          color: theme.colorScheme.subtleTextColor,
+                        ),
+                      ),
+                    )
+                  : _ExtensionsList(extensions: availableExtensions),
+            ),
+          ],
+        ),
+      ),
+      actions: const [
+        DialogCloseButton(),
+      ],
+    );
+  }
+}
+
+class _ExtensionsList extends StatefulWidget {
+  const _ExtensionsList({required this.extensions});
+
+  final List<DevToolsExtensionConfig> extensions;
+
+  @override
+  State<_ExtensionsList> createState() => __ExtensionsListState();
+}
+
+class __ExtensionsListState extends State<_ExtensionsList> {
+  late ScrollController scrollController;
+
+  late final List<DevToolsExtensionConfig> orderedExtensions;
+
+  @override
+  void initState() {
+    super.initState();
+    orderedExtensions = List<DevToolsExtensionConfig>.of(widget.extensions)
+      ..sort((a, b) => a.name.compareTo(b.name));
+    scrollController = ScrollController();
+  }
+
+  @override
+  void dispose() {
+    scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scrollbar(
+      controller: scrollController,
+      thumbVisibility: true,
+      child: ListView.builder(
+        controller: scrollController,
+        itemCount: orderedExtensions.length,
+        itemBuilder: (context, index) => ExtensionSetting(
+          extension: orderedExtensions[index],
+        ),
+      ),
+    );
+  }
+}
+
+@visibleForTesting
+class ExtensionSetting extends StatelessWidget {
+  const ExtensionSetting({super.key, required this.extension});
+
+  final DevToolsExtensionConfig extension;
+
+  @override
+  Widget build(BuildContext context) {
+    final states = [
+      (
+        'Enabled',
+        (state) => state == ExtensionEnabledState.enabled,
+        () {
+          ga.select(
+            gac.extensionSettingsId,
+            gac.extensionEnable(extension.name.toLowerCase()),
+          );
+          unawaited(
+            extensionService.setExtensionEnabledState(
+              extension,
+              enable: true,
+            ),
+          );
+        },
+      ),
+      (
+        'Disabled',
+        (state) => state == ExtensionEnabledState.disabled,
+        () {
+          ga.select(
+            gac.extensionSettingsId,
+            gac.extensionDisable(extension.name.toLowerCase()),
+          );
+          unawaited(
+            extensionService.setExtensionEnabledState(
+              extension,
+              enable: false,
+            ),
+          );
+        },
+      ),
+    ];
+    final theme = Theme.of(context);
+    final extensionName = extension.name.toLowerCase();
+    return ValueListenableBuilder(
+      valueListenable: extensionService.enabledStateListenable(extensionName),
+      builder: (context, enabledState, _) {
+        return Padding(
+          padding: const EdgeInsets.only(bottom: denseSpacing),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'package:$extensionName',
+                overflow: TextOverflow.ellipsis,
+              ),
+              DevToolsToggleButtonGroup(
+                fillColor: theme.colorScheme.primary,
+                selectedColor: theme.colorScheme.onPrimary,
+                onPressed: (index) => states[index].$3(),
+                selectedStates:
+                    states.map((option) => option.$2(enabledState)).toList(),
+                children: states
+                    .map(
+                      (option) => Padding(
+                        padding: const EdgeInsets.symmetric(
+                          vertical: densePadding,
+                          horizontal: denseSpacing,
+                        ),
+                        child: Text(option.$1),
+                      ),
+                    )
+                    .toList(),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
