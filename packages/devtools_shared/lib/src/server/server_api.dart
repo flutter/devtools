@@ -310,9 +310,9 @@ abstract class _ExtensionsApiHandler {
     await extensionsManager.serveAvailableExtensions(rootPath);
     final extensions =
         extensionsManager.devtoolsExtensions.map((p) => p.toJson()).toList();
-    final result = jsonEncode({
+    final result = {
       ExtensionsApi.extensionsResultPropertyName: extensions,
-    });
+    };
     return ServerApi._encodeResponse(result, api: api);
   }
 
