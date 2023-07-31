@@ -220,9 +220,10 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
   }
 
   void _maybeShowBreakpointsWarningBanner() {
+    final isWebApp = serviceManager.connectedApp?.isDartWebAppNow ?? false;
     final chrome115BreakpointBug =
         devToolsExtensionPoints.chrome115BreakpointBug();
-    if (chrome115BreakpointBug != null) {
+    if (isWebApp && chrome115BreakpointBug != null) {
       bannerMessages.addMessage(
         BannerWarning(
           key: const Key('Chrome115BreakpointsWarning'),
