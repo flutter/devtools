@@ -326,7 +326,7 @@ abstract class _ExtensionsApiHandler {
     final missingRequiredParams = ServerApi._checkRequiredParameters(
       [
         ExtensionsApi.extensionRootPathPropertyName,
-        ExtensionsApi.extensionsResultPropertyName,
+        ExtensionsApi.extensionNamePropertyName,
       ],
       queryParams: queryParams,
       api: api,
