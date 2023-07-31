@@ -112,7 +112,8 @@ class DevToolsExtensionConfig {
       };
 }
 
-enum ExtensionActivationState {
+/// Describes the enablement state of a DevTools extension.
+enum ExtensionEnabledState {
   /// The extension has been enabled manually by the user.
   enabled,
 
@@ -127,9 +128,10 @@ enum ExtensionActivationState {
   /// We should ignore extensions with this activation state.
   error;
 
-  static ExtensionActivationState from(String? value) {
-    return ExtensionActivationState.values
+  /// Parses [value] and returns the matching [ExtensionEnabledState] if found.
+  static ExtensionEnabledState from(String? value) {
+    return ExtensionEnabledState.values
             .firstWhereOrNull((e) => e.name == value) ??
-        ExtensionActivationState.none;
+        ExtensionEnabledState.none;
   }
 }

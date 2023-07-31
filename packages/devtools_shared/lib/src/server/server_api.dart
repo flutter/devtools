@@ -11,7 +11,7 @@ import 'dart:io';
 import 'package:shelf/shelf.dart' as shelf;
 
 import '../devtools_api.dart';
-import '../extensions/extension_activation.dart';
+import '../extensions/extension_enablement.dart';
 import '../extensions/extension_manager.dart';
 import 'file_system.dart';
 import 'usage.dart';
@@ -215,8 +215,8 @@ class ServerApi {
           extensionsManager,
         );
 
-      case ExtensionsApi.apiExtensionActivationState:
-        return _ExtensionsApiHandler.handleExtensionActivationState(
+      case ExtensionsApi.apiExtensionEnabledState:
+        return _ExtensionsApiHandler.handleExtensionEnabledState(
           api,
           queryParams,
         );
@@ -319,7 +319,7 @@ abstract class _ExtensionsApiHandler {
     return ServerApi._encodeResponse(result, api: api);
   }
 
-  static shelf.Response handleExtensionActivationState(
+  static shelf.Response handleExtensionEnabledState(
     ServerApi api,
     Map<String, String> queryParams,
   ) {
@@ -330,7 +330,7 @@ abstract class _ExtensionsApiHandler {
       ],
       queryParams: queryParams,
       api: api,
-      requestName: ExtensionsApi.apiExtensionActivationState,
+      requestName: ExtensionsApi.apiExtensionEnabledState,
     );
     if (missingRequiredParams != null) return missingRequiredParams;
 
@@ -338,17 +338,17 @@ abstract class _ExtensionsApiHandler {
     final rootUri = Uri.parse(rootPath);
     final extensionName = queryParams[ExtensionsApi.extensionNamePropertyName]!;
 
-    final activate = queryParams[ExtensionsApi.activationStatePropertyName];
+    final activate = queryParams[ExtensionsApi.enabledStatePropertyName];
     if (activate != null) {
-      final newState = ServerApi._devToolsOptions.setExtensionActivationState(
+      final newState = ServerApi._devToolsOptions.setExtensionEnabledState(
         rootUri: rootUri,
         extensionName: extensionName,
-        activate: bool.parse(activate),
+        enable: bool.parse(activate),
       );
       return ServerApi._encodeResponse(newState.name, api: api);
     }
     final activationState =
-        ServerApi._devToolsOptions.lookupExtensionActivationState(
+        ServerApi._devToolsOptions.lookupExtensionEnabledState(
       rootUri: rootUri,
       extensionName: extensionName,
     );

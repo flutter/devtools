@@ -77,17 +77,17 @@ abstract class ExtensionsApi {
   /// receiving a [apiServeAvailableExtensions] request.
   static const extensionsResultPropertyName = 'extensions';
 
-  /// Returns and optionally sets the activation state for a DevTools extension.
-  static const apiExtensionActivationState =
-      '${apiPrefix}extensionActivationState';
+  /// Returns and optionally sets the enabled state for a DevTools extension.
+  static const apiExtensionEnabledState =
+      '${apiPrefix}extensionEnabledState';
 
   /// The property name for the query parameter passed along with
-  /// [apiExtensionActivationState] requests to the server that describes the
+  /// [apiExtensionEnabledState] requests to the server that describes the
   /// name of the extension whose state is being queried.
   static const extensionNamePropertyName = 'name';
 
   /// The property name for the query parameter that is optionally passed along
-  /// with [apiExtensionActivationState] requests to the server to set the
-  /// activation state for the extension.
-  static const activationStatePropertyName = 'activate';
+  /// with [apiExtensionEnabledState] requests to the server to set the
+  /// enabled state for the extension.
+  static const enabledStatePropertyName = 'enable';
 }

@@ -21,21 +21,21 @@ class DevToolsOptions {
 $_extensionsKey:
 ''';
 
-  /// Returns the current activation state for [extensionName] in the
+  /// Returns the current enabled state for [extensionName] in the
   /// 'devtools_options.yaml' file at [rootUri].
   ///
   /// If the 'devtools_options.yaml' file does not exist, it will be created
   /// with an empty set of extensions.
-  ExtensionActivationState lookupExtensionActivationState({
+  ExtensionEnabledState lookupExtensionEnabledState({
     required Uri rootUri,
     required String extensionName,
   }) {
     final options = _optionsAsMap(rootUri: rootUri);
-    if (options == null) return ExtensionActivationState.error;
+    if (options == null) return ExtensionEnabledState.error;
 
     final extensions =
         (options[_extensionsKey] as List?)?.cast<Map<String, Object?>>();
-    if (extensions == null) return ExtensionActivationState.none;
+    if (extensions == null) return ExtensionEnabledState.none;
 
     for (final e in extensions) {
       // Each entry should only have one key / value pair (e.g. '- foo: true').
@@ -45,20 +45,20 @@ $_extensionsKey:
         return _extensionStateForValue(e[extensionName]);
       }
     }
-    return ExtensionActivationState.none;
+    return ExtensionEnabledState.none;
   }
 
-  /// Sets the activation state for [extensionName] in the
+  /// Sets the enabled state for [extensionName] in the
   /// 'devtools_options.yaml' file at [rootUri].
   ///
   /// If the 'devtools_options.yaml' file does not exist, it will be created.
-  ExtensionActivationState setExtensionActivationState({
+  ExtensionEnabledState setExtensionEnabledState({
     required Uri rootUri,
     required String extensionName,
-    required bool activate,
+    required bool enable,
   }) {
     final options = _optionsAsMap(rootUri: rootUri);
-    if (options == null) return ExtensionActivationState.error;
+    if (options == null) return ExtensionEnabledState.error;
 
     var extensions =
         (options[_extensionsKey] as List?)?.cast<Map<String, Object?>>();
@@ -67,21 +67,21 @@ $_extensionsKey:
       extensions = options[_extensionsKey] as List<Map<String, Object?>>;
     }
 
-    // Write the new activation state to the map.
+    // Write the new enabled state to the map.
     final extension = extensions.firstWhereOrNull(
       (e) => e.keys.first == extensionName,
     );
     if (extension == null) {
-      extensions.add({extensionName: activate});
+      extensions.add({extensionName: enable});
     } else {
-      extension[extensionName] = activate;
+      extension[extensionName] = enable;
     }
 
     _writeToOptionsFile(rootUri: rootUri, options: options);
 
-    // Lookup the activation state from the file we just wrote to to ensure that
+    // Lookup the enabled state from the file we just wrote to to ensure that
     // are not returning an out of sync result.
-    return lookupExtensionActivationState(
+    return lookupExtensionEnabledState(
       rootUri: rootUri,
       extensionName: extensionName,
     );
@@ -130,14 +130,14 @@ $_extensionsKey:
     return optionsFile;
   }
 
-  ExtensionActivationState _extensionStateForValue(Object? value) {
+  ExtensionEnabledState _extensionStateForValue(Object? value) {
     switch (value) {
       case true:
-        return ExtensionActivationState.enabled;
+        return ExtensionEnabledState.enabled;
       case false:
-        return ExtensionActivationState.disabled;
+        return ExtensionEnabledState.disabled;
       default:
-        return ExtensionActivationState.none;
+        return ExtensionEnabledState.none;
     }
   }
 }

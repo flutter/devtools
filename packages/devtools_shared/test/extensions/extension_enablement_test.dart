@@ -5,7 +5,7 @@
 import 'dart:io';
 
 import 'package:devtools_shared/devtools_extensions.dart';
-import 'package:devtools_shared/src/extensions/extension_activation.dart';
+import 'package:devtools_shared/src/extensions/extension_enablement.dart';
 import 'package:test/test.dart';
 
 void main() {
@@ -34,9 +34,9 @@ void main() {
       return optionsFile;
     }
 
-    test('extensionActivatedState creates options file when none exists', () {
+    test('extensionEnabledState creates options file when none exists', () {
       expect(tmpDir.listSync(), isEmpty);
-      options.lookupExtensionActivationState(
+      options.lookupExtensionEnabledState(
         rootUri: tmpUri,
         extensionName: 'foo',
       );
@@ -50,10 +50,10 @@ extensions:
     });
 
     test('can write to options file', () {
-      options.setExtensionActivationState(
+      options.setExtensionEnabledState(
         rootUri: tmpUri,
         extensionName: 'foo',
-        activate: true,
+        enable: true,
       );
       final file = _optionsFileFromTmp();
       expect(
@@ -65,15 +65,15 @@ extensions:
     });
 
     test('can read from options file', () {
-      options.setExtensionActivationState(
+      options.setExtensionEnabledState(
         rootUri: tmpUri,
         extensionName: 'foo',
-        activate: true,
+        enable: true,
       );
-      options.setExtensionActivationState(
+      options.setExtensionEnabledState(
         rootUri: tmpUri,
         extensionName: 'bar',
-        activate: false,
+        enable: false,
       );
       final file = _optionsFileFromTmp();
       expect(
@@ -85,25 +85,25 @@ extensions:
       );
 
       expect(
-        options.lookupExtensionActivationState(
+        options.lookupExtensionEnabledState(
           rootUri: tmpUri,
           extensionName: 'foo',
         ),
-        ExtensionActivationState.enabled,
+        ExtensionEnabledState.enabled,
       );
       expect(
-        options.lookupExtensionActivationState(
+        options.lookupExtensionEnabledState(
           rootUri: tmpUri,
           extensionName: 'bar',
         ),
-        ExtensionActivationState.disabled,
+        ExtensionEnabledState.disabled,
       );
       expect(
-        options.lookupExtensionActivationState(
+        options.lookupExtensionEnabledState(
           rootUri: tmpUri,
           extensionName: 'baz',
         ),
-        ExtensionActivationState.none,
+        ExtensionEnabledState.none,
       );
     });
   });
