@@ -237,13 +237,15 @@ class ServerApi {
     List<String> expectedParams, {
     required Map<String, String> queryParams,
     required ServerApi api,
+    required String requestName,
   }) {
     final missing = expectedParams.where(
       (param) => !queryParams.containsKey(param),
     );
     return missing.isNotEmpty
         ? api.badRequest(
-            'Missing required query parameters: ${missing.toList()}',
+            '[$requestName] missing required query parameters: '
+            '${missing.toList()}',
           )
         : null;
   }
@@ -302,6 +304,7 @@ abstract class _ExtensionsApiHandler {
       [ExtensionsApi.extensionRootPathPropertyName],
       queryParams: queryParams,
       api: api,
+      requestName: ExtensionsApi.apiServeAvailableExtensions,
     );
     if (missingRequiredParams != null) return missingRequiredParams;
 
@@ -327,6 +330,7 @@ abstract class _ExtensionsApiHandler {
       ],
       queryParams: queryParams,
       api: api,
+      requestName: ExtensionsApi.apiExtensionActivationState,
     );
     if (missingRequiredParams != null) return missingRequiredParams;
 
