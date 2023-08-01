@@ -13,6 +13,7 @@ import '../../../../shared/dialogs.dart';
 import '../../../../shared/globals.dart';
 import '../../../../shared/http/http_service.dart' as http_service;
 import '../../../../shared/primitives/auto_dispose.dart';
+import '../../../../shared/primitives/utils.dart';
 import '../../../../shared/theme.dart';
 import '../../../../shared/ui/search.dart';
 import 'legacy/legacy_events_controller.dart';
@@ -32,12 +33,14 @@ class TimelineEventsTabView extends StatelessWidget {
       builder: (context, useLegacy, _) {
         return useLegacy
             ? KeepAliveWrapper(
-                child:
-                    DualValueListenableBuilder<EventsControllerStatus, double>(
-                  firstListenable: controller.status,
-                  secondListenable:
-                      controller.legacyController.processor.progressNotifier,
-                  builder: (context, status, processingProgress, _) {
+                child: MultiValueListenableBuilder(
+                  listenables: [
+                    controller.status,
+                    controller.legacyController.processor.progressNotifier,
+                  ],
+                  builder: (context, values, _) {
+                    final status = values.first as EventsControllerStatus;
+                    final processingProgress = values.second as double;
                     return TimelineEventsView(
                       controller: controller,
                       processing: status == EventsControllerStatus.processing,

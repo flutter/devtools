@@ -8,6 +8,7 @@ import 'package:flutter/material.dart' hide Stack;
 import 'package:vm_service/vm_service.dart';
 
 import '../../shared/common_widgets.dart';
+import '../../shared/primitives/utils.dart';
 import '../../shared/theme.dart';
 import '../../shared/utils.dart';
 import 'debugger_controller.dart';
@@ -32,11 +33,14 @@ class _CallStackState extends State<CallStack>
 
   @override
   Widget build(BuildContext context) {
-    return DualValueListenableBuilder<List<StackFrameAndSourcePosition>,
-        StackFrameAndSourcePosition?>(
-      firstListenable: controller.stackFramesWithLocation,
-      secondListenable: controller.selectedStackFrame,
-      builder: (context, stackFrames, selectedFrame, _) {
+    return MultiValueListenableBuilder(
+      listenables: [
+        controller.stackFramesWithLocation,
+        controller.selectedStackFrame,
+      ],
+      builder: (context, values, _) {
+        final stackFrames = values.first as List<StackFrameAndSourcePosition>;
+        final selectedFrame = values.second as StackFrameAndSourcePosition?;
         return ListView.builder(
           itemCount: stackFrames.length,
           itemExtent: defaultListItemHeight,

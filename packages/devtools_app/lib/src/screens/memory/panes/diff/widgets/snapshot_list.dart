@@ -360,10 +360,14 @@ class _SnapshotListItemsState extends State<_SnapshotListItems>
   Widget build(BuildContext context) {
     final core = widget.controller.core;
 
-    return DualValueListenableBuilder<List<SnapshotItem>, int>(
-      firstListenable: core.snapshots,
-      secondListenable: core.selectedSnapshotIndex,
-      builder: (_, snapshots, selectedIndex, __) {
+    return MultiValueListenableBuilder(
+      listenables: [
+        core.snapshots,
+        core.selectedSnapshotIndex,
+      ],
+      builder: (_, values, __) {
+        final snapshots = values.first as List<SnapshotItem>;
+        final selectedIndex = values.second as int;
         return ListView.builder(
           controller: _scrollController,
           itemCount: snapshots.length,

@@ -11,6 +11,7 @@ import '../service/service_manager.dart';
 import '../shared/analytics/constants.dart' as gac;
 import '../shared/common_widgets.dart';
 import '../shared/globals.dart';
+import '../shared/primitives/utils.dart';
 import '../shared/screen.dart';
 import '../shared/theme.dart';
 import '../shared/ui/utils.dart';
@@ -219,20 +220,23 @@ class IsolateSelector extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final IsolateManager isolateManager = serviceManager.isolateManager;
-    return DualValueListenableBuilder<List<IsolateRef?>, IsolateRef?>(
-      firstListenable: isolateManager.isolates,
-      secondListenable: isolateManager.selectedIsolate,
-      builder: (context, isolates, selectedIsolateRef, _) {
+    return MultiValueListenableBuilder(
+      listenables: [
+        isolateManager.isolates,
+        isolateManager.selectedIsolate,
+      ],
+      builder: (context, values, _) {
+        final isolates = values.first as List<IsolateRef>;
+        final selectedIsolateRef = values.second as IsolateRef?;
         return PopupMenuButton<IsolateRef?>(
           tooltip: 'Selected Isolate',
           initialValue: selectedIsolateRef,
           onSelected: isolateManager.selectIsolate,
-          itemBuilder: (BuildContext context) =>
-              isolates.where((ref) => ref != null).map(
+          itemBuilder: (BuildContext context) => isolates.map(
             (ref) {
               return PopupMenuItem<IsolateRef>(
                 value: ref,
-                child: IsolateOption(ref!),
+                child: IsolateOption(ref),
               );
             },
           ).toList(),
