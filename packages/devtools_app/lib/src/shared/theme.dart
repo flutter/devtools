@@ -237,7 +237,10 @@ const denseSpacing = 8.0;
 const denseModeDenseSpacing = 2.0;
 const denseRowSpacing = 6.0;
 
-const defaultBorderRadius = 16.0;
+final defaultBorderRadius = BorderRadius.circular(_defaultBorderRadiusValue);
+const defaultRadius = Radius.circular(_defaultBorderRadiusValue);
+const _defaultBorderRadiusValue = 16.0;
+
 const defaultElevation = 4.0;
 
 const borderPadding = 2.0;

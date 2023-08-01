@@ -20,4 +20,6 @@ abstract class DevToolsEnvironmentParameters {
   Link? enableSourceMapsLink();
 
   String get perfettoIndexLocation;
+
+  String? chrome115BreakpointBug();
 }

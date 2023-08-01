@@ -12,6 +12,7 @@ import '../../../../../service/service_extensions.dart' as extensions;
 import '../../../../../shared/common_widgets.dart';
 import '../../../../../shared/globals.dart';
 import '../../../../../shared/primitives/auto_dispose.dart';
+import '../../../../../shared/primitives/utils.dart';
 import '../../../../../shared/theme.dart';
 import '../performance_controls.dart';
 import 'enhance_tracing_controller.dart';
@@ -230,10 +231,14 @@ class _TrackWidgetBuildsSettingState extends State<TrackWidgetBuildsSetting>
             );
           },
         ),
-        DualValueListenableBuilder<bool, TrackWidgetBuildsScope?>(
-          firstListenable: _tracked,
-          secondListenable: _selectedScope,
-          builder: (context, tracked, selectedScope, _) {
+        MultiValueListenableBuilder(
+          listenables: [
+            _tracked,
+            _selectedScope,
+          ],
+          builder: (context, values, _) {
+            final tracked = values.first as bool;
+            final selectedScope = values.second as TrackWidgetBuildsScope?;
             return Padding(
               padding: const EdgeInsets.only(left: _scopeSelectorPadding),
               child: TrackWidgetBuildsScopeSelector(

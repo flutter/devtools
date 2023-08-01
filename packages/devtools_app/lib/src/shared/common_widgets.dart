@@ -1018,8 +1018,7 @@ class DevToolsToggleButtonGroup extends StatelessWidget {
     return SizedBox(
       height: defaultButtonHeight,
       child: ToggleButtons(
-        borderRadius:
-            const BorderRadius.all(Radius.circular(defaultBorderRadius)),
+        borderRadius: defaultBorderRadius,
         fillColor: fillColor,
         selectedColor: selectedColor,
         textStyle: theme.textTheme.bodyMedium,
@@ -1202,7 +1201,7 @@ class RoundedDropDownButton<T> extends StatelessWidget {
     final bgColor = Theme.of(context).colorScheme.backgroundColorSelected;
 
     Radius selectRadius(bool show) {
-      return show ? const Radius.circular(defaultBorderRadius) : Radius.zero;
+      return show ? defaultRadius : Radius.zero;
     }
 
     final showTopLeft = roundedCornerOptions?.showTopLeft ?? true;
@@ -1477,18 +1476,10 @@ class RoundedOutlinedBorder extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final borderRadius = BorderRadius.only(
-      topLeft: showTopLeft
-          ? const Radius.circular(defaultBorderRadius)
-          : Radius.zero,
-      topRight: showTopRight
-          ? const Radius.circular(defaultBorderRadius)
-          : Radius.zero,
-      bottomLeft: showBottomLeft
-          ? const Radius.circular(defaultBorderRadius)
-          : Radius.zero,
-      bottomRight: showBottomRight
-          ? const Radius.circular(defaultBorderRadius)
-          : Radius.zero,
+      topLeft: showTopLeft ? defaultRadius : Radius.zero,
+      topRight: showTopRight ? defaultRadius : Radius.zero,
+      bottomLeft: showBottomLeft ? defaultRadius : Radius.zero,
+      bottomRight: showBottomRight ? defaultRadius : Radius.zero,
     );
 
     var child = this.child;
@@ -1511,7 +1502,7 @@ class RoundedOutlinedBorder extends StatelessWidget {
 
 BoxDecoration roundedBorderDecoration(BuildContext context) => BoxDecoration(
       border: Border.all(color: Theme.of(context).focusColor),
-      borderRadius: BorderRadius.circular(defaultBorderRadius),
+      borderRadius: defaultBorderRadius,
     );
 
 class LeftBorder extends StatelessWidget {
@@ -1966,7 +1957,7 @@ class MoreInfoLink extends StatelessWidget {
     final theme = Theme.of(context);
     return InkWell(
       onTap: _onLinkTap,
-      borderRadius: BorderRadius.circular(defaultBorderRadius),
+      borderRadius: defaultBorderRadius,
       child: Padding(
         padding: padding ?? const EdgeInsets.all(denseSpacing),
         child: Row(
@@ -2413,56 +2404,51 @@ class _BlinkingIconState extends State<BlinkingIcon> {
   }
 }
 
-// TODO(https://github.com/flutter/devtools/issues/2989): investigate if we can
-// modify this widget to be a 'MultiValueListenableBuilder' that can take an
-// arbitrary number of listenables.
-/// A widget that listens for changes to two different [ValueListenable]s and
-/// rebuilds for change notifications to either.
+/// A widget that listens for changes to multiple different [ValueListenable]s
+/// and rebuilds for change notifications from any of them.
 ///
-/// This widget is preferred over nesting two [ValueListenableBuilder]s in a
+/// The current value of each [ValueListenable] is provided by the [values]
+/// parameter in [builder], where the index of each value in the list is equal
+/// to the index of its parent [ValueListenable] in [listenables].
+///
+/// This widget is preferred over nesting many [ValueListenableBuilder]s in a
 /// single build method.
-class DualValueListenableBuilder<T, U> extends StatefulWidget {
-  const DualValueListenableBuilder({
-    Key? key,
-    required this.firstListenable,
-    required this.secondListenable,
+class MultiValueListenableBuilder<T, U> extends StatefulWidget {
+  const MultiValueListenableBuilder({
+    super.key,
+    required this.listenables,
     required this.builder,
     this.child,
-  }) : super(key: key);
+  });
 
-  final ValueListenable<T> firstListenable;
-
-  final ValueListenable<U> secondListenable;
+  final List<ValueListenable> listenables;
 
   final Widget Function(
     BuildContext context,
-    T firstValue,
-    U secondValue,
+    List<Object?> values,
     Widget? child,
   ) builder;
 
   final Widget? child;
 
   @override
-  State<DualValueListenableBuilder<T, U>> createState() =>
-      _DualValueListenableBuilderState<T, U>();
+  State<MultiValueListenableBuilder<T, U>> createState() =>
+      _MultiValueListenableBuilderState<T, U>();
 }
 
-class _DualValueListenableBuilderState<T, U>
-    extends State<DualValueListenableBuilder<T, U>> with AutoDisposeMixin {
+class _MultiValueListenableBuilderState<T, U>
+    extends State<MultiValueListenableBuilder<T, U>> with AutoDisposeMixin {
   @override
   void initState() {
     super.initState();
-    addAutoDisposeListener(widget.firstListenable);
-    addAutoDisposeListener(widget.secondListenable);
+    widget.listenables.forEach(addAutoDisposeListener);
   }
 
   @override
   Widget build(BuildContext context) {
     return widget.builder(
       context,
-      widget.firstListenable.value,
-      widget.secondListenable.value,
+      [for (final listenable in widget.listenables) listenable.value],
       widget.child,
     );
   }
@@ -2505,7 +2491,7 @@ class ElevatedCard extends StatelessWidget {
       elevation: defaultElevation,
       color: Theme.of(context).scaffoldBackgroundColor,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(defaultBorderRadius),
+        borderRadius: defaultBorderRadius,
       ),
       child: Container(
         width: width,

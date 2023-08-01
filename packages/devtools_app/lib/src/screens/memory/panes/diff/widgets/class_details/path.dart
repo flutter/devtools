@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import '../../../../../../shared/analytics/analytics.dart' as ga;
 import '../../../../../../shared/analytics/constants.dart' as gac;
 import '../../../../../../shared/common_widgets.dart';
+import '../../../../../../shared/primitives/utils.dart';
 import '../../../../../../shared/theme.dart';
 import '../../../../shared/heap/model.dart';
 import '../../controller/class_data.dart';
@@ -123,18 +124,24 @@ class _PathView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return DualValueListenableBuilder<bool, bool>(
-      firstListenable: controller.hideStandard,
-      secondListenable: controller.invert,
-      builder: (_, hideStandard, invert, __) => SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: SingleChildScrollView(
-          child: Text(
-            path.toLongString(inverted: invert, hideStandard: hideStandard),
-            overflow: TextOverflow.visible,
+    return MultiValueListenableBuilder(
+      listenables: [
+        controller.hideStandard,
+        controller.invert,
+      ],
+      builder: (_, values, __) {
+        final hideStandard = values.first as bool;
+        final invert = values.second as bool;
+        return SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: SingleChildScrollView(
+            child: Text(
+              path.toLongString(inverted: invert, hideStandard: hideStandard),
+              overflow: TextOverflow.visible,
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }

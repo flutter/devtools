@@ -202,10 +202,14 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
                 ),
               ),
               // The legend.
-              DualValueListenableBuilder<bool, bool>(
-                firstListenable: widget.chartController.legendVisibleNotifier,
-                secondListenable: controller.isAndroidChartVisibleNotifier,
-                builder: (_, isLegendVisible, isAndroidChartVisible, __) {
+              MultiValueListenableBuilder(
+                listenables: [
+                  widget.chartController.legendVisibleNotifier,
+                  controller.isAndroidChartVisibleNotifier,
+                ],
+                builder: (_, values, __) {
+                  final isLegendVisible = values.first as bool;
+                  final isAndroidChartVisible = values.second as bool;
                   if (!isLegendVisible) return const SizedBox.shrink();
                   return Padding(
                     padding: const EdgeInsets.only(
@@ -324,7 +328,7 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
               color: focusColor,
               width: _hoverCardBorderWidth,
             ),
-            borderRadius: BorderRadius.circular(defaultBorderRadius),
+            borderRadius: defaultBorderRadius,
           ),
           width: _hoverWidth,
           child: ListView(

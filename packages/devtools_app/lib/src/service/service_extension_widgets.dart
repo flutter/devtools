@@ -819,8 +819,7 @@ class _ServiceExtensionCheckboxGroupOverlay extends StatelessWidget {
               color: theme.focusColor,
               width: hoverCardBorderWidth,
             ),
-            borderRadius:
-                const BorderRadius.all(Radius.circular(defaultBorderRadius)),
+            borderRadius: defaultBorderRadius,
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -940,8 +939,7 @@ class ServiceExtensionTooltip extends StatelessWidget {
           color: focusColor,
           width: hoverCardBorderWidth,
         ),
-        borderRadius:
-            const BorderRadius.all(Radius.circular(defaultBorderRadius)),
+        borderRadius: defaultBorderRadius,
       ),
       textStyle: theme.regularTextStyle.copyWith(color: colorScheme.onSurface),
       child: child,
