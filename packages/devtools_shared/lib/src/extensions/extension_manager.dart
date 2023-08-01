@@ -4,6 +4,7 @@
 
 import 'dart:io';
 
+import 'package:extension_discovery/extension_discovery.dart';
 import 'package:path/path.dart' as path;
 
 import 'extension_model.dart';
@@ -57,13 +58,16 @@ class ExtensionsManager {
     devtoolsExtensions.clear();
 
     if (rootPath != null) {
-      // TODO(kenz): use 'findExtensions' from package:extension_discovery once it
-      // is published.
-      // final extensions = findExtensions(
-      //   'devtools',
-      //   packageConfig: '$rootPath/.dart_tool/package_config.json',
-      // );
-      final extensions = <_Extension>[];
+      final extensions = await findExtensions(
+        'devtools',
+        packageConfig: Uri.parse(
+          path.join(
+            rootPath,
+            '.dart_tool',
+            'package_config.json',
+          ),
+        ),
+      );
       for (final extension in extensions) {
         final config = extension.config;
         if (config is! Map) {
@@ -160,22 +164,4 @@ Future<void> copyPath(String from, String to) async {
       await Link(copyTo).create(await file.target(), recursive: true);
     }
   }
-}
-
-/// TODO(kenz): remove this class. This is copied from
-/// package:extension_discovery, which is drafed here:
-/// https://github.com/dart-lang/tools/pull/129. Remove this temporary copy once
-/// package:extension_discovery is published.
-class _Extension {
-  _Extension._({
-    required this.package,
-    required this.rootUri,
-    required this.packageUri,
-    required this.config,
-  });
-
-  final String package;
-  final Uri rootUri;
-  final Uri packageUri;
-  final Object? config;
 }
