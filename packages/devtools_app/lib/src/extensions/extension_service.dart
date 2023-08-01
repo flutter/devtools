@@ -21,7 +21,7 @@ class ExtensionService extends DisposableController
   /// DevTools extensions that are visible in their own DevTools screen (i.e.
   /// extensions that have not been manually disabled by the user).
   ValueListenable<List<DevToolsExtensionConfig>> get visibleExtensions =>
-      _availableExtensions;
+      _visibleExtensions;
   final _visibleExtensions = ValueNotifier<List<DevToolsExtensionConfig>>([]);
 
   /// Returns the [ValueListenable] that stores the [ExtensionEnabledState] for
@@ -57,7 +57,8 @@ class ExtensionService extends DisposableController
     if (appRootPath == null) return;
 
     _availableExtensions.value =
-        await server.refreshAvailableExtensions(appRootPath);
+        await server.refreshAvailableExtensions(appRootPath)
+          ..sort();
     await _refreshExtensionEnabledStates();
   }
 
@@ -82,7 +83,8 @@ class ExtensionService extends DisposableController
     }
     // [_visibleExtensions] should be set last so that all extension states in
     // [_extensionEnabledStates] are updated by the time we notify listeners of
-    // [visibleExtensions].
+    // [visibleExtensions]. It is not necessary to sort [visible] because
+    // [_availableExtensions] is already sorted.
     _visibleExtensions.value = visible;
   }
 

@@ -90,30 +90,16 @@ class _ExtensionsList extends StatefulWidget {
 class __ExtensionsListState extends State<_ExtensionsList> {
   late ScrollController scrollController;
 
-  late List<DevToolsExtensionConfig> orderedExtensions;
-
   @override
   void initState() {
     super.initState();
-    _initOrderedExtensions();
     scrollController = ScrollController();
-  }
-
-  @override
-  void didUpdateWidget(_ExtensionsList oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    _initOrderedExtensions();
   }
 
   @override
   void dispose() {
     scrollController.dispose();
     super.dispose();
-  }
-
-  void _initOrderedExtensions() {
-    orderedExtensions = List<DevToolsExtensionConfig>.of(widget.extensions)
-      ..sort((a, b) => a.name.compareTo(b.name));
   }
 
   @override
@@ -123,9 +109,9 @@ class __ExtensionsListState extends State<_ExtensionsList> {
       thumbVisibility: true,
       child: ListView.builder(
         controller: scrollController,
-        itemCount: orderedExtensions.length,
+        itemCount: widget.extensions.length,
         itemBuilder: (context, index) => ExtensionSetting(
-          extension: orderedExtensions[index],
+          extension: widget.extensions[index],
         ),
       ),
     );
