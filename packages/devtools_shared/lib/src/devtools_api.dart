@@ -78,8 +78,7 @@ abstract class ExtensionsApi {
   static const extensionsResultPropertyName = 'extensions';
 
   /// Returns and optionally sets the enabled state for a DevTools extension.
-  static const apiExtensionEnabledState =
-      '${apiPrefix}extensionEnabledState';
+  static const apiExtensionEnabledState = '${apiPrefix}extensionEnabledState';
 
   /// The property name for the query parameter passed along with
   /// [apiExtensionEnabledState] requests to the server that describes the
