@@ -12,6 +12,7 @@ import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/common_widgets.dart';
 import '../../shared/globals.dart';
 import '../../shared/primitives/auto_dispose.dart';
+import '../../shared/primitives/utils.dart';
 import '../../shared/theme.dart';
 import '../../shared/ui/label.dart';
 import '../../shared/utils.dart';
@@ -167,10 +168,14 @@ class CodeStatisticsControls extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return DualValueListenableBuilder<bool, bool>(
-      firstListenable: controller.codeViewController.showCodeCoverage,
-      secondListenable: controller.codeViewController.showProfileInformation,
-      builder: (context, showCodeCoverage, showProfileInformation, _) {
+    return MultiValueListenableBuilder(
+      listenables: [
+        controller.codeViewController.showCodeCoverage,
+        controller.codeViewController.showProfileInformation,
+      ],
+      builder: (context, values, _) {
+        final showCodeCoverage = values.first as bool;
+        final showProfileInformation = values.second as bool;
         return Row(
           children: [
             // TODO(kenz): clean up this button group when records are

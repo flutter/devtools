@@ -788,10 +788,15 @@ class Gutters extends StatelessWidget {
 
     return Row(
       children: [
-        DualValueListenableBuilder<List<BreakpointAndSourcePosition>, bool>(
-          firstListenable: breakpointManager.breakpointsWithLocation,
-          secondListenable: codeViewController.showCodeCoverage,
-          builder: (context, breakpoints, showCodeCoverage, _) {
+        MultiValueListenableBuilder(
+          listenables: [
+            breakpointManager.breakpointsWithLocation,
+            codeViewController.showCodeCoverage,
+          ],
+          builder: (context, values, _) {
+            final breakpoints =
+                values.first as List<BreakpointAndSourcePosition>;
+            final showCodeCoverage = values.second as bool;
             return Gutter(
               gutterWidth: gutterWidth,
               scrollController: gutterController,

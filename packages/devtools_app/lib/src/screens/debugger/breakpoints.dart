@@ -33,11 +33,15 @@ class _BreakpointsState extends State<Breakpoints>
 
   @override
   Widget build(BuildContext context) {
-    return DualValueListenableBuilder<List<BreakpointAndSourcePosition>,
-        BreakpointAndSourcePosition?>(
-      firstListenable: breakpointManager.breakpointsWithLocation,
-      secondListenable: controller.selectedBreakpoint,
-      builder: (context, breakpoints, selectedBreakpoint, _) {
+    return MultiValueListenableBuilder(
+      listenables: [
+        breakpointManager.breakpointsWithLocation,
+        controller.selectedBreakpoint,
+      ],
+      builder: (context, values, _) {
+        final breakpoints = values.first as List<BreakpointAndSourcePosition>;
+        final selectedBreakpoint =
+            values.second as BreakpointAndSourcePosition?;
         return ListView.builder(
           itemCount: breakpoints.length,
           itemExtent: defaultListItemHeight,
