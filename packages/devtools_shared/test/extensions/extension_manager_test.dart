@@ -27,9 +27,9 @@ void main() {
 
     await copyPath(from.path, to.path);
     const expected =
-        "[File: 'tmp/foo.txt', Directory: 'tmp/bar', File: 'tmp/bar/baz.txt']";
-    final fromContents = from.listSync(recursive: true);
-    final toContents = to.listSync(recursive: true);
+        "[Directory: 'tmp/bar', File: 'tmp/bar/baz.txt', File: 'tmp/foo.txt']";
+    final fromContents = _contentAsOrderedString(from);
+    final toContents = _contentAsOrderedString(to);
     expect(fromContents.toString(), expected);
     expect(toContents.toString(), expected.replaceAll('tmp', 'tmp2'));
   });
@@ -47,17 +47,23 @@ Directory _createFromDir() {
   File.fromUri(Uri.parse(p.join(from.path, 'foo.txt')))..createSync();
   final dir = Directory(p.join(from.path, 'bar'))..createSync();
   File.fromUri(Uri.parse(p.join(dir.path, 'baz.txt')))..createSync();
-  final contents = from.listSync(recursive: true);
+  final contents = _contentAsOrderedString(from);
   expect(
-    contents.toString(),
-    "[File: 'tmp/foo.txt', Directory: 'tmp/bar', File: 'tmp/bar/baz.txt']",
+    contents,
+    "[Directory: 'tmp/bar', File: 'tmp/bar/baz.txt', File: 'tmp/foo.txt']",
   );
   return from;
 }
 
 Directory _createToDir() {
   final to = Directory('tmp2')..createSync();
-  final contents = to.listSync(recursive: true);
-  expect(contents.toString(), '[]');
+  final contents = _contentAsOrderedString(to);
+  expect(contents, '[]');
   return to;
+}
+
+String _contentAsOrderedString(Directory dir) {
+  final contents = dir.listSync(recursive: true)
+    ..sort((a, b) => a.path.compareTo(b.path));
+  return contents.toString();
 }
