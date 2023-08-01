@@ -54,33 +54,36 @@ class ExtensionService extends DisposableController
 
   Future<void> _maybeRefreshExtensions() async {
     final appRootPath = await _connectedAppRootPath();
-    if (appRootPath != null) {
-      _availableExtensions.value =
-          await server.refreshAvailableExtensions(appRootPath);
-      await _refreshExtensionEnabledStates();
-    }
+    if (appRootPath == null) return;
+
+    _availableExtensions.value =
+        await server.refreshAvailableExtensions(appRootPath);
+    await _refreshExtensionEnabledStates();
   }
 
   Future<void> _refreshExtensionEnabledStates() async {
     final appRootPath = await _connectedAppRootPath();
-    if (appRootPath != null) {
-      final visible = <DevToolsExtensionConfig>[];
-      for (final extension in _availableExtensions.value) {
-        final stateFromOptionsFile = await server.extensionEnabledState(
-          rootPath: appRootPath,
-          extensionName: extension.name,
-        );
-        final stateNotifier = _extensionEnabledStates.putIfAbsent(
-          extension.name,
-          () => ValueNotifier<ExtensionEnabledState>(stateFromOptionsFile),
-        );
-        stateNotifier.value = stateFromOptionsFile;
-        if (stateFromOptionsFile != ExtensionEnabledState.disabled) {
-          visible.add(extension);
-        }
+    if (appRootPath == null) return;
+
+    final visible = <DevToolsExtensionConfig>[];
+    for (final extension in _availableExtensions.value) {
+      final stateFromOptionsFile = await server.extensionEnabledState(
+        rootPath: appRootPath,
+        extensionName: extension.name,
+      );
+      final stateNotifier = _extensionEnabledStates.putIfAbsent(
+        extension.name,
+        () => ValueNotifier<ExtensionEnabledState>(stateFromOptionsFile),
+      );
+      stateNotifier.value = stateFromOptionsFile;
+      if (stateFromOptionsFile != ExtensionEnabledState.disabled) {
+        visible.add(extension);
       }
-      _visibleExtensions.value = visible;
     }
+    // [_visibleExtensions] should be set last so that all extension states in
+    // [_extensionEnabledStates] are updated by the time we notify listeners of
+    // [visibleExtensions].
+    _visibleExtensions.value = visible;
   }
 
   /// Sets the enabled state for [extension].
@@ -100,8 +103,10 @@ class ExtensionService extends DisposableController
   }
 }
 
+// TODO(kenz): consider caching this for the duration of the VM service
+// connection.
 Future<String?> _connectedAppRootPath() async {
-  var fileUri = await serviceManager.rootLibraryForSelectedIsolate();
+  var fileUri = await serviceManager.rootLibraryForMainIsolate();
   if (fileUri == null) return null;
 
   // TODO(kenz): for robustness, consider sending the root library uri to the

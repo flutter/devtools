@@ -39,13 +39,11 @@ void main() {
           .thenAnswer((_) async {
         stubEnabledStates[e.name.toLowerCase()]!.value =
             ExtensionEnabledState.enabled;
-        return Future.value();
       });
       when(mockExtensionService.setExtensionEnabledState(e, enable: false))
           .thenAnswer((_) async {
         stubEnabledStates[e.name.toLowerCase()]!.value =
             ExtensionEnabledState.disabled;
-        return Future.value();
       });
     }
   }

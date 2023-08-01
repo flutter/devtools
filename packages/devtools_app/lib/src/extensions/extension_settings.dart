@@ -41,6 +41,7 @@ class ExtensionSettingsDialog extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final availableExtensions = extensionService.availableExtensions.value;
+    // This dialog needs a fixed height because it contains a scrollable list.
     final dialogHeight = scaleByFontFactor(300.0);
     return DevToolsDialog(
       title: const DialogTitleText('DevTools Extensions'),
@@ -89,20 +90,30 @@ class _ExtensionsList extends StatefulWidget {
 class __ExtensionsListState extends State<_ExtensionsList> {
   late ScrollController scrollController;
 
-  late final List<DevToolsExtensionConfig> orderedExtensions;
+  late List<DevToolsExtensionConfig> orderedExtensions;
 
   @override
   void initState() {
     super.initState();
-    orderedExtensions = List<DevToolsExtensionConfig>.of(widget.extensions)
-      ..sort((a, b) => a.name.compareTo(b.name));
+    _initOrderedExtensions();
     scrollController = ScrollController();
+  }
+
+  @override
+  void didUpdateWidget(_ExtensionsList oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _initOrderedExtensions();
   }
 
   @override
   void dispose() {
     scrollController.dispose();
     super.dispose();
+  }
+
+  void _initOrderedExtensions() {
+    orderedExtensions = List<DevToolsExtensionConfig>.of(widget.extensions)
+      ..sort((a, b) => a.name.compareTo(b.name));
   }
 
   @override
@@ -129,11 +140,12 @@ class ExtensionSetting extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final states = [
+    final buttonStates = [
       (
-        'Enabled',
-        (state) => state == ExtensionEnabledState.enabled,
-        () {
+        title: 'Enabled',
+        isSelected: (ExtensionEnabledState state) =>
+            state == ExtensionEnabledState.enabled,
+        onPressed: () {
           ga.select(
             gac.extensionSettingsId,
             gac.extensionEnable(extension.name.toLowerCase()),
@@ -147,9 +159,10 @@ class ExtensionSetting extends StatelessWidget {
         },
       ),
       (
-        'Disabled',
-        (state) => state == ExtensionEnabledState.disabled,
-        () {
+        title: 'Disabled',
+        isSelected: (ExtensionEnabledState state) =>
+            state == ExtensionEnabledState.disabled,
+        onPressed: () {
           ga.select(
             gac.extensionSettingsId,
             gac.extensionDisable(extension.name.toLowerCase()),
@@ -176,21 +189,23 @@ class ExtensionSetting extends StatelessWidget {
               Text(
                 'package:$extensionName',
                 overflow: TextOverflow.ellipsis,
+                style: theme.fixedFontStyle,
               ),
               DevToolsToggleButtonGroup(
                 fillColor: theme.colorScheme.primary,
                 selectedColor: theme.colorScheme.onPrimary,
-                onPressed: (index) => states[index].$3(),
-                selectedStates:
-                    states.map((option) => option.$2(enabledState)).toList(),
-                children: states
+                onPressed: (index) => buttonStates[index].onPressed(),
+                selectedStates: buttonStates
+                    .map((option) => option.isSelected(enabledState))
+                    .toList(),
+                children: buttonStates
                     .map(
                       (option) => Padding(
                         padding: const EdgeInsets.symmetric(
                           vertical: densePadding,
                           horizontal: denseSpacing,
                         ),
-                        child: Text(option.$1),
+                        child: Text(option.title),
                       ),
                     )
                     .toList(),
