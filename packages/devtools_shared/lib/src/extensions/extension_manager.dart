@@ -72,6 +72,10 @@ class ExtensionsManager {
         final config = extension.config;
         if (config is! Map) {
           // Fail gracefully. Invalid content in the extension's config.json.
+          print(
+            '[WARNING] invalid config.json content for ${extension.package}:\n'
+            '$config',
+          );
           continue;
         }
         final configAsMap = config as Map<String, Object?>;
