@@ -415,6 +415,9 @@ extension ThemeDataExtension on ThemeData {
         ),
       );
 
+  TextStyle get boldTextStyle =>
+      regularTextStyle.copyWith(fontWeight: FontWeight.bold);
+
   TextStyle get subtleTextStyle => _fixBlurryText(
         TextStyle(
           color: colorScheme.subtleTextColor,

@@ -85,8 +85,6 @@ class DevToolsApp extends StatefulWidget {
 ///
 /// This manages the route generation, and marshals URL query parameters into
 /// flutter route parameters.
-// TODO(https://github.com/flutter/devtools/issues/1146): Introduce tests that
-// navigate the full app.
 class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
   List<Screen> get _screens => [
         ..._originalScreens,
@@ -97,7 +95,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
       widget.originalScreens.map((s) => s.screen).toList();
 
   Iterable<Screen> get _extensionScreens =>
-      extensionService.availableExtensions.value.map(
+      extensionService.visibleExtensions.value.map(
         (e) => DevToolsScreen<void>(ExtensionScreen(e)).screen,
       );
 
@@ -129,6 +127,11 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
 
     if (FeatureFlags.devToolsExtensions) {
       addAutoDisposeListener(extensionService.availableExtensions, () {
+        setState(() {
+          _clearCachedRoutes();
+        });
+      });
+      addAutoDisposeListener(extensionService.visibleExtensions, () {
         setState(() {
           _clearCachedRoutes();
         });
@@ -253,6 +256,7 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
         listenables: [
           preferences.vmDeveloperModeEnabled,
           extensionService.availableExtensions,
+          extensionService.visibleExtensions,
         ],
         builder: (_, __, child) {
           final screens = _visibleScreens()
