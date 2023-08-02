@@ -181,20 +181,20 @@ class ExtensionSetting extends StatelessWidget {
                 fillColor: theme.colorScheme.primary,
                 selectedColor: theme.colorScheme.onPrimary,
                 onPressed: (index) => buttonStates[index].onPressed(),
-                selectedStates: buttonStates
-                    .map((option) => option.isSelected(enabledState))
-                    .toList(),
-                children: buttonStates
-                    .map(
-                      (option) => Padding(
-                        padding: const EdgeInsets.symmetric(
-                          vertical: densePadding,
-                          horizontal: denseSpacing,
-                        ),
-                        child: Text(option.title),
+                selectedStates: [
+                  for (final state in buttonStates)
+                    state.isSelected(enabledState),
+                ],
+                children: [
+                  for (final state in buttonStates)
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        vertical: densePadding,
+                        horizontal: denseSpacing,
                       ),
-                    )
-                    .toList(),
+                      child: Text(state.title),
+                    ),
+                ],
               ),
             ],
           ),
