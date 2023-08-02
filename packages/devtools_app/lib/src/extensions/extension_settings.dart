@@ -20,7 +20,7 @@ import '../shared/utils.dart';
 class ExtensionSettingsAction extends ScaffoldAction {
   ExtensionSettingsAction({super.key, Color? color})
       : super(
-          icon: Icons.extension_rounded,
+          icon: Icons.extension_outlined,
           tooltip: 'DevTools Extensions',
           color: color,
           onPressed: (context) {
