@@ -18,8 +18,6 @@ import '../dart_tooling_api.dart';
 import '../vs_code_api.dart';
 import 'vs_code_api.dart';
 
-final _log = Logger('tooling_api');
-
 /// Whether to enable verbose logging for postMessage communication.
 ///
 /// This is useful for debugging when running inside VS Code.
@@ -29,6 +27,8 @@ final _log = Logger('tooling_api');
 ///  that passes a query param.
 const _enablePostMessageVerboseLogging = false;
 
+final _log = Logger('tooling_api');
+
 /// An API for interacting with Dart tooling.
 class DartToolingApiImpl implements DartToolingApi {
   DartToolingApiImpl.rpc(this._rpc) {
@@ -36,7 +36,7 @@ class DartToolingApiImpl implements DartToolingApi {
   }
 
   /// Connects the API using 'postMessage'. This is only available when running
-  /// on web and embedded inside VS Code.
+  /// on web and hosted inside an iframe (such as inside a VS Code webview).
   factory DartToolingApiImpl.postMessage() {
     if (_enablePostMessageVerboseLogging) {
       setDevToolsLoggingLevel(verboseLoggingLevel);
