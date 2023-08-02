@@ -175,7 +175,7 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(find.byType(DisableExtensionDialog), findsOneWidget);
-        
+
         await tester.tap(find.text('YES, DISABLE'));
         await tester.pumpAndSettle();
 

@@ -28,10 +28,10 @@ void main() {
     testWidgets(
       'builds dialog with no available extensions',
       (WidgetTester tester) async {
-      setGlobal(
-        ExtensionService,
-        await createMockExtensionServiceWithDefaults([]),
-      );
+        setGlobal(
+          ExtensionService,
+          await createMockExtensionServiceWithDefaults([]),
+        );
         await tester.pumpWidget(wrap(dialog));
         expect(find.text('DevTools Extensions'), findsOneWidget);
         expect(
