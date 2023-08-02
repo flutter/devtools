@@ -103,6 +103,8 @@ class DevToolsExtensionConfig implements Comparable {
   /// This code point should be part of the 'MaterialIcons' font family.
   final int materialIconCodePoint;
 
+  String get displayName => name.toLowerCase();
+
   Map<String, Object?> toJson() => {
         nameKey: name,
         pathKey: path,

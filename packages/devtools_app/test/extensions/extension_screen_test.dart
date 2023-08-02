@@ -5,6 +5,8 @@
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/extensions/embedded/view.dart';
 import 'package:devtools_app/src/extensions/extension_screen.dart';
+import 'package:devtools_app/src/extensions/extension_screen_controls.dart';
+import 'package:devtools_shared/devtools_extensions.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -13,18 +15,23 @@ import '../test_infra/test_data/extensions.dart';
 
 void main() {
   const windowSize = Size(2000.0, 2000.0);
-  group('Extension screen', () {
+  group('$ExtensionScreen', () {
     late ExtensionScreen fooScreen;
     late ExtensionScreen barScreen;
     late ExtensionScreen providerScreen;
 
-    setUp(() {
+    setUp(() async {
       setGlobal(IdeTheme, IdeTheme());
       setGlobal(PreferencesController, PreferencesController());
       setGlobal(ServiceConnectionManager, ServiceConnectionManager());
       fooScreen = ExtensionScreen(fooExtension);
       barScreen = ExtensionScreen(barExtension);
       providerScreen = ExtensionScreen(providerExtension);
+
+      setGlobal(
+        ExtensionService,
+        await createMockExtensionServiceWithDefaults(testExtensions),
+      );
     });
 
     testWidgets('builds its tab', (WidgetTester tester) async {
@@ -42,7 +49,7 @@ void main() {
     });
 
     testWidgetsWithWindowSize(
-      'renders as expected',
+      'renders for unactivated state',
       windowSize,
       (tester) async {
         await tester.pumpWidget(wrap(Builder(builder: fooScreen.build)));
@@ -54,7 +61,9 @@ void main() {
         );
         expect(find.richTextContaining('(v1.0.0)'), findsOneWidget);
         expect(find.richTextContaining('Report an issue'), findsOneWidget);
-        expect(find.byType(EmbeddedExtensionView), findsOneWidget);
+        expect(find.byType(DisableExtensionButton), findsNothing);
+        expect(find.byType(EnableExtensionPrompt), findsOneWidget);
+        expect(find.byType(EmbeddedExtensionView), findsNothing);
 
         await tester.pumpWidget(wrap(Builder(builder: barScreen.build)));
         expect(find.byType(ExtensionView), findsOneWidget);
@@ -65,7 +74,9 @@ void main() {
         );
         expect(find.richTextContaining('(v2.0.0)'), findsOneWidget);
         expect(find.richTextContaining('Report an issue'), findsOneWidget);
-        expect(find.byType(EmbeddedExtensionView), findsOneWidget);
+        expect(find.byType(DisableExtensionButton), findsNothing);
+        expect(find.byType(EnableExtensionPrompt), findsOneWidget);
+        expect(find.byType(EmbeddedExtensionView), findsNothing);
 
         await tester.pumpWidget(wrap(Builder(builder: providerScreen.build)));
         expect(find.byType(ExtensionView), findsOneWidget);
@@ -76,7 +87,105 @@ void main() {
         );
         expect(find.richTextContaining('(v3.0.0)'), findsOneWidget);
         expect(find.richTextContaining('Report an issue'), findsOneWidget);
+        expect(find.byType(DisableExtensionButton), findsNothing);
+        expect(find.byType(EnableExtensionPrompt), findsOneWidget);
+        expect(find.byType(EmbeddedExtensionView), findsNothing);
+      },
+    );
+
+    testWidgetsWithWindowSize(
+      'renders for enabled state',
+      windowSize,
+      (tester) async {
+        await extensionService.setExtensionEnabledState(
+          fooExtension,
+          enable: true,
+        );
+
+        await tester.pumpWidget(wrap(Builder(builder: fooScreen.build)));
+        expect(find.byType(ExtensionView), findsOneWidget);
+        expect(find.byType(EmbeddedExtensionHeader), findsOneWidget);
+        expect(
+          find.richTextContaining('package:foo extension'),
+          findsOneWidget,
+        );
+        expect(find.richTextContaining('(v1.0.0)'), findsOneWidget);
+        expect(find.richTextContaining('Report an issue'), findsOneWidget);
+        expect(find.byType(DisableExtensionButton), findsOneWidget);
+        expect(find.byType(EnableExtensionPrompt), findsNothing);
         expect(find.byType(EmbeddedExtensionView), findsOneWidget);
+      },
+    );
+
+    testWidgetsWithWindowSize(
+      'renders for disabled state',
+      windowSize,
+      (tester) async {
+        await extensionService.setExtensionEnabledState(
+          fooExtension,
+          enable: false,
+        );
+
+        await tester.pumpWidget(wrap(Builder(builder: fooScreen.build)));
+        expect(find.byType(ExtensionView), findsOneWidget);
+        expect(find.byType(EmbeddedExtensionHeader), findsOneWidget);
+        expect(
+          find.richTextContaining('package:foo extension'),
+          findsOneWidget,
+        );
+        expect(find.richTextContaining('(v1.0.0)'), findsOneWidget);
+        expect(find.richTextContaining('Report an issue'), findsOneWidget);
+        expect(find.byType(DisableExtensionButton), findsNothing);
+        expect(find.byType(EnableExtensionPrompt), findsOneWidget);
+        expect(find.byType(EmbeddedExtensionView), findsNothing);
+      },
+    );
+
+    testWidgetsWithWindowSize(
+      'can enable and disable extension from screen',
+      windowSize,
+      (tester) async {
+        await tester.pumpWidget(wrap(Builder(builder: fooScreen.build)));
+
+        expect(
+          extensionService.enabledStateListenable(fooExtension.name).value,
+          ExtensionEnabledState.none,
+        );
+        expect(find.byType(EnableExtensionPrompt), findsOneWidget);
+        expect(find.byType(EmbeddedExtensionView), findsNothing);
+        expect(find.byType(DisableExtensionButton), findsNothing);
+
+        await tester.tap(
+          find.descendant(
+            of: find.byType(DevToolsButton),
+            matching: find.text('Enable'),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        expect(
+          extensionService.enabledStateListenable(fooExtension.name).value,
+          ExtensionEnabledState.enabled,
+        );
+        expect(find.byType(EnableExtensionPrompt), findsNothing);
+        expect(find.byType(EmbeddedExtensionView), findsOneWidget);
+        expect(find.byType(DisableExtensionButton), findsOneWidget);
+
+        await tester.tap(find.byType(DisableExtensionButton));
+        await tester.pumpAndSettle();
+
+        expect(find.byType(DisableExtensionDialog), findsOneWidget);
+
+        await tester.tap(find.text('YES, DISABLE'));
+        await tester.pumpAndSettle();
+
+        expect(
+          extensionService.enabledStateListenable(fooExtension.name).value,
+          ExtensionEnabledState.disabled,
+        );
+        expect(find.byType(EnableExtensionPrompt), findsOneWidget);
+        expect(find.byType(EmbeddedExtensionView), findsNothing);
+        expect(find.byType(DisableExtensionButton), findsNothing);
       },
     );
   });
