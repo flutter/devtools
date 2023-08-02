@@ -8,7 +8,6 @@ import 'package:devtools_shared/devtools_extensions.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/mockito.dart';
 
 import '../test_infra/matchers/matchers.dart';
 import '../test_infra/test_data/extensions.dart';
@@ -16,49 +15,23 @@ import '../test_infra/test_data/extensions.dart';
 void main() {
   late ExtensionSettingsDialog dialog;
 
-  final stubEnabledStates = <String, ValueNotifier<ExtensionEnabledState>>{};
-
-  Future<void> setUpExtensionService(
-    List<DevToolsExtensionConfig> extensions,
-    // ignore: avoid-redundant-async, false positive
-  ) async {
-    final mockExtensionService = MockExtensionService();
-    setGlobal(ExtensionService, mockExtensionService);
-    when(mockExtensionService.availableExtensions)
-        .thenReturn(ImmediateValueNotifier(extensions));
-
-    stubEnabledStates.clear();
-    for (final e in extensions) {
-      stubEnabledStates[e.name.toLowerCase()] =
-          ValueNotifier<ExtensionEnabledState>(ExtensionEnabledState.none);
-      when(mockExtensionService.enabledStateListenable(e.name))
-          .thenReturn(stubEnabledStates[e.name.toLowerCase()]!);
-      when(mockExtensionService.enabledStateListenable(e.name.toLowerCase()))
-          .thenReturn(stubEnabledStates[e.name.toLowerCase()]!);
-      when(mockExtensionService.setExtensionEnabledState(e, enable: true))
-          .thenAnswer((_) async {
-        stubEnabledStates[e.name.toLowerCase()]!.value =
-            ExtensionEnabledState.enabled;
-      });
-      when(mockExtensionService.setExtensionEnabledState(e, enable: false))
-          .thenAnswer((_) async {
-        stubEnabledStates[e.name.toLowerCase()]!.value =
-            ExtensionEnabledState.disabled;
-      });
-    }
-  }
-
   group('$ExtensionSettingsDialog', () {
     setUp(() async {
       dialog = const ExtensionSettingsDialog();
-      await setUpExtensionService(testExtensions);
+      setGlobal(
+        ExtensionService,
+        await createMockExtensionServiceWithDefaults(testExtensions),
+      );
       setGlobal(IdeTheme, IdeTheme());
     });
 
     testWidgets(
       'builds dialog with no available extensions',
       (WidgetTester tester) async {
-        await setUpExtensionService([]);
+      setGlobal(
+        ExtensionService,
+        await createMockExtensionServiceWithDefaults([]),
+      );
         await tester.pumpWidget(wrap(dialog));
         expect(find.text('DevTools Extensions'), findsOneWidget);
         expect(

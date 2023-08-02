@@ -53,24 +53,12 @@ class EmbeddedExtensionHeader extends StatelessWidget {
         ),
         ValueListenableBuilder<ExtensionEnabledState>(
           valueListenable:
-              extensionService.enabledStateListenable(extensionName),
+              extensionService.enabledStateListenable(extension.displayName),
           builder: (context, activationState, _) {
             if (activationState == ExtensionEnabledState.enabled) {
               return Padding(
                 padding: const EdgeInsets.only(left: denseSpacing),
-                child: DevToolsButton.iconOnly(
-                  icon: Icons.extension_off_outlined,
-                  outlined: false,
-                  tooltip: 'Disable extension',
-                  gaScreen: gac.extensionScreenId,
-                  gaSelection: gac.extensionDisable(extensionName),
-                  onPressed: () => unawaited(
-                    showDialog(
-                      context: context,
-                      builder: (_) => DisableDialog(extension: extension),
-                    ),
-                  ),
-                ),
+                child: DisableExtensionButton(extension: extension),
               );
             }
             return const SizedBox.shrink();
@@ -81,8 +69,33 @@ class EmbeddedExtensionHeader extends StatelessWidget {
   }
 }
 
-class DisableDialog extends StatelessWidget {
-  const DisableDialog({super.key, required this.extension});
+@visibleForTesting
+class DisableExtensionButton extends StatelessWidget {
+  const DisableExtensionButton({super.key, required this.extension});
+
+  final DevToolsExtensionConfig extension;
+
+  @override
+  Widget build(BuildContext context) {
+    return DevToolsButton.iconOnly(
+      icon: Icons.extension_off_outlined,
+      outlined: false,
+      tooltip: 'Disable extension',
+      gaScreen: gac.extensionScreenId,
+      gaSelection: gac.extensionDisable(extension.displayName),
+      onPressed: () => unawaited(
+        showDialog(
+          context: context,
+          builder: (_) => DisableExtensionDialog(extension: extension),
+        ),
+      ),
+    );
+  }
+}
+
+@visibleForTesting
+class DisableExtensionDialog extends StatelessWidget {
+  const DisableExtensionDialog({super.key, required this.extension});
 
   final DevToolsExtensionConfig extension;
 
@@ -151,8 +164,8 @@ class DisableDialog extends StatelessWidget {
   }
 }
 
-class EnablePrompt extends StatelessWidget {
-  const EnablePrompt({
+class EnableExtensionPrompt extends StatelessWidget {
+  const EnableExtensionPrompt({
     super.key,
     required this.extension,
   });

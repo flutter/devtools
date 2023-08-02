@@ -112,7 +112,7 @@ class ExtensionView extends StatelessWidget {
                     ),
                   );
                 }
-                return EnablePrompt(
+                return EnableExtensionPrompt(
                   extension: controller.extensionConfig,
                 );
               },
