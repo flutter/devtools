@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../app.dart';
+import '../extensions/extension_settings.dart';
 import '../screens/debugger/debugger_screen.dart';
 import '../shared/analytics/prompt.dart';
 import '../shared/banner_messages.dart';
@@ -13,6 +14,7 @@ import '../shared/common_widgets.dart';
 import '../shared/config_specific/drag_and_drop/drag_and_drop.dart';
 import '../shared/config_specific/import_export/import_export.dart';
 import '../shared/console/widgets/console_pane.dart';
+import '../shared/feature_flags.dart';
 import '../shared/framework_controller.dart';
 import '../shared/globals.dart';
 import '../shared/primitives/auto_dispose.dart';
@@ -62,6 +64,8 @@ class DevToolsScaffold extends StatefulWidget {
   }) =>
       [
         OpenSettingsAction(color: color),
+        if (FeatureFlags.devToolsExtensions)
+          ExtensionSettingsAction(color: color),
         ReportFeedbackButton(color: color),
         if (!isEmbedded) ImportToolbarAction(color: color),
         OpenAboutAction(color: color),

@@ -7,6 +7,7 @@
 import 'dart:async';
 
 import 'package:devtools_shared/devtools_extensions.dart';
+import 'package:flutter/foundation.dart';
 
 import '../../primitives/utils.dart';
 
@@ -80,9 +81,54 @@ Future<DevToolsJsonFile?> requestTestAppSizeFile(String path) async {
 Future<List<DevToolsExtensionConfig>> refreshAvailableExtensions(
   String rootPath,
 ) async {
-  return [];
+  return kDebugMode ? _debugExtensions : [];
+}
+
+Future<ExtensionEnabledState> extensionEnabledState({
+  required String rootPath,
+  required String extensionName,
+  bool? enable,
+}) async {
+  if (enable != null) {
+    _stubEnabledStates[extensionName] =
+        enable ? ExtensionEnabledState.enabled : ExtensionEnabledState.disabled;
+  }
+  return _stubEnabledStates.putIfAbsent(
+    extensionName,
+    () => ExtensionEnabledState.none,
+  );
 }
 
 void logWarning() {
   throw Exception(unsupportedMessage);
 }
+
+/// Stubbed activation states so we can develop DevTools extensions without a
+/// server connection on Desktop.
+final _stubEnabledStates = <String, ExtensionEnabledState>{};
+
+/// Stubbed extensions so we can develop DevTools Extensions without a server
+/// connection on Desktop.
+final List<DevToolsExtensionConfig> _debugExtensions = [
+  DevToolsExtensionConfig.parse({
+    DevToolsExtensionConfig.nameKey: 'foo',
+    DevToolsExtensionConfig.issueTrackerKey: 'www.google.com',
+    DevToolsExtensionConfig.versionKey: '1.0.0',
+    DevToolsExtensionConfig.pathKey: '/path/to/foo',
+  }),
+  DevToolsExtensionConfig.parse({
+    DevToolsExtensionConfig.nameKey: 'bar',
+    DevToolsExtensionConfig.issueTrackerKey: 'www.google.com',
+    DevToolsExtensionConfig.versionKey: '2.0.0',
+    DevToolsExtensionConfig.materialIconCodePointKey: 0xe638,
+    DevToolsExtensionConfig.pathKey: '/path/to/bar',
+  }),
+  DevToolsExtensionConfig.parse({
+    DevToolsExtensionConfig.nameKey: 'provider',
+    DevToolsExtensionConfig.issueTrackerKey:
+        'https://github.com/rrousselGit/provider/issues',
+    DevToolsExtensionConfig.versionKey: '3.0.0',
+    DevToolsExtensionConfig.materialIconCodePointKey: 0xe50a,
+    DevToolsExtensionConfig.pathKey: '/path/to/provider',
+  }),
+];
