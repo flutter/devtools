@@ -125,8 +125,9 @@ class DeepLinksScreen extends Screen {
 
   static final id = ScreenMetaData.deepLinks.id;
 
-  @override
-  String get docPageId => id;
+  // TODO(https://github.com/flutter/devtools/issues/6013): write documentation.
+  // @override
+  // String get docPageId => id;
 
   @override
   Widget build(BuildContext context) {
@@ -143,10 +144,9 @@ class DeepLinkPage extends StatefulWidget {
 
 class _DeepLinkPageState extends State<DeepLinkPage> {
   String responseBody = 'empty response';
-
   int? selectedRowIndex;
   String searchContent = '';
-  bool bundleByDomain = true;
+  bool bundleByDomain = false;
 
   void setBundleByDomain(bool shouldBundleByDomain) {
     setState(() {

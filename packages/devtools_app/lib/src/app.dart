@@ -496,7 +496,6 @@ List<DevToolsScreen> defaultScreens({
   List<DevToolsJsonFile> sampleData = const [],
 }) {
   return devtoolsScreens ??= <DevToolsScreen>[
-
     DevToolsScreen<void>(HomeScreen(sampleData: sampleData)),
     DevToolsScreen<InspectorController>(
       InspectorScreen(),
