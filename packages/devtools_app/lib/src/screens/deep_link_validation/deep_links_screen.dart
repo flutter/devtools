@@ -108,7 +108,6 @@ class LinkData {
       domain: domain,
       path: '${linkData.path}\n$path',
       domainError: domainError || linkData.domainError,
-      // pathError: pathError || linkData.pathError,
     );
   }
 }
