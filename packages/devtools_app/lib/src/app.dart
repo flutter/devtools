@@ -21,7 +21,6 @@ import 'screens/app_size/app_size_controller.dart';
 import 'screens/app_size/app_size_screen.dart';
 import 'screens/debugger/debugger_controller.dart';
 import 'screens/debugger/debugger_screen.dart';
-import 'screens/deep_link/deep_link_screen.dart';
 import 'screens/deep_link_validation/deep_links_controller.dart';
 import 'screens/deep_link_validation/deep_links_screen.dart';
 import 'screens/inspector/inspector_controller.dart';
@@ -497,10 +496,7 @@ List<DevToolsScreen> defaultScreens({
   List<DevToolsJsonFile> sampleData = const [],
 }) {
   return devtoolsScreens ??= <DevToolsScreen>[
-    DevToolsScreen<void>(
-      DeepLinkScreen(),
-      createController: (_) {},
-    ),
+
     DevToolsScreen<void>(HomeScreen(sampleData: sampleData)),
     DevToolsScreen<InspectorController>(
       InspectorScreen(),
