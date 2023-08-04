@@ -75,7 +75,7 @@ jobs:
             dart tool/update_version.dart auto --type major
             dart tool/update_version.dart auto --type dev
           elif [ "$UPDATE_TYPE" == "dev" ]; then
-            if ! echo "$ORIGINAL_VERSION" |grep -Eq "\-dev\.[0-9]+" ; then
+            if ! echo "$ORIGINAL_VERSION" | grep -Eq "\-dev\.[0-9]+" ; then
               ERROR_DESCRIPTION="Doing \
             a Dev bump on a release version ($ORIGINAL_VERSION) is not supported. \
             Ensure that that current version has been properly bumped to a '-dev.*' \
