@@ -58,6 +58,8 @@ jobs:
 
           ORIGINAL_VERSION=$(dart tool/update_version.dart current-version)
 
+          if [ -z ]
+
           if [ -z "$UPDATE_TYPE" ]; then
             # If $UPDATE_TYPE is not set, then assume it is dev
             UPDATE_TYPE="dev"
@@ -75,6 +77,15 @@ jobs:
             dart tool/update_version.dart auto --type major
             dart tool/update_version.dart auto --type dev
           elif [ "$UPDATE_TYPE" == "dev" ]; then
+            if ! echo "$ORIGINAL_VERSION" |grep -Eq "\-dev\.[0-9]+" ; then
+              ERROR_DESCRIPTION="Doing \
+            a Dev bump on a release version ($ORIGINAL_VERSION) is not supported. \
+            Ensure that that current version has been properly bumped to a '-dev.*' \
+            pre-release version, in order to continue daily dev bumps."
+
+              echo "::error ,title=Cannot do a dev bump on a Release Version ($ORIGINAL_VERSION)::$ERROR_DESCRIPTION" 
+              exit 1;
+            fi
             dart tool/update_version.dart auto --type dev
           else
             echo "ERROR: UNEXPECTED UPDATE TYPE: $UPDATE_TYPE"
