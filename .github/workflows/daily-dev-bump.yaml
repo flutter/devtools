@@ -58,8 +58,6 @@ jobs:
 
           ORIGINAL_VERSION=$(dart tool/update_version.dart current-version)
 
-          if [ -z ]
-
           if [ -z "$UPDATE_TYPE" ]; then
             # If $UPDATE_TYPE is not set, then assume it is dev
             UPDATE_TYPE="dev"
