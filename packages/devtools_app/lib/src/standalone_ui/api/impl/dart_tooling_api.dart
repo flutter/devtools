@@ -9,7 +9,6 @@ import 'package:json_rpc_2/json_rpc_2.dart' as json_rpc_2;
 import 'package:logging/logging.dart';
 import 'package:meta/meta.dart';
 import 'package:stream_channel/stream_channel.dart';
-import 'package:web_socket_channel/web_socket_channel.dart';
 
 import '../../../shared/config_specific/logger/logger_helpers.dart';
 import '../../../shared/config_specific/post_message/post_message.dart';
@@ -29,7 +28,8 @@ const _enablePostMessageVerboseLogging = false;
 
 final _log = Logger('tooling_api');
 
-/// An API for interacting with Dart tooling.
+/// An API used by Dart tooling surfaces to interact with Dart tools that expose
+/// APIs such as Dart-Code and the LSP server.
 class DartToolingApiImpl implements DartToolingApi {
   DartToolingApiImpl.rpc(this._rpc) {
     unawaited(_rpc.listen());
@@ -54,11 +54,6 @@ class DartToolingApiImpl implements DartToolingApi {
       postMessageController,
     );
     return DartToolingApiImpl.rpc(json_rpc_2.Peer.withoutJson(channel));
-  }
-
-  /// Connects the API over the provided WebSocket.
-  factory DartToolingApiImpl.webSocket(WebSocketChannel socket) {
-    return DartToolingApiImpl.rpc(json_rpc_2.Peer(socket.cast<String>()));
   }
 
   final json_rpc_2.Peer _rpc;
@@ -108,6 +103,7 @@ abstract base class ToolApiImpl {
   @protected
   Stream<Map<String, Object?>> events(String name) {
     final streamController = StreamController<Map<String, Object?>>.broadcast();
+    unawaited(rpc.done.then((_) => streamController.close()));
     rpc.registerMethod('$apiName.$name', (json_rpc_2.Parameters parameters) {
       streamController.add(parameters.asMap.cast<String, Object?>());
     });

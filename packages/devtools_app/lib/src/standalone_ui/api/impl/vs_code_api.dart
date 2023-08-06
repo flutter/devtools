@@ -11,23 +11,22 @@ import 'dart_tooling_api.dart';
 final class VsCodeApiImpl extends ToolApiImpl implements VsCodeApi {
   VsCodeApiImpl._(super.rpc, Map<String, Object?> capabilities) {
     this.capabilities = VsCodeCapabilitiesImpl(capabilities);
-    devicesChanged =
-        events('devicesChanged').map(VsCodeDevicesEventImpl.fromJson);
+    devicesChanged = events(VsCodeApi.jsonDevicesChangedEvent)
+        .map(VsCodeDevicesEventImpl.fromJson);
   }
 
   static Future<VsCodeApi?> tryConnect(json_rpc_2.Peer rpc) async {
-    final capabilities = await ToolApiImpl.tryGetCapabilities(rpc, _apiName);
+    final capabilities =
+        await ToolApiImpl.tryGetCapabilities(rpc, VsCodeApi.jsonApiName);
     return capabilities != null ? VsCodeApiImpl._(rpc, capabilities) : null;
   }
 
-  static const _apiName = 'vsCode';
-
   @override
-  Future<void> initialize() => sendRequest('initialize');
+  Future<void> initialize() => sendRequest(VsCodeApi.jsonInitializeMethod);
 
   @override
   @protected
-  String get apiName => _apiName;
+  String get apiName => VsCodeApi.jsonApiName;
 
   @override
   late final Stream<VsCodeDevicesEvent> devicesChanged;
@@ -38,16 +37,19 @@ final class VsCodeApiImpl extends ToolApiImpl implements VsCodeApi {
   @override
   Future<Object?> executeCommand(String command, [List<Object?>? arguments]) {
     return sendRequest(
-      'executeCommand',
-      {'command': command, 'arguments': arguments},
+      VsCodeApi.jsonExecuteCommandMethod,
+      {
+        VsCodeApi.jsonExecuteCommandCommandParameter: command,
+        VsCodeApi.jsonExecuteCommandArgumentsParameter: arguments,
+      },
     );
   }
 
   @override
   Future<bool> selectDevice(String id) {
     return sendRequest(
-      'selectDevice',
-      {'id': id},
+      VsCodeApi.jsonSelectDeviceMethod,
+      {VsCodeApi.jsonSelectDeviceIdParameter: id},
     );
   }
 }
@@ -66,14 +68,14 @@ class VsCodeDeviceImpl implements VsCodeDevice {
 
   VsCodeDeviceImpl.fromJson(Map<String, Object?> json)
       : this(
-          id: json['id'] as String,
-          name: json['name'] as String,
-          category: json['category'] as String?,
-          emulator: json['emulator'] as bool,
-          emulatorId: json['emulatorId'] as String?,
-          ephemeral: json['ephemeral'] as bool,
-          platform: json['platform'] as String,
-          platformType: json['platformType'] as String?,
+          id: json[VsCodeDevice.jsonIdField] as String,
+          name: json[VsCodeDevice.jsonNameField] as String,
+          category: json[VsCodeDevice.jsonCategoryField] as String?,
+          emulator: json[VsCodeDevice.jsonEmulatorField] as bool,
+          emulatorId: json[VsCodeDevice.jsonEmulatorIdField] as String?,
+          ephemeral: json[VsCodeDevice.jsonEphemeralField] as bool,
+          platform: json[VsCodeDevice.jsonPlatformField] as String,
+          platformType: json[VsCodeDevice.jsonPlatformTypeField] as String?,
         );
 
   @override
@@ -101,14 +103,14 @@ class VsCodeDeviceImpl implements VsCodeDevice {
   final String? platformType;
 
   Map<String, Object?> toJson() => {
-        'id': id,
-        'name': name,
-        'category': category,
-        'emulator': emulator,
-        'emulatorId': emulatorId,
-        'ephemeral': ephemeral,
-        'platform': platform,
-        'platformType': platformType,
+        VsCodeDevice.jsonIdField: id,
+        VsCodeDevice.jsonNameField: name,
+        VsCodeDevice.jsonCategoryField: category,
+        VsCodeDevice.jsonEmulatorField: emulator,
+        VsCodeDevice.jsonEmulatorIdField: emulatorId,
+        VsCodeDevice.jsonEphemeralField: ephemeral,
+        VsCodeDevice.jsonPlatformField: platform,
+        VsCodeDevice.jsonPlatformTypeField: platformType,
       };
 }
 
@@ -120,8 +122,9 @@ class VsCodeDevicesEventImpl implements VsCodeDevicesEvent {
 
   VsCodeDevicesEventImpl.fromJson(Map<String, Object?> json)
       : this(
-          selectedDeviceId: json['selectedDeviceId'] as String?,
-          devices: (json['devices'] as List)
+          selectedDeviceId:
+              json[VsCodeDevicesEvent.jsonSelectedDeviceIdField] as String?,
+          devices: (json[VsCodeDevicesEvent.jsonDevicesField] as List)
               .map((item) => Map<String, Object?>.from(item))
               .map((map) => VsCodeDeviceImpl.fromJson(map))
               .toList(),
@@ -134,8 +137,8 @@ class VsCodeDevicesEventImpl implements VsCodeDevicesEvent {
   final List<VsCodeDevice> devices;
 
   Map<String, Object?> toJson() => {
-        'selectedDeviceId': selectedDeviceId,
-        'devices': devices,
+        VsCodeDevicesEvent.jsonSelectedDeviceIdField: selectedDeviceId,
+        VsCodeDevicesEvent.jsonDevicesField: devices,
       };
 }
 
@@ -145,5 +148,10 @@ class VsCodeCapabilitiesImpl implements VsCodeCapabilities {
   final Map<String, Object?>? _raw;
 
   @override
-  bool get executeCommand => _raw?['executeCommand'] == true;
+  bool get executeCommand =>
+      _raw?[VsCodeCapabilities.jsonExecuteCommandField] == true;
+
+  @override
+  bool get selectDevice =>
+      _raw?[VsCodeCapabilities.jsonSelectDeviceField] == true;
 }

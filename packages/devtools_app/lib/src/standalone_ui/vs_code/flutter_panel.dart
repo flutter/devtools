@@ -15,25 +15,17 @@ import '../api/vs_code_api.dart';
 ///
 /// Provides some basic functionality to improve discoverability of features
 /// such as creation of new projects, device selection and DevTools features.
-class VsCodeFlutterPanel extends StatefulWidget {
+class VsCodeFlutterPanel extends StatelessWidget {
   const VsCodeFlutterPanel(this.api, {super.key});
 
   final DartToolingApi api;
 
   @override
-  State<VsCodeFlutterPanel> createState() => _VsCodeFlutterPanelState();
-}
-
-class _VsCodeFlutterPanelState extends State<VsCodeFlutterPanel> {
-  @override
   Widget build(BuildContext context) {
     assert(FeatureFlags.vsCodeSidebarTooling);
 
-    final api = widget.api;
-
     return Column(
       children: [
-        const Text(''),
         FutureBuilder(
           future: api.vsCode,
           builder: (context, snapshot) =>
@@ -73,41 +65,43 @@ class _VsCodeConnectedPanelState extends State<_VsCodeConnectedPanel> {
   Widget build(BuildContext context) {
     return Column(
       children: [
+        const SizedBox(height: 20),
         if (widget.api.capabilities.executeCommand)
           ElevatedButton(
             onPressed: () =>
                 unawaited(widget.api.executeCommand('flutter.createProject')),
             child: const Text('New Flutter Project'),
           ),
-        StreamBuilder(
-          stream: widget.api.devicesChanged,
-          builder: (context, snapshot) {
-            if (!snapshot.hasData) {
-              return const Text('');
-            }
-            final deviceEvent = snapshot.data!;
-            return Table(
-              defaultVerticalAlignment: TableCellVerticalAlignment.middle,
-              children: [
-                for (final device in deviceEvent.devices)
-                  TableRow(
-                    children: [
-                      TextButton(
-                        child: Text(device.name),
-                        onPressed: () =>
-                            unawaited(widget.api.selectDevice(device.id)),
-                      ),
-                      Text(
-                        device.id == deviceEvent.selectedDeviceId
-                            ? '(selected)'
-                            : '',
-                      ),
-                    ],
-                  ),
-              ],
-            );
-          },
-        ),
+        if (widget.api.capabilities.selectDevice)
+          StreamBuilder(
+            stream: widget.api.devicesChanged,
+            builder: (context, snapshot) {
+              if (!snapshot.hasData) {
+                return const SizedBox.shrink();
+              }
+              final deviceEvent = snapshot.data!;
+              return Table(
+                defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+                children: [
+                  for (final device in deviceEvent.devices)
+                    TableRow(
+                      children: [
+                        TextButton(
+                          child: Text(device.name),
+                          onPressed: () =>
+                              unawaited(widget.api.selectDevice(device.id)),
+                        ),
+                        Text(
+                          device.id == deviceEvent.selectedDeviceId
+                              ? '(selected)'
+                              : '',
+                        ),
+                      ],
+                    ),
+                ],
+              );
+            },
+          ),
         if (widget.api.capabilities.executeCommand)
           ElevatedButton(
             onPressed: () =>

@@ -4,7 +4,7 @@
 
 import 'vs_code_api.dart';
 
-/// An API exposed to Dart tooling extensions.
+/// An API exposed to Dart tooling surfaces.
 ///
 /// APIs are grouped into child APIs that are exposed as fields. Each field is a
 /// `Future` that will return null if the requested API is unavailable (for

@@ -65,6 +65,7 @@ class MockDartToolingApi extends DartToolingApiImpl {
     server.registerMethod('vsCode.getCapabilities', () async {
       return {
         'executeCommand': true,
+        'selectDevice': true,
       };
     });
     server.registerMethod('vsCode.initialize', initialize);
@@ -84,7 +85,7 @@ class MockDartToolingApi extends DartToolingApiImpl {
       emulator: false,
       emulatorId: null,
       ephemeral: false,
-      platform: 'dartwin-x64',
+      platform: 'darwin-x64',
       platformType: 'macos',
     ),
     VsCodeDeviceImpl(
@@ -100,7 +101,7 @@ class MockDartToolingApi extends DartToolingApiImpl {
   ];
 
   /// The current set of devices being presented to the embedded panel.
-  final List<VsCodeDevice> _devices = [];
+  final _devices = <VsCodeDevice>[];
 
   /// The currently selected device presented to the embedded panel.
   String? _selectedDeviceId;
