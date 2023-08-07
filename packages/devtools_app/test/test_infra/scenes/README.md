@@ -8,7 +8,7 @@ flutter pub run build_runner build --delete-conflicting-outputs
 
 To run:
 ```
-flutter run -t test/test_infra/scenes/hello.stager_app.dart -d macos
+flutter run -t test/test_infra/scenes/hello.stager_app.g.dart -d macos
 ```
 
 Configuration for VSCode:
@@ -18,7 +18,7 @@ Configuration for VSCode:
     "cwd": "devtools_app",
     "request": "launch",
     "type": "dart",
-    "program": "test/scenes/memory/default.stager_app.dart",
+    "program": "test/scenes/memory/default.stager_app.g.dart",
     "deviceId": "macos"
 },
 ```
