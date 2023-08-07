@@ -5,12 +5,11 @@
 import 'dart:collection';
 import 'dart:convert';
 
+import 'package:devtools_app/src/shared/split.dart';
+import 'package:devtools_app/src/shared/theme.dart';
 import 'package:flutter/material.dart';
 
-import '../../../shared/split.dart';
-import '../../../shared/theme.dart';
-import '../flutter_panel.dart';
-import 'dart_tooling_mock_api.dart';
+import '../../test_data/dart_tooling_api/mock_api.dart';
 
 /// A simple UI that acts as a stand-in host IDE to simplify the development
 /// workflow when working on embedded tooling.
@@ -18,7 +17,16 @@ import 'dart_tooling_mock_api.dart';
 /// This UI interacts with [MockDartToolingApi] to allow triggering events that
 /// would normally be fired by the IDE and also shows a log of recent requests.
 class VsCodeFlutterPanelMockEditor extends StatefulWidget {
-  const VsCodeFlutterPanelMockEditor({super.key});
+  const VsCodeFlutterPanelMockEditor({
+    super.key,
+    required this.api,
+    this.child,
+  });
+
+  /// The mock API to interact with.
+  final MockDartToolingApi api;
+
+  final Widget? child;
 
   @override
   State<VsCodeFlutterPanelMockEditor> createState() =>
@@ -27,8 +35,7 @@ class VsCodeFlutterPanelMockEditor extends StatefulWidget {
 
 class _VsCodeFlutterPanelMockEditorState
     extends State<VsCodeFlutterPanelMockEditor> {
-  /// The mock API to interact with.
-  final api = MockDartToolingApi();
+  MockDartToolingApi get api => widget.api;
 
   /// The number of communication messages to keep in the log.
   static const maxLogEvents = 20;
@@ -61,10 +68,20 @@ class _VsCodeFlutterPanelMockEditorState
 
   @override
   Widget build(BuildContext context) {
+    final editorTheme = VsCodeTheme.of(context);
     return Split(
       axis: Axis.horizontal,
-      initialFractions: const [0.2, 0.8],
+      initialFractions: const [0.25, 0.75],
       minSizes: const [200, 200],
+      splitters: [
+        PreferredSize(
+          preferredSize: const Size.fromWidth(1),
+          child: SizedBox(
+            width: 1,
+            child: ColoredBox(color: editorTheme.editorSidebarSplitterColor),
+          ),
+        ),
+      ],
       children: [
         Row(
           children: [
@@ -74,20 +91,35 @@ class _VsCodeFlutterPanelMockEditorState
                 alignment: Alignment.topCenter,
                 padding: const EdgeInsets.only(top: 60),
                 constraints: const BoxConstraints.expand(width: 48),
-                color: const Color(0xFF333333),
+                color: editorTheme.activityBarBackgroundColor,
                 child: Image.memory(sidebarImageBytes),
               ),
             ),
-            Expanded(child: VsCodeFlutterPanel(api)),
+            Expanded(
+              child: Container(
+                color: editorTheme.sidebarBackgroundColor,
+                child: widget.child ?? const Placeholder(),
+              ),
+            ),
           ],
         ),
         Split(
           axis: Axis.vertical,
           initialFractions: const [0.5, 0.5],
           minSizes: const [200, 200],
+          splitters: [
+            PreferredSize(
+              preferredSize: const Size.fromHeight(1),
+              child: SizedBox(
+                height: 1,
+                child:
+                    ColoredBox(color: editorTheme.editorTerminalSplitterColor),
+              ),
+            ),
+          ],
           children: [
             Container(
-              color: const Color(0xFF282828),
+              color: editorTheme.editorBackgroundColor,
               padding: const EdgeInsets.all(10),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -117,7 +149,7 @@ class _VsCodeFlutterPanelMockEditorState
               ),
             ),
             Container(
-              color: const Color(0xFF222222),
+              color: editorTheme.editorBackgroundColor,
               padding: const EdgeInsets.all(10),
               child: StreamBuilder(
                 stream: logUpdated,
@@ -140,4 +172,42 @@ class _VsCodeFlutterPanelMockEditorState
       ],
     );
   }
+}
+
+/// A basic theme that matches the default colours of VS Code dart/light themes
+/// so the mock environment can be displayed in either.
+class VsCodeTheme {
+  const VsCodeTheme._({
+    required this.activityBarBackgroundColor,
+    required this.editorBackgroundColor,
+    required this.editorSidebarSplitterColor,
+    required this.editorTerminalSplitterColor,
+    required this.sidebarBackgroundColor,
+  });
+
+  static VsCodeTheme of(BuildContext context) {
+    // TODO(dantup): Figure out why Theme.of(context).isDarkTheme doesn't
+    //  match what's in the stager sidebar.
+    return Theme.of(context).isDarkTheme
+        ? const VsCodeTheme._(
+            activityBarBackgroundColor: Color(0xFF333333),
+            editorBackgroundColor: Color(0xFF1E1E1E),
+            editorSidebarSplitterColor: Color(0xFF252526),
+            editorTerminalSplitterColor: Color(0xFF414141),
+            sidebarBackgroundColor: Color(0xFF252526),
+          )
+        : const VsCodeTheme._(
+            activityBarBackgroundColor: Color(0xFF2C2C2C),
+            editorBackgroundColor: Color(0xFFFFFFFF),
+            editorSidebarSplitterColor: Color(0xFFF3F3F3),
+            editorTerminalSplitterColor: Color(0xFFC4C4C4),
+            sidebarBackgroundColor: Color(0xFFF3F3F3),
+          );
+  }
+
+  final Color activityBarBackgroundColor;
+  final Color editorBackgroundColor;
+  final Color editorSidebarSplitterColor;
+  final Color editorTerminalSplitterColor;
+  final Color sidebarBackgroundColor;
 }

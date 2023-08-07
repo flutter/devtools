@@ -79,19 +79,11 @@
             "program": "devtools_app/test/test_infra/fixtures/memory_app/lib/main.dart",
         },
         {
-            "name": "VS Code Sidebar Environment",
+            "name": "standalone_ui/vs_code",
             "request": "launch",
             "type": "dart",
-            "program": "devtools_app/lib/main.dart",
-            "args": [
-                "--dart-define=enable_experiments=true",
-                // web-launch-url only works with an absolute URL so we must set hostname/port
-                // to match. However, this is convenient for using `dart.customDevToolsUri` for
-                // testing inside VS Code anyway.
-                "--web-hostname=localhost",
-                "--web-port=8765",
-                "--web-launch-url=http://localhost:8765/vsCodeFlutterPanelMockEditor",
-            ],
+            "program": "devtools_app/test/test_infra/scenes/standalone_ui/vs_code.stager_app.g.dart",
+            "deviceId": "chrome",
         },
         {
             "name": "attach",

@@ -4,15 +4,14 @@
 
 import 'dart:async';
 
+import 'package:devtools_app/src/standalone_ui/api/impl/dart_tooling_api.dart';
+import 'package:devtools_app/src/standalone_ui/api/impl/vs_code_api.dart';
+import 'package:devtools_app/src/standalone_ui/api/vs_code_api.dart';
 import 'package:json_rpc_2/json_rpc_2.dart' as json_rpc_2;
 import 'package:stream_channel/stream_channel.dart';
 
-import '../../api/impl/dart_tooling_api.dart';
-import '../../api/impl/vs_code_api.dart';
-import '../../api/vs_code_api.dart';
-
-/// A [DartToolingApi] that acts as a stand-in host IDE to simplify the development
-/// workflow when working on embedded tooling.
+/// A [DartToolingApi] that acts as a stand-in host IDE to simplify the
+/// development workflow when working on embedded tooling.
 ///
 /// This API will handle requests with canned responses and can generate
 /// events in a similar way to the IDE would. It is used by
@@ -120,6 +119,8 @@ class MockDartToolingApi extends DartToolingApiImpl {
     final command = params['command'];
     switch (command) {
       case 'flutter.createProject':
+        return null;
+      case 'flutter.doctor':
         return null;
       default:
         throw 'Unknown command $command';
