@@ -9,7 +9,7 @@ import 'package:devtools_app/src/shared/split.dart';
 import 'package:devtools_app/src/shared/theme.dart';
 import 'package:flutter/material.dart';
 
-import '../../test_data/dart_tooling_api/mock_api.dart';
+import '../../../test_infra/test_data/dart_tooling_api/mock_api.dart';
 
 /// A simple UI that acts as a stand-in host IDE to simplify the development
 /// workflow when working on embedded tooling.
@@ -182,32 +182,40 @@ class VsCodeTheme {
     required this.editorBackgroundColor,
     required this.editorSidebarSplitterColor,
     required this.editorTerminalSplitterColor,
+    required this.foregroundColor,
     required this.sidebarBackgroundColor,
   });
 
+  const VsCodeTheme.dark()
+      : this._(
+          activityBarBackgroundColor: const Color(0xFF333333),
+          editorBackgroundColor: const Color(0xFF1E1E1E),
+          editorSidebarSplitterColor: const Color(0xFF252526),
+          editorTerminalSplitterColor: const Color(0xFF414141),
+          foregroundColor: const Color(0xFFD4D4D4),
+          sidebarBackgroundColor: const Color(0xFF252526),
+        );
+
+  const VsCodeTheme.light()
+      : this._(
+          activityBarBackgroundColor: const Color(0xFF2C2C2C),
+          editorBackgroundColor: const Color(0xFFFFFFFF),
+          editorSidebarSplitterColor: const Color(0xFFF3F3F3),
+          editorTerminalSplitterColor: const Color(0xFFC4C4C4),
+          foregroundColor: const Color(0xFF000000),
+          sidebarBackgroundColor: const Color(0xFFF3F3F3),
+        );
+
   static VsCodeTheme of(BuildContext context) {
-    // TODO(dantup): Figure out why Theme.of(context).isDarkTheme doesn't
-    //  match what's in the stager sidebar.
     return Theme.of(context).isDarkTheme
-        ? const VsCodeTheme._(
-            activityBarBackgroundColor: Color(0xFF333333),
-            editorBackgroundColor: Color(0xFF1E1E1E),
-            editorSidebarSplitterColor: Color(0xFF252526),
-            editorTerminalSplitterColor: Color(0xFF414141),
-            sidebarBackgroundColor: Color(0xFF252526),
-          )
-        : const VsCodeTheme._(
-            activityBarBackgroundColor: Color(0xFF2C2C2C),
-            editorBackgroundColor: Color(0xFFFFFFFF),
-            editorSidebarSplitterColor: Color(0xFFF3F3F3),
-            editorTerminalSplitterColor: Color(0xFFC4C4C4),
-            sidebarBackgroundColor: Color(0xFFF3F3F3),
-          );
+        ? const VsCodeTheme.dark()
+        : const VsCodeTheme.light();
   }
 
   final Color activityBarBackgroundColor;
   final Color editorBackgroundColor;
   final Color editorSidebarSplitterColor;
   final Color editorTerminalSplitterColor;
+  final Color foregroundColor;
   final Color sidebarBackgroundColor;
 }
