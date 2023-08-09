@@ -3,12 +3,14 @@
 // found in the LICENSE file.
 
 // ignore: avoid_web_libraries_in_flutter, as designed
+import 'dart:async';
 import 'dart:html' as html;
 
 import 'package:flutter/widgets.dart';
 import 'package:logging/logging.dart';
 
 import '../../api.dart';
+import 'connected_app_manager.dart';
 
 part 'extension_manager.dart';
 
@@ -27,6 +29,7 @@ class DevToolsExtension extends StatefulWidget {
     super.key,
     required this.child,
     this.eventHandlers = const {},
+    this.requiresRunningApplication = true,
   });
 
   /// The root of the extension Flutter web app that is wrapped by this
@@ -37,6 +40,9 @@ class DevToolsExtension extends StatefulWidget {
   /// DevTools events.
   final Map<DevToolsExtensionEventType, ExtensionEventHandler> eventHandlers;
 
+  /// Whether this extension requires a running application to use.
+  final bool requiresRunningApplication;
+
   @override
   State<DevToolsExtension> createState() => _DevToolsExtensionState();
 }
@@ -45,7 +51,8 @@ class _DevToolsExtensionState extends State<DevToolsExtension> {
   @override
   void initState() {
     super.initState();
-    _extensionManager = ExtensionManager().._init();
+    _extensionManager = ExtensionManager()
+      .._init(connectToVmService: widget.requiresRunningApplication);
     for (final handler in widget.eventHandlers.entries) {
       _extensionManager.registerEventHandler(handler.key, handler.value);
     }

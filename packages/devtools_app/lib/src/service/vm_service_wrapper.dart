@@ -28,25 +28,21 @@ final _log = Logger('vm_service_wrapper');
 class VmServiceWrapper implements VmService {
   VmServiceWrapper(
     this._vmService,
-    this._connectedUri, {
+    this.connectedUri, {
     this.trackFutures = false,
   }) {
     unawaited(_initSupportedProtocols());
   }
 
-  VmServiceWrapper.fromNewVmService(
-    Stream<dynamic> /*String|List<int>*/ inStream,
-    void Function(String message) writeMessage,
-    this._connectedUri, {
-    Log? log,
-    DisposeHandler? disposeHandler,
+  VmServiceWrapper.fromNewVmService({
+    required Stream<dynamic> /*String|List<int>*/ inStream,
+    required void Function(String message) writeMessage,
+    required this.connectedUri,
     this.trackFutures = false,
   }) {
     _vmService = VmService(
       inStream,
       writeMessage,
-      log: log,
-      disposeHandler: disposeHandler,
     );
     unawaited(_initSupportedProtocols());
   }
@@ -71,8 +67,7 @@ class VmServiceWrapper implements VmService {
 
   late final VmService _vmService;
 
-  Uri get connectedUri => _connectedUri;
-  final Uri _connectedUri;
+  final Uri connectedUri;
 
   final bool trackFutures;
   final Map<String, Future<Success>> _activeStreams = {};
