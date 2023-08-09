@@ -58,16 +58,23 @@ class ExtensionsManager {
     devtoolsExtensions.clear();
 
     if (rootPath != null) {
-      final extensions = await findExtensions(
-        'devtools',
-        packageConfig: Uri.parse(
-          path.join(
-            rootPath,
-            '.dart_tool',
-            'package_config.json',
+      late final List<Extension> extensions;
+      try {
+        extensions = await findExtensions(
+          'devtools',
+          packageConfig: Uri.parse(
+            path.join(
+              rootPath,
+              '.dart_tool',
+              'package_config.json',
+            ),
           ),
-        ),
-      );
+        );
+      } catch (e) {
+        print('[ERROR] `findExtensions` failed: $e');
+        extensions = <Extension>[];
+      }
+
       for (final extension in extensions) {
         final config = extension.config;
         if (config is! Map) {
