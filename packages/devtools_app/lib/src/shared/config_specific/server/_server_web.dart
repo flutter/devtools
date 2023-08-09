@@ -369,6 +369,39 @@ Future<List<DevToolsExtensionConfig>> refreshAvailableExtensions(
   return [];
 }
 
+/// Makes a request to the server to look up the enabled state for a
+/// DevTools extension, and optionally to set the enabled state (when [enable]
+/// is non-null).
+///
+/// If [enable] is specified, the server will first set the enabled state
+/// to the value set forth by [enable] and then return the value that is saved
+/// to disk.
+Future<ExtensionEnabledState> extensionEnabledState({
+  required String rootPath,
+  required String extensionName,
+  bool? enable,
+}) async {
+  if (isDevToolsServerAvailable) {
+    final uri = Uri(
+      path: ExtensionsApi.apiExtensionEnabledState,
+      queryParameters: {
+        ExtensionsApi.extensionRootPathPropertyName: rootPath,
+        ExtensionsApi.extensionNamePropertyName: extensionName,
+        if (enable != null)
+          ExtensionsApi.enabledStatePropertyName: enable.toString(),
+      },
+    );
+    final resp = await request(uri.toString());
+    if (resp?.status == HttpStatus.ok) {
+      final parsedResult = json.decode(resp!.responseText!);
+      return ExtensionEnabledState.from(parsedResult);
+    } else {
+      logWarning(resp, ExtensionsApi.apiExtensionEnabledState);
+    }
+  }
+  return ExtensionEnabledState.error;
+}
+
 void logWarning(HttpRequest? response, String apiType, [String? respText]) {
   _log.warning(
     'HttpRequest $apiType failed status = ${response?.status}'

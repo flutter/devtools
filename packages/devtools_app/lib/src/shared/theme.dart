@@ -72,6 +72,7 @@ ThemeData _baseTheme({
   // as well as the background color?
   return theme.copyWith(
     tabBarTheme: theme.tabBarTheme.copyWith(
+      tabAlignment: TabAlignment.start,
       dividerColor: Colors.transparent,
       labelPadding:
           const EdgeInsets.symmetric(horizontal: defaultTabBarPadding),
@@ -414,6 +415,9 @@ extension ThemeDataExtension on ThemeData {
           fontSize: defaultFontSize,
         ),
       );
+
+  TextStyle get boldTextStyle =>
+      regularTextStyle.copyWith(fontWeight: FontWeight.bold);
 
   TextStyle get subtleTextStyle => _fixBlurryText(
         TextStyle(

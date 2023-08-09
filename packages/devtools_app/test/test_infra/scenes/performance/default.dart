@@ -14,7 +14,7 @@ import 'package:flutter/material.dart';
 import 'package:stager/stager.dart';
 
 /// To run:
-/// flutter run -t test/test_infra/scenes/performance/default.stager_app.dart -d macos
+/// flutter run -t test/test_infra/scenes/performance/default.stager_app.g.dart -d macos
 class PerformanceDefaultScene extends Scene {
   late PerformanceController controller;
 

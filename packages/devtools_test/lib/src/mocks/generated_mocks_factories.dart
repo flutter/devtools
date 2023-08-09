@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:devtools_app/devtools_app.dart';
+import 'package:devtools_shared/devtools_extensions.dart';
 import 'package:flutter/material.dart';
 import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart' hide TimelineEvent;
@@ -180,4 +181,33 @@ MockLoggingController createMockLoggingControllerWithDefaults({
       .thenReturn(const FixedValueListenable(false));
   when(mockLoggingController.matchIndex).thenReturn(ValueNotifier<int>(0));
   return mockLoggingController;
+}
+
+Future<MockExtensionService> createMockExtensionServiceWithDefaults(
+  List<DevToolsExtensionConfig> extensions,
+) async {
+  final mockExtensionService = MockExtensionService();
+  when(mockExtensionService.availableExtensions)
+      .thenReturn(ImmediateValueNotifier(extensions));
+
+  final _stubEnabledStates = <String, ValueNotifier<ExtensionEnabledState>>{};
+  for (final e in extensions) {
+    _stubEnabledStates[e.name.toLowerCase()] =
+        ValueNotifier<ExtensionEnabledState>(ExtensionEnabledState.none);
+    when(mockExtensionService.enabledStateListenable(e.name))
+        .thenReturn(_stubEnabledStates[e.name.toLowerCase()]!);
+    when(mockExtensionService.enabledStateListenable(e.name.toLowerCase()))
+        .thenReturn(_stubEnabledStates[e.name.toLowerCase()]!);
+    when(mockExtensionService.setExtensionEnabledState(e, enable: true))
+        .thenAnswer((_) async {
+      _stubEnabledStates[e.name.toLowerCase()]!.value =
+          ExtensionEnabledState.enabled;
+    });
+    when(mockExtensionService.setExtensionEnabledState(e, enable: false))
+        .thenAnswer((_) async {
+      _stubEnabledStates[e.name.toLowerCase()]!.value =
+          ExtensionEnabledState.disabled;
+    });
+  }
+  return mockExtensionService;
 }

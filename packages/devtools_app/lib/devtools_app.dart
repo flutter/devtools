@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 export 'src/app.dart';
+export 'src/extensions/extension_service.dart';
 export 'src/framework/app_bar.dart';
 export 'src/framework/home_screen.dart';
 export 'src/framework/notifications_view.dart';

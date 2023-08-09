@@ -6,7 +6,7 @@ import 'package:collection/collection.dart';
 
 /// Describes an extension that can be dynamically loaded into a custom screen
 /// in DevTools.
-class DevToolsExtensionConfig {
+class DevToolsExtensionConfig implements Comparable {
   DevToolsExtensionConfig._({
     required this.name,
     required this.path,
@@ -103,6 +103,8 @@ class DevToolsExtensionConfig {
   /// This code point should be part of the 'MaterialIcons' font family.
   final int materialIconCodePoint;
 
+  String get displayName => name.toLowerCase();
+
   Map<String, Object?> toJson() => {
         nameKey: name,
         pathKey: path,
@@ -110,6 +112,17 @@ class DevToolsExtensionConfig {
         versionKey: version,
         materialIconCodePointKey: materialIconCodePoint,
       };
+
+  @override
+  // ignore: avoid-dynamic, avoids invalid_override error
+  int compareTo(other) {
+    final otherConfig = other as DevToolsExtensionConfig;
+    final compare = name.compareTo(otherConfig.name);
+    if (compare == 0) {
+      return path.compareTo(otherConfig.path);
+    }
+    return compare;
+  }
 }
 
 /// Describes the enablement state of a DevTools extension.

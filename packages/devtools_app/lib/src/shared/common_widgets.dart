@@ -998,6 +998,8 @@ class DevToolsToggleButtonGroup extends StatelessWidget {
     required this.children,
     required this.selectedStates,
     required this.onPressed,
+    this.fillColor,
+    this.selectedColor,
   }) : super(key: key);
 
   final List<Widget> children;
@@ -1006,6 +1008,10 @@ class DevToolsToggleButtonGroup extends StatelessWidget {
 
   final void Function(int)? onPressed;
 
+  final Color? fillColor;
+
+  final Color? selectedColor;
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -1013,6 +1019,8 @@ class DevToolsToggleButtonGroup extends StatelessWidget {
       height: defaultButtonHeight,
       child: ToggleButtons(
         borderRadius: defaultBorderRadius,
+        fillColor: fillColor,
+        selectedColor: selectedColor,
         textStyle: theme.textTheme.bodyMedium,
         constraints: BoxConstraints(
           minWidth: defaultButtonHeight,
