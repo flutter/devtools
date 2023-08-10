@@ -126,8 +126,6 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
         ),
       );
     });
-    // TODO(elliette): Remove once Chrome issue is resolved.
-    _maybeShowBreakpointsWarningBanner();
   }
 
   @override
