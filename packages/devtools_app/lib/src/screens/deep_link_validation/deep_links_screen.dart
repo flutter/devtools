@@ -74,7 +74,9 @@ class _DeepLinkPageState extends State<DeepLinkPage>
               onChanged: (value) {
                 controller.searchContent = value;
               },
-              constraints: BoxConstraints.tight(const Size(200, 40)),
+              constraints: BoxConstraints.tight(
+                Size(defaultSearchFieldWidth, defaultTextFieldHeight),
+              ),
             ),
           ],
         ),
@@ -115,4 +117,49 @@ class _DeepLinkPageState extends State<DeepLinkPage>
       },
     );
   }
+}
+
+DataRow buildRow(
+  BuildContext context,
+  LinkData data, {
+  MaterialStateProperty<Color?>? color,
+}) {
+  return DataRow(
+    color: color,
+    cells: [
+      DataCell(Text(data.os)),
+      DataCell(Text(data.scheme)),
+      DataCell(
+        Row(
+          children: [
+            if (data.domainError)
+              Padding(
+                padding: const EdgeInsets.only(right: denseSpacing),
+                child: Icon(
+                  Icons.error,
+                  color: Theme.of(context).colorScheme.error,
+                ),
+              ),
+            Text(data.domain),
+          ],
+        ),
+      ),
+      DataCell(
+        Row(
+          children: [
+            if (data.pathError)
+              Padding(
+                padding: const EdgeInsets.only(right: denseSpacing),
+                child: Icon(
+                  Icons.error,
+                  color: Theme.of(context).colorScheme.error,
+                ),
+              ),
+            const SizedBox(width: 10),
+            Text(data.paths.join('\n')),
+          ],
+        ),
+      ),
+    ],
+  );
 }

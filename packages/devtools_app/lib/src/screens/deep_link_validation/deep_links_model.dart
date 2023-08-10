@@ -2,10 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/material.dart';
-
-import '../../shared/theme.dart';
-
 /// Contains all data relevant to a deep link.
 class LinkData {
   LinkData({
@@ -38,49 +34,4 @@ class LinkData {
       domainError: domainError || linkData.domainError,
     );
   }
-}
-
-DataRow buildRow(
-  BuildContext context,
-  LinkData data, {
-  MaterialStateProperty<Color?>? color,
-}) {
-  return DataRow(
-    color: color,
-    cells: [
-      DataCell(Text(data.os)),
-      DataCell(Text(data.scheme)),
-      DataCell(
-        Row(
-          children: [
-            if (data.domainError)
-              Padding(
-                padding: const EdgeInsets.only(right: denseSpacing),
-                child: Icon(
-                  Icons.error,
-                  color: Theme.of(context).colorScheme.error,
-                ),
-              ),
-            Text(data.domain),
-          ],
-        ),
-      ),
-      DataCell(
-        Row(
-          children: [
-            if (data.pathError)
-              Padding(
-                padding: const EdgeInsets.only(right: denseSpacing),
-                child: Icon(
-                  Icons.error,
-                  color: Theme.of(context).colorScheme.error,
-                ),
-              ),
-            const SizedBox(width: 10),
-            Text(data.paths.join('\n')),
-          ],
-        ),
-      ),
-    ],
-  );
 }
