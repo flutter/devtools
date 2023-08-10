@@ -81,85 +81,91 @@ class _DeepLinkPageState extends State<DeepLinkPage>
           ],
         ),
         const SizedBox(height: denseSpacing),
-        buildDataTable(context),
+        ValueListenableBuilder<List<LinkData>>(
+          valueListenable: controller.linkDatasNotifier,
+          builder: (context, linkDatas, _) => _DataTable(
+            linkDatas: linkDatas,
+            bundleByDomain: controller.bundleByDomain,
+          ),
+        ),
       ],
-    );
-  }
-
-  Widget buildDataTable(BuildContext context) {
-    return ValueListenableBuilder<List<LinkData>>(
-      valueListenable: controller.linkDatasNotifier,
-      builder: (context, linkDatas, _) {
-        final bool bundleByDomain = controller.bundleByDomain;
-
-        final List<DataRow> rows = [
-          for (var i = 0; i < linkDatas.length; i++)
-            buildRow(
-              context,
-              linkDatas[i],
-              color: MaterialStateProperty.all<Color>(
-                alternatingColorForIndex(i, Theme.of(context).colorScheme),
-              ),
-            ),
-        ];
-
-        return DataTable(
-          columns: const [
-            DataColumn(label: Text('OS')),
-            DataColumn(label: Text('Scheme')),
-            DataColumn(label: Text('Domain')),
-            DataColumn(label: Text('Path')),
-          ],
-          dataRowMinHeight: bundleByDomain ? bundledDataRowHeight : null,
-          dataRowMaxHeight: bundleByDomain ? bundledDataRowHeight : null,
-          rows: rows,
-        );
-      },
     );
   }
 }
 
-DataRow buildRow(
-  BuildContext context,
-  LinkData data, {
-  MaterialStateProperty<Color?>? color,
-}) {
-  return DataRow(
-    color: color,
-    cells: [
-      DataCell(Text(data.os)),
-      DataCell(Text(data.scheme)),
-      DataCell(
-        Row(
-          children: [
-            if (data.domainError)
-              Padding(
-                padding: const EdgeInsets.only(right: denseSpacing),
-                child: Icon(
-                  Icons.error,
-                  color: Theme.of(context).colorScheme.error,
-                ),
-              ),
-            Text(data.domain),
-          ],
+class _DataTable extends StatelessWidget {
+  const _DataTable({required this.bundleByDomain, required this.linkDatas});
+  final bool bundleByDomain;
+  final List<LinkData> linkDatas;
+
+  @override
+  Widget build(BuildContext context) {
+    final List<DataRow> rows = [
+      for (var i = 0; i < linkDatas.length; i++)
+        _buildRow(
+          context,
+          linkDatas[i],
+          color: MaterialStateProperty.all<Color>(
+            alternatingColorForIndex(i, Theme.of(context).colorScheme),
+          ),
         ),
-      ),
-      DataCell(
-        Row(
-          children: [
-            if (data.pathError)
-              Padding(
-                padding: const EdgeInsets.only(right: denseSpacing),
-                child: Icon(
-                  Icons.error,
-                  color: Theme.of(context).colorScheme.error,
+    ];
+
+    return DataTable(
+      columns: const [
+        DataColumn(label: Text('OS')),
+        DataColumn(label: Text('Scheme')),
+        DataColumn(label: Text('Domain')),
+        DataColumn(label: Text('Path')),
+      ],
+      dataRowMinHeight: bundleByDomain ? bundledDataRowHeight : null,
+      dataRowMaxHeight: bundleByDomain ? bundledDataRowHeight : null,
+      rows: rows,
+    );
+  }
+
+  DataRow _buildRow(
+    BuildContext context,
+    LinkData data, {
+    MaterialStateProperty<Color?>? color,
+  }) {
+    return DataRow(
+      color: color,
+      cells: [
+        DataCell(Text(data.os)),
+        DataCell(Text(data.scheme)),
+        DataCell(
+          Row(
+            children: [
+              if (data.domainError)
+                Padding(
+                  padding: const EdgeInsets.only(right: denseSpacing),
+                  child: Icon(
+                    Icons.error,
+                    color: Theme.of(context).colorScheme.error,
+                  ),
                 ),
-              ),
-            const SizedBox(width: 10),
-            Text(data.paths.join('\n')),
-          ],
+              Text(data.domain),
+            ],
+          ),
         ),
-      ),
-    ],
-  );
+        DataCell(
+          Row(
+            children: [
+              if (data.pathError)
+                Padding(
+                  padding: const EdgeInsets.only(right: denseSpacing),
+                  child: Icon(
+                    Icons.error,
+                    color: Theme.of(context).colorScheme.error,
+                  ),
+                ),
+              const SizedBox(width: 10),
+              Text(data.paths.join('\n')),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
 }

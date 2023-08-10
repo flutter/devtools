@@ -27,6 +27,8 @@ class LinkData {
       return this;
     }
 
+    assert(domain == linkData.domain);
+
     return LinkData(
       os: os,
       domain: domain,
