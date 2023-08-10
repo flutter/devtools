@@ -56,10 +56,6 @@ rm -rf build/web
 
 flutter pub get
 
-# Build a profile build rather than a release build to avoid minification
-# as code size doesn't matter very much for us as minification makes some
-# crashes harder to debug. For example, https://github.com/flutter/devtools/issues/2125
-
 flutter build web \
   --web-renderer canvaskit \
   --pwa-strategy=offline-first \

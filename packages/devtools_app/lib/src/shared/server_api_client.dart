@@ -5,12 +5,12 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:logging/logging.dart';
 
 import 'config_specific/notifications/notifications.dart';
-import 'config_specific/sse/sse_shim.dart';
 import 'framework_controller.dart';
 import 'globals.dart';
 

@@ -7,6 +7,8 @@ part of 'devtools_extension.dart';
 final _log = Logger('devtools_extensions/extension_manager');
 
 class ExtensionManager {
+  final appManager = ConnectedAppManager();
+
   final _registeredEventHandlers =
       <DevToolsExtensionEventType, ExtensionEventHandler>{};
 
@@ -18,8 +20,16 @@ class ExtensionManager {
   }
 
   // ignore: unused_element, false positive due to part files
-  void _init() {
+  void _init({required bool connectToVmService}) {
     html.window.addEventListener('message', _handleMessage);
+    if (connectToVmService) {
+      // Request the vm service uri for the connected app. DevTools will
+      // respond with a [DevToolsPluginEventType.connectedVmService] event with
+      // containing the currently connected app's vm service URI.
+      postMessageToDevTools(
+        DevToolsExtensionEvent(DevToolsExtensionEventType.vmServiceConnection),
+      );
+    }
   }
 
   // ignore: unused_element, false positive due to part files
@@ -42,6 +52,10 @@ class ExtensionManager {
           case DevToolsExtensionEventType.pong:
             // Ignore. DevTools extensions should not receive or handle pong
             // events.
+            break;
+          case DevToolsExtensionEventType.vmServiceConnection:
+            final vmServiceUri = extensionEvent.data?['uri'] as String?;
+            unawaited(appManager.connectToVmService(vmServiceUri));
             break;
           case DevToolsExtensionEventType.unknown:
           default:
