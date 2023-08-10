@@ -3,114 +3,12 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import '../../shared/screen.dart';
 
-const List<String> paths = [
-  '/shoes/..*',
-  '/Clothes/..*',
-  '/Toys/..*',
-  '/Jewelry/..*',
-  '/Watches/..* ',
-  '/Glasses/..*',
-];
+import '../../../devtools_app.dart';
+import 'deep_links_controller.dart';
+import 'deep_links_model.dart';
 
-List<LinkData> allLinkDatas = [
-  for (var path in paths)
-    LinkData(
-      os: 'Android, iOS',
-      domain: 'm.shopping.com',
-      path: path,
-      domainError: true,
-      pathError: path.contains('shoe'),
-    ),
-  for (var path in paths)
-    LinkData(
-      os: 'iOS',
-      domain: 'm.french.shopping.com',
-      path: path,
-      pathError: path.contains('shoe'),
-    ),
-  for (var path in paths)
-    LinkData(
-      os: 'Android',
-      domain: 'm.chinese.shopping.com',
-      path: path,
-      pathError: path.contains('shoe'),
-    ),
-];
-
-class LinkData {
-  LinkData({
-    required this.os,
-    required this.domain,
-    required this.path,
-    this.scheme = 'Http://, Https://',
-    this.domainError = false,
-    this.pathError = false,
-  });
-
-  String os;
-  String path;
-  String domain;
-  String scheme;
-  bool domainError;
-  bool pathError;
-  String get searchLabel => (os + path + domain + scheme).toLowerCase();
-
-  DataRow buildRow(
-    BuildContext context, {
-    MaterialStateProperty<Color?>? color,
-  }) {
-    return DataRow(
-      color: color,
-      cells: [
-        DataCell(Text(os)),
-        DataCell(Text(scheme)),
-        DataCell(
-          domainError
-              ? Row(
-                  children: [
-                    Icon(
-                      Icons.error,
-                      color: Theme.of(context).colorScheme.error,
-                    ),
-                    const SizedBox(width: 10),
-                    Text(domain),
-                  ],
-                )
-              : Text(domain),
-        ),
-        DataCell(
-          pathError
-              ? Row(
-                  children: [
-                    Icon(
-                      Icons.error,
-                      color: Theme.of(context).colorScheme.error,
-                    ),
-                    const SizedBox(width: 10),
-                    Text(path),
-                  ],
-                )
-              : Text(path),
-        ),
-      ],
-    );
-  }
-
-  LinkData mergeByDomain(LinkData? linkData) {
-    if (linkData == null) {
-      return this;
-    }
-
-    return LinkData(
-      os: os,
-      domain: domain,
-      path: '${linkData.path}\n$path',
-      domainError: domainError || linkData.domainError,
-    );
-  }
-}
+const bundledDataRowHeight = 150.0;
 
 class DeepLinksScreen extends Screen {
   DeepLinksScreen()
@@ -141,22 +39,15 @@ class DeepLinkPage extends StatefulWidget {
   State<DeepLinkPage> createState() => _DeepLinkPageState();
 }
 
-class _DeepLinkPageState extends State<DeepLinkPage> {
-  String responseBody = 'empty response';
-  int? selectedRowIndex;
-  String searchContent = '';
-  bool bundleByDomain = false;
-
-  void setBundleByDomain(bool shouldBundleByDomain) {
-    setState(() {
-      bundleByDomain = shouldBundleByDomain;
-    });
-  }
-
-  void setResponse(String response) {
-    setState(() {
-      responseBody = response;
-    });
+class _DeepLinkPageState extends State<DeepLinkPage>
+    with
+        AutoDisposeMixin,
+        SingleTickerProviderStateMixin,
+        ProvidedControllerMixin<DeepLinksController, DeepLinkPage> {
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!initController()) return;
   }
 
   @override
@@ -165,77 +56,63 @@ class _DeepLinkPageState extends State<DeepLinkPage> {
       children: [
         Row(
           children: [
-            Expanded(child: buildTitle('All deep links', context)),
+            Expanded(
+              child: Text(
+                'All deep links',
+                style: Theme.of(context).textTheme.bodyLarge,
+              ),
+            ),
             InkWell(
               onTap: () {
-                setBundleByDomain(!bundleByDomain);
+                controller.bundleByDomain = !controller.bundleByDomain;
               },
               child: const Text('Bundle by domain'),
             ),
-            const SizedBox(width: 10),
+            const SizedBox(width: denseSpacing),
             SearchBar(
               leading: const Icon(Icons.search),
               onChanged: (value) {
-                setState(() {
-                  searchContent = value.toLowerCase();
-                });
+                controller.searchContent = value;
               },
               constraints: BoxConstraints.tight(const Size(200, 40)),
             ),
           ],
         ),
-        const SizedBox(height: 10),
+        const SizedBox(height: denseSpacing),
         buildDataTable(context),
       ],
     );
   }
 
   Widget buildDataTable(BuildContext context) {
-    List<LinkData> linkDatas = searchContent.isNotEmpty
-        ? allLinkDatas
-            .where((linkData) => linkData.searchLabel.contains(searchContent))
-            .toList()
-        : allLinkDatas;
+    return ValueListenableBuilder<List<LinkData>>(
+      valueListenable: controller.linkDatasNotifier,
+      builder: (context, linkDatas, _) {
+        final bool bundleByDomain = controller.bundleByDomain;
 
-    if (bundleByDomain) {
-      final Map<String, LinkData> bundleByDomainMap = {};
-      for (var linkData in linkDatas) {
-        bundleByDomainMap[linkData.domain] =
-            linkData.mergeByDomain(bundleByDomainMap[linkData.domain]);
-      }
-      linkDatas = bundleByDomainMap.values.toList();
-    }
+        final List<DataRow> rows = [
+          for (var i = 0; i < linkDatas.length; i++)
+            buildRow(
+              context,
+              linkDatas[i],
+              color: MaterialStateProperty.all<Color>(
+                alternatingColorForIndex(i, Theme.of(context).colorScheme),
+              ),
+            ),
+        ];
 
-    final List<DataRow> rows = [
-      for (var i = 0; i < linkDatas.length; i++)
-        linkDatas[i].buildRow(
-          context,
-          color: i % 2 == 0
-              ? MaterialStateProperty.all<Color>(
-                  Theme.of(context).colorScheme.onSurface.withOpacity(0.2),
-                )
-              : null,
-        ),
-    ];
-
-    return DataTable(
-      columns: const [
-        DataColumn(label: Text('OS')),
-        DataColumn(label: Text('Scheme')),
-        DataColumn(label: Text('Domain')),
-        DataColumn(label: Text('Path')),
-      ],
-      dataRowMinHeight: bundleByDomain ? 150 : null,
-      dataRowMaxHeight: bundleByDomain ? 150 : null,
-      rows: rows,
+        return DataTable(
+          columns: const [
+            DataColumn(label: Text('OS')),
+            DataColumn(label: Text('Scheme')),
+            DataColumn(label: Text('Domain')),
+            DataColumn(label: Text('Path')),
+          ],
+          dataRowMinHeight: bundleByDomain ? bundledDataRowHeight : null,
+          dataRowMaxHeight: bundleByDomain ? bundledDataRowHeight : null,
+          rows: rows,
+        );
+      },
     );
   }
-}
-
-Widget buildTitle(String text, BuildContext context) {
-  final textTheme = Theme.of(context).textTheme;
-  return Text(
-    text,
-    style: textTheme.bodyLarge,
-  );
 }
