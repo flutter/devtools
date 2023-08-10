@@ -19,6 +19,6 @@ in compliance with [Flutter repo style guide]( https://github.com/flutter/flutte
 
 Follow [Flutter repo naming rules for typedefs and function variables](https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo#naming-rules-for-typedefs-and-function-variables).
 
-## Equality
+## Overriding equality
 
 Use [boilerplaite](https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo#common-boilerplates-for-operator--and-hashcode).
