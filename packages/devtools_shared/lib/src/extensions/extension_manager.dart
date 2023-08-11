@@ -77,7 +77,8 @@ class ExtensionsManager {
 
       for (final extension in extensions) {
         final config = extension.config;
-        if (config is Map) {
+        // ignore: avoid-unnecessary-type-assertions; false positive, config is type Object.
+        if (config is! Map) {
           // Fail gracefully. Invalid content in the extension's config.json.
           print(
             '[WARNING] invalid config.json content for ${extension.package}:\n'
