@@ -6,7 +6,7 @@ import 'dart:collection';
 import 'dart:convert';
 import 'package:logging/logging.dart';
 
-import '../../devtools_app.dart';
+import 'primitives/utils.dart';
 
 /// Class for storing a limited number string messages.
 class LogStorage {
