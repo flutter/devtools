@@ -60,7 +60,7 @@ class LayoutExplorerSerializationDelegate
                 if (parentData is FlexParentData) {
                   additionalJson['flexFactor'] = parentData.flex ?? 0;
                   additionalJson['flexFit'] =
-                      describeEnum(parentData.fit ?? FlexFit.tight);
+                      (parentData.fit ?? FlexFit.tight).name;
                 }
               }
             }

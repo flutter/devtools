@@ -125,7 +125,7 @@ void main() {
             "defaultLevel": "info"
           },
           {
-            "description": "${describeEnum(axis)}",
+            "description": "${axis.name}",
             "type": "EnumProperty<Axis>",
             "name": "direction",
             "style": "singleLine",

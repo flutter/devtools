@@ -13,12 +13,12 @@ import '../ui/utils.dart';
 
 String crossAxisAssetImageUrl(Axis direction, CrossAxisAlignment alignment) {
   return 'assets/img/layout_explorer/cross_axis_alignment/'
-      '${direction.flexType.toLowerCase()}_${describeEnum(alignment)}.png';
+      '${direction.flexType.toLowerCase()}_${alignment.name}.png';
 }
 
 String mainAxisAssetImageUrl(Axis direction, MainAxisAlignment alignment) {
   return 'assets/img/layout_explorer/main_axis_alignment/'
-      '${direction.flexType.toLowerCase()}_${describeEnum(alignment)}.png';
+      '${direction.flexType.toLowerCase()}_${alignment.name}.png';
 }
 
 class AnimatedFlexLayoutProperties

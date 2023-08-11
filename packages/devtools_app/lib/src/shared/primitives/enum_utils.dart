@@ -15,10 +15,10 @@ import 'package:flutter/foundation.dart';
 ///   colorUtils.getEnum('red'); // returns Color.red
 ///   colorUtils.getName(Color.red); // returns 'red'
 /// ```
-class EnumUtils<T> {
+class EnumUtils<T extends Enum> {
   EnumUtils(List<T> enumValues) {
     for (var val in enumValues) {
-      final enumDescription = describeEnum(val!);
+      final enumDescription = val.name;
       _lookupTable[enumDescription] = val;
       _reverseLookupTable[val] = enumDescription;
     }
