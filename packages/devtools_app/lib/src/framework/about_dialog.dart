@@ -133,33 +133,21 @@ class _DiscordLink extends StatelessWidget {
   }
 }
 
-class OpenAboutAction extends StatelessWidget {
-  const OpenAboutAction({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    final releaseNotesController = Provider.of<ReleaseNotesController>(context);
-    return DevToolsTooltip(
-      message: 'About DevTools',
-      child: InkWell(
-        onTap: () {
-          unawaited(
-            showDialog(
-              context: context,
-              builder: (context) => DevToolsAboutDialog(releaseNotesController),
-            ),
-          );
-        },
-        child: Container(
-          width: actionWidgetSize,
-          height: actionWidgetSize,
-          alignment: Alignment.center,
-          child: Icon(
-            Icons.help_outline,
-            size: actionsIconSize,
-          ),
-        ),
-      ),
-    );
-  }
+class OpenAboutAction extends ScaffoldAction {
+  OpenAboutAction({super.key, Color? color})
+      : super(
+          icon: Icons.help_outline,
+          tooltip: 'About DevTools',
+          color: color,
+          onPressed: (context) {
+            unawaited(
+              showDialog(
+                context: context,
+                builder: (context) => DevToolsAboutDialog(
+                  Provider.of<ReleaseNotesController>(context),
+                ),
+              ),
+            );
+          },
+        );
 }

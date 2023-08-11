@@ -2,15 +2,23 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:convert';
 
+import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 
 import '../../../../devtools.dart';
+import '../../analytics/analytics.dart' as ga;
+import '../../analytics/constants.dart' as gac;
+import '../../common_widgets.dart';
 import '../../connected_app.dart';
+import '../../file_import.dart';
 import '../../globals.dart';
 import '../../primitives/simple_items.dart';
 import '../../primitives/utils.dart';
+import '../../screen.dart';
 import '_export_stub.dart'
     if (dart.library.html) '_export_web.dart'
     if (dart.library.io) '_export_desktop.dart';
@@ -175,5 +183,31 @@ abstract class ExportController {
   String encode(Map<String, dynamic> offlineScreenData) {
     final data = generateDataForExport(offlineScreenData: offlineScreenData);
     return jsonEncode(data);
+  }
+}
+
+class ImportToolbarAction extends ScaffoldAction {
+  ImportToolbarAction({super.key, Color? color})
+      : super(
+          icon: Icons.upload_rounded,
+          tooltip: 'Load data for viewing in DevTools.',
+          color: color,
+          onPressed: (context) => unawaited(_importFile(context)),
+        );
+
+  static Future<void> _importFile(BuildContext context) async {
+    ga.select(
+      gac.devToolsMain,
+      gac.importFile,
+    );
+    final DevToolsJsonFile? importedFile = await importFileFromPicker(
+      acceptedTypes: ['json'],
+    );
+
+    if (importedFile != null) {
+      // ignore: use_build_context_synchronously, by design
+      Provider.of<ImportController>(context, listen: false)
+          .importData(importedFile);
+    }
   }
 }

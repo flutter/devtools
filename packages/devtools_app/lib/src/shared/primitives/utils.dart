@@ -818,6 +818,8 @@ class ImmediateValueNotifier<T> extends ValueNotifier<T> {
 
 extension SafeAccessList<T> on List<T> {
   T? safeGet(int index) => index < 0 || index >= length ? null : this[index];
+
+  T? safeRemoveLast() => isNotEmpty ? removeLast() : null;
 }
 
 extension SafeAccess<T> on Iterable<T> {
@@ -1219,6 +1221,10 @@ extension ListExtension<T> on List<T> {
     }
     return false;
   }
+
+  T get second => this[1];
+
+  T get third => this[2];
 }
 
 extension SetExtension<T> on Set<T> {

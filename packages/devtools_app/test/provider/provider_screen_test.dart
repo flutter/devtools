@@ -20,28 +20,30 @@ void main() {
   const windowSize = Size(2225.0, 1000.0);
 
   late Widget providerScreen;
-  late BannerMessagesController bannerMessagesController;
 
   setUpAll(() async => await loadFonts());
 
   setUp(() {
     setGlobal(IdeTheme, getIdeTheme());
-    setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
+    setGlobal(
+      DevToolsEnvironmentParameters,
+      ExternalDevToolsEnvironmentParameters(),
+    );
     setGlobal(PreferencesController, PreferencesController());
     setGlobal(ServiceConnectionManager, FakeServiceManager());
     setGlobal(NotificationService, NotificationService());
+    setGlobal(BannerMessagesController, BannerMessagesController());
   });
 
   setUp(() {
-    bannerMessagesController = BannerMessagesController();
-
     providerScreen = Container(
       color: Colors.grey,
       child: Directionality(
         textDirection: TextDirection.ltr,
-        child: wrapWithControllers(
-          BannerMessages(screen: ProviderScreen()),
-          bannerMessages: bannerMessagesController,
+        child: wrap(
+          BannerMessages(
+            screen: ProviderScreen(),
+          ),
         ),
       ),
     );

@@ -12,14 +12,10 @@ import 'globals.dart';
 import 'primitives/auto_dispose.dart';
 import 'primitives/utils.dart';
 
-/// The page ID (used in routing) for the standalone app-size page.
-///
-/// This must be different to the AppSizeScreen ID which is also used in routing when
-/// cnnected to a VM to ensure they have unique URLs.
-const appSizePageId = 'appsize';
+const memoryAnalysisScreenId = 'memoryanalysis';
 
-const homePageId = '';
-const snapshotPageId = 'snapshot';
+const homeScreenId = '';
+const snapshotScreenId = 'snapshot';
 
 /// Represents a Page/route for a DevTools screen.
 class DevToolsRouteConfiguration {
@@ -196,7 +192,7 @@ class DevToolsRouterDelegate extends RouterDelegate<DevToolsRouteConfiguration>
     // Ensure we disconnect from any previously connected applications if we do
     // not have a vm service uri as a query parameter, unless we are loading an
     // offline file.
-    if (page != snapshotPageId && newArgs['uri'] == null) {
+    if (page != snapshotScreenId && newArgs['uri'] == null) {
       serviceManager.manuallyDisconnect();
     }
 
@@ -211,7 +207,7 @@ class DevToolsRouterDelegate extends RouterDelegate<DevToolsRouteConfiguration>
     required bool clearScreenParam,
   }) {
     navigate(
-      homePageId,
+      homeScreenId,
       {
         if (clearUriParam) 'uri': null,
         if (clearScreenParam) 'screen': null,

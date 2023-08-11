@@ -41,16 +41,20 @@ if [[ $1 = "--update-perfetto" ]]; then
   $TOOL_DIR/update_perfetto.sh
 fi
 
+pushd $DEVTOOLS_DIR/packages/devtools_shared
+flutter pub get
+popd
+
+pushd $DEVTOOLS_DIR/packages/devtools_extensions
+flutter pub get
+popd
+
 pushd $DEVTOOLS_DIR/packages/devtools_app
 
 flutter clean
 rm -rf build/web
 
 flutter pub get
-
-# Build a profile build rather than a release build to avoid minification
-# as code size doesn't matter very much for us as minification makes some
-# crashes harder to debug. For example, https://github.com/flutter/devtools/issues/2125
 
 flutter build web \
   --web-renderer canvaskit \

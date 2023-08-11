@@ -8,13 +8,11 @@
 
 // ignore_for_file: avoid_print
 
+import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/memory/panes/control/primary_controls.dart';
 import 'package:devtools_app/src/screens/memory/panes/diff/widgets/snapshot_list.dart';
-import 'package:devtools_app/src/shared/banner_messages.dart';
-import 'package:devtools_app/src/shared/common_widgets.dart';
+import 'package:devtools_app/src/screens/memory/shared/primitives/instance_context_menu.dart';
 import 'package:devtools_app/src/shared/console/widgets/console_pane.dart';
-import 'package:devtools_app/src/shared/primitives/simple_items.dart';
-import 'package:devtools_app/src/shared/ui/search.dart';
 import 'package:devtools_test/devtools_integration_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -42,9 +40,13 @@ void main() {
     await pumpAndConnectDevTools(tester, testApp);
 
     final evalTester = _EvalAndBrowseTester(tester);
+    await evalTester.prepareMemoryUI();
 
     await _testBasicEval(evalTester);
     await _testAssignment(evalTester);
+
+    await _profileOneInstance(evalTester);
+    await _profileAllInstances(evalTester);
 
     await evalTester.switchToSnapshotsAndTakeOne();
 
@@ -68,9 +70,29 @@ Future<void> _testAssignment(_EvalAndBrowseTester tester) async {
   );
 }
 
+Future<void> _profileOneInstance(_EvalAndBrowseTester tester) async {
+  await tester.openContextMenuForClass('MyHomePage');
+  await tester.tapAndPump(
+    find.textContaining('one instance'),
+    duration: longPumpDuration,
+  );
+  expect(find.text('MyHomePage'), findsNWidgets(2));
+}
+
+Future<void> _profileAllInstances(_EvalAndBrowseTester tester) async {
+  await tester.openContextMenuForClass('_MyHomePageState');
+  await tester.tapAndPump(find.textContaining('all class instances'));
+  await tester.tapAndPump(
+    find.text('Direct instances'),
+    duration: longPumpDuration,
+  );
+
+  expect(find.text('List (1 item)'), findsOneWidget);
+}
+
 Future<void> _inboundReferencesAreListed(_EvalAndBrowseTester tester) async {
-  await tester.tapAndPump(find.text('MyApp'));
-  await tester.tapAndPump(find.byType(ContextMenuButton));
+  await tester.openContextMenuForClass('MyApp');
+
   await tester.tapAndPump(find.textContaining('one instance'));
   await tester.tapAndPump(find.text('Any'), duration: longPumpDuration);
 
@@ -128,7 +150,9 @@ class _EvalAndBrowseTester {
     await tester.pump(longPumpDuration);
   }
 
-  Future<void> switchToSnapshotsAndTakeOne() async {
+  /// Prepares the UI of the memory screen so that the eval-related elements are
+  /// visible on the screen for testing.
+  Future<void> prepareMemoryUI() async {
     // Open memory screen.
     await switchToScreen(tester, ScreenMetaData.memory);
 
@@ -150,7 +174,9 @@ class _EvalAndBrowseTester {
       const Offset(0, dragDistance),
     );
     await tester.pumpAndSettle();
+  }
 
+  Future<void> switchToSnapshotsAndTakeOne() async {
     // Switch to diff tab.
     await tapAndPump(find.text('Diff Snapshots'));
 
@@ -180,7 +206,7 @@ class _EvalAndBrowseTester {
     Finder? next,
   }) async {
     Future<void> action(int tryNumber) async {
-      logStatus('tapping #$tryNumber to find \n[$finder]\n');
+      logStatus('attempt #$tryNumber, tapping \n[$finder]\n');
       tryNumber++;
       await tester.tap(finder);
       await tester.pump(duration);
@@ -204,5 +230,15 @@ class _EvalAndBrowseTester {
     }
 
     throw StateError('Could not find $next');
+  }
+
+  Future<void> openContextMenuForClass(String className) async {
+    await tapAndPump(find.text(className));
+    await tapAndPump(
+      find.descendant(
+        of: find.byType(InstanceViewWithContextMenu),
+        matching: find.byType(ContextMenuButton),
+      ),
+    );
   }
 }

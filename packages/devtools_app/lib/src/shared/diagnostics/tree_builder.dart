@@ -17,6 +17,7 @@ import 'diagnostics_node.dart';
 import 'generic_instance_reference.dart';
 import 'helpers.dart';
 import 'inspector_service.dart';
+import 'object_group_api.dart';
 import 'references.dart';
 import 'variable_factory.dart';
 
@@ -46,7 +47,7 @@ Future<void> _addDiagnosticsIfNeeded(
 ) async {
   if (diagnostic == null || !includeDiagnosticPropertiesInDebugger) return;
 
-  final service = diagnostic.inspectorService;
+  final service = diagnostic.objectGroupApi;
   Future<void> addPropertiesHelper(
     List<RemoteDiagnosticsNode>? properties,
   ) async {
@@ -81,7 +82,8 @@ Future<void> _addDiagnosticChildrenIfNeeded(
   if (diagnostic == null || !includeDiagnosticChildren) return;
 
   // Always add children last after properties to avoid confusion.
-  final ObjectGroupBase? service = diagnostic.inspectorService;
+  final InspectorObjectGroupApi<RemoteDiagnosticsNode>? service =
+      diagnostic.objectGroupApi;
   final diagnosticChildren = await diagnostic.children;
   if (diagnosticChildren != null && diagnosticChildren.isNotEmpty) {
     final childrenNode = DartObjectNode.text(
@@ -326,7 +328,7 @@ Future<void> _addInspectorItems(variable, IsolateRef? isolateRef) async {
   final inspectorService = serviceManager.inspectorService;
   if (inspectorService != null) {
     final tasks = <Future>[];
-    ObjectGroupBase? group;
+    InspectorObjectGroupBase? group;
     Future<void> maybeUpdateRef(DartObjectNode child) async {
       final childRef = child.ref;
       if (childRef == null) return;

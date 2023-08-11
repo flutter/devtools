@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 
 import '../../common_widgets.dart';
 import '../../globals.dart';
-import '../../theme.dart';
 import '../console.dart';
 import '../console_service.dart';
 import 'evaluate.dart';
@@ -57,10 +56,7 @@ class ConsolePane extends StatelessWidget {
     if (serviceManager.connectedApp!.isProfileBuildNow!) {
       footer = null;
     } else {
-      footer = SizedBox(
-        height: consoleLineHeight,
-        child: const ExpressionEvalField(),
-      );
+      footer = const ExpressionEvalField();
     }
 
     return Column(

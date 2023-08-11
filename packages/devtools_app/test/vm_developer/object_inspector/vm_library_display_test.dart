@@ -18,7 +18,10 @@ void main() {
     setGlobal(IdeTheme, IdeTheme());
     setGlobal(BreakpointManager, BreakpointManager());
     setGlobal(ServiceConnectionManager, FakeServiceManager());
-    setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
+    setGlobal(
+      DevToolsEnvironmentParameters,
+      ExternalDevToolsEnvironmentParameters(),
+    );
     setGlobal(PreferencesController, PreferencesController());
     setGlobal(NotificationService, NotificationService());
   });
@@ -62,7 +65,7 @@ void main() {
         expect(find.text('General Information'), findsOneWidget);
         expect(find.text('1 KB'), findsOneWidget);
         expect(find.text('URI:'), findsOneWidget);
-        expect(find.text('fooLib.dart'), findsOneWidget);
+        expect(find.text('fooLib.dart', findRichText: true), findsOneWidget);
         expect(find.text('VM Name:'), findsOneWidget);
         expect(find.text('fooDartLibrary'), findsOneWidget);
 
@@ -70,7 +73,7 @@ void main() {
 
         expect(find.byType(RetainingPathWidget), findsOneWidget);
 
-        expect(find.byType(InboundReferencesWidget), findsOneWidget);
+        expect(find.byType(InboundReferencesTree), findsOneWidget);
 
         expect(find.byType(LibraryDependencies), findsOneWidget);
       },
@@ -197,10 +200,9 @@ void main() {
           .pumpWidget(wrap(LibraryDependencies(dependencies: dependencies)));
 
       expect(find.byType(VmExpansionTile), findsOneWidget);
-      expect(find.byType(AreaPaneHeader), findsOneWidget);
       expect(find.text('Dependencies (3)'), findsOneWidget);
 
-      await tester.tap(find.byType(AreaPaneHeader));
+      await tester.tap(find.text('Dependencies (3)'));
 
       await tester.pumpAndSettle();
 

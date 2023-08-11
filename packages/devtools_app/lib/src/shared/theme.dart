@@ -72,6 +72,7 @@ ThemeData _baseTheme({
   // as well as the background color?
   return theme.copyWith(
     tabBarTheme: theme.tabBarTheme.copyWith(
+      tabAlignment: TabAlignment.start,
       dividerColor: Colors.transparent,
       labelPadding:
           const EdgeInsets.symmetric(horizontal: defaultTabBarPadding),
@@ -231,12 +232,16 @@ const defaultIconSizeBeforeScaling = 16.0;
 const defaultActionsIconSizeBeforeScaling = 20.0;
 
 const defaultSpacing = 16.0;
+const tabBarSpacing = 14.0;
 const intermediateSpacing = 12.0;
 const denseSpacing = 8.0;
 const denseModeDenseSpacing = 2.0;
 const denseRowSpacing = 6.0;
 
-const defaultBorderRadius = 16.0;
+final defaultBorderRadius = BorderRadius.circular(_defaultBorderRadiusValue);
+const defaultRadius = Radius.circular(_defaultBorderRadiusValue);
+const _defaultBorderRadiusValue = 16.0;
+
 const defaultElevation = 4.0;
 
 const borderPadding = 2.0;
@@ -410,6 +415,9 @@ extension ThemeDataExtension on ThemeData {
           fontSize: defaultFontSize,
         ),
       );
+
+  TextStyle get boldTextStyle =>
+      regularTextStyle.copyWith(fontWeight: FontWeight.bold);
 
   TextStyle get subtleTextStyle => _fixBlurryText(
         TextStyle(
@@ -627,9 +635,9 @@ ButtonStyle denseAwareOutlinedButtonStyle(
 }
 
 ButtonStyle denseAwareTextButtonStyle(
-  BuildContext context,
+  BuildContext context, {
   double? minScreenWidthForTextBeforeScaling,
-) {
+}) {
   final buttonStyle =
       Theme.of(context).textButtonTheme.style ?? const ButtonStyle();
   return _generateButtonStyle(

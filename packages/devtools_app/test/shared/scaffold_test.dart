@@ -18,6 +18,7 @@ void main() {
   when(mockServiceManager.connectedState).thenReturn(
     ValueNotifier<ConnectedState>(const ConnectedState(false)),
   );
+  when(mockServiceManager.hasConnection).thenReturn(false);
 
   final mockErrorBadgeManager = MockErrorBadgeManager();
   when(mockServiceManager.errorBadgeManager).thenReturn(mockErrorBadgeManager);
@@ -30,6 +31,7 @@ void main() {
   setGlobal(OfflineModeController, OfflineModeController());
   setGlobal(IdeTheme, IdeTheme());
   setGlobal(NotificationService, NotificationService());
+  setGlobal(BannerMessagesController, BannerMessagesController());
 
   Widget wrapScaffold(Widget child) {
     return wrapWithControllers(
@@ -40,8 +42,8 @@ void main() {
   }
 
   testWidgetsWithWindowSize(
-    'displays in narrow mode without error',
-    const Size(200.0, 1200.0),
+    'does not show tab overflow button when screen is wide',
+    const Size(2000.0, 1200.0),
     (WidgetTester tester) async {
       await tester.pumpWidget(
         wrapScaffold(
@@ -51,14 +53,20 @@ void main() {
         ),
       );
       expect(find.byKey(_k1), findsOneWidget);
-      expect(find.byKey(DevToolsScaffold.narrowWidthKey), findsOneWidget);
-      expect(find.byKey(DevToolsScaffold.fullWidthKey), findsNothing);
+
+      expect(find.byKey(_t1), findsOneWidget);
+      expect(find.byKey(_t2), findsOneWidget);
+      expect(find.byKey(_t3), findsOneWidget);
+      expect(find.byKey(_t4), findsOneWidget);
+      expect(find.byKey(_t5), findsOneWidget);
+
+      expect(find.byType(TabOverflowButton), findsNothing);
     },
   );
 
   testWidgetsWithWindowSize(
-    'displays in full-width mode without error',
-    const Size(1200.0, 1200.0),
+    'shows tab overflow button when screen is narrow',
+    const Size(600.0, 1200.0),
     (WidgetTester tester) async {
       await tester.pumpWidget(
         wrapScaffold(
@@ -68,8 +76,66 @@ void main() {
         ),
       );
       expect(find.byKey(_k1), findsOneWidget);
-      expect(find.byKey(DevToolsScaffold.fullWidthKey), findsOneWidget);
-      expect(find.byKey(DevToolsScaffold.narrowWidthKey), findsNothing);
+
+      expect(find.byKey(_t1), findsOneWidget);
+      expect(find.byKey(_t2), findsOneWidget);
+      expect(find.byKey(_t3), findsNothing);
+      expect(find.byKey(_t4), findsNothing);
+      expect(find.byKey(_t5), findsNothing);
+
+      expect(find.byType(TabOverflowButton), findsOneWidget);
+    },
+  );
+
+  testWidgetsWithWindowSize(
+    'can select screen from tab overflow menu',
+    const Size(600.0, 1200.0),
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        wrapScaffold(
+          DevToolsScaffold(
+            screens: const [_screen1, _screen2, _screen3, _screen4, _screen5],
+          ),
+        ),
+      );
+      expect(find.byKey(_k1), findsOneWidget);
+
+      expect(find.byKey(_t1), findsOneWidget);
+      expect(find.byKey(_t2), findsOneWidget);
+      expect(find.byKey(_t3), findsNothing);
+      expect(find.byKey(_t4), findsNothing);
+      expect(find.byKey(_t5), findsNothing);
+      expect(find.byType(TabOverflowButton), findsOneWidget);
+
+      await tester.tap(find.byType(TabOverflowButton));
+      await tester.pumpAndSettle();
+
+      // The overflow tabs should now be shown in the context menu.
+      expect(find.byKey(_t3), findsOneWidget);
+      expect(find.byKey(_t4), findsOneWidget);
+      expect(find.byKey(_t5), findsOneWidget);
+      expect(find.byType(SelectedTabWrapper), findsNothing);
+
+      // Select a tab in the overflow menu.
+      await tester.tap(find.byKey(_t5));
+      await tester.pumpAndSettle();
+
+      // The overflow tabs should now be hidden again.
+      expect(find.byKey(_t3), findsNothing);
+      expect(find.byKey(_t4), findsNothing);
+      expect(find.byKey(_t5), findsNothing);
+
+      // The [TabOverflowButton] should now show up as selected.
+      expect(
+        find.descendant(
+          of: find.byType(TabOverflowButton),
+          matching: find.byType(SelectedTabWrapper),
+        ),
+        findsOneWidget,
+      );
+
+      expect(find.byKey(_k1), findsNothing);
+      expect(find.byKey(_k5), findsOneWidget);
     },
   );
 
@@ -158,8 +224,11 @@ const _k4 = Key('body key 4');
 const _k5 = Key('body key 5');
 const _t1 = Key('tab key 1');
 const _t2 = Key('tab key 2');
+const _t3 = Key('tab key 3');
+const _t4 = Key('tab key 4');
+const _t5 = Key('tab key 5');
 const _screen1 = _TestScreen('screen1', _k1, tabKey: _t1);
 const _screen2 = _TestScreen('screen2', _k2, tabKey: _t2);
-const _screen3 = _TestScreen('screen3', _k3);
-const _screen4 = _TestScreen('screen4', _k4);
-const _screen5 = _TestScreen('screen5', _k5);
+const _screen3 = _TestScreen('screen3', _k3, tabKey: _t3);
+const _screen4 = _TestScreen('screen4', _k4, tabKey: _t4);
+const _screen5 = _TestScreen('screen5', _k5, tabKey: _t5);

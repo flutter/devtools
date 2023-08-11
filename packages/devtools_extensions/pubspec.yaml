@@ -1,0 +1,22 @@
+name: devtools_extensions
+description: A package for building and supporting extensions for Dart DevTools.
+version: 0.0.1-dev.0
+repository: https://github.com/flutter/devtools/tree/master/packages/devtools_extensions
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+  flutter: '>=3.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  logging: ^1.1.1
+  vm_service: ">=10.1.0 <12.0.0"
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+dependency_overrides:
+  devtools_shared:
+    path: ../devtools_shared

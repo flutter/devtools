@@ -11,6 +11,9 @@ import '../../../../shared/charts/flame_chart.dart';
 import '../../../../shared/common_widgets.dart';
 import '../../../../shared/dialogs.dart';
 import '../../../../shared/globals.dart';
+import '../../../../shared/http/http_service.dart' as http_service;
+import '../../../../shared/primitives/auto_dispose.dart';
+import '../../../../shared/primitives/utils.dart';
 import '../../../../shared/theme.dart';
 import '../../../../shared/ui/search.dart';
 import 'legacy/legacy_events_controller.dart';
@@ -30,12 +33,14 @@ class TimelineEventsTabView extends StatelessWidget {
       builder: (context, useLegacy, _) {
         return useLegacy
             ? KeepAliveWrapper(
-                child:
-                    DualValueListenableBuilder<EventsControllerStatus, double>(
-                  firstListenable: controller.status,
-                  secondListenable:
-                      controller.legacyController.processor.progressNotifier,
-                  builder: (context, status, processingProgress, _) {
+                child: MultiValueListenableBuilder(
+                  listenables: [
+                    controller.status,
+                    controller.legacyController.processor.progressNotifier,
+                  ],
+                  builder: (context, values, _) {
+                    final status = values.first as EventsControllerStatus;
+                    final processingProgress = values.second as double;
                     return TimelineEventsView(
                       controller: controller,
                       processing: status == EventsControllerStatus.processing,
@@ -132,7 +137,7 @@ class TraceCategoriesButton extends StatelessWidget {
     unawaited(
       showDialog(
         context: context,
-        builder: (context) => TraceCategoriesDialog(controller),
+        builder: (context) => const TraceCategoriesDialog(),
       ),
     );
   }
@@ -166,10 +171,35 @@ class RefreshTimelineEventsButton extends StatelessWidget {
   }
 }
 
-class TraceCategoriesDialog extends StatelessWidget {
-  const TraceCategoriesDialog(this.timelineEventsController, {super.key});
+class TraceCategoriesDialog extends StatefulWidget {
+  const TraceCategoriesDialog({super.key});
 
-  final TimelineEventsController timelineEventsController;
+  @override
+  State<TraceCategoriesDialog> createState() => _TraceCategoriesDialogState();
+}
+
+class _TraceCategoriesDialogState extends State<TraceCategoriesDialog>
+    with AutoDisposeMixin {
+  late final ValueNotifier<bool?> _httpLogging;
+
+  @override
+  void initState() {
+    super.initState();
+    // Mirror the value of [http_service.httpLoggingState] in the [_httpLogging]
+    // notifier so that we can use [_httpLogging] for the [CheckboxSetting]
+    // widget below.
+    _httpLogging = ValueNotifier<bool>(http_service.httpLoggingEnabled);
+    addAutoDisposeListener(http_service.httpLoggingState, () {
+      _httpLogging.value = http_service.httpLoggingState.value.enabled;
+    });
+  }
+
+  @override
+  void dispose() {
+    cancelListeners();
+    _httpLogging.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -210,10 +240,9 @@ class TraceCategoriesDialog extends StatelessWidget {
       CheckboxSetting(
         title: 'Network',
         description: 'Http traffic',
-        notifier: timelineEventsController.httpTimelineLoggingEnabled
-            as ValueNotifier<bool?>,
+        notifier: _httpLogging,
         onChanged: (value) => unawaited(
-          timelineEventsController.toggleHttpRequestLogging(value ?? false),
+          http_service.toggleHttpRequestLogging(value ?? false),
         ),
       ),
     ];

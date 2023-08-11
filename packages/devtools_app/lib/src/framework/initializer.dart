@@ -78,8 +78,9 @@ class _InitializerState extends State<Initializer>
     // attempt to reconnect.
     addAutoDisposeListener(serviceManager.connectedState, () {
       final connectionState = serviceManager.connectedState.value;
-      if (!connectionState.connected &&
-          !connectionState.userInitiatedConnectionState) {
+      if (connectionState.connected) {
+        setState(() {});
+      } else if (!connectionState.userInitiatedConnectionState) {
         // Try to reconnect (otherwise, will fall back to showing the
         // disconnected overlay).
         unawaited(
@@ -94,13 +95,6 @@ class _InitializerState extends State<Initializer>
         );
       }
     });
-
-    // Trigger a rebuild when the connection becomes available. This is done
-    // by onConnectionAvailable and not onStateChange because we also need
-    // to have queried what type of app this is before we load the UI.
-    autoDisposeStreamSubscription(
-      serviceManager.onConnectionAvailable.listen((_) => setState(() {})),
-    );
 
     unawaited(_attemptUrlConnection());
   }
@@ -199,7 +193,7 @@ class _InitializerState extends State<Initializer>
     final routerDelegate = DevToolsRouterDelegate.of(context);
     Router.neglect(
       context,
-      () => routerDelegate.navigate(snapshotPageId, args),
+      () => routerDelegate.navigate(snapshotScreenId, args),
     );
   }
 

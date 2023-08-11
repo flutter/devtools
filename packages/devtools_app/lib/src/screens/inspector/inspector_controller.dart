@@ -114,16 +114,17 @@ class InspectorController extends DisposableController
       });
     }
 
-    autoDisposeStreamSubscription(
-      serviceManager.onConnectionAvailable
-          .listen((_) => _handleConnectionStart()),
-    );
+    addAutoDisposeListener(serviceManager.connectedState, () {
+      if (serviceManager.connectedState.value.connected) {
+        _handleConnectionStart();
+      } else {
+        _handleConnectionStop();
+      }
+    });
+
     if (serviceManager.connectedAppInitialized) {
       _handleConnectionStart();
     }
-    autoDisposeStreamSubscription(
-      serviceManager.onConnectionClosed.listen((_) => _handleConnectionStop()),
-    );
 
     serviceManager.consoleService.ensureServiceInitialized();
   }
@@ -603,16 +604,6 @@ class InspectorController extends DisposableController
     _refreshRateLimiter.scheduleRequest();
   }
 
-  bool identicalDiagnosticsNodes(
-    RemoteDiagnosticsNode a,
-    RemoteDiagnosticsNode b,
-  ) {
-    if (a == b) {
-      return true;
-    }
-    return a.dartDiagnosticRef == b.dartDiagnosticRef;
-  }
-
   @override
   void onInspectorSelectionChanged() {
     if (!visibleToUser) {
@@ -797,7 +788,7 @@ class InspectorController extends DisposableController
   Future<void> _addNodeToConsole(InspectorTreeNode node) async {
     final valueRef = node.diagnostic!.valueRef;
     final isolateRef = inspectorService.isolateRef;
-    final instanceRef = await node.diagnostic!.inspectorService
+    final instanceRef = await node.diagnostic!.objectGroupApi
         ?.toObservatoryInstanceRef(valueRef);
     if (_disposed) return;
 

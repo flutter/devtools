@@ -45,7 +45,9 @@ class NotificationService {
 
   /// Pushes a notification [message].
   ///
-  /// Includes a button to close the notification if [isDismissible] is true.
+  /// Includes a button to close the notification if [isDismissible] is true,
+  /// otherwise the notification will be automatically dismissed after
+  /// [NotificationMessage.defaultDuration].
   bool push(
     String message, {
     isDismissible = false,
@@ -61,7 +63,8 @@ class NotificationService {
   ///
   /// Includes an action to report the error by opening the link to our issue
   /// tracker if [isReportable] is true. Includes a button to close the error if
-  /// [isDismissible] is true.
+  /// [isDismissible] is true, otherwise the error will be automatically
+  /// dismissed after [NotificationMessage.defaultDuration].
   bool pushError(
     String errorMessage, {
     isDismissible = true,

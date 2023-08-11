@@ -8,6 +8,8 @@ import 'dart:convert';
 // ignore: avoid_web_libraries_in_flutter, as designed
 import 'dart:html';
 
+import 'package:collection/collection.dart';
+import 'package:devtools_shared/devtools_extensions.dart';
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:logging/logging.dart';
 
@@ -335,6 +337,69 @@ DevToolsJsonFile _devToolsJsonFileFromResponse(
     lastModifiedTime: lastModifiedTime,
     data: data,
   );
+}
+
+/// Makes a request to the server to refresh the list of available extensions,
+/// serve their assets on the server, and return the list of available
+/// extensions here.
+Future<List<DevToolsExtensionConfig>> refreshAvailableExtensions(
+  String rootPath,
+) async {
+  if (isDevToolsServerAvailable) {
+    final uri = Uri(
+      path: ExtensionsApi.apiServeAvailableExtensions,
+      queryParameters: {ExtensionsApi.extensionRootPathPropertyName: rootPath},
+    );
+    final resp = await request(uri.toString());
+    if (resp?.status == HttpStatus.ok) {
+      final parsedResult = json.decode(resp!.responseText!);
+      final extensionsAsJson =
+          (parsedResult[ExtensionsApi.extensionsResultPropertyName]!
+                  as List<Object?>)
+              .whereNotNull()
+              .cast<Map<String, Object?>>();
+      return extensionsAsJson
+          .map((p) => DevToolsExtensionConfig.parse(p))
+          .toList();
+    } else {
+      logWarning(resp, ExtensionsApi.apiServeAvailableExtensions);
+      return [];
+    }
+  }
+  return [];
+}
+
+/// Makes a request to the server to look up the enabled state for a
+/// DevTools extension, and optionally to set the enabled state (when [enable]
+/// is non-null).
+///
+/// If [enable] is specified, the server will first set the enabled state
+/// to the value set forth by [enable] and then return the value that is saved
+/// to disk.
+Future<ExtensionEnabledState> extensionEnabledState({
+  required String rootPath,
+  required String extensionName,
+  bool? enable,
+}) async {
+  if (isDevToolsServerAvailable) {
+    final uri = Uri(
+      path: ExtensionsApi.apiExtensionEnabledState,
+      queryParameters: {
+        ExtensionsApi.extensionRootPathPropertyName: rootPath,
+        ExtensionsApi.extensionNamePropertyName: extensionName,
+        if (enable != null)
+          ExtensionsApi.enabledStatePropertyName: enable.toString(),
+      },
+    );
+    final resp = await request(uri.toString());
+    if (resp?.status == HttpStatus.ok) {
+      final parsedResult = json.decode(resp!.responseText!);
+      return ExtensionEnabledState.from(parsedResult);
+    } else {
+      logWarning(resp, ExtensionsApi.apiExtensionEnabledState);
+    }
+  }
+  return ExtensionEnabledState.error;
 }
 
 void logWarning(HttpRequest? response, String apiType, [String? respText]) {

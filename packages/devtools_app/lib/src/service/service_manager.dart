@@ -17,6 +17,7 @@ import '../shared/connected_app.dart';
 import '../shared/console/console_service.dart';
 import '../shared/diagnostics/inspector_service.dart';
 import '../shared/error_badge_manager.dart';
+import '../shared/feature_flags.dart';
 import '../shared/globals.dart';
 import '../shared/primitives/utils.dart';
 import '../shared/title.dart';
@@ -48,11 +49,9 @@ class ServiceConnectionManager {
     _serviceExtensionManager = ServiceExtensionManager(isolateManager);
   }
 
-  final StreamController<VmServiceWrapper> _connectionAvailableController =
-      StreamController<VmServiceWrapper>.broadcast();
-
   Completer<VmService> _serviceAvailable = Completer();
 
+  // TODO(kenz): try to replace uses of this with a listener on [connectedState]
   Future<VmService> get onServiceAvailable => _serviceAvailable.future;
 
   bool get isServiceAvailable => _serviceAvailable.isCompleted;
@@ -71,9 +70,10 @@ class ServiceConnectionManager {
 
   final _registeredServiceNotifiers = <String, ImmediateValueNotifier<bool>>{};
 
-  Map<String, List<String>> get registeredMethodsForService =>
+  /// Mapping of service name to service method.
+  Map<String, String> get registeredMethodsForService =>
       _registeredMethodsForService;
-  final Map<String, List<String>> _registeredMethodsForService = {};
+  final Map<String, String> _registeredMethodsForService = {};
 
   final vmFlagManager = VmFlagManager();
 
@@ -133,12 +133,6 @@ class ServiceConnectionManager {
   final ValueNotifier<ConnectedState> _connectedState =
       ValueNotifier(const ConnectedState(false));
 
-  Stream<VmServiceWrapper> get onConnectionAvailable =>
-      _connectionAvailableController.stream;
-
-  Stream<void> get onConnectionClosed => _connectionClosedController.stream;
-  final _connectionClosedController = StreamController<void>.broadcast();
-
   final ValueNotifier<bool> _deviceBusy = ValueNotifier<bool>(false);
 
   /// Whether the device is currently busy - performing a long-lived, blocking
@@ -167,12 +161,12 @@ class ServiceConnectionManager {
     String? isolateId,
     Map<String, dynamic>? args,
   }) async {
-    final registered = _registeredMethodsForService[name] ?? const [];
-    if (registered.isEmpty) {
-      throw Exception('There are no registered methods for service "$name"');
+    final registeredMethod = _registeredMethodsForService[name];
+    if (registeredMethod == null) {
+      throw Exception('There is no registered method for service "$name"');
     }
     return service!.callMethod(
-      registered.first,
+      registeredMethod,
       isolateId: isolateId,
       args: args,
     );
@@ -250,11 +244,10 @@ class ServiceConnectionManager {
     unawaited(onClosed.then((_) => vmServiceClosed()));
 
     void handleServiceEvent(Event e) {
+      _log.fine('ServiceEvent: [${e.kind}] - ${e.service}');
       if (e.kind == EventKind.kServiceRegistered) {
         final serviceName = e.service!;
-        _registeredMethodsForService
-            .putIfAbsent(serviceName, () => [])
-            .add(e.method!);
+        _registeredMethodsForService[serviceName] = e.method!;
         final serviceNotifier = _registeredServiceNotifiers.putIfAbsent(
           serviceName,
           () => ImmediateValueNotifier(true),
@@ -305,8 +298,6 @@ class ServiceConnectionManager {
       return;
     }
 
-    _connectedState.value = const ConnectedState(true);
-
     final isolates = vm?.isolatesForDevToolsMode() ?? <IsolateRef>[];
     await isolateManager.init(isolates);
     if (service != this.service) {
@@ -331,7 +322,11 @@ class ServiceConnectionManager {
       return;
     }
 
-    _connectionAvailableController.add(service);
+    if (FeatureFlags.devToolsExtensions) {
+      await extensionService.initialize();
+    }
+
+    _connectedState.value = const ConnectedState(true);
   }
 
   void manuallyDisconnect() {
@@ -373,7 +368,8 @@ class ServiceConnectionManager {
     setDeviceBusy(false);
 
     _connectedState.value = connectionState;
-    _connectionClosedController.add(null);
+
+    _registeredMethodsForService.clear();
 
     _inspectorService?.onIsolateStopped();
     _inspectorService?.dispose();
@@ -543,6 +539,25 @@ class ServiceConnectionManager {
     await whenValueNonNull(isolateManager.mainIsolate);
     return libraryUriAvailableNow(uri);
   }
+
+  Future<String?> rootLibraryForMainIsolate() async {
+    if (!connectedState.value.connected) return null;
+
+    final mainIsolateRef = isolateManager.mainIsolate.value;
+    if (mainIsolateRef == null) return null;
+
+    final isolateState = isolateManager.isolateState(mainIsolateRef);
+    await isolateState.waitForIsolateLoad();
+    final rootLib = isolateState.rootInfo!.library;
+    if (rootLib == null) return null;
+
+    final selectedIsolateRefId = mainIsolateRef.id!;
+    await resolvedUriManager.fetchFileUris(selectedIsolateRefId, [rootLib]);
+    return resolvedUriManager.lookupFileUri(
+      selectedIsolateRefId,
+      rootLib,
+    );
+  }
 }
 
 class VmServiceCapabilities {
@@ -564,4 +579,18 @@ class ConnectedState {
 
   /// Whether this [ConnectedState] was manually initiated by the user.
   final bool userInitiatedConnectionState;
+
+  @override
+  bool operator ==(Object? other) {
+    return other is ConnectedState &&
+        other.connected == connected &&
+        other.userInitiatedConnectionState == userInitiatedConnectionState;
+  }
+
+  @override
+  int get hashCode => Object.hash(connected, userInitiatedConnectionState);
+
+  @override
+  String toString() =>
+      'ConnectedState(connected: $connected, userInitiated: $userInitiatedConnectionState)';
 }

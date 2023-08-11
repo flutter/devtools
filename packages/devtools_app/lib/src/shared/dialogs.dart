@@ -35,7 +35,7 @@ List<Widget> dialogSubHeader(ThemeData theme, String titleText) {
 
 final dialogTextFieldDecoration = InputDecoration(
   border: OutlineInputBorder(
-    borderRadius: BorderRadius.circular(defaultBorderRadius),
+    borderRadius: defaultBorderRadius,
   ),
 );
 
@@ -198,6 +198,7 @@ class DevToolsDialog extends StatelessWidget {
     this.includeDivider = true,
     this.scrollable = true,
     this.actions,
+    this.actionsAlignment,
   }) : titleContent = title ?? const SizedBox();
 
   static const contentPadding = 24.0;
@@ -207,6 +208,7 @@ class DevToolsDialog extends StatelessWidget {
   final bool includeDivider;
   final bool scrollable;
   final List<Widget>? actions;
+  final MainAxisAlignment? actionsAlignment;
 
   @override
   Widget build(BuildContext context) {
@@ -231,6 +233,7 @@ class DevToolsDialog extends StatelessWidget {
         ),
         content: content,
         actions: actions,
+        actionsAlignment: actionsAlignment,
         buttonPadding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
       ),
     );

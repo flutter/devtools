@@ -102,7 +102,7 @@ class MemoryChartLegend extends StatelessWidget {
       decoration: BoxDecoration(
         color: colorScheme.defaultBackgroundColor,
         border: Border.all(color: theme.focusColor),
-        borderRadius: BorderRadius.circular(defaultBorderRadius),
+        borderRadius: defaultBorderRadius,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -217,11 +217,12 @@ Map<String, Map<String, Object?>> eventLegendContent(bool isLight) => {
       manualGCLegendName: traceRender(
         image: gcManualLegend,
       ),
+      // TODO: why do we need both a singular and plural legend entry for event?
       eventLegendName: traceRender(
-        image: eventLegend,
+        image: eventLegendAsset(1),
       ),
       eventsLegendName: traceRender(
-        image: eventsLegend,
+        image: eventLegendAsset(2),
       ),
     };
 

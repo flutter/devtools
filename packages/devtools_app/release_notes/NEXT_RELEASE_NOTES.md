@@ -1,12 +1,12 @@
 This is draft for future release notes, that are going to land on
 [the Flutter website](https://docs.flutter.dev/development/tools/devtools/release-notes).
 
-# DevTools 2.24.0 release notes
+# DevTools 2.27.0 release notes
 
 Dart & Flutter DevTools - A Suite of Performance Tools for Dart and Flutter
 
 ## General updates
-* Improve the overal performance of DevTools tables - [#5664](https://github.com/flutter/devtools/pull/5664), [#5696](https://github.com/flutter/devtools/pull/5696)
+TODO: Remove this section if there are not any general updates.
 
 ## Inspector updates
 TODO: Remove this section if there are not any general updates.
@@ -15,20 +15,13 @@ TODO: Remove this section if there are not any general updates.
 TODO: Remove this section if there are not any general updates.
 
 ## CPU profiler updates
-* Fix bug with CPU flame chart selection and tooltips - [#5676](https://github.com/flutter/devtools/pull/5676)
+TODO: Remove this section if there are not any general updates.
 
 ## Memory updates
 TODO: Remove this section if there are not any general updates.
 
 ## Debugger updates
-* Improve support for inspecting `UserTag` and `MirrorReferent` instances - [#5490](https://github.com/flutter/devtools/pull/5490)
-* Fixes expression evaluation bug where selecting an autocomplete result for a field would clear the current input - [#5717](https://github.com/flutter/devtools/pull/5717)
-* Selecting a stack frame scrolls to the frame location in the source code - [#5722](https://github.com/flutter/devtools/pull/5722)
-* Performance improvements when searching in a file, or searching for a file - [#5733](https://github.com/flutter/devtools/pull/5733)
-* Disables syntax highlighting for files with more than 100,000 characters due to performance constraints - [#5743](https://github.com/flutter/devtools/pull/5743)
-* Fix bug where source code wasn't visible if syntax highlighting for a file was disabled - [#5743](https://github.com/flutter/devtools/pull/5743)
-* Prevent file names and source code from getting out of sync. - [#5827](https://github.com/flutter/devtools/pull/5827)
-
+TODO: Remove this section if there are not any general updates.
 
 ## Network profiler updates
 TODO: Remove this section if there are not any general updates.

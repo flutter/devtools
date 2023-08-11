@@ -14,7 +14,7 @@ import '../../../../shared/table/table_controller.dart';
 import '../../../../shared/table/table_data.dart';
 import '../../../../shared/theme.dart';
 import '../../../../shared/utils.dart';
-import '../../shared/shared_memory_widgets.dart';
+import '../../shared/widgets/shared_memory_widgets.dart';
 import 'tracing_pane_controller.dart';
 
 /// The default width for columns containing *mostly* numeric data (e.g.,
@@ -172,10 +172,13 @@ class _AllocationTracingTableState extends State<AllocationTracingTable> {
           ),
         ),
         Expanded(
-          child: DualValueListenableBuilder<bool, TracingIsolateState>(
-            firstListenable: widget.controller.refreshing,
-            secondListenable: widget.controller.stateForIsolate,
-            builder: (context, _, state, __) {
+          child: MultiValueListenableBuilder(
+            listenables: [
+              widget.controller.refreshing,
+              widget.controller.stateForIsolate,
+            ],
+            builder: (context, values, __) {
+              final state = values.second as TracingIsolateState;
               return ValueListenableBuilder<List<TracedClass>>(
                 valueListenable: state.filteredClassList,
                 builder: (context, filteredClassList, _) {

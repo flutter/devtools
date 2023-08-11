@@ -11,7 +11,7 @@ import '../../../../shared/primitives/auto_dispose.dart';
 import '../../../../shared/primitives/simple_items.dart';
 import '../../../../shared/theme.dart';
 import '../../../../shared/utils.dart';
-import '../../memory_controller.dart';
+import '../../framework/connected/memory_controller.dart';
 import '../../shared/primitives/simple_elements.dart';
 import 'chart_pane_controller.dart';
 import 'interval_dropdown.dart';
@@ -27,11 +27,8 @@ class ChartControlPane extends StatefulWidget {
 
 @visibleForTesting
 class ChartPaneTooltips {
-  static const String pauseTooltip =
-      'Pause the chart and auto-collection of snapshots\n'
-      'in case of aggressive memory consumption\n'
-      '(if enabled in settings)';
-  static const String resumeTooltip = 'Resume recording memory statistics';
+  static const String pauseTooltip = 'Pause the chart';
+  static const String resumeTooltip = 'Resume the chart';
 }
 
 class _ChartControlPaneState extends State<ChartControlPane>

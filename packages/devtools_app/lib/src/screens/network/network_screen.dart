@@ -15,7 +15,6 @@ import '../../shared/globals.dart';
 import '../../shared/http/curl_command.dart';
 import '../../shared/http/http_request_data.dart';
 import '../../shared/primitives/auto_dispose.dart';
-import '../../shared/primitives/simple_items.dart';
 import '../../shared/primitives/utils.dart';
 import '../../shared/screen.dart';
 import '../../shared/split.dart';
@@ -35,7 +34,7 @@ class NetworkScreen extends Screen {
           id: id,
           requiresDartVm: true,
           title: ScreenMetaData.network.title,
-          icon: Icons.network_check,
+          icon: ScreenMetaData.network.icon,
         );
 
   static final id = ScreenMetaData.network.id;
@@ -51,10 +50,14 @@ class NetworkScreen extends Screen {
     final networkController = Provider.of<NetworkController>(context);
     final color = Theme.of(context).textTheme.bodyMedium!.color!;
 
-    return DualValueListenableBuilder<NetworkRequests, List<NetworkRequest>>(
-      firstListenable: networkController.requests,
-      secondListenable: networkController.filteredData,
-      builder: (context, networkRequests, filteredRequests, child) {
+    return MultiValueListenableBuilder(
+      listenables: [
+        networkController.requests,
+        networkController.filteredData,
+      ],
+      builder: (context, values, child) {
+        final networkRequests = values.first as NetworkRequests;
+        final filteredRequests = values.second as List<NetworkRequest>;
         final filteredCount = filteredRequests.length;
         final totalCount = networkRequests.requests.length;
         return Row(
@@ -353,6 +356,7 @@ class NetworkRequestsTable extends StatelessWidget {
         onItemSelected: (item) {
           if (item is DartIOHttpRequestData) {
             unawaited(item.getFullRequestData());
+            networkController.resetDropDown();
           }
         },
       ),

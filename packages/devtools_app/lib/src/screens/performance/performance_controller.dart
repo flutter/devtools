@@ -40,6 +40,12 @@ class PerformanceController extends DisposableController
       timelineEventsController,
       rasterStatsController,
     ];
+
+    if (serviceManager.connectedApp?.isDartWebAppNow ?? false) {
+      // Do not perform initialization for web apps.
+      return;
+    }
+
     // See https://github.com/dart-lang/linter/issues/3801
     // ignore: discarded_futures
     unawaited(_init());

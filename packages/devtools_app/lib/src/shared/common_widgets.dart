@@ -109,10 +109,10 @@ TextStyle primaryColorLight(TextStyle style, BuildContext context) {
 class DevToolsButton extends StatelessWidget {
   const DevToolsButton({
     Key? key,
-    required this.icon,
     required this.onPressed,
     required this.gaScreen,
     required this.gaSelection,
+    this.icon,
     this.label,
     this.color,
     this.minScreenWidthForTextBeforeScaling,
@@ -120,7 +120,11 @@ class DevToolsButton extends StatelessWidget {
     this.tooltip,
     this.tooltipPadding,
     this.outlined = true,
-  }) : super(key: key);
+  })  : assert(
+          label != null || icon != null,
+          'Either icon or label must be specified.',
+        ),
+        super(key: key);
 
   factory DevToolsButton.iconOnly({
     required IconData icon,
@@ -140,8 +144,7 @@ class DevToolsButton extends StatelessWidget {
     );
   }
 
-  // TODO(kenz): allow icon to be nullable if this is a text only button.
-  final IconData icon;
+  final IconData? icon;
 
   final String? label;
 
@@ -241,7 +244,8 @@ class DevToolsButton extends StatelessWidget {
                 onPressed: onPressedHandler,
                 style: denseAwareTextButtonStyle(
                   context,
-                  minScreenWidthForTextBeforeScaling,
+                  minScreenWidthForTextBeforeScaling:
+                      minScreenWidthForTextBeforeScaling,
                 ),
                 child: iconLabel,
               ),
@@ -789,6 +793,7 @@ class ToolbarAction extends StatelessWidget {
     Key? key,
     this.size,
     this.style,
+    this.color,
     this.gaScreen,
     this.gaSelection,
   })  : assert((gaScreen == null) == (gaSelection == null)),
@@ -796,6 +801,7 @@ class ToolbarAction extends StatelessWidget {
 
   final TextStyle? style;
   final IconData icon;
+  final Color? color;
   final String? tooltip;
   final VoidCallback? onPressed;
   final double? size;
@@ -819,7 +825,7 @@ class ToolbarAction extends StatelessWidget {
       child: Icon(
         icon,
         size: size ?? actionsIconSize,
-        color: style?.color ?? Theme.of(context).colorScheme.onSurface,
+        color: color ?? Theme.of(context).colorScheme.onSurface,
       ),
     );
 
@@ -829,6 +835,45 @@ class ToolbarAction extends StatelessWidget {
             message: tooltip,
             child: button,
           );
+  }
+}
+
+/// Icon action button used in the main DevTools toolbar or footer.
+abstract class ScaffoldAction extends StatelessWidget {
+  const ScaffoldAction({
+    super.key,
+    required this.icon,
+    required this.tooltip,
+    required this.onPressed,
+    this.color,
+  });
+
+  final IconData icon;
+
+  final String tooltip;
+
+  final Function(BuildContext) onPressed;
+
+  final Color? color;
+
+  @override
+  Widget build(BuildContext context) {
+    return DevToolsTooltip(
+      message: tooltip,
+      child: InkWell(
+        onTap: () => onPressed(context),
+        child: Container(
+          width: actionWidgetSize,
+          height: actionWidgetSize,
+          alignment: Alignment.center,
+          child: Icon(
+            icon,
+            size: actionsIconSize,
+            color: color,
+          ),
+        ),
+      ),
+    );
   }
 }
 
@@ -953,6 +998,8 @@ class DevToolsToggleButtonGroup extends StatelessWidget {
     required this.children,
     required this.selectedStates,
     required this.onPressed,
+    this.fillColor,
+    this.selectedColor,
   }) : super(key: key);
 
   final List<Widget> children;
@@ -961,14 +1008,19 @@ class DevToolsToggleButtonGroup extends StatelessWidget {
 
   final void Function(int)? onPressed;
 
+  final Color? fillColor;
+
+  final Color? selectedColor;
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return SizedBox(
       height: defaultButtonHeight,
       child: ToggleButtons(
-        borderRadius:
-            const BorderRadius.all(Radius.circular(defaultBorderRadius)),
+        borderRadius: defaultBorderRadius,
+        fillColor: fillColor,
+        selectedColor: selectedColor,
         textStyle: theme.textTheme.bodyMedium,
         constraints: BoxConstraints(
           minWidth: defaultButtonHeight,
@@ -1101,15 +1153,31 @@ class FilterButton extends StatelessWidget {
   }
 }
 
+class RoundedCornerOptions {
+  const RoundedCornerOptions({
+    this.showTopLeft = true,
+    this.showTopRight = true,
+    this.showBottomLeft = true,
+    this.showBottomRight = true,
+  });
+
+  final bool showTopLeft;
+  final bool showTopRight;
+  final bool showBottomLeft;
+  final bool showBottomRight;
+}
+
 class RoundedDropDownButton<T> extends StatelessWidget {
   const RoundedDropDownButton({
     Key? key,
     this.value,
     this.onChanged,
     this.isDense = false,
+    this.isExpanded = false,
     this.style,
     this.selectedItemBuilder,
     this.items,
+    this.roundedCornerOptions,
   }) : super(key: key);
 
   final T? value;
@@ -1118,29 +1186,52 @@ class RoundedDropDownButton<T> extends StatelessWidget {
 
   final bool isDense;
 
+  final bool isExpanded;
+
   final TextStyle? style;
 
   final DropdownButtonBuilder? selectedItemBuilder;
 
   final List<DropdownMenuItem<T>>? items;
 
+  final RoundedCornerOptions? roundedCornerOptions;
+
   @override
   Widget build(BuildContext context) {
     final bgColor = Theme.of(context).colorScheme.backgroundColorSelected;
 
+    Radius selectRadius(bool show) {
+      return show ? defaultRadius : Radius.zero;
+    }
+
+    final showTopLeft = roundedCornerOptions?.showTopLeft ?? true;
+    final showTopRight = roundedCornerOptions?.showTopRight ?? true;
+    final showBottomLeft = roundedCornerOptions?.showBottomLeft ?? true;
+    final showBottomRight = roundedCornerOptions?.showBottomRight ?? true;
     return RoundedOutlinedBorder(
+      showTopLeft: showTopLeft,
+      showTopRight: showTopRight,
+      showBottomLeft: showBottomLeft,
+      showBottomRight: showBottomRight,
       child: Center(
-        child: Container(
-          padding: const EdgeInsets.only(
-            left: defaultSpacing,
-            right: borderPadding,
-          ),
+        child: SizedBox(
           height: defaultButtonHeight - 2.0, // subtract 2.0 for width of border
           child: DropdownButtonHideUnderline(
             child: DropdownButton<T>(
+              padding: const EdgeInsets.only(
+                left: defaultSpacing,
+                right: borderPadding,
+              ),
               value: value,
               onChanged: onChanged,
               isDense: isDense,
+              isExpanded: isExpanded,
+              borderRadius: BorderRadius.only(
+                topLeft: selectRadius(showTopLeft),
+                topRight: selectRadius(showTopRight),
+                bottomLeft: selectRadius(showBottomLeft),
+                bottomRight: selectRadius(showBottomRight),
+              ),
               style: style,
               selectedItemBuilder: selectedItemBuilder,
               items: items,
@@ -1385,18 +1476,10 @@ class RoundedOutlinedBorder extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final borderRadius = BorderRadius.only(
-      topLeft: showTopLeft
-          ? const Radius.circular(defaultBorderRadius)
-          : Radius.zero,
-      topRight: showTopRight
-          ? const Radius.circular(defaultBorderRadius)
-          : Radius.zero,
-      bottomLeft: showBottomLeft
-          ? const Radius.circular(defaultBorderRadius)
-          : Radius.zero,
-      bottomRight: showBottomRight
-          ? const Radius.circular(defaultBorderRadius)
-          : Radius.zero,
+      topLeft: showTopLeft ? defaultRadius : Radius.zero,
+      topRight: showTopRight ? defaultRadius : Radius.zero,
+      bottomLeft: showBottomLeft ? defaultRadius : Radius.zero,
+      bottomRight: showBottomRight ? defaultRadius : Radius.zero,
     );
 
     var child = this.child;
@@ -1419,7 +1502,7 @@ class RoundedOutlinedBorder extends StatelessWidget {
 
 BoxDecoration roundedBorderDecoration(BuildContext context) => BoxDecoration(
       border: Border.all(color: Theme.of(context).focusColor),
-      borderRadius: BorderRadius.circular(defaultBorderRadius),
+      borderRadius: defaultBorderRadius,
     );
 
 class LeftBorder extends StatelessWidget {
@@ -1874,7 +1957,7 @@ class MoreInfoLink extends StatelessWidget {
     final theme = Theme.of(context);
     return InkWell(
       onTap: _onLinkTap,
-      borderRadius: BorderRadius.circular(defaultBorderRadius),
+      borderRadius: defaultBorderRadius,
       child: Padding(
         padding: padding ?? const EdgeInsets.all(denseSpacing),
         child: Row(
@@ -2031,10 +2114,8 @@ class CopyToClipboardControl extends StatelessWidget {
     this.size,
     this.gaScreen,
     this.gaItem,
-    this.style,
   });
 
-  final TextStyle? style;
   final ClipboardDataProvider? dataProvider;
   final String? successMessage;
   final String tooltip;
@@ -2056,13 +2137,15 @@ class CopyToClipboardControl extends StatelessWidget {
             );
           };
 
-    return ToolbarAction(
-      icon: Icons.content_copy,
-      tooltip: tooltip,
-      onPressed: onPressed,
-      key: buttonKey,
-      size: size,
-      style: style,
+    return SizedBox(
+      height: size,
+      child: ToolbarAction(
+        icon: Icons.content_copy,
+        tooltip: tooltip,
+        onPressed: onPressed,
+        key: buttonKey,
+        size: size,
+      ),
     );
   }
 }
@@ -2321,56 +2404,51 @@ class _BlinkingIconState extends State<BlinkingIcon> {
   }
 }
 
-// TODO(https://github.com/flutter/devtools/issues/2989): investigate if we can
-// modify this widget to be a 'MultiValueListenableBuilder' that can take an
-// arbitrary number of listenables.
-/// A widget that listens for changes to two different [ValueListenable]s and
-/// rebuilds for change notifications to either.
+/// A widget that listens for changes to multiple different [ValueListenable]s
+/// and rebuilds for change notifications from any of them.
 ///
-/// This widget is preferred over nesting two [ValueListenableBuilder]s in a
+/// The current value of each [ValueListenable] is provided by the [values]
+/// parameter in [builder], where the index of each value in the list is equal
+/// to the index of its parent [ValueListenable] in [listenables].
+///
+/// This widget is preferred over nesting many [ValueListenableBuilder]s in a
 /// single build method.
-class DualValueListenableBuilder<T, U> extends StatefulWidget {
-  const DualValueListenableBuilder({
-    Key? key,
-    required this.firstListenable,
-    required this.secondListenable,
+class MultiValueListenableBuilder<T, U> extends StatefulWidget {
+  const MultiValueListenableBuilder({
+    super.key,
+    required this.listenables,
     required this.builder,
     this.child,
-  }) : super(key: key);
+  });
 
-  final ValueListenable<T> firstListenable;
-
-  final ValueListenable<U> secondListenable;
+  final List<ValueListenable> listenables;
 
   final Widget Function(
     BuildContext context,
-    T firstValue,
-    U secondValue,
+    List<Object?> values,
     Widget? child,
   ) builder;
 
   final Widget? child;
 
   @override
-  State<DualValueListenableBuilder<T, U>> createState() =>
-      _DualValueListenableBuilderState<T, U>();
+  State<MultiValueListenableBuilder<T, U>> createState() =>
+      _MultiValueListenableBuilderState<T, U>();
 }
 
-class _DualValueListenableBuilderState<T, U>
-    extends State<DualValueListenableBuilder<T, U>> with AutoDisposeMixin {
+class _MultiValueListenableBuilderState<T, U>
+    extends State<MultiValueListenableBuilder<T, U>> with AutoDisposeMixin {
   @override
   void initState() {
     super.initState();
-    addAutoDisposeListener(widget.firstListenable);
-    addAutoDisposeListener(widget.secondListenable);
+    widget.listenables.forEach(addAutoDisposeListener);
   }
 
   @override
   Widget build(BuildContext context) {
     return widget.builder(
       context,
-      widget.firstListenable.value,
-      widget.secondListenable.value,
+      [for (final listenable in widget.listenables) listenable.value],
       widget.child,
     );
   }
@@ -2413,7 +2491,7 @@ class ElevatedCard extends StatelessWidget {
       elevation: defaultElevation,
       color: Theme.of(context).scaffoldBackgroundColor,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(defaultBorderRadius),
+        borderRadius: defaultBorderRadius,
       ),
       child: Container(
         width: width,
@@ -2504,9 +2582,9 @@ class HelpButtonWithDialog extends StatelessWidget {
 /// Display a single bullet character in order to act as a stylized spacer
 /// component.
 class BulletSpacer extends StatelessWidget {
-  const BulletSpacer({super.key, this.useAccentColor = false});
+  const BulletSpacer({super.key, this.color});
 
-  final bool useAccentColor;
+  final Color? color;
 
   static double get width => actionWidgetSize / 2;
 
@@ -2514,12 +2592,7 @@ class BulletSpacer extends StatelessWidget {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
 
-    late TextStyle? textStyle;
-    textStyle = useAccentColor
-        ? theme.appBarTheme.toolbarTextStyle ??
-            theme.primaryTextTheme.bodyMedium
-        : theme.textTheme.bodyMedium;
-
+    final textStyle = theme.textTheme.bodyMedium;
     final mutedColor = textStyle?.color?.withAlpha(0x90);
 
     return Container(
@@ -2528,7 +2601,7 @@ class BulletSpacer extends StatelessWidget {
       alignment: Alignment.center,
       child: Text(
         '•',
-        style: textStyle?.copyWith(color: mutedColor),
+        style: textStyle?.copyWith(color: color ?? mutedColor),
       ),
     );
   }
@@ -2624,33 +2697,38 @@ class RadioButton<T> extends StatelessWidget {
 class ContextMenuButton extends StatelessWidget {
   ContextMenuButton({
     super.key,
-    required this.menu,
-    this.style,
+    required this.menuChildren,
+    this.color,
     this.gaScreen,
     this.gaItem,
-    double? size,
-  }) : size = size ?? tableIconSize;
+    this.buttonWidth = defaultWidth,
+    this.icon = Icons.more_vert,
+    double? iconSize,
+  }) : iconSize = iconSize ?? tableIconSize;
 
-  static const double width = 14;
+  static const double defaultWidth = 14.0;
+  static const double densePadding = 2.0;
 
-  final TextStyle? style;
+  final Color? color;
   final String? gaScreen;
   final String? gaItem;
-  final List<Widget> menu;
-  final double size;
+  final List<Widget> menuChildren;
+  final IconData icon;
+  final double iconSize;
+  final double buttonWidth;
 
   @override
   Widget build(BuildContext context) {
     return MenuAnchor(
-      menuChildren: menu,
+      menuChildren: menuChildren,
       builder:
           (BuildContext context, MenuController controller, Widget? child) {
         return SizedBox(
-          width: width,
+          width: buttonWidth,
           child: ToolbarAction(
-            icon: Icons.more_vert,
-            size: size,
-            style: style,
+            icon: icon,
+            size: iconSize,
+            color: color,
             onPressed: () {
               if (gaScreen != null && gaItem != null) {
                 ga.select(gaScreen!, gaItem!);

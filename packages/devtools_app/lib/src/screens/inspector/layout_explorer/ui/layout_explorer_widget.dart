@@ -78,9 +78,7 @@ abstract class LayoutExplorerWidgetState<W extends LayoutExplorerWidget,
     if (shouldFetch) {
       _dirty = false;
       final newSelection = await fetchLayoutProperties();
-      if (newSelection != null) {
-        _setProperties(newSelection);
-      }
+      _setProperties(newSelection);
     } else {
       updateHighlighted(_properties);
     }
@@ -107,7 +105,7 @@ abstract class LayoutExplorerWidgetState<W extends LayoutExplorerWidget,
     final node = await nextObjectGroup.getLayoutExplorerNode(
       getRoot(selectedNode),
     );
-    if (node == null) return null;
+    if (node == null || node.renderObject == null) return null;
 
     if (!nextObjectGroup.disposed) {
       assert(manager.next == nextObjectGroup);
@@ -122,7 +120,7 @@ abstract class LayoutExplorerWidgetState<W extends LayoutExplorerWidget,
 
   void updateHighlighted(L? newProperties);
 
-  String? id(RemoteDiagnosticsNode? node) => node?.dartDiagnosticRef.id;
+  String? id(RemoteDiagnosticsNode? node) => node?.valueRef.id;
 
   void _registerInspectorControllerService() {
     inspectorController.selectedNode.addListener(_onSelectionChangedCallback);
@@ -181,8 +179,8 @@ abstract class LayoutExplorerWidgetState<W extends LayoutExplorerWidget,
   // this is required so that we don't change focus
   //   when tapping on a child is also Flex-based widget.
   Future<void> setSelectionInspector(RemoteDiagnosticsNode node) async {
-    final service = node.inspectorService;
-    if (service is ObjectGroup) {
+    final service = node.objectGroupApi;
+    if (service != null && service is ObjectGroup) {
       await service.setSelectionInspector(node.valueRef, false);
     }
   }
@@ -219,7 +217,7 @@ abstract class LayoutExplorerWidgetState<W extends LayoutExplorerWidget,
     });
   }
 
-  void _setProperties(L newProperties) {
+  void _setProperties(L? newProperties) {
     if (!mounted) return;
     updateHighlighted(newProperties);
     if (_properties == newProperties) {

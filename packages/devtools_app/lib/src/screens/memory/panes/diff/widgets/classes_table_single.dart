@@ -13,9 +13,9 @@ import '../../../../../shared/table/table_data.dart';
 import '../../../../../shared/utils.dart';
 import '../../../shared/heap/heap.dart';
 import '../../../shared/primitives/simple_elements.dart';
-import '../../../shared/shared_memory_widgets.dart';
+import '../../../shared/widgets/class_filter.dart';
+import '../../../shared/widgets/shared_memory_widgets.dart';
 import '../controller/class_data.dart';
-import 'class_filter.dart';
 import 'instances.dart';
 
 class _ClassNameColumn extends ColumnData<SingleClassStats>
@@ -98,7 +98,7 @@ class _InstanceColumn extends ColumnData<SingleClassStats>
     bool isRowSelected = false,
     VoidCallback? onPressed,
   }) {
-    return InstanceTableCell(
+    return HeapInstanceTableCell(
       data.objects,
       classData.heap,
       data.heapClass,

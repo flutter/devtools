@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/foundation.dart';
@@ -159,7 +160,7 @@ class SidePanel extends AnimatedWidget {
         color: theme.scaffoldBackgroundColor,
         clipBehavior: Clip.hardEdge,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(defaultBorderRadius),
+          borderRadius: defaultBorderRadius,
           side: BorderSide(
             color: theme.focusColor,
           ),
@@ -182,8 +183,8 @@ class SidePanel extends AnimatedWidget {
                 : Expanded(
                     child: Markdown(
                       data: markdownData!,
-                      onTapLink: (text, url, title) async =>
-                          await launchUrl(url!),
+                      onTapLink: (text, url, title) =>
+                          unawaited(launchUrl(url!)),
                     ),
                   ),
           ],

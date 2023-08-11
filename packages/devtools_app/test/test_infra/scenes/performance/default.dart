@@ -14,7 +14,7 @@ import 'package:flutter/material.dart';
 import 'package:stager/stager.dart';
 
 /// To run:
-/// flutter run -t test/test_infra/scenes/performance/default.stager_app.dart -d macos
+/// flutter run -t test/test_infra/scenes/performance/default.stager_app.g.dart -d macos
 class PerformanceDefaultScene extends Scene {
   late PerformanceController controller;
 
@@ -33,6 +33,7 @@ class PerformanceDefaultScene extends Scene {
     setGlobal(OfflineModeController, OfflineModeController());
     setGlobal(IdeTheme, IdeTheme());
     setGlobal(NotificationService, NotificationService());
+    setGlobal(BannerMessagesController, BannerMessagesController());
     setGlobal(PreferencesController, PreferencesController());
     setGlobal(ServiceConnectionManager, ServiceConnectionManager());
     await _loadOfflineSnapshot(

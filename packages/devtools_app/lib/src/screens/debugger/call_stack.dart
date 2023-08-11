@@ -2,10 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:flutter/material.dart' hide Stack;
 import 'package:vm_service/vm_service.dart';
 
 import '../../shared/common_widgets.dart';
+import '../../shared/primitives/utils.dart';
 import '../../shared/theme.dart';
 import '../../shared/utils.dart';
 import 'debugger_controller.dart';
@@ -20,6 +23,8 @@ class CallStack extends StatefulWidget {
 
 class _CallStackState extends State<CallStack>
     with ProvidedControllerMixin<DebuggerController, CallStack> {
+  StackFrameAndSourcePosition? _clickedOnFrame;
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -28,17 +33,25 @@ class _CallStackState extends State<CallStack>
 
   @override
   Widget build(BuildContext context) {
-    return DualValueListenableBuilder<List<StackFrameAndSourcePosition>,
-        StackFrameAndSourcePosition?>(
-      firstListenable: controller.stackFramesWithLocation,
-      secondListenable: controller.selectedStackFrame,
-      builder: (context, stackFrames, selectedFrame, _) {
+    return MultiValueListenableBuilder(
+      listenables: [
+        controller.stackFramesWithLocation,
+        controller.selectedStackFrame,
+      ],
+      builder: (context, values, _) {
+        final stackFrames = values.first as List<StackFrameAndSourcePosition>;
+        final selectedFrame = values.second as StackFrameAndSourcePosition?;
         return ListView.builder(
           itemCount: stackFrames.length,
           itemExtent: defaultListItemHeight,
           itemBuilder: (_, index) {
             final frame = stackFrames[index];
-            return _buildStackFrame(frame, frame == selectedFrame);
+            return _buildStackFrame(
+              frame,
+              _clickedOnFrame != null
+                  ? frame == _clickedOnFrame
+                  : frame == selectedFrame,
+            );
           },
         );
       },
@@ -119,6 +132,14 @@ class _CallStackState extends State<CallStack>
   }
 
   Future<void> _onStackFrameSelected(StackFrameAndSourcePosition frame) async {
+    setState(() {
+      _clickedOnFrame = frame;
+      // After 1 second, remove the indicator that the frame was clicked to
+      // avoid stale state.
+      Timer(const Duration(seconds: 1), () {
+        _clickedOnFrame = null;
+      });
+    });
     await controller.selectStackFrame(frame);
   }
 }

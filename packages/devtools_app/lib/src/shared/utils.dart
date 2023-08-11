@@ -19,6 +19,7 @@ import '../../devtools.dart' as devtools;
 import 'common_widgets.dart';
 import 'connected_app.dart';
 import 'globals.dart';
+import 'theme.dart';
 
 final _log = Logger('lib/src/shared/utils');
 
@@ -99,12 +100,22 @@ List<ConnectionDescription> generateDeviceDescription(
     vmServiceConnection = ConnectionDescription(
       title: 'VM Service Connection',
       description: description,
-      actions: [CopyToClipboardControl(dataProvider: () => description)],
+      actions: [
+        CopyToClipboardControl(
+          dataProvider: () => description,
+          size: defaultIconSize,
+        ),
+      ],
     );
   }
 
   return [
     ConnectionDescription(title: 'CPU / OS', description: vm.deviceDisplay),
+    ConnectionDescription(
+      title: 'Connected app type',
+      description: connectedApp.display,
+    ),
+    if (vmServiceConnection != null) vmServiceConnection,
     ConnectionDescription(title: 'Dart Version', description: version),
     if (flutterVersion != null) ...{
       ConnectionDescription(
@@ -117,11 +128,6 @@ List<ConnectionDescription> generateDeviceDescription(
             '${flutterVersion.engineRevision}',
       ),
     },
-    ConnectionDescription(
-      title: 'Connected app type',
-      description: connectedApp.display,
-    ),
-    if (vmServiceConnection != null) vmServiceConnection,
   ];
 }
 

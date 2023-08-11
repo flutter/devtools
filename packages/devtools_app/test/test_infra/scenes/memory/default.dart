@@ -4,6 +4,7 @@
 
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/memory/panes/diff/controller/diff_pane_controller.dart';
+import 'package:devtools_app/src/screens/memory/panes/profile/profile_pane_controller.dart';
 import 'package:devtools_app/src/screens/memory/shared/heap/class_filter.dart';
 import 'package:devtools_app/src/screens/memory/shared/heap/model.dart';
 import 'package:devtools_app/src/shared/memory/adapted_heap_data.dart';
@@ -22,7 +23,7 @@ import '../../../test_infra/test_data/memory/heap/heap_data.dart';
 import '../../../test_infra/test_data/memory_allocation.dart';
 
 /// To run:
-/// flutter run -t test/test_infra/scenes/memory/default.stager_app.dart -d macos
+/// flutter run -t test/test_infra/scenes/memory/default.stager_app.g.dart -d macos
 class MemoryDefaultScene extends Scene {
   late MemoryController controller;
   late FakeServiceManager fakeServiceManager;
@@ -37,10 +38,14 @@ class MemoryDefaultScene extends Scene {
 
   @override
   Future<void> setUp({ClassList? classList}) async {
-    setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
+    setGlobal(
+      DevToolsEnvironmentParameters,
+      ExternalDevToolsEnvironmentParameters(),
+    );
     setGlobal(OfflineModeController, OfflineModeController());
     setGlobal(IdeTheme, IdeTheme());
     setGlobal(NotificationService, NotificationService());
+    setGlobal(BannerMessagesController, BannerMessagesController());
     setGlobal(
       PreferencesController,
       PreferencesController()..memory.showChart.value = false,
@@ -69,12 +74,20 @@ class MemoryDefaultScene extends Scene {
     when(fakeServiceManager.vm.operatingSystem).thenReturn('ios');
     setGlobal(ServiceConnectionManager, fakeServiceManager);
 
-    final diffController = DiffPaneController(_TestSnapshotTaker());
-    diffController.derived.applyFilter(
-      ClassFilter(filterType: ClassFilterType.showAll, except: '', only: ''),
+    final showAllFilter = ClassFilter(
+      filterType: ClassFilterType.showAll,
+      except: '',
+      only: '',
     );
+
+    final diffController = DiffPaneController(_TestSnapshotTaker())
+      ..derived.applyFilter(showAllFilter);
+
+    final profileController = ProfilePaneController()..setFilter(showAllFilter);
+
     controller = MemoryController(
       diffPaneController: diffController,
+      profilePaneController: profileController,
     )
       ..offline = true
       ..memoryTimeline.offlineData.clear()

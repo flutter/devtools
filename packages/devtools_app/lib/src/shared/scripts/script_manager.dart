@@ -15,13 +15,13 @@ import '../primitives/auto_dispose.dart';
 class ScriptManager extends DisposableController
     with AutoDisposeControllerMixin {
   ScriptManager() {
-    autoDisposeStreamSubscription(
-      serviceManager.onConnectionAvailable.listen((service) {
-        if (service == _lastService) return;
-        _lastService = service;
+    addAutoDisposeListener(serviceManager.connectedState, () {
+      if (serviceManager.connectedState.value.connected) {
+        if (serviceManager.service == _lastService) return;
+        _lastService = serviceManager.service;
         _scriptCache.clear();
-      }),
-    );
+      }
+    });
     addAutoDisposeListener(serviceManager.isolateManager.selectedIsolate, () {
       _scriptCache.clear();
     });

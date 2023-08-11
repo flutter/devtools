@@ -12,6 +12,7 @@ import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/common_widgets.dart';
 import '../../shared/globals.dart';
 import '../../shared/primitives/auto_dispose.dart';
+import '../../shared/primitives/utils.dart';
 import '../../shared/theme.dart';
 import '../../shared/ui/label.dart';
 import '../../shared/utils.dart';
@@ -86,6 +87,7 @@ class _DebuggingControlsState extends State<DebuggingControls>
             title: 'Pause',
             icon: Codicons.debugPause,
             autofocus: true,
+            roundedLeftBorder: true,
             // Disable when paused or selected isolate is a system isolate.
             onPressed: (isPaused || isSystemIsolate)
                 ? null
@@ -95,6 +97,7 @@ class _DebuggingControlsState extends State<DebuggingControls>
             child: DebuggerButton(
               title: 'Resume',
               icon: Codicons.debugContinue,
+              roundedRightBorder: true,
               // Enable while paused + not resuming and selected isolate is not
               // a system isolate.
               onPressed: ((isPaused && !resuming) && !isSystemIsolate)
@@ -114,6 +117,7 @@ class _DebuggingControlsState extends State<DebuggingControls>
           DebuggerButton(
             title: 'Step Over',
             icon: Codicons.debugStepOver,
+            roundedLeftBorder: true,
             onPressed: canStep ? () => unawaited(controller.stepOver()) : null,
           ),
           LeftBorder(
@@ -127,6 +131,7 @@ class _DebuggingControlsState extends State<DebuggingControls>
             child: DebuggerButton(
               title: 'Step Out',
               icon: Codicons.debugStepOut,
+              roundedRightBorder: true,
               onPressed: canStep ? () => unawaited(controller.stepOut()) : null,
             ),
           ),
@@ -163,10 +168,14 @@ class CodeStatisticsControls extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return DualValueListenableBuilder<bool, bool>(
-      firstListenable: controller.codeViewController.showCodeCoverage,
-      secondListenable: controller.codeViewController.showProfileInformation,
-      builder: (context, showCodeCoverage, showProfileInformation, _) {
+    return MultiValueListenableBuilder(
+      listenables: [
+        controller.codeViewController.showCodeCoverage,
+        controller.codeViewController.showProfileInformation,
+      ],
+      builder: (context, values, _) {
+        final showCodeCoverage = values.first as bool;
+        final showProfileInformation = values.second as bool;
         return Row(
           children: [
             // TODO(kenz): clean up this button group when records are
@@ -314,12 +323,16 @@ class DebuggerButton extends StatelessWidget {
     required this.icon,
     required this.onPressed,
     this.autofocus = false,
+    this.roundedLeftBorder = false,
+    this.roundedRightBorder = false,
   });
 
   final String title;
   final IconData icon;
   final VoidCallback? onPressed;
   final bool autofocus;
+  final bool roundedLeftBorder;
+  final bool roundedRightBorder;
 
   @override
   Widget build(BuildContext context) {
@@ -329,7 +342,12 @@ class DebuggerButton extends StatelessWidget {
         autofocus: autofocus,
         style: OutlinedButton.styleFrom(
           side: BorderSide.none,
-          shape: const ContinuousRectangleBorder(),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.horizontal(
+              left: roundedLeftBorder ? defaultRadius : Radius.zero,
+              right: roundedRightBorder ? defaultRadius : Radius.zero,
+            ),
+          ),
         ),
         onPressed: onPressed,
         child: MaterialIconLabel(

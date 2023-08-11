@@ -8,6 +8,8 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import '_utils.dart';
+
 Stream<String> transformToLines(Stream<List<int>> byteStream) {
   return byteStream
       .transform<String>(utf8.decoder)
@@ -15,6 +17,8 @@ Stream<String> transformToLines(Stream<List<int>> byteStream) {
 }
 
 mixin IOMixin {
+  static const killTimeout = Duration(seconds: 10);
+
   final stdoutController = StreamController<String>.broadcast();
 
   final stderrController = StreamController<String>.broadcast();
@@ -23,10 +27,14 @@ mixin IOMixin {
 
   void listenToProcessOutput(
     Process process, {
-    void Function(String) printCallback = _defaultPrintCallback,
     void Function(String)? onStdout,
     void Function(String)? onStderr,
+    void Function(String)? printCallback,
+    String printTag = '',
   }) {
+    printCallback =
+        printCallback ?? (line) => _defaultPrintCallback(line, tag: printTag);
+
     streamSubscriptions.addAll([
       transformToLines(process.stdout).listen((String line) {
         onStdout?.call(line);
@@ -45,10 +53,32 @@ mixin IOMixin {
 
   Future<void> cancelAllStreamSubscriptions() async {
     await Future.wait(streamSubscriptions.map((s) => s.cancel()));
+    await Future.wait([
+      stdoutController.close(),
+      stderrController.close(),
+    ]);
     streamSubscriptions.clear();
   }
 
-  static void _defaultPrintCallback(String line) {
-    print(line);
+  static void _defaultPrintCallback(String line, {String tag = ''}) {
+    print(tag.isNotEmpty ? '$tag - $line' : line);
+  }
+
+  Future<int> killGracefully(Process process) async {
+    final processId = process.pid;
+    debugLog('Sending SIGTERM to $processId..');
+    await cancelAllStreamSubscriptions();
+    Process.killPid(processId);
+    return process.exitCode
+        .timeout(killTimeout, onTimeout: () => killForcefully(process));
+  }
+
+  Future<int> killForcefully(Process process) {
+    final processId = process.pid;
+    // Use sigint here instead of sigkill. See
+    // https://github.com/flutter/flutter/issues/117415.
+    debugLog('Sending SIGINT to $processId..');
+    Process.killPid(processId, ProcessSignal.sigint);
+    return process.exitCode;
   }
 }

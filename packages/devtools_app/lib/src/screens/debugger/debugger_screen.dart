@@ -13,18 +13,18 @@ import 'package:vm_service/vm_service.dart';
 
 import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/analytics/constants.dart' as gac;
+import '../../shared/banner_messages.dart';
 import '../../shared/common_widgets.dart';
 import '../../shared/diagnostics/primitives/source_location.dart';
 import '../../shared/flex_split_column.dart';
 import '../../shared/globals.dart';
 import '../../shared/primitives/auto_dispose.dart';
 import '../../shared/primitives/listenable.dart';
-import '../../shared/primitives/simple_items.dart';
+import '../../shared/primitives/utils.dart';
 import '../../shared/routing.dart';
 import '../../shared/screen.dart';
 import '../../shared/split.dart';
 import '../../shared/theme.dart';
-import '../../shared/ui/icons.dart';
 import '../../shared/utils.dart';
 import 'breakpoints.dart';
 import 'call_stack.dart';
@@ -44,7 +44,7 @@ class DebuggerScreen extends Screen {
           id: id,
           requiresDebugBuild: true,
           title: ScreenMetaData.debugger.title,
-          icon: Octicons.bug,
+          icon: ScreenMetaData.debugger.icon,
           showFloatingDebuggerControls: false,
         );
 
@@ -117,7 +117,8 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
     ga.timeStart(DebuggerScreen.id, gac.pageReady);
     _shownFirstScript = false;
     SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
-      if (!_shownFirstScript) return;
+      if (!_shownFirstScript ||
+          controller.codeViewController.navigationInProgress) return;
       final routerDelegate = DevToolsRouterDelegate.of(context);
       routerDelegate.updateStateIfChanged(
         CodeViewSourceLocationNavigationState(
@@ -126,6 +127,8 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
         ),
       );
     });
+    // TODO(elliette): Remove once Chrome issue is resolved.
+    _maybeShowBreakpointsWarningBanner();
   }
 
   @override
@@ -177,10 +180,14 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
                     return child!;
                   }
                 },
-                child: DualValueListenableBuilder<ScriptRef?, ParsedScript?>(
-                  firstListenable: codeViewController.currentScriptRef,
-                  secondListenable: codeViewController.currentParsedScript,
-                  builder: (context, scriptRef, parsedScript, _) {
+                child: MultiValueListenableBuilder(
+                  listenables: [
+                    codeViewController.currentScriptRef,
+                    codeViewController.currentParsedScript,
+                  ],
+                  builder: (context, values, _) {
+                    final scriptRef = values.first as ScriptRef?;
+                    final parsedScript = values.second as ParsedScript?;
                     if (scriptRef != null &&
                         parsedScript != null &&
                         !_shownFirstScript) {
@@ -215,6 +222,26 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
         ),
       ],
     );
+  }
+
+  void _maybeShowBreakpointsWarningBanner() {
+    final isWebApp = serviceManager.connectedApp?.isDartWebAppNow ?? false;
+    final chrome115BreakpointBug =
+        devToolsExtensionPoints.chrome115BreakpointBug();
+    if (isWebApp && chrome115BreakpointBug != null) {
+      bannerMessages.addMessage(
+        BannerWarning(
+          key: const Key('Chrome115BreakpointsWarning'),
+          textSpans: [
+            TextSpan(
+              text:
+                  'Setting a breakpoint in Chrome version 115 will crash your app. See $chrome115BreakpointBug',
+            ),
+          ],
+          screenId: DebuggerScreen.id,
+        ),
+      );
+    }
   }
 
   void _onNodeSelected(VMServiceObjectNode? node) {

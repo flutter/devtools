@@ -63,6 +63,7 @@ class CodeViewController extends DisposableController
     final processedState =
         CodeViewSourceLocationNavigationState._fromState(state);
     final object = processedState.object;
+    _navigationInProgress = true;
     await showScriptLocation(processedState.location, focusLine: true);
     if (programExplorerController.initialized.value) {
       if (object != null) {
@@ -78,7 +79,13 @@ class CodeViewController extends DisposableController
         programExplorerController.clearOutlineSelection();
       }
     }
+    _navigationInProgress = false;
   }
+
+  /// Whether there is a [CodeViewSourceLocationNavigationState] currently being
+  /// processed and handled.
+  bool get navigationInProgress => _navigationInProgress;
+  bool _navigationInProgress = false;
 
   ValueListenable<ScriptLocation?> get scriptLocation => _scriptLocation;
   final _scriptLocation = ValueNotifier<ScriptLocation?>(null);
@@ -305,6 +312,9 @@ class CodeViewController extends DisposableController
   /// Parses the given script into executable lines and prepares the script
   /// for syntax highlighting.
   Future<ParsedScript?> _parseScript(ScriptRef scriptRef) async {
+    final isolateRef = serviceManager.isolateManager.selectedIsolate.value;
+    if (isolateRef == null) return null;
+
     final script = await getScriptForRef(scriptRef);
     if (script == null || script.source == null) return null;
 
@@ -315,7 +325,6 @@ class CodeViewController extends DisposableController
     // Gather the data to display breakable lines.
     var executableLines = <int>{};
 
-    final isolateRef = serviceManager.isolateManager.selectedIsolate.value!;
     try {
       final positions = await breakpointManager.getBreakablePositions(
         isolateRef,

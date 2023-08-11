@@ -45,7 +45,10 @@ void main() {
       ''',
     );
     setUp(() {
-      setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
+      setGlobal(
+        DevToolsEnvironmentParameters,
+        ExternalDevToolsEnvironmentParameters(),
+      );
       setGlobal(PreferencesController, PreferencesController());
       setGlobal(IdeTheme, IdeTheme());
       setGlobal(ServiceConnectionManager, FakeServiceManager());
@@ -58,7 +61,7 @@ void main() {
         'hasChildren': false,
         'children': [],
       };
-      final inspectorService = MockObjectGroupBase();
+      final inspectorService = MockInspectorObjectGroupBase();
       final diagnostic = RemoteDiagnosticsNode(
         nodeJson,
         inspectorService,

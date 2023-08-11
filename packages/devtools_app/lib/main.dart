@@ -5,8 +5,8 @@
 import 'package:flutter/foundation.dart';
 
 import 'initialization.dart';
-import 'src/extension_points/extensions_base.dart';
-import 'src/extension_points/extensions_external.dart';
+import 'src/shared/environment_parameters/environment_parameters_base.dart';
+import 'src/shared/environment_parameters/environment_parameters_external.dart';
 import 'src/shared/globals.dart';
 import 'src/shared/primitives/utils.dart';
 
@@ -21,13 +21,18 @@ void main() {
 }
 
 void externalRunDevTools({
+  bool integrationTestMode = false,
   bool shouldEnableExperiments = false,
   List<DevToolsJsonFile> sampleData = const [],
 }) {
   // Set the extension points global.
-  setGlobal(DevToolsExtensionPoints, ExternalDevToolsExtensionPoints());
+  setGlobal(
+    DevToolsEnvironmentParameters,
+    ExternalDevToolsEnvironmentParameters(),
+  );
 
   runDevTools(
+    integrationTestMode: integrationTestMode,
     shouldEnableExperiments: shouldEnableExperiments,
     sampleData: sampleData,
   );

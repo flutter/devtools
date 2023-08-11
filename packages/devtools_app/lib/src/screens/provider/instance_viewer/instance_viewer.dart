@@ -515,6 +515,7 @@ class _EditableFieldState extends State<_EditableField> {
           final setter = widget.setter;
           if (setter != null) await setter(value);
         } catch (err) {
+          if (!context.mounted) return;
           showErrorSnackBar(context, err);
         }
       },
@@ -539,9 +540,7 @@ class _EditableFieldState extends State<_EditableField> {
             right: -5,
             child: DecoratedBox(
               decoration: BoxDecoration(
-                borderRadius: const BorderRadius.all(
-                  Radius.circular(defaultBorderRadius),
-                ),
+                borderRadius: defaultBorderRadius,
                 border: Border.all(color: colorScheme.surface),
               ),
             ),
