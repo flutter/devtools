@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
@@ -60,7 +59,7 @@ class LayoutExplorerSerializationDelegate
                 if (parentData is FlexParentData) {
                   additionalJson['flexFactor'] = parentData.flex ?? 0;
                   additionalJson['flexFit'] =
-                      describeEnum(parentData.fit ?? FlexFit.tight);
+                      (parentData.fit ?? FlexFit.tight).name;
                 }
               }
             }
