@@ -39,7 +39,7 @@ void main() {
           expect(logStorage.toString(), contains(logRecord.message));
           logStorage.clear();
 
-          expect(logStorage.toString(), '\n');
+          expect(logStorage.toString(), equals(''));
         },
       );
 
