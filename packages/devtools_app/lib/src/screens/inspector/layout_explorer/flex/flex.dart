@@ -5,7 +5,6 @@
 import 'dart:async';
 import 'dart:math' as math;
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../shared/diagnostics/diagnostics_node.dart';
@@ -116,7 +115,7 @@ class FlexLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
     final color = axis == direction
         ? colorScheme.mainAxisTextColor
         : colorScheme.crossAxisTextColor;
-    List<Object> alignmentEnumEntries;
+    List<Enum> alignmentEnumEntries;
     Object? selected;
     final propertiesLocal = properties!;
     if (axis == direction) {
@@ -154,7 +153,7 @@ class FlexLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
                     Expanded(
                       flex: 2,
                       child: Text(
-                        describeEnum(alignment),
+                        alignment.name,
                         style: TextStyle(color: color),
                         textAlign: TextAlign.center,
                         overflow: TextOverflow.ellipsis,
@@ -191,7 +190,7 @@ class FlexLayoutExplorerWidgetState extends LayoutExplorerWidgetState<
                     children: [
                       Expanded(
                         child: Text(
-                          describeEnum(alignment),
+                          alignment.name,
                           style: TextStyle(color: color),
                           textAlign: TextAlign.center,
                           overflow: TextOverflow.ellipsis,
@@ -630,7 +629,7 @@ class FlexChildVisualizer extends StatelessWidget {
 
   Widget _buildFlexFitChangerDropdown() {
     Widget flexFitDescription(FlexFit flexFit) => Text(
-          'fit: ${describeEnum(flexFit)}',
+          'fit: ${flexFit.name}',
           style: const TextStyle(color: emphasizedTextColor),
         );
 
