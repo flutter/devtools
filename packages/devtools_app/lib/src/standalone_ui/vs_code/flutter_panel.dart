@@ -65,7 +65,7 @@ class _VsCodeConnectedPanelState extends State<_VsCodeConnectedPanel> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        const SizedBox(height: 20),
+        const SizedBox(height: defaultSpacing),
         if (widget.api.capabilities.executeCommand)
           ElevatedButton(
             onPressed: () =>

@@ -3,7 +3,6 @@
 // in the LICENSE file.
 
 import 'package:devtools_app/devtools_app.dart';
-import 'package:devtools_app/src/framework/scaffold.dart';
 import 'package:devtools_app/src/shared/feature_flags.dart';
 import 'package:devtools_app/src/standalone_ui/vs_code/flutter_panel.dart';
 import 'package:flutter/material.dart';

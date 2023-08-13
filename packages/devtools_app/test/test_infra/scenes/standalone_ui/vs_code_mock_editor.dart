@@ -73,15 +73,6 @@ class _VsCodeFlutterPanelMockEditorState
       axis: Axis.horizontal,
       initialFractions: const [0.25, 0.75],
       minSizes: const [200, 200],
-      splitters: [
-        PreferredSize(
-          preferredSize: const Size.fromWidth(1),
-          child: SizedBox(
-            width: 1,
-            child: ColoredBox(color: editorTheme.editorSidebarSplitterColor),
-          ),
-        ),
-      ],
       children: [
         Row(
           children: [
@@ -107,16 +98,6 @@ class _VsCodeFlutterPanelMockEditorState
           axis: Axis.vertical,
           initialFractions: const [0.5, 0.5],
           minSizes: const [200, 200],
-          splitters: [
-            PreferredSize(
-              preferredSize: const Size.fromHeight(1),
-              child: SizedBox(
-                height: 1,
-                child:
-                    ColoredBox(color: editorTheme.editorTerminalSplitterColor),
-              ),
-            ),
-          ],
           children: [
             Container(
               color: editorTheme.editorBackgroundColor,
@@ -180,8 +161,6 @@ class VsCodeTheme {
   const VsCodeTheme._({
     required this.activityBarBackgroundColor,
     required this.editorBackgroundColor,
-    required this.editorSidebarSplitterColor,
-    required this.editorTerminalSplitterColor,
     required this.foregroundColor,
     required this.sidebarBackgroundColor,
   });
@@ -190,8 +169,6 @@ class VsCodeTheme {
       : this._(
           activityBarBackgroundColor: const Color(0xFF333333),
           editorBackgroundColor: const Color(0xFF1E1E1E),
-          editorSidebarSplitterColor: const Color(0xFF252526),
-          editorTerminalSplitterColor: const Color(0xFF414141),
           foregroundColor: const Color(0xFFD4D4D4),
           sidebarBackgroundColor: const Color(0xFF252526),
         );
@@ -200,8 +177,6 @@ class VsCodeTheme {
       : this._(
           activityBarBackgroundColor: const Color(0xFF2C2C2C),
           editorBackgroundColor: const Color(0xFFFFFFFF),
-          editorSidebarSplitterColor: const Color(0xFFF3F3F3),
-          editorTerminalSplitterColor: const Color(0xFFC4C4C4),
           foregroundColor: const Color(0xFF000000),
           sidebarBackgroundColor: const Color(0xFFF3F3F3),
         );
@@ -214,8 +189,6 @@ class VsCodeTheme {
 
   final Color activityBarBackgroundColor;
   final Color editorBackgroundColor;
-  final Color editorSidebarSplitterColor;
-  final Color editorTerminalSplitterColor;
   final Color foregroundColor;
   final Color sidebarBackgroundColor;
 }
