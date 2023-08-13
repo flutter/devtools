@@ -45,7 +45,7 @@ class VsCodeFlutterPanel extends StatelessWidget {
 /// The panel shown once we know VS Code is available (the host has responded to
 /// the `vsCode.getCapabilities` request).
 class _VsCodeConnectedPanel extends StatefulWidget {
-  const _VsCodeConnectedPanel(this.api, {super.key});
+  const _VsCodeConnectedPanel(this.api);
 
   final VsCodeApi api;
 
