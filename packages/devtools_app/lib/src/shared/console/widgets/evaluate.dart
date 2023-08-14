@@ -436,10 +436,6 @@ class ExpressionEvalFieldState extends State<ExpressionEvalField>
     if (assignment == null) return false;
     const kSuccess = true;
 
-    if (!evalService.isScopeSupported(emitWarningToConsole: true)) {
-      return kSuccess;
-    }
-
     final variable =
         serviceManager.consoleService.itemAt(assignment.consoleItemIndex + 1);
     final value = variable?.value;
