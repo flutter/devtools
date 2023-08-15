@@ -34,6 +34,8 @@ dependencies:
 dependency_overrides:
   devtools_app:
     path: ../devtools_app
+  devtools_extensions:
+    path: ../devtools_extensions
   devtools_shared:
     path: ../devtools_shared
 
