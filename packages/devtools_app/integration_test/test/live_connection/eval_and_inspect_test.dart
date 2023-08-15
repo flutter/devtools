@@ -9,7 +9,6 @@
 // ignore_for_file: avoid_print
 
 import 'package:devtools_app/devtools_app.dart';
-import 'package:devtools_app/src/shared/console/widgets/console_pane.dart';
 import 'package:devtools_test/devtools_integration_test.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
