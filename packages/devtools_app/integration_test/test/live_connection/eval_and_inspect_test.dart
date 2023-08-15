@@ -73,7 +73,7 @@ Future<void> _testEvalOnWidgetTreeNode(_EvalAndBrowseTester tester) async {
   );
   await tester.testEval(
     'x.toString()',
-    find.textContaining('FloatingActionButton(tooltip: "Increment"'),
+    find.textContaining('FloatingActionButton(tooltip: "Incrementttt"'),
   );
 }
 
