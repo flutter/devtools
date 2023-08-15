@@ -18,6 +18,10 @@ pushd devtools_shared
 flutter pub upgrade
 popd
 
+pushd devtools_extensions
+flutter pub upgrade
+popd
+
 pushd devtools_test
 flutter pub upgrade
 popd

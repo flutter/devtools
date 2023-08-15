@@ -4,6 +4,7 @@
 
 import 'dart:io';
 
+import 'package:extension_discovery/extension_discovery.dart';
 import 'package:path/path.dart' as path;
 
 import 'extension_model.dart';
@@ -57,17 +58,31 @@ class ExtensionsManager {
     devtoolsExtensions.clear();
 
     if (rootPath != null) {
-      // TODO(kenz): use 'findExtensions' from package:extension_discovery once it
-      // is published.
-      // final extensions = findExtensions(
-      //   'devtools',
-      //   packageConfig: '$rootPath/.dart_tool/package_config.json',
-      // );
-      final extensions = <_Extension>[];
+      late final List<Extension> extensions;
+      try {
+        extensions = await findExtensions(
+          'devtools',
+          packageConfig: Uri.parse(
+            path.join(
+              rootPath,
+              '.dart_tool',
+              'package_config.json',
+            ),
+          ),
+        );
+      } catch (e) {
+        print('[ERROR] `findExtensions` failed: $e');
+        extensions = <Extension>[];
+      }
+
       for (final extension in extensions) {
         final config = extension.config;
-        if (config is! Map) {
+        if (config is Map) {
           // Fail gracefully. Invalid content in the extension's config.json.
+          print(
+            '[WARNING] invalid config.json content for ${extension.package}:\n'
+            '$config',
+          );
           continue;
         }
         final configAsMap = config as Map<String, Object?>;
@@ -160,22 +175,4 @@ Future<void> copyPath(String from, String to) async {
       await Link(copyTo).create(await file.target(), recursive: true);
     }
   }
-}
-
-/// TODO(kenz): remove this class. This is copied from
-/// package:extension_discovery, which is drafed here:
-/// https://github.com/dart-lang/tools/pull/129. Remove this temporary copy once
-/// package:extension_discovery is published.
-class _Extension {
-  _Extension._({
-    required this.package,
-    required this.rootUri,
-    required this.packageUri,
-    required this.config,
-  });
-
-  final String package;
-  final Uri rootUri;
-  final Uri packageUri;
-  final Object? config;
 }

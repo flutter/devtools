@@ -128,6 +128,16 @@ class _ExtensionIFrameController extends DisposableController
               _extensionHandlerReady.complete();
             }
             break;
+          case DevToolsExtensionEventType.vmServiceConnection:
+            final service = serviceManager.service;
+            if (service == null) break;
+            _postMessage(
+              DevToolsExtensionEvent(
+                DevToolsExtensionEventType.vmServiceConnection,
+                data: {'uri': service.connectedUri.toString()},
+              ),
+            );
+            break;
           default:
             notificationService.push(
               'Unknown event received from extension: ${e.data}',

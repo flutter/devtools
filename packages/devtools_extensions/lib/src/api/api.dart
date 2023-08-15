@@ -13,6 +13,10 @@ enum DevToolsExtensionEventType {
   /// receiving a [ping] event.
   pong,
 
+  /// An event that DevTools will send to an extension to notify of the
+  /// connected vm service uri.
+  vmServiceConnection,
+
   /// Any unrecognized event that is not one of the above supported event types.
   unknown;
 
