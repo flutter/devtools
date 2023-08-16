@@ -1762,6 +1762,18 @@ void main() {
       });
     });
   });
+
+  group('joinWithTrailing', () {
+    test('joins no items', () {
+      expect([].joinWithTrailing(':'), equals(''));
+    });
+    test(' joins 1 item', () {
+      expect(['A'].joinWithTrailing(':'), equals('A:'));
+    });
+    test(' joins multiple items', () {
+      expect(['A', 'B', 'C'].joinWithTrailing(':'), equals('A:B:C:'));
+    });
+  });
 }
 
 class _SubtractionResult {

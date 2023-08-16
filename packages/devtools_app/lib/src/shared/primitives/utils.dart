@@ -1182,6 +1182,17 @@ extension StringExtension on String {
   }
 }
 
+extension IterableExtension<T> on Iterable<T> {
+  /// Joins the iterable with [separator], and also adds a trailing [separator].
+  String joinWithTrailing([String separator = '']) {
+    var result = join(separator);
+    if (length > 0) {
+      result += separator;
+    }
+    return result;
+  }
+}
+
 extension ListExtension<T> on List<T> {
   List<T> joinWith(T separator) {
     return [
