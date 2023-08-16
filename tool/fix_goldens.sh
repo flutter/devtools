@@ -31,7 +31,7 @@ DOWNLOAD_DIR=$(mktemp -d)
 
 gh run download $RUN_ID -p "*golden_image_failures*" -D "$DOWNLOAD_DIR"
 NEW_GOLDENS=$(find $DOWNLOAD_DIR -type f | grep "testImage.png" )
-pushd packages/devtools_app/test/test_infra/goldens
+pushd packages/devtools_app/test/
 ERROR_COUNTER=0
 while IFS= read -r GOLDEN ; do
   FILE_NAME=$(basename $GOLDEN | sed "s|_testImage.png$|.png|")
@@ -46,7 +46,7 @@ while IFS= read -r GOLDEN ; do
   fi
 done <<< "$NEW_GOLDENS"
 
-echo "Done updating $(wc -l < $NEW_GOLDENS) lines"
+echo "Done updating $(echo -n "$NEW_GOLDENS" | grep -c '^') lines"
 if [[ $ERROR_COUNTER -gt 0 ]] ; then
   echo "ERROR: $ERROR_COUNTER failed golden updates"
 fi
