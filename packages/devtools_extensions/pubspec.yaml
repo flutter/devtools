@@ -9,7 +9,6 @@ environment:
 
 dependencies:
   devtools_shared: ^3.0.0
-    path: ../devtools_shared
   devtools_app_shared:
     path: ../devtools_app_shared
   flutter:
