@@ -18,3 +18,7 @@ dev_dependencies:
     sdk: flutter
 
 flutter:
+
+dependency_overrides:
+  devtools_shared:
+    path: ../devtools_shared
