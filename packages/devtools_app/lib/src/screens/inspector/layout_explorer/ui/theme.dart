@@ -5,7 +5,6 @@
 import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
-
 const margin = 8.0;
 
 double get arrowHeadSize => scaleByFontFactor(8.0);
