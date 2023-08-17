@@ -138,20 +138,6 @@ class ServiceConnectionManager extends ServiceManager<VmServiceWrapper> {
     return vm?.isolatesForDevToolsMode() ?? <IsolateRef>[];
   }
 
-  /// This can throw an [RPCError].
-  Future<void> performHotReload() async {
-    await callServiceOnMainIsolate(
-      registrations.hotReload.service,
-    );
-  }
-
-  /// This can throw an [RPCError].
-  Future<void> performHotRestart() async {
-    await callServiceOnMainIsolate(
-      registrations.hotRestart.service,
-    );
-  }
-
   Future<Response> get adbMemoryInfo async {
     return await callServiceOnMainIsolate(
       registrations.flutterMemoryInfo.service,
