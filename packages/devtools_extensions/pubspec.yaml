@@ -9,8 +9,7 @@ environment:
 
 dependencies:
   devtools_shared: ^3.0.0
-  devtools_app_shared:
-    path: ../devtools_app_shared
+  devtools_app_shared: ^0.0.1-dev.0
   flutter:
     sdk: flutter
   logging: ^1.1.1
@@ -21,5 +20,7 @@ dev_dependencies:
     sdk: flutter
 
 dependency_overrides:
+  devtools_app_shared:
+    path: ../devtools_app_shared
   devtools_shared:
     path: ../devtools_shared
