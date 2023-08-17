@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../common_widgets.dart';
-import '../dialogs.dart';
-import '../primitives/auto_dispose.dart';
 import '../primitives/utils.dart';
-import '../theme.dart';
 
 // TODO(kenz): consider breaking this up for flat data filtering and tree data
 // filtering.

@@ -6,6 +6,8 @@ import 'dart:async';
 
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/performance/panes/timeline_events/legacy/legacy_event_processor.dart';
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';

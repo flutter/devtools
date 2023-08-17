@@ -2,11 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/material.dart';
 
 import '../shared/analytics/constants.dart' as gac;
-import '../shared/theme.dart';
 
 class RegisteredServiceDescription extends RegisteredService {
   const RegisteredServiceDescription._({
@@ -48,15 +48,6 @@ final hotRestart = RegisteredServiceDescription._(
   ),
   gaScreenName: gac.devToolsMain,
   gaItem: gac.hotRestart,
-);
-
-/// Flutter version service registered by Flutter Tools.
-///
-/// We call this service to get version information about the Flutter framework,
-/// the Flutter engine, and the Dart sdk.
-const flutterVersion = RegisteredService(
-  service: 'flutterVersion',
-  title: 'Flutter Version',
 );
 
 RegisteredService get flutterMemoryInfo => flutterMemory;

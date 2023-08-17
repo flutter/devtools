@@ -8,7 +8,10 @@ environment:
   flutter: '>=3.0.0'
 
 dependencies:
-  devtools_shared: 3.0.0
+  devtools_shared: ^3.0.0
+    path: ../devtools_shared
+  devtools_app_shared:
+    path: ../devtools_app_shared
   flutter:
     sdk: flutter
   logging: ^1.1.1

@@ -17,20 +17,19 @@ library inspector_controller;
 
 import 'dart:async';
 
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../service/service_extensions.dart' as extensions;
-import '../../shared/config_specific/url/url.dart';
 import '../../shared/console/eval/inspector_tree.dart';
 import '../../shared/console/primitives/simple_items.dart';
 import '../../shared/diagnostics/diagnostics_node.dart';
 import '../../shared/diagnostics/inspector_service.dart';
 import '../../shared/diagnostics/primitives/instance_ref.dart';
 import '../../shared/globals.dart';
-import '../../shared/primitives/auto_dispose.dart';
 import '../../shared/primitives/utils.dart';
 import 'inspector_screen.dart';
 import 'inspector_tree_controller.dart';

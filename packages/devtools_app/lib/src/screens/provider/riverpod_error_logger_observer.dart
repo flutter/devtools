@@ -2,10 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app_shared/service.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:logging/logging.dart';
-
-import '../../shared/eval_on_dart_library.dart';
 
 final _log = Logger('riverpod_error_logger_observer');
 

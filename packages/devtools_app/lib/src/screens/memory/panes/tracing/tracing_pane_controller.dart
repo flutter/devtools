@@ -2,13 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../../../shared/globals.dart';
 import '../../../../shared/memory/class_name.dart';
-import '../../../../shared/primitives/auto_dispose.dart';
 import '../../../../shared/primitives/utils.dart';
 import '../../../../shared/table/table_data.dart';
 import '../../../profiler/cpu_profile_model.dart';

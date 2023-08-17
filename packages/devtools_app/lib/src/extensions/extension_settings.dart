@@ -4,16 +4,14 @@
 
 import 'dart:async';
 
+import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_shared/devtools_extensions.dart';
 import 'package:flutter/material.dart';
 
 import '../shared/analytics/analytics.dart' as ga;
 import '../shared/analytics/constants.dart' as gac;
 import '../shared/common_widgets.dart';
-import '../shared/dialogs.dart';
 import '../shared/globals.dart';
-import '../shared/theme.dart';
-import '../shared/utils.dart';
 
 /// A [ScaffoldAction] that, when clicked, will open a dialog menu for
 /// managing DevTools extension states.

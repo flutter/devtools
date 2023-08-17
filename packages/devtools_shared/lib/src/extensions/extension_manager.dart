@@ -74,7 +74,6 @@ class ExtensionsManager {
         print('[ERROR] `findExtensions` failed: $e');
         extensions = <Extension>[];
       }
-
       for (final extension in extensions) {
         final config = extension.config;
         // ignore: avoid-unnecessary-type-assertions; false positive, config is type Object.

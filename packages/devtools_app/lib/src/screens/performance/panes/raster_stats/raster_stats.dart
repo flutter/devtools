@@ -5,18 +5,15 @@
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../shared/analytics/constants.dart' as gac;
 import '../../../../shared/common_widgets.dart';
-import '../../../../shared/dialogs.dart';
 import '../../../../shared/globals.dart';
 import '../../../../shared/primitives/utils.dart';
-import '../../../../shared/split.dart';
 import '../../../../shared/table/table.dart';
 import '../../../../shared/table/table_data.dart';
-import '../../../../shared/theme.dart';
-import '../../../../shared/utils.dart';
 import 'raster_stats_controller.dart';
 import 'raster_stats_model.dart';
 
@@ -58,7 +55,7 @@ class _RasterStatsControls extends StatelessWidget {
         padding: const EdgeInsets.all(denseSpacing),
         child: Row(
           children: [
-            DevToolsButton(
+            GaDevToolsButton(
               tooltip: 'Take a snapshot of the rendering layers on the current'
                   ' screen',
               icon: Icons.camera_outlined,
@@ -346,7 +343,7 @@ class _FullScreenButton extends StatelessWidget {
         right: denseSpacing,
       ),
       alignment: Alignment.bottomRight,
-      child: DevToolsButton.iconOnly(
+      child: GaDevToolsButton.iconOnly(
         icon: Icons.fullscreen,
         outlined: false,
         gaScreen: gac.performance,

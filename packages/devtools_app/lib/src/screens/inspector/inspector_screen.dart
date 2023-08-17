@@ -5,6 +5,8 @@
 import 'dart:async';
 import 'dart:collection';
 
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart' hide Stack;
 
@@ -14,15 +16,11 @@ import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/common_widgets.dart';
 import '../../shared/console/eval/inspector_tree.dart';
-import '../../shared/dialogs.dart';
 import '../../shared/editable_list.dart';
 import '../../shared/error_badge_manager.dart';
 import '../../shared/globals.dart';
-import '../../shared/primitives/auto_dispose.dart';
 import '../../shared/primitives/blocking_action_mixin.dart';
 import '../../shared/screen.dart';
-import '../../shared/split.dart';
-import '../../shared/theme.dart';
 import '../../shared/ui/search.dart';
 import '../../shared/utils.dart';
 import 'inspector_controller.dart';
@@ -449,7 +447,7 @@ class InspectorSummaryTreeControls extends StatelessWidget {
 
   Container _controlsContainer(BuildContext context, Widget child) {
     return Container(
-      height: defaultHeaderHeight,
+      height: defaultHeaderHeight(isDense: isDense()),
       decoration: BoxDecoration(
         border: Border(
           bottom: defaultBorderSide(Theme.of(context)),

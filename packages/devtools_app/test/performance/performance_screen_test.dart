@@ -12,6 +12,9 @@ import 'package:devtools_app/src/screens/performance/panes/timeline_events/legac
 import 'package:devtools_app/src/screens/performance/panes/timeline_events/legacy/timeline_flame_chart.dart';
 import 'package:devtools_app/src/screens/performance/tabbed_performance_view.dart';
 import 'package:devtools_app/src/shared/feature_flags.dart';
+import 'package:devtools_app_shared/service.dart';
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_shared/devtools_test_utils.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';

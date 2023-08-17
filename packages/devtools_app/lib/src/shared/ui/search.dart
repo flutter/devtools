@@ -6,16 +6,16 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:async/async.dart';
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:logging/logging.dart';
 
 import '../common_widgets.dart';
-import '../primitives/auto_dispose.dart';
 import '../primitives/trees.dart';
 import '../primitives/utils.dart';
-import '../theme.dart';
 import '../ui/utils.dart';
 import '../utils.dart';
 

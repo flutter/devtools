@@ -22,6 +22,9 @@ class ExtensionManager {
   // ignore: unused_element, false positive due to part files
   void _init({required bool connectToVmService}) {
     html.window.addEventListener('message', _handleMessage);
+    // TODO(kenz) instead of connecting to the VM service through an event, load
+    // the vm service URI through a query parameter like we already do in
+    // DevTools app.
     if (connectToVmService) {
       // Request the vm service uri for the connected app. DevTools will
       // respond with a [DevToolsPluginEventType.connectedVmService] event with

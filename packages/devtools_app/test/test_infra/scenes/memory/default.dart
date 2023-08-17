@@ -10,6 +10,8 @@ import 'package:devtools_app/src/screens/memory/shared/heap/model.dart';
 import 'package:devtools_app/src/shared/memory/adapted_heap_data.dart';
 import 'package:devtools_app/src/shared/memory/adapted_heap_object.dart';
 import 'package:devtools_app/src/shared/memory/class_name.dart';
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';

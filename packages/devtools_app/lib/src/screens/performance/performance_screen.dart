@@ -4,6 +4,8 @@
 
 import 'dart:async';
 
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
@@ -13,9 +15,7 @@ import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/banner_messages.dart';
 import '../../shared/common_widgets.dart';
 import '../../shared/globals.dart';
-import '../../shared/primitives/auto_dispose.dart';
 import '../../shared/screen.dart';
-import '../../shared/theme.dart';
 import '../../shared/utils.dart';
 import 'panes/controls/performance_controls.dart';
 import 'panes/flutter_frames/flutter_frames_chart.dart';

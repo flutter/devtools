@@ -9,6 +9,7 @@ import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/memory/framework/connected/memory_tabs.dart';
 import 'package:devtools_app/src/screens/memory/panes/tracing/tracing_pane_controller.dart';
 import 'package:devtools_app/src/screens/memory/panes/tracing/tracing_tree.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';

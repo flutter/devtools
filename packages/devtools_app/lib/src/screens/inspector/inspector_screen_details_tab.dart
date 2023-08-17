@@ -4,13 +4,13 @@
 
 import 'dart:async';
 
+import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
 import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/common_widgets.dart';
 import '../../shared/primitives/blocking_action_mixin.dart';
-import '../../shared/theme.dart';
 import '../../shared/ui/tab.dart';
 import 'inspector_controller.dart';
 import 'inspector_screen.dart';
@@ -88,7 +88,7 @@ class _InspectorExpandCollapseButtonsState
         mainAxisSize: MainAxisSize.min,
         children: [
           SizedBox(
-            child: DevToolsButton(
+            child: GaDevToolsButton(
               icon: Icons.unfold_more,
               onPressed: enableButtons ? _onExpandClick : null,
               label: 'Expand all',
@@ -101,7 +101,7 @@ class _InspectorExpandCollapseButtonsState
           ),
           const SizedBox(width: denseSpacing),
           SizedBox(
-            child: DevToolsButton(
+            child: GaDevToolsButton(
               icon: Icons.unfold_less,
               onPressed: enableButtons ? _onCollapseClick : null,
               label: 'Collapse to selected',

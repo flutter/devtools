@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -10,10 +11,8 @@ import 'package:vm_service/vm_service.dart';
 import '../../../shared/analytics/constants.dart' as gac;
 import '../../../shared/common_widgets.dart';
 import '../../../shared/primitives/utils.dart';
-import '../../../shared/split.dart';
 import '../../../shared/table/table.dart';
 import '../../../shared/table/table_data.dart';
-import '../../../shared/theme.dart';
 import '../../profiler/profiler_status.dart';
 import '../vm_developer_common_widgets.dart';
 import '../vm_developer_tools_screen.dart';

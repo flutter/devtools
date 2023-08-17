@@ -3,8 +3,9 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app/devtools_app.dart';
-import 'package:devtools_app/src/service/service_registrations.dart'
-    as registrations;
+import 'package:devtools_app_shared/service.dart';
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -20,8 +21,7 @@ void main() {
       bool flutterVersionServiceAvailable = true,
     }) {
       final availableServices = [
-        if (flutterVersionServiceAvailable)
-          registrations.flutterVersion.service,
+        if (flutterVersionServiceAvailable) flutterVersionService.service,
       ];
       fakeServiceManager = FakeServiceManager(
         availableServices: availableServices,

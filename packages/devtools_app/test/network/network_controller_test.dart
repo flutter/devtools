@@ -7,8 +7,8 @@
 import 'package:devtools_app/src/screens/network/network_controller.dart';
 import 'package:devtools_app/src/screens/network/network_model.dart';
 import 'package:devtools_app/src/service/service_manager.dart';
-import 'package:devtools_app/src/shared/globals.dart';
 import 'package:devtools_app/src/shared/http/http_request_data.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vm_service/vm_service.dart';

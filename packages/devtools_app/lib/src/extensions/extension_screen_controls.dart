@@ -4,15 +4,14 @@
 
 import 'dart:async';
 
+import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_shared/devtools_extensions.dart';
 import 'package:flutter/material.dart';
 
 import '../shared/analytics/constants.dart' as gac;
 import '../shared/common_widgets.dart';
-import '../shared/dialogs.dart';
 import '../shared/globals.dart';
 import '../shared/routing.dart';
-import '../shared/theme.dart';
 
 class EmbeddedExtensionHeader extends StatelessWidget {
   const EmbeddedExtensionHeader({super.key, required this.extension});
@@ -77,7 +76,7 @@ class DisableExtensionButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return DevToolsButton.iconOnly(
+    return GaDevToolsButton.iconOnly(
       icon: Icons.extension_off_outlined,
       outlined: false,
       tooltip: 'Disable extension',
@@ -200,11 +199,11 @@ class EnableExtensionPrompt extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              DevToolsButton(
+              GaDevToolsButton(
                 label: 'Enable',
                 gaScreen: gac.extensionScreenId,
                 gaSelection: gac.extensionEnable(extensionName),
-                elevatedButton: true,
+                elevated: true,
                 onPressed: () {
                   unawaited(
                     extensionService.setExtensionEnabledState(
@@ -215,7 +214,7 @@ class EnableExtensionPrompt extends StatelessWidget {
                 },
               ),
               const SizedBox(width: defaultSpacing),
-              DevToolsButton(
+              GaDevToolsButton(
                 label: 'No, hide this screen',
                 gaScreen: gac.extensionScreenId,
                 gaSelection: gac.extensionDisable(extensionName),

@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart' hide Stack;
@@ -10,10 +12,8 @@ import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/banner_messages.dart';
 import '../../shared/common_widgets.dart';
 import '../../shared/globals.dart';
-import '../../shared/primitives/auto_dispose.dart';
 import '../../shared/primitives/listenable.dart';
 import '../../shared/screen.dart';
-import '../../shared/theme.dart';
 import '../../shared/utils.dart';
 import 'cpu_profile_model.dart';
 import 'cpu_profiler.dart';

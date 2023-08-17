@@ -5,6 +5,8 @@
 // ignore: avoid_web_libraries_in_flutter, as designed
 import 'dart:html' hide Storage;
 
+import 'package:devtools_app_shared/utils.dart';
+
 import '../../../service/service_manager.dart';
 import '../../globals.dart';
 import '../../primitives/storage.dart';

@@ -1,5 +1,5 @@
 name: devtools_shared
-description: Package of shared structures between devtools_app, dds, and other tools.
+description: Package of shared Dart structures between devtools_app, dds, and other tools.
 
 version: 3.0.0
 

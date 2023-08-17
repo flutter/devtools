@@ -2,13 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../../../shared/analytics/analytics.dart' as ga;
 import '../../../../../../shared/analytics/constants.dart' as gac;
 import '../../../../../../shared/common_widgets.dart';
 import '../../../../../../shared/primitives/utils.dart';
-import '../../../../../../shared/theme.dart';
 import '../../../../shared/heap/model.dart';
 import '../../controller/class_data.dart';
 
@@ -83,7 +83,7 @@ class _PathControlPane extends StatelessWidget {
         const SizedBox(width: denseSpacing),
         ValueListenableBuilder<bool>(
           valueListenable: controller.hideStandard,
-          builder: (_, hideStandard, __) => FilterButton(
+          builder: (_, hideStandard, __) => DevToolsFilterButton(
             onPressed: () {
               ga.select(
                 gac.memory,
@@ -98,7 +98,7 @@ class _PathControlPane extends StatelessWidget {
         const SizedBox(width: denseSpacing),
         ValueListenableBuilder<bool>(
           valueListenable: controller.invert,
-          builder: (_, invert, __) => ToggleButton(
+          builder: (_, invert, __) => DevToolsToggleButton(
             onPressed: () {
               ga.select(
                 gac.memory,

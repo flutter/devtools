@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -13,8 +14,6 @@ import '../../../shared/diagnostics/dart_object_node.dart';
 import '../../../shared/diagnostics/tree_builder.dart';
 import '../../../shared/globals.dart';
 import '../../../shared/primitives/utils.dart';
-import '../../../shared/split.dart';
-import '../../../shared/theme.dart';
 import '../vm_developer_common_widgets.dart';
 import 'object_inspector_view_controller.dart';
 import 'vm_object_model.dart';

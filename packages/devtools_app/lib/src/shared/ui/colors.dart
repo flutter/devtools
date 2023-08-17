@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
-import '../theme.dart';
 import 'utils.dart';
 
 /// This file holds color constants that are used throughout DevTools.
@@ -39,11 +39,6 @@ extension FlameChartColorScheme on ColorScheme {
   Color get treeGuidelineColor =>
       isLight ? Colors.black54 : const Color.fromARGB(255, 200, 200, 200);
 }
-
-const searchMatchColor = Colors.yellow;
-final searchMatchColorOpaque = Colors.yellow.withOpacity(0.5);
-const activeSearchMatchColor = Colors.orangeAccent;
-final activeSearchMatchColorOpaque = Colors.orangeAccent.withOpacity(0.5);
 
 // Teal 200, 400 - see https://material.io/design/color/#tools-for-picking-colors.
 const asyncColorPalette = [

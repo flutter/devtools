@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_shared/service.dart';
 import 'package:logging/logging.dart';
 

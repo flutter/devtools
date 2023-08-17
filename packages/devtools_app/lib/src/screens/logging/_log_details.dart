@@ -4,11 +4,11 @@
 
 import 'dart:async';
 
+import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
 import '../../shared/common_widgets.dart';
 import '../../shared/console/console.dart';
-import '../../shared/theme.dart';
 import 'logging_controller.dart';
 
 class LogDetails extends StatefulWidget {

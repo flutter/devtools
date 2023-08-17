@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
@@ -11,7 +12,6 @@ import '../../../../shared/diagnostics/diagnostics_node.dart';
 import '../../../../shared/diagnostics/inspector_service.dart';
 import '../../../../shared/globals.dart';
 import '../../../../shared/primitives/utils.dart';
-import '../../../../shared/theme.dart';
 import '../../inspector_controller.dart';
 import '../../inspector_data_models.dart';
 import 'utils.dart';

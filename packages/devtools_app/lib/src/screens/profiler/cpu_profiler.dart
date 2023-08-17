@@ -4,20 +4,18 @@
 
 import 'dart:async';
 
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
 
 import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/charts/flame_chart.dart';
 import '../../shared/common_widgets.dart';
-import '../../shared/dialogs.dart';
 import '../../shared/globals.dart';
-import '../../shared/primitives/auto_dispose.dart';
 import '../../shared/primitives/utils.dart';
-import '../../shared/theme.dart';
 import '../../shared/ui/colors.dart';
 import '../../shared/ui/search.dart';
 import '../../shared/ui/tab.dart';
-import '../../shared/utils.dart';
 import 'common.dart';
 import 'cpu_profile_model.dart';
 import 'cpu_profiler_controller.dart';
@@ -163,7 +161,7 @@ class _CpuProfilerState extends State<CpuProfiler>
             tabs: widget.tabs,
           ),
           actions: [
-            FilterButton(
+            DevToolsFilterButton(
               onPressed: _showFilterDialog,
               isFilterActive: widget.controller.isFilterActive,
             ),
