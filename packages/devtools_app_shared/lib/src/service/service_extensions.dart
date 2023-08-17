@@ -285,3 +285,6 @@ bool isFlutterExtension(String extensionName) {
 bool isDartIoExtension(String extensionName) {
   return extensionName.startsWith(dartIOExtensionPrefix);
 }
+
+const hotReloadServiceName = 'reloadSources';
+const hotRestartServiceName = 'hotRestart';

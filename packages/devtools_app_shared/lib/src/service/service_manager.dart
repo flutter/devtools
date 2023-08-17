@@ -10,6 +10,7 @@ import 'package:logging/logging.dart';
 import 'package:vm_service/vm_service.dart' hide Error;
 
 import '../../service.dart';
+import '../../service_extensions.dart';
 import '../../utils.dart';
 
 final _log = Logger('service_manager');
@@ -362,6 +363,16 @@ class ServiceManager<T extends VmService> {
     return await callServiceOnMainIsolate(
       flutterVersionService.service,
     );
+  }
+
+  /// This can throw an [RPCError].
+  Future<void> performHotReload() async {
+    await callServiceOnMainIsolate(hotReloadServiceName);
+  }
+
+  /// This can throw an [RPCError].
+  Future<void> performHotRestart() async {
+    await callServiceOnMainIsolate(hotRestartServiceName);
   }
 }
 
