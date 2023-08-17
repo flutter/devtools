@@ -56,6 +56,11 @@ class HistoryManager<T> {
   /// Returns null if there is no next value.
   T? peekNext() => hasNext ? _history[_historyIndex + 1] : null;
 
+  /// Return the previous value.
+  ///
+  /// Returns null if there is no previous value.
+  T? peekPrevious() => hasPrevious ? _history[_historyIndex - 1] : null;
+
   /// Remove the most recent historical item on the stack.
   ///
   /// If [current] is the last item on the stack when this method is called,

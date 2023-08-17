@@ -3,13 +3,17 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../../shared/globals.dart';
 import '../../../shared/primitives/auto_dispose.dart';
+import '../../../shared/primitives/utils.dart';
+import '../../../shared/routing.dart';
 import '../../debugger/codeview_controller.dart';
 import '../../debugger/program_explorer_controller.dart';
 import '../vm_service_private_extensions.dart';
@@ -21,16 +25,11 @@ import 'vm_object_model.dart';
 /// Stores the state information for the object inspector view related to
 /// the object history and the object viewport.
 class ObjectInspectorViewController extends DisposableController
-    with AutoDisposeControllerMixin {
+    with AutoDisposeControllerMixin, RouteStateHandlerMixin {
   ObjectInspectorViewController({
     ClassHierarchyExplorerController? classHierarchyController,
   }) : classHierarchyController =
             classHierarchyController ?? ClassHierarchyExplorerController() {
-    addAutoDisposeListener(
-      scriptManager.sortedScripts,
-      _initializeForCurrentIsolate,
-    );
-
     addAutoDisposeListener(
       objectHistory.current,
       _onCurrentObjectChanged,
@@ -51,14 +50,49 @@ class ObjectInspectorViewController extends DisposableController
   ValueListenable<bool> get refreshing => _refreshing;
   final _refreshing = ValueNotifier<bool>(false);
 
+  Reporter get routingEventReporter => _routingEventReporter;
+  final _routingEventReporter = Reporter();
+  void Function()? _routingEventCallback;
+
   bool _initialized = false;
 
   Future<void> init() async {
     if (!_initialized) {
       await programExplorerController.initialize();
       programExplorerController.initListeners();
-      _initializeForCurrentIsolate();
+      initializeForCurrentIsolate();
       _initialized = true;
+    }
+  }
+
+  @override
+  void onRouteStateUpdate(DevToolsNavigationState state) {
+    switch (state.kind) {
+      case ObjectInspectorNavigationState.type:
+        _handleNavigationEvent(state);
+        break;
+    }
+  }
+
+  void _handleNavigationEvent(DevToolsNavigationState state) async {
+    final processedState = ObjectInspectorNavigationState._fromState(state);
+    final objRef = processedState.object;
+    final scriptRef = processedState.script;
+    final next = objectHistory.peekNext();
+    if (next != null && next.obj.id == objRef.id) {
+      objectHistory.moveForward();
+      return;
+    }
+
+    final previous = objectHistory.peekPrevious();
+    if (previous != null && previous.obj.id == objRef.id) {
+      objectHistory.moveBack();
+      return;
+    }
+
+    final object = await createVmObject(objRef, scriptRef: scriptRef);
+    if (object != null) {
+      objectHistory.pushEntry(object);
     }
   }
 
@@ -118,14 +152,29 @@ class ObjectInspectorViewController extends DisposableController
     _refreshing.value = false;
   }
 
-  Future<void> pushObject(ObjRef objRef, {ScriptRef? scriptRef}) async {
+  Future<void> pushObject(
+    ObjRef objRef, {
+    ScriptRef? scriptRef,
+  }) async {
     _refreshing.value = true;
+    _routingEventCallback = () async {
+      final object = await createVmObject(objRef, scriptRef: scriptRef);
+      if (object != null) {
+        objectHistory.pushEntry(object);
+        routerDelegate?.updateStateIfChanged(
+          ObjectInspectorNavigationState(
+            object: objRef,
+            script: scriptRef,
+          ),
+        );
+      }
+    };
+    _routingEventReporter.notify();
+  }
 
-    final object = await createVmObject(objRef, scriptRef: scriptRef);
-    if (object != null) {
-      objectHistory.pushEntry(object);
-    }
-
+  void handleRoutingEvent(BuildContext context) {
+    Router.navigate(context, _routingEventCallback!);
+    _routingEventCallback = null;
     _refreshing.value = false;
   }
 
@@ -196,7 +245,7 @@ class ObjectInspectorViewController extends DisposableController
 
   /// Re-initializes the object inspector's state when building it for the
   /// first time or when the selected isolate is updated.
-  void _initializeForCurrentIsolate() async {
+  void initializeForCurrentIsolate() async {
     objectHistory.clear();
     await objectStoreController.refresh();
     await classHierarchyController.refresh();
@@ -228,7 +277,9 @@ class ObjectInspectorViewController extends DisposableController
     }
   }
 
-  Future<void> findAndSelectNodeForObject(ObjRef obj) async {
+  Future<void> findAndSelectNodeForObject(
+    ObjRef obj,
+  ) async {
     codeViewController.clearState();
     ScriptRef? script;
     try {
@@ -240,5 +291,54 @@ class ObjectInspectorViewController extends DisposableController
       programExplorerController.clearSelection();
     }
     await pushObject(obj, scriptRef: script);
+  }
+}
+
+/// State used to inform [CodeViewController]s listening for
+/// [DevToolsNavigationState] changes to display a specific source location.
+class ObjectInspectorNavigationState extends DevToolsNavigationState {
+  ObjectInspectorNavigationState({
+    required ObjRef object,
+    ScriptRef? script,
+  }) : super(
+          kind: type,
+          state: <String, String?>{
+            _kObject: json.encode(object.json),
+            _kScript: json.encode(script?.json),
+          },
+        );
+
+  ObjectInspectorNavigationState._fromState(
+    DevToolsNavigationState state,
+  ) : super(
+          kind: type,
+          state: state.state,
+        );
+
+  static ObjectInspectorNavigationState? fromState(
+    DevToolsNavigationState? state,
+  ) {
+    if (state?.kind != type) return null;
+    return ObjectInspectorNavigationState._fromState(state!);
+  }
+
+  static const _kObject = 'object';
+  static const _kScript = 'script';
+  static const type = 'objectInspectorNavigationState';
+
+  ObjRef get object {
+    final obj = state[_kObject];
+    return createServiceObject(json.decode(obj!), const []) as ObjRef;
+  }
+
+  ScriptRef? get script {
+    final script = state[_kScript];
+    return createServiceObject(json.decode(script ?? '{}'), const [])
+        as ScriptRef;
+  }
+
+  @override
+  String toString() {
+    return 'kind: $kind object: ${object.id} script: ${script?.id}';
   }
 }

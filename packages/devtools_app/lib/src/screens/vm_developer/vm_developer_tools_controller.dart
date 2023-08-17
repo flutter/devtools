@@ -4,14 +4,22 @@
 
 import 'package:flutter/foundation.dart';
 
+import '../../shared/routing.dart';
 import 'object_inspector/object_inspector_view_controller.dart';
 import 'vm_developer_tools_screen.dart';
 
 class VMDeveloperToolsController {
   VMDeveloperToolsController({
+    DevToolsRouterDelegate? routerDelegate,
     ObjectInspectorViewController? objectInspectorViewController,
   }) : objectInspectorViewController =
-            objectInspectorViewController ?? ObjectInspectorViewController();
+            objectInspectorViewController ?? ObjectInspectorViewController() {
+    if (routerDelegate != null) {
+      this
+          .objectInspectorViewController
+          .subscribeToRouterEvents(routerDelegate);
+    }
+  }
 
   ValueListenable<int> get selectedIndex => _selectedIndex;
   final _selectedIndex = ValueNotifier<int>(0);

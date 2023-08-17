@@ -9,6 +9,8 @@ import 'package:provider/provider.dart';
 
 import '../../../shared/analytics/constants.dart' as gac;
 import '../../../shared/common_widgets.dart';
+import '../../../shared/globals.dart';
+import '../../../shared/primitives/auto_dispose.dart';
 import '../../../shared/split.dart';
 import '../../../shared/ui/drop_down_button.dart';
 import '../../debugger/program_explorer.dart';
@@ -44,7 +46,7 @@ class _ObjectInspectorView extends StatefulWidget {
 }
 
 class _ObjectInspectorViewState extends State<_ObjectInspectorView>
-    with TickerProviderStateMixin {
+    with TickerProviderStateMixin, AutoDisposeMixin {
   late ObjectInspectorViewController controller;
 
   @override
@@ -54,6 +56,16 @@ class _ObjectInspectorViewState extends State<_ObjectInspectorView>
         Provider.of<VMDeveloperToolsController>(context);
     controller = vmDeveloperToolsController.objectInspectorViewController;
     unawaited(controller.init());
+
+    addAutoDisposeListener(
+      controller.routingEventReporter,
+      () => controller.handleRoutingEvent(context),
+    );
+
+    addAutoDisposeListener(
+      scriptManager.sortedScripts,
+      controller.initializeForCurrentIsolate,
+    );
   }
 
   @override
@@ -183,7 +195,12 @@ class _ObjectInspectorSelectorState extends State<ObjectInspectorSelector> {
     final location = node.location;
     if (objRef != null &&
         objRef != controller.objectHistory.current.value?.ref) {
-      unawaited(controller.pushObject(objRef, scriptRef: location?.scriptRef));
+      unawaited(
+        controller.pushObject(
+          objRef,
+          scriptRef: location?.scriptRef,
+        ),
+      );
     }
   }
 }

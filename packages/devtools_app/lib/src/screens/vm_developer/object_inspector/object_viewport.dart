@@ -40,6 +40,14 @@ class ObjectViewport extends StatelessWidget {
         ToolbarRefresh(onPressed: controller.refreshObject),
       ],
       generateTitle: viewportTitle,
+      // We disable history for the viewport as the browser history will
+      // correctly update the contents of the viewport and having separate
+      // history navigation controls will make it difficult to keep state
+      // properly synchronized.
+      //
+      // We should revisit this if we eventually decide to ship on desktop or
+      // some platform that doesn't have built-in router navigation history.
+      historyEnabled: false,
       contentBuilder: (context, _) {
         return ValueListenableBuilder<bool>(
           valueListenable: controller.refreshing,
