@@ -27,11 +27,7 @@ class InspectorSourceLocation {
   String? getFile() {
     final fileName = path;
     if (fileName == null) {
-      if (parent != null) {
-        return parent!.getFile();
-      } else {
-        return null;
-      }
+      return parent?.getFile();
     }
 
     return fileName;
