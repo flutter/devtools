@@ -102,7 +102,6 @@ jobs:
           name: golden_image_failures.${{ matrix.bot }}
           path: packages/devtools_app/test/**/failures/*.png
       - name: Notify of Quick Fix
-        uses: actions/upload-artifact@0b7f8abb1508181956e8e162db84b466c27e18ce
         if: failure()
         with:
           WORKFLOW_ID: ${{ github.run_id }}
