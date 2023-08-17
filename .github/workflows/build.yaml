@@ -103,7 +103,7 @@ jobs:
           path: packages/devtools_app/test/**/failures/*.png
       - name: Notify of Quick Fix
         if: failure()
-        with:
+        env:
           WORKFLOW_ID: ${{ github.run_id }}
         run: |
           echo "::notice title={To Quickly Fix Goldens:}:: Run `./tool/fix_goldens.sh $WORKFLOW_ID` on your local branch."
