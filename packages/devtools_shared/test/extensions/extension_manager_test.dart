@@ -6,7 +6,7 @@
 
 import 'dart:io';
 
-import 'package:devtools_shared/devtools_extensions.dart';
+import 'package:devtools_shared/devtools_extensions_io.dart';
 import 'package:path/path.dart' as p;
 import 'package:test/test.dart';
 
