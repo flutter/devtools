@@ -12,3 +12,9 @@ dependencies:
     sdk: flutter
   devtools_extensions:
     path: ../../
+
+dependency_overrides:
+  devtools_extensions:
+    path: ../../
+  devtools_shared:
+    path: ../../../devtools_shared

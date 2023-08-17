@@ -5,7 +5,7 @@
 import 'dart:io';
 
 import 'package:devtools_shared/devtools_extensions.dart';
-import 'package:devtools_shared/src/extensions/extension_enablement.dart';
+import 'package:devtools_shared/devtools_extensions_io.dart';
 import 'package:test/test.dart';
 
 void main() {

@@ -18,8 +18,8 @@ environment:
 dependencies:
   async: ^2.0.0
   collection: ^1.15.0
-  devtools_shared: 2.26.1
-  devtools_app: 2.26.1
+  devtools_shared: 3.0.0
+  devtools_app: 2.27.0-dev.8
   flutter:
     sdk: flutter
   flutter_test:
@@ -34,6 +34,8 @@ dependencies:
 dependency_overrides:
   devtools_app:
     path: ../devtools_app
+  devtools_extensions:
+    path: ../devtools_extensions
   devtools_shared:
     path: ../devtools_shared
 
