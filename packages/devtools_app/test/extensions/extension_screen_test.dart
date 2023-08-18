@@ -159,7 +159,7 @@ void main() {
 
         await tester.tap(
           find.descendant(
-            of: find.byType(DevToolsButton),
+            of: find.byType(GaDevToolsButton),
             matching: find.text('Enable'),
           ),
         );
