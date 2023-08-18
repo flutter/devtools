@@ -95,32 +95,30 @@ class ExtensionView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return RoundedOutlinedBorder(
-      clip: true,
-      child: Column(
-        children: [
-          EmbeddedExtensionHeader(extension: extension),
-          Expanded(
-            child: ValueListenableBuilder<ExtensionEnabledState>(
-              valueListenable: extensionService.enabledStateListenable(
-                extension.name,
-              ),
-              builder: (context, activationState, _) {
-                if (activationState == ExtensionEnabledState.enabled) {
-                  return KeepAliveWrapper(
-                    child: Center(
-                      child: EmbeddedExtensionView(controller: controller),
-                    ),
-                  );
-                }
-                return EnableExtensionPrompt(
-                  extension: controller.extensionConfig,
-                );
-              },
+    return Column(
+      children: [
+        EmbeddedExtensionHeader(extension: extension),
+        const SizedBox(height: intermediateSpacing),
+        Expanded(
+          child: ValueListenableBuilder<ExtensionEnabledState>(
+            valueListenable: extensionService.enabledStateListenable(
+              extension.name,
             ),
+            builder: (context, activationState, _) {
+              if (activationState == ExtensionEnabledState.enabled) {
+                return KeepAliveWrapper(
+                  child: Center(
+                    child: EmbeddedExtensionView(controller: controller),
+                  ),
+                );
+              }
+              return EnableExtensionPrompt(
+                extension: controller.extensionConfig,
+              );
+            },
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
