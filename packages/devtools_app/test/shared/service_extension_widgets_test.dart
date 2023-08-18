@@ -21,18 +21,23 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 
 void main() {
-  final mockServiceManager = MockServiceConnectionManager();
-  when(mockServiceManager.serviceExtensionManager)
-      .thenReturn(FakeServiceExtensionManager());
-  when(mockServiceManager.isolateManager).thenReturn(FakeIsolateManager());
-  when(mockServiceManager.appState).thenReturn(
-    AppState(mockServiceManager.isolateManager.selectedIsolate),
-  );
-  when(unawaited(mockServiceManager.runDeviceBusyTask(any)))
-      .thenAnswer((_) => Future<void>.value());
-  when(mockServiceManager.isMainIsolatePaused).thenReturn(false);
-  setGlobal(ServiceConnectionManager, mockServiceManager);
-  setGlobal(NotificationService, NotificationService());
+  late MockServiceConnectionManager mockServiceManager;
+
+  setUp(() {
+    mockServiceManager = MockServiceConnectionManager();
+    when(mockServiceManager.serviceExtensionManager)
+        .thenReturn(FakeServiceExtensionManager());
+    when(mockServiceManager.isolateManager).thenReturn(FakeIsolateManager());
+    when(mockServiceManager.appState).thenReturn(
+      AppState(mockServiceManager.isolateManager.selectedIsolate),
+    );
+    when(unawaited(mockServiceManager.runDeviceBusyTask(any)))
+        .thenAnswer((_) => Future<void>.value());
+    when(mockServiceManager.isMainIsolatePaused).thenReturn(false);
+    setGlobal(ServiceConnectionManager, mockServiceManager);
+    setGlobal(NotificationService, NotificationService());
+    setGlobal(IdeTheme, IdeTheme());
+  });
 
   group('Hot Reload Button', () {
     int reloads = 0;
@@ -185,6 +190,7 @@ void main() {
       await tester.tap(find.byWidget(button));
       await tester.pumpAndSettle();
       (mockServiceManager.serviceExtensionManager
+      await (mockServiceManager.serviceExtensionManager
               as FakeServiceExtensionManager)
           .fakeFrame();
       expect(mostRecentState.value, true);

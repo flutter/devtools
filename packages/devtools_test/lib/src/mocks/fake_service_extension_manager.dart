@@ -37,7 +37,7 @@ class FakeServiceExtensionManager extends Fake
   /// Hook to simulate receiving the first frame event.
   ///
   /// Service extensions are only reported once a frame has been received.
-  void fakeFrame() async {
+  Future<void> fakeFrame() async {
     await _onFrameEventReceived();
   }
 
@@ -181,7 +181,7 @@ class FakeServiceExtensionManager extends Fake
     } else {
       await setServiceExtensionState(
         name,
-        enabled: true,
+        enabled: false,
         value: value,
         callExtension: false,
       );
