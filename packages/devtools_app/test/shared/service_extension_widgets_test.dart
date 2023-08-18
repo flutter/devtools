@@ -189,7 +189,6 @@ void main() {
       expect(find.byWidget(button), findsOneWidget);
       await tester.tap(find.byWidget(button));
       await tester.pumpAndSettle();
-      (mockServiceManager.serviceExtensionManager
       await (mockServiceManager.serviceExtensionManager
               as FakeServiceExtensionManager)
           .fakeFrame();
