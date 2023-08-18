@@ -4,7 +4,6 @@
 
 import 'dart:async';
 
-import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app_shared/service.dart';
 import 'package:devtools_app_shared/service_extensions.dart';
 import 'package:flutter/foundation.dart';
