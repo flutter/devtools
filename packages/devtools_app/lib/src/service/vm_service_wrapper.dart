@@ -13,6 +13,7 @@ import 'package:collection/collection.dart' show IterableExtension;
 import 'package:dap/dap.dart' as dap;
 import 'package:dds_service_extensions/dap.dart';
 import 'package:dds_service_extensions/dds_service_extensions.dart';
+import 'package:devtools_app_shared/service.dart';
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:vm_service/vm_service.dart';
@@ -90,6 +91,14 @@ class VmServiceWrapper implements VmService {
 
   /// A sequence number incremented and attached to each DAP request.
   static int _dapSeq = 0;
+
+  /// Executes `callback` for each isolate, and waiting for all callbacks to
+  /// finish before completing.
+  Future<void> forEachIsolate(
+    Future<void> Function(IsolateRef) callback,
+  ) async {
+    await forEachIsolateHelper(this, callback);
+  }
 
   @override
   Future<Breakpoint> addBreakpoint(

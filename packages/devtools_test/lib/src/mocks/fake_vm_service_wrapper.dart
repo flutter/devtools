@@ -148,6 +148,16 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
   final _connectedUri = Uri.parse('ws://127.0.0.1:56137/ISsyt6ki0no=/ws');
 
   @override
+  Future<void> forEachIsolate(Future<void> Function(IsolateRef) callback) =>
+      callback(
+        IsolateRef.parse(
+          {
+            'id': 'fake_isolate_id',
+          },
+        )!,
+      );
+
+  @override
   Future<AllocationProfile> getAllocationProfile(
     String isolateId, {
     bool? reset,
@@ -510,15 +520,4 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
 
   @override
   Stream<Event> get onIsolateEvent => const Stream.empty();
-}
-
-extension FakeVmServiceWrapperExtension on FakeVmServiceWrapper {
-  Future<void> forEachIsolate(Future<void> Function(IsolateRef) callback) =>
-      callback(
-        IsolateRef.parse(
-          {
-            'id': 'fake_isolate_id',
-          },
-        )!,
-      );
 }

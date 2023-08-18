@@ -44,11 +44,18 @@ extension VmServiceExtension on VmService {
   Future<void> forEachIsolate(
     Future<void> Function(IsolateRef) callback,
   ) async {
-    final vm = await getVM();
-    final futures = <Future>[];
-    for (final isolate in vm.isolates ?? []) {
-      futures.add(callback(isolate));
-    }
-    await Future.wait(futures);
+    await forEachIsolateHelper(this, callback);
   }
+}
+
+Future<void> forEachIsolateHelper(
+  VmService vmService,
+  Future<void> Function(IsolateRef) callback,
+) async {
+  final vm = await vmService.getVM();
+  final futures = <Future>[];
+  for (final isolate in vm.isolates ?? []) {
+    futures.add(callback(isolate));
+  }
+  await Future.wait(futures);
 }
