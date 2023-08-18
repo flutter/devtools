@@ -8,6 +8,9 @@
 
 import 'dart:async';
 
+import 'package:devtools_app_shared/service.dart';
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -19,7 +22,6 @@ import '../../devtools.dart' as devtools;
 import 'common_widgets.dart';
 import 'connected_app.dart';
 import 'globals.dart';
-import 'theme.dart';
 
 final _log = Logger('lib/src/shared/utils');
 
@@ -47,10 +49,6 @@ void debugLogger(String message) {
       return true;
     }(),
   );
-}
-
-double scaleByFontFactor(double original) {
-  return (original * ideTheme.fontSizeFactor).roundToDouble();
 }
 
 bool isDense() {

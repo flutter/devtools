@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 import 'package:vm_snapshot_analysis/precompiler_trace.dart';
 import 'package:vm_snapshot_analysis/program_info.dart';
@@ -11,7 +12,6 @@ import '../../shared/primitives/trees.dart';
 import '../../shared/primitives/utils.dart';
 import '../../shared/table/table.dart';
 import '../../shared/table/table_data.dart';
-import '../../shared/theme.dart';
 
 class CallGraphWithDominators extends StatefulWidget {
   const CallGraphWithDominators({super.key, required this.callGraphRoot});

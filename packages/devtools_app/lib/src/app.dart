@@ -4,6 +4,8 @@
 
 import 'dart:async';
 
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -48,11 +50,9 @@ import 'shared/console/primitives/simple_items.dart';
 import 'shared/feature_flags.dart';
 import 'shared/globals.dart';
 import 'shared/offline_screen.dart';
-import 'shared/primitives/auto_dispose.dart';
 import 'shared/primitives/utils.dart';
 import 'shared/routing.dart';
 import 'shared/screen.dart';
-import 'shared/theme.dart';
 import 'shared/ui/hover.dart';
 import 'standalone_ui/standalone_screen.dart';
 
@@ -94,9 +94,6 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
   List<Screen> get _originalScreens =>
       widget.originalScreens.map((s) => s.screen).toList();
 
-  /// TODO(kenz): use [extensionService.visibleExtensions] instead of
-  /// [extensionService.availableExtensions] and verify tabs are added / removed
-  /// propertly based on the enabled state of extensions.
   Iterable<Screen> get _extensionScreens =>
       extensionService.visibleExtensions.value.map(
         (e) => DevToolsScreen<void>(ExtensionScreen(e)).screen,

@@ -4,13 +4,13 @@
 
 import 'dart:async';
 
+import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/foundation.dart';
 import 'package:leak_tracker/devtools_integration.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../../../shared/globals.dart';
-import '../../../../shared/primitives/auto_dispose.dart';
 import '../../../../shared/utils.dart';
 import '../../panes/chart/primitives.dart';
 import '../../panes/diff/controller/diff_pane_controller.dart';

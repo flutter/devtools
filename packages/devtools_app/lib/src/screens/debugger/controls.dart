@@ -5,16 +5,15 @@
 import 'dart:async';
 
 import 'package:codicon/codicon.dart';
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart' hide Stack;
 import 'package:vm_service/vm_service.dart';
 
 import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/common_widgets.dart';
 import '../../shared/globals.dart';
-import '../../shared/primitives/auto_dispose.dart';
 import '../../shared/primitives/utils.dart';
-import '../../shared/theme.dart';
-import '../../shared/ui/label.dart';
 import '../../shared/utils.dart';
 import 'debugger_controller.dart';
 
@@ -144,7 +143,7 @@ class _DebuggingControlsState extends State<DebuggingControls>
     return ValueListenableBuilder<bool>(
       valueListenable: controller.codeViewController.fileExplorerVisible,
       builder: (context, visible, _) {
-        return DevToolsButton(
+        return GaDevToolsButton(
           icon: Icons.folder_outlined,
           label: 'File Explorer',
           onPressed: controller.codeViewController.toggleLibrariesVisible,

@@ -32,6 +32,7 @@ class EmbeddedExtensionControllerImpl extends EmbeddedExtensionController {
   /// in the id.
   late final viewId = 'ext-${extensionConfig.name}-${_viewIdIncrementer++}';
 
+  // TODO(kenz): pass along IDE theme query parameters from the DevTools URL.
   String get extensionUrl {
     return path.join(
       html.window.location.origin,

@@ -4,12 +4,12 @@
 
 import 'dart:async';
 
+import 'package:devtools_app_shared/service.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 
 import 'config_specific/import_export/import_export.dart';
-import 'connected_app.dart';
 import 'globals.dart';
-import 'primitives/auto_dispose.dart';
 import 'routing.dart';
 
 class OfflineModeController {

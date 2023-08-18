@@ -8,6 +8,8 @@ import 'package:devtools_app/src/screens/logging/_log_details.dart';
 import 'package:devtools_app/src/screens/logging/_logs_table.dart';
 import 'package:devtools_app/src/screens/logging/_message_column.dart';
 import 'package:devtools_app/src/service/service_extension_widgets.dart';
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -65,7 +67,7 @@ void main() {
         expect(find.byType(LogDetails), findsOneWidget);
         expect(find.byType(ClearButton), findsOneWidget);
         expect(find.byType(TextField), findsOneWidget);
-        expect(find.byType(FilterButton), findsOneWidget);
+        expect(find.byType(DevToolsFilterButton), findsOneWidget);
         expect(find.byType(StructuredErrorsToggle), findsOneWidget);
       },
     );

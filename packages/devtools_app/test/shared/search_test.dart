@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app/devtools_app.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 // TODO(https://github.com/flutter/devtools/issues/3514): increase test coverage

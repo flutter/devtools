@@ -7,13 +7,13 @@ import 'dart:convert';
 // ignore: avoid_web_libraries_in_flutter, as designed
 import 'dart:html' as html;
 
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../../shared/analytics/analytics.dart' as ga;
 import '../../../../../shared/analytics/constants.dart' as gac;
 import '../../../../../shared/globals.dart';
-import '../../../../../shared/primitives/auto_dispose.dart';
 import '../../../../../shared/primitives/trace_event.dart';
 import '../../../../../shared/primitives/utils.dart';
 import '_perfetto_controller_web.dart';

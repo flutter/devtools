@@ -6,6 +6,9 @@
 import 'dart:async';
 import 'dart:html' as html;
 
+import 'package:devtools_app_shared/service.dart';
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/widgets.dart';
 import 'package:logging/logging.dart';
 
@@ -21,6 +24,13 @@ part 'extension_manager.dart';
 /// registering an event handler from the extension.
 ExtensionManager get extensionManager => _extensionManager;
 late final ExtensionManager _extensionManager;
+
+/// A manager for interacting with the connected vm service, if present.
+///
+/// This manager provides sub-managers to interact with isolates, service
+/// extensions, etc.
+ServiceManager get serviceManager => _serviceManager;
+late final ServiceManager _serviceManager;
 
 /// A wrapper widget that initializes the [extensionManager] and establishes a
 /// connection with DevTools for this extension to interact over.
@@ -51,11 +61,20 @@ class _DevToolsExtensionState extends State<DevToolsExtension> {
   @override
   void initState() {
     super.initState();
-    _extensionManager = ExtensionManager()
-      .._init(connectToVmService: widget.requiresRunningApplication);
+    _initGlobals();
+    _extensionManager._init(
+      connectToVmService: widget.requiresRunningApplication,
+    );
     for (final handler in widget.eventHandlers.entries) {
       _extensionManager.registerEventHandler(handler.key, handler.value);
     }
+  }
+
+  void _initGlobals() {
+    _extensionManager = ExtensionManager();
+    _serviceManager = ServiceManager();
+    // TODO(kenz): pull this from the url query params.
+    setGlobal(IdeTheme, IdeTheme());
   }
 
   @override

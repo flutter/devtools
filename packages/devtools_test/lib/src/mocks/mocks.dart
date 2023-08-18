@@ -7,6 +7,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:devtools_app/devtools_app.dart';
+import 'package:devtools_app_shared/service.dart';
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/foundation.dart';
 import 'package:mockito/mockito.dart';

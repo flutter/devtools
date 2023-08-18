@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
-import '../../shared/primitives/auto_dispose.dart';
 import '../../shared/screen.dart';
-import '../../shared/theme.dart';
 import '../../shared/utils.dart';
 import 'isolate_statistics/isolate_statistics_view.dart';
 import 'object_inspector/object_inspector_view.dart';

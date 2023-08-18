@@ -2,14 +2,13 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../service/service_extension_widgets.dart';
 import '../../../../service/service_extensions.dart' as extensions;
-import '../../../../shared/common_widgets.dart';
 import '../../../../shared/feature_flags.dart';
 import '../../../../shared/globals.dart';
-import '../../../../shared/theme.dart';
 import '../controls/enhance_tracing/enhance_tracing_controller.dart';
 import '../rebuild_stats/rebuild_stats.dart';
 import '../rebuild_stats/rebuild_stats_model.dart';

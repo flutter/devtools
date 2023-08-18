@@ -5,12 +5,12 @@
 import 'dart:async';
 
 import 'package:collection/collection.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../service/vm_service_wrapper.dart';
 import '../globals.dart';
-import '../primitives/auto_dispose.dart';
 
 class ScriptManager extends DisposableController
     with AutoDisposeControllerMixin {

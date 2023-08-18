@@ -4,11 +4,11 @@
 
 import 'dart:async';
 
+import 'package:devtools_app_shared/utils.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../../../../service/service_extensions.dart' as extensions;
 import '../../../../../shared/globals.dart';
-import '../../../../../shared/primitives/auto_dispose.dart';
 import '../../flutter_frames/flutter_frame_model.dart';
 import 'enhance_tracing_model.dart';
 

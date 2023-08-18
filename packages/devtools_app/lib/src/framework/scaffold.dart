@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -17,11 +19,8 @@ import '../shared/console/widgets/console_pane.dart';
 import '../shared/feature_flags.dart';
 import '../shared/framework_controller.dart';
 import '../shared/globals.dart';
-import '../shared/primitives/auto_dispose.dart';
 import '../shared/routing.dart';
 import '../shared/screen.dart';
-import '../shared/split.dart';
-import '../shared/theme.dart';
 import '../shared/title.dart';
 import '../shared/utils.dart';
 import 'about_dialog.dart';

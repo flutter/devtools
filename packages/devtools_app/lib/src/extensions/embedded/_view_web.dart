@@ -6,11 +6,11 @@ import 'dart:async';
 // ignore: avoid_web_libraries_in_flutter, as designed
 import 'dart:html' as html;
 
+import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_extensions/api.dart';
 import 'package:flutter/material.dart';
 
 import '../../shared/globals.dart';
-import '../../shared/primitives/auto_dispose.dart';
 import '_controller_web.dart';
 import 'controller.dart';
 

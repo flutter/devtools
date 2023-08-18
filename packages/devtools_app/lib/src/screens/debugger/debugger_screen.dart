@@ -5,6 +5,8 @@
 import 'dart:async';
 
 import 'package:codicon/codicon.dart';
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide Stack;
 import 'package:flutter/scheduler.dart';
@@ -17,13 +19,10 @@ import '../../shared/common_widgets.dart';
 import '../../shared/diagnostics/primitives/source_location.dart';
 import '../../shared/flex_split_column.dart';
 import '../../shared/globals.dart';
-import '../../shared/primitives/auto_dispose.dart';
 import '../../shared/primitives/listenable.dart';
 import '../../shared/primitives/utils.dart';
 import '../../shared/routing.dart';
 import '../../shared/screen.dart';
-import '../../shared/split.dart';
-import '../../shared/theme.dart';
 import '../../shared/utils.dart';
 import 'breakpoints.dart';
 import 'call_stack.dart';

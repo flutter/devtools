@@ -4,6 +4,9 @@
 
 import 'dart:async';
 
+import 'package:devtools_app_shared/service.dart';
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -13,14 +16,9 @@ import 'package:pointer_interceptor/pointer_interceptor.dart';
 import '../shared/analytics/analytics.dart' as ga;
 import '../shared/common_widgets.dart';
 import '../shared/globals.dart';
-import '../shared/primitives/auto_dispose.dart';
 import '../shared/primitives/message_bus.dart';
 import '../shared/primitives/utils.dart';
-import '../shared/theme.dart';
 import '../shared/ui/hover.dart';
-import '../shared/ui/label.dart';
-import '../shared/utils.dart';
-import 'service_extension_manager.dart';
 import 'service_extensions.dart';
 import 'service_registrations.dart';
 

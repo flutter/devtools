@@ -4,12 +4,11 @@
 
 import 'dart:async';
 
+import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
-import '../../../shared/analytics/constants.dart' as gac;
+import '../../analytics/constants.dart' as gac;
 import '../../common_widgets.dart';
-import '../../dialogs.dart';
-import '../../theme.dart';
 
 const _documentationTopic = gac.console;
 

@@ -6,6 +6,8 @@ import 'dart:async';
 import 'dart:collection';
 
 import 'package:devtools_app/devtools_app.dart';
+import 'package:devtools_app_shared/service.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/foundation.dart';
 import 'package:mockito/mockito.dart';

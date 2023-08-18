@@ -8,7 +8,9 @@ import 'package:collection/collection.dart';
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/service/service_extension_widgets.dart';
 import 'package:devtools_app/src/service/service_extensions.dart' as extensions;
-import 'package:devtools_app/src/shared/eval_on_dart_library.dart';
+import 'package:devtools_app_shared/service.dart';
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_integration_test.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -188,6 +190,7 @@ Future<void> _verifyBooleanExtension(WidgetTester tester) async {
   final library = EvalOnDartLibrary(
     'package:flutter/src/rendering/debug.dart',
     serviceManager.service!,
+    serviceManager: serviceManager,
   );
   await _verifyExtension(
     tester,
@@ -205,6 +208,7 @@ Future<void> _verifyNumericExtension(WidgetTester tester) async {
   final library = EvalOnDartLibrary(
     'package:flutter/src/scheduler/binding.dart',
     serviceManager.service!,
+    serviceManager: serviceManager,
   );
   await _verifyExtension(
     tester,
@@ -225,6 +229,7 @@ Future<void> _verifyStringExtension(WidgetTester tester) async {
   final library = EvalOnDartLibrary(
     'package:flutter/src/foundation/platform.dart',
     serviceManager.service!,
+    serviceManager: serviceManager,
   );
   await _verifyExtension(
     tester,
@@ -247,6 +252,7 @@ Future<void> _verifyHotReloadAndHotRestart() async {
   final library = EvalOnDartLibrary(
     'package:flutter_app/main.dart',
     serviceManager.service!,
+    serviceManager: serviceManager,
   );
 
   // Verify the initial value of [topLevelFieldForTest].

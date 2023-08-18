@@ -27,6 +27,8 @@ dependencies:
   dds_service_extensions: ^1.6.0
   devtools_extensions: ^0.0.2-dev.0
   devtools_shared: 3.0.0
+  devtools_app_shared:
+    path: ../devtools_app_shared
   file: ^6.0.0
   file_selector: ^0.8.0
   file_selector_linux: ^0.0.2
@@ -166,6 +168,8 @@ flutter:
 dependency_overrides:
   devtools_shared:
     path: ../devtools_shared
+  devtools_app_shared:
+    path: ../devtools_app_shared
   devtools_test:
     path: ../devtools_test
   devtools_extensions:

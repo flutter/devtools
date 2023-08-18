@@ -2,18 +2,17 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app_shared/service.dart';
+import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../devtools.dart' as devtools;
-import '../service/isolate_manager.dart';
-import '../service/service_manager.dart';
 import '../shared/analytics/constants.dart' as gac;
 import '../shared/common_widgets.dart';
 import '../shared/globals.dart';
 import '../shared/primitives/utils.dart';
 import '../shared/screen.dart';
-import '../shared/theme.dart';
 import '../shared/ui/utils.dart';
 import '../shared/utils.dart';
 import 'scaffold.dart';

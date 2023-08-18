@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '../../../../../shared/primitives/auto_dispose.dart';
+import 'package:devtools_app_shared/utils.dart';
+
 import '../../../../../shared/primitives/trace_event.dart';
 import '../../../../../shared/primitives/utils.dart';
 import '../../../performance_controller.dart';

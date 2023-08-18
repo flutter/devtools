@@ -8,6 +8,8 @@ import 'package:devtools_app/src/screens/provider/instance_viewer/instance_detai
 import 'package:devtools_app/src/screens/provider/instance_viewer/instance_providers.dart';
 import 'package:devtools_app/src/screens/provider/provider_list.dart';
 import 'package:devtools_app/src/screens/provider/provider_nodes.dart';
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

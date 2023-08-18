@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../service/service_extension_widgets.dart';
@@ -12,7 +13,6 @@ import '../../../../shared/analytics/analytics.dart' as ga;
 import '../../../../shared/analytics/constants.dart' as gac;
 import '../../../../shared/common_widgets.dart';
 import '../../../../shared/globals.dart';
-import '../../../../shared/theme.dart';
 import '../../panes/timeline_events/timeline_events_controller.dart';
 import '../../performance_controller.dart';
 import 'enhance_tracing/enhance_tracing.dart';
@@ -96,7 +96,7 @@ class _PrimaryControls extends StatelessWidget {
           const SizedBox(width: denseSpacing),
         ],
         if (!offline)
-          DevToolsButton(
+          GaDevToolsButton(
             icon: Icons.block,
             label: 'Clear all',
             gaScreen: gac.performance,
@@ -144,7 +144,7 @@ class _SecondaryPerformanceControls extends StatelessWidget {
           const MoreDebuggingOptionsButton(),
         ],
         const SizedBox(width: denseSpacing),
-        DevToolsButton.iconOnly(
+        GaDevToolsButton.iconOnly(
           icon: Icons.file_download,
           gaScreen: gac.performance,
           gaSelection: gac.export,
