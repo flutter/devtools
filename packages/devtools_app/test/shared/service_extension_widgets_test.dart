@@ -5,7 +5,7 @@
 import 'dart:async';
 
 import 'package:devtools_app/src/service/service_extension_widgets.dart';
-import 'package:devtools_app/src/service/service_extensions.dart';
+import 'package:devtools_app/src/service/service_extensions.dart' as extensions;
 import 'package:devtools_app/src/service/service_manager.dart';
 import 'package:devtools_app/src/service/service_registrations.dart';
 import 'package:devtools_app/src/shared/connected_app.dart';
@@ -170,7 +170,7 @@ void main() {
               as FakeServiceExtensionManager)
           .fakeFrame();
       serviceState = mockServiceManager.serviceExtensionManager
-          .getServiceExtensionState(structuredErrors.extension);
+          .getServiceExtensionState(extensions.structuredErrors.extension);
       serviceState.addListener(serviceStateListener);
     });
 
@@ -181,7 +181,7 @@ void main() {
     testWidgets('toggles', (WidgetTester tester) async {
       await (mockServiceManager.serviceExtensionManager
               as FakeServiceExtensionManager)
-          .fakeAddServiceExtension(structuredErrors.extension);
+          .fakeAddServiceExtension(extensions.structuredErrors.extension);
 
       const button = StructuredErrorsToggle();
       await tester
@@ -203,7 +203,7 @@ void main() {
       (WidgetTester tester) async {
         await (mockServiceManager.serviceExtensionManager
                 as FakeServiceExtensionManager)
-            .fakeAddServiceExtension(structuredErrors.extension);
+            .fakeAddServiceExtension(extensions.structuredErrors.extension);
         const button = StructuredErrorsToggle();
         await tester
             .pumpWidget(wrap(const Scaffold(body: Center(child: button))));
@@ -211,7 +211,7 @@ void main() {
 
         await mockServiceManager.serviceExtensionManager
             .setServiceExtensionState(
-          structuredErrors.extension,
+          extensions.structuredErrors.extension,
           enabled: true,
           value: true,
         );
@@ -220,7 +220,7 @@ void main() {
 
         await mockServiceManager.serviceExtensionManager
             .setServiceExtensionState(
-          structuredErrors.extension,
+          extensions.structuredErrors.extension,
           enabled: false,
           value: false,
         );

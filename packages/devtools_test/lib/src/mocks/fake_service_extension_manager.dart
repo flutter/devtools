@@ -84,7 +84,7 @@ class FakeServiceExtensionManager extends Fake
     if (extension != null) {
       final Object? value = _getExtensionValueFromJson(name, valueFromJson);
 
-      final enabled = extension is ToggleableServiceExtensionDescription
+      final enabled = extension is ToggleableServiceExtension
           ? value == extension.enabledValue
           // For extensions that have more than two states
           // (enabled / disabled), we will always consider them to be
@@ -169,19 +169,17 @@ class FakeServiceExtensionManager extends Fake
     }
     final extensionDescription = serviceExtensionsAllowlist[name];
     final value = extensionValueOnDevice[name];
-    if (extensionDescription is ToggleableServiceExtensionDescription) {
-      if (value == extensionDescription.enabledValue) {
-        await setServiceExtensionState(
-          name,
-          enabled: true,
-          value: value,
-          callExtension: false,
-        );
-      }
+    if (extensionDescription is ToggleableServiceExtension) {
+      await setServiceExtensionState(
+        name,
+        enabled: value == extensionDescription.enabledValue,
+        value: value,
+        callExtension: false,
+      );
     } else {
       await setServiceExtensionState(
         name,
-        enabled: false,
+        enabled: true,
         value: value,
         callExtension: false,
       );

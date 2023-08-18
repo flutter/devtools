@@ -68,21 +68,23 @@ void main() {
     )..firstInspectorTreeLoadCompleted = true;
   });
 
-  void mockExtensions() {
+  Future<void> mockExtensions() async {
     fakeExtensionManager.extensionValueOnDevice = {
       extensions.toggleSelectWidgetMode.extension: true,
       extensions.enableOnDeviceInspector.extension: true,
       extensions.toggleOnDeviceWidgetInspector.extension: true,
       extensions.debugPaint.extension: false,
     };
-    fakeExtensionManager
-      ..fakeAddServiceExtension(
-        extensions.toggleOnDeviceWidgetInspector.extension,
-      )
-      ..fakeAddServiceExtension(extensions.toggleSelectWidgetMode.extension)
-      ..fakeAddServiceExtension(extensions.enableOnDeviceInspector.extension)
-      ..fakeAddServiceExtension(extensions.debugPaint.extension)
-      ..fakeFrame();
+    await fakeExtensionManager.fakeAddServiceExtension(
+      extensions.toggleOnDeviceWidgetInspector.extension,
+    );
+    await fakeExtensionManager
+        .fakeAddServiceExtension(extensions.toggleSelectWidgetMode.extension);
+    await fakeExtensionManager
+        .fakeAddServiceExtension(extensions.enableOnDeviceInspector.extension);
+    await fakeExtensionManager
+        .fakeAddServiceExtension(extensions.debugPaint.extension);
+    await fakeExtensionManager.fakeFrame();
   }
 
   void mockNoExtensionsAvailable() {
@@ -143,7 +145,7 @@ void main() {
     'Test toggling service extension buttons',
     windowSize,
     (WidgetTester tester) async {
-      mockExtensions();
+      await mockExtensions();
       expect(
         fakeExtensionManager
             .extensionValueOnDevice[extensions.debugPaint.extension],
