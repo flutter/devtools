@@ -92,10 +92,10 @@ class ServiceConnectionManager extends ServiceManager<VmServiceWrapper> {
     preferences.vmDeveloperModeEnabled
         .addListener(_handleVmDeveloperModeChanged);
 
-    _inspectorService = devToolsExtensionPoints.inspectorServiceProvider();
-
     // This needs to be called before calling
-    // `ga.setupUserApplicationDimensions()`.
+    // `ga.setupUserApplicationDimensions()` and before initializing
+    // [_inspectorService], since both require access to an initialized
+    // [connectedApp] object.
     await connectedApp!.initializeValues(onComplete: generateDevToolsTitle);
 
     // Set up analytics dimensions for the connected app.
@@ -103,6 +103,8 @@ class ServiceConnectionManager extends ServiceManager<VmServiceWrapper> {
     if (FeatureFlags.devToolsExtensions) {
       await extensionService.initialize();
     }
+
+    _inspectorService = devToolsExtensionPoints.inspectorServiceProvider();
   }
 
   @override
