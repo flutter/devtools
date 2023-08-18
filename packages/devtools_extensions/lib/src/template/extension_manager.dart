@@ -56,7 +56,13 @@ class ExtensionManager {
             break;
           case DevToolsExtensionEventType.vmServiceConnection:
             final vmServiceUri = extensionEvent.data?['uri'] as String?;
-            unawaited(connectToVmService(vmServiceUri));
+            unawaited(
+              connectToVmService(vmServiceUri).catchError((e) {
+                // TODO(kenz): post a notification to DevTools for errors
+                // or create an error panel for the extensions screens.
+                print('Error connecting to VM service: $e');
+              }),
+            );
             break;
           case DevToolsExtensionEventType.unknown:
           default:
