@@ -72,7 +72,7 @@ abstract class FeatureFlags {
   /// Flag to enable DevTools extensions.
   ///
   /// https://github.com/flutter/devtools/issues/1632
-  static bool devToolsExtensions = true; // enableExperiments;
+  static bool devToolsExtensions = enableExperiments;
 
   /// Flag to enable debugging via DAP.
   ///

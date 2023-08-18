@@ -9,11 +9,12 @@ import 'dart:html' as html;
 import 'package:devtools_app_shared/service.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
+import 'package:devtools_shared/service.dart';
 import 'package:flutter/widgets.dart';
 import 'package:logging/logging.dart';
+import 'package:vm_service/vm_service.dart';
 
 import '../../api.dart';
-import 'connected_app_manager.dart';
 
 part 'extension_manager.dart';
 
