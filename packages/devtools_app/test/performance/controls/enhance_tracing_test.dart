@@ -22,7 +22,7 @@ void main() {
   group('TrackWidgetBuildsSetting', () {
     setUp(() async {
       fakeExtensionManager = FakeServiceExtensionManager();
-      fakeExtensionManager.fakeFrame();
+      await fakeExtensionManager.fakeFrame();
       await fakeExtensionManager
           .fakeAddServiceExtension(profileWidgetBuilds.extension);
       await fakeExtensionManager

@@ -165,8 +165,8 @@ void main() {
       mostRecentState = serviceState.value;
     }
 
-    setUp(() {
-      (mockServiceManager.serviceExtensionManager
+    setUp(() async {
+      await (mockServiceManager.serviceExtensionManager
               as FakeServiceExtensionManager)
           .fakeFrame();
       serviceState = mockServiceManager.serviceExtensionManager
