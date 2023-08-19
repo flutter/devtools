@@ -8,7 +8,7 @@ the same logic or styling.
 ## Usage
 
 Add a dependency to your `pubspec.yaml` file:
-```
+```yaml
 devtools_app_shared: ^1.0.0
 ```
 
