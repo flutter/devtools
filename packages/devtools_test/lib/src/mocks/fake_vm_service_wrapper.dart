@@ -46,9 +46,9 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
     'pid': 54321,
     'functions': [],
     'samples': [],
-  });
+  })!;
 
-  CpuSamples? cpuSamples;
+  CpuSamples cpuSamples;
 
   CpuSamples? allocationSamples;
 
@@ -114,7 +114,7 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
     int timeOriginMicros,
     int timeExtentMicros,
   ) {
-    return Future.value(cpuSamples!);
+    return Future.value(cpuSamples);
   }
 
   @override
