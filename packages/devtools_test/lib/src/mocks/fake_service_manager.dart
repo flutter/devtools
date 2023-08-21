@@ -161,7 +161,7 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
         Response.parse({
           'layerBytes': 0,
           'pictureBytes': 0,
-        }),
+        })!,
       );
 
   @override
@@ -192,7 +192,7 @@ class FakeServiceManager extends Fake implements ServiceConnectionManager {
         'dartSdkVersion': '2.9.0 (build 2.9.0-8.0.dev d6fed1f624)',
         'frameworkRevisionShort': '74432fa91c',
         'engineRevisionShort': 'ae2222f47e',
-      }),
+      })!,
     );
   }
 
