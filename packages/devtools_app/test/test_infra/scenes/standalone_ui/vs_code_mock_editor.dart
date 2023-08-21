@@ -5,8 +5,7 @@
 import 'dart:collection';
 import 'dart:convert';
 
-import 'package:devtools_app/src/shared/split.dart';
-import 'package:devtools_app/src/shared/theme.dart';
+import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
 import '../../../test_infra/test_data/dart_tooling_api/mock_api.dart';
