@@ -46,9 +46,9 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
     'pid': 54321,
     'functions': [],
     'samples': [],
-  });
+  })!;
 
-  CpuSamples? cpuSamples;
+  CpuSamples cpuSamples;
 
   CpuSamples? allocationSamples;
 
@@ -249,7 +249,7 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
             },
           ),
         },
-      ),
+      )!,
     );
   }
 
@@ -338,7 +338,7 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
 
   @override
   Future<TimelineFlags> getVMTimelineFlags() =>
-      Future.value(TimelineFlags.parse(_vmTimelineFlags));
+      Future.value(TimelineFlags.parse(_vmTimelineFlags)!);
 
   @override
   Future<Timeline> getVMTimeline({
@@ -403,7 +403,7 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
   ) async {
     final httpProfile = await getHttpProfile(isolateId);
     return Future.value(
-      httpProfile.requests.firstWhereOrNull((request) => request.id == id),
+      httpProfile.requests.firstWhere((request) => request.id == id),
     );
   }
 

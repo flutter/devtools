@@ -105,8 +105,9 @@ class _ScriptCache {
     ScriptRef scriptRef,
   ) {
     final scriptId = scriptRef.id!;
-    if (_scripts.containsKey(scriptId)) {
-      return Future.value(_scripts[scriptId]);
+    final script = _scripts[scriptId];
+    if (script != null) {
+      return Future.value(script);
     }
 
     if (_inProgress.containsKey(scriptId)) {
