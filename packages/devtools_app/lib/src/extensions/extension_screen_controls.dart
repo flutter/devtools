@@ -22,23 +22,21 @@ class EmbeddedExtensionHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final extensionName = extension.displayName;
-    return AreaPaneHeader(
-      title: RichText(
-        text: TextSpan(
-          text: 'package:$extensionName extension',
-          style: theme.regularTextStyle.copyWith(fontWeight: FontWeight.bold),
-          children: [
-            TextSpan(
-              text: ' (v${extension.version})',
-              style: theme.subtleTextStyle,
-            ),
-          ],
+    return Row(
+      children: [
+        RichText(
+          text: TextSpan(
+            text: 'package:$extensionName extension',
+            style: theme.regularTextStyle.copyWith(fontWeight: FontWeight.bold),
+            children: [
+              TextSpan(
+                text: ' (v${extension.version})',
+                style: theme.subtleTextStyle,
+              ),
+            ],
+          ),
         ),
-      ),
-      includeTopBorder: false,
-      roundedTopBorder: false,
-      rightPadding: defaultSpacing,
-      actions: [
+        const Spacer(),
         RichText(
           text: LinkTextSpan(
             link: Link(
@@ -63,6 +61,7 @@ class EmbeddedExtensionHeader extends StatelessWidget {
             return const SizedBox.shrink();
           },
         ),
+        const SizedBox(width: defaultSpacing),
       ],
     );
   }
@@ -78,7 +77,6 @@ class DisableExtensionButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return GaDevToolsButton.iconOnly(
       icon: Icons.extension_off_outlined,
-      outlined: false,
       tooltip: 'Disable extension',
       gaScreen: gac.extensionScreenId,
       gaSelection: gac.extensionDisable(extension.displayName),
