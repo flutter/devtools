@@ -21,9 +21,9 @@ void main() {
           .thenReturn(false);
       setGlobal(ServiceConnectionManager, fakeServiceConnection);
       setGlobal(IdeTheme, IdeTheme());
-      when(fakeServiceConnection.errorBadgeManager
-              .errorCountNotifier('network'))
-          .thenReturn(ValueNotifier<int>(0));
+      when(
+        fakeServiceConnection.errorBadgeManager.errorCountNotifier('network'),
+      ).thenReturn(ValueNotifier<int>(0));
       screen = NetworkScreen();
     });
 

@@ -40,9 +40,9 @@ void main() {
         .thenReturn(true);
     when(fakeServiceConnection.serviceManager.connectedApp!.isDartCliAppNow)
         .thenReturn(false);
-    when(fakeServiceConnection
-            .serviceManager.connectedApp!.isDebugFlutterAppNow)
-        .thenReturn(false);
+    when(
+      fakeServiceConnection.serviceManager.connectedApp!.isDebugFlutterAppNow,
+    ).thenReturn(false);
     when(fakeServiceConnection.serviceManager.connectedApp!.isDartWebApp)
         .thenAnswer((_) => Future.value(false));
     setGlobal(

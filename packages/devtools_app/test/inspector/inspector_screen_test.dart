@@ -48,9 +48,9 @@ void main() {
       isProfileBuild: false,
       isWebApp: false,
     );
-    when(fakeServiceConnection.errorBadgeManager
-            .errorCountNotifier('inspector'))
-        .thenReturn(ValueNotifier<int>(0));
+    when(
+      fakeServiceConnection.errorBadgeManager.errorCountNotifier('inspector'),
+    ).thenReturn(ValueNotifier<int>(0));
 
     setGlobal(
       DevToolsEnvironmentParameters,

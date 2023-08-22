@@ -106,9 +106,9 @@ void main() {
       appSizeController = AppSizeTestController();
       fakeServiceConnection = FakeServiceConnectionManager();
       setGlobal(ServiceConnectionManager, fakeServiceConnection);
-      when(fakeServiceConnection.errorBadgeManager
-              .errorCountNotifier('app-size'))
-          .thenReturn(ValueNotifier<int>(0));
+      when(
+        fakeServiceConnection.errorBadgeManager.errorCountNotifier('app-size'),
+      ).thenReturn(ValueNotifier<int>(0));
     });
 
     testWidgets('builds its tab', (WidgetTester tester) async {
