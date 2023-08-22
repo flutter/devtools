@@ -18,7 +18,7 @@ final _log = Logger('service_extension_manager');
 
 /// Manager that handles tracking the service extension for the main isolate.
 @sealed
-class ServiceExtensionManager extends Disposer {
+class ServiceExtensionManager with DisposerMixin {
   ServiceExtensionManager(this._isolateManager);
 
   VmService? _service;

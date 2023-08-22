@@ -190,3 +190,40 @@ class ConnectedApp {
           flutterVersionKey: flutterVersionNow!.version,
       };
 }
+
+final class OfflineConnectedApp extends ConnectedApp {
+  OfflineConnectedApp({
+    this.isFlutterAppNow,
+    this.isProfileBuildNow,
+    this.isDartWebAppNow,
+    this.isRunningOnDartVM,
+    this.operatingSystem = ConnectedApp.unknownOS,
+  }) : super(null);
+
+  factory OfflineConnectedApp.parse(Map<String, Object?>? json) {
+    if (json == null) return OfflineConnectedApp();
+    return OfflineConnectedApp(
+      isFlutterAppNow: json[ConnectedApp.isFlutterAppKey] as bool?,
+      isProfileBuildNow: json[ConnectedApp.isProfileBuildKey] as bool?,
+      isDartWebAppNow: json[ConnectedApp.isDartWebAppKey] as bool?,
+      isRunningOnDartVM: json[ConnectedApp.isRunningOnDartVMKey] as bool?,
+      operatingSystem: (json[ConnectedApp.operatingSystemKey] as String?) ??
+          ConnectedApp.unknownOS,
+    );
+  }
+
+  @override
+  final bool? isFlutterAppNow;
+
+  @override
+  final bool? isProfileBuildNow;
+
+  @override
+  final bool? isDartWebAppNow;
+
+  @override
+  final bool? isRunningOnDartVM;
+
+  @override
+  final String operatingSystem;
+}

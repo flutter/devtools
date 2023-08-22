@@ -13,7 +13,7 @@ const dialogDefaultContext = 'dialog';
 /// A standardized dialog for use in DevTools.
 ///
 /// It normalizes dialog layout, spacing, and look and feel.
-class DevToolsDialog extends StatelessWidget {
+final class DevToolsDialog extends StatelessWidget {
   const DevToolsDialog({
     super.key,
     Widget? title,
@@ -64,7 +64,7 @@ class DevToolsDialog extends StatelessWidget {
 }
 
 /// A [Text] widget styled for dialog titles.
-class DialogTitleText extends StatelessWidget {
+final class DialogTitleText extends StatelessWidget {
   const DialogTitleText(this.text, {super.key});
 
   final String text;
@@ -89,7 +89,7 @@ final dialogTextFieldDecoration = InputDecoration(
 
 /// A standardized dialog with help text and buttons `Reset to default`,
 /// `APPLY` and `CANCEL`.
-class StateUpdateDialog extends StatelessWidget {
+final class StateUpdateDialog extends StatelessWidget {
   const StateUpdateDialog({
     super.key,
     required this.title,
@@ -149,7 +149,7 @@ class StateUpdateDialog extends StatelessWidget {
   }
 }
 
-class _StateUpdateDialogTitle extends StatelessWidget {
+final class _StateUpdateDialogTitle extends StatelessWidget {
   const _StateUpdateDialogTitle({required this.title, this.onResetDefaults});
 
   final String title;
@@ -173,7 +173,7 @@ class _StateUpdateDialogTitle extends StatelessWidget {
   }
 }
 
-class DialogHelpText extends StatelessWidget {
+final class DialogHelpText extends StatelessWidget {
   const DialogHelpText({super.key, required this.helpText});
 
   static TextStyle? textStyle(BuildContext context) =>
@@ -191,7 +191,7 @@ class DialogHelpText extends StatelessWidget {
 }
 
 /// A TextButton used to close a containing dialog (Close).
-class DialogCloseButton extends StatelessWidget {
+final class DialogCloseButton extends StatelessWidget {
   const DialogCloseButton({super.key, this.onClose, this.label = 'CLOSE'});
 
   final VoidCallback? onClose;
@@ -210,7 +210,7 @@ class DialogCloseButton extends StatelessWidget {
 }
 
 /// A TextButton used to close a containing dialog (Cancel).
-class DialogCancelButton extends StatelessWidget {
+final class DialogCancelButton extends StatelessWidget {
   const DialogCancelButton({super.key, this.cancelAction});
 
   final VoidCallback? cancelAction;
@@ -228,7 +228,7 @@ class DialogCancelButton extends StatelessWidget {
 }
 
 /// A TextButton used to close a containing dialog (APPLY).
-class DialogApplyButton extends StatelessWidget {
+final class DialogApplyButton extends StatelessWidget {
   const DialogApplyButton({super.key, required this.onPressed});
 
   final Function onPressed;
@@ -245,7 +245,7 @@ class DialogApplyButton extends StatelessWidget {
   }
 }
 
-class DialogTextButton extends StatelessWidget {
+final class DialogTextButton extends StatelessWidget {
   const DialogTextButton({super.key, this.onPressed, required this.child});
 
   final VoidCallback? onPressed;
