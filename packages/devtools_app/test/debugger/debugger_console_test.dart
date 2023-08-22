@@ -16,16 +16,16 @@ import 'package:mockito/mockito.dart';
 import '../test_infra/utils/test_utils.dart';
 
 void main() {
-  final fakeServiceManager = FakeServiceConnectionManager();
+  final fakeServiceConnection = FakeServiceConnectionManager();
   final debuggerController = createMockDebuggerControllerWithDefaults();
 
   const windowSize = Size(4000.0, 4000.0);
 
-  when(fakeServiceManager.serviceManager.connectedApp!.isProfileBuildNow)
+  when(fakeServiceConnection.serviceManager.connectedApp!.isProfileBuildNow)
       .thenReturn(false);
-  when(fakeServiceManager.serviceManager.connectedApp!.isDartWebAppNow)
+  when(fakeServiceConnection.serviceManager.connectedApp!.isDartWebAppNow)
       .thenReturn(false);
-  setGlobal(ServiceConnectionManager, fakeServiceManager);
+  setGlobal(ServiceConnectionManager, fakeServiceConnection);
   setGlobal(IdeTheme, IdeTheme());
   setGlobal(ScriptManager, MockScriptManager());
   setGlobal(NotificationService, NotificationService());
@@ -35,8 +35,8 @@ void main() {
     ExternalDevToolsEnvironmentParameters(),
   );
   setGlobal(PreferencesController, PreferencesController());
-  fakeServiceManager.consoleService.ensureServiceInitialized();
-  when(fakeServiceManager.errorBadgeManager.errorCountNotifier('debugger'))
+  fakeServiceConnection.consoleService.ensureServiceInitialized();
+  when(fakeServiceConnection.errorBadgeManager.errorCountNotifier('debugger'))
       .thenReturn(ValueNotifier<int>(0));
 
   Future<void> pumpConsole(

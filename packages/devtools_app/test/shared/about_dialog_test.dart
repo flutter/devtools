@@ -17,21 +17,21 @@ void main() {
   group('About Dialog', () {
     setUp(() {
       aboutDialog = DevToolsAboutDialog(ReleaseNotesController());
-      final fakeServiceManager = FakeServiceConnectionManager();
-      when(fakeServiceManager.serviceManager.vm.version).thenReturn('1.9.1');
-      when(fakeServiceManager.serviceManager.vm.targetCPU).thenReturn('arm64');
-      when(fakeServiceManager.serviceManager.vm.architectureBits)
+      final fakeServiceConnection = FakeServiceConnectionManager();
+      when(fakeServiceConnection.serviceManager.vm.version).thenReturn('1.9.1');
+      when(fakeServiceConnection.serviceManager.vm.targetCPU).thenReturn('arm64');
+      when(fakeServiceConnection.serviceManager.vm.architectureBits)
           .thenReturn(64);
-      when(fakeServiceManager.serviceManager.vm.operatingSystem)
+      when(fakeServiceConnection.serviceManager.vm.operatingSystem)
           .thenReturn('android');
 
       mockConnectedApp(
-        fakeServiceManager.serviceManager.connectedApp!,
+        fakeServiceConnection.serviceManager.connectedApp!,
         isFlutterApp: true,
         isProfileBuild: false,
         isWebApp: false,
       );
-      setGlobal(ServiceConnectionManager, fakeServiceManager);
+      setGlobal(ServiceConnectionManager, fakeServiceConnection);
       setGlobal(
         DevToolsEnvironmentParameters,
         ExternalDevToolsEnvironmentParameters(),

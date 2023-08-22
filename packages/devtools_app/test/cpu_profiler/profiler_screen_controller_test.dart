@@ -11,8 +11,8 @@ import 'package:mockito/mockito.dart';
 void main() {
   group('ProfilerScreenController', () {
     late ProfilerScreenController controller;
-    final fakeServiceManager = FakeServiceConnectionManager();
-    when(fakeServiceManager.serviceManager.connectedApp!.isFlutterAppNow)
+    final fakeServiceConnection = FakeServiceConnectionManager();
+    when(fakeServiceConnection.serviceManager.connectedApp!.isFlutterAppNow)
         .thenReturn(false);
 
     setUp(() {
@@ -20,7 +20,7 @@ void main() {
         DevToolsEnvironmentParameters,
         ExternalDevToolsEnvironmentParameters(),
       );
-      setGlobal(ServiceConnectionManager, fakeServiceManager);
+      setGlobal(ServiceConnectionManager, fakeServiceConnection);
       setGlobal(OfflineModeController, OfflineModeController());
       setGlobal(PreferencesController, PreferencesController());
       controller = ProfilerScreenController();

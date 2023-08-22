@@ -12,23 +12,23 @@ import 'package:mockito/mockito.dart';
 import 'package:vm_service/vm_service.dart';
 
 void main() {
-  final fakeServiceManager = FakeServiceConnectionManager();
+  final fakeServiceConnection = FakeServiceConnectionManager();
   final debuggerController = createMockDebuggerControllerWithDefaults();
   final scriptManager = MockScriptManager();
 
-  when(fakeServiceManager.serviceManager.connectedApp!.isProfileBuildNow)
+  when(fakeServiceConnection.serviceManager.connectedApp!.isProfileBuildNow)
       .thenReturn(false);
-  when(fakeServiceManager.serviceManager.connectedApp!.isDartWebAppNow)
+  when(fakeServiceConnection.serviceManager.connectedApp!.isDartWebAppNow)
       .thenReturn(false);
-  setGlobal(ServiceConnectionManager, fakeServiceManager);
+  setGlobal(ServiceConnectionManager, fakeServiceConnection);
   setGlobal(IdeTheme, IdeTheme());
   setGlobal(ScriptManager, scriptManager);
   setGlobal(NotificationService, NotificationService());
-  fakeServiceManager.consoleService.ensureServiceInitialized();
+  fakeServiceConnection.consoleService.ensureServiceInitialized();
 
   setUp(() {
-    fakeServiceManager.serviceManager.isMainIsolatePaused = true;
-    (fakeServiceManager.serviceManager.isolateManager as FakeIsolateManager)
+    fakeServiceConnection.serviceManager.isMainIsolatePaused = true;
+    (fakeServiceConnection.serviceManager.isolateManager as FakeIsolateManager)
         .setMainIsolatePausedState(true);
   });
 
@@ -89,8 +89,8 @@ void main() {
   });
 
   testWidgets('are hidden when app is not paused', (WidgetTester tester) async {
-    fakeServiceManager.serviceManager.isMainIsolatePaused = false;
-    (fakeServiceManager.serviceManager.isolateManager as FakeIsolateManager)
+    fakeServiceConnection.serviceManager.isMainIsolatePaused = false;
+    (fakeServiceConnection.serviceManager.isolateManager as FakeIsolateManager)
         .setMainIsolatePausedState(false);
     await pumpControls(tester);
     final animatedOpacityFinder = find.byType(AnimatedOpacity);

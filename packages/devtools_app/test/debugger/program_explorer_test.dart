@@ -23,9 +23,9 @@ void main() {
     late MockProgramExplorerController mockProgramExplorerController;
 
     setUp(() {
-      final fakeServiceManager = FakeServiceConnectionManager();
+      final fakeServiceConnection = FakeServiceConnectionManager();
       mockConnectedApp(
-        fakeServiceManager.serviceManager.connectedApp!,
+        fakeServiceConnection.serviceManager.connectedApp!,
         isFlutterApp: true,
         isProfileBuild: false,
         isWebApp: false,
@@ -33,7 +33,7 @@ void main() {
       mockProgramExplorerController =
           createMockProgramExplorerControllerWithDefaults();
       setGlobal(IdeTheme, IdeTheme());
-      setGlobal(ServiceConnectionManager, fakeServiceManager);
+      setGlobal(ServiceConnectionManager, fakeServiceConnection);
       setGlobal(
         DevToolsEnvironmentParameters,
         ExternalDevToolsEnvironmentParameters(),

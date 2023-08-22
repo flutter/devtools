@@ -29,18 +29,18 @@ void main() {
   late VMServiceObjectNode libraryNode;
 
   setUp(() async {
-    final fakeServiceManager = FakeServiceConnectionManager();
+    final fakeServiceConnection = FakeServiceConnectionManager();
     final scriptManager = MockScriptManager();
     when(scriptManager.getScript(any)).thenAnswer(
       (_) => Future<Script>.value(testScript),
     );
     mockConnectedApp(
-      fakeServiceManager.serviceManager.connectedApp!,
+      fakeServiceConnection.serviceManager.connectedApp!,
       isFlutterApp: true,
       isProfileBuild: false,
       isWebApp: false,
     );
-    setGlobal(ServiceConnectionManager, fakeServiceManager);
+    setGlobal(ServiceConnectionManager, fakeServiceConnection);
     setGlobal(IdeTheme, IdeTheme());
     setGlobal(ScriptManager, scriptManager);
     setGlobal(NotificationService, NotificationService());
@@ -51,8 +51,8 @@ void main() {
       ExternalDevToolsEnvironmentParameters(),
     );
     setGlobal(PreferencesController, PreferencesController());
-    fakeServiceManager.consoleService.ensureServiceInitialized();
-    when(fakeServiceManager.errorBadgeManager.errorCountNotifier('debugger'))
+    fakeServiceConnection.consoleService.ensureServiceInitialized();
+    when(fakeServiceConnection.errorBadgeManager.errorCountNotifier('debugger'))
         .thenReturn(ValueNotifier<int>(0));
 
     programExplorerController = TestProgramExplorerController(
