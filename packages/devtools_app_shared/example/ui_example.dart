@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/ui.dart' as devtools_shared_ui;
 import 'package:flutter/material.dart';
 
 class ExampleWidget extends StatelessWidget {
@@ -10,12 +10,10 @@ class ExampleWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Shared component
-    return RoundedOutlinedBorder(
+    return devtools_shared_ui.RoundedOutlinedBorder(
       child: Column(
         children: [
-          // Shared component
-          const AreaPaneHeader(
+          const devtools_shared_ui.AreaPaneHeader(
             roundedTopBorder: false,
             includeTopBorder: false,
             title: Text('This is a section header'),
