@@ -25,7 +25,8 @@ void main() {
       .thenReturn(FakeIsolateManager());
   when(mockServiceConnection.appState).thenReturn(
     AppState(
-        mockServiceConnection.serviceManager.isolateManager.selectedIsolate,),
+      mockServiceConnection.serviceManager.isolateManager.selectedIsolate,
+    ),
   );
 
   final mockErrorBadgeManager = MockErrorBadgeManager();

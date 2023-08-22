@@ -72,8 +72,10 @@ void main() {
       fakeServiceConnection = FakeServiceConnectionManager();
       when(fakeServiceConnection.serviceManager.vm.version).thenReturn('1.9.1');
       when(fakeServiceConnection.serviceManager.vm.targetCPU).thenReturn('x64');
-      when(fakeServiceConnection.serviceManager.vm.architectureBits).thenReturn(64);
-      when(fakeServiceConnection.serviceManager.vm.operatingSystem).thenReturn('android');
+      when(fakeServiceConnection.serviceManager.vm.architectureBits)
+          .thenReturn(64);
+      when(fakeServiceConnection.serviceManager.vm.operatingSystem)
+          .thenReturn('android');
       final app = fakeServiceConnection.serviceManager.connectedApp!;
       mockConnectedApp(
         app,

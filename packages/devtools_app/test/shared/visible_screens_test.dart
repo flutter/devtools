@@ -16,7 +16,8 @@ void main() {
     late FakeServiceConnectionManager fakeServiceConnection;
 
     setUp(() async {
-      fakeServiceConnection = FakeServiceConnectionManager(availableLibraries: []);
+      fakeServiceConnection =
+          FakeServiceConnectionManager(availableLibraries: []);
       setGlobal(
         DevToolsEnvironmentParameters,
         ExternalDevToolsEnvironmentParameters(),
@@ -44,7 +45,8 @@ void main() {
       SemanticVersion? flutterVersion,
     }) {
       if (web) {
-        fakeServiceConnection.serviceManager.availableLibraries.add('dart:html');
+        fakeServiceConnection.serviceManager.availableLibraries
+            .add('dart:html');
       }
       mockConnectedApp(
         fakeServiceConnection.serviceManager.connectedApp!,

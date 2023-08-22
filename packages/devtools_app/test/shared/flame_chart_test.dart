@@ -122,7 +122,9 @@ void main() {
     setUp(() {
       final connectedApp = MockConnectedApp();
       setGlobal(
-          ServiceConnectionManager, createMockServiceConnectionWithDefaults(),);
+        ServiceConnectionManager,
+        createMockServiceConnectionWithDefaults(),
+      );
       when(serviceConnection.serviceManager.connectedApp)
           .thenReturn(connectedApp);
       mockConnectedApp(

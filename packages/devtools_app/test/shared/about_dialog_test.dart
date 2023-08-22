@@ -19,7 +19,8 @@ void main() {
       aboutDialog = DevToolsAboutDialog(ReleaseNotesController());
       final fakeServiceConnection = FakeServiceConnectionManager();
       when(fakeServiceConnection.serviceManager.vm.version).thenReturn('1.9.1');
-      when(fakeServiceConnection.serviceManager.vm.targetCPU).thenReturn('arm64');
+      when(fakeServiceConnection.serviceManager.vm.targetCPU)
+          .thenReturn('arm64');
       when(fakeServiceConnection.serviceManager.vm.architectureBits)
           .thenReturn(64);
       when(fakeServiceConnection.serviceManager.vm.operatingSystem)

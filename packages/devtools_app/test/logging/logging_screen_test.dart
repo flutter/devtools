@@ -35,11 +35,13 @@ void main() {
 
       final FakeServiceConnectionManager fakeServiceConnection =
           FakeServiceConnectionManager();
-      when(fakeServiceConnection.serviceManager.connectedApp!.isFlutterWebAppNow)
+      when(fakeServiceConnection
+              .serviceManager.connectedApp!.isFlutterWebAppNow)
           .thenReturn(false);
       when(fakeServiceConnection.serviceManager.connectedApp!.isProfileBuildNow)
           .thenReturn(false);
-      when(fakeServiceConnection.errorBadgeManager.errorCountNotifier('logging'))
+      when(fakeServiceConnection.errorBadgeManager
+              .errorCountNotifier('logging'))
           .thenReturn(ValueNotifier<int>(0));
       setGlobal(NotificationService, NotificationService());
       setGlobal(

@@ -73,7 +73,8 @@ class MemoryDefaultScene extends Scene {
       isProfileBuild: true,
       isWebApp: false,
     );
-    when(fakeServiceConnection.serviceManager.vm.operatingSystem).thenReturn('ios');
+    when(fakeServiceConnection.serviceManager.vm.operatingSystem)
+        .thenReturn('ios');
     setGlobal(ServiceConnectionManager, fakeServiceConnection);
 
     final showAllFilter = ClassFilter(

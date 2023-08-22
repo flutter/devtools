@@ -26,7 +26,9 @@ void main() {
   setUp(() async {
     setCharacterWidthForTables();
     setGlobal(
-        ServiceConnectionManager, createMockServiceConnectionWithDefaults(),);
+      ServiceConnectionManager,
+      createMockServiceConnectionWithDefaults(),
+    );
     setGlobal(IdeTheme, IdeTheme());
     final mockScriptManager = MockScriptManager();
     when(mockScriptManager.sortedScripts).thenReturn(
