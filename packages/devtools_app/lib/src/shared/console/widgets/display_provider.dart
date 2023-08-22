@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide Stack;
 import 'package:flutter/services.dart';
@@ -13,7 +14,6 @@ import '../../globals.dart';
 import '../../primitives/utils.dart';
 import '../../routing.dart';
 import '../../screen.dart';
-import '../../theme.dart';
 import 'description.dart';
 
 /// The display provider for variables fetched via the VM service protocol.

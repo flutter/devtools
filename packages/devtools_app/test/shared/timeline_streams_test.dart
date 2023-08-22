@@ -3,8 +3,7 @@
 // found in the LICENSE file.
 
 @TestOn('vm')
-import 'package:devtools_app/src/screens/performance/timeline_streams.dart';
-import 'package:devtools_app/src/shared/globals.dart';
+import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_shared/devtools_test_utils.dart';
 import 'package:flutter_test/flutter_test.dart';
 

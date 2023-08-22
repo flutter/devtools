@@ -4,6 +4,8 @@
 
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/performance/panes/controls/enhance_tracing/enhance_tracing.dart';
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -20,7 +22,7 @@ void main() {
   group('TrackWidgetBuildsSetting', () {
     setUp(() async {
       fakeExtensionManager = FakeServiceExtensionManager();
-      fakeExtensionManager.fakeFrame();
+      await fakeExtensionManager.fakeFrame();
       await fakeExtensionManager
           .fakeAddServiceExtension(profileWidgetBuilds.extension);
       await fakeExtensionManager

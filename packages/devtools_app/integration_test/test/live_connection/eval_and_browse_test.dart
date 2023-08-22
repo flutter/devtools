@@ -42,14 +42,22 @@ void main() {
     final evalTester = _EvalAndBrowseTester(tester);
     await evalTester.prepareMemoryUI();
 
+    logStatus('test basic evaluation');
     await _testBasicEval(evalTester);
+
+    logStatus('test variable assignment');
     await _testAssignment(evalTester);
 
+    logStatus('test dump one instance to console');
     await _profileOneInstance(evalTester);
+
+    logStatus('test dump all instances to console');
     await _profileAllInstances(evalTester);
 
+    logStatus('test take a snapshot');
     await evalTester.switchToSnapshotsAndTakeOne();
 
+    logStatus('test inbound references are listed on console instance');
     await _inboundReferencesAreListed(evalTester);
   });
 }

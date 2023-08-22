@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:math';
 
+import 'package:devtools_app_shared/utils.dart';
 import 'package:logging/logging.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -152,7 +153,7 @@ Future<void> _addInstanceRefItems(
     final name = child.name;
     if (name != null && name.isNotEmpty) {
       existingNames.add(name);
-      if (!isPrivate(name)) {
+      if (!isPrivateMember(name)) {
         // Assume private and public names with the same name reference the same
         // data so showing both is not useful.
         existingNames.add('_$name');

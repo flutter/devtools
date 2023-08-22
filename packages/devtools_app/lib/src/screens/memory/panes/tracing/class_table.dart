@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../shared/analytics/analytics.dart' as ga;
@@ -12,8 +13,6 @@ import '../../../../shared/primitives/utils.dart';
 import '../../../../shared/table/table.dart';
 import '../../../../shared/table/table_controller.dart';
 import '../../../../shared/table/table_data.dart';
-import '../../../../shared/theme.dart';
-import '../../../../shared/utils.dart';
 import '../../shared/widgets/shared_memory_widgets.dart';
 import 'tracing_pane_controller.dart';
 

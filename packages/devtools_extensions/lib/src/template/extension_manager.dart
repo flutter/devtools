@@ -7,8 +7,6 @@ part of 'devtools_extension.dart';
 final _log = Logger('devtools_extensions/extension_manager');
 
 class ExtensionManager {
-  final appManager = ConnectedAppManager();
-
   final _registeredEventHandlers =
       <DevToolsExtensionEventType, ExtensionEventHandler>{};
 
@@ -22,6 +20,9 @@ class ExtensionManager {
   // ignore: unused_element, false positive due to part files
   void _init({required bool connectToVmService}) {
     html.window.addEventListener('message', _handleMessage);
+    // TODO(kenz) instead of connecting to the VM service through an event, load
+    // the vm service URI through a query parameter like we already do in
+    // DevTools app.
     if (connectToVmService) {
       // Request the vm service uri for the connected app. DevTools will
       // respond with a [DevToolsPluginEventType.connectedVmService] event with
@@ -55,7 +56,13 @@ class ExtensionManager {
             break;
           case DevToolsExtensionEventType.vmServiceConnection:
             final vmServiceUri = extensionEvent.data?['uri'] as String?;
-            unawaited(appManager.connectToVmService(vmServiceUri));
+            unawaited(
+              connectToVmService(vmServiceUri).catchError((e) {
+                // TODO(kenz): post a notification to DevTools for errors
+                // or create an error panel for the extensions screens.
+                print('Error connecting to VM service: $e');
+              }),
+            );
             break;
           case DevToolsExtensionEventType.unknown:
           default:
@@ -71,5 +78,27 @@ class ExtensionManager {
 
   void postMessageToDevTools(DevToolsExtensionEvent event) {
     html.window.parent?.postMessage(event.toJson(), html.window.origin!);
+  }
+
+  Future<void> connectToVmService(String? vmServiceUri) async {
+    if (vmServiceUri == null) return;
+
+    final finishedCompleter = Completer<void>();
+    final vmService = await connect<VmService>(
+      uri: Uri.parse(vmServiceUri),
+      finishedCompleter: finishedCompleter,
+      createService: ({
+        // ignore: avoid-dynamic, code needs to match API from VmService.
+        required Stream<dynamic> /*String|List<int>*/ inStream,
+        required void Function(String message) writeMessage,
+        required Uri connectedUri,
+      }) {
+        return VmService(inStream, writeMessage);
+      },
+    );
+    await serviceManager.vmServiceOpened(
+      vmService,
+      onClosed: finishedCompleter.future,
+    );
   }
 }

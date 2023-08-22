@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:devtools_app/src/service/service_manager.dart';
+import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/shared/diagnostics/dart_object_node.dart';
 import 'package:devtools_app/src/shared/diagnostics/tree_builder.dart';
-import 'package:devtools_app/src/shared/globals.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';

@@ -4,6 +4,8 @@
 
 import 'dart:async';
 
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -17,16 +19,12 @@ import '../shared/config_specific/import_export/import_export.dart';
 import '../shared/connection_info.dart';
 import '../shared/feature_flags.dart';
 import '../shared/globals.dart';
-import '../shared/primitives/auto_dispose.dart';
 import '../shared/primitives/blocking_action_mixin.dart';
 import '../shared/primitives/utils.dart';
 import '../shared/routing.dart';
 import '../shared/screen.dart';
-import '../shared/theme.dart';
 import '../shared/title.dart';
-import '../shared/ui/label.dart';
 import '../shared/ui/vm_flag_widgets.dart';
-import '../shared/utils.dart';
 import 'framework_core.dart';
 
 class HomeScreen extends Screen {

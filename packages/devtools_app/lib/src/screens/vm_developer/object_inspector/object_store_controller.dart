@@ -2,10 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 
 import '../../../shared/globals.dart';
-import '../../../shared/primitives/auto_dispose.dart';
 import '../vm_service_private_extensions.dart';
 
 class ObjectStoreController extends DisposableController

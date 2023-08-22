@@ -11,11 +11,8 @@ class FooPackageDevToolsExtension extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      title: 'Foo DevTools Extension',
-      home: DevToolsExtension(
-        child: FooExtensionHomePage(),
-      ),
+    return const DevToolsExtension(
+      child: FooExtensionHomePage(),
     );
   }
 }

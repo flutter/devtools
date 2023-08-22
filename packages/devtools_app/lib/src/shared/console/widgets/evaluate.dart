@@ -6,6 +6,8 @@ import 'dart:async';
 import 'dart:math';
 import 'dart:ui';
 
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:vm_service/vm_service.dart';
@@ -13,8 +15,6 @@ import 'package:vm_service/vm_service.dart';
 import '../../analytics/analytics.dart' as ga;
 import '../../analytics/constants.dart' as gac;
 import '../../globals.dart';
-import '../../primitives/auto_dispose.dart';
-import '../../theme.dart';
 import '../../ui/search.dart';
 import '../../ui/utils.dart';
 import '../eval/auto_complete.dart';

@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_shared/devtools_extensions.dart';
 import 'package:flutter/foundation.dart';
 
 import '../shared/config_specific/server/server.dart' as server;
 import '../shared/globals.dart';
-import '../shared/primitives/auto_dispose.dart';
 
 class ExtensionService extends DisposableController
     with AutoDisposeControllerMixin {

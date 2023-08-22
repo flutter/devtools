@@ -2,14 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../shared/analytics/analytics.dart' as ga;
 import '../../../../shared/analytics/constants.dart' as gac;
 import '../../../../shared/common_widgets.dart';
-import '../../../../shared/primitives/auto_dispose.dart';
 import '../../../../shared/primitives/simple_items.dart';
-import '../../../../shared/theme.dart';
 import '../../../../shared/utils.dart';
 import '../../framework/connected/memory_controller.dart';
 import '../../shared/primitives/simple_elements.dart';
@@ -116,7 +116,7 @@ class _LegendButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return ValueListenableBuilder<bool>(
       valueListenable: chartController.legendVisibleNotifier,
-      builder: (_, legendVisible, __) => DevToolsButton(
+      builder: (_, legendVisible, __) => GaDevToolsButton(
         onPressed: chartController.toggleLegendVisibility,
         gaScreen: gac.memory,
         gaSelection: legendVisible

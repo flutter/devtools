@@ -11,12 +11,12 @@ import 'dart:async';
 // ignore: avoid_web_libraries_in_flutter, by design
 import 'dart:html';
 
+import 'package:devtools_app_shared/utils.dart';
 import 'package:js/js.dart';
 import 'package:logging/logging.dart';
 
 import '../../../devtools.dart' as devtools show version;
 import '../config_specific/server/server.dart' as server;
-import '../config_specific/url/url.dart';
 import '../globals.dart';
 import '../primitives/url_utils.dart';
 import '../ui/gtags.dart';

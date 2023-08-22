@@ -4,12 +4,12 @@
 
 import 'dart:async';
 
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'common_widgets.dart';
-import 'primitives/utils.dart';
-import 'theme.dart';
 import 'utils.dart';
 
 /// A widget that displays the contents of [entries].

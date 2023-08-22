@@ -57,13 +57,24 @@ dart --disable-analytics
 flutter --version
 dart --version
 
-# Generate code.
+# Fetch dependencies
 pushd packages/devtools_app
+flutter pub get
+popd
+pushd packages/devtools_app_shared
+flutter pub get
+popd
+pushd packages/devtools_extensions
+flutter pub get
+popd
+pushd packages/devtools_shared
 flutter pub get
 popd
 pushd packages/devtools_test
 flutter pub get
 popd
+
+# Generate code.
 bash tool/generate_code.sh
 
 # Change the CI to the packages/devtools_app directory.
@@ -88,7 +99,13 @@ if [ "$BOT" = "main" ]; then
 
     popd
 
-    # Test the devtools_shared and devtools_extensions package tests on the main bot.
+    # Test the `devtools_app_shared`, `devtools_shared` and `devtools_extensions` package tests on the
+    # main bot.
+    pushd packages/devtools_app_shared
+    echo `pwd`
+    flutter test test/
+    popd
+
     pushd packages/devtools_shared
     echo `pwd`
     flutter test test/

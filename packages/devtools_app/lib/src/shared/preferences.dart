@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 
@@ -15,8 +16,6 @@ import 'config_specific/logger/logger_helpers.dart';
 import 'constants.dart';
 import 'diagnostics/inspector_service.dart';
 import 'globals.dart';
-import 'primitives/auto_dispose.dart';
-import 'primitives/utils.dart';
 
 /// A controller for global application preferences.
 class PreferencesController extends DisposableController

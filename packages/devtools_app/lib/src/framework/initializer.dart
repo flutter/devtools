@@ -4,6 +4,8 @@
 
 import 'dart:async';
 
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
@@ -14,10 +16,8 @@ import '../shared/common_widgets.dart';
 import '../shared/config_specific/import_export/import_export.dart';
 import '../shared/framework_controller.dart';
 import '../shared/globals.dart';
-import '../shared/primitives/auto_dispose.dart';
 import '../shared/primitives/utils.dart';
 import '../shared/routing.dart';
-import '../shared/theme.dart';
 import 'framework_core.dart';
 
 final _log = Logger('initializer');

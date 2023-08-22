@@ -4,13 +4,13 @@
 
 import 'dart:math' as math;
 
+import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 import 'package:pointer_interceptor/pointer_interceptor.dart';
 
 import '../shared/common_widgets.dart';
 import '../shared/primitives/utils.dart';
 import '../shared/screen.dart';
-import '../shared/theme.dart';
 
 class DevToolsAppBar extends StatelessWidget {
   const DevToolsAppBar({

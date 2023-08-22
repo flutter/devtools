@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
-import '../../shared/theme.dart';
 import 'cpu_profiler_controller.dart';
 
 class CpuProfilerDisabled extends StatelessWidget {

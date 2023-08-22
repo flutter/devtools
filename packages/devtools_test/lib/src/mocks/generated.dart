@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:devtools_app/devtools_app.dart';
+import 'package:devtools_app_shared/service.dart';
 import 'package:mockito/annotations.dart';
 import 'package:vm_service/vm_service.dart';
 

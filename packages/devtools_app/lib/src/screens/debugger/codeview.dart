@@ -5,6 +5,8 @@
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
@@ -17,15 +19,11 @@ import '../../shared/console/widgets/expandable_variable.dart';
 import '../../shared/diagnostics/dart_object_node.dart';
 import '../../shared/diagnostics/primitives/source_location.dart';
 import '../../shared/diagnostics/tree_builder.dart';
-import '../../shared/dialogs.dart';
 import '../../shared/globals.dart';
 import '../../shared/history_viewport.dart';
-import '../../shared/primitives/auto_dispose.dart';
 import '../../shared/primitives/flutter_widgets/linked_scroll_controller.dart';
 import '../../shared/primitives/listenable.dart';
 import '../../shared/primitives/utils.dart';
-import '../../shared/theme.dart';
-import '../../shared/ui/colors.dart';
 import '../../shared/ui/hover.dart';
 import '../../shared/ui/search.dart';
 import '../../shared/ui/utils.dart';

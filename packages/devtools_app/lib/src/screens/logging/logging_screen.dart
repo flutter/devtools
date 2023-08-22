@@ -4,6 +4,8 @@
 
 import 'dart:async';
 
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -11,10 +13,7 @@ import '../../service/service_extension_widgets.dart';
 import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/common_widgets.dart';
-import '../../shared/primitives/auto_dispose.dart';
 import '../../shared/screen.dart';
-import '../../shared/split.dart';
-import '../../shared/theme.dart';
 import '../../shared/ui/filter.dart';
 import '../../shared/ui/search.dart';
 import '../../shared/utils.dart';
@@ -134,7 +133,7 @@ class _LoggingScreenState extends State<LoggingScreenBody>
           searchFieldEnabled: hasData,
         ),
         const SizedBox(width: denseSpacing),
-        FilterButton(
+        DevToolsFilterButton(
           onPressed: _showFilterDialog,
           isFilterActive: controller.isFilterActive,
         ),

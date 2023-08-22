@@ -2,12 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 
 import 'initialization.dart';
 import 'src/shared/environment_parameters/environment_parameters_base.dart';
 import 'src/shared/environment_parameters/environment_parameters_external.dart';
-import 'src/shared/globals.dart';
 import 'src/shared/primitives/utils.dart';
 
 /// This is the entrypoint for running DevTools externally.

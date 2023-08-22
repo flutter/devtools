@@ -4,6 +4,8 @@
 
 import 'dart:async';
 
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -14,13 +16,10 @@ import '../../shared/common_widgets.dart';
 import '../../shared/globals.dart';
 import '../../shared/http/curl_command.dart';
 import '../../shared/http/http_request_data.dart';
-import '../../shared/primitives/auto_dispose.dart';
 import '../../shared/primitives/utils.dart';
 import '../../shared/screen.dart';
-import '../../shared/split.dart';
 import '../../shared/table/table.dart';
 import '../../shared/table/table_data.dart';
-import '../../shared/theme.dart';
 import '../../shared/ui/filter.dart';
 import '../../shared/ui/search.dart';
 import '../../shared/utils.dart';
@@ -252,7 +251,7 @@ class _NetworkProfilerControlsState extends State<_NetworkProfilerControls>
           searchFieldWidth: wideSearchFieldWidth,
         ),
         const SizedBox(width: denseSpacing),
-        FilterButton(
+        DevToolsFilterButton(
           onPressed: _showFilterDialog,
           isFilterActive: _filteredRequests.length != _requests.requests.length,
         ),

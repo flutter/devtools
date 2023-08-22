@@ -4,11 +4,11 @@
 
 import 'package:collection/collection.dart';
 import 'package:devtools_app/devtools_app.dart';
-import 'package:devtools_app/src/service/service_registrations.dart'
-    as registrations;
-import 'package:devtools_app/src/service/vm_flags.dart' as vm_flags;
 import 'package:devtools_app/src/shared/ui/drop_down_button.dart';
 import 'package:devtools_app/src/shared/ui/vm_flag_widgets.dart';
+import 'package:devtools_app_shared/service.dart';
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -35,7 +35,7 @@ void main() {
       dropdown = CpuSamplingRateDropdown(
         screenId: ProfilerScreen.id,
         profilePeriodFlagNotifier:
-            fakeServiceManager.vmFlagManager.flag(vm_flags.profilePeriod)!,
+            fakeServiceManager.vmFlagManager.flag(profilePeriod)!,
       );
     });
 
@@ -104,7 +104,7 @@ void main() {
 
       profilePeriodFlag =
           (await getProfileGranularityFlag(fakeServiceManager))!;
-      expect(profilePeriodFlag.name, equals(vm_flags.profilePeriod));
+      expect(profilePeriodFlag.name, equals(profilePeriod));
       expect(
         profilePeriodFlag.valueAsString,
         equals(CpuSamplingRate.high.value),
@@ -126,7 +126,7 @@ void main() {
 
       profilePeriodFlag =
           (await getProfileGranularityFlag(fakeServiceManager))!;
-      expect(profilePeriodFlag.name, equals(vm_flags.profilePeriod));
+      expect(profilePeriodFlag.name, equals(profilePeriod));
       expect(
         profilePeriodFlag.valueAsString,
         equals(CpuSamplingRate.low.value),
@@ -151,10 +151,7 @@ void main() {
           tester.widget(dropdownButtonFinder);
       expect(dropdownButton.value, equals(CpuSamplingRate.medium.value));
 
-      await serviceManager.service!.setFlag(
-        vm_flags.profilePeriod,
-        newFlagValue,
-      );
+      await serviceManager.service!.setFlag(profilePeriod, newFlagValue);
       await tester.pumpAndSettle();
       dropdownButton = tester.widget(dropdownButtonFinder);
       expect(dropdownButton.value, equals(expectedFlagValue));
@@ -191,8 +188,7 @@ void main() {
       bool flutterVersionServiceAvailable = true,
     }) {
       final availableServices = [
-        if (flutterVersionServiceAvailable)
-          registrations.flutterVersion.service,
+        if (flutterVersionServiceAvailable) flutterVersionService.service,
       ];
       fakeServiceManager = FakeServiceManager(
         availableServices: availableServices,
@@ -236,6 +232,6 @@ Future<Flag?> getProfileGranularityFlag(
 ) async {
   final flagList = (await serviceManager.service!.getFlagList()).flags!;
   return flagList.firstWhereOrNull(
-    (flag) => flag.name == vm_flags.profilePeriod,
+    (flag) => flag.name == profilePeriod,
   );
 }

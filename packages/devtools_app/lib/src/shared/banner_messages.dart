@@ -3,6 +3,9 @@
 // found in the LICENSE file.
 
 import 'package:collection/collection.dart' show IterableExtension;
+import 'package:devtools_app_shared/service.dart';
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -16,8 +19,6 @@ import 'globals.dart';
 import 'http/http_service.dart' as http_service;
 import 'primitives/utils.dart';
 import 'screen.dart';
-import 'theme.dart';
-import 'version.dart';
 
 const _runInProfileModeDocsUrl =
     'https://flutter.dev/docs/testing/ui-performance#run-in-profile-mode';

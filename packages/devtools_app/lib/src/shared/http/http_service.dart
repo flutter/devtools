@@ -4,9 +4,9 @@
 
 import 'dart:async';
 
+import 'package:devtools_app_shared/service.dart';
 import 'package:flutter/foundation.dart';
 
-import '../../service/service_extension_manager.dart';
 import '../../service/service_extensions.dart' as extensions;
 import '../globals.dart';
 import '../primitives/utils.dart';

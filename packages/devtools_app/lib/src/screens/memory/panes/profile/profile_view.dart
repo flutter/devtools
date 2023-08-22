@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -14,8 +15,6 @@ import '../../../../shared/primitives/utils.dart';
 import '../../../../shared/table/table.dart';
 import '../../../../shared/table/table_controller.dart';
 import '../../../../shared/table/table_data.dart';
-import '../../../../shared/theme.dart';
-import '../../../../shared/utils.dart';
 import '../../../vm_developer/vm_service_private_extensions.dart';
 import '../../shared/heap/class_filter.dart';
 import '../../shared/primitives/simple_elements.dart';
@@ -672,7 +671,7 @@ class _RefreshOnGCToggleButton extends StatelessWidget {
     return ValueListenableBuilder<bool>(
       valueListenable: allocationProfileController.refreshOnGc,
       builder: (context, refreshOnGc, _) {
-        return ToggleButton(
+        return DevToolsToggleButton(
           message: 'Auto-refresh on garbage collection',
           label: 'Refresh on GC',
           icon: Icons.autorenew_outlined,
