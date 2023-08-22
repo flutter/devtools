@@ -7,12 +7,14 @@ import 'dart:core';
 
 import 'package:collection/collection.dart' show IterableExtension;
 import 'package:flutter/foundation.dart';
+import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart' hide Error;
 
 import '../../utils.dart';
 import 'isolate_state.dart';
 import 'service_extensions.dart' as extensions;
 
+@sealed
 class IsolateManager extends Disposer {
   final _isolateStates = <IsolateRef, IsolateState>{};
   VmService? _service;

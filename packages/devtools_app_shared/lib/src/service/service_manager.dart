@@ -7,6 +7,7 @@ import 'dart:core';
 
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
+import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart' hide Error;
 
 import '../../service.dart';
@@ -18,6 +19,7 @@ final _log = Logger('service_manager');
 // TODO(kenz): add an offline service manager implementation.
 // TODO(jacobr): refactor all of these apis to be in terms of ValueListenable
 // instead of Streams.
+@sealed
 class ServiceManager<T extends VmService> {
   ServiceManager() {
     _serviceExtensionManager = ServiceExtensionManager(isolateManager);

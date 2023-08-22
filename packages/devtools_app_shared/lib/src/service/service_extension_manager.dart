@@ -7,6 +7,7 @@ import 'dart:core';
 
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
+import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart' hide Error;
 
 import '../../service.dart';
@@ -16,6 +17,7 @@ import 'service_extensions.dart' as extensions;
 final _log = Logger('service_extension_manager');
 
 /// Manager that handles tracking the service extension for the main isolate.
+@sealed
 class ServiceExtensionManager extends Disposer {
   ServiceExtensionManager(this._isolateManager);
 

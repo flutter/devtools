@@ -9,6 +9,7 @@ import 'package:vm_service/vm_service.dart';
 
 import 'generated.mocks.dart';
 
+// ignore: subtype_of_sealed_class, fake for testing.
 class FakeIsolateManager extends Fake implements IsolateManager {
   @override
   ValueListenable<IsolateRef?> get selectedIsolate => _selectedIsolate;

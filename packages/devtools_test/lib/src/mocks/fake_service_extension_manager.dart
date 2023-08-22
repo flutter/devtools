@@ -9,6 +9,7 @@ import 'package:devtools_app_shared/service_extensions.dart';
 import 'package:flutter/foundation.dart';
 import 'package:mockito/mockito.dart';
 
+// ignore: subtype_of_sealed_class, fake for testing.
 /// Fake that simplifies writing UI tests that depend on the
 /// ServiceExtensionManager.
 // TODO(jacobr): refactor ServiceExtensionManager so this fake can reuse more

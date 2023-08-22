@@ -11,6 +11,7 @@ dependencies:
   devtools_shared: ^3.0.0
   flutter:
     sdk: flutter
+  meta: ^1.9.1
   pointer_interceptor: ^0.9.3+3
   vm_service: ^11.3.0
 

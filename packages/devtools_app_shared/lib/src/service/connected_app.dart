@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:logging/logging.dart';
+import 'package:meta/meta.dart';
 
 import 'eval_on_dart_library.dart';
 import 'flutter_version.dart';
@@ -15,6 +16,7 @@ final _log = Logger('connected_app');
 const flutterLibraryUri = 'package:flutter/src/widgets/binding.dart';
 const dartHtmlLibraryUri = 'dart:html';
 
+@sealed
 class ConnectedApp {
   ConnectedApp(this.serviceManager);
 
