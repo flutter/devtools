@@ -79,9 +79,11 @@ class _ProviderScreenWrapperState extends State<ProviderScreenWrapper>
     ga.screen(ProviderScreen.id);
 
     cancelListeners();
-    addAutoDisposeListener(serviceManager.connectedState, () {
-      if (serviceManager.connectedState.value.connected) {
-        setServiceConnectionForProviderScreen(serviceManager.service!);
+    addAutoDisposeListener(serviceConnection.serviceManager.connectedState, () {
+      if (serviceConnection.serviceManager.connectedState.value.connected) {
+        setServiceConnectionForProviderScreen(
+          serviceConnection.serviceManager.service!,
+        );
       }
     });
   }

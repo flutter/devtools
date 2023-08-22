@@ -40,8 +40,8 @@ void main() {
 
     eval = EvalOnDartLibrary(
       'package:flutter_app/src/autocomplete.dart',
-      serviceManager.service!,
-      serviceManager: serviceManager,
+      serviceConnection.serviceManager.service!,
+      serviceManager: serviceConnection.serviceManager,
       disableBreakpoints: false,
     );
   });

@@ -39,7 +39,8 @@ class TracingPaneState extends State<TracingPane> {
   @override
   Widget build(BuildContext context) {
     final isProfileMode =
-        serviceManager.connectedApp?.isProfileBuildNow ?? false;
+        serviceConnection.serviceManager.connectedApp?.isProfileBuildNow ??
+            false;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [

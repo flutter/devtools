@@ -35,7 +35,8 @@ class _DebuggingControlsState extends State<DebuggingControls>
     super.didChangeDependencies();
     if (!initController()) return;
     addAutoDisposeListener(
-      serviceManager.isolateManager.mainIsolateState?.isPaused,
+      serviceConnection
+          .serviceManager.isolateManager.mainIsolateState?.isPaused,
     );
     addAutoDisposeListener(controller.resuming);
     addAutoDisposeListener(controller.stackFramesWithLocation);
@@ -46,17 +47,19 @@ class _DebuggingControlsState extends State<DebuggingControls>
     final resuming = controller.resuming.value;
     final hasStackFrames = controller.stackFramesWithLocation.value.isNotEmpty;
     final isSystemIsolate = controller.isSystemIsolate;
-    final canStep = serviceManager.isMainIsolatePaused &&
+    final canStep = serviceConnection.serviceManager.isMainIsolatePaused &&
         !resuming &&
         hasStackFrames &&
         !isSystemIsolate;
-    final isVmApp = serviceManager.connectedApp?.isRunningOnDartVM ?? false;
+    final isVmApp =
+        serviceConnection.serviceManager.connectedApp?.isRunningOnDartVM ??
+            false;
     return SizedBox(
       height: defaultButtonHeight,
       child: Row(
         children: [
           _pauseAndResumeButtons(
-            isPaused: serviceManager.isMainIsolatePaused,
+            isPaused: serviceConnection.serviceManager.isMainIsolatePaused,
             resuming: resuming,
           ),
           const SizedBox(width: denseSpacing),

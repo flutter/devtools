@@ -398,7 +398,8 @@ class EvalOnDartLibrary extends DisposableController
 
     // start awaiting the event before starting the evaluation, in case the
     // event is received before the eval function completes.
-    final future = serviceManager.service!.onExtensionEvent.firstWhere((event) {
+    final future =
+        serviceManager.service!.onExtensionEvent.firstWhere((event) {
       return event.extensionKind == 'future_completed' &&
           event.extensionData!.data['future_id'] == futureId &&
           // Using `_clientId` here as if two chrome tabs open the devtool, it is

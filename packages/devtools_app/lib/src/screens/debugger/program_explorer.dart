@@ -459,7 +459,8 @@ class ProgramExplorer extends StatelessWidget {
               // the above issues are resolved.
               //
               // See https://github.com/flutter/devtools/issues/3447.
-              return serviceManager.connectedApp!.isDartWebAppNow!
+              return serviceConnection
+                      .serviceManager.connectedApp!.isDartWebAppNow!
                   ? Column(
                       children: [
                         fileExplorerHeader,

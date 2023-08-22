@@ -117,8 +117,9 @@ class _RebuildStatsViewState extends State<RebuildStatsView>
         ),
         Expanded(
           child: ValueListenableBuilder<ServiceExtensionState>(
-            valueListenable:
-                serviceManager.serviceExtensionManager.getServiceExtensionState(
+            valueListenable: serviceConnection
+                .serviceManager.serviceExtensionManager
+                .getServiceExtensionState(
               extensions.trackRebuildWidgets.extension,
             ),
             builder: (context, state, _) {

@@ -23,7 +23,7 @@ void main() {
   const smallWindowSize = Size(1200.0, 1000.0);
 
   void initializeGlobalsAndMockApp() {
-    final fakeServiceManager = FakeServiceManager();
+    final fakeServiceManager = FakeServiceConnectionManager();
     setGlobal(ServiceConnectionManager, fakeServiceManager);
     setGlobal(BreakpointManager, BreakpointManager());
     setGlobal(IdeTheme, IdeTheme());
@@ -36,7 +36,7 @@ void main() {
     setGlobal(PreferencesController, PreferencesController());
 
     mockConnectedApp(
-      fakeServiceManager.connectedApp!,
+      fakeServiceManager.serviceManager.connectedApp!,
       isProfileBuild: false,
       isFlutterApp: true,
       isWebApp: false,

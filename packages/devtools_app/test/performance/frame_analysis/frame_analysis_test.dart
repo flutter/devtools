@@ -34,11 +34,11 @@ void main() {
       rebuildCountModel = RebuildCountModel();
       setGlobal(IdeTheme, IdeTheme());
       setGlobal(OfflineModeController, OfflineModeController());
-      final fakeServiceManager = FakeServiceManager();
+      final fakeServiceManager = FakeServiceConnectionManager();
       setGlobal(ServiceConnectionManager, fakeServiceManager);
       setGlobal(NotificationService, NotificationService());
       mockConnectedApp(
-        fakeServiceManager.connectedApp!,
+        fakeServiceManager.serviceManager.connectedApp!,
         isFlutterApp: true,
         isProfileBuild: true,
         isWebApp: false,

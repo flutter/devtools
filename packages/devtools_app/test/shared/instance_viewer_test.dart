@@ -131,7 +131,7 @@ void main() {
       ExternalDevToolsEnvironmentParameters(),
     );
     setGlobal(IdeTheme, getIdeTheme());
-    setGlobal(ServiceConnectionManager, FakeServiceManager());
+    setGlobal(ServiceConnectionManager, FakeServiceConnectionManager());
   });
 
   group('InstanceViewer', () {

@@ -10,7 +10,8 @@ environment:
 
 dependencies:
   collection: ^1.15.0
-  extension_discovery: ^1.0.0
+  extension_discovery: #^1.0.0
+    path: ../../../dart-sdk/tools/pkgs/extension_discovery
   path: ^1.8.0
   shelf: ^1.1.0
   sse: ^4.1.2

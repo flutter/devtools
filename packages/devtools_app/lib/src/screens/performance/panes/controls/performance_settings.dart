@@ -26,7 +26,8 @@ class PerformanceSettingsDialog extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if (serviceManager.connectedApp!.isFlutterAppNow!) ...[
+            if (serviceConnection
+                .serviceManager.connectedApp!.isFlutterAppNow!) ...[
               FlutterSettings(
                 flutterFramesController: controller.flutterFramesController,
               ),

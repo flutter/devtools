@@ -15,20 +15,22 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 
 void main() {
-  final mockServiceManager = MockServiceConnectionManager();
-  when(mockServiceManager.service).thenReturn(null);
-  when(mockServiceManager.connectedAppInitialized).thenReturn(false);
-  when(mockServiceManager.connectedState).thenReturn(
+  final mockServiceConnection = createMockServiceConnectionWithDefaults();
+  when(mockServiceConnection.serviceManager.service).thenReturn(null);
+  when(mockServiceConnection.serviceManager.connectedAppInitialized)
+      .thenReturn(false);
+  when(mockServiceConnection.serviceManager.connectedState).thenReturn(
     ValueNotifier<ConnectedState>(const ConnectedState(false)),
   );
-  when(mockServiceManager.hasConnection).thenReturn(false);
+  when(mockServiceConnection.serviceManager.hasConnection).thenReturn(false);
 
   final mockErrorBadgeManager = MockErrorBadgeManager();
-  when(mockServiceManager.errorBadgeManager).thenReturn(mockErrorBadgeManager);
+  when(mockServiceConnection.errorBadgeManager)
+      .thenReturn(mockErrorBadgeManager);
   when(mockErrorBadgeManager.errorCountNotifier(any))
       .thenReturn(ValueNotifier<int>(0));
 
-  setGlobal(ServiceConnectionManager, mockServiceManager);
+  setGlobal(ServiceConnectionManager, mockServiceConnection);
   setGlobal(FrameworkController, FrameworkController());
   setGlobal(SurveyService, SurveyService());
   setGlobal(OfflineModeController, OfflineModeController());
@@ -47,7 +49,8 @@ void main() {
   testWidgets(
     'does not display floating debugger tab controls when no app is connected',
     (WidgetTester tester) async {
-      when(mockServiceManager.connectedAppInitialized).thenReturn(false);
+      when(mockServiceConnection.serviceManager.connectedAppInitialized)
+          .thenReturn(false);
       await tester.pumpWidget(
         wrapScaffold(
           DevToolsScaffold(screens: const [_screen1, _screen2]),

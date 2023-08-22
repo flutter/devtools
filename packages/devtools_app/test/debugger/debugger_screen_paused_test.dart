@@ -22,10 +22,10 @@ void main() {
 
   const windowSize = Size(2500.0, 1500.0);
 
-  final fakeServiceManager = FakeServiceManager();
+  final fakeServiceManager = FakeServiceConnectionManager();
   final scriptManager = MockScriptManager();
   mockConnectedApp(
-    fakeServiceManager.connectedApp!,
+    fakeServiceManager.serviceManager.connectedApp!,
     isFlutterApp: true,
     isProfileBuild: false,
     isWebApp: false,
@@ -89,7 +89,7 @@ void main() {
           debugger: debuggerController,
         ),
       );
-      (serviceManager.isolateManager as FakeIsolateManager)
+      (serviceConnection.serviceManager.isolateManager as FakeIsolateManager)
           .setMainIsolatePausedState(true);
       await tester.pump();
 

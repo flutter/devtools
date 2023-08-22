@@ -62,7 +62,7 @@ class _InitializerState extends State<Initializer>
   ///
   /// This is a method and not a getter to communicate that its value may
   /// change between successive calls.
-  bool _checkLoaded() => serviceManager.hasConnection;
+  bool _checkLoaded() => serviceConnection.serviceManager.hasConnection;
 
   OverlayEntry? currentDisconnectedOverlay;
 
@@ -76,8 +76,9 @@ class _InitializerState extends State<Initializer>
 
     // If we become disconnected by means other than a manual disconnect action,
     // attempt to reconnect.
-    addAutoDisposeListener(serviceManager.connectedState, () {
-      final connectionState = serviceManager.connectedState.value;
+    addAutoDisposeListener(serviceConnection.serviceManager.connectedState, () {
+      final connectionState =
+          serviceConnection.serviceManager.connectedState.value;
       if (connectionState.connected) {
         setState(() {});
       } else if (!connectionState.userInitiatedConnectionState) {
@@ -160,13 +161,17 @@ class _InitializerState extends State<Initializer>
         );
         Overlay.of(context).insert(_createDisconnectedOverlay());
 
-        addAutoDisposeListener(serviceManager.connectedState, () {
-          final connectedState = serviceManager.connectedState.value;
-          if (connectedState.connected) {
-            // Hide the overlay if we become reconnected.
-            hideDisconnectedOverlay();
-          }
-        });
+        addAutoDisposeListener(
+          serviceConnection.serviceManager.connectedState,
+          () {
+            final connectedState =
+                serviceConnection.serviceManager.connectedState.value;
+            if (connectedState.connected) {
+              // Hide the overlay if we become reconnected.
+              hideDisconnectedOverlay();
+            }
+          },
+        );
       }
     });
   }

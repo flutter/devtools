@@ -29,13 +29,13 @@ void main() {
   late VMServiceObjectNode libraryNode;
 
   setUp(() async {
-    final fakeServiceManager = FakeServiceManager();
+    final fakeServiceManager = FakeServiceConnectionManager();
     final scriptManager = MockScriptManager();
     when(scriptManager.getScript(any)).thenAnswer(
       (_) => Future<Script>.value(testScript),
     );
     mockConnectedApp(
-      fakeServiceManager.connectedApp!,
+      fakeServiceManager.serviceManager.connectedApp!,
       isFlutterApp: true,
       isProfileBuild: false,
       isWebApp: false,
@@ -103,7 +103,7 @@ void main() {
     'has Console / stdio area',
     windowSize,
     (WidgetTester tester) async {
-      serviceManager.consoleService.appendStdio('test stdio');
+      serviceConnection.consoleService.appendStdio('test stdio');
 
       await pumpConsole(tester, debuggerController);
 

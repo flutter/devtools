@@ -31,8 +31,9 @@ void main() {
   late CpuProfileData cpuProfileData;
   late CpuProfilerController controller;
 
-  final ServiceConnectionManager fakeServiceManager = FakeServiceManager();
-  final app = fakeServiceManager.connectedApp!;
+  final ServiceConnectionManager fakeServiceManager =
+      FakeServiceConnectionManager();
+  final app = fakeServiceManager.serviceManager.connectedApp!;
   when(app.isFlutterNativeAppNow).thenReturn(false);
   when(app.isFlutterAppNow).thenReturn(false);
   when(app.isDebugFlutterAppNow).thenReturn(false);

@@ -14,11 +14,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
-  late FakeServiceManager fakeServiceManager;
+  late FakeServiceConnectionManager fakeServiceConnection;
 
   setUp(() {
-    fakeServiceManager = FakeServiceManager();
-    setGlobal(ServiceConnectionManager, fakeServiceManager);
+    fakeServiceConnection = FakeServiceConnectionManager();
+    setGlobal(ServiceConnectionManager, fakeServiceConnection);
     setGlobal(IdeTheme, IdeTheme());
     setGlobal(NotificationService, NotificationService());
     setGlobal(BannerMessagesController, BannerMessagesController());

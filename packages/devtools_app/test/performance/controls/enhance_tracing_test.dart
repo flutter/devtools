@@ -13,10 +13,10 @@ import 'package:mockito/mockito.dart';
 
 void main() {
   late FakeServiceExtensionManager fakeExtensionManager;
-  final mockServiceManager = MockServiceConnectionManager();
-  when(mockServiceManager.serviceExtensionManager)
+  final mockServiceConnection = createMockServiceConnectionWithDefaults();
+  when(mockServiceConnection.serviceManager.serviceExtensionManager)
       .thenAnswer((realInvocation) => fakeExtensionManager);
-  setGlobal(ServiceConnectionManager, mockServiceManager);
+  setGlobal(ServiceConnectionManager, mockServiceConnection);
   setGlobal(IdeTheme, getIdeTheme());
 
   group('TrackWidgetBuildsSetting', () {
@@ -56,7 +56,7 @@ void main() {
       await tester.pumpAndSettle();
 
       verifyExtensionStates(
-        mockServiceManager: mockServiceManager,
+        mockServiceConnection: mockServiceConnection,
         trackAllWidgets: false,
         trackUserCreatedWidgets: false,
       );
@@ -79,7 +79,7 @@ void main() {
     testWidgets(
       'builds with profileWidgetBuilds enabled',
       (WidgetTester tester) async {
-        await mockServiceManager.serviceExtensionManager
+        await mockServiceConnection.serviceManager.serviceExtensionManager
             .setServiceExtensionState(
           profileWidgetBuilds.extension,
           enabled: true,
@@ -89,7 +89,7 @@ void main() {
         await tester.pumpAndSettle();
 
         verifyExtensionStates(
-          mockServiceManager: mockServiceManager,
+          mockServiceConnection: mockServiceConnection,
           trackAllWidgets: true,
           trackUserCreatedWidgets: false,
         );
@@ -119,7 +119,7 @@ void main() {
     testWidgets(
       'builds with profileUserWidgetBuilds enabled',
       (WidgetTester tester) async {
-        await mockServiceManager.serviceExtensionManager
+        await mockServiceConnection.serviceManager.serviceExtensionManager
             .setServiceExtensionState(
           profileUserWidgetBuilds.extension,
           enabled: true,
@@ -129,7 +129,7 @@ void main() {
         await tester.pumpAndSettle();
 
         verifyExtensionStates(
-          mockServiceManager: mockServiceManager,
+          mockServiceConnection: mockServiceConnection,
           trackAllWidgets: false,
           trackUserCreatedWidgets: true,
         );
@@ -160,20 +160,20 @@ void main() {
       'defaults to user created widgets when both service extensions are '
       'enabled',
       (WidgetTester tester) async {
-        await mockServiceManager.serviceExtensionManager
+        await mockServiceConnection.serviceManager.serviceExtensionManager
             .setServiceExtensionState(
           profileWidgetBuilds.extension,
           enabled: true,
           value: true,
         );
-        await mockServiceManager.serviceExtensionManager
+        await mockServiceConnection.serviceManager.serviceExtensionManager
             .setServiceExtensionState(
           profileUserWidgetBuilds.extension,
           enabled: true,
           value: true,
         );
         verifyExtensionStates(
-          mockServiceManager: mockServiceManager,
+          mockServiceConnection: mockServiceConnection,
           trackAllWidgets: true,
           trackUserCreatedWidgets: true,
         );
@@ -182,7 +182,7 @@ void main() {
         await tester.pumpAndSettle();
 
         verifyExtensionStates(
-          mockServiceManager: mockServiceManager,
+          mockServiceConnection: mockServiceConnection,
           trackAllWidgets: false,
           trackUserCreatedWidgets: true,
         );
@@ -216,7 +216,7 @@ void main() {
         await tester.pumpAndSettle();
 
         verifyExtensionStates(
-          mockServiceManager: mockServiceManager,
+          mockServiceConnection: mockServiceConnection,
           trackAllWidgets: false,
           trackUserCreatedWidgets: false,
         );
@@ -233,7 +233,7 @@ void main() {
         expect(trackWidgetBuildsCheckbox.value, isTrue);
 
         verifyExtensionStates(
-          mockServiceManager: mockServiceManager,
+          mockServiceConnection: mockServiceConnection,
           trackAllWidgets: false,
           trackUserCreatedWidgets: true,
         );
@@ -243,7 +243,7 @@ void main() {
     testWidgets(
       'unchecking "Track Widget Builds" disables both service extensions',
       (WidgetTester tester) async {
-        await mockServiceManager.serviceExtensionManager
+        await mockServiceConnection.serviceManager.serviceExtensionManager
             .setServiceExtensionState(
           profileUserWidgetBuilds.extension,
           enabled: true,
@@ -253,7 +253,7 @@ void main() {
         await tester.pumpAndSettle();
 
         verifyExtensionStates(
-          mockServiceManager: mockServiceManager,
+          mockServiceConnection: mockServiceConnection,
           trackAllWidgets: false,
           trackUserCreatedWidgets: true,
         );
@@ -270,7 +270,7 @@ void main() {
         expect(trackWidgetBuildsCheckbox.value, isFalse);
 
         verifyExtensionStates(
-          mockServiceManager: mockServiceManager,
+          mockServiceConnection: mockServiceConnection,
           trackAllWidgets: false,
           trackUserCreatedWidgets: false,
         );
@@ -280,7 +280,7 @@ void main() {
     testWidgets(
       'can toggle track widget builds scope',
       (WidgetTester tester) async {
-        await mockServiceManager.serviceExtensionManager
+        await mockServiceConnection.serviceManager.serviceExtensionManager
             .setServiceExtensionState(
           profileUserWidgetBuilds.extension,
           enabled: true,
@@ -290,7 +290,7 @@ void main() {
         await tester.pumpAndSettle();
 
         verifyExtensionStates(
-          mockServiceManager: mockServiceManager,
+          mockServiceConnection: mockServiceConnection,
           trackAllWidgets: false,
           trackUserCreatedWidgets: true,
         );
@@ -315,7 +315,7 @@ void main() {
         );
 
         verifyExtensionStates(
-          mockServiceManager: mockServiceManager,
+          mockServiceConnection: mockServiceConnection,
           trackAllWidgets: true,
           trackUserCreatedWidgets: false,
         );
@@ -329,7 +329,7 @@ void main() {
         await tester.pumpAndSettle();
 
         verifyExtensionStates(
-          mockServiceManager: mockServiceManager,
+          mockServiceConnection: mockServiceConnection,
           trackAllWidgets: false,
           trackUserCreatedWidgets: false,
         );
@@ -368,7 +368,7 @@ void main() {
         expect(allWidgetsRadio.groupValue, isNull);
 
         verifyExtensionStates(
-          mockServiceManager: mockServiceManager,
+          mockServiceConnection: mockServiceConnection,
           trackAllWidgets: false,
           trackUserCreatedWidgets: false,
         );
@@ -413,19 +413,19 @@ void main() {
 }
 
 void verifyExtensionStates({
-  required MockServiceConnectionManager mockServiceManager,
+  required MockServiceConnectionManager mockServiceConnection,
   required bool trackAllWidgets,
   required bool trackUserCreatedWidgets,
 }) {
   expect(
-    mockServiceManager.serviceExtensionManager
+    mockServiceConnection.serviceManager.serviceExtensionManager
         .getServiceExtensionState(profileWidgetBuilds.extension)
         .value
         .enabled,
     equals(trackAllWidgets),
   );
   expect(
-    mockServiceManager.serviceExtensionManager
+    mockServiceConnection.serviceManager.serviceExtensionManager
         .getServiceExtensionState(profileUserWidgetBuilds.extension)
         .value
         .enabled,

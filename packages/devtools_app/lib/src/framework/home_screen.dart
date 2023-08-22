@@ -61,13 +61,13 @@ class _HomeScreenBodyState extends State<HomeScreenBody> with AutoDisposeMixin {
     super.initState();
     ga.screen(gac.home);
 
-    addAutoDisposeListener(serviceManager.connectedState);
+    addAutoDisposeListener(serviceConnection.serviceManager.connectedState);
   }
 
   @override
   Widget build(BuildContext context) {
-    final connected =
-        serviceManager.hasConnection && serviceManager.connectedAppInitialized;
+    final connected = serviceConnection.serviceManager.hasConnection &&
+        serviceConnection.serviceManager.connectedAppInitialized;
     return Scrollbar(
       child: ListView(
         children: [
@@ -311,7 +311,8 @@ class _ConnectDialogState extends State<ConnectDialog>
       },
     );
     if (connected) {
-      final connectedUri = serviceManager.service!.connectedUri;
+      final connectedUri =
+          serviceConnection.serviceManager.service!.connectedUri;
       routerDelegate.updateArgsIfChanged({'uri': '$connectedUri'});
       final shortUri = connectedUri.replace(path: '');
       notificationService.push('Successfully connected to $shortUri.');

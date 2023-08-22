@@ -20,7 +20,7 @@ void main() {
     setUp(() {
       setGlobal(
         ServiceConnectionManager,
-        FakeServiceManager(
+        FakeServiceConnectionManager(
           service: FakeServiceManager.createFakeService(
             resolvedUriMap: goldenResolvedUriMap,
           ),
@@ -142,7 +142,7 @@ void main() {
       const packageUri = 'the/package/Uri';
       setGlobal(
         ServiceConnectionManager,
-        FakeServiceManager(
+        FakeServiceConnectionManager(
           service: FakeServiceManager.createFakeService(
             resolvedUriMap: {resolvedUrl: packageUri},
           ),

@@ -15,23 +15,26 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 
 void main() {
-  final mockServiceManager = MockServiceConnectionManager();
-  when(mockServiceManager.service).thenReturn(null);
-  when(mockServiceManager.connectedState).thenReturn(
+  final mockServiceConnection = createMockServiceConnectionWithDefaults();
+  when(mockServiceConnection.serviceManager.service).thenReturn(null);
+  when(mockServiceConnection.serviceManager.connectedState).thenReturn(
     ValueNotifier<ConnectedState>(const ConnectedState(false)),
   );
-  when(mockServiceManager.hasConnection).thenReturn(false);
-  when(mockServiceManager.isolateManager).thenReturn(FakeIsolateManager());
-  when(mockServiceManager.appState).thenReturn(
-    AppState(mockServiceManager.isolateManager.selectedIsolate),
+  when(mockServiceConnection.serviceManager.hasConnection).thenReturn(false);
+  when(mockServiceConnection.serviceManager.isolateManager)
+      .thenReturn(FakeIsolateManager());
+  when(mockServiceConnection.appState).thenReturn(
+    AppState(
+        mockServiceConnection.serviceManager.isolateManager.selectedIsolate,),
   );
 
   final mockErrorBadgeManager = MockErrorBadgeManager();
-  when(mockServiceManager.errorBadgeManager).thenReturn(mockErrorBadgeManager);
+  when(mockServiceConnection.errorBadgeManager)
+      .thenReturn(mockErrorBadgeManager);
   when(mockErrorBadgeManager.errorCountNotifier(any))
       .thenReturn(ValueNotifier<int>(0));
 
-  setGlobal(ServiceConnectionManager, mockServiceManager);
+  setGlobal(ServiceConnectionManager, mockServiceConnection);
   setGlobal(FrameworkController, FrameworkController());
   setGlobal(SurveyService, SurveyService());
   setGlobal(OfflineModeController, OfflineModeController());
@@ -49,12 +52,14 @@ void main() {
         isProfileBuild: true,
         isWebApp: false,
       );
-      when(mockServiceManager.connectedAppInitialized).thenReturn(true);
-      when(mockServiceManager.connectedApp).thenReturn(connectedApp);
+      when(mockServiceConnection.serviceManager.connectedAppInitialized)
+          .thenReturn(true);
+      when(mockServiceConnection.serviceManager.connectedApp)
+          .thenReturn(connectedApp);
       final mockDebuggerController = MockDebuggerController();
 
-      final state =
-          serviceManager.isolateManager.mainIsolateState! as MockIsolateState;
+      final state = serviceConnection
+          .serviceManager.isolateManager.mainIsolateState! as MockIsolateState;
       when(state.isPaused).thenReturn(ValueNotifier(true));
 
       await tester.pumpWidget(

@@ -21,7 +21,7 @@ void main() {
     setUp(() {
       final service = createMockVmServiceWrapperWithDefaults();
 
-      manager = FakeServiceManager(service: service);
+      manager = FakeServiceConnectionManager(service: service);
       setGlobal(EvalService, EvalService());
       setGlobal(ServiceConnectionManager, manager);
       setGlobal(IdeTheme, getIdeTheme());

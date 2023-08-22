@@ -26,8 +26,8 @@ class LeaksPaneController {
           supportedLeakTrackingProtocols
               .contains(appLeakTrackerProtocolVersion),
         ) {
-    subscriptionWithHistory = serviceManager
-        .service!.onExtensionEventWithHistory
+    subscriptionWithHistory = serviceConnection
+        .serviceManager.service!.onExtensionEventWithHistory
         .listen(_onAppMessageWithHistory);
   }
 
@@ -142,9 +142,11 @@ class LeaksPaneController {
   Future<R> _invokeLeakExtension<M extends Object, R extends Object>(
     M message,
   ) async {
-    final response = await serviceManager.service!.callServiceExtension(
+    final response =
+        await serviceConnection.serviceManager.service!.callServiceExtension(
       memoryLeakTrackingExtensionName,
-      isolateId: serviceManager.isolateManager.mainIsolate.value!.id!,
+      isolateId: serviceConnection
+          .serviceManager.isolateManager.mainIsolate.value!.id!,
       args: RequestToApp(message).toRequestParameters(),
     );
 

@@ -35,9 +35,9 @@ void main() {
 
   group('FlutterFramesChart', () {
     setUp(() {
-      final fakeServiceManager = FakeServiceManager();
+      final fakeServiceManager = FakeServiceConnectionManager();
       mockConnectedApp(
-        fakeServiceManager.connectedApp!,
+        fakeServiceManager.serviceManager.connectedApp!,
         isFlutterApp: true,
         isProfileBuild: true,
         isWebApp: false,

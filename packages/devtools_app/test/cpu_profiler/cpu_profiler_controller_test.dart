@@ -14,13 +14,14 @@ import 'package:vm_service/vm_service.dart';
 import '../test_infra/test_data/cpu_profiler/cpu_profile.dart';
 
 void main() {
-  final ServiceConnectionManager fakeServiceManager = FakeServiceManager(
+  final ServiceConnectionManager fakeServiceManager =
+      FakeServiceConnectionManager(
     service: FakeServiceManager.createFakeService(
       cpuSamples: CpuSamples.parse(goldenCpuSamplesJson),
       resolvedUriMap: goldenResolvedUriMap,
     ),
   );
-  final app = fakeServiceManager.connectedApp!;
+  final app = fakeServiceManager.serviceManager.connectedApp!;
   when(app.isFlutterAppNow).thenReturn(true);
 
   group('CpuProfileController', () {

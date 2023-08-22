@@ -22,7 +22,7 @@ void main() {
 
   late TestObjectInspectorViewController testObjectInspectorViewController;
 
-  late FakeServiceManager fakeServiceManager;
+  late FakeServiceConnectionManager fakeServiceConnection;
 
   late InstanceRef requestedSize;
 
@@ -33,10 +33,10 @@ void main() {
   final inboundRefsNotifier = ListValueNotifier<InboundReferencesTreeNode>([]);
 
   setUp(() {
-    fakeServiceManager = FakeServiceManager();
+    fakeServiceConnection = FakeServiceConnectionManager();
 
     setUpMockScriptManager();
-    setGlobal(ServiceConnectionManager, fakeServiceManager);
+    setGlobal(ServiceConnectionManager, fakeServiceConnection);
     setGlobal(IdeTheme, IdeTheme());
     setGlobal(
       DevToolsEnvironmentParameters,

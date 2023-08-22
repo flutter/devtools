@@ -43,11 +43,11 @@ void main() {
 
       setGlobal(IdeTheme, IdeTheme());
       setGlobal(OfflineModeController, OfflineModeController());
-      final fakeServiceManager = FakeServiceManager();
+      final fakeServiceManager = FakeServiceConnectionManager();
       setGlobal(ServiceConnectionManager, fakeServiceManager);
       setGlobal(NotificationService, NotificationService());
       mockConnectedApp(
-        fakeServiceManager.connectedApp!,
+        fakeServiceManager.serviceManager.connectedApp!,
         isFlutterApp: true,
         isProfileBuild: true,
         isWebApp: false,
@@ -365,7 +365,7 @@ void main() {
           frame: testFrameWithShaderJank,
         );
         mockConnectedApp(
-          serviceManager.connectedApp!,
+          serviceConnection.serviceManager.connectedApp!,
           isFlutterApp: true,
           isProfileBuild: true,
           isWebApp: false,

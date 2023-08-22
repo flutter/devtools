@@ -28,6 +28,7 @@ import 'package:vm_service/vm_service.dart';
   ProgramExplorerController,
   ScriptManager,
   ServiceConnectionManager,
+  ServiceManager,
   VmService,
   VmServiceWrapper,
   InspectorObjectGroupBase,

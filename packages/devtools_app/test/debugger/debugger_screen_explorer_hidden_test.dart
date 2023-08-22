@@ -13,10 +13,10 @@ import 'package:vm_service/vm_service.dart';
 
 void main() {
   const windowSize = Size(4000.0, 4000.0);
-  final fakeServiceManager = FakeServiceManager();
+  final fakeServiceManager = FakeServiceConnectionManager();
   final scriptManager = MockScriptManager();
   mockConnectedApp(
-    fakeServiceManager.connectedApp!,
+    fakeServiceManager.serviceManager.connectedApp!,
     isProfileBuild: false,
     isFlutterApp: true,
     isWebApp: false,

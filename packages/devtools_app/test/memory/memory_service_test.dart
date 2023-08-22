@@ -46,7 +46,7 @@ void main() {
         await env.setupEnvironment();
 
         memoryController.onMemory.listen((MemoryTracker? memoryTracker) {
-          if (!serviceManager.hasConnection) {
+          if (!serviceConnection.serviceManager.hasConnection) {
             // VM Service connection has stopped - unexpected.
             fail('VM Service connection stoped unexpectantly.');
           } else {

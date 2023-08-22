@@ -21,7 +21,7 @@ import 'package:vm_service/vm_service.dart' as vm_service;
 import '../test_infra/test_data/performance.dart';
 
 void main() {
-  late FakeServiceManager fakeServiceManager;
+  late FakeServiceConnectionManager fakeServiceConnection;
   late MockPerformanceController controller;
   late MockFlutterFramesController mockFlutterFramesController;
   late MockTimelineEventsController mockTimelineEventsController;
@@ -29,12 +29,12 @@ void main() {
   Future<void> setUpServiceManagerWithTimeline(
     Map<String, dynamic> timelineJson,
   ) async {
-    fakeServiceManager = FakeServiceManager(
+    fakeServiceConnection = FakeServiceConnectionManager(
       service: FakeServiceManager.createFakeService(
         timelineData: vm_service.Timeline.parse(timelineJson)!,
       ),
     );
-    final app = fakeServiceManager.connectedApp!;
+    final app = fakeServiceConnection.serviceManager.connectedApp!;
     mockConnectedApp(
       app,
       isFlutterApp: true,
@@ -42,12 +42,14 @@ void main() {
       isWebApp: false,
     );
     when(app.flutterVersionNow).thenReturn(
-      FlutterVersion.parse((await fakeServiceManager.flutterVersion).json!),
+      FlutterVersion.parse(
+        (await fakeServiceConnection.serviceManager.flutterVersion).json!,
+      ),
     );
 
-    setGlobal(ServiceConnectionManager, fakeServiceManager);
+    setGlobal(ServiceConnectionManager, fakeServiceConnection);
     setGlobal(OfflineModeController, OfflineModeController());
-    when(serviceManager.connectedApp!.isDartWebApp)
+    when(serviceConnection.serviceManager.connectedApp!.isDartWebApp)
         .thenAnswer((_) => Future.value(false));
   }
 
@@ -227,7 +229,7 @@ void main() {
       (WidgetTester tester) async {
         await tester.runAsync(() async {
           await setUpServiceManagerWithTimeline({});
-          final app = fakeServiceManager.connectedApp!;
+          final app = fakeServiceConnection.serviceManager.connectedApp!;
           mockConnectedApp(
             app,
             isFlutterApp: false,

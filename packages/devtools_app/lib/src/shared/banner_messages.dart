@@ -313,7 +313,7 @@ class ShaderJankMessage {
           style: theme.errorMessageLinkStyle,
         ),
         const TextSpan(text: '.'),
-        if (serviceManager.connectedApp!.isIosApp) ...[
+        if (serviceConnection.serviceManager.connectedApp!.isIosApp) ...[
           const TextSpan(
             text: '\n\nNote: this is a legacy solution with many pitfalls. '
                 'Try ',
@@ -480,13 +480,15 @@ void maybePushUnsupportedFlutterVersionWarning(
   String screenId, {
   required SemanticVersion supportedFlutterVersion,
 }) {
-  final isFlutterApp = serviceManager.connectedApp?.isFlutterAppNow;
+  final isFlutterApp =
+      serviceConnection.serviceManager.connectedApp?.isFlutterAppNow;
   if (offlineController.offlineMode.value ||
       isFlutterApp == null ||
       !isFlutterApp) {
     return;
   }
-  final currentVersion = serviceManager.connectedApp!.flutterVersionNow!;
+  final currentVersion =
+      serviceConnection.serviceManager.connectedApp!.flutterVersionNow!;
   if (currentVersion < supportedFlutterVersion) {
     bannerMessages.addMessage(
       UnsupportedFlutterVersionWarning(
@@ -503,7 +505,8 @@ void maybePushDebugModePerformanceMessage(
   String screenId,
 ) {
   if (offlineController.offlineMode.value) return;
-  if (serviceManager.connectedApp?.isDebugFlutterAppNow ?? false) {
+  if (serviceConnection.serviceManager.connectedApp?.isDebugFlutterAppNow ??
+      false) {
     bannerMessages.addMessage(
       DebugModePerformanceMessage(screenId).build(context),
     );
@@ -515,7 +518,8 @@ void maybePushDebugModeMemoryMessage(
   String screenId,
 ) {
   if (offlineController.offlineMode.value) return;
-  if (serviceManager.connectedApp?.isDebugFlutterAppNow ?? false) {
+  if (serviceConnection.serviceManager.connectedApp?.isDebugFlutterAppNow ??
+      false) {
     bannerMessages.addMessage(DebugModeMemoryMessage(screenId).build(context));
   }
 }

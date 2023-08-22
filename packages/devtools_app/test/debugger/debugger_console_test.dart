@@ -16,13 +16,15 @@ import 'package:mockito/mockito.dart';
 import '../test_infra/utils/test_utils.dart';
 
 void main() {
-  final fakeServiceManager = FakeServiceManager();
+  final fakeServiceManager = FakeServiceConnectionManager();
   final debuggerController = createMockDebuggerControllerWithDefaults();
 
   const windowSize = Size(4000.0, 4000.0);
 
-  when(fakeServiceManager.connectedApp!.isProfileBuildNow).thenReturn(false);
-  when(fakeServiceManager.connectedApp!.isDartWebAppNow).thenReturn(false);
+  when(fakeServiceManager.serviceManager.connectedApp!.isProfileBuildNow)
+      .thenReturn(false);
+  when(fakeServiceManager.serviceManager.connectedApp!.isDartWebAppNow)
+      .thenReturn(false);
   setGlobal(ServiceConnectionManager, fakeServiceManager);
   setGlobal(IdeTheme, IdeTheme());
   setGlobal(ScriptManager, MockScriptManager());
@@ -59,7 +61,7 @@ void main() {
 
     void appendStdioLines() {
       for (var line in stdio) {
-        serviceManager.consoleService.appendStdio('$line\n');
+        serviceConnection.consoleService.appendStdio('$line\n');
       }
     }
 
@@ -67,8 +69,8 @@ void main() {
       'Tapping the Console Clear button clears stdio.',
       windowSize,
       (WidgetTester tester) async {
-        serviceManager.consoleService.clearStdio();
-        serviceManager.consoleService.appendStdio(_ansiCodesOutput());
+        serviceConnection.consoleService.clearStdio();
+        serviceConnection.consoleService.appendStdio(_ansiCodesOutput());
 
         await pumpConsole(tester, debuggerController);
 
@@ -77,7 +79,7 @@ void main() {
 
         await tester.tap(clearButton);
 
-        expect(serviceManager.consoleService.stdio.value, isEmpty);
+        expect(serviceConnection.consoleService.stdio.value, isEmpty);
       },
     );
 

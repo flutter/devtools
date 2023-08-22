@@ -11,34 +11,34 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   final service = createMockVmServiceWrapperWithDefaults();
 
-  final manager = FakeServiceManager(service: service);
+  final manager = FakeServiceConnectionManager(service: service);
   setGlobal(ServiceConnectionManager, manager);
   manager.consoleService.ensureServiceInitialized();
 
   setUp(() {
-    serviceManager.consoleService.clearStdio();
+    serviceConnection.consoleService.clearStdio();
   });
 
   test('ignores trailing new lines', () {
-    serviceManager.consoleService.appendStdio('1\n');
-    expect(serviceManager.consoleService.stdio.value.length, 1);
+    serviceConnection.consoleService.appendStdio('1\n');
+    expect(serviceConnection.consoleService.stdio.value.length, 1);
   });
 
   test('has an item for each line', () {
-    serviceManager.consoleService
+    serviceConnection.consoleService
       ..appendStdio('1\n')
       ..appendStdio('2\n')
       ..appendStdio('3\n')
       ..appendStdio('4\n');
-    expect(serviceManager.consoleService.stdio.value.length, 4);
+    expect(serviceConnection.consoleService.stdio.value.length, 4);
   });
 
   test('preserves additional newlines', () {
-    serviceManager.consoleService
+    serviceConnection.consoleService
       ..appendStdio('1\n\n')
       ..appendStdio('2\n\n')
       ..appendStdio('3\n\n')
       ..appendStdio('4\n\n');
-    expect(serviceManager.consoleService.stdio.value.length, 8);
+    expect(serviceConnection.consoleService.stdio.value.length, 8);
   });
 }

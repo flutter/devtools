@@ -511,8 +511,9 @@ extension FunctionPrivateViewExtension on Func {
   Future<Instance?> get icDataArray async {
     final String? icDataArrayId = json![_icDataArrayKey]?['id'];
     if (icDataArrayId != null) {
-      final service = serviceManager.service!;
-      final isolate = serviceManager.isolateManager.selectedIsolate.value;
+      final service = serviceConnection.serviceManager.service!;
+      final isolate =
+          serviceConnection.serviceManager.isolateManager.selectedIsolate.value;
 
       return await service.getObject(isolate!.id!, icDataArrayId) as Instance;
     } else {
@@ -788,8 +789,9 @@ extension FieldPrivateViewExtension on Field {
 
   Future<Class?> get guardClass async {
     if (_guardClassIsClass()) {
-      final service = serviceManager.service!;
-      final isolate = serviceManager.isolateManager.selectedIsolate.value;
+      final service = serviceConnection.serviceManager.service!;
+      final isolate =
+          serviceConnection.serviceManager.isolateManager.selectedIsolate.value;
 
       return await service.getObject(isolate!.id!, json![_guardClassKey]['id'])
           as Class;

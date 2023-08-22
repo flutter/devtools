@@ -21,20 +21,24 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 
 void main() {
-  late MockServiceConnectionManager mockServiceManager;
+  late MockServiceConnectionManager mockServiceConnection;
 
   setUp(() {
-    mockServiceManager = MockServiceConnectionManager();
-    when(mockServiceManager.serviceExtensionManager)
+    mockServiceConnection = createMockServiceConnectionWithDefaults();
+    final serviceManager =
+        mockServiceConnection.serviceManager as MockServiceManager;
+    when(serviceManager.serviceExtensionManager)
         .thenReturn(FakeServiceExtensionManager());
-    when(mockServiceManager.isolateManager).thenReturn(FakeIsolateManager());
-    when(mockServiceManager.appState).thenReturn(
-      AppState(mockServiceManager.isolateManager.selectedIsolate),
+    when(serviceManager.isolateManager).thenReturn(FakeIsolateManager());
+    when(mockServiceConnection.appState).thenReturn(
+      AppState(
+        serviceManager.isolateManager.selectedIsolate,
+      ),
     );
-    when(unawaited(mockServiceManager.runDeviceBusyTask(any)))
+    when(unawaited(serviceManager.runDeviceBusyTask(any)))
         .thenAnswer((_) => Future<void>.value());
-    when(mockServiceManager.isMainIsolatePaused).thenReturn(false);
-    setGlobal(ServiceConnectionManager, mockServiceManager);
+    when(serviceManager.isMainIsolatePaused).thenReturn(false);
+    setGlobal(ServiceConnectionManager, mockServiceConnection);
     setGlobal(NotificationService, NotificationService());
     setGlobal(IdeTheme, IdeTheme());
   });
@@ -47,7 +51,8 @@ void main() {
 
       // Intentionally unawaited.
       // ignore: discarded_futures
-      when(mockServiceManager.performHotReload()).thenAnswer((invocation) {
+      when(mockServiceConnection.serviceManager.performHotReload())
+          .thenAnswer((invocation) {
         reloads++;
         return Future<void>.value();
       });
@@ -57,7 +62,7 @@ void main() {
     testWidgetsWithContext(
       'performs a hot reload when pressed',
       (WidgetTester tester) async {
-        registerServiceExtension(mockServiceManager, hotReload);
+        registerServiceExtension(mockServiceConnection, hotReload);
         const button = HotReloadButton();
         await tester.pumpWidget(
           wrap(
@@ -82,7 +87,7 @@ void main() {
       'does not perform a hot reload when the extension is not registered.',
       (WidgetTester tester) async {
         registerServiceExtension(
-          mockServiceManager,
+          mockServiceConnection,
           hotReload,
           serviceAvailable: false,
         );
@@ -107,7 +112,8 @@ void main() {
 
       // Intentionally unawaited.
       // ignore: discarded_futures
-      when(mockServiceManager.performHotRestart()).thenAnswer((invocation) {
+      when(mockServiceConnection.serviceManager.performHotRestart())
+          .thenAnswer((invocation) {
         restarts++;
         return Future<void>.value();
       });
@@ -116,7 +122,7 @@ void main() {
     testWidgetsWithContext(
       'performs a hot restart when pressed',
       (WidgetTester tester) async {
-        registerServiceExtension(mockServiceManager, hotRestart);
+        registerServiceExtension(mockServiceConnection, hotRestart);
         const button = HotRestartButton();
         await tester.pumpWidget(
           wrap(
@@ -141,7 +147,7 @@ void main() {
       'does not perform a hot restart when the service is not available',
       (WidgetTester tester) async {
         registerServiceExtension(
-          mockServiceManager,
+          mockServiceConnection,
           hotRestart,
           serviceAvailable: false,
         );
@@ -166,10 +172,11 @@ void main() {
     }
 
     setUp(() async {
-      await (mockServiceManager.serviceExtensionManager
+      await (mockServiceConnection.serviceManager.serviceExtensionManager
               as FakeServiceExtensionManager)
           .fakeFrame();
-      serviceState = mockServiceManager.serviceExtensionManager
+      serviceState = mockServiceConnection
+          .serviceManager.serviceExtensionManager
           .getServiceExtensionState(extensions.structuredErrors.extension);
       serviceState.addListener(serviceStateListener);
     });
@@ -179,7 +186,7 @@ void main() {
     });
 
     testWidgets('toggles', (WidgetTester tester) async {
-      await (mockServiceManager.serviceExtensionManager
+      await (mockServiceConnection.serviceManager.serviceExtensionManager
               as FakeServiceExtensionManager)
           .fakeAddServiceExtension(extensions.structuredErrors.extension);
 
@@ -189,7 +196,7 @@ void main() {
       expect(find.byWidget(button), findsOneWidget);
       await tester.tap(find.byWidget(button));
       await tester.pumpAndSettle();
-      await (mockServiceManager.serviceExtensionManager
+      await (mockServiceConnection.serviceManager.serviceExtensionManager
               as FakeServiceExtensionManager)
           .fakeFrame();
       expect(mostRecentState.value, true);
@@ -201,7 +208,7 @@ void main() {
     testWidgets(
       'updates based on the service extension',
       (WidgetTester tester) async {
-        await (mockServiceManager.serviceExtensionManager
+        await (mockServiceConnection.serviceManager.serviceExtensionManager
                 as FakeServiceExtensionManager)
             .fakeAddServiceExtension(extensions.structuredErrors.extension);
         const button = StructuredErrorsToggle();
@@ -209,7 +216,7 @@ void main() {
             .pumpWidget(wrap(const Scaffold(body: Center(child: button))));
         expect(find.byWidget(button), findsOneWidget);
 
-        await mockServiceManager.serviceExtensionManager
+        await mockServiceConnection.serviceManager.serviceExtensionManager
             .setServiceExtensionState(
           extensions.structuredErrors.extension,
           enabled: true,
@@ -218,7 +225,7 @@ void main() {
         await tester.pumpAndSettle();
         expect(toggle.value, true, reason: 'The extension is enabled.');
 
-        await mockServiceManager.serviceExtensionManager
+        await mockServiceConnection.serviceManager.serviceExtensionManager
             .setServiceExtensionState(
           extensions.structuredErrors.extension,
           enabled: false,
@@ -232,12 +239,14 @@ void main() {
 }
 
 void registerServiceExtension(
-  MockServiceConnectionManager mockServiceManager,
+  MockServiceConnectionManager mockServiceConnection,
   RegisteredServiceDescription description, {
   bool serviceAvailable = true,
 }) {
-  when(mockServiceManager.registeredServiceListenable(description.service))
-      .thenAnswer((invocation) {
+  when(
+    mockServiceConnection.serviceManager
+        .registeredServiceListenable(description.service),
+  ).thenAnswer((invocation) {
     final listenable = ImmediateValueNotifier(serviceAvailable);
     return listenable;
   });

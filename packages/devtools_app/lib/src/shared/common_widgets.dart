@@ -1381,8 +1381,8 @@ class _JsonViewerState extends State<JsonViewer>
     final responseJson = json.decode(widget.encodedJson);
     // Insert the JSON data into the fake service cache so we can use it with
     // the `ExpandableVariable` widget.
-    final root =
-        serviceManager.service!.fakeServiceCache.insertJsonObject(responseJson);
+    final root = serviceConnection.serviceManager.service!.fakeServiceCache
+        .insertJsonObject(responseJson);
     variable = DartObjectNode.fromValue(
       name: '[root]',
       value: root,
@@ -1416,7 +1416,7 @@ class _JsonViewerState extends State<JsonViewer>
     super.dispose();
     // Remove the JSON object from the fake service cache to avoid holding on
     // to large objects indefinitely.
-    serviceManager.service!.fakeServiceCache
+    serviceConnection.serviceManager.service!.fakeServiceCache
         .removeJsonObject(variable.value as Instance);
   }
 
@@ -1814,7 +1814,8 @@ class PubWarningText extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isFlutterApp = serviceManager.connectedApp!.isFlutterAppNow == true;
+    final isFlutterApp =
+        serviceConnection.serviceManager.connectedApp!.isFlutterAppNow == true;
     final sdkName = isFlutterApp ? 'Flutter' : 'Dart';
     final minSdkVersion = isFlutterApp ? '2.8.0' : '2.15.0';
     return SelectableText.rich(

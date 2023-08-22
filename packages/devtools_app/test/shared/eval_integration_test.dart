@@ -32,8 +32,8 @@ void main() {
         await env.setupEnvironment();
         final eval = EvalOnDartLibrary(
           'dart:core',
-          serviceManager.service!,
-          serviceManager: serviceManager,
+          serviceConnection.serviceManager.service!,
+          serviceManager: serviceConnection.serviceManager,
         );
 
         final instance = await eval.safeEval('42', isAlive: isAlive);
@@ -54,8 +54,8 @@ void main() {
 
           final eval = EvalOnDartLibrary(
             'dart:core',
-            serviceManager.service!,
-            serviceManager: serviceManager,
+            serviceConnection.serviceManager.service!,
+            serviceManager: serviceConnection.serviceManager,
           );
 
           final instance = (await eval.asyncEval('42', isAlive: isAlive))!;
@@ -72,13 +72,14 @@ void main() {
         'returns the result of the future completion',
         () async {
           await env.setupEnvironment();
-          final mainIsolate = serviceManager.isolateManager.mainIsolate;
+          final mainIsolate =
+              serviceConnection.serviceManager.isolateManager.mainIsolate;
           expect(mainIsolate, isNotNull);
 
           final eval = EvalOnDartLibrary(
             'dart:core',
-            serviceManager.service!,
-            serviceManager: serviceManager,
+            serviceConnection.serviceManager.service!,
+            serviceManager: serviceConnection.serviceManager,
             isolate: mainIsolate,
           );
 
@@ -100,8 +101,8 @@ void main() {
 
           final eval = EvalOnDartLibrary(
             'dart:core',
-            serviceManager.service!,
-            serviceManager: serviceManager,
+            serviceConnection.serviceManager.service!,
+            serviceManager: serviceConnection.serviceManager,
           );
 
           final instance = await eval

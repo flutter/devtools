@@ -161,6 +161,13 @@ MockVmServiceWrapper createMockVmServiceWrapperWithDefaults() {
   return service;
 }
 
+MockServiceConnectionManager createMockServiceConnectionWithDefaults() {
+  final mockServiceConnection = createMockServiceConnectionWithDefaults();
+  final mockServiceManager = MockServiceManager<VmServiceWrapper>();
+  when(mockServiceConnection.serviceManager).thenReturn(mockServiceManager);
+  return mockServiceConnection;
+}
+
 MockLoggingController createMockLoggingControllerWithDefaults({
   List<LogData> data = const [],
 }) {

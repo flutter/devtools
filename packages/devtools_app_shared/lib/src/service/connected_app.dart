@@ -133,16 +133,19 @@ class ConnectedApp {
     // the future (flutter web), we can modify this check.
     if (!isRunningOnDartVM || !await isFlutterApp) return false;
 
-    await serviceConnectionManager.serviceExtensionManager.extensionStatesUpdated.future;
+    await serviceConnectionManager.manager.serviceExtensionManager.extensionStatesUpdated.future;
 
     // The debugAllowBanner extension is only available in debug builds
-    final hasDebugExtension = serviceConnectionManager.serviceExtensionManager
+    final hasDebugExtension = serviceConnectionManager.manager.serviceExtensionManager
         .isServiceExtensionAvailable(extensions.debugAllowBanner.extension);
     return !hasDebugExtension;
     */
   }
 
   Future<void> initializeValues({void Function()? onComplete}) async {
+    // Return early if already initialized.
+    if (initialized.isCompleted) return;
+
     await Future.wait([isFlutterApp, isProfileBuild, isDartWebApp]);
 
     _operatingSystem = serviceManager!.vm!.operatingSystem ?? unknownOS;

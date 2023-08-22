@@ -52,7 +52,7 @@ void main() {
   );
 
   setUp(() {
-    setGlobal(ServiceConnectionManager, FakeServiceManager());
+    setGlobal(ServiceConnectionManager, FakeServiceConnectionManager());
     setGlobal(IdeTheme, IdeTheme());
     setGlobal(NotificationService, NotificationService());
 

@@ -91,7 +91,9 @@ class CpuProfilerController extends DisposableController
   /// The stored profiles are not guaranteed to be processed.
   CpuProfileStore get cpuProfileStore =>
       _cpuProfileStoreByIsolateId.putIfAbsent(
-        serviceManager.isolateManager.selectedIsolate.value?.id ?? '',
+        serviceConnection
+                .serviceManager.isolateManager.selectedIsolate.value?.id ??
+            '',
         () => CpuProfileStore(),
       );
 
@@ -145,7 +147,8 @@ class CpuProfilerController extends DisposableController
           name: 'Hide core Dart libraries',
           includeCallback: (stackFrame) => !stackFrame.isDartCore,
         ),
-        if (serviceManager.connectedApp?.isFlutterAppNow ?? true)
+        if (serviceConnection.serviceManager.connectedApp?.isFlutterAppNow ??
+            true)
           ToggleFilter<CpuStackFrame>(
             name: 'Hide core Flutter libraries',
             includeCallback: (stackFrame) => !stackFrame.isFlutterCore,
@@ -190,11 +193,11 @@ class CpuProfilerController extends DisposableController
 
   /// Notifies that the vm profiler flag has changed.
   ValueNotifier<Flag>? get profilerFlagNotifier =>
-      serviceManager.vmFlagManager.flag(vm_flags.profiler) ??
+      serviceConnection.vmFlagManager.flag(vm_flags.profiler) ??
       ValueNotifier<Flag>(Flag());
 
   ValueNotifier<Flag>? get profilePeriodFlag =>
-      serviceManager.vmFlagManager.flag(vm_flags.profilePeriod);
+      serviceConnection.vmFlagManager.flag(vm_flags.profilePeriod);
 
   /// Whether the profiler is enabled.
   ///
@@ -206,7 +209,7 @@ class CpuProfilerController extends DisposableController
       : profilerFlagNotifier?.value.valueAsString == 'true';
 
   Future<Response> enableCpuProfiler() {
-    return serviceManager.service!.enableCpuProfiler();
+    return serviceConnection.serviceManager.service!.enableCpuProfiler();
   }
 
   Future<void> pullAndProcessProfile({
@@ -229,7 +232,8 @@ class CpuProfilerController extends DisposableController
       // TODO(kenz): add a cancel button to the processing UI in case pulling a
       // large payload from the vm service takes a long time.
       _profilerBusyStatus.value = CpuProfilerBusyStatus.fetching;
-      cpuProfiles = await serviceManager.service!.getCpuProfile(
+      cpuProfiles =
+          await serviceConnection.serviceManager.service!.getCpuProfile(
         startMicros: startMicros,
         extentMicros: extentMicros,
       );
@@ -420,7 +424,8 @@ class CpuProfilerController extends DisposableController
       }
 
       if (appStartUpProfile == null) {
-        final cpuProfile = await serviceManager.service!.getCpuProfile(
+        final cpuProfile =
+            await serviceConnection.serviceManager.service!.getCpuProfile(
           startMicros: 0,
           // Using [maxJsInt] as [extentMicros] for the getCpuProfile requests will
           // give us all cpu samples we have available.
@@ -564,7 +569,7 @@ class CpuProfilerController extends DisposableController
 
   Future<void> clear() async {
     reset();
-    await serviceManager.service!.clearSamples();
+    await serviceConnection.serviceManager.service!.clearSamples();
   }
 
   void reset({CpuProfileData? data}) {

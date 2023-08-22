@@ -18,7 +18,7 @@ bool isPrimitiveInstanceKind(String? kind) {
 
 Future<ClassRef?> findClass(String? isolateId, HeapClassName className) async {
   if (isolateId == null) return null;
-  final service = serviceManager.service;
+  final service = serviceConnection.serviceManager.service;
   if (service == null) return null;
   final classes = await service.getClassList(isolateId);
   return classes.classes?.firstWhere((ref) => className.matches(ref));
@@ -37,7 +37,7 @@ Future<InstanceRef?> findInstance(
     return null;
   }
 
-  final result = (await serviceManager.service!.getInstances(
+  final result = (await serviceConnection.serviceManager.service!.getInstances(
     isolateId,
     classId,
     preferences.memory.refLimit.value,

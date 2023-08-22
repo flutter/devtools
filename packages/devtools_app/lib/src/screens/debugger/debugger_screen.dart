@@ -192,7 +192,7 @@ class DebuggerScreenBodyState extends State<DebuggerScreenBody>
                         gac.pageReady,
                       );
                       unawaited(
-                        serviceManager.sendDwdsEvent(
+                        serviceConnection.sendDwdsEvent(
                           screen: DebuggerScreen.id,
                           action: gac.pageReady,
                         ),
@@ -390,7 +390,7 @@ class DebuggerStatus extends StatefulWidget {
 class _DebuggerStatusState extends State<DebuggerStatus> with AutoDisposeMixin {
   String _status = '';
 
-  bool get _isPaused => serviceManager.isMainIsolatePaused;
+  bool get _isPaused => serviceConnection.serviceManager.isMainIsolatePaused;
 
   @override
   void initState() {
@@ -412,7 +412,8 @@ class _DebuggerStatusState extends State<DebuggerStatus> with AutoDisposeMixin {
 
   void _updateStatusOnPause() {
     addAutoDisposeListener(
-      serviceManager.isolateManager.mainIsolateState?.isPaused,
+      serviceConnection
+          .serviceManager.isolateManager.mainIsolateState?.isPaused,
       () => unawaited(
         _updateStatus(),
       ),
@@ -490,7 +491,7 @@ class _FloatingDebuggerControlsState extends State<FloatingDebuggerControls>
         ProvidedControllerMixin<DebuggerController, FloatingDebuggerControls> {
   late double controlHeight;
 
-  bool get _isPaused => serviceManager.isMainIsolatePaused;
+  bool get _isPaused => serviceConnection.serviceManager.isMainIsolatePaused;
 
   @override
   void didChangeDependencies() {
@@ -500,7 +501,8 @@ class _FloatingDebuggerControlsState extends State<FloatingDebuggerControls>
 
     controlHeight = _isPaused ? defaultButtonHeight : 0.0;
     addAutoDisposeListener(
-      serviceManager.isolateManager.mainIsolateState?.isPaused,
+      serviceConnection
+          .serviceManager.isolateManager.mainIsolateState?.isPaused,
       () {
         setState(() {
           if (_isPaused) {

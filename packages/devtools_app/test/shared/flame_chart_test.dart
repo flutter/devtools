@@ -121,8 +121,10 @@ void main() {
 
     setUp(() {
       final connectedApp = MockConnectedApp();
-      setGlobal(ServiceConnectionManager, MockServiceConnectionManager());
-      when(serviceManager.connectedApp).thenReturn(connectedApp);
+      setGlobal(
+          ServiceConnectionManager, createMockServiceConnectionWithDefaults(),);
+      when(serviceConnection.serviceManager.connectedApp)
+          .thenReturn(connectedApp);
       mockConnectedApp(
         connectedApp,
         isFlutterApp: true,

@@ -204,7 +204,7 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
         );
 
         // Clear error count when navigating to a screen.
-        serviceManager.errorBadgeManager.clearErrors(screen.screenId);
+        serviceConnection.errorBadgeManager.clearErrors(screen.screenId);
 
         // Update routing with the change.
         final routerDelegate = DevToolsRouterDelegate.of(context);
@@ -291,8 +291,9 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
           controller: _tabController,
           children: tabBodies,
         ),
-        if (serviceManager.connectedAppInitialized &&
-            !serviceManager.connectedApp!.isProfileBuildNow! &&
+        if (serviceConnection.serviceManager.connectedAppInitialized &&
+            !serviceConnection
+                .serviceManager.connectedApp!.isProfileBuildNow! &&
             !offlineController.offlineMode.value &&
             _currentScreen.showFloatingDebuggerControls)
           Container(
@@ -306,9 +307,10 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
     return Provider<ImportController>.value(
       value: _importController,
       builder: (context, _) {
-        final showConsole = serviceManager.connectedAppInitialized &&
-            !offlineController.offlineMode.value &&
-            _currentScreen.showConsole(widget.embed);
+        final showConsole =
+            serviceConnection.serviceManager.connectedAppInitialized &&
+                !offlineController.offlineMode.value &&
+                _currentScreen.showConsole(widget.embed);
 
         return DragAndDrop(
           handleDrop: _importController.importData,
@@ -362,8 +364,8 @@ class DevToolsScaffoldState extends State<DevToolsScaffold>
               bottomNavigationBar: StatusLine(
                 currentScreen: _currentScreen,
                 isEmbedded: widget.embed,
-                isConnected: serviceManager.hasConnection &&
-                    serviceManager.connectedAppInitialized,
+                isConnected: serviceConnection.serviceManager.hasConnection &&
+                    serviceConnection.serviceManager.connectedAppInitialized,
               ),
             ),
           ),

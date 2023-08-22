@@ -145,16 +145,16 @@ class StatusLine extends StatelessWidget {
     final textTheme = theme.textTheme;
     const noConnectionMsg = 'No client connection';
     return ValueListenableBuilder<ConnectedState>(
-      valueListenable: serviceManager.connectedState,
+      valueListenable: serviceConnection.serviceManager.connectedState,
       builder: (context, connectedState, child) {
         if (connectedState.connected) {
-          final app = serviceManager.connectedApp!;
+          final app = serviceConnection.serviceManager.connectedApp!;
 
           String description;
           if (!app.isRunningOnDartVM!) {
             description = 'web app';
           } else {
-            final vm = serviceManager.vm!;
+            final vm = serviceConnection.serviceManager.vm!;
             description = vm.deviceDisplay;
           }
 
@@ -166,7 +166,7 @@ class StatusLine extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
               ValueListenableBuilder(
-                valueListenable: serviceManager.deviceBusy,
+                valueListenable: serviceConnection.serviceManager.deviceBusy,
                 builder: (context, bool isBusy, _) {
                   return SizedBox(
                     width: smallProgressSize,
@@ -218,7 +218,8 @@ class IsolateSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final IsolateManager isolateManager = serviceManager.isolateManager;
+    final IsolateManager isolateManager =
+        serviceConnection.serviceManager.isolateManager;
     return MultiValueListenableBuilder(
       listenables: [
         isolateManager.isolates,
@@ -278,6 +279,6 @@ class IsolateOption extends StatelessWidget {
 
   String _isolateName(IsolateRef ref) {
     final name = ref.name;
-    return '$name #${serviceManager.isolateManager.isolateIndex(ref)}';
+    return '$name #${serviceConnection.serviceManager.isolateManager.isolateIndex(ref)}';
   }
 }

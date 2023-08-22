@@ -71,9 +71,10 @@ class ProgramExplorerController extends DisposableController
     }
     _initializing = true;
 
-    final isolate = serviceManager.isolateManager.selectedIsolate.value;
+    final isolate =
+        serviceConnection.serviceManager.isolateManager.selectedIsolate.value;
     final libraries = isolate != null
-        ? serviceManager.isolateManager
+        ? serviceConnection.serviceManager.isolateManager
             .isolateState(isolate)
             .isolateNow!
             .libraries!
@@ -248,8 +249,9 @@ class ProgramExplorerController extends DisposableController
   /// immediately returns.
   Future<void> populateNode(VMServiceObjectNode node) async {
     final object = node.object;
-    final service = serviceManager.service;
-    final isolateId = serviceManager.isolateManager.selectedIsolate.value!.id;
+    final service = serviceConnection.serviceManager.service;
+    final isolateId = serviceConnection
+        .serviceManager.isolateManager.selectedIsolate.value!.id;
 
     Future<List<Obj>> getObjects(Iterable<ObjRef> objs) {
       return Future.wait(
@@ -329,8 +331,9 @@ class ProgramExplorerController extends DisposableController
   /// Searches and returns the script or library node in the FileExplorer
   /// which is the source location of the target [object].
   Future<VMServiceObjectNode> searchFileExplorer(ObjRef object) async {
-    final service = serviceManager.service!;
-    final isolateId = serviceManager.isolateManager.selectedIsolate.value!.id!;
+    final service = serviceConnection.serviceManager.service!;
+    final isolateId = serviceConnection
+        .serviceManager.isolateManager.selectedIsolate.value!.id!;
 
     // If `object` is a library, it will always be a root node and is simple to
     // find.
