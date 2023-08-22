@@ -109,7 +109,7 @@ class MockDartToolingApi extends DartToolingApiImpl {
   final Stream<String> log;
 
   /// Simulates executing a VS Code command requested by the embedded panel.
-  Future<void> initialize() async {
+  void initialize() {
     connectDevices();
   }
 
