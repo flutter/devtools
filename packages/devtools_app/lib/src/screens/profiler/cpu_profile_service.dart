@@ -5,13 +5,12 @@
 import 'package:vm_service/vm_service.dart';
 
 import '../../service/vm_flags.dart' as vm_flags;
-import '../../service/vm_service_wrapper.dart';
 import '../../shared/globals.dart';
 import '../vm_developer/vm_service_private_extensions.dart';
 import 'cpu_profile_model.dart';
 
 /// Manages interactions between the Cpu Profiler and the VmService.
-extension CpuProfilerExtension on VmServiceWrapper {
+extension CpuProfilerExtension on VmService {
   Future<CpuProfilePair> getCpuProfile({
     required int startMicros,
     required int extentMicros,

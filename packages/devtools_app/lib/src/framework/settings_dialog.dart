@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -11,10 +12,8 @@ import '../shared/analytics/analytics_controller.dart';
 import '../shared/analytics/constants.dart' as gac;
 import '../shared/common_widgets.dart';
 import '../shared/config_specific/server/server.dart';
-import '../shared/dialogs.dart';
 import '../shared/globals.dart';
 import '../shared/log_storage.dart';
-import '../shared/theme.dart';
 import '../shared/utils.dart';
 
 class OpenSettingsAction extends ScaffoldAction {
@@ -110,7 +109,7 @@ class _VerboseLoggingSetting extends StatelessWidget {
               ),
             ),
             const SizedBox(width: defaultSpacing),
-            DevToolsButton(
+            GaDevToolsButton(
               label: 'Copy logs',
               icon: Icons.copy_outlined,
               gaScreen: gac.settingsDialog,

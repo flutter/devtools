@@ -4,6 +4,7 @@
 
 import 'package:flutter/material.dart';
 
+import 'api/impl/dart_tooling_api.dart';
 import 'vs_code/flutter_panel.dart';
 
 /// "Screens" that are intended for standalone use only, likely for embedding
@@ -26,7 +27,8 @@ enum StandaloneScreenType {
 
   Widget get screen {
     return switch (this) {
-      StandaloneScreenType.vsCodeFlutterPanel => const VsCodeFlutterPanel(),
+      StandaloneScreenType.vsCodeFlutterPanel =>
+        VsCodeFlutterPanel(DartToolingApiImpl.postMessage()),
     };
   }
 }

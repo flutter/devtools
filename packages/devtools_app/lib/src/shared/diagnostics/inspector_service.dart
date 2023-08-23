@@ -11,16 +11,15 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
 
+import 'package:devtools_app_shared/service.dart';
+import 'package:devtools_app_shared/service_extensions.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../service/service_extensions.dart';
 import '../console/primitives/simple_items.dart';
-import '../eval_on_dart_library.dart';
 import '../globals.dart';
-import '../primitives/auto_dispose.dart';
-import '../primitives/utils.dart';
 import 'diagnostics_node.dart';
 import 'generic_instance_reference.dart';
 import 'object_group_api.dart';
@@ -41,7 +40,7 @@ abstract class InspectorServiceBase extends DisposableController
         inspectorLibrary = EvalOnDartLibrary(
           inspectorLibraryUri,
           serviceManager.service!,
-          isolate: serviceManager.isolateManager.mainIsolate,
+          serviceManager: serviceManager,
         ) {
     _lastMainIsolate = serviceManager.isolateManager.mainIsolate.value;
     addAutoDisposeListener(serviceManager.isolateManager.mainIsolate, () {
@@ -1000,7 +999,7 @@ abstract class InspectorObjectGroupBase
     final properties = <String, InstanceRef>{};
     for (FieldRef field in clazz.fields!) {
       final String name = field.name!;
-      if (isPrivate(name)) {
+      if (isPrivateMember(name)) {
         // Needed to filter out _deleted_enum_sentinel synthetic property.
         // If showing enum values is useful we could special case
         // just the _deleted_enum_sentinel property name.

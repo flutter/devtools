@@ -6,11 +6,15 @@
 import 'dart:async';
 import 'dart:html' as html;
 
-import 'package:flutter/widgets.dart';
+import 'package:devtools_app_shared/service.dart';
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
+import 'package:devtools_shared/service.dart';
+import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
+import 'package:vm_service/vm_service.dart';
 
 import '../../api.dart';
-import 'connected_app_manager.dart';
 
 part 'extension_manager.dart';
 
@@ -19,8 +23,14 @@ part 'extension_manager.dart';
 ///
 /// A couple of use case examples include posting messages to DevTools or
 /// registering an event handler from the extension.
-ExtensionManager get extensionManager => _extensionManager;
-late final ExtensionManager _extensionManager;
+ExtensionManager get extensionManager =>
+    globals[ExtensionManager] as ExtensionManager;
+
+/// A manager for interacting with the connected vm service, if present.
+///
+/// This manager provides sub-managers to interact with isolates, service
+/// extensions, etc.
+ServiceManager get serviceManager => globals[ServiceManager] as ServiceManager;
 
 /// A wrapper widget that initializes the [extensionManager] and establishes a
 /// connection with DevTools for this extension to interact over.
@@ -51,21 +61,44 @@ class _DevToolsExtensionState extends State<DevToolsExtension> {
   @override
   void initState() {
     super.initState();
-    _extensionManager = ExtensionManager()
-      .._init(connectToVmService: widget.requiresRunningApplication);
+    _initGlobals();
+    extensionManager._init(
+      connectToVmService: widget.requiresRunningApplication,
+    );
     for (final handler in widget.eventHandlers.entries) {
-      _extensionManager.registerEventHandler(handler.key, handler.value);
+      extensionManager.registerEventHandler(handler.key, handler.value);
     }
+  }
+
+  void _initGlobals() {
+    setGlobal(ExtensionManager, ExtensionManager());
+    setGlobal(ServiceManager, ServiceManager());
+    // TODO(kenz): pull the IDE theme from the url query params.
+    setGlobal(IdeTheme, IdeTheme());
   }
 
   @override
   void dispose() {
-    _extensionManager._dispose();
+    extensionManager._dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return widget.child;
+    return MaterialApp(
+      theme: themeFor(
+        isDarkTheme: false,
+        ideTheme: ideTheme,
+        theme: ThemeData(useMaterial3: true, colorScheme: lightColorScheme),
+      ),
+      darkTheme: themeFor(
+        isDarkTheme: true,
+        ideTheme: ideTheme,
+        theme: ThemeData(useMaterial3: true, colorScheme: darkColorScheme),
+      ),
+      home: Scaffold(
+        body: widget.child,
+      ),
+    );
   }
 }

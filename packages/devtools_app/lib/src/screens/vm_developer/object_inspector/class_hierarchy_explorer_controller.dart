@@ -25,10 +25,11 @@ class ClassHierarchyExplorerController {
     final isolateId = isolate.id!;
     final classList = await service.getClassList(isolateId);
     // TODO(bkonyi): we should cache the class list like we do the script list
-    final classes = await Future.wait([
+    final classes = (await Future.wait([
       for (final cls in classList.classes!)
         service.getObject(isolateId, cls.id!).then((e) => e as Class),
-    ]);
+    ]))
+        .cast<Class>();
 
     buildHierarchy(classes);
   }

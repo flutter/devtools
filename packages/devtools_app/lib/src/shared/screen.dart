@@ -4,15 +4,15 @@
 
 import 'dart:math' as math;
 
+import 'package:devtools_app_shared/service.dart';
+import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 
 import 'globals.dart';
 import 'primitives/listenable.dart';
-import 'theme.dart';
 import 'ui/icons.dart';
-import 'version.dart';
 
 final _log = Logger('screen.dart');
 

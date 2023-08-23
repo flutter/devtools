@@ -6,6 +6,8 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:math' as math;
 
+import 'package:devtools_app_shared/service.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_shared/devtools_shared.dart';
 import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
@@ -18,7 +20,6 @@ import '../../shared/console/eval/inspector_tree.dart';
 import '../../shared/diagnostics/diagnostics_node.dart';
 import '../../shared/diagnostics/inspector_service.dart';
 import '../../shared/globals.dart';
-import '../../shared/primitives/auto_dispose.dart';
 import '../../shared/primitives/message_bus.dart';
 import '../../shared/primitives/utils.dart';
 import '../../shared/ui/filter.dart';
@@ -166,6 +167,17 @@ class LoggingController extends DisposableController
     addAutoDisposeListener(serviceManager.connectedState, () {
       if (serviceManager.connectedState.value.connected) {
         _handleConnectionStart(serviceManager.service!);
+
+        autoDisposeStreamSubscription(
+          serviceManager.service!.onIsolateEvent.listen((event) {
+            messageBus.addEvent(
+              BusEvent(
+                'debugger',
+                data: event,
+              ),
+            );
+          }),
+        );
       }
     });
     if (serviceManager.connectedAppInitialized) {

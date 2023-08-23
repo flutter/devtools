@@ -5,12 +5,12 @@
 import 'dart:async';
 
 import 'package:collection/collection.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart' hide VmService;
 
 import '../../../service/vm_service_wrapper.dart';
 import '../../../shared/globals.dart';
-import '../../../shared/primitives/auto_dispose.dart';
 import '../../profiler/cpu_profiler_controller.dart';
 import '../vm_service_private_extensions.dart';
 

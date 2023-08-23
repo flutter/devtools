@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
@@ -9,7 +11,6 @@ import 'package:logging/logging.dart';
 import '../common_widgets.dart';
 import '../primitives/trees.dart';
 import '../primitives/utils.dart';
-import '../theme.dart';
 import '../ui/colors.dart';
 
 enum PivotType { pivotByMiddle, pivotBySize }

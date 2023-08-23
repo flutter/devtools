@@ -8,12 +8,12 @@ library eval;
 
 import 'dart:async';
 
+import 'package:devtools_app_shared/service.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../../service/vm_service_wrapper.dart';
-import '../../../shared/eval_on_dart_library.dart';
 import '../../../shared/globals.dart';
 
 Stream<VmServiceWrapper> get _serviceConnectionStream =>
@@ -48,7 +48,11 @@ final libraryEvalProvider =
     FutureProviderFamily<EvalOnDartLibrary, String>((ref, libraryPath) async {
   final service = await ref.watch(serviceProvider.future);
 
-  final eval = EvalOnDartLibrary(libraryPath, service);
+  final eval = EvalOnDartLibrary(
+    libraryPath,
+    service,
+    serviceManager: serviceManager,
+  );
   ref.onDispose(eval.dispose);
   return eval;
 });

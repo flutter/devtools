@@ -2,12 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// TODO(https://github.com/flutter/devtools/issues/6215): remove this test.
+
 @TestOn('vm')
 import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/screens/provider/instance_viewer/instance_details.dart';
 import 'package:devtools_app/src/screens/provider/instance_viewer/instance_providers.dart';
 import 'package:devtools_app/src/screens/provider/provider_nodes.dart';
-import 'package:devtools_app/src/shared/eval_on_dart_library.dart';
+import 'package:devtools_app_shared/service.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_test/devtools_test.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -28,12 +31,6 @@ void main() {
   late Disposable isAlive;
 
   setUp(() async {
-    setGlobal(
-      DevToolsEnvironmentParameters,
-      ExternalDevToolsEnvironmentParameters(),
-    );
-    setGlobal(IdeTheme, getIdeTheme());
-    setGlobal(BreakpointManager, BreakpointManager());
     setGlobal(Storage, FlutterTestStorage());
     setGlobal(EvalService, MockEvalService());
 
@@ -46,6 +43,7 @@ void main() {
     evalOnDartLibrary = EvalOnDartLibrary(
       'package:provider_app/main.dart',
       env.service,
+      serviceManager: serviceManager,
     );
   });
 
@@ -108,6 +106,7 @@ void main() {
       final evalOnDartLibrary2 = EvalOnDartLibrary(
         'package:provider_app/main.dart',
         env.service,
+        serviceManager: serviceManager,
       );
       addTearDown(evalOnDartLibrary2.dispose);
 

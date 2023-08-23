@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -15,7 +16,6 @@ import '../diagnostics/inspector_service.dart';
 import '../diagnostics/tree_builder.dart';
 import '../globals.dart';
 import '../memory/adapted_heap_data.dart';
-import '../primitives/auto_dispose.dart';
 import '../primitives/utils.dart';
 
 /// A line in the console.

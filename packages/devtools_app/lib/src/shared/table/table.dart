@@ -5,21 +5,19 @@
 import 'dart:async';
 import 'dart:math';
 
+import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide TableRow;
 import 'package:flutter/services.dart';
 
 import '../collapsible_mixin.dart';
 import '../common_widgets.dart';
-import '../primitives/auto_dispose.dart';
 import '../primitives/flutter_widgets/linked_scroll_controller.dart';
 import '../primitives/trees.dart';
 import '../primitives/utils.dart';
-import '../theme.dart';
-import '../ui/colors.dart';
 import '../ui/search.dart';
 import '../ui/utils.dart';
-import '../utils.dart';
 import 'column_widths.dart';
 import 'table_controller.dart';
 import 'table_data.dart';

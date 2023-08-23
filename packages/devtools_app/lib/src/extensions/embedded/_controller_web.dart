@@ -5,7 +5,7 @@
 // ignore_for_file: avoid_web_libraries_in_flutter, as designed
 import 'dart:async';
 import 'dart:html' as html;
-import 'dart:ui' as ui;
+import 'dart:ui_web' as ui_web;
 
 import 'package:devtools_extensions/api.dart';
 import 'package:path/path.dart' as path;
@@ -18,9 +18,9 @@ import 'controller.dart';
 /// Each time [EmbeddedExtensionControllerImpl.init] is called, we create a new
 /// [html.IFrameElement] and register it to
 /// [EmbeddedExtensionControllerImpl.viewId] via
-/// [ui.platformViewRegistry.registerViewFactory]. Each new [html.IFrameElement]
-/// must have a unique id in the [PlatformViewRegistry], which
-/// [_viewIdIncrementer] is used to create.
+/// [ui_web.platformViewRegistry.registerViewFactory]. Each new
+/// [html.IFrameElement] must have a unique id in the [PlatformViewRegistry],
+/// which [_viewIdIncrementer] is used to create.
 var _viewIdIncrementer = 0;
 
 class EmbeddedExtensionControllerImpl extends EmbeddedExtensionController {
@@ -32,6 +32,7 @@ class EmbeddedExtensionControllerImpl extends EmbeddedExtensionController {
   /// in the id.
   late final viewId = 'ext-${extensionConfig.name}-${_viewIdIncrementer++}';
 
+  // TODO(kenz): pass along IDE theme query parameters from the DevTools URL.
   String get extensionUrl {
     return path.join(
       html.window.location.origin,
@@ -69,10 +70,7 @@ class EmbeddedExtensionControllerImpl extends EmbeddedExtensionController {
       ..height = '100%'
       ..width = '100%';
 
-    // This ignore is required due to
-    // https://github.com/flutter/flutter/issues/41563
-    // ignore: undefined_prefixed_name
-    final registered = ui.platformViewRegistry.registerViewFactory(
+    final registered = ui_web.platformViewRegistry.registerViewFactory(
       viewId,
       (int viewId) => _extensionIFrame,
     );

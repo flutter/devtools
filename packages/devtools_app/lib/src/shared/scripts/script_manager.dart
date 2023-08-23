@@ -5,12 +5,12 @@
 import 'dart:async';
 
 import 'package:collection/collection.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../service/vm_service_wrapper.dart';
 import '../globals.dart';
-import '../primitives/auto_dispose.dart';
 
 class ScriptManager extends DisposableController
     with AutoDisposeControllerMixin {
@@ -105,8 +105,9 @@ class _ScriptCache {
     ScriptRef scriptRef,
   ) {
     final scriptId = scriptRef.id!;
-    if (_scripts.containsKey(scriptId)) {
-      return Future.value(_scripts[scriptId]);
+    final script = _scripts[scriptId];
+    if (script != null) {
+      return Future.value(script);
     }
 
     if (_inProgress.containsKey(scriptId)) {

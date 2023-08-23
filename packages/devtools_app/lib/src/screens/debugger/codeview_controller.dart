@@ -5,6 +5,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:vm_service/vm_service.dart';
@@ -14,7 +15,6 @@ import '../../shared/config_specific/launch_url/launch_url.dart';
 import '../../shared/diagnostics/primitives/source_location.dart';
 import '../../shared/globals.dart';
 import '../../shared/notifications.dart';
-import '../../shared/primitives/auto_dispose.dart';
 import '../../shared/primitives/history_manager.dart';
 import '../../shared/routing.dart';
 import '../../shared/ui/search.dart';

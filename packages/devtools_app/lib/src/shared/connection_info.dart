@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 import 'package:vm_service/vm_service.dart';
 
@@ -10,7 +11,6 @@ import 'common_widgets.dart';
 import 'globals.dart';
 import 'primitives/utils.dart';
 import 'routing.dart';
-import 'theme.dart';
 import 'ui/utils.dart';
 import 'utils.dart';
 
@@ -105,8 +105,8 @@ class ConnectToNewAppButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return DevToolsButton(
-      elevatedButton: elevated,
+    return GaDevToolsButton(
+      elevated: elevated,
       label: connectToNewAppText,
       icon: Icons.device_hub_rounded,
       gaScreen: gaScreen,

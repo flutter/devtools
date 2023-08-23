@@ -46,7 +46,7 @@ class AnalyzeButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return DevToolsButton(
+    return GaDevToolsButton(
       label: 'Analyze and Download',
       icon: Icons.file_download,
       tooltip: 'Analyze the leaks and download the result\n'
