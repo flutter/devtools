@@ -7,9 +7,9 @@
 # Fast fail the script on failures.
 set -ex
 
-echo "Refreshing local clone..."
+echo "upgrade.sh: upgrading packages..."
 
-pushd packages/devtools_app
+pushd packages/devtools_shared
 flutter pub upgrade
 popd
 
@@ -17,6 +17,16 @@ pushd packages/devtools_test
 flutter pub upgrade
 popd
 
-bash tool/generate_code.sh
+pushd packages/devtools_app_shared
+flutter pub upgrade
+popd
 
-echo "Refreshed local clone."
+pushd packages/devtools_app
+flutter pub upgrade
+popd
+
+pushd packages/devtools_extensions
+flutter pub upgrade
+popd
+
+echo "upgrade.sh: upgraded packages."
