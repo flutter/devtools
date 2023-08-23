@@ -179,6 +179,8 @@ MockServiceManager<VmServiceWrapper> _createMockServiceManagerWithDefaults() {
   provideDummy<IsolateManager>(fakeIsolateManager);
 
   final fakeServiceExtensionManager = FakeServiceExtensionManager();
+  provideDummy<ServiceExtensionManager>(fakeServiceExtensionManager);
+
   when(mockServiceManager.isolateManager).thenReturn(fakeIsolateManager);
   when(mockServiceManager.serviceExtensionManager)
       .thenReturn(fakeServiceExtensionManager);
