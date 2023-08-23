@@ -9,6 +9,7 @@ import 'package:flutter/foundation.dart';
 import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart' hide Error;
 
+// TODO(https://github.com/flutter/devtools/issues/6239): try to remove this.
 @sealed
 class IsolateState {
   IsolateState(this.isolateRef);

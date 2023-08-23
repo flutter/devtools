@@ -37,6 +37,7 @@ void main() {
     setGlobal(PreferencesController, PreferencesController());
     setGlobal(OfflineModeController, OfflineModeController());
     setGlobal(NotificationService, NotificationService());
+    setGlobal(BannerMessagesController, BannerMessagesController());
   });
 
   group('$PerformanceScreen', () {

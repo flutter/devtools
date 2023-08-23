@@ -54,7 +54,9 @@ class ResolvedUriManager {
               .lookupResolvedPackageUris(isolateId, packageUris))
           .uris;
 
-      if (fileUris != null) {
+      // [_packagePathMappings] could have been set to null during the async gap
+      // so check that it is non-null again here.
+      if (fileUris != null && _packagePathMappings != null) {
         _packagePathMappings!.addMappings(
           isolateId: isolateId,
           fullPaths: fileUris,

@@ -27,11 +27,14 @@ void main() {
 
   group('$PerformanceControls', () {
     late MockServiceConnectionManager mockServiceConnection;
+    late MockServiceManager mockServiceManager;
     late MockPerformanceController mockPerformanceController;
 
     setUp(() {
       mockServiceConnection = createMockServiceConnectionWithDefaults();
-      when(mockServiceConnection.serviceManager.serviceExtensionManager)
+      mockServiceManager =
+          mockServiceConnection.serviceManager as MockServiceManager;
+      when(mockServiceManager.serviceExtensionManager)
           .thenReturn(FakeServiceExtensionManager());
       final connectedApp = MockConnectedApp();
       mockConnectedApp(
@@ -40,8 +43,7 @@ void main() {
         isProfileBuild: false,
         isWebApp: false,
       );
-      when(mockServiceConnection.serviceManager.connectedApp)
-          .thenReturn(connectedApp);
+      when(mockServiceManager.connectedApp).thenReturn(connectedApp);
       setGlobal(ServiceConnectionManager, mockServiceConnection);
       mockPerformanceController = createMockPerformanceControllerWithDefaults();
     });
@@ -84,7 +86,7 @@ void main() {
       windowSize,
       (WidgetTester tester) async {
         mockConnectedApp(
-          mockServiceConnection.serviceManager.connectedApp!,
+          mockServiceManager.connectedApp!,
           isFlutterApp: false,
           isProfileBuild: false,
           isWebApp: false,

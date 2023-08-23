@@ -26,6 +26,8 @@ void main() {
       );
       setGlobal(PreferencesController, PreferencesController());
       mockServiceConnection = createMockServiceConnectionWithDefaults();
+      final mockServiceManager =
+          mockServiceConnection.serviceManager as MockServiceManager;
       final connectedApp = MockConnectedApp();
       mockConnectedApp(
         connectedApp,
@@ -33,9 +35,8 @@ void main() {
         isProfileBuild: false,
         isWebApp: false,
       );
-      when(mockServiceConnection.serviceManager.connectedApp)
-          .thenReturn(connectedApp);
-      when(mockServiceConnection.serviceManager.connectedState)
+      when(mockServiceManager.connectedApp).thenReturn(connectedApp);
+      when(mockServiceManager.connectedState)
           .thenReturn(ValueNotifier(const ConnectedState(true)));
       setGlobal(ServiceConnectionManager, mockServiceConnection);
       offlineController.enterOfflineMode(

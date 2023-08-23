@@ -25,6 +25,7 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
     CpuSamples? allocationSamples,
     this._resolvedUriMap,
     this._classList,
+    List<({String flagName, String value})>? flags,
   )   : _startingSockets = _socketProfile?.sockets ?? [],
         _startingRequests = _httpProfile?.requests ?? [],
         cpuSamples = cpuSamples ?? _defaultProfile,
@@ -34,6 +35,10 @@ class FakeVmServiceWrapper extends Fake implements VmServiceWrapper {
       for (var e in _resolvedUriMap!.entries) {
         _reverseResolvedUriMap![e.value] = e.key;
       }
+    }
+
+    for (final flag in flags ?? []) {
+      unawaited(setFlag(flag.flagName, flag.value));
     }
   }
 

@@ -120,19 +120,20 @@ void main() {
     }
 
     setUp(() {
+      final mockServiceConnection = createMockServiceConnectionWithDefaults();
+      final mockServiceManager =
+          mockServiceConnection.serviceManager as MockServiceManager;
+      setGlobal(ServiceConnectionManager, mockServiceConnection);
+
       final connectedApp = MockConnectedApp();
-      setGlobal(
-        ServiceConnectionManager,
-        createMockServiceConnectionWithDefaults(),
-      );
-      when(serviceConnection.serviceManager.connectedApp)
-          .thenReturn(connectedApp);
       mockConnectedApp(
         connectedApp,
         isFlutterApp: true,
         isProfileBuild: true,
         isWebApp: false,
       );
+      when(mockServiceManager.connectedApp).thenReturn(connectedApp);
+
       controller = CpuProfilerController();
       flameChart = CpuProfileFlameChart(
         data: CpuProfileData.parse(cpuProfileResponseJson),

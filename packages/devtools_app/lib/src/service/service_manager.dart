@@ -85,8 +85,8 @@ class ServiceConnectionManager {
   AppState get appState => _appState!;
   AppState? _appState;
 
-  Future<void> _beforeOpenVmService(VmServiceWrapper service) async {
-    consoleService.vmServiceOpened(service);
+  Future<void> _beforeOpenVmService(VmServiceWrapper? service) async {
+    consoleService.vmServiceOpened(service!);
     resolvedUriManager.vmServiceOpened();
     await vmFlagManager.vmServiceOpened(service);
     timelineStreamManager.vmServiceOpened(
@@ -101,7 +101,7 @@ class ServiceConnectionManager {
     _inspectorService = null;
   }
 
-  Future<void> _afterOpenVmService(VmServiceWrapper service) async {
+  Future<void> _afterOpenVmService(VmServiceWrapper? service) async {
     // Re-initialize isolates when VM developer mode is enabled/disabled to
     // display/hide system isolates.
     preferences.vmDeveloperModeEnabled
@@ -126,11 +126,11 @@ class ServiceConnectionManager {
     _appState = AppState(serviceManager.isolateManager.selectedIsolate);
 
     if (debugLogServiceProtocolEvents) {
-      serviceTrafficLogger = VmServiceTrafficLogger(service);
+      serviceTrafficLogger = VmServiceTrafficLogger(service!);
     }
   }
 
-  void _beforeCloseVmService(VmServiceWrapper service) {
+  void _beforeCloseVmService(VmServiceWrapper? service) {
     // Set [offlineController.previousConnectedApp] in case we need it for
     // viewing data after disconnect. This must be done before resetting the
     // rest of the service manager state.
@@ -140,7 +140,7 @@ class ServiceConnectionManager {
     offlineController.previousConnectedApp = previousConnectedApp;
   }
 
-  void _afterCloseVmService(VmServiceWrapper service) {
+  void _afterCloseVmService(VmServiceWrapper? service) {
     generateDevToolsTitle();
     vmFlagManager.vmServiceClosed();
     timelineStreamManager.vmServiceClosed();

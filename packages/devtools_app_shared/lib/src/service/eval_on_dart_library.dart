@@ -30,6 +30,7 @@ class Disposable {
   }
 }
 
+// TODO(https://github.com/flutter/devtools/issues/6239): try to remove this.
 @sealed
 class EvalOnDartLibrary extends DisposableController
     with AutoDisposeControllerMixin {

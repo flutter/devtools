@@ -15,33 +15,40 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 
 void main() {
-  final mockServiceConnection = createMockServiceConnectionWithDefaults();
-  when(mockServiceConnection.serviceManager.service).thenReturn(null);
-  when(mockServiceConnection.serviceManager.connectedState).thenReturn(
-    ValueNotifier<ConnectedState>(const ConnectedState(false)),
-  );
-  when(mockServiceConnection.serviceManager.hasConnection).thenReturn(false);
-  when(mockServiceConnection.serviceManager.isolateManager)
-      .thenReturn(FakeIsolateManager());
-  when(mockServiceConnection.appState).thenReturn(
-    AppState(
-      mockServiceConnection.serviceManager.isolateManager.selectedIsolate,
-    ),
-  );
+  late MockServiceConnectionManager mockServiceConnection;
+  late MockServiceManager mockServiceManager;
 
-  final mockErrorBadgeManager = MockErrorBadgeManager();
-  when(mockServiceConnection.errorBadgeManager)
-      .thenReturn(mockErrorBadgeManager);
-  when(mockErrorBadgeManager.errorCountNotifier(any))
-      .thenReturn(ValueNotifier<int>(0));
+  setUp(() {
+    mockServiceConnection = createMockServiceConnectionWithDefaults();
+    mockServiceManager =
+        mockServiceConnection.serviceManager as MockServiceManager;
 
-  setGlobal(ServiceConnectionManager, mockServiceConnection);
-  setGlobal(FrameworkController, FrameworkController());
-  setGlobal(SurveyService, SurveyService());
-  setGlobal(OfflineModeController, OfflineModeController());
-  setGlobal(IdeTheme, IdeTheme());
-  setGlobal(NotificationService, NotificationService());
-  setGlobal(BannerMessagesController, BannerMessagesController());
+    when(mockServiceManager.service).thenReturn(null);
+    when(mockServiceManager.connectedState).thenReturn(
+      ValueNotifier<ConnectedState>(const ConnectedState(false)),
+    );
+    when(mockServiceManager.hasConnection).thenReturn(false);
+    when(mockServiceManager.isolateManager).thenReturn(FakeIsolateManager());
+    when(mockServiceConnection.appState).thenReturn(
+      AppState(
+        mockServiceManager.isolateManager.selectedIsolate,
+      ),
+    );
+
+    final mockErrorBadgeManager = MockErrorBadgeManager();
+    when(mockServiceConnection.errorBadgeManager)
+        .thenReturn(mockErrorBadgeManager);
+    when(mockErrorBadgeManager.errorCountNotifier(any))
+        .thenReturn(ValueNotifier<int>(0));
+
+    setGlobal(ServiceConnectionManager, mockServiceConnection);
+    setGlobal(FrameworkController, FrameworkController());
+    setGlobal(SurveyService, SurveyService());
+    setGlobal(OfflineModeController, OfflineModeController());
+    setGlobal(IdeTheme, IdeTheme());
+    setGlobal(NotificationService, NotificationService());
+    setGlobal(BannerMessagesController, BannerMessagesController());
+  });
 
   testWidgets(
     'displays floating debugger controls',
@@ -53,23 +60,19 @@ void main() {
         isProfileBuild: false,
         isWebApp: false,
       );
-      when(mockServiceConnection.serviceManager.connectedAppInitialized)
-          .thenReturn(true);
-      when(mockServiceConnection.serviceManager.connectedApp)
-          .thenReturn(connectedApp);
-      when(mockServiceConnection.serviceManager.isolateManager)
-          .thenReturn(FakeIsolateManager());
+      when(mockServiceManager.connectedAppInitialized).thenReturn(true);
+      when(mockServiceManager.connectedApp).thenReturn(connectedApp);
+      when(mockServiceManager.isolateManager).thenReturn(FakeIsolateManager());
       when(mockServiceConnection.appState).thenReturn(
         AppState(
-          mockServiceConnection.serviceManager.isolateManager.selectedIsolate,
+          mockServiceManager.isolateManager.selectedIsolate,
         ),
       );
       final mockDebuggerController = MockDebuggerController();
       final state = serviceConnection
           .serviceManager.isolateManager.mainIsolateState! as MockIsolateState;
       when(state.isPaused).thenReturn(ValueNotifier(true));
-      when(mockServiceConnection.serviceManager.isMainIsolatePaused)
-          .thenReturn(false);
+      when(mockServiceManager.isMainIsolatePaused).thenReturn(false);
 
       await tester.pumpWidget(
         wrapWithControllers(

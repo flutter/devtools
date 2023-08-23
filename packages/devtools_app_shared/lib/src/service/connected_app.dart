@@ -16,6 +16,7 @@ final _log = Logger('connected_app');
 const flutterLibraryUri = 'package:flutter/src/widgets/binding.dart';
 const dartHtmlLibraryUri = 'dart:html';
 
+// TODO(https://github.com/flutter/devtools/issues/6239): try to remove this.
 @sealed
 class ConnectedApp {
   ConnectedApp(this.serviceManager);

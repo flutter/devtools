@@ -37,10 +37,8 @@ class FakeServiceConnectionManager extends Fake
       hasService: hasService,
       availableLibraries: availableLibraries,
       availableServices: availableServices,
-    )..registerLifecycleCallback(
-        ServiceManagerLifecycle.beforeOpenVmService,
-        (_) => resolvedUriManager.vmServiceOpened(),
-      );
+      onVmServiceOpened: resolvedUriManager.vmServiceOpened,
+    );
     for (var screenId in screenIds) {
       when(errorBadgeManager.erroredItemsForPage(screenId)).thenReturn(
         FixedValueListenable(LinkedHashMap<String, DevToolsError>()),
@@ -107,16 +105,18 @@ class FakeServiceManager extends Fake
     this.hasService = true,
     this.availableServices = const [],
     this.availableLibraries = const [],
-  }) : service = service ?? createFakeService() {
+    this.onVmServiceOpened,
+  }) {
+    this.service = service ?? createFakeService();
     mockConnectedApp(
       connectedApp!,
-      isFlutterApp: false,
-      isProfileBuild: true,
+      isFlutterApp: true,
+      isProfileBuild: false,
       isWebApp: false,
     );
 
     when(vm.operatingSystem).thenReturn('macos');
-    unawaited(vmServiceOpened(service!, onClosed: Future.value()));
+    unawaited(vmServiceOpened(this.service!, onClosed: Future.value()));
   }
 
   static FakeVmServiceWrapper createFakeService({
@@ -129,6 +129,7 @@ class FakeServiceManager extends Fake
     CpuSamples? allocationSamples,
     Map<String, String>? resolvedUriMap,
     ClassList? classList,
+    List<({String flagName, String value})>? vmFlags,
   }) =>
       FakeVmServiceWrapper(
         _flagManager,
@@ -141,11 +142,14 @@ class FakeServiceManager extends Fake
         allocationSamples,
         resolvedUriMap,
         classList,
+        vmFlags,
       );
 
   final List<String> availableServices;
 
   final List<String> availableLibraries;
+
+  final Function? onVmServiceOpened;
 
   @override
   VmServiceWrapper? service;
@@ -256,5 +260,15 @@ class FakeServiceManager extends Fake
   Future<void> initFlagManager() async {
     await _flagManager.vmServiceOpened(service!);
     flagsInitialized.complete();
+  }
+
+  @override
+  Future<void> vmServiceOpened(
+    VmServiceWrapper service, {
+    required Future<void> onClosed,
+  }) async {
+    onVmServiceOpened?.call();
+    await initFlagManager();
+    return Future.value();
   }
 }

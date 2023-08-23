@@ -16,7 +16,7 @@ import '../../utils.dart';
 
 final _log = Logger('service_manager');
 
-typedef ServiceManagerCallback<T> = FutureOr<void> Function(T service);
+typedef ServiceManagerCallback<T> = FutureOr<void> Function(T? service);
 
 enum ServiceManagerLifecycle {
   /// Lifecycle phase that occurrs before the service manager is set up for
@@ -41,6 +41,7 @@ enum ServiceManagerOverride {
 }
 
 // TODO(kenz): add an offline service manager implementation.
+// TODO(https://github.com/flutter/devtools/issues/6239): try to remove this.
 @sealed
 class ServiceManager<T extends VmService> {
   ServiceManager() {
@@ -176,11 +177,13 @@ class ServiceManager<T extends VmService> {
         .add(callback);
   }
 
-  FutureOr<void> _callLifecycleCallbacks(
+  @protected
+  FutureOr<void> callLifecycleCallbacks(
     ServiceManagerLifecycle lifecycle,
-    T service,
+    T? service,
   ) async {
-    final callbacks = _lifecycleCallbacks[lifecycle] ?? <ServiceManagerCallback<T>>[];
+    final callbacks =
+        _lifecycleCallbacks[lifecycle] ?? <ServiceManagerCallback<T>>[];
     await Future.wait(callbacks.map((c) async => await c.call(service)));
   }
 
@@ -218,12 +221,12 @@ class ServiceManager<T extends VmService> {
     isolateManager.vmServiceOpened(service);
     serviceExtensionManager.vmServiceOpened(service, connectedApp!);
 
-    await _callLifecycleCallbacks(
+    await callLifecycleCallbacks(
       ServiceManagerLifecycle.beforeOpenVmService,
       service,
     );
     await _openVmServiceConnection(service, onClosed: onClosed);
-    await _callLifecycleCallbacks(
+    await callLifecycleCallbacks(
       ServiceManagerLifecycle.afterOpenVmService,
       service,
     );
@@ -238,14 +241,14 @@ class ServiceManager<T extends VmService> {
   FutureOr<void> vmServiceClosed({
     ConnectedState connectionState = const ConnectedState(false),
   }) async {
-    await _callLifecycleCallbacks(
+    await callLifecycleCallbacks(
       ServiceManagerLifecycle.beforeCloseVmService,
-      this.service!,
+      this.service,
     );
     _closeVmServiceConnection();
-    await _callLifecycleCallbacks(
+    await callLifecycleCallbacks(
       ServiceManagerLifecycle.afterCloseVmService,
-      this.service!,
+      this.service,
     );
 
     serviceExtensionManager.vmServiceClosed();
