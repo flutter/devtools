@@ -11,6 +11,8 @@ import '../../../devtools_app.dart';
 import '../../shared/feature_flags.dart';
 import '../api/dart_tooling_api.dart';
 import '../api/vs_code_api.dart';
+import 'debug_session_info.dart';
+import 'device_selector.dart';
 
 /// A general Flutter sidebar panel for embedding inside IDEs.
 ///
@@ -68,10 +70,22 @@ class _VsCodeConnectedPanelState extends State<_VsCodeConnectedPanel> {
       children: [
         const SizedBox(height: defaultSpacing),
         if (widget.api.capabilities.executeCommand)
-          ElevatedButton(
-            onPressed: () =>
-                unawaited(widget.api.executeCommand('flutter.createProject')),
-            child: const Text('New Flutter Project'),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              ElevatedButton(
+                onPressed: () => unawaited(
+                  widget.api.executeCommand('flutter.createProject'),
+                ),
+                child: const Text('New Flutter Project'),
+              ),
+              ElevatedButton(
+                onPressed: () => unawaited(
+                  widget.api.executeCommand('flutter.doctor'),
+                ),
+                child: const Text('Run Flutter Doctor'),
+              ),
+            ],
           ),
         if (widget.api.capabilities.selectDevice)
           StreamBuilder(
@@ -80,35 +94,44 @@ class _VsCodeConnectedPanelState extends State<_VsCodeConnectedPanel> {
               if (!snapshot.hasData) {
                 return const SizedBox.shrink();
               }
-              final deviceEvent = snapshot.data!;
-              return Table(
-                defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+              return Column(
                 children: [
-                  for (final device in deviceEvent.devices)
-                    TableRow(
-                      children: [
-                        TextButton(
-                          child: Text(device.name),
-                          onPressed: () =>
-                              unawaited(widget.api.selectDevice(device.id)),
-                        ),
-                        Text(
-                          device.id == deviceEvent.selectedDeviceId
-                              ? '(selected)'
-                              : '',
-                        ),
-                      ],
-                    ),
+                  const SizedBox(height: defaultSpacing),
+                  Text(
+                    'Devices',
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                  DeviceSelector(
+                    api: widget.api,
+                    deviceInfo: snapshot.data!,
+                  ),
                 ],
               );
             },
           ),
-        if (widget.api.capabilities.executeCommand)
-          ElevatedButton(
-            onPressed: () =>
-                unawaited(widget.api.executeCommand('flutter.doctor')),
-            child: const Text('Run Flutter Doctor'),
-          ),
+        const SizedBox(height: defaultSpacing),
+        StreamBuilder(
+          stream: widget.api.debugSessionsChanged,
+          builder: (context, snapshot) {
+            final sessions = snapshot.data?.sessions ?? const [];
+            return Column(
+              children: [
+                Text(
+                  'Debug Sessions',
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                if (sessions.isEmpty)
+                  DebugSessionInfo(api: widget.api)
+                else
+                  for (final session in sessions)
+                    DebugSessionInfo(
+                      api: widget.api,
+                      debugSession: session,
+                    ),
+              ],
+            );
+          },
+        ),
       ],
     );
   }

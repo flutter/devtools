@@ -6,6 +6,7 @@ import 'package:devtools_app/devtools_app.dart';
 import 'package:devtools_app/src/shared/feature_flags.dart';
 import 'package:devtools_app/src/standalone_ui/vs_code/flutter_panel.dart';
 import 'package:devtools_app_shared/ui.dart';
+import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:stager/stager.dart';
 
@@ -58,5 +59,6 @@ class VsCodeScene extends Scene {
   @override
   Future<void> setUp() async {
     FeatureFlags.vsCodeSidebarTooling = true;
+    setGlobal(IdeTheme, IdeTheme());
   }
 }
