@@ -9,23 +9,26 @@ set -ex
 
 echo "upgrade.sh: upgrading packages..."
 
-pushd packages/devtools_shared
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+ROOT_DIR="$SCRIPT_DIR/.."
+
+pushd "$ROOT_DIR/packages/devtools_shared"
 flutter pub upgrade
 popd
 
-pushd packages/devtools_test
+pushd "$ROOT_DIR/packages/devtools_test"
 flutter pub upgrade
 popd
 
-pushd packages/devtools_app_shared
+pushd "$ROOT_DIR/packages/devtools_app_shared"
 flutter pub upgrade
 popd
 
-pushd packages/devtools_app
+pushd "$ROOT_DIR/packages/devtools_app"
 flutter pub upgrade
 popd
 
-pushd packages/devtools_extensions
+pushd "$ROOT_DIR/packages/devtools_extensions"
 flutter pub upgrade
 popd
 
