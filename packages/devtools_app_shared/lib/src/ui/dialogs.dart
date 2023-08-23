@@ -10,6 +10,60 @@ import 'theme/theme.dart';
 
 const dialogDefaultContext = 'dialog';
 
+/// A standardized dialog for use in DevTools.
+///
+/// It normalizes dialog layout, spacing, and look and feel.
+class DevToolsDialog extends StatelessWidget {
+  const DevToolsDialog({
+    super.key,
+    Widget? title,
+    required this.content,
+    this.includeDivider = true,
+    this.scrollable = true,
+    this.actions,
+    this.actionsAlignment,
+  }) : titleContent = title ?? const SizedBox();
+
+  static const contentPadding = 24.0;
+
+  final Widget titleContent;
+  final Widget content;
+  final bool includeDivider;
+  final bool scrollable;
+  final List<Widget>? actions;
+  final MainAxisAlignment? actionsAlignment;
+
+  @override
+  Widget build(BuildContext context) {
+    return PointerInterceptor(
+      child: AlertDialog(
+        scrollable: scrollable,
+        title: Column(
+          children: [
+            titleContent,
+            includeDivider
+                ? const PaddedDivider(
+                    padding: EdgeInsets.only(bottom: denseRowSpacing),
+                  )
+                : const SizedBox(height: defaultSpacing),
+          ],
+        ),
+        contentPadding: const EdgeInsets.fromLTRB(
+          contentPadding,
+          0,
+          contentPadding,
+          contentPadding,
+        ),
+        content: content,
+        actions: actions,
+        actionsAlignment: actionsAlignment,
+        buttonPadding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
+      ),
+    );
+  }
+}
+
+/// A [Text] widget styled for dialog titles.
 class DialogTitleText extends StatelessWidget {
   const DialogTitleText(this.text, {super.key});
 
@@ -132,59 +186,6 @@ class DialogHelpText extends StatelessWidget {
     return Text(
       helpText,
       style: textStyle(context),
-    );
-  }
-}
-
-/// A standardized dialog for use in DevTools.
-///
-/// It normalizes dialog layout, spacing, and look and feel.
-class DevToolsDialog extends StatelessWidget {
-  const DevToolsDialog({
-    super.key,
-    Widget? title,
-    required this.content,
-    this.includeDivider = true,
-    this.scrollable = true,
-    this.actions,
-    this.actionsAlignment,
-  }) : titleContent = title ?? const SizedBox();
-
-  static const contentPadding = 24.0;
-
-  final Widget titleContent;
-  final Widget content;
-  final bool includeDivider;
-  final bool scrollable;
-  final List<Widget>? actions;
-  final MainAxisAlignment? actionsAlignment;
-
-  @override
-  Widget build(BuildContext context) {
-    return PointerInterceptor(
-      child: AlertDialog(
-        scrollable: scrollable,
-        title: Column(
-          children: [
-            titleContent,
-            includeDivider
-                ? const PaddedDivider(
-                    padding: EdgeInsets.only(bottom: denseRowSpacing),
-                  )
-                : const SizedBox(height: defaultSpacing),
-          ],
-        ),
-        contentPadding: const EdgeInsets.fromLTRB(
-          contentPadding,
-          0,
-          contentPadding,
-          contentPadding,
-        ),
-        content: content,
-        actions: actions,
-        actionsAlignment: actionsAlignment,
-        buttonPadding: const EdgeInsets.symmetric(horizontal: defaultSpacing),
-      ),
     );
   }
 }
