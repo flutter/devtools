@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io';
+
 import 'package:devtools_app/src/screens/memory/shared/heap/spanning_tree.dart';
 import 'package:devtools_app/src/shared/memory/adapted_heap_data.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -9,12 +11,25 @@ import 'package:flutter_test/flutter_test.dart';
 import '../../../test_infra/test_data/memory/heap/heap_data.dart';
 
 void main() {
+  final snapshots = <String, AdaptedHeapData>{};
+
+  setUpAll(() async {
+    final before = ProcessInfo.currentRss;
+    for (var t in goldenHeapTests) {
+      snapshots[t.fileName] = await t.loadHeap();
+    }
+
+    final after = ProcessInfo.currentRss;
+    final delta = after - before;
+    print(delta); // 957054976
+  });
+
   for (var t in goldenHeapTests) {
     group(t.fileName, () {
       late AdaptedHeapData heap;
 
-      setUp(() async {
-        heap = await t.loadHeap();
+      setUp(() {
+        heap = snapshots[t.fileName]!;
       });
 
       test('has many objects and roots.', () {
