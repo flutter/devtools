@@ -24,9 +24,7 @@ jobs:
         run: |
           set -ex
 
-          # Get list of branches that exist on the remote, then filter for the auto-bump branches
-          # auto-candidate-
-          # auto-bump
+          # Get list of branches that exist on the remote, then filter for the workflow bot branches
           EXISTING_BRANCHES=$(git ls-remote --heads | grep refs/heads | awk  '{print $2}' |sed 's|refs/heads/\(.*\)$|\1|')
           for EXISTING_BRANCH in $EXISTING_BRANCHES; do
             PR_IS_CLOSED=$(gh pr view --json closed --jq '.closed' "$EXISTING_BRANCH")
