@@ -1,0 +1,43 @@
+name: Workflow Bot Cleanup
+on:
+  workflow_dispatch: # Allows for manual triggering if needed
+  schedule:
+    # * is a special character in YAML so you have to quote this string
+    - cron: "0 9 * * *" # Run every day
+permissions:
+  contents: write
+  pull-requests: write
+
+
+jobs:
+  clean-up-branches:
+    if: ${{ github.repository == 'flutter/devtools }}
+    name: Clean up Dev Bump Branches
+    runs-on: ubuntu-latest
+    steps:
+      - name: Sparse checkout of the repository
+        uses: actions/checkout@v3
+        with:
+          sparse-checkout: |
+            README.md
+      - name: Clean up branches
+        run: |
+          set -ex
+
+          # Get list of branches that exist on the remote, then filter for the auto-bump branches
+          # auto-candidate-
+          # auto-bump
+          EXISTING_BRANCHES=$(git ls-remote --heads | grep refs/heads | awk  '{print $2}' |sed 's|refs/heads/\(.*\)$|\1|')
+          for EXISTING_BRANCH in $EXISTING_BRANCHES; do
+            PR_IS_CLOSED=$(gh pr view --json closed --jq '.closed' "$EXISTING_BRANCH")
+            PR_AUTHOR=$(gh pr view --json author --jq '.author.login' "$EXISTING_BRANCH")
+            if [[ "$PR_IS_CLOSED" == "true" && "$PR_AUTHOR" == "DartDevtoolWorkflowBot" ]]; then
+              # If the branch exists, DartDevtoolWorkflowBot is the author and the PR is closed we will delete it
+              echo "Deleting $EXISTING_BRANCH"
+              echo "gh api  /repos/flutter/devtools/git/refs/heads/$EXISTING_BRANCH -X DELETE"
+            else
+              echo "Avoiding $EXISTING_BRANCH with is_closed:$PR_IS_CLOSED and author:$PR_AUTHOR"
+            fi
+          done
+        env:
+          GH_TOKEN: ${{ secrets.DEVTOOLS_WORKFLOW_BOT_TOKEN }}

@@ -121,33 +121,4 @@ jobs:
           GH_TOKEN: ${{ secrets.DEVTOOLS_WORKFLOW_BOT_TOKEN }}
           ORIGINAL_GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           IS_DRAFT: ${{ inputs.draft == true }}
-  clean-up-branches:
-    # If a pr is closed on a workflow bot PR, then clean up workflow bot branches.
-    if: ${{ github.event_name == 'pull_request' && github.event.action == 'closed'  && github.event.pull_request.user.login == 'DartDevtoolWorkflowBot' && github.repository == 'flutter/devtools}}
-    name: Clean up Dev Bump Branches
-    runs-on: ubuntu-latest
-    steps:
-      - name: Sparse checkout of the repository
-        uses: actions/checkout@v3
-        with:
-          sparse-checkout: |
-            README.md
-      - name: Clean up branches
-        run: |
-          set -e
 
-          # Get list of branches that exist on the remote, then filter for the auto-bump branches
-          EXISTING_BRANCHES=$(git ls-remote --heads | grep refs/heads/auto-bump- | sed 's|.*\(auto-bump-[[:digit:]]*\).*|\1|')
-          for EXISTING_BRANCH in $EXISTING_BRANCHES; do
-            PR_IS_CLOSED=$(gh pr view --json closed --jq '.closed' "$EXISTING_BRANCH")
-            PR_AUTHOR=$(gh pr view --json author --jq '.author.login' "$EXISTING_BRANCH")
-            if [[ "$PR_IS_CLOSED" == "true" && "$PR_AUTHOR" == "DartDevtoolWorkflowBot" ]]; then
-              # If the branch exists, DartDevtoolWorkflowBot is the author and the PR is closed we will delete it
-              echo "Deleting $EXISTING_BRANCH"
-              gh api  /repos/flutter/devtools/git/refs/heads/$EXISTING_BRANCH -X DELETE
-            else
-              echo "Avoiding $EXISTING_BRANCH with is_closed:$PR_IS_CLOSED and author:$PR_AUTHOR"
-            fi
-          done
-        env:
-          GH_TOKEN: ${{ secrets.DEVTOOLS_WORKFLOW_BOT_TOKEN }}
