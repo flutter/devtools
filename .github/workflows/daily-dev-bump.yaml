@@ -135,6 +135,7 @@ jobs:
             README.md
       - name: Clean up branches
         run: |
+          set -x
           # Get 5 most recent branches of closed DartDevtoolWorkflowBot PRs.
           CLOSED_BRANCH_NAMES=$(gh pr list -A DartDevtoolWorkflowBot -s closed -L 5 --search sort:created-desc | grep auto-bump- | sed 's|.*\(auto-bump-[[:digit:]]*\).*|\1|')
 
