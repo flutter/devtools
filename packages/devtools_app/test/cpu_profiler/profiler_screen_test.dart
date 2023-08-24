@@ -33,7 +33,8 @@ void main() {
       expect(find.byType(StopRecordingButton), findsOneWidget);
       expect(find.byType(ClearButton), findsOneWidget);
       expect(find.text('Load all CPU samples'), findsOneWidget);
-      if (scene.fakeServiceManager.connectedApp!.isFlutterNativeAppNow) {
+      if (scene.fakeServiceConnection.serviceManager.connectedApp!
+          .isFlutterNativeAppNow) {
         expect(find.text('Profile app start up'), findsOneWidget);
       }
       expect(find.byType(CpuSamplingRateDropdown), findsOneWidget);
@@ -80,7 +81,7 @@ void main() {
       windowSize,
       (WidgetTester tester) async {
         mockConnectedApp(
-          scene.fakeServiceManager.connectedApp!,
+          scene.fakeServiceConnection.serviceManager.connectedApp!,
           isFlutterApp: true,
           isProfileBuild: true,
           isWebApp: false,
@@ -127,7 +128,7 @@ void main() {
       windowSize,
       (WidgetTester tester) async {
         await tester.runAsync(() async {
-          await scene.fakeServiceManager.service!.setFlag(
+          await scene.fakeServiceConnection.serviceManager.service!.setFlag(
             vm_flags.profiler,
             'false',
           );

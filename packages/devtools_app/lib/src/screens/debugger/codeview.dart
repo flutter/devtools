@@ -1144,7 +1144,7 @@ class _LineItemState extends State<LineItem>
     required PointerEvent event,
     required bool Function() isHoverStale,
   }) async {
-    if (!serviceManager.isMainIsolatePaused) return null;
+    if (!serviceConnection.serviceManager.isMainIsolatePaused) return null;
 
     final word = wordForHover(
       event.localPosition.dx,
@@ -1154,7 +1154,8 @@ class _LineItemState extends State<LineItem>
     if (word != '') {
       try {
         final response = await evalService.evalAtCurrentFrame(word);
-        final isolateRef = serviceManager.isolateManager.selectedIsolate.value;
+        final isolateRef = serviceConnection
+            .serviceManager.isolateManager.selectedIsolate.value;
         if (response is! InstanceRef) return null;
         final variable = DartObjectNode.fromValue(
           value: response,
@@ -1499,17 +1500,18 @@ Future<String?> fetchScriptLocationFullFilePath(
   String? filePath;
   final packagePath = controller.scriptLocation.value!.scriptRef.uri;
   if (packagePath != null) {
-    final isolateId = serviceManager.isolateManager.selectedIsolate.value!.id!;
-    filePath = serviceManager.resolvedUriManager.lookupFileUri(
+    final isolateId = serviceConnection
+        .serviceManager.isolateManager.selectedIsolate.value!.id!;
+    filePath = serviceConnection.resolvedUriManager.lookupFileUri(
       isolateId,
       packagePath,
     );
     if (filePath == null) {
-      await serviceManager.resolvedUriManager.fetchFileUris(
+      await serviceConnection.resolvedUriManager.fetchFileUris(
         isolateId,
         [packagePath],
       );
-      filePath = serviceManager.resolvedUriManager.lookupFileUri(
+      filePath = serviceConnection.resolvedUriManager.lookupFileUri(
         isolateId,
         packagePath,
       );

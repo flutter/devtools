@@ -57,7 +57,7 @@ void main() {
       notifications = NotificationService();
       importController = ImportController((_) {});
       setGlobal(OfflineModeController, OfflineModeController());
-      setGlobal(ServiceConnectionManager, FakeServiceManager());
+      setGlobal(ServiceConnectionManager, FakeServiceConnectionManager());
       setGlobal(NotificationService, notifications);
     });
 

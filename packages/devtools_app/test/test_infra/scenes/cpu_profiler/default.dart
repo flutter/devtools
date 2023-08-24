@@ -19,7 +19,7 @@ import '../../test_data/cpu_profiler/cpu_profile.dart';
 /// flutter run -t test/test_infra/scenes/cpu_profiler/default.stager_app.g.dart -d macos
 class CpuProfilerDefaultScene extends Scene {
   late ProfilerScreenController controller;
-  late FakeServiceManager fakeServiceManager;
+  late FakeServiceConnectionManager fakeServiceConnection;
   late ProfilerScreen screen;
 
   @override
@@ -42,21 +42,21 @@ class CpuProfilerDefaultScene extends Scene {
     setGlobal(PreferencesController, PreferencesController());
     setGlobal(BannerMessagesController, BannerMessagesController());
 
-    fakeServiceManager = FakeServiceManager(
+    fakeServiceConnection = FakeServiceConnectionManager(
       service: FakeServiceManager.createFakeService(
         cpuSamples: CpuSamples.parse(goldenCpuSamplesJson),
       ),
     );
-    final app = fakeServiceManager.connectedApp!;
+    final app = fakeServiceConnection.serviceManager.connectedApp!;
     mockConnectedApp(
       app,
       isFlutterApp: false,
       isProfileBuild: false,
       isWebApp: false,
     );
-    when(fakeServiceManager.errorBadgeManager.errorCountNotifier('profiler'))
+    when(fakeServiceConnection.errorBadgeManager.errorCountNotifier('profiler'))
         .thenReturn(ValueNotifier<int>(0));
-    setGlobal(ServiceConnectionManager, fakeServiceManager);
+    setGlobal(ServiceConnectionManager, fakeServiceConnection);
 
     final mockScriptManager = MockScriptManager();
     when(mockScriptManager.scriptRefForUri(any)).thenReturn(

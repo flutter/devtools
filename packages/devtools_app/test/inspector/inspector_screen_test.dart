@@ -23,7 +23,7 @@ import '../test_infra/flutter_test_storage.dart';
 void main() {
   final screen = InspectorScreen();
 
-  late FakeServiceManager fakeServiceManager;
+  late FakeServiceConnectionManager fakeServiceConnection;
   late FakeServiceExtensionManager fakeExtensionManager;
   late InspectorController inspectorController;
   const windowSize = Size(2600.0, 1200.0);
@@ -39,27 +39,29 @@ void main() {
   }
 
   setUp(() {
-    fakeServiceManager = FakeServiceManager();
-    fakeExtensionManager = fakeServiceManager.serviceExtensionManager;
+    fakeServiceConnection = FakeServiceConnectionManager();
+    fakeExtensionManager =
+        fakeServiceConnection.serviceManager.serviceExtensionManager;
     mockConnectedApp(
-      fakeServiceManager.connectedApp!,
+      fakeServiceConnection.serviceManager.connectedApp!,
       isFlutterApp: true,
       isProfileBuild: false,
       isWebApp: false,
     );
-    when(fakeServiceManager.errorBadgeManager.errorCountNotifier('inspector'))
-        .thenReturn(ValueNotifier<int>(0));
+    when(
+      fakeServiceConnection.errorBadgeManager.errorCountNotifier('inspector'),
+    ).thenReturn(ValueNotifier<int>(0));
 
     setGlobal(
       DevToolsEnvironmentParameters,
       ExternalDevToolsEnvironmentParameters(),
     );
-    setGlobal(ServiceConnectionManager, fakeServiceManager);
+    setGlobal(ServiceConnectionManager, fakeServiceConnection);
     setGlobal(IdeTheme, IdeTheme());
     setGlobal(PreferencesController, PreferencesController());
     setGlobal(Storage, FlutterTestStorage());
     setGlobal(NotificationService, NotificationService());
-    fakeServiceManager.consoleService.ensureServiceInitialized();
+    fakeServiceConnection.consoleService.ensureServiceInitialized();
 
     inspectorController = InspectorController(
       inspectorTree: InspectorTreeController(),

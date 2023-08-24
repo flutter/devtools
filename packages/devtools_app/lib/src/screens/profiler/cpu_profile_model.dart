@@ -621,7 +621,7 @@ class CpuProfileData {
       final resolvedUrl =
           stackFrameJson[CpuProfileData.resolvedUrlKey] as String?;
       if (resolvedUrl != null && resolvedUrl.isNotEmpty) {
-        final packageUri = serviceManager.resolvedUriManager
+        final packageUri = serviceConnection.resolvedUriManager
             .lookupPackageUri(isolateId, resolvedUrl);
         if (packageUri != null) {
           stackFrameJson[CpuProfileData.resolvedPackageUriKey] = packageUri;
@@ -632,14 +632,14 @@ class CpuProfileData {
       }
     }
 
-    await serviceManager.resolvedUriManager.fetchPackageUris(
+    await serviceConnection.resolvedUriManager.fetchPackageUris(
       isolateId,
       urisWithoutPackageUri.toList(),
     );
 
     for (var stackFrameJson in stackFramesWaitingOnPackageUri) {
       final resolvedUri = stackFrameJson[CpuProfileData.resolvedUrlKey];
-      final packageUri = serviceManager.resolvedUriManager
+      final packageUri = serviceConnection.resolvedUriManager
           .lookupPackageUri(isolateId, resolvedUri);
       if (packageUri != null) {
         stackFrameJson[CpuProfileData.resolvedPackageUriKey] = packageUri;

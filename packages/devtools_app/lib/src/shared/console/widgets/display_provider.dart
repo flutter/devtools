@@ -93,7 +93,7 @@ class DisplayProvider extends StatelessWidget {
           onPressed: () {
             ContextMenuController.removeAny();
             final ref = variable.ref;
-            serviceManager.consoleService.appendBrowsableInstance(
+            serviceConnection.consoleService.appendBrowsableInstance(
               instanceRef: variable.value as InstanceRef?,
               isolateRef: ref?.isolateRef,
               heapSelection: ref?.heapSelection,
@@ -101,7 +101,7 @@ class DisplayProvider extends StatelessWidget {
           },
           label: 'Reroot',
         ),
-      if (serviceManager.inspectorService != null && variable.isRoot)
+      if (serviceConnection.inspectorService != null && variable.isRoot)
         ContextMenuButtonItem(
           onPressed: () {
             ContextMenuController.removeAny();
@@ -116,7 +116,7 @@ class DisplayProvider extends StatelessWidget {
     BuildContext context,
   ) async {
     final router = DevToolsRouterDelegate.of(context);
-    final inspectorService = serviceManager.inspectorService;
+    final inspectorService = serviceConnection.inspectorService;
     if (await variable.inspectWidget()) {
       router.navigateIfNotCurrent(ScreenMetaData.inspector.id);
     } else {

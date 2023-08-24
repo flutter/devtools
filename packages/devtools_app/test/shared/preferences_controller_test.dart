@@ -10,7 +10,7 @@ import 'package:flutter_test/flutter_test.dart';
 import '../test_infra/flutter_test_storage.dart';
 
 void main() {
-  setGlobal(ServiceConnectionManager, FakeServiceManager());
+  setGlobal(ServiceConnectionManager, FakeServiceConnectionManager());
 
   group('$PreferencesController', () {
     late PreferencesController controller;
@@ -89,7 +89,7 @@ void main() {
         await controller.init();
         expect(
           controller.hoverEvalModeEnabled.value,
-          serviceManager.inspectorService!.hoverEvalModeEnabledByDefault,
+          serviceConnection.inspectorService!.hoverEvalModeEnabledByDefault,
         );
       });
 

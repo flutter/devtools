@@ -2,19 +2,23 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// ignore_for_file: invalid_use_of_visible_for_testing_member, devtools_test is only used in test code.
+
 import 'dart:async';
 
-import 'package:devtools_app_shared/service.dart';
 import 'package:devtools_app_shared/service_extensions.dart';
+// ignore: implementation_imports, intentional import from src/
+import 'package:devtools_app_shared/src/service/service_extension_manager.dart';
 import 'package:flutter/foundation.dart';
 import 'package:mockito/mockito.dart';
 
+// ignore: subtype_of_sealed_class, fake for testing.
 /// Fake that simplifies writing UI tests that depend on the
 /// ServiceExtensionManager.
 // TODO(jacobr): refactor ServiceExtensionManager so this fake can reuse more
 // code from ServiceExtensionManager instead of reimplementing it.
-class FakeServiceExtensionManager extends Fake
-    implements ServiceExtensionManager {
+base class FakeServiceExtensionManager extends Fake
+    with TestServiceExtensionManager {
   bool _firstFrameEventReceived = false;
 
   final _serviceExtensionStateController =

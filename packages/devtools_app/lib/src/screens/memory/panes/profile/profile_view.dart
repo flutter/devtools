@@ -66,7 +66,7 @@ class _FieldClassNameColumn extends ColumnData<ProfileRecord>
       theClass: data.heapClass,
       showCopyButton: isRowSelected,
       copyGaItem: gac.MemoryEvent.diffClassSingleCopy,
-      rootPackage: serviceManager.rootInfoNow().package,
+      rootPackage: serviceConnection.serviceManager.rootInfoNow().package,
     );
   }
 

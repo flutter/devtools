@@ -11,6 +11,7 @@ import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
+import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart' hide Error;
 import 'package:vm_service/vm_service.dart' as vm_service;
 
@@ -29,6 +30,8 @@ class Disposable {
   }
 }
 
+// TODO(https://github.com/flutter/devtools/issues/6239): try to remove this.
+@sealed
 class EvalOnDartLibrary extends DisposableController
     with AutoDisposeControllerMixin {
   EvalOnDartLibrary(
@@ -396,7 +399,8 @@ class EvalOnDartLibrary extends DisposableController
 
     // start awaiting the event before starting the evaluation, in case the
     // event is received before the eval function completes.
-    final future = serviceManager.service!.onExtensionEvent.firstWhere((event) {
+    final future =
+        serviceManager.service!.onExtensionEvent.firstWhere((event) {
       return event.extensionKind == 'future_completed' &&
           event.extensionData!.data['future_id'] == futureId &&
           // Using `_clientId` here as if two chrome tabs open the devtool, it is
@@ -636,7 +640,7 @@ class EvalOnDartLibrary extends DisposableController
   }
 }
 
-class LibraryNotFound implements Exception {
+final class LibraryNotFound implements Exception {
   LibraryNotFound(this.name);
 
   final String name;
@@ -644,7 +648,7 @@ class LibraryNotFound implements Exception {
   String get message => 'Library matchining $name not found';
 }
 
-class FutureFailedException implements Exception {
+final class FutureFailedException implements Exception {
   FutureFailedException(this.expression, this.errorRef, this.stacktraceRef);
 
   final String expression;
@@ -657,9 +661,9 @@ class FutureFailedException implements Exception {
   }
 }
 
-class CancelledException implements Exception {}
+final class CancelledException implements Exception {}
 
-class UnknownEvalException implements Exception {
+final class UnknownEvalException implements Exception {
   UnknownEvalException({
     required this.expression,
     required this.scope,
@@ -676,7 +680,7 @@ class UnknownEvalException implements Exception {
   }
 }
 
-class SentinelException implements Exception {
+final class SentinelException implements Exception {
   SentinelException(this.sentinel);
 
   final Sentinel sentinel;
@@ -687,7 +691,7 @@ class SentinelException implements Exception {
   }
 }
 
-class EvalSentinelException extends SentinelException {
+final class EvalSentinelException extends SentinelException {
   EvalSentinelException({
     required this.expression,
     required this.scope,
@@ -703,7 +707,7 @@ class EvalSentinelException extends SentinelException {
   }
 }
 
-class EvalErrorException implements Exception {
+final class EvalErrorException implements Exception {
   EvalErrorException({
     required this.expression,
     required this.scope,

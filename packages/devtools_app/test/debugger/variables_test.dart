@@ -14,7 +14,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   setUp(() {
     final service = createMockVmServiceWrapperWithDefaults();
-    final manager = FakeServiceManager(service: service);
+    final manager = FakeServiceConnectionManager(service: service);
     setGlobal(ServiceConnectionManager, manager);
   });
 

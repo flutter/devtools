@@ -141,12 +141,12 @@ void main() {
 
   // Get a service extension state.
   final ValueListenable<ServiceExtensionState> performanceOverlayEnabled =
-      serviceManager.serviceExtensionManager.getServiceExtensionState(
+      serviceManager.manager.serviceExtensionManager.getServiceExtensionState(
         extensions.performanceOverlay.extension,
       );
 
   // Set a service extension state.
-  await serviceManager.serviceExtensionManager.setServiceExtensionState(
+  await serviceManager.manager.serviceExtensionManager.setServiceExtensionState(
     extensions.performanceOverlay.extension,
     enabled: true,
     value: true,

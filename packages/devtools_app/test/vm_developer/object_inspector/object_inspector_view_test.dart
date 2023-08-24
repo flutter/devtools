@@ -19,7 +19,7 @@ import '../vm_developer_test_utils.dart';
 void main() {
   late ObjectInspectorView objectInspector;
 
-  late FakeServiceManager fakeServiceManager;
+  late FakeServiceConnectionManager fakeServiceConnection;
 
   late MockScriptManager scriptManager;
 
@@ -27,7 +27,7 @@ void main() {
 
   setUp(() {
     objectInspector = ObjectInspectorView();
-    fakeServiceManager = FakeServiceManager();
+    fakeServiceConnection = FakeServiceConnectionManager();
     scriptManager = MockScriptManager();
 
     when(scriptManager.sortedScripts).thenReturn(
@@ -37,15 +37,17 @@ void main() {
     when(scriptManager.retrieveAndSortScripts(any)).thenAnswer(
       (_) => Future.value([testScript]),
     );
-    when(fakeServiceManager.connectedApp!.isProfileBuildNow).thenReturn(false);
-    when(fakeServiceManager.connectedApp!.isDartWebAppNow).thenReturn(false);
+    when(fakeServiceConnection.serviceManager.connectedApp!.isProfileBuildNow)
+        .thenReturn(false);
+    when(fakeServiceConnection.serviceManager.connectedApp!.isDartWebAppNow)
+        .thenReturn(false);
 
     setGlobal(
       DevToolsEnvironmentParameters,
       ExternalDevToolsEnvironmentParameters(),
     );
     setGlobal(PreferencesController, PreferencesController());
-    setGlobal(ServiceConnectionManager, fakeServiceManager);
+    setGlobal(ServiceConnectionManager, fakeServiceConnection);
     setGlobal(ScriptManager, scriptManager);
     setGlobal(IdeTheme, IdeTheme());
     setGlobal(NotificationService, NotificationService());

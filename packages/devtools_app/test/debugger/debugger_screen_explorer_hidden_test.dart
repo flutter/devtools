@@ -13,15 +13,15 @@ import 'package:vm_service/vm_service.dart';
 
 void main() {
   const windowSize = Size(4000.0, 4000.0);
-  final fakeServiceManager = FakeServiceManager();
+  final fakeServiceConnection = FakeServiceConnectionManager();
   final scriptManager = MockScriptManager();
   mockConnectedApp(
-    fakeServiceManager.connectedApp!,
+    fakeServiceConnection.serviceManager.connectedApp!,
     isProfileBuild: false,
     isFlutterApp: true,
     isWebApp: false,
   );
-  setGlobal(ServiceConnectionManager, fakeServiceManager);
+  setGlobal(ServiceConnectionManager, fakeServiceConnection);
   setGlobal(IdeTheme, IdeTheme());
   setGlobal(ScriptManager, scriptManager);
   setGlobal(NotificationService, NotificationService());
@@ -31,8 +31,8 @@ void main() {
     ExternalDevToolsEnvironmentParameters(),
   );
   setGlobal(PreferencesController, PreferencesController());
-  fakeServiceManager.consoleService.ensureServiceInitialized();
-  when(fakeServiceManager.errorBadgeManager.errorCountNotifier('debugger'))
+  fakeServiceConnection.consoleService.ensureServiceInitialized();
+  when(fakeServiceConnection.errorBadgeManager.errorCountNotifier('debugger'))
       .thenReturn(ValueNotifier<int>(0));
   final debuggerController = createMockDebuggerControllerWithDefaults();
   final codeViewController = debuggerController.codeViewController;

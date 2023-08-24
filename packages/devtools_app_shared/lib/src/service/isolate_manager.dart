@@ -13,7 +13,10 @@ import '../../utils.dart';
 import 'isolate_state.dart';
 import 'service_extensions.dart' as extensions;
 
-class IsolateManager extends Disposer {
+@visibleForTesting
+base mixin TestIsolateManager implements IsolateManager {}
+
+final class IsolateManager with DisposerMixin {
   final _isolateStates = <IsolateRef, IsolateState>{};
   VmService? _service;
 

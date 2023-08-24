@@ -24,13 +24,13 @@ class ConsolePaneHeader extends AreaPaneHeader {
             const ConsoleHelpLink(),
             CopyToClipboardControl(
               dataProvider: () =>
-                  serviceManager.consoleService.stdio.value.join('\n'),
+                  serviceConnection.consoleService.stdio.value.join('\n'),
               buttonKey: ConsolePane.copyToClipboardButtonKey,
             ),
             DeleteControl(
               buttonKey: ConsolePane.clearStdioButtonKey,
               tooltip: 'Clear console output',
-              onPressed: () => serviceManager.consoleService.clearStdio(),
+              onPressed: () => serviceConnection.consoleService.clearStdio(),
             ),
           ],
         );
@@ -47,14 +47,14 @@ class ConsolePane extends StatelessWidget {
   static const clearStdioButtonKey = Key('console_clear_stdio_button');
 
   ValueListenable<List<ConsoleLine>> get stdio =>
-      serviceManager.consoleService.stdio;
+      serviceConnection.consoleService.stdio;
 
   @override
   Widget build(BuildContext context) {
     final Widget? footer;
 
     // Eval is disabled for profile mode.
-    if (serviceManager.connectedApp!.isProfileBuildNow!) {
+    if (serviceConnection.serviceManager.connectedApp!.isProfileBuildNow!) {
       footer = null;
     } else {
       footer = const ExpressionEvalField();

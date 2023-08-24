@@ -52,7 +52,8 @@ class _VmInstanceDisplayState extends State<VmInstanceDisplay> {
   }
 
   void _populate() {
-    final isolateRef = serviceManager.isolateManager.selectedIsolate.value;
+    final isolateRef =
+        serviceConnection.serviceManager.isolateManager.selectedIsolate.value;
     _root = DartObjectNode.fromValue(
       name: 'value',
       value: widget.instance.obj,

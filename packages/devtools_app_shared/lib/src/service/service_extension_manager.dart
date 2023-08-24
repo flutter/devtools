@@ -16,7 +16,7 @@ import 'service_extensions.dart' as extensions;
 final _log = Logger('service_extension_manager');
 
 /// Manager that handles tracking the service extension for the main isolate.
-class ServiceExtensionManager extends Disposer {
+final class ServiceExtensionManager with DisposerMixin {
   ServiceExtensionManager(this._isolateManager);
 
   VmService? _service;
@@ -582,3 +582,6 @@ class ServiceExtensionState {
     return 'ServiceExtensionState(enabled: $enabled, value: $value)';
   }
 }
+
+@visibleForTesting
+base mixin TestServiceExtensionManager implements ServiceExtensionManager {}

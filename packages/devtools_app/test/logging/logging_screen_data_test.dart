@@ -17,7 +17,7 @@ import 'package:mockito/mockito.dart';
 void main() {
   late MockLoggingController mockLoggingController;
   const windowSize = Size(1000.0, 1000.0);
-  final fakeServiceManager = FakeServiceManager();
+  final fakeServiceConnection = FakeServiceConnectionManager();
 
   Future<void> pumpLoggingScreen(WidgetTester tester) async {
     await tester.pumpWidget(
@@ -32,11 +32,13 @@ void main() {
     mockLoggingController =
         createMockLoggingControllerWithDefaults(data: fakeLogData);
 
-    when(fakeServiceManager.connectedApp!.isFlutterWebAppNow).thenReturn(false);
-    when(fakeServiceManager.connectedApp!.isProfileBuildNow).thenReturn(false);
-    when(fakeServiceManager.errorBadgeManager.errorCountNotifier('logging'))
+    when(fakeServiceConnection.serviceManager.connectedApp!.isFlutterWebAppNow)
+        .thenReturn(false);
+    when(fakeServiceConnection.serviceManager.connectedApp!.isProfileBuildNow)
+        .thenReturn(false);
+    when(fakeServiceConnection.errorBadgeManager.errorCountNotifier('logging'))
         .thenReturn(ValueNotifier<int>(0));
-    setGlobal(ServiceConnectionManager, fakeServiceManager);
+    setGlobal(ServiceConnectionManager, fakeServiceConnection);
     setGlobal(NotificationService, NotificationService());
     setGlobal(
       DevToolsEnvironmentParameters,

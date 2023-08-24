@@ -138,11 +138,14 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
       });
     }
 
-    addAutoDisposeListener(serviceManager.isolateManager.mainIsolate, () {
-      setState(() {
-        _clearCachedRoutes();
-      });
-    });
+    addAutoDisposeListener(
+      serviceConnection.serviceManager.isolateManager.mainIsolate,
+      () {
+        setState(() {
+          _clearCachedRoutes();
+        });
+      },
+    );
 
     _isDarkThemeEnabled = preferences.darkModeTheme.value;
     addAutoDisposeListener(preferences.darkModeTheme, () {
@@ -272,7 +275,8 @@ class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
               actions: [
                 if (connectedToVmService)
                   // TODO(https://github.com/flutter/devtools/issues/1941)
-                  if (serviceManager.connectedApp?.isFlutterAppNow ??
+                  if (serviceConnection
+                          .serviceManager.connectedApp?.isFlutterAppNow ??
                       false) ...[
                     const HotReloadButton(),
                     const HotRestartButton(),

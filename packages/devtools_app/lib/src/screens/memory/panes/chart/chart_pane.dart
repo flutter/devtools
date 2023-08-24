@@ -142,7 +142,7 @@ class _MemoryChartPaneState extends State<MemoryChartPane>
   }
 
   void _updateListeningState() async {
-    await serviceManager.onServiceAvailable;
+    await serviceConnection.serviceManager.onServiceAvailable;
 
     if (!controller.hasStarted) {
       controller.startTimeline();

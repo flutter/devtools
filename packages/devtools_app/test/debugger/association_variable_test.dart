@@ -26,7 +26,7 @@ void main() {
   setUp(() {
     final service = createMockVmServiceWrapperWithDefaults();
 
-    manager = FakeServiceManager(service: service);
+    manager = FakeServiceConnectionManager(service: service);
     setGlobal(ServiceConnectionManager, manager);
   });
 
@@ -65,7 +65,7 @@ void main() {
         ),
         isolateRef,
       );
-      when(manager.service!.getObject(isolateId, objectId))
+      when(manager.serviceManager.service!.getObject(isolateId, objectId))
           .thenAnswer((_) async {
         return instance;
       });
@@ -113,7 +113,7 @@ void main() {
         ),
         isolateRef,
       );
-      when(manager.service!.getObject(isolateId, objectId))
+      when(manager.serviceManager.service!.getObject(isolateId, objectId))
           .thenAnswer((_) async {
         return instance;
       });
@@ -161,7 +161,7 @@ void main() {
         ),
         isolateRef,
       );
-      when(manager.service!.getObject(isolateId, objectId))
+      when(manager.serviceManager.service!.getObject(isolateId, objectId))
           .thenAnswer((_) async {
         return instance;
       });

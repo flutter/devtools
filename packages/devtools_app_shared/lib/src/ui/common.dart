@@ -109,7 +109,7 @@ class AreaPaneHeader extends StatelessWidget implements PreferredSizeWidget {
   }
 }
 
-class RoundedOutlinedBorder extends StatelessWidget {
+final class RoundedOutlinedBorder extends StatelessWidget {
   const RoundedOutlinedBorder({
     super.key,
     this.showTopLeft = true,
@@ -188,7 +188,7 @@ BorderSide defaultBorderSide(ThemeData theme) {
 }
 
 /// Convenience [Divider] with [Padding] that provides a good divider in forms.
-class PaddedDivider extends StatelessWidget {
+final class PaddedDivider extends StatelessWidget {
   const PaddedDivider({
     Key? key,
     this.padding = const EdgeInsets.only(bottom: 10.0),
@@ -351,7 +351,7 @@ class DevToolsButton extends StatelessWidget {
 
 /// A widget, commonly used for icon buttons, that provides a tooltip with a
 /// common delay before the tooltip is shown.
-class DevToolsTooltip extends StatelessWidget {
+final class DevToolsTooltip extends StatelessWidget {
   const DevToolsTooltip({
     Key? key,
     this.message,
@@ -396,7 +396,7 @@ class DevToolsTooltip extends StatelessWidget {
   }
 }
 
-class DevToolsToggleButtonGroup extends StatelessWidget {
+final class DevToolsToggleButtonGroup extends StatelessWidget {
   const DevToolsToggleButtonGroup({
     Key? key,
     required this.children,
@@ -438,7 +438,7 @@ class DevToolsToggleButtonGroup extends StatelessWidget {
   }
 }
 
-class DevToolsToggleButton extends StatelessWidget {
+final class DevToolsToggleButton extends StatelessWidget {
   const DevToolsToggleButton({
     Key? key,
     required this.onPressed,
@@ -485,7 +485,7 @@ class DevToolsToggleButton extends StatelessWidget {
   }
 }
 
-class DevToolsFilterButton extends StatelessWidget {
+final class DevToolsFilterButton extends StatelessWidget {
   const DevToolsFilterButton({
     Key? key,
     required this.onPressed,
@@ -512,7 +512,7 @@ class DevToolsFilterButton extends StatelessWidget {
 }
 
 /// Label including an image icon and optional text.
-class ImageIconLabel extends StatelessWidget {
+final class ImageIconLabel extends StatelessWidget {
   const ImageIconLabel(
     this.icon,
     this.text, {
@@ -542,7 +542,7 @@ class ImageIconLabel extends StatelessWidget {
   }
 }
 
-class MaterialIconLabel extends StatelessWidget {
+final class MaterialIconLabel extends StatelessWidget {
   const MaterialIconLabel({
     super.key,
     required this.label,

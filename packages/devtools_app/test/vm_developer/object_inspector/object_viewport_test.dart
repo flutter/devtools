@@ -24,15 +24,15 @@ import '../vm_developer_test_utils.dart';
 void main() {
   late TestObjectInspectorViewController testObjectInspectorViewController;
 
-  late FakeServiceManager fakeServiceManager;
+  late FakeServiceConnectionManager fakeServiceConnection;
 
   const windowSize = Size(2560.0, 1338.0);
 
   setUp(() {
-    fakeServiceManager = FakeServiceManager();
+    fakeServiceConnection = FakeServiceConnectionManager();
 
     setUpMockScriptManager();
-    setGlobal(ServiceConnectionManager, fakeServiceManager);
+    setGlobal(ServiceConnectionManager, fakeServiceConnection);
     setGlobal(IdeTheme, IdeTheme());
     setGlobal(BreakpointManager, BreakpointManager());
     setGlobal(

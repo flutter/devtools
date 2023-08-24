@@ -37,36 +37,40 @@ void main() {
     setGlobal(PreferencesController, PreferencesController());
     setGlobal(OfflineModeController, OfflineModeController());
     setGlobal(NotificationService, NotificationService());
+    setGlobal(BannerMessagesController, BannerMessagesController());
   });
 
   group('$PerformanceScreen', () {
     late PerformanceController controller;
-    late FakeServiceManager fakeServiceManager;
+    late FakeServiceConnectionManager fakeServiceConnection;
 
     Future<void> setUpServiceManagerWithTimeline(
       Map<String, dynamic> timelineJson,
     ) async {
-      fakeServiceManager = FakeServiceManager(
+      fakeServiceConnection = FakeServiceConnectionManager(
         service: FakeServiceManager.createFakeService(
           timelineData: vm_service.Timeline.parse(timelineJson),
         ),
       );
       when(
-        fakeServiceManager.errorBadgeManager.errorCountNotifier('performance'),
+        fakeServiceConnection.errorBadgeManager
+            .errorCountNotifier('performance'),
       ).thenReturn(ValueNotifier<int>(0));
-      final app = fakeServiceManager.connectedApp!;
+      final app = fakeServiceConnection.serviceManager.connectedApp!;
       when(app.initialized).thenReturn(Completer()..complete(true));
       when(app.isDartWebAppNow).thenReturn(false);
       when(app.isFlutterAppNow).thenReturn(true);
       when(app.isProfileBuild).thenAnswer((_) => Future.value(false));
       when(app.flutterVersionNow).thenReturn(
-        FlutterVersion.parse((await fakeServiceManager.flutterVersion).json!),
+        FlutterVersion.parse(
+          (await fakeServiceConnection.serviceManager.flutterVersion).json!,
+        ),
       );
       when(app.isDartCliAppNow).thenReturn(false);
       when(app.isProfileBuildNow).thenReturn(true);
       when(app.isDartWebApp).thenAnswer((_) async => false);
       when(app.isProfileBuild).thenAnswer((_) async => false);
-      setGlobal(ServiceConnectionManager, fakeServiceManager);
+      setGlobal(ServiceConnectionManager, fakeServiceConnection);
     }
 
     Future<void> pumpPerformanceScreen(
@@ -137,7 +141,7 @@ void main() {
       (WidgetTester tester) async {
         setEnableExperiments();
         mockConnectedApp(
-          fakeServiceManager.connectedApp!,
+          fakeServiceConnection.serviceManager.connectedApp!,
           isFlutterApp: false,
           isProfileBuild: false,
           isWebApp: true,
@@ -173,7 +177,7 @@ void main() {
       (WidgetTester tester) async {
         setEnableExperiments();
         mockConnectedApp(
-          fakeServiceManager.connectedApp!,
+          fakeServiceConnection.serviceManager.connectedApp!,
           isFlutterApp: true,
           isProfileBuild: false,
           isWebApp: true,
@@ -209,7 +213,7 @@ void main() {
       (WidgetTester tester) async {
         await tester.runAsync(() async {
           mockConnectedApp(
-            fakeServiceManager.connectedApp!,
+            fakeServiceConnection.serviceManager.connectedApp!,
             isFlutterApp: false,
             isProfileBuild: false,
             isWebApp: false,
@@ -392,8 +396,10 @@ void main() {
         'hides warning in debugging options overlay when in debug mode',
         windowSize,
         (WidgetTester tester) async {
-          when(fakeServiceManager.connectedApp!.isProfileBuildNow)
-              .thenReturn(false);
+          when(
+            fakeServiceConnection
+                .serviceManager.connectedApp!.isProfileBuildNow,
+          ).thenReturn(false);
 
           await tester.runAsync(() async {
             await pumpPerformanceScreen(tester, runAsync: true);

@@ -132,11 +132,15 @@ class _NetworkScreenBodyState extends State<NetworkScreenBody>
 
     cancelListeners();
 
-    addAutoDisposeListener(serviceManager.isolateManager.mainIsolate, () {
-      if (serviceManager.isolateManager.mainIsolate.value != null) {
-        unawaited(controller.startRecording());
-      }
-    });
+    addAutoDisposeListener(
+      serviceConnection.serviceManager.isolateManager.mainIsolate,
+      () {
+        if (serviceConnection.serviceManager.isolateManager.mainIsolate.value !=
+            null) {
+          unawaited(controller.startRecording());
+        }
+      },
+    );
   }
 
   @override

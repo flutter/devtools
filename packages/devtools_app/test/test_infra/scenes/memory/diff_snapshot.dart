@@ -21,7 +21,7 @@ import '../../../test_infra/test_data/memory/heap/heap_data.dart';
 /// flutter run -t test/test_infra/scenes/memory/diff_snapshot.stager_app.g.dart -d macos
 class DiffSnapshotScene extends Scene {
   late DiffPaneController diffController;
-  late FakeServiceManager fakeServiceManager;
+  late FakeServiceConnectionManager fakeServiceConnection;
 
   @override
   Widget build(BuildContext context) {
@@ -36,15 +36,14 @@ class DiffSnapshotScene extends Scene {
     setGlobal(IdeTheme, IdeTheme());
     setGlobal(NotificationService, NotificationService());
 
-    fakeServiceManager =
-        FakeServiceManager(service: FakeServiceManager.createFakeService());
+    fakeServiceConnection = FakeServiceConnectionManager();
     mockConnectedApp(
-      fakeServiceManager.connectedApp!,
+      fakeServiceConnection.serviceManager.connectedApp!,
       isFlutterApp: true,
       isProfileBuild: true,
       isWebApp: false,
     );
-    setGlobal(ServiceConnectionManager, fakeServiceManager);
+    setGlobal(ServiceConnectionManager, fakeServiceConnection);
 
     diffController = DiffPaneController(_TestSnapshotTaker());
     setClassFilterToShowAll();

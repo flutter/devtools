@@ -26,7 +26,7 @@ void main() {
     setUpMockScriptManager();
     setGlobal(BreakpointManager, BreakpointManager());
     setGlobal(IdeTheme, IdeTheme());
-    setGlobal(ServiceConnectionManager, FakeServiceManager());
+    setGlobal(ServiceConnectionManager, FakeServiceConnectionManager());
     setGlobal(
       DevToolsEnvironmentParameters,
       ExternalDevToolsEnvironmentParameters(),

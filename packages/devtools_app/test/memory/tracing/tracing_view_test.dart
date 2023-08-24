@@ -81,7 +81,7 @@ void main() {
       scene = MemoryDefaultScene();
       await scene.setUp(classList: classList);
       mockConnectedApp(
-        scene.fakeServiceManager.connectedApp!,
+        scene.fakeServiceConnection.serviceManager.connectedApp!,
         isFlutterApp: true,
         isProfileBuild: false,
         isWebApp: false,
@@ -168,7 +168,8 @@ void main() {
         );
 
         // Set fake sample data and refresh to populate the trace view.
-        final fakeService = serviceManager.service as FakeVmServiceWrapper;
+        final fakeService =
+            serviceConnection.serviceManager.service as FakeVmServiceWrapper;
         fakeService.allocationSamples = allocationTracingProfile;
 
         await tester.tap(refresh);
@@ -332,7 +333,8 @@ void main() {
         );
 
         // Set fake sample data and refresh to populate the trace view.
-        final fakeService = serviceManager.service as FakeVmServiceWrapper;
+        final fakeService =
+            serviceConnection.serviceManager.service as FakeVmServiceWrapper;
         fakeService.allocationSamples = allocationTracingProfile;
 
         await tester.tap(refresh);

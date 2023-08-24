@@ -206,7 +206,7 @@ abstract class Screen {
     final title = _userFacingTitle;
     return ValueListenableBuilder<int>(
       valueListenable:
-          serviceManager.errorBadgeManager.errorCountNotifier(screenId),
+          serviceConnection.errorBadgeManager.errorCountNotifier(screenId),
       builder: (context, count, _) {
         final tab = Tab(
           key: tabKey,
@@ -276,8 +276,8 @@ bool shouldShowScreen(Screen screen) {
     return screen.worksOffline;
   }
 
-  final serviceReady = serviceManager.isServiceAvailable &&
-      serviceManager.connectedApp!.connectedAppInitialized;
+  final serviceReady = serviceConnection.serviceManager.isServiceAvailable &&
+      serviceConnection.serviceManager.connectedApp!.connectedAppInitialized;
   if (!serviceReady) {
     if (!screen.requiresConnection) {
       _log.finest('screen does not require connection: returning true');
@@ -292,8 +292,10 @@ bool shouldShowScreen(Screen screen) {
   }
 
   if (screen.requiresLibrary != null) {
-    if (serviceManager.isolateManager.mainIsolate.value == null ||
-        !serviceManager.libraryUriAvailableNow(screen.requiresLibrary)) {
+    if (serviceConnection.serviceManager.isolateManager.mainIsolate.value ==
+            null ||
+        !serviceConnection.serviceManager
+            .libraryUriAvailableNow(screen.requiresLibrary)) {
       _log.finest(
         'screen requires library ${screen.requiresLibrary}: returning false',
       );
@@ -301,18 +303,20 @@ bool shouldShowScreen(Screen screen) {
     }
   }
   if (screen.requiresDartVm) {
-    if (serviceManager.connectedApp!.isRunningOnDartVM != true) {
+    if (serviceConnection.serviceManager.connectedApp!.isRunningOnDartVM !=
+        true) {
       _log.finest('screen requires Dart VM: returning false');
       return false;
     }
   }
   if (screen.requiresFlutter &&
-      serviceManager.connectedApp!.isFlutterAppNow == false) {
+      serviceConnection.serviceManager.connectedApp!.isFlutterAppNow == false) {
     _log.finest('screen requires Flutter: returning false');
     return false;
   }
   if (screen.requiresDebugBuild) {
-    if (serviceManager.connectedApp!.isProfileBuildNow == true) {
+    if (serviceConnection.serviceManager.connectedApp!.isProfileBuildNow ==
+        true) {
       _log.finest('screen requires debug build: returning false');
       return false;
     }
@@ -324,9 +328,10 @@ bool shouldShowScreen(Screen screen) {
     }
   }
   if (screen.shouldShowForFlutterVersion != null) {
-    if (serviceManager.connectedApp!.isFlutterAppNow == true &&
+    if (serviceConnection.serviceManager.connectedApp!.isFlutterAppNow ==
+            true &&
         !screen.shouldShowForFlutterVersion!(
-          serviceManager.connectedApp!.flutterVersionNow,
+          serviceConnection.serviceManager.connectedApp!.flutterVersionNow,
         )) {
       _log.finest('screen has flutter version restraints: returning false');
       return false;

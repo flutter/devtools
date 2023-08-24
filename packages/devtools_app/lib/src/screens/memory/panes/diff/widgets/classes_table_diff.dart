@@ -62,7 +62,7 @@ class _ClassNameColumn extends ColumnData<DiffClassStats>
       theClass: data.heapClass,
       showCopyButton: isRowSelected,
       copyGaItem: gac.MemoryEvent.diffClassDiffCopy,
-      rootPackage: serviceManager.rootInfoNow().package,
+      rootPackage: serviceConnection.serviceManager.rootInfoNow().package,
     );
   }
 
