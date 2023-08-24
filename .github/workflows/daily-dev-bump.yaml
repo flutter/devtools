@@ -137,11 +137,15 @@ jobs:
         run: |
           set -x
           # Get 5 most recent branches of closed DartDevtoolWorkflowBot PRs.
-          CLOSED_BRANCH_NAMES=$(gh pr list -A DartDevtoolWorkflowBot -s closed -L 10 --search sort:created-desc | grep auto-bump- | sed 's|.*\(auto-bump-[[:digit:]]*\).*|\1|')
 
           # Get list of refs(branches) that exist on the remote
-          for CLOSED_BRANCH in $CLOSED_BRANCH_NAMES; do
-            gh api  /repos/flutter/devtools/git/refs/heads/$CLOSED_BRANCH -X DELETE
+          EXISTING_BRANCHES=$(git ls-remote --heads | grep refs/heads/auto-bump- | sed 's|.*\(auto-bump-[[:digit:]]*\).*|\1|')
+          for EXISTING_BRANCH in $EXISTING_BRANCHES; do
+            IS_CLOSED=$(gh pr view --json closed --jq '.closed' "$EXISTING_BRANCH")
+            if [ "$IS_CLOSED" == "true" ] ; then
+              # If the branch exists and the PR is closed we will delete it
+              echo "gh api  /repos/flutter/devtools/git/refs/heads/$EXISTING_BRANCH -X DELETE"
+            fi
           done
         env:
           GH_TOKEN: ${{ secrets.DEVTOOLS_WORKFLOW_BOT_TOKEN }}
