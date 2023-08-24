@@ -125,7 +125,6 @@ jobs:
           IS_DRAFT: ${{ inputs.draft == true }}
   clean-up-branches:
     # If a pr is closed on a workflow bot PR, then clean up workflow bot branches.
-    if: ${{ github.event_name == 'label' || (github.event_name == 'pull_request' && github.event.action == 'closed'  && github.event.pull_request.user.login == 'DartDevtoolWorkflowBot' && github.repository == 'flutter/devtools') }}
     name: Clean up 5 Dev Bump Branches
     runs-on: ubuntu-latest
     steps:
