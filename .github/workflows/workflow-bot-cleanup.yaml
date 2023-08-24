@@ -13,7 +13,7 @@ permissions:
 
 jobs:
   clean-up-branches:
-    if: ${{ github.repository == 'flutter/devtools }}
+    if: ${{ github.repository == 'flutter/devtools' }}
     name: Clean up Dev Bump Branches
     runs-on: ubuntu-latest
     steps:
