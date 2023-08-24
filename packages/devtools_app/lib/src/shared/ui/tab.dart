@@ -6,7 +6,6 @@ import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
 import '../analytics/analytics.dart' as ga;
-import '../common_widgets.dart';
 import '../utils.dart';
 
 double get _tabHeight => scaleByFontFactor(46.0);

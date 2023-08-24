@@ -6,7 +6,6 @@ import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
 
-import '../../../../shared/common_widgets.dart';
 import '../../../../shared/primitives/utils.dart';
 import '../../../../shared/profiler_utils.dart';
 import '../../../../shared/table/table.dart';
