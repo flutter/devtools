@@ -22,8 +22,6 @@ on:
   schedule:
     # * is a special character in YAML so you have to quote this string
     - cron: "0 8 * * *" # Run every day at midnight Pacific Time
-  label:
-    types: [created, deleted]
 permissions:
   contents: write
   pull-requests: write
@@ -32,100 +30,101 @@ env:
   GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 jobs:
-  # bump-version:
-  #   if: ${{ (github.event_name == 'workflow_dispatch' || github.event_name == 'schedule') && github.repository == 'flutter/devtools' }}
-  #   name: Bump Version
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: git clone devtools
-  #       uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9
-  #       with:
-  #         ref: master
+  bump-version:
+    if: ${{ (github.event_name == 'workflow_dispatch' || github.event_name == 'schedule') && github.repository == 'flutter/devtools' }}
+    name: Bump Version
+    runs-on: ubuntu-latest
+    steps:
+      - name: git clone devtools
+        uses: actions/checkout@c85c95e3d7251135ab7dc9ce3241c5835cc595a9
+        with:
+          ref: master
 
-  #     - uses: dart-lang/setup-dart@d6a63dab3335f427404425de0fbfed4686d93c4f
+      - uses: dart-lang/setup-dart@d6a63dab3335f427404425de0fbfed4686d93c4f
 
-  #     - name: setup git config
-  #       run: |
+      - name: setup git config
+        run: |
 
-  #         git config user.name "DevTools Workflow Bot"
-  #         git config user.email "dart-devtool-workflow-bot@google.com"
+          git config user.name "DevTools Workflow Bot"
+          git config user.email "dart-devtool-workflow-bot@google.com"
 
-  #     - name: Bump the Version
-  #       id: version-bump
-  #       run: |
-  #         set -ex
-  #         pushd tool/
-  #         dart pub get
-  #         popd
+      - name: Bump the Version
+        id: version-bump
+        run: |
+          set -ex
+          pushd tool/
+          dart pub get
+          popd
 
-  #         ORIGINAL_VERSION=$(dart tool/update_version.dart current-version)
+          ORIGINAL_VERSION=$(dart tool/update_version.dart current-version)
 
-  #         if [ -z "$UPDATE_TYPE" ]; then
-  #           # If $UPDATE_TYPE is not set, then assume it is dev
-  #           UPDATE_TYPE="dev"
-  #         fi
+          if [ -z "$UPDATE_TYPE" ]; then
+            # If $UPDATE_TYPE is not set, then assume it is dev
+            UPDATE_TYPE="dev"
+          fi
 
-  #         # If there is a major, minor, or patch bump, do it.
+          # If there is a major, minor, or patch bump, do it.
 
-  #         if [ "$UPDATE_TYPE" == "patch+dev" ]; then
-  #           dart tool/update_version.dart auto --type patch
-  #           dart tool/update_version.dart auto --type dev
-  #         elif [ "$UPDATE_TYPE" == "minor+dev" ]; then
-  #           dart tool/update_version.dart auto --type minor
-  #           dart tool/update_version.dart auto --type dev
-  #         elif [ "$UPDATE_TYPE" == "major+dev" ]; then
-  #           dart tool/update_version.dart auto --type major
-  #           dart tool/update_version.dart auto --type dev
-  #         elif [ "$UPDATE_TYPE" == "dev" ]; then
-  #           if ! echo "$ORIGINAL_VERSION" | grep -Eq "\-dev\.[0-9]+" ; then
-  #             ERROR_DESCRIPTION="Doing \
-  #           a Dev bump on a release version ($ORIGINAL_VERSION) is not supported. \
-  #           Ensure that that current version has been properly bumped to a '-dev.*' \
-  #           pre-release version, in order to continue daily dev bumps."
+          if [ "$UPDATE_TYPE" == "patch+dev" ]; then
+            dart tool/update_version.dart auto --type patch
+            dart tool/update_version.dart auto --type dev
+          elif [ "$UPDATE_TYPE" == "minor+dev" ]; then
+            dart tool/update_version.dart auto --type minor
+            dart tool/update_version.dart auto --type dev
+          elif [ "$UPDATE_TYPE" == "major+dev" ]; then
+            dart tool/update_version.dart auto --type major
+            dart tool/update_version.dart auto --type dev
+          elif [ "$UPDATE_TYPE" == "dev" ]; then
+            if ! echo "$ORIGINAL_VERSION" | grep -Eq "\-dev\.[0-9]+" ; then
+              ERROR_DESCRIPTION="Doing \
+            a Dev bump on a release version ($ORIGINAL_VERSION) is not supported. \
+            Ensure that that current version has been properly bumped to a '-dev.*' \
+            pre-release version, in order to continue daily dev bumps."
 
-  #             echo "::error ,title=Cannot do a dev bump on a Release Version ($ORIGINAL_VERSION)::$ERROR_DESCRIPTION" 
-  #             exit 1;
-  #           fi
-  #           dart tool/update_version.dart auto --type dev
-  #         else
-  #           echo "ERROR: UNEXPECTED UPDATE TYPE: $UPDATE_TYPE"
-  #           exit 1
-  #         fi
+              echo "::error ,title=Cannot do a dev bump on a Release Version ($ORIGINAL_VERSION)::$ERROR_DESCRIPTION" 
+              exit 1;
+            fi
+            dart tool/update_version.dart auto --type dev
+          else
+            echo "ERROR: UNEXPECTED UPDATE TYPE: $UPDATE_TYPE"
+            exit 1
+          fi
 
-  #         NEW_VERSION=$(dart tool/update_version.dart current-version)
+          NEW_VERSION=$(dart tool/update_version.dart current-version)
 
-  #         echo "COMMIT_MESSAGE=Updating from $ORIGINAL_VERSION to $NEW_VERSION" >> $GITHUB_OUTPUT
-  #       env:
-  #         UPDATE_TYPE: ${{ inputs.updateType }}
+          echo "COMMIT_MESSAGE=Updating from $ORIGINAL_VERSION to $NEW_VERSION" >> $GITHUB_OUTPUT
+        env:
+          UPDATE_TYPE: ${{ inputs.updateType }}
 
-  #     - name: Create the PR
-  #       run: |
-  #         set -ex
-  #         BRANCH_NAME="auto-bump-$(date +%s)"
-  #         # Stage the file, commit and push
-  #         git checkout -b "$BRANCH_NAME"
-  #         git commit -a -m "$COMMIT_MESSAGE"
-  #         git push -u origin "$BRANCH_NAME"
+      - name: Create the PR
+        run: |
+          set -ex
+          BRANCH_NAME="auto-bump-$(date +%s)"
+          # Stage the file, commit and push
+          git checkout -b "$BRANCH_NAME"
+          git commit -a -m "$COMMIT_MESSAGE"
+          git push -u origin "$BRANCH_NAME"
 
-  #         if [ "$IS_DRAFT" == "true" ]; then
-  #           CREATION_FLAGS="--draft"
-  #         fi
+          if [ "$IS_DRAFT" == "true" ]; then
+            CREATION_FLAGS="--draft"
+          fi
 
-  #         PR_URL=$(gh pr create --title "$COMMIT_MESSAGE" --body "Automated Version Bump" $CREATION_FLAGS) 
+          PR_URL=$(gh pr create --title "$COMMIT_MESSAGE" --body "Automated Version Bump" $CREATION_FLAGS) 
 
-  #         # Change github credentials back to the actions bot.
-  #         GH_TOKEN="$ORIGINAL_GH_TOKEN"
+          # Change github credentials back to the actions bot.
+          GH_TOKEN="$ORIGINAL_GH_TOKEN"
 
-  #         gh pr edit $PR_URL $FLAGS --add-label "autosubmit"
+          gh pr edit $PR_URL $FLAGS --add-label "autosubmit"
 
-  #       env:
-  #         COMMIT_MESSAGE: ${{ steps.version-bump.outputs.COMMIT_MESSAGE }}
-  #         GH_TOKEN: ${{ secrets.DEVTOOLS_WORKFLOW_BOT_TOKEN }}
-  #         ORIGINAL_GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  #         IS_DRAFT: ${{ inputs.draft == true }}
+        env:
+          COMMIT_MESSAGE: ${{ steps.version-bump.outputs.COMMIT_MESSAGE }}
+          GH_TOKEN: ${{ secrets.DEVTOOLS_WORKFLOW_BOT_TOKEN }}
+          ORIGINAL_GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          IS_DRAFT: ${{ inputs.draft == true }}
   clean-up-branches:
     # If a pr is closed on a workflow bot PR, then clean up workflow bot branches.
-    name: Clean up 5 Dev Bump Branches
+    if: ${{ github.event_name == 'pull_request' && github.event.action == 'closed'  && github.event.pull_request.user.login == 'DartDevtoolWorkflowBot' && github.repository == 'flutter/devtools}}
+    name: Clean up Dev Bump Branches
     runs-on: ubuntu-latest
     steps:
       - name: Sparse checkout of the repository
@@ -137,13 +136,13 @@ jobs:
         run: |
           set -e
 
-          # Get list of refs(branches) that exist on the remote, then filter for the auto-bump branches
+          # Get list of branches that exist on the remote, then filter for the auto-bump branches
           EXISTING_BRANCHES=$(git ls-remote --heads | grep refs/heads/auto-bump- | sed 's|.*\(auto-bump-[[:digit:]]*\).*|\1|')
           for EXISTING_BRANCH in $EXISTING_BRANCHES; do
             PR_IS_CLOSED=$(gh pr view --json closed --jq '.closed' "$EXISTING_BRANCH")
             PR_AUTHOR=$(gh pr view --json author --jq '.author.login' "$EXISTING_BRANCH")
             if [[ "$PR_IS_CLOSED" == "true" && "$PR_AUTHOR" == "DartDevtoolWorkflowBot" ]]; then
-              # If the branch exists and the PR is closed we will delete it
+              # If the branch exists, DartDevtoolWorkflowBot is the author and the PR is closed we will delete it
               echo "Deleting $EXISTING_BRANCH"
               gh api  /repos/flutter/devtools/git/refs/heads/$EXISTING_BRANCH -X DELETE
             else
