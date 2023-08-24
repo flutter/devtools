@@ -22,6 +22,8 @@ on:
   schedule:
     # * is a special character in YAML so you have to quote this string
     - cron: "0 8 * * *" # Run every day at midnight Pacific Time
+  label:
+    types: [created, deleted]
 permissions:
   contents: write
   pull-requests: write
@@ -31,7 +33,7 @@ env:
 
 jobs:
   bump-version:
-    if: ${{ github.event_name == 'workflow_dispatch' || github.event_name == 'schedule' }}
+    if: ${{ (github.event_name == 'workflow_dispatch' || github.event_name == 'schedule') && github.repository == 'flutter/devtools' }}
     name: Bump Version
     runs-on: ubuntu-latest
     steps:
@@ -123,8 +125,8 @@ jobs:
           IS_DRAFT: ${{ inputs.draft == true }}
   clean-up-branches:
     # If a pr is closed on a workflow bot PR, then clean up workflow bot branches.
-    if: ${{ github.event_name == 'pull_request' && github.event.action == 'closed'  && github.event.pull_request.user.login == 'DartDevtoolWorkflowBot'}}
-    name: Clean up Dev Bump Branches
+    if: ${{ github.event_name == 'label' || (github.event_name == 'pull_request' && github.event.action == 'closed'  && github.event.pull_request.user.login == 'DartDevtoolWorkflowBot' && github.repository == 'flutter/devtools') }}
+    name: Clean up 5 Dev Bump Branches
     runs-on: ubuntu-latest
     steps:
       - name: Clean up branches
@@ -140,3 +142,5 @@ jobs:
               gh api  /repos/flutter/devtools/git/refs/heads/$CLOSED_BRANCH -X DELETE
             fi
           done
+        env: |
+          GH_TOKEN: ${{ secrets.DEVTOOLS_WORKFLOW_BOT_TOKEN }}
