@@ -141,5 +141,5 @@ jobs:
               gh api  /repos/flutter/devtools/git/refs/heads/$CLOSED_BRANCH -X DELETE
             fi
           done
-        env: |
+        env:
           GH_TOKEN: ${{ secrets.DEVTOOLS_WORKFLOW_BOT_TOKEN }}
