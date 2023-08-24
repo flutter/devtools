@@ -142,7 +142,7 @@ jobs:
           for EXISTING_BRANCH in $EXISTING_BRANCHES; do
             PR_IS_CLOSED=$(gh pr view --json closed --jq '.closed' "$EXISTING_BRANCH")
             PR_AUTHOR=$(gh pr view --json author --jq '.author.login' "$EXISTING_BRANCH")
-            if [ "$PR_IS_CLOSED" == "true" && "$PR_AUTHOR" == "DartDevtoolWorkflowBot" ] ; then
+            if [[ "$PR_IS_CLOSED" == "true" && "$PR_AUTHOR" == "DartDevtoolWorkflowBotZ" ]]; then
               # If the branch exists and the PR is closed we will delete it
               echo "Deleting $EXISTING_BRANCH"
               gh api  /repos/flutter/devtools/git/refs/heads/$EXISTING_BRANCH -X DELETE
