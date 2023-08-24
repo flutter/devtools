@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 
 import '../utils/utils.dart';
@@ -110,10 +112,10 @@ class AreaPaneHeader extends StatelessWidget implements PreferredSizeWidget {
 }
 
 /// Wraps [child] in a rounded border with default styling.
-/// 
+///
 /// This border can optionally be made non-uniform by setting any of
 /// [showTop], [showBottom], [showLeft] or [showRight] to false.
-/// 
+///
 /// If [clip] is true, the child will be wrapped in a [ClipRRect] to ensure the
 /// rounded corner of the border is drawn as expected. This should not be
 /// necessary in most cases.
@@ -191,7 +193,7 @@ final class RoundedOutlinedBorder extends StatelessWidget {
 }
 
 /// Wraps [child] in a border with default styling.
-/// 
+///
 /// This border can optionally be made non-uniform by setting any of
 /// [showTop], [showBottom], [showLeft] or [showRight] to false.
 final class OutlineDecoration extends StatelessWidget {
@@ -683,4 +685,31 @@ Widget maybeWrapWithTooltip({
     );
   }
   return child;
+}
+
+/// Displays a [json] map as selectable, formatted text.
+class FormattedJson extends StatelessWidget {
+  const FormattedJson({
+    super.key,
+    this.json,
+    this.formattedString,
+    this.useSubtleStyle = false,
+  }) : assert((json == null) != (formattedString == null));
+
+  static const encoder = JsonEncoder.withIndent('  ');
+
+  final Map<String, dynamic>? json;
+
+  final String? formattedString;
+
+  final bool useSubtleStyle;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return SelectableText(
+      json != null ? encoder.convert(json) : formattedString!,
+      style: useSubtleStyle ? theme.subtleFixedFontStyle : theme.fixedFontStyle,
+    );
+  }
 }

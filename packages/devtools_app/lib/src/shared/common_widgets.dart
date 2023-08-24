@@ -1252,34 +1252,6 @@ class _BreadcrumbPainter extends CustomPainter {
   }
 }
 
-// TODO(bkonyi): replace uses of this class with `JsonViewer`.
-class FormattedJson extends StatelessWidget {
-  const FormattedJson({
-    super.key,
-    this.json,
-    this.formattedString,
-    this.useSubtleStyle = false,
-  }) : assert((json == null) != (formattedString == null));
-
-  static const encoder = JsonEncoder.withIndent('  ');
-
-  final Map<String, dynamic>? json;
-
-  final String? formattedString;
-
-  final bool useSubtleStyle;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    // TODO(kenz): we could consider using a prettier format like YAML.
-    return SelectableText(
-      json != null ? encoder.convert(json) : formattedString!,
-      style: useSubtleStyle ? theme.subtleFixedFontStyle : theme.fixedFontStyle,
-    );
-  }
-}
-
 class JsonViewer extends StatefulWidget {
   const JsonViewer({
     super.key,
