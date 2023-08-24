@@ -109,6 +109,14 @@ class AreaPaneHeader extends StatelessWidget implements PreferredSizeWidget {
   }
 }
 
+/// Wraps [child] in a rounded border with default styling.
+/// 
+/// This border can optionally be made non-uniform by setting any of
+/// [showTop], [showBottom], [showLeft] or [showRight] to false.
+/// 
+/// If [clip] is true, the child will be wrapped in a [ClipRRect] to ensure the
+/// rounded corner of the border is drawn as expected. This should not be
+/// necessary in most cases.
 final class RoundedOutlinedBorder extends StatelessWidget {
   const RoundedOutlinedBorder({
     super.key,
@@ -182,7 +190,11 @@ final class RoundedOutlinedBorder extends StatelessWidget {
   }
 }
 
-class OutlineDecoration extends StatelessWidget {
+/// Wraps [child] in a border with default styling.
+/// 
+/// This border can optionally be made non-uniform by setting any of
+/// [showTop], [showBottom], [showLeft] or [showRight] to false.
+final class OutlineDecoration extends StatelessWidget {
   const OutlineDecoration({
     Key? key,
     this.child,
