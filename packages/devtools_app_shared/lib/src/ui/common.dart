@@ -109,6 +109,14 @@ class AreaPaneHeader extends StatelessWidget implements PreferredSizeWidget {
   }
 }
 
+/// Wraps [child] in a rounded border with default styling.
+/// 
+/// This border can optionally be made non-uniform by setting any of
+/// [showTop], [showBottom], [showLeft] or [showRight] to false.
+/// 
+/// If [clip] is true, the child will be wrapped in a [ClipRRect] to ensure the
+/// rounded corner of the border is drawn as expected. This should not be
+/// necessary in most cases.
 final class RoundedOutlinedBorder extends StatelessWidget {
   const RoundedOutlinedBorder({
     super.key,
@@ -176,6 +184,77 @@ final class RoundedOutlinedBorder extends StatelessWidget {
       decoration: BoxDecoration(
         border: Border.all(color: Theme.of(context).focusColor),
         borderRadius: borderRadius,
+      ),
+      child: child,
+    );
+  }
+}
+
+/// Wraps [child] in a border with default styling.
+/// 
+/// This border can optionally be made non-uniform by setting any of
+/// [showTop], [showBottom], [showLeft] or [showRight] to false.
+final class OutlineDecoration extends StatelessWidget {
+  const OutlineDecoration({
+    Key? key,
+    this.child,
+    this.showTop = true,
+    this.showBottom = true,
+    this.showLeft = true,
+    this.showRight = true,
+  }) : super(key: key);
+
+  factory OutlineDecoration.onlyBottom({required Widget? child}) =>
+      OutlineDecoration(
+        showTop: false,
+        showLeft: false,
+        showRight: false,
+        child: child,
+      );
+
+  factory OutlineDecoration.onlyTop({required Widget? child}) =>
+      OutlineDecoration(
+        showBottom: false,
+        showLeft: false,
+        showRight: false,
+        child: child,
+      );
+
+  factory OutlineDecoration.onlyLeft({required Widget? child}) =>
+      OutlineDecoration(
+        showBottom: false,
+        showTop: false,
+        showRight: false,
+        child: child,
+      );
+
+  factory OutlineDecoration.onlyRight({required Widget? child}) =>
+      OutlineDecoration(
+        showBottom: false,
+        showTop: false,
+        showLeft: false,
+        child: child,
+      );
+
+  final bool showTop;
+  final bool showBottom;
+  final bool showLeft;
+  final bool showRight;
+
+  final Widget? child;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = Theme.of(context).focusColor;
+    final border = BorderSide(color: color);
+    return Container(
+      decoration: BoxDecoration(
+        border: Border(
+          left: showLeft ? border : BorderSide.none,
+          right: showRight ? border : BorderSide.none,
+          top: showTop ? border : BorderSide.none,
+          bottom: showBottom ? border : BorderSide.none,
+        ),
       ),
       child: child,
     );
