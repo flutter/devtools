@@ -33,7 +33,7 @@ enum DevToolsExtensionEventType {
 }
 
 /// Interface that a DevTools extension host should implement.
-/// 
+///
 /// This interface is implemented by DevTools itself as well as by a simulated
 /// DevTools environment for simplifying extension development.
 abstract interface class DevToolsExtensionHostInterface {
@@ -47,7 +47,7 @@ abstract interface class DevToolsExtensionHostInterface {
   void vmServiceConnectionChanged({required String? uri});
 
   /// Handles events sent by the extension.
-  /// 
+  ///
   /// If an unknown event is recevied, this handler should call [onUnknownEvent]
   /// if non-null.
   void onEventReceived(
