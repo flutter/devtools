@@ -10,13 +10,18 @@ import 'api.dart';
 /// See [DevToolsExtensionEventType] for different types of events that are
 /// supported over this communication channel.
 class DevToolsExtensionEvent {
-  DevToolsExtensionEvent(this.type, {this.data});
+  DevToolsExtensionEvent(
+    this.type, {
+    this.data,
+    this.source,
+  });
 
   factory DevToolsExtensionEvent.parse(Map<String, Object?> json) {
     final eventType =
         DevToolsExtensionEventType.from(json[_typeKey]! as String);
     final data = (json[_dataKey] as Map?)?.cast<String, Object?>();
-    return DevToolsExtensionEvent(eventType, data: data);
+    final source = json[sourceKey] as String?;
+    return DevToolsExtensionEvent(eventType, data: data, source: source);
   }
 
   static DevToolsExtensionEvent? tryParse(Object data) {
@@ -30,16 +35,13 @@ class DevToolsExtensionEvent {
 
   static const _typeKey = 'type';
   static const _dataKey = 'data';
-
-  static DevToolsExtensionEvent ping =
-      DevToolsExtensionEvent(DevToolsExtensionEventType.ping);
-
-  static DevToolsExtensionEvent pong =
-      DevToolsExtensionEvent(DevToolsExtensionEventType.pong);
+  static const sourceKey = 'source';
 
   final DevToolsExtensionEventType type;
-
   final Map<String, Object?>? data;
+
+  /// Optional field to describe the source that created and sent this event.
+  final String? source;
 
   Map<String, Object?> toJson() {
     return {

@@ -1,3 +1,6 @@
+## 0.0.3-wip
+* Add a simulated DevTools environment that for easier development.
+
 ## 0.0.2-dev.0
 
 * Add missing dependency on `package:devtools_shared`.

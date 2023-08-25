@@ -688,7 +688,7 @@ Widget maybeWrapWithTooltip({
 }
 
 /// Displays a [json] map as selectable, formatted text.
-class FormattedJson extends StatelessWidget {
+final class FormattedJson extends StatelessWidget {
   const FormattedJson({
     super.key,
     this.json,
@@ -711,5 +711,36 @@ class FormattedJson extends StatelessWidget {
       json != null ? encoder.convert(json) : formattedString!,
       style: useSubtleStyle ? theme.subtleFixedFontStyle : theme.fixedFontStyle,
     );
+  }
+}
+
+/// An extension on [ScrollController] to facilitate having the scrolling widget
+/// auto scroll to the bottom on new content.
+extension ScrollControllerAutoScroll on ScrollController {
+// TODO(devoncarew): We lose dock-to-bottom when we receive content when we're
+// off screen.
+
+  /// Return whether the view is currently scrolled to the bottom.
+  bool get atScrollBottom {
+    final pos = position;
+    return pos.pixels == pos.maxScrollExtent;
+  }
+
+  /// Scroll the content to the bottom using the app's default animation
+  /// duration and curve..
+  Future<void> autoScrollToBottom() async {
+    await animateTo(
+      position.maxScrollExtent,
+      duration: rapidDuration,
+      curve: defaultCurve,
+    );
+
+    // Scroll again if we've received new content in the interim.
+    if (hasClients) {
+      final pos = position;
+      if (pos.pixels != pos.maxScrollExtent) {
+        jumpTo(pos.maxScrollExtent);
+      }
+    }
   }
 }
