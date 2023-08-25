@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 /// Example of using the [Split] widget from
 /// 'package:devtools_app_shared/ui.dart' with two children laid across a
 /// horizontal axis.
-/// 
+///
 /// This example does not specify the [Split.splitters] parameter, so a
 /// default splitter is used.
 class SplitExample extends StatelessWidget {
@@ -31,7 +31,7 @@ class SplitExample extends StatelessWidget {
 /// Example of using the [Split] widget from
 /// 'package:devtools_app_shared/ui.dart' with three children laid across a
 /// vertical axis.
-/// 
+///
 /// This example uses custom splitters.
 class MultiSplitExample extends StatelessWidget {
   const MultiSplitExample({super.key});

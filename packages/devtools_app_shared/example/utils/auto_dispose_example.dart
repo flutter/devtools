@@ -70,10 +70,10 @@ class _MyStatefulWidgetState extends State<MyStatefulWidget>
   }
 }
 
-/// This is an example of a controller that uses the 
+/// This is an example of a controller that uses the
 /// [AutoDisposeControllerMixin] exposed by
 /// 'package:devtools_app_shared/utils.dart'.
-/// 
+///
 /// When [dispose] is called on this controller, any listeners or stream
 /// subscriptions added using the [AutoDisposeControllerMixin] will be disposed
 /// or canceled.
