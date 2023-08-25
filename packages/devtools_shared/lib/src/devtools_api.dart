@@ -90,3 +90,13 @@ abstract class ExtensionsApi {
   /// enabled state for the extension.
   static const enabledStatePropertyName = 'enable';
 }
+
+abstract class DeeplinkApi {
+  /// Returns a list of available build variants of the android sub-project.
+  static const androidBuildVariants = '${apiPrefix}androidBuildVariants';
+
+  /// The property name for the query parameter passed along with
+  /// deeplink-related requests to the server that describes the package root
+  /// for the app.
+  static const deeplinkRootPathPropertyName = 'rootPath';
+}

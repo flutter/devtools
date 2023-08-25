@@ -402,6 +402,25 @@ Future<ExtensionEnabledState> extensionEnabledState({
   return ExtensionEnabledState.error;
 }
 
+Future<List<String>> requestAndroidBuildVariants(String path) async {
+  print('web $isDevToolsServerAvailable');
+  if (isDevToolsServerAvailable) {
+    final uri = Uri(
+      path: DeeplinkApi.androidBuildVariants,
+      queryParameters: {
+        DeeplinkApi.deeplinkRootPathPropertyName: path,
+      },
+    );
+    final resp = await request(uri.toString());
+    if (resp?.status == HttpStatus.ok) {
+      return json.decode(resp!.responseText!);
+    } else {
+      logWarning(resp, apiResetDevTools);
+    }
+  }
+  return const <String>[];
+}
+
 void logWarning(HttpRequest? response, String apiType, [String? respText]) {
   _log.warning(
     'HttpRequest $apiType failed status = ${response?.status}'
