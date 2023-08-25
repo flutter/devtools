@@ -403,7 +403,6 @@ Future<ExtensionEnabledState> extensionEnabledState({
 }
 
 Future<List<String>> requestAndroidBuildVariants(String path) async {
-  print('web $isDevToolsServerAvailable');
   if (isDevToolsServerAvailable) {
     final uri = Uri(
       path: DeeplinkApi.androidBuildVariants,

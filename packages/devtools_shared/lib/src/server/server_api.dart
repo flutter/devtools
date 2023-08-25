@@ -39,7 +39,6 @@ class ServerApi {
   ]) {
     api ??= ServerApi();
     final queryParams = request.requestedUri.queryParameters;
-    print('handle ${request.url.path}');
     // TODO(kenz): break this switch statement up so that it uses helper methods
     // for each case. Also use [_checkRequiredParameters] and [_encodeResponse]
     // helpers.
@@ -229,12 +228,6 @@ class ServerApi {
       case DeeplinkApi.androidBuildVariants:
         return _DeeplinkApiHandler.handleAndroidBuildVariants(
             api, queryParams, deeplinkManager);
-      //
-      // case DeeplinkApi.androidAppLinkSettings:
-      //   return _ExtensionsApiHandler.handleExtensionEnabledState(
-      //     api,
-      //     queryParams,
-      //   );
 
       default:
         return api.notImplemented();
