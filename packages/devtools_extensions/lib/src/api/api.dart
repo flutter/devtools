@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'model.dart';
+
 /// Supported events that can be sent and received over 'postMessage' between
 /// DevTools and a DevTools extension running in an embedded iFrame.
 enum DevToolsExtensionEventType {
@@ -28,4 +30,28 @@ enum DevToolsExtensionEventType {
     }
     return unknown;
   }
+}
+
+/// Interface that a DevTools extension host should implement.
+/// 
+/// This interface is implemented by DevTools itself as well as by a simulated
+/// DevTools environment for simplifying extension development.
+abstract interface class DevToolsExtensionHostInterface {
+  /// This method should send a [DevToolsExtensionEventType.ping] event to the
+  /// DevTools extension to check that it is ready.
+  void ping();
+
+  /// This method should send a [DevToolsExtensionEventType.vmServiceConnection]
+  /// event to the extension to notify it of the vm service uri it should
+  /// establish a connection to.
+  void vmServiceConnectionChanged({String? uri});
+
+  /// Handles events sent by the extension.
+  /// 
+  /// If an unknown event is recevied, this handler should call [onUnknownEvent]
+  /// if non-null.
+  void onEventReceived(
+    DevToolsExtensionEvent event, {
+    void Function()? onUnknownEvent,
+  });
 }

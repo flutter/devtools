@@ -48,7 +48,8 @@ class _EmbeddedExtensionState extends State<EmbeddedExtension> {
 }
 
 class _ExtensionIFrameController extends DisposableController
-    with AutoDisposeControllerMixin {
+    with AutoDisposeControllerMixin
+    implements DevToolsExtensionHostInterface {
   _ExtensionIFrameController(this.embeddedExtensionController);
 
   final EmbeddedExtensionControllerImpl embeddedExtensionController;
@@ -120,29 +121,12 @@ class _ExtensionIFrameController extends DisposableController
     if (e is html.MessageEvent) {
       final extensionEvent = DevToolsExtensionEvent.tryParse(e.data);
       if (extensionEvent != null) {
-        switch (extensionEvent.type) {
-          case DevToolsExtensionEventType.ping:
-          // Ignore. DevTools should not receive/handle ping events.
-          case DevToolsExtensionEventType.pong:
-            if (!_extensionHandlerReady.isCompleted) {
-              _extensionHandlerReady.complete();
-            }
-            break;
-          case DevToolsExtensionEventType.vmServiceConnection:
-            final service = serviceConnection.serviceManager.service;
-            if (service == null) break;
-            _postMessage(
-              DevToolsExtensionEvent(
-                DevToolsExtensionEventType.vmServiceConnection,
-                data: {'uri': service.connectedUri.toString()},
-              ),
-            );
-            break;
-          default:
-            notificationService.push(
-              'Unknown event received from extension: ${e.data}',
-            );
-        }
+        onEventReceived(
+          extensionEvent,
+          onUnknownEvent: () => notificationService.push(
+            'Unknown event received from extension: ${e.data}',
+          ),
+        );
       }
     }
   }
@@ -160,7 +144,7 @@ class _ExtensionIFrameController extends DisposableController
         // Once the extension UI is ready, the extension will receive this
         // [DevToolsExtensionEventType.ping] message and return a
         // [DevToolsExtensionEventType.pong] message, handled in [_handleMessage].
-        _postMessage(DevToolsExtensionEvent.ping);
+        ping();
       });
 
       await _extensionHandlerReady.future.timeout(
@@ -180,5 +164,43 @@ class _ExtensionIFrameController extends DisposableController
     html.window.removeEventListener('message', _handleMessage);
     _pollForExtensionHandlerReady?.cancel();
     super.dispose();
+  }
+
+  @override
+  void ping() {
+    _postMessage(DevToolsExtensionEvent(DevToolsExtensionEventType.ping));
+  }
+
+  @override
+  void vmServiceConnectionChanged({String? uri}) {
+    _postMessage(
+      DevToolsExtensionEvent(
+        DevToolsExtensionEventType.vmServiceConnection,
+        data: {'uri': uri!},
+      ),
+    );
+  }
+
+  @override
+  void onEventReceived(
+    DevToolsExtensionEvent event, {
+    void Function()? onUnknownEvent,
+  }) {
+    switch (event.type) {
+      case DevToolsExtensionEventType.ping:
+      // Ignore. DevTools should not receive/handle ping events.
+      case DevToolsExtensionEventType.pong:
+        if (!_extensionHandlerReady.isCompleted) {
+          _extensionHandlerReady.complete();
+        }
+        break;
+      case DevToolsExtensionEventType.vmServiceConnection:
+        final service = serviceConnection.serviceManager.service;
+        if (service == null) break;
+        vmServiceConnectionChanged(uri: service.connectedUri.toString());
+        break;
+      default:
+        onUnknownEvent?.call();
+    }
   }
 }
