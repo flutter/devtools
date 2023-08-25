@@ -147,6 +147,8 @@ class ConnectedApp {
     // Return early if already initialized.
     if (initialized.isCompleted) return;
 
+    assert(serviceManager!.isServiceAvailable);
+
     await Future.wait([isFlutterApp, isProfileBuild, isDartWebApp]);
 
     _operatingSystem = serviceManager!.vm!.operatingSystem ?? unknownOS;

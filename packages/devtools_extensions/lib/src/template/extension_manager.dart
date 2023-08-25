@@ -56,13 +56,7 @@ class ExtensionManager {
             break;
           case DevToolsExtensionEventType.vmServiceConnection:
             final vmServiceUri = extensionEvent.data?['uri'] as String?;
-            unawaited(
-              connectToVmService(vmServiceUri).catchError((e) {
-                // TODO(kenz): post a notification to DevTools for errors
-                // or create an error panel for the extensions screens.
-                print('Error connecting to VM service: $e');
-              }),
-            );
+            unawaited(_connectToVmService(vmServiceUri));
             break;
           case DevToolsExtensionEventType.unknown:
           default:
@@ -80,25 +74,34 @@ class ExtensionManager {
     html.window.parent?.postMessage(event.toJson(), html.window.origin!);
   }
 
-  Future<void> connectToVmService(String? vmServiceUri) async {
+  Future<void> _connectToVmService(String? vmServiceUri) async {
     if (vmServiceUri == null) return;
 
-    final finishedCompleter = Completer<void>();
-    final vmService = await connect<VmService>(
-      uri: Uri.parse(vmServiceUri),
-      finishedCompleter: finishedCompleter,
-      createService: ({
-        // ignore: avoid-dynamic, code needs to match API from VmService.
-        required Stream<dynamic> /*String|List<int>*/ inStream,
-        required void Function(String message) writeMessage,
-        required Uri connectedUri,
-      }) {
-        return VmService(inStream, writeMessage);
-      },
-    );
-    await serviceManager.vmServiceOpened(
-      vmService,
-      onClosed: finishedCompleter.future,
-    );
+    try {
+      final finishedCompleter = Completer<void>();
+      final vmService = await connect<VmService>(
+        uri: Uri.parse(vmServiceUri),
+        finishedCompleter: finishedCompleter,
+        createService: ({
+          // ignore: avoid-dynamic, code needs to match API from VmService.
+          required Stream<dynamic> /*String|List<int>*/ inStream,
+          required void Function(String message) writeMessage,
+          required Uri connectedUri,
+        }) {
+          return VmService(
+            inStream,
+            writeMessage,
+          );
+        },
+      );
+      await serviceManager.vmServiceOpened(
+        vmService,
+        onClosed: finishedCompleter.future,
+      );
+    } catch (e) {
+      // TODO(kenz): post a notification to DevTools for errors
+      // or create an error panel for the extensions screens.
+      print('Unable to connect to VM service at $vmServiceUri: $e');
+    }
   }
 }
