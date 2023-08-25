@@ -43,7 +43,7 @@ jobs:
               # - DartDevtoolWorkflowBot is the author 
               # - the PR is closed
               echo "Deleting $EXISTING_BRANCH"
-              echo "gh api  /repos/flutter/devtools/git/refs/heads/$EXISTING_BRANCH -X DELETE"
+              gh api /repos/flutter/devtools/git/refs/heads/$EXISTING_BRANCH -X DELETE
             else
               echo "SKIP: Avoiding $EXISTING_BRANCH { is_closed:$PR_IS_CLOSED, author:$PR_AUTHOR }"
             fi
