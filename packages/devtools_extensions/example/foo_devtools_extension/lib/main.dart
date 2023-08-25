@@ -11,8 +11,8 @@ class FooPackageDevToolsExtension extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const DevToolsExtension(
-      child: FooExtensionHomePage(),
+    return DevToolsExtension(
+      child: const FooExtensionHomePage(),
     );
   }
 }

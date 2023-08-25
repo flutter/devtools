@@ -43,11 +43,14 @@ class ExtensionManager {
     if (e is html.MessageEvent) {
       final extensionEvent = DevToolsExtensionEvent.tryParse(e.data);
       if (extensionEvent != null) {
+        // Do not handle messages that come from the [ExtensionManager] itself.
+        if (extensionEvent.source == '$ExtensionManager') return;
+
         switch (extensionEvent.type) {
           case DevToolsExtensionEventType.ping:
-            html.window.parent?.postMessage(
-              DevToolsExtensionEvent.pong.toJson(),
-              e.origin,
+            postMessageToDevTools(
+              DevToolsExtensionEvent(DevToolsExtensionEventType.pong),
+              targetOrigin: e.origin,
             );
             break;
           case DevToolsExtensionEventType.pong:
@@ -76,8 +79,26 @@ class ExtensionManager {
     }
   }
 
-  void postMessageToDevTools(DevToolsExtensionEvent event) {
-    html.window.parent?.postMessage(event.toJson(), html.window.origin!);
+  /// Posts a [DevToolsExtensionEvent] to the DevTools extension host.
+  ///
+  /// If [targetOrigin] is null, the message will be posed to
+  /// [html.window.origin].
+  ///
+  /// When [_debugUseSimulatedEnvironment] is true, this message will be posted
+  /// to the same [html.window] that the extension is hosted in.
+  void postMessageToDevTools(
+    DevToolsExtensionEvent event, {
+    String? targetOrigin,
+  }) {
+    final postWindow =
+        _debugUseSimulatedEnvironment ? html.window : html.window.parent;
+    postWindow?.postMessage(
+      {
+        ...event.toJson(),
+        DevToolsExtensionEvent.sourceKey: '$ExtensionManager',
+      },
+      targetOrigin ?? html.window.origin!,
+    );
   }
 
   Future<void> connectToVmService(String? vmServiceUri) async {

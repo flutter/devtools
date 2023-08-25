@@ -10,13 +10,17 @@ import 'package:devtools_app_shared/service.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_shared/service.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:vm_service/vm_service.dart';
 
 import '../../api.dart';
+import '_simulated_devtools_environment/_simulated_devtools_environment.dart';
 
 part 'extension_manager.dart';
+
+bool _debugUseSimulatedEnvironment = false;
 
 /// A manager that allows extensions to interact with DevTools or the DevTools
 /// extensions framework.
@@ -34,13 +38,23 @@ ServiceManager get serviceManager => globals[ServiceManager] as ServiceManager;
 
 /// A wrapper widget that initializes the [extensionManager] and establishes a
 /// connection with DevTools for this extension to interact over.
+///
+/// If [useSimulatedEnvironment] is true for a non-release build, a simulated
+/// DevTools environment will wrap [child] so that the extension can be
+/// developed outside of an embedded iFrame environment.
 class DevToolsExtension extends StatefulWidget {
-  const DevToolsExtension({
+  DevToolsExtension({
     super.key,
     required this.child,
     this.eventHandlers = const {},
     this.requiresRunningApplication = true,
-  });
+    bool useSimulatedEnvironment = false,
+  }) {
+    // Guarantee that we cannot use the simulated environment for release mode.
+    if (!kReleaseMode) {
+      _debugUseSimulatedEnvironment = useSimulatedEnvironment;
+    }
+  }
 
   /// The root of the extension Flutter web app that is wrapped by this
   /// [DevToolsExtension] wrapper.
@@ -57,7 +71,10 @@ class DevToolsExtension extends StatefulWidget {
   State<DevToolsExtension> createState() => _DevToolsExtensionState();
 }
 
-class _DevToolsExtensionState extends State<DevToolsExtension> {
+class _DevToolsExtensionState extends State<DevToolsExtension>
+    with AutoDisposeMixin {
+  late ConnectedState connectionState;
+
   @override
   void initState() {
     super.initState();
@@ -68,6 +85,13 @@ class _DevToolsExtensionState extends State<DevToolsExtension> {
     for (final handler in widget.eventHandlers.entries) {
       extensionManager.registerEventHandler(handler.key, handler.value);
     }
+
+    connectionState = serviceManager.connectedState.value;
+    addAutoDisposeListener(serviceManager.connectedState, () {
+      setState(() {
+        connectionState = serviceManager.connectedState.value;
+      });
+    });
   }
 
   void _initGlobals() {
@@ -85,6 +109,11 @@ class _DevToolsExtensionState extends State<DevToolsExtension> {
 
   @override
   Widget build(BuildContext context) {
+    final child = _ConnectionAwareWrapper(
+      requiresRunningApplication: widget.requiresRunningApplication,
+      connected: connectionState.connected,
+      child: widget.child,
+    );
     return MaterialApp(
       theme: themeFor(
         isDarkTheme: false,
@@ -97,8 +126,37 @@ class _DevToolsExtensionState extends State<DevToolsExtension> {
         theme: ThemeData(useMaterial3: true, colorScheme: darkColorScheme),
       ),
       home: Scaffold(
-        body: widget.child,
+        body: _debugUseSimulatedEnvironment
+            ? SimulatedDevToolsWrapper(
+                connected: connectionState.connected,
+                child: child,
+              )
+            : child,
       ),
     );
+  }
+}
+
+class _ConnectionAwareWrapper extends StatelessWidget {
+  const _ConnectionAwareWrapper({
+    required this.child,
+    required this.requiresRunningApplication,
+    required this.connected,
+  });
+
+  final bool requiresRunningApplication;
+
+  final bool connected;
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    if (requiresRunningApplication && !connected) {
+      return const Center(
+        child: Text('Please connect an app to use this DevTools Extension'),
+      );
+    }
+    return child;
   }
 }
