@@ -12,7 +12,7 @@ permissions:
 jobs:
   clean-up-branches:
     if: ${{ github.repository == 'flutter/devtools' }}
-    name: Clean up Dev Bump Branches
+    name: Clean up closed DartDevtoolWorkflowBot Branches
     runs-on: ubuntu-latest
     steps:
       - name: Sparse checkout of the repository
@@ -20,7 +20,7 @@ jobs:
         with:
           sparse-checkout: |
             README.md
-      - name: Clean up branches
+      - name: Clean up closed DartDevtoolWorkflowBot branches
         run: |
           set -e
 
