@@ -96,17 +96,18 @@ class _DevToolsExtensionState extends State<DevToolsExtension> {
     setGlobal(IdeTheme, IdeTheme());
   }
 
-  void _removeGlobals() {
+  void _shutdown() {
+    (globals[ExtensionManager] as ExtensionManager?)?._dispose();
     removeGlobal(ExtensionManager);
     removeGlobal(ServiceManager);
     removeGlobal(IdeTheme);
   }
 
   @override
-  void dispose() async {
-    extensionManager._dispose();
-    await serviceManager.manuallyDisconnect();
-    _removeGlobals();
+  void dispose() {
+    // TODO(https://github.com/flutter/flutter/issues/10437): dispose is never
+    // called on hot restart, so these resources leak for local development.
+    _shutdown();
     super.dispose();
   }
 

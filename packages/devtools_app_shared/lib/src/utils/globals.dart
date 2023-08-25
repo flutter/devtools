@@ -23,4 +23,5 @@ void setGlobal(Type clazz, Object instance) {
 
 void removeGlobal(Type clazz) {
   globals.remove(clazz);
+  assert(globals[clazz] == null);
 }
