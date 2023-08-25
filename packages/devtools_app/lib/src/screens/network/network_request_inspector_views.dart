@@ -156,7 +156,7 @@ class HttpRequestView extends StatelessWidget {
             ? requestContentType.any((element) => element.contains('json'))
             : requestContentType.contains('json');
 
-        Widget child; 
+        Widget child;
         child = isJson
             ? JsonViewer(encodedJson: data.requestBody!)
             : TextViewer(text: data.requestBody!);
