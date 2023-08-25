@@ -20,7 +20,22 @@ import '_simulated_devtools_environment/_simulated_devtools_environment.dart';
 
 part 'extension_manager.dart';
 
-bool _debugUseSimulatedEnvironment = false;
+/// If true, a simulated DevTools environment will be wrapped around the
+/// extension (see [SimulatedDevToolsWrapper]).
+///
+/// By default, the constant is false.
+/// To enable it, pass the compilation flag
+/// `--dart-define=use_simulated_environment=true`.
+///
+/// To enable the flag in debug configuration of VSCode, add value:
+///   "args": [
+///     "--dart-define=use_simulated_environment=true"
+///   ]
+const bool _simulatedEnvironmentEnabled =
+    bool.fromEnvironment('use_simulated_environment');
+
+bool get _debugUseSimulatedEnvironment =>
+    !kReleaseMode && _simulatedEnvironmentEnabled;
 
 /// A manager that allows extensions to interact with DevTools or the DevTools
 /// extensions framework.
@@ -38,23 +53,13 @@ ServiceManager get serviceManager => globals[ServiceManager] as ServiceManager;
 
 /// A wrapper widget that initializes the [extensionManager] and establishes a
 /// connection with DevTools for this extension to interact over.
-///
-/// If [useSimulatedEnvironment] is true for a non-release build, a simulated
-/// DevTools environment will wrap [child] so that the extension can be
-/// developed outside of an embedded iFrame environment.
 class DevToolsExtension extends StatefulWidget {
-  DevToolsExtension({
+  const DevToolsExtension({
     super.key,
     required this.child,
     this.eventHandlers = const {},
     this.requiresRunningApplication = true,
-    bool useSimulatedEnvironment = false,
-  }) {
-    // Guarantee that we cannot use the simulated environment for release mode.
-    if (!kReleaseMode) {
-      _debugUseSimulatedEnvironment = useSimulatedEnvironment;
-    }
-  }
+  });
 
   /// The root of the extension Flutter web app that is wrapped by this
   /// [DevToolsExtension] wrapper.

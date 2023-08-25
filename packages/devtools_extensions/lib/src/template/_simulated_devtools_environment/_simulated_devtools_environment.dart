@@ -22,8 +22,9 @@ part '_simulated_devtools_controller.dart';
 /// The simulated environment implements and exposes the same extension host
 /// APIs that DevTools does.
 /// 
-/// To use this wrapper, set the [useSimulatedEnvironment] to true when
-/// constructing a [DevToolsExtension] widget.
+/// To use this wrapper, set the 'use_simulated_environment' environment
+/// variable to true. See [_simulatedEnvironmentEnabled] from
+/// `devtools_extension.dart`.
 class SimulatedDevToolsWrapper extends StatefulWidget {
   const SimulatedDevToolsWrapper({
     super.key,
