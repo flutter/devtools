@@ -156,13 +156,10 @@ class HttpRequestView extends StatelessWidget {
             ? requestContentType.any((element) => element.contains('json'))
             : requestContentType.contains('json');
 
-        Widget child;
+        Widget child; 
         child = isJson
             ? JsonViewer(encodedJson: data.requestBody!)
-            : Text(
-                data.requestBody!,
-                style: theme.fixedFontStyle,
-              );
+            : TextViewer(text: data.requestBody!);
         return Padding(
           padding: const EdgeInsets.all(denseSpacing),
           child: SingleChildScrollView(
@@ -356,10 +353,7 @@ class HttpTextResponseViewer extends StatelessWidget {
 
         return switch (currentLocalResponseType) {
           NetworkResponseViewType.json => JsonViewer(encodedJson: responseBody),
-          NetworkResponseViewType.text => Text(
-              responseBody,
-              style: textStyle,
-            ),
+          NetworkResponseViewType.text => TextViewer(text: responseBody),
           _ => const SizedBox(),
         };
       },

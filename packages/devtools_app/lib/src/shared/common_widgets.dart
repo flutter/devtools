@@ -1264,6 +1264,30 @@ class JsonViewer extends StatefulWidget {
   State<JsonViewer> createState() => _JsonViewerState();
 }
 
+class TextViewer extends StatelessWidget {
+  const TextViewer({
+    super.key,
+    required this.text,
+  });
+  final String text;
+  static const _maxLength = 65536; //2^16
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final String displayText;
+    // Limit the length of the displayed text to _MAX_LENGTH
+    if (text.length > _maxLength) {
+      displayText = '${text.substring(0, min(_maxLength, text.length))}...';
+    } else {
+      displayText = text;
+    }
+    return Text(
+      displayText,
+      style: theme.fixedFontStyle,
+    );
+  }
+}
+
 class _JsonViewerState extends State<JsonViewer>
     with ProvidedControllerMixin<DebuggerController, JsonViewer> {
   late Future<void> _initializeTree;
