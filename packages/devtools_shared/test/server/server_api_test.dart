@@ -28,7 +28,8 @@ void main() {
     final fakeManager = FakeDeeplinkManager();
     final expectedResponse = Response(HttpStatus.ok);
     fakeManager.responseForGetBuildVariants = expectedResponse;
-    final response = await ServerApi.handle(request, ExtensionsManager(buildDir: '/'), fakeManager);
+    final response = await ServerApi.handle(
+        request, ExtensionsManager(buildDir: '/'), fakeManager);
     expect(response, expectedResponse);
     expect(fakeManager.receivedPathFromGetBuildVariants, expectedRootPath);
   });
@@ -43,7 +44,8 @@ void main() {
         path: DeeplinkApi.androidBuildVariants,
       ),
     );
-    final response = await ServerApi.handle(request, ExtensionsManager(buildDir: '/'), FakeDeeplinkManager());
+    final response = await ServerApi.handle(
+        request, ExtensionsManager(buildDir: '/'), FakeDeeplinkManager());
     expect(response.statusCode, HttpStatus.badRequest);
   });
 }

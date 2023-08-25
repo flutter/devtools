@@ -12,7 +12,6 @@ import '../server/server_api.dart';
 class DeeplinkManager {
   static final _buildVariantJsonRegex = RegExp(r'(\[.*\])');
 
-
   @visibleForTesting
   Future<ProcessResult> runProcess(String executable, List<String> arguments) {
     return Process.run(executable, arguments);

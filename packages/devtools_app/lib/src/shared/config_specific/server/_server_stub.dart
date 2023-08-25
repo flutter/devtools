@@ -99,7 +99,8 @@ Future<ExtensionEnabledState> extensionEnabledState({
   );
 }
 
-Future<List<String>> requestAndroidBuildVariants(String path) async => const <String>[];
+Future<List<String>> requestAndroidBuildVariants(String path) async =>
+    const <String>[];
 
 void logWarning() {
   throw Exception(unsupportedMessage);
