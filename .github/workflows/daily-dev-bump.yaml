@@ -29,7 +29,7 @@ env:
 
 jobs:
   bump-version:
-    if: ${{ (github.event_name == 'workflow_dispatch' || github.event_name == 'schedule') && github.repository == 'flutter/devtools' }}
+    if: ${{ github.repository == 'flutter/devtools' }}
     name: Bump Version
     runs-on: ubuntu-latest
     steps:
