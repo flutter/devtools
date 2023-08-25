@@ -96,7 +96,9 @@ class ExtensionManager {
   }
 
   Future<void> _connectToVmService(String? vmServiceUri) async {
-    if (vmServiceUri == null) return;
+    // TODO(kenz): investigate. this is weird but `vmServiceUri` != null even
+    // when the `toString()` representation is 'null'.
+    if (vmServiceUri == null || '$vmServiceUri' == 'null') return;
 
     try {
       final finishedCompleter = Completer<void>();

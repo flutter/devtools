@@ -44,7 +44,7 @@ abstract interface class DevToolsExtensionHostInterface {
   /// This method should send a [DevToolsExtensionEventType.vmServiceConnection]
   /// event to the extension to notify it of the vm service uri it should
   /// establish a connection to.
-  void vmServiceConnectionChanged({String? uri});
+  void vmServiceConnectionChanged({required String? uri});
 
   /// Handles events sent by the extension.
   /// 

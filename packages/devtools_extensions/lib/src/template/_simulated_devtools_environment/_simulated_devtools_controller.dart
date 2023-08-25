@@ -5,6 +5,7 @@
 part of '_simulated_devtools_environment.dart';
 
 class _SimulatedDevToolsController extends DisposableController
+    with AutoDisposeControllerMixin
     implements DevToolsExtensionHostInterface {
   /// Logs of the post message communication that goes back and forth between
   /// the extension and the simulated DevTools environment.
@@ -12,6 +13,12 @@ class _SimulatedDevToolsController extends DisposableController
 
   void init() {
     html.window.addEventListener('message', _handleMessage);
+    addAutoDisposeListener(serviceManager.connectedState, () {
+      if (!serviceManager.connectedState.value.connected) {
+        vmServiceConnectionChanged(uri: null);
+        messageLogs.clear();
+      }
+    });
   }
 
   void _handleMessage(html.Event e) {
@@ -41,13 +48,13 @@ class _SimulatedDevToolsController extends DisposableController
   }
 
   @override
-  void vmServiceConnectionChanged({String? uri}) {
-    uri = 'http://127.0.0.1:60851/fH-kAEXc7MQ=/';
+  void vmServiceConnectionChanged({required String? uri}) {
     // TODO(kenz): add some validation and error handling if [uri] is bad input.
-    final normalizedUri = normalizeVmServiceUri(uri!);
+    final normalizedUri =
+        uri != null ? normalizeVmServiceUri(uri).toString() : null;
     final event = DevToolsExtensionEvent(
       DevToolsExtensionEventType.vmServiceConnection,
-      data: {'uri': normalizedUri.toString()},
+      data: {'uri': normalizedUri},
     );
     _postMessageToExtension(event);
   }

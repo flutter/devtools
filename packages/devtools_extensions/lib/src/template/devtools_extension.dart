@@ -76,10 +76,7 @@ class DevToolsExtension extends StatefulWidget {
   State<DevToolsExtension> createState() => _DevToolsExtensionState();
 }
 
-class _DevToolsExtensionState extends State<DevToolsExtension>
-    with AutoDisposeMixin {
-  late ConnectedState connectionState;
-
+class _DevToolsExtensionState extends State<DevToolsExtension> {
   @override
   void initState() {
     super.initState();
@@ -90,13 +87,6 @@ class _DevToolsExtensionState extends State<DevToolsExtension>
     for (final handler in widget.eventHandlers.entries) {
       extensionManager.registerEventHandler(handler.key, handler.value);
     }
-
-    connectionState = serviceManager.connectedState.value;
-    addAutoDisposeListener(serviceManager.connectedState, () {
-      setState(() {
-        connectionState = serviceManager.connectedState.value;
-      });
-    });
   }
 
   void _initGlobals() {
@@ -106,9 +96,17 @@ class _DevToolsExtensionState extends State<DevToolsExtension>
     setGlobal(IdeTheme, IdeTheme());
   }
 
+  void _removeGlobals() {
+    removeGlobal(ExtensionManager);
+    removeGlobal(ServiceManager);
+    removeGlobal(IdeTheme);
+  }
+
   @override
-  void dispose() {
+  void dispose() async {
     extensionManager._dispose();
+    await serviceManager.manuallyDisconnect();
+    _removeGlobals();
     super.dispose();
   }
 
@@ -116,7 +114,6 @@ class _DevToolsExtensionState extends State<DevToolsExtension>
   Widget build(BuildContext context) {
     final child = _ConnectionAwareWrapper(
       requiresRunningApplication: widget.requiresRunningApplication,
-      connected: connectionState.connected,
       child: widget.child,
     );
     return MaterialApp(
@@ -132,10 +129,7 @@ class _DevToolsExtensionState extends State<DevToolsExtension>
       ),
       home: Scaffold(
         body: _debugUseSimulatedEnvironment
-            ? SimulatedDevToolsWrapper(
-                connected: connectionState.connected,
-                child: child,
-              )
+            ? SimulatedDevToolsWrapper(child: child)
             : child,
       ),
     );
@@ -146,22 +140,24 @@ class _ConnectionAwareWrapper extends StatelessWidget {
   const _ConnectionAwareWrapper({
     required this.child,
     required this.requiresRunningApplication,
-    required this.connected,
   });
 
   final bool requiresRunningApplication;
-
-  final bool connected;
 
   final Widget child;
 
   @override
   Widget build(BuildContext context) {
-    if (requiresRunningApplication && !connected) {
-      return const Center(
-        child: Text('Please connect an app to use this DevTools Extension'),
-      );
-    }
-    return child;
+    return ValueListenableBuilder(
+      valueListenable: serviceManager.connectedState,
+      builder: (context, connectedState, _) {
+        if (requiresRunningApplication && !connectedState.connected) {
+          return const Center(
+            child: Text('Please connect an app to use this DevTools Extension'),
+          );
+        }
+        return child;
+      },
+    );
   }
 }

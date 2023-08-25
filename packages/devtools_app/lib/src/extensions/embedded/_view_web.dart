@@ -172,7 +172,7 @@ class _ExtensionIFrameController extends DisposableController
   }
 
   @override
-  void vmServiceConnectionChanged({String? uri}) {
+  void vmServiceConnectionChanged({required String? uri}) {
     _postMessage(
       DevToolsExtensionEvent(
         DevToolsExtensionEventType.vmServiceConnection,
