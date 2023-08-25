@@ -227,7 +227,10 @@ class ServerApi {
 
       case DeeplinkApi.androidBuildVariants:
         return _DeeplinkApiHandler.handleAndroidBuildVariants(
-            api, queryParams, deeplinkManager);
+          api,
+          queryParams,
+          deeplinkManager,
+        );
 
       default:
         return api.notImplemented();

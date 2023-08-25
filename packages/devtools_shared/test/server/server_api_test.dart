@@ -29,13 +29,15 @@ void main() {
     final expectedResponse = Response(HttpStatus.ok);
     fakeManager.responseForGetBuildVariants = expectedResponse;
     final response = await ServerApi.handle(
-        request, ExtensionsManager(buildDir: '/'), fakeManager);
+      request,
+      ExtensionsManager(buildDir: '/'),
+      fakeManager,
+    );
     expect(response, expectedResponse);
     expect(fakeManager.receivedPathFromGetBuildVariants, expectedRootPath);
   });
 
   test('handle deeplink api returns bad request if no root path', () async {
-    const expectedRootPath = '/abc';
     final request = Request(
       'get',
       Uri(
@@ -45,7 +47,10 @@ void main() {
       ),
     );
     final response = await ServerApi.handle(
-        request, ExtensionsManager(buildDir: '/'), FakeDeeplinkManager());
+      request,
+      ExtensionsManager(buildDir: '/'),
+      FakeDeeplinkManager(),
+    );
     expect(response.statusCode, HttpStatus.badRequest);
   });
 }

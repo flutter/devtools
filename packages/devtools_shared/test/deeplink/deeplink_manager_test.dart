@@ -17,9 +17,12 @@ void main() {
     });
 
     tearDown(() {
-      expect(manager.expectedCommands.isEmpty, true,
-          reason:
-              'stub does not receive expected command ${manager.expectedCommands}');
+      expect(
+        manager.expectedCommands.isEmpty,
+        true,
+        reason:
+            'stub does not receive expected command ${manager.expectedCommands}',
+      );
     });
 
     test('getBuildVariants calls flutter command correctly', () async {
@@ -31,7 +34,7 @@ void main() {
             'analyze',
             '--android',
             '--list-build-variants',
-            projectRoot
+            projectRoot,
           ],
           result: ProcessResult(
             0,
@@ -42,7 +45,9 @@ void main() {
         ),
       );
       final response = await manager.getBuildVariants(
-          rootPath: projectRoot, api: ServerApi());
+        rootPath: projectRoot,
+        api: ServerApi(),
+      );
       expect(response.statusCode, HttpStatus.ok);
       expect(await response.readAsString(), '["release", "profile"]');
     });
@@ -57,7 +62,7 @@ void main() {
             'analyze',
             '--android',
             '--list-build-variants',
-            projectRoot
+            projectRoot,
           ],
           result: ProcessResult(
             0,
@@ -68,7 +73,9 @@ void main() {
         ),
       );
       final response = await manager.getBuildVariants(
-          rootPath: projectRoot, api: ServerApi());
+        rootPath: projectRoot,
+        api: ServerApi(),
+      );
       expect(response.statusCode, HttpStatus.internalServerError);
     });
   });
@@ -78,14 +85,17 @@ class StubbedDeeplinkManager extends DeeplinkManager {
   final List<TestCommand> expectedCommands = <TestCommand>[];
   @override
   Future<ProcessResult> runProcess(
-      String executable, List<String> arguments) async {
+    String executable,
+    List<String> arguments,
+  ) async {
     if (expectedCommands.isNotEmpty) {
       final TestCommand expectedCommand = expectedCommands.removeAt(0);
       expect(expectedCommand.executable, executable);
       expect(
-          const ListEquality<String>()
-              .equals(expectedCommand.arguments, arguments),
-          isTrue);
+        const ListEquality<String>()
+            .equals(expectedCommand.arguments, arguments),
+        isTrue,
+      );
       return expectedCommand.result;
     }
     throw 'Received unexpected command: $executable ${arguments.join(' ')}';
