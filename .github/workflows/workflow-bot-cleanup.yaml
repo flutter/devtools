@@ -4,8 +4,6 @@ on:
   schedule:
     # * is a special character in YAML so you have to quote this string
     - cron: "0 9 * * *" # Run every day
-  pull_request: # TODO: remove this
-    types: [ labeled, unlabeled ]
 permissions:
   contents: write
   pull-requests: write
