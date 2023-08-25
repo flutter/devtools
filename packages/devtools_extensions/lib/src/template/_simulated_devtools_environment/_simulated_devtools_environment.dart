@@ -18,10 +18,10 @@ part '_connect_ui.dart';
 part '_simulated_devtools_controller.dart';
 
 /// Wraps [child] in a simulated DevTools environment.
-/// 
+///
 /// The simulated environment implements and exposes the same extension host
 /// APIs that DevTools does.
-/// 
+///
 /// To use this wrapper, set the 'use_simulated_environment' environment
 /// variable to true. See [_simulatedEnvironmentEnabled] from
 /// `devtools_extension.dart`.
