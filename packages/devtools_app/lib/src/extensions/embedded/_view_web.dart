@@ -176,7 +176,7 @@ class _ExtensionIFrameController extends DisposableController
     _postMessage(
       DevToolsExtensionEvent(
         DevToolsExtensionEventType.vmServiceConnection,
-        data: {'uri': uri!},
+        data: {'uri': uri},
       ),
     );
   }
