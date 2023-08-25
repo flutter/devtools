@@ -688,7 +688,7 @@ Widget maybeWrapWithTooltip({
 }
 
 /// Displays a [json] map as selectable, formatted text.
-class FormattedJson extends StatelessWidget {
+final class FormattedJson extends StatelessWidget {
   const FormattedJson({
     super.key,
     this.json,
