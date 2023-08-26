@@ -46,7 +46,7 @@ The "materialIconCodePoint" field should correspond to the codepoint value of an
 
 Now it is time to build your extension.
 
-## Building a DevTools extension
+## Build a DevTools extension
 
 ### Where to put your source code
 
@@ -66,7 +66,7 @@ foo_package/  # formerly the repository root of your pub package
     foo_package_devtools_extension/  # source code for your extension
 ```
 
-### Creating the extension web app
+### Create the extension web app
 
 From the directory where you want your extension source code to live, run the following command,
 replacing `foo_package_devtools_extension` with `<your_package_name>_devtools_extension``:
@@ -103,16 +103,16 @@ The `DevToolsExtension` widget automatically performs all extension initializati
 to interact with DevTools. From anywhere your extension web app, you can access the globals
 `extensionManager` and `serviceManager` to send messages and interact with the connected app.
 
-#### Helper packages
+#### Utilize helper packages
 
 Use [package:devtools_app_shared](https://pub.dev/packages/devtools_app_shared) for access to
 service managers, common widgets, DevTools theming, utilities, and more.
 
 TODO(kenz): link examples.
 
-### Debugging the extension web app
+### Debug the extension web app
 
-#### Using the Simulated DevTools Environment (recommended for development)
+#### Use the Simulated DevTools Environment (recommended for development)
 
 For debugging purposes, you will likely want to use the "simulated DevTools environment". This
 is a simulated environment that allows you to build your extension without having to develop it
@@ -146,7 +146,7 @@ or launch your app from the command line with the added flag:
 flutter run -d chrome --dart-define=use_simulated_environment=true
 ```
 
-#### Using a real DevTools Environment
+#### Use a real DevTools Environment
 
 To use a real DevTools environment, you will need to perform a series of setup steps:
 
