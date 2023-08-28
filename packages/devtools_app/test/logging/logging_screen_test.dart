@@ -66,8 +66,8 @@ void main() {
       'copy log contents',
       windowSize,
       (WidgetTester tester) async {
-        final LogData logA = LogData('TEST', 'Log A', 123);
-        final LogData logB = LogData('TEST', 'Log B', 124);
+        final LogData logA = LogData('TEST A', 'Log A', 123);
+        final LogData logB = LogData('TEST B', 'Log B', 124);
         mockLoggingController = createMockLoggingControllerWithDefaults(
           data: [
             logA,
