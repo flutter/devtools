@@ -1264,26 +1264,32 @@ class JsonViewer extends StatefulWidget {
   State<JsonViewer> createState() => _JsonViewerState();
 }
 
+/// A wrapper for a Text widget, which allows for concatenating text if it
+/// becomes too long.
 class TextViewer extends StatelessWidget {
   const TextViewer({
     super.key,
     required this.text,
+    this.maxLength = 65536, //2^16
+    this.style,
   });
+
   final String text;
-  static const _maxLength = 65536; //2^16
+  final int maxLength;
+  final TextStyle? style;
+
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final String displayText;
     // Limit the length of the displayed text to _MAX_LENGTH
-    if (text.length > _maxLength) {
-      displayText = '${text.substring(0, min(_maxLength, text.length))}...';
+    if (text.length > maxLength) {
+      displayText = '${text.substring(0, min(maxLength, text.length))}...';
     } else {
       displayText = text;
     }
     return Text(
       displayText,
-      style: theme.fixedFontStyle,
+      style: style,
     );
   }
 }

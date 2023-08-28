@@ -142,6 +142,7 @@ class HttpRequestView extends StatelessWidget {
     return ValueListenableBuilder(
       valueListenable: data.requestUpdatedNotifier,
       builder: (context, __, ___) {
+        final theme = Theme.of(context);
         final requestHeaders = data.requestHeaders;
         final requestContentType = requestHeaders?['content-type'] ?? '';
         final isLoading = data.isFetchingFullData;
@@ -158,7 +159,12 @@ class HttpRequestView extends StatelessWidget {
         Widget child;
         child = isJson
             ? JsonViewer(encodedJson: data.requestBody!)
-            : TextViewer(text: data.requestBody!);
+            // Using TextViewer fixes
+            // https://github.com/flutter/devtools/issues/5973
+            : TextViewer(
+                text: data.requestBody!,
+                style: theme.fixedFontStyle,
+              );
         return Padding(
           padding: const EdgeInsets.all(denseSpacing),
           child: SingleChildScrollView(
@@ -352,7 +358,12 @@ class HttpTextResponseViewer extends StatelessWidget {
 
         return switch (currentLocalResponseType) {
           NetworkResponseViewType.json => JsonViewer(encodedJson: responseBody),
-          NetworkResponseViewType.text => TextViewer(text: responseBody),
+          // Using TextViewer fixes
+          // https://github.com/flutter/devtools/issues/5973
+          NetworkResponseViewType.text => TextViewer(
+              text: responseBody,
+              style: textStyle,
+            ),
           _ => const SizedBox(),
         };
       },
