@@ -9,6 +9,7 @@ import 'package:devtools_app_shared/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../../devtools_app.dart';
 import '../../service/service_extension_widgets.dart';
 import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/analytics/constants.dart' as gac;
@@ -136,6 +137,13 @@ class _LoggingScreenState extends State<LoggingScreenBody>
         DevToolsFilterButton(
           onPressed: _showFilterDialog,
           isFilterActive: controller.isFilterActive,
+        ),
+        const SizedBox(width: denseSpacing),
+        CopyToClipboardControl(
+          dataProvider: () => controller.filteredData.value
+              .map((e) => e.prettyPrinted())
+              .joinWithTrailing('\n'),
+          tooltip: 'Copy filtered logs',
         ),
       ],
     );
