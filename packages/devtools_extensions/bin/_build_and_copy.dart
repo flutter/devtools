@@ -10,13 +10,13 @@ import 'package:path/path.dart' as path;
 
 /// Command that builds a DevTools extension and copies the built output to
 /// the parent package extension location.
-/// 
+///
 /// Example usage:
-/// 
+///
 /// dart pub global activate devtools_extensions;
 /// dart run devtools_extensions build_and_copy \
 ///  --source=path/to/your_extension_web_app \
-///  --dest=path/to/your_pub_package/extension/devtools 
+///  --dest=path/to/your_pub_package/extension/devtools
 class BuildExtensionCommand extends Command {
   BuildExtensionCommand() {
     argParser
@@ -25,50 +25,36 @@ class BuildExtensionCommand extends Command {
         help: 'The source location for the extension flutter web app (can  be '
             'relative or absolute)',
         valueHelp: 'path/to/foo/packages/foo_devtools_extension',
+        mandatory: true,
       )
       ..addOption(
         'dest',
         help: 'The destination location for the extension build output (can be '
             'relative or absolute)',
         valueHelp: 'path/to/foo/packages/foo/extension/devtools',
+        mandatory: true,
       );
   }
 
   static const _sourceKey = 'source';
   static const _destinationKey = 'dest';
 
-  String get _logPrefix => '[$name]';
+  @override
+  String get name => 'build_and_copy';
 
   @override
-  final name = 'build_and_copy';
-
-  @override
-  final description =
+  String get description =>
       'Command that builds a DevTools extension from source and copies the '
       'built output to the parent package extension location.';
 
   @override
   Future<void> run() async {
-    final source = argResults?[_sourceKey];
-    final destination = argResults?[_destinationKey];
-    if (source == null) {
-      throw ArgumentError(
-        'Missing argument \'$_sourceKey\', which describes the source location '
-        'for the extension flutter web app',
-        _sourceKey,
-      );
-    }
-    if (destination == null) {
-      throw ArgumentError(
-        'Missing argument \'$_destinationKey\', which describes the source '
-        'location for the extension flutter web app',
-        _destinationKey,
-      );
-    }
+    final source = argResults?[_sourceKey]!;
+    final destination = argResults?[_destinationKey]!;
 
     final processManager = ProcessManager();
 
-    _log('building the extension flutter web app...');
+    _log('Building the extension Flutter web app...');
     final buildProcess = await processManager.spawn(
       'flutter',
       [
@@ -84,7 +70,7 @@ class BuildExtensionCommand extends Command {
     );
     await buildProcess.exitCode;
 
-    _log('setting canvaskit permissions...');
+    _log('Setting canvaskit permissions...');
     final chmodProcess = await processManager.spawn(
       'chmod',
       ['0755', 'build/web/canvaskit/canvaskit.*'],
@@ -133,7 +119,5 @@ class BuildExtensionCommand extends Command {
     );
   }
 
-  void _log(String message) {
-    print('$_logPrefix $message');
-  }
+  void _log(String message) => print('[$name] $message');
 }

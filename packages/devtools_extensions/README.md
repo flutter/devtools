@@ -106,9 +106,9 @@ to interact with DevTools. From anywhere your extension web app, you can access 
 #### Utilize helper packages
 
 Use [package:devtools_app_shared](https://pub.dev/packages/devtools_app_shared) for access to
-service managers, common widgets, DevTools theming, utilities, and more. See the
+service managers, common widgets, DevTools theming, utilities, and more. See
 [devtools_app_shared/example](https://github.com/flutter/devtools/tree/master/packages/devtools_app_shared/example)
-directory for sample usages of the different shared libraries from DevTools.
+for sample usages.
 
 ### Debug the extension web app
 
@@ -156,8 +156,8 @@ real DevTools environment. Build your flutter web app and copy the built assets 
 
 Use the `build_extension` command from `package:devtools_extensions` to help with this step.
 ```
-dart pub global activate devtools_extensions;
-dart run devtools_extensions build_and_copy \
+flutter pub global activate devtools_extensions;
+flutter pub global run devtools_extensions build_and_copy \
   --source=path/to/your_extension_web_app \
   --dest=path/to/your_pub_package/extension/devtools 
 ```
