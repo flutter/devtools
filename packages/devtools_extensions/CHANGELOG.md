@@ -1,4 +1,4 @@
-## 0.0.3-wip
+## 0.0.3
 * Add a simulated DevTools environment that for easier development.
 * Add a `build_and_copy` command to build a devtools extension and copy the output to the
 parent package's extension/devtools directory.
