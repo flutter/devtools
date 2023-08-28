@@ -27,8 +27,7 @@ TODO: Remove this section if there are not any general updates.
 TODO: Remove this section if there are not any general updates.
 
 ## Logging updates
-TODO: Remove this section if there are not any general updates.
-
+* Add the ability to copy filtered logs - [#6260](https://github.com/flutter/devtools/pull/6260)
 ## App size tool updates
 TODO: Remove this section if there are not any general updates.
 
