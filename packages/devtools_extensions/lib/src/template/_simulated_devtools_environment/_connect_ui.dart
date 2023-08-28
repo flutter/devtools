@@ -132,7 +132,7 @@ class _DisconnectedVmServiceDisplayState
           elevated: true,
           label: 'Connect',
           onPressed: () {
-            _connectedUri = _connectTextFieldController.text,
+            _connectedUri = _connectTextFieldController.text;
             widget.simController.vmServiceConnectionChanged(
               uri: _connectTextFieldController.text,
             );
