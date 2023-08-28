@@ -19,6 +19,9 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 
+// TODO(polina-c): enable the test
+// https://github.com/flutter/devtools/issues/6271
+
 // To run:
 // dart run integration_test/run_tests.dart --target=integration_test/test/live_connection/eval_and_browse_test.dart
 
