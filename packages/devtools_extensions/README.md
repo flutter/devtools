@@ -106,9 +106,9 @@ to interact with DevTools. From anywhere your extension web app, you can access 
 #### Utilize helper packages
 
 Use [package:devtools_app_shared](https://pub.dev/packages/devtools_app_shared) for access to
-service managers, common widgets, DevTools theming, utilities, and more.
-
-TODO(kenz): link examples.
+service managers, common widgets, DevTools theming, utilities, and more. See the
+[devtools_app_shared/example](https://github.com/flutter/devtools/tree/master/packages/devtools_app_shared/example)
+directory for sample usages of the different shared libraries from DevTools.
 
 ### Debug the extension web app
 
@@ -154,7 +154,13 @@ To use a real DevTools environment, you will need to perform a series of setup s
 real DevTools environment. Build your flutter web app and copy the built assets from
 `your_extension_web_app/build` to your pub package's `extension/devtools/build` directory.
 
-> Use the `build_helper.sh` script to help with this step. (TODO(kenz): create and add link to helper script).
+Use the `build_extension` command from `package:devtools_extensions` to help with this step.
+```
+dart pub global activate devtools_extensions;
+dart run devtools_extensions build_and_copy \
+  --source=path/to/your_extension_web_app \
+  --dest=path/to/your_pub_package/extension/devtools 
+```
 
 2. Prepare and run a test application that depends on your pub package. You'll need to change the
 `pubspec.yaml` dependency to be a `path` dependency that points to your local pub package
@@ -162,7 +168,9 @@ source code. Once you have done this, run `pub get`, and run the application.
 
 3. Start DevTools:
     * **If you need local or unreleased changes from DevTools**, you'll need to build and run DevTools
-    from source. See `<TODO: insert instructions>` for a guide on how to do this.
+    from source. See the DevTools [CONTRIBUTING.md]() for a guide on how to do this.
+        > Note: you'll need to build DevTools with the server and the front end to test extensions - see
+        [instructions](https://github.com/flutter/devtools/blob/master/CONTRIBUTING.md#development-devtools-server--devtools-flutter-web-app).
     * **If not, and if your local Dart or Flutter SDK version is >= `<TODO: insert version>`**,
     you can launch the DevTools instance that was just started by running your app (either from
     a url printed to command line or from the IDE where you ran your test app). You can also run
