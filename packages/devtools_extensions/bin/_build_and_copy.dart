@@ -78,7 +78,7 @@ class BuildExtensionCommand extends Command {
     );
     await chmodProcess.exitCode;
 
-    _log('copying built output to the extension destination...');
+    _log('Copying built output to the extension destination...');
     await _copyBuildToDestination(source: source, dest: destination);
 
     // Closes stdin for the entire program.
@@ -89,13 +89,13 @@ class BuildExtensionCommand extends Command {
     required String source,
     required String dest,
   }) async {
-    _log('copying the extension config.json file into a temp directory...');
+    _log('Copying the extension config.json file into a temp directory...');
     final tmp = Directory.current.createTempSync();
     final tmpConfigPath = path.join(tmp.path, 'config.json');
     final destinationConfigPath = path.join(dest, 'config.json');
     File(destinationConfigPath)..copySync(tmpConfigPath);
 
-    _log('replacing the existing extension build with the new one...');
+    _log('Replacing the existing extension build with the new one...');
     final sourceBuildPath = path.join(source, 'build', 'web');
     final destinationBuildPath = path.join(dest, 'build');
     Directory(destinationBuildPath)..deleteSync(recursive: true);
@@ -106,7 +106,7 @@ class BuildExtensionCommand extends Command {
     );
 
     _log(
-      'copying the extension config.json file back to the destination '
+      'Copying the extension config.json file back to the destination '
       'directory...',
     );
     File(tmpConfigPath)..copySync(destinationConfigPath);
