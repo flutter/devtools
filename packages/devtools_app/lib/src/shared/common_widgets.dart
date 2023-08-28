@@ -1138,7 +1138,7 @@ class Breadcrumb extends StatelessWidget {
       text: TextSpan(
         text: text,
         style: TextStyle(
-          color: theme.colorScheme.chartTextColor,
+          color: theme.colorScheme.contrastTextColor,
           decoration: TextDecoration.underline,
         ),
       ),

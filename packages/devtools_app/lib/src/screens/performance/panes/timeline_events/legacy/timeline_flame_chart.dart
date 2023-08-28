@@ -595,7 +595,7 @@ class TimelineFlameChartState
             color: backgroundWithOpacity,
             child: Text(
               groupName,
-              style: TextStyle(color: colorScheme.chartTextColor),
+              style: TextStyle(color: colorScheme.contrastTextColor),
             ),
           ),
         ),
@@ -1306,7 +1306,7 @@ class ThreadNavigatorButton extends StatelessWidget {
         color: backgroundColor,
       ),
       // Using [buttonMinWidth] will result in a square button.
-      height: useSmallButton ? smallButtonHeight : buttonMinWidth,
+      height: useSmallButton ? actionsIconSize : defaultButtonHeight,
       width: buttonMinWidth,
       child: DevToolsTooltip(
         message: tooltip,

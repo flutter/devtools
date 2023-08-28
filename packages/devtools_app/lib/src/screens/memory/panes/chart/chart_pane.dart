@@ -11,6 +11,7 @@ import '../../../../shared/charts/chart_controller.dart';
 import '../../../../shared/common_widgets.dart';
 import '../../../../shared/globals.dart';
 import '../../../../shared/primitives/utils.dart';
+import '../../../../shared/ui/colors.dart';
 import '../../../../shared/utils.dart';
 import '../../framework/connected/memory_controller.dart';
 import '../../shared/primitives/painting.dart';

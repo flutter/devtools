@@ -16,6 +16,7 @@ import 'package:devtools_app_shared/ui.dart';
 import 'package:flutter/material.dart';
 
 import '../../screens/inspector/layout_explorer/ui/widgets_theme.dart';
+import 'colors.dart';
 
 class CustomIcon extends StatelessWidget {
   const CustomIcon({

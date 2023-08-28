@@ -933,7 +933,7 @@ class GutterItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    final breakpointColor = theme.colorScheme.breakpointColor;
+    final breakpointColor = theme.colorScheme.primary;
     final subtleColor = theme.unselectedWidgetColor;
 
     final bpBoxSize = breakpointRadius * 2;
@@ -1197,7 +1197,7 @@ class _LineItemState extends State<LineItem>
     Widget child;
     final column = widget.pausedFrame?.column;
     if (column != null) {
-      final breakpointColor = theme.colorScheme.breakpointColor;
+      final breakpointColor = theme.colorScheme.primary;
       final widthToCurrentColumn = calculateTextSpanWidth(
         truncateTextSpan(widget.lineContents, column - 1),
       );
@@ -1624,4 +1624,13 @@ class PositionedPopup extends StatelessWidget {
       },
     );
   }
+}
+
+extension CodeViewColorScheme on ColorScheme {
+  Color get performanceLowImpactColor => const Color(0xFF5CB246);
+  Color get performanceMediumImpactColor => const Color(0xFFF7AC2A);
+  Color get performanceHighImpactColor => const Color(0xFFC94040);
+
+  Color get coverageHitColor => performanceLowImpactColor;
+  Color get coverageMissColor => performanceHighImpactColor;
 }
