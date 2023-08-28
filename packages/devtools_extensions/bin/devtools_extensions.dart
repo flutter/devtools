@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:args/command_runner.dart';
-import 'package:devtools_extensions/src/command/build_extension.dart';
+import '_build_and_copy.dart';
 
 void main(List<String> arguments) async {
   final command = BuildExtensionCommand();
