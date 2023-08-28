@@ -17,8 +17,6 @@ on:
         required: false
         type: boolean
         default: false
-  pull_request:
-    types: [closed]
   schedule:
     # * is a special character in YAML so you have to quote this string
     - cron: "0 8 * * *" # Run every day at midnight Pacific Time
@@ -31,7 +29,7 @@ env:
 
 jobs:
   bump-version:
-    if: ${{ github.event_name == 'workflow_dispatch' || github.event_name == 'schedule' }}
+    if: ${{ github.repository == 'flutter/devtools' }}
     name: Bump Version
     runs-on: ubuntu-latest
     steps:
@@ -121,22 +119,4 @@ jobs:
           GH_TOKEN: ${{ secrets.DEVTOOLS_WORKFLOW_BOT_TOKEN }}
           ORIGINAL_GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           IS_DRAFT: ${{ inputs.draft == true }}
-  clean-up-branches:
-    # If a pr is closed on a workflow bot PR, then clean up workflow bot branches.
-    if: ${{ github.event_name == 'pull_request' && github.event.action == 'closed'  && github.event.pull_request.user.login == 'DartDevtoolWorkflowBot'}}
-    name: Clean up Dev Bump Branches
-    runs-on: ubuntu-latest
-    steps:
-      - name: Clean up branches
-        run: |
-          # Get 5 most recent branches of closed DartDevtoolWorkflowBot PRs.
-          CLOSED_BRANCH_NAMES=$(gh pr list -A DartDevtoolWorkflowBot -s closed -L 5 --search sort:created-desc | grep auto-bump- | sed 's|.*\(auto-bump-[[:digit:]]*\).*|\1|')
 
-          # Get list of refs(branches) that exist on the remote
-          EXISTING_REFS=$(git ls-remote --heads | grep refs/heads/auto-bump-) 
-          for CLOSED_BRANCH in $CLOSED_BRANCH_NAMES; do
-            if echo "$EXISTING_REFS" | grep -q "$CLOSED_BRANCH" ; then
-              # If the branch still exists then we will delete it
-              gh api  /repos/flutter/devtools/git/refs/heads/$CLOSED_BRANCH -X DELETE
-            fi
-          done
