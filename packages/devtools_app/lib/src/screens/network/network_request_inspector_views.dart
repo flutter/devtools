@@ -142,7 +142,6 @@ class HttpRequestView extends StatelessWidget {
     return ValueListenableBuilder(
       valueListenable: data.requestUpdatedNotifier,
       builder: (context, __, ___) {
-        final theme = Theme.of(context);
         final requestHeaders = data.requestHeaders;
         final requestContentType = requestHeaders?['content-type'] ?? '';
         final isLoading = data.isFetchingFullData;
