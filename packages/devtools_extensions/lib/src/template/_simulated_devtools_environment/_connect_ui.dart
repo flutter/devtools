@@ -4,6 +4,9 @@
 
 part of '_simulated_devtools_environment.dart';
 
+// TODO(kenz): delete this once we can bump to vm_service ^11.10.0
+String? _connectedUri;
+
 class _VmServiceConnection extends StatelessWidget {
   const _VmServiceConnection({
     required this.simController,
@@ -45,7 +48,7 @@ class _ConnectedVmServiceDisplay extends StatelessWidget {
               'Debugging:',
               style: theme.regularTextStyle,
             ),
-            const Text('<connected uri>'),
+            Text(_connectedUri ?? '--'),
             // TODO(kenz): uncomment once we can bump to vm_service ^11.10.0
             // Text(
             //   serviceManager.service!.wsUri ?? '--',
@@ -59,7 +62,10 @@ class _ConnectedVmServiceDisplay extends StatelessWidget {
         DevToolsButton(
           elevated: true,
           label: 'Disconnect',
-          onPressed: serviceManager.manuallyDisconnect,
+          onPressed: () {
+            _connectedUri = null;
+            unawaited(serviceManager.manuallyDisconnect());
+          },
         ),
       ],
     );
@@ -106,7 +112,6 @@ class _DisconnectedVmServiceDisplayState
             autofocus: true,
             style: theme.regularTextStyle,
             decoration: InputDecoration(
-              // contentPadding: const EdgeInsets.all(denseSpacing),
               isDense: true,
               border: const OutlineInputBorder(),
               enabledBorder: OutlineInputBorder(
@@ -126,9 +131,12 @@ class _DisconnectedVmServiceDisplayState
         DevToolsButton(
           elevated: true,
           label: 'Connect',
-          onPressed: () => widget.simController.vmServiceConnectionChanged(
-            uri: _connectTextFieldController.text,
-          ),
+          onPressed: () {
+            _connectedUri = _connectTextFieldController.text;
+            widget.simController.vmServiceConnectionChanged(
+              uri: _connectTextFieldController.text,
+            );
+          },
         ),
       ],
     );
