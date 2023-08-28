@@ -89,8 +89,8 @@ void main() {
           clipboardContents,
           equals(
             [
-              logA.details,
-              logB.details,
+              '${logA.timestamp} [${logA.kind}] ${logA.details}',
+              '${logB.timestamp} [${logB.kind}] ${logB.details}',
             ].joinWithTrailing('\n'),
           ),
         );

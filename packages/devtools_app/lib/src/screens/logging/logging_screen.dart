@@ -141,7 +141,7 @@ class _LoggingScreenState extends State<LoggingScreenBody>
         const SizedBox(width: denseSpacing),
         CopyToClipboardControl(
           dataProvider: () => controller.filteredData.value
-              .map((e) => e.prettyPrinted())
+              .map((e) => '${e.timestamp} [${e.kind}] ${e.prettyPrinted()}')
               .joinWithTrailing('\n'),
           tooltip: 'Copy filtered logs',
         ),
