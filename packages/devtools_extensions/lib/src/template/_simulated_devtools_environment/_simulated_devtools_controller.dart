@@ -9,7 +9,7 @@ class _SimulatedDevToolsController extends DisposableController
     implements DevToolsExtensionHostInterface {
   /// Logs of the post message communication that goes back and forth between
   /// the extension and the simulated DevTools environment.
-  final messageLogs = ListValueNotifier<_PostMessageLogEntry>([]);
+  final messageLogs = ListValueNotifier<_MessageLogEntry>([]);
 
   void init() {
     html.window.addEventListener('message', _handleMessage);
@@ -65,8 +65,8 @@ class _SimulatedDevToolsController extends DisposableController
     void Function()? onUnknownEvent,
   }) {
     messageLogs.add(
-      _PostMessageLogEntry(
-        source: _PostMessageSource.extension,
+      _MessageLogEntry(
+        source: _MessageSource.extension,
         data: event.toJson(),
       ),
     );
@@ -82,26 +82,48 @@ class _SimulatedDevToolsController extends DisposableController
       html.window.origin!,
     );
     messageLogs.add(
-      _PostMessageLogEntry(
-        source: _PostMessageSource.devtools,
+      _MessageLogEntry(
+        source: _MessageSource.devtools,
         data: eventJson,
+      ),
+    );
+  }
+
+  Future<void> hotReloadConnectedApp() async {
+    await serviceManager.performHotReload();
+    messageLogs.add(
+      _MessageLogEntry(
+        source: _MessageSource.info,
+        message: 'Hot reload performed on connected app',
+      ),
+    );
+  }
+
+  Future<void> hotRestartConnectedApp() async {
+    await serviceManager.performHotRestart();
+    messageLogs.add(
+      _MessageLogEntry(
+        source: _MessageSource.info,
+        message: 'Hot restart performed on connected app',
       ),
     );
   }
 }
 
-class _PostMessageLogEntry {
-  _PostMessageLogEntry({required this.source, required this.data})
+class _MessageLogEntry {
+  _MessageLogEntry({required this.source, this.data, this.message})
       : timestamp = DateTime.now();
 
-  final _PostMessageSource source;
-  final Map<String, Object?> data;
+  final _MessageSource source;
+  final Map<String, Object?>? data;
+  final String? message;
   final DateTime timestamp;
 }
 
-enum _PostMessageSource {
+enum _MessageSource {
   devtools,
-  extension;
+  extension,
+  info;
 
   String get display {
     return name.toUpperCase();
