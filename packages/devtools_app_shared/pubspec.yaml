@@ -8,6 +8,7 @@ environment:
   flutter: '>=3.0.0'
 
 dependencies:
+  collection: ^1.15.0
   devtools_shared: ^3.0.0
   flutter:
     sdk: flutter
