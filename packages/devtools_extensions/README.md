@@ -156,8 +156,9 @@ real DevTools environment. Build your flutter web app and copy the built assets 
 
 Use the `build_extension` command from `package:devtools_extensions` to help with this step.
 ```
-flutter pub global activate devtools_extensions;
-flutter pub global run devtools_extensions build_and_copy \
+cd your_extension_web_app &&
+flutter pub get &&
+dart run devtools_extensions build_and_copy \
   --source=path/to/your_extension_web_app \
   --dest=path/to/your_pub_package/extension/devtools 
 ```
