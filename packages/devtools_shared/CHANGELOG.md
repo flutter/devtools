@@ -1,3 +1,7 @@
+# 3.0.1
+
+- Bump `package:extension_discovery` version to ^1.0.1
+
 # 3.0.0
 
 - Separate extension-related libraries into those that require `dart:io` (exported as
