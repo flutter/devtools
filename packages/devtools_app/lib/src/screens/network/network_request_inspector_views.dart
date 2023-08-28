@@ -159,8 +159,6 @@ class HttpRequestView extends StatelessWidget {
         Widget child;
         child = isJson
             ? JsonViewer(encodedJson: data.requestBody!)
-            // Using TextViewer fixes
-            // https://github.com/flutter/devtools/issues/5973
             : TextViewer(
                 text: data.requestBody!,
                 style: theme.fixedFontStyle,
@@ -358,8 +356,6 @@ class HttpTextResponseViewer extends StatelessWidget {
 
         return switch (currentLocalResponseType) {
           NetworkResponseViewType.json => JsonViewer(encodedJson: responseBody),
-          // Using TextViewer fixes
-          // https://github.com/flutter/devtools/issues/5973
           NetworkResponseViewType.text => TextViewer(
               text: responseBody,
               style: textStyle,

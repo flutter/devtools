@@ -1275,6 +1275,8 @@ class TextViewer extends StatelessWidget {
   });
 
   final String text;
+  // TODO: change the maxLength if we determine a more appropriate limit
+  // in https://github.com/flutter/devtools/issues/6263.
   final int maxLength;
   final TextStyle? style;
 
