@@ -1283,7 +1283,7 @@ class TextViewer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final String displayText;
-    // Limit the length of the displayed text to _MAX_LENGTH
+    // Limit the length of the displayed text to maxLength
     if (text.length > maxLength) {
       displayText = '${text.substring(0, min(maxLength, text.length))}...';
     } else {
