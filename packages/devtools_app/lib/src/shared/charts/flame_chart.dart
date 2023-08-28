@@ -1386,7 +1386,7 @@ class TimelineGridPainter extends FlameChartPainter {
       text: TextSpan(
         text: timestampText,
         style: TextStyle(
-          color: colorScheme.chartTextColor,
+          color: colorScheme.contrastTextColor,
           fontSize: defaultFontSize,
         ),
       ),

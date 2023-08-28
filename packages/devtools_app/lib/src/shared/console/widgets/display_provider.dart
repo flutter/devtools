@@ -14,6 +14,7 @@ import '../../globals.dart';
 import '../../primitives/utils.dart';
 import '../../routing.dart';
 import '../../screen.dart';
+import '../../ui/colors.dart';
 import 'description.dart';
 
 /// The display provider for variables fetched via the VM service protocol.

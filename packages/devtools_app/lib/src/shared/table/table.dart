@@ -1667,12 +1667,16 @@ class _TableRowState<T> extends State<TableRow<T>>
 class _RowGuidelinePainter extends CustomPainter {
   _RowGuidelinePainter(this.level, this.colorScheme);
 
+  static const _treeGuidelineColors = [
+    Color(0xFF13B9FD),
+    Color(0xFF5BC43B),
+  ];
+
   final int level;
   final ColorScheme colorScheme;
 
   @override
   void paint(Canvas canvas, Size size) {
-    final colors = colorScheme.treeGuidelineColors;
     for (int i = 0; i < level; ++i) {
       final currentX = i * TreeColumnData.treeToggleWidth + defaultIconSize / 2;
       // Draw a vertical line for each tick identifying a connection between
@@ -1681,7 +1685,7 @@ class _RowGuidelinePainter extends CustomPainter {
         Offset(currentX, 0.0),
         Offset(currentX, defaultRowHeight),
         Paint()
-          ..color = colors[i % colors.length]
+          ..color = _treeGuidelineColors[i % _treeGuidelineColors.length]
           ..strokeWidth = 1.0,
       );
     }
