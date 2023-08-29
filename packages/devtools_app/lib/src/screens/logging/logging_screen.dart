@@ -129,7 +129,9 @@ class _LoggingScreenState extends State<LoggingScreenBody>
         const SizedBox(width: denseSpacing),
         // TODO(kenz): fix focus issue when state is refreshed
         SearchField<LoggingController>(
-          searchFieldWidth: includeText(context, loggingMinVerboseWidth) ? wideSearchFieldWidth: defaultSearchFieldWidth,
+          searchFieldWidth: includeText(context, loggingMinVerboseWidth)
+              ? wideSearchFieldWidth
+              : defaultSearchFieldWidth,
           searchController: controller,
           searchFieldEnabled: hasData,
         ),
@@ -140,18 +142,18 @@ class _LoggingScreenState extends State<LoggingScreenBody>
         ),
         const SizedBox(width: denseSpacing),
         SettingsOutlinedButton(
-        gaScreen: gac.logging,
-        gaSelection: gac.loggingSettings,
-        tooltip: 'Logging Settings',
-        onPressed: () {
-          unawaited(
-            showDialog(
-              context: context,
-              builder: (context) => const LoggingSettingsDialog(),
-            ),
-          );
-        },
-      )
+          gaScreen: gac.logging,
+          gaSelection: gac.loggingSettings,
+          tooltip: 'Logging Settings',
+          onPressed: () {
+            unawaited(
+              showDialog(
+                context: context,
+                builder: (context) => const LoggingSettingsDialog(),
+              ),
+            );
+          },
+        )
       ],
     );
   }
