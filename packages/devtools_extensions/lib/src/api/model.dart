@@ -53,4 +53,3 @@ class DevToolsExtensionEvent {
 
 /// A void callback that handles a [DevToolsExtensionEvent].
 typedef ExtensionEventHandler = void Function(DevToolsExtensionEvent event);
-
