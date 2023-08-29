@@ -87,11 +87,12 @@ class _FooExtensionHomePageState extends State<FooExtensionHomePage> {
                 const SizedBox(width: 16.0),
                 ElevatedButton(
                   onPressed: () => extensionManager.showBannerMessage(
-                      key: 'example_message',
-                      type: 'warning',
-                      message:
-                          'Warning: with great power, comes great responsibility.',
-                      extensionName: 'foo_package'),
+                    key: 'example_message',
+                    type: 'warning',
+                    message:
+                        'Warning: with great power, comes great responsibility.',
+                    extensionName: 'foo_package',
+                  ),
                   child: const Text('Show DevTools warning'),
                 ),
               ],
