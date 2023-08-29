@@ -86,10 +86,22 @@ class DevToolsApp extends StatefulWidget {
 /// This manages the route generation, and marshals URL query parameters into
 /// flutter route parameters.
 class DevToolsAppState extends State<DevToolsApp> with AutoDisposeMixin {
-  List<Screen> get _screens => [
-        ..._originalScreens,
-        if (FeatureFlags.devToolsExtensions) ..._extensionScreens,
-      ];
+  List<Screen> get _screens {
+    if (FeatureFlags.devToolsExtensions) {
+      // TODO(https://github.com/flutter/devtools/issues/6273): stop special
+      // casing the package:provider extension.
+      final containsProviderExtension = extensionService.visibleExtensions.value
+          .where((e) => e.name == 'provider')
+          .isNotEmpty;
+      final devToolsScreens = containsProviderExtension
+          ? _originalScreens
+              .where((s) => s.screenId != ScreenMetaData.provider.id)
+              .toList()
+          : _originalScreens;
+      return [...devToolsScreens, ..._extensionScreens];
+    }
+    return _originalScreens;
+  }
 
   List<Screen> get _originalScreens =>
       widget.originalScreens.map((s) => s.screen).toList();
