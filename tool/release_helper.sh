@@ -47,16 +47,16 @@ git commit -a -m "$COMMIT_MESSAGE"
 
 git push -u $DEVTOOLS_REMOTE $RELEASE_BRANCH
 
-echo "Creating the PR"
+echo "release_helper.sh: Creating the PR"
 echo
 
-PR_URL=$(gh pr create --draft --title "$COMMIT_MESSAGE" $CREATION_FLAGS)
+PR_URL=$(gh pr create --draft --title "$COMMIT_MESSAGE" --fill $CREATION_FLAGS)
 
 
-echo "Updating your flutter version to the most recent candidate."
+echo "release_helper.sh: Updating your flutter version to the most recent candidate."
 echo
 ./tool/update_flutter_sdk.sh --local
 
-echo "Your Draft release PR can be found at: $PR_URL"
+echo "release_helper.sh: Your Draft release PR can be found at: $PR_URL"
 echo
-echo "$0 DONE: Build, run and test this release using: `dart ./tool/build_e2e.dart`"
+echo "release_helper.sh: $0 DONE: Build, run and test this release using: `dart ./tool/build_e2e.dart`"
