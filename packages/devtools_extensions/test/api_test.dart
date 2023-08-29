@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:devtools_extensions/api.dart';
+import 'package:devtools_extensions/src/api/_structured_events.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
