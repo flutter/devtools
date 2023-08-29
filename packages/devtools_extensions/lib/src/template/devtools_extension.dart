@@ -15,7 +15,9 @@ import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../api.dart';
+import '../api/_structured_events.dart';
+import '../api/api.dart';
+import '../api/model.dart';
 import '_simulated_devtools_environment/_simulated_devtools_environment.dart';
 
 part 'extension_manager.dart';

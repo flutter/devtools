@@ -75,7 +75,6 @@ class _FooExtensionHomePageState extends State<FooExtensionHomePage> {
             const SizedBox(height: 48.0),
             Text('Received message from DevTools: $_message'),
             const SizedBox(height: 48.0),
-            const SizedBox(height: 16.0),
             Row(
               mainAxisSize: MainAxisSize.min,
               mainAxisAlignment: MainAxisAlignment.center,
