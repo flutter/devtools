@@ -27,7 +27,7 @@ TODO: Remove this section if there are not any general updates.
 - Fixed a crash with large text in request or response - [#6254](https://github.com/flutter/devtools/pull/6254)
 
 ## Logging updates
-TODO: Remove this section if there are not any general updates.
+* Improved responsiveness of the top bar in the Logging page - [#6281](https://github.com/flutter/devtools/pull/6281)
 
 ## App size tool updates
 TODO: Remove this section if there are not any general updates.
