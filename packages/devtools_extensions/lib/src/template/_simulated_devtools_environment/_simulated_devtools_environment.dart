@@ -147,15 +147,35 @@ class _SimulatedApi extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return Column(
       children: [
-        DevToolsButton(
-          label: 'PING',
-          onPressed: simController.ping,
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            DevToolsButton(
+              label: 'PING',
+              onPressed: simController.ping,
+            ),
+            // TODO(kenz): add buttons for other simulated events as the extension
+            // API expands.
+          ],
         ),
-        // TODO(kenz): add buttons for other simulated events as the extension
-        // API expands.
+        const SizedBox(height: defaultSpacing),
+        Row(
+          children: [
+            DevToolsButton(
+              icon: Icons.bolt,
+              tooltip: 'Hot reload connected app',
+              onPressed: simController.hotReloadConnectedApp,
+            ),
+            const SizedBox(width: denseSpacing),
+            DevToolsButton(
+              icon: Icons.replay,
+              tooltip: 'Hot restart connected app',
+              onPressed: simController.hotRestartConnectedApp,
+            ),
+          ],
+        ),
       ],
     );
   }
@@ -205,9 +225,11 @@ class _LogMessagesState extends State<_LogMessages> {
                       '[${log.timestamp.toString()}] from ${log.source.display}',
                       style: theme.fixedFontStyle,
                     ),
-                    FormattedJson(
-                      json: log.data,
-                    ),
+                    if (log.message != null) Text(log.message!),
+                    if (log.data != null)
+                      FormattedJson(
+                        json: log.data,
+                      ),
                   ],
                 ),
               );
