@@ -1,3 +1,6 @@
+## 0.0.3-wip
+* Add `showNotification` and `showBannerMessage` endpoints to the extensions API.
+
 ## 0.0.2
 * Add a simulated DevTools environment that for easier development.
 * Add a `build_and_copy` command to build a devtools extension and copy the output to the
