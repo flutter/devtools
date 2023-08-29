@@ -71,7 +71,7 @@ void main() {
         expect(find.byType(ClearButton), findsOneWidget);
         expect(find.byType(TextField), findsOneWidget);
         expect(find.byType(DevToolsFilterButton), findsOneWidget);
-        expect(find.byType(StructuredErrorsToggle), findsOneWidget);
+        expect(find.byType(SettingsOutlinedButton), findsOneWidget);
       },
     );
 
@@ -114,7 +114,10 @@ void main() {
           serviceConnection,
         );
         await pumpLoggingScreen(tester);
-        Switch toggle = tester.widget(find.byType(Switch));
+
+        await tester.tap(find.byType(SettingsOutlinedButton));
+        await tester.pump();
+        Switch toggle = tester.widget(find.descendant(of: find.byType(StructuredErrorsToggle), matching: find.byType(Switch)));
         expect(toggle.value, false);
 
         serviceConnection.serviceManager.serviceExtensionManager
