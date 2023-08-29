@@ -53,13 +53,14 @@ class ExtensionManager {
               targetOrigin: e.origin,
             );
             break;
-          case DevToolsExtensionEventType.pong:
-            // Ignore. DevTools extensions should not receive or handle pong
-            // events.
-            break;
           case DevToolsExtensionEventType.vmServiceConnection:
             final vmServiceUri = extensionEvent.data?['uri'] as String?;
             unawaited(_connectToVmService(vmServiceUri));
+            break;
+          case DevToolsExtensionEventType.pong:
+          case DevToolsExtensionEventType.showNotification:
+          case DevToolsExtensionEventType.showBannerMessage:
+            // Ignore. These events are sent from extensions to DevTools only.
             break;
           case DevToolsExtensionEventType.unknown:
           default:
@@ -126,5 +127,27 @@ class ExtensionManager {
       // or create an error panel for the extensions screens.
       print('Unable to connect to VM service at $vmServiceUri: $e');
     }
+  }
+
+  void showNotification(String message) async {
+    postMessageToDevTools(
+      ShowNotificationExtensionEvent(message: message),
+    );
+  }
+
+  void showBannerMessage({
+    required String key,
+    required String type,
+    required String message,
+    required String extensionName,
+  }) async {
+    postMessageToDevTools(
+      ShowBannerMessageExtensionEvent(
+        id: key,
+        bannerMessageType: type,
+        message: message,
+        extensionName: extensionName,
+      ),
+    );
   }
 }
