@@ -1,5 +1,7 @@
 ## 0.0.3-wip
 * Add hot reload and hot restart actions to the simulated DevTools environment.
+* Update `build_and_copy` command, as well as documentation, to reference `config.yaml`
+instead of `config.json`, as required by `package:extension_discovery` v2.0.0.
 
 ## 0.0.2
 * Add a simulated DevTools environment that for easier development.

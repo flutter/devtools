@@ -78,9 +78,9 @@ class ExtensionsManager {
         final config = extension.config;
         // ignore: avoid-unnecessary-type-assertions; false positive, config is type Object.
         if (config is! Map) {
-          // Fail gracefully. Invalid content in the extension's config.json.
+          // Fail gracefully. Invalid content in the extension's config.yaml.
           print(
-            '[WARNING] invalid config.json content for ${extension.package}:\n'
+            '[WARNING] invalid config.yaml content for ${extension.package}:\n'
             '$config',
           );
           continue;

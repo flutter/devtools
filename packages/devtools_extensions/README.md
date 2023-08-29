@@ -28,20 +28,18 @@ Under this directory, create the following structure:
 extension
   devtools/
     build/
-    config.json
+    config.yaml
 ```
 
-The `config.json` file contains metadata that DevTools needs in order to load the
-extension. Copy the `config.json` file below and fill in the approproate value for each key.
-The "materialIconCodePoint" field should correspond to the codepoint value of an icon from
+The `config.yaml` file contains metadata that DevTools needs in order to load the
+extension. Copy the `config.yaml` file below and fill in the approproate value for each key.
+The `material_icon_code_point` field should correspond to the codepoint value of an icon from
 [material/icons.dart](https://github.com/flutter/flutter/blob/master/packages/flutter/lib/src/material/icons.dart).
-```json
-{
-    "name": "foo_package",
-    "issueTracker": "<link_to_your_issue_tracker.com>",
-    "version": "0.0.1",
-    "materialIconCodePoint": "0xe0b1"
-}
+```yaml
+name: foo_package
+issue_tracker: <link_to_your_issue_tracker.com>
+version: 0.0.1
+material_icon_code_point: '0xe0b1'
 ```
 
 Now it is time to build your extension.
@@ -62,7 +60,7 @@ foo_package/  # formerly the repository root of your pub package
         devtools/
           build/
             ...  # pre-compiled output of foo_package_devtools_extension
-          config.json
+          config.yaml
     foo_package_devtools_extension/  # source code for your extension
 ```
 
