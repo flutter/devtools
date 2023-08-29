@@ -6,10 +6,12 @@ import 'dart:async';
 // ignore: avoid_web_libraries_in_flutter, as designed
 import 'dart:html' as html;
 
+import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_extensions/api.dart';
 import 'package:flutter/material.dart';
 
+import '../../shared/banner_messages.dart';
 import '../../shared/globals.dart';
 import '_controller_web.dart';
 import 'controller.dart';
@@ -198,8 +200,39 @@ class _ExtensionIFrameController extends DisposableController
         final service = serviceConnection.serviceManager.service;
         vmServiceConnectionChanged(uri: service?.connectedUri.toString());
         break;
+      case DevToolsExtensionEventType.showNotification:
+        _handleShowNotification(event);
+      case DevToolsExtensionEventType.showBannerMessage:
+        _handleShowBannerMessage(event);
       default:
         onUnknownEvent?.call();
     }
+  }
+
+  void _handleShowNotification(DevToolsExtensionEvent event) {
+    final showNotificationEvent = ShowNotificationExtensionEvent.from(event);
+    notificationService.push(showNotificationEvent.message);
+  }
+
+  void _handleShowBannerMessage(DevToolsExtensionEvent event) {
+    final showBannerMessageEvent = ShowBannerMessageExtensionEvent.from(event);
+    final bannerMessageType =
+        BannerMessageType.parse(showBannerMessageEvent.bannerMessageType) ??
+            BannerMessageType.warning;
+    final bannerMessage = BannerMessage(
+      messageType: bannerMessageType,
+      key: Key(
+        'ExtensionBannerMessage - ${showBannerMessageEvent.extensionName} - '
+        '${showBannerMessageEvent.messageId}',
+      ),
+      screenId: '${showBannerMessageEvent.extensionName}_ext',
+      textSpans: [
+        TextSpan(
+          text: showBannerMessageEvent.message,
+          style: TextStyle(fontSize: defaultFontSize),
+        ),
+      ],
+    );
+    bannerMessages.addMessage(bannerMessage);
   }
 }

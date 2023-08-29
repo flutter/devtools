@@ -19,6 +19,15 @@ enum DevToolsExtensionEventType {
   /// connected vm service uri.
   vmServiceConnection,
 
+  /// An event that an extension will send to DevTools asking DevTools to post
+  /// a notification to the DevTools global [notificationService].
+  showNotification,
+
+  /// An event that an extension will send to DevTools asking DevTools to post
+  /// a banner message to the extension's screen using the global
+  /// [bannerMessages].
+  showBannerMessage,
+
   /// Any unrecognized event that is not one of the above supported event types.
   unknown;
 
