@@ -12,10 +12,11 @@ import 'simple_items.dart';
 class AdaptedHeapObject {
   AdaptedHeapObject({
     required this.code,
-    required this.outRefs,
-    required this.heapClass,
+    required outRefs,
+    required heapClass,
     required this.shallowSize,
-  });
+  })  : _outRefs = outRefs,
+        _heapClass = heapClass;
 
   factory AdaptedHeapObject.fromHeapSnapshotObject(
     HeapSnapshotObject object,
@@ -29,9 +30,18 @@ class AdaptedHeapObject {
     );
   }
 
-  final Set<int> outRefs;
-  final Set<int> inRefs = {};
-  final HeapClassName heapClass;
+  Set<int>? _outRefs;
+  Set<int> get outRefs => _outRefs!;
+  set outRefs(Set<int> value) => _outRefs = value;
+
+  Set<int>? _inRefs = {};
+  Set<int> get inRefs => _inRefs!;
+  set inRefs(Set<int> value) => _inRefs = value;
+
+  HeapClassName? _heapClass;
+  HeapClassName get heapClass => _heapClass!;
+  set heapClass(HeapClassName value) => _heapClass = value;
+
   final IdentityHashCode code;
   final int shallowSize;
 
