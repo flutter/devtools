@@ -47,7 +47,7 @@ git commit -a -m "$COMMIT_MESSAGE"
 
 git push -u $DEVTOOLS_REMOTE $RELEASE_BRANCH
 
-echo "release_helper.sh: Creating the PR"
+echo "$0: Creating the PR"
 echo
 
 PR_URL=$(gh pr create --draft --title "$COMMIT_MESSAGE" --fill $CREATION_FLAGS)
