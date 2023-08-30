@@ -27,8 +27,8 @@ TODO: Remove this section if there are not any general updates.
 - Fixed a crash with large text in request or response - [#6254](https://github.com/flutter/devtools/pull/6254)
 
 ## Logging updates
-TODO: Remove this section if there are not any general updates.
-
+* Add the ability to copy filtered logs - [#6260](https://github.com/flutter/devtools/pull/6260)
+![Logger tab copy](images/logger_copy.png "Logger tab copy")
 ## App size tool updates
 TODO: Remove this section if there are not any general updates.
 
