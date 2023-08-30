@@ -41,6 +41,7 @@ dart tool/update_version.dart auto --type release
 NEW_VERSION=$(dart tool/update_version.dart current-version)
 
 COMMIT_MESSAGE="Releasing from $ORIGINAL_VERSION to $NEW_VERSION"
+echo "test" >> pubspec.yaml
 
 # Stage the file, commit and push
 git commit -a -m "$COMMIT_MESSAGE"
