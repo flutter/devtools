@@ -13,6 +13,7 @@ import '../../service/service_extension_widgets.dart';
 import '../../shared/analytics/analytics.dart' as ga;
 import '../../shared/analytics/constants.dart' as gac;
 import '../../shared/common_widgets.dart';
+import '../../shared/primitives/utils.dart';
 import '../../shared/screen.dart';
 import '../../shared/ui/filter.dart';
 import '../../shared/ui/search.dart';
@@ -141,6 +142,13 @@ class _LoggingScreenState extends State<LoggingScreenBody>
           isFilterActive: controller.isFilterActive,
         ),
         const SizedBox(width: denseSpacing),
+        CopyToClipboardControl(
+          dataProvider: () => controller.filteredData.value
+              .map((e) => '${e.timestamp} [${e.kind}] ${e.prettyPrinted()}')
+              .joinWithTrailing('\n'),
+          tooltip: 'Copy filtered logs',
+        ),
+        const SizedBox(width: denseSpacing),
         SettingsOutlinedButton(
           gaScreen: gac.logging,
           gaSelection: gac.loggingSettings,
@@ -153,7 +161,7 @@ class _LoggingScreenState extends State<LoggingScreenBody>
               ),
             );
           },
-        )
+        ),
       ],
     );
   }
