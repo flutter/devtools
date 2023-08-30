@@ -311,6 +311,15 @@ class FlutterRunTestDriver extends FlutterTestDriver {
     FlutterRunConfiguration runConfig = const FlutterRunConfiguration(),
     File? pidFile,
   }) async {
+    // Start listening for all events before we start printing
+    // to stdout. This avoids race conditions and deadlocks.
+    final Future<Map<String, dynamic>> startedFuture =
+        waitFor(event: 'app.started', timeout: appStartTimeout);
+    final connectedFuture =
+        waitFor(event: 'daemon.connected');
+    final debugPortFuture =
+          waitFor(event: 'app.debugPort', timeout: appStartTimeout);
+
     await super.setupProcess(
       args,
       flutterExecutable: flutterExecutable,
@@ -318,21 +327,20 @@ class FlutterRunTestDriver extends FlutterTestDriver {
       pidFile: pidFile,
     );
 
+    // Await the startedFuture, which signals that the app has started.
+    _currentRunningAppId = (await startedFuture)['params']['appId'];
+
     // Stash the PID so that we can terminate the VM more reliably than using
     // proc.kill() (because proc is a shell, because `flutter` is a shell
     // script).
     final Map<String, dynamic> connected =
-        await waitFor(event: 'daemon.connected');
+        await connectedFuture;
     procPid = connected['params']['pid'];
 
-    // Set this up now, but we don't wait it yet. We want to make sure we don't
-    // miss it while waiting for debugPort below.
-    final Future<Map<String, dynamic>> started =
-        waitFor(event: 'app.started', timeout: appStartTimeout);
 
     if (runConfig.withDebugger) {
       final Map<String, dynamic> debugPort =
-          await waitFor(event: 'app.debugPort', timeout: appStartTimeout);
+          await debugPortFuture;
       final String wsUriString = debugPort['params']['wsUri'];
       _vmServiceWsUri = Uri.parse(wsUriString);
 
@@ -376,9 +384,6 @@ class FlutterRunTestDriver extends FlutterTestDriver {
       await resume(wait: false);
     }
 
-    // Now await the started event; if it had already happened the future will
-    // have already completed.
-    _currentRunningAppId = (await started)['params']['appId'];
   }
 
   Future<void> hotRestart({bool pause = false}) =>
