@@ -1233,6 +1233,38 @@ class JsonViewer extends StatefulWidget {
   State<JsonViewer> createState() => _JsonViewerState();
 }
 
+/// A wrapper for a Text widget, which allows for concatenating text if it
+/// becomes too long.
+class TextViewer extends StatelessWidget {
+  const TextViewer({
+    super.key,
+    required this.text,
+    this.maxLength = 65536, //2^16
+    this.style,
+  });
+
+  final String text;
+  // TODO: change the maxLength if we determine a more appropriate limit
+  // in https://github.com/flutter/devtools/issues/6263.
+  final int maxLength;
+  final TextStyle? style;
+
+  @override
+  Widget build(BuildContext context) {
+    final String displayText;
+    // Limit the length of the displayed text to maxLength
+    if (text.length > maxLength) {
+      displayText = '${text.substring(0, min(maxLength, text.length))}...';
+    } else {
+      displayText = text;
+    }
+    return Text(
+      displayText,
+      style: style,
+    );
+  }
+}
+
 class _JsonViewerState extends State<JsonViewer>
     with ProvidedControllerMixin<DebuggerController, JsonViewer> {
   late Future<void> _initializeTree;
