@@ -315,10 +315,9 @@ class FlutterRunTestDriver extends FlutterTestDriver {
     // to stdout. This avoids race conditions and deadlocks.
     final Future<Map<String, dynamic>> startedFuture =
         waitFor(event: 'app.started', timeout: appStartTimeout);
-    final connectedFuture =
-        waitFor(event: 'daemon.connected');
+    final connectedFuture = waitFor(event: 'daemon.connected');
     final debugPortFuture =
-          waitFor(event: 'app.debugPort', timeout: appStartTimeout);
+        waitFor(event: 'app.debugPort', timeout: appStartTimeout);
 
     await super.setupProcess(
       args,
@@ -333,14 +332,11 @@ class FlutterRunTestDriver extends FlutterTestDriver {
     // Stash the PID so that we can terminate the VM more reliably than using
     // proc.kill() (because proc is a shell, because `flutter` is a shell
     // script).
-    final Map<String, dynamic> connected =
-        await connectedFuture;
+    final Map<String, dynamic> connected = await connectedFuture;
     procPid = connected['params']['pid'];
 
-
     if (runConfig.withDebugger) {
-      final Map<String, dynamic> debugPort =
-          await debugPortFuture;
+      final Map<String, dynamic> debugPort = await debugPortFuture;
       final String wsUriString = debugPort['params']['wsUri'];
       _vmServiceWsUri = Uri.parse(wsUriString);
 
@@ -383,7 +379,6 @@ class FlutterRunTestDriver extends FlutterTestDriver {
       }
       await resume(wait: false);
     }
-
   }
 
   Future<void> hotRestart({bool pause = false}) =>
