@@ -129,7 +129,7 @@ class _LoggingScreenState extends State<LoggingScreenBody>
         const SizedBox(width: denseSpacing),
         // TODO(kenz): fix focus issue when state is refreshed
         SearchField<LoggingController>(
-          searchFieldWidth: includeText(context, loggingMinVerboseWidth)
+          searchFieldWidth: isDisplayWiderThan(context, loggingMinVerboseWidth)
               ? wideSearchFieldWidth
               : defaultSearchFieldWidth,
           searchController: controller,
@@ -205,12 +205,10 @@ class LoggingSettingsDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final dialogHeight = scaleByFontFactor(400.0);
     return DevToolsDialog(
       title: const DialogTitleText('Logging Settings'),
       content: SizedBox(
         width: defaultDialogWidth,
-        height: dialogHeight,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
