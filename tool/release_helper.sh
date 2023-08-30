@@ -57,7 +57,7 @@ echo "release_helper.sh: Updating your flutter version to the most recent candid
 echo
 ./tool/update_flutter_sdk.sh --local
 
-echo "release_helper.sh: Your Draft release PR can be found at: $PR_URL"
+echo "$0: Your Draft release PR can be found at: $PR_URL"
 echo
 echo "$0: DONE.
 echo "$0: Next Step: Build, run and test this release using: `dart ./tool/build_e2e.dart`"
