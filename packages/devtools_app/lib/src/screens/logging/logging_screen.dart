@@ -129,7 +129,7 @@ class _LoggingScreenState extends State<LoggingScreenBody>
         const SizedBox(width: denseSpacing),
         // TODO(kenz): fix focus issue when state is refreshed
         SearchField<LoggingController>(
-          searchFieldWidth: isDisplayWiderThan(context, loggingMinVerboseWidth)
+          searchFieldWidth: isScreenWiderThan(context, loggingMinVerboseWidth)
               ? wideSearchFieldWidth
               : defaultSearchFieldWidth,
           searchController: controller,

@@ -489,7 +489,7 @@ CurvedAnimation defaultCurvedAnimation(AnimationController parent) =>
 
 /// Measures the screen size to determine whether it is strictly larger
 /// than [width], scaled to the current font factor.
-bool isDisplayWiderThan(
+bool isScreenWiderThan(
   BuildContext context,
   double? width,
 ) {
@@ -529,7 +529,7 @@ ButtonStyle _generateButtonStyle({
   required ButtonStyle buttonStyle,
   double? minScreenWidthForTextBeforeScaling,
 }) {
-  if (!isDisplayWiderThan(context, minScreenWidthForTextBeforeScaling)) {
+  if (!isScreenWiderThan(context, minScreenWidthForTextBeforeScaling)) {
     buttonStyle = buttonStyle.copyWith(
       padding: MaterialStateProperty.resolveWith<EdgeInsets>((_) {
         return EdgeInsets.zero;

@@ -404,7 +404,7 @@ class DevToolsButton extends StatelessWidget {
       tooltipPadding: tooltipPadding,
       child: SizedBox(
         height: defaultButtonHeight,
-        width: !isDisplayWiderThan(context, minScreenWidthForTextBeforeScaling)
+        width: !isScreenWiderThan(context, minScreenWidthForTextBeforeScaling)
             ? buttonMinWidth
             : null,
         child: outlined
@@ -613,7 +613,7 @@ final class ImageIconLabel extends StatelessWidget {
       children: [
         icon,
         // TODO(jacobr): animate showing and hiding the text.
-        if (isDisplayWiderThan(context, unscaledMinIncludeTextWidth))
+        if (isScreenWiderThan(context, unscaledMinIncludeTextWidth))
           Padding(
             padding: const EdgeInsets.only(left: 8.0),
             child: Text(text),
@@ -655,7 +655,7 @@ final class MaterialIconLabel extends StatelessWidget {
           ),
         // TODO(jacobr): animate showing and hiding the text.
         if (label != null &&
-            isDisplayWiderThan(context, minScreenWidthForTextBeforeScaling))
+            isScreenWiderThan(context, minScreenWidthForTextBeforeScaling))
           Padding(
             padding: EdgeInsets.only(
               left: iconData != null ? denseSpacing : 0.0,
