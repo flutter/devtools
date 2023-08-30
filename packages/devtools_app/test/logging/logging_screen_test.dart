@@ -156,7 +156,9 @@ void main() {
         await tester.pump();
         Switch toggle = tester.widget(find.descendant(
             of: find.byType(StructuredErrorsToggle),
-            matching: find.byType(Switch)));
+            matching: find.byType(Switch),
+          ),
+        );
         expect(toggle.value, false);
 
         serviceConnection.serviceManager.serviceExtensionManager
