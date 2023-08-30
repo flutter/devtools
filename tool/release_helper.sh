@@ -1,4 +1,4 @@
-#!/bin/bash -ex
+#!/bin/bash -e
 
 DEVTOOLS_REMOTE=$(git remote -v | grep "flutter/devtools.git" | grep "(fetch)"| tail -n1 | cut -w -f1)
 
@@ -51,7 +51,7 @@ git push -u $DEVTOOLS_REMOTE $RELEASE_BRANCH
 echo "Creating the PR"
 echo
 
-PR_URL=$(gh pr create --repo flutter/devtools --draft --title "$COMMIT_MESSAGE" $CREATION_FLAGS)
+PR_URL=$(gh pr create --repo flutter/devtools --draft --title "$COMMIT_MESSAGE" --fill "$CREATION_FLAGS")
 
 
 echo "Updating your flutter version to the most recent candidate."
