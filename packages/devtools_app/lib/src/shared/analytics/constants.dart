@@ -68,6 +68,7 @@ const enableOnDeviceInspector = 'enableOnDeviceInspector';
 const showOnDeviceInspector = 'showInspector';
 const treeNodeSelection = 'treeNodeSelection';
 const inspectorSettings = 'inspectorSettings';
+const loggingSettings = 'loggingSettings';
 const refreshPubRoots = 'refreshPubRoots';
 
 enum HomeScreenEvents {
