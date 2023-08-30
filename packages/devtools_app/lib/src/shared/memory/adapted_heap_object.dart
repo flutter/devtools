@@ -7,6 +7,16 @@ import 'package:vm_service/vm_service.dart';
 import 'class_name.dart';
 import 'simple_items.dart';
 
+// Wrappers for fiels are needed to separate memory footprint for
+// AdaptedHeapObject, in heap snapshots, taken for DevTools,
+// for analysis and optimization.
+
+class _OutRefs {
+  _OutRefs(this.refs);
+
+  final Set<int> refs;
+}
+
 /// Contains information from [HeapSnapshotObject] needed for
 /// memory analysis on memory screen.
 class AdaptedHeapObject {
@@ -15,7 +25,7 @@ class AdaptedHeapObject {
     required outRefs,
     required heapClass,
     required this.shallowSize,
-  })  : _outRefs = outRefs,
+  })  : _outRefs = _OutRefs(outRefs),
         _heapClass = heapClass;
 
   factory AdaptedHeapObject.fromHeapSnapshotObject(
@@ -30,9 +40,8 @@ class AdaptedHeapObject {
     );
   }
 
-  Set<int>? _outRefs;
-  Set<int> get outRefs => _outRefs!;
-  set outRefs(Set<int> value) => _outRefs = value;
+  _OutRefs _outRefs;
+  Set<int> get outRefs => _outRefs.refs;
 
   Set<int>? _inRefs = {};
   Set<int> get inRefs => _inRefs!;
