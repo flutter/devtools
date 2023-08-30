@@ -430,6 +430,9 @@ enum TestAppDevice {
       'perfetto_test.dart',
       'performance_screen_event_recording_test.dart',
       'service_connection_test.dart',
+      // TODO(https://github.com/flutter/devtools/issues/6289): re-enable this
+      // test once the flake is fixed.
+      'debugger_panel_test.dart',
     ],
     TestAppDevice.cli: [
       'debugger_panel_test.dart',
