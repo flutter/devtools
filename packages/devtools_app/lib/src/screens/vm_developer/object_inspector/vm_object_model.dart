@@ -26,7 +26,7 @@ abstract class VmObject {
   /// corresponding to this VM object.
   final ScriptRef? scriptRef;
 
-  VmServiceWrapper get _service => serviceManager.service!;
+  VmServiceWrapper get _service => serviceConnection.serviceManager.service!;
 
   IsolateRef? _isolate;
 
@@ -65,7 +65,8 @@ abstract class VmObject {
 
   @mustCallSuper
   Future<void> initialize() async {
-    _isolate = serviceManager.isolateManager.selectedIsolate.value!;
+    _isolate =
+        serviceConnection.serviceManager.isolateManager.selectedIsolate.value!;
 
     _obj = ref is Obj
         ? ref as Obj
@@ -118,8 +119,9 @@ abstract class VmObject {
   /// Expands an [InboundReferencesTreeNode] by retrieving the inbound
   /// references for the `source` that references the current node.
   Future<void> expandInboundRef(InboundReferencesTreeNode node) async {
-    final isolate = serviceManager.isolateManager.selectedIsolate.value!;
-    final service = serviceManager.service!;
+    final isolate =
+        serviceConnection.serviceManager.isolateManager.selectedIsolate.value!;
+    final service = serviceConnection.serviceManager.service!;
     final inboundRefs = await service.getInboundReferences(
       isolate.id!,
       node.ref.source!.id!,
@@ -318,8 +320,9 @@ class CodeObject extends VmObject {
   Future<void> initialize() async {
     await super.initialize();
 
-    final service = serviceManager.service!;
-    final isolateId = serviceManager.isolateManager.selectedIsolate.value!.id!;
+    final service = serviceConnection.serviceManager.service!;
+    final isolateId = serviceConnection
+        .serviceManager.isolateManager.selectedIsolate.value!.id!;
 
     // Attempt to retrieve the CPU profile data for this code object.
     try {

@@ -12,16 +12,18 @@ import 'package:mockito/mockito.dart';
 
 void main() {
   late NetworkScreen screen;
-  late FakeServiceManager fakeServiceManager;
+  late FakeServiceConnectionManager fakeServiceConnection;
 
   group('NetworkScreen', () {
     setUp(() {
-      fakeServiceManager = FakeServiceManager();
-      when(fakeServiceManager.connectedApp!.isDartWebAppNow).thenReturn(false);
-      setGlobal(ServiceConnectionManager, fakeServiceManager);
+      fakeServiceConnection = FakeServiceConnectionManager();
+      when(fakeServiceConnection.serviceManager.connectedApp!.isDartWebAppNow)
+          .thenReturn(false);
+      setGlobal(ServiceConnectionManager, fakeServiceConnection);
       setGlobal(IdeTheme, IdeTheme());
-      when(fakeServiceManager.errorBadgeManager.errorCountNotifier('network'))
-          .thenReturn(ValueNotifier<int>(0));
+      when(
+        fakeServiceConnection.errorBadgeManager.errorCountNotifier('network'),
+      ).thenReturn(ValueNotifier<int>(0));
       screen = NetworkScreen();
     });
 

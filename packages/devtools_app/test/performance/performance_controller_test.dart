@@ -14,7 +14,7 @@ import 'package:mockito/mockito.dart';
 
 void main() {
   late PerformanceController controller;
-  late MockServiceConnectionManager mockServiceManager;
+  late MockServiceConnectionManager mockServiceConnection;
 
   group('$PerformanceController', () {
     setUp(() {
@@ -25,7 +25,9 @@ void main() {
         ExternalDevToolsEnvironmentParameters(),
       );
       setGlobal(PreferencesController, PreferencesController());
-      mockServiceManager = MockServiceConnectionManager();
+      mockServiceConnection = createMockServiceConnectionWithDefaults();
+      final mockServiceManager =
+          mockServiceConnection.serviceManager as MockServiceManager;
       final connectedApp = MockConnectedApp();
       mockConnectedApp(
         connectedApp,
@@ -36,9 +38,9 @@ void main() {
       when(mockServiceManager.connectedApp).thenReturn(connectedApp);
       when(mockServiceManager.connectedState)
           .thenReturn(ValueNotifier(const ConnectedState(true)));
-      setGlobal(ServiceConnectionManager, mockServiceManager);
+      setGlobal(ServiceConnectionManager, mockServiceConnection);
       offlineController.enterOfflineMode(
-        offlineApp: serviceManager.connectedApp!,
+        offlineApp: serviceConnection.serviceManager.connectedApp!,
       );
       controller = PerformanceController();
     });

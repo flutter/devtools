@@ -21,13 +21,13 @@ Future<Object?> getObject({
   // subranges of the following instance kinds:
   // https://api.flutter.dev/flutter/vm_service/VmServiceInterface/getObject.html
   if (variable == null || !variable.isPartialObject) {
-    return await serviceManager.service!.getObject(
+    return await serviceConnection.serviceManager.service!.getObject(
       isolateRef!.id!,
       value.id!,
     );
   }
 
-  return await serviceManager.service!.getObject(
+  return await serviceConnection.serviceManager.service!.getObject(
     isolateRef!.id!,
     value.id!,
     offset: variable.offset,

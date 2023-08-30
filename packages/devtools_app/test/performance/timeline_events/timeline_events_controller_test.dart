@@ -17,7 +17,8 @@ import '../../test_infra/test_data/performance.dart';
 // TODO(kenz): add better test coverage for [TimelineEventsController].
 
 void main() {
-  final ServiceConnectionManager fakeServiceManager = FakeServiceManager(
+  final ServiceConnectionManager fakeServiceManager =
+      FakeServiceConnectionManager(
     service: FakeServiceManager.createFakeService(
       timelineData: Timeline.parse(testTimelineJson)!,
     ),
@@ -27,11 +28,11 @@ void main() {
     late TimelineEventsController eventsController;
 
     setUp(() {
-      when(fakeServiceManager.connectedApp!.isProfileBuild)
+      when(fakeServiceManager.serviceManager.connectedApp!.isProfileBuild)
           .thenAnswer((realInvocation) => Future.value(false));
       final initializedCompleter = Completer<bool>();
       initializedCompleter.complete(true);
-      when(fakeServiceManager.connectedApp!.initialized)
+      when(fakeServiceManager.serviceManager.connectedApp!.initialized)
           .thenReturn(initializedCompleter);
       setGlobal(ServiceConnectionManager, fakeServiceManager);
       setGlobal(IdeTheme, IdeTheme());
@@ -60,7 +61,7 @@ void main() {
       );
 
       offlineController.enterOfflineMode(
-        offlineApp: serviceManager.connectedApp!,
+        offlineApp: serviceConnection.serviceManager.connectedApp!,
       );
       final traceEvents = [...goldenUiTraceEvents, ...goldenRasterTraceEvents]
           .map((e) => e.json)

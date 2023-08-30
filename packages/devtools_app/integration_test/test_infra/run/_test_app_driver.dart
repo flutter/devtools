@@ -301,6 +301,7 @@ abstract class IntegrationTestApp with IOMixin {
   Future<void> manuallyStopApp() async {}
 
   Future<void> start() async {
+    _debugPrint('starting the test app process...');
     await startProcess();
     assert(
       runProcess != null,
@@ -319,6 +320,7 @@ abstract class IntegrationTestApp with IOMixin {
 
     listenToProcessOutput(runProcess!, printCallback: _debugPrint);
 
+    _debugPrint('waiting for app start...');
     await waitForAppStart();
   }
 
@@ -363,9 +365,7 @@ abstract class IntegrationTestApp with IOMixin {
     final truncatedMsg =
         msg.length > maxLength ? '${msg.substring(0, maxLength)}...' : msg;
     _allMessages.add(truncatedMsg);
-    if (debugTestScript) {
-      print('_TestApp - $truncatedMsg');
-    }
+    debugLog('_TestApp - $truncatedMsg');
     return msg;
   }
 }

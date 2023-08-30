@@ -33,7 +33,7 @@ class ClassSampler {
   final _HeapObjects? _objects;
 
   IsolateRef get _mainIsolateRef =>
-      serviceManager.isolateManager.mainIsolate.value!;
+      serviceConnection.serviceManager.isolateManager.mainIsolate.value!;
 
   Future<InstanceRef?> _liveInstance() async {
     try {
@@ -42,12 +42,13 @@ class ClassSampler {
       final theClass = await findClass(isolateId, heapClass);
       if (theClass == null) return null;
 
-      final object = (await serviceManager.service!.getInstances(
+      final object =
+          (await serviceConnection.serviceManager.service!.getInstances(
         isolateId,
         theClass.id!,
         1,
       ))
-          .instances?[0];
+              .instances?[0];
 
       if (object is InstanceRef) return object;
       return null;
@@ -64,7 +65,7 @@ class ClassSampler {
       final theClass = await findClass(isolateId, heapClass);
       if (theClass == null) return null;
 
-      return await serviceManager.service!.getInstances(
+      return await serviceConnection.serviceManager.service!.getInstances(
         isolateId,
         theClass.id!,
         preferences.memory.refLimit.value,
@@ -82,7 +83,7 @@ class ClassSampler {
       final theClass = await findClass(isolateId, heapClass);
       if (theClass == null) return null;
 
-      return await serviceManager.service!.getInstancesAsList(
+      return await serviceConnection.serviceManager.service!.getInstancesAsList(
         isolateId,
         theClass.id!,
       );
@@ -93,11 +94,12 @@ class ClassSampler {
   }
 
   void _outputError(Object error, StackTrace trace) {
-    serviceManager.consoleService.appendStdio('$error\n$trace');
+    serviceConnection.consoleService.appendStdio('$error\n$trace');
   }
 
   bool get isEvalEnabled =>
-      heapClass.classType(serviceManager.rootInfoNow().package) !=
+      heapClass
+          .classType(serviceConnection.serviceManager.rootInfoNow().package) !=
       ClassType.runtime;
 
   Future<void> allLiveToConsole({
@@ -115,7 +117,7 @@ class ClassSampler {
     final list = await _liveInstancesAsList();
 
     if (list == null) {
-      serviceManager.consoleService.appendStdio(
+      serviceConnection.consoleService.appendStdio(
         'Unable to select instances for the class ${heapClass.fullName}.',
       );
       return;
@@ -124,7 +126,7 @@ class ClassSampler {
     final selection = _objects;
 
     // drop to console
-    serviceManager.consoleService.appendBrowsableInstance(
+    serviceConnection.consoleService.appendBrowsableInstance(
       instanceRef: list,
       isolateRef: _mainIsolateRef,
       heapSelection: selection == null
@@ -137,7 +139,7 @@ class ClassSampler {
     ga.select(gac.memory, gac.MemoryEvent.dropOneLiveVariable);
 
     // drop to console
-    serviceManager.consoleService.appendBrowsableInstance(
+    serviceConnection.consoleService.appendBrowsableInstance(
       instanceRef: await _liveInstance(),
       isolateRef: _mainIsolateRef,
       heapSelection: null,
@@ -165,7 +167,7 @@ class HeapClassSampler extends ClassSampler {
     ) as InstanceRef?;
 
     if (instanceRef == null) {
-      serviceManager.consoleService.appendStdio(
+      serviceConnection.consoleService.appendStdio(
         'Unable to select instance that exist in snapshot and still alive in application.\n'
         'You may want to increase "${preferences.memory.refLimitTitle}" in memory settings.',
       );
@@ -179,7 +181,7 @@ class HeapClassSampler extends ClassSampler {
         HeapObjectSelection(selection.heap, object: heapObject);
 
     // drop to console
-    serviceManager.consoleService.appendBrowsableInstance(
+    serviceConnection.consoleService.appendBrowsableInstance(
       instanceRef: instanceRef,
       isolateRef: _mainIsolateRef,
       heapSelection: heapSelection,
@@ -195,7 +197,7 @@ class HeapClassSampler extends ClassSampler {
         HeapObjectSelection(selection.heap, object: heapObject);
 
     // drop to console
-    serviceManager.consoleService.appendBrowsableInstance(
+    serviceConnection.consoleService.appendBrowsableInstance(
       instanceRef: null,
       isolateRef: _mainIsolateRef,
       heapSelection: heapSelection,

@@ -19,19 +19,19 @@ import '../../../test_infra/matchers/matchers.dart';
 import '../../../test_infra/test_data/performance.dart';
 
 void main() {
-  FakeServiceManager fakeServiceManager;
+  FakeServiceConnectionManager fakeServiceConnection;
   late PerformanceController controller;
 
   void setUpServiceManagerWithTimeline(
     Map<String, dynamic> timelineJson,
   ) {
-    fakeServiceManager = FakeServiceManager(
+    fakeServiceConnection = FakeServiceConnectionManager(
       service: FakeServiceManager.createFakeService(
         timelineData: vm_service.Timeline.parse(timelineJson)!,
       ),
     );
     mockConnectedApp(
-      fakeServiceManager.connectedApp!,
+      fakeServiceConnection.serviceManager.connectedApp!,
       isFlutterApp: true,
       isProfileBuild: true,
       isWebApp: false,
@@ -41,7 +41,7 @@ void main() {
       DevToolsEnvironmentParameters,
       ExternalDevToolsEnvironmentParameters(),
     );
-    setGlobal(ServiceConnectionManager, fakeServiceManager);
+    setGlobal(ServiceConnectionManager, fakeServiceConnection);
     setGlobal(OfflineModeController, OfflineModeController());
     setGlobal(IdeTheme, IdeTheme());
     setGlobal(PreferencesController, PreferencesController());

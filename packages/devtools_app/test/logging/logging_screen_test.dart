@@ -33,20 +33,23 @@ void main() {
     setUp(() {
       mockLoggingController = createMockLoggingControllerWithDefaults();
 
-      final FakeServiceManager fakeServiceManager = FakeServiceManager();
-      when(fakeServiceManager.connectedApp!.isFlutterWebAppNow)
+      final FakeServiceConnectionManager fakeServiceConnection =
+          FakeServiceConnectionManager();
+      when(
+        fakeServiceConnection.serviceManager.connectedApp!.isFlutterWebAppNow,
+      ).thenReturn(false);
+      when(fakeServiceConnection.serviceManager.connectedApp!.isProfileBuildNow)
           .thenReturn(false);
-      when(fakeServiceManager.connectedApp!.isProfileBuildNow)
-          .thenReturn(false);
-      when(fakeServiceManager.errorBadgeManager.errorCountNotifier('logging'))
-          .thenReturn(ValueNotifier<int>(0));
+      when(
+        fakeServiceConnection.errorBadgeManager.errorCountNotifier('logging'),
+      ).thenReturn(ValueNotifier<int>(0));
       setGlobal(NotificationService, NotificationService());
       setGlobal(
         DevToolsEnvironmentParameters,
         ExternalDevToolsEnvironmentParameters(),
       );
       setGlobal(PreferencesController, PreferencesController());
-      setGlobal(ServiceConnectionManager, fakeServiceManager);
+      setGlobal(ServiceConnectionManager, fakeServiceConnection);
       setGlobal(IdeTheme, IdeTheme());
 
       screen = LoggingScreen();
@@ -101,18 +104,21 @@ void main() {
       'can toggle structured errors',
       windowSize,
       (WidgetTester tester) async {
-        final serviceManager = FakeServiceManager();
-        when(serviceManager.connectedApp!.isFlutterWebAppNow).thenReturn(false);
-        when(serviceManager.connectedApp!.isProfileBuildNow).thenReturn(false);
+        final serviceConnection = FakeServiceConnectionManager();
+        when(serviceConnection.serviceManager.connectedApp!.isFlutterWebAppNow)
+            .thenReturn(false);
+        when(serviceConnection.serviceManager.connectedApp!.isProfileBuildNow)
+            .thenReturn(false);
         setGlobal(
           ServiceConnectionManager,
-          serviceManager,
+          serviceConnection,
         );
         await pumpLoggingScreen(tester);
         Switch toggle = tester.widget(find.byType(Switch));
         expect(toggle.value, false);
 
-        serviceManager.serviceExtensionManager.fakeServiceExtensionStateChanged(
+        serviceConnection.serviceManager.serviceExtensionManager
+            .fakeServiceExtensionStateChanged(
           structuredErrors.extension,
           'true',
         );

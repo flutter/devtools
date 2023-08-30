@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:collection';
 
 import 'package:devtools_app_shared/utils.dart';
@@ -57,7 +58,7 @@ class DevToolsRouteInformationParser
     // query parameter, ensure we manually disconnect from any previously
     // connected applications.
     if (uri.queryParameters['uri'] == null) {
-      serviceManager.manuallyDisconnect();
+      serviceConnection.serviceManager.manuallyDisconnect();
     }
 
     // routeInformation.path comes from the address bar and (when not empty) is
@@ -193,7 +194,7 @@ class DevToolsRouterDelegate extends RouterDelegate<DevToolsRouteConfiguration>
     // not have a vm service uri as a query parameter, unless we are loading an
     // offline file.
     if (page != snapshotScreenId && newArgs['uri'] == null) {
-      serviceManager.manuallyDisconnect();
+      unawaited(serviceConnection.serviceManager.manuallyDisconnect());
     }
 
     _replaceStack(

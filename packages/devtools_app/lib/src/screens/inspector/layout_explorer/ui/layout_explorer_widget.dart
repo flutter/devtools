@@ -61,7 +61,7 @@ abstract class LayoutExplorerWidgetState<W extends LayoutExplorerWidget,
   InspectorController get inspectorController => widget.inspectorController;
 
   InspectorService? get inspectorService =>
-      serviceManager.inspectorService as InspectorService?;
+      serviceConnection.inspectorService as InspectorService?;
 
   late RateLimiter rateLimiter;
 
@@ -256,7 +256,7 @@ abstract class LayoutExplorerWidgetState<W extends LayoutExplorerWidget,
   }
 
   void _updateObjectGroupManager() {
-    final service = serviceManager.inspectorService;
+    final service = serviceConnection.inspectorService;
     if (service != objectGroupManager?.inspectorService) {
       objectGroupManager = InspectorObjectGroupManager(
         service as InspectorService,

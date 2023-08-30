@@ -204,8 +204,8 @@ void main() {
         await tester.pump();
 
         // Emit a GC event and confirm we don't perform a refresh.
-        final fakeService =
-            scene.fakeServiceManager.service as FakeVmServiceWrapper;
+        final fakeService = scene.fakeServiceConnection.serviceManager.service
+            as FakeVmServiceWrapper;
         fakeService.emitGCEvent();
         expect(
           allocationProfileController.currentAllocationProfile.value,

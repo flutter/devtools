@@ -43,7 +43,7 @@ class ExtensionService extends DisposableController
   Future<void> initialize() async {
     await _maybeRefreshExtensions();
     addAutoDisposeListener(
-      serviceManager.connectedState,
+      serviceConnection.serviceManager.connectedState,
       _maybeRefreshExtensions,
     );
 
@@ -108,7 +108,7 @@ class ExtensionService extends DisposableController
 // TODO(kenz): consider caching this for the duration of the VM service
 // connection.
 Future<String?> _connectedAppRootPath() async {
-  var fileUri = await serviceManager.rootLibraryForMainIsolate();
+  var fileUri = await serviceConnection.rootLibraryForMainIsolate();
   if (fileUri == null) return null;
 
   // TODO(kenz): for robustness, consider sending the root library uri to the

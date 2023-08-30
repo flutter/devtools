@@ -15,8 +15,9 @@ class ObjectStoreController extends DisposableController
   final _selectedIsolateObjectStore = ValueNotifier<ObjectStore?>(null);
 
   Future<void> refresh() async {
-    final service = serviceManager.service!;
-    final isolate = serviceManager.isolateManager.selectedIsolate.value;
+    final service = serviceConnection.serviceManager.service!;
+    final isolate =
+        serviceConnection.serviceManager.isolateManager.selectedIsolate.value;
     if (isolate == null) {
       return;
     }

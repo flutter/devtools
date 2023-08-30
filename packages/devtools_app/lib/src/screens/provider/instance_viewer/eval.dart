@@ -25,11 +25,11 @@ void setServiceConnectionForProviderScreen(VmServiceWrapper service) {
 }
 
 /// Exposes the current VmServiceWrapper.
-/// By listening to this provider instead of directly accessing `serviceManager.service`,
+/// By listening to this provider instead of directly accessing `serviceManager.manager.service`,
 /// this ensures that providers reload properly when the devtool is connected
 /// to a different application.
 final serviceProvider = StreamProvider<VmServiceWrapper>((ref) async* {
-  yield serviceManager.service!;
+  yield serviceConnection.serviceManager.service!;
   yield* _serviceConnectionStream;
 });
 
@@ -51,7 +51,7 @@ final libraryEvalProvider =
   final eval = EvalOnDartLibrary(
     libraryPath,
     service,
-    serviceManager: serviceManager,
+    serviceManager: serviceConnection.serviceManager,
   );
   ref.onDispose(eval.dispose);
   return eval;
@@ -60,7 +60,7 @@ final libraryEvalProvider =
 final hotRestartEventProvider =
     ChangeNotifierProvider<ValueNotifier<void>>((ref) {
   final selectedIsolateListenable =
-      serviceManager.isolateManager.selectedIsolate;
+      serviceConnection.serviceManager.isolateManager.selectedIsolate;
 
   // Since ChangeNotifierProvider calls `dispose` on the returned ChangeNotifier
   // when the provider is destroyed, we can't simply return `selectedIsolateListenable`.

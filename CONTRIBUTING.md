@@ -114,6 +114,8 @@ from the main devtools/ directory run:
 export LOCAL_DART_SDK=/path/to/dart-sdk
 dart ./tool/build_e2e.dart
 ```
+* Note: the LOCAL_DART_SDK needs to point to a local checkout of [dart-sdk](https://github.com/dart-lang/sdk/tree/main)
+* Note: if you are also developing server side code, e.g. the devtools_shared package, add a devtools_shared path override to `<path-to-dart-sdk>/pkg/dds/pubspec.yaml`.
 
 That will:
 - start the devtools server

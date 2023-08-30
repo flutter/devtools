@@ -161,13 +161,14 @@ Future<void> addChildReferences(
         return;
       }
       final limit = preferences.memory.refLimit.value;
-      final refs = (await serviceManager.service!.getInboundReferences(
-            ref.isolateRef.id!,
-            value.id!,
-            limit + 1,
-          ))
-              .references ??
-          [];
+      final refs =
+          (await serviceConnection.serviceManager.service!.getInboundReferences(
+                ref.isolateRef.id!,
+                value.id!,
+                limit + 1,
+              ))
+                  .references ??
+              [];
 
       final refsToShow = min(limit, refs.length);
       final children = <DartObjectNode>[];

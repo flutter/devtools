@@ -32,7 +32,7 @@ void main() {
 
     setGlobal(IdeTheme, IdeTheme());
     setGlobal(OfflineModeController, OfflineModeController());
-    setGlobal(ServiceConnectionManager, FakeServiceManager());
+    setGlobal(ServiceConnectionManager, FakeServiceConnectionManager());
   });
 
   group('$PerfettoEventProcessor', () {

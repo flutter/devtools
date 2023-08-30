@@ -40,7 +40,7 @@ Future<void> clearTimeouts(WidgetTester tester) async {
 }
 
 void main() {
-  late FakeServiceManager fakeServiceManager;
+  late FakeServiceConnectionManager fakeServiceConnection;
   late SocketProfile socketProfile;
   late HttpProfile httpProfile;
 
@@ -61,13 +61,13 @@ void main() {
 
   group('Network Profiler', () {
     setUp(() {
-      fakeServiceManager = FakeServiceManager(
+      fakeServiceConnection = FakeServiceConnectionManager(
         service: FakeServiceManager.createFakeService(
           socketProfile: socketProfile,
           httpProfile: httpProfile,
         ),
       );
-      setGlobal(ServiceConnectionManager, fakeServiceManager);
+      setGlobal(ServiceConnectionManager, fakeServiceConnection);
     });
 
     testWidgetsWithWindowSize('starts and stops', windowSize, (

@@ -23,9 +23,9 @@ void main() {
     late MockProgramExplorerController mockProgramExplorerController;
 
     setUp(() {
-      final fakeServiceManager = FakeServiceManager();
+      final fakeServiceConnection = FakeServiceConnectionManager();
       mockConnectedApp(
-        fakeServiceManager.connectedApp!,
+        fakeServiceConnection.serviceManager.connectedApp!,
         isFlutterApp: true,
         isProfileBuild: false,
         isWebApp: false,
@@ -33,7 +33,7 @@ void main() {
       mockProgramExplorerController =
           createMockProgramExplorerControllerWithDefaults();
       setGlobal(IdeTheme, IdeTheme());
-      setGlobal(ServiceConnectionManager, fakeServiceManager);
+      setGlobal(ServiceConnectionManager, fakeServiceConnection);
       setGlobal(
         DevToolsEnvironmentParameters,
         ExternalDevToolsEnvironmentParameters(),
@@ -69,14 +69,15 @@ void main() {
   // tests for the ProgramExplorer widget.
 
   group('Fake ProgramExplorer', () {
-    late final FakeServiceManager fakeServiceManager;
+    late final FakeServiceConnectionManager fakeServiceConnection;
 
     setUpAll(() {
-      fakeServiceManager = FakeServiceManager();
+      fakeServiceConnection = FakeServiceConnectionManager();
 
-      when(fakeServiceManager.connectedApp!.isProfileBuildNow)
+      when(fakeServiceConnection.serviceManager.connectedApp!.isProfileBuildNow)
           .thenReturn(false);
-      when(fakeServiceManager.connectedApp!.isDartWebAppNow).thenReturn(false);
+      when(fakeServiceConnection.serviceManager.connectedApp!.isDartWebAppNow)
+          .thenReturn(false);
 
       final mockScriptManager = MockScriptManager();
       //`then` is used
@@ -86,7 +87,7 @@ void main() {
       );
 
       setGlobal(ScriptManager, mockScriptManager);
-      setGlobal(ServiceConnectionManager, fakeServiceManager);
+      setGlobal(ServiceConnectionManager, fakeServiceConnection);
       setGlobal(IdeTheme, IdeTheme());
       setGlobal(NotificationService, NotificationService());
     });

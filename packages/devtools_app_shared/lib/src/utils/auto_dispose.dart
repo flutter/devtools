@@ -10,15 +10,15 @@ import 'package:flutter/widgets.dart';
 /// Mixin to simplifying managing the lifetime of listeners used by a
 /// [StatefulWidget].
 ///
-/// This mixin works by delegating to a [Disposer]. It implements all of
-/// [Disposer]'s interface.
+/// This mixin works by delegating to a [DisposerMixin]. It implements all of
+/// [DisposerMixin]'s interface.
 ///
 /// See also:
 /// * [AutoDisposeControllerMixin], which provides the same functionality for
 ///   controller classes.
 mixin AutoDisposeMixin<T extends StatefulWidget> on State<T>
-    implements Disposer {
-  final Disposer _delegate = Disposer();
+    implements DisposerMixin {
+  final _delegate = Disposer();
 
   @override
   @visibleForTesting
@@ -102,7 +102,7 @@ mixin AutoDisposeMixin<T extends StatefulWidget> on State<T>
 ///   with [DisposableController] objects.
 /// * [AutoDisposeMixin], which integrates this functionality with [State]
 ///   objects.
-class Disposer {
+mixin DisposerMixin {
   final List<StreamSubscription> _subscriptions = [];
   final List<FocusNode> _focusNodes = [];
 
@@ -228,14 +228,15 @@ abstract class DisposableController {
 /// Mixin to simplifying managing the lifetime of listeners used by a
 /// [DisposableController].
 ///
-/// This mixin works by delegating to a [Disposer]. It implements all of
-/// [Disposer]'s interface.
+/// This mixin works by delegating to a [DisposerMixin]. It implements all of
+/// [DisposerMixin]'s interface.
 ///
 /// See also:
 /// * [AutoDisposeMixin], which provides the same functionality for a
 ///   [StatefulWidget].
-mixin AutoDisposeControllerMixin on DisposableController implements Disposer {
-  final Disposer _delegate = Disposer();
+mixin AutoDisposeControllerMixin on DisposableController
+    implements DisposerMixin {
+  final _delegate = Disposer();
 
   @override
   @visibleForTesting
@@ -306,3 +307,6 @@ mixin AutoDisposeControllerMixin on DisposableController implements Disposer {
     );
   }
 }
+
+@visibleForTesting
+class Disposer with DisposerMixin {}

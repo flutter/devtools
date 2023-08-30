@@ -359,7 +359,7 @@ class ShaderCompilationHint extends StatelessWidget {
             ),
           ],
         ),
-        childrenSpans: serviceManager.connectedApp!.isIosApp
+        childrenSpans: serviceConnection.serviceManager.connectedApp!.isIosApp
             ? [
                 TextSpan(
                   text:

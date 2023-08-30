@@ -692,14 +692,15 @@ bool _userApplicationDimensionsComputed = false;
 void _computeUserApplicationCustomGTagData() {
   if (_userApplicationDimensionsComputed) return;
 
-  final connectedApp = serviceManager.connectedApp!;
+  final connectedApp = serviceConnection.serviceManager.connectedApp!;
   assert(connectedApp.isFlutterAppNow != null);
   assert(connectedApp.isDartWebAppNow != null);
   assert(connectedApp.isProfileBuildNow != null);
 
   const unknownOS = 'unknown';
   if (connectedApp.isFlutterAppNow!) {
-    userPlatformType = serviceManager.vm?.operatingSystem ?? unknownOS;
+    userPlatformType =
+        serviceConnection.serviceManager.vm?.operatingSystem ?? unknownOS;
   }
   if (connectedApp.isFlutterWebAppNow) {
     userAppType = appTypeFlutterWeb;
@@ -800,7 +801,7 @@ Future<void> setupDimensions() async {
 }
 
 void setupUserApplicationDimensions() {
-  if (serviceManager.connectedApp != null &&
+  if (serviceConnection.serviceManager.connectedApp != null &&
       !_userApplicationDimensionsComputed &&
       !_computingUserApplicationDimensions) {
     _computingUserApplicationDimensions = true;

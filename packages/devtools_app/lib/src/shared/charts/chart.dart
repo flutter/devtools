@@ -599,7 +599,7 @@ class ChartPainter extends CustomPainter {
       //              should have PaintCharacteristics.
       style: TextStyle(
         color: Colors.grey[600],
-        fontSize: chartTextFontSize,
+        fontSize: unscaledSmallFontSize,
       ),
       text: textValue,
     );
@@ -784,4 +784,10 @@ class ChartPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(ChartPainter oldDelegate) => chartController.isDirty;
+}
+
+extension ChartColorExtension on ColorScheme {
+  // Bar color for current selection (hover).
+  Color get hoverSelectionBarColor =>
+      isLight ? Colors.lime[600]! : Colors.yellowAccent;
 }

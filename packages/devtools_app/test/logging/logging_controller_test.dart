@@ -42,7 +42,7 @@ void main() {
     setUp(() {
       setGlobal(
         ServiceConnectionManager,
-        FakeServiceManager(),
+        FakeServiceConnectionManager(),
       );
 
       controller = LoggingController();

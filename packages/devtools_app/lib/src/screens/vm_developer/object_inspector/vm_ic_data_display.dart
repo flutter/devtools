@@ -68,8 +68,9 @@ class _VmICDataDisplayState extends State<VmICDataDisplay> {
       return;
     }
 
-    final isolateId = serviceManager.isolateManager.selectedIsolate.value!.id!;
-    final service = serviceManager.service!;
+    final isolateId = serviceConnection
+        .serviceManager.isolateManager.selectedIsolate.value!.id!;
+    final service = serviceConnection.serviceManager.service!;
     final argumentsDescriptorFuture = service
         .getObject(isolateId, icData.argumentsDescriptor.id!)
         .then((e) => e as Instance);

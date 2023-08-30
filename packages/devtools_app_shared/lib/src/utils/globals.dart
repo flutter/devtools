@@ -20,3 +20,8 @@ final Map<Type, Object> globals = <Type, Object>{};
 void setGlobal(Type clazz, Object instance) {
   globals[clazz] = instance;
 }
+
+void removeGlobal(Type clazz) {
+  globals.remove(clazz);
+  assert(globals[clazz] == null);
+}

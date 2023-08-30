@@ -43,26 +43,24 @@ class ExtensionManager {
     if (e is html.MessageEvent) {
       final extensionEvent = DevToolsExtensionEvent.tryParse(e.data);
       if (extensionEvent != null) {
+        // Do not handle messages that come from the [ExtensionManager] itself.
+        if (extensionEvent.source == '$ExtensionManager') return;
+
         switch (extensionEvent.type) {
           case DevToolsExtensionEventType.ping:
-            html.window.parent?.postMessage(
-              DevToolsExtensionEvent.pong.toJson(),
-              e.origin,
+            postMessageToDevTools(
+              DevToolsExtensionEvent(DevToolsExtensionEventType.pong),
+              targetOrigin: e.origin,
             );
-            break;
-          case DevToolsExtensionEventType.pong:
-            // Ignore. DevTools extensions should not receive or handle pong
-            // events.
             break;
           case DevToolsExtensionEventType.vmServiceConnection:
             final vmServiceUri = extensionEvent.data?['uri'] as String?;
-            unawaited(
-              connectToVmService(vmServiceUri).catchError((e) {
-                // TODO(kenz): post a notification to DevTools for errors
-                // or create an error panel for the extensions screens.
-                print('Error connecting to VM service: $e');
-              }),
-            );
+            unawaited(_connectToVmService(vmServiceUri));
+            break;
+          case DevToolsExtensionEventType.pong:
+          case DevToolsExtensionEventType.showNotification:
+          case DevToolsExtensionEventType.showBannerMessage:
+            // Ignore. These events are sent from extensions to DevTools only.
             break;
           case DevToolsExtensionEventType.unknown:
           default:
@@ -76,29 +74,80 @@ class ExtensionManager {
     }
   }
 
-  void postMessageToDevTools(DevToolsExtensionEvent event) {
-    html.window.parent?.postMessage(event.toJson(), html.window.origin!);
+  /// Posts a [DevToolsExtensionEvent] to the DevTools extension host.
+  ///
+  /// If [targetOrigin] is null, the message will be posed to
+  /// [html.window.origin].
+  ///
+  /// When [_debugUseSimulatedEnvironment] is true, this message will be posted
+  /// to the same [html.window] that the extension is hosted in.
+  void postMessageToDevTools(
+    DevToolsExtensionEvent event, {
+    String? targetOrigin,
+  }) {
+    final postWindow =
+        _debugUseSimulatedEnvironment ? html.window : html.window.parent;
+    postWindow?.postMessage(
+      {
+        ...event.toJson(),
+        DevToolsExtensionEvent.sourceKey: '$ExtensionManager',
+      },
+      targetOrigin ?? html.window.origin!,
+    );
   }
 
-  Future<void> connectToVmService(String? vmServiceUri) async {
-    if (vmServiceUri == null) return;
+  Future<void> _connectToVmService(String? vmServiceUri) async {
+    // TODO(kenz): investigate. this is weird but `vmServiceUri` != null even
+    // when the `toString()` representation is 'null'.
+    if (vmServiceUri == null || '$vmServiceUri' == 'null') return;
 
-    final finishedCompleter = Completer<void>();
-    final vmService = await connect<VmService>(
-      uri: Uri.parse(vmServiceUri),
-      finishedCompleter: finishedCompleter,
-      createService: ({
-        // ignore: avoid-dynamic, code needs to match API from VmService.
-        required Stream<dynamic> /*String|List<int>*/ inStream,
-        required void Function(String message) writeMessage,
-        required Uri connectedUri,
-      }) {
-        return VmService(inStream, writeMessage);
-      },
+    try {
+      final finishedCompleter = Completer<void>();
+      final vmService = await connect<VmService>(
+        uri: Uri.parse(vmServiceUri),
+        finishedCompleter: finishedCompleter,
+        createService: ({
+          // ignore: avoid-dynamic, code needs to match API from VmService.
+          required Stream<dynamic> /*String|List<int>*/ inStream,
+          required void Function(String message) writeMessage,
+          required Uri connectedUri,
+        }) {
+          return VmService(
+            inStream,
+            writeMessage,
+          );
+        },
+      );
+      await serviceManager.vmServiceOpened(
+        vmService,
+        onClosed: finishedCompleter.future,
+      );
+    } catch (e) {
+      // TODO(kenz): post a notification to DevTools for errors
+      // or create an error panel for the extensions screens.
+      print('Unable to connect to VM service at $vmServiceUri: $e');
+    }
+  }
+
+  void showNotification(String message) async {
+    postMessageToDevTools(
+      ShowNotificationExtensionEvent(message: message),
     );
-    await serviceManager.vmServiceOpened(
-      vmService,
-      onClosed: finishedCompleter.future,
+  }
+
+  void showBannerMessage({
+    required String key,
+    required String type,
+    required String message,
+    required String extensionName,
+  }) async {
+    postMessageToDevTools(
+      ShowBannerMessageExtensionEvent(
+        id: key,
+        bannerMessageType: type,
+        message: message,
+        extensionName: extensionName,
+      ),
     );
   }
 }

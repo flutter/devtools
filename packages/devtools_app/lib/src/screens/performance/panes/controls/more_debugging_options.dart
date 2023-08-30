@@ -41,7 +41,8 @@ class MoreDebuggingOptionsButton extends StatelessWidget {
             'layer might help identify expensive operations in your app.',
             style: theme.subtleTextStyle,
           ),
-          if (serviceManager.connectedApp!.isProfileBuildNow!) ...[
+          if (serviceConnection
+              .serviceManager.connectedApp!.isProfileBuildNow!) ...[
             const SizedBox(height: denseSpacing),
             RichText(
               text: TextSpan(

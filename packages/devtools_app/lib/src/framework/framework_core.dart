@@ -57,7 +57,7 @@ class FrameworkCore {
     required ErrorReporter errorReporter,
     bool logException = true,
   }) async {
-    if (serviceManager.hasConnection) {
+    if (serviceConnection.serviceManager.hasConnection) {
       // TODO(https://github.com/flutter/devtools/issues/1568): why do we call
       // this multiple times?
       return true;
@@ -85,7 +85,7 @@ class FrameworkCore {
           ),
         );
 
-        await serviceManager.vmServiceOpened(
+        await serviceConnection.serviceManager.vmServiceOpened(
           service,
           onClosed: finishedCompleter.future,
         );

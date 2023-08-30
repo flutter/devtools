@@ -83,9 +83,10 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
       // We'll need to search for the library URI that is a prefix of the
       // script's URI.
       if (libNode == null) {
-        final service = serviceManager.service!;
-        final isolate = serviceManager.isolateManager.selectedIsolate.value!;
-        final libRef = serviceManager.isolateManager
+        final service = serviceConnection.serviceManager.service!;
+        final isolate = serviceConnection
+            .serviceManager.isolateManager.selectedIsolate.value!;
+        final libRef = serviceConnection.serviceManager.isolateManager
             .isolateState(isolate)
             .isolateNow!
             .libraries!
@@ -193,8 +194,8 @@ class VMServiceObjectNode extends TreeNode<VMServiceObjectNode> {
     // Place the root library's parent node at the top of the explorer if it's
     // part of a package. Otherwise, it's a file path and its directory should
     // appear near the top of the list anyway.
-    final rootLibUri = serviceManager
-        .isolateManager.mainIsolateState?.isolateNow?.rootLib?.uri;
+    final rootLibUri = serviceConnection.serviceManager.isolateManager
+        .mainIsolateState?.isolateNow?.rootLib?.uri;
     if (rootLibUri != null) {
       if (rootLibUri.startsWith('package:') ||
           rootLibUri.startsWith('google3:')) {

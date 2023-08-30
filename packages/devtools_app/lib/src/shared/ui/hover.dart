@@ -14,6 +14,16 @@ import 'package:provider/provider.dart';
 import '../common_widgets.dart';
 import 'utils.dart';
 
+double get _maxHoverCardHeight => scaleByFontFactor(250.0);
+
+TextStyle get _hoverTitleTextStyle => fixBlurryText(
+      TextStyle(
+        fontWeight: FontWeight.normal,
+        fontSize: scaleByFontFactor(15.0),
+        decoration: TextDecoration.none,
+      ),
+    );
+
 /// Regex for valid Dart identifiers.
 final _identifier = RegExp(r'^[a-zA-Z0-9]|_|\$');
 
@@ -118,12 +128,11 @@ class HoverCard {
     String? title,
     double? maxCardHeight,
   }) {
-    maxCardHeight ??= maxHoverCardHeight;
+    maxCardHeight ??= _maxHoverCardHeight;
     final overlayState = Overlay.of(context);
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
     final focusColor = theme.focusColor;
-    final hoverHeading = theme.hoverTitleTextStyle;
 
     _overlayEntry = OverlayEntry(
       builder: (context) {
@@ -143,7 +152,7 @@ class HoverCard {
                 color: colorScheme.surface,
                 border: Border.all(
                   color: focusColor,
-                  width: hoverCardBorderWidth,
+                  width: hoverCardBorderSize,
                 ),
                 borderRadius: defaultBorderRadius,
               ),
@@ -157,7 +166,7 @@ class HoverCard {
                       child: Text(
                         title,
                         overflow: TextOverflow.ellipsis,
-                        style: hoverHeading,
+                        style: _hoverTitleTextStyle,
                         textAlign: TextAlign.center,
                       ),
                     ),

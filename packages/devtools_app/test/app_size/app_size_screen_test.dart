@@ -25,7 +25,7 @@ import '../test_infra/test_data/app_size/unsupported_file.dart';
 
 void main() {
   setUp(() {
-    setGlobal(ServiceConnectionManager, FakeServiceManager());
+    setGlobal(ServiceConnectionManager, FakeServiceConnectionManager());
     setGlobal(
       DevToolsEnvironmentParameters,
       ExternalDevToolsEnvironmentParameters(),
@@ -69,7 +69,7 @@ void main() {
 
   late AppSizeScreen screen;
   late AppSizeTestController appSizeController;
-  FakeServiceManager fakeServiceManager;
+  FakeServiceConnectionManager fakeServiceConnection;
 
   const windowSize = Size(2560.0, 1338.0);
 
@@ -104,10 +104,11 @@ void main() {
     setUp(() {
       screen = AppSizeScreen();
       appSizeController = AppSizeTestController();
-      fakeServiceManager = FakeServiceManager();
-      setGlobal(ServiceConnectionManager, fakeServiceManager);
-      when(fakeServiceManager.errorBadgeManager.errorCountNotifier('app-size'))
-          .thenReturn(ValueNotifier<int>(0));
+      fakeServiceConnection = FakeServiceConnectionManager();
+      setGlobal(ServiceConnectionManager, fakeServiceConnection);
+      when(
+        fakeServiceConnection.errorBadgeManager.errorCountNotifier('app-size'),
+      ).thenReturn(ValueNotifier<int>(0));
     });
 
     testWidgets('builds its tab', (WidgetTester tester) async {

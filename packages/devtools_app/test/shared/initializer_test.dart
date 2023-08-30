@@ -17,8 +17,8 @@ void main() {
   group('Initializer', () {
     const Key initializedKey = Key('initialized');
     setUp(() {
-      final serviceManager = FakeServiceManager();
-      when(serviceManager.connectedApp!.isDartWebApp)
+      final serviceManager = FakeServiceConnectionManager();
+      when(serviceManager.serviceManager.connectedApp!.isDartWebApp)
           .thenAnswer((_) => Future.value(false));
       setGlobal(ServiceConnectionManager, serviceManager);
       setGlobal(FrameworkController, FrameworkController());
@@ -43,7 +43,7 @@ void main() {
       (WidgetTester tester) async {
         setGlobal(
           ServiceConnectionManager,
-          FakeServiceManager(
+          FakeServiceConnectionManager(
             hasConnection: false,
           ),
         );
@@ -55,17 +55,17 @@ void main() {
     testWidgets(
       'shows disconnected overlay upon disconnect',
       (WidgetTester tester) async {
-        final serviceManager = FakeServiceManager();
-        setGlobal(ServiceConnectionManager, serviceManager);
+        final serviceConnection = FakeServiceConnectionManager();
+        setGlobal(ServiceConnectionManager, serviceConnection);
 
         // Expect standard connected state.
-        serviceManager.changeState(true);
+        serviceConnection.serviceManager.changeState(true);
         await pumpInitializer(tester);
         expect(find.byKey(initializedKey), findsOneWidget);
         expect(find.text('Disconnected'), findsNothing);
 
         // Trigger a disconnect.
-        serviceManager.changeState(false);
+        serviceConnection.serviceManager.changeState(false);
         await tester.pumpAndSettle(const Duration(microseconds: 1000));
 
         // Expect Disconnected overlay.
@@ -76,22 +76,22 @@ void main() {
     testWidgets(
       'closes disconnected overlay upon reconnect',
       (WidgetTester tester) async {
-        final serviceManager = FakeServiceManager();
-        setGlobal(ServiceConnectionManager, serviceManager);
+        final serviceConnection = FakeServiceConnectionManager();
+        setGlobal(ServiceConnectionManager, serviceConnection);
 
         // Expect standard connected state.
-        serviceManager.changeState(true);
+        serviceConnection.serviceManager.changeState(true);
         await pumpInitializer(tester);
         expect(find.byKey(initializedKey), findsOneWidget);
         expect(find.text('Disconnected'), findsNothing);
 
         // Trigger a disconnect and ensure the overlay appears.
-        serviceManager.changeState(false);
+        serviceConnection.serviceManager.changeState(false);
         await tester.pumpAndSettle();
         expect(find.text('Disconnected'), findsOneWidget);
 
         // Trigger a reconnect
-        serviceManager.changeState(true);
+        serviceConnection.serviceManager.changeState(true);
         await tester.pumpAndSettle();
 
         // Expect no overlay.

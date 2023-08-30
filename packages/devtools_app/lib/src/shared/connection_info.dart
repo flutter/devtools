@@ -21,11 +21,14 @@ class ConnectedAppSummary extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final VM? vm = serviceManager.vm;
-    final connectedApp = serviceManager.connectedApp;
+    final manager = serviceConnection.serviceManager;
+    final VM? vm = manager.vm;
+    final connectedApp = manager.connectedApp;
     if (vm == null ||
         connectedApp == null ||
-        !serviceManager.connectedAppInitialized) return const SizedBox();
+        !manager.connectedAppInitialized) {
+      return const SizedBox();
+    }
 
     final connectionDescriptionEntries =
         generateDeviceDescription(vm, connectedApp);

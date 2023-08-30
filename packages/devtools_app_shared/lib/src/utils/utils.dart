@@ -49,7 +49,7 @@ int sortFieldsByName(String a, String b) {
 }
 
 /// A value notifier that calls each listener immediately when registered.
-class ImmediateValueNotifier<T> extends ValueNotifier<T> {
+final class ImmediateValueNotifier<T> extends ValueNotifier<T> {
   ImmediateValueNotifier(T value) : super(value);
 
   /// Adds a listener and calls the listener upon registration.

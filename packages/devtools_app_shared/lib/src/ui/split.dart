@@ -17,7 +17,7 @@ import '../utils/utils.dart';
 ///
 /// [initialFractions] defines how much space to give each child when building
 /// this widget.
-class Split extends StatefulWidget {
+final class Split extends StatefulWidget {
   /// Builds a split oriented along [axis].
   Split({
     Key? key,
@@ -85,7 +85,7 @@ class Split extends StatefulWidget {
   State<StatefulWidget> createState() => _SplitState();
 }
 
-class _SplitState extends State<Split> {
+final class _SplitState extends State<Split> {
   late final List<double> fractions;
 
   bool get isHorizontal => widget.axis == Axis.horizontal;
@@ -293,7 +293,7 @@ class _SplitState extends State<Split> {
   }
 }
 
-class DefaultSplitter extends StatelessWidget {
+final class DefaultSplitter extends StatelessWidget {
   const DefaultSplitter({super.key, required this.isHorizontal});
 
   static const double iconSize = 24.0;

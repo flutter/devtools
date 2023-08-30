@@ -10,13 +10,33 @@ import 'package:devtools_app_shared/service.dart';
 import 'package:devtools_app_shared/ui.dart';
 import 'package:devtools_app_shared/utils.dart';
 import 'package:devtools_shared/service.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:vm_service/vm_service.dart';
 
-import '../../api.dart';
+import '../api/api.dart';
+import '../api/model.dart';
+import '_simulated_devtools_environment/_simulated_devtools_environment.dart';
 
 part 'extension_manager.dart';
+
+/// If true, a simulated DevTools environment will be wrapped around the
+/// extension (see [SimulatedDevToolsWrapper]).
+///
+/// By default, the constant is false.
+/// To enable it, pass the compilation flag
+/// `--dart-define=use_simulated_environment=true`.
+///
+/// To enable the flag in debug configuration of VSCode, add value:
+///   "args": [
+///     "--dart-define=use_simulated_environment=true"
+///   ]
+const bool _simulatedEnvironmentEnabled =
+    bool.fromEnvironment('use_simulated_environment');
+
+bool get _debugUseSimulatedEnvironment =>
+    !kReleaseMode && _simulatedEnvironmentEnabled;
 
 /// A manager that allows extensions to interact with DevTools or the DevTools
 /// extensions framework.
@@ -77,14 +97,27 @@ class _DevToolsExtensionState extends State<DevToolsExtension> {
     setGlobal(IdeTheme, IdeTheme());
   }
 
+  void _shutdown() {
+    (globals[ExtensionManager] as ExtensionManager?)?._dispose();
+    removeGlobal(ExtensionManager);
+    removeGlobal(ServiceManager);
+    removeGlobal(IdeTheme);
+  }
+
   @override
   void dispose() {
-    extensionManager._dispose();
+    // TODO(https://github.com/flutter/flutter/issues/10437): dispose is never
+    // called on hot restart, so these resources leak for local development.
+    _shutdown();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final child = _ConnectionAwareWrapper(
+      requiresRunningApplication: widget.requiresRunningApplication,
+      child: widget.child,
+    );
     return MaterialApp(
       theme: themeFor(
         isDarkTheme: false,
@@ -97,8 +130,36 @@ class _DevToolsExtensionState extends State<DevToolsExtension> {
         theme: ThemeData(useMaterial3: true, colorScheme: darkColorScheme),
       ),
       home: Scaffold(
-        body: widget.child,
+        body: _debugUseSimulatedEnvironment
+            ? SimulatedDevToolsWrapper(child: child)
+            : child,
       ),
+    );
+  }
+}
+
+class _ConnectionAwareWrapper extends StatelessWidget {
+  const _ConnectionAwareWrapper({
+    required this.child,
+    required this.requiresRunningApplication,
+  });
+
+  final bool requiresRunningApplication;
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return ValueListenableBuilder(
+      valueListenable: serviceManager.connectedState,
+      builder: (context, connectedState, _) {
+        if (requiresRunningApplication && !connectedState.connected) {
+          return const Center(
+            child: Text('Please connect an app to use this DevTools Extension'),
+          );
+        }
+        return child;
+      },
     );
   }
 }
