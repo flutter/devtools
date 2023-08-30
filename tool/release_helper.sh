@@ -53,7 +53,7 @@ echo
 PR_URL=$(gh pr create --draft --title "$COMMIT_MESSAGE" --fill $CREATION_FLAGS)
 
 
-echo "release_helper.sh: Updating your flutter version to the most recent candidate."
+echo "$0: Updating your flutter version to the most recent candidate."
 echo
 ./tool/update_flutter_sdk.sh --local
 
