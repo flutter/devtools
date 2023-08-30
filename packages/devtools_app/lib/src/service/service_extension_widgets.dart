@@ -184,9 +184,10 @@ class ServiceExtensionButton extends StatelessWidget {
       child: Container(
         height: defaultButtonHeight,
         padding: EdgeInsets.symmetric(
-          horizontal: isScreenWiderThan(context, minScreenWidthForTextBeforeScaling)
-              ? defaultSpacing
-              : 0.0,
+          horizontal:
+              isScreenWiderThan(context, minScreenWidthForTextBeforeScaling)
+                  ? defaultSpacing
+                  : 0.0,
         ),
         child: ImageIconLabel(
           ServiceExtensionIcon(extensionState: extensionState),
