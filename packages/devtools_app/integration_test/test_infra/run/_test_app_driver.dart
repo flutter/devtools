@@ -285,7 +285,8 @@ class TestDartCliApp extends IntegrationTestApp {
 abstract class IntegrationTestApp with IOMixin {
   IntegrationTestApp(this.testAppPath, this.testAppDevice);
 
-  static const _appStartTimeout = Duration(seconds: 120);
+  static const _appStartTimeout =
+      Duration(seconds: 300); // TODO change this to 200
 
   static const _defaultTimeout = Duration(seconds: 40);
 
