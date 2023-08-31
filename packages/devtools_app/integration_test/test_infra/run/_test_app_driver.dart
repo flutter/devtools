@@ -35,19 +35,28 @@ class TestFlutterApp extends IntegrationTestApp {
     );
   }
 
+  Future<Map<String, Object?>>? startedFuture;
+  Future<Map<String, Object?>>? debugPortFuture;
   @override
-  Future<void> waitForAppStart() async {
+  void beforeStartProcess() async {
     // Set this up now, but we don't await it yet. We want to make sure we don't
     // miss it while waiting for debugPort below.
-    final started = waitFor(
+    startedFuture = waitFor(
       event: FlutterDaemonConstants.appStarted.key,
       timeout: IntegrationTestApp._appStartTimeout,
     );
 
-    final debugPort = await waitFor(
+    debugPortFuture = waitFor(
       event: FlutterDaemonConstants.appDebugPort.key,
       timeout: IntegrationTestApp._appStartTimeout,
     );
+  }
+
+  @override
+  Future<void> waitForAppStart() async {
+    final startedResult = await startedFuture!;
+    final debugPort = await debugPortFuture!;
+
     final wsUriString = (debugPort[FlutterDaemonConstants.params.key]!
         as Map<String, Object?>)[FlutterDaemonConstants.wsUri.key] as String;
     _vmServiceWsUri = Uri.parse(wsUriString);
@@ -58,7 +67,6 @@ class TestFlutterApp extends IntegrationTestApp {
 
     // Now await the started event; if it had already happened the future will
     // have already completed.
-    final startedResult = await started;
     final params = startedResult[FlutterDaemonConstants.params.key]!
         as Map<String, Object?>;
     _currentRunningAppId = params[FlutterDaemonConstants.appId.key] as String?;
@@ -221,12 +229,18 @@ class TestDartCliApp extends IntegrationTestApp {
     );
   }
 
+  Future<String>? _vmServiceUriFuture;
   @override
-  Future<void> waitForAppStart() async {
-    final vmServiceUri = await waitFor(
+  void beforeStartProcess() async {
+    _vmServiceUriFuture = waitFor(
       message: vmServicePrefix,
       timeout: IntegrationTestApp._appStartTimeout,
     );
+  }
+
+  @override
+  Future<void> waitForAppStart() async {
+    final vmServiceUri = await _vmServiceUriFuture!;
     final parsedVmServiceUri = Uri.parse(vmServiceUri);
 
     // Map to WS URI.
@@ -296,12 +310,16 @@ abstract class IntegrationTestApp with IOMixin {
 
   Future<void> startProcess();
 
+  void beforeStartProcess();
   Future<void> waitForAppStart();
 
   Future<void> manuallyStopApp() async {}
 
   Future<void> start() async {
     _debugPrint('starting the test app process...');
+
+    beforeStartProcess();
+
     await startProcess();
     assert(
       runProcess != null,
